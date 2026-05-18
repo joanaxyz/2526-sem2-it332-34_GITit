@@ -1,0 +1,14 @@
+django
+djangorestframework
+djangorestframework-simplejwt
+psycopg
+django-environ
+django-cors-headers
+redis
+django-redis
+pygit2
+drf-spectacular
+pytest
+pytest-django
+factory_boy
+ruff

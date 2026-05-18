@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import './tokens.css';
+@import 'reactflow/dist/style.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 80% 0%, rgba(0, 214, 143, 0.08), transparent 32rem),
+    hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+.lesson-copy {
+  color: hsl(var(--foreground));
+}
+
+.lesson-copy h1 {
+  font-size: clamp(2rem, 4vw, 3.35rem);
+  line-height: 1.05;
+  font-weight: 800;
+  margin: 0 0 1rem;
+}
+
+.lesson-copy h2 {
+  font-size: 1.35rem;
+  font-weight: 750;
+  margin: 2rem 0 0.75rem;
+}
+
+.lesson-copy p {
+  color: hsl(var(--muted-foreground));
+  line-height: 1.7;
+  margin: 0.8rem 0;
+}
+
+.lesson-copy pre {
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.65rem;
+  color: hsl(var(--accent));
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.lesson-copy .callout {
+  border: 1px solid rgba(0, 214, 143, 0.24);
+  background: rgba(0, 214, 143, 0.08);
+  border-radius: 0.75rem;
+  color: hsl(var(--foreground));
+  margin-top: 1rem;
+  padding: 1rem;
+}
+
+.react-flow__node {
+  border: 0;
+  background: transparent;
+}

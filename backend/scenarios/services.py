@@ -1,0 +1,241 @@
+from django.db import transaction
+from django.utils import timezone
+
+from common.constants import (
+    COMMAND_COUNTED,
+    COMMAND_DIAGNOSTIC,
+    COMMAND_UNPROCESSABLE,
+    DIFFICULTY_EASY,
+    DIFFICULTY_HARD,
+    DIFFICULTY_MEDIUM,
+    RESULT_INVALID,
+    RESULT_TARGET_MATCHED,
+    RESULT_UNPROCESSABLE,
+    SESSION_MODE_PRIMARY,
+    SESSION_STATUS_ABANDONED,
+    SESSION_STATUS_COMPLETED,
+    SESSION_STATUS_FAILED,
+    SESSION_STATUS_STARTED,
+)
+from common.exceptions import Locked
+from evaluation.services import StateBasedEvaluator
+from learning.services import OrientationService
+from progress.services import StreakService
+from retries.services import VariantSelectionService
+from scaffolding.services import FeedbackGenerationService, ScaffoldingService
+from scenarios.models import CommandLog, CompletionRecord, DifficultyInstance, ScenarioSession, StepLog
+from simulator.services import READ_ONLY_PREFIXES, RepositorySnapshotService, RepositoryStateSimulator
+
+
+class DifficultyAccessService:
+    def status_for(self, *, user, difficulty_instance: DifficultyInstance) -> str:
+        if CompletionRecord.objects.filter(user=user, difficulty_instance=difficulty_instance).exists():
+            return "complete"
+        if ScenarioSession.objects.filter(
+            user=user,
+            difficulty_instance=difficulty_instance,
+            status=SESSION_STATUS_STARTED,
+            mode=SESSION_MODE_PRIMARY,
+        ).exists():
+            return "in_progress"
+        if self.is_unlocked(user=user, difficulty_instance=difficulty_instance):
+            return "available"
+        return "locked"
+
+    def is_unlocked(self, *, user, difficulty_instance: DifficultyInstance) -> bool:
+        difficulty = difficulty_instance.difficulty
+        if difficulty == DIFFICULTY_EASY:
+            return True
+        previous = DIFFICULTY_EASY if difficulty == DIFFICULTY_MEDIUM else DIFFICULTY_MEDIUM
+        previous_instance = DifficultyInstance.objects.get(
+            scenario=difficulty_instance.scenario,
+            difficulty=previous,
+        )
+        return CompletionRecord.objects.filter(user=user, difficulty_instance=previous_instance).exists()
+
+
+class CommandCountClassifier:
+    def classify(self, *, command: str, policy_snapshot: dict, processed: bool) -> tuple[str, int]:
+        if not processed:
+            return COMMAND_UNPROCESSABLE, 0
+        normalized = " ".join(command.strip().lower().split())
+        patterns = [p.lower() for p in policy_snapshot.get("non_counted_patterns", [])]
+        is_read_only = normalized.startswith(READ_ONLY_PREFIXES)
+        if is_read_only and any(normalized == p or normalized.startswith(f"{p} ") for p in patterns):
+            return COMMAND_DIAGNOSTIC, 0
+        return COMMAND_COUNTED, 1
+
+
+class ScenarioSessionService:
+    @transaction.atomic
+    def start_session(
+        self,
+        *,
+        user,
+        difficulty_instance: DifficultyInstance,
+        source_entry_point: str,
+        prior_session: ScenarioSession | None = None,
+        mode: str = SESSION_MODE_PRIMARY,
+    ) -> ScenarioSession:
+        if mode == SESSION_MODE_PRIMARY and not DifficultyAccessService().is_unlocked(
+            user=user, difficulty_instance=difficulty_instance
+        ):
+            raise Locked("This difficulty is locked until the previous level is completed.")
+
+        student_progress = user.studentprogress
+        ocg_satisfied = OrientationService().is_gate_satisfied(user)
+        if (
+            mode == SESSION_MODE_PRIMARY
+            and student_progress.first_scenario_started_at is None
+            and not ocg_satisfied
+        ):
+            raise Locked("Complete all Unit 1 orientation lessons before starting scenario practice.")
+
+        variant = VariantSelectionService().select_variant(
+            user=user,
+            scenario=difficulty_instance.scenario,
+            prior_session=prior_session,
+        )
+        changed_variant = bool(prior_session and prior_session.variant_id != variant.id)
+        retry_index = prior_session.retry_index + 1 if prior_session else 0
+        rta_eligible = bool(
+            mode == SESSION_MODE_PRIMARY
+            and prior_session
+            and prior_session.status in (SESSION_STATUS_FAILED, SESSION_STATUS_ABANDONED)
+            and changed_variant
+        )
+        policy = difficulty_instance.command_policy.snapshot()
+        session = ScenarioSession.objects.create(
+            user=user,
+            learning_unit=difficulty_instance.scenario.learning_unit,
+            scenario=difficulty_instance.scenario,
+            difficulty_instance=difficulty_instance,
+            variant=variant,
+            prior_session=prior_session,
+            source_entry_point=source_entry_point,
+            mode=mode,
+            ocg_satisfied_at_start=ocg_satisfied,
+            rta_eligible=rta_eligible,
+            changed_variant=changed_variant,
+            retry_index=retry_index,
+            command_policy_snapshot=policy,
+            repository_state=variant.initial_state,
+        )
+        if mode == SESSION_MODE_PRIMARY and student_progress.first_scenario_started_at is None:
+            student_progress.first_scenario_started_at = session.started_at
+            student_progress.orientation_gate_satisfied_at_first_start = ocg_satisfied
+            student_progress.save(
+                update_fields=[
+                    "first_scenario_started_at",
+                    "orientation_gate_satisfied_at_first_start",
+                ]
+            )
+        return session
+
+    @transaction.atomic
+    def abandon(self, *, session: ScenarioSession) -> ScenarioSession:
+        if session.status != SESSION_STATUS_STARTED:
+            return session
+        session.status = SESSION_STATUS_ABANDONED
+        session.ended_at = timezone.now()
+        session.failure_reason = "Student left the session before completion."
+        session.save(update_fields=["status", "ended_at", "failure_reason"])
+        return session
+
+
+class CommandProcessingService:
+    @transaction.atomic
+    def submit_command(self, *, session: ScenarioSession, command: str) -> dict:
+        if session.status != SESSION_STATUS_STARTED:
+            raise Locked("This session has already ended.")
+
+        simulator = RepositoryStateSimulator()
+        snapshotter = RepositorySnapshotService()
+        previous_state = simulator.clone_state(session.repository_state)
+        sim_result = simulator.process(previous_state, command)
+        classification, increment = CommandCountClassifier().classify(
+            command=command,
+            policy_snapshot=session.command_policy_snapshot,
+            processed=sim_result.processed,
+        )
+
+        result_category = RESULT_UNPROCESSABLE
+        feedback = ""
+        if sim_result.processed:
+            target_rule = session.difficulty_instance.target_rule.rule
+            evaluation = StateBasedEvaluator().evaluate(sim_result.state, target_rule)
+            result_category = evaluation.result_category
+            if session.difficulty_instance.difficulty == DIFFICULTY_EASY:
+                feedback = FeedbackGenerationService().describe(previous_state, sim_result.state)
+        else:
+            result_category = RESULT_INVALID if command.strip().lower().startswith("git") else RESULT_UNPROCESSABLE
+
+        if classification == COMMAND_COUNTED:
+            session.counted_action_total += increment
+        elif classification == COMMAND_DIAGNOSTIC:
+            session.non_counted_diagnostic_total += 1
+        session.total_attempts += 1
+        if result_category != RESULT_TARGET_MATCHED:
+            session.first_attempt_star_eligible = False
+        session.repository_state = sim_result.state
+
+        state_hash = simulator.state_hash(sim_result.state)
+        step = StepLog.objects.create(
+            session=session,
+            command_text=command,
+            terminal_output=sim_result.output,
+            result_category=result_category,
+            command_classification=classification,
+            counted_increment=increment,
+            attempt_number=session.total_attempts,
+            counted_total_after=session.counted_action_total,
+            state_hash=state_hash,
+            expected_state_hash=session.difficulty_instance.target_rule.target_state_hash,
+            repository_state=sim_result.state,
+            contextual_feedback=feedback,
+        )
+        CommandLog.objects.create(
+            step_log=step,
+            raw_command=command,
+            normalized_command=sim_result.normalized_command,
+            was_processable=sim_result.processed,
+        )
+
+        max_count = session.command_policy_snapshot["max_counted_commands"]
+        if result_category == RESULT_TARGET_MATCHED:
+            self._complete_session(session)
+        elif session.counted_action_total >= max_count:
+            session.status = SESSION_STATUS_FAILED
+            session.ended_at = timezone.now()
+            session.failure_reason = "Maximum counted-command limit reached."
+
+        session.save()
+        return {
+            "session": session,
+            "step": step,
+            "terminal_output": sim_result.output,
+            "repository_state": snapshotter.snapshot(session.repository_state),
+            "evaluation_result": result_category,
+            "command_classification": classification,
+            "remaining_counted_commands": max(0, max_count - session.counted_action_total),
+            "contextual_feedback": feedback,
+            "scaffolding": ScaffoldingService().supports_for(session.difficulty_instance.difficulty),
+        }
+
+    def _complete_session(self, session: ScenarioSession) -> None:
+        session.status = SESSION_STATUS_COMPLETED
+        session.completed_at = timezone.now()
+        session.ended_at = session.completed_at
+        session.rta_success = bool(session.rta_eligible and session.first_attempt_star_eligible)
+        if session.mode == SESSION_MODE_PRIMARY:
+            CompletionRecord.objects.get_or_create(
+                user=session.user,
+                scenario=session.scenario,
+                difficulty_instance=session.difficulty_instance,
+                defaults={
+                    "session": session,
+                    "first_attempt_star": session.first_attempt_star_eligible,
+                    "counted_action_total": session.counted_action_total,
+                },
+            )
+            StreakService().record_completion(user=session.user, completed_at=session.completed_at)

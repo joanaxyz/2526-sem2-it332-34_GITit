@@ -1,0 +1,20 @@
+:root {
+  --background: 205 34% 6%;
+  --foreground: 212 48% 94%;
+  --card: 210 30% 11%;
+  --card-foreground: 212 48% 94%;
+  --primary: 159 100% 42%;
+  --primary-foreground: 155 86% 7%;
+  --secondary: 211 30% 16%;
+  --secondary-foreground: 212 48% 94%;
+  --muted: 212 30% 15%;
+  --muted-foreground: 209 23% 64%;
+  --accent: 208 100% 66%;
+  --accent-foreground: 210 32% 8%;
+  --destructive: 0 100% 68%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 210 24% 20%;
+  --input: 210 24% 20%;
+  --ring: 159 100% 42%;
+  --radius: 0.75rem;
+}
