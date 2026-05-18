@@ -11,8 +11,18 @@ import { Button } from '@/shared/components/Button'
 
 const schema = z
   .object({
-    display_name: z.string().min(2, 'Use at least two characters.'),
-    email: z.string().email(),
+    student_id: z
+      .string()
+      .trim()
+      .regex(/^\d{2}-\d{4}-\d{3}$/, 'Use the format NN-NNNN-NNN.'),
+    first_name: z.string().trim().min(1, 'First name is required.'),
+    last_name: z.string().trim().min(1, 'Last name is required.'),
+    email: z
+      .string()
+      .trim()
+      .email('Enter a valid CIT email.')
+      .refine((value) => value.toLowerCase().endsWith('@cit.edu'), 'Use your @cit.edu email.')
+      .transform((value) => value.toLowerCase()),
     password: z.string().min(8, 'Use at least eight characters.'),
     password_confirm: z.string().min(8),
   })
@@ -42,12 +52,20 @@ export function RegisterForm() {
         <p className="mt-2 text-sm leading-6 text-muted-foreground">Register as a student and explore lessons or scenario practice at your own pace.</p>
       </div>
       <label className="flex flex-col gap-2 text-sm font-semibold">
-        Display name
-        <input className="h-11 rounded-md border border-input bg-secondary px-3 outline-none focus:ring-2 focus:ring-ring" {...form.register('display_name')} />
+        Student ID
+        <input className="h-11 rounded-md border border-input bg-secondary px-3 outline-none focus:ring-2 focus:ring-ring" autoComplete="username" {...form.register('student_id')} />
       </label>
       <label className="flex flex-col gap-2 text-sm font-semibold">
-        Email
-        <input className="h-11 rounded-md border border-input bg-secondary px-3 outline-none focus:ring-2 focus:ring-ring" {...form.register('email')} />
+        First name
+        <input className="h-11 rounded-md border border-input bg-secondary px-3 outline-none focus:ring-2 focus:ring-ring" autoComplete="given-name" {...form.register('first_name')} />
+      </label>
+      <label className="flex flex-col gap-2 text-sm font-semibold">
+        Last name
+        <input className="h-11 rounded-md border border-input bg-secondary px-3 outline-none focus:ring-2 focus:ring-ring" autoComplete="family-name" {...form.register('last_name')} />
+      </label>
+      <label className="flex flex-col gap-2 text-sm font-semibold">
+        CIT email
+        <input className="h-11 rounded-md border border-input bg-secondary px-3 outline-none focus:ring-2 focus:ring-ring" autoComplete="email" {...form.register('email')} />
       </label>
       <label className="flex flex-col gap-2 text-sm font-semibold">
         Password

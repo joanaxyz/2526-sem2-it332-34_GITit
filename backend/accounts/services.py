@@ -12,6 +12,8 @@ from accounts.models import SessionRecord, StudentProfile
 from common.exceptions import Conflict
 from progress.models import StreakRecord, StudentProgress
 
+CIT_EMAIL_DOMAIN = "@cit.edu"
+
 
 @dataclass(frozen=True)
 class IssuedTokens:
@@ -22,19 +24,31 @@ class IssuedTokens:
 
 class UserService:
     @transaction.atomic
-    def register_student(self, *, email: str, password: str, display_name: str):
+    def register_student(
+        self,
+        *,
+        email: str,
+        password: str,
+        student_id: str,
+        first_name: str,
+        last_name: str,
+    ):
         User = get_user_model()
         normalized_email = User.objects.normalize_email(email).lower()
+        normalized_student_id = student_id.strip().upper()
         if User.objects.filter(email__iexact=normalized_email).exists():
             raise Conflict("A student account already exists for this email.")
+        if StudentProfile.objects.filter(student_id__iexact=normalized_student_id).exists():
+            raise Conflict("A student account already exists for this student ID.")
 
         user = User.objects.create_user(
             username=normalized_email,
             email=normalized_email,
             password=password,
-            first_name=display_name,
+            first_name=first_name.strip(),
+            last_name=last_name.strip(),
         )
-        StudentProfile.objects.create(user=user, display_name=display_name)
+        StudentProfile.objects.create(user=user, student_id=normalized_student_id)
         StudentProgress.objects.create(user=user)
         StreakRecord.objects.create(user=user)
         return user
@@ -78,8 +92,24 @@ class TokenService:
         )
         return IssuedTokens(access=str(refresh.access_token), refresh=str(refresh), refresh_jti=jti)
 
-    def authenticate_student(self, *, email: str, password: str, request=None):
-        user = authenticate(request=request, username=email.lower(), password=password)
+    def authenticate_student(self, *, identifier: str, password: str, request=None):
+        User = get_user_model()
+        normalized_identifier = identifier.strip()
+        if "@" in normalized_identifier:
+            email = User.objects.normalize_email(normalized_identifier).lower()
+            if not email.endswith(CIT_EMAIL_DOMAIN):
+                return None
+            user = User.objects.filter(email__iexact=email).first()
+        else:
+            profile = StudentProfile.objects.select_related("user").filter(
+                student_id__iexact=normalized_identifier
+            ).first()
+            user = profile.user if profile else None
+
+        if user is None or user.is_staff:
+            return None
+
+        user = authenticate(request=request, username=user.username, password=password)
         if user is None or user.is_staff:
             return None
         return user
