@@ -69,6 +69,8 @@ This SDD covers the current-release student-facing system and the planned Phase 
 | Repository State Simulator | Backend component that initializes and manipulates isolated simulated Git repository sessions |
 | State-Based Evaluator | Backend component that compares normalized repository-state snapshots against expected target-state rules |
 | Command-Count Policy | Scenario difficulty configuration storing the minimum counted-command threshold, maximum counted-command limit, and non-counted diagnostic command patterns |
+| Difficulty Instance | Configured Easy, Medium, or Hard playable level under a scenario skill focus; owns its narrative/task prompt, initial state, target-state rule, command-count policy, scaffolding configuration, expected-state behavior, and variant pool |
+| Difficulty Variant | Structurally distinct variant owned by one difficulty instance and used to initialize a session or changed retry |
 | Counted Action Command | Simulator-processed command included in CAR and remaining counted-command calculations |
 | Non-Counted Diagnostic Command | Simulator-processed read-only inspection command that is logged but excluded from CAR and remaining counted-command calculations |
 | No-Answer Policy | Design rule preventing student-facing screens and AI responses from revealing correct commands, command sequences, hidden evaluator rules, or unauthorized target-state comparisons |
@@ -110,7 +112,7 @@ The architecture uses the following implementation technologies:
 | Backend API | Django + Django REST Framework | Authentication endpoints, scenario endpoints, command execution API, progress/KPI endpoints, admin/AI endpoints in Phase 2 |
 | Repository Simulation | pygit2/libgit2 | Internal Git repository manipulation inside isolated server-side sessions |
 | State Evaluation | Custom Python evaluator service | Normalized repository-state comparison against authored target-state rules |
-| Database | PostgreSQL, hosted through Supabase or equivalent PostgreSQL provider | Persistent storage of users, units, lessons, scenarios, variants, sessions, step logs, and progress records |
+| Database | PostgreSQL, hosted through Supabase or equivalent PostgreSQL provider | Persistent storage of users, units, lessons, scenario skill focuses, difficulty-instance configurations, difficulty-owned variants, sessions, step logs, and progress records |
 | Cache | Redis or compatible managed Redis service | Active scenario state cache, metadata caching, token/session support, and performance optimization |
 | Authentication | JWT access token + secure refresh-token flow | Authenticated API access and session continuity |
 | Deployment | Static frontend hosting + WSGI/ASGI backend hosting | Separate deployment for frontend and backend services |
@@ -389,14 +391,14 @@ Tables/entities involved: LearningUnit, Lesson, ScenarioSkillFocus, DifficultyIn
 #### Back-end component(s)
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
-| ScenarioSessionAPIView | Creates a new scenario session, selects a variant, and attaches the applicable command-count policy snapshot. | Django REST Framework API view |
-| VariantSelectionService | Selects initial or retry variant according to rules. | Python service class |
+| ScenarioSessionAPIView | Creates a new scenario session from the selected difficulty instance, selects a variant from that difficulty's variant pool, and attaches the applicable command-count policy snapshot. | Django REST Framework API view |
+| VariantSelectionService | Selects initial or retry variant from the selected difficulty instance's valid variant pool according to rules. | Python service class |
 | CommandCountPolicyService | Loads the difficulty instance's authored minimum counted-command threshold, maximum counted-command limit, and non-counted diagnostic command patterns. | Python service class |
 | RepositorySessionService | Initializes isolated repository session through pygit2/libgit2. | Python service class |
 
 #### Object-Oriented Components
 
-Primary classes/components: ScenarioSession, ScenarioVariant, RepositorySessionService, VariantSelectionService, DifficultyInstance, CommandCountPolicy.
+Primary classes/components: ScenarioSession, DifficultyInstance, DifficultyVariant, RepositorySessionService, VariantSelectionService, CommandCountPolicy, TargetStateRule.
 
 ##### Class Diagram
 [PLACEHOLDER — Insert class diagram for Load Scenario Instance.]
@@ -405,7 +407,7 @@ Primary classes/components: ScenarioSession, ScenarioVariant, RepositorySessionS
 [PLACEHOLDER — Insert sequence diagram for Load Scenario Instance.]
 
 #### Data Design
-Tables/entities involved: ScenarioSession, ScenarioVariant, DifficultyInstance, CommandCountPolicy, SessionLog. Active repository data may be cached in Redis and persisted by session identifiers. The scenario session stores the command-count policy ID or snapshot used for that attempt.
+Tables/entities involved: ScenarioSession, DifficultyInstance, DifficultyVariant, CommandCountPolicy, TargetStateRule, SessionLog. Active repository data may be cached in Redis and persisted by session identifiers. The scenario session stores the selected difficulty-instance ID, selected variant ID, target-state rule reference/hash, and command-count policy ID or snapshot used for that attempt.
 
 ##### ERD or schema
 [PLACEHOLDER — Insert ERD/schema excerpt for Load Scenario Instance.]
@@ -631,11 +633,11 @@ Tables/entities involved: StepLog may store feedback category or generated conse
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
 | RetryScenarioAPIView | Creates retry session and requests changed variant selection. | Django REST Framework API view |
-| VariantSelectionService | Selects a structurally different variant when available. | Python service class |
+| VariantSelectionService | Selects a structurally different variant from the same difficulty instance's variant pool when available. | Python service class |
 
 #### Object-Oriented Components
 
-Primary classes/components: ScenarioVariant, ScenarioSession, VariantSelectionService, PriorSessionReference.
+Primary classes/components: DifficultyVariant, ScenarioSession, DifficultyInstance, VariantSelectionService, PriorSessionReference.
 
 ##### Class Diagram
 [PLACEHOLDER — Insert class diagram for Serve Structurally Changed Retry Variant.]
@@ -644,7 +646,7 @@ Primary classes/components: ScenarioVariant, ScenarioSession, VariantSelectionSe
 [PLACEHOLDER — Insert sequence diagram for Serve Structurally Changed Retry Variant.]
 
 #### Data Design
-Tables/entities involved: ScenarioVariant, VariantStructureSignature, ScenarioSession, PriorSessionReference. Retry sessions must store prior-session and variant IDs.
+Tables/entities involved: DifficultyVariant, VariantStructureSignature, DifficultyInstance, ScenarioSession, PriorSessionReference. Retry sessions must store prior-session, difficulty-instance, and variant IDs. RTA-eligible retries compare the new variant against the prior Failed or Abandoned session within the same scenario skill focus and difficulty level.
 
 ##### ERD or schema
 [PLACEHOLDER — Insert ERD/schema excerpt for Serve Structurally Changed Retry Variant.]
@@ -667,7 +669,7 @@ Tables/entities involved: ScenarioVariant, VariantStructureSignature, ScenarioSe
 
 #### Object-Oriented Components
 
-Primary classes/components: MetricsService, ScenarioSession, ScenarioVariant, StepLog, ProgressSummary.
+Primary classes/components: MetricsService, ScenarioSession, DifficultyInstance, DifficultyVariant, StepLog, ProgressSummary.
 
 ##### Class Diagram
 [PLACEHOLDER — Insert class diagram for Compute Retry Transfer Accuracy Eligibility.]
@@ -676,7 +678,7 @@ Primary classes/components: MetricsService, ScenarioSession, ScenarioVariant, St
 [PLACEHOLDER — Insert sequence diagram for Compute Retry Transfer Accuracy Eligibility.]
 
 #### Data Design
-Tables/entities involved: ScenarioSession, ScenarioVariant, StepLog, ProgressSummary. RTA eligibility requires prior Failed or Abandoned session and a structurally changed retry variant.
+Tables/entities involved: ScenarioSession, DifficultyInstance, DifficultyVariant, StepLog, ProgressSummary. RTA eligibility requires a prior Failed or Abandoned session for the same scenario skill focus and difficulty level, plus a structurally changed retry variant from the same difficulty instance's variant pool.
 
 ##### ERD or schema
 [PLACEHOLDER — Insert ERD/schema excerpt for Compute Retry Transfer Accuracy Eligibility.]
@@ -793,7 +795,7 @@ Tables/entities involved: CompletionRecord, ScenarioSession, StudentProgress. Re
 #### Front-end component(s)
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
-| AdminContentPage | Allows administrator to create/edit/archive learning units, lessons, scenarios, variants, and target-state data. | React admin page component |
+| AdminContentPage | Allows administrator to create/edit/archive learning units, lessons, scenario skill focuses, difficulty-instance configurations, difficulty-owned variants, and target-state data. | React admin page component |
 | HtmlCssCodeEditor | Edits Lesson Overview HTML and scoped CSS. | Frontend code editor component |
 
 #### Back-end component(s)
@@ -804,7 +806,7 @@ Tables/entities involved: CompletionRecord, ScenarioSession, StudentProgress. Re
 
 #### Object-Oriented Components
 
-Primary classes/components: LearningUnit, Lesson, ScenarioSkillFocus, DifficultyInstance, ScenarioVariant, CommandCountPolicy, TargetStateRule, AdminAuditLog.
+Primary classes/components: LearningUnit, Lesson, ScenarioSkillFocus, DifficultyInstance, DifficultyVariant, CommandCountPolicy, TargetStateRule, AdminAuditLog.
 
 ##### Class Diagram
 [PLACEHOLDER — Insert class diagram for Manage Learning Content and Scenario Records.]
@@ -813,7 +815,7 @@ Primary classes/components: LearningUnit, Lesson, ScenarioSkillFocus, Difficulty
 [PLACEHOLDER — Insert sequence diagram for Manage Learning Content and Scenario Records.]
 
 #### Data Design
-Tables/entities involved: LearningUnit, Lesson, ScenarioSkillFocus, DifficultyInstance, ScenarioVariant, CommandCountPolicy, TargetStateRule, AdminAuditLog. This module is planned Phase 2 scope.
+Tables/entities involved: LearningUnit, Lesson, ScenarioSkillFocus, DifficultyInstance, DifficultyVariant, CommandCountPolicy, TargetStateRule, AdminAuditLog. This module is planned Phase 2 scope. DifficultyVariant records belong to exactly one DifficultyInstance so Easy, Medium, and Hard can maintain different repository-state templates and retry pools under the same scenario skill focus.
 
 ##### ERD or schema
 [PLACEHOLDER — Insert ERD/schema excerpt for Manage Learning Content and Scenario Records.]
@@ -906,7 +908,7 @@ Tables/entities involved: Lesson, LessonDraft, AiDraftRequest, AiDraftResponse, 
 
 #### Object-Oriented Components
 
-Primary classes/components: AiScenarioDraft, ScenarioSkillFocus, ScenarioVariant, CommandCountPolicy, TargetStateRule, ConceptChatSession, NoAnswerPolicyGuard.
+Primary classes/components: AiScenarioDraft, ScenarioSkillFocus, DifficultyInstance, DifficultyVariant, CommandCountPolicy, TargetStateRule, ConceptChatSession, NoAnswerPolicyGuard.
 
 ##### Class Diagram
 [PLACEHOLDER — Insert class diagram for Generate AI-Assisted Scenario Draft and Provide Concept Chat.]
@@ -915,8 +917,7 @@ Primary classes/components: AiScenarioDraft, ScenarioSkillFocus, ScenarioVariant
 [PLACEHOLDER — Insert sequence diagram for Generate AI-Assisted Scenario Draft and Provide Concept Chat.]
 
 #### Data Design
-Tables/entities involved: AiScenarioDraft, ScenarioSkillFocus, ScenarioVariant, CommandCountPolicy, TargetStateRule, ConceptChatSession, AdminAuditLog. AI-generated scenario content is not student-accessible until administrator validation and publication. This module is planned Phase 2 scope.
+Tables/entities involved: AiScenarioDraft, ScenarioSkillFocus, DifficultyInstance, DifficultyVariant, CommandCountPolicy, TargetStateRule, ConceptChatSession, AdminAuditLog. AI-generated scenario content is not student-accessible until administrator validation and publication. This module is planned Phase 2 scope.
 
 ##### ERD or schema
 [PLACEHOLDER — Insert ERD/schema excerpt for Generate AI-Assisted Scenario Draft and Provide Concept Chat.]
-

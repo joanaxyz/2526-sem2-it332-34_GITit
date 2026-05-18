@@ -7,7 +7,7 @@ import { Button } from '@/shared/components/Button'
 
 export function ScenarioStatusHeader({ session }: { session: ScenarioSession }) {
   return (
-    <header className="flex h-14 items-center justify-between gap-3 border-b border-border bg-background px-4">
+    <header className="flex h-12 items-center justify-between gap-3 border-b border-border bg-background px-3">
       <div className="flex min-w-0 items-center gap-3">
         <Button asChild variant="ghost" size="sm">
           <Link to="/units">

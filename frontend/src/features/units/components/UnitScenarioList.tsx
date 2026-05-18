@@ -5,6 +5,7 @@ import { reviewApi } from '@/features/review/api/reviewApi'
 import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import { ScenarioCard } from '@/features/scenarios/components/ScenarioCard'
 import type { DifficultyAccess } from '@/features/scenarios/types'
+import { syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
@@ -15,11 +16,13 @@ export function UnitScenarioList({ unitId, source }: { unitId: number; source: '
   const { data, error, isError, isLoading } = useQuery({
     queryKey: ['unit-scenarios', unitId],
     queryFn: () => scenariosApi.listForUnit(unitId),
+    staleTime: 5 * 60 * 1000,
   })
   const startMutation = useMutation({
     mutationFn: (difficulty: DifficultyAccess) =>
       scenariosApi.startSession({ difficulty_instance_id: difficulty.id, source_entry_point: source }),
     onSuccess: (session) => {
+      syncScenarioSessionInCache(queryClient, session)
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
       navigate(`/practice/${session.id}`)
     },

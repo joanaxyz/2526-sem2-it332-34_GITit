@@ -12,6 +12,7 @@ import { useCommandSubmission } from '@/features/practice/hooks/useCommandSubmis
 import { useScenarioSession } from '@/features/practice/hooks/useScenarioSession'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
+import { cn } from '@/shared/utils/cn'
 
 export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean }) {
   const params = useParams()
@@ -47,20 +48,33 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <ScenarioStatusHeader session={session} />
-      <main className="grid min-h-0 flex-1 grid-cols-[20rem_minmax(0,1fr)_22rem] gap-3 p-3 max-xl:grid-cols-[18rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
-        <aside className="flex min-h-0 flex-col gap-3">
+      <main className="grid min-h-0 flex-1 grid-cols-[18rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[17rem_minmax(0,1fr)] max-xl:grid-cols-[16rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
+        <aside className="flex min-h-0 flex-col gap-2">
           <ScenarioContextPanel session={session} />
           <CommandCounter session={session} />
           <SessionOutcomeBanner session={session} />
         </aside>
-        <section className="grid min-h-0 grid-rows-[minmax(15rem,0.8fr)_minmax(18rem,1fr)] gap-3">
-          <LiveDagPanel snapshot={session.repository_state} />
-          <TerminalPanel lines={lines} disabled={session.status !== 'started' || mutation.isPending} onCommand={submit} />
+        <section className="grid min-h-0 grid-rows-[minmax(0,1fr)_minmax(10rem,0.36fr)] gap-2 max-lg:min-h-[56rem]">
+          <div className="grid min-h-0 grid-cols-[minmax(0,1.04fr)_minmax(0,0.96fr)] gap-2 max-xl:grid-cols-1">
+            <LiveDagPanel
+              snapshot={session.repository_state}
+              className="flex min-h-0 flex-col"
+              contentClassName="h-full min-h-0 flex-1"
+            />
+            <ExpectedStatePanel session={session} />
+          </div>
+          <div
+            className={cn(
+              'grid min-h-0 gap-2',
+              session.scaffolding.contextual_feedback
+                ? 'grid-cols-[minmax(0,1.55fr)_minmax(20rem,0.65fr)] max-xl:grid-cols-1'
+                : 'grid-cols-1',
+            )}
+          >
+            <TerminalPanel lines={lines} disabled={session.status !== 'started' || mutation.isPending} onCommand={submit} />
+            <ContextualFeedbackPanel session={session} feedback={feedback} />
+          </div>
         </section>
-        <aside className="flex min-h-0 flex-col gap-3 max-xl:col-span-2 max-lg:col-span-1">
-          <ExpectedStatePanel session={session} />
-          <ContextualFeedbackPanel session={session} feedback={feedback} />
-        </aside>
       </main>
     </div>
   )

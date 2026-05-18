@@ -23,6 +23,9 @@ def session_payload(session) -> dict:
         "id": session.id,
         "mode": session.mode,
         "status": session.status,
+        "difficulty_instance_id": session.difficulty_instance_id,
+        "completed_at": session.completed_at,
+        "first_attempt_star_eligible": session.first_attempt_star_eligible,
         "scenario": {
             "id": session.scenario_id,
             "slug": session.scenario.slug,

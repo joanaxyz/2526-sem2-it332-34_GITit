@@ -1,0 +1,96 @@
+import type { QueryClient } from '@tanstack/react-query'
+
+import type { ScenarioSession } from '@/features/practice/types'
+import type { Difficulty, DifficultyStatus, ScenarioSkillFocus } from '@/features/scenarios/types'
+
+const scenarioListQueryKeys = new Set(['lesson-scenarios', 'unit-scenarios'])
+const difficultyOrder: Difficulty[] = ['easy', 'medium', 'hard']
+
+export function syncScenarioSessionInCache(queryClient: QueryClient, session: ScenarioSession) {
+  queryClient.setQueryData(['scenario-session', session.id], session)
+
+  if (session.review_mode) return
+
+  queryClient.setQueriesData<ScenarioSkillFocus[]>(
+    {
+      predicate: (query) => scenarioListQueryKeys.has(String(query.queryKey[0])),
+    },
+    (scenarios) => updateScenarioListWithSession(scenarios, session),
+  )
+}
+
+export function updateScenarioListWithSession(
+  scenarios: ScenarioSkillFocus[] | undefined,
+  session: ScenarioSession,
+) {
+  if (!scenarios?.length) return scenarios
+
+  let matchedScenario = false
+  const unlockedDifficulty = session.status === 'completed' ? nextDifficultyAfter(session.difficulty) : null
+
+  const nextScenarios = scenarios.map((scenario) => {
+    if (scenario.id !== session.scenario.id) return scenario
+
+    matchedScenario = true
+    let changed = false
+    const difficulties = scenario.difficulties.map((difficulty) => {
+      if (difficulty.difficulty === session.difficulty) {
+        const status = statusFromSession(session.status, difficulty.status)
+        const activeSessionId = session.status === 'started' ? session.id : null
+        const completion =
+          session.status === 'completed'
+            ? {
+                first_attempt_star: session.first_attempt_star_eligible,
+                counted_action_total: session.counts.counted_action_total,
+                completed_at: session.completed_at ?? new Date().toISOString(),
+              }
+            : difficulty.completion
+
+        if (
+          difficulty.status === status &&
+          difficulty.active_session_id === activeSessionId &&
+          difficulty.review_available === (session.status === 'completed' || difficulty.review_available) &&
+          difficulty.completion === completion
+        ) {
+          return difficulty
+        }
+
+        changed = true
+        return {
+          ...difficulty,
+          status,
+          active_session_id: activeSessionId,
+          review_available: session.status === 'completed' || difficulty.review_available,
+          completion,
+        }
+      }
+
+      if (difficulty.difficulty === unlockedDifficulty && difficulty.status === 'locked') {
+        changed = true
+        return { ...difficulty, status: 'available' as DifficultyStatus }
+      }
+
+      return difficulty
+    })
+
+    return changed ? { ...scenario, difficulties } : scenario
+  })
+
+  return matchedScenario ? nextScenarios : scenarios
+}
+
+function nextDifficultyAfter(difficulty: Difficulty) {
+  const index = difficultyOrder.indexOf(difficulty)
+  return index >= 0 ? difficultyOrder[index + 1] ?? null : null
+}
+
+function statusFromSession(
+  sessionStatus: ScenarioSession['status'],
+  currentStatus: DifficultyStatus,
+): DifficultyStatus {
+  if (sessionStatus === 'completed') return 'complete'
+  if (sessionStatus === 'started') return 'in_progress'
+  if (currentStatus === 'complete') return 'complete'
+  if (currentStatus === 'locked') return 'locked'
+  return 'available'
+}

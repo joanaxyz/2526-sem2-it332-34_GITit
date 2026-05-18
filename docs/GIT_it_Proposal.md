@@ -71,7 +71,7 @@ Improve students' ability to apply Git concepts to structurally changed reposito
 
 #### Specific Objectives
 
-- **SO 4.1** — Improve authentic Git skill transfer so that students successfully complete RTA-eligible structurally changed scenario variants at a rate of at least 65% across all eligible attempts — demonstrating that students apply the same Git concept to a changed repository topology rather than repeat a memorized command pattern from a prior attempt. (RTA ≥ 65%)
+- **SO 4.1** — Improve authentic Git skill transfer so that students successfully complete RTA-eligible structurally changed difficulty variants at a rate of at least 65% across all eligible attempts — demonstrating that students apply the same Git concept and difficulty-level intent to a changed repository topology rather than repeat a memorized command pattern from a prior attempt. (RTA ≥ 65%)
 - **SO 4.2** — Eliminate identical retry repetition so that every retry following a Failed or Abandoned session serves a structurally different scenario variant — altering branch names, commit structure, file state, or starting repository topology — ensuring students engage with genuine conceptual variation rather than surface-level repetition, verified by logging that no Failed or Abandoned attempt followed by a retry results in an identical scenario being served when a changed variant exists. (0% identical-variant retries when a changed variant exists)
 - **SO 4.3** — Improve students' ability to apply Git concepts across varied repository contexts, measured by verifying through variant ID logs that Retry Transfer Accuracy is computed exclusively from changed-variant encounters — ensuring no RTA-eligible attempt reuses an identical prior template and that transfer metrics reflect genuine conceptual application rather than command recall. (100% RTA computation integrity across eligible sessions)
 
@@ -90,7 +90,7 @@ Improve students' ability to monitor their own Git practice progress through vis
 - **RQ1.** Does the Orientation and Conceptual Readiness Unit ensure that all students who proceed to scenario practice have first completed the structured Unit 1 orientation content, as evidenced by 100% Orientation Completion Gate adherence across the evaluation period — and does orientation completion contribute to reduced retry burden in subsequent scenario practice?
 - **RQ2.** Does the Scenario Practice and State-Based Evaluation Unit improve measurable Git command proficiency among third-year BSIT students at CIT-U, as evidenced by Scenario Completion Rate (SCR ≥ 80%), Command Accuracy Rate (CAR ≥ 60%), and Review Mode scenario completion rate (≥ 60%) across the active published scenario library?
 - **RQ3.** Does the Repository Visualization and Fading Scaffolding Unit improve students' repository-state reasoning and independent Git competence, as evidenced by correct difficulty-based scaffolding rendering and Hard-Level Completion Rate (HLCR ≥ 70%) across active Hard-level sessions?
-- **RQ4.** Does the Adaptive Retry and Transfer Practice Unit promote authentic Git skill transfer rather than command memorization, as evidenced by Retry Transfer Accuracy (RTA ≥ 65%) across structurally changed scenario variants and the elimination of identical retry repetition?
+- **RQ4.** Does the Adaptive Retry and Transfer Practice Unit promote authentic Git skill transfer rather than command memorization, as evidenced by Retry Transfer Accuracy (RTA ≥ 65%) across structurally changed difficulty variants and the elimination of identical retry repetition?
 - **RQ5.** Does the Progress Tracking and Self-Monitoring Unit support students' self-directed engagement with Git practice, as evidenced by 100% log-display match accuracy on the student dashboard and Scenario Abandonment Rate (SAR ≤ 20%) across the active published scenario library?
 
 ## PART 3: Methods
@@ -146,8 +146,8 @@ Learning Unit
 - **A Learning Unit:** a top-level content group that organizes the Git syllabus for students in the unit page.
 - **A Lesson:** an instructional unit within a learning unit. It contains the concept explanations, examples, command references, diagrams, and other learning materials a student needs before practice. A lesson may or may not include scenario practice — lessons without scenario skill focuses present their content directly, while lessons with scenario skill focuses attach one or more scenarios to their content.
 - **A Scenario Skill Focus:** a reusable Git problem pattern attached to a scenario-bearing lesson. Examples include first commit, wrong-branch commit, partial staging, detached HEAD recovery, branch cleanup, merge conflict resolution, and undo/recovery patterns. Each scenario skill focus provides three difficulty instances: Easy, Medium, and Hard.
-- **A Difficulty Instance:** the actual playable practice level for a scenario skill focus. Easy, Medium, and Hard target the same Git concept but differ in available scaffolding, command limits, and required independence.
-- **A Retry Variant:** a structurally changed version of a scenario difficulty instance used after a Failed or Abandoned session. Variants alter branch names, commit structures, file-state markers, or starting repository topology so students cannot rely on memorized command sequences.
+- **A Difficulty Instance:** the actual configured playable practice level for a scenario skill focus. Easy, Medium, and Hard target the same Git concept, but each difficulty instance owns its own student-facing narrative, task prompt, initial repository-state definition, target-state rule, expected-state diagram availability, command-count policy, and variant pool. Difficulty instances are therefore not merely UI labels or scaffold toggles; they are independently authored scenario configurations under the same skill focus.
+- **A Retry Variant:** a structurally changed version owned by one difficulty instance and used after a Failed or Abandoned session for that same difficulty level. Variants alter branch names, commit structures, file-state markers, starting repository topology, or file/context details so students cannot rely on memorized command sequences. Easy, Medium, and Hard maintain separate valid variant pools because the intended repository complexity and independence level differ by difficulty.
 - **Unit 1: Orientation:** the first learning unit in the platform. Its lessons contain no scenario practice. Unit 1 establishes the foundational Git mental model students need before entering scenario-driven content and orients students to the platform's interface and conventions. Completion of all Unit 1 lessons is enforced as a prerequisite gate before a student may start their first scenario session, tracked by the Orientation Completion Gate (OCG). Unit 1 does not generate scenario session logs or scenario KPI data.
 
 ### Scaffolding Components
@@ -159,7 +159,7 @@ Three interface components support student reasoning within the Scenario Practic
 
 ### Difficulty-Differentiated Scaffolding Model
 
-A central design principle of GIT it! is the progressive reduction of available scaffolding as students advance through harder difficulty levels within each scenario skill focus (Sweller et al., 2011). Scenario skill focuses are freely selectable at any time, but difficulty levels within a selected scenario follow a completion-based progression: Easy is available by default, Medium unlocks after Easy completion, and Hard unlocks after Medium completion. Each scenario offers three difficulty levels that target the same Git concept but progressively reduce the instructional support available:
+A central design principle of GIT it! is the progressive reduction of available scaffolding as students advance through harder difficulty levels within each scenario skill focus (Sweller et al., 2011). Scenario skill focuses are freely selectable at any time, but difficulty levels within a selected scenario follow a completion-based progression: Easy is available by default, Medium unlocks after Easy completion, and Hard unlocks after Medium completion. Each scenario offers three difficulty levels that target the same Git concept but are configured as separate authored difficulty instances. In addition to reducing instructional support, Easy, Medium, and Hard may differ in professional narrative, file names, branch names, starting repository topology, target-state rules, command-count policies, and variant pools so the student practices transfer rather than replaying the same template with fewer hints.
 | Level | Scaffolding | Available Components | Cognitive Goal |
 |---|---|---|---|
 | Easy | Full | Live animated DAG + Expected-state diagram + Contextual feedback panel + Remaining Counted-Command Counter | Supported interpretation — student connects commands to visible repository consequences with feedback describing what changed |
@@ -190,7 +190,7 @@ CAR is computed from the latest completed primary attempt per student, scenario 
 
 ### Adaptive Retry and Scenario Variation
 
-When a student retries after a Failed or Abandoned session, the system serves a structurally different variant from the scenario's predefined pool rather than repeating the identical scenario. Variants alter branch names, commit structures, file-state markers, or starting repository topology. No Failed or Abandoned session followed by a retry results in the identical scenario being repeated when a structurally different valid variant exists. Variant IDs are logged for every attempt, enabling the system to verify that Retry Transfer Accuracy is computed only from changed-variant encounters rather than repeated identical templates.
+When a student retries after a Failed or Abandoned session, the system serves a structurally different variant from the selected difficulty instance's predefined variant pool rather than repeating the identical difficulty-level scenario. Variants alter branch names, commit structures, file-state markers, file/context details, or starting repository topology. No Failed or Abandoned session followed by a retry results in the identical difficulty variant being repeated when a structurally different valid variant exists within that difficulty's pool. Variant IDs and difficulty-instance IDs are logged for every attempt, enabling the system to verify that Retry Transfer Accuracy is computed only from changed-variant encounters rather than repeated identical templates.
 
 ### Core Interface Components
 
@@ -233,15 +233,15 @@ All session and step interactions are logged continuously for KPI computation, i
 | Learning Unit | Groups related lessons for the unit page; Unit 1: Orientation is the first unit and contains only non-scenario lessons |
 | Lesson | Presents instructional content; may include scenario skill focuses or may be content-only |
 | Scenario Skill Focus | A reusable Git problem pattern attached to a scenario-bearing lesson |
-| Difficulty Instance | Provides Easy, Medium, and Hard practice levels for a scenario skill focus |
-| Retry Variant | Provides structurally changed scenario attempts for transfer measurement |
+| Difficulty Instance | Provides independently configured Easy, Medium, and Hard practice levels for a scenario skill focus |
+| Retry Variant | Provides structurally changed scenario attempts from the selected difficulty instance's own variant pool for transfer measurement |
 | Command-Count Policy Configuration | Stores minimum counted-command thresholds, maximum counted-command limits, and non-counted diagnostic command patterns per scenario difficulty instance |
 
 ### Planned Phase 2 — Not Included in Current MVP Evaluation
 
 The current semester deliverable focuses on the student-facing scenario practice platform using a static, pre-authored starter syllabus. Administrative Management and AI-Assisted Learning Support are documented as planned Phase 2 units, excluded from current-release MVP evaluation and KPI computation.
 
-Administrative Management consolidates all non-student platform capabilities: viewing cohort-level and student-level KPI summaries, managing student accounts and access, creating and maintaining student-facing learning units, lessons, lesson content, scenario records, scenario variants, command-count policy configurations, and reviewing administrative audit logs.
+Administrative Management consolidates all non-student platform capabilities: viewing cohort-level and student-level KPI summaries, managing student accounts and access, creating and maintaining student-facing learning units, lessons, lesson content, scenario skill focus records, difficulty-instance configurations, difficulty-owned variants, command-count policy configurations, and reviewing administrative audit logs.
 
 AI-Assisted Learning Support includes three planned capabilities: a conceptual Git chatbot for student-facing lesson pages, an AI-assisted lesson content drafting workflow, and an AI-assisted scenario-drafting workflow. AI-generated content does not publish directly; the administrator must validate, edit, and publish all AI-generated content before students can access it.
 

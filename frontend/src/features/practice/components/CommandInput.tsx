@@ -48,10 +48,10 @@ export function CommandInput({
   }
 
   return (
-    <form className="flex gap-2 border-t border-border p-3" onSubmit={submit}>
-      <span className="hidden pt-2 font-mono text-xs text-primary md:block">student@git-it $</span>
+    <form className="flex gap-2 border-t border-border p-2" onSubmit={submit}>
+      <span className="hidden pt-2 font-mono text-[11px] text-primary md:block">student@git-it $</span>
       <input
-        className="h-10 min-w-0 flex-1 rounded-md border border-input bg-background px-3 font-mono text-sm outline-none focus:ring-2 focus:ring-ring"
+        className="h-9 min-w-0 flex-1 rounded-md border border-input bg-background px-3 font-mono text-xs outline-none focus:ring-2 focus:ring-ring"
         value={value}
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={handleKeyDown}
@@ -59,7 +59,7 @@ export function CommandInput({
         autoFocus
         placeholder="Type a simulated git command"
       />
-      <Button type="submit" disabled={disabled}>Run</Button>
+      <Button type="submit" size="sm" disabled={disabled}>Run</Button>
     </form>
   )
 }

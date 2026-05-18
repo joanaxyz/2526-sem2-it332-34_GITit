@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
@@ -6,6 +6,7 @@ import { reviewApi } from '@/features/review/api/reviewApi'
 import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import { ScenarioCard } from '@/features/scenarios/components/ScenarioCard'
 import type { DifficultyAccess } from '@/features/scenarios/types'
+import { syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
 import { unitsApi } from '@/features/units/api/unitsApi'
 import { Button } from '@/shared/components/Button'
 import { EmptyState } from '@/shared/components/EmptyState'
@@ -16,6 +17,7 @@ export function ScenarioSelectionPage() {
   const params = useParams()
   const lessonId = Number(params.lessonId)
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const lessonQuery = useQuery({
     queryKey: ['lesson', lessonId],
     queryFn: () => unitsApi.getLesson(lessonId),
@@ -25,11 +27,15 @@ export function ScenarioSelectionPage() {
     queryKey: ['lesson-scenarios', lessonId],
     queryFn: () => scenariosApi.listForLesson(lessonId),
     enabled: Number.isFinite(lessonId),
+    staleTime: 5 * 60 * 1000,
   })
   const startMutation = useMutation({
     mutationFn: (difficulty: DifficultyAccess) =>
       scenariosApi.startSession({ difficulty_instance_id: difficulty.id, source_entry_point: 'lesson_overview' }),
-    onSuccess: (session) => navigate(`/practice/${session.id}`),
+    onSuccess: (session) => {
+      syncScenarioSessionInCache(queryClient, session)
+      navigate(`/practice/${session.id}`)
+    },
   })
   const reviewMutation = useMutation({
     mutationFn: (difficulty: DifficultyAccess) => reviewApi.startReviewSession(difficulty.id),
