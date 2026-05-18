@@ -22,7 +22,6 @@
     "lucide-react": "^0.561.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-flow-renderer": "^10.3.17",
     "react-hook-form": "^7.68.0",
     "react-router-dom": "^7.10.1",
     "reactflow": "^11.11.4",
@@ -33,6 +32,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.12.3",
+    "@types/dagre": "^0.7.53",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@testing-library/jest-dom": "^6.9.1",

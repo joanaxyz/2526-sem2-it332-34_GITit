@@ -1,4 +1,5 @@
 import { X } from 'lucide-react'
+import type { ReactNode } from 'react'
 
 import { Button } from './Button'
 import { Card } from './Card'
@@ -11,7 +12,7 @@ export function Modal({
 }: {
   open: boolean
   title: string
-  children: React.ReactNode
+  children: ReactNode
   onClose: () => void
 }) {
   if (!open) return null
