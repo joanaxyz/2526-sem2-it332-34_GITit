@@ -24,7 +24,9 @@ class RegisterAPIView(APIView):
         user = UserService().register_student(
             email=serializer.validated_data["email"],
             password=serializer.validated_data["password"],
-            display_name=serializer.validated_data["display_name"],
+            student_id=serializer.validated_data["student_id"],
+            first_name=serializer.validated_data["first_name"],
+            last_name=serializer.validated_data["last_name"],
         )
         tokens = TokenService().issue_for_user(user, request=request)
         response = Response(
@@ -42,13 +44,13 @@ class LoginAPIView(APIView):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = TokenService().authenticate_student(
-            email=serializer.validated_data["email"],
+            identifier=serializer.validated_data["identifier"],
             password=serializer.validated_data["password"],
             request=request,
         )
         if user is None:
             return Response(
-                {"detail": "Invalid email or password."},
+                {"detail": "Invalid student ID/email or password."},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
         tokens = TokenService().issue_for_user(user, request=request)

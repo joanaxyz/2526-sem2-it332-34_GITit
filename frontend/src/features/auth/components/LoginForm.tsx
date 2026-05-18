@@ -10,7 +10,17 @@ import { useAuthStore } from '@/features/auth/hooks/useAuth'
 import { Button } from '@/shared/components/Button'
 
 const schema = z.object({
-  email: z.string().email(),
+  identifier: z
+    .string()
+    .trim()
+    .min(1, 'Student ID or email is required.')
+    .refine(
+      (value) =>
+        value.includes('@')
+          ? z.string().email().safeParse(value).success && value.toLowerCase().endsWith('@cit.edu')
+          : /^\d{2}-\d{4}-\d{3}$/.test(value),
+      'Use your student ID or @cit.edu email.',
+    ),
   password: z.string().min(1, 'Password is required.'),
 })
 
@@ -35,9 +45,9 @@ export function LoginForm() {
         <p className="mt-2 text-sm leading-6 text-muted-foreground">Continue your Git practice dashboard.</p>
       </div>
       <label className="flex flex-col gap-2 text-sm font-semibold">
-        Email
-        <input className="h-11 rounded-md border border-input bg-secondary px-3 outline-none focus:ring-2 focus:ring-ring" {...form.register('email')} />
-        {form.formState.errors.email ? <span className="text-xs text-destructive">{form.formState.errors.email.message}</span> : null}
+        Student ID or email
+        <input className="h-11 rounded-md border border-input bg-secondary px-3 outline-none focus:ring-2 focus:ring-ring" autoComplete="username" {...form.register('identifier')} />
+        {form.formState.errors.identifier ? <span className="text-xs text-destructive">{form.formState.errors.identifier.message}</span> : null}
       </label>
       <label className="flex flex-col gap-2 text-sm font-semibold">
         Password

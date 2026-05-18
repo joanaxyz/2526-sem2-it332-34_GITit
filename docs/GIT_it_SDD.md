@@ -145,19 +145,19 @@ The main component interaction flow is as follows:
 #### Front-end component(s)
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
-| AuthForm | Displays and validates email/password or registration fields before API submission. | React component |
+| AuthForm | Displays and validates student ID in NN-NNNN-NNN format, first name, last name, @cit.edu email, and password registration fields before API submission. | React component |
 | AuthApiClient | Sends authentication requests to the backend API and handles token responses. | TypeScript/JavaScript service |
 
 #### Back-end component(s)
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
-| AuthViewSet/RegisterAPIView | Validates registration payload, creates student account, hashes password, initializes progress record. | Django REST Framework API view |
+| AuthViewSet/RegisterAPIView | Validates registration payload, enforces unique NN-NNNN-NNN student ID and @cit.edu email requirements, creates student account, hashes password, initializes progress record. | Django REST Framework API view |
 | UserService | Handles user creation and initial progress setup. | Django service class |
 | TokenService | Issues JWT access token and refresh token. | Python service class |
 
 #### Object-Oriented Components
 
-Primary classes/components: User, StudentProfile, ProgressRecord, TokenService, AuthSerializer.
+Primary classes/components: User, StudentProfile, ProgressRecord, TokenService, AuthSerializer. StudentProfile stores the unique NN-NNNN-NNN student ID while User stores first name, last name, and CIT educational email.
 
 ##### Class Diagram
 [PLACEHOLDER — Insert class diagram for Register a New Student Account.]
@@ -166,7 +166,7 @@ Primary classes/components: User, StudentProfile, ProgressRecord, TokenService, 
 [PLACEHOLDER — Insert sequence diagram for Register a New Student Account.]
 
 #### Data Design
-Tables/entities involved: User, StudentProfile, ProgressRecord, RefreshToken/SessionRecord. Registration writes must be transactional so that user and initial progress records are created together.
+Tables/entities involved: User, StudentProfile, ProgressRecord, RefreshToken/SessionRecord. Registration writes must be transactional so that user, unique student ID profile, and initial progress records are created together.
 
 ##### ERD or schema
 [PLACEHOLDER — Insert ERD/schema excerpt for Register a New Student Account.]
@@ -179,18 +179,18 @@ Tables/entities involved: User, StudentProfile, ProgressRecord, RefreshToken/Ses
 #### Front-end component(s)
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
-| AuthForm | Displays and validates email/password or registration fields before API submission. | React component |
+| AuthForm | Displays and validates a student ID or @cit.edu email identifier with password before API submission. | React component |
 | AuthApiClient | Sends authentication requests to the backend API and handles token responses. | TypeScript/JavaScript service |
 
 #### Back-end component(s)
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
-| LoginAPIView | Authenticates email/password and returns session tokens. | Django REST Framework API view |
+| LoginAPIView | Authenticates student ID/password or @cit.edu email/password and returns session tokens. | Django REST Framework API view |
 | TokenService | Creates access and refresh tokens and sets secure cookie metadata. | Python service class |
 
 #### Object-Oriented Components
 
-Primary classes/components: User, LoginSerializer, TokenService, SessionRecord.
+Primary classes/components: User, StudentProfile, LoginSerializer, TokenService, SessionRecord.
 
 ##### Class Diagram
 [PLACEHOLDER — Insert class diagram for Log In to Student Account.]
@@ -199,7 +199,7 @@ Primary classes/components: User, LoginSerializer, TokenService, SessionRecord.
 [PLACEHOLDER — Insert sequence diagram for Log In to Student Account.]
 
 #### Data Design
-Tables/entities involved: User, SessionRecord, RefreshToken. Failed login attempts return a generic invalid-credentials response.
+Tables/entities involved: User, StudentProfile, SessionRecord, RefreshToken. Failed login attempts return a generic invalid-credentials response without disclosing whether the submitted identifier was an unknown student ID/email or the password was wrong.
 
 ##### ERD or schema
 [PLACEHOLDER — Insert ERD/schema excerpt for Log In to Student Account.]
