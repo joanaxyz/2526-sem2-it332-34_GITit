@@ -31,7 +31,7 @@ export function ScenarioSelectionPage() {
   })
   const startMutation = useMutation({
     mutationFn: (difficulty: DifficultyAccess) =>
-      scenariosApi.startSession({ difficulty_instance_id: difficulty.id, source_entry_point: 'lesson_overview' }),
+      scenariosApi.startSession({ difficulty_instance_id: difficulty.id, source_entry_point: 'lesson' }),
     onSuccess: (session) => {
       syncScenarioSessionInCache(queryClient, session)
       navigate(`/practice/${session.id}`)
@@ -63,7 +63,7 @@ export function ScenarioSelectionPage() {
         </div>
         <h1 className="text-4xl font-extrabold tracking-tight">{lessonQuery.data.title}</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-          Select a scenario skill focus and choose the available difficulty. Medium and Hard unlock only through same-scenario completion.
+          Choose a practice topic and start with the level that is open. Medium and Hard unlock as you complete that same topic.
         </p>
       </section>
       {scenarios.length ? (
@@ -83,14 +83,20 @@ export function ScenarioSelectionPage() {
               <ScenarioCard
                 key={scenario.id}
                 scenario={scenario}
-                onStart={(difficulty) => startMutation.mutate(difficulty)}
+                onStart={(difficulty) => {
+                  if (difficulty.status === 'in_progress' && difficulty.active_session_id) {
+                    navigate(`/practice/${difficulty.active_session_id}`)
+                    return
+                  }
+                  startMutation.mutate(difficulty)
+                }}
                 onReview={(difficulty) => reviewMutation.mutate(difficulty)}
               />
             ))}
           </div>
         </>
       ) : (
-        <EmptyState title="No scenarios attached" description="This lesson is reading-only and does not lead to scenario practice." />
+        <EmptyState title="No practice set here" description="Use this lesson as a reference, then open a unit with practice topics when you are ready." />
       )}
     </div>
   )

@@ -17,6 +17,8 @@ const scenario: ScenarioSkillFocus = {
     {
       id: 101,
       difficulty: 'easy',
+      narrative: 'Easy setup.',
+      task_prompt: 'Recover the misplaced commit.',
       status: 'in_progress',
       review_available: false,
       active_session_id: 900,
@@ -26,6 +28,8 @@ const scenario: ScenarioSkillFocus = {
     {
       id: 102,
       difficulty: 'medium',
+      narrative: 'Medium setup.',
+      task_prompt: 'Recover a busier misplaced commit.',
       status: 'locked',
       review_available: false,
       active_session_id: null,
@@ -35,6 +39,8 @@ const scenario: ScenarioSkillFocus = {
     {
       id: 103,
       difficulty: 'hard',
+      narrative: 'Hard setup.',
+      task_prompt: 'Recover a complex misplaced commit.',
       status: 'locked',
       review_available: false,
       active_session_id: null,
@@ -91,6 +97,7 @@ const completedSession: ScenarioSession = {
     conflicts: [],
   },
   expected_state: null,
+  steps: [],
   review_mode: false,
 }
 

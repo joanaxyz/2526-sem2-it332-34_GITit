@@ -10,7 +10,9 @@ Scenario descriptions must be specific enough for a student to know the professi
 
 Current-release MVP does not include real remotes or external Git hosting. Therefore, scenarios must not require `git push`, GitHub, GitLab, Bitbucket, pull requests, forks, or remote branch tracking as assessed outcomes. If a future remote-workflow unit is added, the scenario must explicitly name the remote, local branch, destination branch, and whether the push should create, update, or avoid updating a remote ref.
 
-Commit messages should be authored when the scenario teaches staging, commit intent, or professional communication. In the current simulator, commit-message text is not yet enforced by evaluator rules, so the curriculum may display a required message as scenario context, but the MVP evaluator should grade repository state first. If exact message grading is needed, add a future target-state rule such as `latest_commit_message_matches`.
+Commit messages should be authored when the scenario teaches staging, commit intent, or professional communication. The MVP evaluator may enforce lightweight message intent through `message_contains`, but it should still grade repository state first and avoid exact full-message matching unless an instructor has a clear reason to require it.
+
+Student-facing scenario context must distinguish narrative from rules. Each scenario card or workspace should make clear: the target is a final repository state, not a hidden command sequence; diagnostic commands listed in the command policy do not consume counted actions; and commit-message wording is graded only when the task explicitly says the message must include a word or intent.
 
 ## Scenario Authoring Contract
 
@@ -63,7 +65,7 @@ Unit 6 should be included if the pilot has enough time for synthesis practice. I
 
 ## Unit 1: Orientation
 
-Unit 1 is a no-terminal, concept-only Orientation Completion Gate. Students must complete all orientation lessons before entering scenario practice.
+Unit 1 is a no-terminal, concept-only orientation unit. Its lessons are single scrollable pages that students can read before or during scenario practice. Completion/read status is tracked for progress, but Unit 1 does not block access to scenarios.
 
 ### Lesson 1.1: The Three File Areas
 
@@ -411,7 +413,7 @@ For staging scenarios, the scenario must always tell the student which work is r
 
 For commit scenarios, include a commit-message expectation when message intent is educationally important. Student-facing text should say something like "Use a commit message that communicates the configuration update" or "Commit intent: update app configuration." Avoid saying "type `git commit -m ...`" because that exposes part of the answer.
 
-For evaluator design, repository state remains the primary success criterion in the MVP. Exact commit-message validation should be treated as a future evaluator enhancement unless a new target rule is implemented.
+For evaluator design, repository state remains the primary success criterion in the MVP. The implemented target-rule vocabulary may also enforce lightweight commit-message intent, latest-commit file inclusion/exclusion, required working-tree leftovers, and branch pointer targets where a scenario needs those checks. Exact full-message matching should still be avoided unless an instructor has a clear reason to grade an exact phrase.
 
 ## Branch and Push Authoring Rules
 
@@ -467,10 +469,10 @@ Preferred pilot set:
 - All minimum viable pilot scenarios.
 - Unit 6 with at least two mixed-workflow capstone skill focuses.
 
-## Implementation Gap Notes
+## Implementation Alignment Notes
 
-The curriculum target architecture requires scenario content to be configured at the `DifficultyInstance` level. Each Easy, Medium, and Hard difficulty instance should own its narrative/task prompt, initial repository state, target-state rule, command-count policy, expected-state behavior, and variant pool. The current seeded backend content already creates scenario skill focuses, variants, difficulty instances, command-count policies, and target rules, but the current implementation still stores variants under the parent scenario skill focus and gives each Easy/Medium/Hard difficulty instance the same narrative text. The current seed also uses the older five-unit path where collaboration appears before undo/recovery and does not include the recommended Unit 6 capstone. These should be treated as implementation gaps, not as the intended curriculum architecture.
+The current implementation now treats `DifficultyInstance` as the playable configuration boundary. Each Easy, Medium, and Hard difficulty instance can define its own narrative, task prompt, target-state rule, command-count policy, expected-state behavior, and difficulty-owned variant pool. The seeded starter content follows the improved six-unit path, places local undo/recovery before collaboration/integration, and includes the Unit 6 capstone.
 
-The current evaluator can confirm broad state outcomes such as branch presence, HEAD branch, clean working tree, empty staging area, conflict-free state, minimum commit depth, and equal branch pointers. It does not yet enforce file-specific commit contents or exact commit messages. This matters most for partial-staging scenarios: the curriculum should describe the intended file-selection behavior now, but full grading of "only this file was committed and this other file stayed uncommitted" requires a future evaluator rule that inspects commit file contents and remaining working-tree paths.
+The evaluator can confirm broad state outcomes such as branch presence, branch absence, branch pointer targets, HEAD branch, clean working tree, empty staging area, conflict-free state, minimum commit depth, equal branch pointers, required working-tree paths, latest-commit file contents, latest-commit exclusions, and message-keyword intent. This supports partial-staging tasks where the student must commit one requested file while leaving draft work uncommitted.
 
-To fully match this curriculum plan, the backend schema should make variants difficulty-owned, either by attaching variants directly to `DifficultyInstance` or by introducing a join model such as `DifficultyVariant`. The seed data should then create separate Easy, Medium, and Hard variant pools and level-specific scenario context. If commit-message grading becomes required, the evaluator and target-state rule schema should be extended before the curriculum treats exact commit messages as graded outcomes.
+Remaining curriculum work should focus on adding more authored variants and future advanced Git operations only after the simulator supports them. Remote pushes are described as collaboration context but are not executed by the MVP simulator.

@@ -25,7 +25,9 @@ class ScenarioSkillFocus(models.Model):
     learning_unit = models.ForeignKey(
         "learning.LearningUnit", related_name="scenarios", on_delete=models.CASCADE
     )
-    lesson = models.ForeignKey("learning.Lesson", related_name="scenarios", on_delete=models.CASCADE)
+    lesson = models.ForeignKey(
+        "learning.Lesson", related_name="scenarios", on_delete=models.CASCADE
+    )
     slug = models.SlugField()
     title = models.CharField(max_length=180)
     focus = models.CharField(max_length=140)
@@ -53,6 +55,7 @@ class DifficultyInstance(models.Model):
     )
     difficulty = models.CharField(max_length=12, choices=Difficulty.choices)
     narrative = models.TextField(blank=True)
+    task_prompt = models.TextField(blank=True)
     is_published = models.BooleanField(default=True)
 
     class Meta:
@@ -80,7 +83,12 @@ class CommandCountPolicy(models.Model):
 
 
 class ScenarioVariant(models.Model):
-    scenario = models.ForeignKey(ScenarioSkillFocus, related_name="variants", on_delete=models.CASCADE)
+    scenario = models.ForeignKey(
+        ScenarioSkillFocus, related_name="variants", on_delete=models.CASCADE
+    )
+    difficulty_instance = models.ForeignKey(
+        DifficultyInstance, related_name="variants", on_delete=models.CASCADE
+    )
     slug = models.SlugField()
     label = models.CharField(max_length=80)
     structure_signature = models.CharField(max_length=120)
@@ -90,10 +98,10 @@ class ScenarioVariant(models.Model):
     is_published = models.BooleanField(default=True)
 
     class Meta:
-        unique_together = [("scenario", "slug")]
+        unique_together = [("difficulty_instance", "slug")]
 
     def __str__(self) -> str:
-        return f"{self.scenario.slug}:{self.slug}"
+        return f"{self.scenario.slug}:{self.difficulty_instance.difficulty}:{self.slug}"
 
 
 class TargetStateRule(models.Model):
@@ -126,7 +134,7 @@ class ScenarioSession(models.Model):
     source_entry_point = models.CharField(max_length=40)
     mode = models.CharField(max_length=16, choices=Mode.choices, default=SESSION_MODE_PRIMARY)
     status = models.CharField(max_length=16, choices=Status.choices, default=SESSION_STATUS_STARTED)
-    ocg_satisfied_at_start = models.BooleanField(default=False)
+    orientation_complete_at_start = models.BooleanField(default=False)
     rta_eligible = models.BooleanField(default=False)
     rta_success = models.BooleanField(default=False)
     changed_variant = models.BooleanField(default=False)

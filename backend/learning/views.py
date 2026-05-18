@@ -51,7 +51,7 @@ class OrientationStatusAPIView(APIView):
                         "is_complete": False,
                     }
                 )
-        return Response({"gate_satisfied": service.is_gate_satisfied(request.user), "lessons": payload})
+        return Response({"orientation_complete": service.is_orientation_complete(request.user), "lessons": payload})
 
 
 class OrientationCompleteAPIView(APIView):

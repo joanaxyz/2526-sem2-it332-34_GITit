@@ -5,7 +5,7 @@ from django.db import models
 class StudentProgress(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     first_scenario_started_at = models.DateTimeField(null=True, blank=True)
-    orientation_gate_satisfied_at_first_start = models.BooleanField(default=False)
+    orientation_complete_at_first_start = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

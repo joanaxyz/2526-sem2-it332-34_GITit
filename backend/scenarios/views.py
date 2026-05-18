@@ -39,12 +39,16 @@ class ScenarioSessionStartAPIView(APIView):
 
 class ScenarioSessionDetailAPIView(APIView):
     def get(self, request, session_id: int):
-        session = ScenarioSession.objects.select_related(
-            "scenario",
-            "learning_unit",
-            "difficulty_instance",
-            "variant",
-        ).get(id=session_id, user=request.user)
+        session = (
+            ScenarioSession.objects.select_related(
+                "scenario",
+                "learning_unit",
+                "difficulty_instance",
+                "variant",
+            )
+            .prefetch_related("step_logs")
+            .get(id=session_id, user=request.user)
+        )
         return Response(session_payload(session))
 
 
@@ -91,6 +95,7 @@ class ScenarioRetryAPIView(APIView):
             "difficulty_instance",
             "difficulty_instance__command_policy",
             "difficulty_instance__target_rule",
+            "variant",
         ).get(id=session_id, user=request.user)
         session = ScenarioSessionService().start_session(
             user=request.user,

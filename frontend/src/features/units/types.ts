@@ -8,6 +8,7 @@ export type LessonSummary = {
   kind: LessonKind
   sort_order: number
   is_complete: boolean
+  scenario_count: number
 }
 
 export type LearningUnit = {
@@ -24,7 +25,7 @@ export type LearningUnit = {
 }
 
 export type LessonDetail = LessonSummary & {
-  overview_html: string
+  content_html: string
   scoped_css: string
   interaction_steps: string[]
   unit: {
@@ -37,7 +38,7 @@ export type LessonDetail = LessonSummary & {
 }
 
 export type OrientationStatus = {
-  gate_satisfied: boolean
+  orientation_complete: boolean
   lessons: Array<{
     lesson_id: number
     highest_step_seen: number

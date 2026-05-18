@@ -9,7 +9,7 @@ const metricMap = [
   ['hlcr', 'Hard completion', ShieldCheck],
   ['rta', 'Retry transfer', GitPullRequest],
   ['sar', 'Abandonment', RotateCcw],
-  ['review_scr', 'Review SCR', Activity],
+  ['review_scr', 'Review completion', Activity],
 ] as const
 
 export function ProgressSummaryCards({ summary }: { summary: DashboardSummary }) {
@@ -28,7 +28,7 @@ export function ProgressSummaryCards({ summary }: { summary: DashboardSummary })
                 <Icon className="size-5 text-primary" />
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                {metric.denominator ? `${metric.numerator}/${metric.denominator} log records` : 'Waiting for sessions'}
+                {metric.denominator ? `${metric.numerator}/${metric.denominator} attempts` : 'Waiting for practice'}
               </p>
             </CardContent>
           </Card>

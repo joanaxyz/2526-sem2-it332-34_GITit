@@ -19,7 +19,7 @@ export function UnitsPage() {
       <div>
         <h1 className="text-4xl font-extrabold tracking-tight">Units</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-          Browse Unit lessons and expand scenario-bearing Units without leaving the dashboard flow.
+          Browse foundation lessons, then open the practice sets attached to each Git topic.
         </p>
       </div>
       <div className="flex flex-col gap-3">

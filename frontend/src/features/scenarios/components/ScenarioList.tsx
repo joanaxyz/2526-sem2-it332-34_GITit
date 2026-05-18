@@ -10,17 +10,22 @@ import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 
-export function UnitScenarioList({ unitId, source }: { unitId: number; source: 'unit_card' | 'lesson_overview' }) {
+type ScenarioListProps =
+  | { scope: 'lesson'; lessonId: number; source: 'lesson' }
+  | { scope: 'unit'; unitId: number; source: 'unit_card' }
+
+export function ScenarioList(props: ScenarioListProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const queryKey = props.scope === 'lesson' ? ['lesson-scenarios', props.lessonId] : ['unit-scenarios', props.unitId]
   const { data, error, isError, isLoading } = useQuery({
-    queryKey: ['unit-scenarios', unitId],
-    queryFn: () => scenariosApi.listForUnit(unitId),
+    queryKey,
+    queryFn: () => (props.scope === 'lesson' ? scenariosApi.listForLesson(props.lessonId) : scenariosApi.listForUnit(props.unitId)),
     staleTime: 5 * 60 * 1000,
   })
   const startMutation = useMutation({
     mutationFn: (difficulty: DifficultyAccess) =>
-      scenariosApi.startSession({ difficulty_instance_id: difficulty.id, source_entry_point: source }),
+      scenariosApi.startSession({ difficulty_instance_id: difficulty.id, source_entry_point: props.source }),
     onSuccess: (session) => {
       syncScenarioSessionInCache(queryClient, session)
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
@@ -34,7 +39,7 @@ export function UnitScenarioList({ unitId, source }: { unitId: number; source: '
 
   if (isLoading) return <LoadingState label="Loading scenarios" />
   if (isError) return <ErrorState title="Could not load scenarios" description={error.message} />
-  if (!data?.length) return <EmptyState title="No scenarios" description="This Unit has reading or orientation content only." />
+  if (!data?.length) return <EmptyState title="No scenarios here yet" description="Use this lesson as reference material, then continue with a scenario-bearing lesson." />
 
   return (
     <div className="flex flex-col gap-3">
@@ -52,7 +57,13 @@ export function UnitScenarioList({ unitId, source }: { unitId: number; source: '
         <ScenarioCard
           key={scenario.id}
           scenario={scenario}
-          onStart={(difficulty) => startMutation.mutate(difficulty)}
+          onStart={(difficulty) => {
+            if (difficulty.status === 'in_progress' && difficulty.active_session_id) {
+              navigate(`/practice/${difficulty.active_session_id}`)
+              return
+            }
+            startMutation.mutate(difficulty)
+          }}
           onReview={(difficulty) => reviewMutation.mutate(difficulty)}
         />
       ))}

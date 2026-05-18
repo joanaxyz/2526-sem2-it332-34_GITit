@@ -5,6 +5,7 @@ from learning.models import LearningUnit, Lesson, OrientationProgress
 
 class LessonListSerializer(serializers.ModelSerializer):
     is_complete = serializers.SerializerMethodField()
+    scenario_count = serializers.IntegerField(source="published_scenario_count", read_only=True)
 
     class Meta:
         model = Lesson
@@ -16,6 +17,7 @@ class LessonListSerializer(serializers.ModelSerializer):
             "kind",
             "sort_order",
             "is_complete",
+            "scenario_count",
         ]
 
     def get_is_complete(self, obj) -> bool:
@@ -48,6 +50,7 @@ class UnitListSerializer(serializers.ModelSerializer):
 class LessonDetailSerializer(serializers.ModelSerializer):
     unit = serializers.SerializerMethodField()
     is_complete = serializers.SerializerMethodField()
+    scenario_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Lesson
@@ -57,11 +60,12 @@ class LessonDetailSerializer(serializers.ModelSerializer):
             "title",
             "subtitle",
             "kind",
-            "overview_html",
+            "content_html",
             "scoped_css",
             "interaction_steps",
             "unit",
             "is_complete",
+            "scenario_count",
         ]
 
     def get_unit(self, obj):
@@ -77,6 +81,9 @@ class LessonDetailSerializer(serializers.ModelSerializer):
         progress_map = self.context.get("orientation_progress_map", {})
         progress = progress_map.get(obj.id)
         return bool(progress and progress.completed_at)
+
+    def get_scenario_count(self, obj) -> int:
+        return obj.scenarios.filter(is_published=True).count()
 
 
 class OrientationProgressSerializer(serializers.ModelSerializer):

@@ -92,17 +92,17 @@ class RepositoryStateSimulator:
 
     def _status(self, state: dict, args: list[str]) -> str:
         branch = self._head_branch(state) or "detached HEAD"
-        staged = len(state.get("staging", {}))
-        changes = len(state.get("working_tree", {}))
-        conflicts = len(state.get("conflicts", []))
+        staged_paths = sorted(state.get("staging", {}).keys())
+        working_paths = sorted(state.get("working_tree", {}).keys())
+        conflict_paths = sorted(state.get("conflicts", []))
         lines = [f"On {branch}"]
-        if conflicts:
-            lines.append(f"{conflicts} path(s) still have conflict markers.")
-        if staged:
-            lines.append(f"{staged} path(s) staged for commit.")
-        if changes:
-            lines.append(f"{changes} path(s) with working tree changes.")
-        if not staged and not changes and not conflicts:
+        if conflict_paths:
+            lines.append(f"Conflicts: {self._format_paths(conflict_paths)}")
+        if staged_paths:
+            lines.append(f"Staged for commit: {self._format_paths(staged_paths)}")
+        if working_paths:
+            lines.append(f"Working tree changes: {self._format_paths(working_paths)}")
+        if not staged_paths and not working_paths and not conflict_paths:
             lines.append("Working tree clean.")
         return "\n".join(lines)
 
@@ -135,13 +135,18 @@ class RepositoryStateSimulator:
         return f"Created branch {name}."
 
     def _diff(self, state: dict, args: list[str]) -> str:
-        if state.get("conflicts"):
-            return "Conflict markers are present in the working tree."
-        if state.get("working_tree"):
-            return "Working tree changes are present."
-        if state.get("staging"):
-            return "Staged changes are ready."
-        return "No differences."
+        if args and args[0] == "--staged":
+            staged_paths = sorted(state.get("staging", {}).keys())
+            if staged_paths:
+                return f"Staged changes: {self._format_paths(staged_paths)}"
+            return "No staged differences."
+        conflict_paths = sorted(state.get("conflicts", []))
+        if conflict_paths:
+            return f"Conflict markers are present in: {self._format_paths(conflict_paths)}"
+        working_paths = sorted(state.get("working_tree", {}).keys())
+        if working_paths:
+            return f"Working tree changes: {self._format_paths(working_paths)}"
+        return "No working tree differences."
 
     def _show(self, state: dict, args: list[str]) -> str:
         return "Object details available in the simulated repository."
@@ -159,7 +164,7 @@ class RepositoryStateSimulator:
             staging[path] = working_tree.pop(path, "updated")
             conflicts.discard(path)
         state["conflicts"] = sorted(conflicts)
-        return f"Staged {len(paths)} path(s)."
+        return f"Staged: {self._format_paths(paths)}."
 
     def _commit(self, state: dict, args: list[str]) -> str:
         if not state.get("staging") and not state.get("merge_parent"):
@@ -270,6 +275,9 @@ class RepositoryStateSimulator:
         )
         self._set_head_commit(state, commit_id)
         return f"Applied changes as {commit_id}."
+
+    def _format_paths(self, paths: list[str]) -> str:
+        return ", ".join(paths)
 
 
 class RepositorySnapshotService:

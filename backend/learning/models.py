@@ -29,7 +29,7 @@ class Lesson(models.Model):
     title = models.CharField(max_length=180)
     subtitle = models.CharField(max_length=240, blank=True)
     kind = models.CharField(max_length=24, choices=LessonKind.choices)
-    overview_html = models.TextField()
+    content_html = models.TextField()
     scoped_css = models.TextField(blank=True)
     interaction_steps = models.JSONField(default=list, blank=True)
     is_published = models.BooleanField(default=True)

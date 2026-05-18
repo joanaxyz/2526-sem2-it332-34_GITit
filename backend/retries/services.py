@@ -1,4 +1,4 @@
-from scenarios.models import ScenarioSession, ScenarioSkillFocus, ScenarioVariant
+from scenarios.models import DifficultyInstance, ScenarioSession, ScenarioVariant
 
 
 class VariantSelectionService:
@@ -6,12 +6,12 @@ class VariantSelectionService:
         self,
         *,
         user,
-        scenario: ScenarioSkillFocus,
+        difficulty_instance: DifficultyInstance,
         prior_session: ScenarioSession | None = None,
     ) -> ScenarioVariant:
-        variants = list(scenario.variants.filter(is_published=True).order_by("id"))
+        variants = list(difficulty_instance.variants.filter(is_published=True).order_by("id"))
         if not variants:
-            raise ValueError("Scenario has no published variants.")
+            raise ValueError("Difficulty instance has no published variants.")
         if prior_session is None:
             return variants[0]
         for variant in variants:

@@ -809,8 +809,8 @@
             <button class="btn solid" data-open-current-lesson style="width:100%;margin-top:14px">Open lesson</button>
           </div>
           <div class="card sidebar-card">
-            <h3>Orientation gate</h3>
-            <p>Complete all Unit 1 orientation lessons before your first scenario session.</p>
+            <h3>Orientation progress</h3>
+            <p>Read Unit 1 lessons as preparation or reference. Scenario access stays open.</p>
             <div class="progress-row"><span>Orientation lessons</span><span id="dashOriStatus">6 / 8</span></div>
             <div class="progress" style="margin-top:6px"><i id="dashOriBar" style="width:75%"></i></div>
           </div>
@@ -992,7 +992,7 @@
   // ── DATA ────────────────────────────────────────────────
   const DATA = {
     metrics: [
-      { label: 'OCG',       value: '75%',  note: 'Orientation completion gate' },
+      { label: 'OLCR',      value: '75%',  note: 'Orientation lesson completion' },
       { label: 'SCR',       value: '83%',  note: 'Scenario completion rate' },
       { label: 'CAR',       value: '64%',  note: 'Within-threshold completions' },
       { label: 'ARC',       value: '1.6',  note: 'Avg. retries before success' },
@@ -1200,7 +1200,7 @@
     const complete = isOri ? DATA.oriLessons.filter(l => l.done).length : null;
     const scenCount = unit.lessons.reduce((a, l) => a + l.scenarios.length, 0);
     const tags = isOri
-      ? `<span class="tag green">${complete}/${DATA.oriLessons.length} lessons done</span><span class="tag amber">Gate to scenarios</span>`
+      ? `<span class="tag green">${complete}/${DATA.oriLessons.length} lessons read</span><span class="tag amber">Reference unit</span>`
       : `<span class="tag blue">${unit.lessons.length} lessons</span><span class="tag green">${scenCount} scenarios</span><span class="tag">${unit.progress}% done</span>`;
     return `<article class="card unit-card">
       <div class="unit-header" data-toggle-unit="${unit.id}">
@@ -1255,7 +1255,7 @@
         </div>
         <div class="lesson-actions">
           <button class="btn outline sm" data-open-lesson="${lesson.id}">${icon('book')} Read lesson</button>
-          ${isScen ? `<button class="btn solid sm" data-open-scenarios="${lesson.id}">${icon('list')} View Scenarios</button>` : ''}
+          ${isScen ? `<button class="btn solid sm" data-open-scenarios="${lesson.id}">${icon('list')} Scenarios</button>` : ''}
         </div>
       </div>
       <div class="lesson-body">${isScen ? `<div class="scenario-list">${lesson.scenarios.slice(0,2).map(scenHTML).join('')}${lesson.scenarios.length > 2 ? `<button class="btn outline" data-open-scenarios="${lesson.id}" style="width:100%">${icon('list')} Open all scenarios</button>` : ''}</div>` : `<p style="font-size:13px;color:var(--text-3);padding-bottom:4px">Reading-only lesson — no scenario practice attached.</p>`}</div>
@@ -1295,7 +1295,7 @@
       ${lesson.content.map((p, i) => `<p>${esc(p)}</p>${i === 0 ? `<div class="code-block"><span class="p">$</span> git status\nOn branch feature/login\nYour branch and 'main' have diverged.\n\n<span class="p">$</span> git log --oneline --graph</div>` : ''}`).join('')}
       <h2>Before you practice</h2>
       <p>Read through this lesson first. If this lesson includes scenario skill focuses, open the scenario selection page to choose a scenario and difficulty.</p>
-      ${isScen ? `<button class="btn solid" style="margin-top:14px" data-open-scenarios="${lesson.id}">${icon('list')} View Scenarios ${icon('arrow')}</button>` : `<button class="btn outline" style="margin-top:14px" data-go="units">Back to Units</button>`}
+      ${isScen ? `<button class="btn solid" style="margin-top:14px" data-open-scenarios="${lesson.id}">${icon('list')} Scenarios ${icon('arrow')}</button>` : `<button class="btn outline" style="margin-top:14px" data-go="units">Back to Units</button>`}
     `;
     $('#lessonAside').innerHTML = isScen ? `
       <div class="aside-title">Lesson practice</div>
@@ -1340,18 +1340,15 @@
   // ── RENDER ORIENTATION ───────────────────────────────────
   function renderOrientation() {
     const lesson = DATA.oriLessons[state.oriIdx];
-    const step   = lesson.steps[state.oriStep];
     const doneCount = DATA.oriLessons.filter(l => l.done).length;
-    const gateOpen  = DATA.oriLessons.every(l => l.done);
-    const pct = Math.round(((state.oriStep + 1) / lesson.steps.length) * 100);
 
     $('#orientationSidebar').innerHTML = `
       <div style="display:flex;justify-content:space-between;gap:6px;margin-bottom:10px;">
         <span class="tag green">Unit 1</span>
-        <span class="tag ${gateOpen ? 'green' : 'amber'}">${gateOpen ? 'Gate open' : `${doneCount}/${DATA.oriLessons.length} done`}</span>
+        <span class="tag ${doneCount === DATA.oriLessons.length ? 'green' : 'amber'}">${doneCount}/${DATA.oriLessons.length} read</span>
       </div>
       <h2>Orientation</h2>
-      <p class="sub">Eight concept lessons before your first scenario — no quizzes, no terminal.</p>
+      <p class="sub">Eight single-scroll concept lessons. No quizzes, no terminal, no scenario prerequisite.</p>
       <div class="progress" style="margin-bottom:12px"><i style="width:${Math.round(doneCount/DATA.oriLessons.length*100)}%"></i></div>
       ${DATA.oriLessons.map((l, i) => `
         <div class="orientation-item ${i === state.oriIdx ? 'active' : ''} ${l.done ? 'done' : ''}" data-open-orientation="${i}">
@@ -1369,17 +1366,16 @@
           <span class="tag green">Unit 1</span>
           <span class="tag">Lesson ${state.oriIdx + 1} of ${DATA.oriLessons.length}</span>
         </div>
-        <span class="tag ${lesson.done ? 'green' : 'blue'}">${lesson.done ? 'Complete' : pct + '% through'}</span>
+        <span class="tag ${lesson.done ? 'green' : 'blue'}">${lesson.done ? 'Read' : 'Open reading'}</span>
       </div>
       <h1>${esc(lesson.title)}</h1>
       <p style="color:var(--text-2);font-size:14px;line-height:1.65;margin-top:8px;">${esc(lesson.sub)}. This lesson prepares you for scenario practice without turning the page into a terminal exercise.</p>
-      <div class="step-rail">${lesson.steps.map((_, i) => `<div class="step-dot ${i === state.oriStep ? 'active' : i < state.oriStep ? 'done' : ''}" data-orientation-step="${i}" style="cursor:pointer"></div>`).join('')}</div>
       <div class="concept-grid">
         <div class="concept-box">
-          <div class="section-label">Step ${state.oriStep + 1} of ${lesson.steps.length}</div>
-          <h2>${state.oriStep === 0 ? 'Start with the mental model' : 'Build on what you know'}</h2>
-          <p>${esc(step)}</p>
-          <div class="callout" style="margin-top:14px">Scenario practice begins after all orientation lessons are complete — so this page stays focused on concepts.</div>
+          <div class="section-label">Single scroll lesson</div>
+          <h2>Read the concept as one page</h2>
+          ${lesson.steps.map((step, i) => `<p><strong>${i + 1}.</strong> ${esc(step)}</p>`).join('')}
+          <div class="callout" style="margin-top:14px">Scenario practice stays open even when orientation reading is incomplete.</div>
         </div>
         <div class="visual-box">
           <div class="vb-label">Repository map preview</div>
@@ -1389,12 +1385,11 @@
       </div>
       <div class="orient-status">
         <div class="mini-stat"><div class="ms-label">Progress</div><div class="ms-val">${doneCount}/${DATA.oriLessons.length}</div></div>
-        <div class="mini-stat"><div class="ms-label">Scenario access</div><div class="ms-val">${gateOpen ? 'Open' : 'Gated'}</div></div>
+        <div class="mini-stat"><div class="ms-label">Scenario access</div><div class="ms-val">Open</div></div>
         <div class="mini-stat"><div class="ms-label">Mode</div><div class="ms-val">Concept</div></div>
       </div>
       <div class="orient-footer">
-        ${state.oriStep > 0 ? '<button class="btn outline" data-orientation-prev>← Previous</button>' : ''}
-        <button class="btn solid" data-orientation-next>${state.oriStep === lesson.steps.length - 1 ? (lesson.done ? 'Next lesson →' : 'Mark complete') : 'Next step →'}</button>
+        <button class="btn solid" data-orientation-next>${lesson.done ? 'Marked read' : 'Mark read'}</button>
         <button class="btn ghost" data-go="units">Back to units</button>
       </div>
     `;
@@ -1490,11 +1485,8 @@
   // ── STEP / ORIENTATION ───────────────────────────────────
   function advanceOrientation() {
     const lesson = DATA.oriLessons[state.oriIdx];
-    if (state.oriStep < lesson.steps.length - 1) {
-      state.oriStep++;
-    } else {
+    if (!lesson.done) {
       lesson.done = true;
-      if (state.oriIdx < DATA.oriLessons.length - 1) { state.oriIdx++; state.oriStep = 0; }
     }
     renderOrientation();
     renderUnits();
@@ -1544,12 +1536,7 @@
       state.oriIdx = Number(e.target.closest('[data-open-orientation]').dataset.openOrientation);
       state.oriStep = 0; switchScreen('orientation'); return;
     }
-    if (e.target.closest('[data-orientation-prev]')) { state.oriStep = Math.max(0, state.oriStep - 1); renderOrientation(); return; }
     if (e.target.closest('[data-orientation-next]')) { advanceOrientation(); return; }
-    if (e.target.closest('[data-orientation-step]')) {
-      state.oriStep = Number(e.target.closest('[data-orientation-step]').dataset.orientationStep);
-      renderOrientation(); return;
-    }
     if (e.target.closest('[data-exit-workspace]')) { switchScreen('lesson'); return; }
     if (e.target.id === 'logoutBtn') {
       $('#authScreen').classList.remove('hidden');
@@ -1594,3 +1581,4 @@
 </script>
 </body>
 </html>
+

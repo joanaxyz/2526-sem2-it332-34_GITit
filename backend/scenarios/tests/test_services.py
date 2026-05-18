@@ -30,8 +30,34 @@ def student(db, seeded_content):
     StudentProgress.objects.create(user=user)
     StreakRecord.objects.create(user=user)
     for lesson in Lesson.objects.filter(unit__is_orientation=True):
-        OrientationProgress.objects.create(user=user, lesson=lesson, completed_at="2026-05-18T00:00:00Z")
+        OrientationProgress.objects.create(
+            user=user, lesson=lesson, completed_at="2026-05-18T00:00:00Z"
+        )
     return user
+
+
+def test_primary_session_can_start_before_orientation_completion(db, seeded_content):
+    user = get_user_model().objects.create_user(
+        username="new@example.com",
+        email="new@example.com",
+        password="Password123!",
+        first_name="New",
+    )
+    StudentProgress.objects.create(user=user)
+    StreakRecord.objects.create(user=user)
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="first-clean-commit",
+        difficulty="easy",
+    )
+
+    session = ScenarioSessionService().start_session(
+        user=user,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+
+    assert session.status == "started"
+    assert session.orientation_complete_at_start is False
 
 
 def test_diagnostic_commands_are_logged_but_not_counted(student):
@@ -42,8 +68,10 @@ def test_diagnostic_commands_are_logged_but_not_counted(student):
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson_overview",
+        source_entry_point="lesson",
     )
+
+    assert session.variant.difficulty_instance_id == difficulty.id
 
     response = CommandProcessingService().submit_command(session=session, command="git status")
 
@@ -61,16 +89,57 @@ def test_state_based_completion_creates_completion_record(student):
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson_overview",
+        source_entry_point="lesson",
     )
 
     CommandProcessingService().submit_command(session=session, command="git add .")
-    CommandProcessingService().submit_command(session=session, command='git commit -m "starter snapshot"')
+    CommandProcessingService().submit_command(
+        session=session, command='git commit -m "starter snapshot"'
+    )
 
     session.refresh_from_db()
     completion = CompletionRecord.objects.get(user=student, difficulty_instance=difficulty)
     assert session.status == "completed"
     assert completion.counted_action_total == 2
+
+
+def test_partial_staging_requires_the_selected_file_scope_and_message(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="partial-staging",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+
+    CommandProcessingService().submit_command(session=session, command="git add .")
+    CommandProcessingService().submit_command(
+        session=session, command='git commit -m "config baseline"'
+    )
+
+    session.refresh_from_db()
+    assert session.status == "started"
+    assert not CompletionRecord.objects.filter(
+        user=student, difficulty_instance=difficulty
+    ).exists()
+
+    ScenarioSessionService().abandon(session=session)
+    retry = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="retry",
+        prior_session=session,
+    )
+
+    CommandProcessingService().submit_command(session=retry, command="git add config.yml")
+    CommandProcessingService().submit_command(
+        session=retry, command='git commit -m "config baseline"'
+    )
+
+    retry.refresh_from_db()
+    assert retry.status == "completed"
 
 
 def test_retry_after_failure_uses_changed_variant_when_available(student):
@@ -81,7 +150,7 @@ def test_retry_after_failure_uses_changed_variant_when_available(student):
     prior = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson_overview",
+        source_entry_point="lesson",
     )
     prior.status = SESSION_STATUS_FAILED
     prior.save(update_fields=["status"])
@@ -94,6 +163,7 @@ def test_retry_after_failure_uses_changed_variant_when_available(student):
     )
 
     assert retry.variant_id != prior.variant_id
+    assert retry.variant.difficulty_instance_id == difficulty.id
     assert retry.changed_variant is True
     assert retry.rta_eligible is True
 
@@ -106,13 +176,20 @@ def test_review_mode_logs_separately_without_new_completion(student):
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson_overview",
+        source_entry_point="lesson",
     )
     CommandProcessingService().submit_command(session=session, command="git add .")
-    CommandProcessingService().submit_command(session=session, command='git commit -m "starter snapshot"')
+    CommandProcessingService().submit_command(
+        session=session, command='git commit -m "starter snapshot"'
+    )
 
-    review_session = ReviewModeService().start_review_session(user=student, difficulty_instance=difficulty)
+    review_session = ReviewModeService().start_review_session(
+        user=student, difficulty_instance=difficulty
+    )
 
     assert review_session.mode == SESSION_MODE_REVIEW
-    assert CompletionRecord.objects.filter(user=student, difficulty_instance=difficulty).count() == 1
+    assert (
+        CompletionRecord.objects.filter(user=student, difficulty_instance=difficulty).count() == 1
+    )
     assert ScenarioSession.objects.filter(user=student, mode=SESSION_MODE_REVIEW).count() == 1
+

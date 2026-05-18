@@ -7,8 +7,8 @@ from simulator.services import RepositorySnapshotService
 class ScenarioStartSerializer(serializers.Serializer):
     difficulty_instance_id = serializers.IntegerField()
     source_entry_point = serializers.ChoiceField(
-        choices=["lesson_overview", "unit_card", "retry", "review"],
-        default="lesson_overview",
+        choices=["lesson", "unit_card", "retry", "review"],
+        default="lesson",
     )
     prior_session_id = serializers.IntegerField(required=False, allow_null=True)
 
@@ -19,6 +19,7 @@ class CommandSubmitSerializer(serializers.Serializer):
 
 def session_payload(session) -> dict:
     supports = ScaffoldingService().supports_for(session.difficulty_instance.difficulty)
+    step_logs = session.step_logs.order_by("id")
     return {
         "id": session.id,
         "mode": session.mode,
@@ -32,7 +33,7 @@ def session_payload(session) -> dict:
             "title": session.scenario.title,
             "focus": session.scenario.focus,
             "narrative": session.difficulty_instance.narrative or session.scenario.narrative,
-            "task_prompt": session.scenario.task_prompt,
+            "task_prompt": session.difficulty_instance.task_prompt or session.scenario.task_prompt,
         },
         "unit": {
             "id": session.learning_unit_id,
@@ -58,6 +59,20 @@ def session_payload(session) -> dict:
         },
         "scaffolding": supports,
         "repository_state": RepositorySnapshotService().snapshot(session.repository_state),
-        "expected_state": session.variant.expected_state_diagram if supports["expected_state"] else None,
+        "expected_state": session.variant.expected_state_diagram
+        if supports["expected_state"]
+        else None,
+        "steps": [
+            {
+                "id": step.id,
+                "command_text": step.command_text,
+                "terminal_output": step.terminal_output,
+                "result_category": step.result_category,
+                "command_classification": step.command_classification,
+                "contextual_feedback": step.contextual_feedback,
+                "created_at": step.created_at,
+            }
+            for step in step_logs
+        ],
         "review_mode": session.mode == "review",
     }

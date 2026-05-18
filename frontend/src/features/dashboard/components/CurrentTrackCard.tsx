@@ -17,7 +17,7 @@ export function CurrentTrackCard() {
             Build Git confidence through Unit lessons, simulated state, and replayable practice.
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Complete Unit 1 orientation first, then choose any scenario skill focus and progress from Easy to Hard.
+            Start with the Git foundations when you need them, then choose a practice topic and work from Easy toward Hard.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

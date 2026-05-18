@@ -9,12 +9,16 @@ from scenarios.services import DifficultyAccessService
 
 def scenario_queryset():
     return (
-        ScenarioSkillFocus.objects.filter(is_published=True)
+        ScenarioSkillFocus.objects.filter(
+            is_published=True,
+            learning_unit__is_published=True,
+            lesson__is_published=True,
+        )
         .select_related("learning_unit", "lesson")
         .prefetch_related(
             "difficulty_instances",
             "difficulty_instances__command_policy",
-            "variants",
+            "difficulty_instances__variants",
         )
     )
 
@@ -23,7 +27,9 @@ def scenario_status_payload(*, user, scenario: ScenarioSkillFocus) -> dict:
     access = DifficultyAccessService()
     difficulties = []
     for instance in scenario.difficulty_instances.all():
-        completion = CompletionRecord.objects.filter(user=user, difficulty_instance=instance).first()
+        completion = CompletionRecord.objects.filter(
+            user=user, difficulty_instance=instance
+        ).first()
         in_progress = ScenarioSession.objects.filter(
             user=user,
             difficulty_instance=instance,
@@ -34,6 +40,8 @@ def scenario_status_payload(*, user, scenario: ScenarioSkillFocus) -> dict:
             {
                 "id": instance.id,
                 "difficulty": instance.difficulty,
+                "narrative": instance.narrative or scenario.narrative,
+                "task_prompt": instance.task_prompt or scenario.task_prompt,
                 "status": access.status_for(user=user, difficulty_instance=instance),
                 "review_available": completion is not None,
                 "completion": {
@@ -63,9 +71,19 @@ def scenario_status_payload(*, user, scenario: ScenarioSkillFocus) -> dict:
 
 
 def get_difficulty_instance(instance_id: int) -> DifficultyInstance:
-    return DifficultyInstance.objects.select_related(
-        "scenario",
-        "scenario__learning_unit",
-        "command_policy",
-        "target_rule",
-    ).get(id=instance_id, is_published=True, scenario__is_published=True)
+    return (
+        DifficultyInstance.objects.select_related(
+            "scenario",
+            "scenario__learning_unit",
+            "command_policy",
+            "target_rule",
+        )
+        .prefetch_related("variants")
+        .get(
+            id=instance_id,
+            is_published=True,
+            scenario__is_published=True,
+            scenario__learning_unit__is_published=True,
+            scenario__lesson__is_published=True,
+        )
+    )

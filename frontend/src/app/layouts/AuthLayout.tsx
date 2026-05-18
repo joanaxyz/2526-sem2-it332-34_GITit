@@ -22,7 +22,7 @@ export function AuthLayout() {
                 Practice Git through repository state, not memorized answers.
               </h1>
               <p className="mt-5 text-base leading-7 text-muted-foreground">
-                Learn with orientation-first guidance, scenario practice, live DAG feedback, and consequence-safe command simulation.
+                Learn with rich orientation lessons, scenario practice, live DAG feedback, and consequence-safe command simulation.
               </p>
               <div className="mt-8 flex flex-wrap gap-2">
                 <Badge variant="default">

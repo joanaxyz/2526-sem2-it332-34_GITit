@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.utils import timezone
+from rest_framework.exceptions import ValidationError
 
 from learning.models import Lesson, OrientationProgress
 from progress.models import StudentProgress
@@ -13,7 +14,7 @@ class OrientationService:
             is_published=True,
         ).select_related("unit")
 
-    def is_gate_satisfied(self, user) -> bool:
+    def is_orientation_complete(self, user) -> bool:
         lesson_ids = list(self.orientation_lessons().values_list("id", flat=True))
         if not lesson_ids:
             return False
@@ -27,7 +28,7 @@ class OrientationService:
     @transaction.atomic
     def mark_complete(self, *, user, lesson: Lesson, highest_step_seen: int) -> OrientationProgress:
         if not lesson.unit.is_orientation or lesson.kind != Lesson.LessonKind.ORIENTATION:
-            raise ValueError("Only Unit 1 orientation lessons can be completed here.")
+            raise ValidationError("This lesson does not use the mark-read action.")
         progress, _ = OrientationProgress.objects.select_for_update().get_or_create(
             user=user,
             lesson=lesson,
@@ -39,10 +40,7 @@ class OrientationService:
         progress.save(update_fields=["highest_step_seen", "completed_at"])
 
         student_progress, _ = StudentProgress.objects.get_or_create(user=user)
-        if (
-            student_progress.first_scenario_started_at is None
-            and self.is_gate_satisfied(user)
-        ):
-            student_progress.orientation_gate_satisfied_at_first_start = True
-            student_progress.save(update_fields=["orientation_gate_satisfied_at_first_start"])
+        if student_progress.first_scenario_started_at is None and self.is_orientation_complete(user):
+            student_progress.orientation_complete_at_first_start = True
+            student_progress.save(update_fields=["orientation_complete_at_first_start"])
         return progress

@@ -13,7 +13,7 @@ export function CommandCounter({ session }: { session: ScenarioSession }) {
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 font-semibold">
           <GaugeCircle className="size-5 text-primary" />
-          Counted commands
+          Action commands
         </div>
         <div className="font-mono text-sm">
           {session.counts.remaining_counted_commands} left
@@ -21,8 +21,8 @@ export function CommandCounter({ session }: { session: ScenarioSession }) {
       </div>
       <ProgressBar value={pct} className="mt-2" />
       <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-        <span>CAR threshold: {session.policy.min_counted_commands}</span>
-        <span>Diagnostics: {session.policy.non_counted_patterns.length}</span>
+        <span>Target actions: {session.policy.min_counted_commands}</span>
+        <span>Free inspections: {session.policy.non_counted_patterns.length}</span>
       </div>
     </Card>
   )

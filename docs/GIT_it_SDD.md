@@ -77,7 +77,7 @@ This SDD covers the current-release student-facing system and the planned Phase 
 | Review Mode | Playable re-attempt mode for a previously completed scenario difficulty instance |
 | RTA | Retry Transfer Accuracy |
 | SAR | Scenario Abandonment Rate |
-| OCG | Orientation Completion Gate |
+| OLCR | Orientation Lesson Completion Rate |
 
 ## 1.4 References
 
@@ -282,8 +282,8 @@ Tables/entities involved: SessionRecord/RefreshToken. Redis may store token blac
 #### Front-end component(s)
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
-| OrientationLessonPage | Renders Unit 1 topic content, interaction steps, and completion state. | React page component |
-| OrientationProgressTracker | Tracks click-through completion locally before API update. | React component/service |
+| OrientationLessonPage | Renders Unit 1 topic content as a single scrollable page with completion state. | React page component |
+| LessonReadAction | Sends the mark-read completion update to the API. | React component/service |
 
 #### Back-end component(s)
 | Component Name | Description and purpose | Component type or format |
@@ -302,62 +302,62 @@ Primary classes/components: LearningUnit, Lesson, OrientationLesson, Orientation
 [PLACEHOLDER — Insert sequence diagram for View and Complete Orientation Lesson.]
 
 #### Data Design
-Tables/entities involved: LearningUnit, Lesson, OrientationLesson, OrientationProgress, StudentProgress. Completion is stored when all required interaction steps are advanced.
+Tables/entities involved: LearningUnit, Lesson, OrientationLesson, OrientationProgress, StudentProgress. Completion is stored when the student marks a single-scroll orientation lesson as read.
 
 ##### ERD or schema
 [PLACEHOLDER — Insert ERD/schema excerpt for View and Complete Orientation Lesson.]
 
-### 1.2 Enforce Orientation Completion Gate
+### 1.2 Track Orientation Lesson Completion
 
 #### User Interface Design
-[PLACEHOLDER — Insert user interface design/wireframe for Enforce Orientation Completion Gate.]
+[PLACEHOLDER — Insert user interface design/wireframe for Track Orientation Lesson Completion.]
 
 #### Front-end component(s)
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
-| OrientationGateNotice | Displays missing Unit 1 topic requirements before first scenario session. | React component |
-| ScenarioStartGuard | Checks API response before routing to scenario workspace. | Frontend routing guard |
+| OrientationProgressStatus | Displays Unit 1 lesson read/completion progress without blocking scenario navigation. | React component |
+| LessonReadAction | Marks a single-scroll orientation lesson as read. | React component |
 
 #### Back-end component(s)
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
-| OrientationGateService | Checks whether all Unit 1 topics are complete before first scenario start. | Python service class |
-| ScenarioSessionAPIView | Blocks first scenario start when the gate is incomplete. | Django REST Framework API view |
+| OrientationService | Stores and retrieves Unit 1 lesson completion/read status. | Python service class |
+| ScenarioSessionAPIView | Starts scenario sessions regardless of Unit 1 completion and records orientation-complete-at-start as non-blocking analytics context. | Django REST Framework API view |
 
 #### Object-Oriented Components
 
-Primary classes/components: OrientationGateService, StudentProgress, ScenarioSession, LearningUnit.
+Primary classes/components: OrientationService, StudentProgress, ScenarioSession, LearningUnit.
 
 ##### Class Diagram
-[PLACEHOLDER — Insert class diagram for Enforce Orientation Completion Gate.]
+[PLACEHOLDER — Insert class diagram for Track Orientation Lesson Completion.]
 
 ##### Sequence Diagram
-[PLACEHOLDER — Insert sequence diagram for Enforce Orientation Completion Gate.]
+[PLACEHOLDER — Insert sequence diagram for Track Orientation Lesson Completion.]
 
 #### Data Design
-Tables/entities involved: OrientationProgress, StudentProgress, ScenarioSession. The first scenario session records OCG compliance status for KPI computation.
+Tables/entities involved: OrientationProgress, StudentProgress, ScenarioSession. Scenario start records whether all Unit 1 lessons were complete as non-blocking analytics context for readiness analysis.
 
 ##### ERD or schema
-[PLACEHOLDER — Insert ERD/schema excerpt for Enforce Orientation Completion Gate.]
+[PLACEHOLDER — Insert ERD/schema excerpt for Track Orientation Lesson Completion.]
 
 ## Module 2: Scenario Practice and State-Based Evaluation
 
-### 2.1 View Lesson Overview, View Scenarios, and Select Difficulty
+### 2.1 View Lesson, Browse Attached Scenarios, and Select Difficulty
 
 #### User Interface Design
-[PLACEHOLDER — Insert user interface design/wireframe for View Lesson Overview, View Scenarios, and Select Difficulty.]
+[PLACEHOLDER — Insert user interface design/wireframe for View Lesson, Browse Attached Scenarios, and Select Difficulty.]
 
 #### Front-end component(s)
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
-| LessonOverviewPage | Renders lesson HTML/CSS and View Scenarios action. | React page component |
+| LessonPage | Renders lesson HTML/CSS and embedded scenario list. | React page component |
 | ScenarioCardList | Displays scenario cards and Easy/Medium/Hard access states. | React component |
 | DifficultySelector | Allows available difficulty selection and displays lock reasons. | React component |
 
 #### Back-end component(s)
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
-| LessonAPIView | Returns published lesson overview content. | Django REST Framework API view |
+| LessonAPIView | Returns published lesson content. | Django REST Framework API view |
 | ScenarioListAPIView | Returns scenarios, difficulty status, and completion indicators. | Django REST Framework API view |
 | DifficultyAccessService | Determines Easy/Medium/Hard access states. | Python service class |
 
@@ -366,16 +366,16 @@ Tables/entities involved: OrientationProgress, StudentProgress, ScenarioSession.
 Primary classes/components: LearningUnit, Lesson, ScenarioSkillFocus, DifficultyInstance, DifficultyAccessService, StudentProgress.
 
 ##### Class Diagram
-[PLACEHOLDER — Insert class diagram for View Lesson Overview, View Scenarios, and Select Difficulty.]
+[PLACEHOLDER — Insert class diagram for View Lesson, Browse Attached Scenarios, and Select Difficulty.]
 
 ##### Sequence Diagram
-[PLACEHOLDER — Insert sequence diagram for View Lesson Overview, View Scenarios, and Select Difficulty.]
+[PLACEHOLDER — Insert sequence diagram for View Lesson, Browse Attached Scenarios, and Select Difficulty.]
 
 #### Data Design
 Tables/entities involved: LearningUnit, Lesson, ScenarioSkillFocus, DifficultyInstance, StudentProgress, CompletionRecord.
 
 ##### ERD or schema
-[PLACEHOLDER — Insert ERD/schema excerpt for View Lesson Overview, View Scenarios, and Select Difficulty.]
+[PLACEHOLDER — Insert ERD/schema excerpt for View Lesson, Browse Attached Scenarios, and Select Difficulty.]
 
 ### 2.2 Load Scenario Instance
 
@@ -385,7 +385,8 @@ Tables/entities involved: LearningUnit, Lesson, ScenarioSkillFocus, DifficultyIn
 #### Front-end component(s)
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
-| ScenarioWorkspace | Main scenario practice page containing narrative, terminal, live DAG, expected-state panel, and feedback panel. | React page component |
+| ScenarioWorkspace | Main scenario practice page containing narrative, explicit success rules, terminal, live DAG, expected-state panel, and feedback panel. | React page component |
+| ScenarioContextPanel | Displays scenario narrative, task, state-based grading rule, commit-message expectation, and non-counted diagnostic commands. | React component |
 | ScenarioLoader | Requests session initialization and stores active session state. | Frontend service |
 
 #### Back-end component(s)
@@ -695,7 +696,7 @@ Tables/entities involved: ScenarioSession, DifficultyInstance, DifficultyVariant
 |---|---|---|
 | DashboardPage | Displays student progress summary and available learning units. | React page component |
 | ProgressMetricCards | Displays log-derived progress/KPI indicators. | React component |
-| UnitCardList | Displays expandable learning unit cards with scenario lists. | React component |
+| UnitCardList | Displays expandable learning unit cards with lesson lists. | React component |
 
 #### Back-end component(s)
 | Component Name | Description and purpose | Component type or format |
@@ -796,7 +797,7 @@ Tables/entities involved: CompletionRecord, ScenarioSession, StudentProgress. Re
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
 | AdminContentPage | Allows administrator to create/edit/archive learning units, lessons, scenario skill focuses, difficulty-instance configurations, difficulty-owned variants, and target-state data. | React admin page component |
-| HtmlCssCodeEditor | Edits Lesson Overview HTML and scoped CSS. | Frontend code editor component |
+| HtmlCssCodeEditor | Edits Lesson HTML and scoped CSS. | Frontend code editor component |
 
 #### Back-end component(s)
 | Component Name | Description and purpose | Component type or format |
@@ -855,15 +856,15 @@ Tables/entities involved: User, StudentProfile, ScenarioSession, StepLog, Progre
 
 ## Module 7: AI-Assisted Learning Support
 
-### 7.1 Generate AI-Assisted Lesson Overview Draft
+### 7.1 Generate AI-Assisted Lesson Draft
 
 #### User Interface Design
-[PLACEHOLDER — Insert user interface design/wireframe for Generate AI-Assisted Lesson Overview Draft.]
+[PLACEHOLDER — Insert user interface design/wireframe for Generate AI-Assisted Lesson Draft.]
 
 #### Front-end component(s)
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
-| AiLessonDraftPanel | Displays AI chat/revision prompts for lesson overview drafting. | React admin component |
+| AiLessonDraftPanel | Displays AI chat/revision prompts for lesson drafting. | React admin component |
 | HtmlCssCodeEditor | Receives proposed HTML/CSS draft after administrator approval. | Frontend code editor component |
 
 #### Back-end component(s)
@@ -877,16 +878,16 @@ Tables/entities involved: User, StudentProfile, ScenarioSession, StepLog, Progre
 Primary classes/components: AiDraftRequest, AiDraftResponse, Lesson, LessonDraft, AdminAuditLog.
 
 ##### Class Diagram
-[PLACEHOLDER — Insert class diagram for Generate AI-Assisted Lesson Overview Draft.]
+[PLACEHOLDER — Insert class diagram for Generate AI-Assisted Lesson Draft.]
 
 ##### Sequence Diagram
-[PLACEHOLDER — Insert sequence diagram for Generate AI-Assisted Lesson Overview Draft.]
+[PLACEHOLDER — Insert sequence diagram for Generate AI-Assisted Lesson Draft.]
 
 #### Data Design
 Tables/entities involved: Lesson, LessonDraft, AiDraftRequest, AiDraftResponse, AdminAuditLog. AI output remains draft content until administrator validates and publishes it. This module is planned Phase 2 scope.
 
 ##### ERD or schema
-[PLACEHOLDER — Insert ERD/schema excerpt for Generate AI-Assisted Lesson Overview Draft.]
+[PLACEHOLDER — Insert ERD/schema excerpt for Generate AI-Assisted Lesson Draft.]
 
 ### 7.2 Generate AI-Assisted Scenario Draft and Provide Concept Chat
 
@@ -921,3 +922,5 @@ Tables/entities involved: AiScenarioDraft, ScenarioSkillFocus, DifficultyInstanc
 
 ##### ERD or schema
 [PLACEHOLDER — Insert ERD/schema excerpt for Generate AI-Assisted Scenario Draft and Provide Concept Chat.]
+
+

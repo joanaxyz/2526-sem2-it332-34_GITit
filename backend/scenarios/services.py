@@ -38,7 +38,9 @@ from simulator.services import (
 
 class DifficultyAccessService:
     def status_for(self, *, user, difficulty_instance: DifficultyInstance) -> str:
-        if CompletionRecord.objects.filter(user=user, difficulty_instance=difficulty_instance).exists():
+        if CompletionRecord.objects.filter(
+            user=user, difficulty_instance=difficulty_instance
+        ).exists():
             return "complete"
         if ScenarioSession.objects.filter(
             user=user,
@@ -60,7 +62,9 @@ class DifficultyAccessService:
             scenario=difficulty_instance.scenario,
             difficulty=previous,
         )
-        return CompletionRecord.objects.filter(user=user, difficulty_instance=previous_instance).exists()
+        return CompletionRecord.objects.filter(
+            user=user, difficulty_instance=previous_instance
+        ).exists()
 
 
 class CommandCountClassifier:
@@ -70,7 +74,9 @@ class CommandCountClassifier:
         normalized = " ".join(command.strip().lower().split())
         patterns = [p.lower() for p in policy_snapshot.get("non_counted_patterns", [])]
         is_read_only = normalized.startswith(READ_ONLY_PREFIXES)
-        if is_read_only and any(normalized == p or normalized.startswith(f"{p} ") for p in patterns):
+        if is_read_only and any(
+            normalized == p or normalized.startswith(f"{p} ") for p in patterns
+        ):
             return COMMAND_DIAGNOSTIC, 0
         return COMMAND_COUNTED, 1
 
@@ -86,23 +92,39 @@ class ScenarioSessionService:
         prior_session: ScenarioSession | None = None,
         mode: str = SESSION_MODE_PRIMARY,
     ) -> ScenarioSession:
+        if prior_session and prior_session.difficulty_instance_id != difficulty_instance.id:
+            raise Locked("Retry sessions must use the same scenario difficulty.")
+
         if mode == SESSION_MODE_PRIMARY and not DifficultyAccessService().is_unlocked(
             user=user, difficulty_instance=difficulty_instance
         ):
             raise Locked("This difficulty is locked until the previous level is completed.")
 
         student_progress = user.studentprogress
-        ocg_satisfied = OrientationService().is_gate_satisfied(user)
-        if (
-            mode == SESSION_MODE_PRIMARY
-            and student_progress.first_scenario_started_at is None
-            and not ocg_satisfied
-        ):
-            raise Locked("Complete all Unit 1 orientation lessons before starting scenario practice.")
+        orientation_complete = OrientationService().is_orientation_complete(user)
+
+        if mode == SESSION_MODE_PRIMARY and prior_session is None:
+            active_session = (
+                ScenarioSession.objects.select_related(
+                    "scenario",
+                    "learning_unit",
+                    "difficulty_instance",
+                    "variant",
+                )
+                .filter(
+                    user=user,
+                    difficulty_instance=difficulty_instance,
+                    status=SESSION_STATUS_STARTED,
+                    mode=SESSION_MODE_PRIMARY,
+                )
+                .first()
+            )
+            if active_session:
+                return active_session
 
         variant = VariantSelectionService().select_variant(
             user=user,
-            scenario=difficulty_instance.scenario,
+            difficulty_instance=difficulty_instance,
             prior_session=prior_session,
         )
         changed_variant = bool(prior_session and prior_session.variant_id != variant.id)
@@ -123,7 +145,7 @@ class ScenarioSessionService:
             prior_session=prior_session,
             source_entry_point=source_entry_point,
             mode=mode,
-            ocg_satisfied_at_start=ocg_satisfied,
+            orientation_complete_at_start=orientation_complete,
             rta_eligible=rta_eligible,
             changed_variant=changed_variant,
             retry_index=retry_index,
@@ -132,11 +154,11 @@ class ScenarioSessionService:
         )
         if mode == SESSION_MODE_PRIMARY and student_progress.first_scenario_started_at is None:
             student_progress.first_scenario_started_at = session.started_at
-            student_progress.orientation_gate_satisfied_at_first_start = ocg_satisfied
+            student_progress.orientation_complete_at_first_start = orientation_complete
             student_progress.save(
                 update_fields=[
                     "first_scenario_started_at",
-                    "orientation_gate_satisfied_at_first_start",
+                    "orientation_complete_at_first_start",
                 ]
             )
         return session
@@ -177,7 +199,11 @@ class CommandProcessingService:
             if session.difficulty_instance.difficulty == DIFFICULTY_EASY:
                 feedback = FeedbackGenerationService().describe(previous_state, sim_result.state)
         else:
-            result_category = RESULT_INVALID if command.strip().lower().startswith("git") else RESULT_UNPROCESSABLE
+            result_category = (
+                RESULT_INVALID
+                if command.strip().lower().startswith("git")
+                else RESULT_UNPROCESSABLE
+            )
 
         if classification == COMMAND_COUNTED:
             session.counted_action_total += increment
@@ -216,7 +242,7 @@ class CommandProcessingService:
         elif session.counted_action_total >= max_count:
             session.status = SESSION_STATUS_FAILED
             session.ended_at = timezone.now()
-            session.failure_reason = "Maximum counted-command limit reached."
+            session.failure_reason = "Action limit reached."
 
         session.save()
         return {
@@ -228,7 +254,9 @@ class CommandProcessingService:
             "command_classification": classification,
             "remaining_counted_commands": max(0, max_count - session.counted_action_total),
             "contextual_feedback": feedback,
-            "scaffolding": ScaffoldingService().supports_for(session.difficulty_instance.difficulty),
+            "scaffolding": ScaffoldingService().supports_for(
+                session.difficulty_instance.difficulty
+            ),
         }
 
     def _complete_session(self, session: ScenarioSession) -> None:

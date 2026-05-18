@@ -20,7 +20,7 @@ COMMAND_COUNTED = "counted_action"
 COMMAND_DIAGNOSTIC = "non_counted_diagnostic"
 COMMAND_UNPROCESSABLE = "unprocessable"
 
-SOURCE_LESSON = "lesson_overview"
+SOURCE_LESSON = "lesson"
 SOURCE_UNIT_CARD = "unit_card"
 SOURCE_RETRY = "retry"
 SOURCE_REVIEW = "review"

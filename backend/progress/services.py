@@ -11,6 +11,7 @@ from common.constants import (
     SESSION_STATUS_COMPLETED,
     SESSION_STATUS_FAILED,
 )
+from learning.models import Lesson, OrientationProgress
 from progress.models import StreakRecord
 from scenarios.models import CompletionRecord, ScenarioSession
 
@@ -46,6 +47,22 @@ class MetricsService:
         rta = primary.filter(rta_eligible=True)
         review_started = review.count()
         review_completed = review.filter(status=SESSION_STATUS_COMPLETED).count()
+        orientation_lesson_ids = list(
+            Lesson.objects.filter(
+                unit__is_orientation=True,
+                kind=Lesson.LessonKind.ORIENTATION,
+                is_published=True,
+            ).values_list("id", flat=True)
+        )
+        orientation_completed = (
+            OrientationProgress.objects.filter(
+                user=user,
+                lesson_id__in=orientation_lesson_ids,
+                completed_at__isnull=False,
+            ).count()
+            if orientation_lesson_ids
+            else 0
+        )
 
         latest_completion_ids = []
         for completion in (
@@ -70,9 +87,9 @@ class MetricsService:
         streak = getattr(user, "streakrecord", None)
         return {
             "kpis": {
-                "ocg": self._rate(
-                    primary.filter(ocg_satisfied_at_start=True).count(),
-                    started,
+                "orientation_completion": self._rate(
+                    orientation_completed,
+                    len(orientation_lesson_ids),
                 ),
                 "scr": self._rate(completed, started),
                 "arc": self._average_retry_count(primary),

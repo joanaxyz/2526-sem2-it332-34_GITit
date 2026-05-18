@@ -28,16 +28,16 @@ export function DashboardLayout() {
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-4 px-6">
-          <div className="flex items-center gap-3">
+        <div className="mx-auto flex min-h-16 max-w-[1440px] items-center justify-between gap-3 px-6 py-3 max-sm:px-4">
+          <div className="flex min-w-0 items-center gap-3">
             <span className="grid size-9 place-items-center rounded-md border border-primary/30 bg-primary/10 text-primary">
               <GitBranch />
             </span>
-            <span className="text-xl font-extrabold tracking-tight">
+            <span className="whitespace-nowrap text-xl font-extrabold tracking-tight max-sm:text-lg">
               GIT <span className="text-primary">it!</span>
             </span>
           </div>
-          <nav className="flex items-center gap-1">
+          <nav className="flex shrink-0 items-center gap-1">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
@@ -54,19 +54,19 @@ export function DashboardLayout() {
               </NavLink>
             ))}
           </nav>
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2">
             <div className="hidden items-center gap-2 text-sm text-muted-foreground md:flex">
               <PanelsTopLeft className="size-4" />
               {user?.email}
             </div>
             <Button variant="ghost" size="sm" onClick={logout}>
               <LogOut data-icon="inline-start" />
-              Logout
+              <span className="max-sm:hidden">Logout</span>
             </Button>
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-[1440px] px-6 py-6">
+      <main className="mx-auto max-w-[1440px] px-6 py-6 max-sm:px-4">
         <Outlet />
       </main>
     </div>

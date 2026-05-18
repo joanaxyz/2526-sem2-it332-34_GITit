@@ -11,6 +11,8 @@ export type CommandPolicy = {
 export type DifficultyAccess = {
   id: number
   difficulty: Difficulty
+  narrative: string
+  task_prompt: string
   status: DifficultyStatus
   review_available: boolean
   active_session_id: number | null

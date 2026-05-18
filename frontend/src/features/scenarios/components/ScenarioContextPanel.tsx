@@ -1,4 +1,7 @@
+import { ListChecks } from 'lucide-react'
+
 import type { ScenarioSession } from '@/features/practice/types'
+import { commitMessageGuidance } from '@/features/scenarios/utils/scenarioGuidance'
 import { Badge } from '@/shared/components/Badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/Card'
 
@@ -18,7 +21,20 @@ export function ScenarioContextPanel({ session }: { session: ScenarioSession }) 
       <CardContent className="p-3 pt-0">
         <p className="text-sm leading-6 text-muted-foreground">{session.scenario.narrative}</p>
         <div className="mt-3 rounded-md border border-border bg-secondary/50 p-3 text-sm leading-6">
+          <div className="mb-1 text-xs font-bold uppercase text-muted-foreground">Task</div>
           {session.scenario.task_prompt}
+        </div>
+        <div className="mt-3 rounded-md border border-border bg-background/40 p-3 text-xs leading-5 text-muted-foreground">
+          <div className="mb-2 flex items-center gap-2 font-semibold text-foreground">
+            <ListChecks className="size-4 text-primary" />
+            Success rules
+          </div>
+          <p>Reach the requested final repository state. Any valid command sequence can pass; there is no required hidden script.</p>
+          <p className="mt-2">{commitMessageGuidance(session.scenario.task_prompt)}</p>
+          <p className="mt-2">
+            Inspection commands do not spend action budget:{' '}
+            {session.policy.non_counted_patterns.length ? session.policy.non_counted_patterns.join(', ') : 'none listed'}.
+          </p>
         </div>
       </CardContent>
     </Card>

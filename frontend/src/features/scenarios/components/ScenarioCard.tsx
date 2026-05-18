@@ -1,4 +1,4 @@
-import { GitPullRequest } from 'lucide-react'
+import { GitPullRequest, ListChecks } from 'lucide-react'
 
 import { DifficultySelector } from '@/features/scenarios/components/DifficultySelector'
 import type { DifficultyAccess, ScenarioSkillFocus } from '@/features/scenarios/types'
@@ -29,6 +29,17 @@ export function ScenarioCard({
         </div>
       </CardHeader>
       <CardContent>
+        <div className="mb-3 rounded-md border border-border bg-secondary/30 p-3 text-xs leading-5 text-muted-foreground">
+          <div className="mb-2 flex items-center gap-2 font-semibold text-foreground">
+            <ListChecks className="size-4 text-primary" />
+            How this is graded
+          </div>
+          <p>
+            Reach the final repository state described by the selected level. Any valid command sequence can pass; the
+            evaluator checks state, not a hidden command script. Commit-message wording matters only when the task says the
+            message must mention a word.
+          </p>
+        </div>
         <DifficultySelector difficulties={scenario.difficulties} onStart={onStart} onReview={onReview} />
       </CardContent>
     </Card>

@@ -8,6 +8,8 @@ const difficulties: DifficultyAccess[] = [
   {
     id: 1,
     difficulty: 'easy',
+    narrative: 'Easy setup.',
+    task_prompt: 'Complete the easy task.',
     status: 'available',
     review_available: false,
     active_session_id: null,
@@ -17,6 +19,8 @@ const difficulties: DifficultyAccess[] = [
   {
     id: 2,
     difficulty: 'medium',
+    narrative: 'Medium setup.',
+    task_prompt: 'Complete the medium task.',
     status: 'locked',
     review_available: false,
     active_session_id: null,
@@ -26,6 +30,8 @@ const difficulties: DifficultyAccess[] = [
   {
     id: 3,
     difficulty: 'hard',
+    narrative: 'Hard setup.',
+    task_prompt: 'Complete the hard task.',
     status: 'complete',
     review_available: true,
     active_session_id: null,
@@ -40,6 +46,7 @@ describe('DifficultySelector', () => {
 
     expect(screen.getByText('Available')).toBeInTheDocument()
     expect(screen.getByText('Locked')).toBeInTheDocument()
+    expect(screen.getByText('Complete the easy task.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /review/i })).toBeInTheDocument()
   })
 })

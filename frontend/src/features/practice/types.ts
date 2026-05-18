@@ -64,7 +64,18 @@ export type ScenarioSession = {
   }
   repository_state: RepositorySnapshot
   expected_state: Pick<RepositorySnapshot, 'commits' | 'branches' | 'head'> | null
+  steps: ScenarioStepLog[]
   review_mode: boolean
+}
+
+export type ScenarioStepLog = {
+  id: number
+  command_text: string
+  terminal_output: string
+  result_category: string
+  command_classification: string
+  contextual_feedback: string
+  created_at: string
 }
 
 export type CommandResponse = {
