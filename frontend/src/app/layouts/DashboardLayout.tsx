@@ -58,6 +58,11 @@ export function DashboardLayout() {
             <div className="hidden items-center gap-2 text-sm text-muted-foreground md:flex">
               <PanelsTopLeft className="size-4" />
               {user?.student_id}
+              {user && (
+                <span className="text-foreground font-semibold">
+                  {user.last_name}, {user.first_name}
+                </span>
+              )}
             </div>
             <Button variant="ghost" size="sm" onClick={logout}>
               <LogOut data-icon="inline-start" />
