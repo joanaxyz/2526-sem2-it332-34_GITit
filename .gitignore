@@ -1,4 +1,6 @@
 .venv/
+*.env
+!.env.example
 backend/.venv/
 backend/db.sqlite3
 backend/.pytest_cache/

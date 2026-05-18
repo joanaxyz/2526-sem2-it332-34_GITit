@@ -1,7 +1,7 @@
 django
 djangorestframework
 djangorestframework-simplejwt
-psycopg
+psycopg[binary]
 django-environ
 django-cors-headers
 redis

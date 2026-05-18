@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.db import transaction
 
 from common.constants import DIFFICULTY_EASY, DIFFICULTY_HARD, DIFFICULTY_MEDIUM
 from learning.models import LearningUnit, Lesson
@@ -57,44 +58,84 @@ class Command(BaseCommand):
             (
                 "branching-collaboration",
                 3,
-                "Branching and Collaboration",
-                "Reason about HEAD, branch pointers, divergent history, merges, and cleanup.",
+                "Branching and Navigation",
+                "Reason about HEAD, branch pointers, detached states, and safe navigation.",
+                False,
+            ),
+            (
+                "collaboration-integration",
+                4,
+                "Collaboration and Integration",
+                "Resolve divergent history, merge conflicts, and branch cleanup without discarding work.",
                 False,
             ),
             (
                 "undo-recovery",
-                4,
+                5,
                 "Undo and Recovery",
                 "Recover safely from common repository mistakes without deleting or re-cloning.",
                 False,
             ),
         ]
-        units = {}
-        for index, (slug, number, title, description, is_orientation) in enumerate(data, start=1):
-            unit, _ = LearningUnit.objects.update_or_create(
-                slug=slug,
-                defaults={
-                    "number": number,
-                    "title": title,
-                    "description": description,
-                    "is_orientation": is_orientation,
-                    "sort_order": index,
-                    "is_published": True,
-                },
-            )
-            units[slug] = unit
+        starter_slugs = [slug for slug, *_ in data]
+        with transaction.atomic():
+            for index, slug in enumerate(starter_slugs, start=1):
+                LearningUnit.objects.filter(slug=slug).update(number=1000 + index)
+
+            units = {}
+            for index, (slug, number, title, description, is_orientation) in enumerate(data, start=1):
+                unit, _ = LearningUnit.objects.update_or_create(
+                    slug=slug,
+                    defaults={
+                        "number": number,
+                        "title": title,
+                        "description": description,
+                        "is_orientation": is_orientation,
+                        "sort_order": index,
+                        "is_published": True,
+                    },
+                )
+                units[slug] = unit
         return units
 
     def _lessons(self, units: dict[str, LearningUnit]) -> dict[str, Lesson]:
         orientation_titles = [
-            ("mental-model", "Git as Repository State", "Commits, references, and safe practice boundaries."),
-            ("command-anatomy", "Command Anatomy", "How Git commands are structured without memorizing answers."),
-            ("dag-literacy", "Reading the DAG", "Commits, parent edges, branch labels, and HEAD."),
-            ("working-tree", "Working Tree and Staging Area", "Before a commit exists, state can still matter."),
-            ("branch-pointers", "Branch Pointers", "Branches are movable labels, not folders."),
-            ("merge-thinking", "Merge Thinking", "Collaboration changes repository topology."),
-            ("feedback-policy", "Feedback and No-Answer Policy", "Consequences are explained without command solutions."),
-            ("practice-flow", "Practice Flow", "Difficulty scaffolding, command limits, retry variants, and Review Mode."),
+            (
+                "three-file-areas",
+                "The Three File Areas",
+                "Working tree, staging area, and repository.",
+            ),
+            (
+                "tracked-untracked",
+                "Tracked vs. Untracked Files",
+                "Why Git notices some paths and ignores others until they are staged.",
+            ),
+            ("what-head-is", "What HEAD Is", "The current repository position the simulator displays."),
+            (
+                "dag-literacy",
+                "Commits, Parents, and DAG Literacy",
+                "Reading commits, parent edges, branch labels, and HEAD.",
+            ),
+            (
+                "branch-pointers",
+                "Branches as Movable Pointers",
+                "Branches are labels that move with commits, not folders.",
+            ),
+            (
+                "command-anatomy",
+                "Git Command Anatomy",
+                "Command, subcommand, options, arguments, and diagnostics.",
+            ),
+            (
+                "practice-rules",
+                "GIT it! Practice Rules",
+                "Simulator boundaries, No-Answer Policy, and command-count rules.",
+            ),
+            (
+                "scaffolds-review",
+                "Scaffolding, Retry, and Review Mode",
+                "How Easy, Medium, Hard, adaptive retry, and Review Mode differ.",
+            ),
         ]
         lessons: dict[str, Lesson] = {}
         for index, (slug, title, subtitle) in enumerate(orientation_titles, start=1):
@@ -105,12 +146,8 @@ class Command(BaseCommand):
                     "title": title,
                     "subtitle": subtitle,
                     "kind": Lesson.LessonKind.ORIENTATION,
-                    "overview_html": self._orientation_html(title, subtitle),
-                    "interaction_steps": [
-                        "Start with the repository state you can observe.",
-                        "Identify which pointer, file area, or graph relationship changed.",
-                        "Connect the consequence to the concept before moving on.",
-                    ],
+                    "overview_html": self._orientation_html(slug, title, subtitle),
+                    "interaction_steps": self._orientation_steps(slug),
                     "sort_order": index,
                     "is_published": True,
                 },
@@ -135,28 +172,68 @@ class Command(BaseCommand):
                 ["first-clean-commit", "partial-staging"],
             ),
             (
+                "history-inspection",
+                units["repository-state"],
+                "Inspecting History Without Changing State",
+                Lesson.LessonKind.CONTENT,
+                "Use diagnostic commands to understand commits without spending counted actions.",
+                [],
+            ),
+            (
                 "branch-head",
                 units["branching-collaboration"],
-                "Branch Pointers and Detached HEAD",
+                "Branch Pointers and HEAD",
                 Lesson.LessonKind.CONTENT,
                 "How HEAD and branch labels move.",
                 [],
             ),
             (
-                "divergence-merge",
+                "detached-head",
                 units["branching-collaboration"],
+                "Detached HEAD and Safe Navigation",
+                Lesson.LessonKind.CONTENT,
+                "Understand detached states before making recovery decisions.",
+                [],
+            ),
+            (
+                "right-branch",
+                units["branching-collaboration"],
+                "Moving Work to the Right Branch",
+                Lesson.LessonKind.SCENARIO,
+                "Recover a local commit made from the wrong repository position.",
+                ["wrong-branch-commit"],
+            ),
+            (
+                "divergence-merge",
+                units["collaboration-integration"],
                 "Divergent Branches and Merge Recovery",
                 Lesson.LessonKind.SCENARIO,
                 "Resolve collaboration states without discarding team work.",
                 ["divergent-branches", "merge-conflict", "branch-cleanup"],
             ),
             (
+                "conflict-state",
+                units["collaboration-integration"],
+                "Understanding Merge Conflict State",
+                Lesson.LessonKind.CONTENT,
+                "Read conflict state as a repository condition, not as a reason to re-clone.",
+                [],
+            ),
+            (
                 "undo-without-panic",
                 units["undo-recovery"],
                 "Undo Without Panic",
+                Lesson.LessonKind.CONTENT,
+                "Recovery decisions without deleting, re-cloning, or blindly copying commands.",
+                [],
+            ),
+            (
+                "reset-recovery",
+                units["undo-recovery"],
+                "Recovering After Pointer Movement",
                 Lesson.LessonKind.SCENARIO,
-                "Recovery decisions without deleting or re-cloning.",
-                ["wrong-branch-commit"],
+                "Repair a local branch pointer move while preserving reachable work.",
+                ["accidental-reset-recovery"],
             ),
         ]
         for index, (slug, unit, title, kind, subtitle, _) in enumerate(content_rows, start=1):
@@ -221,7 +298,7 @@ class Command(BaseCommand):
             },
             {
                 "slug": "divergent-branches",
-                "unit": units["branching-collaboration"],
+                "unit": units["collaboration-integration"],
                 "lesson": lessons["divergence-merge"],
                 "title": "Resolve divergent branches after team edits",
                 "focus": "merge/rebase recovery",
@@ -242,7 +319,7 @@ class Command(BaseCommand):
             },
             {
                 "slug": "merge-conflict",
-                "unit": units["branching-collaboration"],
+                "unit": units["collaboration-integration"],
                 "lesson": lessons["divergence-merge"],
                 "title": "Finish a merge after conflict markers appear",
                 "focus": "merge conflict resolution",
@@ -263,7 +340,7 @@ class Command(BaseCommand):
             },
             {
                 "slug": "branch-cleanup",
-                "unit": units["branching-collaboration"],
+                "unit": units["collaboration-integration"],
                 "lesson": lessons["divergence-merge"],
                 "title": "Clean up a merged feature branch",
                 "focus": "branch cleanup",
@@ -284,8 +361,8 @@ class Command(BaseCommand):
             },
             {
                 "slug": "wrong-branch-commit",
-                "unit": units["undo-recovery"],
-                "lesson": lessons["undo-without-panic"],
+                "unit": units["branching-collaboration"],
+                "lesson": lessons["right-branch"],
                 "title": "Move a commit made on the wrong branch",
                 "focus": "wrong-branch commit recovery",
                 "narrative": "Feature work was committed while main was checked out. Recover it onto the appropriate branch.",
@@ -302,6 +379,46 @@ class Command(BaseCommand):
                 "variants": [
                     self._variant("a", "Variant A", "wrong-a", graph([commit("c0", "Base"), commit("c1", "Feature work", ["c0"])], {"main": "c1", "feature/recovery": "c0"}, "main")),
                     self._variant("b", "Variant B", "wrong-b", graph([commit("c0", "Base"), commit("c1", "Report work", ["c0"])], {"main": "c1", "feature/recovery": "c0"}, "main")),
+                ],
+            },
+            {
+                "slug": "accidental-reset-recovery",
+                "unit": units["undo-recovery"],
+                "lesson": lessons["reset-recovery"],
+                "title": "Recover after an accidental local reset",
+                "focus": "local reset recovery",
+                "narrative": "A local branch pointer moved backward, but a safety reference still points to the work that must be preserved.",
+                "task": "Move the active branch pointer back to the preserved work without inventing a new history.",
+                "policy": (2, 8, ["git status", "git log --oneline", "git branch -v"]),
+                "rule": {
+                    "head_branch": "main",
+                    "branch_exists": ["safety-copy"],
+                    "branches_equal": [["main", "safety-copy"]],
+                    "working_tree_clean": True,
+                    "staging_empty": True,
+                    "conflict_free": True,
+                },
+                "variants": [
+                    self._variant(
+                        "a",
+                        "Variant A",
+                        "reset-a",
+                        graph(
+                            [commit("c0", "Base"), commit("c1", "Lost local work", ["c0"])],
+                            {"main": "c0", "safety-copy": "c1"},
+                            "main",
+                        ),
+                    ),
+                    self._variant(
+                        "b",
+                        "Variant B",
+                        "reset-b",
+                        graph(
+                            [commit("c0", "Base"), commit("c1", "Recovered report", ["c0"])],
+                            {"main": "c0", "safety-copy": "c1"},
+                            "main",
+                        ),
+                    ),
                 ],
             },
         ]
@@ -397,15 +514,109 @@ class Command(BaseCommand):
                 commits.append({"id": new_id, "message": "Recovered feature work", "parents": ["c0"]})
                 branches["feature/recovery"] = new_id
 
+        if "safety-copy" in branches and head.get("name") == "main":
+            branches["main"] = branches["safety-copy"]
+
         head_target = branches.get(head.get("name"))
         return {"commits": commits, "branches": branches, "head": {**head, "target": head_target}}
 
-    def _orientation_html(self, title: str, subtitle: str) -> str:
+    def _orientation_steps(self, slug: str) -> list[str]:
+        steps = {
+            "three-file-areas": [
+                "Locate the working tree: the place where file edits appear before Git records them.",
+                "Locate the staging area: the proposed contents of the next commit.",
+                "Locate the repository history: committed snapshots connected by parent edges.",
+            ],
+            "tracked-untracked": [
+                "Start with an untracked file that Git can see but does not yet include in history.",
+                "Notice how staging changes that file's relationship to the repository.",
+                "Connect tracked status to whether future changes can be compared and committed.",
+            ],
+            "what-head-is": [
+                "Find HEAD in the diagram before looking at branch names.",
+                "Observe whether HEAD is attached to a branch or points directly to a commit.",
+                "Use HEAD to explain where the next commit or branch movement would happen.",
+            ],
+            "dag-literacy": [
+                "Read commits as nodes and parent links as arrows through history.",
+                "Identify branch labels and the commit each label currently names.",
+                "Compare the graph shape before and after a state change.",
+            ],
+            "branch-pointers": [
+                "Treat a branch as a movable label, not as a separate folder.",
+                "Watch the current branch pointer move when a new commit is created.",
+                "Distinguish switching branches from changing committed history.",
+            ],
+            "command-anatomy": [
+                "Separate the git command, subcommand, options, and arguments.",
+                "Classify inspection commands as diagnostic before changing repository state.",
+                "Read command intent without assuming there is only one valid path.",
+            ],
+            "practice-rules": [
+                "Confirm that typed commands are parsed by the simulator, not a real shell.",
+                "Use feedback as a consequence summary, not as an answer key.",
+                "Track counted action commands separately from diagnostic commands.",
+            ],
+            "scaffolds-review": [
+                "Compare Easy, Medium, and Hard scaffolds before starting a scenario.",
+                "Recognize that failed or abandoned retries may use changed variants.",
+                "Recognize that Review Mode is playable and logged separately.",
+            ],
+        }
+        return steps[slug]
+
+    def _orientation_html(self, slug: str, title: str, subtitle: str) -> str:
+        bodies = {
+            "three-file-areas": """
+              <p>Git reasoning starts with three areas. The working tree contains file edits.
+              The staging area holds the next proposed snapshot. The repository history stores
+              completed commits. Scenario practice expects students to name which area changed
+              before deciding what to do next.</p>
+            """,
+            "tracked-untracked": """
+              <p>A tracked file already belongs to Git's history. An untracked file exists in
+              the working tree but has not yet been included in a commit. This distinction
+              explains why status output matters before any state-changing action.</p>
+            """,
+            "what-head-is": """
+              <p>HEAD marks the current repository position. In normal work it is attached to
+              a branch, so new commits move that branch pointer. In a detached state, HEAD
+              points directly at a commit, which changes how students should reason about safety.</p>
+            """,
+            "dag-literacy": """
+              <p>Git history forms a Directed Acyclic Graph. Commits are nodes, parent
+              relationships are edges, and branch labels point to selected commits. GIT it!
+              uses the live DAG to make those relationships visible after simulator-processed
+              commands.</p>
+            """,
+            "branch-pointers": """
+              <p>Branches are movable pointers. They do not copy the whole project into a
+              separate folder. Understanding this prevents destructive workarounds when a
+              branch appears to diverge or when work was committed from the wrong position.</p>
+            """,
+            "command-anatomy": """
+              <p>Git commands have a shape: <code>git</code>, a subcommand, optional flags,
+              and arguments. GIT it! encourages students to inspect before acting and logs
+              diagnostic commands separately from counted action commands.</p>
+            """,
+            "practice-rules": """
+              <p>The terminal in GIT it! is simulated. It never executes shell input, never
+              calls the external Git CLI, and never connects to GitHub or another remote. The
+              No-Answer Policy also means the system will never reveal a correct command
+              sequence.</p>
+            """,
+            "scaffolds-review": """
+              <p>Easy shows the live DAG, expected-state diagram, and contextual feedback.
+              Medium keeps the live DAG and expected-state diagram. Hard shows the live DAG
+              and narrative context only. Completed difficulties can be replayed in Review
+              Mode without altering primary KPI records.</p>
+            """,
+        }
         return f"""
         <article class="lesson-copy">
           <h1>{title}</h1>
           <p>{subtitle}</p>
-          <p>Use this walkthrough to connect Git vocabulary with repository state before entering scenario practice.</p>
+          {bodies[slug]}
           <div class="callout">Orientation lessons are concept-only. They do not ask for commands and do not generate scenario KPI logs.</div>
         </article>
         """
