@@ -4,7 +4,6 @@ import json
 import shlex
 from dataclasses import dataclass
 
-
 READ_ONLY_PREFIXES = (
     "git status",
     "git log",

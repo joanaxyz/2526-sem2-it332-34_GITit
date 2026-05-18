@@ -1,4 +1,9 @@
-from scenarios.models import CompletionRecord, DifficultyInstance, ScenarioSkillFocus, ScenarioSession
+from scenarios.models import (
+    CompletionRecord,
+    DifficultyInstance,
+    ScenarioSession,
+    ScenarioSkillFocus,
+)
 from scenarios.services import DifficultyAccessService
 
 

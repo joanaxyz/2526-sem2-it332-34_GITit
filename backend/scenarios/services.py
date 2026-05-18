@@ -6,7 +6,6 @@ from common.constants import (
     COMMAND_DIAGNOSTIC,
     COMMAND_UNPROCESSABLE,
     DIFFICULTY_EASY,
-    DIFFICULTY_HARD,
     DIFFICULTY_MEDIUM,
     RESULT_INVALID,
     RESULT_TARGET_MATCHED,
@@ -23,8 +22,18 @@ from learning.services import OrientationService
 from progress.services import StreakService
 from retries.services import VariantSelectionService
 from scaffolding.services import FeedbackGenerationService, ScaffoldingService
-from scenarios.models import CommandLog, CompletionRecord, DifficultyInstance, ScenarioSession, StepLog
-from simulator.services import READ_ONLY_PREFIXES, RepositorySnapshotService, RepositoryStateSimulator
+from scenarios.models import (
+    CommandLog,
+    CompletionRecord,
+    DifficultyInstance,
+    ScenarioSession,
+    StepLog,
+)
+from simulator.services import (
+    READ_ONLY_PREFIXES,
+    RepositorySnapshotService,
+    RepositoryStateSimulator,
+)
 
 
 class DifficultyAccessService:

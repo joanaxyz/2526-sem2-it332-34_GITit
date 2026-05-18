@@ -1,10 +1,10 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from review.services import ReviewModeService
 from scenarios.selectors import get_difficulty_instance
 from scenarios.serializers import CommandSubmitSerializer, ScenarioStartSerializer, session_payload
 from scenarios.views import CommandSubmitAPIView
-from review.services import ReviewModeService
 
 
 class ReviewSessionStartAPIView(APIView):

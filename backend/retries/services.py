@@ -1,4 +1,4 @@
-from scenarios.models import ScenarioSkillFocus, ScenarioSession, ScenarioVariant
+from scenarios.models import ScenarioSession, ScenarioSkillFocus, ScenarioVariant
 
 
 class VariantSelectionService:
