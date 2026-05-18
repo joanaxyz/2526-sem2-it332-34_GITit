@@ -1,9 +1,20 @@
 import { ApiError } from './apiError'
 import { useAuthStore } from '@/features/auth/hooks/useAuth'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? defaultApiBaseUrl()
 
 type RequestOptions = RequestInit & { skipAuthRefresh?: boolean }
+
+let refreshPromise: Promise<boolean> | null = null
+
+function defaultApiBaseUrl() {
+  if (typeof window === 'undefined') return 'http://127.0.0.1:8000/api'
+
+  const host = window.location.hostname.includes(':')
+    ? `[${window.location.hostname}]`
+    : window.location.hostname
+  return `${window.location.protocol}//${host}:8000/api`
+}
 
 async function parseResponse(response: Response) {
   if (response.status === 204) return null
@@ -25,6 +36,11 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   })
 
   if (response.status === 401 && !options.skipAuthRefresh) {
+    const latestToken = useAuthStore.getState().accessToken
+    if (token && latestToken && token !== latestToken) {
+      return apiRequest<T>(path, { ...options, skipAuthRefresh: true })
+    }
+
     const refreshed = await refreshAccessToken()
     if (refreshed) {
       return apiRequest<T>(path, { ...options, skipAuthRefresh: true })
@@ -40,6 +56,17 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 }
 
 async function refreshAccessToken() {
+  if (refreshPromise) return refreshPromise
+
+  refreshPromise = requestAccessTokenRefresh()
+  refreshPromise.finally(() => {
+    refreshPromise = null
+  })
+
+  return refreshPromise
+}
+
+async function requestAccessTokenRefresh() {
   try {
     const payload = await apiRequest<{ access: string }>('/auth/refresh/', {
       method: 'POST',
