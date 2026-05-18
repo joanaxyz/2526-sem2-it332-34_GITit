@@ -6,12 +6,13 @@ import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import { ScenarioCard } from '@/features/scenarios/components/ScenarioCard'
 import type { DifficultyAccess } from '@/features/scenarios/types'
 import { EmptyState } from '@/shared/components/EmptyState'
+import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 
 export function UnitScenarioList({ unitId, source }: { unitId: number; source: 'unit_card' | 'lesson_overview' }) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { data, isLoading } = useQuery({
+  const { data, error, isError, isLoading } = useQuery({
     queryKey: ['unit-scenarios', unitId],
     queryFn: () => scenariosApi.listForUnit(unitId),
   })
@@ -29,10 +30,21 @@ export function UnitScenarioList({ unitId, source }: { unitId: number; source: '
   })
 
   if (isLoading) return <LoadingState label="Loading scenarios" />
+  if (isError) return <ErrorState title="Could not load scenarios" description={error.message} />
   if (!data?.length) return <EmptyState title="No scenarios" description="This Unit has reading or orientation content only." />
 
   return (
     <div className="flex flex-col gap-3">
+      {startMutation.error ? (
+        <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm leading-6 text-destructive">
+          {startMutation.error.message}
+        </div>
+      ) : null}
+      {reviewMutation.error ? (
+        <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm leading-6 text-destructive">
+          {reviewMutation.error.message}
+        </div>
+      ) : null}
       {data.map((scenario) => (
         <ScenarioCard
           key={scenario.id}

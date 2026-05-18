@@ -3,13 +3,16 @@ import { useState } from 'react'
 
 import { unitsApi } from '@/features/units/api/unitsApi'
 import { UnitCard } from '@/features/units/components/UnitCard'
+import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 
 export function UnitsPage() {
   const [expanded, setExpanded] = useState<number | null>(null)
-  const { data, isLoading } = useQuery({ queryKey: ['units'], queryFn: unitsApi.listUnits })
+  const { data, error, isError, isLoading } = useQuery({ queryKey: ['units'], queryFn: unitsApi.listUnits })
 
-  if (isLoading || !data) return <LoadingState label="Loading Units" />
+  if (isLoading) return <LoadingState label="Loading Units" />
+  if (isError) return <ErrorState title="Could not load Units" description={error.message} />
+  if (!data) return <ErrorState title="Could not load Units" description="The API returned no Unit data." />
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-4">

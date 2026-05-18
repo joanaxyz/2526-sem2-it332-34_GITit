@@ -9,6 +9,7 @@ import type { DifficultyAccess } from '@/features/scenarios/types'
 import { unitsApi } from '@/features/units/api/unitsApi'
 import { Button } from '@/shared/components/Button'
 import { EmptyState } from '@/shared/components/EmptyState'
+import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 
 export function ScenarioSelectionPage() {
@@ -35,9 +36,12 @@ export function ScenarioSelectionPage() {
     onSuccess: (session) => navigate(`/review/${session.id}`),
   })
 
-  if (lessonQuery.isLoading || scenariosQuery.isLoading || !lessonQuery.data) {
+  if (lessonQuery.isLoading || scenariosQuery.isLoading) {
     return <LoadingState label="Loading scenario selection" />
   }
+  if (lessonQuery.isError) return <ErrorState title="Could not load lesson" description={lessonQuery.error.message} />
+  if (scenariosQuery.isError) return <ErrorState title="Could not load scenarios" description={scenariosQuery.error.message} />
+  if (!lessonQuery.data) return <ErrorState title="Could not load scenario selection" description="The API returned no lesson data." />
 
   const scenarios = scenariosQuery.data ?? []
   return (
@@ -57,16 +61,28 @@ export function ScenarioSelectionPage() {
         </p>
       </section>
       {scenarios.length ? (
-        <div className="grid grid-cols-2 gap-4 max-xl:grid-cols-1">
-          {scenarios.map((scenario) => (
-            <ScenarioCard
-              key={scenario.id}
-              scenario={scenario}
-              onStart={(difficulty) => startMutation.mutate(difficulty)}
-              onReview={(difficulty) => reviewMutation.mutate(difficulty)}
-            />
-          ))}
-        </div>
+        <>
+          {startMutation.error ? (
+            <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm leading-6 text-destructive">
+              {startMutation.error.message}
+            </div>
+          ) : null}
+          {reviewMutation.error ? (
+            <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm leading-6 text-destructive">
+              {reviewMutation.error.message}
+            </div>
+          ) : null}
+          <div className="grid grid-cols-2 gap-4 max-xl:grid-cols-1">
+            {scenarios.map((scenario) => (
+              <ScenarioCard
+                key={scenario.id}
+                scenario={scenario}
+                onStart={(difficulty) => startMutation.mutate(difficulty)}
+                onReview={(difficulty) => reviewMutation.mutate(difficulty)}
+              />
+            ))}
+          </div>
+        </>
       ) : (
         <EmptyState title="No scenarios attached" description="This lesson is reading-only and does not lead to scenario practice." />
       )}

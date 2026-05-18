@@ -9,6 +9,7 @@ import { ViewScenariosPanel } from '@/features/units/components/ViewScenariosPan
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
+import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { ProgressBar } from '@/shared/components/ProgressBar'
 
@@ -18,7 +19,7 @@ export function LessonOverviewPage() {
   const queryClient = useQueryClient()
   const [stepIndex, setStepIndex] = useState(0)
   const [showScenarios, setShowScenarios] = useState(false)
-  const { data: lesson, isLoading } = useQuery({
+  const { data: lesson, error, isError, isLoading } = useQuery({
     queryKey: ['lesson', lessonId],
     queryFn: () => unitsApi.getLesson(lessonId),
     enabled: Number.isFinite(lessonId),
@@ -35,7 +36,9 @@ export function LessonOverviewPage() {
     return Math.round(((stepIndex + 1) / lesson.interaction_steps.length) * 100)
   }, [lesson?.interaction_steps.length, stepIndex])
 
-  if (isLoading || !lesson) return <LoadingState label="Loading lesson" />
+  if (isLoading) return <LoadingState label="Loading lesson" />
+  if (isError) return <ErrorState title="Could not load lesson" description={error.message} />
+  if (!lesson) return <ErrorState title="Could not load lesson" description="The API returned no lesson data." />
 
   const isOrientation = lesson.kind === 'orientation'
   const currentStep = lesson.interaction_steps[stepIndex]

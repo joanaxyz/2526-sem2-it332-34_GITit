@@ -8,8 +8,8 @@ def published_units():
         LearningUnit.objects.filter(is_published=True)
         .prefetch_related("lessons", "scenarios")
         .annotate(
-            published_lesson_count=Count("lessons", filter=Q(lessons__is_published=True)),
-            published_scenario_count=Count("scenarios", filter=Q(scenarios__is_published=True)),
+            published_lesson_count=Count("lessons", filter=Q(lessons__is_published=True), distinct=True),
+            published_scenario_count=Count("scenarios", filter=Q(scenarios__is_published=True), distinct=True),
         )
         .order_by("sort_order", "number")
     )

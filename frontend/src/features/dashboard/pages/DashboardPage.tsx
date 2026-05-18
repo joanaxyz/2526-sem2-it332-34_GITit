@@ -7,12 +7,15 @@ import { ProgressSummaryCards } from '@/features/dashboard/components/ProgressSu
 import { RecentActivityList } from '@/features/dashboard/components/RecentActivityList'
 import { RetryTrendCard } from '@/features/dashboard/components/RetryTrendCard'
 import { StreakCard } from '@/features/dashboard/components/StreakCard'
+import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 
 export function DashboardPage() {
-  const { data, isLoading } = useQuery({ queryKey: ['dashboard-summary'], queryFn: dashboardApi.summary })
+  const { data, error, isError, isLoading } = useQuery({ queryKey: ['dashboard-summary'], queryFn: dashboardApi.summary })
 
-  if (isLoading || !data) return <LoadingState label="Loading dashboard" />
+  if (isLoading) return <LoadingState label="Loading dashboard" />
+  if (isError) return <ErrorState title="Could not load dashboard" description={error.message} />
+  if (!data) return <ErrorState title="Could not load dashboard" description="The API returned no dashboard data." />
 
   return (
     <div className="flex flex-col gap-4">

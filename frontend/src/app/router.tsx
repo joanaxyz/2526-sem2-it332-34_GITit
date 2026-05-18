@@ -15,7 +15,7 @@ import { UnitsPage } from '@/features/units/pages/UnitsPage'
 import { useAuthStore } from '@/features/auth/hooks/useAuth'
 
 function Protected({ children }: { children: ReactElement }) {
-  const token = useAuthStore.getState().accessToken
+  const token = useAuthStore((state) => state.accessToken)
   if (!token) return <Navigate replace to="/login" />
   return children
 }

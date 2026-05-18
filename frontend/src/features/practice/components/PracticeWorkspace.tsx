@@ -10,6 +10,7 @@ import { SessionOutcomeBanner } from '@/features/practice/components/SessionOutc
 import { TerminalPanel } from '@/features/practice/components/TerminalPanel'
 import { useCommandSubmission } from '@/features/practice/hooks/useCommandSubmission'
 import { useScenarioSession } from '@/features/practice/hooks/useScenarioSession'
+import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 
 export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean }) {
@@ -18,7 +19,9 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const { query, session, setSession, lines, setLines, feedback, setFeedback } = useScenarioSession(sessionId)
   const mutation = useCommandSubmission(sessionId, reviewMode)
 
-  if (query.isLoading || !session) return <LoadingState label="Loading scenario workspace" />
+  if (query.isLoading) return <LoadingState label="Loading scenario workspace" />
+  if (query.isError) return <ErrorState title="Could not load scenario workspace" description={query.error.message} />
+  if (!session) return <ErrorState title="Could not load scenario workspace" description="The API returned no session data." />
 
   function submit(command: string) {
     setLines((items) => [...items, { id: crypto.randomUUID(), kind: 'input', text: command }])

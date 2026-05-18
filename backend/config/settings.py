@@ -140,12 +140,3 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Student-facing Git scenario practice API.",
     "VERSION": "0.1.0",
 }
-
-# The repository uses model-first apps in this MVP. Disabling migrations keeps
-# the starter schema easy to recreate during early capstone iteration.
-MIGRATION_MODULES = {
-    "accounts": None,
-    "learning": None,
-    "scenarios": None,
-    "progress": None,
-}

@@ -8,6 +8,8 @@ import type { RepositorySnapshot } from '@/features/practice/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Card'
 
 type GraphInput = Pick<RepositorySnapshot, 'commits' | 'branches' | 'head'>
+const nodeTypes = {}
+const edgeTypes = {}
 
 export function LiveDagPanel({ title = 'Live DAG', snapshot }: { title?: string; snapshot: GraphInput }) {
   const { nodes, edges } = useMemo(() => buildGraph(snapshot), [snapshot])
@@ -21,7 +23,16 @@ export function LiveDagPanel({ title = 'Live DAG', snapshot }: { title?: string;
         </CardTitle>
       </CardHeader>
       <CardContent className="h-[18rem] p-0">
-        <ReactFlow nodes={nodes} edges={edges} fitView nodesDraggable={false} nodesConnectable={false} panOnScroll>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          fitView
+          nodesDraggable={false}
+          nodesConnectable={false}
+          panOnScroll
+        >
           <Background gap={18} color="rgba(255,255,255,0.05)" />
           <Controls showInteractive={false} />
         </ReactFlow>
