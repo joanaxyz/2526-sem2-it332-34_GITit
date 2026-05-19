@@ -7,6 +7,7 @@ from scenarios.views import (
     ScenarioSessionAbandonAPIView,
     ScenarioSessionDetailAPIView,
     ScenarioSessionStartAPIView,
+    SkillFocusDemoCommandAPIView,
     UnitScenarioListAPIView,
 )
 
