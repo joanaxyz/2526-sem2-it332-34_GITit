@@ -1,8 +1,8 @@
 import dagre from 'dagre'
 import { GitCommitHorizontal } from 'lucide-react'
-import { useMemo } from 'react'
-import ReactFlow, { Background, Controls, Position } from 'reactflow'
-import type { Edge, Node } from 'reactflow'
+import { memo, useMemo } from 'react'
+import ReactFlow, { Background, Handle, Position } from 'reactflow'
+import type { Edge, Node, NodeProps } from 'reactflow'
 
 import type { RepositorySnapshot } from '@/features/practice/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Card'
@@ -10,6 +10,18 @@ import { cn } from '@/shared/utils/cn'
 
 type GraphInput = Pick<RepositorySnapshot, 'commits' | 'branches' | 'head'> &
   Partial<Pick<RepositorySnapshot, 'working_tree' | 'staging' | 'conflicts'>>
+
+type CommitNodeData = {
+  hash: string
+  refs: string[]
+  activeRef: string | null
+  isHead: boolean
+  isDetachedHead: boolean
+}
+
+const commitNodeTypes = {
+  commit: memo(CommitNode),
+}
 
 function handleReactFlowError(code: string, message: string) {
   if (code === '002') return
@@ -39,29 +51,85 @@ export function LiveDagPanel({
       </CardHeader>
       <CardContent className={cn('h-[21rem] p-0', contentClassName)}>
         <ReactFlow
+          className="h-full w-full"
+          style={{ height: '100%', width: '100%' }}
           nodes={nodes}
           edges={edges}
           fitView
-          fitViewOptions={{ padding: 0.12 }}
+          fitViewOptions={{ padding: 0.08 }}
           nodesDraggable={false}
           nodesConnectable={false}
+          nodeTypes={commitNodeTypes}
           panOnScroll
-          minZoom={0.45}
+          minZoom={0.55}
           maxZoom={1.6}
+          proOptions={{ hideAttribution: true }}
           onError={handleReactFlowError}
         >
           <Background gap={18} color="rgba(255,255,255,0.05)" />
-          <Controls showInteractive={false} />
         </ReactFlow>
       </CardContent>
     </Card>
   )
 }
 
+function CommitNode({ data }: NodeProps<CommitNodeData>) {
+  const visibleRefs = orderRefs(data.refs, data.activeRef).slice(0, 3)
+  const hiddenRefCount = Math.max(data.refs.length - visibleRefs.length, 0)
+
+  return (
+    <div className="flex w-32 flex-col items-center gap-2">
+      <Handle className="opacity-0" type="target" position={Position.Top} />
+      <div
+        className={cn(
+          'grid size-16 place-items-center rounded-full border font-mono text-sm font-semibold shadow-sm transition-colors',
+          data.isHead
+            ? 'border-accent bg-accent text-accent-foreground shadow-[0_0_0_4px_hsla(var(--accent)/0.16)]'
+            : 'border-border bg-card text-foreground',
+        )}
+      >
+        {data.hash}
+      </div>
+      {(visibleRefs.length > 0 || data.isDetachedHead) && (
+        <div className="flex max-w-32 flex-wrap justify-center gap-1">
+          {data.isDetachedHead && (
+            <span className="rounded-full border border-accent/40 bg-accent/15 px-2 py-0.5 text-[10px] font-semibold leading-none text-accent">
+              HEAD
+            </span>
+          )}
+          {visibleRefs.map((ref) => {
+            const isActive = ref === data.activeRef
+            return (
+              <span
+                className={cn(
+                  'max-w-28 truncate rounded-full border px-2 py-0.5 text-[10px] font-medium leading-none',
+                  isActive
+                    ? 'border-accent/50 bg-accent/15 text-accent'
+                    : 'border-border bg-secondary text-muted-foreground',
+                )}
+                key={ref}
+                title={ref}
+              >
+                {ref}
+              </span>
+            )
+          })}
+          {hiddenRefCount > 0 && (
+            <span className="rounded-full border border-border bg-secondary px-2 py-0.5 text-[10px] font-medium leading-none text-muted-foreground">
+              +{hiddenRefCount}
+            </span>
+          )}
+        </div>
+      )}
+      <Handle className="opacity-0" type="source" position={Position.Bottom} />
+    </div>
+  )
+}
+
 function buildGraph(snapshot: GraphInput): { nodes: Node[]; edges: Edge[] } {
   const graph = new dagre.graphlib.Graph()
   graph.setDefaultEdgeLabel(() => ({}))
-  graph.setGraph({ rankdir: 'TB', nodesep: 56, ranksep: 76 })
+  graph.setGraph({ rankdir: 'TB', nodesep: 44, ranksep: 80 })
 
   if (!snapshot.commits.length) {
     const branchLabels = Object.entries(snapshot.branches)
@@ -77,7 +145,7 @@ function buildGraph(snapshot: GraphInput): { nodes: Node[]; edges: Edge[] } {
       stagedCount ? `${stagedCount} staged` : null,
       conflictCount ? `${conflictCount} conflict${conflictCount === 1 ? '' : 's'}` : null,
     ].filter(Boolean)
-    graph.setNode('__empty__', { width: 180, height: 96 })
+    graph.setNode('__empty__', { width: 180, height: 88 })
     dagre.layout(graph)
     const point = graph.node('__empty__')
 
@@ -85,7 +153,7 @@ function buildGraph(snapshot: GraphInput): { nodes: Node[]; edges: Edge[] } {
       nodes: [
         {
           id: '__empty__',
-          position: { x: point.x - 90, y: point.y - 48 },
+          position: { x: point.x - 90, y: point.y - 44 },
           sourcePosition: Position.Bottom,
           targetPosition: Position.Top,
           data: { label: `No commits yet\n${stateLabels.join('\n')}` },
@@ -107,30 +175,30 @@ function buildGraph(snapshot: GraphInput): { nodes: Node[]; edges: Edge[] } {
     }
   }
 
-  const nodes: Node[] = snapshot.commits.map((commit) => {
-    const branchLabels = Object.entries(snapshot.branches)
+  const nodeSizes = new Map<string, { width: number; height: number }>()
+  const nodes: Node<CommitNodeData>[] = snapshot.commits.map((commit) => {
+    const refs = Object.entries(snapshot.branches)
       .filter(([, target]) => target === commit.id)
       .map(([name]) => name)
+      .sort()
     const isHead = snapshot.head.target === commit.id
-    const label = `${commit.id}\n${commit.message}${branchLabels.length ? `\n${branchLabels.join(', ')}` : ''}${isHead ? '\nHEAD' : ''}`
-    graph.setNode(commit.id, { width: 168, height: 86 })
+    const activeRef = snapshot.head.type === 'branch' && isHead ? (snapshot.head.name ?? null) : null
+    const size = { width: 128, height: refs.length || (isHead && snapshot.head.type === 'detached') ? 98 : 72 }
+    nodeSizes.set(commit.id, size)
+    graph.setNode(commit.id, size)
+
     return {
       id: commit.id,
+      type: 'commit',
       position: { x: 0, y: 0 },
       sourcePosition: Position.Bottom,
       targetPosition: Position.Top,
-      data: { label },
-      style: {
-        width: 168,
-        borderRadius: 8,
-        border: isHead ? '1px solid hsl(var(--primary))' : '1px solid hsl(var(--border))',
-        background: isHead ? 'rgba(0,214,143,0.12)' : 'hsl(var(--secondary))',
-        color: 'hsl(var(--foreground))',
-        fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-        fontSize: 12,
-        lineHeight: 1.35,
-        whiteSpace: 'pre-line',
-        textAlign: 'left',
+      data: {
+        hash: shortenHash(commit.id),
+        refs,
+        activeRef,
+        isHead,
+        isDetachedHead: isHead && snapshot.head.type === 'detached',
       },
     }
   })
@@ -142,8 +210,8 @@ function buildGraph(snapshot: GraphInput): { nodes: Node[]; edges: Edge[] } {
         id: `${parent}-${commit.id}`,
         source: parent,
         target: commit.id,
-        animated: true,
-        style: { stroke: 'hsl(var(--muted-foreground))' },
+        type: 'smoothstep',
+        style: { stroke: 'hsl(var(--muted-foreground))', strokeWidth: 1.4 },
       })
       graph.setEdge(parent, commit.id)
     }
@@ -153,8 +221,22 @@ function buildGraph(snapshot: GraphInput): { nodes: Node[]; edges: Edge[] } {
   return {
     nodes: nodes.map((node) => {
       const point = graph.node(node.id)
-      return { ...node, position: { x: point.x - 84, y: point.y - 43 } }
+      const size = nodeSizes.get(node.id) ?? { width: 128, height: 72 }
+      return { ...node, position: { x: point.x - size.width / 2, y: point.y - size.height / 2 } }
     }),
     edges,
   }
+}
+
+function shortenHash(hash: string) {
+  return hash.length > 7 ? hash.slice(0, 7) : hash
+}
+
+function orderRefs(refs: string[], activeRef: string | null) {
+  if (!activeRef) return refs
+  return [...refs].sort((left, right) => {
+    if (left === activeRef) return -1
+    if (right === activeRef) return 1
+    return left.localeCompare(right)
+  })
 }
