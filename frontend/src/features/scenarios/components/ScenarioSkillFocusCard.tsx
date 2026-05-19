@@ -36,12 +36,6 @@ export function ScenarioSkillFocusCard({
             <span className="font-semibold">{scenario.primary_focus_commands.length ? `${primaryLabel}:` : 'Skill focus:'}</span>
             <span className="font-mono">{focusValue}</span>
           </div>
-          {scenario.supporting_inspection_commands.length ? (
-            <div>
-              <span className="font-semibold text-foreground">Supporting inspection commands: </span>
-              {scenario.supporting_inspection_commands.join(', ')}
-            </div>
-          ) : null}
         </div>
         <div className="grid grid-cols-3 gap-2 max-md:grid-cols-1">
           {scenario.difficulties.map((difficulty) => (

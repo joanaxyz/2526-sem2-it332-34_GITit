@@ -105,12 +105,6 @@ export function SkillFocusPreviewModal({
                   <span className="font-mono text-muted-foreground">{scenario.primary_focus_commands.join(', ')}</span>
                 </div>
               ) : null}
-              {scenario.supporting_inspection_commands.length ? (
-                <div>
-                  <span className="font-semibold">Supporting inspection commands: </span>
-                  <span className="font-mono text-muted-foreground">{scenario.supporting_inspection_commands.join(', ')}</span>
-                </div>
-              ) : null}
             </div>
           ) : null}
 
