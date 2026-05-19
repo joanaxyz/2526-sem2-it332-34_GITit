@@ -19,8 +19,13 @@ type CommitNodeData = {
   isDetachedHead: boolean
 }
 
+type EmptyRepositoryNodeData = {
+  branchName: string
+}
+
 const commitNodeTypes = {
   commit: memo(CommitNode),
+  emptyRepository: memo(EmptyRepositoryNode),
 }
 
 function handleReactFlowError(code: string, message: string) {
@@ -126,26 +131,34 @@ function CommitNode({ data }: NodeProps<CommitNodeData>) {
   )
 }
 
+function EmptyRepositoryNode({ data }: NodeProps<EmptyRepositoryNodeData>) {
+  return (
+    <div className="flex w-32 flex-col items-center gap-2">
+      <div className="grid size-16 place-items-center rounded-full border border-dashed border-accent bg-accent/15 font-mono text-xs font-semibold text-accent shadow-[0_0_0_4px_hsla(var(--accent)/0.12)]">
+        HEAD
+      </div>
+      <span className="max-w-28 truncate rounded-full border border-accent/50 bg-accent/15 px-2 py-0.5 text-[10px] font-medium leading-none text-accent">
+        {data.branchName}
+      </span>
+      <span className="text-center text-[11px] font-medium leading-none text-muted-foreground">No commits yet</span>
+    </div>
+  )
+}
+
 function buildGraph(snapshot: GraphInput): { nodes: Node[]; edges: Edge[] } {
   const graph = new dagre.graphlib.Graph()
   graph.setDefaultEdgeLabel(() => ({}))
   graph.setGraph({ rankdir: 'TB', nodesep: 44, ranksep: 80 })
 
   if (!snapshot.commits.length) {
-    const branchLabels = Object.entries(snapshot.branches)
-      .filter(([, target]) => target === null)
-      .map(([name]) => name)
-    const workingTreeCount = Object.keys(snapshot.working_tree ?? {}).length
-    const stagedCount = Object.keys(snapshot.staging ?? {}).length
-    const conflictCount = snapshot.conflicts?.length ?? 0
-    const stateLabels = [
-      branchLabels.join(', ') || 'unborn branch',
-      snapshot.head.target === null ? 'HEAD' : null,
-      workingTreeCount ? `${workingTreeCount} working change${workingTreeCount === 1 ? '' : 's'}` : null,
-      stagedCount ? `${stagedCount} staged` : null,
-      conflictCount ? `${conflictCount} conflict${conflictCount === 1 ? '' : 's'}` : null,
-    ].filter(Boolean)
-    graph.setNode('__empty__', { width: 180, height: 88 })
+    const branchName =
+      snapshot.head.type === 'branch' && snapshot.head.name
+        ? snapshot.head.name
+        : (Object.entries(snapshot.branches)
+            .filter(([, target]) => target === null)
+            .map(([name]) => name)
+            .sort()[0] ?? 'unborn branch')
+    graph.setNode('__empty__', { width: 128, height: 104 })
     dagre.layout(graph)
     const point = graph.node('__empty__')
 
@@ -153,22 +166,9 @@ function buildGraph(snapshot: GraphInput): { nodes: Node[]; edges: Edge[] } {
       nodes: [
         {
           id: '__empty__',
-          position: { x: point.x - 90, y: point.y - 44 },
-          sourcePosition: Position.Bottom,
-          targetPosition: Position.Top,
-          data: { label: `No commits yet\n${stateLabels.join('\n')}` },
-          style: {
-            width: 180,
-            borderRadius: 8,
-            border: '1px solid hsl(var(--primary))',
-            background: 'rgba(0,214,143,0.12)',
-            color: 'hsl(var(--foreground))',
-            fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-            fontSize: 12,
-            lineHeight: 1.35,
-            whiteSpace: 'pre-line',
-            textAlign: 'left',
-          },
+          type: 'emptyRepository',
+          position: { x: point.x - 64, y: point.y - 52 },
+          data: { branchName },
         },
       ],
       edges: [],
