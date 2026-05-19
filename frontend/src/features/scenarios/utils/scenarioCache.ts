@@ -37,6 +37,10 @@ export function updateScenarioListWithSession(
       if (difficulty.difficulty === session.difficulty) {
         const status = statusFromSession(session.status, difficulty.status)
         const activeSessionId = session.status === 'started' ? session.id : null
+        const retrySessionId =
+          session.status === 'failed' || session.status === 'abandoned'
+            ? session.id
+            : difficulty.retry_session_id
         const completion =
           session.status === 'completed'
             ? {
@@ -49,6 +53,7 @@ export function updateScenarioListWithSession(
         if (
           difficulty.status === status &&
           difficulty.active_session_id === activeSessionId &&
+          difficulty.retry_session_id === retrySessionId &&
           difficulty.review_available === (session.status === 'completed' || difficulty.review_available) &&
           difficulty.completion === completion
         ) {
@@ -60,6 +65,7 @@ export function updateScenarioListWithSession(
           ...difficulty,
           status,
           active_session_id: activeSessionId,
+          retry_session_id: retrySessionId,
           review_available: session.status === 'completed' || difficulty.review_available,
           completion,
         }
@@ -67,7 +73,7 @@ export function updateScenarioListWithSession(
 
       if (difficulty.difficulty === unlockedDifficulty && difficulty.status === 'locked') {
         changed = true
-        return { ...difficulty, status: 'available' as DifficultyStatus }
+        return { ...difficulty, status: 'not_started' as DifficultyStatus }
       }
 
       return difficulty
@@ -88,9 +94,11 @@ function statusFromSession(
   sessionStatus: ScenarioSession['status'],
   currentStatus: DifficultyStatus,
 ): DifficultyStatus {
-  if (sessionStatus === 'completed') return 'complete'
+  if (sessionStatus === 'completed') return 'completed'
   if (sessionStatus === 'started') return 'in_progress'
-  if (currentStatus === 'complete') return 'complete'
+  if (sessionStatus === 'failed') return 'failed'
+  if (sessionStatus === 'abandoned') return 'abandoned'
+  if (currentStatus === 'completed') return 'completed'
   if (currentStatus === 'locked') return 'locked'
-  return 'available'
+  return 'not_started'
 }
