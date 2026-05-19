@@ -19,7 +19,8 @@ export function UnitsPage() {
       <div>
         <h1 className="text-4xl font-extrabold tracking-tight">Units</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-          Browse foundation lessons, then open the practice sets attached to each Git topic.
+          Expand a unit to choose a Scenario Skill Focus directly. Each available difficulty opens a Skill Focus Preview
+          before the real practice workspace.
         </p>
       </div>
       <div className="flex flex-col gap-3">
