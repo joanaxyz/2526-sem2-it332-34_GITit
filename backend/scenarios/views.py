@@ -3,8 +3,14 @@ from rest_framework.views import APIView
 
 from scenarios.models import ScenarioSession
 from scenarios.selectors import get_difficulty_instance, scenario_queryset, scenario_status_payload
-from scenarios.serializers import CommandSubmitSerializer, ScenarioStartSerializer, session_payload
+from scenarios.serializers import (
+    CommandSubmitSerializer,
+    ScenarioStartSerializer,
+    SkillFocusDemoCommandSerializer,
+    session_payload,
+)
 from scenarios.services import CommandProcessingService, ScenarioSessionService
+from simulator.services import RepositorySnapshotService, RepositoryStateSimulator
 
 
 class LessonScenarioListAPIView(APIView):
@@ -17,6 +23,40 @@ class UnitScenarioListAPIView(APIView):
     def get(self, request, unit_id: int):
         scenarios = scenario_queryset().filter(learning_unit_id=unit_id)
         return Response([scenario_status_payload(user=request.user, scenario=s) for s in scenarios])
+
+
+class SkillFocusDemoCommandAPIView(APIView):
+    def post(self, request, slug: str):
+        serializer = SkillFocusDemoCommandSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        scenario = scenario_queryset().get(slug=slug)
+
+        def normalize(command: str) -> str:
+            return " ".join(command.strip().split()).lower()
+
+        command = serializer.validated_data["command"]
+        normalized_command = normalize(command)
+        safe_commands = scenario.safe_demo_commands or []
+        normalized_safe = {normalize(item) for item in safe_commands}
+        if normalized_command not in normalized_safe:
+            return Response(
+                {
+                    "detail": "This preview only accepts the listed safe demo commands.",
+                },
+                status=400,
+            )
+
+        state = serializer.validated_data.get("repository_state") or scenario.demo_repository_state
+        simulator = RepositoryStateSimulator()
+        result = simulator.process(state, command)
+        snapshot = RepositorySnapshotService().snapshot(result.state)
+        return Response(
+            {
+                "repository_state": snapshot,
+                "terminal_output": result.output,
+                "was_processable": result.processed,
+            }
+        )
 
 
 class ScenarioSessionStartAPIView(APIView):

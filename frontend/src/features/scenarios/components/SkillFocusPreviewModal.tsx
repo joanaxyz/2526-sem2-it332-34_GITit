@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react'
 
 import type { RepositorySnapshot } from '@/features/practice/types'
-import { DemoCommandInput } from '@/features/scenarios/components/DemoCommandInput'
+import type { TerminalLine } from '@/features/practice/types'
+import { TerminalPanel } from '@/features/practice/components/TerminalPanel'
 import { DemoExplanationPanel } from '@/features/scenarios/components/DemoExplanationPanel'
 import { DemoLiveDagPanel } from '@/features/scenarios/components/DemoLiveDagPanel'
 import { PreviewNavigationControls } from '@/features/scenarios/components/PreviewNavigationControls'
+import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import type { DifficultyAccess, DifficultyActionIntent, ScenarioSkillFocus } from '@/features/scenarios/types'
 import { Badge } from '@/shared/components/Badge'
 import { Modal } from '@/shared/components/Modal'
@@ -24,6 +26,11 @@ const actionCopy: Record<DifficultyActionIntent, string> = {
   review: 'Playable Review Mode session',
   retry: 'Retry practice attempt',
 }
+
+const demoBootLines: TerminalLine[] = [
+  { id: 'demo-boot-1', kind: 'system', text: 'Demo repository loaded. This is a warm-up only.' },
+  { id: 'demo-boot-2', kind: 'output', text: 'Try a safe demo command to see simulated output.' },
+]
 
 export function SkillFocusPreviewModal({
   scenario,
@@ -48,6 +55,8 @@ export function SkillFocusPreviewModal({
   const [snapshot, setSnapshot] = useState<RepositorySnapshot>(initialSnapshot)
   const [explanation, setExplanation] = useState(scenario.short_explanation)
   const [stepIndex, setStepIndex] = useState(-1)
+  const [terminalLines, setTerminalLines] = useState<TerminalLine[]>(demoBootLines)
+  const [isRunningDemo, setIsRunningDemo] = useState(false)
   const difficultyLabel = difficulty.difficulty.charAt(0).toUpperCase() + difficulty.difficulty.slice(1)
 
   function applyStep(nextIndex: number) {
@@ -58,18 +67,31 @@ export function SkillFocusPreviewModal({
     setStepIndex(nextIndex)
   }
 
-  function runDemoCommand(command: string) {
+  async function runDemoCommand(command: string) {
+    setTerminalLines((items) => [...items, { id: crypto.randomUUID(), kind: 'input', text: command }])
+    setIsRunningDemo(true)
     const normalizedCommand = normalize(command)
     const nextIndex = steps.findIndex((step) => normalize(step.command) === normalizedCommand)
+
+    try {
+      const response = await scenariosApi.submitDemoCommand(scenario.slug, { command, repository_state: snapshot })
+      if (isRepositorySnapshot(response.repository_state)) {
+        setSnapshot(response.repository_state)
+      }
+      setTerminalLines((items) => [...items, { id: crypto.randomUUID(), kind: 'output', text: response.terminal_output }])
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not run demo command.'
+      setTerminalLines((items) => [...items, { id: crypto.randomUUID(), kind: 'warning', text: message }])
+    } finally {
+      setIsRunningDemo(false)
+    }
+
     if (nextIndex >= 0) {
       applyStep(nextIndex)
       return
     }
-    if ((scenario.safe_demo_commands ?? []).some((safeCommand) => normalize(safeCommand) === normalizedCommand)) {
-      setExplanation('That safe demo command is available for exploration; this preview has no additional visual change for it.')
-      return
-    }
-    setExplanation('This preview only accepts the listed safe demo commands. It does not run real scenario commands or evaluate answers.')
+    if ((scenario.safe_demo_commands ?? []).some((safeCommand) => normalize(safeCommand) === normalizedCommand)) return
+    setExplanation('This preview only accepts the listed safe demo commands. It does not evaluate answers.')
   }
 
   return (
@@ -116,7 +138,21 @@ export function SkillFocusPreviewModal({
           <DemoExplanationPanel explanation={explanation} snapshot={snapshot} />
         </section>
 
-        <DemoCommandInput safeCommands={scenario.safe_demo_commands ?? []} onCommand={runDemoCommand} />
+        <div className="grid gap-3">
+          <TerminalPanel
+            title="Demo terminal (simulated Git)"
+            className="h-56"
+            disabled={isRunningDemo}
+            lines={terminalLines}
+            onCommand={runDemoCommand}
+          />
+          {scenario.safe_demo_commands?.length ? (
+            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+              <span className="font-semibold">Safe demo commands:</span>
+              <span className="font-mono">{scenario.safe_demo_commands.join(' · ')}</span>
+            </div>
+          ) : null}
+        </div>
 
         <PreviewNavigationControls
           canGoPrevious={stepIndex > 0}

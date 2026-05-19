@@ -17,6 +17,11 @@ class CommandSubmitSerializer(serializers.Serializer):
     command = serializers.CharField(max_length=500)
 
 
+class SkillFocusDemoCommandSerializer(serializers.Serializer):
+    command = serializers.CharField(max_length=500)
+    repository_state = serializers.JSONField(required=False)
+
+
 def session_payload(session) -> dict:
     supports = ScaffoldingService().supports_for(session.difficulty_instance.difficulty)
     step_logs = session.step_logs.order_by("id")
