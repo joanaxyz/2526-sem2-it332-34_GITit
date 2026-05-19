@@ -1,26 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 
 import { practiceApi } from '@/features/practice/api/practiceApi'
 import type { ScenarioSession, TerminalLine } from '@/features/practice/types'
 
 const bootLines: TerminalLine[] = []
-
-function terminalLinesFromSession(session: ScenarioSession): TerminalLine[] {
-  return session.steps.reduce<TerminalLine[]>(
-    (items, step) => [
-      ...items,
-      { id: `input-${step.id}`, kind: 'input', text: step.command_text },
-      {
-        id: `output-${step.id}`,
-        kind: step.result_category === 'TargetMatched' ? 'success' : 'output',
-        text: step.terminal_output,
-      },
-    ],
-    [...bootLines],
-  )
-}
 
 export function useScenarioSession(sessionId: number) {
   const [sessionOverride, setSessionOverride] = useState<ScenarioSession | null>(null)
@@ -31,7 +16,7 @@ export function useScenarioSession(sessionId: number) {
     queryFn: () => practiceApi.getSession(sessionId),
     enabled: Number.isFinite(sessionId),
   })
-  const baseLines = useMemo(() => (query.data ? terminalLinesFromSession(query.data) : bootLines), [query.data])
+  const baseLines = bootLines
   const setLines: Dispatch<SetStateAction<TerminalLine[]>> = useCallback(
     (value) => {
       setLineOverride((current) => {
