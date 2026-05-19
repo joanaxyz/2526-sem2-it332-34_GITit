@@ -393,6 +393,10 @@ Recommended capstone patterns:
 
 ## Current-Release Scenario Library Summary
 
+Scenario-bearing units should be accessed through unit-level Scenario Skill Focus cards rather than through long lesson pages. Each Scenario Skill Focus stores the public instructional preview material: title, short explanation, focus command/s, optional supporting inspection commands, safe demo commands, demo-only DAG/repository state, demo explanation text, and related Git concepts. Easy, Medium, and Hard Difficulty Instances remain the place for actual playable scenario configuration, including narrative/task prompt, initial repository state, hidden target-state rule, scaffolding, command-count policy, retry variants, and internal solution notes.
+
+The Skill Focus Preview is a short command/skill warm-up shown before Start, Continue, Review, or Retry. It may teach what commands such as `git status`, `git add`, `git switch`, `git branch`, or `git merge` do in a demo-only repository, but it must not reveal actual scenario branch names, file names, target states, hidden evaluator rules, or exact solution command sequences.
+
 | Unit | Lesson | Scenario Skill Focus | Easy/Medium/Hard Differentiation |
 | --- | --- | --- | --- |
 | Unit 2 | First Commits and Staging Decisions | Create a first clean commit | Same first-commit skill; different project files, ambiguity, and command efficiency. |

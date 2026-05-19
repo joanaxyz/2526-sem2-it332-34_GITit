@@ -69,6 +69,8 @@ This SDD covers the current-release student-facing system and the planned Phase 
 | Repository State Simulator | Backend component that initializes and manipulates isolated simulated Git repository sessions |
 | State-Based Evaluator | Backend component that compares normalized repository-state snapshots against expected target-state rules |
 | Command-Count Policy | Scenario difficulty configuration storing the minimum counted-command threshold, maximum counted-command limit, and non-counted diagnostic command patterns |
+| Scenario Skill Focus | Public command, concept, or workflow focus record storing short explanation, focus command/s, safe demo commands, demo DAG/repository state, demo explanation content, and linked difficulty instances |
+| Skill Focus Preview | Pre-practice modal that uses Scenario Skill Focus public data and demo-only state before Start, Continue, Retry, or Review enters the actual Scenario Practice Workspace |
 | Difficulty Instance | Configured Easy, Medium, or Hard playable level under a scenario skill focus; owns its narrative/task prompt, initial state, target-state rule, command-count policy, scaffolding configuration, expected-state behavior, and variant pool |
 | Difficulty Variant | Structurally distinct variant owned by one difficulty instance and used to initialize a session or changed retry |
 | Counted Action Command | Simulator-processed command included in CAR and remaining counted-command calculations |
@@ -342,40 +344,45 @@ Tables/entities involved: OrientationProgress, StudentProgress, ScenarioSession.
 
 ## Module 2: Scenario Practice and State-Based Evaluation
 
-### 2.1 View Lesson, Browse Attached Scenarios, and Select Difficulty
+### 2.1 Browse Unit Skill Focuses, Preview Skill Focus, and Select Difficulty
 
 #### User Interface Design
-[PLACEHOLDER — Insert user interface design/wireframe for View Lesson, Browse Attached Scenarios, and Select Difficulty.]
+[PLACEHOLDER — Insert user interface design/wireframe for expanded unit Scenario Skill Focus cards, Easy/Medium/Hard difficulty actions, and the Skill Focus Preview modal.]
 
 #### Front-end component(s)
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
-| LessonPage | Renders lesson HTML/CSS and embedded scenario list. | React page component |
-| ScenarioCardList | Displays scenario cards and Easy/Medium/Hard access states. | React component |
-| DifficultySelector | Allows available difficulty selection and displays lock reasons. | React component |
+| UnitScenarioHub | Renders Scenario Skill Focus cards directly inside an expanded scenario-bearing unit. | React component |
+| ScenarioSkillFocusCard | Displays public skill focus title, summary, focus command/s, supporting inspection command/s, and Easy/Medium/Hard action states. | React component |
+| DifficultyActionButton | Displays Start, Continue, Review, Lock, or Retry action state for one difficulty. | React component |
+| SkillFocusPreviewModal | Shows the Skill Focus Preview before Start, Continue, Review, or Retry proceeds to the actual workspace. | React component |
+| DemoLiveDagPanel | Reuses the live DAG visualization for demo-only preview state. | React component |
+| DemoCommandInput | Provides a compact single-line command bar for safe demo commands only. | React component |
+| DemoExplanationPanel | Explains demo-only command consequences without evaluating real scenario correctness. | React component |
+| PreviewNavigationControls | Handles Previous, Next, Skip, Start Practice, and Close/X modal behavior. | React component |
 
 #### Back-end component(s)
 | Component Name | Description and purpose | Component type or format |
 |---|---|---|
-| LessonAPIView | Returns published lesson content. | Django REST Framework API view |
-| ScenarioListAPIView | Returns scenarios, difficulty status, and completion indicators. | Django REST Framework API view |
-| DifficultyAccessService | Determines Easy/Medium/Hard access states. | Python service class |
+| LessonAPIView | Returns optional reference lesson content. | Django REST Framework API view |
+| UnitScenarioListAPIView | Returns unit-level Scenario Skill Focus records, public preview data, difficulty status, and completion indicators. | Django REST Framework API view |
+| DifficultyAccessService | Determines Easy/Medium/Hard action states, including Not Started, In Progress, Completed, Locked, Failed, and Abandoned. | Python service class |
 
 #### Object-Oriented Components
 
 Primary classes/components: LearningUnit, Lesson, ScenarioSkillFocus, DifficultyInstance, DifficultyAccessService, StudentProgress.
 
 ##### Class Diagram
-[PLACEHOLDER — Insert class diagram for View Lesson, Browse Attached Scenarios, and Select Difficulty.]
+[PLACEHOLDER — Insert class diagram for unit-level Scenario Skill Focus access, Skill Focus Preview, and difficulty action selection.]
 
 ##### Sequence Diagram
-[PLACEHOLDER — Insert sequence diagram for View Lesson, Browse Attached Scenarios, and Select Difficulty.]
+[PLACEHOLDER — Insert sequence diagram for expanded unit access, Skill Focus Preview, and Start/Continue/Review/Retry routing.]
 
 #### Data Design
-Tables/entities involved: LearningUnit, Lesson, ScenarioSkillFocus, DifficultyInstance, StudentProgress, CompletionRecord.
+Tables/entities involved: LearningUnit, Lesson, ScenarioSkillFocus, DifficultyInstance, StudentProgress, CompletionRecord. ScenarioSkillFocus stores only public preview data; DifficultyInstance stores the actual playable scenario configuration.
 
 ##### ERD or schema
-[PLACEHOLDER — Insert ERD/schema excerpt for View Lesson, Browse Attached Scenarios, and Select Difficulty.]
+[PLACEHOLDER — Insert ERD/schema excerpt for ScenarioSkillFocus public preview fields linked to DifficultyInstance playable scenario records.]
 
 ### 2.2 Load Scenario Instance
 
@@ -696,7 +703,7 @@ Tables/entities involved: ScenarioSession, DifficultyInstance, DifficultyVariant
 |---|---|---|
 | DashboardPage | Displays student progress summary and available learning units. | React page component |
 | ProgressMetricCards | Displays log-derived progress/KPI indicators. | React component |
-| UnitCardList | Displays expandable learning unit cards with lesson lists. | React component |
+| UnitCardList | Displays expandable learning unit cards; Unit 1 expands to orientation lessons, while scenario-bearing units expand to Scenario Skill Focus cards and optional reference lesson links. | React component |
 
 #### Back-end component(s)
 | Component Name | Description and purpose | Component type or format |

@@ -198,10 +198,11 @@ When a student retries after a Failed or Abandoned session, the system serves a 
 |---|---|
 | Registration and Login Screens | Allow students to create accounts and access their own progress records |
 | Student Dashboard | Shows available learning units, active progress, completion status, retry indicators, difficulty unlocks, Command Accuracy Rate indicators, first-attempt stars, streak information, RTA-related progress, and Review access for completed difficulty instances |
-| Unit Page | Displays the starter syllabus as student-facing learning units, beginning with Unit 1: Orientation. Each unit expands to show its lessons |
+| Unit Page | Displays the starter syllabus as student-facing learning units. Unit 1 expands to show orientation lessons; scenario-bearing units expand to show Scenario Skill Focus cards directly |
 | Unit 1: Orientation | The first learning unit in the platform. Contains single-scroll lessons with no scenario practice, establishing the foundational Git mental model and introducing the platform's interface and conventions. Completion/read status is tracked for progress but does not block scenario access |
-| Lesson Page | Presents the selected lesson's instructional content. For scenario-bearing lessons, an embedded scenario list leads the student to the scenario skill focuses attached to that lesson |
-| Scenario List Under Lesson | Displays the scenario skill focuses that belong to the selected lesson |
+| Lesson Page | Presents optional reference or orientation lesson content. It is no longer the main scenario access path for scenario-bearing units |
+| Scenario Skill Focus Cards | Display public Git skill focus title, summary, focus command/s, and Easy/Medium/Hard difficulty actions directly inside the expanded unit |
+| Skill Focus Preview | Opens before Start, Continue, Review, or Retry and provides a short public command/skill warm-up with demo-only DAG state, safe demo command input, and demo explanation text |
 | Difficulty Selection / Unlocking Interface | Shows Easy, Medium, and Hard difficulty instances and enforces Easy → Medium → Hard completion-based progression within each scenario skill focus |
 | Scenario Practice Workspace | Presents the scenario narrative, student task prompt, terminal-style command input, live animated DAG, difficulty-appropriate scaffolding components, and the Remaining Counted-Command Counter |
 | Live Animated DAG Panel | Renders the evolving repository state after every simulator-processed command at all difficulty levels |
@@ -214,7 +215,7 @@ When a student retries after a Failed or Abandoned session, the system serves a 
 
 Students register and log in, then access the dashboard and unit page. The unit page displays all student-facing learning units, beginning with Unit 1: Orientation. Students may read Unit 1 lessons before scenario practice or return to them later as reference material. Unit 1 lessons build the foundational Git mental model and introduce the platform's interface conventions, but scenario access remains self-paced and is not blocked by incomplete orientation lessons.
 
-For lessons that contain no scenario practice, the student reads the lesson content and proceeds. For scenario-bearing lessons, the student reads the lesson content, uses the embedded scenario list, selects a scenario skill focus, and chooses a difficulty level. Easy is available first; Medium unlocks after Easy completion for the same scenario skill focus, and Hard unlocks after Medium completion.
+For Unit 1, students read orientation lessons and may return to them later as reference material. For scenario-bearing units, the student expands the unit, selects a Scenario Skill Focus card directly, and chooses an available difficulty action. The Skill Focus Preview opens before Start, Continue, Review, or Retry proceeds to the actual Scenario Practice Workspace. Easy is available first; Medium unlocks after Easy completion for the same scenario skill focus, and Hard unlocks after Medium completion.
 
 Each scenario difficulty instance presents a professional narrative, a simulated repository state, a terminal-style command input interface, and a live animated DAG. The scaffolding available depends on difficulty level: Easy includes the live DAG, expected-state diagram, and contextual feedback panel; Medium includes the live DAG and expected-state diagram; Hard includes only the live DAG and narrative context. The Remaining Counted-Command Counter is visible at all levels.
 
