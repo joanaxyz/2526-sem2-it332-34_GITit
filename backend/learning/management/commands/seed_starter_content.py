@@ -951,8 +951,9 @@ class Command(BaseCommand):
                     "lesson": item["lesson"],
                     "title": item["title"],
                     "focus": item["focus"],
-                    "narrative": item["narrative"],
-                    "task_prompt": item["task"],
+                    **self._skill_focus_preview(item["slug"]),
+                    "narrative": "",
+                    "task_prompt": "",
                     "sort_order": index,
                     "is_published": True,
                 },
@@ -995,6 +996,462 @@ class Command(BaseCommand):
                 ScenarioVariant.objects.filter(difficulty_instance=diff).exclude(
                     slug__in=current_variant_slugs
                 ).update(is_published=False)
+
+    def _skill_focus_preview(self, slug: str) -> dict:
+        previews = {
+            "first-clean-commit": {
+                "title": "Clean Commit Formation",
+                "focus": "git status, git add, git commit",
+                "summary": "Read file state, stage intentional work, and form a clean snapshot.",
+                "short_explanation": "A clean commit starts by checking what changed, moving only intended work into the staging area, then saving that staged state as a new commit.",
+                "skill_focus_type": ScenarioSkillFocus.SkillFocusType.WORKFLOW_SPECIFIC,
+                "primary_focus_commands": ["git status", "git add", "git commit"],
+                "supporting_inspection_commands": ["git log --oneline"],
+                "safe_demo_commands": [
+                    "git status",
+                    "git add demo-notes.md",
+                    'git commit -m "demo snapshot"',
+                ],
+                "demo_repository_state": self._demo_snapshot(
+                    graph(
+                        [],
+                        {"demo-main": None},
+                        "demo-main",
+                        working_tree={"demo-notes.md": "untracked"},
+                    )
+                ),
+                "demo_explanation_steps": [
+                    self._demo_step(
+                        "git status",
+                        "git status shows that demo-notes.md is visible in the working tree and has not been staged.",
+                        graph(
+                            [],
+                            {"demo-main": None},
+                            "demo-main",
+                            working_tree={"demo-notes.md": "untracked"},
+                        ),
+                    ),
+                    self._demo_step(
+                        "git add demo-notes.md",
+                        "git add moves the selected demo file from the working tree into the staging area.",
+                        graph(
+                            [],
+                            {"demo-main": None},
+                            "demo-main",
+                            staging={"demo-notes.md": "added"},
+                        ),
+                    ),
+                    self._demo_step(
+                        'git commit -m "demo snapshot"',
+                        "git commit creates a demo snapshot from staged content and leaves the working tree clean.",
+                        graph(
+                            [commit("d1", "Demo snapshot")],
+                            {"demo-main": "d1"},
+                            "demo-main",
+                        ),
+                    ),
+                ],
+                "related_git_concepts": ["working tree", "staging area", "commit history"],
+            },
+            "partial-staging": {
+                "title": "Staging Selected Changes",
+                "focus": "git add",
+                "summary": "Move selected working tree changes into the staging area before committing.",
+                "short_explanation": "Staging is a deliberate boundary: only selected changes move from the working tree into the next commit candidate.",
+                "skill_focus_type": ScenarioSkillFocus.SkillFocusType.COMMAND_SPECIFIC,
+                "primary_focus_commands": ["git add"],
+                "supporting_inspection_commands": ["git status", "git restore --staged"],
+                "safe_demo_commands": [
+                    "git status",
+                    "git add demo-config.yml",
+                    "git restore --staged demo-config.yml",
+                ],
+                "demo_repository_state": self._demo_snapshot(
+                    graph(
+                        [commit("d0", "Demo base")],
+                        {"demo-main": "d0"},
+                        "demo-main",
+                        working_tree={
+                            "demo-config.yml": "modified",
+                            "demo-draft.md": "modified",
+                        },
+                    )
+                ),
+                "demo_explanation_steps": [
+                    self._demo_step(
+                        "git status",
+                        "The demo status has two modified files, but neither one is staged yet.",
+                        graph(
+                            [commit("d0", "Demo base")],
+                            {"demo-main": "d0"},
+                            "demo-main",
+                            working_tree={
+                                "demo-config.yml": "modified",
+                                "demo-draft.md": "modified",
+                            },
+                        ),
+                    ),
+                    self._demo_step(
+                        "git add demo-config.yml",
+                        "Only demo-config.yml moves into the staging area; the draft file remains unstaged.",
+                        graph(
+                            [commit("d0", "Demo base")],
+                            {"demo-main": "d0"},
+                            "demo-main",
+                            working_tree={"demo-draft.md": "modified"},
+                            staging={"demo-config.yml": "modified"},
+                        ),
+                    ),
+                    self._demo_step(
+                        "git restore --staged demo-config.yml",
+                        "The staged demo file moves back out of the staging area without changing branch history.",
+                        graph(
+                            [commit("d0", "Demo base")],
+                            {"demo-main": "d0"},
+                            "demo-main",
+                            working_tree={
+                                "demo-config.yml": "modified",
+                                "demo-draft.md": "modified",
+                            },
+                        ),
+                    ),
+                ],
+                "related_git_concepts": ["working tree", "staging area", "selected changes"],
+            },
+            "wrong-branch-commit": self._head_pointer_preview(
+                title="Branch Pointers and HEAD",
+                summary="Reason about the current branch before moving or preserving work.",
+            ),
+            "detached-work-rescue": {
+                **self._head_pointer_preview(
+                    title="Detached HEAD Rescue",
+                    summary="Recognize when HEAD points at a commit instead of a branch.",
+                ),
+                "focus": "git switch -c",
+                "primary_focus_commands": ["git switch -c"],
+                "supporting_inspection_commands": ["git status", "git branch", "git log --oneline --graph"],
+                "short_explanation": "A detached HEAD means the current position is a commit rather than a branch label. Creating a branch can give that position a stable name without exposing any real scenario state.",
+            },
+            "accidental-reset-recovery": {
+                "title": "Branch Pointer Recovery",
+                "focus": "branch pointer recovery workflow",
+                "summary": "Inspect reachable commits before deciding how a moved branch pointer should recover.",
+                "short_explanation": "Pointer recovery starts by reading the graph: branch labels can move, but reachable commits may still be visible through another safe reference.",
+                "skill_focus_type": ScenarioSkillFocus.SkillFocusType.WORKFLOW_SPECIFIC,
+                "primary_focus_commands": ["git reset"],
+                "supporting_inspection_commands": [
+                    "git status",
+                    "git branch",
+                    "git log --oneline --graph",
+                ],
+                "safe_demo_commands": [
+                    "git branch",
+                    "git log --oneline --graph",
+                    "git reset --hard demo-safe",
+                ],
+                "demo_repository_state": self._demo_snapshot(
+                    graph(
+                        [commit("d0", "Demo base"), commit("d1", "Demo saved work", ["d0"])],
+                        {"demo-main": "d0", "demo-safe": "d1"},
+                        "demo-main",
+                    )
+                ),
+                "demo_explanation_steps": [
+                    self._demo_step(
+                        "git branch",
+                        "The demo branch list shows labels that point at reachable commits.",
+                        graph(
+                            [commit("d0", "Demo base"), commit("d1", "Demo saved work", ["d0"])],
+                            {"demo-main": "d0", "demo-safe": "d1"},
+                            "demo-main",
+                        ),
+                    ),
+                    self._demo_step(
+                        "git log --oneline --graph",
+                        "The demo graph makes the saved work visible before any pointer movement.",
+                        graph(
+                            [commit("d0", "Demo base"), commit("d1", "Demo saved work", ["d0"])],
+                            {"demo-main": "d0", "demo-safe": "d1"},
+                            "demo-main",
+                        ),
+                    ),
+                    self._demo_step(
+                        "git reset --hard demo-safe",
+                        "The current demo branch pointer moves to the demo-safe commit and the working tree is clean.",
+                        graph(
+                            [commit("d0", "Demo base"), commit("d1", "Demo saved work", ["d0"])],
+                            {"demo-main": "d1", "demo-safe": "d1"},
+                            "demo-main",
+                        ),
+                    ),
+                ],
+                "related_git_concepts": ["branch pointers", "reachable commits", "HEAD"],
+            },
+            "divergent-branches": self._merge_preview(
+                title="Divergent Branches and Merge Recovery",
+                summary="Inspect diverged histories and safely bring work together.",
+            ),
+            "merge-conflict": {
+                "title": "Merge Conflict State",
+                "focus": "merge conflict resolution workflow",
+                "summary": "Read a paused merge as repository state that can be completed safely.",
+                "short_explanation": "A merge conflict means Git paused integration until the conflicted content is resolved and the merge can be completed.",
+                "skill_focus_type": ScenarioSkillFocus.SkillFocusType.WORKFLOW_SPECIFIC,
+                "primary_focus_commands": ["git status", "git add", "git commit"],
+                "supporting_inspection_commands": ["git status", "git log --oneline --graph"],
+                "safe_demo_commands": [
+                    "git status",
+                    "git add demo-conflict.txt",
+                    'git commit -m "demo merge"',
+                ],
+                "demo_repository_state": self._demo_snapshot(
+                    graph(
+                        [
+                            commit("d0", "Demo base"),
+                            commit("d1", "Demo main edit", ["d0"]),
+                            commit("d2", "Demo team edit", ["d0"]),
+                        ],
+                        {"demo-main": "d1", "demo-topic": "d2"},
+                        "demo-main",
+                        merge_parent="d2",
+                        conflicts=["demo-conflict.txt"],
+                    )
+                ),
+                "demo_explanation_steps": [
+                    self._demo_step(
+                        "git status",
+                        "The demo status explains that the repository is paused during a merge with one conflicted file.",
+                        graph(
+                            [
+                                commit("d0", "Demo base"),
+                                commit("d1", "Demo main edit", ["d0"]),
+                                commit("d2", "Demo team edit", ["d0"]),
+                            ],
+                            {"demo-main": "d1", "demo-topic": "d2"},
+                            "demo-main",
+                            merge_parent="d2",
+                            conflicts=["demo-conflict.txt"],
+                        ),
+                    ),
+                    self._demo_step(
+                        "git add demo-conflict.txt",
+                        "The demo file is marked resolved and moves to the staging area; no real scenario file is involved.",
+                        graph(
+                            [
+                                commit("d0", "Demo base"),
+                                commit("d1", "Demo main edit", ["d0"]),
+                                commit("d2", "Demo team edit", ["d0"]),
+                            ],
+                            {"demo-main": "d1", "demo-topic": "d2"},
+                            "demo-main",
+                            merge_parent="d2",
+                            staging={"demo-conflict.txt": "resolved"},
+                        ),
+                    ),
+                    self._demo_step(
+                        'git commit -m "demo merge"',
+                        "The demo merge completes with a merge commit that has both demo parents.",
+                        graph(
+                            [
+                                commit("d0", "Demo base"),
+                                commit("d1", "Demo main edit", ["d0"]),
+                                commit("d2", "Demo team edit", ["d0"]),
+                                commit("d3", "Demo merge", ["d1", "d2"]),
+                            ],
+                            {"demo-main": "d3", "demo-topic": "d2"},
+                            "demo-main",
+                        ),
+                    ),
+                ],
+                "related_git_concepts": ["merge state", "conflicts", "staging area"],
+            },
+            "branch-cleanup": {
+                "title": "Branch Cleanup",
+                "focus": "git branch -d",
+                "summary": "Remove an already-finished branch label without changing commit history.",
+                "short_explanation": "Deleting a branch removes a label. It does not delete commits that are still reachable from another branch.",
+                "skill_focus_type": ScenarioSkillFocus.SkillFocusType.COMMAND_SPECIFIC,
+                "primary_focus_commands": ["git branch -d"],
+                "supporting_inspection_commands": ["git branch", "git log --oneline --graph"],
+                "safe_demo_commands": [
+                    "git branch",
+                    "git branch -d demo-old",
+                ],
+                "demo_repository_state": self._demo_snapshot(
+                    graph(
+                        [commit("d0", "Demo base"), commit("d1", "Demo merged work", ["d0"])],
+                        {"demo-main": "d1", "demo-old": "d1"},
+                        "demo-main",
+                    )
+                ),
+                "demo_explanation_steps": [
+                    self._demo_step(
+                        "git branch",
+                        "The demo branch list shows demo-old pointing at the same commit as demo-main.",
+                        graph(
+                            [commit("d0", "Demo base"), commit("d1", "Demo merged work", ["d0"])],
+                            {"demo-main": "d1", "demo-old": "d1"},
+                            "demo-main",
+                        ),
+                    ),
+                    self._demo_step(
+                        "git branch -d demo-old",
+                        "The demo-old branch label is removed while the commit history stays in place.",
+                        graph(
+                            [commit("d0", "Demo base"), commit("d1", "Demo merged work", ["d0"])],
+                            {"demo-main": "d1"},
+                            "demo-main",
+                        ),
+                    ),
+                ],
+                "related_git_concepts": ["branch labels", "reachable commits", "cleanup"],
+            },
+            "release-integration-capstone": {
+                **self._merge_preview(
+                    title="Integrated Merge and Cleanup Workflow",
+                    summary="Combine inspection, integration, and branch cleanup in a safe workflow.",
+                ),
+                "focus": "integration cleanup workflow",
+                "primary_focus_commands": ["git merge", "git branch -d"],
+                "safe_demo_commands": [
+                    "git branch",
+                    "git merge demo-topic",
+                    "git branch -d demo-old",
+                ],
+                "related_git_concepts": ["divergence", "merge commits", "branch cleanup"],
+            },
+        }
+        return {
+            "demo_dag_config": {"mode": "preview_only", "layout": "compact"},
+            **previews[slug],
+        }
+
+    def _head_pointer_preview(self, *, title: str, summary: str) -> dict:
+        return {
+            "title": title,
+            "focus": "git branch, git switch",
+            "summary": summary,
+            "short_explanation": "HEAD marks the current checkout. Switching branches changes which branch HEAD refers to without changing the commit graph by itself.",
+            "skill_focus_type": ScenarioSkillFocus.SkillFocusType.CONCEPT_SPECIFIC,
+            "primary_focus_commands": ["git branch", "git switch"],
+            "supporting_inspection_commands": ["git status", "git log --oneline --graph"],
+            "safe_demo_commands": [
+                "git branch",
+                "git switch demo-feature",
+            ],
+            "demo_repository_state": self._demo_snapshot(
+                graph(
+                    [commit("d0", "Demo base"), commit("d1", "Demo feature", ["d0"])],
+                    {"demo-main": "d0", "demo-feature": "d1"},
+                    "demo-main",
+                )
+            ),
+            "demo_explanation_steps": [
+                self._demo_step(
+                    "git branch",
+                    "The demo branch list shows which branch HEAD currently refers to.",
+                    graph(
+                        [commit("d0", "Demo base"), commit("d1", "Demo feature", ["d0"])],
+                        {"demo-main": "d0", "demo-feature": "d1"},
+                        "demo-main",
+                    ),
+                ),
+                self._demo_step(
+                    "git switch demo-feature",
+                    "HEAD moved to the demo-feature branch. The branch pointer stayed in place because no new commit was created.",
+                    graph(
+                        [commit("d0", "Demo base"), commit("d1", "Demo feature", ["d0"])],
+                        {"demo-main": "d0", "demo-feature": "d1"},
+                        "demo-feature",
+                    ),
+                ),
+            ],
+            "related_git_concepts": ["HEAD", "branch pointers", "checkout state"],
+        }
+
+    def _merge_preview(self, *, title: str, summary: str) -> dict:
+        return {
+            "title": title,
+            "focus": "merge recovery workflow",
+            "summary": summary,
+            "short_explanation": "A merge attempts to bring changes from another branch into the current branch while preserving the visible history of both sides.",
+            "skill_focus_type": ScenarioSkillFocus.SkillFocusType.WORKFLOW_SPECIFIC,
+            "primary_focus_commands": ["git merge"],
+            "supporting_inspection_commands": [
+                "git status",
+                "git branch",
+                "git log --oneline --graph",
+            ],
+            "safe_demo_commands": [
+                "git branch",
+                "git log --oneline --graph",
+                "git merge demo-topic",
+            ],
+            "demo_repository_state": self._demo_snapshot(
+                graph(
+                    [
+                        commit("d0", "Demo base"),
+                        commit("d1", "Demo main edit", ["d0"]),
+                        commit("d2", "Demo topic edit", ["d0"]),
+                    ],
+                    {"demo-main": "d1", "demo-topic": "d2"},
+                    "demo-main",
+                )
+            ),
+            "demo_explanation_steps": [
+                self._demo_step(
+                    "git branch",
+                    "The demo branch list shows the current branch and the branch that can be inspected.",
+                    graph(
+                        [
+                            commit("d0", "Demo base"),
+                            commit("d1", "Demo main edit", ["d0"]),
+                            commit("d2", "Demo topic edit", ["d0"]),
+                        ],
+                        {"demo-main": "d1", "demo-topic": "d2"},
+                        "demo-main",
+                    ),
+                ),
+                self._demo_step(
+                    "git log --oneline --graph",
+                    "The demo graph shows two branch pointers that diverged from the same base commit.",
+                    graph(
+                        [
+                            commit("d0", "Demo base"),
+                            commit("d1", "Demo main edit", ["d0"]),
+                            commit("d2", "Demo topic edit", ["d0"]),
+                        ],
+                        {"demo-main": "d1", "demo-topic": "d2"},
+                        "demo-main",
+                    ),
+                ),
+                self._demo_step(
+                    "git merge demo-topic",
+                    "The demo merge creates a new merge commit on the current branch and preserves both parent commits.",
+                    graph(
+                        [
+                            commit("d0", "Demo base"),
+                            commit("d1", "Demo main edit", ["d0"]),
+                            commit("d2", "Demo topic edit", ["d0"]),
+                            commit("d3", "Demo merge", ["d1", "d2"]),
+                        ],
+                        {"demo-main": "d3", "demo-topic": "d2"},
+                        "demo-main",
+                    ),
+                ),
+            ],
+            "related_git_concepts": ["divergence", "merge commits", "branch pointers"],
+        }
+
+    def _demo_step(self, command: str, explanation: str, state: dict) -> dict:
+        return {
+            "command": command,
+            "explanation": explanation,
+            "repository_state": self._demo_snapshot(state),
+        }
+
+    def _demo_snapshot(self, state: dict) -> dict:
+        return RepositorySnapshotService().snapshot(state)
 
     def _difficulty(
         self,

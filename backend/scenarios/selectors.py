@@ -36,12 +36,14 @@ def scenario_status_payload(*, user, scenario: ScenarioSkillFocus) -> dict:
             status="started",
             mode="primary",
         ).first()
+        retryable_session = access.latest_retryable_session(
+            user=user,
+            difficulty_instance=instance,
+        )
         difficulties.append(
             {
                 "id": instance.id,
                 "difficulty": instance.difficulty,
-                "narrative": instance.narrative or scenario.narrative,
-                "task_prompt": instance.task_prompt or scenario.task_prompt,
                 "status": access.status_for(user=user, difficulty_instance=instance),
                 "review_available": completion is not None,
                 "completion": {
@@ -52,6 +54,7 @@ def scenario_status_payload(*, user, scenario: ScenarioSkillFocus) -> dict:
                 if completion
                 else None,
                 "active_session_id": in_progress.id if in_progress else None,
+                "retry_session_id": retryable_session.id if retryable_session else None,
                 "policy": instance.command_policy.snapshot(),
             }
         )
@@ -62,8 +65,16 @@ def scenario_status_payload(*, user, scenario: ScenarioSkillFocus) -> dict:
         "slug": scenario.slug,
         "title": scenario.title,
         "focus": scenario.focus,
-        "narrative": scenario.narrative,
-        "task_prompt": scenario.task_prompt,
+        "summary": scenario.summary,
+        "short_explanation": scenario.short_explanation,
+        "skill_focus_type": scenario.skill_focus_type,
+        "primary_focus_commands": scenario.primary_focus_commands,
+        "supporting_inspection_commands": scenario.supporting_inspection_commands,
+        "safe_demo_commands": scenario.safe_demo_commands,
+        "demo_repository_state": scenario.demo_repository_state,
+        "demo_dag_config": scenario.demo_dag_config,
+        "demo_explanation_steps": scenario.demo_explanation_steps,
+        "related_git_concepts": scenario.related_git_concepts,
         "learning_unit_id": scenario.learning_unit_id,
         "lesson_id": scenario.lesson_id,
         "difficulties": difficulties,

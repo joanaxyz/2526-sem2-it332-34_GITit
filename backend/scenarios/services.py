@@ -41,7 +41,7 @@ class DifficultyAccessService:
         if CompletionRecord.objects.filter(
             user=user, difficulty_instance=difficulty_instance
         ).exists():
-            return "complete"
+            return "completed"
         if ScenarioSession.objects.filter(
             user=user,
             difficulty_instance=difficulty_instance,
@@ -49,9 +49,27 @@ class DifficultyAccessService:
             mode=SESSION_MODE_PRIMARY,
         ).exists():
             return "in_progress"
+        latest_retryable = self.latest_retryable_session(
+            user=user,
+            difficulty_instance=difficulty_instance,
+        )
+        if latest_retryable and self.is_unlocked(user=user, difficulty_instance=difficulty_instance):
+            return latest_retryable.status
         if self.is_unlocked(user=user, difficulty_instance=difficulty_instance):
-            return "available"
+            return "not_started"
         return "locked"
+
+    def latest_retryable_session(self, *, user, difficulty_instance: DifficultyInstance):
+        return (
+            ScenarioSession.objects.filter(
+                user=user,
+                difficulty_instance=difficulty_instance,
+                status__in=[SESSION_STATUS_FAILED, SESSION_STATUS_ABANDONED],
+                mode=SESSION_MODE_PRIMARY,
+            )
+            .order_by("-ended_at", "-id")
+            .first()
+        )
 
     def is_unlocked(self, *, user, difficulty_instance: DifficultyInstance) -> bool:
         difficulty = difficulty_instance.difficulty
