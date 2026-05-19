@@ -85,7 +85,6 @@ export function SkillFocusPreviewModal({
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Scenario skill focus</p>
             <h3 className="mt-1 text-2xl font-extrabold tracking-tight">{scenario.title}</h3>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{scenario.short_explanation}</p>
           </div>
           <div className="flex flex-wrap justify-end gap-2">
             <Badge variant="blue">{difficultyLabel}</Badge>
@@ -99,10 +98,6 @@ export function SkillFocusPreviewModal({
             <p className="mt-1 text-sm leading-6 text-muted-foreground">{scenario.short_explanation}</p>
           </div>
           <div className="grid gap-2 text-sm leading-6">
-            <div>
-              <span className="font-semibold">Skill focus: </span>
-              <span className="text-muted-foreground">{scenario.focus}</span>
-            </div>
             {scenario.primary_focus_commands.length ? (
               <div>
                 <span className="font-semibold">
@@ -118,6 +113,7 @@ export function SkillFocusPreviewModal({
               </div>
             ) : null}
           </div>
+          <CommandQuickReference commands={scenario.primary_focus_commands ?? []} />
         </section>
 
         <section className="grid grid-cols-[minmax(0,1.05fr)_minmax(18rem,0.75fr)] gap-4 max-lg:grid-cols-1">
@@ -126,11 +122,6 @@ export function SkillFocusPreviewModal({
         </section>
 
         <DemoCommandInput safeCommands={scenario.safe_demo_commands ?? []} onCommand={runDemoCommand} />
-
-        <p className="rounded-md border border-border bg-background/40 p-3 text-xs leading-5 text-muted-foreground">
-          Preview commands use demo-only state. They do not start the scenario, count commands, affect CAR/SCR/RTA, change retry
-          counts, create evaluator logs, or reveal the real scenario state.
-        </p>
 
         <PreviewNavigationControls
           canGoPrevious={stepIndex > 0}
@@ -152,4 +143,64 @@ function normalize(command: string) {
 
 function isRepositorySnapshot(value: RepositorySnapshot | Record<string, unknown> | null | undefined): value is RepositorySnapshot {
   return Boolean(value && Array.isArray((value as RepositorySnapshot).commits) && (value as RepositorySnapshot).head)
+}
+
+function CommandQuickReference({ commands }: { commands: string[] }) {
+  const items = commands
+    .map((command) => quickReferenceFor(command))
+    .filter((item): item is NonNullable<ReturnType<typeof quickReferenceFor>> => Boolean(item))
+  if (!items.length) return null
+
+  return (
+    <div className="rounded-md border border-border bg-background/40 p-3">
+      <div className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Command quick reference</div>
+      <div className="grid gap-3 md:grid-cols-3">
+        {items.map((item) => (
+          <div className="rounded-md border border-border bg-secondary/20 p-3" key={item.key}>
+            <div className="font-mono text-sm font-semibold text-foreground">{item.title}</div>
+            <div className="mt-2 space-y-1 text-xs leading-5 text-muted-foreground">
+              {item.syntax.map((line) => (
+                <div className="font-mono" key={line}>
+                  {line}
+                </div>
+              ))}
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">{item.note}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-xs leading-5 text-muted-foreground">
+        This is a command warm-up only. It does not reveal the scenario setup or a correct command sequence.
+      </p>
+    </div>
+  )
+}
+
+function quickReferenceFor(command: string) {
+  const normalized = normalize(command)
+  if (normalized === 'git status') {
+    return {
+      key: 'git-status',
+      title: 'git status',
+      syntax: ['git status'],
+      note: 'Shows working tree vs staging area state so you can name what changed before acting.',
+    }
+  }
+  if (normalized === 'git add') {
+    return {
+      key: 'git-add',
+      title: 'git add',
+      syntax: ['git add <path>', 'git add .', 'git add -A'],
+      note: 'Stages selected changes. Use paths when you want a selective commit; use "." / "-A" only when you intend to stage everything.',
+    }
+  }
+  if (normalized === 'git commit') {
+    return {
+      key: 'git-commit',
+      title: 'git commit',
+      syntax: ['git commit -m "message"', 'git commit'],
+      note: 'Creates a commit from staged content. The -m flag sets the commit message inline.',
+    }
+  }
+  return null
 }

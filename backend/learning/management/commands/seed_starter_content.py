@@ -1003,13 +1003,19 @@ class Command(BaseCommand):
                 "title": "Clean Commit Formation",
                 "focus": "git status, git add, git commit",
                 "summary": "Read file state, stage intentional work, and form a clean snapshot.",
-                "short_explanation": "A clean commit starts by checking what changed, moving only intended work into the staging area, then saving that staged state as a new commit.",
+                "short_explanation": "A clean commit is a three-step habit: (1) inspect state, (2) stage intentionally, (3) commit the staged snapshot. The goal is to understand what you are about to change before you change it.",
                 "skill_focus_type": ScenarioSkillFocus.SkillFocusType.WORKFLOW_SPECIFIC,
                 "primary_focus_commands": ["git status", "git add", "git commit"],
-                "supporting_inspection_commands": ["git log --oneline"],
+                "supporting_inspection_commands": [
+                    "git log --oneline",
+                    "git diff",
+                    "git diff --staged",
+                ],
                 "safe_demo_commands": [
                     "git status",
+                    "git diff",
                     "git add demo-notes.md",
+                    "git diff --staged",
                     'git commit -m "demo snapshot"',
                 ],
                 "demo_repository_state": self._demo_snapshot(
@@ -1023,7 +1029,17 @@ class Command(BaseCommand):
                 "demo_explanation_steps": [
                     self._demo_step(
                         "git status",
-                        "git status shows that demo-notes.md is visible in the working tree and has not been staged.",
+                        "git status helps you name what changed. Here the demo file is in the working tree and not staged yet.",
+                        graph(
+                            [],
+                            {"demo-main": None},
+                            "demo-main",
+                            working_tree={"demo-notes.md": "untracked"},
+                        ),
+                    ),
+                    self._demo_step(
+                        "git diff",
+                        "git diff inspects working tree changes that are not staged yet. It is safe inspection: it does not change state.",
                         graph(
                             [],
                             {"demo-main": None},
@@ -1033,7 +1049,17 @@ class Command(BaseCommand):
                     ),
                     self._demo_step(
                         "git add demo-notes.md",
-                        "git add moves the selected demo file from the working tree into the staging area.",
+                        "git add stages only the selected path. The staged snapshot is what the next commit will capture.",
+                        graph(
+                            [],
+                            {"demo-main": None},
+                            "demo-main",
+                            staging={"demo-notes.md": "added"},
+                        ),
+                    ),
+                    self._demo_step(
+                        "git diff --staged",
+                        "git diff --staged inspects what is currently staged. Use it to verify what would go into a commit before committing.",
                         graph(
                             [],
                             {"demo-main": None},
@@ -1043,7 +1069,7 @@ class Command(BaseCommand):
                     ),
                     self._demo_step(
                         'git commit -m "demo snapshot"',
-                        "git commit creates a demo snapshot from staged content and leaves the working tree clean.",
+                        'git commit creates a new snapshot from staged content. The -m flag sets a message inline (the message is descriptive, not a "solution").',
                         graph(
                             [commit("d1", "Demo snapshot")],
                             {"demo-main": "d1"},
@@ -1057,13 +1083,20 @@ class Command(BaseCommand):
                 "title": "Staging Selected Changes",
                 "focus": "git add",
                 "summary": "Move selected working tree changes into the staging area before committing.",
-                "short_explanation": "Staging is a deliberate boundary: only selected changes move from the working tree into the next commit candidate.",
+                "short_explanation": "Staging is a deliberate boundary: only what you stage can enter the next commit. Selective staging helps you keep messy draft work visible without accidentally committing it.",
                 "skill_focus_type": ScenarioSkillFocus.SkillFocusType.COMMAND_SPECIFIC,
                 "primary_focus_commands": ["git add"],
-                "supporting_inspection_commands": ["git status", "git restore --staged"],
+                "supporting_inspection_commands": [
+                    "git status",
+                    "git diff",
+                    "git diff --staged",
+                    "git restore --staged",
+                ],
                 "safe_demo_commands": [
                     "git status",
+                    "git diff",
                     "git add demo-config.yml",
+                    "git diff --staged",
                     "git restore --staged demo-config.yml",
                 ],
                 "demo_repository_state": self._demo_snapshot(
@@ -1080,7 +1113,20 @@ class Command(BaseCommand):
                 "demo_explanation_steps": [
                     self._demo_step(
                         "git status",
-                        "The demo status has two modified files, but neither one is staged yet.",
+                        "git status shows two modified demo files. The key question is: which one belongs in the next commit candidate?",
+                        graph(
+                            [commit("d0", "Demo base")],
+                            {"demo-main": "d0"},
+                            "demo-main",
+                            working_tree={
+                                "demo-config.yml": "modified",
+                                "demo-draft.md": "modified",
+                            },
+                        ),
+                    ),
+                    self._demo_step(
+                        "git diff",
+                        "git diff helps you inspect working tree changes before staging. It is read-only inspection.",
                         graph(
                             [commit("d0", "Demo base")],
                             {"demo-main": "d0"},
@@ -1103,8 +1149,19 @@ class Command(BaseCommand):
                         ),
                     ),
                     self._demo_step(
+                        "git diff --staged",
+                        "git diff --staged confirms what is currently staged. Use it to verify your staging scope before committing.",
+                        graph(
+                            [commit("d0", "Demo base")],
+                            {"demo-main": "d0"},
+                            "demo-main",
+                            working_tree={"demo-draft.md": "modified"},
+                            staging={"demo-config.yml": "modified"},
+                        ),
+                    ),
+                    self._demo_step(
                         "git restore --staged demo-config.yml",
-                        "The staged demo file moves back out of the staging area without changing branch history.",
+                        "git restore --staged moves a path back out of staging. This can be used to correct an accidental stage without changing commit history.",
                         graph(
                             [commit("d0", "Demo base")],
                             {"demo-main": "d0"},
