@@ -6,6 +6,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? defaultApiBaseUrl()
 type RequestOptions = RequestInit & { skipAuthRefresh?: boolean }
 
 let refreshPromise: Promise<boolean> | null = null
+const REFRESH_RETRY_DELAY_MS = 250
 
 function defaultApiBaseUrl() {
   if (typeof window === 'undefined') return 'http://127.0.0.1:8000/api'
@@ -66,7 +67,13 @@ async function refreshAccessToken() {
   return refreshPromise
 }
 
-async function requestAccessTokenRefresh() {
+function sleep(ms: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
+async function requestAccessTokenRefresh(attempt = 0): Promise<boolean> {
   try {
     const payload = await apiRequest<{ access: string }>('/auth/refresh/', {
       method: 'POST',
@@ -74,7 +81,14 @@ async function requestAccessTokenRefresh() {
     })
     useAuthStore.getState().setAccessToken(payload.access)
     return true
-  } catch {
+  } catch (error) {
+    // Refresh token rotation can cause a 401 if another tab refreshed at the same
+    // time. Give the browser a moment to apply the rotated refresh cookie, then
+    // retry once before forcing a logout.
+    if (error instanceof ApiError && error.status === 401 && attempt < 1) {
+      await sleep(REFRESH_RETRY_DELAY_MS)
+      return requestAccessTokenRefresh(attempt + 1)
+    }
     useAuthStore.getState().clearSession()
     return false
   }

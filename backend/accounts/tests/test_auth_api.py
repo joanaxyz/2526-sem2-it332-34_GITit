@@ -1,4 +1,5 @@
 import pytest
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -99,3 +100,12 @@ def test_login_rejects_non_cit_email_identifier(db, api_client):
     )
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_refresh_does_not_clear_refresh_cookie_on_token_error(db, api_client):
+    api_client.cookies[settings.GIT_IT_REFRESH_COOKIE] = "not-a-valid-token"
+
+    response = api_client.post("/api/auth/refresh/", format="json")
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert settings.GIT_IT_REFRESH_COOKIE not in response.cookies
