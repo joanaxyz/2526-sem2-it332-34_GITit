@@ -1003,7 +1003,7 @@ class Command(BaseCommand):
                 "title": "Clean Commit Formation",
                 "focus": "git status, git add, git commit",
                 "summary": "Read file state, stage intentional work, and form a clean snapshot.",
-                "short_explanation": "A clean commit is a three-step habit: (1) inspect state, (2) stage intentionally, (3) commit the staged snapshot. The goal is to understand what you are about to change before you change it.",
+                "short_explanation": "Clean commits start with inspection and end with a deliberate snapshot. Use git status to name what changed, git diff / git diff --staged to inspect content without changing state, git add <path> to stage only what belongs in the next snapshot (git add . / -A stage everything), and git commit -m \"message\" to record the staged snapshot with a clear message.",
                 "skill_focus_type": ScenarioSkillFocus.SkillFocusType.WORKFLOW_SPECIFIC,
                 "primary_focus_commands": ["git status", "git add", "git commit"],
                 "supporting_inspection_commands": [
@@ -1083,9 +1083,9 @@ class Command(BaseCommand):
                 "title": "Staging Selected Changes",
                 "focus": "git add",
                 "summary": "Move selected working tree changes into the staging area before committing.",
-                "short_explanation": "Staging is a deliberate boundary: only what you stage can enter the next commit. Selective staging helps you keep messy draft work visible without accidentally committing it.",
+                "short_explanation": "Staging is a deliberate boundary: only staged changes can enter a commit. Use git status to see what is modified, git diff to inspect unstaged content, git add <path> to stage only the intended file(s), git diff --staged to verify exactly what is staged, and git restore --staged <path> to unstage a path without rewriting history.",
                 "skill_focus_type": ScenarioSkillFocus.SkillFocusType.COMMAND_SPECIFIC,
-                "primary_focus_commands": ["git add"],
+                "primary_focus_commands": ["git status", "git add", "git commit"],
                 "supporting_inspection_commands": [
                     "git status",
                     "git diff",
@@ -1097,6 +1097,7 @@ class Command(BaseCommand):
                     "git diff",
                     "git add demo-config.yml",
                     "git diff --staged",
+                    'git commit -m "demo config update"',
                     "git restore --staged demo-config.yml",
                 ],
                 "demo_repository_state": self._demo_snapshot(
@@ -1157,6 +1158,16 @@ class Command(BaseCommand):
                             "demo-main",
                             working_tree={"demo-draft.md": "modified"},
                             staging={"demo-config.yml": "modified"},
+                        ),
+                    ),
+                    self._demo_step(
+                        'git commit -m "demo config update"',
+                        'git commit records a snapshot of what is staged. The -m flag sets the commit message inline. Unstaged draft work stays in the working tree.',
+                        graph(
+                            [commit("d0", "Demo base"), commit("d1", "Demo config update", ["d0"])],
+                            {"demo-main": "d1"},
+                            "demo-main",
+                            working_tree={"demo-draft.md": "modified"},
                         ),
                     ),
                     self._demo_step(
