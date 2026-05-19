@@ -16,7 +16,7 @@ export function DemoExplanationPanel({
   return (
     <Card className="h-full shadow-none">
       <CardHeader className="p-3">
-        <CardTitle className="text-sm">Demo Explanation Panel</CardTitle>
+        <CardTitle className="text-sm">Demo explanation</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 p-3 pt-0">
         <p className="text-sm leading-6 text-muted-foreground">{explanation}</p>

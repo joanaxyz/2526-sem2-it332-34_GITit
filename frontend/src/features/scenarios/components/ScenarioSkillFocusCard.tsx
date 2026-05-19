@@ -13,6 +13,7 @@ export function ScenarioSkillFocusCard({
   onDifficultyAction: (scenario: ScenarioSkillFocus, difficulty: DifficultyAccess, action: DifficultyActionIntent) => void
 }) {
   const primaryLabel = scenario.primary_focus_commands.length === 1 ? 'Focus command' : 'Focus commands'
+  const focusValue = scenario.primary_focus_commands.length ? scenario.primary_focus_commands.join(', ') : scenario.focus
 
   return (
     <Card className="shadow-none">
@@ -32,14 +33,9 @@ export function ScenarioSkillFocusCard({
         <div className="mb-4 grid gap-2 rounded-md border border-border bg-secondary/30 p-3 text-xs leading-5 text-muted-foreground">
           <div className="flex items-center gap-2 font-semibold text-foreground">
             <ListChecks className="size-4 text-primary" />
-            Skill focus: {scenario.focus}
+            <span className="font-semibold">{scenario.primary_focus_commands.length ? `${primaryLabel}:` : 'Skill focus:'}</span>
+            <span className="font-mono">{focusValue}</span>
           </div>
-          {scenario.primary_focus_commands.length ? (
-            <div>
-              <span className="font-semibold text-foreground">{primaryLabel}: </span>
-              {scenario.primary_focus_commands.join(', ')}
-            </div>
-          ) : null}
           {scenario.supporting_inspection_commands.length ? (
             <div>
               <span className="font-semibold text-foreground">Supporting inspection commands: </span>

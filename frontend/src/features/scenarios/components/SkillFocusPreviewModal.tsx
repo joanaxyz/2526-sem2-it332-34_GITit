@@ -93,26 +93,27 @@ export function SkillFocusPreviewModal({
         </header>
 
         <section className="grid gap-3 rounded-lg border border-border bg-secondary/20 p-4">
-          <div>
-            <div className="text-sm font-bold">Short concept explanation</div>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">{scenario.short_explanation}</p>
-          </div>
-          <div className="grid gap-2 text-sm leading-6">
-            {scenario.primary_focus_commands.length ? (
-              <div>
-                <span className="font-semibold">
-                  {scenario.primary_focus_commands.length === 1 ? 'Focus command: ' : 'Focus commands: '}
-                </span>
-                <span className="font-mono text-muted-foreground">{scenario.primary_focus_commands.join(', ')}</span>
-              </div>
-            ) : null}
-            {scenario.supporting_inspection_commands.length ? (
-              <div>
-                <span className="font-semibold">Supporting inspection commands: </span>
-                <span className="font-mono text-muted-foreground">{scenario.supporting_inspection_commands.join(', ')}</span>
-              </div>
-            ) : null}
-          </div>
+          <p className="text-sm leading-6 text-muted-foreground">{scenario.short_explanation}</p>
+
+          {scenario.primary_focus_commands.length || scenario.supporting_inspection_commands.length ? (
+            <div className="grid gap-2 text-sm leading-6">
+              {scenario.primary_focus_commands.length ? (
+                <div>
+                  <span className="font-semibold">
+                    {scenario.primary_focus_commands.length === 1 ? 'Focus command: ' : 'Focus commands: '}
+                  </span>
+                  <span className="font-mono text-muted-foreground">{scenario.primary_focus_commands.join(', ')}</span>
+                </div>
+              ) : null}
+              {scenario.supporting_inspection_commands.length ? (
+                <div>
+                  <span className="font-semibold">Supporting inspection commands: </span>
+                  <span className="font-mono text-muted-foreground">{scenario.supporting_inspection_commands.join(', ')}</span>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
           <CommandQuickReference commands={scenario.primary_focus_commands ?? []} />
         </section>
 
