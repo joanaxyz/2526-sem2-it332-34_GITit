@@ -25,6 +25,7 @@ describe('apiRequest auth refresh', () => {
   })
 
   afterEach(() => {
+    vi.useRealTimers()
     vi.unstubAllGlobals()
   })
 
@@ -87,5 +88,38 @@ describe('apiRequest auth refresh', () => {
 
     await expect(slowRequest).resolves.toEqual({ endpoint: 'slow' })
     expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/auth/refresh/'))).toHaveLength(1)
+  })
+
+  it('retries refresh once when refresh returns a 401', async () => {
+    vi.useFakeTimers()
+
+    let refreshAttempts = 0
+    const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input)
+      const headers = init?.headers as Record<string, string> | undefined
+
+      if (url.endsWith('/auth/refresh/')) {
+        refreshAttempts += 1
+        if (refreshAttempts === 1) {
+          return Promise.resolve(jsonResponse(401, { detail: 'Session expired.' }))
+        }
+        return Promise.resolve(jsonResponse(200, { access: 'fresh-token' }))
+      }
+
+      if (headers?.Authorization === 'Bearer fresh-token') {
+        return Promise.resolve(jsonResponse(200, { endpoint: url.split('/').at(-2) }))
+      }
+
+      return Promise.resolve(jsonResponse(401, { detail: 'Token expired.' }))
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const request = apiRequest<{ endpoint: string }>('/protected/')
+
+    await vi.runAllTimersAsync()
+
+    await expect(request).resolves.toEqual({ endpoint: 'protected' })
+    expect(useAuthStore.getState().accessToken).toBe('fresh-token')
+    expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/auth/refresh/'))).toHaveLength(2)
   })
 })

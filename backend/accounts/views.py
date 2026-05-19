@@ -67,9 +67,11 @@ class RefreshAPIView(APIView):
         try:
             tokens = TokenService().refresh_access(refresh_token)
         except TokenError:
-            response = Response({"detail": "Session expired."}, status=status.HTTP_401_UNAUTHORIZED)
-            clear_refresh_cookie(response)
-            return response
+            # Avoid clearing the refresh cookie here: refresh token rotation can cause
+            # concurrent refresh requests (e.g., multiple tabs) where one succeeds and
+            # another fails with a revoked token. Clearing the cookie on the failing
+            # response can race and wipe a newly-rotated refresh cookie.
+            return Response({"detail": "Session expired."}, status=status.HTTP_401_UNAUTHORIZED)
         response = Response({"access": tokens.access})
         set_refresh_cookie(response, tokens.refresh)
         return response
