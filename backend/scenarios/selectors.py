@@ -7,6 +7,21 @@ from scenarios.models import (
 from scenarios.services import DifficultyAccessService
 
 
+def command_accuracy_rate(
+    *,
+    status: str,
+    counted_action_total: int,
+    minimum_counted_commands: int,
+) -> int | None:
+    if status != "completed":
+        return None
+    if counted_action_total <= minimum_counted_commands:
+        return 100
+    if minimum_counted_commands == 0:
+        return 0
+    return round((minimum_counted_commands / counted_action_total) * 100)
+
+
 def latest_attempt_payload(*, user, difficulty_instance: DifficultyInstance) -> dict | None:
     session = (
         ScenarioSession.objects.filter(
@@ -24,21 +39,14 @@ def latest_attempt_payload(*, user, difficulty_instance: DifficultyInstance) -> 
         session.status == "completed"
         and session.counted_action_total <= minimum_counted_commands
     )
-    latest_accuracy = 100 if command_accurate else 0 if session.status == "completed" else None
-
-    # Once 100% is achieved, it stays at 100%
-    ever_perfect = (
-        latest_accuracy == 100
-        or ScenarioSession.objects.filter(
-            user=user,
-            difficulty_instance=difficulty_instance,
-            status="completed",
-            counted_action_total__lte=minimum_counted_commands,
-        ).exists()
+    accuracy_rate = command_accuracy_rate(
+        status=session.status,
+        counted_action_total=session.counted_action_total,
+        minimum_counted_commands=minimum_counted_commands,
     )
-    accuracy_rate = 100 if ever_perfect else latest_accuracy
 
     return {
+        "id": session.id,
         "status": session.status,
         "accuracy_rate": accuracy_rate,
         "command_accurate": command_accurate if session.status == "completed" else None,
@@ -86,6 +94,7 @@ def scenario_status_payload(*, user, scenario: ScenarioSkillFocus) -> dict:
             {
                 "id": instance.id,
                 "difficulty": instance.difficulty,
+                "completion_type": instance.completion_type,
                 "status": access.status_for(user=user, difficulty_instance=instance),
                 "review_available": completion is not None,
                 "completion": {

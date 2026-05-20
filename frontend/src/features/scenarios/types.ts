@@ -3,8 +3,8 @@ import type { RepositorySnapshot } from '@/features/practice/types'
 export type Difficulty = 'easy' | 'medium' | 'hard'
 export type DifficultyStatus = 'not_started' | 'locked' | 'in_progress' | 'completed' | 'failed' | 'abandoned'
 export type AttemptStatus = 'started' | 'completed' | 'failed' | 'abandoned'
-export type DifficultyActionIntent = 'start' | 'continue' | 'review' | 'retry'
-export type SkillFocusType = 'command_specific' | 'concept_specific' | 'workflow_specific'
+export type DifficultyActionIntent = 'start' | 'review' | 'retry'
+export type SkillFocusType = 'command_specific' | 'concept_specific' | 'workflow_specific' | 'diagnostic_inspection'
 
 export type CommandPolicy = {
   id: number
@@ -14,6 +14,7 @@ export type CommandPolicy = {
 }
 
 export type LatestAttemptStats = {
+  id: number
   status: AttemptStatus
   accuracy_rate: number | null
   command_accurate: boolean | null

@@ -5,6 +5,7 @@ from common.constants import (
     COMMAND_COUNTED,
     COMMAND_DIAGNOSTIC,
     COMMAND_UNPROCESSABLE,
+    COMPLETION_INSPECTION,
     DIFFICULTY_EASY,
     DIFFICULTY_MEDIUM,
     RESULT_INVALID,
@@ -17,7 +18,7 @@ from common.constants import (
     SESSION_STATUS_STARTED,
 )
 from common.exceptions import Locked
-from evaluation.services import StateBasedEvaluator
+from evaluation.services import InspectionEvaluator, StateBasedEvaluator
 from learning.services import OrientationService
 from progress.services import StreakService
 from retries.services import VariantSelectionService
@@ -30,9 +31,10 @@ from scenarios.models import (
     StepLog,
 )
 from simulator.services import (
-    READ_ONLY_PREFIXES,
     RepositorySnapshotService,
     RepositoryStateSimulator,
+    is_diagnostic_command,
+    normalize_command,
 )
 
 
@@ -88,13 +90,11 @@ class DifficultyAccessService:
 class CommandCountClassifier:
     def classify(self, *, command: str, policy_snapshot: dict, processed: bool) -> tuple[str, int]:
         if not processed:
+            normalized = normalize_command(command).lower()
+            if normalized == "git" or normalized.startswith("git "):
+                return COMMAND_COUNTED, 1
             return COMMAND_UNPROCESSABLE, 0
-        normalized = " ".join(command.strip().lower().split())
-        patterns = [p.lower() for p in policy_snapshot.get("non_counted_patterns", [])]
-        is_read_only = normalized.startswith(READ_ONLY_PREFIXES)
-        if is_read_only and any(
-            normalized == p or normalized.startswith(f"{p} ") for p in patterns
-        ):
+        if is_diagnostic_command(command):
             return COMMAND_DIAGNOSTIC, 0
         return COMMAND_COUNTED, 1
 
@@ -112,6 +112,8 @@ class ScenarioSessionService:
     ) -> ScenarioSession:
         if prior_session and prior_session.difficulty_instance_id != difficulty_instance.id:
             raise Locked("Retry sessions must use the same scenario difficulty.")
+        if prior_session and prior_session.status == SESSION_STATUS_STARTED:
+            raise Locked("Exit the current scenario before retrying.")
 
         if mode == SESSION_MODE_PRIMARY and not DifficultyAccessService().is_unlocked(
             user=user, difficulty_instance=difficulty_instance
@@ -138,7 +140,7 @@ class ScenarioSessionService:
                 .first()
             )
             if active_session:
-                return active_session
+                raise Locked("Exit the current scenario before starting again.")
 
         variant = VariantSelectionService().select_variant(
             user=user,
@@ -147,6 +149,7 @@ class ScenarioSessionService:
         )
         changed_variant = bool(prior_session and prior_session.variant_id != variant.id)
         retry_index = prior_session.retry_index + 1 if prior_session else 0
+
         rta_eligible = bool(
             mode == SESSION_MODE_PRIMARY
             and prior_session
@@ -211,8 +214,26 @@ class CommandProcessingService:
         result_category = RESULT_UNPROCESSABLE
         feedback = ""
         if sim_result.processed:
-            target_rule = session.difficulty_instance.target_rule.rule
-            evaluation = StateBasedEvaluator().evaluate(sim_result.state, target_rule)
+            executed_commands = [
+                *session.step_logs.order_by("id").values_list("command_log__normalized_command", flat=True),
+                sim_result.normalized_command,
+            ]
+            completion_type = session.difficulty_instance.completion_type
+            if completion_type == COMPLETION_INSPECTION:
+                evaluation = InspectionEvaluator().evaluate(
+                    initial_state=session.variant.initial_state,
+                    current_state=sim_result.state,
+                    expected_observations=session.variant.expected_observations,
+                    executed_commands=executed_commands,
+                )
+            else:
+                target_rule = session.variant.target_rule or session.difficulty_instance.target_rule.rule
+                evaluation = StateBasedEvaluator().evaluate(
+                    sim_result.state,
+                    target_rule,
+                    initial_state=session.variant.initial_state,
+                    executed_commands=executed_commands,
+                )
             result_category = evaluation.result_category
             if session.difficulty_instance.difficulty == DIFFICULTY_EASY:
                 feedback = FeedbackGenerationService().describe(previous_state, sim_result.state)
@@ -243,7 +264,7 @@ class CommandProcessingService:
             attempt_number=session.total_attempts,
             counted_total_after=session.counted_action_total,
             state_hash=state_hash,
-            expected_state_hash=session.difficulty_instance.target_rule.target_state_hash,
+            expected_state_hash=simulator.state_hash(session.variant.target_state),
             repository_state=sim_result.state,
             contextual_feedback=feedback,
         )
@@ -257,7 +278,7 @@ class CommandProcessingService:
         max_count = session.command_policy_snapshot["max_counted_commands"]
         if result_category == RESULT_TARGET_MATCHED:
             self._complete_session(session)
-        elif session.counted_action_total >= max_count:
+        elif classification == COMMAND_COUNTED and session.counted_action_total >= max_count:
             session.status = SESSION_STATUS_FAILED
             session.ended_at = timezone.now()
             session.failure_reason = "Action limit reached."

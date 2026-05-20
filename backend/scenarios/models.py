@@ -5,6 +5,9 @@ from common.constants import (
     COMMAND_COUNTED,
     COMMAND_DIAGNOSTIC,
     COMMAND_UNPROCESSABLE,
+    COMPLETION_EXPANDED_STATE_BASED,
+    COMPLETION_INSPECTION,
+    COMPLETION_STATE_BASED,
     DIFFICULTY_EASY,
     DIFFICULTY_HARD,
     DIFFICULTY_MEDIUM,
@@ -69,10 +72,20 @@ class DifficultyInstance(models.Model):
         MEDIUM = DIFFICULTY_MEDIUM, "Medium"
         HARD = DIFFICULTY_HARD, "Hard"
 
+    class CompletionType(models.TextChoices):
+        STATE_BASED = COMPLETION_STATE_BASED, "State based"
+        INSPECTION = COMPLETION_INSPECTION, "Inspection"
+        EXPANDED_STATE_BASED = COMPLETION_EXPANDED_STATE_BASED, "Expanded state based"
+
     scenario = models.ForeignKey(
         ScenarioSkillFocus, related_name="difficulty_instances", on_delete=models.CASCADE
     )
     difficulty = models.CharField(max_length=12, choices=Difficulty.choices)
+    completion_type = models.CharField(
+        max_length=32,
+        choices=CompletionType.choices,
+        default=CompletionType.STATE_BASED,
+    )
     narrative = models.TextField(blank=True)
     task_prompt = models.TextField(blank=True)
     is_published = models.BooleanField(default=True)
@@ -112,8 +125,11 @@ class ScenarioVariant(models.Model):
     label = models.CharField(max_length=80)
     structure_signature = models.CharField(max_length=120)
     initial_state = models.JSONField()
+    target_rule = models.JSONField(default=dict, blank=True)
     target_state = models.JSONField()
     expected_state_diagram = models.JSONField(default=dict, blank=True)
+    expected_observations = models.JSONField(default=dict, blank=True)
+    solution_commands = models.JSONField(default=list, blank=True)
     is_published = models.BooleanField(default=True)
 
     class Meta:

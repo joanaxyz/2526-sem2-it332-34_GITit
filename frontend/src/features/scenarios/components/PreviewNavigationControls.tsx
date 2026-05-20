@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, FastForward, Play } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Play } from 'lucide-react'
 
 import { Button } from '@/shared/components/Button'
 
@@ -6,17 +6,17 @@ export function PreviewNavigationControls({
   canGoPrevious,
   canGoNext,
   isProceeding,
+  startLabel = 'Start scenario',
   onPrevious,
   onNext,
-  onSkip,
   onStartPractice,
 }: {
   canGoPrevious: boolean
   canGoNext: boolean
   isProceeding: boolean
+  startLabel?: string
   onPrevious: () => void
   onNext: () => void
-  onSkip: () => void
   onStartPractice: () => void
 }) {
   return (
@@ -32,13 +32,9 @@ export function PreviewNavigationControls({
         </Button>
       </div>
       <div className="flex gap-2">
-        <Button type="button" variant="ghost" disabled={isProceeding} onClick={onSkip}>
-          <FastForward data-icon="inline-start" />
-          Skip
-        </Button>
         <Button type="button" disabled={isProceeding} onClick={onStartPractice}>
           <Play data-icon="inline-start" />
-          {isProceeding ? 'Opening...' : 'Start scenario'}
+          {isProceeding ? 'Opening...' : startLabel}
         </Button>
       </div>
     </div>

@@ -19,6 +19,10 @@ export type RegisterResponse = {
   user: User
 }
 
+type RefreshResponse = {
+  access: string
+}
+
 export const authApi = {
   register(payload: RegisterPayload) {
     return apiRequest<RegisterResponse>('/auth/register/', {
@@ -34,6 +38,13 @@ export const authApi = {
   },
   logout() {
     return apiRequest<null>('/auth/logout/', { method: 'POST' })
+  },
+  refresh() {
+    return apiRequest<RefreshResponse>('/auth/refresh/', {
+      method: 'POST',
+      body: JSON.stringify({}),
+      skipAuthRefresh: true,
+    })
   },
   me() {
     return apiRequest<User>('/auth/me/')

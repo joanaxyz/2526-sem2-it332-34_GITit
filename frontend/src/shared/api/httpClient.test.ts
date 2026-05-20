@@ -124,4 +124,33 @@ describe('apiRequest auth refresh', () => {
     expect(useAuthStore.getState().accessToken).toBe('fresh-token')
     expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/auth/refresh/'))).toHaveLength(2)
   })
+
+  it('does not clear auth when another tab already stored a newer token', async () => {
+    vi.useFakeTimers()
+
+    const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input)
+      const headers = init?.headers as Record<string, string> | undefined
+
+      if (url.endsWith('/auth/refresh/')) {
+        localStorage.setItem('git-it-access-token', 'other-tab-token')
+        return Promise.resolve(jsonResponse(401, { detail: 'Session expired.' }))
+      }
+
+      if (headers?.Authorization === 'Bearer other-tab-token') {
+        return Promise.resolve(jsonResponse(200, { endpoint: url.split('/').at(-2) }))
+      }
+
+      return Promise.resolve(jsonResponse(401, { detail: 'Token expired.' }))
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const request = apiRequest<{ endpoint: string }>('/protected/')
+
+    await vi.runAllTimersAsync()
+
+    await expect(request).resolves.toEqual({ endpoint: 'protected' })
+    expect(useAuthStore.getState().accessToken).toBe('other-tab-token')
+    expect(useAuthStore.getState().user).toEqual(user)
+  })
 })

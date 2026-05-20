@@ -10,7 +10,11 @@ READ_ONLY_PREFIXES = (
     "git branch",
     "git diff",
     "git show",
+    "git remote",
+    "git reflog",
 )
+
+BRANCH_LISTING_OPTIONS = {"-v", "-vv", "-a", "--all", "--list"}
 
 
 @dataclass(frozen=True)
@@ -21,42 +25,93 @@ class SimulatorResult:
     normalized_command: str
 
 
+def normalize_command(command: str) -> str:
+    return " ".join(command.strip().split())
+
+
+def parse_git_command(command: str) -> list[str] | None:
+    command = normalize_command(command)
+    if not command:
+        return None
+    try:
+        parts = shlex.split(command)
+    except ValueError:
+        return None
+    if not parts or parts[0] != "git":
+        return None
+    return parts
+
+
+def is_diagnostic_command(command: str) -> bool:
+    parts = parse_git_command(command)
+    if not parts or len(parts) < 2:
+        return False
+
+    action = parts[1]
+    args = parts[2:]
+    if action in {"status", "log", "diff", "show", "reflog"}:
+        return True
+    if action == "branch":
+        return not args or all(arg in BRANCH_LISTING_OPTIONS for arg in args)
+    if action == "remote":
+        return not args or args in (["-v"], ["--verbose"])
+    return False
+
+
 class RepositoryStateSimulator:
     """Internal Git-like simulator boundary. Student input is never executed."""
 
     def clone_state(self, state: dict) -> dict:
         return copy.deepcopy(state)
 
+    def normalize_state(self, state: dict) -> dict:
+        normalized = self.clone_state(state)
+        self._ensure_state_shape(normalized)
+        return normalized
+
     def state_hash(self, state: dict) -> str:
         payload = json.dumps(state, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
     def process(self, state: dict, command: str) -> SimulatorResult:
-        command = " ".join(command.strip().split())
+        command = normalize_command(command)
         if not command:
             return SimulatorResult(False, state, "No command entered.", "")
-        try:
-            parts = shlex.split(command)
-        except ValueError:
-            return SimulatorResult(False, state, "The command could not be parsed.", command)
-        if not parts or parts[0] != "git":
+
+        parts = parse_git_command(command)
+        if parts is None:
+            try:
+                shlex.split(command)
+            except ValueError:
+                return SimulatorResult(False, state, "The command could not be parsed.", command)
             return SimulatorResult(False, state, "Only simulated git commands are accepted.", command)
 
         next_state = self.clone_state(state)
+        self._ensure_state_shape(next_state)
         action = parts[1] if len(parts) > 1 else ""
 
         handlers = {
+            "init": self._init,
+            "clone": self._clone,
             "status": self._status,
             "log": self._log,
             "branch": self._branch,
             "diff": self._diff,
             "show": self._show,
+            "remote": self._remote,
+            "fetch": self._fetch,
+            "pull": self._pull,
+            "push": self._push,
             "add": self._add,
             "commit": self._commit,
             "checkout": self._checkout,
             "switch": self._switch,
             "merge": self._merge,
             "reset": self._reset,
+            "restore": self._restore,
+            "stash": self._stash,
+            "reflog": self._reflog,
+            "revert": self._revert,
             "cherry-pick": self._cherry_pick,
         }
         handler = handlers.get(action)
@@ -64,14 +119,55 @@ class RepositoryStateSimulator:
             return SimulatorResult(
                 False,
                 state,
-                "That Git operation is not available in this scenario simulator.",
+                f"git: '{action or command}' is not a git command. See 'git --help'.",
                 command,
             )
+
+        try:
+            self._validate_syntax(action, parts[2:])
+        except ValueError as exc:
+            return SimulatorResult(False, state, str(exc), command)
+
+        if not next_state.get("repository_initialized", True) and action not in {"init", "clone"}:
+            return SimulatorResult(
+                True,
+                next_state,
+                "fatal: not a git repository. Run git init or git clone first.",
+                command,
+            )
+
         try:
             output = handler(next_state, parts[2:])
         except (KeyError, IndexError, ValueError) as exc:
             return SimulatorResult(False, state, str(exc), command)
         return SimulatorResult(True, next_state, output, command)
+
+    def _validate_syntax(self, action: str, args: list[str]) -> None:
+        if action == "status":
+            self._reject_unknown_options(args, {"-s", "--short", "--porcelain"}, "error: unknown option `{}`.")
+        elif action == "log":
+            self._reject_unknown_options(args, {"--oneline", "--graph"}, "fatal: unrecognized argument: {}")
+        elif action == "diff":
+            self._reject_unknown_options(args, {"--staged", "--cached"}, "error: invalid option: {}")
+
+    def _reject_unknown_options(self, args: list[str], allowed_options: set[str], message: str) -> None:
+        bad_option = next((arg for arg in args if arg.startswith("-") and arg not in allowed_options), None)
+        if bad_option:
+            raise ValueError(message.format(bad_option))
+
+    def _ensure_state_shape(self, state: dict) -> None:
+        state.setdefault("commits", [])
+        state.setdefault("branches", {})
+        state.setdefault("head", {"type": "branch", "name": "main"})
+        state.setdefault("working_tree", {})
+        state.setdefault("staging", {})
+        state.setdefault("conflicts", [])
+        state.setdefault("remotes", {})
+        state.setdefault("remote_branches", {})
+        state.setdefault("upstream_tracking", {})
+        state.setdefault("stash_stack", [])
+        state.setdefault("reflog", [])
+        state.setdefault("repository_initialized", True)
 
     def _head_branch(self, state: dict) -> str | None:
         head = state.get("head", {})
@@ -89,6 +185,44 @@ class RepositoryStateSimulator:
             state.setdefault("branches", {})[branch] = commit_id
         else:
             state.setdefault("head", {})["target"] = commit_id
+        self._record_reflog(state, commit_id, "move HEAD")
+
+    def _record_reflog(self, state: dict, target: str | None, message: str) -> None:
+        if not target:
+            return
+        state.setdefault("reflog", []).append(
+            {"ref": f"HEAD@{{{len(state.get('reflog', []))}}}", "target": target, "message": message}
+        )
+
+    def _init(self, state: dict, args: list[str]) -> str:
+        state["repository_initialized"] = True
+        state["remotes"] = {}
+        state["remote_branches"] = {}
+        state["upstream_tracking"] = {}
+        branches = state.setdefault("branches", {})
+        branches.setdefault("main", None)
+        state["head"] = {"type": "branch", "name": "main"}
+        return "Initialized empty Git repository."
+
+    def _clone(self, state: dict, args: list[str]) -> str:
+        if state.get("repository_initialized", True):
+            raise ValueError("Clone starts a new repository and is only available before initialization.")
+        if not args:
+            raise ValueError("Specify a repository URL to clone.")
+        url = args[0]
+        state["repository_initialized"] = True
+        state["remotes"] = {"origin": url}
+        remote_branches = state.setdefault("remote_branches", {})
+        remote_branches.setdefault("origin/main", self._first_remote_target(remote_branches))
+        self._materialize_remote_commits(state)
+        main_target = remote_branches.get("origin/main")
+        state["branches"] = {"main": main_target}
+        state["head"] = {"type": "branch", "name": "main"}
+        state["upstream_tracking"] = {"main": "origin/main"}
+        state["working_tree"] = {}
+        state["staging"] = {}
+        state["conflicts"] = []
+        return f"Cloned {url}."
 
     def _status(self, state: dict, args: list[str]) -> str:
         branch = self._head_branch(state) or "HEAD (detached)"
@@ -107,6 +241,9 @@ class RepositoryStateSimulator:
             return "modified:"
 
         lines: list[str] = [f"On branch {branch}"]
+        upstream = state.get("upstream_tracking", {}).get(branch)
+        if upstream:
+            lines.append(f"Your branch is tracking {upstream}.")
 
         if conflict_paths:
             lines += [
@@ -145,17 +282,24 @@ class RepositoryStateSimulator:
         commits = state.get("commits", [])
         if not commits:
             return "No commits yet."
-        return "\n".join(f"{c['id']} {c.get('message', '')}" for c in reversed(commits[-6:]))
+        graph = "--graph" in args
+        lines = []
+        for commit in reversed(commits[-8:]):
+            prefix = "* " if graph else ""
+            lines.append(f"{prefix}{commit['id']} {commit.get('message', '')}".rstrip())
+        return "\n".join(lines)
 
     def _branch(self, state: dict, args: list[str]) -> str:
         branches = state.setdefault("branches", {})
-        if not args or args == ["-v"]:
+        if not args or all(arg in BRANCH_LISTING_OPTIONS for arg in args):
             current = self._head_branch(state)
             return "\n".join(
                 f"{'*' if name == current else ' '} {name} {target or '(no commits)'}"
                 for name, target in sorted(branches.items())
             )
         if args[0] in ("-d", "-D"):
+            if len(args) < 2:
+                raise ValueError("error: branch name required.")
             name = args[1]
             if name == self._head_branch(state):
                 raise ValueError("Cannot delete the checked-out branch.")
@@ -163,14 +307,18 @@ class RepositoryStateSimulator:
                 raise ValueError("Branch not found.")
             del branches[name]
             return f"Deleted branch {name}."
+
         name = args[0]
         if name in branches:
             raise ValueError("Branch already exists.")
-        branches[name] = self._head_commit(state)
+        if name.startswith("-"):
+            raise ValueError(f"error: unknown switch `{name}`.")
+        start_point = args[1] if len(args) > 1 else None
+        branches[name] = self._resolve_ref(state, start_point) if start_point else self._head_commit(state)
         return f"Created branch {name}."
 
     def _diff(self, state: dict, args: list[str]) -> str:
-        if args and args[0] == "--staged":
+        if args and args[0] in ("--staged", "--cached"):
             staged_paths = sorted(state.get("staging", {}).keys())
             if staged_paths:
                 return f"Staged changes: {self._format_paths(staged_paths)}"
@@ -184,7 +332,67 @@ class RepositoryStateSimulator:
         return "No working tree differences."
 
     def _show(self, state: dict, args: list[str]) -> str:
-        return "Object details available in the simulated repository."
+        target = args[0] if args else self._head_commit(state)
+        commit = self._commit_by_id(state, target)
+        if not commit:
+            return "Object details available in the simulated repository."
+        paths = sorted((commit.get("files") or {}).keys())
+        suffix = f"\nChanged paths: {self._format_paths(paths)}" if paths else ""
+        return f"commit {commit['id']}\n{commit.get('message', '')}{suffix}"
+
+    def _remote(self, state: dict, args: list[str]) -> str:
+        remotes = state.setdefault("remotes", {})
+        if not args:
+            return "\n".join(sorted(remotes))
+        if args in (["-v"], ["--verbose"]):
+            return "\n".join(
+                f"{name}\t{url} (fetch)\n{name}\t{url} (push)" for name, url in sorted(remotes.items())
+            )
+        if args[0] == "add":
+            if len(args) < 3:
+                raise ValueError("Specify a remote name and URL.")
+            name, url = args[1], args[2]
+            if name in remotes:
+                raise ValueError("Remote already exists.")
+            remotes[name] = url
+            return f"Added remote {name}."
+        raise ValueError("Only git remote and git remote add are simulated.")
+
+    def _fetch(self, state: dict, args: list[str]) -> str:
+        remote = args[0] if args else "origin"
+        if remote not in state.get("remotes", {}):
+            raise ValueError("Remote not found.")
+        self._materialize_remote_commits(state)
+        state["remote_tracking_updated"] = True
+        state["last_fetch_remote"] = remote
+        return f"Fetched updates from {remote}."
+
+    def _pull(self, state: dict, args: list[str]) -> str:
+        branch = self._head_branch(state)
+        if not branch:
+            raise ValueError("Cannot pull into detached HEAD.")
+        upstream = state.setdefault("upstream_tracking", {}).get(branch, f"origin/{branch}")
+        target = state.setdefault("remote_branches", {}).get(upstream)
+        if target is None:
+            raise ValueError("Upstream branch not found.")
+        self._materialize_remote_commits(state)
+        state.setdefault("branches", {})[branch] = target
+        state["remote_tracking_updated"] = False
+        state["last_pull_remote_branch"] = upstream
+        self._record_reflog(state, target, f"pull {upstream}")
+        return f"Pulled {upstream} into {branch}."
+
+    def _push(self, state: dict, args: list[str]) -> str:
+        branch = self._head_branch(state)
+        if not branch:
+            raise ValueError("Cannot push detached HEAD.")
+        upstream = state.setdefault("upstream_tracking", {}).get(branch, f"origin/{branch}")
+        remote = upstream.split("/", 1)[0]
+        if remote not in state.get("remotes", {}):
+            raise ValueError("Remote not found.")
+        state.setdefault("remote_branches", {})[upstream] = state.get("branches", {}).get(branch)
+        state["last_push_remote_branch"] = upstream
+        return f"Pushed {branch} to {upstream}."
 
     def _add(self, state: dict, args: list[str]) -> str:
         if not args:
@@ -202,15 +410,19 @@ class RepositoryStateSimulator:
         return ""
 
     def _commit(self, state: dict, args: list[str]) -> str:
+        if "--amend" in args:
+            return self._commit_amend(state, args)
         if not state.get("staging") and not state.get("merge_parent"):
             raise ValueError("Nothing staged to commit.")
         message = "commit"
         if "-m" in args:
             idx = args.index("-m")
+            if idx + 1 >= len(args):
+                raise ValueError("error: switch `m' requires a value.")
             message = args[idx + 1]
         current = self._head_commit(state)
         parents = [p for p in [current, state.pop("merge_parent", None)] if p]
-        commit_id = f"c{len(state.get('commits', []))}"
+        commit_id = self._next_commit_id(state)
         state.setdefault("commits", []).append(
             {
                 "id": commit_id,
@@ -223,34 +435,57 @@ class RepositoryStateSimulator:
         self._set_head_commit(state, commit_id)
         return f"[{self._head_branch(state) or 'detached'} {commit_id}] {message}"
 
+    def _commit_amend(self, state: dict, args: list[str]) -> str:
+        current = self._head_commit(state)
+        commit = self._commit_by_id(state, current)
+        if not commit:
+            raise ValueError("No commit available to amend.")
+        if "-m" in args:
+            idx = args.index("-m")
+            if idx + 1 >= len(args):
+                raise ValueError("error: switch `m' requires a value.")
+            commit["message"] = args[idx + 1]
+        files = copy.deepcopy(commit.get("files", {}))
+        files.update(copy.deepcopy(state.get("staging", {})))
+        commit["files"] = files
+        state["staging"] = {}
+        self._record_reflog(state, current, "commit --amend")
+        return f"[{self._head_branch(state) or 'detached'} {current}] amended commit"
+
     def _checkout(self, state: dict, args: list[str]) -> str:
+        if not args:
+            raise ValueError("You must specify a branch or path to checkout.")
         if args and args[0] == "-b":
-            return self._create_and_switch(state, args[1])
+            if len(args) < 2:
+                raise ValueError("error: switch `b' requires a value.")
+            return self._create_and_switch(state, args[1], args[2] if len(args) > 2 else None)
         return self._switch_to_ref(state, args[0])
 
     def _switch(self, state: dict, args: list[str]) -> str:
+        if not args:
+            raise ValueError("fatal: missing branch or commit argument.")
         if args and args[0] == "-c":
-            return self._create_and_switch(state, args[1])
+            if len(args) < 2:
+                raise ValueError("error: switch `c' requires a value.")
+            return self._create_and_switch(state, args[1], args[2] if len(args) > 2 else None)
         return self._switch_to_ref(state, args[0])
 
-    def _create_and_switch(self, state: dict, name: str) -> str:
+    def _create_and_switch(self, state: dict, name: str, start_point: str | None = None) -> str:
         branches = state.setdefault("branches", {})
         if name in branches:
             raise ValueError("Branch already exists.")
-        branches[name] = self._head_commit(state)
+        branches[name] = self._resolve_ref(state, start_point) if start_point else self._head_commit(state)
         state["head"] = {"type": "branch", "name": name}
         return f"Switched to a new branch '{name}'."
 
     def _switch_to_ref(self, state: dict, name: str) -> str:
         branches = state.setdefault("branches", {})
-        commits = {commit["id"] for commit in state.get("commits", [])}
         if name in branches:
             state["head"] = {"type": "branch", "name": name}
             return f"Switched to branch '{name}'."
-        if name in commits:
-            state["head"] = {"type": "detached", "target": name}
-            return f"HEAD is now detached at {name}."
-        raise ValueError("Reference not found.")
+        target = self._resolve_ref(state, name)
+        state["head"] = {"type": "detached", "target": target}
+        return f"HEAD is now detached at {target}."
 
     def _merge(self, state: dict, args: list[str]) -> str:
         if not args:
@@ -263,11 +498,15 @@ class RepositoryStateSimulator:
             state["conflicts"] = sorted(state.get("conflict_files", ["app.py"]))
             state["merge_parent"] = branches[other]
             return "Automatic merge stopped because conflicts need resolution."
+
         current = self._head_commit(state)
         other_target = branches[other]
         if current == other_target:
             return "Already up to date."
-        commit_id = f"c{len(state.get('commits', []))}"
+        if self._is_ancestor(state, current, other_target):
+            self._set_head_commit(state, other_target)
+            return f"Fast-forwarded to {other_target}."
+        commit_id = self._next_commit_id(state)
         state.setdefault("commits", []).append(
             {"id": commit_id, "message": f"Merge {other}", "parents": [current, other_target]}
         )
@@ -277,29 +516,108 @@ class RepositoryStateSimulator:
     def _reset(self, state: dict, args: list[str]) -> str:
         if not args:
             raise ValueError("Specify a reset target.")
-        target = args[-1]
-        if target == "HEAD~1":
-            current = self._head_commit(state)
-            commits = {commit["id"]: commit for commit in state.get("commits", [])}
-            parents = commits.get(current, {}).get("parents", [])
-            if not parents:
-                raise ValueError("No parent commit available.")
-            self._set_head_commit(state, parents[0])
-            return "Moved branch pointer to the parent commit."
-        if target in state.get("branches", {}):
-            self._set_head_commit(state, state["branches"][target])
-            return f"Moved branch pointer to {target}."
-        raise ValueError("Reset target not found.")
+        mode = "--mixed"
+        target_args = []
+        for arg in args:
+            if arg in {"--soft", "--mixed", "--hard"}:
+                mode = arg
+            else:
+                target_args.append(arg)
+        if not target_args:
+            raise ValueError("Specify a reset target.")
+        target = self._resolve_reset_target(state, target_args[-1])
+        current = self._head_commit(state)
+        current_commit = self._commit_by_id(state, current)
+        self._set_head_commit(state, target)
+        if mode == "--hard":
+            state["staging"] = {}
+            state["working_tree"] = {}
+            state["conflicts"] = []
+        elif mode == "--soft":
+            state["staging"] = self._files_for_soft_reset(current_commit)
+        else:
+            state["staging"] = {}
+        return f"Moved branch pointer to {target}."
+
+    def _restore(self, state: dict, args: list[str]) -> str:
+        if not args:
+            raise ValueError("Specify a path to restore.")
+        if args[0] == "--staged":
+            paths = args[1:]
+            if not paths:
+                raise ValueError("Specify a staged path to restore.")
+            for path in paths:
+                value = state.setdefault("staging", {}).pop(path, "modified")
+                state.setdefault("working_tree", {})[path] = value
+            return "Unstaged paths."
+        for path in args:
+            state.setdefault("working_tree", {}).pop(path, None)
+            state.setdefault("staging", {}).pop(path, None)
+            conflicts = set(state.get("conflicts", []))
+            conflicts.discard(path)
+            state["conflicts"] = sorted(conflicts)
+        return "Restored working tree paths."
+
+    def _stash(self, state: dict, args: list[str]) -> str:
+        if args and args[0] == "pop":
+            stack = state.setdefault("stash_stack", [])
+            if not stack:
+                raise ValueError("No stash entries found.")
+            entry = stack.pop()
+            state.setdefault("working_tree", {}).update(entry.get("working_tree", {}))
+            state.setdefault("staging", {}).update(entry.get("staging", {}))
+            state["conflicts"] = sorted(set(state.get("conflicts", [])) | set(entry.get("conflicts", [])))
+            return "Applied stash and dropped it."
+
+        if not state.get("working_tree") and not state.get("staging"):
+            return "No local changes to save."
+        state.setdefault("stash_stack", []).append(
+            {
+                "working_tree": copy.deepcopy(state.get("working_tree", {})),
+                "staging": copy.deepcopy(state.get("staging", {})),
+                "conflicts": copy.deepcopy(state.get("conflicts", [])),
+            }
+        )
+        state["working_tree"] = {}
+        state["staging"] = {}
+        state["conflicts"] = []
+        return "Saved working directory and index state."
+
+    def _reflog(self, state: dict, args: list[str]) -> str:
+        entries = state.get("reflog", [])
+        if not entries:
+            return "HEAD@{0} current position"
+        return "\n".join(f"{entry.get('ref')} {entry.get('target')} {entry.get('message')}" for entry in entries)
+
+    def _revert(self, state: dict, args: list[str]) -> str:
+        if not args:
+            raise ValueError("Specify a commit to revert.")
+        target = args[0]
+        commit = self._commit_by_id(state, target)
+        if not commit:
+            raise ValueError("Commit not found.")
+        current = self._head_commit(state)
+        commit_id = self._next_commit_id(state)
+        state.setdefault("commits", []).append(
+            {
+                "id": commit_id,
+                "message": f"Revert {commit.get('message', target)}",
+                "parents": [current] if current else [],
+                "files": {},
+            }
+        )
+        self._set_head_commit(state, commit_id)
+        return f"Created revert commit {commit_id}."
 
     def _cherry_pick(self, state: dict, args: list[str]) -> str:
         if not args:
             raise ValueError("Specify a commit to cherry-pick.")
         source_id = args[0]
-        source = next((commit for commit in state.get("commits", []) if commit["id"] == source_id), None)
+        source = self._commit_by_id(state, source_id)
         if not source:
             raise ValueError("Commit not found.")
         current = self._head_commit(state)
-        commit_id = f"c{len(state.get('commits', []))}"
+        commit_id = self._next_commit_id(state)
         state.setdefault("commits", []).append(
             {
                 "id": commit_id,
@@ -311,6 +629,89 @@ class RepositoryStateSimulator:
         self._set_head_commit(state, commit_id)
         return f"Applied changes as {commit_id}."
 
+    def _resolve_ref(self, state: dict, ref: str | None) -> str | None:
+        if ref is None:
+            return self._head_commit(state)
+        if ref in state.get("branches", {}):
+            return state["branches"][ref]
+        if ref in state.get("remote_branches", {}):
+            return state["remote_branches"][ref]
+        if self._commit_by_id(state, ref):
+            return ref
+        raise ValueError("Reference not found.")
+
+    def _resolve_reset_target(self, state: dict, target: str) -> str | None:
+        if target == "HEAD~1":
+            current = self._head_commit(state)
+            parents = (self._commit_by_id(state, current) or {}).get("parents", [])
+            if not parents:
+                raise ValueError("No parent commit available.")
+            return parents[0]
+        return self._resolve_ref(state, target)
+
+    def _commit_by_id(self, state: dict, commit_id: str | None) -> dict | None:
+        if not commit_id:
+            return None
+        return next((commit for commit in state.get("commits", []) if commit["id"] == commit_id), None)
+
+    def _next_commit_id(self, state: dict) -> str:
+        index = 0
+        existing = {commit["id"] for commit in state.get("commits", [])}
+        while f"c{index}" in existing:
+            index += 1
+        return f"c{index}"
+
+    def _is_ancestor(self, state: dict, ancestor: str | None, descendant: str | None) -> bool:
+        if ancestor is None or descendant is None:
+            return False
+        commits = {commit["id"]: commit for commit in state.get("commits", [])}
+        stack = [descendant]
+        seen: set[str] = set()
+        while stack:
+            current = stack.pop()
+            if current == ancestor:
+                return True
+            if current in seen or current not in commits:
+                continue
+            seen.add(current)
+            stack.extend(commits[current].get("parents", []))
+        return False
+
+    def _files_for_soft_reset(self, commit: dict | None) -> dict:
+        if not commit:
+            return {}
+        files = copy.deepcopy(commit.get("files") or {})
+        if files:
+            return files
+        message = commit.get("message", "").lower()
+        topics = ["auth", "payment", "search", "export", "profile"]
+        topic = next((item for item in topics if item in message), "update")
+        if any(word in message for word in ("combined", "scope", "messy")):
+            return {"README.md": "modified", f"{topic}.py": "modified"}
+        return {f"{topic}.py": "modified"}
+
+    def _first_remote_target(self, remote_branches: dict) -> str:
+        targets = [target for target in remote_branches.values() if target]
+        return sorted(targets)[0] if targets else "r0"
+
+    def _materialize_remote_commits(self, state: dict) -> None:
+        commits = state.setdefault("commits", [])
+        existing = {commit["id"] for commit in commits}
+        remote_ids = sorted({target for target in state.get("remote_branches", {}).values() if target})
+        previous = None
+        for commit_id in remote_ids:
+            if commit_id not in existing:
+                commits.append(
+                    {
+                        "id": commit_id,
+                        "message": f"Remote commit {commit_id}",
+                        "parents": [previous] if previous else [],
+                        "files": {},
+                    }
+                )
+                existing.add(commit_id)
+            previous = commit_id
+
     def _format_paths(self, paths: list[str]) -> str:
         return ", ".join(paths)
 
@@ -321,10 +722,16 @@ class RepositorySnapshotService:
         head = state.get("head", {})
         head_target = branches.get(head.get("name")) if head.get("type") == "branch" else head.get("target")
         return {
+            "repository_initialized": state.get("repository_initialized", True),
             "commits": state.get("commits", []),
             "branches": branches,
             "head": {**head, "target": head_target},
             "staging": state.get("staging", {}),
             "working_tree": state.get("working_tree", {}),
             "conflicts": state.get("conflicts", []),
+            "remotes": state.get("remotes", {}),
+            "remote_branches": state.get("remote_branches", {}),
+            "upstream_tracking": state.get("upstream_tracking", {}),
+            "stash_stack": state.get("stash_stack", []),
+            "reflog": state.get("reflog", []),
         }

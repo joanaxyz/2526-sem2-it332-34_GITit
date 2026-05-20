@@ -95,6 +95,7 @@ function nextDifficultyAfter(difficulty: Difficulty) {
 
 function latestAttemptFromSession(session: ScenarioSession): LatestAttemptStats {
   return {
+    id: session.id,
     status: session.status,
     accuracy_rate: latestAttemptAccuracy(session),
     command_accurate:
@@ -110,7 +111,9 @@ function latestAttemptFromSession(session: ScenarioSession): LatestAttemptStats 
 
 function latestAttemptAccuracy(session: ScenarioSession) {
   if (session.status !== 'completed') return null
-  return session.counts.counted_action_total <= session.policy.min_counted_commands ? 100 : 0
+  if (session.counts.counted_action_total <= session.policy.min_counted_commands) return 100
+  if (session.policy.min_counted_commands === 0) return 0
+  return Math.round((session.policy.min_counted_commands / session.counts.counted_action_total) * 100)
 }
 
 function statusFromSession(

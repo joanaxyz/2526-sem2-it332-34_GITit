@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -5,7 +7,6 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import AccessToken
-from datetime import timedelta
 
 from accounts.models import StudentProfile
 from accounts.services import TokenService

@@ -1,5 +1,5 @@
 import { ApiError } from './apiError'
-import { useAuthStore } from '@/features/auth/hooks/useAuth'
+import { getStoredAccessToken, useAuthStore } from '@/features/auth/hooks/useAuth'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? defaultApiBaseUrl()
 
@@ -42,7 +42,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       return apiRequest<T>(path, { ...options, skipAuthRefresh: true })
     }
 
-    const refreshed = await refreshAccessToken()
+    const refreshed = await refreshAccessToken(token)
     if (refreshed) {
       return apiRequest<T>(path, { ...options, skipAuthRefresh: true })
     }
@@ -56,10 +56,10 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   return payload as T
 }
 
-async function refreshAccessToken() {
+async function refreshAccessToken(tokenAtStart: string | null) {
   if (refreshPromise) return refreshPromise
 
-  refreshPromise = requestAccessTokenRefresh()
+  refreshPromise = requestAccessTokenRefresh(0, tokenAtStart)
   refreshPromise.finally(() => {
     refreshPromise = null
   })
@@ -73,7 +73,7 @@ function sleep(ms: number) {
   })
 }
 
-async function requestAccessTokenRefresh(attempt = 0): Promise<boolean> {
+async function requestAccessTokenRefresh(attempt = 0, tokenAtStart: string | null): Promise<boolean> {
   try {
     const payload = await apiRequest<{ access: string }>('/auth/refresh/', {
       method: 'POST',
@@ -87,9 +87,22 @@ async function requestAccessTokenRefresh(attempt = 0): Promise<boolean> {
     // retry once before forcing a logout.
     if (error instanceof ApiError && error.status === 401 && attempt < 1) {
       await sleep(REFRESH_RETRY_DELAY_MS)
-      return requestAccessTokenRefresh(attempt + 1)
+      return requestAccessTokenRefresh(attempt + 1, tokenAtStart)
     }
-    useAuthStore.getState().clearSession()
+    const latestToken = useAuthStore.getState().accessToken
+    const storedToken = getStoredAccessToken()
+    if (
+      (latestToken && latestToken !== tokenAtStart) ||
+      (storedToken && storedToken !== tokenAtStart)
+    ) {
+      if (storedToken && storedToken !== latestToken) {
+        useAuthStore.getState().setAccessToken(storedToken)
+      }
+      return true
+    }
+    if (error instanceof ApiError && error.status === 401) {
+      useAuthStore.getState().clearSession()
+    }
     return false
   }
 }

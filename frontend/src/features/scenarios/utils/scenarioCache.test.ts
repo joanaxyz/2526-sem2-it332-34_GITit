@@ -39,6 +39,7 @@ const scenario: ScenarioSkillFocus = {
       policy: { id: 1, min_counted_commands: 2, max_counted_commands: 6, non_counted_patterns: [] },
       completion: null,
       latest_attempt: {
+        id: 900,
         status: 'started',
         accuracy_rate: null,
         command_accurate: null,
@@ -142,6 +143,7 @@ describe('updateScenarioListWithSession', () => {
         completed_at: '2026-05-18T12:00:00Z',
       },
       latest_attempt: {
+        id: 900,
         status: 'completed',
         accuracy_rate: 100,
         command_accurate: true,
@@ -156,5 +158,19 @@ describe('updateScenarioListWithSession', () => {
     const unrelated = [{ ...scenario, id: 99 }]
 
     expect(updateScenarioListWithSession(unrelated, completedSession)).toBe(unrelated)
+  })
+
+  it('calculates command accuracy from target actions versus used actions', () => {
+    const sessionWithExtraAction: ScenarioSession = {
+      ...completedSession,
+      counts: {
+        ...completedSession.counts,
+        counted_action_total: 3,
+      },
+    }
+    const [updated] = updateScenarioListWithSession([scenario], sessionWithExtraAction) ?? []
+
+    expect(updated.difficulties[0].latest_attempt?.accuracy_rate).toBe(67)
+    expect(updated.difficulties[0].latest_attempt?.command_accurate).toBe(false)
   })
 })

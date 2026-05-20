@@ -28,9 +28,15 @@ export const scenariosApi = {
     })
   },
   retrySession(sessionId: number) {
-    return apiRequest<ScenarioSession>(`/scenarios/sessions/${sessionId}/retry/`, { method: 'POST' })
+    return apiRequest<ScenarioSession>(`/scenarios/sessions/${sessionId}/retry/`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    })
   },
   abandonSession(sessionId: number) {
-    return apiRequest<ScenarioSession>(`/scenarios/sessions/${sessionId}/abandon/`, { method: 'POST' })
+    return apiRequest<ScenarioSession>(`/scenarios/sessions/${sessionId}/abandon/`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    })
   },
 }

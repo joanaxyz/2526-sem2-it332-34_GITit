@@ -20,7 +20,7 @@ import { reviewApi } from '@/features/review/api/reviewApi'
 import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import { syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { PracticeWorkspaceSkeleton } from '@/shared/components/Skeleton'
 import { cn } from '@/shared/utils/cn'
 
 const DEFAULT_TERMINAL_RATIO = 0.28
@@ -84,19 +84,16 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const workspaceGridRef = useRef<HTMLElement>(null)
   const diagramGridRef = useRef<HTMLDivElement>(null)
   const terminalGridRef = useRef<HTMLDivElement>(null)
-  const retryMutation = useMutation({
+  const exitMutation = useMutation({
     mutationFn: () => {
-      if (session?.review_mode) return reviewApi.startReviewSession(session.difficulty_instance_id)
-      return scenariosApi.startSession({
-        difficulty_instance_id: session?.difficulty_instance_id ?? 0,
-        source_entry_point: 'retry',
-      })
+      if (!session) throw new Error('No session is available to exit.')
+      if (session.status === 'started') return scenariosApi.abandonSession(session.id)
+      return Promise.resolve(session)
     },
-    onSuccess: (next) => {
-      syncScenarioSessionInCache(queryClient, next)
+    onSuccess: (updatedSession) => {
+      syncScenarioSessionInCache(queryClient, updatedSession)
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
-      setDismissedCompletionSessionId(next.id)
-      navigate(next.review_mode ? `/review/${next.id}` : `/practice/${next.id}`)
+      navigate(`/units?unit=${updatedSession.unit.id}`)
     },
   })
   const nextLevelMutation = useMutation({
@@ -108,7 +105,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     onSuccess: (next) => {
       syncScenarioSessionInCache(queryClient, next)
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
-      setDismissedCompletionSessionId(next.id)
+      if (session?.status === 'completed') setDismissedCompletionSessionId(session.id)
       navigate(`/practice/${next.id}`)
     },
   })
@@ -117,8 +114,20 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     onSuccess: (next) => {
       syncScenarioSessionInCache(queryClient, next)
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
-      setDismissedCompletionSessionId(next.id)
+      if (session?.status === 'completed') setDismissedCompletionSessionId(session.id)
       navigate(`/review/${next.id}`)
+    },
+  })
+  const retryMutation = useMutation({
+    mutationFn: () => {
+      if (!session) throw new Error('No session is available to retry.')
+      return scenariosApi.retrySession(session.id)
+    },
+    onSuccess: (next) => {
+      syncScenarioSessionInCache(queryClient, next)
+      void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
+      setDismissedCompletionSessionId(null)
+      navigate(`/practice/${next.id}`)
     },
   })
   const unitScenariosQuery = useQuery({
@@ -132,7 +141,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     (d) => d.review_available && d.difficulty !== session?.difficulty
   ) ?? []
 
-  if (query.isLoading) return <LoadingState label="Loading scenario workspace" />
+  if (query.isLoading) return <PracticeWorkspaceSkeleton />
   if (query.isError) return <ErrorState title="Could not load scenario workspace" description={query.error.message} />
   if (!session) return <ErrorState title="Could not load scenario workspace" description="The API returned no session data." />
 
@@ -256,13 +265,23 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
-      <ScenarioStatusHeader session={session} />
+      <ScenarioStatusHeader
+        session={session}
+        isExiting={exitMutation.isPending}
+        isRetrying={retryMutation.isPending}
+        onExit={() => exitMutation.mutate()}
+        onRetry={() => retryMutation.mutate()}
+      />
       <main className="grid min-h-0 flex-1 grid-cols-[18rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[17rem_minmax(0,1fr)] max-xl:grid-cols-[16rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
         <aside className="flex min-h-0 flex-col gap-2">
           <ScenarioContextPanel session={session} />
           <CommandCounter session={session} />
           <ProjectStructurePanel snapshot={session.repository_state} />
-          <SessionOutcomeBanner session={session} />
+          <SessionOutcomeBanner
+            session={session}
+            isRetrying={retryMutation.isPending}
+            onRetry={() => retryMutation.mutate()}
+          />
         </aside>
         <section
           ref={workspaceGridRef}
@@ -325,9 +344,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         onReviewDifficulty={(difficulty) => reviewMutation.mutate(difficulty.id)}
         previousDifficulties={reviewableDifficulties}
         isReviewing={reviewMutation.isPending}
-        onRetry={() => retryMutation.mutate()}
         onNextLevel={session.next_difficulty ? () => nextLevelMutation.mutate() : undefined}
-        isRetrying={retryMutation.isPending}
         isStartingNextLevel={nextLevelMutation.isPending}
         nextDifficultyLabel={
           session.next_difficulty

@@ -22,12 +22,13 @@ const emptyDemoSnapshot: RepositorySnapshot = {
 
 const demoBootLines: TerminalLine[] = [
   { id: 'demo-boot-1', kind: 'system', text: 'Demo repository loaded. This is a warm-up only.' },
-  { id: 'demo-boot-2', kind: 'output', text: 'Try a safe demo command to see example output.' },
+  { id: 'demo-boot-2', kind: 'output', text: 'Try the focus command syntax to see example output.' },
 ]
 
 export function SkillFocusPreviewModal({
   scenario,
   difficulty,
+  action,
   isProceeding,
   onClose,
   onProceed,
@@ -50,6 +51,12 @@ export function SkillFocusPreviewModal({
   const [terminalLines, setTerminalLines] = useState<TerminalLine[]>(demoBootLines)
   const [isRunningDemo, setIsRunningDemo] = useState(false)
   const difficultyLabel = difficulty.difficulty.charAt(0).toUpperCase() + difficulty.difficulty.slice(1)
+  const startLabel =
+    action === 'review'
+        ? 'Open review'
+        : action === 'retry'
+          ? 'Retry scenario'
+          : 'Start scenario'
 
   function applyStep(nextIndex: number) {
     const step = steps[nextIndex]
@@ -83,7 +90,7 @@ export function SkillFocusPreviewModal({
       return
     }
     if ((scenario.safe_demo_commands ?? []).some((safeCommand) => normalize(safeCommand) === normalizedCommand)) return
-    setExplanation('This preview only accepts the listed safe demo commands. It does not evaluate answers.')
+    setExplanation('This preview accepts only a small warm-up set. It teaches command behavior without evaluating the scenario answer.')
   }
 
   return (
@@ -137,21 +144,15 @@ export function SkillFocusPreviewModal({
             lines={terminalLines}
             onCommand={runDemoCommand}
           />
-          {scenario.safe_demo_commands?.length ? (
-            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-              <span className="font-semibold">Safe demo commands:</span>
-              <span className="font-mono">{scenario.safe_demo_commands.join(' · ')}</span>
-            </div>
-          ) : null}
         </div>
 
         <PreviewNavigationControls
           canGoPrevious={stepIndex > 0}
           canGoNext={steps.length > 0 && stepIndex < steps.length - 1}
           isProceeding={isProceeding}
+          startLabel={startLabel}
           onPrevious={() => applyStep(stepIndex - 1)}
           onNext={() => applyStep(stepIndex + 1)}
-          onSkip={onProceed}
           onStartPractice={onProceed}
         />
       </div>
@@ -224,6 +225,88 @@ function quickReferenceFor(command: string) {
       title: 'git commit',
       syntax: ['git commit -m "message"', 'git commit'],
       note: 'Creates a commit from staged content. The -m flag sets the commit message inline.',
+    }
+  }
+  if (normalized === 'git init') {
+    return {
+      key: 'git-init',
+      title: 'git init',
+      syntax: ['git init'],
+      note: 'Creates repository metadata in the current folder so Git can begin tracking snapshots.',
+    }
+  }
+  if (normalized === 'git clone') {
+    return {
+      key: 'git-clone',
+      title: 'git clone',
+      syntax: ['git clone <url>', 'git clone <url> <folder>'],
+      note: 'Creates a local working copy from a remote repository and configures origin.',
+    }
+  }
+  if (normalized === 'git remote') {
+    return {
+      key: 'git-remote',
+      title: 'git remote',
+      syntax: ['git remote', 'git remote -v', 'git remote add origin <url>'],
+      note: 'Shows or configures named remote repository locations such as origin.',
+    }
+  }
+  if (normalized === 'git fetch') {
+    return {
+      key: 'git-fetch',
+      title: 'git fetch',
+      syntax: ['git fetch', 'git fetch origin'],
+      note: 'Updates remote-tracking refs without moving the current local branch.',
+    }
+  }
+  if (normalized === 'git pull') {
+    return {
+      key: 'git-pull',
+      title: 'git pull',
+      syntax: ['git pull'],
+      note: 'Updates the current branch from its configured upstream.',
+    }
+  }
+  if (normalized === 'git push') {
+    return {
+      key: 'git-push',
+      title: 'git push',
+      syntax: ['git push'],
+      note: 'Publishes the current branch to its configured upstream remote branch.',
+    }
+  }
+  if (normalized === 'git restore' || normalized === 'git restore --staged') {
+    return {
+      key: normalized.replace(/\s+/g, '-'),
+      title: normalized,
+      syntax: normalized === 'git restore --staged' ? ['git restore --staged <path>'] : ['git restore <path>'],
+      note: normalized === 'git restore --staged'
+        ? 'Moves selected paths out of staging while keeping the working tree copy.'
+        : 'Discards selected working-tree changes from the current checkout.',
+    }
+  }
+  if (normalized === 'git stash') {
+    return {
+      key: 'git-stash',
+      title: 'git stash',
+      syntax: ['git stash', 'git stash pop'],
+      note: 'Temporarily saves local changes so branch navigation or integration can continue.',
+    }
+  }
+  if (normalized === 'git reflog') {
+    return {
+      key: 'git-reflog',
+      title: 'git reflog',
+      syntax: ['git reflog'],
+      note: 'Shows recent HEAD movements that can help recover from pointer mistakes.',
+    }
+  }
+  if (normalized === 'git commit --amend') {
+    return {
+      key: 'git-commit-amend',
+      title: 'git commit --amend',
+      syntax: ['git commit --amend', 'git commit --amend -m "message"'],
+      note: 'Replaces the latest commit with staged changes and optionally a revised message.',
     }
   }
   return null
