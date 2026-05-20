@@ -17,9 +17,9 @@ export function ScenarioSelectionPage() {
     enabled: Number.isFinite(lessonId),
   })
 
-  if (lessonQuery.isLoading) return <LoadingState label="Loading skill focuses" />
+  if (lessonQuery.isLoading) return <LoadingState label="Loading scenarios" />
   if (lessonQuery.isError) return <ErrorState title="Could not load lesson" description={lessonQuery.error.message} />
-  if (!lessonQuery.data) return <ErrorState title="Could not load skill focuses" description="The API returned no lesson data." />
+  if (!lessonQuery.data) return <ErrorState title="Could not load scenarios" description="The API returned no lesson data." />
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-4">
@@ -32,11 +32,7 @@ export function ScenarioSelectionPage() {
             </Link>
           </Button>
         </div>
-        <h1 className="text-4xl font-extrabold tracking-tight">Scenario Skill Focuses</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-          This legacy route now uses the same Skill Focus Preview flow as the expanded Unit page. The main access path is
-          Units → expanded unit → Scenario Skill Focus card.
-        </p>
+        <h1 className="text-4xl font-extrabold tracking-tight">Scenarios</h1>
       </section>
       <ScenarioList scope="lesson" lessonId={lessonQuery.data.id} source="lesson" />
     </div>

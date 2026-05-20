@@ -68,12 +68,12 @@ export function LessonPage() {
             <div className="mb-4">
               <h2 className="text-xl font-bold">Practice starts from the Unit page</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Scenario-bearing units now show Scenario Skill Focus cards directly when expanded. This lesson remains as
-                reference material, not the main scenario selection path.
+                Scenario-bearing units now show scenarios directly when expanded. This lesson remains as reference material,
+                not the main scenario selection path.
               </p>
             </div>
             <Button asChild>
-              <Link to="/units">Back to Unit Skill Focuses</Link>
+              <Link to="/units">Back to Units</Link>
             </Button>
           </section>
         ) : null}

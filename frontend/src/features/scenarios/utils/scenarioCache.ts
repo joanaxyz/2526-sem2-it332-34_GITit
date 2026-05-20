@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query'
 
 import type { ScenarioSession } from '@/features/practice/types'
-import type { Difficulty, DifficultyStatus, ScenarioSkillFocus } from '@/features/scenarios/types'
+import type { Difficulty, DifficultyStatus, LatestAttemptStats, ScenarioSkillFocus } from '@/features/scenarios/types'
 
 const scenarioListQueryKeys = new Set(['lesson-scenarios', 'unit-scenarios'])
 const difficultyOrder: Difficulty[] = ['easy', 'medium', 'hard']
@@ -49,13 +49,15 @@ export function updateScenarioListWithSession(
                 completed_at: session.completed_at ?? new Date().toISOString(),
               }
             : difficulty.completion
+        const latestAttempt = latestAttemptFromSession(session)
 
         if (
           difficulty.status === status &&
           difficulty.active_session_id === activeSessionId &&
           difficulty.retry_session_id === retrySessionId &&
           difficulty.review_available === (session.status === 'completed' || difficulty.review_available) &&
-          difficulty.completion === completion
+          difficulty.completion === completion &&
+          difficulty.latest_attempt === latestAttempt
         ) {
           return difficulty
         }
@@ -68,6 +70,7 @@ export function updateScenarioListWithSession(
           retry_session_id: retrySessionId,
           review_available: session.status === 'completed' || difficulty.review_available,
           completion,
+          latest_attempt: latestAttempt,
         }
       }
 
@@ -88,6 +91,26 @@ export function updateScenarioListWithSession(
 function nextDifficultyAfter(difficulty: Difficulty) {
   const index = difficultyOrder.indexOf(difficulty)
   return index >= 0 ? difficultyOrder[index + 1] ?? null : null
+}
+
+function latestAttemptFromSession(session: ScenarioSession): LatestAttemptStats {
+  return {
+    status: session.status,
+    accuracy_rate: latestAttemptAccuracy(session),
+    command_accurate:
+      session.status === 'completed'
+        ? session.counts.counted_action_total <= session.policy.min_counted_commands
+        : null,
+    counted_action_total: session.counts.counted_action_total,
+    total_attempts: session.counts.total_attempts,
+    completed_at: session.completed_at,
+    ended_at: session.completed_at,
+  }
+}
+
+function latestAttemptAccuracy(session: ScenarioSession) {
+  if (session.status !== 'completed') return null
+  return session.counts.counted_action_total <= session.policy.min_counted_commands ? 100 : 0
 }
 
 function statusFromSession(

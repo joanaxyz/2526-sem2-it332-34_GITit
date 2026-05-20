@@ -2,6 +2,7 @@ import type { RepositorySnapshot } from '@/features/practice/types'
 
 export type Difficulty = 'easy' | 'medium' | 'hard'
 export type DifficultyStatus = 'not_started' | 'locked' | 'in_progress' | 'completed' | 'failed' | 'abandoned'
+export type AttemptStatus = 'started' | 'completed' | 'failed' | 'abandoned'
 export type DifficultyActionIntent = 'start' | 'continue' | 'review' | 'retry'
 export type SkillFocusType = 'command_specific' | 'concept_specific' | 'workflow_specific'
 
@@ -10,6 +11,16 @@ export type CommandPolicy = {
   min_counted_commands: number
   max_counted_commands: number
   non_counted_patterns: string[]
+}
+
+export type LatestAttemptStats = {
+  status: AttemptStatus
+  accuracy_rate: number | null
+  command_accurate: boolean | null
+  counted_action_total: number
+  total_attempts: number
+  completed_at: string | null
+  ended_at: string | null
 }
 
 export type DifficultyAccess = {
@@ -25,6 +36,7 @@ export type DifficultyAccess = {
     counted_action_total: number
     completed_at: string
   }
+  latest_attempt: LatestAttemptStats | null
 }
 
 export type DemoExplanationStep = {

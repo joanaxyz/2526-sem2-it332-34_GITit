@@ -11,11 +11,7 @@ export function UnitScenarioHub({ unit }: { unit: LearningUnit }) {
           <Target className="size-5" />
         </div>
         <div>
-          <h3 className="text-lg font-bold">Scenario Skill Focuses</h3>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">
-            Choose a public Git skill focus, then open an available difficulty. A Skill Focus Preview appears before the
-            real scenario workspace starts.
-          </p>
+          <h3 className="text-lg font-bold">Scenarios</h3>
         </div>
       </div>
       <ScenarioList scope="unit" unitId={unit.id} source="unit_card" />

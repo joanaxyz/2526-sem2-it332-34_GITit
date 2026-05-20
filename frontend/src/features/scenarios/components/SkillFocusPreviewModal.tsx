@@ -20,22 +20,15 @@ const emptyDemoSnapshot: RepositorySnapshot = {
   conflicts: [],
 }
 
-const actionCopy: Record<DifficultyActionIntent, string> = {
-  start: 'New practice session',
-  continue: 'Resume existing practice session',
-  review: 'Playable Review Mode session',
-  retry: 'Retry practice attempt',
-}
-
 const demoBootLines: TerminalLine[] = [
   { id: 'demo-boot-1', kind: 'system', text: 'Demo repository loaded. This is a warm-up only.' },
-  { id: 'demo-boot-2', kind: 'output', text: 'Try a safe demo command to see simulated output.' },
+  { id: 'demo-boot-2', kind: 'output', text: 'Try a safe demo command to see example output.' },
 ]
 
 export function SkillFocusPreviewModal({
   scenario,
   difficulty,
-  action,
+  action: _action,
   isProceeding,
   onClose,
   onProceed,
@@ -97,7 +90,7 @@ export function SkillFocusPreviewModal({
   return (
     <Modal
       open
-      title="Skill Focus Preview"
+      title="Scenario preview"
       onClose={onClose}
       className="max-h-[92vh] w-full max-w-6xl overflow-hidden"
       contentClassName="max-h-[calc(92vh-4.5rem)] overflow-auto p-5"
@@ -105,12 +98,11 @@ export function SkillFocusPreviewModal({
       <div className="space-y-5">
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Scenario skill focus</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Scenario</p>
             <h3 className="mt-1 text-2xl font-extrabold tracking-tight">{scenario.title}</h3>
           </div>
           <div className="flex flex-wrap justify-end gap-2">
             <Badge variant="blue">{difficultyLabel}</Badge>
-            <Badge variant="outline">{actionCopy[action]}</Badge>
           </div>
         </header>
 
@@ -140,7 +132,7 @@ export function SkillFocusPreviewModal({
 
         <div className="grid gap-3">
           <TerminalPanel
-            title="Demo terminal (simulated Git)"
+            title="Demo terminal"
             className="h-56"
             disabled={isRunningDemo}
             lines={terminalLines}
@@ -172,8 +164,10 @@ function normalize(command: string) {
   return command.trim().replace(/\s+/g, ' ').toLowerCase()
 }
 
-function isRepositorySnapshot(value: RepositorySnapshot | Record<string, unknown> | null | undefined): value is RepositorySnapshot {
-  return Boolean(value && Array.isArray((value as RepositorySnapshot).commits) && (value as RepositorySnapshot).head)
+function isRepositorySnapshot(value: unknown): value is RepositorySnapshot {
+  if (!value || typeof value !== 'object') return false
+  const snapshot = value as Partial<RepositorySnapshot>
+  return Array.isArray(snapshot.commits) && Boolean((snapshot as RepositorySnapshot).head)
 }
 
 function CommandQuickReference({ commands }: { commands: string[] }) {

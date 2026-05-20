@@ -38,7 +38,7 @@ export function PreviewNavigationControls({
         </Button>
         <Button type="button" disabled={isProceeding} onClick={onStartPractice}>
           <Play data-icon="inline-start" />
-          {isProceeding ? 'Opening…' : 'Start Practice'}
+          {isProceeding ? 'Opening...' : 'Start scenario'}
         </Button>
       </div>
     </div>

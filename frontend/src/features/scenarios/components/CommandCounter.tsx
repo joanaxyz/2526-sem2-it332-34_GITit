@@ -22,7 +22,16 @@ export function CommandCounter({ session }: { session: ScenarioSession }) {
       <ProgressBar value={pct} className="mt-2" />
       <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
         <span>Target actions: {session.policy.min_counted_commands}</span>
-        <span>Free inspections: {session.policy.non_counted_patterns.length}</span>
+        <span
+          title={
+            session.policy.non_counted_patterns.length
+              ? `Inspection commands: ${session.policy.non_counted_patterns.join(', ')}`
+              : 'No inspection commands listed'
+          }
+          className="cursor-help underline decoration-dotted"
+        >
+          Free inspections: {session.policy.non_counted_patterns.length}
+        </span>
       </div>
     </Card>
   )

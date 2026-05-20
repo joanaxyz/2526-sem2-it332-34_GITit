@@ -62,7 +62,7 @@ export function ScenarioList(props: ScenarioListProps) {
 
   if (isLoading) return <LoadingState label="Loading scenarios" />
   if (isError) return <ErrorState title="Could not load scenarios" description={error.message} />
-  if (!data?.length) return <EmptyState title="No skill focuses here yet" description="This unit does not have scenario skill focuses published yet." />
+  if (!data?.length) return <EmptyState title="No scenarios here yet" description="This unit does not have any published scenarios yet." />
 
   function proceedFromPreview() {
     if (!previewRequest) return

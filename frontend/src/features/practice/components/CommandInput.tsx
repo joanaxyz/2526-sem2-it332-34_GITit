@@ -57,7 +57,7 @@ export function CommandInput({
         onKeyDown={handleKeyDown}
         disabled={disabled}
         autoFocus
-        placeholder="Type a simulated git command"
+        placeholder="Type a git command"
       />
       <Button type="submit" size="sm" disabled={disabled}>Run</Button>
     </form>

@@ -11,6 +11,8 @@ from learning.models import Lesson, OrientationProgress
 from progress.models import StreakRecord, StudentProgress
 from review.services import ReviewModeService
 from scenarios.models import CompletionRecord, DifficultyInstance, ScenarioSession
+from scenarios.selectors import scenario_status_payload
+from scenarios.serializers import session_payload
 from scenarios.services import CommandProcessingService, ScenarioSessionService
 
 
@@ -192,4 +194,28 @@ def test_review_mode_logs_separately_without_new_completion(student):
         CompletionRecord.objects.filter(user=student, difficulty_instance=difficulty).count() == 1
     )
     assert ScenarioSession.objects.filter(user=student, mode=SESSION_MODE_REVIEW).count() == 1
+
+
+def test_scenario_payload_includes_latest_attempt_accuracy(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="first-clean-commit",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    CommandProcessingService().submit_command(session=session, command="git add .")
+    CommandProcessingService().submit_command(
+        session=session, command='git commit -m "starter snapshot"'
+    )
+
+    payload = scenario_status_payload(user=student, scenario=difficulty.scenario)
+    easy = next(item for item in payload["difficulties"] if item["difficulty"] == "easy")
+
+    assert easy["latest_attempt"]["status"] == "completed"
+    assert easy["latest_attempt"]["accuracy_rate"] == 100
+    assert easy["latest_attempt"]["command_accurate"] is True
+    assert session_payload(session)["next_difficulty"]["difficulty"] == "medium"
 

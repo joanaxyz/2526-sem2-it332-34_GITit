@@ -17,9 +17,11 @@ export function UnitCard({
   expanded: boolean
   onToggle: () => void
 }) {
-  const progress = unit.is_orientation
-    ? Math.round((unit.lessons.filter((lesson) => lesson.is_complete).length / Math.max(unit.lessons.length, 1)) * 100)
-    : 0
+  const orientationProgress = Math.round(
+    (unit.lessons.filter((lesson) => lesson.is_complete).length / Math.max(unit.lessons.length, 1)) * 100,
+  )
+  const practiceProgress = Math.round(unit.practice_completion?.value ?? 0)
+  const progressValue = unit.is_orientation ? orientationProgress : practiceProgress
   const referenceLessons = unit.lessons.filter((lesson) => lesson.kind !== 'scenario')
 
   return (
@@ -31,12 +33,11 @@ export function UnitCard({
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-lg font-bold">{unit.title}</h2>
-            {unit.is_orientation ? <Badge variant="warning">Orientation</Badge> : <Badge variant="blue">{unit.scenario_count} scenarios</Badge>}
           </div>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">{unit.description}</p>
           <div className="mt-3 flex max-w-xl items-center gap-3">
-            <ProgressBar value={unit.is_orientation ? progress : 0} className="flex-1" />
-            <span className="font-mono text-xs text-muted-foreground">{unit.is_orientation ? `${progress}%` : 'Practice'}</span>
+            <ProgressBar value={progressValue} className="flex-1" />
+            <span className="font-mono text-xs text-muted-foreground">{progressValue}%</span>
           </div>
         </div>
         {expanded ? <ChevronDown className="size-5 text-muted-foreground" /> : <ChevronRight className="size-5 text-muted-foreground" />}

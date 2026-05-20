@@ -38,6 +38,15 @@ const scenario: ScenarioSkillFocus = {
       retry_session_id: null,
       policy: { id: 1, min_counted_commands: 2, max_counted_commands: 6, non_counted_patterns: [] },
       completion: null,
+      latest_attempt: {
+        status: 'started',
+        accuracy_rate: null,
+        command_accurate: null,
+        counted_action_total: 0,
+        total_attempts: 0,
+        completed_at: null,
+        ended_at: null,
+      },
     },
     {
       id: 102,
@@ -48,6 +57,7 @@ const scenario: ScenarioSkillFocus = {
       retry_session_id: null,
       policy: { id: 2, min_counted_commands: 2, max_counted_commands: 6, non_counted_patterns: [] },
       completion: null,
+      latest_attempt: null,
     },
     {
       id: 103,
@@ -58,6 +68,7 @@ const scenario: ScenarioSkillFocus = {
       retry_session_id: null,
       policy: { id: 3, min_counted_commands: 1, max_counted_commands: 5, non_counted_patterns: [] },
       completion: null,
+      latest_attempt: null,
     },
   ],
 }
@@ -111,6 +122,10 @@ const completedSession: ScenarioSession = {
   expected_state: null,
   steps: [],
   review_mode: false,
+  next_difficulty: {
+    id: 102,
+    difficulty: 'medium',
+  },
 }
 
 describe('updateScenarioListWithSession', () => {
@@ -125,6 +140,12 @@ describe('updateScenarioListWithSession', () => {
         first_attempt_star: true,
         counted_action_total: 2,
         completed_at: '2026-05-18T12:00:00Z',
+      },
+      latest_attempt: {
+        status: 'completed',
+        accuracy_rate: 100,
+        command_accurate: true,
+        counted_action_total: 2,
       },
     })
     expect(updated.difficulties[1].status).toBe('not_started')

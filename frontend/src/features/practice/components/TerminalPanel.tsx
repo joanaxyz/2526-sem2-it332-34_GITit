@@ -6,7 +6,7 @@ export function TerminalPanel({
   lines,
   disabled,
   onCommand,
-  title = 'Terminal - simulated Git only',
+  title = 'Terminal',
   className,
 }: {
   lines: TerminalLine[]

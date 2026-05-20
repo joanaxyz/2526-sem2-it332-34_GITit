@@ -7,6 +7,48 @@ from scenarios.models import (
 from scenarios.services import DifficultyAccessService
 
 
+def latest_attempt_payload(*, user, difficulty_instance: DifficultyInstance) -> dict | None:
+    session = (
+        ScenarioSession.objects.filter(
+            user=user,
+            difficulty_instance=difficulty_instance,
+        )
+        .order_by("-id")
+        .first()
+    )
+    if not session:
+        return None
+
+    minimum_counted_commands = difficulty_instance.command_policy.min_counted_commands
+    command_accurate = (
+        session.status == "completed"
+        and session.counted_action_total <= minimum_counted_commands
+    )
+    latest_accuracy = 100 if command_accurate else 0 if session.status == "completed" else None
+
+    # Once 100% is achieved, it stays at 100%
+    ever_perfect = (
+        latest_accuracy == 100
+        or ScenarioSession.objects.filter(
+            user=user,
+            difficulty_instance=difficulty_instance,
+            status="completed",
+            counted_action_total__lte=minimum_counted_commands,
+        ).exists()
+    )
+    accuracy_rate = 100 if ever_perfect else latest_accuracy
+
+    return {
+        "status": session.status,
+        "accuracy_rate": accuracy_rate,
+        "command_accurate": command_accurate if session.status == "completed" else None,
+        "counted_action_total": session.counted_action_total,
+        "total_attempts": session.total_attempts,
+        "completed_at": session.completed_at,
+        "ended_at": session.ended_at,
+    }
+
+
 def scenario_queryset():
     return (
         ScenarioSkillFocus.objects.filter(
@@ -53,6 +95,10 @@ def scenario_status_payload(*, user, scenario: ScenarioSkillFocus) -> dict:
                 }
                 if completion
                 else None,
+                "latest_attempt": latest_attempt_payload(
+                    user=user,
+                    difficulty_instance=instance,
+                ),
                 "active_session_id": in_progress.id if in_progress else None,
                 "retry_session_id": retryable_session.id if retryable_session else None,
                 "policy": instance.command_policy.snapshot(),

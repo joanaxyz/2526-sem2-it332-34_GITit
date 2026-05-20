@@ -2,7 +2,6 @@ import { GitPullRequest, ListChecks } from 'lucide-react'
 
 import { DifficultyActionButton } from '@/features/scenarios/components/DifficultyActionButton'
 import type { DifficultyAccess, DifficultyActionIntent, ScenarioSkillFocus } from '@/features/scenarios/types'
-import { Badge } from '@/shared/components/Badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Card'
 
 export function ScenarioSkillFocusCard({
@@ -22,11 +21,10 @@ export function ScenarioSkillFocusCard({
           <div>
             <CardTitle className="flex items-center gap-2">
               <GitPullRequest className="size-5 text-primary" />
-              Scenario Skill Focus: {scenario.title}
+              {scenario.title}
             </CardTitle>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">{scenario.summary}</p>
           </div>
-          <Badge variant="blue">{scenario.skill_focus_type.replace('_', ' ')}</Badge>
         </div>
       </CardHeader>
       <CardContent>
