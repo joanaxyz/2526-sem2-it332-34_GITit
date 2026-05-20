@@ -15,9 +15,13 @@ export type RegisterPayload = {
   password_confirm: string
 }
 
+export type RegisterResponse = {
+  user: User
+}
+
 export const authApi = {
   register(payload: RegisterPayload) {
-    return apiRequest<AuthResponse>('/auth/register/', {
+    return apiRequest<RegisterResponse>('/auth/register/', {
       method: 'POST',
       body: JSON.stringify(payload),
     })

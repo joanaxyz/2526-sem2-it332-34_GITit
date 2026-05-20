@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { GripHorizontal, GripVertical } from 'lucide-react'
 
 import { CommandCounter } from '@/features/scenarios/components/CommandCounter'
 import { ScenarioContextPanel } from '@/features/scenarios/components/ScenarioContextPanel'
@@ -21,6 +23,53 @@ import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { cn } from '@/shared/utils/cn'
 
+const DEFAULT_TERMINAL_RATIO = 0.28
+const DEFAULT_DIAGRAM_RATIO = 0.52
+const DEFAULT_TERMINAL_PANE_RATIO = 0.76
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max)
+}
+
+function ResizeHandle({
+  label,
+  orientation,
+  className,
+  onPointerDown,
+}: {
+  label: string
+  orientation: 'horizontal' | 'vertical'
+  className?: string
+  onPointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void
+}) {
+  const isVertical = orientation === 'vertical'
+  const Icon = isVertical ? GripVertical : GripHorizontal
+
+  return (
+    <div
+      aria-label={label}
+      aria-orientation={orientation}
+      className={cn(
+        'group relative z-10 flex shrink-0 items-center justify-center',
+        isVertical ? 'h-full cursor-col-resize px-1' : 'w-full cursor-row-resize py-1',
+        className,
+      )}
+      role="separator"
+      onPointerDown={onPointerDown}
+    >
+      <span
+        className={cn(
+          'rounded-full bg-border/70 transition-colors group-hover:bg-primary/70 group-active:bg-primary',
+          isVertical ? 'h-full w-px' : 'h-px w-full',
+        )}
+      />
+      <span className="absolute grid size-5 place-items-center rounded-full border border-border bg-background/95 text-muted-foreground shadow-sm transition-colors group-hover:border-primary/60 group-hover:text-primary group-active:text-primary">
+        <Icon className="size-3" />
+      </span>
+    </div>
+  )
+}
+
 export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean }) {
   const params = useParams()
   const navigate = useNavigate()
@@ -29,6 +78,12 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const { query, session, setSession, lines, setLines, feedback, setFeedback } = useScenarioSession(sessionId)
   const mutation = useCommandSubmission(sessionId, reviewMode)
   const [dismissedCompletionSessionId, setDismissedCompletionSessionId] = useState<number | null>(null)
+  const [terminalRatio, setTerminalRatio] = useState(DEFAULT_TERMINAL_RATIO)
+  const [diagramRatio, setDiagramRatio] = useState(DEFAULT_DIAGRAM_RATIO)
+  const [terminalPaneRatio, setTerminalPaneRatio] = useState(DEFAULT_TERMINAL_PANE_RATIO)
+  const workspaceGridRef = useRef<HTMLElement>(null)
+  const diagramGridRef = useRef<HTMLDivElement>(null)
+  const terminalGridRef = useRef<HTMLDivElement>(null)
   const retryMutation = useMutation({
     mutationFn: () => {
       if (session?.review_mode) return reviewApi.startReviewSession(session.difficulty_instance_id)
@@ -102,6 +157,103 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     })
   }
 
+  function beginTerminalResize(event: ReactPointerEvent<HTMLDivElement>) {
+    const bounds = workspaceGridRef.current?.getBoundingClientRect()
+    if (!bounds) return
+    const resizeBounds = bounds
+    event.preventDefault()
+
+    function update(clientY: number) {
+      const bottomHeight = resizeBounds.bottom - clientY
+      setTerminalRatio(clamp(bottomHeight / resizeBounds.height, 0.22, 0.58))
+    }
+
+    function handlePointerMove(moveEvent: PointerEvent) {
+      update(moveEvent.clientY)
+    }
+
+    function handlePointerUp() {
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', handlePointerUp)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+
+    document.body.style.cursor = 'row-resize'
+    document.body.style.userSelect = 'none'
+    update(event.clientY)
+    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', handlePointerUp, { once: true })
+  }
+
+  function beginDiagramResize(event: ReactPointerEvent<HTMLDivElement>) {
+    const bounds = diagramGridRef.current?.getBoundingClientRect()
+    if (!bounds) return
+    const resizeBounds = bounds
+    event.preventDefault()
+
+    function update(clientX: number) {
+      setDiagramRatio(clamp((clientX - resizeBounds.left) / resizeBounds.width, 0.34, 0.66))
+    }
+
+    function handlePointerMove(moveEvent: PointerEvent) {
+      update(moveEvent.clientX)
+    }
+
+    function handlePointerUp() {
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', handlePointerUp)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    update(event.clientX)
+    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', handlePointerUp, { once: true })
+  }
+
+  function beginTerminalPaneResize(event: ReactPointerEvent<HTMLDivElement>) {
+    const bounds = terminalGridRef.current?.getBoundingClientRect()
+    if (!bounds) return
+    const resizeBounds = bounds
+    event.preventDefault()
+
+    function update(clientX: number) {
+      setTerminalPaneRatio(clamp((clientX - resizeBounds.left) / resizeBounds.width, 0.52, 0.86))
+    }
+
+    function handlePointerMove(moveEvent: PointerEvent) {
+      update(moveEvent.clientX)
+    }
+
+    function handlePointerUp() {
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', handlePointerUp)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    update(event.clientX)
+    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', handlePointerUp, { once: true })
+  }
+
+  const workspaceGridStyle = {
+    gridTemplateRows: `minmax(14rem, ${1 - terminalRatio}fr) 0.375rem minmax(10rem, ${terminalRatio}fr)`,
+  }
+  const diagramGridStyle = {
+    '--live-dag-size': `${diagramRatio}fr`,
+    '--expected-dag-size': `${1 - diagramRatio}fr`,
+  } as CSSProperties
+  const terminalGridStyle = {
+    '--terminal-pane-size': `${terminalPaneRatio}fr`,
+    '--feedback-pane-size': `${1 - terminalPaneRatio}fr`,
+  } as CSSProperties
+
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <ScenarioStatusHeader session={session} />
@@ -112,24 +264,53 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
           <ProjectStructurePanel snapshot={session.repository_state} />
           <SessionOutcomeBanner session={session} />
         </aside>
-        <section className="grid min-h-0 grid-rows-[minmax(0,1fr)_minmax(10rem,0.36fr)] gap-2 max-lg:min-h-[56rem]">
-          <div className="grid min-h-0 grid-cols-[minmax(0,1.04fr)_minmax(0,0.96fr)] gap-2 max-xl:grid-cols-1">
+        <section
+          ref={workspaceGridRef}
+          className="grid min-h-0 gap-0 max-lg:min-h-[56rem]"
+          style={workspaceGridStyle}
+        >
+          <div
+            ref={diagramGridRef}
+            className="grid min-h-0 grid-cols-1 gap-2 xl:grid-cols-[minmax(0,var(--live-dag-size))_0.375rem_minmax(0,var(--expected-dag-size))] xl:gap-0"
+            style={diagramGridStyle}
+          >
             <LiveDagPanel
               snapshot={session.repository_state}
               className="flex min-h-0 flex-col"
               contentClassName="h-full min-h-0 flex-1"
             />
+            <ResizeHandle
+              label="Resize diagrams"
+              orientation="vertical"
+              className="hidden xl:flex"
+              onPointerDown={beginDiagramResize}
+            />
             <ExpectedStatePanel session={session} />
           </div>
+          <ResizeHandle
+            label="Resize terminal height"
+            orientation="horizontal"
+            onPointerDown={beginTerminalResize}
+          />
           <div
+            ref={terminalGridRef}
             className={cn(
-              'grid min-h-0 gap-2',
+              'grid min-h-0',
               session.scaffolding.contextual_feedback
-                ? 'grid-cols-[minmax(0,1.55fr)_minmax(20rem,0.65fr)] max-xl:grid-cols-1'
+                ? 'grid-cols-1 gap-2 xl:grid-cols-[minmax(0,var(--terminal-pane-size))_0.375rem_minmax(18rem,var(--feedback-pane-size))] xl:gap-0'
                 : 'grid-cols-1',
             )}
+            style={terminalGridStyle}
           >
             <TerminalPanel lines={lines} disabled={session.status !== 'started' || mutation.isPending} onCommand={submit} />
+            {session.scaffolding.contextual_feedback ? (
+              <ResizeHandle
+                label="Resize terminal and feedback"
+                orientation="vertical"
+                className="hidden xl:flex"
+                onPointerDown={beginTerminalPaneResize}
+              />
+            ) : null}
             <ContextualFeedbackPanel session={session} feedback={feedback} />
           </div>
         </section>

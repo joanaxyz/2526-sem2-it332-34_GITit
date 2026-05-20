@@ -155,11 +155,10 @@ The main component interaction flow is as follows:
 |---|---|---|
 | AuthViewSet/RegisterAPIView | Validates registration payload, enforces unique NN-NNNN-NNN student ID and @cit.edu email requirements, creates student account, hashes password, initializes progress record. | Django REST Framework API view |
 | UserService | Handles user creation and initial progress setup. | Django service class |
-| TokenService | Issues JWT access token and refresh token. | Python service class |
 
 #### Object-Oriented Components
 
-Primary classes/components: User, StudentProfile, ProgressRecord, TokenService, AuthSerializer. StudentProfile stores the unique NN-NNNN-NNN student ID while User stores first name, last name, and CIT educational email.
+Primary classes/components: User, StudentProfile, ProgressRecord, AuthSerializer. StudentProfile stores the unique NN-NNNN-NNN student ID while User stores first name, last name, and CIT educational email.
 
 ##### Class Diagram
 [PLACEHOLDER — Insert class diagram for Register a New Student Account.]
@@ -168,7 +167,7 @@ Primary classes/components: User, StudentProfile, ProgressRecord, TokenService, 
 [PLACEHOLDER — Insert sequence diagram for Register a New Student Account.]
 
 #### Data Design
-Tables/entities involved: User, StudentProfile, ProgressRecord, RefreshToken/SessionRecord. Registration writes must be transactional so that user, unique student ID profile, and initial progress records are created together.
+Tables/entities involved: User, StudentProfile, ProgressRecord. Registration writes must be transactional so that user, unique student ID profile, and initial progress records are created together.
 
 ##### ERD or schema
 [PLACEHOLDER — Insert ERD/schema excerpt for Register a New Student Account.]

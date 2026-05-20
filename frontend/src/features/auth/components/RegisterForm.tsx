@@ -6,7 +6,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { authApi } from '@/features/auth/api/authApi'
-import { useAuthStore } from '@/features/auth/hooks/useAuth'
 import { Button } from '@/shared/components/Button'
 
 const schema = z
@@ -35,13 +34,11 @@ type FormValues = z.infer<typeof schema>
 
 export function RegisterForm() {
   const navigate = useNavigate()
-  const setSession = useAuthStore((state) => state.setSession)
   const form = useForm<FormValues>({ resolver: zodResolver(schema) })
   const mutation = useMutation({
     mutationFn: authApi.register,
-    onSuccess: (data) => {
-      setSession(data.access, data.user)
-      navigate('/dashboard')
+    onSuccess: () => {
+      navigate('/login')
     },
   })
 
