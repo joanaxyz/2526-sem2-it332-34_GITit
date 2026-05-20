@@ -28,13 +28,10 @@ class RegisterAPIView(APIView):
             first_name=serializer.validated_data["first_name"],
             last_name=serializer.validated_data["last_name"],
         )
-        tokens = TokenService().issue_for_user(user, request=request)
-        response = Response(
-            {"access": tokens.access, "user": UserSerializer(user).data},
+        return Response(
+            {"user": UserSerializer(user).data},
             status=status.HTTP_201_CREATED,
         )
-        set_refresh_cookie(response, tokens.refresh)
-        return response
 
 
 class LoginAPIView(APIView):
@@ -60,6 +57,7 @@ class LoginAPIView(APIView):
 
 
 class RefreshAPIView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):

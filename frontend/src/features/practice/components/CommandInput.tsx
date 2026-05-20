@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent, KeyboardEvent } from 'react'
 
 import { Button } from '@/shared/components/Button'
@@ -13,9 +13,15 @@ export function CommandInput({
   const [value, setValue] = useState('')
   const [history, setHistory] = useState<string[]>([])
   const [cursor, setCursor] = useState<number | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (!disabled) inputRef.current?.focus()
+  }, [disabled])
 
   function submit(event: FormEvent) {
     event.preventDefault()
+    if (disabled) return
     const command = value.trim()
     if (!command) return
     setHistory((items) => [...items, command])
@@ -51,6 +57,7 @@ export function CommandInput({
     <form className="flex gap-2 border-t border-border p-2" onSubmit={submit}>
       <span className="hidden pt-2 font-mono text-[11px] text-primary md:block">student@git-it $</span>
       <input
+        ref={inputRef}
         className="h-9 min-w-0 flex-1 rounded-md border border-input bg-background px-3 font-mono text-xs outline-none focus:ring-2 focus:ring-ring"
         value={value}
         onChange={(event) => setValue(event.target.value)}

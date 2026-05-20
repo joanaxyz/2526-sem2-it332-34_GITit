@@ -21,7 +21,12 @@ export function CommandCounter({ session }: { session: ScenarioSession }) {
       </div>
       <ProgressBar value={pct} className="mt-2" />
       <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-        <span>Target actions: {session.policy.min_counted_commands}</span>
+        <span
+          title="Minimum action commands required to complete this scenario"
+          className="cursor-help underline decoration-dotted"
+        >
+          Target actions: {session.policy.min_counted_commands}
+        </span>
         <span
           title={
             session.policy.non_counted_patterns.length

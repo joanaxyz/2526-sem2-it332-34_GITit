@@ -28,7 +28,6 @@ const demoBootLines: TerminalLine[] = [
 export function SkillFocusPreviewModal({
   scenario,
   difficulty,
-  action: _action,
   isProceeding,
   onClose,
   onProceed,
