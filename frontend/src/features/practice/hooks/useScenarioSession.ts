@@ -5,10 +5,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { practiceApi } from '@/features/practice/api/practiceApi'
 import type { ScenarioSession, TerminalLine } from '@/features/practice/types'
 
-const bootLines: TerminalLine[] = [
-  { id: 'boot-1', kind: 'system', text: 'Repository state loaded. Action budget active.' },
-  { id: 'boot-2', kind: 'output', text: 'Inspect the DAG and scenario context before changing state.' },
-]
+const bootLines: TerminalLine[] = []
 
 function terminalLinesFromSession(session: ScenarioSession): TerminalLine[] {
   return session.steps.reduce<TerminalLine[]>(

@@ -7,6 +7,48 @@ from scenarios.models import (
 from scenarios.services import DifficultyAccessService
 
 
+def latest_attempt_payload(*, user, difficulty_instance: DifficultyInstance) -> dict | None:
+    session = (
+        ScenarioSession.objects.filter(
+            user=user,
+            difficulty_instance=difficulty_instance,
+        )
+        .order_by("-id")
+        .first()
+    )
+    if not session:
+        return None
+
+    minimum_counted_commands = difficulty_instance.command_policy.min_counted_commands
+    command_accurate = (
+        session.status == "completed"
+        and session.counted_action_total <= minimum_counted_commands
+    )
+    latest_accuracy = 100 if command_accurate else 0 if session.status == "completed" else None
+
+    # Once 100% is achieved, it stays at 100%
+    ever_perfect = (
+        latest_accuracy == 100
+        or ScenarioSession.objects.filter(
+            user=user,
+            difficulty_instance=difficulty_instance,
+            status="completed",
+            counted_action_total__lte=minimum_counted_commands,
+        ).exists()
+    )
+    accuracy_rate = 100 if ever_perfect else latest_accuracy
+
+    return {
+        "status": session.status,
+        "accuracy_rate": accuracy_rate,
+        "command_accurate": command_accurate if session.status == "completed" else None,
+        "counted_action_total": session.counted_action_total,
+        "total_attempts": session.total_attempts,
+        "completed_at": session.completed_at,
+        "ended_at": session.ended_at,
+    }
+
+
 def scenario_queryset():
     return (
         ScenarioSkillFocus.objects.filter(
@@ -36,12 +78,14 @@ def scenario_status_payload(*, user, scenario: ScenarioSkillFocus) -> dict:
             status="started",
             mode="primary",
         ).first()
+        retryable_session = access.latest_retryable_session(
+            user=user,
+            difficulty_instance=instance,
+        )
         difficulties.append(
             {
                 "id": instance.id,
                 "difficulty": instance.difficulty,
-                "narrative": instance.narrative or scenario.narrative,
-                "task_prompt": instance.task_prompt or scenario.task_prompt,
                 "status": access.status_for(user=user, difficulty_instance=instance),
                 "review_available": completion is not None,
                 "completion": {
@@ -51,7 +95,12 @@ def scenario_status_payload(*, user, scenario: ScenarioSkillFocus) -> dict:
                 }
                 if completion
                 else None,
+                "latest_attempt": latest_attempt_payload(
+                    user=user,
+                    difficulty_instance=instance,
+                ),
                 "active_session_id": in_progress.id if in_progress else None,
+                "retry_session_id": retryable_session.id if retryable_session else None,
                 "policy": instance.command_policy.snapshot(),
             }
         )
@@ -62,8 +111,16 @@ def scenario_status_payload(*, user, scenario: ScenarioSkillFocus) -> dict:
         "slug": scenario.slug,
         "title": scenario.title,
         "focus": scenario.focus,
-        "narrative": scenario.narrative,
-        "task_prompt": scenario.task_prompt,
+        "summary": scenario.summary,
+        "short_explanation": scenario.short_explanation,
+        "skill_focus_type": scenario.skill_focus_type,
+        "primary_focus_commands": scenario.primary_focus_commands,
+        "supporting_inspection_commands": scenario.supporting_inspection_commands,
+        "safe_demo_commands": scenario.safe_demo_commands,
+        "demo_repository_state": scenario.demo_repository_state,
+        "demo_dag_config": scenario.demo_dag_config,
+        "demo_explanation_steps": scenario.demo_explanation_steps,
+        "related_git_concepts": scenario.related_git_concepts,
         "learning_unit_id": scenario.learning_unit_id,
         "lesson_id": scenario.lesson_id,
         "difficulties": difficulties,

@@ -1,5 +1,11 @@
 export type LessonKind = 'orientation' | 'content' | 'scenario'
 
+export type UnitPracticeMetric = {
+  value: number
+  numerator: number
+  denominator: number
+}
+
 export type LessonSummary = {
   id: number
   slug: string
@@ -21,6 +27,7 @@ export type LearningUnit = {
   sort_order: number
   lesson_count: number
   scenario_count: number
+  practice_completion?: UnitPracticeMetric
   lessons: LessonSummary[]
 }
 

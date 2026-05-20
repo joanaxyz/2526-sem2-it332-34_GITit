@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, BookOpen, CheckCircle2 } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 
-import { ScenarioList } from '@/features/scenarios/components/ScenarioList'
 import { unitsApi } from '@/features/units/api/unitsApi'
 import { LessonContentRenderer } from '@/features/units/components/LessonContentRenderer'
 import { Badge } from '@/shared/components/Badge'
@@ -67,12 +66,15 @@ export function LessonPage() {
         {lesson.scenario_count ? (
           <section className="mt-6 rounded-lg border border-border bg-card p-5">
             <div className="mb-4">
-              <h2 className="text-xl font-bold">Scenarios in this lesson</h2>
+              <h2 className="text-xl font-bold">Practice starts from the Unit page</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Choose a scenario, then start an available difficulty level when you are ready to practice.
+                Scenario-bearing units now show scenarios directly when expanded. This lesson remains as reference material,
+                not the main scenario selection path.
               </p>
             </div>
-            <ScenarioList scope="lesson" lessonId={lesson.id} source="lesson" />
+            <Button asChild>
+              <Link to="/units">Back to Units</Link>
+            </Button>
           </section>
         ) : null}
       </article>
@@ -82,7 +84,7 @@ export function LessonPage() {
           Lesson status
         </div>
         <p className="text-sm leading-6 text-muted-foreground">
-          {isOrientation ? 'Saved to your foundation progress.' : 'Use this lesson to build the mental model before starting a scenario.'}
+          {isOrientation ? 'Saved to your foundation progress.' : 'Use this reference only when you want extra context; scenario practice starts from the Unit page.'}
         </p>
       </Card>
     </div>

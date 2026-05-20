@@ -1,7 +1,10 @@
 from rest_framework import serializers
 
 from scaffolding.services import ScaffoldingService
+from scenarios.models import DifficultyInstance
 from simulator.services import RepositorySnapshotService
+
+DIFFICULTY_ORDER = ["easy", "medium", "hard"]
 
 
 class ScenarioStartSerializer(serializers.Serializer):
@@ -15,6 +18,11 @@ class ScenarioStartSerializer(serializers.Serializer):
 
 class CommandSubmitSerializer(serializers.Serializer):
     command = serializers.CharField(max_length=500)
+
+
+class SkillFocusDemoCommandSerializer(serializers.Serializer):
+    command = serializers.CharField(max_length=500)
+    repository_state = serializers.JSONField(required=False)
 
 
 def session_payload(session) -> dict:
@@ -75,4 +83,29 @@ def session_payload(session) -> dict:
             for step in step_logs
         ],
         "review_mode": session.mode == "review",
+        "next_difficulty": next_difficulty_payload(session),
+    }
+
+
+def next_difficulty_payload(session) -> dict | None:
+    if session.mode != "primary" or session.status != "completed":
+        return None
+
+    try:
+        current_index = DIFFICULTY_ORDER.index(session.difficulty_instance.difficulty)
+        next_difficulty = DIFFICULTY_ORDER[current_index + 1]
+    except (ValueError, IndexError):
+        return None
+
+    next_instance = DifficultyInstance.objects.filter(
+        scenario=session.scenario,
+        difficulty=next_difficulty,
+        is_published=True,
+    ).first()
+    if not next_instance:
+        return None
+
+    return {
+        "id": next_instance.id,
+        "difficulty": next_instance.difficulty,
     }

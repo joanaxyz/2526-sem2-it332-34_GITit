@@ -8,35 +8,43 @@ const difficulties: DifficultyAccess[] = [
   {
     id: 1,
     difficulty: 'easy',
-    narrative: 'Easy setup.',
-    task_prompt: 'Complete the easy task.',
-    status: 'available',
+    status: 'not_started',
     review_available: false,
     active_session_id: null,
+    retry_session_id: null,
     policy: { id: 1, min_counted_commands: 3, max_counted_commands: 9, non_counted_patterns: [] },
     completion: null,
+    latest_attempt: null,
   },
   {
     id: 2,
     difficulty: 'medium',
-    narrative: 'Medium setup.',
-    task_prompt: 'Complete the medium task.',
     status: 'locked',
     review_available: false,
     active_session_id: null,
+    retry_session_id: null,
     policy: { id: 2, min_counted_commands: 2, max_counted_commands: 9, non_counted_patterns: [] },
     completion: null,
+    latest_attempt: null,
   },
   {
     id: 3,
     difficulty: 'hard',
-    narrative: 'Hard setup.',
-    task_prompt: 'Complete the hard task.',
-    status: 'complete',
+    status: 'completed',
     review_available: true,
     active_session_id: null,
+    retry_session_id: null,
     policy: { id: 3, min_counted_commands: 1, max_counted_commands: 9, non_counted_patterns: [] },
     completion: { first_attempt_star: true, counted_action_total: 1, completed_at: '2026-05-18T00:00:00Z' },
+    latest_attempt: {
+      status: 'completed',
+      accuracy_rate: 100,
+      command_accurate: true,
+      counted_action_total: 1,
+      total_attempts: 1,
+      completed_at: '2026-05-18T00:00:00Z',
+      ended_at: '2026-05-18T00:00:00Z',
+    },
   },
 ]
 
@@ -44,9 +52,11 @@ describe('DifficultySelector', () => {
   it('renders available, locked, and review states', () => {
     render(<DifficultySelector difficulties={difficulties} onStart={vi.fn()} onReview={vi.fn()} />)
 
-    expect(screen.getByText('Available')).toBeInTheDocument()
-    expect(screen.getByText('Locked')).toBeInTheDocument()
-    expect(screen.getByText('Complete the easy task.')).toBeInTheDocument()
+    const startButtons = screen.getAllByRole('button', { name: /start/i })
+    expect(startButtons[0]).not.toBeDisabled()
+    expect(startButtons[1]).toBeDisabled()
     expect(screen.getByRole('button', { name: /review/i })).toBeInTheDocument()
+    expect(screen.getByText('100%')).toBeInTheDocument()
+    expect(screen.queryByText(/counted action/i)).not.toBeInTheDocument()
   })
 })

@@ -22,6 +22,11 @@ from common.constants import (
 
 
 class ScenarioSkillFocus(models.Model):
+    class SkillFocusType(models.TextChoices):
+        COMMAND_SPECIFIC = "command_specific", "Command-specific"
+        CONCEPT_SPECIFIC = "concept_specific", "Concept-specific"
+        WORKFLOW_SPECIFIC = "workflow_specific", "Workflow-specific"
+
     learning_unit = models.ForeignKey(
         "learning.LearningUnit", related_name="scenarios", on_delete=models.CASCADE
     )
@@ -31,8 +36,22 @@ class ScenarioSkillFocus(models.Model):
     slug = models.SlugField()
     title = models.CharField(max_length=180)
     focus = models.CharField(max_length=140)
-    narrative = models.TextField()
-    task_prompt = models.TextField()
+    summary = models.CharField(max_length=240, blank=True)
+    short_explanation = models.TextField(blank=True)
+    skill_focus_type = models.CharField(
+        max_length=24,
+        choices=SkillFocusType.choices,
+        default=SkillFocusType.COMMAND_SPECIFIC,
+    )
+    primary_focus_commands = models.JSONField(default=list, blank=True)
+    supporting_inspection_commands = models.JSONField(default=list, blank=True)
+    safe_demo_commands = models.JSONField(default=list, blank=True)
+    demo_repository_state = models.JSONField(default=dict, blank=True)
+    demo_dag_config = models.JSONField(default=dict, blank=True)
+    demo_explanation_steps = models.JSONField(default=list, blank=True)
+    related_git_concepts = models.JSONField(default=list, blank=True)
+    narrative = models.TextField(blank=True)
+    task_prompt = models.TextField(blank=True)
     is_published = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
 

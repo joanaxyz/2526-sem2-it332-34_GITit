@@ -30,6 +30,7 @@ class UnitListSerializer(serializers.ModelSerializer):
     lessons = LessonListSerializer(many=True)
     lesson_count = serializers.IntegerField(source="published_lesson_count", read_only=True)
     scenario_count = serializers.IntegerField(source="published_scenario_count", read_only=True)
+    practice_completion = serializers.SerializerMethodField()
 
     class Meta:
         model = LearningUnit
@@ -43,8 +44,20 @@ class UnitListSerializer(serializers.ModelSerializer):
             "sort_order",
             "lesson_count",
             "scenario_count",
+            "practice_completion",
             "lessons",
         ]
+
+    def get_practice_completion(self, obj) -> dict:
+        scenario_count = int(getattr(obj, "published_scenario_count", 0) or 0)
+        denominator = scenario_count * 3
+        numerator = int(self.context.get("practice_completion_count_map", {}).get(obj.id, 0) or 0)
+        value = round((numerator / denominator) * 100, 1) if denominator else 0.0
+        return {
+            "value": value,
+            "numerator": numerator,
+            "denominator": denominator,
+        }
 
 
 class LessonDetailSerializer(serializers.ModelSerializer):

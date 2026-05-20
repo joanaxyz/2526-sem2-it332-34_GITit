@@ -66,6 +66,10 @@ export type ScenarioSession = {
   expected_state: Pick<RepositorySnapshot, 'commits' | 'branches' | 'head'> | null
   steps: ScenarioStepLog[]
   review_mode: boolean
+  next_difficulty: {
+    id: number
+    difficulty: Difficulty
+  } | null
 }
 
 export type ScenarioStepLog = {

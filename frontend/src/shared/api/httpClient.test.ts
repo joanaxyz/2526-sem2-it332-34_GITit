@@ -7,7 +7,9 @@ import { apiRequest } from './httpClient'
 const user = {
   id: 1,
   email: 'student@example.com',
-  display_name: 'Student',
+  student_id: 'S0001',
+  first_name: 'Student',
+  last_name: 'User',
 }
 
 function jsonResponse(status: number, payload: unknown) {

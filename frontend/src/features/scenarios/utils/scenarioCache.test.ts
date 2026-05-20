@@ -9,43 +9,66 @@ const scenario: ScenarioSkillFocus = {
   slug: 'branch-rescue',
   title: 'Branch rescue',
   focus: 'Branching',
-  narrative: 'Move work safely.',
-  task_prompt: 'Recover the misplaced commit.',
+  summary: 'Move work safely.',
+  short_explanation: 'Learn how branch pointers and HEAD relate.',
+  skill_focus_type: 'concept_specific',
+  primary_focus_commands: ['git branch', 'git switch'],
+  supporting_inspection_commands: ['git status'],
+  safe_demo_commands: ['git branch'],
+  demo_repository_state: {
+    commits: [],
+    branches: {},
+    head: { type: 'branch', name: 'main', target: null },
+    staging: {},
+    working_tree: {},
+    conflicts: [],
+  },
+  demo_dag_config: {},
+  demo_explanation_steps: [],
+  related_git_concepts: ['HEAD'],
   learning_unit_id: 2,
   lesson_id: 5,
   difficulties: [
     {
       id: 101,
       difficulty: 'easy',
-      narrative: 'Easy setup.',
-      task_prompt: 'Recover the misplaced commit.',
       status: 'in_progress',
       review_available: false,
       active_session_id: 900,
+      retry_session_id: null,
       policy: { id: 1, min_counted_commands: 2, max_counted_commands: 6, non_counted_patterns: [] },
       completion: null,
+      latest_attempt: {
+        status: 'started',
+        accuracy_rate: null,
+        command_accurate: null,
+        counted_action_total: 0,
+        total_attempts: 0,
+        completed_at: null,
+        ended_at: null,
+      },
     },
     {
       id: 102,
       difficulty: 'medium',
-      narrative: 'Medium setup.',
-      task_prompt: 'Recover a busier misplaced commit.',
       status: 'locked',
       review_available: false,
       active_session_id: null,
+      retry_session_id: null,
       policy: { id: 2, min_counted_commands: 2, max_counted_commands: 6, non_counted_patterns: [] },
       completion: null,
+      latest_attempt: null,
     },
     {
       id: 103,
       difficulty: 'hard',
-      narrative: 'Hard setup.',
-      task_prompt: 'Recover a complex misplaced commit.',
       status: 'locked',
       review_available: false,
       active_session_id: null,
+      retry_session_id: null,
       policy: { id: 3, min_counted_commands: 1, max_counted_commands: 5, non_counted_patterns: [] },
       completion: null,
+      latest_attempt: null,
     },
   ],
 }
@@ -99,6 +122,10 @@ const completedSession: ScenarioSession = {
   expected_state: null,
   steps: [],
   review_mode: false,
+  next_difficulty: {
+    id: 102,
+    difficulty: 'medium',
+  },
 }
 
 describe('updateScenarioListWithSession', () => {
@@ -106,7 +133,7 @@ describe('updateScenarioListWithSession', () => {
     const [updated] = updateScenarioListWithSession([scenario], completedSession) ?? []
 
     expect(updated.difficulties[0]).toMatchObject({
-      status: 'complete',
+      status: 'completed',
       review_available: true,
       active_session_id: null,
       completion: {
@@ -114,8 +141,14 @@ describe('updateScenarioListWithSession', () => {
         counted_action_total: 2,
         completed_at: '2026-05-18T12:00:00Z',
       },
+      latest_attempt: {
+        status: 'completed',
+        accuracy_rate: 100,
+        command_accurate: true,
+        counted_action_total: 2,
+      },
     })
-    expect(updated.difficulties[1].status).toBe('available')
+    expect(updated.difficulties[1].status).toBe('not_started')
     expect(updated.difficulties[2].status).toBe('locked')
   })
 

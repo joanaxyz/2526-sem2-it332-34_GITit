@@ -91,19 +91,54 @@ class RepositoryStateSimulator:
             state.setdefault("head", {})["target"] = commit_id
 
     def _status(self, state: dict, args: list[str]) -> str:
-        branch = self._head_branch(state) or "detached HEAD"
-        staged_paths = sorted(state.get("staging", {}).keys())
-        working_paths = sorted(state.get("working_tree", {}).keys())
+        branch = self._head_branch(state) or "HEAD (detached)"
+        staged = state.get("staging", {}) or {}
+        working = state.get("working_tree", {}) or {}
         conflict_paths = sorted(state.get("conflicts", []))
-        lines = [f"On {branch}"]
+
+        def label_for(value: str | None) -> str:
+            value = (value or "").lower()
+            if value in ("untracked",):
+                return "new file:"
+            if value in ("added", "new"):
+                return "new file:"
+            if value in ("deleted", "removed"):
+                return "deleted:"
+            return "modified:"
+
+        lines: list[str] = [f"On branch {branch}"]
+
         if conflict_paths:
-            lines.append(f"Conflicts: {self._format_paths(conflict_paths)}")
+            lines += [
+                "",
+                "You have unmerged paths.",
+                '  (fix conflicts and run "git commit")',
+                "",
+                "Unmerged paths:",
+            ]
+            lines += [f"  both modified:   {path}" for path in conflict_paths]
+
+        staged_paths = sorted(staged.keys())
         if staged_paths:
-            lines.append(f"Staged for commit: {self._format_paths(staged_paths)}")
-        if working_paths:
-            lines.append(f"Working tree changes: {self._format_paths(working_paths)}")
+            lines += ["", "Changes to be committed:"]
+            lines += [f"  {label_for(staged.get(path)):<11} {path}" for path in staged_paths]
+
+        working_paths = sorted(working.keys())
+        untracked = [path for path in working_paths if str(working.get(path)).lower() == "untracked"]
+        modified = [path for path in working_paths if path not in untracked]
+        if modified:
+            lines += ["", "Changes not staged for commit:"]
+            lines += [f"  {label_for(working.get(path)):<11} {path}" for path in modified]
+            lines += ['  (use "git add <file>..." to update what will be committed)']
+
+        if untracked:
+            lines += ["", "Untracked files:"]
+            lines += [f"  {path}" for path in untracked]
+            lines += ['  (use "git add <file>..." to include in what will be committed)']
+
         if not staged_paths and not working_paths and not conflict_paths:
-            lines.append("Working tree clean.")
+            lines += ["", "nothing to commit, working tree clean"]
+
         return "\n".join(lines)
 
     def _log(self, state: dict, args: list[str]) -> str:
@@ -156,7 +191,7 @@ class RepositoryStateSimulator:
             raise ValueError("Specify a path to add.")
         paths = list(state.get("working_tree", {}).keys()) if args[0] in (".", "-A") else args
         if not paths:
-            return "No paths changed."
+            return ""
         staging = state.setdefault("staging", {})
         working_tree = state.setdefault("working_tree", {})
         conflicts = set(state.get("conflicts", []))
@@ -164,7 +199,7 @@ class RepositoryStateSimulator:
             staging[path] = working_tree.pop(path, "updated")
             conflicts.discard(path)
         state["conflicts"] = sorted(conflicts)
-        return f"Staged: {self._format_paths(paths)}."
+        return ""
 
     def _commit(self, state: dict, args: list[str]) -> str:
         if not state.get("staging") and not state.get("merge_parent"):

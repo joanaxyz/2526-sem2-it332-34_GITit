@@ -2,7 +2,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from learning.models import Lesson
-from learning.selectors import orientation_progress_map, published_lesson, published_units
+from learning.selectors import (
+    orientation_progress_map,
+    practice_completion_count_map,
+    published_lesson,
+    published_units,
+)
 from learning.serializers import (
     LessonDetailSerializer,
     OrientationCompleteSerializer,
@@ -14,11 +19,19 @@ from learning.services import OrientationService
 
 class UnitListAPIView(APIView):
     def get(self, request):
+        units = list(published_units())
         progress_map = orientation_progress_map(request.user)
+        practice_map = practice_completion_count_map(
+            user=request.user,
+            unit_ids=[unit.id for unit in units],
+        )
         serializer = UnitListSerializer(
-            published_units(),
+            units,
             many=True,
-            context={"orientation_progress_map": progress_map},
+            context={
+                "orientation_progress_map": progress_map,
+                "practice_completion_count_map": practice_map,
+            },
         )
         return Response(serializer.data)
 
