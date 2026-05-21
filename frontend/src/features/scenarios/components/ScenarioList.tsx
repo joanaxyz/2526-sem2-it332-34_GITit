@@ -14,7 +14,13 @@ import { useRef, useState } from 'react'
 
 type ScenarioListProps =
   | { scope: 'lesson'; lessonId: number; source: 'lesson' }
-  | { scope: 'unit'; unitId: number; source: 'unit_card' }
+  | {
+      scope: 'unit'
+      unitId: number
+      source: 'unit_card'
+      initialScenarios?: ScenarioSkillFocus[]
+      deferFetch?: boolean
+    }
 
 export function ScenarioList(props: ScenarioListProps) {
   const navigate = useNavigate()
@@ -26,9 +32,12 @@ export function ScenarioList(props: ScenarioListProps) {
     action: DifficultyActionIntent
   } | null>(null)
   const queryKey = props.scope === 'lesson' ? ['lesson-scenarios', props.lessonId] : ['unit-scenarios', props.unitId]
+  const shouldDeferUnitFetch = props.scope === 'unit' && props.deferFetch && !props.initialScenarios
   const { data, error, isError, isLoading } = useQuery({
     queryKey,
     queryFn: () => (props.scope === 'lesson' ? scenariosApi.listForLesson(props.lessonId) : scenariosApi.listForUnit(props.unitId)),
+    enabled: !shouldDeferUnitFetch,
+    initialData: props.scope === 'unit' ? props.initialScenarios : undefined,
     staleTime: 5 * 60 * 1000,
   })
   const startMutation = useMutation({
