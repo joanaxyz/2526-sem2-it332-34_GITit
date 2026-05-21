@@ -45,6 +45,7 @@ export function LiveDagPanel({
   contentClassName?: string
 }) {
   const { nodes, edges } = useMemo(() => buildGraph(snapshot), [snapshot])
+  const nodeTypes = useMemo(() => commitNodeTypes, [])
 
   return (
     <Card className={cn('min-h-0 overflow-hidden shadow-none', className)}>
@@ -64,7 +65,7 @@ export function LiveDagPanel({
           fitViewOptions={{ padding: 0.08 }}
           nodesDraggable={false}
           nodesConnectable={false}
-          nodeTypes={commitNodeTypes}
+          nodeTypes={nodeTypes}
           panOnScroll
           minZoom={0.55}
           maxZoom={1.6}

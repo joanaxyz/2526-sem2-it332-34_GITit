@@ -1,24 +1,18 @@
 import { CheckCircle2, RotateCcw, XCircle } from 'lucide-react'
 
-import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import type { ScenarioSession } from '@/features/practice/types'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
-import { syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
 
-export function SessionOutcomeBanner({ session }: { session: ScenarioSession }) {
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const retryMutation = useMutation({
-    mutationFn: () => scenariosApi.retrySession(session.id),
-    onSuccess: (next) => {
-      syncScenarioSessionInCache(queryClient, next)
-      navigate(`/practice/${next.id}`)
-    },
-  })
-
+export function SessionOutcomeBanner({
+  session,
+  isRetrying = false,
+  onRetry,
+}: {
+  session: ScenarioSession
+  isRetrying?: boolean
+  onRetry?: () => void
+}) {
   if (session.status === 'started') return null
   const completed = session.status === 'completed'
   return (
@@ -35,9 +29,9 @@ export function SessionOutcomeBanner({ session }: { session: ScenarioSession }) 
             </p>
           </div>
         </div>
-        {!completed && !session.review_mode ? (
-          <Button type="button" onClick={() => retryMutation.mutate()}>
-            Retry changed variant
+        {!completed && !session.review_mode && onRetry ? (
+          <Button type="button" disabled={isRetrying} onClick={onRetry}>
+            {isRetrying ? 'Starting retry' : 'Retry changed variant'}
           </Button>
         ) : null}
       </div>

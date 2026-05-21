@@ -49,6 +49,7 @@ def session_payload(session) -> dict:
             "title": session.learning_unit.title,
         },
         "difficulty": session.difficulty_instance.difficulty,
+        "completion_type": session.difficulty_instance.completion_type,
         "variant": {
             "id": session.variant_id,
             "label": session.variant.label,

@@ -76,13 +76,10 @@ class MetricsService:
             user=user,
             difficulty_instance_id__in=latest_completion_ids,
         ).select_related("difficulty_instance__command_policy")
-        car_denominator = latest_completions.count()
-        car_numerator = sum(
-            1
+        command_accuracy_values = [
+            self._command_accuracy_for_completion(item)
             for item in latest_completions
-            if item.counted_action_total
-            <= item.difficulty_instance.command_policy.min_counted_commands
-        )
+        ]
 
         streak = getattr(user, "streakrecord", None)
         return {
@@ -93,7 +90,7 @@ class MetricsService:
                 ),
                 "scr": self._rate(completed, started),
                 "arc": self._average_retry_count(primary),
-                "car": self._rate(car_numerator, car_denominator),
+                "car": self._average_percent(command_accuracy_values),
                 "hlcr": self._rate(hard_completed, hard_started),
                 "rta": self._rate(rta.filter(rta_success=True).count(), rta.count()),
                 "sar": self._rate(abandoned, started),
@@ -124,6 +121,23 @@ class MetricsService:
             "numerator": numerator,
             "denominator": denominator,
         }
+
+    def _average_percent(self, values: list[int]) -> dict:
+        total = sum(values)
+        return {
+            "value": round(total / len(values), 1) if values else None,
+            "numerator": round(total, 1),
+            "denominator": len(values),
+        }
+
+    def _command_accuracy_for_completion(self, completion: CompletionRecord) -> int:
+        target_actions = completion.difficulty_instance.command_policy.min_counted_commands
+        used_actions = completion.counted_action_total
+        if used_actions <= target_actions:
+            return 100
+        if target_actions == 0:
+            return 0
+        return round((target_actions / used_actions) * 100)
 
     def _average_retry_count(self, sessions) -> dict:
         completed = sessions.filter(status=SESSION_STATUS_COMPLETED)

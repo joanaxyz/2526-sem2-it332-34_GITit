@@ -1,4 +1,4 @@
-import { ArrowRight, Award, PartyPopper, RotateCcw, Sparkles } from 'lucide-react'
+import { ArrowRight, Award, PartyPopper, Sparkles } from 'lucide-react'
 import type { CSSProperties } from 'react'
 
 import type { ScenarioSession } from '@/features/practice/types'
@@ -28,7 +28,11 @@ const confettiPieces = Array.from({ length: 46 }, (_, index) => {
 })
 
 function completionAccuracy(session: ScenarioSession) {
-  return session.counts.counted_action_total <= session.policy.min_counted_commands ? 100 : 0
+  const targetActions = session.policy.min_counted_commands
+  const usedActions = session.counts.counted_action_total
+  if (usedActions <= targetActions) return 100
+  if (targetActions === 0) return 0
+  return Math.round((targetActions / usedActions) * 100)
 }
 
 function difficultyLabel(session: ScenarioSession) {
@@ -40,11 +44,9 @@ export function CompletionCelebrationModal({
   session,
   onClose,
   onBackToUnits,
-  onRetry,
   onNextLevel,
   onReviewDifficulty,
   previousDifficulties = [],
-  isRetrying = false,
   isStartingNextLevel = false,
   isReviewing = false,
   nextDifficultyLabel,
@@ -53,11 +55,9 @@ export function CompletionCelebrationModal({
   session: ScenarioSession
   onClose: () => void
   onBackToUnits: () => void
-  onRetry: () => void
   onNextLevel?: () => void
   onReviewDifficulty?: (difficulty: DifficultyAccess) => void
   previousDifficulties?: DifficultyAccess[]
-  isRetrying?: boolean
   isStartingNextLevel?: boolean
   isReviewing?: boolean
   nextDifficultyLabel?: string | null
@@ -68,7 +68,7 @@ export function CompletionCelebrationModal({
   const message = session.first_attempt_star_eligible
     ? 'You reached the target state without a miss — crisp, confident Git thinking.'
     : 'You got the repository exactly where it needed to be. The detours count as practice; the finish counts as progress.'
-  const isNavigating = isRetrying || isStartingNextLevel || isReviewing
+  const isNavigating = isStartingNextLevel || isReviewing
 
   return (
     <Modal
@@ -189,10 +189,6 @@ export function CompletionCelebrationModal({
                 {isStartingNextLevel ? 'Opening next level' : `Next: ${nextDifficultyLabel}`}
               </Button>
             ) : null}
-            <Button type="button" variant="outline" disabled={isNavigating} onClick={onRetry}>
-              <RotateCcw data-icon="inline-start" />
-              {isRetrying ? 'Starting retry' : 'Retry level'}
-            </Button>
             <Button type="button" variant="secondary" disabled={isNavigating} onClick={onClose}>
               Stay in workspace
             </Button>

@@ -9,8 +9,8 @@ import type { DifficultyAccess, DifficultyActionIntent, ScenarioSkillFocus } fro
 import { syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
-import { useState } from 'react'
+import { ScenarioListSkeleton } from '@/shared/components/Skeleton'
+import { useRef, useState } from 'react'
 
 type ScenarioListProps =
   | { scope: 'lesson'; lessonId: number; source: 'lesson' }
@@ -19,6 +19,7 @@ type ScenarioListProps =
 export function ScenarioList(props: ScenarioListProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const reservedScenarioTabRef = useRef<Window | null>(null)
   const [previewRequest, setPreviewRequest] = useState<{
     scenario: ScenarioSkillFocus
     difficulty: DifficultyAccess
@@ -37,41 +38,71 @@ export function ScenarioList(props: ScenarioListProps) {
       syncScenarioSessionInCache(queryClient, session)
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
       setPreviewRequest(null)
-      navigate(`/practice/${session.id}`)
+      openScenarioRoute(`/practice/${session.id}`)
     },
+    onError: closeReservedScenarioTab,
   })
   const retryMutation = useMutation({
-    mutationFn: (difficulty: DifficultyAccess) =>
-      difficulty.retry_session_id
-        ? scenariosApi.retrySession(difficulty.retry_session_id)
-        : scenariosApi.startSession({ difficulty_instance_id: difficulty.id, source_entry_point: 'retry' }),
+    mutationFn: (difficulty: DifficultyAccess) => {
+      if (!difficulty.retry_session_id) throw new Error('Exit the current scenario before retrying.')
+      return scenariosApi.retrySession(difficulty.retry_session_id)
+    },
     onSuccess: (session) => {
       syncScenarioSessionInCache(queryClient, session)
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
       setPreviewRequest(null)
-      navigate(`/practice/${session.id}`)
+      openScenarioRoute(`/practice/${session.id}`)
     },
+    onError: closeReservedScenarioTab,
   })
   const reviewMutation = useMutation({
     mutationFn: (difficulty: DifficultyAccess) => reviewApi.startReviewSession(difficulty.id),
     onSuccess: (session) => {
       setPreviewRequest(null)
-      navigate(`/review/${session.id}`)
+      openScenarioRoute(`/review/${session.id}`)
     },
+    onError: closeReservedScenarioTab,
   })
 
-  if (isLoading) return <LoadingState label="Loading scenarios" />
+  function reserveScenarioTab() {
+    reservedScenarioTabRef.current = window.open('about:blank', '_blank')
+  }
+
+  function closeReservedScenarioTab() {
+    const tab = reservedScenarioTabRef.current
+    reservedScenarioTabRef.current = null
+    if (tab && !tab.closed) tab.close()
+  }
+
+  function openScenarioRoute(path: string) {
+    const url = new URL(path, window.location.origin).toString()
+    const reservedTab = reservedScenarioTabRef.current
+    reservedScenarioTabRef.current = null
+
+    if (reservedTab && !reservedTab.closed) {
+      reservedTab.opener = null
+      reservedTab.location.href = url
+      reservedTab.focus()
+      return
+    }
+
+    const openedTab = window.open(url, '_blank')
+    if (openedTab) {
+      openedTab.opener = null
+      return
+    }
+
+    navigate(path)
+  }
+
+  if (isLoading) return <ScenarioListSkeleton />
   if (isError) return <ErrorState title="Could not load scenarios" description={error.message} />
   if (!data?.length) return <EmptyState title="No scenarios here yet" description="This unit does not have any published scenarios yet." />
 
   function proceedFromPreview() {
     if (!previewRequest) return
     const { difficulty, action } = previewRequest
-    if (action === 'continue' && difficulty.active_session_id) {
-      setPreviewRequest(null)
-      navigate(`/practice/${difficulty.active_session_id}`)
-      return
-    }
+    reserveScenarioTab()
     if (action === 'review') {
       reviewMutation.mutate(difficulty)
       return

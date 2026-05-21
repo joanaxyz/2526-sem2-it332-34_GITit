@@ -10,27 +10,54 @@ type AuthState = {
   clearSession: () => void
 }
 
-const storedToken = localStorage.getItem('git-it-access-token')
-const storedUser = localStorage.getItem('git-it-user')
+const accessTokenStorageKey = 'git-it-access-token'
+const userStorageKey = 'git-it-user'
 
-export const useAuthStore = create<AuthState>((set) => ({
-  accessToken: storedToken,
-  user: storedUser ? (JSON.parse(storedUser) as User) : null,
-  setSession: (accessToken, user) => {
-    localStorage.setItem('git-it-access-token', accessToken)
-    localStorage.setItem('git-it-user', JSON.stringify(user))
-    set({ accessToken, user })
-  },
-  setAccessToken: (accessToken) => {
-    localStorage.setItem('git-it-access-token', accessToken)
-    set({ accessToken })
-  },
-  clearSession: () => {
-    localStorage.removeItem('git-it-access-token')
-    localStorage.removeItem('git-it-user')
-    set({ accessToken: null, user: null })
-  },
-}))
+export function getStoredAccessToken() {
+  return localStorage.getItem(accessTokenStorageKey)
+}
+
+function getStoredUser() {
+  const storedUser = localStorage.getItem(userStorageKey)
+  if (!storedUser) return null
+  try {
+    return JSON.parse(storedUser) as User
+  } catch {
+    localStorage.removeItem(userStorageKey)
+    return null
+  }
+}
+
+const storedToken = getStoredAccessToken()
+const storedUser = getStoredUser()
+
+export const useAuthStore = create<AuthState>((set) => {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('storage', (event) => {
+      if (event.key && event.key !== accessTokenStorageKey && event.key !== userStorageKey) return
+      set({ accessToken: getStoredAccessToken(), user: getStoredUser() })
+    })
+  }
+
+  return {
+    accessToken: storedToken,
+    user: storedUser,
+    setSession: (accessToken, user) => {
+      localStorage.setItem(accessTokenStorageKey, accessToken)
+      localStorage.setItem(userStorageKey, JSON.stringify(user))
+      set({ accessToken, user })
+    },
+    setAccessToken: (accessToken) => {
+      localStorage.setItem(accessTokenStorageKey, accessToken)
+      set({ accessToken })
+    },
+    clearSession: () => {
+      localStorage.removeItem(accessTokenStorageKey)
+      localStorage.removeItem(userStorageKey)
+      set({ accessToken: null, user: null })
+    },
+  }
+})
 
 export function useAuth() {
   return useAuthStore()

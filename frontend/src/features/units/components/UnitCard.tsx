@@ -1,4 +1,4 @@
-import { BookOpen, ChevronDown, ChevronRight } from 'lucide-react'
+import { BookOpen } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { UnitScenarioHub } from '@/features/units/components/UnitScenarioHub'
@@ -7,15 +7,14 @@ import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { ProgressBar } from '@/shared/components/ProgressBar'
+import { Skeleton } from '@/shared/components/Skeleton'
 
 export function UnitCard({
   unit,
-  expanded,
-  onToggle,
+  isContentVisible,
 }: {
   unit: LearningUnit
-  expanded: boolean
-  onToggle: () => void
+  isContentVisible: boolean
 }) {
   const orientationProgress = Math.round(
     (unit.lessons.filter((lesson) => lesson.is_complete).length / Math.max(unit.lessons.length, 1)) * 100,
@@ -25,8 +24,8 @@ export function UnitCard({
   const referenceLessons = unit.lessons.filter((lesson) => lesson.kind !== 'scenario')
 
   return (
-    <Card className="overflow-hidden shadow-none">
-      <button className="grid w-full grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-4 p-5 text-left" onClick={onToggle} type="button">
+    <Card className="overflow-hidden shadow-none" data-unit-id={unit.id}>
+      <div className="grid w-full grid-cols-[3rem_minmax(0,1fr)] items-center gap-4 p-5 text-left">
         <div className="grid size-12 place-items-center rounded-md border border-border bg-secondary text-lg font-extrabold text-primary">
           {unit.number}
         </div>
@@ -40,9 +39,8 @@ export function UnitCard({
             <span className="font-mono text-xs text-muted-foreground">{progressValue}%</span>
           </div>
         </div>
-        {expanded ? <ChevronDown className="size-5 text-muted-foreground" /> : <ChevronRight className="size-5 text-muted-foreground" />}
-      </button>
-      {expanded ? (
+      </div>
+      {isContentVisible ? (
         <div className="border-t border-border bg-background/35 p-5">
           {unit.is_orientation ? (
             <div className="grid gap-2">
@@ -91,7 +89,14 @@ export function UnitCard({
             </div>
           )}
         </div>
-      ) : null}
+      ) : (
+        <div className="border-t border-border bg-background/25 p-5">
+          <div className="grid gap-3">
+            <Skeleton className="h-5 w-48" />
+            <Skeleton className="h-14 w-full" />
+          </div>
+        </div>
+      )}
     </Card>
   )
 }

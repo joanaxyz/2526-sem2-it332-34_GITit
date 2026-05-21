@@ -8,7 +8,7 @@ import { cn } from '@/shared/utils/cn'
 function actionForDifficulty(difficulty: DifficultyAccess): DifficultyActionIntent | null {
   if (difficulty.status === 'locked') return null
   if (difficulty.status === 'completed') return 'review'
-  if (difficulty.status === 'in_progress') return 'continue'
+  if (difficulty.status === 'in_progress') return null
   if (difficulty.status === 'failed' || difficulty.status === 'abandoned') return 'retry'
   return 'start'
 }
@@ -21,8 +21,20 @@ export function DifficultyActionButton({
   onAction: (difficulty: DifficultyAccess, action: DifficultyActionIntent) => void
 }) {
   const action = actionForDifficulty(difficulty)
-  const buttonLabel = action === 'continue' ? 'Continue' : action === 'review' ? 'Review' : action === 'retry' ? 'Retry' : 'Start'
-  const Icon = difficulty.status === 'locked' ? Lock : action === 'review' ? RotateCcw : action === 'retry' ? RefreshCcw : Play
+  const buttonLabel =
+    action === 'review'
+      ? 'Review'
+      : action === 'retry'
+        ? 'Retry'
+        : 'Start'
+  const Icon =
+    difficulty.status === 'locked'
+      ? Lock
+      : action === 'review'
+        ? RotateCcw
+        : action === 'retry'
+          ? RefreshCcw
+          : Play
   const latestAttempt = difficulty.latest_attempt
   const mastery = latestAttempt?.accuracy_rate ?? null
 
@@ -30,21 +42,23 @@ export function DifficultyActionButton({
     <div className="flex items-center rounded-md border border-border bg-background/30 p-3">
       <div className="flex items-center gap-2">
         <div className="text-sm font-bold capitalize">{difficulty.difficulty}</div>
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            size="sm"
-            disabled={!action}
-            variant={action === 'review' || action === 'retry' ? 'outline' : 'default'}
-            onClick={() => {
-              if (action) onAction(difficulty, action)
-            }}
-          >
-            <Icon data-icon="inline-start" />
-            {buttonLabel}
-          </Button>
-          {difficulty.completion?.first_attempt_star ? <Star className="size-4 text-amber-300" /> : null}
-        </div>
+        {difficulty.status !== 'in_progress' ? (
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              size="sm"
+              disabled={!action}
+              variant={!action || action === 'review' || action === 'retry' ? 'outline' : 'default'}
+              onClick={() => {
+                if (action) onAction(difficulty, action)
+              }}
+            >
+              <Icon data-icon="inline-start" />
+              {buttonLabel}
+            </Button>
+            {difficulty.completion?.first_attempt_star ? <Star className="size-4 text-amber-300" /> : null}
+          </div>
+        ) : null}
       </div>
       <div className="ml-auto">
         <MasteryProgress value={mastery} />
@@ -63,7 +77,7 @@ function MasteryProgress({ value }: { value: number | null }) {
     : isPerfect
       ? 'hsl(var(--primary))'
       : 'hsl(var(--destructive))'
-  const label = !hasValue ? '—' : `${value}%`
+  const label = !hasValue ? '-' : `${value}%`
 
   return (
     <div

@@ -17,6 +17,9 @@ export function ProgressSummaryCards({ summary }: { summary: DashboardSummary })
     <section className="grid grid-cols-3 gap-3 xl:grid-cols-6 max-lg:grid-cols-2">
       {metricMap.map(([key, label, Icon]) => {
         const metric = summary.kpis[key]
+        const detail = key === 'car'
+          ? `${metric.denominator} completed attempts`
+          : `${metric.numerator}/${metric.denominator} attempts`
         return (
           <Card key={key} className="shadow-none">
             <CardContent className="p-4">
@@ -28,7 +31,7 @@ export function ProgressSummaryCards({ summary }: { summary: DashboardSummary })
                 <Icon className="size-5 text-primary" />
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                {metric.denominator ? `${metric.numerator}/${metric.denominator} attempts` : 'Waiting for practice'}
+                {metric.denominator ? detail : 'Waiting for practice'}
               </p>
             </CardContent>
           </Card>
