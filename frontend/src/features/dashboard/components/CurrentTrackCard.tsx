@@ -14,7 +14,7 @@ export function CurrentTrackCard() {
             Student practice track
           </div>
           <h1 className="max-w-3xl text-4xl font-extrabold leading-tight tracking-tight">
-            Build Git confidence through Unit lessons, practice repo state, and replayable scenarios.
+            Build Git confidence through module lessons, practice repo state, and replayable scenarios.
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
             Start with the Git foundations when you need them, then choose a practice topic and work from Easy toward Hard.
@@ -23,7 +23,7 @@ export function CurrentTrackCard() {
         <div className="flex flex-wrap gap-2">
           <Button asChild>
             <Link to="/units">
-              Open Units
+              Open Modules
               <ArrowRight data-icon="inline-end" />
             </Link>
           </Button>

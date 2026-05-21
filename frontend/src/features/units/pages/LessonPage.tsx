@@ -39,11 +39,11 @@ export function LessonPage() {
           <Button asChild variant="ghost" size="sm">
             <Link to="/units">
               <ArrowLeft data-icon="inline-start" />
-              Back to Units
+              Back to Modules
             </Link>
           </Button>
           <Badge variant={isOrientation ? 'warning' : lesson.kind === 'scenario' ? 'default' : 'blue'}>
-            Unit {lesson.unit.number}: {lesson.unit.title}
+            Module {lesson.unit.number}: {lesson.unit.title}
           </Badge>
         </div>
         <LessonContentRenderer lesson={lesson} />
@@ -66,14 +66,14 @@ export function LessonPage() {
         {lesson.scenario_count ? (
           <section className="mt-6 rounded-lg border border-border bg-card p-5">
             <div className="mb-4">
-              <h2 className="text-xl font-bold">Practice starts from the Unit page</h2>
+              <h2 className="text-xl font-bold">Practice starts from the Modules page</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Scenario-bearing units now show scenarios directly when expanded. This lesson remains as reference material,
+                Scenario-bearing modules now show scenarios directly when expanded. This lesson remains as reference material,
                 not the main scenario selection path.
               </p>
             </div>
             <Button asChild>
-              <Link to="/units">Back to Units</Link>
+              <Link to="/units">Back to Modules</Link>
             </Button>
           </section>
         ) : null}
@@ -84,7 +84,7 @@ export function LessonPage() {
           Lesson status
         </div>
         <p className="text-sm leading-6 text-muted-foreground">
-          {isOrientation ? 'Saved to your foundation progress.' : 'Use this reference only when you want extra context; scenario practice starts from the Unit page.'}
+          {isOrientation ? 'Saved to your foundation progress.' : 'Use this reference only when you want extra context; scenario practice starts from the Modules page.'}
         </p>
       </Card>
     </div>

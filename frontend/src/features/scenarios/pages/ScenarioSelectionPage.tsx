@@ -28,7 +28,7 @@ export function ScenarioSelectionPage() {
           <Button asChild variant="ghost" size="sm">
             <Link to="/units">
               <ArrowLeft data-icon="inline-start" />
-              Back to Units
+              Back to Modules
             </Link>
           </Button>
         </div>

@@ -193,7 +193,7 @@ export function CompletionCelebrationModal({
               Stay in workspace
             </Button>
             <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToUnits}>
-              Back to Units
+              Back to Modules
             </Button>
           </div>
         </div>
