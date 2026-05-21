@@ -6,18 +6,18 @@ export function Skeleton({ className }: { className?: string }) {
 
 export function UnitsSkeleton() {
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-4" aria-label="Loading units">
+    <div className="mx-auto flex max-w-6xl flex-col gap-4" aria-label="Loading modules">
       <Skeleton className="h-10 w-36" />
       {Array.from({ length: 4 }, (_, index) => (
         <div className="rounded-md border border-border bg-card p-5" key={index}>
-          <div className="grid grid-cols-[3rem_minmax(0,1fr)_5rem] items-center gap-4">
+          <div className="grid grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-4">
             <Skeleton className="size-12" />
             <div className="space-y-3">
               <Skeleton className="h-5 w-52 max-w-full" />
               <Skeleton className="h-4 w-full max-w-2xl" />
               <Skeleton className="h-2 w-full max-w-xl" />
             </div>
-            <Skeleton className="h-8 w-20" />
+            <Skeleton className="size-9 shrink-0 rounded-md" />
           </div>
         </div>
       ))}

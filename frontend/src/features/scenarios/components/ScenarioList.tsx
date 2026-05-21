@@ -97,7 +97,7 @@ export function ScenarioList(props: ScenarioListProps) {
 
   if (isLoading) return <ScenarioListSkeleton />
   if (isError) return <ErrorState title="Could not load scenarios" description={error.message} />
-  if (!data?.length) return <EmptyState title="No scenarios here yet" description="This unit does not have any published scenarios yet." />
+  if (!data?.length) return <EmptyState title="No scenarios here yet" description="This module does not have any published scenarios yet." />
 
   function proceedFromPreview() {
     if (!previewRequest) return
@@ -133,10 +133,11 @@ export function ScenarioList(props: ScenarioListProps) {
           {reviewMutation.error.message}
         </div>
       ) : null}
-      {data.map((scenario) => (
+      {data.map((scenario, index) => (
         <ScenarioSkillFocusCard
           key={scenario.id}
           scenario={scenario}
+          topicNumber={index + 1}
           onDifficultyAction={(selectedScenario, difficulty, action) =>
             setPreviewRequest({ scenario: selectedScenario, difficulty, action })
           }

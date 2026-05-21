@@ -1,20 +1,23 @@
 import { BookOpen } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
+import { ModuleSymbol } from '@/features/units/components/ModuleSymbol'
 import { UnitScenarioHub } from '@/features/units/components/UnitScenarioHub'
 import type { LearningUnit } from '@/features/units/types'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
+import { ExpandToggleButton } from '@/shared/components/ExpandToggleButton'
 import { ProgressBar } from '@/shared/components/ProgressBar'
-import { Skeleton } from '@/shared/components/Skeleton'
 
 export function UnitCard({
   unit,
-  isContentVisible,
+  isExpanded,
+  onToggle,
 }: {
   unit: LearningUnit
-  isContentVisible: boolean
+  isExpanded: boolean
+  onToggle: () => void
 }) {
   const orientationProgress = Math.round(
     (unit.lessons.filter((lesson) => lesson.is_complete).length / Math.max(unit.lessons.length, 1)) * 100,
@@ -22,13 +25,12 @@ export function UnitCard({
   const practiceProgress = Math.round(unit.practice_completion?.value ?? 0)
   const progressValue = unit.is_orientation ? orientationProgress : practiceProgress
   const referenceLessons = unit.lessons.filter((lesson) => lesson.kind !== 'scenario')
+  const panelId = `unit-panel-${unit.id}`
 
   return (
     <Card className="overflow-hidden shadow-none" data-unit-id={unit.id}>
-      <div className="grid w-full grid-cols-[3rem_minmax(0,1fr)] items-center gap-4 p-5 text-left">
-        <div className="grid size-12 place-items-center rounded-md border border-border bg-secondary text-lg font-extrabold text-primary">
-          {unit.number}
-        </div>
+      <div className="grid w-full grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-4 p-5 text-left">
+        <ModuleSymbol unit={unit} />
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-lg font-bold">{unit.title}</h2>
@@ -39,9 +41,10 @@ export function UnitCard({
             <span className="font-mono text-xs text-muted-foreground">{progressValue}%</span>
           </div>
         </div>
+        <ExpandToggleButton expanded={isExpanded} controlsId={panelId} label={unit.title} onToggle={onToggle} />
       </div>
-      {isContentVisible ? (
-        <div className="border-t border-border bg-background/35 p-5">
+      {isExpanded ? (
+        <div className="border-t border-border bg-background/35 p-5" id={panelId}>
           {unit.is_orientation ? (
             <div className="grid gap-2">
               {unit.lessons.map((lesson) => (
@@ -89,14 +92,7 @@ export function UnitCard({
             </div>
           )}
         </div>
-      ) : (
-        <div className="border-t border-border bg-background/25 p-5">
-          <div className="grid gap-3">
-            <Skeleton className="h-5 w-48" />
-            <Skeleton className="h-14 w-full" />
-          </div>
-        </div>
-      )}
+      ) : null}
     </Card>
   )
 }
