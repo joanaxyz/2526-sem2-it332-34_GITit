@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 
 import type { RepositorySnapshot } from '@/features/practice/types'
@@ -40,13 +41,76 @@ export function SkillFocusPreviewModal({
   onClose: () => void
   onProceed: () => void
 }) {
+  const detailQuery = useQuery({
+    queryKey: ['skill-focus', scenario.slug],
+    queryFn: () => scenariosApi.getSkillFocus(scenario.slug),
+    staleTime: 5 * 60 * 1000,
+  })
+
+  if (detailQuery.isLoading) {
+    return (
+      <Modal
+        open
+        title="Scenario preview"
+        onClose={onClose}
+        className="w-full max-w-xl"
+        contentClassName="p-5"
+      >
+        <div className="py-8 text-center text-sm text-muted-foreground">Loading preview...</div>
+      </Modal>
+    )
+  }
+
+  if (detailQuery.isError || !detailQuery.data) {
+    return (
+      <Modal
+        open
+        title="Scenario preview"
+        onClose={onClose}
+        className="w-full max-w-xl"
+        contentClassName="p-5"
+      >
+        <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm leading-6 text-destructive">
+          {detailQuery.error?.message ?? 'Could not load the scenario preview.'}
+        </div>
+      </Modal>
+    )
+  }
+
+  return (
+    <SkillFocusPreviewContent
+      scenario={detailQuery.data}
+      difficulty={difficulty}
+      action={action}
+      isProceeding={isProceeding}
+      onClose={onClose}
+      onProceed={onProceed}
+    />
+  )
+}
+
+function SkillFocusPreviewContent({
+  scenario,
+  difficulty,
+  action,
+  isProceeding,
+  onClose,
+  onProceed,
+}: {
+  scenario: ScenarioSkillFocus
+  difficulty: DifficultyAccess
+  action: DifficultyActionIntent
+  isProceeding: boolean
+  onClose: () => void
+  onProceed: () => void
+}) {
   const initialSnapshot = useMemo(
     () => (isRepositorySnapshot(scenario.demo_repository_state) ? scenario.demo_repository_state : emptyDemoSnapshot),
     [scenario.demo_repository_state],
   )
   const steps = scenario.demo_explanation_steps ?? []
   const [snapshot, setSnapshot] = useState<RepositorySnapshot>(initialSnapshot)
-  const [explanation, setExplanation] = useState(scenario.short_explanation)
+  const [explanation, setExplanation] = useState(scenario.short_explanation ?? '')
   const [stepIndex, setStepIndex] = useState(-1)
   const [terminalLines, setTerminalLines] = useState<TerminalLine[]>(demoBootLines)
   const [isRunningDemo, setIsRunningDemo] = useState(false)
@@ -113,9 +177,9 @@ export function SkillFocusPreviewModal({
         </header>
 
         <section className="grid gap-3 rounded-lg border border-border bg-secondary/20 p-4">
-          <p className="text-sm leading-6 text-muted-foreground">{scenario.short_explanation}</p>
+          <p className="text-sm leading-6 text-muted-foreground">{scenario.short_explanation ?? ''}</p>
 
-          {scenario.primary_focus_commands.length || scenario.supporting_inspection_commands.length ? (
+          {scenario.primary_focus_commands.length || (scenario.supporting_inspection_commands ?? []).length ? (
             <div className="grid gap-2 text-sm leading-6">
               {scenario.primary_focus_commands.length ? (
                 <div>

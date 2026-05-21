@@ -86,10 +86,13 @@ export type CommandResponse = {
   session: ScenarioSession
   step: {
     id: number
+    command_text: string
     terminal_output: string
+    result_category: string
     evaluation_result: string
     command_classification: string
     contextual_feedback: string
+    created_at: string
   }
 }
 

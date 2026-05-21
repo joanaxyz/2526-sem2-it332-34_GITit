@@ -10,7 +10,7 @@ export type CommandPolicy = {
   id: number
   min_counted_commands: number
   max_counted_commands: number
-  non_counted_patterns: string[]
+  non_counted_patterns?: string[]
 }
 
 export type LatestAttemptStats = {
@@ -52,15 +52,15 @@ export type ScenarioSkillFocus = {
   title: string
   focus: string
   summary: string
-  short_explanation: string
+  short_explanation?: string
   skill_focus_type: SkillFocusType
   primary_focus_commands: string[]
-  supporting_inspection_commands: string[]
-  safe_demo_commands: string[]
-  demo_repository_state: RepositorySnapshot
-  demo_dag_config: Record<string, unknown>
-  demo_explanation_steps: DemoExplanationStep[]
-  related_git_concepts: string[]
+  supporting_inspection_commands?: string[]
+  safe_demo_commands?: string[]
+  demo_repository_state?: RepositorySnapshot
+  demo_dag_config?: Record<string, unknown>
+  demo_explanation_steps?: DemoExplanationStep[]
+  related_git_concepts?: string[]
   learning_unit_id: number
   lesson_id: number
   difficulties: DifficultyAccess[]

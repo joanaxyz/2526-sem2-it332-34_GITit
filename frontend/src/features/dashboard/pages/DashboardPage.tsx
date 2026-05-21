@@ -11,7 +11,11 @@ import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 
 export function DashboardPage() {
-  const { data, error, isError, isLoading } = useQuery({ queryKey: ['dashboard-summary'], queryFn: dashboardApi.summary })
+  const { data, error, isError, isLoading } = useQuery({
+    queryKey: ['dashboard-summary'],
+    queryFn: dashboardApi.summary,
+    staleTime: 5 * 60 * 1000,
+  })
 
   if (isLoading) return <LoadingState label="Loading dashboard" />
   if (isError) return <ErrorState title="Could not load dashboard" description={error.message} />

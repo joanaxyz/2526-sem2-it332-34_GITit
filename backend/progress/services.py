@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from django.db.models import Count, Q
+from django.db.models import Case, Count, ExpressionWrapper, F, FloatField, Q, Sum, Value, When
 from django.utils import timezone
 
 from common.constants import (
@@ -11,7 +11,7 @@ from common.constants import (
     SESSION_STATUS_COMPLETED,
     SESSION_STATUS_FAILED,
 )
-from learning.models import Lesson, OrientationProgress
+from learning.models import Lesson
 from progress.models import StreakRecord
 from scenarios.models import CompletionRecord, ScenarioSession
 
@@ -33,66 +33,130 @@ class StreakService:
 
 class MetricsService:
     def dashboard_summary(self, *, user) -> dict:
-        primary = ScenarioSession.objects.filter(user=user, mode=SESSION_MODE_PRIMARY)
-        review = ScenarioSession.objects.filter(user=user, mode=SESSION_MODE_REVIEW)
-        started = primary.count()
-        completed = primary.filter(status=SESSION_STATUS_COMPLETED).count()
-        failed = primary.filter(status=SESSION_STATUS_FAILED).count()
-        abandoned = primary.filter(status=SESSION_STATUS_ABANDONED).count()
-        hard_started = primary.filter(difficulty_instance__difficulty=DIFFICULTY_HARD).count()
-        hard_completed = primary.filter(
-            difficulty_instance__difficulty=DIFFICULTY_HARD,
-            status=SESSION_STATUS_COMPLETED,
-        ).count()
-        rta = primary.filter(rta_eligible=True)
-        review_started = review.count()
-        review_completed = review.filter(status=SESSION_STATUS_COMPLETED).count()
-        orientation_lesson_ids = list(
-            Lesson.objects.filter(
-                unit__is_orientation=True,
-                kind=Lesson.LessonKind.ORIENTATION,
-                is_published=True,
-            ).values_list("id", flat=True)
+        session_counts = ScenarioSession.objects.filter(user=user).aggregate(
+            started=Count("id", filter=Q(mode=SESSION_MODE_PRIMARY)),
+            completed=Count(
+                "id",
+                filter=Q(mode=SESSION_MODE_PRIMARY, status=SESSION_STATUS_COMPLETED),
+            ),
+            failed=Count(
+                "id",
+                filter=Q(mode=SESSION_MODE_PRIMARY, status=SESSION_STATUS_FAILED),
+            ),
+            abandoned=Count(
+                "id",
+                filter=Q(mode=SESSION_MODE_PRIMARY, status=SESSION_STATUS_ABANDONED),
+            ),
+            hard_started=Count(
+                "id",
+                filter=Q(
+                    mode=SESSION_MODE_PRIMARY,
+                    difficulty_instance__difficulty=DIFFICULTY_HARD,
+                ),
+            ),
+            hard_completed=Count(
+                "id",
+                filter=Q(
+                    mode=SESSION_MODE_PRIMARY,
+                    difficulty_instance__difficulty=DIFFICULTY_HARD,
+                    status=SESSION_STATUS_COMPLETED,
+                ),
+            ),
+            rta_success=Count(
+                "id",
+                filter=Q(mode=SESSION_MODE_PRIMARY, rta_eligible=True, rta_success=True),
+            ),
+            rta_total=Count(
+                "id",
+                filter=Q(mode=SESSION_MODE_PRIMARY, rta_eligible=True),
+            ),
+            completed_retry_total=Sum(
+                "retry_index",
+                filter=Q(mode=SESSION_MODE_PRIMARY, status=SESSION_STATUS_COMPLETED),
+            ),
+            review_started=Count("id", filter=Q(mode=SESSION_MODE_REVIEW)),
+            review_completed=Count(
+                "id",
+                filter=Q(mode=SESSION_MODE_REVIEW, status=SESSION_STATUS_COMPLETED),
+            ),
         )
-        orientation_completed = (
-            OrientationProgress.objects.filter(
-                user=user,
-                lesson_id__in=orientation_lesson_ids,
-                completed_at__isnull=False,
-            ).count()
-            if orientation_lesson_ids
-            else 0
+        started = session_counts["started"] or 0
+        completed = session_counts["completed"] or 0
+        failed = session_counts["failed"] or 0
+        abandoned = session_counts["abandoned"] or 0
+        hard_started = session_counts["hard_started"] or 0
+        hard_completed = session_counts["hard_completed"] or 0
+        review_started = session_counts["review_started"] or 0
+        review_completed = session_counts["review_completed"] or 0
+        orientation_counts = Lesson.objects.filter(
+            unit__is_orientation=True,
+            kind=Lesson.LessonKind.ORIENTATION,
+            is_published=True,
+        ).aggregate(
+            total=Count("id", distinct=True),
+            completed=Count(
+                "orientationprogress",
+                filter=Q(
+                    orientationprogress__user=user,
+                    orientationprogress__completed_at__isnull=False,
+                ),
+                distinct=True,
+            ),
+        )
+        orientation_lesson_count = orientation_counts["total"] or 0
+        orientation_completed = orientation_counts["completed"] or 0
+
+        completion_metrics = CompletionRecord.objects.filter(user=user).aggregate(
+            first_attempt_stars=Count("id", filter=Q(first_attempt_star=True)),
+            command_accuracy_total=Sum(
+                Case(
+                    When(
+                        counted_action_total__lte=F(
+                            "difficulty_instance__command_policy__min_counted_commands"
+                        ),
+                        then=Value(100.0),
+                    ),
+                    When(
+                        difficulty_instance__command_policy__min_counted_commands=0,
+                        then=Value(0.0),
+                    ),
+                    default=ExpressionWrapper(
+                        Value(100.0)
+                        * F("difficulty_instance__command_policy__min_counted_commands")
+                        / F("counted_action_total"),
+                        output_field=FloatField(),
+                    ),
+                    output_field=FloatField(),
+                )
+            ),
+            command_accuracy_count=Count("id"),
         )
 
-        latest_completion_ids = []
-        for completion in (
-            CompletionRecord.objects.filter(user=user)
-            .select_related("difficulty_instance__command_policy")
-            .order_by("difficulty_instance_id", "-completed_at")
-        ):
-            if completion.difficulty_instance_id not in latest_completion_ids:
-                latest_completion_ids.append(completion.difficulty_instance_id)
-        latest_completions = CompletionRecord.objects.filter(
-            user=user,
-            difficulty_instance_id__in=latest_completion_ids,
-        ).select_related("difficulty_instance__command_policy")
-        command_accuracy_values = [
-            self._command_accuracy_for_completion(item)
-            for item in latest_completions
-        ]
-
-        streak = getattr(user, "streakrecord", None)
+        streak = StreakRecord.objects.filter(user=user).only(
+            "current_streak",
+            "longest_streak",
+            "last_completed_on",
+        ).first()
         return {
             "kpis": {
                 "orientation_completion": self._rate(
                     orientation_completed,
-                    len(orientation_lesson_ids),
+                    orientation_lesson_count,
                 ),
                 "scr": self._rate(completed, started),
-                "arc": self._average_retry_count(primary),
-                "car": self._average_percent(command_accuracy_values),
+                "arc": self._average_retry_count_from_counts(
+                    session_counts["completed_retry_total"] or 0,
+                    completed,
+                ),
+                "car": self._average_percent_from_counts(
+                    completion_metrics["command_accuracy_total"] or 0,
+                    completion_metrics["command_accuracy_count"] or 0,
+                ),
                 "hlcr": self._rate(hard_completed, hard_started),
-                "rta": self._rate(rta.filter(rta_success=True).count(), rta.count()),
+                "rta": self._rate(
+                    session_counts["rta_success"] or 0,
+                    session_counts["rta_total"] or 0,
+                ),
                 "sar": self._rate(abandoned, started),
                 "review_scr": self._rate(review_completed, review_started),
             },
@@ -108,11 +172,8 @@ class MetricsService:
                 "longest": streak.longest_streak if streak else 0,
                 "last_completed_on": streak.last_completed_on if streak else None,
             },
-            "first_attempt_stars": CompletionRecord.objects.filter(
-                user=user,
-                first_attempt_star=True,
-            ).count(),
-            "retry_trends": self._retry_trends(user=user),
+            "first_attempt_stars": completion_metrics["first_attempt_stars"] or 0,
+            "retry_trends": self._retry_trends(user=user, started=started),
         }
 
     def _rate(self, numerator: int, denominator: int) -> dict:
@@ -124,10 +185,13 @@ class MetricsService:
 
     def _average_percent(self, values: list[int]) -> dict:
         total = sum(values)
+        return self._average_percent_from_counts(total, len(values))
+
+    def _average_percent_from_counts(self, total: float, count: int) -> dict:
         return {
-            "value": round(total / len(values), 1) if values else None,
+            "value": round(total / count, 1) if count else None,
             "numerator": round(total, 1),
-            "denominator": len(values),
+            "denominator": count,
         }
 
     def _command_accuracy_for_completion(self, completion: CompletionRecord) -> int:
@@ -139,17 +203,16 @@ class MetricsService:
             return 0
         return round((target_actions / used_actions) * 100)
 
-    def _average_retry_count(self, sessions) -> dict:
-        completed = sessions.filter(status=SESSION_STATUS_COMPLETED)
-        denominator = completed.count()
-        numerator = sum(item.retry_index for item in completed)
+    def _average_retry_count_from_counts(self, numerator: int, denominator: int) -> dict:
         return {
             "value": round(numerator / denominator, 2) if denominator else None,
             "numerator": numerator,
             "denominator": denominator,
         }
 
-    def _retry_trends(self, *, user) -> list[dict]:
+    def _retry_trends(self, *, user, started: int) -> list[dict]:
+        if started < 2:
+            return []
         rows = (
             ScenarioSession.objects.filter(user=user, mode=SESSION_MODE_PRIMARY)
             .values("scenario_id", "scenario__title")

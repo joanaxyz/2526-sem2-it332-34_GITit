@@ -188,6 +188,19 @@ class ScenarioSession(models.Model):
     def __str__(self) -> str:
         return f"Session({self.id}, {self.scenario.slug}, {self.mode}, {self.status})"
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "mode", "status"], name="sess_user_mode_status_idx"),
+            models.Index(
+                fields=["user", "difficulty_instance", "status", "mode"],
+                name="sess_user_diff_state_idx",
+            ),
+            models.Index(
+                fields=["user", "difficulty_instance", "-id"],
+                name="sess_user_diff_latest_idx",
+            ),
+        ]
+
 
 class StepLog(models.Model):
     class ResultCategory(models.TextChoices):
@@ -214,6 +227,11 @@ class StepLog(models.Model):
     repository_state = models.JSONField(default=dict, blank=True)
     contextual_feedback = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["session", "id"], name="steplog_session_id_idx"),
+        ]
 
 
 class CommandLog(models.Model):

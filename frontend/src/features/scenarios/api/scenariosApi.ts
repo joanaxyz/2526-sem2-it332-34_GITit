@@ -15,6 +15,13 @@ export const scenariosApi = {
   listForUnit(unitId: number) {
     return apiRequest<ScenarioSkillFocus[]>(`/scenarios/units/${unitId}/`)
   },
+  listForUnits(unitIds: number[]) {
+    const params = new URLSearchParams({ unit_ids: unitIds.join(',') })
+    return apiRequest<Record<string, ScenarioSkillFocus[]>>(`/scenarios/units/summary/?${params.toString()}`)
+  },
+  getSkillFocus(skillFocusSlug: string) {
+    return apiRequest<ScenarioSkillFocus>(`/scenarios/skill-focus/${skillFocusSlug}/`)
+  },
   submitDemoCommand(skillFocusSlug: string, payload: { command: string; repository_state?: unknown }) {
     return apiRequest<DemoCommandResponse>(`/scenarios/skill-focus/${skillFocusSlug}/demo/commands/`, {
       method: 'POST',

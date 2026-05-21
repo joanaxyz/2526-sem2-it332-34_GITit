@@ -25,9 +25,9 @@ class SkillFocusDemoCommandSerializer(serializers.Serializer):
     repository_state = serializers.JSONField(required=False)
 
 
-def session_payload(session) -> dict:
+def session_payload(session, *, include_steps: bool = True) -> dict:
     supports = ScaffoldingService().supports_for(session.difficulty_instance.difficulty)
-    step_logs = session.step_logs.order_by("id")
+    step_logs = session.step_logs.order_by("id") if include_steps else []
     return {
         "id": session.id,
         "mode": session.mode,

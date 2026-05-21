@@ -2,7 +2,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from scenarios.models import ScenarioSession
-from scenarios.selectors import get_difficulty_instance, scenario_queryset, scenario_status_payload
+from scenarios.selectors import (
+    get_difficulty_instance,
+    scenario_list_queryset,
+    scenario_queryset,
+    scenario_status_payloads,
+)
 from scenarios.serializers import (
     CommandSubmitSerializer,
     ScenarioStartSerializer,
@@ -15,21 +20,67 @@ from simulator.services import RepositorySnapshotService, RepositoryStateSimulat
 
 class LessonScenarioListAPIView(APIView):
     def get(self, request, lesson_id: int):
-        scenarios = scenario_queryset().filter(lesson_id=lesson_id)
-        return Response([scenario_status_payload(user=request.user, scenario=s) for s in scenarios])
+        scenarios = scenario_list_queryset().filter(lesson_id=lesson_id)
+        return Response(
+            scenario_status_payloads(
+                user=request.user,
+                scenarios=scenarios,
+                include_preview=False,
+            )
+        )
 
 
 class UnitScenarioListAPIView(APIView):
     def get(self, request, unit_id: int):
-        scenarios = scenario_queryset().filter(learning_unit_id=unit_id)
-        return Response([scenario_status_payload(user=request.user, scenario=s) for s in scenarios])
+        scenarios = scenario_list_queryset().filter(learning_unit_id=unit_id)
+        return Response(
+            scenario_status_payloads(
+                user=request.user,
+                scenarios=scenarios,
+                include_preview=False,
+            )
+        )
+
+
+class UnitScenarioSummaryAPIView(APIView):
+    def get(self, request):
+        raw_unit_ids = request.query_params.get("unit_ids", "")
+        unit_ids = [
+            int(item)
+            for item in raw_unit_ids.split(",")
+            if item.strip().isdigit()
+        ]
+        scenarios = scenario_list_queryset()
+        if unit_ids:
+            scenarios = scenarios.filter(learning_unit_id__in=unit_ids)
+
+        grouped = {str(unit_id): [] for unit_id in unit_ids}
+        for payload in scenario_status_payloads(
+            user=request.user,
+            scenarios=scenarios,
+            include_preview=False,
+        ):
+            grouped.setdefault(str(payload["learning_unit_id"]), []).append(payload)
+        return Response(grouped)
+
+
+class SkillFocusDetailAPIView(APIView):
+    def get(self, request, slug: str):
+        scenario = scenario_queryset(include_variants=False).get(slug=slug)
+        return Response(
+            scenario_status_payloads(
+                user=request.user,
+                scenarios=[scenario],
+                include_preview=True,
+            )[0]
+        )
 
 
 class SkillFocusDemoCommandAPIView(APIView):
     def post(self, request, slug: str):
         serializer = SkillFocusDemoCommandSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        scenario = scenario_queryset().get(slug=slug)
+        scenario = scenario_queryset(include_variants=False).get(slug=slug)
 
         def normalize(command: str) -> str:
             return " ".join(command.strip().split()).lower()
@@ -109,13 +160,16 @@ class CommandSubmitAPIView(APIView):
         )
         return Response(
             {
-                "session": session_payload(result["session"]),
+                "session": session_payload(result["session"], include_steps=False),
                 "step": {
                     "id": result["step"].id,
+                    "command_text": result["step"].command_text,
                     "terminal_output": result["terminal_output"],
+                    "result_category": result["step"].result_category,
                     "evaluation_result": result["evaluation_result"],
                     "command_classification": result["command_classification"],
                     "contextual_feedback": result["contextual_feedback"],
+                    "created_at": result["step"].created_at,
                 },
             }
         )

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 
 import { ModuleSymbol } from '@/features/units/components/ModuleSymbol'
 import { UnitScenarioHub } from '@/features/units/components/UnitScenarioHub'
+import type { ScenarioSkillFocus } from '@/features/scenarios/types'
 import type { LearningUnit } from '@/features/units/types'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
@@ -13,10 +14,14 @@ import { ProgressBar } from '@/shared/components/ProgressBar'
 export function UnitCard({
   unit,
   isExpanded,
+  scenarioSummary,
+  scenarioSummaryPending = false,
   onToggle,
 }: {
   unit: LearningUnit
   isExpanded: boolean
+  scenarioSummary?: ScenarioSkillFocus[]
+  scenarioSummaryPending?: boolean
   onToggle: () => void
 }) {
   const orientationProgress = Math.round(
@@ -67,7 +72,11 @@ export function UnitCard({
             </div>
           ) : (
             <div className="grid gap-5">
-              <UnitScenarioHub unit={unit} />
+              <UnitScenarioHub
+                unit={unit}
+                scenarioSummary={scenarioSummary}
+                scenarioSummaryPending={scenarioSummaryPending}
+              />
               {referenceLessons.length ? (
                 <div className="rounded-lg border border-border bg-card/60 p-4">
                   <div className="mb-3 flex items-center gap-2 font-bold">
