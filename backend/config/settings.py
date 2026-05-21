@@ -74,7 +74,14 @@ DATABASES = {
     "default": env.db("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
 }
 DATABASES["default"]["CONN_MAX_AGE"] = env.int("DATABASE_CONN_MAX_AGE", default=0)
-DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = env.bool("DATABASE_CONN_HEALTH_CHECKS", default=False)
+if "postgresql" in DATABASES["default"].get("ENGINE", ""):
+    DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = env.bool(
+        "DATABASE_DISABLE_SERVER_SIDE_CURSORS",
+        default=True,
+    )
+    if env.bool("DATABASE_DISABLE_PREPARED_STATEMENTS", default=True):
+        DATABASES["default"].setdefault("OPTIONS", {})["prepare_threshold"] = None
 
 REDIS_URL = env("REDIS_URL", default="")
 if REDIS_URL:
