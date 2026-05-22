@@ -1,4 +1,4 @@
-import { AlertTriangle, BookOpenText, CheckCircle2, ClipboardList, Info, ListChecks, Search, Target } from 'lucide-react'
+import { AlertTriangle, BookOpenText, CheckCircle2, ClipboardList, Info, Search, Target } from 'lucide-react'
 import type { ComponentType, ReactNode } from 'react'
 
 import type { ScenarioSession, ScenarioStudentContext } from '@/features/practice/types'
@@ -51,9 +51,7 @@ export function ScenarioContextPanel({ session }: { session: ScenarioSession }) 
           </dl>
         </Section>
 
-        <Section icon={ListChecks} title="Your Task" hidden={!context.requirements.length}>
-          <CompactList items={context.requirements} />
-        </Section>
+        {/* 'Your Task' section removed per request */}
 
         <Section icon={CheckCircle2} title="Success Checklist" hidden={!compactChecklist.length}>
           <CompactList items={compactChecklist} marker="check" />
