@@ -28,6 +28,7 @@ class SkillFocusDemoCommandSerializer(serializers.Serializer):
 
 def session_payload(session, *, include_steps: bool = True) -> dict:
     supports = ScaffoldingService().supports_for(session.difficulty_instance.difficulty)
+    snapshotter = RepositorySnapshotService()
     step_logs = session.step_logs.order_by("id") if include_steps else []
     mastered_count = session.user.scenariosession_set.filter(
         mode="primary",
@@ -92,8 +93,10 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
             "total_attempts": session.total_attempts,
         },
         "scaffolding": supports,
-        "repository_state": RepositorySnapshotService().snapshot(session.repository_state),
-        "expected_state": session.variant.expected_state_diagram
+        "repository_state": snapshotter.snapshot(session.repository_state),
+        "expected_state": snapshotter.snapshot(
+            session.variant.expected_state_diagram or session.variant.target_state
+        )
         if supports["expected_state"]
         else None,
         "steps": [

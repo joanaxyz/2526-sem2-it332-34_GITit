@@ -153,6 +153,47 @@ def test_session_payload_includes_completion_when_record_exists(student):
     assert payload["completion"]["completed_at"] is not None
 
 
+def test_session_payload_expected_state_uses_rich_snapshot_and_scaffolding(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="form-clean-commit",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+
+    payload = session_payload(session, include_steps=False)
+    latest_commit = payload["expected_state"]["commits"][-1]
+
+    assert payload["scaffolding"]["expected_state"] is True
+    assert latest_commit["message"]
+    assert "tree" in latest_commit
+    assert "changes" in latest_commit
+
+    hard = DifficultyInstance.objects.get(
+        scenario=difficulty.scenario,
+        difficulty="hard",
+    )
+    hard_variant = hard.variants.filter(is_published=True).first()
+    hard_session = ScenarioSession.objects.create(
+        user=student,
+        learning_unit=hard.scenario.learning_unit,
+        scenario=hard.scenario,
+        difficulty_instance=hard,
+        variant=hard_variant,
+        source_entry_point="lesson",
+        command_policy_snapshot=hard.command_policy.snapshot(),
+        repository_state=hard_variant.initial_state,
+    )
+
+    hard_payload = session_payload(hard_session, include_steps=False)
+
+    assert hard_payload["scaffolding"]["expected_state"] is False
+    assert hard_payload["expected_state"] is None
+
+
 def test_partial_staging_requires_the_selected_file_scope(student):
     difficulty = DifficultyInstance.objects.get(
         scenario__slug="stage-selected-changes",

@@ -1,6 +1,6 @@
 import type { ScenarioSession } from '@/features/practice/types'
 import { Card, CardTitle } from '@/shared/components/Card'
-import { LiveDagPanel } from './LiveDagPanel'
+import { RepositoryStateDiagram } from './LiveDagPanel'
 
 export function ExpectedStatePanel({ session }: { session: ScenarioSession }) {
   if (!session.scaffolding.expected_state || !session.expected_state) {
@@ -12,7 +12,7 @@ export function ExpectedStatePanel({ session }: { session: ScenarioSession }) {
     )
   }
   return (
-    <LiveDagPanel
+    <RepositoryStateDiagram
       title="Expected-State Diagram"
       snapshot={session.expected_state}
       className="flex h-full min-h-0 flex-col"

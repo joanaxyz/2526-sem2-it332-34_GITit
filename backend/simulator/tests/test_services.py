@@ -31,6 +31,8 @@ def test_init_allows_pre_repository_first_commit_flow():
     assert result.state["repository_initialized"] is True
     assert result.state["branches"]["main"] == "c0"
     assert result.state["working_tree"] == {}
+    assert result.state["commits"][0]["tree"]["README.md"] == "untracked"
+    assert result.state["commits"][0]["changes"]["README.md"]["change_type"] == "added"
 
 
 def test_pre_repository_git_syntax_errors_are_reported_before_not_a_repo():

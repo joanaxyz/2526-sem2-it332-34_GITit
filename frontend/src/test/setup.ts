@@ -24,4 +24,19 @@ if (typeof window !== 'undefined') {
     configurable: true,
     value: storage,
   })
+
+  class TestResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+
+  Object.defineProperty(window, 'ResizeObserver', {
+    configurable: true,
+    value: TestResizeObserver,
+  })
+  Object.defineProperty(globalThis, 'ResizeObserver', {
+    configurable: true,
+    value: TestResizeObserver,
+  })
 }

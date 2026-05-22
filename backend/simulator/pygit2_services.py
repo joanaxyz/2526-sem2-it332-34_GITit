@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pygit2
 
+from simulator.state import RepositoryStateNormalizer
+
 
 @dataclass(frozen=True)
 class MaterializedRepository:
@@ -29,6 +31,7 @@ class Pygit2RepositoryMaterializer:
         path: str | Path,
         remote_url_overrides: dict[str, str] | None = None,
     ) -> MaterializedRepository:
+        state = RepositoryStateNormalizer().normalize(state)
         path = Path(path)
         path.mkdir(parents=True, exist_ok=True)
         head = state.get("head", {})
@@ -77,6 +80,7 @@ class Pygit2RepositoryMaterializer:
         )
 
     def materialize_workspace_files(self, *, state: dict, path: str | Path) -> None:
+        state = RepositoryStateNormalizer().normalize(state)
         path = Path(path)
         path.mkdir(parents=True, exist_ok=True)
         for source in (state.get("staging", {}), state.get("working_tree", {})):
@@ -198,6 +202,11 @@ class Pygit2RepositoryMaterializer:
         commit: dict,
         commit_files: dict[str, dict[str, str]],
     ) -> dict[str, str]:
+        if isinstance(commit.get("tree"), dict):
+            return {
+                path: self._file_content(path, marker, commit["id"])
+                for path, marker in commit["tree"].items()
+            }
         parents = commit.get("parents", [])
         files = dict(commit_files.get(parents[0], {})) if parents else {}
         for path, marker in (commit.get("files") or {}).items():
@@ -266,7 +275,7 @@ class Pygit2RepositorySnapshotter:
         }
         remote_branches = self._remote_branches(repo=repo, aliases=aliases)
         status = repo.status()
-        return {
+        snapshot = {
             "repository_initialized": True,
             "commits": self._commits(repo, aliases=aliases),
             "branches": branches,
@@ -280,6 +289,7 @@ class Pygit2RepositorySnapshotter:
             "stash_stack": (previous_state or {}).get("stash_stack", []),
             "reflog": (previous_state or {}).get("reflog", []),
         }
+        return RepositoryStateNormalizer().normalize(snapshot)
 
     def _head_payload(self, repo: pygit2.Repository, aliases: _OidAliasMap) -> dict:
         if repo.head_is_unborn:
@@ -303,9 +313,21 @@ class Pygit2RepositorySnapshotter:
                     "message": commit.message.strip(),
                     "parents": [aliases.alias_for_oid(parent.id) for parent in commit.parents],
                     "files": self._changed_files(commit),
+                    "tree": self._tree_files(repo, commit.tree),
                 }
             )
         return commits
+
+    def _tree_files(self, repo: pygit2.Repository, tree: pygit2.Tree, prefix: str = "") -> dict[str, str]:
+        files: dict[str, str] = {}
+        for entry in tree:
+            path = f"{prefix}{entry.name}"
+            obj = repo[entry.id]
+            if isinstance(obj, pygit2.Tree):
+                files.update(self._tree_files(repo, obj, f"{path}/"))
+            else:
+                files[path] = obj.data.decode("utf-8")
+        return files
 
     def _changed_files(self, commit: pygit2.Commit) -> dict[str, str]:
         if commit.parents:
@@ -417,6 +439,7 @@ class Pygit2RemoteRepositoryFactory:
         path: str | Path,
         remote_name: str = "origin",
     ) -> str:
+        state = RepositoryStateNormalizer().normalize(state)
         path = Path(path)
         if path.exists():
             shutil.rmtree(path)

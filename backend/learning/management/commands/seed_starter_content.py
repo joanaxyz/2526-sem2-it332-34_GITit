@@ -1657,7 +1657,9 @@ class Command(BaseCommand):
 
         if any(command.startswith("git commit") for command in solution_commands):
             latest_commit = self._head_commit(target_state)
-            changed_paths = sorted((latest_commit or {}).get("files", {}))
+            changed_paths = sorted(
+                (latest_commit or {}).get("changes") or (latest_commit or {}).get("files", {})
+            )
             if changed_paths:
                 latest_rule = dict(augmented.get("latest_commit", {}))
                 latest_rule.setdefault("branch", self._head_branch(target_state) or "main")

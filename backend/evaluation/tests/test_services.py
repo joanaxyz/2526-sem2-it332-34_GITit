@@ -1,5 +1,6 @@
 from common.constants import RESULT_TARGET_MATCHED, RESULT_TARGET_NOT_YET_MATCHED
 from evaluation.services import InspectionEvaluator, StateBasedEvaluator
+from simulator.services import RepositoryStateSimulator
 
 
 def test_evaluator_checks_partial_staging_commit_scope_and_message():
@@ -177,3 +178,297 @@ def test_inspection_evaluator_requires_commands_and_unchanged_state():
 
     assert matched.result_category == RESULT_TARGET_MATCHED
     assert missing_command.result_category == RESULT_TARGET_NOT_YET_MATCHED
+
+
+def test_rule_evaluator_checks_commit_message_changes_scope_and_clean_state():
+    initial = {
+        "commits": [
+            {
+                "id": "c1",
+                "message": "Base",
+                "parents": [],
+                "tree": {"README.md": "readme-v1", "src/form.js": "form-validation-v1"},
+            }
+        ],
+        "branches": {"main": "c1"},
+        "head": {"type": "branch", "name": "main"},
+        "working_tree": {"src/form.js": "form-validation-v2", "debug.log": "debug-v1"},
+        "staging": {},
+        "conflicts": [],
+    }
+    state = {
+        **initial,
+        "commits": [
+            initial["commits"][0],
+            {
+                "id": "c2",
+                "message": "Update form validation",
+                "parents": ["c1"],
+                "tree": {"README.md": "readme-v1", "src/form.js": "form-validation-v2"},
+                "changes": {
+                    "src/form.js": {
+                        "change_type": "modified",
+                        "before": "form-validation-v1",
+                        "after": "form-validation-v2",
+                    }
+                },
+            },
+        ],
+        "branches": {"main": "c2"},
+        "head": {"type": "branch", "name": "main"},
+        "working_tree": {},
+        "staging": {},
+    }
+    rule = {
+        "rules": [
+            {"type": "head_branch_equals", "branch": "main"},
+            {
+                "type": "branch_tip_commit",
+                "branch": "main",
+                "message_contains": "form validation",
+                "changes_include": ["src/form.js"],
+                "changes_exclude": ["debug.log"],
+                "parent_equals": "$initial.head_commit",
+            },
+            {"type": "index_empty"},
+            {"type": "working_tree_clean"},
+        ]
+    }
+
+    result = StateBasedEvaluator().evaluate(state, rule, initial_state=initial)
+
+    assert result.result_category == RESULT_TARGET_MATCHED
+    assert result.failed_rules == ()
+
+
+def test_rule_evaluator_reports_failed_rule_diagnostics():
+    state = {
+        "commits": [{"id": "c0", "message": "Base", "parents": [], "files": {"README.md": "added"}}],
+        "branches": {"main": "c0"},
+        "head": {"type": "branch", "name": "main"},
+        "working_tree": {},
+        "staging": {},
+        "conflicts": [],
+    }
+    rule = {"rules": [{"type": "branch_tip_commit", "branch": "main", "changes_include": ["app.py"]}]}
+
+    result = StateBasedEvaluator().evaluate(state, rule)
+
+    assert result.result_category == RESULT_TARGET_NOT_YET_MATCHED
+    assert result.failed_rules[0]["type"] == "branch_tip_commit"
+    assert "missing" in result.failed_rules[0]["reason"].lower()
+
+
+def test_rule_evaluator_supports_selective_staging_expectations():
+    state = {
+        "commits": [
+            {"id": "c0", "message": "Base", "parents": [], "tree": {"app.py": "v1", "notes.md": "v1"}},
+            {
+                "id": "c1",
+                "message": "Update app only",
+                "parents": ["c0"],
+                "tree": {"app.py": "v2", "notes.md": "v1"},
+                "changes": {"app.py": {"change_type": "modified", "before": "v1", "after": "v2"}},
+            },
+        ],
+        "branches": {"main": "c1"},
+        "head": {"type": "branch", "name": "main"},
+        "working_tree": {"notes.md": "draft-v2"},
+        "staging": {},
+        "conflicts": [],
+    }
+    rule = {
+        "rules": [
+            {"type": "branch_tip_commit", "branch": "main", "changes_include": ["app.py"], "changes_exclude": ["notes.md"]},
+            {"type": "working_tree_contains", "path": "notes.md"},
+            {"type": "index_empty"},
+        ]
+    }
+
+    result = StateBasedEvaluator().evaluate(state, rule)
+
+    assert result.result_category == RESULT_TARGET_MATCHED
+
+
+def test_rule_evaluator_checks_branch_creation_from_initial_head():
+    initial = {
+        "commits": [{"id": "c0", "message": "Base", "parents": []}],
+        "branches": {"main": "c0"},
+        "head": {"type": "branch", "name": "main"},
+        "working_tree": {},
+        "staging": {},
+        "conflicts": [],
+    }
+    state = {
+        **initial,
+        "branches": {"main": "c0", "feature/form": "c0"},
+        "head": {"type": "branch", "name": "feature/form"},
+    }
+    rule = {
+        "rules": [
+            {"type": "branch_exists", "branch": "feature/form"},
+            {"type": "head_branch_equals", "branch": "feature/form"},
+            {"type": "branch_points_to", "branch": "feature/form", "commit": "$initial.head_commit"},
+        ]
+    }
+
+    result = StateBasedEvaluator().evaluate(state, rule, initial_state=initial)
+
+    assert result.result_category == RESULT_TARGET_MATCHED
+
+
+def test_rule_evaluator_checks_merge_commit_and_conflict_state():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "commits": [
+                {"id": "c0", "message": "Base", "parents": [], "tree": {"app.py": "base"}},
+                {"id": "c1", "message": "Main", "parents": ["c0"], "tree": {"app.py": "main"}},
+                {"id": "c2", "message": "Feature", "parents": ["c0"], "tree": {"app.py": "feature"}},
+            ],
+            "branches": {"main": "c1", "feature/app": "c2"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {},
+            "staging": {},
+            "conflicts": [],
+        }
+    )
+
+    merged = simulator.process(state, "git merge feature/app").state
+    merge_result = StateBasedEvaluator().evaluate(
+        merged,
+        {
+            "rules": [
+                {"type": "branch_tip_commit", "branch": "main", "parent_count_equals": 2, "is_merge": True},
+                {"type": "conflict_free"},
+            ]
+        },
+    )
+
+    conflict_state = simulator.normalize_state({**state, "conflict_on_merge": True, "conflict_files": ["app.py"]})
+    conflicted = simulator.process(conflict_state, "git merge feature/app").state
+    conflict_result = StateBasedEvaluator().evaluate(
+        conflicted,
+        {"rules": [{"type": "conflicts_contain_paths", "paths": ["app.py"]}]},
+    )
+
+    assert merge_result.result_category == RESULT_TARGET_MATCHED
+    assert conflict_result.result_category == RESULT_TARGET_MATCHED
+
+
+def test_rule_evaluator_distinguishes_reset_modes():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "commits": [
+                {"id": "c0", "message": "Base", "parents": [], "tree": {"app.py": "v1"}},
+                {"id": "c1", "message": "Update app", "parents": ["c0"], "tree": {"app.py": "v2"}},
+            ],
+            "branches": {"main": "c1"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {},
+            "staging": {},
+            "conflicts": [],
+        }
+    )
+
+    soft = simulator.process(state, "git reset --soft HEAD~1").state
+    mixed = simulator.process(state, "git reset --mixed HEAD~1").state
+    hard = simulator.process(state, "git reset --hard HEAD~1").state
+
+    evaluator = StateBasedEvaluator()
+    assert evaluator.evaluate(soft, {"rules": [{"type": "staging_contains", "path": "app.py"}]}).target_matched
+    assert evaluator.evaluate(mixed, {"rules": [{"type": "working_tree_contains", "path": "app.py"}, {"type": "index_empty"}]}).target_matched
+    assert evaluator.evaluate(hard, {"rules": [{"type": "working_tree_clean"}, {"type": "index_empty"}]}).target_matched
+
+
+def test_rule_evaluator_checks_restore_index_and_working_tree_effects():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "commits": [{"id": "c0", "message": "Base", "parents": [], "tree": {"app.py": "v1"}}],
+            "branches": {"main": "c0"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {"app.py": "v2", "notes.md": "draft"},
+            "staging": {"app.py": "v2"},
+            "conflicts": [],
+        }
+    )
+
+    unstaged = simulator.process(state, "git restore --staged app.py").state
+    restored = simulator.process(unstaged, "git restore app.py").state
+    evaluator = StateBasedEvaluator()
+
+    assert evaluator.evaluate(unstaged, {"rules": [{"type": "staging_excludes", "path": "app.py"}, {"type": "working_tree_contains", "path": "app.py"}]}).target_matched
+    assert evaluator.evaluate(restored, {"rules": [{"type": "working_tree_absent", "path": "app.py"}, {"type": "working_tree_contains", "path": "notes.md"}]}).target_matched
+
+
+def test_rule_evaluator_checks_fetch_pull_and_push_state():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "commits": [{"id": "c0", "message": "Base", "parents": []}],
+            "branches": {"main": "c0"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {},
+            "staging": {},
+            "conflicts": [],
+            "remotes": {"origin": "https://example.test/app.git"},
+            "remote_branches": {"origin/main": "c1"},
+            "upstream_tracking": {"main": "origin/main"},
+        }
+    )
+    evaluator = StateBasedEvaluator()
+
+    fetched = simulator.process(state, "git fetch origin").state
+    pulled = simulator.process(fetched, "git pull").state
+    pushed = simulator.process(pulled, "git push").state
+
+    assert evaluator.evaluate(fetched, {"rules": [{"type": "fetch_updated_remote_tracking_without_moving_local", "branch": "main"}]}, initial_state=state).target_matched
+    assert evaluator.evaluate(pulled, {"rules": [{"type": "pull_moved_local_to_upstream", "branch": "main"}]}).target_matched
+    assert evaluator.evaluate(pushed, {"rules": [{"type": "push_moved_remote_to_local_tip", "branch": "main"}]}).target_matched
+
+
+def test_rule_evaluator_checks_stash_save_and_pop():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "commits": [{"id": "c0", "message": "Base", "parents": []}],
+            "branches": {"main": "c0"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {"app.py": "v2"},
+            "staging": {"README.md": "v2"},
+            "conflicts": [],
+        }
+    )
+
+    stashed = simulator.process(state, "git stash").state
+    popped = simulator.process(stashed, "git stash pop").state
+    evaluator = StateBasedEvaluator()
+
+    assert evaluator.evaluate(stashed, {"rules": [{"type": "stash_stack_contains_paths", "paths": ["app.py", "README.md"]}, {"type": "working_tree_clean"}, {"type": "index_empty"}]}).target_matched
+    assert evaluator.evaluate(popped, {"rules": [{"type": "stash_stack_empty"}, {"type": "stash_pop_restored_paths", "paths": ["app.py", "README.md"]}]}).target_matched
+
+
+def test_rule_evaluator_normalizes_legacy_commit_files_for_changes_and_tree():
+    state = {
+        "commits": [
+            {"id": "c0", "message": "Base", "parents": []},
+            {"id": "c1", "message": "Legacy change", "parents": ["c0"], "files": {"legacy.txt": "legacy-v1"}},
+        ],
+        "branches": {"main": "c1"},
+        "head": {"type": "branch", "name": "main"},
+        "working_tree": {},
+        "staging": {},
+        "conflicts": [],
+    }
+    rule = {
+        "rules": [
+            {"type": "branch_tip_commit", "branch": "main", "changes_include": ["legacy.txt"]},
+            {"type": "commit_tree_contains", "commit": "c1", "tree": {"legacy.txt": "legacy-v1"}},
+        ]
+    }
+
+    result = StateBasedEvaluator().evaluate(state, rule)
+
+    assert result.result_category == RESULT_TARGET_MATCHED
