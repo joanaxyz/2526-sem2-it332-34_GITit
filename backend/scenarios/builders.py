@@ -203,8 +203,14 @@ class RuntimeScenarioBuilder:
         initial_state = self.simulator.normalize_state(
             self.renderer.render(blueprint.initial_state_template, context)
         )
-        solution_commands = list(
-            self.renderer.render(blueprint.solution_commands_template, context)
+        rendered_solution_commands = self.renderer.render(
+            blueprint.solution_commands_template,
+            context,
+        )
+        solution_commands = (
+            list(rendered_solution_commands)
+            if isinstance(rendered_solution_commands, list)
+            else [rendered_solution_commands]
         )
         target_rule = self.renderer.render(blueprint.target_rule_template, context)
         target_state = self._target_state_from_solution(initial_state, solution_commands)
@@ -217,8 +223,10 @@ class RuntimeScenarioBuilder:
             completion_type=difficulty_instance.completion_type,
         )
         expected_observations = self._expected_observations(
+            blueprint=blueprint,
             difficulty_instance=difficulty_instance,
             initial_state=initial_state,
+            parameter_context=context,
             target_rule=target_rule,
         )
         student_context = self._student_context(
@@ -328,12 +336,19 @@ class RuntimeScenarioBuilder:
     def _expected_observations(
         self,
         *,
+        blueprint: ScenarioGenerationBlueprint,
         difficulty_instance: DifficultyInstance,
         initial_state: dict,
+        parameter_context: dict[str, Any],
         target_rule: dict,
     ) -> dict:
+        rendered_template = self.renderer.render(
+            blueprint.expected_observations_template or {},
+            parameter_context,
+        )
+        seeded_observations = rendered_template if isinstance(rendered_template, dict) else {}
         if difficulty_instance.completion_type != COMPLETION_INSPECTION:
-            return {}
+            return seeded_observations
         observations = InspectionEvaluator().observations_for(initial_state)
         must_identify = target_rule.get("must_identify", [])
         explicit_expected = {}
@@ -347,6 +362,7 @@ class RuntimeScenarioBuilder:
         }
         expected_answer = explicit_expected or checks
         return {
+            **seeded_observations,
             "required_commands": target_rule.get("required_commands", []),
             "repository_state_unchanged": target_rule.get("repository_state_unchanged", True),
             "checks": checks,
@@ -784,8 +800,6 @@ class GeneratedVariantValidator:
                 self._collect(values, rule.get("paths"))
             if rule.get("type") in {"partial_hunks_committed", "partial_hunks_left_in_working_tree"}:
                 self._collect(values, rule.get("paths"))
-            if rule.get("type") == "inspection_answer_matches":
-                self._collect(values, rule.get("expected"))
         return {
             value
             for value in values
