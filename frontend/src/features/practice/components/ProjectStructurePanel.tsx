@@ -84,7 +84,7 @@ function TreeItem({ node, depth = 0 }: { node: TreeNode; depth?: number }) {
               'ml-auto shrink-0 rounded px-1 text-[10px] font-medium uppercase leading-none',
               node.source === 'staging'
                 ? 'bg-primary/10 text-primary'
-                : 'bg-amber-500/10 text-amber-600'
+                : 'bg-muted text-muted-foreground'
             )}
             title={node.source === 'staging' ? 'Staged' : 'Working tree'}
           >

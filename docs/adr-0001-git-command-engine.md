@@ -14,10 +14,11 @@ The current scenario workspace uses an in-process repository-state simulator. It
 
 Move toward a hybrid command engine:
 
-1. Use a pygit2-backed runtime engine for real repository state transitions.
-2. Keep the existing simulator as a deterministic fallback, demo engine, and fixture/compiler aid during migration.
-3. Keep an application-owned command parser and safety policy in front of any Git engine.
-4. Run slow or remote-capable operations through queued workers, not inside DRF request handlers.
+1. Use a pygit2-backed command engine to materialize each authored scenario state into an isolated Git workspace.
+2. Run student `git ...` porcelain through the Git executable without a shell so terminal output matches real Git instead of hand-authored simulator messages.
+3. Keep the existing compact scenario JSON as the durable teaching state while the pygit2 snapshotter expands coverage for index/worktree/remotes.
+4. Keep evaluation behind a separate completion strategy so command execution is not mixed with state-based vs inspection-based scoring.
+5. Run slow or remote-capable operations through queued workers once the product enables broader command coverage beyond local scenario-scale commands.
 
 ## Why Commands Still Need a Safety Boundary
 
@@ -39,22 +40,20 @@ Git commands can trigger or depend on:
 Command submission should become asynchronous:
 
 1. DRF validates the session and command text.
-2. The command is parsed into an internal command model.
-3. The API persists a command job and immediately returns `accepted`.
-4. A worker runs the command against an isolated repository workspace.
-5. The worker writes terminal output, state snapshots, and evaluation results.
-6. The frontend receives progress through SSE/WebSocket or polls a command status endpoint.
+2. The command engine parses only enough to confirm it is a Git command and to avoid shell execution.
+3. pygit2 materializes the authored state into a temporary workspace, including commits, refs, index, working tree, and local fake remotes.
+4. The Git executable runs inside that workspace with prompts, pagers, editors, and global config disabled.
+5. The service stores real terminal output, advances the compact teaching state, and evaluates completion through the appropriate strategy.
+6. The frontend receives a single command response today; the same boundary can move to SSE/WebSocket or polling when commands become queued jobs.
 
 Fast local commands can complete quickly, but the interface should still use the same job/event model. That keeps `clone`, `fetch`, `pull`, large diffs, and conflict operations from blocking web workers.
 
 ## Migration Plan
 
-1. Keep the simulator as the default engine while latency hot paths are fixed.
-2. Add a pygit2 materializer that can turn authored scenario JSON into an isolated Git repository.
-3. Add a pygit2 snapshotter that maps libgit2 repository state back into the UI's DAG/status schema.
-4. Route a small command subset through pygit2 behind the same command-engine interface.
-5. Expand command coverage by category: status/log/diff, add/restore, commit/branch/switch/checkout, merge/rebase/cherry-pick/revert, remote operations.
-6. Move remote-capable commands into queued isolated workers before enabling them broadly.
+1. Keep the simulator available as the deterministic state-transition fallback and seed compiler.
+2. Use the pygit2 materializer and local Git runner for runtime terminal output.
+3. Expand the pygit2 snapshotter until it can replace simulator state transitions category by category.
+4. Move remote-capable and long-running commands into queued isolated workers before enabling them broadly.
 
 ## Consequences
 

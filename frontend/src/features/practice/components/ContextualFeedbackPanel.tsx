@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Ca
 export function ContextualFeedbackPanel({ session, feedback }: { session: ScenarioSession; feedback: string }) {
   if (!session.scaffolding.contextual_feedback) return null
   return (
-    <Card className="shadow-none">
+    <Card className="h-full shadow-none">
       <CardHeader className="p-3">
         <CardTitle className="flex items-center gap-2 text-sm">
           <MessageSquareText className="size-5 text-primary" />

@@ -80,7 +80,7 @@ export function CompletionCelebrationModal({
     >
       <div className="relative overflow-hidden">
         <div className="completion-party-popper completion-party-popper-left" aria-hidden="true">
-          <PartyPopper className="size-11 text-amber-300" />
+          <PartyPopper className="size-11 text-accent" />
         </div>
         <div className="completion-party-popper completion-party-popper-right" aria-hidden="true">
           <PartyPopper className="size-11 -scale-x-100 text-primary" />

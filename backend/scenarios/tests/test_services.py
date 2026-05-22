@@ -96,6 +96,8 @@ def test_diagnostic_commands_are_logged_but_not_counted(student):
 
     session.refresh_from_db()
     assert response["command_classification"] == COMMAND_DIAGNOSTIC
+    assert "On branch" in response["terminal_output"]
+    assert "Only simulated" not in response["terminal_output"]
     assert session.counted_action_total == 0
     assert session.non_counted_diagnostic_total == 1
 
@@ -392,6 +394,7 @@ def test_invalid_git_syntax_consumes_action_budget(student):
     session.refresh_from_db()
     assert response["command_classification"] == COMMAND_COUNTED
     assert response["evaluation_result"] == RESULT_INVALID
+    assert "usage: git status" in response["terminal_output"]
     assert session.counted_action_total == 1
     assert response["remaining_counted_commands"] == session.command_policy_snapshot["max_counted_commands"] - 1
 
