@@ -115,6 +115,36 @@ class CommandCountPolicy(models.Model):
         }
 
 
+class ScenarioGenerationBlueprint(models.Model):
+    difficulty_instance = models.ForeignKey(
+        DifficultyInstance,
+        related_name="generation_blueprints",
+        on_delete=models.CASCADE,
+    )
+    slug = models.SlugField()
+    slug_template = models.CharField(max_length=160)
+    label_template = models.CharField(max_length=160)
+    blueprint_signature = models.CharField(max_length=160)
+    subtemplate_signature = models.CharField(max_length=160, blank=True)
+    parameter_pools = models.JSONField(default=dict, blank=True)
+    initial_state_template = models.JSONField(default=dict, blank=True)
+    target_rule_template = models.JSONField(default=dict, blank=True)
+    solution_commands_template = models.JSONField(default=list, blank=True)
+    expected_observations_template = models.JSONField(default=dict, blank=True)
+    student_context_template = models.JSONField(default=dict, blank=True)
+    generation_count = models.PositiveIntegerField(default=1)
+    max_combinations = models.PositiveIntegerField(null=True, blank=True)
+    is_published = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["difficulty_instance_id", "sort_order", "id"]
+        unique_together = [("difficulty_instance", "slug")]
+
+    def __str__(self) -> str:
+        return f"{self.difficulty_instance}:{self.slug}"
+
+
 class ScenarioVariant(models.Model):
     scenario = models.ForeignKey(
         ScenarioSkillFocus, related_name="variants", on_delete=models.CASCADE
@@ -131,6 +161,20 @@ class ScenarioVariant(models.Model):
     expected_state_diagram = models.JSONField(default=dict, blank=True)
     expected_observations = models.JSONField(default=dict, blank=True)
     solution_commands = models.JSONField(default=list, blank=True)
+    is_generated = models.BooleanField(default=False)
+    parameter_context = models.JSONField(default=dict, blank=True)
+    student_context = models.JSONField(default=dict, blank=True)
+    blueprint_signature = models.CharField(max_length=160, blank=True)
+    subtemplate_signature = models.CharField(max_length=160, blank=True)
+    variant_fingerprint = models.CharField(max_length=160, blank=True)
+    generation_seed = models.CharField(max_length=160, blank=True)
+    generated_from_blueprint = models.ForeignKey(
+        ScenarioGenerationBlueprint,
+        null=True,
+        blank=True,
+        related_name="generated_variants",
+        on_delete=models.SET_NULL,
+    )
     is_published = models.BooleanField(default=True)
 
     class Meta:
