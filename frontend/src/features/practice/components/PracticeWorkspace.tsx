@@ -4,7 +4,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { GripHorizontal, GripVertical, PanelsTopLeft } from 'lucide-react'
 
-import { CommandCounter } from '@/features/scenarios/components/CommandCounter'
 import { ScenarioContextPanel } from '@/features/scenarios/components/ScenarioContextPanel'
 import { ScenarioStatusHeader } from '@/features/scenarios/components/ScenarioStatusHeader'
 import { CompletionCelebrationModal } from '@/features/practice/components/CompletionCelebrationModal'
@@ -325,8 +324,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
 
           <ScenarioContextPanel session={session} />
 
-          {/* Command counter placed below the scenario panel as requested */}
-          {!reviewMode ? <CommandCounter session={session} /> : null}
+          {/* Left-panel command counter removed; counter now lives in header */}
           {!reviewMode && session.completion_type === 'inspection' ? (
             <InspectionAnswerPanel
               disabled={session.status !== 'started'}

@@ -52,23 +52,30 @@ export function ScenarioStatusHeader({
         </span>
       </div>
       <div className="flex items-center gap-2">
-        {/* Compact command counter shown in header */}
+        {/* Compact command counter shown in header (compact height) */}
         <div className="hidden lg:flex items-center">
           {(() => {
             const used = session.counts.counted_action_total
             const max = session.policy.max_counted_commands
             const pct = max ? Math.round((used / max) * 100) : 0
             return (
-              <div className="mr-2 rounded-md border border-border bg-card p-2 shadow-sm" style={{ minWidth: 160 }}>
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 font-semibold text-sm">
-                    <GaugeCircle className="size-4 text-primary" />
-                    <span>Action</span>
-                  </div>
-                  <div className="font-mono text-sm">{session.counts.remaining_counted_commands} left</div>
+              <div
+                className="mr-2 rounded-md border border-border bg-card px-2 py-1 shadow-sm flex items-center"
+                style={{ minWidth: 200, height: 36 }}
+              >
+                <div className="flex items-center gap-2">
+                  <GaugeCircle className="size-4 text-primary" />
+                  <span className="text-sm font-semibold">Action</span>
                 </div>
-                <div className="mt-2">
-                  <ProgressBar value={pct} />
+
+                <div className="ml-4 flex flex-col items-end flex-1">
+                  <div className="flex items-center gap-2">
+                    <div className="font-mono text-sm font-semibold">{used}/{session.policy.min_counted_commands}</div>
+                    <Badge variant="default" className="text-xs">Target {session.policy.min_counted_commands}</Badge>
+                  </div>
+                  <div className="w-full mt-1">
+                    <ProgressBar value={pct} />
+                  </div>
                 </div>
               </div>
             )
