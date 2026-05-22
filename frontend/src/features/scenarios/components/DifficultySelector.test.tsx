@@ -63,7 +63,7 @@ describe('DifficultySelector', () => {
     expect(screen.queryByText(/counted action/i)).not.toBeInTheDocument()
   })
 
-  it('does not render a list action for an active session', () => {
+  it('renders retry for an active session instead of continuing the same variant', () => {
     render(
       <DifficultySelector
         difficulties={[
@@ -88,8 +88,36 @@ describe('DifficultySelector', () => {
       />,
     )
 
+    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /continue/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /in progress/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /start/i })).not.toBeInTheDocument()
+  })
+
+  it('keeps completed scenarios retryable until accuracy reaches 100%', () => {
+    render(
+      <DifficultySelector
+        difficulties={[
+          {
+            ...difficulties[2],
+            review_available: false,
+            retry_session_id: 7,
+            latest_attempt: {
+              ...difficulties[2].latest_attempt!,
+              id: 7,
+              accuracy_rate: 67,
+              command_accurate: false,
+              counted_action_total: 3,
+            },
+          },
+        ]}
+        onStart={vi.fn()}
+        onReview={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /review/i })).not.toBeInTheDocument()
+    expect(screen.getByText('67%')).toBeInTheDocument()
   })
 })

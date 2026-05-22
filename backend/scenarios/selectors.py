@@ -5,6 +5,7 @@ from common.constants import (
     DIFFICULTY_MEDIUM,
     SESSION_MODE_PRIMARY,
     SESSION_STATUS_ABANDONED,
+    SESSION_STATUS_COMPLETED,
     SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
@@ -75,6 +76,16 @@ def latest_attempt_payload_from_session(
         "completed_at": session.completed_at,
         "ended_at": session.ended_at,
     }
+
+
+def session_is_command_accurate(
+    *,
+    session: ScenarioSession | None,
+    difficulty_instance: DifficultyInstance,
+) -> bool:
+    if not session or session.status != SESSION_STATUS_COMPLETED:
+        return False
+    return session.counted_action_total <= difficulty_instance.command_policy.min_counted_commands
 
 
 def _published_difficulty_queryset():
@@ -189,6 +200,10 @@ def _scenario_status_payload_from_maps(
         in_progress = active_sessions.get(instance.id)
         retryable_session = retryable_sessions.get(instance.id)
         latest_session = latest_sessions.get(instance.id)
+        mastered = session_is_command_accurate(
+            session=latest_session,
+            difficulty_instance=instance,
+        )
         difficulties.append(
             {
                 "id": instance.id,
@@ -202,7 +217,7 @@ def _scenario_status_payload_from_maps(
                     difficulty_by_key=difficulty_by_key,
                     completed_ids=completed_ids,
                 ),
-                "review_available": completion is not None,
+                "review_available": completion is not None and mastered,
                 "completion": {
                     "first_attempt_star": completion.first_attempt_star if completion else False,
                     "counted_action_total": completion.counted_action_total if completion else None,
@@ -217,7 +232,7 @@ def _scenario_status_payload_from_maps(
                 if latest_session
                 else None,
                 "active_session_id": in_progress.id if in_progress else None,
-                "retry_session_id": retryable_session.id if retryable_session else None,
+                "retry_session_id": retryable_session.id if retryable_session and not mastered else None,
                 "policy": _policy_payload(instance=instance, include_preview=include_preview),
             }
         )
@@ -309,12 +324,16 @@ def _session_state_maps(
         )
         .order_by("difficulty_instance_id", "-id")
     ):
-        latest_sessions.setdefault(session.difficulty_instance_id, session)
         if session.mode != SESSION_MODE_PRIMARY:
             continue
+        latest_sessions.setdefault(session.difficulty_instance_id, session)
         if session.status == SESSION_STATUS_STARTED:
             active_sessions.setdefault(session.difficulty_instance_id, session)
-        elif session.status in {SESSION_STATUS_FAILED, SESSION_STATUS_ABANDONED}:
+        elif session.status in {
+            SESSION_STATUS_FAILED,
+            SESSION_STATUS_ABANDONED,
+            SESSION_STATUS_COMPLETED,
+        }:
             retryable_sessions.setdefault(session.difficulty_instance_id, session)
     return active_sessions, latest_sessions, retryable_sessions
 

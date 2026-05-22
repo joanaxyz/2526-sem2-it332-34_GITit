@@ -15,6 +15,10 @@ export function SessionOutcomeBanner({
 }) {
   if (session.status === 'started') return null
   const completed = session.status === 'completed'
+  const canRetry =
+    !session.review_mode &&
+    onRetry &&
+    (!completed || session.counts.counted_action_total > session.policy.min_counted_commands)
   return (
     <Card className="border-primary/30 bg-primary/10 p-3 shadow-none">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -29,7 +33,7 @@ export function SessionOutcomeBanner({
             </p>
           </div>
         </div>
-        {!completed && !session.review_mode && onRetry ? (
+        {canRetry ? (
           <Button type="button" disabled={isRetrying} onClick={onRetry}>
             {isRetrying ? 'Starting retry' : 'Retry changed variant'}
           </Button>

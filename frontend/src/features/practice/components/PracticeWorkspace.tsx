@@ -286,7 +286,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
       <main className="grid min-h-0 flex-1 grid-cols-[18rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[17rem_minmax(0,1fr)] max-xl:grid-cols-[16rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
         <aside className="flex min-h-0 flex-col gap-2" data-tour-target="scenario-brief">
           <ScenarioContextPanel session={session} />
-          <CommandCounter session={session} />
+          {!reviewMode ? <CommandCounter session={session} /> : null}
           <ProjectStructurePanel snapshot={session.repository_state} />
           <SessionOutcomeBanner
             session={session}

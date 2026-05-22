@@ -297,7 +297,7 @@ class CommandProcessingService:
         session.ended_at = session.completed_at
         session.rta_success = bool(session.rta_eligible and session.first_attempt_star_eligible)
         if session.mode == SESSION_MODE_PRIMARY:
-            CompletionRecord.objects.get_or_create(
+            completion, created = CompletionRecord.objects.get_or_create(
                 user=session.user,
                 scenario=session.scenario,
                 difficulty_instance=session.difficulty_instance,
@@ -307,4 +307,8 @@ class CommandProcessingService:
                     "counted_action_total": session.counted_action_total,
                 },
             )
+            if not created and session.counted_action_total < completion.counted_action_total:
+                completion.session = session
+                completion.counted_action_total = session.counted_action_total
+                completion.save(update_fields=["session", "counted_action_total"])
             StreakService().record_completion(user=session.user, completed_at=session.completed_at)

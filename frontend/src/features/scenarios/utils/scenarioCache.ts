@@ -36,9 +36,12 @@ export function updateScenarioListWithSession(
     const difficulties = scenario.difficulties.map((difficulty) => {
       if (difficulty.difficulty === session.difficulty) {
         const status = statusFromSession(session.status, difficulty.status)
+        const mastered =
+          session.status === 'completed' &&
+          session.counts.counted_action_total <= session.policy.min_counted_commands
         const activeSessionId = session.status === 'started' ? session.id : null
         const retrySessionId =
-          session.status === 'failed' || session.status === 'abandoned'
+          session.status === 'failed' || session.status === 'abandoned' || (session.status === 'completed' && !mastered)
             ? session.id
             : difficulty.retry_session_id
         const completion =
@@ -55,7 +58,7 @@ export function updateScenarioListWithSession(
           difficulty.status === status &&
           difficulty.active_session_id === activeSessionId &&
           difficulty.retry_session_id === retrySessionId &&
-          difficulty.review_available === (session.status === 'completed' || difficulty.review_available) &&
+          difficulty.review_available === (mastered || difficulty.review_available) &&
           difficulty.completion === completion &&
           difficulty.latest_attempt === latestAttempt
         ) {
@@ -68,7 +71,7 @@ export function updateScenarioListWithSession(
           status,
           active_session_id: activeSessionId,
           retry_session_id: retrySessionId,
-          review_available: session.status === 'completed' || difficulty.review_available,
+          review_available: mastered || difficulty.review_available,
           completion,
           latest_attempt: latestAttempt,
         }

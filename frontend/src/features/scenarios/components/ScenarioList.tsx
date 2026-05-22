@@ -53,8 +53,9 @@ export function ScenarioList(props: ScenarioListProps) {
   })
   const retryMutation = useMutation({
     mutationFn: (difficulty: DifficultyAccess) => {
-      if (!difficulty.retry_session_id) throw new Error('Exit the current scenario before retrying.')
-      return scenariosApi.retrySession(difficulty.retry_session_id)
+      const priorSessionId = difficulty.retry_session_id ?? difficulty.active_session_id
+      if (!priorSessionId) throw new Error('Exit the current scenario before retrying.')
+      return scenariosApi.retrySession(priorSessionId)
     },
     onSuccess: (session) => {
       syncScenarioSessionInCache(queryClient, session)

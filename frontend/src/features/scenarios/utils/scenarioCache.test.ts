@@ -136,6 +136,7 @@ describe('updateScenarioListWithSession', () => {
     expect(updated.difficulties[0]).toMatchObject({
       status: 'completed',
       review_available: true,
+      retry_session_id: null,
       active_session_id: null,
       completion: {
         first_attempt_star: true,
@@ -172,5 +173,7 @@ describe('updateScenarioListWithSession', () => {
 
     expect(updated.difficulties[0].latest_attempt?.accuracy_rate).toBe(67)
     expect(updated.difficulties[0].latest_attempt?.command_accurate).toBe(false)
+    expect(updated.difficulties[0].review_available).toBe(false)
+    expect(updated.difficulties[0].retry_session_id).toBe(sessionWithExtraAction.id)
   })
 })

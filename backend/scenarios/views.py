@@ -1,6 +1,12 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from common.constants import (
+    SESSION_MODE_PRIMARY,
+    SESSION_STATUS_COMPLETED,
+    SESSION_STATUS_STARTED,
+)
+from common.exceptions import Locked
 from scenarios.models import ScenarioSession
 from scenarios.selectors import (
     get_difficulty_instance,
@@ -191,6 +197,16 @@ class ScenarioRetryAPIView(APIView):
             "difficulty_instance__target_rule",
             "variant",
         ).get(id=session_id, user=request.user)
+        if prior.mode != SESSION_MODE_PRIMARY:
+            raise Locked("Review sessions cannot be retried.")
+        if (
+            prior.mode == SESSION_MODE_PRIMARY
+            and prior.status == SESSION_STATUS_COMPLETED
+            and prior.counted_action_total <= prior.command_policy_snapshot["min_counted_commands"]
+        ):
+            raise Locked("This scenario is already mastered. Use Review mode instead.")
+        if prior.status == SESSION_STATUS_STARTED:
+            prior = ScenarioSessionService().abandon(session=prior)
         session = ScenarioSessionService().start_session(
             user=request.user,
             difficulty_instance=prior.difficulty_instance,

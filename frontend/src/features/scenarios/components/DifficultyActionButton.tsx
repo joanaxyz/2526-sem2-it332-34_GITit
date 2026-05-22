@@ -7,8 +7,8 @@ import { cn } from '@/shared/utils/cn'
 
 function actionForDifficulty(difficulty: DifficultyAccess): DifficultyActionIntent | null {
   if (difficulty.status === 'locked') return null
-  if (difficulty.status === 'completed') return 'review'
-  if (difficulty.status === 'in_progress') return null
+  if (difficulty.status === 'in_progress') return difficulty.active_session_id ? 'retry' : null
+  if (difficulty.status === 'completed') return difficulty.review_available ? 'review' : 'retry'
   if (difficulty.status === 'failed' || difficulty.status === 'abandoned') return 'retry'
   return 'start'
 }
@@ -42,23 +42,21 @@ export function DifficultyActionButton({
     <div className="flex items-center rounded-md border border-border bg-background/30 p-3">
       <div className="flex items-center gap-2">
         <div className="text-sm font-bold capitalize">{difficulty.difficulty}</div>
-        {difficulty.status !== 'in_progress' ? (
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              size="sm"
-              disabled={!action}
-              variant={!action || action === 'review' || action === 'retry' ? 'outline' : 'default'}
-              onClick={() => {
-                if (action) onAction(difficulty, action)
-              }}
-            >
-              <Icon data-icon="inline-start" />
-              {buttonLabel}
-            </Button>
-            {difficulty.completion?.first_attempt_star ? <Star className="size-4 text-primary" /> : null}
-          </div>
-        ) : null}
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            disabled={!action}
+            variant={!action || action === 'review' || action === 'retry' ? 'outline' : 'default'}
+            onClick={() => {
+              if (action) onAction(difficulty, action)
+            }}
+          >
+            <Icon data-icon="inline-start" />
+            {buttonLabel}
+          </Button>
+          {difficulty.completion?.first_attempt_star ? <Star className="size-4 text-primary" /> : null}
+        </div>
       </div>
       <div className="ml-auto">
         <MasteryProgress value={mastery} />

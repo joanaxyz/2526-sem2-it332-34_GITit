@@ -20,7 +20,10 @@ export function ScenarioStatusHeader({
   onOpenTour?: () => void
 }) {
   const exitLabel = session.status === 'started' ? 'Exit' : 'Back'
-  const canRetry = session.status !== 'started' && session.status !== 'completed' && !session.review_mode && onRetry
+  const isPerfectCompletion =
+    session.status === 'completed' &&
+    session.counts.counted_action_total <= session.policy.min_counted_commands
+  const canRetry = !session.review_mode && !isPerfectCompletion && onRetry
 
   return (
     <header className="flex h-12 items-center justify-between gap-3 border-b border-border bg-background px-3">
@@ -41,7 +44,7 @@ export function ScenarioStatusHeader({
         {canRetry ? (
           <Button type="button" variant="outline" size="sm" disabled={isRetrying} onClick={onRetry}>
             <RefreshCcw data-icon="inline-start" />
-            {isRetrying ? 'Retrying' : 'Retry'}
+            {isRetrying ? 'Starting retry' : 'Retry'}
           </Button>
         ) : null}
         <Badge variant={session.status === 'completed' ? 'default' : session.status === 'failed' ? 'destructive' : 'blue'}>

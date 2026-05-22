@@ -10,6 +10,7 @@ from common.constants import (
     COMPLETION_INSPECTION,
     RESULT_INVALID,
     SESSION_MODE_REVIEW,
+    SESSION_STATUS_COMPLETED,
     SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
@@ -319,6 +320,98 @@ def test_latest_attempt_accuracy_reflects_extra_counted_actions(student):
 
     assert easy["latest_attempt"]["accuracy_rate"] == 67
     assert easy["latest_attempt"]["command_accurate"] is False
+
+
+def test_completed_scenario_remains_retryable_until_primary_accuracy_is_perfect(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="form-clean-commit",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    CommandProcessingService().submit_command(session=session, command="git status --wat")
+    CommandProcessingService().submit_command(session=session, command="git add .")
+    CommandProcessingService().submit_command(
+        session=session, command='git commit -m "starter snapshot"'
+    )
+    session.refresh_from_db()
+
+    payload = scenario_status_payload(user=student, scenario=difficulty.scenario)
+    easy = next(item for item in payload["difficulties"] if item["difficulty"] == "easy")
+
+    assert session.status == SESSION_STATUS_COMPLETED
+    assert easy["review_available"] is False
+    assert easy["retry_session_id"] == session.id
+    assert easy["latest_attempt"]["accuracy_rate"] == 67
+
+    retry = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="retry",
+        prior_session=session,
+    )
+    for command in retry.variant.solution_commands:
+        CommandProcessingService().submit_command(session=retry, command=command)
+        retry.refresh_from_db()
+        if retry.status == SESSION_STATUS_COMPLETED:
+            break
+
+    payload = scenario_status_payload(user=student, scenario=difficulty.scenario)
+    easy = next(item for item in payload["difficulties"] if item["difficulty"] == "easy")
+    completion = CompletionRecord.objects.get(user=student, difficulty_instance=difficulty)
+
+    assert retry.status == SESSION_STATUS_COMPLETED
+    assert completion.session_id == retry.id
+    assert completion.counted_action_total == difficulty.command_policy.min_counted_commands
+    assert easy["review_available"] is True
+    assert easy["retry_session_id"] is None
+    assert easy["latest_attempt"]["id"] == retry.id
+    assert easy["latest_attempt"]["accuracy_rate"] == 100
+
+
+def test_review_sessions_do_not_replace_primary_accuracy(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="form-clean-commit",
+        difficulty="easy",
+    )
+    primary = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    primary.status = SESSION_STATUS_COMPLETED
+    primary.counted_action_total = 3
+    primary.completed_at = timezone.now()
+    primary.ended_at = primary.completed_at
+    primary.save(update_fields=["status", "counted_action_total", "completed_at", "ended_at"])
+    CompletionRecord.objects.create(
+        user=student,
+        scenario=difficulty.scenario,
+        difficulty_instance=difficulty,
+        session=primary,
+        first_attempt_star=False,
+        counted_action_total=3,
+    )
+    review_session = ReviewModeService().start_review_session(
+        user=student,
+        difficulty_instance=difficulty,
+    )
+    review_session.status = SESSION_STATUS_COMPLETED
+    review_session.counted_action_total = 2
+    review_session.completed_at = timezone.now()
+    review_session.ended_at = review_session.completed_at
+    review_session.save(update_fields=["status", "counted_action_total", "completed_at", "ended_at"])
+
+    payload = scenario_status_payload(user=student, scenario=difficulty.scenario)
+    easy = next(item for item in payload["difficulties"] if item["difficulty"] == "easy")
+
+    assert easy["latest_attempt"]["id"] == primary.id
+    assert easy["latest_attempt"]["accuracy_rate"] == 67
+    assert easy["review_available"] is False
+    assert easy["retry_session_id"] == primary.id
 
 
 def test_seeded_curriculum_has_full_variant_set_and_one_primary_focus(seeded_content):
