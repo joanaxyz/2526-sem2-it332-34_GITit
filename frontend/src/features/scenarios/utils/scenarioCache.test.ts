@@ -84,6 +84,7 @@ const completedSession: ScenarioSession = {
   difficulty_instance_id: 101,
   completed_at: '2026-05-18T12:00:00Z',
   first_attempt_star_eligible: true,
+  completion_type: 'state_based',
   scenario: {
     id: 10,
     slug: 'branch-rescue',

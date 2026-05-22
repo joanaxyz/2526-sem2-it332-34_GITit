@@ -168,16 +168,157 @@ def test_inspection_evaluator_requires_commands_and_unchanged_state():
         current_state=state,
         expected_observations=expected,
         executed_commands=["git status"],
+        submitted_answer={"head_branch": "main", "unstaged_changes": ["README.md"], "staging_empty": True},
     )
     missing_command = InspectionEvaluator().evaluate(
         initial_state=state,
         current_state=state,
         expected_observations=expected,
         executed_commands=["git diff"],
+        submitted_answer={"head_branch": "main", "unstaged_changes": ["README.md"], "staging_empty": True},
+    )
+    missing_answer = InspectionEvaluator().evaluate(
+        initial_state=state,
+        current_state=state,
+        expected_observations=expected,
+        executed_commands=["git status"],
     )
 
     assert matched.result_category == RESULT_TARGET_MATCHED
     assert missing_command.result_category == RESULT_TARGET_NOT_YET_MATCHED
+    assert missing_answer.result_category == RESULT_TARGET_NOT_YET_MATCHED
+
+
+def test_evaluator_supports_module1_exact_state_rules():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "commits": [
+                {"id": "c0", "message": "Base", "parents": [], "tree": {"src/auth.py": "auth-v1"}},
+                {"id": "c1", "message": "WIP auth", "parents": ["c0"], "tree": {"src/auth.py": "auth-v2"}},
+            ],
+            "branches": {"main": "c1"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {
+                "src/auth.py": {
+                    "status": "modified",
+                    "hunks": ["auth-validation-hunk", "auth-refactor-hunk"],
+                },
+                "debug.log": {"status": "ignored", "content": "debug-noise"},
+            },
+            "partial_hunks": {
+                "src/auth.py": {
+                    "target_hunks": ["auth-validation-hunk"],
+                    "leftover_hunks": ["auth-refactor-hunk"],
+                }
+            },
+            "staging": {},
+        }
+    )
+    state = simulator.process(state, "git add -p src/auth.py").state
+    state = simulator.process(state, 'git commit --amend -m "Validate auth input"').state
+
+    rule = {
+        "rules": [
+            {"type": "commit_count_equals", "count": 3},
+            {"type": "commit_count_on_branch_equals", "branch": "main", "count": 2},
+            {"type": "operation_metadata_equals", "key": "last_amend_replaced_commit", "value": "c1"},
+            {"type": "operation_metadata_not_equals", "key": "last_amend_created_commit", "value": "c1"},
+            {"type": "operation_metadata_contains", "key": "last_amend_created_commit", "value": "c2"},
+            {"type": "partial_hunks_committed", "paths": {"src/auth.py": ["auth-validation-hunk"]}},
+            {"type": "partial_hunks_left_in_working_tree", "paths": {"src/auth.py": ["auth-refactor-hunk"]}},
+            {"type": "commit_changes_exclude_tokens", "tokens": ["auth-refactor-hunk"]},
+            {"type": "commit_tree_contains_tokens", "tokens": ["auth-validation-hunk"]},
+            {"type": "working_tree_excludes_tokens", "tokens": ["auth-validation-hunk"]},
+            {"type": "ignored_paths_present", "paths": ["debug.log"], "statuses": ["ignored"]},
+            {"type": "commit_replaced_by_amend", "old": "c1", "new": "c2"},
+            {"type": "branch_tip_replaces_commit", "branch": "main", "commit": "c1"},
+            {"type": "commit_not_followed_by_extra_commit", "branch": "main", "commit": "c2"},
+        ]
+    }
+
+    result = StateBasedEvaluator().evaluate(state, rule)
+
+    assert result.result_category == RESULT_TARGET_MATCHED
+    assert result.failed_rules == ()
+
+
+def test_evaluator_checks_init_clone_and_tracked_generated_file_rules():
+    simulator = RepositoryStateSimulator()
+    init_state = simulator.process({"repository_initialized": False}, "git init research-log").state
+    init_result = StateBasedEvaluator().evaluate(
+        init_state,
+        {
+            "repository_initialized": True,
+            "rules": [
+                {"type": "commit_count_equals", "count": 0},
+                {"type": "operation_metadata_equals", "key": "last_init_directory", "value": "research-log"},
+            ],
+        },
+    )
+
+    clone_state = simulator.normalize_state(
+        {
+            "repository_initialized": False,
+            "remote_fixtures": {
+                "origin/main": "r10",
+                "commits": [
+                    {
+                        "id": "r10",
+                        "message": "Create docs portal starter",
+                        "parents": [],
+                        "tree": {"README.md": "docs-readme-v1"},
+                    }
+                ],
+            },
+        }
+    )
+    clone_state = simulator.process(
+        clone_state,
+        "git clone https://example.test/training/docs-portal.git docs-portal",
+    ).state
+    clone_result = StateBasedEvaluator().evaluate(
+        clone_state,
+        {
+            "repository_initialized": True,
+            "head_branch": "main",
+            "remote_url_matches": {"origin": "https://example.test/training/docs-portal.git"},
+            "branch_points_to": {"main": "r10"},
+            "remote_branch_points_to": {"origin/main": "r10"},
+            "upstream_tracking": {"main": "origin/main"},
+            "working_tree_clean": True,
+            "staging_empty": True,
+            "rules": [
+                {"type": "operation_metadata_equals", "key": "last_clone_destination", "value": "docs-portal"},
+                {"type": "commit_tree_contains", "commit": "r10", "tree": {"README.md": "docs-readme-v1"}},
+            ],
+        },
+    )
+
+    rm_state = simulator.normalize_state(
+        {
+            "commits": [{"id": "c0", "message": "Base", "parents": [], "tree": {".env": "secret", ".gitignore": "*.env"}}],
+            "branches": {"main": "c0"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {},
+            "staging": {},
+        }
+    )
+    rm_state = simulator.process(rm_state, "git rm --cached .env").state
+    rm_state = simulator.process(rm_state, 'git commit -m "Stop tracking env"').state
+    rm_result = StateBasedEvaluator().evaluate(
+        rm_state,
+        {
+            "rules": [
+                {"type": "tracked_path_removed_from_commit_tree", "path": ".env"},
+                {"type": "ignored_paths_present", "path": ".env"},
+            ]
+        },
+    )
+
+    assert init_result.result_category == RESULT_TARGET_MATCHED
+    assert clone_result.result_category == RESULT_TARGET_MATCHED
+    assert rm_result.result_category == RESULT_TARGET_MATCHED
 
 
 def test_rule_evaluator_checks_commit_message_changes_scope_and_clean_state():

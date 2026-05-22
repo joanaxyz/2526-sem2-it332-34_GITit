@@ -4,7 +4,7 @@ import { memo, useMemo, useState } from 'react'
 import ReactFlow, { Background, Handle, Position } from 'reactflow'
 import type { Edge, Node, NodeProps } from 'reactflow'
 
-import type { RepositoryCommit, RepositorySnapshot } from '@/features/practice/types'
+import type { RepositoryCommit, RepositorySnapshot, RepositoryValue } from '@/features/practice/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Card'
 import { cn } from '@/shared/utils/cn'
 
@@ -204,13 +204,15 @@ function CommitDetailsCard({ data, open }: { data: CommitNodeData; open: boolean
         empty="No recorded path changes."
         items={changedEntries.map(([path, value]) => {
           if (typeof value === 'string') return `${value} ${path}`
-          return `${value.change_type ?? 'modified'} ${path}`
+          if (!value || typeof value !== 'object' || Array.isArray(value)) return `${formatValue(value)} ${path}`
+          const changeType = typeof value.change_type === 'string' ? value.change_type : 'modified'
+          return `${changeType} ${path}${formatTokens(value.after)}`
         })}
       />
       <DetailList
         title="Tree"
         empty="No committed tree details."
-        items={treeEntries.map(([path, value]) => `${path} @ ${String(value)}`)}
+        items={treeEntries.map(([path, value]) => `${path} @ ${formatValue(value)}`)}
         limit={8}
       />
     </div>
@@ -264,18 +266,25 @@ function EmptyRepositoryNode({ data }: NodeProps<EmptyRepositoryNodeData>) {
 }
 
 function RepositoryDetails({ snapshot }: { snapshot: RepositorySnapshot }) {
-  const staged = Object.keys(snapshot.staging)
-  const working = Object.keys(snapshot.working_tree)
+  const staged = Object.entries(snapshot.staging).map(([path, value]) => `${path}${formatTokens(value)}`)
+  const working = Object.entries(snapshot.working_tree).map(([path, value]) => `${path}${formatTokens(value)}`)
+  const ignored = Object.entries(snapshot.working_tree)
+    .filter(([, value]) => entryStatus(value) === 'ignored')
+    .map(([path]) => path)
   const conflicts = snapshot.conflicts
   const remotes = Object.entries(snapshot.remotes ?? {})
   const remoteBranches = Object.entries(snapshot.remote_branches ?? {})
+  const upstream = Object.entries(snapshot.upstream_tracking ?? {})
   const stashCount = snapshot.stash_stack?.length ?? 0
+  const metadata = Object.entries(snapshot.operation_metadata ?? {}).map(([key, value]) => `${key}: ${formatValue(value)}`)
+  const partialHunks = Object.entries(snapshot.partial_hunks ?? {}).map(([path, value]) => `${path}${formatTokens(value as RepositoryValue)}`)
 
   return (
     <div className="max-h-28 overflow-auto border-t border-border bg-background/95 px-3 py-2 text-[11px]">
       <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
         <SummaryLine label="Staged" value={formatPaths(staged)} />
         <SummaryLine label="Working tree" value={formatPaths(working)} />
+        <SummaryLine label="Ignored" value={formatPaths(ignored)} />
         <SummaryLine label="Conflicts" value={formatPaths(conflicts)} />
         <SummaryLine
           label="Remotes"
@@ -289,7 +298,13 @@ function RepositoryDetails({ snapshot }: { snapshot: RepositorySnapshot }) {
               : 'none'
           }
         />
+        <SummaryLine
+          label="Upstream"
+          value={upstream.length ? upstream.map(([name, target]) => `${name} -> ${target}`).join(', ') : 'none'}
+        />
         <SummaryLine label="Stash" value={stashCount ? `${stashCount} entr${stashCount === 1 ? 'y' : 'ies'}` : 'none'} />
+        <SummaryLine label="Hunks" value={formatPaths(partialHunks)} />
+        <SummaryLine label="Metadata" value={formatPaths(metadata)} />
       </div>
     </div>
   )
@@ -404,6 +419,7 @@ function normalizeSnapshot(snapshot: RepositorySnapshot): RepositorySnapshot {
     stash_stack: snapshot.stash_stack ?? [],
     reflog: snapshot.reflog ?? [],
     partial_hunks: snapshot.partial_hunks ?? {},
+    replaced_commits: snapshot.replaced_commits ?? {},
     operation_metadata: snapshot.operation_metadata ?? {},
   }
 }
@@ -444,4 +460,44 @@ function formatPaths(paths: string[]) {
   if (!paths.length) return 'none'
   if (paths.length <= 3) return paths.join(', ')
   return `${paths.slice(0, 3).join(', ')} +${paths.length - 3}`
+}
+
+function formatTokens(value?: RepositoryValue) {
+  const tokens = tokensFor(value)
+  return tokens.length ? ` (${tokens.join(', ')})` : ''
+}
+
+function tokensFor(value?: RepositoryValue): string[] {
+  if (value === null || value === undefined) return []
+  if (Array.isArray(value)) return value.flatMap(tokensFor)
+  if (typeof value === 'object') {
+    const direct = ['hunks', 'tokens', 'target_hunks', 'leftover_hunks']
+      .flatMap((key) => tokensFor(value[key]))
+      .filter(Boolean)
+    if (direct.length) return direct
+    return ['after', 'content', 'value'].flatMap((key) => tokensFor(value[key])).filter(Boolean)
+  }
+  const text = String(value)
+  return text.includes('-hunk') || text.includes('-token') ? [text] : []
+}
+
+function formatValue(value?: RepositoryValue): string {
+  if (value === null || value === undefined) return ''
+  if (Array.isArray(value)) return value.map(formatValue).filter(Boolean).join(', ')
+  if (typeof value === 'object') {
+    const status = typeof value.status === 'string' ? value.status : ''
+    const tokens = formatTokens(value)
+    if (status || tokens) return `${status || 'value'}${tokens}`
+    return Object.entries(value)
+      .map(([key, item]) => `${key}: ${formatValue(item)}`)
+      .join(', ')
+  }
+  return String(value)
+}
+
+function entryStatus(value?: RepositoryValue) {
+  if (value && typeof value === 'object' && !Array.isArray(value) && typeof value.status === 'string') {
+    return value.status.toLowerCase()
+  }
+  return String(value ?? '').toLowerCase()
 }

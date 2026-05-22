@@ -245,6 +245,7 @@ class CommandProcessingService:
                     previous_state=previous_state,
                     next_state=command_result.state,
                     executed_commands=executed_commands,
+                    inspection_answer=session.inspection_answer,
                 )
             )
             result_category = evaluation.result_category
@@ -356,3 +357,33 @@ class CommandProcessingService:
                         ]
                     )
                 StreakService().record_completion(user=session.user, completed_at=session.completed_at)
+
+
+class InspectionAnswerSubmissionService:
+    @transaction.atomic
+    def submit_answer(self, *, session: ScenarioSession, answer: dict) -> dict:
+        if session.status != SESSION_STATUS_STARTED:
+            raise Locked("This session has already ended.")
+
+        session.inspection_answer = answer
+        executed_commands = list(
+            session.step_logs.order_by("id").values_list("command_log__normalized_command", flat=True)
+        )
+        evaluation = ScenarioCompletionEvaluator().evaluate(
+            CompletionEvaluationContext(
+                session=session,
+                previous_state=session.repository_state,
+                next_state=session.repository_state,
+                executed_commands=executed_commands,
+                inspection_answer=answer,
+            )
+        )
+        if evaluation.result_category == RESULT_TARGET_MATCHED:
+            CommandProcessingService()._complete_session(session)
+        else:
+            session.first_attempt_star_eligible = False
+        session.save()
+        return {
+            "session": session,
+            "evaluation": evaluation,
+        }

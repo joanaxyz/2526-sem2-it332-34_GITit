@@ -106,6 +106,7 @@ class RepositoryStateSimulator:
             "pull": self._pull,
             "push": self._push,
             "add": self._add,
+            "rm": self._rm,
             "commit": self._commit,
             "checkout": self._checkout,
             "switch": self._switch,
@@ -229,6 +230,12 @@ class RepositoryStateSimulator:
         for key, value in metadata.items():
             state[key] = value
 
+    def _clear_operation_metadata(self, state: dict, *keys: str) -> None:
+        operation_metadata = state.setdefault("operation_metadata", {})
+        for key in keys:
+            operation_metadata.pop(key, None)
+            state.pop(key, None)
+
     def _set_head_commit(self, state: dict, commit_id: str | None) -> None:
         branch = self._head_branch(state)
         if branch:
@@ -246,6 +253,7 @@ class RepositoryStateSimulator:
         )
 
     def _init(self, state: dict, args: list[str]) -> str:
+        target_directory = next((arg for arg in args if not arg.startswith("-")), None)
         state["repository_initialized"] = True
         state["remotes"] = {}
         state["remote_branches"] = {}
@@ -253,6 +261,14 @@ class RepositoryStateSimulator:
         branches = state.setdefault("branches", {})
         branches.setdefault("main", None)
         state["head"] = {"type": "branch", "name": "main"}
+        self._set_operation_metadata(
+            state,
+            last_init_current_directory=target_directory is None,
+        )
+        if target_directory:
+            self._set_operation_metadata(state, last_init_directory=target_directory)
+        else:
+            self._clear_operation_metadata(state, "last_init_directory")
         return "Initialized empty Git repository."
 
     def _clone(self, state: dict, args: list[str]) -> str:
@@ -261,9 +277,11 @@ class RepositoryStateSimulator:
         if not args:
             raise ValueError("Specify a repository URL to clone.")
         url = args[0]
+        target_dir = args[1] if len(args) > 1 else url.rstrip("/").rsplit("/", 1)[-1].removesuffix(".git")
         state["repository_initialized"] = True
         state["remotes"] = {"origin": url}
         remote_branches = state.setdefault("remote_branches", {})
+        self._apply_remote_fixture_branches(state)
         remote_branches.setdefault("origin/main", self._first_remote_target(remote_branches))
         self._materialize_remote_commits(state)
         main_target = remote_branches.get("origin/main")
@@ -273,7 +291,11 @@ class RepositoryStateSimulator:
         state["working_tree"] = {}
         state["staging"] = {}
         state["conflicts"] = []
-        target_dir = args[1] if len(args) > 1 else url.rstrip("/").rsplit("/", 1)[-1].removesuffix(".git")
+        self._set_operation_metadata(
+            state,
+            last_clone_url=url,
+            last_clone_destination=target_dir,
+        )
         return f"Cloning into '{target_dir}'...\ndone."
 
     def _status(self, state: dict, args: list[str]) -> str:
@@ -282,8 +304,8 @@ class RepositoryStateSimulator:
         working = state.get("working_tree", {}) or {}
         conflict_paths = sorted(state.get("conflicts", []))
 
-        def label_for(value: str | None) -> str:
-            value = (value or "").lower()
+        def label_for(value: object | None) -> str:
+            value = self.normalizer.entry_status(value)
             if value in ("untracked",):
                 return "new file:"
             if value in ("added", "new"):
@@ -315,9 +337,13 @@ class RepositoryStateSimulator:
         working_paths = sorted(
             path
             for path, value in working.items()
-            if str(value).lower() != "ignored"
+            if self.normalizer.entry_status(value) != "ignored"
         )
-        untracked = [path for path in working_paths if str(working.get(path)).lower() == "untracked"]
+        untracked = [
+            path
+            for path in working_paths
+            if self.normalizer.entry_status(working.get(path)) == "untracked"
+        ]
         modified = [path for path in working_paths if path not in untracked]
         if modified:
             lines += ["", "Changes not staged for commit:"]
@@ -385,7 +411,7 @@ class RepositoryStateSimulator:
         working_paths = sorted(
             path
             for path, value in state.get("working_tree", {}).items()
-            if str(value).lower() != "ignored"
+            if self.normalizer.entry_status(value) != "ignored"
         )
         if working_paths:
             return f"Working tree changes: {self._format_paths(working_paths)}"
@@ -479,7 +505,7 @@ class RepositoryStateSimulator:
             [
                 path
                 for path, value in working_tree.items()
-                if str(value).lower() != "ignored"
+                if self.normalizer.entry_status(value) != "ignored"
             ]
             if args[0] in (".", "-A")
             else args
@@ -489,7 +515,7 @@ class RepositoryStateSimulator:
         staging = state.setdefault("staging", {})
         conflicts = set(state.get("conflicts", []))
         for path in paths:
-            if str(working_tree.get(path)).lower() == "ignored":
+            if self.normalizer.entry_status(working_tree.get(path)) == "ignored":
                 continue
             staging[path] = working_tree.pop(path, "updated")
             conflicts.discard(path)
@@ -502,19 +528,73 @@ class RepositoryStateSimulator:
         paths = args or list(partial_hunks) or [
             path
             for path, value in working_tree.items()
-            if str(value).lower() not in {"ignored", "untracked"}
+            if self.normalizer.entry_status(value) not in {"ignored", "untracked"}
         ]
         if not paths:
             raise ValueError("No tracked changes available for patch staging.")
         staging = state.setdefault("staging", {})
         for path in paths:
-            if path not in working_tree:
+            if path not in working_tree and path not in partial_hunks:
                 continue
-            if str(working_tree.get(path)).lower() == "ignored":
+            if self.normalizer.entry_status(working_tree.get(path)) == "ignored":
                 continue
-            staging[path] = "partial"
-            working_tree[path] = "modified"
+            authored = partial_hunks.get(path) or {}
+            if isinstance(authored, dict):
+                target_hunks = self._as_list(
+                    authored.get("target_hunks")
+                    or authored.get("staged_hunks")
+                    or authored.get("stage")
+                )
+                leftover_hunks = self._as_list(
+                    authored.get("leftover_hunks")
+                    or authored.get("remaining_hunks")
+                    or authored.get("leftover")
+                )
+            else:
+                authored_hunks = self._as_list(authored)
+                target_hunks = authored_hunks[:1]
+                leftover_hunks = authored_hunks[1:]
+            if target_hunks or leftover_hunks:
+                staging[path] = {"status": "partial", "hunks": target_hunks}
+                if leftover_hunks:
+                    working_tree[path] = {"status": "modified", "hunks": leftover_hunks}
+                else:
+                    working_tree.pop(path, None)
+            else:
+                staging[path] = {"status": "partial", "hunks": self._entry_tokens(working_tree.get(path))}
+                working_tree[path] = "modified"
         return "Staged selected hunks."
+
+    def _rm(self, state: dict, args: list[str]) -> str:
+        if not args or args[0] != "--cached":
+            raise ValueError("Only git rm --cached <path> is simulated.")
+        paths = [path for path in args[1:] if path != "--"]
+        if not paths:
+            raise ValueError("Specify a path to remove from the index.")
+        staging = state.setdefault("staging", {})
+        working_tree = state.setdefault("working_tree", {})
+        head_tree = self._head_tree(state)
+        removed_paths: list[str] = []
+        for path in paths:
+            if path not in head_tree and path not in staging:
+                raise ValueError(f"pathspec '{path}' did not match any tracked file.")
+            staging[path] = "deleted"
+            existing = working_tree.get(path)
+            if existing is None:
+                working_tree[path] = {
+                    "status": "ignored",
+                    "content": copy.deepcopy(head_tree.get(path)),
+                    "preserved": True,
+                }
+            elif self.normalizer.entry_status(existing) not in {"ignored", "untracked"}:
+                working_tree[path] = {
+                    "status": "ignored",
+                    "content": copy.deepcopy(existing),
+                    "preserved": True,
+                }
+            removed_paths.append(path)
+        self._set_operation_metadata(state, last_rm_cached_paths=removed_paths)
+        return f"rm '{self._format_paths(removed_paths)}'"
 
     def _commit(self, state: dict, args: list[str]) -> str:
         if "--amend" in args:
@@ -531,7 +611,8 @@ class RepositoryStateSimulator:
         parents = [p for p in [current, state.pop("merge_parent", None)] if p]
         commit_id = self._next_commit_id(state)
         base_tree = self._tree_for_commit(state, current)
-        staged_changes = self._changes_from_entries(base_tree, state.get("staging", {}))
+        staged_entries = copy.deepcopy(state.get("staging", {}))
+        staged_changes = self._changes_from_entries(base_tree, staged_entries)
         tree = self._apply_changes(base_tree, staged_changes)
         state.setdefault("commits", []).append(
             self._commit_payload(
@@ -544,31 +625,51 @@ class RepositoryStateSimulator:
             )
         )
         state["staging"] = {}
+        self._cleanup_partial_hunks_after_commit(state, staged_entries)
         self._set_head_commit(state, commit_id)
         return f"[{self._head_branch(state) or 'detached'} {commit_id}] {message}"
 
     def _commit_amend(self, state: dict, args: list[str]) -> str:
         current = self._head_commit(state)
-        commit = self._commit_by_id(state, current)
-        if not commit:
+        old_commit = self._commit_by_id(state, current)
+        if not old_commit:
             raise ValueError("No commit available to amend.")
+        message = old_commit.get("message", "commit")
         if "-m" in args:
             idx = args.index("-m")
             if idx + 1 >= len(args):
                 raise ValueError("error: switch `m' requires a value.")
-            commit["message"] = args[idx + 1]
-        parent_id = (commit.get("parents") or [None])[0]
+            message = args[idx + 1]
+        parent_ids = list(old_commit.get("parents", []))
+        parent_id = (parent_ids or [None])[0]
         parent_tree = self._tree_for_commit(state, parent_id)
-        current_tree = copy.deepcopy(commit.get("tree") or parent_tree)
-        staged_changes = self._changes_from_entries(current_tree, state.get("staging", {}))
+        current_tree = copy.deepcopy(old_commit.get("tree") or parent_tree)
+        staged_entries = copy.deepcopy(state.get("staging", {}))
+        staged_changes = self._changes_from_entries(current_tree, staged_entries)
         amended_tree = self._apply_changes(current_tree, staged_changes)
-        commit["tree"] = amended_tree
-        commit["changes"] = self._diff_trees(parent_tree, amended_tree)
-        commit["files"] = self.normalizer.files_from_changes(commit.get("changes", {}))
-        commit["is_merge"] = len(commit.get("parents", [])) > 1
+        commit_id = self._next_commit_id(state)
+        changes = self._diff_trees(parent_tree, amended_tree)
+        state.setdefault("commits", []).append(
+            self._commit_payload(
+                state=state,
+                commit_id=commit_id,
+                message=message,
+                parents=parent_ids,
+                tree=amended_tree,
+                changes=changes,
+            )
+        )
+        state.setdefault("replaced_commits", {})[current] = commit_id
+        self._set_operation_metadata(
+            state,
+            last_amend_replaced_commit=current,
+            last_amend_created_commit=commit_id,
+        )
         state["staging"] = {}
-        self._record_reflog(state, current, "commit --amend")
-        return f"[{self._head_branch(state) or 'detached'} {current}] amended commit"
+        self._cleanup_partial_hunks_after_commit(state, staged_entries)
+        self._set_head_commit(state, commit_id)
+        self._record_reflog(state, commit_id, f"commit --amend: replaced {current}")
+        return f"[{self._head_branch(state) or 'detached'} {commit_id}] amended commit"
 
     def _checkout(self, state: dict, args: list[str]) -> str:
         if not args:
@@ -870,12 +971,82 @@ class RepositoryStateSimulator:
             return {"README.md": "modified", f"{topic}.py": "modified"}
         return {f"{topic}.py": "modified"}
 
+    def _as_list(self, value: object | None) -> list:
+        if value in (None, ""):
+            return []
+        return value if isinstance(value, list) else [value]
+
+    def _entry_tokens(self, value: object | None) -> list[str]:
+        if value is None:
+            return []
+        if isinstance(value, dict):
+            for key in ("hunks", "tokens", "target_hunks", "leftover_hunks"):
+                if key in value:
+                    return [str(item) for item in self._as_list(value.get(key))]
+        return [self.normalizer.token_haystack(value)] if self.normalizer.token_haystack(value) else []
+
+    def _cleanup_partial_hunks_after_commit(self, state: dict, staged_entries: dict) -> None:
+        partial_hunks = state.setdefault("partial_hunks", {})
+        for path, staged_value in staged_entries.items():
+            if self.normalizer.entry_status(staged_value) != "partial":
+                continue
+            authored = partial_hunks.get(path)
+            if not isinstance(authored, dict):
+                continue
+            leftover = self._as_list(
+                authored.get("leftover_hunks")
+                or authored.get("remaining_hunks")
+                or authored.get("leftover")
+            )
+            if leftover:
+                partial_hunks[path] = {"target_hunks": [], "leftover_hunks": leftover}
+            else:
+                partial_hunks.pop(path, None)
+
     def _first_remote_target(self, remote_branches: dict) -> str:
         targets = [target for target in remote_branches.values() if target]
         return sorted(targets)[0] if targets else "r0"
 
+    def _apply_remote_fixture_branches(self, state: dict) -> None:
+        fixture = state.get("remote_fixtures") or {}
+        if not isinstance(fixture, dict):
+            return
+        remote_branches = state.setdefault("remote_branches", {})
+        branch_targets = {}
+        authored_branches = fixture.get("branches")
+        if isinstance(authored_branches, dict):
+            branch_targets.update(authored_branches)
+        for key, value in fixture.items():
+            if key in {"commits", "branches", "remote_head", "head", "default_branch"}:
+                continue
+            if "/" in key and value:
+                branch_targets[key] = value
+        remote_head = fixture.get("remote_head") or fixture.get("head")
+        default_branch = fixture.get("default_branch") or "origin/main"
+        if remote_head:
+            branch_targets.setdefault(default_branch, remote_head)
+        for branch, target in branch_targets.items():
+            remote_branches[branch] = target
+
     def _materialize_remote_commits(self, state: dict) -> None:
         commits = state.setdefault("commits", [])
+        existing = {commit["id"] for commit in commits}
+        fixture = state.get("remote_fixtures") or {}
+        fixture_commits = fixture.get("commits", []) if isinstance(fixture, dict) else []
+        for authored_commit in fixture_commits:
+            if not isinstance(authored_commit, dict):
+                continue
+            commit_id = authored_commit.get("id")
+            if not commit_id:
+                continue
+            if commit_id in existing:
+                existing_commit = self._commit_by_id(state, commit_id)
+                if existing_commit:
+                    existing_commit.update(copy.deepcopy(authored_commit))
+                continue
+            commits.append(copy.deepcopy(authored_commit))
+            existing.add(commit_id)
+        self.normalizer.normalize_commits(state)
         existing = {commit["id"] for commit in commits}
         remote_ids = sorted({target for target in state.get("remote_branches", {}).values() if target})
         previous = None
@@ -894,6 +1065,7 @@ class RepositoryStateSimulator:
                 )
                 existing.add(commit_id)
             previous = commit_id
+        self.normalizer.normalize_commits(state)
 
     def _format_paths(self, paths: list[str]) -> str:
         return ", ".join(paths)
@@ -918,6 +1090,7 @@ class RepositorySnapshotService:
             "upstream_tracking": state.get("upstream_tracking", {}),
             "stash_stack": state.get("stash_stack", []),
             "partial_hunks": state.get("partial_hunks", {}),
+            "replaced_commits": state.get("replaced_commits", {}),
             "reflog": state.get("reflog", []),
             "operation_metadata": state.get("operation_metadata", {}),
         }

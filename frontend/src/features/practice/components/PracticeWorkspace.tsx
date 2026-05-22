@@ -10,11 +10,13 @@ import { ScenarioStatusHeader } from '@/features/scenarios/components/ScenarioSt
 import { CompletionCelebrationModal } from '@/features/practice/components/CompletionCelebrationModal'
 import { ContextualFeedbackPanel } from '@/features/practice/components/ContextualFeedbackPanel'
 import { ExpectedStatePanel } from '@/features/practice/components/ExpectedStatePanel'
+import { InspectionAnswerPanel } from '@/features/practice/components/InspectionAnswerPanel'
 import { LiveDagPanel } from '@/features/practice/components/LiveDagPanel'
 import { ProjectStructurePanel } from '@/features/practice/components/ProjectStructurePanel'
 import { ScenarioWorkspaceTour } from '@/features/practice/components/ScenarioWorkspaceTour'
 import { TerminalPanel } from '@/features/practice/components/TerminalPanel'
 import { useAuthStore } from '@/features/auth/hooks/useAuth'
+import { practiceApi } from '@/features/practice/api/practiceApi'
 import { hasSeenScenarioTour, markScenarioTourSeen } from '@/features/practice/utils/scenarioTour'
 import { useCommandSubmission } from '@/features/practice/hooks/useCommandSubmission'
 import { useScenarioSession } from '@/features/practice/hooks/useScenarioSession'
@@ -79,6 +81,28 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const sessionId = Number(params.sessionId)
   const { query, session, setSession, lines, setLines, feedback, setFeedback } = useScenarioSession(sessionId)
   const mutation = useCommandSubmission(sessionId, reviewMode)
+  const inspectionAnswerMutation = useMutation({
+    mutationFn: (answer: Record<string, unknown>) => {
+      if (!session) throw new Error('No session is available.')
+      return practiceApi.submitInspectionAnswer(session.id, answer)
+    },
+    onSuccess: (response) => {
+      setSession(response.session)
+      syncScenarioSessionInCache(queryClient, response.session)
+      void queryClient.invalidateQueries({ queryKey: ['units'] })
+      setLines((items) => [
+        ...items,
+        {
+          id: crypto.randomUUID(),
+          kind: response.session.status === 'completed' ? 'success' : 'warning',
+          text: response.summary,
+        },
+      ])
+    },
+    onError: (error) => {
+      setLines((items) => [...items, { id: crypto.randomUUID(), kind: 'warning', text: error.message }])
+    },
+  })
   const [dismissedCompletionSessionId, setDismissedCompletionSessionId] = useState<number | null>(null)
   const [terminalRatio, setTerminalRatio] = useState(DEFAULT_TERMINAL_RATIO)
   const [diagramRatio, setDiagramRatio] = useState(DEFAULT_DIAGRAM_RATIO)
@@ -291,6 +315,14 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         <aside className="flex min-h-0 flex-col gap-2" data-tour-target="scenario-brief">
           <ScenarioContextPanel session={session} />
           {!reviewMode ? <CommandCounter session={session} /> : null}
+          {!reviewMode && session.completion_type === 'inspection' ? (
+            <InspectionAnswerPanel
+              disabled={session.status !== 'started'}
+              isSubmitting={inspectionAnswerMutation.isPending}
+              session={session}
+              onSubmit={(answer) => inspectionAnswerMutation.mutate(answer)}
+            />
+          ) : null}
           <ProjectStructurePanel snapshot={session.repository_state} />
         </aside>
         <section
