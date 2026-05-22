@@ -12,8 +12,11 @@ import { ContextualFeedbackPanel } from '@/features/practice/components/Contextu
 import { ExpectedStatePanel } from '@/features/practice/components/ExpectedStatePanel'
 import { LiveDagPanel } from '@/features/practice/components/LiveDagPanel'
 import { ProjectStructurePanel } from '@/features/practice/components/ProjectStructurePanel'
+import { ScenarioWorkspaceTour } from '@/features/practice/components/ScenarioWorkspaceTour'
 import { SessionOutcomeBanner } from '@/features/practice/components/SessionOutcomeBanner'
 import { TerminalPanel } from '@/features/practice/components/TerminalPanel'
+import { useAuthStore } from '@/features/auth/hooks/useAuth'
+import { hasSeenScenarioTour, markScenarioTourSeen } from '@/features/practice/utils/scenarioTour'
 import { useCommandSubmission } from '@/features/practice/hooks/useCommandSubmission'
 import { useScenarioSession } from '@/features/practice/hooks/useScenarioSession'
 import { reviewApi } from '@/features/review/api/reviewApi'
@@ -81,6 +84,9 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const [terminalRatio, setTerminalRatio] = useState(DEFAULT_TERMINAL_RATIO)
   const [diagramRatio, setDiagramRatio] = useState(DEFAULT_DIAGRAM_RATIO)
   const [terminalPaneRatio, setTerminalPaneRatio] = useState(DEFAULT_TERMINAL_PANE_RATIO)
+  const [tourOpen, setTourOpen] = useState(false)
+  const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
+  const user = useAuthStore((state) => state.user)
   const workspaceGridRef = useRef<HTMLElement>(null)
   const diagramGridRef = useRef<HTMLDivElement>(null)
   const terminalGridRef = useRef<HTMLDivElement>(null)
@@ -144,6 +150,10 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   if (query.isLoading) return <PracticeWorkspaceSkeleton />
   if (query.isError) return <ErrorState title="Could not load scenario workspace" description={query.error.message} />
   if (!session) return <ErrorState title="Could not load scenario workspace" description="The API returned no session data." />
+
+  const tourKey = `${user?.id ?? 'guest'}:${session.scenario.id}`
+  const shouldAutoOpenTour = dismissedTourKey !== tourKey && !hasSeenScenarioTour(user?.id)
+  const isTourOpen = tourOpen || shouldAutoOpenTour
 
   function submit(command: string) {
     setLines((items) => [...items, { id: crypto.randomUUID(), kind: 'input', text: command }])
@@ -271,9 +281,10 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         isRetrying={retryMutation.isPending}
         onExit={() => exitMutation.mutate()}
         onRetry={() => retryMutation.mutate()}
+        onOpenTour={() => setTourOpen(true)}
       />
       <main className="grid min-h-0 flex-1 grid-cols-[18rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[17rem_minmax(0,1fr)] max-xl:grid-cols-[16rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
-        <aside className="flex min-h-0 flex-col gap-2">
+        <aside className="flex min-h-0 flex-col gap-2" data-tour-target="scenario-brief">
           <ScenarioContextPanel session={session} />
           <CommandCounter session={session} />
           <ProjectStructurePanel snapshot={session.repository_state} />
@@ -293,18 +304,22 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             className="grid min-h-0 grid-cols-1 gap-2 xl:grid-cols-[minmax(0,var(--live-dag-size))_0.375rem_minmax(0,var(--expected-dag-size))] xl:gap-0"
             style={diagramGridStyle}
           >
-            <LiveDagPanel
-              snapshot={session.repository_state}
-              className="flex min-h-0 flex-col"
-              contentClassName="h-full min-h-0 flex-1"
-            />
+            <div className="h-full min-h-0" data-tour-target="live-dag">
+              <LiveDagPanel
+                snapshot={session.repository_state}
+                className="flex h-full min-h-0 flex-col"
+                contentClassName="h-full min-h-0 flex-1"
+              />
+            </div>
             <ResizeHandle
               label="Resize diagrams"
               orientation="vertical"
               className="hidden xl:flex"
               onPointerDown={beginDiagramResize}
             />
-            <ExpectedStatePanel session={session} />
+            <div className="h-full min-h-0" data-tour-target="expected-state">
+              <ExpectedStatePanel session={session} />
+            </div>
           </div>
           <ResizeHandle
             label="Resize terminal height"
@@ -321,7 +336,14 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             )}
             style={terminalGridStyle}
           >
-            <TerminalPanel lines={lines} disabled={session.status !== 'started' || mutation.isPending} onCommand={submit} />
+            <div className="h-full min-h-0" data-tour-target="terminal">
+              <TerminalPanel
+                lines={lines}
+                disabled={session.status !== 'started' || mutation.isPending}
+                className="h-full"
+                onCommand={submit}
+              />
+            </div>
             {session.scaffolding.contextual_feedback ? (
               <ResizeHandle
                 label="Resize terminal and feedback"
@@ -330,7 +352,13 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
                 onPointerDown={beginTerminalPaneResize}
               />
             ) : null}
-            <ContextualFeedbackPanel session={session} feedback={feedback} />
+            {session.scaffolding.contextual_feedback ? (
+              <div className="h-full min-h-0" data-tour-target="feedback">
+                <ContextualFeedbackPanel session={session} feedback={feedback} />
+              </div>
+            ) : (
+              <ContextualFeedbackPanel session={session} feedback={feedback} />
+            )}
           </div>
         </section>
       </main>
@@ -352,6 +380,17 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             : null
         }
       />
+      {isTourOpen ? (
+        <ScenarioWorkspaceTour
+          key={tourKey}
+          session={session}
+          onClose={() => {
+            markScenarioTourSeen(user?.id)
+            setDismissedTourKey(tourKey)
+            setTourOpen(false)
+          }}
+        />
+      ) : null}
     </div>
   )
 }

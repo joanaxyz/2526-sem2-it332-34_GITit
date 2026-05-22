@@ -56,7 +56,7 @@ export function DifficultyActionButton({
               <Icon data-icon="inline-start" />
               {buttonLabel}
             </Button>
-            {difficulty.completion?.first_attempt_star ? <Star className="size-4 text-amber-300" /> : null}
+            {difficulty.completion?.first_attempt_star ? <Star className="size-4 text-primary" /> : null}
           </div>
         ) : null}
       </div>

@@ -24,8 +24,11 @@ export function UnitCard({
   scenarioSummaryPending?: boolean
   onToggle: () => void
 }) {
+  const visibleLessons = unit.is_orientation
+    ? unit.lessons.filter((lesson) => !['practice-rules', 'scaffolds-review'].includes(lesson.slug))
+    : unit.lessons
   const orientationProgress = Math.round(
-    (unit.lessons.filter((lesson) => lesson.is_complete).length / Math.max(unit.lessons.length, 1)) * 100,
+    (visibleLessons.filter((lesson) => lesson.is_complete).length / Math.max(visibleLessons.length, 1)) * 100,
   )
   const practiceProgress = Math.round(unit.practice_completion?.value ?? 0)
   const progressValue = unit.is_orientation ? orientationProgress : practiceProgress
@@ -52,7 +55,7 @@ export function UnitCard({
         <div className="border-t border-border bg-background/35 p-5" id={panelId}>
           {unit.is_orientation ? (
             <div className="grid gap-2">
-              {unit.lessons.map((lesson) => (
+              {visibleLessons.map((lesson) => (
                 <div key={lesson.id} className="rounded-md border border-border bg-secondary/40 p-3 transition hover:bg-secondary">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="min-w-0">

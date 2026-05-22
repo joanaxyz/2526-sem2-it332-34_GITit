@@ -26,7 +26,7 @@ export function TerminalPanel({
               line.kind === 'input' && 'text-foreground',
               line.kind === 'output' && 'text-muted-foreground',
               line.kind === 'system' && 'text-accent',
-              line.kind === 'warning' && 'text-amber-300',
+              line.kind === 'warning' && 'text-accent',
               line.kind === 'success' && 'text-primary',
             )}
           >

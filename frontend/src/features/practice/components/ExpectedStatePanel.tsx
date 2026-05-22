@@ -15,7 +15,7 @@ export function ExpectedStatePanel({ session }: { session: ScenarioSession }) {
     <LiveDagPanel
       title="Expected-State Diagram"
       snapshot={session.expected_state}
-      className="flex min-h-0 flex-col"
+      className="flex h-full min-h-0 flex-col"
       contentClassName="h-full min-h-0 flex-1"
     />
   )

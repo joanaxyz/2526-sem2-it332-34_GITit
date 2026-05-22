@@ -5,7 +5,6 @@ from common.constants import (
     COMMAND_COUNTED,
     COMMAND_DIAGNOSTIC,
     COMMAND_UNPROCESSABLE,
-    COMPLETION_INSPECTION,
     DIFFICULTY_EASY,
     DIFFICULTY_MEDIUM,
     RESULT_INVALID,
@@ -18,7 +17,7 @@ from common.constants import (
     SESSION_STATUS_STARTED,
 )
 from common.exceptions import Locked
-from evaluation.services import InspectionEvaluator, StateBasedEvaluator
+from evaluation.completion import CompletionEvaluationContext, ScenarioCompletionEvaluator
 from learning.services import OrientationService
 from progress.services import StreakService
 from retries.services import VariantSelectionService
@@ -30,6 +29,7 @@ from scenarios.models import (
     ScenarioSession,
     StepLog,
 )
+from simulator.command_engine import Pygit2GitCommandEngine
 from simulator.services import (
     RepositorySnapshotService,
     RepositoryStateSimulator,
@@ -201,42 +201,35 @@ class CommandProcessingService:
         if session.status != SESSION_STATUS_STARTED:
             raise Locked("This session has already ended.")
 
-        simulator = RepositoryStateSimulator()
+        state_tools = RepositoryStateSimulator()
         snapshotter = RepositorySnapshotService()
-        previous_state = simulator.clone_state(session.repository_state)
-        sim_result = simulator.process(previous_state, command)
+        command_engine = Pygit2GitCommandEngine()
+        previous_state = state_tools.clone_state(session.repository_state)
+        command_result = command_engine.process(previous_state, command)
         classification, increment = CommandCountClassifier().classify(
             command=command,
             policy_snapshot=session.command_policy_snapshot,
-            processed=sim_result.processed,
+            processed=command_result.processed,
         )
 
         result_category = RESULT_UNPROCESSABLE
         feedback = ""
-        if sim_result.processed:
+        if command_result.processed:
             executed_commands = [
                 *session.step_logs.order_by("id").values_list("command_log__normalized_command", flat=True),
-                sim_result.normalized_command,
+                command_result.normalized_command,
             ]
-            completion_type = session.difficulty_instance.completion_type
-            if completion_type == COMPLETION_INSPECTION:
-                evaluation = InspectionEvaluator().evaluate(
-                    initial_state=session.variant.initial_state,
-                    current_state=sim_result.state,
-                    expected_observations=session.variant.expected_observations,
+            evaluation = ScenarioCompletionEvaluator().evaluate(
+                CompletionEvaluationContext(
+                    session=session,
+                    previous_state=previous_state,
+                    next_state=command_result.state,
                     executed_commands=executed_commands,
                 )
-            else:
-                target_rule = session.variant.target_rule or session.difficulty_instance.target_rule.rule
-                evaluation = StateBasedEvaluator().evaluate(
-                    sim_result.state,
-                    target_rule,
-                    initial_state=session.variant.initial_state,
-                    executed_commands=executed_commands,
-                )
+            )
             result_category = evaluation.result_category
             if session.difficulty_instance.difficulty == DIFFICULTY_EASY:
-                feedback = FeedbackGenerationService().describe(previous_state, sim_result.state)
+                feedback = FeedbackGenerationService().describe(previous_state, command_result.state)
         else:
             result_category = (
                 RESULT_INVALID
@@ -251,28 +244,28 @@ class CommandProcessingService:
         session.total_attempts += 1
         if result_category != RESULT_TARGET_MATCHED:
             session.first_attempt_star_eligible = False
-        session.repository_state = sim_result.state
+        session.repository_state = command_result.state
 
-        state_hash = simulator.state_hash(sim_result.state)
+        state_hash = state_tools.state_hash(command_result.state)
         step = StepLog.objects.create(
             session=session,
             command_text=command,
-            terminal_output=sim_result.output,
+            terminal_output=command_result.output,
             result_category=result_category,
             command_classification=classification,
             counted_increment=increment,
             attempt_number=session.total_attempts,
             counted_total_after=session.counted_action_total,
             state_hash=state_hash,
-            expected_state_hash=simulator.state_hash(session.variant.target_state),
-            repository_state=sim_result.state,
+            expected_state_hash=state_tools.state_hash(session.variant.target_state),
+            repository_state=command_result.state,
             contextual_feedback=feedback,
         )
         CommandLog.objects.create(
             step_log=step,
             raw_command=command,
-            normalized_command=sim_result.normalized_command,
-            was_processable=sim_result.processed,
+            normalized_command=command_result.normalized_command,
+            was_processable=command_result.processed,
         )
 
         max_count = session.command_policy_snapshot["max_counted_commands"]
@@ -287,7 +280,7 @@ class CommandProcessingService:
         return {
             "session": session,
             "step": step,
-            "terminal_output": sim_result.output,
+            "terminal_output": command_result.output,
             "repository_state": snapshotter.snapshot(session.repository_state),
             "evaluation_result": result_category,
             "command_classification": classification,

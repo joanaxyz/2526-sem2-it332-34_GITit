@@ -42,7 +42,7 @@ export function LessonPage() {
               Back to Modules
             </Link>
           </Button>
-          <Badge variant={isOrientation ? 'warning' : lesson.kind === 'scenario' ? 'default' : 'blue'}>
+          <Badge variant={isOrientation ? 'outline' : lesson.kind === 'scenario' ? 'default' : 'blue'}>
             Module {lesson.unit.number}: {lesson.unit.title}
           </Badge>
         </div>

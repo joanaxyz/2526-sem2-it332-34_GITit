@@ -1,4 +1,4 @@
-import { ArrowLeft, GitBranch, RefreshCcw } from 'lucide-react'
+import { ArrowLeft, CircleHelp, GitBranch, RefreshCcw } from 'lucide-react'
 
 import type { ScenarioSession } from '@/features/practice/types'
 import { Badge } from '@/shared/components/Badge'
@@ -10,12 +10,14 @@ export function ScenarioStatusHeader({
   isRetrying = false,
   onExit,
   onRetry,
+  onOpenTour,
 }: {
   session: ScenarioSession
   isExiting?: boolean
   isRetrying?: boolean
   onExit?: () => void
   onRetry?: () => void
+  onOpenTour?: () => void
 }) {
   const exitLabel = session.status === 'started' ? 'Exit' : 'Back'
   const canRetry = session.status !== 'started' && session.status !== 'completed' && !session.review_mode && onRetry
@@ -33,6 +35,9 @@ export function ScenarioStatusHeader({
         </span>
       </div>
       <div className="flex items-center gap-2">
+        <Button type="button" variant="ghost" size="icon" className="size-8" aria-label="Open workspace guide" onClick={onOpenTour}>
+          <CircleHelp className="size-4" />
+        </Button>
         {canRetry ? (
           <Button type="button" variant="outline" size="sm" disabled={isRetrying} onClick={onRetry}>
             <RefreshCcw data-icon="inline-start" />
