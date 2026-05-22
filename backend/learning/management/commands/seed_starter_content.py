@@ -7,6 +7,7 @@ from typing import Any
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
+from django.core.management import call_command
 from django.db import transaction
 
 from common.constants import (
@@ -1367,6 +1368,19 @@ class Command(BaseCommand):
             help="Clear local seeded content and scenario progress before seeding.",
         )
         parser.add_argument(
+            "--reset-module1",
+            action="store_true",
+            help="Clear only Module 1 seeded content (development-only).",
+        )
+        parser.add_argument(
+            "--reset-all-dev",
+            action="store_true",
+            help=(
+                "Wipe the development database by running Django's flush. "
+                "REQUIRES DEBUG=True and --confirm. Use with extreme caution."
+            ),
+        )
+        parser.add_argument(
             "--confirm",
             action="store_true",
             help="Required with --reset to confirm local development data deletion.",
@@ -1379,7 +1393,11 @@ class Command(BaseCommand):
         else:
             units, lessons, scenarios = ModuleOneSeedBuilder().build()
         with transaction.atomic():
-            if options["reset"]:
+            if options.get("reset_all_dev"):
+                self._reset_all_dev(confirm=options.get("confirm", False))
+            elif options.get("reset_module1"):
+                self._reset_module1_seed(confirm=options.get("confirm", False))
+            elif options["reset"]:
                 self._reset_seeded_content(confirm=options["confirm"])
             unit_map = self._seed_units(units)
             lesson_map = self._seed_lessons(lessons, unit_map)
@@ -1405,6 +1423,63 @@ class Command(BaseCommand):
             longest_streak=0,
             last_completed_on=None,
         )
+
+    def _reset_module1_seed(self, *, confirm: bool) -> None:
+        """Remove Module 1 curriculum objects and related seeded scenario data.
+
+        This only runs in DEBUG mode and requires --confirm to execute.
+        """
+        if not settings.DEBUG:
+            raise CommandError("--reset-module1 is only available when DEBUG=True.")
+        if not confirm:
+            raise CommandError("Pass --confirm with --reset-module1 to clear Module 1 seeded data.")
+
+        unit_slug = "local-repository-foundations"
+        unit = LearningUnit.objects.filter(slug=unit_slug).first()
+        if not unit:
+            self.stdout.write(self.style.WARNING("Module 1 LearningUnit not found; nothing to reset."))
+            return
+
+        # Collect related objects
+        lessons = list(Lesson.objects.filter(unit=unit))
+        scenarios = list(ScenarioSkillFocus.objects.filter(learning_unit=unit))
+        difficulty_instances = list(DifficultyInstance.objects.filter(scenario__in=scenarios))
+
+        # Delete dependent runtime / progress records that point at these scenarios
+        CompletionRecord.objects.filter(scenario__in=scenarios).delete()
+        ScenarioSession.objects.filter(scenario__in=scenarios).delete()
+
+        # Orientation progress entries for lessons in this unit
+        OrientationProgress.objects.filter(lesson__unit=unit).delete()
+
+        # Remove generated and seeded scenario artifacts
+        ScenarioVariant.objects.filter(scenario__in=scenarios).delete()
+        ScenarioGenerationBlueprint.objects.filter(difficulty_instance__in=difficulty_instances).delete()
+        TargetStateRule.objects.filter(difficulty_instance__in=difficulty_instances).delete()
+        CommandCountPolicy.objects.filter(difficulty_instance__in=difficulty_instances).delete()
+        DifficultyInstance.objects.filter(scenario__in=scenarios).delete()
+
+        # Remove the scenario skill focuses, lessons, and the unit itself
+        ScenarioSkillFocus.objects.filter(learning_unit=unit).delete()
+        Lesson.objects.filter(unit=unit).delete()
+        LearningUnit.objects.filter(pk=unit.pk).delete()
+
+        self.stdout.write(self.style.SUCCESS("Module 1 seeded content removed."))
+
+    def _reset_all_dev(self, *, confirm: bool) -> None:
+        """Wipe the development database using Django's flush.
+
+        This is destructive: it removes all data. Requires DEBUG=True and --confirm.
+        """
+        if not settings.DEBUG:
+            raise CommandError("--reset-all-dev is only available when DEBUG=True.")
+        if not confirm:
+            raise CommandError("Pass --confirm with --reset-all-dev to wipe the development database.")
+
+        # Use Django's flush to remove all data and reset sequences
+        self.stdout.write(self.style.WARNING("Flushing development database (no input)..."))
+        call_command("flush", "--noinput")
+        self.stdout.write(self.style.SUCCESS("Development database flushed."))
 
     def _seed_units(self, specs: list[UnitSpec]) -> dict[str, LearningUnit]:
         active_slugs = [spec.slug for spec in specs]
