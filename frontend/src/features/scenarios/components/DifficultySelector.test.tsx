@@ -123,4 +123,32 @@ describe('DifficultySelector', () => {
     expect(screen.queryByRole('button', { name: /review/i })).not.toBeInTheDocument()
     expect(screen.getByText('67%')).toBeInTheDocument()
   })
+
+  it('continues completed perfect scenarios until mastery count is satisfied', () => {
+    render(
+      <DifficultySelector
+        difficulties={[
+          {
+            ...difficulties[2],
+            review_available: false,
+            retry_session_id: 8,
+            mastery_progress: { mastered: 1, required: 3 },
+            latest_attempt: {
+              ...difficulties[2].latest_attempt!,
+              id: 8,
+              accuracy_rate: 100,
+              command_accurate: true,
+              counted_action_total: 1,
+            },
+          },
+        ]}
+        onStart={vi.fn()}
+        onReview={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: /continue/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /review/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /retry/i })).not.toBeInTheDocument()
+  })
 })

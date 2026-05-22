@@ -10,10 +10,10 @@ from common.exceptions import Locked
 from scenarios.models import ScenarioSession
 from scenarios.selectors import (
     get_difficulty_instance,
+    required_successful_attempts_for_difficulty,
     scenario_list_queryset,
     scenario_queryset,
     scenario_status_payloads,
-    required_successful_attempts_for_difficulty,
 )
 from scenarios.serializers import (
     CommandSubmitSerializer,
@@ -208,7 +208,7 @@ class ScenarioRetryAPIView(APIView):
             and prior.status == SESSION_STATUS_COMPLETED
             and prior.counted_action_total <= prior.command_policy_snapshot["min_counted_commands"]
         ):
-            required = required_successful_attempts_for_difficulty(prior.difficulty_instance.difficulty)
+            required = required_successful_attempts_for_difficulty(prior.difficulty_instance)
             accurate_count = ScenarioSession.objects.filter(
                 user=request.user,
                 mode=SESSION_MODE_PRIMARY,

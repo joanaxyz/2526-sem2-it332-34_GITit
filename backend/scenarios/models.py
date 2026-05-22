@@ -86,6 +86,7 @@ class DifficultyInstance(models.Model):
         choices=CompletionType.choices,
         default=CompletionType.STATE_BASED,
     )
+    required_successful_attempts = models.PositiveIntegerField(default=2)
     narrative = models.TextField(blank=True)
     task_prompt = models.TextField(blank=True)
     is_published = models.BooleanField(default=True)

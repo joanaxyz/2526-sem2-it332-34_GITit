@@ -16,15 +16,19 @@ from scenarios.models import (
     ScenarioSkillFocus,
 )
 
-SUCCESSFUL_ATTEMPTS_REQUIRED = 3
+
+def default_successful_attempts_for_difficulty(difficulty: str) -> int:
+    """Fallback attempt requirement for legacy difficulty rows."""
+    return 3 if difficulty == "easy" else 2
 
 
-def required_successful_attempts_for_difficulty(difficulty: str) -> int:
-    """Return the number of successful accurate completions required for a difficulty.
-
-    Easy requires 3 accurate completions; Medium/Hard require 2.
-    """
-    return 3 if difficulty == DIFFICULTY_EASY else 2
+def required_successful_attempts_for_difficulty(
+    difficulty_or_instance: str | DifficultyInstance,
+) -> int:
+    """Return the data-driven successful attempt requirement for a difficulty."""
+    if isinstance(difficulty_or_instance, DifficultyInstance):
+        return difficulty_or_instance.required_successful_attempts
+    return default_successful_attempts_for_difficulty(difficulty_or_instance)
 
 
 def command_accuracy_rate(
@@ -117,6 +121,7 @@ def _published_difficulty_queryset():
             "scenario_id",
             "difficulty",
             "completion_type",
+            "required_successful_attempts",
             "command_policy__id",
             "command_policy__min_counted_commands",
             "command_policy__max_counted_commands",
@@ -184,11 +189,7 @@ def scenario_status_payloads(*, user, scenarios, include_preview: bool = True) -
     completions = _completion_map(user=user, difficulty_ids=difficulty_ids)
     successful_attempts = _successful_attempts_map(user=user, difficulty_ids=difficulty_ids)
     mastery_progress_map = _mastery_progress_map(user=user, difficulty_ids=difficulty_ids)
-    # A difficulty is considered completed when a CompletionRecord exists for it.
-    # Previously this used mastery (3 accurate completions) to mark completion,
-    # which caused the UI progress counter (e.g. "-/3") to increment on mastery
-    # rather than on actual recorded completion. Use completions dict keys.
-    completed_ids = set(completions.keys())
+    completed_ids = _completed_difficulty_ids(user=user, difficulty_ids=difficulty_ids)
     active_sessions, latest_sessions, retryable_sessions = _session_state_maps(
         user=user,
         difficulty_ids=difficulty_ids,
@@ -236,13 +237,24 @@ def _scenario_status_payload_from_maps(
         )
         progress = successful_attempts.get(
             instance.id,
-            {"count": 0, "required": required_successful_attempts_for_difficulty(instance.difficulty)},
+            {"count": 0, "required": required_successful_attempts_for_difficulty(instance)},
         )
         mastery = mastery_progress_map.get(
             instance.id,
-            {"mastered": 0, "required": required_successful_attempts_for_difficulty(instance.difficulty)},
+            {"mastered": 0, "required": required_successful_attempts_for_difficulty(instance)},
         )
+        latest_attempt = (
+            latest_attempt_payload_from_session(
+                session=display_session,
+                difficulty_instance=instance,
+            )
+            if display_session
+            else None
+        )
+        latest_is_accurate = (latest_attempt or {}).get("accuracy_rate") == 100
         successful_enough = progress["count"] >= progress["required"]
+        can_review = completion is not None and successful_enough and latest_is_accurate
+        can_retry = retryable_session is not None and not can_review
         difficulties.append(
             {
                 "id": instance.id,
@@ -256,7 +268,7 @@ def _scenario_status_payload_from_maps(
                     difficulty_by_key=difficulty_by_key,
                     completed_ids=completed_ids,
                 ),
-                "review_available": completion is not None and successful_enough,
+                "review_available": can_review,
                 "mastery_progress": mastery,
                 "mastered_records": mastery,
                 "successful_attempts": progress,
@@ -267,14 +279,9 @@ def _scenario_status_payload_from_maps(
                 }
                 if completion
                 else None,
-                "latest_attempt": latest_attempt_payload_from_session(
-                    session=display_session,
-                    difficulty_instance=instance,
-                )
-                if display_session
-                else None,
+                "latest_attempt": latest_attempt,
                 "active_session_id": in_progress.id if in_progress else None,
-                "retry_session_id": retryable_session.id if retryable_session and not successful_enough else None,
+                "retry_session_id": retryable_session.id if can_retry else None,
                 "policy": _policy_payload(instance=instance, include_preview=include_preview),
             }
         )
@@ -349,16 +356,17 @@ def _completion_map(*, user, difficulty_ids: list[int]) -> dict[int, CompletionR
 
 
 def _mastery_progress_map(*, user, difficulty_ids: list[int]) -> dict[int, dict]:
-    diff_map = {
-        di.id: di.difficulty
-        for di in DifficultyInstance.objects.filter(id__in=difficulty_ids).only("id", "difficulty")
+    required_map = {
+        di.id: di.required_successful_attempts
+        for di in DifficultyInstance.objects.filter(id__in=difficulty_ids).only(
+            "id",
+            "required_successful_attempts",
+        )
     }
     progress = {
         difficulty_id: {
             "mastered": 0,
-            "required": required_successful_attempts_for_difficulty(
-                diff_map.get(difficulty_id, DIFFICULTY_EASY)
-            ),
+            "required": required_map.get(difficulty_id, 2),
         }
         for difficulty_id in difficulty_ids
     }
@@ -389,18 +397,31 @@ def _mastery_progress_map(*, user, difficulty_ids: list[int]) -> dict[int, dict]
     return progress
 
 
+def _completed_difficulty_ids(*, user, difficulty_ids: list[int]) -> set[int]:
+    if not difficulty_ids:
+        return set()
+    return set(
+        ScenarioSession.objects.filter(
+            user=user,
+            mode=SESSION_MODE_PRIMARY,
+            status=SESSION_STATUS_COMPLETED,
+            difficulty_instance_id__in=difficulty_ids,
+        ).values_list("difficulty_instance_id", flat=True)
+    )
+
+
 def _successful_attempts_map(*, user, difficulty_ids: list[int]) -> dict[int, dict]:
-    # Determine required attempts per difficulty instance (easy=3, medium/hard=2)
-    diff_map = {
-        di.id: di.difficulty
-        for di in DifficultyInstance.objects.filter(id__in=difficulty_ids).only("id", "difficulty")
+    required_map = {
+        di.id: di.required_successful_attempts
+        for di in DifficultyInstance.objects.filter(id__in=difficulty_ids).only(
+            "id",
+            "required_successful_attempts",
+        )
     }
     progress = {
         difficulty_id: {
             "count": 0,
-            "required": required_successful_attempts_for_difficulty(
-                diff_map.get(difficulty_id, DIFFICULTY_EASY)
-            ),
+            "required": required_map.get(difficulty_id, 2),
         }
         for difficulty_id in difficulty_ids
     }

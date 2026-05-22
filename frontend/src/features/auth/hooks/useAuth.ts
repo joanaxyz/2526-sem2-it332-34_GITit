@@ -13,17 +13,24 @@ type AuthState = {
 const accessTokenStorageKey = 'git-it-access-token'
 const userStorageKey = 'git-it-user'
 
+function browserStorage() {
+  if (typeof window === 'undefined') return null
+  const storage = window.localStorage
+  return storage && typeof storage.getItem === 'function' ? storage : null
+}
+
 export function getStoredAccessToken() {
-  return localStorage.getItem(accessTokenStorageKey)
+  return browserStorage()?.getItem(accessTokenStorageKey) ?? null
 }
 
 function getStoredUser() {
-  const storedUser = localStorage.getItem(userStorageKey)
+  const storage = browserStorage()
+  const storedUser = storage?.getItem(userStorageKey)
   if (!storedUser) return null
   try {
     return JSON.parse(storedUser) as User
   } catch {
-    localStorage.removeItem(userStorageKey)
+    storage?.removeItem(userStorageKey)
     return null
   }
 }
@@ -43,17 +50,19 @@ export const useAuthStore = create<AuthState>((set) => {
     accessToken: storedToken,
     user: storedUser,
     setSession: (accessToken, user) => {
-      localStorage.setItem(accessTokenStorageKey, accessToken)
-      localStorage.setItem(userStorageKey, JSON.stringify(user))
+      const storage = browserStorage()
+      storage?.setItem(accessTokenStorageKey, accessToken)
+      storage?.setItem(userStorageKey, JSON.stringify(user))
       set({ accessToken, user })
     },
     setAccessToken: (accessToken) => {
-      localStorage.setItem(accessTokenStorageKey, accessToken)
+      browserStorage()?.setItem(accessTokenStorageKey, accessToken)
       set({ accessToken })
     },
     clearSession: () => {
-      localStorage.removeItem(accessTokenStorageKey)
-      localStorage.removeItem(userStorageKey)
+      const storage = browserStorage()
+      storage?.removeItem(accessTokenStorageKey)
+      storage?.removeItem(userStorageKey)
       set({ accessToken: null, user: null })
     },
   }

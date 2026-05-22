@@ -17,7 +17,7 @@ export function CurrentTrackCard() {
             Build Git confidence through module lessons, practice repo state, and replayable scenarios.
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Start with the Git foundations when you need them, then choose a practice topic and work from Easy toward Hard.
+            Start with the Git foundations when you need them, then choose a practice scenario and work from Easy toward Hard.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
