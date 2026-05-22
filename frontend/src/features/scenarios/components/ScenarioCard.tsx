@@ -3,19 +3,19 @@ import type { DifficultyAccess, ScenarioSkillFocus } from '@/features/scenarios/
 
 export function ScenarioCard({
   scenario,
-  topicNumber,
+  scenarioNumber,
   onStart,
   onReview,
 }: {
   scenario: ScenarioSkillFocus
-  topicNumber: number
+  scenarioNumber: number
   onStart: (difficulty: DifficultyAccess) => void
   onReview: (difficulty: DifficultyAccess) => void
 }) {
   return (
     <ScenarioSkillFocusCard
       scenario={scenario}
-      topicNumber={topicNumber}
+      scenarioNumber={scenarioNumber}
       onDifficultyAction={(_, difficulty, action) => {
         if (action === 'review') {
           onReview(difficulty)

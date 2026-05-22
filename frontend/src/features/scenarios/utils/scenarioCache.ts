@@ -93,7 +93,7 @@ export function updateScenarioListWithSession(
     const difficulties = scenario.difficulties.map((difficulty) => {
       if (difficulty.difficulty === session.difficulty) {
         // Prefer completion info provided by the server in the session payload
-        const hasSessionCompletion = Boolean((session as any).completion)
+        const hasSessionCompletion = Boolean(session.completion)
         const status = statusFromSession(
           session.status,
           difficulty.status,
@@ -119,7 +119,7 @@ export function updateScenarioListWithSession(
                 (session.status === 'completed' && (!mastered || !completedAccurateAttempt))
             ? session.id
             : null
-        const completion = (session as any).completion ?? difficulty.completion
+        const completion = session.completion ?? difficulty.completion
         const reviewAvailable = Boolean(completion) && mastered && completedAccurateAttempt
 
         if (

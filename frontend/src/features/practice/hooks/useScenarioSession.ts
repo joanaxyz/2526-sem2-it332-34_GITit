@@ -53,7 +53,8 @@ export function useScenarioSession(sessionId: number) {
   }, [])
 
   useEffect(() => {
-    resetLocalSessionState()
+    const timeoutId = window.setTimeout(resetLocalSessionState, 0)
+    return () => window.clearTimeout(timeoutId)
   }, [resetLocalSessionState, sessionId])
 
   const session = sessionOverride?.id === sessionId ? sessionOverride : (query.data ?? null)

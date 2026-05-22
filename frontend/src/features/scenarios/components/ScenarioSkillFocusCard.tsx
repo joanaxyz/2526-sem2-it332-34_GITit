@@ -8,11 +8,11 @@ import { ExpandToggleButton } from '@/shared/components/ExpandToggleButton'
 
 export function ScenarioSkillFocusCard({
   scenario,
-  topicNumber,
+  scenarioNumber,
   onDifficultyAction,
 }: {
   scenario: ScenarioSkillFocus
-  topicNumber: number
+  scenarioNumber: number
   onDifficultyAction: (scenario: ScenarioSkillFocus, difficulty: DifficultyAccess, action: DifficultyActionIntent) => void
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -25,7 +25,7 @@ export function ScenarioSkillFocusCard({
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-primary">Topic {topicNumber}</p>
+            <p className="text-xs font-semibold text-primary">Scenario {scenarioNumber}</p>
             <CardTitle className="mt-1 flex items-center gap-2">
               <GitPullRequest className="size-5 shrink-0 text-primary" />
               {scenario.title}
@@ -35,7 +35,7 @@ export function ScenarioSkillFocusCard({
           <ExpandToggleButton
             expanded={isExpanded}
             controlsId={panelId}
-            label={`Topic ${topicNumber}: ${scenario.title}`}
+            label={`Scenario ${scenarioNumber}: ${scenario.title}`}
             onToggle={() => setIsExpanded((current) => !current)}
           />
         </div>

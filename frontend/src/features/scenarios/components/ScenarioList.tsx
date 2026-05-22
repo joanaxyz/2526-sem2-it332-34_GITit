@@ -168,7 +168,7 @@ export function ScenarioList(props: ScenarioListProps) {
         <ScenarioSkillFocusCard
           key={scenario.id}
           scenario={scenario}
-          topicNumber={index + 1}
+          scenarioNumber={index + 1}
           onDifficultyAction={(selectedScenario, difficulty, action) =>
             setPreviewRequest({ scenario: selectedScenario, difficulty, action })
           }
