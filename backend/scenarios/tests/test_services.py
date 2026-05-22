@@ -56,6 +56,28 @@ def student(db, seeded_content):
     return user
 
 
+def complete_accurate_session(*, user, difficulty):
+    session = ScenarioSessionService().start_session(
+        user=user,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    for command in session.variant.solution_commands:
+        CommandProcessingService().submit_command(session=session, command=command)
+        session.refresh_from_db()
+        if session.status == SESSION_STATUS_COMPLETED:
+            break
+    return session
+
+
+def complete_required_accurate_sessions(*, user, difficulty):
+    sessions = [
+        complete_accurate_session(user=user, difficulty=difficulty)
+        for _ in range(difficulty.required_successful_attempts)
+    ]
+    return sessions[-1]
+
+
 def test_primary_session_can_start_before_orientation_completion(db, seeded_content):
     user = get_user_model().objects.create_user(
         username="new@example.com",
@@ -108,16 +130,7 @@ def test_state_based_completion_creates_completion_record(student):
         scenario__slug="form-clean-commit",
         difficulty="easy",
     )
-    session = ScenarioSessionService().start_session(
-        user=student,
-        difficulty_instance=difficulty,
-        source_entry_point="lesson",
-    )
-
-    CommandProcessingService().submit_command(session=session, command="git add .")
-    CommandProcessingService().submit_command(
-        session=session, command='git commit -m "starter snapshot"'
-    )
+    session = complete_required_accurate_sessions(user=student, difficulty=difficulty)
 
     session.refresh_from_db()
     completion = CompletionRecord.objects.get(user=student, difficulty_instance=difficulty)
@@ -130,16 +143,7 @@ def test_session_payload_includes_completion_when_record_exists(student):
         scenario__slug="form-clean-commit",
         difficulty="easy",
     )
-    session = ScenarioSessionService().start_session(
-        user=student,
-        difficulty_instance=difficulty,
-        source_entry_point="lesson",
-    )
-
-    CommandProcessingService().submit_command(session=session, command="git add .")
-    CommandProcessingService().submit_command(
-        session=session, command='git commit -m "starter snapshot"'
-    )
+    session = complete_required_accurate_sessions(user=student, difficulty=difficulty)
 
     session.refresh_from_db()
     payload = session_payload(session, include_steps=False)
@@ -176,9 +180,11 @@ def test_partial_staging_requires_the_selected_file_scope(student):
         prior_session=session,
     )
 
-    CommandProcessingService().submit_command(
-        session=retry, command=retry.variant.solution_commands[0]
-    )
+    for command in retry.variant.solution_commands:
+        CommandProcessingService().submit_command(session=retry, command=command)
+        retry.refresh_from_db()
+        if retry.status == SESSION_STATUS_COMPLETED:
+            break
 
     retry.refresh_from_db()
     assert retry.status == "completed"
@@ -206,6 +212,7 @@ def test_retry_after_failure_uses_changed_variant_when_available(student):
 
     assert retry.variant_id != prior.variant_id
     assert retry.variant.difficulty_instance_id == difficulty.id
+    assert retry.variant.structure_signature != prior.variant.structure_signature
     assert retry.changed_variant is True
     assert retry.rta_eligible is True
 
@@ -277,15 +284,7 @@ def test_review_mode_logs_separately_without_new_completion(student):
         scenario__slug="form-clean-commit",
         difficulty="easy",
     )
-    session = ScenarioSessionService().start_session(
-        user=student,
-        difficulty_instance=difficulty,
-        source_entry_point="lesson",
-    )
-    CommandProcessingService().submit_command(session=session, command="git add .")
-    CommandProcessingService().submit_command(
-        session=session, command='git commit -m "starter snapshot"'
-    )
+    complete_required_accurate_sessions(user=student, difficulty=difficulty)
 
     review_session = ReviewModeService().start_review_session(
         user=student, difficulty_instance=difficulty
@@ -308,10 +307,11 @@ def test_scenario_payload_includes_latest_attempt_accuracy(student):
         difficulty_instance=difficulty,
         source_entry_point="lesson",
     )
-    CommandProcessingService().submit_command(session=session, command="git add .")
-    CommandProcessingService().submit_command(
-        session=session, command='git commit -m "starter snapshot"'
-    )
+    for command in session.variant.solution_commands:
+        CommandProcessingService().submit_command(session=session, command=command)
+        session.refresh_from_db()
+        if session.status == SESSION_STATUS_COMPLETED:
+            break
 
     payload = scenario_status_payload(user=student, scenario=difficulty.scenario)
     easy = next(item for item in payload["difficulties"] if item["difficulty"] == "easy")
@@ -358,10 +358,11 @@ def test_completed_scenario_remains_retryable_until_three_mastered_instances(stu
         source_entry_point="lesson",
     )
     CommandProcessingService().submit_command(session=session, command="git status --wat")
-    CommandProcessingService().submit_command(session=session, command="git add .")
-    CommandProcessingService().submit_command(
-        session=session, command='git commit -m "starter snapshot"'
-    )
+    for command in session.variant.solution_commands:
+        CommandProcessingService().submit_command(session=session, command=command)
+        session.refresh_from_db()
+        if session.status == SESSION_STATUS_COMPLETED:
+            break
     session.refresh_from_db()
 
     payload = scenario_status_payload(user=student, scenario=difficulty.scenario)
@@ -386,11 +387,13 @@ def test_completed_scenario_remains_retryable_until_three_mastered_instances(stu
 
     payload = scenario_status_payload(user=student, scenario=difficulty.scenario)
     easy = next(item for item in payload["difficulties"] if item["difficulty"] == "easy")
-    completion = CompletionRecord.objects.get(user=student, difficulty_instance=difficulty)
+    completion = CompletionRecord.objects.filter(
+        user=student,
+        difficulty_instance=difficulty,
+    ).first()
 
     assert retry.status == SESSION_STATUS_COMPLETED
-    assert completion.session_id == retry.id
-    assert completion.counted_action_total == difficulty.command_policy.min_counted_commands
+    assert completion is None
     assert easy["review_available"] is False
     assert easy["retry_session_id"] == retry.id
     assert easy["latest_attempt"]["id"] == retry.id
@@ -409,10 +412,11 @@ def test_abandoned_retry_becomes_latest_zero_mastery(student):
         source_entry_point="lesson",
     )
     CommandProcessingService().submit_command(session=session, command="git status --wat")
-    CommandProcessingService().submit_command(session=session, command="git add .")
-    CommandProcessingService().submit_command(
-        session=session, command='git commit -m "starter snapshot"'
-    )
+    for command in session.variant.solution_commands:
+        CommandProcessingService().submit_command(session=session, command=command)
+        session.refresh_from_db()
+        if session.status == SESSION_STATUS_COMPLETED:
+            break
     session.refresh_from_db()
     retry = ScenarioSessionService().start_session(
         user=student,
@@ -438,15 +442,18 @@ def test_later_completed_retry_replaces_prior_mastery_even_when_worse(student):
         scenario__slug="form-clean-commit",
         difficulty="easy",
     )
+    difficulty.required_successful_attempts = 1
+    difficulty.save(update_fields=["required_successful_attempts"])
     first = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
         source_entry_point="lesson",
     )
-    CommandProcessingService().submit_command(session=first, command="git add .")
-    CommandProcessingService().submit_command(
-        first, command='git commit -m "starter snapshot"'
-    )
+    for command in first.variant.solution_commands:
+        CommandProcessingService().submit_command(session=first, command=command)
+        first.refresh_from_db()
+        if first.status == SESSION_STATUS_COMPLETED:
+            break
     first.refresh_from_db()
 
     retry = ScenarioSessionService().start_session(
@@ -517,13 +524,54 @@ def test_review_sessions_do_not_replace_primary_accuracy(student):
 
 
 def test_seeded_curriculum_has_full_variant_set_and_one_primary_focus(seeded_content):
-    assert ScenarioSkillFocus.objects.filter(is_published=True).count() == 27
-    assert DifficultyInstance.objects.filter(is_published=True).count() == 81
-    assert ScenarioVariant.objects.filter(is_published=True).count() == 405
+    assert (
+        Lesson.objects.filter(unit__slug="local-repository-foundations", is_published=True).count()
+        == 9
+    )
+    assert ScenarioSkillFocus.objects.filter(is_published=True).count() == 9
+    assert DifficultyInstance.objects.filter(is_published=True).count() == 27
+    assert ScenarioVariant.objects.filter(is_published=True).count() == 62
     assert all(
         len(scenario.primary_focus_commands) == 1
         for scenario in ScenarioSkillFocus.objects.filter(is_published=True)
     )
+
+
+def test_module_one_scenarios_have_all_difficulties_and_generated_variants(seeded_content):
+    expected_difficulties = {"easy", "medium", "hard"}
+    for scenario in ScenarioSkillFocus.objects.filter(
+        learning_unit__slug="local-repository-foundations",
+        is_published=True,
+    ):
+        difficulties = {
+            instance.difficulty: instance
+            for instance in scenario.difficulty_instances.filter(is_published=True)
+        }
+        assert set(difficulties) == expected_difficulties
+        for instance in difficulties.values():
+            variant_count = instance.variants.filter(is_published=True).count()
+            assert variant_count >= instance.required_successful_attempts
+            signatures = set(
+                instance.variants.filter(is_published=True).values_list(
+                    "structure_signature",
+                    flat=True,
+                )
+            )
+            assert len(signatures) == variant_count
+
+
+def test_module_one_required_attempt_counts_come_from_curriculum(seeded_content):
+    hard_review = DifficultyInstance.objects.get(
+        scenario__slug="integrate-local-workflow",
+        difficulty="hard",
+    )
+    easy_partial = DifficultyInstance.objects.get(
+        scenario__slug="stage-selected-changes",
+        difficulty="easy",
+    )
+
+    assert hard_review.required_successful_attempts == 3
+    assert easy_partial.required_successful_attempts == 2
 
 
 def test_primary_focus_is_not_polluted_by_supporting_workflow_commands(seeded_content):
@@ -740,6 +788,7 @@ def test_seeded_variants_do_not_contain_unresolved_target_placeholders(seeded_co
     ]
 
     assert "<" not in str(serialized)
+    assert "{{" not in str(serialized)
 
 
 def test_seeded_state_based_variants_require_focus_commands_and_hide_task_answers(seeded_content):

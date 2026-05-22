@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from scaffolding.services import ScaffoldingService
-from scenarios.models import DifficultyInstance, CompletionRecord
+from scenarios.models import CompletionRecord, DifficultyInstance
 from scenarios.selectors import required_successful_attempts_for_difficulty
 from simulator.services import RepositorySnapshotService
 
@@ -35,7 +35,7 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
         difficulty_instance=session.difficulty_instance,
         counted_action_total__lte=session.difficulty_instance.command_policy.min_counted_commands,
     ).count()
-    required = required_successful_attempts_for_difficulty(session.difficulty_instance.difficulty)
+    required = required_successful_attempts_for_difficulty(session.difficulty_instance)
     mastery_progress = {
         "mastered": min(mastered_count, required),
         "required": required,
@@ -123,7 +123,7 @@ def next_difficulty_payload(session) -> dict | None:
         difficulty_instance=session.difficulty_instance,
         counted_action_total__lte=session.difficulty_instance.command_policy.min_counted_commands,
     ).count()
-    required = required_successful_attempts_for_difficulty(session.difficulty_instance.difficulty)
+    required = required_successful_attempts_for_difficulty(session.difficulty_instance)
     # Require the current completed attempt to be accurate (100% accuracy)
     if session.counted_action_total > session.difficulty_instance.command_policy.min_counted_commands:
         return None

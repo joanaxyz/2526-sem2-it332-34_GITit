@@ -1,7 +1,7 @@
 from django.db.models import BooleanField, Count, Exists, IntegerField, OuterRef, Prefetch, Q, Value
 
 from learning.models import LearningUnit, Lesson, OrientationProgress
-from scenarios.models import CompletionRecord, ScenarioSession
+from scenarios.models import ScenarioSession
 
 
 def published_units(*, user=None):
@@ -77,6 +77,7 @@ def practice_completion_count_map(*, user, unit_ids: list[int]) -> dict[int, int
 
     counts_by_instance: dict[int, int] = {}
     unit_by_instance: dict[int, int] = {}
+    required_by_instance: dict[int, int] = {}
     for session in (
         ScenarioSession.objects.filter(
             user=user,
@@ -92,6 +93,7 @@ def practice_completion_count_map(*, user, unit_ids: list[int]) -> dict[int, int
             "scenario__learning_unit_id",
             "difficulty_instance_id",
             "difficulty_instance__difficulty",
+            "difficulty_instance__required_successful_attempts",
             "difficulty_instance__command_policy__min_counted_commands",
             "status",
             "counted_action_total",
@@ -104,9 +106,13 @@ def practice_completion_count_map(*, user, unit_ids: list[int]) -> dict[int, int
             counts_by_instance.get(session.difficulty_instance_id, 0) + 1
         )
         unit_by_instance[session.difficulty_instance_id] = session.scenario.learning_unit_id
+        required_by_instance[session.difficulty_instance_id] = (
+            session.difficulty_instance.required_successful_attempts
+        )
 
     completion_by_unit = {unit_id: 0 for unit_id in unit_ids}
     for difficulty_instance_id, count in counts_by_instance.items():
         unit_id = unit_by_instance[difficulty_instance_id]
-        completion_by_unit[unit_id] = completion_by_unit.get(unit_id, 0) + min(count, 3)
+        required = required_by_instance.get(difficulty_instance_id, 2)
+        completion_by_unit[unit_id] = completion_by_unit.get(unit_id, 0) + min(count, required)
     return completion_by_unit

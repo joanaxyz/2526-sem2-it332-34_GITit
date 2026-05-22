@@ -146,7 +146,7 @@ class RepositoryStateSimulator:
         if action == "status":
             self._reject_unknown_options(args, {"-s", "--short", "--porcelain"}, "error: unknown option `{}`.")
         elif action == "log":
-            self._reject_unknown_options(args, {"--oneline", "--graph"}, "fatal: unrecognized argument: {}")
+            self._reject_unknown_options(args, {"--oneline", "--graph", "--all"}, "fatal: unrecognized argument: {}")
         elif action == "diff":
             self._reject_unknown_options(args, {"--staged", "--cached"}, "error: invalid option: {}")
 
@@ -167,6 +167,7 @@ class RepositoryStateSimulator:
         state.setdefault("upstream_tracking", {})
         state.setdefault("stash_stack", [])
         state.setdefault("reflog", [])
+        state.setdefault("partial_hunks", {})
         state.setdefault("repository_initialized", True)
 
     def _head_branch(self, state: dict) -> str | None:
@@ -261,7 +262,11 @@ class RepositoryStateSimulator:
             lines += ["", "Changes to be committed:"]
             lines += [f"  {label_for(staged.get(path)):<11} {path}" for path in staged_paths]
 
-        working_paths = sorted(working.keys())
+        working_paths = sorted(
+            path
+            for path, value in working.items()
+            if str(value).lower() != "ignored"
+        )
         untracked = [path for path in working_paths if str(working.get(path)).lower() == "untracked"]
         modified = [path for path in working_paths if path not in untracked]
         if modified:
@@ -327,7 +332,11 @@ class RepositoryStateSimulator:
         conflict_paths = sorted(state.get("conflicts", []))
         if conflict_paths:
             return f"Conflict markers are present in: {self._format_paths(conflict_paths)}"
-        working_paths = sorted(state.get("working_tree", {}).keys())
+        working_paths = sorted(
+            path
+            for path, value in state.get("working_tree", {}).items()
+            if str(value).lower() != "ignored"
+        )
         if working_paths:
             return f"Working tree changes: {self._format_paths(working_paths)}"
         return "No working tree differences."
@@ -398,17 +407,49 @@ class RepositoryStateSimulator:
     def _add(self, state: dict, args: list[str]) -> str:
         if not args:
             raise ValueError("Specify a path to add.")
-        paths = list(state.get("working_tree", {}).keys()) if args[0] in (".", "-A") else args
+        if args[0] == "-p":
+            return self._add_patch(state, args[1:])
+        working_tree = state.setdefault("working_tree", {})
+        paths = (
+            [
+                path
+                for path, value in working_tree.items()
+                if str(value).lower() != "ignored"
+            ]
+            if args[0] in (".", "-A")
+            else args
+        )
         if not paths:
             return ""
         staging = state.setdefault("staging", {})
-        working_tree = state.setdefault("working_tree", {})
         conflicts = set(state.get("conflicts", []))
         for path in paths:
+            if str(working_tree.get(path)).lower() == "ignored":
+                continue
             staging[path] = working_tree.pop(path, "updated")
             conflicts.discard(path)
         state["conflicts"] = sorted(conflicts)
         return ""
+
+    def _add_patch(self, state: dict, args: list[str]) -> str:
+        working_tree = state.setdefault("working_tree", {})
+        partial_hunks = state.setdefault("partial_hunks", {})
+        paths = args or list(partial_hunks) or [
+            path
+            for path, value in working_tree.items()
+            if str(value).lower() not in {"ignored", "untracked"}
+        ]
+        if not paths:
+            raise ValueError("No tracked changes available for patch staging.")
+        staging = state.setdefault("staging", {})
+        for path in paths:
+            if path not in working_tree:
+                continue
+            if str(working_tree.get(path)).lower() == "ignored":
+                continue
+            staging[path] = "partial"
+            working_tree[path] = "modified"
+        return "Staged selected hunks."
 
     def _commit(self, state: dict, args: list[str]) -> str:
         if "--amend" in args:
@@ -526,6 +567,11 @@ class RepositoryStateSimulator:
                 target_args.append(arg)
         if not target_args:
             raise ValueError("Specify a reset target.")
+        if mode == "--mixed" and target_args[0] == "HEAD" and len(target_args) > 1:
+            for path in target_args[1:]:
+                value = state.setdefault("staging", {}).pop(path, "modified")
+                state.setdefault("working_tree", {})[path] = value
+            return "Unstaged paths."
         target = self._resolve_reset_target(state, target_args[-1])
         current = self._head_commit(state)
         current_commit = self._commit_by_id(state, current)
@@ -734,5 +780,6 @@ class RepositorySnapshotService:
             "remote_branches": state.get("remote_branches", {}),
             "upstream_tracking": state.get("upstream_tracking", {}),
             "stash_stack": state.get("stash_stack", []),
+            "partial_hunks": state.get("partial_hunks", {}),
             "reflog": state.get("reflog", []),
         }

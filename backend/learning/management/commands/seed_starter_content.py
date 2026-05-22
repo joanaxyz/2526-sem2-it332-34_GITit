@@ -18,10 +18,13 @@ from common.constants import (
     DIFFICULTY_MEDIUM,
 )
 from evaluation.services import InspectionEvaluator
-from learning.models import LearningUnit, Lesson
+from learning.models import LearningUnit, Lesson, OrientationProgress
+from progress.models import StreakRecord, StudentProgress
 from scenarios.models import (
     CommandCountPolicy,
+    CompletionRecord,
     DifficultyInstance,
+    ScenarioSession,
     ScenarioSkillFocus,
     ScenarioVariant,
     TargetStateRule,
@@ -33,6 +36,10 @@ DIFFICULTY_MAP = {
     "Medium": DIFFICULTY_MEDIUM,
     "Hard": DIFFICULTY_HARD,
 }
+
+
+def default_successful_attempts_for_difficulty(difficulty: str) -> int:
+    return 3 if difficulty == DIFFICULTY_EASY else 2
 
 TOPICS = ("auth", "payment", "search", "export", "profile")
 PLACEHOLDER_RE = re.compile(r"<[^>]+>")
@@ -95,6 +102,7 @@ class LessonSpec:
 @dataclass
 class DifficultySpec:
     difficulty: str
+    required_successful_attempts: int
     narrative: str
     task: str
     policy: tuple[int, int, list[str]]
@@ -112,6 +120,19 @@ class ScenarioSpec:
     seeding_status: str
     fields: dict
     difficulties: dict[str, DifficultySpec]
+
+
+@dataclass
+class VariantTemplateSpec:
+    slug_template: str
+    label_template: str
+    structure_signature_template: str
+    initial_state_template: dict
+    target_rule_template: dict
+    solution_commands_template: list[str]
+    parameter_pools: dict[str, list[Any]]
+    generation_count: int
+    expected_observations_template: dict = field(default_factory=dict)
 
 
 class CurriculumMarkdownParser:
@@ -229,6 +250,9 @@ class CurriculumMarkdownParser:
                 difficulty = DIFFICULTY_MAP[diff_match.group(1)]
                 current_difficulty = DifficultySpec(
                     difficulty=difficulty,
+                    required_successful_attempts=default_successful_attempts_for_difficulty(
+                        difficulty
+                    ),
                     narrative="",
                     task="",
                     policy=(0, 0, []),
@@ -329,10 +353,101 @@ class CurriculumMarkdownParser:
         return " ".join(part.capitalize() for part in slug.split("-"))
 
 
-class ModuleOneSeedBuilder:
-    """Build the compact Module 1 seed from curriculum-defined scenario focuses."""
+class DynamicVariantGenerator:
+    """Resolve template specs into concrete ScenarioVariant seed payloads."""
 
-    diagnostic_commands = ["git status", "git log --oneline", "git remote -v"]
+    placeholder_re = re.compile(r"\{\{\s*([a-zA-Z0-9_]+)\s*\}\}")
+
+    def generate(self, template: VariantTemplateSpec) -> list[dict]:
+        contexts = self._contexts(template.parameter_pools)
+        if not contexts:
+            raise CommandError(f"Variant template {template.slug_template} has no parameter cases.")
+
+        variants = []
+        for index in range(template.generation_count):
+            context = {**contexts[index % len(contexts)], "index": index + 1}
+            variants.append(
+                {
+                    "slug": self._render(template.slug_template, context),
+                    "label": self._render(template.label_template, context),
+                    "structure_signature": self._render(
+                        template.structure_signature_template,
+                        context,
+                    ),
+                    "initial_state": self._render(template.initial_state_template, context),
+                    "target_rule": self._render(template.target_rule_template, context),
+                    "expected_observations": self._render(
+                        template.expected_observations_template,
+                        context,
+                    ),
+                    "solution_commands": self._render(
+                        template.solution_commands_template,
+                        context,
+                    ),
+                }
+            )
+        return variants
+
+    def _contexts(self, pools: dict[str, list[Any]]) -> list[dict]:
+        if "cases" in pools:
+            return [dict(item) for item in pools["cases"]]
+
+        contexts = [{}]
+        for key, values in pools.items():
+            contexts = [
+                {**context, key: value}
+                for context in contexts
+                for value in values
+            ]
+        return contexts
+
+    def _render(self, value: Any, context: dict[str, Any]) -> Any:
+        if isinstance(value, dict):
+            return {
+                self._render(key, context): self._render(item, context)
+                for key, item in value.items()
+            }
+        if isinstance(value, list):
+            return [self._render(item, context) for item in value]
+        if not isinstance(value, str):
+            return value
+
+        exact = self.placeholder_re.fullmatch(value)
+        if exact:
+            return context[exact.group(1)]
+
+        def replace(match: re.Match) -> str:
+            return str(context[match.group(1)])
+
+        return self.placeholder_re.sub(replace, value)
+
+
+class ModuleOneSeedBuilder:
+    """Build Module 1 from dynamic variant templates based on docs/curriculum.md."""
+
+    diagnostic_commands = [
+        "git status",
+        "git log",
+        "git log --oneline",
+        "git remote -v",
+        "git diff",
+        "git diff --staged",
+    ]
+
+    session_counts = {
+        1: {DIFFICULTY_EASY: 3, DIFFICULTY_MEDIUM: 2, DIFFICULTY_HARD: 2},
+        2: {DIFFICULTY_EASY: 3, DIFFICULTY_MEDIUM: 2, DIFFICULTY_HARD: 2},
+        3: {DIFFICULTY_EASY: 3, DIFFICULTY_MEDIUM: 3, DIFFICULTY_HARD: 2},
+        4: {DIFFICULTY_EASY: 3, DIFFICULTY_MEDIUM: 2, DIFFICULTY_HARD: 2},
+        5: {DIFFICULTY_EASY: 2, DIFFICULTY_MEDIUM: 3, DIFFICULTY_HARD: 2},
+        6: {DIFFICULTY_EASY: 2, DIFFICULTY_MEDIUM: 2, DIFFICULTY_HARD: 2},
+        7: {DIFFICULTY_EASY: 2, DIFFICULTY_MEDIUM: 2, DIFFICULTY_HARD: 2},
+        8: {DIFFICULTY_EASY: 2, DIFFICULTY_MEDIUM: 2, DIFFICULTY_HARD: 2},
+        9: {DIFFICULTY_EASY: 3, DIFFICULTY_MEDIUM: 2, DIFFICULTY_HARD: 3},
+    }
+
+    def __init__(self) -> None:
+        self.generator = DynamicVariantGenerator()
 
     def build(self) -> tuple[list[UnitSpec], list[LessonSpec], list[ScenarioSpec]]:
         unit = UnitSpec(
@@ -340,74 +455,161 @@ class ModuleOneSeedBuilder:
             number=1,
             title="Local Repository Foundations",
             description=(
-                "Initialize and clone repositories while reading the working tree, "
-                "staging area, commit history, and remotes with confidence."
+                "Initialize, clone, stage, commit, ignore, amend, clean up, and inspect "
+                "local Git repositories through scenario practice."
             ),
             is_orientation=False,
             sort_order=1,
         )
-        lessons = [
-            LessonSpec(
-                unit_slug=unit.slug,
-                slug="initializing-a-local-repository",
-                kind="scenario",
-                title="Initializing a Local Repository",
-                subtitle="Create a repository in an existing project and save its first snapshot.",
-                sort_order=1,
-            ),
-            LessonSpec(
-                unit_slug=unit.slug,
-                slug="cloning-a-remote-repository",
-                kind="scenario",
-                title="Cloning a Remote Repository",
-                subtitle="Create a local working copy and verify the remote relationship.",
-                sort_order=2,
-            ),
-        ]
+        lessons = self._lessons(unit.slug)
+        lesson_map = {lesson.sort_order: lesson.slug for lesson in lessons}
         scenarios = [
-            self._init_scenario(unit.slug, lessons[0].slug),
-            self._clone_scenario(unit.slug, lessons[1].slug),
+            self._init_scenario(unit.slug, lesson_map[1]),
+            self._clone_scenario(unit.slug, lesson_map[2]),
+            self._stage_commit_scenario(unit.slug, lesson_map[3]),
+            self._gitignore_scenario(unit.slug, lesson_map[4]),
+            self._partial_staging_scenario(unit.slug, lesson_map[5]),
+            self._amend_scenario(unit.slug, lesson_map[6]),
+            self._restore_scenario(unit.slug, lesson_map[7]),
+            self._read_state_scenario(unit.slug, lesson_map[8]),
+            self._review_scenario(unit.slug, lesson_map[9]),
         ]
         return [unit], lessons, scenarios
 
-    def _init_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
-        variants = self._init_variants()
+    def _lessons(self, unit_slug: str) -> list[LessonSpec]:
+        lesson_data = [
+            (
+                "initializing-a-local-repository",
+                "Initializing a Local Repository",
+                "Create Git metadata in an existing or named project folder.",
+            ),
+            (
+                "cloning-a-remote-repository",
+                "Cloning a Remote Repository",
+                "Create a local working copy and verify the origin relationship.",
+            ),
+            (
+                "staging-and-committing-basic-workflow",
+                "Staging and Committing: The Basic Workflow",
+                "Prepare intentional changes and save them with a clear message.",
+            ),
+            (
+                "ignoring-files-with-gitignore",
+                "Ignoring Files with .gitignore",
+                "Keep generated files, dependency folders, logs, and secrets out of history.",
+            ),
+            (
+                "partial-staging-and-git-add-p",
+                "Partial Staging and git add -p",
+                "Stage selected hunks so each commit has one clear purpose.",
+            ),
+            (
+                "amending-commits",
+                "Amending Commits",
+                "Repair the latest commit message or contents before sharing it.",
+            ),
+            (
+                "unstaging-and-discarding-changes",
+                "Unstaging and Discarding Changes",
+                "Move changes out of the index and safely discard unwanted work.",
+            ),
+            (
+                "reading-repository-status-and-history",
+                "Reading Repository Status and History",
+                "Inspect status, history, and diffs without changing repository state.",
+            ),
+            (
+                "module-1-review-and-practice",
+                "Module 1 Review and Practice",
+                "Combine the local workflow skills in larger repository situations.",
+            ),
+        ]
+        return [
+            LessonSpec(
+                unit_slug=unit_slug,
+                slug=slug,
+                kind="scenario",
+                title=title,
+                subtitle=subtitle,
+                sort_order=index,
+                body_html=self._body_html(title, subtitle),
+            )
+            for index, (slug, title, subtitle) in enumerate(lesson_data, start=1)
+        ]
+
+    def _scenario(
+        self,
+        *,
+        slug: str,
+        unit_slug: str,
+        lesson_slug: str,
+        title: str,
+        focus: str,
+        summary: str,
+        explanation: str,
+        primary: list[str],
+        supporting: list[str],
+        concepts: list[str],
+        narrative: str,
+        task_prompt: str,
+        lesson_number: int,
+        difficulty_configs: dict[str, tuple[str, str, tuple[int, int, list[str]], VariantTemplateSpec]],
+    ) -> ScenarioSpec:
+        difficulties = {}
+        for difficulty, (diff_narrative, task, policy, template) in difficulty_configs.items():
+            variants = self.generator.generate(template)
+            difficulties[difficulty] = DifficultySpec(
+                difficulty=difficulty,
+                required_successful_attempts=self.session_counts[lesson_number][difficulty],
+                narrative=diff_narrative,
+                task=task,
+                policy=policy,
+                target_rule=template.target_rule_template,
+                variants=variants,
+            )
+
         fields = {
-            "title": "Initialize and save the first snapshot",
-            "focus": "git init",
-            "summary": "Turn an existing folder into a repository and commit the starter files.",
-            "short_explanation": (
-                "Initialization creates the repository metadata. A first commit proves the "
-                "project is tracked and gives the history a starting point."
-            ),
-            "primary_focus_commands": ["git init"],
-            "supporting_inspection_commands": ["git status", "git log --oneline"],
-            "safe_demo_commands": ["git init", "git status", "git log --oneline"],
-            "demo_repository_state": variants[0]["initial_state"],
-            "related_git_concepts": ["working tree", "staging area", "first commit"],
-            "narrative": "You inherited a folder with starter files, but it is not a Git repository yet.",
-            "task_prompt": "Initialize the folder, prepare the starter files, and save the first snapshot.",
+            "title": title,
+            "focus": focus,
+            "summary": summary,
+            "short_explanation": explanation,
+            "skill_focus_type": ScenarioSkillFocus.SkillFocusType.WORKFLOW_SPECIFIC,
+            "primary_focus_commands": primary,
+            "supporting_inspection_commands": supporting,
+            "safe_demo_commands": supporting[:3],
+            "demo_repository_state": difficulties[DIFFICULTY_EASY].variants[0]["initial_state"],
+            "related_git_concepts": concepts,
+            "narrative": narrative,
+            "task_prompt": task_prompt,
         }
-        difficulties = self._difficulties(
-            easy=(
-                "The project folder already has a README and one source file. Make it a repository and save both files.",
-                "Initialize the project, prepare every starter file, and save the first snapshot.",
-                (3, 5, self.diagnostic_commands),
-                variants[:2],
-            ),
-            medium=(
-                "The folder has starter files at different depths. Create the repository and make one clean first snapshot.",
-                "Initialize the project, prepare the starter files, and save the first snapshot.",
-                (3, 5, self.diagnostic_commands),
-                variants[1:3],
-            ),
-            hard=(
-                "You only have the repository state view. Create a clean first commit from the untracked starter files.",
-                "Initialize the project and save a clean first snapshot.",
-                (3, 4, self.diagnostic_commands),
-                variants[2:4],
-            ),
-            rule={
+        return ScenarioSpec(
+            slug=slug,
+            unit_slug=unit_slug,
+            lesson_slug=lesson_slug,
+            title=title,
+            focus=focus,
+            seeding_status="ready",
+            fields=fields,
+            difficulties=difficulties,
+        )
+
+    def _init_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
+        cases = [
+            {"project": "docs-portal", "files": {"README.md": "untracked", "docs/intro.md": "untracked"}},
+            {"project": "api-starter", "files": {"README.md": "untracked", "api/routes.py": "untracked"}},
+            {"project": "cli-tool", "files": {"README.md": "untracked", "git_it_cli.py": "untracked"}},
+            {"project": "profile-site", "files": {"README.md": "untracked", "site/index.html": "untracked"}},
+        ]
+        template = self._state_template(
+            slug="init-{{project}}-{{index}}",
+            label="{{project}} starter files",
+            signature="init/{{project}}/{{index}}",
+            cases=cases,
+            initial_state={
+                **self._empty_uninitialized_state(),
+                "working_tree": "{{files}}",
+            },
+            target_rule={
                 "repository_initialized": True,
                 "head_branch": "main",
                 "working_tree_clean": True,
@@ -415,147 +617,733 @@ class ModuleOneSeedBuilder:
                 "min_commits_on_branch": {"main": 1},
                 "required_commands": ["git init", "git add", "git commit"],
             },
+            commands=["git init", "git add .", 'git commit -m "Create starter snapshot"'],
+            count=3,
         )
-        return ScenarioSpec(
+        return self._scenario(
             slug="initialize-project-and-first-commit",
             unit_slug=unit_slug,
             lesson_slug=lesson_slug,
-            title=fields["title"],
-            focus=fields["focus"],
-            seeding_status="ready",
-            fields=fields,
-            difficulties=difficulties,
+            title="Initialize and save the first snapshot",
+            focus="git init",
+            summary="Turn a folder into a repository and commit the starter files.",
+            explanation="Initialization creates the .git metadata; the first commit gives the repository a clean starting point.",
+            primary=["git init"],
+            supporting=["git status", "git log --oneline"],
+            concepts=["working tree", "staging area", "first commit"],
+            narrative="A starter folder exists, but Git is not tracking it yet.",
+            task_prompt="Initialize the folder, prepare the starter files, and save the first snapshot.",
+            lesson_number=1,
+            difficulty_configs={
+                DIFFICULTY_EASY: (
+                    "The starter files are visible. Create the repository and save them.",
+                    "Initialize the project, prepare every starter file, and save the first snapshot.",
+                    (3, 5, self.diagnostic_commands),
+                    template,
+                ),
+                DIFFICULTY_MEDIUM: (
+                    "The files sit at different depths. Create one clean initial snapshot.",
+                    "Initialize the project and save the starter files in one snapshot.",
+                    (3, 5, self.diagnostic_commands),
+                    self._copy_template(template, count=2, signature="init/medium/{{project}}/{{index}}"),
+                ),
+                DIFFICULTY_HARD: (
+                    "Use the repository state alone to create the first clean commit.",
+                    "Initialize the project and save a clean first snapshot.",
+                    (3, 4, self.diagnostic_commands),
+                    self._copy_template(template, count=2, signature="init/hard/{{project}}/{{index}}"),
+                ),
+            },
         )
 
     def _clone_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
-        variants = self._clone_variants()
-        fields = {
-            "title": "Clone and verify a remote project",
-            "focus": "git clone",
-            "summary": "Create a local working copy and confirm origin is configured.",
-            "short_explanation": (
-                "Cloning creates a repository from an existing remote, checks out the default "
-                "branch, and records where origin points."
-            ),
-            "primary_focus_commands": ["git clone"],
-            "supporting_inspection_commands": ["git remote -v", "git log --oneline"],
-            "safe_demo_commands": ["git clone https://example.test/demo.git demo", "git remote -v", "git log --oneline"],
-            "demo_repository_state": variants[0]["initial_state"],
-            "related_git_concepts": ["origin", "remote tracking", "working copy"],
-            "narrative": "A teammate published a starter repository and you need a local copy before work can begin.",
-            "task_prompt": "Create a local working copy from the provided remote and verify that origin is configured.",
-        }
-        difficulties = self._difficulties(
-            easy=(
-                "The remote URL and target folder are provided. Clone the project and verify the remote connection.",
-                "Create the local working copy, then inspect the configured remote.",
-                (1, 4, self.diagnostic_commands),
-                variants[:2],
-            ),
-            medium=(
-                "The remote uses a different project name and should land in the requested destination folder.",
-                "Create the local working copy and inspect the remote configuration.",
-                (1, 3, self.diagnostic_commands),
-                variants[1:3],
-            ),
-            hard=(
-                "Use the provided remote details to create the working copy with no extra setup steps.",
-                "Create the local working copy from the remote.",
-                (1, 2, self.diagnostic_commands),
-                variants[2:4],
-            ),
-            rule={
+        cases = [
+            {"project": "docs-portal", "url": "https://example.test/docs-portal.git", "folder": "docs-portal", "remote_commit": "r10"},
+            {"project": "api-starter", "url": "git@example.test:training/api-starter.git", "folder": "api-starter", "remote_commit": "r11"},
+            {"project": "cli-tool", "url": "https://example.test/tools/cli-tool.git", "folder": "cli-lab", "remote_commit": "r12"},
+            {"project": "profile-site", "url": "git@example.test:training/profile-site.git", "folder": "profile-site", "remote_commit": "r13"},
+        ]
+        template = self._state_template(
+            slug="clone-{{project}}-{{index}}",
+            label="{{project}} remote",
+            signature="clone/{{project}}/{{folder}}/{{index}}",
+            cases=cases,
+            initial_state={
+                **self._empty_uninitialized_state(),
+                "remote_branches": {"origin/main": "{{remote_commit}}"},
+            },
+            target_rule={
                 "repository_initialized": True,
                 "head_branch": "main",
                 "remote_exists": ["origin"],
+                "remote_url_matches": {"origin": "{{url}}"},
                 "upstream_tracking": {"main": "origin/main"},
                 "branches_equal": [["main", "origin/main"]],
                 "required_commands": ["git clone"],
             },
+            commands=["git clone {{url}} {{folder}}"],
+            count=3,
         )
-        return ScenarioSpec(
+        return self._scenario(
             slug="clone-project-and-inspect",
             unit_slug=unit_slug,
             lesson_slug=lesson_slug,
-            title=fields["title"],
-            focus=fields["focus"],
-            seeding_status="ready",
-            fields=fields,
-            difficulties=difficulties,
+            title="Clone and verify a remote project",
+            focus="git clone",
+            summary="Create a local working copy and confirm origin is configured.",
+            explanation="Cloning copies history, checks out the default branch, and records the remote as origin.",
+            primary=["git clone"],
+            supporting=["git remote -v", "git log --oneline"],
+            concepts=["origin", "remote branch", "working copy"],
+            narrative="A teammate published a starter repository and you need a local copy.",
+            task_prompt="Create a local working copy from the provided remote and verify origin.",
+            lesson_number=2,
+            difficulty_configs={
+                DIFFICULTY_EASY: (
+                    "The remote URL and destination are provided.",
+                    "Create the local working copy, then inspect the configured remote.",
+                    (1, 4, self.diagnostic_commands),
+                    template,
+                ),
+                DIFFICULTY_MEDIUM: (
+                    "The destination folder name differs from the remote project name.",
+                    "Create the local working copy in the requested folder.",
+                    (1, 3, self.diagnostic_commands),
+                    self._copy_template(template, count=2, signature="clone/medium/{{project}}/{{folder}}/{{index}}"),
+                ),
+                DIFFICULTY_HARD: (
+                    "Use the provided remote details with no extra setup.",
+                    "Create the local working copy from the remote.",
+                    (1, 2, self.diagnostic_commands),
+                    self._copy_template(template, count=2, signature="clone/hard/{{project}}/{{folder}}/{{index}}"),
+                ),
+            },
         )
 
-    def _difficulties(self, *, easy: tuple, medium: tuple, hard: tuple, rule: dict) -> dict[str, DifficultySpec]:
-        specs = {}
-        for difficulty, config in (
-            (DIFFICULTY_EASY, easy),
-            (DIFFICULTY_MEDIUM, medium),
-            (DIFFICULTY_HARD, hard),
-        ):
-            narrative, task, policy, variants = config
-            specs[difficulty] = DifficultySpec(
-                difficulty=difficulty,
-                narrative=narrative,
-                task=task,
-                policy=policy,
-                target_rule=rule,
-                variants=variants,
+    def _stage_commit_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
+        cases = [
+            {"project": "form-flow", "files": {"src/form.js": "modified"}, "message": "Update form validation"},
+            {"project": "copy-pass", "files": {"README.md": "modified"}, "message": "Clarify setup notes"},
+            {"project": "asset-cleanup", "files": {"src/app.js": "modified", "styles/site.css": "modified"}, "message": "Refresh app styling"},
+            {"project": "api-route", "files": {"api/routes.py": "modified"}, "message": "Add route handling"},
+        ]
+        template = self._state_template(
+            slug="commit-{{project}}-{{index}}",
+            label="{{project}} working changes",
+            signature="commit/{{project}}/{{index}}",
+            cases=cases,
+            initial_state=self._repo_state("c0", "{{files}}", {}),
+            target_rule={
+                "head_branch": "main",
+                "working_tree_clean": True,
+                "staging_empty": True,
+                "latest_commit": {"branch": "main", "message_contains": ["{{message}}"]},
+                "required_commands": ["git add", "git commit"],
+            },
+            commands=["git add .", 'git commit -m "{{message}}"'],
+            count=3,
+        )
+        return self._scenario(
+            slug="form-clean-commit",
+            unit_slug=unit_slug,
+            lesson_slug=lesson_slug,
+            title="Stage and commit a clean change",
+            focus="git commit",
+            summary="Prepare working changes and save them with a descriptive message.",
+            explanation="The basic workflow is deliberate: stage the next snapshot, then commit that staged state.",
+            primary=["git commit"],
+            supporting=["git status", "git diff", "git diff --staged"],
+            concepts=["staging area", "commit message", "clean working tree"],
+            narrative="A small local change is ready to become a proper commit.",
+            task_prompt="Prepare the intended changes and save a clear snapshot.",
+            lesson_number=3,
+            difficulty_configs={
+                DIFFICULTY_EASY: (
+                    "One or two files need to be saved as a clean snapshot.",
+                    "Prepare the changes and save them with a descriptive message.",
+                    (2, 5, self.diagnostic_commands),
+                    template,
+                ),
+                DIFFICULTY_MEDIUM: (
+                    "Use the status and diff views to decide what belongs in the snapshot.",
+                    "Prepare the intended files and save the snapshot.",
+                    (2, 5, self.diagnostic_commands),
+                    self._copy_template(template, count=3, signature="commit/medium/{{project}}/{{index}}"),
+                ),
+                DIFFICULTY_HARD: (
+                    "Only the repository state view is available.",
+                    "Prepare and save the intended change.",
+                    (2, 4, self.diagnostic_commands),
+                    self._copy_template(template, count=2, signature="commit/hard/{{project}}/{{index}}"),
+                ),
+            },
+        )
+
+    def _gitignore_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
+        cases = [
+            {"project": "node-app", "files": {".gitignore": "untracked", "node_modules/pkg.js": "ignored", "dist/app.js": "ignored"}, "message": "Add Node ignore rules"},
+            {"project": "python-api", "files": {".gitignore": "untracked", "__pycache__/app.pyc": "ignored", ".env": "ignored"}, "message": "Add Python ignore rules"},
+            {"project": "java-service", "files": {".gitignore": "untracked", "target/classes/App.class": "ignored", "app.log": "ignored"}, "message": "Add Java ignore rules"},
+        ]
+        template = self._state_template(
+            slug="ignore-{{project}}-{{index}}",
+            label="{{project}} generated files",
+            signature="ignore/{{project}}/{{index}}",
+            cases=cases,
+            initial_state=self._repo_state("c0", "{{files}}", {}),
+            target_rule={
+                "head_branch": "main",
+                "staging_empty": True,
+                "working_tree_contains": "{{ignored_paths}}",
+                "latest_commit": {
+                    "branch": "main",
+                    "contains_paths": [".gitignore"],
+                    "excludes_paths": "{{ignored_paths}}",
+                    "message_contains": ["{{message}}"],
+                },
+                "required_commands": ["git add", "git commit"],
+            },
+            commands=["git add .gitignore", 'git commit -m "{{message}}"'],
+            count=3,
+        )
+        return self._scenario(
+            slug="configure-gitignore-rules",
+            unit_slug=unit_slug,
+            lesson_slug=lesson_slug,
+            title="Create and commit ignore rules",
+            focus="git add .gitignore",
+            summary="Commit ignore rules while keeping generated files out of history.",
+            explanation=".gitignore is tracked like any other file, while matching generated files remain outside commits.",
+            primary=["git add"],
+            supporting=["git status"],
+            concepts=["ignore patterns", "untracked files", "tracked ignore rules"],
+            narrative="Generated files are present locally and should not enter Git history.",
+            task_prompt="Prepare and save the ignore rules without saving generated files.",
+            lesson_number=4,
+            difficulty_configs={
+                DIFFICULTY_EASY: (
+                    "The ignore file is ready and generated files are present.",
+                    "Save only the ignore rules.",
+                    (2, 4, self.diagnostic_commands),
+                    template,
+                ),
+                DIFFICULTY_MEDIUM: (
+                    "The project type changes which generated files should stay out.",
+                    "Save the ignore rules and leave generated files out of history.",
+                    (2, 4, self.diagnostic_commands),
+                    self._copy_template(template, count=2, signature="ignore/medium/{{project}}/{{index}}"),
+                ),
+                DIFFICULTY_HARD: (
+                    "Use the state view to identify the one file that belongs in history.",
+                    "Save the ignore rules without saving ignored artifacts.",
+                    (2, 3, self.diagnostic_commands),
+                    self._copy_template(template, count=2, signature="ignore/hard/{{project}}/{{index}}"),
+                ),
+            },
+        )
+
+    def _partial_staging_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
+        cases = [
+            {"project": "auth", "file": "src/auth.py", "other_file": "notes/auth-notes.md", "message": "Isolate auth validation"},
+            {"project": "search", "file": "src/search.py", "other_file": "notes/search-notes.md", "message": "Isolate search ranking"},
+            {"project": "billing", "file": "src/billing.py", "other_file": "notes/billing-notes.md", "message": "Isolate billing totals"},
+        ]
+        template = self._state_template(
+            slug="partial-{{project}}-{{index}}",
+            label="{{project}} mixed hunks",
+            signature="partial/{{project}}/{{index}}",
+            cases=cases,
+            initial_state=self._repo_state(
+                "c0",
+                {"{{file}}": "modified", "{{other_file}}": "modified"},
+                {},
+                extra={"partial_hunks": {"{{file}}": ["target-hunk", "leftover-hunk"]}},
+            ),
+            target_rule={
+                "head_branch": "main",
+                "staging_empty": True,
+                "working_tree_contains": ["{{file}}", "{{other_file}}"],
+                "latest_commit": {
+                    "branch": "main",
+                    "contains_paths": ["{{file}}"],
+                    "excludes_paths": ["{{other_file}}"],
+                    "message_contains": ["{{message}}"],
+                },
+                "required_commands": ["git add -p", "git commit"],
+            },
+            commands=["git add -p {{file}}", 'git commit -m "{{message}}"'],
+            count=2,
+        )
+        return self._scenario(
+            slug="stage-selected-changes",
+            unit_slug=unit_slug,
+            lesson_slug=lesson_slug,
+            title="Stage selected hunks for a focused commit",
+            focus="git add -p",
+            summary="Use partial staging to commit one logical change while leaving other work untouched.",
+            explanation="Partial staging lets one file carry both staged and unstaged work until the focused commit is saved.",
+            primary=["git add -p"],
+            supporting=["git diff", "git diff --staged", "git status"],
+            concepts=["hunks", "partial staging", "focused commits"],
+            narrative="A file contains mixed-purpose edits and only one hunk belongs in the next commit.",
+            task_prompt="Prepare only the requested hunk and save a focused snapshot.",
+            lesson_number=5,
+            difficulty_configs={
+                DIFFICULTY_EASY: (
+                    "The target file is identified for you.",
+                    "Stage only the requested hunk and save it.",
+                    (2, 5, self.diagnostic_commands),
+                    template,
+                ),
+                DIFFICULTY_MEDIUM: (
+                    "Use the diff views to verify the staged hunk before saving.",
+                    "Stage only the intended hunk and save it.",
+                    (2, 5, self.diagnostic_commands),
+                    self._copy_template(template, count=3, signature="partial/medium/{{project}}/{{index}}"),
+                ),
+                DIFFICULTY_HARD: (
+                    "Use the state view to avoid committing unrelated edits.",
+                    "Save only the selected hunk.",
+                    (2, 4, self.diagnostic_commands),
+                    self._copy_template(template, count=2, signature="partial/hard/{{project}}/{{index}}"),
+                ),
+            },
+        )
+
+    def _amend_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
+        message_cases = [
+            {"project": "login-copy", "message": "Clarify login copy"},
+            {"project": "settings-docs", "message": "Clarify settings docs"},
+        ]
+        content_cases = [
+            {"project": "profile", "file": "src/profile.py", "message": "Polish profile update"},
+            {"project": "export", "file": "src/export.py", "message": "Polish export update"},
+        ]
+        easy_template = self._state_template(
+            slug="amend-message-{{project}}-{{index}}",
+            label="{{project}} message repair",
+            signature="amend/message/{{project}}/{{index}}",
+            cases=message_cases,
+            initial_state=self._repo_state("c1", {}, {}),
+            target_rule={
+                "head_branch": "main",
+                "working_tree_clean": True,
+                "staging_empty": True,
+                "latest_commit": {"branch": "main", "message_contains": ["{{message}}"]},
+                "required_commands": ["git commit --amend"],
+            },
+            commands=['git commit --amend -m "{{message}}"'],
+            count=2,
+        )
+        content_template = self._state_template(
+            slug="amend-content-{{project}}-{{index}}",
+            label="{{project}} content repair",
+            signature="amend/content/{{project}}/{{index}}",
+            cases=content_cases,
+            initial_state=self._repo_state("c1", {"{{file}}": "modified"}, {}),
+            target_rule={
+                "head_branch": "main",
+                "working_tree_clean": True,
+                "staging_empty": True,
+                "latest_commit": {"branch": "main", "contains_paths": ["{{file}}"]},
+                "required_commands": ["git add", "git commit --amend"],
+            },
+            commands=["git add {{file}}", "git commit --amend --no-edit"],
+            count=2,
+        )
+        hard_template = self._copy_template(
+            content_template,
+            slug="amend-hard-{{project}}-{{index}}",
+            signature="amend/hard/{{project}}/{{index}}",
+            commands=["git add {{file}}", 'git commit --amend -m "{{message}}"'],
+            target_rule={
+                "head_branch": "main",
+                "working_tree_clean": True,
+                "staging_empty": True,
+                "latest_commit": {
+                    "branch": "main",
+                    "contains_paths": ["{{file}}"],
+                    "message_contains": ["{{message}}"],
+                },
+                "required_commands": ["git add", "git commit --amend"],
+            },
+        )
+        return self._scenario(
+            slug="amend-latest-commit",
+            unit_slug=unit_slug,
+            lesson_slug=lesson_slug,
+            title="Amend the latest commit",
+            focus="git commit --amend",
+            summary="Repair the latest local commit before it is shared.",
+            explanation="Amending rewrites the most recent local commit so the message or contents better match the intended snapshot.",
+            primary=["git commit --amend"],
+            supporting=["git status", "git log --oneline", "git diff --staged"],
+            concepts=["commit amendment", "message repair", "content repair"],
+            narrative="The latest commit needs a final local correction before anyone else sees it.",
+            task_prompt="Repair the latest snapshot without creating an extra commit.",
+            lesson_number=6,
+            difficulty_configs={
+                DIFFICULTY_EASY: (
+                    "Only the commit message needs repair.",
+                    "Amend the latest snapshot with the corrected message.",
+                    (1, 3, self.diagnostic_commands),
+                    easy_template,
+                ),
+                DIFFICULTY_MEDIUM: (
+                    "A missing file change belongs in the latest commit.",
+                    "Prepare the missing change and amend the latest snapshot.",
+                    (2, 4, self.diagnostic_commands),
+                    content_template,
+                ),
+                DIFFICULTY_HARD: (
+                    "Repair both the staged content and message on the latest commit.",
+                    "Amend the latest snapshot with the corrected content and message.",
+                    (2, 4, self.diagnostic_commands),
+                    hard_template,
+                ),
+            },
+        )
+
+    def _restore_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
+        cases = [
+            {"project": "cleanup", "keep_file": "src/app.py", "discard_file": "debug.log"},
+            {"project": "docs", "keep_file": "docs/guide.md", "discard_file": "tmp/scratch.txt"},
+            {"project": "styles", "keep_file": "styles/site.css", "discard_file": "dist/site.css"},
+        ]
+        template = self._state_template(
+            slug="restore-{{project}}-{{index}}",
+            label="{{project}} staged and unstaged mix",
+            signature="restore/{{project}}/{{index}}",
+            cases=cases,
+            initial_state=self._repo_state(
+                "c0",
+                {"{{discard_file}}": "modified"},
+                {"{{keep_file}}": "modified"},
+            ),
+            target_rule={
+                "head_branch": "main",
+                "staging_empty": True,
+                "working_tree_contains": ["{{keep_file}}"],
+                "working_tree_absent": ["{{discard_file}}"],
+                "required_commands": ["git restore --staged", "git restore"],
+            },
+            commands=["git restore --staged {{keep_file}}", "git restore {{discard_file}}"],
+            count=2,
+        )
+        reset_template = self._copy_template(
+            template,
+            slug="reset-restore-{{project}}-{{index}}",
+            signature="restore/reset-head/{{project}}/{{index}}",
+            target_rule={
+                "head_branch": "main",
+                "staging_empty": True,
+                "working_tree_contains": ["{{keep_file}}"],
+                "working_tree_absent": ["{{discard_file}}"],
+                "required_commands": ["git reset HEAD", "git restore"],
+            },
+            commands=["git reset HEAD {{keep_file}}", "git restore {{discard_file}}"],
+        )
+        return self._scenario(
+            slug="unstage-and-discard-changes",
+            unit_slug=unit_slug,
+            lesson_slug=lesson_slug,
+            title="Unstage and discard safely",
+            focus="git restore",
+            summary="Move wanted changes out of staging and remove unwanted working-tree edits.",
+            explanation="Unstaging keeps work in the working tree; restoring a path discards the local edit for that path.",
+            primary=["git restore"],
+            supporting=["git status", "git diff", "git diff --staged"],
+            concepts=["unstaging", "working tree", "discarding changes"],
+            narrative="Some changes were staged too early and another local edit should be discarded.",
+            task_prompt="Keep the intended work, unstage it, and discard the unwanted edit.",
+            lesson_number=7,
+            difficulty_configs={
+                DIFFICULTY_EASY: (
+                    "The staged file should be kept but not staged; the scratch file should go away.",
+                    "Unstage the kept file and discard the unwanted file.",
+                    (2, 4, self.diagnostic_commands),
+                    template,
+                ),
+                DIFFICULTY_MEDIUM: (
+                    "Use restore to separate kept work from discarded work.",
+                    "Unstage the kept file and discard the unwanted edit.",
+                    (2, 4, self.diagnostic_commands),
+                    self._copy_template(template, count=2, signature="restore/medium/{{project}}/{{index}}"),
+                ),
+                DIFFICULTY_HARD: (
+                    "Use the legacy unstage form, then discard the unwanted edit.",
+                    "Unstage the kept file and discard the unwanted edit.",
+                    (2, 4, self.diagnostic_commands),
+                    reset_template,
+                ),
+            },
+        )
+
+    def _read_state_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
+        cases = [
+            {"project": "status", "command": "git status", "must": ["staged_paths", "unstaged_paths", "untracked_paths"]},
+            {"project": "history", "command": "git log --oneline", "must": ["commit_history", "latest_commit"]},
+            {"project": "staged-diff", "command": "git diff --staged", "must": ["staged_diff_paths"]},
+        ]
+        template = self._state_template(
+            slug="read-{{project}}-{{index}}",
+            label="{{project}} repository reading",
+            signature="read/{{project}}/{{index}}",
+            cases=cases,
+            initial_state=self._repo_state(
+                "c2",
+                {"src/app.py": "modified", "notes/todo.md": "untracked"},
+                {"README.md": "modified"},
+            ),
+            target_rule={
+                "completion_type": COMPLETION_INSPECTION,
+                "repository_state_unchanged": True,
+                "required_commands": ["{{command}}"],
+                "must_identify": "{{must}}",
+            },
+            commands=["{{command}}"],
+            count=2,
+        )
+        return self._scenario(
+            slug="read-repository-state",
+            unit_slug=unit_slug,
+            lesson_slug=lesson_slug,
+            title="Read status, history, and diffs",
+            focus="git status",
+            summary="Use diagnostic commands to identify repository state without changing it.",
+            explanation="Inspection commands are non-counted because they help students reason before acting.",
+            primary=["git status"],
+            supporting=["git status", "git log --oneline", "git diff", "git diff --staged"],
+            concepts=["status output", "commit history", "diff views"],
+            narrative="The repository already has mixed state; the goal is to read it accurately.",
+            task_prompt="Inspect the repository state without changing files, staging, or history.",
+            lesson_number=8,
+            difficulty_configs={
+                DIFFICULTY_EASY: (
+                    "Use the named diagnostic command to inspect the repository.",
+                    "Inspect the repository without changing it.",
+                    (0, 3, self.diagnostic_commands),
+                    template,
+                ),
+                DIFFICULTY_MEDIUM: (
+                    "Choose the diagnostic view that answers the question.",
+                    "Inspect the repository without changing it.",
+                    (0, 3, self.diagnostic_commands),
+                    self._copy_template(template, count=2, signature="read/medium/{{project}}/{{index}}"),
+                ),
+                DIFFICULTY_HARD: (
+                    "Use only diagnostic commands and preserve the repository state.",
+                    "Inspect the repository without changing it.",
+                    (0, 2, self.diagnostic_commands),
+                    self._copy_template(template, count=2, signature="read/hard/{{project}}/{{index}}"),
+                ),
+            },
+        )
+
+    def _review_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
+        cases = [
+            {"project": "release-notes", "commit_file": "docs/release.md", "keep_file": "notes/draft.md", "message": "Prepare release notes"},
+            {"project": "profile-polish", "commit_file": "src/profile.py", "keep_file": "notes/profile-plan.md", "message": "Polish profile flow"},
+            {"project": "build-cleanup", "commit_file": "build/config.yml", "keep_file": "notes/build-plan.md", "message": "Clean build config"},
+        ]
+        template = self._state_template(
+            slug="review-{{project}}-{{index}}",
+            label="{{project}} local workflow",
+            signature="review/{{project}}/{{index}}",
+            cases=cases,
+            initial_state=self._repo_state(
+                "c0",
+                {"{{commit_file}}": "modified", ".gitignore": "untracked", "{{keep_file}}": "modified", "tmp/output.log": "ignored"},
+                {},
+            ),
+            target_rule={
+                "head_branch": "main",
+                "staging_empty": True,
+                "working_tree_contains": ["{{keep_file}}", "tmp/output.log"],
+                "latest_commit": {
+                    "branch": "main",
+                    "contains_paths": ["{{commit_file}}", ".gitignore"],
+                    "excludes_paths": ["{{keep_file}}", "tmp/output.log"],
+                    "message_contains": ["{{message}}"],
+                },
+                "required_commands": ["git add", "git commit"],
+            },
+            commands=["git add .gitignore", "git add {{commit_file}}", 'git commit -m "{{message}}"'],
+            count=3,
+        )
+        hard_template = self._copy_template(
+            template,
+            count=3,
+            signature="review/hard/{{project}}/{{index}}",
+            initial_state=self._repo_state(
+                "c1",
+                {"{{commit_file}}": "modified", "{{keep_file}}": "modified", "tmp/output.log": "ignored"},
+                {},
+            ),
+            target_rule={
+                "head_branch": "main",
+                "staging_empty": True,
+                "working_tree_contains": ["{{keep_file}}", "tmp/output.log"],
+                "latest_commit": {
+                    "branch": "main",
+                    "contains_paths": ["{{commit_file}}"],
+                    "excludes_paths": ["{{keep_file}}", "tmp/output.log"],
+                    "message_contains": ["{{message}}"],
+                },
+                "required_commands": ["git add -p", "git commit --amend"],
+            },
+            commands=["git add -p {{commit_file}}", 'git commit --amend -m "{{message}}"'],
+        )
+        return self._scenario(
+            slug="integrate-local-workflow",
+            unit_slug=unit_slug,
+            lesson_slug=lesson_slug,
+            title="Complete a local repository workflow",
+            focus="local Git workflow",
+            summary="Combine ignore rules, selective staging, clean commits, and state reading.",
+            explanation="The review scenario asks students to reason across the full local workflow, not just recall one command.",
+            primary=["git commit"],
+            supporting=["git status", "git diff", "git diff --staged", "git log --oneline"],
+            concepts=["workflow integration", "clean commits", "state reasoning"],
+            narrative="A local repository has useful work, ignored artifacts, and unrelated notes in progress.",
+            task_prompt="Save the intended local work while leaving unrelated and ignored files out of the snapshot.",
+            lesson_number=9,
+            difficulty_configs={
+                DIFFICULTY_EASY: (
+                    "Use the visible file groups to save only the release-ready work.",
+                    "Save the intended local work and leave unrelated files out.",
+                    (3, 6, self.diagnostic_commands),
+                    template,
+                ),
+                DIFFICULTY_MEDIUM: (
+                    "Use status and diff views to confirm the snapshot scope.",
+                    "Save the intended local work and leave unrelated files out.",
+                    (3, 5, self.diagnostic_commands),
+                    self._copy_template(template, count=2, signature="review/medium/{{project}}/{{index}}"),
+                ),
+                DIFFICULTY_HARD: (
+                    "Repair the latest local snapshot with only the selected work.",
+                    "Amend the latest snapshot with the intended local work.",
+                    (2, 5, self.diagnostic_commands),
+                    hard_template,
+                ),
+            },
+        )
+
+    def _state_template(
+        self,
+        *,
+        slug: str,
+        label: str,
+        signature: str,
+        cases: list[dict],
+        initial_state: dict,
+        target_rule: dict,
+        commands: list[str],
+        count: int,
+    ) -> VariantTemplateSpec:
+        return VariantTemplateSpec(
+            slug_template=slug,
+            label_template=label,
+            structure_signature_template=signature,
+            initial_state_template=initial_state,
+            target_rule_template=target_rule,
+            solution_commands_template=commands,
+            parameter_pools={"cases": [self._augment_case(case) for case in cases]},
+            generation_count=count,
+        )
+
+    def _copy_template(self, template: VariantTemplateSpec, **overrides) -> VariantTemplateSpec:
+        return VariantTemplateSpec(
+            slug_template=overrides.get("slug", template.slug_template),
+            label_template=overrides.get("label", template.label_template),
+            structure_signature_template=overrides.get(
+                "signature",
+                template.structure_signature_template,
+            ),
+            initial_state_template=overrides.get("initial_state", template.initial_state_template),
+            target_rule_template=overrides.get("target_rule", template.target_rule_template),
+            solution_commands_template=overrides.get("commands", template.solution_commands_template),
+            parameter_pools=overrides.get("parameter_pools", template.parameter_pools),
+            generation_count=overrides.get("count", template.generation_count),
+            expected_observations_template=template.expected_observations_template,
+        )
+
+    def _augment_case(self, case: dict) -> dict:
+        files = case.get("files") or {}
+        ignored_paths = [
+            path
+            for path, state in files.items()
+            if str(state).lower() == "ignored"
+        ]
+        return {**case, "ignored_paths": ignored_paths}
+
+    def _empty_uninitialized_state(self) -> dict:
+        return {
+            "repository_initialized": False,
+            "commits": [],
+            "branches": {"main": None},
+            "head": {"type": "none", "name": None},
+            "working_tree": {},
+            "staging": {},
+            "conflicts": [],
+        }
+
+    def _repo_state(
+        self,
+        head_commit: str,
+        working_tree: dict | str,
+        staging: dict | str,
+        *,
+        extra: dict | None = None,
+    ) -> dict:
+        commits = [{"id": "c0", "message": "Initial project", "parents": [], "files": {}}]
+        if head_commit != "c0":
+            commits.append(
+                {
+                    "id": head_commit,
+                    "message": "Draft local update",
+                    "parents": ["c0"],
+                    "files": {"README.md": "modified"},
+                }
             )
-        return specs
+        state = {
+            "repository_initialized": True,
+            "commits": commits,
+            "branches": {"main": head_commit},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": working_tree,
+            "staging": staging,
+            "conflicts": [],
+        }
+        if extra:
+            state.update(extra)
+        return state
 
-    def _init_variants(self) -> list[dict]:
-        projects = [
-            ("docs-portal", ["README.md", "src/app.py"]),
-            ("api-starter", ["README.md", "api/routes.py"]),
-            ("cli-tool", ["README.md", "git_it_cli.py"]),
-            ("profile-site", ["README.md", "site/index.html"]),
-        ]
-        return [
-            {
-                "slug": f"{project}-initial-snapshot",
-                "label": f"{project} starter files",
-                "initial_state": {
-                    "repository_initialized": False,
-                    "commits": [],
-                    "branches": {"main": None},
-                    "head": {"type": "none", "name": None},
-                    "working_tree": {path: "untracked" for path in paths},
-                    "staging": {},
-                    "conflicts": [],
-                },
-                "solution_commands": ["git init", "git add .", 'git commit -m "starter snapshot"'],
-            }
-            for project, paths in projects
-        ]
-
-    def _clone_variants(self) -> list[dict]:
-        projects = [
-            ("docs-portal", "https://example.test/docs-portal.git", "docs-portal"),
-            ("api-starter", "git@example.test:training/api-starter.git", "api-starter"),
-            ("cli-tool", "https://example.test/tools/cli-tool.git", "cli-tool-lab"),
-            ("profile-site", "git@example.test:training/profile-site.git", "profile-site"),
-        ]
-        return [
-            {
-                "slug": f"{project}-clone",
-                "label": f"{project} remote",
-                "initial_state": {
-                    "repository_initialized": False,
-                    "commits": [],
-                    "branches": {"main": None},
-                    "head": {"type": "none", "name": None},
-                    "working_tree": {},
-                    "staging": {},
-                    "conflicts": [],
-                    "remote_branches": {"origin/main": f"r{index}"},
-                },
-                "solution_commands": [f"git clone {url} {folder}"],
-            }
-            for index, (project, url, folder) in enumerate(projects)
-        ]
+    def _body_html(self, title: str, subtitle: str) -> str:
+        return f"""
+        <section class="lesson-panel">
+          <h2>{title}</h2>
+          <p>{subtitle}</p>
+          <p>Practice below rotates project names, file structures, and repository states so the command pattern has to be understood instead of memorized.</p>
+        </section>
+        """
 
 
 class Command(BaseCommand):
     help = "Seed the compact GIT it! Module 1 curriculum content."
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--reset",
+            action="store_true",
+            help="Clear local seeded content and scenario progress before seeding.",
+        )
+        parser.add_argument(
+            "--confirm",
+            action="store_true",
+            help="Required with --reset to confirm local development data deletion.",
+        )
 
     def handle(self, *args, **options):
         curriculum_path = settings.BASE_DIR.parent / "docs" / "GIT_it_Curriculum.md"
@@ -564,10 +1352,32 @@ class Command(BaseCommand):
         else:
             units, lessons, scenarios = ModuleOneSeedBuilder().build()
         with transaction.atomic():
+            if options["reset"]:
+                self._reset_seeded_content(confirm=options["confirm"])
             unit_map = self._seed_units(units)
             lesson_map = self._seed_lessons(lessons, unit_map)
             self._seed_scenarios(scenarios, unit_map, lesson_map)
         self.stdout.write(self.style.SUCCESS("Seeded GIT it! curriculum content."))
+
+    def _reset_seeded_content(self, *, confirm: bool) -> None:
+        if not settings.DEBUG:
+            raise CommandError("--reset is only available when DEBUG=True.")
+        if not confirm:
+            raise CommandError("Pass --confirm with --reset to clear local seeded data.")
+
+        CompletionRecord.objects.all().delete()
+        ScenarioSession.objects.all().delete()
+        OrientationProgress.objects.all().delete()
+        LearningUnit.objects.all().delete()
+        StudentProgress.objects.update(
+            first_scenario_started_at=None,
+            orientation_complete_at_first_start=False,
+        )
+        StreakRecord.objects.update(
+            current_streak=0,
+            longest_streak=0,
+            last_completed_on=None,
+        )
 
     def _seed_units(self, specs: list[UnitSpec]) -> dict[str, LearningUnit]:
         active_slugs = [spec.slug for spec in specs]
@@ -664,6 +1474,7 @@ class Command(BaseCommand):
                     difficulty=difficulty,
                     defaults={
                         "completion_type": completion_type,
+                        "required_successful_attempts": config.required_successful_attempts,
                         "narrative": config.narrative,
                         "task_prompt": self._student_task_prompt(config.task),
                         "is_published": True,
@@ -683,8 +1494,9 @@ class Command(BaseCommand):
                 for variant in config.variants:
                     initial_state = simulator.normalize_state(variant["initial_state"])
                     solution_commands = list(variant["solution_commands"])
+                    raw_target_rule = variant.get("target_rule", config.target_rule)
                     target_rule = self._resolve_rule(
-                        config.target_rule,
+                        raw_target_rule,
                         variant_slug=variant["slug"],
                         initial_state=initial_state,
                         solution_commands=solution_commands,
@@ -723,7 +1535,10 @@ class Command(BaseCommand):
                         {
                             "slug": variant["slug"],
                             "label": variant["label"][:80],
-                            "structure_signature": variant["slug"],
+                            "structure_signature": variant.get(
+                                "structure_signature",
+                                variant["slug"],
+                            )[:120],
                             "initial_state": initial_state,
                             "target_rule": target_rule,
                             "target_state": target_state,
@@ -1042,7 +1857,7 @@ class Command(BaseCommand):
         meta_last = "Includes practice" if kind == Lesson.LessonKind.SCENARIO else "Visual guide"
         practice_heading = "Practice connection" if kind == Lesson.LessonKind.SCENARIO else "Where you will use this"
         practice_text = (
-            "After reading, use the scenarios listed below this lesson to choose a practice topic "
+            "After reading, use the scenarios listed below this lesson to choose a lesson scenario "
             "and difficulty. Each level has its own situation, action budget, and retry version."
             if kind == Lesson.LessonKind.SCENARIO
             else "Use this page as a field guide. The same idea returns in later practice."

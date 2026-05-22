@@ -299,11 +299,9 @@ class CommandProcessingService:
         session.rta_success = bool(session.rta_eligible and session.first_attempt_star_eligible)
         if session.mode == SESSION_MODE_PRIMARY:
             # Only create or update a CompletionRecord once the user has reached
-            # the required number of successful accurate completions for this
-            # difficulty (easy=3, medium/hard=2).
-            required = required_successful_attempts_for_difficulty(
-                session.difficulty_instance.difficulty
-            )
+            # the seeded number of successful accurate completions for this
+            # difficulty.
+            required = required_successful_attempts_for_difficulty(session.difficulty_instance)
             previous_accurate = ScenarioSession.objects.filter(
                 user=session.user,
                 mode=SESSION_MODE_PRIMARY,
