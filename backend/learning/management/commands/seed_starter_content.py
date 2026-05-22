@@ -329,15 +329,240 @@ class CurriculumMarkdownParser:
         return " ".join(part.capitalize() for part in slug.split("-"))
 
 
+class ModuleOneSeedBuilder:
+    """Build the compact Module 1 seed from curriculum-defined scenario focuses."""
+
+    diagnostic_commands = ["git status", "git log --oneline", "git remote -v"]
+
+    def build(self) -> tuple[list[UnitSpec], list[LessonSpec], list[ScenarioSpec]]:
+        unit = UnitSpec(
+            slug="local-repository-foundations",
+            number=1,
+            title="Local Repository Foundations",
+            description=(
+                "Initialize and clone repositories while reading the working tree, "
+                "staging area, commit history, and remotes with confidence."
+            ),
+            is_orientation=False,
+            sort_order=1,
+        )
+        lessons = [
+            LessonSpec(
+                unit_slug=unit.slug,
+                slug="initializing-a-local-repository",
+                kind="scenario",
+                title="Initializing a Local Repository",
+                subtitle="Create a repository in an existing project and save its first snapshot.",
+                sort_order=1,
+            ),
+            LessonSpec(
+                unit_slug=unit.slug,
+                slug="cloning-a-remote-repository",
+                kind="scenario",
+                title="Cloning a Remote Repository",
+                subtitle="Create a local working copy and verify the remote relationship.",
+                sort_order=2,
+            ),
+        ]
+        scenarios = [
+            self._init_scenario(unit.slug, lessons[0].slug),
+            self._clone_scenario(unit.slug, lessons[1].slug),
+        ]
+        return [unit], lessons, scenarios
+
+    def _init_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
+        variants = self._init_variants()
+        fields = {
+            "title": "Initialize and save the first snapshot",
+            "focus": "git init",
+            "summary": "Turn an existing folder into a repository and commit the starter files.",
+            "short_explanation": (
+                "Initialization creates the repository metadata. A first commit proves the "
+                "project is tracked and gives the history a starting point."
+            ),
+            "primary_focus_commands": ["git init"],
+            "supporting_inspection_commands": ["git status", "git log --oneline"],
+            "safe_demo_commands": ["git init", "git status", "git log --oneline"],
+            "demo_repository_state": variants[0]["initial_state"],
+            "related_git_concepts": ["working tree", "staging area", "first commit"],
+            "narrative": "You inherited a folder with starter files, but it is not a Git repository yet.",
+            "task_prompt": "Initialize the folder, prepare the starter files, and save the first snapshot.",
+        }
+        difficulties = self._difficulties(
+            easy=(
+                "The project folder already has a README and one source file. Make it a repository and save both files.",
+                "Initialize the project, prepare every starter file, and save the first snapshot.",
+                (3, 5, self.diagnostic_commands),
+                variants[:2],
+            ),
+            medium=(
+                "The folder has starter files at different depths. Create the repository and make one clean first snapshot.",
+                "Initialize the project, prepare the starter files, and save the first snapshot.",
+                (3, 5, self.diagnostic_commands),
+                variants[1:3],
+            ),
+            hard=(
+                "You only have the repository state view. Create a clean first commit from the untracked starter files.",
+                "Initialize the project and save a clean first snapshot.",
+                (3, 4, self.diagnostic_commands),
+                variants[2:4],
+            ),
+            rule={
+                "repository_initialized": True,
+                "head_branch": "main",
+                "working_tree_clean": True,
+                "staging_empty": True,
+                "min_commits_on_branch": {"main": 1},
+                "required_commands": ["git init", "git add", "git commit"],
+            },
+        )
+        return ScenarioSpec(
+            slug="initialize-project-and-first-commit",
+            unit_slug=unit_slug,
+            lesson_slug=lesson_slug,
+            title=fields["title"],
+            focus=fields["focus"],
+            seeding_status="ready",
+            fields=fields,
+            difficulties=difficulties,
+        )
+
+    def _clone_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
+        variants = self._clone_variants()
+        fields = {
+            "title": "Clone and verify a remote project",
+            "focus": "git clone",
+            "summary": "Create a local working copy and confirm origin is configured.",
+            "short_explanation": (
+                "Cloning creates a repository from an existing remote, checks out the default "
+                "branch, and records where origin points."
+            ),
+            "primary_focus_commands": ["git clone"],
+            "supporting_inspection_commands": ["git remote -v", "git log --oneline"],
+            "safe_demo_commands": ["git clone https://example.test/demo.git demo", "git remote -v", "git log --oneline"],
+            "demo_repository_state": variants[0]["initial_state"],
+            "related_git_concepts": ["origin", "remote tracking", "working copy"],
+            "narrative": "A teammate published a starter repository and you need a local copy before work can begin.",
+            "task_prompt": "Create a local working copy from the provided remote and verify that origin is configured.",
+        }
+        difficulties = self._difficulties(
+            easy=(
+                "The remote URL and target folder are provided. Clone the project and verify the remote connection.",
+                "Create the local working copy, then inspect the configured remote.",
+                (1, 4, self.diagnostic_commands),
+                variants[:2],
+            ),
+            medium=(
+                "The remote uses a different project name and should land in the requested destination folder.",
+                "Create the local working copy and inspect the remote configuration.",
+                (1, 3, self.diagnostic_commands),
+                variants[1:3],
+            ),
+            hard=(
+                "Use the provided remote details to create the working copy with no extra setup steps.",
+                "Create the local working copy from the remote.",
+                (1, 2, self.diagnostic_commands),
+                variants[2:4],
+            ),
+            rule={
+                "repository_initialized": True,
+                "head_branch": "main",
+                "remote_exists": ["origin"],
+                "upstream_tracking": {"main": "origin/main"},
+                "branches_equal": [["main", "origin/main"]],
+                "required_commands": ["git clone"],
+            },
+        )
+        return ScenarioSpec(
+            slug="clone-project-and-inspect",
+            unit_slug=unit_slug,
+            lesson_slug=lesson_slug,
+            title=fields["title"],
+            focus=fields["focus"],
+            seeding_status="ready",
+            fields=fields,
+            difficulties=difficulties,
+        )
+
+    def _difficulties(self, *, easy: tuple, medium: tuple, hard: tuple, rule: dict) -> dict[str, DifficultySpec]:
+        specs = {}
+        for difficulty, config in (
+            (DIFFICULTY_EASY, easy),
+            (DIFFICULTY_MEDIUM, medium),
+            (DIFFICULTY_HARD, hard),
+        ):
+            narrative, task, policy, variants = config
+            specs[difficulty] = DifficultySpec(
+                difficulty=difficulty,
+                narrative=narrative,
+                task=task,
+                policy=policy,
+                target_rule=rule,
+                variants=variants,
+            )
+        return specs
+
+    def _init_variants(self) -> list[dict]:
+        projects = [
+            ("docs-portal", ["README.md", "src/app.py"]),
+            ("api-starter", ["README.md", "api/routes.py"]),
+            ("cli-tool", ["README.md", "git_it_cli.py"]),
+            ("profile-site", ["README.md", "site/index.html"]),
+        ]
+        return [
+            {
+                "slug": f"{project}-initial-snapshot",
+                "label": f"{project} starter files",
+                "initial_state": {
+                    "repository_initialized": False,
+                    "commits": [],
+                    "branches": {"main": None},
+                    "head": {"type": "none", "name": None},
+                    "working_tree": {path: "untracked" for path in paths},
+                    "staging": {},
+                    "conflicts": [],
+                },
+                "solution_commands": ["git init", "git add .", 'git commit -m "starter snapshot"'],
+            }
+            for project, paths in projects
+        ]
+
+    def _clone_variants(self) -> list[dict]:
+        projects = [
+            ("docs-portal", "https://example.test/docs-portal.git", "docs-portal"),
+            ("api-starter", "git@example.test:training/api-starter.git", "api-starter"),
+            ("cli-tool", "https://example.test/tools/cli-tool.git", "cli-tool-lab"),
+            ("profile-site", "git@example.test:training/profile-site.git", "profile-site"),
+        ]
+        return [
+            {
+                "slug": f"{project}-clone",
+                "label": f"{project} remote",
+                "initial_state": {
+                    "repository_initialized": False,
+                    "commits": [],
+                    "branches": {"main": None},
+                    "head": {"type": "none", "name": None},
+                    "working_tree": {},
+                    "staging": {},
+                    "conflicts": [],
+                    "remote_branches": {"origin/main": f"r{index}"},
+                },
+                "solution_commands": [f"git clone {url} {folder}"],
+            }
+            for index, (project, url, folder) in enumerate(projects)
+        ]
+
+
 class Command(BaseCommand):
-    help = "Seed the GIT it! curriculum from docs/GIT_it_Curriculum.md."
+    help = "Seed the compact GIT it! Module 1 curriculum content."
 
     def handle(self, *args, **options):
         curriculum_path = settings.BASE_DIR.parent / "docs" / "GIT_it_Curriculum.md"
-        if not curriculum_path.exists():
-            raise CommandError(f"Curriculum markdown not found at {curriculum_path}.")
-
-        units, lessons, scenarios = CurriculumMarkdownParser().parse(curriculum_path)
+        if curriculum_path.exists():
+            units, lessons, scenarios = CurriculumMarkdownParser().parse(curriculum_path)
+        else:
+            units, lessons, scenarios = ModuleOneSeedBuilder().build()
         with transaction.atomic():
             unit_map = self._seed_units(units)
             lesson_map = self._seed_lessons(lessons, unit_map)

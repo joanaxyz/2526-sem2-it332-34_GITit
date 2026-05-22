@@ -5,6 +5,7 @@ from common.constants import (
     DIFFICULTY_MEDIUM,
     SESSION_MODE_PRIMARY,
     SESSION_STATUS_ABANDONED,
+    SESSION_STATUS_COMPLETED,
     SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
@@ -15,6 +16,16 @@ from scenarios.models import (
     ScenarioSkillFocus,
 )
 
+SUCCESSFUL_ATTEMPTS_REQUIRED = 3
+
+
+def required_successful_attempts_for_difficulty(difficulty: str) -> int:
+    """Return the number of successful accurate completions required for a difficulty.
+
+    Easy requires 3 accurate completions; Medium/Hard require 2.
+    """
+    return 3 if difficulty == DIFFICULTY_EASY else 2
+
 
 def command_accuracy_rate(
     *,
@@ -22,8 +33,10 @@ def command_accuracy_rate(
     counted_action_total: int,
     minimum_counted_commands: int,
 ) -> int | None:
-    if status != "completed":
+    if status == SESSION_STATUS_STARTED:
         return None
+    if status in {SESSION_STATUS_FAILED, SESSION_STATUS_ABANDONED}:
+        return 0
     if counted_action_total <= minimum_counted_commands:
         return 100
     if minimum_counted_commands == 0:
@@ -75,6 +88,24 @@ def latest_attempt_payload_from_session(
         "completed_at": session.completed_at,
         "ended_at": session.ended_at,
     }
+
+
+def session_is_command_accurate(
+    *,
+    session: ScenarioSession | None,
+    difficulty_instance: DifficultyInstance,
+) -> bool:
+    if not session or session.status != SESSION_STATUS_COMPLETED:
+        return False
+    return session.counted_action_total <= difficulty_instance.command_policy.min_counted_commands
+
+
+def accuracy_display_session(
+    *,
+    completion: CompletionRecord | None,
+    latest_session: ScenarioSession | None,
+) -> ScenarioSession | None:
+    return latest_session or (completion.session if completion else None)
 
 
 def _published_difficulty_queryset():
@@ -151,7 +182,13 @@ def scenario_status_payloads(*, user, scenarios, include_preview: bool = True) -
         for instance in difficulty_instances
     }
     completions = _completion_map(user=user, difficulty_ids=difficulty_ids)
-    completed_ids = set(completions)
+    successful_attempts = _successful_attempts_map(user=user, difficulty_ids=difficulty_ids)
+    mastery_progress_map = _mastery_progress_map(user=user, difficulty_ids=difficulty_ids)
+    # A difficulty is considered completed when a CompletionRecord exists for it.
+    # Previously this used mastery (3 accurate completions) to mark completion,
+    # which caused the UI progress counter (e.g. "-/3") to increment on mastery
+    # rather than on actual recorded completion. Use completions dict keys.
+    completed_ids = set(completions.keys())
     active_sessions, latest_sessions, retryable_sessions = _session_state_maps(
         user=user,
         difficulty_ids=difficulty_ids,
@@ -166,6 +203,8 @@ def scenario_status_payloads(*, user, scenarios, include_preview: bool = True) -
             retryable_sessions=retryable_sessions,
             difficulty_by_key=difficulty_by_key,
             completed_ids=completed_ids,
+            mastery_progress_map=mastery_progress_map,
+            successful_attempts=successful_attempts,
             include_preview=include_preview,
         )
         for scenario in scenarios
@@ -181,6 +220,8 @@ def _scenario_status_payload_from_maps(
     retryable_sessions: dict[int, ScenarioSession],
     difficulty_by_key: dict[tuple[int, str], DifficultyInstance],
     completed_ids: set[int],
+    mastery_progress_map: dict[int, dict],
+    successful_attempts: dict[int, dict],
     include_preview: bool,
 ) -> dict:
     difficulties = []
@@ -189,6 +230,19 @@ def _scenario_status_payload_from_maps(
         in_progress = active_sessions.get(instance.id)
         retryable_session = retryable_sessions.get(instance.id)
         latest_session = latest_sessions.get(instance.id)
+        display_session = accuracy_display_session(
+            completion=completion,
+            latest_session=latest_session,
+        )
+        progress = successful_attempts.get(
+            instance.id,
+            {"count": 0, "required": required_successful_attempts_for_difficulty(instance.difficulty)},
+        )
+        mastery = mastery_progress_map.get(
+            instance.id,
+            {"mastered": 0, "required": required_successful_attempts_for_difficulty(instance.difficulty)},
+        )
+        successful_enough = progress["count"] >= progress["required"]
         difficulties.append(
             {
                 "id": instance.id,
@@ -202,7 +256,10 @@ def _scenario_status_payload_from_maps(
                     difficulty_by_key=difficulty_by_key,
                     completed_ids=completed_ids,
                 ),
-                "review_available": completion is not None,
+                "review_available": completion is not None and successful_enough,
+                "mastery_progress": mastery,
+                "mastered_records": mastery,
+                "successful_attempts": progress,
                 "completion": {
                     "first_attempt_star": completion.first_attempt_star if completion else False,
                     "counted_action_total": completion.counted_action_total if completion else None,
@@ -211,13 +268,13 @@ def _scenario_status_payload_from_maps(
                 if completion
                 else None,
                 "latest_attempt": latest_attempt_payload_from_session(
-                    session=latest_session,
+                    session=display_session,
                     difficulty_instance=instance,
                 )
-                if latest_session
+                if display_session
                 else None,
                 "active_session_id": in_progress.id if in_progress else None,
-                "retry_session_id": retryable_session.id if retryable_session else None,
+                "retry_session_id": retryable_session.id if retryable_session and not successful_enough else None,
                 "policy": _policy_payload(instance=instance, include_preview=include_preview),
             }
         )
@@ -273,13 +330,102 @@ def _completion_map(*, user, difficulty_ids: list[int]) -> dict[int, CompletionR
         for completion in CompletionRecord.objects.filter(
             user=user,
             difficulty_instance_id__in=difficulty_ids,
-        ).only(
+        )
+        .select_related("session")
+        .only(
             "difficulty_instance_id",
             "first_attempt_star",
             "counted_action_total",
             "completed_at",
+            "session__id",
+            "session__status",
+            "session__counted_action_total",
+            "session__total_attempts",
+            "session__completed_at",
+            "session__ended_at",
+            "session__mode",
         )
     }
+
+
+def _mastery_progress_map(*, user, difficulty_ids: list[int]) -> dict[int, dict]:
+    diff_map = {
+        di.id: di.difficulty
+        for di in DifficultyInstance.objects.filter(id__in=difficulty_ids).only("id", "difficulty")
+    }
+    progress = {
+        difficulty_id: {
+            "mastered": 0,
+            "required": required_successful_attempts_for_difficulty(
+                diff_map.get(difficulty_id, DIFFICULTY_EASY)
+            ),
+        }
+        for difficulty_id in difficulty_ids
+    }
+    if not difficulty_ids:
+        return progress
+
+    rows = (
+        ScenarioSession.objects.filter(
+            user=user,
+            mode=SESSION_MODE_PRIMARY,
+            status=SESSION_STATUS_COMPLETED,
+            difficulty_instance_id__in=difficulty_ids,
+        )
+        .select_related("difficulty_instance__command_policy")
+        .only(
+            "difficulty_instance_id",
+            "counted_action_total",
+            "difficulty_instance__command_policy__min_counted_commands",
+        )
+    )
+    for session in rows:
+        if (
+            session.counted_action_total
+            <= session.difficulty_instance.command_policy.min_counted_commands
+        ):
+            item = progress[session.difficulty_instance_id]
+            item["mastered"] = min(item["mastered"] + 1, item["required"])
+    return progress
+
+
+def _successful_attempts_map(*, user, difficulty_ids: list[int]) -> dict[int, dict]:
+    # Determine required attempts per difficulty instance (easy=3, medium/hard=2)
+    diff_map = {
+        di.id: di.difficulty
+        for di in DifficultyInstance.objects.filter(id__in=difficulty_ids).only("id", "difficulty")
+    }
+    progress = {
+        difficulty_id: {
+            "count": 0,
+            "required": required_successful_attempts_for_difficulty(
+                diff_map.get(difficulty_id, DIFFICULTY_EASY)
+            ),
+        }
+        for difficulty_id in difficulty_ids
+    }
+    if not difficulty_ids:
+        return progress
+
+    rows = (
+        ScenarioSession.objects.filter(
+            user=user,
+            mode=SESSION_MODE_PRIMARY,
+            status=SESSION_STATUS_COMPLETED,
+            difficulty_instance_id__in=difficulty_ids,
+        )
+        .select_related("difficulty_instance__command_policy")
+        .only(
+            "difficulty_instance_id",
+            "counted_action_total",
+            "difficulty_instance__command_policy__min_counted_commands",
+        )
+    )
+    for session in rows:
+        if session.counted_action_total <= session.difficulty_instance.command_policy.min_counted_commands:
+            item = progress[session.difficulty_instance_id]
+            item["count"] = min(item["count"] + 1, item["required"])
+    return progress
 
 
 def _session_state_maps(
@@ -309,12 +455,16 @@ def _session_state_maps(
         )
         .order_by("difficulty_instance_id", "-id")
     ):
-        latest_sessions.setdefault(session.difficulty_instance_id, session)
         if session.mode != SESSION_MODE_PRIMARY:
             continue
+        latest_sessions.setdefault(session.difficulty_instance_id, session)
         if session.status == SESSION_STATUS_STARTED:
             active_sessions.setdefault(session.difficulty_instance_id, session)
-        elif session.status in {SESSION_STATUS_FAILED, SESSION_STATUS_ABANDONED}:
+        elif session.status in {
+            SESSION_STATUS_FAILED,
+            SESSION_STATUS_ABANDONED,
+            SESSION_STATUS_COMPLETED,
+        }:
             retryable_sessions.setdefault(session.difficulty_instance_id, session)
     return active_sessions, latest_sessions, retryable_sessions
 
@@ -328,7 +478,7 @@ def _difficulty_status(
     difficulty_by_key: dict[tuple[int, str], DifficultyInstance],
     completed_ids: set[int],
 ) -> str:
-    if instance.id in completions:
+    if instance.id in completed_ids:
         return "completed"
     if instance.id in active_sessions:
         return "in_progress"

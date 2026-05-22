@@ -13,7 +13,6 @@ import { ExpectedStatePanel } from '@/features/practice/components/ExpectedState
 import { LiveDagPanel } from '@/features/practice/components/LiveDagPanel'
 import { ProjectStructurePanel } from '@/features/practice/components/ProjectStructurePanel'
 import { ScenarioWorkspaceTour } from '@/features/practice/components/ScenarioWorkspaceTour'
-import { SessionOutcomeBanner } from '@/features/practice/components/SessionOutcomeBanner'
 import { TerminalPanel } from '@/features/practice/components/TerminalPanel'
 import { useAuthStore } from '@/features/auth/hooks/useAuth'
 import { hasSeenScenarioTour, markScenarioTourSeen } from '@/features/practice/utils/scenarioTour'
@@ -98,6 +97,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     },
     onSuccess: (updatedSession) => {
       syncScenarioSessionInCache(queryClient, updatedSession)
+      void queryClient.invalidateQueries({ queryKey: ['units'] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
       navigate(`/units?unit=${updatedSession.unit.id}`)
     },
@@ -110,6 +110,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
       }),
     onSuccess: (next) => {
       syncScenarioSessionInCache(queryClient, next)
+      void queryClient.invalidateQueries({ queryKey: ['units'] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
       if (session?.status === 'completed') setDismissedCompletionSessionId(session.id)
       navigate(`/practice/${next.id}`)
@@ -119,6 +120,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     mutationFn: (difficultyInstanceId: number) => reviewApi.startReviewSession(difficultyInstanceId),
     onSuccess: (next) => {
       syncScenarioSessionInCache(queryClient, next)
+      void queryClient.invalidateQueries({ queryKey: ['units'] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
       if (session?.status === 'completed') setDismissedCompletionSessionId(session.id)
       navigate(`/review/${next.id}`)
@@ -131,6 +133,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     },
     onSuccess: (next) => {
       syncScenarioSessionInCache(queryClient, next)
+      void queryClient.invalidateQueries({ queryKey: ['units'] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
       setDismissedCompletionSessionId(null)
       navigate(`/practice/${next.id}`)
@@ -282,17 +285,13 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         onExit={() => exitMutation.mutate()}
         onRetry={() => retryMutation.mutate()}
         onOpenTour={() => setTourOpen(true)}
+        onContinue={() => retryMutation.mutate()}
       />
       <main className="grid min-h-0 flex-1 grid-cols-[18rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[17rem_minmax(0,1fr)] max-xl:grid-cols-[16rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
         <aside className="flex min-h-0 flex-col gap-2" data-tour-target="scenario-brief">
           <ScenarioContextPanel session={session} />
-          <CommandCounter session={session} />
+          {!reviewMode ? <CommandCounter session={session} /> : null}
           <ProjectStructurePanel snapshot={session.repository_state} />
-          <SessionOutcomeBanner
-            session={session}
-            isRetrying={retryMutation.isPending}
-            onRetry={() => retryMutation.mutate()}
-          />
         </aside>
         <section
           ref={workspaceGridRef}
@@ -363,15 +362,19 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         </section>
       </main>
       <CompletionCelebrationModal
-        open={session.status === 'completed' && dismissedCompletionSessionId !== session.id}
+        open={(session.status === 'completed' || session.status === 'failed') && dismissedCompletionSessionId !== session.id}
         session={session}
         onClose={() => {
           setDismissedCompletionSessionId(session.id)
         }}
         onBackToUnits={() => navigate(`/units?unit=${session.unit.id}`)}
+        onRetry={() => retryMutation.mutate()}
+        onContinue={() => retryMutation.mutate()}
         onReviewDifficulty={(difficulty) => reviewMutation.mutate(difficulty.id)}
         previousDifficulties={reviewableDifficulties}
         isReviewing={reviewMutation.isPending}
+        isRetrying={retryMutation.isPending}
+        isContinuing={retryMutation.isPending}
         onNextLevel={session.next_difficulty ? () => nextLevelMutation.mutate() : undefined}
         isStartingNextLevel={nextLevelMutation.isPending}
         nextDifficultyLabel={

@@ -118,6 +118,8 @@ function SkillFocusPreviewContent({
   const startLabel =
     action === 'review'
         ? 'Open review'
+        : action === 'continue' || action === 'resume'
+          ? 'Continue'
         : action === 'retry'
           ? 'Retry scenario'
           : 'Start scenario'

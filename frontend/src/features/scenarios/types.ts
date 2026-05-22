@@ -3,7 +3,7 @@ import type { RepositorySnapshot } from '@/features/practice/types'
 export type Difficulty = 'easy' | 'medium' | 'hard'
 export type DifficultyStatus = 'not_started' | 'locked' | 'in_progress' | 'completed' | 'failed' | 'abandoned'
 export type AttemptStatus = 'started' | 'completed' | 'failed' | 'abandoned'
-export type DifficultyActionIntent = 'start' | 'review' | 'retry'
+export type DifficultyActionIntent = 'start' | 'review' | 'retry' | 'continue' | 'resume'
 export type SkillFocusType = 'command_specific' | 'concept_specific' | 'workflow_specific' | 'diagnostic_inspection'
 
 export type CommandPolicy = {
@@ -29,6 +29,18 @@ export type DifficultyAccess = {
   difficulty: Difficulty
   status: DifficultyStatus
   review_available: boolean
+  mastery_progress: {
+    mastered: number
+    required: number
+  }
+  mastered_records?: {
+    mastered: number
+    required: number
+  }
+  successful_attempts?: {
+    count: number
+    required: number
+  }
   active_session_id: number | null
   retry_session_id: number | null
   policy: CommandPolicy

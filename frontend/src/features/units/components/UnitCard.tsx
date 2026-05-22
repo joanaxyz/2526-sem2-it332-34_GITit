@@ -11,6 +11,25 @@ import { Card } from '@/shared/components/Card'
 import { ExpandToggleButton } from '@/shared/components/ExpandToggleButton'
 import { ProgressBar } from '@/shared/components/ProgressBar'
 
+function practiceCompletionFromSummary(scenarios: ScenarioSkillFocus[] | undefined) {
+  if (!scenarios) return null
+  const numerator = scenarios.reduce(
+    (total, scenario) =>
+      total + scenario.difficulties.reduce((sum, difficulty) => sum + difficulty.mastery_progress.mastered, 0),
+    0,
+  )
+  const denominator = scenarios.reduce(
+    (total, scenario) =>
+      total + scenario.difficulties.reduce((sum, difficulty) => sum + difficulty.mastery_progress.required, 0),
+    0,
+  )
+  return {
+    numerator,
+    denominator,
+    value: denominator ? Math.round((numerator / denominator) * 100) : 0,
+  }
+}
+
 export function UnitCard({
   unit,
   isExpanded,
@@ -30,7 +49,8 @@ export function UnitCard({
   const orientationProgress = Math.round(
     (visibleLessons.filter((lesson) => lesson.is_complete).length / Math.max(visibleLessons.length, 1)) * 100,
   )
-  const practiceProgress = Math.round(unit.practice_completion?.value ?? 0)
+  const livePracticeCompletion = practiceCompletionFromSummary(scenarioSummary)
+  const practiceProgress = Math.round(livePracticeCompletion?.value ?? unit.practice_completion?.value ?? 0)
   const progressValue = unit.is_orientation ? orientationProgress : practiceProgress
   const referenceLessons = unit.lessons.filter((lesson) => lesson.kind !== 'scenario')
   const panelId = `unit-panel-${unit.id}`

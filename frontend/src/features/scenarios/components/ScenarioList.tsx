@@ -45,6 +45,7 @@ export function ScenarioList(props: ScenarioListProps) {
       scenariosApi.startSession({ difficulty_instance_id: difficulty.id, source_entry_point: props.source }),
     onSuccess: (session) => {
       syncScenarioSessionInCache(queryClient, session)
+      void queryClient.invalidateQueries({ queryKey: ['units'] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
       setPreviewRequest(null)
       openScenarioRoute(`/practice/${session.id}`)
@@ -53,11 +54,13 @@ export function ScenarioList(props: ScenarioListProps) {
   })
   const retryMutation = useMutation({
     mutationFn: (difficulty: DifficultyAccess) => {
-      if (!difficulty.retry_session_id) throw new Error('Exit the current scenario before retrying.')
-      return scenariosApi.retrySession(difficulty.retry_session_id)
+      const priorSessionId = difficulty.active_session_id ?? difficulty.retry_session_id
+      if (!priorSessionId) throw new Error('Exit the current scenario before retrying.')
+      return scenariosApi.retrySession(priorSessionId)
     },
     onSuccess: (session) => {
       syncScenarioSessionInCache(queryClient, session)
+      void queryClient.invalidateQueries({ queryKey: ['units'] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
       setPreviewRequest(null)
       openScenarioRoute(`/practice/${session.id}`)
@@ -110,8 +113,27 @@ export function ScenarioList(props: ScenarioListProps) {
 
   function proceedFromPreview() {
     if (!previewRequest) return
-    const { difficulty, action } = previewRequest
+    const { scenario, difficulty, action } = previewRequest
     reserveScenarioTab()
+    if (action === 'resume') {
+      if (!difficulty.active_session_id) throw new Error('No active scenario is available to continue.')
+      setPreviewRequest(null)
+      openScenarioRoute(`/practice/${difficulty.active_session_id}`)
+      return
+    }
+    if (action === 'continue') {
+      const nextDifficulty = nextDifficultyAfter(scenario, difficulty)
+      if (nextDifficulty && hasRequiredAccurateAttempts(difficulty)) {
+        startMutation.mutate(nextDifficulty)
+        return
+      }
+      if (difficulty.review_available && hasRequiredAccurateAttempts(difficulty)) {
+        reviewMutation.mutate(difficulty)
+        return
+      }
+      retryMutation.mutate(difficulty)
+      return
+    }
     if (action === 'review') {
       reviewMutation.mutate(difficulty)
       return
@@ -166,4 +188,22 @@ export function ScenarioList(props: ScenarioListProps) {
       ) : null}
     </div>
   )
+}
+
+const difficultyOrder = ['easy', 'medium', 'hard'] as const
+
+function hasRequiredAccurateAttempts(difficulty: DifficultyAccess) {
+  const latestAccuracy = difficulty.latest_attempt?.accuracy_rate ?? null
+  const progress = difficulty.successful_attempts
+    ? { mastered: difficulty.successful_attempts.count, required: difficulty.successful_attempts.required }
+    : difficulty.mastered_records ?? difficulty.mastery_progress
+  return latestAccuracy !== null && latestAccuracy >= 100 && progress.mastered >= progress.required
+}
+
+function nextDifficultyAfter(scenario: ScenarioSkillFocus, difficulty: DifficultyAccess) {
+  const currentIndex = difficultyOrder.indexOf(difficulty.difficulty)
+  const nextName = difficultyOrder[currentIndex + 1]
+  if (!nextName) return null
+  const nextDifficulty = scenario.difficulties.find((item) => item.difficulty === nextName)
+  return nextDifficulty && nextDifficulty.status !== 'locked' ? nextDifficulty : null
 }

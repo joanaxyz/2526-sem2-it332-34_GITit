@@ -1,7 +1,7 @@
 from django.db.models import BooleanField, Count, Exists, IntegerField, OuterRef, Prefetch, Q, Value
 
 from learning.models import LearningUnit, Lesson, OrientationProgress
-from scenarios.models import CompletionRecord
+from scenarios.models import CompletionRecord, ScenarioSession
 
 
 def published_units(*, user=None):
@@ -75,15 +75,38 @@ def practice_completion_count_map(*, user, unit_ids: list[int]) -> dict[int, int
     if not getattr(user, "is_authenticated", False) or not unit_ids:
         return {}
 
-    rows = (
-        CompletionRecord.objects.filter(
+    counts_by_instance: dict[int, int] = {}
+    unit_by_instance: dict[int, int] = {}
+    for session in (
+        ScenarioSession.objects.filter(
             user=user,
+            mode="primary",
+            status="completed",
             difficulty_instance__is_published=True,
             scenario__is_published=True,
             scenario__learning_unit_id__in=unit_ids,
         )
-        .values("scenario__learning_unit_id")
-        .annotate(completed=Count("difficulty_instance_id", distinct=True))
-        .order_by()
-    )
-    return {row["scenario__learning_unit_id"]: row["completed"] for row in rows}
+        .select_related("difficulty_instance__command_policy")
+        .only(
+            "id",
+            "scenario__learning_unit_id",
+            "difficulty_instance_id",
+            "difficulty_instance__difficulty",
+            "difficulty_instance__command_policy__min_counted_commands",
+            "status",
+            "counted_action_total",
+        )
+    ):
+        policy = session.difficulty_instance.command_policy
+        if session.counted_action_total > policy.min_counted_commands:
+            continue
+        counts_by_instance[session.difficulty_instance_id] = (
+            counts_by_instance.get(session.difficulty_instance_id, 0) + 1
+        )
+        unit_by_instance[session.difficulty_instance_id] = session.scenario.learning_unit_id
+
+    completion_by_unit = {unit_id: 0 for unit_id in unit_ids}
+    for difficulty_instance_id, count in counts_by_instance.items():
+        unit_id = unit_by_instance[difficulty_instance_id]
+        completion_by_unit[unit_id] = completion_by_unit.get(unit_id, 0) + min(count, 3)
+    return completion_by_unit

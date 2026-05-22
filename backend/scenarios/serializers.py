@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from scaffolding.services import ScaffoldingService
-from scenarios.models import DifficultyInstance
+from scenarios.models import DifficultyInstance, CompletionRecord
+from scenarios.selectors import required_successful_attempts_for_difficulty
 from simulator.services import RepositorySnapshotService
 
 DIFFICULTY_ORDER = ["easy", "medium", "hard"]
@@ -28,6 +29,28 @@ class SkillFocusDemoCommandSerializer(serializers.Serializer):
 def session_payload(session, *, include_steps: bool = True) -> dict:
     supports = ScaffoldingService().supports_for(session.difficulty_instance.difficulty)
     step_logs = session.step_logs.order_by("id") if include_steps else []
+    mastered_count = session.user.scenariosession_set.filter(
+        mode="primary",
+        status="completed",
+        difficulty_instance=session.difficulty_instance,
+        counted_action_total__lte=session.difficulty_instance.command_policy.min_counted_commands,
+    ).count()
+    required = required_successful_attempts_for_difficulty(session.difficulty_instance.difficulty)
+    mastery_progress = {
+        "mastered": min(mastered_count, required),
+        "required": required,
+    }
+    # Include completion record if one exists for this user/difficulty instance.
+    completion_record = CompletionRecord.objects.filter(
+        user=session.user, difficulty_instance=session.difficulty_instance
+    ).first()
+    completion = None
+    if completion_record:
+        completion = {
+            "first_attempt_star": completion_record.first_attempt_star,
+            "counted_action_total": completion_record.counted_action_total,
+            "completed_at": completion_record.completed_at,
+        }
     return {
         "id": session.id,
         "mode": session.mode,
@@ -55,6 +78,8 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
             "label": session.variant.label,
             "changed_variant": session.changed_variant,
         },
+        "mastery_progress": mastery_progress,
+        "mastered_records": mastery_progress,
         "policy": session.command_policy_snapshot,
         "counts": {
             "counted_action_total": session.counted_action_total,
@@ -85,11 +110,24 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
         ],
         "review_mode": session.mode == "review",
         "next_difficulty": next_difficulty_payload(session),
+        "completion": completion,
     }
 
 
 def next_difficulty_payload(session) -> dict | None:
     if session.mode != "primary" or session.status != "completed":
+        return None
+    mastered_count = session.user.scenariosession_set.filter(
+        mode="primary",
+        status="completed",
+        difficulty_instance=session.difficulty_instance,
+        counted_action_total__lte=session.difficulty_instance.command_policy.min_counted_commands,
+    ).count()
+    required = required_successful_attempts_for_difficulty(session.difficulty_instance.difficulty)
+    # Require the current completed attempt to be accurate (100% accuracy)
+    if session.counted_action_total > session.difficulty_instance.command_policy.min_counted_commands:
+        return None
+    if mastered_count < required:
         return None
 
     try:

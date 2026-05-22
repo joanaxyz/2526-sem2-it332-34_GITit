@@ -53,13 +53,8 @@ class UnitListSerializer(serializers.ModelSerializer):
 
     def get_practice_completion(self, obj) -> dict:
         scenario_count = int(getattr(obj, "published_scenario_count", 0) or 0)
-        denominator = scenario_count * 3
-        numerator = int(
-            getattr(obj, "practice_completion_count", None)
-            if getattr(obj, "practice_completion_count", None) is not None
-            else self.context.get("practice_completion_count_map", {}).get(obj.id, 0)
-            or 0
-        )
+        denominator = scenario_count * 9 if not obj.is_orientation else 0
+        numerator = int(self.context.get("practice_completion_count_map", {}).get(obj.id, 0) or 0)
         value = round((numerator / denominator) * 100, 1) if denominator else 0.0
         return {
             "value": value,

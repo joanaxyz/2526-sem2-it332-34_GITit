@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 
 import { practiceApi } from '@/features/practice/api/practiceApi'
@@ -46,6 +46,15 @@ export function useScenarioSession(sessionId: number) {
     (feedback: string) => setFeedbackOverride({ sessionId, feedback }),
     [sessionId],
   )
+  const resetLocalSessionState = useCallback(() => {
+    setSessionOverride(null)
+    setFeedbackOverride(null)
+    setLineOverride(null)
+  }, [])
+
+  useEffect(() => {
+    resetLocalSessionState()
+  }, [resetLocalSessionState, sessionId])
 
   const session = sessionOverride?.id === sessionId ? sessionOverride : (query.data ?? null)
   const lines = lineOverride?.sessionId === sessionId ? lineOverride.lines : baseLines
@@ -54,5 +63,14 @@ export function useScenarioSession(sessionId: number) {
       ? feedbackOverride.feedback
       : (query.data?.steps.at(-1)?.contextual_feedback ?? '')
 
-  return { query, session, setSession: setSessionOverride, lines, setLines, feedback, setFeedback }
+  return {
+    query,
+    session,
+    setSession: setSessionOverride,
+    lines,
+    setLines,
+    feedback,
+    setFeedback,
+    resetLocalSessionState,
+  }
 }
