@@ -4,6 +4,8 @@ import json
 import shlex
 from dataclasses import dataclass
 
+from simulator.state import RepositoryStateNormalizer
+
 READ_ONLY_PREFIXES = (
     "git status",
     "git log",
@@ -61,16 +63,17 @@ def is_diagnostic_command(command: str) -> bool:
 class RepositoryStateSimulator:
     """Internal Git-like simulator boundary. Student input is never executed."""
 
+    def __init__(self) -> None:
+        self.normalizer = RepositoryStateNormalizer()
+
     def clone_state(self, state: dict) -> dict:
         return copy.deepcopy(state)
 
     def normalize_state(self, state: dict) -> dict:
-        normalized = self.clone_state(state)
-        self._ensure_state_shape(normalized)
-        return normalized
+        return self.normalizer.normalize(state)
 
     def state_hash(self, state: dict) -> str:
-        payload = json.dumps(state, sort_keys=True, separators=(",", ":"))
+        payload = json.dumps(self.normalize_state(state), sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
     def process(self, state: dict, command: str) -> SimulatorResult:
@@ -156,19 +159,9 @@ class RepositoryStateSimulator:
             raise ValueError(message.format(bad_option))
 
     def _ensure_state_shape(self, state: dict) -> None:
-        state.setdefault("commits", [])
-        state.setdefault("branches", {})
-        state.setdefault("head", {"type": "branch", "name": "main"})
-        state.setdefault("working_tree", {})
-        state.setdefault("staging", {})
-        state.setdefault("conflicts", [])
-        state.setdefault("remotes", {})
-        state.setdefault("remote_branches", {})
-        state.setdefault("upstream_tracking", {})
-        state.setdefault("stash_stack", [])
-        state.setdefault("reflog", [])
-        state.setdefault("partial_hunks", {})
-        state.setdefault("repository_initialized", True)
+        self.normalizer.ensure_shape(state)
+        self.normalizer.normalize_commits(state)
+        self.normalizer.normalize_head(state)
 
     def _head_branch(self, state: dict) -> str | None:
         head = state.get("head", {})
@@ -180,12 +173,69 @@ class RepositoryStateSimulator:
             return state.get("branches", {}).get(head.get("name"))
         return head.get("target")
 
+    def _head_tree(self, state: dict) -> dict:
+        return self._tree_for_commit(state, self._head_commit(state))
+
+    def _tree_for_commit(self, state: dict, commit_id: str | None) -> dict:
+        commit = self._commit_by_id(state, commit_id)
+        if not commit:
+            return {}
+        return copy.deepcopy(commit.get("tree") or {})
+
+    def _commit_payload(
+        self,
+        *,
+        state: dict,
+        commit_id: str,
+        message: str,
+        parents: list[str],
+        tree: dict,
+        changes: dict,
+    ) -> dict:
+        return {
+            "id": commit_id,
+            "message": message,
+            "parents": parents,
+            "tree": copy.deepcopy(tree),
+            "changes": copy.deepcopy(changes),
+            "files": self.normalizer.files_from_changes(changes),
+            "author": "GIT it",
+            "order": len(state.get("commits", [])),
+            "is_merge": len(parents) > 1,
+        }
+
+    def _changes_from_entries(self, base_tree: dict, entries: dict) -> dict:
+        return self.normalizer.changes_from_entries(base_tree, entries)
+
+    def _apply_changes(self, base_tree: dict, changes: dict) -> dict:
+        return self.normalizer.apply_changes(base_tree, changes)
+
+    def _diff_trees(self, before: dict, after: dict) -> dict:
+        return self.normalizer.diff_trees(before, after)
+
+    def _diff_trees_as_entries(self, before: dict, after: dict) -> dict:
+        entries: dict[str, object] = {}
+        for path, change in self._diff_trees(before, after).items():
+            entries[path] = change.get("change_type") if change.get("after") is None else change.get("after")
+        return entries
+
+    def _merge_trees(self, current_tree: dict, other_tree: dict) -> dict:
+        merged = copy.deepcopy(current_tree)
+        merged.update(copy.deepcopy(other_tree))
+        return merged
+
+    def _set_operation_metadata(self, state: dict, **metadata: object) -> None:
+        state.setdefault("operation_metadata", {}).update(metadata)
+        for key, value in metadata.items():
+            state[key] = value
+
     def _set_head_commit(self, state: dict, commit_id: str | None) -> None:
         branch = self._head_branch(state)
         if branch:
             state.setdefault("branches", {})[branch] = commit_id
         else:
             state.setdefault("head", {})["target"] = commit_id
+        self.normalizer.normalize_head(state)
         self._record_reflog(state, commit_id, "move HEAD")
 
     def _record_reflog(self, state: dict, target: str | None, message: str) -> None:
@@ -346,7 +396,7 @@ class RepositoryStateSimulator:
         commit = self._commit_by_id(state, target)
         if not commit:
             return "Object details available in the simulated repository."
-        paths = sorted((commit.get("files") or {}).keys())
+        paths = sorted((commit.get("changes") or commit.get("files") or {}).keys())
         suffix = f"\nChanged paths: {self._format_paths(paths)}" if paths else ""
         return f"commit {commit['id']}\n{commit.get('message', '')}{suffix}"
 
@@ -373,8 +423,12 @@ class RepositoryStateSimulator:
         if remote not in state.get("remotes", {}):
             raise ValueError("Remote not found.")
         self._materialize_remote_commits(state)
-        state["remote_tracking_updated"] = True
-        state["last_fetch_remote"] = remote
+        self._set_operation_metadata(
+            state,
+            remote_tracking_updated=True,
+            last_fetch_remote=remote,
+            last_fetch_local_before=self._head_commit(state),
+        )
         return f"Fetched updates from {remote}."
 
     def _pull(self, state: dict, args: list[str]) -> str:
@@ -387,8 +441,14 @@ class RepositoryStateSimulator:
             raise ValueError("Upstream branch not found.")
         self._materialize_remote_commits(state)
         state.setdefault("branches", {})[branch] = target
-        state["remote_tracking_updated"] = False
-        state["last_pull_remote_branch"] = upstream
+        self.normalizer.normalize_head(state)
+        self._set_operation_metadata(
+            state,
+            remote_tracking_updated=False,
+            last_pull_remote_branch=upstream,
+            last_pull_local_branch=branch,
+            last_pull_target=target,
+        )
         self._record_reflog(state, target, f"pull {upstream}")
         return f"Pulled {upstream} into {branch}."
 
@@ -401,7 +461,12 @@ class RepositoryStateSimulator:
         if remote not in state.get("remotes", {}):
             raise ValueError("Remote not found.")
         state.setdefault("remote_branches", {})[upstream] = state.get("branches", {}).get(branch)
-        state["last_push_remote_branch"] = upstream
+        self._set_operation_metadata(
+            state,
+            last_push_remote_branch=upstream,
+            last_push_local_branch=branch,
+            last_push_target=state.get("branches", {}).get(branch),
+        )
         return f"Pushed {branch} to {upstream}."
 
     def _add(self, state: dict, args: list[str]) -> str:
@@ -465,13 +530,18 @@ class RepositoryStateSimulator:
         current = self._head_commit(state)
         parents = [p for p in [current, state.pop("merge_parent", None)] if p]
         commit_id = self._next_commit_id(state)
+        base_tree = self._tree_for_commit(state, current)
+        staged_changes = self._changes_from_entries(base_tree, state.get("staging", {}))
+        tree = self._apply_changes(base_tree, staged_changes)
         state.setdefault("commits", []).append(
-            {
-                "id": commit_id,
-                "message": message,
-                "parents": parents,
-                "files": copy.deepcopy(state.get("staging", {})),
-            }
+            self._commit_payload(
+                state=state,
+                commit_id=commit_id,
+                message=message,
+                parents=parents,
+                tree=tree,
+                changes=staged_changes,
+            )
         )
         state["staging"] = {}
         self._set_head_commit(state, commit_id)
@@ -487,9 +557,15 @@ class RepositoryStateSimulator:
             if idx + 1 >= len(args):
                 raise ValueError("error: switch `m' requires a value.")
             commit["message"] = args[idx + 1]
-        files = copy.deepcopy(commit.get("files", {}))
-        files.update(copy.deepcopy(state.get("staging", {})))
-        commit["files"] = files
+        parent_id = (commit.get("parents") or [None])[0]
+        parent_tree = self._tree_for_commit(state, parent_id)
+        current_tree = copy.deepcopy(commit.get("tree") or parent_tree)
+        staged_changes = self._changes_from_entries(current_tree, state.get("staging", {}))
+        amended_tree = self._apply_changes(current_tree, staged_changes)
+        commit["tree"] = amended_tree
+        commit["changes"] = self._diff_trees(parent_tree, amended_tree)
+        commit["files"] = self.normalizer.files_from_changes(commit.get("changes", {}))
+        commit["is_merge"] = len(commit.get("parents", [])) > 1
         state["staging"] = {}
         self._record_reflog(state, current, "commit --amend")
         return f"[{self._head_branch(state) or 'detached'} {current}] amended commit"
@@ -537,8 +613,17 @@ class RepositoryStateSimulator:
         if other not in branches:
             raise ValueError("Branch not found.")
         if state.get("conflict_on_merge"):
-            state["conflicts"] = sorted(state.get("conflict_files", ["app.py"]))
+            conflict_paths = sorted(state.get("conflict_files", ["app.py"]))
+            state["conflicts"] = conflict_paths
+            for path in conflict_paths:
+                state.setdefault("working_tree", {}).setdefault(path, "conflict")
             state["merge_parent"] = branches[other]
+            self._set_operation_metadata(
+                state,
+                merge_conflict=True,
+                merge_source=other,
+                merge_target=branches[other],
+            )
             return "Automatic merge stopped because conflicts need resolution."
 
         current = self._head_commit(state)
@@ -549,8 +634,19 @@ class RepositoryStateSimulator:
             self._set_head_commit(state, other_target)
             return f"Fast-forwarded to {other_target}."
         commit_id = self._next_commit_id(state)
+        current_tree = self._tree_for_commit(state, current)
+        other_tree = self._tree_for_commit(state, other_target)
+        merged_tree = self._merge_trees(current_tree, other_tree)
+        changes = self._diff_trees(current_tree, merged_tree)
         state.setdefault("commits", []).append(
-            {"id": commit_id, "message": f"Merge {other}", "parents": [current, other_target]}
+            self._commit_payload(
+                state=state,
+                commit_id=commit_id,
+                message=f"Merge {other}",
+                parents=[p for p in [current, other_target] if p],
+                tree=merged_tree,
+                changes=changes,
+            )
         )
         self._set_head_commit(state, commit_id)
         return f"Merge made by the simulated recursive strategy at {commit_id}."
@@ -574,16 +670,26 @@ class RepositoryStateSimulator:
             return "Unstaged paths."
         target = self._resolve_reset_target(state, target_args[-1])
         current = self._head_commit(state)
-        current_commit = self._commit_by_id(state, current)
+        current_tree = self._tree_for_commit(state, current)
+        target_tree = self._tree_for_commit(state, target)
         self._set_head_commit(state, target)
         if mode == "--hard":
             state["staging"] = {}
             state["working_tree"] = {}
             state["conflicts"] = []
         elif mode == "--soft":
-            state["staging"] = self._files_for_soft_reset(current_commit)
+            state["staging"] = self._diff_trees_as_entries(target_tree, current_tree)
         else:
             state["staging"] = {}
+            state.setdefault("working_tree", {}).update(
+                self._diff_trees_as_entries(target_tree, current_tree)
+            )
+        self._set_operation_metadata(
+            state,
+            last_reset_mode=mode.removeprefix("--"),
+            last_reset_from=current,
+            last_reset_to=target,
+        )
         return f"Moved branch pointer to {target}."
 
     def _restore(self, state: dict, args: list[str]) -> str:
@@ -599,7 +705,6 @@ class RepositoryStateSimulator:
             return "Unstaged paths."
         for path in args:
             state.setdefault("working_tree", {}).pop(path, None)
-            state.setdefault("staging", {}).pop(path, None)
             conflicts = set(state.get("conflicts", []))
             conflicts.discard(path)
             state["conflicts"] = sorted(conflicts)
@@ -614,6 +719,12 @@ class RepositoryStateSimulator:
             state.setdefault("working_tree", {}).update(entry.get("working_tree", {}))
             state.setdefault("staging", {}).update(entry.get("staging", {}))
             state["conflicts"] = sorted(set(state.get("conflicts", [])) | set(entry.get("conflicts", [])))
+            self._set_operation_metadata(
+                state,
+                last_stash_pop_restored_paths=sorted(
+                    set(entry.get("working_tree", {})) | set(entry.get("staging", {}))
+                ),
+            )
             return "Applied stash and dropped it."
 
         if not state.get("working_tree") and not state.get("staging"):
@@ -624,6 +735,12 @@ class RepositoryStateSimulator:
                 "staging": copy.deepcopy(state.get("staging", {})),
                 "conflicts": copy.deepcopy(state.get("conflicts", [])),
             }
+        )
+        self._set_operation_metadata(
+            state,
+            last_stash_saved_paths=sorted(
+                set(state.get("working_tree", {})) | set(state.get("staging", {}))
+            ),
         )
         state["working_tree"] = {}
         state["staging"] = {}
@@ -645,14 +762,18 @@ class RepositoryStateSimulator:
             raise ValueError("Commit not found.")
         current = self._head_commit(state)
         commit_id = self._next_commit_id(state)
+        current_tree = self._tree_for_commit(state, current)
         state.setdefault("commits", []).append(
-            {
-                "id": commit_id,
-                "message": f"Revert {commit.get('message', target)}",
-                "parents": [current] if current else [],
-                "files": {},
-            }
+            self._commit_payload(
+                state=state,
+                commit_id=commit_id,
+                message=f"Revert {commit.get('message', target)}",
+                parents=[current] if current else [],
+                tree=current_tree,
+                changes={},
+            )
         )
+        self._set_operation_metadata(state, last_revert_commit=target, last_revert_created=commit_id)
         self._set_head_commit(state, commit_id)
         return f"Created revert commit {commit_id}."
 
@@ -665,13 +786,25 @@ class RepositoryStateSimulator:
             raise ValueError("Commit not found.")
         current = self._head_commit(state)
         commit_id = self._next_commit_id(state)
+        base_tree = self._tree_for_commit(state, current)
+        source_changes = copy.deepcopy(source.get("changes") or {})
+        if not source_changes:
+            source_changes = self._changes_from_entries(base_tree, source.get("files", {}))
+        tree = self._apply_changes(base_tree, source_changes)
         state.setdefault("commits", []).append(
-            {
-                "id": commit_id,
-                "message": source.get("message", "cherry-pick"),
-                "parents": [current] if current else [],
-                "files": copy.deepcopy(source.get("files", {})),
-            }
+            self._commit_payload(
+                state=state,
+                commit_id=commit_id,
+                message=source.get("message", "cherry-pick"),
+                parents=[current] if current else [],
+                tree=tree,
+                changes=source_changes,
+            )
+        )
+        self._set_operation_metadata(
+            state,
+            last_cherry_pick_source=source_id,
+            last_cherry_pick_created=commit_id,
         )
         self._set_head_commit(state, commit_id)
         return f"Applied changes as {commit_id}."
@@ -753,7 +886,10 @@ class RepositoryStateSimulator:
                         "id": commit_id,
                         "message": f"Remote commit {commit_id}",
                         "parents": [previous] if previous else [],
+                        "tree": {},
+                        "changes": {},
                         "files": {},
+                        "is_merge": False,
                     }
                 )
                 existing.add(commit_id)
@@ -765,6 +901,7 @@ class RepositoryStateSimulator:
 
 class RepositorySnapshotService:
     def snapshot(self, state: dict) -> dict:
+        state = RepositoryStateNormalizer().normalize(state)
         branches = state.get("branches", {})
         head = state.get("head", {})
         head_target = branches.get(head.get("name")) if head.get("type") == "branch" else head.get("target")
@@ -782,4 +919,5 @@ class RepositorySnapshotService:
             "stash_stack": state.get("stash_stack", []),
             "partial_hunks": state.get("partial_hunks", {}),
             "reflog": state.get("reflog", []),
+            "operation_metadata": state.get("operation_metadata", {}),
         }
