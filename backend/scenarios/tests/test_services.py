@@ -34,6 +34,7 @@ from scenarios.serializers import session_payload
 from scenarios.services import (
     CommandCountClassifier,
     CommandProcessingService,
+    InspectionAnswerSubmissionService,
     ScenarioSessionService,
 )
 
@@ -855,10 +856,18 @@ def test_inspection_scenario_completes_without_fake_state_changes(student):
     initial_state = session.repository_state
 
     response = CommandProcessingService().submit_command(session=session, command="git status")
+    session.refresh_from_db()
+    assert session.status == SESSION_STATUS_STARTED
+
+    answer_response = InspectionAnswerSubmissionService().submit_answer(
+        session=session,
+        answer=session.variant.expected_observations["expected_answer"],
+    )
 
     session.refresh_from_db()
     assert difficulty.completion_type == COMPLETION_INSPECTION
     assert response["command_classification"] == COMMAND_DIAGNOSTIC
+    assert answer_response["evaluation"].target_matched is True
     assert session.status == "completed"
     assert session.counted_action_total == 0
     assert session.repository_state == initial_state
