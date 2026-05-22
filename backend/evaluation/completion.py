@@ -13,6 +13,7 @@ class CompletionEvaluationContext:
     previous_state: dict
     next_state: dict
     executed_commands: list[str]
+    inspection_answer: dict | None = None
 
 
 class ScenarioCompletionEvaluator:
@@ -48,4 +49,5 @@ class InspectionCompletionEvaluator:
             current_state=context.next_state,
             expected_observations=context.session.variant.expected_observations,
             executed_commands=context.executed_commands,
+            submitted_answer=context.inspection_answer,
         )

@@ -1,19 +1,27 @@
 import type { Difficulty } from '@/features/scenarios/types'
 
+export type RepositoryValue =
+  | string
+  | number
+  | boolean
+  | null
+  | RepositoryValue[]
+  | { [key: string]: RepositoryValue }
+
 export type RepositoryCommit = {
   id: string
   message: string
   parents: string[]
-  tree?: Record<string, string>
+  tree?: Record<string, RepositoryValue>
   changes?: Record<
     string,
     {
       change_type?: string
-      before?: string | null
-      after?: string | null
+      before?: RepositoryValue
+      after?: RepositoryValue
     }
   >
-  files?: Record<string, string>
+  files?: Record<string, RepositoryValue>
   author?: string
   order?: number
   is_merge?: boolean
@@ -28,20 +36,21 @@ export type RepositorySnapshot = {
     name?: string
     target?: string | null
   }
-  staging: Record<string, string>
-  working_tree: Record<string, string>
+  staging: Record<string, RepositoryValue>
+  working_tree: Record<string, RepositoryValue>
   conflicts: string[]
   remotes?: Record<string, string>
   remote_branches?: Record<string, string | null>
   upstream_tracking?: Record<string, string>
   stash_stack?: Array<{
-    working_tree?: Record<string, string>
-    staging?: Record<string, string>
+    working_tree?: Record<string, RepositoryValue>
+    staging?: Record<string, RepositoryValue>
     conflicts?: string[]
   }>
   reflog?: Array<Record<string, string | null>>
-  partial_hunks?: Record<string, unknown>
-  operation_metadata?: Record<string, unknown>
+  partial_hunks?: Record<string, RepositoryValue>
+  replaced_commits?: Record<string, string>
+  operation_metadata?: Record<string, RepositoryValue>
 }
 
 export type ScenarioStudentContext = {
@@ -61,6 +70,8 @@ export type ScenarioSession = {
   difficulty_instance_id: number
   completed_at: string | null
   first_attempt_star_eligible: boolean
+  completion_type: 'state_based' | 'inspection' | 'expanded_state_based'
+  inspection_answer?: Record<string, unknown>
   scenario: {
     id: number
     slug: string
@@ -144,6 +155,13 @@ export type CommandResponse = {
     contextual_feedback: string
     created_at: string
   }
+}
+
+export type InspectionAnswerResponse = {
+  session: ScenarioSession
+  evaluation_result: string
+  summary: string
+  failed_rules: Array<Record<string, unknown>>
 }
 
 export type TerminalLine = {

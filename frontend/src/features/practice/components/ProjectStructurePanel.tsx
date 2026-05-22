@@ -1,7 +1,7 @@
 import { FileText, Folder, FolderOpen } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
-import type { RepositorySnapshot } from '@/features/practice/types'
+import type { RepositorySnapshot, RepositoryValue } from '@/features/practice/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Card'
 import { cn } from '@/shared/utils/cn'
 
@@ -17,7 +17,7 @@ type TreeNode = {
 function buildTree(snapshot: RepositorySnapshot): TreeNode[] {
   const root: TreeNode = { name: '', path: '', type: 'directory', children: [] }
 
-  const addPath = (filePath: string, status: string, source: 'staging' | 'working_tree') => {
+  const addPath = (filePath: string, status: RepositoryValue, source: 'staging' | 'working_tree') => {
     const parts = filePath.split('/')
     let current = root
 
@@ -33,7 +33,7 @@ function buildTree(snapshot: RepositorySnapshot): TreeNode[] {
           name: part,
           path: fullPath,
           type: isFile ? 'file' : 'directory',
-          status: isFile ? status : undefined,
+          status: isFile ? statusLabel(status) : undefined,
           source: isFile ? source : undefined,
           children: [],
         }
@@ -51,6 +51,14 @@ function buildTree(snapshot: RepositorySnapshot): TreeNode[] {
   Object.entries(snapshot.working_tree).forEach(([path, status]) => addPath(path, status, 'working_tree'))
 
   return root.children
+}
+
+function statusLabel(value: RepositoryValue) {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    const status = value.status
+    if (typeof status === 'string') return status
+  }
+  return String(value ?? 'changed')
 }
 
 function TreeItem({ node, depth = 0 }: { node: TreeNode; depth?: number }) {

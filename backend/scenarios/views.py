@@ -17,11 +17,12 @@ from scenarios.selectors import (
 )
 from scenarios.serializers import (
     CommandSubmitSerializer,
+    InspectionAnswerSubmitSerializer,
     ScenarioStartSerializer,
     SkillFocusDemoCommandSerializer,
     session_payload,
 )
-from scenarios.services import CommandProcessingService, ScenarioSessionService
+from scenarios.services import CommandProcessingService, InspectionAnswerSubmissionService, ScenarioSessionService
 from simulator.services import RepositorySnapshotService, RepositoryStateSimulator
 
 
@@ -178,6 +179,31 @@ class CommandSubmitAPIView(APIView):
                     "contextual_feedback": result["contextual_feedback"],
                     "created_at": result["step"].created_at,
                 },
+            }
+        )
+
+
+class InspectionAnswerSubmitAPIView(APIView):
+    def post(self, request, session_id: int):
+        serializer = InspectionAnswerSubmitSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        session = ScenarioSession.objects.select_related(
+            "scenario",
+            "learning_unit",
+            "difficulty_instance",
+            "difficulty_instance__target_rule",
+            "variant",
+        ).get(id=session_id, user=request.user)
+        result = InspectionAnswerSubmissionService().submit_answer(
+            session=session,
+            answer=serializer.validated_data["answer"],
+        )
+        return Response(
+            {
+                "session": session_payload(result["session"], include_steps=False),
+                "evaluation_result": result["evaluation"].result_category,
+                "summary": result["evaluation"].summary,
+                "failed_rules": result["evaluation"].failed_rules,
             }
         )
 

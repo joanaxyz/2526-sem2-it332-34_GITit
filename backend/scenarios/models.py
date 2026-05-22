@@ -220,6 +220,7 @@ class ScenarioSession(models.Model):
     changed_variant = models.BooleanField(default=False)
     command_policy_snapshot = models.JSONField(default=dict)
     repository_state = models.JSONField(default=dict)
+    inspection_answer = models.JSONField(default=dict, blank=True)
     counted_action_total = models.PositiveIntegerField(default=0)
     non_counted_diagnostic_total = models.PositiveIntegerField(default=0)
     total_attempts = models.PositiveIntegerField(default=0)
