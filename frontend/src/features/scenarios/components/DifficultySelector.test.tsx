@@ -10,6 +10,7 @@ const difficulties: DifficultyAccess[] = [
     difficulty: 'easy',
     status: 'not_started',
     review_available: false,
+    mastery_progress: { mastered: 0, required: 3 },
     active_session_id: null,
     retry_session_id: null,
     policy: { id: 1, min_counted_commands: 3, max_counted_commands: 9, non_counted_patterns: [] },
@@ -21,6 +22,7 @@ const difficulties: DifficultyAccess[] = [
     difficulty: 'medium',
     status: 'locked',
     review_available: false,
+    mastery_progress: { mastered: 0, required: 3 },
     active_session_id: null,
     retry_session_id: null,
     policy: { id: 2, min_counted_commands: 2, max_counted_commands: 9, non_counted_patterns: [] },
@@ -32,6 +34,7 @@ const difficulties: DifficultyAccess[] = [
     difficulty: 'hard',
     status: 'completed',
     review_available: true,
+    mastery_progress: { mastered: 3, required: 3 },
     active_session_id: null,
     retry_session_id: null,
     policy: { id: 3, min_counted_commands: 1, max_counted_commands: 9, non_counted_patterns: [] },
@@ -63,7 +66,7 @@ describe('DifficultySelector', () => {
     expect(screen.queryByText(/counted action/i)).not.toBeInTheDocument()
   })
 
-  it('renders retry for an active session instead of continuing the same variant', () => {
+  it('renders continue for an active session resume', () => {
     render(
       <DifficultySelector
         difficulties={[
@@ -88,8 +91,8 @@ describe('DifficultySelector', () => {
       />,
     )
 
-    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /continue/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /continue/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /retry/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /in progress/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /start/i })).not.toBeInTheDocument()
   })

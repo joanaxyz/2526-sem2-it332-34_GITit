@@ -13,6 +13,7 @@ from scenarios.selectors import (
     scenario_list_queryset,
     scenario_queryset,
     scenario_status_payloads,
+    required_successful_attempts_for_difficulty,
 )
 from scenarios.serializers import (
     CommandSubmitSerializer,
@@ -199,12 +200,24 @@ class ScenarioRetryAPIView(APIView):
         ).get(id=session_id, user=request.user)
         if prior.mode != SESSION_MODE_PRIMARY:
             raise Locked("Review sessions cannot be retried.")
+        # If the prior session is a completed, accurate primary session and the
+        # user already has the required number of successful accurate completions
+        # for this difficulty, prevent retrying and direct them to Review mode.
         if (
             prior.mode == SESSION_MODE_PRIMARY
             and prior.status == SESSION_STATUS_COMPLETED
             and prior.counted_action_total <= prior.command_policy_snapshot["min_counted_commands"]
         ):
-            raise Locked("This scenario is already mastered. Use Review mode instead.")
+            required = required_successful_attempts_for_difficulty(prior.difficulty_instance.difficulty)
+            accurate_count = ScenarioSession.objects.filter(
+                user=request.user,
+                mode=SESSION_MODE_PRIMARY,
+                status=SESSION_STATUS_COMPLETED,
+                difficulty_instance=prior.difficulty_instance,
+                counted_action_total__lte=prior.command_policy_snapshot["min_counted_commands"],
+            ).count()
+            if accurate_count >= required:
+                raise Locked("This scenario is already mastered. Use Review mode instead.")
         if prior.status == SESSION_STATUS_STARTED:
             prior = ScenarioSessionService().abandon(session=prior)
         session = ScenarioSessionService().start_session(

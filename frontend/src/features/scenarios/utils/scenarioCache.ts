@@ -83,7 +83,7 @@ export function updateScenarioListWithSession(
   if (!scenarios?.length) return scenarios
 
   let matchedScenario = false
-  const unlockedDifficulty = session.status === 'completed' ? nextDifficultyAfter(session.difficulty) : null
+  const unlockedDifficulty = hasRequiredAccurateAttempts(session) ? nextDifficultyAfter(session.difficulty) : null
 
   const nextScenarios = scenarios.map((scenario) => {
     if (scenario.id !== session.scenario.id) return scenario
@@ -92,35 +92,42 @@ export function updateScenarioListWithSession(
     let changed = false
     const difficulties = scenario.difficulties.map((difficulty) => {
       if (difficulty.difficulty === session.difficulty) {
-        const status = statusFromSession(session.status, difficulty.status, Boolean(difficulty.completion))
-        const latestAttempt =
-          session.status === 'completed'
-            ? latestAttemptFromSession(session)
-            : difficulty.latest_attempt?.status === 'completed'
-              ? difficulty.latest_attempt
-              : latestAttemptFromSession(session)
-        const mastered = latestAttempt.accuracy_rate !== null && latestAttempt.accuracy_rate >= 100
+        // Prefer completion info provided by the server in the session payload
+        const hasSessionCompletion = Boolean((session as any).completion)
+        const status = statusFromSession(
+          session.status,
+          difficulty.status,
+          hasSessionCompletion || Boolean(difficulty.completion),
+        )
+        const latestAttempt = latestAttemptFromSession(session)
+        const completedAccurateAttempt = session.status === 'completed' && latestAttempt.accuracy_rate !== null && latestAttempt.accuracy_rate >= 100
+        const masteredRecords =
+          session.mastery_progress ??
+          (completedAccurateAttempt && difficulty.latest_attempt?.id !== session.id
+            ? {
+                ...difficulty.mastery_progress,
+                mastered: Math.min(difficulty.mastery_progress.mastered + 1, difficulty.mastery_progress.required),
+              }
+            : difficulty.mastery_progress)
+        const mastered = masteredRecords.mastered >= masteredRecords.required
         const activeSessionId = session.status === 'started' ? session.id : null
         const retrySessionId =
-          (session.status === 'failed' || session.status === 'abandoned' || (session.status === 'completed' && !mastered)) && !mastered
+          session.status === 'started'
+            ? null
+            : session.status === 'failed' ||
+                session.status === 'abandoned' ||
+                (session.status === 'completed' && (!mastered || !completedAccurateAttempt))
             ? session.id
-            : mastered
-              ? null
-              : difficulty.retry_session_id
-        const completion =
-          session.status === 'completed'
-            ? {
-                first_attempt_star: session.first_attempt_star_eligible,
-                counted_action_total: session.counts.counted_action_total,
-                completed_at: session.completed_at ?? new Date().toISOString(),
-              }
-            : difficulty.completion
+            : null
+        const completion = (session as any).completion ?? difficulty.completion
+        const reviewAvailable = Boolean(completion) && mastered && completedAccurateAttempt
 
         if (
           difficulty.status === status &&
           difficulty.active_session_id === activeSessionId &&
           difficulty.retry_session_id === retrySessionId &&
-          difficulty.review_available === (mastered || difficulty.review_available) &&
+          difficulty.review_available === reviewAvailable &&
+          difficulty.mastery_progress === masteredRecords &&
           difficulty.completion === completion &&
           difficulty.latest_attempt === latestAttempt
         ) {
@@ -133,7 +140,13 @@ export function updateScenarioListWithSession(
           status,
           active_session_id: activeSessionId,
           retry_session_id: retrySessionId,
-          review_available: mastered || difficulty.review_available,
+          review_available: reviewAvailable,
+          mastery_progress: masteredRecords,
+          mastered_records: masteredRecords,
+          successful_attempts: {
+            count: masteredRecords.mastered,
+            required: masteredRecords.required,
+          },
           completion,
           latest_attempt: latestAttempt,
         }
@@ -218,10 +231,17 @@ function latestAttemptFromSession(session: ScenarioSession): LatestAttemptStats 
 }
 
 function latestAttemptAccuracy(session: ScenarioSession) {
-  if (session.status !== 'completed') return null
+  if (session.status === 'started') return null
+  if (session.status === 'failed' || session.status === 'abandoned') return 0
   if (session.counts.counted_action_total <= session.policy.min_counted_commands) return 100
   if (session.policy.min_counted_commands === 0) return 0
   return Math.round((session.policy.min_counted_commands / session.counts.counted_action_total) * 100)
+}
+
+function hasRequiredAccurateAttempts(session: ScenarioSession) {
+  if (session.status !== 'completed') return false
+  if (latestAttemptAccuracy(session) !== 100) return false
+  return session.mastery_progress.mastered >= session.mastery_progress.required
 }
 
 function statusFromSession(

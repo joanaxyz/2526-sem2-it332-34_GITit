@@ -34,6 +34,7 @@ const scenario: ScenarioSkillFocus = {
       difficulty: 'easy',
       status: 'in_progress',
       review_available: false,
+      mastery_progress: { mastered: 0, required: 3 },
       active_session_id: 900,
       retry_session_id: null,
       policy: { id: 1, min_counted_commands: 2, max_counted_commands: 6, non_counted_patterns: [] },
@@ -54,6 +55,7 @@ const scenario: ScenarioSkillFocus = {
       difficulty: 'medium',
       status: 'locked',
       review_available: false,
+      mastery_progress: { mastered: 0, required: 3 },
       active_session_id: null,
       retry_session_id: null,
       policy: { id: 2, min_counted_commands: 2, max_counted_commands: 6, non_counted_patterns: [] },
@@ -65,6 +67,7 @@ const scenario: ScenarioSkillFocus = {
       difficulty: 'hard',
       status: 'locked',
       review_available: false,
+      mastery_progress: { mastered: 0, required: 3 },
       active_session_id: null,
       retry_session_id: null,
       policy: { id: 3, min_counted_commands: 1, max_counted_commands: 5, non_counted_patterns: [] },
@@ -99,6 +102,13 @@ const completedSession: ScenarioSession = {
     id: 77,
     label: 'A',
     changed_variant: false,
+  },
+  mastery_progress: { mastered: 3, required: 3 },
+  mastered_records: { mastered: 3, required: 3 },
+  completion: {
+    first_attempt_star: true,
+    counted_action_total: 2,
+    completed_at: '2026-05-18T12:00:00Z',
   },
   policy: { id: 1, min_counted_commands: 2, max_counted_commands: 6, non_counted_patterns: [] },
   counts: {
@@ -182,6 +192,7 @@ describe('updateScenarioListWithSession', () => {
   it('calculates command accuracy from target actions versus used actions', () => {
     const sessionWithExtraAction: ScenarioSession = {
       ...completedSession,
+      mastery_progress: { mastered: 2, required: 3 },
       counts: {
         ...completedSession.counts,
         counted_action_total: 3,
@@ -195,7 +206,7 @@ describe('updateScenarioListWithSession', () => {
     expect(updated.difficulties[0].retry_session_id).toBe(sessionWithExtraAction.id)
   })
 
-  it('preserves completed accuracy when a later retry is active or abandoned', () => {
+  it('uses the latest retry attempt for mastery and retry routing', () => {
     const completedDifficulty = {
       ...scenario.difficulties[0],
       status: 'completed' as const,
@@ -226,6 +237,7 @@ describe('updateScenarioListWithSession', () => {
       id: 901,
       status: 'started',
       completed_at: null,
+      mastery_progress: { mastered: 1, required: 3 },
       counts: {
         ...completedSession.counts,
         counted_action_total: 0,
@@ -237,10 +249,10 @@ describe('updateScenarioListWithSession', () => {
     expect(activeUpdated.difficulties[0]).toMatchObject({
       status: 'completed',
       active_session_id: 901,
-      retry_session_id: 900,
+      retry_session_id: null,
       latest_attempt: {
-        id: 900,
-        accuracy_rate: 67,
+        id: 901,
+        accuracy_rate: null,
       },
     })
 
@@ -255,8 +267,8 @@ describe('updateScenarioListWithSession', () => {
       active_session_id: null,
       retry_session_id: 901,
       latest_attempt: {
-        id: 900,
-        accuracy_rate: 67,
+        id: 901,
+        accuracy_rate: 0,
       },
     })
   })

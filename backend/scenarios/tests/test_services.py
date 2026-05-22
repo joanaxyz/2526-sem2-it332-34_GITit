@@ -125,6 +125,30 @@ def test_state_based_completion_creates_completion_record(student):
     assert completion.counted_action_total == 2
 
 
+def test_session_payload_includes_completion_when_record_exists(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="form-clean-commit",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+
+    CommandProcessingService().submit_command(session=session, command="git add .")
+    CommandProcessingService().submit_command(
+        session=session, command='git commit -m "starter snapshot"'
+    )
+
+    session.refresh_from_db()
+    payload = session_payload(session, include_steps=False)
+    assert "completion" in payload and payload["completion"] is not None
+    assert payload["completion"]["counted_action_total"] == 2
+    assert payload["completion"]["first_attempt_star"] in (True, False)
+    assert payload["completion"]["completed_at"] is not None
+
+
 def test_partial_staging_requires_the_selected_file_scope(student):
     difficulty = DifficultyInstance.objects.get(
         scenario__slug="stage-selected-changes",
@@ -296,7 +320,8 @@ def test_scenario_payload_includes_latest_attempt_accuracy(student):
     assert easy["latest_attempt"]["id"] == session.id
     assert easy["latest_attempt"]["accuracy_rate"] == 100
     assert easy["latest_attempt"]["command_accurate"] is True
-    assert session_payload(session)["next_difficulty"]["difficulty"] == "medium"
+    assert easy["mastery_progress"] == {"mastered": 1, "required": 3}
+    assert session_payload(session)["next_difficulty"] is None
 
 
 def test_latest_attempt_accuracy_reflects_extra_counted_actions(student):
@@ -322,7 +347,7 @@ def test_latest_attempt_accuracy_reflects_extra_counted_actions(student):
     assert easy["latest_attempt"]["command_accurate"] is False
 
 
-def test_completed_scenario_remains_retryable_until_primary_accuracy_is_perfect(student):
+def test_completed_scenario_remains_retryable_until_three_mastered_instances(student):
     difficulty = DifficultyInstance.objects.get(
         scenario__slug="form-clean-commit",
         difficulty="easy",
@@ -366,13 +391,14 @@ def test_completed_scenario_remains_retryable_until_primary_accuracy_is_perfect(
     assert retry.status == SESSION_STATUS_COMPLETED
     assert completion.session_id == retry.id
     assert completion.counted_action_total == difficulty.command_policy.min_counted_commands
-    assert easy["review_available"] is True
-    assert easy["retry_session_id"] is None
+    assert easy["review_available"] is False
+    assert easy["retry_session_id"] == retry.id
     assert easy["latest_attempt"]["id"] == retry.id
     assert easy["latest_attempt"]["accuracy_rate"] == 100
+    assert easy["mastery_progress"] == {"mastered": 1, "required": 3}
 
 
-def test_abandoned_retry_does_not_clear_completed_accuracy(student):
+def test_abandoned_retry_becomes_latest_zero_mastery(student):
     difficulty = DifficultyInstance.objects.get(
         scenario__slug="form-clean-commit",
         difficulty="easy",
@@ -403,8 +429,49 @@ def test_abandoned_retry_does_not_clear_completed_accuracy(student):
     assert easy["status"] == "completed"
     assert easy["review_available"] is False
     assert easy["retry_session_id"] == retry.id
-    assert easy["latest_attempt"]["id"] == session.id
-    assert easy["latest_attempt"]["accuracy_rate"] == 67
+    assert easy["latest_attempt"]["id"] == retry.id
+    assert easy["latest_attempt"]["accuracy_rate"] == 0
+
+
+def test_later_completed_retry_replaces_prior_mastery_even_when_worse(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="form-clean-commit",
+        difficulty="easy",
+    )
+    first = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    CommandProcessingService().submit_command(session=first, command="git add .")
+    CommandProcessingService().submit_command(
+        first, command='git commit -m "starter snapshot"'
+    )
+    first.refresh_from_db()
+
+    retry = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="retry",
+        prior_session=first,
+    )
+    retry.status = SESSION_STATUS_COMPLETED
+    retry.counted_action_total = 4
+    retry.completed_at = timezone.now()
+    retry.ended_at = retry.completed_at
+    retry.save(update_fields=["status", "counted_action_total", "completed_at", "ended_at"])
+    CommandProcessingService()._complete_session(retry)
+
+    payload = scenario_status_payload(user=student, scenario=difficulty.scenario)
+    easy = next(item for item in payload["difficulties"] if item["difficulty"] == "easy")
+    completion = CompletionRecord.objects.get(user=student, difficulty_instance=difficulty)
+
+    assert completion.session_id == retry.id
+    assert completion.counted_action_total == 4
+    assert easy["latest_attempt"]["id"] == retry.id
+    assert easy["latest_attempt"]["accuracy_rate"] == 50
+    assert easy["review_available"] is False
+    assert easy["retry_session_id"] == retry.id
 
 
 def test_review_sessions_do_not_replace_primary_accuracy(student):
@@ -522,7 +589,7 @@ def test_invalid_git_syntax_consumes_action_budget(student):
     session.refresh_from_db()
     assert response["command_classification"] == COMMAND_COUNTED
     assert response["evaluation_result"] == RESULT_INVALID
-    assert "usage: git status" in response["terminal_output"]
+    assert "error: unknown option" in response["terminal_output"]
     assert session.counted_action_total == 1
     assert response["remaining_counted_commands"] == session.command_policy_snapshot["max_counted_commands"] - 1
 

@@ -45,6 +45,14 @@ export type ScenarioSession = {
     label: string
     changed_variant: boolean
   }
+  mastery_progress: {
+    mastered: number
+    required: number
+  }
+  mastered_records?: {
+    mastered: number
+    required: number
+  }
   policy: {
     id: number
     min_counted_commands: number
@@ -69,6 +77,11 @@ export type ScenarioSession = {
   next_difficulty: {
     id: number
     difficulty: Difficulty
+  } | null
+  completion?: {
+    first_attempt_star: boolean
+    counted_action_total: number
+    completed_at: string
   } | null
 }
 

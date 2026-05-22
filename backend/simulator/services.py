@@ -222,7 +222,8 @@ class RepositoryStateSimulator:
         state["working_tree"] = {}
         state["staging"] = {}
         state["conflicts"] = []
-        return f"Cloned {url}."
+        target_dir = args[1] if len(args) > 1 else url.rstrip("/").rsplit("/", 1)[-1].removesuffix(".git")
+        return f"Cloning into '{target_dir}'...\ndone."
 
     def _status(self, state: dict, args: list[str]) -> str:
         branch = self._head_branch(state) or "HEAD (detached)"

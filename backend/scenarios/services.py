@@ -29,7 +29,8 @@ from scenarios.models import (
     ScenarioSession,
     StepLog,
 )
-from simulator.command_engine import Pygit2GitCommandEngine
+from scenarios.selectors import required_successful_attempts_for_difficulty
+from simulator.command_engine import Pygit2CommandEngine
 from simulator.services import (
     RepositorySnapshotService,
     RepositoryStateSimulator,
@@ -203,7 +204,7 @@ class CommandProcessingService:
 
         state_tools = RepositoryStateSimulator()
         snapshotter = RepositorySnapshotService()
-        command_engine = Pygit2GitCommandEngine()
+        command_engine = Pygit2CommandEngine()
         previous_state = state_tools.clone_state(session.repository_state)
         command_result = command_engine.process(previous_state, command)
         classification, increment = CommandCountClassifier().classify(
@@ -297,18 +298,44 @@ class CommandProcessingService:
         session.ended_at = session.completed_at
         session.rta_success = bool(session.rta_eligible and session.first_attempt_star_eligible)
         if session.mode == SESSION_MODE_PRIMARY:
-            completion, created = CompletionRecord.objects.get_or_create(
-                user=session.user,
-                scenario=session.scenario,
-                difficulty_instance=session.difficulty_instance,
-                defaults={
-                    "session": session,
-                    "first_attempt_star": session.first_attempt_star_eligible,
-                    "counted_action_total": session.counted_action_total,
-                },
+            # Only create or update a CompletionRecord once the user has reached
+            # the required number of successful accurate completions for this
+            # difficulty (easy=3, medium/hard=2).
+            required = required_successful_attempts_for_difficulty(
+                session.difficulty_instance.difficulty
             )
-            if not created and session.counted_action_total < completion.counted_action_total:
-                completion.session = session
-                completion.counted_action_total = session.counted_action_total
-                completion.save(update_fields=["session", "counted_action_total"])
-            StreakService().record_completion(user=session.user, completed_at=session.completed_at)
+            previous_accurate = ScenarioSession.objects.filter(
+                user=session.user,
+                mode=SESSION_MODE_PRIMARY,
+                status=SESSION_STATUS_COMPLETED,
+                difficulty_instance=session.difficulty_instance,
+                counted_action_total__lte=session.difficulty_instance.command_policy.min_counted_commands,
+            ).count()
+            # Include the current session if it is accurate
+            current_is_accurate = session.counted_action_total <= session.difficulty_instance.command_policy.min_counted_commands
+            accurate_count = previous_accurate + (1 if current_is_accurate else 0)
+            if accurate_count >= required:
+                completion, created = CompletionRecord.objects.get_or_create(
+                    user=session.user,
+                    scenario=session.scenario,
+                    difficulty_instance=session.difficulty_instance,
+                    defaults={
+                        "session": session,
+                        "first_attempt_star": session.first_attempt_star_eligible,
+                        "counted_action_total": session.counted_action_total,
+                    },
+                )
+                if not created:
+                    completion.session = session
+                    completion.first_attempt_star = session.first_attempt_star_eligible
+                    completion.counted_action_total = session.counted_action_total
+                    completion.completed_at = session.completed_at
+                    completion.save(
+                        update_fields=[
+                            "session",
+                            "first_attempt_star",
+                            "counted_action_total",
+                            "completed_at",
+                        ]
+                    )
+                StreakService().record_completion(user=session.user, completed_at=session.completed_at)

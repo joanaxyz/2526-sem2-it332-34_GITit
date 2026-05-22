@@ -1,4 +1,4 @@
-import { Lock, Play, RefreshCcw, RotateCcw, Star } from 'lucide-react'
+import { ArrowRight, Lock, Play, RefreshCcw, RotateCcw, Star } from 'lucide-react'
 import type { CSSProperties } from 'react'
 
 import type { DifficultyAccess, DifficultyActionIntent } from '@/features/scenarios/types'
@@ -7,10 +7,27 @@ import { cn } from '@/shared/utils/cn'
 
 function actionForDifficulty(difficulty: DifficultyAccess): DifficultyActionIntent | null {
   if (difficulty.status === 'locked') return null
-  if (difficulty.status === 'in_progress') return difficulty.active_session_id ? 'retry' : null
-  if (difficulty.status === 'completed') return difficulty.review_available ? 'review' : 'retry'
+  if (difficulty.status === 'in_progress') return difficulty.active_session_id ? 'resume' : null
+  if (difficulty.status === 'completed') {
+    const progress = masteredRecordsFor(difficulty)
+    const hasRequiredAttempts = progress.mastered >= progress.required
+    const latestAccuracy = difficulty.latest_attempt?.accuracy_rate ?? null
+    const isAccurate = latestAccuracy !== null && latestAccuracy >= 100
+    if (isAccurate) return hasRequiredAttempts ? 'review' : 'continue'
+    return 'retry'
+  }
   if (difficulty.status === 'failed' || difficulty.status === 'abandoned') return 'retry'
   return 'start'
+}
+
+function masteredRecordsFor(difficulty: DifficultyAccess) {
+  if (difficulty.successful_attempts) {
+    return {
+      mastered: difficulty.successful_attempts.count,
+      required: difficulty.successful_attempts.required,
+    }
+  }
+  return difficulty.mastered_records ?? difficulty.mastery_progress
 }
 
 export function DifficultyActionButton({
@@ -24,6 +41,8 @@ export function DifficultyActionButton({
   const buttonLabel =
     action === 'review'
       ? 'Review'
+      : action === 'continue' || action === 'resume'
+        ? 'Continue'
       : action === 'retry'
         ? 'Retry'
         : 'Start'
@@ -32,17 +51,20 @@ export function DifficultyActionButton({
       ? Lock
       : action === 'review'
         ? RotateCcw
+        : action === 'continue' || action === 'resume'
+          ? ArrowRight
         : action === 'retry'
           ? RefreshCcw
           : Play
   const latestAttempt = difficulty.latest_attempt
   const mastery = latestAttempt?.accuracy_rate ?? null
+  const masteredRecords = masteredRecordsFor(difficulty)
 
   return (
-    <div className="flex items-center rounded-md border border-border bg-background/30 p-3">
-      <div className="flex items-center gap-2">
-        <div className="text-sm font-bold capitalize">{difficulty.difficulty}</div>
+    <div className="flex items-center gap-3 rounded-md border border-border bg-background/30 p-3">
+      <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
+          <div className="text-sm font-bold capitalize">{difficulty.difficulty}</div>
           <Button
             type="button"
             size="sm"
@@ -57,8 +79,19 @@ export function DifficultyActionButton({
           </Button>
           {difficulty.completion?.first_attempt_star ? <Star className="size-4 text-primary" /> : null}
         </div>
+        <div className="mt-3 flex items-center gap-2">
+          <span className="font-mono text-xs font-bold text-muted-foreground">
+            {masteredRecords.mastered}/{masteredRecords.required}
+          </span>
+          <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-border">
+            <span
+              className="block h-full rounded-full bg-primary"
+              style={{ width: `${(masteredRecords.mastered / masteredRecords.required) * 100}%` }}
+            />
+          </span>
+        </div>
       </div>
-      <div className="ml-auto">
+      <div>
         <MasteryProgress value={mastery} />
       </div>
     </div>

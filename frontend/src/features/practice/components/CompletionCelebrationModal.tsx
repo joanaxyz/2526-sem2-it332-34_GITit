@@ -1,4 +1,4 @@
-import { ArrowRight, Award, PartyPopper, Sparkles } from 'lucide-react'
+import { ArrowRight, Award, PartyPopper, RefreshCcw, Sparkles, XCircle } from 'lucide-react'
 import type { CSSProperties } from 'react'
 
 import type { ScenarioSession } from '@/features/practice/types'
@@ -45,9 +45,13 @@ export function CompletionCelebrationModal({
   onClose,
   onBackToUnits,
   onNextLevel,
+  onContinue,
+  onRetry,
   onReviewDifficulty,
   previousDifficulties = [],
   isStartingNextLevel = false,
+  isContinuing = false,
+  isRetrying = false,
   isReviewing = false,
   nextDifficultyLabel,
 }: {
@@ -56,70 +60,114 @@ export function CompletionCelebrationModal({
   onClose: () => void
   onBackToUnits: () => void
   onNextLevel?: () => void
+  onContinue?: () => void
+  onRetry?: () => void
   onReviewDifficulty?: (difficulty: DifficultyAccess) => void
   previousDifficulties?: DifficultyAccess[]
   isStartingNextLevel?: boolean
+  isContinuing?: boolean
+  isRetrying?: boolean
   isReviewing?: boolean
   nextDifficultyLabel?: string | null
 }) {
   const accuracy = completionAccuracy(session)
+  const isFailed = session.status === 'failed'
   const withinMasteryTarget = session.counts.counted_action_total <= session.policy.min_counted_commands
-  const headline = session.first_attempt_star_eligible ? 'Clean sweep!' : 'Scenario cleared!'
-  const message = session.first_attempt_star_eligible
-    ? 'You reached the target state without a miss — crisp, confident Git thinking.'
-    : 'You got the repository exactly where it needed to be. The detours count as practice; the finish counts as progress.'
-  const isNavigating = isStartingNextLevel || isReviewing
+  const isNavigating = isStartingNextLevel || isContinuing || isRetrying || isReviewing
+  const requiredAttempts = session.mastery_progress?.required ?? 3
+  const hasRequiredAttempts = (session.mastery_progress?.mastered ?? 0) >= requiredAttempts
+  const isAccurate = session.counts.counted_action_total <= session.policy.min_counted_commands
+  const canAdvance = session.status === 'completed' && hasRequiredAttempts && isAccurate
+  const shouldContinueAttempt = session.status === 'completed' && !hasRequiredAttempts && isAccurate
+  const shouldRetryForAccuracy = session.status === 'completed' && !isAccurate
+  const headline = isFailed
+    ? 'Attempt limit reached'
+    : shouldRetryForAccuracy
+      ? 'Scenario cleared, but accuracy needs a retry'
+      : canAdvance
+        ? 'Level ready'
+        : session.first_attempt_star_eligible
+          ? 'Clean run logged'
+          : 'Scenario cleared'
+  const message = isFailed
+    ? 'This attempt ended before the repository reached the target state. Start a fresh variant and try again with a clean workspace.'
+    : shouldRetryForAccuracy
+      ? 'The target state was reached, but the latest run was not 100% accurate. Retry this level to protect your progress.'
+      : canAdvance
+        ? 'You completed the required successful attempts at 100% accuracy. The next level is ready.'
+        : 'That accurate run counts. Continue to start a fresh attempt for the remaining successful records.'
+  const Icon = isFailed ? XCircle : Sparkles
 
   return (
     <Modal
       open={open}
-      title="Completion unlocked"
-      className="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto border-primary/30 bg-card shadow-[0_28px_110px_rgba(0,214,143,0.18)]"
+      title={isFailed ? 'Scenario failed' : 'Scenario complete'}
+      className={cn(
+        'max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto bg-card',
+        isFailed
+          ? 'border-destructive/30 shadow-[0_28px_110px_rgba(248,113,113,0.16)]'
+          : 'border-primary/30 shadow-[0_28px_110px_rgba(0,214,143,0.18)]',
+      )}
       contentClassName="p-0"
       onClose={onClose}
     >
       <div className="relative overflow-hidden">
-        <div className="completion-party-popper completion-party-popper-left" aria-hidden="true">
-          <PartyPopper className="size-11 text-accent" />
-        </div>
-        <div className="completion-party-popper completion-party-popper-right" aria-hidden="true">
-          <PartyPopper className="size-11 -scale-x-100 text-primary" />
-        </div>
-        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-          {confettiPieces.map((piece, index) => (
-            <span
-              className="completion-confetti"
-              key={`${piece.x}-${piece.y}-${index}`}
-              style={
-                {
-                  '--confetti-color': piece.color,
-                  '--confetti-delay': piece.delay,
-                  '--confetti-duration': piece.duration,
-                  '--confetti-height': piece.height,
-                  '--confetti-rotate': piece.rotate,
-                  '--confetti-width': piece.width,
-                  '--confetti-x': piece.x,
-                  '--confetti-y': piece.y,
-                } as CSSProperties
-              }
-            />
-          ))}
-        </div>
+        {!isFailed ? (
+          <>
+            <div className="completion-party-popper completion-party-popper-left" aria-hidden="true">
+              <PartyPopper className="size-11 text-accent" />
+            </div>
+            <div className="completion-party-popper completion-party-popper-right" aria-hidden="true">
+              <PartyPopper className="size-11 -scale-x-100 text-primary" />
+            </div>
+            <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+              {confettiPieces.map((piece, index) => (
+                <span
+                  className="completion-confetti"
+                  key={`${piece.x}-${piece.y}-${index}`}
+                  style={
+                    {
+                      '--confetti-color': piece.color,
+                      '--confetti-delay': piece.delay,
+                      '--confetti-duration': piece.duration,
+                      '--confetti-height': piece.height,
+                      '--confetti-rotate': piece.rotate,
+                      '--confetti-width': piece.width,
+                      '--confetti-x': piece.x,
+                      '--confetti-y': piece.y,
+                    } as CSSProperties
+                  }
+                />
+              ))}
+            </div>
+          </>
+        ) : null}
 
         <div className="relative px-6 pb-6 pt-7 text-center">
-          <div className="mx-auto grid size-16 place-items-center rounded-full border border-primary/30 bg-primary/10 shadow-[0_0_42px_rgba(0,214,143,0.2)]">
-            <Sparkles className="size-8 text-primary" />
+          <div
+            className={cn(
+              'mx-auto grid size-16 place-items-center rounded-full border',
+              isFailed
+                ? 'border-destructive/30 bg-destructive/10 shadow-[0_0_42px_rgba(248,113,113,0.16)]'
+                : 'border-primary/30 bg-primary/10 shadow-[0_0_42px_rgba(0,214,143,0.2)]',
+            )}
+          >
+            <Icon className={cn('size-8', isFailed ? 'text-destructive' : 'text-primary')} />
           </div>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
-            <Badge variant="default">{difficultyLabel(session)} complete</Badge>
-            {session.first_attempt_star_eligible ? (
+            <Badge variant={isFailed ? 'destructive' : 'default'}>
+              {difficultyLabel(session)} {isFailed ? 'failed' : 'complete'}
+            </Badge>
+            {!isFailed && session.first_attempt_star_eligible ? (
               <Badge variant="warning">
                 <Award className="size-3.5" />
                 First-attempt star
               </Badge>
             ) : null}
           </div>
-          <h3 className="mt-4 text-3xl font-extrabold tracking-tight">{headline}</h3>
+          <h3 className="mx-auto mt-4 max-w-xl text-balance text-2xl font-extrabold tracking-tight sm:text-3xl">
+            {headline}
+          </h3>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground">{message}</p>
 
           <div className="mt-6 grid grid-cols-2 gap-3 text-left max-sm:grid-cols-1">
@@ -139,9 +187,14 @@ export function CompletionCelebrationModal({
               value={`${session.counts.non_counted_diagnostic_total}`}
               helper="Diagnostics excluded from accuracy"
             />
+            <StatTile
+              label="Successful attempts"
+              value={`${session.mastery_progress.mastered}/${session.mastery_progress.required}`}
+              helper="Accurate records"
+            />
           </div>
 
-          {previousDifficulties.length > 0 ? (
+          {previousDifficulties.length > 0 && !isFailed ? (
             <div className="mt-6">
               <div className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Previous levels
@@ -156,8 +209,8 @@ export function CompletionCelebrationModal({
                     className={cn(
                       'flex items-center justify-between rounded-lg border border-border bg-background/50 p-3 text-left transition-colors',
                       difficulty.review_available && !isNavigating
-                        ? 'hover:bg-primary/5 hover:border-primary/30'
-                        : 'opacity-50 cursor-not-allowed'
+                        ? 'hover:border-primary/30 hover:bg-primary/5'
+                        : 'cursor-not-allowed opacity-50',
                     )}
                   >
                     <div>
@@ -170,7 +223,7 @@ export function CompletionCelebrationModal({
                       <span
                         className={cn(
                           'font-mono text-sm font-extrabold',
-                          difficulty.latest_attempt.accuracy_rate >= 100 ? 'text-primary' : 'text-destructive'
+                          difficulty.latest_attempt.accuracy_rate >= 100 ? 'text-primary' : 'text-destructive',
                         )}
                       >
                         {difficulty.latest_attempt.accuracy_rate}%
@@ -183,18 +236,43 @@ export function CompletionCelebrationModal({
           ) : null}
 
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            {onNextLevel && nextDifficultyLabel ? (
-              <Button type="button" disabled={isNavigating} onClick={onNextLevel}>
-                <ArrowRight data-icon="inline-start" />
-                {isStartingNextLevel ? 'Opening next level' : `Next: ${nextDifficultyLabel}`}
-              </Button>
+            {isFailed || shouldRetryForAccuracy ? (
+              <>
+                {onRetry ? (
+                  <Button type="button" variant="destructive" disabled={isNavigating} onClick={onRetry}>
+                    <RefreshCcw data-icon="inline-start" />
+                    {isRetrying ? 'Starting retry' : 'Retry'}
+                  </Button>
+                ) : null}
+                <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToUnits}>
+                  Back to Modules
+                </Button>
+              </>
+            ) : canAdvance ? (
+              <>
+                {onNextLevel && nextDifficultyLabel ? (
+                  <Button type="button" disabled={isNavigating} onClick={onNextLevel}>
+                    <ArrowRight data-icon="inline-start" />
+                    {isStartingNextLevel ? 'Opening next level' : `Next: ${nextDifficultyLabel}`}
+                  </Button>
+                ) : null}
+                <Button type="button" variant="secondary" disabled={isNavigating} onClick={onClose}>
+                  Stay in workspace
+                </Button>
+              </>
+            ) : shouldContinueAttempt ? (
+              <>
+                {onContinue ? (
+                  <Button type="button" disabled={isNavigating} onClick={onContinue}>
+                    <ArrowRight data-icon="inline-start" />
+                    {isContinuing ? 'Continuing' : 'Continue'}
+                  </Button>
+                ) : null}
+                <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToUnits}>
+                  Back to Modules
+                </Button>
+              </>
             ) : null}
-            <Button type="button" variant="secondary" disabled={isNavigating} onClick={onClose}>
-              Stay in workspace
-            </Button>
-            <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToUnits}>
-              Back to Modules
-            </Button>
           </div>
         </div>
       </div>
