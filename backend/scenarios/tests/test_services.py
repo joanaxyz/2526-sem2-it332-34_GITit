@@ -372,6 +372,41 @@ def test_completed_scenario_remains_retryable_until_primary_accuracy_is_perfect(
     assert easy["latest_attempt"]["accuracy_rate"] == 100
 
 
+def test_abandoned_retry_does_not_clear_completed_accuracy(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="form-clean-commit",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    CommandProcessingService().submit_command(session=session, command="git status --wat")
+    CommandProcessingService().submit_command(session=session, command="git add .")
+    CommandProcessingService().submit_command(
+        session=session, command='git commit -m "starter snapshot"'
+    )
+    session.refresh_from_db()
+    retry = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="retry",
+        prior_session=session,
+    )
+    ScenarioSessionService().abandon(session=retry)
+
+    payload = scenario_status_payload(user=student, scenario=difficulty.scenario)
+    easy = next(item for item in payload["difficulties"] if item["difficulty"] == "easy")
+
+    assert session.status == SESSION_STATUS_COMPLETED
+    assert easy["status"] == "completed"
+    assert easy["review_available"] is False
+    assert easy["retry_session_id"] == retry.id
+    assert easy["latest_attempt"]["id"] == session.id
+    assert easy["latest_attempt"]["accuracy_rate"] == 67
+
+
 def test_review_sessions_do_not_replace_primary_accuracy(student):
     difficulty = DifficultyInstance.objects.get(
         scenario__slug="form-clean-commit",

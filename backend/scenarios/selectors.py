@@ -88,6 +88,18 @@ def session_is_command_accurate(
     return session.counted_action_total <= difficulty_instance.command_policy.min_counted_commands
 
 
+def accuracy_display_session(
+    *,
+    completion: CompletionRecord | None,
+    latest_session: ScenarioSession | None,
+) -> ScenarioSession | None:
+    if latest_session and latest_session.status == SESSION_STATUS_COMPLETED:
+        return latest_session
+    if completion:
+        return completion.session
+    return latest_session
+
+
 def _published_difficulty_queryset():
     return (
         DifficultyInstance.objects.filter(is_published=True)
@@ -200,8 +212,12 @@ def _scenario_status_payload_from_maps(
         in_progress = active_sessions.get(instance.id)
         retryable_session = retryable_sessions.get(instance.id)
         latest_session = latest_sessions.get(instance.id)
+        display_session = accuracy_display_session(
+            completion=completion,
+            latest_session=latest_session,
+        )
         mastered = session_is_command_accurate(
-            session=latest_session,
+            session=display_session,
             difficulty_instance=instance,
         )
         difficulties.append(
@@ -226,10 +242,10 @@ def _scenario_status_payload_from_maps(
                 if completion
                 else None,
                 "latest_attempt": latest_attempt_payload_from_session(
-                    session=latest_session,
+                    session=display_session,
                     difficulty_instance=instance,
                 )
-                if latest_session
+                if display_session
                 else None,
                 "active_session_id": in_progress.id if in_progress else None,
                 "retry_session_id": retryable_session.id if retryable_session and not mastered else None,
@@ -288,11 +304,20 @@ def _completion_map(*, user, difficulty_ids: list[int]) -> dict[int, CompletionR
         for completion in CompletionRecord.objects.filter(
             user=user,
             difficulty_instance_id__in=difficulty_ids,
-        ).only(
+        )
+        .select_related("session")
+        .only(
             "difficulty_instance_id",
             "first_attempt_star",
             "counted_action_total",
             "completed_at",
+            "session__id",
+            "session__status",
+            "session__counted_action_total",
+            "session__total_attempts",
+            "session__completed_at",
+            "session__ended_at",
+            "session__mode",
         )
     }
 

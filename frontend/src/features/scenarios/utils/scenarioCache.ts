@@ -3,10 +3,60 @@ import type { QueryClient } from '@tanstack/react-query'
 import type { ScenarioSession } from '@/features/practice/types'
 import type { Difficulty, DifficultyStatus, LatestAttemptStats, ScenarioSkillFocus } from '@/features/scenarios/types'
 
+const scenarioSessionSyncChannel = 'git-it:scenario-session-sync'
 const scenarioListQueryKeys = new Set(['lesson-scenarios', 'unit-scenarios'])
 const difficultyOrder: Difficulty[] = ['easy', 'medium', 'hard']
 
-export function syncScenarioSessionInCache(queryClient: QueryClient, session: ScenarioSession) {
+type ScenarioSessionSyncMessage = {
+  type: 'scenario-session-updated'
+  session: ScenarioSession
+}
+
+export function syncScenarioSessionInCache(
+  queryClient: QueryClient,
+  session: ScenarioSession,
+  options: { broadcast?: boolean } = {},
+) {
+  applyScenarioSessionToCache(queryClient, session)
+  if (options.broadcast !== false && !session.review_mode) {
+    broadcastScenarioSessionSync(session)
+  }
+}
+
+export function subscribeToScenarioSessionSync(queryClient: QueryClient) {
+  if (typeof window === 'undefined') return () => {}
+
+  const handleMessage = (message: unknown) => {
+    if (!isScenarioSessionSyncMessage(message)) return
+    syncScenarioSessionInCache(queryClient, message.session, { broadcast: false })
+    void queryClient.invalidateQueries({ queryKey: ['units'] })
+    void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
+  }
+
+  const channel = typeof BroadcastChannel !== 'undefined'
+    ? new BroadcastChannel(scenarioSessionSyncChannel)
+    : null
+  const handleBroadcastMessage = (event: MessageEvent<unknown>) => handleMessage(event.data)
+  channel?.addEventListener('message', handleBroadcastMessage)
+
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key !== scenarioSessionSyncChannel || !event.newValue) return
+    try {
+      handleMessage(JSON.parse(event.newValue))
+    } catch {
+      // Ignore malformed cross-tab messages from older app versions.
+    }
+  }
+  window.addEventListener('storage', handleStorage)
+
+  return () => {
+    channel?.removeEventListener('message', handleBroadcastMessage)
+    channel?.close()
+    window.removeEventListener('storage', handleStorage)
+  }
+}
+
+function applyScenarioSessionToCache(queryClient: QueryClient, session: ScenarioSession) {
   queryClient.setQueryData(['scenario-session', session.id], session)
 
   if (session.review_mode) return
@@ -16,6 +66,13 @@ export function syncScenarioSessionInCache(queryClient: QueryClient, session: Sc
       predicate: (query) => scenarioListQueryKeys.has(String(query.queryKey[0])),
     },
     (scenarios) => updateScenarioListWithSession(scenarios, session),
+  )
+
+  queryClient.setQueriesData<Record<string, ScenarioSkillFocus[]>>(
+    {
+      predicate: (query) => String(query.queryKey[0]) === 'unit-scenarios-summary',
+    },
+    (summary) => updateScenarioSummaryWithSession(summary, session),
   )
 }
 
@@ -35,15 +92,21 @@ export function updateScenarioListWithSession(
     let changed = false
     const difficulties = scenario.difficulties.map((difficulty) => {
       if (difficulty.difficulty === session.difficulty) {
-        const status = statusFromSession(session.status, difficulty.status)
-        const mastered =
-          session.status === 'completed' &&
-          session.counts.counted_action_total <= session.policy.min_counted_commands
+        const status = statusFromSession(session.status, difficulty.status, Boolean(difficulty.completion))
+        const latestAttempt =
+          session.status === 'completed'
+            ? latestAttemptFromSession(session)
+            : difficulty.latest_attempt?.status === 'completed'
+              ? difficulty.latest_attempt
+              : latestAttemptFromSession(session)
+        const mastered = latestAttempt.accuracy_rate !== null && latestAttempt.accuracy_rate >= 100
         const activeSessionId = session.status === 'started' ? session.id : null
         const retrySessionId =
-          session.status === 'failed' || session.status === 'abandoned' || (session.status === 'completed' && !mastered)
+          (session.status === 'failed' || session.status === 'abandoned' || (session.status === 'completed' && !mastered)) && !mastered
             ? session.id
-            : difficulty.retry_session_id
+            : mastered
+              ? null
+              : difficulty.retry_session_id
         const completion =
           session.status === 'completed'
             ? {
@@ -52,7 +115,6 @@ export function updateScenarioListWithSession(
                 completed_at: session.completed_at ?? new Date().toISOString(),
               }
             : difficulty.completion
-        const latestAttempt = latestAttemptFromSession(session)
 
         if (
           difficulty.status === status &&
@@ -91,6 +153,49 @@ export function updateScenarioListWithSession(
   return matchedScenario ? nextScenarios : scenarios
 }
 
+export function updateScenarioSummaryWithSession(
+  summary: Record<string, ScenarioSkillFocus[]> | undefined,
+  session: ScenarioSession,
+) {
+  if (!summary) return summary
+  let changed = false
+  const nextSummary = Object.fromEntries(
+    Object.entries(summary).map(([unitId, scenarios]) => {
+      const nextScenarios = updateScenarioListWithSession(scenarios, session)
+      if (nextScenarios !== scenarios) changed = true
+      return [unitId, nextScenarios ?? scenarios]
+    }),
+  )
+  return changed ? nextSummary : summary
+}
+
+function broadcastScenarioSessionSync(session: ScenarioSession) {
+  if (typeof window === 'undefined') return
+  const message: ScenarioSessionSyncMessage = {
+    type: 'scenario-session-updated',
+    session,
+  }
+  if (typeof BroadcastChannel !== 'undefined') {
+    const channel = new BroadcastChannel(scenarioSessionSyncChannel)
+    channel.postMessage(message)
+    channel.close()
+  }
+  try {
+    window.localStorage.setItem(
+      scenarioSessionSyncChannel,
+      JSON.stringify({ ...message, sentAt: Date.now() }),
+    )
+  } catch {
+    // Some browsers disable storage; BroadcastChannel is enough when available.
+  }
+}
+
+function isScenarioSessionSyncMessage(value: unknown): value is ScenarioSessionSyncMessage {
+  if (!value || typeof value !== 'object') return false
+  const message = value as Partial<ScenarioSessionSyncMessage>
+  return message.type === 'scenario-session-updated' && Boolean(message.session)
+}
+
 function nextDifficultyAfter(difficulty: Difficulty) {
   const index = difficultyOrder.indexOf(difficulty)
   return index >= 0 ? difficultyOrder[index + 1] ?? null : null
@@ -122,7 +227,9 @@ function latestAttemptAccuracy(session: ScenarioSession) {
 function statusFromSession(
   sessionStatus: ScenarioSession['status'],
   currentStatus: DifficultyStatus,
+  hasCompletion: boolean,
 ): DifficultyStatus {
+  if (hasCompletion) return 'completed'
   if (sessionStatus === 'completed') return 'completed'
   if (sessionStatus === 'started') return 'in_progress'
   if (sessionStatus === 'failed') return 'failed'
