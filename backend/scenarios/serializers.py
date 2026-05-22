@@ -52,6 +52,7 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
             "counted_action_total": completion_record.counted_action_total,
             "completed_at": completion_record.completed_at,
         }
+    student_context = session.variant.student_context or fallback_student_context(session)
     return {
         "id": session.id,
         "mode": session.mode,
@@ -66,7 +67,9 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
             "focus": session.scenario.focus,
             "narrative": session.difficulty_instance.narrative or session.scenario.narrative,
             "task_prompt": session.difficulty_instance.task_prompt or session.scenario.task_prompt,
+            "student_context": student_context,
         },
+        "student_context": student_context,
         "unit": {
             "id": session.learning_unit_id,
             "number": session.learning_unit.number,
@@ -114,6 +117,23 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
         "review_mode": session.mode == "review",
         "next_difficulty": next_difficulty_payload(session),
         "completion": completion,
+    }
+
+
+def fallback_student_context(session) -> dict:
+    narrative = session.difficulty_instance.narrative or session.scenario.narrative
+    task_prompt = session.difficulty_instance.task_prompt or session.scenario.task_prompt
+    context = {
+        "story": narrative,
+        "requirements": [task_prompt] if task_prompt else [],
+        "inspection_suggestions": [
+            "You may inspect the repository state before deciding what to do."
+        ],
+    }
+    return {
+        key: value
+        for key, value in context.items()
+        if value not in ("", [], None)
     }
 
 

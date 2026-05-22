@@ -44,6 +44,16 @@ export type RepositorySnapshot = {
   operation_metadata?: Record<string, unknown>
 }
 
+export type ScenarioStudentContext = {
+  story?: string
+  current_state?: string[]
+  provided_values?: Array<{ label: string; value: string }>
+  requirements?: string[]
+  warnings?: string[]
+  success_checklist?: string[]
+  inspection_suggestions?: string[]
+}
+
 export type ScenarioSession = {
   id: number
   mode: 'primary' | 'review'
@@ -58,7 +68,9 @@ export type ScenarioSession = {
     focus: string
     narrative: string
     task_prompt: string
+    student_context?: ScenarioStudentContext
   }
+  student_context?: ScenarioStudentContext
   unit: {
     id: number
     number: number

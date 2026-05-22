@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
@@ -18,9 +20,11 @@ from common.exceptions import Locked
 from learning.models import Lesson, OrientationProgress
 from progress.models import StreakRecord, StudentProgress
 from review.services import ReviewModeService
+from scenarios.builders import RuntimeScenarioBuilder
 from scenarios.models import (
     CompletionRecord,
     DifficultyInstance,
+    ScenarioGenerationBlueprint,
     ScenarioSession,
     ScenarioSkillFocus,
     ScenarioVariant,
@@ -176,7 +180,10 @@ def test_session_payload_expected_state_uses_rich_snapshot_and_scaffolding(stude
         scenario=difficulty.scenario,
         difficulty="hard",
     )
-    hard_variant = hard.variants.filter(is_published=True).first()
+    hard_variant = RuntimeScenarioBuilder().generate_variant(
+        user=student,
+        difficulty_instance=hard,
+    )
     hard_session = ScenarioSession.objects.create(
         user=student,
         learning_unit=hard.scenario.learning_unit,
@@ -192,6 +199,145 @@ def test_session_payload_expected_state_uses_rich_snapshot_and_scaffolding(stude
 
     assert hard_payload["scaffolding"]["expected_state"] is False
     assert hard_payload["expected_state"] is None
+
+
+def test_starting_session_creates_persisted_generated_variant_with_student_context(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="form-clean-commit",
+        difficulty="easy",
+    )
+    before_count = ScenarioVariant.objects.filter(
+        difficulty_instance=difficulty,
+        is_generated=True,
+    ).count()
+
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    variant = session.variant
+    payload = session_payload(session, include_steps=False)
+    serialized_payload = json.dumps(payload)
+
+    assert ScenarioVariant.objects.filter(
+        difficulty_instance=difficulty,
+        is_generated=True,
+    ).count() == before_count + 1
+    assert variant.is_generated is True
+    assert variant.generated_from_blueprint is not None
+    assert variant.parameter_context
+    assert variant.student_context
+    assert variant.initial_state
+    assert variant.target_rule
+    assert variant.target_state
+    assert variant.expected_state_diagram
+    assert variant.solution_commands
+    assert payload["student_context"] == variant.student_context
+    assert payload["scenario"]["student_context"] == variant.student_context
+    for command in variant.solution_commands:
+        assert command not in serialized_payload
+
+
+def test_session_payload_falls_back_for_old_variants_without_student_context(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="form-clean-commit",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    session.variant.student_context = {}
+    session.variant.save(update_fields=["student_context"])
+    session.refresh_from_db()
+
+    payload = session_payload(session, include_steps=False)
+
+    assert payload["student_context"]["story"] == session.difficulty_instance.narrative
+    assert payload["student_context"]["requirements"] == [session.difficulty_instance.task_prompt]
+
+
+def test_active_session_payload_and_command_submit_do_not_regenerate_variant(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="form-clean-commit",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    variant_id = session.variant_id
+    generated_count = ScenarioVariant.objects.filter(
+        difficulty_instance=difficulty,
+        is_generated=True,
+    ).count()
+
+    assert session_payload(session, include_steps=False)["variant"]["id"] == variant_id
+    CommandProcessingService().submit_command(session=session, command="git status")
+    session.refresh_from_db()
+
+    assert session.variant_id == variant_id
+    assert ScenarioVariant.objects.filter(
+        difficulty_instance=difficulty,
+        is_generated=True,
+    ).count() == generated_count
+
+
+def test_generated_context_exposes_checked_values_without_solution_commands(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="form-clean-commit",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    variant = session.variant
+    context_text = json.dumps(variant.student_context).lower()
+    latest_commit_rule = variant.target_rule["latest_commit"]
+
+    for message in latest_commit_rule["message_contains"]:
+        assert message.lower() in context_text
+    for path in latest_commit_rule["contains_paths"]:
+        assert path.lower() in context_text
+    for path in latest_commit_rule.get("excludes_paths", []):
+        assert path.lower() in context_text
+    assert variant.target_rule["head_branch"] in context_text
+    for command in variant.solution_commands:
+        assert command.lower() not in context_text
+
+
+def test_generated_context_exposes_excluded_files_and_remote_values(student):
+    ignore_difficulty = DifficultyInstance.objects.get(
+        scenario__slug="configure-gitignore-rules",
+        difficulty="easy",
+    )
+    ignore_session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=ignore_difficulty,
+        source_entry_point="lesson",
+    )
+    ignore_context = json.dumps(ignore_session.variant.student_context).lower()
+    for path in ignore_session.variant.target_rule["latest_commit"]["excludes_paths"]:
+        assert path.lower() in ignore_context
+
+    clone_difficulty = DifficultyInstance.objects.get(
+        scenario__slug="clone-project-and-inspect",
+        difficulty="easy",
+    )
+    clone_session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=clone_difficulty,
+        source_entry_point="lesson",
+    )
+    clone_context = json.dumps(clone_session.variant.student_context).lower()
+    for remote, url in clone_session.variant.target_rule["remote_url_matches"].items():
+        assert remote.lower() in clone_context
+        assert url.lower() in clone_context
 
 
 def test_partial_staging_requires_the_selected_file_scope(student):
@@ -252,8 +398,12 @@ def test_retry_after_failure_uses_changed_variant_when_available(student):
     )
 
     assert retry.variant_id != prior.variant_id
+    assert retry.variant.scenario_id == prior.variant.scenario_id == difficulty.scenario_id
     assert retry.variant.difficulty_instance_id == difficulty.id
-    assert retry.variant.structure_signature != prior.variant.structure_signature
+    assert retry.variant.scenario.primary_focus_commands == prior.variant.scenario.primary_focus_commands
+    assert retry.variant.variant_fingerprint != prior.variant.variant_fingerprint
+    assert retry.variant.parameter_context != prior.variant.parameter_context
+    assert retry.variant.blueprint_signature == prior.variant.blueprint_signature
     assert retry.changed_variant is True
     assert retry.rta_eligible is True
 
@@ -326,12 +476,22 @@ def test_review_mode_logs_separately_without_new_completion(student):
         difficulty="easy",
     )
     complete_required_accurate_sessions(user=student, difficulty=difficulty)
+    completion = CompletionRecord.objects.get(user=student, difficulty_instance=difficulty)
+    generated_count = ScenarioVariant.objects.filter(
+        difficulty_instance=difficulty,
+        is_generated=True,
+    ).count()
 
     review_session = ReviewModeService().start_review_session(
         user=student, difficulty_instance=difficulty
     )
 
     assert review_session.mode == SESSION_MODE_REVIEW
+    assert review_session.variant_id == completion.session.variant_id
+    assert ScenarioVariant.objects.filter(
+        difficulty_instance=difficulty,
+        is_generated=True,
+    ).count() == generated_count
     assert (
         CompletionRecord.objects.filter(user=student, difficulty_instance=difficulty).count() == 1
     )
@@ -571,14 +731,15 @@ def test_seeded_curriculum_has_full_variant_set_and_one_primary_focus(seeded_con
     )
     assert ScenarioSkillFocus.objects.filter(is_published=True).count() == 9
     assert DifficultyInstance.objects.filter(is_published=True).count() == 27
-    assert ScenarioVariant.objects.filter(is_published=True).count() == 62
+    assert ScenarioGenerationBlueprint.objects.filter(is_published=True).count() == 27
+    assert ScenarioVariant.objects.filter(is_published=True, is_generated=False).count() == 0
     assert all(
         len(scenario.primary_focus_commands) == 1
         for scenario in ScenarioSkillFocus.objects.filter(is_published=True)
     )
 
 
-def test_module_one_scenarios_have_all_difficulties_and_generated_variants(seeded_content):
+def test_module_one_scenarios_have_all_difficulties_and_generation_blueprints(seeded_content):
     expected_difficulties = {"easy", "medium", "hard"}
     for scenario in ScenarioSkillFocus.objects.filter(
         learning_unit__slug="local-repository-foundations",
@@ -590,15 +751,13 @@ def test_module_one_scenarios_have_all_difficulties_and_generated_variants(seede
         }
         assert set(difficulties) == expected_difficulties
         for instance in difficulties.values():
-            variant_count = instance.variants.filter(is_published=True).count()
-            assert variant_count >= instance.required_successful_attempts
-            signatures = set(
-                instance.variants.filter(is_published=True).values_list(
-                    "structure_signature",
-                    flat=True,
-                )
-            )
-            assert len(signatures) == variant_count
+            blueprint = instance.generation_blueprints.get(is_published=True)
+            assert blueprint.generation_count >= 1
+            assert blueprint.parameter_pools
+            assert blueprint.initial_state_template
+            assert blueprint.target_rule_template
+            assert blueprint.solution_commands_template
+            assert blueprint.student_context_template
 
 
 def test_module_one_required_attempt_counts_come_from_curriculum(seeded_content):
@@ -818,21 +977,29 @@ def test_retry_after_failed_retry_resets_action_budget(student):
     assert payload["counts"]["remaining_counted_commands"] == next_retry.command_policy_snapshot["max_counted_commands"]
 
 
-def test_seeded_variants_do_not_contain_unresolved_target_placeholders(seeded_content):
-    serialized = [
-        {
-            "target_rule": variant.target_rule,
-            "expected_observations": variant.expected_observations,
-            "solution_commands": variant.solution_commands,
-        }
-        for variant in ScenarioVariant.objects.filter(is_published=True)
-    ]
+def test_generated_variants_do_not_contain_unresolved_target_placeholders(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="form-clean-commit",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    variant = session.variant
+    serialized = {
+        "target_rule": variant.target_rule,
+        "expected_observations": variant.expected_observations,
+        "solution_commands": variant.solution_commands,
+        "student_context": variant.student_context,
+    }
 
     assert "<" not in str(serialized)
     assert "{{" not in str(serialized)
 
 
-def test_seeded_state_based_variants_require_focus_commands_and_hide_task_answers(seeded_content):
+def test_generated_state_based_variants_require_focus_commands_and_hide_task_answers(student):
     for difficulty in DifficultyInstance.objects.select_related("scenario").filter(is_published=True):
         task_prompt = difficulty.task_prompt.lower()
         assert "git " not in task_prompt.replace("git repository", "repository")
@@ -843,9 +1010,12 @@ def test_seeded_state_based_variants_require_focus_commands_and_hide_task_answer
             continue
 
         focus_commands = set(difficulty.scenario.primary_focus_commands)
-        for variant in difficulty.variants.filter(is_published=True):
-            assert focus_commands.issubset(set(variant.target_rule.get("required_commands", [])))
+        variant = RuntimeScenarioBuilder().generate_variant(
+            user=student,
+            difficulty_instance=difficulty,
+        )
+        assert focus_commands.issubset(set(variant.target_rule.get("required_commands", [])))
 
-            if difficulty.scenario.focus in {"git clone", "git remote"}:
-                assert variant.target_rule.get("remote_url_matches", {}).get("origin")
+        if difficulty.scenario.focus in {"git clone", "git remote"}:
+            assert variant.target_rule.get("remote_url_matches", {}).get("origin")
 

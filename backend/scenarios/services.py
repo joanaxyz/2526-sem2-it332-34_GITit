@@ -11,6 +11,7 @@ from common.constants import (
     RESULT_TARGET_MATCHED,
     RESULT_UNPROCESSABLE,
     SESSION_MODE_PRIMARY,
+    SESSION_MODE_REVIEW,
     SESSION_STATUS_ABANDONED,
     SESSION_STATUS_COMPLETED,
     SESSION_STATUS_FAILED,
@@ -143,12 +144,20 @@ class ScenarioSessionService:
             if active_session:
                 raise Locked("Exit the current scenario before starting again.")
 
-        variant = VariantSelectionService().select_variant(
-            user=user,
-            difficulty_instance=difficulty_instance,
-            prior_session=prior_session,
+        variant_selector = VariantSelectionService()
+        variant = (
+            self._review_variant(user=user, difficulty_instance=difficulty_instance)
+            if mode == SESSION_MODE_REVIEW
+            else variant_selector.select_variant(
+                user=user,
+                difficulty_instance=difficulty_instance,
+                prior_session=prior_session,
+            )
         )
-        changed_variant = bool(prior_session and prior_session.variant_id != variant.id)
+        changed_variant = bool(
+            prior_session
+            and variant_selector.changed_between(prior=prior_session.variant, current=variant)
+        )
         retry_index = prior_session.retry_index + 1 if prior_session else 0
 
         rta_eligible = bool(
@@ -184,6 +193,16 @@ class ScenarioSessionService:
                 ]
             )
         return session
+
+    def _review_variant(self, *, user, difficulty_instance: DifficultyInstance):
+        completion = (
+            CompletionRecord.objects.select_related("session__variant")
+            .filter(user=user, difficulty_instance=difficulty_instance)
+            .first()
+        )
+        if not completion:
+            raise Locked("Review Mode is available only after completing this difficulty.")
+        return completion.session.variant
 
     @transaction.atomic
     def abandon(self, *, session: ScenarioSession) -> ScenarioSession:
