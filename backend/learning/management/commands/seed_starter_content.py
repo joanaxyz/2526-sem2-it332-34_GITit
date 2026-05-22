@@ -24,6 +24,7 @@ from scenarios.models import (
     CommandCountPolicy,
     CompletionRecord,
     DifficultyInstance,
+    ScenarioGenerationBlueprint,
     ScenarioSession,
     ScenarioSkillFocus,
     ScenarioVariant,
@@ -108,6 +109,7 @@ class DifficultySpec:
     policy: tuple[int, int, list[str]]
     target_rule: dict
     variants: list[dict] = field(default_factory=list)
+    blueprints: list["VariantTemplateSpec"] = field(default_factory=list)
 
 
 @dataclass
@@ -133,6 +135,7 @@ class VariantTemplateSpec:
     parameter_pools: dict[str, list[Any]]
     generation_count: int
     expected_observations_template: dict = field(default_factory=dict)
+    student_context_template: dict = field(default_factory=dict)
 
 
 class CurriculumMarkdownParser:
@@ -566,6 +569,7 @@ class ModuleOneSeedBuilder:
                 policy=policy,
                 target_rule=template.target_rule_template,
                 variants=variants,
+                blueprints=[template],
             )
 
         fields = {
@@ -1251,6 +1255,7 @@ class ModuleOneSeedBuilder:
             solution_commands_template=commands,
             parameter_pools={"cases": [self._augment_case(case) for case in cases]},
             generation_count=count,
+            student_context_template=self._student_context_template(),
         )
 
     def _copy_template(self, template: VariantTemplateSpec, **overrides) -> VariantTemplateSpec:
@@ -1267,7 +1272,29 @@ class ModuleOneSeedBuilder:
             parameter_pools=overrides.get("parameter_pools", template.parameter_pools),
             generation_count=overrides.get("count", template.generation_count),
             expected_observations_template=template.expected_observations_template,
+            student_context_template=overrides.get(
+                "student_context_template",
+                template.student_context_template,
+            ),
         )
+
+    def _student_context_template(self) -> dict:
+        return {
+            "story": "You are working on {{project}}. Reach the requested repository outcome cleanly.",
+            "current_state": [
+                "Use the live repository state and terminal output to confirm the current branch, staged paths, and working-tree changes.",
+            ],
+            "provided_values": [],
+            "requirements": [
+                "Use the required details below as the exact target values for this attempt.",
+                "Do not use the context as a command sequence; decide the Git steps from the repository state.",
+            ],
+            "warnings": [],
+            "success_checklist": [],
+            "inspection_suggestions": [
+                "You may inspect the repository state before deciding what to do.",
+            ],
+        }
 
     def _augment_case(self, case: dict) -> dict:
         files = case.get("files") or {}
@@ -1447,6 +1474,9 @@ class Command(BaseCommand):
         DifficultyInstance.objects.filter(scenario__in=retired_scenarios).update(
             is_published=False
         )
+        ScenarioGenerationBlueprint.objects.filter(
+            difficulty_instance__scenario__in=retired_scenarios
+        ).update(is_published=False)
         ScenarioVariant.objects.filter(scenario__in=retired_scenarios).update(
             is_published=False
         )
@@ -1489,6 +1519,34 @@ class Command(BaseCommand):
                         "non_counted_patterns": diagnostics,
                     },
                 )
+
+                current_blueprint_slugs = []
+                for blueprint_index, template in enumerate(config.blueprints, start=1):
+                    blueprint_slug = f"{scenario.slug}-{difficulty}-{blueprint_index}"
+                    current_blueprint_slugs.append(blueprint_slug)
+                    ScenarioGenerationBlueprint.objects.update_or_create(
+                        difficulty_instance=diff,
+                        slug=blueprint_slug,
+                        defaults={
+                            "slug_template": template.slug_template,
+                            "label_template": template.label_template,
+                            "blueprint_signature": f"{scenario.slug}/{difficulty}",
+                            "subtemplate_signature": template.structure_signature_template,
+                            "parameter_pools": template.parameter_pools,
+                            "initial_state_template": template.initial_state_template,
+                            "target_rule_template": template.target_rule_template,
+                            "solution_commands_template": template.solution_commands_template,
+                            "expected_observations_template": template.expected_observations_template,
+                            "student_context_template": template.student_context_template,
+                            "generation_count": template.generation_count,
+                            "max_combinations": template.generation_count,
+                            "sort_order": blueprint_index,
+                            "is_published": True,
+                        },
+                    )
+                ScenarioGenerationBlueprint.objects.filter(difficulty_instance=diff).exclude(
+                    slug__in=current_blueprint_slugs
+                ).update(is_published=False)
 
                 variant_payloads = []
                 for variant in config.variants:
@@ -1558,17 +1616,9 @@ class Command(BaseCommand):
                     },
                 )
 
-                current_variant_slugs = []
-                for payload in variant_payloads:
-                    current_variant_slugs.append(payload["slug"])
-                    ScenarioVariant.objects.update_or_create(
-                        scenario=scenario,
-                        difficulty_instance=diff,
-                        slug=payload["slug"],
-                        defaults=payload,
-                    )
-                ScenarioVariant.objects.filter(difficulty_instance=diff).exclude(
-                    slug__in=current_variant_slugs
+                ScenarioVariant.objects.filter(
+                    difficulty_instance=diff,
+                    is_generated=False,
                 ).update(is_published=False)
 
     def _scenario_defaults(self, spec: ScenarioSpec) -> dict:
