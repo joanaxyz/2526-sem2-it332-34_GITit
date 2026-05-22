@@ -1,7 +1,8 @@
-import { ArrowLeft, CircleHelp, GitBranch, RefreshCcw } from 'lucide-react'
+import { ArrowLeft, CircleHelp, GitBranch, RefreshCcw, GaugeCircle } from 'lucide-react'
 
 import type { ScenarioSession } from '@/features/practice/types'
 import { Badge } from '@/shared/components/Badge'
+import { ProgressBar } from '@/shared/components/ProgressBar'
 import { Button } from '@/shared/components/Button'
 
 export function ScenarioStatusHeader({
@@ -51,6 +52,28 @@ export function ScenarioStatusHeader({
         </span>
       </div>
       <div className="flex items-center gap-2">
+        {/* Compact command counter shown in header */}
+        <div className="hidden lg:flex items-center">
+          {(() => {
+            const used = session.counts.counted_action_total
+            const max = session.policy.max_counted_commands
+            const pct = max ? Math.round((used / max) * 100) : 0
+            return (
+              <div className="mr-2 rounded-md border border-border bg-card p-2 shadow-sm" style={{ minWidth: 160 }}>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 font-semibold text-sm">
+                    <GaugeCircle className="size-4 text-primary" />
+                    <span>Action</span>
+                  </div>
+                  <div className="font-mono text-sm">{session.counts.remaining_counted_commands} left</div>
+                </div>
+                <div className="mt-2">
+                  <ProgressBar value={pct} />
+                </div>
+              </div>
+            )
+          })()}
+        </div>
         <Button type="button" variant="ghost" size="icon" className="size-8" aria-label="Open workspace guide" onClick={onOpenTour}>
           <CircleHelp className="size-4" />
         </Button>

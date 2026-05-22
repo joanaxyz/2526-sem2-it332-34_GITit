@@ -158,3 +158,35 @@ textarea {
     opacity: 0.75;
   }
 }
+
+/* App scrollbar styling for consistent look on scrollable panels */
+:root {
+  --scrollbar-thumb: hsl(var(--muted-foreground) / 0.14);
+  --scrollbar-thumb-hover: hsl(var(--muted-foreground) / 0.22);
+  --scrollbar-track: transparent;
+}
+
+/* WebKit browsers */
+.app-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.app-scrollbar::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 9999px;
+}
+.app-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 9999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+.app-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+/* Firefox */
+.app-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}

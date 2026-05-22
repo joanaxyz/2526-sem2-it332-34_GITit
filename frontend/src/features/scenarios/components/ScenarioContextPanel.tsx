@@ -1,4 +1,4 @@
-import { AlertTriangle, BookOpenText, CheckCircle2, ClipboardList, Info, Search, Target } from 'lucide-react'
+import { AlertTriangle, BookOpenText, CheckCircle2, ClipboardList, Info, Target } from 'lucide-react'
 import type { ComponentType, ReactNode } from 'react'
 
 import type { ScenarioSession, ScenarioStudentContext } from '@/features/practice/types'
@@ -8,12 +8,6 @@ import { cn } from '@/shared/utils/cn'
 
 export function ScenarioContextPanel({ session }: { session: ScenarioSession }) {
   const context = contextForSession(session)
-  const compactChecklist =
-    session.difficulty === 'easy'
-      ? context.success_checklist
-      : session.difficulty === 'medium'
-        ? context.success_checklist.slice(0, 4)
-        : []
 
   return (
     <Card className="shadow-none">
@@ -51,18 +45,10 @@ export function ScenarioContextPanel({ session }: { session: ScenarioSession }) 
           </dl>
         </Section>
 
-        {/* 'Your Task' section removed per request */}
-
-        <Section icon={CheckCircle2} title="Success Checklist" hidden={!compactChecklist.length}>
-          <CompactList items={compactChecklist} marker="check" />
-        </Section>
+        {/* Success checklist removed as requested */}
 
         <Section icon={AlertTriangle} title="Constraints" hidden={!context.warnings.length}>
           <CompactList items={context.warnings} tone="warning" />
-        </Section>
-
-        <Section icon={Search} title="Helpful Inspections" hidden={session.difficulty === 'hard' || !context.inspection_suggestions.length}>
-          <CompactList items={context.inspection_suggestions} />
         </Section>
       </CardContent>
     </Card>

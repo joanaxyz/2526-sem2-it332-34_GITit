@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { GripHorizontal, GripVertical } from 'lucide-react'
+import { GripHorizontal, GripVertical, PanelsTopLeft } from 'lucide-react'
 
 import { CommandCounter } from '@/features/scenarios/components/CommandCounter'
 import { ScenarioContextPanel } from '@/features/scenarios/components/ScenarioContextPanel'
@@ -312,8 +312,20 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         onContinue={() => retryMutation.mutate()}
       />
       <main className="grid min-h-0 flex-1 grid-cols-[18rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[17rem_minmax(0,1fr)] max-xl:grid-cols-[16rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
-        <aside className="flex min-h-0 flex-col gap-2" data-tour-target="scenario-brief">
+        <aside
+          className="flex min-h-0 flex-col gap-2 overflow-y-auto app-scrollbar"
+          data-tour-target="scenario-brief"
+        >
+          <div className="flex items-center justify-between gap-2 px-2">
+            <div className="flex items-center gap-2">
+              <PanelsTopLeft className="size-4" />
+              <span className="font-semibold">Project</span>
+            </div>
+          </div>
+
           <ScenarioContextPanel session={session} />
+
+          {/* Command counter placed below the scenario panel as requested */}
           {!reviewMode ? <CommandCounter session={session} /> : null}
           {!reviewMode && session.completion_type === 'inspection' ? (
             <InspectionAnswerPanel
@@ -323,6 +335,8 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
               onSubmit={(answer) => inspectionAnswerMutation.mutate(answer)}
             />
           ) : null}
+
+          {/* Project structure pinned to the bottom and always visible */}
           <ProjectStructurePanel snapshot={session.repository_state} />
         </aside>
         <section

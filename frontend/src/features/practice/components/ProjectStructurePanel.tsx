@@ -116,7 +116,7 @@ export function ProjectStructurePanel({ snapshot }: { snapshot: RepositorySnapsh
   const hasFiles = tree.length > 0
 
   return (
-    <Card className="min-h-0 flex-1 overflow-hidden shadow-none">
+    <Card className="min-h-0 flex-1 overflow-hidden shadow-none flex flex-col">
       <CardHeader className="p-3">
         <CardTitle className="text-sm">Project Structure</CardTitle>
       </CardHeader>
