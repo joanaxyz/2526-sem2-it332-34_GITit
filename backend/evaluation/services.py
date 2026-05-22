@@ -1,4 +1,5 @@
 import copy
+import json
 from dataclasses import dataclass
 from typing import Any
 
@@ -90,6 +91,8 @@ class StateBasedEvaluator:
             rules.append({"type": "branch_absent", "branch": name})
         for name, commit_id in target_rule.get("branch_points_to", {}).items():
             rules.append({"type": "branch_points_to", "branch": name, "commit": commit_id})
+        for name, commit_id in target_rule.get("remote_branch_points_to", {}).items():
+            rules.append({"type": "remote_branch_points_to", "remote_branch": name, "commit": commit_id})
         if target_rule.get("head_branch"):
             rules.append({"type": "head_branch_equals", "branch": target_rule["head_branch"]})
 
@@ -266,15 +269,19 @@ class StateBasedEvaluator:
             "commit_message_contains",
             "commit_changes_include",
             "commit_changes_exclude",
+            "commit_changes_include_tokens",
+            "commit_changes_exclude_tokens",
             "commit_tree_contains",
             "commit_tree_excludes",
+            "commit_tree_contains_tokens",
+            "commit_tree_excludes_tokens",
             "commit_has_parent",
             "commit_parent_equals",
             "commit_parent_count_equals",
             "commit_is_merge",
             "commit_is_not_merge",
         }:
-            commit = self._commit_for_rule(state, rule, initial_state=initial_state)
+            commit = self._commit_for_rule(state, rule, initial_state=initial_state) or self._latest_commit_for_rule(state, rule)
             if not commit:
                 return False, "Commit was not found."
             return self._check_commit_rule(rule_type, commit, rule, state=state, initial_state=initial_state)
@@ -291,6 +298,16 @@ class StateBasedEvaluator:
             present = [commit_id for commit_id in excluded if commit_id in history]
             return not present, "Branch history excludes forbidden commits." if not present else f"Unexpected commits in history: {present}."
 
+        if rule_type == "commit_count_equals":
+            expected = int(rule.get("count", 0))
+            actual = len(state.get("commits", []))
+            return actual == expected, f"Repository has {actual} commits, expected {expected}."
+        if rule_type == "commit_count_on_branch_equals":
+            branch = rule.get("branch") or self._head_branch(state)
+            expected = int(rule.get("count", 0))
+            actual = self._commit_depth(state, self._ref_target(state, branch))
+            return actual == expected, f"Branch {branch!r} has {actual} commits, expected {expected}."
+
         if rule_type in {"index_empty", "staging_empty"}:
             passed = not state.get("staging")
             return passed, "Index is empty." if passed else f"Index still has {sorted(state.get('staging', {}))}."
@@ -306,9 +323,18 @@ class StateBasedEvaluator:
             expected = sorted(rule.get("paths", []))
             actual = sorted(state.get("staging", {}))
             return actual == expected, f"Staged paths were {actual}, expected {expected}."
+        if rule_type == "staging_contains_tokens":
+            return self._token_rule_for_entries(state.get("staging", {}), rule, should_contain=True, label="Staging")
+        if rule_type == "staging_excludes_tokens":
+            return self._token_rule_for_entries(state.get("staging", {}), rule, should_contain=False, label="Staging")
 
         if rule_type == "working_tree_clean":
-            passed = not state.get("working_tree") and not state.get("conflicts")
+            visible_working = {
+                path: value
+                for path, value in state.get("working_tree", {}).items()
+                if self.normalizer.entry_status(value) != "ignored"
+            }
+            passed = not visible_working and not state.get("conflicts")
             return passed, "Working tree is clean." if passed else "Working tree still has changes or conflicts."
         if rule_type == "working_tree_contains":
             paths = set(self._as_list(rule.get("path") or rule.get("paths")))
@@ -322,9 +348,17 @@ class StateBasedEvaluator:
             expected = sorted(rule.get("paths", []))
             actual = sorted(state.get("working_tree", {}))
             return actual == expected, f"Working tree paths were {actual}, expected {expected}."
+        if rule_type == "working_tree_contains_tokens":
+            return self._token_rule_for_entries(state.get("working_tree", {}), rule, should_contain=True, label="Working tree")
+        if rule_type == "working_tree_excludes_tokens":
+            return self._token_rule_for_entries(state.get("working_tree", {}), rule, should_contain=False, label="Working tree")
         if rule_type == "working_tree_clean_except":
             allowed = set(rule.get("paths", []))
-            actual = set(state.get("working_tree", {}))
+            actual = {
+                path
+                for path, value in state.get("working_tree", {}).items()
+                if self.normalizer.entry_status(value) != "ignored"
+            }
             extra = sorted(actual - allowed)
             return not extra and not state.get("conflicts"), "Working tree only has allowed paths." if not extra else f"Unexpected working tree paths: {extra}."
 
@@ -356,6 +390,13 @@ class StateBasedEvaluator:
             expected = bool(rule.get("value", True))
             passed = bool(self._operation_value(state, "remote_tracking_updated")) == expected
             return passed, f"remote_tracking_updated is {self._operation_value(state, 'remote_tracking_updated')!r}."
+        if rule_type in {
+            "operation_metadata_equals",
+            "operation_metadata_not_equals",
+            "operation_metadata_absent",
+            "operation_metadata_contains",
+        }:
+            return self._check_operation_metadata(rule_type, state, rule)
         if rule_type == "fetch_updated_remote_tracking_without_moving_local":
             branch = rule.get("branch") or self._head_branch(state)
             local_unchanged = True
@@ -429,6 +470,51 @@ class StateBasedEvaluator:
             passed = bool(source and tip and set(self._changed_paths(source)) <= set(self._changed_paths(tip)))
             return passed, "Cherry-pick copied expected changes." if passed else "Cherry-pick did not copy expected changes."
 
+        if rule_type == "commit_replaced_by_amend":
+            return self._check_commit_replaced_by_amend(state, rule, initial_state)
+        if rule_type == "commit_not_followed_by_extra_commit":
+            return self._check_commit_not_followed_by_extra_commit(state, rule, initial_state)
+        if rule_type == "branch_tip_replaces_commit":
+            return self._check_branch_tip_replaces_commit(state, rule, initial_state)
+        if rule_type == "tracked_path_removed_from_commit_tree":
+            commit = self._commit_for_rule(state, rule, initial_state=initial_state) or self._latest_commit_for_rule(state, rule)
+            if not commit:
+                return False, "Commit was not found."
+            paths = set(self._as_list(rule.get("path") or rule.get("paths")))
+            present = sorted(path for path in paths if path in (commit.get("tree") or {}))
+            return not present, "Tracked paths are absent from the commit tree." if not present else f"Commit tree still contains {present}."
+        if rule_type == "ignored_paths_present":
+            paths = set(self._as_list(rule.get("path") or rule.get("paths")))
+            allowed_statuses = set(self._as_list(rule.get("statuses") or ["ignored", "untracked"]))
+            working_tree = state.get("working_tree", {})
+            missing = [
+                path
+                for path in sorted(paths)
+                if path not in working_tree or self.normalizer.entry_status(working_tree.get(path)) not in allowed_statuses
+            ]
+            return not missing, "Ignored/untracked local paths are present." if not missing else f"Missing ignored/untracked paths: {missing}."
+        if rule_type == "ignored_paths_excluded_from_commit":
+            commit = self._commit_for_rule(state, rule, initial_state=initial_state) or self._latest_commit_for_rule(state, rule)
+            if not commit:
+                return False, "Commit was not found."
+            paths = set(self._as_list(rule.get("path") or rule.get("paths")))
+            changed = set(self._changed_paths(commit))
+            tree = commit.get("tree") or {}
+            present = sorted(path for path in paths if path in changed or path in tree)
+            return not present, "Ignored paths are excluded from the commit." if not present else f"Ignored paths appeared in commit: {present}."
+        if rule_type == "partial_hunks_committed":
+            commit = self._commit_for_rule(state, rule, initial_state=initial_state) or self._latest_commit_for_rule(state, rule)
+            if not commit:
+                return False, "Commit was not found."
+            return self._path_token_map_rule(commit.get("changes") or {}, rule.get("paths", {}), label="Committed hunks")
+        if rule_type == "partial_hunks_left_in_working_tree":
+            return self._path_token_map_rule(state.get("working_tree", {}), rule.get("paths", {}), label="Working tree hunks")
+        if rule_type == "inspection_answer_matches":
+            expected = self._resolve_expected(rule.get("expected"), state, initial_state)
+            actual = rule.get("actual", self._operation_value(state, "inspection_answer"))
+            passed = self._normalize_answer(actual) == self._normalize_answer(expected)
+            return passed, "Inspection answer matched." if passed else "Inspection answer did not match."
+
         if rule_type == "repository_state_unchanged":
             if initial_state is None:
                 return False, "Initial state is required."
@@ -461,8 +547,12 @@ class StateBasedEvaluator:
             ("commit_message_contains", {"text": rule.get("message_contains")}),
             ("commit_changes_include", {"paths": rule.get("changes_include")}),
             ("commit_changes_exclude", {"paths": rule.get("changes_exclude")}),
+            ("commit_changes_include_tokens", {"tokens": rule.get("changes_include_tokens")}),
+            ("commit_changes_exclude_tokens", {"tokens": rule.get("changes_exclude_tokens")}),
             ("commit_tree_contains", {"tree": rule.get("tree_contains"), "paths": rule.get("tree_contains")}),
             ("commit_tree_excludes", {"paths": rule.get("tree_excludes")}),
+            ("commit_tree_contains_tokens", {"tokens": rule.get("tree_contains_tokens")}),
+            ("commit_tree_excludes_tokens", {"tokens": rule.get("tree_excludes_tokens")}),
             ("commit_parent_equals", {"parent": rule.get("parent_equals")}),
             ("commit_parent_count_equals", {"count": rule.get("parent_count_equals")}),
         ]
@@ -510,6 +600,20 @@ class StateBasedEvaluator:
             changed = set(self._changed_paths(commit))
             present = sorted(paths & changed)
             return not present, "Commit changes exclude forbidden paths." if not present else f"Commit unexpectedly changed {present}."
+        if rule_type == "commit_changes_include_tokens":
+            return self._token_rule_for_payload(
+                commit.get("changes") or {},
+                rule.get("tokens") or rule.get("changes_include_tokens") or [],
+                should_contain=True,
+                label="Commit changes",
+            )
+        if rule_type == "commit_changes_exclude_tokens":
+            return self._token_rule_for_payload(
+                commit.get("changes") or {},
+                rule.get("tokens") or rule.get("changes_exclude_tokens") or [],
+                should_contain=False,
+                label="Commit changes",
+            )
         if rule_type == "commit_tree_contains":
             tree = commit.get("tree") or {}
             expected_tree = rule.get("tree")
@@ -528,6 +632,20 @@ class StateBasedEvaluator:
             paths = set(rule.get("paths") or rule.get("tree_excludes") or [])
             present = sorted(path for path in paths if path in tree)
             return not present, "Commit tree excludes expected paths." if not present else f"Tree unexpectedly contains paths: {present}."
+        if rule_type == "commit_tree_contains_tokens":
+            return self._token_rule_for_payload(
+                commit.get("tree") or {},
+                rule.get("tokens") or rule.get("tree_contains_tokens") or [],
+                should_contain=True,
+                label="Commit tree",
+            )
+        if rule_type == "commit_tree_excludes_tokens":
+            return self._token_rule_for_payload(
+                commit.get("tree") or {},
+                rule.get("tokens") or rule.get("tree_excludes_tokens") or [],
+                should_contain=False,
+                label="Commit tree",
+            )
         if rule_type in {"commit_has_parent", "commit_parent_equals"}:
             parent = self._resolve_expected(
                 rule.get("parent") or rule.get("parent_equals") or rule.get("expected"),
@@ -547,6 +665,158 @@ class StateBasedEvaluator:
             passed = len(commit.get("parents", [])) <= 1
             return passed, "Commit is not a merge commit." if passed else "Commit is a merge commit."
         return False, f"Unsupported commit rule type: {rule_type!r}."
+
+    def _check_operation_metadata(self, rule_type: str, state: dict, rule: dict) -> tuple[bool, str]:
+        key = rule.get("key")
+        metadata = state.get("operation_metadata", {})
+        present = key in metadata or key in state
+        actual = self._operation_value(state, key)
+        expected = rule.get("value")
+        if rule_type == "operation_metadata_absent":
+            return not present, f"Operation metadata {key!r} {'is absent' if not present else 'is present'}."
+        if rule_type == "operation_metadata_equals":
+            passed = actual == expected
+            return passed, f"Operation metadata {key!r} was {actual!r}, expected {expected!r}."
+        if rule_type == "operation_metadata_not_equals":
+            passed = actual != expected
+            return passed, f"Operation metadata {key!r} was {actual!r}."
+        if rule_type == "operation_metadata_contains":
+            needle = rule.get("value")
+            if isinstance(actual, dict) and isinstance(needle, dict):
+                passed = all(actual.get(item_key) == item_value for item_key, item_value in needle.items())
+            elif isinstance(actual, (list, tuple, set)):
+                passed = needle in actual
+            else:
+                passed = str(needle) in str(actual)
+            return passed, f"Operation metadata {key!r} was {actual!r}."
+        return False, f"Unsupported operation metadata rule: {rule_type!r}."
+
+    def _check_commit_replaced_by_amend(
+        self,
+        state: dict,
+        rule: dict,
+        initial_state: dict | None,
+    ) -> tuple[bool, str]:
+        old_commit = self._resolve_expected(
+            rule.get("old")
+            or rule.get("replaced")
+            or rule.get("commit")
+            or self._operation_value(state, "last_amend_replaced_commit"),
+            state,
+            initial_state,
+        )
+        new_commit = self._resolve_expected(
+            rule.get("new")
+            or rule.get("created")
+            or self._operation_value(state, "last_amend_created_commit"),
+            state,
+            initial_state,
+        )
+        replaced = state.get("replaced_commits", {}).get(old_commit)
+        passed = bool(old_commit and new_commit and replaced == new_commit)
+        return passed, "Amend replacement metadata matched." if passed else f"Amend metadata was {old_commit!r} -> {replaced!r}, expected {new_commit!r}."
+
+    def _check_commit_not_followed_by_extra_commit(
+        self,
+        state: dict,
+        rule: dict,
+        initial_state: dict | None,
+    ) -> tuple[bool, str]:
+        branch = rule.get("branch") or self._head_branch(state)
+        expected_tip = self._resolve_expected(
+            rule.get("commit")
+            or rule.get("tip")
+            or self._operation_value(state, "last_amend_created_commit"),
+            state,
+            initial_state,
+        )
+        actual_tip = self._ref_target(state, branch)
+        passed = bool(expected_tip and actual_tip == expected_tip)
+        return passed, f"Branch {branch!r} tip is {actual_tip!r}, expected amended tip {expected_tip!r}."
+
+    def _check_branch_tip_replaces_commit(
+        self,
+        state: dict,
+        rule: dict,
+        initial_state: dict | None,
+    ) -> tuple[bool, str]:
+        branch = rule.get("branch") or self._head_branch(state)
+        old_id = self._resolve_expected(
+            rule.get("old")
+            or rule.get("replaced")
+            or rule.get("commit")
+            or self._operation_value(state, "last_amend_replaced_commit"),
+            state,
+            initial_state,
+        )
+        tip_id = self._ref_target(state, branch)
+        old_commit = self._commit_by_id(state, old_id)
+        tip_commit = self._commit_by_id(state, tip_id)
+        passed = bool(
+            old_commit
+            and tip_commit
+            and tip_id != old_id
+            and tip_commit.get("parents", []) == old_commit.get("parents", [])
+        )
+        return passed, f"Branch {branch!r} tip {tip_id!r} compared with replaced commit {old_id!r}."
+
+    def _token_rule_for_entries(
+        self,
+        entries: dict,
+        rule: dict,
+        *,
+        should_contain: bool,
+        label: str,
+    ) -> tuple[bool, str]:
+        path_map = rule.get("paths")
+        if isinstance(path_map, dict):
+            for path, tokens in path_map.items():
+                missing = self._missing_tokens(entries.get(path), self._as_list(tokens))
+                if should_contain and missing:
+                    return False, f"{label} entry {path!r} is missing tokens {missing}."
+                if not should_contain and len(missing) != len(self._as_list(tokens)):
+                    present = sorted(set(map(str, self._as_list(tokens))) - set(missing))
+                    return False, f"{label} entry {path!r} still contains tokens {present}."
+            return True, f"{label} token rule matched."
+        return self._token_rule_for_payload(
+            entries,
+            rule.get("tokens", []),
+            should_contain=should_contain,
+            label=label,
+        )
+
+    def _token_rule_for_payload(
+        self,
+        payload: object,
+        tokens: object,
+        *,
+        should_contain: bool,
+        label: str,
+    ) -> tuple[bool, str]:
+        token_list = self._as_list(tokens)
+        missing = self._missing_tokens(payload, token_list)
+        if should_contain:
+            return not missing, f"{label} contains expected tokens." if not missing else f"{label} is missing tokens {missing}."
+        present = sorted(set(map(str, token_list)) - set(missing))
+        return not present, f"{label} excludes expected tokens." if not present else f"{label} still contains tokens {present}."
+
+    def _path_token_map_rule(self, entries: dict, path_map: dict, *, label: str) -> tuple[bool, str]:
+        for path, tokens in (path_map or {}).items():
+            missing = self._missing_tokens(entries.get(path), self._as_list(tokens))
+            if missing:
+                return False, f"{label} for {path!r} is missing tokens {missing}."
+        return True, f"{label} matched expected tokens."
+
+    def _missing_tokens(self, payload: object, tokens: list) -> list[str]:
+        haystack = self.normalizer.token_haystack(payload).lower()
+        return [str(token) for token in tokens if str(token).lower() not in haystack]
+
+    def _normalize_answer(self, value: Any) -> Any:
+        if isinstance(value, dict):
+            return {key: self._normalize_answer(value[key]) for key in sorted(value)}
+        if isinstance(value, list):
+            return sorted((self._normalize_answer(item) for item in value), key=lambda item: json.dumps(item, sort_keys=True))
+        return value
 
     def _commit_depth(self, state: dict, commit_id: str | None) -> int:
         return len(self._branch_history_from_commit(state, commit_id))
@@ -707,6 +977,7 @@ class InspectionEvaluator:
         current_state: dict,
         expected_observations: dict,
         executed_commands: list[str],
+        submitted_answer: dict | None = None,
     ) -> EvaluationOutcome:
         initial_state = self.normalizer.normalize(initial_state)
         current_state = self.normalizer.normalize(current_state)
@@ -731,17 +1002,18 @@ class InspectionEvaluator:
             else:
                 failed_rules.append({**detail, "reason": "Repository state changed during inspection."})
 
-        observed = self.observations_for(initial_state)
-        for key, expected in checks.items():
-            passed = observed.get(key) == expected
-            detail = {"type": "observation_equals", "rule": {"key": key, "expected": expected}}
+        expected_answer = expected_observations.get("expected_answer", checks)
+        answer_payload = submitted_answer or {}
+        if expected_answer:
+            passed = self._answer_matches(answer_payload, expected_answer)
+            detail = {"type": "inspection_answer_matches", "rule": {"expected": expected_answer}}
             if passed:
-                passed_rules.append({**detail, "reason": f"Observation {key!r} matched."})
+                passed_rules.append({**detail, "reason": "Submitted inspection answer matched."})
             else:
                 failed_rules.append(
                     {
                         **detail,
-                        "reason": f"Observation {key!r} was {observed.get(key)!r}, expected {expected!r}.",
+                        "reason": "Submitted inspection answer was missing or did not match expected observations.",
                     }
                 )
 
@@ -821,6 +1093,20 @@ class InspectionEvaluator:
 
     def _command_matches(self, executed: str, required: str) -> bool:
         return command_matches(executed, required)
+
+    def _answer_matches(self, submitted: dict, expected: dict) -> bool:
+        if not isinstance(submitted, dict) or not isinstance(expected, dict):
+            return submitted == expected
+        normalized_submitted = self._normalize_answer(submitted)
+        normalized_expected = self._normalize_answer(expected)
+        return all(normalized_submitted.get(key) == value for key, value in normalized_expected.items())
+
+    def _normalize_answer(self, value):
+        if isinstance(value, dict):
+            return {key: self._normalize_answer(value[key]) for key in sorted(value)}
+        if isinstance(value, list):
+            return sorted((self._normalize_answer(item) for item in value), key=lambda item: json.dumps(item, sort_keys=True))
+        return value
 
     def _commit_by_id(self, state: dict, commit_id: str | None) -> dict | None:
         if not commit_id:

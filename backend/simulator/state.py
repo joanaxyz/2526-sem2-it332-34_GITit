@@ -38,6 +38,7 @@ class RepositoryStateNormalizer:
         "stash_stack": list,
         "reflog": list,
         "partial_hunks": dict,
+        "replaced_commits": dict,
         "operation_metadata": dict,
     }
 
@@ -175,3 +176,27 @@ class RepositoryStateNormalizer:
 
     def is_delete_marker(self, value: object | None) -> bool:
         return str(value or "").lower() in DELETE_MARKERS
+
+    def entry_status(self, value: object | None) -> str:
+        if isinstance(value, dict):
+            status = value.get("status") or value.get("state") or value.get("change_type")
+            if status is not None:
+                return str(status).lower()
+            if value.get("ignored") is True:
+                return "ignored"
+            if value.get("untracked") is True:
+                return "untracked"
+        return str(value or "").lower()
+
+    def token_haystack(self, value: object | None) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, dict):
+            return " ".join(self.token_haystack(item) for item in value.values())
+        if isinstance(value, (list, tuple, set)):
+            return " ".join(self.token_haystack(item) for item in value)
+        return str(value)
+
+    def contains_tokens(self, value: object | None, tokens: list[str]) -> bool:
+        haystack = self.token_haystack(value).lower()
+        return all(str(token).lower() in haystack for token in tokens)

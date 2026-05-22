@@ -336,14 +336,21 @@ class RuntimeScenarioBuilder:
             return {}
         observations = InspectionEvaluator().observations_for(initial_state)
         must_identify = target_rule.get("must_identify", [])
+        explicit_expected = {}
+        for rule in target_rule.get("rules", []):
+            if rule.get("type") == "inspection_answer_matches" and isinstance(rule.get("expected"), dict):
+                explicit_expected.update(rule["expected"])
+        checks = {
+            key: observations[key]
+            for key in must_identify
+            if key in observations
+        }
+        expected_answer = explicit_expected or checks
         return {
             "required_commands": target_rule.get("required_commands", []),
             "repository_state_unchanged": target_rule.get("repository_state_unchanged", True),
-            "checks": {
-                key: observations[key]
-                for key in must_identify
-                if key in observations
-            },
+            "checks": checks,
+            "expected_answer": expected_answer,
         }
 
     def _student_context(
@@ -715,6 +722,8 @@ class GeneratedVariantValidator:
                 current_state=state,
                 expected_observations=variant.expected_observations,
                 executed_commands=variant.solution_commands,
+                submitted_answer=variant.expected_observations.get("expected_answer")
+                or variant.expected_observations.get("checks"),
             )
         else:
             outcome = StateBasedEvaluator().evaluate(
@@ -759,6 +768,24 @@ class GeneratedVariantValidator:
             if rule.get("type") == "conflict_resolution_contains":
                 self._collect(values, rule.get("path"))
                 self._collect(values, rule.get("token"))
+            if rule.get("type", "").startswith("operation_metadata"):
+                self._collect(values, rule.get("value"))
+            if rule.get("type") in {
+                "working_tree_contains_tokens",
+                "working_tree_excludes_tokens",
+                "staging_contains_tokens",
+                "staging_excludes_tokens",
+                "commit_changes_include_tokens",
+                "commit_changes_exclude_tokens",
+                "commit_tree_contains_tokens",
+                "commit_tree_excludes_tokens",
+            }:
+                self._collect(values, rule.get("tokens"))
+                self._collect(values, rule.get("paths"))
+            if rule.get("type") in {"partial_hunks_committed", "partial_hunks_left_in_working_tree"}:
+                self._collect(values, rule.get("paths"))
+            if rule.get("type") == "inspection_answer_matches":
+                self._collect(values, rule.get("expected"))
         return {
             value
             for value in values
