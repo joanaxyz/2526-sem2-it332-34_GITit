@@ -52,7 +52,7 @@ export function UnitCard({
   const livePracticeCompletion = practiceCompletionFromSummary(scenarioSummary)
   const practiceProgress = Math.round(livePracticeCompletion?.value ?? unit.practice_completion?.value ?? 0)
   const progressValue = unit.is_orientation ? orientationProgress : practiceProgress
-  const referenceLessons = unit.lessons.filter((lesson) => lesson.kind !== 'scenario')
+  const overviewLessons = unit.lessons.filter((lesson) => !unit.is_orientation && lesson.scenario_count === 0)
   const panelId = `unit-panel-${unit.id}`
 
   return (
@@ -100,21 +100,21 @@ export function UnitCard({
                 scenarioSummary={scenarioSummary}
                 scenarioSummaryPending={scenarioSummaryPending}
               />
-              {referenceLessons.length ? (
+              {overviewLessons.length ? (
                 <div className="rounded-lg border border-border bg-card/60 p-4">
                   <div className="mb-3 flex items-center gap-2 font-bold">
                     <BookOpen className="size-4 text-primary" />
-                    Reference lessons
+                    Lesson overviews
                   </div>
                   <div className="grid gap-2">
-                    {referenceLessons.map((lesson) => (
+                    {overviewLessons.map((lesson) => (
                       <div key={lesson.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-secondary/30 p-3">
                         <div>
                           <div className="font-semibold">{lesson.title}</div>
                           <div className="mt-1 text-sm text-muted-foreground">{lesson.subtitle}</div>
                         </div>
                         <Button asChild size="sm" variant="outline">
-                          <Link to={`/lessons/${lesson.id}`}>Open reference</Link>
+                          <Link to={`/lessons/${lesson.id}`}>View overview</Link>
                         </Button>
                       </div>
                     ))}

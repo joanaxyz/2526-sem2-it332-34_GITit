@@ -127,13 +127,8 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
 
 def fallback_student_context(session) -> dict:
     narrative = session.difficulty_instance.narrative or session.scenario.narrative
-    task_prompt = session.difficulty_instance.task_prompt or session.scenario.task_prompt
     context = {
         "story": narrative,
-        "requirements": [task_prompt] if task_prompt else [],
-        "inspection_suggestions": [
-            "You may inspect the repository state before deciding what to do."
-        ],
     }
     return {
         key: value

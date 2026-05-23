@@ -203,14 +203,8 @@ class RuntimeScenarioBuilder:
         initial_state = self.simulator.normalize_state(
             self.renderer.render(blueprint.initial_state_template, context)
         )
-        rendered_solution_commands = self.renderer.render(
-            blueprint.solution_commands_template,
-            context,
-        )
-        solution_commands = (
-            list(rendered_solution_commands)
-            if isinstance(rendered_solution_commands, list)
-            else [rendered_solution_commands]
+        solution_commands = list(
+            self.renderer.render(blueprint.solution_commands_template, context)
         )
         target_rule = self.renderer.render(blueprint.target_rule_template, context)
         target_state = self._target_state_from_solution(initial_state, solution_commands)
@@ -223,10 +217,8 @@ class RuntimeScenarioBuilder:
             completion_type=difficulty_instance.completion_type,
         )
         expected_observations = self._expected_observations(
-            blueprint=blueprint,
             difficulty_instance=difficulty_instance,
             initial_state=initial_state,
-            parameter_context=context,
             target_rule=target_rule,
         )
         student_context = self._student_context(
@@ -336,19 +328,12 @@ class RuntimeScenarioBuilder:
     def _expected_observations(
         self,
         *,
-        blueprint: ScenarioGenerationBlueprint,
         difficulty_instance: DifficultyInstance,
         initial_state: dict,
-        parameter_context: dict[str, Any],
         target_rule: dict,
     ) -> dict:
-        rendered_template = self.renderer.render(
-            blueprint.expected_observations_template or {},
-            parameter_context,
-        )
-        seeded_observations = rendered_template if isinstance(rendered_template, dict) else {}
         if difficulty_instance.completion_type != COMPLETION_INSPECTION:
-            return seeded_observations
+            return {}
         observations = InspectionEvaluator().observations_for(initial_state)
         must_identify = target_rule.get("must_identify", [])
         explicit_expected = {}
@@ -362,7 +347,6 @@ class RuntimeScenarioBuilder:
         }
         expected_answer = explicit_expected or checks
         return {
-            **seeded_observations,
             "required_commands": target_rule.get("required_commands", []),
             "repository_state_unchanged": target_rule.get("repository_state_unchanged", True),
             "checks": checks,
@@ -394,11 +378,15 @@ class RuntimeScenarioBuilder:
             base.get("provided_values", []),
             auto.get("provided_values", []),
         )
-        for section in ("warnings", "requirements", "success_checklist", "inspection_suggestions"):
-            context[section] = self._merge_strings(
-                base.get(section, []),
-                auto.get(section, []),
-            )
+        context["warnings"] = self._merge_strings(
+            base.get("warnings", []),
+            auto.get("warnings", []),
+        )
+        # Do not persist active-attempt scaffolds that reveal evaluator rules.
+        # The frontend also ignores these legacy fields, but stripping them here
+        # keeps newly generated variants clean.
+        for hidden_section in ("requirements", "success_checklist", "inspection_suggestions"):
+            context.pop(hidden_section, None)
         return StudentContextFactory().normalize(context)
 
     def _merge_values(self, primary: Any, fallback: Any) -> list[dict[str, str]]:
@@ -477,18 +465,12 @@ class StudentContextFactory:
     ) -> dict:
         provided_values = self.provided_values(target_rule=target_rule, parameter_context=parameter_context)
         warnings = self.warnings(target_rule)
-        requirements = self.requirements(target_rule)
         return self.normalize(
             {
                 "story": self.story(parameter_context),
                 "current_state": self.current_state(initial_state),
                 "provided_values": provided_values,
-                "requirements": requirements,
                 "warnings": warnings,
-                "success_checklist": self.success_checklist(target_rule),
-                "inspection_suggestions": [
-                    "You may inspect the repository state before deciding what to do."
-                ],
             }
         )
 
@@ -637,13 +619,7 @@ class StudentContextFactory:
                 for item in self._as_list(context.get("provided_values"))
                 if isinstance(item, dict) and item.get("label") and item.get("value") not in (None, "")
             ],
-            "requirements": [self.format_value(item) for item in self._as_list(context.get("requirements"))],
             "warnings": [self.format_value(item) for item in self._as_list(context.get("warnings"))],
-            "success_checklist": [self.format_value(item) for item in self._as_list(context.get("success_checklist"))],
-            "inspection_suggestions": [
-                self.format_value(item)
-                for item in self._as_list(context.get("inspection_suggestions"))
-            ],
         }
         return {
             key: value
@@ -800,6 +776,8 @@ class GeneratedVariantValidator:
                 self._collect(values, rule.get("paths"))
             if rule.get("type") in {"partial_hunks_committed", "partial_hunks_left_in_working_tree"}:
                 self._collect(values, rule.get("paths"))
+            if rule.get("type") == "inspection_answer_matches":
+                self._collect(values, rule.get("expected"))
         return {
             value
             for value in values

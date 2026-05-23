@@ -42,11 +42,13 @@ export function LiveDagPanel({
   snapshot,
   className,
   contentClassName,
+  showRepositoryDetails = false,
 }: {
   title?: string
   snapshot: RepositorySnapshot
   className?: string
   contentClassName?: string
+  showRepositoryDetails?: boolean
 }) {
   return (
     <RepositoryStateDiagram
@@ -54,6 +56,7 @@ export function LiveDagPanel({
       snapshot={snapshot}
       className={className}
       contentClassName={contentClassName}
+      showRepositoryDetails={showRepositoryDetails}
     />
   )
 }
@@ -63,11 +66,13 @@ export function RepositoryStateDiagram({
   snapshot,
   className,
   contentClassName,
+  showRepositoryDetails = false,
 }: {
   title: string
   snapshot: RepositorySnapshot
   className?: string
   contentClassName?: string
+  showRepositoryDetails?: boolean
 }) {
   const normalizedSnapshot = useMemo(() => normalizeSnapshot(snapshot), [snapshot])
   const { nodes, edges } = useMemo(() => buildGraph(normalizedSnapshot), [normalizedSnapshot])
@@ -76,12 +81,22 @@ export function RepositoryStateDiagram({
   return (
     <Card className={cn('min-h-0 overflow-hidden shadow-none', className)}>
       <CardHeader className="p-3">
-        <CardTitle className="flex items-center gap-2 text-sm">
+        <CardTitle className="flex flex-wrap items-center gap-2 text-sm">
           <GitCommitHorizontal className="size-5 text-primary" />
           {title}
+          <span className="text-[11px] font-normal text-muted-foreground">
+            {normalizedSnapshot.commits.length
+              ? 'Hover or click a commit for details.'
+              : 'No commit metadata yet; the repository is still empty.'}
+          </span>
         </CardTitle>
       </CardHeader>
-      <CardContent className={cn('grid h-[21rem] grid-rows-[minmax(0,1fr)_auto] p-0', contentClassName)}>
+      <CardContent
+        className={cn(
+          showRepositoryDetails ? 'grid h-[21rem] grid-rows-[minmax(0,1fr)_auto] p-0' : 'h-[21rem] p-0',
+          contentClassName,
+        )}
+      >
         <ReactFlow
           className="h-full w-full"
           style={{ height: '100%', width: '100%' }}
@@ -100,7 +115,7 @@ export function RepositoryStateDiagram({
         >
           <Background gap={18} color="rgba(255,255,255,0.05)" />
         </ReactFlow>
-        <RepositoryDetails snapshot={normalizedSnapshot} />
+        {showRepositoryDetails ? <RepositoryDetails snapshot={normalizedSnapshot} /> : null}
       </CardContent>
     </Card>
   )

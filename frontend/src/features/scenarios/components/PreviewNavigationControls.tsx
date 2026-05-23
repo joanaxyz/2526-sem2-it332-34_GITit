@@ -19,18 +19,30 @@ export function PreviewNavigationControls({
   onNext: () => void
   onStartPractice: () => void
 }) {
+  const showStepControls = canGoPrevious || canGoNext
+
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
-      <div className="flex gap-2">
-        <Button type="button" size="sm" variant="outline" disabled={!canGoPrevious || isProceeding} onClick={onPrevious}>
-          <ArrowLeft data-icon="inline-start" />
-          Previous
-        </Button>
-        <Button type="button" size="sm" variant="outline" disabled={!canGoNext || isProceeding} onClick={onNext}>
-          Next
-          <ArrowRight data-icon="inline-start" />
-        </Button>
-      </div>
+      {showStepControls ? (
+        <div className="flex gap-2">
+          {canGoPrevious ? (
+            <Button type="button" size="sm" variant="outline" disabled={isProceeding} onClick={onPrevious}>
+              <ArrowLeft data-icon="inline-start" />
+              Previous
+            </Button>
+          ) : null}
+          {canGoNext ? (
+            <Button type="button" size="sm" variant="outline" disabled={isProceeding} onClick={onNext}>
+              Next
+              <ArrowRight data-icon="inline-start" />
+            </Button>
+          ) : null}
+        </div>
+      ) : (
+        <div className="text-xs leading-5 text-muted-foreground">
+          This preview is a short command warm-up, not a step-by-step answer path.
+        </div>
+      )}
       <div className="flex gap-2">
         <Button type="button" disabled={isProceeding} onClick={onStartPractice}>
           <Play data-icon="inline-start" />

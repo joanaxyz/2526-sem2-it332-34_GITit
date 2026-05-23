@@ -54,7 +54,7 @@ const snapshot: RepositorySnapshot = {
 describe('LiveDagPanel', () => {
   afterEach(() => cleanup())
 
-  it('renders commit details and repository side state from the snapshot', () => {
+  it('renders commit details from the node hover/click card', () => {
     render(<LiveDagPanel snapshot={snapshot} />)
 
     const commitButton = screen.getByTitle(/commit c2/i)
@@ -63,10 +63,6 @@ describe('LiveDagPanel', () => {
     expect(screen.getByText('Message: Update form validation')).toBeInTheDocument()
     expect(screen.getByText(/modified src\/form\.js/i)).toBeInTheDocument()
     expect(screen.getByText(/src\/form\.js @ form-validation-v2/i)).toBeInTheDocument()
-    expect(screen.getByTitle(/Staged: src\/form\.js/i)).toBeInTheDocument()
-    expect(screen.getByTitle(/Working tree: debug\.log/i)).toBeInTheDocument()
-    expect(screen.getByTitle(/Remote branches: origin\/main -> c1/i)).toBeInTheDocument()
-    expect(screen.getByTitle(/Stash: 1 entry/i)).toBeInTheDocument()
   })
 })
 

@@ -1,4 +1,4 @@
-import { AlertTriangle, BookOpenText, CheckCircle2, ClipboardList, Info, Target } from 'lucide-react'
+import { AlertTriangle, BookOpenText, ClipboardList, Info, Target } from 'lucide-react'
 import type { ComponentType, ReactNode } from 'react'
 
 import type { ScenarioSession, ScenarioStudentContext } from '@/features/practice/types'
@@ -45,8 +45,6 @@ export function ScenarioContextPanel({ session }: { session: ScenarioSession }) 
           </dl>
         </Section>
 
-        {/* Success checklist removed as requested */}
-
         <Section icon={AlertTriangle} title="Constraints" hidden={!context.warnings.length}>
           <CompactList items={context.warnings} tone="warning" />
         </Section>
@@ -80,11 +78,9 @@ function Section({
 
 function CompactList({
   items,
-  marker = 'dot',
   tone = 'default',
 }: {
   items: string[]
-  marker?: 'dot' | 'check'
   tone?: 'default' | 'warning'
 }) {
   return (
@@ -94,12 +90,9 @@ function CompactList({
           <span
             className={cn(
               'mt-2 size-1.5 rounded-full bg-muted-foreground',
-              marker === 'check' && 'mt-0.5 grid size-4 place-items-center rounded-full bg-primary/15 text-primary',
-              tone === 'warning' && marker !== 'check' && 'bg-destructive'
+              tone === 'warning' && 'bg-destructive'
             )}
-          >
-            {marker === 'check' ? <CheckCircle2 className="size-4" /> : null}
-          </span>
+          />
           <span className={cn('min-w-0 text-muted-foreground', tone === 'warning' && 'text-foreground')}>{item}</span>
         </li>
       ))}
@@ -111,17 +104,12 @@ function contextForSession(session: ScenarioSession) {
   const context = normalizeContext(session.student_context ?? session.scenario.student_context)
   const fallback = normalizeContext({
     story: session.scenario.narrative,
-    requirements: session.scenario.task_prompt ? [session.scenario.task_prompt] : [],
-    inspection_suggestions: ['You may inspect the repository state before deciding what to do.'],
   })
   const hasStructuredContext =
     context.story ||
     context.current_state.length ||
     context.provided_values.length ||
-    context.requirements.length ||
-    context.warnings.length ||
-    context.success_checklist.length ||
-    context.inspection_suggestions.length
+    context.warnings.length
 
   const active = hasStructuredContext ? context : fallback
   return {
@@ -137,10 +125,7 @@ function normalizeContext(context?: ScenarioStudentContext | null) {
     provided_values: (context?.provided_values ?? [])
       .map((item) => ({ label: cleanText(item.label), value: cleanText(item.value) }))
       .filter((item) => item.label && item.value),
-    requirements: cleanList(context?.requirements),
     warnings: cleanList(context?.warnings),
-    success_checklist: cleanList(context?.success_checklist),
-    inspection_suggestions: cleanList(context?.inspection_suggestions),
   }
 }
 

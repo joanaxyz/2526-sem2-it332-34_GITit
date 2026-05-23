@@ -10,7 +10,7 @@ const tourSteps = [
     target: 'scenario-brief',
     icon: PanelLeft,
     label: 'Scenario brief',
-    body: 'Story, task, limits, files, and attempt state live here. Read this before touching the terminal.',
+    body: 'Story, required details, constraints, and attempt state live here. Read this before touching the terminal.',
     placement: 'right',
   },
   {

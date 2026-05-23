@@ -43,7 +43,19 @@ export function RegisterForm() {
   })
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={form.handleSubmit((values) => mutation.mutate(values))}>
+    <form
+      className="flex flex-col gap-4"
+      onSubmit={form.handleSubmit((values) =>
+        mutation.mutate({
+          student_id: values.student_id,
+          first_name: values.first_name,
+          last_name: values.last_name,
+          email: values.email,
+          password: values.password,
+          password_confirm: values.password_confirm,
+        })
+      )}
+    >
       <div>
         <h2 className="text-3xl font-extrabold tracking-tight">Create account</h2>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">Register as a student and explore lessons or scenario practice at your own pace.</p>
