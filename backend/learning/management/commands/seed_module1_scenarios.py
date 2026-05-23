@@ -9,7 +9,6 @@ from django.db import transaction
 
 from common.constants import (
     COMPLETION_EXPANDED_STATE_BASED,
-    COMPLETION_INSPECTION,
     COMPLETION_STATE_BASED,
     DIFFICULTY_EASY,
     DIFFICULTY_HARD,
@@ -49,6 +48,19 @@ SESSION_COUNTS = {
     DIFFICULTY_MEDIUM: 2,
     DIFFICULTY_HARD: 2,
 }
+
+
+MODULE_ONE_LESSONS = [
+    (1, "initializing-a-local-repository", "Initializing a Local Repository", "Create Git metadata in an existing or named project folder.", "scenario"),
+    (2, "cloning-a-remote-repository", "Cloning a Remote Repository", "Create a local working copy and verify the origin relationship.", "scenario"),
+    (3, "staging-and-committing-basic-workflow", "Staging and Committing: The Basic Workflow", "Prepare intentional changes and save them with a clear message.", "scenario"),
+    (4, "ignoring-files-with-gitignore", "Ignoring Files with .gitignore", "Keep generated files, dependency folders, logs, and secrets out of history.", "scenario"),
+    (5, "partial-staging-and-git-add-p", "Partial Staging and git add -p", "Stage selected hunks so each commit has one clear purpose.", "scenario"),
+    (6, "amending-commits", "Amending Commits", "Repair the latest commit message or contents before sharing it.", "scenario"),
+    (7, "unstaging-and-discarding-changes", "Unstaging and Discarding Changes", "Move changes out of the index and safely discard unwanted work.", "scenario"),
+    (8, "reading-repository-status-and-history", "Reading Repository Status and History", "Scenario overview for reading status, history, and diffs before scenario practice.", "scenario"),
+    (9, "module-1-review-and-practice", "Module 1 Review and Practice", "Combine the local workflow skills in larger repository situations.", "scenario"),
+]
 
 
 def commit(commit_id: str, message: str, tree: dict[str, Any], parents: list[str] | None = None) -> dict[str, Any]:
@@ -118,10 +130,9 @@ def uninitialized_state(**extra: Any) -> dict[str, Any]:
 
 def student_context_template(kind: str) -> dict[str, Any]:
     common = {
-        "inspection_suggestions": [
-            "Inspect the repository state before deciding what to change.",
-            "Use the diagram and terminal output as support, but follow the required outcome in this brief.",
-        ],
+        # Keep the active-attempt context focused on the brief and required values.
+        # The UI intentionally hides task/checklist/helpful-inspection scaffolds
+        # because those sections can leak evaluator rules or imply exact commands.
     }
     templates = {
         "init": {
@@ -131,18 +142,8 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 {"label": "Target directory", "value": "{{target_directory}}"},
                 {"label": "Expected untracked paths", "value": "{{expected_untracked_paths}}"},
             ],
-            "requirements": [
-                "Make the correct folder a Git repository.",
-                "Do not create a commit yet.",
-                "Leave existing starter files untracked unless the task says otherwise.",
-            ],
-            "success_checklist": [
-                "Repository metadata exists for the required folder.",
-                "HEAD is on main.",
-                "There are zero commits.",
-                "The staging area is empty.",
-                "The expected starter files are still in the working tree when provided.",
-            ],
+            "requirements": [],
+            "success_checklist": [],
             **common,
         },
         "clone": {
@@ -152,19 +153,8 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 {"label": "Destination folder", "value": "{{destination_folder}}"},
                 {"label": "Remote tip", "value": "{{remote_head}}"},
             ],
-            "requirements": [
-                "Create the local repository from the provided remote URL.",
-                "Use the requested destination folder when one is provided.",
-                "The local main branch should track origin/main.",
-                "The working tree should be clean after cloning.",
-            ],
-            "success_checklist": [
-                "origin points to the required remote URL.",
-                "main points to the cloned remote tip.",
-                "origin/main exists and points to the same remote tip.",
-                "main tracks origin/main.",
-                "The clone destination matches the required folder.",
-            ],
+            "requirements": [],
+            "success_checklist": [],
             **common,
         },
         "commit": {
@@ -174,18 +164,8 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 {"label": "Files to leave out", "value": "{{excluded_files}}"},
                 {"label": "Required commit message text", "value": "{{required_commit_message}}"},
             ],
-            "requirements": [
-                "Save only the intended target files in the new snapshot.",
-                "Use the required commit message text.",
-                "Do not include excluded files in the final snapshot.",
-            ],
-            "success_checklist": [
-                "main points to a new commit.",
-                "The new commit contains the target files.",
-                "The new commit excludes the files marked to leave out.",
-                "The commit message includes the required text.",
-                "The staging area is empty afterward.",
-            ],
+            "requirements": [],
+            "success_checklist": [],
             **common,
         },
         "gitignore": {
@@ -197,17 +177,8 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 {"label": "Tracked generated path to remove from history", "value": "{{tracked_generated_path}}"},
                 {"label": "Required commit message text", "value": "{{required_commit_message}}"},
             ],
-            "requirements": [
-                "Save the ignore rules in project history.",
-                "Keep generated or secret files out of the final commit tree.",
-                "If a generated file is already tracked, remove it from tracking while preserving the local file.",
-            ],
-            "success_checklist": [
-                ".gitignore is part of the final snapshot.",
-                "Ignored/generated paths remain local and are not added as normal project files.",
-                "The required commit message text is used.",
-                "The staging area is empty afterward.",
-            ],
+            "requirements": [],
+            "success_checklist": [],
             **common,
         },
         "partial": {
@@ -219,17 +190,8 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 {"label": "Other files to leave out", "value": "{{unrelated_files}}"},
                 {"label": "Required commit message text", "value": "{{required_commit_message}}"},
             ],
-            "requirements": [
-                "Save only the target hunk in the final snapshot.",
-                "Leave the leftover hunk available in the working tree.",
-                "Do not include unrelated files in the final snapshot.",
-            ],
-            "success_checklist": [
-                "The final commit contains the target hunk token.",
-                "The leftover hunk token remains in the working tree.",
-                "The staging area is empty afterward.",
-                "The required commit message text is used.",
-            ],
+            "requirements": [],
+            "success_checklist": [],
             **common,
         },
         "amend": {
@@ -239,17 +201,8 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 {"label": "Corrected message", "value": "{{required_commit_message}}"},
                 {"label": "Files in repaired commit", "value": "{{target_files}}"},
             ],
-            "requirements": [
-                "Repair the latest commit instead of creating a separate follow-up commit.",
-                "Preserve the latest commit's parent relationship.",
-                "Include the required corrected message and file when provided.",
-            ],
-            "success_checklist": [
-                "main points to a replacement commit.",
-                "The replaced commit is recorded as repaired.",
-                "The final commit contains the corrected required details.",
-                "The staging area is empty afterward.",
-            ],
+            "requirements": [],
+            "success_checklist": [],
             **common,
         },
         "restore": {
@@ -258,34 +211,8 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 {"label": "Keep but unstage", "value": "{{keep_paths}}"},
                 {"label": "Discard from working tree", "value": "{{discard_paths}}"},
             ],
-            "requirements": [
-                "Move the keep paths out of staging while preserving them as working-tree changes.",
-                "Remove the discard paths from the working tree.",
-                "Do not create a new commit.",
-            ],
-            "success_checklist": [
-                "The staging area is empty.",
-                "The keep paths remain in the working tree.",
-                "The discard paths are absent from the working tree.",
-                "main still points to the original commit.",
-            ],
-            **common,
-        },
-        "inspect": {
-            "story": "You are asked to read the repository state for {{project}} without changing it.",
-            "provided_values": [
-                {"label": "Inspection question", "value": "{{question}}"},
-                {"label": "Expected answer fields", "value": "{{answer_keys}}"},
-            ],
-            "requirements": [
-                "Run the appropriate diagnostic command.",
-                "Submit the requested observation without changing the repository state.",
-            ],
-            "success_checklist": [
-                "The repository state is unchanged.",
-                "The required diagnostic command was used.",
-                "The submitted observation matches the expected state facts.",
-            ],
+            "requirements": [],
+            "success_checklist": [],
             **common,
         },
         "review": {
@@ -298,17 +225,8 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 {"label": "Hunks to leave", "value": "{{leftover_hunks}}"},
                 {"label": "Commit to repair", "value": "{{commit_to_repair}}"},
             ],
-            "requirements": [
-                "Reach the requested final repository state using the local workflow skills from Module 1.",
-                "Save only the required work and leave unrelated work out.",
-                "Use the required final commit message text.",
-            ],
-            "success_checklist": [
-                "The final snapshot contains the required work only.",
-                "Unrelated paths or hunks remain out of the final snapshot.",
-                "The staging area is empty afterward.",
-                "The final repository state matches the scenario requirements.",
-            ],
+            "requirements": [],
+            "success_checklist": [],
             **common,
         },
     }
@@ -318,126 +236,141 @@ def student_context_template(kind: str) -> dict[str, Any]:
 def base_scenarios() -> list[dict[str, Any]]:
     base_tree = {"README.md": "readme-v1", "src/app.py": "app-v1", "styles/site.css": "style-v1"}
     return [
-        {
-            "lesson": (1, "initializing-a-local-repository", "Initializing a Local Repository", "Create Git metadata in an existing or named project folder."),
-            "slug": "initialize-local-repository",
-            "title": "Initialize a local repository",
-            "focus": "git init",
-            "summary": "Create repository metadata without staging or committing files.",
-            "explanation": "Initialization creates Git metadata for a folder. It does not save a snapshot, stage files, or change file contents.",
-            "primary": ["git init"],
-            "supporting": ["git status"],
-            "concepts": ["repository metadata", ".git directory", "HEAD", "working tree", "untracked files"],
-            "kind": ScenarioSkillFocus.SkillFocusType.COMMAND_SPECIFIC,
-            "difficulties": {
-                DIFFICULTY_EASY: {
-                    "policy": (1, 1),
-                    "narrative": "Initialize the current empty folder.",
-                    "task": "Make the current folder a Git repository, but do not create a commit.",
-                    "blueprints": [
-                        bp(
-                            slug="init-current-empty",
-                            kind="init",
-                            signature="module1.init.current-empty",
-                            subtemplate="current-directory-empty",
-                            cases=[
-                                {"case_id": "init-easy-empty-lab", "project": "empty-lab", "target_directory": "current folder", "expected_untracked_paths": [], "answer_anchor": "initialized current empty folder; zero commits"},
-                                {"case_id": "init-easy-notes-shell", "project": "notes-shell", "target_directory": "current folder", "expected_untracked_paths": [], "answer_anchor": "initialized current empty notes shell; zero commits"},
-                                {"case_id": "init-easy-sandbox", "project": "sandbox", "target_directory": "current folder", "expected_untracked_paths": [], "answer_anchor": "initialized current sandbox; zero commits"},
-                            ],
-                            initial_state=uninitialized_state(),
-                            target_rule={
-                                "repository_initialized": True,
-                                "head_branch": "main",
-                                "staging_empty": True,
-                                "rules": [
-                                    {"type": "commit_count_equals", "count": 0},
-                                    {"type": "working_tree_matches_exact_paths", "paths": []},
-                                    {"type": "operation_metadata_absent", "key": "last_init_directory"},
-                                ],
-                            },
-                            solution=["git init"],
-                            label="Initialize {{project}}",
-                            slug_template="init-{{case_id}}",
-                        )
-                    ],
-                },
-                DIFFICULTY_MEDIUM: {
-                    "policy": (1, 1),
-                    "narrative": "Initialize a current folder that already contains starter files.",
-                    "task": "Make the current folder a Git repository while leaving the starter files untracked.",
-                    "blueprints": [
-                        bp(
-                            slug="init-current-untracked",
-                            kind="init",
-                            signature="module1.init.current-untracked",
-                            subtemplate="current-directory-with-untracked",
-                            cases=[
-                                {"case_id": "init-medium-docs-folder", "project": "docs-folder", "target_directory": "current folder", "initial_working_tree": {"README.md": "untracked", "docs/intro.md": "untracked"}, "expected_untracked_paths": ["README.md", "docs/intro.md"], "answer_anchor": "README.md and docs/intro.md remain untracked; zero commits"},
-                                {"case_id": "init-medium-web-starter", "project": "web-starter", "target_directory": "current folder", "initial_working_tree": {"index.html": "untracked", "styles/site.css": "untracked", "scripts/app.js": "untracked"}, "expected_untracked_paths": ["index.html", "styles/site.css", "scripts/app.js"], "answer_anchor": "three starter files remain untracked; zero commits"},
-                                {"case_id": "init-medium-api-starter", "project": "api-starter", "target_directory": "current folder", "initial_working_tree": {"README.md": "untracked", "api/routes.py": "untracked", "api/config.py": "untracked"}, "expected_untracked_paths": ["README.md", "api/routes.py", "api/config.py"], "answer_anchor": "API starter files remain untracked; zero commits"},
-                            ],
-                            initial_state=uninitialized_state(working_tree="{{initial_working_tree}}"),
-                            target_rule={
-                                "repository_initialized": True,
-                                "head_branch": "main",
-                                "staging_empty": True,
-                                "rules": [
-                                    {"type": "commit_count_equals", "count": 0},
-                                    {"type": "working_tree_matches_exact_paths", "paths": "{{expected_untracked_paths}}"},
-                                    {"type": "working_tree_contains", "paths": "{{expected_untracked_paths}}"},
-                                ],
-                            },
-                            solution=["git init"],
-                            label="Initialize {{project}} with starter files",
-                            slug_template="init-{{case_id}}",
-                        )
-                    ],
-                },
-                DIFFICULTY_HARD: {
-                    "policy": (1, 1),
-                    "narrative": "Initialize a named child directory from a parent workspace.",
-                    "task": "Initialize only the requested child directory, not the parent workspace.",
-                    "blueprints": [
-                        bp(
-                            slug="init-named-directory",
-                            kind="init",
-                            signature="module1.init.named-directory",
-                            subtemplate="named-directory-from-parent",
-                            cases=[
-                                {"case_id": "init-hard-new-research-log", "project": "parent-workspace", "target_directory": "research-log", "expected_untracked_paths": [], "sibling_directories": ["notes", "archive"], "answer_anchor": "initialized research-log only; parent not initialized; zero commits"},
-                                {"case_id": "init-hard-new-ui-kit", "project": "design-parent", "target_directory": "ui-kit", "expected_untracked_paths": [], "sibling_directories": ["brand-assets", "experiments"], "answer_anchor": "initialized ui-kit only; sibling folders untouched; zero commits"},
-                                {"case_id": "init-hard-new-deploy-checklist", "project": "ops-parent", "target_directory": "deploy-checklist", "expected_untracked_paths": [], "sibling_directories": ["docs", "scripts"], "answer_anchor": "initialized deploy-checklist only; parent/siblings untouched; zero commits"},
-                            ],
-                            initial_state=uninitialized_state(),
-                            target_rule={
-                                "repository_initialized": True,
-                                "head_branch": "main",
-                                "staging_empty": True,
-                                "rules": [
-                                    {"type": "commit_count_equals", "count": 0},
-                                    {"type": "operation_metadata_equals", "key": "last_init_directory", "value": "{{target_directory}}"},
-                                    {"type": "operation_metadata_not_equals", "key": "last_init_directory", "value": "."},
-                                ],
-                            },
-                            solution=["git init {{target_directory}}"],
-                            label="Initialize {{target_directory}}",
-                            slug_template="init-{{case_id}}",
-                        )
-                    ],
-                },
-            },
-        },
+        init_scenario(),
         clone_scenario(),
         commit_scenario(base_tree),
         gitignore_scenario(),
         partial_staging_scenario(),
         amend_scenario(),
         restore_scenario(),
-        inspection_scenario(),
         review_scenario(),
     ]
 
+
+def init_scenario() -> dict[str, Any]:
+    """Module 1.1: intentionally avoids fake variety.
+
+    Easy is a single current-directory warm-up because the honest answer is always
+    `git init`. Medium and hard use the simulator-supported `git init <dir>` form so
+    each generated variant has a different target directory and final-state check.
+    """
+    return {
+        "lesson": (1, "initializing-a-local-repository", "Initializing a Local Repository", "Create Git metadata in an existing or named project folder."),
+        "slug": "initialize-local-repository",
+        "title": "Initialize a local repository",
+        "focus": "git init",
+        "summary": "Create repository metadata without staging or committing files.",
+        "explanation": "Initialization creates Git metadata for a folder. It does not save a snapshot, stage files, or change file contents.",
+        "primary": ["git init"],
+        "supporting": ["git status"],
+        "concepts": ["repository metadata", ".git directory", "HEAD", "working tree", "untracked files"],
+        "kind": ScenarioSkillFocus.SkillFocusType.COMMAND_SPECIFIC,
+        "difficulties": {
+            DIFFICULTY_EASY: diff(
+                (1, 1),
+                "Initialize the current empty folder.",
+                "Make the current folder a Git repository, but do not create a commit.",
+                [
+                    bp(
+                        slug="init-current-empty",
+                        kind="init",
+                        signature="module1.init.current-empty",
+                        subtemplate="current-directory-empty",
+                        cases=[
+                            {
+                                "case_id": "init-easy-current-empty",
+                                "project": "empty-lab",
+                                "target_directory": "current folder",
+                                "expected_untracked_paths": [],
+                                "answer_anchor": "initialized the current folder only; zero commits",
+                            },
+                        ],
+                        initial_state=uninitialized_state(),
+                        target_rule={
+                            "repository_initialized": True,
+                            "head_branch": "main",
+                            "staging_empty": True,
+                            "rules": [
+                                {"type": "commit_count_equals", "count": 0},
+                                {"type": "working_tree_matches_exact_paths", "paths": []},
+                                {"type": "operation_metadata_absent", "key": "last_init_directory"},
+                                {"type": "operation_metadata_equals", "key": "last_init_current_directory", "value": True},
+                            ],
+                        },
+                        solution=["git init"],
+                        label="Initialize the current folder",
+                        slug_template="init-{{case_id}}",
+                    )
+                ],
+                required_attempts=1,
+            ),
+            DIFFICULTY_MEDIUM: diff(
+                (1, 1),
+                "Initialize a named project folder from the current workspace.",
+                "Initialize the exact target directory named in the brief; do not initialize the parent/current folder.",
+                [
+                    bp(
+                        slug="init-named-directory",
+                        kind="init",
+                        signature="module1.init.named-directory",
+                        subtemplate="named-directory",
+                        cases=[
+                            {"case_id": "init-medium-docs-site", "project": "workspace", "target_directory": "docs-site", "expected_untracked_paths": [], "answer_anchor": "initialized docs-site only; zero commits"},
+                            {"case_id": "init-medium-api-playground", "project": "workspace", "target_directory": "api-playground", "expected_untracked_paths": [], "answer_anchor": "initialized api-playground only; zero commits"},
+                            {"case_id": "init-medium-design-kit", "project": "workspace", "target_directory": "design-kit", "expected_untracked_paths": [], "answer_anchor": "initialized design-kit only; zero commits"},
+                        ],
+                        initial_state=uninitialized_state(),
+                        target_rule={
+                            "repository_initialized": True,
+                            "head_branch": "main",
+                            "staging_empty": True,
+                            "rules": [
+                                {"type": "commit_count_equals", "count": 0},
+                                {"type": "operation_metadata_equals", "key": "last_init_directory", "value": "{{target_directory}}"},
+                                {"type": "operation_metadata_equals", "key": "last_init_current_directory", "value": False},
+                            ],
+                        },
+                        solution=["git init {{target_directory}}"],
+                        label="Initialize {{target_directory}}",
+                        slug_template="init-{{case_id}}",
+                    )
+                ],
+            ),
+            DIFFICULTY_HARD: diff(
+                (1, 1),
+                "Choose the correct child folder from a parent workspace with sibling traps.",
+                "Initialize only the requested child directory; the parent/current workspace must not be the initialized target.",
+                [
+                    bp(
+                        slug="init-correct-child-directory",
+                        kind="init",
+                        signature="module1.init.child-directory-trap",
+                        subtemplate="named-directory-from-parent",
+                        cases=[
+                            {"case_id": "init-hard-research-log", "project": "parent-workspace", "target_directory": "research-log", "expected_untracked_paths": ["research-log/README.md"], "sibling_directories": ["notes", "archive"], "answer_anchor": "initialized research-log only; parent and siblings not targeted", "initial_working_tree": {"research-log/README.md": "untracked", "notes/ideas.md": "untracked", "archive/old.md": "untracked"}},
+                            {"case_id": "init-hard-ui-kit", "project": "design-parent", "target_directory": "ui-kit", "expected_untracked_paths": ["ui-kit/tokens.css"], "sibling_directories": ["brand-assets", "experiments"], "answer_anchor": "initialized ui-kit only; sibling folders untouched", "initial_working_tree": {"ui-kit/tokens.css": "untracked", "brand-assets/logo.svg": "untracked", "experiments/mockup.html": "untracked"}},
+                            {"case_id": "init-hard-deploy-checklist", "project": "ops-parent", "target_directory": "deploy-checklist", "expected_untracked_paths": ["deploy-checklist/steps.md"], "sibling_directories": ["docs", "scripts"], "answer_anchor": "initialized deploy-checklist only; parent/current workspace not initialized", "initial_working_tree": {"deploy-checklist/steps.md": "untracked", "docs/runbook.md": "untracked", "scripts/deploy.sh": "untracked"}},
+                        ],
+                        initial_state=uninitialized_state(working_tree="{{initial_working_tree}}"),
+                        target_rule={
+                            "repository_initialized": True,
+                            "head_branch": "main",
+                            "staging_empty": True,
+                            "rules": [
+                                {"type": "commit_count_equals", "count": 0},
+                                {"type": "operation_metadata_equals", "key": "last_init_directory", "value": "{{target_directory}}"},
+                                {"type": "operation_metadata_equals", "key": "last_init_current_directory", "value": False},
+                                {"type": "operation_metadata_not_equals", "key": "last_init_directory", "value": "."},
+                            ],
+                        },
+                        solution=["git init {{target_directory}}"],
+                        label="Initialize {{target_directory}} only",
+                        slug_template="init-{{case_id}}",
+                    )
+                ],
+            ),
+        },
+    }
 
 def bp(
     *,
@@ -897,49 +830,6 @@ def restore_bp(slug: str, cases: list[dict[str, Any]], signature: str, subtempla
     )
 
 
-def inspection_scenario() -> dict[str, Any]:
-    cases_status = [
-        inspect_case("inspect-easy-status-staged", "status-lab", ["git status"], "Which file is staged for the next commit?", ["staged_paths"], {"staged_paths": ["src/app.py"]}, repo_with_head(staging={"src/app.py": "modified"}), "staged path src/app.py"),
-        inspect_case("inspect-easy-log-latest", "history-lab", ["git log --oneline"], "What is the latest commit message?", ["commit_message"], {"commit_message": "Add profile card"}, repo_with_head(commits=[commit("c1", "Initial project snapshot", {"README.md": "readme-v1"}), commit("c2", "Add profile card", {"README.md": "readme-v1", "src/profile-card.js": "profile-v1"}, ["c1"])], head="c2"), "latest commit message Add profile card"),
-        inspect_case("inspect-easy-diff-working", "diff-lab", ["git diff"], "Which file has unstaged changes?", ["unstaged_paths"], {"unstaged_paths": ["README.md"]}, repo_with_head(working_tree={"README.md": "modified"}), "unstaged path README.md"),
-    ]
-    cases_medium = [
-        inspect_case("inspect-medium-status-mixed", "mixed-status-lab", ["git status"], "Identify the staged, unstaged, and untracked paths.", ["staged_paths", "unstaged_paths", "untracked_paths"], {"staged_paths": ["src/app.py"], "unstaged_paths": ["README.md"], "untracked_paths": ["notes/todo.md"]}, repo_with_head(staging={"src/app.py": "modified"}, working_tree={"README.md": "modified", "notes/todo.md": "untracked"}), "three distinct file areas"),
-        inspect_case("inspect-medium-staged-diff", "staged-diff-lab", ["git diff --staged"], "Which path is staged for the next snapshot?", ["staged_diff_paths"], {"staged_diff_paths": ["styles/site.css"]}, repo_with_head(staging={"styles/site.css": "modified"}), "staged diff path styles/site.css"),
-        inspect_case("inspect-medium-branch-history", "branch-history-lab", ["git log --oneline"], "Which commit is currently at HEAD?", ["latest_commit", "commit_message"], {"latest_commit": "c3", "commit_message": "Refine search results view"}, repo_with_head(commits=[commit("c1", "Initial", {"README.md": "v1"}), commit("c2", "Add search shell", {"README.md": "v1", "src/search.js": "search-v1"}, ["c1"]), commit("c3", "Refine search results view", {"README.md": "v1", "src/search.js": "search-v2"}, ["c2"])], head="c3"), "latest commit c3 with specific message"),
-    ]
-    cases_hard = [
-        inspect_case("inspect-hard-full-state", "full-state-lab", ["git status", "git diff --staged", "git log --oneline"], "Identify the current branch, staged file, unstaged file, and latest commit message.", ["head_branch", "staged_paths", "unstaged_paths", "commit_message"], {"head_branch": "main", "staged_paths": ["src/export.py"], "unstaged_paths": ["docs/export.md"], "commit_message": "Add export starter"}, repo_with_head(commits=[commit("c1", "Add export starter", {"README.md": "readme-v1", "src/export.py": "export-v1"})], staging={"src/export.py": "export-v2"}, working_tree={"docs/export.md": "export-docs-v2"}), "branch + staged + unstaged + latest message"),
-        inspect_case("inspect-hard-conflict-state", "conflict-read-lab", ["git status", "git diff"], "Which path is conflicted and which branch is active?", ["head_branch", "conflicted_paths"], {"head_branch": "main", "conflicted_paths": ["src/app.py"]}, repo_with_head(working_tree={"src/app.py": "conflict"}, extra={"conflicts": ["src/app.py"]}), "active branch main and conflict path src/app.py"),
-        inspect_case("inspect-hard-history-and-diff", "history-diff-lab", ["git log --oneline", "git diff HEAD"], "Identify the latest commit and all paths changed since HEAD.", ["latest_commit", "commit_message", "diff_target"], {"latest_commit": "c4", "commit_message": "Add dashboard shell", "diff_target": {"unstaged": ["src/dashboard.js"], "staged": ["styles/dashboard.css"], "conflicted": []}}, repo_with_head(commits=[commit("c1", "Initial", {"README.md": "v1"}), commit("c4", "Add dashboard shell", {"README.md": "v1", "src/dashboard.js": "dashboard-v1"}, ["c1"])], head="c4", staging={"styles/dashboard.css": "dashboard-css-v2"}, working_tree={"src/dashboard.js": "dashboard-v2"}), "latest commit c4 plus staged/unstaged diff split"),
-    ]
-    return scenario_dict(
-        lesson=(8, "reading-repository-status-and-history", "Reading Repository Status and History", "Inspect status, history, and diffs without changing repository state."),
-        slug="read-repository-status-and-history", title="Read repository status and history", focus="repository inspection",
-        summary="Use diagnostic commands to identify repository facts without changing state.", explanation="Inspection commands help decide what to do next. They should not mutate the repository state.",
-        primary=[], supporting=["git status", "git log", "git log --oneline", "git diff", "git diff --staged", "git show", "git branch -v"], concepts=["status", "log", "diff", "inspection", "repository state"], kind=ScenarioSkillFocus.SkillFocusType.CONCEPT_SPECIFIC,
-        difficulties={
-            DIFFICULTY_EASY: diff((0, 0), "Use the named diagnostic command.", "Run the required inspection and submit the matching observation.", [inspect_bp("inspect-guided", cases_status, "module1.inspect.guided", "guided-inspection")], completion_type=COMPLETION_INSPECTION),
-            DIFFICULTY_MEDIUM: diff((0, 0), "Choose from common diagnostics.", "Inspect the right repository area and submit the matching observation.", [inspect_bp("inspect-focused", cases_medium, "module1.inspect.focused", "focused-inspection")], completion_type=COMPLETION_INSPECTION),
-            DIFFICULTY_HARD: diff((0, 0), "Read a mixed repository state.", "Inspect the requested facts without changing repository state.", [inspect_bp("inspect-mixed", cases_hard, "module1.inspect.mixed", "mixed-state-inspection")], completion_type=COMPLETION_INSPECTION),
-        },
-    )
-
-
-def inspect_case(case_id: str, project: str, commands: list[str], question: str, answer_keys: list[str], expected_answer: dict[str, Any], state: dict[str, Any], answer_anchor: str) -> dict[str, Any]:
-    return {"case_id": case_id, "project": project, "required_commands": commands, "question": question, "answer_keys": answer_keys, "expected_answer": expected_answer, "initial_state": state, "solution_commands": commands, "answer_anchor": answer_anchor}
-
-
-def inspect_bp(slug: str, cases: list[dict[str, Any]], signature: str, subtemplate: str) -> dict[str, Any]:
-    return bp(
-        slug=slug, kind="inspect", signature=signature, subtemplate=subtemplate, cases=cases,
-        initial_state="{{initial_state}}",
-        target_rule={"repository_state_unchanged": True, "required_commands": "{{required_commands}}", "must_identify": "{{answer_keys}}", "rules": [{"type": "inspection_answer_matches", "expected": "{{expected_answer}}"}]},
-        solution="{{solution_commands}}", label="Inspect {{project}}", slug_template="inspect-{{case_id}}",
-        expected_observations={"answer_anchor": "{{answer_anchor}}"},
-    )
-
-
 def review_scenario() -> dict[str, Any]:
     clean_cases = [
         review_clean_case("review-easy-docs-ignore", "docs-portal", ["docs/intro.md", ".gitignore"], ["dist/site.html"], "Prepare docs portal intro", "commit contains docs/intro.md + .gitignore; excludes dist/site.html"),
@@ -1011,8 +901,11 @@ def scenario_dict(*, lesson, slug, title, focus, summary, explanation, primary, 
     return {"lesson": lesson, "slug": slug, "title": title, "focus": focus, "summary": summary, "explanation": explanation, "primary": primary, "supporting": supporting, "concepts": concepts, "kind": kind, "difficulties": difficulties}
 
 
-def diff(policy, narrative, task, blueprints, completion_type=COMPLETION_STATE_BASED):
-    return {"policy": policy, "narrative": narrative, "task": task, "blueprints": blueprints, "completion_type": completion_type}
+def diff(policy, narrative, task, blueprints, completion_type=COMPLETION_STATE_BASED, required_attempts=None):
+    payload = {"policy": policy, "narrative": narrative, "task": task, "blueprints": blueprints, "completion_type": completion_type}
+    if required_attempts is not None:
+        payload["required_successful_attempts"] = required_attempts
+    return payload
 
 
 class Command(BaseCommand):
@@ -1040,15 +933,16 @@ class Command(BaseCommand):
             },
         )
 
-        for spec in base_scenarios():
-            lesson_order, lesson_slug, lesson_title, lesson_subtitle = spec["lesson"]
+        lesson_by_order = {}
+        for lesson_order, lesson_slug, lesson_title, lesson_subtitle, lesson_kind in MODULE_ONE_LESSONS:
+            kind = Lesson.LessonKind.SCENARIO if lesson_kind == "scenario" else Lesson.LessonKind.CONTENT
             lesson, _ = Lesson.objects.update_or_create(
                 unit=unit,
                 slug=lesson_slug,
                 defaults={
                     "title": lesson_title,
                     "subtitle": lesson_subtitle,
-                    "kind": Lesson.LessonKind.SCENARIO,
+                    "kind": kind,
                     "content_html": self._lesson_html(lesson_title, lesson_subtitle),
                     "scoped_css": "",
                     "interaction_steps": [],
@@ -1056,6 +950,15 @@ class Command(BaseCommand):
                     "sort_order": lesson_order,
                 },
             )
+            lesson_by_order[lesson_order] = lesson
+
+        specs = base_scenarios()
+        active_scenario_slugs = [spec["slug"] for spec in specs]
+        ScenarioSkillFocus.objects.filter(learning_unit=unit).exclude(slug__in=active_scenario_slugs).update(is_published=False)
+
+        for spec in specs:
+            lesson_order, lesson_slug, lesson_title, lesson_subtitle = spec["lesson"]
+            lesson = lesson_by_order[lesson_order]
             scenario, _ = ScenarioSkillFocus.objects.update_or_create(
                 learning_unit=unit,
                 slug=spec["slug"],
@@ -1086,7 +989,7 @@ class Command(BaseCommand):
                     difficulty=difficulty,
                     defaults={
                         "completion_type": dspec.get("completion_type", COMPLETION_STATE_BASED),
-                        "required_successful_attempts": SESSION_COUNTS[difficulty],
+                        "required_successful_attempts": dspec.get("required_successful_attempts", SESSION_COUNTS[difficulty]),
                         "narrative": dspec["narrative"],
                         "task_prompt": dspec["task"],
                         "is_published": True,
@@ -1160,7 +1063,7 @@ class Command(BaseCommand):
 <section class=\"lesson-overview\">
   <h1>{title}</h1>
   <p>{subtitle}</p>
-  <p>Read the scenario preview, then start a difficulty level to receive a generated repository-state task.</p>
+  <p>This lesson overview explains the Git concept before practice. Open the scenario preview to see a command warm-up, then start a generated variant from the scenario card.</p>
 </section>
 """.strip()
 
@@ -1171,12 +1074,39 @@ class Command(BaseCommand):
         except Exception:
             return {}
 
-    def _demo_steps(self, spec: dict[str, Any]) -> list[str]:
+    def _demo_steps(self, spec: dict[str, Any]) -> list[dict[str, Any]]:
+        command = self._demo_command_for(spec)
+        if not command:
+            return []
         return [
-            spec["explanation"],
-            "Inspect the starting repository state.",
-            "Reach the requested final state without relying on a memorized command sequence.",
+            {
+                "command": command,
+                "explanation": self._demo_command_explanation(command, spec),
+                "repository_state": self._demo_state(spec),
+            }
         ]
+
+    def _demo_command_for(self, spec: dict[str, Any]) -> str:
+        for command in spec.get("primary", []):
+            if command:
+                return command
+        for command in spec.get("supporting", []):
+            if command:
+                return command
+        return ""
+
+    def _demo_command_explanation(self, command: str, spec: dict[str, Any]) -> str:
+        notes = {
+            "git init": "git init creates Git metadata for the selected folder. It does not create a commit, stage files, or modify file contents.",
+            "git clone": "git clone creates a local repository from a remote URL, checks out the default branch, and configures origin tracking.",
+            "git add": "git add copies selected working-tree changes into the staging area so the next commit can save them.",
+            "git commit": "git commit saves the staged snapshot and moves the current branch tip to the new commit.",
+            "git add -p": "git add -p lets you stage selected hunks instead of staging an entire file.",
+            "git commit --amend": "git commit --amend replaces the latest local commit with a corrected commit instead of creating a separate follow-up commit.",
+            "git restore": "git restore changes either the staging area or the working tree, depending on whether --staged is used.",
+        }
+        normalized = command.strip().lower()
+        return notes.get(normalized, spec.get("explanation", "Use the preview to understand the command behavior before starting a variant."))
 
     def _validate_builds(self):
         builder = RuntimeScenarioBuilder()

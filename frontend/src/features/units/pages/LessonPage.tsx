@@ -68,8 +68,7 @@ export function LessonPage() {
             <div className="mb-4">
               <h2 className="text-xl font-bold">Practice starts from the Modules page</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Scenario-bearing modules now show scenarios directly when expanded. This lesson remains as reference material,
-                not the main scenario selection path.
+                Scenario practice starts from scenario cards on the Modules page. This lesson page stays as the concept overview.
               </p>
             </div>
             <Button asChild>
@@ -84,7 +83,7 @@ export function LessonPage() {
           Lesson status
         </div>
         <p className="text-sm leading-6 text-muted-foreground">
-          {isOrientation ? 'Saved to your foundation progress.' : 'Use this reference only when you want extra context; scenario practice starts from the Modules page.'}
+          {isOrientation ? 'Saved to your foundation progress.' : 'Scenario practice starts from the Modules page; this page is the lesson overview.'}
         </p>
       </Card>
     </div>

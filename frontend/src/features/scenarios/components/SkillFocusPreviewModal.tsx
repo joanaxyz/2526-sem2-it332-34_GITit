@@ -23,7 +23,7 @@ const emptyDemoSnapshot: RepositorySnapshot = {
 
 const demoBootLines: TerminalLine[] = [
   { id: 'demo-boot-1', kind: 'system', text: 'Demo repository loaded. This is a warm-up only.' },
-  { id: 'demo-boot-2', kind: 'output', text: 'Try the focus command syntax to see example output.' },
+  { id: 'demo-boot-2', kind: 'output', text: 'Read the command behavior first, then try a safe demo command.' },
 ]
 
 export function SkillFocusPreviewModal({
@@ -108,9 +108,12 @@ function SkillFocusPreviewContent({
     () => (isRepositorySnapshot(scenario.demo_repository_state) ? scenario.demo_repository_state : emptyDemoSnapshot),
     [scenario.demo_repository_state],
   )
-  const steps = scenario.demo_explanation_steps ?? []
+  const steps = useMemo(
+    () => normalizeDemoSteps(scenario.demo_explanation_steps, initialSnapshot, scenario.short_explanation),
+    [initialSnapshot, scenario.demo_explanation_steps, scenario.short_explanation],
+  )
   const [snapshot, setSnapshot] = useState<RepositorySnapshot>(initialSnapshot)
-  const [explanation, setExplanation] = useState(scenario.short_explanation ?? '')
+  const [explanation, setExplanation] = useState(commandBehaviorSummary(scenario))
   const [stepIndex, setStepIndex] = useState(-1)
   const [terminalLines, setTerminalLines] = useState<TerminalLine[]>(demoBootLines)
   const [isRunningDemo, setIsRunningDemo] = useState(false)
@@ -194,6 +197,7 @@ function SkillFocusPreviewContent({
             </div>
           ) : null}
 
+          <CommandConceptGuide scenario={scenario} />
           <CommandQuickReference commands={scenario.primary_focus_commands ?? []} />
         </section>
 
@@ -226,6 +230,70 @@ function SkillFocusPreviewContent({
   )
 }
 
+type NormalizedDemoStep = {
+  command: string
+  explanation: string
+  repository_state: RepositorySnapshot
+}
+
+function normalizeDemoSteps(
+  value: unknown,
+  fallbackSnapshot: RepositorySnapshot,
+  fallbackExplanation?: string,
+): NormalizedDemoStep[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .map((item, index): NormalizedDemoStep | null => {
+      if (typeof item === 'string') {
+        return {
+          command: '',
+          explanation: item || fallbackExplanation || '',
+          repository_state: fallbackSnapshot,
+        }
+      }
+      if (!item || typeof item !== 'object') return null
+      const candidate = item as Partial<NormalizedDemoStep>
+      return {
+        command: typeof candidate.command === 'string' ? candidate.command : '',
+        explanation:
+          typeof candidate.explanation === 'string' && candidate.explanation.trim()
+            ? candidate.explanation
+            : fallbackExplanation || `Demo step ${index + 1}`,
+        repository_state: isRepositorySnapshot(candidate.repository_state) ? candidate.repository_state : fallbackSnapshot,
+      }
+    })
+    .filter((step): step is NormalizedDemoStep => Boolean(step))
+}
+
+function commandBehaviorSummary(scenario: ScenarioSkillFocus) {
+  const normalized = normalize(scenario.focus)
+  if (normalized === 'git init') {
+    return 'git init prepares a folder for Git by creating repository metadata. It does not stage files, commit files, or change file contents.'
+  }
+  if (normalized === 'git clone') {
+    return 'git clone copies a remote repository into a local folder, checks out the default branch, and sets up origin tracking.'
+  }
+  if (normalized === 'git add') {
+    return 'git add moves selected changes from the working tree into the staging area so the next commit can save them.'
+  }
+  if (normalized === 'git commit') {
+    return 'git commit saves the staged snapshot and moves the current branch tip to the new commit.'
+  }
+  if (normalized === '.gitignore') {
+    return '.gitignore teaches Git which untracked local files should be ignored, while already tracked files need an explicit untrack step.'
+  }
+  if (normalized === 'git add -p') {
+    return 'git add -p lets you stage selected hunks, so one file can be split across separate focused commits.'
+  }
+  if (normalized === 'git commit --amend') {
+    return 'git commit --amend replaces the latest local commit with a corrected version instead of creating a separate follow-up commit.'
+  }
+  if (normalized === 'git restore') {
+    return 'git restore can either unstage selected paths or discard selected working-tree changes depending on the flags used.'
+  }
+  return scenario.short_explanation ?? 'This preview explains the command behavior before you open a generated scenario variant.'
+}
+
 function normalize(command: string) {
   return command.trim().replace(/\s+/g, ' ').toLowerCase()
 }
@@ -234,6 +302,75 @@ function isRepositorySnapshot(value: unknown): value is RepositorySnapshot {
   if (!value || typeof value !== 'object') return false
   const snapshot = value as Partial<RepositorySnapshot>
   return Array.isArray(snapshot.commits) && Boolean((snapshot as RepositorySnapshot).head)
+}
+
+function CommandConceptGuide({ scenario }: { scenario: ScenarioSkillFocus }) {
+  const normalized = normalize(scenario.focus)
+  const guide = commandGuideFor(normalized)
+  if (!guide) return null
+
+  return (
+    <div className="grid gap-3 rounded-md border border-border bg-background/40 p-3 md:grid-cols-3">
+      <div>
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">What it changes</div>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{guide.changes}</p>
+      </div>
+      <div>
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">What it does not do</div>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{guide.doesNotDo}</p>
+      </div>
+      <div>
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Common mistake</div>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{guide.mistake}</p>
+      </div>
+    </div>
+  )
+}
+
+function commandGuideFor(normalizedCommand: string) {
+  const guides: Record<string, { changes: string; doesNotDo: string; mistake: string }> = {
+    'git init': {
+      changes: 'Creates Git metadata in the current folder or in the named folder when you use git init <directory>.',
+      doesNotDo: 'It does not create a first commit, stage files, or make existing files tracked.',
+      mistake: 'Initializing the parent folder when the requested repository is a specific child directory.',
+    },
+    'git clone': {
+      changes: 'Creates a local repository from a remote and records origin plus remote-tracking branches.',
+      doesNotDo: 'It does not push anything back to the remote or change the remote repository.',
+      mistake: 'Forgetting the required destination folder when the scenario asks for a custom folder name.',
+    },
+    'git add': {
+      changes: 'Copies selected working-tree changes into the staging area for the next commit.',
+      doesNotDo: 'It does not create a commit by itself and does not automatically mean every file should be staged.',
+      mistake: 'Using git add . when the scenario asks for only selected files.',
+    },
+    'git commit': {
+      changes: 'Creates a new snapshot from staged content and moves the current branch tip forward.',
+      doesNotDo: 'It does not include unstaged changes and should not include unrelated work accidentally.',
+      mistake: 'Committing before checking what is staged.',
+    },
+    '.gitignore': {
+      changes: 'Adds ignore rules that Git uses when deciding which untracked local paths to ignore.',
+      doesNotDo: 'It does not automatically remove files that are already tracked in history.',
+      mistake: 'Committing generated files or secrets instead of committing only the ignore rules and untracking already tracked generated paths.',
+    },
+    'git add -p': {
+      changes: 'Stages selected hunks while leaving other hunks in the working tree.',
+      doesNotDo: 'It does not require staging the whole file.',
+      mistake: 'Accepting every hunk when only one logical change belongs in the commit.',
+    },
+    'git commit --amend': {
+      changes: 'Replaces the latest local commit with a corrected commit.',
+      doesNotDo: 'It should not create a second follow-up commit for a simple latest-commit repair.',
+      mistake: 'Using a normal commit when the task specifically asks to repair the latest commit.',
+    },
+    'git restore': {
+      changes: 'With --staged, moves paths out of staging; without --staged, restores working-tree paths.',
+      doesNotDo: 'It does not create a commit and can discard work when used on the working tree.',
+      mistake: 'Confusing unstage with discard and accidentally removing work you meant to keep.',
+    },
+  }
+  return guides[normalizedCommand] ?? null
 }
 
 function CommandQuickReference({ commands }: { commands: string[] }) {
@@ -297,8 +434,8 @@ function quickReferenceFor(command: string) {
     return {
       key: 'git-init',
       title: 'git init',
-      syntax: ['git init'],
-      note: 'Creates repository metadata in the current folder so Git can begin tracking snapshots.',
+      syntax: ['git init', 'git init <directory>'],
+      note: 'Creates repository metadata in the current folder, or in the named directory when a directory is provided.',
     }
   }
   if (normalized === 'git clone') {
