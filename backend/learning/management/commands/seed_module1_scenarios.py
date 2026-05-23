@@ -9,13 +9,14 @@ from django.db import transaction
 
 from common.constants import (
     COMPLETION_EXPANDED_STATE_BASED,
+    COMPLETION_INSPECTION,
     COMPLETION_STATE_BASED,
     DIFFICULTY_EASY,
     DIFFICULTY_HARD,
     DIFFICULTY_MEDIUM,
 )
 from learning.models import LearningUnit, Lesson, OrientationProgress
-from scenarios.builders import RuntimeScenarioBuilder, ScenarioVariantBuildError
+from scenarios.builders import RuntimeScenarioBuilder, ScenarioVariantBuildError, TemplateRenderer
 from scenarios.models import (
     CommandCountPolicy,
     CompletionRecord,
@@ -51,14 +52,14 @@ SESSION_COUNTS = {
 
 
 MODULE_ONE_LESSONS = [
-    (1, "initializing-a-local-repository", "Initializing a Local Repository", "Create Git metadata in an existing or named project folder.", "scenario"),
-    (2, "cloning-a-remote-repository", "Cloning a Remote Repository", "Create a local working copy and verify the origin relationship.", "scenario"),
-    (3, "staging-and-committing-basic-workflow", "Staging and Committing: The Basic Workflow", "Prepare intentional changes and save them with a clear message.", "scenario"),
-    (4, "ignoring-files-with-gitignore", "Ignoring Files with .gitignore", "Keep generated files, dependency folders, logs, and secrets out of history.", "scenario"),
-    (5, "partial-staging-and-git-add-p", "Partial Staging and git add -p", "Stage selected hunks so each commit has one clear purpose.", "scenario"),
-    (6, "amending-commits", "Amending Commits", "Repair the latest commit message or contents before sharing it.", "scenario"),
-    (7, "unstaging-and-discarding-changes", "Unstaging and Discarding Changes", "Move changes out of the index and safely discard unwanted work.", "scenario"),
-    (8, "reading-repository-status-and-history", "Reading Repository Status and History", "Scenario overview for reading status, history, and diffs before scenario practice.", "scenario"),
+    (1, "inspecting-repository-state", "Inspecting Repository State", "Read repository status, history, diffs, branches, remotes, and objects before acting.", "scenario"),
+    (2, "initializing-a-local-repository", "Initializing a Local Repository", "Create Git metadata in an existing or named project folder.", "scenario"),
+    (3, "cloning-a-remote-repository", "Cloning a Remote Repository", "Create a local working copy and verify the origin relationship.", "scenario"),
+    (4, "staging-and-committing-basic-workflow", "Staging and Committing: The Basic Workflow", "Prepare intentional changes and save them with a clear message.", "scenario"),
+    (5, "ignoring-files-with-gitignore", "Ignoring Files with .gitignore", "Keep generated files, dependency folders, logs, and secrets out of history.", "scenario"),
+    (6, "partial-staging-and-git-add-p", "Partial Staging and git add -p", "Stage selected hunks so each commit has one clear purpose.", "scenario"),
+    (7, "amending-commits", "Amending Commits", "Repair the latest commit message or contents before sharing it.", "scenario"),
+    (8, "unstaging-and-discarding-changes", "Unstaging and Discarding Changes", "Move changes out of the index and safely discard unwanted work.", "scenario"),
     (9, "module-1-review-and-practice", "Module 1 Review and Practice", "Combine the local workflow skills in larger repository situations.", "scenario"),
 ]
 
@@ -141,6 +142,19 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 {"label": "Project", "value": "{{project}}"},
                 {"label": "Target directory", "value": "{{target_directory}}"},
                 {"label": "Expected untracked paths", "value": "{{expected_untracked_paths}}"},
+            ],
+            "requirements": [],
+            "success_checklist": [],
+            **common,
+        },
+        "diagnostic": {
+            "story": "Before changing {{project}}, inspect the repository and report what you observe.",
+            "provided_values": [
+                {"label": "Question", "value": "{{question}}"},
+                {"label": "Observation fields", "value": "{{must_identify}}"},
+            ],
+            "warnings": [
+                "Use read-only commands only; the repository state should not change.",
             ],
             "requirements": [],
             "success_checklist": [],
@@ -236,6 +250,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
 def base_scenarios() -> list[dict[str, Any]]:
     base_tree = {"README.md": "readme-v1", "src/app.py": "app-v1", "styles/site.css": "style-v1"}
     return [
+        diagnostic_scenario(),
         init_scenario(),
         clone_scenario(),
         commit_scenario(base_tree),
@@ -247,6 +262,204 @@ def base_scenarios() -> list[dict[str, Any]]:
     ]
 
 
+def diagnostic_scenario() -> dict[str, Any]:
+    base = repo_with_head(
+        commits=[
+            commit("c1", "Create starter files", {"README.md": "readme-v1", "src/app.py": "app-v1"}),
+            commit("c2", "Add dashboard shell", {"README.md": "readme-v1", "src/app.py": "app-v1", "src/dashboard.py": "dashboard-v1"}, ["c1"]),
+        ],
+        head="c2",
+        working_tree={"src/app.py": "app-v2", "notes/todo.md": "untracked"},
+        staging={"src/dashboard.py": "dashboard-v2"},
+        remotes={"origin": "https://example.test/training/dashboard.git"},
+        remote_branches={"origin/main": "c2"},
+        upstream_tracking={"main": "origin/main"},
+    )
+    easy_cases = [
+        diagnostic_case(
+            "diagnostic-easy-status",
+            "dashboard-lab",
+            "Identify the current branch, staged paths, unstaged paths, and untracked files.",
+            ["git status"],
+            ["head_branch", "staged_paths", "unstaged_paths", "untracked_paths"],
+            {
+                "head_branch": "main",
+                "staged_paths": ["src/dashboard.py"],
+                "unstaged_paths": ["src/app.py"],
+                "untracked_paths": ["notes/todo.md"],
+            },
+            "status identifies main, staged dashboard, unstaged app, and untracked notes",
+            base,
+        ),
+        diagnostic_case(
+            "diagnostic-easy-diff",
+            "dashboard-lab",
+            "Use diff views to separate unstaged and staged changes.",
+            ["git diff", "git diff --staged"],
+            ["unstaged_diff_paths", "staged_diff_paths"],
+            {
+                "unstaged_diff_paths": ["src/app.py"],
+                "staged_diff_paths": ["src/dashboard.py"],
+            },
+            "diff separates app working change from staged dashboard change",
+            base,
+        ),
+    ]
+    medium_state = repo_with_head(
+        commits=[
+            commit("c1", "Create starter files", {"README.md": "readme-v1"}),
+            commit("c2", "Add profile page", {"README.md": "readme-v1", "src/profile.py": "profile-v1"}, ["c1"]),
+            commit("c3", "Add profile tests", {"README.md": "readme-v1", "src/profile.py": "profile-v1", "tests/test_profile.py": "profile-test-v1"}, ["c2"]),
+        ],
+        head="c3",
+        working_tree={"src/profile.py": "profile-v2"},
+        staging={},
+        remotes={"origin": "https://example.test/training/profile.git"},
+        remote_branches={"origin/main": "c3"},
+        upstream_tracking={"main": "origin/main"},
+    )
+    medium_cases = [
+        diagnostic_case(
+            "diagnostic-medium-history",
+            "profile-lab",
+            "Read the compact history and identify the latest commit and message.",
+            ["git log --oneline", "git show"],
+            ["latest_commit", "commit_message", "changed_paths"],
+            {
+                "latest_commit": "c3",
+                "commit_message": "Add profile tests",
+                "changed_paths": ["tests/test_profile.py"],
+            },
+            "history points to c3 with profile test change",
+            medium_state,
+        ),
+        diagnostic_case(
+            "diagnostic-medium-branches",
+            "profile-lab",
+            "Inspect local branches before choosing any action.",
+            ["git branch", "git branch -v"],
+            ["head_branch", "available_branches", "branch_tips"],
+            {
+                "head_branch": "main",
+                "available_branches": ["main"],
+                "branch_tips": {"main": "c3"},
+            },
+            "branch output identifies main at c3",
+            medium_state,
+        ),
+    ]
+    hard_state = repo_with_head(
+        commits=[
+            commit("c1", "Create starter files", {"README.md": "readme-v1"}),
+            commit("c2", "Add API client", {"README.md": "readme-v1", "src/api.py": "api-v1"}, ["c1"]),
+            commit("c3", "Add export command", {"README.md": "readme-v1", "src/api.py": "api-v1", "src/export.py": "export-v1"}, ["c2"]),
+        ],
+        head="c3",
+        working_tree={"src/export.py": "export-v2", "debug.log": "untracked"},
+        staging={"src/api.py": "api-v2"},
+        remotes={"origin": "https://example.test/training/export.git"},
+        remote_branches={"origin/main": "c3", "origin/release": "c2"},
+        upstream_tracking={"main": "origin/main"},
+        extra={"branches": {"main": "c3", "release-check": "c2"}},
+    )
+    hard_cases = [
+        diagnostic_case(
+            "diagnostic-hard-combined-read",
+            "export-lab",
+            "Combine status, staged diff, history, branch, remote, and show output before acting.",
+            ["git status", "git diff --staged", "git log --oneline --graph --all", "git show", "git branch -v", "git remote -v"],
+            ["head_branch", "staged_paths", "unstaged_paths", "commit_history", "available_branches", "latest_commit"],
+            {
+                "head_branch": "main",
+                "staged_paths": ["src/api.py"],
+                "unstaged_paths": ["src/export.py"],
+                "commit_history": ["c1", "c2", "c3"],
+                "available_branches": ["main", "release-check"],
+                "latest_commit": "c3",
+            },
+            "combined diagnostics identify branch, index, worktree, history, and remote context",
+            hard_state,
+        ),
+        diagnostic_case(
+            "diagnostic-hard-reflog-recovery",
+            "export-lab",
+            "Use reflog plus status/history views to confirm where HEAD is before making changes.",
+            ["git reflog", "git status", "git log --oneline"],
+            ["head_branch", "latest_commit", "unstaged_paths", "staged_paths"],
+            {
+                "head_branch": "main",
+                "latest_commit": "c3",
+                "unstaged_paths": ["src/export.py"],
+                "staged_paths": ["src/api.py"],
+            },
+            "reflog/status/history confirm main at c3 with split changes",
+            {**hard_state, "reflog": [{"ref": "HEAD@{0}", "target": "c3", "message": "commit: Add export command"}]},
+        ),
+    ]
+    return scenario_dict(
+        lesson=(1, "inspecting-repository-state", "Inspecting Repository State", "Read repository status, history, diffs, branches, remotes, and objects before acting."),
+        slug="inspect-repository-state",
+        title="Inspect repository state before acting",
+        focus="diagnostic commands",
+        summary="Practice read-only Git commands before making repository changes.",
+        explanation="Diagnostic commands help you understand the branch, history, index, working tree, remotes, and commit details before choosing an action.",
+        primary=["git status", "git log --oneline", "git diff", "git diff --staged", "git show", "git branch", "git remote -v"],
+        supporting=["git log --oneline --graph --all", "git branch -v", "git reflog"],
+        concepts=["status", "history", "diffs", "branches", "remotes", "read-only inspection"],
+        kind=ScenarioSkillFocus.SkillFocusType.CONCEPT_SPECIFIC,
+        difficulties={
+            DIFFICULTY_EASY: diff((0, 0), "Read the repository before acting.", "Use the requested diagnostic command and submit the observations.", [diagnostic_bp("diagnostic-status-and-diff", easy_cases, "module1.diagnostic.status-diff", "status-diff")], completion_type=COMPLETION_INSPECTION),
+            DIFFICULTY_MEDIUM: diff((0, 0), "Read history and branch context.", "Use diagnostic history or branch commands and submit the observations.", [diagnostic_bp("diagnostic-history-branches", medium_cases, "module1.diagnostic.history-branches", "history-branches")], completion_type=COMPLETION_INSPECTION),
+            DIFFICULTY_HARD: diff((0, 0), "Combine multiple diagnostic views.", "Use only read-only commands to inspect the repository and submit the observations.", [diagnostic_bp("diagnostic-combined", hard_cases, "module1.diagnostic.combined", "combined-diagnostics")], completion_type=COMPLETION_INSPECTION),
+        },
+    )
+
+
+def diagnostic_case(
+    case_id: str,
+    project: str,
+    question: str,
+    required_commands: list[str],
+    must_identify: list[str],
+    expected_answer: dict[str, Any],
+    answer_anchor: str,
+    state: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "case_id": case_id,
+        "project": project,
+        "question": question,
+        "required_commands": required_commands,
+        "must_identify": must_identify,
+        "expected_answer": expected_answer,
+        "answer_anchor": answer_anchor,
+        "initial_state": state,
+    }
+
+
+def diagnostic_bp(slug: str, cases: list[dict[str, Any]], signature: str, subtemplate: str) -> dict[str, Any]:
+    return bp(
+        slug=slug,
+        kind="diagnostic",
+        signature=signature,
+        subtemplate=subtemplate,
+        cases=cases,
+        initial_state="{{initial_state}}",
+        target_rule={
+            "completion_type": COMPLETION_INSPECTION,
+            "required_commands": "{{required_commands}}",
+            "repository_state_unchanged": True,
+            "must_identify": "{{must_identify}}",
+            "rules": [
+                {"type": "inspection_answer_matches", "expected": "{{expected_answer}}"},
+            ],
+        },
+        solution="{{required_commands}}",
+        label="Inspect {{project}}",
+        slug_template="diagnostic-{{case_id}}",
+    )
+
+
 def init_scenario() -> dict[str, Any]:
     """Module 1.1: intentionally avoids fake variety.
 
@@ -255,7 +468,7 @@ def init_scenario() -> dict[str, Any]:
     each generated variant has a different target directory and final-state check.
     """
     return {
-        "lesson": (1, "initializing-a-local-repository", "Initializing a Local Repository", "Create Git metadata in an existing or named project folder."),
+        "lesson": (2, "initializing-a-local-repository", "Initializing a Local Repository", "Create Git metadata in an existing or named project folder."),
         "slug": "initialize-local-repository",
         "title": "Initialize a local repository",
         "focus": "git init",
@@ -422,7 +635,7 @@ def clone_scenario() -> dict[str, Any]:
         remote_case("clone-hard-lab-notebook", "lab-notebook", "git@example.test:docs/lab-notebook.git", "notebook-review", "r32", {"README.md": "notebook-readme-v2", "entries/day-1.md": "day1-v1", "entries/day-2.md": "day2-v1"}, [{"id": "r24", "message": "Create lab notebook", "parents": [], "tree": {"README.md": "notebook-readme-v1", "entries/day-1.md": "day1-v1"}}, {"id": "r32", "message": "Add second lab entry", "parents": ["r24"], "tree": {"README.md": "notebook-readme-v2", "entries/day-1.md": "day1-v1", "entries/day-2.md": "day2-v1"}}], "SSH URL; custom folder notebook-review; notebook tree ending r32"),
     ]
     return scenario_dict(
-        lesson=(2, "cloning-a-remote-repository", "Cloning a Remote Repository", "Create a local working copy and verify the origin relationship."),
+        lesson=(3, "cloning-a-remote-repository", "Cloning a Remote Repository", "Create a local working copy and verify the origin relationship."),
         slug="clone-remote-repository",
         title="Clone a remote repository",
         focus="git clone",
@@ -491,7 +704,7 @@ def commit_scenario(base_tree: dict[str, str]) -> dict[str, Any]:
         commit_case("commit-hard-search-two-targets-one-distractor", "search-view", {"src/search.js": "search-js-v3", "templates/search.html": "search-template-v3", "notes/search-ranking.md": "search-notes-draft"}, ["src/search.js", "templates/search.html"], ["notes/search-ranking.md"], ["notes/search-ranking.md"], {"src/search.js": "search-js-v3", "templates/search.html": "search-template-v3"}, "Refine search ranking display", "commit includes two target paths; notes remain uncommitted"),
     ]
     return scenario_dict(
-        lesson=(3, "staging-and-committing-basic-workflow", "Staging and Committing: The Basic Workflow", "Prepare intentional changes and save them with a clear message."),
+        lesson=(4, "staging-and-committing-basic-workflow", "Staging and Committing: The Basic Workflow", "Prepare intentional changes and save them with a clear message."),
         slug="stage-and-commit-basic-workflow",
         title="Stage and commit the intended change",
         focus="git commit",
@@ -568,7 +781,7 @@ def gitignore_scenario() -> dict[str, Any]:
         ignore_case("ignore-hard-untrack-pycache", "script-runner", "pycache-ignore-v3", ["__pycache__/runner.cpython.pyc", ".pytest_cache/v/cache"], "Stop tracking Python cache files", "tracked pycache removed from future tree; .gitignore committed", tracked_generated_path="__pycache__/runner.cpython.pyc", base_tree={**base, "__pycache__/runner.cpython.pyc": "pycache-old"}),
     ]
     return scenario_dict(
-        lesson=(4, "ignoring-files-with-gitignore", "Ignoring Files with .gitignore", "Keep generated files, dependency folders, logs, and secrets out of history."),
+        lesson=(5, "ignoring-files-with-gitignore", "Ignoring Files with .gitignore", "Keep generated files, dependency folders, logs, and secrets out of history."),
         slug="configure-gitignore-rules", title="Configure ignore rules", focus=".gitignore",
         summary="Commit ignore rules while keeping generated files out of history.", explanation=".gitignore controls which untracked local files Git should ignore. Already tracked files require an explicit untrack step.",
         primary=["git add", "git commit"], supporting=["git status", "git diff", "git diff --staged"], concepts=["ignored files", "untracked files", "tracked files", "index"],
@@ -642,7 +855,7 @@ def partial_staging_scenario() -> dict[str, Any]:
         partial_case("partial-hard-export-cross-file", "export-module", ["src/export.py", "tests/test_export.py"], ["export-format-hunk", "export-format-test-hunk"], ["export-logging-hunk", "export-test-cleanup-hunk"], ["notes/export-followup.md"], "Commit export formatting path", "export formatting hunks committed; logging/test cleanup and notes remain"),
     ]
     return scenario_dict(
-        lesson=(5, "partial-staging-and-git-add-p", "Partial Staging and git add -p", "Stage selected hunks so each commit has one clear purpose."),
+        lesson=(6, "partial-staging-and-git-add-p", "Partial Staging and git add -p", "Stage selected hunks so each commit has one clear purpose."),
         slug="partial-staging-add-p", title="Stage selected hunks", focus="git add -p",
         summary="Commit selected hunks while leaving other changes uncommitted.", explanation="Partial staging lets one file contribute only the selected logical change to the next commit.",
         primary=["git add -p", "git commit"], supporting=["git status", "git diff", "git diff --staged"], concepts=["hunks", "partial staging", "index", "working tree leftovers"],
@@ -730,7 +943,7 @@ def amend_scenario() -> dict[str, Any]:
         amend_case("amend-hard-export-message-and-doc", "export-flow", ["src/export.py", "docs/export.md"], "Export update", "Document export validation behavior", {"docs/export.md": "export-docs-v3"}, "amended tip has corrected message and docs; old tip replaced"),
     ]
     return scenario_dict(
-        lesson=(6, "amending-commits", "Amending Commits", "Repair the latest commit message or contents before sharing it."),
+        lesson=(7, "amending-commits", "Amending Commits", "Repair the latest commit message or contents before sharing it."),
         slug="amend-latest-commit", title="Amend the latest commit", focus="git commit --amend",
         summary="Repair the latest local commit instead of creating a follow-up commit.", explanation="Amend replaces the branch tip with a corrected commit that keeps the intended parent relationship.",
         primary=["git commit --amend"], supporting=["git status", "git log --oneline", "git diff", "git diff --staged"], concepts=["latest commit", "amend", "branch tip replacement", "commit message"],
@@ -792,7 +1005,7 @@ def restore_scenario() -> dict[str, Any]:
         restore_case("restore-hard-mixed-search", "search-view", {"src/search.js": "search-js-v2", "notes/search.md": "notes-draft"}, {"debug/search.log": "search-debug"}, ["src/search.js"], ["debug/search.log"], "search.js preserved; notes unstaged; debug log discarded; no commit"),
     ]
     return scenario_dict(
-        lesson=(7, "unstaging-and-discarding-changes", "Unstaging and Discarding Changes", "Move changes out of the index and safely discard unwanted work."),
+        lesson=(8, "unstaging-and-discarding-changes", "Unstaging and Discarding Changes", "Move changes out of the index and safely discard unwanted work."),
         slug="unstage-and-discard-changes", title="Unstage and discard safely", focus="git restore",
         summary="Keep selected changes as working-tree work and discard unwanted paths.", explanation="Restoring from the index and working tree are different state changes. One preserves work, the other removes it.",
         primary=["git restore"], supporting=["git status", "git diff", "git diff --staged"], concepts=["restore", "unstage", "discard", "index", "working tree"],
@@ -953,6 +1166,7 @@ class Command(BaseCommand):
             lesson_by_order[lesson_order] = lesson
 
         specs = base_scenarios()
+        self._validate_seed_specs(specs)
         active_scenario_slugs = [spec["slug"] for spec in specs]
         ScenarioSkillFocus.objects.filter(learning_unit=unit).exclude(slug__in=active_scenario_slugs).update(is_published=False)
 
@@ -971,7 +1185,7 @@ class Command(BaseCommand):
                     "skill_focus_type": spec["kind"],
                     "primary_focus_commands": spec["primary"],
                     "supporting_inspection_commands": spec["supporting"],
-                    "safe_demo_commands": spec["supporting"][:3],
+                    "safe_demo_commands": self._demo_commands(spec),
                     "demo_repository_state": self._demo_state(spec),
                     "demo_dag_config": {},
                     "demo_explanation_steps": self._demo_steps(spec),
@@ -1039,6 +1253,46 @@ class Command(BaseCommand):
         if options["validate_build"]:
             self._validate_builds()
 
+    def _validate_seed_specs(self, specs: list[dict[str, Any]]) -> None:
+        renderer = TemplateRenderer()
+        failures: list[str] = []
+        for spec in specs:
+            for difficulty, dspec in spec["difficulties"].items():
+                rendered_solutions: dict[str, list[str]] = {}
+                for blueprint in dspec["blueprints"]:
+                    cases = blueprint.get("parameter_pools", {}).get("cases", [])
+                    if not cases:
+                        failures.append(f"{spec['slug']}/{difficulty}/{blueprint['slug']}: blueprint has no cases")
+                        continue
+                    case_ids = [case.get("case_id") for case in cases]
+                    if len(set(case_ids)) != len(case_ids):
+                        failures.append(f"{spec['slug']}/{difficulty}/{blueprint['slug']}: duplicate case_id")
+                    anchors = [case.get("answer_anchor") for case in cases]
+                    if len(set(json.dumps(anchor, sort_keys=True) for anchor in anchors)) != len(anchors):
+                        failures.append(f"{spec['slug']}/{difficulty}/{blueprint['slug']}: duplicate answer_anchor")
+                    for case in cases:
+                        rendered = renderer.render(
+                            blueprint.get("solution_commands_template", []),
+                            {**case, "index": 1},
+                        )
+                        key = json.dumps(rendered, sort_keys=True)
+                        rendered_solutions.setdefault(key, []).append(case.get("case_id", "unknown"))
+                for sequence, case_ids_for_sequence in rendered_solutions.items():
+                    if len(case_ids_for_sequence) <= 1:
+                        continue
+                    waived_cases = [
+                        case
+                        for blueprint in dspec["blueprints"]
+                        for case in blueprint.get("parameter_pools", {}).get("cases", [])
+                        if case.get("case_id") in case_ids_for_sequence and case.get("duplicate_solution_waiver")
+                    ]
+                    if len(waived_cases) != len(case_ids_for_sequence):
+                        failures.append(
+                            f"{spec['slug']}/{difficulty}: duplicate solution sequence {sequence} in cases {case_ids_for_sequence}"
+                        )
+        if failures:
+            raise CommandError("Module 1 seed validation failed:\n" + "\n".join(failures))
+
     def _reset_module_one(self, *, confirm: bool):
         if not settings.DEBUG:
             raise CommandError("--reset is only available when DEBUG=True.")
@@ -1068,32 +1322,72 @@ class Command(BaseCommand):
 """.strip()
 
     def _demo_state(self, spec: dict[str, Any]) -> dict[str, Any]:
-        try:
-            first_diff = next(iter(spec["difficulties"].values()))
-            return first_diff["blueprints"][0]["initial_state_template"]
-        except Exception:
-            return {}
+        if spec["slug"] == "initialize-local-repository":
+            return uninitialized_state(working_tree={"demo.txt": "untracked"})
+        if spec["slug"] == "clone-remote-repository":
+            return uninitialized_state(
+                remote_fixtures={
+                    "branches": {"origin/main": "r0"},
+                    "commits": [
+                        commit(
+                            "r0",
+                            "Create demo repository",
+                            {"README.md": "demo-readme-v1", "src/demo.py": "demo-v1"},
+                        )
+                    ],
+                }
+            )
+        return repo_with_head(
+            commits=[
+                commit("c0", "Create demo repository", {"README.md": "readme-v1", "demo.txt": "demo-v1", ".env": "SECRET=old"}),
+                commit("c1", "Add baseline feature", {"README.md": "readme-v1", "demo.txt": "demo-v1", "baseline.txt": "base-v1", ".env": "SECRET=old"}, ["c0"]),
+            ],
+            head="c1",
+            working_tree={
+                "demo.txt": "demo-v2",
+                "notes.txt": "untracked",
+                ".gitignore": "demo-ignore-v1",
+                ".env": {"status": "ignored", "content": "SECRET=demo"},
+            },
+            staging={"staged.txt": "staged-v1"},
+            partial_hunks={"demo.txt": {"target_hunks": ["demo-target-hunk"], "leftover_hunks": ["demo-leftover-hunk"]}},
+            remotes={"origin": "https://example.test/demo/repository.git"},
+            remote_branches={"origin/main": "c1"},
+            upstream_tracking={"main": "origin/main"},
+            extra={"reflog": [{"ref": "HEAD@{0}", "target": "c1", "message": "commit: Add baseline feature"}]},
+        )
 
     def _demo_steps(self, spec: dict[str, Any]) -> list[dict[str, Any]]:
-        command = self._demo_command_for(spec)
-        if not command:
-            return []
         return [
             {
                 "command": command,
+                "title": self._demo_title(command),
                 "explanation": self._demo_command_explanation(command, spec),
                 "repository_state": self._demo_state(spec),
+                "common_mistake": self._demo_common_mistake(command),
+                "diagnostic": command.strip().lower() in {item.lower() for item in DIAG_PATTERNS},
+                "counted": command.strip().lower() not in {item.lower() for item in DIAG_PATTERNS},
             }
+            for command in self._demo_commands(spec)
         ]
 
-    def _demo_command_for(self, spec: dict[str, Any]) -> str:
-        for command in spec.get("primary", []):
-            if command:
-                return command
-        for command in spec.get("supporting", []):
-            if command:
-                return command
-        return ""
+    def _demo_commands(self, spec: dict[str, Any]) -> list[str]:
+        normalized_focus = " ".join(str(spec.get("focus", "")).split()).lower()
+        commands = {
+            "diagnostic commands": ["git status", "git log --oneline", "git diff", "git diff --staged", "git show", "git branch", "git remote -v", "git log --oneline --graph --all", "git branch -v", "git reflog"],
+            "git init": ["git status", "git init", "git init demo-project"],
+            "git clone": ["git clone https://example.test/demo/repository.git demo-repository", "git remote -v", "git log --oneline", "git status"],
+            "git commit": ["git status", "git diff", "git add demo.txt", "git diff --staged", "git commit -m \"Demo snapshot\"", "git log --oneline"],
+            ".gitignore": ["git status", "git add .gitignore", "git rm --cached .env", "git commit -m \"Demo ignore rules\""],
+            "git add -p": ["git status", "git add -p demo.txt", "git diff --staged", "git commit -m \"Demo selected hunk\""],
+            "git commit --amend": ["git log --oneline", "git status", "git add demo.txt", "git commit --amend -m \"Demo amended snapshot\"", "git show"],
+            "git restore": ["git status", "git restore --staged staged.txt", "git restore demo.txt", "git diff"],
+            "local repository workflow": ["git status", "git diff", "git add demo.txt", "git commit -m \"Demo workflow snapshot\"", "git log --oneline"],
+        }.get(normalized_focus, [])
+        for command in [*spec.get("primary", []), *spec.get("supporting", [])]:
+            if command in DIAG_PATTERNS and command not in commands:
+                commands.append(command)
+        return commands
 
     def _demo_command_explanation(self, command: str, spec: dict[str, Any]) -> str:
         notes = {
@@ -1106,7 +1400,47 @@ class Command(BaseCommand):
             "git restore": "git restore changes either the staging area or the working tree, depending on whether --staged is used.",
         }
         normalized = command.strip().lower()
+        if normalized.startswith("git status"):
+            return "git status summarizes the current branch, staged changes, unstaged changes, and untracked files without changing the repository."
+        if normalized.startswith("git log"):
+            return "git log reads commit history. The --oneline, --graph, and --all flags change how history is displayed, not repository state."
+        if normalized.startswith("git diff --staged") or normalized.startswith("git diff --cached"):
+            return "git diff --staged shows what is already in the index for the next commit."
+        if normalized.startswith("git diff"):
+            return "git diff shows unstaged working-tree changes."
+        if normalized.startswith("git show"):
+            return "git show displays details for the current or named object, usually the latest commit."
+        if normalized.startswith("git branch"):
+            return "git branch lists local branches. With -v it also shows the commit each branch points to."
+        if normalized.startswith("git remote -v"):
+            return "git remote -v lists configured remote URLs for fetch and push."
+        if normalized.startswith("git reflog"):
+            return "git reflog shows recent HEAD movements for recovery and orientation."
         return notes.get(normalized, spec.get("explanation", "Use the preview to understand the command behavior before starting a variant."))
+
+    def _demo_title(self, command: str) -> str:
+        parts = command.split()
+        return " ".join(parts[:3]) if len(parts) > 2 and parts[2].startswith("-") else " ".join(parts[:2])
+
+    def _demo_common_mistake(self, command: str) -> str:
+        normalized = command.strip().lower()
+        if normalized.startswith("git diff --staged"):
+            return "Looking only at unstaged diff output and missing what is already staged."
+        if normalized.startswith("git diff"):
+            return "Assuming diff shows staged changes; plain git diff reads the working tree."
+        if normalized.startswith("git add"):
+            return "Staging every file when only one path or hunk belongs in the next commit."
+        if normalized.startswith("git commit --amend"):
+            return "Creating a second commit instead of replacing the latest local commit."
+        if normalized.startswith("git restore --staged"):
+            return "Using restore without --staged and discarding work instead of unstaging it."
+        if normalized.startswith("git restore"):
+            return "Restoring the wrong path and losing working-tree edits you meant to keep."
+        if normalized.startswith("git clone"):
+            return "Forgetting the destination folder when the task names one."
+        if normalized.startswith("git init"):
+            return "Initializing the parent folder when the task names a child directory."
+        return "Skipping inspection and acting before you know what Git sees."
 
     def _validate_builds(self):
         builder = RuntimeScenarioBuilder()

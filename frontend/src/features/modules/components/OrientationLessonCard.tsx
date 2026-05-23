@@ -1,7 +1,7 @@
 import { CheckCircle2, Circle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import type { LessonSummary } from '@/features/units/types'
+import type { LessonSummary } from '@/features/modules/types'
 
 export function OrientationLessonCard({ lesson, index }: { lesson: LessonSummary; index: number }) {
   return (

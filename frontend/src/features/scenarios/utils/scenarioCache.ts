@@ -4,7 +4,7 @@ import type { ScenarioSession } from '@/features/practice/types'
 import type { Difficulty, DifficultyStatus, LatestAttemptStats, ScenarioSkillFocus } from '@/features/scenarios/types'
 
 const scenarioSessionSyncChannel = 'git-it:scenario-session-sync'
-const scenarioListQueryKeys = new Set(['lesson-scenarios', 'unit-scenarios'])
+const scenarioListQueryKeys = new Set(['lesson-scenarios', 'module-scenarios', 'unit-scenarios'])
 const difficultyOrder: Difficulty[] = ['easy', 'medium', 'hard']
 
 type ScenarioSessionSyncMessage = {
@@ -29,7 +29,7 @@ export function subscribeToScenarioSessionSync(queryClient: QueryClient) {
   const handleMessage = (message: unknown) => {
     if (!isScenarioSessionSyncMessage(message)) return
     syncScenarioSessionInCache(queryClient, message.session, { broadcast: false })
-    void queryClient.invalidateQueries({ queryKey: ['units'] })
+    void queryClient.invalidateQueries({ queryKey: ['modules'] })
     void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
   }
 
@@ -70,7 +70,7 @@ function applyScenarioSessionToCache(queryClient: QueryClient, session: Scenario
 
   queryClient.setQueriesData<Record<string, ScenarioSkillFocus[]>>(
     {
-      predicate: (query) => String(query.queryKey[0]) === 'unit-scenarios-summary',
+      predicate: (query) => ['module-scenarios-summary', 'unit-scenarios-summary'].includes(String(query.queryKey[0])),
     },
     (summary) => updateScenarioSummaryWithSession(summary, session),
   )
@@ -173,10 +173,10 @@ export function updateScenarioSummaryWithSession(
   if (!summary) return summary
   let changed = false
   const nextSummary = Object.fromEntries(
-    Object.entries(summary).map(([unitId, scenarios]) => {
+    Object.entries(summary).map(([moduleId, scenarios]) => {
       const nextScenarios = updateScenarioListWithSession(scenarios, session)
       if (nextScenarios !== scenarios) changed = true
-      return [unitId, nextScenarios ?? scenarios]
+      return [moduleId, nextScenarios ?? scenarios]
     }),
   )
   return changed ? nextSummary : summary

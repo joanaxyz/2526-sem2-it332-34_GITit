@@ -2,8 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, BookOpen, CheckCircle2 } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 
-import { unitsApi } from '@/features/units/api/unitsApi'
-import { LessonContentRenderer } from '@/features/units/components/LessonContentRenderer'
+import { modulesApi } from '@/features/modules/api/modulesApi'
+import { LessonContentRenderer } from '@/features/modules/components/LessonContentRenderer'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
@@ -16,13 +16,13 @@ export function LessonPage() {
   const queryClient = useQueryClient()
   const { data: lesson, error, isError, isLoading } = useQuery({
     queryKey: ['lesson', lessonId],
-    queryFn: () => unitsApi.getLesson(lessonId),
+    queryFn: () => modulesApi.getLesson(lessonId),
     enabled: Number.isFinite(lessonId),
   })
   const completeMutation = useMutation({
-    mutationFn: () => unitsApi.completeOrientationLesson(lessonId, 0),
+    mutationFn: () => modulesApi.completeOrientationLesson(lessonId, 0),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['units'] })
+      await queryClient.invalidateQueries({ queryKey: ['modules'] })
       await queryClient.invalidateQueries({ queryKey: ['lesson', lessonId] })
     },
   })
@@ -37,13 +37,13 @@ export function LessonPage() {
       <article>
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <Button asChild variant="ghost" size="sm">
-            <Link to="/units">
+            <Link to="/modules">
               <ArrowLeft data-icon="inline-start" />
               Back to Modules
             </Link>
           </Button>
           <Badge variant={isOrientation ? 'outline' : lesson.kind === 'scenario' ? 'default' : 'blue'}>
-            Module {lesson.unit.number}: {lesson.unit.title}
+            Module {lesson.module.number}: {lesson.module.title}
           </Badge>
         </div>
         <LessonContentRenderer lesson={lesson} />
@@ -72,7 +72,7 @@ export function LessonPage() {
               </p>
             </div>
             <Button asChild>
-              <Link to="/units">Back to Modules</Link>
+              <Link to="/modules">Back to Modules</Link>
             </Button>
           </section>
         ) : null}

@@ -22,7 +22,7 @@ export function CurrentTrackCard() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild>
-            <Link to="/units">
+            <Link to="/modules">
               Open Modules
               <ArrowRight data-icon="inline-end" />
             </Link>

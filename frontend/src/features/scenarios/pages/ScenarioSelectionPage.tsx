@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 
 import { ScenarioList } from '@/features/scenarios/components/ScenarioList'
-import { unitsApi } from '@/features/units/api/unitsApi'
+import { modulesApi } from '@/features/modules/api/modulesApi'
 import { Button } from '@/shared/components/Button'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
@@ -13,7 +13,7 @@ export function ScenarioSelectionPage() {
   const lessonId = Number(params.lessonId)
   const lessonQuery = useQuery({
     queryKey: ['lesson', lessonId],
-    queryFn: () => unitsApi.getLesson(lessonId),
+    queryFn: () => modulesApi.getLesson(lessonId),
     enabled: Number.isFinite(lessonId),
   })
 
@@ -26,7 +26,7 @@ export function ScenarioSelectionPage() {
       <section className="rounded-lg border border-border bg-card p-6">
         <div className="mb-4">
           <Button asChild variant="ghost" size="sm">
-            <Link to="/units">
+            <Link to="/modules">
               <ArrowLeft data-icon="inline-start" />
               Back to Modules
             </Link>

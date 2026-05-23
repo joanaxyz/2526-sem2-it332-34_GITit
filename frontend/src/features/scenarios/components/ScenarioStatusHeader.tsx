@@ -48,7 +48,7 @@ export function ScenarioStatusHeader({
         </Button>
         <GitBranch className="size-5 text-primary" />
         <span className="truncate font-mono text-xs text-muted-foreground">
-          Module {session.unit.number} / {session.scenario.focus}
+          Module {session.module.number} / {session.scenario.focus}
         </span>
       </div>
       <div className="flex items-center gap-2">

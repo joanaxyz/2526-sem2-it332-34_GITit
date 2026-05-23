@@ -29,7 +29,7 @@ from scenarios.models import (
     ScenarioSkillFocus,
     ScenarioVariant,
 )
-from scenarios.selectors import scenario_status_payload
+from scenarios.selectors import scenario_status_payload, scenario_status_payloads
 from scenarios.serializers import session_payload
 from scenarios.services import (
     CommandCountClassifier,
@@ -526,6 +526,19 @@ def test_scenario_payload_includes_latest_attempt_accuracy(student):
     assert session_payload(session)["next_difficulty"] is None
 
 
+def test_scenario_summary_payload_excludes_heavy_preview_fields(student):
+    scenario = ScenarioSkillFocus.objects.get(slug="form-clean-commit", is_published=True)
+
+    payload = scenario_status_payload(user=student, scenario=scenario)
+    list_payload = scenario_status_payloads(user=student, scenarios=[scenario], include_preview=False)[0]
+
+    assert "demo_repository_state" in payload
+    assert "safe_demo_commands" in payload
+    assert "demo_repository_state" not in list_payload
+    assert "demo_explanation_steps" not in list_payload
+    assert "command_preview" not in list_payload
+
+
 def test_latest_attempt_accuracy_reflects_extra_counted_actions(student):
     difficulty = DifficultyInstance.objects.get(
         scenario__slug="form-clean-commit",
@@ -736,6 +749,7 @@ def test_seeded_curriculum_has_full_variant_set_and_one_primary_focus(seeded_con
     assert ScenarioVariant.objects.filter(is_published=True, is_generated=False).count() == 0
     assert all(
         len(scenario.primary_focus_commands) == 1
+        or scenario.slug in {"inspect-repository-state", "read-repository-state"}
         for scenario in ScenarioSkillFocus.objects.filter(is_published=True)
     )
 

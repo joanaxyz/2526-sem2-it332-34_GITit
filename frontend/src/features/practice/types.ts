@@ -82,7 +82,12 @@ export type ScenarioSession = {
     student_context?: ScenarioStudentContext
   }
   student_context?: ScenarioStudentContext
-  unit: {
+  module: {
+    id: number
+    number: number
+    title: string
+  }
+  unit?: {
     id: number
     number: number
     title: string

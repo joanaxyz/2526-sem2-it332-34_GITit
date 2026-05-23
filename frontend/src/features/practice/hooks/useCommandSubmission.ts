@@ -13,7 +13,7 @@ export function useCommandSubmission(sessionId: number, reviewMode: boolean) {
       reviewMode ? reviewApi.submitCommand(sessionId, command) : practiceApi.submitCommand(sessionId, command),
     onSuccess: (response) => {
       syncScenarioSessionInCache(queryClient, mergeCommandStepIntoSession(queryClient, response))
-      if (!reviewMode) void queryClient.invalidateQueries({ queryKey: ['units'] })
+      if (!reviewMode) void queryClient.invalidateQueries({ queryKey: ['modules'] })
     },
   })
 }

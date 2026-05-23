@@ -54,8 +54,26 @@ export type DifficultyAccess = {
 
 export type DemoExplanationStep = {
   command: string
+  title?: string
   explanation: string
   repository_state: RepositorySnapshot
+  common_mistake?: string
+  diagnostic?: boolean
+  counted?: boolean
+}
+
+export type CommandPreviewMetadata = {
+  title: string
+  command_title: string
+  syntax_examples: string[]
+  supported_demo_commands: string[]
+  demo_steps: DemoExplanationStep[]
+  before_state: RepositorySnapshot
+  after_state: RepositorySnapshot
+  short_explanation: string
+  common_mistakes: string[]
+  diagnostic: boolean
+  counted: boolean
 }
 
 export type ScenarioSkillFocus = {
@@ -72,8 +90,10 @@ export type ScenarioSkillFocus = {
   demo_repository_state?: RepositorySnapshot
   demo_dag_config?: Record<string, unknown>
   demo_explanation_steps?: DemoExplanationStep[]
+  command_preview?: CommandPreviewMetadata
   related_git_concepts?: string[]
   learning_unit_id: number
+  module_id?: number
   lesson_id: number
   difficulties: DifficultyAccess[]
 }

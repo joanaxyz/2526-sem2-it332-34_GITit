@@ -220,6 +220,7 @@ class RuntimeScenarioBuilder:
             difficulty_instance=difficulty_instance,
             initial_state=initial_state,
             target_rule=target_rule,
+            template=self.renderer.render(blueprint.expected_observations_template or {}, context),
         )
         student_context = self._student_context(
             blueprint=blueprint,
@@ -331,9 +332,11 @@ class RuntimeScenarioBuilder:
         difficulty_instance: DifficultyInstance,
         initial_state: dict,
         target_rule: dict,
+        template: dict | None = None,
     ) -> dict:
+        template = template if isinstance(template, dict) else {}
         if difficulty_instance.completion_type != COMPLETION_INSPECTION:
-            return {}
+            return template
         observations = InspectionEvaluator().observations_for(initial_state)
         must_identify = target_rule.get("must_identify", [])
         explicit_expected = {}
@@ -347,6 +350,7 @@ class RuntimeScenarioBuilder:
         }
         expected_answer = explicit_expected or checks
         return {
+            **template,
             "required_commands": target_rule.get("required_commands", []),
             "repository_state_unchanged": target_rule.get("repository_state_unchanged", True),
             "checks": checks,
@@ -776,8 +780,6 @@ class GeneratedVariantValidator:
                 self._collect(values, rule.get("paths"))
             if rule.get("type") in {"partial_hunks_committed", "partial_hunks_left_in_working_tree"}:
                 self._collect(values, rule.get("paths"))
-            if rule.get("type") == "inspection_answer_matches":
-                self._collect(values, rule.get("expected"))
         return {
             value
             for value in values

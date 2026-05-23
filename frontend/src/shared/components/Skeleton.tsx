@@ -4,7 +4,7 @@ export function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse rounded-md bg-secondary/70', className)} />
 }
 
-export function UnitsSkeleton() {
+export function ModulesSkeleton() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-4" aria-label="Loading modules">
       <Skeleton className="h-10 w-36" />

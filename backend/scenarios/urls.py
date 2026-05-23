@@ -22,6 +22,8 @@ urlpatterns = [
     ),
     path("skill-focus/<slug:slug>/", SkillFocusDetailAPIView.as_view(), name="skill-focus-detail"),
     path("lessons/<int:lesson_id>/", LessonScenarioListAPIView.as_view(), name="lesson-scenarios"),
+    path("modules/summary/", UnitScenarioSummaryAPIView.as_view(), name="module-scenario-summary"),
+    path("modules/<int:unit_id>/", UnitScenarioListAPIView.as_view(), name="module-scenarios"),
     path("units/summary/", UnitScenarioSummaryAPIView.as_view(), name="unit-scenario-summary"),
     path("units/<int:unit_id>/", UnitScenarioListAPIView.as_view(), name="unit-scenarios"),
     path("sessions/", ScenarioSessionStartAPIView.as_view(), name="scenario-session-start"),

@@ -15,9 +15,9 @@ import { useRef, useState } from 'react'
 type ScenarioListProps =
   | { scope: 'lesson'; lessonId: number; source: 'lesson' }
   | {
-      scope: 'unit'
-      unitId: number
-      source: 'unit_card'
+      scope: 'module'
+      moduleId: number
+      source: 'module_card'
       initialScenarios?: ScenarioSkillFocus[]
       deferFetch?: boolean
     }
@@ -31,13 +31,13 @@ export function ScenarioList(props: ScenarioListProps) {
     difficulty: DifficultyAccess
     action: DifficultyActionIntent
   } | null>(null)
-  const queryKey = props.scope === 'lesson' ? ['lesson-scenarios', props.lessonId] : ['unit-scenarios', props.unitId]
-  const shouldDeferUnitFetch = props.scope === 'unit' && props.deferFetch && !props.initialScenarios
+  const queryKey = props.scope === 'lesson' ? ['lesson-scenarios', props.lessonId] : ['module-scenarios', props.moduleId]
+  const shouldDeferModuleFetch = props.scope === 'module' && props.deferFetch && !props.initialScenarios
   const { data, error, isError, isLoading } = useQuery({
     queryKey,
-    queryFn: () => (props.scope === 'lesson' ? scenariosApi.listForLesson(props.lessonId) : scenariosApi.listForUnit(props.unitId)),
-    enabled: !shouldDeferUnitFetch,
-    initialData: props.scope === 'unit' ? props.initialScenarios : undefined,
+    queryFn: () => (props.scope === 'lesson' ? scenariosApi.listForLesson(props.lessonId) : scenariosApi.listForModule(props.moduleId)),
+    enabled: !shouldDeferModuleFetch,
+    initialData: props.scope === 'module' ? props.initialScenarios : undefined,
     staleTime: 5 * 60 * 1000,
   })
   const startMutation = useMutation({
@@ -45,7 +45,7 @@ export function ScenarioList(props: ScenarioListProps) {
       scenariosApi.startSession({ difficulty_instance_id: difficulty.id, source_entry_point: props.source }),
     onSuccess: (session) => {
       syncScenarioSessionInCache(queryClient, session)
-      void queryClient.invalidateQueries({ queryKey: ['units'] })
+      void queryClient.invalidateQueries({ queryKey: ['modules'] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
       setPreviewRequest(null)
       openScenarioRoute(`/practice/${session.id}`)
@@ -60,7 +60,7 @@ export function ScenarioList(props: ScenarioListProps) {
     },
     onSuccess: (session) => {
       syncScenarioSessionInCache(queryClient, session)
-      void queryClient.invalidateQueries({ queryKey: ['units'] })
+      void queryClient.invalidateQueries({ queryKey: ['modules'] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
       setPreviewRequest(null)
       openScenarioRoute(`/practice/${session.id}`)

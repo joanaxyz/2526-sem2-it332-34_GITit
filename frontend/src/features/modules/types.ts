@@ -1,6 +1,6 @@
 export type LessonKind = 'orientation' | 'content' | 'scenario'
 
-export type UnitPracticeMetric = {
+export type ModulePracticeMetric = {
   value: number
   numerator: number
   denominator: number
@@ -17,7 +17,7 @@ export type LessonSummary = {
   scenario_count: number
 }
 
-export type LearningUnit = {
+export type LearningModule = {
   id: number
   slug: string
   number: number
@@ -27,7 +27,7 @@ export type LearningUnit = {
   sort_order: number
   lesson_count: number
   scenario_count: number
-  practice_completion?: UnitPracticeMetric
+  practice_completion?: ModulePracticeMetric
   lessons: LessonSummary[]
 }
 
@@ -35,7 +35,14 @@ export type LessonDetail = LessonSummary & {
   content_html: string
   scoped_css: string
   interaction_steps: string[]
-  unit: {
+  module: {
+    id: number
+    slug: string
+    number: number
+    title: string
+    is_orientation: boolean
+  }
+  unit?: {
     id: number
     slug: string
     number: number

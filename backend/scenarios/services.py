@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from django.db import transaction
 from django.utils import timezone
 
@@ -18,6 +20,7 @@ from common.constants import (
     SESSION_STATUS_STARTED,
 )
 from common.exceptions import Locked
+from common.performance import timing
 from evaluation.completion import CompletionEvaluationContext, ScenarioCompletionEvaluator
 from learning.services import OrientationService
 from progress.services import StreakService
@@ -101,6 +104,50 @@ class CommandCountClassifier:
         return COMMAND_COUNTED, 1
 
 
+class CommandHistoryCache:
+    """Small process-local cache for normalized session command history.
+
+    The database remains the source of truth. The cache key includes the
+    session attempt count, so stale entries naturally miss after each command.
+    """
+
+    _cache: OrderedDict[tuple[int, int], list[str]] = OrderedDict()
+    _max_entries = 512
+
+    def history_for(self, *, session: ScenarioSession) -> list[str]:
+        key = (session.id, session.total_attempts)
+        cached = self._cache.get(key)
+        if cached is not None:
+            self._cache.move_to_end(key)
+            return list(cached)
+
+        history = list(
+            CommandLog.objects.filter(step_log__session=session)
+            .order_by("step_log_id")
+            .values_list("normalized_command", flat=True)
+        )
+        self._remember(key, history)
+        return history
+
+    def remember_after_append(
+        self,
+        *,
+        session: ScenarioSession,
+        previous_history: list[str],
+        normalized_command: str,
+    ) -> None:
+        self._remember(
+            (session.id, session.total_attempts),
+            [*previous_history, normalized_command],
+        )
+
+    def _remember(self, key: tuple[int, int], history: list[str]) -> None:
+        self._cache[key] = list(history)
+        self._cache.move_to_end(key)
+        while len(self._cache) > self._max_entries:
+            self._cache.popitem(last=False)
+
+
 class ScenarioSessionService:
     @transaction.atomic
     def start_session(
@@ -145,15 +192,16 @@ class ScenarioSessionService:
                 raise Locked("Exit the current scenario before starting again.")
 
         variant_selector = VariantSelectionService()
-        variant = (
-            self._review_variant(user=user, difficulty_instance=difficulty_instance)
-            if mode == SESSION_MODE_REVIEW
-            else variant_selector.select_variant(
-                user=user,
-                difficulty_instance=difficulty_instance,
-                prior_session=prior_session,
+        with timing("scenario.variant_generation", difficulty_id=difficulty_instance.id, mode=mode):
+            variant = (
+                self._review_variant(user=user, difficulty_instance=difficulty_instance)
+                if mode == SESSION_MODE_REVIEW
+                else variant_selector.select_variant(
+                    user=user,
+                    difficulty_instance=difficulty_instance,
+                    prior_session=prior_session,
+                )
             )
-        )
         changed_variant = bool(
             prior_session
             and variant_selector.changed_between(prior=prior_session.variant, current=variant)
@@ -225,7 +273,8 @@ class CommandProcessingService:
         snapshotter = RepositorySnapshotService()
         command_engine = Pygit2CommandEngine()
         previous_state = state_tools.clone_state(session.repository_state)
-        command_result = command_engine.process(previous_state, command)
+        with timing("scenario.command.parse_execute", session_id=session.id):
+            command_result = command_engine.process(previous_state, command)
         classification, increment = CommandCountClassifier().classify(
             command=command,
             policy_snapshot=session.command_policy_snapshot,
@@ -234,20 +283,21 @@ class CommandProcessingService:
 
         result_category = RESULT_UNPROCESSABLE
         feedback = ""
+        executed_commands: list[str] = []
         if command_result.processed:
-            executed_commands = [
-                *session.step_logs.order_by("id").values_list("command_log__normalized_command", flat=True),
-                command_result.normalized_command,
-            ]
-            evaluation = ScenarioCompletionEvaluator().evaluate(
-                CompletionEvaluationContext(
-                    session=session,
-                    previous_state=previous_state,
-                    next_state=command_result.state,
-                    executed_commands=executed_commands,
-                    inspection_answer=session.inspection_answer,
+            with timing("scenario.command.history", session_id=session.id):
+                previous_history = CommandHistoryCache().history_for(session=session)
+                executed_commands = [*previous_history, command_result.normalized_command]
+            with timing("scenario.command.evaluation", session_id=session.id):
+                evaluation = ScenarioCompletionEvaluator().evaluate(
+                    CompletionEvaluationContext(
+                        session=session,
+                        previous_state=previous_state,
+                        next_state=command_result.state,
+                        executed_commands=executed_commands,
+                        inspection_answer=session.inspection_answer,
+                    )
                 )
-            )
             result_category = evaluation.result_category
             if session.difficulty_instance.difficulty == DIFFICULTY_EASY:
                 feedback = FeedbackGenerationService().describe(previous_state, command_result.state)
@@ -288,6 +338,12 @@ class CommandProcessingService:
             normalized_command=command_result.normalized_command,
             was_processable=command_result.processed,
         )
+        if command_result.processed:
+            CommandHistoryCache().remember_after_append(
+                session=session,
+                previous_history=executed_commands[:-1],
+                normalized_command=command_result.normalized_command,
+            )
 
         max_count = session.command_policy_snapshot["max_counted_commands"]
         if result_category == RESULT_TARGET_MATCHED:
@@ -366,18 +422,18 @@ class InspectionAnswerSubmissionService:
             raise Locked("This session has already ended.")
 
         session.inspection_answer = answer
-        executed_commands = list(
-            session.step_logs.order_by("id").values_list("command_log__normalized_command", flat=True)
-        )
-        evaluation = ScenarioCompletionEvaluator().evaluate(
-            CompletionEvaluationContext(
-                session=session,
-                previous_state=session.repository_state,
-                next_state=session.repository_state,
-                executed_commands=executed_commands,
-                inspection_answer=answer,
+        with timing("scenario.inspection_answer.history", session_id=session.id):
+            executed_commands = CommandHistoryCache().history_for(session=session)
+        with timing("scenario.inspection_answer.evaluation", session_id=session.id):
+            evaluation = ScenarioCompletionEvaluator().evaluate(
+                CompletionEvaluationContext(
+                    session=session,
+                    previous_state=session.repository_state,
+                    next_state=session.repository_state,
+                    executed_commands=executed_commands,
+                    inspection_answer=answer,
+                )
             )
-        )
         if evaluation.result_category == RESULT_TARGET_MATCHED:
             CommandProcessingService()._complete_session(session)
         else:

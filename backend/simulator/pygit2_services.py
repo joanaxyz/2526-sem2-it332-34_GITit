@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import shutil
+import tempfile
+from collections import OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
 
 import pygit2
 
+from simulator.services import RepositoryStateSimulator
 from simulator.state import RepositoryStateNormalizer
 
 
@@ -14,6 +17,62 @@ class MaterializedRepository:
     repo: pygit2.Repository
     aliases_to_oids: dict[str, pygit2.Oid]
     original_remote_urls: dict[str, str]
+
+
+@dataclass(frozen=True)
+class BridgedRepositoryState:
+    state_hash: str
+    normalized_state: dict
+
+
+class RepositoryStateBridge:
+    """Bridge authored teaching JSON and libgit2 repositories.
+
+    Most Module 1 scenarios are authored as normalized JSON so the evaluator can
+    stay state-based and deterministic. This bridge centralizes the conversion
+    points to pygit2 and keeps a tiny normalized-state cache so command
+    submission does not repeatedly re-normalize identical repository payloads.
+    """
+
+    _normalized_cache: OrderedDict[str, BridgedRepositoryState] = OrderedDict()
+    _max_cache_entries = 128
+
+    def __init__(self) -> None:
+        self.normalizer = RepositoryStateNormalizer()
+        self.state_tools = RepositoryStateSimulator()
+        self.materializer = Pygit2RepositoryMaterializer()
+        self.snapshotter = Pygit2RepositorySnapshotter()
+
+    def normalize(self, state: dict) -> dict:
+        state_hash = self.state_tools.state_hash(state)
+        cached = self._normalized_cache.get(state_hash)
+        if cached:
+            self._normalized_cache.move_to_end(state_hash)
+            return self.state_tools.clone_state(cached.normalized_state)
+        normalized = self.normalizer.normalize(state)
+        self._remember(BridgedRepositoryState(state_hash=state_hash, normalized_state=normalized))
+        return self.state_tools.clone_state(normalized)
+
+    def materialize(self, *, state: dict, path: str | Path) -> MaterializedRepository:
+        return self.materializer.materialize(state=self.normalize(state), path=path)
+
+    def snapshot(self, *, repo: pygit2.Repository, previous_state: dict | None = None) -> dict:
+        return self.snapshotter.snapshot(repo=repo, previous_state=previous_state)
+
+    def round_trip_snapshot(self, state: dict) -> dict:
+        with tempfile.TemporaryDirectory(prefix="git-it-bridge-") as workspace:
+            materialized = self.materialize(state=state, path=workspace)
+            return self.snapshotter.snapshot(
+                repo=materialized.repo,
+                aliases_to_oids=materialized.aliases_to_oids,
+                previous_state=state,
+            )
+
+    def _remember(self, bridged: BridgedRepositoryState) -> None:
+        self._normalized_cache[bridged.state_hash] = bridged
+        self._normalized_cache.move_to_end(bridged.state_hash)
+        while len(self._normalized_cache) > self._max_cache_entries:
+            self._normalized_cache.popitem(last=False)
 
 
 class Pygit2RepositoryMaterializer:

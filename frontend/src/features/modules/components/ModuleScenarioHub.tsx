@@ -2,14 +2,14 @@ import { Target } from 'lucide-react'
 
 import { ScenarioList } from '@/features/scenarios/components/ScenarioList'
 import type { ScenarioSkillFocus } from '@/features/scenarios/types'
-import type { LearningUnit } from '@/features/units/types'
+import type { LearningModule } from '@/features/modules/types'
 
-export function UnitScenarioHub({
-  unit,
+export function ModuleScenarioHub({
+  module,
   scenarioSummary,
   scenarioSummaryPending = false,
 }: {
-  unit: LearningUnit
+  module: LearningModule
   scenarioSummary?: ScenarioSkillFocus[]
   scenarioSummaryPending?: boolean
 }) {
@@ -24,9 +24,9 @@ export function UnitScenarioHub({
         </div>
       </div>
       <ScenarioList
-        scope="unit"
-        unitId={unit.id}
-        source="unit_card"
+        scope="module"
+        moduleId={module.id}
+        source="module_card"
         initialScenarios={scenarioSummary}
         deferFetch={scenarioSummaryPending}
       />

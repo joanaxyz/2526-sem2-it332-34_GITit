@@ -88,7 +88,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     onSuccess: (response) => {
       setSession(response.session)
       syncScenarioSessionInCache(queryClient, response.session)
-      void queryClient.invalidateQueries({ queryKey: ['units'] })
+      void queryClient.invalidateQueries({ queryKey: ['modules'] })
       setLines((items) => [
         ...items,
         {
@@ -120,20 +120,20 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     },
     onSuccess: (updatedSession) => {
       syncScenarioSessionInCache(queryClient, updatedSession)
-      void queryClient.invalidateQueries({ queryKey: ['units'] })
+      void queryClient.invalidateQueries({ queryKey: ['modules'] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
-      navigate(`/units?unit=${updatedSession.unit.id}`)
+      navigate(`/modules?module=${updatedSession.module.id}`)
     },
   })
   const nextLevelMutation = useMutation({
     mutationFn: () =>
       scenariosApi.startSession({
         difficulty_instance_id: session?.next_difficulty?.id ?? 0,
-        source_entry_point: 'unit_card',
+        source_entry_point: 'module_card',
       }),
     onSuccess: (next) => {
       syncScenarioSessionInCache(queryClient, next)
-      void queryClient.invalidateQueries({ queryKey: ['units'] })
+      void queryClient.invalidateQueries({ queryKey: ['modules'] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
       if (session?.status === 'completed') setDismissedCompletionSessionId(session.id)
       navigate(`/practice/${next.id}`)
@@ -143,7 +143,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     mutationFn: (difficultyInstanceId: number) => reviewApi.startReviewSession(difficultyInstanceId),
     onSuccess: (next) => {
       syncScenarioSessionInCache(queryClient, next)
-      void queryClient.invalidateQueries({ queryKey: ['units'] })
+      void queryClient.invalidateQueries({ queryKey: ['modules'] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
       if (session?.status === 'completed') setDismissedCompletionSessionId(session.id)
       navigate(`/review/${next.id}`)
@@ -156,19 +156,19 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     },
     onSuccess: (next) => {
       syncScenarioSessionInCache(queryClient, next)
-      void queryClient.invalidateQueries({ queryKey: ['units'] })
+      void queryClient.invalidateQueries({ queryKey: ['modules'] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
       setDismissedCompletionSessionId(null)
       navigate(`/practice/${next.id}`)
     },
   })
-  const unitScenariosQuery = useQuery({
-    queryKey: ['unit-scenarios', session?.unit.id],
-    queryFn: () => scenariosApi.listForUnit(session!.unit.id),
-    enabled: !!session?.unit.id,
+  const moduleScenariosQuery = useQuery({
+    queryKey: ['module-scenarios', session?.module.id],
+    queryFn: () => scenariosApi.listForModule(session!.module.id),
+    enabled: !!session?.module.id,
     staleTime: 5 * 60 * 1000,
   })
-  const currentScenario = unitScenariosQuery.data?.find((s) => s.id === session?.scenario.id)
+  const currentScenario = moduleScenariosQuery.data?.find((s) => s.id === session?.scenario.id)
   const reviewableDifficulties = currentScenario?.difficulties.filter(
     (d) => d.review_available && d.difficulty !== session?.difficulty
   ) ?? []
@@ -411,7 +411,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         onClose={() => {
           setDismissedCompletionSessionId(session.id)
         }}
-        onBackToUnits={() => navigate(`/units?unit=${session.unit.id}`)}
+        onBackToModules={() => navigate(`/modules?module=${session.module.id}`)}
         onRetry={() => retryMutation.mutate()}
         onContinue={() => retryMutation.mutate()}
         onReviewDifficulty={(difficulty) => reviewMutation.mutate(difficulty.id)}
