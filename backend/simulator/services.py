@@ -3,6 +3,8 @@ import hashlib
 import json
 from dataclasses import dataclass
 
+from simulator.commands import command_handlers
+from simulator.commands.base import SimulatorCommandError
 from simulator.git_commands import (
     GitCommandParseError,
     GitCommandParser,
@@ -10,6 +12,9 @@ from simulator.git_commands import (
     NonGitCommandError,
     ParsedGitCommand,
 )
+from simulator.intents import CommandIntentMapper
+from simulator.output import GitLikeOutputFormatter
+from simulator.output.errors import not_a_repository, unsupported_command
 from simulator.state import RepositoryStateNormalizer
 
 READ_ONLY_PREFIXES = (
@@ -31,6 +36,11 @@ class SimulatorResult:
     state: dict
     output: str
     normalized_command: str
+    stdout: str = ""
+    stderr: str = ""
+    exit_code: int = 0
+    diagnostic_metadata: tuple[str, ...] = ()
+    command_family: str = ""
 
 
 def normalize_command(command: str) -> str:
@@ -61,6 +71,9 @@ class RepositoryStateSimulator:
 
     def __init__(self) -> None:
         self.normalizer = RepositoryStateNormalizer()
+        self.intent_mapper = CommandIntentMapper()
+        self.handlers = command_handlers()
+        self.output_formatter = GitLikeOutputFormatter()
 
     def clone_state(self, state: dict) -> dict:
         return copy.deepcopy(state)
@@ -76,9 +89,14 @@ class RepositoryStateSimulator:
         try:
             parsed = GitCommandParser().parse(command)
         except GitCommandParseError as exc:
-            return SimulatorResult(False, state, str(exc), normalize_command(command))
+            return SimulatorResult(
+                False, state, str(exc), normalize_command(command), stderr=str(exc), exit_code=129
+            )
         except NonGitCommandError:
-            return SimulatorResult(False, state, "Only simulated git commands are accepted.", normalize_command(command))
+            message = "Only simulated git commands are accepted."
+            return SimulatorResult(
+                False, state, message, normalize_command(command), stderr=message, exit_code=127
+            )
 
         return self.process_parsed(state, parsed)
 
@@ -93,70 +111,134 @@ class RepositoryStateSimulator:
         self._ensure_state_shape(next_state)
         action = parsed.subcommand
 
-        handlers = {
-            "init": self._init,
+        legacy_handlers = {
             "clone": self._clone,
-            "status": self._status,
-            "log": self._log,
-            "branch": self._branch,
-            "diff": self._diff,
-            "show": self._show,
-            "remote": self._remote,
             "fetch": self._fetch,
             "pull": self._pull,
             "push": self._push,
-            "add": self._add,
-            "rm": self._rm,
-            "commit": self._commit,
-            "checkout": self._checkout,
-            "switch": self._switch,
             "merge": self._merge,
-            "reset": self._reset,
-            "restore": self._restore,
             "stash": self._stash,
-            "reflog": self._reflog,
             "revert": self._revert,
             "cherry-pick": self._cherry_pick,
         }
-        handler = handlers.get(action)
-        if handler is None:
+        handler = self.handlers.get(action)
+        legacy_handler = legacy_handlers.get(action)
+        if handler is None and legacy_handler is None:
             return SimulatorResult(
                 False,
                 state,
-                f"git: '{action or parsed.normalized_text}' is not a git command. See 'git --help'.",
+                unsupported_command(action or parsed.normalized_text),
                 parsed.normalized_text,
+                stderr=unsupported_command(action or parsed.normalized_text),
+                exit_code=129,
+                command_family=action,
             )
 
         if validate:
             registry_spec = GitCommandRegistry().get(action)
             validation_error = registry_spec.validate(parsed) if registry_spec else None
             if validation_error:
-                return SimulatorResult(False, state, validation_error, parsed.normalized_text)
+                return SimulatorResult(
+                    False,
+                    state,
+                    validation_error,
+                    parsed.normalized_text,
+                    stderr=validation_error,
+                    exit_code=129,
+                    command_family=action,
+                )
 
         if not next_state.get("repository_initialized", True) and action not in {"init", "clone"}:
+            message = not_a_repository()
             return SimulatorResult(
                 True,
                 next_state,
-                "fatal: not a git repository. Run git init or git clone first.",
+                message,
                 parsed.normalized_text,
+                stderr=message,
+                exit_code=128,
+                command_family=action,
             )
 
+        if legacy_handler is not None:
+            try:
+                output = legacy_handler(next_state, parsed.executor_args)
+            except (KeyError, IndexError, ValueError) as exc:
+                return SimulatorResult(
+                    False,
+                    state,
+                    str(exc),
+                    parsed.normalized_text,
+                    stderr=str(exc),
+                    exit_code=128,
+                    command_family=action,
+                )
+            return SimulatorResult(
+                True,
+                next_state,
+                output,
+                parsed.normalized_text,
+                stdout=output,
+                command_family=action,
+            )
+
+        intent = self.intent_mapper.map(parsed)
         try:
-            output = handler(next_state, parsed.executor_args)
+            outcome = handler.apply(self, next_state, intent)
+            stdout, stderr = self.output_formatter.format(self, next_state, intent, outcome)
+        except SimulatorCommandError as exc:
+            return SimulatorResult(
+                False,
+                state,
+                str(exc),
+                parsed.normalized_text,
+                stderr=str(exc),
+                exit_code=exc.exit_code,
+                command_family=action,
+            )
         except (KeyError, IndexError, ValueError) as exc:
-            return SimulatorResult(False, state, str(exc), parsed.normalized_text)
-        return SimulatorResult(True, next_state, output, parsed.normalized_text)
+            return SimulatorResult(
+                False,
+                state,
+                str(exc),
+                parsed.normalized_text,
+                stderr=str(exc),
+                exit_code=128,
+                command_family=action,
+            )
+        output = "\n".join(part for part in (stdout, stderr) if part)
+        return SimulatorResult(
+            True,
+            next_state,
+            output,
+            parsed.normalized_text,
+            stdout=stdout,
+            stderr=stderr,
+            exit_code=outcome.exit_code,
+            diagnostic_metadata=intent.diagnostic_metadata,
+            command_family=action,
+        )
 
     def _validate_syntax(self, action: str, args: list[str]) -> None:
         if action == "status":
-            self._reject_unknown_options(args, {"-s", "--short", "--porcelain"}, "error: unknown option `{}`.")
+            self._reject_unknown_options(
+                args, {"-s", "--short", "--porcelain"}, "error: unknown option `{}`."
+            )
         elif action == "log":
-            self._reject_unknown_options(args, {"--oneline", "--graph", "--all"}, "fatal: unrecognized argument: {}")
+            self._reject_unknown_options(
+                args, {"--oneline", "--graph", "--all"}, "fatal: unrecognized argument: {}"
+            )
         elif action == "diff":
-            self._reject_unknown_options(args, {"--staged", "--cached"}, "error: invalid option: {}")
+            self._reject_unknown_options(
+                args, {"--staged", "--cached"}, "error: invalid option: {}"
+            )
 
-    def _reject_unknown_options(self, args: list[str], allowed_options: set[str], message: str) -> None:
-        bad_option = next((arg for arg in args if arg.startswith("-") and arg not in allowed_options), None)
+    def _reject_unknown_options(
+        self, args: list[str], allowed_options: set[str], message: str
+    ) -> None:
+        bad_option = next(
+            (arg for arg in args if arg.startswith("-") and arg not in allowed_options), None
+        )
         if bad_option:
             raise ValueError(message.format(bad_option))
 
@@ -218,7 +300,9 @@ class RepositoryStateSimulator:
     def _diff_trees_as_entries(self, before: dict, after: dict) -> dict:
         entries: dict[str, object] = {}
         for path, change in self._diff_trees(before, after).items():
-            entries[path] = change.get("change_type") if change.get("after") is None else change.get("after")
+            entries[path] = (
+                change.get("change_type") if change.get("after") is None else change.get("after")
+            )
         return entries
 
     def _merge_trees(self, current_tree: dict, other_tree: dict) -> dict:
@@ -250,7 +334,11 @@ class RepositoryStateSimulator:
         if not target:
             return
         state.setdefault("reflog", []).append(
-            {"ref": f"HEAD@{{{len(state.get('reflog', []))}}}", "target": target, "message": message}
+            {
+                "ref": f"HEAD@{{{len(state.get('reflog', []))}}}",
+                "target": target,
+                "message": message,
+            }
         )
 
     def _init(self, state: dict, args: list[str]) -> str:
@@ -274,11 +362,15 @@ class RepositoryStateSimulator:
 
     def _clone(self, state: dict, args: list[str]) -> str:
         if state.get("repository_initialized", True):
-            raise ValueError("Clone starts a new repository and is only available before initialization.")
+            raise ValueError(
+                "Clone starts a new repository and is only available before initialization."
+            )
         if not args:
             raise ValueError("Specify a repository URL to clone.")
         url = args[0]
-        target_dir = args[1] if len(args) > 1 else url.rstrip("/").rsplit("/", 1)[-1].removesuffix(".git")
+        target_dir = (
+            args[1] if len(args) > 1 else url.rstrip("/").rsplit("/", 1)[-1].removesuffix(".git")
+        )
         state["repository_initialized"] = True
         state["remotes"] = {"origin": url}
         remote_branches = state.setdefault("remote_branches", {})
@@ -397,7 +489,9 @@ class RepositoryStateSimulator:
         if name.startswith("-"):
             raise ValueError(f"error: unknown switch `{name}`.")
         start_point = args[1] if len(args) > 1 else None
-        branches[name] = self._resolve_ref(state, start_point) if start_point else self._head_commit(state)
+        branches[name] = (
+            self._resolve_ref(state, start_point) if start_point else self._head_commit(state)
+        )
         return f"Created branch {name}."
 
     def _diff(self, state: dict, args: list[str]) -> str:
@@ -433,7 +527,8 @@ class RepositoryStateSimulator:
             return "\n".join(sorted(remotes))
         if args in (["-v"], ["--verbose"]):
             return "\n".join(
-                f"{name}\t{url} (fetch)\n{name}\t{url} (push)" for name, url in sorted(remotes.items())
+                f"{name}\t{url} (fetch)\n{name}\t{url} (push)"
+                for name, url in sorted(remotes.items())
             )
         if args[0] == "add":
             if len(args) < 3:
@@ -526,11 +621,15 @@ class RepositoryStateSimulator:
     def _add_patch(self, state: dict, args: list[str]) -> str:
         working_tree = state.setdefault("working_tree", {})
         partial_hunks = state.setdefault("partial_hunks", {})
-        paths = args or list(partial_hunks) or [
-            path
-            for path, value in working_tree.items()
-            if self.normalizer.entry_status(value) not in {"ignored", "untracked"}
-        ]
+        paths = (
+            args
+            or list(partial_hunks)
+            or [
+                path
+                for path, value in working_tree.items()
+                if self.normalizer.entry_status(value) not in {"ignored", "untracked"}
+            ]
+        )
         if not paths:
             raise ValueError("No tracked changes available for patch staging.")
         staging = state.setdefault("staging", {})
@@ -562,7 +661,10 @@ class RepositoryStateSimulator:
                 else:
                     working_tree.pop(path, None)
             else:
-                staging[path] = {"status": "partial", "hunks": self._entry_tokens(working_tree.get(path))}
+                staging[path] = {
+                    "status": "partial",
+                    "hunks": self._entry_tokens(working_tree.get(path)),
+                }
                 working_tree[path] = "modified"
         return "Staged selected hunks."
 
@@ -694,7 +796,9 @@ class RepositoryStateSimulator:
         branches = state.setdefault("branches", {})
         if name in branches:
             raise ValueError("Branch already exists.")
-        branches[name] = self._resolve_ref(state, start_point) if start_point else self._head_commit(state)
+        branches[name] = (
+            self._resolve_ref(state, start_point) if start_point else self._head_commit(state)
+        )
         state["head"] = {"type": "branch", "name": name}
         return f"Switched to a new branch '{name}'."
 
@@ -820,7 +924,9 @@ class RepositoryStateSimulator:
             entry = stack.pop()
             state.setdefault("working_tree", {}).update(entry.get("working_tree", {}))
             state.setdefault("staging", {}).update(entry.get("staging", {}))
-            state["conflicts"] = sorted(set(state.get("conflicts", [])) | set(entry.get("conflicts", [])))
+            state["conflicts"] = sorted(
+                set(state.get("conflicts", [])) | set(entry.get("conflicts", []))
+            )
             self._set_operation_metadata(
                 state,
                 last_stash_pop_restored_paths=sorted(
@@ -853,7 +959,9 @@ class RepositoryStateSimulator:
         entries = state.get("reflog", [])
         if not entries:
             return "HEAD@{0} current position"
-        return "\n".join(f"{entry.get('ref')} {entry.get('target')} {entry.get('message')}" for entry in entries)
+        return "\n".join(
+            f"{entry.get('ref')} {entry.get('target')} {entry.get('message')}" for entry in entries
+        )
 
     def _revert(self, state: dict, args: list[str]) -> str:
         if not args:
@@ -875,7 +983,9 @@ class RepositoryStateSimulator:
                 changes={},
             )
         )
-        self._set_operation_metadata(state, last_revert_commit=target, last_revert_created=commit_id)
+        self._set_operation_metadata(
+            state, last_revert_commit=target, last_revert_created=commit_id
+        )
         self._set_head_commit(state, commit_id)
         return f"Created revert commit {commit_id}."
 
@@ -934,7 +1044,9 @@ class RepositoryStateSimulator:
     def _commit_by_id(self, state: dict, commit_id: str | None) -> dict | None:
         if not commit_id:
             return None
-        return next((commit for commit in state.get("commits", []) if commit["id"] == commit_id), None)
+        return next(
+            (commit for commit in state.get("commits", []) if commit["id"] == commit_id), None
+        )
 
     def _next_commit_id(self, state: dict) -> str:
         index = 0
@@ -984,7 +1096,9 @@ class RepositoryStateSimulator:
             for key in ("hunks", "tokens", "target_hunks", "leftover_hunks"):
                 if key in value:
                     return [str(item) for item in self._as_list(value.get(key))]
-        return [self.normalizer.token_haystack(value)] if self.normalizer.token_haystack(value) else []
+        return (
+            [self.normalizer.token_haystack(value)] if self.normalizer.token_haystack(value) else []
+        )
 
     def _cleanup_partial_hunks_after_commit(self, state: dict, staged_entries: dict) -> None:
         partial_hunks = state.setdefault("partial_hunks", {})
@@ -1049,7 +1163,9 @@ class RepositoryStateSimulator:
             existing.add(commit_id)
         self.normalizer.normalize_commits(state)
         existing = {commit["id"] for commit in commits}
-        remote_ids = sorted({target for target in state.get("remote_branches", {}).values() if target})
+        remote_ids = sorted(
+            {target for target in state.get("remote_branches", {}).values() if target}
+        )
         previous = None
         for commit_id in remote_ids:
             if commit_id not in existing:
@@ -1074,10 +1190,14 @@ class RepositoryStateSimulator:
 
 class RepositorySnapshotService:
     def snapshot(self, state: dict) -> dict:
-        state = RepositoryStateNormalizer().normalize(state)
+        normalizer = RepositoryStateNormalizer()
+        state = normalizer.normalize(state)
         branches = state.get("branches", {})
         head = state.get("head", {})
-        head_target = branches.get(head.get("name")) if head.get("type") == "branch" else head.get("target")
+        head_target = (
+            branches.get(head.get("name")) if head.get("type") == "branch" else head.get("target")
+        )
+        visible_tree = normalizer.visible_project_tree(state)
         return {
             "repository_initialized": state.get("repository_initialized", True),
             "commits": state.get("commits", []),
@@ -1094,4 +1214,6 @@ class RepositorySnapshotService:
             "replaced_commits": state.get("replaced_commits", {}),
             "reflog": state.get("reflog", []),
             "operation_metadata": state.get("operation_metadata", {}),
+            "project_tree": visible_tree,
+            "visible_tree": visible_tree,
         }

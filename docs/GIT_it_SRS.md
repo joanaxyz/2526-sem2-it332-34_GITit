@@ -161,8 +161,6 @@ The planned AI-Assisted Learning Support module (Module 7) includes a conceptual
 | [27] | PostgreSQL Documentation | Not applicable | Online | PostgreSQL Global Development Group | PostgreSQL official documentation |
 | [28] | Supabase Documentation | Not applicable | Online | Supabase Inc. | Supabase official documentation |
 | [29] | Redis Documentation | Not applicable | Online | Redis Ltd. / Redis Open Source Project | Redis official documentation |
-| [30] | pygit2 Documentation | Not applicable | Online | pygit2 Project | pygit2 official documentation |
-| [31] | libgit2 Documentation | Not applicable | Online | libgit2 Project | libgit2 official documentation |
 | [9] | Cognitive Load During Problem Solving: Effects on Learning | Not applicable | 1988 | Cognitive Science | Sweller, J. |
 | [10] | Multimedia Learning, 2nd Edition | Not applicable | 2009 | Cambridge University Press | Mayer, R. E. |
 | [11] | SUS: A Quick and Dirty Usability Scale | Not applicable | 1996 | Taylor & Francis | Brooke, J. |
@@ -261,8 +259,7 @@ Recommended server hardware for the backend: ≥ 2 vCPUs, ≥ 4 GB RAM, ≥ 20 G
 | Backend REST API (Django / Django REST Framework) | Server-side application interface responsible for authentication, scenario delivery, command processing, repository-state simulation coordination, state-based evaluation, session logging, progress tracking, and dashboard metric retrieval. Exposes RESTful JSON endpoints consumed by the frontend SPA. |
 | Supabase (PostgreSQL) | Managed relational database for persistent storage of user accounts, unit and lesson records, scenario skill focus definitions, difficulty-instance configurations, difficulty-owned variant pools, session logs, step logs, completion records, Review Mode attempt logs, and progress records. All writes involving completion records use database transactions and unique constraints to prevent duplicate entries. |
 | In-Memory Cache (Redis / Upstash Redis) | Used for active scenario session state, repository snapshot/session metadata caching, frequently accessed scenario metadata, and JWT revocation blacklisting. Refresh tokens added on logout use a time-to-live equal to their remaining lifetime. |
-| Python Git Library (pygit2 / libgit2) | Internal implementation dependency used by the Repository State Simulator to initialize and manipulate isolated server-side repository sessions. This is not an external Git hosting integration and does not permit execution of student input through an operating-system shell or external Git command-line binary. |
-| Repository State Simulator | Internal backend component that maintains isolated simulated repository sessions and processes student-entered Git commands through an application-controlled command adapter before any repository operation is performed. |
+| Repository State Simulator | Internal backend component that maintains isolated simulated repository sessions and processes student-entered Git commands through an application-controlled command adapter. It is the source of supported command behavior and does not require server-side Git installation. |
 | State-Based Evaluator | Internal backend component that compares normalized post-command repository-state snapshots against the expected target state for the current scenario step. Returns evaluation results such as TargetMatched or TargetNotYetMatched without checking the submitted command against a fixed answer string. |
 
 #### 3.1.3 Communications Interfaces

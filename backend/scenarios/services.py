@@ -34,7 +34,7 @@ from scenarios.models import (
     StepLog,
 )
 from scenarios.selectors import required_successful_attempts_for_difficulty
-from simulator.command_engine import Pygit2CommandEngine
+from simulator.command_engine import SimulatedGitCommandEngine
 from simulator.services import (
     RepositorySnapshotService,
     RepositoryStateSimulator,
@@ -60,7 +60,9 @@ class DifficultyAccessService:
             user=user,
             difficulty_instance=difficulty_instance,
         )
-        if latest_retryable and self.is_unlocked(user=user, difficulty_instance=difficulty_instance):
+        if latest_retryable and self.is_unlocked(
+            user=user, difficulty_instance=difficulty_instance
+        ):
             return latest_retryable.status
         if self.is_unlocked(user=user, difficulty_instance=difficulty_instance):
             return "not_started"
@@ -271,7 +273,7 @@ class CommandProcessingService:
 
         state_tools = RepositoryStateSimulator()
         snapshotter = RepositorySnapshotService()
-        command_engine = Pygit2CommandEngine()
+        command_engine = SimulatedGitCommandEngine()
         previous_state = state_tools.clone_state(session.repository_state)
         with timing("scenario.command.parse_execute", session_id=session.id):
             command_result = command_engine.process(previous_state, command)
@@ -300,7 +302,9 @@ class CommandProcessingService:
                 )
             result_category = evaluation.result_category
             if session.difficulty_instance.difficulty == DIFFICULTY_EASY:
-                feedback = FeedbackGenerationService().describe(previous_state, command_result.state)
+                feedback = FeedbackGenerationService().describe(
+                    previous_state, command_result.state
+                )
         else:
             result_category = (
                 RESULT_INVALID
@@ -358,6 +362,11 @@ class CommandProcessingService:
             "session": session,
             "step": step,
             "terminal_output": command_result.output,
+            "stdout": command_result.stdout,
+            "stderr": command_result.stderr,
+            "exit_code": command_result.exit_code,
+            "command_family": command_result.command_family,
+            "diagnostic_metadata": command_result.diagnostic_metadata,
             "repository_state": snapshotter.snapshot(session.repository_state),
             "evaluation_result": result_category,
             "command_classification": classification,
@@ -386,7 +395,10 @@ class CommandProcessingService:
                 counted_action_total__lte=session.difficulty_instance.command_policy.min_counted_commands,
             ).count()
             # Include the current session if it is accurate
-            current_is_accurate = session.counted_action_total <= session.difficulty_instance.command_policy.min_counted_commands
+            current_is_accurate = (
+                session.counted_action_total
+                <= session.difficulty_instance.command_policy.min_counted_commands
+            )
             accurate_count = previous_accurate + (1 if current_is_accurate else 0)
             if accurate_count >= required:
                 completion, created = CompletionRecord.objects.get_or_create(
@@ -412,7 +424,9 @@ class CommandProcessingService:
                             "completed_at",
                         ]
                     )
-                StreakService().record_completion(user=session.user, completed_at=session.completed_at)
+                StreakService().record_completion(
+                    user=session.user, completed_at=session.completed_at
+                )
 
 
 class InspectionAnswerSubmissionService:

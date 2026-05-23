@@ -51,6 +51,8 @@ export type RepositorySnapshot = {
   partial_hunks?: Record<string, RepositoryValue>
   replaced_commits?: Record<string, string>
   operation_metadata?: Record<string, RepositoryValue>
+  project_tree?: Record<string, RepositoryValue>
+  visible_tree?: Record<string, RepositoryValue>
 }
 
 export type ScenarioStudentContext = {
@@ -150,6 +152,11 @@ export type ScenarioStepLog = {
 
 export type CommandResponse = {
   session: ScenarioSession
+  stdout?: string
+  stderr?: string
+  exit_code?: number
+  command_family?: string
+  diagnostic_metadata?: string[]
   step: {
     id: number
     command_text: string

@@ -47,8 +47,12 @@ class ParsedGitCommand:
         """Arguments normalized for the teaching-state command adapters."""
         if self.subcommand == "commit":
             args: list[str] = []
+            if self.has_option("-a") or self.has_option("--all"):
+                args.append("-a")
             if self.has_option("--amend"):
                 args.append("--amend")
+            if self.has_option("--allow-empty"):
+                args.append("--allow-empty")
             if self.message is not None:
                 args.extend(["-m", self.message])
             args.extend(self.pathspecs)
@@ -66,7 +70,9 @@ def shell_join(parts: list[str] | tuple[str, ...]) -> str:
 
 
 def _needs_quote(value: str) -> bool:
-    return any(character.isspace() for character in value) or '"' in value or "'" in value
+    return any(character.isspace() for character in value) or any(
+        character in value for character in "\"';&|<>`$"
+    )
 
 
 class GitCommandParser:
@@ -79,9 +85,11 @@ class GitCommandParser:
             raise GitCommandParseError("No command entered.")
 
         try:
-            argv = shlex.split(stripped, posix=True)
+            argv = self._split_safely(stripped)
+        except GitCommandParseError:
+            raise
         except ValueError as exc:
-            raise GitCommandParseError("The command could not be parsed.") from exc
+            raise GitCommandParseError("fatal: could not parse command line") from exc
 
         if not argv:
             raise GitCommandParseError("No command entered.")
@@ -115,6 +123,18 @@ class GitCommandParser:
             message=message,
         )
 
+    def _split_safely(self, command: str) -> list[str]:
+        lexer = shlex.shlex(command, posix=True, punctuation_chars=";&|<>")
+        lexer.whitespace_split = True
+        tokens = list(lexer)
+        forbidden = {";", "&&", "&", "|", "||", ">", ">>", "<", "<<"}
+        bad_token = next((token for token in tokens if token in forbidden), None)
+        if bad_token:
+            raise GitCommandParseError(f"fatal: unsupported shell syntax near '{bad_token}'")
+        if any("$(" in token or "`" in token for token in tokens):
+            raise GitCommandParseError("fatal: command substitution is not supported")
+        return tokens
+
     def _parse_tail(
         self,
         *,
@@ -123,7 +143,17 @@ class GitCommandParser:
     ) -> tuple[dict[str, tuple[str | bool, ...]], list[str], list[str], str | None, list[str]]:
         if subcommand == "commit":
             return self._parse_commit_tail(tokens)
+        if subcommand == "init":
+            return self._parse_init_tail(tokens)
         return self._parse_generic_tail(tokens)
+
+    def _append_option(
+        self,
+        options: dict[str, list[str | bool]],
+        option: str,
+        value: str | bool = True,
+    ) -> None:
+        options.setdefault(option, []).append(value)
 
     def _parse_commit_tail(
         self,
@@ -145,28 +175,54 @@ class GitCommandParser:
                 if index + 1 >= len(tokens):
                     raise GitCommandParseError("error: switch `m' requires a value.")
                 message = tokens[index + 1]
-                options.setdefault("-m", []).append(message)
+                self._append_option(options, "-m", message)
                 normalized.extend(["-m", message])
+                index += 2
+                continue
+            if token.startswith("-am") and token != "-am":
+                message = token.removeprefix("-am")
+                self._append_option(options, "-a")
+                self._append_option(options, "-m", message)
+                normalized.extend(["-a", "-m", message])
+                index += 1
+                continue
+            if token == "-am":
+                if index + 1 >= len(tokens):
+                    raise GitCommandParseError("error: switch `m' requires a value.")
+                message = tokens[index + 1]
+                self._append_option(options, "-a")
+                self._append_option(options, "-m", message)
+                normalized.extend(["-a", "-m", message])
                 index += 2
                 continue
             if token.startswith("--message="):
                 message = token.split("=", 1)[1]
-                options.setdefault("-m", []).append(message)
+                self._append_option(options, "-m", message)
                 normalized.extend(["-m", message])
                 index += 1
                 continue
+            if token in {"-a", "--all"}:
+                self._append_option(options, token)
+                normalized.append(token)
+                index += 1
+                continue
+            if token == "--allow-empty":
+                self._append_option(options, token)
+                normalized.append(token)
+                index += 1
+                continue
             if token == "--amend":
-                options.setdefault("--amend", []).append(True)
+                self._append_option(options, token)
                 normalized.append(token)
                 index += 1
                 continue
             if token == "--no-edit":
-                options.setdefault("--no-edit", []).append(True)
+                self._append_option(options, token)
                 normalized.append(token)
                 index += 1
                 continue
             if token.startswith("-"):
-                options.setdefault(token, []).append(True)
+                self._append_option(options, token)
                 normalized.append(token)
                 index += 1
                 continue
@@ -174,7 +230,60 @@ class GitCommandParser:
             pathspecs.append(token)
             normalized.append(token)
             index += 1
-        return {key: tuple(value) for key, value in options.items()}, args, pathspecs, message, normalized
+        return (
+            {key: tuple(value) for key, value in options.items()},
+            args,
+            pathspecs,
+            message,
+            normalized,
+        )
+
+    def _parse_init_tail(
+        self,
+        tokens: list[str],
+    ) -> tuple[dict[str, tuple[str | bool, ...]], list[str], list[str], str | None, list[str]]:
+        options: dict[str, list[str | bool]] = {}
+        args: list[str] = []
+        pathspecs: list[str] = []
+        normalized: list[str] = []
+        index = 0
+        while index < len(tokens):
+            token = tokens[index]
+            if token in {"-b", "--initial-branch"}:
+                if index + 1 >= len(tokens):
+                    raise GitCommandParseError(f"error: option `{token}` requires a value.")
+                value = tokens[index + 1]
+                self._append_option(options, token, value)
+                normalized.extend([token, value])
+                index += 2
+                continue
+            if token.startswith("--initial-branch="):
+                value = token.split("=", 1)[1]
+                self._append_option(options, "--initial-branch", value)
+                normalized.extend(["--initial-branch", value])
+                index += 1
+                continue
+            if token == "--quiet":
+                self._append_option(options, token)
+                normalized.append(token)
+                index += 1
+                continue
+            if token.startswith("-"):
+                self._append_option(options, token)
+                normalized.append(token)
+                index += 1
+                continue
+            args.append(token)
+            pathspecs.append(token)
+            normalized.append(token)
+            index += 1
+        return (
+            {key: tuple(value) for key, value in options.items()},
+            args,
+            pathspecs,
+            None,
+            normalized,
+        )
 
     def _parse_generic_tail(
         self,
@@ -185,17 +294,33 @@ class GitCommandParser:
         pathspecs: list[str] = []
         after_double_dash = False
         normalized: list[str] = []
-        for token in tokens:
+        index = 0
+        while index < len(tokens):
+            token = tokens[index]
             normalized.append(token)
             if token == "--" and not after_double_dash:
                 after_double_dash = True
+                index += 1
                 continue
             if not after_double_dash and token.startswith("-"):
-                options.setdefault(token, []).append(True)
+                if "=" in token and token.startswith("--"):
+                    option, value = token.split("=", 1)
+                    options.setdefault(option, []).append(value)
+                    normalized[-1:] = [option, value]
+                else:
+                    options.setdefault(token, []).append(True)
+                index += 1
                 continue
             args.append(token)
             pathspecs.append(token)
-        return {key: tuple(value) for key, value in options.items()}, args, pathspecs, None, normalized
+            index += 1
+        return (
+            {key: tuple(value) for key, value in options.items()},
+            args,
+            pathspecs,
+            None,
+            normalized,
+        )
 
 
 ParserValidator = Callable[[ParsedGitCommand], str | None]
@@ -223,11 +348,7 @@ class GitCommandSpec:
         return self.counted
 
     def validate(self, parsed: ParsedGitCommand) -> str | None:
-        unsupported = [
-            option
-            for option in parsed.options
-            if option not in self.supported_options
-        ]
+        unsupported = [option for option in parsed.options if option not in self.supported_options]
         if unsupported:
             return _unknown_option_message(parsed.subcommand, unsupported[0])
         return self.parser_validation(parsed)
@@ -240,7 +361,7 @@ class GitCommandRegistry:
         self._specs = {
             "init": GitCommandSpec(
                 "init",
-                frozenset(),
+                frozenset({"-b", "--initial-branch", "--quiet"}),
                 diagnostic=False,
                 counted=True,
                 executor="teaching_state",
@@ -264,7 +385,7 @@ class GitCommandRegistry:
             ),
             "add": GitCommandSpec(
                 "add",
-                frozenset({"-p", "-A"}),
+                frozenset({"-p", "-A", "--all", "-u", "--update", "--intent-to-add"}),
                 diagnostic=False,
                 counted=True,
                 executor="teaching_state",
@@ -272,7 +393,7 @@ class GitCommandRegistry:
             ),
             "commit": GitCommandSpec(
                 "commit",
-                frozenset({"-m", "--amend", "--no-edit"}),
+                frozenset({"-m", "-a", "--all", "--amend", "--allow-empty", "--no-edit"}),
                 diagnostic=False,
                 counted=True,
                 executor="teaching_state",
@@ -342,6 +463,30 @@ class GitCommandRegistry:
                 executor="teaching_state",
                 parser_validation=_validate_no_path_limit,
             ),
+            "checkout": GitCommandSpec(
+                "checkout",
+                frozenset({"-b"}),
+                diagnostic=False,
+                counted=True,
+                executor="teaching_state",
+                parser_validation=_validate_checkout,
+            ),
+            "switch": GitCommandSpec(
+                "switch",
+                frozenset({"-c"}),
+                diagnostic=False,
+                counted=True,
+                executor="teaching_state",
+                parser_validation=_validate_switch,
+            ),
+            "reset": GitCommandSpec(
+                "reset",
+                frozenset({"--soft", "--mixed", "--hard"}),
+                diagnostic=False,
+                counted=True,
+                executor="teaching_state",
+                parser_validation=_validate_reset,
+            ),
         }
 
     def get(self, command_name: str) -> GitCommandSpec | None:
@@ -381,7 +526,12 @@ def _validate_at_most_one_arg(parsed: ParsedGitCommand) -> str | None:
 
 def _validate_init(parsed: ParsedGitCommand) -> str | None:
     if len(parsed.args) > 1:
-        return "usage: git init [<directory>]"
+        return "usage: git init [-q | --quiet] [--initial-branch=<branch-name>] [<directory>]"
+    branch_values = parsed.options.get("-b", ()) + parsed.options.get("--initial-branch", ())
+    if len(branch_values) > 1:
+        return "error: only one initial branch may be specified"
+    if any(value in ("", True) for value in branch_values):
+        return "error: option `--initial-branch` requires a value."
     return None
 
 
@@ -396,7 +546,9 @@ def _validate_clone(parsed: ParsedGitCommand) -> str | None:
 def _validate_add(parsed: ParsedGitCommand) -> str | None:
     if parsed.has_option("-p"):
         return None
-    if parsed.has_option("-A"):
+    if parsed.has_option("-A") or parsed.has_option("--all"):
+        return None
+    if parsed.has_option("-u") or parsed.has_option("--update"):
         return None
     if not parsed.pathspecs:
         return "Nothing specified, nothing added."
@@ -408,6 +560,8 @@ def _validate_commit(parsed: ParsedGitCommand) -> str | None:
         return "error: only one -m option is supported in this lesson."
     if parsed.has_option("--no-edit") and not parsed.has_option("--amend"):
         return "fatal: options '--no-edit' and '--amend' must be used together"
+    if parsed.pathspecs:
+        return "fatal: paths with git commit are not supported in this simulator"
     return None
 
 
@@ -422,12 +576,18 @@ def _validate_remote(parsed: ParsedGitCommand) -> str | None:
         if len(parsed.args) != 3:
             return "usage: git remote add <name> <url>"
         return None
-    return "Only git remote, git remote -v, and git remote add are supported."
+    if parsed.args[0] in {"remove", "rm"}:
+        if len(parsed.args) != 2:
+            return "usage: git remote remove <name>"
+        return None
+    if parsed.args[0] == "rename":
+        if len(parsed.args) != 3:
+            return "usage: git remote rename <old> <new>"
+        return None
+    return "Only git remote, git remote -v, add, remove, and rename are supported."
 
 
 def _validate_rm(parsed: ParsedGitCommand) -> str | None:
-    if not parsed.has_option("--cached"):
-        return "Only git rm --cached <path> is supported."
     if not parsed.pathspecs:
         return "fatal: No pathspec was given."
     return None
@@ -436,6 +596,39 @@ def _validate_rm(parsed: ParsedGitCommand) -> str | None:
 def _validate_restore(parsed: ParsedGitCommand) -> str | None:
     if not parsed.pathspecs:
         return "fatal: you must specify path(s) to restore"
+    return None
+
+
+def _validate_checkout(parsed: ParsedGitCommand) -> str | None:
+    if parsed.has_option("-b"):
+        if len(parsed.args) < 1:
+            return "error: switch `b' requires a value."
+        if len(parsed.args) > 2:
+            return "usage: git checkout -b <branch> [<start-point>]"
+        return None
+    if len(parsed.args) != 1:
+        return "usage: git checkout <branch>"
+    return None
+
+
+def _validate_switch(parsed: ParsedGitCommand) -> str | None:
+    if parsed.has_option("-c"):
+        if len(parsed.args) < 1:
+            return "error: switch `c' requires a value."
+        if len(parsed.args) > 2:
+            return "usage: git switch -c <branch> [<start-point>]"
+        return None
+    if len(parsed.args) != 1:
+        return "fatal: missing branch or commit argument."
+    return None
+
+
+def _validate_reset(parsed: ParsedGitCommand) -> str | None:
+    modes = [option for option in ("--soft", "--mixed", "--hard") if parsed.has_option(option)]
+    if len(modes) > 1:
+        return "fatal: options '--soft', '--mixed', and '--hard' cannot be used together"
+    if not parsed.args:
+        return "fatal: ambiguous argument 'HEAD'"
     return None
 
 
