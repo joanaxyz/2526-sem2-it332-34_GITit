@@ -8,7 +8,7 @@ import { cn } from '@/shared/utils/cn'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: Gauge },
-  { to: '/units', label: 'Modules', icon: BookOpen },
+  { to: '/modules', label: 'Modules', icon: BookOpen },
 ]
 
 export function DashboardLayout() {

@@ -10,8 +10,8 @@ import { DashboardPage } from '@/features/dashboard/pages/DashboardPage'
 import { ReviewPracticePage } from '@/features/review/pages/ReviewPracticePage'
 import { ScenarioPracticePage } from '@/features/scenarios/pages/ScenarioPracticePage'
 import { ScenarioSelectionPage } from '@/features/scenarios/pages/ScenarioSelectionPage'
-import { LessonPage } from '@/features/units/pages/LessonPage'
-import { UnitsPage } from '@/features/units/pages/UnitsPage'
+import { LessonPage } from '@/features/modules/pages/LessonPage'
+import { ModulesPage } from '@/features/modules/pages/ModulesPage'
 
 export const router = createBrowserRouter([
   {
@@ -30,7 +30,8 @@ export const router = createBrowserRouter([
     children: [
       { path: '/', element: <Navigate replace to="/dashboard" /> },
       { path: '/dashboard', element: <DashboardPage /> },
-      { path: '/units', element: <UnitsPage /> },
+      { path: '/units', element: <ModulesPage /> },
+      { path: '/modules', element: <ModulesPage /> },
       { path: '/lessons/:lessonId', element: <LessonPage /> },
       { path: '/lessons/:lessonId/scenarios', element: <ScenarioSelectionPage /> },
     ],

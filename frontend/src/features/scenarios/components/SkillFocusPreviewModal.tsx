@@ -51,7 +51,7 @@ export function SkillFocusPreviewModal({
     return (
       <Modal
         open
-        title="Scenario preview"
+        title="Command preview"
         onClose={onClose}
         className="w-full max-w-xl"
         contentClassName="p-5"
@@ -65,13 +65,13 @@ export function SkillFocusPreviewModal({
     return (
       <Modal
         open
-        title="Scenario preview"
+        title="Command preview"
         onClose={onClose}
         className="w-full max-w-xl"
         contentClassName="p-5"
       >
         <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm leading-6 text-destructive">
-          {detailQuery.error?.message ?? 'Could not load the scenario preview.'}
+          {detailQuery.error?.message ?? 'Could not load the command preview.'}
         </div>
       </Modal>
     )
@@ -109,12 +109,15 @@ function SkillFocusPreviewContent({
     [scenario.demo_repository_state],
   )
   const steps = useMemo(
-    () => normalizeDemoSteps(scenario.demo_explanation_steps, initialSnapshot, scenario.short_explanation),
-    [initialSnapshot, scenario.demo_explanation_steps, scenario.short_explanation],
+    () => normalizeDemoSteps(scenario.command_preview?.demo_steps ?? scenario.demo_explanation_steps, initialSnapshot, scenario.short_explanation),
+    [initialSnapshot, scenario.command_preview?.demo_steps, scenario.demo_explanation_steps, scenario.short_explanation],
   )
+  const supportedDemoCommands = scenario.command_preview?.supported_demo_commands ?? scenario.safe_demo_commands ?? []
+  const syntaxExamples = scenario.command_preview?.syntax_examples ?? []
+  const commonMistakes = scenario.command_preview?.common_mistakes ?? []
   const [snapshot, setSnapshot] = useState<RepositorySnapshot>(initialSnapshot)
   const [explanation, setExplanation] = useState(commandBehaviorSummary(scenario))
-  const [stepIndex, setStepIndex] = useState(-1)
+  const [stepIndex, setStepIndex] = useState(0)
   const [terminalLines, setTerminalLines] = useState<TerminalLine[]>(demoBootLines)
   const [isRunningDemo, setIsRunningDemo] = useState(false)
   const difficultyLabel = difficulty.difficulty.charAt(0).toUpperCase() + difficulty.difficulty.slice(1)
@@ -127,12 +130,11 @@ function SkillFocusPreviewContent({
           ? 'Retry scenario'
           : 'Start scenario'
 
-  function applyStep(nextIndex: number) {
+  function applyDemoStep(nextIndex: number) {
     const step = steps[nextIndex]
     if (!step) return
     setSnapshot(isRepositorySnapshot(step.repository_state) ? step.repository_state : initialSnapshot)
     setExplanation(step.explanation)
-    setStepIndex(nextIndex)
   }
 
   async function runDemoCommand(command: string) {
@@ -155,17 +157,27 @@ function SkillFocusPreviewContent({
     }
 
     if (nextIndex >= 0) {
-      applyStep(nextIndex)
+      applyDemoStep(nextIndex)
       return
     }
-    if ((scenario.safe_demo_commands ?? []).some((safeCommand) => normalize(safeCommand) === normalizedCommand)) return
-    setExplanation('This preview accepts only a small warm-up set. It teaches command behavior without evaluating the scenario answer.')
+    if (supportedDemoCommands.some((safeCommand) => normalize(safeCommand) === normalizedCommand)) return
+    setExplanation('This preview accepts the listed demo commands. It teaches command behavior without evaluating the scenario answer.')
   }
+
+  const previewSteps = [
+    'What this command is for',
+    'Before state',
+    'Try command in demo terminal',
+    'After state / DAG change',
+    'Common mistake',
+    'Proceed to scenario',
+  ]
+  const currentStep = previewSteps[stepIndex] ?? previewSteps[0]
 
   return (
     <Modal
       open
-      title="Scenario preview"
+      title="Command preview"
       onClose={onClose}
       className="max-h-[92vh] w-full max-w-6xl overflow-hidden"
       contentClassName="max-h-[calc(92vh-4.5rem)] overflow-auto p-5"
@@ -173,60 +185,173 @@ function SkillFocusPreviewContent({
       <div className="space-y-5">
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Scenario</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Command preview</p>
             <h3 className="mt-1 text-2xl font-extrabold tracking-tight">{scenario.title}</h3>
           </div>
           <div className="flex flex-wrap justify-end gap-2">
             <Badge variant="blue">{difficultyLabel}</Badge>
+            {scenario.command_preview?.diagnostic ? <Badge variant="outline">Diagnostic</Badge> : null}
           </div>
         </header>
 
-        <section className="grid gap-3 rounded-lg border border-border bg-secondary/20 p-4">
-          <p className="text-sm leading-6 text-muted-foreground">{scenario.short_explanation ?? ''}</p>
+        <section className="grid grid-cols-[13rem_minmax(0,1fr)] gap-4 max-lg:grid-cols-1">
+          <nav className="grid content-start gap-2" aria-label="Command preview steps">
+            {previewSteps.map((label, index) => (
+              <button
+                className={`rounded-md border px-3 py-2 text-left text-sm transition ${
+                  index === stepIndex
+                    ? 'border-primary bg-primary/10 font-semibold text-foreground'
+                    : 'border-border bg-secondary/20 text-muted-foreground hover:bg-secondary'
+                }`}
+                key={label}
+                type="button"
+                onClick={() => setStepIndex(index)}
+              >
+                {index + 1}. {label}
+              </button>
+            ))}
+          </nav>
 
-          {scenario.primary_focus_commands.length || (scenario.supporting_inspection_commands ?? []).length ? (
-            <div className="grid gap-2 text-sm leading-6">
-              {scenario.primary_focus_commands.length ? (
-                <div>
-                  <span className="font-semibold">
-                    {scenario.primary_focus_commands.length === 1 ? 'Focus command: ' : 'Focus commands: '}
-                  </span>
-                  <span className="font-mono text-muted-foreground">{scenario.primary_focus_commands.join(', ')}</span>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
+          <div className="grid gap-4">
+            <section className="rounded-md border border-border bg-card p-4">
+              <div className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                {currentStep}
+              </div>
+              <PreviewStepContent
+                stepIndex={stepIndex}
+                scenario={scenario}
+                explanation={explanation}
+                snapshot={snapshot}
+                syntaxExamples={syntaxExamples}
+                supportedDemoCommands={supportedDemoCommands}
+                commonMistakes={commonMistakes}
+                startLabel={startLabel}
+              />
+            </section>
 
-          <CommandConceptGuide scenario={scenario} />
-          <CommandQuickReference commands={scenario.primary_focus_commands ?? []} />
+            <section className="grid grid-cols-[minmax(0,1fr)_20rem] gap-4 max-xl:grid-cols-1">
+              <TerminalPanel
+                title="Demo terminal"
+                className="h-60"
+                disabled={isRunningDemo}
+                lines={terminalLines}
+                onCommand={runDemoCommand}
+              />
+              <DemoExplanationPanel explanation={explanation} snapshot={snapshot} />
+            </section>
+          </div>
         </section>
-
-        <section className="grid grid-cols-[minmax(0,1.05fr)_minmax(18rem,0.75fr)] gap-4 max-lg:grid-cols-1">
-          <DemoLiveDagPanel snapshot={snapshot} />
-          <DemoExplanationPanel explanation={explanation} snapshot={snapshot} />
-        </section>
-
-        <div className="grid gap-3">
-          <TerminalPanel
-            title="Demo terminal"
-            className="h-56"
-            disabled={isRunningDemo}
-            lines={terminalLines}
-            onCommand={runDemoCommand}
-          />
-        </div>
 
         <PreviewNavigationControls
           canGoPrevious={stepIndex > 0}
-          canGoNext={steps.length > 0 && stepIndex < steps.length - 1}
+          canGoNext={stepIndex < previewSteps.length - 1}
           isProceeding={isProceeding}
           startLabel={startLabel}
-          onPrevious={() => applyStep(stepIndex - 1)}
-          onNext={() => applyStep(stepIndex + 1)}
+          onPrevious={() => setStepIndex((index) => Math.max(0, index - 1))}
+          onNext={() => setStepIndex((index) => Math.min(previewSteps.length - 1, index + 1))}
           onStartPractice={onProceed}
         />
       </div>
     </Modal>
+  )
+}
+
+function PreviewStepContent({
+  stepIndex,
+  scenario,
+  explanation,
+  snapshot,
+  syntaxExamples,
+  supportedDemoCommands,
+  commonMistakes,
+  startLabel,
+}: {
+  stepIndex: number
+  scenario: ScenarioSkillFocus
+  explanation: string
+  snapshot: RepositorySnapshot
+  syntaxExamples: string[]
+  supportedDemoCommands: string[]
+  commonMistakes: string[]
+  startLabel: string
+}) {
+  if (stepIndex === 0) {
+    return (
+      <div className="grid gap-3">
+        <p className="text-sm leading-6 text-muted-foreground">{scenario.short_explanation || explanation}</p>
+        <div className="flex flex-wrap gap-2">
+          {[...(scenario.primary_focus_commands ?? []), ...(scenario.supporting_inspection_commands ?? [])].map((command) => (
+            <span className="rounded-md border border-border bg-secondary/40 px-2 py-1 font-mono text-xs" key={command}>
+              {command}
+            </span>
+          ))}
+        </div>
+        {syntaxExamples.length ? (
+          <div className="grid gap-2">
+            <div className="text-sm font-semibold">Syntax examples</div>
+            <div className="flex flex-wrap gap-2">
+              {syntaxExamples.slice(0, 8).map((syntax) => (
+                <code className="rounded-md bg-secondary px-2 py-1 text-xs" key={syntax}>
+                  {syntax}
+                </code>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    )
+  }
+
+  if (stepIndex === 1) {
+    return (
+      <div className="grid gap-3">
+        <p className="text-sm leading-6 text-muted-foreground">Start by reading the repository shape before typing a command.</p>
+        <DemoLiveDagPanel snapshot={snapshot} />
+      </div>
+    )
+  }
+
+  if (stepIndex === 2) {
+    return (
+      <div className="grid gap-3">
+        <p className="text-sm leading-6 text-muted-foreground">Try any listed command in the demo terminal. These commands are a warm-up and are not scenario answers.</p>
+        <div className="grid max-h-32 gap-2 overflow-auto rounded-md border border-border bg-secondary/20 p-2">
+          {supportedDemoCommands.map((command) => (
+            <code className="text-xs" key={command}>{command}</code>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (stepIndex === 3) {
+    return (
+      <div className="grid gap-3">
+        <p className="text-sm leading-6 text-muted-foreground">{explanation}</p>
+        <DemoLiveDagPanel snapshot={snapshot} />
+      </div>
+    )
+  }
+
+  if (stepIndex === 4) {
+    return (
+      <div className="grid gap-2">
+        {(commonMistakes.length ? commonMistakes : ['Skipping inspection before choosing an action.']).map((mistake) => (
+          <div className="rounded-md border border-border bg-secondary/30 p-3 text-sm leading-6 text-muted-foreground" key={mistake}>
+            {mistake}
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid gap-3">
+      <p className="text-sm leading-6 text-muted-foreground">
+        The scenario opens as a generated variant with its own paths, messages, and validation rules. Use the command behavior here, then inspect the actual scenario state before acting.
+      </p>
+      <div className="rounded-md border border-border bg-secondary/30 p-3 text-sm font-semibold">{startLabel}</div>
+    </div>
   )
 }
 
@@ -302,215 +427,4 @@ function isRepositorySnapshot(value: unknown): value is RepositorySnapshot {
   if (!value || typeof value !== 'object') return false
   const snapshot = value as Partial<RepositorySnapshot>
   return Array.isArray(snapshot.commits) && Boolean((snapshot as RepositorySnapshot).head)
-}
-
-function CommandConceptGuide({ scenario }: { scenario: ScenarioSkillFocus }) {
-  const normalized = normalize(scenario.focus)
-  const guide = commandGuideFor(normalized)
-  if (!guide) return null
-
-  return (
-    <div className="grid gap-3 rounded-md border border-border bg-background/40 p-3 md:grid-cols-3">
-      <div>
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">What it changes</div>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">{guide.changes}</p>
-      </div>
-      <div>
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">What it does not do</div>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">{guide.doesNotDo}</p>
-      </div>
-      <div>
-        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Common mistake</div>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">{guide.mistake}</p>
-      </div>
-    </div>
-  )
-}
-
-function commandGuideFor(normalizedCommand: string) {
-  const guides: Record<string, { changes: string; doesNotDo: string; mistake: string }> = {
-    'git init': {
-      changes: 'Creates Git metadata in the current folder or in the named folder when you use git init <directory>.',
-      doesNotDo: 'It does not create a first commit, stage files, or make existing files tracked.',
-      mistake: 'Initializing the parent folder when the requested repository is a specific child directory.',
-    },
-    'git clone': {
-      changes: 'Creates a local repository from a remote and records origin plus remote-tracking branches.',
-      doesNotDo: 'It does not push anything back to the remote or change the remote repository.',
-      mistake: 'Forgetting the required destination folder when the scenario asks for a custom folder name.',
-    },
-    'git add': {
-      changes: 'Copies selected working-tree changes into the staging area for the next commit.',
-      doesNotDo: 'It does not create a commit by itself and does not automatically mean every file should be staged.',
-      mistake: 'Using git add . when the scenario asks for only selected files.',
-    },
-    'git commit': {
-      changes: 'Creates a new snapshot from staged content and moves the current branch tip forward.',
-      doesNotDo: 'It does not include unstaged changes and should not include unrelated work accidentally.',
-      mistake: 'Committing before checking what is staged.',
-    },
-    '.gitignore': {
-      changes: 'Adds ignore rules that Git uses when deciding which untracked local paths to ignore.',
-      doesNotDo: 'It does not automatically remove files that are already tracked in history.',
-      mistake: 'Committing generated files or secrets instead of committing only the ignore rules and untracking already tracked generated paths.',
-    },
-    'git add -p': {
-      changes: 'Stages selected hunks while leaving other hunks in the working tree.',
-      doesNotDo: 'It does not require staging the whole file.',
-      mistake: 'Accepting every hunk when only one logical change belongs in the commit.',
-    },
-    'git commit --amend': {
-      changes: 'Replaces the latest local commit with a corrected commit.',
-      doesNotDo: 'It should not create a second follow-up commit for a simple latest-commit repair.',
-      mistake: 'Using a normal commit when the task specifically asks to repair the latest commit.',
-    },
-    'git restore': {
-      changes: 'With --staged, moves paths out of staging; without --staged, restores working-tree paths.',
-      doesNotDo: 'It does not create a commit and can discard work when used on the working tree.',
-      mistake: 'Confusing unstage with discard and accidentally removing work you meant to keep.',
-    },
-  }
-  return guides[normalizedCommand] ?? null
-}
-
-function CommandQuickReference({ commands }: { commands: string[] }) {
-  const items = commands
-    .map((command) => quickReferenceFor(command))
-    .filter((item): item is NonNullable<ReturnType<typeof quickReferenceFor>> => Boolean(item))
-  if (!items.length) return null
-
-  return (
-    <div className="rounded-md border border-border bg-background/40 p-3">
-      <div className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Command quick reference</div>
-      <div className="grid gap-3 md:grid-cols-3">
-        {items.map((item) => (
-          <div className="rounded-md border border-border bg-secondary/20 p-3" key={item.key}>
-            <div className="font-mono text-sm font-semibold text-foreground">{item.title}</div>
-            <div className="mt-2 space-y-1 text-xs leading-5 text-muted-foreground">
-              {item.syntax.map((line) => (
-                <div className="font-mono" key={line}>
-                  {line}
-                </div>
-              ))}
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">{item.note}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-      <p className="mt-3 text-xs leading-5 text-muted-foreground">
-        This is a command warm-up only. It does not reveal the scenario setup or a correct command sequence.
-      </p>
-    </div>
-  )
-}
-
-function quickReferenceFor(command: string) {
-  const normalized = normalize(command)
-  if (normalized === 'git status') {
-    return {
-      key: 'git-status',
-      title: 'git status',
-      syntax: ['git status'],
-      note: 'Shows working tree vs staging area state so you can name what changed before acting.',
-    }
-  }
-  if (normalized === 'git add') {
-    return {
-      key: 'git-add',
-      title: 'git add',
-      syntax: ['git add <path>', 'git add .', 'git add -A'],
-      note: 'Stages selected changes. Use paths when you want a selective commit; use "." / "-A" only when you intend to stage everything.',
-    }
-  }
-  if (normalized === 'git commit') {
-    return {
-      key: 'git-commit',
-      title: 'git commit',
-      syntax: ['git commit -m "message"', 'git commit'],
-      note: 'Creates a commit from staged content. The -m flag sets the commit message inline.',
-    }
-  }
-  if (normalized === 'git init') {
-    return {
-      key: 'git-init',
-      title: 'git init',
-      syntax: ['git init', 'git init <directory>'],
-      note: 'Creates repository metadata in the current folder, or in the named directory when a directory is provided.',
-    }
-  }
-  if (normalized === 'git clone') {
-    return {
-      key: 'git-clone',
-      title: 'git clone',
-      syntax: ['git clone <url>', 'git clone <url> <folder>'],
-      note: 'Creates a local working copy from a remote repository and configures origin.',
-    }
-  }
-  if (normalized === 'git remote') {
-    return {
-      key: 'git-remote',
-      title: 'git remote',
-      syntax: ['git remote', 'git remote -v', 'git remote add origin <url>'],
-      note: 'Shows or configures named remote repository locations such as origin.',
-    }
-  }
-  if (normalized === 'git fetch') {
-    return {
-      key: 'git-fetch',
-      title: 'git fetch',
-      syntax: ['git fetch', 'git fetch origin'],
-      note: 'Updates remote-tracking refs without moving the current local branch.',
-    }
-  }
-  if (normalized === 'git pull') {
-    return {
-      key: 'git-pull',
-      title: 'git pull',
-      syntax: ['git pull'],
-      note: 'Updates the current branch from its configured upstream.',
-    }
-  }
-  if (normalized === 'git push') {
-    return {
-      key: 'git-push',
-      title: 'git push',
-      syntax: ['git push'],
-      note: 'Publishes the current branch to its configured upstream remote branch.',
-    }
-  }
-  if (normalized === 'git restore' || normalized === 'git restore --staged') {
-    return {
-      key: normalized.replace(/\s+/g, '-'),
-      title: normalized,
-      syntax: normalized === 'git restore --staged' ? ['git restore --staged <path>'] : ['git restore <path>'],
-      note: normalized === 'git restore --staged'
-        ? 'Moves selected paths out of staging while keeping the working tree copy.'
-        : 'Discards selected working-tree changes from the current checkout.',
-    }
-  }
-  if (normalized === 'git stash') {
-    return {
-      key: 'git-stash',
-      title: 'git stash',
-      syntax: ['git stash', 'git stash pop'],
-      note: 'Temporarily saves local changes so branch navigation or integration can continue.',
-    }
-  }
-  if (normalized === 'git reflog') {
-    return {
-      key: 'git-reflog',
-      title: 'git reflog',
-      syntax: ['git reflog'],
-      note: 'Shows recent HEAD movements that can help recover from pointer mistakes.',
-    }
-  }
-  if (normalized === 'git commit --amend') {
-    return {
-      key: 'git-commit-amend',
-      title: 'git commit --amend',
-      syntax: ['git commit --amend', 'git commit --amend -m "message"'],
-      note: 'Replaces the latest commit with staged changes and optionally a revised message.',
-    }
-  }
-  return null
 }

@@ -1,9 +1,15 @@
 import copy
 import hashlib
 import json
-import shlex
 from dataclasses import dataclass
 
+from simulator.git_commands import (
+    GitCommandParseError,
+    GitCommandParser,
+    GitCommandRegistry,
+    NonGitCommandError,
+    ParsedGitCommand,
+)
 from simulator.state import RepositoryStateNormalizer
 
 READ_ONLY_PREFIXES = (
@@ -28,36 +34,26 @@ class SimulatorResult:
 
 
 def normalize_command(command: str) -> str:
-    return " ".join(command.strip().split())
+    try:
+        return GitCommandParser().parse(command).normalized_text
+    except (GitCommandParseError, NonGitCommandError):
+        return " ".join(command.strip().split())
 
 
 def parse_git_command(command: str) -> list[str] | None:
-    command = normalize_command(command)
-    if not command:
-        return None
     try:
-        parts = shlex.split(command)
-    except ValueError:
+        parsed = GitCommandParser().parse(command)
+    except (GitCommandParseError, NonGitCommandError):
         return None
-    if not parts or parts[0] != "git":
-        return None
-    return parts
+    return list(parsed.argv)
 
 
 def is_diagnostic_command(command: str) -> bool:
-    parts = parse_git_command(command)
-    if not parts or len(parts) < 2:
+    try:
+        parsed = GitCommandParser().parse(command)
+    except (GitCommandParseError, NonGitCommandError):
         return False
-
-    action = parts[1]
-    args = parts[2:]
-    if action in {"status", "log", "diff", "show", "reflog"}:
-        return True
-    if action == "branch":
-        return not args or all(arg in BRANCH_LISTING_OPTIONS for arg in args)
-    if action == "remote":
-        return not args or args in (["-v"], ["--verbose"])
-    return False
+    return GitCommandRegistry().is_diagnostic(parsed)
 
 
 class RepositoryStateSimulator:
@@ -77,21 +73,25 @@ class RepositoryStateSimulator:
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
     def process(self, state: dict, command: str) -> SimulatorResult:
-        command = normalize_command(command)
-        if not command:
-            return SimulatorResult(False, state, "No command entered.", "")
+        try:
+            parsed = GitCommandParser().parse(command)
+        except GitCommandParseError as exc:
+            return SimulatorResult(False, state, str(exc), normalize_command(command))
+        except NonGitCommandError:
+            return SimulatorResult(False, state, "Only simulated git commands are accepted.", normalize_command(command))
 
-        parts = parse_git_command(command)
-        if parts is None:
-            try:
-                shlex.split(command)
-            except ValueError:
-                return SimulatorResult(False, state, "The command could not be parsed.", command)
-            return SimulatorResult(False, state, "Only simulated git commands are accepted.", command)
+        return self.process_parsed(state, parsed)
 
+    def process_parsed(
+        self,
+        state: dict,
+        parsed: ParsedGitCommand,
+        *,
+        validate: bool = True,
+    ) -> SimulatorResult:
         next_state = self.clone_state(state)
         self._ensure_state_shape(next_state)
-        action = parts[1] if len(parts) > 1 else ""
+        action = parsed.subcommand
 
         handlers = {
             "init": self._init,
@@ -123,28 +123,29 @@ class RepositoryStateSimulator:
             return SimulatorResult(
                 False,
                 state,
-                f"git: '{action or command}' is not a git command. See 'git --help'.",
-                command,
+                f"git: '{action or parsed.normalized_text}' is not a git command. See 'git --help'.",
+                parsed.normalized_text,
             )
 
-        try:
-            self._validate_syntax(action, parts[2:])
-        except ValueError as exc:
-            return SimulatorResult(False, state, str(exc), command)
+        if validate:
+            registry_spec = GitCommandRegistry().get(action)
+            validation_error = registry_spec.validate(parsed) if registry_spec else None
+            if validation_error:
+                return SimulatorResult(False, state, validation_error, parsed.normalized_text)
 
         if not next_state.get("repository_initialized", True) and action not in {"init", "clone"}:
             return SimulatorResult(
                 True,
                 next_state,
                 "fatal: not a git repository. Run git init or git clone first.",
-                command,
+                parsed.normalized_text,
             )
 
         try:
-            output = handler(next_state, parts[2:])
+            output = handler(next_state, parsed.executor_args)
         except (KeyError, IndexError, ValueError) as exc:
-            return SimulatorResult(False, state, str(exc), command)
-        return SimulatorResult(True, next_state, output, command)
+            return SimulatorResult(False, state, str(exc), parsed.normalized_text)
+        return SimulatorResult(True, next_state, output, parsed.normalized_text)
 
     def _validate_syntax(self, action: str, args: list[str]) -> None:
         if action == "status":

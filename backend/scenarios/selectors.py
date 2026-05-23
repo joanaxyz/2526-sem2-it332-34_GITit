@@ -15,6 +15,7 @@ from scenarios.models import (
     ScenarioSession,
     ScenarioSkillFocus,
 )
+from simulator.services import is_diagnostic_command
 
 
 def default_successful_attempts_for_difficulty(difficulty: str) -> int:
@@ -182,13 +183,28 @@ def scenario_status_payloads(*, user, scenarios, include_preview: bool = True) -
         for instance in scenario.difficulty_instances.all()
     ]
     difficulty_ids = [instance.id for instance in difficulty_instances]
+    required_map = {
+        instance.id: required_successful_attempts_for_difficulty(instance)
+        for instance in difficulty_instances
+    }
     difficulty_by_key = {
         (instance.scenario_id, instance.difficulty): instance
         for instance in difficulty_instances
     }
     completions = _completion_map(user=user, difficulty_ids=difficulty_ids)
-    successful_attempts = _successful_attempts_map(user=user, difficulty_ids=difficulty_ids)
-    mastery_progress_map = _mastery_progress_map(user=user, difficulty_ids=difficulty_ids)
+    accurate_counts = _accurate_completion_counts(user=user, difficulty_ids=difficulty_ids)
+    successful_attempts = _progress_map(
+        difficulty_ids=difficulty_ids,
+        required_map=required_map,
+        accurate_counts=accurate_counts,
+        count_key="count",
+    )
+    mastery_progress_map = _progress_map(
+        difficulty_ids=difficulty_ids,
+        required_map=required_map,
+        accurate_counts=accurate_counts,
+        count_key="mastered",
+    )
     completed_ids = _completed_difficulty_ids(user=user, difficulty_ids=difficulty_ids)
     active_sessions, latest_sessions, retryable_sessions = _session_state_maps(
         user=user,
@@ -296,6 +312,7 @@ def _scenario_status_payload_from_maps(
         "skill_focus_type": scenario.skill_focus_type,
         "primary_focus_commands": scenario.primary_focus_commands,
         "learning_unit_id": scenario.learning_unit_id,
+        "module_id": scenario.learning_unit_id,
         "lesson_id": scenario.lesson_id,
         "difficulties": difficulties,
     }
@@ -310,11 +327,96 @@ def _scenario_status_payload_from_maps(
                 "demo_dag_config": scenario.demo_dag_config,
                 "demo_explanation_steps": scenario.demo_explanation_steps,
                 "related_git_concepts": scenario.related_git_concepts,
+                "command_preview": _command_preview_payload(scenario),
             }
         )
         return payload
 
     return payload
+
+
+def _command_preview_payload(scenario: ScenarioSkillFocus) -> dict:
+    commands = _unique_commands(
+        [
+            *list(scenario.primary_focus_commands or []),
+            *list(scenario.supporting_inspection_commands or []),
+            *list(scenario.safe_demo_commands or []),
+        ]
+    )
+    demo_steps = scenario.demo_explanation_steps or []
+    before_state = scenario.demo_repository_state or {}
+    after_state = demo_steps[-1].get("repository_state") if demo_steps and isinstance(demo_steps[-1], dict) else before_state
+    return {
+        "title": "Command preview",
+        "command_title": scenario.title,
+        "syntax_examples": [
+            example
+            for command in commands
+            for example in _syntax_examples(command)
+        ],
+        "supported_demo_commands": scenario.safe_demo_commands or commands,
+        "demo_steps": demo_steps,
+        "before_state": before_state,
+        "after_state": after_state,
+        "short_explanation": scenario.short_explanation,
+        "common_mistakes": _common_mistakes(commands),
+        "diagnostic": commands and all(is_diagnostic_command(command) for command in commands if command.startswith("git")),
+        "counted": any(not is_diagnostic_command(command) for command in commands if command.startswith("git")),
+    }
+
+
+def _unique_commands(commands: list[str]) -> list[str]:
+    seen = set()
+    unique = []
+    for command in commands:
+        normalized = " ".join(str(command).split()).lower()
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        unique.append(command)
+    return unique
+
+
+def _syntax_examples(command: str) -> list[str]:
+    normalized = " ".join(command.split()).lower()
+    examples = {
+        "git status": ["git status"],
+        "git log --oneline": ["git log --oneline", "git log --oneline --graph --all"],
+        "git diff": ["git diff", "git diff --staged"],
+        "git diff --staged": ["git diff --staged", "git diff --cached"],
+        "git show": ["git show", "git show <commit>"],
+        "git branch": ["git branch", "git branch -v"],
+        "git remote -v": ["git remote", "git remote -v"],
+        "git reflog": ["git reflog"],
+        "git init": ["git init", "git init <directory>"],
+        "git clone": ["git clone <url>", "git clone <url> <folder>"],
+        "git add": ["git add <path>", "git add .", "git add -A", "git add -p <path>"],
+        "git add -p": ["git add -p <path>"],
+        "git commit": ['git commit -m "message"'],
+        "git commit --amend": ["git commit --amend", 'git commit --amend -m "message"'],
+        "git restore": ["git restore <path>", "git restore --staged <path>"],
+        "git rm --cached": ["git rm --cached <path>"],
+    }
+    for prefix, syntax in examples.items():
+        if normalized.startswith(prefix):
+            return syntax
+    return [command]
+
+
+def _common_mistakes(commands: list[str]) -> list[str]:
+    mistakes = []
+    normalized = " ".join(commands).lower()
+    if "git diff" in normalized:
+        mistakes.append("Confusing unstaged diff output with staged diff output.")
+    if "git add" in normalized:
+        mistakes.append("Staging unrelated files instead of the requested path or hunk.")
+    if "git restore" in normalized:
+        mistakes.append("Using working-tree restore when you meant to unstage with --staged.")
+    if "git commit --amend" in normalized:
+        mistakes.append("Creating a new follow-up commit instead of replacing the latest local commit.")
+    if not mistakes:
+        mistakes.append("Skipping read-only inspection before choosing an action.")
+    return mistakes[:3]
 
 
 def _policy_payload(*, instance: DifficultyInstance, include_preview: bool) -> dict:
@@ -355,46 +457,28 @@ def _completion_map(*, user, difficulty_ids: list[int]) -> dict[int, CompletionR
     }
 
 
-def _mastery_progress_map(*, user, difficulty_ids: list[int]) -> dict[int, dict]:
-    required_map = {
-        di.id: di.required_successful_attempts
-        for di in DifficultyInstance.objects.filter(id__in=difficulty_ids).only(
-            "id",
-            "required_successful_attempts",
-        )
-    }
-    progress = {
+def _progress_map(
+    *,
+    difficulty_ids: list[int],
+    required_map: dict[int, int],
+    accurate_counts: dict[int, int],
+    count_key: str,
+) -> dict[int, dict]:
+    if not difficulty_ids:
+        return {}
+    return {
         difficulty_id: {
-            "mastered": 0,
-            "required": required_map.get(difficulty_id, 2),
+            count_key: min(
+                accurate_counts.get(difficulty_id, 0),
+                required_map.get(difficulty_id, default_successful_attempts_for_difficulty("medium")),
+            ),
+            "required": required_map.get(
+                difficulty_id,
+                default_successful_attempts_for_difficulty("medium"),
+            ),
         }
         for difficulty_id in difficulty_ids
     }
-    if not difficulty_ids:
-        return progress
-
-    rows = (
-        ScenarioSession.objects.filter(
-            user=user,
-            mode=SESSION_MODE_PRIMARY,
-            status=SESSION_STATUS_COMPLETED,
-            difficulty_instance_id__in=difficulty_ids,
-        )
-        .select_related("difficulty_instance__command_policy")
-        .only(
-            "difficulty_instance_id",
-            "counted_action_total",
-            "difficulty_instance__command_policy__min_counted_commands",
-        )
-    )
-    for session in rows:
-        if (
-            session.counted_action_total
-            <= session.difficulty_instance.command_policy.min_counted_commands
-        ):
-            item = progress[session.difficulty_instance_id]
-            item["mastered"] = min(item["mastered"] + 1, item["required"])
-    return progress
 
 
 def _completed_difficulty_ids(*, user, difficulty_ids: list[int]) -> set[int]:
@@ -410,24 +494,14 @@ def _completed_difficulty_ids(*, user, difficulty_ids: list[int]) -> set[int]:
     )
 
 
-def _successful_attempts_map(*, user, difficulty_ids: list[int]) -> dict[int, dict]:
-    required_map = {
-        di.id: di.required_successful_attempts
-        for di in DifficultyInstance.objects.filter(id__in=difficulty_ids).only(
-            "id",
-            "required_successful_attempts",
-        )
-    }
-    progress = {
-        difficulty_id: {
-            "count": 0,
-            "required": required_map.get(difficulty_id, 2),
-        }
-        for difficulty_id in difficulty_ids
-    }
+def _accurate_completion_counts(*, user, difficulty_ids: list[int]) -> dict[int, int]:
     if not difficulty_ids:
-        return progress
+        return {}
 
+    counts = {difficulty_id: 0 for difficulty_id in difficulty_ids}
+    # Expected query shape: one session scan with command policy joined for all
+    # visible difficulties; callers already have required attempt counts from
+    # the prefetched DifficultyInstance rows.
     rows = (
         ScenarioSession.objects.filter(
             user=user,
@@ -444,9 +518,8 @@ def _successful_attempts_map(*, user, difficulty_ids: list[int]) -> dict[int, di
     )
     for session in rows:
         if session.counted_action_total <= session.difficulty_instance.command_policy.min_counted_commands:
-            item = progress[session.difficulty_instance_id]
-            item["count"] = min(item["count"] + 1, item["required"])
-    return progress
+            counts[session.difficulty_instance_id] = counts.get(session.difficulty_instance_id, 0) + 1
+    return counts
 
 
 def _session_state_maps(

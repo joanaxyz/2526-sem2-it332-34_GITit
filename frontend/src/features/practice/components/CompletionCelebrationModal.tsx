@@ -43,7 +43,7 @@ export function CompletionCelebrationModal({
   open,
   session,
   onClose,
-  onBackToUnits,
+  onBackToModules,
   onNextLevel,
   onContinue,
   onRetry,
@@ -58,7 +58,7 @@ export function CompletionCelebrationModal({
   open: boolean
   session: ScenarioSession
   onClose: () => void
-  onBackToUnits: () => void
+  onBackToModules: () => void
   onNextLevel?: () => void
   onContinue?: () => void
   onRetry?: () => void
@@ -244,7 +244,7 @@ export function CompletionCelebrationModal({
                     {isRetrying ? 'Starting retry' : 'Retry'}
                   </Button>
                 ) : null}
-                <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToUnits}>
+                <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToModules}>
                   Back to Modules
                 </Button>
               </>
@@ -268,7 +268,7 @@ export function CompletionCelebrationModal({
                     {isContinuing ? 'Continuing' : 'Continue'}
                   </Button>
                 ) : null}
-                <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToUnits}>
+                <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToModules}>
                   Back to Modules
                 </Button>
               </>

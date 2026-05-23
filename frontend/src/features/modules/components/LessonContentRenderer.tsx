@@ -1,4 +1,4 @@
-import type { LessonDetail } from '@/features/units/types'
+import type { LessonDetail } from '@/features/modules/types'
 
 export function LessonContentRenderer({ lesson }: { lesson: LessonDetail }) {
   return (

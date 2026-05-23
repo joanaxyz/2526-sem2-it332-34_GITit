@@ -1,10 +1,10 @@
 import { BookOpen } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import { ModuleSymbol } from '@/features/units/components/ModuleSymbol'
-import { UnitScenarioHub } from '@/features/units/components/UnitScenarioHub'
+import { ModuleSymbol } from '@/features/modules/components/ModuleSymbol'
+import { ModuleScenarioHub } from '@/features/modules/components/ModuleScenarioHub'
 import type { ScenarioSkillFocus } from '@/features/scenarios/types'
-import type { LearningUnit } from '@/features/units/types'
+import type { LearningModule } from '@/features/modules/types'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
@@ -30,50 +30,50 @@ function practiceCompletionFromSummary(scenarios: ScenarioSkillFocus[] | undefin
   }
 }
 
-export function UnitCard({
-  unit,
+export function ModuleCard({
+  module,
   isExpanded,
   scenarioSummary,
   scenarioSummaryPending = false,
   onToggle,
 }: {
-  unit: LearningUnit
+  module: LearningModule
   isExpanded: boolean
   scenarioSummary?: ScenarioSkillFocus[]
   scenarioSummaryPending?: boolean
   onToggle: () => void
 }) {
-  const visibleLessons = unit.is_orientation
-    ? unit.lessons.filter((lesson) => !['practice-rules', 'scaffolds-review'].includes(lesson.slug))
-    : unit.lessons
+  const visibleLessons = module.is_orientation
+    ? module.lessons.filter((lesson) => !['practice-rules', 'scaffolds-review'].includes(lesson.slug))
+    : module.lessons
   const orientationProgress = Math.round(
     (visibleLessons.filter((lesson) => lesson.is_complete).length / Math.max(visibleLessons.length, 1)) * 100,
   )
   const livePracticeCompletion = practiceCompletionFromSummary(scenarioSummary)
-  const practiceProgress = Math.round(livePracticeCompletion?.value ?? unit.practice_completion?.value ?? 0)
-  const progressValue = unit.is_orientation ? orientationProgress : practiceProgress
-  const overviewLessons = unit.lessons.filter((lesson) => !unit.is_orientation && lesson.scenario_count === 0)
-  const panelId = `unit-panel-${unit.id}`
+  const practiceProgress = Math.round(livePracticeCompletion?.value ?? module.practice_completion?.value ?? 0)
+  const progressValue = module.is_orientation ? orientationProgress : practiceProgress
+  const overviewLessons = module.lessons.filter((lesson) => !module.is_orientation && lesson.scenario_count === 0)
+  const panelId = `module-panel-${module.id}`
 
   return (
-    <Card className="overflow-hidden shadow-none" data-unit-id={unit.id}>
+    <Card className="overflow-hidden shadow-none" data-module-id={module.id}>
       <div className="grid w-full grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-4 p-5 text-left">
-        <ModuleSymbol unit={unit} />
+        <ModuleSymbol module={module} />
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-lg font-bold">{unit.title}</h2>
+            <h2 className="text-lg font-bold">{module.title}</h2>
           </div>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">{unit.description}</p>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">{module.description}</p>
           <div className="mt-3 flex max-w-xl items-center gap-3">
             <ProgressBar value={progressValue} className="flex-1" />
             <span className="font-mono text-xs text-muted-foreground">{progressValue}%</span>
           </div>
         </div>
-        <ExpandToggleButton expanded={isExpanded} controlsId={panelId} label={unit.title} onToggle={onToggle} />
+        <ExpandToggleButton expanded={isExpanded} controlsId={panelId} label={module.title} onToggle={onToggle} />
       </div>
       {isExpanded ? (
         <div className="border-t border-border bg-background/35 p-5" id={panelId}>
-          {unit.is_orientation ? (
+          {module.is_orientation ? (
             <div className="grid gap-2">
               {visibleLessons.map((lesson) => (
                 <div key={lesson.id} className="rounded-md border border-border bg-secondary/40 p-3 transition hover:bg-secondary">
@@ -95,8 +95,8 @@ export function UnitCard({
             </div>
           ) : (
             <div className="grid gap-5">
-              <UnitScenarioHub
-                unit={unit}
+              <ModuleScenarioHub
+                module={module}
                 scenarioSummary={scenarioSummary}
                 scenarioSummaryPending={scenarioSummaryPending}
               />

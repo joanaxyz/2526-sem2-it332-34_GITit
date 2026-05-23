@@ -93,7 +93,7 @@ const completedSession: ScenarioSession = {
     narrative: 'Move work safely.',
     task_prompt: 'Recover the misplaced commit.',
   },
-  unit: {
+  module: {
     id: 2,
     number: 2,
     title: 'Branches',
@@ -172,7 +172,7 @@ describe('updateScenarioListWithSession', () => {
     expect(updateScenarioListWithSession(unrelated, completedSession)).toBe(unrelated)
   })
 
-  it('patches unit scenario summaries that seed expanded module cards', () => {
+  it('patches module scenario summaries that seed expanded module cards', () => {
     const summary = {
       '2': [scenario],
       '3': [{ ...scenario, id: 99 }],

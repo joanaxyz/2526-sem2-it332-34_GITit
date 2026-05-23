@@ -1,9 +1,9 @@
 import { apiRequest } from '@/shared/api/httpClient'
-import type { LearningUnit, LessonDetail, OrientationStatus } from '@/features/units/types'
+import type { LearningModule, LessonDetail, OrientationStatus } from '@/features/modules/types'
 
-export const unitsApi = {
-  listUnits() {
-    return apiRequest<LearningUnit[]>('/learning/units/')
+export const modulesApi = {
+  listModules() {
+    return apiRequest<LearningModule[]>('/learning/modules/')
   },
   getLesson(lessonId: number) {
     return apiRequest<LessonDetail>(`/learning/lessons/${lessonId}/`)

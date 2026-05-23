@@ -11,7 +11,7 @@ DIFFICULTY_ORDER = ["easy", "medium", "hard"]
 class ScenarioStartSerializer(serializers.Serializer):
     difficulty_instance_id = serializers.IntegerField()
     source_entry_point = serializers.ChoiceField(
-        choices=["lesson", "unit_card", "retry", "review"],
+        choices=["lesson", "module_card", "unit_card", "retry", "review"],
         default="lesson",
     )
     prior_session_id = serializers.IntegerField(required=False, allow_null=True)
@@ -74,6 +74,12 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
             "student_context": student_context,
         },
         "student_context": student_context,
+        "module": {
+            "id": session.learning_unit_id,
+            "number": session.learning_unit.number,
+            "title": session.learning_unit.title,
+        },
+        # Backward-compatible alias while the frontend migrates to module naming.
         "unit": {
             "id": session.learning_unit_id,
             "number": session.learning_unit.number,
@@ -129,6 +135,7 @@ def fallback_student_context(session) -> dict:
     narrative = session.difficulty_instance.narrative or session.scenario.narrative
     context = {
         "story": narrative,
+        "requirements": [session.difficulty_instance.task_prompt or session.scenario.task_prompt],
     }
     return {
         key: value
