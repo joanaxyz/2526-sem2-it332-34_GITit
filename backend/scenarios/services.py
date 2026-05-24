@@ -350,12 +350,12 @@ class CommandProcessingService:
             )
 
         max_count = session.command_policy_snapshot["max_counted_commands"]
-        if result_category == RESULT_TARGET_MATCHED:
-            self._complete_session(session)
-        elif classification == COMMAND_COUNTED and session.counted_action_total >= max_count:
+        if classification == COMMAND_COUNTED and session.counted_action_total >= max_count:
             session.status = SESSION_STATUS_FAILED
             session.ended_at = timezone.now()
             session.failure_reason = "Action limit reached."
+        elif result_category == RESULT_TARGET_MATCHED:
+            self._complete_session(session)
 
         session.save()
         return {

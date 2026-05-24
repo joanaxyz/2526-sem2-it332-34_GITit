@@ -22,6 +22,27 @@ const snapshot = {
   conflicts: [],
 }
 
+const demoSteps = [
+  {
+    command: 'git status',
+    title: 'Check status',
+    explanation: 'Check the branch and dirty paths before deciding what to do next.',
+    repository_state: snapshot,
+    common_mistake: 'Do not treat status as a fix; it only reports state.',
+    diagnostic: true,
+    counted: false,
+  },
+  {
+    command: 'git diff',
+    title: 'Inspect unstaged changes',
+    explanation: 'Read the unstaged file changes before staging anything.',
+    repository_state: snapshot,
+    common_mistake: 'Do not use git diff --staged when nothing is staged yet.',
+    diagnostic: true,
+    counted: false,
+  },
+]
+
 const scenario: ScenarioSkillFocus = {
   id: 1,
   slug: 'inspect-repository-state',
@@ -34,13 +55,64 @@ const scenario: ScenarioSkillFocus = {
   supporting_inspection_commands: ['git diff', 'git diff --staged'],
   safe_demo_commands: ['git status', 'git log --oneline', 'git diff', 'git diff --staged'],
   demo_repository_state: snapshot,
-  demo_explanation_steps: [],
+  demo_explanation_steps: demoSteps,
   command_preview: {
+    schema_version: 2,
     title: 'Command preview',
+    intro: 'Read before acting.',
+    purpose: 'Learn what these inspection commands report before starting.',
+    focus_label: 'diagnostic commands',
     command_title: 'Inspect repository state before acting',
+    commands: [
+      {
+        id: 'git-status',
+        key: 'git-status',
+        title: 'git status',
+        command: 'git status',
+        canonical_command: 'git status',
+        summary: 'Check the branch and dirty paths before deciding what to do next.',
+        pages: [
+          {
+            title: 'Introduction',
+            heading: 'What git status is for',
+            blocks: [
+              { type: 'paragraph', body: 'git status is the first read-only inspection command.' },
+              { type: 'terminal_output', title: 'Typical output', body: 'On branch main' },
+            ],
+          },
+          {
+            title: 'Details',
+            heading: 'Status behavior',
+            blocks: [
+              { type: 'command', title: 'Command forms', items: ['git status'] },
+              { type: 'warning', title: 'Common mistake', body: 'Do not treat status as a fix; it only reports state.' },
+            ],
+          },
+        ],
+        demo_steps: [demoSteps[0]],
+      },
+      {
+        id: 'git-diff',
+        key: 'git-diff',
+        title: 'git diff',
+        command: 'git diff',
+        canonical_command: 'git diff',
+        summary: 'Read the unstaged file changes before staging anything.',
+        pages: [
+          {
+            title: 'Overview',
+            blocks: [
+              { type: 'paragraph', body: 'Read the unstaged file changes before staging anything.' },
+              { type: 'bullet_list', title: 'Boundaries', items: ['It does not show staged changes unless you use --staged.'] },
+            ],
+          },
+        ],
+        demo_steps: [demoSteps[1]],
+      },
+    ],
     syntax_examples: ['git status', 'git log --oneline', 'git diff', 'git diff --staged'],
     supported_demo_commands: ['git status', 'git log --oneline', 'git diff', 'git diff --staged'],
-    demo_steps: [],
+    demo_steps: demoSteps,
     before_state: snapshot,
     after_state: snapshot,
     short_explanation: 'Read before acting.',
@@ -97,23 +169,56 @@ describe('SkillFocusPreviewModal', () => {
     vi.clearAllMocks()
   })
 
-  it('renders as Command preview with persistent previous and next controls', async () => {
+  it('renders the first command as structured learning content with one shared demo area', async () => {
     renderPreview()
 
     expect((await screen.findAllByText('Command preview')).length).toBeGreaterThan(0)
-    await screen.findByText('Inspect repository state before acting')
+    expect((await screen.findAllByText('Inspect repository state before acting')).length).toBeGreaterThan(0)
+    expect(screen.getByText('What git status is for')).toBeInTheDocument()
+    expect(screen.getByText('git status is the first read-only inspection command.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /start scenario/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /previous/i })).toBeDisabled()
     expect(screen.getByRole('button', { name: /next/i })).not.toBeDisabled()
+    expect(screen.getByText('diagnostic commands')).toBeInTheDocument()
+  })
+
+  it('moves through authored pages and opens one dedicated demo view', async () => {
+    renderPreview()
+    await screen.findByText('What git status is for')
 
     fireEvent.click(screen.getByRole('button', { name: /next/i }))
+    expect(screen.getByText('Status behavior')).toBeInTheDocument()
+    expect(screen.getByText('Command forms')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /next/i })).toBeDisabled()
 
-    expect(screen.getByRole('button', { name: /previous/i })).not.toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: /open demo/i }))
+    expect(screen.getByText('Try it')).toBeInTheDocument()
+    expect(screen.getByText('Inline command demo')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /back to pages/i })).toBeInTheDocument()
+  })
+
+  it('switches commands while preserving terminal history', async () => {
+    renderPreview()
+    await screen.findByText('What git status is for')
+    fireEvent.click(screen.getByRole('button', { name: /open demo/i }))
+
+    const input = screen.getByRole('textbox')
+    fireEvent.change(input, { target: { value: 'git status' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Run' }))
+
+    await screen.findByText('On branch main')
+    fireEvent.click(screen.getAllByRole('button', { name: /git diff/i })[0])
+
+    expect(screen.getByText('Read the unstaged file changes before staging anything.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /open demo/i }))
+    expect(screen.getByText('On branch main')).toBeInTheDocument()
   })
 
   it('submits every command listed in preview metadata', async () => {
     renderPreview()
     await screen.findAllByText('Command preview')
-    await screen.findByText('Inspect repository state before acting')
+    await screen.findAllByText('Inspect repository state before acting')
+    fireEvent.click(screen.getByRole('button', { name: /open demo/i }))
 
     for (const command of scenario.command_preview!.supported_demo_commands) {
       const input = screen.getByRole('textbox')

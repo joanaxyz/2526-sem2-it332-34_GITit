@@ -23,6 +23,7 @@ export function ScenarioCard({
         }
         onStart(difficulty)
       }}
+      onPreview={() => {}}
     />
   )
 }

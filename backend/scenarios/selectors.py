@@ -9,9 +9,11 @@ from common.constants import (
     SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
+from scenarios.command_content import command_content_key_for_command, normalize_command_text
 from scenarios.models import (
     CompletionRecord,
     DifficultyInstance,
+    GitCommandContent,
     ScenarioSession,
     ScenarioSkillFocus,
 )
@@ -336,6 +338,10 @@ def _scenario_status_payload_from_maps(
 
 
 def _command_preview_payload(scenario: ScenarioSkillFocus) -> dict:
+    config = scenario.command_preview_config or {}
+    if config:
+        return _normalized_command_preview_config(scenario, config)
+
     commands = _unique_commands(
         [
             *list(scenario.primary_focus_commands or []),
@@ -345,10 +351,26 @@ def _command_preview_payload(scenario: ScenarioSkillFocus) -> dict:
     )
     demo_steps = scenario.demo_explanation_steps or []
     before_state = scenario.demo_repository_state or {}
+    preview_commands = _resolved_preview_commands(
+        scenario=scenario,
+        config={},
+        commands=commands,
+        before_state=before_state,
+        sections=[],
+    )
+    if not demo_steps:
+        demo_steps = [
+            step
+            for preview_command in preview_commands
+            for step in preview_command.get("demo_steps", [])
+            if isinstance(step, dict)
+        ]
     after_state = demo_steps[-1].get("repository_state") if demo_steps and isinstance(demo_steps[-1], dict) else before_state
     return {
+        "schema_version": 2,
         "title": "Command preview",
         "command_title": scenario.title,
+        "commands": preview_commands,
         "syntax_examples": [
             example
             for command in commands
@@ -363,6 +385,547 @@ def _command_preview_payload(scenario: ScenarioSkillFocus) -> dict:
         "diagnostic": commands and all(is_diagnostic_command(command) for command in commands if command.startswith("git")),
         "counted": any(not is_diagnostic_command(command) for command in commands if command.startswith("git")),
     }
+
+
+def _normalized_command_preview_config(scenario: ScenarioSkillFocus, config: dict) -> dict:
+    sections = [
+        section
+        for section in config.get("sections", [])
+        if isinstance(section, dict)
+    ]
+    supported_commands = config.get("supported_demo_commands") or scenario.safe_demo_commands or []
+    demo_steps = []
+    for section in sections:
+        demo_steps.extend(
+            step
+            for step in section.get("demo_steps", [])
+            if isinstance(step, dict)
+        )
+    if not demo_steps:
+        demo_steps = scenario.demo_explanation_steps or []
+    before_state = config.get("demo_repository_state") or scenario.demo_repository_state or {}
+    commands = _unique_commands(
+        [
+            *list(scenario.primary_focus_commands or []),
+            *list(scenario.supporting_inspection_commands or []),
+            *list(supported_commands),
+        ]
+    )
+    preview_commands = _resolved_preview_commands(
+        scenario=scenario,
+        config=config,
+        commands=commands,
+        before_state=before_state,
+        sections=sections,
+    )
+    if not demo_steps:
+        demo_steps = [
+            step
+            for preview_command in preview_commands
+            for step in preview_command.get("demo_steps", [])
+            if isinstance(step, dict)
+        ]
+    after_state = demo_steps[-1].get("repository_state") if demo_steps and isinstance(demo_steps[-1], dict) else before_state
+    return {
+        "schema_version": config.get("schema_version") or 2,
+        "title": config.get("title") or "Command preview",
+        "intro": config.get("intro") or scenario.short_explanation,
+        "purpose": config.get("purpose") or scenario.summary,
+        "focus_label": config.get("focus_label") or scenario.focus,
+        "command_title": config.get("command_title") or scenario.title,
+        "commands": preview_commands,
+        "custom_pages": _normalize_preview_pages(config.get("custom_pages") or []),
+        "command_refs": config.get("command_refs") or [],
+        "sections": sections,
+        "syntax_examples": config.get("syntax_examples")
+        or _syntax_examples_from_preview_commands(preview_commands)
+        or _section_syntax_examples(sections),
+        "supported_demo_commands": supported_commands or commands,
+        "demo_steps": demo_steps,
+        "demo_repository_state": before_state,
+        "demo_dag_config": config.get("demo_dag_config") or scenario.demo_dag_config or {},
+        "before_state": before_state,
+        "after_state": after_state,
+        "short_explanation": config.get("short_explanation") or scenario.short_explanation,
+        "what_changes": config.get("what_changes") or [],
+        "what_does_not_change": config.get("what_does_not_change") or [],
+        "common_mistakes": config.get("common_mistakes") or _common_mistakes(commands),
+        "readiness_notes": config.get("readiness_notes") or [],
+        "diagnostic": config.get("diagnostic")
+        if "diagnostic" in config
+        else commands and all(is_diagnostic_command(command) for command in commands if command.startswith("git")),
+        "counted": config.get("counted")
+        if "counted" in config
+        else any(not is_diagnostic_command(command) for command in commands if command.startswith("git")),
+    }
+
+
+def _resolved_preview_commands(
+    *,
+    scenario: ScenarioSkillFocus,
+    config: dict,
+    commands: list[str],
+    before_state: dict,
+    sections: list[dict],
+) -> list[dict]:
+    lookup = _command_content_lookup()
+    direct_commands = config.get("commands")
+    if isinstance(direct_commands, list) and direct_commands:
+        return [
+            _direct_preview_command(
+                command=item,
+                index=index,
+                scenario=scenario,
+                before_state=before_state,
+            )
+            for index, item in enumerate(direct_commands)
+            if isinstance(item, dict)
+        ]
+
+    refs = config.get("command_refs") or []
+    if refs:
+        preview_commands = [
+            _preview_command_from_ref(
+                ref=_normalize_command_ref(ref),
+                index=index,
+                scenario=scenario,
+                config=config,
+                lookup=lookup,
+                before_state=before_state,
+            )
+            for index, ref in enumerate(refs)
+        ]
+    elif sections:
+        preview_commands = [
+            _legacy_section_preview_command(
+                section=section,
+                index=index,
+                before_state=before_state,
+            )
+            for index, section in enumerate(sections)
+        ]
+    else:
+        preview_commands = [
+            _preview_command_from_ref(
+                ref={"command": command, "key": command_content_key_for_command(command)},
+                index=index,
+                scenario=scenario,
+                config=config,
+                lookup=lookup,
+                before_state=before_state,
+            )
+            for index, command in enumerate(commands)
+        ]
+
+    custom_pages = _normalize_preview_pages(config.get("custom_pages") or [])
+    if custom_pages:
+        preview_commands.append(
+            {
+                "id": "scenario-context",
+                "key": "scenario-context",
+                "title": config.get("custom_pages_title") or "Scenario context",
+                "command": "",
+                "canonical_command": "",
+                "aliases": [],
+                "summary": config.get("purpose") or scenario.summary,
+                "tags": ["scenario"],
+                "pages": custom_pages,
+                "demo_steps": [],
+            }
+        )
+    return [command for command in preview_commands if command.get("pages")]
+
+
+def _command_content_lookup() -> dict[str, GitCommandContent]:
+    lookup = {}
+    for content in GitCommandContent.objects.filter(is_active=True):
+        lookup[content.key] = content
+        lookup[normalize_command_text(content.canonical_command)] = content
+        for alias in content.aliases or []:
+            lookup[normalize_command_text(alias)] = content
+    return lookup
+
+
+def _normalize_command_ref(ref: str | dict) -> dict:
+    if isinstance(ref, str):
+        return {"key": command_content_key_for_command(ref), "command": ref}
+    if isinstance(ref, dict):
+        command = ref.get("command") or ref.get("canonical_command") or ""
+        key = ref.get("key") or command_content_key_for_command(command)
+        return {**ref, "key": key}
+    return {"key": "", "command": ""}
+
+
+def _preview_command_from_ref(
+    *,
+    ref: dict,
+    index: int,
+    scenario: ScenarioSkillFocus,
+    config: dict,
+    lookup: dict[str, GitCommandContent],
+    before_state: dict,
+) -> dict:
+    command = ref.get("command") or ref.get("canonical_command") or ""
+    key = ref.get("key") or command_content_key_for_command(command)
+    content = lookup.get(key) or lookup.get(normalize_command_text(command))
+    title = ref.get("title") or ref.get("display_name")
+    summary = ref.get("summary")
+    if content:
+        command = command or content.canonical_command
+        title = title or content.display_name
+        summary = summary or content.summary
+        aliases = content.aliases or []
+        tags = content.tags or []
+        pages = _resolved_content_pages(
+            content=content,
+            ref=ref,
+            config=config,
+        )
+    else:
+        title = title or command or "Command"
+        summary = summary or "Use this preview command before starting the generated scenario."
+        aliases = []
+        tags = []
+        pages = _fallback_command_pages(command=command, title=title, summary=summary)
+
+    return {
+        "id": ref.get("id") or key or f"command-{index}",
+        "key": key,
+        "title": title,
+        "command": command,
+        "canonical_command": content.canonical_command if content else command,
+        "aliases": aliases,
+        "summary": summary,
+        "tags": tags,
+        "pages": pages,
+        "demo_steps": _demo_steps_for_preview_command(
+            scenario=scenario,
+            ref=ref,
+            command=command,
+            title=title,
+            summary=summary,
+            before_state=before_state,
+        ),
+    }
+
+
+def _resolved_content_pages(
+    *,
+    content: GitCommandContent,
+    ref: dict,
+    config: dict,
+) -> list[dict]:
+    pages = _normalize_preview_pages(content.pages or [])
+    include_ids = _included_page_ids(config=config, ref=ref, key=content.key)
+    if include_ids:
+        include_set = {str(page_id) for page_id in include_ids}
+        pages = [page for page in pages if str(page.get("id")) in include_set]
+
+    overrides = _page_override_map(_command_page_overrides(config=config, ref=ref, key=content.key))
+    if overrides:
+        pages = [_merge_page_override(page, overrides.get(str(page.get("id")))) for page in pages]
+
+    if ref.get("replace_pages"):
+        pages = _normalize_preview_pages(ref.get("pages") or [])
+
+    prepend_pages = _normalize_preview_pages(ref.get("prepend_pages") or [])
+    append_pages = _normalize_preview_pages(
+        ref.get("append_pages") or ref.get("custom_pages") or []
+    )
+    return [*prepend_pages, *pages, *append_pages]
+
+
+def _included_page_ids(*, config: dict, ref: dict, key: str) -> list[str]:
+    raw = (
+        ref.get("include_page_ids")
+        or ref.get("included_page_ids")
+        or config.get("include_page_ids")
+        or config.get("included_page_ids")
+    )
+    if isinstance(raw, dict):
+        raw = raw.get(key)
+    return raw if isinstance(raw, list) else []
+
+
+def _command_page_overrides(*, config: dict, ref: dict, key: str):
+    raw = ref.get("page_overrides")
+    if raw:
+        return raw
+    raw = config.get("page_overrides") or {}
+    if isinstance(raw, dict) and key in raw:
+        return raw[key]
+    return raw
+
+
+def _page_override_map(raw) -> dict[str, dict]:
+    if isinstance(raw, list):
+        return {
+            str(item.get("id")): item
+            for item in raw
+            if isinstance(item, dict) and item.get("id")
+        }
+    if isinstance(raw, dict):
+        if all(isinstance(value, dict) for value in raw.values()):
+            return {str(key): value for key, value in raw.items()}
+        if raw.get("id"):
+            return {str(raw["id"]): raw}
+    return {}
+
+
+def _merge_page_override(page: dict, override: dict | None) -> dict:
+    if not override:
+        return page
+    merged = {**page, **override}
+    if "blocks" in override:
+        merged["blocks"] = _normalize_preview_blocks(override["blocks"])
+    return merged
+
+
+def _direct_preview_command(
+    *,
+    command: dict,
+    index: int,
+    scenario: ScenarioSkillFocus,
+    before_state: dict,
+) -> dict:
+    command_text = command.get("command") or command.get("canonical_command") or ""
+    title = command.get("title") or command.get("display_name") or command_text or "Command"
+    summary = command.get("summary") or ""
+    return {
+        "id": command.get("id") or command.get("key") or f"command-{index}",
+        "key": command.get("key") or command_content_key_for_command(command_text),
+        "title": title,
+        "command": command_text,
+        "canonical_command": command.get("canonical_command") or command_text,
+        "aliases": command.get("aliases") or [],
+        "summary": summary,
+        "tags": command.get("tags") or [],
+        "pages": _normalize_preview_pages(command.get("pages") or []),
+        "demo_steps": _demo_steps_for_preview_command(
+            scenario=scenario,
+            ref=command,
+            command=command_text,
+            title=title,
+            summary=summary,
+            before_state=before_state,
+        ),
+    }
+
+
+def _legacy_section_preview_command(
+    *,
+    section: dict,
+    index: int,
+    before_state: dict,
+) -> dict:
+    command = section.get("command") or section.get("title") or ""
+    title = section.get("title") or command or "Command"
+    pages = _normalize_preview_pages(section.get("pages") or [])
+    if not pages:
+        pages = _fallback_command_pages(
+            command=command,
+            title=title,
+            summary=section.get("explanation") or "",
+            syntax_examples=section.get("syntax_examples") or [],
+        )
+    demo_steps = _normalize_demo_steps(
+        section.get("demo_steps") or [],
+        fallback_snapshot=before_state,
+        fallback_command=command,
+        fallback_title=title,
+        fallback_explanation=section.get("explanation") or "",
+    )
+    return {
+        "id": section.get("id") or command_content_key_for_command(command) or f"section-{index}",
+        "key": command_content_key_for_command(command),
+        "title": title,
+        "command": command,
+        "canonical_command": command,
+        "aliases": [],
+        "summary": section.get("explanation") or "",
+        "tags": [],
+        "pages": pages,
+        "demo_steps": demo_steps,
+    }
+
+
+def _normalize_preview_pages(value) -> list[dict]:
+    if not isinstance(value, list):
+        return []
+    pages = []
+    for index, page in enumerate(value, start=1):
+        if not isinstance(page, dict):
+            continue
+        title = page.get("title") or page.get("heading") or f"Page {index}"
+        normalized = {
+            key: page[key]
+            for key in (
+                "id",
+                "title",
+                "subtitle",
+                "eyebrow",
+                "heading",
+                "body",
+                "demo_steps",
+            )
+            if key in page
+        }
+        normalized["id"] = normalized.get("id") or f"page-{index}"
+        normalized["title"] = title
+        normalized["blocks"] = _normalize_preview_blocks(page.get("blocks") or [])
+        pages.append(normalized)
+    return pages
+
+
+def _normalize_preview_blocks(value) -> list[dict]:
+    if not isinstance(value, list):
+        return []
+    blocks = []
+    for block in value:
+        if not isinstance(block, dict):
+            continue
+        normalized = dict(block)
+        if normalized.get("type") == "list":
+            normalized["type"] = "bullet_list"
+        blocks.append(normalized)
+    return blocks
+
+
+def _fallback_command_pages(
+    *,
+    command: str,
+    title: str,
+    summary: str,
+    syntax_examples: list[str] | None = None,
+) -> list[dict]:
+    syntax = syntax_examples or _syntax_examples(command)
+    return [
+        {
+            "id": "overview",
+            "title": "Overview",
+            "blocks": [
+                {"type": "paragraph", "body": summary},
+                {"type": "command", "title": "Command forms", "items": syntax},
+            ],
+        },
+        {
+            "id": "readiness",
+            "title": "Readiness",
+            "blocks": [
+                {
+                    "type": "callout",
+                    "title": title,
+                    "body": "Use this preview content before starting the generated scenario.",
+                }
+            ],
+        },
+    ]
+
+
+def _demo_steps_for_preview_command(
+    *,
+    scenario: ScenarioSkillFocus,
+    ref: dict,
+    command: str,
+    title: str,
+    summary: str,
+    before_state: dict,
+) -> list[dict]:
+    explicit_steps = _normalize_demo_steps(
+        ref.get("demo_steps") or [],
+        fallback_snapshot=before_state,
+        fallback_command=command,
+        fallback_title=title,
+        fallback_explanation=summary,
+    )
+    if explicit_steps:
+        return explicit_steps
+
+    normalized_command = normalize_command_text(command)
+    scenario_steps = _normalize_demo_steps(
+        scenario.demo_explanation_steps or [],
+        fallback_snapshot=before_state,
+        fallback_command=command,
+        fallback_title=title,
+        fallback_explanation=summary,
+    )
+    matching_steps = [
+        step
+        for step in scenario_steps
+        if normalize_command_text(step.get("command", "")) == normalized_command
+    ]
+    if matching_steps:
+        return matching_steps
+    if not command:
+        return []
+
+    diagnostic = command.startswith("git ") and is_diagnostic_command(command)
+    return [
+        {
+            "command": command,
+            "title": title or command,
+            "explanation": summary,
+            "repository_state": before_state,
+            "common_mistake": "",
+            "diagnostic": diagnostic,
+            "counted": command.startswith("git ") and not diagnostic,
+        }
+    ]
+
+
+def _normalize_demo_steps(
+    value,
+    *,
+    fallback_snapshot: dict,
+    fallback_command: str,
+    fallback_title: str,
+    fallback_explanation: str,
+) -> list[dict]:
+    if not isinstance(value, list):
+        return []
+    steps = []
+    for index, step in enumerate(value, start=1):
+        if not isinstance(step, dict):
+            continue
+        command = step.get("command") or fallback_command or f"Demo step {index}"
+        title = step.get("title") or fallback_title or command
+        explanation = step.get("explanation") or fallback_explanation
+        diagnostic = step.get("diagnostic")
+        if diagnostic is None:
+            diagnostic = command.startswith("git ") and is_diagnostic_command(command)
+        steps.append(
+            {
+                "command": command,
+                "title": title,
+                "explanation": explanation,
+                "repository_state": step.get("repository_state") or fallback_snapshot,
+                "common_mistake": step.get("common_mistake") or "",
+                "diagnostic": diagnostic,
+                "counted": step.get("counted")
+                if "counted" in step
+                else command.startswith("git ") and not diagnostic,
+            }
+        )
+    return steps
+
+
+def _syntax_examples_from_preview_commands(preview_commands: list[dict]) -> list[str]:
+    examples = []
+    for command in preview_commands:
+        for page in command.get("pages", []):
+            for block in page.get("blocks", []):
+                if block.get("type") in {"command", "code"}:
+                    examples.extend(block.get("items") or [])
+    return _unique_commands(examples)
+
+
+def _section_syntax_examples(sections: list[dict]) -> list[str]:
+    examples = []
+    for section in sections:
+        if not isinstance(section, dict):
+            continue
+        examples.extend(section.get("syntax_examples", []))
+    return examples
 
 
 def _unique_commands(commands: list[str]) -> list[str]:
@@ -382,18 +945,19 @@ def _syntax_examples(command: str) -> list[str]:
     examples = {
         "git status": ["git status"],
         "git log --oneline": ["git log --oneline", "git log --oneline --graph --all"],
-        "git diff": ["git diff", "git diff --staged"],
         "git diff --staged": ["git diff --staged", "git diff --cached"],
+        "git diff": ["git diff", "git diff --staged"],
         "git show": ["git show", "git show <commit>"],
         "git branch": ["git branch", "git branch -v"],
         "git remote -v": ["git remote", "git remote -v"],
         "git reflog": ["git reflog"],
         "git init": ["git init", "git init <directory>"],
         "git clone": ["git clone <url>", "git clone <url> <folder>"],
-        "git add": ["git add <path>", "git add .", "git add -A", "git add -p <path>"],
         "git add -p": ["git add -p <path>"],
-        "git commit": ['git commit -m "message"'],
+        "git add": ["git add <path>", "git add .", "git add -A", "git add -p <path>"],
         "git commit --amend": ["git commit --amend", 'git commit --amend -m "message"'],
+        "git commit": ['git commit -m "message"'],
+        "git restore --staged": ["git restore --staged <path>"],
         "git restore": ["git restore <path>", "git restore --staged <path>"],
         "git rm --cached": ["git rm --cached <path>"],
     }

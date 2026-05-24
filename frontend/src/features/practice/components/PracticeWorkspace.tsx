@@ -2,20 +2,18 @@ import { useRef, useState } from 'react'
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { GripHorizontal, GripVertical, PanelsTopLeft } from 'lucide-react'
+import { ArrowLeft, GripHorizontal, GripVertical, PanelsTopLeft } from 'lucide-react'
 
 import { ScenarioContextPanel } from '@/features/scenarios/components/ScenarioContextPanel'
 import { ScenarioStatusHeader } from '@/features/scenarios/components/ScenarioStatusHeader'
 import { CompletionCelebrationModal } from '@/features/practice/components/CompletionCelebrationModal'
 import { ContextualFeedbackPanel } from '@/features/practice/components/ContextualFeedbackPanel'
 import { ExpectedStatePanel } from '@/features/practice/components/ExpectedStatePanel'
-import { InspectionAnswerPanel } from '@/features/practice/components/InspectionAnswerPanel'
 import { LiveDagPanel } from '@/features/practice/components/LiveDagPanel'
 import { ProjectStructurePanel } from '@/features/practice/components/ProjectStructurePanel'
 import { ScenarioWorkspaceTour } from '@/features/practice/components/ScenarioWorkspaceTour'
 import { TerminalPanel } from '@/features/practice/components/TerminalPanel'
 import { useAuthStore } from '@/features/auth/hooks/useAuth'
-import { practiceApi } from '@/features/practice/api/practiceApi'
 import { hasSeenScenarioTour, markScenarioTourSeen } from '@/features/practice/utils/scenarioTour'
 import { useCommandSubmission } from '@/features/practice/hooks/useCommandSubmission'
 import { useScenarioSession } from '@/features/practice/hooks/useScenarioSession'
@@ -24,6 +22,8 @@ import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import { syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { PracticeWorkspaceSkeleton } from '@/shared/components/Skeleton'
+import { Badge } from '@/shared/components/Badge'
+import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
 
 const DEFAULT_TERMINAL_RATIO = 0.28
@@ -80,28 +80,6 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const sessionId = Number(params.sessionId)
   const { query, session, setSession, lines, setLines, feedback, setFeedback } = useScenarioSession(sessionId)
   const mutation = useCommandSubmission(sessionId, reviewMode)
-  const inspectionAnswerMutation = useMutation({
-    mutationFn: (answer: Record<string, unknown>) => {
-      if (!session) throw new Error('No session is available.')
-      return practiceApi.submitInspectionAnswer(session.id, answer)
-    },
-    onSuccess: (response) => {
-      setSession(response.session)
-      syncScenarioSessionInCache(queryClient, response.session)
-      void queryClient.invalidateQueries({ queryKey: ['modules'] })
-      setLines((items) => [
-        ...items,
-        {
-          id: crypto.randomUUID(),
-          kind: response.session.status === 'completed' ? 'success' : 'warning',
-          text: response.summary,
-        },
-      ])
-    },
-    onError: (error) => {
-      setLines((items) => [...items, { id: crypto.randomUUID(), kind: 'warning', text: error.message }])
-    },
-  })
   const [dismissedCompletionSessionId, setDismissedCompletionSessionId] = useState<number | null>(null)
   const [terminalRatio, setTerminalRatio] = useState(DEFAULT_TERMINAL_RATIO)
   const [diagramRatio, setDiagramRatio] = useState(DEFAULT_DIAGRAM_RATIO)
@@ -200,6 +178,40 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         setLines((items) => [...items, { id: crypto.randomUUID(), kind: 'warning', text: error.message }])
       },
     })
+  }
+
+  if (session.completion_type === 'inspection') {
+    return (
+      <div className="flex h-screen flex-col overflow-hidden bg-background">
+        <header className="flex min-h-14 items-center justify-between gap-3 border-b border-border bg-background px-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <Button type="button" variant="ghost" size="sm" disabled={exitMutation.isPending} onClick={() => exitMutation.mutate()}>
+              <ArrowLeft data-icon="inline-start" />
+              {exitMutation.isPending ? 'Exiting' : session.status === 'started' ? 'Exit' : 'Back'}
+            </Button>
+            <h1 className="truncate text-sm font-semibold">{session.scenario.title}</h1>
+          </div>
+          <Badge variant="outline">{session.variant.label}</Badge>
+        </header>
+        <main className="grid min-h-0 flex-1 grid-cols-[minmax(0,1.25fr)_minmax(20rem,0.75fr)] gap-2 p-2 max-lg:grid-cols-1 max-lg:overflow-auto">
+          <div className="min-h-0 max-lg:min-h-[28rem]">
+            <TerminalPanel
+              lines={lines}
+              disabled={session.status !== 'started' || mutation.isPending}
+              className="h-full"
+              onCommand={submit}
+            />
+          </div>
+          <div className="min-h-0 max-lg:min-h-[24rem]">
+            <LiveDagPanel
+              snapshot={session.repository_state}
+              className="flex h-full min-h-0 flex-col"
+              contentClassName="h-full min-h-0 flex-1"
+            />
+          </div>
+        </main>
+      </div>
+    )
   }
 
   function beginTerminalResize(event: ReactPointerEvent<HTMLDivElement>) {
@@ -323,16 +335,6 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
           </div>
 
           <ScenarioContextPanel session={session} />
-
-          {/* Left-panel command counter removed; counter now lives in header */}
-          {!reviewMode && session.completion_type === 'inspection' ? (
-            <InspectionAnswerPanel
-              disabled={session.status !== 'started'}
-              isSubmitting={inspectionAnswerMutation.isPending}
-              session={session}
-              onSubmit={(answer) => inspectionAnswerMutation.mutate(answer)}
-            />
-          ) : null}
 
           {/* Project structure pinned to the bottom and always visible */}
           <ProjectStructurePanel snapshot={session.repository_state} />

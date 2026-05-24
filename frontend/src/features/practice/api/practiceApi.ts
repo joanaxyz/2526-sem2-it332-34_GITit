@@ -1,5 +1,5 @@
 import { apiRequest } from '@/shared/api/httpClient'
-import type { CommandResponse, InspectionAnswerResponse, ScenarioSession } from '@/features/practice/types'
+import type { CommandResponse, ScenarioSession } from '@/features/practice/types'
 
 export const practiceApi = {
   getSession(sessionId: number) {
@@ -9,12 +9,6 @@ export const practiceApi = {
     return apiRequest<CommandResponse>(`/scenarios/sessions/${sessionId}/commands/`, {
       method: 'POST',
       body: JSON.stringify({ command }),
-    })
-  },
-  submitInspectionAnswer(sessionId: number, answer: Record<string, unknown>) {
-    return apiRequest<InspectionAnswerResponse>(`/scenarios/sessions/${sessionId}/inspection-answer/`, {
-      method: 'POST',
-      body: JSON.stringify({ answer }),
     })
   },
 }

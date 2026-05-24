@@ -114,8 +114,11 @@ const completedSession: ScenarioSession = {
   policy: { id: 1, min_counted_commands: 2, max_counted_commands: 6, non_counted_patterns: [] },
   counts: {
     counted_action_total: 2,
+    minimum_counted_commands: 2,
+    maximum_counted_commands: 6,
     non_counted_diagnostic_total: 1,
     remaining_counted_commands: 4,
+    max_reached: false,
     total_attempts: 3,
   },
   scaffolding: {

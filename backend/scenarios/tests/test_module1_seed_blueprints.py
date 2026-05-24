@@ -8,6 +8,7 @@ from learning.models import Lesson
 from scenarios.models import (
     CommandCountPolicy,
     DifficultyInstance,
+    GitCommandContent,
     ScenarioGenerationBlueprint,
     ScenarioSkillFocus,
     ScenarioVariant,
@@ -136,6 +137,15 @@ def test_diagnostic_command_preview_is_first_module_one_scenario(db):
         "git branch",
         "git remote -v",
     ]
+    assert first.command_preview_config["focus_label"] == "diagnostic commands"
+    assert GitCommandContent.objects.filter(key="git-status", is_active=True).exists()
+    assert len(first.command_preview_config["command_refs"]) >= 7
+    assert first.command_preview_config["command_refs"][0] == {
+        "id": "git-status",
+        "key": "git-status",
+        "command": "git status",
+    }
+    assert "sections" not in first.command_preview_config
 
 
 @override_settings(DEBUG=True)

@@ -52,6 +52,7 @@ class ScenarioSkillFocus(models.Model):
     demo_repository_state = models.JSONField(default=dict, blank=True)
     demo_dag_config = models.JSONField(default=dict, blank=True)
     demo_explanation_steps = models.JSONField(default=list, blank=True)
+    command_preview_config = models.JSONField(default=dict, blank=True)
     related_git_concepts = models.JSONField(default=list, blank=True)
     narrative = models.TextField(blank=True)
     task_prompt = models.TextField(blank=True)
@@ -64,6 +65,25 @@ class ScenarioSkillFocus(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+class GitCommandContent(models.Model):
+    key = models.SlugField(unique=True)
+    display_name = models.CharField(max_length=120)
+    canonical_command = models.CharField(max_length=160)
+    aliases = models.JSONField(default=list, blank=True)
+    summary = models.TextField(blank=True)
+    tags = models.JSONField(default=list, blank=True)
+    pages = models.JSONField(default=list, blank=True)
+    is_active = models.BooleanField(default=True)
+    version = models.PositiveIntegerField(default=1)
+    sort_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["sort_order", "key"]
+
+    def __str__(self) -> str:
+        return self.display_name
 
 
 class DifficultyInstance(models.Model):

@@ -116,8 +116,11 @@ export type ScenarioSession = {
   }
   counts: {
     counted_action_total: number
+    minimum_counted_commands: number
+    maximum_counted_commands: number
     non_counted_diagnostic_total: number
     remaining_counted_commands: number
+    max_reached: boolean
     total_attempts: number
   }
   scaffolding: {
@@ -167,13 +170,6 @@ export type CommandResponse = {
     contextual_feedback: string
     created_at: string
   }
-}
-
-export type InspectionAnswerResponse = {
-  session: ScenarioSession
-  evaluation_result: string
-  summary: string
-  failed_rules: Array<Record<string, unknown>>
 }
 
 export type TerminalLine = {

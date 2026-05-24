@@ -24,6 +24,7 @@ from scenarios.builders import RuntimeScenarioBuilder
 from scenarios.models import (
     CompletionRecord,
     DifficultyInstance,
+    GitCommandContent,
     ScenarioGenerationBlueprint,
     ScenarioSession,
     ScenarioSkillFocus,
@@ -548,9 +549,72 @@ def test_scenario_summary_payload_excludes_heavy_preview_fields(student):
 
     assert "demo_repository_state" in payload
     assert "safe_demo_commands" in payload
+    assert payload["command_preview"]["supported_demo_commands"]
     assert "demo_repository_state" not in list_payload
     assert "demo_explanation_steps" not in list_payload
     assert "command_preview" not in list_payload
+
+
+def test_command_preview_resolves_reusable_command_content(student):
+    scenario = ScenarioSkillFocus.objects.get(slug="form-clean-commit", is_published=True)
+
+    payload = scenario_status_payload(user=student, scenario=scenario)
+    preview = payload["command_preview"]
+    status_command = next(
+        command for command in preview["commands"] if command["key"] == "git-status"
+    )
+
+    assert GitCommandContent.objects.filter(key="git-status").count() == 1
+    assert preview["schema_version"] == 2
+    assert preview["command_refs"]
+    assert status_command["command"] == "git status"
+    assert status_command["pages"][0]["blocks"][0]["type"] == "paragraph"
+    assert status_command["demo_steps"][0]["repository_state"]
+    assert any(command["key"] == "scenario-context" for command in preview["commands"])
+
+
+def test_command_preview_applies_scenario_page_customization(student):
+    scenario = ScenarioSkillFocus.objects.get(slug="form-clean-commit", is_published=True)
+    scenario.command_preview_config = {
+        **scenario.command_preview_config,
+        "command_refs": [
+            {
+                "key": "git-status",
+                "command": "git status",
+                "include_page_ids": ["overview"],
+                "append_pages": [
+                    {
+                        "id": "scenario-note",
+                        "title": "Scenario note",
+                        "blocks": [
+                            {
+                                "type": "callout",
+                                "body": "Use status to read this scenario before acting.",
+                            }
+                        ],
+                    }
+                ],
+            }
+        ],
+        "page_overrides": {
+            "git-status": {
+                "overview": {"title": "Status in this scenario"},
+            }
+        },
+    }
+    scenario.save(update_fields=["command_preview_config"])
+
+    payload = scenario_status_payload(user=student, scenario=scenario)
+    status_command = payload["command_preview"]["commands"][0]
+
+    assert [page["id"] for page in status_command["pages"]] == [
+        "overview",
+        "scenario-note",
+    ]
+    assert status_command["pages"][0]["title"] == "Status in this scenario"
+    assert status_command["pages"][1]["blocks"][0]["body"] == (
+        "Use status to read this scenario before acting."
+    )
 
 
 def test_latest_attempt_accuracy_reflects_extra_counted_actions(student):
@@ -888,6 +952,59 @@ def test_invalid_git_syntax_consumes_action_budget(student):
         response["remaining_counted_commands"]
         == session.command_policy_snapshot["max_counted_commands"] - 1
     )
+
+
+def test_counted_command_reaching_max_limit_fails_session(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="form-clean-commit",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    session.command_policy_snapshot = {
+        **session.command_policy_snapshot,
+        "min_counted_commands": 1,
+        "max_counted_commands": 1,
+    }
+    session.save(update_fields=["command_policy_snapshot"])
+
+    response = CommandProcessingService().submit_command(
+        session=session, command="git status --wat"
+    )
+
+    session.refresh_from_db()
+    payload = session_payload(session)
+    assert response["command_classification"] == COMMAND_COUNTED
+    assert session.status == SESSION_STATUS_FAILED
+    assert session.failure_reason == "Action limit reached."
+    assert payload["status"] == SESSION_STATUS_FAILED
+    assert payload["counts"]["counted_action_total"] == 1
+    assert payload["counts"]["minimum_counted_commands"] == 1
+    assert payload["counts"]["maximum_counted_commands"] == 1
+    assert payload["counts"]["remaining_counted_commands"] == 0
+    assert payload["counts"]["max_reached"] is True
+
+
+def test_failed_session_blocks_further_commands(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="form-clean-commit",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    session.status = SESSION_STATUS_FAILED
+    session.ended_at = timezone.now()
+    session.failure_reason = "Action limit reached."
+    session.save(update_fields=["status", "ended_at", "failure_reason"])
+
+    with pytest.raises(Locked):
+        CommandProcessingService().submit_command(session=session, command="git status")
 
 
 def test_inspection_scenario_completes_without_fake_state_changes(student):

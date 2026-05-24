@@ -27,6 +27,7 @@ export type LatestAttemptStats = {
 export type DifficultyAccess = {
   id: number
   difficulty: Difficulty
+  completion_type?: 'state_based' | 'inspection' | 'expanded_state_based'
   status: DifficultyStatus
   review_available: boolean
   mastery_progress: {
@@ -62,16 +63,89 @@ export type DemoExplanationStep = {
   counted?: boolean
 }
 
-export type CommandPreviewMetadata = {
+export type CommandPreviewSection = {
+  id?: string
   title: string
+  command?: string
+  explanation: string
+  pages?: CommandPreviewPage[]
+  syntax_examples?: string[]
+  what_changes?: string[]
+  what_does_not_change?: string[]
+  common_mistakes?: string[]
+  readiness_notes?: string[]
+  demo_steps?: DemoExplanationStep[]
+}
+
+export type CommandPreviewPage = {
+  id?: string
+  title: string
+  subtitle?: string
+  eyebrow?: string
+  heading?: string
+  body?: string
+  blocks?: CommandPreviewBlock[]
+  demo_steps?: DemoExplanationStep[]
+}
+
+export type CommandPreviewBlock = {
+  type?:
+    | 'paragraph'
+    | 'bullet_list'
+    | 'list'
+    | 'command'
+    | 'code'
+    | 'callout'
+    | 'warning'
+    | 'terminal_output'
+    | 'dag_note'
+    | 'demo_step_ref'
+  title?: string
+  subtitle?: string
+  body?: string
+  text?: string
+  items?: string[]
+  command?: string
+  language?: string
+  demo_step_id?: string
+}
+
+export type CommandPreviewCommand = {
+  id?: string
+  key?: string
+  title: string
+  command?: string
+  canonical_command?: string
+  aliases?: string[]
+  summary?: string
+  tags?: string[]
+  pages: CommandPreviewPage[]
+  demo_steps?: DemoExplanationStep[]
+}
+
+export type CommandPreviewMetadata = {
+  schema_version?: number
+  title: string
+  intro?: string
+  purpose?: string
+  focus_label?: string
   command_title: string
+  commands?: CommandPreviewCommand[]
+  command_refs?: Array<string | Record<string, unknown>>
+  custom_pages?: CommandPreviewPage[]
+  sections?: CommandPreviewSection[]
   syntax_examples: string[]
   supported_demo_commands: string[]
   demo_steps: DemoExplanationStep[]
+  demo_repository_state?: RepositorySnapshot
+  demo_dag_config?: Record<string, unknown>
   before_state: RepositorySnapshot
   after_state: RepositorySnapshot
   short_explanation: string
+  what_changes?: string[]
+  what_does_not_change?: string[]
   common_mistakes: string[]
+  readiness_notes?: string[]
   diagnostic: boolean
   counted: boolean
 }

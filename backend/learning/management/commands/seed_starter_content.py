@@ -20,6 +20,10 @@ from common.constants import (
 from evaluation.services import InspectionEvaluator
 from learning.models import LearningUnit, Lesson, OrientationProgress
 from progress.models import StreakRecord, StudentProgress
+from scenarios.command_content import (
+    command_content_key_for_command,
+    seed_git_command_content_library,
+)
 from scenarios.models import (
     CommandCountPolicy,
     CompletionRecord,
@@ -1533,6 +1537,7 @@ class Command(BaseCommand):
         with transaction.atomic():
             if options["reset"]:
                 self._reset_seeded_content(confirm=options["confirm"])
+            seed_git_command_content_library()
             unit_map = self._seed_units(units)
             lesson_map = self._seed_lessons(lessons, unit_map)
             self._seed_scenarios(scenarios, unit_map, lesson_map)
@@ -1794,10 +1799,68 @@ class Command(BaseCommand):
             else {},
             "demo_dag_config": spec.fields.get("demo_dag_config", {}),
             "demo_explanation_steps": spec.fields.get("demo_explanation_steps", []),
+            "command_preview_config": spec.fields.get("command_preview_config")
+            or self._command_preview_config(spec),
             "related_git_concepts": spec.fields.get("related_git_concepts", []),
             "narrative": spec.fields.get("narrative", ""),
             "task_prompt": self._student_task_prompt(spec.fields.get("task_prompt", "")),
         }
+
+    def _command_preview_config(self, spec: ScenarioSpec) -> dict:
+        commands = self._preview_commands_for_spec(spec)
+        if not commands:
+            return {}
+        return {
+            "schema_version": 2,
+            "title": f"{spec.focus} command preview",
+            "intro": spec.fields.get("short_explanation", ""),
+            "purpose": spec.fields.get("summary", ""),
+            "focus_label": spec.focus,
+            "command_title": spec.title,
+            "command_refs": [
+                {
+                    "key": command_content_key_for_command(command),
+                    "command": command,
+                }
+                for command in commands
+            ],
+            "supported_demo_commands": spec.fields.get("safe_demo_commands", commands),
+            "demo_repository_state": spec.fields.get("demo_repository_state", {}),
+            "demo_dag_config": spec.fields.get("demo_dag_config", {}),
+            "custom_pages": [
+                {
+                    "id": "scenario-context",
+                    "title": "Scenario context",
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "body": spec.fields.get("short_explanation", ""),
+                        },
+                        {
+                            "type": "callout",
+                            "title": "Practice purpose",
+                            "body": spec.fields.get("summary", ""),
+                        },
+                    ],
+                }
+            ],
+        }
+
+    def _preview_commands_for_spec(self, spec: ScenarioSpec) -> list[str]:
+        commands = [
+            *list(spec.fields.get("safe_demo_commands", [])),
+            *list(spec.fields.get("primary_focus_commands", [])),
+            *list(spec.fields.get("supporting_inspection_commands", [])),
+        ]
+        seen = set()
+        unique = []
+        for command in commands:
+            normalized = " ".join(str(command).split()).lower()
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            unique.append(command)
+        return unique
 
     def _student_task_prompt(self, task: str) -> str:
         prompt = task

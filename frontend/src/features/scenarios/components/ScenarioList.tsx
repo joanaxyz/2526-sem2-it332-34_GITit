@@ -28,8 +28,9 @@ export function ScenarioList(props: ScenarioListProps) {
   const reservedScenarioTabRef = useRef<Window | null>(null)
   const [previewRequest, setPreviewRequest] = useState<{
     scenario: ScenarioSkillFocus
-    difficulty: DifficultyAccess
-    action: DifficultyActionIntent
+    difficulty?: DifficultyAccess
+    action?: DifficultyActionIntent
+    mode: 'manual' | 'gate'
   } | null>(null)
   const queryKey = props.scope === 'lesson' ? ['lesson-scenarios', props.lessonId] : ['module-scenarios', props.moduleId]
   const shouldDeferModuleFetch = props.scope === 'module' && props.deferFetch && !props.initialScenarios
@@ -111,9 +112,7 @@ export function ScenarioList(props: ScenarioListProps) {
   if (isError) return <ErrorState title="Could not load scenarios" description={error.message} />
   if (!data?.length) return <EmptyState title="No scenarios here yet" description="This module does not have any published scenarios yet." />
 
-  function proceedFromPreview() {
-    if (!previewRequest) return
-    const { scenario, difficulty, action } = previewRequest
+  function performDifficultyAction(scenario: ScenarioSkillFocus, difficulty: DifficultyAccess, action: DifficultyActionIntent) {
     reserveScenarioTab()
     if (action === 'resume') {
       if (!difficulty.active_session_id) throw new Error('No active scenario is available to continue.')
@@ -145,6 +144,36 @@ export function ScenarioList(props: ScenarioListProps) {
     startMutation.mutate(difficulty)
   }
 
+  function handleDifficultyAction(scenario: ScenarioSkillFocus, difficulty: DifficultyAccess, action: DifficultyActionIntent) {
+    if (isDiagnosticOnly(scenario)) {
+      setPreviewRequest({ scenario, mode: 'manual' })
+      markPreviewSeen(scenario.slug)
+      return
+    }
+    if (shouldOpenPreviewGate(scenario, difficulty, action)) {
+      setPreviewRequest({ scenario, difficulty, action, mode: 'gate' })
+      markPreviewSeen(scenario.slug)
+      return
+    }
+    performDifficultyAction(scenario, difficulty, action)
+  }
+
+  function openManualPreview(scenario: ScenarioSkillFocus) {
+    setPreviewRequest({ scenario, mode: 'manual' })
+    markPreviewSeen(scenario.slug)
+  }
+
+  function proceedFromPreview() {
+    if (!previewRequest) return
+    const { scenario, difficulty, action } = previewRequest
+    if (!difficulty || !action) {
+      setPreviewRequest(null)
+      return
+    }
+    markPreviewSeen(scenario.slug)
+    performDifficultyAction(scenario, difficulty, action)
+  }
+
   const isProceeding = startMutation.isPending || retryMutation.isPending || reviewMutation.isPending
 
   return (
@@ -169,9 +198,8 @@ export function ScenarioList(props: ScenarioListProps) {
           key={scenario.id}
           scenario={scenario}
           scenarioNumber={index + 1}
-          onDifficultyAction={(selectedScenario, difficulty, action) =>
-            setPreviewRequest({ scenario: selectedScenario, difficulty, action })
-          }
+          onDifficultyAction={handleDifficultyAction}
+          onPreview={openManualPreview}
         />
       ))}
       {previewRequest ? (
@@ -181,9 +209,10 @@ export function ScenarioList(props: ScenarioListProps) {
           action={previewRequest.action}
           isProceeding={isProceeding}
           onClose={() => {
+            markPreviewSeen(previewRequest.scenario.slug)
             if (!isProceeding) setPreviewRequest(null)
           }}
-          onProceed={proceedFromPreview}
+          onProceed={previewRequest.mode === 'gate' ? proceedFromPreview : undefined}
         />
       ) : null}
     </div>
@@ -206,4 +235,35 @@ function nextDifficultyAfter(scenario: ScenarioSkillFocus, difficulty: Difficult
   if (!nextName) return null
   const nextDifficulty = scenario.difficulties.find((item) => item.difficulty === nextName)
   return nextDifficulty && nextDifficulty.status !== 'locked' ? nextDifficulty : null
+}
+
+function shouldOpenPreviewGate(scenario: ScenarioSkillFocus, difficulty: DifficultyAccess, action: DifficultyActionIntent) {
+  return (
+    action === 'start'
+    && difficulty.difficulty === 'easy'
+    && difficulty.status === 'not_started'
+    && !hasSeenPreview(scenario.slug)
+    && !difficulty.latest_attempt
+    && !difficulty.active_session_id
+    && !difficulty.retry_session_id
+    && !difficulty.completion
+  )
+}
+
+function isDiagnosticOnly(scenario: ScenarioSkillFocus) {
+  return scenario.difficulties.length > 0 && scenario.difficulties.every(
+    (difficulty) => difficulty.completion_type === 'inspection',
+  )
+}
+
+function previewSeenKey(slug: string) {
+  return `git-it-command-preview-seen:${slug}`
+}
+
+function hasSeenPreview(slug: string) {
+  return window.localStorage.getItem(previewSeenKey(slug)) === 'seen'
+}
+
+function markPreviewSeen(slug: string) {
+  window.localStorage.setItem(previewSeenKey(slug), 'seen')
 }

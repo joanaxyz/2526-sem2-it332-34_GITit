@@ -57,6 +57,13 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
             "completed_at": completion_record.completed_at,
         }
     student_context = session.variant.student_context or fallback_student_context(session)
+    minimum_counted_commands = session.command_policy_snapshot["min_counted_commands"]
+    maximum_counted_commands = session.command_policy_snapshot["max_counted_commands"]
+    remaining_counted_commands = max(
+        0,
+        maximum_counted_commands - session.counted_action_total,
+    )
+    max_reached = session.counted_action_total >= maximum_counted_commands
     return {
         "id": session.id,
         "mode": session.mode,
@@ -98,12 +105,11 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
         "policy": session.command_policy_snapshot,
         "counts": {
             "counted_action_total": session.counted_action_total,
+            "minimum_counted_commands": minimum_counted_commands,
+            "maximum_counted_commands": maximum_counted_commands,
             "non_counted_diagnostic_total": session.non_counted_diagnostic_total,
-            "remaining_counted_commands": max(
-                0,
-                session.command_policy_snapshot["max_counted_commands"]
-                - session.counted_action_total,
-            ),
+            "remaining_counted_commands": remaining_counted_commands,
+            "max_reached": max_reached,
             "total_attempts": session.total_attempts,
         },
         "scaffolding": supports,
