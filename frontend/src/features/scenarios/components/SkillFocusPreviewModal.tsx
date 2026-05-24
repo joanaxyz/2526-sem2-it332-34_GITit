@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, ArrowRight, BookOpen, Code2, GitBranch, Play, SquareTerminal } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, ArrowRight, BookOpen, Code2, GitBranch, Play, SquareTerminal } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import type { RepositorySnapshot, TerminalLine } from '@/features/practice/types'
@@ -8,6 +8,7 @@ import { DemoLiveDagPanel } from '@/features/scenarios/components/DemoLiveDagPan
 import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import type {
   CommandPreviewBlock,
+  CommandPreviewCommand,
   CommandPreviewPage,
   CommandPreviewSection,
   DemoExplanationStep,
@@ -230,7 +231,7 @@ function SkillFocusPreviewContent({
                   type="button"
                   onClick={() => selectCommand(index)}
                 >
-                  <span className="block truncate font-mono text-sm font-bold">{item.command ?? item.title}</span>
+                  <span className="block truncate font-mono text-sm font-bold">{item.command || item.title}</span>
                 </button>
               ))}
             </nav>
@@ -319,6 +320,7 @@ function SkillFocusPreviewContent({
 function ContentPage({ page }: { page: PreviewPage }) {
   return (
     <article className="mx-auto grid min-w-0 max-w-3xl gap-4">
+      {page.subtitle ? <p className="text-sm leading-6 text-muted-foreground">{page.subtitle}</p> : null}
       {page.body ? <p className="text-base leading-7 text-muted-foreground">{page.body}</p> : null}
       {(page.blocks ?? []).map((block, index) => (
         <PreviewBlock block={block} key={`${block.title ?? block.type ?? 'block'}-${index}`} />
@@ -328,7 +330,19 @@ function ContentPage({ page }: { page: PreviewPage }) {
 }
 
 function PreviewBlock({ block }: { block: CommandPreviewBlock }) {
-  if (block.type === 'code') {
+  const body = block.body ?? block.text
+  const codeItems = block.items?.length ? block.items : block.command ? [block.command] : body ? [body] : []
+
+  if (block.type === 'paragraph') {
+    return (
+      <section className="grid gap-2">
+        {block.title ? <h5 className="text-sm font-bold">{block.title}</h5> : null}
+        {body ? <p className="text-sm leading-6 text-muted-foreground">{body}</p> : null}
+      </section>
+    )
+  }
+
+  if (block.type === 'code' || block.type === 'command') {
     return (
       <section className="rounded-md border border-border bg-card p-4">
         {block.title ? (
@@ -338,7 +352,7 @@ function PreviewBlock({ block }: { block: CommandPreviewBlock }) {
           </h5>
         ) : null}
         <div className="grid gap-2">
-          {(block.items?.length ? block.items : block.body ? [block.body] : []).map((item) => (
+          {codeItems.map((item) => (
             <code
               className="block overflow-x-auto rounded-sm border border-border bg-secondary/30 px-3 py-2 text-xs text-foreground"
               key={item}
@@ -351,25 +365,78 @@ function PreviewBlock({ block }: { block: CommandPreviewBlock }) {
     )
   }
 
+  if (block.type === 'terminal_output') {
+    return (
+      <section className="rounded-md border border-border bg-zinc-950 p-4 text-zinc-100">
+        {block.title ? (
+          <h5 className="mb-3 flex items-center gap-2 text-sm font-bold">
+            <SquareTerminal className="size-4 text-primary" />
+            {block.title}
+          </h5>
+        ) : null}
+        <pre className="overflow-x-auto whitespace-pre-wrap text-xs leading-5">{body}</pre>
+      </section>
+    )
+  }
+
+  if (block.type === 'warning') {
+    return (
+      <section className="rounded-md border border-amber-500/30 bg-amber-500/10 p-4">
+        {block.title ? (
+          <h5 className="mb-2 flex items-center gap-2 text-sm font-bold text-amber-700 dark:text-amber-300">
+            <AlertTriangle className="size-4" />
+            {block.title}
+          </h5>
+        ) : null}
+        {body ? <p className="text-sm leading-6 text-muted-foreground">{body}</p> : null}
+        {block.items?.length ? <BlockList items={block.items} /> : null}
+      </section>
+    )
+  }
+
+  if (block.type === 'bullet_list' || block.type === 'list') {
+    return (
+      <section className="rounded-md border border-border bg-card p-4">
+        {block.title ? (
+          <h5 className="mb-2 flex items-center gap-2 text-sm font-bold">
+            <GitBranch className="size-4 text-primary" />
+            {block.title}
+          </h5>
+        ) : null}
+        {body ? <p className="mb-3 text-sm leading-6 text-muted-foreground">{body}</p> : null}
+        {block.items?.length ? <BlockList items={block.items} /> : null}
+      </section>
+    )
+  }
+
   return (
-    <section className={cn('rounded-md border border-border bg-card p-4', block.type === 'callout' && 'bg-primary/5')}>
+    <section
+      className={cn(
+        'rounded-md border border-border bg-card p-4',
+        (block.type === 'callout' || block.type === 'dag_note' || block.type === 'demo_step_ref') && 'bg-primary/5',
+      )}
+    >
       {block.title ? (
         <h5 className="mb-2 flex items-center gap-2 text-sm font-bold">
           <GitBranch className="size-4 text-primary" />
           {block.title}
         </h5>
       ) : null}
-      {block.body ? <p className="text-sm leading-6 text-muted-foreground">{block.body}</p> : null}
-      {block.items?.length ? (
-        <ul className="grid gap-2">
-          {block.items.map((item) => (
-            <li className="rounded-sm border border-border bg-secondary/20 px-3 py-2 text-sm leading-6 text-muted-foreground" key={item}>
-              {item}
-            </li>
-          ))}
-        </ul>
-      ) : null}
+      {body ? <p className="text-sm leading-6 text-muted-foreground">{body}</p> : null}
+      {block.items?.length ? <BlockList items={block.items} /> : null}
     </section>
+  )
+}
+
+function BlockList({ items }: { items: string[] }) {
+  return (
+    <ul className="grid gap-2">
+      {items.map((item) => (
+        <li className="rounded-sm border border-border bg-secondary/20 px-3 py-2 text-sm leading-6 text-muted-foreground" key={item}>
+          {item}
+        </li>
+      ))}
+    </ul>
   )
 }
 
@@ -427,6 +494,11 @@ function buildPreviewCommands(
   scenario: ScenarioSkillFocus,
   fallbackSnapshot: RepositorySnapshot,
 ): PreviewCommand[] {
+  const resolvedCommands = scenario.command_preview?.commands?.filter((command) => command.pages?.length) ?? []
+  if (resolvedCommands.length) {
+    return commandsFromResolvedCommands(resolvedCommands, fallbackSnapshot)
+  }
+
   const configuredSections = scenario.command_preview?.sections?.filter((section) => section.title && section.explanation) ?? []
   if (configuredSections.length) {
     return commandsFromSections(configuredSections, fallbackSnapshot)
@@ -470,6 +542,33 @@ function buildPreviewCommands(
     ],
     fallbackSnapshot,
   )
+}
+
+function commandsFromResolvedCommands(
+  commands: CommandPreviewCommand[],
+  fallbackSnapshot: RepositorySnapshot,
+): PreviewCommand[] {
+  return commands.map((command, index) => {
+    const title = command.title || command.command || `Command ${index + 1}`
+    const demoSteps = normalizeDemoSteps(
+      command.demo_steps ?? [],
+      fallbackSnapshot,
+      command.summary,
+    )
+    const pages = command.pages.map((page, pageIndex): PreviewPage => ({
+      ...page,
+      id: page.id ?? `${command.key ?? command.id ?? index}-page-${pageIndex}`,
+      kind: 'content',
+      demo_steps: normalizeDemoSteps(page.demo_steps ?? [], fallbackSnapshot, page.body ?? command.summary),
+    }))
+    return {
+      id: command.id ?? command.key ?? `${normalize(title)}-${index}`,
+      title,
+      command: command.command || command.canonical_command,
+      pages,
+      demo_steps: demoSteps,
+    }
+  })
 }
 
 function commandsFromSections(sections: CommandPreviewSection[], fallbackSnapshot: RepositorySnapshot): PreviewCommand[] {

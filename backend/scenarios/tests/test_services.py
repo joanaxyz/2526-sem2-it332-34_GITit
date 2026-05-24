@@ -24,6 +24,7 @@ from scenarios.builders import RuntimeScenarioBuilder
 from scenarios.models import (
     CompletionRecord,
     DifficultyInstance,
+    GitCommandContent,
     ScenarioGenerationBlueprint,
     ScenarioSession,
     ScenarioSkillFocus,
@@ -552,6 +553,68 @@ def test_scenario_summary_payload_excludes_heavy_preview_fields(student):
     assert "demo_repository_state" not in list_payload
     assert "demo_explanation_steps" not in list_payload
     assert "command_preview" not in list_payload
+
+
+def test_command_preview_resolves_reusable_command_content(student):
+    scenario = ScenarioSkillFocus.objects.get(slug="form-clean-commit", is_published=True)
+
+    payload = scenario_status_payload(user=student, scenario=scenario)
+    preview = payload["command_preview"]
+    status_command = next(
+        command for command in preview["commands"] if command["key"] == "git-status"
+    )
+
+    assert GitCommandContent.objects.filter(key="git-status").count() == 1
+    assert preview["schema_version"] == 2
+    assert preview["command_refs"]
+    assert status_command["command"] == "git status"
+    assert status_command["pages"][0]["blocks"][0]["type"] == "paragraph"
+    assert status_command["demo_steps"][0]["repository_state"]
+    assert any(command["key"] == "scenario-context" for command in preview["commands"])
+
+
+def test_command_preview_applies_scenario_page_customization(student):
+    scenario = ScenarioSkillFocus.objects.get(slug="form-clean-commit", is_published=True)
+    scenario.command_preview_config = {
+        **scenario.command_preview_config,
+        "command_refs": [
+            {
+                "key": "git-status",
+                "command": "git status",
+                "include_page_ids": ["overview"],
+                "append_pages": [
+                    {
+                        "id": "scenario-note",
+                        "title": "Scenario note",
+                        "blocks": [
+                            {
+                                "type": "callout",
+                                "body": "Use status to read this scenario before acting.",
+                            }
+                        ],
+                    }
+                ],
+            }
+        ],
+        "page_overrides": {
+            "git-status": {
+                "overview": {"title": "Status in this scenario"},
+            }
+        },
+    }
+    scenario.save(update_fields=["command_preview_config"])
+
+    payload = scenario_status_payload(user=student, scenario=scenario)
+    status_command = payload["command_preview"]["commands"][0]
+
+    assert [page["id"] for page in status_command["pages"]] == [
+        "overview",
+        "scenario-note",
+    ]
+    assert status_command["pages"][0]["title"] == "Status in this scenario"
+    assert status_command["pages"][1]["blocks"][0]["body"] == (
+        "Use status to read this scenario before acting."
+    )
 
 
 def test_latest_attempt_accuracy_reflects_extra_counted_actions(student):

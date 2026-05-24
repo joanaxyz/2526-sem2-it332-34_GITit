@@ -57,47 +57,56 @@ const scenario: ScenarioSkillFocus = {
   demo_repository_state: snapshot,
   demo_explanation_steps: demoSteps,
   command_preview: {
+    schema_version: 2,
     title: 'Command preview',
     intro: 'Read before acting.',
     purpose: 'Learn what these inspection commands report before starting.',
     focus_label: 'diagnostic commands',
     command_title: 'Inspect repository state before acting',
-    sections: [
+    commands: [
       {
-        title: 'Check status',
+        id: 'git-status',
+        key: 'git-status',
+        title: 'git status',
         command: 'git status',
-        explanation: 'Check the branch and dirty paths before deciding what to do next.',
+        canonical_command: 'git status',
+        summary: 'Check the branch and dirty paths before deciding what to do next.',
         pages: [
           {
             title: 'Introduction',
             heading: 'What git status is for',
-            body: 'git status is the first read-only inspection command.',
+            blocks: [
+              { type: 'paragraph', body: 'git status is the first read-only inspection command.' },
+              { type: 'terminal_output', title: 'Typical output', body: 'On branch main' },
+            ],
           },
           {
             title: 'Details',
             heading: 'Status behavior',
             blocks: [
-              { type: 'code', title: 'Syntax examples', items: ['git status'] },
-              { type: 'callout', title: 'Common mistake', body: 'Do not treat status as a fix; it only reports state.' },
+              { type: 'command', title: 'Command forms', items: ['git status'] },
+              { type: 'warning', title: 'Common mistake', body: 'Do not treat status as a fix; it only reports state.' },
             ],
           },
         ],
-        syntax_examples: ['git status'],
-        what_changes: ['Nothing changes; status only reports state.'],
-        what_does_not_change: ['It does not stage or commit files.'],
-        common_mistakes: ['Do not treat status as a fix; it only reports state.'],
-        readiness_notes: ['Name the branch and dirty paths before acting.'],
         demo_steps: [demoSteps[0]],
       },
       {
-        title: 'Inspect unstaged changes',
+        id: 'git-diff',
+        key: 'git-diff',
+        title: 'git diff',
         command: 'git diff',
-        explanation: 'Read the unstaged file changes before staging anything.',
-        syntax_examples: ['git diff'],
-        what_changes: ['Nothing changes; diff only reports content changes.'],
-        what_does_not_change: ['It does not show staged changes unless you use --staged.'],
-        common_mistakes: ['Do not use git diff --staged when nothing is staged yet.'],
-        readiness_notes: ['Compare plain diff with staged diff when needed.'],
+        canonical_command: 'git diff',
+        summary: 'Read the unstaged file changes before staging anything.',
+        pages: [
+          {
+            title: 'Overview',
+            blocks: [
+              { type: 'paragraph', body: 'Read the unstaged file changes before staging anything.' },
+              { type: 'bullet_list', title: 'Boundaries', items: ['It does not show staged changes unless you use --staged.'] },
+            ],
+          },
+        ],
         demo_steps: [demoSteps[1]],
       },
     ],
@@ -179,7 +188,7 @@ describe('SkillFocusPreviewModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /next/i }))
     expect(screen.getByText('Status behavior')).toBeInTheDocument()
-    expect(screen.getByText('Syntax examples')).toBeInTheDocument()
+    expect(screen.getByText('Command forms')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /next/i })).toBeDisabled()
 
     fireEvent.click(screen.getByRole('button', { name: /open demo/i }))

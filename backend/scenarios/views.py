@@ -107,7 +107,16 @@ class SkillFocusDemoCommandAPIView(APIView):
             command = serializer.validated_data["command"]
             normalized_command = normalize(command)
             preview_config = scenario.command_preview_config or {}
-            safe_commands = preview_config.get("supported_demo_commands") or scenario.safe_demo_commands or []
+            safe_commands = (
+                preview_config.get("supported_demo_commands")
+                or [
+                    item if isinstance(item, str) else item.get("command")
+                    for item in preview_config.get("command_refs", [])
+                    if isinstance(item, str) or (isinstance(item, dict) and item.get("command"))
+                ]
+                or scenario.safe_demo_commands
+                or []
+            )
             normalized_safe = {normalize(item) for item in safe_commands}
             if normalized_command not in normalized_safe:
                 return Response(

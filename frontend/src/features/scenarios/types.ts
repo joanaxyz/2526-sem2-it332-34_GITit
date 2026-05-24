@@ -80,6 +80,7 @@ export type CommandPreviewSection = {
 export type CommandPreviewPage = {
   id?: string
   title: string
+  subtitle?: string
   eyebrow?: string
   heading?: string
   body?: string
@@ -88,18 +89,50 @@ export type CommandPreviewPage = {
 }
 
 export type CommandPreviewBlock = {
-  type?: 'paragraph' | 'list' | 'callout' | 'code'
+  type?:
+    | 'paragraph'
+    | 'bullet_list'
+    | 'list'
+    | 'command'
+    | 'code'
+    | 'callout'
+    | 'warning'
+    | 'terminal_output'
+    | 'dag_note'
+    | 'demo_step_ref'
   title?: string
+  subtitle?: string
   body?: string
+  text?: string
   items?: string[]
+  command?: string
+  language?: string
+  demo_step_id?: string
+}
+
+export type CommandPreviewCommand = {
+  id?: string
+  key?: string
+  title: string
+  command?: string
+  canonical_command?: string
+  aliases?: string[]
+  summary?: string
+  tags?: string[]
+  pages: CommandPreviewPage[]
+  demo_steps?: DemoExplanationStep[]
 }
 
 export type CommandPreviewMetadata = {
+  schema_version?: number
   title: string
   intro?: string
   purpose?: string
   focus_label?: string
   command_title: string
+  commands?: CommandPreviewCommand[]
+  command_refs?: Array<string | Record<string, unknown>>
+  custom_pages?: CommandPreviewPage[]
   sections?: CommandPreviewSection[]
   syntax_examples: string[]
   supported_demo_commands: string[]
