@@ -187,7 +187,6 @@ describe('PracticeWorkspace', () => {
 
     expect(screen.getByText('Inspect the repository')).toBeInTheDocument()
     expect(screen.getByText('Variant A')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /view command preview/i })).toBeInTheDocument()
     expect(screen.getByText('Terminal panel')).toBeInTheDocument()
     expect(screen.getByText('Live DAG panel')).toBeInTheDocument()
     expect(screen.queryByText('Scenario status header')).not.toBeInTheDocument()
@@ -201,7 +200,6 @@ describe('PracticeWorkspace', () => {
     renderWorkspace(baseSession)
 
     expect(screen.getByText('Scenario status header')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /preview/i })).toBeInTheDocument()
     expect(screen.getByText('Scenario context panel')).toBeInTheDocument()
     expect(screen.getByText('Expected state panel')).toBeInTheDocument()
     expect(screen.getByText('Contextual feedback panel')).toBeInTheDocument()

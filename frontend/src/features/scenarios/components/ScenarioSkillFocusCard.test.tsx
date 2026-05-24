@@ -39,6 +39,7 @@ describe('ScenarioSkillFocusCard', () => {
         scenario={scenario}
         scenarioNumber={2}
         onDifficultyAction={vi.fn()}
+        onPreview={vi.fn()}
       />,
     )
 

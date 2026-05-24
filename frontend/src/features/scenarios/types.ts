@@ -27,6 +27,7 @@ export type LatestAttemptStats = {
 export type DifficultyAccess = {
   id: number
   difficulty: Difficulty
+  completion_type?: 'state_based' | 'inspection' | 'expanded_state_based'
   status: DifficultyStatus
   review_available: boolean
   mastery_progress: {
@@ -67,12 +68,30 @@ export type CommandPreviewSection = {
   title: string
   command?: string
   explanation: string
+  pages?: CommandPreviewPage[]
   syntax_examples?: string[]
   what_changes?: string[]
   what_does_not_change?: string[]
   common_mistakes?: string[]
   readiness_notes?: string[]
   demo_steps?: DemoExplanationStep[]
+}
+
+export type CommandPreviewPage = {
+  id?: string
+  title: string
+  eyebrow?: string
+  heading?: string
+  body?: string
+  blocks?: CommandPreviewBlock[]
+  demo_steps?: DemoExplanationStep[]
+}
+
+export type CommandPreviewBlock = {
+  type?: 'paragraph' | 'list' | 'callout' | 'code'
+  title?: string
+  body?: string
+  items?: string[]
 }
 
 export type CommandPreviewMetadata = {

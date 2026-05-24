@@ -23,7 +23,12 @@ vi.mock('@/features/review/api/reviewApi', () => ({
 }))
 
 vi.mock('@/features/scenarios/components/SkillFocusPreviewModal', () => ({
-  SkillFocusPreviewModal: () => <div role="dialog">Command preview modal</div>,
+  SkillFocusPreviewModal: ({ onProceed }: { onProceed?: () => void }) => (
+    <div role="dialog">
+      Command preview modal
+      {onProceed ? <button type="button" onClick={onProceed}>Proceed</button> : null}
+    </div>
+  ),
 }))
 
 vi.mock('@/features/scenarios/utils/scenarioCache', () => ({
@@ -33,6 +38,7 @@ vi.mock('@/features/scenarios/utils/scenarioCache', () => ({
 const baseDifficulty: DifficultyAccess = {
   id: 10,
   difficulty: 'easy',
+  completion_type: 'state_based',
   status: 'not_started',
   review_available: false,
   mastery_progress: { mastered: 0, required: 1 },
@@ -93,6 +99,7 @@ async function expandScenario() {
 describe('ScenarioList preview gate', () => {
   afterEach(() => {
     cleanup()
+    localStorage.clear()
     vi.restoreAllMocks()
     vi.clearAllMocks()
   })
@@ -102,6 +109,40 @@ describe('ScenarioList preview gate', () => {
     await expandScenario()
 
     fireEvent.click(screen.getAllByRole('button', { name: /start/i })[0])
+
+    expect(await screen.findByRole('dialog')).toHaveTextContent('Command preview modal')
+    expect(scenariosApi.startSession).not.toHaveBeenCalled()
+  })
+
+  it('does not automatically reopen the first-start preview after it has been seen', async () => {
+    renderList()
+    await expandScenario()
+
+    fireEvent.click(screen.getAllByRole('button', { name: /start/i })[0])
+    fireEvent.click(await screen.findByRole('button', { name: /proceed/i }))
+
+    await waitFor(() => expect(scenariosApi.startSession).toHaveBeenCalledWith({
+      difficulty_instance_id: 10,
+      source_entry_point: 'lesson',
+    }))
+
+    cleanup()
+    vi.clearAllMocks()
+    renderList()
+    await expandScenario()
+    fireEvent.click(screen.getAllByRole('button', { name: /start/i })[0])
+
+    await waitFor(() => expect(scenariosApi.startSession).toHaveBeenCalledWith({
+      difficulty_instance_id: 10,
+      source_entry_point: 'lesson',
+    }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('opens command preview from the scenario-level view button without starting a session', async () => {
+    renderList()
+
+    fireEvent.click(await screen.findByRole('button', { name: /view/i }))
 
     expect(await screen.findByRole('dialog')).toHaveTextContent('Command preview modal')
     expect(scenariosApi.startSession).not.toHaveBeenCalled()
@@ -157,5 +198,29 @@ describe('ScenarioList preview gate', () => {
 
     await waitFor(() => expect(scenariosApi.retrySession).toHaveBeenCalledWith(77))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('renders diagnostic-only scenarios as preview-only cards', async () => {
+    renderList([
+      {
+        ...scenario,
+        skill_focus_type: 'concept_specific',
+        difficulties: [
+          difficulty({ id: 10, difficulty: 'easy', completion_type: 'inspection' }),
+          difficulty({ id: 20, difficulty: 'medium', completion_type: 'inspection' }),
+          difficulty({ id: 30, difficulty: 'hard', completion_type: 'inspection' }),
+        ],
+      },
+    ])
+    fireEvent.click(await screen.findByLabelText(/expand command preview/i))
+
+    expect(screen.getByText('Command preview')).toBeInTheDocument()
+    expect(screen.queryByText('Scenario 1')).not.toBeInTheDocument()
+    expect(screen.getByText('Command preview only')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^start$/i })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getAllByRole('button', { name: /view/i })[0])
+    expect(await screen.findByRole('dialog')).toHaveTextContent('Command preview modal')
+    expect(scenariosApi.startSession).not.toHaveBeenCalled()
   })
 })

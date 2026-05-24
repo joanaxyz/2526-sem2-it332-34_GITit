@@ -2,11 +2,10 @@ import { useRef, useState } from 'react'
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, BookOpen, GripHorizontal, GripVertical, PanelsTopLeft } from 'lucide-react'
+import { ArrowLeft, GripHorizontal, GripVertical, PanelsTopLeft } from 'lucide-react'
 
 import { ScenarioContextPanel } from '@/features/scenarios/components/ScenarioContextPanel'
 import { ScenarioStatusHeader } from '@/features/scenarios/components/ScenarioStatusHeader'
-import { SkillFocusPreviewModal } from '@/features/scenarios/components/SkillFocusPreviewModal'
 import { CompletionCelebrationModal } from '@/features/practice/components/CompletionCelebrationModal'
 import { ContextualFeedbackPanel } from '@/features/practice/components/ContextualFeedbackPanel'
 import { ExpectedStatePanel } from '@/features/practice/components/ExpectedStatePanel'
@@ -14,14 +13,12 @@ import { LiveDagPanel } from '@/features/practice/components/LiveDagPanel'
 import { ProjectStructurePanel } from '@/features/practice/components/ProjectStructurePanel'
 import { ScenarioWorkspaceTour } from '@/features/practice/components/ScenarioWorkspaceTour'
 import { TerminalPanel } from '@/features/practice/components/TerminalPanel'
-import type { ScenarioSession } from '@/features/practice/types'
 import { useAuthStore } from '@/features/auth/hooks/useAuth'
 import { hasSeenScenarioTour, markScenarioTourSeen } from '@/features/practice/utils/scenarioTour'
 import { useCommandSubmission } from '@/features/practice/hooks/useCommandSubmission'
 import { useScenarioSession } from '@/features/practice/hooks/useScenarioSession'
 import { reviewApi } from '@/features/review/api/reviewApi'
 import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
-import type { DifficultyAccess, ScenarioSkillFocus } from '@/features/scenarios/types'
 import { syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { PracticeWorkspaceSkeleton } from '@/shared/components/Skeleton'
@@ -88,7 +85,6 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const [diagramRatio, setDiagramRatio] = useState(DEFAULT_DIAGRAM_RATIO)
   const [terminalPaneRatio, setTerminalPaneRatio] = useState(DEFAULT_TERMINAL_PANE_RATIO)
   const [tourOpen, setTourOpen] = useState(false)
-  const [previewOpen, setPreviewOpen] = useState(false)
   const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
   const user = useAuthStore((state) => state.user)
   const workspaceGridRef = useRef<HTMLElement>(null)
@@ -151,10 +147,6 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     staleTime: 5 * 60 * 1000,
   })
   const currentScenario = moduleScenariosQuery.data?.find((s) => s.id === session?.scenario.id)
-  const currentPreviewScenario = session ? currentScenario ?? scenarioSkillFocusFromSession(session) : null
-  const currentPreviewDifficulty = session
-    ? currentScenario?.difficulties.find((d) => d.id === session.difficulty_instance_id) ?? difficultyAccessFromSession(session)
-    : null
   const reviewableDifficulties = currentScenario?.difficulties.filter(
     (d) => d.review_available && d.difficulty !== session?.difficulty
   ) ?? []
@@ -199,13 +191,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             </Button>
             <h1 className="truncate text-sm font-semibold">{session.scenario.title}</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={() => setPreviewOpen(true)}>
-              <BookOpen data-icon="inline-start" />
-              View Command Preview
-            </Button>
-            <Badge variant="outline">{session.variant.label}</Badge>
-          </div>
+          <Badge variant="outline">{session.variant.label}</Badge>
         </header>
         <main className="grid min-h-0 flex-1 grid-cols-[minmax(0,1.25fr)_minmax(20rem,0.75fr)] gap-2 p-2 max-lg:grid-cols-1 max-lg:overflow-auto">
           <div className="min-h-0 max-lg:min-h-[28rem]">
@@ -224,14 +210,6 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             />
           </div>
         </main>
-        {previewOpen && currentPreviewScenario && currentPreviewDifficulty ? (
-          <SkillFocusPreviewModal
-            scenario={currentPreviewScenario}
-            difficulty={currentPreviewDifficulty}
-            action="start"
-            onClose={() => setPreviewOpen(false)}
-          />
-        ) : null}
       </div>
     )
   }
@@ -354,10 +332,6 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
               <PanelsTopLeft className="size-4" />
               <span className="font-semibold">Project</span>
             </div>
-            <Button type="button" variant="outline" size="sm" onClick={() => setPreviewOpen(true)}>
-              <BookOpen data-icon="inline-start" />
-              Preview
-            </Button>
           </div>
 
           <ScenarioContextPanel session={session} />
@@ -466,47 +440,6 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
           }}
         />
       ) : null}
-      {previewOpen && currentPreviewScenario && currentPreviewDifficulty ? (
-        <SkillFocusPreviewModal
-          scenario={currentPreviewScenario}
-          difficulty={currentPreviewDifficulty}
-          action="start"
-          onClose={() => setPreviewOpen(false)}
-        />
-      ) : null}
     </div>
   )
-}
-
-function scenarioSkillFocusFromSession(session: ScenarioSession): ScenarioSkillFocus {
-  return {
-    id: session.scenario.id,
-    slug: session.scenario.slug,
-    title: session.scenario.title,
-    focus: session.scenario.focus,
-    summary: session.scenario.task_prompt || session.scenario.narrative,
-    short_explanation: session.scenario.narrative,
-    skill_focus_type: 'command_specific',
-    primary_focus_commands: [session.scenario.focus].filter(Boolean),
-    learning_unit_id: session.module.id,
-    module_id: session.module.id,
-    lesson_id: 0,
-    difficulties: [],
-  }
-}
-
-function difficultyAccessFromSession(session: ScenarioSession): DifficultyAccess {
-  return {
-    id: session.difficulty_instance_id,
-    difficulty: session.difficulty,
-    status: session.status === 'started' ? 'in_progress' : session.status,
-    review_available: false,
-    mastery_progress: session.mastery_progress,
-    mastered_records: session.mastered_records,
-    active_session_id: session.status === 'started' ? session.id : null,
-    retry_session_id: null,
-    policy: session.policy,
-    completion: session.completion ?? null,
-    latest_attempt: null,
-  }
 }

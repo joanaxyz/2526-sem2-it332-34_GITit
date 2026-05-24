@@ -172,13 +172,6 @@ export type CommandResponse = {
   }
 }
 
-export type InspectionAnswerResponse = {
-  session: ScenarioSession
-  evaluation_result: string
-  summary: string
-  failed_rules: Array<Record<string, unknown>>
-}
-
 export type TerminalLine = {
   id: string
   kind: 'system' | 'input' | 'output' | 'warning' | 'success'

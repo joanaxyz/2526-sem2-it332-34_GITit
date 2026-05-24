@@ -3097,6 +3097,7 @@ class Command(BaseCommand):
                     "title": self._demo_title(command),
                     "command": command,
                     "explanation": self._demo_command_explanation(command, spec),
+                    "pages": self._preview_pages(command, spec),
                     "syntax_examples": self._preview_syntax_examples(command),
                     "what_changes": self._preview_changes(command),
                     "what_does_not_change": self._preview_non_changes(command),
@@ -3274,6 +3275,67 @@ class Command(BaseCommand):
             .replace(" ", "-")
             .replace("/", "-")
         )
+
+    def _preview_pages(self, command: str, spec: dict[str, Any]) -> list[dict[str, Any]]:
+        title = self._demo_title(command)
+        explanation = self._demo_command_explanation(command, spec)
+        return [
+            {
+                "id": f"{self._preview_section_id(command)}-intro",
+                "title": "Introduction",
+                "eyebrow": command,
+                "heading": f"What {title} is for",
+                "body": explanation,
+                "blocks": [
+                    {
+                        "type": "callout",
+                        "title": "Scenario-level purpose",
+                        "body": spec["explanation"],
+                    }
+                ],
+            },
+            {
+                "id": f"{self._preview_section_id(command)}-behavior",
+                "title": "Behavior",
+                "heading": "What to expect",
+                "body": "Use this page to separate repository-changing commands from read-only inspection commands before you enter a generated variant.",
+                "blocks": [
+                    {
+                        "type": "code",
+                        "title": "Syntax examples",
+                        "items": self._preview_syntax_examples(command),
+                    },
+                    {
+                        "type": "list",
+                        "title": "What it changes",
+                        "items": self._preview_changes(command),
+                    },
+                    {
+                        "type": "list",
+                        "title": "What it does not change",
+                        "items": self._preview_non_changes(command),
+                    },
+                ],
+            },
+            {
+                "id": f"{self._preview_section_id(command)}-readiness",
+                "title": "Readiness",
+                "heading": "Before you use it in a scenario",
+                "body": "Read the prompt values carefully, then use the command only for the kind of evidence or state change it is meant to provide.",
+                "blocks": [
+                    {
+                        "type": "callout",
+                        "title": "Common mistake",
+                        "body": self._demo_common_mistake(command),
+                    },
+                    {
+                        "type": "list",
+                        "title": "Readiness notes",
+                        "items": self._preview_readiness_notes(command),
+                    },
+                ],
+            },
+        ]
 
     def _preview_syntax_examples(self, command: str) -> list[str]:
         normalized = " ".join(command.split()).lower()

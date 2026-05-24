@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { BookOpen, CheckCircle2, CircleAlert, Code2, GitBranch, Play, SquareTerminal } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BookOpen, Code2, GitBranch, Play, SquareTerminal } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import type { RepositorySnapshot, TerminalLine } from '@/features/practice/types'
@@ -8,6 +7,8 @@ import { TerminalPanel } from '@/features/practice/components/TerminalPanel'
 import { DemoLiveDagPanel } from '@/features/scenarios/components/DemoLiveDagPanel'
 import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import type {
+  CommandPreviewBlock,
+  CommandPreviewPage,
   CommandPreviewSection,
   DemoExplanationStep,
   DifficultyAccess,
@@ -33,6 +34,19 @@ const demoBootLines: TerminalLine[] = [
   { id: 'demo-boot-2', kind: 'output', text: 'Run one of the preview commands to watch the shared DAG update.' },
 ]
 
+type PreviewCommand = {
+  id: string
+  title: string
+  command?: string
+  pages: PreviewPage[]
+  demo_steps: DemoExplanationStep[]
+}
+
+type PreviewPage = CommandPreviewPage & {
+  kind: 'content'
+  demo_steps: DemoExplanationStep[]
+}
+
 export function SkillFocusPreviewModal({
   scenario,
   difficulty,
@@ -42,8 +56,8 @@ export function SkillFocusPreviewModal({
   onProceed,
 }: {
   scenario: ScenarioSkillFocus
-  difficulty: DifficultyAccess
-  action: DifficultyActionIntent
+  difficulty?: DifficultyAccess
+  action?: DifficultyActionIntent
   isProceeding?: boolean
   onClose: () => void
   onProceed?: () => void
@@ -93,8 +107,8 @@ function SkillFocusPreviewContent({
   onProceed,
 }: {
   scenario: ScenarioSkillFocus
-  difficulty: DifficultyAccess
-  action: DifficultyActionIntent
+  difficulty?: DifficultyAccess
+  action?: DifficultyActionIntent
   isProceeding: boolean
   onClose: () => void
   onProceed?: () => void
@@ -113,19 +127,19 @@ function SkillFocusPreviewContent({
     () => preview?.supported_demo_commands ?? scenario.safe_demo_commands ?? [],
     [preview?.supported_demo_commands, scenario.safe_demo_commands],
   )
-  const sections = useMemo(
-    () => buildPreviewSections(scenario, initialSnapshot),
-    [initialSnapshot, scenario],
-  )
-  const [selectedSectionIndex, setSelectedSectionIndex] = useState(0)
-  const [selectedStepIndex, setSelectedStepIndex] = useState(0)
-  const selectedSection = sections[selectedSectionIndex] ?? sections[0]
-  const selectedSteps = selectedSection?.demo_steps ?? []
-  const selectedStep = selectedSteps[selectedStepIndex] ?? selectedSteps[0] ?? null
-  const [snapshot, setSnapshot] = useState<RepositorySnapshot>(() => selectedStep?.repository_state ?? initialSnapshot)
+  const commands = useMemo(() => buildPreviewCommands(scenario, initialSnapshot), [initialSnapshot, scenario])
+  const [commandIndex, setCommandIndex] = useState(0)
+  const [pageIndex, setPageIndex] = useState(0)
+  const [view, setView] = useState<'content' | 'demo'>('content')
+  const selectedCommand = commands[commandIndex] ?? commands[0]
+  const selectedPage = selectedCommand.pages[pageIndex] ?? selectedCommand.pages[0]
+  const selectedDemoStep = selectedCommand.demo_steps[0] ?? selectedPage.demo_steps[0] ?? null
+  const [snapshot, setSnapshot] = useState<RepositorySnapshot>(() => selectedDemoStep?.repository_state ?? initialSnapshot)
   const [terminalLines, setTerminalLines] = useState<TerminalLine[]>(demoBootLines)
   const [isRunningDemo, setIsRunningDemo] = useState(false)
-  const difficultyLabel = difficulty.difficulty.charAt(0).toUpperCase() + difficulty.difficulty.slice(1)
+  const difficultyLabel = difficulty
+    ? difficulty.difficulty.charAt(0).toUpperCase() + difficulty.difficulty.slice(1)
+    : null
   const startLabel =
     action === 'review'
       ? 'Open review'
@@ -134,34 +148,35 @@ function SkillFocusPreviewContent({
         : action === 'retry'
           ? 'Retry scenario'
           : 'Start scenario'
+  const canGoPrevious = pageIndex > 0
+  const canGoNext = pageIndex < selectedCommand.pages.length - 1
+  const isDemoView = view === 'demo'
 
-  function selectSection(nextIndex: number) {
-    const section = sections[nextIndex]
-    if (!section) return
-    const firstStep = section.demo_steps?.[0]
-    setSelectedSectionIndex(nextIndex)
-    setSelectedStepIndex(0)
-    setSnapshot(firstStep?.repository_state ?? initialSnapshot)
+  function selectCommand(nextIndex: number) {
+    const nextCommand = commands[nextIndex]
+    if (!nextCommand) return
+    const nextPage = nextCommand.pages[0]
+    setCommandIndex(nextIndex)
+    setPageIndex(0)
+    setView('content')
+    setSnapshot(nextCommand.demo_steps[0]?.repository_state ?? nextPage.demo_steps[0]?.repository_state ?? initialSnapshot)
   }
 
-  function applyDemoStep(nextIndex: number) {
-    const step = selectedSteps[nextIndex]
-    if (!step) return
-    setSelectedStepIndex(nextIndex)
-    setSnapshot(step.repository_state)
+  function goToPage(nextIndex: number) {
+    const nextPage = selectedCommand.pages[nextIndex]
+    if (!nextPage) return
+    setPageIndex(nextIndex)
+    setView('content')
+    setSnapshot(nextPage.demo_steps[0]?.repository_state ?? snapshot)
   }
 
   async function runDemoCommand(command: string) {
     setTerminalLines((items) => [...items, { id: crypto.randomUUID(), kind: 'input', text: command }])
     setIsRunningDemo(true)
     const normalizedCommand = normalize(command)
-    const nextSectionIndex = sections.findIndex((section) =>
-      (section.demo_steps ?? []).some((step) => normalize(step.command) === normalizedCommand),
+    const nextCommandIndex = commands.findIndex((item) =>
+      item.demo_steps.some((step) => normalize(step.command) === normalizedCommand),
     )
-    const nextStepIndex =
-      nextSectionIndex >= 0
-        ? (sections[nextSectionIndex].demo_steps ?? []).findIndex((step) => normalize(step.command) === normalizedCommand)
-        : -1
 
     try {
       const response = await scenariosApi.submitDemoCommand(scenario.slug, { command, repository_state: snapshot })
@@ -176,9 +191,9 @@ function SkillFocusPreviewContent({
       setIsRunningDemo(false)
     }
 
-    if (nextSectionIndex >= 0 && nextStepIndex >= 0) {
-      setSelectedSectionIndex(nextSectionIndex)
-      setSelectedStepIndex(nextStepIndex)
+    if (nextCommandIndex >= 0) {
+      setCommandIndex(nextCommandIndex)
+      setView('demo')
     }
   }
 
@@ -187,249 +202,346 @@ function SkillFocusPreviewContent({
       open
       title={preview?.title ?? 'Command preview'}
       onClose={onClose}
-      className="max-h-[94vh] w-full max-w-7xl overflow-hidden"
-      contentClassName="max-h-[calc(94vh-4.5rem)] overflow-auto p-0 app-scrollbar"
+      className="max-h-[94vh] w-full max-w-6xl overflow-hidden"
+      contentClassName="h-[calc(94vh-4.5rem)] overflow-hidden p-0"
     >
-      <div className="grid min-h-0 grid-cols-[18rem_minmax(0,1fr)_22rem] max-xl:grid-cols-[16rem_minmax(0,1fr)] max-lg:grid-cols-1">
-        <aside className="border-r border-border bg-secondary/20 p-4 max-lg:border-b max-lg:border-r-0">
-          <div className="mb-4">
-            <p className="text-xs font-semibold uppercase text-primary">Scenario preview</p>
-            <h3 className="mt-1 text-xl font-extrabold leading-tight">{scenario.title}</h3>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Badge variant="blue">{difficultyLabel}</Badge>
-              <Badge variant="outline">{preview?.focus_label ?? scenario.focus}</Badge>
-            </div>
-          </div>
-          <nav className="grid gap-2" aria-label="Command preview sections">
-            {sections.map((section, index) => (
-              <button
-                aria-pressed={index === selectedSectionIndex}
-                className={cn(
-                  'rounded-md border px-3 py-3 text-left transition',
-                  index === selectedSectionIndex
-                    ? 'border-primary bg-primary/10 text-foreground'
-                    : 'border-border bg-background/40 text-muted-foreground hover:bg-secondary',
-                )}
-                key={section.id ?? `${section.title}-${index}`}
-                type="button"
-                onClick={() => selectSection(index)}
-              >
-                <span className="block truncate text-sm font-bold">{section.title}</span>
-                {section.command ? <span className="mt-1 block truncate font-mono text-xs">{section.command}</span> : null}
-              </button>
-            ))}
-          </nav>
-        </aside>
-
-        <main className="min-w-0 p-5">
-          <header className="mb-5 rounded-md border border-border bg-card p-4">
-            <div className="flex items-start gap-3">
-              <div className="grid size-10 shrink-0 place-items-center rounded-md border border-primary/30 bg-primary/10 text-primary">
-                <BookOpen className="size-5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground">{preview?.command_title ?? scenario.title}</p>
-                <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                  {preview?.intro ?? preview?.short_explanation ?? scenario.short_explanation ?? scenario.summary}
-                </p>
-                {preview?.purpose ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{preview.purpose}</p> : null}
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="grid min-h-0 flex-1 grid-cols-[14rem_minmax(0,1fr)] overflow-hidden max-lg:grid-cols-1">
+          <aside className="min-h-0 overflow-y-auto border-r border-border bg-secondary/20 p-4 app-scrollbar max-lg:max-h-56 max-lg:border-b max-lg:border-r-0">
+            <div className="mb-4">
+              <p className="text-xs font-semibold uppercase text-primary">Scenario preview</p>
+              <h3 className="mt-1 text-base font-extrabold leading-tight">{scenario.title}</h3>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {difficultyLabel ? <Badge variant="blue">{difficultyLabel}</Badge> : null}
+                <Badge variant="outline">{preview?.focus_label ?? scenario.focus}</Badge>
               </div>
             </div>
-          </header>
-
-          <article className="grid gap-4">
-            <section className="rounded-md border border-border bg-card p-4">
-              <div className="mb-2 flex items-center gap-2 text-sm font-bold">
-                <GitBranch className="size-4 text-primary" />
-                {selectedSection.title}
-              </div>
-              <p className="text-sm leading-6 text-muted-foreground">{selectedSection.explanation}</p>
-            </section>
-
-            <PreviewList
-              icon={Code2}
-              title="Syntax examples"
-              items={selectedSection.syntax_examples}
-              mono
-              emptyText="No syntax examples were provided for this section."
-            />
-            <PreviewList
-              icon={CheckCircle2}
-              title="What it changes"
-              items={selectedSection.what_changes}
-              emptyText="This section is informational."
-            />
-            <PreviewList
-              icon={CircleAlert}
-              title="What it does not change"
-              items={selectedSection.what_does_not_change}
-              emptyText="No boundaries were provided for this section."
-            />
-            <PreviewList
-              icon={CircleAlert}
-              title="Common mistakes"
-              items={selectedSection.common_mistakes}
-              emptyText="No common mistakes were provided for this section."
-            />
-            <PreviewList
-              icon={CheckCircle2}
-              title="Readiness notes"
-              items={selectedSection.readiness_notes}
-              emptyText="Review the scenario prompt before starting."
-            />
-          </article>
-        </main>
-
-        <aside className="border-l border-border bg-background p-4 max-xl:col-span-2 max-xl:border-l-0 max-xl:border-t max-lg:col-span-1">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2 text-sm font-bold">
-                <SquareTerminal className="size-4 text-primary" />
-                Shared demo
-              </div>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">One demo area updates as you move through the outline.</p>
-            </div>
-          </div>
-
-          {selectedSteps.length ? (
-            <div className="mb-3 flex flex-wrap gap-2">
-              {selectedSteps.map((step, index) => (
+            <nav className="grid gap-2" aria-label="Command preview commands">
+              {commands.map((item, index) => (
                 <button
-                  type="button"
-                  key={`${step.command}-${index}`}
+                  aria-pressed={index === commandIndex && !isDemoView}
                   className={cn(
-                    'rounded-sm border px-2 py-1 font-mono text-[11px] transition',
-                    index === selectedStepIndex
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border bg-secondary/30 text-muted-foreground hover:text-foreground',
+                    'w-full min-w-0 overflow-hidden rounded-md border px-3 py-2 text-left transition',
+                    index === commandIndex && !isDemoView
+                      ? 'border-primary bg-primary/10 text-foreground'
+                      : 'border-border bg-background/40 text-muted-foreground hover:bg-secondary',
                   )}
-                  onClick={() => applyDemoStep(index)}
+                  key={item.id}
+                  type="button"
+                  onClick={() => selectCommand(index)}
                 >
-                  {step.command}
+                  <span className="block truncate font-mono text-sm font-bold">{item.command ?? item.title}</span>
                 </button>
               ))}
-            </div>
-          ) : null}
+            </nav>
+          </aside>
 
-          <div className="grid gap-3">
-            <div className="rounded-md border border-border bg-card p-3">
-              <DemoLiveDagPanel snapshot={snapshot} />
-            </div>
-            <TerminalPanel
-              title="Inline command demo"
-              className="h-60 rounded-md"
-              disabled={isRunningDemo || supportedDemoCommands.length === 0}
-              lines={terminalLines}
-              onCommand={runDemoCommand}
-            />
+          <main className="grid min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden">
+            <header className="border-b border-border bg-card/60 p-5">
+              <div className="flex min-w-0 items-start gap-3">
+                <div className="grid size-10 shrink-0 place-items-center rounded-md border border-primary/30 bg-primary/10 text-primary">
+                  {isDemoView ? <SquareTerminal className="size-5" /> : <BookOpen className="size-5" />}
+                </div>
+                <div className="min-w-0">
+                  {isDemoView ? (
+                    <p className="text-xs font-semibold uppercase text-muted-foreground">Demo</p>
+                  ) : selectedCommand.command || selectedPage.eyebrow ? (
+                    <p className="truncate text-xs font-semibold uppercase text-muted-foreground">
+                      {selectedCommand.command ?? selectedPage.eyebrow}
+                    </p>
+                  ) : null}
+                  <h4 className="text-xl font-extrabold leading-tight">
+                    {isDemoView ? 'Try commands in a safe preview repository' : selectedPage.heading ?? selectedPage.title}
+                  </h4>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {isDemoView ? 'Shared demo for this scenario preview' : `Page ${pageIndex + 1} of ${selectedCommand.pages.length}`}
+                  </p>
+                </div>
+              </div>
+            </header>
+
+            <section className="min-h-0 min-w-0 overflow-auto p-5 app-scrollbar">
+              {isDemoView ? (
+                <DemoPage
+                  commands={supportedDemoCommands}
+                  disabled={isRunningDemo || supportedDemoCommands.length === 0}
+                  lines={terminalLines}
+                  snapshot={snapshot}
+                  onCommand={runDemoCommand}
+                />
+              ) : (
+                <ContentPage page={selectedPage} />
+              )}
+            </section>
+          </main>
+        </div>
+
+        <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card/70 px-5 py-4">
+          <div className="flex flex-wrap gap-2">
+            {isDemoView ? (
+              <Button type="button" size="sm" variant="outline" onClick={() => setView('content')}>
+                <ArrowLeft data-icon="inline-start" />
+                Back to pages
+              </Button>
+            ) : (
+              <>
+                <Button type="button" size="sm" variant="outline" disabled={!canGoPrevious} onClick={() => goToPage(pageIndex - 1)}>
+                  <ArrowLeft data-icon="inline-start" />
+                  Previous
+                </Button>
+                <Button type="button" size="sm" variant="outline" disabled={!canGoNext} onClick={() => goToPage(pageIndex + 1)}>
+                  Next
+                  <ArrowRight data-icon="inline-start" />
+                </Button>
+                <Button type="button" size="sm" variant="outline" onClick={() => setView('demo')}>
+                  <SquareTerminal data-icon="inline-start" />
+                  Open demo
+                </Button>
+              </>
+            )}
           </div>
-        </aside>
+          {onProceed ? (
+            <Button type="button" disabled={isProceeding} onClick={onProceed}>
+              <Play data-icon="inline-start" />
+              {isProceeding ? 'Opening...' : startLabel}
+            </Button>
+          ) : (
+            <Button type="button" variant="outline" onClick={onClose}>
+              Close preview
+            </Button>
+          )}
+        </footer>
       </div>
-
-      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-card/70 px-5 py-4">
-        <p className="text-xs leading-5 text-muted-foreground">Use this as a reference before working in the generated repository.</p>
-        {onProceed ? (
-          <Button type="button" disabled={isProceeding} onClick={onProceed}>
-            <Play data-icon="inline-start" />
-            {isProceeding ? 'Opening...' : startLabel}
-          </Button>
-        ) : (
-          <Button type="button" variant="outline" onClick={onClose}>
-            Close preview
-          </Button>
-        )}
-      </footer>
     </Modal>
   )
 }
 
-function PreviewList({
-  icon: Icon,
-  title,
-  items,
-  emptyText,
-  mono = false,
-}: {
-  icon: LucideIcon
-  title: string
-  items?: string[]
-  emptyText: string
-  mono?: boolean
-}) {
-  const visibleItems = items?.filter(Boolean) ?? []
+function ContentPage({ page }: { page: PreviewPage }) {
   return (
-    <section className="rounded-md border border-border bg-card p-4">
-      <div className="mb-3 flex items-center gap-2 text-sm font-bold">
-        <Icon className="size-4 text-primary" />
-        {title}
-      </div>
-      {visibleItems.length ? (
-        <ul className="grid gap-2">
-          {visibleItems.map((item) => (
-            <li
-              className={cn(
-                'rounded-sm border border-border bg-secondary/20 px-3 py-2 text-sm leading-6 text-muted-foreground',
-                mono && 'font-mono text-xs text-foreground',
-              )}
+    <article className="mx-auto grid min-w-0 max-w-3xl gap-4">
+      {page.body ? <p className="text-base leading-7 text-muted-foreground">{page.body}</p> : null}
+      {(page.blocks ?? []).map((block, index) => (
+        <PreviewBlock block={block} key={`${block.title ?? block.type ?? 'block'}-${index}`} />
+      ))}
+    </article>
+  )
+}
+
+function PreviewBlock({ block }: { block: CommandPreviewBlock }) {
+  if (block.type === 'code') {
+    return (
+      <section className="rounded-md border border-border bg-card p-4">
+        {block.title ? (
+          <h5 className="mb-3 flex items-center gap-2 text-sm font-bold">
+            <Code2 className="size-4 text-primary" />
+            {block.title}
+          </h5>
+        ) : null}
+        <div className="grid gap-2">
+          {(block.items?.length ? block.items : block.body ? [block.body] : []).map((item) => (
+            <code
+              className="block overflow-x-auto rounded-sm border border-border bg-secondary/30 px-3 py-2 text-xs text-foreground"
               key={item}
             >
+              {item}
+            </code>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section className={cn('rounded-md border border-border bg-card p-4', block.type === 'callout' && 'bg-primary/5')}>
+      {block.title ? (
+        <h5 className="mb-2 flex items-center gap-2 text-sm font-bold">
+          <GitBranch className="size-4 text-primary" />
+          {block.title}
+        </h5>
+      ) : null}
+      {block.body ? <p className="text-sm leading-6 text-muted-foreground">{block.body}</p> : null}
+      {block.items?.length ? (
+        <ul className="grid gap-2">
+          {block.items.map((item) => (
+            <li className="rounded-sm border border-border bg-secondary/20 px-3 py-2 text-sm leading-6 text-muted-foreground" key={item}>
               {item}
             </li>
           ))}
         </ul>
-      ) : (
-        <p className="text-sm leading-6 text-muted-foreground">{emptyText}</p>
-      )}
+      ) : null}
     </section>
   )
 }
 
-function buildPreviewSections(
+function DemoPage({
+  commands,
+  disabled,
+  lines,
+  snapshot,
+  onCommand,
+}: {
+  commands: string[]
+  disabled: boolean
+  lines: TerminalLine[]
+  snapshot: RepositorySnapshot
+  onCommand: (command: string) => void
+}) {
+  return (
+    <div className="mx-auto grid max-w-4xl gap-4">
+      <DemoLiveDagPanel snapshot={snapshot} />
+      <section className="grid gap-3">
+        <div className="rounded-md border border-border bg-card p-4">
+          <h5 className="flex items-center gap-2 text-sm font-bold">
+            <SquareTerminal className="size-4 text-primary" />
+            Try it
+          </h5>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            Run any preview command here. This is a shared demo, separate from scenario attempts.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {commands.map((command) => (
+              <button
+                className="rounded-sm border border-border bg-secondary/30 px-2 py-1 font-mono text-[11px] text-muted-foreground hover:text-foreground"
+                key={command}
+                type="button"
+                onClick={() => onCommand(command)}
+              >
+                {command}
+              </button>
+            ))}
+          </div>
+        </div>
+        <TerminalPanel
+          title="Inline command demo"
+          className="h-72 rounded-md"
+          disabled={disabled}
+          lines={lines}
+          onCommand={onCommand}
+        />
+      </section>
+    </div>
+  )
+}
+
+function buildPreviewCommands(
   scenario: ScenarioSkillFocus,
   fallbackSnapshot: RepositorySnapshot,
-): CommandPreviewSection[] {
+): PreviewCommand[] {
   const configuredSections = scenario.command_preview?.sections?.filter((section) => section.title && section.explanation) ?? []
   if (configuredSections.length) {
-    return configuredSections.map((section, index) => ({
-      ...section,
-      id: section.id ?? `${normalize(section.title)}-${index}`,
-      demo_steps: normalizeDemoSteps(section.demo_steps ?? [], fallbackSnapshot, section.explanation, section.common_mistakes?.[0]),
-    }))
+    return commandsFromSections(configuredSections, fallbackSnapshot)
   }
 
-  const normalizedSteps = normalizeDemoSteps(
+  const steps = normalizeDemoSteps(
     scenario.command_preview?.demo_steps?.length ? scenario.command_preview.demo_steps : scenario.demo_explanation_steps,
     fallbackSnapshot,
     scenario.command_preview?.short_explanation ?? scenario.short_explanation,
     scenario.command_preview?.common_mistakes?.[0],
   )
-  if (normalizedSteps.length) {
-    return normalizedSteps.map((step, index) => ({
-      id: `${normalize(step.command)}-${index}`,
-      title: step.title || step.command,
-      command: step.command,
-      explanation: step.explanation,
-      syntax_examples: [step.command],
-      what_changes: scenario.command_preview?.what_changes ?? [],
-      what_does_not_change: scenario.command_preview?.what_does_not_change ?? [],
-      common_mistakes: step.common_mistake ? [step.common_mistake] : [],
-      readiness_notes: scenario.command_preview?.readiness_notes ?? [],
-      demo_steps: [step],
-    }))
+
+  if (steps.length) {
+    return commandsFromSections(
+      steps.map((step, index) => (
+        {
+          id: `${normalize(step.command)}-${index}`,
+          title: step.title || step.command,
+          command: step.command,
+          explanation: step.explanation,
+          syntax_examples: [step.command],
+          common_mistakes: step.common_mistake ? [step.common_mistake] : [],
+          demo_steps: [step],
+        }
+      )),
+      fallbackSnapshot,
+    )
   }
+
+  return commandsFromSections(
+    [
+      {
+        id: 'overview',
+        title: scenario.focus || 'Scenario focus',
+        command: scenario.primary_focus_commands[0],
+        explanation: scenario.short_explanation ?? scenario.summary,
+        syntax_examples: scenario.command_preview?.syntax_examples ?? scenario.primary_focus_commands,
+        common_mistakes: scenario.command_preview?.common_mistakes ?? [],
+        demo_steps: [],
+      },
+    ],
+    fallbackSnapshot,
+  )
+}
+
+function commandsFromSections(sections: CommandPreviewSection[], fallbackSnapshot: RepositorySnapshot): PreviewCommand[] {
+  const groups = new Map<string, CommandPreviewSection[]>()
+  for (const section of sections) {
+    const label = canonicalCommand(section.command ?? section.title)
+    const group = groups.get(label) ?? []
+    group.push(section)
+    groups.set(label, group)
+  }
+
+  return Array.from(groups.entries()).map(([label, group], index) =>
+    commandFromSections(label, group, index, fallbackSnapshot),
+  )
+}
+
+function commandFromSections(
+  label: string,
+  sections: CommandPreviewSection[],
+  index: number,
+  fallbackSnapshot: RepositorySnapshot,
+): PreviewCommand {
+  const demoSteps = sections.flatMap((section) =>
+    normalizeDemoSteps(section.demo_steps ?? [], fallbackSnapshot, section.explanation, section.common_mistakes?.[0]),
+  )
+  const authoredPages = sections.flatMap((section, sectionIndex) =>
+    section.pages?.length
+      ? section.pages.map((page, pageIndex): PreviewPage => ({
+          ...page,
+          id: page.id ?? `${section.id ?? index}-${sectionIndex}-page-${pageIndex}`,
+          kind: 'content',
+          demo_steps: normalizeDemoSteps(page.demo_steps ?? [], fallbackSnapshot, page.body ?? section.explanation, section.common_mistakes?.[0]),
+        }))
+      : generatedPagesFromSection(section),
+  )
+
+  return {
+    id: `${normalize(label)}-${index}`,
+    title: label,
+    command: label,
+    pages: authoredPages.length ? authoredPages : generatedPagesFromSection(sections[0]),
+    demo_steps: demoSteps,
+  }
+}
+
+function generatedPagesFromSection(section: CommandPreviewSection): PreviewPage[] {
+  const detailBlockCandidates: CommandPreviewBlock[] = [
+    { type: 'code', title: 'Syntax examples', items: section.syntax_examples },
+    { type: 'list', title: 'What it changes', items: section.what_changes },
+    { type: 'list', title: 'What it does not change', items: section.what_does_not_change },
+    { type: 'callout', title: 'Common mistakes', items: section.common_mistakes },
+    { type: 'list', title: 'Readiness notes', items: section.readiness_notes },
+  ]
+  const detailBlocks = detailBlockCandidates.filter((block) => Boolean(block.items?.length))
 
   return [
     {
-      id: 'overview',
-      title: scenario.focus || 'Scenario focus',
-      command: scenario.primary_focus_commands[0],
-      explanation: scenario.short_explanation ?? scenario.summary,
-      syntax_examples: scenario.command_preview?.syntax_examples ?? scenario.primary_focus_commands,
-      what_changes: scenario.command_preview?.what_changes ?? [],
-      what_does_not_change: scenario.command_preview?.what_does_not_change ?? [],
-      common_mistakes: scenario.command_preview?.common_mistakes ?? [],
-      readiness_notes: scenario.command_preview?.readiness_notes ?? [],
+      id: `${section.id ?? section.title}-intro`,
+      title: 'Introduction',
+      eyebrow: section.command,
+      heading: section.title,
+      body: section.explanation,
+      kind: 'content',
       demo_steps: [],
+    },
+    {
+      id: `${section.id ?? section.title}-details`,
+      title: 'Details',
+      heading: 'Behavior and boundaries',
+      kind: 'content',
+      demo_steps: [],
+      blocks: detailBlocks,
     },
   ]
 }
@@ -480,6 +592,16 @@ function normalizeDemoSteps(
 
 function normalize(command: string) {
   return command.trim().replace(/\s+/g, ' ').toLowerCase()
+}
+
+function canonicalCommand(command: string) {
+  const normalized = normalize(command)
+  if (!normalized) return 'Command'
+  if (normalized === '.gitignore') return '.gitignore'
+  const parts = normalized.split(' ')
+  if (parts[0] !== 'git') return command
+  if (!parts[1]) return 'git'
+  return `git ${parts[1]}`
 }
 
 function isRepositorySnapshot(value: unknown): value is RepositorySnapshot {

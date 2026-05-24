@@ -67,6 +67,21 @@ const scenario: ScenarioSkillFocus = {
         title: 'Check status',
         command: 'git status',
         explanation: 'Check the branch and dirty paths before deciding what to do next.',
+        pages: [
+          {
+            title: 'Introduction',
+            heading: 'What git status is for',
+            body: 'git status is the first read-only inspection command.',
+          },
+          {
+            title: 'Details',
+            heading: 'Status behavior',
+            blocks: [
+              { type: 'code', title: 'Syntax examples', items: ['git status'] },
+              { type: 'callout', title: 'Common mistake', body: 'Do not treat status as a fix; it only reports state.' },
+            ],
+          },
+        ],
         syntax_examples: ['git status'],
         what_changes: ['Nothing changes; status only reports state.'],
         what_does_not_change: ['It does not stage or commit files.'],
@@ -150,32 +165,43 @@ describe('SkillFocusPreviewModal', () => {
 
     expect((await screen.findAllByText('Command preview')).length).toBeGreaterThan(0)
     expect((await screen.findAllByText('Inspect repository state before acting')).length).toBeGreaterThan(0)
-    expect(screen.getByText('Syntax examples')).toBeInTheDocument()
-    expect(screen.getByText('What it changes')).toBeInTheDocument()
-    expect(screen.getByText('What it does not change')).toBeInTheDocument()
-    expect(screen.getByText('Common mistakes')).toBeInTheDocument()
-    expect(screen.getByText('Shared demo')).toBeInTheDocument()
-    expect(screen.getByText('Inline command demo')).toBeInTheDocument()
-    expect(screen.getByText('Check the branch and dirty paths before deciding what to do next.')).toBeInTheDocument()
+    expect(screen.getByText('What git status is for')).toBeInTheDocument()
+    expect(screen.getByText('git status is the first read-only inspection command.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /start scenario/i })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /previous/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /next/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /previous/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /next/i })).not.toBeDisabled()
     expect(screen.getByText('diagnostic commands')).toBeInTheDocument()
   })
 
-  it('switches command details while preserving terminal history', async () => {
+  it('moves through authored pages and opens one dedicated demo view', async () => {
     renderPreview()
-    await screen.findByText('Check the branch and dirty paths before deciding what to do next.')
+    await screen.findByText('What git status is for')
+
+    fireEvent.click(screen.getByRole('button', { name: /next/i }))
+    expect(screen.getByText('Status behavior')).toBeInTheDocument()
+    expect(screen.getByText('Syntax examples')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /next/i })).toBeDisabled()
+
+    fireEvent.click(screen.getByRole('button', { name: /open demo/i }))
+    expect(screen.getByText('Try it')).toBeInTheDocument()
+    expect(screen.getByText('Inline command demo')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /back to pages/i })).toBeInTheDocument()
+  })
+
+  it('switches commands while preserving terminal history', async () => {
+    renderPreview()
+    await screen.findByText('What git status is for')
+    fireEvent.click(screen.getByRole('button', { name: /open demo/i }))
 
     const input = screen.getByRole('textbox')
     fireEvent.change(input, { target: { value: 'git status' } })
     fireEvent.click(screen.getByRole('button', { name: 'Run' }))
 
     await screen.findByText('On branch main')
-    fireEvent.click(screen.getByRole('button', { name: /git diff/i }))
+    fireEvent.click(screen.getAllByRole('button', { name: /git diff/i })[0])
 
     expect(screen.getByText('Read the unstaged file changes before staging anything.')).toBeInTheDocument()
-    expect(screen.getByText('Do not use git diff --staged when nothing is staged yet.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /open demo/i }))
     expect(screen.getByText('On branch main')).toBeInTheDocument()
   })
 
@@ -183,6 +209,7 @@ describe('SkillFocusPreviewModal', () => {
     renderPreview()
     await screen.findAllByText('Command preview')
     await screen.findAllByText('Inspect repository state before acting')
+    fireEvent.click(screen.getByRole('button', { name: /open demo/i }))
 
     for (const command of scenario.command_preview!.supported_demo_commands) {
       const input = screen.getByRole('textbox')
