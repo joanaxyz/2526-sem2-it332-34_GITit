@@ -29,8 +29,10 @@ The following diagnostic commands are non-counted in all Module 1 scenario sessi
 | `git diff` | 1.8 | 🔍 DIAGNOSTIC — Unstaged changes |
 | `git diff --staged` | 1.5 / 1.8 | 🔍 DIAGNOSTIC — Staged changes |
 | `git diff HEAD` | 1.8 | 🔍 DIAGNOSTIC — All changes since last commit |
-| `git diff <commit>` | 1.8 | 🔍 DIAGNOSTIC — Changes since a specific commit |
+| `git diff --name-only` | 1.8 | 🔍 DIAGNOSTIC — Changed path names only |
 | `git remote -v` | 1.2 | 🔍 DIAGNOSTIC — Show remote connections |
+| `git check-ignore -v <path>` | 1.4 | 🔍 DIAGNOSTIC — Explain an ignore-rule match |
+| `git ls-files` | 1.4 | 🔍 DIAGNOSTIC — List tracked files |
 
 ---
 
@@ -70,7 +72,7 @@ This is the correct, expected output for an empty initialized repository.
 * Confusing `git init` (local, starts fresh) with `git clone` (local, copies existing remote)
 
 **`git init` vs `git clone`:**  
- `git init` starts a new, empty repository. `git clone` creates a local copy of an existing remote repository, complete with its full history and remote configuration. Both produce a local repository — the starting content differs.
+ `git init` starts a new, empty repository. `git clone` creates a local copy of an existing remote repository, including the selected branch history and remote configuration. Both produce a local repository — the starting content differs.
 
 ### **Commands Introduced**
 
@@ -103,20 +105,27 @@ This is the correct, expected output for an empty initialized repository.
 
 * Clone a remote repository using HTTPS and SSH URL formats  
 * Clone into a custom-named local directory  
-* Verify a successful clone using remote configuration and commit history inspection  
+* Verify a successful clone using remote configuration and commit history diagnostics  
 * Explain the difference between `origin` and the local branch
 
 ### **Content Summary**
 
-Cloning is distinct from initializing. `git clone` does more than copy files: it sets up the remote tracking relationship, copies the full commit history, and checks out the default branch automatically.
+Cloning is distinct from initializing. `git clone` does more than copy files: it sets up the remote tracking relationship, copies commit history from the remote fixture, and checks out the default branch or the branch named with `-b`/`--branch`.
 
 **What `git clone` actually does:**
 
 1. Creates a new local directory (named after the repository by default, or as specified)  
 2. Initializes a git repository inside it  
 3. Adds a remote named `origin` pointing to the source URL  
-4. Fetches all branches and their complete history  
-5. Checks out the default branch (usually `main` or `master`)
+4. Records remote-tracking refs such as `origin/main` or `origin/starter`
+5. Checks out the selected branch and leaves the working tree clean
+
+**Destination and history options supported in Module 1:**
+
+* Without a destination, the folder is inferred from the URL, such as `docs-portal` from `https://example.test/training/docs-portal.git`.
+* With a destination, Git uses the folder name you provide.
+* `-b <branch>` and `--branch <branch>` check out a branch that already exists in the simulated remote.
+* `--depth <number>` records a shallow clone; `--depth 1` keeps only the selected branch tip visible.
 
 **HTTPS vs SSH clone URLs:**
 
@@ -140,6 +149,10 @@ Cloning is distinct from initializing. `git clone` does more than copy files: it
 | ----- | ----- | ----- |
 | `git clone <url>` | ⚡ ACTION | Clone a repository into a new directory |
 | `git clone <url> <directory>` | ⚡ ACTION | Clone into a custom-named directory |
+| `git clone -b <branch> <url>` | ⚡ ACTION | Clone and check out a specific branch |
+| `git clone --branch <branch> <url> <directory>` | ⚡ ACTION | Clone a specific branch into a custom directory |
+| `git clone --depth <number> <url>` | ⚡ ACTION | Clone shallow history |
+| `git clone --depth <number> -b <branch> <url> <directory>` | ⚡ ACTION | Shallow clone a selected branch into a custom directory |
 | `git remote -v` | 🔍 DIAGNOSTIC — Non-Counted | Show remote connections and their URLs |
 | `git log --oneline` | 🔍 DIAGNOSTIC — Non-Counted | Show condensed commit history |
 
@@ -306,14 +319,14 @@ Partial staging is where Git starts feeling like a precision tool rather than a 
 🔍 **`git diff --staged` and `git diff` are diagnostic commands.** Non-counted. Run them after every partial staging operation to confirm the staging area contains exactly what you intend.
 
 **Unstaging a file:**  
- `git reset HEAD <file>` moves a file from the staging area back to the working directory without discarding changes. The file's content is unchanged — it simply moves from "staged" to "modified but unstaged."
+ `git restore --staged <file>` moves a file from the staging area back to the working directory without discarding changes. The file's content is unchanged — it simply moves from "staged" to "modified but unstaged."
 
 ### **Commands Introduced**
 
 | Command | Type | Purpose |
 | ----- | ----- | ----- |
 | `git add -p` | ⚡ ACTION | Interactively stage hunks from modified files |
-| `git reset HEAD <file>` | ⚡ ACTION | Unstage a file (keep working tree changes) |
+| `git restore --staged <file>` | ⚡ ACTION | Unstage a file (keep working tree changes) |
 | `git diff --staged` | 🔍 DIAGNOSTIC — Non-Counted | Show staged changes vs last commit |
 | `git diff` | 🔍 DIAGNOSTIC — Non-Counted | Show unstaged changes (working vs staging) |
 
@@ -393,7 +406,7 @@ This safety principle — *never rewrite commits that have been shared* — is i
 * Unstage a file from the staging area without discarding working tree changes  
 * Discard working tree changes and restore a file to its last committed state  
 * Distinguish between unstaging (safe, reversible) and discarding (destructive, irreversible without reflog)  
-* Use both modern (`git restore`) and legacy (`git checkout --`) syntax
+* Use `git restore` syntax to unstage or discard selected changes
 
 ### **Content Summary**
 
@@ -406,15 +419,16 @@ This lesson draws a critical line between two operations that beginners frequent
 | Unstage | `git restore --staged <file>` | Yes — still in working tree | ✓ Reversible |
 | Discard working tree | `git restore <file>` | No — gone unless in reflog | ✗ Destructive |
 
-**Modern vs legacy syntax:**  
- Git 2.23 (August 2019\) introduced `git restore` and `git switch` as cleaner alternatives to the overloaded `git checkout`. Both syntaxes work in current Git versions:
+**Supported restore syntax:**
 
-| Action | Modern (Git 2.23+) | Legacy |
-| ----- | ----- | ----- |
-| Unstage file | `git restore --staged <file>` | `git reset HEAD <file>` |
-| Discard working tree changes | `git restore <file>` | `git checkout -- <file>` |
+The Module 1 simulator uses `git restore` for both unstaging and discarding:
 
-The platform accepts both. Students should know both — they will see both in documentation, Stack Overflow answers, and teammates' scripts.
+| Action | Command |
+| ----- | ----- |
+| Unstage file | `git restore --staged <file>` |
+| Discard working tree changes | `git restore <file>` |
+
+Other undo forms are intentionally saved for later modules and are not listed in Module 1 preview content.
 
 **When discarding is appropriate:**  
  Discarding working tree changes makes sense when you have made experimental edits that turned out to be wrong and you want to get back to the last committed state cleanly. Before discarding, run `git diff` to verify exactly what you are about to lose.
@@ -427,7 +441,6 @@ The platform accepts both. Students should know both — they will see both in d
 | ----- | ----- | ----- |
 | `git restore <file>` | ⚡ ACTION | Discard working tree changes (restore from last commit) |
 | `git restore --staged <file>` | ⚡ ACTION | Unstage a file (keep working tree changes) |
-| `git checkout -- <file>` | ⚡ ACTION | Legacy: discard working tree changes |
 
 ### **Scenario Practice**
 
@@ -455,7 +468,7 @@ The platform accepts both. Students should know both — they will see both in d
 * Read `git log` output and extract commit metadata (hash, author, date, message)  
 * Use `git log` flags to filter, format, and graph commit history  
 * Read diffs across the working directory, staging area, and commit history  
-* Know which `git diff` variant to use for a given inspection need
+* Know which `git diff` variant to use for a given diagnostic need
 
 ### **Content Summary**
 
@@ -496,8 +509,8 @@ Date:   Mon May 20 14:32:11 2025 \+0800
 | `git log` | Full commit metadata needed |
 | `git log --oneline` | Quick history scan |
 | `git log --oneline --graph --all` | Visualizing branch structure |
-| `git log --oneline -n 5` | Last 5 commits only |
-| `git log --oneline --author="Name"` | Filter by author |
+| `git log -n 5` | Last 5 commits only |
+| `git log --max-count=5` | Last 5 commits only |
 
 **The three `git diff` variants:**
 
@@ -506,9 +519,9 @@ Date:   Mon May 20 14:32:11 2025 \+0800
 | `git diff` | Working tree vs staging area | What's changed but not yet staged? |
 | `git diff --staged` | Staging area vs last commit | What's about to be committed? |
 | `git diff HEAD` | Working tree vs last commit | What's changed since last commit (total)? |
-| `git diff <hash>` | Working tree vs a specific commit | How far have we come since this commit? |
+| `git diff --name-only` | Working tree vs staging area | Which unstaged paths changed? |
 
-🔍 **All commands in this lesson are diagnostic — non-counted.** The scenario sessions in this lesson focus on selecting the correct diagnostic command for a given inspection need, reading the output accurately, and extracting the correct information. No state-changing commands are required.
+🔍 **All commands in this lesson are diagnostic — non-counted.** This lesson is taught through overview and preview content. Students apply these commands inside normal state-based scenarios, where diagnostic commands are logged but do not reduce the counted-command budget.
 
 ### **Commands Introduced**
 
@@ -518,12 +531,12 @@ Date:   Mon May 20 14:32:11 2025 \+0800
 | `git log` | 🔍 DIAGNOSTIC — Non-Counted | Show full commit history with metadata |
 | `git log --oneline` | 🔍 DIAGNOSTIC — Non-Counted | Show condensed one-line commit history |
 | `git log --oneline --graph --all` | 🔍 DIAGNOSTIC — Non-Counted | Show full commit graph |
-| `git log --oneline -n <number>` | 🔍 DIAGNOSTIC — Non-Counted | Show last N commits |
-| `git log --oneline --author="name"` | 🔍 DIAGNOSTIC — Non-Counted | Filter history by author |
+| `git log -n <number>` | 🔍 DIAGNOSTIC — Non-Counted | Show last N commits |
+| `git log --max-count=<number>` | 🔍 DIAGNOSTIC — Non-Counted | Show last N commits |
 | `git diff` | 🔍 DIAGNOSTIC — Non-Counted | Show unstaged changes |
 | `git diff --staged` | 🔍 DIAGNOSTIC — Non-Counted | Show staged changes |
 | `git diff HEAD` | 🔍 DIAGNOSTIC — Non-Counted | Show all changes since last commit |
-| `git diff <commit>` | 🔍 DIAGNOSTIC — Non-Counted | Show changes since a specific commit |
+| `git diff --name-only` | 🔍 DIAGNOSTIC — Non-Counted | Show unstaged changed path names |
 
 ### **Scenario Practice**
 

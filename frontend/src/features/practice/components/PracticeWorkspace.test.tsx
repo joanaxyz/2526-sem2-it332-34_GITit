@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -44,7 +44,27 @@ vi.mock('@/features/review/api/reviewApi', () => ({
 }))
 
 vi.mock('@/features/scenarios/components/ScenarioStatusHeader', () => ({
-  ScenarioStatusHeader: () => <div>Scenario status header</div>,
+  ScenarioStatusHeader: ({
+    onStartOver,
+    onRetry,
+  }: {
+    onStartOver?: () => void
+    onRetry?: () => void
+  }) => (
+    <div>
+      Scenario status header
+      {onStartOver ? (
+        <button type="button" onClick={onStartOver}>
+          Start over
+        </button>
+      ) : null}
+      {onRetry ? (
+        <button type="button" onClick={onRetry}>
+          Retry
+        </button>
+      ) : null}
+    </div>
+  ),
 }))
 
 vi.mock('@/features/scenarios/components/ScenarioContextPanel', () => ({
@@ -60,7 +80,11 @@ vi.mock('@/features/practice/components/ContextualFeedbackPanel', () => ({
 }))
 
 vi.mock('@/features/practice/components/ProjectStructurePanel', () => ({
-  ProjectStructurePanel: () => <div>Project structure panel</div>,
+  ProjectStructurePanel: ({ className }: { className?: string }) => (
+    <div data-testid="project-structure-panel" className={className}>
+      Project structure panel
+    </div>
+  ),
 }))
 
 vi.mock('@/features/practice/components/LiveDagPanel', () => ({
@@ -150,6 +174,7 @@ const baseSession: ScenarioSession = {
 function renderWorkspace(session: ScenarioSession) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   vi.mocked(scenariosApi.listForModule).mockResolvedValue([])
+  vi.mocked(scenariosApi.retrySession).mockResolvedValue({ ...session, id: session.id + 1, variant: { ...session.variant, label: 'Variant B' } })
   vi.mocked(useCommandSubmission).mockReturnValue({
     isPending: false,
     mutate: vi.fn(),
@@ -182,20 +207,6 @@ describe('PracticeWorkspace', () => {
     vi.clearAllMocks()
   })
 
-  it('renders only the command-preview panels for inspection sessions', () => {
-    renderWorkspace({ ...baseSession, completion_type: 'inspection' })
-
-    expect(screen.getByText('Inspect the repository')).toBeInTheDocument()
-    expect(screen.getByText('Variant A')).toBeInTheDocument()
-    expect(screen.getByText('Terminal panel')).toBeInTheDocument()
-    expect(screen.getByText('Live DAG panel')).toBeInTheDocument()
-    expect(screen.queryByText('Scenario status header')).not.toBeInTheDocument()
-    expect(screen.queryByText('Scenario context panel')).not.toBeInTheDocument()
-    expect(screen.queryByText('Expected state panel')).not.toBeInTheDocument()
-    expect(screen.queryByText('Contextual feedback panel')).not.toBeInTheDocument()
-    expect(screen.queryByText('Project structure panel')).not.toBeInTheDocument()
-  })
-
   it('keeps the full workspace for state-based sessions', () => {
     renderWorkspace(baseSession)
 
@@ -206,5 +217,28 @@ describe('PracticeWorkspace', () => {
     expect(screen.getByText('Project structure panel')).toBeInTheDocument()
     expect(screen.getByText('Terminal panel')).toBeInTheDocument()
     expect(screen.getByText('Live DAG panel')).toBeInTheDocument()
+  })
+
+  it('splits long sidebar content from the project structure scroll region', () => {
+    renderWorkspace(baseSession)
+
+    expect(screen.getByTestId('workspace-sidebar')).toHaveClass('overflow-hidden')
+    expect(screen.getByTestId('scenario-context-scroll')).toHaveClass('overflow-y-auto')
+    expect(screen.getByTestId('project-structure-region')).toHaveClass('min-h-[14rem]')
+    expect(screen.getByTestId('project-structure-panel')).toHaveClass('h-full')
+  })
+
+  it('confirms before retrying an active workspace as a fresh attempt', async () => {
+    renderWorkspace(baseSession)
+
+    fireEvent.click(screen.getByRole('button', { name: /start over/i }))
+
+    expect(screen.getByRole('dialog', { name: /start fresh attempt/i })).toBeInTheDocument()
+    expect(screen.getByText(/current workspace state resets/i)).toBeInTheDocument()
+    expect(scenariosApi.retrySession).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: /start fresh attempt/i }))
+
+    await waitFor(() => expect(scenariosApi.retrySession).toHaveBeenCalledWith(baseSession.id))
   })
 })

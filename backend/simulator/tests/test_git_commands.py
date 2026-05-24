@@ -76,12 +76,185 @@ def test_parser_supports_long_option_values_and_combined_commit_flags():
     assert commit.normalized_text == "git commit -a -m 'Update tracked files'"
 
 
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git status",
+        "git status -s",
+        "git status --short",
+        "git status --porcelain",
+        "git status -sb",
+        "git status --ignored",
+        "git diff",
+        "git diff README.md",
+        "git diff --staged",
+        "git diff --cached",
+        "git diff --staged README.md",
+        "git diff --cached README.md",
+        "git diff HEAD",
+        "git diff --name-only",
+        "git diff --staged --name-only",
+        "git log",
+        "git log --oneline",
+        "git log --oneline --graph --all",
+        "git log -n 2",
+        "git log --max-count=2",
+        "git show",
+        "git show c1",
+        "git show --name-only",
+        "git branch",
+        "git branch -v",
+        "git remote",
+        "git remote -v",
+        "git reflog",
+        "git check-ignore -v .env",
+        "git ls-files",
+    ],
+)
+def test_parser_and_registry_support_module_one_diagnostic_forms(command):
+    parsed = GitCommandParser().parse(command)
+    registry = GitCommandRegistry()
+    spec = registry.get(parsed.subcommand)
+
+    assert spec is not None
+    assert spec.validate(parsed) is None
+    assert spec.is_diagnostic(parsed) is True
+    assert spec.is_counted(parsed) is False
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git init",
+        "git init docs-site",
+        "git init -b trunk",
+        "git init --initial-branch trunk",
+        "git init --initial-branch=trunk",
+        "git init -q",
+        "git init --quiet",
+        "git init -q -b main research-log",
+        "git init --quiet --initial-branch=main research-log",
+        "git clone https://example.test/repo.git",
+        "git clone https://example.test/repo.git repo-copy",
+        "git clone -b starter https://example.test/repo.git",
+        "git clone --branch starter https://example.test/repo.git",
+        "git clone -b starter https://example.test/repo.git repo-copy",
+        "git clone --branch starter https://example.test/repo.git repo-copy",
+        "git clone --depth 1 https://example.test/repo.git",
+        "git clone --depth 1 https://example.test/repo.git repo-copy",
+        "git clone --depth 1 -b starter https://example.test/repo.git repo-copy",
+        "git clone --depth 1 --branch starter https://example.test/repo.git repo-copy",
+        "git add README.md",
+        "git add README.md docs/intro.md",
+        "git add docs/",
+        "git add .",
+        "git add -A",
+        "git add --all",
+        "git add -u",
+        "git add --update",
+        "git add -p",
+        "git add -p README.md",
+        "git add --patch README.md",
+        'git commit -m "Add docs"',
+        'git commit --message "Add docs"',
+        'git commit -am "Update tracked files"',
+        'git commit -a -m "Update tracked files"',
+        "git commit --amend",
+        'git commit --amend -m "Update message"',
+        "git commit --amend --no-edit",
+        "git rm --cached .env",
+        "git rm -r --cached dist",
+        "git restore README.md",
+        "git restore README.md docs/intro.md",
+        "git restore .",
+        "git restore --staged README.md",
+        "git restore --staged README.md docs/intro.md",
+        "git restore --staged .",
+    ],
+)
+def test_parser_and_registry_support_module_one_action_forms(command):
+    parsed = GitCommandParser().parse(command)
+    registry = GitCommandRegistry()
+    spec = registry.get(parsed.subcommand)
+
+    assert spec is not None
+    assert spec.validate(parsed) is None
+    assert spec.is_diagnostic(parsed) is False
+    assert spec.is_counted(parsed) is True
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git fetch",
+        "git pull",
+        "git push",
+        "git merge feature",
+        "git rebase main",
+        "git stash",
+        "git tag v1",
+        "git cherry-pick c1",
+        "git revert c1",
+        "git branch feature",
+        "git branch -d stale",
+        "git remote add origin https://example.test/repo.git",
+        "git checkout main",
+        "git switch main",
+        "git reset HEAD README.md",
+        "git clone --bare https://example.test/repo.git",
+        "git clone --mirror https://example.test/repo.git",
+        "git clone --recurse-submodules https://example.test/repo.git",
+        "git clone --no-checkout https://example.test/repo.git",
+        "git clone --filter blob:none https://example.test/repo.git",
+        "git clone --template template https://example.test/repo.git",
+        "git clone --separate-git-dir .git https://example.test/repo.git",
+        'git commit --allow-empty -m "Empty"',
+        "git add --intent-to-add README.md",
+    ],
+)
+def test_registry_rejects_unsupported_non_module_one_forms(command):
+    result = GitCommandEngine().process(
+        {
+            "commits": [{"id": "c0", "message": "Base", "parents": [], "tree": {}}],
+            "branches": {"main": "c0"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {"README.md": "v2"},
+            "staging": {},
+        },
+        command,
+    )
+
+    assert result.processed is False
+    assert result.exit_code == 129
+
+
 def test_registry_rejects_unsupported_flags_and_classifies_diagnostics():
     parser = GitCommandParser()
     registry = GitCommandRegistry()
 
     bad = parser.parse("git status --wat")
     assert registry.require("status").validate(bad) == "error: unknown option `--wat`."
+
+    missing_url = parser.parse("git clone --depth 1")
+    assert registry.require("clone").validate(missing_url) == (
+        "fatal: You must specify a repository to clone."
+    )
+    too_many_clone_args = parser.parse("git clone https://example.test/repo.git one two")
+    assert registry.require("clone").validate(too_many_clone_args) == (
+        "usage: git clone <repository> [<directory>]"
+    )
+    invalid_depth = parser.parse("git clone --depth 0 https://example.test/repo.git")
+    assert registry.require("clone").validate(invalid_depth) == (
+        "fatal: invalid depth value: 0"
+    )
+    unsupported_clone = parser.parse("git clone --bare https://example.test/repo.git")
+    assert registry.require("clone").validate(unsupported_clone) == (
+        "error: unknown option `--bare`. Module 1 clone supports only -b/--branch and --depth."
+    )
+    with pytest.raises(GitCommandParseError, match="requires a value"):
+        parser.parse("git clone -b")
+    with pytest.raises(GitCommandParseError, match="requires a value"):
+        parser.parse("git clone --depth")
 
     assert registry.is_diagnostic(parser.parse("git status"))
     assert registry.is_diagnostic(parser.parse("git log --oneline --graph --all"))
@@ -103,6 +276,9 @@ def test_intent_mapper_unifies_common_command_variants():
     init_short = mapper.map(parser.parse("git init -b main"))
     init_long = mapper.map(parser.parse("git init --initial-branch=main"))
     init_quiet = mapper.map(parser.parse("git init -q"))
+    clone_branch = mapper.map(
+        parser.parse("git clone --depth 1 -b starter https://example.test/repo.git lab")
+    )
 
     assert add_a.operations[0].name == add_all.operations[0].name == "StageAllChanges"
     assert add_update.operations[0].name == "StageTrackedChangesOnly"
@@ -117,6 +293,10 @@ def test_intent_mapper_unifies_common_command_variants():
         == "main"
     )
     assert init_quiet.operations[0].params["quiet"] is True
+    assert clone_branch.operations[0].name == "CloneRepository"
+    assert clone_branch.operations[0].params["branch"] == "starter"
+    assert clone_branch.operations[0].params["depth"] == 1
+    assert clone_branch.operations[0].params["destination"] == "lab"
 
 
 def test_engine_blocks_shell_and_unsupported_git_without_mutation():

@@ -1,5 +1,5 @@
 from common.constants import RESULT_TARGET_MATCHED, RESULT_TARGET_NOT_YET_MATCHED
-from evaluation.services import InspectionEvaluator, StateBasedEvaluator
+from evaluation.services import StateBasedEvaluator
 from simulator.services import RepositoryStateSimulator
 
 
@@ -151,55 +151,6 @@ def test_state_based_evaluator_can_require_command_history():
 
     assert matched.result_category == RESULT_TARGET_MATCHED
     assert missing_required_command.result_category == RESULT_TARGET_NOT_YET_MATCHED
-
-
-def test_inspection_evaluator_requires_commands_and_unchanged_state():
-    state = {
-        "commits": [{"id": "c0", "message": "Base", "parents": []}],
-        "branches": {"main": "c0"},
-        "head": {"type": "branch", "name": "main"},
-        "working_tree": {"README.md": "modified"},
-        "staging": {},
-        "conflicts": [],
-    }
-    expected = {
-        "required_commands": ["git status"],
-        "repository_state_unchanged": True,
-        "checks": {"head_branch": "main", "unstaged_changes": ["README.md"], "staging_empty": True},
-    }
-
-    matched = InspectionEvaluator().evaluate(
-        initial_state=state,
-        current_state=state,
-        expected_observations=expected,
-        executed_commands=["git status"],
-        submitted_answer={
-            "head_branch": "main",
-            "unstaged_changes": ["README.md"],
-            "staging_empty": True,
-        },
-    )
-    missing_command = InspectionEvaluator().evaluate(
-        initial_state=state,
-        current_state=state,
-        expected_observations=expected,
-        executed_commands=["git diff"],
-        submitted_answer={
-            "head_branch": "main",
-            "unstaged_changes": ["README.md"],
-            "staging_empty": True,
-        },
-    )
-    missing_answer = InspectionEvaluator().evaluate(
-        initial_state=state,
-        current_state=state,
-        expected_observations=expected,
-        executed_commands=["git status"],
-    )
-
-    assert matched.result_category == RESULT_TARGET_MATCHED
-    assert missing_command.result_category == RESULT_TARGET_NOT_YET_MATCHED
-    assert missing_answer.result_category == RESULT_TARGET_NOT_YET_MATCHED
 
 
 def test_evaluator_supports_module1_exact_state_rules():
@@ -550,7 +501,21 @@ def test_rule_evaluator_checks_merge_commit_and_conflict_state():
         }
     )
 
-    merged = simulator.process(state, "git merge feature/app").state
+    merged = simulator.normalize_state(
+        {
+            **state,
+            "commits": [
+                *state["commits"],
+                {
+                    "id": "c3",
+                    "message": "Merge feature/app",
+                    "parents": ["c1", "c2"],
+                    "tree": {"app.py": "feature"},
+                },
+            ],
+            "branches": {"main": "c3", "feature/app": "c2"},
+        }
+    )
     merge_result = StateBasedEvaluator().evaluate(
         merged,
         {
@@ -569,7 +534,7 @@ def test_rule_evaluator_checks_merge_commit_and_conflict_state():
     conflict_state = simulator.normalize_state(
         {**state, "conflict_on_merge": True, "conflict_files": ["app.py"]}
     )
-    conflicted = simulator.process(conflict_state, "git merge feature/app").state
+    conflicted = simulator.normalize_state({**conflict_state, "conflicts": ["app.py"]})
     conflict_result = StateBasedEvaluator().evaluate(
         conflicted,
         {"rules": [{"type": "conflicts_contain_paths", "paths": ["app.py"]}]},
@@ -595,9 +560,13 @@ def test_rule_evaluator_distinguishes_reset_modes():
         }
     )
 
-    soft = simulator.process(state, "git reset --soft HEAD~1").state
-    mixed = simulator.process(state, "git reset --mixed HEAD~1").state
-    hard = simulator.process(state, "git reset --hard HEAD~1").state
+    soft = simulator.normalize_state(
+        {**state, "branches": {"main": "c0"}, "staging": {"app.py": "v2"}}
+    )
+    mixed = simulator.normalize_state(
+        {**state, "branches": {"main": "c0"}, "working_tree": {"app.py": "v2"}}
+    )
+    hard = simulator.normalize_state({**state, "branches": {"main": "c0"}})
 
     evaluator = StateBasedEvaluator()
     assert evaluator.evaluate(
@@ -666,9 +635,11 @@ def test_rule_evaluator_checks_fetch_pull_and_push_state():
     )
     evaluator = StateBasedEvaluator()
 
-    fetched = simulator.process(state, "git fetch origin").state
-    pulled = simulator.process(fetched, "git pull").state
-    pushed = simulator.process(pulled, "git push").state
+    fetched = simulator.normalize_state({**state, "remote_tracking_updated": True})
+    pulled = simulator.normalize_state({**fetched, "branches": {"main": "c1"}})
+    pushed = simulator.normalize_state(
+        {**pulled, "remote_branches": {"origin/main": pulled["branches"]["main"]}}
+    )
 
     assert evaluator.evaluate(
         fetched,
@@ -700,8 +671,27 @@ def test_rule_evaluator_checks_stash_save_and_pop():
         }
     )
 
-    stashed = simulator.process(state, "git stash").state
-    popped = simulator.process(stashed, "git stash pop").state
+    stashed = simulator.normalize_state(
+        {
+            **state,
+            "working_tree": {},
+            "staging": {},
+            "stash_stack": [
+                {
+                    "working_tree": {"app.py": "v2"},
+                    "staging": {"README.md": "v2"},
+                    "conflicts": [],
+                }
+            ],
+        }
+    )
+    popped = simulator.normalize_state(
+        {
+            **state,
+            "stash_stack": [],
+            "operation_metadata": {"last_stash_pop_restored_paths": ["app.py", "README.md"]},
+        }
+    )
     evaluator = StateBasedEvaluator()
 
     assert evaluator.evaluate(

@@ -6,4 +6,5 @@ def format_init(runtime, state: dict, outcome) -> str:
         return ""
     directory = outcome.details.get("directory")
     suffix = f" in {directory}/.git/" if directory else " in .git/"
-    return f"Initialized empty Git repository{suffix}"
+    action = "Reinitialized existing Git repository" if outcome.details.get("reinitialized") else "Initialized empty Git repository"
+    return f"{action}{suffix}"

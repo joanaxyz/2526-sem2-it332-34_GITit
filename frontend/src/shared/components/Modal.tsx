@@ -1,4 +1,5 @@
 import { X } from 'lucide-react'
+import { useId } from 'react'
 import type { ReactNode } from 'react'
 
 import { Button } from './Button'
@@ -19,12 +20,18 @@ export function Modal({
   className?: string
   contentClassName?: string
 }) {
+  const titleId = useId()
   if (!open) return null
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">
+    <div
+      aria-labelledby={titleId}
+      aria-modal="true"
+      className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4"
+      role="dialog"
+    >
       <Card className={className ?? 'w-full max-w-lg'}>
         <div className="flex items-center justify-between border-b border-border p-5">
-          <h2 className="text-lg font-bold">{title}</h2>
+          <h2 id={titleId} className="text-lg font-bold">{title}</h2>
           <Button type="button" variant="ghost" size="icon" onClick={onClose} aria-label="Close modal">
             <X />
           </Button>

@@ -42,21 +42,41 @@ Use these as `non_counted_patterns` for all Module 1 command-count policies unle
 ```json
 [
   "git status",
+  "git status -s",
+  "git status --short",
+  "git status --porcelain",
+  "git status -sb",
+  "git status --ignored",
   "git log",
   "git log --oneline",
   "git log --oneline --graph --all",
+  "git log -n <number>",
+  "git log --max-count=<number>",
   "git diff",
+  "git diff <path>",
   "git diff --staged",
   "git diff --cached",
+  "git diff --staged <path>",
+  "git diff --cached <path>",
   "git diff HEAD",
+  "git diff --name-only",
+  "git diff --staged --name-only",
   "git show",
+  "git show <commit>",
+  "git show --name-only",
+  "git remote",
   "git remote -v",
   "git branch",
-  "git branch -v"
+  "git branch -v",
+  "git reflog",
+  "git check-ignore -v <path>",
+  "git ls-files"
 ]
 ```
 
-Diagnostic commands should support the task but should not become normal state-completion scenarios, except Lesson 1.8, which is explicitly an inspection activity.
+The full parser/preview support matrix lives in `docs/module-1_command_support_matrix.md`.
+
+Diagnostic commands should support state-based practice, but diagnostic-only learning belongs in lesson overview and command-preview content.
 
 ---
 
@@ -65,7 +85,7 @@ Diagnostic commands should support the task but should not become normal state-c
 The following support is required because this document intentionally keeps the richer curriculum cases:
 
 1. `git init <directory>` must set `operation_metadata.last_init_directory` and allow the evaluator to confirm the target directory.
-2. `git clone <url> <directory>` must set `operation_metadata.last_clone_destination` and materialize remote fixture commits with real `tree` and `changes`, not empty placeholder commits.
+2. `git clone` must support default/custom destinations, `-b`/`--branch`, and `--depth`; it must set clone operation metadata and materialize remote fixture commits with real `tree` and `changes`, not empty placeholder commits.
 3. `.gitignore` cases must distinguish ignored untracked files from tracked generated files.
 4. Hard `.gitignore` cases require `git rm --cached <path>` or equivalent simulator support.
 5. Partial staging cases require hunk/content-token support. A path-only check is insufficient.
@@ -85,7 +105,7 @@ Show:
 
 ```text
 commit message, target files, excluded files, branch names, remote URLs, destination folders,
-ignored patterns, hunk labels/tokens, files to preserve/discard, inspection questions
+ignored patterns, hunk labels/tokens, files to preserve/discard, diagnostic questions
 ```
 
 Do not show:
@@ -104,7 +124,7 @@ title: Initialize a local repository
 focus: git init
 skill_focus_type: command_specific
 primary_focus_commands: ["git init"]
-supporting_inspection_commands: ["git status"]
+supporting_diagnostic_commands: ["git status"]
 completion_type: state_based
 related_git_concepts: ["repository metadata", ".git directory", "HEAD", "working tree", "untracked files"]
 ```
@@ -241,23 +261,23 @@ title: Clone a remote repository
 focus: git clone
 skill_focus_type: command_specific
 primary_focus_commands: ["git clone"]
-supporting_inspection_commands: ["git remote -v", "git log --oneline", "git status"]
+supporting_diagnostic_commands: ["git remote -v", "git log --oneline", "git status"]
 completion_type: state_based
-related_git_concepts: ["origin", "remote-tracking branch", "upstream", "working tree checkout"]
+related_git_concepts: ["origin", "remote-tracking branch", "upstream", "branch checkout", "shallow clone"]
 ```
 
 ## Preview content
 
-**Skill explanation:** `git clone` creates a local repository from an existing remote, configures `origin`, creates local branch `main`, records `origin/main`, checks out the remote tree, and leaves the working tree clean.  
-**Preview demo:** show remote fixture -> clone -> local `main` and `origin/main` both pointing to the cloned commit.
+**Skill explanation:** `git clone` creates a local repository from an existing remote, configures `origin`, creates the selected local branch, records the matching `origin/<branch>` remote-tracking branch, checks out the remote tree, and leaves the working tree clean.
+**Preview demo:** show remote fixture -> clone -> local branch and `origin/<branch>` both pointing to the cloned commit.
 
 ## Difficulty progression
 
 | Difficulty | Definition | Why harder |
 |---|---|---|
-| Easy | HTTPS URL into default destination. | Basic clone setup. |
-| Medium | HTTPS URL into required custom folder. | Student must include destination folder exactly. |
-| Hard | SSH URL into required custom folder with deeper remote history. | More exact values and history refs to verify. |
+| Easy | Default destination, custom destination, and simple branch checkout. | Student must distinguish omitted destination from named destination and selected branch. |
+| Medium | SSH custom destination, branch into folder, and shallow default clone. | Student must combine URL style, destination, branch, or depth exactly. |
+| Hard | Shallow selected-branch clones and SSH custom destination variants. | More exact option order, branch refs, and metadata to verify. |
 
 ## Command policies
 
@@ -272,132 +292,41 @@ related_git_concepts: ["origin", "remote-tracking branch", "upstream", "working 
 ```yaml
 shared_target_rule_template:
   repository_initialized: true
-  head_branch: main
+  head_branch: "{{selected_branch}}"
   remote_url_matches: {origin: "{{remote_url}}"}
-  branch_points_to: {main: "{{remote_head}}"}
-  remote_branch_points_to: {origin/main: "{{remote_head}}"}
-  upstream_tracking: {main: origin/main}
+  branch_points_to: {"{{selected_branch}}": "{{remote_head}}"}
+  remote_branch_points_to: {"{{selected_remote_branch}}": "{{remote_head}}"}
+  upstream_tracking: {"{{selected_branch}}": "{{selected_remote_branch}}"}
   staging_empty: true
   working_tree_clean: true
   rules:
     - {type: operation_metadata_equals, key: last_clone_destination, value: "{{destination_folder}}"}
+    - {type: operation_metadata_equals, key: last_clone_url, value: "{{remote_url}}"}
+    - {type: operation_metadata_equals, key: last_clone_branch, value: "{{selected_branch}}"}
+    - {type: operation_metadata_equals, key: last_clone_depth, value: "{{clone_depth}}"}
+    - {type: operation_metadata_equals, key: last_clone_remote_name, value: origin}
+    - {type: operation_metadata_equals, key: last_clone_default_branch, value: "{{default_branch}}"}
+    - {type: operation_metadata_equals, key: last_clone_shallow, value: "{{clone_shallow}}"}
     - {type: commit_exists, commit: "{{remote_head}}"}
     - {type: commit_tree_contains, commit: "{{remote_head}}", tree: "{{remote_tree}}"}
 ```
 
-### Easy cases
+### Case coverage
 
-```yaml
-difficulty: Easy
-blueprint_signature: module1.clone.https-default-folder
-subtemplate_signature: clone-https-default
-solution_commands_template: ["git clone {{remote_url}}"]
-parameter_pools:
-  cases:
-    - case_id: clone-easy-docs-portal
-      project: docs-portal
-      remote_url: https://example.test/training/docs-portal.git
-      destination_folder: docs-portal
-      remote_head: r10
-      remote_tree: {README.md: docs-readme-v1, docs/intro.md: docs-intro-v1}
-      remote_commits: [{id: r10, message: Create docs portal starter, parents: [], tree: {README.md: docs-readme-v1, docs/intro.md: docs-intro-v1}}]
-      answer_anchor: origin URL docs-portal; main/origin-main -> r10; docs tree checked out
-    - case_id: clone-easy-api-lab
-      project: api-lab
-      remote_url: https://example.test/training/api-lab.git
-      destination_folder: api-lab
-      remote_head: r11
-      remote_tree: {README.md: api-readme-v1, api/routes.py: api-routes-v1}
-      remote_commits: [{id: r11, message: Create API lab starter, parents: [], tree: {README.md: api-readme-v1, api/routes.py: api-routes-v1}}]
-      answer_anchor: origin URL api-lab; main/origin-main -> r11; API tree checked out
-    - case_id: clone-easy-profile-site
-      project: profile-site
-      remote_url: https://example.test/training/profile-site.git
-      destination_folder: profile-site
-      remote_head: r12
-      remote_tree: {index.html: profile-index-v1, styles/site.css: profile-css-v1}
-      remote_commits: [{id: r12, message: Create profile site starter, parents: [], tree: {index.html: profile-index-v1, styles/site.css: profile-css-v1}}]
-      answer_anchor: origin URL profile-site; main/origin-main -> r12; site tree checked out
-```
+Each clone blueprint keeps one command in `solution_commands_template`: `["{{solution_command}}"]`.
+The case pool provides a concrete supported command plus remote fixture data.
 
-### Medium cases
+Current case categories:
 
-```yaml
-difficulty: Medium
-blueprint_signature: module1.clone.https-custom-folder
-subtemplate_signature: clone-https-custom-destination
-solution_commands_template: ["git clone {{remote_url}} {{destination_folder}}"]
-parameter_pools:
-  cases:
-    - case_id: clone-medium-cli-tool
-      project: cli-tool
-      remote_url: https://example.test/tools/cli-tool.git
-      destination_folder: cli-practice
-      remote_head: r20
-      remote_tree: {README.md: cli-readme-v2, src/parser.py: cli-parser-v2}
-      remote_commits:
-        - {id: r19, message: Create CLI skeleton, parents: [], tree: {README.md: cli-readme-v1}}
-        - {id: r20, message: Add parser command, parents: [r19], tree: {README.md: cli-readme-v2, src/parser.py: cli-parser-v2}}
-      answer_anchor: custom folder cli-practice; r20 tree/history
-    - case_id: clone-medium-css-kit
-      project: css-kit
-      remote_url: https://example.test/frontend/css-kit.git
-      destination_folder: style-lab
-      remote_head: r21
-      remote_tree: {README.md: css-readme-v1, styles/tokens.css: tokens-v1}
-      remote_commits: [{id: r21, message: Create style token kit, parents: [], tree: {README.md: css-readme-v1, styles/tokens.css: tokens-v1}}]
-      answer_anchor: custom folder style-lab; CSS token tree
-    - case_id: clone-medium-recipe-book
-      project: recipe-book
-      remote_url: https://example.test/docs/recipe-book.git
-      destination_folder: kitchen-docs
-      remote_head: r22
-      remote_tree: {README.md: recipe-readme-v1, recipes/adobo.md: adobo-v1}
-      remote_commits: [{id: r22, message: Create recipe book starter, parents: [], tree: {README.md: recipe-readme-v1, recipes/adobo.md: adobo-v1}}]
-      answer_anchor: custom folder kitchen-docs; recipe tree
-```
-
-### Hard cases
-
-```yaml
-difficulty: Hard
-blueprint_signature: module1.clone.ssh-custom-folder-history
-subtemplate_signature: clone-ssh-custom-history
-solution_commands_template: ["git clone {{remote_url}} {{destination_folder}}"]
-parameter_pools:
-  cases:
-    - case_id: clone-hard-analytics
-      project: analytics-lab
-      remote_url: git@example.test:training/analytics-lab.git
-      destination_folder: analytics-worktree
-      remote_head: r30
-      remote_tree: {README.md: analytics-readme-v3, metrics/report.md: metrics-report-v2, src/summary.py: summary-v1}
-      remote_commits:
-        - {id: r28, message: Create analytics starter, parents: [], tree: {README.md: analytics-readme-v1}}
-        - {id: r29, message: Add metrics report, parents: [r28], tree: {README.md: analytics-readme-v2, metrics/report.md: metrics-report-v1}}
-        - {id: r30, message: Add summary script, parents: [r29], tree: {README.md: analytics-readme-v3, metrics/report.md: metrics-report-v2, src/summary.py: summary-v1}}
-      answer_anchor: SSH URL; custom folder analytics-worktree; three-commit history ending r30
-    - case_id: clone-hard-mobile-ui
-      project: mobile-ui
-      remote_url: git@example.test:frontend/mobile-ui.git
-      destination_folder: mobile-ui-lab
-      remote_head: r31
-      remote_tree: {README.md: mobile-readme-v2, screens/home.tsx: home-v1, styles/mobile.css: mobile-css-v1}
-      remote_commits:
-        - {id: r23, message: Create mobile UI shell, parents: [], tree: {README.md: mobile-readme-v1}}
-        - {id: r31, message: Add mobile home screen, parents: [r23], tree: {README.md: mobile-readme-v2, screens/home.tsx: home-v1, styles/mobile.css: mobile-css-v1}}
-      answer_anchor: SSH URL; custom folder mobile-ui-lab; UI tree ending r31
-    - case_id: clone-hard-lab-notebook
-      project: lab-notebook
-      remote_url: git@example.test:docs/lab-notebook.git
-      destination_folder: notebook-review
-      remote_head: r32
-      remote_tree: {README.md: notebook-readme-v2, entries/day-1.md: day1-v1, entries/day-2.md: day2-v1}
-      remote_commits:
-        - {id: r24, message: Create lab notebook, parents: [], tree: {README.md: notebook-readme-v1, entries/day-1.md: day1-v1}}
-        - {id: r32, message: Add second lab entry, parents: [r24], tree: {README.md: notebook-readme-v2, entries/day-1.md: day1-v1, entries/day-2.md: day2-v1}}
-      answer_anchor: SSH URL; custom folder notebook-review; notebook tree ending r32
-```
+| Category | Example supported solution |
+|---|---|
+| Default destination clone | `git clone https://example.test/training/docs-portal.git` |
+| Custom destination clone | `git clone https://example.test/training/api-lab.git api-workshop` |
+| SSH URL custom destination clone | `git clone git@example.test:training/analytics-lab.git analytics-worktree` |
+| Specific branch clone | `git clone -b starter https://example.test/training/profile-site.git` |
+| Specific branch into custom folder | `git clone --branch starter https://example.test/tools/cli-tool.git cli-starter-lab` |
+| Shallow clone with `--depth 1` | `git clone --depth 1 https://example.test/frontend/css-kit.git` |
+| Shallow selected branch into folder | `git clone --depth 1 -b starter https://example.test/frontend/mobile-ui.git mobile-ui-lab` |
 
 ---
 
@@ -409,7 +338,7 @@ title: Stage and commit the intended change
 focus: git commit
 skill_focus_type: workflow_specific
 primary_focus_commands: ["git add", "git commit"]
-supporting_inspection_commands: ["git status", "git diff", "git diff --staged"]
+supporting_diagnostic_commands: ["git status", "git diff", "git diff --staged"]
 completion_type: state_based
 related_git_concepts: ["working tree", "staging area", "commit", "branch tip"]
 ```
@@ -565,7 +494,7 @@ title: Configure ignore rules
 focus: .gitignore
 skill_focus_type: concept_specific
 primary_focus_commands: ["git add", "git commit"]
-supporting_inspection_commands: ["git status", "git diff", "git diff --staged"]
+supporting_diagnostic_commands: ["git status", "git diff", "git diff --staged"]
 completion_type: expanded_state_based
 related_git_concepts: ["ignored files", "untracked files", "tracked files", "index"]
 ```
@@ -692,7 +621,7 @@ title: Stage selected hunks
 focus: git add -p
 skill_focus_type: command_specific
 primary_focus_commands: ["git add -p", "git commit"]
-supporting_inspection_commands: ["git status", "git diff", "git diff --staged"]
+supporting_diagnostic_commands: ["git status", "git diff", "git diff --staged"]
 completion_type: expanded_state_based
 related_git_concepts: ["hunks", "partial staging", "index", "working tree leftovers"]
 ```
@@ -812,7 +741,7 @@ title: Amend the latest commit
 focus: git commit --amend
 skill_focus_type: command_specific
 primary_focus_commands: ["git commit --amend"]
-supporting_inspection_commands: ["git status", "git log --oneline", "git diff", "git diff --staged"]
+supporting_diagnostic_commands: ["git status", "git log --oneline", "git diff", "git diff --staged"]
 completion_type: expanded_state_based
 related_git_concepts: ["latest commit", "amend", "branch tip replacement", "commit message"]
 ```
@@ -929,7 +858,7 @@ title: Unstage and discard safely
 focus: git restore
 skill_focus_type: command_specific
 primary_focus_commands: ["git restore"]
-supporting_inspection_commands: ["git status", "git diff", "git diff --staged"]
+supporting_diagnostic_commands: ["git status", "git diff", "git diff --staged"]
 completion_type: state_based
 related_git_concepts: ["index", "working tree", "unstage", "discard"]
 ```
@@ -1038,53 +967,41 @@ parameter_pools:
 ```yaml
 scenario_slug: read-repository-status-and-history
 title: Read repository status and history
-focus: repository inspection
+focus: diagnostic commands
 skill_focus_type: concept_specific
-primary_focus_commands: []
-supporting_inspection_commands: ["git status", "git log --oneline", "git diff", "git diff --staged", "git show"]
-completion_type: inspection
+primary_focus_commands: ["git status"]
+supporting_diagnostic_commands: ["git status", "git log --oneline", "git diff", "git diff --staged", "git show"]
+playable_difficulties: []
 related_git_concepts: ["status interpretation", "history interpretation", "diff interpretation"]
 ```
 
-## Difficulty progression
+## Preview content
 
-| Difficulty | Definition | Why harder |
-|---|---|---|
-| Easy | One inspection goal, command named by context. | Student learns what to look for. |
-| Medium | Mixed state; student chooses the correct diagnostic command. | Requires selecting status/diff/log based on question. |
-| Hard | Multi-part observation across status, diff, and history. | Requires interpretation without changing state. |
+Lesson 1.8 is lesson overview plus Skill Focus Preview content. It should not seed Easy/Medium/Hard playable sessions because there is no state-changing target.
 
-## Command policies
-
-| Difficulty | min_counted | max_counted |
-|---|---:|---:|
-| Easy | 0 | 0 |
-| Medium | 0 | 0 |
-| Hard | 0 | 0 |
-
-## Authored cases
+The command preview should cover:
 
 ```yaml
-parameter_pools:
+preview_examples:
   easy_cases:
     - case_id: inspect-easy-status-staged
       project: status-lab
       required_commands: ["git status"]
-      inspection_question: Which file is staged for the next commit?
+      diagnostic_question: Which file is staged for the next commit?
       must_identify: [staged_paths]
       expected_answer: {staged_paths: [src/app.py]}
       answer_anchor: staged path src/app.py
     - case_id: inspect-easy-log-latest
       project: history-lab
       required_commands: ["git log --oneline"]
-      inspection_question: What is the latest commit message?
+      diagnostic_question: What is the latest commit message?
       must_identify: [commit_message]
       expected_answer: {commit_message: Add profile card}
       answer_anchor: latest commit message Add profile card
     - case_id: inspect-easy-diff-working
       project: diff-lab
       required_commands: ["git diff"]
-      inspection_question: Which file has unstaged changes?
+      diagnostic_question: Which file has unstaged changes?
       must_identify: [unstaged_paths]
       expected_answer: {unstaged_paths: [README.md]}
       answer_anchor: unstaged path README.md
@@ -1092,21 +1009,21 @@ parameter_pools:
     - case_id: inspect-medium-status-mixed
       project: mixed-status-lab
       required_commands: ["git status"]
-      inspection_question: Identify the staged, unstaged, and untracked paths.
+      diagnostic_question: Identify the staged, unstaged, and untracked paths.
       must_identify: [staged_paths, unstaged_paths, untracked_paths]
       expected_answer: {staged_paths: [src/app.py], unstaged_paths: [README.md], untracked_paths: [notes/todo.md]}
       answer_anchor: three distinct file areas
     - case_id: inspect-medium-staged-diff
       project: staged-diff-lab
       required_commands: ["git diff --staged"]
-      inspection_question: Which path is staged for the next snapshot?
+      diagnostic_question: Which path is staged for the next snapshot?
       must_identify: [staged_diff_paths]
       expected_answer: {staged_diff_paths: [styles/site.css]}
       answer_anchor: staged diff path styles/site.css
     - case_id: inspect-medium-branch-history
       project: branch-history-lab
       required_commands: ["git log --oneline"]
-      inspection_question: Which commit is currently at HEAD?
+      diagnostic_question: Which commit is currently at HEAD?
       must_identify: [latest_commit, commit_message]
       expected_answer: {latest_commit: c3, commit_message: Refine search results view}
       answer_anchor: latest commit c3 with specific message
@@ -1114,27 +1031,27 @@ parameter_pools:
     - case_id: inspect-hard-full-state
       project: full-state-lab
       required_commands: ["git status", "git diff --staged", "git log --oneline"]
-      inspection_question: Identify the current branch, staged file, unstaged file, and latest commit message.
+      diagnostic_question: Identify the current branch, staged file, unstaged file, and latest commit message.
       must_identify: [head_branch, staged_paths, unstaged_paths, commit_message]
       expected_answer: {head_branch: main, staged_paths: [src/export.py], unstaged_paths: [docs/export.md], commit_message: Add export starter}
       answer_anchor: branch + staged + unstaged + latest message
     - case_id: inspect-hard-conflict-state
       project: conflict-read-lab
       required_commands: ["git status", "git diff"]
-      inspection_question: Which path is conflicted and which branch is active?
+      diagnostic_question: Which path is conflicted and which branch is active?
       must_identify: [head_branch, conflicted_paths]
       expected_answer: {head_branch: main, conflicted_paths: [src/app.py]}
       answer_anchor: active branch main and conflict path src/app.py
     - case_id: inspect-hard-history-and-diff
       project: history-diff-lab
       required_commands: ["git log --oneline", "git diff HEAD"]
-      inspection_question: Identify the latest commit and all paths changed since HEAD.
+      diagnostic_question: Identify the latest commit and all paths changed since HEAD.
       must_identify: [latest_commit, commit_message, diff_target]
       expected_answer: {latest_commit: c4, commit_message: Add dashboard shell, diff_target: {unstaged: [src/dashboard.js], staged: [styles/dashboard.css], conflicted: []}}
       answer_anchor: latest commit c4 plus staged/unstaged diff split
 ```
 
-Lesson 1.8 should not use CAR as a normal command-count state task. It should use inspection completion with answer capture.
+Students apply these diagnostic commands inside the normal state-based scenarios, where diagnostic commands are logged as non-counted and excluded from CAR.
 
 ---
 
@@ -1146,7 +1063,7 @@ title: Complete a focused local workflow
 focus: local repository workflow
 skill_focus_type: workflow_specific
 primary_focus_commands: ["git add", "git commit"]
-supporting_inspection_commands: ["git status", "git diff", "git diff --staged", "git log --oneline"]
+supporting_diagnostic_commands: ["git status", "git diff", "git diff --staged", "git log --oneline"]
 completion_type: expanded_state_based
 related_git_concepts: ["focused snapshot", "ignore rules", "partial staging", "amend", "clean final state"]
 ```

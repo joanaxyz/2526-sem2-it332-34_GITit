@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -18,14 +19,12 @@ from scenarios.selectors import (
 )
 from scenarios.serializers import (
     CommandSubmitSerializer,
-    InspectionAnswerSubmitSerializer,
     ScenarioStartSerializer,
     SkillFocusDemoCommandSerializer,
     session_payload,
 )
 from scenarios.services import (
     CommandProcessingService,
-    InspectionAnswerSubmissionService,
     ScenarioSessionService,
 )
 from simulator.command_engine import GitCommandEngine
@@ -212,31 +211,6 @@ class CommandSubmitAPIView(APIView):
             )
 
 
-class InspectionAnswerSubmitAPIView(APIView):
-    def post(self, request, session_id: int):
-        serializer = InspectionAnswerSubmitSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        session = ScenarioSession.objects.select_related(
-            "scenario",
-            "learning_unit",
-            "difficulty_instance",
-            "difficulty_instance__target_rule",
-            "variant",
-        ).get(id=session_id, user=request.user)
-        result = InspectionAnswerSubmissionService().submit_answer(
-            session=session,
-            answer=serializer.validated_data["answer"],
-        )
-        return Response(
-            {
-                "session": session_payload(result["session"], include_steps=False),
-                "evaluation_result": result["evaluation"].result_category,
-                "summary": result["evaluation"].summary,
-                "failed_rules": result["evaluation"].failed_rules,
-            }
-        )
-
-
 class ScenarioSessionAbandonAPIView(APIView):
     def post(self, request, session_id: int):
         session = ScenarioSession.objects.get(id=session_id, user=request.user)
@@ -245,8 +219,9 @@ class ScenarioSessionAbandonAPIView(APIView):
 
 
 class ScenarioRetryAPIView(APIView):
+    @transaction.atomic
     def post(self, request, session_id: int):
-        prior = ScenarioSession.objects.select_related(
+        prior = ScenarioSession.objects.select_for_update().select_related(
             "scenario",
             "difficulty_instance",
             "difficulty_instance__command_policy",

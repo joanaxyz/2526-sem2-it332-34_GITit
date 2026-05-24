@@ -11,6 +11,7 @@ export function ScenarioStatusHeader({
   isRetrying = false,
   onExit,
   onRetry,
+  onStartOver,
   onOpenTour,
   onContinue,
 }: {
@@ -19,6 +20,7 @@ export function ScenarioStatusHeader({
   isRetrying?: boolean
   onExit?: () => void
   onRetry?: () => void
+  onStartOver?: () => void
   onOpenTour?: () => void
   onContinue?: () => void
 }) {
@@ -31,6 +33,7 @@ export function ScenarioStatusHeader({
     !session.review_mode &&
     (session.status === 'failed' || (session.status === 'completed' && !isAccurate)) &&
     !!onRetry
+  const canStartOver = !session.review_mode && session.status === 'started' && !!onStartOver
   const canContinue =
     !canRetry &&
     !session.review_mode &&
@@ -59,7 +62,13 @@ export function ScenarioStatusHeader({
         {canRetry ? (
           <Button type="button" variant="outline" size="sm" disabled={isRetrying} onClick={onRetry}>
             <RefreshCcw data-icon="inline-start" />
-            {isRetrying ? 'Starting retry' : 'Retry'}
+            {isRetrying ? 'Starting retry' : session.status === 'completed' ? 'Retry for accuracy' : 'Retry'}
+          </Button>
+        ) : null}
+        {canStartOver ? (
+          <Button type="button" variant="outline" size="sm" disabled={isRetrying} onClick={onStartOver}>
+            <RefreshCcw data-icon="inline-start" />
+            {isRetrying ? 'Starting' : 'Start over'}
           </Button>
         ) : null}
         {canContinue ? (

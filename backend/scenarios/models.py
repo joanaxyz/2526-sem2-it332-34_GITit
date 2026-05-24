@@ -6,7 +6,6 @@ from common.constants import (
     COMMAND_DIAGNOSTIC,
     COMMAND_UNPROCESSABLE,
     COMPLETION_EXPANDED_STATE_BASED,
-    COMPLETION_INSPECTION,
     COMPLETION_STATE_BASED,
     DIFFICULTY_EASY,
     DIFFICULTY_HARD,
@@ -47,7 +46,7 @@ class ScenarioSkillFocus(models.Model):
         default=SkillFocusType.COMMAND_SPECIFIC,
     )
     primary_focus_commands = models.JSONField(default=list, blank=True)
-    supporting_inspection_commands = models.JSONField(default=list, blank=True)
+    supporting_diagnostic_commands = models.JSONField(default=list, blank=True)
     safe_demo_commands = models.JSONField(default=list, blank=True)
     demo_repository_state = models.JSONField(default=dict, blank=True)
     demo_dag_config = models.JSONField(default=dict, blank=True)
@@ -96,8 +95,10 @@ class DifficultyInstance(models.Model):
 
     class CompletionType(models.TextChoices):
         STATE_BASED = COMPLETION_STATE_BASED, "State based"
-        INSPECTION = COMPLETION_INSPECTION, "Inspection"
-        EXPANDED_STATE_BASED = COMPLETION_EXPANDED_STATE_BASED, "Expanded state based"
+        EXPANDED_STATE_BASED = (
+            COMPLETION_EXPANDED_STATE_BASED,
+            "State based with detailed target rules",
+        )
 
     scenario = models.ForeignKey(
         ScenarioSkillFocus, related_name="difficulty_instances", on_delete=models.CASCADE
@@ -152,7 +153,6 @@ class ScenarioGenerationBlueprint(models.Model):
     initial_state_template = models.JSONField(default=dict, blank=True)
     target_rule_template = models.JSONField(default=dict, blank=True)
     solution_commands_template = models.JSONField(default=list, blank=True)
-    expected_observations_template = models.JSONField(default=dict, blank=True)
     student_context_template = models.JSONField(default=dict, blank=True)
     generation_count = models.PositiveIntegerField(default=1)
     max_combinations = models.PositiveIntegerField(null=True, blank=True)
@@ -181,7 +181,6 @@ class ScenarioVariant(models.Model):
     target_rule = models.JSONField(default=dict, blank=True)
     target_state = models.JSONField()
     expected_state_diagram = models.JSONField(default=dict, blank=True)
-    expected_observations = models.JSONField(default=dict, blank=True)
     solution_commands = models.JSONField(default=list, blank=True)
     is_generated = models.BooleanField(default=False)
     parameter_context = models.JSONField(default=dict, blank=True)
@@ -242,7 +241,6 @@ class ScenarioSession(models.Model):
     changed_variant = models.BooleanField(default=False)
     command_policy_snapshot = models.JSONField(default=dict)
     repository_state = models.JSONField(default=dict)
-    inspection_answer = models.JSONField(default=dict, blank=True)
     counted_action_total = models.PositiveIntegerField(default=0)
     non_counted_diagnostic_total = models.PositiveIntegerField(default=0)
     total_attempts = models.PositiveIntegerField(default=0)

@@ -200,16 +200,12 @@ describe('ScenarioList preview gate', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('renders diagnostic-only scenarios as preview-only cards', async () => {
+  it('renders diagnostic lessons with no playable difficulties as preview-only cards', async () => {
     renderList([
       {
         ...scenario,
         skill_focus_type: 'concept_specific',
-        difficulties: [
-          difficulty({ id: 10, difficulty: 'easy', completion_type: 'inspection' }),
-          difficulty({ id: 20, difficulty: 'medium', completion_type: 'inspection' }),
-          difficulty({ id: 30, difficulty: 'hard', completion_type: 'inspection' }),
-        ],
+        difficulties: [],
       },
     ])
     fireEvent.click(await screen.findByLabelText(/expand command preview/i))

@@ -9,7 +9,6 @@ from django.db import transaction
 
 from common.constants import (
     COMPLETION_EXPANDED_STATE_BASED,
-    COMPLETION_INSPECTION,
     COMPLETION_STATE_BASED,
     DIFFICULTY_EASY,
     DIFFICULTY_HARD,
@@ -34,18 +33,35 @@ from scenarios.models import (
 
 DIAG_PATTERNS = [
     "git status",
+    "git status -s",
+    "git status --short",
+    "git status --porcelain",
+    "git status -sb",
+    "git status --ignored",
     "git log",
     "git log --oneline",
     "git log --oneline --graph --all",
+    "git log -n <number>",
+    "git log --max-count=<number>",
     "git diff",
+    "git diff <path>",
     "git diff --staged",
     "git diff --cached",
+    "git diff --staged <path>",
+    "git diff --cached <path>",
     "git diff HEAD",
+    "git diff --name-only",
+    "git diff --staged --name-only",
     "git show",
+    "git show <commit>",
+    "git show --name-only",
+    "git remote",
     "git remote -v",
     "git branch",
     "git branch -v",
     "git reflog",
+    "git check-ignore -v <path>",
+    "git ls-files",
 ]
 
 SESSION_COUNTS = {
@@ -61,7 +77,7 @@ MODULE_ONE_LESSONS = [
         "inspecting-repository-state",
         "Inspecting Repository State",
         "Read repository status, history, diffs, branches, remotes, and objects before acting.",
-        "scenario",
+        "content",
     ),
     (
         2,
@@ -193,59 +209,57 @@ def uninitialized_state(**extra: Any) -> dict[str, Any]:
 def student_context_template(kind: str) -> dict[str, Any]:
     common = {
         # Keep the active-attempt context focused on the brief and required values.
-        # The UI intentionally hides task/checklist/helpful-inspection scaffolds
+        # The UI intentionally hides task/checklist/helpful diagnostic scaffolds
         # because those sections can leak evaluator rules or imply exact commands.
     }
     templates = {
         "init": {
             "story": "You are preparing {{project}} for version control.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Project", "value": "{{project}}"},
                 {"label": "Target directory", "value": "{{target_directory}}"},
+                {"label": "Initial branch", "value": "{{expected_initial_branch}}"},
+                {"label": "Quiet mode", "value": "{{expected_quiet}}"},
+                {"label": "Existing repository", "value": "{{expected_reinitialized}}"},
                 {"label": "Expected untracked paths", "value": "{{expected_untracked_paths}}"},
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
         "diagnostic": {
             "story": "Before changing {{project}}, inspect the repository and report what you observe.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Question", "value": "{{question}}"},
                 {"label": "Observation fields", "value": "{{must_identify}}"},
             ],
-            "warnings": [
+            "constraints": [
                 "Use read-only commands only; the repository state should not change.",
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
         "clone": {
             "story": "You need a local working copy of {{project}} from its remote repository.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Remote URL", "value": "{{remote_url}}"},
                 {"label": "Destination folder", "value": "{{destination_folder}}"},
+                {"label": "Branch to check out", "value": "{{selected_branch}}"},
+                {"label": "Default remote branch", "value": "{{default_branch}}"},
+                {"label": "Clone depth", "value": "{{clone_depth_label}}"},
                 {"label": "Remote tip", "value": "{{remote_head}}"},
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
         "commit": {
             "story": "You are preparing a focused project snapshot for {{project}}.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Target files", "value": "{{target_files}}"},
                 {"label": "Files to leave out", "value": "{{excluded_files}}"},
                 {"label": "Required commit message text", "value": "{{required_commit_message}}"},
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
         "gitignore": {
             "story": "{{project}} has local/generated files that should not be saved in project history.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Ignore file", "value": ".gitignore"},
                 {"label": "Ignore marker", "value": "{{gitignore_token}}"},
                 {"label": "Ignored/generated paths", "value": "{{ignored_paths}}"},
@@ -255,47 +269,39 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 },
                 {"label": "Required commit message text", "value": "{{required_commit_message}}"},
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
         "partial": {
             "story": "{{project}} has multiple changes, but only one logical hunk belongs in the next snapshot.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Target files", "value": "{{target_files}}"},
                 {"label": "Hunks to commit", "value": "{{target_hunks}}"},
                 {"label": "Hunks to leave in working tree", "value": "{{leftover_hunks}}"},
                 {"label": "Other files to leave out", "value": "{{unrelated_files}}"},
                 {"label": "Required commit message text", "value": "{{required_commit_message}}"},
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
         "amend": {
             "story": "The latest local snapshot in {{project}} needs to be repaired before it is considered final.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Commit to repair", "value": "{{commit_to_repair}}"},
                 {"label": "Corrected message", "value": "{{required_commit_message}}"},
                 {"label": "Files in repaired commit", "value": "{{target_files}}"},
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
         "restore": {
             "story": "{{project}} has mixed changes. Some should be kept for later, and some should be discarded.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Keep but unstage", "value": "{{keep_paths}}"},
                 {"label": "Discard from working tree", "value": "{{discard_paths}}"},
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
         "review": {
             "story": "{{project}} combines several Module 1 local workflow skills in one task.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Target files", "value": "{{target_files}}"},
                 {"label": "Files/hunks to leave out", "value": "{{excluded_files}}"},
                 {"label": "Required commit message text", "value": "{{required_commit_message}}"},
@@ -303,8 +309,6 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 {"label": "Hunks to leave", "value": "{{leftover_hunks}}"},
                 {"label": "Commit to repair", "value": "{{commit_to_repair}}"},
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
     }
@@ -327,190 +331,6 @@ def base_scenarios() -> list[dict[str, Any]]:
 
 
 def diagnostic_scenario() -> dict[str, Any]:
-    base = repo_with_head(
-        commits=[
-            commit(
-                "c1", "Create starter files", {"README.md": "readme-v1", "src/app.py": "app-v1"}
-            ),
-            commit(
-                "c2",
-                "Add dashboard shell",
-                {
-                    "README.md": "readme-v1",
-                    "src/app.py": "app-v1",
-                    "src/dashboard.py": "dashboard-v1",
-                },
-                ["c1"],
-            ),
-        ],
-        head="c2",
-        working_tree={"src/app.py": "app-v2", "notes/todo.md": "untracked"},
-        staging={"src/dashboard.py": "dashboard-v2"},
-        remotes={"origin": "https://example.test/training/dashboard.git"},
-        remote_branches={"origin/main": "c2"},
-        upstream_tracking={"main": "origin/main"},
-    )
-    easy_cases = [
-        diagnostic_case(
-            "diagnostic-easy-status",
-            "dashboard-lab",
-            "Identify the current branch, staged paths, unstaged paths, and untracked files.",
-            ["git status"],
-            ["head_branch", "staged_paths", "unstaged_paths", "untracked_paths"],
-            {
-                "head_branch": "main",
-                "staged_paths": ["src/dashboard.py"],
-                "unstaged_paths": ["src/app.py"],
-                "untracked_paths": ["notes/todo.md"],
-            },
-            "status identifies main, staged dashboard, unstaged app, and untracked notes",
-            base,
-        ),
-        diagnostic_case(
-            "diagnostic-easy-diff",
-            "dashboard-lab",
-            "Use diff views to separate unstaged and staged changes.",
-            ["git diff", "git diff --staged"],
-            ["unstaged_diff_paths", "staged_diff_paths"],
-            {
-                "unstaged_diff_paths": ["src/app.py"],
-                "staged_diff_paths": ["src/dashboard.py"],
-            },
-            "diff separates app working change from staged dashboard change",
-            base,
-        ),
-    ]
-    medium_state = repo_with_head(
-        commits=[
-            commit("c1", "Create starter files", {"README.md": "readme-v1"}),
-            commit(
-                "c2",
-                "Add profile page",
-                {"README.md": "readme-v1", "src/profile.py": "profile-v1"},
-                ["c1"],
-            ),
-            commit(
-                "c3",
-                "Add profile tests",
-                {
-                    "README.md": "readme-v1",
-                    "src/profile.py": "profile-v1",
-                    "tests/test_profile.py": "profile-test-v1",
-                },
-                ["c2"],
-            ),
-        ],
-        head="c3",
-        working_tree={"src/profile.py": "profile-v2"},
-        staging={},
-        remotes={"origin": "https://example.test/training/profile.git"},
-        remote_branches={"origin/main": "c3"},
-        upstream_tracking={"main": "origin/main"},
-    )
-    medium_cases = [
-        diagnostic_case(
-            "diagnostic-medium-history",
-            "profile-lab",
-            "Read the compact history and identify the latest commit and message.",
-            ["git log --oneline", "git show"],
-            ["latest_commit", "commit_message", "changed_paths"],
-            {
-                "latest_commit": "c3",
-                "commit_message": "Add profile tests",
-                "changed_paths": ["tests/test_profile.py"],
-            },
-            "history points to c3 with profile test change",
-            medium_state,
-        ),
-        diagnostic_case(
-            "diagnostic-medium-branches",
-            "profile-lab",
-            "Inspect local branches before choosing any action.",
-            ["git branch", "git branch -v"],
-            ["head_branch", "available_branches", "branch_tips"],
-            {
-                "head_branch": "main",
-                "available_branches": ["main"],
-                "branch_tips": {"main": "c3"},
-            },
-            "branch output identifies main at c3",
-            medium_state,
-        ),
-    ]
-    hard_state = repo_with_head(
-        commits=[
-            commit("c1", "Create starter files", {"README.md": "readme-v1"}),
-            commit(
-                "c2", "Add API client", {"README.md": "readme-v1", "src/api.py": "api-v1"}, ["c1"]
-            ),
-            commit(
-                "c3",
-                "Add export command",
-                {"README.md": "readme-v1", "src/api.py": "api-v1", "src/export.py": "export-v1"},
-                ["c2"],
-            ),
-        ],
-        head="c3",
-        working_tree={"src/export.py": "export-v2", "debug.log": "untracked"},
-        staging={"src/api.py": "api-v2"},
-        remotes={"origin": "https://example.test/training/export.git"},
-        remote_branches={"origin/main": "c3", "origin/release": "c2"},
-        upstream_tracking={"main": "origin/main"},
-        extra={"branches": {"main": "c3", "release-check": "c2"}},
-    )
-    hard_cases = [
-        diagnostic_case(
-            "diagnostic-hard-combined-read",
-            "export-lab",
-            "Combine status, staged diff, history, branch, remote, and show output before acting.",
-            [
-                "git status",
-                "git diff --staged",
-                "git log --oneline --graph --all",
-                "git show",
-                "git branch -v",
-                "git remote -v",
-            ],
-            [
-                "head_branch",
-                "staged_paths",
-                "unstaged_paths",
-                "commit_history",
-                "available_branches",
-                "latest_commit",
-            ],
-            {
-                "head_branch": "main",
-                "staged_paths": ["src/api.py"],
-                "unstaged_paths": ["src/export.py"],
-                "commit_history": ["c1", "c2", "c3"],
-                "available_branches": ["main", "release-check"],
-                "latest_commit": "c3",
-            },
-            "combined diagnostics identify branch, index, worktree, history, and remote context",
-            hard_state,
-        ),
-        diagnostic_case(
-            "diagnostic-hard-reflog-recovery",
-            "export-lab",
-            "Use reflog plus status/history views to confirm where HEAD is before making changes.",
-            ["git reflog", "git status", "git log --oneline"],
-            ["head_branch", "latest_commit", "unstaged_paths", "staged_paths"],
-            {
-                "head_branch": "main",
-                "latest_commit": "c3",
-                "unstaged_paths": ["src/export.py"],
-                "staged_paths": ["src/api.py"],
-            },
-            "reflog/status/history confirm main at c3 with split changes",
-            {
-                **hard_state,
-                "reflog": [
-                    {"ref": "HEAD@{0}", "target": "c3", "message": "commit: Add export command"}
-                ],
-            },
-        ),
-    ]
     return scenario_dict(
         lesson=(
             1,
@@ -533,109 +353,52 @@ def diagnostic_scenario() -> dict[str, Any]:
             "git remote -v",
         ],
         supporting=["git log --oneline --graph --all", "git branch -v", "git reflog"],
-        concepts=["status", "history", "diffs", "branches", "remotes", "read-only inspection"],
+        concepts=["status", "history", "diffs", "branches", "remotes", "diagnostic commands"],
         kind=ScenarioSkillFocus.SkillFocusType.CONCEPT_SPECIFIC,
-        difficulties={
-            DIFFICULTY_EASY: diff(
-                (0, 0),
-                "Read the repository before acting.",
-                "Use the requested diagnostic command and submit the observations.",
-                [
-                    diagnostic_bp(
-                        "diagnostic-status-and-diff",
-                        easy_cases,
-                        "module1.diagnostic.status-diff",
-                        "status-diff",
-                    )
-                ],
-                completion_type=COMPLETION_INSPECTION,
-            ),
-            DIFFICULTY_MEDIUM: diff(
-                (0, 0),
-                "Read history and branch context.",
-                "Use diagnostic history or branch commands and submit the observations.",
-                [
-                    diagnostic_bp(
-                        "diagnostic-history-branches",
-                        medium_cases,
-                        "module1.diagnostic.history-branches",
-                        "history-branches",
-                    )
-                ],
-                completion_type=COMPLETION_INSPECTION,
-            ),
-            DIFFICULTY_HARD: diff(
-                (0, 0),
-                "Combine multiple diagnostic views.",
-                "Use only read-only commands to inspect the repository and submit the observations.",
-                [
-                    diagnostic_bp(
-                        "diagnostic-combined",
-                        hard_cases,
-                        "module1.diagnostic.combined",
-                        "combined-diagnostics",
-                    )
-                ],
-                completion_type=COMPLETION_INSPECTION,
-            ),
-        },
-    )
-
-
-def diagnostic_case(
-    case_id: str,
-    project: str,
-    question: str,
-    required_commands: list[str],
-    must_identify: list[str],
-    expected_answer: dict[str, Any],
-    answer_anchor: str,
-    state: dict[str, Any],
-) -> dict[str, Any]:
-    return {
-        "case_id": case_id,
-        "project": project,
-        "question": question,
-        "required_commands": required_commands,
-        "must_identify": must_identify,
-        "expected_answer": expected_answer,
-        "answer_anchor": answer_anchor,
-        "initial_state": state,
-    }
-
-
-def diagnostic_bp(
-    slug: str, cases: list[dict[str, Any]], signature: str, subtemplate: str
-) -> dict[str, Any]:
-    return bp(
-        slug=slug,
-        kind="diagnostic",
-        signature=signature,
-        subtemplate=subtemplate,
-        cases=cases,
-        initial_state="{{initial_state}}",
-        target_rule={
-            "completion_type": COMPLETION_INSPECTION,
-            "required_commands": "{{required_commands}}",
-            "repository_state_unchanged": True,
-            "must_identify": "{{must_identify}}",
-            "rules": [
-                {"type": "inspection_answer_matches", "expected": "{{expected_answer}}"},
-            ],
-        },
-        solution="{{required_commands}}",
-        label="Inspect {{project}}",
-        slug_template="diagnostic-{{case_id}}",
+        difficulties={},
     )
 
 
 def init_scenario() -> dict[str, Any]:
-    """Module 1.1: intentionally avoids fake variety.
-
-    Easy is a single current-directory warm-up because the honest answer is always
-    `git init`. Medium and hard use the simulator-supported `git init <dir>` form so
-    each generated variant has a different target directory and final-state check.
-    """
+    """Module 1.1: variants map to simulator-supported git init metadata."""
+    reinit_state = repo_with_head(
+        commits=[commit("c1", "Keep existing notes", {"README.md": "readme-v1"})],
+        head="c1",
+        working_tree={"notes/today.md": "untracked"},
+    )
+    init_rule = {
+        "repository_initialized": True,
+        "head_branch": "{{expected_initial_branch}}",
+        "staging_empty": True,
+        "rules": [
+            {"type": "commit_count_equals", "count": "{{expected_commit_count}}"},
+            {
+                "type": "operation_metadata_equals",
+                "key": "last_init_directory",
+                "value": "{{expected_init_directory}}",
+            },
+            {
+                "type": "operation_metadata_equals",
+                "key": "last_init_current_directory",
+                "value": "{{expected_current_directory}}",
+            },
+            {
+                "type": "operation_metadata_equals",
+                "key": "last_init_initial_branch",
+                "value": "{{expected_initial_branch}}",
+            },
+            {
+                "type": "operation_metadata_equals",
+                "key": "last_init_quiet",
+                "value": "{{expected_quiet}}",
+            },
+            {
+                "type": "operation_metadata_equals",
+                "key": "last_init_reinitialized",
+                "value": "{{expected_reinitialized}}",
+            },
+        ],
+    }
     return {
         "lesson": (
             2,
@@ -661,40 +424,66 @@ def init_scenario() -> dict[str, Any]:
         "difficulties": {
             DIFFICULTY_EASY: diff(
                 (1, 1),
-                "Initialize the current empty folder.",
-                "Make the current folder a Git repository, but do not create a commit.",
+                "Initialize the current folder with the requested first-branch behavior.",
+                "Make the current folder a Git repository, but do not stage files or create a commit.",
                 [
                     bp(
-                        slug="init-current-empty",
+                        slug="init-current-folder",
                         kind="init",
-                        signature="module1.init.current-empty",
-                        subtemplate="current-directory-empty",
+                        signature="module1.init.current-folder",
+                        subtemplate="current-directory",
                         cases=[
                             {
                                 "case_id": "init-easy-current-empty",
                                 "project": "empty-lab",
                                 "target_directory": "current folder",
                                 "expected_untracked_paths": [],
+                                "initial_state": uninitialized_state(),
+                                "solution_commands": ["git init"],
+                                "expected_init_directory": None,
+                                "expected_current_directory": True,
+                                "expected_initial_branch": "main",
+                                "expected_quiet": False,
+                                "expected_reinitialized": False,
+                                "expected_commit_count": 0,
+                                "duplicate_solution_waiver": True,
                                 "answer_anchor": "initialized the current folder only; zero commits",
                             },
+                            {
+                                "case_id": "init-easy-trunk-branch",
+                                "project": "trunk-lab",
+                                "target_directory": "current folder",
+                                "expected_untracked_paths": [],
+                                "initial_state": uninitialized_state(),
+                                "solution_commands": ["git init --initial-branch=trunk"],
+                                "expected_init_directory": None,
+                                "expected_current_directory": True,
+                                "expected_initial_branch": "trunk",
+                                "expected_quiet": False,
+                                "expected_reinitialized": False,
+                                "expected_commit_count": 0,
+                                "answer_anchor": "initialized current folder with trunk as the first branch",
+                            },
+                            {
+                                "case_id": "init-easy-safe-reinit",
+                                "project": "existing-notes",
+                                "target_directory": "current folder",
+                                "expected_untracked_paths": ["notes/today.md"],
+                                "initial_state": reinit_state,
+                                "solution_commands": ["git init"],
+                                "expected_init_directory": None,
+                                "expected_current_directory": True,
+                                "expected_initial_branch": "main",
+                                "expected_quiet": False,
+                                "expected_reinitialized": True,
+                                "expected_commit_count": 1,
+                                "duplicate_solution_waiver": True,
+                                "answer_anchor": "reinitialized safely; existing commit and untracked notes remain",
+                            },
                         ],
-                        initial_state=uninitialized_state(),
-                        target_rule={
-                            "repository_initialized": True,
-                            "head_branch": "main",
-                            "staging_empty": True,
-                            "rules": [
-                                {"type": "commit_count_equals", "count": 0},
-                                {"type": "working_tree_matches_exact_paths", "paths": []},
-                                {"type": "operation_metadata_absent", "key": "last_init_directory"},
-                                {
-                                    "type": "operation_metadata_equals",
-                                    "key": "last_init_current_directory",
-                                    "value": True,
-                                },
-                            ],
-                        },
-                        solution=["git init -b main"],
+                        initial_state="{{initial_state}}",
+                        target_rule=init_rule,
+                        solution="{{solution_commands}}",
                         label="Initialize the current folder",
                         slug_template="init-{{case_id}}",
                     )
@@ -703,57 +492,66 @@ def init_scenario() -> dict[str, Any]:
             ),
             DIFFICULTY_MEDIUM: diff(
                 (1, 1),
-                "Initialize a named project folder from the current workspace.",
-                "Initialize the exact target directory named in the brief; do not initialize the parent/current folder.",
+                "Initialize a named project folder with branch and quiet options when requested.",
+                "Initialize the exact target directory and branch mode named in the brief.",
                 [
                     bp(
-                        slug="init-named-directory",
+                        slug="init-directory-options",
                         kind="init",
-                        signature="module1.init.named-directory",
-                        subtemplate="named-directory",
+                        signature="module1.init.directory-options",
+                        subtemplate="named-directory-options",
                         cases=[
                             {
                                 "case_id": "init-medium-docs-site",
                                 "project": "workspace",
                                 "target_directory": "docs-site",
                                 "expected_untracked_paths": [],
+                                "initial_state": uninitialized_state(),
+                                "solution_commands": ["git init docs-site"],
+                                "expected_init_directory": "docs-site",
+                                "expected_current_directory": False,
+                                "expected_initial_branch": "main",
+                                "expected_quiet": False,
+                                "expected_reinitialized": False,
+                                "expected_commit_count": 0,
                                 "answer_anchor": "initialized docs-site only; zero commits",
                             },
                             {
-                                "case_id": "init-medium-api-playground",
+                                "case_id": "init-medium-trunk-api-playground",
                                 "project": "workspace",
                                 "target_directory": "api-playground",
                                 "expected_untracked_paths": [],
-                                "answer_anchor": "initialized api-playground only; zero commits",
+                                "initial_state": uninitialized_state(),
+                                "solution_commands": ["git init -b trunk api-playground"],
+                                "expected_init_directory": "api-playground",
+                                "expected_current_directory": False,
+                                "expected_initial_branch": "trunk",
+                                "expected_quiet": False,
+                                "expected_reinitialized": False,
+                                "expected_commit_count": 0,
+                                "answer_anchor": "initialized api-playground with trunk as the first branch",
                             },
                             {
-                                "case_id": "init-medium-design-kit",
+                                "case_id": "init-medium-quiet-research-log",
                                 "project": "workspace",
-                                "target_directory": "design-kit",
+                                "target_directory": "research-log",
                                 "expected_untracked_paths": [],
-                                "answer_anchor": "initialized design-kit only; zero commits",
+                                "initial_state": uninitialized_state(),
+                                "solution_commands": [
+                                    "git init --quiet --initial-branch=main research-log"
+                                ],
+                                "expected_init_directory": "research-log",
+                                "expected_current_directory": False,
+                                "expected_initial_branch": "main",
+                                "expected_quiet": True,
+                                "expected_reinitialized": False,
+                                "expected_commit_count": 0,
+                                "answer_anchor": "initialized research-log quietly with main as the first branch",
                             },
                         ],
-                        initial_state=uninitialized_state(),
-                        target_rule={
-                            "repository_initialized": True,
-                            "head_branch": "main",
-                            "staging_empty": True,
-                            "rules": [
-                                {"type": "commit_count_equals", "count": 0},
-                                {
-                                    "type": "operation_metadata_equals",
-                                    "key": "last_init_directory",
-                                    "value": "{{target_directory}}",
-                                },
-                                {
-                                    "type": "operation_metadata_equals",
-                                    "key": "last_init_current_directory",
-                                    "value": False,
-                                },
-                            ],
-                        },
-                        solution=["git init --initial-branch=main {{target_directory}}"],
+                        initial_state="{{initial_state}}",
+                        target_rule=init_rule,
+                        solution="{{solution_commands}}",
                         label="Initialize {{target_directory}}",
                         slug_template="init-{{case_id}}",
                     )
@@ -761,14 +559,14 @@ def init_scenario() -> dict[str, Any]:
             ),
             DIFFICULTY_HARD: diff(
                 (1, 1),
-                "Choose the correct child folder from a parent workspace with sibling traps.",
-                "Initialize only the requested child directory; the parent/current workspace must not be the initialized target.",
+                "Combine child-folder targeting with branch, quiet, and reinitialization details.",
+                "Initialize only the requested child directory or safely reinitialize the existing repository as directed.",
                 [
                     bp(
-                        slug="init-correct-child-directory",
+                        slug="init-combined-options",
                         kind="init",
-                        signature="module1.init.child-directory-trap",
-                        subtemplate="named-directory-from-parent",
+                        signature="module1.init.combined-options",
+                        subtemplate="combined-init-options",
                         cases=[
                             {
                                 "case_id": "init-hard-research-log",
@@ -782,6 +580,22 @@ def init_scenario() -> dict[str, Any]:
                                     "notes/ideas.md": "untracked",
                                     "archive/old.md": "untracked",
                                 },
+                                "initial_state": uninitialized_state(
+                                    working_tree={
+                                        "research-log/README.md": "untracked",
+                                        "notes/ideas.md": "untracked",
+                                        "archive/old.md": "untracked",
+                                    }
+                                ),
+                                "solution_commands": [
+                                    "git init -q -b main research-log",
+                                ],
+                                "expected_init_directory": "research-log",
+                                "expected_current_directory": False,
+                                "expected_initial_branch": "main",
+                                "expected_quiet": True,
+                                "expected_reinitialized": False,
+                                "expected_commit_count": 0,
                             },
                             {
                                 "case_id": "init-hard-ui-kit",
@@ -795,47 +609,45 @@ def init_scenario() -> dict[str, Any]:
                                     "brand-assets/logo.svg": "untracked",
                                     "experiments/mockup.html": "untracked",
                                 },
+                                "initial_state": uninitialized_state(
+                                    working_tree={
+                                        "ui-kit/tokens.css": "untracked",
+                                        "brand-assets/logo.svg": "untracked",
+                                        "experiments/mockup.html": "untracked",
+                                    }
+                                ),
+                                "solution_commands": [
+                                    "git init --quiet --initial-branch=trunk ui-kit",
+                                ],
+                                "expected_init_directory": "ui-kit",
+                                "expected_current_directory": False,
+                                "expected_initial_branch": "trunk",
+                                "expected_quiet": True,
+                                "expected_reinitialized": False,
+                                "expected_commit_count": 0,
                             },
                             {
-                                "case_id": "init-hard-deploy-checklist",
-                                "project": "ops-parent",
-                                "target_directory": "deploy-checklist",
-                                "expected_untracked_paths": ["deploy-checklist/steps.md"],
-                                "sibling_directories": ["docs", "scripts"],
-                                "answer_anchor": "initialized deploy-checklist only; parent/current workspace not initialized",
-                                "initial_working_tree": {
-                                    "deploy-checklist/steps.md": "untracked",
-                                    "docs/runbook.md": "untracked",
-                                    "scripts/deploy.sh": "untracked",
-                                },
+                                "case_id": "init-hard-safe-rerun",
+                                "project": "release-notes",
+                                "target_directory": "current folder",
+                                "expected_untracked_paths": ["notes/today.md"],
+                                "sibling_directories": [],
+                                "answer_anchor": "re-ran init safely without deleting existing repository state",
+                                "initial_working_tree": {"notes/today.md": "untracked"},
+                                "initial_state": reinit_state,
+                                "solution_commands": ["git init --quiet"],
+                                "expected_init_directory": None,
+                                "expected_current_directory": True,
+                                "expected_initial_branch": "main",
+                                "expected_quiet": True,
+                                "expected_reinitialized": True,
+                                "expected_commit_count": 1,
                             },
                         ],
-                        initial_state=uninitialized_state(working_tree="{{initial_working_tree}}"),
-                        target_rule={
-                            "repository_initialized": True,
-                            "head_branch": "main",
-                            "staging_empty": True,
-                            "rules": [
-                                {"type": "commit_count_equals", "count": 0},
-                                {
-                                    "type": "operation_metadata_equals",
-                                    "key": "last_init_directory",
-                                    "value": "{{target_directory}}",
-                                },
-                                {
-                                    "type": "operation_metadata_equals",
-                                    "key": "last_init_current_directory",
-                                    "value": False,
-                                },
-                                {
-                                    "type": "operation_metadata_not_equals",
-                                    "key": "last_init_directory",
-                                    "value": ".",
-                                },
-                            ],
-                        },
-                        solution=["git init --initial-branch=main {{target_directory}}"],
-                        label="Initialize {{target_directory}} only",
+                        initial_state="{{initial_state}}",
+                        target_rule=init_rule,
+                        solution="{{solution_commands}}",
+                        label="Initialize {{target_directory}} with required options",
                         slug_template="init-{{case_id}}",
                     )
                 ],
@@ -856,10 +668,7 @@ def bp(
     solution: list[str],
     label: str,
     slug_template: str,
-    expected_observations: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    if expected_observations is None and all("answer_anchor" in case for case in cases):
-        expected_observations = {"answer_anchor": "{{answer_anchor}}"}
     return {
         "slug": slug,
         "slug_template": slug_template,
@@ -872,7 +681,6 @@ def bp(
         "initial_state_template": initial_state,
         "target_rule_template": target_rule,
         "solution_commands_template": solution,
-        "expected_observations_template": expected_observations or {},
         "student_context_template": student_context_template(kind),
     }
 
@@ -895,12 +703,13 @@ def clone_scenario() -> dict[str, Any]:
                 }
             ],
             "origin URL docs-portal; main/origin-main -> r10; docs tree checked out",
+            solution_command="git clone {{remote_url}}",
         ),
         remote_case(
             "clone-easy-api-lab",
             "api-lab",
             "https://example.test/training/api-lab.git",
-            "api-lab",
+            "api-workshop",
             "r11",
             {"README.md": "api-readme-v1", "api/routes.py": "api-routes-v1"},
             [
@@ -911,88 +720,47 @@ def clone_scenario() -> dict[str, Any]:
                     "tree": {"README.md": "api-readme-v1", "api/routes.py": "api-routes-v1"},
                 }
             ],
-            "origin URL api-lab; main/origin-main -> r11; API tree checked out",
+            "custom folder api-workshop; main/origin-main -> r11; API tree checked out",
+            solution_command="git clone {{remote_url}} {{destination_folder}}",
         ),
         remote_case(
-            "clone-easy-profile-site",
+            "clone-easy-profile-starter",
             "profile-site",
             "https://example.test/training/profile-site.git",
             "profile-site",
-            "r12",
-            {"index.html": "profile-index-v1", "styles/site.css": "profile-css-v1"},
+            "r13",
+            {
+                "index.html": "profile-index-v2",
+                "styles/site.css": "profile-css-v1",
+                "starter-notes.md": "starter-notes-v1",
+            },
             [
                 {
                     "id": "r12",
                     "message": "Create profile site starter",
                     "parents": [],
                     "tree": {"index.html": "profile-index-v1", "styles/site.css": "profile-css-v1"},
+                },
+                {
+                    "id": "r13",
+                    "message": "Prepare starter branch",
+                    "parents": ["r12"],
+                    "tree": {
+                        "index.html": "profile-index-v2",
+                        "styles/site.css": "profile-css-v1",
+                        "starter-notes.md": "starter-notes-v1",
+                    },
                 }
             ],
-            "origin URL profile-site; main/origin-main -> r12; site tree checked out",
+            "specific starter branch; starter/origin-starter -> r13; starter notes checked out",
+            selected_branch="starter",
+            default_head="r12",
+            solution_command="git clone -b {{selected_branch}} {{remote_url}}",
         ),
     ]
     medium_cases = [
         remote_case(
-            "clone-medium-cli-tool",
-            "cli-tool",
-            "https://example.test/tools/cli-tool.git",
-            "cli-practice",
-            "r20",
-            {"README.md": "cli-readme-v2", "src/parser.py": "cli-parser-v2"},
-            [
-                {
-                    "id": "r19",
-                    "message": "Create CLI skeleton",
-                    "parents": [],
-                    "tree": {"README.md": "cli-readme-v1"},
-                },
-                {
-                    "id": "r20",
-                    "message": "Add parser command",
-                    "parents": ["r19"],
-                    "tree": {"README.md": "cli-readme-v2", "src/parser.py": "cli-parser-v2"},
-                },
-            ],
-            "custom folder cli-practice; r20 tree/history",
-        ),
-        remote_case(
-            "clone-medium-css-kit",
-            "css-kit",
-            "https://example.test/frontend/css-kit.git",
-            "style-lab",
-            "r21",
-            {"README.md": "css-readme-v1", "styles/tokens.css": "tokens-v1"},
-            [
-                {
-                    "id": "r21",
-                    "message": "Create style token kit",
-                    "parents": [],
-                    "tree": {"README.md": "css-readme-v1", "styles/tokens.css": "tokens-v1"},
-                }
-            ],
-            "custom folder style-lab; CSS token tree",
-        ),
-        remote_case(
-            "clone-medium-recipe-book",
-            "recipe-book",
-            "https://example.test/docs/recipe-book.git",
-            "kitchen-docs",
-            "r22",
-            {"README.md": "recipe-readme-v1", "recipes/adobo.md": "adobo-v1"},
-            [
-                {
-                    "id": "r22",
-                    "message": "Create recipe book starter",
-                    "parents": [],
-                    "tree": {"README.md": "recipe-readme-v1", "recipes/adobo.md": "adobo-v1"},
-                }
-            ],
-            "custom folder kitchen-docs; recipe tree",
-        ),
-    ]
-    hard_cases = [
-        remote_case(
-            "clone-hard-analytics",
+            "clone-medium-analytics-ssh",
             "analytics-lab",
             "git@example.test:training/analytics-lab.git",
             "analytics-worktree",
@@ -1030,11 +798,75 @@ def clone_scenario() -> dict[str, Any]:
                 },
             ],
             "SSH URL; custom folder analytics-worktree; three-commit history ending r30",
+            solution_command="git clone {{remote_url}} {{destination_folder}}",
         ),
         remote_case(
-            "clone-hard-mobile-ui",
+            "clone-medium-cli-starter-folder",
+            "cli-tool",
+            "https://example.test/tools/cli-tool.git",
+            "cli-starter-lab",
+            "r20",
+            {
+                "README.md": "cli-readme-v2",
+                "src/parser.py": "cli-parser-v2",
+                "starter.md": "cli-starter-v1",
+            },
+            [
+                {
+                    "id": "r19",
+                    "message": "Create CLI skeleton",
+                    "parents": [],
+                    "tree": {"README.md": "cli-readme-v1"},
+                },
+                {
+                    "id": "r20",
+                    "message": "Prepare CLI starter branch",
+                    "parents": ["r19"],
+                    "tree": {
+                        "README.md": "cli-readme-v2",
+                        "src/parser.py": "cli-parser-v2",
+                        "starter.md": "cli-starter-v1",
+                    },
+                },
+            ],
+            "specific starter branch in cli-starter-lab; starter/origin-starter -> r20",
+            selected_branch="starter",
+            default_head="r19",
+            solution_command=(
+                "git clone --branch {{selected_branch}} {{remote_url}} {{destination_folder}}"
+            ),
+        ),
+        remote_case(
+            "clone-medium-css-kit-shallow",
+            "css-kit",
+            "https://example.test/frontend/css-kit.git",
+            "css-kit",
+            "r22",
+            {"README.md": "css-readme-v2", "styles/tokens.css": "tokens-v2"},
+            [
+                {
+                    "id": "r21",
+                    "message": "Create CSS kit starter",
+                    "parents": [],
+                    "tree": {"README.md": "css-readme-v1"},
+                },
+                {
+                    "id": "r22",
+                    "message": "Add style token kit",
+                    "parents": ["r21"],
+                    "tree": {"README.md": "css-readme-v2", "styles/tokens.css": "tokens-v2"},
+                },
+            ],
+            "shallow depth 1 clone; main/origin-main -> r22; only tip history visible",
+            clone_depth=1,
+            solution_command="git clone --depth {{clone_depth}} {{remote_url}}",
+        ),
+    ]
+    hard_cases = [
+        remote_case(
+            "clone-hard-mobile-ui-shallow-branch",
             "mobile-ui",
-            "git@example.test:frontend/mobile-ui.git",
+            "https://example.test/frontend/mobile-ui.git",
             "mobile-ui-lab",
             "r31",
             {
@@ -1051,7 +883,7 @@ def clone_scenario() -> dict[str, Any]:
                 },
                 {
                     "id": "r31",
-                    "message": "Add mobile home screen",
+                    "message": "Prepare mobile starter branch",
                     "parents": ["r23"],
                     "tree": {
                         "README.md": "mobile-readme-v2",
@@ -1060,12 +892,19 @@ def clone_scenario() -> dict[str, Any]:
                     },
                 },
             ],
-            "SSH URL; custom folder mobile-ui-lab; UI tree ending r31",
+            "shallow starter branch in mobile-ui-lab; starter/origin-starter -> r31",
+            selected_branch="starter",
+            default_head="r23",
+            clone_depth=1,
+            solution_command=(
+                "git clone --depth {{clone_depth}} -b {{selected_branch}} "
+                "{{remote_url}} {{destination_folder}}"
+            ),
         ),
         remote_case(
-            "clone-hard-lab-notebook",
+            "clone-hard-lab-notebook-depth-branch",
             "lab-notebook",
-            "git@example.test:docs/lab-notebook.git",
+            "https://example.test/docs/lab-notebook.git",
             "notebook-review",
             "r32",
             {
@@ -1082,7 +921,7 @@ def clone_scenario() -> dict[str, Any]:
                 },
                 {
                     "id": "r32",
-                    "message": "Add second lab entry",
+                    "message": "Prepare review branch",
                     "parents": ["r24"],
                     "tree": {
                         "README.md": "notebook-readme-v2",
@@ -1091,7 +930,46 @@ def clone_scenario() -> dict[str, Any]:
                     },
                 },
             ],
-            "SSH URL; custom folder notebook-review; notebook tree ending r32",
+            "shallow review branch in notebook-review using --branch; review/origin-review -> r32",
+            selected_branch="review",
+            default_head="r24",
+            clone_depth=1,
+            solution_command=(
+                "git clone --depth {{clone_depth}} --branch {{selected_branch}} "
+                "{{remote_url}} {{destination_folder}}"
+            ),
+        ),
+        remote_case(
+            "clone-hard-research-log-ssh",
+            "research-log",
+            "git@example.test:docs/research-log.git",
+            "research-log-lab",
+            "r34",
+            {
+                "README.md": "research-readme-v2",
+                "notes/week-1.md": "week1-v1",
+                "notes/week-2.md": "week2-v1",
+            },
+            [
+                {
+                    "id": "r33",
+                    "message": "Create research log",
+                    "parents": [],
+                    "tree": {"README.md": "research-readme-v1", "notes/week-1.md": "week1-v1"},
+                },
+                {
+                    "id": "r34",
+                    "message": "Add second research note",
+                    "parents": ["r33"],
+                    "tree": {
+                        "README.md": "research-readme-v2",
+                        "notes/week-1.md": "week1-v1",
+                        "notes/week-2.md": "week2-v1",
+                    },
+                },
+            ],
+            "SSH URL; custom folder research-log-lab; research tree ending r34",
+            solution_command="git clone {{remote_url}} {{destination_folder}}",
         ),
     ]
     return scenario_dict(
@@ -1104,51 +982,54 @@ def clone_scenario() -> dict[str, Any]:
         slug="clone-remote-repository",
         title="Clone a remote repository",
         focus="git clone",
-        summary="Create a local repository from a remote and verify origin/main.",
-        explanation="Cloning creates a local repository, configures origin, checks out main, and records remote-tracking information.",
+        summary="Create a local repository from a remote and verify the origin relationship.",
+        explanation="Cloning creates a local repository, configures origin, checks out the selected branch, and records remote-tracking information.",
         primary=["git clone"],
         supporting=["git remote -v", "git log --oneline", "git status"],
-        concepts=["origin", "remote-tracking branch", "upstream", "working tree checkout"],
+        concepts=[
+            "origin",
+            "remote-tracking branch",
+            "upstream",
+            "branch checkout",
+            "shallow clone",
+        ],
         difficulties={
             DIFFICULTY_EASY: diff(
                 (1, 1),
-                "Clone with the default folder name.",
-                "Use the provided remote URL and let the destination use the default repository name.",
+                "Clone with the requested destination and branch behavior.",
+                "Use the provided remote URL and follow the destination or branch details exactly.",
                 [
                     clone_bp(
-                        "clone-default-folder",
+                        "clone-basic-forms",
                         easy_cases,
-                        False,
-                        "module1.clone.https-default-folder",
-                        "clone-https-default",
+                        "module1.clone.basic-forms",
+                        "clone-basic-forms",
                     )
                 ],
             ),
             DIFFICULTY_MEDIUM: diff(
                 (1, 1),
-                "Clone into a required custom folder.",
-                "Use the provided remote URL and the exact destination folder.",
+                "Clone SSH, branch, and shallow variants.",
+                "Use the requested URL form, branch, destination folder, and depth exactly.",
                 [
                     clone_bp(
-                        "clone-custom-folder",
+                        "clone-branch-and-shallow",
                         medium_cases,
-                        True,
-                        "module1.clone.https-custom-folder",
-                        "clone-https-custom-destination",
+                        "module1.clone.branch-and-shallow",
+                        "clone-branch-and-shallow",
                     )
                 ],
             ),
             DIFFICULTY_HARD: diff(
                 (1, 1),
-                "Clone an SSH remote into a required custom folder with deeper history.",
-                "Use the exact SSH-style remote and destination folder, then end with clean tracking refs.",
+                "Combine shallow clone, selected branch, and custom destination requirements.",
+                "Use the exact clone form requested, then end with clean tracking refs.",
                 [
                     clone_bp(
-                        "clone-ssh-custom-folder",
+                        "clone-combined-forms",
                         hard_cases,
-                        True,
-                        "module1.clone.ssh-custom-folder-history",
-                        "clone-ssh-custom-history",
+                        "module1.clone.combined-forms",
+                        "clone-combined-forms",
                     )
                 ],
             ),
@@ -1165,7 +1046,25 @@ def remote_case(
     tree: dict[str, Any],
     commits: list[dict[str, Any]],
     answer_anchor: str,
+    *,
+    selected_branch: str = "main",
+    default_branch: str = "main",
+    default_head: str | None = None,
+    clone_depth: int | None = None,
+    solution_command: str = "git clone {{remote_url}}",
 ) -> dict[str, Any]:
+    default_remote_branch = f"origin/{default_branch}"
+    selected_remote_branch = f"origin/{selected_branch}"
+    branch_targets = {
+        default_remote_branch: default_head or head,
+        selected_remote_branch: head,
+    }
+    rendered_solution_command = (
+        solution_command.replace("{{remote_url}}", url)
+        .replace("{{destination_folder}}", folder)
+        .replace("{{selected_branch}}", selected_branch)
+        .replace("{{clone_depth}}", str(clone_depth or ""))
+    )
     return {
         "case_id": case_id,
         "project": project,
@@ -1174,18 +1073,20 @@ def remote_case(
         "remote_head": head,
         "remote_tree": tree,
         "remote_commits": commits,
+        "remote_branches": branch_targets,
+        "selected_branch": selected_branch,
+        "selected_remote_branch": selected_remote_branch,
+        "default_branch": default_branch,
+        "default_remote_branch": default_remote_branch,
+        "clone_depth": clone_depth,
+        "clone_depth_label": str(clone_depth) if clone_depth else "full history",
+        "clone_shallow": clone_depth is not None,
+        "solution_command": rendered_solution_command,
         "answer_anchor": answer_anchor,
     }
 
 
-def clone_bp(
-    slug: str, cases: list[dict[str, Any]], custom_folder: bool, signature: str, subtemplate: str
-) -> dict[str, Any]:
-    command = (
-        "git clone {{remote_url}} {{destination_folder}}"
-        if custom_folder
-        else "git clone {{remote_url}}"
-    )
+def clone_bp(slug: str, cases: list[dict[str, Any]], signature: str, subtemplate: str) -> dict[str, Any]:
     return bp(
         slug=slug,
         kind="clone",
@@ -1194,19 +1095,20 @@ def clone_bp(
         cases=cases,
         initial_state=uninitialized_state(
             remote_fixtures={
-                "branches": {"origin/main": "{{remote_head}}"},
+                "branches": "{{remote_branches}}",
+                "default_branch": "{{default_remote_branch}}",
                 "commits": "{{remote_commits}}",
             }
         ),
         target_rule={
             "repository_initialized": True,
-            "head_branch": "main",
+            "head_branch": "{{selected_branch}}",
             "remote_exists": ["origin"],
             "remote_url_matches": {"origin": "{{remote_url}}"},
-            "remote_branch_exists": ["origin/main"],
-            "remote_branch_points_to": {"origin/main": "{{remote_head}}"},
-            "branch_points_to": {"main": "{{remote_head}}"},
-            "upstream_tracking": {"main": "origin/main"},
+            "remote_branch_exists": ["{{selected_remote_branch}}"],
+            "remote_branch_points_to": {"{{selected_remote_branch}}": "{{remote_head}}"},
+            "branch_points_to": {"{{selected_branch}}": "{{remote_head}}"},
+            "upstream_tracking": {"{{selected_branch}}": "{{selected_remote_branch}}"},
             "staging_empty": True,
             "working_tree_clean": True,
             "rules": [
@@ -1220,6 +1122,31 @@ def clone_bp(
                     "key": "last_clone_url",
                     "value": "{{remote_url}}",
                 },
+                {
+                    "type": "operation_metadata_equals",
+                    "key": "last_clone_branch",
+                    "value": "{{selected_branch}}",
+                },
+                {
+                    "type": "operation_metadata_equals",
+                    "key": "last_clone_depth",
+                    "value": "{{clone_depth}}",
+                },
+                {
+                    "type": "operation_metadata_equals",
+                    "key": "last_clone_remote_name",
+                    "value": "origin",
+                },
+                {
+                    "type": "operation_metadata_equals",
+                    "key": "last_clone_default_branch",
+                    "value": "{{default_branch}}",
+                },
+                {
+                    "type": "operation_metadata_equals",
+                    "key": "last_clone_shallow",
+                    "value": "{{clone_shallow}}",
+                },
                 {"type": "commit_exists", "commit": "{{remote_head}}"},
                 {
                     "type": "commit_tree_contains",
@@ -1228,7 +1155,7 @@ def clone_bp(
                 },
             ],
         },
-        solution=[command],
+        solution=["{{solution_command}}"],
         label="Clone {{project}}",
         slug_template="clone-{{case_id}}",
     )
@@ -1367,7 +1294,14 @@ def commit_scenario(base_tree: dict[str, str]) -> dict[str, Any]:
         summary="Stage intended changes and create a focused commit.",
         explanation="A commit saves the staged snapshot and moves the current branch to the new commit.",
         primary=["git add", "git commit"],
-        supporting=["git status", "git diff", "git diff --staged"],
+        supporting=[
+            "git status",
+            "git status --ignored",
+            "git diff",
+            "git diff --staged",
+            "git check-ignore -v <path>",
+            "git ls-files",
+        ],
         concepts=["working tree", "staging area", "commit", "branch tip"],
         difficulties={
             DIFFICULTY_EASY: diff(
@@ -2518,7 +2452,7 @@ def review_scenario() -> dict[str, Any]:
         title="Complete a focused local workflow",
         focus="local repository workflow",
         summary="Combine Module 1 skills to reach a clean local repository outcome.",
-        explanation="The review scenario combines inspection, staging, committing, ignore rules, partial staging, restore, or amend within one local workflow task.",
+        explanation="The review scenario combines diagnostics, staging, committing, ignore rules, partial staging, restore, or amend within one local workflow task.",
         primary=["git add", "git commit"],
         supporting=["git status", "git diff", "git diff --staged", "git log --oneline"],
         concepts=[
@@ -2848,7 +2782,7 @@ class Command(BaseCommand):
                     "short_explanation": spec["explanation"],
                     "skill_focus_type": spec["kind"],
                     "primary_focus_commands": spec["primary"],
-                    "supporting_inspection_commands": spec["supporting"],
+                    "supporting_diagnostic_commands": spec["supporting"],
                     "safe_demo_commands": self._demo_commands(spec),
                     "demo_repository_state": self._demo_state(spec),
                     "demo_dag_config": {},
@@ -2861,6 +2795,14 @@ class Command(BaseCommand):
                     "sort_order": lesson_order,
                 },
             )
+            if not spec["difficulties"]:
+                DifficultyInstance.objects.filter(scenario=scenario).update(is_published=False)
+                ScenarioGenerationBlueprint.objects.filter(
+                    difficulty_instance__scenario=scenario
+                ).delete()
+                TargetStateRule.objects.filter(difficulty_instance__scenario=scenario).delete()
+                ScenarioVariant.objects.filter(scenario=scenario).update(is_published=False)
+                continue
 
             for difficulty, dspec in spec["difficulties"].items():
                 difficulty_instance, _ = DifficultyInstance.objects.update_or_create(
@@ -2908,9 +2850,6 @@ class Command(BaseCommand):
                             "initial_state_template": blueprint["initial_state_template"],
                             "target_rule_template": blueprint["target_rule_template"],
                             "solution_commands_template": blueprint["solution_commands_template"],
-                            "expected_observations_template": blueprint[
-                                "expected_observations_template"
-                            ],
                             "student_context_template": blueprint["student_context_template"],
                             "generation_count": blueprint["generation_count"],
                             "max_combinations": blueprint["max_combinations"],
@@ -3000,6 +2939,14 @@ class Command(BaseCommand):
         unit.delete()
 
     def _lesson_html(self, title: str, subtitle: str) -> str:
+        if title == "Inspecting Repository State":
+            return f"""
+<section class=\"lesson-overview\">
+  <h1>{title}</h1>
+  <p>{subtitle}</p>
+  <p>Use this lesson and its command preview to study diagnostic commands. These commands stay available inside normal practice scenarios and do not consume the counted action-command budget.</p>
+</section>
+""".strip()
         return f"""
 <section class=\"lesson-overview\">
   <h1>{title}</h1>
@@ -3132,12 +3079,24 @@ class Command(BaseCommand):
         seen_keys = set()
         unique = []
         for command in commands:
+            command = self._supported_preview_form(command)
             key = command_content_key_for_command(command)
             if not key or key in seen_keys:
                 continue
             seen_keys.add(key)
             unique.append(command)
         return unique
+
+    def _supported_preview_form(self, command: str) -> str:
+        normalized = " ".join(str(command).split()).lower()
+        replacements = {
+            "git add": "git add <path>",
+            "git commit": 'git commit -m "message"',
+            "git restore": "git restore <path>",
+            "git clone": "git clone <url>",
+            "git check-ignore -v <path>": "git check-ignore -v <path>",
+        }
+        return replacements.get(normalized, command)
 
     def _demo_commands(self, spec: dict[str, Any]) -> list[str]:
         normalized_focus = " ".join(str(spec.get("focus", "")).split()).lower()
@@ -3171,7 +3130,10 @@ class Command(BaseCommand):
             ],
             ".gitignore": [
                 "git status",
+                "git status --ignored",
                 "git add .gitignore",
+                "git check-ignore -v .env",
+                "git ls-files",
                 "git rm --cached .env",
                 'git commit -m "Demo ignore rules"',
             ],
@@ -3223,10 +3185,10 @@ class Command(BaseCommand):
         created_variant_ids = []
         try:
             for difficulty in DifficultyInstance.objects.filter(
-                scenario__learning_unit__slug="local-repository-foundations"
+                scenario__learning_unit__slug="local-repository-foundations",
+                is_published=True,
             ).order_by("scenario__sort_order", "difficulty"):
                 fingerprints = set()
-                anchors = set()
                 candidates = []
                 for blueprint in difficulty.generation_blueprints.filter(
                     is_published=True
@@ -3247,9 +3209,6 @@ class Command(BaseCommand):
                         )
                         created_variant_ids.append(variant.id)
                         fingerprints.add(candidate.candidate_fingerprint)
-                        anchor = (variant.expected_observations or {}).get("answer_anchor")
-                        if anchor:
-                            anchors.add(json.dumps(anchor, sort_keys=True))
                         self.stdout.write(
                             f"Built {difficulty.scenario.slug}/{difficulty.difficulty}: {variant.slug}"
                         )
@@ -3260,10 +3219,6 @@ class Command(BaseCommand):
                 if len(candidates) > 1 and len(fingerprints) != len(candidates):
                     failures.append(
                         f"{difficulty.scenario.slug}/{difficulty.difficulty}: duplicate parameter fingerprints"
-                    )
-                if len(candidates) > 1 and len(anchors) != len(candidates):
-                    failures.append(
-                        f"{difficulty.scenario.slug}/{difficulty.difficulty}: duplicate or missing answer anchors"
                     )
         finally:
             ScenarioVariant.objects.filter(id__in=created_variant_ids).delete()

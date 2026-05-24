@@ -5,6 +5,9 @@ def format_log(runtime, state: dict, outcome) -> str:
     if outcome.stderr is not None:
         return outcome.stderr
     commits = _history(runtime, state, all_refs=bool(outcome.details.get("all")))
+    limit = outcome.details.get("limit")
+    if limit:
+        commits = commits[: int(limit)]
     oneline = bool(outcome.details.get("oneline"))
     graph = bool(outcome.details.get("graph"))
     lines: list[str] = []

@@ -4,7 +4,7 @@ export type Difficulty = 'easy' | 'medium' | 'hard'
 export type DifficultyStatus = 'not_started' | 'locked' | 'in_progress' | 'completed' | 'failed' | 'abandoned'
 export type AttemptStatus = 'started' | 'completed' | 'failed' | 'abandoned'
 export type DifficultyActionIntent = 'start' | 'review' | 'retry' | 'continue' | 'resume'
-export type SkillFocusType = 'command_specific' | 'concept_specific' | 'workflow_specific' | 'diagnostic_inspection'
+export type SkillFocusType = 'command_specific' | 'concept_specific' | 'workflow_specific'
 
 export type CommandPolicy = {
   id: number
@@ -27,7 +27,7 @@ export type LatestAttemptStats = {
 export type DifficultyAccess = {
   id: number
   difficulty: Difficulty
-  completion_type?: 'state_based' | 'inspection' | 'expanded_state_based'
+  completion_type?: 'state_based' | 'expanded_state_based'
   status: DifficultyStatus
   review_available: boolean
   mastery_progress: {
@@ -166,7 +166,7 @@ export type ScenarioSkillFocus = {
   short_explanation?: string
   skill_focus_type: SkillFocusType
   primary_focus_commands: string[]
-  supporting_inspection_commands?: string[]
+  supporting_diagnostic_commands?: string[]
   safe_demo_commands?: string[]
   demo_repository_state?: RepositorySnapshot
   demo_dag_config?: Record<string, unknown>

@@ -1,5 +1,4 @@
 import copy
-import json
 from dataclasses import dataclass
 from typing import Any
 
@@ -772,15 +771,6 @@ class StateBasedEvaluator:
             return self._path_token_map_rule(
                 state.get("working_tree", {}), rule.get("paths", {}), label="Working tree hunks"
             )
-        if rule_type == "inspection_answer_matches":
-            expected = self._resolve_expected(rule.get("expected"), state, initial_state)
-            actual = rule.get("actual", self._operation_value(state, "inspection_answer"))
-            passed = self._normalize_answer(actual) == self._normalize_answer(expected)
-            return (
-                passed,
-                "Inspection answer matched." if passed else "Inspection answer did not match.",
-            )
-
         if rule_type == "repository_state_unchanged":
             if initial_state is None:
                 return False, "Initial state is required."
@@ -1157,16 +1147,6 @@ class StateBasedEvaluator:
         haystack = self.normalizer.token_haystack(payload).lower()
         return [str(token) for token in tokens if str(token).lower() not in haystack]
 
-    def _normalize_answer(self, value: Any) -> Any:
-        if isinstance(value, dict):
-            return {key: self._normalize_answer(value[key]) for key in sorted(value)}
-        if isinstance(value, list):
-            return sorted(
-                (self._normalize_answer(item) for item in value),
-                key=lambda item: json.dumps(item, sort_keys=True),
-            )
-        return value
-
     def _commit_depth(self, state: dict, commit_id: str | None) -> int:
         return len(self._branch_history_from_commit(state, commit_id))
 
@@ -1321,187 +1301,3 @@ class StateBasedEvaluator:
         if value in (None, ""):
             return []
         return value if isinstance(value, list) else [value]
-
-
-class InspectionEvaluator:
-    def __init__(self) -> None:
-        self.normalizer = RepositoryStateNormalizer()
-
-    def evaluate(
-        self,
-        *,
-        initial_state: dict,
-        current_state: dict,
-        expected_observations: dict,
-        executed_commands: list[str],
-        submitted_answer: dict | None = None,
-    ) -> EvaluationOutcome:
-        initial_state = self.normalizer.normalize(initial_state)
-        current_state = self.normalizer.normalize(current_state)
-        required_commands = expected_observations.get("required_commands", [])
-        checks = expected_observations.get("checks", {})
-        passed_rules: list[dict] = []
-        failed_rules: list[dict] = []
-
-        for required in required_commands:
-            passed = any(
-                self._command_matches(executed, required) for executed in executed_commands
-            )
-            detail = {"type": "required_command", "rule": {"command": required}}
-            if passed:
-                passed_rules.append(
-                    {**detail, "reason": "Required inspection command was executed."}
-                )
-            else:
-                failed_rules.append(
-                    {
-                        **detail,
-                        "reason": f"Required inspection command {required!r} was not executed.",
-                    }
-                )
-
-        if expected_observations.get("repository_state_unchanged", True):
-            passed = current_state == initial_state
-            detail = {"type": "repository_state_unchanged", "rule": {}}
-            if passed:
-                passed_rules.append({**detail, "reason": "Repository state is unchanged."})
-            else:
-                failed_rules.append(
-                    {**detail, "reason": "Repository state changed during inspection."}
-                )
-
-        expected_answer = expected_observations.get("expected_answer", checks)
-        answer_payload = submitted_answer or {}
-        if expected_answer:
-            passed = self._answer_matches(answer_payload, expected_answer)
-            detail = {"type": "inspection_answer_matches", "rule": {"expected": expected_answer}}
-            if passed:
-                passed_rules.append({**detail, "reason": "Submitted inspection answer matched."})
-            else:
-                failed_rules.append(
-                    {
-                        **detail,
-                        "reason": "Submitted inspection answer was missing or did not match expected observations.",
-                    }
-                )
-
-        matched = not failed_rules
-        result = RESULT_TARGET_MATCHED if matched else RESULT_TARGET_NOT_YET_MATCHED
-        return EvaluationOutcome(
-            result_category=result,
-            target_matched=matched,
-            passed_rules=tuple(passed_rules),
-            failed_rules=tuple(failed_rules),
-            summary=(
-                f"{len(passed_rules)} inspection checks passed."
-                if matched
-                else f"{len(failed_rules)} inspection checks failed."
-            ),
-        )
-
-    def observations_for(self, state: dict) -> dict:
-        state = self.normalizer.normalize(state)
-        branches = state.get("branches", {})
-        head = state.get("head", {})
-        head_branch = head.get("name") if head.get("type") == "branch" else None
-        working_tree = state.get("working_tree", {})
-        staging = state.get("staging", {})
-        commits = state.get("commits", [])
-        conflicts = sorted(state.get("conflicts", []))
-        unstaged_paths = sorted(
-            path for path, value in working_tree.items() if str(value).lower() != "untracked"
-        )
-        untracked_paths = sorted(
-            path for path, value in working_tree.items() if str(value).lower() == "untracked"
-        )
-        staged_paths = sorted(staging)
-        head_target = branches.get(head_branch) if head_branch else head.get("target")
-        latest_commit = self._commit_by_id(state, head_target)
-        merge_commit = next(
-            (commit for commit in reversed(commits) if len(commit.get("parents", [])) > 1),
-            None,
-        )
-        latest_changed_paths = sorted(
-            (latest_commit or {}).get("changes") or (latest_commit or {}).get("files", {})
-        )
-
-        return {
-            "head_branch": head_branch,
-            "current_branch": head_branch,
-            "active_branch": head_branch,
-            "available_branches": sorted(branches),
-            "branch_list": sorted(branches),
-            "branch_tips": dict(sorted(branches.items())),
-            "active_feature_branch": head_branch
-            if str(head_branch or "").startswith("feature/")
-            else None,
-            "stale_branch": self._stale_branch(branches),
-            "staged_paths": staged_paths,
-            "staged_changes": staged_paths,
-            "staging_empty": not staged_paths,
-            "staged_diff_paths": staged_paths,
-            "unstaged_paths": unstaged_paths,
-            "unstaged_changes": unstaged_paths,
-            "unstaged_diff_paths": unstaged_paths,
-            "untracked_paths": untracked_paths,
-            "untracked_files": untracked_paths,
-            "conflicted_paths": conflicts,
-            "latest_commit": head_target,
-            "commit_order": [commit["id"] for commit in commits],
-            "commit_history": [commit["id"] for commit in commits],
-            "target_commit": head_target,
-            "commit_message": (latest_commit or {}).get("message", ""),
-            "changed_paths": latest_changed_paths,
-            "parent_commit": ((latest_commit or {}).get("parents") or [None])[0],
-            "merge_commit": (merge_commit or {}).get("id"),
-            "merge_parents": (merge_commit or {}).get("parents", []),
-            "divergence_point": self._divergence_point(commits),
-            "diff_target": {
-                "unstaged": unstaged_paths,
-                "staged": staged_paths,
-                "conflicted": conflicts,
-            },
-        }
-
-    def _command_matches(self, executed: str, required: str) -> bool:
-        return command_matches(executed, required)
-
-    def _answer_matches(self, submitted: dict, expected: dict) -> bool:
-        if not isinstance(submitted, dict) or not isinstance(expected, dict):
-            return submitted == expected
-        normalized_submitted = self._normalize_answer(submitted)
-        normalized_expected = self._normalize_answer(expected)
-        return all(
-            normalized_submitted.get(key) == value for key, value in normalized_expected.items()
-        )
-
-    def _normalize_answer(self, value):
-        if isinstance(value, dict):
-            return {key: self._normalize_answer(value[key]) for key in sorted(value)}
-        if isinstance(value, list):
-            return sorted(
-                (self._normalize_answer(item) for item in value),
-                key=lambda item: json.dumps(item, sort_keys=True),
-            )
-        return value
-
-    def _commit_by_id(self, state: dict, commit_id: str | None) -> dict | None:
-        if not commit_id:
-            return None
-        return next(
-            (commit for commit in state.get("commits", []) if commit["id"] == commit_id), None
-        )
-
-    def _stale_branch(self, branches: dict) -> str | None:
-        for name in sorted(branches):
-            if name.endswith(("-old", "-done", "-stale")):
-                return name
-        return None
-
-    def _divergence_point(self, commits: list[dict]) -> str | None:
-        parent_counts: dict[str, int] = {}
-        for commit in commits:
-            for parent in commit.get("parents", []):
-                parent_counts[parent] = parent_counts.get(parent, 0) + 1
-        common = [commit_id for commit_id, count in parent_counts.items() if count > 1]
-        return common[-1] if common else None

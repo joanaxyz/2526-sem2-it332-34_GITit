@@ -21,11 +21,11 @@ COMMAND_DIAGNOSTIC = "non_counted_diagnostic"
 COMMAND_UNPROCESSABLE = "unprocessable"
 
 COMPLETION_STATE_BASED = "state_based"
-COMPLETION_INSPECTION = "inspection"
+# State-based scenarios may use detailed target rules, but they still evaluate
+# through the normal state-based evaluator.
 COMPLETION_EXPANDED_STATE_BASED = "expanded_state_based"
 COMPLETION_TYPES = (
     COMPLETION_STATE_BASED,
-    COMPLETION_INSPECTION,
     COMPLETION_EXPANDED_STATE_BASED,
 )
 

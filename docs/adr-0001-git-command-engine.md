@@ -18,7 +18,7 @@ Keep production command execution fully simulated:
 2. Map syntax variants to command intents.
 3. Apply the relevant simulated command handler to the teaching state.
 4. Format high-fidelity Git-like terminal output for supported curriculum commands.
-5. Evaluate completion from the resulting state or, for diagnostic scenarios, from inspection intent metadata.
+5. Evaluate completion from the resulting state.
 
 The simulator targets high-fidelity behavior for supported curriculum command families. It does not claim complete compatibility with every Git command or every Git version.
 
@@ -43,7 +43,7 @@ Command submission remains synchronous and deterministic for scenario-scale work
 3. `CommandIntentMapper` converts aliases/options into simulator operations.
 4. A command-family handler mutates the simulated repository state.
 5. A formatter module produces Git-like stdout/stderr and exit code metadata.
-6. The evaluator checks the target state or diagnostic/inspection requirements.
+6. The evaluator checks the target state. Diagnostic commands may be part of the command history, but they do not create separate completion sessions.
 
 ## Optional Development Comparison
 

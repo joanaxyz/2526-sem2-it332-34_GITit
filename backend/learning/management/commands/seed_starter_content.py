@@ -11,13 +11,11 @@ from django.db import transaction
 
 from common.constants import (
     COMPLETION_EXPANDED_STATE_BASED,
-    COMPLETION_INSPECTION,
     COMPLETION_STATE_BASED,
     DIFFICULTY_EASY,
     DIFFICULTY_HARD,
     DIFFICULTY_MEDIUM,
 )
-from evaluation.services import InspectionEvaluator
 from learning.models import LearningUnit, Lesson, OrientationProgress
 from progress.models import StreakRecord, StudentProgress
 from scenarios.command_content import (
@@ -52,15 +50,15 @@ PLACEHOLDER_RE = re.compile(r"<[^>]+>")
 TASK_COMMAND_REPLACEMENTS = (
     ("git commit --amend", "the latest snapshot repair"),
     ("git restore --staged", "the unstaging recovery"),
-    ("git log --oneline --graph", "history inspection"),
-    ("git log --oneline", "history inspection"),
-    ("git diff --staged", "staged-difference inspection"),
+    ("git log --oneline --graph", "history diagnostics"),
+    ("git log --oneline", "history diagnostics"),
+    ("git diff --staged", "staged-difference diagnostics"),
     ("git remote -v", "remote verification"),
-    ("git branch -v", "branch inspection"),
-    ("git status", "state inspection"),
-    ("git diff", "difference inspection"),
-    ("git show", "object inspection"),
-    ("git branch", "branch inspection"),
+    ("git branch -v", "branch diagnostics"),
+    ("git status", "state diagnostics"),
+    ("git diff", "difference diagnostics"),
+    ("git show", "object diagnostics"),
+    ("git branch", "branch diagnostics"),
     ("git remote", "remote configuration"),
     ("git switch -c", "new-branch navigation"),
     ("git checkout -b", "new-branch navigation"),
@@ -74,7 +72,7 @@ TASK_COMMAND_REPLACEMENTS = (
     ("git reset", "branch-pointer recovery"),
     ("git revert", "reversing snapshot"),
     ("git stash", "temporary work save"),
-    ("git reflog", "recovery-history inspection"),
+    ("git reflog", "recovery-history diagnostics"),
     ("git switch", "branch navigation"),
     ("git checkout", "branch navigation"),
     ("git merge", "branch integration"),
@@ -139,7 +137,6 @@ class VariantTemplateSpec:
     solution_commands_template: list[str]
     parameter_pools: dict[str, list[Any]]
     generation_count: int
-    expected_observations_template: dict = field(default_factory=dict)
     student_context_template: dict = field(default_factory=dict)
 
 
@@ -294,7 +291,7 @@ class CurriculumMarkdownParser:
         fields.setdefault("title", self._title_from_slug(slug))
         fields.setdefault("focus", primary_focus)
         fields.setdefault("primary_focus_commands", [primary_focus])
-        fields.setdefault("supporting_inspection_commands", [])
+        fields.setdefault("supporting_diagnostic_commands", [])
         return ScenarioSpec(
             slug=slug,
             unit_slug=unit_slug,
@@ -384,10 +381,6 @@ class DynamicVariantGenerator:
                     ),
                     "initial_state": self._render(template.initial_state_template, context),
                     "target_rule": self._render(template.target_rule_template, context),
-                    "expected_observations": self._render(
-                        template.expected_observations_template,
-                        context,
-                    ),
                     "solution_commands": self._render(
                         template.solution_commands_template,
                         context,
@@ -532,7 +525,11 @@ class ModuleOneSeedBuilder:
             LessonSpec(
                 unit_slug=unit_slug,
                 slug=slug,
-                kind="scenario",
+                kind=(
+                    "content"
+                    if slug == "reading-repository-status-and-history"
+                    else "scenario"
+                ),
                 title=title,
                 subtitle=subtitle,
                 sort_order=index,
@@ -582,7 +579,7 @@ class ModuleOneSeedBuilder:
             "short_explanation": explanation,
             "skill_focus_type": ScenarioSkillFocus.SkillFocusType.WORKFLOW_SPECIFIC,
             "primary_focus_commands": primary,
-            "supporting_inspection_commands": supporting,
+            "supporting_diagnostic_commands": supporting,
             "safe_demo_commands": supporting[:3],
             "demo_repository_state": difficulties[DIFFICULTY_EASY].variants[0]["initial_state"],
             "related_git_concepts": concepts,
@@ -1144,18 +1141,18 @@ class ModuleOneSeedBuilder:
             commands=["git restore --staged {{keep_file}}", "git restore {{discard_file}}"],
             count=2,
         )
-        reset_template = self._copy_template(
+        restore_dot_template = self._copy_template(
             template,
-            slug="reset-restore-{{project}}-{{index}}",
-            signature="restore/reset-head/{{project}}/{{index}}",
+            slug="restore-dot-{{project}}-{{index}}",
+            signature="restore/staged-dot/{{project}}/{{index}}",
             target_rule={
                 "head_branch": "main",
                 "staging_empty": True,
                 "working_tree_contains": ["{{keep_file}}"],
                 "working_tree_absent": ["{{discard_file}}"],
-                "required_commands": ["git reset HEAD", "git restore"],
+                "required_commands": ["git restore --staged", "git restore"],
             },
-            commands=["git reset HEAD {{keep_file}}", "git restore {{discard_file}}"],
+            commands=["git restore --staged .", "git restore {{discard_file}}"],
         )
         return self._scenario(
             slug="unstage-and-discard-changes",
@@ -1187,89 +1184,47 @@ class ModuleOneSeedBuilder:
                     ),
                 ),
                 DIFFICULTY_HARD: (
-                    "Use the legacy unstage form, then discard the unwanted edit.",
+                    "Use the broad staged-restore form, then discard the unwanted edit.",
                     "Unstage the kept file and discard the unwanted edit.",
                     (2, 4, self.diagnostic_commands),
-                    reset_template,
+                    restore_dot_template,
                 ),
             },
         )
 
     def _read_state_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
-        cases = [
-            {
-                "project": "status",
-                "command": "git status",
-                "must": ["staged_paths", "unstaged_paths", "untracked_paths"],
-            },
-            {
-                "project": "history",
-                "command": "git log --oneline",
-                "must": ["commit_history", "latest_commit"],
-            },
-            {
-                "project": "staged-diff",
-                "command": "git diff --staged",
-                "must": ["staged_diff_paths"],
-            },
-        ]
-        template = self._state_template(
-            slug="read-{{project}}-{{index}}",
-            label="{{project}} repository reading",
-            signature="read/{{project}}/{{index}}",
-            cases=cases,
-            initial_state=self._repo_state(
+        fields = {
+            "title": "Read status, history, and diffs",
+            "focus": "git status",
+            "summary": "Use diagnostic commands to identify repository state before changing it.",
+            "short_explanation": "Diagnostic commands are non-counted because they help students reason before acting.",
+            "skill_focus_type": ScenarioSkillFocus.SkillFocusType.CONCEPT_SPECIFIC,
+            "primary_focus_commands": ["git status"],
+            "supporting_diagnostic_commands": [
+                "git status",
+                "git log --oneline",
+                "git diff",
+                "git diff --staged",
+            ],
+            "safe_demo_commands": ["git status", "git log --oneline", "git diff"],
+            "demo_repository_state": self._repo_state(
                 "c2",
                 {"src/app.py": "modified", "notes/todo.md": "untracked"},
                 {"README.md": "modified"},
             ),
-            target_rule={
-                "completion_type": COMPLETION_INSPECTION,
-                "repository_state_unchanged": True,
-                "required_commands": ["{{command}}"],
-                "must_identify": "{{must}}",
-            },
-            commands=["{{command}}"],
-            count=2,
-        )
-        return self._scenario(
+            "related_git_concepts": ["status output", "commit history", "diff views"],
+            "narrative": "The repository already has mixed state; the goal is to read it accurately before choosing an action.",
+            "task_prompt": "Use the command preview to practice reading the repository state.",
+        }
+        return ScenarioSpec(
             slug="read-repository-state",
             unit_slug=unit_slug,
             lesson_slug=lesson_slug,
-            title="Read status, history, and diffs",
+            title=fields["title"],
             focus="git status",
-            summary="Use diagnostic commands to identify repository state without changing it.",
-            explanation="Inspection commands are non-counted because they help students reason before acting.",
-            primary=["git status"],
-            supporting=["git status", "git log --oneline", "git diff", "git diff --staged"],
-            concepts=["status output", "commit history", "diff views"],
-            narrative="The repository already has mixed state; the goal is to read it accurately.",
-            task_prompt="Inspect the repository state without changing files, staging, or history.",
-            lesson_number=8,
-            difficulty_configs={
-                DIFFICULTY_EASY: (
-                    "Use the named diagnostic command to inspect the repository.",
-                    "Inspect the repository without changing it.",
-                    (0, 3, self.diagnostic_commands),
-                    template,
-                ),
-                DIFFICULTY_MEDIUM: (
-                    "Choose the diagnostic view that answers the question.",
-                    "Inspect the repository without changing it.",
-                    (0, 3, self.diagnostic_commands),
-                    self._copy_template(
-                        template, count=2, signature="read/medium/{{project}}/{{index}}"
-                    ),
-                ),
-                DIFFICULTY_HARD: (
-                    "Use only diagnostic commands and preserve the repository state.",
-                    "Inspect the repository without changing it.",
-                    (0, 2, self.diagnostic_commands),
-                    self._copy_template(
-                        template, count=2, signature="read/hard/{{project}}/{{index}}"
-                    ),
-                ),
-            },
+            seeding_status="preview_only",
+            fields=fields,
+            difficulties={},
         )
 
     def _review_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
@@ -1431,7 +1386,6 @@ class ModuleOneSeedBuilder:
             ),
             parameter_pools=overrides.get("parameter_pools", template.parameter_pools),
             generation_count=overrides.get("count", template.generation_count),
-            expected_observations_template=template.expected_observations_template,
             student_context_template=overrides.get(
                 "student_context_template",
                 template.student_context_template,
@@ -1444,15 +1398,15 @@ class ModuleOneSeedBuilder:
             "current_state": [
                 "Use the live repository state and terminal output to confirm the current branch, staged paths, and working-tree changes.",
             ],
-            "provided_values": [],
-            "requirements": [
+            "required_details": [
+                {
+                    "label": "Scenario target",
+                    "value": "Use the task prompt and required details as the exact target values for this attempt.",
+                },
+            ],
+            "constraints": [
                 "Use the required details below as the exact target values for this attempt.",
                 "Do not use the context as a command sequence; decide the Git steps from the repository state.",
-            ],
-            "warnings": [],
-            "success_checklist": [],
-            "inspection_suggestions": [
-                "You may inspect the repository state before deciding what to do.",
             ],
         }
 
@@ -1504,6 +1458,14 @@ class ModuleOneSeedBuilder:
         return state
 
     def _body_html(self, title: str, subtitle: str) -> str:
+        if title == "Reading Repository Status and History":
+            return f"""
+        <section class="lesson-panel">
+          <h2>{title}</h2>
+          <p>{subtitle}</p>
+          <p>Use this lesson and its command preview to learn diagnostic commands. These commands stay non-counted inside normal practice scenarios.</p>
+        </section>
+        """
         return f"""
         <section class="lesson-panel">
           <h2>{title}</h2>
@@ -1635,7 +1597,6 @@ class Command(BaseCommand):
         ScenarioVariant.objects.filter(scenario__in=retired_scenarios).update(is_published=False)
         simulator = RepositoryStateSimulator()
         snapshotter = RepositorySnapshotService()
-        inspector = InspectionEvaluator()
 
         for sort_order, spec in enumerate(specs, start=1):
             fields = self._scenario_defaults(spec)
@@ -1649,6 +1610,13 @@ class Command(BaseCommand):
                     "is_published": True,
                 },
             )
+            if not spec.difficulties:
+                DifficultyInstance.objects.filter(scenario=scenario).update(is_published=False)
+                ScenarioGenerationBlueprint.objects.filter(
+                    difficulty_instance__scenario=scenario
+                ).update(is_published=False)
+                ScenarioVariant.objects.filter(scenario=scenario).update(is_published=False)
+                continue
             for difficulty in (DIFFICULTY_EASY, DIFFICULTY_MEDIUM, DIFFICULTY_HARD):
                 config = spec.difficulties[difficulty]
                 completion_type = self._completion_type(spec, config.target_rule)
@@ -1689,7 +1657,6 @@ class Command(BaseCommand):
                             "initial_state_template": template.initial_state_template,
                             "target_rule_template": template.target_rule_template,
                             "solution_commands_template": template.solution_commands_template,
-                            "expected_observations_template": template.expected_observations_template,
                             "student_context_template": template.student_context_template,
                             "generation_count": template.generation_count,
                             "max_combinations": template.generation_count,
@@ -1723,22 +1690,11 @@ class Command(BaseCommand):
                         initial_state=initial_state,
                         solution_commands=solution_commands,
                         target_state=target_state,
-                        completion_type=completion_type,
-                    )
-                    expected_observations = (
-                        self._expected_observations(
-                            inspector,
-                            initial_state=initial_state,
-                            target_rule=target_rule,
-                        )
-                        if completion_type == COMPLETION_INSPECTION
-                        else {}
                     )
                     self._assert_no_variant_placeholders(
                         variant["slug"],
                         {
                             "target_rule": target_rule,
-                            "expected_observations": expected_observations,
                             "solution_commands": solution_commands,
                         },
                     )
@@ -1754,7 +1710,6 @@ class Command(BaseCommand):
                             "target_rule": target_rule,
                             "target_state": target_state,
                             "expected_state_diagram": snapshotter.snapshot(target_state),
-                            "expected_observations": expected_observations,
                             "solution_commands": solution_commands,
                             "is_published": True,
                         }
@@ -1790,7 +1745,7 @@ class Command(BaseCommand):
                 "skill_focus_type", ScenarioSkillFocus.SkillFocusType.COMMAND_SPECIFIC
             ),
             "primary_focus_commands": primary_focus_commands,
-            "supporting_inspection_commands": spec.fields.get("supporting_inspection_commands", []),
+            "supporting_diagnostic_commands": spec.fields.get("supporting_diagnostic_commands", []),
             "safe_demo_commands": spec.fields.get("safe_demo_commands", []),
             "demo_repository_state": RepositoryStateSimulator().normalize_state(
                 spec.fields.get("demo_repository_state", {})
@@ -1856,7 +1811,7 @@ class Command(BaseCommand):
     ) -> list[str]:
         commands = [
             *list(spec.fields.get("primary_focus_commands", [])),
-            *list(spec.fields.get("supporting_inspection_commands", [])),
+            *list(spec.fields.get("supporting_diagnostic_commands", [])),
         ] or fallback_commands
         seen_keys = set()
         unique = []
@@ -1872,7 +1827,7 @@ class Command(BaseCommand):
         commands = [
             *list(spec.fields.get("safe_demo_commands", [])),
             *list(spec.fields.get("primary_focus_commands", [])),
-            *list(spec.fields.get("supporting_inspection_commands", [])),
+            *list(spec.fields.get("supporting_diagnostic_commands", [])),
         ]
         seen = set()
         unique = []
@@ -1921,11 +1876,7 @@ class Command(BaseCommand):
         initial_state: dict,
         solution_commands: list[str],
         target_state: dict,
-        completion_type: str,
     ) -> dict:
-        if completion_type == COMPLETION_INSPECTION:
-            return target_rule
-
         augmented = dict(target_rule)
         required = list(augmented.get("required_commands", []))
         for command in spec.fields.get("primary_focus_commands") or [spec.focus]:
@@ -1965,8 +1916,10 @@ class Command(BaseCommand):
         return augmented
 
     def _completion_type(self, spec: ScenarioSpec, target_rule: dict) -> str:
-        if target_rule.get("completion_type") == COMPLETION_INSPECTION:
-            return COMPLETION_INSPECTION
+        if target_rule.get("completion_type") == "inspection":
+            raise CommandError(
+                f"{spec.slug} uses deprecated diagnostic-only completion; move it to lesson or preview content."
+            )
         if spec.seeding_status == "requires_simulator_expansion":
             return COMPLETION_EXPANDED_STATE_BASED
         return COMPLETION_STATE_BASED
@@ -2001,21 +1954,6 @@ class Command(BaseCommand):
         return next(
             (commit for commit in state.get("commits", []) if commit["id"] == commit_id), None
         )
-
-    def _expected_observations(
-        self,
-        inspector: InspectionEvaluator,
-        *,
-        initial_state: dict,
-        target_rule: dict,
-    ) -> dict:
-        observations = inspector.observations_for(initial_state)
-        must_identify = target_rule.get("must_identify", [])
-        return {
-            "required_commands": target_rule.get("required_commands", []),
-            "repository_state_unchanged": target_rule.get("repository_state_unchanged", True),
-            "checks": {key: observations[key] for key in must_identify if key in observations},
-        }
 
     def _difficulty_rule_for_storage(self, raw_rule: dict, variants: list[dict]) -> dict:
         if not self._has_placeholder(raw_rule):

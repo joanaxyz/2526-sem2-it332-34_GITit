@@ -23,10 +23,8 @@ export function ScenarioSkillFocusCard({
   const primaryLabel = scenario.primary_focus_commands.length === 1 ? 'Focus command' : 'Focus commands'
   const focusValue = scenario.primary_focus_commands.length ? scenario.primary_focus_commands.join(', ') : scenario.focus
   const panelId = `skill-panel-${scenario.id}`
-  const isDiagnosticOnly = scenario.difficulties.length > 0 && scenario.difficulties.every(
-    (difficulty) => difficulty.completion_type === 'inspection',
-  )
-  const cardLabel = isDiagnosticOnly ? 'Command preview' : `Scenario ${scenarioNumber}`
+  const isPreviewOnly = scenario.difficulties.length === 0
+  const cardLabel = isPreviewOnly ? 'Command preview' : `Scenario ${scenarioNumber}`
 
   return (
     <Card className="shadow-none">
@@ -63,12 +61,12 @@ export function ScenarioSkillFocusCard({
               <span className="font-mono">{focusValue}</span>
             </div>
           </div>
-          {isDiagnosticOnly ? (
+          {isPreviewOnly ? (
             <div className="rounded-md border border-border bg-background/30 p-3">
               <div className="min-w-0">
                 <Badge variant="outline">Command preview only</Badge>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  This diagnostic lesson is read-only. Use the preview to study the commands; no practice workspace is opened.
+                  This diagnostic lesson is preview-only. Study the commands here, then use them freely inside normal practice workspaces.
                 </p>
               </div>
             </div>

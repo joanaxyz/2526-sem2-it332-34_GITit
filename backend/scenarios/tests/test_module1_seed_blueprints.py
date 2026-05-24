@@ -3,7 +3,6 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import override_settings
 
-from common.constants import COMPLETION_INSPECTION
 from learning.models import Lesson
 from scenarios.command_content import GIT_COMMAND_CONTENT_LIBRARY
 from scenarios.models import (
@@ -28,6 +27,7 @@ def _example_command(command: str) -> str:
         "<old>": "origin",
         "<new>": "upstream",
         "<commit>": "c1",
+        "<number>": "2",
     }
     example = command
     for placeholder, value in replacements.items():
@@ -71,20 +71,20 @@ def test_module_one_blueprint_seed_matches_v3_contract(db):
             scenario__learning_unit__slug="local-repository-foundations",
             is_published=True,
         ).count()
-        == 27
+        == 24
     )
     assert (
         CommandCountPolicy.objects.filter(
             difficulty_instance__scenario__learning_unit__slug="local-repository-foundations",
         ).count()
-        == 27
+        == 24
     )
     assert (
         ScenarioGenerationBlueprint.objects.filter(
             difficulty_instance__scenario__learning_unit__slug="local-repository-foundations",
             is_published=True,
         ).count()
-        >= 27
+        >= 24
     )
     assert (
         ScenarioVariant.objects.filter(
@@ -95,7 +95,7 @@ def test_module_one_blueprint_seed_matches_v3_contract(db):
 
 
 @override_settings(DEBUG=True)
-def test_module_one_seed_uses_authored_cases_and_inspection_policy(db):
+def test_module_one_seed_uses_authored_cases_and_preview_only_diagnostics(db):
     call_command("seed_module1_scenarios", "--reset", "--confirm")
 
     for blueprint in ScenarioGenerationBlueprint.objects.filter(
@@ -122,16 +122,33 @@ def test_module_one_seed_uses_authored_cases_and_inspection_policy(db):
                 3 if difficulty.difficulty == "easy" else 2
             )
 
-    inspection = DifficultyInstance.objects.get(
-        scenario__slug="inspect-repository-state",
-        difficulty="easy",
-    )
-    assert inspection.completion_type == COMPLETION_INSPECTION
-    assert inspection.command_policy.min_counted_commands == 0
-    assert inspection.command_policy.max_counted_commands == 0
-    assert "inspection_answer_matches" in str(
-        inspection.generation_blueprints.get().target_rule_template
-    )
+    preview = ScenarioSkillFocus.objects.get(slug="inspect-repository-state")
+    assert preview.difficulty_instances.filter(is_published=True).count() == 0
+    assert preview.command_preview_config["diagnostic"] is True
+    assert not DifficultyInstance.objects.filter(completion_type="inspection").exists()
+
+
+@override_settings(DEBUG=True)
+def test_clone_blueprints_cover_branch_depth_and_destination_forms(db):
+    call_command("seed_module1_scenarios", "--reset", "--confirm", "--validate-build")
+
+    commands = []
+    cases = []
+    for blueprint in ScenarioGenerationBlueprint.objects.filter(
+        difficulty_instance__scenario__slug="clone-remote-repository",
+        is_published=True,
+    ):
+        cases.extend(blueprint.parameter_pools["cases"])
+        commands.extend(case["solution_command"] for case in blueprint.parameter_pools["cases"])
+
+    assert any(command == "git clone https://example.test/training/docs-portal.git" for command in commands)
+    assert any(command.endswith(" api-workshop") for command in commands)
+    assert any("git@example.test:" in command for command in commands)
+    assert any(command.startswith("git clone -b starter ") for command in commands)
+    assert any(command.startswith("git clone --branch starter ") for command in commands)
+    assert any(command.startswith("git clone --depth 1 ") for command in commands)
+    assert any(case["selected_branch"] != "main" for case in cases)
+    assert any(case["clone_shallow"] is True and case["clone_depth"] == 1 for case in cases)
 
 
 @override_settings(DEBUG=True)
@@ -148,6 +165,7 @@ def test_diagnostic_command_preview_is_first_module_one_scenario(db):
     )
 
     assert first.slug == "inspect-repository-state"
+    assert first.difficulty_instances.filter(is_published=True).count() == 0
     assert first.safe_demo_commands[:7] == [
         "git status",
         "git log --oneline",
@@ -210,6 +228,32 @@ def test_command_content_documents_only_simulator_supported_forms():
                     spec = registry.get(parsed.subcommand)
                     assert spec is not None, command
                     assert spec.validate(parsed) is None, command
+
+
+@override_settings(DEBUG=True)
+def test_module_one_preview_commands_are_supported_by_simulator(db):
+    call_command("seed_module1_scenarios", "--reset", "--confirm")
+    parser = GitCommandParser()
+    registry = GitCommandRegistry()
+
+    for scenario in ScenarioSkillFocus.objects.filter(
+        learning_unit__slug="local-repository-foundations",
+        is_published=True,
+    ):
+        preview = scenario.command_preview_config or {}
+        commands = [
+            *preview.get("supported_demo_commands", []),
+            *[
+                ref.get("command")
+                for ref in preview.get("command_refs", [])
+                if isinstance(ref, dict) and ref.get("command")
+            ],
+        ]
+        for command in commands:
+            parsed = parser.parse(_example_command(command))
+            spec = registry.get(parsed.subcommand)
+            assert spec is not None, command
+            assert spec.validate(parsed) is None, command
 
 
 @override_settings(DEBUG=True)

@@ -183,7 +183,7 @@ export function CompletionCelebrationModal({
             />
             <StatTile label="Submissions" value={`${session.counts.total_attempts}`} helper="All terminal entries" />
             <StatTile
-              label="Free inspections"
+              label="Free diagnostics"
               value={`${session.counts.non_counted_diagnostic_total}`}
               helper="Diagnostics excluded from accuracy"
             />
@@ -241,7 +241,7 @@ export function CompletionCelebrationModal({
                 {onRetry ? (
                   <Button type="button" variant="destructive" disabled={isNavigating} onClick={onRetry}>
                     <RefreshCcw data-icon="inline-start" />
-                    {isRetrying ? 'Starting retry' : 'Retry'}
+                    {isRetrying ? 'Starting retry' : shouldRetryForAccuracy ? 'Retry for accuracy' : 'Retry'}
                   </Button>
                 ) : null}
                 <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToModules}>

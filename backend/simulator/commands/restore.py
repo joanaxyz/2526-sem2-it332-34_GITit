@@ -13,6 +13,8 @@ class RestoreCommandHandler(BaseCommandHandler):
         if not paths:
             raise SimulatorCommandError("fatal: you must specify path(s) to restore", exit_code=128)
         if operation.name == "RestoreStaged":
+            if "." in paths:
+                paths = sorted(state.setdefault("staging", {}))
             unstaged: list[str] = []
             for path in paths:
                 if path not in state.setdefault("staging", {}):
@@ -26,6 +28,12 @@ class RestoreCommandHandler(BaseCommandHandler):
             return CommandOutcome(command="restore", details={"unstaged": unstaged})
 
         restored: list[str] = []
+        if "." in paths:
+            paths = sorted(
+                path
+                for path, value in state.setdefault("working_tree", {}).items()
+                if runtime.normalizer.entry_status(value) != "ignored"
+            )
         for path in paths:
             if path not in state.setdefault("working_tree", {}) and path not in runtime._head_tree(
                 state

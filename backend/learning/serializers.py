@@ -104,7 +104,10 @@ class LessonDetailSerializer(serializers.ModelSerializer):
         return bool(progress and progress.completed_at)
 
     def get_scenario_count(self, obj) -> int:
-        return obj.scenarios.filter(is_published=True).count()
+        return obj.scenarios.filter(
+            is_published=True,
+            difficulty_instances__is_published=True,
+        ).distinct().count()
 
 
 class OrientationProgressSerializer(serializers.ModelSerializer):

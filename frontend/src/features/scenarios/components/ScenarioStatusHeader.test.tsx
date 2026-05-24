@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { ScenarioSession } from '@/features/practice/types'
 import { ScenarioStatusHeader } from './ScenarioStatusHeader'
@@ -73,6 +73,8 @@ const session: ScenarioSession = {
 }
 
 describe('ScenarioStatusHeader', () => {
+  afterEach(() => cleanup())
+
   it('renders a compact command budget in the header with detail text', () => {
     render(<ScenarioStatusHeader session={session} onExit={vi.fn()} />)
 
@@ -103,5 +105,43 @@ describe('ScenarioStatusHeader', () => {
 
     expect(screen.getAllByText('Failed').length).toBeGreaterThan(0)
     expect(screen.getAllByText('failed').length).toBeGreaterThan(0)
+  })
+
+  it('labels failed attempts as retry', () => {
+    render(
+      <ScenarioStatusHeader
+        session={{ ...session, status: 'failed' }}
+        onExit={vi.fn()}
+        onRetry={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: /^retry$/i })).toBeInTheDocument()
+  })
+
+  it('labels active restarts as start over and calls the confirmation hook', () => {
+    const onStartOver = vi.fn()
+    render(<ScenarioStatusHeader session={session} onExit={vi.fn()} onStartOver={onStartOver} />)
+
+    fireEvent.click(screen.getByRole('button', { name: /start over/i }))
+
+    expect(onStartOver).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('button', { name: /^retry$/i })).not.toBeInTheDocument()
+  })
+
+  it('labels completed inaccurate attempts as retry for accuracy', () => {
+    render(
+      <ScenarioStatusHeader
+        session={{
+          ...session,
+          status: 'completed',
+          counts: { ...session.counts, counted_action_total: 4 },
+        }}
+        onExit={vi.fn()}
+        onRetry={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: /retry for accuracy/i })).toBeInTheDocument()
   })
 })

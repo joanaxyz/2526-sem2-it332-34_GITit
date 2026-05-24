@@ -831,7 +831,7 @@ function normalizeDemoSteps(
   value: unknown,
   fallbackSnapshot: RepositorySnapshot,
   fallbackExplanation?: string,
-  fallbackCommonMistake = 'Skipping inspection before choosing an action.',
+  fallbackCommonMistake = 'Skipping diagnostics before choosing an action.',
 ): DemoExplanationStep[] {
   if (!Array.isArray(value)) return []
   return value

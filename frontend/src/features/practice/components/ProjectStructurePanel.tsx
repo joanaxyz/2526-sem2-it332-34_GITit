@@ -127,12 +127,12 @@ function TreeItem({ node, depth = 0 }: { node: TreeNode; depth?: number }) {
   )
 }
 
-export function ProjectStructurePanel({ snapshot }: { snapshot: RepositorySnapshot }) {
+export function ProjectStructurePanel({ snapshot, className }: { snapshot: RepositorySnapshot; className?: string }) {
   const tree = useMemo(() => buildTree(snapshot), [snapshot])
   const hasFiles = tree.length > 0
 
   return (
-    <Card className="min-h-0 flex-1 overflow-hidden shadow-none flex flex-col">
+    <Card className={cn('flex min-h-[14rem] flex-col overflow-hidden shadow-none', className)}>
       <CardHeader className="p-3">
         <CardTitle className="text-sm">Project Structure</CardTitle>
       </CardHeader>

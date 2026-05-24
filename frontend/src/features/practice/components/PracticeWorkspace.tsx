@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, GripHorizontal, GripVertical, PanelsTopLeft } from 'lucide-react'
+import { GripHorizontal, GripVertical, PanelsTopLeft } from 'lucide-react'
 
 import { ScenarioContextPanel } from '@/features/scenarios/components/ScenarioContextPanel'
 import { ScenarioStatusHeader } from '@/features/scenarios/components/ScenarioStatusHeader'
@@ -22,8 +22,8 @@ import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import { syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { PracticeWorkspaceSkeleton } from '@/shared/components/Skeleton'
-import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
+import { Modal } from '@/shared/components/Modal'
 import { cn } from '@/shared/utils/cn'
 
 const DEFAULT_TERMINAL_RATIO = 0.28
@@ -86,6 +86,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const [terminalPaneRatio, setTerminalPaneRatio] = useState(DEFAULT_TERMINAL_PANE_RATIO)
   const [tourOpen, setTourOpen] = useState(false)
   const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
+  const [startOverConfirmOpen, setStartOverConfirmOpen] = useState(false)
   const user = useAuthStore((state) => state.user)
   const workspaceGridRef = useRef<HTMLElement>(null)
   const diagramGridRef = useRef<HTMLDivElement>(null)
@@ -137,6 +138,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
       void queryClient.invalidateQueries({ queryKey: ['modules'] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
       setDismissedCompletionSessionId(null)
+      setStartOverConfirmOpen(false)
       navigate(`/practice/${next.id}`)
     },
   })
@@ -180,38 +182,8 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     })
   }
 
-  if (session.completion_type === 'inspection') {
-    return (
-      <div className="flex h-screen flex-col overflow-hidden bg-background">
-        <header className="flex min-h-14 items-center justify-between gap-3 border-b border-border bg-background px-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <Button type="button" variant="ghost" size="sm" disabled={exitMutation.isPending} onClick={() => exitMutation.mutate()}>
-              <ArrowLeft data-icon="inline-start" />
-              {exitMutation.isPending ? 'Exiting' : session.status === 'started' ? 'Exit' : 'Back'}
-            </Button>
-            <h1 className="truncate text-sm font-semibold">{session.scenario.title}</h1>
-          </div>
-          <Badge variant="outline">{session.variant.label}</Badge>
-        </header>
-        <main className="grid min-h-0 flex-1 grid-cols-[minmax(0,1.25fr)_minmax(20rem,0.75fr)] gap-2 p-2 max-lg:grid-cols-1 max-lg:overflow-auto">
-          <div className="min-h-0 max-lg:min-h-[28rem]">
-            <TerminalPanel
-              lines={lines}
-              disabled={session.status !== 'started' || mutation.isPending}
-              className="h-full"
-              onCommand={submit}
-            />
-          </div>
-          <div className="min-h-0 max-lg:min-h-[24rem]">
-            <LiveDagPanel
-              snapshot={session.repository_state}
-              className="flex h-full min-h-0 flex-col"
-              contentClassName="h-full min-h-0 flex-1"
-            />
-          </div>
-        </main>
-      </div>
-    )
+  function startFreshAttempt() {
+    retryMutation.mutate()
   }
 
   function beginTerminalResize(event: ReactPointerEvent<HTMLDivElement>) {
@@ -319,12 +291,14 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         isRetrying={retryMutation.isPending}
         onExit={() => exitMutation.mutate()}
         onRetry={() => retryMutation.mutate()}
+        onStartOver={() => setStartOverConfirmOpen(true)}
         onOpenTour={() => setTourOpen(true)}
         onContinue={() => retryMutation.mutate()}
       />
       <main className="grid min-h-0 flex-1 grid-cols-[18rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[17rem_minmax(0,1fr)] max-xl:grid-cols-[16rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
         <aside
-          className="flex min-h-0 flex-col gap-2 overflow-y-auto app-scrollbar"
+          className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_minmax(14rem,0.42fr)] gap-2 overflow-hidden max-lg:min-h-[36rem]"
+          data-testid="workspace-sidebar"
           data-tour-target="scenario-brief"
         >
           <div className="flex items-center justify-between gap-2 px-2">
@@ -334,10 +308,13 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             </div>
           </div>
 
-          <ScenarioContextPanel session={session} />
+          <div className="min-h-0 overflow-y-auto app-scrollbar" data-testid="scenario-context-scroll">
+            <ScenarioContextPanel session={session} />
+          </div>
 
-          {/* Project structure pinned to the bottom and always visible */}
-          <ProjectStructurePanel snapshot={session.repository_state} />
+          <div className="min-h-[14rem] overflow-hidden" data-testid="project-structure-region">
+            <ProjectStructurePanel snapshot={session.repository_state} className="h-full" />
+          </div>
         </aside>
         <section
           ref={workspaceGridRef}
@@ -429,6 +406,30 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             : null
         }
       />
+      <Modal
+        open={startOverConfirmOpen}
+        title="Start fresh attempt?"
+        className="w-full max-w-md"
+        onClose={() => setStartOverConfirmOpen(false)}
+      >
+        <div className="space-y-5">
+          <p className="text-sm leading-6 text-muted-foreground">
+            This starts a fresh attempt and variant. Your current workspace state resets, and the terminal history from this attempt will not carry over.
+          </p>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li>Completed progress is not deleted.</li>
+            <li>This action cannot be undone.</li>
+          </ul>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="ghost" disabled={retryMutation.isPending} onClick={() => setStartOverConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" disabled={retryMutation.isPending} onClick={startFreshAttempt}>
+              {retryMutation.isPending ? 'Starting' : 'Start fresh attempt'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
       {isTourOpen ? (
         <ScenarioWorkspaceTour
           key={tourKey}

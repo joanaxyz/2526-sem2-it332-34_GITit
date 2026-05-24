@@ -112,7 +112,6 @@ class RepositoryStateSimulator:
         action = parsed.subcommand
 
         legacy_handlers = {
-            "clone": self._clone,
             "fetch": self._fetch,
             "pull": self._pull,
             "push": self._push,
@@ -136,6 +135,17 @@ class RepositoryStateSimulator:
 
         if validate:
             registry_spec = GitCommandRegistry().get(action)
+            if registry_spec is None:
+                message = unsupported_command(action or parsed.normalized_text)
+                return SimulatorResult(
+                    False,
+                    state,
+                    message,
+                    parsed.normalized_text,
+                    stderr=message,
+                    exit_code=129,
+                    command_family=action,
+                )
             validation_error = registry_spec.validate(parsed) if registry_spec else None
             if validation_error:
                 return SimulatorResult(

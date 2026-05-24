@@ -34,9 +34,9 @@ export function ScenarioContextPanel({ session }: { session: ScenarioSession }) 
           <CompactList items={context.current_state} />
         </Section>
 
-        <Section icon={Target} title="Required Details" hidden={!context.provided_values.length}>
+        <Section icon={Target} title="Required Details" hidden={!context.required_details.length}>
           <dl className="grid gap-2">
-            {context.provided_values.map((item) => (
+            {context.required_details.map((item) => (
               <div className="rounded-md border border-border bg-secondary/35 px-2.5 py-2" key={`${item.label}:${item.value}`}>
                 <dt className="text-[11px] font-bold uppercase text-muted-foreground">{item.label}</dt>
                 <dd className="mt-0.5 break-words font-mono text-xs text-foreground">{item.value}</dd>
@@ -45,8 +45,8 @@ export function ScenarioContextPanel({ session }: { session: ScenarioSession }) 
           </dl>
         </Section>
 
-        <Section icon={AlertTriangle} title="Constraints" hidden={!context.warnings.length}>
-          <CompactList items={context.warnings} tone="warning" />
+        <Section icon={AlertTriangle} title="Constraints" hidden={!context.constraints.length}>
+          <CompactList items={context.constraints} tone="warning" />
         </Section>
       </CardContent>
     </Card>
@@ -108,24 +108,25 @@ function contextForSession(session: ScenarioSession) {
   const hasStructuredContext =
     context.story ||
     context.current_state.length ||
-    context.provided_values.length ||
-    context.warnings.length
+    context.required_details.length ||
+    context.constraints.length
 
   const active = hasStructuredContext ? context : fallback
   return {
     ...active,
-    situation: hasStructuredContext ? session.scenario.narrative : '',
+    situation: hasStructuredContext ? active.situation || session.scenario.narrative : '',
   }
 }
 
 function normalizeContext(context?: ScenarioStudentContext | null) {
   return {
     story: cleanText(context?.story),
+    situation: cleanText(context?.situation),
     current_state: cleanList(context?.current_state),
-    provided_values: (context?.provided_values ?? [])
+    required_details: (context?.required_details ?? [])
       .map((item) => ({ label: cleanText(item.label), value: cleanText(item.value) }))
       .filter((item) => item.label && item.value),
-    warnings: cleanList(context?.warnings),
+    constraints: cleanList(context?.constraints),
   }
 }
 
