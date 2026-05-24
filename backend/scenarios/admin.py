@@ -7,6 +7,7 @@ from scenarios.models import GitCommandContent
 class GitCommandContentAdmin(admin.ModelAdmin):
     list_display = (
         "key",
+        "base_command",
         "display_name",
         "canonical_command",
         "is_active",
@@ -14,5 +15,5 @@ class GitCommandContentAdmin(admin.ModelAdmin):
         "sort_order",
     )
     list_filter = ("is_active",)
-    search_fields = ("key", "display_name", "canonical_command")
+    search_fields = ("key", "base_command", "display_name", "canonical_command")
     ordering = ("sort_order", "key")

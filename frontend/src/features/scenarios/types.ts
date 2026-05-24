@@ -65,9 +65,12 @@ export type DemoExplanationStep = {
 
 export type CommandPreviewSection = {
   id?: string
+  type?: 'overview' | 'form' | 'option' | 'argument' | 'effect' | 'mistake' | 'practice_note'
   title: string
   command?: string
-  explanation: string
+  token?: string
+  content?: CommandPreviewBlock[]
+  explanation?: string
   pages?: CommandPreviewPage[]
   syntax_examples?: string[]
   what_changes?: string[]
@@ -84,6 +87,7 @@ export type CommandPreviewPage = {
   eyebrow?: string
   heading?: string
   body?: string
+  section_type?: CommandPreviewSection['type']
   blocks?: CommandPreviewBlock[]
   demo_steps?: DemoExplanationStep[]
 }
@@ -113,12 +117,15 @@ export type CommandPreviewBlock = {
 export type CommandPreviewCommand = {
   id?: string
   key?: string
+  base_command?: string
   title: string
+  display_name?: string
   command?: string
   canonical_command?: string
   aliases?: string[]
   summary?: string
   tags?: string[]
+  sections?: CommandPreviewSection[]
   pages: CommandPreviewPage[]
   demo_steps?: DemoExplanationStep[]
 }

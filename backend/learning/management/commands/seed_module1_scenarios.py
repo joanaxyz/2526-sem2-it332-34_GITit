@@ -3069,6 +3069,7 @@ class Command(BaseCommand):
 
     def _command_preview_config(self, spec: dict[str, Any]) -> dict[str, Any]:
         commands = self._demo_commands(spec)
+        preview_commands = self._preview_commands(spec, fallback_commands=commands)
         demo_state = self._demo_state(spec)
 
         normalized_commands = [command.strip().lower() for command in commands]
@@ -3082,11 +3083,11 @@ class Command(BaseCommand):
             "command_title": spec["title"],
             "command_refs": [
                 {
-                    "id": self._preview_section_id(command),
+                    "id": command_content_key_for_command(command),
                     "key": command_content_key_for_command(command),
                     "command": command,
                 }
-                for command in commands
+                for command in preview_commands
             ],
             "supported_demo_commands": commands,
             "demo_repository_state": demo_state,
@@ -3117,6 +3118,26 @@ class Command(BaseCommand):
             "diagnostic": diagnostic,
             "counted": not diagnostic,
         }
+
+    def _preview_commands(
+        self,
+        spec: dict[str, Any],
+        *,
+        fallback_commands: list[str],
+    ) -> list[str]:
+        commands = [
+            *list(spec.get("primary", [])),
+            *list(spec.get("supporting", [])),
+        ] or fallback_commands
+        seen_keys = set()
+        unique = []
+        for command in commands:
+            key = command_content_key_for_command(command)
+            if not key or key in seen_keys:
+                continue
+            seen_keys.add(key)
+            unique.append(command)
+        return unique
 
     def _demo_commands(self, spec: dict[str, Any]) -> list[str]:
         normalized_focus = " ".join(str(spec.get("focus", "")).split()).lower()

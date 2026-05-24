@@ -102,6 +102,7 @@ def test_intent_mapper_unifies_common_command_variants():
     commit_all = mapper.map(parser.parse('git commit -am "Update tracked files"'))
     init_short = mapper.map(parser.parse("git init -b main"))
     init_long = mapper.map(parser.parse("git init --initial-branch=main"))
+    init_quiet = mapper.map(parser.parse("git init -q"))
 
     assert add_a.operations[0].name == add_all.operations[0].name == "StageAllChanges"
     assert add_update.operations[0].name == "StageTrackedChangesOnly"
@@ -115,6 +116,7 @@ def test_intent_mapper_unifies_common_command_variants():
         == init_long.operations[0].params["initial_branch"]
         == "main"
     )
+    assert init_quiet.operations[0].params["quiet"] is True
 
 
 def test_engine_blocks_shell_and_unsupported_git_without_mutation():

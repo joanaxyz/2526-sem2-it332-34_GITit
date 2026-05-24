@@ -67,6 +67,7 @@ const scenario: ScenarioSkillFocus = {
       {
         id: 'git-status',
         key: 'git-status',
+        base_command: 'git status',
         title: 'git status',
         command: 'git status',
         canonical_command: 'git status',
@@ -94,6 +95,7 @@ const scenario: ScenarioSkillFocus = {
       {
         id: 'git-diff',
         key: 'git-diff',
+        base_command: 'git diff',
         title: 'git diff',
         command: 'git diff',
         canonical_command: 'git diff',
@@ -179,17 +181,21 @@ describe('SkillFocusPreviewModal', () => {
     expect(screen.getByRole('button', { name: /start scenario/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /previous/i })).toBeDisabled()
     expect(screen.getByRole('button', { name: /next/i })).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: /contents/i })).toBeInTheDocument()
     expect(screen.getByText('diagnostic commands')).toBeInTheDocument()
   })
 
-  it('moves through authored pages and opens one dedicated demo view', async () => {
+  it('moves through authored pages across command groups and opens one dedicated demo view', async () => {
     renderPreview()
     await screen.findByText('What git status is for')
 
     fireEvent.click(screen.getByRole('button', { name: /next/i }))
     expect(screen.getByText('Status behavior')).toBeInTheDocument()
     expect(screen.getByText('Command forms')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /next/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /next/i })).not.toBeDisabled()
+
+    fireEvent.click(screen.getByRole('button', { name: /next/i }))
+    expect(screen.getByText('Read the unstaged file changes before staging anything.')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /open demo/i }))
     expect(screen.getByText('Try it')).toBeInTheDocument()
@@ -207,11 +213,27 @@ describe('SkillFocusPreviewModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Run' }))
 
     await screen.findByText('On branch main')
-    fireEvent.click(screen.getAllByRole('button', { name: /git diff/i })[0])
+    fireEvent.click(screen.getByRole('button', { name: /contents/i }))
+    expect(screen.getByRole('dialog', { name: /command preview contents/i })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /open git diff: overview/i }))
 
     expect(screen.getByText('Read the unstaged file changes before staging anything.')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /open demo/i }))
     expect(screen.getByText('On branch main')).toBeInTheDocument()
+  })
+
+  it('uses a collapsible overlay navigator grouped by base command', async () => {
+    renderPreview()
+    await screen.findByText('What git status is for')
+
+    fireEvent.click(screen.getByRole('button', { name: /contents/i }))
+    expect(screen.getByText('Command guide')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^git status/i })).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('button', { name: /open git status: what git status is for/i })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /^git status/i }))
+    expect(screen.getByRole('button', { name: /^git status/i })).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByRole('button', { name: /open git status: what git status is for/i })).not.toBeInTheDocument()
   })
 
   it('submits every command listed in preview metadata', async () => {

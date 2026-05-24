@@ -1810,6 +1810,7 @@ class Command(BaseCommand):
         commands = self._preview_commands_for_spec(spec)
         if not commands:
             return {}
+        preview_commands = self._preview_commands_from_focus(spec, fallback_commands=commands)
         return {
             "schema_version": 2,
             "title": f"{spec.focus} command preview",
@@ -1819,10 +1820,11 @@ class Command(BaseCommand):
             "command_title": spec.title,
             "command_refs": [
                 {
+                    "id": command_content_key_for_command(command),
                     "key": command_content_key_for_command(command),
                     "command": command,
                 }
-                for command in commands
+                for command in preview_commands
             ],
             "supported_demo_commands": spec.fields.get("safe_demo_commands", commands),
             "demo_repository_state": spec.fields.get("demo_repository_state", {}),
@@ -1845,6 +1847,26 @@ class Command(BaseCommand):
                 }
             ],
         }
+
+    def _preview_commands_from_focus(
+        self,
+        spec: ScenarioSpec,
+        *,
+        fallback_commands: list[str],
+    ) -> list[str]:
+        commands = [
+            *list(spec.fields.get("primary_focus_commands", [])),
+            *list(spec.fields.get("supporting_inspection_commands", [])),
+        ] or fallback_commands
+        seen_keys = set()
+        unique = []
+        for command in commands:
+            key = command_content_key_for_command(command)
+            if not key or key in seen_keys:
+                continue
+            seen_keys.add(key)
+            unique.append(command)
+        return unique
 
     def _preview_commands_for_spec(self, spec: ScenarioSpec) -> list[str]:
         commands = [

@@ -56,7 +56,7 @@ class CommandIntentMapper:
                     {
                         "initial_branch": initial_branch,
                         "directory": directory,
-                        "quiet": parsed.has_option("--quiet"),
+                        "quiet": parsed.has_option("-q") or parsed.has_option("--quiet"),
                     },
                 ),
             ),
@@ -76,7 +76,7 @@ class CommandIntentMapper:
         )
 
     def _map_add(self, parsed: ParsedGitCommand) -> CommandIntent:
-        if parsed.has_option("-p"):
+        if parsed.has_option("-p") or parsed.has_option("--patch"):
             return CommandIntent(
                 command="add",
                 operations=(CommandOperation("StagePatch", {"paths": parsed.pathspecs}),),
