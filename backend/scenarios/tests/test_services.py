@@ -451,6 +451,46 @@ def test_retry_from_active_session_requires_exit_first(student):
     )
 
 
+def test_retry_does_not_create_duplicate_active_session(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="form-clean-commit",
+        difficulty="easy",
+    )
+    prior = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    prior.status = SESSION_STATUS_FAILED
+    prior.ended_at = timezone.now()
+    prior.save(update_fields=["status", "ended_at"])
+    active = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="retry",
+        prior_session=prior,
+    )
+
+    with pytest.raises(Locked, match="Exit the current scenario"):
+        ScenarioSessionService().start_session(
+            user=student,
+            difficulty_instance=difficulty,
+            source_entry_point="retry",
+            prior_session=prior,
+        )
+
+    active.refresh_from_db()
+    assert active.status == SESSION_STATUS_STARTED
+    assert (
+        ScenarioSession.objects.filter(
+            user=student,
+            difficulty_instance=difficulty,
+            status=SESSION_STATUS_STARTED,
+        ).count()
+        == 1
+    )
+
+
 def test_starting_active_difficulty_requires_exit_first(student):
     difficulty = DifficultyInstance.objects.get(
         scenario__slug="form-clean-commit",

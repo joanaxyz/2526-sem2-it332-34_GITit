@@ -43,4 +43,27 @@ describe('ProjectStructurePanel', () => {
 
     expect(screen.getByText('No project files yet.')).toBeInTheDocument()
   })
+
+  it('keeps a minimum usable height while allowing tree content to scroll', () => {
+    const projectTree = Object.fromEntries(
+      Array.from({ length: 30 }, (_, index) => [
+        `src/generated/file-${index}.ts`,
+        { status: 'clean', source: 'head', content: `file-${index}` },
+      ]),
+    )
+
+    const { container } = render(
+      <ProjectStructurePanel
+        snapshot={{
+          ...baseSnapshot,
+          project_tree: projectTree,
+        }}
+      />,
+    )
+
+    expect(container.firstElementChild).toHaveClass('min-h-[14rem]')
+    expect(container.querySelector('.overflow-auto')).toBeInTheDocument()
+    expect(screen.getByText('file-0.ts')).toBeInTheDocument()
+    expect(screen.getByText('file-29.ts')).toBeInTheDocument()
+  })
 })

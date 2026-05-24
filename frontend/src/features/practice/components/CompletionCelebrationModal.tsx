@@ -241,7 +241,7 @@ export function CompletionCelebrationModal({
                 {onRetry ? (
                   <Button type="button" variant="destructive" disabled={isNavigating} onClick={onRetry}>
                     <RefreshCcw data-icon="inline-start" />
-                    {isRetrying ? 'Starting retry' : 'Retry'}
+                    {isRetrying ? 'Starting retry' : shouldRetryForAccuracy ? 'Retry for accuracy' : 'Retry'}
                   </Button>
                 ) : null}
                 <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToModules}>

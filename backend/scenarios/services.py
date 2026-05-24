@@ -174,7 +174,7 @@ class ScenarioSessionService:
         student_progress = user.studentprogress
         orientation_complete = OrientationService().is_orientation_complete(user)
 
-        if mode == SESSION_MODE_PRIMARY and prior_session is None:
+        if mode == SESSION_MODE_PRIMARY:
             active_session = (
                 ScenarioSession.objects.select_related(
                     "scenario",
@@ -188,6 +188,7 @@ class ScenarioSessionService:
                     status=SESSION_STATUS_STARTED,
                     mode=SESSION_MODE_PRIMARY,
                 )
+                .exclude(id=prior_session.id if prior_session else None)
                 .first()
             )
             if active_session:

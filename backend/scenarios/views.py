@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -245,8 +246,9 @@ class ScenarioSessionAbandonAPIView(APIView):
 
 
 class ScenarioRetryAPIView(APIView):
+    @transaction.atomic
     def post(self, request, session_id: int):
-        prior = ScenarioSession.objects.select_related(
+        prior = ScenarioSession.objects.select_for_update().select_related(
             "scenario",
             "difficulty_instance",
             "difficulty_instance__command_policy",
