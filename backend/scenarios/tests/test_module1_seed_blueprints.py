@@ -5,6 +5,7 @@ from django.test import override_settings
 
 from common.constants import COMPLETION_INSPECTION
 from learning.models import Lesson
+from scenarios.command_content import GIT_COMMAND_CONTENT_LIBRARY
 from scenarios.models import (
     CommandCountPolicy,
     DifficultyInstance,
@@ -13,6 +14,25 @@ from scenarios.models import (
     ScenarioSkillFocus,
     ScenarioVariant,
 )
+from simulator.git_commands import GitCommandParser, GitCommandRegistry
+
+
+def _example_command(command: str) -> str:
+    replacements = {
+        "<path>": "demo.txt",
+        "<directory>": "demo-repo",
+        "<url>": "https://example.test/repo.git",
+        "<folder>": "repo-copy",
+        "<branch>": "feature",
+        "<name>": "origin",
+        "<old>": "origin",
+        "<new>": "upstream",
+        "<commit>": "c1",
+    }
+    example = command
+    for placeholder, value in replacements.items():
+        example = example.replace(placeholder, value)
+    return example
 
 
 @override_settings(DEBUG=True)
@@ -145,7 +165,51 @@ def test_diagnostic_command_preview_is_first_module_one_scenario(db):
         "key": "git-status",
         "command": "git status",
     }
+    ref_keys = [ref["key"] for ref in first.command_preview_config["command_refs"]]
+    assert ref_keys.count("git-log") == 1
+    assert "git log --oneline" in first.safe_demo_commands
+    assert "git log --oneline --graph --all" in first.safe_demo_commands
+    status_content = GitCommandContent.objects.get(key="git-status", is_active=True)
+    log_content = GitCommandContent.objects.get(key="git-log", is_active=True)
+    assert status_content.base_command == "git status"
+    assert status_content.sections[0]["type"] == "overview"
+    assert any(section["type"] == "option" for section in status_content.sections)
+    assert log_content.base_command == "git log"
+    assert [section["title"] for section in log_content.sections[:4]] == [
+        "Overview",
+        "Reading History",
+        "Compact History",
+        "Visual Branch History",
+    ]
+    assert any(
+        section["type"] == "option" and section["token"] == "--oneline"
+        for section in log_content.sections
+    )
     assert "sections" not in first.command_preview_config
+
+
+def test_command_content_documents_only_simulator_supported_forms():
+    parser = GitCommandParser()
+    registry = GitCommandRegistry()
+
+    for definition in GIT_COMMAND_CONTENT_LIBRARY:
+        for section in definition["sections"]:
+            command = section.get("command")
+            if command and str(command).startswith("git "):
+                parsed = parser.parse(_example_command(command))
+                spec = registry.get(parsed.subcommand)
+                assert spec is not None, command
+                assert spec.validate(parsed) is None, command
+            for block in section.get("content", []):
+                if block.get("type") != "command":
+                    continue
+                for command in block.get("items", []):
+                    if not str(command).startswith("git "):
+                        continue
+                    parsed = parser.parse(_example_command(command))
+                    spec = registry.get(parsed.subcommand)
+                    assert spec is not None, command
+                    assert spec.validate(parsed) is None, command
 
 
 @override_settings(DEBUG=True)

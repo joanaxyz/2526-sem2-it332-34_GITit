@@ -567,7 +567,10 @@ def test_command_preview_resolves_reusable_command_content(student):
     assert GitCommandContent.objects.filter(key="git-status").count() == 1
     assert preview["schema_version"] == 2
     assert preview["command_refs"]
+    assert status_command["base_command"] == "git status"
     assert status_command["command"] == "git status"
+    assert status_command["sections"][0]["type"] == "overview"
+    assert status_command["sections"][1]["type"] == "form"
     assert status_command["pages"][0]["blocks"][0]["type"] == "paragraph"
     assert status_command["demo_steps"][0]["repository_state"]
     assert any(command["key"] == "scenario-context" for command in preview["commands"])
@@ -615,6 +618,41 @@ def test_command_preview_applies_scenario_page_customization(student):
     assert status_command["pages"][1]["blocks"][0]["body"] == (
         "Use status to read this scenario before acting."
     )
+
+
+def test_command_preview_deduplicates_variant_refs_under_one_command(student):
+    scenario = ScenarioSkillFocus.objects.get(slug="form-clean-commit", is_published=True)
+    scenario.command_preview_config = {
+        **scenario.command_preview_config,
+        "command_refs": [
+            {
+                "key": "git-log",
+                "command": "git log --oneline",
+            },
+            {
+                "key": "git-log",
+                "command": "git log --oneline --graph --all",
+            },
+        ],
+        "custom_pages": [],
+    }
+    scenario.save(update_fields=["command_preview_config"])
+
+    payload = scenario_status_payload(user=student, scenario=scenario)
+    log_commands = [
+        command
+        for command in payload["command_preview"]["commands"]
+        if command["key"] == "git-log"
+    ]
+
+    assert len(log_commands) == 1
+    assert log_commands[0]["base_command"] == "git log"
+    assert log_commands[0]["command"] == "git log"
+    assert [
+        page["title"]
+        for page in log_commands[0]["pages"]
+        if page["title"] in {"Compact History", "Visual Branch History"}
+    ] == ["Compact History", "Visual Branch History"]
 
 
 def test_latest_attempt_accuracy_reflects_extra_counted_actions(student):

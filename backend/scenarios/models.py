@@ -69,11 +69,13 @@ class ScenarioSkillFocus(models.Model):
 
 class GitCommandContent(models.Model):
     key = models.SlugField(unique=True)
+    base_command = models.CharField(max_length=120, blank=True)
     display_name = models.CharField(max_length=120)
     canonical_command = models.CharField(max_length=160)
     aliases = models.JSONField(default=list, blank=True)
     summary = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
+    sections = models.JSONField(default=list, blank=True)
     pages = models.JSONField(default=list, blank=True)
     is_active = models.BooleanField(default=True)
     version = models.PositiveIntegerField(default=1)

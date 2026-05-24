@@ -1,5 +1,18 @@
 import { useQuery } from '@tanstack/react-query'
-import { AlertTriangle, ArrowLeft, ArrowRight, BookOpen, Code2, GitBranch, Play, SquareTerminal } from 'lucide-react'
+import {
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  ChevronDown,
+  ChevronRight,
+  Code2,
+  GitBranch,
+  ListTree,
+  Play,
+  SquareTerminal,
+  X,
+} from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import type { RepositorySnapshot, TerminalLine } from '@/features/practice/types'
@@ -39,6 +52,7 @@ type PreviewCommand = {
   id: string
   title: string
   command?: string
+  baseCommand: string
   pages: PreviewPage[]
   demo_steps: DemoExplanationStep[]
 }
@@ -46,6 +60,12 @@ type PreviewCommand = {
 type PreviewPage = CommandPreviewPage & {
   kind: 'content'
   demo_steps: DemoExplanationStep[]
+}
+
+type PreviewNavGroup = {
+  id: string
+  title: string
+  commandIndexes: number[]
 }
 
 export function SkillFocusPreviewModal({
@@ -129,9 +149,12 @@ function SkillFocusPreviewContent({
     [preview?.supported_demo_commands, scenario.safe_demo_commands],
   )
   const commands = useMemo(() => buildPreviewCommands(scenario, initialSnapshot), [initialSnapshot, scenario])
+  const navGroups = useMemo(() => navigationGroupsFromCommands(commands), [commands])
   const [commandIndex, setCommandIndex] = useState(0)
   const [pageIndex, setPageIndex] = useState(0)
   const [view, setView] = useState<'content' | 'demo'>('content')
+  const [isNavigatorOpen, setIsNavigatorOpen] = useState(false)
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
   const selectedCommand = commands[commandIndex] ?? commands[0]
   const selectedPage = selectedCommand.pages[pageIndex] ?? selectedCommand.pages[0]
   const selectedDemoStep = selectedCommand.demo_steps[0] ?? selectedPage.demo_steps[0] ?? null
@@ -149,26 +172,26 @@ function SkillFocusPreviewContent({
         : action === 'retry'
           ? 'Retry scenario'
           : 'Start scenario'
-  const canGoPrevious = pageIndex > 0
-  const canGoNext = pageIndex < selectedCommand.pages.length - 1
+  const previousLocation = previousReadingLocation(commands, commandIndex, pageIndex)
+  const nextLocation = nextReadingLocation(commands, commandIndex, pageIndex)
+  const canGoPrevious = Boolean(previousLocation)
+  const canGoNext = Boolean(nextLocation)
   const isDemoView = view === 'demo'
 
-  function selectCommand(nextIndex: number) {
-    const nextCommand = commands[nextIndex]
+  function selectPage(nextCommandIndex: number, nextPageIndex: number) {
+    const nextCommand = commands[nextCommandIndex]
     if (!nextCommand) return
-    const nextPage = nextCommand.pages[0]
-    setCommandIndex(nextIndex)
-    setPageIndex(0)
+    const nextPage = nextCommand.pages[nextPageIndex] ?? nextCommand.pages[0]
+    if (!nextPage) return
+    setCommandIndex(nextCommandIndex)
+    setPageIndex(nextCommand.pages[nextPageIndex] ? nextPageIndex : 0)
     setView('content')
-    setSnapshot(nextCommand.demo_steps[0]?.repository_state ?? nextPage.demo_steps[0]?.repository_state ?? initialSnapshot)
+    setIsNavigatorOpen(false)
+    setSnapshot(nextPage.demo_steps[0]?.repository_state ?? nextCommand.demo_steps[0]?.repository_state ?? initialSnapshot)
   }
 
-  function goToPage(nextIndex: number) {
-    const nextPage = selectedCommand.pages[nextIndex]
-    if (!nextPage) return
-    setPageIndex(nextIndex)
-    setView('content')
-    setSnapshot(nextPage.demo_steps[0]?.repository_state ?? snapshot)
+  function toggleGroup(groupId: string) {
+    setCollapsedGroups((groups) => ({ ...groups, [groupId]: !groups[groupId] }))
   }
 
   async function runDemoCommand(command: string) {
@@ -194,6 +217,7 @@ function SkillFocusPreviewContent({
 
     if (nextCommandIndex >= 0) {
       setCommandIndex(nextCommandIndex)
+      setPageIndex(0)
       setView('demo')
     }
   }
@@ -206,52 +230,42 @@ function SkillFocusPreviewContent({
       className="max-h-[94vh] w-full max-w-6xl overflow-hidden"
       contentClassName="h-[calc(94vh-4.5rem)] overflow-hidden p-0"
     >
-      <div className="flex h-full min-h-0 flex-col">
-        <div className="grid min-h-0 flex-1 grid-cols-[14rem_minmax(0,1fr)] overflow-hidden max-lg:grid-cols-1">
-          <aside className="min-h-0 overflow-y-auto border-r border-border bg-secondary/20 p-4 app-scrollbar max-lg:max-h-56 max-lg:border-b max-lg:border-r-0">
-            <div className="mb-4">
-              <p className="text-xs font-semibold uppercase text-primary">Scenario preview</p>
-              <h3 className="mt-1 text-base font-extrabold leading-tight">{scenario.title}</h3>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {difficultyLabel ? <Badge variant="blue">{difficultyLabel}</Badge> : null}
-                <Badge variant="outline">{preview?.focus_label ?? scenario.focus}</Badge>
-              </div>
-            </div>
-            <nav className="grid gap-2" aria-label="Command preview commands">
-              {commands.map((item, index) => (
-                <button
-                  aria-pressed={index === commandIndex && !isDemoView}
-                  className={cn(
-                    'w-full min-w-0 overflow-hidden rounded-md border px-3 py-2 text-left transition',
-                    index === commandIndex && !isDemoView
-                      ? 'border-primary bg-primary/10 text-foreground'
-                      : 'border-border bg-background/40 text-muted-foreground hover:bg-secondary',
-                  )}
-                  key={item.id}
-                  type="button"
-                  onClick={() => selectCommand(index)}
-                >
-                  <span className="block truncate font-mono text-sm font-bold">{item.command || item.title}</span>
-                </button>
-              ))}
-            </nav>
-          </aside>
+      <div className="relative flex h-full min-h-0 flex-col overflow-hidden">
+        {isNavigatorOpen ? (
+          <PreviewNavigatorOverlay
+            groups={navGroups}
+            commands={commands}
+            activeCommandIndex={commandIndex}
+            activePageIndex={pageIndex}
+            collapsedGroups={collapsedGroups}
+            onClose={() => setIsNavigatorOpen(false)}
+            onSelect={selectPage}
+            onToggleGroup={toggleGroup}
+          />
+        ) : null}
 
-          <main className="grid min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden">
-            <header className="border-b border-border bg-card/60 p-5">
+        <main className="grid min-h-0 min-w-0 flex-1 grid-rows-[auto_minmax(0,1fr)] overflow-hidden">
+          <header className="border-b border-border bg-card/60 p-5">
+            <div className="flex min-w-0 flex-wrap items-start justify-between gap-4">
               <div className="flex min-w-0 items-start gap-3">
                 <div className="grid size-10 shrink-0 place-items-center rounded-md border border-primary/30 bg-primary/10 text-primary">
                   {isDemoView ? <SquareTerminal className="size-5" /> : <BookOpen className="size-5" />}
                 </div>
                 <div className="min-w-0">
+                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                    {difficultyLabel ? <Badge variant="blue">{difficultyLabel}</Badge> : null}
+                    <Badge variant="outline">{preview?.focus_label ?? scenario.focus}</Badge>
+                  </div>
+                  <p className="text-xs font-semibold uppercase text-primary">Scenario preview</p>
+                  <h3 className="mt-1 text-base font-extrabold leading-tight">{scenario.title}</h3>
                   {isDemoView ? (
-                    <p className="text-xs font-semibold uppercase text-muted-foreground">Demo</p>
+                    <p className="mt-3 text-xs font-semibold uppercase text-muted-foreground">Demo</p>
                   ) : selectedCommand.command || selectedPage.eyebrow ? (
-                    <p className="truncate text-xs font-semibold uppercase text-muted-foreground">
+                    <p className="mt-3 truncate text-xs font-semibold uppercase text-muted-foreground">
                       {selectedCommand.command ?? selectedPage.eyebrow}
                     </p>
                   ) : null}
-                  <h4 className="text-xl font-extrabold leading-tight">
+                  <h4 className="mt-1 text-xl font-extrabold leading-tight">
                     {isDemoView ? 'Try commands in a safe preview repository' : selectedPage.heading ?? selectedPage.title}
                   </h4>
                   <p className="mt-2 text-xs text-muted-foreground">
@@ -259,23 +273,27 @@ function SkillFocusPreviewContent({
                   </p>
                 </div>
               </div>
-            </header>
+              <Button type="button" size="sm" variant="outline" onClick={() => setIsNavigatorOpen(true)}>
+                <ListTree data-icon="inline-start" />
+                Contents
+              </Button>
+            </div>
+          </header>
 
-            <section className="min-h-0 min-w-0 overflow-auto p-5 app-scrollbar">
-              {isDemoView ? (
-                <DemoPage
-                  commands={supportedDemoCommands}
-                  disabled={isRunningDemo || supportedDemoCommands.length === 0}
-                  lines={terminalLines}
-                  snapshot={snapshot}
-                  onCommand={runDemoCommand}
-                />
-              ) : (
-                <ContentPage page={selectedPage} />
-              )}
-            </section>
-          </main>
-        </div>
+          <section className="min-h-0 min-w-0 overflow-auto p-5 app-scrollbar">
+            {isDemoView ? (
+              <DemoPage
+                commands={supportedDemoCommands}
+                disabled={isRunningDemo || supportedDemoCommands.length === 0}
+                lines={terminalLines}
+                snapshot={snapshot}
+                onCommand={runDemoCommand}
+              />
+            ) : (
+              <ContentPage page={selectedPage} />
+            )}
+          </section>
+        </main>
 
         <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card/70 px-5 py-4">
           <div className="flex flex-wrap gap-2">
@@ -286,11 +304,23 @@ function SkillFocusPreviewContent({
               </Button>
             ) : (
               <>
-                <Button type="button" size="sm" variant="outline" disabled={!canGoPrevious} onClick={() => goToPage(pageIndex - 1)}>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={!canGoPrevious}
+                  onClick={() => previousLocation && selectPage(previousLocation.commandIndex, previousLocation.pageIndex)}
+                >
                   <ArrowLeft data-icon="inline-start" />
                   Previous
                 </Button>
-                <Button type="button" size="sm" variant="outline" disabled={!canGoNext} onClick={() => goToPage(pageIndex + 1)}>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={!canGoNext}
+                  onClick={() => nextLocation && selectPage(nextLocation.commandIndex, nextLocation.pageIndex)}
+                >
                   Next
                   <ArrowRight data-icon="inline-start" />
                 </Button>
@@ -314,6 +344,94 @@ function SkillFocusPreviewContent({
         </footer>
       </div>
     </Modal>
+  )
+}
+
+function PreviewNavigatorOverlay({
+  groups,
+  commands,
+  activeCommandIndex,
+  activePageIndex,
+  collapsedGroups,
+  onClose,
+  onSelect,
+  onToggleGroup,
+}: {
+  groups: PreviewNavGroup[]
+  commands: PreviewCommand[]
+  activeCommandIndex: number
+  activePageIndex: number
+  collapsedGroups: Record<string, boolean>
+  onClose: () => void
+  onSelect: (commandIndex: number, pageIndex: number) => void
+  onToggleGroup: (groupId: string) => void
+}) {
+  return (
+    <div className="absolute inset-0 z-20 bg-background/70 backdrop-blur-sm" role="dialog" aria-label="Command preview contents">
+      <div className="flex h-full w-full max-w-md flex-col border-r border-border bg-card shadow-2xl">
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <div>
+            <p className="text-xs font-semibold uppercase text-primary">Contents</p>
+            <h4 className="text-base font-extrabold">Command guide</h4>
+          </div>
+          <Button type="button" size="icon" variant="ghost" onClick={onClose} aria-label="Close contents">
+            <X className="size-4" />
+          </Button>
+        </div>
+        <nav className="min-h-0 flex-1 overflow-y-auto p-3 app-scrollbar" aria-label="Command preview contents">
+          {groups.map((group) => {
+            const collapsed = Boolean(collapsedGroups[group.id])
+            const active = group.commandIndexes.includes(activeCommandIndex)
+            return (
+              <section className="border-b border-border/70 py-2 last:border-b-0" key={group.id}>
+                <button
+                  aria-expanded={!collapsed}
+                  className={cn(
+                    'flex w-full min-w-0 items-center gap-2 rounded-md px-2 py-2 text-left transition hover:bg-secondary',
+                    active && 'text-foreground',
+                  )}
+                  type="button"
+                  onClick={() => onToggleGroup(group.id)}
+                >
+                  {collapsed ? <ChevronRight className="size-4 shrink-0" /> : <ChevronDown className="size-4 shrink-0" />}
+                  <span className="min-w-0 flex-1 truncate font-mono text-sm font-bold">{group.title}</span>
+                  <span className="rounded-sm border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                    {group.commandIndexes.reduce((total, commandIndex) => total + commands[commandIndex].pages.length, 0)}
+                  </span>
+                </button>
+                {!collapsed ? (
+                  <div className="mt-1 grid gap-1 pl-6">
+                    {group.commandIndexes.map((commandIndex) => {
+                      const command = commands[commandIndex]
+                      return command.pages.map((page, pageIndex) => {
+                        const selected = commandIndex === activeCommandIndex && pageIndex === activePageIndex
+                        const label = page.heading ?? page.title
+                        return (
+                          <button
+                            aria-current={selected ? 'page' : undefined}
+                            aria-label={`Open ${command.command || command.title}: ${label}`}
+                            className={cn(
+                              'grid min-h-12 min-w-0 rounded-md px-2 py-2 text-left transition hover:bg-secondary',
+                              selected ? 'bg-primary/10 text-foreground' : 'text-muted-foreground',
+                            )}
+                            key={`${command.id}-${page.id ?? pageIndex}`}
+                            type="button"
+                            onClick={() => onSelect(commandIndex, pageIndex)}
+                          >
+                            <span className="truncate text-sm font-semibold">{label}</span>
+                            <span className="truncate font-mono text-[11px]">{command.command || command.title}</span>
+                          </button>
+                        )
+                      })
+                    })}
+                  </div>
+                ) : null}
+              </section>
+            )
+          })}
+        </nav>
+      </div>
+    </div>
   )
 }
 
@@ -494,12 +612,12 @@ function buildPreviewCommands(
   scenario: ScenarioSkillFocus,
   fallbackSnapshot: RepositorySnapshot,
 ): PreviewCommand[] {
-  const resolvedCommands = scenario.command_preview?.commands?.filter((command) => command.pages?.length) ?? []
+  const resolvedCommands = scenario.command_preview?.commands?.filter((command) => command.pages?.length || command.sections?.length) ?? []
   if (resolvedCommands.length) {
     return commandsFromResolvedCommands(resolvedCommands, fallbackSnapshot)
   }
 
-  const configuredSections = scenario.command_preview?.sections?.filter((section) => section.title && section.explanation) ?? []
+  const configuredSections = scenario.command_preview?.sections?.filter(hasSectionContent) ?? []
   if (configuredSections.length) {
     return commandsFromSections(configuredSections, fallbackSnapshot)
   }
@@ -544,6 +662,50 @@ function buildPreviewCommands(
   )
 }
 
+function navigationGroupsFromCommands(commands: PreviewCommand[]): PreviewNavGroup[] {
+  const groups: PreviewNavGroup[] = []
+  const indexByTitle = new Map<string, number>()
+  commands.forEach((command, commandIndex) => {
+    const title = command.baseCommand || canonicalCommand(command.command ?? command.title)
+    const groupIndex = indexByTitle.get(title)
+    if (groupIndex === undefined) {
+      indexByTitle.set(title, groups.length)
+      groups.push({ id: `${normalize(title)}-${groups.length}`, title, commandIndexes: [commandIndex] })
+      return
+    }
+    groups[groupIndex].commandIndexes.push(commandIndex)
+  })
+  return groups
+}
+
+function previousReadingLocation(commands: PreviewCommand[], commandIndex: number, pageIndex: number) {
+  if (pageIndex > 0) return { commandIndex, pageIndex: pageIndex - 1 }
+  for (let index = commandIndex - 1; index >= 0; index -= 1) {
+    const previousCommand = commands[index]
+    if (previousCommand?.pages.length) {
+      return { commandIndex: index, pageIndex: previousCommand.pages.length - 1 }
+    }
+  }
+  return null
+}
+
+function nextReadingLocation(commands: PreviewCommand[], commandIndex: number, pageIndex: number) {
+  const currentCommand = commands[commandIndex]
+  if (currentCommand && pageIndex < currentCommand.pages.length - 1) {
+    return { commandIndex, pageIndex: pageIndex + 1 }
+  }
+  for (let index = commandIndex + 1; index < commands.length; index += 1) {
+    if (commands[index]?.pages.length) {
+      return { commandIndex: index, pageIndex: 0 }
+    }
+  }
+  return null
+}
+
+function hasSectionContent(section: CommandPreviewSection) {
+  return Boolean(section.title && (section.explanation || section.content?.length || section.pages?.length))
+}
+
 function commandsFromResolvedCommands(
   commands: CommandPreviewCommand[],
   fallbackSnapshot: RepositorySnapshot,
@@ -555,7 +717,10 @@ function commandsFromResolvedCommands(
       fallbackSnapshot,
       command.summary,
     )
-    const pages = command.pages.map((page, pageIndex): PreviewPage => ({
+    const sourcePages = command.pages?.length
+      ? command.pages
+      : (command.sections ?? []).flatMap((section) => generatedPagesFromSection(section))
+    const pages = sourcePages.map((page, pageIndex): PreviewPage => ({
       ...page,
       id: page.id ?? `${command.key ?? command.id ?? index}-page-${pageIndex}`,
       kind: 'content',
@@ -565,6 +730,7 @@ function commandsFromResolvedCommands(
       id: command.id ?? command.key ?? `${normalize(title)}-${index}`,
       title,
       command: command.command || command.canonical_command,
+      baseCommand: command.base_command || canonicalCommand(command.command || command.canonical_command || title),
       pages,
       demo_steps: demoSteps,
     }
@@ -592,7 +758,7 @@ function commandFromSections(
   fallbackSnapshot: RepositorySnapshot,
 ): PreviewCommand {
   const demoSteps = sections.flatMap((section) =>
-    normalizeDemoSteps(section.demo_steps ?? [], fallbackSnapshot, section.explanation, section.common_mistakes?.[0]),
+    normalizeDemoSteps(section.demo_steps ?? [], fallbackSnapshot, section.explanation ?? '', section.common_mistakes?.[0]),
   )
   const authoredPages = sections.flatMap((section, sectionIndex) =>
     section.pages?.length
@@ -600,7 +766,7 @@ function commandFromSections(
           ...page,
           id: page.id ?? `${section.id ?? index}-${sectionIndex}-page-${pageIndex}`,
           kind: 'content',
-          demo_steps: normalizeDemoSteps(page.demo_steps ?? [], fallbackSnapshot, page.body ?? section.explanation, section.common_mistakes?.[0]),
+          demo_steps: normalizeDemoSteps(page.demo_steps ?? [], fallbackSnapshot, page.body ?? section.explanation ?? '', section.common_mistakes?.[0]),
         }))
       : generatedPagesFromSection(section),
   )
@@ -609,12 +775,28 @@ function commandFromSections(
     id: `${normalize(label)}-${index}`,
     title: label,
     command: label,
+    baseCommand: canonicalCommand(label),
     pages: authoredPages.length ? authoredPages : generatedPagesFromSection(sections[0]),
     demo_steps: demoSteps,
   }
 }
 
 function generatedPagesFromSection(section: CommandPreviewSection): PreviewPage[] {
+  if (section.content?.length) {
+    return [
+      {
+        id: section.id ?? `${section.title}-content`,
+        title: section.title,
+        eyebrow: section.command ?? section.token,
+        heading: section.title,
+        kind: 'content',
+        section_type: section.type,
+        blocks: section.content,
+        demo_steps: [],
+      },
+    ]
+  }
+
   const detailBlockCandidates: CommandPreviewBlock[] = [
     { type: 'code', title: 'Syntax examples', items: section.syntax_examples },
     { type: 'list', title: 'What it changes', items: section.what_changes },
@@ -630,7 +812,7 @@ function generatedPagesFromSection(section: CommandPreviewSection): PreviewPage[
       title: 'Introduction',
       eyebrow: section.command,
       heading: section.title,
-      body: section.explanation,
+      body: section.explanation ?? '',
       kind: 'content',
       demo_steps: [],
     },

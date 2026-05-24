@@ -263,7 +263,7 @@ class GitCommandParser:
                 normalized.extend(["--initial-branch", value])
                 index += 1
                 continue
-            if token == "--quiet":
+            if token in {"-q", "--quiet"}:
                 self._append_option(options, token)
                 normalized.append(token)
                 index += 1
@@ -361,7 +361,7 @@ class GitCommandRegistry:
         self._specs = {
             "init": GitCommandSpec(
                 "init",
-                frozenset({"-b", "--initial-branch", "--quiet"}),
+                frozenset({"-b", "--initial-branch", "-q", "--quiet"}),
                 diagnostic=False,
                 counted=True,
                 executor="teaching_state",
@@ -385,7 +385,7 @@ class GitCommandRegistry:
             ),
             "add": GitCommandSpec(
                 "add",
-                frozenset({"-p", "-A", "--all", "-u", "--update", "--intent-to-add"}),
+                frozenset({"-p", "--patch", "-A", "--all", "-u", "--update", "--intent-to-add"}),
                 diagnostic=False,
                 counted=True,
                 executor="teaching_state",
@@ -544,7 +544,7 @@ def _validate_clone(parsed: ParsedGitCommand) -> str | None:
 
 
 def _validate_add(parsed: ParsedGitCommand) -> str | None:
-    if parsed.has_option("-p"):
+    if parsed.has_option("-p") or parsed.has_option("--patch"):
         return None
     if parsed.has_option("-A") or parsed.has_option("--all"):
         return None

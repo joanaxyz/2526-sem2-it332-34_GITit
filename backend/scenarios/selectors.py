@@ -9,7 +9,12 @@ from common.constants import (
     SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
-from scenarios.command_content import command_content_key_for_command, normalize_command_text
+from scenarios.command_content import (
+    base_command_for_command,
+    command_content_key_for_command,
+    normalize_command_text,
+    pages_from_command_sections,
+)
 from scenarios.models import (
     CompletionRecord,
     DifficultyInstance,
@@ -517,6 +522,8 @@ def _resolved_preview_commands(
             for index, command in enumerate(commands)
         ]
 
+    preview_commands = _dedupe_preview_commands(preview_commands)
+
     custom_pages = _normalize_preview_pages(config.get("custom_pages") or [])
     if custom_pages:
         preview_commands.append(
@@ -534,6 +541,59 @@ def _resolved_preview_commands(
             }
         )
     return [command for command in preview_commands if command.get("pages")]
+
+
+def _dedupe_preview_commands(preview_commands: list[dict]) -> list[dict]:
+    deduped: list[dict] = []
+    index_by_key: dict[str, int] = {}
+    for command in preview_commands:
+        if not isinstance(command, dict):
+            continue
+        dedupe_key = command.get("key") or command.get("base_command") or command.get("command") or command.get("title")
+        dedupe_key = normalize_command_text(str(dedupe_key))
+        if not dedupe_key:
+            deduped.append(command)
+            continue
+        if dedupe_key not in index_by_key:
+            index_by_key[dedupe_key] = len(deduped)
+            deduped.append(command)
+            continue
+
+        existing = deduped[index_by_key[dedupe_key]]
+        existing["demo_steps"] = _merge_unique_by_fields(
+            existing.get("demo_steps") or [],
+            command.get("demo_steps") or [],
+            ("command", "title"),
+        )
+        existing["sections"] = _merge_unique_by_fields(
+            existing.get("sections") or [],
+            command.get("sections") or [],
+            ("id", "title"),
+        )
+        existing["pages"] = _merge_unique_by_fields(
+            existing.get("pages") or [],
+            command.get("pages") or [],
+            ("id", "title"),
+        )
+    return deduped
+
+
+def _merge_unique_by_fields(existing: list, incoming: list, fields: tuple[str, ...]) -> list:
+    merged = list(existing)
+    seen = {
+        tuple(str(item.get(field, "")) for field in fields)
+        for item in merged
+        if isinstance(item, dict)
+    }
+    for item in incoming:
+        if not isinstance(item, dict):
+            continue
+        identity = tuple(str(item.get(field, "")) for field in fields)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        merged.append(item)
+    return merged
 
 
 def _command_content_lookup() -> dict[str, GitCommandContent]:
@@ -565,17 +625,21 @@ def _preview_command_from_ref(
     lookup: dict[str, GitCommandContent],
     before_state: dict,
 ) -> dict:
-    command = ref.get("command") or ref.get("canonical_command") or ""
+    ref_command = ref.get("command") or ref.get("canonical_command") or ""
+    command = ref_command
     key = ref.get("key") or command_content_key_for_command(command)
     content = lookup.get(key) or lookup.get(normalize_command_text(command))
     title = ref.get("title") or ref.get("display_name")
     summary = ref.get("summary")
     if content:
-        command = command or content.canonical_command
+        demo_command = command or content.canonical_command
+        command = content.canonical_command
         title = title or content.display_name
         summary = summary or content.summary
         aliases = content.aliases or []
         tags = content.tags or []
+        base_command = content.base_command or base_command_for_command(command)
+        sections = _resolved_content_sections(content=content, ref=ref, config=config)
         pages = _resolved_content_pages(
             content=content,
             ref=ref,
@@ -586,22 +650,28 @@ def _preview_command_from_ref(
         summary = summary or "Use this preview command before starting the generated scenario."
         aliases = []
         tags = []
+        base_command = base_command_for_command(command)
+        sections = []
         pages = _fallback_command_pages(command=command, title=title, summary=summary)
+        demo_command = command
 
     return {
         "id": ref.get("id") or key or f"command-{index}",
         "key": key,
+        "base_command": ref.get("base_command") or base_command,
         "title": title,
+        "display_name": content.display_name if content else title,
         "command": command,
         "canonical_command": content.canonical_command if content else command,
         "aliases": aliases,
         "summary": summary,
         "tags": tags,
+        "sections": sections,
         "pages": pages,
         "demo_steps": _demo_steps_for_preview_command(
             scenario=scenario,
             ref=ref,
-            command=command,
+            command=demo_command,
             title=title,
             summary=summary,
             before_state=before_state,
@@ -615,7 +685,8 @@ def _resolved_content_pages(
     ref: dict,
     config: dict,
 ) -> list[dict]:
-    pages = _normalize_preview_pages(content.pages or [])
+    section_pages = pages_from_command_sections(_normalize_command_sections(content.sections or []))
+    pages = _normalize_preview_pages(section_pages or content.pages or [])
     include_ids = _included_page_ids(config=config, ref=ref, key=content.key)
     if include_ids:
         include_set = {str(page_id) for page_id in include_ids}
@@ -633,6 +704,25 @@ def _resolved_content_pages(
         ref.get("append_pages") or ref.get("custom_pages") or []
     )
     return [*prepend_pages, *pages, *append_pages]
+
+
+def _resolved_content_sections(
+    *,
+    content: GitCommandContent,
+    ref: dict,
+    config: dict,
+) -> list[dict]:
+    sections = _normalize_command_sections(content.sections or [])
+    include_ids = _included_page_ids(config=config, ref=ref, key=content.key)
+    if include_ids:
+        include_set = {str(section_id) for section_id in include_ids}
+        sections = [section for section in sections if str(section.get("id")) in include_set]
+    if ref.get("replace_sections"):
+        sections = _normalize_command_sections(ref.get("sections") or [])
+    append_sections = _normalize_command_sections(
+        ref.get("append_sections") or ref.get("custom_sections") or []
+    )
+    return [*sections, *append_sections]
 
 
 def _included_page_ids(*, config: dict, ref: dict, key: str) -> list[str]:
@@ -691,16 +781,22 @@ def _direct_preview_command(
     command_text = command.get("command") or command.get("canonical_command") or ""
     title = command.get("title") or command.get("display_name") or command_text or "Command"
     summary = command.get("summary") or ""
+    sections = _normalize_command_sections(command.get("sections") or [])
+    section_pages = pages_from_command_sections(sections)
+    pages = _normalize_preview_pages(command.get("pages") or section_pages)
     return {
         "id": command.get("id") or command.get("key") or f"command-{index}",
         "key": command.get("key") or command_content_key_for_command(command_text),
+        "base_command": command.get("base_command") or base_command_for_command(command_text),
         "title": title,
+        "display_name": command.get("display_name") or title,
         "command": command_text,
         "canonical_command": command.get("canonical_command") or command_text,
         "aliases": command.get("aliases") or [],
         "summary": summary,
         "tags": command.get("tags") or [],
-        "pages": _normalize_preview_pages(command.get("pages") or []),
+        "sections": sections,
+        "pages": pages,
         "demo_steps": _demo_steps_for_preview_command(
             scenario=scenario,
             ref=command,
@@ -738,15 +834,52 @@ def _legacy_section_preview_command(
     return {
         "id": section.get("id") or command_content_key_for_command(command) or f"section-{index}",
         "key": command_content_key_for_command(command),
+        "base_command": base_command_for_command(command),
         "title": title,
+        "display_name": title,
         "command": command,
         "canonical_command": command,
         "aliases": [],
         "summary": section.get("explanation") or "",
         "tags": [],
+        "sections": [],
         "pages": pages,
         "demo_steps": demo_steps,
     }
+
+
+def _normalize_command_sections(value) -> list[dict]:
+    if not isinstance(value, list):
+        return []
+    sections = []
+    allowed_types = {
+        "overview",
+        "form",
+        "option",
+        "argument",
+        "effect",
+        "mistake",
+        "practice_note",
+    }
+    for index, section in enumerate(value, start=1):
+        if not isinstance(section, dict):
+            continue
+        section_type = section.get("type") or "overview"
+        if section_type not in allowed_types:
+            section_type = "overview"
+        title = section.get("title") or f"Section {index}"
+        normalized = {
+            "id": section.get("id") or f"section-{index}",
+            "type": section_type,
+            "title": title,
+            "content": _normalize_preview_blocks(section.get("content") or []),
+        }
+        if section.get("command"):
+            normalized["command"] = section["command"]
+        if section.get("token"):
+            normalized["token"] = section["token"]
+        sections.append(normalized)
+    return sections
 
 
 def _normalize_preview_pages(value) -> list[dict]:
@@ -767,6 +900,7 @@ def _normalize_preview_pages(value) -> list[dict]:
                 "heading",
                 "body",
                 "demo_steps",
+                "section_type",
             )
             if key in page
         }
