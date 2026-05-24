@@ -324,10 +324,10 @@ def _scenario_status_payload_from_maps(
                 "supporting_inspection_commands": scenario.supporting_inspection_commands,
                 "safe_demo_commands": scenario.safe_demo_commands,
                 "demo_repository_state": scenario.demo_repository_state,
-                "demo_dag_config": scenario.demo_dag_config,
-                "demo_explanation_steps": scenario.demo_explanation_steps,
-                "related_git_concepts": scenario.related_git_concepts,
-                "command_preview": _command_preview_payload(scenario),
+            "demo_dag_config": scenario.demo_dag_config,
+            "demo_explanation_steps": scenario.demo_explanation_steps,
+            "related_git_concepts": scenario.related_git_concepts,
+            "command_preview": _command_preview_payload(scenario),
             }
         )
         return payload
@@ -336,6 +336,10 @@ def _scenario_status_payload_from_maps(
 
 
 def _command_preview_payload(scenario: ScenarioSkillFocus) -> dict:
+    config = scenario.command_preview_config or {}
+    if config:
+        return _normalized_command_preview_config(scenario, config)
+
     commands = _unique_commands(
         [
             *list(scenario.primary_focus_commands or []),
@@ -363,6 +367,66 @@ def _command_preview_payload(scenario: ScenarioSkillFocus) -> dict:
         "diagnostic": commands and all(is_diagnostic_command(command) for command in commands if command.startswith("git")),
         "counted": any(not is_diagnostic_command(command) for command in commands if command.startswith("git")),
     }
+
+
+def _normalized_command_preview_config(scenario: ScenarioSkillFocus, config: dict) -> dict:
+    sections = config.get("sections") or []
+    supported_commands = config.get("supported_demo_commands") or scenario.safe_demo_commands or []
+    demo_steps = []
+    for section in sections:
+        if not isinstance(section, dict):
+            continue
+        demo_steps.extend(
+            step
+            for step in section.get("demo_steps", [])
+            if isinstance(step, dict)
+        )
+    if not demo_steps:
+        demo_steps = scenario.demo_explanation_steps or []
+    before_state = config.get("demo_repository_state") or scenario.demo_repository_state or {}
+    after_state = demo_steps[-1].get("repository_state") if demo_steps and isinstance(demo_steps[-1], dict) else before_state
+    commands = _unique_commands(
+        [
+            *list(scenario.primary_focus_commands or []),
+            *list(scenario.supporting_inspection_commands or []),
+            *list(supported_commands),
+        ]
+    )
+    return {
+        "title": config.get("title") or "Command preview",
+        "intro": config.get("intro") or scenario.short_explanation,
+        "purpose": config.get("purpose") or scenario.summary,
+        "focus_label": config.get("focus_label") or scenario.focus,
+        "command_title": config.get("command_title") or scenario.title,
+        "sections": sections,
+        "syntax_examples": config.get("syntax_examples") or _section_syntax_examples(sections),
+        "supported_demo_commands": supported_commands or commands,
+        "demo_steps": demo_steps,
+        "demo_repository_state": before_state,
+        "demo_dag_config": config.get("demo_dag_config") or scenario.demo_dag_config or {},
+        "before_state": before_state,
+        "after_state": after_state,
+        "short_explanation": config.get("short_explanation") or scenario.short_explanation,
+        "what_changes": config.get("what_changes") or [],
+        "what_does_not_change": config.get("what_does_not_change") or [],
+        "common_mistakes": config.get("common_mistakes") or _common_mistakes(commands),
+        "readiness_notes": config.get("readiness_notes") or [],
+        "diagnostic": config.get("diagnostic")
+        if "diagnostic" in config
+        else commands and all(is_diagnostic_command(command) for command in commands if command.startswith("git")),
+        "counted": config.get("counted")
+        if "counted" in config
+        else any(not is_diagnostic_command(command) for command in commands if command.startswith("git")),
+    }
+
+
+def _section_syntax_examples(sections: list[dict]) -> list[str]:
+    examples = []
+    for section in sections:
+        if not isinstance(section, dict):
+            continue
+        examples.extend(section.get("syntax_examples", []))
+    return examples
 
 
 def _unique_commands(commands: list[str]) -> list[str]:

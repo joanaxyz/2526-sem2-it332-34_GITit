@@ -1,16 +1,23 @@
 import { useQuery } from '@tanstack/react-query'
+import { BookOpen, CheckCircle2, CircleAlert, Code2, GitBranch, Play, SquareTerminal } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
-import type { RepositorySnapshot } from '@/features/practice/types'
-import type { TerminalLine } from '@/features/practice/types'
+import type { RepositorySnapshot, TerminalLine } from '@/features/practice/types'
 import { TerminalPanel } from '@/features/practice/components/TerminalPanel'
-import { DemoExplanationPanel } from '@/features/scenarios/components/DemoExplanationPanel'
 import { DemoLiveDagPanel } from '@/features/scenarios/components/DemoLiveDagPanel'
-import { PreviewNavigationControls } from '@/features/scenarios/components/PreviewNavigationControls'
 import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
-import type { DifficultyAccess, DifficultyActionIntent, ScenarioSkillFocus } from '@/features/scenarios/types'
+import type {
+  CommandPreviewSection,
+  DemoExplanationStep,
+  DifficultyAccess,
+  DifficultyActionIntent,
+  ScenarioSkillFocus,
+} from '@/features/scenarios/types'
 import { Badge } from '@/shared/components/Badge'
+import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
+import { cn } from '@/shared/utils/cn'
 
 const emptyDemoSnapshot: RepositorySnapshot = {
   commits: [],
@@ -22,8 +29,8 @@ const emptyDemoSnapshot: RepositorySnapshot = {
 }
 
 const demoBootLines: TerminalLine[] = [
-  { id: 'demo-boot-1', kind: 'system', text: 'Demo repository loaded. This is a warm-up only.' },
-  { id: 'demo-boot-2', kind: 'output', text: 'Read the command behavior first, then try a safe demo command.' },
+  { id: 'demo-boot-1', kind: 'system', text: 'Inline demo repository loaded.' },
+  { id: 'demo-boot-2', kind: 'output', text: 'Run one of the preview commands to watch the shared DAG update.' },
 ]
 
 export function SkillFocusPreviewModal({
@@ -37,9 +44,9 @@ export function SkillFocusPreviewModal({
   scenario: ScenarioSkillFocus
   difficulty: DifficultyAccess
   action: DifficultyActionIntent
-  isProceeding: boolean
+  isProceeding?: boolean
   onClose: () => void
-  onProceed: () => void
+  onProceed?: () => void
 }) {
   const detailQuery = useQuery({
     queryKey: ['skill-focus', scenario.slug],
@@ -49,13 +56,7 @@ export function SkillFocusPreviewModal({
 
   if (detailQuery.isLoading) {
     return (
-      <Modal
-        open
-        title="Command preview"
-        onClose={onClose}
-        className="w-full max-w-xl"
-        contentClassName="p-5"
-      >
+      <Modal open title="Command preview" onClose={onClose} className="w-full max-w-xl" contentClassName="p-5">
         <div className="py-8 text-center text-sm text-muted-foreground">Loading preview...</div>
       </Modal>
     )
@@ -63,13 +64,7 @@ export function SkillFocusPreviewModal({
 
   if (detailQuery.isError || !detailQuery.data) {
     return (
-      <Modal
-        open
-        title="Command preview"
-        onClose={onClose}
-        className="w-full max-w-xl"
-        contentClassName="p-5"
-      >
+      <Modal open title="Command preview" onClose={onClose} className="w-full max-w-xl" contentClassName="p-5">
         <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm leading-6 text-destructive">
           {detailQuery.error?.message ?? 'Could not load the command preview.'}
         </div>
@@ -82,7 +77,7 @@ export function SkillFocusPreviewModal({
       scenario={detailQuery.data}
       difficulty={difficulty}
       action={action}
-      isProceeding={isProceeding}
+      isProceeding={Boolean(isProceeding)}
       onClose={onClose}
       onProceed={onProceed}
     />
@@ -102,46 +97,71 @@ function SkillFocusPreviewContent({
   action: DifficultyActionIntent
   isProceeding: boolean
   onClose: () => void
-  onProceed: () => void
+  onProceed?: () => void
 }) {
+  const preview = scenario.command_preview
   const initialSnapshot = useMemo(
-    () => (isRepositorySnapshot(scenario.demo_repository_state) ? scenario.demo_repository_state : emptyDemoSnapshot),
-    [scenario.demo_repository_state],
+    () =>
+      isRepositorySnapshot(preview?.demo_repository_state)
+        ? preview.demo_repository_state
+        : isRepositorySnapshot(scenario.demo_repository_state)
+          ? scenario.demo_repository_state
+          : emptyDemoSnapshot,
+    [preview?.demo_repository_state, scenario.demo_repository_state],
   )
-  const steps = useMemo(
-    () => normalizeDemoSteps(scenario.command_preview?.demo_steps ?? scenario.demo_explanation_steps, initialSnapshot, scenario.short_explanation),
-    [initialSnapshot, scenario.command_preview?.demo_steps, scenario.demo_explanation_steps, scenario.short_explanation],
+  const supportedDemoCommands = useMemo(
+    () => preview?.supported_demo_commands ?? scenario.safe_demo_commands ?? [],
+    [preview?.supported_demo_commands, scenario.safe_demo_commands],
   )
-  const supportedDemoCommands = scenario.command_preview?.supported_demo_commands ?? scenario.safe_demo_commands ?? []
-  const syntaxExamples = scenario.command_preview?.syntax_examples ?? []
-  const commonMistakes = scenario.command_preview?.common_mistakes ?? []
-  const [snapshot, setSnapshot] = useState<RepositorySnapshot>(initialSnapshot)
-  const [explanation, setExplanation] = useState(commandBehaviorSummary(scenario))
-  const [stepIndex, setStepIndex] = useState(0)
+  const sections = useMemo(
+    () => buildPreviewSections(scenario, initialSnapshot),
+    [initialSnapshot, scenario],
+  )
+  const [selectedSectionIndex, setSelectedSectionIndex] = useState(0)
+  const [selectedStepIndex, setSelectedStepIndex] = useState(0)
+  const selectedSection = sections[selectedSectionIndex] ?? sections[0]
+  const selectedSteps = selectedSection?.demo_steps ?? []
+  const selectedStep = selectedSteps[selectedStepIndex] ?? selectedSteps[0] ?? null
+  const [snapshot, setSnapshot] = useState<RepositorySnapshot>(() => selectedStep?.repository_state ?? initialSnapshot)
   const [terminalLines, setTerminalLines] = useState<TerminalLine[]>(demoBootLines)
   const [isRunningDemo, setIsRunningDemo] = useState(false)
   const difficultyLabel = difficulty.difficulty.charAt(0).toUpperCase() + difficulty.difficulty.slice(1)
   const startLabel =
     action === 'review'
-        ? 'Open review'
-        : action === 'continue' || action === 'resume'
-          ? 'Continue'
+      ? 'Open review'
+      : action === 'continue' || action === 'resume'
+        ? 'Continue'
         : action === 'retry'
           ? 'Retry scenario'
           : 'Start scenario'
 
+  function selectSection(nextIndex: number) {
+    const section = sections[nextIndex]
+    if (!section) return
+    const firstStep = section.demo_steps?.[0]
+    setSelectedSectionIndex(nextIndex)
+    setSelectedStepIndex(0)
+    setSnapshot(firstStep?.repository_state ?? initialSnapshot)
+  }
+
   function applyDemoStep(nextIndex: number) {
-    const step = steps[nextIndex]
+    const step = selectedSteps[nextIndex]
     if (!step) return
-    setSnapshot(isRepositorySnapshot(step.repository_state) ? step.repository_state : initialSnapshot)
-    setExplanation(step.explanation)
+    setSelectedStepIndex(nextIndex)
+    setSnapshot(step.repository_state)
   }
 
   async function runDemoCommand(command: string) {
     setTerminalLines((items) => [...items, { id: crypto.randomUUID(), kind: 'input', text: command }])
     setIsRunningDemo(true)
     const normalizedCommand = normalize(command)
-    const nextIndex = steps.findIndex((step) => normalize(step.command) === normalizedCommand)
+    const nextSectionIndex = sections.findIndex((section) =>
+      (section.demo_steps ?? []).some((step) => normalize(step.command) === normalizedCommand),
+    )
+    const nextStepIndex =
+      nextSectionIndex >= 0
+        ? (sections[nextSectionIndex].demo_steps ?? []).findIndex((step) => normalize(step.command) === normalizedCommand)
+        : -1
 
     try {
       const response = await scenariosApi.submitDemoCommand(scenario.slug, { command, repository_state: snapshot })
@@ -156,267 +176,306 @@ function SkillFocusPreviewContent({
       setIsRunningDemo(false)
     }
 
-    if (nextIndex >= 0) {
-      applyDemoStep(nextIndex)
-      return
+    if (nextSectionIndex >= 0 && nextStepIndex >= 0) {
+      setSelectedSectionIndex(nextSectionIndex)
+      setSelectedStepIndex(nextStepIndex)
     }
-    if (supportedDemoCommands.some((safeCommand) => normalize(safeCommand) === normalizedCommand)) return
-    setExplanation('This preview accepts the listed demo commands. It teaches command behavior without evaluating the scenario answer.')
   }
-
-  const previewSteps = [
-    'What this command is for',
-    'Before state',
-    'Try command in demo terminal',
-    'After state / DAG change',
-    'Common mistake',
-    'Proceed to scenario',
-  ]
-  const currentStep = previewSteps[stepIndex] ?? previewSteps[0]
 
   return (
     <Modal
       open
-      title="Command preview"
+      title={preview?.title ?? 'Command preview'}
       onClose={onClose}
-      className="max-h-[92vh] w-full max-w-6xl overflow-hidden"
-      contentClassName="max-h-[calc(92vh-4.5rem)] overflow-auto p-5"
+      className="max-h-[94vh] w-full max-w-7xl overflow-hidden"
+      contentClassName="max-h-[calc(94vh-4.5rem)] overflow-auto p-0 app-scrollbar"
     >
-      <div className="space-y-5">
-        <header className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Command preview</p>
-            <h3 className="mt-1 text-2xl font-extrabold tracking-tight">{scenario.title}</h3>
+      <div className="grid min-h-0 grid-cols-[18rem_minmax(0,1fr)_22rem] max-xl:grid-cols-[16rem_minmax(0,1fr)] max-lg:grid-cols-1">
+        <aside className="border-r border-border bg-secondary/20 p-4 max-lg:border-b max-lg:border-r-0">
+          <div className="mb-4">
+            <p className="text-xs font-semibold uppercase text-primary">Scenario preview</p>
+            <h3 className="mt-1 text-xl font-extrabold leading-tight">{scenario.title}</h3>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Badge variant="blue">{difficultyLabel}</Badge>
+              <Badge variant="outline">{preview?.focus_label ?? scenario.focus}</Badge>
+            </div>
           </div>
-          <div className="flex flex-wrap justify-end gap-2">
-            <Badge variant="blue">{difficultyLabel}</Badge>
-            {scenario.command_preview?.diagnostic ? <Badge variant="outline">Diagnostic</Badge> : null}
-          </div>
-        </header>
-
-        <section className="grid grid-cols-[13rem_minmax(0,1fr)] gap-4 max-lg:grid-cols-1">
-          <nav className="grid content-start gap-2" aria-label="Command preview steps">
-            {previewSteps.map((label, index) => (
+          <nav className="grid gap-2" aria-label="Command preview sections">
+            {sections.map((section, index) => (
               <button
-                className={`rounded-md border px-3 py-2 text-left text-sm transition ${
-                  index === stepIndex
-                    ? 'border-primary bg-primary/10 font-semibold text-foreground'
-                    : 'border-border bg-secondary/20 text-muted-foreground hover:bg-secondary'
-                }`}
-                key={label}
+                aria-pressed={index === selectedSectionIndex}
+                className={cn(
+                  'rounded-md border px-3 py-3 text-left transition',
+                  index === selectedSectionIndex
+                    ? 'border-primary bg-primary/10 text-foreground'
+                    : 'border-border bg-background/40 text-muted-foreground hover:bg-secondary',
+                )}
+                key={section.id ?? `${section.title}-${index}`}
                 type="button"
-                onClick={() => setStepIndex(index)}
+                onClick={() => selectSection(index)}
               >
-                {index + 1}. {label}
+                <span className="block truncate text-sm font-bold">{section.title}</span>
+                {section.command ? <span className="mt-1 block truncate font-mono text-xs">{section.command}</span> : null}
               </button>
             ))}
           </nav>
+        </aside>
 
-          <div className="grid gap-4">
-            <section className="rounded-md border border-border bg-card p-4">
-              <div className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                {currentStep}
+        <main className="min-w-0 p-5">
+          <header className="mb-5 rounded-md border border-border bg-card p-4">
+            <div className="flex items-start gap-3">
+              <div className="grid size-10 shrink-0 place-items-center rounded-md border border-primary/30 bg-primary/10 text-primary">
+                <BookOpen className="size-5" />
               </div>
-              <PreviewStepContent
-                stepIndex={stepIndex}
-                scenario={scenario}
-                explanation={explanation}
-                snapshot={snapshot}
-                syntaxExamples={syntaxExamples}
-                supportedDemoCommands={supportedDemoCommands}
-                commonMistakes={commonMistakes}
-                startLabel={startLabel}
-              />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">{preview?.command_title ?? scenario.title}</p>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                  {preview?.intro ?? preview?.short_explanation ?? scenario.short_explanation ?? scenario.summary}
+                </p>
+                {preview?.purpose ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{preview.purpose}</p> : null}
+              </div>
+            </div>
+          </header>
+
+          <article className="grid gap-4">
+            <section className="rounded-md border border-border bg-card p-4">
+              <div className="mb-2 flex items-center gap-2 text-sm font-bold">
+                <GitBranch className="size-4 text-primary" />
+                {selectedSection.title}
+              </div>
+              <p className="text-sm leading-6 text-muted-foreground">{selectedSection.explanation}</p>
             </section>
 
-            <section className="grid grid-cols-[minmax(0,1fr)_20rem] gap-4 max-xl:grid-cols-1">
-              <TerminalPanel
-                title="Demo terminal"
-                className="h-60"
-                disabled={isRunningDemo}
-                lines={terminalLines}
-                onCommand={runDemoCommand}
-              />
-              <DemoExplanationPanel explanation={explanation} snapshot={snapshot} />
-            </section>
+            <PreviewList
+              icon={Code2}
+              title="Syntax examples"
+              items={selectedSection.syntax_examples}
+              mono
+              emptyText="No syntax examples were provided for this section."
+            />
+            <PreviewList
+              icon={CheckCircle2}
+              title="What it changes"
+              items={selectedSection.what_changes}
+              emptyText="This section is informational."
+            />
+            <PreviewList
+              icon={CircleAlert}
+              title="What it does not change"
+              items={selectedSection.what_does_not_change}
+              emptyText="No boundaries were provided for this section."
+            />
+            <PreviewList
+              icon={CircleAlert}
+              title="Common mistakes"
+              items={selectedSection.common_mistakes}
+              emptyText="No common mistakes were provided for this section."
+            />
+            <PreviewList
+              icon={CheckCircle2}
+              title="Readiness notes"
+              items={selectedSection.readiness_notes}
+              emptyText="Review the scenario prompt before starting."
+            />
+          </article>
+        </main>
+
+        <aside className="border-l border-border bg-background p-4 max-xl:col-span-2 max-xl:border-l-0 max-xl:border-t max-lg:col-span-1">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2 text-sm font-bold">
+                <SquareTerminal className="size-4 text-primary" />
+                Shared demo
+              </div>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">One demo area updates as you move through the outline.</p>
+            </div>
           </div>
-        </section>
 
-        <PreviewNavigationControls
-          canGoPrevious={stepIndex > 0}
-          canGoNext={stepIndex < previewSteps.length - 1}
-          isProceeding={isProceeding}
-          startLabel={startLabel}
-          onPrevious={() => setStepIndex((index) => Math.max(0, index - 1))}
-          onNext={() => setStepIndex((index) => Math.min(previewSteps.length - 1, index + 1))}
-          onStartPractice={onProceed}
-        />
+          {selectedSteps.length ? (
+            <div className="mb-3 flex flex-wrap gap-2">
+              {selectedSteps.map((step, index) => (
+                <button
+                  type="button"
+                  key={`${step.command}-${index}`}
+                  className={cn(
+                    'rounded-sm border px-2 py-1 font-mono text-[11px] transition',
+                    index === selectedStepIndex
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-secondary/30 text-muted-foreground hover:text-foreground',
+                  )}
+                  onClick={() => applyDemoStep(index)}
+                >
+                  {step.command}
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="grid gap-3">
+            <div className="rounded-md border border-border bg-card p-3">
+              <DemoLiveDagPanel snapshot={snapshot} />
+            </div>
+            <TerminalPanel
+              title="Inline command demo"
+              className="h-60 rounded-md"
+              disabled={isRunningDemo || supportedDemoCommands.length === 0}
+              lines={terminalLines}
+              onCommand={runDemoCommand}
+            />
+          </div>
+        </aside>
       </div>
+
+      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-card/70 px-5 py-4">
+        <p className="text-xs leading-5 text-muted-foreground">Use this as a reference before working in the generated repository.</p>
+        {onProceed ? (
+          <Button type="button" disabled={isProceeding} onClick={onProceed}>
+            <Play data-icon="inline-start" />
+            {isProceeding ? 'Opening...' : startLabel}
+          </Button>
+        ) : (
+          <Button type="button" variant="outline" onClick={onClose}>
+            Close preview
+          </Button>
+        )}
+      </footer>
     </Modal>
   )
 }
 
-function PreviewStepContent({
-  stepIndex,
-  scenario,
-  explanation,
-  snapshot,
-  syntaxExamples,
-  supportedDemoCommands,
-  commonMistakes,
-  startLabel,
+function PreviewList({
+  icon: Icon,
+  title,
+  items,
+  emptyText,
+  mono = false,
 }: {
-  stepIndex: number
-  scenario: ScenarioSkillFocus
-  explanation: string
-  snapshot: RepositorySnapshot
-  syntaxExamples: string[]
-  supportedDemoCommands: string[]
-  commonMistakes: string[]
-  startLabel: string
+  icon: LucideIcon
+  title: string
+  items?: string[]
+  emptyText: string
+  mono?: boolean
 }) {
-  if (stepIndex === 0) {
-    return (
-      <div className="grid gap-3">
-        <p className="text-sm leading-6 text-muted-foreground">{scenario.short_explanation || explanation}</p>
-        <div className="flex flex-wrap gap-2">
-          {[...(scenario.primary_focus_commands ?? []), ...(scenario.supporting_inspection_commands ?? [])].map((command) => (
-            <span className="rounded-md border border-border bg-secondary/40 px-2 py-1 font-mono text-xs" key={command}>
-              {command}
-            </span>
-          ))}
-        </div>
-        {syntaxExamples.length ? (
-          <div className="grid gap-2">
-            <div className="text-sm font-semibold">Syntax examples</div>
-            <div className="flex flex-wrap gap-2">
-              {syntaxExamples.slice(0, 8).map((syntax) => (
-                <code className="rounded-md bg-secondary px-2 py-1 text-xs" key={syntax}>
-                  {syntax}
-                </code>
-              ))}
-            </div>
-          </div>
-        ) : null}
-      </div>
-    )
-  }
-
-  if (stepIndex === 1) {
-    return (
-      <div className="grid gap-3">
-        <p className="text-sm leading-6 text-muted-foreground">Start by reading the repository shape before typing a command.</p>
-        <DemoLiveDagPanel snapshot={snapshot} />
-      </div>
-    )
-  }
-
-  if (stepIndex === 2) {
-    return (
-      <div className="grid gap-3">
-        <p className="text-sm leading-6 text-muted-foreground">Try any listed command in the demo terminal. These commands are a warm-up and are not scenario answers.</p>
-        <div className="grid max-h-32 gap-2 overflow-auto rounded-md border border-border bg-secondary/20 p-2">
-          {supportedDemoCommands.map((command) => (
-            <code className="text-xs" key={command}>{command}</code>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  if (stepIndex === 3) {
-    return (
-      <div className="grid gap-3">
-        <p className="text-sm leading-6 text-muted-foreground">{explanation}</p>
-        <DemoLiveDagPanel snapshot={snapshot} />
-      </div>
-    )
-  }
-
-  if (stepIndex === 4) {
-    return (
-      <div className="grid gap-2">
-        {(commonMistakes.length ? commonMistakes : ['Skipping inspection before choosing an action.']).map((mistake) => (
-          <div className="rounded-md border border-border bg-secondary/30 p-3 text-sm leading-6 text-muted-foreground" key={mistake}>
-            {mistake}
-          </div>
-        ))}
-      </div>
-    )
-  }
-
+  const visibleItems = items?.filter(Boolean) ?? []
   return (
-    <div className="grid gap-3">
-      <p className="text-sm leading-6 text-muted-foreground">
-        The scenario opens as a generated variant with its own paths, messages, and validation rules. Use the command behavior here, then inspect the actual scenario state before acting.
-      </p>
-      <div className="rounded-md border border-border bg-secondary/30 p-3 text-sm font-semibold">{startLabel}</div>
-    </div>
+    <section className="rounded-md border border-border bg-card p-4">
+      <div className="mb-3 flex items-center gap-2 text-sm font-bold">
+        <Icon className="size-4 text-primary" />
+        {title}
+      </div>
+      {visibleItems.length ? (
+        <ul className="grid gap-2">
+          {visibleItems.map((item) => (
+            <li
+              className={cn(
+                'rounded-sm border border-border bg-secondary/20 px-3 py-2 text-sm leading-6 text-muted-foreground',
+                mono && 'font-mono text-xs text-foreground',
+              )}
+              key={item}
+            >
+              {item}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm leading-6 text-muted-foreground">{emptyText}</p>
+      )}
+    </section>
   )
 }
 
-type NormalizedDemoStep = {
-  command: string
-  explanation: string
-  repository_state: RepositorySnapshot
+function buildPreviewSections(
+  scenario: ScenarioSkillFocus,
+  fallbackSnapshot: RepositorySnapshot,
+): CommandPreviewSection[] {
+  const configuredSections = scenario.command_preview?.sections?.filter((section) => section.title && section.explanation) ?? []
+  if (configuredSections.length) {
+    return configuredSections.map((section, index) => ({
+      ...section,
+      id: section.id ?? `${normalize(section.title)}-${index}`,
+      demo_steps: normalizeDemoSteps(section.demo_steps ?? [], fallbackSnapshot, section.explanation, section.common_mistakes?.[0]),
+    }))
+  }
+
+  const normalizedSteps = normalizeDemoSteps(
+    scenario.command_preview?.demo_steps?.length ? scenario.command_preview.demo_steps : scenario.demo_explanation_steps,
+    fallbackSnapshot,
+    scenario.command_preview?.short_explanation ?? scenario.short_explanation,
+    scenario.command_preview?.common_mistakes?.[0],
+  )
+  if (normalizedSteps.length) {
+    return normalizedSteps.map((step, index) => ({
+      id: `${normalize(step.command)}-${index}`,
+      title: step.title || step.command,
+      command: step.command,
+      explanation: step.explanation,
+      syntax_examples: [step.command],
+      what_changes: scenario.command_preview?.what_changes ?? [],
+      what_does_not_change: scenario.command_preview?.what_does_not_change ?? [],
+      common_mistakes: step.common_mistake ? [step.common_mistake] : [],
+      readiness_notes: scenario.command_preview?.readiness_notes ?? [],
+      demo_steps: [step],
+    }))
+  }
+
+  return [
+    {
+      id: 'overview',
+      title: scenario.focus || 'Scenario focus',
+      command: scenario.primary_focus_commands[0],
+      explanation: scenario.short_explanation ?? scenario.summary,
+      syntax_examples: scenario.command_preview?.syntax_examples ?? scenario.primary_focus_commands,
+      what_changes: scenario.command_preview?.what_changes ?? [],
+      what_does_not_change: scenario.command_preview?.what_does_not_change ?? [],
+      common_mistakes: scenario.command_preview?.common_mistakes ?? [],
+      readiness_notes: scenario.command_preview?.readiness_notes ?? [],
+      demo_steps: [],
+    },
+  ]
 }
 
 function normalizeDemoSteps(
   value: unknown,
   fallbackSnapshot: RepositorySnapshot,
   fallbackExplanation?: string,
-): NormalizedDemoStep[] {
+  fallbackCommonMistake = 'Skipping inspection before choosing an action.',
+): DemoExplanationStep[] {
   if (!Array.isArray(value)) return []
   return value
-    .map((item, index): NormalizedDemoStep | null => {
+    .map((item, index): DemoExplanationStep | null => {
       if (typeof item === 'string') {
         return {
-          command: '',
+          command: `Demo step ${index + 1}`,
+          title: `Demo step ${index + 1}`,
           explanation: item || fallbackExplanation || '',
           repository_state: fallbackSnapshot,
+          common_mistake: fallbackCommonMistake,
+          diagnostic: false,
+          counted: true,
         }
       }
       if (!item || typeof item !== 'object') return null
-      const candidate = item as Partial<NormalizedDemoStep>
+      const candidate = item as Partial<DemoExplanationStep>
+      const command = typeof candidate.command === 'string' && candidate.command.trim()
+        ? candidate.command
+        : `Demo step ${index + 1}`
       return {
-        command: typeof candidate.command === 'string' ? candidate.command : '',
+        command,
+        title: typeof candidate.title === 'string' && candidate.title.trim() ? candidate.title : command,
         explanation:
           typeof candidate.explanation === 'string' && candidate.explanation.trim()
             ? candidate.explanation
             : fallbackExplanation || `Demo step ${index + 1}`,
         repository_state: isRepositorySnapshot(candidate.repository_state) ? candidate.repository_state : fallbackSnapshot,
+        common_mistake:
+          typeof candidate.common_mistake === 'string' && candidate.common_mistake.trim()
+            ? candidate.common_mistake
+            : fallbackCommonMistake,
+        diagnostic: candidate.diagnostic ?? false,
+        counted: candidate.counted ?? true,
       }
     })
-    .filter((step): step is NormalizedDemoStep => Boolean(step))
-}
-
-function commandBehaviorSummary(scenario: ScenarioSkillFocus) {
-  const normalized = normalize(scenario.focus)
-  if (normalized === 'git init') {
-    return 'git init prepares a folder for Git by creating repository metadata. It does not stage files, commit files, or change file contents.'
-  }
-  if (normalized === 'git clone') {
-    return 'git clone copies a remote repository into a local folder, checks out the default branch, and sets up origin tracking.'
-  }
-  if (normalized === 'git add') {
-    return 'git add moves selected changes from the working tree into the staging area so the next commit can save them.'
-  }
-  if (normalized === 'git commit') {
-    return 'git commit saves the staged snapshot and moves the current branch tip to the new commit.'
-  }
-  if (normalized === '.gitignore') {
-    return '.gitignore teaches Git which untracked local files should be ignored, while already tracked files need an explicit untrack step.'
-  }
-  if (normalized === 'git add -p') {
-    return 'git add -p lets you stage selected hunks, so one file can be split across separate focused commits.'
-  }
-  if (normalized === 'git commit --amend') {
-    return 'git commit --amend replaces the latest local commit with a corrected version instead of creating a separate follow-up commit.'
-  }
-  if (normalized === 'git restore') {
-    return 'git restore can either unstage selected paths or discard selected working-tree changes depending on the flags used.'
-  }
-  return scenario.short_explanation ?? 'This preview explains the command behavior before you open a generated scenario variant.'
+    .filter((step): step is DemoExplanationStep => Boolean(step))
 }
 
 function normalize(command: string) {

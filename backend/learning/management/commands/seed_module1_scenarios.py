@@ -2847,6 +2847,7 @@ class Command(BaseCommand):
                     "demo_repository_state": self._demo_state(spec),
                     "demo_dag_config": {},
                     "demo_explanation_steps": self._demo_steps(spec),
+                    "command_preview_config": self._command_preview_config(spec),
                     "related_git_concepts": spec["concepts"],
                     "narrative": spec["summary"],
                     "task_prompt": "Start a generated variant and reach the requested repository outcome.",
@@ -3074,6 +3075,65 @@ class Command(BaseCommand):
             for command in self._demo_commands(spec)
         ]
 
+    def _command_preview_config(self, spec: dict[str, Any]) -> dict[str, Any]:
+        commands = self._demo_commands(spec)
+        demo_state = self._demo_state(spec)
+        sections = []
+        for command in commands:
+            section_steps = [
+                {
+                    "command": command,
+                    "title": self._demo_title(command),
+                    "explanation": self._demo_command_explanation(command, spec),
+                    "repository_state": demo_state,
+                    "common_mistake": self._demo_common_mistake(command),
+                    "diagnostic": command.strip().lower() in {item.lower() for item in DIAG_PATTERNS},
+                    "counted": command.strip().lower() not in {item.lower() for item in DIAG_PATTERNS},
+                }
+            ]
+            sections.append(
+                {
+                    "id": self._preview_section_id(command),
+                    "title": self._demo_title(command),
+                    "command": command,
+                    "explanation": self._demo_command_explanation(command, spec),
+                    "syntax_examples": self._preview_syntax_examples(command),
+                    "what_changes": self._preview_changes(command),
+                    "what_does_not_change": self._preview_non_changes(command),
+                    "common_mistakes": [self._demo_common_mistake(command)],
+                    "readiness_notes": self._preview_readiness_notes(command),
+                    "demo_steps": section_steps,
+                }
+            )
+
+        normalized_commands = [command.strip().lower() for command in commands]
+        diagnostic = bool(commands) and all(command in {item.lower() for item in DIAG_PATTERNS} for command in normalized_commands)
+        return {
+            "title": f"{spec['focus']} command preview",
+            "intro": spec["explanation"],
+            "purpose": "Understand what this skill changes, what it only reports, and what to inspect before entering a generated scenario.",
+            "focus_label": spec["focus"],
+            "command_title": spec["title"],
+            "sections": sections,
+            "supported_demo_commands": commands,
+            "demo_repository_state": demo_state,
+            "demo_dag_config": {},
+            "syntax_examples": [
+                example
+                for command in commands
+                for example in self._preview_syntax_examples(command)
+            ],
+            "what_changes": self._preview_changes(spec["focus"]),
+            "what_does_not_change": self._preview_non_changes(spec["focus"]),
+            "common_mistakes": list(dict.fromkeys(self._demo_common_mistake(command) for command in commands))[:4],
+            "readiness_notes": [
+                "Read the scenario values before choosing paths, messages, or folders.",
+                "Use the demo area to see command behavior, then apply the idea to the generated variant.",
+            ],
+            "diagnostic": diagnostic,
+            "counted": not diagnostic,
+        }
+
     def _demo_commands(self, spec: dict[str, Any]) -> list[str]:
         normalized_focus = " ".join(str(spec.get("focus", "")).split()).lower()
         commands = {
@@ -3204,6 +3264,101 @@ class Command(BaseCommand):
         if normalized.startswith("git init"):
             return "Initializing the parent folder when the task names a child directory."
         return "Skipping inspection and acting before you know what Git sees."
+
+    def _preview_section_id(self, command: str) -> str:
+        return (
+            command.strip()
+            .lower()
+            .replace('"', "")
+            .replace(".", "dot")
+            .replace(" ", "-")
+            .replace("/", "-")
+        )
+
+    def _preview_syntax_examples(self, command: str) -> list[str]:
+        normalized = " ".join(command.split()).lower()
+        examples = {
+            "git status": ["git status"],
+            "git log --oneline": ["git log --oneline", "git log --oneline --graph --all"],
+            "git diff --staged": ["git diff --staged", "git diff --cached"],
+            "git diff": ["git diff", "git diff -- <path>"],
+            "git show": ["git show", "git show <commit>"],
+            "git branch -v": ["git branch -v"],
+            "git branch": ["git branch", "git branch -v"],
+            "git remote -v": ["git remote -v"],
+            "git reflog": ["git reflog"],
+            "git init": ["git init", "git init <directory>"],
+            "git clone": ["git clone <url>", "git clone <url> <folder>"],
+            "git add -p": ["git add -p <path>"],
+            "git add": ["git add <path>", "git add -p <path>"],
+            "git rm --cached": ["git rm --cached <path>"],
+            "git commit --amend": ["git commit --amend", 'git commit --amend -m "message"'],
+            "git commit": ['git commit -m "message"'],
+            "git restore --staged": ["git restore --staged <path>"],
+            "git restore": ["git restore <path>", "git restore --staged <path>"],
+        }
+        for prefix, syntax in examples.items():
+            if normalized.startswith(prefix):
+                return syntax
+        return [command]
+
+    def _preview_changes(self, command: str) -> list[str]:
+        normalized = " ".join(command.split()).lower()
+        if normalized.startswith(("git status", "git log", "git diff", "git show", "git branch", "git remote", "git reflog")):
+            return ["Nothing in the repository changes; the command only reports information."]
+        if normalized.startswith("git init"):
+            return ["Creates Git metadata for the target folder so Git can track future snapshots."]
+        if normalized.startswith("git clone"):
+            return ["Creates a local working copy, default branch checkout, and origin remote relationship."]
+        if normalized.startswith("git add -p"):
+            return ["Moves selected hunks from the working tree into the staging area."]
+        if normalized.startswith("git add"):
+            return ["Moves selected path changes from the working tree into the staging area."]
+        if normalized.startswith("git rm --cached"):
+            return ["Removes the path from the index while leaving the local file in the working tree."]
+        if normalized.startswith("git commit --amend"):
+            return ["Replaces the latest local commit with a corrected commit."]
+        if normalized.startswith("git commit"):
+            return ["Creates a new commit from the staged snapshot and advances the current branch."]
+        if normalized.startswith("git restore --staged"):
+            return ["Moves selected changes out of the staging area."]
+        if normalized.startswith("git restore"):
+            return ["Restores selected working-tree paths from the index or HEAD."]
+        return ["The command changes the repository state described by the scenario."]
+
+    def _preview_non_changes(self, command: str) -> list[str]:
+        normalized = " ".join(command.split()).lower()
+        if normalized.startswith(("git status", "git log", "git diff", "git show", "git branch", "git remote", "git reflog")):
+            return ["It does not stage, commit, discard, or rewrite files."]
+        if normalized.startswith("git init"):
+            return ["It does not stage files, create a commit, or rewrite file contents."]
+        if normalized.startswith("git clone"):
+            return ["It does not modify the remote repository."]
+        if normalized.startswith("git add"):
+            return ["It does not create a commit or remove the working-tree edits from your files."]
+        if normalized.startswith("git rm --cached"):
+            return ["It does not delete the local file unless you use a different removal command."]
+        if normalized.startswith("git commit --amend"):
+            return ["It should not be used to rewrite shared history in these local-only scenarios."]
+        if normalized.startswith("git commit"):
+            return ["It does not include unstaged changes or ignored files."]
+        if normalized.startswith("git restore --staged"):
+            return ["It does not discard the working-tree file content."]
+        if normalized.startswith("git restore"):
+            return ["It does not affect unrelated paths."]
+        return ["It does not replace careful inspection of the scenario requirements."]
+
+    def _preview_readiness_notes(self, command: str) -> list[str]:
+        normalized = " ".join(command.split()).lower()
+        if normalized.startswith(("git status", "git log", "git diff", "git show", "git branch", "git remote", "git reflog")):
+            return ["Use the output to name what Git sees before you act."]
+        if normalized.startswith("git commit"):
+            return ["Confirm the exact staged paths and required message before committing."]
+        if normalized.startswith("git add"):
+            return ["Confirm the target path or hunk before staging."]
+        if normalized.startswith("git restore"):
+            return ["Separate unstaging from discarding before you run the command."]
+        return ["Check the scenario's named values before running the command."]
 
     def _validate_builds(self):
         builder = RuntimeScenarioBuilder()

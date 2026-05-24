@@ -22,6 +22,27 @@ const snapshot = {
   conflicts: [],
 }
 
+const demoSteps = [
+  {
+    command: 'git status',
+    title: 'Check status',
+    explanation: 'Check the branch and dirty paths before deciding what to do next.',
+    repository_state: snapshot,
+    common_mistake: 'Do not treat status as a fix; it only reports state.',
+    diagnostic: true,
+    counted: false,
+  },
+  {
+    command: 'git diff',
+    title: 'Inspect unstaged changes',
+    explanation: 'Read the unstaged file changes before staging anything.',
+    repository_state: snapshot,
+    common_mistake: 'Do not use git diff --staged when nothing is staged yet.',
+    diagnostic: true,
+    counted: false,
+  },
+]
+
 const scenario: ScenarioSkillFocus = {
   id: 1,
   slug: 'inspect-repository-state',
@@ -34,13 +55,40 @@ const scenario: ScenarioSkillFocus = {
   supporting_inspection_commands: ['git diff', 'git diff --staged'],
   safe_demo_commands: ['git status', 'git log --oneline', 'git diff', 'git diff --staged'],
   demo_repository_state: snapshot,
-  demo_explanation_steps: [],
+  demo_explanation_steps: demoSteps,
   command_preview: {
     title: 'Command preview',
+    intro: 'Read before acting.',
+    purpose: 'Learn what these inspection commands report before starting.',
+    focus_label: 'diagnostic commands',
     command_title: 'Inspect repository state before acting',
+    sections: [
+      {
+        title: 'Check status',
+        command: 'git status',
+        explanation: 'Check the branch and dirty paths before deciding what to do next.',
+        syntax_examples: ['git status'],
+        what_changes: ['Nothing changes; status only reports state.'],
+        what_does_not_change: ['It does not stage or commit files.'],
+        common_mistakes: ['Do not treat status as a fix; it only reports state.'],
+        readiness_notes: ['Name the branch and dirty paths before acting.'],
+        demo_steps: [demoSteps[0]],
+      },
+      {
+        title: 'Inspect unstaged changes',
+        command: 'git diff',
+        explanation: 'Read the unstaged file changes before staging anything.',
+        syntax_examples: ['git diff'],
+        what_changes: ['Nothing changes; diff only reports content changes.'],
+        what_does_not_change: ['It does not show staged changes unless you use --staged.'],
+        common_mistakes: ['Do not use git diff --staged when nothing is staged yet.'],
+        readiness_notes: ['Compare plain diff with staged diff when needed.'],
+        demo_steps: [demoSteps[1]],
+      },
+    ],
     syntax_examples: ['git status', 'git log --oneline', 'git diff', 'git diff --staged'],
     supported_demo_commands: ['git status', 'git log --oneline', 'git diff', 'git diff --staged'],
-    demo_steps: [],
+    demo_steps: demoSteps,
     before_state: snapshot,
     after_state: snapshot,
     short_explanation: 'Read before acting.',
@@ -97,23 +145,44 @@ describe('SkillFocusPreviewModal', () => {
     vi.clearAllMocks()
   })
 
-  it('renders as Command preview with persistent previous and next controls', async () => {
+  it('renders the first command as structured learning content with one shared demo area', async () => {
     renderPreview()
 
     expect((await screen.findAllByText('Command preview')).length).toBeGreaterThan(0)
-    await screen.findByText('Inspect repository state before acting')
-    expect(screen.getByRole('button', { name: /previous/i })).toBeDisabled()
-    expect(screen.getByRole('button', { name: /next/i })).not.toBeDisabled()
+    expect((await screen.findAllByText('Inspect repository state before acting')).length).toBeGreaterThan(0)
+    expect(screen.getByText('Syntax examples')).toBeInTheDocument()
+    expect(screen.getByText('What it changes')).toBeInTheDocument()
+    expect(screen.getByText('What it does not change')).toBeInTheDocument()
+    expect(screen.getByText('Common mistakes')).toBeInTheDocument()
+    expect(screen.getByText('Shared demo')).toBeInTheDocument()
+    expect(screen.getByText('Inline command demo')).toBeInTheDocument()
+    expect(screen.getByText('Check the branch and dirty paths before deciding what to do next.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /start scenario/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /previous/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /next/i })).not.toBeInTheDocument()
+    expect(screen.getByText('diagnostic commands')).toBeInTheDocument()
+  })
 
-    fireEvent.click(screen.getByRole('button', { name: /next/i }))
+  it('switches command details while preserving terminal history', async () => {
+    renderPreview()
+    await screen.findByText('Check the branch and dirty paths before deciding what to do next.')
 
-    expect(screen.getByRole('button', { name: /previous/i })).not.toBeDisabled()
+    const input = screen.getByRole('textbox')
+    fireEvent.change(input, { target: { value: 'git status' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Run' }))
+
+    await screen.findByText('On branch main')
+    fireEvent.click(screen.getByRole('button', { name: /git diff/i }))
+
+    expect(screen.getByText('Read the unstaged file changes before staging anything.')).toBeInTheDocument()
+    expect(screen.getByText('Do not use git diff --staged when nothing is staged yet.')).toBeInTheDocument()
+    expect(screen.getByText('On branch main')).toBeInTheDocument()
   })
 
   it('submits every command listed in preview metadata', async () => {
     renderPreview()
     await screen.findAllByText('Command preview')
-    await screen.findByText('Inspect repository state before acting')
+    await screen.findAllByText('Inspect repository state before acting')
 
     for (const command of scenario.command_preview!.supported_demo_commands) {
       const input = screen.getByRole('textbox')

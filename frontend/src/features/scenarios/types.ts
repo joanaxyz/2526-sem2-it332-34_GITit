@@ -62,16 +62,38 @@ export type DemoExplanationStep = {
   counted?: boolean
 }
 
+export type CommandPreviewSection = {
+  id?: string
+  title: string
+  command?: string
+  explanation: string
+  syntax_examples?: string[]
+  what_changes?: string[]
+  what_does_not_change?: string[]
+  common_mistakes?: string[]
+  readiness_notes?: string[]
+  demo_steps?: DemoExplanationStep[]
+}
+
 export type CommandPreviewMetadata = {
   title: string
+  intro?: string
+  purpose?: string
+  focus_label?: string
   command_title: string
+  sections?: CommandPreviewSection[]
   syntax_examples: string[]
   supported_demo_commands: string[]
   demo_steps: DemoExplanationStep[]
+  demo_repository_state?: RepositorySnapshot
+  demo_dag_config?: Record<string, unknown>
   before_state: RepositorySnapshot
   after_state: RepositorySnapshot
   short_explanation: string
+  what_changes?: string[]
+  what_does_not_change?: string[]
   common_mistakes: string[]
+  readiness_notes?: string[]
   diagnostic: boolean
   counted: boolean
 }

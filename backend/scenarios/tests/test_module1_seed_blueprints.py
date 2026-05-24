@@ -136,6 +136,9 @@ def test_diagnostic_command_preview_is_first_module_one_scenario(db):
         "git branch",
         "git remote -v",
     ]
+    assert first.command_preview_config["focus_label"] == "diagnostic commands"
+    assert len(first.command_preview_config["sections"]) >= 7
+    assert first.command_preview_config["sections"][0]["command"] == "git status"
 
 
 @override_settings(DEBUG=True)

@@ -548,6 +548,7 @@ def test_scenario_summary_payload_excludes_heavy_preview_fields(student):
 
     assert "demo_repository_state" in payload
     assert "safe_demo_commands" in payload
+    assert payload["command_preview"]["supported_demo_commands"]
     assert "demo_repository_state" not in list_payload
     assert "demo_explanation_steps" not in list_payload
     assert "command_preview" not in list_payload

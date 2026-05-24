@@ -111,9 +111,7 @@ export function ScenarioList(props: ScenarioListProps) {
   if (isError) return <ErrorState title="Could not load scenarios" description={error.message} />
   if (!data?.length) return <EmptyState title="No scenarios here yet" description="This module does not have any published scenarios yet." />
 
-  function proceedFromPreview() {
-    if (!previewRequest) return
-    const { scenario, difficulty, action } = previewRequest
+  function performDifficultyAction(scenario: ScenarioSkillFocus, difficulty: DifficultyAccess, action: DifficultyActionIntent) {
     reserveScenarioTab()
     if (action === 'resume') {
       if (!difficulty.active_session_id) throw new Error('No active scenario is available to continue.')
@@ -145,6 +143,20 @@ export function ScenarioList(props: ScenarioListProps) {
     startMutation.mutate(difficulty)
   }
 
+  function handleDifficultyAction(scenario: ScenarioSkillFocus, difficulty: DifficultyAccess, action: DifficultyActionIntent) {
+    if (shouldOpenPreviewGate(difficulty, action)) {
+      setPreviewRequest({ scenario, difficulty, action })
+      return
+    }
+    performDifficultyAction(scenario, difficulty, action)
+  }
+
+  function proceedFromPreview() {
+    if (!previewRequest) return
+    const { scenario, difficulty, action } = previewRequest
+    performDifficultyAction(scenario, difficulty, action)
+  }
+
   const isProceeding = startMutation.isPending || retryMutation.isPending || reviewMutation.isPending
 
   return (
@@ -169,9 +181,7 @@ export function ScenarioList(props: ScenarioListProps) {
           key={scenario.id}
           scenario={scenario}
           scenarioNumber={index + 1}
-          onDifficultyAction={(selectedScenario, difficulty, action) =>
-            setPreviewRequest({ scenario: selectedScenario, difficulty, action })
-          }
+          onDifficultyAction={handleDifficultyAction}
         />
       ))}
       {previewRequest ? (
@@ -206,4 +216,16 @@ function nextDifficultyAfter(scenario: ScenarioSkillFocus, difficulty: Difficult
   if (!nextName) return null
   const nextDifficulty = scenario.difficulties.find((item) => item.difficulty === nextName)
   return nextDifficulty && nextDifficulty.status !== 'locked' ? nextDifficulty : null
+}
+
+function shouldOpenPreviewGate(difficulty: DifficultyAccess, action: DifficultyActionIntent) {
+  return (
+    action === 'start'
+    && difficulty.difficulty === 'easy'
+    && difficulty.status === 'not_started'
+    && !difficulty.latest_attempt
+    && !difficulty.active_session_id
+    && !difficulty.retry_session_id
+    && !difficulty.completion
+  )
 }

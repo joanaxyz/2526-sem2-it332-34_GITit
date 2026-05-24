@@ -52,6 +52,7 @@ class ScenarioSkillFocus(models.Model):
     demo_repository_state = models.JSONField(default=dict, blank=True)
     demo_dag_config = models.JSONField(default=dict, blank=True)
     demo_explanation_steps = models.JSONField(default=list, blank=True)
+    command_preview_config = models.JSONField(default=dict, blank=True)
     related_git_concepts = models.JSONField(default=list, blank=True)
     narrative = models.TextField(blank=True)
     task_prompt = models.TextField(blank=True)
