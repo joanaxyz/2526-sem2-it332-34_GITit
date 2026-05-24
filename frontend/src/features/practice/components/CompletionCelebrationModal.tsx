@@ -183,7 +183,7 @@ export function CompletionCelebrationModal({
             />
             <StatTile label="Submissions" value={`${session.counts.total_attempts}`} helper="All terminal entries" />
             <StatTile
-              label="Free inspections"
+              label="Free diagnostics"
               value={`${session.counts.non_counted_diagnostic_total}`}
               helper="Diagnostics excluded from accuracy"
             />

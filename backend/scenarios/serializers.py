@@ -21,10 +21,6 @@ class CommandSubmitSerializer(serializers.Serializer):
     command = serializers.CharField(max_length=500)
 
 
-class InspectionAnswerSubmitSerializer(serializers.Serializer):
-    answer = serializers.JSONField()
-
-
 class SkillFocusDemoCommandSerializer(serializers.Serializer):
     command = serializers.CharField(max_length=500)
     repository_state = serializers.JSONField(required=False)
@@ -94,7 +90,6 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
         },
         "difficulty": session.difficulty_instance.difficulty,
         "completion_type": session.difficulty_instance.completion_type,
-        "inspection_answer": session.inspection_answer,
         "variant": {
             "id": session.variant_id,
             "label": session.variant.label,
@@ -141,7 +136,7 @@ def fallback_student_context(session) -> dict:
     narrative = session.difficulty_instance.narrative or session.scenario.narrative
     context = {
         "story": narrative,
-        "requirements": [session.difficulty_instance.task_prompt or session.scenario.task_prompt],
+        "situation": session.difficulty_instance.task_prompt or session.scenario.task_prompt,
     }
     return {
         key: value

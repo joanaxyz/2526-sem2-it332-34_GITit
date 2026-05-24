@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, GripHorizontal, GripVertical, PanelsTopLeft } from 'lucide-react'
+import { GripHorizontal, GripVertical, PanelsTopLeft } from 'lucide-react'
 
 import { ScenarioContextPanel } from '@/features/scenarios/components/ScenarioContextPanel'
 import { ScenarioStatusHeader } from '@/features/scenarios/components/ScenarioStatusHeader'
@@ -22,7 +22,6 @@ import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import { syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { PracticeWorkspaceSkeleton } from '@/shared/components/Skeleton'
-import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
 import { cn } from '@/shared/utils/cn'
@@ -185,40 +184,6 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
 
   function startFreshAttempt() {
     retryMutation.mutate()
-  }
-
-  if (session.completion_type === 'inspection') {
-    return (
-      <div className="flex h-screen flex-col overflow-hidden bg-background">
-        <header className="flex min-h-14 items-center justify-between gap-3 border-b border-border bg-background px-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <Button type="button" variant="ghost" size="sm" disabled={exitMutation.isPending} onClick={() => exitMutation.mutate()}>
-              <ArrowLeft data-icon="inline-start" />
-              {exitMutation.isPending ? 'Exiting' : session.status === 'started' ? 'Exit' : 'Back'}
-            </Button>
-            <h1 className="truncate text-sm font-semibold">{session.scenario.title}</h1>
-          </div>
-          <Badge variant="outline">{session.variant.label}</Badge>
-        </header>
-        <main className="grid min-h-0 flex-1 grid-cols-[minmax(0,1.25fr)_minmax(20rem,0.75fr)] gap-2 p-2 max-lg:grid-cols-1 max-lg:overflow-auto">
-          <div className="min-h-0 max-lg:min-h-[28rem]">
-            <TerminalPanel
-              lines={lines}
-              disabled={session.status !== 'started' || mutation.isPending}
-              className="h-full"
-              onCommand={submit}
-            />
-          </div>
-          <div className="min-h-0 max-lg:min-h-[24rem]">
-            <LiveDagPanel
-              snapshot={session.repository_state}
-              className="flex h-full min-h-0 flex-col"
-              contentClassName="h-full min-h-0 flex-1"
-            />
-          </div>
-        </main>
-      </div>
-    )
   }
 
   function beginTerminalResize(event: ReactPointerEvent<HTMLDivElement>) {

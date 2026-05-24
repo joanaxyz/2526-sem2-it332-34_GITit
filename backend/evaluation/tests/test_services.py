@@ -1,5 +1,5 @@
 from common.constants import RESULT_TARGET_MATCHED, RESULT_TARGET_NOT_YET_MATCHED
-from evaluation.services import InspectionEvaluator, StateBasedEvaluator
+from evaluation.services import StateBasedEvaluator
 from simulator.services import RepositoryStateSimulator
 
 
@@ -151,55 +151,6 @@ def test_state_based_evaluator_can_require_command_history():
 
     assert matched.result_category == RESULT_TARGET_MATCHED
     assert missing_required_command.result_category == RESULT_TARGET_NOT_YET_MATCHED
-
-
-def test_inspection_evaluator_requires_commands_and_unchanged_state():
-    state = {
-        "commits": [{"id": "c0", "message": "Base", "parents": []}],
-        "branches": {"main": "c0"},
-        "head": {"type": "branch", "name": "main"},
-        "working_tree": {"README.md": "modified"},
-        "staging": {},
-        "conflicts": [],
-    }
-    expected = {
-        "required_commands": ["git status"],
-        "repository_state_unchanged": True,
-        "checks": {"head_branch": "main", "unstaged_changes": ["README.md"], "staging_empty": True},
-    }
-
-    matched = InspectionEvaluator().evaluate(
-        initial_state=state,
-        current_state=state,
-        expected_observations=expected,
-        executed_commands=["git status"],
-        submitted_answer={
-            "head_branch": "main",
-            "unstaged_changes": ["README.md"],
-            "staging_empty": True,
-        },
-    )
-    missing_command = InspectionEvaluator().evaluate(
-        initial_state=state,
-        current_state=state,
-        expected_observations=expected,
-        executed_commands=["git diff"],
-        submitted_answer={
-            "head_branch": "main",
-            "unstaged_changes": ["README.md"],
-            "staging_empty": True,
-        },
-    )
-    missing_answer = InspectionEvaluator().evaluate(
-        initial_state=state,
-        current_state=state,
-        expected_observations=expected,
-        executed_commands=["git status"],
-    )
-
-    assert matched.result_category == RESULT_TARGET_MATCHED
-    assert missing_command.result_category == RESULT_TARGET_NOT_YET_MATCHED
-    assert missing_answer.result_category == RESULT_TARGET_NOT_YET_MATCHED
 
 
 def test_evaluator_supports_module1_exact_state_rules():

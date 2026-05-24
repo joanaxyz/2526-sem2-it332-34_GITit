@@ -57,12 +57,10 @@ export type RepositorySnapshot = {
 
 export type ScenarioStudentContext = {
   story?: string
+  situation?: string
   current_state?: string[]
-  provided_values?: Array<{ label: string; value: string }>
-  requirements?: string[]
-  warnings?: string[]
-  success_checklist?: string[]
-  inspection_suggestions?: string[]
+  required_details?: Array<{ label: string; value: string }>
+  constraints?: string[]
 }
 
 export type ScenarioSession = {
@@ -72,8 +70,7 @@ export type ScenarioSession = {
   difficulty_instance_id: number
   completed_at: string | null
   first_attempt_star_eligible: boolean
-  completion_type: 'state_based' | 'inspection' | 'expanded_state_based'
-  inspection_answer?: Record<string, unknown>
+  completion_type: 'state_based' | 'expanded_state_based'
   scenario: {
     id: number
     slug: string

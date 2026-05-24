@@ -1,6 +1,7 @@
 from django.db.models import Prefetch
 
 from common.constants import (
+    COMPLETION_TYPES,
     DIFFICULTY_EASY,
     DIFFICULTY_MEDIUM,
     SESSION_MODE_PRIMARY,
@@ -122,7 +123,10 @@ def accuracy_display_session(
 
 def _published_difficulty_queryset():
     return (
-        DifficultyInstance.objects.filter(is_published=True)
+        DifficultyInstance.objects.filter(
+            is_published=True,
+            completion_type__in=COMPLETION_TYPES,
+        )
         .select_related("command_policy")
         .only(
             "id",
@@ -328,7 +332,7 @@ def _scenario_status_payload_from_maps(
         payload.update(
             {
                 "short_explanation": scenario.short_explanation,
-                "supporting_inspection_commands": scenario.supporting_inspection_commands,
+                "supporting_diagnostic_commands": scenario.supporting_diagnostic_commands,
                 "safe_demo_commands": scenario.safe_demo_commands,
                 "demo_repository_state": scenario.demo_repository_state,
                 "demo_dag_config": scenario.demo_dag_config,
@@ -350,7 +354,7 @@ def _command_preview_payload(scenario: ScenarioSkillFocus) -> dict:
     commands = _unique_commands(
         [
             *list(scenario.primary_focus_commands or []),
-            *list(scenario.supporting_inspection_commands or []),
+            *list(scenario.supporting_diagnostic_commands or []),
             *list(scenario.safe_demo_commands or []),
         ]
     )
@@ -412,7 +416,7 @@ def _normalized_command_preview_config(scenario: ScenarioSkillFocus, config: dic
     commands = _unique_commands(
         [
             *list(scenario.primary_focus_commands or []),
-            *list(scenario.supporting_inspection_commands or []),
+            *list(scenario.supporting_diagnostic_commands or []),
             *list(supported_commands),
         ]
     )
@@ -1113,7 +1117,7 @@ def _common_mistakes(commands: list[str]) -> list[str]:
     if "git commit --amend" in normalized:
         mistakes.append("Creating a new follow-up commit instead of replacing the latest local commit.")
     if not mistakes:
-        mistakes.append("Skipping read-only inspection before choosing an action.")
+        mistakes.append("Skipping read-only diagnostics before choosing an action.")
     return mistakes[:3]
 
 
@@ -1313,6 +1317,7 @@ def get_difficulty_instance(instance_id: int) -> DifficultyInstance:
         .get(
             id=instance_id,
             is_published=True,
+            completion_type__in=COMPLETION_TYPES,
             scenario__is_published=True,
             scenario__learning_unit__is_published=True,
             scenario__lesson__is_published=True,

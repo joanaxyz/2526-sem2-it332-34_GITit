@@ -9,7 +9,6 @@ from django.db import transaction
 
 from common.constants import (
     COMPLETION_EXPANDED_STATE_BASED,
-    COMPLETION_INSPECTION,
     COMPLETION_STATE_BASED,
     DIFFICULTY_EASY,
     DIFFICULTY_HARD,
@@ -42,20 +41,26 @@ DIAG_PATTERNS = [
     "git log",
     "git log --oneline",
     "git log --oneline --graph --all",
+    "git log -n <number>",
+    "git log --max-count=<number>",
     "git diff",
+    "git diff <path>",
     "git diff --staged",
     "git diff --cached",
+    "git diff --staged <path>",
+    "git diff --cached <path>",
     "git diff HEAD",
     "git diff --name-only",
     "git diff --staged --name-only",
     "git show",
+    "git show <commit>",
     "git show --name-only",
     "git remote",
     "git remote -v",
     "git branch",
     "git branch -v",
     "git reflog",
-    "git check-ignore -v",
+    "git check-ignore -v <path>",
     "git ls-files",
 ]
 
@@ -72,7 +77,7 @@ MODULE_ONE_LESSONS = [
         "inspecting-repository-state",
         "Inspecting Repository State",
         "Read repository status, history, diffs, branches, remotes, and objects before acting.",
-        "scenario",
+        "content",
     ),
     (
         2,
@@ -204,13 +209,13 @@ def uninitialized_state(**extra: Any) -> dict[str, Any]:
 def student_context_template(kind: str) -> dict[str, Any]:
     common = {
         # Keep the active-attempt context focused on the brief and required values.
-        # The UI intentionally hides task/checklist/helpful-inspection scaffolds
+        # The UI intentionally hides task/checklist/helpful diagnostic scaffolds
         # because those sections can leak evaluator rules or imply exact commands.
     }
     templates = {
         "init": {
             "story": "You are preparing {{project}} for version control.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Project", "value": "{{project}}"},
                 {"label": "Target directory", "value": "{{target_directory}}"},
                 {"label": "Initial branch", "value": "{{expected_initial_branch}}"},
@@ -218,26 +223,22 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 {"label": "Existing repository", "value": "{{expected_reinitialized}}"},
                 {"label": "Expected untracked paths", "value": "{{expected_untracked_paths}}"},
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
         "diagnostic": {
             "story": "Before changing {{project}}, inspect the repository and report what you observe.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Question", "value": "{{question}}"},
                 {"label": "Observation fields", "value": "{{must_identify}}"},
             ],
-            "warnings": [
+            "constraints": [
                 "Use read-only commands only; the repository state should not change.",
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
         "clone": {
             "story": "You need a local working copy of {{project}} from its remote repository.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Remote URL", "value": "{{remote_url}}"},
                 {"label": "Destination folder", "value": "{{destination_folder}}"},
                 {"label": "Branch to check out", "value": "{{selected_branch}}"},
@@ -245,24 +246,20 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 {"label": "Clone depth", "value": "{{clone_depth_label}}"},
                 {"label": "Remote tip", "value": "{{remote_head}}"},
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
         "commit": {
             "story": "You are preparing a focused project snapshot for {{project}}.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Target files", "value": "{{target_files}}"},
                 {"label": "Files to leave out", "value": "{{excluded_files}}"},
                 {"label": "Required commit message text", "value": "{{required_commit_message}}"},
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
         "gitignore": {
             "story": "{{project}} has local/generated files that should not be saved in project history.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Ignore file", "value": ".gitignore"},
                 {"label": "Ignore marker", "value": "{{gitignore_token}}"},
                 {"label": "Ignored/generated paths", "value": "{{ignored_paths}}"},
@@ -272,47 +269,39 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 },
                 {"label": "Required commit message text", "value": "{{required_commit_message}}"},
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
         "partial": {
             "story": "{{project}} has multiple changes, but only one logical hunk belongs in the next snapshot.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Target files", "value": "{{target_files}}"},
                 {"label": "Hunks to commit", "value": "{{target_hunks}}"},
                 {"label": "Hunks to leave in working tree", "value": "{{leftover_hunks}}"},
                 {"label": "Other files to leave out", "value": "{{unrelated_files}}"},
                 {"label": "Required commit message text", "value": "{{required_commit_message}}"},
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
         "amend": {
             "story": "The latest local snapshot in {{project}} needs to be repaired before it is considered final.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Commit to repair", "value": "{{commit_to_repair}}"},
                 {"label": "Corrected message", "value": "{{required_commit_message}}"},
                 {"label": "Files in repaired commit", "value": "{{target_files}}"},
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
         "restore": {
             "story": "{{project}} has mixed changes. Some should be kept for later, and some should be discarded.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Keep but unstage", "value": "{{keep_paths}}"},
                 {"label": "Discard from working tree", "value": "{{discard_paths}}"},
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
         "review": {
             "story": "{{project}} combines several Module 1 local workflow skills in one task.",
-            "provided_values": [
+            "required_details": [
                 {"label": "Target files", "value": "{{target_files}}"},
                 {"label": "Files/hunks to leave out", "value": "{{excluded_files}}"},
                 {"label": "Required commit message text", "value": "{{required_commit_message}}"},
@@ -320,8 +309,6 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 {"label": "Hunks to leave", "value": "{{leftover_hunks}}"},
                 {"label": "Commit to repair", "value": "{{commit_to_repair}}"},
             ],
-            "requirements": [],
-            "success_checklist": [],
             **common,
         },
     }
@@ -344,190 +331,6 @@ def base_scenarios() -> list[dict[str, Any]]:
 
 
 def diagnostic_scenario() -> dict[str, Any]:
-    base = repo_with_head(
-        commits=[
-            commit(
-                "c1", "Create starter files", {"README.md": "readme-v1", "src/app.py": "app-v1"}
-            ),
-            commit(
-                "c2",
-                "Add dashboard shell",
-                {
-                    "README.md": "readme-v1",
-                    "src/app.py": "app-v1",
-                    "src/dashboard.py": "dashboard-v1",
-                },
-                ["c1"],
-            ),
-        ],
-        head="c2",
-        working_tree={"src/app.py": "app-v2", "notes/todo.md": "untracked"},
-        staging={"src/dashboard.py": "dashboard-v2"},
-        remotes={"origin": "https://example.test/training/dashboard.git"},
-        remote_branches={"origin/main": "c2"},
-        upstream_tracking={"main": "origin/main"},
-    )
-    easy_cases = [
-        diagnostic_case(
-            "diagnostic-easy-status",
-            "dashboard-lab",
-            "Identify the current branch, staged paths, unstaged paths, and untracked files.",
-            ["git status"],
-            ["head_branch", "staged_paths", "unstaged_paths", "untracked_paths"],
-            {
-                "head_branch": "main",
-                "staged_paths": ["src/dashboard.py"],
-                "unstaged_paths": ["src/app.py"],
-                "untracked_paths": ["notes/todo.md"],
-            },
-            "status identifies main, staged dashboard, unstaged app, and untracked notes",
-            base,
-        ),
-        diagnostic_case(
-            "diagnostic-easy-diff",
-            "dashboard-lab",
-            "Use diff views to separate unstaged and staged changes.",
-            ["git diff", "git diff --staged"],
-            ["unstaged_diff_paths", "staged_diff_paths"],
-            {
-                "unstaged_diff_paths": ["src/app.py"],
-                "staged_diff_paths": ["src/dashboard.py"],
-            },
-            "diff separates app working change from staged dashboard change",
-            base,
-        ),
-    ]
-    medium_state = repo_with_head(
-        commits=[
-            commit("c1", "Create starter files", {"README.md": "readme-v1"}),
-            commit(
-                "c2",
-                "Add profile page",
-                {"README.md": "readme-v1", "src/profile.py": "profile-v1"},
-                ["c1"],
-            ),
-            commit(
-                "c3",
-                "Add profile tests",
-                {
-                    "README.md": "readme-v1",
-                    "src/profile.py": "profile-v1",
-                    "tests/test_profile.py": "profile-test-v1",
-                },
-                ["c2"],
-            ),
-        ],
-        head="c3",
-        working_tree={"src/profile.py": "profile-v2"},
-        staging={},
-        remotes={"origin": "https://example.test/training/profile.git"},
-        remote_branches={"origin/main": "c3"},
-        upstream_tracking={"main": "origin/main"},
-    )
-    medium_cases = [
-        diagnostic_case(
-            "diagnostic-medium-history",
-            "profile-lab",
-            "Read the compact history and identify the latest commit and message.",
-            ["git log --oneline", "git show"],
-            ["latest_commit", "commit_message", "changed_paths"],
-            {
-                "latest_commit": "c3",
-                "commit_message": "Add profile tests",
-                "changed_paths": ["tests/test_profile.py"],
-            },
-            "history points to c3 with profile test change",
-            medium_state,
-        ),
-        diagnostic_case(
-            "diagnostic-medium-branches",
-            "profile-lab",
-            "Inspect local branches before choosing any action.",
-            ["git branch", "git branch -v"],
-            ["head_branch", "available_branches", "branch_tips"],
-            {
-                "head_branch": "main",
-                "available_branches": ["main"],
-                "branch_tips": {"main": "c3"},
-            },
-            "branch output identifies main at c3",
-            medium_state,
-        ),
-    ]
-    hard_state = repo_with_head(
-        commits=[
-            commit("c1", "Create starter files", {"README.md": "readme-v1"}),
-            commit(
-                "c2", "Add API client", {"README.md": "readme-v1", "src/api.py": "api-v1"}, ["c1"]
-            ),
-            commit(
-                "c3",
-                "Add export command",
-                {"README.md": "readme-v1", "src/api.py": "api-v1", "src/export.py": "export-v1"},
-                ["c2"],
-            ),
-        ],
-        head="c3",
-        working_tree={"src/export.py": "export-v2", "debug.log": "untracked"},
-        staging={"src/api.py": "api-v2"},
-        remotes={"origin": "https://example.test/training/export.git"},
-        remote_branches={"origin/main": "c3", "origin/release": "c2"},
-        upstream_tracking={"main": "origin/main"},
-        extra={"branches": {"main": "c3", "release-check": "c2"}},
-    )
-    hard_cases = [
-        diagnostic_case(
-            "diagnostic-hard-combined-read",
-            "export-lab",
-            "Combine status, staged diff, history, branch, remote, and show output before acting.",
-            [
-                "git status",
-                "git diff --staged",
-                "git log --oneline --graph --all",
-                "git show",
-                "git branch -v",
-                "git remote -v",
-            ],
-            [
-                "head_branch",
-                "staged_paths",
-                "unstaged_paths",
-                "commit_history",
-                "available_branches",
-                "latest_commit",
-            ],
-            {
-                "head_branch": "main",
-                "staged_paths": ["src/api.py"],
-                "unstaged_paths": ["src/export.py"],
-                "commit_history": ["c1", "c2", "c3"],
-                "available_branches": ["main", "release-check"],
-                "latest_commit": "c3",
-            },
-            "combined diagnostics identify branch, index, worktree, history, and remote context",
-            hard_state,
-        ),
-        diagnostic_case(
-            "diagnostic-hard-reflog-recovery",
-            "export-lab",
-            "Use reflog plus status/history views to confirm where HEAD is before making changes.",
-            ["git reflog", "git status", "git log --oneline"],
-            ["head_branch", "latest_commit", "unstaged_paths", "staged_paths"],
-            {
-                "head_branch": "main",
-                "latest_commit": "c3",
-                "unstaged_paths": ["src/export.py"],
-                "staged_paths": ["src/api.py"],
-            },
-            "reflog/status/history confirm main at c3 with split changes",
-            {
-                **hard_state,
-                "reflog": [
-                    {"ref": "HEAD@{0}", "target": "c3", "message": "commit: Add export command"}
-                ],
-            },
-        ),
-    ]
     return scenario_dict(
         lesson=(
             1,
@@ -550,99 +353,9 @@ def diagnostic_scenario() -> dict[str, Any]:
             "git remote -v",
         ],
         supporting=["git log --oneline --graph --all", "git branch -v", "git reflog"],
-        concepts=["status", "history", "diffs", "branches", "remotes", "read-only inspection"],
+        concepts=["status", "history", "diffs", "branches", "remotes", "diagnostic commands"],
         kind=ScenarioSkillFocus.SkillFocusType.CONCEPT_SPECIFIC,
-        difficulties={
-            DIFFICULTY_EASY: diff(
-                (0, 0),
-                "Read the repository before acting.",
-                "Use the requested diagnostic command and submit the observations.",
-                [
-                    diagnostic_bp(
-                        "diagnostic-status-and-diff",
-                        easy_cases,
-                        "module1.diagnostic.status-diff",
-                        "status-diff",
-                    )
-                ],
-                completion_type=COMPLETION_INSPECTION,
-            ),
-            DIFFICULTY_MEDIUM: diff(
-                (0, 0),
-                "Read history and branch context.",
-                "Use diagnostic history or branch commands and submit the observations.",
-                [
-                    diagnostic_bp(
-                        "diagnostic-history-branches",
-                        medium_cases,
-                        "module1.diagnostic.history-branches",
-                        "history-branches",
-                    )
-                ],
-                completion_type=COMPLETION_INSPECTION,
-            ),
-            DIFFICULTY_HARD: diff(
-                (0, 0),
-                "Combine multiple diagnostic views.",
-                "Use only read-only commands to inspect the repository and submit the observations.",
-                [
-                    diagnostic_bp(
-                        "diagnostic-combined",
-                        hard_cases,
-                        "module1.diagnostic.combined",
-                        "combined-diagnostics",
-                    )
-                ],
-                completion_type=COMPLETION_INSPECTION,
-            ),
-        },
-    )
-
-
-def diagnostic_case(
-    case_id: str,
-    project: str,
-    question: str,
-    required_commands: list[str],
-    must_identify: list[str],
-    expected_answer: dict[str, Any],
-    answer_anchor: str,
-    state: dict[str, Any],
-) -> dict[str, Any]:
-    return {
-        "case_id": case_id,
-        "project": project,
-        "question": question,
-        "required_commands": required_commands,
-        "must_identify": must_identify,
-        "expected_answer": expected_answer,
-        "answer_anchor": answer_anchor,
-        "initial_state": state,
-    }
-
-
-def diagnostic_bp(
-    slug: str, cases: list[dict[str, Any]], signature: str, subtemplate: str
-) -> dict[str, Any]:
-    return bp(
-        slug=slug,
-        kind="diagnostic",
-        signature=signature,
-        subtemplate=subtemplate,
-        cases=cases,
-        initial_state="{{initial_state}}",
-        target_rule={
-            "completion_type": COMPLETION_INSPECTION,
-            "required_commands": "{{required_commands}}",
-            "repository_state_unchanged": True,
-            "must_identify": "{{must_identify}}",
-            "rules": [
-                {"type": "inspection_answer_matches", "expected": "{{expected_answer}}"},
-            ],
-        },
-        solution="{{required_commands}}",
-        label="Inspect {{project}}",
-        slug_template="diagnostic-{{case_id}}",
+        difficulties={},
     )
 
 
@@ -955,10 +668,7 @@ def bp(
     solution: list[str],
     label: str,
     slug_template: str,
-    expected_observations: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    if expected_observations is None and all("answer_anchor" in case for case in cases):
-        expected_observations = {"answer_anchor": "{{answer_anchor}}"}
     return {
         "slug": slug,
         "slug_template": slug_template,
@@ -971,7 +681,6 @@ def bp(
         "initial_state_template": initial_state,
         "target_rule_template": target_rule,
         "solution_commands_template": solution,
-        "expected_observations_template": expected_observations or {},
         "student_context_template": student_context_template(kind),
     }
 
@@ -2743,7 +2452,7 @@ def review_scenario() -> dict[str, Any]:
         title="Complete a focused local workflow",
         focus="local repository workflow",
         summary="Combine Module 1 skills to reach a clean local repository outcome.",
-        explanation="The review scenario combines inspection, staging, committing, ignore rules, partial staging, restore, or amend within one local workflow task.",
+        explanation="The review scenario combines diagnostics, staging, committing, ignore rules, partial staging, restore, or amend within one local workflow task.",
         primary=["git add", "git commit"],
         supporting=["git status", "git diff", "git diff --staged", "git log --oneline"],
         concepts=[
@@ -3073,7 +2782,7 @@ class Command(BaseCommand):
                     "short_explanation": spec["explanation"],
                     "skill_focus_type": spec["kind"],
                     "primary_focus_commands": spec["primary"],
-                    "supporting_inspection_commands": spec["supporting"],
+                    "supporting_diagnostic_commands": spec["supporting"],
                     "safe_demo_commands": self._demo_commands(spec),
                     "demo_repository_state": self._demo_state(spec),
                     "demo_dag_config": {},
@@ -3086,6 +2795,14 @@ class Command(BaseCommand):
                     "sort_order": lesson_order,
                 },
             )
+            if not spec["difficulties"]:
+                DifficultyInstance.objects.filter(scenario=scenario).update(is_published=False)
+                ScenarioGenerationBlueprint.objects.filter(
+                    difficulty_instance__scenario=scenario
+                ).delete()
+                TargetStateRule.objects.filter(difficulty_instance__scenario=scenario).delete()
+                ScenarioVariant.objects.filter(scenario=scenario).update(is_published=False)
+                continue
 
             for difficulty, dspec in spec["difficulties"].items():
                 difficulty_instance, _ = DifficultyInstance.objects.update_or_create(
@@ -3133,9 +2850,6 @@ class Command(BaseCommand):
                             "initial_state_template": blueprint["initial_state_template"],
                             "target_rule_template": blueprint["target_rule_template"],
                             "solution_commands_template": blueprint["solution_commands_template"],
-                            "expected_observations_template": blueprint[
-                                "expected_observations_template"
-                            ],
                             "student_context_template": blueprint["student_context_template"],
                             "generation_count": blueprint["generation_count"],
                             "max_combinations": blueprint["max_combinations"],
@@ -3225,6 +2939,14 @@ class Command(BaseCommand):
         unit.delete()
 
     def _lesson_html(self, title: str, subtitle: str) -> str:
+        if title == "Inspecting Repository State":
+            return f"""
+<section class=\"lesson-overview\">
+  <h1>{title}</h1>
+  <p>{subtitle}</p>
+  <p>Use this lesson and its command preview to study diagnostic commands. These commands stay available inside normal practice scenarios and do not consume the counted action-command budget.</p>
+</section>
+""".strip()
         return f"""
 <section class=\"lesson-overview\">
   <h1>{title}</h1>
@@ -3463,10 +3185,10 @@ class Command(BaseCommand):
         created_variant_ids = []
         try:
             for difficulty in DifficultyInstance.objects.filter(
-                scenario__learning_unit__slug="local-repository-foundations"
+                scenario__learning_unit__slug="local-repository-foundations",
+                is_published=True,
             ).order_by("scenario__sort_order", "difficulty"):
                 fingerprints = set()
-                anchors = set()
                 candidates = []
                 for blueprint in difficulty.generation_blueprints.filter(
                     is_published=True
@@ -3487,9 +3209,6 @@ class Command(BaseCommand):
                         )
                         created_variant_ids.append(variant.id)
                         fingerprints.add(candidate.candidate_fingerprint)
-                        anchor = (variant.expected_observations or {}).get("answer_anchor")
-                        if anchor:
-                            anchors.add(json.dumps(anchor, sort_keys=True))
                         self.stdout.write(
                             f"Built {difficulty.scenario.slug}/{difficulty.difficulty}: {variant.slug}"
                         )
@@ -3500,10 +3219,6 @@ class Command(BaseCommand):
                 if len(candidates) > 1 and len(fingerprints) != len(candidates):
                     failures.append(
                         f"{difficulty.scenario.slug}/{difficulty.difficulty}: duplicate parameter fingerprints"
-                    )
-                if len(candidates) > 1 and len(anchors) != len(candidates):
-                    failures.append(
-                        f"{difficulty.scenario.slug}/{difficulty.difficulty}: duplicate or missing answer anchors"
                     )
         finally:
             ScenarioVariant.objects.filter(id__in=created_variant_ids).delete()

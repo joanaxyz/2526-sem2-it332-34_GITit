@@ -35,7 +35,12 @@ def published_units(*, user=None):
         .annotate(
             is_complete_for_user=lesson_complete_annotation,
             published_scenario_count=Count(
-                "scenarios", filter=Q(scenarios__is_published=True), distinct=True
+                "scenarios",
+                filter=Q(
+                    scenarios__is_published=True,
+                    scenarios__difficulty_instances__is_published=True,
+                ),
+                distinct=True,
             )
         )
     )
@@ -48,7 +53,12 @@ def published_units(*, user=None):
                 "lessons", filter=Q(lessons__is_published=True), distinct=True
             ),
             published_scenario_count=Count(
-                "scenarios", filter=Q(scenarios__is_published=True), distinct=True
+                "scenarios",
+                filter=Q(
+                    scenarios__is_published=True,
+                    scenarios__difficulty_instances__is_published=True,
+                ),
+                distinct=True,
             ),
             practice_completion_count=practice_completion_annotation,
         )

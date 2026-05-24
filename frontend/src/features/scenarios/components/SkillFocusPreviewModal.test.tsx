@@ -52,7 +52,7 @@ const scenario: ScenarioSkillFocus = {
   short_explanation: 'Read the repository before acting.',
   skill_focus_type: 'concept_specific',
   primary_focus_commands: ['git status', 'git log --oneline'],
-  supporting_inspection_commands: ['git diff', 'git diff --staged'],
+  supporting_diagnostic_commands: ['git diff', 'git diff --staged'],
   safe_demo_commands: ['git status', 'git log --oneline', 'git diff', 'git diff --staged'],
   demo_repository_state: snapshot,
   demo_explanation_steps: demoSteps,
@@ -60,7 +60,7 @@ const scenario: ScenarioSkillFocus = {
     schema_version: 2,
     title: 'Command preview',
     intro: 'Read before acting.',
-    purpose: 'Learn what these inspection commands report before starting.',
+    purpose: 'Learn what these diagnostic commands report before starting.',
     focus_label: 'diagnostic commands',
     command_title: 'Inspect repository state before acting',
     commands: [
@@ -77,7 +77,7 @@ const scenario: ScenarioSkillFocus = {
             title: 'Introduction',
             heading: 'What git status is for',
             blocks: [
-              { type: 'paragraph', body: 'git status is the first read-only inspection command.' },
+              { type: 'paragraph', body: 'git status is the first read-only diagnostic command.' },
               { type: 'terminal_output', title: 'Typical output', body: 'On branch main' },
             ],
           },
@@ -118,7 +118,7 @@ const scenario: ScenarioSkillFocus = {
     before_state: snapshot,
     after_state: snapshot,
     short_explanation: 'Read before acting.',
-    common_mistakes: ['Skipping inspection before acting.'],
+    common_mistakes: ['Skipping diagnostics before acting.'],
     diagnostic: true,
     counted: false,
   },
@@ -177,7 +177,7 @@ describe('SkillFocusPreviewModal', () => {
     expect((await screen.findAllByText('Command preview')).length).toBeGreaterThan(0)
     expect((await screen.findAllByText('Inspect repository state before acting')).length).toBeGreaterThan(0)
     expect(screen.getByText('What git status is for')).toBeInTheDocument()
-    expect(screen.getByText('git status is the first read-only inspection command.')).toBeInTheDocument()
+    expect(screen.getByText('git status is the first read-only diagnostic command.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /start scenario/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /previous/i })).toBeDisabled()
     expect(screen.getByRole('button', { name: /next/i })).not.toBeDisabled()

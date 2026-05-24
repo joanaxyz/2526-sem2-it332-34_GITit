@@ -207,20 +207,6 @@ describe('PracticeWorkspace', () => {
     vi.clearAllMocks()
   })
 
-  it('renders only the command-preview panels for inspection sessions', () => {
-    renderWorkspace({ ...baseSession, completion_type: 'inspection' })
-
-    expect(screen.getByText('Inspect the repository')).toBeInTheDocument()
-    expect(screen.getByText('Variant A')).toBeInTheDocument()
-    expect(screen.getByText('Terminal panel')).toBeInTheDocument()
-    expect(screen.getByText('Live DAG panel')).toBeInTheDocument()
-    expect(screen.queryByText('Scenario status header')).not.toBeInTheDocument()
-    expect(screen.queryByText('Scenario context panel')).not.toBeInTheDocument()
-    expect(screen.queryByText('Expected state panel')).not.toBeInTheDocument()
-    expect(screen.queryByText('Contextual feedback panel')).not.toBeInTheDocument()
-    expect(screen.queryByText('Project structure panel')).not.toBeInTheDocument()
-  })
-
   it('keeps the full workspace for state-based sessions', () => {
     renderWorkspace(baseSession)
 

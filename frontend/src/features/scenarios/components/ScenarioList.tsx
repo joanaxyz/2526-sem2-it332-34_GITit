@@ -145,11 +145,6 @@ export function ScenarioList(props: ScenarioListProps) {
   }
 
   function handleDifficultyAction(scenario: ScenarioSkillFocus, difficulty: DifficultyAccess, action: DifficultyActionIntent) {
-    if (isDiagnosticOnly(scenario)) {
-      setPreviewRequest({ scenario, mode: 'manual' })
-      markPreviewSeen(scenario.slug)
-      return
-    }
     if (shouldOpenPreviewGate(scenario, difficulty, action)) {
       setPreviewRequest({ scenario, difficulty, action, mode: 'gate' })
       markPreviewSeen(scenario.slug)
@@ -197,7 +192,7 @@ export function ScenarioList(props: ScenarioListProps) {
         <ScenarioSkillFocusCard
           key={scenario.id}
           scenario={scenario}
-          scenarioNumber={index + 1}
+          scenarioNumber={playableScenarioNumber(data, index)}
           onDifficultyAction={handleDifficultyAction}
           onPreview={openManualPreview}
         />
@@ -250,14 +245,12 @@ function shouldOpenPreviewGate(scenario: ScenarioSkillFocus, difficulty: Difficu
   )
 }
 
-function isDiagnosticOnly(scenario: ScenarioSkillFocus) {
-  return scenario.difficulties.length > 0 && scenario.difficulties.every(
-    (difficulty) => difficulty.completion_type === 'inspection',
-  )
-}
-
 function previewSeenKey(slug: string) {
   return `git-it-command-preview-seen:${slug}`
+}
+
+function playableScenarioNumber(scenarios: ScenarioSkillFocus[], index: number) {
+  return scenarios.slice(0, index + 1).filter((scenario) => scenario.difficulties.length > 0).length
 }
 
 function hasSeenPreview(slug: string) {

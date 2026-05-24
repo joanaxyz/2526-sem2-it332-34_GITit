@@ -7,6 +7,7 @@ from common.constants import (
     COMMAND_COUNTED,
     COMMAND_DIAGNOSTIC,
     COMMAND_UNPROCESSABLE,
+    COMPLETION_TYPES,
     DIFFICULTY_EASY,
     DIFFICULTY_MEDIUM,
     RESULT_INVALID,
@@ -165,6 +166,8 @@ class ScenarioSessionService:
             raise Locked("Retry sessions must use the same scenario difficulty.")
         if prior_session and prior_session.status == SESSION_STATUS_STARTED:
             raise Locked("Exit the current scenario before retrying.")
+        if difficulty_instance.completion_type not in COMPLETION_TYPES:
+            raise Locked("This scenario type is no longer playable. Use the lesson preview instead.")
 
         if mode == SESSION_MODE_PRIMARY and not DifficultyAccessService().is_unlocked(
             user=user, difficulty_instance=difficulty_instance
@@ -298,7 +301,6 @@ class CommandProcessingService:
                         previous_state=previous_state,
                         next_state=command_result.state,
                         executed_commands=executed_commands,
-                        inspection_answer=session.inspection_answer,
                     )
                 )
             result_category = evaluation.result_category
@@ -429,32 +431,3 @@ class CommandProcessingService:
                     user=session.user, completed_at=session.completed_at
                 )
 
-
-class InspectionAnswerSubmissionService:
-    @transaction.atomic
-    def submit_answer(self, *, session: ScenarioSession, answer: dict) -> dict:
-        if session.status != SESSION_STATUS_STARTED:
-            raise Locked("This session has already ended.")
-
-        session.inspection_answer = answer
-        with timing("scenario.inspection_answer.history", session_id=session.id):
-            executed_commands = CommandHistoryCache().history_for(session=session)
-        with timing("scenario.inspection_answer.evaluation", session_id=session.id):
-            evaluation = ScenarioCompletionEvaluator().evaluate(
-                CompletionEvaluationContext(
-                    session=session,
-                    previous_state=session.repository_state,
-                    next_state=session.repository_state,
-                    executed_commands=executed_commands,
-                    inspection_answer=answer,
-                )
-            )
-        if evaluation.result_category == RESULT_TARGET_MATCHED:
-            CommandProcessingService()._complete_session(session)
-        else:
-            session.first_attempt_star_eligible = False
-        session.save()
-        return {
-            "session": session,
-            "evaluation": evaluation,
-        }

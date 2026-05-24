@@ -50,13 +50,19 @@ Use these as `non_counted_patterns` for all Module 1 command-count policies unle
   "git log",
   "git log --oneline",
   "git log --oneline --graph --all",
+  "git log -n <number>",
+  "git log --max-count=<number>",
   "git diff",
+  "git diff <path>",
   "git diff --staged",
   "git diff --cached",
+  "git diff --staged <path>",
+  "git diff --cached <path>",
   "git diff HEAD",
   "git diff --name-only",
   "git diff --staged --name-only",
   "git show",
+  "git show <commit>",
   "git show --name-only",
   "git remote",
   "git remote -v",
@@ -70,7 +76,7 @@ Use these as `non_counted_patterns` for all Module 1 command-count policies unle
 
 The full parser/preview support matrix lives in `docs/module-1_command_support_matrix.md`.
 
-Diagnostic commands should support the task but should not become normal state-completion scenarios, except Lesson 1.8, which is explicitly an inspection activity.
+Diagnostic commands should support state-based practice, but diagnostic-only learning belongs in lesson overview and command-preview content.
 
 ---
 
@@ -99,7 +105,7 @@ Show:
 
 ```text
 commit message, target files, excluded files, branch names, remote URLs, destination folders,
-ignored patterns, hunk labels/tokens, files to preserve/discard, inspection questions
+ignored patterns, hunk labels/tokens, files to preserve/discard, diagnostic questions
 ```
 
 Do not show:
@@ -118,7 +124,7 @@ title: Initialize a local repository
 focus: git init
 skill_focus_type: command_specific
 primary_focus_commands: ["git init"]
-supporting_inspection_commands: ["git status"]
+supporting_diagnostic_commands: ["git status"]
 completion_type: state_based
 related_git_concepts: ["repository metadata", ".git directory", "HEAD", "working tree", "untracked files"]
 ```
@@ -255,7 +261,7 @@ title: Clone a remote repository
 focus: git clone
 skill_focus_type: command_specific
 primary_focus_commands: ["git clone"]
-supporting_inspection_commands: ["git remote -v", "git log --oneline", "git status"]
+supporting_diagnostic_commands: ["git remote -v", "git log --oneline", "git status"]
 completion_type: state_based
 related_git_concepts: ["origin", "remote-tracking branch", "upstream", "branch checkout", "shallow clone"]
 ```
@@ -332,7 +338,7 @@ title: Stage and commit the intended change
 focus: git commit
 skill_focus_type: workflow_specific
 primary_focus_commands: ["git add", "git commit"]
-supporting_inspection_commands: ["git status", "git diff", "git diff --staged"]
+supporting_diagnostic_commands: ["git status", "git diff", "git diff --staged"]
 completion_type: state_based
 related_git_concepts: ["working tree", "staging area", "commit", "branch tip"]
 ```
@@ -488,7 +494,7 @@ title: Configure ignore rules
 focus: .gitignore
 skill_focus_type: concept_specific
 primary_focus_commands: ["git add", "git commit"]
-supporting_inspection_commands: ["git status", "git diff", "git diff --staged"]
+supporting_diagnostic_commands: ["git status", "git diff", "git diff --staged"]
 completion_type: expanded_state_based
 related_git_concepts: ["ignored files", "untracked files", "tracked files", "index"]
 ```
@@ -615,7 +621,7 @@ title: Stage selected hunks
 focus: git add -p
 skill_focus_type: command_specific
 primary_focus_commands: ["git add -p", "git commit"]
-supporting_inspection_commands: ["git status", "git diff", "git diff --staged"]
+supporting_diagnostic_commands: ["git status", "git diff", "git diff --staged"]
 completion_type: expanded_state_based
 related_git_concepts: ["hunks", "partial staging", "index", "working tree leftovers"]
 ```
@@ -735,7 +741,7 @@ title: Amend the latest commit
 focus: git commit --amend
 skill_focus_type: command_specific
 primary_focus_commands: ["git commit --amend"]
-supporting_inspection_commands: ["git status", "git log --oneline", "git diff", "git diff --staged"]
+supporting_diagnostic_commands: ["git status", "git log --oneline", "git diff", "git diff --staged"]
 completion_type: expanded_state_based
 related_git_concepts: ["latest commit", "amend", "branch tip replacement", "commit message"]
 ```
@@ -852,7 +858,7 @@ title: Unstage and discard safely
 focus: git restore
 skill_focus_type: command_specific
 primary_focus_commands: ["git restore"]
-supporting_inspection_commands: ["git status", "git diff", "git diff --staged"]
+supporting_diagnostic_commands: ["git status", "git diff", "git diff --staged"]
 completion_type: state_based
 related_git_concepts: ["index", "working tree", "unstage", "discard"]
 ```
@@ -961,53 +967,41 @@ parameter_pools:
 ```yaml
 scenario_slug: read-repository-status-and-history
 title: Read repository status and history
-focus: repository inspection
+focus: diagnostic commands
 skill_focus_type: concept_specific
-primary_focus_commands: []
-supporting_inspection_commands: ["git status", "git log --oneline", "git diff", "git diff --staged", "git show"]
-completion_type: inspection
+primary_focus_commands: ["git status"]
+supporting_diagnostic_commands: ["git status", "git log --oneline", "git diff", "git diff --staged", "git show"]
+playable_difficulties: []
 related_git_concepts: ["status interpretation", "history interpretation", "diff interpretation"]
 ```
 
-## Difficulty progression
+## Preview content
 
-| Difficulty | Definition | Why harder |
-|---|---|---|
-| Easy | One inspection goal, command named by context. | Student learns what to look for. |
-| Medium | Mixed state; student chooses the correct diagnostic command. | Requires selecting status/diff/log based on question. |
-| Hard | Multi-part observation across status, diff, and history. | Requires interpretation without changing state. |
+Lesson 1.8 is lesson overview plus Skill Focus Preview content. It should not seed Easy/Medium/Hard playable sessions because there is no state-changing target.
 
-## Command policies
-
-| Difficulty | min_counted | max_counted |
-|---|---:|---:|
-| Easy | 0 | 0 |
-| Medium | 0 | 0 |
-| Hard | 0 | 0 |
-
-## Authored cases
+The command preview should cover:
 
 ```yaml
-parameter_pools:
+preview_examples:
   easy_cases:
     - case_id: inspect-easy-status-staged
       project: status-lab
       required_commands: ["git status"]
-      inspection_question: Which file is staged for the next commit?
+      diagnostic_question: Which file is staged for the next commit?
       must_identify: [staged_paths]
       expected_answer: {staged_paths: [src/app.py]}
       answer_anchor: staged path src/app.py
     - case_id: inspect-easy-log-latest
       project: history-lab
       required_commands: ["git log --oneline"]
-      inspection_question: What is the latest commit message?
+      diagnostic_question: What is the latest commit message?
       must_identify: [commit_message]
       expected_answer: {commit_message: Add profile card}
       answer_anchor: latest commit message Add profile card
     - case_id: inspect-easy-diff-working
       project: diff-lab
       required_commands: ["git diff"]
-      inspection_question: Which file has unstaged changes?
+      diagnostic_question: Which file has unstaged changes?
       must_identify: [unstaged_paths]
       expected_answer: {unstaged_paths: [README.md]}
       answer_anchor: unstaged path README.md
@@ -1015,21 +1009,21 @@ parameter_pools:
     - case_id: inspect-medium-status-mixed
       project: mixed-status-lab
       required_commands: ["git status"]
-      inspection_question: Identify the staged, unstaged, and untracked paths.
+      diagnostic_question: Identify the staged, unstaged, and untracked paths.
       must_identify: [staged_paths, unstaged_paths, untracked_paths]
       expected_answer: {staged_paths: [src/app.py], unstaged_paths: [README.md], untracked_paths: [notes/todo.md]}
       answer_anchor: three distinct file areas
     - case_id: inspect-medium-staged-diff
       project: staged-diff-lab
       required_commands: ["git diff --staged"]
-      inspection_question: Which path is staged for the next snapshot?
+      diagnostic_question: Which path is staged for the next snapshot?
       must_identify: [staged_diff_paths]
       expected_answer: {staged_diff_paths: [styles/site.css]}
       answer_anchor: staged diff path styles/site.css
     - case_id: inspect-medium-branch-history
       project: branch-history-lab
       required_commands: ["git log --oneline"]
-      inspection_question: Which commit is currently at HEAD?
+      diagnostic_question: Which commit is currently at HEAD?
       must_identify: [latest_commit, commit_message]
       expected_answer: {latest_commit: c3, commit_message: Refine search results view}
       answer_anchor: latest commit c3 with specific message
@@ -1037,27 +1031,27 @@ parameter_pools:
     - case_id: inspect-hard-full-state
       project: full-state-lab
       required_commands: ["git status", "git diff --staged", "git log --oneline"]
-      inspection_question: Identify the current branch, staged file, unstaged file, and latest commit message.
+      diagnostic_question: Identify the current branch, staged file, unstaged file, and latest commit message.
       must_identify: [head_branch, staged_paths, unstaged_paths, commit_message]
       expected_answer: {head_branch: main, staged_paths: [src/export.py], unstaged_paths: [docs/export.md], commit_message: Add export starter}
       answer_anchor: branch + staged + unstaged + latest message
     - case_id: inspect-hard-conflict-state
       project: conflict-read-lab
       required_commands: ["git status", "git diff"]
-      inspection_question: Which path is conflicted and which branch is active?
+      diagnostic_question: Which path is conflicted and which branch is active?
       must_identify: [head_branch, conflicted_paths]
       expected_answer: {head_branch: main, conflicted_paths: [src/app.py]}
       answer_anchor: active branch main and conflict path src/app.py
     - case_id: inspect-hard-history-and-diff
       project: history-diff-lab
       required_commands: ["git log --oneline", "git diff HEAD"]
-      inspection_question: Identify the latest commit and all paths changed since HEAD.
+      diagnostic_question: Identify the latest commit and all paths changed since HEAD.
       must_identify: [latest_commit, commit_message, diff_target]
       expected_answer: {latest_commit: c4, commit_message: Add dashboard shell, diff_target: {unstaged: [src/dashboard.js], staged: [styles/dashboard.css], conflicted: []}}
       answer_anchor: latest commit c4 plus staged/unstaged diff split
 ```
 
-Lesson 1.8 should not use CAR as a normal command-count state task. It should use inspection completion with answer capture.
+Students apply these diagnostic commands inside the normal state-based scenarios, where diagnostic commands are logged as non-counted and excluded from CAR.
 
 ---
 
@@ -1069,7 +1063,7 @@ title: Complete a focused local workflow
 focus: local repository workflow
 skill_focus_type: workflow_specific
 primary_focus_commands: ["git add", "git commit"]
-supporting_inspection_commands: ["git status", "git diff", "git diff --staged", "git log --oneline"]
+supporting_diagnostic_commands: ["git status", "git diff", "git diff --staged", "git log --oneline"]
 completion_type: expanded_state_based
 related_git_concepts: ["focused snapshot", "ignore rules", "partial staging", "amend", "clean final state"]
 ```

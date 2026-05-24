@@ -105,7 +105,7 @@ This is the correct, expected output for an empty initialized repository.
 
 * Clone a remote repository using HTTPS and SSH URL formats  
 * Clone into a custom-named local directory  
-* Verify a successful clone using remote configuration and commit history inspection  
+* Verify a successful clone using remote configuration and commit history diagnostics  
 * Explain the difference between `origin` and the local branch
 
 ### **Content Summary**
@@ -468,7 +468,7 @@ Other undo forms are intentionally saved for later modules and are not listed in
 * Read `git log` output and extract commit metadata (hash, author, date, message)  
 * Use `git log` flags to filter, format, and graph commit history  
 * Read diffs across the working directory, staging area, and commit history  
-* Know which `git diff` variant to use for a given inspection need
+* Know which `git diff` variant to use for a given diagnostic need
 
 ### **Content Summary**
 
@@ -521,7 +521,7 @@ Date:   Mon May 20 14:32:11 2025 \+0800
 | `git diff HEAD` | Working tree vs last commit | What's changed since last commit (total)? |
 | `git diff --name-only` | Working tree vs staging area | Which unstaged paths changed? |
 
-🔍 **All commands in this lesson are diagnostic — non-counted.** The scenario sessions in this lesson focus on selecting the correct diagnostic command for a given inspection need, reading the output accurately, and extracting the correct information. No state-changing commands are required.
+🔍 **All commands in this lesson are diagnostic — non-counted.** This lesson is taught through overview and preview content. Students apply these commands inside normal state-based scenarios, where diagnostic commands are logged but do not reduce the counted-command budget.
 
 ### **Commands Introduced**
 

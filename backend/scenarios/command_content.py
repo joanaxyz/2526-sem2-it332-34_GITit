@@ -329,7 +329,7 @@ def _git_log_sections() -> list[dict[str, Any]]:
             sample_output="commit c2\nAuthor: Demo User\n\n    Add profile validation\n\ncommit c1\nAuthor: Demo User\n\n    Add baseline feature",
             how_to_read=[
                 "The top commit is the newest commit reachable from the current HEAD.",
-                "The commit id, such as c2, is the name you can pass to supported inspection commands like git show.",
+                "The commit id, such as c2, is the name you can pass to supported diagnostic commands like git show.",
                 "The indented message is the human explanation of that snapshot.",
             ],
             effects=["No repository state changes. It only reads commit history."],
@@ -398,7 +398,7 @@ def _git_log_sections() -> list[dict[str, Any]]:
                 ),
                 _callout(
                     "Simulator scope",
-                    "These are the history forms accepted for Module 1 inspection scenarios.",
+                    "These are the history forms accepted for Module 1 diagnostic previews.",
                 ),
             ],
         ),
@@ -634,7 +634,7 @@ GIT_COMMAND_CONTENT_LIBRARY: list[dict[str, Any]] = [
             {
                 "token": "--name-only",
                 "title": "Path names only",
-                "body": "Prints only changed paths for quick beginner-friendly inspection.",
+                "body": "Prints only changed paths for quick beginner-friendly diagnostics.",
             },
         ],
         arguments=[

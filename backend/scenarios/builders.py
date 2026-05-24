@@ -11,8 +11,7 @@ from typing import Any
 
 from django.utils.text import slugify
 
-from common.constants import COMPLETION_INSPECTION
-from evaluation.services import InspectionEvaluator, StateBasedEvaluator
+from evaluation.services import StateBasedEvaluator
 from scenarios.models import (
     DifficultyInstance,
     ScenarioGenerationBlueprint,
@@ -233,13 +232,6 @@ class RuntimeScenarioBuilder:
             initial_state=initial_state,
             solution_commands=solution_commands,
             target_state=target_state,
-            completion_type=difficulty_instance.completion_type,
-        )
-        expected_observations = self._expected_observations(
-            difficulty_instance=difficulty_instance,
-            initial_state=initial_state,
-            target_rule=target_rule,
-            template=self.renderer.render(blueprint.expected_observations_template or {}, context),
         )
         student_context = self._student_context(
             blueprint=blueprint,
@@ -267,7 +259,6 @@ class RuntimeScenarioBuilder:
             target_rule=target_rule,
             target_state=target_state,
             expected_state_diagram=self.snapshotter.snapshot(target_state),
-            expected_observations=expected_observations,
             solution_commands=solution_commands,
             is_generated=True,
             parameter_context=context,
@@ -306,11 +297,7 @@ class RuntimeScenarioBuilder:
         initial_state: dict,
         solution_commands: list[str],
         target_state: dict,
-        completion_type: str,
     ) -> dict:
-        if completion_type == COMPLETION_INSPECTION:
-            return target_rule
-
         augmented = dict(target_rule or {})
         required = list(augmented.get("required_commands", []))
         for command in scenario.primary_focus_commands or [scenario.focus]:
@@ -349,35 +336,6 @@ class RuntimeScenarioBuilder:
 
         return augmented
 
-    def _expected_observations(
-        self,
-        *,
-        difficulty_instance: DifficultyInstance,
-        initial_state: dict,
-        target_rule: dict,
-        template: dict | None = None,
-    ) -> dict:
-        template = template if isinstance(template, dict) else {}
-        if difficulty_instance.completion_type != COMPLETION_INSPECTION:
-            return template
-        observations = InspectionEvaluator().observations_for(initial_state)
-        must_identify = target_rule.get("must_identify", [])
-        explicit_expected = {}
-        for rule in target_rule.get("rules", []):
-            if rule.get("type") == "inspection_answer_matches" and isinstance(
-                rule.get("expected"), dict
-            ):
-                explicit_expected.update(rule["expected"])
-        checks = {key: observations[key] for key in must_identify if key in observations}
-        expected_answer = explicit_expected or checks
-        return {
-            **template,
-            "required_commands": target_rule.get("required_commands", []),
-            "repository_state_unchanged": target_rule.get("repository_state_unchanged", True),
-            "checks": checks,
-            "expected_answer": expected_answer,
-        }
-
     def _student_context(
         self,
         *,
@@ -402,19 +360,14 @@ class RuntimeScenarioBuilder:
             auto.get("current_state", []),
             base.get("current_state", []),
         )
-        context["provided_values"] = self._merge_values(
-            base.get("provided_values", []),
-            auto.get("provided_values", []),
+        context["required_details"] = self._merge_values(
+            base.get("required_details", []),
+            auto.get("required_details", []),
         )
-        context["warnings"] = self._merge_strings(
-            base.get("warnings", []),
-            auto.get("warnings", []),
+        context["constraints"] = self._merge_strings(
+            base.get("constraints", []),
+            auto.get("constraints", []),
         )
-        # Do not persist active-attempt scaffolds that reveal evaluator rules.
-        # The frontend also ignores these legacy fields, but stripping them here
-        # keeps newly generated variants clean.
-        for hidden_section in ("requirements", "success_checklist", "inspection_suggestions"):
-            context.pop(hidden_section, None)
         return StudentContextFactory().normalize(context)
 
     def _merge_values(self, primary: Any, fallback: Any) -> list[dict[str, str]]:
@@ -493,16 +446,16 @@ class StudentContextFactory:
         initial_state: dict,
         target_rule: dict,
     ) -> dict:
-        provided_values = self.provided_values(
+        required_details = self.required_details(
             target_rule=target_rule, parameter_context=parameter_context
         )
-        warnings = self.warnings(target_rule)
+        constraints = self.constraints(target_rule)
         return self.normalize(
             {
                 "story": self.story(parameter_context),
                 "current_state": self.current_state(initial_state),
-                "provided_values": provided_values,
-                "warnings": warnings,
+                "required_details": required_details,
+                "constraints": constraints,
             }
         )
 
@@ -545,7 +498,7 @@ class StudentContextFactory:
             items.append(f"Conflicts are present in: {self.format_value(conflicts)}.")
         return items
 
-    def provided_values(
+    def required_details(
         self,
         *,
         target_rule: dict,
@@ -584,73 +537,12 @@ class StudentContextFactory:
                 self._add(values, "Conflict resolution goal", rule.get("token"))
         return values
 
-    def requirements(self, target_rule: dict) -> list[str]:
-        items = []
+    def constraints(self, target_rule: dict) -> list[str]:
         latest = target_rule.get("latest_commit") or {}
-        branch = target_rule.get("head_branch") or latest.get("branch")
-        if branch:
-            items.append(f"End on the {branch} branch.")
-        if target_rule.get("repository_initialized"):
-            items.append("The folder must be a Git repository.")
-        if latest:
-            paths = latest.get("contains_paths") or []
-            message = latest.get("message_contains") or []
-            if paths:
-                items.append(f"The final snapshot must include {self.format_value(paths)}.")
-            if message:
-                items.append(
-                    f"The final snapshot message must include {self.format_value(message)}."
-                )
-        if target_rule.get("remote_url_matches"):
-            items.append("The requested remote URL must be configured.")
-        if target_rule.get("upstream_tracking"):
-            items.append("The local branch must track the requested upstream branch.")
-        if target_rule.get("staging_empty"):
-            items.append("The staging area must be empty afterward.")
-        if target_rule.get("working_tree_clean"):
-            items.append("The working tree must be clean afterward.")
-        for path in self._as_list(target_rule.get("working_tree_contains")):
-            items.append(f"Leave {path} in the working tree.")
-        for path in self._as_list(target_rule.get("working_tree_absent")):
-            items.append(f"Remove or discard the working-tree change for {path}.")
-        if not items:
-            items.append("Reach the requested repository state.")
-        return items
-
-    def warnings(self, target_rule: dict) -> list[str]:
-        latest = target_rule.get("latest_commit") or {}
-        warnings = []
+        constraints = []
         for path in self._as_list(latest.get("excludes_paths")):
-            warnings.append(f"Do not include {path} in the final snapshot.")
-        return warnings
-
-    def success_checklist(self, target_rule: dict) -> list[str]:
-        items = []
-        latest = target_rule.get("latest_commit") or {}
-        branch = target_rule.get("head_branch") or latest.get("branch")
-        if branch:
-            items.append(f"You are on {branch}.")
-        if latest:
-            items.append("The required final snapshot exists.")
-            for path in self._as_list(latest.get("contains_paths")):
-                items.append(f"The final snapshot contains {path}.")
-            for path in self._as_list(latest.get("excludes_paths")):
-                items.append(f"{path} is not included in the final snapshot.")
-            for message in self._as_list(latest.get("message_contains")):
-                items.append(f"The final snapshot message includes {message}.")
-        for remote, url in (target_rule.get("remote_url_matches") or {}).items():
-            items.append(f"{remote} points to {url}.")
-        for branch_name, upstream in (target_rule.get("upstream_tracking") or {}).items():
-            items.append(f"{branch_name} tracks {upstream}.")
-        if target_rule.get("staging_empty"):
-            items.append("The staging area is empty.")
-        if target_rule.get("working_tree_clean"):
-            items.append("The working tree is clean.")
-        for path in self._as_list(target_rule.get("working_tree_contains")):
-            items.append(f"{path} is still present in the working tree.")
-        for path in self._as_list(target_rule.get("working_tree_absent")):
-            items.append(f"{path} is absent from the working tree.")
-        return items
+            constraints.append(f"Do not include {path} in the final snapshot.")
+        return constraints
 
     def normalize(self, context: dict) -> dict:
         normalized = {
@@ -658,18 +550,19 @@ class StudentContextFactory:
             "current_state": [
                 self.format_value(item) for item in self._as_list(context.get("current_state"))
             ],
-            "provided_values": [
+            "required_details": [
                 {
                     "label": self.format_value(item.get("label")),
                     "value": self.format_value(item.get("value")),
                 }
-                for item in self._as_list(context.get("provided_values"))
+                for item in self._as_list(context.get("required_details"))
                 if isinstance(item, dict)
                 and item.get("label")
                 and item.get("value") not in (None, "")
             ],
-            "warnings": [
-                self.format_value(item) for item in self._as_list(context.get("warnings"))
+            "constraints": [
+                self.format_value(item)
+                for item in self._as_list(context.get("constraints"))
             ],
         }
         return {key: value for key, value in normalized.items() if value not in ("", [], None)}
@@ -720,7 +613,7 @@ class GeneratedVariantValidator:
             raise ScenarioVariantBuildError("Generated variant scenario does not match.")
         if not variant.initial_state:
             raise ScenarioVariantBuildError("Generated variant has no initial state.")
-        if difficulty_instance.completion_type != COMPLETION_INSPECTION and not variant.target_rule:
+        if not variant.target_rule:
             raise ScenarioVariantBuildError("State-based generated variant has no target rule.")
         if not variant.target_state:
             raise ScenarioVariantBuildError("Generated variant has no target state.")
@@ -743,8 +636,6 @@ class GeneratedVariantValidator:
         difficulty_instance: DifficultyInstance,
         scenario: ScenarioSkillFocus,
     ) -> None:
-        if difficulty_instance.completion_type == COMPLETION_INSPECTION:
-            return
         required = set(variant.target_rule.get("required_commands", []))
         primary = set(scenario.primary_focus_commands or [scenario.focus])
         if not primary <= required:
@@ -764,22 +655,12 @@ class GeneratedVariantValidator:
                 raise ScenarioVariantBuildError(f"Solution command is not processable: {command}")
             state = result.state
 
-        if difficulty_instance.completion_type == COMPLETION_INSPECTION:
-            outcome = InspectionEvaluator().evaluate(
-                initial_state=variant.initial_state,
-                current_state=state,
-                expected_observations=variant.expected_observations,
-                executed_commands=variant.solution_commands,
-                submitted_answer=variant.expected_observations.get("expected_answer")
-                or variant.expected_observations.get("checks"),
-            )
-        else:
-            outcome = StateBasedEvaluator().evaluate(
-                state,
-                variant.target_rule,
-                initial_state=variant.initial_state,
-                executed_commands=variant.solution_commands,
-            )
+        outcome = StateBasedEvaluator().evaluate(
+            state,
+            variant.target_rule,
+            initial_state=variant.initial_state,
+            executed_commands=variant.solution_commands,
+        )
         if not outcome.target_matched:
             raise ScenarioVariantBuildError(
                 f"Generated solution does not satisfy target rule: {outcome.summary}"

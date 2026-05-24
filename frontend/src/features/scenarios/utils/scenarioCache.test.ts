@@ -13,7 +13,7 @@ const scenario: ScenarioSkillFocus = {
   short_explanation: 'Learn how branch pointers and HEAD relate.',
   skill_focus_type: 'concept_specific',
   primary_focus_commands: ['git branch', 'git switch'],
-  supporting_inspection_commands: ['git status'],
+  supporting_diagnostic_commands: ['git status'],
   safe_demo_commands: ['git branch'],
   demo_repository_state: {
     commits: [],
