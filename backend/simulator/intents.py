@@ -65,14 +65,28 @@ class CommandIntentMapper:
     def _map_status(self, parsed: ParsedGitCommand) -> CommandIntent:
         short = (
             parsed.has_option("-s")
+            or parsed.has_option("-sb")
             or parsed.has_option("--short")
             or parsed.has_option("--porcelain")
         )
+        branch = parsed.has_option("-sb")
+        ignored = parsed.has_option("--ignored")
         return CommandIntent(
             command="status",
-            operations=(CommandOperation("InspectStatus", {"short": short}),),
-            diagnostic_metadata=("inspected_short_status" if short else "inspected_status",),
-            output_mode="short" if short else "default",
+            operations=(
+                CommandOperation(
+                    "InspectStatus",
+                    {"short": short, "branch": branch, "ignored": ignored},
+                ),
+            ),
+            diagnostic_metadata=(
+                "inspected_ignored_status"
+                if ignored
+                else "inspected_short_status"
+                if short
+                else "inspected_status",
+            ),
+            output_mode="short_branch" if branch else "short" if short else "default",
         )
 
     def _map_add(self, parsed: ParsedGitCommand) -> CommandIntent:
@@ -121,24 +135,52 @@ class CommandIntentMapper:
 
     def _map_diff(self, parsed: ParsedGitCommand) -> CommandIntent:
         staged = parsed.has_option("--staged") or parsed.has_option("--cached")
+        head = bool(parsed.args and parsed.args[0] == "HEAD")
+        name_only = parsed.has_option("--name-only")
+        paths = tuple(arg for arg in parsed.pathspecs if arg != "HEAD")
         return CommandIntent(
             command="diff",
             operations=(
-                CommandOperation("InspectDiff", {"staged": staged, "paths": parsed.pathspecs}),
+                CommandOperation(
+                    "InspectDiff",
+                    {
+                        "staged": staged,
+                        "head": head,
+                        "name_only": name_only,
+                        "paths": paths,
+                    },
+                ),
             ),
-            diagnostic_metadata=("inspected_staged_diff" if staged else "inspected_diff",),
-            output_mode="staged" if staged else "default",
+            diagnostic_metadata=(
+                "inspected_head_diff"
+                if head
+                else "inspected_staged_diff"
+                if staged
+                else "inspected_diff",
+            ),
+            output_mode=(
+                "name_only"
+                if name_only
+                else "head"
+                if head
+                else "staged"
+                if staged
+                else "default"
+            ),
         )
 
     def _map_log(self, parsed: ParsedGitCommand) -> CommandIntent:
         oneline = parsed.has_option("--oneline")
         graph = parsed.has_option("--graph")
         all_refs = parsed.has_option("--all")
+        count_values = parsed.options.get("-n", ()) + parsed.options.get("--max-count", ())
+        limit = int(str(count_values[-1])) if count_values else None
         return CommandIntent(
             command="log",
             operations=(
                 CommandOperation(
-                    "InspectLog", {"oneline": oneline, "graph": graph, "all": all_refs}
+                    "InspectLog",
+                    {"oneline": oneline, "graph": graph, "all": all_refs, "limit": limit},
                 ),
             ),
             diagnostic_metadata=("inspected_log",),
@@ -154,7 +196,11 @@ class CommandIntentMapper:
             command="show",
             operations=(
                 CommandOperation(
-                    "InspectObject", {"target": parsed.args[0] if parsed.args else "HEAD"}
+                    "InspectObject",
+                    {
+                        "target": parsed.args[0] if parsed.args else "HEAD",
+                        "name_only": parsed.has_option("--name-only"),
+                    },
                 ),
             ),
             diagnostic_metadata=("inspected_show",),
@@ -271,7 +317,11 @@ class CommandIntentMapper:
             operations=(
                 CommandOperation(
                     "RemovePaths",
-                    {"paths": parsed.pathspecs, "cached": parsed.has_option("--cached")},
+                    {
+                        "paths": parsed.pathspecs,
+                        "cached": parsed.has_option("--cached"),
+                        "recursive": parsed.has_option("-r"),
+                    },
                 ),
             ),
         )
@@ -291,31 +341,11 @@ class CommandIntentMapper:
                 if parsed.has_option("-v") or parsed.has_option("--verbose")
                 else "default",
             )
-        action = parsed.args[0]
-        if action == "add":
-            return CommandIntent(
-                command="remote",
-                operations=(
-                    CommandOperation("AddRemote", {"name": parsed.args[1], "url": parsed.args[2]}),
-                ),
-            )
-        if action in {"remove", "rm"}:
-            return CommandIntent(
-                command="remote",
-                operations=(CommandOperation("RemoveRemote", {"name": parsed.args[1]}),),
-            )
-        if action == "rename":
-            return CommandIntent(
-                command="remote",
-                operations=(
-                    CommandOperation(
-                        "RenameRemote", {"old": parsed.args[1], "new": parsed.args[2]}
-                    ),
-                ),
-            )
         return CommandIntent(
             command="remote",
-            operations=(CommandOperation("UnsupportedRemoteAction", {"action": action}),),
+            operations=(
+                CommandOperation("UnsupportedRemoteAction", {"action": parsed.args[0]}),
+            ),
         )
 
     def _map_reflog(self, parsed: ParsedGitCommand) -> CommandIntent:
@@ -323,4 +353,18 @@ class CommandIntentMapper:
             command="reflog",
             operations=(CommandOperation("InspectReflog", {}),),
             diagnostic_metadata=("inspected_reflog",),
+        )
+
+    def _map_check_ignore(self, parsed: ParsedGitCommand) -> CommandIntent:
+        return CommandIntent(
+            command="check-ignore",
+            operations=(CommandOperation("InspectIgnoredPath", {"path": parsed.pathspecs[0]}),),
+            diagnostic_metadata=("inspected_check_ignore",),
+        )
+
+    def _map_ls_files(self, parsed: ParsedGitCommand) -> CommandIntent:
+        return CommandIntent(
+            command="ls-files",
+            operations=(CommandOperation("InspectTrackedFiles", {}),),
+            diagnostic_metadata=("inspected_ls_files",),
         )

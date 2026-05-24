@@ -9,7 +9,12 @@ class StatusCommandHandler(BaseCommandHandler):
 
     def apply(self, runtime, state: dict, intent: CommandIntent) -> CommandOutcome:
         operation = intent.first("InspectStatus")
+        params = operation.params if operation else {}
         return CommandOutcome(
             command="status",
-            details={"short": bool((operation.params if operation else {}).get("short"))},
+            details={
+                "short": bool(params.get("short")),
+                "branch": bool(params.get("branch")),
+                "ignored": bool(params.get("ignored")),
+            },
         )

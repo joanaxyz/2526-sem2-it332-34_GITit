@@ -42,6 +42,11 @@ Use these as `non_counted_patterns` for all Module 1 command-count policies unle
 ```json
 [
   "git status",
+  "git status -s",
+  "git status --short",
+  "git status --porcelain",
+  "git status -sb",
+  "git status --ignored",
   "git log",
   "git log --oneline",
   "git log --oneline --graph --all",
@@ -49,12 +54,21 @@ Use these as `non_counted_patterns` for all Module 1 command-count policies unle
   "git diff --staged",
   "git diff --cached",
   "git diff HEAD",
+  "git diff --name-only",
+  "git diff --staged --name-only",
   "git show",
+  "git show --name-only",
+  "git remote",
   "git remote -v",
   "git branch",
-  "git branch -v"
+  "git branch -v",
+  "git reflog",
+  "git check-ignore -v <path>",
+  "git ls-files"
 ]
 ```
+
+The full parser/preview support matrix lives in `docs/module-1_command_support_matrix.md`.
 
 Diagnostic commands should support the task but should not become normal state-completion scenarios, except Lesson 1.8, which is explicitly an inspection activity.
 

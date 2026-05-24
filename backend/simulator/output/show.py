@@ -17,6 +17,9 @@ def format_show(runtime, state: dict, outcome) -> str:
         f"    {commit.get('message', '')}",
     ]
     changes = commit.get("changes") or {}
+    if outcome.details.get("name_only"):
+        paths = sorted(changes)
+        return "\n".join([*lines, "", *paths]).rstrip()
     if changes:
         lines.append("")
         lines.extend(

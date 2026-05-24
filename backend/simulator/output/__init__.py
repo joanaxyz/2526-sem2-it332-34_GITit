@@ -2,12 +2,14 @@ from __future__ import annotations
 
 from simulator.output.add import format_add
 from simulator.output.branch import format_branch
+from simulator.output.check_ignore import format_check_ignore
 from simulator.output.checkout import format_checkout
 from simulator.output.commit import format_commit
 from simulator.output.diff import format_diff
 from simulator.output.errors import OUTPUT_REFERENCE
 from simulator.output.init import format_init
 from simulator.output.log import format_log
+from simulator.output.ls_files import format_ls_files
 from simulator.output.reflog import format_reflog
 from simulator.output.remote import format_remote
 from simulator.output.reset import format_reset
@@ -25,7 +27,13 @@ class GitLikeOutputFormatter:
             return outcome.stdout or "", outcome.stderr or ""
         formatter = {
             "init": format_init,
-            "status": lambda rt, st, oc: format_status(rt, st, short=bool(oc.details.get("short"))),
+            "status": lambda rt, st, oc: format_status(
+                rt,
+                st,
+                short=bool(oc.details.get("short")),
+                branch=bool(oc.details.get("branch")),
+                ignored=bool(oc.details.get("ignored")),
+            ),
             "add": format_add,
             "commit": format_commit,
             "diff": format_diff,
@@ -39,6 +47,8 @@ class GitLikeOutputFormatter:
             "remote": format_remote,
             "rm": format_rm,
             "reflog": format_reflog,
+            "check-ignore": format_check_ignore,
+            "ls-files": format_ls_files,
         }.get(outcome.command)
         if formatter is None:
             return "", ""

@@ -28,6 +28,7 @@ def _example_command(command: str) -> str:
         "<old>": "origin",
         "<new>": "upstream",
         "<commit>": "c1",
+        "<number>": "2",
     }
     example = command
     for placeholder, value in replacements.items():
@@ -210,6 +211,32 @@ def test_command_content_documents_only_simulator_supported_forms():
                     spec = registry.get(parsed.subcommand)
                     assert spec is not None, command
                     assert spec.validate(parsed) is None, command
+
+
+@override_settings(DEBUG=True)
+def test_module_one_preview_commands_are_supported_by_simulator(db):
+    call_command("seed_module1_scenarios", "--reset", "--confirm")
+    parser = GitCommandParser()
+    registry = GitCommandRegistry()
+
+    for scenario in ScenarioSkillFocus.objects.filter(
+        learning_unit__slug="local-repository-foundations",
+        is_published=True,
+    ):
+        preview = scenario.command_preview_config or {}
+        commands = [
+            *preview.get("supported_demo_commands", []),
+            *[
+                ref.get("command")
+                for ref in preview.get("command_refs", [])
+                if isinstance(ref, dict) and ref.get("command")
+            ],
+        ]
+        for command in commands:
+            parsed = parser.parse(_example_command(command))
+            spec = registry.get(parsed.subcommand)
+            assert spec is not None, command
+            assert spec.validate(parsed) is None, command
 
 
 @override_settings(DEBUG=True)

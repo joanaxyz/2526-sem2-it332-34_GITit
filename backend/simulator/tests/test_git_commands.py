@@ -76,6 +76,143 @@ def test_parser_supports_long_option_values_and_combined_commit_flags():
     assert commit.normalized_text == "git commit -a -m 'Update tracked files'"
 
 
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git status",
+        "git status -s",
+        "git status --short",
+        "git status --porcelain",
+        "git status -sb",
+        "git status --ignored",
+        "git diff",
+        "git diff README.md",
+        "git diff --staged",
+        "git diff --cached",
+        "git diff --staged README.md",
+        "git diff --cached README.md",
+        "git diff HEAD",
+        "git diff --name-only",
+        "git diff --staged --name-only",
+        "git log",
+        "git log --oneline",
+        "git log --oneline --graph --all",
+        "git log -n 2",
+        "git log --max-count=2",
+        "git show",
+        "git show c1",
+        "git show --name-only",
+        "git branch",
+        "git branch -v",
+        "git remote",
+        "git remote -v",
+        "git reflog",
+        "git check-ignore -v .env",
+        "git ls-files",
+    ],
+)
+def test_parser_and_registry_support_module_one_diagnostic_forms(command):
+    parsed = GitCommandParser().parse(command)
+    registry = GitCommandRegistry()
+    spec = registry.get(parsed.subcommand)
+
+    assert spec is not None
+    assert spec.validate(parsed) is None
+    assert spec.is_diagnostic(parsed) is True
+    assert spec.is_counted(parsed) is False
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git init",
+        "git init docs-site",
+        "git init -b trunk",
+        "git init --initial-branch trunk",
+        "git init --initial-branch=trunk",
+        "git init -q",
+        "git init --quiet",
+        "git init -q -b main research-log",
+        "git init --quiet --initial-branch=main research-log",
+        "git clone https://example.test/repo.git",
+        "git clone https://example.test/repo.git repo-copy",
+        "git add README.md",
+        "git add README.md docs/intro.md",
+        "git add docs/",
+        "git add .",
+        "git add -A",
+        "git add --all",
+        "git add -u",
+        "git add --update",
+        "git add -p",
+        "git add -p README.md",
+        "git add --patch README.md",
+        'git commit -m "Add docs"',
+        'git commit --message "Add docs"',
+        'git commit -am "Update tracked files"',
+        'git commit -a -m "Update tracked files"',
+        "git commit --amend",
+        'git commit --amend -m "Update message"',
+        "git commit --amend --no-edit",
+        "git rm --cached .env",
+        "git rm -r --cached dist",
+        "git restore README.md",
+        "git restore README.md docs/intro.md",
+        "git restore .",
+        "git restore --staged README.md",
+        "git restore --staged README.md docs/intro.md",
+        "git restore --staged .",
+    ],
+)
+def test_parser_and_registry_support_module_one_action_forms(command):
+    parsed = GitCommandParser().parse(command)
+    registry = GitCommandRegistry()
+    spec = registry.get(parsed.subcommand)
+
+    assert spec is not None
+    assert spec.validate(parsed) is None
+    assert spec.is_diagnostic(parsed) is False
+    assert spec.is_counted(parsed) is True
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git fetch",
+        "git pull",
+        "git push",
+        "git merge feature",
+        "git rebase main",
+        "git stash",
+        "git tag v1",
+        "git cherry-pick c1",
+        "git revert c1",
+        "git branch feature",
+        "git branch -d stale",
+        "git remote add origin https://example.test/repo.git",
+        "git checkout main",
+        "git switch main",
+        "git reset HEAD README.md",
+        'git commit --allow-empty -m "Empty"',
+        "git add --intent-to-add README.md",
+    ],
+)
+def test_registry_rejects_unsupported_non_module_one_forms(command):
+    result = GitCommandEngine().process(
+        {
+            "commits": [{"id": "c0", "message": "Base", "parents": [], "tree": {}}],
+            "branches": {"main": "c0"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {"README.md": "v2"},
+            "staging": {},
+        },
+        command,
+    )
+
+    assert result.processed is False
+    assert result.exit_code == 129
+
+
 def test_registry_rejects_unsupported_flags_and_classifies_diagnostics():
     parser = GitCommandParser()
     registry = GitCommandRegistry()

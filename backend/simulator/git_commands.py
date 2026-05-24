@@ -145,6 +145,8 @@ class GitCommandParser:
             return self._parse_commit_tail(tokens)
         if subcommand == "init":
             return self._parse_init_tail(tokens)
+        if subcommand == "log":
+            return self._parse_log_tail(tokens)
         return self._parse_generic_tail(tokens)
 
     def _append_option(
@@ -285,6 +287,56 @@ class GitCommandParser:
             normalized,
         )
 
+    def _parse_log_tail(
+        self,
+        tokens: list[str],
+    ) -> tuple[dict[str, tuple[str | bool, ...]], list[str], list[str], str | None, list[str]]:
+        options: dict[str, list[str | bool]] = {}
+        args: list[str] = []
+        pathspecs: list[str] = []
+        normalized: list[str] = []
+        index = 0
+        while index < len(tokens):
+            token = tokens[index]
+            if token == "-n":
+                if index + 1 >= len(tokens):
+                    raise GitCommandParseError("error: option `-n` requires a value.")
+                value = tokens[index + 1]
+                self._append_option(options, "-n", value)
+                normalized.extend(["-n", value])
+                index += 2
+                continue
+            if token.startswith("--max-count="):
+                value = token.split("=", 1)[1]
+                self._append_option(options, "--max-count", value)
+                normalized.extend(["--max-count", value])
+                index += 1
+                continue
+            if token == "--max-count":
+                if index + 1 >= len(tokens):
+                    raise GitCommandParseError("error: option `--max-count` requires a value.")
+                value = tokens[index + 1]
+                self._append_option(options, "--max-count", value)
+                normalized.extend(["--max-count", value])
+                index += 2
+                continue
+            if token.startswith("-"):
+                self._append_option(options, token)
+                normalized.append(token)
+                index += 1
+                continue
+            args.append(token)
+            pathspecs.append(token)
+            normalized.append(token)
+            index += 1
+        return (
+            {key: tuple(value) for key, value in options.items()},
+            args,
+            pathspecs,
+            None,
+            normalized,
+        )
+
     def _parse_generic_tail(
         self,
         tokens: list[str],
@@ -377,7 +429,7 @@ class GitCommandRegistry:
             ),
             "status": GitCommandSpec(
                 "status",
-                frozenset({"-s", "--short", "--porcelain"}),
+                frozenset({"-s", "-sb", "--short", "--porcelain", "--ignored"}),
                 diagnostic=True,
                 counted=False,
                 executor="teaching_state",
@@ -385,7 +437,7 @@ class GitCommandRegistry:
             ),
             "add": GitCommandSpec(
                 "add",
-                frozenset({"-p", "--patch", "-A", "--all", "-u", "--update", "--intent-to-add"}),
+                frozenset({"-p", "--patch", "-A", "--all", "-u", "--update"}),
                 diagnostic=False,
                 counted=True,
                 executor="teaching_state",
@@ -393,7 +445,7 @@ class GitCommandRegistry:
             ),
             "commit": GitCommandSpec(
                 "commit",
-                frozenset({"-m", "-a", "--all", "--amend", "--allow-empty", "--no-edit"}),
+                frozenset({"-m", "-a", "--all", "--amend", "--no-edit"}),
                 diagnostic=False,
                 counted=True,
                 executor="teaching_state",
@@ -401,27 +453,27 @@ class GitCommandRegistry:
             ),
             "diff": GitCommandSpec(
                 "diff",
-                frozenset({"--staged", "--cached"}),
+                frozenset({"--staged", "--cached", "--name-only"}),
                 diagnostic=True,
                 counted=False,
                 executor="teaching_state",
-                parser_validation=_validate_no_path_limit,
+                parser_validation=_validate_diff,
             ),
             "log": GitCommandSpec(
                 "log",
-                frozenset({"--oneline", "--graph", "--all"}),
+                frozenset({"--oneline", "--graph", "--all", "-n", "--max-count"}),
                 diagnostic=True,
                 counted=False,
                 executor="teaching_state",
-                parser_validation=_validate_no_path_limit,
+                parser_validation=_validate_log,
             ),
             "branch": GitCommandSpec(
                 "branch",
-                frozenset({"-v", "-vv", "-a", "--all", "--list", "-d", "-D"}),
+                frozenset({"-v"}),
                 diagnostic=_branch_is_diagnostic,
                 counted=lambda parsed: not _branch_is_diagnostic(parsed),
                 executor="teaching_state",
-                parser_validation=_validate_no_path_limit,
+                parser_validation=_validate_branch_list,
             ),
             "remote": GitCommandSpec(
                 "remote",
@@ -433,7 +485,7 @@ class GitCommandRegistry:
             ),
             "rm": GitCommandSpec(
                 "rm",
-                frozenset({"--cached"}),
+                frozenset({"--cached", "-r"}),
                 diagnostic=False,
                 counted=True,
                 executor="teaching_state",
@@ -449,7 +501,7 @@ class GitCommandRegistry:
             ),
             "show": GitCommandSpec(
                 "show",
-                frozenset(),
+                frozenset({"--name-only"}),
                 diagnostic=True,
                 counted=False,
                 executor="teaching_state",
@@ -463,29 +515,21 @@ class GitCommandRegistry:
                 executor="teaching_state",
                 parser_validation=_validate_no_path_limit,
             ),
-            "checkout": GitCommandSpec(
-                "checkout",
-                frozenset({"-b"}),
-                diagnostic=False,
-                counted=True,
+            "check-ignore": GitCommandSpec(
+                "check-ignore",
+                frozenset({"-v"}),
+                diagnostic=True,
+                counted=False,
                 executor="teaching_state",
-                parser_validation=_validate_checkout,
+                parser_validation=_validate_check_ignore,
             ),
-            "switch": GitCommandSpec(
-                "switch",
-                frozenset({"-c"}),
-                diagnostic=False,
-                counted=True,
+            "ls-files": GitCommandSpec(
+                "ls-files",
+                frozenset(),
+                diagnostic=True,
+                counted=False,
                 executor="teaching_state",
-                parser_validation=_validate_switch,
-            ),
-            "reset": GitCommandSpec(
-                "reset",
-                frozenset({"--soft", "--mixed", "--hard"}),
-                diagnostic=False,
-                counted=True,
-                executor="teaching_state",
-                parser_validation=_validate_reset,
+                parser_validation=_validate_no_path_limit,
             ),
         }
 
@@ -524,6 +568,12 @@ def _validate_at_most_one_arg(parsed: ParsedGitCommand) -> str | None:
     return None
 
 
+def _positive_int_option(value: str | bool, option: str) -> str | None:
+    if value is True or not str(value).isdigit() or int(str(value)) < 1:
+        return f"fatal: invalid {option} value: {value}"
+    return None
+
+
 def _validate_init(parsed: ParsedGitCommand) -> str | None:
     if len(parsed.args) > 1:
         return "usage: git init [-q | --quiet] [--initial-branch=<branch-name>] [<directory>]"
@@ -558,10 +608,40 @@ def _validate_add(parsed: ParsedGitCommand) -> str | None:
 def _validate_commit(parsed: ParsedGitCommand) -> str | None:
     if len(parsed.options.get("-m", ())) > 1:
         return "error: only one -m option is supported in this lesson."
+    if parsed.has_option("--allow-empty"):
+        return _unknown_option_message(parsed.subcommand, "--allow-empty")
     if parsed.has_option("--no-edit") and not parsed.has_option("--amend"):
         return "fatal: options '--no-edit' and '--amend' must be used together"
     if parsed.pathspecs:
         return "fatal: paths with git commit are not supported in this simulator"
+    return None
+
+
+def _validate_diff(parsed: ParsedGitCommand) -> str | None:
+    non_path_args = [arg for arg in parsed.args if arg != "HEAD"]
+    if "HEAD" in parsed.args and parsed.args[0] != "HEAD":
+        return "fatal: ambiguous argument 'HEAD'"
+    if parsed.args.count("HEAD") > 1:
+        return "fatal: ambiguous argument 'HEAD'"
+    if len(non_path_args) > 1:
+        return "fatal: only one pathspec is supported for this diff form"
+    return None
+
+
+def _validate_log(parsed: ParsedGitCommand) -> str | None:
+    if parsed.args:
+        return f"fatal: ambiguous argument '{parsed.args[0]}'"
+    limits = [*parsed.options.get("-n", ()), *parsed.options.get("--max-count", ())]
+    if len(limits) > 1:
+        return "fatal: only one log count option is supported"
+    if limits:
+        return _positive_int_option(limits[0], "count")
+    return None
+
+
+def _validate_branch_list(parsed: ParsedGitCommand) -> str | None:
+    if parsed.args:
+        return "fatal: only branch listing is supported in Module 1"
     return None
 
 
@@ -572,24 +652,14 @@ def _validate_remote(parsed: ParsedGitCommand) -> str | None:
         return None
     if not parsed.args:
         return None
-    if parsed.args[0] == "add":
-        if len(parsed.args) != 3:
-            return "usage: git remote add <name> <url>"
-        return None
-    if parsed.args[0] in {"remove", "rm"}:
-        if len(parsed.args) != 2:
-            return "usage: git remote remove <name>"
-        return None
-    if parsed.args[0] == "rename":
-        if len(parsed.args) != 3:
-            return "usage: git remote rename <old> <new>"
-        return None
-    return "Only git remote, git remote -v, add, remove, and rename are supported."
+    return "Only git remote and git remote -v are supported in Module 1."
 
 
 def _validate_rm(parsed: ParsedGitCommand) -> str | None:
     if not parsed.pathspecs:
         return "fatal: No pathspec was given."
+    if parsed.has_option("-r") and not parsed.has_option("--cached"):
+        return "fatal: git rm -r is only supported with --cached in Module 1"
     return None
 
 
@@ -599,42 +669,16 @@ def _validate_restore(parsed: ParsedGitCommand) -> str | None:
     return None
 
 
-def _validate_checkout(parsed: ParsedGitCommand) -> str | None:
-    if parsed.has_option("-b"):
-        if len(parsed.args) < 1:
-            return "error: switch `b' requires a value."
-        if len(parsed.args) > 2:
-            return "usage: git checkout -b <branch> [<start-point>]"
-        return None
-    if len(parsed.args) != 1:
-        return "usage: git checkout <branch>"
-    return None
-
-
-def _validate_switch(parsed: ParsedGitCommand) -> str | None:
-    if parsed.has_option("-c"):
-        if len(parsed.args) < 1:
-            return "error: switch `c' requires a value."
-        if len(parsed.args) > 2:
-            return "usage: git switch -c <branch> [<start-point>]"
-        return None
-    if len(parsed.args) != 1:
-        return "fatal: missing branch or commit argument."
-    return None
-
-
-def _validate_reset(parsed: ParsedGitCommand) -> str | None:
-    modes = [option for option in ("--soft", "--mixed", "--hard") if parsed.has_option(option)]
-    if len(modes) > 1:
-        return "fatal: options '--soft', '--mixed', and '--hard' cannot be used together"
-    if not parsed.args:
-        return "fatal: ambiguous argument 'HEAD'"
+def _validate_check_ignore(parsed: ParsedGitCommand) -> str | None:
+    if not parsed.has_option("-v"):
+        return "usage: git check-ignore -v <path>"
+    if len(parsed.pathspecs) != 1:
+        return "usage: git check-ignore -v <path>"
     return None
 
 
 def _branch_is_diagnostic(parsed: ParsedGitCommand) -> bool:
-    listing_options = {"-v", "-vv", "-a", "--all", "--list"}
-    return not parsed.args and set(parsed.options).issubset(listing_options)
+    return not parsed.args and set(parsed.options).issubset({"-v"})
 
 
 def _remote_is_diagnostic(parsed: ParsedGitCommand) -> bool:

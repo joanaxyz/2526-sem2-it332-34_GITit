@@ -34,6 +34,11 @@ from scenarios.models import (
 
 DIAG_PATTERNS = [
     "git status",
+    "git status -s",
+    "git status --short",
+    "git status --porcelain",
+    "git status -sb",
+    "git status --ignored",
     "git log",
     "git log --oneline",
     "git log --oneline --graph --all",
@@ -41,11 +46,17 @@ DIAG_PATTERNS = [
     "git diff --staged",
     "git diff --cached",
     "git diff HEAD",
+    "git diff --name-only",
+    "git diff --staged --name-only",
     "git show",
+    "git show --name-only",
+    "git remote",
     "git remote -v",
     "git branch",
     "git branch -v",
     "git reflog",
+    "git check-ignore -v",
+    "git ls-files",
 ]
 
 SESSION_COUNTS = {
@@ -202,6 +213,9 @@ def student_context_template(kind: str) -> dict[str, Any]:
             "provided_values": [
                 {"label": "Project", "value": "{{project}}"},
                 {"label": "Target directory", "value": "{{target_directory}}"},
+                {"label": "Initial branch", "value": "{{expected_initial_branch}}"},
+                {"label": "Quiet mode", "value": "{{expected_quiet}}"},
+                {"label": "Existing repository", "value": "{{expected_reinitialized}}"},
                 {"label": "Expected untracked paths", "value": "{{expected_untracked_paths}}"},
             ],
             "requirements": [],
@@ -630,12 +644,45 @@ def diagnostic_bp(
 
 
 def init_scenario() -> dict[str, Any]:
-    """Module 1.1: intentionally avoids fake variety.
-
-    Easy is a single current-directory warm-up because the honest answer is always
-    `git init`. Medium and hard use the simulator-supported `git init <dir>` form so
-    each generated variant has a different target directory and final-state check.
-    """
+    """Module 1.1: variants map to simulator-supported git init metadata."""
+    reinit_state = repo_with_head(
+        commits=[commit("c1", "Keep existing notes", {"README.md": "readme-v1"})],
+        head="c1",
+        working_tree={"notes/today.md": "untracked"},
+    )
+    init_rule = {
+        "repository_initialized": True,
+        "head_branch": "{{expected_initial_branch}}",
+        "staging_empty": True,
+        "rules": [
+            {"type": "commit_count_equals", "count": "{{expected_commit_count}}"},
+            {
+                "type": "operation_metadata_equals",
+                "key": "last_init_directory",
+                "value": "{{expected_init_directory}}",
+            },
+            {
+                "type": "operation_metadata_equals",
+                "key": "last_init_current_directory",
+                "value": "{{expected_current_directory}}",
+            },
+            {
+                "type": "operation_metadata_equals",
+                "key": "last_init_initial_branch",
+                "value": "{{expected_initial_branch}}",
+            },
+            {
+                "type": "operation_metadata_equals",
+                "key": "last_init_quiet",
+                "value": "{{expected_quiet}}",
+            },
+            {
+                "type": "operation_metadata_equals",
+                "key": "last_init_reinitialized",
+                "value": "{{expected_reinitialized}}",
+            },
+        ],
+    }
     return {
         "lesson": (
             2,
@@ -661,40 +708,66 @@ def init_scenario() -> dict[str, Any]:
         "difficulties": {
             DIFFICULTY_EASY: diff(
                 (1, 1),
-                "Initialize the current empty folder.",
-                "Make the current folder a Git repository, but do not create a commit.",
+                "Initialize the current folder with the requested first-branch behavior.",
+                "Make the current folder a Git repository, but do not stage files or create a commit.",
                 [
                     bp(
-                        slug="init-current-empty",
+                        slug="init-current-folder",
                         kind="init",
-                        signature="module1.init.current-empty",
-                        subtemplate="current-directory-empty",
+                        signature="module1.init.current-folder",
+                        subtemplate="current-directory",
                         cases=[
                             {
                                 "case_id": "init-easy-current-empty",
                                 "project": "empty-lab",
                                 "target_directory": "current folder",
                                 "expected_untracked_paths": [],
+                                "initial_state": uninitialized_state(),
+                                "solution_commands": ["git init"],
+                                "expected_init_directory": None,
+                                "expected_current_directory": True,
+                                "expected_initial_branch": "main",
+                                "expected_quiet": False,
+                                "expected_reinitialized": False,
+                                "expected_commit_count": 0,
+                                "duplicate_solution_waiver": True,
                                 "answer_anchor": "initialized the current folder only; zero commits",
                             },
+                            {
+                                "case_id": "init-easy-trunk-branch",
+                                "project": "trunk-lab",
+                                "target_directory": "current folder",
+                                "expected_untracked_paths": [],
+                                "initial_state": uninitialized_state(),
+                                "solution_commands": ["git init --initial-branch=trunk"],
+                                "expected_init_directory": None,
+                                "expected_current_directory": True,
+                                "expected_initial_branch": "trunk",
+                                "expected_quiet": False,
+                                "expected_reinitialized": False,
+                                "expected_commit_count": 0,
+                                "answer_anchor": "initialized current folder with trunk as the first branch",
+                            },
+                            {
+                                "case_id": "init-easy-safe-reinit",
+                                "project": "existing-notes",
+                                "target_directory": "current folder",
+                                "expected_untracked_paths": ["notes/today.md"],
+                                "initial_state": reinit_state,
+                                "solution_commands": ["git init"],
+                                "expected_init_directory": None,
+                                "expected_current_directory": True,
+                                "expected_initial_branch": "main",
+                                "expected_quiet": False,
+                                "expected_reinitialized": True,
+                                "expected_commit_count": 1,
+                                "duplicate_solution_waiver": True,
+                                "answer_anchor": "reinitialized safely; existing commit and untracked notes remain",
+                            },
                         ],
-                        initial_state=uninitialized_state(),
-                        target_rule={
-                            "repository_initialized": True,
-                            "head_branch": "main",
-                            "staging_empty": True,
-                            "rules": [
-                                {"type": "commit_count_equals", "count": 0},
-                                {"type": "working_tree_matches_exact_paths", "paths": []},
-                                {"type": "operation_metadata_absent", "key": "last_init_directory"},
-                                {
-                                    "type": "operation_metadata_equals",
-                                    "key": "last_init_current_directory",
-                                    "value": True,
-                                },
-                            ],
-                        },
-                        solution=["git init -b main"],
+                        initial_state="{{initial_state}}",
+                        target_rule=init_rule,
+                        solution="{{solution_commands}}",
                         label="Initialize the current folder",
                         slug_template="init-{{case_id}}",
                     )
@@ -703,57 +776,66 @@ def init_scenario() -> dict[str, Any]:
             ),
             DIFFICULTY_MEDIUM: diff(
                 (1, 1),
-                "Initialize a named project folder from the current workspace.",
-                "Initialize the exact target directory named in the brief; do not initialize the parent/current folder.",
+                "Initialize a named project folder with branch and quiet options when requested.",
+                "Initialize the exact target directory and branch mode named in the brief.",
                 [
                     bp(
-                        slug="init-named-directory",
+                        slug="init-directory-options",
                         kind="init",
-                        signature="module1.init.named-directory",
-                        subtemplate="named-directory",
+                        signature="module1.init.directory-options",
+                        subtemplate="named-directory-options",
                         cases=[
                             {
                                 "case_id": "init-medium-docs-site",
                                 "project": "workspace",
                                 "target_directory": "docs-site",
                                 "expected_untracked_paths": [],
+                                "initial_state": uninitialized_state(),
+                                "solution_commands": ["git init docs-site"],
+                                "expected_init_directory": "docs-site",
+                                "expected_current_directory": False,
+                                "expected_initial_branch": "main",
+                                "expected_quiet": False,
+                                "expected_reinitialized": False,
+                                "expected_commit_count": 0,
                                 "answer_anchor": "initialized docs-site only; zero commits",
                             },
                             {
-                                "case_id": "init-medium-api-playground",
+                                "case_id": "init-medium-trunk-api-playground",
                                 "project": "workspace",
                                 "target_directory": "api-playground",
                                 "expected_untracked_paths": [],
-                                "answer_anchor": "initialized api-playground only; zero commits",
+                                "initial_state": uninitialized_state(),
+                                "solution_commands": ["git init -b trunk api-playground"],
+                                "expected_init_directory": "api-playground",
+                                "expected_current_directory": False,
+                                "expected_initial_branch": "trunk",
+                                "expected_quiet": False,
+                                "expected_reinitialized": False,
+                                "expected_commit_count": 0,
+                                "answer_anchor": "initialized api-playground with trunk as the first branch",
                             },
                             {
-                                "case_id": "init-medium-design-kit",
+                                "case_id": "init-medium-quiet-research-log",
                                 "project": "workspace",
-                                "target_directory": "design-kit",
+                                "target_directory": "research-log",
                                 "expected_untracked_paths": [],
-                                "answer_anchor": "initialized design-kit only; zero commits",
+                                "initial_state": uninitialized_state(),
+                                "solution_commands": [
+                                    "git init --quiet --initial-branch=main research-log"
+                                ],
+                                "expected_init_directory": "research-log",
+                                "expected_current_directory": False,
+                                "expected_initial_branch": "main",
+                                "expected_quiet": True,
+                                "expected_reinitialized": False,
+                                "expected_commit_count": 0,
+                                "answer_anchor": "initialized research-log quietly with main as the first branch",
                             },
                         ],
-                        initial_state=uninitialized_state(),
-                        target_rule={
-                            "repository_initialized": True,
-                            "head_branch": "main",
-                            "staging_empty": True,
-                            "rules": [
-                                {"type": "commit_count_equals", "count": 0},
-                                {
-                                    "type": "operation_metadata_equals",
-                                    "key": "last_init_directory",
-                                    "value": "{{target_directory}}",
-                                },
-                                {
-                                    "type": "operation_metadata_equals",
-                                    "key": "last_init_current_directory",
-                                    "value": False,
-                                },
-                            ],
-                        },
-                        solution=["git init --initial-branch=main {{target_directory}}"],
+                        initial_state="{{initial_state}}",
+                        target_rule=init_rule,
+                        solution="{{solution_commands}}",
                         label="Initialize {{target_directory}}",
                         slug_template="init-{{case_id}}",
                     )
@@ -761,14 +843,14 @@ def init_scenario() -> dict[str, Any]:
             ),
             DIFFICULTY_HARD: diff(
                 (1, 1),
-                "Choose the correct child folder from a parent workspace with sibling traps.",
-                "Initialize only the requested child directory; the parent/current workspace must not be the initialized target.",
+                "Combine child-folder targeting with branch, quiet, and reinitialization details.",
+                "Initialize only the requested child directory or safely reinitialize the existing repository as directed.",
                 [
                     bp(
-                        slug="init-correct-child-directory",
+                        slug="init-combined-options",
                         kind="init",
-                        signature="module1.init.child-directory-trap",
-                        subtemplate="named-directory-from-parent",
+                        signature="module1.init.combined-options",
+                        subtemplate="combined-init-options",
                         cases=[
                             {
                                 "case_id": "init-hard-research-log",
@@ -782,6 +864,22 @@ def init_scenario() -> dict[str, Any]:
                                     "notes/ideas.md": "untracked",
                                     "archive/old.md": "untracked",
                                 },
+                                "initial_state": uninitialized_state(
+                                    working_tree={
+                                        "research-log/README.md": "untracked",
+                                        "notes/ideas.md": "untracked",
+                                        "archive/old.md": "untracked",
+                                    }
+                                ),
+                                "solution_commands": [
+                                    "git init -q -b main research-log",
+                                ],
+                                "expected_init_directory": "research-log",
+                                "expected_current_directory": False,
+                                "expected_initial_branch": "main",
+                                "expected_quiet": True,
+                                "expected_reinitialized": False,
+                                "expected_commit_count": 0,
                             },
                             {
                                 "case_id": "init-hard-ui-kit",
@@ -795,47 +893,45 @@ def init_scenario() -> dict[str, Any]:
                                     "brand-assets/logo.svg": "untracked",
                                     "experiments/mockup.html": "untracked",
                                 },
+                                "initial_state": uninitialized_state(
+                                    working_tree={
+                                        "ui-kit/tokens.css": "untracked",
+                                        "brand-assets/logo.svg": "untracked",
+                                        "experiments/mockup.html": "untracked",
+                                    }
+                                ),
+                                "solution_commands": [
+                                    "git init --quiet --initial-branch=trunk ui-kit",
+                                ],
+                                "expected_init_directory": "ui-kit",
+                                "expected_current_directory": False,
+                                "expected_initial_branch": "trunk",
+                                "expected_quiet": True,
+                                "expected_reinitialized": False,
+                                "expected_commit_count": 0,
                             },
                             {
-                                "case_id": "init-hard-deploy-checklist",
-                                "project": "ops-parent",
-                                "target_directory": "deploy-checklist",
-                                "expected_untracked_paths": ["deploy-checklist/steps.md"],
-                                "sibling_directories": ["docs", "scripts"],
-                                "answer_anchor": "initialized deploy-checklist only; parent/current workspace not initialized",
-                                "initial_working_tree": {
-                                    "deploy-checklist/steps.md": "untracked",
-                                    "docs/runbook.md": "untracked",
-                                    "scripts/deploy.sh": "untracked",
-                                },
+                                "case_id": "init-hard-safe-rerun",
+                                "project": "release-notes",
+                                "target_directory": "current folder",
+                                "expected_untracked_paths": ["notes/today.md"],
+                                "sibling_directories": [],
+                                "answer_anchor": "re-ran init safely without deleting existing repository state",
+                                "initial_working_tree": {"notes/today.md": "untracked"},
+                                "initial_state": reinit_state,
+                                "solution_commands": ["git init --quiet"],
+                                "expected_init_directory": None,
+                                "expected_current_directory": True,
+                                "expected_initial_branch": "main",
+                                "expected_quiet": True,
+                                "expected_reinitialized": True,
+                                "expected_commit_count": 1,
                             },
                         ],
-                        initial_state=uninitialized_state(working_tree="{{initial_working_tree}}"),
-                        target_rule={
-                            "repository_initialized": True,
-                            "head_branch": "main",
-                            "staging_empty": True,
-                            "rules": [
-                                {"type": "commit_count_equals", "count": 0},
-                                {
-                                    "type": "operation_metadata_equals",
-                                    "key": "last_init_directory",
-                                    "value": "{{target_directory}}",
-                                },
-                                {
-                                    "type": "operation_metadata_equals",
-                                    "key": "last_init_current_directory",
-                                    "value": False,
-                                },
-                                {
-                                    "type": "operation_metadata_not_equals",
-                                    "key": "last_init_directory",
-                                    "value": ".",
-                                },
-                            ],
-                        },
-                        solution=["git init --initial-branch=main {{target_directory}}"],
-                        label="Initialize {{target_directory}} only",
+                        initial_state="{{initial_state}}",
+                        target_rule=init_rule,
+                        solution="{{solution_commands}}",
+                        label="Initialize {{target_directory}} with required options",
                         slug_template="init-{{case_id}}",
                     )
                 ],
@@ -1367,7 +1463,14 @@ def commit_scenario(base_tree: dict[str, str]) -> dict[str, Any]:
         summary="Stage intended changes and create a focused commit.",
         explanation="A commit saves the staged snapshot and moves the current branch to the new commit.",
         primary=["git add", "git commit"],
-        supporting=["git status", "git diff", "git diff --staged"],
+        supporting=[
+            "git status",
+            "git status --ignored",
+            "git diff",
+            "git diff --staged",
+            "git check-ignore -v <path>",
+            "git ls-files",
+        ],
         concepts=["working tree", "staging area", "commit", "branch tip"],
         difficulties={
             DIFFICULTY_EASY: diff(
@@ -3132,12 +3235,24 @@ class Command(BaseCommand):
         seen_keys = set()
         unique = []
         for command in commands:
+            command = self._supported_preview_form(command)
             key = command_content_key_for_command(command)
             if not key or key in seen_keys:
                 continue
             seen_keys.add(key)
             unique.append(command)
         return unique
+
+    def _supported_preview_form(self, command: str) -> str:
+        normalized = " ".join(str(command).split()).lower()
+        replacements = {
+            "git add": "git add <path>",
+            "git commit": 'git commit -m "message"',
+            "git restore": "git restore <path>",
+            "git clone": "git clone <url>",
+            "git check-ignore -v <path>": "git check-ignore -v <path>",
+        }
+        return replacements.get(normalized, command)
 
     def _demo_commands(self, spec: dict[str, Any]) -> list[str]:
         normalized_focus = " ".join(str(spec.get("focus", "")).split()).lower()
@@ -3171,7 +3286,10 @@ class Command(BaseCommand):
             ],
             ".gitignore": [
                 "git status",
+                "git status --ignored",
                 "git add .gitignore",
+                "git check-ignore -v .env",
+                "git ls-files",
                 "git rm --cached .env",
                 'git commit -m "Demo ignore rules"',
             ],

@@ -115,8 +115,10 @@ def test_init_directory_records_operation_metadata():
 
     assert named["operation_metadata"]["last_init_directory"] == "research-log"
     assert named["operation_metadata"]["last_init_current_directory"] is False
-    assert "last_init_directory" not in current["operation_metadata"]
+    assert current["operation_metadata"]["last_init_directory"] is None
     assert current["operation_metadata"]["last_init_current_directory"] is True
+    assert current["operation_metadata"]["last_init_quiet"] is False
+    assert current["operation_metadata"]["last_init_reinitialized"] is False
 
 
 def test_init_initial_branch_variants_create_requested_branch():
@@ -135,6 +137,34 @@ def test_init_initial_branch_variants_create_requested_branch():
     assert short["branches"] == {"trunk": None}
     assert long["head"]["name"] == "main"
     assert long["operation_metadata"]["last_init_initial_branch"] == "main"
+
+
+def test_init_quiet_directory_branch_combo_and_safe_reinitialization():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "repository_initialized": False,
+            "commits": [],
+            "branches": {},
+            "head": {"type": "none"},
+            "working_tree": {"README.md": "untracked"},
+            "staging": {},
+        }
+    )
+
+    quiet = simulator.process(state, "git init --quiet --initial-branch=trunk docs-site")
+
+    assert quiet.output == ""
+    assert quiet.state["head"]["name"] == "trunk"
+    assert quiet.state["operation_metadata"]["last_init_directory"] == "docs-site"
+    assert quiet.state["operation_metadata"]["last_init_quiet"] is True
+    assert quiet.state["operation_metadata"]["last_init_reinitialized"] is False
+
+    reinitialized = simulator.process(quiet.state, "git init")
+
+    assert reinitialized.state["branches"] == {"trunk": None}
+    assert reinitialized.state["working_tree"] == {"README.md": "untracked"}
+    assert reinitialized.state["operation_metadata"]["last_init_reinitialized"] is True
 
 
 def test_clone_records_destination_and_materializes_remote_fixture_tree():
@@ -260,6 +290,101 @@ def test_commit_am_stages_tracked_changes_only():
     assert result.state["working_tree"] == {"new.txt": "untracked"}
 
 
+def test_diff_head_and_name_only_include_staged_and_unstaged_changes():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "commits": [
+                {
+                    "id": "c0",
+                    "message": "Base",
+                    "parents": [],
+                    "tree": {"README.md": "v1", "app.py": "v1"},
+                }
+            ],
+            "branches": {"main": "c0"},
+            "head": {"type": "branch", "name": "main"},
+            "staging": {"README.md": "v2"},
+            "working_tree": {"app.py": "v2", "notes.md": "untracked"},
+        }
+    )
+
+    diff_head = simulator.process(state, "git diff HEAD")
+    unstaged_names = simulator.process(state, "git diff --name-only")
+    staged_names = simulator.process(state, "git diff --staged --name-only")
+
+    assert "diff --git a/README.md b/README.md" in diff_head.output
+    assert "diff --git a/app.py b/app.py" in diff_head.output
+    assert "notes.md" not in diff_head.output
+    assert unstaged_names.output == "app.py"
+    assert staged_names.output == "README.md"
+
+
+def test_gitignore_diagnostics_status_check_ignore_and_ls_files():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "commits": [
+                {
+                    "id": "c0",
+                    "message": "Base",
+                    "parents": [],
+                    "tree": {".env": "SECRET=1", "app.py": "v1"},
+                }
+            ],
+            "branches": {"main": "c0"},
+            "head": {"type": "branch", "name": "main"},
+            "staging": {},
+            "working_tree": {
+                ".gitignore": ".env\nlogs/",
+                ".env": {"status": "ignored", "content": "SECRET=2"},
+                "logs/app.log": {"status": "ignored", "content": "log"},
+            },
+        }
+    )
+
+    status = simulator.process(state, "git status --ignored")
+    check_ignore = simulator.process(state, "git check-ignore -v .env")
+    ls_files_before = simulator.process(state, "git ls-files")
+    removed = simulator.process(state, "git rm --cached .env").state
+    ls_files_after = simulator.process(removed, "git ls-files")
+
+    assert "Ignored files:" in status.output
+    assert ".env" in status.output
+    assert check_ignore.output == ".gitignore:1:.env\t.env"
+    assert ls_files_before.output == ".env\napp.py"
+    assert ls_files_after.output == "app.py"
+
+
+def test_rm_recursive_cached_untracks_directory_without_deleting_local_files():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "commits": [
+                {
+                    "id": "c0",
+                    "message": "Track build",
+                    "parents": [],
+                    "tree": {"dist/app.js": "old", "dist/app.css": "old", "src/app.js": "v1"},
+                }
+            ],
+            "branches": {"main": "c0"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {},
+            "staging": {},
+        }
+    )
+
+    result = simulator.process(state, "git rm -r --cached dist")
+
+    assert sorted(result.state["staging"]) == ["dist/app.css", "dist/app.js"]
+    assert result.state["working_tree"]["dist/app.js"]["status"] == "ignored"
+    assert result.state["operation_metadata"]["last_rm_cached_paths"] == [
+        "dist/app.css",
+        "dist/app.js",
+    ]
+
+
 def test_add_patch_commits_target_hunks_and_leaves_leftover_hunks():
     simulator = RepositoryStateSimulator()
     state = simulator.normalize_state(
@@ -324,7 +449,7 @@ def test_commit_amend_replaces_branch_tip_without_child_commit():
     assert state["operation_metadata"]["last_amend_created_commit"] == "c2"
 
 
-def test_branch_switch_checkout_remote_reset_restore_variants():
+def test_restore_dot_and_multi_path_variants():
     simulator = RepositoryStateSimulator()
     state = simulator.normalize_state(
         {
@@ -339,24 +464,17 @@ def test_branch_switch_checkout_remote_reset_restore_variants():
             ],
             "branches": {"main": "c1"},
             "head": {"type": "branch", "name": "main"},
-            "working_tree": {"README.md": "v3"},
-            "staging": {"notes.md": "draft"},
+            "working_tree": {"README.md": "v3", "debug.log": "draft", ".env": {"status": "ignored"}},
+            "staging": {"notes.md": "draft", "docs/guide.md": "guide-v2"},
         }
     )
 
-    state = simulator.process(state, "git branch feature/readme").state
-    state = simulator.process(state, "git switch feature/readme").state
-    state = simulator.process(state, "git checkout -b scratch").state
-    state = simulator.process(state, "git restore --staged notes.md").state
-    state = simulator.process(state, "git reset --soft HEAD~1").state
-    state = simulator.process(state, "git remote add origin https://example.test/repo.git").state
-    state = simulator.process(state, "git remote rename origin upstream").state
-    state = simulator.process(state, "git remote remove upstream").state
+    unstaged = simulator.process(state, "git restore --staged notes.md docs/guide.md").state
+    restored = simulator.process(unstaged, "git restore .").state
 
-    assert state["head"]["name"] == "scratch"
-    assert state["branches"]["scratch"] == "c0"
-    assert "README.md" in state["staging"]
-    assert state["remotes"] == {}
+    assert unstaged["staging"] == {}
+    assert sorted(unstaged["working_tree"]) == [".env", "README.md", "debug.log", "docs/guide.md", "notes.md"]
+    assert restored["working_tree"] == {".env": {"status": "ignored"}}
 
 
 def test_diagnostic_commands_record_metadata_without_state_mutation():
@@ -414,7 +532,7 @@ def test_snapshot_visible_tree_includes_clean_committed_and_changed_files():
     assert snapshot["project_tree"]["notes.md"]["status"] == "untracked"
 
 
-def test_remote_fetch_pull_and_push_update_remote_state():
+def test_unsupported_advanced_commands_are_rejected_without_mutation():
     simulator = RepositoryStateSimulator()
     state = simulator.normalize_state(
         {
@@ -430,16 +548,27 @@ def test_remote_fetch_pull_and_push_update_remote_state():
         }
     )
 
-    fetched = simulator.process(state, "git fetch origin").state
-    pulled = simulator.process(fetched, "git pull").state
-    pushed = simulator.process(pulled, "git push").state
+    for command in [
+        "git fetch origin",
+        "git pull",
+        "git push",
+        "git merge feature",
+        "git stash",
+        "git revert c0",
+        "git cherry-pick c0",
+        "git branch feature",
+        "git remote add origin https://example.test/repo.git",
+        "git checkout main",
+        "git switch main",
+        "git reset HEAD README.md",
+    ]:
+        result = simulator.process(state, command)
+        assert result.processed is False, command
+        assert result.state == state, command
+        assert result.exit_code == 129, command
 
-    assert fetched["remote_tracking_updated"] is True
-    assert pulled["branches"]["main"] == "c1"
-    assert pushed["remote_branches"]["origin/main"] == pushed["branches"]["main"]
 
-
-def test_restore_stash_revert_amend_and_reflog_are_simulated():
+def test_amend_and_reflog_remain_module_one_supported():
     simulator = RepositoryStateSimulator()
     state = simulator.normalize_state(
         {
@@ -458,20 +587,8 @@ def test_restore_stash_revert_amend_and_reflog_are_simulated():
     state = simulator.process(state, "git restore scratch.md").state
     assert "scratch.md" not in state["working_tree"]
 
-    state = simulator.process(state, "git stash").state
-    assert state["working_tree"] == {}
-    assert len(state["stash_stack"]) == 1
-
-    state = simulator.process(state, "git switch feature/auth").state
-    state = simulator.process(state, "git stash pop").state
-    assert state["head"]["name"] == "feature/auth"
-    assert "auth.py" in state["working_tree"]
-    assert state["stash_stack"] == []
-
     state = simulator.process(state, "git add auth.py").state
     state = simulator.process(state, "git commit --amend").state
     assert "auth.py" in state["commits"][-1]["files"]
 
-    state = simulator.process(state, "git revert c1").state
-    assert state["branches"]["feature/auth"] == "c3"
     assert simulator.process(state, "git reflog").processed is True

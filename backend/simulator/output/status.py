@@ -1,11 +1,20 @@
 from __future__ import annotations
 
 
-def format_status(runtime, state: dict, *, short: bool = False) -> str:
-    return format_short_status(runtime, state) if short else format_long_status(runtime, state)
+def format_status(
+    runtime,
+    state: dict,
+    *,
+    short: bool = False,
+    branch: bool = False,
+    ignored: bool = False,
+) -> str:
+    if short:
+        return format_short_status(runtime, state, branch=branch, ignored=ignored)
+    return format_long_status(runtime, state, ignored=ignored)
 
 
-def format_long_status(runtime, state: dict) -> str:
+def format_long_status(runtime, state: dict, *, ignored: bool = False) -> str:
     branch = runtime._head_branch(state) or "HEAD (detached)"
     staged = state.get("staging", {}) or {}
     working = {
@@ -79,6 +88,11 @@ def format_long_status(runtime, state: dict) -> str:
         )
         lines.extend(f"\t{path}" for path in untracked)
 
+    ignored_paths = _ignored_paths(runtime, state)
+    if ignored and ignored_paths:
+        lines.extend(["", "Ignored files:"])
+        lines.extend(f"\t{path}" for path in ignored_paths)
+
     if not staged and not working and not conflicts:
         if has_commits:
             lines.extend(["", "nothing to commit, working tree clean"])
@@ -94,7 +108,7 @@ def format_long_status(runtime, state: dict) -> str:
     return "\n".join(lines)
 
 
-def format_short_status(runtime, state: dict) -> str:
+def format_short_status(runtime, state: dict, *, branch: bool = False, ignored: bool = False) -> str:
     staged = state.get("staging", {}) or {}
     working = {
         path: value
@@ -103,6 +117,10 @@ def format_short_status(runtime, state: dict) -> str:
     }
     head_tree = runtime._head_tree(state)
     lines: list[str] = []
+    if branch:
+        branch_name = runtime._head_branch(state) or "HEAD"
+        target = runtime._head_commit(state) or ""
+        lines.append(f"## {branch_name}{f'...{target}' if target else ''}")
     for path in sorted(set(staged) | set(working)):
         staged_value = staged.get(path)
         working_value = working.get(path)
@@ -114,7 +132,17 @@ def format_short_status(runtime, state: dict) -> str:
         x = _short_label(runtime, staged_value, " ")
         y = _short_label(runtime, working_value, " ")
         lines.append(f"{x}{y} {path}")
+    if ignored:
+        lines.extend(f"!! {path}" for path in _ignored_paths(runtime, state))
     return "\n".join(lines)
+
+
+def _ignored_paths(runtime, state: dict) -> list[str]:
+    return sorted(
+        path
+        for path, value in (state.get("working_tree") or {}).items()
+        if runtime.normalizer.entry_status(value) == "ignored"
+    )
 
 
 def _long_label(runtime, value: object) -> str:

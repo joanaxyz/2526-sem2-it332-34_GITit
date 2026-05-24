@@ -1144,18 +1144,18 @@ class ModuleOneSeedBuilder:
             commands=["git restore --staged {{keep_file}}", "git restore {{discard_file}}"],
             count=2,
         )
-        reset_template = self._copy_template(
+        restore_dot_template = self._copy_template(
             template,
-            slug="reset-restore-{{project}}-{{index}}",
-            signature="restore/reset-head/{{project}}/{{index}}",
+            slug="restore-dot-{{project}}-{{index}}",
+            signature="restore/staged-dot/{{project}}/{{index}}",
             target_rule={
                 "head_branch": "main",
                 "staging_empty": True,
                 "working_tree_contains": ["{{keep_file}}"],
                 "working_tree_absent": ["{{discard_file}}"],
-                "required_commands": ["git reset HEAD", "git restore"],
+                "required_commands": ["git restore --staged", "git restore"],
             },
-            commands=["git reset HEAD {{keep_file}}", "git restore {{discard_file}}"],
+            commands=["git restore --staged .", "git restore {{discard_file}}"],
         )
         return self._scenario(
             slug="unstage-and-discard-changes",
@@ -1187,10 +1187,10 @@ class ModuleOneSeedBuilder:
                     ),
                 ),
                 DIFFICULTY_HARD: (
-                    "Use the legacy unstage form, then discard the unwanted edit.",
+                    "Use the broad staged-restore form, then discard the unwanted edit.",
                     "Unstage the kept file and discard the unwanted edit.",
                     (2, 4, self.diagnostic_commands),
-                    reset_template,
+                    restore_dot_template,
                 ),
             },
         )

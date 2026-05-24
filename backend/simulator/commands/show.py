@@ -21,4 +21,10 @@ class ShowCommandHandler(BaseCommandHandler):
                 if target is None
                 else f"fatal: bad object {target}",
             )
-        return CommandOutcome(command="show", details={"target": target})
+        return CommandOutcome(
+            command="show",
+            details={
+                "target": target,
+                "name_only": bool((operation.params if operation else {}).get("name_only")),
+            },
+        )
