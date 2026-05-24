@@ -145,6 +145,8 @@ class GitCommandParser:
             return self._parse_commit_tail(tokens)
         if subcommand == "init":
             return self._parse_init_tail(tokens)
+        if subcommand == "clone":
+            return self._parse_clone_tail(tokens)
         if subcommand == "log":
             return self._parse_log_tail(tokens)
         return self._parse_generic_tail(tokens)
@@ -269,6 +271,42 @@ class GitCommandParser:
                 self._append_option(options, token)
                 normalized.append(token)
                 index += 1
+                continue
+            if token.startswith("-"):
+                self._append_option(options, token)
+                normalized.append(token)
+                index += 1
+                continue
+            args.append(token)
+            pathspecs.append(token)
+            normalized.append(token)
+            index += 1
+        return (
+            {key: tuple(value) for key, value in options.items()},
+            args,
+            pathspecs,
+            None,
+            normalized,
+        )
+
+    def _parse_clone_tail(
+        self,
+        tokens: list[str],
+    ) -> tuple[dict[str, tuple[str | bool, ...]], list[str], list[str], str | None, list[str]]:
+        options: dict[str, list[str | bool]] = {}
+        args: list[str] = []
+        pathspecs: list[str] = []
+        normalized: list[str] = []
+        index = 0
+        while index < len(tokens):
+            token = tokens[index]
+            if token in {"-b", "--branch", "--depth"}:
+                if index + 1 >= len(tokens):
+                    raise GitCommandParseError(f"error: option `{token}` requires a value.")
+                value = tokens[index + 1]
+                self._append_option(options, token, value)
+                normalized.extend([token, value])
+                index += 2
                 continue
             if token.startswith("-"):
                 self._append_option(options, token)
@@ -421,7 +459,7 @@ class GitCommandRegistry:
             ),
             "clone": GitCommandSpec(
                 "clone",
-                frozenset(),
+                frozenset({"-b", "--branch", "--depth"}),
                 diagnostic=False,
                 counted=True,
                 executor="teaching_state",
@@ -551,6 +589,11 @@ class GitCommandRegistry:
 
 
 def _unknown_option_message(subcommand: str, option: str) -> str:
+    if subcommand == "clone":
+        return (
+            f"error: unknown option `{option}`. "
+            "Module 1 clone supports only -b/--branch and --depth."
+        )
     if subcommand == "log":
         return f"fatal: unrecognized argument: {option}"
     if subcommand == "branch":
@@ -590,6 +633,16 @@ def _validate_clone(parsed: ParsedGitCommand) -> str | None:
         return "fatal: You must specify a repository to clone."
     if len(parsed.args) > 2:
         return "usage: git clone <repository> [<directory>]"
+    branch_values = parsed.options.get("-b", ()) + parsed.options.get("--branch", ())
+    if len(branch_values) > 1:
+        return "error: only one branch may be specified for clone"
+    if any(value in ("", True) for value in branch_values):
+        return "error: option `--branch` requires a value."
+    depth_values = parsed.options.get("--depth", ())
+    if len(depth_values) > 1:
+        return "fatal: only one clone depth may be specified"
+    if depth_values:
+        return _positive_int_option(depth_values[0], "depth")
     return None
 
 

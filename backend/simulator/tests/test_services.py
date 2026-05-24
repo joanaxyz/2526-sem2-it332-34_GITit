@@ -204,11 +204,134 @@ def test_clone_records_destination_and_materializes_remote_fixture_tree():
         == "https://example.test/training/docs-portal.git"
     )
     assert result.state["operation_metadata"]["last_clone_destination"] == "docs-portal"
+    assert result.state["operation_metadata"]["last_clone_branch"] == "main"
+    assert result.state["operation_metadata"]["last_clone_depth"] is None
+    assert result.state["operation_metadata"]["last_clone_remote_name"] == "origin"
+    assert result.state["operation_metadata"]["last_clone_default_branch"] == "main"
+    assert result.state["operation_metadata"]["last_clone_shallow"] is False
     assert result.state["branches"]["main"] == "r10"
     assert result.state["remote_branches"]["origin/main"] == "r10"
     assert result.state["upstream_tracking"]["main"] == "origin/main"
     assert result.state["commits"][0]["message"] == "Create docs portal starter"
     assert result.state["commits"][0]["tree"]["docs/intro.md"] == "docs-intro-v1"
+
+
+def test_clone_specific_branch_checks_out_requested_remote_branch():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "repository_initialized": False,
+            "commits": [],
+            "branches": {},
+            "head": {"type": "none"},
+            "working_tree": {},
+            "staging": {},
+            "remote_fixtures": {
+                "branches": {"origin/main": "r40", "origin/starter": "r41"},
+                "default_branch": "origin/main",
+                "commits": [
+                    {
+                        "id": "r40",
+                        "message": "Create lab base",
+                        "parents": [],
+                        "tree": {"README.md": "base-readme"},
+                    },
+                    {
+                        "id": "r41",
+                        "message": "Prepare starter branch",
+                        "parents": ["r40"],
+                        "tree": {"README.md": "starter-readme", "starter.md": "starter-v1"},
+                    },
+                ],
+            },
+        }
+    )
+
+    result = simulator.process(
+        state, "git clone -b starter https://example.test/training/lab.git lab"
+    )
+
+    assert result.processed is True
+    assert result.state["head"]["name"] == "starter"
+    assert result.state["branches"] == {"starter": "r41"}
+    assert result.state["remote_branches"]["origin/starter"] == "r41"
+    assert result.state["upstream_tracking"] == {"starter": "origin/starter"}
+    assert result.state["operation_metadata"]["last_clone_branch"] == "starter"
+    assert result.state["operation_metadata"]["last_clone_default_branch"] == "main"
+    assert result.state["commits"][-1]["tree"]["starter.md"] == "starter-v1"
+
+
+def test_clone_depth_records_shallow_metadata_and_limits_history():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "repository_initialized": False,
+            "commits": [],
+            "branches": {},
+            "head": {"type": "none"},
+            "working_tree": {},
+            "staging": {},
+            "remote_fixtures": {
+                "branches": {"origin/main": "r52"},
+                "default_branch": "origin/main",
+                "commits": [
+                    {
+                        "id": "r50",
+                        "message": "Create project",
+                        "parents": [],
+                        "tree": {"README.md": "v1"},
+                    },
+                    {
+                        "id": "r51",
+                        "message": "Add source",
+                        "parents": ["r50"],
+                        "tree": {"README.md": "v1", "src/app.py": "v1"},
+                    },
+                    {
+                        "id": "r52",
+                        "message": "Polish source",
+                        "parents": ["r51"],
+                        "tree": {"README.md": "v2", "src/app.py": "v2"},
+                    },
+                ],
+            },
+        }
+    )
+
+    result = simulator.process(state, "git clone --depth 1 https://example.test/app.git")
+
+    assert result.processed is True
+    assert result.state["operation_metadata"]["last_clone_depth"] == 1
+    assert result.state["operation_metadata"]["last_clone_shallow"] is True
+    assert result.state["branches"]["main"] == "r52"
+    assert [commit["id"] for commit in result.state["commits"]] == ["r52"]
+    assert result.state["commits"][0]["parents"] == []
+
+
+def test_clone_unknown_branch_returns_beginner_friendly_error():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "repository_initialized": False,
+            "commits": [],
+            "branches": {},
+            "head": {"type": "none"},
+            "working_tree": {},
+            "staging": {},
+            "remote_fixtures": {
+                "branches": {"origin/main": "r60"},
+                "commits": [{"id": "r60", "message": "Base", "parents": [], "tree": {}}],
+            },
+        }
+    )
+
+    result = simulator.process(
+        state, "git clone --branch starter https://example.test/app.git lab"
+    )
+
+    assert result.processed is False
+    assert result.exit_code == 128
+    assert "Remote branch 'starter' was not found" in result.output
 
 
 def test_rm_cached_preserves_local_ignored_file_and_stages_deletion():

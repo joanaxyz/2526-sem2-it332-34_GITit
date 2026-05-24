@@ -2,6 +2,7 @@ from simulator.commands.add import AddCommandHandler
 from simulator.commands.branch import BranchCommandHandler
 from simulator.commands.check_ignore import CheckIgnoreCommandHandler
 from simulator.commands.checkout import CheckoutCommandHandler
+from simulator.commands.clone import CloneCommandHandler
 from simulator.commands.commit import CommitCommandHandler
 from simulator.commands.diff import DiffCommandHandler
 from simulator.commands.init import InitCommandHandler
@@ -20,6 +21,7 @@ from simulator.commands.switch import SwitchCommandHandler
 def command_handlers() -> dict:
     handlers = [
         InitCommandHandler(),
+        CloneCommandHandler(),
         StatusCommandHandler(),
         AddCommandHandler(),
         CommitCommandHandler(),

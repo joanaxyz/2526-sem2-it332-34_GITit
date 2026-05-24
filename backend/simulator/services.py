@@ -112,7 +112,6 @@ class RepositoryStateSimulator:
         action = parsed.subcommand
 
         legacy_handlers = {
-            "clone": self._clone,
             "fetch": self._fetch,
             "pull": self._pull,
             "push": self._push,

@@ -72,7 +72,7 @@ This is the correct, expected output for an empty initialized repository.
 * Confusing `git init` (local, starts fresh) with `git clone` (local, copies existing remote)
 
 **`git init` vs `git clone`:**  
- `git init` starts a new, empty repository. `git clone` creates a local copy of an existing remote repository, complete with its full history and remote configuration. Both produce a local repository — the starting content differs.
+ `git init` starts a new, empty repository. `git clone` creates a local copy of an existing remote repository, including the selected branch history and remote configuration. Both produce a local repository — the starting content differs.
 
 ### **Commands Introduced**
 
@@ -110,15 +110,22 @@ This is the correct, expected output for an empty initialized repository.
 
 ### **Content Summary**
 
-Cloning is distinct from initializing. `git clone` does more than copy files: it sets up the remote tracking relationship, copies the full commit history, and checks out the default branch automatically.
+Cloning is distinct from initializing. `git clone` does more than copy files: it sets up the remote tracking relationship, copies commit history from the remote fixture, and checks out the default branch or the branch named with `-b`/`--branch`.
 
 **What `git clone` actually does:**
 
 1. Creates a new local directory (named after the repository by default, or as specified)  
 2. Initializes a git repository inside it  
 3. Adds a remote named `origin` pointing to the source URL  
-4. Fetches all branches and their complete history  
-5. Checks out the default branch (usually `main` or `master`)
+4. Records remote-tracking refs such as `origin/main` or `origin/starter`
+5. Checks out the selected branch and leaves the working tree clean
+
+**Destination and history options supported in Module 1:**
+
+* Without a destination, the folder is inferred from the URL, such as `docs-portal` from `https://example.test/training/docs-portal.git`.
+* With a destination, Git uses the folder name you provide.
+* `-b <branch>` and `--branch <branch>` check out a branch that already exists in the simulated remote.
+* `--depth <number>` records a shallow clone; `--depth 1` keeps only the selected branch tip visible.
 
 **HTTPS vs SSH clone URLs:**
 
@@ -142,6 +149,10 @@ Cloning is distinct from initializing. `git clone` does more than copy files: it
 | ----- | ----- | ----- |
 | `git clone <url>` | ⚡ ACTION | Clone a repository into a new directory |
 | `git clone <url> <directory>` | ⚡ ACTION | Clone into a custom-named directory |
+| `git clone -b <branch> <url>` | ⚡ ACTION | Clone and check out a specific branch |
+| `git clone --branch <branch> <url> <directory>` | ⚡ ACTION | Clone a specific branch into a custom directory |
+| `git clone --depth <number> <url>` | ⚡ ACTION | Clone shallow history |
+| `git clone --depth <number> -b <branch> <url> <directory>` | ⚡ ACTION | Shallow clone a selected branch into a custom directory |
 | `git remote -v` | 🔍 DIAGNOSTIC — Non-Counted | Show remote connections and their URLs |
 | `git log --oneline` | 🔍 DIAGNOSTIC — Non-Counted | Show condensed commit history |
 

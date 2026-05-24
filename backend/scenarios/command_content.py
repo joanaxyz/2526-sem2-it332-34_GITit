@@ -848,27 +848,73 @@ GIT_COMMAND_CONTENT_LIBRARY: list[dict[str, Any]] = [
         key="git-clone",
         display_name="git clone",
         canonical_command="git clone <url>",
-        aliases=["git clone <url> <folder>"],
+        aliases=[
+            "git clone <url> <directory>",
+            "git clone -b <branch> <url>",
+            "git clone --branch <branch> <url>",
+            "git clone --depth <number> <url>",
+        ],
         summary=(
             "git clone creates a local working copy from a remote repository and sets "
-            "up the origin relationship."
+            "up the origin and upstream relationship."
         ),
         tags=["action", "remote", "repository-setup"],
-        syntax=["git clone <url>", "git clone <url> <folder>"],
-        effects=["Creates a local repository, checks out the default branch, and configures origin."],
-        boundaries=["It does not modify the remote repository."],
-        watch_for="Forgetting the destination folder when the scenario names one.",
-        readiness=["Confirm the remote URL and destination folder before cloning."],
+        syntax=[
+            "git clone <url>",
+            "git clone <url> <directory>",
+            "git clone -b <branch> <url>",
+            "git clone --branch <branch> <url>",
+            "git clone -b <branch> <url> <directory>",
+            "git clone --branch <branch> <url> <directory>",
+            "git clone --depth <number> <url>",
+            "git clone --depth <number> <url> <directory>",
+            "git clone --depth <number> -b <branch> <url> <directory>",
+            "git clone --depth <number> --branch <branch> <url> <directory>",
+        ],
+        effects=[
+            "Creates a local repository, configures origin, checks out the selected branch, and leaves the working tree clean.",
+            "Records an origin remote URL and an origin/<branch> remote-tracking branch for the checked-out branch.",
+        ],
+        boundaries=[
+            "It does not modify the remote repository.",
+            "Module 1 does not support advanced clone options such as --bare, --mirror, submodules, filters, or templates.",
+        ],
+        watch_for="Use the exact destination, branch, and depth requested by the scenario.",
+        readiness=[
+            "Confirm whether the URL is HTTPS or SSH, whether a custom destination is named, and whether the branch or depth is specified.",
+        ],
+        options=[
+            {
+                "token": "-b / --branch",
+                "title": "Selected branch",
+                "body": "Checks out the named remote branch instead of the default branch and tracks origin/<branch>.",
+            },
+            {
+                "token": "--depth",
+                "title": "Shallow history",
+                "body": "Uses a positive number to limit visible cloned history, such as --depth 1 for only the tip commit.",
+            },
+        ],
         arguments=[
             {
                 "token": "<url>",
                 "title": "Remote URL",
-                "body": "Required. The simulator uses this as the origin URL for the local copy.",
+                "body": "Required. HTTPS URLs and SSH-style URLs are both recorded as the origin URL for the local copy.",
             },
             {
-                "token": "<folder>",
+                "token": "<directory>",
                 "title": "Destination folder",
-                "body": "Optional. Records the local folder name for the cloned repository.",
+                "body": "Optional. If omitted, Module 1 infers the folder name from the repository URL.",
+            },
+            {
+                "token": "<branch>",
+                "title": "Branch name",
+                "body": "Names a branch that must exist in the simulated remote fixture.",
+            },
+            {
+                "token": "<number>",
+                "title": "Depth",
+                "body": "Must be a positive integer. Module 1 uses it to mark the clone as shallow.",
             },
         ],
     ),

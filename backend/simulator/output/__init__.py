@@ -4,6 +4,7 @@ from simulator.output.add import format_add
 from simulator.output.branch import format_branch
 from simulator.output.check_ignore import format_check_ignore
 from simulator.output.checkout import format_checkout
+from simulator.output.clone import format_clone
 from simulator.output.commit import format_commit
 from simulator.output.diff import format_diff
 from simulator.output.errors import OUTPUT_REFERENCE
@@ -27,6 +28,7 @@ class GitLikeOutputFormatter:
             return outcome.stdout or "", outcome.stderr or ""
         formatter = {
             "init": format_init,
+            "clone": format_clone,
             "status": lambda rt, st, oc: format_status(
                 rt,
                 st,

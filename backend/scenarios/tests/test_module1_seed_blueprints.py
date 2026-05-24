@@ -136,6 +136,29 @@ def test_module_one_seed_uses_authored_cases_and_inspection_policy(db):
 
 
 @override_settings(DEBUG=True)
+def test_clone_blueprints_cover_branch_depth_and_destination_forms(db):
+    call_command("seed_module1_scenarios", "--reset", "--confirm", "--validate-build")
+
+    commands = []
+    cases = []
+    for blueprint in ScenarioGenerationBlueprint.objects.filter(
+        difficulty_instance__scenario__slug="clone-remote-repository",
+        is_published=True,
+    ):
+        cases.extend(blueprint.parameter_pools["cases"])
+        commands.extend(case["solution_command"] for case in blueprint.parameter_pools["cases"])
+
+    assert any(command == "git clone https://example.test/training/docs-portal.git" for command in commands)
+    assert any(command.endswith(" api-workshop") for command in commands)
+    assert any("git@example.test:" in command for command in commands)
+    assert any(command.startswith("git clone -b starter ") for command in commands)
+    assert any(command.startswith("git clone --branch starter ") for command in commands)
+    assert any(command.startswith("git clone --depth 1 ") for command in commands)
+    assert any(case["selected_branch"] != "main" for case in cases)
+    assert any(case["clone_shallow"] is True and case["clone_depth"] == 1 for case in cases)
+
+
+@override_settings(DEBUG=True)
 def test_diagnostic_command_preview_is_first_module_one_scenario(db):
     call_command("seed_module1_scenarios", "--reset", "--confirm")
 

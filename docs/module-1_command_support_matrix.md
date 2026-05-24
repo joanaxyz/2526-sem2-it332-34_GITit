@@ -54,6 +54,14 @@ The simulator accepts only the forms below for Module 1. Diagnostic commands are
 | `git init --quiet --initial-branch=<branch> <directory>` | Combine quiet mode, branch, and directory. |
 | `git clone <url>` | Clone a remote fixture into the default folder. |
 | `git clone <url> <directory>` | Clone into a named local folder. |
+| `git clone -b <branch> <url>` | Clone and check out a remote branch. |
+| `git clone --branch <branch> <url>` | Clone and check out a remote branch. |
+| `git clone -b <branch> <url> <directory>` | Clone a remote branch into a named local folder. |
+| `git clone --branch <branch> <url> <directory>` | Clone a remote branch into a named local folder. |
+| `git clone --depth <number> <url>` | Clone shallow history for the default branch. |
+| `git clone --depth <number> <url> <directory>` | Clone shallow history into a named local folder. |
+| `git clone --depth <number> -b <branch> <url> <directory>` | Shallow clone a selected branch into a named folder. |
+| `git clone --depth <number> --branch <branch> <url> <directory>` | Shallow clone a selected branch into a named folder. |
 | `git add <path>` | Stage one path. |
 | `git add <path> <path>` | Stage multiple paths. |
 | `git add <directory>/` | Stage changes under a directory. |
@@ -85,4 +93,4 @@ The simulator accepts only the forms below for Module 1. Diagnostic commands are
 
 The Module 1 simulator rejects `git fetch`, `git pull`, `git push`, `git merge`, `git rebase`, `git stash`, `git tag`, `git cherry-pick`, and `git revert`.
 
-Branch creation/deletion, remote mutation, checkout/switch, reset, empty commits, author filtering, and arbitrary commit-range diffing are also not documented for Module 1 preview content.
+Branch creation/deletion, remote mutation, checkout/switch, reset, empty commits, author filtering, arbitrary commit-range diffing, and advanced clone options such as `--bare`, `--mirror`, `--recurse-submodules`, `--no-checkout`, `--filter`, `--template`, and `--separate-git-dir` are also not documented for Module 1 preview content.

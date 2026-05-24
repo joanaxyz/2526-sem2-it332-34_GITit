@@ -62,6 +62,25 @@ class CommandIntentMapper:
             ),
         )
 
+    def _map_clone(self, parsed: ParsedGitCommand) -> CommandIntent:
+        branch_values = parsed.options.get("-b", ()) + parsed.options.get("--branch", ())
+        depth_values = parsed.options.get("--depth", ())
+        return CommandIntent(
+            command="clone",
+            operations=(
+                CommandOperation(
+                    "CloneRepository",
+                    {
+                        "url": parsed.args[0],
+                        "destination": parsed.args[1] if len(parsed.args) > 1 else None,
+                        "branch": str(branch_values[-1]) if branch_values else None,
+                        "depth": int(str(depth_values[-1])) if depth_values else None,
+                        "remote_name": "origin",
+                    },
+                ),
+            ),
+        )
+
     def _map_status(self, parsed: ParsedGitCommand) -> CommandIntent:
         short = (
             parsed.has_option("-s")

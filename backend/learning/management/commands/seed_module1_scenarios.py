@@ -240,6 +240,9 @@ def student_context_template(kind: str) -> dict[str, Any]:
             "provided_values": [
                 {"label": "Remote URL", "value": "{{remote_url}}"},
                 {"label": "Destination folder", "value": "{{destination_folder}}"},
+                {"label": "Branch to check out", "value": "{{selected_branch}}"},
+                {"label": "Default remote branch", "value": "{{default_branch}}"},
+                {"label": "Clone depth", "value": "{{clone_depth_label}}"},
                 {"label": "Remote tip", "value": "{{remote_head}}"},
             ],
             "requirements": [],
@@ -991,12 +994,13 @@ def clone_scenario() -> dict[str, Any]:
                 }
             ],
             "origin URL docs-portal; main/origin-main -> r10; docs tree checked out",
+            solution_command="git clone {{remote_url}}",
         ),
         remote_case(
             "clone-easy-api-lab",
             "api-lab",
             "https://example.test/training/api-lab.git",
-            "api-lab",
+            "api-workshop",
             "r11",
             {"README.md": "api-readme-v1", "api/routes.py": "api-routes-v1"},
             [
@@ -1007,88 +1011,47 @@ def clone_scenario() -> dict[str, Any]:
                     "tree": {"README.md": "api-readme-v1", "api/routes.py": "api-routes-v1"},
                 }
             ],
-            "origin URL api-lab; main/origin-main -> r11; API tree checked out",
+            "custom folder api-workshop; main/origin-main -> r11; API tree checked out",
+            solution_command="git clone {{remote_url}} {{destination_folder}}",
         ),
         remote_case(
-            "clone-easy-profile-site",
+            "clone-easy-profile-starter",
             "profile-site",
             "https://example.test/training/profile-site.git",
             "profile-site",
-            "r12",
-            {"index.html": "profile-index-v1", "styles/site.css": "profile-css-v1"},
+            "r13",
+            {
+                "index.html": "profile-index-v2",
+                "styles/site.css": "profile-css-v1",
+                "starter-notes.md": "starter-notes-v1",
+            },
             [
                 {
                     "id": "r12",
                     "message": "Create profile site starter",
                     "parents": [],
                     "tree": {"index.html": "profile-index-v1", "styles/site.css": "profile-css-v1"},
+                },
+                {
+                    "id": "r13",
+                    "message": "Prepare starter branch",
+                    "parents": ["r12"],
+                    "tree": {
+                        "index.html": "profile-index-v2",
+                        "styles/site.css": "profile-css-v1",
+                        "starter-notes.md": "starter-notes-v1",
+                    },
                 }
             ],
-            "origin URL profile-site; main/origin-main -> r12; site tree checked out",
+            "specific starter branch; starter/origin-starter -> r13; starter notes checked out",
+            selected_branch="starter",
+            default_head="r12",
+            solution_command="git clone -b {{selected_branch}} {{remote_url}}",
         ),
     ]
     medium_cases = [
         remote_case(
-            "clone-medium-cli-tool",
-            "cli-tool",
-            "https://example.test/tools/cli-tool.git",
-            "cli-practice",
-            "r20",
-            {"README.md": "cli-readme-v2", "src/parser.py": "cli-parser-v2"},
-            [
-                {
-                    "id": "r19",
-                    "message": "Create CLI skeleton",
-                    "parents": [],
-                    "tree": {"README.md": "cli-readme-v1"},
-                },
-                {
-                    "id": "r20",
-                    "message": "Add parser command",
-                    "parents": ["r19"],
-                    "tree": {"README.md": "cli-readme-v2", "src/parser.py": "cli-parser-v2"},
-                },
-            ],
-            "custom folder cli-practice; r20 tree/history",
-        ),
-        remote_case(
-            "clone-medium-css-kit",
-            "css-kit",
-            "https://example.test/frontend/css-kit.git",
-            "style-lab",
-            "r21",
-            {"README.md": "css-readme-v1", "styles/tokens.css": "tokens-v1"},
-            [
-                {
-                    "id": "r21",
-                    "message": "Create style token kit",
-                    "parents": [],
-                    "tree": {"README.md": "css-readme-v1", "styles/tokens.css": "tokens-v1"},
-                }
-            ],
-            "custom folder style-lab; CSS token tree",
-        ),
-        remote_case(
-            "clone-medium-recipe-book",
-            "recipe-book",
-            "https://example.test/docs/recipe-book.git",
-            "kitchen-docs",
-            "r22",
-            {"README.md": "recipe-readme-v1", "recipes/adobo.md": "adobo-v1"},
-            [
-                {
-                    "id": "r22",
-                    "message": "Create recipe book starter",
-                    "parents": [],
-                    "tree": {"README.md": "recipe-readme-v1", "recipes/adobo.md": "adobo-v1"},
-                }
-            ],
-            "custom folder kitchen-docs; recipe tree",
-        ),
-    ]
-    hard_cases = [
-        remote_case(
-            "clone-hard-analytics",
+            "clone-medium-analytics-ssh",
             "analytics-lab",
             "git@example.test:training/analytics-lab.git",
             "analytics-worktree",
@@ -1126,11 +1089,75 @@ def clone_scenario() -> dict[str, Any]:
                 },
             ],
             "SSH URL; custom folder analytics-worktree; three-commit history ending r30",
+            solution_command="git clone {{remote_url}} {{destination_folder}}",
         ),
         remote_case(
-            "clone-hard-mobile-ui",
+            "clone-medium-cli-starter-folder",
+            "cli-tool",
+            "https://example.test/tools/cli-tool.git",
+            "cli-starter-lab",
+            "r20",
+            {
+                "README.md": "cli-readme-v2",
+                "src/parser.py": "cli-parser-v2",
+                "starter.md": "cli-starter-v1",
+            },
+            [
+                {
+                    "id": "r19",
+                    "message": "Create CLI skeleton",
+                    "parents": [],
+                    "tree": {"README.md": "cli-readme-v1"},
+                },
+                {
+                    "id": "r20",
+                    "message": "Prepare CLI starter branch",
+                    "parents": ["r19"],
+                    "tree": {
+                        "README.md": "cli-readme-v2",
+                        "src/parser.py": "cli-parser-v2",
+                        "starter.md": "cli-starter-v1",
+                    },
+                },
+            ],
+            "specific starter branch in cli-starter-lab; starter/origin-starter -> r20",
+            selected_branch="starter",
+            default_head="r19",
+            solution_command=(
+                "git clone --branch {{selected_branch}} {{remote_url}} {{destination_folder}}"
+            ),
+        ),
+        remote_case(
+            "clone-medium-css-kit-shallow",
+            "css-kit",
+            "https://example.test/frontend/css-kit.git",
+            "css-kit",
+            "r22",
+            {"README.md": "css-readme-v2", "styles/tokens.css": "tokens-v2"},
+            [
+                {
+                    "id": "r21",
+                    "message": "Create CSS kit starter",
+                    "parents": [],
+                    "tree": {"README.md": "css-readme-v1"},
+                },
+                {
+                    "id": "r22",
+                    "message": "Add style token kit",
+                    "parents": ["r21"],
+                    "tree": {"README.md": "css-readme-v2", "styles/tokens.css": "tokens-v2"},
+                },
+            ],
+            "shallow depth 1 clone; main/origin-main -> r22; only tip history visible",
+            clone_depth=1,
+            solution_command="git clone --depth {{clone_depth}} {{remote_url}}",
+        ),
+    ]
+    hard_cases = [
+        remote_case(
+            "clone-hard-mobile-ui-shallow-branch",
             "mobile-ui",
-            "git@example.test:frontend/mobile-ui.git",
+            "https://example.test/frontend/mobile-ui.git",
             "mobile-ui-lab",
             "r31",
             {
@@ -1147,7 +1174,7 @@ def clone_scenario() -> dict[str, Any]:
                 },
                 {
                     "id": "r31",
-                    "message": "Add mobile home screen",
+                    "message": "Prepare mobile starter branch",
                     "parents": ["r23"],
                     "tree": {
                         "README.md": "mobile-readme-v2",
@@ -1156,12 +1183,19 @@ def clone_scenario() -> dict[str, Any]:
                     },
                 },
             ],
-            "SSH URL; custom folder mobile-ui-lab; UI tree ending r31",
+            "shallow starter branch in mobile-ui-lab; starter/origin-starter -> r31",
+            selected_branch="starter",
+            default_head="r23",
+            clone_depth=1,
+            solution_command=(
+                "git clone --depth {{clone_depth}} -b {{selected_branch}} "
+                "{{remote_url}} {{destination_folder}}"
+            ),
         ),
         remote_case(
-            "clone-hard-lab-notebook",
+            "clone-hard-lab-notebook-depth-branch",
             "lab-notebook",
-            "git@example.test:docs/lab-notebook.git",
+            "https://example.test/docs/lab-notebook.git",
             "notebook-review",
             "r32",
             {
@@ -1178,7 +1212,7 @@ def clone_scenario() -> dict[str, Any]:
                 },
                 {
                     "id": "r32",
-                    "message": "Add second lab entry",
+                    "message": "Prepare review branch",
                     "parents": ["r24"],
                     "tree": {
                         "README.md": "notebook-readme-v2",
@@ -1187,7 +1221,46 @@ def clone_scenario() -> dict[str, Any]:
                     },
                 },
             ],
-            "SSH URL; custom folder notebook-review; notebook tree ending r32",
+            "shallow review branch in notebook-review using --branch; review/origin-review -> r32",
+            selected_branch="review",
+            default_head="r24",
+            clone_depth=1,
+            solution_command=(
+                "git clone --depth {{clone_depth}} --branch {{selected_branch}} "
+                "{{remote_url}} {{destination_folder}}"
+            ),
+        ),
+        remote_case(
+            "clone-hard-research-log-ssh",
+            "research-log",
+            "git@example.test:docs/research-log.git",
+            "research-log-lab",
+            "r34",
+            {
+                "README.md": "research-readme-v2",
+                "notes/week-1.md": "week1-v1",
+                "notes/week-2.md": "week2-v1",
+            },
+            [
+                {
+                    "id": "r33",
+                    "message": "Create research log",
+                    "parents": [],
+                    "tree": {"README.md": "research-readme-v1", "notes/week-1.md": "week1-v1"},
+                },
+                {
+                    "id": "r34",
+                    "message": "Add second research note",
+                    "parents": ["r33"],
+                    "tree": {
+                        "README.md": "research-readme-v2",
+                        "notes/week-1.md": "week1-v1",
+                        "notes/week-2.md": "week2-v1",
+                    },
+                },
+            ],
+            "SSH URL; custom folder research-log-lab; research tree ending r34",
+            solution_command="git clone {{remote_url}} {{destination_folder}}",
         ),
     ]
     return scenario_dict(
@@ -1200,51 +1273,54 @@ def clone_scenario() -> dict[str, Any]:
         slug="clone-remote-repository",
         title="Clone a remote repository",
         focus="git clone",
-        summary="Create a local repository from a remote and verify origin/main.",
-        explanation="Cloning creates a local repository, configures origin, checks out main, and records remote-tracking information.",
+        summary="Create a local repository from a remote and verify the origin relationship.",
+        explanation="Cloning creates a local repository, configures origin, checks out the selected branch, and records remote-tracking information.",
         primary=["git clone"],
         supporting=["git remote -v", "git log --oneline", "git status"],
-        concepts=["origin", "remote-tracking branch", "upstream", "working tree checkout"],
+        concepts=[
+            "origin",
+            "remote-tracking branch",
+            "upstream",
+            "branch checkout",
+            "shallow clone",
+        ],
         difficulties={
             DIFFICULTY_EASY: diff(
                 (1, 1),
-                "Clone with the default folder name.",
-                "Use the provided remote URL and let the destination use the default repository name.",
+                "Clone with the requested destination and branch behavior.",
+                "Use the provided remote URL and follow the destination or branch details exactly.",
                 [
                     clone_bp(
-                        "clone-default-folder",
+                        "clone-basic-forms",
                         easy_cases,
-                        False,
-                        "module1.clone.https-default-folder",
-                        "clone-https-default",
+                        "module1.clone.basic-forms",
+                        "clone-basic-forms",
                     )
                 ],
             ),
             DIFFICULTY_MEDIUM: diff(
                 (1, 1),
-                "Clone into a required custom folder.",
-                "Use the provided remote URL and the exact destination folder.",
+                "Clone SSH, branch, and shallow variants.",
+                "Use the requested URL form, branch, destination folder, and depth exactly.",
                 [
                     clone_bp(
-                        "clone-custom-folder",
+                        "clone-branch-and-shallow",
                         medium_cases,
-                        True,
-                        "module1.clone.https-custom-folder",
-                        "clone-https-custom-destination",
+                        "module1.clone.branch-and-shallow",
+                        "clone-branch-and-shallow",
                     )
                 ],
             ),
             DIFFICULTY_HARD: diff(
                 (1, 1),
-                "Clone an SSH remote into a required custom folder with deeper history.",
-                "Use the exact SSH-style remote and destination folder, then end with clean tracking refs.",
+                "Combine shallow clone, selected branch, and custom destination requirements.",
+                "Use the exact clone form requested, then end with clean tracking refs.",
                 [
                     clone_bp(
-                        "clone-ssh-custom-folder",
+                        "clone-combined-forms",
                         hard_cases,
-                        True,
-                        "module1.clone.ssh-custom-folder-history",
-                        "clone-ssh-custom-history",
+                        "module1.clone.combined-forms",
+                        "clone-combined-forms",
                     )
                 ],
             ),
@@ -1261,7 +1337,25 @@ def remote_case(
     tree: dict[str, Any],
     commits: list[dict[str, Any]],
     answer_anchor: str,
+    *,
+    selected_branch: str = "main",
+    default_branch: str = "main",
+    default_head: str | None = None,
+    clone_depth: int | None = None,
+    solution_command: str = "git clone {{remote_url}}",
 ) -> dict[str, Any]:
+    default_remote_branch = f"origin/{default_branch}"
+    selected_remote_branch = f"origin/{selected_branch}"
+    branch_targets = {
+        default_remote_branch: default_head or head,
+        selected_remote_branch: head,
+    }
+    rendered_solution_command = (
+        solution_command.replace("{{remote_url}}", url)
+        .replace("{{destination_folder}}", folder)
+        .replace("{{selected_branch}}", selected_branch)
+        .replace("{{clone_depth}}", str(clone_depth or ""))
+    )
     return {
         "case_id": case_id,
         "project": project,
@@ -1270,18 +1364,20 @@ def remote_case(
         "remote_head": head,
         "remote_tree": tree,
         "remote_commits": commits,
+        "remote_branches": branch_targets,
+        "selected_branch": selected_branch,
+        "selected_remote_branch": selected_remote_branch,
+        "default_branch": default_branch,
+        "default_remote_branch": default_remote_branch,
+        "clone_depth": clone_depth,
+        "clone_depth_label": str(clone_depth) if clone_depth else "full history",
+        "clone_shallow": clone_depth is not None,
+        "solution_command": rendered_solution_command,
         "answer_anchor": answer_anchor,
     }
 
 
-def clone_bp(
-    slug: str, cases: list[dict[str, Any]], custom_folder: bool, signature: str, subtemplate: str
-) -> dict[str, Any]:
-    command = (
-        "git clone {{remote_url}} {{destination_folder}}"
-        if custom_folder
-        else "git clone {{remote_url}}"
-    )
+def clone_bp(slug: str, cases: list[dict[str, Any]], signature: str, subtemplate: str) -> dict[str, Any]:
     return bp(
         slug=slug,
         kind="clone",
@@ -1290,19 +1386,20 @@ def clone_bp(
         cases=cases,
         initial_state=uninitialized_state(
             remote_fixtures={
-                "branches": {"origin/main": "{{remote_head}}"},
+                "branches": "{{remote_branches}}",
+                "default_branch": "{{default_remote_branch}}",
                 "commits": "{{remote_commits}}",
             }
         ),
         target_rule={
             "repository_initialized": True,
-            "head_branch": "main",
+            "head_branch": "{{selected_branch}}",
             "remote_exists": ["origin"],
             "remote_url_matches": {"origin": "{{remote_url}}"},
-            "remote_branch_exists": ["origin/main"],
-            "remote_branch_points_to": {"origin/main": "{{remote_head}}"},
-            "branch_points_to": {"main": "{{remote_head}}"},
-            "upstream_tracking": {"main": "origin/main"},
+            "remote_branch_exists": ["{{selected_remote_branch}}"],
+            "remote_branch_points_to": {"{{selected_remote_branch}}": "{{remote_head}}"},
+            "branch_points_to": {"{{selected_branch}}": "{{remote_head}}"},
+            "upstream_tracking": {"{{selected_branch}}": "{{selected_remote_branch}}"},
             "staging_empty": True,
             "working_tree_clean": True,
             "rules": [
@@ -1316,6 +1413,31 @@ def clone_bp(
                     "key": "last_clone_url",
                     "value": "{{remote_url}}",
                 },
+                {
+                    "type": "operation_metadata_equals",
+                    "key": "last_clone_branch",
+                    "value": "{{selected_branch}}",
+                },
+                {
+                    "type": "operation_metadata_equals",
+                    "key": "last_clone_depth",
+                    "value": "{{clone_depth}}",
+                },
+                {
+                    "type": "operation_metadata_equals",
+                    "key": "last_clone_remote_name",
+                    "value": "origin",
+                },
+                {
+                    "type": "operation_metadata_equals",
+                    "key": "last_clone_default_branch",
+                    "value": "{{default_branch}}",
+                },
+                {
+                    "type": "operation_metadata_equals",
+                    "key": "last_clone_shallow",
+                    "value": "{{clone_shallow}}",
+                },
                 {"type": "commit_exists", "commit": "{{remote_head}}"},
                 {
                     "type": "commit_tree_contains",
@@ -1324,7 +1446,7 @@ def clone_bp(
                 },
             ],
         },
-        solution=[command],
+        solution=["{{solution_command}}"],
         label="Clone {{project}}",
         slug_template="clone-{{case_id}}",
     )
