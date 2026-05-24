@@ -119,6 +119,24 @@ def test_init_directory_records_operation_metadata():
     assert current["operation_metadata"]["last_init_current_directory"] is True
 
 
+def test_init_initial_branch_variants_create_requested_branch():
+    simulator = RepositoryStateSimulator()
+    state = {
+        "repository_initialized": False,
+        "commits": [],
+        "branches": {},
+        "head": {"type": "none"},
+    }
+
+    short = simulator.process(state, "git init -b trunk").state
+    long = simulator.process(state, "git init --initial-branch=main").state
+
+    assert short["head"]["name"] == "trunk"
+    assert short["branches"] == {"trunk": None}
+    assert long["head"]["name"] == "main"
+    assert long["operation_metadata"]["last_init_initial_branch"] == "main"
+
+
 def test_clone_records_destination_and_materializes_remote_fixture_tree():
     simulator = RepositoryStateSimulator()
     state = simulator.normalize_state(
@@ -146,10 +164,15 @@ def test_clone_records_destination_and_materializes_remote_fixture_tree():
         }
     )
 
-    result = simulator.process(state, "git clone https://example.test/training/docs-portal.git docs-portal")
+    result = simulator.process(
+        state, "git clone https://example.test/training/docs-portal.git docs-portal"
+    )
 
     assert result.processed is True
-    assert result.state["operation_metadata"]["last_clone_url"] == "https://example.test/training/docs-portal.git"
+    assert (
+        result.state["operation_metadata"]["last_clone_url"]
+        == "https://example.test/training/docs-portal.git"
+    )
     assert result.state["operation_metadata"]["last_clone_destination"] == "docs-portal"
     assert result.state["branches"]["main"] == "r10"
     assert result.state["remote_branches"]["origin/main"] == "r10"
@@ -186,6 +209,55 @@ def test_rm_cached_preserves_local_ignored_file_and_stages_deletion():
     assert ".env" not in result.state["commits"][-1]["tree"]
     assert result.state["working_tree"][".env"]["status"] == "ignored"
     assert result.state["operation_metadata"]["last_rm_cached_paths"] == [".env"]
+
+
+def test_add_all_and_update_respect_tracked_vs_untracked_files():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "commits": [
+                {
+                    "id": "c0",
+                    "message": "Base",
+                    "parents": [],
+                    "tree": {"tracked.txt": "v1", "gone.txt": "v1"},
+                }
+            ],
+            "branches": {"main": "c0"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {"tracked.txt": "v2", "new.txt": "untracked", "gone.txt": "deleted"},
+            "staging": {},
+        }
+    )
+
+    update = simulator.process(state, "git add -u").state
+    all_changes = simulator.process(state, "git add --all").state
+
+    assert sorted(update["staging"]) == ["gone.txt", "tracked.txt"]
+    assert update["working_tree"] == {"new.txt": "untracked"}
+    assert sorted(all_changes["staging"]) == ["gone.txt", "new.txt", "tracked.txt"]
+    assert all_changes["working_tree"] == {}
+
+
+def test_commit_am_stages_tracked_changes_only():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "commits": [
+                {"id": "c0", "message": "Base", "parents": [], "tree": {"tracked.txt": "v1"}}
+            ],
+            "branches": {"main": "c0"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {"tracked.txt": "v2", "new.txt": "untracked"},
+            "staging": {},
+        }
+    )
+
+    result = simulator.process(state, 'git commit -am "Update tracked"')
+
+    assert result.processed is True
+    assert result.state["commits"][-1]["changes"].keys() == {"tracked.txt"}
+    assert result.state["working_tree"] == {"new.txt": "untracked"}
 
 
 def test_add_patch_commits_target_hunks_and_leaves_leftover_hunks():
@@ -250,6 +322,96 @@ def test_commit_amend_replaces_branch_tip_without_child_commit():
     assert state["commits"][-1]["tree"]["app.py"] == "v1"
     assert state["operation_metadata"]["last_amend_replaced_commit"] == "c1"
     assert state["operation_metadata"]["last_amend_created_commit"] == "c2"
+
+
+def test_branch_switch_checkout_remote_reset_restore_variants():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "commits": [
+                {"id": "c0", "message": "Base", "parents": [], "tree": {"README.md": "v1"}},
+                {
+                    "id": "c1",
+                    "message": "Update readme",
+                    "parents": ["c0"],
+                    "tree": {"README.md": "v2"},
+                },
+            ],
+            "branches": {"main": "c1"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {"README.md": "v3"},
+            "staging": {"notes.md": "draft"},
+        }
+    )
+
+    state = simulator.process(state, "git branch feature/readme").state
+    state = simulator.process(state, "git switch feature/readme").state
+    state = simulator.process(state, "git checkout -b scratch").state
+    state = simulator.process(state, "git restore --staged notes.md").state
+    state = simulator.process(state, "git reset --soft HEAD~1").state
+    state = simulator.process(state, "git remote add origin https://example.test/repo.git").state
+    state = simulator.process(state, "git remote rename origin upstream").state
+    state = simulator.process(state, "git remote remove upstream").state
+
+    assert state["head"]["name"] == "scratch"
+    assert state["branches"]["scratch"] == "c0"
+    assert "README.md" in state["staging"]
+    assert state["remotes"] == {}
+
+
+def test_diagnostic_commands_record_metadata_without_state_mutation():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "commits": [
+                {"id": "c0", "message": "Base", "parents": [], "tree": {"README.md": "v1"}}
+            ],
+            "branches": {"main": "c0"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {"README.md": "v2"},
+            "staging": {},
+            "remotes": {"origin": "https://example.test/repo.git"},
+        }
+    )
+
+    status = simulator.process(state, "git status -s")
+    diff = simulator.process(state, "git diff")
+    remote = simulator.process(state, "git remote -v")
+
+    assert status.diagnostic_metadata == ("inspected_short_status",)
+    assert diff.diagnostic_metadata == ("inspected_diff",)
+    assert remote.diagnostic_metadata == ("inspected_remote_list",)
+    assert status.state == state
+    assert diff.state == state
+    assert remote.state == state
+
+
+def test_snapshot_visible_tree_includes_clean_committed_and_changed_files():
+    from simulator.services import RepositorySnapshotService
+
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "commits": [
+                {
+                    "id": "c0",
+                    "message": "Base",
+                    "parents": [],
+                    "tree": {"README.md": "v1", "src/app.py": "v1"},
+                }
+            ],
+            "branches": {"main": "c0"},
+            "head": {"type": "branch", "name": "main"},
+            "staging": {"src/app.py": "v2"},
+            "working_tree": {"notes.md": "untracked"},
+        }
+    )
+
+    snapshot = RepositorySnapshotService().snapshot(state)
+
+    assert snapshot["project_tree"]["README.md"]["status"] == "clean"
+    assert snapshot["project_tree"]["src/app.py"]["source"] == "staging"
+    assert snapshot["project_tree"]["notes.md"]["status"] == "untracked"
 
 
 def test_remote_fetch_pull_and_push_update_remote_state():

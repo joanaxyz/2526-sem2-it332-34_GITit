@@ -1,7 +1,7 @@
-from simulator.command_engine import Pygit2CommandEngine
+from simulator.command_engine import SimulatedGitCommandEngine
 
 
-def test_pygit2_command_engine_returns_git_like_status_text_without_system_git():
+def test_simulated_command_engine_returns_git_like_status_text_without_system_git():
     state = {
         "commits": [],
         "branches": {"main": None},
@@ -11,7 +11,7 @@ def test_pygit2_command_engine_returns_git_like_status_text_without_system_git()
         "conflicts": [],
     }
 
-    result = Pygit2CommandEngine().process(state, "git status")
+    result = SimulatedGitCommandEngine().process(state, "git status")
 
     assert result.processed is True
     assert result.exit_code == 0
@@ -21,7 +21,7 @@ def test_pygit2_command_engine_returns_git_like_status_text_without_system_git()
     assert "Only simulated" not in result.output
 
 
-def test_pygit2_command_engine_returns_git_like_errors_for_invalid_options():
+def test_simulated_command_engine_returns_git_like_errors_for_invalid_options():
     state = {
         "commits": [],
         "branches": {"main": None},
@@ -31,14 +31,14 @@ def test_pygit2_command_engine_returns_git_like_errors_for_invalid_options():
         "conflicts": [],
     }
 
-    result = Pygit2CommandEngine().process(state, "git status --wat")
+    result = SimulatedGitCommandEngine().process(state, "git status --wat")
 
     assert result.processed is False
     assert result.exit_code == 129
     assert "error: unknown option" in result.output
 
 
-def test_pygit2_command_engine_clones_without_system_git_or_network():
+def test_simulated_command_engine_clones_without_system_git_or_network():
     state = {
         "repository_initialized": False,
         "commits": [],
@@ -50,7 +50,7 @@ def test_pygit2_command_engine_clones_without_system_git_or_network():
         "remote_branches": {"origin/main": "r0"},
     }
 
-    result = Pygit2CommandEngine(timeout_seconds=5).process(
+    result = SimulatedGitCommandEngine(timeout_seconds=5).process(
         state,
         "git clone https://example.test/app.git app",
     )

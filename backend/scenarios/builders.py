@@ -40,8 +40,7 @@ class TemplateRenderer:
     def render(self, value: Any, context: dict[str, Any]) -> Any:
         if isinstance(value, dict):
             return {
-                self.render(key, context): self.render(item, context)
-                for key, item in value.items()
+                self.render(key, context): self.render(item, context) for key, item in value.items()
             }
         if isinstance(value, list):
             return [self.render(item, context) for item in value]
@@ -80,11 +79,15 @@ class RuntimeScenarioBuilder:
             )
         )
         if not blueprints:
-            raise ScenarioVariantBuildError("Difficulty instance has no published generation blueprint.")
+            raise ScenarioVariantBuildError(
+                "Difficulty instance has no published generation blueprint."
+            )
 
         candidates = self._candidates(blueprints)
         if not candidates:
-            raise ScenarioVariantBuildError("Generation blueprints did not produce any parameter cases.")
+            raise ScenarioVariantBuildError(
+                "Generation blueprints did not produce any parameter cases."
+            )
 
         candidate = self._select_candidate(
             candidates,
@@ -102,8 +105,27 @@ class RuntimeScenarioBuilder:
 
     def _candidates(self, blueprints: list[ScenarioGenerationBlueprint]) -> list[VariantCandidate]:
         candidates = []
+        rendered_solution_sequences: dict[str, str] = {}
         for blueprint in blueprints:
             for context in self._contexts(blueprint):
+                rendered_solution = self.renderer.render(
+                    blueprint.solution_commands_template, context
+                )
+                sequence_key = json.dumps(rendered_solution, sort_keys=True)
+                should_enforce_duplicate = bool(context.get("case_id"))
+                if (
+                    should_enforce_duplicate
+                    and sequence_key in rendered_solution_sequences
+                    and not context.get("duplicate_solution_waiver")
+                ):
+                    raise ScenarioVariantBuildError(
+                        "Generation blueprints produced duplicate solution command sequences "
+                        f"for {context.get('case_id', 'unknown')} and {rendered_solution_sequences[sequence_key]}."
+                    )
+                if should_enforce_duplicate:
+                    rendered_solution_sequences.setdefault(
+                        sequence_key, str(context.get("case_id", "unknown"))
+                    )
                 stable_payload = {
                     "blueprint_signature": blueprint.blueprint_signature,
                     "subtemplate_signature": blueprint.subtemplate_signature,
@@ -161,15 +183,12 @@ class RuntimeScenarioBuilder:
             return ordered[0]
 
         prior_context = prior_session.variant.parameter_context or {}
-        prior_fingerprint = (
-            prior_session.variant.variant_fingerprint
-            or self._hash(
-                {
-                    "blueprint_signature": prior_session.variant.blueprint_signature,
-                    "subtemplate_signature": prior_session.variant.subtemplate_signature,
-                    "parameter_context": prior_context,
-                }
-            )
+        prior_fingerprint = prior_session.variant.variant_fingerprint or self._hash(
+            {
+                "blueprint_signature": prior_session.variant.blueprint_signature,
+                "subtemplate_signature": prior_session.variant.subtemplate_signature,
+                "parameter_context": prior_context,
+            }
         )
         for candidate in ordered:
             if (
@@ -303,7 +322,9 @@ class RuntimeScenarioBuilder:
         primary_commands = set(scenario.primary_focus_commands or [scenario.focus])
         if primary_commands & {"git clone", "git remote"}:
             remote_matches = dict(augmented.get("remote_url_matches", {}))
-            remote_matches.setdefault("origin", self._remote_url(initial_state, solution_commands, "app"))
+            remote_matches.setdefault(
+                "origin", self._remote_url(initial_state, solution_commands, "app")
+            )
             augmented["remote_url_matches"] = remote_matches
 
         if any(command.startswith("git commit") for command in solution_commands):
@@ -317,7 +338,9 @@ class RuntimeScenarioBuilder:
                 latest_rule["contains_paths"] = sorted(
                     set(latest_rule.get("contains_paths", [])) | set(changed_paths)
                 )
-                excluded_paths = sorted(set(initial_state.get("working_tree", {})) - set(changed_paths))
+                excluded_paths = sorted(
+                    set(initial_state.get("working_tree", {})) - set(changed_paths)
+                )
                 if excluded_paths:
                     latest_rule["excludes_paths"] = sorted(
                         set(latest_rule.get("excludes_paths", [])) | set(excluded_paths)
@@ -341,13 +364,11 @@ class RuntimeScenarioBuilder:
         must_identify = target_rule.get("must_identify", [])
         explicit_expected = {}
         for rule in target_rule.get("rules", []):
-            if rule.get("type") == "inspection_answer_matches" and isinstance(rule.get("expected"), dict):
+            if rule.get("type") == "inspection_answer_matches" and isinstance(
+                rule.get("expected"), dict
+            ):
                 explicit_expected.update(rule["expected"])
-        checks = {
-            key: observations[key]
-            for key in must_identify
-            if key in observations
-        }
+        checks = {key: observations[key] for key in must_identify if key in observations}
         expected_answer = explicit_expected or checks
         return {
             **template,
@@ -373,7 +394,10 @@ class RuntimeScenarioBuilder:
             target_rule=target_rule,
         )
 
-        context = {**auto, **{key: value for key, value in base.items() if value not in (None, "", [], {})}}
+        context = {
+            **auto,
+            **{key: value for key, value in base.items() if value not in (None, "", [], {})},
+        }
         context["current_state"] = self._merge_strings(
             auto.get("current_state", []),
             base.get("current_state", []),
@@ -456,7 +480,9 @@ class RuntimeScenarioBuilder:
         )
         if not commit_id:
             return None
-        return next((commit for commit in state.get("commits", []) if commit["id"] == commit_id), None)
+        return next(
+            (commit for commit in state.get("commits", []) if commit["id"] == commit_id), None
+        )
 
 
 class StudentContextFactory:
@@ -467,7 +493,9 @@ class StudentContextFactory:
         initial_state: dict,
         target_rule: dict,
     ) -> dict:
-        provided_values = self.provided_values(target_rule=target_rule, parameter_context=parameter_context)
+        provided_values = self.provided_values(
+            target_rule=target_rule, parameter_context=parameter_context
+        )
         warnings = self.warnings(target_rule)
         return self.normalize(
             {
@@ -501,14 +529,10 @@ class StudentContextFactory:
             items.append("Nothing is currently staged.")
         working = state.get("working_tree", {})
         visible_working = {
-            path: status
-            for path, status in working.items()
-            if str(status).lower() != "ignored"
+            path: status for path, status in working.items() if str(status).lower() != "ignored"
         }
         ignored = sorted(
-            path
-            for path, status in working.items()
-            if str(status).lower() == "ignored"
+            path for path, status in working.items() if str(status).lower() == "ignored"
         )
         if visible_working:
             items.append(f"Working tree changes: {self.format_value(sorted(visible_working))}.")
@@ -533,14 +557,26 @@ class StudentContextFactory:
         self._add(values, "Required commit message text", latest.get("message_contains"))
         self._add(values, "Target file", latest.get("contains_paths"))
         self._add(values, "File to leave out", latest.get("excludes_paths"))
-        self._add(values, "File that should remain in the working tree", target_rule.get("working_tree_contains"))
-        self._add(values, "File that should be absent from the working tree", target_rule.get("working_tree_absent"))
+        self._add(
+            values,
+            "File that should remain in the working tree",
+            target_rule.get("working_tree_contains"),
+        )
+        self._add(
+            values,
+            "File that should be absent from the working tree",
+            target_rule.get("working_tree_absent"),
+        )
         self._add(values, "File that should be staged", target_rule.get("staging_contains"))
         self._add(values, "Required local branch", target_rule.get("branch_exists"))
         self._add(values, "Branch that should not exist", target_rule.get("branch_absent"))
         self._add(values, "Remote name", target_rule.get("remote_exists"))
-        self._add(values, "Remote URL", list((target_rule.get("remote_url_matches") or {}).values()))
-        self._add(values, "Upstream branch", list((target_rule.get("upstream_tracking") or {}).values()))
+        self._add(
+            values, "Remote URL", list((target_rule.get("remote_url_matches") or {}).values())
+        )
+        self._add(
+            values, "Upstream branch", list((target_rule.get("upstream_tracking") or {}).values())
+        )
         self._add(values, "Destination folder", parameter_context.get("folder"))
         for rule in target_rule.get("rules", []):
             if rule.get("type") == "conflict_resolution_contains":
@@ -562,7 +598,9 @@ class StudentContextFactory:
             if paths:
                 items.append(f"The final snapshot must include {self.format_value(paths)}.")
             if message:
-                items.append(f"The final snapshot message must include {self.format_value(message)}.")
+                items.append(
+                    f"The final snapshot message must include {self.format_value(message)}."
+                )
         if target_rule.get("remote_url_matches"):
             items.append("The requested remote URL must be configured.")
         if target_rule.get("upstream_tracking"):
@@ -617,28 +655,37 @@ class StudentContextFactory:
     def normalize(self, context: dict) -> dict:
         normalized = {
             "story": self.format_value(context.get("story", "")),
-            "current_state": [self.format_value(item) for item in self._as_list(context.get("current_state"))],
-            "provided_values": [
-                {"label": self.format_value(item.get("label")), "value": self.format_value(item.get("value"))}
-                for item in self._as_list(context.get("provided_values"))
-                if isinstance(item, dict) and item.get("label") and item.get("value") not in (None, "")
+            "current_state": [
+                self.format_value(item) for item in self._as_list(context.get("current_state"))
             ],
-            "warnings": [self.format_value(item) for item in self._as_list(context.get("warnings"))],
+            "provided_values": [
+                {
+                    "label": self.format_value(item.get("label")),
+                    "value": self.format_value(item.get("value")),
+                }
+                for item in self._as_list(context.get("provided_values"))
+                if isinstance(item, dict)
+                and item.get("label")
+                and item.get("value") not in (None, "")
+            ],
+            "warnings": [
+                self.format_value(item) for item in self._as_list(context.get("warnings"))
+            ],
         }
-        return {
-            key: value
-            for key, value in normalized.items()
-            if value not in ("", [], None)
-        }
+        return {key: value for key, value in normalized.items() if value not in ("", [], None)}
 
     @staticmethod
     def format_value(value: Any) -> str:
         if value in (None, ""):
             return ""
         if isinstance(value, dict):
-            return ", ".join(f"{key}: {StudentContextFactory.format_value(item)}" for key, item in value.items())
+            return ", ".join(
+                f"{key}: {StudentContextFactory.format_value(item)}" for key, item in value.items()
+            )
         if isinstance(value, (list, tuple, set)):
-            return ", ".join(StudentContextFactory.format_value(item) for item in value if item not in (None, ""))
+            return ", ".join(
+                StudentContextFactory.format_value(item) for item in value if item not in (None, "")
+            )
         return str(value)
 
     def _add(self, values: list[dict[str, str]], label: str, value: Any) -> None:
@@ -664,7 +711,10 @@ class GeneratedVariantValidator:
         difficulty_instance: DifficultyInstance,
         scenario: ScenarioSkillFocus,
     ) -> None:
-        if variant.difficulty_instance_id and variant.difficulty_instance_id != difficulty_instance.id:
+        if (
+            variant.difficulty_instance_id
+            and variant.difficulty_instance_id != difficulty_instance.id
+        ):
             raise ScenarioVariantBuildError("Generated variant difficulty does not match.")
         if variant.scenario_id and variant.scenario_id != scenario.id:
             raise ScenarioVariantBuildError("Generated variant scenario does not match.")
@@ -680,7 +730,9 @@ class GeneratedVariantValidator:
             raise ScenarioVariantBuildError("Generated variant has no student context.")
         if not variant.parameter_context:
             raise ScenarioVariantBuildError("Generated variant has no parameter context.")
-        self._validate_primary_skill(variant=variant, difficulty_instance=difficulty_instance, scenario=scenario)
+        self._validate_primary_skill(
+            variant=variant, difficulty_instance=difficulty_instance, scenario=scenario
+        )
         self._validate_solution(variant=variant, difficulty_instance=difficulty_instance)
         self._validate_context_fairness(variant)
 
@@ -729,7 +781,9 @@ class GeneratedVariantValidator:
                 executed_commands=variant.solution_commands,
             )
         if not outcome.target_matched:
-            raise ScenarioVariantBuildError(f"Generated solution does not satisfy target rule: {outcome.summary}")
+            raise ScenarioVariantBuildError(
+                f"Generated solution does not satisfy target rule: {outcome.summary}"
+            )
 
     def _validate_context_fairness(self, variant: ScenarioVariant) -> None:
         flattened_context = json.dumps(variant.student_context, sort_keys=True).lower()
@@ -778,12 +832,18 @@ class GeneratedVariantValidator:
             }:
                 self._collect(values, rule.get("tokens"))
                 self._collect(values, rule.get("paths"))
-            if rule.get("type") in {"partial_hunks_committed", "partial_hunks_left_in_working_tree"}:
+            if rule.get("type") in {
+                "partial_hunks_committed",
+                "partial_hunks_left_in_working_tree",
+            }:
                 self._collect(values, rule.get("paths"))
         return {
             value
             for value in values
-            if value and len(value) > 1 and not value.startswith("$") and not value.startswith("git ")
+            if value
+            and len(value) > 1
+            and not value.startswith("$")
+            and not value.startswith("git ")
         }
 
     def _collect(self, values: set[str], value: Any) -> None:

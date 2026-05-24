@@ -221,10 +221,13 @@ def test_starting_session_creates_persisted_generated_variant_with_student_conte
     payload = session_payload(session, include_steps=False)
     serialized_payload = json.dumps(payload)
 
-    assert ScenarioVariant.objects.filter(
-        difficulty_instance=difficulty,
-        is_generated=True,
-    ).count() == before_count + 1
+    assert (
+        ScenarioVariant.objects.filter(
+            difficulty_instance=difficulty,
+            is_generated=True,
+        ).count()
+        == before_count + 1
+    )
     assert variant.is_generated is True
     assert variant.generated_from_blueprint is not None
     assert variant.parameter_context
@@ -281,10 +284,13 @@ def test_active_session_payload_and_command_submit_do_not_regenerate_variant(stu
     session.refresh_from_db()
 
     assert session.variant_id == variant_id
-    assert ScenarioVariant.objects.filter(
-        difficulty_instance=difficulty,
-        is_generated=True,
-    ).count() == generated_count
+    assert (
+        ScenarioVariant.objects.filter(
+            difficulty_instance=difficulty,
+            is_generated=True,
+        ).count()
+        == generated_count
+    )
 
 
 def test_generated_context_exposes_checked_values_without_solution_commands(student):
@@ -401,7 +407,10 @@ def test_retry_after_failure_uses_changed_variant_when_available(student):
     assert retry.variant_id != prior.variant_id
     assert retry.variant.scenario_id == prior.variant.scenario_id == difficulty.scenario_id
     assert retry.variant.difficulty_instance_id == difficulty.id
-    assert retry.variant.scenario.primary_focus_commands == prior.variant.scenario.primary_focus_commands
+    assert (
+        retry.variant.scenario.primary_focus_commands
+        == prior.variant.scenario.primary_focus_commands
+    )
     assert retry.variant.variant_fingerprint != prior.variant.variant_fingerprint
     assert retry.variant.parameter_context != prior.variant.parameter_context
     assert retry.variant.blueprint_signature == prior.variant.blueprint_signature
@@ -489,10 +498,13 @@ def test_review_mode_logs_separately_without_new_completion(student):
 
     assert review_session.mode == SESSION_MODE_REVIEW
     assert review_session.variant_id == completion.session.variant_id
-    assert ScenarioVariant.objects.filter(
-        difficulty_instance=difficulty,
-        is_generated=True,
-    ).count() == generated_count
+    assert (
+        ScenarioVariant.objects.filter(
+            difficulty_instance=difficulty,
+            is_generated=True,
+        ).count()
+        == generated_count
+    )
     assert (
         CompletionRecord.objects.filter(user=student, difficulty_instance=difficulty).count() == 1
     )
@@ -530,7 +542,9 @@ def test_scenario_summary_payload_excludes_heavy_preview_fields(student):
     scenario = ScenarioSkillFocus.objects.get(slug="form-clean-commit", is_published=True)
 
     payload = scenario_status_payload(user=student, scenario=scenario)
-    list_payload = scenario_status_payloads(user=student, scenarios=[scenario], include_preview=False)[0]
+    list_payload = scenario_status_payloads(
+        user=student, scenarios=[scenario], include_preview=False
+    )[0]
 
     assert "demo_repository_state" in payload
     assert "safe_demo_commands" in payload
@@ -727,7 +741,9 @@ def test_review_sessions_do_not_replace_primary_accuracy(student):
     review_session.counted_action_total = 2
     review_session.completed_at = timezone.now()
     review_session.ended_at = review_session.completed_at
-    review_session.save(update_fields=["status", "counted_action_total", "completed_at", "ended_at"])
+    review_session.save(
+        update_fields=["status", "counted_action_total", "completed_at", "ended_at"]
+    )
 
     payload = scenario_status_payload(user=student, scenario=difficulty.scenario)
     easy = next(item for item in payload["difficulties"] if item["difficulty"] == "easy")
@@ -806,7 +822,9 @@ def test_command_classifier_keeps_diagnostics_free_and_actions_counted():
         COMMAND_DIAGNOSTIC,
         0,
     )
-    assert classifier.classify(command="git diff --staged", policy_snapshot=policy, processed=True) == (
+    assert classifier.classify(
+        command="git diff --staged", policy_snapshot=policy, processed=True
+    ) == (
         COMMAND_DIAGNOSTIC,
         0,
     )
@@ -814,23 +832,33 @@ def test_command_classifier_keeps_diagnostics_free_and_actions_counted():
         COMMAND_DIAGNOSTIC,
         0,
     )
-    assert classifier.classify(command="git branch -d stale", policy_snapshot=policy, processed=True) == (
+    assert classifier.classify(
+        command="git branch -d stale", policy_snapshot=policy, processed=True
+    ) == (
         COMMAND_COUNTED,
         1,
     )
-    assert classifier.classify(command="git restore scratch.md", policy_snapshot=policy, processed=True) == (
+    assert classifier.classify(
+        command="git restore scratch.md", policy_snapshot=policy, processed=True
+    ) == (
         COMMAND_COUNTED,
         1,
     )
-    assert classifier.classify(command="git status --wat", policy_snapshot=policy, processed=False) == (
+    assert classifier.classify(
+        command="git status --wat", policy_snapshot=policy, processed=False
+    ) == (
         COMMAND_COUNTED,
         1,
     )
-    assert classifier.classify(command="git rebase main", policy_snapshot=policy, processed=False) == (
+    assert classifier.classify(
+        command="git rebase main", policy_snapshot=policy, processed=False
+    ) == (
         COMMAND_COUNTED,
         1,
     )
-    assert classifier.classify(command="python cleanup.py", policy_snapshot=policy, processed=False) == (
+    assert classifier.classify(
+        command="python cleanup.py", policy_snapshot=policy, processed=False
+    ) == (
         COMMAND_UNPROCESSABLE,
         0,
     )
@@ -847,14 +875,19 @@ def test_invalid_git_syntax_consumes_action_budget(student):
         source_entry_point="lesson",
     )
 
-    response = CommandProcessingService().submit_command(session=session, command="git status --wat")
+    response = CommandProcessingService().submit_command(
+        session=session, command="git status --wat"
+    )
 
     session.refresh_from_db()
     assert response["command_classification"] == COMMAND_COUNTED
     assert response["evaluation_result"] == RESULT_INVALID
     assert "error: unknown option" in response["terminal_output"]
     assert session.counted_action_total == 1
-    assert response["remaining_counted_commands"] == session.command_policy_snapshot["max_counted_commands"] - 1
+    assert (
+        response["remaining_counted_commands"]
+        == session.command_policy_snapshot["max_counted_commands"] - 1
+    )
 
 
 def test_inspection_scenario_completes_without_fake_state_changes(student):
@@ -997,7 +1030,10 @@ def test_retry_after_failed_retry_resets_action_budget(student):
     payload = session_payload(next_retry)
 
     assert next_retry.counted_action_total == 0
-    assert payload["counts"]["remaining_counted_commands"] == next_retry.command_policy_snapshot["max_counted_commands"]
+    assert (
+        payload["counts"]["remaining_counted_commands"]
+        == next_retry.command_policy_snapshot["max_counted_commands"]
+    )
 
 
 def test_generated_variants_do_not_contain_unresolved_target_placeholders(student):
@@ -1023,7 +1059,9 @@ def test_generated_variants_do_not_contain_unresolved_target_placeholders(studen
 
 
 def test_generated_state_based_variants_require_focus_commands_and_hide_task_answers(student):
-    for difficulty in DifficultyInstance.objects.select_related("scenario").filter(is_published=True):
+    for difficulty in DifficultyInstance.objects.select_related("scenario").filter(
+        is_published=True
+    ):
         task_prompt = difficulty.task_prompt.lower()
         assert "git " not in task_prompt.replace("git repository", "repository")
         for focus_command in difficulty.scenario.primary_focus_commands:
@@ -1041,4 +1079,3 @@ def test_generated_state_based_variants_require_focus_commands_and_hide_task_ans
 
         if difficulty.scenario.focus in {"git clone", "git remote"}:
             assert variant.target_rule.get("remote_url_matches", {}).get("origin")
-

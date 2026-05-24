@@ -104,7 +104,12 @@ def test_evaluator_supports_remote_stash_reflog_and_unchanged_rules():
         "remote_branch_matches_local": {"origin/main": "main"},
         "stash_stack_empty": True,
         "reflog_contains": ["reset"],
-        "repository_state_unchanged_except": ["remotes", "remote_branches", "upstream_tracking", "reflog"],
+        "repository_state_unchanged_except": [
+            "remotes",
+            "remote_branches",
+            "upstream_tracking",
+            "reflog",
+        ],
     }
 
     result = StateBasedEvaluator().evaluate(state, rule, initial_state=initial)
@@ -168,14 +173,22 @@ def test_inspection_evaluator_requires_commands_and_unchanged_state():
         current_state=state,
         expected_observations=expected,
         executed_commands=["git status"],
-        submitted_answer={"head_branch": "main", "unstaged_changes": ["README.md"], "staging_empty": True},
+        submitted_answer={
+            "head_branch": "main",
+            "unstaged_changes": ["README.md"],
+            "staging_empty": True,
+        },
     )
     missing_command = InspectionEvaluator().evaluate(
         initial_state=state,
         current_state=state,
         expected_observations=expected,
         executed_commands=["git diff"],
-        submitted_answer={"head_branch": "main", "unstaged_changes": ["README.md"], "staging_empty": True},
+        submitted_answer={
+            "head_branch": "main",
+            "unstaged_changes": ["README.md"],
+            "staging_empty": True,
+        },
     )
     missing_answer = InspectionEvaluator().evaluate(
         initial_state=state,
@@ -195,7 +208,12 @@ def test_evaluator_supports_module1_exact_state_rules():
         {
             "commits": [
                 {"id": "c0", "message": "Base", "parents": [], "tree": {"src/auth.py": "auth-v1"}},
-                {"id": "c1", "message": "WIP auth", "parents": ["c0"], "tree": {"src/auth.py": "auth-v2"}},
+                {
+                    "id": "c1",
+                    "message": "WIP auth",
+                    "parents": ["c0"],
+                    "tree": {"src/auth.py": "auth-v2"},
+                },
             ],
             "branches": {"main": "c1"},
             "head": {"type": "branch", "name": "main"},
@@ -222,11 +240,26 @@ def test_evaluator_supports_module1_exact_state_rules():
         "rules": [
             {"type": "commit_count_equals", "count": 3},
             {"type": "commit_count_on_branch_equals", "branch": "main", "count": 2},
-            {"type": "operation_metadata_equals", "key": "last_amend_replaced_commit", "value": "c1"},
-            {"type": "operation_metadata_not_equals", "key": "last_amend_created_commit", "value": "c1"},
-            {"type": "operation_metadata_contains", "key": "last_amend_created_commit", "value": "c2"},
+            {
+                "type": "operation_metadata_equals",
+                "key": "last_amend_replaced_commit",
+                "value": "c1",
+            },
+            {
+                "type": "operation_metadata_not_equals",
+                "key": "last_amend_created_commit",
+                "value": "c1",
+            },
+            {
+                "type": "operation_metadata_contains",
+                "key": "last_amend_created_commit",
+                "value": "c2",
+            },
             {"type": "partial_hunks_committed", "paths": {"src/auth.py": ["auth-validation-hunk"]}},
-            {"type": "partial_hunks_left_in_working_tree", "paths": {"src/auth.py": ["auth-refactor-hunk"]}},
+            {
+                "type": "partial_hunks_left_in_working_tree",
+                "paths": {"src/auth.py": ["auth-refactor-hunk"]},
+            },
             {"type": "commit_changes_exclude_tokens", "tokens": ["auth-refactor-hunk"]},
             {"type": "commit_tree_contains_tokens", "tokens": ["auth-validation-hunk"]},
             {"type": "working_tree_excludes_tokens", "tokens": ["auth-validation-hunk"]},
@@ -252,7 +285,11 @@ def test_evaluator_checks_init_clone_and_tracked_generated_file_rules():
             "repository_initialized": True,
             "rules": [
                 {"type": "commit_count_equals", "count": 0},
-                {"type": "operation_metadata_equals", "key": "last_init_directory", "value": "research-log"},
+                {
+                    "type": "operation_metadata_equals",
+                    "key": "last_init_directory",
+                    "value": "research-log",
+                },
             ],
         },
     )
@@ -289,15 +326,30 @@ def test_evaluator_checks_init_clone_and_tracked_generated_file_rules():
             "working_tree_clean": True,
             "staging_empty": True,
             "rules": [
-                {"type": "operation_metadata_equals", "key": "last_clone_destination", "value": "docs-portal"},
-                {"type": "commit_tree_contains", "commit": "r10", "tree": {"README.md": "docs-readme-v1"}},
+                {
+                    "type": "operation_metadata_equals",
+                    "key": "last_clone_destination",
+                    "value": "docs-portal",
+                },
+                {
+                    "type": "commit_tree_contains",
+                    "commit": "r10",
+                    "tree": {"README.md": "docs-readme-v1"},
+                },
             ],
         },
     )
 
     rm_state = simulator.normalize_state(
         {
-            "commits": [{"id": "c0", "message": "Base", "parents": [], "tree": {".env": "secret", ".gitignore": "*.env"}}],
+            "commits": [
+                {
+                    "id": "c0",
+                    "message": "Base",
+                    "parents": [],
+                    "tree": {".env": "secret", ".gitignore": "*.env"},
+                }
+            ],
             "branches": {"main": "c0"},
             "head": {"type": "branch", "name": "main"},
             "working_tree": {},
@@ -384,14 +436,18 @@ def test_rule_evaluator_checks_commit_message_changes_scope_and_clean_state():
 
 def test_rule_evaluator_reports_failed_rule_diagnostics():
     state = {
-        "commits": [{"id": "c0", "message": "Base", "parents": [], "files": {"README.md": "added"}}],
+        "commits": [
+            {"id": "c0", "message": "Base", "parents": [], "files": {"README.md": "added"}}
+        ],
         "branches": {"main": "c0"},
         "head": {"type": "branch", "name": "main"},
         "working_tree": {},
         "staging": {},
         "conflicts": [],
     }
-    rule = {"rules": [{"type": "branch_tip_commit", "branch": "main", "changes_include": ["app.py"]}]}
+    rule = {
+        "rules": [{"type": "branch_tip_commit", "branch": "main", "changes_include": ["app.py"]}]
+    }
 
     result = StateBasedEvaluator().evaluate(state, rule)
 
@@ -403,7 +459,12 @@ def test_rule_evaluator_reports_failed_rule_diagnostics():
 def test_rule_evaluator_supports_selective_staging_expectations():
     state = {
         "commits": [
-            {"id": "c0", "message": "Base", "parents": [], "tree": {"app.py": "v1", "notes.md": "v1"}},
+            {
+                "id": "c0",
+                "message": "Base",
+                "parents": [],
+                "tree": {"app.py": "v1", "notes.md": "v1"},
+            },
             {
                 "id": "c1",
                 "message": "Update app only",
@@ -420,7 +481,12 @@ def test_rule_evaluator_supports_selective_staging_expectations():
     }
     rule = {
         "rules": [
-            {"type": "branch_tip_commit", "branch": "main", "changes_include": ["app.py"], "changes_exclude": ["notes.md"]},
+            {
+                "type": "branch_tip_commit",
+                "branch": "main",
+                "changes_include": ["app.py"],
+                "changes_exclude": ["notes.md"],
+            },
             {"type": "working_tree_contains", "path": "notes.md"},
             {"type": "index_empty"},
         ]
@@ -449,7 +515,11 @@ def test_rule_evaluator_checks_branch_creation_from_initial_head():
         "rules": [
             {"type": "branch_exists", "branch": "feature/form"},
             {"type": "head_branch_equals", "branch": "feature/form"},
-            {"type": "branch_points_to", "branch": "feature/form", "commit": "$initial.head_commit"},
+            {
+                "type": "branch_points_to",
+                "branch": "feature/form",
+                "commit": "$initial.head_commit",
+            },
         ]
     }
 
@@ -465,7 +535,12 @@ def test_rule_evaluator_checks_merge_commit_and_conflict_state():
             "commits": [
                 {"id": "c0", "message": "Base", "parents": [], "tree": {"app.py": "base"}},
                 {"id": "c1", "message": "Main", "parents": ["c0"], "tree": {"app.py": "main"}},
-                {"id": "c2", "message": "Feature", "parents": ["c0"], "tree": {"app.py": "feature"}},
+                {
+                    "id": "c2",
+                    "message": "Feature",
+                    "parents": ["c0"],
+                    "tree": {"app.py": "feature"},
+                },
             ],
             "branches": {"main": "c1", "feature/app": "c2"},
             "head": {"type": "branch", "name": "main"},
@@ -480,13 +555,20 @@ def test_rule_evaluator_checks_merge_commit_and_conflict_state():
         merged,
         {
             "rules": [
-                {"type": "branch_tip_commit", "branch": "main", "parent_count_equals": 2, "is_merge": True},
+                {
+                    "type": "branch_tip_commit",
+                    "branch": "main",
+                    "parent_count_equals": 2,
+                    "is_merge": True,
+                },
                 {"type": "conflict_free"},
             ]
         },
     )
 
-    conflict_state = simulator.normalize_state({**state, "conflict_on_merge": True, "conflict_files": ["app.py"]})
+    conflict_state = simulator.normalize_state(
+        {**state, "conflict_on_merge": True, "conflict_files": ["app.py"]}
+    )
     conflicted = simulator.process(conflict_state, "git merge feature/app").state
     conflict_result = StateBasedEvaluator().evaluate(
         conflicted,
@@ -518,9 +600,16 @@ def test_rule_evaluator_distinguishes_reset_modes():
     hard = simulator.process(state, "git reset --hard HEAD~1").state
 
     evaluator = StateBasedEvaluator()
-    assert evaluator.evaluate(soft, {"rules": [{"type": "staging_contains", "path": "app.py"}]}).target_matched
-    assert evaluator.evaluate(mixed, {"rules": [{"type": "working_tree_contains", "path": "app.py"}, {"type": "index_empty"}]}).target_matched
-    assert evaluator.evaluate(hard, {"rules": [{"type": "working_tree_clean"}, {"type": "index_empty"}]}).target_matched
+    assert evaluator.evaluate(
+        soft, {"rules": [{"type": "staging_contains", "path": "app.py"}]}
+    ).target_matched
+    assert evaluator.evaluate(
+        mixed,
+        {"rules": [{"type": "working_tree_contains", "path": "app.py"}, {"type": "index_empty"}]},
+    ).target_matched
+    assert evaluator.evaluate(
+        hard, {"rules": [{"type": "working_tree_clean"}, {"type": "index_empty"}]}
+    ).target_matched
 
 
 def test_rule_evaluator_checks_restore_index_and_working_tree_effects():
@@ -540,8 +629,24 @@ def test_rule_evaluator_checks_restore_index_and_working_tree_effects():
     restored = simulator.process(unstaged, "git restore app.py").state
     evaluator = StateBasedEvaluator()
 
-    assert evaluator.evaluate(unstaged, {"rules": [{"type": "staging_excludes", "path": "app.py"}, {"type": "working_tree_contains", "path": "app.py"}]}).target_matched
-    assert evaluator.evaluate(restored, {"rules": [{"type": "working_tree_absent", "path": "app.py"}, {"type": "working_tree_contains", "path": "notes.md"}]}).target_matched
+    assert evaluator.evaluate(
+        unstaged,
+        {
+            "rules": [
+                {"type": "staging_excludes", "path": "app.py"},
+                {"type": "working_tree_contains", "path": "app.py"},
+            ]
+        },
+    ).target_matched
+    assert evaluator.evaluate(
+        restored,
+        {
+            "rules": [
+                {"type": "working_tree_absent", "path": "app.py"},
+                {"type": "working_tree_contains", "path": "notes.md"},
+            ]
+        },
+    ).target_matched
 
 
 def test_rule_evaluator_checks_fetch_pull_and_push_state():
@@ -565,9 +670,21 @@ def test_rule_evaluator_checks_fetch_pull_and_push_state():
     pulled = simulator.process(fetched, "git pull").state
     pushed = simulator.process(pulled, "git push").state
 
-    assert evaluator.evaluate(fetched, {"rules": [{"type": "fetch_updated_remote_tracking_without_moving_local", "branch": "main"}]}, initial_state=state).target_matched
-    assert evaluator.evaluate(pulled, {"rules": [{"type": "pull_moved_local_to_upstream", "branch": "main"}]}).target_matched
-    assert evaluator.evaluate(pushed, {"rules": [{"type": "push_moved_remote_to_local_tip", "branch": "main"}]}).target_matched
+    assert evaluator.evaluate(
+        fetched,
+        {
+            "rules": [
+                {"type": "fetch_updated_remote_tracking_without_moving_local", "branch": "main"}
+            ]
+        },
+        initial_state=state,
+    ).target_matched
+    assert evaluator.evaluate(
+        pulled, {"rules": [{"type": "pull_moved_local_to_upstream", "branch": "main"}]}
+    ).target_matched
+    assert evaluator.evaluate(
+        pushed, {"rules": [{"type": "push_moved_remote_to_local_tip", "branch": "main"}]}
+    ).target_matched
 
 
 def test_rule_evaluator_checks_stash_save_and_pop():
@@ -587,15 +704,37 @@ def test_rule_evaluator_checks_stash_save_and_pop():
     popped = simulator.process(stashed, "git stash pop").state
     evaluator = StateBasedEvaluator()
 
-    assert evaluator.evaluate(stashed, {"rules": [{"type": "stash_stack_contains_paths", "paths": ["app.py", "README.md"]}, {"type": "working_tree_clean"}, {"type": "index_empty"}]}).target_matched
-    assert evaluator.evaluate(popped, {"rules": [{"type": "stash_stack_empty"}, {"type": "stash_pop_restored_paths", "paths": ["app.py", "README.md"]}]}).target_matched
+    assert evaluator.evaluate(
+        stashed,
+        {
+            "rules": [
+                {"type": "stash_stack_contains_paths", "paths": ["app.py", "README.md"]},
+                {"type": "working_tree_clean"},
+                {"type": "index_empty"},
+            ]
+        },
+    ).target_matched
+    assert evaluator.evaluate(
+        popped,
+        {
+            "rules": [
+                {"type": "stash_stack_empty"},
+                {"type": "stash_pop_restored_paths", "paths": ["app.py", "README.md"]},
+            ]
+        },
+    ).target_matched
 
 
 def test_rule_evaluator_normalizes_legacy_commit_files_for_changes_and_tree():
     state = {
         "commits": [
             {"id": "c0", "message": "Base", "parents": []},
-            {"id": "c1", "message": "Legacy change", "parents": ["c0"], "files": {"legacy.txt": "legacy-v1"}},
+            {
+                "id": "c1",
+                "message": "Legacy change",
+                "parents": ["c0"],
+                "files": {"legacy.txt": "legacy-v1"},
+            },
         ],
         "branches": {"main": "c1"},
         "head": {"type": "branch", "name": "main"},

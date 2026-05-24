@@ -74,7 +74,11 @@ class RepositoryStateNormalizer:
 
             parent_tree = self.parent_tree(commit, commits_by_id)
             tree_was_authored = isinstance(commit.get("tree"), dict)
-            tree = copy.deepcopy(commit.get("tree")) if tree_was_authored else copy.deepcopy(parent_tree)
+            tree = (
+                copy.deepcopy(commit.get("tree"))
+                if tree_was_authored
+                else copy.deepcopy(parent_tree)
+            )
 
             if tree_was_authored:
                 inferred_changes = self.diff_trees(parent_tree, tree)
@@ -200,3 +204,69 @@ class RepositoryStateNormalizer:
     def contains_tokens(self, value: object | None, tokens: list[str]) -> bool:
         haystack = self.token_haystack(value).lower()
         return all(str(token).lower() in haystack for token in tokens)
+
+    def head_commit_id(self, state: dict) -> str | None:
+        head = state.get("head", {})
+        if head.get("type") == "branch":
+            return state.get("branches", {}).get(head.get("name"))
+        return head.get("target")
+
+    def commit_by_id(self, state: dict, commit_id: str | None) -> dict | None:
+        if not commit_id:
+            return None
+        return next(
+            (commit for commit in state.get("commits", []) if commit.get("id") == commit_id), None
+        )
+
+    def head_tree(self, state: dict) -> dict:
+        commit = self.commit_by_id(state, self.head_commit_id(state))
+        return copy.deepcopy((commit or {}).get("tree") or {})
+
+    def visible_project_tree(self, state: dict) -> dict[str, dict]:
+        """Derive the user-visible file set from HEAD, index, and worktree.
+
+        ``working_tree`` in authored scenarios intentionally stores only local
+        changes, not every committed file. The Project Structure panel needs the
+        merged view students would see in a checkout, so this helper starts with
+        the HEAD tree and overlays staged and working-tree entries.
+        """
+
+        normalized = self.normalize(state)
+        visible: dict[str, dict] = {
+            path: {"status": "clean", "source": "head", "content": copy.deepcopy(content)}
+            for path, content in self.head_tree(normalized).items()
+        }
+
+        for path, value in (normalized.get("staging") or {}).items():
+            status = self.entry_status(value) or "modified"
+            if self.is_delete_marker(status) or self.is_delete_marker(value):
+                visible[path] = {"status": "deleted", "source": "staging", "content": None}
+                continue
+            visible[path] = {
+                "status": self.display_status(value, fallback="modified"),
+                "source": "staging",
+                "content": copy.deepcopy(value),
+            }
+
+        for path, value in (normalized.get("working_tree") or {}).items():
+            status = self.entry_status(value) or "modified"
+            if self.is_delete_marker(status) or self.is_delete_marker(value):
+                visible[path] = {"status": "deleted", "source": "working_tree", "content": None}
+                continue
+            visible[path] = {
+                "status": self.display_status(value, fallback="modified"),
+                "source": "working_tree",
+                "content": copy.deepcopy(value),
+            }
+
+        return dict(sorted(visible.items()))
+
+    def display_status(self, value: object | None, *, fallback: str = "changed") -> str:
+        status = self.entry_status(value)
+        if status in {"", "none"}:
+            return fallback
+        if status in {"new", "added"}:
+            return "added"
+        if status in {"remove", "removed"}:
+            return "deleted"
+        return status

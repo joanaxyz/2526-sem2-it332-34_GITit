@@ -42,6 +42,7 @@ DIFFICULTY_MAP = {
 def default_successful_attempts_for_difficulty(difficulty: str) -> int:
     return 3 if difficulty == DIFFICULTY_EASY else 2
 
+
 TOPICS = ("auth", "payment", "search", "export", "profile")
 PLACEHOLDER_RE = re.compile(r"<[^>]+>")
 TASK_COMMAND_REPLACEMENTS = (
@@ -397,11 +398,7 @@ class DynamicVariantGenerator:
 
         contexts = [{}]
         for key, values in pools.items():
-            contexts = [
-                {**context, key: value}
-                for context in contexts
-                for value in values
-            ]
+            contexts = [{**context, key: value} for context in contexts for value in values]
         return contexts
 
     def _render(self, value: Any, context: dict[str, Any]) -> Any:
@@ -556,7 +553,9 @@ class ModuleOneSeedBuilder:
         narrative: str,
         task_prompt: str,
         lesson_number: int,
-        difficulty_configs: dict[str, tuple[str, str, tuple[int, int, list[str]], VariantTemplateSpec]],
+        difficulty_configs: dict[
+            str, tuple[str, str, tuple[int, int, list[str]], VariantTemplateSpec]
+        ],
     ) -> ScenarioSpec:
         difficulties = {}
         for difficulty, (diff_narrative, task, policy, template) in difficulty_configs.items():
@@ -599,10 +598,22 @@ class ModuleOneSeedBuilder:
 
     def _init_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
         cases = [
-            {"project": "docs-portal", "files": {"README.md": "untracked", "docs/intro.md": "untracked"}},
-            {"project": "api-starter", "files": {"README.md": "untracked", "api/routes.py": "untracked"}},
-            {"project": "cli-tool", "files": {"README.md": "untracked", "git_it_cli.py": "untracked"}},
-            {"project": "profile-site", "files": {"README.md": "untracked", "site/index.html": "untracked"}},
+            {
+                "project": "docs-portal",
+                "files": {"README.md": "untracked", "docs/intro.md": "untracked"},
+            },
+            {
+                "project": "api-starter",
+                "files": {"README.md": "untracked", "api/routes.py": "untracked"},
+            },
+            {
+                "project": "cli-tool",
+                "files": {"README.md": "untracked", "git_it_cli.py": "untracked"},
+            },
+            {
+                "project": "profile-site",
+                "files": {"README.md": "untracked", "site/index.html": "untracked"},
+            },
         ]
         template = self._state_template(
             slug="init-{{project}}-{{index}}",
@@ -649,23 +660,47 @@ class ModuleOneSeedBuilder:
                     "The files sit at different depths. Create one clean initial snapshot.",
                     "Initialize the project and save the starter files in one snapshot.",
                     (3, 5, self.diagnostic_commands),
-                    self._copy_template(template, count=2, signature="init/medium/{{project}}/{{index}}"),
+                    self._copy_template(
+                        template, count=2, signature="init/medium/{{project}}/{{index}}"
+                    ),
                 ),
                 DIFFICULTY_HARD: (
                     "Use the repository state alone to create the first clean commit.",
                     "Initialize the project and save a clean first snapshot.",
                     (3, 4, self.diagnostic_commands),
-                    self._copy_template(template, count=2, signature="init/hard/{{project}}/{{index}}"),
+                    self._copy_template(
+                        template, count=2, signature="init/hard/{{project}}/{{index}}"
+                    ),
                 ),
             },
         )
 
     def _clone_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
         cases = [
-            {"project": "docs-portal", "url": "https://example.test/docs-portal.git", "folder": "docs-portal", "remote_commit": "r10"},
-            {"project": "api-starter", "url": "git@example.test:training/api-starter.git", "folder": "api-starter", "remote_commit": "r11"},
-            {"project": "cli-tool", "url": "https://example.test/tools/cli-tool.git", "folder": "cli-lab", "remote_commit": "r12"},
-            {"project": "profile-site", "url": "git@example.test:training/profile-site.git", "folder": "profile-site", "remote_commit": "r13"},
+            {
+                "project": "docs-portal",
+                "url": "https://example.test/docs-portal.git",
+                "folder": "docs-portal",
+                "remote_commit": "r10",
+            },
+            {
+                "project": "api-starter",
+                "url": "git@example.test:training/api-starter.git",
+                "folder": "api-starter",
+                "remote_commit": "r11",
+            },
+            {
+                "project": "cli-tool",
+                "url": "https://example.test/tools/cli-tool.git",
+                "folder": "cli-lab",
+                "remote_commit": "r12",
+            },
+            {
+                "project": "profile-site",
+                "url": "git@example.test:training/profile-site.git",
+                "folder": "profile-site",
+                "remote_commit": "r13",
+            },
         ]
         template = self._state_template(
             slug="clone-{{project}}-{{index}}",
@@ -713,23 +748,43 @@ class ModuleOneSeedBuilder:
                     "The destination folder name differs from the remote project name.",
                     "Create the local working copy in the requested folder.",
                     (1, 3, self.diagnostic_commands),
-                    self._copy_template(template, count=2, signature="clone/medium/{{project}}/{{folder}}/{{index}}"),
+                    self._copy_template(
+                        template, count=2, signature="clone/medium/{{project}}/{{folder}}/{{index}}"
+                    ),
                 ),
                 DIFFICULTY_HARD: (
                     "Use the provided remote details with no extra setup.",
                     "Create the local working copy from the remote.",
                     (1, 2, self.diagnostic_commands),
-                    self._copy_template(template, count=2, signature="clone/hard/{{project}}/{{folder}}/{{index}}"),
+                    self._copy_template(
+                        template, count=2, signature="clone/hard/{{project}}/{{folder}}/{{index}}"
+                    ),
                 ),
             },
         )
 
     def _stage_commit_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
         cases = [
-            {"project": "form-flow", "files": {"src/form.js": "modified"}, "message": "Update form validation"},
-            {"project": "copy-pass", "files": {"README.md": "modified"}, "message": "Clarify setup notes"},
-            {"project": "asset-cleanup", "files": {"src/app.js": "modified", "styles/site.css": "modified"}, "message": "Refresh app styling"},
-            {"project": "api-route", "files": {"api/routes.py": "modified"}, "message": "Add route handling"},
+            {
+                "project": "form-flow",
+                "files": {"src/form.js": "modified"},
+                "message": "Update form validation",
+            },
+            {
+                "project": "copy-pass",
+                "files": {"README.md": "modified"},
+                "message": "Clarify setup notes",
+            },
+            {
+                "project": "asset-cleanup",
+                "files": {"src/app.js": "modified", "styles/site.css": "modified"},
+                "message": "Refresh app styling",
+            },
+            {
+                "project": "api-route",
+                "files": {"api/routes.py": "modified"},
+                "message": "Add route handling",
+            },
         ]
         template = self._state_template(
             slug="commit-{{project}}-{{index}}",
@@ -772,22 +827,50 @@ class ModuleOneSeedBuilder:
                     "Use the status and diff views to decide what belongs in the snapshot.",
                     "Prepare the intended files and save the snapshot.",
                     (2, 5, self.diagnostic_commands),
-                    self._copy_template(template, count=3, signature="commit/medium/{{project}}/{{index}}"),
+                    self._copy_template(
+                        template, count=3, signature="commit/medium/{{project}}/{{index}}"
+                    ),
                 ),
                 DIFFICULTY_HARD: (
                     "Only the repository state view is available.",
                     "Prepare and save the intended change.",
                     (2, 4, self.diagnostic_commands),
-                    self._copy_template(template, count=2, signature="commit/hard/{{project}}/{{index}}"),
+                    self._copy_template(
+                        template, count=2, signature="commit/hard/{{project}}/{{index}}"
+                    ),
                 ),
             },
         )
 
     def _gitignore_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
         cases = [
-            {"project": "node-app", "files": {".gitignore": "untracked", "node_modules/pkg.js": "ignored", "dist/app.js": "ignored"}, "message": "Add Node ignore rules"},
-            {"project": "python-api", "files": {".gitignore": "untracked", "__pycache__/app.pyc": "ignored", ".env": "ignored"}, "message": "Add Python ignore rules"},
-            {"project": "java-service", "files": {".gitignore": "untracked", "target/classes/App.class": "ignored", "app.log": "ignored"}, "message": "Add Java ignore rules"},
+            {
+                "project": "node-app",
+                "files": {
+                    ".gitignore": "untracked",
+                    "node_modules/pkg.js": "ignored",
+                    "dist/app.js": "ignored",
+                },
+                "message": "Add Node ignore rules",
+            },
+            {
+                "project": "python-api",
+                "files": {
+                    ".gitignore": "untracked",
+                    "__pycache__/app.pyc": "ignored",
+                    ".env": "ignored",
+                },
+                "message": "Add Python ignore rules",
+            },
+            {
+                "project": "java-service",
+                "files": {
+                    ".gitignore": "untracked",
+                    "target/classes/App.class": "ignored",
+                    "app.log": "ignored",
+                },
+                "message": "Add Java ignore rules",
+            },
         ]
         template = self._state_template(
             slug="ignore-{{project}}-{{index}}",
@@ -835,22 +918,41 @@ class ModuleOneSeedBuilder:
                     "The project type changes which generated files should stay out.",
                     "Save the ignore rules and leave generated files out of history.",
                     (2, 4, self.diagnostic_commands),
-                    self._copy_template(template, count=2, signature="ignore/medium/{{project}}/{{index}}"),
+                    self._copy_template(
+                        template, count=2, signature="ignore/medium/{{project}}/{{index}}"
+                    ),
                 ),
                 DIFFICULTY_HARD: (
                     "Use the state view to identify the one file that belongs in history.",
                     "Save the ignore rules without saving ignored artifacts.",
                     (2, 3, self.diagnostic_commands),
-                    self._copy_template(template, count=2, signature="ignore/hard/{{project}}/{{index}}"),
+                    self._copy_template(
+                        template, count=2, signature="ignore/hard/{{project}}/{{index}}"
+                    ),
                 ),
             },
         )
 
     def _partial_staging_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
         cases = [
-            {"project": "auth", "file": "src/auth.py", "other_file": "notes/auth-notes.md", "message": "Isolate auth validation"},
-            {"project": "search", "file": "src/search.py", "other_file": "notes/search-notes.md", "message": "Isolate search ranking"},
-            {"project": "billing", "file": "src/billing.py", "other_file": "notes/billing-notes.md", "message": "Isolate billing totals"},
+            {
+                "project": "auth",
+                "file": "src/auth.py",
+                "other_file": "notes/auth-notes.md",
+                "message": "Isolate auth validation",
+            },
+            {
+                "project": "search",
+                "file": "src/search.py",
+                "other_file": "notes/search-notes.md",
+                "message": "Isolate search ranking",
+            },
+            {
+                "project": "billing",
+                "file": "src/billing.py",
+                "other_file": "notes/billing-notes.md",
+                "message": "Isolate billing totals",
+            },
         ]
         template = self._state_template(
             slug="partial-{{project}}-{{index}}",
@@ -903,13 +1005,17 @@ class ModuleOneSeedBuilder:
                     "Use the diff views to verify the staged hunk before saving.",
                     "Stage only the intended hunk and save it.",
                     (2, 5, self.diagnostic_commands),
-                    self._copy_template(template, count=3, signature="partial/medium/{{project}}/{{index}}"),
+                    self._copy_template(
+                        template, count=3, signature="partial/medium/{{project}}/{{index}}"
+                    ),
                 ),
                 DIFFICULTY_HARD: (
                     "Use the state view to avoid committing unrelated edits.",
                     "Save only the selected hunk.",
                     (2, 4, self.diagnostic_commands),
-                    self._copy_template(template, count=2, signature="partial/hard/{{project}}/{{index}}"),
+                    self._copy_template(
+                        template, count=2, signature="partial/hard/{{project}}/{{index}}"
+                    ),
                 ),
             },
         )
@@ -1072,7 +1178,9 @@ class ModuleOneSeedBuilder:
                     "Use restore to separate kept work from discarded work.",
                     "Unstage the kept file and discard the unwanted edit.",
                     (2, 4, self.diagnostic_commands),
-                    self._copy_template(template, count=2, signature="restore/medium/{{project}}/{{index}}"),
+                    self._copy_template(
+                        template, count=2, signature="restore/medium/{{project}}/{{index}}"
+                    ),
                 ),
                 DIFFICULTY_HARD: (
                     "Use the legacy unstage form, then discard the unwanted edit.",
@@ -1085,9 +1193,21 @@ class ModuleOneSeedBuilder:
 
     def _read_state_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
         cases = [
-            {"project": "status", "command": "git status", "must": ["staged_paths", "unstaged_paths", "untracked_paths"]},
-            {"project": "history", "command": "git log --oneline", "must": ["commit_history", "latest_commit"]},
-            {"project": "staged-diff", "command": "git diff --staged", "must": ["staged_diff_paths"]},
+            {
+                "project": "status",
+                "command": "git status",
+                "must": ["staged_paths", "unstaged_paths", "untracked_paths"],
+            },
+            {
+                "project": "history",
+                "command": "git log --oneline",
+                "must": ["commit_history", "latest_commit"],
+            },
+            {
+                "project": "staged-diff",
+                "command": "git diff --staged",
+                "must": ["staged_diff_paths"],
+            },
         ]
         template = self._state_template(
             slug="read-{{project}}-{{index}}",
@@ -1133,22 +1253,41 @@ class ModuleOneSeedBuilder:
                     "Choose the diagnostic view that answers the question.",
                     "Inspect the repository without changing it.",
                     (0, 3, self.diagnostic_commands),
-                    self._copy_template(template, count=2, signature="read/medium/{{project}}/{{index}}"),
+                    self._copy_template(
+                        template, count=2, signature="read/medium/{{project}}/{{index}}"
+                    ),
                 ),
                 DIFFICULTY_HARD: (
                     "Use only diagnostic commands and preserve the repository state.",
                     "Inspect the repository without changing it.",
                     (0, 2, self.diagnostic_commands),
-                    self._copy_template(template, count=2, signature="read/hard/{{project}}/{{index}}"),
+                    self._copy_template(
+                        template, count=2, signature="read/hard/{{project}}/{{index}}"
+                    ),
                 ),
             },
         )
 
     def _review_scenario(self, unit_slug: str, lesson_slug: str) -> ScenarioSpec:
         cases = [
-            {"project": "release-notes", "commit_file": "docs/release.md", "keep_file": "notes/draft.md", "message": "Prepare release notes"},
-            {"project": "profile-polish", "commit_file": "src/profile.py", "keep_file": "notes/profile-plan.md", "message": "Polish profile flow"},
-            {"project": "build-cleanup", "commit_file": "build/config.yml", "keep_file": "notes/build-plan.md", "message": "Clean build config"},
+            {
+                "project": "release-notes",
+                "commit_file": "docs/release.md",
+                "keep_file": "notes/draft.md",
+                "message": "Prepare release notes",
+            },
+            {
+                "project": "profile-polish",
+                "commit_file": "src/profile.py",
+                "keep_file": "notes/profile-plan.md",
+                "message": "Polish profile flow",
+            },
+            {
+                "project": "build-cleanup",
+                "commit_file": "build/config.yml",
+                "keep_file": "notes/build-plan.md",
+                "message": "Clean build config",
+            },
         ]
         template = self._state_template(
             slug="review-{{project}}-{{index}}",
@@ -1157,7 +1296,12 @@ class ModuleOneSeedBuilder:
             cases=cases,
             initial_state=self._repo_state(
                 "c0",
-                {"{{commit_file}}": "modified", ".gitignore": "untracked", "{{keep_file}}": "modified", "tmp/output.log": "ignored"},
+                {
+                    "{{commit_file}}": "modified",
+                    ".gitignore": "untracked",
+                    "{{keep_file}}": "modified",
+                    "tmp/output.log": "ignored",
+                },
                 {},
             ),
             target_rule={
@@ -1172,7 +1316,11 @@ class ModuleOneSeedBuilder:
                 },
                 "required_commands": ["git add", "git commit"],
             },
-            commands=["git add .gitignore", "git add {{commit_file}}", 'git commit -m "{{message}}"'],
+            commands=[
+                "git add .gitignore",
+                "git add {{commit_file}}",
+                'git commit -m "{{message}}"',
+            ],
             count=3,
         )
         hard_template = self._copy_template(
@@ -1181,7 +1329,11 @@ class ModuleOneSeedBuilder:
             signature="review/hard/{{project}}/{{index}}",
             initial_state=self._repo_state(
                 "c1",
-                {"{{commit_file}}": "modified", "{{keep_file}}": "modified", "tmp/output.log": "ignored"},
+                {
+                    "{{commit_file}}": "modified",
+                    "{{keep_file}}": "modified",
+                    "tmp/output.log": "ignored",
+                },
                 {},
             ),
             target_rule={
@@ -1223,7 +1375,9 @@ class ModuleOneSeedBuilder:
                     "Use status and diff views to confirm the snapshot scope.",
                     "Save the intended local work and leave unrelated files out.",
                     (3, 5, self.diagnostic_commands),
-                    self._copy_template(template, count=2, signature="review/medium/{{project}}/{{index}}"),
+                    self._copy_template(
+                        template, count=2, signature="review/medium/{{project}}/{{index}}"
+                    ),
                 ),
                 DIFFICULTY_HARD: (
                     "Repair the latest local snapshot with only the selected work.",
@@ -1268,7 +1422,9 @@ class ModuleOneSeedBuilder:
             ),
             initial_state_template=overrides.get("initial_state", template.initial_state_template),
             target_rule_template=overrides.get("target_rule", template.target_rule_template),
-            solution_commands_template=overrides.get("commands", template.solution_commands_template),
+            solution_commands_template=overrides.get(
+                "commands", template.solution_commands_template
+            ),
             parameter_pools=overrides.get("parameter_pools", template.parameter_pools),
             generation_count=overrides.get("count", template.generation_count),
             expected_observations_template=template.expected_observations_template,
@@ -1298,11 +1454,7 @@ class ModuleOneSeedBuilder:
 
     def _augment_case(self, case: dict) -> dict:
         files = case.get("files") or {}
-        ignored_paths = [
-            path
-            for path, state in files.items()
-            if str(state).lower() == "ignored"
-        ]
+        ignored_paths = [path for path, state in files.items() if str(state).lower() == "ignored"]
         return {**case, "ignored_paths": ignored_paths}
 
     def _empty_uninitialized_state(self) -> dict:
@@ -1471,15 +1623,11 @@ class Command(BaseCommand):
         active_slugs = [spec.slug for spec in specs]
         retired_scenarios = ScenarioSkillFocus.objects.exclude(slug__in=active_slugs)
         retired_scenarios.update(is_published=False)
-        DifficultyInstance.objects.filter(scenario__in=retired_scenarios).update(
-            is_published=False
-        )
+        DifficultyInstance.objects.filter(scenario__in=retired_scenarios).update(is_published=False)
         ScenarioGenerationBlueprint.objects.filter(
             difficulty_instance__scenario__in=retired_scenarios
         ).update(is_published=False)
-        ScenarioVariant.objects.filter(scenario__in=retired_scenarios).update(
-            is_published=False
-        )
+        ScenarioVariant.objects.filter(scenario__in=retired_scenarios).update(is_published=False)
         simulator = RepositoryStateSimulator()
         snapshotter = RepositorySnapshotService()
         inspector = InspectionEvaluator()
@@ -1611,7 +1759,9 @@ class Command(BaseCommand):
                 TargetStateRule.objects.update_or_create(
                     difficulty_instance=diff,
                     defaults={
-                        "rule": self._difficulty_rule_for_storage(config.target_rule, variant_payloads),
+                        "rule": self._difficulty_rule_for_storage(
+                            config.target_rule, variant_payloads
+                        ),
                         "target_state_hash": simulator.state_hash(first_target_state),
                     },
                 )
@@ -1624,9 +1774,7 @@ class Command(BaseCommand):
     def _scenario_defaults(self, spec: ScenarioSpec) -> dict:
         primary_focus_commands = spec.fields.get("primary_focus_commands") or [spec.focus]
         if len(primary_focus_commands) != 1:
-            raise CommandError(
-                f"Scenario {spec.slug} must have exactly one primary focus command."
-            )
+            raise CommandError(f"Scenario {spec.slug} must have exactly one primary focus command.")
         return {
             "lesson": None,
             "title": spec.title,
@@ -1661,7 +1809,9 @@ class Command(BaseCommand):
         prompt = re.sub(r"\b[Pp]ull\b", "Update from upstream", prompt)
         prompt = re.sub(r"\b[Mm]erge\b", "Integrate", prompt)
         prompt = re.sub(r"\b[Ss]witch\b", "Move", prompt)
-        prompt = re.sub(r"\b[Ss]oft reset\b", "Move the branch pointer while keeping changes staged", prompt)
+        prompt = re.sub(
+            r"\b[Ss]oft reset\b", "Move the branch pointer while keeping changes staged", prompt
+        )
         prompt = re.sub(r"\b[Rr]eset\b", "Move the branch pointer", prompt)
         prompt = re.sub(r"\b[Ss]tage only\b", "Prepare only", prompt)
         prompt = re.sub(r"\b[Ss]tage\b", "Prepare", prompt)
@@ -1702,7 +1852,9 @@ class Command(BaseCommand):
         primary_commands = set(spec.fields.get("primary_focus_commands") or [spec.focus])
         if primary_commands & {"git clone", "git remote"}:
             remote_matches = dict(augmented.get("remote_url_matches", {}))
-            remote_matches.setdefault("origin", self._remote_url(initial_state, solution_commands, "app"))
+            remote_matches.setdefault(
+                "origin", self._remote_url(initial_state, solution_commands, "app")
+            )
             augmented["remote_url_matches"] = remote_matches
 
         if any(command.startswith("git commit") for command in solution_commands):
@@ -1716,7 +1868,9 @@ class Command(BaseCommand):
                 latest_rule["contains_paths"] = sorted(
                     set(latest_rule.get("contains_paths", [])) | set(changed_paths)
                 )
-                excluded_paths = sorted(set(initial_state.get("working_tree", {})) - set(changed_paths))
+                excluded_paths = sorted(
+                    set(initial_state.get("working_tree", {})) - set(changed_paths)
+                )
                 if excluded_paths:
                     latest_rule["excludes_paths"] = sorted(
                         set(latest_rule.get("excludes_paths", [])) | set(excluded_paths)
@@ -1759,7 +1913,9 @@ class Command(BaseCommand):
         )
         if not commit_id:
             return None
-        return next((commit for commit in state.get("commits", []) if commit["id"] == commit_id), None)
+        return next(
+            (commit for commit in state.get("commits", []) if commit["id"] == commit_id), None
+        )
 
     def _expected_observations(
         self,
@@ -1773,11 +1929,7 @@ class Command(BaseCommand):
         return {
             "required_commands": target_rule.get("required_commands", []),
             "repository_state_unchanged": target_rule.get("repository_state_unchanged", True),
-            "checks": {
-                key: observations[key]
-                for key in must_identify
-                if key in observations
-            },
+            "checks": {key: observations[key] for key in must_identify if key in observations},
         }
 
     def _difficulty_rule_for_storage(self, raw_rule: dict, variants: list[dict]) -> dict:
@@ -1858,7 +2010,9 @@ class Command(BaseCommand):
             return resolved
         return value
 
-    def _topic_for(self, variant_slug: str, initial_state: dict, solution_commands: list[str]) -> str:
+    def _topic_for(
+        self, variant_slug: str, initial_state: dict, solution_commands: list[str]
+    ) -> str:
         joined = " ".join(
             [
                 variant_slug,
@@ -1907,7 +2061,11 @@ class Command(BaseCommand):
     def _lesson_html(self, spec: LessonSpec, kind: str) -> str:
         kicker = "Practice lesson" if kind == Lesson.LessonKind.SCENARIO else "Foundation lesson"
         meta_last = "Includes practice" if kind == Lesson.LessonKind.SCENARIO else "Visual guide"
-        practice_heading = "Practice connection" if kind == Lesson.LessonKind.SCENARIO else "Where you will use this"
+        practice_heading = (
+            "Practice connection"
+            if kind == Lesson.LessonKind.SCENARIO
+            else "Where you will use this"
+        )
         practice_text = (
             "After reading, use the scenarios listed below this lesson to choose a lesson scenario "
             "and difficulty. Each level has its own situation, action budget, and retry version."

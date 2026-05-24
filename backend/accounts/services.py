@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
 from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.utils import timezone
 from rest_framework_simplejwt.exceptions import TokenError
@@ -101,9 +102,11 @@ class TokenService:
                 return None
             user = User.objects.filter(email__iexact=email).first()
         else:
-            profile = StudentProfile.objects.select_related("user").filter(
-                student_id__iexact=normalized_identifier
-            ).first()
+            profile = (
+                StudentProfile.objects.select_related("user")
+                .filter(student_id__iexact=normalized_identifier)
+                .first()
+            )
             user = profile.user if profile else None
 
         if user is None or user.is_staff:
@@ -121,7 +124,10 @@ class TokenService:
             raise TokenError("Refresh token revoked.")
         refresh = RefreshToken(refresh_token)
         user_id = refresh["user_id"]
-        user = get_user_model().objects.get(id=user_id)
+        try:
+            user = get_user_model().objects.get(id=user_id)
+        except ObjectDoesNotExist as exc:
+            raise TokenError("User no longer exists.") from exc
         new_refresh = RefreshToken.for_user(user)
         self.blacklist_service.revoke(refresh_token)
         return IssuedTokens(

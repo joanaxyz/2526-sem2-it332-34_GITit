@@ -139,3 +139,19 @@ def test_refresh_succeeds_with_expired_access_token_header(db, api_client):
     assert response.status_code == status.HTTP_200_OK
     assert "access" in response.data
     assert settings.GIT_IT_REFRESH_COOKIE in response.cookies
+
+
+def test_refresh_for_deleted_user_returns_401(db, api_client):
+    user = get_user_model().objects.create_user(
+        username="deleted@cit.edu",
+        email="deleted@cit.edu",
+        password="Password123!",
+    )
+    StudentProfile.objects.create(user=user, student_id="23-0001-002")
+    tokens = TokenService().issue_for_user(user)
+    user.delete()
+    api_client.cookies[settings.GIT_IT_REFRESH_COOKIE] = tokens.refresh
+
+    response = api_client.post("/api/auth/refresh/", format="json")
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED

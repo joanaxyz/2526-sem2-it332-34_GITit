@@ -1,63 +1,57 @@
-# ADR 0001: Git Command Engine Strategy
+# ADR 0001: Simulated Git Command Engine Strategy
 
 ## Status
 
-Accepted.
+Accepted, revised May 2026.
 
 ## Context
 
-The current scenario workspace uses an in-process repository-state simulator. It is deterministic and safe, but it is also a growing reimplementation of Git behavior. That is a poor long-term fit if the product goal is broad Git command coverage.
+GIT it! is a teaching environment, not a hosted shell. Student commands must stay deterministic, safe, and aligned with authored curriculum states. The backend stores compact scenario JSON for commits, refs, index entries, working-tree changes, remotes, reflog, and operation metadata.
 
-`pygit2` is already installed and should become the primary Git semantics layer for runtime command processing. It gives the backend direct libgit2 access without spawning a shell for ordinary repository operations.
+The simulator is therefore the production source of command behavior. It may use helpers to normalize or snapshot authored state, but production command submission must not require Git to be installed and must not execute Git processes.
 
 ## Decision
 
-Move toward a hybrid command engine:
+Keep production command execution fully simulated:
 
-1. Use a pygit2-backed command engine to materialize each authored scenario state into an isolated Git workspace.
-2. Run student `git ...` porcelain through the Git executable without a shell so terminal output matches real Git instead of hand-authored simulator messages.
-3. Keep the existing compact scenario JSON as the durable teaching state while the pygit2 snapshotter expands coverage for index/worktree/remotes.
-4. Keep evaluation behind a separate completion strategy so command execution is not mixed with state-based vs inspection-based scoring.
-5. Run slow or remote-capable operations through queued workers once the product enables broader command coverage beyond local scenario-scale commands.
+1. Parse raw input with a safe Git command parser.
+2. Map syntax variants to command intents.
+3. Apply the relevant simulated command handler to the teaching state.
+4. Format high-fidelity Git-like terminal output for supported curriculum commands.
+5. Evaluate completion from the resulting state or, for diagnostic scenarios, from inspection intent metadata.
 
-## Why Commands Still Need a Safety Boundary
+The simulator targets high-fidelity behavior for supported curriculum command families. It does not claim complete compatibility with every Git command or every Git version.
 
-The product should teach and accept broad Git usage, but a browser terminal must not become arbitrary server execution.
+## Safety Boundary
 
-Git commands can trigger or depend on:
+The browser terminal must not become arbitrary server execution. Production command processing rejects:
 
-- hooks and configured helpers
-- credential helpers
-- local filesystem paths
-- remote URLs and network access
-- submodules, filters, smudge/clean drivers, and external diff/merge tools
-- shell parsing if commands are handed to a subprocess
+- non-Git commands
+- shell chaining and pipes
+- redirects
+- command substitution
+- unsupported Git command families or options
 
-`pygit2` helps because it exposes Git operations as library calls instead of shelling out. It does not remove the need to decide which operations are allowed, which are queued, which need network isolation, and which are out of scope for a student session.
+Rejected commands return Git-like errors instead of server errors.
 
 ## Runtime Shape
 
-Command submission should become asynchronous:
+Command submission remains synchronous and deterministic for scenario-scale work:
 
 1. DRF validates the session and command text.
-2. The command engine parses only enough to confirm it is a Git command and to avoid shell execution.
-3. pygit2 materializes the authored state into a temporary workspace, including commits, refs, index, working tree, and local fake remotes.
-4. The Git executable runs inside that workspace with prompts, pagers, editors, and global config disabled.
-5. The service stores real terminal output, advances the compact teaching state, and evaluates completion through the appropriate strategy.
-6. The frontend receives a single command response today; the same boundary can move to SSE/WebSocket or polling when commands become queued jobs.
+2. `GitCommandParser` parses and normalizes safe Git input.
+3. `CommandIntentMapper` converts aliases/options into simulator operations.
+4. A command-family handler mutates the simulated repository state.
+5. A formatter module produces Git-like stdout/stderr and exit code metadata.
+6. The evaluator checks the target state or diagnostic/inspection requirements.
 
-Fast local commands can complete quickly, but the interface should still use the same job/event model. That keeps `clone`, `fetch`, `pull`, large diffs, and conflict operations from blocking web workers.
+## Optional Development Comparison
 
-## Migration Plan
-
-1. Keep the simulator available as the deterministic state-transition fallback and seed compiler.
-2. Use the pygit2 materializer and local Git runner for runtime terminal output.
-3. Expand the pygit2 snapshotter until it can replace simulator state transitions category by category.
-4. Move remote-capable and long-running commands into queued isolated workers before enabling them broadly.
+Development-only tests may compare simulator output against a local Git installation when one is available. Those tests must be optional and skipped when Git is missing. They must not introduce production executor classes/settings, per-session real repository workspaces, or Git process execution in command submission.
 
 ## Consequences
 
-- The current simulator should not grow into a full Git clone.
-- pygit2 should be kept and optimized into the command engine.
-- Safe parsing is not a product compromise; it is what lets the product support broad Git behavior without exposing the backend host.
-- Some commands may still need sandboxed `git` subprocess execution because libgit2 does not implement every porcelain behavior. Those commands should run only in an isolated worker with network and filesystem controls.
+- The simulator remains the source of truth for production command behavior.
+- Adding command variants should happen by extending parser support, intent mapping, command handlers, and output formatters.
+- The backend server does not need Git installed for students to use the app.
+- Output should be realistic and consistent for supported curriculum commands, while unsupported Git behavior remains explicitly out of scope.

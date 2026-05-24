@@ -10,14 +10,14 @@ type TreeNode = {
   path: string
   type: 'file' | 'directory'
   status?: string
-  source?: 'staging' | 'working_tree'
+  source?: 'head' | 'staging' | 'working_tree'
   children: TreeNode[]
 }
 
 function buildTree(snapshot: RepositorySnapshot): TreeNode[] {
   const root: TreeNode = { name: '', path: '', type: 'directory', children: [] }
 
-  const addPath = (filePath: string, status: RepositoryValue, source: 'staging' | 'working_tree') => {
+  const addPath = (filePath: string, status: RepositoryValue, source: 'head' | 'staging' | 'working_tree') => {
     const parts = filePath.split('/')
     let current = root
 
@@ -47,8 +47,16 @@ function buildTree(snapshot: RepositorySnapshot): TreeNode[] {
     })
   }
 
-  Object.entries(snapshot.staging).forEach(([path, status]) => addPath(path, status, 'staging'))
-  Object.entries(snapshot.working_tree).forEach(([path, status]) => addPath(path, status, 'working_tree'))
+  const visibleTree = snapshot.project_tree ?? snapshot.visible_tree
+  if (visibleTree && Object.keys(visibleTree).length > 0) {
+    Object.entries(visibleTree).forEach(([path, value]) => {
+      const source = sourceLabel(value)
+      addPath(path, value, source)
+    })
+  } else {
+    Object.entries(snapshot.staging).forEach(([path, status]) => addPath(path, status, 'staging'))
+    Object.entries(snapshot.working_tree).forEach(([path, status]) => addPath(path, status, 'working_tree'))
+  }
 
   return root.children
 }
@@ -59,6 +67,14 @@ function statusLabel(value: RepositoryValue) {
     if (typeof status === 'string') return status
   }
   return String(value ?? 'changed')
+}
+
+function sourceLabel(value: RepositoryValue): 'head' | 'staging' | 'working_tree' {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    const source = value.source
+    if (source === 'staging' || source === 'working_tree' || source === 'head') return source
+  }
+  return 'head'
 }
 
 function TreeItem({ node, depth = 0 }: { node: TreeNode; depth?: number }) {
@@ -86,7 +102,7 @@ function TreeItem({ node, depth = 0 }: { node: TreeNode; depth?: number }) {
           <FileText className="size-3.5 shrink-0 text-muted-foreground" />
         )}
         <span className="truncate">{node.name}</span>
-        {node.status && (
+        {node.status && node.status !== 'clean' && (
           <span
             className={cn(
               'ml-auto shrink-0 rounded px-1 text-[10px] font-medium uppercase leading-none',
@@ -94,7 +110,7 @@ function TreeItem({ node, depth = 0 }: { node: TreeNode; depth?: number }) {
                 ? 'bg-primary/10 text-primary'
                 : 'bg-muted text-muted-foreground'
             )}
-            title={node.source === 'staging' ? 'Staged' : 'Working tree'}
+            title={node.source === 'staging' ? 'Staged' : node.source === 'working_tree' ? 'Working tree' : 'Committed'}
           >
             {node.status}
           </span>
@@ -128,7 +144,7 @@ export function ProjectStructurePanel({ snapshot }: { snapshot: RepositorySnapsh
             ))}
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground">No working tree or staged files.</p>
+          <p className="text-xs text-muted-foreground">No project files yet.</p>
         )}
       </CardContent>
     </Card>

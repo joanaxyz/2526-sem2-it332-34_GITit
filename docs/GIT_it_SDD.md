@@ -91,8 +91,6 @@ This SDD covers the current-release student-facing system and the planned Phase 
 | [4] | Django REST Framework Documentation | Online | Encode OSS Ltd. | Official documentation |
 | [5] | React Documentation | Online | Meta Open Source / React Team | Official documentation |
 | [6] | Vite Documentation | Online | Vite Team | Official documentation |
-| [7] | pygit2 Documentation | Online | pygit2 Project | Official documentation |
-| [8] | libgit2 Documentation | Online | libgit2 Project | Official documentation |
 | [9] | PostgreSQL Documentation | Online | PostgreSQL Global Development Group | Official documentation |
 | [10] | Redis Documentation | Online | Redis Ltd. / Redis Open Source Project | Official documentation |
 | [11] | JSON Web Token (JWT) | 2015 | IETF | RFC 7519 |
@@ -102,9 +100,9 @@ This SDD covers the current-release student-facing system and the planned Phase 
 
 # 2. Architectural Design
 
-GIT it! uses a client-server web architecture. The front end is implemented as a React.js single-page application using Vite. The backend is implemented using Django with Django REST Framework for REST API endpoints. PostgreSQL is used as the persistent relational database, and Redis is used for active session cache, scenario metadata cache, and token/session support where applicable. The Repository State Simulator uses pygit2/libgit2 to manipulate isolated server-side Git repository sessions. The State-Based Evaluator is a custom Python service layer that extracts normalized repository-state snapshots and compares them against the target-state rules for the active scenario step.
+GIT it! uses a client-server web architecture. The front end is implemented as a React.js single-page application using Vite. The backend is implemented using Django with Django REST Framework for REST API endpoints. PostgreSQL is used as the persistent relational database, and Redis is used for active session cache, scenario metadata cache, and token/session support where applicable. The Repository State Simulator applies supported Git-like commands to an in-process teaching-state model. The State-Based Evaluator is a custom Python service layer that extracts normalized repository-state snapshots and compares them against the target-state rules for the active scenario step.
 
-[PLACEHOLDER — Insert architectural block diagram showing the React/Vite frontend, Django REST API backend, PostgreSQL database, Redis cache, pygit2/libgit2 Repository State Simulator, State-Based Evaluator, authentication/session components, and optional Phase 2 AI service boundary.]
+[PLACEHOLDER — Insert architectural block diagram showing the React/Vite frontend, Django REST API backend, PostgreSQL database, Redis cache, in-process Repository State Simulator, State-Based Evaluator, authentication/session components, and optional Phase 2 AI service boundary.]
 
 The architecture uses the following implementation technologies:
 
@@ -112,7 +110,7 @@ The architecture uses the following implementation technologies:
 |---|---|---|
 | Frontend | React.js with Vite | Student-facing SPA, dashboard, unit pages, scenario workspace, live DAG rendering, terminal UI |
 | Backend API | Django + Django REST Framework | Authentication endpoints, scenario endpoints, command execution API, progress/KPI endpoints, admin/AI endpoints in Phase 2 |
-| Repository Simulation | pygit2/libgit2 | Internal Git repository manipulation inside isolated server-side sessions |
+| Repository Simulation | In-process teaching-state simulator | Internal high-fidelity Git-like state transitions for supported curriculum commands |
 | State Evaluation | Custom Python evaluator service | Normalized repository-state comparison against authored target-state rules |
 | Database | PostgreSQL, hosted through Supabase or equivalent PostgreSQL provider | Persistent storage of users, units, lessons, scenario skill focuses, difficulty-instance configurations, difficulty-owned variants, sessions, step logs, and progress records |
 | Cache | Redis or compatible managed Redis service | Active scenario state cache, metadata caching, token/session support, and performance optimization |
@@ -125,7 +123,7 @@ The main component interaction flow is as follows:
 2. The frontend sends authenticated JSON requests to the Django REST API.
 3. The backend validates authentication, permissions, scenario access rules, and difficulty unlock rules.
 4. Scenario commands are passed to an application-controlled command adapter.
-5. The command adapter maps supported Git-like commands to pygit2/libgit2 operations inside an isolated repository session.
+5. The command adapter maps supported Git-like commands to simulator intents and command-family handlers.
 6. The simulator returns the updated repository state.
 7. The command-count policy service classifies the processed command as a counted action command or non-counted diagnostic command.
 8. The evaluator converts the resulting repository state into a normalized snapshot and compares it with the expected target state.
@@ -401,7 +399,7 @@ Tables/entities involved: LearningUnit, Lesson, ScenarioSkillFocus, DifficultyIn
 | ScenarioSessionAPIView | Creates a new scenario session from the selected difficulty instance, selects a variant from that difficulty's variant pool, and attaches the applicable command-count policy snapshot. | Django REST Framework API view |
 | VariantSelectionService | Selects initial or retry variant from the selected difficulty instance's valid variant pool according to rules. | Python service class |
 | CommandCountPolicyService | Loads the difficulty instance's authored minimum counted-command threshold, maximum counted-command limit, and non-counted diagnostic command patterns. | Python service class |
-| RepositorySessionService | Initializes isolated repository session through pygit2/libgit2. | Python service class |
+| RepositorySessionService | Initializes isolated simulated repository session state. | Python service class |
 
 #### Object-Oriented Components
 
@@ -437,7 +435,7 @@ Tables/entities involved: ScenarioSession, DifficultyInstance, DifficultyVariant
 |---|---|---|
 | CommandExecutionAPIView | Receives command submissions and returns output, state snapshot, and evaluation result. | Django REST Framework API view |
 | CommandAdapter | Maps supported command syntax to safe simulator operations. | Python service class |
-| RepositoryStateSimulator | Applies supported operations through pygit2/libgit2. | Python service class |
+| RepositoryStateSimulator | Applies supported operations through the in-process teaching-state simulator. | Python service class |
 | StateBasedEvaluator | Compares normalized state snapshot against target-state rules. | Python service class |
 | CommandCountPolicyService | Classifies simulator-processed commands as counted action commands or non-counted diagnostic commands and updates counted-command totals. | Python service class |
 
