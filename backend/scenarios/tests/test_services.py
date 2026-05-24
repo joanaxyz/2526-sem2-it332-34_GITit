@@ -891,6 +891,59 @@ def test_invalid_git_syntax_consumes_action_budget(student):
     )
 
 
+def test_counted_command_reaching_max_limit_fails_session(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="form-clean-commit",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    session.command_policy_snapshot = {
+        **session.command_policy_snapshot,
+        "min_counted_commands": 1,
+        "max_counted_commands": 1,
+    }
+    session.save(update_fields=["command_policy_snapshot"])
+
+    response = CommandProcessingService().submit_command(
+        session=session, command="git status --wat"
+    )
+
+    session.refresh_from_db()
+    payload = session_payload(session)
+    assert response["command_classification"] == COMMAND_COUNTED
+    assert session.status == SESSION_STATUS_FAILED
+    assert session.failure_reason == "Action limit reached."
+    assert payload["status"] == SESSION_STATUS_FAILED
+    assert payload["counts"]["counted_action_total"] == 1
+    assert payload["counts"]["minimum_counted_commands"] == 1
+    assert payload["counts"]["maximum_counted_commands"] == 1
+    assert payload["counts"]["remaining_counted_commands"] == 0
+    assert payload["counts"]["max_reached"] is True
+
+
+def test_failed_session_blocks_further_commands(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="form-clean-commit",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    session.status = SESSION_STATUS_FAILED
+    session.ended_at = timezone.now()
+    session.failure_reason = "Action limit reached."
+    session.save(update_fields=["status", "ended_at", "failure_reason"])
+
+    with pytest.raises(Locked):
+        CommandProcessingService().submit_command(session=session, command="git status")
+
+
 def test_inspection_scenario_completes_without_fake_state_changes(student):
     difficulty = DifficultyInstance.objects.get(
         scenario__slug="read-repository-state",

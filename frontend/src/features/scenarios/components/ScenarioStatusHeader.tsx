@@ -1,8 +1,8 @@
-import { ArrowLeft, CircleHelp, GitBranch, RefreshCcw, GaugeCircle } from 'lucide-react'
+import { ArrowLeft, CircleHelp, GitBranch, RefreshCcw } from 'lucide-react'
 
 import type { ScenarioSession } from '@/features/practice/types'
+import { CommandBudgetHeader } from '@/features/scenarios/components/CommandBudgetHeader'
 import { Badge } from '@/shared/components/Badge'
-import { ProgressBar } from '@/shared/components/ProgressBar'
 import { Button } from '@/shared/components/Button'
 
 export function ScenarioStatusHeader({
@@ -51,36 +51,8 @@ export function ScenarioStatusHeader({
           Module {session.module.number} / {session.scenario.focus}
         </span>
       </div>
-      <div className="flex items-center gap-2">
-        {/* Compact command counter shown in header (compact height) */}
-        <div className="hidden lg:flex items-center">
-          {(() => {
-            const used = session.counts.counted_action_total
-            const max = session.policy.max_counted_commands
-            const pct = max ? Math.round((used / max) * 100) : 0
-            return (
-              <div
-                className="mr-2 rounded-md border border-border bg-card px-2 py-1 shadow-sm flex items-center"
-                style={{ minWidth: 200, height: 36 }}
-              >
-                <div className="flex items-center gap-2">
-                  <GaugeCircle className="size-4 text-primary" />
-                  <span className="text-sm font-semibold">Action</span>
-                </div>
-
-                <div className="ml-4 flex flex-col items-end flex-1">
-                  <div className="flex items-center gap-2">
-                    <div className="font-mono text-sm font-semibold">{used}/{session.policy.min_counted_commands}</div>
-                    <Badge variant="default" className="text-xs">Target {session.policy.min_counted_commands}</Badge>
-                  </div>
-                  <div className="w-full mt-1">
-                    <ProgressBar value={pct} />
-                  </div>
-                </div>
-              </div>
-            )
-          })()}
-        </div>
+      <div className="flex min-w-0 items-center gap-2">
+        <CommandBudgetHeader session={session} />
         <Button type="button" variant="ghost" size="icon" className="size-8" aria-label="Open workspace guide" onClick={onOpenTour}>
           <CircleHelp className="size-4" />
         </Button>
@@ -98,7 +70,9 @@ export function ScenarioStatusHeader({
         <Badge variant={session.status === 'completed' ? 'default' : session.status === 'failed' ? 'destructive' : 'blue'}>
           {session.status}
         </Badge>
-        <Badge variant="outline">{session.variant.label}</Badge>
+        <Badge variant="outline" className="hidden sm:inline-flex">
+          {session.variant.label}
+        </Badge>
       </div>
     </header>
   )

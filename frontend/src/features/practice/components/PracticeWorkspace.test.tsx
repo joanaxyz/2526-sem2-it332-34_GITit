@@ -127,8 +127,11 @@ const baseSession: ScenarioSession = {
   },
   counts: {
     counted_action_total: 0,
+    minimum_counted_commands: 1,
+    maximum_counted_commands: 3,
     non_counted_diagnostic_total: 0,
     remaining_counted_commands: 3,
+    max_reached: false,
     total_attempts: 0,
   },
   scaffolding: {
