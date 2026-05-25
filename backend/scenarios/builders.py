@@ -619,21 +619,21 @@ class GeneratedVariantValidator:
             variant.difficulty_instance_id
             and variant.difficulty_instance_id != difficulty_instance.id
         ):
-            raise ScenarioVariantBuildError("Generated variant difficulty does not match.")
+            raise ScenarioVariantBuildError("Practice variant difficulty does not match.")
         if variant.scenario_id and variant.scenario_id != scenario.id:
-            raise ScenarioVariantBuildError("Generated variant scenario does not match.")
+            raise ScenarioVariantBuildError("Practice variant scenario does not match.")
         if not variant.initial_state:
-            raise ScenarioVariantBuildError("Generated variant has no initial state.")
+            raise ScenarioVariantBuildError("Practice variant has no initial state.")
         if not variant.target_rule:
-            raise ScenarioVariantBuildError("State-based generated variant has no target rule.")
+            raise ScenarioVariantBuildError("State-based practice variant has no target rule.")
         if not variant.target_state:
-            raise ScenarioVariantBuildError("Generated variant has no target state.")
+            raise ScenarioVariantBuildError("Practice variant has no target state.")
         if not variant.expected_state_diagram:
-            raise ScenarioVariantBuildError("Generated variant has no expected state diagram.")
+            raise ScenarioVariantBuildError("Practice variant has no expected state diagram.")
         if not variant.student_context:
-            raise ScenarioVariantBuildError("Generated variant has no student context.")
+            raise ScenarioVariantBuildError("Practice variant has no student context.")
         if not variant.parameter_context:
-            raise ScenarioVariantBuildError("Generated variant has no parameter context.")
+            raise ScenarioVariantBuildError("Practice variant has no parameter context.")
         self._validate_primary_skill(
             variant=variant, difficulty_instance=difficulty_instance, scenario=scenario
         )
@@ -650,7 +650,7 @@ class GeneratedVariantValidator:
         required = set(variant.target_rule.get("required_commands", []))
         primary = set(scenario.primary_focus_commands or [scenario.focus])
         if not primary <= required:
-            raise ScenarioVariantBuildError("Generated variant changed the scenario primary skill.")
+            raise ScenarioVariantBuildError("Practice variant changed the scenario primary skill.")
 
     def _validate_solution(
         self,

@@ -90,7 +90,6 @@ class MetricsService:
         review_completed = session_counts["review_completed"] or 0
         orientation_counts = Lesson.objects.filter(
             unit__is_orientation=True,
-            kind=Lesson.LessonKind.ORIENTATION,
             is_published=True,
         ).aggregate(
             total=Count("id", distinct=True),

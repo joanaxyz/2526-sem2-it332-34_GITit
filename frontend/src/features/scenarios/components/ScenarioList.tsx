@@ -15,14 +15,13 @@ import { ScenarioListSkeleton } from '@/shared/components/Skeleton'
 import { useRef, useState } from 'react'
 
 type ScenarioListProps =
-  | { scope: 'lesson'; lessonId: number; source: 'lesson' }
-  | {
-      scope: 'module'
-      moduleId: number
-      source: 'module_card'
-      initialScenarios?: ScenarioSkillFocus[]
-      deferFetch?: boolean
-    }
+  {
+    scope: 'module'
+    moduleId: number
+    source: 'module_card' | 'unit_card'
+    initialScenarios?: ScenarioSkillFocus[]
+    deferFetch?: boolean
+  }
 
 export function ScenarioList(props: ScenarioListProps) {
   const navigate = useNavigate()
@@ -34,13 +33,13 @@ export function ScenarioList(props: ScenarioListProps) {
     action?: DifficultyActionIntent
     mode: 'manual' | 'gate'
   } | null>(null)
-  const queryKey = props.scope === 'lesson' ? queryKeys.lessonScenarios(props.lessonId) : queryKeys.moduleScenarios(props.moduleId)
-  const shouldDeferModuleFetch = props.scope === 'module' && props.deferFetch && !props.initialScenarios
+  const queryKey = queryKeys.moduleScenarios(props.moduleId)
+  const shouldDeferModuleFetch = props.deferFetch && !props.initialScenarios
   const { data, error, isError, isLoading } = useQuery({
     queryKey,
-    queryFn: () => (props.scope === 'lesson' ? scenariosApi.listForLesson(props.lessonId) : scenariosApi.listForModule(props.moduleId)),
+    queryFn: () => scenariosApi.listForModule(props.moduleId),
     enabled: !shouldDeferModuleFetch,
-    initialData: props.scope === 'module' ? props.initialScenarios : undefined,
+    initialData: props.initialScenarios,
     staleTime: 5 * 60 * 1000,
   })
   const startMutation = useMutation({

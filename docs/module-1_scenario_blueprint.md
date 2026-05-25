@@ -2,7 +2,7 @@
 
 **Scope:** Module 1 only.  
 **Purpose:** Concrete scenario-definition content for seeding `ScenarioSkillFocus`, `DifficultyInstance`, `CommandCountPolicy`, and `ScenarioGenerationBlueprint` records.  
-**Important constraint:** The 9 Module 1 scenarios are fixed by the curriculum. This document does **not** change the scenario set. It refines each scenario definition so every runtime-generated variant has a different answer and a different expected repository state.
+**Important constraint:** The 9 Module 1 scenarios are fixed by the curriculum. This document does **not** change the scenario set. It refines each scenario definition so every runtime-built authored practice variant has a different answer and a different expected repository state.
 
 ---
 
@@ -19,7 +19,7 @@ ScenarioVariant = generated concrete playable attempt
 
 The builder must select from authored `parameter_pools.cases`. It should not invent arbitrary scenario values.
 
-Each generated variant must render its own:
+Each authored practice variant must render its own:
 
 ```text
 parameter_context
@@ -76,7 +76,7 @@ Use these as `non_counted_patterns` for all Module 1 command-count policies unle
 
 The full parser/preview support matrix lives in `docs/module-1_command_support_matrix.md`.
 
-Diagnostic commands should support state-based practice, but diagnostic-only learning belongs in lesson overview and command-preview content.
+Diagnostic commands should support state-based practice, but diagnostic-only learning belongs in Skill Focus Preview content rather than a practice-module lesson page.
 
 ---
 
@@ -99,7 +99,7 @@ Do not remove these cases. Upgrade the evaluator/simulator if needed.
 
 ## 3. Shared student-context rule
 
-Every generated variant must expose exact values checked by `target_rule` in `student_context.provided_values`, `requirements`, or `success_checklist`.
+Every authored practice variant must expose exact values checked by `target_rule` in `student_context.provided_values`, `requirements`, or `success_checklist`.
 
 Show:
 
@@ -977,7 +977,7 @@ related_git_concepts: ["status interpretation", "history interpretation", "diff 
 
 ## Preview content
 
-Lesson 1.8 is lesson overview plus Skill Focus Preview content. It should not seed Easy/Medium/Hard playable sessions because there is no state-changing target.
+The diagnostic skill focus is Skill Focus Preview content only. It should not seed Easy/Medium/Hard playable sessions because there is no state-changing target.
 
 The command preview should cover:
 
@@ -1192,7 +1192,7 @@ parameter_pools:
 
 ## 4. Seeding acceptance checklist
 
-Before publishing the seed, verify every generated variant satisfies these checks:
+Before publishing the seed, verify every authored practice variant satisfies these checks:
 
 ```text
 [ ] Same scenario skill focus as the curriculum row.
@@ -1204,5 +1204,5 @@ Before publishing the seed, verify every generated variant satisfies these check
 [ ] Generated target state satisfies target rule.
 [ ] Expected-state diagram is generated from target_state.
 [ ] Retry after fail/abandon/quit selects a different case whenever possible.
-[ ] Review mode reuses the historical generated variant and does not regenerate unexpectedly.
+[ ] Review mode reuses the historical authored practice variant and does not regenerate unexpectedly.
 ```

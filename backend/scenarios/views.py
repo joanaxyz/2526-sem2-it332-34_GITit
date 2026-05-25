@@ -32,19 +32,6 @@ from simulator.command_engine import GitCommandEngine
 from simulator.services import RepositorySnapshotService
 
 
-class LessonScenarioListAPIView(APIView):
-    def get(self, request, lesson_id: int):
-        with timing("scenario.lesson_list", lesson_id=lesson_id):
-            scenarios = scenario_list_queryset().filter(lesson_id=lesson_id)
-            return Response(
-                scenario_status_payloads(
-                    user=request.user,
-                    scenarios=scenarios,
-                    include_preview=False,
-                )
-            )
-
-
 class UnitScenarioListAPIView(APIView):
     def get(self, request, unit_id: int):
         with timing("scenario.module_list", unit_id=unit_id):

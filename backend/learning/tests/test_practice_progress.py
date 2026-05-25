@@ -30,7 +30,6 @@ def progress_unit(db):
         unit=unit,
         slug="diagnostic-preview",
         title="Diagnostic Preview",
-        kind=Lesson.LessonKind.CONTENT,
         content_html="",
         sort_order=1,
     )
@@ -47,7 +46,6 @@ def progress_unit(db):
         unit=unit,
         slug="playable",
         title="Playable",
-        kind=Lesson.LessonKind.SCENARIO,
         content_html="",
         sort_order=2,
     )
@@ -109,7 +107,7 @@ def _completed_session(*, user, unit, scenario, difficulty, variant, counted_tot
         scenario=scenario,
         difficulty_instance=difficulty,
         variant=variant,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
         status=SESSION_STATUS_COMPLETED,
         counted_action_total=counted_total,
         command_policy_snapshot=difficulty.command_policy.snapshot(),

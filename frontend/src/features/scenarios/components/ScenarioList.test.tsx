@@ -9,7 +9,6 @@ import type { DifficultyAccess, ScenarioSkillFocus } from '@/features/scenarios/
 
 vi.mock('@/features/scenarios/api/scenariosApi', () => ({
   scenariosApi: {
-    listForLesson: vi.fn(),
     listForModule: vi.fn(),
     startSession: vi.fn(),
     retrySession: vi.fn(),
@@ -79,7 +78,7 @@ const sessionResponse = {
 
 function renderList(items: ScenarioSkillFocus[] = [scenario]) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  vi.mocked(scenariosApi.listForLesson).mockResolvedValue(items)
+  vi.mocked(scenariosApi.listForModule).mockResolvedValue(items)
   vi.mocked(scenariosApi.startSession).mockResolvedValue(sessionResponse as never)
   vi.mocked(scenariosApi.retrySession).mockResolvedValue(sessionResponse as never)
   vi.spyOn(window, 'open').mockReturnValue(null)
@@ -87,7 +86,7 @@ function renderList(items: ScenarioSkillFocus[] = [scenario]) {
   return render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
-        <ScenarioList scope="lesson" lessonId={1} source="lesson" />
+        <ScenarioList scope="module" moduleId={1} source="module_card" />
       </MemoryRouter>
     </QueryClientProvider>,
   )
@@ -124,7 +123,7 @@ describe('ScenarioList preview gate', () => {
 
     await waitFor(() => expect(scenariosApi.startSession).toHaveBeenCalledWith({
       difficulty_instance_id: 10,
-      source_entry_point: 'lesson',
+      source_entry_point: 'module_card',
     }))
 
     cleanup()
@@ -135,7 +134,7 @@ describe('ScenarioList preview gate', () => {
 
     await waitFor(() => expect(scenariosApi.startSession).toHaveBeenCalledWith({
       difficulty_instance_id: 10,
-      source_entry_point: 'lesson',
+      source_entry_point: 'module_card',
     }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
@@ -158,14 +157,14 @@ describe('ScenarioList preview gate', () => {
 
     await waitFor(() => expect(scenariosApi.startSession).toHaveBeenCalledWith({
       difficulty_instance_id: 20,
-      source_entry_point: 'lesson',
+      source_entry_point: 'module_card',
     }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
     fireEvent.click(startButtons[2])
     await waitFor(() => expect(scenariosApi.startSession).toHaveBeenCalledWith({
       difficulty_instance_id: 30,
-      source_entry_point: 'lesson',
+      source_entry_point: 'module_card',
     }))
   })
 
@@ -201,7 +200,7 @@ describe('ScenarioList preview gate', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('renders diagnostic lessons with no playable difficulties as preview-only cards', async () => {
+  it('renders diagnostic skill focuses with no playable difficulties as preview-only cards', async () => {
     renderList([
       {
         ...scenario,

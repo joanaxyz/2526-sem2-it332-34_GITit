@@ -1,4 +1,5 @@
 from django.db.models import BooleanField, Count, Exists, IntegerField, OuterRef, Prefetch, Q, Value
+from django.shortcuts import get_object_or_404
 
 from common.constants import COMPLETION_TYPES
 from learning.models import LearningUnit, Lesson, OrientationProgress
@@ -31,8 +32,8 @@ def published_units(*, user=None):
         else Value(0, output_field=IntegerField())
     )
     lesson_queryset = (
-        Lesson.objects.filter(is_published=True)
-        .only("id", "unit_id", "slug", "title", "subtitle", "kind", "sort_order")
+        Lesson.objects.filter(is_published=True, unit__is_orientation=True)
+        .only("id", "unit_id", "slug", "title", "subtitle", "sort_order")
         .annotate(
             is_complete_for_user=lesson_complete_annotation,
             published_scenario_count=Count(
@@ -52,7 +53,9 @@ def published_units(*, user=None):
         .prefetch_related(Prefetch("lessons", queryset=lesson_queryset))
         .annotate(
             published_lesson_count=Count(
-                "lessons", filter=Q(lessons__is_published=True), distinct=True
+                "lessons",
+                filter=Q(is_orientation=True, lessons__is_published=True),
+                distinct=True,
             ),
             published_scenario_count=Count(
                 "scenarios",
@@ -70,7 +73,8 @@ def published_units(*, user=None):
 
 
 def published_lesson(lesson_id: int) -> Lesson:
-    return Lesson.objects.select_related("unit").get(
+    return get_object_or_404(
+        Lesson.objects.select_related("unit"),
         id=lesson_id,
         is_published=True,
         unit__is_published=True,
