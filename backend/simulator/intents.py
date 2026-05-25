@@ -129,7 +129,7 @@ class CommandIntentMapper:
         if parsed.has_option("--intent-to-add"):
             return CommandIntent(
                 command="add",
-                operations=(CommandOperation("IntentToAdd", {"paths": parsed.pathspecs}),),
+                operations=(CommandOperation("UnsupportedCommand", {"command": "add"}),),
             )
         return CommandIntent(
             command="add",
@@ -137,6 +137,11 @@ class CommandIntentMapper:
         )
 
     def _map_commit(self, parsed: ParsedGitCommand) -> CommandIntent:
+        if parsed.has_option("--allow-empty"):
+            return CommandIntent(
+                command="commit",
+                operations=(CommandOperation("UnsupportedCommand", {"command": "commit"}),),
+            )
         operations: list[CommandOperation] = []
         if parsed.has_option("-a") or parsed.has_option("--all"):
             operations.append(CommandOperation("StageTrackedChangesOnly", {"paths": ()}))
@@ -145,7 +150,6 @@ class CommandIntentMapper:
                 "AmendCommit" if parsed.has_option("--amend") else "CreateCommit",
                 {
                     "message": parsed.message,
-                    "allow_empty": parsed.has_option("--allow-empty"),
                     "no_edit": parsed.has_option("--no-edit"),
                 },
             )
@@ -240,65 +244,9 @@ class CommandIntentMapper:
                 if parsed.has_option("-v") or parsed.has_option("-vv")
                 else "default",
             )
-        if parsed.has_option("-d") or parsed.has_option("-D"):
-            return CommandIntent(
-                command="branch",
-                operations=(
-                    CommandOperation(
-                        "DeleteBranch",
-                        {"name": parsed.args[0], "force": parsed.has_option("-D")},
-                    ),
-                ),
-            )
         return CommandIntent(
             command="branch",
-            operations=(
-                CommandOperation(
-                    "CreateBranch",
-                    {
-                        "name": parsed.args[0],
-                        "start_point": parsed.args[1] if len(parsed.args) > 1 else None,
-                    },
-                ),
-            ),
-        )
-
-    def _map_checkout(self, parsed: ParsedGitCommand) -> CommandIntent:
-        if parsed.has_option("-b"):
-            return CommandIntent(
-                command="checkout",
-                operations=(
-                    CommandOperation(
-                        "CreateAndSwitchBranch",
-                        {
-                            "name": parsed.args[0],
-                            "start_point": parsed.args[1] if len(parsed.args) > 1 else None,
-                        },
-                    ),
-                ),
-            )
-        return CommandIntent(
-            command="checkout",
-            operations=(CommandOperation("SwitchBranch", {"name": parsed.args[0]}),),
-        )
-
-    def _map_switch(self, parsed: ParsedGitCommand) -> CommandIntent:
-        if parsed.has_option("-c"):
-            return CommandIntent(
-                command="switch",
-                operations=(
-                    CommandOperation(
-                        "CreateAndSwitchBranch",
-                        {
-                            "name": parsed.args[0],
-                            "start_point": parsed.args[1] if len(parsed.args) > 1 else None,
-                        },
-                    ),
-                ),
-            )
-        return CommandIntent(
-            command="switch",
-            operations=(CommandOperation("SwitchBranch", {"name": parsed.args[0]}),),
+            operations=(CommandOperation("UnsupportedCommand", {"command": "branch"}),),
         )
 
     def _map_restore(self, parsed: ParsedGitCommand) -> CommandIntent:
@@ -310,24 +258,6 @@ class CommandIntentMapper:
                     {"paths": parsed.pathspecs},
                 ),
             ),
-        )
-
-    def _map_reset(self, parsed: ParsedGitCommand) -> CommandIntent:
-        mode = (
-            "soft"
-            if parsed.has_option("--soft")
-            else "hard"
-            if parsed.has_option("--hard")
-            else "mixed"
-        )
-        if mode == "mixed" and parsed.args and parsed.args[0] == "HEAD" and len(parsed.args) > 1:
-            return CommandIntent(
-                command="reset",
-                operations=(CommandOperation("UnstagePaths", {"paths": tuple(parsed.args[1:])}),),
-            )
-        return CommandIntent(
-            command="reset",
-            operations=(CommandOperation("ResetHead", {"mode": mode, "target": parsed.args[-1]}),),
         )
 
     def _map_rm(self, parsed: ParsedGitCommand) -> CommandIntent:
