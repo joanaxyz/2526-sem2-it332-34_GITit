@@ -171,7 +171,7 @@ class VariantTargetStateHashCache:
     _max_entries = 512
 
     def hash_for(self, *, variant, state_tools: RepositoryStateSimulator) -> str:
-        key = (variant.id, variant.variant_fingerprint or "")
+        key = (variant.id, variant.semantic_key or "")
         cached = self._cache.get(key)
         if cached is not None:
             self._cache.move_to_end(key)
@@ -232,7 +232,7 @@ class ScenarioSessionService:
                 raise Locked("Exit the current scenario before starting again.")
 
         variant_selector = VariantSelectionService()
-        with timing("scenario.variant_generation", difficulty_id=difficulty_instance.id, mode=mode):
+        with timing("scenario.variant_selection", difficulty_id=difficulty_instance.id, mode=mode):
             variant = (
                 self._review_variant(user=user, difficulty_instance=difficulty_instance)
                 if mode == SESSION_MODE_REVIEW

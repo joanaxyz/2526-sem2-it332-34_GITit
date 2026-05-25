@@ -645,7 +645,7 @@ def _preview_command_from_ref(
         )
     else:
         title = title or command or "Command"
-        summary = summary or "Use this preview command before starting the generated scenario."
+        summary = summary or "Use this preview command before starting the authored scenario."
         aliases = []
         tags = []
         base_command = base_command_for_command(command)

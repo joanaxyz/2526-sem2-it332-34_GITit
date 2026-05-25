@@ -17,7 +17,8 @@ from common.constants import (
 from learning.models import LearningUnit, Lesson, OrientationProgress
 from scenarios.builders import (
     PLACEHOLDER_RE,
-    RuntimeScenarioBuilder,
+    AuthoredCaseRenderer,
+    AuthoredVariantValidator,
     ScenarioVariantBuildError,
     TemplateRenderer,
 )
@@ -29,7 +30,6 @@ from scenarios.models import (
     CommandCountPolicy,
     CompletionRecord,
     DifficultyInstance,
-    ScenarioGenerationBlueprint,
     ScenarioSession,
     ScenarioSkillFocus,
     ScenarioVariant,
@@ -660,11 +660,9 @@ def bp(
         "slug": slug,
         "slug_template": slug_template,
         "label_template": label,
-        "blueprint_signature": signature,
-        "subtemplate_signature": subtemplate,
-        "parameter_pools": {"cases": cases},
-        "generation_count": len(cases),
-        "max_combinations": len(cases),
+        "template_key": signature,
+        "structure_key": subtemplate,
+        "cases": cases,
         "initial_state_template": initial_state,
         "target_rule_template": target_rule,
         "solution_commands_template": solution,
@@ -2669,7 +2667,7 @@ def diff(
     policy,
     narrative,
     task,
-    blueprints,
+    templates,
     completion_type=COMPLETION_STATE_BASED,
     required_attempts=None,
 ):
@@ -2677,7 +2675,7 @@ def diff(
         "policy": policy,
         "narrative": narrative,
         "task": task,
-        "blueprints": blueprints,
+        "templates": templates,
         "completion_type": completion_type,
     }
     if required_attempts is not None:
@@ -2686,13 +2684,13 @@ def diff(
 
 
 class Command(BaseCommand):
-    help = "Seed Module 1 scenario skill focuses, difficulties, policies, and runtime generation blueprints."
+    help = "Seed Module 1 scenario skill focuses, difficulties, policies, and authored variants."
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--reset",
             action="store_true",
-            help="Delete existing Module 1 content and generated sessions before seeding.",
+            help="Delete existing Module 1 content and sessions before seeding.",
         )
         parser.add_argument(
             "--confirm",
@@ -2702,7 +2700,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--validate-build",
             action="store_true",
-            help="Try building one authored practice variant for every difficulty after seeding.",
+            help="Validate every seeded authored practice variant after seeding.",
         )
 
     @transaction.atomic
@@ -2782,9 +2780,6 @@ class Command(BaseCommand):
             )
             if not spec["difficulties"]:
                 DifficultyInstance.objects.filter(scenario=scenario).update(is_published=False)
-                ScenarioGenerationBlueprint.objects.filter(
-                    difficulty_instance__scenario=scenario
-                ).delete()
                 TargetStateRule.objects.filter(difficulty_instance__scenario=scenario).delete()
                 ScenarioVariant.objects.filter(scenario=scenario).update(is_published=False)
                 continue
@@ -2812,114 +2807,169 @@ class Command(BaseCommand):
                         "non_counted_patterns": DIAG_PATTERNS,
                     },
                 )
+                variants = self._render_authored_variants(
+                    scenario=scenario,
+                    difficulty_instance=difficulty_instance,
+                    dspec=dspec,
+                )
+                if not variants:
+                    raise CommandError(
+                        f"{scenario.slug}/{difficulty}: no authored variants were rendered"
+                    )
                 TargetStateRule.objects.update_or_create(
                     difficulty_instance=difficulty_instance,
                     defaults={
-                        "rule": dspec["blueprints"][0]["target_rule_template"],
+                        "rule": variants[0].target_rule,
                         "target_state_hash": "",
                     },
                 )
 
-                existing_slugs = []
-                for index, blueprint in enumerate(dspec["blueprints"], start=1):
-                    existing_slugs.append(blueprint["slug"])
-                    ScenarioGenerationBlueprint.objects.update_or_create(
+                active_semantic_keys = []
+                for variant in variants:
+                    active_semantic_keys.append(variant.semantic_key)
+                    ScenarioVariant.objects.update_or_create(
                         difficulty_instance=difficulty_instance,
-                        slug=blueprint["slug"],
+                        semantic_key=variant.semantic_key,
                         defaults={
-                            "slug_template": blueprint["slug_template"],
-                            "label_template": blueprint["label_template"],
-                            "blueprint_signature": blueprint["blueprint_signature"],
-                            "subtemplate_signature": blueprint["subtemplate_signature"],
-                            "parameter_pools": blueprint["parameter_pools"],
-                            "initial_state_template": blueprint["initial_state_template"],
-                            "target_rule_template": blueprint["target_rule_template"],
-                            "solution_commands_template": blueprint["solution_commands_template"],
-                            "student_context_template": blueprint["student_context_template"],
-                            "generation_count": blueprint["generation_count"],
-                            "max_combinations": blueprint["max_combinations"],
+                            "scenario": scenario,
+                            "slug": variant.slug,
+                            "label": variant.label,
+                            "structure_signature": variant.structure_signature,
+                            "initial_state": variant.initial_state,
+                            "target_rule": variant.target_rule,
+                            "target_state": variant.target_state,
+                            "expected_state_diagram": variant.expected_state_diagram,
+                            "solution_commands": variant.solution_commands,
+                            "case_id": variant.case_id,
+                            "parameter_context": variant.parameter_context,
+                            "student_context": variant.student_context,
                             "is_published": True,
-                            "sort_order": index,
                         },
                     )
-                ScenarioGenerationBlueprint.objects.filter(
-                    difficulty_instance=difficulty_instance
-                ).exclude(slug__in=existing_slugs).delete()
+                ScenarioVariant.objects.filter(difficulty_instance=difficulty_instance).exclude(
+                    semantic_key__in=active_semantic_keys
+                ).update(is_published=False)
 
-        self.stdout.write(self.style.SUCCESS("Seeded Module 1 scenario blueprints."))
+        self.stdout.write(self.style.SUCCESS("Seeded Module 1 authored scenario variants."))
 
         if options["validate_build"]:
             self._validate_builds()
 
+    def _render_authored_variants(
+        self,
+        *,
+        scenario: ScenarioSkillFocus,
+        difficulty_instance: DifficultyInstance,
+        dspec: dict[str, Any],
+    ) -> list[ScenarioVariant]:
+        renderer = AuthoredCaseRenderer()
+        variants: list[ScenarioVariant] = []
+        seen_semantic_keys: set[str] = set()
+        seen_slugs: set[str] = set()
+        for template in dspec["templates"]:
+            cases = template.get("cases", [])
+            for index, case in enumerate(cases, start=1):
+                try:
+                    variant = renderer.render_variant(
+                        difficulty_instance=difficulty_instance,
+                        template=template,
+                        case=case,
+                        index=index,
+                    )
+                except (KeyError, ScenarioVariantBuildError) as exc:
+                    case_id = case.get("case_id", "unknown")
+                    raise CommandError(
+                        f"{scenario.slug}/{difficulty_instance.difficulty}/{template['slug']}/{case_id}: "
+                        f"could not render authored variant: {exc}"
+                    ) from exc
+                if variant.semantic_key in seen_semantic_keys:
+                    raise CommandError(
+                        f"{scenario.slug}/{difficulty_instance.difficulty}: duplicate semantic_key "
+                        f"{variant.semantic_key}"
+                    )
+                if variant.slug in seen_slugs:
+                    raise CommandError(
+                        f"{scenario.slug}/{difficulty_instance.difficulty}: duplicate variant slug "
+                        f"{variant.slug}"
+                    )
+                seen_semantic_keys.add(variant.semantic_key)
+                seen_slugs.add(variant.slug)
+                variants.append(variant)
+        return variants
+
     def _validate_seed_specs(self, specs: list[dict[str, Any]]) -> None:
         renderer = TemplateRenderer()
-        builder = RuntimeScenarioBuilder()
+        authored_renderer = AuthoredCaseRenderer()
         failures: list[str] = []
         for spec in specs:
             for difficulty, dspec in spec["difficulties"].items():
                 rendered_solutions: dict[str, list[str]] = {}
                 rendered_target_rules: dict[str, list[str]] = {}
                 rendered_target_states: dict[str, list[str]] = {}
-                for blueprint in dspec["blueprints"]:
-                    cases = blueprint.get("parameter_pools", {}).get("cases", [])
+                for template in dspec["templates"]:
+                    cases = template.get("cases", [])
                     if not cases:
                         failures.append(
-                            f"{spec['slug']}/{difficulty}/{blueprint['slug']}: blueprint has no cases"
+                            f"{spec['slug']}/{difficulty}/{template['slug']}: authored template has no cases"
                         )
                         continue
                     case_ids = [case.get("case_id") for case in cases]
+                    if any(not case_id for case_id in case_ids):
+                        failures.append(
+                            f"{spec['slug']}/{difficulty}/{template['slug']}: every case needs a stable case_id"
+                        )
                     if len(set(case_ids)) != len(case_ids):
                         failures.append(
-                            f"{spec['slug']}/{difficulty}/{blueprint['slug']}: duplicate case_id"
+                            f"{spec['slug']}/{difficulty}/{template['slug']}: duplicate case_id"
                         )
                     anchors = [case.get("answer_anchor") for case in cases]
                     if len(set(json.dumps(anchor, sort_keys=True) for anchor in anchors)) != len(
                         anchors
                     ):
                         failures.append(
-                            f"{spec['slug']}/{difficulty}/{blueprint['slug']}: duplicate answer_anchor"
+                            f"{spec['slug']}/{difficulty}/{template['slug']}: duplicate answer_anchor"
                         )
-                    placeholders = self._blueprint_placeholders(blueprint)
+                    placeholders = self._template_placeholders(template)
                     for case in cases:
                         case_id = case.get("case_id", "unknown")
                         available_fields = set(case) | {"index"}
                         missing = sorted(placeholders - available_fields)
                         if missing:
                             failures.append(
-                                f"{spec['slug']}/{difficulty}/{blueprint['slug']}/{case_id}: missing case fields {missing}"
+                                f"{spec['slug']}/{difficulty}/{template['slug']}/{case_id}: missing case fields {missing}"
                             )
                         unused = sorted(
                             set(case) - placeholders - VALIDATION_ONLY_CASE_FIELDS
                         )
                         if unused:
                             failures.append(
-                                f"{spec['slug']}/{difficulty}/{blueprint['slug']}/{case_id}: unused case fields {unused}"
+                                f"{spec['slug']}/{difficulty}/{template['slug']}/{case_id}: unused case fields {unused}"
                             )
                         if missing:
                             continue
                         context = {**case, "index": 1}
                         try:
                             rendered_solution = renderer.render(
-                                blueprint.get("solution_commands_template", []),
+                                template.get("solution_commands_template", []),
                                 context,
                             )
                             rendered_rule = renderer.render(
-                                blueprint.get("target_rule_template", {}),
+                                template.get("target_rule_template", {}),
                                 context,
                             )
-                            rendered_initial = builder.simulator.normalize_state(
+                            rendered_initial = authored_renderer.simulator.normalize_state(
                                 renderer.render(
-                                    blueprint.get("initial_state_template", {}),
+                                    template.get("initial_state_template", {}),
                                     context,
                                 )
                             )
-                            rendered_target_state = builder._target_state_from_solution(
+                            rendered_target_state = authored_renderer._target_state_from_solution(
                                 rendered_initial,
                                 list(rendered_solution),
                             )
                         except (KeyError, ScenarioVariantBuildError) as exc:
                             failures.append(
-                                f"{spec['slug']}/{difficulty}/{blueprint['slug']}/{case_id}: could not render validation target: {exc}"
+                                f"{spec['slug']}/{difficulty}/{template['slug']}/{case_id}: could not render validation target: {exc}"
                             )
                             continue
                         solution_key = json.dumps(rendered_solution, sort_keys=True)
@@ -2933,8 +2983,8 @@ class Command(BaseCommand):
                         continue
                     waived_cases = [
                         case
-                        for blueprint in dspec["blueprints"]
-                        for case in blueprint.get("parameter_pools", {}).get("cases", [])
+                        for template in dspec["templates"]
+                        for case in template.get("cases", [])
                         if case.get("case_id") in case_ids_for_sequence
                         and case.get("duplicate_solution_waiver")
                     ]
@@ -2955,18 +3005,18 @@ class Command(BaseCommand):
         if failures:
             raise CommandError("Module 1 seed validation failed:\n" + "\n".join(failures))
 
-    def _blueprint_placeholders(self, blueprint: dict[str, Any]) -> set[str]:
+    def _template_placeholders(self, template: dict[str, Any]) -> set[str]:
         placeholders: set[str] = set()
         for key in (
             "slug_template",
             "label_template",
-            "subtemplate_signature",
+            "structure_key",
             "initial_state_template",
             "target_rule_template",
             "solution_commands_template",
             "student_context_template",
         ):
-            self._collect_placeholders(placeholders, blueprint.get(key))
+            self._collect_placeholders(placeholders, template.get(key))
         return placeholders
 
     def _collect_placeholders(self, placeholders: set[str], value: Any) -> None:
@@ -2994,9 +3044,6 @@ class Command(BaseCommand):
         CompletionRecord.objects.filter(scenario__learning_unit=unit).delete()
         ScenarioSession.objects.filter(learning_unit=unit).delete()
         ScenarioVariant.objects.filter(scenario__learning_unit=unit).delete()
-        ScenarioGenerationBlueprint.objects.filter(
-            difficulty_instance__scenario__learning_unit=unit
-        ).delete()
         TargetStateRule.objects.filter(difficulty_instance__scenario__learning_unit=unit).delete()
         DifficultyInstance.objects.filter(scenario__learning_unit=unit).delete()
         ScenarioSkillFocus.objects.filter(learning_unit=unit).delete()
@@ -3091,7 +3138,7 @@ class Command(BaseCommand):
             "schema_version": 2,
             "title": f"{spec['focus']} command preview",
             "intro": spec["explanation"],
-            "purpose": "Understand what this skill changes, what it only reports, and what to inspect before entering a generated scenario.",
+            "purpose": "Understand what this skill changes, what it only reports, and what to inspect before entering an authored practice scenario.",
             "focus_label": spec["focus"],
             "command_title": spec["title"],
             "command_refs": [
@@ -3246,52 +3293,41 @@ class Command(BaseCommand):
         )
 
     def _validate_builds(self):
-        builder = RuntimeScenarioBuilder()
+        validator = AuthoredVariantValidator()
         failures = []
-        created_variant_ids = []
-        try:
-            for difficulty in DifficultyInstance.objects.filter(
-                scenario__learning_unit__slug="local-repository-foundations",
-                is_published=True,
-            ).order_by("scenario__sort_order", "difficulty"):
-                fingerprints = set()
-                candidates = []
-                for blueprint in difficulty.generation_blueprints.filter(
-                    is_published=True
-                ).order_by("sort_order", "id"):
-                    candidates.extend(builder._candidates([blueprint]))
-                if not candidates:
-                    failures.append(
-                        f"{difficulty.scenario.slug}/{difficulty.difficulty}: no blueprint cases"
+        for difficulty in DifficultyInstance.objects.select_related("scenario").filter(
+            scenario__learning_unit__slug="local-repository-foundations",
+            is_published=True,
+        ).order_by("scenario__sort_order", "difficulty"):
+            variants = list(difficulty.variants.filter(is_published=True).order_by("id"))
+            if not variants:
+                failures.append(
+                    f"{difficulty.scenario.slug}/{difficulty.difficulty}: no authored variants"
+                )
+                continue
+            semantic_keys = {variant.semantic_key for variant in variants}
+            if len(semantic_keys) != len(variants):
+                failures.append(
+                    f"{difficulty.scenario.slug}/{difficulty.difficulty}: duplicate semantic keys"
+                )
+            for variant in variants:
+                try:
+                    validator.validate(
+                        variant=variant,
+                        difficulty_instance=difficulty,
+                        scenario=difficulty.scenario,
                     )
-                    continue
-                for index, candidate in enumerate(candidates, start=1):
-                    try:
-                        variant = builder._build_variant(
-                            candidate,
-                            user=None,
-                            difficulty_instance=difficulty,
-                            generation_seed=f"seedcheck{difficulty.id:04d}{index:04d}",
-                        )
-                        created_variant_ids.append(variant.id)
-                        fingerprints.add(candidate.candidate_fingerprint)
-                        self.stdout.write(
-                            f"Built {difficulty.scenario.slug}/{difficulty.difficulty}: {variant.slug}"
-                        )
-                    except ScenarioVariantBuildError as exc:
-                        failures.append(
-                            f"{difficulty.scenario.slug}/{difficulty.difficulty}: {exc}"
-                        )
-                if len(candidates) > 1 and len(fingerprints) != len(candidates):
-                    failures.append(
-                        f"{difficulty.scenario.slug}/{difficulty.difficulty}: duplicate parameter fingerprints"
+                    self.stdout.write(
+                        f"Validated {difficulty.scenario.slug}/{difficulty.difficulty}: {variant.slug}"
                     )
-        finally:
-            ScenarioVariant.objects.filter(id__in=created_variant_ids).delete()
+                except ScenarioVariantBuildError as exc:
+                    failures.append(
+                        f"{difficulty.scenario.slug}/{difficulty.difficulty}/{variant.slug}: {exc}"
+                    )
         if failures:
             raise CommandError("Variant validation failed:\n" + "\n".join(failures))
         self.stdout.write(
             self.style.SUCCESS(
-                "All Module 1 blueprint cases built valid authored practice variants. Validation variants were removed."
+                "All Module 1 authored practice variants are valid."
             )
         )
