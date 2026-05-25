@@ -94,7 +94,8 @@ def _difficulty(scenario, difficulty: str, *, required: int, min_count: int):
         expected_state_diagram={"commits": [], "branches": {}, "head": {"type": "branch", "name": "main"}},
         parameter_context={"case_id": difficulty, "index": 1},
         student_context={"story": f"{difficulty} story"},
-        variant_fingerprint=difficulty,
+        case_id=difficulty,
+        semantic_key=f"{difficulty}:progress:{difficulty}",
         is_published=True,
     )
     return instance, variant

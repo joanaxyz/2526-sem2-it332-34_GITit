@@ -4,8 +4,6 @@ import copy
 import hashlib
 import json
 import re
-import uuid
-from dataclasses import dataclass
 from typing import Any
 
 from django.utils.text import slugify
@@ -13,8 +11,6 @@ from django.utils.text import slugify
 from evaluation.services import StateBasedEvaluator
 from scenarios.models import (
     DifficultyInstance,
-    ScenarioGenerationBlueprint,
-    ScenarioSession,
     ScenarioSkillFocus,
     ScenarioVariant,
 )
@@ -25,13 +21,6 @@ PLACEHOLDER_RE = re.compile(r"\{\{\s*([a-zA-Z0-9_]+)\s*\}\}")
 
 class ScenarioVariantBuildError(ValueError):
     pass
-
-
-@dataclass(frozen=True)
-class VariantCandidate:
-    blueprint: ScenarioGenerationBlueprint
-    parameter_context: dict[str, Any]
-    candidate_fingerprint: str
 
 
 class TemplateRenderer:
@@ -55,175 +44,47 @@ class TemplateRenderer:
         return PLACEHOLDER_RE.sub(replace, value)
 
 
-class RuntimeScenarioBuilder:
-    """Create concrete playable variants from seeded blueprint values."""
+class AuthoredCaseRenderer:
+    """Render authored seed cases into concrete static practice variants."""
 
     def __init__(self) -> None:
         self.renderer = TemplateRenderer()
         self.simulator = RepositoryStateSimulator()
         self.snapshotter = RepositorySnapshotService()
 
-    def generate_variant(
+    def render_variant(
         self,
         *,
-        user,
         difficulty_instance: DifficultyInstance,
-        prior_session: ScenarioSession | None = None,
+        template: dict[str, Any],
+        case: dict[str, Any],
+        index: int,
     ) -> ScenarioVariant:
-        blueprints = list(
-            difficulty_instance.generation_blueprints.filter(is_published=True).order_by(
-                "sort_order",
-                "id",
-            )
-        )
-        if not blueprints:
-            raise ScenarioVariantBuildError(
-                "Difficulty instance has no published generation blueprint."
-            )
-
-        candidates = self._candidates(blueprints)
-        if not candidates:
-            raise ScenarioVariantBuildError(
-                "Generation blueprints did not produce any parameter cases."
-            )
-
-        candidate = self._select_candidate(
-            candidates,
-            user=user,
-            difficulty_instance=difficulty_instance,
-            prior_session=prior_session,
-        )
-        generation_seed = uuid.uuid4().hex
-        return self._build_variant(
-            candidate,
-            user=user,
-            difficulty_instance=difficulty_instance,
-            generation_seed=generation_seed,
-        )
-
-    def _candidates(self, blueprints: list[ScenarioGenerationBlueprint]) -> list[VariantCandidate]:
-        candidates = []
-        rendered_solution_sequences: dict[str, str] = {}
-        for blueprint in blueprints:
-            for context in self._contexts(blueprint):
-                rendered_solution = self.renderer.render(
-                    blueprint.solution_commands_template, context
-                )
-                sequence_key = json.dumps(rendered_solution, sort_keys=True)
-                should_enforce_duplicate = bool(context.get("case_id"))
-                if (
-                    should_enforce_duplicate
-                    and sequence_key in rendered_solution_sequences
-                    and not context.get("duplicate_solution_waiver")
-                ):
-                    raise ScenarioVariantBuildError(
-                        "Generation blueprints produced duplicate solution command sequences "
-                        f"for {context.get('case_id', 'unknown')} and {rendered_solution_sequences[sequence_key]}."
-                    )
-                if should_enforce_duplicate:
-                    rendered_solution_sequences.setdefault(
-                        sequence_key, str(context.get("case_id", "unknown"))
-                    )
-                rendered_subtemplate_signature = self.renderer.render(
-                    blueprint.subtemplate_signature,
-                    context,
-                )
-                candidates.append(
-                    VariantCandidate(
-                        blueprint=blueprint,
-                        parameter_context=context,
-                        candidate_fingerprint=self._variant_fingerprint(
-                            blueprint_signature=blueprint.blueprint_signature,
-                            subtemplate_signature=str(rendered_subtemplate_signature),
-                            parameter_context=context,
-                        ),
-                    )
-                )
-        return candidates
-
-    def _contexts(self, blueprint: ScenarioGenerationBlueprint) -> list[dict[str, Any]]:
-        pools = blueprint.parameter_pools or {}
-        if "cases" not in pools:
-            return []
-        base_contexts = [dict(item) for item in pools["cases"]]
-
-        if not base_contexts:
-            return []
-
-        generation_count = min(
-            max(1, blueprint.generation_count or len(base_contexts)),
-            len(base_contexts),
-        )
-        if blueprint.max_combinations:
-            generation_count = min(generation_count, blueprint.max_combinations)
-        return [
-            {**base_contexts[index], "index": index + 1}
-            for index in range(generation_count)
-        ]
-
-    def _select_candidate(
-        self,
-        candidates: list[VariantCandidate],
-        *,
-        user,
-        difficulty_instance: DifficultyInstance,
-        prior_session: ScenarioSession | None,
-    ) -> VariantCandidate:
-        attempt_count = ScenarioSession.objects.filter(
-            user=user,
-            difficulty_instance=difficulty_instance,
-        ).count()
-        offset_seed = prior_session.id if prior_session else attempt_count
-        offset = offset_seed % len(candidates)
-        ordered = candidates[offset:] + candidates[:offset]
-
-        if prior_session is None:
-            return ordered[0]
-
-        prior_context = prior_session.variant.parameter_context or {}
-        prior_fingerprint = prior_session.variant.variant_fingerprint or self._hash(
-            {
-                "blueprint_signature": prior_session.variant.blueprint_signature,
-                "subtemplate_signature": prior_session.variant.subtemplate_signature,
-                "parameter_context": prior_context,
-            }
-        )
-        for candidate in ordered:
-            if (
-                candidate.parameter_context != prior_context
-                and candidate.candidate_fingerprint != prior_fingerprint
-            ):
-                return candidate
-        for candidate in ordered:
-            if candidate.candidate_fingerprint != prior_fingerprint:
-                return candidate
-        return ordered[0]
-
-    def _build_variant(
-        self,
-        candidate: VariantCandidate,
-        *,
-        user,
-        difficulty_instance: DifficultyInstance,
-        generation_seed: str,
-    ) -> ScenarioVariant:
-        blueprint = candidate.blueprint
         scenario = difficulty_instance.scenario
-        context = candidate.parameter_context
+        context = {**case, "index": index}
+        case_id = str(context.get("case_id") or "").strip()
+        if not case_id:
+            raise ScenarioVariantBuildError("Authored practice case is missing case_id.")
+        template_key = str(
+            template.get("slug")
+            or template.get("template_key")
+            or template.get("structure_key")
+            or "variant"
+        )
 
-        rendered_slug = self.renderer.render(blueprint.slug_template, context)
-        rendered_label = self.renderer.render(blueprint.label_template, context)
-        rendered_subtemplate_signature = self.renderer.render(
-            blueprint.subtemplate_signature,
+        rendered_slug = self.renderer.render(template["slug_template"], context)
+        rendered_label = self.renderer.render(template["label_template"], context)
+        rendered_structure_key = self.renderer.render(
+            template.get("structure_key", template_key),
             context,
         )
         initial_state = self.simulator.normalize_state(
-            self.renderer.render(blueprint.initial_state_template, context)
+            self.renderer.render(template.get("initial_state_template", {}), context)
         )
         solution_commands = list(
-            self.renderer.render(blueprint.solution_commands_template, context)
+            self.renderer.render(template.get("solution_commands_template", []), context)
         )
-        target_rule = self.renderer.render(blueprint.target_rule_template, context)
+        target_rule = self.renderer.render(template.get("target_rule_template", {}), context)
         target_state = self._target_state_from_solution(initial_state, solution_commands)
         target_rule = self._augment_target_rule(
             target_rule,
@@ -233,45 +94,44 @@ class RuntimeScenarioBuilder:
             target_state=target_state,
         )
         student_context = self._student_context(
-            blueprint=blueprint,
+            template=template,
             parameter_context=context,
             initial_state=initial_state,
             target_rule=target_rule,
         )
-        fingerprint = self._variant_fingerprint(
-            blueprint_signature=blueprint.blueprint_signature,
-            subtemplate_signature=str(rendered_subtemplate_signature),
-            parameter_context=context,
+        slug = self._variant_slug(
+            rendered_slug,
+            scenario=scenario,
+            difficulty=difficulty_instance.difficulty,
+            case_id=case_id,
         )
-        slug = self._variant_slug(rendered_slug, generation_seed)
 
         variant = ScenarioVariant(
             scenario=scenario,
             difficulty_instance=difficulty_instance,
             slug=slug,
             label=str(rendered_label)[:80],
-            structure_signature=str(rendered_subtemplate_signature)[:120],
+            structure_signature=str(rendered_structure_key)[:120],
             initial_state=initial_state,
             target_rule=target_rule,
             target_state=target_state,
             expected_state_diagram=self.snapshotter.snapshot(target_state),
             solution_commands=solution_commands,
-            is_generated=True,
+            case_id=case_id,
+            semantic_key=self.semantic_key(
+                difficulty=difficulty_instance.difficulty,
+                template_key=template_key,
+                case_id=case_id,
+            ),
             parameter_context=context,
             student_context=student_context,
-            blueprint_signature=blueprint.blueprint_signature,
-            subtemplate_signature=str(rendered_subtemplate_signature)[:160],
-            variant_fingerprint=fingerprint,
-            generation_seed=generation_seed,
-            generated_from_blueprint=blueprint,
             is_published=True,
         )
-        GeneratedVariantValidator().validate(
+        AuthoredVariantValidator().validate(
             variant=variant,
             difficulty_instance=difficulty_instance,
             scenario=scenario,
         )
-        variant.save()
         return variant
 
     def _target_state_from_solution(self, initial_state: dict, commands: list[str]) -> dict:
@@ -335,12 +195,15 @@ class RuntimeScenarioBuilder:
     def _student_context(
         self,
         *,
-        blueprint: ScenarioGenerationBlueprint,
+        template: dict[str, Any],
         parameter_context: dict[str, Any],
         initial_state: dict,
         target_rule: dict,
     ) -> dict:
-        rendered = self.renderer.render(blueprint.student_context_template or {}, parameter_context)
+        rendered = self.renderer.render(
+            template.get("student_context_template") or {},
+            parameter_context,
+        )
         base = rendered if isinstance(rendered, dict) else {}
         auto = StudentContextFactory().build(
             parameter_context=parameter_context,
@@ -397,29 +260,35 @@ class RuntimeScenarioBuilder:
             return []
         return value if isinstance(value, list) else [value]
 
-    def _variant_slug(self, rendered_slug: Any, generation_seed: str) -> str:
+    def _variant_slug(
+        self,
+        rendered_slug: Any,
+        *,
+        scenario: ScenarioSkillFocus,
+        difficulty: str,
+        case_id: str,
+    ) -> str:
         base = slugify(str(rendered_slug)) or "variant"
-        suffix = generation_seed[:8]
-        return f"{base[:41]}-{suffix}"[:50]
+        fallback = slugify(f"{scenario.slug}-{difficulty}-{case_id}") or "variant"
+        base = base if base != "variant" else fallback
+        if len(base) <= 50:
+            return base
+        suffix = slugify(case_id)[:18] or self._hash({"case_id": case_id})[:8]
+        prefix_length = max(1, 49 - len(suffix))
+        return f"{base[:prefix_length]}-{suffix}"[:50]
+
+    def semantic_key(self, *, difficulty: str, template_key: str, case_id: str) -> str:
+        key = f"{difficulty}:{slugify(template_key) or template_key}:{case_id}"
+        if len(key) <= 240:
+            return key
+        digest = self._hash(
+            {"difficulty": difficulty, "template_key": template_key, "case_id": case_id}
+        )
+        return f"{key[:199]}:{digest}"
 
     def _hash(self, payload: dict) -> str:
         serialized = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
         return hashlib.sha256(serialized.encode("utf-8")).hexdigest()[:40]
-
-    def _variant_fingerprint(
-        self,
-        *,
-        blueprint_signature: str,
-        subtemplate_signature: str,
-        parameter_context: dict[str, Any],
-    ) -> str:
-        return self._hash(
-            {
-                "blueprint_signature": blueprint_signature,
-                "subtemplate_signature": subtemplate_signature,
-                "parameter_context": parameter_context,
-            }
-        )
 
     def _remote_url(self, initial_state: dict, solution_commands: list[str], topic: str) -> str:
         for command in solution_commands:
@@ -607,7 +476,7 @@ class StudentContextFactory:
         return value if isinstance(value, list) else [value]
 
 
-class GeneratedVariantValidator:
+class AuthoredVariantValidator:
     def validate(
         self,
         *,
@@ -674,7 +543,7 @@ class GeneratedVariantValidator:
         )
         if not outcome.target_matched:
             raise ScenarioVariantBuildError(
-                f"Generated solution does not satisfy target rule: {outcome.summary}"
+                f"Authored solution does not satisfy target rule: {outcome.summary}"
             )
 
     def _validate_context_fairness(self, variant: ScenarioVariant) -> None:
