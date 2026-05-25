@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
@@ -165,6 +167,30 @@ def test_clone_authored_variants_cover_branch_depth_and_destination_forms(db):
 
 
 @override_settings(DEBUG=True)
+def test_gitignore_variants_require_creating_gitignore_file(db):
+    call_command("seed_module1_scenarios", "--reset", "--confirm", "--validate-build")
+
+    variants = ScenarioVariant.objects.filter(
+        difficulty_instance__scenario__slug="configure-gitignore-rules",
+        is_published=True,
+    )
+
+    assert variants
+    assert all(".gitignore" not in variant.initial_state["working_tree"] for variant in variants)
+    assert all(variant.solution_commands[0].startswith("printf ") for variant in variants)
+    assert all(
+        any(rule.get("type") == "gitignore_matches_paths" for rule in variant.target_rule["rules"])
+        for variant in variants
+    )
+    preview_payload = json.dumps(
+        ScenarioSkillFocus.objects.get(slug="configure-gitignore-rules").command_preview_config
+    )
+    assert "printf" in preview_payload
+    assert "<content>" in preview_payload
+    assert all(variant.solution_commands[0] not in preview_payload for variant in variants)
+
+
+@override_settings(DEBUG=True)
 def test_authored_variant_semantic_key_is_unique_per_difficulty(db):
     call_command("seed_module1_scenarios", "--reset", "--confirm")
     variant = ScenarioVariant.objects.filter(is_published=True).first()
@@ -217,13 +243,13 @@ def test_diagnostic_command_preview_is_first_module_one_scenario(db):
     assert first.command_preview_config["focus_label"] == "diagnostic commands"
     assert GitCommandContent.objects.filter(key="git-status", is_active=True).exists()
     assert len(first.command_preview_config["command_refs"]) >= 7
-    assert first.command_preview_config["command_refs"][0] == {
-        "id": "git-status",
-        "key": "git-status",
-        "command": "git status",
-    }
+    first_ref = first.command_preview_config["command_refs"][0]
+    assert first_ref["id"].startswith("git-status")
+    assert first_ref["key"] == "git-status"
+    assert first_ref["command"] == "git status"
+    assert "overview" in first_ref["include_page_ids"]
     ref_keys = [ref["key"] for ref in first.command_preview_config["command_refs"]]
-    assert ref_keys.count("git-log") == 1
+    assert ref_keys.count("git-log") >= 1
     assert "git log --oneline" in first.safe_demo_commands
     assert "git log --oneline --graph --all" in first.safe_demo_commands
     status_content = GitCommandContent.objects.get(key="git-status", is_active=True)

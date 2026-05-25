@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from common.constants import RESULT_TARGET_MATCHED, RESULT_TARGET_NOT_YET_MATCHED
+from simulator.ignore import matching_gitignore_rule
 from simulator.services import normalize_command
 from simulator.state import RepositoryStateNormalizer
 
@@ -757,6 +758,24 @@ class StateBasedEvaluator:
                 "Ignored paths are excluded from the commit."
                 if not present
                 else f"Ignored paths appeared in commit: {present}.",
+            )
+        if rule_type == "gitignore_matches_paths":
+            commit = self._commit_for_rule(
+                state, rule, initial_state=initial_state
+            ) or self._latest_commit_for_rule(state, rule)
+            if not commit:
+                return False, "Commit was not found."
+            gitignore_path = rule.get("gitignore_path") or rule.get("path") or ".gitignore"
+            content = self.normalizer.entry_content((commit.get("tree") or {}).get(gitignore_path))
+            paths = set(self._as_list(rule.get("paths") or rule.get("ignored_paths")))
+            missing = sorted(
+                path for path in paths if not matching_gitignore_rule(content, path)
+            )
+            return (
+                not missing,
+                ".gitignore patterns match expected paths."
+                if not missing
+                else f".gitignore does not match paths: {missing}.",
             )
         if rule_type == "partial_hunks_committed":
             commit = self._commit_for_rule(

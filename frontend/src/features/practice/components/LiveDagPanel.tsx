@@ -1,6 +1,6 @@
 import dagre from 'dagre'
 import { GitCommitHorizontal } from 'lucide-react'
-import { memo, useMemo, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 import ReactFlow, { Background, Handle, Position } from 'reactflow'
 import type { Edge, Node, NodeProps } from 'reactflow'
 
@@ -21,6 +21,9 @@ type CommitNodeData = {
   activeRef: string | null
   isHead: boolean
   isDetachedHead: boolean
+  isActive?: boolean
+  onActivate?: () => void
+  onDismiss?: () => void
 }
 
 type EmptyRepositoryNodeData = {
@@ -77,6 +80,31 @@ export function RepositoryStateDiagram({
   const normalizedSnapshot = useMemo(() => normalizeSnapshot(snapshot), [snapshot])
   const { nodes, edges } = useMemo(() => buildGraph(normalizedSnapshot), [normalizedSnapshot])
   const nodeTypes = useMemo(() => commitNodeTypes, [])
+  const [activeCommitId, setActiveCommitId] = useState<string | null>(null)
+  const dismissCommit = useCallback((commitId: string) => {
+    setActiveCommitId((currentId) => (currentId === commitId ? null : currentId))
+  }, [])
+  const diagramNodes = useMemo(
+    () =>
+      nodes.map((node) => {
+        if (node.type !== 'commit') return node
+        const commitId = node.id
+        return {
+          ...node,
+          data: {
+            ...(node.data as CommitNodeData),
+            isActive: activeCommitId === commitId,
+            onActivate: () => setActiveCommitId(commitId),
+            onDismiss: () => dismissCommit(commitId),
+          },
+        }
+      }),
+    [activeCommitId, dismissCommit, nodes],
+  )
+  const activeCommitData = useMemo(() => {
+    const activeNode = diagramNodes.find((node) => node.type === 'commit' && node.id === activeCommitId)
+    return activeNode?.data as CommitNodeData | undefined
+  }, [activeCommitId, diagramNodes])
 
   return (
     <Card className={cn('min-h-0 overflow-hidden shadow-none', className)}>
@@ -97,24 +125,27 @@ export function RepositoryStateDiagram({
           contentClassName,
         )}
       >
-        <ReactFlow
-          className="h-full w-full"
-          style={{ height: '100%', width: '100%' }}
-          nodes={nodes}
-          edges={edges}
-          fitView
-          fitViewOptions={{ padding: 0.08 }}
-          nodesDraggable={false}
-          nodesConnectable={false}
-          nodeTypes={nodeTypes}
-          panOnScroll
-          minZoom={0.55}
-          maxZoom={1.6}
-          proOptions={{ hideAttribution: true }}
-          onError={handleReactFlowError}
-        >
-          <Background gap={18} color="rgba(255,255,255,0.05)" />
-        </ReactFlow>
+        <div className="relative h-full min-h-0">
+          <ReactFlow
+            className="h-full w-full"
+            style={{ height: '100%', width: '100%' }}
+            nodes={diagramNodes}
+            edges={edges}
+            fitView
+            fitViewOptions={{ padding: 0.08 }}
+            nodesDraggable={false}
+            nodesConnectable={false}
+            nodeTypes={nodeTypes}
+            panOnScroll
+            minZoom={0.55}
+            maxZoom={1.6}
+            proOptions={{ hideAttribution: true }}
+            onError={handleReactFlowError}
+          >
+            <Background gap={18} color="rgba(255,255,255,0.05)" />
+          </ReactFlow>
+          <CommitDetailsPanel data={activeCommitData ?? null} />
+        </div>
         {showRepositoryDetails ? <RepositoryDetails snapshot={normalizedSnapshot} /> : null}
       </CardContent>
     </Card>
@@ -122,7 +153,6 @@ export function RepositoryStateDiagram({
 }
 
 function CommitNode({ data }: NodeProps<CommitNodeData>) {
-  const [open, setOpen] = useState(false)
   const visibleRefs = orderRefs(data.refs, data.activeRef).slice(0, 4)
   const hiddenRefCount = Math.max(data.refs.length - visibleRefs.length, 0)
   const label = [
@@ -135,18 +165,30 @@ function CommitNode({ data }: NodeProps<CommitNodeData>) {
     .join(', ')
 
   return (
-    <div className="group relative z-10 flex w-36 flex-col items-center gap-2">
+    <div
+      className="relative z-10 flex w-36 flex-col items-center gap-2"
+      onMouseEnter={data.onActivate}
+      onMouseLeave={data.onDismiss}
+      onFocus={data.onActivate}
+      onBlur={(event) => {
+        const nextFocusTarget = event.relatedTarget
+        if (!(nextFocusTarget instanceof HTMLElement) || !event.currentTarget.contains(nextFocusTarget)) {
+          data.onDismiss?.()
+        }
+      }}
+    >
       <Handle className="opacity-0" type="target" position={Position.Top} />
       <button
         type="button"
         aria-label={label}
         title={label}
-        onClick={() => setOpen((value) => !value)}
+        onClick={data.onActivate}
         className={cn(
-          'grid size-16 place-items-center rounded-full border font-mono text-sm font-semibold shadow-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
+          'grid size-16 place-items-center rounded-full border font-mono text-sm font-semibold shadow-sm outline-none transition-all focus-visible:ring-2 focus-visible:ring-ring',
           data.isHead
             ? 'border-accent bg-accent text-accent-foreground shadow-[0_0_0_4px_hsla(var(--accent)/0.16)]'
             : 'border-border bg-card text-foreground',
+          data.isActive && 'ring-2 ring-primary/70 ring-offset-2 ring-offset-background',
         )}
       >
         {shortenHash(data.commit.id)}
@@ -184,36 +226,45 @@ function CommitNode({ data }: NodeProps<CommitNodeData>) {
           )}
         </div>
       )}
-      <CommitDetailsCard data={data} open={open} />
       <Handle className="opacity-0" type="source" position={Position.Bottom} />
     </div>
   )
 }
 
-function CommitDetailsCard({ data, open }: { data: CommitNodeData; open: boolean }) {
+function CommitDetailsPanel({ data }: { data: CommitNodeData | null }) {
+  if (!data) return null
+
   const changedEntries = Object.entries(data.commit.changes ?? data.commit.files ?? {})
   const treeEntries = Object.entries(data.commit.tree ?? {})
 
   return (
     <div
-      className={cn(
-        'pointer-events-none absolute left-1/2 top-20 z-50 hidden max-h-80 w-80 -translate-x-1/2 overflow-auto rounded-md border border-border bg-card p-3 text-left text-xs shadow-xl group-hover:block group-focus-within:block',
-        open && 'block',
-      )}
+      className="pointer-events-none absolute right-3 top-3 z-50 max-h-[calc(100%-1.5rem)] w-72 max-w-[calc(100%-1.5rem)] overflow-hidden rounded-md border border-border/80 bg-card/85 p-3 text-left text-xs shadow-2xl shadow-black/25 backdrop-blur-md"
+      data-testid="commit-details-overlay"
       role="tooltip"
     >
-      <p className="font-mono text-[11px] font-semibold text-foreground">Commit {data.commit.id}</p>
-      <p className="mt-1 font-medium text-foreground">Message: {data.commit.message || '(empty)'}</p>
-      <p className="mt-2 text-muted-foreground">
-        Refs: {data.refs.length ? data.refs.map((ref) => ref.name).join(', ') : 'none'}
-        {data.isHead ? ', HEAD' : ''}
-      </p>
-      <p className="text-muted-foreground">
-        Parents: {data.commit.parents.length ? data.commit.parents.join(', ') : 'none'}
-      </p>
-      <p className="text-muted-foreground">
-        Type: {data.commit.is_merge || data.commit.parents.length > 1 ? 'merge commit' : 'regular commit'}
-      </p>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="font-mono text-[11px] font-semibold text-foreground">Commit {data.commit.id}</p>
+          <p className="mt-1 truncate font-medium text-foreground" title={data.commit.message || '(empty)'}>
+            Message: {data.commit.message || '(empty)'}
+          </p>
+        </div>
+        {data.isHead ? (
+          <span className="shrink-0 rounded-full border border-accent/45 bg-accent/15 px-2 py-0.5 text-[10px] font-semibold leading-none text-accent">
+            HEAD
+          </span>
+        ) : null}
+      </div>
+      <div className="mt-2 space-y-0.5 text-muted-foreground">
+        <p className="truncate" title={data.refs.length ? data.refs.map((ref) => ref.name).join(', ') : 'none'}>
+          Refs: {data.refs.length ? data.refs.map((ref) => ref.name).join(', ') : 'none'}
+        </p>
+        <p className="truncate" title={data.commit.parents.length ? data.commit.parents.join(', ') : 'none'}>
+          Parents: {data.commit.parents.length ? data.commit.parents.join(', ') : 'none'}
+        </p>
+        <p>Type: {data.commit.is_merge || data.commit.parents.length > 1 ? 'merge commit' : 'regular commit'}</p>
+      </div>
       <DetailList
         title="Changed paths"
         empty="No recorded path changes."

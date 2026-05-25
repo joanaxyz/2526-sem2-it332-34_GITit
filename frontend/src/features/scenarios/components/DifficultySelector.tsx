@@ -3,10 +3,12 @@ import type { DifficultyAccess } from '@/features/scenarios/types'
 
 export function DifficultySelector({
   difficulties,
+  disabled = false,
   onStart,
   onReview,
 }: {
   difficulties: DifficultyAccess[]
+  disabled?: boolean
   onStart: (difficulty: DifficultyAccess) => void
   onReview: (difficulty: DifficultyAccess) => void
 }) {
@@ -14,6 +16,7 @@ export function DifficultySelector({
     <div className="grid grid-cols-3 gap-2 max-md:grid-cols-1">
       {difficulties.map((difficulty) => (
         <DifficultyActionButton
+          disabled={disabled}
           difficulty={difficulty}
           key={difficulty.id}
           onAction={(selectedDifficulty, action) => {

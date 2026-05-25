@@ -9,6 +9,7 @@ from simulator.git_commands import (
     GitCommandRegistry,
     NonGitCommandError,
 )
+from simulator.file_commands import FileCommandParseError, FileCommandParser, NonFileCommandError
 from simulator.services import RepositoryStateSimulator, normalize_command
 from simulator.state import RepositoryStateNormalizer
 
@@ -41,11 +42,13 @@ class GitCommandExecutor:
         self,
         *,
         parser: GitCommandParser | None = None,
+        file_parser: FileCommandParser | None = None,
         registry: GitCommandRegistry | None = None,
         simulator: RepositoryStateSimulator | None = None,
         normalizer: RepositoryStateNormalizer | None = None,
     ) -> None:
         self.parser = parser or GitCommandParser()
+        self.file_parser = file_parser or FileCommandParser()
         self.registry = registry or GitCommandRegistry()
         self.simulator = simulator or RepositoryStateSimulator()
         self.normalizer = normalizer or RepositoryStateNormalizer()
@@ -53,6 +56,36 @@ class GitCommandExecutor:
     def execute(self, state: dict, command: str) -> CommandExecutionResult:
         start = time.perf_counter()
         normalized_fallback = normalize_command(command)
+        try:
+            parsed_file = self.file_parser.parse(command)
+        except NonFileCommandError:
+            parsed_file = None
+        except FileCommandParseError as exc:
+            return self._result(
+                processed=False,
+                state=state,
+                output=str(exc),
+                normalized_command=normalized_fallback,
+                exit_code=exc.exit_code,
+                start=start,
+                command_family="file",
+            )
+        if parsed_file is not None:
+            normalized_state = self.normalizer.normalize(state)
+            result = self.simulator.process_file_parsed(normalized_state, parsed_file)
+            return self._result(
+                processed=result.processed,
+                state=result.state,
+                output=result.output,
+                normalized_command=result.normalized_command,
+                exit_code=result.exit_code,
+                stdout=result.stdout,
+                stderr=result.stderr,
+                command_family=result.command_family,
+                diagnostic_metadata=result.diagnostic_metadata,
+                start=start,
+            )
+
         try:
             parsed = self.parser.parse(command)
         except NonGitCommandError as exc:

@@ -11,16 +11,17 @@ import { ExpandToggleButton } from '@/shared/components/ExpandToggleButton'
 export function ScenarioSkillFocusCard({
   scenario,
   scenarioNumber,
+  actionsDisabled = false,
   onDifficultyAction,
   onPreview,
 }: {
   scenario: ScenarioSkillFocus
   scenarioNumber: number
+  actionsDisabled?: boolean
   onDifficultyAction: (scenario: ScenarioSkillFocus, difficulty: DifficultyAccess, action: DifficultyActionIntent) => void
   onPreview: (scenario: ScenarioSkillFocus) => void
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const primaryLabel = scenario.primary_focus_commands.length === 1 ? 'Focus command' : 'Focus commands'
   const focusValue = scenario.primary_focus_commands.length ? scenario.primary_focus_commands.join(', ') : scenario.focus
   const panelId = `skill-panel-${scenario.id}`
   const isPreviewOnly = scenario.difficulties.length === 0
@@ -54,13 +55,7 @@ export function ScenarioSkillFocusCard({
       </CardHeader>
       {isExpanded ? (
         <CardContent id={panelId}>
-          <div className="mb-4 grid gap-2 rounded-md border border-border bg-secondary/30 p-3 text-xs leading-5 text-muted-foreground">
-            <div className="flex items-center gap-2 font-semibold text-foreground">
-              <ListChecks className="size-4 text-primary" />
-              <span className="font-semibold">{scenario.primary_focus_commands.length ? `${primaryLabel}:` : 'Skill focus:'}</span>
-              <span className="font-mono">{focusValue}</span>
-            </div>
-          </div>
+          {/* Command focus intentionally hidden in the card UI */}
           {isPreviewOnly ? (
             <div className="rounded-md border border-border bg-background/30 p-3">
               <div className="min-w-0">
@@ -74,6 +69,7 @@ export function ScenarioSkillFocusCard({
             <div className="grid grid-cols-3 gap-2 max-md:grid-cols-1">
               {scenario.difficulties.map((difficulty) => (
                 <DifficultyActionButton
+                  disabled={actionsDisabled}
                   difficulty={difficulty}
                   key={difficulty.id}
                   onAction={(selectedDifficulty, action) => onDifficultyAction(scenario, selectedDifficulty, action)}

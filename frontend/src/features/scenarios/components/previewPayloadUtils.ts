@@ -27,11 +27,13 @@ export type PreviewCommand = {
   title: string
   command?: string
   baseCommand: string
+  summary?: string
   pages: PreviewPage[]
   demo_steps: DemoExplanationStep[]
 }
 
-export type PreviewPage = CommandPreviewPage & {
+export type PreviewPage = Omit<CommandPreviewPage, 'id'> & {
+  id: string
   kind: 'content'
   demo_steps: DemoExplanationStep[]
 }
@@ -42,18 +44,24 @@ export type PreviewNavGroup = {
   commandIndexes: number[]
 }
 
+export type PreviewAnchor = {
+  id: string
+  label: string
+  sectionType?: string
+}
+
 export function buildPreviewCommands(
   scenario: ScenarioSkillFocus,
   fallbackSnapshot: RepositorySnapshot,
 ): PreviewCommand[] {
   const resolvedCommands = scenario.command_preview?.commands?.filter((command) => command.pages?.length || command.sections?.length) ?? []
   if (resolvedCommands.length) {
-    return commandsFromResolvedCommands(resolvedCommands, fallbackSnapshot)
+    return commandsFromResolvedCommands(resolvedCommands, fallbackSnapshot).filter(hasReadableCommand)
   }
 
   const configuredSections = scenario.command_preview?.sections?.filter(hasSectionContent) ?? []
   if (configuredSections.length) {
-    return commandsFromSections(configuredSections, fallbackSnapshot)
+    return commandsFromSections(configuredSections, fallbackSnapshot).filter(hasReadableCommand)
   }
 
   const steps = normalizeDemoSteps(
@@ -77,7 +85,7 @@ export function buildPreviewCommands(
         }
       )),
       fallbackSnapshot,
-    )
+    ).filter(hasReadableCommand)
   }
 
   return commandsFromSections(
@@ -93,7 +101,7 @@ export function buildPreviewCommands(
       },
     ],
     fallbackSnapshot,
-  )
+  ).filter(hasReadableCommand)
 }
 
 export function navigationGroupsFromCommands(commands: PreviewCommand[]): PreviewNavGroup[] {
@@ -110,6 +118,35 @@ export function navigationGroupsFromCommands(commands: PreviewCommand[]): Previe
     groups[groupIndex].commandIndexes.push(commandIndex)
   })
   return groups
+}
+
+export function navigationAnchorsForCommand(command: PreviewCommand): PreviewAnchor[] {
+  const anchors = command.pages
+    .map((page, index) => ({ page, index }))
+    .filter(({ page }) => isNavigationSection(page.section_type))
+    .map(({ page, index }) => ({
+      id: page.id,
+      label: navigationLabelForPage(page, command.baseCommand),
+      sectionType: page.section_type,
+      order: navigationSectionOrder(page.section_type),
+      index,
+    }))
+    .filter((anchor) => anchor.label)
+    .sort((first, second) => first.order - second.order || first.index - second.index)
+
+  const seen = new Set<string>()
+  const deduped: PreviewAnchor[] = []
+  for (const anchor of anchors) {
+    const key = normalize(anchor.label)
+    if (seen.has(key)) continue
+    seen.add(key)
+    deduped.push({ id: anchor.id, label: anchor.label, sectionType: anchor.sectionType })
+  }
+  return deduped
+}
+
+export function previewAnchorDomId(commandId: string, anchorId: string) {
+  return `preview-${slugForDomId(commandId)}-${slugForDomId(anchorId)}`
 }
 
 export function previousReadingLocation(commands: PreviewCommand[], commandIndex: number, pageIndex: number) {
@@ -150,6 +187,40 @@ function hasSectionContent(section: CommandPreviewSection) {
   return Boolean(section.title && (section.explanation || section.content?.length || section.pages?.length))
 }
 
+function hasReadableCommand(command: PreviewCommand) {
+  return Boolean(command.command?.trim() || command.pages.some((page) => page.eyebrow?.trim()))
+}
+
+function isNavigationSection(sectionType?: string) {
+  return sectionType === 'form' || sectionType === 'option' || sectionType === 'argument'
+}
+
+function navigationSectionOrder(sectionType?: string) {
+  if (sectionType === 'form') return 0
+  if (sectionType === 'option') return 1
+  if (sectionType === 'argument') return 2
+  return 3
+}
+
+function navigationLabelForPage(page: PreviewPage, baseCommand: string) {
+  const source = page.eyebrow || page.heading || page.title
+  if (!source) return ''
+  if (page.section_type === 'option' || page.section_type === 'argument') {
+    return source.replace(/^Option:\s*/i, '').replace(/^Argument:\s*/i, '')
+  }
+  const normalizedSource = normalize(source)
+  const normalizedBase = normalize(baseCommand)
+  if (normalizedBase && normalizedSource.startsWith(normalizedBase)) {
+    const suffix = source.slice(baseCommand.length).trim()
+    return suffix
+  }
+  return source
+}
+
+function slugForDomId(value: string) {
+  return normalize(value).replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'section'
+}
+
 function commandsFromResolvedCommands(
   commands: CommandPreviewCommand[],
   fallbackSnapshot: RepositorySnapshot,
@@ -175,6 +246,7 @@ function commandsFromResolvedCommands(
       title,
       command: command.command || command.canonical_command,
       baseCommand: command.base_command || canonicalCommand(command.command || command.canonical_command || title),
+      summary: command.summary,
       pages,
       demo_steps: demoSteps,
     }
@@ -220,6 +292,7 @@ function commandFromSections(
     title: label,
     command: label,
     baseCommand: canonicalCommand(label),
+    summary: sections.find((section) => section.explanation)?.explanation,
     pages: authoredPages.length ? authoredPages : generatedPagesFromSection(sections[0]),
     demo_steps: demoSteps,
   }

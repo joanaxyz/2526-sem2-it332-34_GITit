@@ -32,9 +32,11 @@ function masteredRecordsFor(difficulty: DifficultyAccess) {
 
 export function DifficultyActionButton({
   difficulty,
+  disabled = false,
   onAction,
 }: {
   difficulty: DifficultyAccess
+  disabled?: boolean
   onAction: (difficulty: DifficultyAccess, action: DifficultyActionIntent) => void
 }) {
   const action = actionForDifficulty(difficulty)
@@ -68,10 +70,10 @@ export function DifficultyActionButton({
           <Button
             type="button"
             size="sm"
-            disabled={!action}
+            disabled={!action || disabled}
             variant={!action || action === 'review' || action === 'retry' ? 'outline' : 'default'}
             onClick={() => {
-              if (action) onAction(difficulty, action)
+              if (action && !disabled) onAction(difficulty, action)
             }}
           >
             <Icon data-icon="inline-start" />

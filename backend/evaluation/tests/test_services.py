@@ -364,6 +364,66 @@ def test_evaluator_checks_init_clone_and_tracked_generated_file_rules():
     assert rm_result.result_category == RESULT_TARGET_MATCHED
 
 
+def test_evaluator_checks_created_gitignore_patterns_and_ignored_paths():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "commits": [
+                {
+                    "id": "c0",
+                    "message": "Base",
+                    "parents": [],
+                    "tree": {"README.md": "readme-v1"},
+                }
+            ],
+            "branches": {"main": "c0"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {
+                ".env": {"status": "untracked", "content": "SECRET=local"},
+                "dist/app.js": {"status": "untracked", "content": "bundle"},
+            },
+            "staging": {},
+        }
+    )
+    for command in [
+        'printf ".env*\\ndist/\\n" > .gitignore',
+        "git add .gitignore",
+        'git commit -m "Add ignore rules"',
+    ]:
+        state = simulator.process(state, command).state
+
+    result = StateBasedEvaluator().evaluate(
+        state,
+        {
+            "head_branch": "main",
+            "staging_empty": True,
+            "working_tree_clean": True,
+            "latest_commit": {
+                "branch": "main",
+                "contains_paths": [".gitignore"],
+                "excludes_paths": [".env", "dist/app.js"],
+                "message_contains": ["Add ignore rules"],
+            },
+            "rules": [
+                {
+                    "type": "ignored_paths_present",
+                    "paths": [".env", "dist/app.js"],
+                    "statuses": ["ignored"],
+                },
+                {"type": "gitignore_matches_paths", "paths": [".env", "dist/app.js"]},
+                {
+                    "type": "commit_tree_contains",
+                    "branch": "main",
+                    "tree": {".gitignore": ".env*\ndist/\n"},
+                },
+            ],
+        },
+    )
+
+    assert result.result_category == RESULT_TARGET_MATCHED
+    assert result.failed_rules == ()
+
+
 def test_rule_evaluator_checks_commit_message_changes_scope_and_clean_state():
     initial = {
         "commits": [

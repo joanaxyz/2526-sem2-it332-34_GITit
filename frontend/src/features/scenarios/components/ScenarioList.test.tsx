@@ -200,6 +200,76 @@ describe('ScenarioList preview gate', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
+  it('disables Retry while the retry attempt is starting', async () => {
+    renderList([
+      {
+        ...scenario,
+        difficulties: [
+          difficulty({
+            id: 10,
+            difficulty: 'easy',
+            status: 'failed',
+            retry_session_id: 77,
+            latest_attempt: {
+              id: 77,
+              status: 'failed',
+              accuracy_rate: 0,
+              command_accurate: null,
+              counted_action_total: 2,
+              total_attempts: 2,
+              completed_at: null,
+              ended_at: null,
+            },
+          }),
+        ],
+      },
+    ])
+    vi.mocked(scenariosApi.retrySession).mockReturnValue(new Promise(() => {}) as never)
+    await expandScenario()
+
+    const retryButton = screen.getByRole('button', { name: /^retry$/i })
+    fireEvent.click(retryButton)
+
+    await waitFor(() => expect(scenariosApi.retrySession).toHaveBeenCalledWith(77))
+    expect(retryButton).toBeDisabled()
+  })
+
+  it('disables Continue while the next mastery attempt is starting', async () => {
+    renderList([
+      {
+        ...scenario,
+        difficulties: [
+          difficulty({
+            id: 10,
+            difficulty: 'easy',
+            status: 'completed',
+            mastery_progress: { mastered: 1, required: 3 },
+            retry_session_id: 77,
+            completion: { first_attempt_star: false, counted_action_total: 1, completed_at: '2026-05-18T00:00:00Z' },
+            latest_attempt: {
+              id: 77,
+              status: 'completed',
+              accuracy_rate: 100,
+              command_accurate: true,
+              counted_action_total: 1,
+              total_attempts: 1,
+              completed_at: '2026-05-18T00:00:00Z',
+              ended_at: '2026-05-18T00:00:00Z',
+            },
+          }),
+        ],
+      },
+    ])
+    vi.mocked(scenariosApi.retrySession).mockReturnValue(new Promise(() => {}) as never)
+    await expandScenario()
+
+    const continueButton = screen.getByRole('button', { name: /^continue$/i })
+    fireEvent.click(continueButton)
+
+    await waitFor(() => expect(scenariosApi.retrySession).toHaveBeenCalledWith(77))
+    expect(continueButton).toBeDisabled()
+  })
+
   it('renders diagnostic skill focuses with no playable difficulties as preview-only cards', async () => {
     renderList([
       {

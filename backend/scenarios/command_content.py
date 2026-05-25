@@ -34,6 +34,31 @@ COMMAND_KEY_PREFIXES: tuple[tuple[str, str], ...] = (
 )
 
 
+# For each command key, option and argument pages that should always appear in the
+# preview regardless of which specific command form triggered the key. These teach
+# the vocabulary (flags, placeholders, argument semantics) that students need when
+# any variant of the command is used in an authored scenario.
+COMMAND_KEY_OPTION_PAGE_IDS: dict[str, list[str]] = {
+    "git-status": ["option-s-short", "option-porcelain", "option-sb", "option-ignored"],
+    "git-log": ["option-oneline", "option-graph", "option-all", "option-count"],
+    "git-diff": ["option-staged-cached", "option-head", "option-name-only", "argument-path"],
+    "git-diff-staged": ["option-staged-cached"],
+    "git-show": ["argument-commit"],
+    "git-branch": ["option-v"],
+    "git-remote-v": ["option-v-verbose"],
+    "git-check-ignore": ["option-v", "argument-path"],
+    "git-init": ["option-b-initial-branch", "option-q-quiet", "argument-directory"],
+    "git-clone": ["option-b-branch", "option-depth", "argument-url", "argument-directory", "argument-branch", "argument-number"],
+    "git-add": ["option-a-all", "option-u-update", "option-p-patch", "argument-path"],
+    "git-add-p": ["option-p-patch", "argument-path"],
+    "git-rm-cached": ["option-cached", "argument-path"],
+    "git-commit": ["option-m-message", "option-a-all", "option-amend"],
+    "git-commit-amend": ["option-amend", "option-no-edit", "option-m-message"],
+    "git-restore": ["argument-path"],
+    "git-restore-staged": ["option-staged", "argument-path"],
+}
+
+
 def command_content_key_for_command(command: str) -> str:
     normalized = normalize_command_text(command)
     for prefix, key in COMMAND_KEY_PREFIXES:
@@ -99,6 +124,12 @@ def command_preview_form_for_command(command: str) -> str:
         return ""
     if normalized == ".gitignore":
         return ".gitignore"
+    if normalized.startswith("touch "):
+        return "touch <path>"
+    if normalized.startswith("printf ") and ">" in normalized:
+        return 'printf "<content>" > <path>'
+    if normalized.startswith("echo ") and ">" in normalized:
+        return 'echo "<content>" > <path>'
 
     if normalized.startswith("git init"):
         return _git_init_preview_form(raw)
@@ -173,12 +204,29 @@ def command_preview_form_for_command(command: str) -> str:
 
 
 def command_preview_page_ids_for_command(command: str) -> list[str]:
+    """Return the ordered page IDs to include for this command form's preview.
+
+    Always includes: overview, the specific form page, all option/argument pages
+    for the command key, effects, mistakes, and practice-notes. The option/argument
+    pages are included unconditionally because they teach flag vocabulary that any
+    variant of the command may require — even when the specific form being previewed
+    does not use that flag.
+    """
     form = command_preview_form_for_command(command)
-    ids = ["overview"]
+    key = command_content_key_for_command(form or command)
+    ids: list[str] = ["overview"]
     if form:
         ids.append(command_form_page_id(form))
+    ids.extend(COMMAND_KEY_OPTION_PAGE_IDS.get(key, []))
     ids.extend(["effects", "mistakes", "practice-notes"])
-    return ids
+    # Preserve insertion order while deduplicating.
+    seen: set[str] = set()
+    unique: list[str] = []
+    for page_id in ids:
+        if page_id not in seen:
+            seen.add(page_id)
+            unique.append(page_id)
+    return unique
 
 
 def _git_init_preview_form(command: str) -> str:
@@ -828,8 +876,29 @@ def _git_log_sections() -> list[dict[str, Any]]:
                     "a compact one-line view, a graph view across all refs, and simple count limits."
                 ),
                 _callout(
-                    "Read-only command",
-                    "Every git log form here is diagnostic: it reports commits and refs without moving HEAD, editing files, staging, or committing.",
+                    "Mental model",
+                    "This is a reading command in Module 1. It gives evidence for the next decision, "
+                    "but the repository state should remain unchanged after the preview command runs.",
+                ),
+                _bullets(
+                    "What to look at before using it",
+                    [
+                        "Identify the specific history question the scenario asks: message, commit order, branch tips, or count.",
+                        "Decide whether you need the full log, one-line compact view, graph across all refs, or a limited count.",
+                        "Note any commit id the scenario requires so you can verify it appears in the output.",
+                    ],
+                ),
+                _terminal(
+                    "commit c2\nAuthor: Demo User\n\n    Add profile validation\n\ncommit c1\nAuthor: Demo User\n\n    Add baseline feature"
+                ),
+                _bullets(
+                    "How to verify the result",
+                    [
+                        "Expected result: Reports commit history without changing HEAD, branches, staging, or working-tree files.",
+                        "Before running it: Identify which log form the scenario asks for (base, --oneline, --graph --all, or -n <number>).",
+                        "Verify commit order before choosing a commit id or judging whether history looks correct.",
+                        "Do not expect it to do this: stage, commit, switch branches, discard edits, or fetch remote data.",
+                    ],
                 ),
             ],
         ),

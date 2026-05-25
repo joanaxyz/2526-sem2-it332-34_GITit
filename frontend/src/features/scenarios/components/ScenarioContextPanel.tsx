@@ -3,7 +3,7 @@ import type { ComponentType, ReactNode } from 'react'
 
 import type { ScenarioSession, ScenarioStudentContext } from '@/features/practice/types'
 import { Badge } from '@/shared/components/Badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/Card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Card'
 import { cn } from '@/shared/utils/cn'
 
 export function ScenarioContextPanel({ session }: { session: ScenarioSession }) {
@@ -19,7 +19,6 @@ export function ScenarioContextPanel({ session }: { session: ScenarioSession }) 
           {session.variant.changed_variant ? <Badge variant="warning">Changed variant</Badge> : null}
         </div>
         <CardTitle className="text-base leading-tight">{session.scenario.title}</CardTitle>
-        <CardDescription>{session.scenario.focus}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 p-3 pt-0">
         <Section icon={BookOpenText} title="Scenario Brief" hidden={!context.story}>

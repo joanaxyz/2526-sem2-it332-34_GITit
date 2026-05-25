@@ -60,6 +60,7 @@ DIAG_PATTERNS = [
     "git diff --staged --name-only",
     "git show",
     "git show <commit>",
+    "git show HEAD",
     "git show --name-only",
     "git remote",
     "git remote -v",
@@ -269,7 +270,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
             "story": "{{project}} has local/generated files that should not be saved in project history.",
             "required_details": [
                 {"label": "Ignore file", "value": ".gitignore"},
-                {"label": "Ignore marker", "value": "{{gitignore_token}}"},
+                {"label": "Ignore patterns", "value": "{{gitignore_patterns}}"},
                 {"label": "Ignored/generated paths", "value": "{{ignored_paths}}"},
                 {
                     "label": "Tracked generated path to remove from history",
@@ -1582,15 +1583,19 @@ def ignore_case(
     tracked_generated_path: str = "none",
     base_tree: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    working_tree: dict[str, Any] = {".gitignore": token}
+    patterns = ignore_patterns_for_paths(ignored_paths)
+    content = "\n".join(patterns) + "\n"
+    working_tree: dict[str, Any] = {}
     for path in ignored_paths:
         if path == tracked_generated_path:
             continue
-        working_tree[path] = {"status": "ignored", "content": f"{path}-local"}
+        working_tree[path] = {"status": "untracked", "content": f"{path}-local"}
     payload = {
         "case_id": case_id,
         "project": project,
-        "gitignore_token": token,
+        "gitignore_patterns": patterns,
+        "gitignore_content": content,
+        "gitignore_printf": content.replace("\\", "\\\\").replace("\n", "\\n").replace('"', '\\"'),
         "working_tree": working_tree,
         "ignored_paths": ignored_paths,
         "target_files": [".gitignore"],
@@ -1602,6 +1607,20 @@ def ignore_case(
     if base_tree is not None:
         payload["base_tree"] = base_tree
     return payload
+
+
+def ignore_patterns_for_paths(paths: list[str]) -> list[str]:
+    patterns: list[str] = []
+    for path in paths:
+        if path.startswith(".env"):
+            pattern = ".env*"
+        elif "/" in path:
+            pattern = f"{path.split('/', 1)[0]}/"
+        else:
+            pattern = path
+        if pattern not in patterns:
+            patterns.append(pattern)
+    return patterns
 
 
 def ignore_bp(
@@ -1616,17 +1635,23 @@ def ignore_bp(
     if hard:
         latest_excludes = []
     rules = [
-        {"type": "ignored_paths_present", "paths": "{{ignored_paths}}"},
+        {"type": "ignored_paths_present", "paths": "{{ignored_paths}}", "statuses": ["ignored"]},
+        {"type": "gitignore_matches_paths", "paths": "{{ignored_paths}}"},
         {
             "type": "commit_tree_contains",
             "branch": "main",
-            "tree": {".gitignore": "{{gitignore_token}}"},
+            "tree": {".gitignore": "{{gitignore_content}}"},
         },
         {"type": "commit_tree_excludes", "branch": "main", "paths": "{{excluded_files}}"},
     ]
-    solution = ["git add .gitignore", 'git commit -m "{{required_commit_message}}"']
+    solution = [
+        'printf "{{gitignore_printf}}" > .gitignore',
+        "git add .gitignore",
+        'git commit -m "{{required_commit_message}}"',
+    ]
     if hard:
         solution = [
+            'printf "{{gitignore_printf}}" > .gitignore',
             "git rm --cached {{tracked_generated_path}}",
             "git add .gitignore",
             'git commit -m "{{required_commit_message}}"',
@@ -3274,6 +3299,9 @@ class Command(BaseCommand):
         refs: list[dict[str, Any]] = []
         seen: set[tuple[str, str, tuple[str, ...]]] = set()
         for command in commands:
+            normalized = " ".join(str(command).strip().lower().split())
+            if not normalized.startswith("git "):
+                continue
             preview_form = command_preview_form_for_command(command)
             key = command_content_key_for_command(preview_form or command)
             include_page_ids = command_preview_page_ids_for_command(preview_form or command)
@@ -3347,13 +3375,17 @@ class Command(BaseCommand):
                 "git show",
                 "git branch",
                 "git remote -v",
-                "git log --oneline --graph --all",
                 "git branch -v",
+                "git log --oneline --graph --all",
+                "git show HEAD",
+                "git show --name-only",
                 "git reflog",
             ],
-            "git init": ["git status", "git init", "git init demo-project"],
+            "git init": ["git status", "git init", "git init demo-project", "git init -b main"],
             "git clone": [
                 "git clone https://example.test/demo/repository.git demo-repository",
+                "git clone https://example.test/demo/repository.git",
+                "git clone --depth 1 https://example.test/demo/repository.git demo-repository",
                 "git remote -v",
                 "git log --oneline",
                 "git status",
@@ -3362,6 +3394,8 @@ class Command(BaseCommand):
                 "git status",
                 "git diff",
                 "git add demo.txt",
+                "git add .",
+                "git add -A",
                 "git diff --staged",
                 'git commit -m "Demo snapshot"',
                 "git log --oneline",
@@ -3377,7 +3411,9 @@ class Command(BaseCommand):
             ],
             "git add -p": [
                 "git status",
+                "git add -p",
                 "git add -p demo.txt",
+                "git add --patch demo.txt",
                 "git diff --staged",
                 'git commit -m "Demo selected hunk"',
             ],
@@ -3386,12 +3422,18 @@ class Command(BaseCommand):
                 "git status",
                 "git add demo.txt",
                 'git commit --amend -m "Demo amended snapshot"',
+                "git commit --amend",
+                "git commit --amend --no-edit",
                 "git show",
             ],
             "git restore": [
                 "git status",
                 "git restore --staged staged.txt",
+                "git restore --staged .",
+                "git restore --staged staged.txt baseline.txt",
                 "git restore demo.txt",
+                "git restore .",
+                "git restore demo.txt baseline.txt",
                 "git diff",
             ],
             "local repository workflow": [

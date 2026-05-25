@@ -189,6 +189,7 @@ export function ScenarioList(props: ScenarioListProps) {
       ) : null}
       {data.map((scenario, index) => (
         <ScenarioSkillFocusCard
+          actionsDisabled={isProceeding}
           key={scenario.id}
           scenario={scenario}
           scenarioNumber={playableScenarioNumber(data, index)}

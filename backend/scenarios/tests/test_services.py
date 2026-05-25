@@ -40,7 +40,7 @@ from scenarios.services import (
     CommandProcessingService,
     ScenarioSessionService,
 )
-from scenarios.views import CommandSubmitAPIView, SkillFocusDemoCommandAPIView
+from scenarios.views import CommandSubmitAPIView, ScenarioRetryAPIView, SkillFocusDemoCommandAPIView
 
 
 @pytest.fixture()
@@ -669,6 +669,34 @@ def test_retry_does_not_create_duplicate_active_session(student):
         ).count()
         == 1
     )
+
+
+def test_retry_endpoint_starts_new_attempt_from_ended_session(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="stage-and-commit-basic-workflow",
+        difficulty="easy",
+    )
+    prior = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="module_card",
+    )
+    prior.status = SESSION_STATUS_FAILED
+    prior.ended_at = timezone.now()
+    prior.save(update_fields=["status", "ended_at"])
+    request = APIRequestFactory().post(
+        f"/api/scenarios/sessions/{prior.id}/retry/",
+        format="json",
+    )
+    force_authenticate(request, user=student)
+
+    response = ScenarioRetryAPIView.as_view()(request, session_id=prior.id)
+
+    assert response.status_code == 201
+    session = ScenarioSession.objects.get(id=response.data["id"])
+    assert session.prior_session_id == prior.id
+    assert session.status == SESSION_STATUS_STARTED
+    assert session.source_entry_point == "retry"
 
 
 def test_starting_active_difficulty_requires_exit_first(student):

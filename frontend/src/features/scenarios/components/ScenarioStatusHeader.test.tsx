@@ -143,4 +143,28 @@ describe('ScenarioStatusHeader', () => {
 
     expect(screen.getByRole('button', { name: /retry for accuracy/i })).toBeInTheDocument()
   })
+
+  it('disables Continue while a fresh mastery attempt is starting', () => {
+    const onContinue = vi.fn()
+    render(
+      <ScenarioStatusHeader
+        session={{
+          ...session,
+          status: 'completed',
+          mastery_progress: { mastered: 1, required: 3 },
+          counts: { ...session.counts, counted_action_total: 3 },
+        }}
+        isRetrying
+        onContinue={onContinue}
+        onExit={vi.fn()}
+      />,
+    )
+
+    const continueButton = screen.getByRole('button', { name: /continuing/i })
+    expect(continueButton).toBeDisabled()
+
+    fireEvent.click(continueButton)
+
+    expect(onContinue).not.toHaveBeenCalled()
+  })
 })

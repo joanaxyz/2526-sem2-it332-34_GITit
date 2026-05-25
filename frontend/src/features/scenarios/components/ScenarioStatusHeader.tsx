@@ -72,8 +72,8 @@ export function ScenarioStatusHeader({
           </Button>
         ) : null}
         {canContinue ? (
-          <Button type="button" variant="outline" size="sm" disabled={isExiting} onClick={onContinue}>
-            Continue
+          <Button type="button" variant="outline" size="sm" disabled={isExiting || isRetrying} onClick={onContinue}>
+            {isRetrying ? 'Continuing' : 'Continue'}
           </Button>
         ) : null}
         <Badge variant={session.status === 'completed' ? 'default' : session.status === 'failed' ? 'destructive' : 'blue'}>
