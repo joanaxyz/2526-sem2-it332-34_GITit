@@ -115,18 +115,8 @@ class RepositoryStateSimulator:
         self._ensure_state_shape(next_state)
         action = parsed.subcommand
 
-        legacy_handlers = {
-            "fetch": self._fetch,
-            "pull": self._pull,
-            "push": self._push,
-            "merge": self._merge,
-            "stash": self._stash,
-            "revert": self._revert,
-            "cherry-pick": self._cherry_pick,
-        }
         handler = self.handlers.get(action)
-        legacy_handler = legacy_handlers.get(action)
-        if handler is None and legacy_handler is None:
+        if handler is None:
             return SimulatorResult(
                 False,
                 state,
@@ -171,28 +161,6 @@ class RepositoryStateSimulator:
                 parsed.normalized_text,
                 stderr=message,
                 exit_code=128,
-                command_family=action,
-            )
-
-        if legacy_handler is not None:
-            try:
-                output = legacy_handler(next_state, parsed.executor_args)
-            except (KeyError, IndexError, ValueError) as exc:
-                return SimulatorResult(
-                    False,
-                    state,
-                    str(exc),
-                    parsed.normalized_text,
-                    stderr=str(exc),
-                    exit_code=128,
-                    command_family=action,
-                )
-            return SimulatorResult(
-                True,
-                next_state,
-                output,
-                parsed.normalized_text,
-                stdout=output,
                 command_family=action,
             )
 
@@ -318,11 +286,6 @@ class RepositoryStateSimulator:
                 change.get("change_type") if change.get("after") is None else change.get("after")
             )
         return entries
-
-    def _merge_trees(self, current_tree: dict, other_tree: dict) -> dict:
-        merged = copy.deepcopy(current_tree)
-        merged.update(copy.deepcopy(other_tree))
-        return merged
 
     def _set_operation_metadata(self, state: dict, **metadata: object) -> None:
         state.setdefault("operation_metadata", {}).update(metadata)
@@ -554,57 +517,6 @@ class RepositoryStateSimulator:
             return f"Added remote {name}."
         raise ValueError("Only git remote and git remote add are simulated.")
 
-    def _fetch(self, state: dict, args: list[str]) -> str:
-        remote = args[0] if args else "origin"
-        if remote not in state.get("remotes", {}):
-            raise ValueError("Remote not found.")
-        self._materialize_remote_commits(state)
-        self._set_operation_metadata(
-            state,
-            remote_tracking_updated=True,
-            last_fetch_remote=remote,
-            last_fetch_local_before=self._head_commit(state),
-        )
-        return f"Fetched updates from {remote}."
-
-    def _pull(self, state: dict, args: list[str]) -> str:
-        branch = self._head_branch(state)
-        if not branch:
-            raise ValueError("Cannot pull into detached HEAD.")
-        upstream = state.setdefault("upstream_tracking", {}).get(branch, f"origin/{branch}")
-        target = state.setdefault("remote_branches", {}).get(upstream)
-        if target is None:
-            raise ValueError("Upstream branch not found.")
-        self._materialize_remote_commits(state)
-        state.setdefault("branches", {})[branch] = target
-        self.normalizer.normalize_head(state)
-        self._set_operation_metadata(
-            state,
-            remote_tracking_updated=False,
-            last_pull_remote_branch=upstream,
-            last_pull_local_branch=branch,
-            last_pull_target=target,
-        )
-        self._record_reflog(state, target, f"pull {upstream}")
-        return f"Pulled {upstream} into {branch}."
-
-    def _push(self, state: dict, args: list[str]) -> str:
-        branch = self._head_branch(state)
-        if not branch:
-            raise ValueError("Cannot push detached HEAD.")
-        upstream = state.setdefault("upstream_tracking", {}).get(branch, f"origin/{branch}")
-        remote = upstream.split("/", 1)[0]
-        if remote not in state.get("remotes", {}):
-            raise ValueError("Remote not found.")
-        state.setdefault("remote_branches", {})[upstream] = state.get("branches", {}).get(branch)
-        self._set_operation_metadata(
-            state,
-            last_push_remote_branch=upstream,
-            last_push_local_branch=branch,
-            last_push_target=state.get("branches", {}).get(branch),
-        )
-        return f"Pushed {branch} to {upstream}."
-
     def _add(self, state: dict, args: list[str]) -> str:
         if not args:
             raise ValueError("Specify a path to add.")
@@ -825,52 +737,6 @@ class RepositoryStateSimulator:
         state["head"] = {"type": "detached", "target": target}
         return f"HEAD is now detached at {target}."
 
-    def _merge(self, state: dict, args: list[str]) -> str:
-        if not args:
-            raise ValueError("Specify a branch to merge.")
-        other = args[0]
-        branches = state.setdefault("branches", {})
-        if other not in branches:
-            raise ValueError("Branch not found.")
-        if state.get("conflict_on_merge"):
-            conflict_paths = sorted(state.get("conflict_files", ["app.py"]))
-            state["conflicts"] = conflict_paths
-            for path in conflict_paths:
-                state.setdefault("working_tree", {}).setdefault(path, "conflict")
-            state["merge_parent"] = branches[other]
-            self._set_operation_metadata(
-                state,
-                merge_conflict=True,
-                merge_source=other,
-                merge_target=branches[other],
-            )
-            return "Automatic merge stopped because conflicts need resolution."
-
-        current = self._head_commit(state)
-        other_target = branches[other]
-        if current == other_target:
-            return "Already up to date."
-        if self._is_ancestor(state, current, other_target):
-            self._set_head_commit(state, other_target)
-            return f"Fast-forwarded to {other_target}."
-        commit_id = self._next_commit_id(state)
-        current_tree = self._tree_for_commit(state, current)
-        other_tree = self._tree_for_commit(state, other_target)
-        merged_tree = self._merge_trees(current_tree, other_tree)
-        changes = self._diff_trees(current_tree, merged_tree)
-        state.setdefault("commits", []).append(
-            self._commit_payload(
-                state=state,
-                commit_id=commit_id,
-                message=f"Merge {other}",
-                parents=[p for p in [current, other_target] if p],
-                tree=merged_tree,
-                changes=changes,
-            )
-        )
-        self._set_head_commit(state, commit_id)
-        return f"Merge made by the simulated recursive strategy at {commit_id}."
-
     def _reset(self, state: dict, args: list[str]) -> str:
         if not args:
             raise ValueError("Specify a reset target.")
@@ -930,45 +796,6 @@ class RepositoryStateSimulator:
             state["conflicts"] = sorted(conflicts)
         return "Restored working tree paths."
 
-    def _stash(self, state: dict, args: list[str]) -> str:
-        if args and args[0] == "pop":
-            stack = state.setdefault("stash_stack", [])
-            if not stack:
-                raise ValueError("No stash entries found.")
-            entry = stack.pop()
-            state.setdefault("working_tree", {}).update(entry.get("working_tree", {}))
-            state.setdefault("staging", {}).update(entry.get("staging", {}))
-            state["conflicts"] = sorted(
-                set(state.get("conflicts", [])) | set(entry.get("conflicts", []))
-            )
-            self._set_operation_metadata(
-                state,
-                last_stash_pop_restored_paths=sorted(
-                    set(entry.get("working_tree", {})) | set(entry.get("staging", {}))
-                ),
-            )
-            return "Applied stash and dropped it."
-
-        if not state.get("working_tree") and not state.get("staging"):
-            return "No local changes to save."
-        state.setdefault("stash_stack", []).append(
-            {
-                "working_tree": copy.deepcopy(state.get("working_tree", {})),
-                "staging": copy.deepcopy(state.get("staging", {})),
-                "conflicts": copy.deepcopy(state.get("conflicts", [])),
-            }
-        )
-        self._set_operation_metadata(
-            state,
-            last_stash_saved_paths=sorted(
-                set(state.get("working_tree", {})) | set(state.get("staging", {}))
-            ),
-        )
-        state["working_tree"] = {}
-        state["staging"] = {}
-        state["conflicts"] = []
-        return "Saved working directory and index state."
-
     def _reflog(self, state: dict, args: list[str]) -> str:
         entries = state.get("reflog", [])
         if not entries:
@@ -976,64 +803,6 @@ class RepositoryStateSimulator:
         return "\n".join(
             f"{entry.get('ref')} {entry.get('target')} {entry.get('message')}" for entry in entries
         )
-
-    def _revert(self, state: dict, args: list[str]) -> str:
-        if not args:
-            raise ValueError("Specify a commit to revert.")
-        target = args[0]
-        commit = self._commit_by_id(state, target)
-        if not commit:
-            raise ValueError("Commit not found.")
-        current = self._head_commit(state)
-        commit_id = self._next_commit_id(state)
-        current_tree = self._tree_for_commit(state, current)
-        state.setdefault("commits", []).append(
-            self._commit_payload(
-                state=state,
-                commit_id=commit_id,
-                message=f"Revert {commit.get('message', target)}",
-                parents=[current] if current else [],
-                tree=current_tree,
-                changes={},
-            )
-        )
-        self._set_operation_metadata(
-            state, last_revert_commit=target, last_revert_created=commit_id
-        )
-        self._set_head_commit(state, commit_id)
-        return f"Created revert commit {commit_id}."
-
-    def _cherry_pick(self, state: dict, args: list[str]) -> str:
-        if not args:
-            raise ValueError("Specify a commit to cherry-pick.")
-        source_id = args[0]
-        source = self._commit_by_id(state, source_id)
-        if not source:
-            raise ValueError("Commit not found.")
-        current = self._head_commit(state)
-        commit_id = self._next_commit_id(state)
-        base_tree = self._tree_for_commit(state, current)
-        source_changes = copy.deepcopy(source.get("changes") or {})
-        if not source_changes:
-            source_changes = self._changes_from_entries(base_tree, source.get("files", {}))
-        tree = self._apply_changes(base_tree, source_changes)
-        state.setdefault("commits", []).append(
-            self._commit_payload(
-                state=state,
-                commit_id=commit_id,
-                message=source.get("message", "cherry-pick"),
-                parents=[current] if current else [],
-                tree=tree,
-                changes=source_changes,
-            )
-        )
-        self._set_operation_metadata(
-            state,
-            last_cherry_pick_source=source_id,
-            last_cherry_pick_created=commit_id,
-        )
-        self._set_head_commit(state, commit_id)
-        return f"Applied changes as {commit_id}."
 
     def _resolve_ref(self, state: dict, ref: str | None) -> str | None:
         if ref is None:
@@ -1068,22 +837,6 @@ class RepositoryStateSimulator:
         while f"c{index}" in existing:
             index += 1
         return f"c{index}"
-
-    def _is_ancestor(self, state: dict, ancestor: str | None, descendant: str | None) -> bool:
-        if ancestor is None or descendant is None:
-            return False
-        commits = {commit["id"]: commit for commit in state.get("commits", [])}
-        stack = [descendant]
-        seen: set[str] = set()
-        while stack:
-            current = stack.pop()
-            if current == ancestor:
-                return True
-            if current in seen or current not in commits:
-                continue
-            seen.add(current)
-            stack.extend(commits[current].get("parents", []))
-        return False
 
     def _files_for_soft_reset(self, commit: dict | None) -> dict:
         if not commit:
