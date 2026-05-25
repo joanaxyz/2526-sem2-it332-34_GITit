@@ -21,6 +21,7 @@ from scenarios.serializers import (
     CommandSubmitSerializer,
     ScenarioStartSerializer,
     SkillFocusDemoCommandSerializer,
+    command_session_payload,
     session_payload,
 )
 from scenarios.services import (
@@ -178,25 +179,36 @@ class ScenarioSessionDetailAPIView(APIView):
 class CommandSubmitAPIView(APIView):
     def post(self, request, session_id: int):
         with timing("scenario.command_submit", session_id=session_id):
-            serializer = CommandSubmitSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            session = ScenarioSession.objects.select_related(
-                "scenario",
-                "learning_unit",
-                "difficulty_instance",
-                "difficulty_instance__target_rule",
-                "difficulty_instance__command_policy",
-                "variant",
-            ).get(id=session_id, user=request.user)
-            result = CommandProcessingService().submit_command(
-                session=session,
-                command=serializer.validated_data["command"],
-            )
-            with timing("scenario.command_submit.serialization", session_id=session_id):
-                payload = session_payload(result["session"], include_steps=False)
+            with timing("scenario.command_submit.validate", session_id=session_id):
+                serializer = CommandSubmitSerializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+            with timing("scenario.command_submit.session_fetch", session_id=session_id):
+                session = ScenarioSession.objects.select_related(
+                    "scenario",
+                    "learning_unit",
+                    "difficulty_instance",
+                    "difficulty_instance__target_rule",
+                    "difficulty_instance__command_policy",
+                    "variant",
+                ).get(id=session_id, user=request.user)
+            with timing("scenario.command_submit.execution", session_id=session_id):
+                result = CommandProcessingService().submit_command(
+                    session=session,
+                    command=serializer.validated_data["command"],
+                )
+            with timing("scenario.command_submit.response_payload", session_id=session_id):
+                payload = command_session_payload(
+                    result["session"],
+                    repository_state=result["repository_state"],
+                )
             return Response(
                 {
                     "session": payload,
+                    "stdout": result["stdout"],
+                    "stderr": result["stderr"],
+                    "exit_code": result["exit_code"],
+                    "command_family": result["command_family"],
+                    "diagnostic_metadata": result["diagnostic_metadata"],
                     "step": {
                         "id": result["step"].id,
                         "command_text": result["step"].command_text,
