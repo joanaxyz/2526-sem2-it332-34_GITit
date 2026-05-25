@@ -2,6 +2,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.core.management.base import CommandError
+from django.db import IntegrityError, transaction
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -12,7 +13,6 @@ from scenarios.models import (
     CommandCountPolicy,
     DifficultyInstance,
     GitCommandContent,
-    ScenarioGenerationBlueprint,
     ScenarioSkillFocus,
     ScenarioVariant,
 )
@@ -39,7 +39,7 @@ def _example_command(command: str) -> str:
 
 
 @override_settings(DEBUG=True)
-def test_module_one_blueprint_seed_matches_v3_contract(db):
+def test_module_one_authored_variant_seed_matches_v3_contract(db):
     call_command("seed_module1_scenarios", "--reset", "--confirm", "--validate-build")
 
     expected_slugs = [
@@ -91,34 +91,36 @@ def test_module_one_blueprint_seed_matches_v3_contract(db):
         == 24
     )
     assert (
-        ScenarioGenerationBlueprint.objects.filter(
-            difficulty_instance__scenario__learning_unit__slug="local-repository-foundations",
-            is_published=True,
-        ).count()
-        >= 24
-    )
-    assert (
         ScenarioVariant.objects.filter(
             scenario__learning_unit__slug="local-repository-foundations",
+            is_published=True,
         ).count()
-        == 0
+        >= 65
     )
+    assert not ScenarioVariant.objects.filter(
+        scenario__learning_unit__slug="local-repository-foundations",
+        case_id="",
+    ).exists()
+    assert not ScenarioVariant.objects.filter(
+        scenario__learning_unit__slug="local-repository-foundations",
+        semantic_key="",
+    ).exists()
 
 
 @override_settings(DEBUG=True)
 def test_module_one_seed_uses_authored_cases_and_preview_only_diagnostics(db):
     call_command("seed_module1_scenarios", "--reset", "--confirm")
 
-    for blueprint in ScenarioGenerationBlueprint.objects.filter(
-        difficulty_instance__scenario__learning_unit__slug="local-repository-foundations",
+    for difficulty in DifficultyInstance.objects.filter(
+        scenario__learning_unit__slug="local-repository-foundations",
         is_published=True,
     ):
-        cases = blueprint.parameter_pools["cases"]
-        assert cases
-        assert blueprint.generation_count == len(cases)
-        assert blueprint.max_combinations == len(cases)
-        assert len({case["case_id"] for case in cases}) == len(cases)
-        assert len({case["answer_anchor"] for case in cases}) == len(cases)
+        variants = list(difficulty.variants.filter(is_published=True))
+        assert variants
+        assert len({variant.case_id for variant in variants}) == len(variants)
+        assert len({variant.semantic_key for variant in variants}) == len(variants)
+        assert all(variant.student_context for variant in variants)
+        assert all(variant.solution_commands for variant in variants)
 
     for difficulty in DifficultyInstance.objects.filter(
         scenario__learning_unit__slug="local-repository-foundations",
@@ -140,17 +142,17 @@ def test_module_one_seed_uses_authored_cases_and_preview_only_diagnostics(db):
 
 
 @override_settings(DEBUG=True)
-def test_clone_blueprints_cover_branch_depth_and_destination_forms(db):
+def test_clone_authored_variants_cover_branch_depth_and_destination_forms(db):
     call_command("seed_module1_scenarios", "--reset", "--confirm", "--validate-build")
 
     commands = []
     cases = []
-    for blueprint in ScenarioGenerationBlueprint.objects.filter(
+    for variant in ScenarioVariant.objects.filter(
         difficulty_instance__scenario__slug="clone-remote-repository",
         is_published=True,
     ):
-        cases.extend(blueprint.parameter_pools["cases"])
-        commands.extend(case["solution_command"] for case in blueprint.parameter_pools["cases"])
+        cases.append(variant.parameter_context)
+        commands.extend(variant.solution_commands)
 
     assert any(command == "git clone https://example.test/training/docs-portal.git" for command in commands)
     assert any(command.endswith(" api-workshop") for command in commands)
@@ -160,6 +162,32 @@ def test_clone_blueprints_cover_branch_depth_and_destination_forms(db):
     assert any(command.startswith("git clone --depth 1 ") for command in commands)
     assert any(case["selected_branch"] != "main" for case in cases)
     assert any(case["clone_shallow"] is True and case["clone_depth"] == 1 for case in cases)
+
+
+@override_settings(DEBUG=True)
+def test_authored_variant_semantic_key_is_unique_per_difficulty(db):
+    call_command("seed_module1_scenarios", "--reset", "--confirm")
+    variant = ScenarioVariant.objects.filter(is_published=True).first()
+
+    with pytest.raises(IntegrityError):
+        with transaction.atomic():
+            ScenarioVariant.objects.create(
+                scenario=variant.scenario,
+                difficulty_instance=variant.difficulty_instance,
+                slug=f"{variant.slug}-copy",
+                label=variant.label,
+                structure_signature=variant.structure_signature,
+                initial_state=variant.initial_state,
+                target_state=variant.target_state,
+                target_rule=variant.target_rule,
+                expected_state_diagram=variant.expected_state_diagram,
+                solution_commands=variant.solution_commands,
+                case_id=variant.case_id,
+                semantic_key=variant.semantic_key,
+                parameter_context=variant.parameter_context,
+                student_context=variant.student_context,
+                is_published=True,
+            )
 
 
 @override_settings(DEBUG=True)
@@ -300,15 +328,13 @@ def test_module_one_seed_rejects_duplicate_solutions_without_waiver(db):
             "slug": "duplicate-demo",
             "difficulties": {
                 "easy": {
-                    "blueprints": [
+                    "templates": [
                         {
                             "slug": "dupe",
-                            "parameter_pools": {
-                                "cases": [
-                                    {"case_id": "one", "answer_anchor": "one"},
-                                    {"case_id": "two", "answer_anchor": "two"},
-                                ]
-                            },
+                            "cases": [
+                                {"case_id": "one", "answer_anchor": "one"},
+                                {"case_id": "two", "answer_anchor": "two"},
+                            ],
                             "solution_commands_template": ["git status"],
                         }
                     ]
@@ -332,15 +358,13 @@ def test_module_one_seed_rejects_missing_placeholders(db):
             "slug": "missing-placeholder-demo",
             "difficulties": {
                 "easy": {
-                    "blueprints": [
+                    "templates": [
                         {
                             "slug": "missing",
                             "slug_template": "missing-{{case_id}}",
                             "label_template": "Missing {{missing_value}}",
-                            "subtemplate_signature": "missing",
-                            "parameter_pools": {
-                                "cases": [{"case_id": "one", "answer_anchor": "one"}]
-                            },
+                            "structure_key": "missing",
+                            "cases": [{"case_id": "one", "answer_anchor": "one"}],
                             "initial_state_template": {},
                             "target_rule_template": {},
                             "solution_commands_template": ["git status"],
@@ -367,21 +391,19 @@ def test_module_one_seed_rejects_unused_case_fields(db):
             "slug": "unused-field-demo",
             "difficulties": {
                 "easy": {
-                    "blueprints": [
+                    "templates": [
                         {
                             "slug": "unused",
                             "slug_template": "unused-{{case_id}}",
                             "label_template": "Unused {{case_id}}",
-                            "subtemplate_signature": "unused",
-                            "parameter_pools": {
-                                "cases": [
-                                    {
-                                        "case_id": "one",
-                                        "answer_anchor": "one",
-                                        "dead_metadata": "not referenced",
-                                    }
-                                ]
-                            },
+                            "structure_key": "unused",
+                            "cases": [
+                                {
+                                    "case_id": "one",
+                                    "answer_anchor": "one",
+                                    "dead_metadata": "not referenced",
+                                }
+                            ],
                             "initial_state_template": {},
                             "target_rule_template": {},
                             "solution_commands_template": ["git status"],
