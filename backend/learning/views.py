@@ -1,3 +1,5 @@
+from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -41,6 +43,8 @@ class UnitListAPIView(APIView):
 class LessonDetailAPIView(APIView):
     def get(self, request, lesson_id: int):
         lesson = published_lesson(lesson_id)
+        if not lesson.unit.is_orientation:
+            raise NotFound()
         serializer = LessonDetailSerializer(
             lesson,
             context={"orientation_progress_map": orientation_progress_map(request.user)},
@@ -73,7 +77,14 @@ class OrientationCompleteAPIView(APIView):
     def post(self, request, lesson_id: int):
         serializer = OrientationCompleteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        lesson = Lesson.objects.select_related("unit").get(id=lesson_id, is_published=True)
+        lesson = get_object_or_404(
+            Lesson.objects.select_related("unit"),
+            id=lesson_id,
+            is_published=True,
+            unit__is_published=True,
+        )
+        if not lesson.unit.is_orientation:
+            raise NotFound()
         progress = OrientationService().mark_complete(
             user=request.user,
             lesson=lesson,

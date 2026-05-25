@@ -32,8 +32,6 @@ export function LessonPage() {
   if (isError) return <ErrorState title="Could not load lesson" description={error.message} />
   if (!lesson) return <ErrorState title="Could not load lesson" description="The API returned no lesson data." />
 
-  const isOrientation = lesson.kind === 'orientation'
-
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-5">
       <article>
@@ -44,40 +42,25 @@ export function LessonPage() {
               Back to Modules
             </Link>
           </Button>
-          <Badge variant={isOrientation ? 'outline' : lesson.kind === 'scenario' ? 'default' : 'blue'}>
+          <Badge variant="outline">
             Module {lesson.module.number}: {lesson.module.title}
           </Badge>
         </div>
         <LessonContentRenderer lesson={lesson} />
-        {isOrientation ? (
-          <Card className="mt-6 flex flex-wrap items-center justify-between gap-4 p-5 shadow-none">
-            <div className="flex items-start gap-3">
-              <BookOpen className="mt-0.5 size-5 text-primary" />
-              <div>
-                <h2 className="text-lg font-bold">Foundation note</h2>
-                <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                  Mark this when the idea feels clear enough to use. You can come back to it any time during practice.
-                </p>
-              </div>
-            </div>
-            <Button type="button" disabled={lesson.is_complete || completeMutation.isPending} onClick={() => completeMutation.mutate()}>
-              {lesson.is_complete ? 'Marked read' : completeMutation.isPending ? 'Marking read' : 'Mark lesson read'}
-            </Button>
-          </Card>
-        ) : null}
-        {lesson.scenario_count ? (
-          <section className="mt-6 rounded-lg border border-border bg-card p-5">
-            <div className="mb-4">
-              <h2 className="text-xl font-bold">Practice starts from the Modules page</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Scenario practice starts from scenario cards on the Modules page. This lesson page stays as the concept overview.
+        <Card className="mt-6 flex flex-wrap items-center justify-between gap-4 p-5 shadow-none">
+          <div className="flex items-start gap-3">
+            <BookOpen className="mt-0.5 size-5 text-primary" />
+            <div>
+              <h2 className="text-lg font-bold">Foundation note</h2>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                Mark this when the idea feels clear enough to use. You can come back to it any time during practice.
               </p>
             </div>
-            <Button asChild>
-              <Link to="/modules">Back to Modules</Link>
-            </Button>
-          </section>
-        ) : null}
+          </div>
+          <Button type="button" disabled={lesson.is_complete || completeMutation.isPending} onClick={() => completeMutation.mutate()}>
+            {lesson.is_complete ? 'Marked read' : completeMutation.isPending ? 'Marking read' : 'Mark lesson read'}
+          </Button>
+        </Card>
       </article>
       <Card className="flex flex-wrap items-center justify-between gap-3 p-5 shadow-none">
         <div className="flex items-center gap-2 font-bold">
@@ -85,7 +68,7 @@ export function LessonPage() {
           Lesson status
         </div>
         <p className="text-sm leading-6 text-muted-foreground">
-          {isOrientation ? 'Saved to your foundation progress.' : 'Scenario practice starts from the Modules page; this page is the lesson overview.'}
+          Saved to your foundation progress.
         </p>
       </Card>
     </div>

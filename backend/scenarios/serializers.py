@@ -12,8 +12,8 @@ DIFFICULTY_ORDER = ["easy", "medium", "hard"]
 class ScenarioStartSerializer(serializers.Serializer):
     difficulty_instance_id = serializers.IntegerField()
     source_entry_point = serializers.ChoiceField(
-        choices=["lesson", "module_card", "unit_card", "retry", "review"],
-        default="lesson",
+        choices=["module_card", "unit_card", "retry", "review"],
+        default="module_card",
     )
     prior_session_id = serializers.IntegerField(required=False, allow_null=True)
 

@@ -70,7 +70,7 @@ def complete_accurate_session(*, user, difficulty):
     session = ScenarioSessionService().start_session(
         user=user,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     for command in session.variant.solution_commands:
         CommandProcessingService().submit_command(session=session, command=command)
@@ -105,7 +105,7 @@ def test_primary_session_can_start_before_orientation_completion(db, seeded_cont
     session = ScenarioSessionService().start_session(
         user=user,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
 
     assert session.status == "started"
@@ -120,7 +120,7 @@ def test_diagnostic_commands_are_logged_but_not_counted(student):
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
 
     assert session.variant.difficulty_instance_id == difficulty.id
@@ -143,7 +143,7 @@ def test_command_submit_response_uses_lightweight_in_progress_payload(student):
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     request = APIRequestFactory().post(
         f"/api/scenarios/sessions/{session.id}/commands/",
@@ -181,7 +181,7 @@ def test_command_submit_in_progress_query_count_is_bounded(student):
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     request = APIRequestFactory().post(
         f"/api/scenarios/sessions/{session.id}/commands/",
@@ -205,7 +205,7 @@ def test_command_submit_completion_payload_keeps_progress_without_full_metadata(
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     response = None
     for command in session.variant.solution_commands:
@@ -287,7 +287,7 @@ def test_session_payload_expected_state_uses_rich_snapshot_and_scaffolding(stude
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
 
     payload = session_payload(session, include_steps=False)
@@ -312,7 +312,7 @@ def test_session_payload_expected_state_uses_rich_snapshot_and_scaffolding(stude
         scenario=hard.scenario,
         difficulty_instance=hard,
         variant=hard_variant,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
         command_policy_snapshot=hard.command_policy.snapshot(),
         repository_state=hard_variant.initial_state,
     )
@@ -336,7 +336,7 @@ def test_starting_session_creates_persisted_generated_variant_with_student_conte
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     variant = session.variant
     payload = session_payload(session, include_steps=False)
@@ -374,7 +374,7 @@ def test_session_payload_falls_back_for_old_variants_without_student_context(stu
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     session.variant.student_context = {}
     session.variant.save(update_fields=["student_context"])
@@ -395,7 +395,7 @@ def test_active_session_payload_and_command_submit_do_not_regenerate_variant(stu
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     variant_id = session.variant_id
     generated_count = ScenarioVariant.objects.filter(
@@ -425,7 +425,7 @@ def test_generated_context_exposes_checked_values_without_solution_commands(stud
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     variant = session.variant
     context_text = json.dumps(variant.student_context).lower()
@@ -450,7 +450,7 @@ def test_generated_context_exposes_excluded_files_and_remote_values(student):
     ignore_session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=ignore_difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     ignore_context = json.dumps(ignore_session.variant.student_context).lower()
     for path in ignore_session.variant.target_rule["latest_commit"]["excludes_paths"]:
@@ -463,7 +463,7 @@ def test_generated_context_exposes_excluded_files_and_remote_values(student):
     clone_session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=clone_difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     clone_context = json.dumps(clone_session.variant.student_context).lower()
     for remote, url in clone_session.variant.target_rule["remote_url_matches"].items():
@@ -479,7 +479,7 @@ def test_partial_staging_requires_the_selected_file_scope(student):
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
 
     CommandProcessingService().submit_command(session=session, command="git add .")
@@ -516,7 +516,7 @@ def test_retry_after_failure_uses_changed_variant_when_available(student):
     prior = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     prior.status = SESSION_STATUS_FAILED
     prior.save(update_fields=["status"])
@@ -581,7 +581,7 @@ def test_retry_from_active_session_requires_exit_first(student):
     prior = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
 
     with pytest.raises(Locked, match="Exit the current scenario"):
@@ -613,7 +613,7 @@ def test_retry_does_not_create_duplicate_active_session(student):
     prior = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     prior.status = SESSION_STATUS_FAILED
     prior.ended_at = timezone.now()
@@ -653,7 +653,7 @@ def test_starting_active_difficulty_requires_exit_first(student):
     active = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
 
     with pytest.raises(Locked, match="Exit the current scenario"):
@@ -714,7 +714,7 @@ def test_scenario_payload_includes_latest_attempt_accuracy(student):
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     for command in session.variant.solution_commands:
         CommandProcessingService().submit_command(session=session, command=command)
@@ -858,7 +858,7 @@ def test_latest_attempt_accuracy_reflects_extra_counted_actions(student):
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     session.status = "completed"
     session.counted_action_total = 3
@@ -881,7 +881,7 @@ def test_completed_scenario_remains_retryable_until_three_mastered_instances(stu
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     session.command_policy_snapshot = {
         **session.command_policy_snapshot,
@@ -940,7 +940,7 @@ def test_abandoned_retry_becomes_latest_zero_mastery(student):
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     session.command_policy_snapshot = {
         **session.command_policy_snapshot,
@@ -983,7 +983,7 @@ def test_later_completed_retry_replaces_prior_mastery_even_when_worse(student):
     first = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     for command in first.variant.solution_commands:
         CommandProcessingService().submit_command(session=first, command=command)
@@ -1025,7 +1025,7 @@ def test_review_sessions_do_not_replace_primary_accuracy(student):
     primary = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     primary.status = SESSION_STATUS_COMPLETED
     primary.counted_action_total = 3
@@ -1184,7 +1184,7 @@ def test_invalid_git_syntax_consumes_action_budget(student):
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
 
     response = CommandProcessingService().submit_command(
@@ -1210,7 +1210,7 @@ def test_counted_command_reaching_max_limit_fails_session(student):
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     session.command_policy_snapshot = {
         **session.command_policy_snapshot,
@@ -1244,7 +1244,7 @@ def test_failed_session_blocks_further_commands(student):
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     session.status = SESSION_STATUS_FAILED
     session.ended_at = timezone.now()
@@ -1263,7 +1263,7 @@ def test_diagnostic_commands_remain_non_counted_inside_state_based_sessions(stud
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     initial_state = json.loads(json.dumps(session.repository_state))
 
@@ -1291,7 +1291,7 @@ def test_init_scenario_does_not_complete_by_cloning_after_init(student):
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     session.command_policy_snapshot = {
         **session.command_policy_snapshot,
@@ -1327,7 +1327,7 @@ def test_init_scenario_does_not_complete_by_cloning_first(student):
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     session.command_policy_snapshot = {
         **session.command_policy_snapshot,
@@ -1356,7 +1356,7 @@ def test_clone_scenario_does_not_complete_by_initializing_folder(student):
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     session.command_policy_snapshot = {
         **session.command_policy_snapshot,
@@ -1384,7 +1384,7 @@ def test_retry_after_failed_retry_resets_action_budget(student):
     first = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     first.status = SESSION_STATUS_FAILED
     first.counted_action_total = first.command_policy_snapshot["max_counted_commands"]
@@ -1425,7 +1425,7 @@ def test_generated_variants_do_not_contain_unresolved_target_placeholders(studen
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
-        source_entry_point="lesson",
+        source_entry_point="module_card",
     )
     variant = session.variant
     serialized = {

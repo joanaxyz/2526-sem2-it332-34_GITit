@@ -82,69 +82,60 @@ VALIDATION_ONLY_CASE_FIELDS = {
 }
 
 
-MODULE_ONE_LESSONS = [
+MODULE_ONE_SCENARIO_ANCHORS = [
     (
         1,
         "inspecting-repository-state",
         "Inspecting Repository State",
         "Read repository status, history, diffs, branches, remotes, and objects before acting.",
-        "content",
     ),
     (
         2,
         "initializing-a-local-repository",
         "Initializing a Local Repository",
         "Create Git metadata in an existing or named project folder.",
-        "scenario",
     ),
     (
         3,
         "cloning-a-remote-repository",
         "Cloning a Remote Repository",
         "Create a local working copy and verify the origin relationship.",
-        "scenario",
     ),
     (
         4,
         "staging-and-committing-basic-workflow",
         "Staging and Committing: The Basic Workflow",
         "Prepare intentional changes and save them with a clear message.",
-        "scenario",
     ),
     (
         5,
         "ignoring-files-with-gitignore",
         "Ignoring Files with .gitignore",
         "Keep generated files, dependency folders, logs, and secrets out of history.",
-        "scenario",
     ),
     (
         6,
         "partial-staging-and-git-add-p",
         "Partial Staging and git add -p",
         "Stage selected hunks so each commit has one clear purpose.",
-        "scenario",
     ),
     (
         7,
         "amending-commits",
         "Amending Commits",
         "Repair the latest commit message or contents before sharing it.",
-        "scenario",
     ),
     (
         8,
         "unstaging-and-discarding-changes",
         "Unstaging and Discarding Changes",
         "Move changes out of the index and safely discard unwanted work.",
-        "scenario",
     ),
     (
         9,
         "module-1-review-and-practice",
         "Module 1 Review and Practice",
         "Combine the local workflow skills in larger repository situations.",
-        "scenario",
     ),
 ]
 
@@ -2711,7 +2702,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--validate-build",
             action="store_true",
-            help="Try generating one variant for every difficulty after seeding.",
+            help="Try building one authored practice variant for every difficulty after seeding.",
         )
 
     @transaction.atomic
@@ -2739,21 +2730,14 @@ class Command(BaseCommand):
             lesson_slug,
             lesson_title,
             lesson_subtitle,
-            lesson_kind,
-        ) in MODULE_ONE_LESSONS:
-            kind = (
-                Lesson.LessonKind.SCENARIO
-                if lesson_kind == "scenario"
-                else Lesson.LessonKind.CONTENT
-            )
+        ) in MODULE_ONE_SCENARIO_ANCHORS:
             lesson, _ = Lesson.objects.update_or_create(
                 unit=unit,
                 slug=lesson_slug,
                 defaults={
                     "title": lesson_title,
                     "subtitle": lesson_subtitle,
-                    "kind": kind,
-                    "content_html": self._lesson_html(lesson_title, lesson_subtitle),
+                    "content_html": self._anchor_html(lesson_title, lesson_subtitle),
                     "scoped_css": "",
                     "interaction_steps": [],
                     "is_published": True,
@@ -2791,7 +2775,7 @@ class Command(BaseCommand):
                     "command_preview_config": self._command_preview_config(spec),
                     "related_git_concepts": spec["concepts"],
                     "narrative": spec["summary"],
-                    "task_prompt": "Start a generated variant and reach the requested repository outcome.",
+                    "task_prompt": "Start an authored practice variant and reach the requested repository outcome.",
                     "is_published": True,
                     "sort_order": lesson_order,
                 },
@@ -3020,20 +3004,20 @@ class Command(BaseCommand):
         unit.lessons.all().delete()
         unit.delete()
 
-    def _lesson_html(self, title: str, subtitle: str) -> str:
+    def _anchor_html(self, title: str, subtitle: str) -> str:
         if title == "Inspecting Repository State":
             return f"""
-<section class=\"lesson-overview\">
+<section class=\"internal-scenario-anchor\">
   <h1>{title}</h1>
   <p>{subtitle}</p>
-  <p>Use this lesson and its command preview to study diagnostic commands. These commands stay available inside normal practice scenarios and do not consume the counted action-command budget.</p>
+  <p>Internal scenario anchor for diagnostic command preview ordering. Students start practice from Scenario Skill Focus cards on the Modules page.</p>
 </section>
 """.strip()
         return f"""
-<section class=\"lesson-overview\">
+<section class=\"internal-scenario-anchor\">
   <h1>{title}</h1>
   <p>{subtitle}</p>
-  <p>This lesson overview explains the Git concept before practice. Open the command preview to see a command warm-up, then start a generated variant from the scenario card.</p>
+  <p>Internal scenario anchor for ordering Module 1 Scenario Skill Focus cards. Concept and command prep belongs in the Skill Focus Preview modal before students start an authored practice variant.</p>
 </section>
 """.strip()
 
@@ -3131,14 +3115,14 @@ class Command(BaseCommand):
                         {
                             "type": "callout",
                             "title": "Practice purpose",
-                            "body": "Use the reusable command pages to understand behavior before entering a generated variant.",
+                            "body": "Use the reusable command pages to understand behavior before entering an authored practice variant.",
                         },
                         {
                             "type": "bullet_list",
                             "title": "Before starting",
                             "items": [
                                 "Read the scenario values before choosing paths, messages, or folders.",
-                                "Use the demo area to see command behavior, then apply the idea to the generated variant.",
+                                "Use the demo area to see command behavior, then apply the idea to the authored practice variant.",
                             ],
                         },
                     ],
@@ -3308,6 +3292,6 @@ class Command(BaseCommand):
             raise CommandError("Variant validation failed:\n" + "\n".join(failures))
         self.stdout.write(
             self.style.SUCCESS(
-                "All Module 1 blueprint cases generated valid variants. Validation variants were removed."
+                "All Module 1 blueprint cases built valid authored practice variants. Validation variants were removed."
             )
         )

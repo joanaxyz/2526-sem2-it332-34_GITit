@@ -1,5 +1,3 @@
-export type LessonKind = 'orientation' | 'content' | 'scenario'
-
 export type ModulePracticeMetric = {
   value: number
   numerator: number
@@ -11,7 +9,6 @@ export type LessonSummary = {
   slug: string
   title: string
   subtitle: string
-  kind: LessonKind
   sort_order: number
   is_complete: boolean
   scenario_count: number

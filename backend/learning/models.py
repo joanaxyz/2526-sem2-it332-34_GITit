@@ -19,16 +19,10 @@ class LearningUnit(models.Model):
 
 
 class Lesson(models.Model):
-    class LessonKind(models.TextChoices):
-        ORIENTATION = "orientation", "Orientation"
-        CONTENT = "content", "Content"
-        SCENARIO = "scenario", "Scenario-bearing"
-
     unit = models.ForeignKey(LearningUnit, related_name="lessons", on_delete=models.CASCADE)
     slug = models.SlugField()
     title = models.CharField(max_length=180)
     subtitle = models.CharField(max_length=240, blank=True)
-    kind = models.CharField(max_length=24, choices=LessonKind.choices)
     content_html = models.TextField()
     scoped_css = models.TextField(blank=True)
     interaction_steps = models.JSONField(default=list, blank=True)

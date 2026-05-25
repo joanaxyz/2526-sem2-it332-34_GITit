@@ -10,7 +10,6 @@ class OrientationService:
     def orientation_lessons(self):
         return Lesson.objects.filter(
             unit__is_orientation=True,
-            kind=Lesson.LessonKind.ORIENTATION,
             is_published=True,
         ).select_related("unit")
 
@@ -27,7 +26,7 @@ class OrientationService:
 
     @transaction.atomic
     def mark_complete(self, *, user, lesson: Lesson, highest_step_seen: int) -> OrientationProgress:
-        if not lesson.unit.is_orientation or lesson.kind != Lesson.LessonKind.ORIENTATION:
+        if not lesson.unit.is_orientation:
             raise ValidationError("This lesson does not use the mark-read action.")
         progress, _ = OrientationProgress.objects.select_for_update().get_or_create(
             user=user,

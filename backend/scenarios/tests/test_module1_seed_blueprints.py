@@ -1,9 +1,12 @@
 import pytest
+from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import override_settings
+from rest_framework import status
+from rest_framework.test import APIClient
 
-from learning.models import Lesson
+from learning.models import LearningUnit, Lesson
 from scenarios.command_content import GIT_COMMAND_CONTENT_LIBRARY
 from scenarios.models import (
     CommandCountPolicy,
@@ -55,6 +58,14 @@ def test_module_one_blueprint_seed_matches_v3_contract(db):
         Lesson.objects.filter(unit__slug="local-repository-foundations", is_published=True).count()
         == 9
     )
+    anchor_html = "\n".join(
+        Lesson.objects.filter(unit__slug="local-repository-foundations", is_published=True)
+        .order_by("sort_order")
+        .values_list("content_html", flat=True)
+    ).lower()
+    assert "internal scenario anchor" in anchor_html
+    assert "overview explains" not in anchor_html
+    assert "start a generated" not in anchor_html
     assert (
         list(
             ScenarioSkillFocus.objects.filter(
@@ -204,6 +215,28 @@ def test_diagnostic_command_preview_is_first_module_one_scenario(db):
         for section in log_content.sections
     )
     assert "sections" not in first.command_preview_config
+
+
+@override_settings(DEBUG=True)
+def test_lesson_scoped_scenario_route_is_gone_and_module_list_still_works(db):
+    call_command("seed_module1_scenarios", "--reset", "--confirm")
+    user = get_user_model().objects.create_user(
+        username="scenario-list@example.com",
+        email="scenario-list@example.com",
+        password="Password123!",
+    )
+    client = APIClient()
+    client.force_authenticate(user)
+    unit = LearningUnit.objects.get(slug="local-repository-foundations")
+    lesson = Lesson.objects.filter(unit=unit).first()
+
+    lesson_response = client.get(f"/api/scenarios/lessons/{lesson.id}/")
+    module_response = client.get(f"/api/scenarios/modules/{unit.id}/")
+
+    assert lesson_response.status_code == status.HTTP_404_NOT_FOUND
+    assert module_response.status_code == status.HTTP_200_OK
+    assert len(module_response.data) == 9
+    assert module_response.data[0]["learning_unit_id"] == unit.id
 
 
 def test_command_content_documents_only_simulator_supported_forms():

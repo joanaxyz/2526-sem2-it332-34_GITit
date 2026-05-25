@@ -45,14 +45,13 @@ export function ModuleCard({
 }) {
   const visibleLessons = module.is_orientation
     ? module.lessons.filter((lesson) => !['practice-rules', 'scaffolds-review'].includes(lesson.slug))
-    : module.lessons
+    : []
   const orientationProgress = Math.round(
     (visibleLessons.filter((lesson) => lesson.is_complete).length / Math.max(visibleLessons.length, 1)) * 100,
   )
   const livePracticeCompletion = practiceCompletionFromSummary(scenarioSummary)
   const practiceProgress = Math.round(livePracticeCompletion?.value ?? module.practice_completion?.value ?? 0)
   const progressValue = module.is_orientation ? orientationProgress : practiceProgress
-  const overviewLessons = module.lessons.filter((lesson) => !module.is_orientation && lesson.scenario_count === 0)
   const panelId = `module-panel-${module.id}`
 
   return (
@@ -94,34 +93,11 @@ export function ModuleCard({
               ))}
             </div>
           ) : (
-            <div className="grid gap-5">
-              <ModuleScenarioHub
-                module={module}
-                scenarioSummary={scenarioSummary}
-                scenarioSummaryPending={scenarioSummaryPending}
-              />
-              {overviewLessons.length ? (
-                <div className="rounded-lg border border-border bg-card/60 p-4">
-                  <div className="mb-3 flex items-center gap-2 font-bold">
-                    <BookOpen className="size-4 text-primary" />
-                    Lesson overviews
-                  </div>
-                  <div className="grid gap-2">
-                    {overviewLessons.map((lesson) => (
-                      <div key={lesson.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-secondary/30 p-3">
-                        <div>
-                          <div className="font-semibold">{lesson.title}</div>
-                          <div className="mt-1 text-sm text-muted-foreground">{lesson.subtitle}</div>
-                        </div>
-                        <Button asChild size="sm" variant="outline">
-                          <Link to={`/lessons/${lesson.id}`}>View overview</Link>
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-            </div>
+            <ModuleScenarioHub
+              module={module}
+              scenarioSummary={scenarioSummary}
+              scenarioSummaryPending={scenarioSummaryPending}
+            />
           )}
         </div>
       ) : null}
