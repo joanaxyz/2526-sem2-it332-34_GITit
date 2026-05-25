@@ -686,7 +686,7 @@ def test_starting_active_difficulty_requires_exit_first(student):
         ScenarioSessionService().start_session(
             user=student,
             difficulty_instance=difficulty,
-            source_entry_point="unit_card",
+            source_entry_point="module_card",
         )
 
     active.refresh_from_db()

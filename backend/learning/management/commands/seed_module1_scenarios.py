@@ -17,10 +17,10 @@ from common.constants import (
 from learning.models import LearningUnit, Lesson, OrientationProgress
 from scenarios.builders import (
     PLACEHOLDER_RE,
-    AuthoredCaseRenderer,
     AuthoredVariantValidator,
     ScenarioVariantBuildError,
-    TemplateRenderer,
+    StaticCaseMaterializer,
+    StaticTemplateMaterializer,
 )
 from scenarios.command_content import (
     command_content_key_for_command,
@@ -33,7 +33,6 @@ from scenarios.models import (
     ScenarioSession,
     ScenarioSkillFocus,
     ScenarioVariant,
-    TargetStateRule,
 )
 
 DIAG_PATTERNS = [
@@ -2780,7 +2779,6 @@ class Command(BaseCommand):
             )
             if not spec["difficulties"]:
                 DifficultyInstance.objects.filter(scenario=scenario).update(is_published=False)
-                TargetStateRule.objects.filter(difficulty_instance__scenario=scenario).delete()
                 ScenarioVariant.objects.filter(scenario=scenario).update(is_published=False)
                 continue
 
@@ -2816,12 +2814,10 @@ class Command(BaseCommand):
                     raise CommandError(
                         f"{scenario.slug}/{difficulty}: no authored variants were rendered"
                     )
-                TargetStateRule.objects.update_or_create(
-                    difficulty_instance=difficulty_instance,
-                    defaults={
-                        "rule": variants[0].target_rule,
-                        "target_state_hash": "",
-                    },
+                self._ensure_variant_target_rules(
+                    scenario=scenario,
+                    difficulty=difficulty,
+                    variants=variants,
                 )
 
                 active_semantic_keys = []
@@ -2862,7 +2858,7 @@ class Command(BaseCommand):
         difficulty_instance: DifficultyInstance,
         dspec: dict[str, Any],
     ) -> list[ScenarioVariant]:
-        renderer = AuthoredCaseRenderer()
+        materializer = StaticCaseMaterializer()
         variants: list[ScenarioVariant] = []
         seen_semantic_keys: set[str] = set()
         seen_slugs: set[str] = set()
@@ -2870,7 +2866,7 @@ class Command(BaseCommand):
             cases = template.get("cases", [])
             for index, case in enumerate(cases, start=1):
                 try:
-                    variant = renderer.render_variant(
+                    variant = materializer.materialize_variant(
                         difficulty_instance=difficulty_instance,
                         template=template,
                         case=case,
@@ -2898,8 +2894,8 @@ class Command(BaseCommand):
         return variants
 
     def _validate_seed_specs(self, specs: list[dict[str, Any]]) -> None:
-        renderer = TemplateRenderer()
-        authored_renderer = AuthoredCaseRenderer()
+        template_materializer = StaticTemplateMaterializer()
+        case_materializer = StaticCaseMaterializer()
         failures: list[str] = []
         for spec in specs:
             for difficulty, dspec in spec["difficulties"].items():
@@ -2949,21 +2945,25 @@ class Command(BaseCommand):
                             continue
                         context = {**case, "index": 1}
                         try:
-                            rendered_solution = renderer.render(
+                            rendered_solution = template_materializer.render(
                                 template.get("solution_commands_template", []),
                                 context,
                             )
-                            rendered_rule = renderer.render(
+                            rendered_rule = template_materializer.render(
                                 template.get("target_rule_template", {}),
                                 context,
                             )
-                            rendered_initial = authored_renderer.simulator.normalize_state(
-                                renderer.render(
+                            if not rendered_rule:
+                                raise ScenarioVariantBuildError(
+                                    "authored variant has no target_rule"
+                                )
+                            rendered_initial = case_materializer.simulator.normalize_state(
+                                template_materializer.render(
                                     template.get("initial_state_template", {}),
                                     context,
                                 )
                             )
-                            rendered_target_state = authored_renderer._target_state_from_solution(
+                            rendered_target_state = case_materializer._target_state_from_solution(
                                 rendered_initial,
                                 list(rendered_solution),
                             )
@@ -3044,7 +3044,6 @@ class Command(BaseCommand):
         CompletionRecord.objects.filter(scenario__learning_unit=unit).delete()
         ScenarioSession.objects.filter(learning_unit=unit).delete()
         ScenarioVariant.objects.filter(scenario__learning_unit=unit).delete()
-        TargetStateRule.objects.filter(difficulty_instance__scenario__learning_unit=unit).delete()
         DifficultyInstance.objects.filter(scenario__learning_unit=unit).delete()
         ScenarioSkillFocus.objects.filter(learning_unit=unit).delete()
         OrientationProgress.objects.filter(lesson__unit=unit).delete()
@@ -3331,3 +3330,17 @@ class Command(BaseCommand):
                 "All Module 1 authored practice variants are valid."
             )
         )
+
+    def _ensure_variant_target_rules(
+        self,
+        *,
+        scenario: ScenarioSkillFocus,
+        difficulty: str,
+        variants: list[ScenarioVariant],
+    ) -> None:
+        missing = [variant.slug for variant in variants if not variant.target_rule]
+        if missing:
+            raise CommandError(
+                f"{scenario.slug}/{difficulty}: authored variants missing target_rule: "
+                + ", ".join(missing)
+            )

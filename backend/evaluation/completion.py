@@ -29,7 +29,9 @@ class ScenarioCompletionEvaluator:
 
 class StateRuleCompletionEvaluator:
     def evaluate(self, context: CompletionEvaluationContext) -> EvaluationOutcome:
-        rule = context.session.variant.target_rule or context.session.difficulty_instance.target_rule.rule
+        rule = context.session.variant.target_rule
+        if not rule:
+            raise ValueError("Scenario variant is missing target_rule.")
         return StateBasedEvaluator().evaluate(
             context.next_state,
             rule,

@@ -22,7 +22,7 @@ class CommitCommandHandler(BaseCommandHandler):
 
         commit_operation = intent.first("AmendCommit") or intent.first("CreateCommit")
         if commit_operation is None:
-            raise SimulatorCommandError("fatal: no commit operation was requested", exit_code=128)
+            raise SimulatorCommandError("fatal: unsupported commit operation", exit_code=129)
         if commit_operation.name == "AmendCommit":
             return self._amend(runtime, state, commit_operation.params, staged_by_all=staged_by_all)
         return self._create(runtime, state, commit_operation.params, staged_by_all=staged_by_all)
@@ -30,8 +30,7 @@ class CommitCommandHandler(BaseCommandHandler):
     def _create(
         self, runtime, state: dict, params: dict, *, staged_by_all: list[str]
     ) -> CommandOutcome:
-        allow_empty = bool(params.get("allow_empty"))
-        if not state.get("staging") and not state.get("merge_parent") and not allow_empty:
+        if not state.get("staging") and not state.get("merge_parent"):
             raise SimulatorCommandError("nothing to commit, working tree clean", exit_code=1)
 
         message = params.get("message") or "commit"
@@ -63,7 +62,6 @@ class CommitCommandHandler(BaseCommandHandler):
                 "changes": staged_changes,
                 "branch": runtime._head_branch(state) or "HEAD",
                 "amend": False,
-                "allow_empty": allow_empty,
                 "staged_by_all": staged_by_all,
             },
         )

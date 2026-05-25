@@ -25,7 +25,7 @@ export const scenariosApi = {
       body: JSON.stringify(payload),
     })
   },
-  startSession(payload: { difficulty_instance_id: number; source_entry_point: 'module_card' | 'unit_card' | 'retry' | 'review'; prior_session_id?: number | null }) {
+  startSession(payload: { difficulty_instance_id: number; source_entry_point: 'module_card' | 'retry' | 'review'; prior_session_id?: number | null }) {
     return apiRequest<ScenarioSession>('/scenarios/sessions/', {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -42,11 +42,5 @@ export const scenariosApi = {
       method: 'POST',
       body: JSON.stringify({}),
     })
-  },
-  listForUnit(unitId: number) {
-    return this.listForModule(unitId)
-  },
-  listForUnits(unitIds: number[]) {
-    return this.listForModules(unitIds)
   },
 }

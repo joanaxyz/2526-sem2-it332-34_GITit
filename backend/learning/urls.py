@@ -9,7 +9,6 @@ from learning.views import (
 
 urlpatterns = [
     path("modules/", UnitListAPIView.as_view(), name="module-list"),
-    path("units/", UnitListAPIView.as_view(), name="unit-list"),
     path("lessons/<int:lesson_id>/", LessonDetailAPIView.as_view(), name="lesson-detail"),
     path("orientation/status/", OrientationStatusAPIView.as_view(), name="orientation-status"),
     path(

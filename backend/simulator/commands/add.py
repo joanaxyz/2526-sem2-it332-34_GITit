@@ -24,9 +24,8 @@ class AddCommandHandler(BaseCommandHandler):
         if operation.name == "StageAllChanges":
             paths = self.stage_all(runtime, state, tuple(operation.params.get("paths") or ()))
             return CommandOutcome(command="add", details={"paths": paths, "mode": "all"})
-        if operation.name == "IntentToAdd":
-            paths = self.intent_to_add(runtime, state, tuple(operation.params.get("paths") or ()))
-            return CommandOutcome(command="add", details={"paths": paths, "mode": "intent-to-add"})
+        if operation.name == "UnsupportedCommand":
+            raise SimulatorCommandError("fatal: unsupported add operation", exit_code=129)
         paths = self.stage_pathspecs(runtime, state, tuple(operation.params.get("paths") or ()))
         return CommandOutcome(command="add", details={"paths": paths, "mode": "pathspec"})
 
@@ -51,23 +50,6 @@ class AddCommandHandler(BaseCommandHandler):
             runtime, state, paths, include_tracked=True, include_untracked=True
         )
         self._stage_selected(runtime, state, selected)
-        return selected
-
-    def intent_to_add(self, runtime, state: dict, paths: tuple[str, ...]) -> list[str]:
-        if not paths:
-            raise SimulatorCommandError("fatal: No pathspec was given.", exit_code=128)
-        working_tree = state.setdefault("working_tree", {})
-        staging = state.setdefault("staging", {})
-        selected: list[str] = []
-        for path in paths:
-            if path not in working_tree:
-                raise SimulatorCommandError(
-                    f"fatal: pathspec '{path}' did not match any files", exit_code=128
-                )
-            if runtime.normalizer.entry_status(working_tree.get(path)) == "ignored":
-                continue
-            staging[path] = {"status": "intent-to-add", "content": None}
-            selected.append(path)
         return selected
 
     def _stage_selected(self, runtime, state: dict, paths: list[str]) -> None:

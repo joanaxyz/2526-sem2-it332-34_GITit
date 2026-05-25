@@ -329,11 +329,21 @@ def test_module_one_seed_rejects_duplicate_solutions_without_waiver(db):
             "difficulties": {
                 "easy": {
                     "templates": [
-                        {
-                            "slug": "dupe",
-                            "cases": [
-                                {"case_id": "one", "answer_anchor": "one"},
-                                {"case_id": "two", "answer_anchor": "two"},
+                            {
+                                "slug": "dupe",
+                                "initial_state_template": {
+                                    "repository_initialized": True,
+                                    "commits": [],
+                                    "branches": {"main": None},
+                                    "head": {"type": "branch", "name": "main"},
+                                    "working_tree": {},
+                                    "staging": {},
+                                    "conflicts": [],
+                                },
+                                "target_rule_template": {"repository_state_unchanged": True},
+                                "cases": [
+                                    {"case_id": "one", "answer_anchor": "one"},
+                                    {"case_id": "two", "answer_anchor": "two"},
                             ],
                             "solution_commands_template": ["git status"],
                         }
@@ -416,4 +426,37 @@ def test_module_one_seed_rejects_unused_case_fields(db):
     ]
 
     with pytest.raises(CommandError, match="unused case fields"):
+        command._validate_seed_specs(specs)
+
+
+@override_settings(DEBUG=True)
+def test_module_one_seed_rejects_empty_target_rules(db):
+    command = __import__(
+        "learning.management.commands.seed_module1_scenarios",
+        fromlist=["Command"],
+    ).Command()
+    specs = [
+        {
+            "slug": "empty-target-rule-demo",
+            "difficulties": {
+                "easy": {
+                    "templates": [
+                        {
+                            "slug": "empty-rule",
+                            "slug_template": "empty-rule-{{case_id}}",
+                            "label_template": "Empty rule {{case_id}}",
+                            "structure_key": "empty-rule",
+                            "cases": [{"case_id": "one", "answer_anchor": "one"}],
+                            "initial_state_template": {"repository_initialized": True},
+                            "target_rule_template": {},
+                            "solution_commands_template": ["git status"],
+                            "student_context_template": {"summary": "Inspect status."},
+                        }
+                    ]
+                }
+            },
+        }
+    ]
+
+    with pytest.raises(CommandError, match="authored variant has no target_rule"):
         command._validate_seed_specs(specs)

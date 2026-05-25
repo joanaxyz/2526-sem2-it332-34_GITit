@@ -175,14 +175,6 @@ class ScenarioVariant(models.Model):
         return f"{self.scenario.slug}:{self.difficulty_instance.difficulty}:{self.slug}"
 
 
-class TargetStateRule(models.Model):
-    difficulty_instance = models.OneToOneField(
-        DifficultyInstance, related_name="target_rule", on_delete=models.CASCADE
-    )
-    rule = models.JSONField()
-    target_state_hash = models.CharField(max_length=128, blank=True)
-
-
 class ScenarioSession(models.Model):
     class Status(models.TextChoices):
         STARTED = SESSION_STATUS_STARTED, "Started"

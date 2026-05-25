@@ -1,3 +1,4 @@
+from simulator.output.errors import unsupported_command
 from simulator.services import RepositoryStateSimulator
 
 
@@ -671,7 +672,7 @@ def test_unsupported_advanced_commands_are_rejected_without_mutation():
         }
     )
 
-    for command in [
+    unsupported_advanced_commands = [
         "git fetch origin",
         "git pull",
         "git push",
@@ -679,6 +680,18 @@ def test_unsupported_advanced_commands_are_rejected_without_mutation():
         "git stash",
         "git revert c0",
         "git cherry-pick c0",
+    ]
+
+    for command in unsupported_advanced_commands:
+        result = simulator.process(state, command)
+        command_family = command.split()[1]
+        assert result.processed is False, command
+        assert result.state == state, command
+        assert result.output == unsupported_command(command_family), command
+        assert result.stderr == unsupported_command(command_family), command
+        assert result.exit_code == 129, command
+
+    for command in [
         "git branch feature",
         "git remote add origin https://example.test/repo.git",
         "git checkout main",

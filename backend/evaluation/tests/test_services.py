@@ -1,4 +1,9 @@
+from types import SimpleNamespace
+
+import pytest
+
 from common.constants import RESULT_TARGET_MATCHED, RESULT_TARGET_NOT_YET_MATCHED
+from evaluation.completion import CompletionEvaluationContext, StateRuleCompletionEvaluator
 from evaluation.services import StateBasedEvaluator
 from simulator.services import RepositoryStateSimulator
 
@@ -36,6 +41,41 @@ def test_evaluator_checks_partial_staging_commit_scope_and_message():
     result = StateBasedEvaluator().evaluate(state, rule)
 
     assert result.result_category == RESULT_TARGET_MATCHED
+
+
+def test_completion_evaluator_uses_variant_owned_target_rule():
+    context = CompletionEvaluationContext(
+        session=SimpleNamespace(
+            variant=SimpleNamespace(
+                target_rule={"repository_initialized": True},
+                initial_state={"repository_initialized": False},
+            )
+        ),
+        previous_state={"repository_initialized": False},
+        next_state={"repository_initialized": True},
+        executed_commands=[],
+    )
+
+    result = StateRuleCompletionEvaluator().evaluate(context)
+
+    assert result.result_category == RESULT_TARGET_MATCHED
+
+
+def test_completion_evaluator_requires_variant_target_rule():
+    context = CompletionEvaluationContext(
+        session=SimpleNamespace(
+            variant=SimpleNamespace(
+                target_rule={},
+                initial_state={"repository_initialized": False},
+            )
+        ),
+        previous_state={"repository_initialized": False},
+        next_state={"repository_initialized": True},
+        executed_commands=[],
+    )
+
+    with pytest.raises(ValueError, match="missing target_rule"):
+        StateRuleCompletionEvaluator().evaluate(context)
 
 
 def test_evaluator_rejects_commit_that_sweeps_draft_work_into_history():

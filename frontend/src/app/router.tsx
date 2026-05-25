@@ -29,6 +29,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '/', element: <Navigate replace to="/dashboard" /> },
       { path: '/dashboard', element: <DashboardPage /> },
+      // TODO(module-terminology): remove this compatibility route after old shared links age out.
       { path: '/units', element: <ModulesPage /> },
       { path: '/modules', element: <ModulesPage /> },
       { path: '/lessons/:lessonId', element: <LessonPage /> },

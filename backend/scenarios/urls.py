@@ -8,8 +8,8 @@ from scenarios.views import (
     ScenarioSessionStartAPIView,
     SkillFocusDemoCommandAPIView,
     SkillFocusDetailAPIView,
-    UnitScenarioListAPIView,
-    UnitScenarioSummaryAPIView,
+    ModuleScenarioListAPIView,
+    ModuleScenarioSummaryAPIView,
 )
 
 urlpatterns = [
@@ -19,10 +19,8 @@ urlpatterns = [
         name="skill-focus-demo-command",
     ),
     path("skill-focus/<slug:slug>/", SkillFocusDetailAPIView.as_view(), name="skill-focus-detail"),
-    path("modules/summary/", UnitScenarioSummaryAPIView.as_view(), name="module-scenario-summary"),
-    path("modules/<int:unit_id>/", UnitScenarioListAPIView.as_view(), name="module-scenarios"),
-    path("units/summary/", UnitScenarioSummaryAPIView.as_view(), name="unit-scenario-summary"),
-    path("units/<int:unit_id>/", UnitScenarioListAPIView.as_view(), name="unit-scenarios"),
+    path("modules/summary/", ModuleScenarioSummaryAPIView.as_view(), name="module-scenario-summary"),
+    path("modules/<int:module_id>/", ModuleScenarioListAPIView.as_view(), name="module-scenarios"),
     path("sessions/", ScenarioSessionStartAPIView.as_view(), name="scenario-session-start"),
     path("sessions/<int:session_id>/", ScenarioSessionDetailAPIView.as_view(), name="scenario-session"),
     path(
