@@ -30,6 +30,5 @@ COMPLETION_TYPES = (
 )
 
 SOURCE_LESSON = "lesson"
-SOURCE_UNIT_CARD = "unit_card"
 SOURCE_RETRY = "retry"
 SOURCE_REVIEW = "review"

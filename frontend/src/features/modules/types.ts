@@ -39,13 +39,6 @@ export type LessonDetail = LessonSummary & {
     title: string
     is_orientation: boolean
   }
-  unit?: {
-    id: number
-    slug: string
-    number: number
-    title: string
-    is_orientation: boolean
-  }
 }
 
 export type OrientationStatus = {

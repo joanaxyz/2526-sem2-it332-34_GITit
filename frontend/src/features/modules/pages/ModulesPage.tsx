@@ -12,6 +12,7 @@ import { ModulesSkeleton } from '@/shared/components/Skeleton'
 export function ModulesPage() {
   const queryClient = useQueryClient()
   const [searchParams] = useSearchParams()
+  // TODO(module-terminology): drop the legacy unit param after old links age out.
   const moduleParam = searchParams.get('module') ?? searchParams.get('unit')
   const focusedModuleId = moduleParam ? Number(moduleParam) : null
   const [expandedModuleIds, setExpandedModuleIds] = useState<Set<number>>(() => {

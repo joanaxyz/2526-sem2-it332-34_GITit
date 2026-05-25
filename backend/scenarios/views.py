@@ -32,10 +32,10 @@ from simulator.command_engine import GitCommandEngine
 from simulator.services import RepositorySnapshotService
 
 
-class UnitScenarioListAPIView(APIView):
-    def get(self, request, unit_id: int):
-        with timing("scenario.module_list", unit_id=unit_id):
-            scenarios = scenario_list_queryset().filter(learning_unit_id=unit_id)
+class ModuleScenarioListAPIView(APIView):
+    def get(self, request, module_id: int):
+        with timing("scenario.module_list", module_id=module_id):
+            scenarios = scenario_list_queryset().filter(learning_unit_id=module_id)
             return Response(
                 scenario_status_payloads(
                     user=request.user,
@@ -45,20 +45,20 @@ class UnitScenarioListAPIView(APIView):
             )
 
 
-class UnitScenarioSummaryAPIView(APIView):
+class ModuleScenarioSummaryAPIView(APIView):
     def get(self, request):
         with timing("scenario.module_summary"):
-            raw_unit_ids = request.query_params.get("module_ids") or request.query_params.get("unit_ids", "")
-            unit_ids = [
+            raw_module_ids = request.query_params.get("module_ids", "")
+            module_ids = [
                 int(item)
-                for item in raw_unit_ids.split(",")
+                for item in raw_module_ids.split(",")
                 if item.strip().isdigit()
             ]
             scenarios = scenario_list_queryset()
-            if unit_ids:
-                scenarios = scenarios.filter(learning_unit_id__in=unit_ids)
+            if module_ids:
+                scenarios = scenarios.filter(learning_unit_id__in=module_ids)
 
-            grouped = {str(unit_id): [] for unit_id in unit_ids}
+            grouped = {str(module_id): [] for module_id in module_ids}
             for payload in scenario_status_payloads(
                 user=request.user,
                 scenarios=scenarios,

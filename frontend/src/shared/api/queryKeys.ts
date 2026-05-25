@@ -7,11 +7,9 @@ export const queryKeys = {
   moduleScenariosSummary: (moduleIdsKey: string) => ['module-scenarios-summary', moduleIdsKey] as const,
   scenarioSession: (sessionId: number) => ['scenario-session', sessionId] as const,
   skillFocus: (slug: string) => ['skill-focus', slug] as const,
-  unitScenarios: (unitId: number) => ['unit-scenarios', unitId] as const,
-  unitScenariosSummary: (unitIdsKey: string) => ['unit-scenarios-summary', unitIdsKey] as const,
 }
 
 export const queryKeyRoots = {
-  scenarioLists: ['module-scenarios', 'unit-scenarios'] as const,
-  scenarioSummaries: ['module-scenarios-summary', 'unit-scenarios-summary'] as const,
+  scenarioLists: ['module-scenarios'] as const,
+  scenarioSummaries: ['module-scenarios-summary'] as const,
 }

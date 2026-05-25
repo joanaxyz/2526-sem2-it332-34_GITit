@@ -67,7 +67,6 @@ class UnitListSerializer(serializers.ModelSerializer):
 
 class LessonDetailSerializer(serializers.ModelSerializer):
     module = serializers.SerializerMethodField()
-    unit = serializers.SerializerMethodField()
     is_complete = serializers.SerializerMethodField()
     scenario_count = serializers.SerializerMethodField()
 
@@ -82,13 +81,9 @@ class LessonDetailSerializer(serializers.ModelSerializer):
             "scoped_css",
             "interaction_steps",
             "module",
-            "unit",
             "is_complete",
             "scenario_count",
         ]
-
-    def get_unit(self, obj):
-        return self.get_module(obj)
 
     def get_module(self, obj):
         return {

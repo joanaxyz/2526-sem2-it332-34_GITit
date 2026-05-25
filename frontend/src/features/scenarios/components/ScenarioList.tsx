@@ -18,7 +18,7 @@ type ScenarioListProps =
   {
     scope: 'module'
     moduleId: number
-    source: 'module_card' | 'unit_card'
+    source: 'module_card'
     initialScenarios?: ScenarioSkillFocus[]
     deferFetch?: boolean
   }

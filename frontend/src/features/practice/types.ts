@@ -85,11 +85,6 @@ export type ScenarioSession = {
     number: number
     title: string
   }
-  unit?: {
-    id: number
-    number: number
-    title: string
-  }
   difficulty: Difficulty
   variant: {
     id: number
