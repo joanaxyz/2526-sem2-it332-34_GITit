@@ -24,6 +24,8 @@ from scenarios.builders import (
 )
 from scenarios.command_content import (
     command_content_key_for_command,
+    command_preview_form_for_command,
+    command_preview_page_ids_for_command,
     seed_git_command_content_library,
 )
 from scenarios.models import (
@@ -58,6 +60,7 @@ DIAG_PATTERNS = [
     "git diff --staged --name-only",
     "git show",
     "git show <commit>",
+    "git show HEAD",
     "git show --name-only",
     "git remote",
     "git remote -v",
@@ -79,6 +82,11 @@ VALIDATION_ONLY_CASE_FIELDS = {
     "case_id",
     "duplicate_solution_waiver",
 }
+
+
+def normalize_preview_identity(command: str) -> str:
+    return " ".join(str(command).strip().lower().split())
+
 
 
 MODULE_ONE_SCENARIO_ANCHORS = [
@@ -262,7 +270,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
             "story": "{{project}} has local/generated files that should not be saved in project history.",
             "required_details": [
                 {"label": "Ignore file", "value": ".gitignore"},
-                {"label": "Ignore marker", "value": "{{gitignore_token}}"},
+                {"label": "Ignore patterns", "value": "{{gitignore_patterns}}"},
                 {"label": "Ignored/generated paths", "value": "{{ignored_paths}}"},
                 {
                     "label": "Tracked generated path to remove from history",
@@ -1509,7 +1517,7 @@ def gitignore_scenario() -> dict[str, Any]:
         summary="Commit ignore rules while keeping generated files out of history.",
         explanation=".gitignore controls which untracked local files Git should ignore. Already tracked files require an explicit untrack step.",
         primary=["git add", "git commit"],
-        supporting=["git status", "git diff", "git diff --staged"],
+        supporting=[".gitignore", "git status", "git diff", "git diff --staged"],
         concepts=["ignored files", "untracked files", "tracked files", "index"],
         difficulties={
             DIFFICULTY_EASY: diff(
@@ -1575,15 +1583,19 @@ def ignore_case(
     tracked_generated_path: str = "none",
     base_tree: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    working_tree: dict[str, Any] = {".gitignore": token}
+    patterns = ignore_patterns_for_paths(ignored_paths)
+    content = "\n".join(patterns) + "\n"
+    working_tree: dict[str, Any] = {}
     for path in ignored_paths:
         if path == tracked_generated_path:
             continue
-        working_tree[path] = {"status": "ignored", "content": f"{path}-local"}
+        working_tree[path] = {"status": "untracked", "content": f"{path}-local"}
     payload = {
         "case_id": case_id,
         "project": project,
-        "gitignore_token": token,
+        "gitignore_patterns": patterns,
+        "gitignore_content": content,
+        "gitignore_printf": content.replace("\\", "\\\\").replace("\n", "\\n").replace('"', '\\"'),
         "working_tree": working_tree,
         "ignored_paths": ignored_paths,
         "target_files": [".gitignore"],
@@ -1595,6 +1607,20 @@ def ignore_case(
     if base_tree is not None:
         payload["base_tree"] = base_tree
     return payload
+
+
+def ignore_patterns_for_paths(paths: list[str]) -> list[str]:
+    patterns: list[str] = []
+    for path in paths:
+        if path.startswith(".env"):
+            pattern = ".env*"
+        elif "/" in path:
+            pattern = f"{path.split('/', 1)[0]}/"
+        else:
+            pattern = path
+        if pattern not in patterns:
+            patterns.append(pattern)
+    return patterns
 
 
 def ignore_bp(
@@ -1609,17 +1635,23 @@ def ignore_bp(
     if hard:
         latest_excludes = []
     rules = [
-        {"type": "ignored_paths_present", "paths": "{{ignored_paths}}"},
+        {"type": "ignored_paths_present", "paths": "{{ignored_paths}}", "statuses": ["ignored"]},
+        {"type": "gitignore_matches_paths", "paths": "{{ignored_paths}}"},
         {
             "type": "commit_tree_contains",
             "branch": "main",
-            "tree": {".gitignore": "{{gitignore_token}}"},
+            "tree": {".gitignore": "{{gitignore_content}}"},
         },
         {"type": "commit_tree_excludes", "branch": "main", "paths": "{{excluded_files}}"},
     ]
-    solution = ["git add .gitignore", 'git commit -m "{{required_commit_message}}"']
+    solution = [
+        'printf "{{gitignore_printf}}" > .gitignore',
+        "git add .gitignore",
+        'git commit -m "{{required_commit_message}}"',
+    ]
     if hard:
         solution = [
+            'printf "{{gitignore_printf}}" > .gitignore',
             "git rm --cached {{tracked_generated_path}}",
             "git add .gitignore",
             'git commit -m "{{required_commit_message}}"',
@@ -1975,13 +2007,13 @@ def amend_scenario() -> dict[str, Any]:
     ]
     hard = [
         amend_case(
-            "amend-hard-profile-message-and-css",
+            "amend-hard-profile-message-and-layout",
             "profile-card",
-            ["src/profile-card.js", "styles/profile-card.css"],
+            ["src/profile-card.js", "styles/profile-layout.css"],
             "Update profile stuff",
-            "Update profile card layout",
-            {"styles/profile-card.css": "profile-css-v3"},
-            "amended tip has corrected message and missing CSS; old tip replaced",
+            "Polish profile card layout",
+            {"styles/profile-layout.css": "profile-layout-css-v3"},
+            "amended tip has corrected message and missing layout CSS; old tip replaced",
         ),
         amend_case(
             "amend-hard-auth-message-and-test",
@@ -2898,6 +2930,7 @@ class Command(BaseCommand):
         case_materializer = StaticCaseMaterializer()
         failures: list[str] = []
         for spec in specs:
+            rendered_solution_sequences_by_difficulty: dict[str, set[tuple[str, ...]]] = {}
             for difficulty, dspec in spec["difficulties"].items():
                 rendered_solutions: dict[str, list[str]] = {}
                 rendered_target_rules: dict[str, list[str]] = {}
@@ -2974,6 +3007,13 @@ class Command(BaseCommand):
                             continue
                         solution_key = json.dumps(rendered_solution, sort_keys=True)
                         rendered_solutions.setdefault(solution_key, []).append(str(case_id))
+                        sequence_tuple = tuple(
+                            normalize_preview_identity(command)
+                            for command in rendered_solution
+                            if isinstance(command, str) and command.strip()
+                        )
+                        if sequence_tuple:
+                            rendered_solution_sequences_by_difficulty.setdefault(difficulty, set()).add(sequence_tuple)
                         rule_key = json.dumps(rendered_rule, sort_keys=True)
                         rendered_target_rules.setdefault(rule_key, []).append(str(case_id))
                         state_key = json.dumps(rendered_target_state, sort_keys=True)
@@ -3002,6 +3042,14 @@ class Command(BaseCommand):
                         failures.append(
                             f"{spec['slug']}/{difficulty}: duplicate target state {state} in cases {case_ids_for_state}"
                         )
+            sequence_owner: dict[tuple[str, ...], str] = {}
+            for difficulty, sequences in rendered_solution_sequences_by_difficulty.items():
+                for sequence in sequences:
+                    if sequence in sequence_owner and sequence_owner[sequence] != difficulty:
+                        failures.append(
+                            f"{spec['slug']}: exact same solution sequence reused in {sequence_owner[sequence]} and {difficulty}: {list(sequence)}"
+                        )
+                    sequence_owner[sequence] = difficulty
         if failures:
             raise CommandError("Module 1 seed validation failed:\n" + "\n".join(failures))
 
@@ -3140,43 +3188,137 @@ class Command(BaseCommand):
             "purpose": "Understand what this skill changes, what it only reports, and what to inspect before entering an authored practice scenario.",
             "focus_label": spec["focus"],
             "command_title": spec["title"],
-            "command_refs": [
-                {
-                    "id": command_content_key_for_command(command),
-                    "key": command_content_key_for_command(command),
-                    "command": command,
-                }
-                for command in preview_commands
-            ],
+            "command_refs": self._preview_command_refs(preview_commands),
             "supported_demo_commands": commands,
             "demo_repository_state": demo_state,
             "demo_dag_config": {},
-            "custom_pages": [
-                {
-                    "id": "practice-context",
-                    "title": "Practice context",
-                    "subtitle": "How this command preview connects to practice.",
-                    "blocks": [
-                        {"type": "paragraph", "body": spec["explanation"]},
-                        {
-                            "type": "callout",
-                            "title": "Practice purpose",
-                            "body": "Use the reusable command pages to understand behavior before entering an authored practice variant.",
-                        },
-                        {
-                            "type": "bullet_list",
-                            "title": "Before starting",
-                            "items": [
-                                "Read the scenario values before choosing paths, messages, or folders.",
-                                "Use the demo area to see command behavior, then apply the idea to the authored practice variant.",
-                            ],
-                        },
-                    ],
-                }
-            ],
+            "custom_pages": self._practice_context_pages(
+                spec=spec,
+                preview_commands=preview_commands,
+                diagnostic=diagnostic,
+            ),
             "diagnostic": diagnostic,
             "counted": not diagnostic,
         }
+
+    def _practice_context_pages(
+        self,
+        *,
+        spec: dict[str, Any],
+        preview_commands: list[str],
+        diagnostic: bool,
+    ) -> list[dict[str, Any]]:
+        focus = str(spec["focus"])
+        command_list = ", ".join(preview_commands[:5])
+        if len(preview_commands) > 5:
+            command_list += ", and related forms"
+        mode_note = (
+            "This focus is diagnostic. The preview commands are for reading state and should not be counted as the student's solution."
+            if diagnostic
+            else "This focus includes action commands. The preview explains what changes before the student enters a scored authored variant."
+        )
+        return [
+            {
+                "id": "practice-context",
+                "title": "Practice context",
+                "subtitle": "How this preview prepares the student before practice.",
+                "blocks": [
+                    {
+                        "type": "paragraph",
+                        "body": spec["explanation"],
+                    },
+                    {
+                        "type": "callout",
+                        "title": "Why this appears before the scenario",
+                        "body": (
+                            f"The {focus} preview teaches behavior, vocabulary, and boundaries before the authored practice variant asks for exact files, folders, messages, URLs, or branch names."
+                        ),
+                    },
+                    {
+                        "type": "bullet_list",
+                        "title": "Commands covered here",
+                        "items": [
+                            command_list or "Use the reusable command pages attached to this skill focus.",
+                            "Each command page separates syntax, options, arguments, repository effects, boundaries, and beginner mistakes.",
+                            "The demo terminal is for exploration only; the authored scenario still has its own required values.",
+                        ],
+                    },
+                ],
+            },
+            {
+                "id": "study-flow",
+                "title": "Suggested study flow",
+                "subtitle": "How students should read the preview instead of skimming it.",
+                "blocks": [
+                    {
+                        "type": "bullet_list",
+                        "title": "Step-by-step reading order",
+                        "items": [
+                            "Start with the overview page to learn the mental model of the command or workflow.",
+                            "Open the supported forms page and match each placeholder to real scenario values such as <path>, <directory>, <url>, <branch>, <number>, or the required commit message.",
+                            "Read option and argument pages when the scenario asks for a specific branch, depth, destination, path, hunk, or quiet behavior.",
+                            "Finish with effects, boundaries, and common mistakes so the student knows what the command will not fix.",
+                        ],
+                    },
+                    {
+                        "type": "callout",
+                        "title": "Preview-to-practice rule",
+                        "body": "The preview should teach transfer, not reveal a scenario answer. It explains how to decide; the authored scenario still provides the values the student must apply.",
+                    },
+                ],
+            },
+            {
+                "id": "before-starting",
+                "title": "Before starting the authored variant",
+                "subtitle": "Checks that reduce guessing inside the workspace.",
+                "blocks": [
+                    {
+                        "type": "paragraph",
+                        "body": mode_note,
+                    },
+                    {
+                        "type": "bullet_list",
+                        "title": "Student checklist",
+                        "items": [
+                            "Identify whether the task is asking for inspection only, repository setup, staging, committing, ignoring, partial staging, amending, unstaging, or discarding.",
+                            "Copy scenario values mentally before typing: path names, folder names, branch names, remote URLs, depth numbers, and exact commit messages matter.",
+                            "Use diagnostic commands to confirm state when unsure, but do not treat diagnostic output as the solution for action-focused scenarios.",
+                            "After an action command, inspect again to verify that only the intended repository area changed.",
+                        ],
+                    },
+                    {
+                        "type": "warning",
+                        "title": "Do not over-apply the demo",
+                        "body": "The demo command may use sample names like demo.txt or demo-repository. In the scored scenario, those sample values must be replaced with the actual values in the scenario brief.",
+                    },
+                ],
+            },
+        ]
+
+    def _preview_command_refs(self, commands: list[str]) -> list[dict[str, Any]]:
+        refs: list[dict[str, Any]] = []
+        seen: set[tuple[str, str, tuple[str, ...]]] = set()
+        for command in commands:
+            normalized = " ".join(str(command).strip().lower().split())
+            if not normalized.startswith("git "):
+                continue
+            preview_form = command_preview_form_for_command(command)
+            key = command_content_key_for_command(preview_form or command)
+            include_page_ids = command_preview_page_ids_for_command(preview_form or command)
+            identity = (key, preview_form, tuple(include_page_ids))
+            if not key or identity in seen:
+                continue
+            seen.add(identity)
+            refs.append(
+                {
+                    "id": f"{key}-{len(refs) + 1}",
+                    "key": key,
+                    "command": preview_form or command,
+                    "include_page_ids": include_page_ids,
+                    "summary": "This page is included because this exact command form appears in the authored practice variants for this skill focus.",
+                }
+            )
+        return refs
 
     def _preview_commands(
         self,
@@ -3184,31 +3326,43 @@ class Command(BaseCommand):
         *,
         fallback_commands: list[str],
     ) -> list[str]:
-        commands = [
-            *list(spec.get("primary", [])),
-            *list(spec.get("supporting", [])),
-        ] or fallback_commands
-        seen_keys = set()
-        unique = []
+        """Preview only the forms introduced by this authored scenario, plus safe diagnostics."""
+        authored_commands = self._authored_solution_commands(spec)
+        if spec.get("difficulties") and authored_commands:
+            commands = [
+                *list(spec.get("primary", [])),
+                *authored_commands,
+                *list(spec.get("supporting", [])),
+            ]
+        else:
+            commands = [*list(spec.get("primary", [])), *list(spec.get("supporting", []))] or fallback_commands
+
+        seen_forms: set[str] = set()
+        unique: list[str] = []
         for command in commands:
-            command = self._supported_preview_form(command)
-            key = command_content_key_for_command(command)
-            if not key or key in seen_keys:
+            preview_form = command_preview_form_for_command(command)
+            key = normalize_preview_identity(preview_form or command)
+            if not key or key in seen_forms:
                 continue
-            seen_keys.add(key)
-            unique.append(command)
+            seen_forms.add(key)
+            unique.append(preview_form or command)
         return unique
 
-    def _supported_preview_form(self, command: str) -> str:
-        normalized = " ".join(str(command).split()).lower()
-        replacements = {
-            "git add": "git add <path>",
-            "git commit": 'git commit -m "message"',
-            "git restore": "git restore <path>",
-            "git clone": "git clone <url>",
-            "git check-ignore -v <path>": "git check-ignore -v <path>",
-        }
-        return replacements.get(normalized, command)
+    def _authored_solution_commands(self, spec: dict[str, Any]) -> list[str]:
+        renderer = StaticTemplateMaterializer()
+        commands: list[str] = []
+        for dspec in spec.get("difficulties", {}).values():
+            for template in dspec.get("templates", []):
+                for index, case in enumerate(template.get("cases", []), start=1):
+                    context = {**case, "index": index}
+                    rendered = renderer.render(
+                        template.get("solution_commands_template", []),
+                        context,
+                    )
+                    for command in rendered or []:
+                        if isinstance(command, str) and command.strip():
+                            commands.append(command.strip())
+        return commands
 
     def _demo_commands(self, spec: dict[str, Any]) -> list[str]:
         normalized_focus = " ".join(str(spec.get("focus", "")).split()).lower()
@@ -3221,13 +3375,17 @@ class Command(BaseCommand):
                 "git show",
                 "git branch",
                 "git remote -v",
-                "git log --oneline --graph --all",
                 "git branch -v",
+                "git log --oneline --graph --all",
+                "git show HEAD",
+                "git show --name-only",
                 "git reflog",
             ],
-            "git init": ["git status", "git init", "git init demo-project"],
+            "git init": ["git status", "git init", "git init demo-project", "git init -b main"],
             "git clone": [
                 "git clone https://example.test/demo/repository.git demo-repository",
+                "git clone https://example.test/demo/repository.git",
+                "git clone --depth 1 https://example.test/demo/repository.git demo-repository",
                 "git remote -v",
                 "git log --oneline",
                 "git status",
@@ -3236,6 +3394,8 @@ class Command(BaseCommand):
                 "git status",
                 "git diff",
                 "git add demo.txt",
+                "git add .",
+                "git add -A",
                 "git diff --staged",
                 'git commit -m "Demo snapshot"',
                 "git log --oneline",
@@ -3251,7 +3411,9 @@ class Command(BaseCommand):
             ],
             "git add -p": [
                 "git status",
+                "git add -p",
                 "git add -p demo.txt",
+                "git add --patch demo.txt",
                 "git diff --staged",
                 'git commit -m "Demo selected hunk"',
             ],
@@ -3260,12 +3422,18 @@ class Command(BaseCommand):
                 "git status",
                 "git add demo.txt",
                 'git commit --amend -m "Demo amended snapshot"',
+                "git commit --amend",
+                "git commit --amend --no-edit",
                 "git show",
             ],
             "git restore": [
                 "git status",
                 "git restore --staged staged.txt",
+                "git restore --staged .",
+                "git restore --staged staged.txt baseline.txt",
                 "git restore demo.txt",
+                "git restore .",
+                "git restore demo.txt baseline.txt",
                 "git diff",
             ],
             "local repository workflow": [

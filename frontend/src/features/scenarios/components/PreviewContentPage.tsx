@@ -1,18 +1,47 @@
 import { AlertTriangle, Code2, GitBranch, SquareTerminal } from 'lucide-react'
 
-import type { PreviewPage } from '@/features/scenarios/components/previewPayloadUtils'
+import type { PreviewCommand, PreviewPage } from '@/features/scenarios/components/previewPayloadUtils'
+import { previewAnchorDomId } from '@/features/scenarios/components/previewPayloadUtils'
 import type { CommandPreviewBlock } from '@/features/scenarios/types'
 import { cn } from '@/shared/utils/cn'
 
-export function PreviewContentPage({ page }: { page: PreviewPage }) {
+export function PreviewCommandContent({ command }: { command: PreviewCommand }) {
   return (
-    <article className="mx-auto grid min-w-0 max-w-3xl gap-4">
-      {page.subtitle ? <p className="text-sm leading-6 text-muted-foreground">{page.subtitle}</p> : null}
-      {page.body ? <p className="text-base leading-7 text-muted-foreground">{page.body}</p> : null}
-      {(page.blocks ?? []).map((block, index) => (
-        <PreviewBlock block={block} key={`${block.title ?? block.type ?? 'block'}-${index}`} />
+    <article className="mx-auto grid min-w-0 max-w-3xl gap-6">
+      {command.pages.map((page, index) => (
+        <PreviewSection command={command} isFirst={index === 0} key={page.id ?? `${page.title}-${index}`} page={page} />
       ))}
     </article>
+  )
+}
+
+function PreviewSection({
+  command,
+  page,
+  isFirst,
+}: {
+  command: PreviewCommand
+  page: PreviewPage
+  isFirst: boolean
+}) {
+  return (
+    <section
+      className={cn('scroll-mt-5', !isFirst && 'border-t border-border/70 pt-5')}
+      data-preview-anchor={page.id}
+      id={previewAnchorDomId(command.id, page.id)}
+    >
+      <div className="mb-4">
+        {page.eyebrow ? <p className="mb-1 font-mono text-xs font-semibold text-primary">{page.eyebrow}</p> : null}
+        <h4 className="text-lg font-extrabold leading-tight">{page.heading ?? page.title}</h4>
+        {page.subtitle ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{page.subtitle}</p> : null}
+        {page.body ? <p className="mt-3 text-sm leading-6 text-muted-foreground">{page.body}</p> : null}
+      </div>
+      <div className="grid gap-4">
+        {(page.blocks ?? []).map((block, index) => (
+          <PreviewBlock block={block} key={`${block.title ?? block.type ?? 'block'}-${index}`} />
+        ))}
+      </div>
+    </section>
   )
 }
 
@@ -119,8 +148,9 @@ function BlockList({ items }: { items: string[] }) {
   return (
     <ul className="grid gap-2">
       {items.map((item) => (
-        <li className="rounded-sm border border-border bg-secondary/20 px-3 py-2 text-sm leading-6 text-muted-foreground" key={item}>
-          {item}
+        <li className="flex gap-2 text-sm leading-6 text-muted-foreground" key={item}>
+          <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary/70" aria-hidden="true" />
+          <span>{item}</span>
         </li>
       ))}
     </ul>

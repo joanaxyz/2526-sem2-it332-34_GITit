@@ -129,7 +129,11 @@ class RepositoryStateNormalizer:
         changes: dict[str, dict] = {}
         for path, marker in (entries or {}).items():
             before = base_tree.get(path)
-            after = None if self.is_delete_marker(marker) else marker
+            after = (
+                None
+                if self.is_delete_marker(marker) or self.is_delete_marker(self.entry_status(marker))
+                else self.entry_content(marker)
+            )
             changes[path] = {
                 "change_type": self.change_type(before, after, marker),
                 "before": before,
@@ -192,6 +196,16 @@ class RepositoryStateNormalizer:
                 return "untracked"
         return str(value or "").lower()
 
+    def entry_content(self, value: object | None) -> object:
+        if isinstance(value, dict):
+            if "content" in value:
+                return copy.deepcopy(value.get("content"))
+            if "after" in value:
+                return copy.deepcopy(value.get("after"))
+            if "value" in value:
+                return copy.deepcopy(value.get("value"))
+        return copy.deepcopy(value)
+
     def token_haystack(self, value: object | None) -> str:
         if value is None:
             return ""
@@ -245,7 +259,7 @@ class RepositoryStateNormalizer:
             visible[path] = {
                 "status": self.display_status(value, fallback="modified"),
                 "source": "staging",
-                "content": copy.deepcopy(value),
+                "content": self.entry_content(value),
             }
 
         for path, value in (normalized.get("working_tree") or {}).items():
@@ -256,7 +270,7 @@ class RepositoryStateNormalizer:
             visible[path] = {
                 "status": self.display_status(value, fallback="modified"),
                 "source": "working_tree",
-                "content": copy.deepcopy(value),
+                "content": self.entry_content(value),
             }
 
         return dict(sorted(visible.items()))

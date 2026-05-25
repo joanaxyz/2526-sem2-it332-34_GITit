@@ -331,6 +331,33 @@ def test_engine_mutates_state_for_supported_commit_with_quoted_message():
     assert committed.state["branches"]["main"] == "c1"
 
 
+def test_engine_supports_safe_file_creation_and_gitignore_refresh():
+    state = {
+        "commits": [{"id": "c0", "message": "Base", "parents": [], "tree": {"README.md": "v1"}}],
+        "branches": {"main": "c0"},
+        "head": {"type": "branch", "name": "main"},
+        "working_tree": {
+            ".env": {"status": "untracked", "content": "SECRET=local"},
+            "node_modules/pkg/index.js": {"status": "untracked", "content": "package"},
+        },
+        "staging": {},
+    }
+    engine = GitCommandEngine()
+
+    written = engine.process(state, 'printf "node_modules/\\n.env*\\n" > .gitignore')
+    status = engine.process(written.state, "git status --short --ignored")
+    staged = engine.process(written.state, "git add .gitignore")
+    committed = engine.process(staged.state, 'git commit -m "Add ignore rules"')
+
+    assert written.processed is True
+    assert written.state["working_tree"][".gitignore"]["content"] == "node_modules/\n.env*\n"
+    assert written.state["working_tree"][".env"]["status"] == "ignored"
+    assert written.state["working_tree"]["node_modules/pkg/index.js"]["status"] == "ignored"
+    assert "!! .env" in status.output
+    assert committed.state["commits"][-1]["tree"][".gitignore"] == "node_modules/\n.env*\n"
+    assert ".env" not in committed.state["commits"][-1]["tree"]
+
+
 def test_engine_marks_diagnostics_non_mutating():
     state = {
         "commits": [{"id": "c0", "message": "Base", "parents": [], "tree": {"README.md": "v1"}}],

@@ -225,6 +225,33 @@ describe('PracticeWorkspace', () => {
     expect(screen.getByTestId('project-structure-panel')).toHaveClass('h-full')
   })
 
+  it('keeps the contextual feedback splitter from moving too far left', () => {
+    renderWorkspace(baseSession)
+
+    const terminalGrid = screen.getByTestId('terminal-feedback-grid')
+    vi.spyOn(terminalGrid, 'getBoundingClientRect').mockReturnValue({
+      bottom: 320,
+      height: 320,
+      left: 300,
+      right: 1900,
+      top: 0,
+      width: 1600,
+      x: 300,
+      y: 0,
+      toJSON: () => ({}),
+    } as DOMRect)
+
+    fireEvent.pointerDown(screen.getByRole('separator', { name: 'Resize terminal and feedback' }), {
+      clientX: 300,
+    })
+
+    const ratio = Number(terminalGrid.style.getPropertyValue('--terminal-pane-size').replace('fr', ''))
+    expect(ratio).toBeGreaterThan(0.69)
+    expect(ratio).toBeLessThan(0.71)
+
+    fireEvent.pointerUp(window)
+  })
+
   it('confirms before retrying an active workspace as a fresh attempt', async () => {
     renderWorkspace(baseSession)
 

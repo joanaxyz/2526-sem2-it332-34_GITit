@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, ArrowRight, BookOpen, ListTree, Play, SquareTerminal } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { BookOpen, ChevronLeft, ChevronRight, ListTree, Play, SquareTerminal } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { RepositorySnapshot, TerminalLine } from '@/features/practice/types'
 import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
-import { PreviewContentPage } from '@/features/scenarios/components/PreviewContentPage'
+import { PreviewCommandContent } from '@/features/scenarios/components/PreviewContentPage'
 import { PreviewDemoPanel } from '@/features/scenarios/components/PreviewDemoPanel'
 import { PreviewNavigator } from '@/features/scenarios/components/PreviewNavigator'
 import {
@@ -13,19 +13,20 @@ import {
   emptyDemoSnapshot,
   isRepositorySnapshot,
   navigationGroupsFromCommands,
-  nextReadingLocation,
   normalize,
-  previousReadingLocation,
+  previewAnchorDomId,
 } from '@/features/scenarios/components/previewPayloadUtils'
+import type { PreviewCommand } from '@/features/scenarios/components/previewPayloadUtils'
 import type {
   DifficultyAccess,
   DifficultyActionIntent,
   ScenarioSkillFocus,
 } from '@/features/scenarios/types'
-import { Badge } from '@/shared/components/Badge'
 import { queryKeys } from '@/shared/api/queryKeys'
+import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
+import { cn } from '@/shared/utils/cn'
 
 export function SkillFocusPreviewModal({
   scenario,
@@ -110,16 +111,15 @@ function SkillFocusPreviewContent({
   const commands = useMemo(() => buildPreviewCommands(scenario, initialSnapshot), [initialSnapshot, scenario])
   const navGroups = useMemo(() => navigationGroupsFromCommands(commands), [commands])
   const [commandIndex, setCommandIndex] = useState(0)
-  const [pageIndex, setPageIndex] = useState(0)
   const [view, setView] = useState<'content' | 'demo'>('content')
   const [isNavigatorOpen, setIsNavigatorOpen] = useState(false)
-  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
   const selectedCommand = commands[commandIndex] ?? commands[0]
-  const selectedPage = selectedCommand.pages[pageIndex] ?? selectedCommand.pages[0]
-  const selectedDemoStep = selectedCommand.demo_steps[0] ?? selectedPage.demo_steps[0] ?? null
+  const selectedDemoStep = selectedCommand.demo_steps[0] ?? selectedCommand.pages.find((page) => page.demo_steps[0])?.demo_steps[0] ?? null
   const [snapshot, setSnapshot] = useState<RepositorySnapshot>(() => selectedDemoStep?.repository_state ?? initialSnapshot)
   const [terminalLines, setTerminalLines] = useState<TerminalLine[]>(demoBootLines)
   const [isRunningDemo, setIsRunningDemo] = useState(false)
+  const contentRef = useRef<HTMLElement | null>(null)
+  const [pendingScroll, setPendingScroll] = useState<{ commandIndex: number; anchorId: string; nonce: number } | null>(null)
   const difficultyLabel = difficulty
     ? difficulty.difficulty.charAt(0).toUpperCase() + difficulty.difficulty.slice(1)
     : null
@@ -131,27 +131,38 @@ function SkillFocusPreviewContent({
         : action === 'retry'
           ? 'Retry scenario'
           : 'Start scenario'
-  const previousLocation = previousReadingLocation(commands, commandIndex, pageIndex)
-  const nextLocation = nextReadingLocation(commands, commandIndex, pageIndex)
-  const canGoPrevious = Boolean(previousLocation)
-  const canGoNext = Boolean(nextLocation)
   const isDemoView = view === 'demo'
-  const previewLabel = preview?.diagnostic ? 'Diagnostic command preview' : 'Command preview'
+  const modalTitle = preview?.command_title || scenario.title || preview?.title || 'Command preview'
+  const commandLabel = selectedCommand.command || selectedCommand.title
 
-  function selectPage(nextCommandIndex: number, nextPageIndex: number) {
+  useEffect(() => {
+    if (!pendingScroll || pendingScroll.commandIndex !== commandIndex || view !== 'content') return
+    const container = contentRef.current
+    if (!container) return
+
+    if (pendingScroll.anchorId === 'top') {
+      if (typeof container.scrollTo === 'function') {
+        container.scrollTo({ top: 0, behavior: 'smooth' })
+      } else {
+        container.scrollTop = 0
+      }
+      return
+    }
+
+    const target = document.getElementById(previewAnchorDomId(selectedCommand.id, pendingScroll.anchorId))
+    if (target && typeof target.scrollIntoView === 'function') {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [commandIndex, pendingScroll, selectedCommand.id, view])
+
+  function selectCommand(nextCommandIndex: number, anchorId = 'top') {
     const nextCommand = commands[nextCommandIndex]
     if (!nextCommand) return
-    const nextPage = nextCommand.pages[nextPageIndex] ?? nextCommand.pages[0]
-    if (!nextPage) return
     setCommandIndex(nextCommandIndex)
-    setPageIndex(nextCommand.pages[nextPageIndex] ? nextPageIndex : 0)
     setView('content')
     setIsNavigatorOpen(false)
-    setSnapshot(nextPage.demo_steps[0]?.repository_state ?? nextCommand.demo_steps[0]?.repository_state ?? initialSnapshot)
-  }
-
-  function toggleGroup(groupId: string) {
-    setCollapsedGroups((groups) => ({ ...groups, [groupId]: !groups[groupId] }))
+    setPendingScroll({ commandIndex: nextCommandIndex, anchorId, nonce: Date.now() })
+    setSnapshot(nextCommand.pages[0]?.demo_steps[0]?.repository_state ?? nextCommand.demo_steps[0]?.repository_state ?? initialSnapshot)
   }
 
   async function runDemoCommand(command: string) {
@@ -177,7 +188,6 @@ function SkillFocusPreviewContent({
 
     if (nextCommandIndex >= 0) {
       setCommandIndex(nextCommandIndex)
-      setPageIndex(0)
       setView('demo')
     }
   }
@@ -185,7 +195,7 @@ function SkillFocusPreviewContent({
   return (
     <Modal
       open
-      title={preview?.title ?? 'Command preview'}
+      title={modalTitle}
       onClose={onClose}
       className="max-h-[94vh] w-full max-w-6xl overflow-hidden"
       contentClassName="h-[calc(94vh-4.5rem)] overflow-hidden p-0"
@@ -196,11 +206,8 @@ function SkillFocusPreviewContent({
             groups={navGroups}
             commands={commands}
             activeCommandIndex={commandIndex}
-            activePageIndex={pageIndex}
-            collapsedGroups={collapsedGroups}
             onClose={() => setIsNavigatorOpen(false)}
-            onSelect={selectPage}
-            onToggleGroup={toggleGroup}
+            onSelect={selectCommand}
           />
         ) : null}
 
@@ -212,35 +219,30 @@ function SkillFocusPreviewContent({
                   {isDemoView ? <SquareTerminal className="size-5" /> : <BookOpen className="size-5" />}
                 </div>
                 <div className="min-w-0">
-                  <div className="mb-2 flex flex-wrap items-center gap-2">
-                    {difficultyLabel ? <Badge variant="blue">{difficultyLabel}</Badge> : null}
-                    <Badge variant="outline">{preview?.focus_label ?? scenario.focus}</Badge>
-                  </div>
-                  <p className="text-xs font-semibold uppercase text-primary">{previewLabel}</p>
-                  <h3 className="mt-1 text-base font-extrabold leading-tight">{scenario.title}</h3>
-                  {isDemoView ? (
-                    <p className="mt-3 text-xs font-semibold uppercase text-muted-foreground">Demo</p>
-                  ) : selectedCommand.command || selectedPage.eyebrow ? (
-                    <p className="mt-3 truncate text-xs font-semibold uppercase text-muted-foreground">
-                      {selectedCommand.command ?? selectedPage.eyebrow}
-                    </p>
+                  {difficultyLabel ? (
+                    <div className="mb-2">
+                      <Badge variant="blue">{difficultyLabel}</Badge>
+                    </div>
                   ) : null}
-                  <h4 className="mt-1 text-xl font-extrabold leading-tight">
-                    {isDemoView ? 'Try commands in a safe preview repository' : selectedPage.heading ?? selectedPage.title}
-                  </h4>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    {isDemoView ? 'Shared demo for this command preview' : `Page ${pageIndex + 1} of ${selectedCommand.pages.length}`}
-                  </p>
+                  <h3 className={cn('mt-1 text-xl font-extrabold leading-tight', !isDemoView && 'font-mono')}>
+                    {isDemoView ? 'Safe command demo' : commandLabel}
+                  </h3>
                 </div>
               </div>
-              <Button type="button" size="sm" variant="outline" onClick={() => setIsNavigatorOpen(true)}>
-                <ListTree data-icon="inline-start" />
-                Contents
+              <Button
+                aria-label="Open contents"
+                title="Contents"
+                type="button"
+                size="icon"
+                variant="outline"
+                onClick={() => setIsNavigatorOpen(true)}
+              >
+                <ListTree className="size-5" />
               </Button>
             </div>
           </header>
 
-          <section className="min-h-0 min-w-0 overflow-auto p-5 app-scrollbar">
+          <section className="min-h-0 min-w-0 overflow-auto p-5 app-scrollbar" ref={contentRef}>
             {isDemoView ? (
               <PreviewDemoPanel
                 commands={supportedDemoCommands}
@@ -250,59 +252,112 @@ function SkillFocusPreviewContent({
                 onCommand={runDemoCommand}
               />
             ) : (
-              <PreviewContentPage page={selectedPage} />
+              <PreviewCommandContent command={selectedCommand} />
             )}
           </section>
         </main>
 
-        <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card/70 px-5 py-4">
-          <div className="flex flex-wrap gap-2">
+        <footer className="grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-3 border-t border-border bg-card/70 px-5 py-4 max-md:grid-cols-1">
+          <div className="flex gap-2">
             {isDemoView ? (
-              <Button type="button" size="sm" variant="outline" onClick={() => setView('content')}>
-                <ArrowLeft data-icon="inline-start" />
-                Back to pages
+              <Button
+                aria-label="Back to command guide"
+                title="Back to command guide"
+                type="button"
+                size="icon"
+                variant="outline"
+                onClick={() => selectCommand(commandIndex)}
+              >
+                <BookOpen className="size-5" />
               </Button>
             ) : (
-              <>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  disabled={!canGoPrevious}
-                  onClick={() => previousLocation && selectPage(previousLocation.commandIndex, previousLocation.pageIndex)}
-                >
-                  <ArrowLeft data-icon="inline-start" />
-                  Previous
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  disabled={!canGoNext}
-                  onClick={() => nextLocation && selectPage(nextLocation.commandIndex, nextLocation.pageIndex)}
-                >
-                  Next
-                  <ArrowRight data-icon="inline-start" />
-                </Button>
-                <Button type="button" size="sm" variant="outline" onClick={() => setView('demo')}>
-                  <SquareTerminal data-icon="inline-start" />
-                  Open demo
-                </Button>
-              </>
+              <Button
+                aria-label="Open demo"
+                title="Open demo"
+                type="button"
+                size="icon"
+                variant="outline"
+                onClick={() => setView('demo')}
+              >
+                <SquareTerminal className="size-5" />
+              </Button>
             )}
           </div>
+          <CommandPagination commands={commands} activeCommandIndex={commandIndex} onSelect={selectCommand} />
           {onProceed ? (
-            <Button type="button" disabled={isProceeding} onClick={onProceed}>
+            <Button className="justify-self-end max-md:justify-self-start" type="button" disabled={isProceeding} onClick={onProceed}>
               <Play data-icon="inline-start" />
               {isProceeding ? 'Opening...' : startLabel}
             </Button>
           ) : (
-            <Button type="button" variant="outline" onClick={onClose}>
-              Close preview
-            </Button>
+            <div />
           )}
         </footer>
       </div>
     </Modal>
+  )
+}
+
+function CommandPagination({
+  commands,
+  activeCommandIndex,
+  onSelect,
+}: {
+  commands: PreviewCommand[]
+  activeCommandIndex: number
+  onSelect: (commandIndex: number) => void
+}) {
+  const canGoPrevious = activeCommandIndex > 0
+  const canGoNext = activeCommandIndex < commands.length - 1
+
+  return (
+    <div className="flex items-center justify-center gap-2" aria-label="Commands">
+      <Button
+        aria-label="Previous command"
+        title="Previous command"
+        className="size-8 rounded-sm"
+        disabled={!canGoPrevious}
+        type="button"
+        size="icon"
+        variant="ghost"
+        onClick={() => onSelect(activeCommandIndex - 1)}
+      >
+        <ChevronLeft className="size-4" />
+      </Button>
+      <div className="flex min-w-0 items-center gap-1.5">
+        {commands.map((command, index) => {
+          const selected = index === activeCommandIndex
+          const label = command.command || command.title
+          return (
+            <button
+              aria-current={selected ? 'page' : undefined}
+              aria-label={`Switch to ${label}`}
+              title={label}
+              className={cn(
+                'grid size-5 place-items-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                selected ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
+              )}
+              key={command.id}
+              type="button"
+              onClick={() => onSelect(index)}
+            >
+              <span className={cn('block rounded-full', selected ? 'size-2.5 bg-primary' : 'size-2 bg-muted-foreground/45')} />
+            </button>
+          )
+        })}
+      </div>
+      <Button
+        aria-label="Next command"
+        title="Next command"
+        className="size-8 rounded-sm"
+        disabled={!canGoNext}
+        type="button"
+        size="icon"
+        variant="ghost"
+        onClick={() => onSelect(activeCommandIndex + 1)}
+      >
+        <ChevronRight className="size-4" />
+      </Button>
+    </div>
   )
 }

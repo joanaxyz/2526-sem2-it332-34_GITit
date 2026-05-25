@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { GripHorizontal, GripVertical, PanelsTopLeft } from 'lucide-react'
+import { GripHorizontal, GripVertical } from 'lucide-react'
 
 import { ScenarioContextPanel } from '@/features/scenarios/components/ScenarioContextPanel'
 import { ScenarioStatusHeader } from '@/features/scenarios/components/ScenarioStatusHeader'
@@ -30,9 +30,29 @@ import { cn } from '@/shared/utils/cn'
 const DEFAULT_TERMINAL_RATIO = 0.28
 const DEFAULT_DIAGRAM_RATIO = 0.52
 const DEFAULT_TERMINAL_PANE_RATIO = 0.76
+const MIN_TERMINAL_PANE_WIDTH = 544
+const MIN_FEEDBACK_PANE_WIDTH = 288
+const MAX_FEEDBACK_PANE_WIDTH = 480
+const RESIZE_HANDLE_WIDTH = 6
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
+}
+
+function constrainedTerminalPaneRatio(clientX: number, bounds: DOMRect) {
+  const usableWidth = Math.max(bounds.width - RESIZE_HANDLE_WIDTH, 1)
+  const rawRatio = (clientX - bounds.left) / bounds.width
+  const minRatio = Math.max(
+    MIN_TERMINAL_PANE_WIDTH / usableWidth,
+    1 - MAX_FEEDBACK_PANE_WIDTH / usableWidth,
+  )
+  const maxRatio = 1 - MIN_FEEDBACK_PANE_WIDTH / usableWidth
+
+  if (minRatio > maxRatio) {
+    return clamp(rawRatio, 0.58, 0.86)
+  }
+
+  return clamp(rawRatio, minRatio, maxRatio)
 }
 
 function ResizeHandle({
@@ -246,7 +266,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     event.preventDefault()
 
     function update(clientX: number) {
-      setTerminalPaneRatio(clamp((clientX - resizeBounds.left) / resizeBounds.width, 0.52, 0.86))
+      setTerminalPaneRatio(constrainedTerminalPaneRatio(clientX, resizeBounds))
     }
 
     function handlePointerMove(moveEvent: PointerEvent) {
@@ -293,17 +313,10 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
       />
       <main className="grid min-h-0 flex-1 grid-cols-[18rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[17rem_minmax(0,1fr)] max-xl:grid-cols-[16rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
         <aside
-          className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_minmax(14rem,0.42fr)] gap-2 overflow-hidden max-lg:min-h-[36rem]"
+          className="grid min-h-0 grid-rows-[minmax(0,1fr)_minmax(14rem,0.42fr)] gap-2 overflow-hidden max-lg:min-h-[36rem]"
           data-testid="workspace-sidebar"
           data-tour-target="scenario-brief"
         >
-          <div className="flex items-center justify-between gap-2 px-2">
-            <div className="flex items-center gap-2">
-              <PanelsTopLeft className="size-4" />
-              <span className="font-semibold">Project</span>
-            </div>
-          </div>
-
           <div className="min-h-0 overflow-y-auto app-scrollbar" data-testid="scenario-context-scroll">
             <ScenarioContextPanel session={session} />
           </div>
@@ -346,10 +359,11 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
           />
           <div
             ref={terminalGridRef}
+            data-testid="terminal-feedback-grid"
             className={cn(
               'grid min-h-0',
               session.scaffolding.contextual_feedback
-                ? 'grid-cols-1 gap-2 xl:grid-cols-[minmax(0,var(--terminal-pane-size))_0.375rem_minmax(18rem,var(--feedback-pane-size))] xl:gap-0'
+                ? 'grid-cols-1 gap-2 xl:grid-cols-[minmax(34rem,var(--terminal-pane-size))_0.375rem_minmax(18rem,var(--feedback-pane-size))] xl:gap-0'
                 : 'grid-cols-1',
             )}
             style={terminalGridStyle}

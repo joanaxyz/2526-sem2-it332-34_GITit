@@ -219,10 +219,9 @@ class ScenarioSessionAbandonAPIView(APIView):
 class ScenarioRetryAPIView(APIView):
     @transaction.atomic
     def post(self, request, session_id: int):
-        prior = ScenarioSession.objects.select_for_update().select_related(
+        prior = ScenarioSession.objects.select_for_update(of=("self",)).select_related(
             "scenario",
             "difficulty_instance",
-            "difficulty_instance__command_policy",
             "variant",
         ).get(id=session_id, user=request.user)
         if prior.mode != SESSION_MODE_PRIMARY:

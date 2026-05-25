@@ -66,7 +66,7 @@ export function CommandInput({
         onKeyDown={handleKeyDown}
         disabled={disabled}
         autoFocus
-        placeholder={processing ? 'Processing command' : 'Type a git command'}
+        placeholder={processing ? 'Processing command' : 'Type a command'}
       />
       <Button type="submit" size="sm" disabled={disabled}>{processing ? 'Running' : 'Run'}</Button>
     </form>

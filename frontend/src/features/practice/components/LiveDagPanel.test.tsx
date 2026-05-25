@@ -54,12 +54,13 @@ const snapshot: RepositorySnapshot = {
 describe('LiveDagPanel', () => {
   afterEach(() => cleanup())
 
-  it('renders commit details from the node hover/click card', () => {
+  it('renders commit details in the diagram overlay when a node is active', () => {
     render(<LiveDagPanel snapshot={snapshot} />)
 
     const commitButton = screen.getByTitle(/commit c2/i)
     fireEvent.focus(commitButton)
 
+    expect(screen.getByTestId('commit-details-overlay')).toBeInTheDocument()
     expect(screen.getByText('Message: Update form validation')).toBeInTheDocument()
     expect(screen.getByText(/modified src\/form\.js/i)).toBeInTheDocument()
     expect(screen.getByText(/src\/form\.js @ form-validation-v2/i)).toBeInTheDocument()
@@ -78,6 +79,7 @@ describe('ExpectedStatePanel', () => {
     render(<ExpectedStatePanel session={session} />)
 
     expect(screen.getByText('Expected-State Diagram')).toBeInTheDocument()
+    fireEvent.focus(screen.getByTitle(/commit c2/i))
     expect(screen.getByText('Message: Update form validation')).toBeInTheDocument()
   })
 })

@@ -74,19 +74,35 @@ const scenario: ScenarioSkillFocus = {
         summary: 'Check the branch and dirty paths before deciding what to do next.',
         pages: [
           {
+            id: 'overview',
             title: 'Introduction',
             heading: 'What git status is for',
+            eyebrow: 'git status',
+            section_type: 'overview',
             blocks: [
               { type: 'paragraph', body: 'git status is the first read-only diagnostic command.' },
               { type: 'terminal_output', title: 'Typical output', body: 'On branch main' },
             ],
           },
           {
+            id: 'status-form',
             title: 'Details',
             heading: 'Status behavior',
+            eyebrow: 'git status',
+            section_type: 'form',
             blocks: [
               { type: 'command', title: 'Command forms', items: ['git status'] },
               { type: 'warning', title: 'Common mistake', body: 'Do not treat status as a fix; it only reports state.' },
+            ],
+          },
+          {
+            id: 'option-short',
+            title: 'Option: -s',
+            heading: 'Short status',
+            eyebrow: '-s',
+            section_type: 'option',
+            blocks: [
+              { type: 'paragraph', body: 'Use -s when the scenario wants compact status output.' },
             ],
           },
         ],
@@ -102,7 +118,10 @@ const scenario: ScenarioSkillFocus = {
         summary: 'Read the unstaged file changes before staging anything.',
         pages: [
           {
+            id: 'diff-overview',
             title: 'Overview',
+            eyebrow: 'git diff',
+            section_type: 'overview',
             blocks: [
               { type: 'paragraph', body: 'Read the unstaged file changes before staging anything.' },
               { type: 'bullet_list', title: 'Boundaries', items: ['It does not show staged changes unless you use --staged.'] },
@@ -171,37 +190,36 @@ describe('SkillFocusPreviewModal', () => {
     vi.clearAllMocks()
   })
 
-  it('renders the first command as structured learning content with one shared demo area', async () => {
+  it('renders one continuous command lesson with one shared demo area', async () => {
     renderPreview()
 
-    expect((await screen.findAllByText('Inspect repository state before acting')).length).toBeGreaterThan(0)
-    expect(screen.getByText('Diagnostic command preview')).toBeInTheDocument()
-    expect(screen.getAllByText('Command preview').length).toBeGreaterThan(0)
-    expect(screen.getByText('What git status is for')).toBeInTheDocument()
+    expect(await screen.findByText('What git status is for')).toBeInTheDocument()
+    expect(screen.getByText('Status behavior')).toBeInTheDocument()
+    expect(screen.getByText('Short status')).toBeInTheDocument()
+    expect(screen.queryByText('Diagnostic command preview')).not.toBeInTheDocument()
+    expect(screen.queryByText('Command preview')).not.toBeInTheDocument()
     expect(screen.getByText('git status is the first read-only diagnostic command.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /start scenario/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /previous/i })).toBeDisabled()
-    expect(screen.getByRole('button', { name: /next/i })).not.toBeDisabled()
-    expect(screen.getByRole('button', { name: /contents/i })).toBeInTheDocument()
-    expect(screen.getByText('diagnostic commands')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /next page/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /previous page/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /previous command/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /next command/i })).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: /open contents/i })).toBeInTheDocument()
+    expect(screen.getAllByText('git status').length).toBeGreaterThan(0)
   })
 
-  it('moves through authored pages across command groups and opens one dedicated demo view', async () => {
+  it('uses the compact footer navigator for commands', async () => {
     renderPreview()
     await screen.findByText('What git status is for')
 
-    fireEvent.click(screen.getByRole('button', { name: /next/i }))
-    expect(screen.getByText('Status behavior')).toBeInTheDocument()
-    expect(screen.getByText('Command forms')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /next/i })).not.toBeDisabled()
-
-    fireEvent.click(screen.getByRole('button', { name: /next/i }))
+    fireEvent.click(screen.getByRole('button', { name: /next command/i }))
     expect(screen.getByText('Read the unstaged file changes before staging anything.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /previous command/i })).not.toBeDisabled()
 
     fireEvent.click(screen.getByRole('button', { name: /open demo/i }))
     expect(screen.getByText('Try it')).toBeInTheDocument()
     expect(screen.getByText('Inline command demo')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /back to pages/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /back to command guide/i })).toBeInTheDocument()
   })
 
   it('switches commands while preserving terminal history', async () => {
@@ -214,33 +232,32 @@ describe('SkillFocusPreviewModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Run' }))
 
     await screen.findByText('On branch main')
-    fireEvent.click(screen.getByRole('button', { name: /contents/i }))
-    expect(screen.getByRole('dialog', { name: /command preview contents/i })).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: /open git diff: overview/i }))
+    fireEvent.click(screen.getByRole('button', { name: /open contents/i }))
+    expect(screen.getByRole('dialog', { name: /command contents/i })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /open git diff/i }))
 
     expect(screen.getByText('Read the unstaged file changes before staging anything.')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /open demo/i }))
     expect(screen.getByText('On branch main')).toBeInTheDocument()
   })
 
-  it('uses a collapsible overlay navigator grouped by base command', async () => {
+  it('uses command and option anchors in the contents panel', async () => {
     renderPreview()
     await screen.findByText('What git status is for')
 
-    fireEvent.click(screen.getByRole('button', { name: /contents/i }))
-    expect(screen.getByText('Command guide')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /^git status/i })).toHaveAttribute('aria-expanded', 'true')
-    expect(screen.getByRole('button', { name: /open git status: what git status is for/i })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /open contents/i }))
+    expect(screen.getByText('Commands')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Open git status' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Jump to git status -s' })).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: /^git status/i }))
-    expect(screen.getByRole('button', { name: /^git status/i })).toHaveAttribute('aria-expanded', 'false')
-    expect(screen.queryByRole('button', { name: /open git status: what git status is for/i })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Jump to git status -s' }))
+    expect(screen.queryByRole('dialog', { name: /command contents/i })).not.toBeInTheDocument()
+    expect(screen.getByText('Use -s when the scenario wants compact status output.')).toBeInTheDocument()
   })
 
   it('submits every command listed in preview metadata', async () => {
     renderPreview()
-    await screen.findAllByText('Command preview')
-    await screen.findAllByText('Inspect repository state before acting')
+    await screen.findByText('What git status is for')
     fireEvent.click(screen.getByRole('button', { name: /open demo/i }))
 
     for (const command of scenario.command_preview!.supported_demo_commands) {

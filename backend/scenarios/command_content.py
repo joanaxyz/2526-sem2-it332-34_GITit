@@ -34,6 +34,31 @@ COMMAND_KEY_PREFIXES: tuple[tuple[str, str], ...] = (
 )
 
 
+# For each command key, option and argument pages that should always appear in the
+# preview regardless of which specific command form triggered the key. These teach
+# the vocabulary (flags, placeholders, argument semantics) that students need when
+# any variant of the command is used in an authored scenario.
+COMMAND_KEY_OPTION_PAGE_IDS: dict[str, list[str]] = {
+    "git-status": ["option-s-short", "option-porcelain", "option-sb", "option-ignored"],
+    "git-log": ["option-oneline", "option-graph", "option-all", "option-count"],
+    "git-diff": ["option-staged-cached", "option-head", "option-name-only", "argument-path"],
+    "git-diff-staged": ["option-staged-cached"],
+    "git-show": ["argument-commit"],
+    "git-branch": ["option-v"],
+    "git-remote-v": ["option-v-verbose"],
+    "git-check-ignore": ["option-v", "argument-path"],
+    "git-init": ["option-b-initial-branch", "option-q-quiet", "argument-directory"],
+    "git-clone": ["option-b-branch", "option-depth", "argument-url", "argument-directory", "argument-branch", "argument-number"],
+    "git-add": ["option-a-all", "option-u-update", "option-p-patch", "argument-path"],
+    "git-add-p": ["option-p-patch", "argument-path"],
+    "git-rm-cached": ["option-cached", "argument-path"],
+    "git-commit": ["option-m-message", "option-a-all", "option-amend"],
+    "git-commit-amend": ["option-amend", "option-no-edit", "option-m-message"],
+    "git-restore": ["argument-path"],
+    "git-restore-staged": ["option-staged", "argument-path"],
+}
+
+
 def command_content_key_for_command(command: str) -> str:
     normalized = normalize_command_text(command)
     for prefix, key in COMMAND_KEY_PREFIXES:
@@ -81,6 +106,467 @@ def _callout(title: str, body: str) -> dict[str, Any]:
 
 def _terminal(body: str) -> dict[str, Any]:
     return {"type": "terminal_output", "title": "Typical output", "body": body}
+
+def command_form_page_id(command: str) -> str:
+    value = str(command).replace("=", " equals ").replace('"', " quote ")
+    return f"form-{_slug(value)}"
+
+
+def _command_words(command: str) -> list[str]:
+    return str(command).strip().split()
+
+
+def command_preview_form_for_command(command: str) -> str:
+    """Return the reusable command-library form taught for a concrete scenario command."""
+    raw = " ".join(str(command).strip().split())
+    normalized = raw.lower()
+    if not raw:
+        return ""
+    if normalized == ".gitignore":
+        return ".gitignore"
+    if normalized.startswith("touch "):
+        return "touch <path>"
+    if normalized.startswith("printf ") and ">" in normalized:
+        return 'printf "<content>" > <path>'
+    if normalized.startswith("echo ") and ">" in normalized:
+        return 'echo "<content>" > <path>'
+
+    if normalized.startswith("git init"):
+        return _git_init_preview_form(raw)
+    if normalized.startswith("git clone"):
+        return _git_clone_preview_form(raw)
+    if normalized.startswith("git add -p") or normalized.startswith("git add --patch"):
+        return "git add -p <path>" if len(_command_words(raw)) > 3 else "git add -p"
+    if normalized.startswith("git add"):
+        return _git_add_preview_form(raw)
+    if normalized.startswith("git commit --amend"):
+        if "--no-edit" in normalized:
+            return "git commit --amend --no-edit"
+        if " -m " in normalized or " --message " in normalized:
+            return 'git commit --amend -m "message"'
+        return "git commit --amend"
+    if normalized.startswith("git commit"):
+        if " -am " in normalized:
+            return 'git commit -am "message"'
+        if " -a " in normalized and " -m " in normalized:
+            return 'git commit -a -m "message"'
+        if "--message" in normalized:
+            return 'git commit --message "message"'
+        return 'git commit -m "message"'
+    if normalized.startswith("git rm -r --cached"):
+        return "git rm -r --cached <directory>"
+    if normalized.startswith("git rm --cached"):
+        return "git rm --cached <path>"
+    if normalized.startswith("git restore --staged"):
+        return _restore_preview_form(raw, staged=True)
+    if normalized.startswith("git restore"):
+        return _restore_preview_form(raw, staged=False)
+    if normalized.startswith("git check-ignore -v"):
+        return "git check-ignore -v <path>"
+    if normalized.startswith("git diff --staged"):
+        return "git diff --staged <path>" if len(_command_words(raw)) > 3 else "git diff --staged"
+    if normalized.startswith("git diff --cached"):
+        return "git diff --cached <path>" if len(_command_words(raw)) > 3 else "git diff --cached"
+    if normalized.startswith("git diff"):
+        if "--name-only" in normalized:
+            return "git diff --name-only"
+        if normalized == "git diff head":
+            return "git diff HEAD"
+        return "git diff <path>" if len(_command_words(raw)) > 2 else "git diff"
+    if normalized.startswith("git log"):
+        if "--oneline --graph --all" in normalized:
+            return "git log --oneline --graph --all"
+        if "--max-count" in normalized:
+            return "git log --max-count=<number>"
+        if " -n " in normalized or normalized.startswith("git log -n"):
+            return "git log -n <number>"
+        if "--oneline" in normalized:
+            return "git log --oneline"
+        return "git log"
+    if normalized.startswith("git show"):
+        if "--name-only" in normalized:
+            return "git show --name-only"
+        return "git show <commit>" if len(_command_words(raw)) > 2 else "git show"
+    if normalized.startswith("git branch -v"):
+        return "git branch -v"
+    if normalized.startswith("git branch"):
+        return "git branch"
+    if normalized.startswith("git remote -v"):
+        return "git remote -v"
+    if normalized.startswith("git remote"):
+        return "git remote"
+    if normalized.startswith("git status"):
+        for form in ("git status --ignored", "git status --porcelain", "git status -sb", "git status --short", "git status -s"):
+            if normalized == form:
+                return form
+        return "git status"
+    return raw
+
+
+def command_preview_page_ids_for_command(command: str) -> list[str]:
+    """Return the ordered page IDs to include for this command form's preview.
+
+    Always includes: overview, the specific form page, all option/argument pages
+    for the command key, effects, mistakes, and practice-notes. The option/argument
+    pages are included unconditionally because they teach flag vocabulary that any
+    variant of the command may require — even when the specific form being previewed
+    does not use that flag.
+    """
+    form = command_preview_form_for_command(command)
+    key = command_content_key_for_command(form or command)
+    ids: list[str] = ["overview"]
+    if form:
+        ids.append(command_form_page_id(form))
+    ids.extend(COMMAND_KEY_OPTION_PAGE_IDS.get(key, []))
+    ids.extend(["effects", "mistakes", "practice-notes"])
+    # Preserve insertion order while deduplicating.
+    seen: set[str] = set()
+    unique: list[str] = []
+    for page_id in ids:
+        if page_id not in seen:
+            seen.add(page_id)
+            unique.append(page_id)
+    return unique
+
+
+def _git_init_preview_form(command: str) -> str:
+    words = _command_words(command)
+    opts = [word.lower() for word in words[2:] if word.startswith("-")]
+    has_quiet = any(word in {"-q", "--quiet"} for word in opts)
+    has_short_branch = "-b" in opts
+    has_long_branch = any(word == "--initial-branch" or word.startswith("--initial-branch=") for word in opts)
+    # Any non-option token after `git init` that is not the branch value is treated as a directory.
+    args = words[2:]
+    directory = False
+    skip_next = False
+    for index, word in enumerate(args):
+        lowered = word.lower()
+        if skip_next:
+            skip_next = False
+            continue
+        if lowered in {"-b", "--initial-branch"}:
+            skip_next = True
+            continue
+        if lowered.startswith("--initial-branch=") or lowered in {"-q", "--quiet"}:
+            continue
+        if word == ".":
+            return "git init ."
+        if not word.startswith("-"):
+            directory = True
+    if has_quiet and has_short_branch and directory:
+        return "git init -q -b <branch> <directory>"
+    if has_quiet and has_long_branch and directory:
+        return "git init --quiet --initial-branch=<branch> <directory>"
+    if has_short_branch and directory:
+        return "git init -b <branch> <directory>"
+    if has_long_branch and directory:
+        return "git init --initial-branch=<branch> <directory>"
+    if has_short_branch:
+        return "git init -b <branch>"
+    if has_long_branch:
+        return "git init --initial-branch=<branch>"
+    if has_quiet and directory:
+        return "git init --quiet <directory>"
+    if has_quiet:
+        return "git init --quiet"
+    if directory:
+        return "git init <directory>"
+    return "git init"
+
+
+def _git_clone_preview_form(command: str) -> str:
+    normalized = normalize_command_text(command)
+    words = _command_words(command)
+    has_depth = "--depth" in normalized
+    has_short_branch = " -b " in f" {normalized} "
+    has_long_branch = "--branch" in normalized
+    # Count URL-ish non-option args after option values. The first is URL, the second is destination.
+    positional = []
+    skip_next = False
+    for word in words[2:]:
+        lowered = word.lower()
+        if skip_next:
+            skip_next = False
+            continue
+        if lowered in {"-b", "--branch", "--depth"}:
+            skip_next = True
+            continue
+        if word.startswith("-"):
+            continue
+        positional.append(word)
+    has_directory = len(positional) >= 2
+    branch_flag = "--branch" if has_long_branch and not has_short_branch else "-b"
+    if has_depth and (has_short_branch or has_long_branch) and has_directory:
+        return f"git clone --depth <number> {branch_flag} <branch> <url> <directory>"
+    if has_depth and has_directory:
+        return "git clone --depth <number> <url> <directory>"
+    if has_depth:
+        return "git clone --depth <number> <url>"
+    if (has_short_branch or has_long_branch) and has_directory:
+        return f"git clone {branch_flag} <branch> <url> <directory>"
+    if has_short_branch or has_long_branch:
+        return f"git clone {branch_flag} <branch> <url>"
+    if has_directory:
+        return "git clone <url> <directory>"
+    return "git clone <url>"
+
+
+def _git_add_preview_form(command: str) -> str:
+    raw = " ".join(str(command).strip().split())
+    normalized = normalize_command_text(command)
+    words = _command_words(command)
+    if raw == "git add .":
+        return "git add ."
+    if raw == "git add -A" or raw.startswith("git add -A "):
+        return "git add -A"
+    if normalized == "git add --all" or normalized.startswith("git add --all "):
+        return "git add --all"
+    if normalized.startswith("git add -u"):
+        return "git add -u"
+    if normalized.startswith("git add --update"):
+        return "git add --update"
+    path_count = max(0, len([word for word in words[2:] if not word.startswith("-")]))
+    if path_count >= 2:
+        return "git add <path> <path>"
+    if words[-1].endswith("/") if words else False:
+        return "git add <directory>/"
+    return "git add <path>"
+
+
+def _restore_preview_form(command: str, *, staged: bool) -> str:
+    normalized = normalize_command_text(command)
+    words = _command_words(command)
+    base = "git restore --staged" if staged else "git restore"
+    if normalized.endswith(" ."):
+        return f"{base} ."
+    # Ignore the command words and --staged flag, then count path-like args.
+    args = [word for word in words[2:] if word != "--staged" and not word.startswith("--source")]
+    if len(args) >= 2:
+        return f"{base} <path> <path>"
+    return f"{base} <path>"
+
+
+def _sample_output_for_form(command: str) -> str:
+    normalized = normalize_command_text(command)
+    prompt = f"student@git-it $ {command}"
+    if normalized.startswith("git init"):
+        if "--quiet" in normalized or " -q" in f" {normalized}":
+            return f"{prompt}\n# no terminal output when quiet initialization succeeds"
+        if "<directory>" in command:
+            return f"{prompt}\nInitialized empty Git repository in /workspace/{_sample_directory_for(command)}/.git/"
+        return f"{prompt}\nInitialized empty Git repository in /workspace/.git/"
+    if normalized.startswith("git clone"):
+        directory = "demo-repository" if "<directory>" in command else "repository"
+        return "\n".join([
+            prompt,
+            f"Cloning into '{directory}'...",
+            "remote: Enumerating objects: 6, done.",
+            "remote: Counting objects: 100% (6/6), done.",
+            "Receiving objects: 100% (6/6), done.",
+        ])
+    if normalized.startswith("git add") or normalized.startswith("git restore") or normalized.startswith("git rm"):
+        return f"{prompt}\n# no output means the command was accepted; run git status to verify the state change"
+    if normalized.startswith("git commit --amend"):
+        return f"{prompt}\n[main c3] Corrected snapshot\n Date: Mon May 25 12:00:00 2026 +0800\n 1 file changed, 2 insertions(+)"
+    if normalized.startswith("git commit"):
+        return f"{prompt}\n[main c2] Demo snapshot\n 1 file changed, 2 insertions(+)"
+    if normalized.startswith("git status"):
+        return f"{prompt}\nOn branch main\nChanges to be committed:\n  modified:   README.md\n\nUntracked files:\n  notes.txt"
+    if normalized.startswith("git log"):
+        return f"{prompt}\nc2 Demo snapshot\nc1 Initial project snapshot"
+    if normalized.startswith("git diff"):
+        return f"{prompt}\ndiff --git a/README.md b/README.md\n+Added practice note"
+    if normalized.startswith("git remote"):
+        return f"{prompt}\norigin  https://example.test/demo/repository.git (fetch)\norigin  https://example.test/demo/repository.git (push)"
+    if normalized.startswith("git branch"):
+        return f"{prompt}\n* main\n  starter"
+    if normalized.startswith("git show"):
+        return f"{prompt}\ncommit c2\n\n    Demo snapshot\n\ndiff --git a/README.md b/README.md"
+    if normalized.startswith("git check-ignore"):
+        return f"{prompt}\n.gitignore:3:*.log\tdebug.log"
+    if normalized.startswith("git ls-files"):
+        return f"{prompt}\nREADME.md\nsrc/app.py"
+    if normalized == ".gitignore":
+        return "# .gitignore\nnode_modules/\n*.log\n.env"
+    return f"{prompt}\n# output depends on the repository state"
+
+
+def _sample_directory_for(command: str) -> str:
+    if "research" in command:
+        return "research-log"
+    if "ui-kit" in command:
+        return "ui-kit"
+    return "demo-project"
+
+
+def _form_title(command: str) -> str:
+    if any(token in command for token in ("<path>", "<directory>", "<url>", "<branch>", "<number>", '"message"')):
+        return f"Form: {command}"
+    return command
+
+
+def _form_explanation(command: str, canonical_command: str) -> str:
+    note = _placeholder_note(command)
+    return (
+        f"Use `{command}` only when the authored scenario asks for this exact shape of command. "
+        f"The form is different from `{canonical_command}` because options, destinations, paths, branch names, depth, or messages change what Git acts on. "
+        f"{note}"
+    )
+
+
+def _form_how_to_read(command: str) -> list[str]:
+    items = [
+        "Read the command from left to right: base command first, then options, then the concrete value such as a path, directory, URL, branch, number, or message.",
+        "Anything shown inside angle brackets is not typed literally; it is replaced with the value given by the scenario.",
+    ]
+    normalized = normalize_command_text(command)
+    if "--quiet" in normalized or " -q" in f" {normalized}":
+        items.append("Quiet forms can succeed with no visible output, so verification must come from status, metadata, or the target state rather than terminal chatter.")
+    if "<directory>" in command:
+        items.append("The directory argument matters because initializing or cloning the parent folder is a different answer from targeting the named child folder.")
+    if "<branch>" in command:
+        items.append("The branch option changes which branch name is created or checked out; it is not just decoration.")
+    if "<path>" in command:
+        items.append("The path limits the operation. A broad command can accidentally stage, restore, or inspect files that the scenario wanted left alone.")
+    if "<number>" in command:
+        items.append("The number limits history depth or output count, so use the exact amount requested.")
+    if '"message"' in command:
+        items.append("The message text must match the scenario's required commit message, not the sample word shown here.")
+    return _clean_items(items)
+
+
+def _form_when_to_use(command: str) -> list[str]:
+    normalized = normalize_command_text(command)
+    items = []
+    if normalized.startswith("git init"):
+        items.append("Use this during repository setup, before any first commit exists unless the task explicitly says you are safely reinitializing.")
+    elif normalized.startswith("git clone"):
+        items.append("Use this when the required starting point is a remote repository, not a local folder that already exists.")
+    elif normalized.startswith("git add"):
+        items.append("Use this after inspecting changes and before committing, when the chosen content belongs in the next snapshot.")
+    elif normalized.startswith("git commit"):
+        items.append("Use this only after the index contains exactly the snapshot that should be saved.")
+    elif normalized.startswith("git restore --staged"):
+        items.append("Use this when content is staged but should be kept as an unstaged working-tree change.")
+    elif normalized.startswith("git restore"):
+        items.append("Use this when the scenario says selected working-tree edits should be discarded.")
+    elif normalized.startswith("git rm"):
+        items.append("Use this when a tracked generated file should stop being tracked but remain on disk.")
+    elif normalized == ".gitignore":
+        items.append("Use this when the scenario asks you to ignore generated, local, or secret files before staging the ignore rule.")
+    else:
+        items.append("Use this as an inspection step when the scenario asks you to read repository evidence before acting.")
+    items.append("Do not choose it just because it looks familiar; match it to the scenario's exact required values.")
+    return _clean_items(items)
+
+
+def _generic_form_section(
+    *,
+    command: str,
+    canonical_command: str,
+    effects: list[str],
+    boundaries: list[str],
+    watch_for: str,
+    readiness: list[str],
+) -> dict[str, Any]:
+    return _section(
+        section_id=command_form_page_id(command),
+        section_type="form",
+        title=_form_title(command),
+        command=command,
+        content=[
+            _paragraph(_form_explanation(command, canonical_command)),
+            _terminal(_sample_output_for_form(command)),
+            _bullets("How to read this form", _form_how_to_read(command)),
+            _bullets("When to use this exact form", _form_when_to_use(command)),
+            _bullets("What changes", effects),
+            _bullets("What does not change", boundaries),
+            _bullets("Check before/after", readiness or ["Run a diagnostic command after action commands to confirm the repository state matches the scenario."]),
+            _warning(watch_for),
+        ],
+    )
+
+def _clean_items(items: list[str] | None) -> list[str]:
+    return [str(item).strip() for item in (items or []) if str(item).strip()]
+
+
+def _first_sentence(text: str) -> str:
+    value = " ".join(str(text).strip().split())
+    if not value:
+        return ""
+    for marker in (". ", "! ", "? "):
+        if marker in value:
+            return value.split(marker, 1)[0] + marker.strip()
+    return value
+
+
+def _placeholder_note(command: str) -> str:
+    if "<path>" in command:
+        return "Replace <path> with the exact file or folder named by the scenario. Do not use a placeholder literally."
+    if "<directory>" in command:
+        return "Replace <directory> with the exact destination folder requested by the scenario."
+    if "<url>" in command:
+        return "Replace <url> with the exact remote URL from the scenario."
+    if "<branch>" in command:
+        return "Replace <branch> with the exact branch name requested by the scenario."
+    if "<number>" in command:
+        return "Replace <number> with the numeric value requested by the scenario."
+    if '"message"' in command:
+        return "Replace the sample message with the exact commit message required by the scenario."
+    return "Choose this form only when its option, path, or argument matches the scenario details."
+
+
+def _verification_items(*, command: str, effects: list[str], boundaries: list[str], readiness: list[str]) -> list[str]:
+    items = []
+    if effects:
+        items.append(f"Expected result: {effects[0]}")
+    if readiness:
+        items.append(f"Before running it: {readiness[0]}")
+    if boundaries:
+        items.append(f"Do not expect it to do this: {boundaries[0]}")
+    if command.startswith("git status"):
+        items.append("Verify the branch line and each path category: staged, unstaged, untracked, and ignored when requested.")
+    elif command.startswith("git diff --staged") or command.startswith("git diff --cached"):
+        items.append("Verify that the displayed patch is the version already staged for the next commit.")
+    elif command.startswith("git diff"):
+        items.append("Verify whether you are reading unstaged edits, staged edits, or all tracked edits since HEAD.")
+    elif command.startswith("git log"):
+        items.append("Verify commit order before choosing a commit id or judging whether history looks correct.")
+    elif command.startswith("git add"):
+        items.append("Run a status or staged diff afterward to confirm only the intended paths or hunks entered the index.")
+    elif command.startswith("git commit"):
+        items.append("Run a log or status check afterward to confirm the new or amended snapshot is the intended one.")
+    elif command.startswith("git restore"):
+        items.append("Run status afterward because restore affects either the working tree or index depending on the flags used.")
+    elif command.startswith("git init"):
+        items.append("Run status afterward to confirm the folder is now a repository without assuming a commit was created.")
+    elif command.startswith("git clone"):
+        items.append("Inspect status and remotes afterward to confirm the local copy is clean and connected to origin.")
+    elif command == ".gitignore":
+        items.append("Pair the ignore rule with status or check-ignore so you can prove the generated path is excluded.")
+    return _clean_items(items)
+
+
+def _state_language(*, command: str, effects: list[str], boundaries: list[str]) -> str:
+    if command.startswith(("git status", "git log", "git diff", "git show", "git branch", "git remote", "git reflog", "git check-ignore", "git ls-files")):
+        return "This is a reading command in Module 1. It gives evidence for the next decision, but the repository state should remain unchanged after the preview command runs."
+    if command.startswith("git add"):
+        return "This command changes the index, which is the staged snapshot prepared for the next commit. It does not create history by itself."
+    if command.startswith("git commit"):
+        return "This command changes local history by creating or replacing the commit at the current branch tip."
+    if command.startswith("git restore --staged"):
+        return "This command changes the index by moving selected content out of staging while keeping the working-tree edits available."
+    if command.startswith("git restore"):
+        return "This command changes working-tree files by replacing local edits with the chosen source version."
+    if command.startswith("git rm --cached"):
+        return "This command changes the index so Git stops tracking a path while leaving the local file present."
+    if command.startswith("git init"):
+        return "This command creates repository metadata. It prepares tracking capability, but it does not stage or commit project files."
+    if command.startswith("git clone"):
+        return "This command creates a local repository from a remote fixture and records the origin relationship."
+    if command == ".gitignore":
+        return "This content changes ignore behavior for untracked paths. It does not automatically remove files already tracked by Git."
+    return _first_sentence(effects[0] if effects else "Use this command only when it matches the scenario state.")
 
 
 def _rich_form_section(
@@ -143,10 +629,31 @@ def _semantic_item_sections(
     for item in items or []:
         token = item.get("token") or item.get("command") or item.get("title") or ""
         title = item.get("title") or token or section_type.replace("_", " ").title()
+        body = item.get("body") or item.get("description") or ""
         content = item.get("content")
         if not isinstance(content, list):
-            body = item.get("body") or item.get("description") or ""
-            content = [_paragraph(body)] if body else []
+            token_label = str(token or title).strip()
+            content = []
+            if body:
+                content.append(_paragraph(body))
+            content.extend(
+                [
+                    _callout(
+                        "How to use this in a scenario",
+                        f"Look for the exact clue that requires {token_label}. If the scenario does not ask for that behavior, prefer the simpler supported form.",
+                    ),
+                    _bullets(
+                        "Decision checklist",
+                        _clean_items(
+                            [
+                                f"Confirm the scenario names or implies {token_label} before using this form.",
+                                "Keep the rest of the command unchanged unless the scenario gives another required value.",
+                                "After running it, inspect the state that this option or argument is supposed to affect.",
+                            ]
+                        ),
+                    ),
+                ]
+            )
         sections.append(
             _section(
                 section_id=item.get("id") or f"{prefix}-{_slug(token or title)}",
@@ -158,7 +665,6 @@ def _semantic_item_sections(
             )
         )
     return sections
-
 
 def _sections(
     *,
@@ -173,9 +679,38 @@ def _sections(
     options: list[dict[str, Any]] | None = None,
     arguments: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
-    overview_blocks = [_paragraph(summary)]
+    syntax = _clean_items(syntax)
+    effects = _clean_items(effects)
+    boundaries = _clean_items(boundaries)
+    readiness = _clean_items(readiness)
+    overview_blocks = [
+        _paragraph(summary),
+        _callout(
+            "Mental model",
+            _state_language(command=canonical_command, effects=effects, boundaries=boundaries),
+        ),
+        _bullets(
+            "What to look at before using it",
+            readiness
+            or [
+                "Read the scenario values carefully before choosing a command form.",
+                "Check whether the task is asking you to inspect, stage, commit, initialize, clone, ignore, unstage, or discard.",
+            ],
+        ),
+    ]
     if terminal_output:
         overview_blocks.append(_terminal(terminal_output))
+    overview_blocks.append(
+        _bullets(
+            "How to verify the result",
+            _verification_items(
+                command=canonical_command,
+                effects=effects,
+                boundaries=boundaries,
+                readiness=readiness,
+            ),
+        )
+    )
 
     sections = [
         _section(
@@ -186,20 +721,15 @@ def _sections(
             content=overview_blocks,
         )
     ]
-    if syntax:
+    for form in syntax:
         sections.append(
-            _section(
-                section_id="forms",
-                section_type="form",
-                title="Supported forms",
-                command=syntax[0],
-                content=[
-                    _commands(syntax),
-                    _callout(
-                        "Simulator scope",
-                        "These are the command forms this simulator accepts for this lesson content.",
-                    ),
-                ],
+            _generic_form_section(
+                command=form,
+                canonical_command=canonical_command,
+                effects=effects,
+                boundaries=boundaries,
+                watch_for=watch_for,
+                readiness=readiness,
             )
         )
     sections.extend(
@@ -215,26 +745,59 @@ def _sections(
                 section_type="effect",
                 title="Effects and boundaries",
                 content=[
+                    _paragraph(
+                        "Before you run the command in a scored scenario, separate the thing it changes or reports from the things it deliberately leaves alone."
+                    ),
                     _bullets("Repository effect", effects),
-                    _bullets("Boundaries", boundaries),
+                    _bullets("What does not change", boundaries),
+                    _callout(
+                        "State-check habit",
+                        "After an action command, inspect the repository again. After a diagnostic command, use the evidence to choose the next action rather than treating the diagnostic output as the solution itself.",
+                    ),
                 ],
             ),
             _section(
                 section_id="mistakes",
                 section_type="mistake",
                 title="Common beginner mistake",
-                content=[_warning(watch_for)],
+                content=[
+                    _warning(watch_for),
+                    _bullets(
+                        "Safer habit",
+                        _clean_items(
+                            [
+                                "Read the scenario's exact path, branch, directory, URL, or message before typing.",
+                                "Use status, diff, log, or another diagnostic command when you are unsure what state you are changing.",
+                                "Prefer a narrow command form over a broad one when the scenario only asks for one file, one hunk, or one folder.",
+                            ]
+                        ),
+                    ),
+                ],
             ),
             _section(
                 section_id="practice-notes",
                 section_type="practice_note",
                 title="Practice notes",
-                content=[_bullets("Before running it", readiness)],
+                content=[
+                    _paragraph(
+                        "Use this page as the last check before opening an authored practice variant. The preview teaches behavior; the scenario will still require you to apply the exact values from its brief."
+                    ),
+                    _bullets("Before running it", readiness),
+                    _bullets(
+                        "During practice",
+                        _clean_items(
+                            [
+                                "Keep diagnostic commands separate from counted action commands.",
+                                "Do not guess from memory when the scenario gives concrete file names or messages.",
+                                "When the state is not what you expected, inspect first instead of piling on more action commands.",
+                            ]
+                        ),
+                    ),
+                ],
             ),
         ]
     )
     return sections
-
 
 def pages_from_command_sections(sections: list[dict[str, Any]]) -> list[dict[str, Any]]:
     pages = []
@@ -313,13 +876,34 @@ def _git_log_sections() -> list[dict[str, Any]]:
                     "a compact one-line view, a graph view across all refs, and simple count limits."
                 ),
                 _callout(
-                    "Read-only command",
-                    "Every git log form here is diagnostic: it reports commits and refs without moving HEAD, editing files, staging, or committing.",
+                    "Mental model",
+                    "This is a reading command in Module 1. It gives evidence for the next decision, "
+                    "but the repository state should remain unchanged after the preview command runs.",
+                ),
+                _bullets(
+                    "What to look at before using it",
+                    [
+                        "Identify the specific history question the scenario asks: message, commit order, branch tips, or count.",
+                        "Decide whether you need the full log, one-line compact view, graph across all refs, or a limited count.",
+                        "Note any commit id the scenario requires so you can verify it appears in the output.",
+                    ],
+                ),
+                _terminal(
+                    "commit c2\nAuthor: Demo User\n\n    Add profile validation\n\ncommit c1\nAuthor: Demo User\n\n    Add baseline feature"
+                ),
+                _bullets(
+                    "How to verify the result",
+                    [
+                        "Expected result: Reports commit history without changing HEAD, branches, staging, or working-tree files.",
+                        "Before running it: Identify which log form the scenario asks for (base, --oneline, --graph --all, or -n <number>).",
+                        "Verify commit order before choosing a commit id or judging whether history looks correct.",
+                        "Do not expect it to do this: stage, commit, switch branches, discard edits, or fetch remote data.",
+                    ],
                 ),
             ],
         ),
         _rich_form_section(
-            section_id="reading-history",
+            section_id=command_form_page_id("git log"),
             title="Reading History",
             command="git log",
             does=(
@@ -340,7 +924,7 @@ def _git_log_sections() -> list[dict[str, Any]]:
             mistake="Reading the newest message as proof that the working tree is clean. Pair history checks with git status when files may have changed.",
         ),
         _rich_form_section(
-            section_id="compact-history",
+            section_id=command_form_page_id("git log --oneline"),
             title="Compact History",
             command="git log --oneline",
             does=(
@@ -361,7 +945,7 @@ def _git_log_sections() -> list[dict[str, Any]]:
             mistake="Copying a short id from the wrong line because the output is compact. Read the message beside the id before using it.",
         ),
         _rich_form_section(
-            section_id="visual-branch-history",
+            section_id=command_form_page_id("git log --oneline --graph --all"),
             title="Visual Branch History",
             command="git log --oneline --graph --all",
             does=(
@@ -381,26 +965,47 @@ def _git_log_sections() -> list[dict[str, Any]]:
             ],
             mistake="Assuming graph lines changed the repository. They are visual output only; choose an action command separately if the task asks for a change.",
         ),
-        _section(
-            section_id="forms",
-            section_type="form",
-            title="Supported Forms",
-            command="git log",
-            content=[
-                _commands(
-                    [
-                        "git log",
-                        "git log --oneline",
-                        "git log --oneline --graph --all",
-                        "git log -n <number>",
-                        "git log --max-count=<number>",
-                    ]
-                ),
-                _callout(
-                    "Simulator scope",
-                    "These are the history forms accepted for Module 1 diagnostic previews.",
-                ),
+        _rich_form_section(
+            section_id=command_form_page_id("git log -n <number>"),
+            title="Limit History by Count",
+            command="git log -n <number>",
+            does=(
+                "git log -n <number> shows only the newest number of commits requested by the scenario. "
+                "Use it when the task asks for a short recent history window instead of the full log."
+            ),
+            sample_output="c3 Finalize profile card\nc2 Add profile validation",
+            how_to_read=[
+                "Replace <number> with the exact count named by the scenario.",
+                "The output is still newest first; it is only shorter than the full log.",
+                "If the scenario asks for two recent commits, showing more commits is unnecessary evidence.",
             ],
+            effects=["No repository state changes. It only limits how many history rows are printed."],
+            boundaries=[
+                "It does not delete older commits.",
+                "It does not change which branch HEAD points to.",
+            ],
+            mistake="Typing the word <number> literally or using a count different from the scenario requirement.",
+        ),
+        _rich_form_section(
+            section_id=command_form_page_id("git log --max-count=<number>"),
+            title="Limit History with --max-count",
+            command="git log --max-count=<number>",
+            does=(
+                "git log --max-count=<number> is the long-option version of limiting history output. "
+                "It is useful when the preview or scenario emphasizes the named option rather than the short -n form."
+            ),
+            sample_output="c3 Finalize profile card\nc2 Add profile validation",
+            how_to_read=[
+                "The value after = is the maximum number of commits to display.",
+                "The commits themselves are unchanged; only the printed list is limited.",
+                "Use this form when the scenario specifically names --max-count or asks for the long option form.",
+            ],
+            effects=["No repository state changes. It only limits displayed history."],
+            boundaries=[
+                "It does not squash, hide, or remove commits from the repository.",
+                "It does not inspect working-tree or staged changes.",
+            ],
+            mistake="Confusing limited output with limited history. Older commits still exist even if this form does not print them.",
         ),
         _section(
             section_id="option-oneline",
@@ -504,6 +1109,24 @@ def _git_log_sections() -> list[dict[str, Any]]:
                         "Reading only the first oneline row when the task asks about branch shape.",
                         "Forgetting --all when the relevant commit is on another known ref.",
                         "Assuming --graph performs a branch operation instead of drawing output.",
+                    ],
+                ),
+            ],
+        ),
+        _section(
+            section_id="practice-notes",
+            section_type="practice_note",
+            title="Practice notes",
+            content=[
+                _paragraph(
+                    "Use history output as evidence, not as the final action. In an authored scenario, read the newest commit, branch labels, and graph shape first, then decide whether a separate action command is needed."
+                ),
+                _bullets(
+                    "Before relying on log output",
+                    [
+                        "Check whether the scenario asks about the current branch only or every known ref.",
+                        "Pair log with git status when working-tree or staged changes may matter.",
+                        "Copy commit ids only after confirming the message beside the id is the one you mean.",
                     ],
                 ),
             ],
@@ -801,8 +1424,11 @@ GIT_COMMAND_CONTENT_LIBRARY: list[dict[str, Any]] = [
             "git init -b <branch>",
             "git init --initial-branch <branch>",
             "git init --initial-branch=<branch>",
+            "git init -b <branch> <directory>",
+            "git init --initial-branch=<branch> <directory>",
             "git init -q",
             "git init --quiet",
+            "git init --quiet <directory>",
         ],
         summary=(
             "git init creates Git metadata for a folder so future snapshots can be "
@@ -815,8 +1441,11 @@ GIT_COMMAND_CONTENT_LIBRARY: list[dict[str, Any]] = [
             "git init -b <branch>",
             "git init --initial-branch <branch>",
             "git init --initial-branch=<branch>",
+            "git init -b <branch> <directory>",
+            "git init --initial-branch=<branch> <directory>",
             "git init -q",
             "git init --quiet",
+            "git init --quiet <directory>",
             "git init -q -b <branch> <directory>",
             "git init --quiet --initial-branch=<branch> <directory>",
         ],
