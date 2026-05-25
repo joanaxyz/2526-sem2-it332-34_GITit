@@ -13,13 +13,15 @@ import { LiveDagPanel } from '@/features/practice/components/LiveDagPanel'
 import { ProjectStructurePanel } from '@/features/practice/components/ProjectStructurePanel'
 import { ScenarioWorkspaceTour } from '@/features/practice/components/ScenarioWorkspaceTour'
 import { TerminalPanel } from '@/features/practice/components/TerminalPanel'
+import { WorkspaceEditorOverlay } from '@/features/practice/components/WorkspaceEditorOverlay'
+import { practiceApi } from '@/features/practice/api/practiceApi'
 import { useAuthStore } from '@/features/auth/hooks/useAuth'
 import { hasSeenScenarioTour, markScenarioTourSeen } from '@/features/practice/utils/scenarioTour'
 import { useCommandSubmission } from '@/features/practice/hooks/useCommandSubmission'
 import { useScenarioSession } from '@/features/practice/hooks/useScenarioSession'
 import { reviewApi } from '@/features/review/api/reviewApi'
 import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
-import { invalidateScenarioProgressQueries, syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
+import { invalidateScenarioProgressQueries, syncScenarioSessionInCache, updateScenarioSessionCache } from '@/features/scenarios/utils/scenarioCache'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { PracticeWorkspaceSkeleton } from '@/shared/components/Skeleton'
@@ -34,6 +36,10 @@ const MIN_TERMINAL_PANE_WIDTH = 544
 const MIN_FEEDBACK_PANE_WIDTH = 288
 const MAX_FEEDBACK_PANE_WIDTH = 480
 const RESIZE_HANDLE_WIDTH = 6
+
+function stringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
+}
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
@@ -108,6 +114,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const [tourOpen, setTourOpen] = useState(false)
   const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
   const [startOverConfirmOpen, setStartOverConfirmOpen] = useState(false)
+  const [workspaceEditorPath, setWorkspaceEditorPath] = useState<string | null>(null)
   const user = useAuthStore((state) => state.user)
   const workspaceGridRef = useRef<HTMLElement>(null)
   const diagramGridRef = useRef<HTMLDivElement>(null)
@@ -159,6 +166,26 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
       navigate(`/practice/${next.id}`)
     },
   })
+  const createFileMutation = useMutation({
+    mutationFn: (input: { path: string; content: string }) => {
+      if (!session) throw new Error('No session is available to update.')
+      return practiceApi.createFile(session.id, input)
+    },
+    onSuccess: (updatedSession) => {
+      updateScenarioSessionCache(queryClient, updatedSession)
+      window.setTimeout(resetLocalSessionState, 0)
+    },
+  })
+  const writeFileMutation = useMutation({
+    mutationFn: (input: { path: string; content: string }) => {
+      if (!session) throw new Error('No session is available to update.')
+      return practiceApi.writeFile(session.id, input)
+    },
+    onSuccess: (updatedSession) => {
+      updateScenarioSessionCache(queryClient, updatedSession)
+      window.setTimeout(resetLocalSessionState, 0)
+    },
+  })
   const moduleScenariosQuery = useQuery({
     queryKey: queryKeys.moduleScenarios(session?.module.id),
     queryFn: () => scenariosApi.listForModule(session!.module.id),
@@ -190,6 +217,13 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             text: response.step.terminal_output,
           },
         ])
+        if (response.command_family === 'mergetool') {
+          const snapshot = response.session.repository_state
+          const requestedPaths = stringList(snapshot.operation_metadata?.last_mergetool_paths)
+          const conflictPaths = snapshot.conflicts ?? []
+          const nextPath = requestedPaths.find((path) => conflictPaths.includes(path)) ?? conflictPaths[0]
+          if (nextPath) setWorkspaceEditorPath(nextPath)
+        }
         window.setTimeout(resetLocalSessionState, 0)
       },
       onError: (error) => {
@@ -311,9 +345,9 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         onOpenTour={() => setTourOpen(true)}
         onContinue={() => retryMutation.mutate()}
       />
-      <main className="grid min-h-0 flex-1 grid-cols-[18rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[17rem_minmax(0,1fr)] max-xl:grid-cols-[16rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
+      <main className="relative grid min-h-0 flex-1 grid-cols-[22rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[21rem_minmax(0,1fr)] max-xl:grid-cols-[19rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
         <aside
-          className="grid min-h-0 grid-rows-[minmax(0,1fr)_minmax(14rem,0.42fr)] gap-2 overflow-hidden max-lg:min-h-[36rem]"
+          className="grid min-h-0 grid-rows-[minmax(13rem,0.72fr)_minmax(18rem,0.58fr)] gap-2 overflow-hidden max-lg:min-h-[44rem]"
           data-testid="workspace-sidebar"
           data-tour-target="scenario-brief"
         >
@@ -322,7 +356,18 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
           </div>
 
           <div className="min-h-[14rem] overflow-hidden" data-testid="project-structure-region">
-            <ProjectStructurePanel snapshot={session.repository_state} className="h-full" />
+            <ProjectStructurePanel
+              snapshot={session.repository_state}
+              className="h-full"
+              selectedPath={workspaceEditorPath}
+              createDisabled={session.status !== 'started' || createFileMutation.isPending}
+              onCreateFile={async (input) => {
+                const updatedSession = await createFileMutation.mutateAsync(input)
+                setWorkspaceEditorPath(input.path)
+                return updatedSession
+              }}
+              onOpenFile={setWorkspaceEditorPath}
+            />
           </div>
         </aside>
         <section
@@ -394,6 +439,14 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             )}
           </div>
         </section>
+        <WorkspaceEditorOverlay
+          snapshot={session.repository_state}
+          filePath={workspaceEditorPath}
+          open={Boolean(workspaceEditorPath)}
+          writeDisabled={session.status !== 'started' || writeFileMutation.isPending}
+          onClose={() => setWorkspaceEditorPath(null)}
+          onWriteFile={(input) => writeFileMutation.mutateAsync(input)}
+        />
       </main>
       <CompletionCelebrationModal
         open={(session.status === 'completed' || session.status === 'failed') && dismissedCompletionSessionId !== session.id}

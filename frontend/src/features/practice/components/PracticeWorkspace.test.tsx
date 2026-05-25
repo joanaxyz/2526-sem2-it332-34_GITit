@@ -92,7 +92,16 @@ vi.mock('@/features/practice/components/LiveDagPanel', () => ({
 }))
 
 vi.mock('@/features/practice/components/TerminalPanel', () => ({
-  TerminalPanel: () => <div>Terminal panel</div>,
+  TerminalPanel: ({ onCommand }: { onCommand?: (command: string) => void }) => (
+    <div>
+      Terminal panel
+      {onCommand ? (
+        <button type="button" onClick={() => onCommand('git mergetool')}>
+          Run mergetool
+        </button>
+      ) : null}
+    </div>
+  ),
 }))
 
 vi.mock('@/features/practice/components/CompletionCelebrationModal', () => ({
@@ -170,13 +179,13 @@ const baseSession: ScenarioSession = {
   completion: null,
 }
 
-function renderWorkspace(session: ScenarioSession) {
+function renderWorkspace(session: ScenarioSession, commandMutate = vi.fn()) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   vi.mocked(scenariosApi.listForModule).mockResolvedValue([])
   vi.mocked(scenariosApi.retrySession).mockResolvedValue({ ...session, id: session.id + 1, variant: { ...session.variant, label: 'Variant B' } })
   vi.mocked(useCommandSubmission).mockReturnValue({
     isPending: false,
-    mutate: vi.fn(),
+    mutate: commandMutate,
   } as unknown as ReturnType<typeof useCommandSubmission>)
   vi.mocked(useScenarioSession).mockReturnValue({
     query: { isLoading: false, isError: false },
@@ -264,5 +273,68 @@ describe('PracticeWorkspace', () => {
     fireEvent.click(screen.getByRole('button', { name: /start fresh attempt/i }))
 
     await waitFor(() => expect(scenariosApi.retrySession).toHaveBeenCalledWith(baseSession.id))
+  })
+
+  it('opens the conflict overlay after git mergetool launches the workspace editor', () => {
+    const conflictedSession: ScenarioSession = {
+      ...baseSession,
+      repository_state: {
+        ...repositoryState,
+        conflicts: ['src/auth.js'],
+        operation_metadata: {
+          last_mergetool_paths: ['src/auth.js'],
+        },
+        project_tree: {
+          'src/auth.js': {
+            status: 'conflicted',
+            source: 'working_tree',
+            content: '<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n',
+          },
+        },
+        conflict_details: {
+          'src/auth.js': {
+            base: 'timeout=3000',
+            ours: 'timeout=5000',
+            theirs: 'timeout=2500',
+            merge_branch: 'feature/auth-timeout',
+          },
+        },
+      },
+    }
+    const commandMutate = vi.fn((_command: string, options: { onSuccess: (response: unknown) => void }) => {
+      options.onSuccess({
+        session: {
+          id: conflictedSession.id,
+          mode: conflictedSession.mode,
+          status: conflictedSession.status,
+          difficulty_instance_id: conflictedSession.difficulty_instance_id,
+          completed_at: conflictedSession.completed_at,
+          first_attempt_star_eligible: conflictedSession.first_attempt_star_eligible,
+          counts: conflictedSession.counts,
+          repository_state: conflictedSession.repository_state,
+          review_mode: conflictedSession.review_mode,
+        },
+        command_family: 'mergetool',
+        step: {
+          id: 1,
+          command_text: 'git mergetool',
+          terminal_output: 'Opened vscode for src/auth.js.',
+          result_category: 'target_not_yet_matched',
+          evaluation_result: 'target_not_yet_matched',
+          command_classification: 'counted',
+          contextual_feedback: '',
+          created_at: '',
+        },
+      })
+    })
+
+    renderWorkspace(conflictedSession, commandMutate)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Run mergetool' }))
+
+    expect(screen.getByRole('dialog', { name: 'Conflict resolver' })).toBeInTheDocument()
+    expect(screen.getByLabelText('File content')).toHaveValue(
+      '<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n',
+    )
   })
 })

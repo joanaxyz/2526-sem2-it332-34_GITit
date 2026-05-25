@@ -8,4 +8,5 @@ class LsFilesCommandHandler(BaseCommandHandler):
     command = "ls-files"
 
     def apply(self, runtime, state: dict, intent: CommandIntent) -> CommandOutcome:
-        return CommandOutcome(command="ls-files")
+        operation = intent.first("InspectTrackedFiles")
+        return CommandOutcome(command="ls-files", details=operation.params if operation else {})

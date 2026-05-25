@@ -66,7 +66,7 @@ export type DemoExplanationStep = {
 
 export type CommandPreviewSection = {
   id?: string
-  type?: 'overview' | 'form' | 'option' | 'argument' | 'effect' | 'mistake' | 'practice_note'
+  type?: 'overview' | 'syntax' | 'option' | 'argument' | 'effect' | 'mistake' | 'practice_note'
   title: string
   command?: string
   token?: string
@@ -140,7 +140,6 @@ export type CommandPreviewMetadata = {
   command_title: string
   commands?: CommandPreviewCommand[]
   command_refs?: Array<string | Record<string, unknown>>
-  custom_pages?: CommandPreviewPage[]
   sections?: CommandPreviewSection[]
   syntax_examples: string[]
   supported_demo_commands: string[]

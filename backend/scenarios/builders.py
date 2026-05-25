@@ -14,13 +14,55 @@ from scenarios.models import (
     ScenarioSkillFocus,
     ScenarioVariant,
 )
-from simulator.services import RepositorySnapshotService, RepositoryStateSimulator
+from simulator.services import (
+    RepositorySnapshotService,
+    RepositoryStateSimulator,
+    normalize_command,
+)
+from simulator.workspace_files import WorkspaceFileError, WorkspaceFileStateService
 
 PLACEHOLDER_RE = re.compile(r"\{\{\s*([a-zA-Z0-9_]+)\s*\}\}")
 
 
 class ScenarioVariantBuildError(ValueError):
     pass
+
+
+def _workspace_file_applies(file_spec: dict, *, command: str | None, command_index: int) -> bool:
+    after_command = file_spec.get("after_command")
+    if after_command:
+        return command is not None and normalize_command(str(after_command)) == normalize_command(command)
+    if "after_command_index" in file_spec:
+        return int(file_spec.get("after_command_index") or 0) == command_index
+    return command_index == 0
+
+
+def _apply_solution_workspace_files(
+    state: dict,
+    workspace_files: list[dict],
+    *,
+    command: str | None,
+    command_index: int,
+) -> dict:
+    workspace = WorkspaceFileStateService()
+    next_state = state
+    for file_spec in workspace_files:
+        if not isinstance(file_spec, dict):
+            raise ScenarioVariantBuildError("Workspace file creation must be an object.")
+        if not _workspace_file_applies(
+            file_spec,
+            command=command,
+            command_index=command_index,
+        ):
+            continue
+        mode = str(file_spec.get("mode") or "create")
+        writer = workspace.write_file if mode in {"write", "update", "edit"} else workspace.create_file
+        next_state = writer(
+            next_state,
+            path=str(file_spec.get("path") or ""),
+            content=str(file_spec.get("content") or ""),
+        )
+    return next_state
 
 
 class StaticTemplateMaterializer:
@@ -88,10 +130,21 @@ class StaticCaseMaterializer:
                 template.get("solution_commands_template", []), context
             )
         )
+        solution_workspace_files = list(
+            self.template_materializer.render(
+                template.get("solution_workspace_files_template", []), context
+            )
+        )
+        if solution_workspace_files:
+            context["solution_workspace_files"] = solution_workspace_files
         target_rule = self.template_materializer.render(
             template.get("target_rule_template", {}), context
         )
-        target_state = self._target_state_from_solution(initial_state, solution_commands)
+        target_state = self._target_state_from_solution(
+            initial_state,
+            solution_commands,
+            workspace_files=solution_workspace_files,
+        )
         target_rule = self._augment_target_rule(
             target_rule,
             scenario=scenario,
@@ -140,15 +193,42 @@ class StaticCaseMaterializer:
         )
         return variant
 
-    def _target_state_from_solution(self, initial_state: dict, commands: list[str]) -> dict:
+    def _target_state_from_solution(
+        self,
+        initial_state: dict,
+        commands: list[str],
+        *,
+        workspace_files: list[dict] | None = None,
+    ) -> dict:
         state = self.simulator.clone_state(initial_state)
-        for command in commands:
+        try:
+            state = _apply_solution_workspace_files(
+                state,
+                workspace_files or [],
+                command=None,
+                command_index=0,
+            )
+        except WorkspaceFileError as exc:
+            raise ScenarioVariantBuildError(f"Could not apply solution workspace file: {exc}") from exc
+
+        for index, command in enumerate(commands, start=1):
             result = self.simulator.process(state, command)
             if not result.processed:
                 raise ScenarioVariantBuildError(
                     f"Could not process solution command {command!r}: {result.output}"
                 )
             state = result.state
+            try:
+                state = _apply_solution_workspace_files(
+                    state,
+                    workspace_files or [],
+                    command=command,
+                    command_index=index,
+                )
+            except WorkspaceFileError as exc:
+                raise ScenarioVariantBuildError(
+                    f"Could not apply solution workspace file after {command!r}: {exc}"
+                ) from exc
         return self.simulator.normalize_state(state)
 
     def _augment_target_rule(
@@ -535,11 +615,31 @@ class AuthoredVariantValidator:
     ) -> None:
         simulator = RepositoryStateSimulator()
         state = simulator.clone_state(variant.initial_state)
-        for command in variant.solution_commands:
+        workspace_files = variant.parameter_context.get("solution_workspace_files", [])
+        try:
+            state = _apply_solution_workspace_files(
+                state,
+                workspace_files,
+                command=None,
+                command_index=0,
+            )
+        except WorkspaceFileError as exc:
+            raise ScenarioVariantBuildError(f"Solution workspace file is invalid: {exc}") from exc
+
+        for index, command in enumerate(variant.solution_commands, start=1):
             result = simulator.process(state, command)
             if not result.processed:
                 raise ScenarioVariantBuildError(f"Solution command is not processable: {command}")
             state = result.state
+            try:
+                state = _apply_solution_workspace_files(
+                    state,
+                    workspace_files,
+                    command=command,
+                    command_index=index,
+                )
+            except WorkspaceFileError as exc:
+                raise ScenarioVariantBuildError(f"Solution workspace file is invalid: {exc}") from exc
 
         outcome = StateBasedEvaluator().evaluate(
             state,

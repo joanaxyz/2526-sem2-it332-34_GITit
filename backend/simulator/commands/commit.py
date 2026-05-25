@@ -30,12 +30,21 @@ class CommitCommandHandler(BaseCommandHandler):
     def _create(
         self, runtime, state: dict, params: dict, *, staged_by_all: list[str]
     ) -> CommandOutcome:
+        if state.get("conflicts"):
+            raise SimulatorCommandError(
+                "Committing is not possible because you have unmerged files.",
+                exit_code=128,
+            )
         if not state.get("staging") and not state.get("merge_parent"):
             raise SimulatorCommandError("nothing to commit, working tree clean", exit_code=1)
 
-        message = params.get("message") or "commit"
+        merge_parent = state.pop("merge_parent", None)
+        merge_branch = state.get("operation_metadata", {}).get("last_merge_branch", "branch")
+        message = params.get("message") or (
+            f"Merge branch '{merge_branch}'" if merge_parent else "commit"
+        )
         current = runtime._head_commit(state)
-        parents = [parent for parent in [current, state.pop("merge_parent", None)] if parent]
+        parents = [parent for parent in [current, merge_parent] if parent]
         commit_id = runtime._next_commit_id(state)
         base_tree = runtime._tree_for_commit(state, current)
         staged_entries = copy.deepcopy(state.get("staging", {}))
@@ -52,8 +61,11 @@ class CommitCommandHandler(BaseCommandHandler):
             )
         )
         state["staging"] = {}
+        state.pop("merge_abort_state", None)
         runtime._cleanup_partial_hunks_after_commit(state, staged_entries)
         runtime._set_head_commit(state, commit_id)
+        if merge_parent:
+            runtime._set_operation_metadata(state, last_merge_created_commit=commit_id)
         return CommandOutcome(
             command="commit",
             details={

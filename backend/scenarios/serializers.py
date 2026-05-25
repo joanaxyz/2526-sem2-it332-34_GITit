@@ -22,6 +22,17 @@ class CommandSubmitSerializer(serializers.Serializer):
     command = serializers.CharField(max_length=500)
 
 
+class WorkspaceFileCreateSerializer(serializers.Serializer):
+    path = serializers.CharField(max_length=240)
+    content = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=20000,
+        default="",
+        trim_whitespace=False,
+    )
+
+
 class SkillFocusDemoCommandSerializer(serializers.Serializer):
     command = serializers.CharField(max_length=500)
     repository_state = serializers.JSONField(required=False)

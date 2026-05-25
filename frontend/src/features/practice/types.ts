@@ -27,6 +27,15 @@ export type RepositoryCommit = {
   is_merge?: boolean
 }
 
+export type ConflictDetail = {
+  base?: RepositoryValue
+  ours?: RepositoryValue
+  theirs?: RepositoryValue
+  resolution?: RepositoryValue
+  merged?: RepositoryValue
+  merge_branch?: string
+}
+
 export type RepositorySnapshot = {
   repository_initialized?: boolean
   commits: RepositoryCommit[]
@@ -39,6 +48,7 @@ export type RepositorySnapshot = {
   staging: Record<string, RepositoryValue>
   working_tree: Record<string, RepositoryValue>
   conflicts: string[]
+  conflict_details?: Record<string, ConflictDetail>
   remotes?: Record<string, string>
   remote_branches?: Record<string, string | null>
   upstream_tracking?: Record<string, string>

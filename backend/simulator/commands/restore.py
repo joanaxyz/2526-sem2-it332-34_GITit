@@ -45,5 +45,6 @@ class RestoreCommandHandler(BaseCommandHandler):
             conflicts = set(state.get("conflicts", []))
             conflicts.discard(path)
             state["conflicts"] = sorted(conflicts)
+            state.setdefault("conflict_details", {}).pop(path, None)
             restored.append(path)
         return CommandOutcome(command="restore", details={"restored": restored})

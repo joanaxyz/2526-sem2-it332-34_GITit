@@ -2,6 +2,7 @@ from collections import OrderedDict
 
 from django.db import transaction
 from django.utils import timezone
+from rest_framework.exceptions import ValidationError
 
 from common.constants import (
     COMMAND_COUNTED,
@@ -42,6 +43,7 @@ from simulator.services import (
     is_diagnostic_command,
     normalize_command,
 )
+from simulator.workspace_files import WorkspaceFileError, WorkspaceFileStateService
 
 
 class DifficultyAccessService:
@@ -491,4 +493,42 @@ class CommandProcessingService:
                     user=session.user, completed_at=session.completed_at
                 )
         return {"status", "completed_at", "ended_at", "rta_success"}
+
+
+class WorkspaceFileCreationService:
+    @transaction.atomic
+    def create_file(self, *, session: ScenarioSession, path: str, content: str = "") -> ScenarioSession:
+        if session.status != SESSION_STATUS_STARTED:
+            raise Locked("This session has already ended.")
+
+        try:
+            next_state = WorkspaceFileStateService().create_file(
+                session.repository_state,
+                path=path,
+                content=content,
+            )
+        except WorkspaceFileError as exc:
+            raise ValidationError({"path": [str(exc)]}) from exc
+
+        session.repository_state = next_state
+        session.save(update_fields=["repository_state"])
+        return session
+
+    @transaction.atomic
+    def write_file(self, *, session: ScenarioSession, path: str, content: str = "") -> ScenarioSession:
+        if session.status != SESSION_STATUS_STARTED:
+            raise Locked("This session has already ended.")
+
+        try:
+            next_state = WorkspaceFileStateService().write_file(
+                session.repository_state,
+                path=path,
+                content=content,
+            )
+        except WorkspaceFileError as exc:
+            raise ValidationError({"path": [str(exc)]}) from exc
+
+        session.repository_state = next_state
+        session.save(update_fields=["repository_state"])
+        return session
 

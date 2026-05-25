@@ -50,3 +50,38 @@ def test_repository_snapshot_preserves_index_and_worktree_state():
     assert snapshot["project_tree"]["tracked.md"]["source"] == "working_tree"
     assert snapshot["project_tree"]["ready.md"]["source"] == "staging"
     assert snapshot["project_tree"]["draft.md"]["status"] == "untracked"
+
+
+def test_repository_snapshot_includes_conflict_details():
+    state = {
+        "commits": [
+            {"id": "c0", "message": "Base", "parents": [], "tree": {"src/auth.js": "timeout=3000"}},
+            {"id": "c1", "message": "Main", "parents": ["c0"], "tree": {"src/auth.js": "timeout=5000"}},
+        ],
+        "branches": {"main": "c1"},
+        "head": {"type": "branch", "name": "main"},
+        "working_tree": {
+            "src/auth.js": {
+                "status": "conflicted",
+                "content": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n",
+                "base": "timeout=3000",
+                "ours": "timeout=5000",
+                "theirs": "timeout=2500",
+                "resolution": "timeout=5000\nretry=enabled",
+            }
+        },
+        "staging": {},
+        "conflicts": ["src/auth.js"],
+        "operation_metadata": {"last_merge_branch": "feature/auth-timeout"},
+    }
+
+    snapshot = RepositorySnapshotService().snapshot(state)
+
+    assert snapshot["conflict_details"]["src/auth.js"] == {
+        "base": "timeout=3000",
+        "ours": "timeout=5000",
+        "theirs": "timeout=2500",
+        "resolution": "timeout=5000\nretry=enabled",
+        "merged": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n",
+        "merge_branch": "feature/auth-timeout",
+    }

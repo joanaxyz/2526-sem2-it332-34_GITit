@@ -21,12 +21,14 @@ from scenarios.serializers import (
     CommandSubmitSerializer,
     ScenarioStartSerializer,
     SkillFocusDemoCommandSerializer,
+    WorkspaceFileCreateSerializer,
     command_session_payload,
     session_payload,
 )
 from scenarios.services import (
     CommandProcessingService,
     ScenarioSessionService,
+    WorkspaceFileCreationService,
 )
 from simulator.command_engine import GitCommandEngine
 from simulator.services import RepositorySnapshotService
@@ -207,6 +209,40 @@ class CommandSubmitAPIView(APIView):
                     },
                 }
             )
+
+
+class WorkspaceFileCreateAPIView(APIView):
+    def post(self, request, session_id: int):
+        serializer = WorkspaceFileCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        session = ScenarioSession.objects.select_related(
+            "scenario",
+            "learning_unit",
+            "difficulty_instance",
+            "variant",
+        ).get(id=session_id, user=request.user)
+        session = WorkspaceFileCreationService().create_file(
+            session=session,
+            path=serializer.validated_data["path"],
+            content=serializer.validated_data.get("content", ""),
+        )
+        return Response(session_payload(session))
+
+    def patch(self, request, session_id: int):
+        serializer = WorkspaceFileCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        session = ScenarioSession.objects.select_related(
+            "scenario",
+            "learning_unit",
+            "difficulty_instance",
+            "variant",
+        ).get(id=session_id, user=request.user)
+        session = WorkspaceFileCreationService().write_file(
+            session=session,
+            path=serializer.validated_data["path"],
+            content=serializer.validated_data.get("content", ""),
+        )
+        return Response(session_payload(session))
 
 
 class ScenarioSessionAbandonAPIView(APIView):

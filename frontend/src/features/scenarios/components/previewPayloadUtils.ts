@@ -27,7 +27,6 @@ export type PreviewCommand = {
   title: string
   command?: string
   baseCommand: string
-  summary?: string
   pages: PreviewPage[]
   demo_steps: DemoExplanationStep[]
 }
@@ -47,7 +46,6 @@ export type PreviewNavGroup = {
 export type PreviewAnchor = {
   id: string
   label: string
-  sectionType?: string
 }
 
 export function buildPreviewCommands(
@@ -127,7 +125,6 @@ export function navigationAnchorsForCommand(command: PreviewCommand): PreviewAnc
     .map(({ page, index }) => ({
       id: page.id,
       label: navigationLabelForPage(page, command.baseCommand),
-      sectionType: page.section_type,
       order: navigationSectionOrder(page.section_type),
       index,
     }))
@@ -140,37 +137,13 @@ export function navigationAnchorsForCommand(command: PreviewCommand): PreviewAnc
     const key = normalize(anchor.label)
     if (seen.has(key)) continue
     seen.add(key)
-    deduped.push({ id: anchor.id, label: anchor.label, sectionType: anchor.sectionType })
+    deduped.push({ id: anchor.id, label: anchor.label })
   }
   return deduped
 }
 
 export function previewAnchorDomId(commandId: string, anchorId: string) {
   return `preview-${slugForDomId(commandId)}-${slugForDomId(anchorId)}`
-}
-
-export function previousReadingLocation(commands: PreviewCommand[], commandIndex: number, pageIndex: number) {
-  if (pageIndex > 0) return { commandIndex, pageIndex: pageIndex - 1 }
-  for (let index = commandIndex - 1; index >= 0; index -= 1) {
-    const previousCommand = commands[index]
-    if (previousCommand?.pages.length) {
-      return { commandIndex: index, pageIndex: previousCommand.pages.length - 1 }
-    }
-  }
-  return null
-}
-
-export function nextReadingLocation(commands: PreviewCommand[], commandIndex: number, pageIndex: number) {
-  const currentCommand = commands[commandIndex]
-  if (currentCommand && pageIndex < currentCommand.pages.length - 1) {
-    return { commandIndex, pageIndex: pageIndex + 1 }
-  }
-  for (let index = commandIndex + 1; index < commands.length; index += 1) {
-    if (commands[index]?.pages.length) {
-      return { commandIndex: index, pageIndex: 0 }
-    }
-  }
-  return null
 }
 
 export function normalize(command: string) {
@@ -192,14 +165,13 @@ function hasReadableCommand(command: PreviewCommand) {
 }
 
 function isNavigationSection(sectionType?: string) {
-  return sectionType === 'form' || sectionType === 'option' || sectionType === 'argument'
+  return sectionType === 'option' || sectionType === 'argument'
 }
 
 function navigationSectionOrder(sectionType?: string) {
-  if (sectionType === 'form') return 0
-  if (sectionType === 'option') return 1
-  if (sectionType === 'argument') return 2
-  return 3
+  if (sectionType === 'option') return 0
+  if (sectionType === 'argument') return 1
+  return 2
 }
 
 function navigationLabelForPage(page: PreviewPage, baseCommand: string) {
@@ -246,7 +218,6 @@ function commandsFromResolvedCommands(
       title,
       command: command.command || command.canonical_command,
       baseCommand: command.base_command || canonicalCommand(command.command || command.canonical_command || title),
-      summary: command.summary,
       pages,
       demo_steps: demoSteps,
     }
@@ -292,7 +263,6 @@ function commandFromSections(
     title: label,
     command: label,
     baseCommand: canonicalCommand(label),
-    summary: sections.find((section) => section.explanation)?.explanation,
     pages: authoredPages.length ? authoredPages : generatedPagesFromSection(sections[0]),
     demo_steps: demoSteps,
   }

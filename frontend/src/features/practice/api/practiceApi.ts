@@ -11,4 +11,16 @@ export const practiceApi = {
       body: JSON.stringify({ command }),
     })
   },
+  createFile(sessionId: number, input: { path: string; content: string }) {
+    return apiRequest<ScenarioSession>(`/scenarios/sessions/${sessionId}/files/`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    })
+  },
+  writeFile(sessionId: number, input: { path: string; content: string }) {
+    return apiRequest<ScenarioSession>(`/scenarios/sessions/${sessionId}/files/`, {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    })
+  },
 }

@@ -32,6 +32,7 @@ class RepositoryStateNormalizer:
         "staging": dict,
         "working_tree": dict,
         "conflicts": list,
+        "conflict_details": dict,
         "remotes": dict,
         "remote_branches": dict,
         "upstream_tracking": dict,

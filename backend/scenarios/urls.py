@@ -2,6 +2,7 @@ from django.urls import path
 
 from scenarios.views import (
     CommandSubmitAPIView,
+    WorkspaceFileCreateAPIView,
     ScenarioRetryAPIView,
     ScenarioSessionAbandonAPIView,
     ScenarioSessionDetailAPIView,
@@ -27,6 +28,11 @@ urlpatterns = [
         "sessions/<int:session_id>/commands/",
         CommandSubmitAPIView.as_view(),
         name="scenario-command",
+    ),
+    path(
+        "sessions/<int:session_id>/files/",
+        WorkspaceFileCreateAPIView.as_view(),
+        name="scenario-workspace-file",
     ),
     path(
         "sessions/<int:session_id>/abandon/",

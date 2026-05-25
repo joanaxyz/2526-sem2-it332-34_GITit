@@ -6,6 +6,7 @@ from common.constants import RESULT_TARGET_MATCHED, RESULT_TARGET_NOT_YET_MATCHE
 from evaluation.completion import CompletionEvaluationContext, StateRuleCompletionEvaluator
 from evaluation.services import StateBasedEvaluator
 from simulator.services import RepositoryStateSimulator
+from simulator.workspace_files import WorkspaceFileStateService
 
 
 def test_evaluator_checks_partial_staging_commit_scope_and_message():
@@ -385,11 +386,12 @@ def test_evaluator_checks_created_gitignore_patterns_and_ignored_paths():
             "staging": {},
         }
     )
-    for command in [
-        'printf ".env*\\ndist/\\n" > .gitignore',
-        "git add .gitignore",
-        'git commit -m "Add ignore rules"',
-    ]:
+    state = WorkspaceFileStateService().create_file(
+        state,
+        path=".gitignore",
+        content=".env*\ndist/\n",
+    )
+    for command in ["git add .gitignore", 'git commit -m "Add ignore rules"']:
         state = simulator.process(state, command).state
 
     result = StateBasedEvaluator().evaluate(

@@ -28,6 +28,10 @@ def _example_command(command: str) -> str:
         "<url>": "https://example.test/repo.git",
         "<folder>": "repo-copy",
         "<branch>": "feature",
+        "<remote>": "origin",
+        "<tool>": "vscode",
+        "<key>": "merge.tool",
+        "<value>": "vscode",
         "<name>": "origin",
         "<old>": "origin",
         "<new>": "upstream",
@@ -177,7 +181,20 @@ def test_gitignore_variants_require_creating_gitignore_file(db):
 
     assert variants
     assert all(".gitignore" not in variant.initial_state["working_tree"] for variant in variants)
-    assert all(variant.solution_commands[0].startswith("printf ") for variant in variants)
+    assert all(
+        variant.parameter_context["solution_workspace_files"][0]["path"] == ".gitignore"
+        for variant in variants
+    )
+    assert all(
+        variant.parameter_context["solution_workspace_files"][0]["content"]
+        for variant in variants
+    )
+    assert all(
+        not command.startswith("printf ")
+        for variant in variants
+        for command in variant.solution_commands
+    )
+    assert all("git add .gitignore" in variant.solution_commands for variant in variants)
     assert all(
         any(rule.get("type") == "gitignore_matches_paths" for rule in variant.target_rule["rules"])
         for variant in variants
@@ -185,9 +202,8 @@ def test_gitignore_variants_require_creating_gitignore_file(db):
     preview_payload = json.dumps(
         ScenarioSkillFocus.objects.get(slug="configure-gitignore-rules").command_preview_config
     )
-    assert "printf" in preview_payload
-    assert "<content>" in preview_payload
-    assert all(variant.solution_commands[0] not in preview_payload for variant in variants)
+    assert "printf" not in preview_payload
+    assert "<content>" not in preview_payload
 
 
 @override_settings(DEBUG=True)
@@ -247,7 +263,7 @@ def test_diagnostic_command_preview_is_first_module_one_scenario(db):
     assert first_ref["id"].startswith("git-status")
     assert first_ref["key"] == "git-status"
     assert first_ref["command"] == "git status"
-    assert "overview" in first_ref["include_page_ids"]
+    assert "overview" in first_ref["include_section_ids"]
     ref_keys = [ref["key"] for ref in first.command_preview_config["command_refs"]]
     assert ref_keys.count("git-log") >= 1
     assert "git log --oneline" in first.safe_demo_commands
