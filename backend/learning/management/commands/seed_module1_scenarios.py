@@ -33,7 +33,6 @@ from scenarios.models import (
     ScenarioSession,
     ScenarioSkillFocus,
     ScenarioVariant,
-    TargetStateRule,
 )
 
 DIAG_PATTERNS = [
@@ -2780,7 +2779,6 @@ class Command(BaseCommand):
             )
             if not spec["difficulties"]:
                 DifficultyInstance.objects.filter(scenario=scenario).update(is_published=False)
-                TargetStateRule.objects.filter(difficulty_instance__scenario=scenario).delete()
                 ScenarioVariant.objects.filter(scenario=scenario).update(is_published=False)
                 continue
 
@@ -2816,12 +2814,10 @@ class Command(BaseCommand):
                     raise CommandError(
                         f"{scenario.slug}/{difficulty}: no authored variants were rendered"
                     )
-                TargetStateRule.objects.update_or_create(
-                    difficulty_instance=difficulty_instance,
-                    defaults={
-                        "rule": variants[0].target_rule,
-                        "target_state_hash": "",
-                    },
+                self._ensure_variant_target_rules(
+                    scenario=scenario,
+                    difficulty=difficulty,
+                    variants=variants,
                 )
 
                 active_semantic_keys = []
@@ -2957,6 +2953,10 @@ class Command(BaseCommand):
                                 template.get("target_rule_template", {}),
                                 context,
                             )
+                            if not rendered_rule:
+                                raise ScenarioVariantBuildError(
+                                    "authored variant has no target_rule"
+                                )
                             rendered_initial = authored_renderer.simulator.normalize_state(
                                 renderer.render(
                                     template.get("initial_state_template", {}),
@@ -3044,7 +3044,6 @@ class Command(BaseCommand):
         CompletionRecord.objects.filter(scenario__learning_unit=unit).delete()
         ScenarioSession.objects.filter(learning_unit=unit).delete()
         ScenarioVariant.objects.filter(scenario__learning_unit=unit).delete()
-        TargetStateRule.objects.filter(difficulty_instance__scenario__learning_unit=unit).delete()
         DifficultyInstance.objects.filter(scenario__learning_unit=unit).delete()
         ScenarioSkillFocus.objects.filter(learning_unit=unit).delete()
         OrientationProgress.objects.filter(lesson__unit=unit).delete()
@@ -3331,3 +3330,17 @@ class Command(BaseCommand):
                 "All Module 1 authored practice variants are valid."
             )
         )
+
+    def _ensure_variant_target_rules(
+        self,
+        *,
+        scenario: ScenarioSkillFocus,
+        difficulty: str,
+        variants: list[ScenarioVariant],
+    ) -> None:
+        missing = [variant.slug for variant in variants if not variant.target_rule]
+        if missing:
+            raise CommandError(
+                f"{scenario.slug}/{difficulty}: authored variants missing target_rule: "
+                + ", ".join(missing)
+            )

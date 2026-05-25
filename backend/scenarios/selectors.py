@@ -1305,7 +1305,6 @@ def get_difficulty_instance(instance_id: int) -> DifficultyInstance:
             "scenario",
             "scenario__learning_unit",
             "command_policy",
-            "target_rule",
         )
         .prefetch_related("variants")
         .get(

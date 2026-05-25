@@ -174,7 +174,6 @@ class CommandSubmitAPIView(APIView):
                     "scenario",
                     "learning_unit",
                     "difficulty_instance",
-                    "difficulty_instance__target_rule",
                     "difficulty_instance__command_policy",
                     "variant",
                 ).get(id=session_id, user=request.user)
@@ -224,7 +223,6 @@ class ScenarioRetryAPIView(APIView):
             "scenario",
             "difficulty_instance",
             "difficulty_instance__command_policy",
-            "difficulty_instance__target_rule",
             "variant",
         ).get(id=session_id, user=request.user)
         if prior.mode != SESSION_MODE_PRIMARY:
