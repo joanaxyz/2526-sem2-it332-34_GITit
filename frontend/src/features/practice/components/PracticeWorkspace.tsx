@@ -358,6 +358,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
               <TerminalPanel
                 lines={lines}
                 disabled={session.status !== 'started' || mutation.isPending}
+                processing={mutation.isPending}
                 className="h-full"
                 onCommand={submit}
               />

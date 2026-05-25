@@ -9,18 +9,18 @@ import { queryKeys } from '@/shared/api/queryKeys'
 const bootLines: TerminalLine[] = []
 
 function terminalLinesFromSession(session: ScenarioSession): TerminalLine[] {
-  return session.steps.reduce<TerminalLine[]>(
-    (items, step) => [
-      ...items,
+  const lines = [...bootLines]
+  for (const step of session.steps) {
+    lines.push(
       { id: `input-${step.id}`, kind: 'input', text: step.command_text },
       {
         id: `output-${step.id}`,
         kind: step.result_category === 'TargetMatched' ? 'success' : 'output',
         text: step.terminal_output,
       },
-    ],
-    [...bootLines],
-  )
+    )
+  }
+  return lines
 }
 
 export function useScenarioSession(sessionId: number) {
