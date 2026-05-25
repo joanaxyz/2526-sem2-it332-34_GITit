@@ -242,6 +242,30 @@ class CommandIntentMapper:
             ),
         )
 
+    def _map_checkout(self, parsed: ParsedGitCommand) -> CommandIntent:
+        side = None
+        if parsed.has_option("--ours"):
+            side = "ours"
+        elif parsed.has_option("--theirs"):
+            side = "theirs"
+        if side is None:
+            return CommandIntent(
+                command="checkout",
+                operations=(CommandOperation("UnsupportedCommand", {"command": "checkout"}),),
+            )
+        return CommandIntent(
+            command="checkout",
+            operations=(
+                CommandOperation(
+                    "CheckoutConflictSide",
+                    {
+                        "side": side,
+                        "paths": parsed.pathspecs,
+                    },
+                ),
+            ),
+        )
+
     def _map_config(self, parsed: ParsedGitCommand) -> CommandIntent:
         return CommandIntent(
             command="config",

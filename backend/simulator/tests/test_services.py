@@ -1,5 +1,6 @@
 from simulator.output.errors import unsupported_command
 from simulator.services import RepositoryStateSimulator
+from simulator.workspace_files import WorkspaceFileStateService
 
 
 def test_simulator_rejects_non_git_input_without_execution():
@@ -692,14 +693,21 @@ def test_module_three_commands_merge_mergetool_fetch_and_cherry_pick():
     fetched = simulator.process(state, "git fetch origin").state
     configured = simulator.process(fetched, "git config --global merge.tool vscode").state
     conflicted = simulator.process(configured, "git merge feature").state
-    resolved = simulator.process(conflicted, "git mergetool").state
-    merged = simulator.process(resolved, "git commit").state
+    tool_opened = simulator.process(conflicted, "git mergetool").state
+    edited = WorkspaceFileStateService().write_file(
+        tool_opened,
+        path="app.py",
+        content="resolved",
+    )
+    staged = simulator.process(edited, "git add app.py").state
+    merged = simulator.process(staged, "git commit").state
     picked = simulator.process(merged, "git cherry-pick c3").state
 
     assert fetched["operation_metadata"]["remote_tracking_updated"] is True
     assert configured["operation_metadata"]["configured_merge_tool"] == "vscode"
     assert conflicted["conflicts"] == ["app.py"]
-    assert resolved["staging"]["app.py"]["content"] == "resolved"
+    assert tool_opened["staging"] == {}
+    assert tool_opened["operation_metadata"]["last_mergetool_paths"] == ["app.py"]
     assert merged["commits"][-1]["parents"] == ["c1", "c2"]
     assert picked["commits"][-1]["message"] == "Hotfix"
     assert picked["commits"][-1]["tree"]["fix.py"] == "hotfix-token"

@@ -1,6 +1,7 @@
 from simulator.commands.add import AddCommandHandler
 from simulator.commands.branch import BranchCommandHandler
 from simulator.commands.check_ignore import CheckIgnoreCommandHandler
+from simulator.commands.checkout import CheckoutCommandHandler
 from simulator.commands.cherry_pick import CherryPickCommandHandler
 from simulator.commands.clone import CloneCommandHandler
 from simulator.commands.commit import CommitCommandHandler
@@ -36,6 +37,7 @@ def command_handlers() -> dict:
         RmCommandHandler(),
         ReflogCommandHandler(),
         CheckIgnoreCommandHandler(),
+        CheckoutCommandHandler(),
         LsFilesCommandHandler(),
         MergeCommandHandler(),
         MergetoolCommandHandler(),

@@ -27,6 +27,7 @@ class MergeCommandHandler(BaseCommandHandler):
             runtime._set_operation_metadata(state, last_merge_aborted=True)
             return CommandOutcome(command="merge", stdout="")
         state["conflicts"] = []
+        state.pop("conflict_details", None)
         state["staging"] = {}
         state["working_tree"] = {}
         state.pop("merge_parent", None)
@@ -85,7 +86,15 @@ class MergeCommandHandler(BaseCommandHandler):
             state["merge_parent"] = target_id
             state["merge_abort_state"] = before_merge
             state["conflicts"] = sorted(conflict_paths)
+            conflict_details = state.setdefault("conflict_details", {})
             for path in sorted(conflict_paths):
+                conflict_details[path] = {
+                    "base": copy.deepcopy(base_tree.get(path)),
+                    "ours": copy.deepcopy(current_tree.get(path)),
+                    "theirs": copy.deepcopy(target_tree.get(path)),
+                    "resolution": copy.deepcopy((state.get("merge_resolutions") or {}).get(path)),
+                    "merge_branch": branch,
+                }
                 state.setdefault("working_tree", {})[path] = self._conflict_entry(
                     path=path,
                     branch=branch,

@@ -401,6 +401,7 @@ class RepositorySnapshotService:
             "staging": state.get("staging", {}),
             "working_tree": state.get("working_tree", {}),
             "conflicts": state.get("conflicts", []),
+            "conflict_details": self._conflict_details(normalizer, state),
             "remotes": state.get("remotes", {}),
             "remote_branches": state.get("remote_branches", {}),
             "upstream_tracking": state.get("upstream_tracking", {}),
@@ -412,3 +413,30 @@ class RepositorySnapshotService:
             "project_tree": visible_tree,
             "visible_tree": visible_tree,
         }
+
+    def _conflict_details(self, normalizer: RepositoryStateNormalizer, state: dict) -> dict:
+        details: dict[str, dict] = {}
+        authored_details = state.get("conflict_details") or {}
+        working_tree = state.get("working_tree") or {}
+        merge_branch = state.get("operation_metadata", {}).get("last_merge_branch")
+
+        for path in state.get("conflicts", []):
+            detail: dict = {}
+            authored = authored_details.get(path)
+            if isinstance(authored, dict):
+                detail.update(copy.deepcopy(authored))
+
+            entry = working_tree.get(path)
+            if isinstance(entry, dict):
+                for key in ("base", "ours", "theirs", "resolution"):
+                    if key in entry and key not in detail:
+                        detail[key] = copy.deepcopy(entry.get(key))
+                if "content" in entry:
+                    detail.setdefault("merged", copy.deepcopy(entry.get("content")))
+
+            if merge_branch and "merge_branch" not in detail:
+                detail["merge_branch"] = merge_branch
+            if detail:
+                details[path] = detail
+
+        return details

@@ -61,6 +61,7 @@ class AddCommandHandler(BaseCommandHandler):
                 continue
             staging[path] = copy.deepcopy(working_tree.pop(path, "updated"))
             conflicts.discard(path)
+            state.setdefault("conflict_details", {}).pop(path, None)
         state["conflicts"] = sorted(conflicts)
 
     def _stage_patch(self, runtime, state: dict, paths: tuple[str, ...]) -> CommandOutcome:

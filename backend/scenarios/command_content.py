@@ -16,6 +16,8 @@ COMMAND_KEY_PREFIXES: tuple[tuple[str, str], ...] = (
     ("git restore --staged", "git-restore-staged"),
     ("git rm --cached", "git-rm-cached"),
     ("git cherry-pick", "git-cherry-pick"),
+    ("git checkout --ours", "git-checkout-conflict-side"),
+    ("git checkout --theirs", "git-checkout-conflict-side"),
     ("git mergetool", "git-mergetool"),
     ("git merge", "git-merge"),
     ("git config", "git-config"),
@@ -69,6 +71,7 @@ COMMAND_KEY_ALWAYS_INCLUDED_SECTION_IDS: dict[str, list[str]] = {
     "git-restore": ["argument-path"],
     "git-restore-staged": ["option-staged", "argument-path"],
     "git-merge": ["option-abort", "option-continue", "argument-branch"],
+    "git-checkout-conflict-side": ["option-ours", "option-theirs", "argument-path"],
     "git-mergetool": ["option-tool"],
     "git-config": ["option-global", "argument-key", "argument-value"],
     "git-fetch": ["argument-remote"],
@@ -183,6 +186,10 @@ def command_preview_syntax_for_command(command: str) -> str:
         if "--tool" in normalized:
             return "git mergetool --tool <tool>"
         return "git mergetool"
+    if normalized.startswith("git checkout --ours"):
+        return "git checkout --ours <path>"
+    if normalized.startswith("git checkout --theirs"):
+        return "git checkout --theirs <path>"
     if normalized.startswith("git config"):
         if "merge.tool" in normalized:
             return "git config --global merge.tool <tool>"
@@ -1896,6 +1903,45 @@ GIT_COMMAND_CONTENT_LIBRARY: list[dict[str, Any]] = [
         ],
     ),
     _content(
+        key="git-checkout-conflict-side",
+        display_name="git checkout --ours/--theirs",
+        canonical_command="git checkout --ours <path>",
+        aliases=["git checkout --theirs <path>"],
+        summary="git checkout --ours or --theirs copies one side of an unresolved conflict into the working tree.",
+        tags=["action", "merge", "conflict-resolution"],
+        syntax=["git checkout --ours <path>", "git checkout --theirs <path>"],
+        effects=[
+            "Replaces the conflicted working-tree file with either the current branch side or the incoming branch side.",
+        ],
+        boundaries=[
+            "This simulator supports only --ours/--theirs for conflicted paths, not general branch checkout.",
+            "It does not stage the file; the conflict remains unmerged until the path is added.",
+        ],
+        watch_for="Using the wrong side for the scenario goal before staging the resolved file.",
+        readiness=["Confirm whether the goal asks for the current branch version or the incoming branch version."],
+        options=[
+            {
+                "id": "option-ours",
+                "token": "--ours",
+                "title": "Current branch side",
+                "body": "Uses the HEAD/current branch version of the conflicted file.",
+            },
+            {
+                "id": "option-theirs",
+                "token": "--theirs",
+                "title": "Incoming branch side",
+                "body": "Uses the incoming branch version of the conflicted file.",
+            },
+        ],
+        arguments=[
+            {
+                "token": "<path>",
+                "title": "Conflict path",
+                "body": "Required. Names a file currently listed as unmerged.",
+            },
+        ],
+    ),
+    _content(
         key="git-mergetool",
         display_name="git mergetool",
         canonical_command="git mergetool",
@@ -1903,8 +1949,11 @@ GIT_COMMAND_CONTENT_LIBRARY: list[dict[str, Any]] = [
         summary="git mergetool opens the configured merge tool workflow for unresolved conflict paths.",
         tags=["action", "merge", "conflict-resolution"],
         syntax=["git mergetool", "git mergetool --tool <tool>", "git mergetool <path>"],
-        effects=["Writes the scenario's resolved content for selected conflict paths and stages those paths."],
-        boundaries=["It only works when a merge conflict is in progress."],
+        effects=["Records that the merge tool was launched and opens the workspace conflict editor for selected paths."],
+        boundaries=[
+            "It only works when a merge conflict is in progress.",
+            "It does not choose or stage the resolved file content for you.",
+        ],
         watch_for="Running mergetool before a merge has produced unmerged files.",
         readiness=["Confirm the conflict path and merge tool requested by the scenario."],
         options=[

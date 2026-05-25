@@ -191,6 +191,9 @@ def test_parser_and_registry_support_module_one_action_forms(command):
         "git fetch origin",
         "git merge feature/app",
         "git merge --abort",
+        "git merge --continue",
+        "git checkout --ours src/auth.js",
+        "git checkout --theirs src/auth.js",
         "git config --global merge.tool vscode",
         "git config --global mergetool.vscode.cmd \"code --wait $MERGED\"",
         "git mergetool",
@@ -409,7 +412,6 @@ def test_engine_marks_diagnostics_non_mutating():
 
 
 def test_conflict_diagnostics_and_merge_continue_are_supported():
-    simulator = RepositoryStateSimulator()
     state = {
         "commits": [
             {"id": "c0", "message": "Base", "parents": [], "tree": {"src/auth.js": "timeout=3000"}},
@@ -433,8 +435,14 @@ def test_conflict_diagnostics_and_merge_continue_are_supported():
     base = engine.process(conflicted, "git diff --base src/auth.js")
     marker_check = engine.process(conflicted, "git diff --check src/auth.js")
     unmerged = engine.process(conflicted, "git ls-files -u")
-    resolved = engine.process(conflicted, "git mergetool --tool vscode src/auth.js").state
-    completed = engine.process(resolved, "git merge --continue")
+    tool = engine.process(conflicted, "git mergetool --tool vscode src/auth.js")
+    edited = WorkspaceFileStateService().write_file(
+        tool.state,
+        path="src/auth.js",
+        content="timeout=5000\nretry=enabled",
+    )
+    staged = engine.process(edited, "git add src/auth.js").state
+    completed = engine.process(staged, "git merge --continue")
 
     assert ours.diagnostic is True
     assert "+timeout=5000" in ours.output
@@ -442,7 +450,108 @@ def test_conflict_diagnostics_and_merge_continue_are_supported():
     assert "+timeout=3000" in base.output
     assert "leftover conflict marker" in marker_check.output
     assert "src/auth.js" in unmerged.output
+    assert tool.state["conflicts"] == ["src/auth.js"]
+    assert tool.state["staging"] == {}
+    assert tool.state["operation_metadata"]["last_mergetool_paths"] == ["src/auth.js"]
     assert completed.processed is True
     assert completed.state["conflicts"] == []
     assert completed.state["branches"]["main"] == "c3"
     assert completed.state["commits"][-1]["is_merge"] is True
+
+
+def test_checkout_ours_and_theirs_write_conflict_sides_without_staging():
+    simulator = RepositoryStateSimulator()
+    state = {
+        "commits": [
+            {"id": "c0", "message": "Base", "parents": [], "tree": {"src/auth.js": "timeout=3000"}},
+            {"id": "c1", "message": "Main", "parents": ["c0"], "tree": {"src/auth.js": "timeout=5000"}},
+            {"id": "c2", "message": "Feature", "parents": ["c0"], "tree": {"src/auth.js": "timeout=2500"}},
+        ],
+        "branches": {"main": "c1", "feature/auth-timeout": "c2"},
+        "head": {"type": "branch", "name": "main"},
+        "staging": {},
+        "working_tree": {},
+        "conflicts": [],
+        "conflict_on_merge": True,
+        "conflict_files": ["src/auth.js"],
+    }
+
+    conflicted = simulator.process(state, "git merge feature/auth-timeout").state
+    ours = simulator.process(conflicted, "git checkout --ours src/auth.js")
+    theirs = simulator.process(conflicted, "git checkout --theirs src/auth.js")
+
+    assert ours.processed is True
+    assert ours.state["working_tree"]["src/auth.js"]["content"] == "timeout=5000"
+    assert ours.state["staging"] == {}
+    assert ours.state["conflicts"] == ["src/auth.js"]
+    assert theirs.state["working_tree"]["src/auth.js"]["content"] == "timeout=2500"
+    assert theirs.state["staging"] == {}
+    assert theirs.state["conflicts"] == ["src/auth.js"]
+
+
+def test_checkout_conflict_side_fails_outside_conflicted_paths():
+    simulator = RepositoryStateSimulator()
+    clean_state = simulator.normalize_state(
+        {
+            "commits": [
+                {"id": "c0", "message": "Base", "parents": [], "tree": {"README.md": "v1"}}
+            ],
+            "branches": {"main": "c0"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {},
+            "staging": {},
+            "conflicts": [],
+        }
+    )
+
+    no_conflict = simulator.process(clean_state, "git checkout --ours README.md")
+    conflicted = simulator.process(
+        {
+            **clean_state,
+            "conflicts": ["src/auth.js"],
+            "conflict_details": {"src/auth.js": {"ours": "ours", "theirs": "theirs"}},
+            "working_tree": {
+                "src/auth.js": {
+                    "status": "conflicted",
+                    "ours": "ours",
+                    "theirs": "theirs",
+                }
+            },
+        },
+        "git checkout --ours README.md",
+    )
+
+    assert no_conflict.processed is False
+    assert "--ours/--theirs can only be used" in no_conflict.output
+    assert conflicted.processed is False
+    assert "is not an unmerged file" in conflicted.output
+
+
+def test_checkout_side_then_add_and_continue_finishes_merge():
+    simulator = RepositoryStateSimulator()
+    state = {
+        "commits": [
+            {"id": "c0", "message": "Base", "parents": [], "tree": {"src/auth.js": "timeout=3000"}},
+            {"id": "c1", "message": "Main", "parents": ["c0"], "tree": {"src/auth.js": "timeout=5000"}},
+            {"id": "c2", "message": "Feature", "parents": ["c0"], "tree": {"src/auth.js": "timeout=2500"}},
+        ],
+        "branches": {"main": "c1", "feature/auth-timeout": "c2"},
+        "head": {"type": "branch", "name": "main"},
+        "staging": {},
+        "working_tree": {},
+        "conflicts": [],
+        "conflict_on_merge": True,
+        "conflict_files": ["src/auth.js"],
+    }
+
+    state = simulator.process(state, "git merge feature/auth-timeout").state
+    state = simulator.process(state, "git checkout --theirs src/auth.js").state
+    state = simulator.process(state, "git add src/auth.js").state
+    result = simulator.process(state, "git merge --continue")
+
+    assert result.processed is True
+    assert result.state["conflicts"] == []
+    assert result.state["working_tree"] == {}
+    assert result.state["branches"]["main"] == "c3"
+    assert result.state["commits"][-1]["parents"] == ["c1", "c2"]
+    assert result.state["commits"][-1]["tree"]["src/auth.js"] == "timeout=2500"

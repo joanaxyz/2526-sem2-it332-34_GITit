@@ -637,6 +637,14 @@ class GitCommandRegistry:
                 executor="teaching_state",
                 parser_validation=_validate_mergetool,
             ),
+            "checkout": GitCommandSpec(
+                "checkout",
+                frozenset({"--ours", "--theirs"}),
+                diagnostic=False,
+                counted=True,
+                executor="teaching_state",
+                parser_validation=_validate_checkout,
+            ),
             "config": GitCommandSpec(
                 "config",
                 frozenset({"--global"}),
@@ -859,6 +867,15 @@ def _validate_mergetool(parsed: ParsedGitCommand) -> str | None:
         return "error: only one merge tool may be specified"
     if any(value in ("", True) for value in tool_values):
         return "error: option `--tool` requires a value."
+    return None
+
+
+def _validate_checkout(parsed: ParsedGitCommand) -> str | None:
+    sides = [option for option in ("--ours", "--theirs") if parsed.has_option(option)]
+    if len(sides) != 1:
+        return "git checkout in this simulator supports only one of --ours or --theirs for conflicted files."
+    if not parsed.pathspecs:
+        return "fatal: git checkout --ours/--theirs requires a conflicted path."
     return None
 
 
