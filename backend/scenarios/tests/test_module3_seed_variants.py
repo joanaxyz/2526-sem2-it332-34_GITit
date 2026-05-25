@@ -39,6 +39,8 @@ def test_module_three_seed_creates_conflict_resolution_variants(db):
         == [
             "diagnose-conflict-state",
             "identify-merge-conflict-state",
+            "accept-conflict-side",
+            "abort-conflicted-merge",
             "resolve-conflicts-manually",
             "use-merge-tool-workflow",
             "prevent-stale-conflict-merge",
@@ -46,17 +48,25 @@ def test_module_three_seed_creates_conflict_resolution_variants(db):
             "module3-integrated-conflict-workflow",
         ]
     )
-    assert DifficultyInstance.objects.filter(scenario__learning_unit=unit, is_published=True).count() == 21
-    assert ScenarioVariant.objects.filter(scenario__learning_unit=unit, is_published=True).count() == 48
+    assert DifficultyInstance.objects.filter(scenario__learning_unit=unit, is_published=True).count() == 27
+    assert ScenarioVariant.objects.filter(scenario__learning_unit=unit, is_published=True).count() == 60
 
     mergetool = ScenarioSkillFocus.objects.get(learning_unit=unit, slug="use-merge-tool-workflow")
     assert mergetool.primary_focus_commands == [
         "git config",
         "git merge",
         "git mergetool",
+        "git add",
         "git commit",
     ]
     assert "git mergetool" in json.dumps(mergetool.command_preview_config)
+
+    side = ScenarioSkillFocus.objects.get(learning_unit=unit, slug="accept-conflict-side")
+    assert "git checkout" in side.primary_focus_commands
+    assert "git checkout --ours" in json.dumps(side.command_preview_config)
+
+    abort = ScenarioSkillFocus.objects.get(learning_unit=unit, slug="abort-conflicted-merge")
+    assert abort.focus == "git merge --abort"
 
     diagnostics = ScenarioSkillFocus.objects.get(learning_unit=unit, slug="diagnose-conflict-state")
     assert diagnostics.skill_focus_type == ScenarioSkillFocus.SkillFocusType.CONCEPT_SPECIFIC

@@ -136,11 +136,36 @@ def student_context_template(kind: str) -> dict[str, Any]:
         }
     if kind == "manual-resolution":
         return {
-            "story": "{{project}} is already stopped in a conflicted merge. Finish the manual resolution cleanly.",
+            "story": "{{project}} is already stopped in a conflicted merge. Combine both changes manually.",
             "required_details": [
                 {"label": "Current branch", "value": "main"},
                 {"label": "Conflict file", "value": "{{conflict_path}}"},
-                {"label": "Resolution token", "value": "{{resolution_token}}"},
+                {"label": "Manual resolution detail", "value": "{{resolution_token}}"},
+                {"label": "Commit message text", "value": "{{commit_message}}"},
+                {"label": "Markers to remove", "value": "<<<<<<<, =======, >>>>>>>"},
+            ],
+            **common,
+        }
+    if kind == "accept-ours":
+        return {
+            "story": "{{project}} is already stopped in a conflicted merge. Keep the current branch version of the conflicted file.",
+            "required_details": [
+                {"label": "Current branch", "value": "main"},
+                {"label": "Conflict file", "value": "{{conflict_path}}"},
+                {"label": "Resolution strategy", "value": "Keep ours / HEAD / current branch"},
+                {"label": "Commit message text", "value": "{{commit_message}}"},
+                {"label": "Markers to remove", "value": "<<<<<<<, =======, >>>>>>>"},
+            ],
+            **common,
+        }
+    if kind == "accept-theirs":
+        return {
+            "story": "{{project}} is already stopped in a conflicted merge. Accept the incoming branch version of the conflicted file.",
+            "required_details": [
+                {"label": "Current branch", "value": "main"},
+                {"label": "Incoming branch", "value": "{{source_branch}}"},
+                {"label": "Conflict file", "value": "{{conflict_path}}"},
+                {"label": "Resolution strategy", "value": "Accept theirs / incoming branch"},
                 {"label": "Commit message text", "value": "{{commit_message}}"},
                 {"label": "Markers to remove", "value": "<<<<<<<, =======, >>>>>>>"},
             ],
@@ -148,22 +173,22 @@ def student_context_template(kind: str) -> dict[str, Any]:
         }
     if kind == "merge-abort":
         return {
-            "story": "{{project}} is in a conflicted merge that should be canceled instead of resolved.",
+            "story": "{{project}} is in a conflicted merge. Cancel the merge and return to the pre-merge state.",
             "required_details": [
                 {"label": "Current branch", "value": "main"},
                 {"label": "Conflict file", "value": "{{conflict_path}}"},
-                {"label": "Pre-merge tip", "value": "c1"},
+                {"label": "Pre-merge tip", "value": "{{pre_merge_tip}}"},
             ],
         }
     if kind == "mergetool":
         return {
-            "story": "{{project}} needs the configured merge tool workflow for a conflicted merge.",
+            "story": "{{project}} needs the configured merge tool to inspect and resolve the conflict.",
             "required_details": [
                 {"label": "Current branch", "value": "main"},
                 {"label": "Source branch", "value": "{{source_branch}}"},
                 {"label": "Merge tool", "value": "{{merge_tool}}"},
                 {"label": "Conflict file", "value": "{{conflict_path}}"},
-                {"label": "Resolution token", "value": "{{resolution_token}}"},
+                {"label": "Resolution detail", "value": "{{resolution_token}}"},
                 {"label": "Markers to remove", "value": "<<<<<<<, =======, >>>>>>>"},
             ],
             **common,
@@ -333,6 +358,9 @@ def conflict_repo_case(
         "project": project,
         "conflict_path": conflict_path,
         "source_branch": source_branch,
+        "base_content": base_content,
+        "main_content": main_content,
+        "feature_content": feature_content,
         "resolution_content": resolution_content,
         "resolution_token": resolution_token,
         "initial_state": state,
@@ -361,6 +389,48 @@ def conflicted_case(base_case: dict[str, Any], *, commit_message: str) -> dict[s
                 "content": base_case["resolution_content"],
             }
         ],
+    }
+
+
+def conflict_side_case(
+    base_case: dict[str, Any],
+    *,
+    side: str,
+    commit_message: str,
+) -> dict[str, Any]:
+    simulator = RepositoryStateSimulator()
+    conflicted = simulator.process(
+        base_case["initial_state"],
+        f"git merge {base_case['source_branch']}",
+    ).state
+    side_option = "--ours" if side == "ours" else "--theirs"
+    side_content = base_case["main_content"] if side == "ours" else base_case["feature_content"]
+    return {
+        **base_case,
+        "initial_state": conflicted,
+        "side": side,
+        "side_label": "current branch" if side == "ours" else "incoming branch",
+        "side_content": side_content,
+        "commit_message": commit_message,
+        "solution_commands": [
+            f"git checkout {side_option} {base_case['conflict_path']}",
+            f"git add {base_case['conflict_path']}",
+            f'git commit -m "{commit_message}"',
+        ],
+    }
+
+
+def merge_abort_case(base_case: dict[str, Any]) -> dict[str, Any]:
+    simulator = RepositoryStateSimulator()
+    conflicted = simulator.process(
+        base_case["initial_state"],
+        f"git merge {base_case['source_branch']}",
+    ).state
+    return {
+        **base_case,
+        "initial_state": conflicted,
+        "pre_merge_tip": "c1",
+        "solution_commands": ["git merge --abort"],
     }
 
 
@@ -623,6 +693,21 @@ def module_three_scenarios() -> list[dict[str, Any]]:
         conflicted_case(case, commit_message="Resolve release conflict")
         for case in hard_conflicts
     ]
+    accept_ours_easy = [
+        conflict_side_case(case, side="ours", commit_message="Keep current branch version")
+        for case in easy_conflicts[:2]
+    ]
+    accept_theirs_medium = [
+        conflict_side_case(case, side="theirs", commit_message="Accept incoming branch version")
+        for case in medium_conflicts
+    ]
+    accept_side_hard = [
+        conflict_side_case(hard_conflicts[0], side="ours", commit_message="Keep release branch version"),
+        conflict_side_case(hard_conflicts[1], side="theirs", commit_message="Accept incoming schema version"),
+    ]
+    merge_abort_easy = [merge_abort_case(case) for case in easy_conflicts[:2]]
+    merge_abort_medium = [merge_abort_case(case) for case in medium_conflicts]
+    merge_abort_hard = [merge_abort_case(case) for case in hard_conflicts]
 
     diagnostic_case_fields = {"solution_workspace_files", "solution_commands", "commit_message"}
     diagnostic_easy = [
@@ -910,6 +995,45 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                 "type": "commit_tree_excludes_tokens",
                 "branch": "main",
                 "tokens": ["<<<<<<<", "=======", ">>>>>>>"],
+            },
+        ],
+    }
+    accept_side_target = {
+        "head_branch": "main",
+        "staging_empty": True,
+        "working_tree_clean": True,
+        "conflict_free": True,
+        "rules": [
+            {
+                "type": "branch_tip_commit",
+                "branch": "main",
+                "changes_include": ["{{conflict_path}}"],
+                "parent_count_equals": 2,
+                "is_merge": True,
+            },
+            {
+                "type": "commit_tree_contains",
+                "branch": "main",
+                "tree": {"{{conflict_path}}": "{{side_content}}"},
+            },
+            {
+                "type": "commit_tree_excludes_tokens",
+                "branch": "main",
+                "tokens": ["<<<<<<<", "=======", ">>>>>>>"],
+            },
+        ],
+    }
+    abort_merge_target = {
+        "head_branch": "main",
+        "staging_empty": True,
+        "working_tree_clean": True,
+        "conflict_free": True,
+        "branch_points_to": {"main": "{{pre_merge_tip}}"},
+        "rules": [
+            {
+                "type": "operation_metadata_equals",
+                "key": "last_merge_aborted",
+                "value": True,
             },
         ],
     }
@@ -1212,6 +1336,83 @@ def module_three_scenarios() -> list[dict[str, Any]]:
             },
         ),
         scenario_dict(
+            lesson=MODULE_THREE_LESSONS[2],
+            slug="accept-conflict-side",
+            title="Accept one side of a conflict",
+            focus="git checkout conflict side",
+            summary="Resolve a conflict by intentionally choosing ours or theirs.",
+            explanation="Some conflicts should not be combined. These variants teach the supported subset: inspect the conflict, choose the requested side into the working tree, stage it, and complete the merge.",
+            primary=["git checkout", "git add", "git commit"],
+            supporting=["git status", "git diff --ours <path>", "git diff --theirs <path>", "git ls-files -u"],
+            concepts=["ours", "theirs", "HEAD", "incoming branch", "unmerged index"],
+            difficulties={
+                DIFFICULTY_EASY: diff(
+                    (3, 4),
+                    "Keep the current branch version of the conflicted file.",
+                    "Resolve by keeping ours, then stage and finish the merge.",
+                    [
+                        template(
+                            slug="accept-ours",
+                            kind="accept-ours",
+                            signature="module3.accept-side.easy.ours",
+                            cases=accept_ours_easy,
+                            initial_state="{{initial_state}}",
+                            target_rule=accept_side_target,
+                            solution="{{solution_commands}}",
+                            label="Keep ours for {{conflict_path}}",
+                        )
+                    ],
+                    required_attempts=2,
+                ),
+                DIFFICULTY_MEDIUM: diff(
+                    (3, 4),
+                    "Accept the incoming branch version of the conflicted file.",
+                    "Resolve by accepting theirs, then stage and finish the merge.",
+                    [
+                        template(
+                            slug="accept-theirs",
+                            kind="accept-theirs",
+                            signature="module3.accept-side.medium.theirs",
+                            cases=accept_theirs_medium,
+                            initial_state="{{initial_state}}",
+                            target_rule=accept_side_target,
+                            solution="{{solution_commands}}",
+                            label="Accept theirs for {{conflict_path}}",
+                        )
+                    ],
+                    required_attempts=2,
+                ),
+                DIFFICULTY_HARD: diff(
+                    (3, 4),
+                    "Choose the requested conflict side without combining both changes.",
+                    "Use the side named by the scenario, then stage and finish the merge.",
+                    [
+                        template(
+                            slug="accept-ours",
+                            kind="accept-ours",
+                            signature="module3.accept-side.hard.ours",
+                            cases=[accept_side_hard[0]],
+                            initial_state="{{initial_state}}",
+                            target_rule=accept_side_target,
+                            solution="{{solution_commands}}",
+                            label="Choose {{side_label}} for {{conflict_path}}",
+                        ),
+                        template(
+                            slug="accept-theirs",
+                            kind="accept-theirs",
+                            signature="module3.accept-side.hard.theirs",
+                            cases=[accept_side_hard[1]],
+                            initial_state="{{initial_state}}",
+                            target_rule=accept_side_target,
+                            solution="{{solution_commands}}",
+                            label="Choose {{side_label}} for {{conflict_path}}",
+                        )
+                    ],
+                    required_attempts=2,
+                ),
+            },
+        ),
+        scenario_dict(
             lesson=MODULE_THREE_LESSONS[3],
             slug="resolve-conflicts-manually",
             title="Resolve conflicts manually",
@@ -1282,13 +1483,80 @@ def module_three_scenarios() -> list[dict[str, Any]]:
             },
         ),
         scenario_dict(
+            lesson=MODULE_THREE_LESSONS[3],
+            slug="abort-conflicted-merge",
+            title="Abort a conflicted merge",
+            focus="git merge --abort",
+            summary="Cancel a merge conflict and restore the pre-merge branch state.",
+            explanation="Not every conflict should be resolved. These variants ask students to recognize that the correct outcome is to cancel the merge and leave no unmerged files behind.",
+            primary=["git merge"],
+            supporting=["git status", "git diff", "git ls-files -u"],
+            concepts=["merge abort", "pre-merge tip", "conflict cleanup"],
+            difficulties={
+                DIFFICULTY_EASY: diff(
+                    (1, 1),
+                    "Cancel the conflicted merge and return to the pre-merge state.",
+                    "Abort the merge without committing the incoming branch.",
+                    [
+                        template(
+                            slug="abort-merge",
+                            kind="merge-abort",
+                            signature="module3.merge-abort.easy",
+                            cases=merge_abort_easy,
+                            initial_state="{{initial_state}}",
+                            target_rule=abort_merge_target,
+                            solution="{{solution_commands}}",
+                            label="Abort merge for {{conflict_path}}",
+                        )
+                    ],
+                    required_attempts=2,
+                ),
+                DIFFICULTY_MEDIUM: diff(
+                    (1, 1),
+                    "Cancel the merge after confirming the conflict should not land.",
+                    "Return main to the pre-merge tip with no conflict state.",
+                    [
+                        template(
+                            slug="abort-merge",
+                            kind="merge-abort",
+                            signature="module3.merge-abort.medium",
+                            cases=merge_abort_medium,
+                            initial_state="{{initial_state}}",
+                            target_rule=abort_merge_target,
+                            solution="{{solution_commands}}",
+                            label="Cancel merge for {{conflict_path}}",
+                        )
+                    ],
+                    required_attempts=2,
+                ),
+                DIFFICULTY_HARD: diff(
+                    (1, 1),
+                    "Recognize a conflict that should be canceled instead of resolved.",
+                    "Restore the original branch tip and clear all merge state.",
+                    [
+                        template(
+                            slug="abort-merge",
+                            kind="merge-abort",
+                            signature="module3.merge-abort.hard",
+                            cases=merge_abort_hard,
+                            initial_state="{{initial_state}}",
+                            target_rule=abort_merge_target,
+                            solution="{{solution_commands}}",
+                            label="Restore pre-merge {{conflict_path}}",
+                        )
+                    ],
+                    required_attempts=2,
+                ),
+            },
+        ),
+        scenario_dict(
             lesson=MODULE_THREE_LESSONS[4],
             slug="use-merge-tool-workflow",
             title="Use a merge tool workflow",
             focus="git mergetool",
             summary="Configure a merge tool, use it to resolve conflicts, and complete the merge.",
-            explanation="The simulator models mergetool abstractly: the chosen tool writes the scenario's resolved content and stages the conflicted paths.",
-            primary=["git config", "git merge", "git mergetool", "git commit"],
+            explanation="The simulator records the merge tool launch and opens the workspace conflict editor. Students still choose and save the resolution, stage the file, and complete the merge.",
+            primary=["git config", "git merge", "git mergetool", "git add", "git commit"],
             supporting=["git status", "git diff --check", "git ls-files -u"],
             concepts=["merge tool", "LOCAL", "REMOTE", "BASE", "MERGED"],
             difficulties={
@@ -1311,7 +1579,16 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                                 "git config --global merge.tool {{merge_tool}}",
                                 "git merge {{source_branch}}",
                                 "git mergetool",
+                                "git add {{conflict_path}}",
                                 "git commit",
+                            ],
+                            workspace_files=[
+                                {
+                                    "mode": "write",
+                                    "path": "{{conflict_path}}",
+                                    "content": "{{resolution_content}}",
+                                    "after_command": "git mergetool",
+                                }
                             ],
                             label="Resolve {{conflict_path}} with {{merge_tool}}",
                         )
@@ -1337,7 +1614,16 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                                 "git config --global merge.tool {{merge_tool}}",
                                 "git merge {{source_branch}}",
                                 "git mergetool",
+                                "git add {{conflict_path}}",
                                 "git commit",
+                            ],
+                            workspace_files=[
+                                {
+                                    "mode": "write",
+                                    "path": "{{conflict_path}}",
+                                    "content": "{{resolution_content}}",
+                                    "after_command": "git mergetool",
+                                }
                             ],
                             label="Resolve {{conflict_path}} with {{merge_tool}}",
                         )
@@ -1363,7 +1649,16 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                                 "git config --global merge.tool {{merge_tool}}",
                                 "git merge {{source_branch}}",
                                 "git mergetool",
+                                "git add {{conflict_path}}",
                                 "git commit",
+                            ],
+                            workspace_files=[
+                                {
+                                    "mode": "write",
+                                    "path": "{{conflict_path}}",
+                                    "content": "{{resolution_content}}",
+                                    "after_command": "git mergetool",
+                                }
                             ],
                             label="Resolve {{conflict_path}} with {{merge_tool}}",
                         )
@@ -1573,8 +1868,17 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                                 "git diff main..{{source_branch}}",
                                 "git merge {{source_branch}}",
                                 "git mergetool --tool {{merge_tool}} {{conflict_path}}",
+                                "git add {{conflict_path}}",
                                 "git merge --continue",
                                 "git cherry-pick {{source_commit}}",
+                            ],
+                            workspace_files=[
+                                {
+                                    "mode": "write",
+                                    "path": "{{conflict_path}}",
+                                    "content": "{{resolution_content}}",
+                                    "after_command": "git mergetool --tool {{merge_tool}} {{conflict_path}}",
+                                }
                             ],
                             label="Complete {{project}} integration",
                         )
@@ -1600,8 +1904,17 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                                 "git merge {{source_branch}}",
                                 "git ls-files -u",
                                 "git mergetool --tool {{merge_tool}} {{conflict_path}}",
+                                "git add {{conflict_path}}",
                                 "git merge --continue",
                                 "git cherry-pick {{source_commit}}",
+                            ],
+                            workspace_files=[
+                                {
+                                    "mode": "write",
+                                    "path": "{{conflict_path}}",
+                                    "content": "{{resolution_content}}",
+                                    "after_command": "git mergetool --tool {{merge_tool}} {{conflict_path}}",
+                                }
                             ],
                             label="Integrate {{project}}",
                         )
@@ -1627,8 +1940,17 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                                 "git merge {{source_branch}}",
                                 "git diff --check {{conflict_path}}",
                                 "git mergetool --tool {{merge_tool}} {{conflict_path}}",
+                                "git add {{conflict_path}}",
                                 "git merge --continue",
                                 "git cherry-pick {{source_commit}}",
+                            ],
+                            workspace_files=[
+                                {
+                                    "mode": "write",
+                                    "path": "{{conflict_path}}",
+                                    "content": "{{resolution_content}}",
+                                    "after_command": "git mergetool --tool {{merge_tool}} {{conflict_path}}",
+                                }
                             ],
                             label="Review {{project}} integration",
                         )
@@ -1851,11 +2173,25 @@ class Command(BaseCommand):
                 "git ls-files -u",
             ],
             "manual conflict resolution": ["git status", "git diff", "git add src/auth.js", "git commit"],
+            "git checkout conflict side": [
+                "git status",
+                "git diff --ours src/auth.js",
+                "git diff --theirs src/auth.js",
+                "git checkout --ours src/auth.js",
+                "git add src/auth.js",
+                "git commit",
+            ],
+            "git merge --abort": [
+                "git status",
+                "git ls-files -u",
+                "git merge --abort",
+            ],
             "git mergetool": [
                 "git config --global merge.tool vscode",
                 "git merge feature/auth-timeout",
                 "git ls-files -u",
                 "git mergetool",
+                "git add src/auth.js",
                 "git commit",
                 "git status",
             ],
@@ -1876,6 +2212,7 @@ class Command(BaseCommand):
                 "git diff main..origin/feature/auth-timeout",
                 "git merge origin/feature/auth-timeout",
                 "git mergetool --tool vscode src/auth.js",
+                "git add src/auth.js",
                 "git merge --continue",
                 "git cherry-pick c3",
             ],
