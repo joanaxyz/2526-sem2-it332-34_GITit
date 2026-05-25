@@ -437,7 +437,6 @@ def _normalized_command_preview_config(scenario: ScenarioSkillFocus, config: dic
         "focus_label": config.get("focus_label") or scenario.focus,
         "command_title": config.get("command_title") or scenario.title,
         "commands": preview_commands,
-        "custom_pages": _normalize_preview_pages(config.get("custom_pages") or []),
         "command_refs": config.get("command_refs") or [],
         "sections": sections,
         "syntax_examples": config.get("syntax_examples")
@@ -522,22 +521,6 @@ def _resolved_preview_commands(
 
     preview_commands = _dedupe_preview_commands(preview_commands)
 
-    custom_pages = _normalize_preview_pages(config.get("custom_pages") or [])
-    if custom_pages:
-        preview_commands.append(
-            {
-                "id": "practice-context",
-                "key": "practice-context",
-                "title": config.get("custom_pages_title") or "Practice context",
-                "command": "",
-                "canonical_command": "",
-                "aliases": [],
-                "summary": config.get("purpose") or scenario.summary,
-                "tags": ["practice"],
-                "pages": custom_pages,
-                "demo_steps": [],
-            }
-        )
     return [command for command in preview_commands if command.get("pages")]
 
 
@@ -685,23 +668,21 @@ def _resolved_content_pages(
 ) -> list[dict]:
     section_pages = pages_from_command_sections(_normalize_command_sections(content.sections or []))
     pages = _normalize_preview_pages(section_pages or content.pages or [])
-    include_ids = _included_page_ids(config=config, ref=ref, key=content.key)
+    include_ids = _included_section_ids(config=config, ref=ref, key=content.key)
     if include_ids:
-        include_set = {str(page_id) for page_id in include_ids}
+        include_set = {str(section_id) for section_id in include_ids}
         pages = [page for page in pages if str(page.get("id")) in include_set]
 
-    overrides = _page_override_map(_command_page_overrides(config=config, ref=ref, key=content.key))
+    overrides = _content_override_map(_command_section_overrides(config=config, ref=ref, key=content.key))
     if overrides:
-        pages = [_merge_page_override(page, overrides.get(str(page.get("id")))) for page in pages]
+        pages = [_merge_content_override(page, overrides.get(str(page.get("id")))) for page in pages]
 
-    if ref.get("replace_pages"):
+    if ref.get("replace_content") or ref.get("replace_pages"):
         pages = _normalize_preview_pages(ref.get("pages") or [])
 
-    prepend_pages = _normalize_preview_pages(ref.get("prepend_pages") or [])
-    append_pages = _normalize_preview_pages(
-        ref.get("append_pages") or ref.get("custom_pages") or []
-    )
-    return [*prepend_pages, *pages, *append_pages]
+    prepend_content = _normalize_preview_pages(ref.get("prepend_content") or ref.get("prepend_pages") or [])
+    append_content = _normalize_preview_pages(ref.get("append_content") or ref.get("append_pages") or [])
+    return [*prepend_content, *pages, *append_content]
 
 
 def _resolved_content_sections(
@@ -711,7 +692,7 @@ def _resolved_content_sections(
     config: dict,
 ) -> list[dict]:
     sections = _normalize_command_sections(content.sections or [])
-    include_ids = _included_page_ids(config=config, ref=ref, key=content.key)
+    include_ids = _included_section_ids(config=config, ref=ref, key=content.key)
     if include_ids:
         include_set = {str(section_id) for section_id in include_ids}
         sections = [section for section in sections if str(section.get("id")) in include_set]
@@ -723,9 +704,14 @@ def _resolved_content_sections(
     return [*sections, *append_sections]
 
 
-def _included_page_ids(*, config: dict, ref: dict, key: str) -> list[str]:
+def _included_section_ids(*, config: dict, ref: dict, key: str) -> list[str]:
+    # The page-named aliases keep existing seeded rows readable until they are refreshed.
     raw = (
-        ref.get("include_page_ids")
+        ref.get("include_section_ids")
+        or ref.get("included_section_ids")
+        or config.get("include_section_ids")
+        or config.get("included_section_ids")
+        or ref.get("include_page_ids")
         or ref.get("included_page_ids")
         or config.get("include_page_ids")
         or config.get("included_page_ids")
@@ -735,17 +721,18 @@ def _included_page_ids(*, config: dict, ref: dict, key: str) -> list[str]:
     return raw if isinstance(raw, list) else []
 
 
-def _command_page_overrides(*, config: dict, ref: dict, key: str):
-    raw = ref.get("page_overrides")
+def _command_section_overrides(*, config: dict, ref: dict, key: str):
+    # The page-named aliases keep existing seeded rows readable until they are refreshed.
+    raw = ref.get("section_overrides") or ref.get("page_overrides")
     if raw:
         return raw
-    raw = config.get("page_overrides") or {}
+    raw = config.get("section_overrides") or config.get("page_overrides") or {}
     if isinstance(raw, dict) and key in raw:
         return raw[key]
     return raw
 
 
-def _page_override_map(raw) -> dict[str, dict]:
+def _content_override_map(raw) -> dict[str, dict]:
     if isinstance(raw, list):
         return {
             str(item.get("id")): item
@@ -760,7 +747,7 @@ def _page_override_map(raw) -> dict[str, dict]:
     return {}
 
 
-def _merge_page_override(page: dict, override: dict | None) -> dict:
+def _merge_content_override(page: dict, override: dict | None) -> dict:
     if not override:
         return page
     merged = {**page, **override}
@@ -852,7 +839,7 @@ def _normalize_command_sections(value) -> list[dict]:
     sections = []
     allowed_types = {
         "overview",
-        "form",
+        "syntax",
         "option",
         "argument",
         "effect",
@@ -863,6 +850,8 @@ def _normalize_command_sections(value) -> list[dict]:
         if not isinstance(section, dict):
             continue
         section_type = section.get("type") or "overview"
+        if section_type == "form":
+            section_type = "syntax"
         if section_type not in allowed_types:
             section_type = "overview"
         title = section.get("title") or f"Section {index}"
@@ -904,6 +893,8 @@ def _normalize_preview_pages(value) -> list[dict]:
         }
         normalized["id"] = normalized.get("id") or f"page-{index}"
         normalized["title"] = title
+        if normalized.get("section_type") == "form":
+            normalized["section_type"] = "syntax"
         normalized["blocks"] = _normalize_preview_blocks(page.get("blocks") or [])
         pages.append(normalized)
     return pages
@@ -937,7 +928,7 @@ def _fallback_command_pages(
             "title": "Overview",
             "blocks": [
                 {"type": "paragraph", "body": summary},
-                {"type": "command", "title": "Command forms", "items": syntax},
+                {"type": "command", "title": "Command syntax", "items": syntax},
             ],
         },
         {

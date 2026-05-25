@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { RepositorySnapshot, TerminalLine } from '@/features/practice/types'
 import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
-import { PreviewCommandContent } from '@/features/scenarios/components/PreviewContentPage'
+import { PreviewCommandContent } from '@/features/scenarios/components/PreviewCommandContent'
 import { PreviewDemoPanel } from '@/features/scenarios/components/PreviewDemoPanel'
 import { PreviewNavigator } from '@/features/scenarios/components/PreviewNavigator'
 import {

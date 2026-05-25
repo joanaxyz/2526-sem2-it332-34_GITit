@@ -5,12 +5,6 @@ from dataclasses import dataclass
 
 from simulator.commands import command_handlers
 from simulator.commands.base import SimulatorCommandError
-from simulator.file_commands import (
-    FileCommandParseError,
-    FileCommandParser,
-    NonFileCommandError,
-    ParsedFileCommand,
-)
 from simulator.git_commands import (
     GitCommandParseError,
     GitCommandParser,
@@ -19,10 +13,10 @@ from simulator.git_commands import (
     ParsedGitCommand,
 )
 from simulator.intents import CommandIntentMapper
-from simulator.ignore import refresh_ignored_paths
 from simulator.output import GitLikeOutputFormatter
 from simulator.output.errors import not_a_repository, unsupported_command
 from simulator.state import RepositoryStateNormalizer
+
 
 @dataclass(frozen=True)
 class SimulatorResult:
@@ -38,10 +32,6 @@ class SimulatorResult:
 
 
 def normalize_command(command: str) -> str:
-    try:
-        return FileCommandParser().parse(command).normalized_text
-    except (FileCommandParseError, NonFileCommandError):
-        pass
     try:
         return GitCommandParser().parse(command).normalized_text
     except (GitCommandParseError, NonGitCommandError):
@@ -89,16 +79,6 @@ class RepositoryStateSimulator:
 
     def process(self, state: dict, command: str) -> SimulatorResult:
         try:
-            parsed_file = FileCommandParser().parse(command)
-            return self.process_file_parsed(state, parsed_file)
-        except NonFileCommandError:
-            pass
-        except FileCommandParseError as exc:
-            return SimulatorResult(
-                False, state, str(exc), normalize_command(command), stderr=str(exc), exit_code=129
-            )
-
-        try:
             parsed = GitCommandParser().parse(command)
         except GitCommandParseError as exc:
             return SimulatorResult(
@@ -111,46 +91,6 @@ class RepositoryStateSimulator:
             )
 
         return self.process_parsed(state, parsed)
-
-    def process_file_parsed(self, state: dict, parsed: ParsedFileCommand) -> SimulatorResult:
-        next_state = self.clone_state(state)
-        self._ensure_state_shape(next_state)
-        try:
-            touched_paths: list[str] = []
-            written_paths: list[str] = []
-            if parsed.command_name == "touch":
-                for path in parsed.paths:
-                    self._touch_file(next_state, path)
-                    touched_paths.append(path)
-            elif parsed.path is not None:
-                self._write_file(next_state, parsed.path, parsed.content, append=parsed.append)
-                written_paths.append(parsed.path)
-            else:
-                raise SimulatorCommandError("fatal: unsupported file operation", exit_code=129)
-            refresh_ignored_paths(self, next_state)
-            self._set_operation_metadata(
-                next_state,
-                last_touched_paths=touched_paths,
-                last_file_written_paths=written_paths,
-            )
-        except SimulatorCommandError as exc:
-            return SimulatorResult(
-                False,
-                state,
-                str(exc),
-                parsed.normalized_text,
-                stderr=str(exc),
-                exit_code=exc.exit_code,
-                command_family="file",
-            )
-        return SimulatorResult(
-            True,
-            next_state,
-            "",
-            parsed.normalized_text,
-            exit_code=0,
-            command_family="file",
-        )
 
     def process_parsed(
         self,
@@ -253,23 +193,6 @@ class RepositoryStateSimulator:
         self.normalizer.ensure_shape(state)
         self.normalizer.normalize_commits(state)
         self.normalizer.normalize_head(state)
-
-    def _touch_file(self, state: dict, path: str) -> None:
-        working_tree = state.setdefault("working_tree", {})
-        if path in working_tree or path in self._head_tree(state):
-            return
-        working_tree[path] = {"status": "untracked", "content": ""}
-
-    def _write_file(self, state: dict, path: str, content: str, *, append: bool) -> None:
-        working_tree = state.setdefault("working_tree", {})
-        head_tree = self._head_tree(state)
-        current = working_tree.get(path, head_tree.get(path, ""))
-        current_content = self.normalizer.entry_content(current)
-        if current_content is None:
-            current_content = ""
-        next_content = f"{current_content}{content}" if append else content
-        status = "modified" if path in head_tree else "untracked"
-        working_tree[path] = {"status": status, "content": next_content}
 
     def _head_branch(self, state: dict) -> str | None:
         head = state.get("head", {})

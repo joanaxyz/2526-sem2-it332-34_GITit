@@ -149,6 +149,8 @@ class GitCommandParser:
             return self._parse_clone_tail(tokens)
         if subcommand == "log":
             return self._parse_log_tail(tokens)
+        if subcommand == "mergetool":
+            return self._parse_mergetool_tail(tokens)
         return self._parse_generic_tail(tokens)
 
     def _append_option(
@@ -375,6 +377,48 @@ class GitCommandParser:
             normalized,
         )
 
+    def _parse_mergetool_tail(
+        self,
+        tokens: list[str],
+    ) -> tuple[dict[str, tuple[str | bool, ...]], list[str], list[str], str | None, list[str]]:
+        options: dict[str, list[str | bool]] = {}
+        args: list[str] = []
+        pathspecs: list[str] = []
+        normalized: list[str] = []
+        index = 0
+        while index < len(tokens):
+            token = tokens[index]
+            if token == "--tool":
+                if index + 1 >= len(tokens):
+                    raise GitCommandParseError("error: option `--tool` requires a value.")
+                value = tokens[index + 1]
+                self._append_option(options, "--tool", value)
+                normalized.extend(["--tool", value])
+                index += 2
+                continue
+            if token.startswith("--tool="):
+                value = token.split("=", 1)[1]
+                self._append_option(options, "--tool", value)
+                normalized.extend(["--tool", value])
+                index += 1
+                continue
+            if token.startswith("-"):
+                self._append_option(options, token)
+                normalized.append(token)
+                index += 1
+                continue
+            args.append(token)
+            pathspecs.append(token)
+            normalized.append(token)
+            index += 1
+        return (
+            {key: tuple(value) for key, value in options.items()},
+            args,
+            pathspecs,
+            None,
+            normalized,
+        )
+
     def _parse_generic_tail(
         self,
         tokens: list[str],
@@ -491,7 +535,15 @@ class GitCommandRegistry:
             ),
             "diff": GitCommandSpec(
                 "diff",
-                frozenset({"--staged", "--cached", "--name-only"}),
+                frozenset({
+                    "--staged",
+                    "--cached",
+                    "--name-only",
+                    "--ours",
+                    "--theirs",
+                    "--base",
+                    "--check",
+                }),
                 diagnostic=True,
                 counted=False,
                 executor="teaching_state",
@@ -563,11 +615,51 @@ class GitCommandRegistry:
             ),
             "ls-files": GitCommandSpec(
                 "ls-files",
-                frozenset(),
+                frozenset({"-u", "--unmerged"}),
                 diagnostic=True,
                 counted=False,
                 executor="teaching_state",
                 parser_validation=_validate_no_path_limit,
+            ),
+            "merge": GitCommandSpec(
+                "merge",
+                frozenset({"--abort", "--continue"}),
+                diagnostic=False,
+                counted=True,
+                executor="teaching_state",
+                parser_validation=_validate_merge,
+            ),
+            "mergetool": GitCommandSpec(
+                "mergetool",
+                frozenset({"--tool"}),
+                diagnostic=False,
+                counted=True,
+                executor="teaching_state",
+                parser_validation=_validate_mergetool,
+            ),
+            "config": GitCommandSpec(
+                "config",
+                frozenset({"--global"}),
+                diagnostic=False,
+                counted=True,
+                executor="teaching_state",
+                parser_validation=_validate_config,
+            ),
+            "fetch": GitCommandSpec(
+                "fetch",
+                frozenset(),
+                diagnostic=False,
+                counted=True,
+                executor="teaching_state",
+                parser_validation=_validate_fetch,
+            ),
+            "cherry-pick": GitCommandSpec(
+                "cherry-pick",
+                frozenset({"--no-commit", "-n", "--abort"}),
+                diagnostic=False,
+                counted=True,
+                executor="teaching_state",
+                parser_validation=_validate_cherry_pick,
             ),
         }
 
@@ -671,6 +763,21 @@ def _validate_commit(parsed: ParsedGitCommand) -> str | None:
 
 
 def _validate_diff(parsed: ParsedGitCommand) -> str | None:
+    conflict_sides = [option for option in ("--ours", "--theirs", "--base") if parsed.has_option(option)]
+    if len(conflict_sides) > 1:
+        return "fatal: use only one conflict side option"
+    if conflict_sides and (parsed.has_option("--staged") or parsed.has_option("--cached")):
+        return "fatal: conflict side options cannot be combined with --staged"
+    if conflict_sides and len(parsed.pathspecs) > 1:
+        return "fatal: only one pathspec is supported for conflict-side diff"
+    if parsed.has_option("--check") and len(parsed.pathspecs) > 1:
+        return "fatal: only one pathspec is supported with --check"
+    if len(parsed.args) == 1 and ".." in parsed.args[0]:
+        if parsed.has_option("--staged") or parsed.has_option("--cached"):
+            return "fatal: --staged cannot be combined with a branch range"
+        if conflict_sides or parsed.has_option("--check"):
+            return "fatal: conflict diff options cannot be combined with a branch range"
+        return None
     non_path_args = [arg for arg in parsed.args if arg != "HEAD"]
     if "HEAD" in parsed.args and parsed.args[0] != "HEAD":
         return "fatal: ambiguous argument 'HEAD'"
@@ -727,6 +834,57 @@ def _validate_check_ignore(parsed: ParsedGitCommand) -> str | None:
         return "usage: git check-ignore -v <path>"
     if len(parsed.pathspecs) != 1:
         return "usage: git check-ignore -v <path>"
+    return None
+
+
+def _validate_merge(parsed: ParsedGitCommand) -> str | None:
+    if parsed.has_option("--abort") and parsed.has_option("--continue"):
+        return "fatal: --abort and --continue cannot be used together"
+    if parsed.has_option("--abort"):
+        if parsed.args:
+            return "fatal: --abort does not take a branch name"
+        return None
+    if parsed.has_option("--continue"):
+        if parsed.args:
+            return "fatal: --continue does not take a branch name"
+        return None
+    if len(parsed.args) != 1:
+        return "usage: git merge <branch>"
+    return None
+
+
+def _validate_mergetool(parsed: ParsedGitCommand) -> str | None:
+    tool_values = parsed.options.get("--tool", ())
+    if len(tool_values) > 1:
+        return "error: only one merge tool may be specified"
+    if any(value in ("", True) for value in tool_values):
+        return "error: option `--tool` requires a value."
+    return None
+
+
+def _validate_config(parsed: ParsedGitCommand) -> str | None:
+    if not parsed.has_option("--global"):
+        return "error: only --global git config is supported in this simulator"
+    if len(parsed.args) != 2:
+        return "usage: git config --global <key> <value>"
+    return None
+
+
+def _validate_fetch(parsed: ParsedGitCommand) -> str | None:
+    if len(parsed.args) > 1:
+        return "usage: git fetch [<remote>]"
+    return None
+
+
+def _validate_cherry_pick(parsed: ParsedGitCommand) -> str | None:
+    if parsed.has_option("--abort"):
+        if parsed.args or parsed.has_option("--no-commit") or parsed.has_option("-n"):
+            return "fatal: --abort cannot be combined with commit arguments"
+        return None
+    if len(parsed.args) != 1:
+        return "usage: git cherry-pick [--no-commit] <commit>"
+    if parsed.has_option("--no-commit") and parsed.has_option("-n"):
+        return "error: use only one no-commit option"
     return None
 
 

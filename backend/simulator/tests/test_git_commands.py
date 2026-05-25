@@ -9,6 +9,7 @@ from simulator.git_commands import (
 )
 from simulator.intents import CommandIntentMapper
 from simulator.services import RepositoryStateSimulator
+from simulator.workspace_files import WorkspaceFileStateService
 
 
 def test_parser_handles_quoted_commit_message_and_normalizes_alias():
@@ -187,13 +188,43 @@ def test_parser_and_registry_support_module_one_action_forms(command):
     "command",
     [
         "git fetch",
+        "git fetch origin",
+        "git merge feature/app",
+        "git merge --abort",
+        "git config --global merge.tool vscode",
+        "git config --global mergetool.vscode.cmd \"code --wait $MERGED\"",
+        "git mergetool",
+        "git mergetool --tool vimdiff",
+        "git cherry-pick c1",
+        "git cherry-pick --no-commit c1",
+        "git cherry-pick -n c1",
+        "git cherry-pick --abort",
+        "git diff main..feature",
+    ],
+)
+def test_parser_and_registry_support_module_three_forms(command):
+    parsed = GitCommandParser().parse(command)
+    registry = GitCommandRegistry()
+    spec = registry.get(parsed.subcommand)
+
+    assert spec is not None
+    assert spec.validate(parsed) is None
+    if parsed.subcommand == "diff":
+        assert spec.is_diagnostic(parsed) is True
+        assert spec.is_counted(parsed) is False
+    else:
+        assert spec.is_diagnostic(parsed) is False
+        assert spec.is_counted(parsed) is True
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
         "git pull",
         "git push",
-        "git merge feature",
         "git rebase main",
         "git stash",
         "git tag v1",
-        "git cherry-pick c1",
         "git revert c1",
         "git branch feature",
         "git branch -d stale",
@@ -331,7 +362,7 @@ def test_engine_mutates_state_for_supported_commit_with_quoted_message():
     assert committed.state["branches"]["main"] == "c1"
 
 
-def test_engine_supports_safe_file_creation_and_gitignore_refresh():
+def test_workspace_file_creation_refreshes_gitignore_status_before_git_commands():
     state = {
         "commits": [{"id": "c0", "message": "Base", "parents": [], "tree": {"README.md": "v1"}}],
         "branches": {"main": "c0"},
@@ -344,15 +375,18 @@ def test_engine_supports_safe_file_creation_and_gitignore_refresh():
     }
     engine = GitCommandEngine()
 
-    written = engine.process(state, 'printf "node_modules/\\n.env*\\n" > .gitignore')
-    status = engine.process(written.state, "git status --short --ignored")
-    staged = engine.process(written.state, "git add .gitignore")
+    written = WorkspaceFileStateService().create_file(
+        state,
+        path=".gitignore",
+        content="node_modules/\n.env*\n",
+    )
+    status = engine.process(written, "git status --short --ignored")
+    staged = engine.process(written, "git add .gitignore")
     committed = engine.process(staged.state, 'git commit -m "Add ignore rules"')
 
-    assert written.processed is True
-    assert written.state["working_tree"][".gitignore"]["content"] == "node_modules/\n.env*\n"
-    assert written.state["working_tree"][".env"]["status"] == "ignored"
-    assert written.state["working_tree"]["node_modules/pkg/index.js"]["status"] == "ignored"
+    assert written["working_tree"][".gitignore"]["content"] == "node_modules/\n.env*\n"
+    assert written["working_tree"][".env"]["status"] == "ignored"
+    assert written["working_tree"]["node_modules/pkg/index.js"]["status"] == "ignored"
     assert "!! .env" in status.output
     assert committed.state["commits"][-1]["tree"][".gitignore"] == "node_modules/\n.env*\n"
     assert ".env" not in committed.state["commits"][-1]["tree"]
@@ -372,3 +406,43 @@ def test_engine_marks_diagnostics_non_mutating():
     assert result.processed is True
     assert result.diagnostic is True
     assert result.state == RepositoryStateSimulator().normalize_state(state)
+
+
+def test_conflict_diagnostics_and_merge_continue_are_supported():
+    simulator = RepositoryStateSimulator()
+    state = {
+        "commits": [
+            {"id": "c0", "message": "Base", "parents": [], "tree": {"src/auth.js": "timeout=3000"}},
+            {"id": "c1", "message": "Main", "parents": ["c0"], "tree": {"src/auth.js": "timeout=5000"}},
+            {"id": "c2", "message": "Feature", "parents": ["c0"], "tree": {"src/auth.js": "timeout=2500"}},
+        ],
+        "branches": {"main": "c1", "feature/auth-timeout": "c2"},
+        "head": {"type": "branch", "name": "main"},
+        "staging": {},
+        "working_tree": {},
+        "conflicts": [],
+        "conflict_on_merge": True,
+        "conflict_files": ["src/auth.js"],
+        "merge_resolutions": {"src/auth.js": "timeout=5000\nretry=enabled"},
+    }
+    engine = GitCommandEngine()
+
+    conflicted = engine.process(state, "git merge feature/auth-timeout").state
+    ours = engine.process(conflicted, "git diff --ours src/auth.js")
+    theirs = engine.process(conflicted, "git diff --theirs src/auth.js")
+    base = engine.process(conflicted, "git diff --base src/auth.js")
+    marker_check = engine.process(conflicted, "git diff --check src/auth.js")
+    unmerged = engine.process(conflicted, "git ls-files -u")
+    resolved = engine.process(conflicted, "git mergetool --tool vscode src/auth.js").state
+    completed = engine.process(resolved, "git merge --continue")
+
+    assert ours.diagnostic is True
+    assert "+timeout=5000" in ours.output
+    assert "+timeout=2500" in theirs.output
+    assert "+timeout=3000" in base.output
+    assert "leftover conflict marker" in marker_check.output
+    assert "src/auth.js" in unmerged.output
+    assert completed.processed is True
+    assert completed.state["conflicts"] == []
+    assert completed.state["branches"]["main"] == "c3"
+    assert completed.state["commits"][-1]["is_merge"] is True

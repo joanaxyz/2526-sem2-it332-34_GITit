@@ -656,6 +656,55 @@ def test_snapshot_visible_tree_includes_clean_committed_and_changed_files():
     assert snapshot["project_tree"]["notes.md"]["status"] == "untracked"
 
 
+def test_module_three_commands_merge_mergetool_fetch_and_cherry_pick():
+    simulator = RepositoryStateSimulator()
+    state = simulator.normalize_state(
+        {
+            "commits": [
+                {"id": "c0", "message": "Base", "parents": [], "tree": {"app.py": "base"}},
+                {"id": "c1", "message": "Main", "parents": ["c0"], "tree": {"app.py": "main"}},
+                {
+                    "id": "c2",
+                    "message": "Feature",
+                    "parents": ["c0"],
+                    "tree": {"app.py": "feature"},
+                },
+                {
+                    "id": "c3",
+                    "message": "Hotfix",
+                    "parents": ["c1"],
+                    "tree": {"app.py": "main", "fix.py": "hotfix-token"},
+                },
+            ],
+            "branches": {"main": "c1", "feature": "c2", "hotfix": "c3"},
+            "head": {"type": "branch", "name": "main"},
+            "working_tree": {},
+            "staging": {},
+            "conflicts": [],
+            "conflict_on_merge": True,
+            "conflict_files": ["app.py"],
+            "merge_resolutions": {"app.py": "resolved"},
+            "remotes": {"origin": "https://example.test/app.git"},
+            "remote_updates": {"origin/main": "c3"},
+        }
+    )
+
+    fetched = simulator.process(state, "git fetch origin").state
+    configured = simulator.process(fetched, "git config --global merge.tool vscode").state
+    conflicted = simulator.process(configured, "git merge feature").state
+    resolved = simulator.process(conflicted, "git mergetool").state
+    merged = simulator.process(resolved, "git commit").state
+    picked = simulator.process(merged, "git cherry-pick c3").state
+
+    assert fetched["operation_metadata"]["remote_tracking_updated"] is True
+    assert configured["operation_metadata"]["configured_merge_tool"] == "vscode"
+    assert conflicted["conflicts"] == ["app.py"]
+    assert resolved["staging"]["app.py"]["content"] == "resolved"
+    assert merged["commits"][-1]["parents"] == ["c1", "c2"]
+    assert picked["commits"][-1]["message"] == "Hotfix"
+    assert picked["commits"][-1]["tree"]["fix.py"] == "hotfix-token"
+
+
 def test_unsupported_advanced_commands_are_rejected_without_mutation():
     simulator = RepositoryStateSimulator()
     state = simulator.normalize_state(
@@ -673,13 +722,10 @@ def test_unsupported_advanced_commands_are_rejected_without_mutation():
     )
 
     unsupported_advanced_commands = [
-        "git fetch origin",
         "git pull",
         "git push",
-        "git merge feature",
         "git stash",
         "git revert c0",
-        "git cherry-pick c0",
     ]
 
     for command in unsupported_advanced_commands:

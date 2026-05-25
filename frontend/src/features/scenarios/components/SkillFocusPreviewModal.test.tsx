@@ -85,13 +85,13 @@ const scenario: ScenarioSkillFocus = {
             ],
           },
           {
-            id: 'status-form',
+            id: 'status-syntax',
             title: 'Details',
             heading: 'Status behavior',
             eyebrow: 'git status',
-            section_type: 'form',
+            section_type: 'syntax',
             blocks: [
-              { type: 'command', title: 'Command forms', items: ['git status'] },
+              { type: 'command', title: 'Command syntax', items: ['git status'] },
               { type: 'warning', title: 'Common mistake', body: 'Do not treat status as a fix; it only reports state.' },
             ],
           },

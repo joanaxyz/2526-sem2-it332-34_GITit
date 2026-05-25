@@ -160,6 +160,16 @@ class CommandIntentMapper:
         staged = parsed.has_option("--staged") or parsed.has_option("--cached")
         head = bool(parsed.args and parsed.args[0] == "HEAD")
         name_only = parsed.has_option("--name-only")
+        check = parsed.has_option("--check")
+        conflict_side = next(
+            (
+                option.removeprefix("--")
+                for option in ("--ours", "--theirs", "--base")
+                if parsed.has_option(option)
+            ),
+            None,
+        )
+        branch_range = parsed.args[0] if len(parsed.args) == 1 and ".." in parsed.args[0] else None
         paths = tuple(arg for arg in parsed.pathspecs if arg != "HEAD")
         return CommandIntent(
             command="diff",
@@ -170,12 +180,21 @@ class CommandIntentMapper:
                         "staged": staged,
                         "head": head,
                         "name_only": name_only,
-                        "paths": paths,
+                        "check": check,
+                        "conflict_side": conflict_side,
+                        "paths": () if branch_range else paths,
+                        "range": branch_range,
                     },
                 ),
             ),
             diagnostic_metadata=(
-                "inspected_head_diff"
+                "inspected_conflict_marker_check"
+                if check
+                else "inspected_conflict_side"
+                if conflict_side
+                else "inspected_range_diff"
+                if branch_range
+                else "inspected_head_diff"
                 if head
                 else "inspected_staged_diff"
                 if staged
@@ -189,6 +208,77 @@ class CommandIntentMapper:
                 else "staged"
                 if staged
                 else "default"
+            ),
+        )
+
+    def _map_merge(self, parsed: ParsedGitCommand) -> CommandIntent:
+        if parsed.has_option("--abort"):
+            return CommandIntent(
+                command="merge",
+                operations=(CommandOperation("AbortMerge", {}),),
+            )
+        if parsed.has_option("--continue"):
+            return CommandIntent(
+                command="merge",
+                operations=(CommandOperation("ContinueMerge", {}),),
+            )
+        return CommandIntent(
+            command="merge",
+            operations=(CommandOperation("MergeBranch", {"branch": parsed.args[0]}),),
+        )
+
+    def _map_mergetool(self, parsed: ParsedGitCommand) -> CommandIntent:
+        tool_values = parsed.options.get("--tool", ())
+        return CommandIntent(
+            command="mergetool",
+            operations=(
+                CommandOperation(
+                    "RunMergeTool",
+                    {
+                        "tool": str(tool_values[-1]) if tool_values else None,
+                        "paths": parsed.pathspecs,
+                    },
+                ),
+            ),
+        )
+
+    def _map_config(self, parsed: ParsedGitCommand) -> CommandIntent:
+        return CommandIntent(
+            command="config",
+            operations=(
+                CommandOperation(
+                    "SetConfig",
+                    {
+                        "scope": "global" if parsed.has_option("--global") else "local",
+                        "key": parsed.args[0],
+                        "value": parsed.args[1],
+                    },
+                ),
+            ),
+        )
+
+    def _map_fetch(self, parsed: ParsedGitCommand) -> CommandIntent:
+        return CommandIntent(
+            command="fetch",
+            operations=(CommandOperation("FetchRemote", {"remote": parsed.args[0] if parsed.args else "origin"}),),
+        )
+
+    def _map_cherry_pick(self, parsed: ParsedGitCommand) -> CommandIntent:
+        if parsed.has_option("--abort"):
+            return CommandIntent(
+                command="cherry-pick",
+                operations=(CommandOperation("AbortCherryPick", {}),),
+            )
+        return CommandIntent(
+            command="cherry-pick",
+            operations=(
+                CommandOperation(
+                    "CherryPickCommit",
+                    {
+                        "commit": parsed.args[0],
+                        "no_commit": parsed.has_option("--no-commit") or parsed.has_option("-n"),
+                    },
+                ),
             ),
         )
 
@@ -314,6 +404,15 @@ class CommandIntentMapper:
     def _map_ls_files(self, parsed: ParsedGitCommand) -> CommandIntent:
         return CommandIntent(
             command="ls-files",
-            operations=(CommandOperation("InspectTrackedFiles", {}),),
-            diagnostic_metadata=("inspected_ls_files",),
+            operations=(
+                CommandOperation(
+                    "InspectTrackedFiles",
+                    {"unmerged": parsed.has_option("-u") or parsed.has_option("--unmerged")},
+                ),
+            ),
+            diagnostic_metadata=(
+                "inspected_unmerged_index"
+                if parsed.has_option("-u") or parsed.has_option("--unmerged")
+                else "inspected_ls_files",
+            ),
         )

@@ -1,4 +1,4 @@
-import { Eye, GitPullRequest, ListChecks } from 'lucide-react'
+import { Eye, GitPullRequest } from 'lucide-react'
 import { useState } from 'react'
 
 import { DifficultyActionButton } from '@/features/scenarios/components/DifficultyActionButton'
@@ -22,7 +22,6 @@ export function ScenarioSkillFocusCard({
   onPreview: (scenario: ScenarioSkillFocus) => void
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const focusValue = scenario.primary_focus_commands.length ? scenario.primary_focus_commands.join(', ') : scenario.focus
   const panelId = `skill-panel-${scenario.id}`
   const isPreviewOnly = scenario.difficulties.length === 0
   const cardLabel = isPreviewOnly ? 'Command preview' : `Scenario ${scenarioNumber}`

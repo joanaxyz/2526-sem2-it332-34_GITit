@@ -40,7 +40,12 @@ from scenarios.services import (
     CommandProcessingService,
     ScenarioSessionService,
 )
-from scenarios.views import CommandSubmitAPIView, ScenarioRetryAPIView, SkillFocusDemoCommandAPIView
+from scenarios.views import (
+    CommandSubmitAPIView,
+    ScenarioRetryAPIView,
+    SkillFocusDemoCommandAPIView,
+    WorkspaceFileCreateAPIView,
+)
 
 
 @pytest.fixture()
@@ -170,6 +175,74 @@ def test_command_submit_response_uses_lightweight_in_progress_payload(student):
     assert "scaffolding" not in payload
     assert "next_difficulty" not in payload
     assert "completion" not in payload
+
+
+def test_workspace_file_create_response_updates_project_tree_without_counting(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="stage-and-commit-basic-workflow",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="module_card",
+    )
+    request = APIRequestFactory().post(
+        f"/api/scenarios/sessions/{session.id}/files/",
+        {"path": "src/generated.py", "content": "print('hello')\n"},
+        format="json",
+    )
+    force_authenticate(request, user=student)
+
+    response = WorkspaceFileCreateAPIView.as_view()(request, session_id=session.id)
+
+    assert response.status_code == 200
+    session.refresh_from_db()
+    assert session.repository_state["working_tree"]["src/generated.py"] == {
+        "status": "untracked",
+        "content": "print('hello')\n",
+    }
+    assert response.data["repository_state"]["project_tree"]["src/generated.py"] == {
+        "status": "untracked",
+        "source": "working_tree",
+        "content": "print('hello')\n",
+    }
+    assert response.data["counts"]["total_attempts"] == 0
+    assert response.data["steps"] == []
+
+
+def test_workspace_file_write_response_updates_project_tree_without_counting(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="stage-and-commit-basic-workflow",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="module_card",
+    )
+    request = APIRequestFactory().patch(
+        f"/api/scenarios/sessions/{session.id}/files/",
+        {"path": "README.md", "content": "readme-v2\n"},
+        format="json",
+    )
+    force_authenticate(request, user=student)
+
+    response = WorkspaceFileCreateAPIView.as_view()(request, session_id=session.id)
+
+    assert response.status_code == 200
+    session.refresh_from_db()
+    assert session.repository_state["working_tree"]["README.md"] == {
+        "status": "modified",
+        "content": "readme-v2\n",
+    }
+    assert response.data["repository_state"]["project_tree"]["README.md"] == {
+        "status": "modified",
+        "source": "working_tree",
+        "content": "readme-v2\n",
+    }
+    assert response.data["counts"]["total_attempts"] == 0
+    assert response.data["steps"] == []
 
 
 def test_command_submit_in_progress_query_count_is_bounded(student):
@@ -813,10 +886,9 @@ def test_command_preview_resolves_reusable_command_content(student):
     assert status_command["base_command"] == "git status"
     assert status_command["command"] == "git status"
     assert status_command["sections"][0]["type"] == "overview"
-    assert status_command["sections"][1]["type"] == "form"
+    assert status_command["sections"][1]["type"] == "syntax"
     assert status_command["pages"][0]["blocks"][0]["type"] == "paragraph"
     assert status_command["demo_steps"][0]["repository_state"]
-    assert any(command["key"] == "practice-context" for command in preview["commands"])
 
 
 def test_command_preview_applies_scenario_page_customization(student):
@@ -827,8 +899,8 @@ def test_command_preview_applies_scenario_page_customization(student):
             {
                 "key": "git-status",
                 "command": "git status",
-                "include_page_ids": ["overview"],
-                "append_pages": [
+                "include_section_ids": ["overview"],
+                "append_content": [
                     {
                         "id": "scenario-note",
                         "title": "Scenario note",
@@ -842,7 +914,7 @@ def test_command_preview_applies_scenario_page_customization(student):
                 ],
             }
         ],
-        "page_overrides": {
+        "section_overrides": {
             "git-status": {
                 "overview": {"title": "Status in this scenario"},
             }
@@ -877,7 +949,6 @@ def test_command_preview_deduplicates_variant_refs_under_one_command(student):
                 "command": "git log --oneline --graph --all",
             },
         ],
-        "custom_pages": [],
     }
     scenario.save(update_fields=["command_preview_config"])
 

@@ -13,13 +13,14 @@ import { LiveDagPanel } from '@/features/practice/components/LiveDagPanel'
 import { ProjectStructurePanel } from '@/features/practice/components/ProjectStructurePanel'
 import { ScenarioWorkspaceTour } from '@/features/practice/components/ScenarioWorkspaceTour'
 import { TerminalPanel } from '@/features/practice/components/TerminalPanel'
+import { practiceApi } from '@/features/practice/api/practiceApi'
 import { useAuthStore } from '@/features/auth/hooks/useAuth'
 import { hasSeenScenarioTour, markScenarioTourSeen } from '@/features/practice/utils/scenarioTour'
 import { useCommandSubmission } from '@/features/practice/hooks/useCommandSubmission'
 import { useScenarioSession } from '@/features/practice/hooks/useScenarioSession'
 import { reviewApi } from '@/features/review/api/reviewApi'
 import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
-import { invalidateScenarioProgressQueries, syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
+import { invalidateScenarioProgressQueries, syncScenarioSessionInCache, updateScenarioSessionCache } from '@/features/scenarios/utils/scenarioCache'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { PracticeWorkspaceSkeleton } from '@/shared/components/Skeleton'
@@ -157,6 +158,26 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
       setDismissedCompletionSessionId(null)
       setStartOverConfirmOpen(false)
       navigate(`/practice/${next.id}`)
+    },
+  })
+  const createFileMutation = useMutation({
+    mutationFn: (input: { path: string; content: string }) => {
+      if (!session) throw new Error('No session is available to update.')
+      return practiceApi.createFile(session.id, input)
+    },
+    onSuccess: (updatedSession) => {
+      updateScenarioSessionCache(queryClient, updatedSession)
+      window.setTimeout(resetLocalSessionState, 0)
+    },
+  })
+  const writeFileMutation = useMutation({
+    mutationFn: (input: { path: string; content: string }) => {
+      if (!session) throw new Error('No session is available to update.')
+      return practiceApi.writeFile(session.id, input)
+    },
+    onSuccess: (updatedSession) => {
+      updateScenarioSessionCache(queryClient, updatedSession)
+      window.setTimeout(resetLocalSessionState, 0)
     },
   })
   const moduleScenariosQuery = useQuery({
@@ -311,9 +332,9 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         onOpenTour={() => setTourOpen(true)}
         onContinue={() => retryMutation.mutate()}
       />
-      <main className="grid min-h-0 flex-1 grid-cols-[18rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[17rem_minmax(0,1fr)] max-xl:grid-cols-[16rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
+      <main className="grid min-h-0 flex-1 grid-cols-[22rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[21rem_minmax(0,1fr)] max-xl:grid-cols-[19rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
         <aside
-          className="grid min-h-0 grid-rows-[minmax(0,1fr)_minmax(14rem,0.42fr)] gap-2 overflow-hidden max-lg:min-h-[36rem]"
+          className="grid min-h-0 grid-rows-[minmax(13rem,0.72fr)_minmax(18rem,0.58fr)] gap-2 overflow-hidden max-lg:min-h-[44rem]"
           data-testid="workspace-sidebar"
           data-tour-target="scenario-brief"
         >
@@ -322,7 +343,14 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
           </div>
 
           <div className="min-h-[14rem] overflow-hidden" data-testid="project-structure-region">
-            <ProjectStructurePanel snapshot={session.repository_state} className="h-full" />
+            <ProjectStructurePanel
+              snapshot={session.repository_state}
+              className="h-full"
+              createDisabled={session.status !== 'started' || createFileMutation.isPending}
+              writeDisabled={session.status !== 'started' || writeFileMutation.isPending}
+              onCreateFile={(input) => createFileMutation.mutateAsync(input)}
+              onWriteFile={(input) => writeFileMutation.mutateAsync(input)}
+            />
           </div>
         </aside>
         <section
