@@ -150,7 +150,7 @@ export type ScenarioStepLog = {
 }
 
 export type CommandResponse = {
-  session: ScenarioSession
+  session: CommandSessionUpdate
   stdout?: string
   stderr?: string
   exit_code?: number
@@ -167,6 +167,25 @@ export type CommandResponse = {
     created_at: string
   }
 }
+
+export type CommandSessionUpdate = Pick<
+  ScenarioSession,
+  | 'id'
+  | 'mode'
+  | 'status'
+  | 'difficulty_instance_id'
+  | 'completed_at'
+  | 'first_attempt_star_eligible'
+  | 'counts'
+  | 'repository_state'
+  | 'review_mode'
+> &
+  Partial<
+    Pick<
+      ScenarioSession,
+      'mastery_progress' | 'mastered_records' | 'completion' | 'next_difficulty'
+    >
+  >
 
 export type TerminalLine = {
   id: string

@@ -3,6 +3,8 @@ import json
 import pytest
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 from rest_framework.test import APIRequestFactory, force_authenticate
 
@@ -19,8 +21,8 @@ from common.constants import (
 from common.exceptions import Locked
 from learning.models import Lesson, OrientationProgress
 from progress.models import StreakRecord, StudentProgress
-from review.services import ReviewModeService
 from retries.services import VariantSelectionService
+from review.services import ReviewModeService
 from scenarios.builders import RuntimeScenarioBuilder
 from scenarios.models import (
     CompletionRecord,
@@ -39,7 +41,7 @@ from scenarios.services import (
     CommandProcessingService,
     ScenarioSessionService,
 )
-from scenarios.views import SkillFocusDemoCommandAPIView
+from scenarios.views import CommandSubmitAPIView, SkillFocusDemoCommandAPIView
 
 
 @pytest.fixture()
@@ -131,6 +133,103 @@ def test_diagnostic_commands_are_logged_but_not_counted(student):
     assert "Only simulated" not in response["terminal_output"]
     assert session.counted_action_total == 0
     assert session.non_counted_diagnostic_total == 1
+
+
+def test_command_submit_response_uses_lightweight_in_progress_payload(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="stage-and-commit-basic-workflow",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    request = APIRequestFactory().post(
+        f"/api/scenarios/sessions/{session.id}/commands/",
+        {"command": "git status"},
+        format="json",
+    )
+    force_authenticate(request, user=student)
+
+    response = CommandSubmitAPIView.as_view()(request, session_id=session.id)
+
+    assert response.status_code == 200
+    payload = response.data["session"]
+    assert payload["id"] == session.id
+    assert payload["status"] == SESSION_STATUS_STARTED
+    assert payload["repository_state"]["branches"] == session.repository_state["branches"]
+    assert payload["counts"]["non_counted_diagnostic_total"] == 1
+    assert response.data["step"]["command_text"] == "git status"
+    assert response.data["step"]["contextual_feedback"]
+    assert "scenario" not in payload
+    assert "module" not in payload
+    assert "unit" not in payload
+    assert "expected_state" not in payload
+    assert "steps" not in payload
+    assert "policy" not in payload
+    assert "scaffolding" not in payload
+    assert "next_difficulty" not in payload
+    assert "completion" not in payload
+
+
+def test_command_submit_in_progress_query_count_is_bounded(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="stage-and-commit-basic-workflow",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    request = APIRequestFactory().post(
+        f"/api/scenarios/sessions/{session.id}/commands/",
+        {"command": "git status"},
+        format="json",
+    )
+    force_authenticate(request, user=student)
+
+    with CaptureQueriesContext(connection) as captured:
+        response = CommandSubmitAPIView.as_view()(request, session_id=session.id)
+
+    assert response.status_code == 200
+    assert len(captured) <= 10
+
+
+def test_command_submit_completion_payload_keeps_progress_without_full_metadata(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="stage-and-commit-basic-workflow",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="lesson",
+    )
+    response = None
+    for command in session.variant.solution_commands:
+        request = APIRequestFactory().post(
+            f"/api/scenarios/sessions/{session.id}/commands/",
+            {"command": command},
+            format="json",
+        )
+        force_authenticate(request, user=student)
+        response = CommandSubmitAPIView.as_view()(request, session_id=session.id)
+        session.refresh_from_db()
+        if response.data["session"]["status"] == SESSION_STATUS_COMPLETED:
+            break
+
+    assert response is not None
+    payload = response.data["session"]
+    assert payload["status"] == SESSION_STATUS_COMPLETED
+    assert payload["mastery_progress"]["required"] == difficulty.required_successful_attempts
+    assert "completion" in payload
+    assert "next_difficulty" in payload
+    assert "scenario" not in payload
+    assert "module" not in payload
+    assert "expected_state" not in payload
+    assert "steps" not in payload
 
 
 def test_diagnostic_command_preview_does_not_create_playable_records(student):

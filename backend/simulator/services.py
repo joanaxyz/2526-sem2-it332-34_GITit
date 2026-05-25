@@ -85,6 +85,10 @@ class RepositoryStateSimulator:
         payload = json.dumps(self.normalize_state(state), sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
+    def state_hash_for_normalized(self, state: dict) -> str:
+        payload = json.dumps(state, sort_keys=True, separators=(",", ":"))
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
     def process(self, state: dict, command: str) -> SimulatorResult:
         try:
             parsed = GitCommandParser().parse(command)

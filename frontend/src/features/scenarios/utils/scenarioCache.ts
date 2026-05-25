@@ -19,10 +19,16 @@ export function syncScenarioSessionInCache(
   session: ScenarioSession,
   options: { broadcast?: boolean } = {},
 ) {
-  applyScenarioSessionToCache(queryClient, session)
+  updateScenarioSessionCache(queryClient, session)
   if (options.broadcast !== false && !session.review_mode) {
     broadcastScenarioSessionSync(session)
   }
+
+  applyScenarioSessionToProgressCaches(queryClient, session)
+}
+
+export function updateScenarioSessionCache(queryClient: QueryClient, session: ScenarioSession) {
+  queryClient.setQueryData(queryKeys.scenarioSession(session.id), session)
 }
 
 export function subscribeToScenarioSessionSync(queryClient: QueryClient) {
@@ -62,9 +68,7 @@ export function invalidateScenarioProgressQueries(queryClient: QueryClient) {
   void queryClient.invalidateQueries({ queryKey: queryKeys.dashboardSummary })
 }
 
-function applyScenarioSessionToCache(queryClient: QueryClient, session: ScenarioSession) {
-  queryClient.setQueryData(queryKeys.scenarioSession(session.id), session)
-
+function applyScenarioSessionToProgressCaches(queryClient: QueryClient, session: ScenarioSession) {
   if (session.review_mode) return
 
   queryClient.setQueriesData<ScenarioSkillFocus[]>(

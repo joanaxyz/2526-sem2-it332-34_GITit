@@ -5,12 +5,14 @@ import { CommandInput } from './CommandInput'
 export function TerminalPanel({
   lines,
   disabled,
+  processing,
   onCommand,
   title = 'Terminal',
   className,
 }: {
   lines: TerminalLine[]
   disabled?: boolean
+  processing?: boolean
   onCommand: (command: string) => void
   title?: string
   className?: string
@@ -35,7 +37,7 @@ export function TerminalPanel({
           </div>
         ))}
       </div>
-      <CommandInput disabled={disabled} onSubmit={onCommand} />
+      <CommandInput disabled={disabled} processing={processing} onSubmit={onCommand} />
     </section>
   )
 }

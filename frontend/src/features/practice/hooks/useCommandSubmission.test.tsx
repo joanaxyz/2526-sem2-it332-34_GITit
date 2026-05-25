@@ -85,8 +85,52 @@ const baseSession: ScenarioSession = {
   completion: null,
 }
 
-const response: CommandResponse = {
-  session: baseSession,
+const startedResponse: CommandResponse = {
+  session: {
+    id: baseSession.id,
+    mode: baseSession.mode,
+    status: 'started',
+    difficulty_instance_id: baseSession.difficulty_instance_id,
+    completed_at: null,
+    first_attempt_star_eligible: false,
+    counts: {
+      ...baseSession.counts,
+      counted_action_total: 0,
+      non_counted_diagnostic_total: 1,
+      remaining_counted_commands: 3,
+      total_attempts: 2,
+    },
+    repository_state: baseSession.repository_state,
+    review_mode: false,
+  },
+  step: {
+    id: 2,
+    command_text: 'git status',
+    terminal_output: 'On branch main',
+    result_category: 'TargetNotYetMatched',
+    evaluation_result: 'TargetNotYetMatched',
+    command_classification: 'non_counted_diagnostic',
+    contextual_feedback: 'Nice diagnostic.',
+    created_at: '2026-05-18T12:00:01Z',
+  },
+}
+
+const completedResponse: CommandResponse = {
+  session: {
+    id: baseSession.id,
+    mode: baseSession.mode,
+    status: 'completed',
+    difficulty_instance_id: baseSession.difficulty_instance_id,
+    completed_at: baseSession.completed_at,
+    first_attempt_star_eligible: baseSession.first_attempt_star_eligible,
+    counts: baseSession.counts,
+    repository_state: baseSession.repository_state,
+    review_mode: false,
+    mastery_progress: baseSession.mastery_progress,
+    mastered_records: baseSession.mastered_records,
+    completion: baseSession.completion,
+    next_difficulty: baseSession.next_difficulty,
+  },
   step: {
     id: 2,
     command_text: 'git status',
@@ -113,7 +157,7 @@ describe('useCommandSubmission', () => {
     vi.clearAllMocks()
   })
 
-  it('merges the command step into the session cache and invalidates progress queries', async () => {
+  it('merges an in-progress command step without invalidating progress queries', async () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     queryClient.setQueryData(queryKeys.scenarioSession(42), {
       ...baseSession,
@@ -132,7 +176,7 @@ describe('useCommandSubmission', () => {
     })
     queryClient.setQueryData(queryKeys.modules, [])
     queryClient.setQueryData(queryKeys.dashboardSummary, {})
-    vi.mocked(practiceApi.submitCommand).mockResolvedValue(response)
+    vi.mocked(practiceApi.submitCommand).mockResolvedValue(startedResponse)
     const { result } = renderSubmissionHook(queryClient)
 
     await act(async () => {
@@ -141,6 +185,28 @@ describe('useCommandSubmission', () => {
 
     const updatedSession = queryClient.getQueryData<ScenarioSession>(queryKeys.scenarioSession(42))
     expect(updatedSession?.steps.map((step) => step.id)).toEqual([1, 2])
+    expect(updatedSession?.counts.non_counted_diagnostic_total).toBe(1)
+    expect(queryClient.getQueryState(queryKeys.modules)?.isInvalidated).toBe(false)
+    expect(queryClient.getQueryState(queryKeys.dashboardSummary)?.isInvalidated).toBe(false)
+  })
+
+  it('invalidates progress queries after a command completes the session', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    queryClient.setQueryData(queryKeys.scenarioSession(42), {
+      ...baseSession,
+      status: 'started',
+    })
+    queryClient.setQueryData(queryKeys.modules, [])
+    queryClient.setQueryData(queryKeys.dashboardSummary, {})
+    vi.mocked(practiceApi.submitCommand).mockResolvedValue(completedResponse)
+    const { result } = renderSubmissionHook(queryClient)
+
+    await act(async () => {
+      await result.current.mutateAsync('git status')
+    })
+
+    const updatedSession = queryClient.getQueryData<ScenarioSession>(queryKeys.scenarioSession(42))
+    expect(updatedSession?.status).toBe('completed')
     await waitFor(() => {
       expect(queryClient.getQueryState(queryKeys.modules)?.isInvalidated).toBe(true)
       expect(queryClient.getQueryState(queryKeys.dashboardSummary)?.isInvalidated).toBe(true)

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from common.constants import SESSION_STATUS_STARTED
 from scaffolding.services import ScaffoldingService
 from scenarios.models import CompletionRecord, DifficultyInstance
 from scenarios.selectors import required_successful_attempts_for_difficulty
@@ -30,36 +31,10 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
     supports = ScaffoldingService().supports_for(session.difficulty_instance.difficulty)
     snapshotter = RepositorySnapshotService()
     step_logs = session.step_logs.order_by("id") if include_steps else []
-    mastered_count = session.user.scenariosession_set.filter(
-        mode="primary",
-        status="completed",
-        difficulty_instance=session.difficulty_instance,
-        counted_action_total__lte=session.difficulty_instance.command_policy.min_counted_commands,
-    ).count()
-    required = required_successful_attempts_for_difficulty(session.difficulty_instance)
-    mastery_progress = {
-        "mastered": min(mastered_count, required),
-        "required": required,
-    }
-    # Include completion record if one exists for this user/difficulty instance.
-    completion_record = CompletionRecord.objects.filter(
-        user=session.user, difficulty_instance=session.difficulty_instance
-    ).first()
-    completion = None
-    if completion_record:
-        completion = {
-            "first_attempt_star": completion_record.first_attempt_star,
-            "counted_action_total": completion_record.counted_action_total,
-            "completed_at": completion_record.completed_at,
-        }
+    mastery_progress = mastery_progress_payload(session)
+    completion = completion_payload(session)
     student_context = session.variant.student_context or fallback_student_context(session)
-    minimum_counted_commands = session.command_policy_snapshot["min_counted_commands"]
-    maximum_counted_commands = session.command_policy_snapshot["max_counted_commands"]
-    remaining_counted_commands = max(
-        0,
-        maximum_counted_commands - session.counted_action_total,
-    )
-    max_reached = session.counted_action_total >= maximum_counted_commands
+    counts = session_counts_payload(session)
     return {
         "id": session.id,
         "mode": session.mode,
@@ -97,15 +72,7 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
         "mastery_progress": mastery_progress,
         "mastered_records": mastery_progress,
         "policy": session.command_policy_snapshot,
-        "counts": {
-            "counted_action_total": session.counted_action_total,
-            "minimum_counted_commands": minimum_counted_commands,
-            "maximum_counted_commands": maximum_counted_commands,
-            "non_counted_diagnostic_total": session.non_counted_diagnostic_total,
-            "remaining_counted_commands": remaining_counted_commands,
-            "max_reached": max_reached,
-            "total_attempts": session.total_attempts,
-        },
+        "counts": counts,
         "scaffolding": supports,
         "repository_state": snapshotter.snapshot(session.repository_state),
         "expected_state": snapshotter.snapshot(
@@ -126,8 +93,88 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
             for step in step_logs
         ],
         "review_mode": session.mode == "review",
-        "next_difficulty": next_difficulty_payload(session),
+        "next_difficulty": next_difficulty_payload(
+            session,
+            mastery_progress=mastery_progress,
+        ),
         "completion": completion,
+    }
+
+
+def command_session_payload(session, *, repository_state: dict) -> dict:
+    payload = {
+        "id": session.id,
+        "mode": session.mode,
+        "status": session.status,
+        "difficulty_instance_id": session.difficulty_instance_id,
+        "completed_at": session.completed_at,
+        "first_attempt_star_eligible": session.first_attempt_star_eligible,
+        "counts": session_counts_payload(session),
+        "repository_state": repository_state,
+        "review_mode": session.mode == "review",
+    }
+    if session.status == SESSION_STATUS_STARTED:
+        return payload
+
+    mastery_progress = mastery_progress_payload(session)
+    payload.update(
+        {
+            "mastery_progress": mastery_progress,
+            "mastered_records": mastery_progress,
+            "completion": completion_payload(session),
+            "next_difficulty": next_difficulty_payload(
+                session,
+                mastery_progress=mastery_progress,
+            ),
+        }
+    )
+    return payload
+
+
+def mastery_progress_payload(session) -> dict:
+    mastered_count = session.user.scenariosession_set.filter(
+        mode="primary",
+        status="completed",
+        difficulty_instance=session.difficulty_instance,
+        counted_action_total__lte=session.difficulty_instance.command_policy.min_counted_commands,
+    ).count()
+    required = required_successful_attempts_for_difficulty(session.difficulty_instance)
+    mastery_progress = {
+        "mastered": min(mastered_count, required),
+        "required": required,
+    }
+    return mastery_progress
+
+
+def completion_payload(session) -> dict | None:
+    completion_record = CompletionRecord.objects.filter(
+        user=session.user, difficulty_instance=session.difficulty_instance
+    ).first()
+    if completion_record:
+        return {
+            "first_attempt_star": completion_record.first_attempt_star,
+            "counted_action_total": completion_record.counted_action_total,
+            "completed_at": completion_record.completed_at,
+        }
+    return None
+
+
+def session_counts_payload(session) -> dict:
+    minimum_counted_commands = session.command_policy_snapshot["min_counted_commands"]
+    maximum_counted_commands = session.command_policy_snapshot["max_counted_commands"]
+    remaining_counted_commands = max(
+        0,
+        maximum_counted_commands - session.counted_action_total,
+    )
+    max_reached = session.counted_action_total >= maximum_counted_commands
+    return {
+        "counted_action_total": session.counted_action_total,
+        "minimum_counted_commands": minimum_counted_commands,
+        "maximum_counted_commands": maximum_counted_commands,
+        "non_counted_diagnostic_total": session.non_counted_diagnostic_total,
+        "remaining_counted_commands": remaining_counted_commands,
+        "max_reached": max_reached,
+        "total_attempts": session.total_attempts,
     }
 
 
@@ -143,20 +190,14 @@ def fallback_student_context(session) -> dict:
     }
 
 
-def next_difficulty_payload(session) -> dict | None:
+def next_difficulty_payload(session, *, mastery_progress: dict | None = None) -> dict | None:
     if session.mode != "primary" or session.status != "completed":
         return None
-    mastered_count = session.user.scenariosession_set.filter(
-        mode="primary",
-        status="completed",
-        difficulty_instance=session.difficulty_instance,
-        counted_action_total__lte=session.difficulty_instance.command_policy.min_counted_commands,
-    ).count()
-    required = required_successful_attempts_for_difficulty(session.difficulty_instance)
+    progress = mastery_progress or mastery_progress_payload(session)
     # Require the current completed attempt to be accurate (100% accuracy)
     if session.counted_action_total > session.difficulty_instance.command_policy.min_counted_commands:
         return None
-    if mastered_count < required:
+    if progress["mastered"] < progress["required"]:
         return None
 
     try:

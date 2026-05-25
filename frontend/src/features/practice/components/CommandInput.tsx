@@ -5,9 +5,11 @@ import { Button } from '@/shared/components/Button'
 
 export function CommandInput({
   disabled,
+  processing,
   onSubmit,
 }: {
   disabled?: boolean
+  processing?: boolean
   onSubmit: (command: string) => void
 }) {
   const [value, setValue] = useState('')
@@ -64,9 +66,9 @@ export function CommandInput({
         onKeyDown={handleKeyDown}
         disabled={disabled}
         autoFocus
-        placeholder="Type a git command"
+        placeholder={processing ? 'Processing command' : 'Type a git command'}
       />
-      <Button type="submit" size="sm" disabled={disabled}>Run</Button>
+      <Button type="submit" size="sm" disabled={disabled}>{processing ? 'Running' : 'Run'}</Button>
     </form>
   )
 }

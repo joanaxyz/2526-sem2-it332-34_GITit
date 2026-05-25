@@ -9,6 +9,7 @@ env = environ.Env(
     DJANGO_DEBUG=(bool, True),
     DJANGO_ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
     DJANGO_CORS_ALLOWED_ORIGINS=(list, ["http://localhost:5173", "http://127.0.0.1:5173"]),
+    PERFORMANCE_TIMING_ENABLED=(bool, False),
     JWT_COOKIE_SECURE=(bool, False),
     SECURE_SSL_REDIRECT=(bool, False),
 )
@@ -16,6 +17,7 @@ env.read_env(BASE_DIR / ".env")
 
 SECRET_KEY = env("DJANGO_SECRET_KEY", default="dev-only-change-me")
 DEBUG = env("DJANGO_DEBUG")
+PERFORMANCE_TIMING_ENABLED = env("PERFORMANCE_TIMING_ENABLED", default=DEBUG)
 ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS")
 
 INSTALLED_APPS = [

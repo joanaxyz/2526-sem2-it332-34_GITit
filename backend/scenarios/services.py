@@ -96,13 +96,21 @@ class DifficultyAccessService:
 
 
 class CommandCountClassifier:
-    def classify(self, *, command: str, policy_snapshot: dict, processed: bool) -> tuple[str, int]:
+    def classify(
+        self,
+        *,
+        command: str,
+        policy_snapshot: dict,
+        processed: bool,
+        diagnostic: bool | None = None,
+    ) -> tuple[str, int]:
         if not processed:
             normalized = normalize_command(command).lower()
             if normalized == "git" or normalized.startswith("git "):
                 return COMMAND_COUNTED, 1
             return COMMAND_UNPROCESSABLE, 0
-        if is_diagnostic_command(command):
+        is_diagnostic = diagnostic if diagnostic is not None else is_diagnostic_command(command)
+        if is_diagnostic:
             return COMMAND_DIAGNOSTIC, 0
         return COMMAND_COUNTED, 1
 
@@ -149,6 +157,32 @@ class CommandHistoryCache:
         self._cache.move_to_end(key)
         while len(self._cache) > self._max_entries:
             self._cache.popitem(last=False)
+
+
+class VariantTargetStateHashCache:
+    """Process-local cache for authored target-state hashes.
+
+    Variant target states are authored static data. Keeping this tiny cache
+    avoids normalizing and hashing the unchanged target state after every
+    command in a session while leaving the database as the source of truth.
+    """
+
+    _cache: OrderedDict[tuple[int, str], str] = OrderedDict()
+    _max_entries = 512
+
+    def hash_for(self, *, variant, state_tools: RepositoryStateSimulator) -> str:
+        key = (variant.id, variant.variant_fingerprint or "")
+        cached = self._cache.get(key)
+        if cached is not None:
+            self._cache.move_to_end(key)
+            return cached
+
+        state_hash = state_tools.state_hash(variant.target_state)
+        self._cache[key] = state_hash
+        self._cache.move_to_end(key)
+        while len(self._cache) > self._max_entries:
+            self._cache.popitem(last=False)
+        return state_hash
 
 
 class ScenarioSessionService:
@@ -278,13 +312,17 @@ class CommandProcessingService:
         state_tools = RepositoryStateSimulator()
         snapshotter = RepositorySnapshotService()
         command_engine = SimulatedGitCommandEngine()
-        previous_state = state_tools.clone_state(session.repository_state)
+        with timing("scenario.command.repository_state_clone", session_id=session.id):
+            previous_state = state_tools.clone_state(session.repository_state)
         with timing("scenario.command.parse_execute", session_id=session.id):
             command_result = command_engine.process(previous_state, command)
+        with timing("scenario.command.repository_state_normalize", session_id=session.id):
+            next_state = state_tools.normalize_state(command_result.state)
         classification, increment = CommandCountClassifier().classify(
             command=command,
             policy_snapshot=session.command_policy_snapshot,
             processed=command_result.processed,
+            diagnostic=command_result.diagnostic,
         )
 
         result_category = RESULT_UNPROCESSABLE
@@ -299,15 +337,16 @@ class CommandProcessingService:
                     CompletionEvaluationContext(
                         session=session,
                         previous_state=previous_state,
-                        next_state=command_result.state,
+                        next_state=next_state,
                         executed_commands=executed_commands,
                     )
                 )
             result_category = evaluation.result_category
             if session.difficulty_instance.difficulty == DIFFICULTY_EASY:
-                feedback = FeedbackGenerationService().describe(
-                    previous_state, command_result.state
-                )
+                with timing("scenario.command.contextual_feedback", session_id=session.id):
+                    feedback = FeedbackGenerationService().describe(
+                        previous_state, next_state
+                    )
         else:
             result_category = (
                 RESULT_INVALID
@@ -322,29 +361,37 @@ class CommandProcessingService:
         session.total_attempts += 1
         if result_category != RESULT_TARGET_MATCHED:
             session.first_attempt_star_eligible = False
-        session.repository_state = command_result.state
+        session.repository_state = next_state
 
-        state_hash = state_tools.state_hash(command_result.state)
-        step = StepLog.objects.create(
-            session=session,
-            command_text=command,
-            terminal_output=command_result.output,
-            result_category=result_category,
-            command_classification=classification,
-            counted_increment=increment,
-            attempt_number=session.total_attempts,
-            counted_total_after=session.counted_action_total,
-            state_hash=state_hash,
-            expected_state_hash=state_tools.state_hash(session.variant.target_state),
-            repository_state=command_result.state,
-            contextual_feedback=feedback,
-        )
-        CommandLog.objects.create(
-            step_log=step,
-            raw_command=command,
-            normalized_command=command_result.normalized_command,
-            was_processable=command_result.processed,
-        )
+        with timing("scenario.command.state_hash", session_id=session.id):
+            state_hash = state_tools.state_hash_for_normalized(next_state)
+        with timing("scenario.command.expected_state_hash", session_id=session.id):
+            expected_state_hash = VariantTargetStateHashCache().hash_for(
+                variant=session.variant,
+                state_tools=state_tools,
+            )
+        with timing("scenario.command.step_log_create", session_id=session.id):
+            step = StepLog.objects.create(
+                session=session,
+                command_text=command,
+                terminal_output=command_result.output,
+                result_category=result_category,
+                command_classification=classification,
+                counted_increment=increment,
+                attempt_number=session.total_attempts,
+                counted_total_after=session.counted_action_total,
+                state_hash=state_hash,
+                expected_state_hash=expected_state_hash,
+                repository_state=next_state,
+                contextual_feedback=feedback,
+            )
+        with timing("scenario.command.command_log_create", session_id=session.id):
+            CommandLog.objects.create(
+                step_log=step,
+                raw_command=command,
+                normalized_command=command_result.normalized_command,
+                was_processable=command_result.processed,
+            )
         if command_result.processed:
             CommandHistoryCache().remember_after_append(
                 session=session,
@@ -353,14 +400,27 @@ class CommandProcessingService:
             )
 
         max_count = session.command_policy_snapshot["max_counted_commands"]
+        update_fields = {
+            "repository_state",
+            "total_attempts",
+            "first_attempt_star_eligible",
+        }
+        if classification == COMMAND_COUNTED:
+            update_fields.add("counted_action_total")
+        elif classification == COMMAND_DIAGNOSTIC:
+            update_fields.add("non_counted_diagnostic_total")
         if result_category == RESULT_TARGET_MATCHED:
-            self._complete_session(session)
+            update_fields.update(self._complete_session(session))
         elif classification == COMMAND_COUNTED and session.counted_action_total >= max_count:
             session.status = SESSION_STATUS_FAILED
             session.ended_at = timezone.now()
             session.failure_reason = "Action limit reached."
+            update_fields.update({"status", "ended_at", "failure_reason"})
 
-        session.save()
+        with timing("scenario.command.session_save", session_id=session.id):
+            session.save(update_fields=sorted(update_fields))
+        with timing("scenario.command.repository_snapshot", session_id=session.id):
+            repository_snapshot = snapshotter.snapshot(session.repository_state)
         return {
             "session": session,
             "step": step,
@@ -370,7 +430,7 @@ class CommandProcessingService:
             "exit_code": command_result.exit_code,
             "command_family": command_result.command_family,
             "diagnostic_metadata": command_result.diagnostic_metadata,
-            "repository_state": snapshotter.snapshot(session.repository_state),
+            "repository_state": repository_snapshot,
             "evaluation_result": result_category,
             "command_classification": classification,
             "remaining_counted_commands": max(0, max_count - session.counted_action_total),
@@ -380,7 +440,7 @@ class CommandProcessingService:
             ),
         }
 
-    def _complete_session(self, session: ScenarioSession) -> None:
+    def _complete_session(self, session: ScenarioSession) -> set[str]:
         session.status = SESSION_STATUS_COMPLETED
         session.completed_at = timezone.now()
         session.ended_at = session.completed_at
@@ -430,4 +490,5 @@ class CommandProcessingService:
                 StreakService().record_completion(
                     user=session.user, completed_at=session.completed_at
                 )
+        return {"status", "completed_at", "ended_at", "rta_success"}
 
