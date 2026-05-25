@@ -1,7 +1,8 @@
 from django.db.models import BooleanField, Count, Exists, IntegerField, OuterRef, Prefetch, Q, Value
 
+from common.constants import COMPLETION_TYPES
 from learning.models import LearningUnit, Lesson, OrientationProgress
-from scenarios.models import ScenarioSession
+from scenarios.models import DifficultyInstance, ScenarioSession
 
 
 def published_units(*, user=None):
@@ -39,6 +40,7 @@ def published_units(*, user=None):
                 filter=Q(
                     scenarios__is_published=True,
                     scenarios__difficulty_instances__is_published=True,
+                    scenarios__difficulty_instances__completion_type__in=COMPLETION_TYPES,
                 ),
                 distinct=True,
             )
@@ -57,6 +59,7 @@ def published_units(*, user=None):
                 filter=Q(
                     scenarios__is_published=True,
                     scenarios__difficulty_instances__is_published=True,
+                    scenarios__difficulty_instances__completion_type__in=COMPLETION_TYPES,
                 ),
                 distinct=True,
             ),
@@ -94,6 +97,7 @@ def practice_completion_count_map(*, user, unit_ids: list[int]) -> dict[int, int
             mode="primary",
             status="completed",
             difficulty_instance__is_published=True,
+            difficulty_instance__completion_type__in=COMPLETION_TYPES,
             scenario__is_published=True,
             scenario__learning_unit_id__in=unit_ids,
         )
@@ -126,3 +130,28 @@ def practice_completion_count_map(*, user, unit_ids: list[int]) -> dict[int, int
         required = required_by_instance.get(difficulty_instance_id, 2)
         completion_by_unit[unit_id] = completion_by_unit.get(unit_id, 0) + min(count, required)
     return completion_by_unit
+
+
+def practice_completion_denominator_map(*, unit_ids: list[int]) -> dict[int, int]:
+    if not unit_ids:
+        return {}
+
+    denominator_by_unit = {unit_id: 0 for unit_id in unit_ids}
+    for item in (
+        DifficultyInstance.objects.filter(
+            is_published=True,
+            completion_type__in=COMPLETION_TYPES,
+            scenario__is_published=True,
+            scenario__learning_unit__is_published=True,
+            scenario__learning_unit_id__in=unit_ids,
+        )
+        .values(
+            "scenario__learning_unit_id",
+            "required_successful_attempts",
+        )
+    ):
+        unit_id = item["scenario__learning_unit_id"]
+        denominator_by_unit[unit_id] = denominator_by_unit.get(unit_id, 0) + int(
+            item["required_successful_attempts"] or 0
+        )
+    return denominator_by_unit

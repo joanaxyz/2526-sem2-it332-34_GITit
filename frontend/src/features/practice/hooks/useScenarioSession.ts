@@ -4,6 +4,7 @@ import type { Dispatch, SetStateAction } from 'react'
 
 import { practiceApi } from '@/features/practice/api/practiceApi'
 import type { ScenarioSession, TerminalLine } from '@/features/practice/types'
+import { queryKeys } from '@/shared/api/queryKeys'
 
 const bootLines: TerminalLine[] = []
 
@@ -23,11 +24,9 @@ function terminalLinesFromSession(session: ScenarioSession): TerminalLine[] {
 }
 
 export function useScenarioSession(sessionId: number) {
-  const [sessionOverride, setSessionOverride] = useState<ScenarioSession | null>(null)
-  const [feedbackOverride, setFeedbackOverride] = useState<{ sessionId: number; feedback: string } | null>(null)
   const [lineOverride, setLineOverride] = useState<{ sessionId: number; lines: TerminalLine[] } | null>(null)
   const query = useQuery({
-    queryKey: ['scenario-session', sessionId],
+    queryKey: queryKeys.scenarioSession(sessionId),
     queryFn: () => practiceApi.getSession(sessionId),
     enabled: Number.isFinite(sessionId),
   })
@@ -42,13 +41,7 @@ export function useScenarioSession(sessionId: number) {
     },
     [baseLines, sessionId],
   )
-  const setFeedback = useCallback(
-    (feedback: string) => setFeedbackOverride({ sessionId, feedback }),
-    [sessionId],
-  )
   const resetLocalSessionState = useCallback(() => {
-    setSessionOverride(null)
-    setFeedbackOverride(null)
     setLineOverride(null)
   }, [])
 
@@ -57,21 +50,16 @@ export function useScenarioSession(sessionId: number) {
     return () => window.clearTimeout(timeoutId)
   }, [resetLocalSessionState, sessionId])
 
-  const session = sessionOverride?.id === sessionId ? sessionOverride : (query.data ?? null)
+  const session = query.data ?? null
   const lines = lineOverride?.sessionId === sessionId ? lineOverride.lines : baseLines
-  const feedback =
-    feedbackOverride?.sessionId === sessionId
-      ? feedbackOverride.feedback
-      : (query.data?.steps.at(-1)?.contextual_feedback ?? '')
+  const feedback = query.data?.steps.at(-1)?.contextual_feedback ?? ''
 
   return {
     query,
     session,
-    setSession: setSessionOverride,
     lines,
     setLines,
     feedback,
-    setFeedback,
     resetLocalSessionState,
   }
 }

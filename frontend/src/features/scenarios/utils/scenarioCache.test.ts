@@ -91,7 +91,6 @@ const completedSession: ScenarioSession = {
     title: 'Branch rescue',
     focus: 'Branching',
     narrative: 'Move work safely.',
-    task_prompt: 'Recover the misplaced commit.',
   },
   module: {
     id: 2,
@@ -167,6 +166,38 @@ describe('updateScenarioListWithSession', () => {
     })
     expect(updated.difficulties[1].status).toBe('not_started')
     expect(updated.difficulties[2].status).toBe('locked')
+  })
+
+  it('unlocks the next backend-provided difficulty without assuming only three levels', () => {
+    const scenarioWithExtraHard: ScenarioSkillFocus = {
+      ...scenario,
+      difficulties: [
+        ...scenario.difficulties,
+        {
+          ...scenario.difficulties[2],
+          id: 104,
+          difficulty: 'extra hard',
+          status: 'locked',
+        },
+      ],
+    }
+    const completedHardSession: ScenarioSession = {
+      ...completedSession,
+      difficulty_instance_id: 103,
+      difficulty: 'hard',
+      next_difficulty: {
+        id: 104,
+        difficulty: 'extra hard',
+      },
+    }
+
+    const [updated] = updateScenarioListWithSession([scenarioWithExtraHard], completedHardSession) ?? []
+
+    expect(updated.difficulties[2].status).toBe('completed')
+    expect(updated.difficulties[3]).toMatchObject({
+      difficulty: 'extra hard',
+      status: 'not_started',
+    })
   })
 
   it('keeps unrelated scenario lists by reference', () => {

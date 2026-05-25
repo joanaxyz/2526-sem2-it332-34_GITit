@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 
 import { ScenarioList } from '@/features/scenarios/components/ScenarioList'
 import { modulesApi } from '@/features/modules/api/modulesApi'
+import { queryKeys } from '@/shared/api/queryKeys'
 import { Button } from '@/shared/components/Button'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
@@ -12,7 +13,7 @@ export function ScenarioSelectionPage() {
   const params = useParams()
   const lessonId = Number(params.lessonId)
   const lessonQuery = useQuery({
-    queryKey: ['lesson', lessonId],
+    queryKey: queryKeys.lesson(lessonId),
     queryFn: () => modulesApi.getLesson(lessonId),
     enabled: Number.isFinite(lessonId),
   })

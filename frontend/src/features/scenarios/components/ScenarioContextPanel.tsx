@@ -1,4 +1,4 @@
-import { AlertTriangle, BookOpenText, ClipboardList, Info, Target } from 'lucide-react'
+import { AlertTriangle, BookOpenText, ClipboardList, Target } from 'lucide-react'
 import type { ComponentType, ReactNode } from 'react'
 
 import type { ScenarioSession, ScenarioStudentContext } from '@/features/practice/types'
@@ -24,10 +24,6 @@ export function ScenarioContextPanel({ session }: { session: ScenarioSession }) 
       <CardContent className="space-y-3 p-3 pt-0">
         <Section icon={BookOpenText} title="Scenario Brief" hidden={!context.story}>
           <p className="text-sm leading-5 text-muted-foreground">{context.story}</p>
-        </Section>
-
-        <Section icon={Info} title="Situation" hidden={session.difficulty === 'hard' || !context.situation}>
-          <p className="text-sm leading-5 text-muted-foreground">{context.situation}</p>
         </Section>
 
         <Section icon={ClipboardList} title="Repository Brief" hidden={session.difficulty !== 'easy' || !context.current_state.length}>
@@ -114,7 +110,7 @@ function contextForSession(session: ScenarioSession) {
   const active = hasStructuredContext ? context : fallback
   return {
     ...active,
-    situation: hasStructuredContext ? active.situation || session.scenario.narrative : '',
+    situation: active.situation,
   }
 }
 

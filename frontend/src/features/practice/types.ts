@@ -77,7 +77,6 @@ export type ScenarioSession = {
     title: string
     focus: string
     narrative: string
-    task_prompt: string
     student_context?: ScenarioStudentContext
   }
   student_context?: ScenarioStudentContext

@@ -1,6 +1,7 @@
 import type { RepositorySnapshot } from '@/features/practice/types'
+import type { KnownDifficulty } from '@/features/scenarios/constants'
 
-export type Difficulty = 'easy' | 'medium' | 'hard'
+export type Difficulty = KnownDifficulty | (string & {})
 export type DifficultyStatus = 'not_started' | 'locked' | 'in_progress' | 'completed' | 'failed' | 'abandoned'
 export type AttemptStatus = 'started' | 'completed' | 'failed' | 'abandoned'
 export type DifficultyActionIntent = 'start' | 'review' | 'retry' | 'continue' | 'resume'

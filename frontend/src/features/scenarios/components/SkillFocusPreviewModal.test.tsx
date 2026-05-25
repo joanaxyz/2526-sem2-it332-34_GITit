@@ -174,8 +174,9 @@ describe('SkillFocusPreviewModal', () => {
   it('renders the first command as structured learning content with one shared demo area', async () => {
     renderPreview()
 
-    expect((await screen.findAllByText('Command preview')).length).toBeGreaterThan(0)
     expect((await screen.findAllByText('Inspect repository state before acting')).length).toBeGreaterThan(0)
+    expect(screen.getByText('Diagnostic command preview')).toBeInTheDocument()
+    expect(screen.getAllByText('Command preview').length).toBeGreaterThan(0)
     expect(screen.getByText('What git status is for')).toBeInTheDocument()
     expect(screen.getByText('git status is the first read-only diagnostic command.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /start scenario/i })).toBeInTheDocument()

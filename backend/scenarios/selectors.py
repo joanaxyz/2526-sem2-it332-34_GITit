@@ -331,12 +331,6 @@ def _scenario_status_payload_from_maps(
     if include_preview:
         payload.update(
             {
-                "short_explanation": scenario.short_explanation,
-                "supporting_diagnostic_commands": scenario.supporting_diagnostic_commands,
-                "safe_demo_commands": scenario.safe_demo_commands,
-                "demo_repository_state": scenario.demo_repository_state,
-                "demo_dag_config": scenario.demo_dag_config,
-                "demo_explanation_steps": scenario.demo_explanation_steps,
                 "related_git_concepts": scenario.related_git_concepts,
                 "command_preview": _command_preview_payload(scenario),
             }
@@ -532,14 +526,14 @@ def _resolved_preview_commands(
     if custom_pages:
         preview_commands.append(
             {
-                "id": "scenario-context",
-                "key": "scenario-context",
-                "title": config.get("custom_pages_title") or "Scenario context",
+                "id": "practice-context",
+                "key": "practice-context",
+                "title": config.get("custom_pages_title") or "Practice context",
                 "command": "",
                 "canonical_command": "",
                 "aliases": [],
                 "summary": config.get("purpose") or scenario.summary,
-                "tags": ["scenario"],
+                "tags": ["practice"],
                 "pages": custom_pages,
                 "demo_steps": [],
             }
@@ -953,7 +947,7 @@ def _fallback_command_pages(
                 {
                     "type": "callout",
                     "title": title,
-                    "body": "Use this preview content before starting the generated scenario.",
+                    "body": "Use this command preview before starting practice.",
                 }
             ],
         },

@@ -7,12 +7,13 @@ import { ProgressSummaryCards } from '@/features/dashboard/components/ProgressSu
 import { RecentActivityList } from '@/features/dashboard/components/RecentActivityList'
 import { RetryTrendCard } from '@/features/dashboard/components/RetryTrendCard'
 import { StreakCard } from '@/features/dashboard/components/StreakCard'
+import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 
 export function DashboardPage() {
   const { data, error, isError, isLoading } = useQuery({
-    queryKey: ['dashboard-summary'],
+    queryKey: queryKeys.dashboardSummary,
     queryFn: dashboardApi.summary,
     staleTime: 5 * 60 * 1000,
   })

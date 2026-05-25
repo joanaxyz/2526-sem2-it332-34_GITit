@@ -6,7 +6,9 @@ import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import { ScenarioSkillFocusCard } from '@/features/scenarios/components/ScenarioSkillFocusCard'
 import { SkillFocusPreviewModal } from '@/features/scenarios/components/SkillFocusPreviewModal'
 import type { DifficultyAccess, DifficultyActionIntent, ScenarioSkillFocus } from '@/features/scenarios/types'
-import { syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
+import { nextAvailableDifficultyAfter } from '@/features/scenarios/utils/difficulty'
+import { invalidateScenarioProgressQueries, syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
+import { queryKeys } from '@/shared/api/queryKeys'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { ScenarioListSkeleton } from '@/shared/components/Skeleton'
@@ -32,7 +34,7 @@ export function ScenarioList(props: ScenarioListProps) {
     action?: DifficultyActionIntent
     mode: 'manual' | 'gate'
   } | null>(null)
-  const queryKey = props.scope === 'lesson' ? ['lesson-scenarios', props.lessonId] : ['module-scenarios', props.moduleId]
+  const queryKey = props.scope === 'lesson' ? queryKeys.lessonScenarios(props.lessonId) : queryKeys.moduleScenarios(props.moduleId)
   const shouldDeferModuleFetch = props.scope === 'module' && props.deferFetch && !props.initialScenarios
   const { data, error, isError, isLoading } = useQuery({
     queryKey,
@@ -46,8 +48,7 @@ export function ScenarioList(props: ScenarioListProps) {
       scenariosApi.startSession({ difficulty_instance_id: difficulty.id, source_entry_point: props.source }),
     onSuccess: (session) => {
       syncScenarioSessionInCache(queryClient, session)
-      void queryClient.invalidateQueries({ queryKey: ['modules'] })
-      void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
+      invalidateScenarioProgressQueries(queryClient)
       setPreviewRequest(null)
       openScenarioRoute(`/practice/${session.id}`)
     },
@@ -61,8 +62,7 @@ export function ScenarioList(props: ScenarioListProps) {
     },
     onSuccess: (session) => {
       syncScenarioSessionInCache(queryClient, session)
-      void queryClient.invalidateQueries({ queryKey: ['modules'] })
-      void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
+      invalidateScenarioProgressQueries(queryClient)
       setPreviewRequest(null)
       openScenarioRoute(`/practice/${session.id}`)
     },
@@ -214,8 +214,6 @@ export function ScenarioList(props: ScenarioListProps) {
   )
 }
 
-const difficultyOrder = ['easy', 'medium', 'hard'] as const
-
 function hasRequiredAccurateAttempts(difficulty: DifficultyAccess) {
   const latestAccuracy = difficulty.latest_attempt?.accuracy_rate ?? null
   const progress = difficulty.successful_attempts
@@ -225,11 +223,7 @@ function hasRequiredAccurateAttempts(difficulty: DifficultyAccess) {
 }
 
 function nextDifficultyAfter(scenario: ScenarioSkillFocus, difficulty: DifficultyAccess) {
-  const currentIndex = difficultyOrder.indexOf(difficulty.difficulty)
-  const nextName = difficultyOrder[currentIndex + 1]
-  if (!nextName) return null
-  const nextDifficulty = scenario.difficulties.find((item) => item.difficulty === nextName)
-  return nextDifficulty && nextDifficulty.status !== 'locked' ? nextDifficulty : null
+  return nextAvailableDifficultyAfter(scenario.difficulties, difficulty.difficulty)
 }
 
 function shouldOpenPreviewGate(scenario: ScenarioSkillFocus, difficulty: DifficultyAccess, action: DifficultyActionIntent) {

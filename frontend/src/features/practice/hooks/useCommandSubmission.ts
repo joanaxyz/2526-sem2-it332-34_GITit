@@ -2,8 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { practiceApi } from '@/features/practice/api/practiceApi'
 import { reviewApi } from '@/features/review/api/reviewApi'
-import { syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
+import { invalidateScenarioProgressQueries, syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
 import type { CommandResponse, ScenarioSession } from '@/features/practice/types'
+import { queryKeys } from '@/shared/api/queryKeys'
 
 export function useCommandSubmission(sessionId: number, reviewMode: boolean) {
   const queryClient = useQueryClient()
@@ -13,13 +14,13 @@ export function useCommandSubmission(sessionId: number, reviewMode: boolean) {
       reviewMode ? reviewApi.submitCommand(sessionId, command) : practiceApi.submitCommand(sessionId, command),
     onSuccess: (response) => {
       syncScenarioSessionInCache(queryClient, mergeCommandStepIntoSession(queryClient, response))
-      if (!reviewMode) void queryClient.invalidateQueries({ queryKey: ['modules'] })
+      if (!reviewMode) invalidateScenarioProgressQueries(queryClient)
     },
   })
 }
 
 function mergeCommandStepIntoSession(queryClient: ReturnType<typeof useQueryClient>, response: CommandResponse) {
-  const previous = queryClient.getQueryData<ScenarioSession>(['scenario-session', response.session.id])
+  const previous = queryClient.getQueryData<ScenarioSession>(queryKeys.scenarioSession(response.session.id))
   const priorSteps = previous?.steps ?? []
   const step = {
     id: response.step.id,

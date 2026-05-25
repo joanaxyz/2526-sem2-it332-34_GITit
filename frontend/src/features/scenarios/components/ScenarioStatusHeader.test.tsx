@@ -27,7 +27,6 @@ const session: ScenarioSession = {
     title: 'Commit the clean changes',
     focus: 'git commit',
     narrative: '',
-    task_prompt: '',
   },
   module: {
     id: 3,
