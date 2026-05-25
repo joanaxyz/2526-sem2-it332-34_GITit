@@ -17,10 +17,10 @@ from common.constants import (
 from learning.models import LearningUnit, Lesson, OrientationProgress
 from scenarios.builders import (
     PLACEHOLDER_RE,
-    AuthoredCaseRenderer,
     AuthoredVariantValidator,
     ScenarioVariantBuildError,
-    TemplateRenderer,
+    StaticCaseMaterializer,
+    StaticTemplateMaterializer,
 )
 from scenarios.command_content import (
     command_content_key_for_command,
@@ -2858,7 +2858,7 @@ class Command(BaseCommand):
         difficulty_instance: DifficultyInstance,
         dspec: dict[str, Any],
     ) -> list[ScenarioVariant]:
-        renderer = AuthoredCaseRenderer()
+        materializer = StaticCaseMaterializer()
         variants: list[ScenarioVariant] = []
         seen_semantic_keys: set[str] = set()
         seen_slugs: set[str] = set()
@@ -2866,7 +2866,7 @@ class Command(BaseCommand):
             cases = template.get("cases", [])
             for index, case in enumerate(cases, start=1):
                 try:
-                    variant = renderer.render_variant(
+                    variant = materializer.materialize_variant(
                         difficulty_instance=difficulty_instance,
                         template=template,
                         case=case,
@@ -2894,8 +2894,8 @@ class Command(BaseCommand):
         return variants
 
     def _validate_seed_specs(self, specs: list[dict[str, Any]]) -> None:
-        renderer = TemplateRenderer()
-        authored_renderer = AuthoredCaseRenderer()
+        template_materializer = StaticTemplateMaterializer()
+        case_materializer = StaticCaseMaterializer()
         failures: list[str] = []
         for spec in specs:
             for difficulty, dspec in spec["difficulties"].items():
@@ -2945,11 +2945,11 @@ class Command(BaseCommand):
                             continue
                         context = {**case, "index": 1}
                         try:
-                            rendered_solution = renderer.render(
+                            rendered_solution = template_materializer.render(
                                 template.get("solution_commands_template", []),
                                 context,
                             )
-                            rendered_rule = renderer.render(
+                            rendered_rule = template_materializer.render(
                                 template.get("target_rule_template", {}),
                                 context,
                             )
@@ -2957,13 +2957,13 @@ class Command(BaseCommand):
                                 raise ScenarioVariantBuildError(
                                     "authored variant has no target_rule"
                                 )
-                            rendered_initial = authored_renderer.simulator.normalize_state(
-                                renderer.render(
+                            rendered_initial = case_materializer.simulator.normalize_state(
+                                template_materializer.render(
                                     template.get("initial_state_template", {}),
                                     context,
                                 )
                             )
-                            rendered_target_state = authored_renderer._target_state_from_solution(
+                            rendered_target_state = case_materializer._target_state_from_solution(
                                 rendered_initial,
                                 list(rendered_solution),
                             )

@@ -23,7 +23,9 @@ class ScenarioVariantBuildError(ValueError):
     pass
 
 
-class TemplateRenderer:
+class StaticTemplateMaterializer:
+    """Materialize authored static template values with a case context."""
+
     def render(self, value: Any, context: dict[str, Any]) -> Any:
         if isinstance(value, dict):
             return {
@@ -44,15 +46,15 @@ class TemplateRenderer:
         return PLACEHOLDER_RE.sub(replace, value)
 
 
-class AuthoredCaseRenderer:
-    """Render authored seed cases into concrete static practice variants."""
+class StaticCaseMaterializer:
+    """Materialize authored seed cases into concrete static practice variants."""
 
     def __init__(self) -> None:
-        self.renderer = TemplateRenderer()
+        self.template_materializer = StaticTemplateMaterializer()
         self.simulator = RepositoryStateSimulator()
         self.snapshotter = RepositorySnapshotService()
 
-    def render_variant(
+    def materialize_variant(
         self,
         *,
         difficulty_instance: DifficultyInstance,
@@ -72,19 +74,23 @@ class AuthoredCaseRenderer:
             or "variant"
         )
 
-        rendered_slug = self.renderer.render(template["slug_template"], context)
-        rendered_label = self.renderer.render(template["label_template"], context)
-        rendered_structure_key = self.renderer.render(
+        rendered_slug = self.template_materializer.render(template["slug_template"], context)
+        rendered_label = self.template_materializer.render(template["label_template"], context)
+        rendered_structure_key = self.template_materializer.render(
             template.get("structure_key", template_key),
             context,
         )
         initial_state = self.simulator.normalize_state(
-            self.renderer.render(template.get("initial_state_template", {}), context)
+            self.template_materializer.render(template.get("initial_state_template", {}), context)
         )
         solution_commands = list(
-            self.renderer.render(template.get("solution_commands_template", []), context)
+            self.template_materializer.render(
+                template.get("solution_commands_template", []), context
+            )
         )
-        target_rule = self.renderer.render(template.get("target_rule_template", {}), context)
+        target_rule = self.template_materializer.render(
+            template.get("target_rule_template", {}), context
+        )
         target_state = self._target_state_from_solution(initial_state, solution_commands)
         target_rule = self._augment_target_rule(
             target_rule,
@@ -200,7 +206,7 @@ class AuthoredCaseRenderer:
         initial_state: dict,
         target_rule: dict,
     ) -> dict:
-        rendered = self.renderer.render(
+        rendered = self.template_materializer.render(
             template.get("student_context_template") or {},
             parameter_context,
         )
