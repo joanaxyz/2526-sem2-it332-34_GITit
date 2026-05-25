@@ -67,8 +67,8 @@ describe('ProjectStructurePanel', () => {
     expect(screen.getByText('file-29.ts')).toBeInTheDocument()
   })
 
-  it('opens a clicked file in the editor and saves edits', async () => {
-    const onWriteFile = vi.fn().mockResolvedValue(undefined)
+  it('keeps the full editor out of the side panel and opens clicked files', () => {
+    const onOpenFile = vi.fn()
 
     render(
       <ProjectStructurePanel
@@ -79,32 +79,20 @@ describe('ProjectStructurePanel', () => {
             'src/app.py': { status: 'modified', source: 'working_tree', content: 'print("v2")' },
           },
         }}
-        onWriteFile={onWriteFile}
+        onOpenFile={onOpenFile}
       />,
     )
 
+    expect(screen.queryByTestId('file-editor')).not.toBeInTheDocument()
+
     fireEvent.click(screen.getByText('app.py'))
 
-    const editor = screen.getByTestId('file-editor')
-    expect(within(editor).getByText('src/app.py')).toBeInTheDocument()
-    expect(within(editor).getByLabelText('File content')).toHaveValue('print("v2")')
-
-    fireEvent.change(within(editor).getByLabelText('File content'), {
-      target: { value: 'print("fixed")\n' },
-    })
-    expect(within(editor).getByText('unsaved')).toBeInTheDocument()
-
-    fireEvent.click(within(editor).getByRole('button', { name: 'Save file' }))
-
-    await waitFor(() => {
-      expect(onWriteFile).toHaveBeenCalledWith({
-        path: 'src/app.py',
-        content: 'print("fixed")\n',
-      })
-    })
+    expect(onOpenFile).toHaveBeenCalledWith('src/app.py')
   })
 
-  it('surfaces conflict files when a merge conflict is present', async () => {
+  it('surfaces conflict files and opens the conflict resolver action', () => {
+    const onOpenFile = vi.fn()
+
     render(
       <ProjectStructurePanel
         snapshot={{
@@ -118,21 +106,21 @@ describe('ProjectStructurePanel', () => {
             },
           },
         }}
+        onOpenFile={onOpenFile}
       />,
     )
 
-    await waitFor(() => {
-      expect(screen.getByLabelText('File content')).toHaveValue(
-        '<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n',
-      )
-    })
-    expect(within(screen.getByTestId('file-editor')).getByText('conflict')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Open conflict resolver' }))
+
+    expect(onOpenFile).toHaveBeenCalledWith('src/auth.js')
+    expect(screen.getByText('conflicted')).toBeInTheDocument()
   })
 
   it('opens a root add-file modal with a numbered code editor and submits the file', async () => {
     const onCreateFile = vi.fn().mockResolvedValue(undefined)
+    const onOpenFile = vi.fn()
 
-    render(<ProjectStructurePanel snapshot={baseSnapshot} onCreateFile={onCreateFile} />)
+    render(<ProjectStructurePanel snapshot={baseSnapshot} onCreateFile={onCreateFile} onOpenFile={onOpenFile} />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Add file' }))
     const dialog = screen.getByRole('dialog', { name: 'Add file' })
@@ -158,6 +146,8 @@ describe('ProjectStructurePanel', () => {
     await waitFor(() => {
       expect(screen.queryByRole('dialog', { name: 'Add file' })).not.toBeInTheDocument()
     })
+    expect(onCreateFile).toHaveBeenCalledTimes(1)
+    expect(onOpenFile).toHaveBeenCalledWith('src/new-file.ts')
   })
 
   it('prefills the selected folder when adding a file from a directory', () => {
