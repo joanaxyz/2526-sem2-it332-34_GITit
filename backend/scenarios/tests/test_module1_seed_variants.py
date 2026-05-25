@@ -329,11 +329,21 @@ def test_module_one_seed_rejects_duplicate_solutions_without_waiver(db):
             "difficulties": {
                 "easy": {
                     "templates": [
-                        {
-                            "slug": "dupe",
-                            "cases": [
-                                {"case_id": "one", "answer_anchor": "one"},
-                                {"case_id": "two", "answer_anchor": "two"},
+                            {
+                                "slug": "dupe",
+                                "initial_state_template": {
+                                    "repository_initialized": True,
+                                    "commits": [],
+                                    "branches": {"main": None},
+                                    "head": {"type": "branch", "name": "main"},
+                                    "working_tree": {},
+                                    "staging": {},
+                                    "conflicts": [],
+                                },
+                                "target_rule_template": {"repository_state_unchanged": True},
+                                "cases": [
+                                    {"case_id": "one", "answer_anchor": "one"},
+                                    {"case_id": "two", "answer_anchor": "two"},
                             ],
                             "solution_commands_template": ["git status"],
                         }
