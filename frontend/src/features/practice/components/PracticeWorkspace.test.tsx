@@ -126,7 +126,6 @@ const baseSession: ScenarioSession = {
     title: 'Inspect the repository',
     focus: 'git status',
     narrative: '',
-    task_prompt: '',
   },
   module: {
     id: 3,
@@ -182,11 +181,9 @@ function renderWorkspace(session: ScenarioSession) {
   vi.mocked(useScenarioSession).mockReturnValue({
     query: { isLoading: false, isError: false },
     session,
-    setSession: vi.fn(),
     lines: [],
     setLines: vi.fn(),
     feedback: '',
-    setFeedback: vi.fn(),
     resetLocalSessionState: vi.fn(),
   } as unknown as ReturnType<typeof useScenarioSession>)
 

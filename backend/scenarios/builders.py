@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import hashlib
-import itertools
 import json
 import re
 import uuid
@@ -125,40 +124,40 @@ class RuntimeScenarioBuilder:
                     rendered_solution_sequences.setdefault(
                         sequence_key, str(context.get("case_id", "unknown"))
                     )
-                stable_payload = {
-                    "blueprint_signature": blueprint.blueprint_signature,
-                    "subtemplate_signature": blueprint.subtemplate_signature,
-                    "parameter_context": context,
-                }
+                rendered_subtemplate_signature = self.renderer.render(
+                    blueprint.subtemplate_signature,
+                    context,
+                )
                 candidates.append(
                     VariantCandidate(
                         blueprint=blueprint,
                         parameter_context=context,
-                        candidate_fingerprint=self._hash(stable_payload),
+                        candidate_fingerprint=self._variant_fingerprint(
+                            blueprint_signature=blueprint.blueprint_signature,
+                            subtemplate_signature=str(rendered_subtemplate_signature),
+                            parameter_context=context,
+                        ),
                     )
                 )
         return candidates
 
     def _contexts(self, blueprint: ScenarioGenerationBlueprint) -> list[dict[str, Any]]:
         pools = blueprint.parameter_pools or {}
-        if "cases" in pools:
-            base_contexts = [dict(item) for item in pools["cases"]]
-        else:
-            base_contexts = [{}]
-            for key, values in pools.items():
-                base_contexts = [
-                    {**context, key: value}
-                    for context, value in itertools.product(base_contexts, values)
-                ]
+        if "cases" not in pools:
+            return []
+        base_contexts = [dict(item) for item in pools["cases"]]
 
         if not base_contexts:
             return []
 
-        generation_count = max(1, blueprint.generation_count or len(base_contexts))
+        generation_count = min(
+            max(1, blueprint.generation_count or len(base_contexts)),
+            len(base_contexts),
+        )
         if blueprint.max_combinations:
             generation_count = min(generation_count, blueprint.max_combinations)
         return [
-            {**base_contexts[index % len(base_contexts)], "index": index + 1}
+            {**base_contexts[index], "index": index + 1}
             for index in range(generation_count)
         ]
 
@@ -239,13 +238,10 @@ class RuntimeScenarioBuilder:
             initial_state=initial_state,
             target_rule=target_rule,
         )
-        fingerprint = self._hash(
-            {
-                "blueprint_signature": blueprint.blueprint_signature,
-                "subtemplate_signature": rendered_subtemplate_signature,
-                "parameter_context": context,
-                "generation_seed": generation_seed,
-            }
+        fingerprint = self._variant_fingerprint(
+            blueprint_signature=blueprint.blueprint_signature,
+            subtemplate_signature=str(rendered_subtemplate_signature),
+            parameter_context=context,
         )
         slug = self._variant_slug(rendered_slug, generation_seed)
 
@@ -409,6 +405,21 @@ class RuntimeScenarioBuilder:
     def _hash(self, payload: dict) -> str:
         serialized = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
         return hashlib.sha256(serialized.encode("utf-8")).hexdigest()[:40]
+
+    def _variant_fingerprint(
+        self,
+        *,
+        blueprint_signature: str,
+        subtemplate_signature: str,
+        parameter_context: dict[str, Any],
+    ) -> str:
+        return self._hash(
+            {
+                "blueprint_signature": blueprint_signature,
+                "subtemplate_signature": subtemplate_signature,
+                "parameter_context": parameter_context,
+            }
+        )
 
     def _remote_url(self, initial_state: dict, solution_commands: list[str], topic: str) -> str:
         for command in solution_commands:

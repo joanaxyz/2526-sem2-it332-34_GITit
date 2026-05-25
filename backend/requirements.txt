@@ -4,10 +4,5 @@ djangorestframework-simplejwt
 psycopg[binary]
 django-environ
 django-cors-headers
-redis
 django-redis
 drf-spectacular
-pytest
-pytest-django
-factory_boy
-ruff

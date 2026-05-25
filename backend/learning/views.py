@@ -5,6 +5,7 @@ from learning.models import Lesson
 from learning.selectors import (
     orientation_progress_map,
     practice_completion_count_map,
+    practice_completion_denominator_map,
     published_lesson,
     published_units,
 )
@@ -28,7 +29,10 @@ class UnitListAPIView(APIView):
                 "practice_completion_count_map": practice_completion_count_map(
                     user=request.user,
                     unit_ids=unit_ids,
-                )
+                ),
+                "practice_completion_denominator_map": practice_completion_denominator_map(
+                    unit_ids=unit_ids,
+                ),
             },
         )
         return Response(serializer.data)

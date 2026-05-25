@@ -1,11 +1,13 @@
 import type { QueryClient } from '@tanstack/react-query'
 
 import type { ScenarioSession } from '@/features/practice/types'
-import type { Difficulty, DifficultyStatus, LatestAttemptStats, ScenarioSkillFocus } from '@/features/scenarios/types'
+import type { DifficultyStatus, LatestAttemptStats, ScenarioSkillFocus } from '@/features/scenarios/types'
+import { nextDifficultyInSequence } from '@/features/scenarios/utils/difficulty'
+import { queryKeyRoots, queryKeys } from '@/shared/api/queryKeys'
 
 const scenarioSessionSyncChannel = 'git-it:scenario-session-sync'
-const scenarioListQueryKeys = new Set(['lesson-scenarios', 'module-scenarios', 'unit-scenarios'])
-const difficultyOrder: Difficulty[] = ['easy', 'medium', 'hard']
+const scenarioListQueryKeys = new Set<string>(queryKeyRoots.scenarioLists)
+const scenarioSummaryQueryKeys = new Set<string>(queryKeyRoots.scenarioSummaries)
 
 type ScenarioSessionSyncMessage = {
   type: 'scenario-session-updated'
@@ -29,8 +31,7 @@ export function subscribeToScenarioSessionSync(queryClient: QueryClient) {
   const handleMessage = (message: unknown) => {
     if (!isScenarioSessionSyncMessage(message)) return
     syncScenarioSessionInCache(queryClient, message.session, { broadcast: false })
-    void queryClient.invalidateQueries({ queryKey: ['modules'] })
-    void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
+    invalidateScenarioProgressQueries(queryClient)
   }
 
   const channel = typeof BroadcastChannel !== 'undefined'
@@ -56,8 +57,13 @@ export function subscribeToScenarioSessionSync(queryClient: QueryClient) {
   }
 }
 
+export function invalidateScenarioProgressQueries(queryClient: QueryClient) {
+  void queryClient.invalidateQueries({ queryKey: queryKeys.modules })
+  void queryClient.invalidateQueries({ queryKey: queryKeys.dashboardSummary })
+}
+
 function applyScenarioSessionToCache(queryClient: QueryClient, session: ScenarioSession) {
-  queryClient.setQueryData(['scenario-session', session.id], session)
+  queryClient.setQueryData(queryKeys.scenarioSession(session.id), session)
 
   if (session.review_mode) return
 
@@ -70,7 +76,7 @@ function applyScenarioSessionToCache(queryClient: QueryClient, session: Scenario
 
   queryClient.setQueriesData<Record<string, ScenarioSkillFocus[]>>(
     {
-      predicate: (query) => ['module-scenarios-summary', 'unit-scenarios-summary'].includes(String(query.queryKey[0])),
+      predicate: (query) => scenarioSummaryQueryKeys.has(String(query.queryKey[0])),
     },
     (summary) => updateScenarioSummaryWithSession(summary, session),
   )
@@ -83,13 +89,15 @@ export function updateScenarioListWithSession(
   if (!scenarios?.length) return scenarios
 
   let matchedScenario = false
-  const unlockedDifficulty = hasRequiredAccurateAttempts(session) ? nextDifficultyAfter(session.difficulty) : null
 
   const nextScenarios = scenarios.map((scenario) => {
     if (scenario.id !== session.scenario.id) return scenario
 
     matchedScenario = true
     let changed = false
+    const unlockedDifficulty = hasRequiredAccurateAttempts(session)
+      ? nextDifficultyInSequence(scenario.difficulties, session.difficulty)?.difficulty ?? null
+      : null
     const difficulties = scenario.difficulties.map((difficulty) => {
       if (difficulty.difficulty === session.difficulty) {
         // Prefer completion info provided by the server in the session payload
@@ -207,11 +215,6 @@ function isScenarioSessionSyncMessage(value: unknown): value is ScenarioSessionS
   if (!value || typeof value !== 'object') return false
   const message = value as Partial<ScenarioSessionSyncMessage>
   return message.type === 'scenario-session-updated' && Boolean(message.session)
-}
-
-function nextDifficultyAfter(difficulty: Difficulty) {
-  const index = difficultyOrder.indexOf(difficulty)
-  return index >= 0 ? difficultyOrder[index + 1] ?? null : null
 }
 
 function latestAttemptFromSession(session: ScenarioSession): LatestAttemptStats {

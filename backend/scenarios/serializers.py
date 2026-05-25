@@ -73,7 +73,6 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
             "title": session.scenario.title,
             "focus": session.scenario.focus,
             "narrative": session.difficulty_instance.narrative or session.scenario.narrative,
-            "task_prompt": session.difficulty_instance.task_prompt or session.scenario.task_prompt,
             "student_context": student_context,
         },
         "student_context": student_context,
@@ -136,7 +135,6 @@ def fallback_student_context(session) -> dict:
     narrative = session.difficulty_instance.narrative or session.scenario.narrative
     context = {
         "story": narrative,
-        "situation": session.difficulty_instance.task_prompt or session.scenario.task_prompt,
     }
     return {
         key: value

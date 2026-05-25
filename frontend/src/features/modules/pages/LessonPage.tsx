@@ -4,6 +4,8 @@ import { Link, useParams } from 'react-router-dom'
 
 import { modulesApi } from '@/features/modules/api/modulesApi'
 import { LessonContentRenderer } from '@/features/modules/components/LessonContentRenderer'
+import { invalidateScenarioProgressQueries } from '@/features/scenarios/utils/scenarioCache'
+import { queryKeys } from '@/shared/api/queryKeys'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
@@ -15,15 +17,15 @@ export function LessonPage() {
   const lessonId = Number(params.lessonId)
   const queryClient = useQueryClient()
   const { data: lesson, error, isError, isLoading } = useQuery({
-    queryKey: ['lesson', lessonId],
+    queryKey: queryKeys.lesson(lessonId),
     queryFn: () => modulesApi.getLesson(lessonId),
     enabled: Number.isFinite(lessonId),
   })
   const completeMutation = useMutation({
     mutationFn: () => modulesApi.completeOrientationLesson(lessonId, 0),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['modules'] })
-      await queryClient.invalidateQueries({ queryKey: ['lesson', lessonId] })
+      invalidateScenarioProgressQueries(queryClient)
+      await queryClient.invalidateQueries({ queryKey: queryKeys.lesson(lessonId) })
     },
   })
   if (isLoading) return <LoadingState label="Loading lesson" />

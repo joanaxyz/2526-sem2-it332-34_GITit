@@ -15,7 +15,12 @@ from common.constants import (
     DIFFICULTY_MEDIUM,
 )
 from learning.models import LearningUnit, Lesson, OrientationProgress
-from scenarios.builders import RuntimeScenarioBuilder, ScenarioVariantBuildError, TemplateRenderer
+from scenarios.builders import (
+    PLACEHOLDER_RE,
+    RuntimeScenarioBuilder,
+    ScenarioVariantBuildError,
+    TemplateRenderer,
+)
 from scenarios.command_content import (
     command_content_key_for_command,
     seed_git_command_content_library,
@@ -68,6 +73,12 @@ SESSION_COUNTS = {
     DIFFICULTY_EASY: 3,
     DIFFICULTY_MEDIUM: 2,
     DIFFICULTY_HARD: 2,
+}
+
+VALIDATION_ONLY_CASE_FIELDS = {
+    "answer_anchor",
+    "case_id",
+    "duplicate_solution_waiver",
 }
 
 
@@ -209,7 +220,7 @@ def uninitialized_state(**extra: Any) -> dict[str, Any]:
 def student_context_template(kind: str) -> dict[str, Any]:
     common = {
         # Keep the active-attempt context focused on the brief and required values.
-        # The UI intentionally hides task/checklist/helpful diagnostic scaffolds
+        # The UI intentionally hides legacy prompt and diagnostic scaffolds
         # because those sections can leak evaluator rules or imply exact commands.
     }
     templates = {
@@ -219,8 +230,8 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 {"label": "Project", "value": "{{project}}"},
                 {"label": "Target directory", "value": "{{target_directory}}"},
                 {"label": "Initial branch", "value": "{{expected_initial_branch}}"},
-                {"label": "Quiet mode", "value": "{{expected_quiet}}"},
-                {"label": "Existing repository", "value": "{{expected_reinitialized}}"},
+                {"label": "Quiet option", "value": "{{quiet_requirement}}"},
+                {"label": "Repository status", "value": "{{repository_status}}"},
                 {"label": "Expected untracked paths", "value": "{{expected_untracked_paths}}"},
             ],
             **common,
@@ -444,9 +455,10 @@ def init_scenario() -> dict[str, Any]:
                                 "expected_current_directory": True,
                                 "expected_initial_branch": "main",
                                 "expected_quiet": False,
+                                "quiet_requirement": "No quiet option required.",
                                 "expected_reinitialized": False,
+                                "repository_status": "This is not an existing Git repository.",
                                 "expected_commit_count": 0,
-                                "duplicate_solution_waiver": True,
                                 "answer_anchor": "initialized the current folder only; zero commits",
                             },
                             {
@@ -460,25 +472,11 @@ def init_scenario() -> dict[str, Any]:
                                 "expected_current_directory": True,
                                 "expected_initial_branch": "trunk",
                                 "expected_quiet": False,
+                                "quiet_requirement": "No quiet option required.",
                                 "expected_reinitialized": False,
+                                "repository_status": "This is not an existing Git repository.",
                                 "expected_commit_count": 0,
                                 "answer_anchor": "initialized current folder with trunk as the first branch",
-                            },
-                            {
-                                "case_id": "init-easy-safe-reinit",
-                                "project": "existing-notes",
-                                "target_directory": "current folder",
-                                "expected_untracked_paths": ["notes/today.md"],
-                                "initial_state": reinit_state,
-                                "solution_commands": ["git init"],
-                                "expected_init_directory": None,
-                                "expected_current_directory": True,
-                                "expected_initial_branch": "main",
-                                "expected_quiet": False,
-                                "expected_reinitialized": True,
-                                "expected_commit_count": 1,
-                                "duplicate_solution_waiver": True,
-                                "answer_anchor": "reinitialized safely; existing commit and untracked notes remain",
                             },
                         ],
                         initial_state="{{initial_state}}",
@@ -512,7 +510,9 @@ def init_scenario() -> dict[str, Any]:
                                 "expected_current_directory": False,
                                 "expected_initial_branch": "main",
                                 "expected_quiet": False,
+                                "quiet_requirement": "No quiet option required.",
                                 "expected_reinitialized": False,
+                                "repository_status": "This is not an existing Git repository.",
                                 "expected_commit_count": 0,
                                 "answer_anchor": "initialized docs-site only; zero commits",
                             },
@@ -527,7 +527,9 @@ def init_scenario() -> dict[str, Any]:
                                 "expected_current_directory": False,
                                 "expected_initial_branch": "trunk",
                                 "expected_quiet": False,
+                                "quiet_requirement": "No quiet option required.",
                                 "expected_reinitialized": False,
+                                "repository_status": "This is not an existing Git repository.",
                                 "expected_commit_count": 0,
                                 "answer_anchor": "initialized api-playground with trunk as the first branch",
                             },
@@ -544,7 +546,9 @@ def init_scenario() -> dict[str, Any]:
                                 "expected_current_directory": False,
                                 "expected_initial_branch": "main",
                                 "expected_quiet": True,
+                                "quiet_requirement": "Use quiet output.",
                                 "expected_reinitialized": False,
+                                "repository_status": "This is not an existing Git repository.",
                                 "expected_commit_count": 0,
                                 "answer_anchor": "initialized research-log quietly with main as the first branch",
                             },
@@ -573,13 +577,7 @@ def init_scenario() -> dict[str, Any]:
                                 "project": "parent-workspace",
                                 "target_directory": "research-log",
                                 "expected_untracked_paths": ["research-log/README.md"],
-                                "sibling_directories": ["notes", "archive"],
                                 "answer_anchor": "initialized research-log only; parent and siblings not targeted",
-                                "initial_working_tree": {
-                                    "research-log/README.md": "untracked",
-                                    "notes/ideas.md": "untracked",
-                                    "archive/old.md": "untracked",
-                                },
                                 "initial_state": uninitialized_state(
                                     working_tree={
                                         "research-log/README.md": "untracked",
@@ -594,7 +592,9 @@ def init_scenario() -> dict[str, Any]:
                                 "expected_current_directory": False,
                                 "expected_initial_branch": "main",
                                 "expected_quiet": True,
+                                "quiet_requirement": "Use quiet output.",
                                 "expected_reinitialized": False,
+                                "repository_status": "This is not an existing Git repository.",
                                 "expected_commit_count": 0,
                             },
                             {
@@ -602,13 +602,7 @@ def init_scenario() -> dict[str, Any]:
                                 "project": "design-parent",
                                 "target_directory": "ui-kit",
                                 "expected_untracked_paths": ["ui-kit/tokens.css"],
-                                "sibling_directories": ["brand-assets", "experiments"],
                                 "answer_anchor": "initialized ui-kit only; sibling folders untouched",
-                                "initial_working_tree": {
-                                    "ui-kit/tokens.css": "untracked",
-                                    "brand-assets/logo.svg": "untracked",
-                                    "experiments/mockup.html": "untracked",
-                                },
                                 "initial_state": uninitialized_state(
                                     working_tree={
                                         "ui-kit/tokens.css": "untracked",
@@ -623,7 +617,9 @@ def init_scenario() -> dict[str, Any]:
                                 "expected_current_directory": False,
                                 "expected_initial_branch": "trunk",
                                 "expected_quiet": True,
+                                "quiet_requirement": "Use quiet output.",
                                 "expected_reinitialized": False,
+                                "repository_status": "This is not an existing Git repository.",
                                 "expected_commit_count": 0,
                             },
                             {
@@ -631,16 +627,16 @@ def init_scenario() -> dict[str, Any]:
                                 "project": "release-notes",
                                 "target_directory": "current folder",
                                 "expected_untracked_paths": ["notes/today.md"],
-                                "sibling_directories": [],
                                 "answer_anchor": "re-ran init safely without deleting existing repository state",
-                                "initial_working_tree": {"notes/today.md": "untracked"},
                                 "initial_state": reinit_state,
                                 "solution_commands": ["git init --quiet"],
                                 "expected_init_directory": None,
                                 "expected_current_directory": True,
                                 "expected_initial_branch": "main",
                                 "expected_quiet": True,
+                                "quiet_requirement": "Use quiet output.",
                                 "expected_reinitialized": True,
+                                "repository_status": "This is already a Git repository; reinitialize it without losing existing history.",
                                 "expected_commit_count": 1,
                             },
                         ],
@@ -1376,7 +1372,6 @@ def commit_case(
         "excluded_files": excluded_files,
         "allowed_working_tree_paths": allowed_working_tree_paths,
         "target_tree_requirements": target_tree_requirements,
-        "stage_args": " ".join(target_files),
         "required_commit_message": message,
         "stage_command": stage_command or f"git add {' '.join(target_files)}",
         "commit_command": commit_command or f'git commit -m "{message}"',
@@ -1597,10 +1592,9 @@ def ignore_case(
         if path == tracked_generated_path:
             continue
         working_tree[path] = {"status": "ignored", "content": f"{path}-local"}
-    return {
+    payload = {
         "case_id": case_id,
         "project": project,
-        "base_tree": base_tree or {},
         "gitignore_token": token,
         "working_tree": working_tree,
         "ignored_paths": ignored_paths,
@@ -1610,6 +1604,9 @@ def ignore_case(
         "required_commit_message": message,
         "answer_anchor": answer_anchor,
     }
+    if base_tree is not None:
+        payload["base_tree"] = base_tree
+    return payload
 
 
 def ignore_bp(
@@ -1850,6 +1847,8 @@ def partial_case(
     unrelated_files: list[str],
     message: str,
     answer_anchor: str,
+    *,
+    review_context: bool = False,
 ) -> dict[str, Any]:
     working: dict[str, Any] = {}
     partial_hunks: dict[str, Any] = {}
@@ -1864,7 +1863,7 @@ def partial_case(
         leftover_hunk_map[target_file] = leftover
     for path in unrelated_files:
         working[path] = "modified"
-    return {
+    payload = {
         "case_id": case_id,
         "project": project,
         "target_files": target_files,
@@ -1872,7 +1871,6 @@ def partial_case(
         "leftover_hunks": leftover_hunks,
         "target_hunk_map": target_hunk_map,
         "leftover_hunk_map": leftover_hunk_map,
-        "unrelated_files": unrelated_files,
         "excluded_files": unrelated_files,
         "allowed_working_tree_paths": [*target_files, *unrelated_files],
         "working_tree": working,
@@ -1883,12 +1881,12 @@ def partial_case(
             f'git commit -m "{message}"',
         ],
         "answer_anchor": answer_anchor,
-        "target_file": ", ".join(target_files),
-        "target_hunk": ", ".join(target_hunks),
-        "leftover_hunk": ", ".join(leftover_hunks),
-        "other_file": ", ".join(unrelated_files) if unrelated_files else "none",
-        "commit_to_repair": "none",
     }
+    if review_context:
+        payload["commit_to_repair"] = "none"
+    else:
+        payload["unrelated_files"] = unrelated_files
+    return payload
 
 
 def partial_bp(
@@ -2076,22 +2074,17 @@ def amend_case(
     new_message: str,
     working_tree: dict[str, Any],
     answer_anchor: str,
+    *,
+    review_context: bool = False,
 ) -> dict[str, Any]:
     tree_c1 = {"README.md": "readme-v1"}
     committed_files = [path for path in target_files if path not in working_tree]
     tree_c2 = {**tree_c1, **{path: f"{path}-committed-v1" for path in committed_files}}
-    return {
+    payload = {
         "case_id": case_id,
         "project": project,
-        "target_file": ", ".join(target_files),
         "target_files": target_files,
-        "excluded_files": [],
-        "target_hunk": "none",
-        "target_hunks": [],
-        "leftover_hunk": "none",
-        "leftover_hunks": [],
         "commit_to_repair": "c2",
-        "old_message": old_message,
         "required_commit_message": new_message,
         "working_tree": working_tree,
         "commits": [
@@ -2104,6 +2097,11 @@ def amend_case(
         ],
         "answer_anchor": answer_anchor,
     }
+    if review_context:
+        payload["excluded_files"] = []
+        payload["target_hunks"] = []
+        payload["leftover_hunks"] = []
+    return payload
 
 
 def amend_bp(
@@ -2418,6 +2416,7 @@ def review_scenario() -> dict[str, Any]:
             ["notes/auth-debug.md"],
             "Finalize auth validation change",
             "only validation hunks committed; leftovers and notes remain",
+            review_context=True,
         ),
         partial_case(
             "review-hard-search-partial",
@@ -2428,6 +2427,7 @@ def review_scenario() -> dict[str, Any]:
             ["tmp/search-output.json"],
             "Finalize search ranking behavior",
             "ranking hunks committed; theme/fixture/tmp leftovers remain",
+            review_context=True,
         ),
     ]
     hard_amend_cases = [
@@ -2439,6 +2439,7 @@ def review_scenario() -> dict[str, Any]:
             "Finalize export validation behavior",
             {"docs/export.md": "export-docs-final"},
             "branch tip is amended commit with corrected message and docs; no extra commit",
+            review_context=True,
         ),
     ]
     return scenario_dict(
@@ -2868,10 +2869,13 @@ class Command(BaseCommand):
 
     def _validate_seed_specs(self, specs: list[dict[str, Any]]) -> None:
         renderer = TemplateRenderer()
+        builder = RuntimeScenarioBuilder()
         failures: list[str] = []
         for spec in specs:
             for difficulty, dspec in spec["difficulties"].items():
                 rendered_solutions: dict[str, list[str]] = {}
+                rendered_target_rules: dict[str, list[str]] = {}
+                rendered_target_states: dict[str, list[str]] = {}
                 for blueprint in dspec["blueprints"]:
                     cases = blueprint.get("parameter_pools", {}).get("cases", [])
                     if not cases:
@@ -2891,15 +2895,55 @@ class Command(BaseCommand):
                         failures.append(
                             f"{spec['slug']}/{difficulty}/{blueprint['slug']}: duplicate answer_anchor"
                         )
+                    placeholders = self._blueprint_placeholders(blueprint)
                     for case in cases:
-                        rendered = renderer.render(
-                            blueprint.get("solution_commands_template", []),
-                            {**case, "index": 1},
+                        case_id = case.get("case_id", "unknown")
+                        available_fields = set(case) | {"index"}
+                        missing = sorted(placeholders - available_fields)
+                        if missing:
+                            failures.append(
+                                f"{spec['slug']}/{difficulty}/{blueprint['slug']}/{case_id}: missing case fields {missing}"
+                            )
+                        unused = sorted(
+                            set(case) - placeholders - VALIDATION_ONLY_CASE_FIELDS
                         )
-                        key = json.dumps(rendered, sort_keys=True)
-                        rendered_solutions.setdefault(key, []).append(
-                            case.get("case_id", "unknown")
-                        )
+                        if unused:
+                            failures.append(
+                                f"{spec['slug']}/{difficulty}/{blueprint['slug']}/{case_id}: unused case fields {unused}"
+                            )
+                        if missing:
+                            continue
+                        context = {**case, "index": 1}
+                        try:
+                            rendered_solution = renderer.render(
+                                blueprint.get("solution_commands_template", []),
+                                context,
+                            )
+                            rendered_rule = renderer.render(
+                                blueprint.get("target_rule_template", {}),
+                                context,
+                            )
+                            rendered_initial = builder.simulator.normalize_state(
+                                renderer.render(
+                                    blueprint.get("initial_state_template", {}),
+                                    context,
+                                )
+                            )
+                            rendered_target_state = builder._target_state_from_solution(
+                                rendered_initial,
+                                list(rendered_solution),
+                            )
+                        except (KeyError, ScenarioVariantBuildError) as exc:
+                            failures.append(
+                                f"{spec['slug']}/{difficulty}/{blueprint['slug']}/{case_id}: could not render validation target: {exc}"
+                            )
+                            continue
+                        solution_key = json.dumps(rendered_solution, sort_keys=True)
+                        rendered_solutions.setdefault(solution_key, []).append(str(case_id))
+                        rule_key = json.dumps(rendered_rule, sort_keys=True)
+                        rendered_target_rules.setdefault(rule_key, []).append(str(case_id))
+                        state_key = json.dumps(rendered_target_state, sort_keys=True)
+                        rendered_target_states.setdefault(state_key, []).append(str(case_id))
                 for sequence, case_ids_for_sequence in rendered_solutions.items():
                     if len(case_ids_for_sequence) <= 1:
                         continue
@@ -2914,8 +2958,46 @@ class Command(BaseCommand):
                         failures.append(
                             f"{spec['slug']}/{difficulty}: duplicate solution sequence {sequence} in cases {case_ids_for_sequence}"
                         )
+                for rule, case_ids_for_rule in rendered_target_rules.items():
+                    if len(case_ids_for_rule) > 1:
+                        failures.append(
+                            f"{spec['slug']}/{difficulty}: duplicate target rule {rule} in cases {case_ids_for_rule}"
+                        )
+                for state, case_ids_for_state in rendered_target_states.items():
+                    if len(case_ids_for_state) > 1:
+                        failures.append(
+                            f"{spec['slug']}/{difficulty}: duplicate target state {state} in cases {case_ids_for_state}"
+                        )
         if failures:
             raise CommandError("Module 1 seed validation failed:\n" + "\n".join(failures))
+
+    def _blueprint_placeholders(self, blueprint: dict[str, Any]) -> set[str]:
+        placeholders: set[str] = set()
+        for key in (
+            "slug_template",
+            "label_template",
+            "subtemplate_signature",
+            "initial_state_template",
+            "target_rule_template",
+            "solution_commands_template",
+            "student_context_template",
+        ):
+            self._collect_placeholders(placeholders, blueprint.get(key))
+        return placeholders
+
+    def _collect_placeholders(self, placeholders: set[str], value: Any) -> None:
+        if isinstance(value, dict):
+            for key, item in value.items():
+                self._collect_placeholders(placeholders, key)
+                self._collect_placeholders(placeholders, item)
+            return
+        if isinstance(value, (list, tuple)):
+            for item in value:
+                self._collect_placeholders(placeholders, item)
+            return
+        if not isinstance(value, str):
+            return
+        placeholders.update(match.group(1) for match in PLACEHOLDER_RE.finditer(value))
 
     def _reset_module_one(self, *, confirm: bool):
         if not settings.DEBUG:
@@ -2951,7 +3033,7 @@ class Command(BaseCommand):
 <section class=\"lesson-overview\">
   <h1>{title}</h1>
   <p>{subtitle}</p>
-  <p>This lesson overview explains the Git concept before practice. Open the scenario preview to see a command warm-up, then start a generated variant from the scenario card.</p>
+  <p>This lesson overview explains the Git concept before practice. Open the command preview to see a command warm-up, then start a generated variant from the scenario card.</p>
 </section>
 """.strip()
 
@@ -3041,15 +3123,15 @@ class Command(BaseCommand):
             "demo_dag_config": {},
             "custom_pages": [
                 {
-                    "id": "scenario-context",
-                    "title": "Scenario context",
-                    "subtitle": "How this preview connects to the generated scenario.",
+                    "id": "practice-context",
+                    "title": "Practice context",
+                    "subtitle": "How this command preview connects to practice.",
                     "blocks": [
                         {"type": "paragraph", "body": spec["explanation"]},
                         {
                             "type": "callout",
                             "title": "Practice purpose",
-                            "body": "Use the reusable command pages with this scenario's target paths, messages, and repository state.",
+                            "body": "Use the reusable command pages to understand behavior before entering a generated variant.",
                         },
                         {
                             "type": "bullet_list",

@@ -32,6 +32,7 @@ vi.mock('@/features/scenarios/components/SkillFocusPreviewModal', () => ({
 }))
 
 vi.mock('@/features/scenarios/utils/scenarioCache', () => ({
+  invalidateScenarioProgressQueries: vi.fn(),
   syncScenarioSessionInCache: vi.fn(),
 }))
 

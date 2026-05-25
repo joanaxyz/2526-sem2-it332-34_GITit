@@ -84,6 +84,12 @@ if "postgresql" in DATABASES["default"].get("ENGINE", ""):
         DATABASES["default"].setdefault("OPTIONS", {})["prepare_threshold"] = None
 
 REDIS_URL = env("REDIS_URL", default="")
+# Refresh-token revocation is stored in the configured Django cache. The
+# process-local fallback is useful for development, but production needs a
+# shared cache so logout and rotated-token revocation apply across workers.
+if not DEBUG and not REDIS_URL:
+    raise RuntimeError("REDIS_URL is required in production for shared token revocation cache.")
+
 if REDIS_URL:
     CACHES = {
         "default": {

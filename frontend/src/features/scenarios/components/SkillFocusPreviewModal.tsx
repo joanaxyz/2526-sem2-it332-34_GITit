@@ -30,6 +30,7 @@ import type {
   ScenarioSkillFocus,
 } from '@/features/scenarios/types'
 import { Badge } from '@/shared/components/Badge'
+import { queryKeys } from '@/shared/api/queryKeys'
 import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
 import { cn } from '@/shared/utils/cn'
@@ -84,7 +85,7 @@ export function SkillFocusPreviewModal({
   onProceed?: () => void
 }) {
   const detailQuery = useQuery({
-    queryKey: ['skill-focus', scenario.slug],
+    queryKey: queryKeys.skillFocus(scenario.slug),
     queryFn: () => scenariosApi.getSkillFocus(scenario.slug),
     staleTime: 5 * 60 * 1000,
   })
@@ -177,6 +178,7 @@ function SkillFocusPreviewContent({
   const canGoPrevious = Boolean(previousLocation)
   const canGoNext = Boolean(nextLocation)
   const isDemoView = view === 'demo'
+  const previewLabel = preview?.diagnostic ? 'Diagnostic command preview' : 'Command preview'
 
   function selectPage(nextCommandIndex: number, nextPageIndex: number) {
     const nextCommand = commands[nextCommandIndex]
@@ -256,7 +258,7 @@ function SkillFocusPreviewContent({
                     {difficultyLabel ? <Badge variant="blue">{difficultyLabel}</Badge> : null}
                     <Badge variant="outline">{preview?.focus_label ?? scenario.focus}</Badge>
                   </div>
-                  <p className="text-xs font-semibold uppercase text-primary">Scenario preview</p>
+                  <p className="text-xs font-semibold uppercase text-primary">{previewLabel}</p>
                   <h3 className="mt-1 text-base font-extrabold leading-tight">{scenario.title}</h3>
                   {isDemoView ? (
                     <p className="mt-3 text-xs font-semibold uppercase text-muted-foreground">Demo</p>
@@ -269,7 +271,7 @@ function SkillFocusPreviewContent({
                     {isDemoView ? 'Try commands in a safe preview repository' : selectedPage.heading ?? selectedPage.title}
                   </h4>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    {isDemoView ? 'Shared demo for this scenario preview' : `Page ${pageIndex + 1} of ${selectedCommand.pages.length}`}
+                    {isDemoView ? 'Shared demo for this command preview' : `Page ${pageIndex + 1} of ${selectedCommand.pages.length}`}
                   </p>
                 </div>
               </div>
@@ -650,7 +652,7 @@ function buildPreviewCommands(
     [
       {
         id: 'overview',
-        title: scenario.focus || 'Scenario focus',
+        title: scenario.focus || 'Command focus',
         command: scenario.primary_focus_commands[0],
         explanation: scenario.short_explanation ?? scenario.summary,
         syntax_examples: scenario.command_preview?.syntax_examples ?? scenario.primary_focus_commands,

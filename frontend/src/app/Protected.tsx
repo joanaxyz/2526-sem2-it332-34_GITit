@@ -4,12 +4,13 @@ import { useQuery } from '@tanstack/react-query'
 
 import { authApi } from '@/features/auth/api/authApi'
 import { useAuthStore } from '@/features/auth/hooks/useAuth'
+import { queryKeys } from '@/shared/api/queryKeys'
 import { LoadingState } from '@/shared/components/LoadingState'
 
 export function Protected({ children }: { children: ReactElement }) {
   const token = useAuthStore((state) => state.accessToken)
   const bootstrapQuery = useQuery({
-    queryKey: ['auth-bootstrap'],
+    queryKey: queryKeys.authBootstrap,
     queryFn: async () => {
       const refreshed = await authApi.refresh()
       useAuthStore.getState().setAccessToken(refreshed.access)

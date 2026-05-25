@@ -8,8 +8,8 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import AccessToken
 
-from accounts.models import StudentProfile
-from accounts.services import TokenService
+from accounts.models import SessionRecord, StudentProfile
+from accounts.services import TokenBlacklistService, TokenService
 
 
 @pytest.fixture()
@@ -155,3 +155,21 @@ def test_refresh_for_deleted_user_returns_401(db, api_client):
     response = api_client.post("/api/auth/refresh/", format="json")
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_refresh_token_revocation_uses_configured_cache(db):
+    user = get_user_model().objects.create_user(
+        username="revoked@cit.edu",
+        email="revoked@cit.edu",
+        password="Password123!",
+    )
+    StudentProfile.objects.create(user=user, student_id="23-0001-003")
+    tokens = TokenService().issue_for_user(user)
+    blacklist = TokenBlacklistService()
+
+    assert blacklist.is_revoked(tokens.refresh) is False
+
+    blacklist.revoke(tokens.refresh)
+
+    assert blacklist.is_revoked(tokens.refresh) is True
+    assert SessionRecord.objects.get(refresh_jti=tokens.refresh_jti).revoked_at is not None

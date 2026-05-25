@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom'
 import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import { modulesApi } from '@/features/modules/api/modulesApi'
 import { ModuleCard } from '@/features/modules/components/ModuleCard'
+import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { ModulesSkeleton } from '@/shared/components/Skeleton'
 
@@ -18,7 +19,7 @@ export function ModulesPage() {
     return new Set()
   })
   const { data, error, isError, isLoading } = useQuery({
-    queryKey: ['modules'],
+    queryKey: queryKeys.modules,
     queryFn: modulesApi.listModules,
     staleTime: 5 * 60 * 1000,
   })
@@ -28,7 +29,7 @@ export function ModulesPage() {
   )
   const scenarioModuleIdKey = scenarioModuleIds.join(',')
   const scenarioSummaryQuery = useQuery({
-    queryKey: ['module-scenarios-summary', scenarioModuleIdKey],
+    queryKey: queryKeys.moduleScenariosSummary(scenarioModuleIdKey),
     queryFn: () => scenariosApi.listForModules(scenarioModuleIds),
     enabled: scenarioModuleIds.length > 0,
     staleTime: 5 * 60 * 1000,
@@ -56,7 +57,7 @@ export function ModulesPage() {
   useEffect(() => {
     if (!scenarioSummaryQuery.data) return
     for (const [moduleId, scenarios] of Object.entries(scenarioSummaryQuery.data)) {
-      queryClient.setQueryData(['module-scenarios', Number(moduleId)], scenarios)
+      queryClient.setQueryData(queryKeys.moduleScenarios(Number(moduleId)), scenarios)
     }
   }, [queryClient, scenarioSummaryQuery.data])
 

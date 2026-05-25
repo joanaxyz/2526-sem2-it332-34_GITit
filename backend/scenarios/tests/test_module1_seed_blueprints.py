@@ -286,3 +286,79 @@ def test_module_one_seed_rejects_duplicate_solutions_without_waiver(db):
 
     with pytest.raises(CommandError, match="duplicate solution sequence"):
         command._validate_seed_specs(specs)
+
+
+@override_settings(DEBUG=True)
+def test_module_one_seed_rejects_missing_placeholders(db):
+    command = __import__(
+        "learning.management.commands.seed_module1_scenarios",
+        fromlist=["Command"],
+    ).Command()
+    specs = [
+        {
+            "slug": "missing-placeholder-demo",
+            "difficulties": {
+                "easy": {
+                    "blueprints": [
+                        {
+                            "slug": "missing",
+                            "slug_template": "missing-{{case_id}}",
+                            "label_template": "Missing {{missing_value}}",
+                            "subtemplate_signature": "missing",
+                            "parameter_pools": {
+                                "cases": [{"case_id": "one", "answer_anchor": "one"}]
+                            },
+                            "initial_state_template": {},
+                            "target_rule_template": {},
+                            "solution_commands_template": ["git status"],
+                            "student_context_template": {},
+                        }
+                    ]
+                }
+            },
+        }
+    ]
+
+    with pytest.raises(CommandError, match="missing case fields"):
+        command._validate_seed_specs(specs)
+
+
+@override_settings(DEBUG=True)
+def test_module_one_seed_rejects_unused_case_fields(db):
+    command = __import__(
+        "learning.management.commands.seed_module1_scenarios",
+        fromlist=["Command"],
+    ).Command()
+    specs = [
+        {
+            "slug": "unused-field-demo",
+            "difficulties": {
+                "easy": {
+                    "blueprints": [
+                        {
+                            "slug": "unused",
+                            "slug_template": "unused-{{case_id}}",
+                            "label_template": "Unused {{case_id}}",
+                            "subtemplate_signature": "unused",
+                            "parameter_pools": {
+                                "cases": [
+                                    {
+                                        "case_id": "one",
+                                        "answer_anchor": "one",
+                                        "dead_metadata": "not referenced",
+                                    }
+                                ]
+                            },
+                            "initial_state_template": {},
+                            "target_rule_template": {},
+                            "solution_commands_template": ["git status"],
+                            "student_context_template": {},
+                        }
+                    ]
+                }
+            },
+        }
+    ]
+
+    with pytest.raises(CommandError, match="unused case fields"):
+        command._validate_seed_specs(specs)

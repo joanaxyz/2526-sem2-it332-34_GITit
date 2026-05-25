@@ -4,6 +4,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.utils import timezone
+from rest_framework.test import APIRequestFactory, force_authenticate
 
 from common.constants import (
     COMMAND_COUNTED,
@@ -19,6 +20,7 @@ from common.exceptions import Locked
 from learning.models import Lesson, OrientationProgress
 from progress.models import StreakRecord, StudentProgress
 from review.services import ReviewModeService
+from retries.services import VariantSelectionService
 from scenarios.builders import RuntimeScenarioBuilder
 from scenarios.models import (
     CompletionRecord,
@@ -28,6 +30,7 @@ from scenarios.models import (
     ScenarioSession,
     ScenarioSkillFocus,
     ScenarioVariant,
+    StepLog,
 )
 from scenarios.selectors import scenario_status_payload, scenario_status_payloads
 from scenarios.serializers import session_payload
@@ -36,11 +39,12 @@ from scenarios.services import (
     CommandProcessingService,
     ScenarioSessionService,
 )
+from scenarios.views import SkillFocusDemoCommandAPIView
 
 
 @pytest.fixture()
 def seeded_content(db):
-    call_command("seed_starter_content")
+    call_command("seed_module1_scenarios")
 
 
 @pytest.fixture()
@@ -92,7 +96,7 @@ def test_primary_session_can_start_before_orientation_completion(db, seeded_cont
     StudentProgress.objects.create(user=user)
     StreakRecord.objects.create(user=user)
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
 
@@ -108,7 +112,7 @@ def test_primary_session_can_start_before_orientation_completion(db, seeded_cont
 
 def test_diagnostic_commands_are_logged_but_not_counted(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     session = ScenarioSessionService().start_session(
@@ -129,9 +133,28 @@ def test_diagnostic_commands_are_logged_but_not_counted(student):
     assert session.non_counted_diagnostic_total == 1
 
 
+def test_diagnostic_command_preview_does_not_create_playable_records(student):
+    preview = ScenarioSkillFocus.objects.get(slug="inspect-repository-state")
+    assert preview.difficulty_instances.filter(is_published=True).count() == 0
+
+    request = APIRequestFactory().post(
+        "/api/scenarios/inspect-repository-state/demo-command/",
+        {"command": "git status"},
+        format="json",
+    )
+    force_authenticate(request, user=student)
+    response = SkillFocusDemoCommandAPIView.as_view()(request, slug=preview.slug)
+
+    assert response.status_code == 200
+    assert response.data["command_classification"] == "diagnostic"
+    assert ScenarioSession.objects.filter(user=student).count() == 0
+    assert CompletionRecord.objects.filter(user=student).count() == 0
+    assert StepLog.objects.count() == 0
+
+
 def test_state_based_completion_creates_completion_record(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     session = complete_required_accurate_sessions(user=student, difficulty=difficulty)
@@ -144,7 +167,7 @@ def test_state_based_completion_creates_completion_record(student):
 
 def test_session_payload_includes_completion_when_record_exists(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     session = complete_required_accurate_sessions(user=student, difficulty=difficulty)
@@ -159,7 +182,7 @@ def test_session_payload_includes_completion_when_record_exists(student):
 
 def test_session_payload_expected_state_uses_rich_snapshot_and_scaffolding(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     session = ScenarioSessionService().start_session(
@@ -203,7 +226,7 @@ def test_session_payload_expected_state_uses_rich_snapshot_and_scaffolding(stude
 
 def test_starting_session_creates_persisted_generated_variant_with_student_context(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     before_count = ScenarioVariant.objects.filter(
@@ -238,13 +261,15 @@ def test_starting_session_creates_persisted_generated_variant_with_student_conte
     assert variant.solution_commands
     assert payload["student_context"] == variant.student_context
     assert payload["scenario"]["student_context"] == variant.student_context
+    assert "task_prompt" not in payload["scenario"]
+    assert "success_conditions" not in serialized_payload
     for command in variant.solution_commands:
         assert command not in serialized_payload
 
 
 def test_session_payload_falls_back_for_old_variants_without_student_context(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     session = ScenarioSessionService().start_session(
@@ -259,12 +284,13 @@ def test_session_payload_falls_back_for_old_variants_without_student_context(stu
     payload = session_payload(session, include_steps=False)
 
     assert payload["student_context"]["story"] == session.difficulty_instance.narrative
-    assert payload["student_context"]["situation"] == session.difficulty_instance.task_prompt
+    assert "situation" not in payload["student_context"]
+    assert "task_prompt" not in payload["scenario"]
 
 
 def test_active_session_payload_and_command_submit_do_not_regenerate_variant(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     session = ScenarioSessionService().start_session(
@@ -294,7 +320,7 @@ def test_active_session_payload_and_command_submit_do_not_regenerate_variant(stu
 
 def test_generated_context_exposes_checked_values_without_solution_commands(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     session = ScenarioSessionService().start_session(
@@ -332,7 +358,7 @@ def test_generated_context_exposes_excluded_files_and_remote_values(student):
         assert path.lower() in ignore_context
 
     clone_difficulty = DifficultyInstance.objects.get(
-        scenario__slug="clone-project-and-inspect",
+        scenario__slug="clone-remote-repository",
         difficulty="easy",
     )
     clone_session = ScenarioSessionService().start_session(
@@ -348,7 +374,7 @@ def test_generated_context_exposes_excluded_files_and_remote_values(student):
 
 def test_partial_staging_requires_the_selected_file_scope(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="stage-selected-changes",
+        scenario__slug="partial-staging-add-p",
         difficulty="easy",
     )
     session = ScenarioSessionService().start_session(
@@ -385,7 +411,7 @@ def test_partial_staging_requires_the_selected_file_scope(student):
 
 def test_retry_after_failure_uses_changed_variant_when_available(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     prior = ScenarioSessionService().start_session(
@@ -417,9 +443,40 @@ def test_retry_after_failure_uses_changed_variant_when_available(student):
     assert retry.rta_eligible is True
 
 
+def test_semantic_variant_identity_ignores_generation_seed(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="stage-and-commit-basic-workflow",
+        difficulty="easy",
+    )
+    builder = RuntimeScenarioBuilder()
+    blueprint = difficulty.generation_blueprints.get(is_published=True)
+    candidate = builder._candidates([blueprint])[0]
+
+    first = builder._build_variant(
+        candidate,
+        user=student,
+        difficulty_instance=difficulty,
+        generation_seed="seed-one",
+    )
+    second = builder._build_variant(
+        candidate,
+        user=student,
+        difficulty_instance=difficulty,
+        generation_seed="seed-two",
+    )
+
+    assert first.slug != second.slug
+    assert first.generation_seed != second.generation_seed
+    assert first.variant_fingerprint == second.variant_fingerprint
+    assert (
+        VariantSelectionService().changed_between(prior=first, current=second)
+        is False
+    )
+
+
 def test_retry_from_active_session_requires_exit_first(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     prior = ScenarioSessionService().start_session(
@@ -451,7 +508,7 @@ def test_retry_from_active_session_requires_exit_first(student):
 
 def test_retry_does_not_create_duplicate_active_session(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     prior = ScenarioSessionService().start_session(
@@ -491,7 +548,7 @@ def test_retry_does_not_create_duplicate_active_session(student):
 
 def test_starting_active_difficulty_requires_exit_first(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     active = ScenarioSessionService().start_session(
@@ -521,7 +578,7 @@ def test_starting_active_difficulty_requires_exit_first(student):
 
 def test_review_mode_logs_separately_without_new_completion(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     complete_required_accurate_sessions(user=student, difficulty=difficulty)
@@ -552,7 +609,7 @@ def test_review_mode_logs_separately_without_new_completion(student):
 
 def test_scenario_payload_includes_latest_attempt_accuracy(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     session = ScenarioSessionService().start_session(
@@ -578,23 +635,24 @@ def test_scenario_payload_includes_latest_attempt_accuracy(student):
 
 
 def test_scenario_summary_payload_excludes_heavy_preview_fields(student):
-    scenario = ScenarioSkillFocus.objects.get(slug="form-clean-commit", is_published=True)
+    scenario = ScenarioSkillFocus.objects.get(slug="stage-and-commit-basic-workflow", is_published=True)
 
     payload = scenario_status_payload(user=student, scenario=scenario)
     list_payload = scenario_status_payloads(
         user=student, scenarios=[scenario], include_preview=False
     )[0]
 
-    assert "demo_repository_state" in payload
-    assert "safe_demo_commands" in payload
+    assert "demo_repository_state" not in payload
+    assert "safe_demo_commands" not in payload
     assert payload["command_preview"]["supported_demo_commands"]
+    assert payload["command_preview"]["demo_repository_state"]
     assert "demo_repository_state" not in list_payload
     assert "demo_explanation_steps" not in list_payload
     assert "command_preview" not in list_payload
 
 
 def test_command_preview_resolves_reusable_command_content(student):
-    scenario = ScenarioSkillFocus.objects.get(slug="form-clean-commit", is_published=True)
+    scenario = ScenarioSkillFocus.objects.get(slug="stage-and-commit-basic-workflow", is_published=True)
 
     payload = scenario_status_payload(user=student, scenario=scenario)
     preview = payload["command_preview"]
@@ -611,11 +669,11 @@ def test_command_preview_resolves_reusable_command_content(student):
     assert status_command["sections"][1]["type"] == "form"
     assert status_command["pages"][0]["blocks"][0]["type"] == "paragraph"
     assert status_command["demo_steps"][0]["repository_state"]
-    assert any(command["key"] == "scenario-context" for command in preview["commands"])
+    assert any(command["key"] == "practice-context" for command in preview["commands"])
 
 
 def test_command_preview_applies_scenario_page_customization(student):
-    scenario = ScenarioSkillFocus.objects.get(slug="form-clean-commit", is_published=True)
+    scenario = ScenarioSkillFocus.objects.get(slug="stage-and-commit-basic-workflow", is_published=True)
     scenario.command_preview_config = {
         **scenario.command_preview_config,
         "command_refs": [
@@ -659,7 +717,7 @@ def test_command_preview_applies_scenario_page_customization(student):
 
 
 def test_command_preview_deduplicates_variant_refs_under_one_command(student):
-    scenario = ScenarioSkillFocus.objects.get(slug="form-clean-commit", is_published=True)
+    scenario = ScenarioSkillFocus.objects.get(slug="stage-and-commit-basic-workflow", is_published=True)
     scenario.command_preview_config = {
         **scenario.command_preview_config,
         "command_refs": [
@@ -695,7 +753,7 @@ def test_command_preview_deduplicates_variant_refs_under_one_command(student):
 
 def test_latest_attempt_accuracy_reflects_extra_counted_actions(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     session = ScenarioSessionService().start_session(
@@ -718,7 +776,7 @@ def test_latest_attempt_accuracy_reflects_extra_counted_actions(student):
 
 def test_completed_scenario_remains_retryable_until_three_mastered_instances(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     session = ScenarioSessionService().start_session(
@@ -726,6 +784,11 @@ def test_completed_scenario_remains_retryable_until_three_mastered_instances(stu
         difficulty_instance=difficulty,
         source_entry_point="lesson",
     )
+    session.command_policy_snapshot = {
+        **session.command_policy_snapshot,
+        "max_counted_commands": 10,
+    }
+    session.save(update_fields=["command_policy_snapshot"])
     CommandProcessingService().submit_command(session=session, command="git status --wat")
     for command in session.variant.solution_commands:
         CommandProcessingService().submit_command(session=session, command=command)
@@ -772,7 +835,7 @@ def test_completed_scenario_remains_retryable_until_three_mastered_instances(stu
 
 def test_abandoned_retry_becomes_latest_zero_mastery(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     session = ScenarioSessionService().start_session(
@@ -780,6 +843,11 @@ def test_abandoned_retry_becomes_latest_zero_mastery(student):
         difficulty_instance=difficulty,
         source_entry_point="lesson",
     )
+    session.command_policy_snapshot = {
+        **session.command_policy_snapshot,
+        "max_counted_commands": 10,
+    }
+    session.save(update_fields=["command_policy_snapshot"])
     CommandProcessingService().submit_command(session=session, command="git status --wat")
     for command in session.variant.solution_commands:
         CommandProcessingService().submit_command(session=session, command=command)
@@ -808,7 +876,7 @@ def test_abandoned_retry_becomes_latest_zero_mastery(student):
 
 def test_later_completed_retry_replaces_prior_mastery_even_when_worse(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     difficulty.required_successful_attempts = 1
@@ -852,7 +920,7 @@ def test_later_completed_retry_replaces_prior_mastery_even_when_worse(student):
 
 def test_review_sessions_do_not_replace_primary_accuracy(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     primary = ScenarioSessionService().start_session(
@@ -901,10 +969,10 @@ def test_seeded_curriculum_has_full_variant_set_and_one_primary_focus(seeded_con
     )
     assert ScenarioSkillFocus.objects.filter(is_published=True).count() == 9
     assert DifficultyInstance.objects.filter(is_published=True).count() == 24
-    assert ScenarioGenerationBlueprint.objects.filter(is_published=True).count() == 24
+    assert ScenarioGenerationBlueprint.objects.filter(is_published=True).count() == 25
     assert ScenarioVariant.objects.filter(is_published=True, is_generated=False).count() == 0
     assert all(
-        len(scenario.primary_focus_commands) == 1
+        scenario.primary_focus_commands
         for scenario in ScenarioSkillFocus.objects.filter(is_published=True)
     )
 
@@ -919,41 +987,44 @@ def test_module_one_scenarios_have_all_difficulties_and_generation_blueprints(se
             instance.difficulty: instance
             for instance in scenario.difficulty_instances.filter(is_published=True)
         }
-        if scenario.slug == "read-repository-state":
+        if scenario.slug == "inspect-repository-state":
             assert difficulties == {}
             continue
         assert set(difficulties) == expected_difficulties
         for instance in difficulties.values():
-            blueprint = instance.generation_blueprints.get(is_published=True)
-            assert blueprint.generation_count >= 1
-            assert blueprint.parameter_pools
-            assert blueprint.initial_state_template
-            assert blueprint.target_rule_template
-            assert blueprint.solution_commands_template
-            assert blueprint.student_context_template
+            blueprints = instance.generation_blueprints.filter(is_published=True)
+            assert blueprints.exists()
+            for blueprint in blueprints:
+                assert blueprint.generation_count >= 1
+                assert blueprint.parameter_pools
+                assert blueprint.initial_state_template
+                assert blueprint.target_rule_template
+                assert blueprint.solution_commands_template
+                assert blueprint.student_context_template
 
 
 def test_module_one_required_attempt_counts_come_from_curriculum(seeded_content):
     hard_review = DifficultyInstance.objects.get(
-        scenario__slug="integrate-local-workflow",
+        scenario__slug="module1-integrated-local-workflow",
         difficulty="hard",
     )
     easy_partial = DifficultyInstance.objects.get(
-        scenario__slug="stage-selected-changes",
+        scenario__slug="partial-staging-add-p",
         difficulty="easy",
     )
 
-    assert hard_review.required_successful_attempts == 3
-    assert easy_partial.required_successful_attempts == 2
+    assert hard_review.required_successful_attempts == 2
+    assert easy_partial.required_successful_attempts == 3
 
 
 def test_primary_focus_is_not_polluted_by_supporting_workflow_commands(seeded_content):
-    scenario = ScenarioSkillFocus.objects.get(slug="form-clean-commit", is_published=True)
+    scenario = ScenarioSkillFocus.objects.get(slug="stage-and-commit-basic-workflow", is_published=True)
 
-    assert scenario.primary_focus_commands == ["git commit"]
+    assert scenario.primary_focus_commands == ["git add", "git commit"]
     assert "git status" in scenario.supporting_diagnostic_commands
     assert "git diff" in scenario.supporting_diagnostic_commands
-    assert "git add" not in scenario.primary_focus_commands
+    assert "git status" not in scenario.primary_focus_commands
+    assert "git diff" not in scenario.primary_focus_commands
 
 
 def test_command_classifier_keeps_diagnostics_free_and_actions_counted():
@@ -1008,7 +1079,7 @@ def test_command_classifier_keeps_diagnostics_free_and_actions_counted():
 
 def test_invalid_git_syntax_consumes_action_budget(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     session = ScenarioSessionService().start_session(
@@ -1034,7 +1105,7 @@ def test_invalid_git_syntax_consumes_action_budget(student):
 
 def test_counted_command_reaching_max_limit_fails_session(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     session = ScenarioSessionService().start_session(
@@ -1068,7 +1139,7 @@ def test_counted_command_reaching_max_limit_fails_session(student):
 
 def test_failed_session_blocks_further_commands(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     session = ScenarioSessionService().start_session(
@@ -1087,7 +1158,7 @@ def test_failed_session_blocks_further_commands(student):
 
 def test_diagnostic_commands_remain_non_counted_inside_state_based_sessions(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     session = ScenarioSessionService().start_session(
@@ -1109,15 +1180,25 @@ def test_diagnostic_commands_remain_non_counted_inside_state_based_sessions(stud
 
 
 def test_init_scenario_does_not_complete_by_cloning_after_init(student):
-    difficulty = DifficultyInstance.objects.get(
-        scenario__slug="initialize-project-and-first-commit",
+    easy = DifficultyInstance.objects.get(
+        scenario__slug="initialize-local-repository",
         difficulty="easy",
+    )
+    complete_required_accurate_sessions(user=student, difficulty=easy)
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="initialize-local-repository",
+        difficulty="medium",
     )
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
         source_entry_point="lesson",
     )
+    session.command_policy_snapshot = {
+        **session.command_policy_snapshot,
+        "max_counted_commands": 3,
+    }
+    session.save(update_fields=["command_policy_snapshot"])
 
     CommandProcessingService().submit_command(session=session, command="git init")
     response = CommandProcessingService().submit_command(
@@ -1129,22 +1210,31 @@ def test_init_scenario_does_not_complete_by_cloning_after_init(student):
     assert response["command_classification"] == COMMAND_COUNTED
     assert session.status == "started"
     assert session.repository_state["repository_initialized"] is True
-    assert session.repository_state["working_tree"]
     assert not CompletionRecord.objects.filter(
         user=student, difficulty_instance=difficulty
     ).exists()
 
 
 def test_init_scenario_does_not_complete_by_cloning_first(student):
-    difficulty = DifficultyInstance.objects.get(
-        scenario__slug="initialize-project-and-first-commit",
+    easy = DifficultyInstance.objects.get(
+        scenario__slug="initialize-local-repository",
         difficulty="easy",
+    )
+    complete_required_accurate_sessions(user=student, difficulty=easy)
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="initialize-local-repository",
+        difficulty="medium",
     )
     session = ScenarioSessionService().start_session(
         user=student,
         difficulty_instance=difficulty,
         source_entry_point="lesson",
     )
+    session.command_policy_snapshot = {
+        **session.command_policy_snapshot,
+        "max_counted_commands": 3,
+    }
+    session.save(update_fields=["command_policy_snapshot"])
 
     response = CommandProcessingService().submit_command(
         session=session,
@@ -1161,7 +1251,7 @@ def test_init_scenario_does_not_complete_by_cloning_first(student):
 
 def test_clone_scenario_does_not_complete_by_initializing_folder(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="clone-project-and-inspect",
+        scenario__slug="clone-remote-repository",
         difficulty="easy",
     )
     session = ScenarioSessionService().start_session(
@@ -1169,6 +1259,11 @@ def test_clone_scenario_does_not_complete_by_initializing_folder(student):
         difficulty_instance=difficulty,
         source_entry_point="lesson",
     )
+    session.command_policy_snapshot = {
+        **session.command_policy_snapshot,
+        "max_counted_commands": 3,
+    }
+    session.save(update_fields=["command_policy_snapshot"])
 
     response = CommandProcessingService().submit_command(session=session, command="git init")
 
@@ -1184,7 +1279,7 @@ def test_clone_scenario_does_not_complete_by_initializing_folder(student):
 
 def test_retry_after_failed_retry_resets_action_budget(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     first = ScenarioSessionService().start_session(
@@ -1225,7 +1320,7 @@ def test_retry_after_failed_retry_resets_action_budget(student):
 
 def test_generated_variants_do_not_contain_unresolved_target_placeholders(student):
     difficulty = DifficultyInstance.objects.get(
-        scenario__slug="form-clean-commit",
+        scenario__slug="stage-and-commit-basic-workflow",
         difficulty="easy",
     )
     session = ScenarioSessionService().start_session(

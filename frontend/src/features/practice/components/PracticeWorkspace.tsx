@@ -19,7 +19,8 @@ import { useCommandSubmission } from '@/features/practice/hooks/useCommandSubmis
 import { useScenarioSession } from '@/features/practice/hooks/useScenarioSession'
 import { reviewApi } from '@/features/review/api/reviewApi'
 import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
-import { syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
+import { invalidateScenarioProgressQueries, syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
+import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { PracticeWorkspaceSkeleton } from '@/shared/components/Skeleton'
 import { Button } from '@/shared/components/Button'
@@ -78,7 +79,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const sessionId = Number(params.sessionId)
-  const { query, session, setSession, lines, setLines, feedback, setFeedback } = useScenarioSession(sessionId)
+  const { query, session, lines, setLines, feedback, resetLocalSessionState } = useScenarioSession(sessionId)
   const mutation = useCommandSubmission(sessionId, reviewMode)
   const [dismissedCompletionSessionId, setDismissedCompletionSessionId] = useState<number | null>(null)
   const [terminalRatio, setTerminalRatio] = useState(DEFAULT_TERMINAL_RATIO)
@@ -99,8 +100,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     },
     onSuccess: (updatedSession) => {
       syncScenarioSessionInCache(queryClient, updatedSession)
-      void queryClient.invalidateQueries({ queryKey: ['modules'] })
-      void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
+      invalidateScenarioProgressQueries(queryClient)
       navigate(`/modules?module=${updatedSession.module.id}`)
     },
   })
@@ -112,8 +112,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
       }),
     onSuccess: (next) => {
       syncScenarioSessionInCache(queryClient, next)
-      void queryClient.invalidateQueries({ queryKey: ['modules'] })
-      void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
+      invalidateScenarioProgressQueries(queryClient)
       if (session?.status === 'completed') setDismissedCompletionSessionId(session.id)
       navigate(`/practice/${next.id}`)
     },
@@ -122,8 +121,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     mutationFn: (difficultyInstanceId: number) => reviewApi.startReviewSession(difficultyInstanceId),
     onSuccess: (next) => {
       syncScenarioSessionInCache(queryClient, next)
-      void queryClient.invalidateQueries({ queryKey: ['modules'] })
-      void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
+      invalidateScenarioProgressQueries(queryClient)
       if (session?.status === 'completed') setDismissedCompletionSessionId(session.id)
       navigate(`/review/${next.id}`)
     },
@@ -135,15 +133,14 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     },
     onSuccess: (next) => {
       syncScenarioSessionInCache(queryClient, next)
-      void queryClient.invalidateQueries({ queryKey: ['modules'] })
-      void queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] })
+      invalidateScenarioProgressQueries(queryClient)
       setDismissedCompletionSessionId(null)
       setStartOverConfirmOpen(false)
       navigate(`/practice/${next.id}`)
     },
   })
   const moduleScenariosQuery = useQuery({
-    queryKey: ['module-scenarios', session?.module.id],
+    queryKey: queryKeys.moduleScenarios(session?.module.id),
     queryFn: () => scenariosApi.listForModule(session!.module.id),
     enabled: !!session?.module.id,
     staleTime: 5 * 60 * 1000,
@@ -165,8 +162,6 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     setLines((items) => [...items, { id: crypto.randomUUID(), kind: 'input', text: command }])
     mutation.mutate(command, {
       onSuccess: (response) => {
-        setSession(response.session)
-        setFeedback(response.step.contextual_feedback)
         setLines((items) => [
           ...items,
           {
@@ -175,6 +170,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             text: response.step.terminal_output,
           },
         ])
+        window.setTimeout(resetLocalSessionState, 0)
       },
       onError: (error) => {
         setLines((items) => [...items, { id: crypto.randomUUID(), kind: 'warning', text: error.message }])
