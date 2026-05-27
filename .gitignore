@@ -1,12 +1,52 @@
-.venv/
+# Environment files
 *.env
 !.env.example
+!.env.*.example
+
+# Python environments and caches
+.venv/
+venv/
+env/
 backend/.venv/
-backend/db.sqlite3
-backend/.pytest_cache/
+backend/env/
+__pycache__/
 backend/**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+backend/.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Django/local backend artifacts
+backend/db.sqlite3
+*.sqlite3
+*.log
+
+# Frontend dependencies and build artifacts
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
-backend/env/
+frontend/coverage/
+
+# Logs and debug outputs
+debug-*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS/editor cruft
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Project-specific generated folders
 scripts/
+md_files/
