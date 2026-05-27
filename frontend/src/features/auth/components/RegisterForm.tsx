@@ -1,26 +1,25 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { UserPlus } from 'lucide-react'
+import { Eye, EyeOff, Loader2, UserPlus } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import { authApi } from '@/features/auth/api/authApi'
+import { presentAuthError } from '@/features/auth/api/authError'
+import { PasswordStrengthIndicator } from '@/features/auth/components/PasswordStrengthIndicator'
 import { Button } from '@/shared/components/Button'
+import { cn } from '@/shared/utils/cn'
 
 const schema = z
   .object({
-    student_id: z
-      .string()
-      .trim()
-      .regex(/^\d{2}-\d{4}-\d{3}$/, 'Use the format NN-NNNN-NNN.'),
     first_name: z.string().trim().min(1, 'First name is required.'),
     last_name: z.string().trim().min(1, 'Last name is required.'),
     email: z
       .string()
       .trim()
-      .email('Enter a valid CIT email.')
-      .refine((value) => value.toLowerCase().endsWith('@cit.edu'), 'Use your @cit.edu email.')
+      .email('Enter a valid email address.')
       .transform((value) => value.toLowerCase()),
     password: z.string().min(8, 'Use at least eight characters.'),
     password_confirm: z.string().min(8),
@@ -32,62 +31,132 @@ const schema = z
 
 type FormValues = z.infer<typeof schema>
 
+const inputClasses =
+  'h-10 rounded-md border border-input bg-secondary px-3 text-sm outline-none transition focus:ring-2 focus:ring-ring'
+
 export function RegisterForm() {
   const navigate = useNavigate()
-  const form = useForm<FormValues>({ resolver: zodResolver(schema) })
+  const [showPassword, setShowPassword] = useState(false)
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
+  const [lastSubmittedValues, setLastSubmittedValues] = useState<FormValues | null>(null)
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    mode: 'onBlur',
+    reValidateMode: 'onBlur',
+  })
+  const passwordValue = form.watch('password') ?? ''
   const mutation = useMutation({
     mutationFn: authApi.register,
     onSuccess: () => {
       navigate('/login')
     },
   })
+  const errorPresentation = useMemo(
+    () => (mutation.error ? presentAuthError(mutation.error) : null),
+    [mutation.error],
+  )
 
   return (
     <form
-      className="flex flex-col gap-4"
-      onSubmit={form.handleSubmit((values) =>
+      className="flex flex-col gap-2.5"
+      onSubmit={form.handleSubmit((values) => {
+        setLastSubmittedValues(values)
         mutation.mutate({
-          student_id: values.student_id,
           first_name: values.first_name,
           last_name: values.last_name,
           email: values.email,
           password: values.password,
           password_confirm: values.password_confirm,
         })
-      )}
+      })}
     >
       <div>
-        <h2 className="text-3xl font-extrabold tracking-tight">Create account</h2>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">Register as a student and explore lessons or scenario practice at your own pace.</p>
+        <h2 className="text-2xl font-extrabold tracking-tight">Create account</h2>
       </div>
-      <label className="flex flex-col gap-2 text-sm font-semibold">
-        Student ID
-        <input className="h-11 rounded-md border border-input bg-secondary px-3 outline-none focus:ring-2 focus:ring-ring" autoComplete="username" {...form.register('student_id')} />
-      </label>
-      <label className="flex flex-col gap-2 text-sm font-semibold">
+      <label className="flex flex-col gap-1.5 text-sm font-semibold">
         First name
-        <input className="h-11 rounded-md border border-input bg-secondary px-3 outline-none focus:ring-2 focus:ring-ring" autoComplete="given-name" {...form.register('first_name')} />
+        <input className={cn(inputClasses, form.formState.errors.first_name && 'border-destructive focus:ring-destructive/30')} autoComplete="given-name" {...form.register('first_name')} />
+        {form.formState.errors.first_name ? <span className="text-xs font-normal text-destructive">{form.formState.errors.first_name.message}</span> : null}
       </label>
-      <label className="flex flex-col gap-2 text-sm font-semibold">
+      <label className="flex flex-col gap-1.5 text-sm font-semibold">
         Last name
-        <input className="h-11 rounded-md border border-input bg-secondary px-3 outline-none focus:ring-2 focus:ring-ring" autoComplete="family-name" {...form.register('last_name')} />
+        <input className={cn(inputClasses, form.formState.errors.last_name && 'border-destructive focus:ring-destructive/30')} autoComplete="family-name" {...form.register('last_name')} />
+        {form.formState.errors.last_name ? <span className="text-xs font-normal text-destructive">{form.formState.errors.last_name.message}</span> : null}
       </label>
-      <label className="flex flex-col gap-2 text-sm font-semibold">
-        CIT email
-        <input className="h-11 rounded-md border border-input bg-secondary px-3 outline-none focus:ring-2 focus:ring-ring" autoComplete="email" {...form.register('email')} />
+      <label className="flex flex-col gap-1.5 text-sm font-semibold">
+        Email
+        <input className={cn(inputClasses, form.formState.errors.email && 'border-destructive focus:ring-destructive/30')} autoComplete="email" {...form.register('email')} />
+        {form.formState.errors.email ? <span className="text-xs font-normal text-destructive">{form.formState.errors.email.message}</span> : null}
       </label>
-      <label className="flex flex-col gap-2 text-sm font-semibold">
+      <label className="flex flex-col gap-1.5 text-sm font-semibold">
         Password
-        <input className="h-11 rounded-md border border-input bg-secondary px-3 outline-none focus:ring-2 focus:ring-ring" type="password" {...form.register('password')} />
+        <div className="relative">
+          <input
+            className={cn(
+              `${inputClasses} w-full pr-10`,
+              form.formState.errors.password && 'border-destructive focus:ring-destructive/30',
+            )}
+            type={showPassword ? 'text' : 'password'}
+            {...form.register('password')}
+          />
+          <button
+            type="button"
+            className="absolute inset-y-0 right-0 grid w-10 place-items-center text-muted-foreground"
+            onClick={() => setShowPassword((value) => !value)}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+          >
+            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          </button>
+        </div>
+        {form.formState.errors.password ? <span className="text-xs font-normal text-destructive">{form.formState.errors.password.message}</span> : null}
+        <PasswordStrengthIndicator password={passwordValue} />
       </label>
-      <label className="flex flex-col gap-2 text-sm font-semibold">
+      <label className="flex flex-col gap-1.5 text-sm font-semibold">
         Confirm password
-        <input className="h-11 rounded-md border border-input bg-secondary px-3 outline-none focus:ring-2 focus:ring-ring" type="password" {...form.register('password_confirm')} />
+        <div className="relative">
+          <input
+            className={cn(
+              `${inputClasses} w-full pr-10`,
+              form.formState.errors.password_confirm && 'border-destructive focus:ring-destructive/30',
+            )}
+            type={showPasswordConfirm ? 'text' : 'password'}
+            {...form.register('password_confirm')}
+          />
+          <button
+            type="button"
+            className="absolute inset-y-0 right-0 grid w-10 place-items-center text-muted-foreground"
+            onClick={() => setShowPasswordConfirm((value) => !value)}
+            aria-label={showPasswordConfirm ? 'Hide password confirmation' : 'Show password confirmation'}
+          >
+            {showPasswordConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          </button>
+        </div>
+        {form.formState.errors.password_confirm ? <span className="text-xs font-normal text-destructive">{form.formState.errors.password_confirm.message}</span> : null}
       </label>
-      {Object.values(form.formState.errors)[0]?.message ? <p className="text-sm text-destructive">{String(Object.values(form.formState.errors)[0]?.message)}</p> : null}
-      {mutation.error ? <p className="text-sm text-destructive">{mutation.error.message}</p> : null}
+      {errorPresentation ? (
+        <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+          <p>{errorPresentation.message}</p>
+          {errorPresentation.retryable && lastSubmittedValues ? (
+            <button
+              type="button"
+              className="mt-2 text-xs font-semibold underline underline-offset-2"
+              onClick={() =>
+                mutation.mutate({
+                  first_name: lastSubmittedValues.first_name,
+                  last_name: lastSubmittedValues.last_name,
+                  email: lastSubmittedValues.email,
+                  password: lastSubmittedValues.password,
+                  password_confirm: lastSubmittedValues.password_confirm,
+                })
+              }
+            >
+              Retry
+            </button>
+          ) : null}
+        </div>
+      ) : null}
       <Button type="submit" disabled={mutation.isPending}>
-        <UserPlus data-icon="inline-start" />
+        {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <UserPlus data-icon="inline-start" />}
         {mutation.isPending ? 'Creating account' : 'Create account'}
       </Button>
       <p className="text-sm text-muted-foreground">
