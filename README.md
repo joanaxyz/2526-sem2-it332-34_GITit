@@ -1,11 +1,10 @@
 # GIT it!
 
-GIT it! is a web-based, scenario-driven Git learning platform built for third-year BSIT students at CIT-U. It trains practical Git problem-solving through a simulated terminal, live repository visualization, and state-based evaluation inside a consequence-safe environment.
+GIT it! is a web-based, scenario-driven Git learning platform. It trains practical Git problem-solving through a simulated terminal, live repository visualization, and state-based evaluation inside a consequence-safe environment.
 
 This repository contains the current implementation split into:
 - `frontend/` - React + Vite single-page application
 - `backend/` - Django + Django REST Framework API, simulator, evaluator, and persistence
-- `docs/` and `md_files/` - SRS/SDD/proposal, curriculum, ADRs, scenario blueprints, use-case specs, and technical audits
 
 ## Why This System Exists
 
@@ -92,13 +91,11 @@ Planned Phase 2 modules:
 ## Metrics and Evaluation Model
 
 The system computes progress from logs (not command quizzes), including:
-- `OLCR` - Orientation Lesson Completion Rate
 - `SCR` - Scenario Completion Rate
 - `ARC` - Average Retry Count
 - `CAR` - Command Accuracy Rate (counted commands vs authored threshold)
 - `HLCR` - Hard-Level Completion Rate
 - `RTA` - Retry Transfer Accuracy (changed-variant retries)
-- `SAR` - Scenario Abandonment Rate
 
 ## Local Development Setup
 
@@ -141,11 +138,5 @@ Backend (example):
 cd backend
 python manage.py test
 ```
-
-## Documentation Sources
-
-Primary project documentation used for this system description is in:
-- `docs/` - SRS, SDD, proposal, curriculum guides, module docs, ADRs, evaluator audits
-- `md_files/` - use-case PlantUML specs, scenario blueprints, mirrored ADR/audit notes
 
 These documents are the authoritative source for detailed requirements, research framing, and module-level behavior.
