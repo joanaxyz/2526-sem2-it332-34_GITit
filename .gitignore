@@ -50,3 +50,8 @@ Thumbs.db
 # Project-specific generated folders
 scripts/
 md_files/
+
+
+frontend/src/features/auth/components/LoginForm.test.tsx
+frontend/src/features/auth/components/RegisterForm.test.tsx
+frontend/src/features/auth/utils/passwordStrength.test.ts
