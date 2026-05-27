@@ -1,3 +1,7 @@
+import json
+import time
+from pathlib import Path
+
 from django.conf import settings
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -14,6 +18,26 @@ from accounts.services import (
     set_refresh_cookie,
 )
 
+_DEBUG_LOG_PATH = Path(__file__).resolve().parents[2] / "debug-0efce9.log"
+
+
+def _agent_debug_log(hypothesis_id: str, location: str, message: str, data: dict) -> None:
+    # #region agent log
+    try:
+        payload = {
+            "sessionId": "0efce9",
+            "hypothesisId": hypothesis_id,
+            "location": location,
+            "message": message,
+            "data": data,
+            "timestamp": int(time.time() * 1000),
+        }
+        with open(_DEBUG_LOG_PATH, "a", encoding="utf-8") as log_file:
+            log_file.write(json.dumps(payload) + "\n")
+    except OSError:
+        pass
+    # #endregion
+
 
 class RegisterAPIView(APIView):
     permission_classes = [AllowAny]
@@ -24,7 +48,6 @@ class RegisterAPIView(APIView):
         user = UserService().register_student(
             email=serializer.validated_data["email"],
             password=serializer.validated_data["password"],
-            student_id=serializer.validated_data["student_id"],
             first_name=serializer.validated_data["first_name"],
             last_name=serializer.validated_data["last_name"],
         )
@@ -40,17 +63,58 @@ class LoginAPIView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = TokenService().authenticate_student(
+        token_service = TokenService()
+        identifier = serializer.validated_data["identifier"]
+        ip_address = request.META.get("REMOTE_ADDR")
+        # #region agent log
+        _agent_debug_log(
+            "B",
+            "views.py:LoginAPIView.post",
+            "Login handler before lockout cache read",
+            {
+                "cache_backend": settings.CACHES["default"]["BACKEND"],
+                "debug_mode": settings.DEBUG,
+                "redis_url_configured": bool(getattr(settings, "REDIS_URL", "")),
+            },
+        )
+        # #endregion
+        lockout_remaining = token_service.get_lockout_remaining(
+            identifier=identifier,
+            ip_address=ip_address,
+        )
+        if lockout_remaining > 0:
+            return Response(
+                {
+                    "detail": "Too many failed attempts. Try again later.",
+                    "retry_after": lockout_remaining,
+                },
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        user = token_service.authenticate_student(
             identifier=serializer.validated_data["identifier"],
             password=serializer.validated_data["password"],
             request=request,
         )
         if user is None:
+            lockout_remaining = token_service.register_failed_login(
+                identifier=identifier,
+                ip_address=ip_address,
+            )
+            if lockout_remaining > 0:
+                return Response(
+                    {
+                        "detail": "Too many failed attempts. Try again later.",
+                        "retry_after": lockout_remaining,
+                    },
+                    status=status.HTTP_429_TOO_MANY_REQUESTS,
+                )
             return Response(
-                {"detail": "Invalid student ID/email or password."},
+                {"detail": "Incorrect email or password"},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
-        tokens = TokenService().issue_for_user(user, request=request)
+        token_service.clear_failed_login(identifier=identifier, ip_address=ip_address)
+        tokens = token_service.issue_for_user(user, request=request)
         response = Response({"access": tokens.access, "user": UserSerializer(user).data})
         set_refresh_cookie(response, tokens.refresh)
         return response

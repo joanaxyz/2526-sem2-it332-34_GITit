@@ -1,4 +1,7 @@
+import json
+import time
 from dataclasses import dataclass
+from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
@@ -13,7 +16,25 @@ from accounts.models import SessionRecord, StudentProfile
 from common.exceptions import Conflict
 from progress.models import StreakRecord, StudentProgress
 
-CIT_EMAIL_DOMAIN = "@cit.edu"
+_DEBUG_LOG_PATH = Path(__file__).resolve().parents[2] / "debug-0efce9.log"
+
+
+def _agent_debug_log(hypothesis_id: str, location: str, message: str, data: dict) -> None:
+    # #region agent log
+    try:
+        payload = {
+            "sessionId": "0efce9",
+            "hypothesisId": hypothesis_id,
+            "location": location,
+            "message": message,
+            "data": data,
+            "timestamp": int(time.time() * 1000),
+        }
+        with open(_DEBUG_LOG_PATH, "a", encoding="utf-8") as log_file:
+            log_file.write(json.dumps(payload) + "\n")
+    except OSError:
+        pass
+    # #endregion
 
 
 @dataclass(frozen=True)
@@ -30,17 +51,13 @@ class UserService:
         *,
         email: str,
         password: str,
-        student_id: str,
         first_name: str,
         last_name: str,
     ):
         User = get_user_model()
         normalized_email = User.objects.normalize_email(email).lower()
-        normalized_student_id = student_id.strip().upper()
         if User.objects.filter(email__iexact=normalized_email).exists():
-            raise Conflict("A student account already exists for this email.")
-        if StudentProfile.objects.filter(student_id__iexact=normalized_student_id).exists():
-            raise Conflict("A student account already exists for this student ID.")
+            raise Conflict("An account already exists for this email.")
 
         user = User.objects.create_user(
             username=normalized_email,
@@ -49,7 +66,6 @@ class UserService:
             first_name=first_name.strip(),
             last_name=last_name.strip(),
         )
-        StudentProfile.objects.create(user=user, student_id=normalized_student_id)
         StudentProgress.objects.create(user=user)
         StreakRecord.objects.create(user=user)
         return user
@@ -82,6 +98,69 @@ class TokenBlacklistService:
 class TokenService:
     blacklist_service = TokenBlacklistService()
 
+    @staticmethod
+    def _normalize_identifier(identifier: str) -> str:
+        normalized = identifier.strip().lower()
+        return normalized or "unknown"
+
+    def _lockout_key(self, identifier: str, ip_address: str | None) -> str:
+        safe_ip = (ip_address or "unknown").strip().lower() or "unknown"
+        return f"login-lockout-until:{self._normalize_identifier(identifier)}:{safe_ip}"
+
+    def _attempt_key(self, identifier: str, ip_address: str | None) -> str:
+        safe_ip = (ip_address or "unknown").strip().lower() or "unknown"
+        return f"login-attempts:{self._normalize_identifier(identifier)}:{safe_ip}"
+
+    def get_lockout_remaining(self, *, identifier: str, ip_address: str | None) -> int:
+        lockout_key = self._lockout_key(identifier, ip_address)
+        # #region agent log
+        _agent_debug_log(
+            "B",
+            "services.py:get_lockout_remaining",
+            "About to read lockout from cache",
+            {
+                "lockout_key_prefix": lockout_key.split(":")[0],
+                "cache_backend": settings.CACHES["default"]["BACKEND"],
+                "cache_location_redacted": str(settings.CACHES["default"].get("LOCATION", ""))[:80],
+            },
+        )
+        # #endregion
+        try:
+            lockout_until = cache.get(lockout_key)
+        except Exception as exc:
+            # #region agent log
+            _agent_debug_log(
+                "C",
+                "services.py:get_lockout_remaining",
+                "cache.get raised during login lockout check",
+                {"error_type": type(exc).__name__, "error": str(exc)[:300]},
+            )
+            # #endregion
+            raise
+        if lockout_until is None:
+            return 0
+        now_timestamp = int(timezone.now().timestamp())
+        return max(0, int(lockout_until) - now_timestamp)
+
+    def register_failed_login(self, *, identifier: str, ip_address: str | None) -> int:
+        attempt_key = self._attempt_key(identifier, ip_address)
+        lockout_key = self._lockout_key(identifier, ip_address)
+        max_attempts = int(getattr(settings, "AUTH_LOGIN_MAX_ATTEMPTS", 5))
+        lockout_seconds = int(getattr(settings, "AUTH_LOGIN_LOCKOUT_SECONDS", 300))
+
+        attempts = cache.get(attempt_key, 0) + 1
+        cache.set(attempt_key, attempts, timeout=lockout_seconds)
+        if attempts >= max_attempts:
+            lockout_until = int(timezone.now().timestamp()) + lockout_seconds
+            cache.set(lockout_key, lockout_until, timeout=lockout_seconds)
+            cache.delete(attempt_key)
+            return lockout_seconds
+        return 0
+
+    def clear_failed_login(self, *, identifier: str, ip_address: str | None) -> None:
+        cache.delete(self._attempt_key(identifier, ip_address))
+        cache.delete(self._lockout_key(identifier, ip_address))
+
     def issue_for_user(self, user, request=None) -> IssuedTokens:
         refresh = RefreshToken.for_user(user)
         jti = str(refresh["jti"])
@@ -98,8 +177,6 @@ class TokenService:
         normalized_identifier = identifier.strip()
         if "@" in normalized_identifier:
             email = User.objects.normalize_email(normalized_identifier).lower()
-            if not email.endswith(CIT_EMAIL_DOMAIN):
-                return None
             user = User.objects.filter(email__iexact=email).first()
         else:
             profile = (
