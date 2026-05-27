@@ -130,6 +130,30 @@ class MetricsService:
             ),
             command_accuracy_count=Count("id"),
         )
+        module_rows = (
+            ScenarioSession.objects.filter(user=user, mode=SESSION_MODE_PRIMARY)
+            .values("learning_unit__number")
+            .annotate(
+                hard_started=Count(
+                    "id",
+                    filter=Q(difficulty_instance__difficulty=DIFFICULTY_HARD),
+                ),
+                hard_completed=Count(
+                    "id",
+                    filter=Q(
+                        difficulty_instance__difficulty=DIFFICULTY_HARD,
+                        status=SESSION_STATUS_COMPLETED,
+                    ),
+                ),
+                rta_success=Count("id", filter=Q(rta_eligible=True, rta_success=True)),
+                rta_total=Count("id", filter=Q(rta_eligible=True)),
+            )
+        )
+        module_metrics_map = {
+            int(row["learning_unit__number"]): row
+            for row in module_rows
+            if row["learning_unit__number"] is not None
+        }
 
         streak = StreakRecord.objects.filter(user=user).only(
             "current_streak",
@@ -158,6 +182,25 @@ class MetricsService:
                 ),
                 "sar": self._rate(abandoned, started),
                 "review_scr": self._rate(review_completed, review_started),
+            },
+            "module_kpis": {
+                str(module_number): {
+                    "hlcr": self._rate(
+                        (
+                            module_metrics_map.get(module_number, {}).get("hard_completed")
+                            or 0
+                        ),
+                        (
+                            module_metrics_map.get(module_number, {}).get("hard_started")
+                            or 0
+                        ),
+                    ),
+                    "rta": self._rate(
+                        (module_metrics_map.get(module_number, {}).get("rta_success") or 0),
+                        (module_metrics_map.get(module_number, {}).get("rta_total") or 0),
+                    ),
+                }
+                for module_number in [1, 2, 3, 4]
             },
             "counts": {
                 "started": started,

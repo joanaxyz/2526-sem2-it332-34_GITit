@@ -14,7 +14,7 @@ const metricMap = [
 
 export function ProgressSummaryCards({ summary }: { summary: DashboardSummary }) {
   return (
-    <section className="grid grid-cols-3 gap-3 xl:grid-cols-6 max-lg:grid-cols-2">
+    <section className="grid grid-cols-2 gap-3 2xl:grid-cols-3 max-md:grid-cols-1">
       {metricMap.map(([key, label, Icon]) => {
         const metric = summary.kpis[key]
         const detail = key === 'car'

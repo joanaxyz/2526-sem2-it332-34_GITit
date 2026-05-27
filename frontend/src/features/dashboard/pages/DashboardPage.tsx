@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { dashboardApi } from '@/features/dashboard/api/dashboardApi'
 import { CurrentTrackCard } from '@/features/dashboard/components/CurrentTrackCard'
 import { FirstAttemptStars } from '@/features/dashboard/components/FirstAttemptStars'
+import { ModulePerformanceCard } from '@/features/dashboard/components/ModulePerformanceCard'
 import { ProgressSummaryCards } from '@/features/dashboard/components/ProgressSummaryCards'
 import { RecentActivityList } from '@/features/dashboard/components/RecentActivityList'
 import { RetryTrendCard } from '@/features/dashboard/components/RetryTrendCard'
@@ -23,13 +24,14 @@ export function DashboardPage() {
   if (!data) return <ErrorState title="Could not load dashboard" description="The API returned no dashboard data." />
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       <div className="grid grid-cols-[minmax(0,1fr)_22rem] gap-4 max-xl:grid-cols-1">
         <CurrentTrackCard />
         <StreakCard summary={data} />
       </div>
       <ProgressSummaryCards summary={data} />
-      <div className="grid grid-cols-3 gap-4 max-xl:grid-cols-1">
+      <ModulePerformanceCard summary={data} />
+      <div className="grid grid-cols-3 gap-4 max-2xl:grid-cols-2 max-xl:grid-cols-1">
         <RetryTrendCard summary={data} />
         <FirstAttemptStars summary={data} />
         <RecentActivityList summary={data} />

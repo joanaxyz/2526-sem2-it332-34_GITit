@@ -6,6 +6,10 @@ export type RateMetric = {
 
 export type DashboardSummary = {
   kpis: Record<'orientation_completion' | 'scr' | 'arc' | 'car' | 'hlcr' | 'rta' | 'sar' | 'review_scr', RateMetric>
+  module_kpis: Record<'1' | '2' | '3' | '4', {
+    hlcr: RateMetric
+    rta: RateMetric
+  }>
   counts: {
     started: number
     completed: number
