@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
-import { useId } from 'react'
+import { useEffect, useId } from 'react'
+import { createPortal } from 'react-dom'
 import type { ReactNode } from 'react'
 
 import { Button } from './Button'
@@ -21,8 +22,19 @@ export function Modal({
   contentClassName?: string
 }) {
   const titleId = useId()
+
+  useEffect(() => {
+    if (!open) return
+    const original = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = original
+    }
+  }, [open])
+
   if (!open) return null
-  return (
+
+  return createPortal(
     <div
       aria-labelledby={titleId}
       aria-modal="true"
@@ -38,6 +50,7 @@ export function Modal({
         </div>
         <div className={contentClassName ?? 'p-5'}>{children}</div>
       </Card>
-    </div>
+    </div>,
+    document.body,
   )
 }
