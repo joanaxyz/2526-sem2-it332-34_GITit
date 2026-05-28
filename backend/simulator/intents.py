@@ -312,6 +312,122 @@ class CommandIntentMapper:
             ),
         )
 
+    def _map_reset(self, parsed: ParsedGitCommand) -> CommandIntent:
+        return CommandIntent(
+            command="reset",
+            operations=(
+                CommandOperation(
+                    "ResetHard",
+                    {
+                        "target": parsed.args[0],
+                    },
+                ),
+            ),
+        )
+
+    def _map_revert(self, parsed: ParsedGitCommand) -> CommandIntent:
+        return CommandIntent(
+            command="revert",
+            operations=(
+                CommandOperation(
+                    "RevertCommit",
+                    {
+                        "commit": parsed.args[0],
+                        "no_edit": parsed.has_option("--no-edit"),
+                    },
+                ),
+            ),
+        )
+
+    def _map_push(self, parsed: ParsedGitCommand) -> CommandIntent:
+        remote = parsed.args[0] if parsed.args else "origin"
+        branch = parsed.args[1] if len(parsed.args) > 1 else None
+        return CommandIntent(
+            command="push",
+            operations=(
+                CommandOperation(
+                    "PushBranch",
+                    {
+                        "remote": remote,
+                        "branch": branch,
+                        "set_upstream": parsed.has_option("-u"),
+                    },
+                ),
+            ),
+        )
+
+    def _map_rebase(self, parsed: ParsedGitCommand) -> CommandIntent:
+        if parsed.has_option("--abort"):
+            return CommandIntent(
+                command="rebase",
+                operations=(CommandOperation("AbortRebase", {}),),
+            )
+        if parsed.has_option("--continue"):
+            return CommandIntent(
+                command="rebase",
+                operations=(CommandOperation("ContinueRebase", {}),),
+            )
+        return CommandIntent(
+            command="rebase",
+            operations=(
+                CommandOperation(
+                    "StartRebase",
+                    {
+                        "target": parsed.args[0],
+                        "interactive": parsed.has_option("-i"),
+                    },
+                ),
+            ),
+        )
+
+    def _map_merge_base(self, parsed: ParsedGitCommand) -> CommandIntent:
+        return CommandIntent(
+            command="merge-base",
+            operations=(
+                CommandOperation(
+                    "InspectMergeBase",
+                    {
+                        "left": parsed.args[0],
+                        "right": parsed.args[1],
+                    },
+                ),
+            ),
+            diagnostic_metadata=("inspected_merge_base",),
+        )
+
+    def _map_rev_list(self, parsed: ParsedGitCommand) -> CommandIntent:
+        return CommandIntent(
+            command="rev-list",
+            operations=(
+                CommandOperation(
+                    "InspectRevListCount",
+                    {
+                        "range": parsed.args[0],
+                    },
+                ),
+            ),
+            diagnostic_metadata=("inspected_rev_list",),
+        )
+
+    def _map_switch(self, parsed: ParsedGitCommand) -> CommandIntent:
+        if parsed.has_option("-c"):
+            return CommandIntent(
+                command="switch",
+                operations=(
+                    CommandOperation(
+                        "CreateAndSwitchBranch",
+                        {
+                            "branch": parsed.args[0],
+                            "start_point": parsed.args[1] if len(parsed.args) > 1 else None,
+                        },
+                    ),
+                ),
+            )
+        return CommandIntent(
+            command="switch",
+            operations=(CommandOperation("SwitchBranch", {"branch": parsed.args[0]}),),
+        )
+
     def _map_log(self, parsed: ParsedGitCommand) -> CommandIntent:
         oneline = parsed.has_option("--oneline")
         graph = parsed.has_option("--graph")

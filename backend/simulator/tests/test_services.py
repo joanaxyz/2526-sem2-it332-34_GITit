@@ -1,4 +1,3 @@
-from simulator.output.errors import unsupported_command
 from simulator.services import RepositoryStateSimulator
 from simulator.workspace_files import WorkspaceFileStateService
 
@@ -713,7 +712,7 @@ def test_module_three_commands_merge_mergetool_fetch_and_cherry_pick():
     assert picked["commits"][-1]["tree"]["fix.py"] == "hotfix-token"
 
 
-def test_unsupported_advanced_commands_are_rejected_without_mutation():
+def test_module_four_commands_are_supported_with_expected_state_effects():
     simulator = RepositoryStateSimulator()
     state = simulator.normalize_state(
         {
@@ -729,27 +728,21 @@ def test_unsupported_advanced_commands_are_rejected_without_mutation():
         }
     )
 
-    unsupported_advanced_commands = [
-        "git pull",
-        "git push",
-        "git stash",
+    supported_module_four_commands = [
+        "git push origin main",
         "git revert c0",
+        "git switch main",
+        "git rebase origin/main",
     ]
 
-    for command in unsupported_advanced_commands:
+    for command in supported_module_four_commands:
         result = simulator.process(state, command)
-        command_family = command.split()[1]
-        assert result.processed is False, command
-        assert result.state == state, command
-        assert result.output == unsupported_command(command_family), command
-        assert result.stderr == unsupported_command(command_family), command
-        assert result.exit_code == 129, command
+        assert result.processed is True, command
 
     for command in [
         "git branch feature",
         "git remote add origin https://example.test/repo.git",
         "git checkout main",
-        "git switch main",
         "git reset HEAD README.md",
     ]:
         result = simulator.process(state, command)
