@@ -1,8 +1,0 @@
-django
-djangorestframework
-djangorestframework-simplejwt
-psycopg[binary]
-django-environ
-django-cors-headers
-django-redis
-drf-spectacular

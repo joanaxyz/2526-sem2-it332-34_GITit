@@ -1,20 +1,20 @@
 :root {
-  --background: 205 34% 6%;
-  --foreground: 212 48% 94%;
-  --card: 210 30% 11%;
-  --card-foreground: 212 48% 94%;
-  --primary: 159 100% 42%;
-  --primary-foreground: 155 86% 7%;
-  --secondary: 211 30% 16%;
-  --secondary-foreground: 212 48% 94%;
-  --muted: 212 30% 15%;
-  --muted-foreground: 209 23% 64%;
-  --accent: 208 100% 66%;
-  --accent-foreground: 210 32% 8%;
+  --background: 205 34% 6%;          /* original near-black */
+  --foreground: 195 60% 95%;         /* cool white */
+  --card: 215 40% 10%;               /* dark navy card */
+  --card-foreground: 195 60% 95%;
+  --primary: 172 100% 48%;           /* #00F5D4 aurora cyan */
+  --primary-foreground: 172 80% 6%;
+  --secondary: 215 36% 16%;
+  --secondary-foreground: 195 60% 95%;
+  --muted: 215 28% 13%;
+  --muted-foreground: 200 20% 55%;
+  --accent: 190 100% 42%;            /* #00B4D8 ocean blue */
+  --accent-foreground: 190 80% 95%;
   --destructive: 0 100% 68%;
   --destructive-foreground: 0 0% 100%;
-  --border: 210 24% 20%;
-  --input: 210 24% 20%;
-  --ring: 159 100% 42%;
+  --border: 215 28% 20%;
+  --input: 215 28% 20%;
+  --ring: 172 100% 48%;
   --radius: 0.75rem;
 }
