@@ -105,7 +105,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const sessionId = Number(params.sessionId)
-  const { query, session, lines, setLines, feedback, resetLocalSessionState } = useScenarioSession(sessionId)
+  const { query, session, lines, feedback } = useScenarioSession(sessionId)
   const mutation = useCommandSubmission(sessionId, reviewMode)
   const [dismissedCompletionSessionId, setDismissedCompletionSessionId] = useState<number | null>(null)
   const [terminalRatio, setTerminalRatio] = useState(DEFAULT_TERMINAL_RATIO)
@@ -173,7 +173,6 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     },
     onSuccess: (updatedSession) => {
       updateScenarioSessionCache(queryClient, updatedSession)
-      window.setTimeout(resetLocalSessionState, 0)
     },
   })
   const writeFileMutation = useMutation({
@@ -183,19 +182,9 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     },
     onSuccess: (updatedSession) => {
       updateScenarioSessionCache(queryClient, updatedSession)
-      window.setTimeout(resetLocalSessionState, 0)
     },
   })
-  const moduleScenariosQuery = useQuery({
-    queryKey: queryKeys.moduleScenarios(session?.module.id),
-    queryFn: () => scenariosApi.listForModule(session!.module.id),
-    enabled: !!session?.module.id,
-    staleTime: 5 * 60 * 1000,
-  })
-  const currentScenario = moduleScenariosQuery.data?.find((s) => s.id === session?.scenario.id)
-  const reviewableDifficulties = currentScenario?.difficulties.filter(
-    (d) => d.review_available && d.difficulty !== session?.difficulty
-  ) ?? []
+  const reviewableDifficulties = session?.reviewable_difficulties ?? []
 
   if (query.isLoading) return <PracticeWorkspaceSkeleton />
   if (query.isError) return <ErrorState title="Could not load scenario workspace" description={query.error.message} />
@@ -206,17 +195,8 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const isTourOpen = tourOpen || shouldAutoOpenTour
 
   function submit(command: string) {
-    setLines((items) => [...items, { id: crypto.randomUUID(), kind: 'input', text: command }])
     mutation.mutate(command, {
       onSuccess: (response) => {
-        setLines((items) => [
-          ...items,
-          {
-            id: crypto.randomUUID(),
-            kind: response.session.status === 'completed' ? 'success' : 'output',
-            text: response.step.terminal_output,
-          },
-        ])
         if (response.command_family === 'mergetool') {
           const snapshot = response.session.repository_state
           const requestedPaths = stringList(snapshot.operation_metadata?.last_mergetool_paths)
@@ -224,10 +204,6 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
           const nextPath = requestedPaths.find((path) => conflictPaths.includes(path)) ?? conflictPaths[0]
           if (nextPath) setWorkspaceEditorPath(nextPath)
         }
-        window.setTimeout(resetLocalSessionState, 0)
-      },
-      onError: (error) => {
-        setLines((items) => [...items, { id: crypto.randomUUID(), kind: 'warning', text: error.message }])
       },
     })
   }
@@ -416,7 +392,8 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             <div className="h-full min-h-0" data-tour-target="terminal">
               <TerminalPanel
                 lines={lines}
-                disabled={session.status !== 'started' || mutation.isPending}
+                disabled={session.status !== 'started'}
+                runDisabled={mutation.isPending}
                 processing={mutation.isPending}
                 className="h-full"
                 onCommand={submit}

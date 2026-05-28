@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 
 import type { RepositorySnapshot, ScenarioSession } from '@/features/practice/types'
 import { ExpectedStatePanel } from './ExpectedStatePanel'
-import { LiveDagPanel } from './LiveDagPanel'
+import { graphLayoutSignature, LiveDagPanel } from './LiveDagPanel'
 
 const snapshot: RepositorySnapshot = {
   repository_initialized: true,
@@ -53,6 +53,16 @@ const snapshot: RepositorySnapshot = {
 
 describe('LiveDagPanel', () => {
   afterEach(() => cleanup())
+
+  it('keeps the same layout signature when only branch pointers move', () => {
+    const movedPointerSnapshot: RepositorySnapshot = {
+      ...snapshot,
+      branches: { main: 'c1', feature: 'c2' },
+      head: { type: 'branch', name: 'feature', target: 'c2' },
+    }
+
+    expect(graphLayoutSignature(snapshot)).toBe(graphLayoutSignature(movedPointerSnapshot))
+  })
 
   it('renders commit details in the diagram overlay when a node is active', () => {
     render(<LiveDagPanel snapshot={snapshot} />)

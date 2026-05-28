@@ -1,6 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query'
 
 import type { ScenarioSession } from '@/features/practice/types'
+import { writeSessionBootstrap } from '@/features/scenarios/utils/sessionBootstrap'
 import type { DifficultyStatus, LatestAttemptStats, ScenarioSkillFocus } from '@/features/scenarios/types'
 import { nextDifficultyInSequence } from '@/features/scenarios/utils/difficulty'
 import { queryKeyRoots, queryKeys } from '@/shared/api/queryKeys'
@@ -28,6 +29,7 @@ export function syncScenarioSessionInCache(
 }
 
 export function updateScenarioSessionCache(queryClient: QueryClient, session: ScenarioSession) {
+  writeSessionBootstrap(session)
   queryClient.setQueryData(queryKeys.scenarioSession(session.id), session)
 }
 

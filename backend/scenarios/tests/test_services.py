@@ -1,7 +1,10 @@
 import json
+import logging
+import time
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.test import override_settings
 from django.core.management import call_command
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -34,7 +37,7 @@ from scenarios.models import (
     StepLog,
 )
 from scenarios.selectors import scenario_status_payload, scenario_status_payloads
-from scenarios.serializers import session_payload
+from scenarios.serializers import prefetch_session_payload_context, session_payload
 from scenarios.services import (
     CommandCountClassifier,
     CommandProcessingService,
@@ -114,6 +117,96 @@ def test_primary_session_can_start_before_orientation_completion(db, seeded_cont
 
     assert session.status == "started"
     assert session.orientation_complete_at_start is False
+
+
+def test_git_status_command_response_omits_project_tree(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="stage-and-commit-basic-workflow",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="module_card",
+    )
+
+    response = CommandProcessingService().submit_command(session=session, command="git status")
+
+    assert "project_tree" not in response["repository_state"]
+    assert "visible_tree" not in response["repository_state"]
+    assert response["repository_state"]["commits"]
+
+
+def test_git_status_command_submit_completes_within_performance_budget(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="stage-and-commit-basic-workflow",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="module_card",
+    )
+    service = CommandProcessingService()
+
+    start = time.perf_counter()
+    service.submit_command(session=session, command="git status")
+    elapsed_ms = (time.perf_counter() - start) * 1000
+
+    assert elapsed_ms < 750, f"git status submit took {elapsed_ms:.1f}ms"
+
+
+COMMAND_SUBMIT_TIMING_SPANS = (
+    "scenario.command.repository_state_clone",
+    "scenario.command.parse_execute",
+    "scenario.command.repository_state_normalize",
+    "scenario.command.state_hash",
+    "scenario.command.expected_state_hash",
+    "scenario.command.evaluation",
+    "scenario.command.repository_snapshot",
+)
+
+
+def test_command_submit_emits_performance_timing_spans(student, caplog):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="stage-and-commit-basic-workflow",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="module_card",
+    )
+
+    with override_settings(PERFORMANCE_TIMING_ENABLED=True):
+        with caplog.at_level(logging.INFO, logger="git_it.performance"):
+            CommandProcessingService().submit_command(session=session, command="git status")
+            session.refresh_from_db()
+            CommandProcessingService().submit_command(session=session, command="git add .")
+
+    messages = "\n".join(record.message for record in caplog.records)
+    for span in COMMAND_SUBMIT_TIMING_SPANS:
+        assert span in messages, f"missing timing span: {span}"
+
+
+def test_module4_git_status_command_submit_completes_within_performance_budget(student):
+    call_command("seed_module4_scenarios", "--reset", "--confirm", "--validate-build")
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="recover-from-hard-reset-incident",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="module_card",
+    )
+    service = CommandProcessingService()
+
+    start = time.perf_counter()
+    service.submit_command(session=session, command="git status")
+    elapsed_ms = (time.perf_counter() - start) * 1000
+
+    assert elapsed_ms < 1500, f"module 4 git status submit took {elapsed_ms:.1f}ms"
 
 
 def test_diagnostic_commands_are_logged_but_not_counted(student):
@@ -448,6 +541,26 @@ def test_session_payload_falls_back_for_old_variants_without_student_context(stu
     assert payload["student_context"]["story"] == session.difficulty_instance.narrative
     assert "situation" not in payload["student_context"]
     assert "task_prompt" not in payload["scenario"]
+
+
+def test_new_session_payload_stays_within_query_budget(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="stage-and-commit-basic-workflow",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="module_card",
+    )
+    prefetch_session_payload_context(session)
+
+    with CaptureQueriesContext() as context:
+        payload = session_payload(session, include_steps=False)
+
+    assert payload["variant"]["looped_variant"] is False
+    assert payload["reviewable_difficulties"] == []
+    assert len(context.captured_queries) <= 1
 
 
 def test_active_session_payload_and_command_submit_do_not_create_variant(student):
