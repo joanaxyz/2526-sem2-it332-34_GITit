@@ -3,7 +3,8 @@ from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from learning.models import Lesson
+from learning.models import Lesson, OrientationLessonSession
+from learning.orientation_session import OrientationSessionService
 from learning.selectors import (
     orientation_progress_map,
     practice_completion_count_map,
@@ -13,6 +14,8 @@ from learning.selectors import (
 )
 from learning.serializers import (
     LessonDetailSerializer,
+    OrientationCommandSubmitSerializer,
+    OrientationSessionResetSerializer,
     OrientationCompleteSerializer,
     OrientationProgressSerializer,
     UnitListSerializer,
@@ -91,3 +94,62 @@ class OrientationCompleteAPIView(APIView):
             highest_step_seen=serializer.validated_data["highest_step_seen"],
         )
         return Response(OrientationProgressSerializer(progress).data)
+
+
+class OrientationLessonSessionStartAPIView(APIView):
+    def post(self, request, lesson_id: int):
+        lesson = get_object_or_404(
+            Lesson.objects.select_related("unit"),
+            id=lesson_id,
+            is_published=True,
+            unit__is_published=True,
+            unit__is_orientation=True,
+        )
+        service = OrientationSessionService()
+        session = service.get_or_create_session(user=request.user, lesson=lesson)
+        return Response(service.session_payload(session))
+
+
+class OrientationLessonSessionDetailAPIView(APIView):
+    def get(self, request, session_id: int):
+        session = get_object_or_404(
+            OrientationLessonSession.objects.select_related("lesson", "lesson__unit"),
+            id=session_id,
+            user=request.user,
+        )
+        return Response(OrientationSessionService().session_payload(session))
+
+
+class OrientationLessonSessionCommandAPIView(APIView):
+    def post(self, request, session_id: int):
+        serializer = OrientationCommandSubmitSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        session = get_object_or_404(
+            OrientationLessonSession.objects.select_related("lesson", "lesson__unit"),
+            id=session_id,
+            user=request.user,
+        )
+        result = OrientationSessionService().submit_command(
+            user=request.user,
+            session=session,
+            command=serializer.validated_data["command"],
+            step_id=serializer.validated_data["step_id"],
+        )
+        return Response(result)
+
+
+class OrientationLessonSessionResetAPIView(APIView):
+    def post(self, request, session_id: int):
+        serializer = OrientationSessionResetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        session = get_object_or_404(
+            OrientationLessonSession.objects.select_related("lesson", "lesson__unit"),
+            id=session_id,
+            user=request.user,
+        )
+        session = OrientationSessionService().reset_for_step(
+            user=request.user,
+            session=session,
+            step_id=serializer.validated_data["step_id"],
+        )
+        return Response(OrientationSessionService().session_payload(session))

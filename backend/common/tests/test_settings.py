@@ -40,3 +40,29 @@ def test_development_settings_allow_locmem_without_redis():
     result = run_settings_import(debug="True", redis_url="")
 
     assert result.returncode == 0
+
+
+def test_jdbc_database_url_is_normalized_to_postgresql():
+    env = {
+        "DATABASE_URL": "jdbc:postgresql://localhost:5432/git_it",
+        "DJANGO_ALLOWED_HOSTS": "localhost,127.0.0.1",
+        "DJANGO_CORS_ALLOWED_ORIGINS": "http://localhost:5173",
+        "DJANGO_DEBUG": "True",
+        "DJANGO_SECRET_KEY": "test-secret",
+        "REDIS_URL": "",
+    }
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import config.settings as s; print(s.DATABASES['default']['ENGINE'])",
+        ],
+        cwd=BACKEND_DIR,
+        env={**os.environ, **env},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "postgresql" in result.stdout

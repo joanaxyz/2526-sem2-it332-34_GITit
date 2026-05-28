@@ -76,6 +76,35 @@ class GitCommandExecutor:
 
         spec = self.registry.get(parsed.subcommand)
         if spec is None:
+            if parsed.subcommand == "--global" and parsed.args and parsed.args[0] == "config":
+                guidance = (
+                    "error: invalid git config order.\n"
+                    "Use: git config --global <key> <value>\n"
+                    "Or list values with: git config --list"
+                )
+                return self._result(
+                    processed=False,
+                    state=state,
+                    output=guidance,
+                    normalized_command=parsed.normalized_text,
+                    exit_code=129,
+                    stderr=guidance,
+                    start=start,
+                )
+            if parsed.subcommand in {"--help", "help"}:
+                help_text = (
+                    "usage: git <command> [<args>]\n\n"
+                    "Common commands: status, add, commit, log, branch, restore, diff, config"
+                )
+                return self._result(
+                    processed=False,
+                    state=state,
+                    output=help_text,
+                    normalized_command=parsed.normalized_text,
+                    exit_code=0,
+                    stdout=help_text,
+                    start=start,
+                )
             command_name = parsed.subcommand or parsed.normalized_text
             return self._result(
                 processed=False,

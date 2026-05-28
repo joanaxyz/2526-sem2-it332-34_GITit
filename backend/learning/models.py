@@ -49,3 +49,17 @@ class OrientationProgress(models.Model):
     @property
     def is_complete(self) -> bool:
         return self.completed_at is not None
+
+
+class OrientationLessonSession(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson, related_name="orientation_sessions", on_delete=models.CASCADE)
+    repository_state = models.JSONField(default=dict)
+    command_log = models.JSONField(default=list, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "lesson", "-updated_at"]),
+        ]

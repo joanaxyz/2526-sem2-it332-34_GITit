@@ -267,6 +267,12 @@ class CommandIntentMapper:
         )
 
     def _map_config(self, parsed: ParsedGitCommand) -> CommandIntent:
+        if parsed.has_option("--list") or parsed.has_option("-l"):
+            return CommandIntent(
+                command="config",
+                operations=(CommandOperation("ListConfig", {}),),
+                diagnostic_metadata=("inspected_config",),
+            )
         return CommandIntent(
             command="config",
             operations=(

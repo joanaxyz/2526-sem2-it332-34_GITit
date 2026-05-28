@@ -46,12 +46,14 @@ export function LiveDagPanel({
   className,
   contentClassName,
   showRepositoryDetails = false,
+  fitViewPadding = 0.08,
 }: {
   title?: string
   snapshot: RepositorySnapshot
   className?: string
   contentClassName?: string
   showRepositoryDetails?: boolean
+  fitViewPadding?: number
 }) {
   return (
     <RepositoryStateDiagram
@@ -60,6 +62,7 @@ export function LiveDagPanel({
       className={className}
       contentClassName={contentClassName}
       showRepositoryDetails={showRepositoryDetails}
+      fitViewPadding={fitViewPadding}
     />
   )
 }
@@ -70,12 +73,14 @@ export function RepositoryStateDiagram({
   className,
   contentClassName,
   showRepositoryDetails = false,
+  fitViewPadding = 0.08,
 }: {
   title: string
   snapshot: RepositorySnapshot
   className?: string
   contentClassName?: string
   showRepositoryDetails?: boolean
+  fitViewPadding?: number
 }) {
   const normalizedSnapshot = useMemo(() => normalizeSnapshot(snapshot), [snapshot])
   const { nodes, edges } = useMemo(() => buildGraph(normalizedSnapshot), [normalizedSnapshot])
@@ -132,7 +137,7 @@ export function RepositoryStateDiagram({
             nodes={diagramNodes}
             edges={edges}
             fitView
-            fitViewOptions={{ padding: 0.08 }}
+            fitViewOptions={{ padding: fitViewPadding }}
             nodesDraggable={false}
             nodesConnectable={false}
             nodeTypes={nodeTypes}

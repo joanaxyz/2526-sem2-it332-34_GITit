@@ -16,14 +16,14 @@ from accounts.models import SessionRecord, StudentProfile
 from common.exceptions import Conflict
 from progress.models import StreakRecord, StudentProgress
 
-_DEBUG_LOG_PATH = Path(__file__).resolve().parents[2] / "debug-0efce9.log"
+_DEBUG_LOG_PATH = Path(__file__).resolve().parents[2] / "debug-4ce873.log"
 
 
 def _agent_debug_log(hypothesis_id: str, location: str, message: str, data: dict) -> None:
     # #region agent log
     try:
         payload = {
-            "sessionId": "0efce9",
+            "sessionId": "4ce873",
             "hypothesisId": hypothesis_id,
             "location": location,
             "message": message,
@@ -132,11 +132,11 @@ class TokenService:
             _agent_debug_log(
                 "C",
                 "services.py:get_lockout_remaining",
-                "cache.get raised during login lockout check",
-                {"error_type": type(exc).__name__, "error": str(exc)[:300]},
+                "cache unavailable; skipping lockout check",
+                {"error_type": type(exc).__name__, "error": str(exc)[:300], "runId": "post-fix"},
             )
             # #endregion
-            raise
+            return 0
         if lockout_until is None:
             return 0
         now_timestamp = int(timezone.now().timestamp())
@@ -148,18 +148,38 @@ class TokenService:
         max_attempts = int(getattr(settings, "AUTH_LOGIN_MAX_ATTEMPTS", 5))
         lockout_seconds = int(getattr(settings, "AUTH_LOGIN_LOCKOUT_SECONDS", 300))
 
-        attempts = cache.get(attempt_key, 0) + 1
-        cache.set(attempt_key, attempts, timeout=lockout_seconds)
-        if attempts >= max_attempts:
-            lockout_until = int(timezone.now().timestamp()) + lockout_seconds
-            cache.set(lockout_key, lockout_until, timeout=lockout_seconds)
-            cache.delete(attempt_key)
-            return lockout_seconds
+        try:
+            attempts = cache.get(attempt_key, 0) + 1
+            cache.set(attempt_key, attempts, timeout=lockout_seconds)
+            if attempts >= max_attempts:
+                lockout_until = int(timezone.now().timestamp()) + lockout_seconds
+                cache.set(lockout_key, lockout_until, timeout=lockout_seconds)
+                cache.delete(attempt_key)
+                return lockout_seconds
+        except Exception as exc:
+            # #region agent log
+            _agent_debug_log(
+                "C",
+                "services.py:register_failed_login",
+                "cache unavailable; skipping failed-login tracking",
+                {"error_type": type(exc).__name__, "error": str(exc)[:300], "runId": "post-fix"},
+            )
+            # #endregion
         return 0
 
     def clear_failed_login(self, *, identifier: str, ip_address: str | None) -> None:
-        cache.delete(self._attempt_key(identifier, ip_address))
-        cache.delete(self._lockout_key(identifier, ip_address))
+        try:
+            cache.delete(self._attempt_key(identifier, ip_address))
+            cache.delete(self._lockout_key(identifier, ip_address))
+        except Exception as exc:
+            # #region agent log
+            _agent_debug_log(
+                "C",
+                "services.py:clear_failed_login",
+                "cache unavailable; skipping failed-login clear",
+                {"error_type": type(exc).__name__, "error": str(exc)[:300], "runId": "post-fix"},
+            )
+            # #endregion
 
     def issue_for_user(self, user, request=None) -> IssuedTokens:
         refresh = RefreshToken.for_user(user)

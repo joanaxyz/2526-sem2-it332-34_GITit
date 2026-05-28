@@ -8,6 +8,12 @@ class ConfigCommandHandler(BaseCommandHandler):
     command = "config"
 
     def apply(self, runtime, state: dict, intent: CommandIntent) -> CommandOutcome:
+        list_operation = intent.first("ListConfig")
+        if list_operation:
+            config = state.get("config", {})
+            lines = [f"{key}={value}" for key, value in sorted(config.items())]
+            return CommandOutcome(command="config", stdout="\n".join(lines))
+
         operation = intent.first("SetConfig")
         key = operation.params["key"]
         value = operation.params["value"]

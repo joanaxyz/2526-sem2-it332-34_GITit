@@ -1,9 +1,18 @@
+import os
 from datetime import timedelta
 from pathlib import Path
 
 import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def _normalize_database_url(url: str) -> str:
+    """Django expects postgresql://, not JDBC-style jdbc:postgresql:// URLs."""
+    if url.startswith("jdbc:"):
+        return url.removeprefix("jdbc:")
+    return url
+
 
 env = environ.Env(
     DJANGO_DEBUG=(bool, True),
@@ -13,7 +22,12 @@ env = environ.Env(
     JWT_COOKIE_SECURE=(bool, False),
     SECURE_SSL_REDIRECT=(bool, False),
 )
+_os_database_url_before_read_env = os.environ.get("DATABASE_URL")
 env.read_env(BASE_DIR / ".env")
+# A system-level JDBC URL (common when copied from desktop DB tools) overrides
+# backend/.env and often points at the wrong pooler/port. Prefer project .env.
+if (_os_database_url_before_read_env or "").startswith("jdbc:"):
+    env.read_env(BASE_DIR / ".env", overwrite=True)
 
 SECRET_KEY = env("DJANGO_SECRET_KEY", default="dev-only-change-me")
 DEBUG = env("DJANGO_DEBUG")
@@ -72,8 +86,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+_database_url = _normalize_database_url(
+    env("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
+)
 DATABASES = {
-    "default": env.db("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
+    "default": env.db_url_config(_database_url),
 }
 DATABASES["default"]["CONN_MAX_AGE"] = env.int("DATABASE_CONN_MAX_AGE", default=0)
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = env.bool("DATABASE_CONN_HEALTH_CHECKS", default=False)

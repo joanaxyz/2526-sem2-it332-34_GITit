@@ -46,6 +46,11 @@ export function ModulesPage() {
   }, [])
 
   useEffect(() => {
+    if (focusedModuleId && Number.isFinite(focusedModuleId)) return
+    window.scrollTo({ top: 0, behavior: 'auto' })
+  }, [focusedModuleId])
+
+  useEffect(() => {
     if (!focusedModuleId || !data?.length) return
     window.requestAnimationFrame(() => {
       document.querySelector(`[data-module-id="${focusedModuleId}"]`)?.scrollIntoView({
