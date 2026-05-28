@@ -723,7 +723,7 @@ def test_module_four_commands_are_supported_with_expected_state_effects():
             "staging": {},
             "conflicts": [],
             "remotes": {"origin": "https://example.test/app.git"},
-            "remote_branches": {"origin/main": "c1"},
+            "remote_branches": {"origin/main": "c0"},
             "upstream_tracking": {"main": "origin/main"},
         }
     )
@@ -740,10 +740,8 @@ def test_module_four_commands_are_supported_with_expected_state_effects():
         assert result.processed is True, command
 
     for command in [
-        "git branch feature",
         "git remote add origin https://example.test/repo.git",
         "git checkout main",
-        "git reset HEAD README.md",
     ]:
         result = simulator.process(state, command)
         assert result.processed is False, command

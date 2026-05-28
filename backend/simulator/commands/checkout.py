@@ -10,10 +10,15 @@ class CheckoutCommandHandler(BaseCommandHandler):
     command = "checkout"
 
     def apply(self, runtime, state: dict, intent: CommandIntent) -> CommandOutcome:
+        create_op = intent.first("CreateAndSwitchBranch")
+        if create_op is not None:
+            from simulator.commands.switch import SwitchCommandHandler
+            return SwitchCommandHandler()._create_and_switch(runtime, state, create_op.params)
+
         operation = intent.first("CheckoutConflictSide")
         if operation is None:
             raise SimulatorCommandError(
-                "git checkout in this simulator only supports --ours/--theirs for conflicted files.",
+                "git checkout in this simulator supports -b to create a branch, or --ours/--theirs for conflicted files.",
                 exit_code=129,
             )
 

@@ -222,9 +222,19 @@ class CommandIntentMapper:
                 command="merge",
                 operations=(CommandOperation("ContinueMerge", {}),),
             )
+        if parsed.has_option("--squash"):
+            return CommandIntent(
+                command="merge",
+                operations=(CommandOperation("SquashMerge", {"branch": parsed.args[0]}),),
+            )
         return CommandIntent(
             command="merge",
-            operations=(CommandOperation("MergeBranch", {"branch": parsed.args[0]}),),
+            operations=(
+                CommandOperation(
+                    "MergeBranch",
+                    {"branch": parsed.args[0], "no_ff": parsed.has_option("--no-ff")},
+                ),
+            ),
         )
 
     def _map_mergetool(self, parsed: ParsedGitCommand) -> CommandIntent:
@@ -243,6 +253,19 @@ class CommandIntentMapper:
         )
 
     def _map_checkout(self, parsed: ParsedGitCommand) -> CommandIntent:
+        if parsed.has_option("-b"):
+            return CommandIntent(
+                command="checkout",
+                operations=(
+                    CommandOperation(
+                        "CreateAndSwitchBranch",
+                        {
+                            "name": parsed.args[0],
+                            "start_point": parsed.args[1] if len(parsed.args) > 1 else None,
+                        },
+                    ),
+                ),
+            )
         side = None
         if parsed.has_option("--ours"):
             side = "ours"
@@ -290,7 +313,15 @@ class CommandIntentMapper:
     def _map_fetch(self, parsed: ParsedGitCommand) -> CommandIntent:
         return CommandIntent(
             command="fetch",
-            operations=(CommandOperation("FetchRemote", {"remote": parsed.args[0] if parsed.args else "origin"}),),
+            operations=(
+                CommandOperation(
+                    "FetchRemote",
+                    {
+                        "remote": parsed.args[0] if parsed.args else "origin",
+                        "prune": parsed.has_option("--prune") or parsed.has_option("-p"),
+                    },
+                ),
+            ),
         )
 
     def _map_cherry_pick(self, parsed: ParsedGitCommand) -> CommandIntent:
@@ -466,23 +497,42 @@ class CommandIntentMapper:
         )
 
     def _map_branch(self, parsed: ParsedGitCommand) -> CommandIntent:
-        if not parsed.args:
+        has_delete = parsed.has_option("-d") or parsed.has_option("-D") or parsed.has_option("--delete")
+        if has_delete:
             return CommandIntent(
                 command="branch",
                 operations=(
                     CommandOperation(
-                        "InspectBranchList",
-                        {"verbose": parsed.has_option("-v") or parsed.has_option("-vv")},
+                        "DeleteBranch",
+                        {"name": parsed.args[0], "force": parsed.has_option("-D")},
                     ),
                 ),
-                diagnostic_metadata=("inspected_branch_list",),
-                output_mode="verbose"
-                if parsed.has_option("-v") or parsed.has_option("-vv")
-                else "default",
             )
+        if parsed.args:
+            return CommandIntent(
+                command="branch",
+                operations=(
+                    CommandOperation(
+                        "CreateBranch",
+                        {
+                            "name": parsed.args[0],
+                            "start_point": parsed.args[1] if len(parsed.args) > 1 else None,
+                        },
+                    ),
+                ),
+            )
+        all_refs = parsed.has_option("-a")
+        verbose = parsed.has_option("-v") or parsed.has_option("-vv")
         return CommandIntent(
             command="branch",
-            operations=(CommandOperation("UnsupportedCommand", {"command": "branch"}),),
+            operations=(
+                CommandOperation(
+                    "InspectBranchList",
+                    {"verbose": verbose, "all": all_refs},
+                ),
+            ),
+            diagnostic_metadata=("inspected_branch_list",),
+            output_mode="verbose" if verbose else "all" if all_refs else "default",
         )
 
     def _map_restore(self, parsed: ParsedGitCommand) -> CommandIntent:
@@ -560,5 +610,135 @@ class CommandIntentMapper:
                 "inspected_unmerged_index"
                 if parsed.has_option("-u") or parsed.has_option("--unmerged")
                 else "inspected_ls_files",
+            ),
+        )
+
+    def _map_switch(self, parsed: ParsedGitCommand) -> CommandIntent:
+        if parsed.has_option("-c") or parsed.has_option("--create"):
+            return CommandIntent(
+                command="switch",
+                operations=(
+                    CommandOperation(
+                        "CreateAndSwitchBranch",
+                        {
+                            "name": parsed.args[0],
+                            "start_point": parsed.args[1] if len(parsed.args) > 1 else None,
+                        },
+                    ),
+                ),
+            )
+        if parsed.has_option("--detach"):
+            return CommandIntent(
+                command="switch",
+                operations=(
+                    CommandOperation(
+                        "DetachHead",
+                        {"target": parsed.args[0] if parsed.args else "HEAD"},
+                    ),
+                ),
+            )
+        return CommandIntent(
+            command="switch",
+            operations=(CommandOperation("SwitchBranch", {"name": parsed.args[0]}),),
+        )
+
+    def _map_stash(self, parsed: ParsedGitCommand) -> CommandIntent:
+        subcommand = parsed.args[0] if parsed.args else "push"
+        if subcommand == "list":
+            return CommandIntent(
+                command="stash",
+                operations=(CommandOperation("ListStash", {}),),
+                diagnostic_metadata=("inspected_stash_list",),
+            )
+        if subcommand == "pop":
+            raw = parsed.args[1] if len(parsed.args) > 1 else None
+            index = self._parse_stash_index(raw)
+            return CommandIntent(
+                command="stash",
+                operations=(CommandOperation("PopStash", {"index": index}),),
+            )
+        if subcommand == "apply":
+            raw = parsed.args[1] if len(parsed.args) > 1 else None
+            index = self._parse_stash_index(raw)
+            return CommandIntent(
+                command="stash",
+                operations=(CommandOperation("ApplyStash", {"index": index}),),
+            )
+        if subcommand == "drop":
+            raw = parsed.args[1] if len(parsed.args) > 1 else None
+            index = self._parse_stash_index(raw)
+            return CommandIntent(
+                command="stash",
+                operations=(CommandOperation("DropStash", {"index": index}),),
+            )
+        return CommandIntent(
+            command="stash",
+            operations=(CommandOperation("StashChanges", {}),),
+        )
+
+    def _parse_stash_index(self, raw: str | None) -> int:
+        if raw is None:
+            return 0
+        cleaned = raw.replace("stash@{", "").replace("}", "")
+        try:
+            return int(cleaned)
+        except ValueError:
+            return 0
+
+    def _map_push(self, parsed: ParsedGitCommand) -> CommandIntent:
+        remote = parsed.args[0] if parsed.args else "origin"
+        has_delete = parsed.has_option("--delete") or parsed.has_option("-d")
+        if has_delete:
+            branch = parsed.args[1] if len(parsed.args) > 1 else None
+            return CommandIntent(
+                command="push",
+                operations=(
+                    CommandOperation(
+                        "DeleteRemoteBranch",
+                        {"remote": remote, "branch": branch},
+                    ),
+                ),
+            )
+        if parsed.has_option("--force-with-lease"):
+            return CommandIntent(
+                command="push",
+                operations=(
+                    CommandOperation(
+                        "ForcePushWithLease",
+                        {
+                            "remote": remote,
+                            "branch": parsed.args[1] if len(parsed.args) > 1 else None,
+                        },
+                    ),
+                ),
+            )
+        set_upstream = parsed.has_option("-u") or parsed.has_option("--set-upstream")
+        return CommandIntent(
+            command="push",
+            operations=(
+                CommandOperation(
+                    "PushBranch",
+                    {
+                        "remote": remote,
+                        "branch": parsed.args[1] if len(parsed.args) > 1 else None,
+                        "set_upstream": set_upstream,
+                        "force": parsed.has_option("-f") or parsed.has_option("--force"),
+                    },
+                ),
+            ),
+        )
+
+    def _map_pull(self, parsed: ParsedGitCommand) -> CommandIntent:
+        return CommandIntent(
+            command="pull",
+            operations=(
+                CommandOperation(
+                    "PullBranch",
+                    {
+                        "remote": parsed.args[0] if parsed.args else "origin",
+                        "branch": parsed.args[1] if len(parsed.args) > 1 else None,
+                        "rebase": parsed.has_option("--rebase"),
+                    },
+                ),
             ),
         )
