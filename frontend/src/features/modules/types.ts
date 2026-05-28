@@ -28,10 +28,12 @@ export type LearningModule = {
   lessons: LessonSummary[]
 }
 
+import type { OrientationStep } from '@/features/modules/orientation/types'
+
 export type LessonDetail = LessonSummary & {
   content_html: string
   scoped_css: string
-  interaction_steps: string[]
+  interaction_steps: OrientationStep[]
   module: {
     id: number
     slug: string

@@ -11,10 +11,13 @@ def format_log(runtime, state: dict, outcome) -> str:
     oneline = bool(outcome.details.get("oneline"))
     graph = bool(outcome.details.get("graph"))
     lines: list[str] = []
+    branch_labels = _branch_labels(state)
     for commit in commits:
         if oneline:
             prefix = "* " if graph else ""
-            lines.append(f"{prefix}{commit['id']} {commit.get('message', '')}".rstrip())
+            labels = branch_labels.get(commit["id"], "")
+            decoration = f" ({labels})" if labels else ""
+            lines.append(f"{prefix}{commit['id']}{decoration} {commit.get('message', '')}".rstrip())
         else:
             lines.extend(
                 [
@@ -26,6 +29,28 @@ def format_log(runtime, state: dict, outcome) -> str:
                 ]
             )
     return "\n".join(lines).rstrip()
+
+
+def _branch_labels(state: dict) -> dict[str, str]:
+    labels_by_commit: dict[str, list[str]] = {}
+    for name, target in (state.get("branches") or {}).items():
+        if target:
+            labels_by_commit.setdefault(target, []).append(name)
+    for name, target in (state.get("remote_branches") or {}).items():
+        if target:
+            labels_by_commit.setdefault(target, []).append(name)
+    head = state.get("head") or {}
+    if head.get("type") == "branch":
+        current_branch = head.get("name")
+        current_target = (state.get("branches") or {}).get(current_branch)
+        if current_branch and current_target:
+            labels_by_commit.setdefault(current_target, []).append("HEAD")
+    elif head.get("type") == "detached" and head.get("name"):
+        labels_by_commit.setdefault(head["name"], []).append("HEAD")
+    return {
+        commit_id: ", ".join(dict.fromkeys(names))
+        for commit_id, names in labels_by_commit.items()
+    }
 
 
 def _history(runtime, state: dict, *, all_refs: bool) -> list[dict]:

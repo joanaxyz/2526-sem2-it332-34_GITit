@@ -117,3 +117,12 @@ class OrientationProgressSerializer(serializers.ModelSerializer):
 
 class OrientationCompleteSerializer(serializers.Serializer):
     highest_step_seen = serializers.IntegerField(min_value=0)
+
+
+class OrientationCommandSubmitSerializer(serializers.Serializer):
+    command = serializers.CharField(max_length=500)
+    step_id = serializers.CharField(max_length=80)
+
+
+class OrientationSessionResetSerializer(serializers.Serializer):
+    step_id = serializers.CharField(max_length=80)

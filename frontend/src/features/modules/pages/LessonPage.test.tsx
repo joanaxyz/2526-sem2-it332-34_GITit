@@ -10,11 +10,9 @@ vi.mock('@/features/modules/api/modulesApi', () => ({
   modulesApi: {
     getLesson: vi.fn(),
     completeOrientationLesson: vi.fn(),
+    startOrientationSession: vi.fn(),
+    submitOrientationCommand: vi.fn(),
   },
-}))
-
-vi.mock('@/features/modules/components/LessonContentRenderer', () => ({
-  LessonContentRenderer: ({ lesson }: { lesson: { title: string } }) => <h1>{lesson.title}</h1>,
 }))
 
 vi.mock('@/features/scenarios/utils/scenarioCache', () => ({
@@ -39,18 +37,26 @@ describe('LessonPage', () => {
     vi.clearAllMocks()
   })
 
-  it('renders orientation lesson content without requiring a lesson kind', async () => {
+  it('renders orientation workspace with Mark as complete', async () => {
     vi.mocked(modulesApi.getLesson).mockResolvedValue({
       id: 7,
-      slug: 'orientation-basics',
-      title: 'Orientation Basics',
-      subtitle: 'Start here.',
+      slug: 'what-is-git-and-why-it-matters',
+      title: 'Lesson 0.1 — What Is Git and Why Does It Matter?',
+      subtitle: 'Version control basics.',
       sort_order: 1,
       is_complete: false,
       scenario_count: 0,
-      content_html: '<h1>Orientation Basics</h1>',
+      content_html: '<p>Git intro</p>',
       scoped_css: '',
-      interaction_steps: [],
+      interaction_steps: [
+        {
+          id: 'vc-discipline',
+          kind: 'continue',
+          title: 'Version control discipline',
+          prompt: 'Read and continue.',
+          body: 'Version control tracks changes.',
+        },
+      ],
       module: {
         id: 1,
         slug: 'orientation',
@@ -62,10 +68,7 @@ describe('LessonPage', () => {
 
     renderPage()
 
-    expect(await screen.findByRole('heading', { name: 'Orientation Basics' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /mark lesson read/i })).toBeInTheDocument()
-    expect(screen.getByText('Saved to your foundation progress.')).toBeInTheDocument()
-    expect(screen.queryByText(/overview/i)).not.toBeInTheDocument()
-    expect(screen.queryByText(/scenario practice starts/i)).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /What Is Git/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Complete steps|Mark as complete/i })).toBeInTheDocument()
   })
 })

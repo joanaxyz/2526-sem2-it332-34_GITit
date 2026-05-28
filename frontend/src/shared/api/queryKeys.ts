@@ -2,6 +2,7 @@ export const queryKeys = {
   authBootstrap: ['auth-bootstrap'] as const,
   dashboardSummary: ['dashboard-summary'] as const,
   lesson: (lessonId: number) => ['lesson', lessonId] as const,
+  orientationSession: (lessonId: number) => ['orientation-session', lessonId] as const,
   modules: ['modules'] as const,
   moduleScenarios: (moduleId: number | null | undefined) => ['module-scenarios', moduleId] as const,
   moduleScenariosSummary: (moduleIdsKey: string) => ['module-scenarios-summary', moduleIdsKey] as const,

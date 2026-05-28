@@ -1,11 +1,10 @@
-import { BookOpen } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
+import { OrientationLessonCard } from '@/features/modules/components/OrientationLessonCard'
 import { ModuleSymbol } from '@/features/modules/components/ModuleSymbol'
 import { ModuleScenarioHub } from '@/features/modules/components/ModuleScenarioHub'
 import type { ScenarioSkillFocus } from '@/features/scenarios/types'
 import type { LearningModule } from '@/features/modules/types'
-import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { ExpandToggleButton } from '@/shared/components/ExpandToggleButton'
@@ -73,24 +72,19 @@ export function ModuleCard({
       {isExpanded ? (
         <div className="border-t border-border bg-background/35 p-5" id={panelId}>
           {module.is_orientation ? (
-            <div className="grid gap-2">
-              {visibleLessons.map((lesson) => (
-                <div key={lesson.id} className="rounded-md border border-border bg-secondary/40 p-3 transition hover:bg-secondary">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <BookOpen className="size-4 text-primary" />
-                        <div className="font-semibold">{lesson.title}</div>
-                        <Badge variant={lesson.is_complete ? 'default' : 'outline'}>{lesson.is_complete ? 'Complete' : 'Open'}</Badge>
-                      </div>
-                      <div className="mt-1 text-sm text-muted-foreground">{lesson.subtitle}</div>
-                    </div>
-                    <Button asChild size="sm" variant="outline">
-                      <Link to={`/lessons/${lesson.id}`}>View lesson</Link>
-                    </Button>
-                  </div>
-                </div>
-              ))}
+            <div className="grid gap-3">
+              <p className="rounded-md border border-primary/25 bg-primary/5 px-3 py-2 text-sm text-muted-foreground">
+                Recommended before scenario practice: complete all {visibleLessons.length} orientation lessons at your
+                own pace.
+              </p>
+              <p className="font-mono text-xs text-muted-foreground">
+                {visibleLessons.filter((lesson) => lesson.is_complete).length} / {visibleLessons.length} complete
+              </p>
+              <div className="grid gap-2">
+                {visibleLessons.map((lesson) => (
+                  <OrientationLessonCard key={lesson.id} lesson={lesson} />
+                ))}
+              </div>
             </div>
           ) : (
             <ModuleScenarioHub

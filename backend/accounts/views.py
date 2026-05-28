@@ -18,14 +18,14 @@ from accounts.services import (
     set_refresh_cookie,
 )
 
-_DEBUG_LOG_PATH = Path(__file__).resolve().parents[2] / "debug-0efce9.log"
+_DEBUG_LOG_PATH = Path(__file__).resolve().parents[2] / "debug-4ce873.log"
 
 
 def _agent_debug_log(hypothesis_id: str, location: str, message: str, data: dict) -> None:
     # #region agent log
     try:
         payload = {
-            "sessionId": "0efce9",
+            "sessionId": "4ce873",
             "hypothesisId": hypothesis_id,
             "location": location,
             "message": message,
@@ -82,6 +82,14 @@ class LoginAPIView(APIView):
             identifier=identifier,
             ip_address=ip_address,
         )
+        # #region agent log
+        _agent_debug_log(
+            "C",
+            "views.py:LoginAPIView.post",
+            "lockout check completed",
+            {"lockout_remaining": lockout_remaining, "runId": "post-fix"},
+        )
+        # #endregion
         if lockout_remaining > 0:
             return Response(
                 {
@@ -117,6 +125,14 @@ class LoginAPIView(APIView):
         tokens = token_service.issue_for_user(user, request=request)
         response = Response({"access": tokens.access, "user": UserSerializer(user).data})
         set_refresh_cookie(response, tokens.refresh)
+        # #region agent log
+        _agent_debug_log(
+            "E",
+            "views.py:LoginAPIView.post",
+            "login succeeded",
+            {"user_id": user.pk, "runId": "post-fix"},
+        )
+        # #endregion
         return response
 
 

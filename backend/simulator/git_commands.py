@@ -647,7 +647,7 @@ class GitCommandRegistry:
             ),
             "config": GitCommandSpec(
                 "config",
-                frozenset({"--global"}),
+                frozenset({"--global", "--list", "-l"}),
                 diagnostic=False,
                 counted=True,
                 executor="teaching_state",
@@ -880,8 +880,15 @@ def _validate_checkout(parsed: ParsedGitCommand) -> str | None:
 
 
 def _validate_config(parsed: ParsedGitCommand) -> str | None:
+    if parsed.has_option("--list") or parsed.has_option("-l"):
+        if parsed.args:
+            return "usage: git config [--list|-l]"
+        return None
     if not parsed.has_option("--global"):
-        return "error: only --global git config is supported in this simulator"
+        return (
+            "error: expected git config --global <key> <value> "
+            "or git config --list"
+        )
     if len(parsed.args) != 2:
         return "usage: git config --global <key> <value>"
     return None
