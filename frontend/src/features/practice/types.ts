@@ -1,4 +1,4 @@
-import type { Difficulty } from '@/features/scenarios/types'
+import type { Difficulty, DifficultyAccess } from '@/features/scenarios/types'
 
 export type RepositoryValue =
   | string
@@ -77,6 +77,7 @@ export type ScenarioSession = {
   id: number
   mode: 'primary' | 'review'
   status: 'started' | 'completed' | 'failed' | 'abandoned'
+  failure_reason?: string | null
   difficulty_instance_id: number
   completed_at: string | null
   first_attempt_star_eligible: boolean
@@ -88,6 +89,7 @@ export type ScenarioSession = {
     focus: string
     narrative: string
     student_context?: ScenarioStudentContext
+    lesson_number: number
   }
   student_context?: ScenarioStudentContext
   module: {
@@ -100,6 +102,7 @@ export type ScenarioSession = {
     id: number
     label: string
     changed_variant: boolean
+    looped_variant?: boolean
   }
   mastery_progress: {
     mastered: number
@@ -142,6 +145,7 @@ export type ScenarioSession = {
     counted_action_total: number
     completed_at: string
   } | null
+  reviewable_difficulties?: DifficultyAccess[]
 }
 
 export type ScenarioStepLog = {

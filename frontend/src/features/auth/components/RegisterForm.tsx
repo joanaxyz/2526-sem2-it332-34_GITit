@@ -32,7 +32,7 @@ const schema = z
 type FormValues = z.infer<typeof schema>
 
 const inputClasses =
-  'h-10 rounded-md border border-input bg-secondary px-3 text-sm outline-none transition focus:ring-2 focus:ring-ring'
+  'h-10 rounded-md border border-input bg-secondary px-3 text-sm outline-none transition-all duration-200 focus:border-primary/40 focus:ring-2 focus:ring-ring/25'
 
 export function RegisterForm() {
   const navigate = useNavigate()
@@ -75,17 +75,17 @@ export function RegisterForm() {
       </div>
       <label className="flex flex-col gap-1.5 text-sm font-semibold">
         First name
-        <input className={cn(inputClasses, form.formState.errors.first_name && 'border-destructive focus:ring-destructive/30')} autoComplete="given-name" {...form.register('first_name')} />
+        <input className={cn(inputClasses, form.formState.errors.first_name && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30')} autoComplete="given-name" {...form.register('first_name')} />
         {form.formState.errors.first_name ? <span className="text-xs font-normal text-destructive">{form.formState.errors.first_name.message}</span> : null}
       </label>
       <label className="flex flex-col gap-1.5 text-sm font-semibold">
         Last name
-        <input className={cn(inputClasses, form.formState.errors.last_name && 'border-destructive focus:ring-destructive/30')} autoComplete="family-name" {...form.register('last_name')} />
+        <input className={cn(inputClasses, form.formState.errors.last_name && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30')} autoComplete="family-name" {...form.register('last_name')} />
         {form.formState.errors.last_name ? <span className="text-xs font-normal text-destructive">{form.formState.errors.last_name.message}</span> : null}
       </label>
       <label className="flex flex-col gap-1.5 text-sm font-semibold">
         Email
-        <input className={cn(inputClasses, form.formState.errors.email && 'border-destructive focus:ring-destructive/30')} autoComplete="email" {...form.register('email')} />
+        <input className={cn(inputClasses, form.formState.errors.email && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30')} autoComplete="email" {...form.register('email')} />
         {form.formState.errors.email ? <span className="text-xs font-normal text-destructive">{form.formState.errors.email.message}</span> : null}
       </label>
       <label className="flex flex-col gap-1.5 text-sm font-semibold">
@@ -94,7 +94,7 @@ export function RegisterForm() {
           <input
             className={cn(
               `${inputClasses} w-full pr-10`,
-              form.formState.errors.password && 'border-destructive focus:ring-destructive/30',
+              form.formState.errors.password && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30',
             )}
             type={showPassword ? 'text' : 'password'}
             {...form.register('password')}
@@ -117,7 +117,7 @@ export function RegisterForm() {
           <input
             className={cn(
               `${inputClasses} w-full pr-10`,
-              form.formState.errors.password_confirm && 'border-destructive focus:ring-destructive/30',
+              form.formState.errors.password_confirm && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30',
             )}
             type={showPasswordConfirm ? 'text' : 'password'}
             {...form.register('password_confirm')}
@@ -160,7 +160,10 @@ export function RegisterForm() {
         {mutation.isPending ? 'Creating account' : 'Create account'}
       </Button>
       <p className="text-sm text-muted-foreground">
-        Already registered? <Link className="font-semibold text-primary" to="/login">Sign in</Link>
+        Already registered?{' '}
+        <Link className="link-underline-anim font-semibold text-primary" to="/login">
+          Sign in
+        </Link>
       </p>
     </form>
   )

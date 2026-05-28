@@ -31,7 +31,7 @@ import { cn } from '@/shared/utils/cn'
 
 const DEFAULT_TERMINAL_RATIO = 0.28
 const DEFAULT_DIAGRAM_RATIO = 0.52
-const DEFAULT_TERMINAL_PANE_RATIO = 0.76
+const DEFAULT_TERMINAL_PANE_RATIO = 0.60
 const MIN_TERMINAL_PANE_WIDTH = 544
 const MIN_FEEDBACK_PANE_WIDTH = 288
 const MAX_FEEDBACK_PANE_WIDTH = 480
@@ -105,12 +105,13 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const sessionId = Number(params.sessionId)
-  const { query, session, lines, setLines, feedback, resetLocalSessionState } = useScenarioSession(sessionId)
+  const { query, session, lines, feedback } = useScenarioSession(sessionId)
   const mutation = useCommandSubmission(sessionId, reviewMode)
   const [dismissedCompletionSessionId, setDismissedCompletionSessionId] = useState<number | null>(null)
   const [terminalRatio, setTerminalRatio] = useState(DEFAULT_TERMINAL_RATIO)
   const [diagramRatio, setDiagramRatio] = useState(DEFAULT_DIAGRAM_RATIO)
   const [terminalPaneRatio, setTerminalPaneRatio] = useState(DEFAULT_TERMINAL_PANE_RATIO)
+  const [projectFilesOpen, setProjectFilesOpen] = useState(true)
   const [tourOpen, setTourOpen] = useState(false)
   const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
   const [startOverConfirmOpen, setStartOverConfirmOpen] = useState(false)
@@ -173,7 +174,6 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     },
     onSuccess: (updatedSession) => {
       updateScenarioSessionCache(queryClient, updatedSession)
-      window.setTimeout(resetLocalSessionState, 0)
     },
   })
   const writeFileMutation = useMutation({
@@ -183,40 +183,25 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     },
     onSuccess: (updatedSession) => {
       updateScenarioSessionCache(queryClient, updatedSession)
-      window.setTimeout(resetLocalSessionState, 0)
     },
   })
-  const moduleScenariosQuery = useQuery({
-    queryKey: queryKeys.moduleScenarios(session?.module.id),
-    queryFn: () => scenariosApi.listForModule(session!.module.id),
-    enabled: !!session?.module.id,
-    staleTime: 5 * 60 * 1000,
-  })
-  const currentScenario = moduleScenariosQuery.data?.find((s) => s.id === session?.scenario.id)
-  const reviewableDifficulties = currentScenario?.difficulties.filter(
-    (d) => d.review_available && d.difficulty !== session?.difficulty
-  ) ?? []
+  const reviewableDifficulties = session?.reviewable_difficulties ?? []
 
   if (query.isLoading) return <PracticeWorkspaceSkeleton />
   if (query.isError) return <ErrorState title="Could not load scenario workspace" description={query.error.message} />
   if (!session) return <ErrorState title="Could not load scenario workspace" description="The API returned no session data." />
+
+  // #region agent log
+  fetch('http://127.0.0.1:7681/ingest/62fc7eb8-c151-4a74-bb87-4f3717466167',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4d73ce'},body:JSON.stringify({sessionId:'4d73ce',location:'PracticeWorkspace.tsx:session-ready',message:'session loaded, rendering workspace',data:{hypothesisId:'B',sessionId:session.id,status:session.status,commitsCount:session.repository_state?.commits?.length??0},timestamp:Date.now(),runId:'post-fix'})}).catch(()=>{});
+  // #endregion
 
   const tourKey = `${user?.id ?? 'guest'}:${session.scenario.id}`
   const shouldAutoOpenTour = dismissedTourKey !== tourKey && !hasSeenScenarioTour(user?.id)
   const isTourOpen = tourOpen || shouldAutoOpenTour
 
   function submit(command: string) {
-    setLines((items) => [...items, { id: crypto.randomUUID(), kind: 'input', text: command }])
     mutation.mutate(command, {
       onSuccess: (response) => {
-        setLines((items) => [
-          ...items,
-          {
-            id: crypto.randomUUID(),
-            kind: response.session.status === 'completed' ? 'success' : 'output',
-            text: response.step.terminal_output,
-          },
-        ])
         if (response.command_family === 'mergetool') {
           const snapshot = response.session.repository_state
           const requestedPaths = stringList(snapshot.operation_metadata?.last_mergetool_paths)
@@ -224,10 +209,6 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
           const nextPath = requestedPaths.find((path) => conflictPaths.includes(path)) ?? conflictPaths[0]
           if (nextPath) setWorkspaceEditorPath(nextPath)
         }
-        window.setTimeout(resetLocalSessionState, 0)
-      },
-      onError: (error) => {
-        setLines((items) => [...items, { id: crypto.randomUUID(), kind: 'warning', text: error.message }])
       },
     })
   }
@@ -345,9 +326,14 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         onOpenTour={() => setTourOpen(true)}
         onContinue={() => retryMutation.mutate()}
       />
-      <main className="relative grid min-h-0 flex-1 grid-cols-[22rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[21rem_minmax(0,1fr)] max-xl:grid-cols-[19rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
+      <main className="relative grid min-h-0 flex-1 grid-cols-[27rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[26rem_minmax(0,1fr)] max-xl:grid-cols-[23rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
         <aside
-          className="grid min-h-0 grid-rows-[minmax(13rem,0.72fr)_minmax(18rem,0.58fr)] gap-2 overflow-hidden max-lg:min-h-[44rem]"
+          className="grid min-h-0 gap-2 overflow-hidden max-lg:min-h-[44rem]"
+          style={{
+            gridTemplateRows: projectFilesOpen
+              ? 'minmax(13rem, 0.72fr) minmax(18rem, 0.58fr)'
+              : 'minmax(13rem, 1fr) auto',
+          }}
           data-testid="workspace-sidebar"
           data-tour-target="scenario-brief"
         >
@@ -355,12 +341,14 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             <ScenarioContextPanel session={session} />
           </div>
 
-          <div className="min-h-[14rem] overflow-hidden" data-testid="project-structure-region">
+          <div className={cn('overflow-hidden', projectFilesOpen ? 'min-h-[14rem]' : '')} data-testid="project-structure-region">
             <ProjectStructurePanel
               snapshot={session.repository_state}
               className="h-full"
               selectedPath={workspaceEditorPath}
               createDisabled={session.status !== 'started' || createFileMutation.isPending}
+              isOpen={projectFilesOpen}
+              onToggle={() => setProjectFilesOpen((v) => !v)}
               onCreateFile={async (input) => {
                 const updatedSession = await createFileMutation.mutateAsync(input)
                 setWorkspaceEditorPath(input.path)
@@ -406,7 +394,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             ref={terminalGridRef}
             data-testid="terminal-feedback-grid"
             className={cn(
-              'grid min-h-0',
+              'grid min-h-0 min-w-0',
               session.scaffolding.contextual_feedback
                 ? 'grid-cols-1 gap-2 xl:grid-cols-[minmax(34rem,var(--terminal-pane-size))_0.375rem_minmax(18rem,var(--feedback-pane-size))] xl:gap-0'
                 : 'grid-cols-1',
@@ -416,7 +404,8 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             <div className="h-full min-h-0" data-tour-target="terminal">
               <TerminalPanel
                 lines={lines}
-                disabled={session.status !== 'started' || mutation.isPending}
+                disabled={session.status !== 'started'}
+                runDisabled={mutation.isPending}
                 processing={mutation.isPending}
                 className="h-full"
                 onCommand={submit}
@@ -431,7 +420,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
               />
             ) : null}
             {session.scaffolding.contextual_feedback ? (
-              <div className="h-full min-h-0" data-tour-target="feedback">
+              <div className="h-full min-h-0 w-full min-w-0" data-tour-target="feedback">
                 <ContextualFeedbackPanel session={session} feedback={feedback} />
               </div>
             ) : (

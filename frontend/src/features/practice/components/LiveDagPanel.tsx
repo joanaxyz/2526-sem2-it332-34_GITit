@@ -1,12 +1,14 @@
 import dagre from 'dagre'
 import { GitCommitHorizontal } from 'lucide-react'
-import { memo, useCallback, useMemo, useState } from 'react'
-import ReactFlow, { Background, Handle, Position } from 'reactflow'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import ReactFlow, { Background, Handle, Position, ReactFlowProvider, useReactFlow } from 'reactflow'
 import type { Edge, Node, NodeProps } from 'reactflow'
 
 import type { RepositoryCommit, RepositorySnapshot, RepositoryValue } from '@/features/practice/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Card'
 import { cn } from '@/shared/utils/cn'
+
+type DagVariant = 'cyan' | 'violet'
 
 type RefKind = 'local' | 'remote'
 
@@ -21,6 +23,7 @@ type CommitNodeData = {
   activeRef: string | null
   isHead: boolean
   isDetachedHead: boolean
+  variant: DagVariant
   isActive?: boolean
   onActivate?: () => void
   onDismiss?: () => void
@@ -28,7 +31,35 @@ type CommitNodeData = {
 
 type EmptyRepositoryNodeData = {
   branchName: string
+  variant: DagVariant
 }
+
+const VARIANT_COLORS = {
+  cyan: {
+    border: 'rgba(0,245,212,0.42)',
+    headerBg: 'rgba(0,245,212,0.025)',
+    iconShadow: 'drop-shadow(0 0 4px rgba(0,245,212,0.55))',
+    titleClass: 'text-primary',
+    gradientBg: 'radial-gradient(ellipse at 30% 40%, rgba(0,245,212,0.05) 0%, transparent 62%)',
+    dotColor: 'rgba(0,245,212,0.06)',
+    headNode: 'border-2 border-primary bg-primary/15 text-primary dag-head-glow',
+    activePill: 'border-primary/55 bg-primary/10 text-primary shadow-[0_0_8px_rgba(0,245,212,0.22)]',
+    emptyHead: 'dag-head-glow border-2 border-dashed border-primary bg-primary/10 text-primary',
+    emptyPill: 'border-primary/50 bg-primary/10 text-primary shadow-[0_0_6px_rgba(0,245,212,0.2)]',
+  },
+  violet: {
+    border: 'rgba(167,139,250,0.42)',
+    headerBg: 'rgba(167,139,250,0.025)',
+    iconShadow: 'drop-shadow(0 0 4px rgba(167,139,250,0.55))',
+    titleClass: 'text-violet-400',
+    gradientBg: 'radial-gradient(ellipse at 30% 40%, rgba(167,139,250,0.05) 0%, transparent 62%)',
+    dotColor: 'rgba(167,139,250,0.06)',
+    headNode: 'border-2 border-violet-400 bg-violet-400/15 text-violet-400 dag-head-glow-violet',
+    activePill: 'border-violet-400/55 bg-violet-400/10 text-violet-400 shadow-[0_0_8px_rgba(167,139,250,0.22)]',
+    emptyHead: 'dag-head-glow-violet border-2 border-dashed border-violet-400 bg-violet-400/10 text-violet-400',
+    emptyPill: 'border-violet-400/50 bg-violet-400/10 text-violet-400 shadow-[0_0_6px_rgba(167,139,250,0.2)]',
+  },
+} as const
 
 const commitNodeTypes = {
   commit: memo(CommitNode),
@@ -67,13 +98,14 @@ export function LiveDagPanel({
   )
 }
 
-export function RepositoryStateDiagram({
+const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   title,
   snapshot,
   className,
   contentClassName,
   showRepositoryDetails = false,
   fitViewPadding = 0.08,
+  variant = 'cyan',
 }: {
   title: string
   snapshot: RepositorySnapshot
@@ -81,9 +113,29 @@ export function RepositoryStateDiagram({
   contentClassName?: string
   showRepositoryDetails?: boolean
   fitViewPadding?: number
+  variant?: DagVariant
 }) {
+  const colors = VARIANT_COLORS[variant]
+  // #region agent log
+  fetch('http://127.0.0.1:7681/ingest/62fc7eb8-c151-4a74-bb87-4f3717466167',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4d73ce'},body:JSON.stringify({sessionId:'4d73ce',location:'LiveDagPanel.tsx:RepositoryStateDiagramBody',message:'diagram body mount',data:{hypothesisId:'E',variantProp:variant,commitsCount:snapshot.commits?.length??0},timestamp:Date.now(),runId:'post-fix'})}).catch(()=>{});
+  // #endregion
   const normalizedSnapshot = useMemo(() => normalizeSnapshot(snapshot), [snapshot])
-  const { nodes, edges } = useMemo(() => buildGraph(normalizedSnapshot), [normalizedSnapshot])
+  const layoutSignature = useMemo(() => graphLayoutSignature(normalizedSnapshot), [normalizedSnapshot])
+  const layoutCacheRef = useRef<{ signature: string; positions: Map<string, { x: number; y: number }> } | null>(
+    null,
+  )
+  const { nodes, edges } = useMemo(() => {
+    const cached = layoutCacheRef.current
+    if (cached?.signature === layoutSignature) {
+      return buildGraph(normalizedSnapshot, variant, cached.positions)
+    }
+    const graph = buildGraph(normalizedSnapshot, variant)
+    layoutCacheRef.current = {
+      signature: layoutSignature,
+      positions: new Map(graph.nodes.map((node) => [node.id, node.position])),
+    }
+    return graph
+  }, [layoutSignature, normalizedSnapshot, variant])
   const nodeTypes = useMemo(() => commitNodeTypes, [])
   const [activeCommitId, setActiveCommitId] = useState<string | null>(null)
   const dismissCommit = useCallback((commitId: string) => {
@@ -112,17 +164,28 @@ export function RepositoryStateDiagram({
   }, [activeCommitId, diagramNodes])
 
   return (
-    <Card className={cn('min-h-0 overflow-hidden shadow-none', className)}>
-      <CardHeader className="p-3">
-        <CardTitle className="flex flex-wrap items-center gap-2 text-sm">
-          <GitCommitHorizontal className="size-5 text-primary" />
-          {title}
-          <span className="text-[11px] font-normal text-muted-foreground">
-            {normalizedSnapshot.commits.length
-              ? 'Hover or click a commit for details.'
-              : 'No commit metadata yet; the repository is still empty.'}
-          </span>
-        </CardTitle>
+    <Card
+      className={cn('min-h-0 overflow-hidden shadow-none', className)}
+      style={{ borderTop: `1.5px solid ${colors.border}` }}
+    >
+      <CardHeader className="p-3" style={{ background: colors.headerBg }}>
+        <div className="flex flex-wrap items-center gap-2">
+          <GitCommitHorizontal
+            className="size-4"
+            style={{ filter: colors.iconShadow, color: variant === 'violet' ? 'rgb(167,139,250)' : undefined }}
+          />
+          <span className={cn('text-sm font-bold tracking-wide', colors.titleClass)}>{title}</span>
+          {normalizedSnapshot.commits.length > 0 && (
+            <span className="text-[10px] font-normal text-muted-foreground/65">
+              Hover or click a commit for details.
+            </span>
+          )}
+        </div>
+        {!normalizedSnapshot.commits.length && (
+          <p className="mt-0.5 text-[10px] text-muted-foreground/50">
+            No commit metadata yet.
+          </p>
+        )}
       </CardHeader>
       <CardContent
         className={cn(
@@ -131,23 +194,30 @@ export function RepositoryStateDiagram({
         )}
       >
         <div className="relative h-full min-h-0">
+          <div
+            className="pointer-events-none absolute inset-0 z-0"
+            style={{
+              background: colors.gradientBg,
+              animation: 'bg-drift 20s ease-in-out infinite alternate',
+            }}
+          />
           <ReactFlow
             className="h-full w-full"
-            style={{ height: '100%', width: '100%' }}
+            style={{ height: '100%', width: '100%', background: 'transparent' }}
             nodes={diagramNodes}
             edges={edges}
-            fitView
-            fitViewOptions={{ padding: fitViewPadding }}
             nodesDraggable={false}
             nodesConnectable={false}
             nodeTypes={nodeTypes}
             panOnScroll
+            onlyRenderVisibleElements
             minZoom={0.55}
             maxZoom={1.6}
             proOptions={{ hideAttribution: true }}
             onError={handleReactFlowError}
           >
             <Background gap={18} color="rgba(255,255,255,0.05)" />
+            <FitViewOnTopologyChange layoutSignature={layoutSignature} fitViewPadding={fitViewPadding} />
           </ReactFlow>
           <CommitDetailsPanel data={activeCommitData ?? null} />
         </div>
@@ -155,9 +225,61 @@ export function RepositoryStateDiagram({
       </CardContent>
     </Card>
   )
+})
+
+export function RepositoryStateDiagram({
+  title,
+  snapshot,
+  className,
+  contentClassName,
+  showRepositoryDetails = false,
+  fitViewPadding = 0.08,
+}: {
+  title: string
+  snapshot: RepositorySnapshot
+  className?: string
+  contentClassName?: string
+  showRepositoryDetails?: boolean
+  fitViewPadding?: number
+}) {
+  return (
+    <ReactFlowProvider>
+      <RepositoryStateDiagramBody
+        title={title}
+        snapshot={snapshot}
+        className={className}
+        contentClassName={contentClassName}
+        showRepositoryDetails={showRepositoryDetails}
+        fitViewPadding={fitViewPadding}
+      />
+    </ReactFlowProvider>
+  )
+}
+
+function FitViewOnTopologyChange({
+  layoutSignature,
+  fitViewPadding,
+}: {
+  layoutSignature: string
+  fitViewPadding: number
+}) {
+  const { fitView } = useReactFlow()
+  const previousSignature = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (previousSignature.current === layoutSignature) return
+    previousSignature.current = layoutSignature
+    const frameId = window.requestAnimationFrame(() => {
+      void fitView({ padding: fitViewPadding, duration: 0 })
+    })
+    return () => window.cancelAnimationFrame(frameId)
+  }, [fitView, fitViewPadding, layoutSignature])
+
+  return null
 }
 
 function CommitNode({ data }: NodeProps<CommitNodeData>) {
+  const colors = VARIANT_COLORS[data.variant]
   const visibleRefs = orderRefs(data.refs, data.activeRef).slice(0, 4)
   const hiddenRefCount = Math.max(data.refs.length - visibleRefs.length, 0)
   const label = [
@@ -189,10 +311,10 @@ function CommitNode({ data }: NodeProps<CommitNodeData>) {
         title={label}
         onClick={data.onActivate}
         className={cn(
-          'grid size-16 place-items-center rounded-full border font-mono text-sm font-semibold shadow-sm outline-none transition-all focus-visible:ring-2 focus-visible:ring-ring',
+          'grid size-16 place-items-center rounded-full font-mono text-sm font-semibold outline-none transition-all focus-visible:ring-2 focus-visible:ring-ring',
           data.isHead
-            ? 'border-accent bg-accent text-accent-foreground shadow-[0_0_0_4px_hsla(var(--accent)/0.16)]'
-            : 'border-border bg-card text-foreground',
+            ? colors.headNode
+            : 'border border-border bg-card text-foreground shadow-sm',
           data.isActive && 'ring-2 ring-primary/70 ring-offset-2 ring-offset-background',
         )}
       >
@@ -210,9 +332,9 @@ function CommitNode({ data }: NodeProps<CommitNodeData>) {
             return (
               <span
                 className={cn(
-                  'max-w-32 truncate rounded-full border px-2 py-0.5 text-[10px] font-medium leading-none',
+                  'max-w-32 truncate rounded-full border px-2 py-0.5 text-[10px] font-semibold leading-none',
                   isActive
-                    ? 'border-accent/50 bg-accent/15 text-accent'
+                    ? colors.activePill
                     : ref.kind === 'remote'
                       ? 'border-sky-500/35 bg-sky-500/10 text-sky-700 dark:text-sky-300'
                       : 'border-border bg-secondary text-muted-foreground',
@@ -323,15 +445,18 @@ function DetailList({
 }
 
 function EmptyRepositoryNode({ data }: NodeProps<EmptyRepositoryNodeData>) {
+  const colors = VARIANT_COLORS[data.variant]
   return (
     <div className="flex w-32 flex-col items-center gap-2">
-      <div className="grid size-16 place-items-center rounded-full border border-dashed border-accent bg-accent/15 font-mono text-xs font-semibold text-accent shadow-[0_0_0_4px_hsla(var(--accent)/0.12)]">
+      <div className={cn('grid size-16 place-items-center rounded-full font-mono text-xs font-semibold', colors.emptyHead)}>
         HEAD
       </div>
-      <span className="max-w-28 truncate rounded-full border border-accent/50 bg-accent/15 px-2 py-0.5 text-[10px] font-medium leading-none text-accent">
+      <span className={cn('max-w-28 truncate rounded-full border px-2 py-0.5 text-[10px] font-semibold leading-none', colors.emptyPill)}>
         {data.branchName}
       </span>
-      <span className="text-center text-[11px] font-medium leading-none text-muted-foreground">No commits yet</span>
+      <div className="mt-0.5 rounded border border-dashed border-muted-foreground/20 px-2.5 py-1.5 text-center">
+        <span className="text-[10px] font-medium leading-none text-muted-foreground/55">No commits yet</span>
+      </div>
     </div>
   )
 }
@@ -389,7 +514,27 @@ function SummaryLine({ label, value }: { label: string; value: string }) {
   )
 }
 
-function buildGraph(snapshot: RepositorySnapshot): { nodes: Node[]; edges: Edge[] } {
+export function graphLayoutSignature(snapshot: RepositorySnapshot): string {
+  if (!snapshot.commits.length) return 'empty'
+  const commitIds = snapshot.commits
+    .map((commit) => commit.id)
+    .sort()
+    .join(',')
+  const edges = snapshot.commits
+    .flatMap((commit) => (commit.parents ?? []).map((parent) => `${parent}->${commit.id}`))
+    .sort()
+    .join(',')
+  return `${commitIds}|${edges}`
+}
+
+function buildGraph(
+  snapshot: RepositorySnapshot,
+  variant: DagVariant,
+  cachedPositions?: Map<string, { x: number; y: number }>,
+): { nodes: Node[]; edges: Edge[] } {
+  // #region agent log
+  fetch('http://127.0.0.1:7681/ingest/62fc7eb8-c151-4a74-bb87-4f3717466167',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4d73ce'},body:JSON.stringify({sessionId:'4d73ce',location:'LiveDagPanel.tsx:buildGraph',message:'buildGraph entry',data:{hypothesisId:'A',variantParam:variant,commitsLength:snapshot.commits.length,emptyRepo:!snapshot.commits.length,hasCachedPositions:Boolean(cachedPositions)},timestamp:Date.now(),runId:'post-fix'})}).catch(()=>{});
+  // #endregion
   const graph = new dagre.graphlib.Graph()
   graph.setDefaultEdgeLabel(() => ({}))
   graph.setGraph({ rankdir: 'TB', nodesep: 56, ranksep: 88 })
@@ -412,7 +557,7 @@ function buildGraph(snapshot: RepositorySnapshot): { nodes: Node[]; edges: Edge[
           id: '__empty__',
           type: 'emptyRepository',
           position: { x: point.x - 64, y: point.y - 52 },
-          data: { branchName },
+          data: { branchName, variant },
         },
       ],
       edges: [],
@@ -441,6 +586,7 @@ function buildGraph(snapshot: RepositorySnapshot): { nodes: Node[]; edges: Edge[
         activeRef,
         isHead,
         isDetachedHead: isHead && snapshot.head.type === 'detached',
+        variant,
       },
     }
   })
@@ -459,9 +605,13 @@ function buildGraph(snapshot: RepositorySnapshot): { nodes: Node[]; edges: Edge[
     }
   }
 
-  dagre.layout(graph)
+  if (!cachedPositions) {
+    dagre.layout(graph)
+  }
   return {
     nodes: nodes.map((node) => {
+      const cachedPosition = cachedPositions?.get(node.id)
+      if (cachedPosition) return { ...node, position: cachedPosition }
       const point = graph.node(node.id)
       const size = nodeSizes.get(node.id) ?? { width: 144, height: 76 }
       return { ...node, position: { x: point.x - size.width / 2, y: point.y - size.height / 2 } }

@@ -241,6 +241,23 @@ describe('updateScenarioListWithSession', () => {
     expect(updated.difficulties[0].retry_session_id).toBe(sessionWithExtraAction.id)
   })
 
+  it('does not force retry when completed accuracy is at least 70%', () => {
+    const sessionAtSeventyFive: ScenarioSession = {
+      ...completedSession,
+      mastery_progress: { mastered: 1, required: 3 },
+      policy: { ...completedSession.policy, min_counted_commands: 3 },
+      counts: {
+        ...completedSession.counts,
+        counted_action_total: 4,
+        minimum_counted_commands: 3,
+      },
+    }
+    const [updated] = updateScenarioListWithSession([scenario], sessionAtSeventyFive) ?? []
+
+    expect(updated.difficulties[0].latest_attempt?.accuracy_rate).toBe(75)
+    expect(updated.difficulties[0].retry_session_id).toBeNull()
+  })
+
   it('uses the latest retry attempt for mastery and retry routing', () => {
     const completedDifficulty = {
       ...scenario.difficulties[0],

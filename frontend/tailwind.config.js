@@ -38,6 +38,13 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        aurora: {
+          cyan: "#00F5D4",
+          blue: "#00B4D8",
+          deep: "#0077B6",
+          navy: "#03045E",
+          card: "#0a1628",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -45,7 +52,9 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        panel: "0 22px 80px rgba(0, 0, 0, 0.32)",
+        panel: "0 4px 24px rgba(0, 0, 0, 0.45), 0 1px 4px rgba(0, 0, 0, 0.3)",
+        "aurora-sm": "0 0 12px rgba(0, 245, 212, 0.25)",
+        "aurora-md": "0 0 22px rgba(0, 245, 212, 0.35), 0 0 44px rgba(0, 180, 216, 0.15)",
       },
     },
   },

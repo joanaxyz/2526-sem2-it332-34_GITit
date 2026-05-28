@@ -34,7 +34,7 @@ export const scenariosApi = {
   retrySession(sessionId: number) {
     return apiRequest<ScenarioSession>(`/scenarios/sessions/${sessionId}/retry/`, {
       method: 'POST',
-      body: JSON.stringify({}),
+      body: JSON.stringify({ source_entry_point: 'retry' }),
     })
   },
   abandonSession(sessionId: number) {

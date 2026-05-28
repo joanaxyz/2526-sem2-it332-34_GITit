@@ -157,6 +157,94 @@ describe('useCommandSubmission', () => {
     vi.clearAllMocks()
   })
 
+  it('appends a pending step synchronously on mutate', () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    queryClient.setQueryData(queryKeys.scenarioSession(42), {
+      ...baseSession,
+      status: 'started',
+      steps: [],
+    })
+    vi.mocked(practiceApi.submitCommand).mockImplementation(() => new Promise(() => {}))
+    const { result } = renderSubmissionHook(queryClient)
+
+    act(() => {
+      result.current.mutate('git status')
+    })
+
+    const pendingSession = queryClient.getQueryData<ScenarioSession>(queryKeys.scenarioSession(42))
+    expect(pendingSession?.steps).toHaveLength(1)
+    expect(pendingSession?.steps[0]?.command_text).toBe('git status')
+  })
+
+  it('appends a pending step optimistically before the API resolves', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    queryClient.setQueryData(queryKeys.scenarioSession(42), {
+      ...baseSession,
+      status: 'started',
+      steps: [],
+    })
+    let resolveCommand: (value: CommandResponse) => void = () => {}
+    vi.mocked(practiceApi.submitCommand).mockImplementation(
+      () =>
+        new Promise<CommandResponse>((resolve) => {
+          resolveCommand = resolve
+        }),
+    )
+    const { result } = renderSubmissionHook(queryClient)
+
+    act(() => {
+      result.current.mutate('git status')
+    })
+
+    await waitFor(() => {
+      const pendingSession = queryClient.getQueryData<ScenarioSession>(queryKeys.scenarioSession(42))
+      expect(pendingSession?.steps).toHaveLength(1)
+    })
+
+    const pendingSession = queryClient.getQueryData<ScenarioSession>(queryKeys.scenarioSession(42))
+    expect(pendingSession?.steps[0]?.command_text).toBe('git status')
+    expect(pendingSession?.steps[0]?.id).toBeLessThan(0)
+
+    await act(async () => {
+      resolveCommand(startedResponse)
+      await Promise.resolve()
+    })
+  })
+
+  it('preserves project_tree when the command response omits it', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const projectTree = { 'README.md': { status: 'clean', source: 'head', content: 'readme' } }
+    queryClient.setQueryData(queryKeys.scenarioSession(42), {
+      ...baseSession,
+      status: 'started',
+      repository_state: {
+        ...baseSession.repository_state,
+        project_tree: projectTree,
+        visible_tree: projectTree,
+      },
+    })
+    vi.mocked(practiceApi.submitCommand).mockResolvedValue({
+      ...startedResponse,
+      session: {
+        ...startedResponse.session,
+        repository_state: {
+          ...startedResponse.session.repository_state,
+          project_tree: undefined,
+          visible_tree: undefined,
+        },
+      },
+    })
+    const { result } = renderSubmissionHook(queryClient)
+
+    await act(async () => {
+      await result.current.mutateAsync('git status')
+    })
+
+    const updatedSession = queryClient.getQueryData<ScenarioSession>(queryKeys.scenarioSession(42))
+    expect(updatedSession?.repository_state.project_tree).toEqual(projectTree)
+    expect(updatedSession?.repository_state.visible_tree).toEqual(projectTree)
+  })
+
   it('merges an in-progress command step without invalidating progress queries', async () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     queryClient.setQueryData(queryKeys.scenarioSession(42), {

@@ -14,6 +14,7 @@ const MODULE_SYMBOLS: Record<string, ModuleSymbolConfig> = {
   'branching-navigation': { icon: GitBranch, shortLabel: 'Branch' },
   'collaboration-integration': { icon: GitMerge, shortLabel: 'Merge' },
   'recovery-repair': { icon: LifeBuoy, shortLabel: 'Recover' },
+  'advanced-recovery-history': { icon: LifeBuoy, shortLabel: 'Recover' },
 }
 
 const FALLBACK_SYMBOL: ModuleSymbolConfig = { icon: BookOpen, shortLabel: 'Module' }
@@ -35,7 +36,7 @@ export function ModuleSymbol({
   return (
     <div
       className={cn(
-        'flex size-12 flex-col items-center justify-center gap-0.5 rounded-md border border-border bg-secondary text-primary',
+        'flex size-12 flex-col items-center justify-center gap-0.5 rounded-md border border-primary/25 bg-secondary text-primary transition-all duration-200 hover:border-primary/50 hover:shadow-aurora-sm',
         className,
       )}
       title={`${shortLabel}: ${module.title}`}

@@ -151,6 +151,8 @@ class GitCommandParser:
             return self._parse_log_tail(tokens)
         if subcommand == "mergetool":
             return self._parse_mergetool_tail(tokens)
+        if subcommand == "reset":
+            return self._parse_reset_tail(tokens)
         return self._parse_generic_tail(tokens)
 
     def _append_option(
@@ -400,6 +402,39 @@ class GitCommandParser:
                 value = token.split("=", 1)[1]
                 self._append_option(options, "--tool", value)
                 normalized.extend(["--tool", value])
+                index += 1
+                continue
+            if token.startswith("-"):
+                self._append_option(options, token)
+                normalized.append(token)
+                index += 1
+                continue
+            args.append(token)
+            pathspecs.append(token)
+            normalized.append(token)
+            index += 1
+        return (
+            {key: tuple(value) for key, value in options.items()},
+            args,
+            pathspecs,
+            None,
+            normalized,
+        )
+
+    def _parse_reset_tail(
+        self,
+        tokens: list[str],
+    ) -> tuple[dict[str, tuple[str | bool, ...]], list[str], list[str], str | None, list[str]]:
+        options: dict[str, list[str | bool]] = {}
+        args: list[str] = []
+        pathspecs: list[str] = []
+        normalized: list[str] = []
+        index = 0
+        while index < len(tokens):
+            token = tokens[index]
+            if token in {"--hard"}:
+                self._append_option(options, token)
+                normalized.append(token)
                 index += 1
                 continue
             if token.startswith("-"):
@@ -669,6 +704,22 @@ class GitCommandRegistry:
                 executor="teaching_state",
                 parser_validation=_validate_cherry_pick,
             ),
+            "reset": GitCommandSpec(
+                "reset",
+                frozenset({"--hard"}),
+                diagnostic=False,
+                counted=True,
+                executor="teaching_state",
+                parser_validation=_validate_reset,
+            ),
+            "revert": GitCommandSpec(
+                "revert",
+                frozenset({"--no-edit"}),
+                diagnostic=False,
+                counted=True,
+                executor="teaching_state",
+                parser_validation=_validate_revert,
+            ),
             "switch": GitCommandSpec(
                 "switch",
                 frozenset({"-c", "--create", "--detach"}),
@@ -700,6 +751,30 @@ class GitCommandRegistry:
                 counted=True,
                 executor="teaching_state",
                 parser_validation=_validate_pull,
+            ),
+            "rebase": GitCommandSpec(
+                "rebase",
+                frozenset({"-i", "--continue", "--abort"}),
+                diagnostic=False,
+                counted=True,
+                executor="teaching_state",
+                parser_validation=_validate_rebase,
+            ),
+            "merge-base": GitCommandSpec(
+                "merge-base",
+                frozenset(),
+                diagnostic=True,
+                counted=False,
+                executor="teaching_state",
+                parser_validation=_validate_merge_base,
+            ),
+            "rev-list": GitCommandSpec(
+                "rev-list",
+                frozenset({"--count"}),
+                diagnostic=True,
+                counted=False,
+                executor="teaching_state",
+                parser_validation=_validate_rev_list,
             ),
         }
 
@@ -956,6 +1031,62 @@ def _validate_cherry_pick(parsed: ParsedGitCommand) -> str | None:
         return "usage: git cherry-pick [--no-commit] <commit>"
     if parsed.has_option("--no-commit") and parsed.has_option("-n"):
         return "error: use only one no-commit option"
+    return None
+
+
+def _validate_reset(parsed: ParsedGitCommand) -> str | None:
+    if not parsed.has_option("--hard"):
+        return "error: this simulator only supports git reset --hard <target>"
+    if len(parsed.args) != 1:
+        return "usage: git reset --hard <target>"
+    return None
+
+
+def _validate_revert(parsed: ParsedGitCommand) -> str | None:
+    if len(parsed.args) != 1:
+        return "usage: git revert [--no-edit] <commit>"
+    return None
+
+
+def _validate_push(parsed: ParsedGitCommand) -> str | None:
+    if len(parsed.args) > 2:
+        return "usage: git push [-u] <remote> <branch>"
+    return None
+
+
+def _validate_rebase(parsed: ParsedGitCommand) -> str | None:
+    if parsed.has_option("--abort") and parsed.has_option("--continue"):
+        return "fatal: --abort and --continue cannot be used together"
+    if parsed.has_option("--abort") or parsed.has_option("--continue"):
+        if parsed.args or parsed.has_option("-i"):
+            return "fatal: --abort/--continue do not take additional arguments"
+        return None
+    if len(parsed.args) != 1:
+        return "usage: git rebase [-i] <upstream>"
+    return None
+
+
+def _validate_merge_base(parsed: ParsedGitCommand) -> str | None:
+    if len(parsed.args) != 2:
+        return "usage: git merge-base <commit> <commit>"
+    return None
+
+
+def _validate_rev_list(parsed: ParsedGitCommand) -> str | None:
+    if not parsed.has_option("--count"):
+        return "usage: git rev-list --count <left>..<right>"
+    if len(parsed.args) != 1 or ".." not in parsed.args[0]:
+        return "usage: git rev-list --count <left>..<right>"
+    return None
+
+
+def _validate_switch(parsed: ParsedGitCommand) -> str | None:
+    if parsed.has_option("-c"):
+        if len(parsed.args) not in {1, 2}:
+            return "usage: git switch -c <branch> [<start-point>]"
+        return None
+    if len(parsed.args) != 1:
+        return "usage: git switch <branch>"
     return None
 
 

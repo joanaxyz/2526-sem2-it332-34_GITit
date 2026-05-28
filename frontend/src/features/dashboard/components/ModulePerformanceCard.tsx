@@ -1,71 +1,251 @@
-import { Gauge, ShieldCheck, GitPullRequest } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { BarChart2, GitPullRequest, ShieldCheck } from 'lucide-react'
 
 import type { DashboardSummary, RateMetric } from '@/features/dashboard/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/Card'
-import { ProgressBar } from '@/shared/components/ProgressBar'
 
 type ModuleKey = '1' | '2' | '3' | '4'
 
 const MODULE_KEYS: ModuleKey[] = ['1', '2', '3', '4']
 
-export function ModulePerformanceCard({ summary }: { summary: DashboardSummary }) {
+const HLCR_COLOR = '#7DD3FC'
+const RTA_COLOR = '#34D399'
+
+function useAnimatedWidth(value: number | null, delay: number) {
+  const [width, setWidth] = useState(0)
+  useEffect(() => {
+    const timer = setTimeout(() => setWidth(value ?? 0), delay)
+    return () => clearTimeout(timer)
+  }, [value, delay])
+  return width
+}
+
+function useCountUp(target: number | null, duration = 900, delay = 0): number {
+  const [value, setValue] = useState(0)
+  useEffect(() => {
+    if (target === null || target === 0) { setValue(target ?? 0); return }
+    const timer = setTimeout(() => {
+      const startTime = performance.now()
+      const tick = (now: number) => {
+        const p = Math.min((now - startTime) / duration, 1)
+        setValue(Math.round((1 - Math.pow(1 - p, 3)) * target))
+        if (p < 1) requestAnimationFrame(tick)
+      }
+      const id = requestAnimationFrame(tick)
+      return () => cancelAnimationFrame(id)
+    }, delay)
+    return () => clearTimeout(timer)
+  }, [target, duration, delay])
+  return value
+}
+
+function MetricBar({
+  label,
+  Icon,
+  metric,
+  color,
+  hasData,
+  barDelay,
+}: {
+  label: string
+  Icon: typeof ShieldCheck
+  metric: RateMetric
+  color: string
+  hasData: boolean
+  barDelay: number
+}) {
+  const barWidth = useAnimatedWidth(metric.value, barDelay)
+  const counted = useCountUp(metric.value, 900, barDelay)
+  const pct = metric.value ?? 0
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Gauge className="size-5 text-primary" />
-          Module hard + retry performance
-        </CardTitle>
-        <CardDescription className="flex flex-wrap items-center gap-3">
-          <span>Overall Hard completion: {formatPercent(summary.kpis.hlcr.value)}</span>
-          <span>Overall Retry transfer: {formatPercent(summary.kpis.rta.value)}</span>
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {MODULE_KEYS.map((moduleKey) => {
-          const moduleKpis = summary.module_kpis[moduleKey]
-          return (
-            <div key={moduleKey} className="rounded-md border border-border bg-secondary/40 p-3">
-              <div className="mb-3 text-sm font-semibold">Module {moduleKey}</div>
-              <div className="grid grid-cols-2 gap-3 max-md:grid-cols-1">
-                <MetricMeter label="Hard completion" icon={ShieldCheck} metric={moduleKpis.hlcr} />
-                <MetricMeter label="Retry transfer" icon={GitPullRequest} metric={moduleKpis.rta} />
-              </div>
-            </div>
-          )
-        })}
-      </CardContent>
-    </Card>
+    <div className="flex flex-col gap-1.5">
+      {/* Label row */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          <Icon
+            className="size-3.5 flex-shrink-0"
+            style={{ color: hasData ? color : 'rgba(255,255,255,0.2)' }}
+          />
+          <span
+            className="text-[0.65rem] font-semibold uppercase tracking-[0.1em]"
+            style={{ color: hasData ? 'rgba(200,220,240,0.75)' : 'rgba(255,255,255,0.2)' }}
+          >
+            {label}
+          </span>
+        </div>
+        <span
+          className="text-xs font-bold tabular-nums"
+          style={{ color: hasData ? color : 'rgba(255,255,255,0.18)' }}
+        >
+          {hasData ? `${counted}%` : '—'}
+        </span>
+      </div>
+
+      {/* Animated bar */}
+      <div
+        className="h-2 rounded-full overflow-hidden"
+        style={{ background: 'rgba(255,255,255,0.06)' }}
+      >
+        <div
+          className="h-full rounded-full"
+          style={{
+            width: `${barWidth}%`,
+            background: hasData
+              ? `linear-gradient(90deg, ${color}88, ${color})`
+              : 'rgba(255,255,255,0.08)',
+            boxShadow:
+              hasData && pct > 0
+                ? `0 0 8px ${color}55, 0 0 2px ${color}99`
+                : undefined,
+            transition: 'width 1.1s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
+        />
+      </div>
+
+      {/* Attempt count */}
+      <p className="text-[0.63rem] text-muted-foreground">
+        {metric.denominator
+          ? `${metric.numerator}/${metric.denominator} attempts`
+          : 'Waiting for practice'}
+      </p>
+    </div>
   )
 }
 
-function MetricMeter({
-  label,
-  icon: Icon,
-  metric,
+function ModulePanel({
+  moduleKey,
+  hlcr,
+  rta,
+  index,
 }: {
-  label: string
-  icon: typeof ShieldCheck
-  metric: RateMetric
+  moduleKey: ModuleKey
+  hlcr: RateMetric
+  rta: RateMetric
+  index: number
 }) {
-  const value = metric.value ?? 0
+  const hasAnyData = hlcr.denominator > 0 || rta.denominator > 0
+  const barDelay = 200 + index * 120
+
   return (
-    <div className="rounded-md border border-border/70 bg-card p-3">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <Icon className="size-4 text-primary" />
-          <span className="text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">{label}</span>
+    <div
+      className="module-card-hover rounded-lg p-4 transition-all duration-200"
+      style={{
+        background: hasAnyData
+          ? 'rgba(0,180,216,0.05)'
+          : 'rgba(255,255,255,0.02)',
+        border: hasAnyData
+          ? '1px solid rgba(0,180,216,0.2)'
+          : '1px solid rgba(255,255,255,0.06)',
+        borderTop: hasAnyData
+          ? '1px solid rgba(0,245,212,0.22)'
+          : '1px solid rgba(255,255,255,0.06)',
+        opacity: hasAnyData ? 1 : 0.45,
+      }}
+    >
+      {/* Module header badge */}
+      <div className="flex items-center gap-2 mb-3.5">
+        <div
+          className="flex items-center gap-1.5 rounded-md px-2 py-0.5"
+          style={{
+            background: hasAnyData
+              ? 'rgba(0,245,212,0.1)'
+              : 'rgba(255,255,255,0.06)',
+            border: hasAnyData
+              ? '1px solid rgba(0,245,212,0.2)'
+              : '1px solid rgba(255,255,255,0.08)',
+          }}
+        >
+          <span
+            className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.14em]"
+            style={{ color: hasAnyData ? 'rgba(0,245,212,0.85)' : 'rgba(255,255,255,0.28)' }}
+          >
+            Module {moduleKey}
+          </span>
         </div>
-        <span className="text-sm font-bold">{formatPercent(metric.value)}</span>
+        {!hasAnyData && (
+          <span className="text-[0.6rem] text-muted-foreground/40 font-mono uppercase tracking-widest">
+            no data yet
+          </span>
+        )}
       </div>
-      <ProgressBar value={value} className="mt-2 h-1.5" />
-      <p className="mt-2 text-xs text-muted-foreground">
-        {metric.denominator ? `${metric.numerator}/${metric.denominator} attempts` : 'Waiting for practice'}
-      </p>
+
+      {/* Two metric bars side by side */}
+      <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
+        <MetricBar
+          label="Hard completion"
+          Icon={ShieldCheck}
+          metric={hlcr}
+          color={HLCR_COLOR}
+          hasData={hlcr.denominator > 0}
+          barDelay={barDelay}
+        />
+        <MetricBar
+          label="Retry transfer"
+          Icon={GitPullRequest}
+          metric={rta}
+          color={RTA_COLOR}
+          hasData={rta.denominator > 0}
+          barDelay={barDelay + 80}
+        />
+      </div>
     </div>
   )
 }
 
 function formatPercent(value: number | null) {
   return value === null ? 'No data' : `${value}%`
+}
+
+export function ModulePerformanceCard({ summary }: { summary: DashboardSummary }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <BarChart2
+            className="size-5"
+            style={{ color: '#00F5D4', filter: 'drop-shadow(0 0 6px rgba(0,245,212,0.5))' }}
+          />
+          Module hard + retry performance
+        </CardTitle>
+        <CardDescription className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-0.5">
+          <span className="flex items-center gap-1.5">
+            <ShieldCheck className="size-3.5" style={{ color: HLCR_COLOR }} />
+            <span>Overall hard completion:</span>
+            <span
+              className="font-semibold"
+              style={{ color: HLCR_COLOR }}
+            >
+              {formatPercent(summary.kpis.hlcr.value)}
+            </span>
+          </span>
+          <span className="text-muted-foreground/30 select-none">·</span>
+          <span className="flex items-center gap-1.5">
+            <GitPullRequest className="size-3.5" style={{ color: RTA_COLOR }} />
+            <span>Overall retry transfer:</span>
+            <span
+              className="font-semibold"
+              style={{ color: RTA_COLOR }}
+            >
+              {formatPercent(summary.kpis.rta.value)}
+            </span>
+          </span>
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {MODULE_KEYS.map((moduleKey, index) => {
+          const moduleKpis = summary.module_kpis[moduleKey]
+          return (
+            <ModulePanel
+              key={moduleKey}
+              moduleKey={moduleKey}
+              hlcr={moduleKpis.hlcr}
+              rta={moduleKpis.rta}
+              index={index}
+            />
+          )
+        })}
+      </CardContent>
+    </Card>
+  )
 }

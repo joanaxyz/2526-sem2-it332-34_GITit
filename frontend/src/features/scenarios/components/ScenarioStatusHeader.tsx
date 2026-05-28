@@ -2,6 +2,11 @@ import { ArrowLeft, CircleHelp, GitBranch, RefreshCcw } from 'lucide-react'
 
 import type { ScenarioSession } from '@/features/practice/types'
 import { CommandBudgetHeader } from '@/features/scenarios/components/CommandBudgetHeader'
+import {
+  commandAccuracyFromSession,
+  meetsMasteryAccuracy,
+  meetsProgressAccuracy,
+} from '@/features/scenarios/utils/commandAccuracy'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 
@@ -25,13 +30,14 @@ export function ScenarioStatusHeader({
   onContinue?: () => void
 }) {
   const exitLabel = session.status === 'started' ? 'Exit' : 'Back'
+  const accuracy = commandAccuracyFromSession(session)
   const requiredAttempts = session.mastery_progress?.required ?? 3
   const hasRequiredAttempts = (session.mastery_progress?.mastered ?? 0) >= requiredAttempts
-  const isAccurate = session.counts.counted_action_total <= session.policy.min_counted_commands
-  const isMastered = session.status === 'completed' && hasRequiredAttempts && isAccurate
+  const meetsProgress = meetsProgressAccuracy(accuracy)
+  const isMastered = session.status === 'completed' && hasRequiredAttempts && meetsMasteryAccuracy(accuracy)
   const canRetry =
     !session.review_mode &&
-    (session.status === 'failed' || (session.status === 'completed' && !isAccurate)) &&
+    (session.status === 'failed' || (session.status === 'completed' && !meetsProgress)) &&
     !!onRetry
   const canStartOver = !session.review_mode && session.status === 'started' && !!onStartOver
   const canContinue =
@@ -39,7 +45,7 @@ export function ScenarioStatusHeader({
     !session.review_mode &&
     session.status === 'completed' &&
     !isMastered &&
-    isAccurate &&
+    meetsProgress &&
     !!onContinue
 
   return (
@@ -51,7 +57,7 @@ export function ScenarioStatusHeader({
         </Button>
         <GitBranch className="size-5 text-primary" />
         <span className="truncate font-mono text-xs text-muted-foreground">
-          Module {session.module.number} / {session.scenario.focus}
+          Module {session.module.number} / Lesson {session.scenario.lesson_number}
         </span>
       </div>
       <div className="flex min-w-0 items-center gap-2">
@@ -76,9 +82,7 @@ export function ScenarioStatusHeader({
             {isRetrying ? 'Continuing' : 'Continue'}
           </Button>
         ) : null}
-        <Badge variant={session.status === 'completed' ? 'default' : session.status === 'failed' ? 'destructive' : 'blue'}>
-          {session.status}
-        </Badge>
+
         <Badge variant="outline" className="hidden sm:inline-flex">
           {session.variant.label}
         </Badge>

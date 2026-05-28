@@ -64,6 +64,7 @@ class PushCommandHandler(BaseCommandHandler):
             state,
             last_push_remote=remote,
             last_push_branch=branch,
+            last_push_remote_branch=remote_key,
             last_push_commit=commit_id,
             push_set_upstream=set_upstream,
         )
@@ -105,6 +106,7 @@ class PushCommandHandler(BaseCommandHandler):
             state,
             last_push_remote=remote,
             last_push_branch=branch,
+            last_push_remote_branch=remote_key,
             last_push_commit=commit_id,
             force_push_with_lease=True,
         )

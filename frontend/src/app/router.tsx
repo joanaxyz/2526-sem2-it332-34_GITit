@@ -7,6 +7,7 @@ import { Protected } from '@/app/Protected'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { DashboardPage } from '@/features/dashboard/pages/DashboardPage'
+import { PerformancePage } from '@/features/dashboard/pages/PerformancePage'
 import { ReviewPracticePage } from '@/features/review/pages/ReviewPracticePage'
 import { ScenarioPracticePage } from '@/features/scenarios/pages/ScenarioPracticePage'
 import { LessonPage } from '@/features/modules/pages/LessonPage'
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
       // TODO(module-terminology): remove this compatibility route after old shared links age out.
       { path: '/units', element: <ModulesPage /> },
       { path: '/modules', element: <ModulesPage /> },
+      { path: '/performance', element: <PerformancePage /> },
       { path: '/lessons/:lessonId', element: <LessonPage /> },
     ],
   },

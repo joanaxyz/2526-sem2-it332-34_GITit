@@ -1,7 +1,13 @@
 import type { QueryClient } from '@tanstack/react-query'
 
 import type { ScenarioSession } from '@/features/practice/types'
+import { writeSessionBootstrap } from '@/features/scenarios/utils/sessionBootstrap'
 import type { DifficultyStatus, LatestAttemptStats, ScenarioSkillFocus } from '@/features/scenarios/types'
+import {
+  commandAccuracyFromSession,
+  meetsMasteryAccuracy,
+  meetsProgressAccuracy,
+} from '@/features/scenarios/utils/commandAccuracy'
 import { nextDifficultyInSequence } from '@/features/scenarios/utils/difficulty'
 import { queryKeyRoots, queryKeys } from '@/shared/api/queryKeys'
 
@@ -28,6 +34,7 @@ export function syncScenarioSessionInCache(
 }
 
 export function updateScenarioSessionCache(queryClient: QueryClient, session: ScenarioSession) {
+  writeSessionBootstrap(session)
   queryClient.setQueryData(queryKeys.scenarioSession(session.id), session)
 }
 
@@ -99,7 +106,7 @@ export function updateScenarioListWithSession(
 
     matchedScenario = true
     let changed = false
-    const unlockedDifficulty = hasRequiredAccurateAttempts(session)
+    const unlockedDifficulty = hasRequiredProgressAttempts(session)
       ? nextDifficultyInSequence(scenario.difficulties, session.difficulty)?.difficulty ?? null
       : null
     const difficulties = scenario.difficulties.map((difficulty) => {
@@ -112,10 +119,13 @@ export function updateScenarioListWithSession(
           hasSessionCompletion || Boolean(difficulty.completion),
         )
         const latestAttempt = latestAttemptFromSession(session)
-        const completedAccurateAttempt = session.status === 'completed' && latestAttempt.accuracy_rate !== null && latestAttempt.accuracy_rate >= 100
+        const completedProgressAttempt =
+          session.status === 'completed' && meetsProgressAccuracy(latestAttempt.accuracy_rate)
+        const completedMasteryAttempt =
+          session.status === 'completed' && meetsMasteryAccuracy(latestAttempt.accuracy_rate)
         const masteredRecords =
           session.mastery_progress ??
-          (completedAccurateAttempt && difficulty.latest_attempt?.id !== session.id
+          (completedProgressAttempt && difficulty.latest_attempt?.id !== session.id
             ? {
                 ...difficulty.mastery_progress,
                 mastered: Math.min(difficulty.mastery_progress.mastered + 1, difficulty.mastery_progress.required),
@@ -128,11 +138,11 @@ export function updateScenarioListWithSession(
             ? null
             : session.status === 'failed' ||
                 session.status === 'abandoned' ||
-                (session.status === 'completed' && (!mastered || !completedAccurateAttempt))
+                (session.status === 'completed' && !meetsProgressAccuracy(latestAttempt.accuracy_rate))
             ? session.id
             : null
         const completion = session.completion ?? difficulty.completion
-        const reviewAvailable = Boolean(completion) && mastered && completedAccurateAttempt
+        const reviewAvailable = Boolean(completion) && mastered && completedMasteryAttempt
 
         if (
           difficulty.status === status &&
@@ -225,7 +235,7 @@ function latestAttemptFromSession(session: ScenarioSession): LatestAttemptStats 
   return {
     id: session.id,
     status: session.status,
-    accuracy_rate: latestAttemptAccuracy(session),
+    accuracy_rate: commandAccuracyFromSession(session),
     command_accurate:
       session.status === 'completed'
         ? session.counts.counted_action_total <= session.policy.min_counted_commands
@@ -237,17 +247,9 @@ function latestAttemptFromSession(session: ScenarioSession): LatestAttemptStats 
   }
 }
 
-function latestAttemptAccuracy(session: ScenarioSession) {
-  if (session.status === 'started') return null
-  if (session.status === 'failed' || session.status === 'abandoned') return 0
-  if (session.counts.counted_action_total <= session.policy.min_counted_commands) return 100
-  if (session.policy.min_counted_commands === 0) return 0
-  return Math.round((session.policy.min_counted_commands / session.counts.counted_action_total) * 100)
-}
-
-function hasRequiredAccurateAttempts(session: ScenarioSession) {
+function hasRequiredProgressAttempts(session: ScenarioSession) {
   if (session.status !== 'completed') return false
-  if (latestAttemptAccuracy(session) !== 100) return false
+  if (!meetsProgressAccuracy(commandAccuracyFromSession(session))) return false
   return session.mastery_progress.mastered >= session.mastery_progress.required
 }
 

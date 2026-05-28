@@ -223,17 +223,9 @@ def test_parser_and_registry_support_module_three_forms(command):
 @pytest.mark.parametrize(
     "command",
     [
-        "git pull",
-        "git push",
-        "git rebase main",
-        "git stash",
         "git tag v1",
-        "git revert c1",
-        "git branch feature",
-        "git branch -d stale",
         "git remote add origin https://example.test/repo.git",
         "git checkout main",
-        "git switch main",
         "git reset HEAD README.md",
         "git clone --bare https://example.test/repo.git",
         "git clone --mirror https://example.test/repo.git",
@@ -260,6 +252,26 @@ def test_registry_rejects_unsupported_non_module_one_forms(command):
 
     assert result.processed is False
     assert result.exit_code == 129
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git push origin main",
+        "git rebase main",
+        "git revert c0",
+        "git switch -c rescue",
+        "git merge-base main feature",
+        "git rev-list --count main..feature",
+    ],
+)
+def test_registry_accepts_module_four_command_forms(command):
+    parser = GitCommandParser()
+    registry = GitCommandRegistry()
+    parsed = parser.parse(command)
+    spec = registry.get(parsed.subcommand)
+    assert spec is not None
+    assert spec.validate(parsed) is None
 
 
 def test_registry_rejects_unsupported_flags_and_classifies_diagnostics():
@@ -338,7 +350,7 @@ def test_engine_blocks_shell_and_unsupported_git_without_mutation():
     engine = GitCommandEngine()
 
     shell = engine.process(state, "powershell Remove-Item important.txt")
-    unsupported = engine.process(state, "git rebase main")
+    unsupported = engine.process(state, "git tag v1")
 
     assert shell.exit_code == 127
     assert shell.state == state

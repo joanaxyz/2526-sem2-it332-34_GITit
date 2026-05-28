@@ -58,9 +58,8 @@ describe('DifficultySelector', () => {
   it('renders available, locked, and review states', () => {
     render(<DifficultySelector difficulties={difficulties} onStart={vi.fn()} onReview={vi.fn()} />)
 
-    const startButtons = screen.getAllByRole('button', { name: /start/i })
-    expect(startButtons[0]).not.toBeDisabled()
-    expect(startButtons[1]).toBeDisabled()
+    expect(screen.getByRole('button', { name: /start/i })).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: /locked/i })).toBeDisabled()
     expect(screen.getByRole('button', { name: /review/i })).toBeInTheDocument()
     expect(screen.getByText('100%')).toBeInTheDocument()
     expect(screen.queryByText(/counted action/i)).not.toBeInTheDocument()
@@ -97,7 +96,7 @@ describe('DifficultySelector', () => {
     expect(screen.queryByRole('button', { name: /start/i })).not.toBeInTheDocument()
   })
 
-  it('keeps completed scenarios retryable until accuracy reaches 100%', () => {
+  it('keeps completed scenarios retryable until accuracy reaches 70%', () => {
     render(
       <DifficultySelector
         difficulties={[
@@ -122,6 +121,33 @@ describe('DifficultySelector', () => {
     expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /review/i })).not.toBeInTheDocument()
     expect(screen.getByText('67%')).toBeInTheDocument()
+  })
+
+  it('continues completed scenarios at or above 70% accuracy', () => {
+    render(
+      <DifficultySelector
+        difficulties={[
+          {
+            ...difficulties[2],
+            review_available: false,
+            retry_session_id: null,
+            mastery_progress: { mastered: 1, required: 3 },
+            latest_attempt: {
+              ...difficulties[2].latest_attempt!,
+              id: 9,
+              accuracy_rate: 75,
+              command_accurate: false,
+              counted_action_total: 4,
+            },
+          },
+        ]}
+        onStart={vi.fn()}
+        onReview={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: /continue/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /retry/i })).not.toBeInTheDocument()
   })
 
   it('continues completed perfect scenarios until mastery count is satisfied', () => {

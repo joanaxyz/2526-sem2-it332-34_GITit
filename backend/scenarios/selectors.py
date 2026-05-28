@@ -1,6 +1,7 @@
 from django.db.models import Prefetch
 
 from common.constants import (
+    COMMAND_ACCURACY_PROGRESS_THRESHOLD,
     COMPLETION_TYPES,
     DIFFICULTY_EASY,
     DIFFICULTY_MEDIUM,
@@ -57,6 +58,72 @@ def command_accuracy_rate(
     return round((minimum_counted_commands / counted_action_total) * 100)
 
 
+def minimum_counted_for_session(
+    *,
+    session: ScenarioSession,
+    difficulty_instance: DifficultyInstance,
+) -> int:
+    snapshot = session.command_policy_snapshot or {}
+    if "min_counted_commands" in snapshot:
+        return snapshot["min_counted_commands"]
+    return difficulty_instance.command_policy.min_counted_commands
+
+
+def session_accuracy_rate(
+    *,
+    session: ScenarioSession,
+    difficulty_instance: DifficultyInstance,
+) -> int | None:
+    minimum_counted_commands = minimum_counted_for_session(
+        session=session,
+        difficulty_instance=difficulty_instance,
+    )
+    return command_accuracy_rate(
+        status=session.status,
+        counted_action_total=session.counted_action_total,
+        minimum_counted_commands=minimum_counted_commands,
+    )
+
+
+def session_meets_progress_threshold(
+    *,
+    session: ScenarioSession,
+    difficulty_instance: DifficultyInstance,
+) -> bool:
+    rate = session_accuracy_rate(session=session, difficulty_instance=difficulty_instance)
+    return rate is not None and rate >= COMMAND_ACCURACY_PROGRESS_THRESHOLD
+
+
+def progress_completion_count_for_difficulty(
+    *,
+    user=None,
+    user_id=None,
+    difficulty_instance: DifficultyInstance,
+) -> int:
+    if user is None and user_id is None:
+        raise ValueError("user or user_id is required")
+    user_filter = {"user": user} if user is not None else {"user_id": user_id}
+    count = 0
+    for session in (
+        ScenarioSession.objects.filter(
+            **user_filter,
+            mode=SESSION_MODE_PRIMARY,
+            status=SESSION_STATUS_COMPLETED,
+            difficulty_instance=difficulty_instance,
+        )
+        .select_related("difficulty_instance__command_policy")
+        .only(
+            "status",
+            "counted_action_total",
+            "command_policy_snapshot",
+            "difficulty_instance__command_policy__min_counted_commands",
+        )
+    ):
+        if session_meets_progress_threshold(session=session, difficulty_instance=difficulty_instance):
+            count += 1
+    return count
+
+
 def latest_attempt_payload(*, user, difficulty_instance: DifficultyInstance) -> dict | None:
     session = (
         ScenarioSession.objects.filter(
@@ -80,7 +147,10 @@ def latest_attempt_payload_from_session(
     session: ScenarioSession,
     difficulty_instance: DifficultyInstance,
 ) -> dict:
-    minimum_counted_commands = difficulty_instance.command_policy.min_counted_commands
+    minimum_counted_commands = minimum_counted_for_session(
+        session=session,
+        difficulty_instance=difficulty_instance,
+    )
     command_accurate = (
         session.status == "completed"
         and session.counted_action_total <= minimum_counted_commands
@@ -110,7 +180,11 @@ def session_is_command_accurate(
 ) -> bool:
     if not session or session.status != SESSION_STATUS_COMPLETED:
         return False
-    return session.counted_action_total <= difficulty_instance.command_policy.min_counted_commands
+    minimum_counted_commands = minimum_counted_for_session(
+        session=session,
+        difficulty_instance=difficulty_instance,
+    )
+    return session.counted_action_total <= minimum_counted_commands
 
 
 def accuracy_display_session(
@@ -278,10 +352,19 @@ def _scenario_status_payload_from_maps(
             if display_session
             else None
         )
-        latest_is_accurate = (latest_attempt or {}).get("accuracy_rate") == 100
+        latest_accuracy = (latest_attempt or {}).get("accuracy_rate")
+        latest_is_accurate = latest_accuracy == 100
+        latest_meets_progress = (
+            latest_accuracy is not None
+            and latest_accuracy >= COMMAND_ACCURACY_PROGRESS_THRESHOLD
+        )
         successful_enough = progress["count"] >= progress["required"]
         can_review = completion is not None and successful_enough and latest_is_accurate
-        can_retry = retryable_session is not None and not can_review
+        can_retry = (
+            retryable_session is not None
+            and not can_review
+            and not latest_meets_progress
+        )
         difficulties.append(
             {
                 "id": instance.id,
@@ -338,6 +421,24 @@ def _scenario_status_payload_from_maps(
         return payload
 
     return payload
+
+
+def reviewable_difficulties_for_session(*, session: ScenarioSession) -> list[dict]:
+    """Difficulties on the same skill focus that are eligible for review (excludes current)."""
+    scenario = scenario_queryset(include_variants=False).get(pk=session.scenario_id)
+    payloads = scenario_status_payloads(
+        user=session.user,
+        scenarios=[scenario],
+        include_preview=False,
+    )
+    if not payloads:
+        return []
+    current_difficulty = session.difficulty_instance.difficulty
+    return [
+        difficulty
+        for difficulty in payloads[0]["difficulties"]
+        if difficulty.get("review_available") and difficulty["difficulty"] != current_difficulty
+    ]
 
 
 def _command_preview_payload(scenario: ScenarioSkillFocus) -> dict:
@@ -1200,11 +1301,19 @@ def _accurate_completion_counts(*, user, difficulty_ids: list[int]) -> dict[int,
         .only(
             "difficulty_instance_id",
             "counted_action_total",
+            "command_policy_snapshot",
             "difficulty_instance__command_policy__min_counted_commands",
         )
     )
     for session in rows:
-        if session.counted_action_total <= session.difficulty_instance.command_policy.min_counted_commands:
+        minimum_counted_commands = minimum_counted_for_session(
+            session=session,
+            difficulty_instance=session.difficulty_instance,
+        )
+        if session_meets_progress_threshold(
+            session=session,
+            difficulty_instance=session.difficulty_instance,
+        ):
             counts[session.difficulty_instance_id] = counts.get(session.difficulty_instance_id, 0) + 1
     return counts
 
@@ -1233,6 +1342,7 @@ def _session_state_maps(
             "completed_at",
             "ended_at",
             "mode",
+            "command_policy_snapshot",
         )
         .order_by("difficulty_instance_id", "-id")
     ):
