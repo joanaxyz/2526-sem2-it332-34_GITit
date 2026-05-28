@@ -14,6 +14,7 @@ const MODULE_SYMBOLS: Record<string, ModuleSymbolConfig> = {
   'branching-navigation': { icon: GitBranch, shortLabel: 'Branch' },
   'collaboration-integration': { icon: GitMerge, shortLabel: 'Merge' },
   'recovery-repair': { icon: LifeBuoy, shortLabel: 'Recover' },
+  'advanced-recovery-history': { icon: LifeBuoy, shortLabel: 'Recover' },
 }
 
 const FALLBACK_SYMBOL: ModuleSymbolConfig = { icon: BookOpen, shortLabel: 'Module' }

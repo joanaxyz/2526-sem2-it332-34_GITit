@@ -100,6 +100,7 @@ export type ScenarioSession = {
     id: number
     label: string
     changed_variant: boolean
+    looped_variant?: boolean
   }
   mastery_progress: {
     mastered: number

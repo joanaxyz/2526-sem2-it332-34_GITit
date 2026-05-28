@@ -169,6 +169,11 @@ export function CompletionCelebrationModal({
             {headline}
           </h3>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground">{message}</p>
+          {isFailed && session.variant.looped_variant ? (
+            <p className="mx-auto mt-2 max-w-xl text-xs font-medium leading-5 text-warning">
+              You have cycled through all authored variants. Consider reviewing the lesson overview before this next attempt.
+            </p>
+          ) : null}
 
           <div className="mt-6 grid grid-cols-2 gap-3 text-left max-sm:grid-cols-1">
             <StatTile
@@ -241,7 +246,11 @@ export function CompletionCelebrationModal({
                 {onRetry ? (
                   <Button type="button" variant="destructive" disabled={isNavigating} onClick={onRetry}>
                     <RefreshCcw data-icon="inline-start" />
-                    {isRetrying ? 'Starting retry' : shouldRetryForAccuracy ? 'Retry for accuracy' : 'Retry'}
+                    {isRetrying
+                      ? 'Starting fresh variant'
+                      : shouldRetryForAccuracy
+                        ? 'Retry for accuracy'
+                        : 'Start fresh variant'}
                   </Button>
                 ) : null}
                 <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToModules}>
