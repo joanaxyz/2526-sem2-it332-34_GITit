@@ -32,7 +32,7 @@ export function ScenarioContextPanel({ session }: { session: ScenarioSession }) 
         <Section icon={Target} title="Required Details" hidden={!context.required_details.length}>
           <dl className="grid gap-2">
             {context.required_details.map((item) => (
-              <div className="rounded-md border border-border bg-secondary/35 px-2.5 py-2" key={`${item.label}:${item.value}`}>
+              <div className="rounded-md border border-border bg-secondary/35 px-3 py-2.5" key={`${item.label}:${item.value}`}>
                 <dt className="text-[11px] font-bold uppercase text-muted-foreground">{item.label}</dt>
                 <dd className="mt-0.5 break-words font-mono text-xs text-foreground">{item.value}</dd>
               </div>
@@ -61,7 +61,7 @@ function Section({
 }) {
   if (hidden) return null
   return (
-    <section className="rounded-md border border-border bg-background/40 p-2.5">
+    <section className="rounded-md border border-border bg-background/40 p-3">
       <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-normal text-muted-foreground">
         <Icon className="size-3.5 text-primary" />
         {title}

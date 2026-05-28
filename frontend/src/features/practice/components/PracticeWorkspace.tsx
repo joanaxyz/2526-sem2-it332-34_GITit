@@ -31,7 +31,7 @@ import { cn } from '@/shared/utils/cn'
 
 const DEFAULT_TERMINAL_RATIO = 0.28
 const DEFAULT_DIAGRAM_RATIO = 0.52
-const DEFAULT_TERMINAL_PANE_RATIO = 0.76
+const DEFAULT_TERMINAL_PANE_RATIO = 0.60
 const MIN_TERMINAL_PANE_WIDTH = 544
 const MIN_FEEDBACK_PANE_WIDTH = 288
 const MAX_FEEDBACK_PANE_WIDTH = 480
@@ -111,6 +111,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const [terminalRatio, setTerminalRatio] = useState(DEFAULT_TERMINAL_RATIO)
   const [diagramRatio, setDiagramRatio] = useState(DEFAULT_DIAGRAM_RATIO)
   const [terminalPaneRatio, setTerminalPaneRatio] = useState(DEFAULT_TERMINAL_PANE_RATIO)
+  const [projectFilesOpen, setProjectFilesOpen] = useState(true)
   const [tourOpen, setTourOpen] = useState(false)
   const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
   const [startOverConfirmOpen, setStartOverConfirmOpen] = useState(false)
@@ -345,9 +346,14 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         onOpenTour={() => setTourOpen(true)}
         onContinue={() => retryMutation.mutate()}
       />
-      <main className="relative grid min-h-0 flex-1 grid-cols-[22rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[21rem_minmax(0,1fr)] max-xl:grid-cols-[19rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
+      <main className="relative grid min-h-0 flex-1 grid-cols-[27rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[26rem_minmax(0,1fr)] max-xl:grid-cols-[23rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
         <aside
-          className="grid min-h-0 grid-rows-[minmax(13rem,0.72fr)_minmax(18rem,0.58fr)] gap-2 overflow-hidden max-lg:min-h-[44rem]"
+          className="grid min-h-0 gap-2 overflow-hidden max-lg:min-h-[44rem]"
+          style={{
+            gridTemplateRows: projectFilesOpen
+              ? 'minmax(13rem, 0.72fr) minmax(18rem, 0.58fr)'
+              : 'minmax(13rem, 1fr) auto',
+          }}
           data-testid="workspace-sidebar"
           data-tour-target="scenario-brief"
         >
@@ -355,12 +361,14 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             <ScenarioContextPanel session={session} />
           </div>
 
-          <div className="min-h-[14rem] overflow-hidden" data-testid="project-structure-region">
+          <div className={cn('overflow-hidden', projectFilesOpen ? 'min-h-[14rem]' : '')} data-testid="project-structure-region">
             <ProjectStructurePanel
               snapshot={session.repository_state}
               className="h-full"
               selectedPath={workspaceEditorPath}
               createDisabled={session.status !== 'started' || createFileMutation.isPending}
+              isOpen={projectFilesOpen}
+              onToggle={() => setProjectFilesOpen((v) => !v)}
               onCreateFile={async (input) => {
                 const updatedSession = await createFileMutation.mutateAsync(input)
                 setWorkspaceEditorPath(input.path)
@@ -406,7 +414,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             ref={terminalGridRef}
             data-testid="terminal-feedback-grid"
             className={cn(
-              'grid min-h-0',
+              'grid min-h-0 min-w-0',
               session.scaffolding.contextual_feedback
                 ? 'grid-cols-1 gap-2 xl:grid-cols-[minmax(34rem,var(--terminal-pane-size))_0.375rem_minmax(18rem,var(--feedback-pane-size))] xl:gap-0'
                 : 'grid-cols-1',
@@ -431,7 +439,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
               />
             ) : null}
             {session.scaffolding.contextual_feedback ? (
-              <div className="h-full min-h-0" data-tour-target="feedback">
+              <div className="h-full min-h-0 w-full min-w-0" data-tour-target="feedback">
                 <ContextualFeedbackPanel session={session} feedback={feedback} />
               </div>
             ) : (
