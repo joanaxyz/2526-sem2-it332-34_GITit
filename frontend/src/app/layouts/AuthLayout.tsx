@@ -34,7 +34,7 @@ const registerHero = {
 const featureBadges = [
   {
     Icon: ShieldCheck,
-    label: 'No real Git execution',
+    label: 'Consequence-safe practice',
     borderAccent: 'rgba(0,245,212,0.65)',
     border: 'rgba(0,245,212,0.22)',
     bg: 'rgba(0,245,212,0.06)',
