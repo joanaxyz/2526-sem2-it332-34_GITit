@@ -1,14 +1,6 @@
 from django.db import migrations
 
-
-class Migration(migrations.Migration):
-    dependencies = [
-        ("learning", "0004_orientationlessonsession"),
-    ]
-
-    operations = [
-        migrations.RunSQL(
-            sql="""
+_SQL = """
 DO $$
 BEGIN
     IF EXISTS (
@@ -81,7 +73,20 @@ BEGIN
         EXECUTE 'ALTER TABLE learning_orientationlessonsession DROP COLUMN completed_at';
     END IF;
 END $$;
-""",
-            reverse_sql=migrations.RunSQL.noop,
-        ),
+"""
+
+
+def _reconcile_schema(apps, schema_editor):
+    if schema_editor.connection.vendor != "postgresql":
+        return
+    schema_editor.execute(_SQL)
+
+
+class Migration(migrations.Migration):
+    dependencies = [
+        ("learning", "0004_orientationlessonsession"),
+    ]
+
+    operations = [
+        migrations.RunPython(_reconcile_schema, migrations.RunPython.noop),
     ]

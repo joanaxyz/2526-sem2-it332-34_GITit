@@ -37,6 +37,7 @@ def _example_command(command: str) -> str:
         "<new>": "upstream",
         "<commit>": "c1",
         "<number>": "2",
+        "<start-point>": "c1",
     }
     example = command
     for placeholder, value in replacements.items():

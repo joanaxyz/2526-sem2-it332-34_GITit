@@ -241,12 +241,14 @@ class StaticCaseMaterializer:
         target_state: dict,
     ) -> dict:
         augmented = dict(target_rule or {})
-        required = list(augmented.get("required_commands", []))
-        for command in scenario.primary_focus_commands or [scenario.focus]:
-            if command and command not in required:
-                required.append(command)
-        if required:
-            augmented["required_commands"] = required
+        skip_required = augmented.pop("skip_required_commands", False)
+        if not skip_required:
+            required = list(augmented.get("required_commands", []))
+            for command in scenario.primary_focus_commands or [scenario.focus]:
+                if command and command not in required:
+                    required.append(command)
+            if required:
+                augmented["required_commands"] = required
 
         primary_commands = set(scenario.primary_focus_commands or [scenario.focus])
         if primary_commands & {"git clone", "git remote"}:
@@ -602,6 +604,9 @@ class AuthoredVariantValidator:
         difficulty_instance: DifficultyInstance,
         scenario: ScenarioSkillFocus,
     ) -> None:
+        # State-based variants omit required_commands entirely — skip enforcement.
+        if "required_commands" not in variant.target_rule:
+            return
         required = set(variant.target_rule.get("required_commands", []))
         primary = set(scenario.primary_focus_commands or [scenario.focus])
         if not primary <= required:

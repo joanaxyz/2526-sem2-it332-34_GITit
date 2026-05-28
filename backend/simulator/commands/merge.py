@@ -15,7 +15,10 @@ class MergeCommandHandler(BaseCommandHandler):
             return self._abort(runtime, state)
         if operation.name == "ContinueMerge":
             return self._continue(runtime, state)
-        return self._merge(runtime, state, operation.params["branch"])
+        if operation.name == "SquashMerge":
+            return self._squash(runtime, state, operation.params["branch"])
+        no_ff = bool(operation.params.get("no_ff"))
+        return self._merge(runtime, state, operation.params["branch"], no_ff=no_ff)
 
     def _abort(self, runtime, state: dict) -> CommandOutcome:
         if not state.get("merge_parent") and not state.get("conflicts"):
@@ -46,7 +49,47 @@ class MergeCommandHandler(BaseCommandHandler):
 
         return CommitCommandHandler()._create(runtime, state, {"message": None}, staged_by_all=[])
 
-    def _merge(self, runtime, state: dict, branch: str) -> CommandOutcome:
+    def _squash(self, runtime, state: dict, branch: str) -> CommandOutcome:
+        if state.get("merge_parent") or state.get("conflicts"):
+            raise SimulatorCommandError(
+                "error: Merging is not possible because you have unmerged files.",
+                exit_code=128,
+            )
+        target_id = self._resolve_ref(state, branch)
+        if not target_id:
+            raise SimulatorCommandError(f"merge: {branch} - not something we can merge")
+        current_id = runtime._head_commit(state)
+        if current_id == target_id:
+            return CommandOutcome(command="merge", stdout="Already up to date.")
+
+        current_tree = runtime._tree_for_commit(state, current_id)
+        target_tree = runtime._tree_for_commit(state, target_id)
+
+        for path, value in target_tree.items():
+            if value != current_tree.get(path):
+                state.setdefault("staging", {})[path] = {
+                    "status": runtime.normalizer.change_type(current_tree.get(path), value),
+                    "content": copy.deepcopy(value),
+                }
+        for path in current_tree:
+            if path not in target_tree:
+                state.setdefault("staging", {})[path] = "deleted"
+
+        runtime._set_operation_metadata(
+            state,
+            last_merge_branch=branch,
+            last_merge_target=target_id,
+            squash_merge_staged=True,
+        )
+        return CommandOutcome(
+            command="merge",
+            stdout=(
+                f"Squash commit -- not updating HEAD\n"
+                f"Automatic merge went well; stopped before committing as requested"
+            ),
+        )
+
+    def _merge(self, runtime, state: dict, branch: str, *, no_ff: bool = False) -> CommandOutcome:
         if state.get("merge_parent") or state.get("conflicts"):
             raise SimulatorCommandError(
                 "error: Merging is not possible because you have unmerged files.",
@@ -122,7 +165,7 @@ class MergeCommandHandler(BaseCommandHandler):
                 ),
             )
 
-        if self._is_ancestor(state, current_id, target_id):
+        if not no_ff and self._is_ancestor(state, current_id, target_id):
             runtime._set_head_commit(state, target_id)
             runtime._set_operation_metadata(
                 state,
@@ -152,8 +195,10 @@ class MergeCommandHandler(BaseCommandHandler):
             last_merge_target=target_id,
             last_merge_created_commit=commit_id,
             last_merge_auto_staged_paths=staged_paths,
+            last_merge_no_ff=no_ff,
         )
-        return CommandOutcome(command="merge", stdout=f"Merge made by the 'ort' strategy.\n {len(changes)} file(s) changed")
+        strategy = "ort" if not no_ff else "ort (no fast-forward)"
+        return CommandOutcome(command="merge", stdout=f"Merge made by the '{strategy}' strategy.\n {len(changes)} file(s) changed")
 
     def _resolve_ref(self, state: dict, ref: str) -> str | None:
         if ref in state.get("branches", {}):

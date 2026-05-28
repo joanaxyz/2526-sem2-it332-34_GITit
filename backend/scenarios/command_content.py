@@ -18,8 +18,14 @@ COMMAND_KEY_PREFIXES: tuple[tuple[str, str], ...] = (
     ("git cherry-pick", "git-cherry-pick"),
     ("git checkout --ours", "git-checkout-conflict-side"),
     ("git checkout --theirs", "git-checkout-conflict-side"),
+    ("git checkout -b", "git-checkout-b"),
     ("git mergetool", "git-mergetool"),
+    ("git merge --squash", "git-merge-squash"),
     ("git merge", "git-merge"),
+    ("git switch", "git-switch"),
+    ("git stash", "git-stash"),
+    ("git push", "git-push"),
+    ("git pull", "git-pull"),
     ("git config", "git-config"),
     ("git fetch", "git-fetch"),
     ("git remote -v", "git-remote-v"),
@@ -58,7 +64,13 @@ COMMAND_KEY_ALWAYS_INCLUDED_SECTION_IDS: dict[str, list[str]] = {
     ],
     "git-diff-staged": ["option-staged-cached"],
     "git-show": ["argument-commit"],
-    "git-branch": ["option-v"],
+    "git-branch": ["option-v", "option-a-all", "option-d-delete"],
+    "git-switch": ["option-c-create", "option-detach", "argument-branch"],
+    "git-checkout-b": ["option-b-create", "argument-branch", "argument-start-point"],
+    "git-stash": ["option-pop", "option-apply", "option-drop", "option-list"],
+    "git-push": ["option-u-upstream", "option-force-with-lease", "option-delete", "argument-remote", "argument-branch"],
+    "git-pull": ["option-rebase", "argument-remote", "argument-branch"],
+    "git-merge-squash": ["option-squash", "argument-branch"],
     "git-remote-v": ["option-v-verbose"],
     "git-check-ignore": ["option-v", "argument-path"],
     "git-init": ["option-b-initial-branch", "option-q-quiet", "argument-directory"],
@@ -74,7 +86,7 @@ COMMAND_KEY_ALWAYS_INCLUDED_SECTION_IDS: dict[str, list[str]] = {
     "git-checkout-conflict-side": ["option-ours", "option-theirs", "argument-path"],
     "git-mergetool": ["option-tool"],
     "git-config": ["option-global", "argument-key", "argument-value"],
-    "git-fetch": ["argument-remote"],
+    "git-fetch": ["argument-remote", "option-prune"],
     "git-cherry-pick": ["option-no-commit", "option-abort", "argument-commit"],
     "git-ls-files": ["option-unmerged"],
 }
@@ -235,8 +247,52 @@ def command_preview_syntax_for_command(command: str) -> str:
         if "--name-only" in normalized:
             return "git show --name-only"
         return "git show <commit>" if len(_command_words(raw)) > 2 else "git show"
+    if normalized.startswith("git switch --detach"):
+        return "git switch --detach <commit>"
+    if normalized.startswith("git switch -c") or normalized.startswith("git switch --create"):
+        return "git switch -c <branch>"
+    if normalized.startswith("git switch"):
+        return "git switch <branch>"
+    if normalized.startswith("git checkout -b"):
+        words = _command_words(raw)
+        positional = [w for w in words[2:] if not w.startswith("-")]
+        return "git checkout -b <branch> <start-point>" if len(positional) >= 2 else "git checkout -b <branch>"
+    if normalized.startswith("git stash list"):
+        return "git stash list"
+    if normalized.startswith("git stash pop"):
+        return "git stash pop"
+    if normalized.startswith("git stash apply"):
+        return "git stash apply"
+    if normalized.startswith("git stash drop"):
+        return "git stash drop"
+    if normalized.startswith("git stash"):
+        return "git stash"
+    if normalized.startswith("git push --force-with-lease") or normalized.startswith("git push -f") or normalized.startswith("git push --force"):
+        return "git push --force-with-lease <remote> <branch>"
+    if normalized.startswith("git push") and " --delete " in f" {normalized} ":
+        return "git push <remote> --delete <branch>"
+    if normalized.startswith("git push -u") or normalized.startswith("git push --set-upstream"):
+        return "git push -u <remote> <branch>"
+    if normalized.startswith("git push"):
+        words = _command_words(raw)
+        positional = [w for w in words[2:] if not w.startswith("-")]
+        return "git push <remote> <branch>" if len(positional) >= 2 else "git push"
+    if normalized.startswith("git pull --rebase"):
+        return "git pull --rebase"
+    if normalized.startswith("git pull"):
+        words = _command_words(raw)
+        positional = [w for w in words[2:] if not w.startswith("-")]
+        return "git pull <remote> <branch>" if len(positional) >= 2 else "git pull"
+    if normalized.startswith("git merge --squash"):
+        return "git merge --squash <branch>"
     if normalized.startswith("git branch -v"):
         return "git branch -v"
+    if normalized.startswith("git branch -a"):
+        return "git branch -a"
+    if normalized.startswith("git branch -d") or normalized.startswith("git branch --delete"):
+        return "git branch -d <branch>"
+    if normalized.startswith("git branch -D"):
+        return "git branch -D <branch>"
     if normalized.startswith("git branch"):
         return "git branch"
     if normalized.startswith("git remote -v"):
@@ -414,6 +470,54 @@ def _sample_output_for_syntax(command: str) -> str:
         ])
     if normalized.startswith("git add") or normalized.startswith("git restore") or normalized.startswith("git rm"):
         return f"{prompt}\n# no output means the command was accepted; run git status to verify the state change"
+    if normalized.startswith("git switch -c") or normalized.startswith("git switch --create"):
+        branch = "<branch>"
+        parts = command.strip().split()
+        if len(parts) >= 3:
+            branch = parts[-1]
+        return f"{prompt}\nSwitched to a new branch '{branch}'"
+    if normalized.startswith("git switch --detach"):
+        return f"{prompt}\nHEAD is now at c1 Demo snapshot"
+    if normalized.startswith("git switch"):
+        branch = "<branch>"
+        parts = command.strip().split()
+        if len(parts) >= 3:
+            branch = parts[-1]
+        return f"{prompt}\nSwitched to branch '{branch}'"
+    if normalized.startswith("git checkout -b"):
+        branch = "<branch>"
+        parts = command.strip().split()
+        if len(parts) >= 3:
+            b_idx = parts.index("-b") if "-b" in parts else -1
+            if b_idx >= 0 and b_idx + 1 < len(parts):
+                branch = parts[b_idx + 1]
+        return f"{prompt}\nSwitched to a new branch '{branch}'"
+    if normalized.startswith("git stash list"):
+        return f"{prompt}\nstash@{{0}}: WIP on feature/ui: c2 Add styles\nstash@{{1}}: WIP on main: c1 Initial snapshot"
+    if normalized.startswith("git stash pop") or normalized.startswith("git stash apply"):
+        return f"{prompt}\nOn branch feature/ui\nChanges not staged for commit:\n  modified:   src/app.js\nDropped stash@{{0}}"
+    if normalized.startswith("git stash"):
+        return f"{prompt}\nSaved working directory and index state WIP on feature/ui: c2 Add styles"
+    if normalized.startswith("git push --force-with-lease") or normalized.startswith("git push -f"):
+        return f"{prompt}\nTo https://example.test/demo/repository.git\n + c2...c3 feature/ui -> feature/ui (forced update)"
+    if normalized.startswith("git push") and "--delete" in normalized:
+        return f"{prompt}\nTo https://example.test/demo/repository.git\n - [deleted]         feature/old"
+    if normalized.startswith("git push -u") or normalized.startswith("git push --set-upstream"):
+        return f"{prompt}\nTo https://example.test/demo/repository.git\n * [new branch]      feature/ui -> feature/ui\nBranch 'feature/ui' set up to track remote branch 'feature/ui' from 'origin'."
+    if normalized.startswith("git push"):
+        return f"{prompt}\nTo https://example.test/demo/repository.git\n   c1..c2  feature/ui -> feature/ui"
+    if normalized.startswith("git pull --rebase"):
+        return f"{prompt}\nSuccessfully rebased and updated refs/heads/main."
+    if normalized.startswith("git pull"):
+        return f"{prompt}\nFrom https://example.test/demo/repository.git\n * branch            main       -> FETCH_HEAD\nUpdating c1..c2\nFast-forward\n README.md | 2 +-"
+    if normalized.startswith("git merge --squash"):
+        return f"{prompt}\nSquash commit -- not updating HEAD\nAutomatic merge went well; stopped before committing as requested"
+    if normalized.startswith("git branch -d") or normalized.startswith("git branch --delete"):
+        return f"{prompt}\nDeleted branch feature/ui (was c2)."
+    if normalized.startswith("git branch -D"):
+        return f"{prompt}\nDeleted branch feature/spike (was c2)."
+    if normalized.startswith("git branch -a"):
+        return f"{prompt}\n* main\n  feature/ui\n  remotes/origin/main\n  remotes/origin/feature/ui"
     if normalized.startswith("git commit --amend"):
         return f"{prompt}\n[main c3] Corrected snapshot\n Date: Mon May 25 12:00:00 2026 +0800\n 1 file changed, 2 insertions(+)"
     if normalized.startswith("git commit"):
@@ -2063,6 +2167,245 @@ GIT_COMMAND_CONTENT_LIBRARY: list[dict[str, Any]] = [
         boundaries=["It does not remove files that are already tracked."],
         watch_for="Adding ignore rules but forgetting to untrack a generated file already in Git.",
         readiness=["Pair ignore rules with git status and git rm --cached when needed."],
+    ),
+    # ── Module 2 command content ──────────────────────────────────────────────
+    _content(
+        key="git-switch",
+        display_name="git switch",
+        canonical_command="git switch <branch>",
+        aliases=["git switch -c <branch>", "git switch --detach <commit>"],
+        summary=(
+            "git switch moves HEAD to a named branch. "
+            "With -c it creates the branch first. "
+            "With --detach it moves HEAD off any branch pointer."
+        ),
+        tags=["action", "branching", "navigation"],
+        syntax=["git switch <branch>", "git switch -c <branch>", "git switch --detach <commit>"],
+        effects=["Moves HEAD to the target branch or detached commit."],
+        boundaries=["It does not commit, merge, or rewrite history."],
+        watch_for="Forgetting -c when the branch does not exist yet.",
+        readiness=["Use git branch to confirm the target branch exists before switching."],
+        terminal_output="Switched to branch 'feature/auth'",
+        options=[
+            {
+                "token": "-c / --create",
+                "title": "Create and switch",
+                "body": "Creates a new branch at the current HEAD (or an optional start point) and immediately switches to it.",
+            },
+            {
+                "token": "--detach",
+                "title": "Detach HEAD",
+                "body": "Moves HEAD directly to the named commit without attaching it to a branch.",
+            },
+        ],
+        arguments=[
+            {
+                "token": "<branch>",
+                "title": "Branch name",
+                "body": "The name of the branch to switch to, or create when -c is used.",
+            },
+        ],
+    ),
+    _content(
+        key="git-checkout-b",
+        display_name="git checkout -b",
+        canonical_command="git checkout -b <branch>",
+        aliases=["git checkout -b <branch> <start-point>"],
+        summary=(
+            "git checkout -b creates a new branch and checks it out in one step. "
+            "An optional start point sets the commit the branch begins at."
+        ),
+        tags=["action", "branching", "legacy"],
+        syntax=["git checkout -b <branch>", "git checkout -b <branch> <start-point>"],
+        effects=["Creates the named branch and moves HEAD to it."],
+        boundaries=["It does not commit or merge."],
+        watch_for="Omitting the start point when the branch must begin at a specific older commit.",
+        readiness=["Prefer git switch -c in modern workflows; git checkout -b is the legacy equivalent."],
+        terminal_output="Switched to a new branch 'feature/auth'",
+        options=[
+            {
+                "token": "-b",
+                "title": "Create and checkout",
+                "body": "Creates a new branch and immediately checks it out, equivalent to git branch then git checkout.",
+            },
+        ],
+        arguments=[
+            {
+                "token": "<branch>",
+                "title": "New branch name",
+                "body": "The name of the branch to create.",
+            },
+            {
+                "token": "<start-point>",
+                "title": "Branch start point",
+                "body": "Commit id or branch tip to begin the new branch from. Defaults to HEAD when omitted.",
+            },
+        ],
+    ),
+    _content(
+        key="git-stash",
+        display_name="git stash",
+        canonical_command="git stash",
+        aliases=["git stash pop", "git stash apply", "git stash drop", "git stash list"],
+        summary=(
+            "git stash saves uncommitted working-tree and index changes to a temporary stack "
+            "so you can switch context and restore the work later."
+        ),
+        tags=["action", "working-tree", "context-switch"],
+        syntax=["git stash", "git stash pop", "git stash apply", "git stash drop", "git stash list"],
+        effects=["Stash saves changes; pop or apply restores them; drop discards one entry."],
+        boundaries=["Stash does not create a permanent commit or push to any remote."],
+        watch_for="Using stash pop when apply is safer because stash pop removes the entry even if conflicts occur.",
+        readiness=["Check git stash list to verify the entry exists before pop or apply."],
+        terminal_output="Saved working directory and index state WIP on feature/ui: c2 Add styles",
+        options=[
+            {
+                "token": "pop",
+                "title": "Restore and remove",
+                "body": "Applies the most recent stash entry and removes it from the stack.",
+            },
+            {
+                "token": "apply",
+                "title": "Restore without removing",
+                "body": "Applies a stash entry to the working tree but keeps it on the stack.",
+            },
+            {
+                "token": "drop",
+                "title": "Remove without restoring",
+                "body": "Deletes one stash entry without applying it.",
+            },
+            {
+                "token": "list",
+                "title": "Show all stash entries",
+                "body": "Lists all entries in the stash stack with their indices.",
+            },
+        ],
+    ),
+    _content(
+        key="git-push",
+        display_name="git push",
+        canonical_command="git push",
+        aliases=[
+            "git push -u <remote> <branch>",
+            "git push <remote> <branch>",
+            "git push --force-with-lease <remote> <branch>",
+            "git push <remote> --delete <branch>",
+        ],
+        summary=(
+            "git push uploads local commits to a remote repository. "
+            "-u sets upstream tracking. "
+            "--force-with-lease safely overwrites the remote after a rebase."
+        ),
+        tags=["action", "remote", "collaboration"],
+        syntax=[
+            "git push",
+            "git push -u <remote> <branch>",
+            "git push <remote> <branch>",
+            "git push --force-with-lease <remote> <branch>",
+            "git push <remote> --delete <branch>",
+        ],
+        effects=["Moves the remote branch pointer forward (or deletes it)."],
+        boundaries=["It does not merge, rebase, or create local commits."],
+        watch_for="Using --force instead of --force-with-lease, which can overwrite a teammate's push.",
+        readiness=["Confirm the local branch is ahead of the remote before pushing."],
+        terminal_output="To https://example.test/demo/repository.git\n * [new branch]      feature/auth -> feature/auth",
+        options=[
+            {
+                "token": "-u / --set-upstream",
+                "title": "Set upstream tracking",
+                "body": "Links the local branch to the remote branch so future git push and git pull can omit the remote and branch names.",
+            },
+            {
+                "token": "--force-with-lease",
+                "title": "Safe force push",
+                "body": "Overwrites the remote branch only if it matches what you last fetched, preventing accidental overwrites of a teammate's commits.",
+            },
+            {
+                "token": "--delete",
+                "title": "Delete remote branch",
+                "body": "Removes the named branch from the remote repository.",
+            },
+        ],
+        arguments=[
+            {
+                "token": "<remote>",
+                "title": "Remote name",
+                "body": "The remote to push to; origin is used when omitted.",
+            },
+            {
+                "token": "<branch>",
+                "title": "Branch name",
+                "body": "The local branch to push; HEAD's branch is used when omitted.",
+            },
+        ],
+    ),
+    _content(
+        key="git-pull",
+        display_name="git pull",
+        canonical_command="git pull",
+        aliases=["git pull --rebase", "git pull <remote> <branch>"],
+        summary=(
+            "git pull fetches from the remote and integrates changes into the current branch. "
+            "--rebase replays local commits on top of the fetched tip instead of creating a merge commit."
+        ),
+        tags=["action", "remote", "collaboration"],
+        syntax=["git pull", "git pull --rebase", "git pull <remote> <branch>"],
+        effects=["Advances the local branch to include remote commits."],
+        boundaries=["It does not push or create new remote branches."],
+        watch_for="Forgetting --rebase when the team policy requires a linear history.",
+        readiness=["Run git fetch and inspect remote branches before deciding to pull or rebase."],
+        terminal_output="From https://example.test/demo/repository.git\n * branch  main -> FETCH_HEAD\nUpdating c1..c2\nFast-forward",
+        options=[
+            {
+                "token": "--rebase",
+                "title": "Rebase instead of merge",
+                "body": "Replays local commits on top of the fetched remote tip, keeping a linear history.",
+            },
+        ],
+        arguments=[
+            {
+                "token": "<remote>",
+                "title": "Remote name",
+                "body": "Overrides the default remote; origin is used when omitted.",
+            },
+            {
+                "token": "<branch>",
+                "title": "Remote branch",
+                "body": "The remote branch to pull from; the tracked upstream is used when omitted.",
+            },
+        ],
+    ),
+    _content(
+        key="git-merge-squash",
+        display_name="git merge --squash",
+        canonical_command="git merge --squash <branch>",
+        aliases=[],
+        summary=(
+            "git merge --squash collapses all commits from the source branch into staged changes "
+            "on the target branch without creating a merge commit. "
+            "A separate git commit then lands the work as a single snapshot."
+        ),
+        tags=["action", "merging", "history"],
+        syntax=["git merge --squash <branch>"],
+        effects=["Stages all changes from the source branch as a single diff ready to commit."],
+        boundaries=["It does not create a commit or merge-commit on its own."],
+        watch_for="Forgetting to run git commit after the squash; the changes stay staged but no commit is recorded.",
+        readiness=["Confirm the target branch is clean before squashing so you can isolate the incoming changes."],
+        terminal_output="Squash commit -- not updating HEAD\nAutomatic merge went well; stopped before committing as requested",
+        options=[
+            {
+                "token": "--squash",
+                "title": "Squash into staged changes",
+                "body": "Combines all commits from the source branch into staged working-tree edits; must be followed by git commit.",
+            },
+        ],
+        arguments=[
+            {
+                "token": "<branch>",
+                "title": "Source branch",
+                "body": "The branch whose commits are squashed into the current branch's index.",
+            },
+        ],
     ),
 ]
 

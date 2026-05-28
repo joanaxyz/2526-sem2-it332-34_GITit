@@ -559,11 +559,11 @@ class GitCommandRegistry:
             ),
             "branch": GitCommandSpec(
                 "branch",
-                frozenset({"-v"}),
+                frozenset({"-v", "-vv", "-a", "-d", "-D", "--delete"}),
                 diagnostic=_branch_is_diagnostic,
                 counted=lambda parsed: not _branch_is_diagnostic(parsed),
                 executor="teaching_state",
-                parser_validation=_validate_branch_list,
+                parser_validation=_validate_branch,
             ),
             "remote": GitCommandSpec(
                 "remote",
@@ -623,7 +623,7 @@ class GitCommandRegistry:
             ),
             "merge": GitCommandSpec(
                 "merge",
-                frozenset({"--abort", "--continue"}),
+                frozenset({"--abort", "--continue", "--no-ff", "--squash"}),
                 diagnostic=False,
                 counted=True,
                 executor="teaching_state",
@@ -639,7 +639,7 @@ class GitCommandRegistry:
             ),
             "checkout": GitCommandSpec(
                 "checkout",
-                frozenset({"--ours", "--theirs"}),
+                frozenset({"--ours", "--theirs", "-b"}),
                 diagnostic=False,
                 counted=True,
                 executor="teaching_state",
@@ -655,7 +655,7 @@ class GitCommandRegistry:
             ),
             "fetch": GitCommandSpec(
                 "fetch",
-                frozenset(),
+                frozenset({"--prune", "-p"}),
                 diagnostic=False,
                 counted=True,
                 executor="teaching_state",
@@ -668,6 +668,38 @@ class GitCommandRegistry:
                 counted=True,
                 executor="teaching_state",
                 parser_validation=_validate_cherry_pick,
+            ),
+            "switch": GitCommandSpec(
+                "switch",
+                frozenset({"-c", "--create", "--detach"}),
+                diagnostic=False,
+                counted=True,
+                executor="teaching_state",
+                parser_validation=_validate_switch,
+            ),
+            "stash": GitCommandSpec(
+                "stash",
+                frozenset(),
+                diagnostic=_stash_is_diagnostic,
+                counted=lambda parsed: not _stash_is_diagnostic(parsed),
+                executor="teaching_state",
+                parser_validation=_validate_stash,
+            ),
+            "push": GitCommandSpec(
+                "push",
+                frozenset({"-u", "--set-upstream", "--force-with-lease", "-f", "--force", "--delete", "-d"}),
+                diagnostic=False,
+                counted=True,
+                executor="teaching_state",
+                parser_validation=_validate_push,
+            ),
+            "pull": GitCommandSpec(
+                "pull",
+                frozenset({"--rebase"}),
+                diagnostic=False,
+                counted=True,
+                executor="teaching_state",
+                parser_validation=_validate_pull,
             ),
         }
 
@@ -807,9 +839,16 @@ def _validate_log(parsed: ParsedGitCommand) -> str | None:
     return None
 
 
-def _validate_branch_list(parsed: ParsedGitCommand) -> str | None:
+def _validate_branch(parsed: ParsedGitCommand) -> str | None:
+    has_delete = parsed.has_option("-d") or parsed.has_option("-D") or parsed.has_option("--delete")
+    if has_delete:
+        if len(parsed.args) != 1:
+            return "usage: git branch (-d | -D) <branchname>"
+        return None
     if parsed.args:
-        return "fatal: only branch listing is supported in Module 1"
+        if len(parsed.args) > 2:
+            return "usage: git branch <branchname> [<start-point>]"
+        return None
     return None
 
 
@@ -856,8 +895,10 @@ def _validate_merge(parsed: ParsedGitCommand) -> str | None:
         if parsed.args:
             return "fatal: --continue does not take a branch name"
         return None
+    if parsed.has_option("--no-ff") and parsed.has_option("--squash"):
+        return "fatal: --no-ff and --squash cannot be combined"
     if len(parsed.args) != 1:
-        return "usage: git merge <branch>"
+        return "usage: git merge [--no-ff | --squash] <branch>"
     return None
 
 
@@ -871,9 +912,15 @@ def _validate_mergetool(parsed: ParsedGitCommand) -> str | None:
 
 
 def _validate_checkout(parsed: ParsedGitCommand) -> str | None:
+    if parsed.has_option("-b"):
+        if not parsed.args:
+            return "usage: git checkout -b <branch> [<start-point>]"
+        if len(parsed.args) > 2:
+            return "usage: git checkout -b <branch> [<start-point>]"
+        return None
     sides = [option for option in ("--ours", "--theirs") if parsed.has_option(option)]
     if len(sides) != 1:
-        return "git checkout in this simulator supports only one of --ours or --theirs for conflicted files."
+        return "git checkout in this simulator supports -b to create a branch, or --ours/--theirs for conflicted files."
     if not parsed.pathspecs:
         return "fatal: git checkout --ours/--theirs requires a conflicted path."
     return None
@@ -896,7 +943,7 @@ def _validate_config(parsed: ParsedGitCommand) -> str | None:
 
 def _validate_fetch(parsed: ParsedGitCommand) -> str | None:
     if len(parsed.args) > 1:
-        return "usage: git fetch [<remote>]"
+        return "usage: git fetch [--prune] [<remote>]"
     return None
 
 
@@ -913,8 +960,52 @@ def _validate_cherry_pick(parsed: ParsedGitCommand) -> str | None:
 
 
 def _branch_is_diagnostic(parsed: ParsedGitCommand) -> bool:
-    return not parsed.args and set(parsed.options).issubset({"-v"})
+    has_delete = parsed.has_option("-d") or parsed.has_option("-D") or parsed.has_option("--delete")
+    return not parsed.args and not has_delete
 
 
 def _remote_is_diagnostic(parsed: ParsedGitCommand) -> bool:
     return not parsed.args and set(parsed.options).issubset({"-v", "--verbose"})
+
+
+def _stash_is_diagnostic(parsed: ParsedGitCommand) -> bool:
+    return bool(parsed.args) and parsed.args[0] == "list"
+
+
+def _validate_switch(parsed: ParsedGitCommand) -> str | None:
+    if parsed.has_option("-c") or parsed.has_option("--create"):
+        if not parsed.args:
+            return "usage: git switch -c <branch> [<start-point>]"
+        if len(parsed.args) > 2:
+            return "usage: git switch -c <branch> [<start-point>]"
+        return None
+    if not parsed.args and not parsed.has_option("--detach"):
+        return "usage: git switch <branch>"
+    if len(parsed.args) > 1:
+        return "fatal: too many arguments"
+    return None
+
+
+def _validate_stash(parsed: ParsedGitCommand) -> str | None:
+    subcommand = parsed.args[0] if parsed.args else "push"
+    allowed = {"push", "pop", "list", "drop", "apply", "show"}
+    if subcommand not in allowed:
+        return f"error: unknown stash subcommand: {subcommand!r}"
+    return None
+
+
+def _validate_push(parsed: ParsedGitCommand) -> str | None:
+    has_delete = parsed.has_option("--delete") or parsed.has_option("-d")
+    if has_delete:
+        if len(parsed.args) < 2:
+            return "usage: git push <remote> --delete <branch>"
+        return None
+    if len(parsed.args) > 2:
+        return "usage: git push [<remote>] [<branch>]"
+    return None
+
+
+def _validate_pull(parsed: ParsedGitCommand) -> str | None:
+    if len(parsed.args) > 2:
+        return "usage: git pull [--rebase] [<remote>] [<branch>]"
+    return None
