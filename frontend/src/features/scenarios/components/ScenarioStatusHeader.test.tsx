@@ -128,13 +128,13 @@ describe('ScenarioStatusHeader', () => {
     expect(screen.queryByRole('button', { name: /^retry$/i })).not.toBeInTheDocument()
   })
 
-  it('labels completed inaccurate attempts as retry for accuracy', () => {
+  it('labels completed attempts below 70% accuracy as retry for accuracy', () => {
     render(
       <ScenarioStatusHeader
         session={{
           ...session,
           status: 'completed',
-          counts: { ...session.counts, counted_action_total: 4 },
+          counts: { ...session.counts, counted_action_total: 5 },
         }}
         onExit={vi.fn()}
         onRetry={vi.fn()}
@@ -142,6 +142,25 @@ describe('ScenarioStatusHeader', () => {
     )
 
     expect(screen.getByRole('button', { name: /retry for accuracy/i })).toBeInTheDocument()
+  })
+
+  it('shows continue for completed attempts at or above 70% accuracy', () => {
+    render(
+      <ScenarioStatusHeader
+        session={{
+          ...session,
+          status: 'completed',
+          mastery_progress: { mastered: 1, required: 3 },
+          counts: { ...session.counts, counted_action_total: 4 },
+        }}
+        onExit={vi.fn()}
+        onRetry={vi.fn()}
+        onContinue={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: /^continue$/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /retry for accuracy/i })).not.toBeInTheDocument()
   })
 
   it('disables Continue while a fresh mastery attempt is starting', () => {

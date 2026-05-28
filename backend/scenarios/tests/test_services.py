@@ -1243,6 +1243,69 @@ def test_completed_scenario_remains_retryable_until_three_mastered_instances(stu
     assert easy["mastery_progress"] == {"mastered": 1, "required": 3}
 
 
+def test_accept_conflict_side_fails_at_max_when_wrong_side_committed(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="accept-conflict-side",
+        difficulty="medium",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="module_card",
+    )
+    session.command_policy_snapshot = {
+        **session.command_policy_snapshot,
+        "max_counted_commands": 4,
+    }
+    session.save(update_fields=["command_policy_snapshot"])
+    service = CommandProcessingService()
+    for command in (
+        "git checkout --ours src/policy.yml",
+        "git add src/policy.yml",
+        'git commit -m "Accept incoming branch version"',
+        "git status --wat",
+    ):
+        service.submit_command(session=session, command=command)
+        session.refresh_from_db()
+
+    assert session.status == SESSION_STATUS_FAILED
+    assert session.counted_action_total == 4
+    assert (
+        session.failure_reason
+        == "Action limit reached before the target repository state was reached."
+    )
+
+
+def test_completed_scenario_at_seventy_five_percent_counts_progress_without_forced_retry(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="stage-and-commit-basic-workflow",
+        difficulty="easy",
+    )
+    min_counted = difficulty.command_policy.min_counted_commands
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="module_card",
+    )
+    session.status = SESSION_STATUS_COMPLETED
+    session.counted_action_total = min_counted + 1
+    session.completed_at = timezone.now()
+    session.ended_at = session.completed_at
+    session.save(
+        update_fields=["status", "counted_action_total", "completed_at", "ended_at"]
+    )
+
+    payload = scenario_status_payload(user=student, scenario=difficulty.scenario)
+    easy = next(item for item in payload["difficulties"] if item["difficulty"] == "easy")
+    expected = round((min_counted / (min_counted + 1)) * 100)
+
+    assert expected >= 70
+    assert easy["latest_attempt"]["accuracy_rate"] == expected
+    assert easy["latest_attempt"]["command_accurate"] is False
+    assert easy["retry_session_id"] is None
+    assert easy["mastery_progress"]["mastered"] == 1
+
+
 def test_abandoned_retry_becomes_latest_zero_mastery(student):
     difficulty = DifficultyInstance.objects.get(
         scenario__slug="stage-and-commit-basic-workflow",
@@ -1537,7 +1600,10 @@ def test_counted_command_reaching_max_limit_fails_session(student):
     payload = session_payload(session)
     assert response["command_classification"] == COMMAND_COUNTED
     assert session.status == SESSION_STATUS_FAILED
-    assert session.failure_reason == "Action limit reached."
+    assert (
+        session.failure_reason
+        == "Action limit reached before the target repository state was reached."
+    )
     assert payload["status"] == SESSION_STATUS_FAILED
     assert payload["counts"]["counted_action_total"] == 1
     assert payload["counts"]["minimum_counted_commands"] == 1
