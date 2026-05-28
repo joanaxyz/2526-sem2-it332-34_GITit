@@ -73,6 +73,7 @@ export function CommandBudgetHeader({ session }: { session: ScenarioSession }) {
         </dl>
         <p className="mt-3 border-t border-border pt-2 text-muted-foreground">
           Diagnostic commands do not count. You have used {diagnostics} diagnostic command{diagnostics === 1 ? '' : 's'}.
+          {' '}You fail when all {max} counted actions are used and the repository has not yet reached the scenario target.
         </p>
       </div>
     </div>

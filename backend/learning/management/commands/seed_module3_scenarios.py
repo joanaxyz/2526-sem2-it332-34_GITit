@@ -1347,7 +1347,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
             concepts=["ours", "theirs", "HEAD", "incoming branch", "unmerged index"],
             difficulties={
                 DIFFICULTY_EASY: diff(
-                    (3, 4),
+                    (3, 5),
                     "Keep the current branch version of the conflicted file.",
                     "Resolve by keeping ours, then stage and finish the merge.",
                     [
@@ -1365,7 +1365,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                     required_attempts=2,
                 ),
                 DIFFICULTY_MEDIUM: diff(
-                    (3, 4),
+                    (3, 5),
                     "Accept the incoming branch version of the conflicted file.",
                     "Resolve by accepting theirs, then stage and finish the merge.",
                     [
@@ -1383,7 +1383,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                     required_attempts=2,
                 ),
                 DIFFICULTY_HARD: diff(
-                    (3, 4),
+                    (3, 5),
                     "Choose the requested conflict side without combining both changes.",
                     "Use the side named by the scenario, then stage and finish the merge.",
                     [

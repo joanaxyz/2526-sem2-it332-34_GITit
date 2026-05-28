@@ -45,7 +45,10 @@ SESSION_HYDRATE_SELECT_RELATED = (
     "prior_session",
     "user",
 )
-from scenarios.selectors import required_successful_attempts_for_difficulty
+from scenarios.selectors import (
+    required_successful_attempts_for_difficulty,
+    session_meets_progress_threshold,
+)
 from simulator.command_engine import SimulatedGitCommandEngine
 from simulator.services import (
     RepositorySnapshotService,
@@ -512,10 +515,29 @@ class CommandProcessingService:
         if result_category == RESULT_TARGET_MATCHED:
             update_fields.update(self._complete_session(session))
         elif classification == COMMAND_COUNTED and session.counted_action_total >= max_count:
-            session.status = SESSION_STATUS_FAILED
-            session.ended_at = timezone.now()
-            session.failure_reason = "Action limit reached."
-            update_fields.update({"status", "ended_at", "failure_reason"})
+            target_matched = False
+            if command_result.processed:
+                recheck = ScenarioCompletionEvaluator().evaluate(
+                    CompletionEvaluationContext(
+                        session=session,
+                        previous_state=previous_state,
+                        next_state=next_state,
+                        executed_commands=executed_commands,
+                        next_state_hash=state_hash,
+                        expected_state_hash=expected_state_hash,
+                    )
+                )
+                target_matched = recheck.target_matched
+            if target_matched:
+                result_category = RESULT_TARGET_MATCHED
+                update_fields.update(self._complete_session(session))
+            else:
+                session.status = SESSION_STATUS_FAILED
+                session.ended_at = timezone.now()
+                session.failure_reason = (
+                    "Action limit reached before the target repository state was reached."
+                )
+                update_fields.update({"status", "ended_at", "failure_reason"})
 
         with timing("scenario.command.session_save", session_id=session.id):
             session.save(update_fields=sorted(update_fields))
@@ -559,20 +581,28 @@ class CommandProcessingService:
             # the seeded number of successful accurate completions for this
             # difficulty.
             required = required_successful_attempts_for_difficulty(session.difficulty_instance)
-            previous_accurate = ScenarioSession.objects.filter(
-                user=session.user,
-                mode=SESSION_MODE_PRIMARY,
-                status=SESSION_STATUS_COMPLETED,
+            previous_progress = 0
+            for prior_session in (
+                ScenarioSession.objects.filter(
+                    user=session.user,
+                    mode=SESSION_MODE_PRIMARY,
+                    status=SESSION_STATUS_COMPLETED,
+                    difficulty_instance=session.difficulty_instance,
+                )
+                .exclude(pk=session.pk)
+                .select_related("difficulty_instance__command_policy")
+            ):
+                if session_meets_progress_threshold(
+                    session=prior_session,
+                    difficulty_instance=session.difficulty_instance,
+                ):
+                    previous_progress += 1
+            current_meets_progress = session_meets_progress_threshold(
+                session=session,
                 difficulty_instance=session.difficulty_instance,
-                counted_action_total__lte=session.difficulty_instance.command_policy.min_counted_commands,
-            ).count()
-            # Include the current session if it is accurate
-            current_is_accurate = (
-                session.counted_action_total
-                <= session.difficulty_instance.command_policy.min_counted_commands
             )
-            accurate_count = previous_accurate + (1 if current_is_accurate else 0)
-            if accurate_count >= required:
+            progress_count = previous_progress + (1 if current_meets_progress else 0)
+            if progress_count >= required:
                 completion, created = CompletionRecord.objects.get_or_create(
                     user=session.user,
                     scenario=session.scenario,

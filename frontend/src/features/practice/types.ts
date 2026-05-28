@@ -77,6 +77,7 @@ export type ScenarioSession = {
   id: number
   mode: 'primary' | 'review'
   status: 'started' | 'completed' | 'failed' | 'abandoned'
+  failure_reason?: string | null
   difficulty_instance_id: number
   completed_at: string | null
   first_attempt_star_eligible: boolean

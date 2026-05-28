@@ -4,6 +4,11 @@ import type { CSSProperties } from 'react'
 
 import type { ScenarioSession } from '@/features/practice/types'
 import type { DifficultyAccess } from '@/features/scenarios/types'
+import {
+  commandAccuracyFromSession,
+  meetsMasteryAccuracy,
+  meetsProgressAccuracy,
+} from '@/features/scenarios/utils/commandAccuracy'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
@@ -29,14 +34,6 @@ const confettiPieces = Array.from({ length: 52 }, (_, index) => {
     y: `${y}px`,
   }
 })
-
-function completionAccuracy(session: ScenarioSession) {
-  const targetActions = session.policy.min_counted_commands
-  const usedActions = session.counts.counted_action_total
-  if (usedActions <= targetActions) return 100
-  if (targetActions === 0) return 0
-  return Math.round((targetActions / usedActions) * 100)
-}
 
 function difficultyLabel(session: ScenarioSession) {
   return session.difficulty.charAt(0).toUpperCase() + session.difficulty.slice(1)
@@ -101,32 +98,40 @@ export function CompletionCelebrationModal({
   isReviewing?: boolean
   nextDifficultyLabel?: string | null
 }) {
-  const accuracy = completionAccuracy(session)
+  const accuracy = commandAccuracyFromSession(session)
   const isFailed = session.status === 'failed'
-  const withinMasteryTarget = session.counts.counted_action_total <= session.policy.min_counted_commands
+  const withinMasteryTarget = meetsMasteryAccuracy(accuracy)
+  const meetsProgress = meetsProgressAccuracy(accuracy)
   const isNavigating = isStartingNextLevel || isContinuing || isRetrying || isReviewing
   const requiredAttempts = session.mastery_progress?.required ?? 3
   const hasRequiredAttempts = (session.mastery_progress?.mastered ?? 0) >= requiredAttempts
-  const isAccurate = session.counts.counted_action_total <= session.policy.min_counted_commands
-  const canAdvance = session.status === 'completed' && hasRequiredAttempts && isAccurate
-  const shouldContinueAttempt = session.status === 'completed' && !hasRequiredAttempts && isAccurate
-  const shouldRetryForAccuracy = session.status === 'completed' && !isAccurate
+  const canAdvance = session.status === 'completed' && hasRequiredAttempts && meetsProgress
+  const shouldContinueAttempt = session.status === 'completed' && !hasRequiredAttempts && meetsProgress
+  const shouldRetryForAccuracy = session.status === 'completed' && !meetsProgress
   const headline = isFailed
     ? 'Attempt limit reached'
     : shouldRetryForAccuracy
       ? 'Scenario cleared, but accuracy needs a retry'
       : canAdvance
         ? 'Level ready'
-        : session.first_attempt_star_eligible
+        : session.first_attempt_star_eligible && withinMasteryTarget
           ? 'Clean run logged'
           : 'Scenario cleared'
+  const hitActionLimit = isFailed && session.counts.max_reached
   const message = isFailed
-    ? 'This attempt ended before the repository reached the target state. Start a fresh variant and try again with a clean workspace.'
+    ? hitActionLimit
+      ? session.failure_reason ??
+        'You used every counted action allowed for this attempt without reaching the target repository state. Check that you chose the correct conflict side, staged the file, and completed the merge commit, then start a fresh variant.'
+      : 'This attempt ended before the repository reached the target state. Start a fresh variant and try again with a clean workspace.'
     : shouldRetryForAccuracy
-      ? 'The target state was reached, but the latest run was not 100% accurate. Retry this level to protect your progress.'
+      ? 'The target state was reached, but command accuracy was below 70%. Retry this level to count the run toward progress.'
       : canAdvance
-        ? 'You completed the required successful attempts at 100% accuracy. The next level is ready.'
-        : 'That accurate run counts. Continue to start a fresh attempt for the remaining successful records.'
+        ? withinMasteryTarget
+          ? 'You completed the required successful attempts at 100% accuracy. The next level is ready.'
+          : 'You completed the required successful attempts. The next level is ready.'
+        : meetsProgress
+          ? 'That run counts toward progress. Continue to start a fresh attempt for the remaining successful records.'
+          : 'Scenario cleared.'
   const Icon = isFailed ? XCircle : Sparkles
 
   return (
@@ -220,9 +225,15 @@ export function CompletionCelebrationModal({
           <div className="mt-4 grid grid-cols-2 gap-2 text-left max-sm:grid-cols-1">
             <StatTile
               label="Accuracy"
-              numerator={accuracy}
+              numerator={accuracy ?? 0}
               suffix="%"
-              helper={withinMasteryTarget ? 'At mastery target' : 'Above counted-action target'}
+              helper={
+                withinMasteryTarget
+                  ? 'At mastery target'
+                  : meetsProgress
+                    ? 'Counts toward progress'
+                    : 'Below progress threshold'
+              }
               accentColor={TILE_ACCENTS[0]}
               animationDelay={160}
             />
@@ -252,7 +263,7 @@ export function CompletionCelebrationModal({
               label="Successful attempts"
               numerator={session.mastery_progress.mastered}
               denominator={session.mastery_progress.required}
-              helper="Accurate records"
+              helper="Progress records"
               accentColor={TILE_ACCENTS[4]}
               animationDelay={400}
             />
@@ -292,9 +303,11 @@ export function CompletionCelebrationModal({
                       <span
                         className={cn(
                           'font-mono text-sm font-extrabold',
-                          difficulty.latest_attempt.accuracy_rate >= 100
+                          meetsMasteryAccuracy(difficulty.latest_attempt.accuracy_rate)
                             ? 'completion-perfect-score text-primary'
-                            : 'text-destructive',
+                            : meetsProgressAccuracy(difficulty.latest_attempt.accuracy_rate)
+                              ? 'text-warning'
+                              : 'text-destructive',
                         )}
                       >
                         {difficulty.latest_attempt.accuracy_rate}%
@@ -347,6 +360,10 @@ export function CompletionCelebrationModal({
                   Back to Modules
                 </Button>
               </>
+            ) : session.status === 'completed' && meetsProgress ? (
+              <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToModules}>
+                Back to Modules
+              </Button>
             ) : null}
           </div>
         </div>
