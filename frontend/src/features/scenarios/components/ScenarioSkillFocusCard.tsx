@@ -21,9 +21,9 @@ export function ScenarioSkillFocusCard({
   onPreview: (scenario: ScenarioSkillFocus) => void
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const panelId = `skill-panel-${scenario.id}`
   const isPreviewOnly = scenario.difficulties.length === 0
   const cardLabel = isPreviewOnly ? 'Guided Preview' : `Scenario ${scenarioNumber}`
+  const panelId = `skill-panel-${scenario.id}`
 
   return (
     <Card
@@ -81,30 +81,30 @@ export function ScenarioSkillFocusCard({
               <BookOpen className="size-3.5" />
               Learn
             </Button>
-            <ExpandToggleButton
-              expanded={isExpanded}
-              controlsId={panelId}
-              label={`${cardLabel}: ${scenario.title}`}
-              onToggle={() => setIsExpanded((current) => !current)}
-            />
+            {!isPreviewOnly && (
+              <ExpandToggleButton
+                expanded={isExpanded}
+                controlsId={panelId}
+                label={`${cardLabel}: ${scenario.title}`}
+                onToggle={() => setIsExpanded((current) => !current)}
+              />
+            )}
           </div>
         </div>
       </CardHeader>
-      {isExpanded ? (
+      {!isPreviewOnly && isExpanded ? (
         <CardContent id={panelId}>
           {/* Command focus intentionally hidden in the card UI */}
-          {isPreviewOnly ? null : (
-            <div className="grid grid-cols-3 gap-2 max-md:grid-cols-1">
-              {scenario.difficulties.map((difficulty) => (
-                <DifficultyActionButton
-                  disabled={actionsDisabled}
-                  difficulty={difficulty}
-                  key={difficulty.id}
-                  onAction={(selectedDifficulty, action) => onDifficultyAction(scenario, selectedDifficulty, action)}
-                />
-              ))}
-            </div>
-          )}
+          <div className="grid grid-cols-3 gap-2 max-md:grid-cols-1">
+            {scenario.difficulties.map((difficulty) => (
+              <DifficultyActionButton
+                disabled={actionsDisabled}
+                difficulty={difficulty}
+                key={difficulty.id}
+                onAction={(selectedDifficulty, action) => onDifficultyAction(scenario, selectedDifficulty, action)}
+              />
+            ))}
+          </div>
         </CardContent>
       ) : null}
     </Card>

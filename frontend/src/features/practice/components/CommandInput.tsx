@@ -58,17 +58,25 @@ export function CommandInput({
   }
 
   return (
-    <form className="flex gap-2 border-t border-border p-2" onSubmit={submit}>
-      <span className="hidden pt-2 font-mono text-[11px] text-primary md:block">student@git-it $</span>
+    <form
+      className="flex items-center gap-2 border-t border-white/[0.08] bg-[#131620] px-3 py-2"
+      onSubmit={submit}
+    >
+      <span className="hidden shrink-0 font-mono text-[11px] md:inline-flex md:items-center" aria-hidden="true">
+        <span className="text-emerald-400">student@git-it</span>
+        <span className="text-muted-foreground/55">:</span>
+        <span className="text-primary">~</span>
+        <span className="text-muted-foreground/55"> $ </span>
+      </span>
       <input
         ref={inputRef}
-        className="h-9 min-w-0 flex-1 rounded-md border border-input bg-background px-3 font-mono text-xs outline-none focus:ring-2 focus:ring-ring"
+        className="h-7 min-w-0 flex-1 bg-transparent font-mono text-xs text-foreground caret-primary outline-none placeholder:text-muted-foreground/35"
         value={value}
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={handleKeyDown}
         disabled={disabled}
         autoFocus
-        placeholder={processing ? 'Processing command' : 'Type a git command'}
+        placeholder={processing ? 'Processing command…' : 'Type a git command'}
       />
       <Button type="submit" size="sm" disabled={disabled || runDisabled}>
         {processing ? 'Running' : 'Run'}
