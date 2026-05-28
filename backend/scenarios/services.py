@@ -39,6 +39,7 @@ from scenarios.models import (
 
 SESSION_HYDRATE_SELECT_RELATED = (
     "scenario",
+    "scenario__lesson",
     "learning_unit",
     "difficulty_instance__command_policy",
     "variant",

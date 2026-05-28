@@ -22,7 +22,7 @@ export function ScenarioSkillFocusCard({
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
   const isPreviewOnly = scenario.difficulties.length === 0
-  const cardLabel = isPreviewOnly ? 'Guided Preview' : `Scenario ${scenarioNumber}`
+  const cardLabel = isPreviewOnly ? 'Guided Preview' : `Lesson ${scenarioNumber}`
   const panelId = `skill-panel-${scenario.id}`
 
   return (
@@ -96,14 +96,24 @@ export function ScenarioSkillFocusCard({
         <CardContent id={panelId}>
           {/* Command focus intentionally hidden in the card UI */}
           <div className="grid grid-cols-3 gap-2 max-md:grid-cols-1">
-            {scenario.difficulties.map((difficulty) => (
-              <DifficultyActionButton
-                disabled={actionsDisabled}
-                difficulty={difficulty}
-                key={difficulty.id}
-                onAction={(selectedDifficulty, action) => onDifficultyAction(scenario, selectedDifficulty, action)}
-              />
-            ))}
+            {scenario.difficulties.map((difficulty, index) => {
+              const prev = index > 0 ? scenario.difficulties[index - 1] : null
+              const prevProgress = prev
+                ? (prev.successful_attempts
+                    ? { mastered: prev.successful_attempts.count, required: prev.successful_attempts.required }
+                    : prev.mastered_records ?? prev.mastery_progress)
+                : null
+              const gatingLocked = prevProgress !== null && prevProgress.mastered < prevProgress.required
+              const effectiveDifficulty = gatingLocked ? { ...difficulty, status: 'locked' as const } : difficulty
+              return (
+                <DifficultyActionButton
+                  disabled={actionsDisabled}
+                  difficulty={effectiveDifficulty}
+                  key={difficulty.id}
+                  onAction={(selectedDifficulty, action) => onDifficultyAction(scenario, selectedDifficulty, action)}
+                />
+              )
+            })}
           </div>
         </CardContent>
       ) : null}

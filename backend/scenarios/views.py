@@ -1,6 +1,6 @@
 import time
 
-from django.db import transaction
+from django.db import OperationalError, transaction
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -271,11 +271,14 @@ class ScenarioRetryAPIView(APIView):
             hypothesis_id="A",
         )
         # #endregion
-        prior = ScenarioSession.objects.select_for_update(of=("self",)).select_related(
-            "scenario",
-            "difficulty_instance",
-            "variant",
-        ).get(id=session_id, user=request.user)
+        try:
+            prior = ScenarioSession.objects.select_for_update(nowait=True, of=("self",)).select_related(
+                "scenario",
+                "difficulty_instance",
+                "variant",
+            ).get(id=session_id, user=request.user)
+        except OperationalError:
+            return Response({"detail": "Session busy, retry later."}, status=409)
         # #region agent log
         agent_debug_log(
             location="scenarios/views.py:ScenarioRetryAPIView.post",

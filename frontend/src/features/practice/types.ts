@@ -89,6 +89,7 @@ export type ScenarioSession = {
     focus: string
     narrative: string
     student_context?: ScenarioStudentContext
+    lesson_number: number
   }
   student_context?: ScenarioStudentContext
   module: {
