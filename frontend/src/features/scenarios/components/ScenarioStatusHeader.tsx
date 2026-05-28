@@ -51,7 +51,7 @@ export function ScenarioStatusHeader({
         </Button>
         <GitBranch className="size-5 text-primary" />
         <span className="truncate font-mono text-xs text-muted-foreground">
-          Module {session.module.number} / {session.scenario.focus}
+          Module {session.module.number} / Lesson {session.scenario.lesson_number}
         </span>
       </div>
       <div className="flex min-w-0 items-center gap-2">
@@ -76,9 +76,7 @@ export function ScenarioStatusHeader({
             {isRetrying ? 'Continuing' : 'Continue'}
           </Button>
         ) : null}
-        <Badge variant={session.status === 'completed' ? 'default' : session.status === 'failed' ? 'destructive' : 'blue'}>
-          {session.status}
-        </Badge>
+
         <Badge variant="outline" className="hidden sm:inline-flex">
           {session.variant.label}
         </Badge>
