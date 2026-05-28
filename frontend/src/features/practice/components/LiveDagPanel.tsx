@@ -1,7 +1,7 @@
 import dagre from 'dagre'
 import { GitCommitHorizontal } from 'lucide-react'
-import { memo, useCallback, useMemo, useState } from 'react'
-import ReactFlow, { Background, Handle, Position } from 'reactflow'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import ReactFlow, { Background, Handle, Position, ReactFlowProvider, useReactFlow } from 'reactflow'
 import type { Edge, Node, NodeProps } from 'reactflow'
 
 import type { RepositoryCommit, RepositorySnapshot, RepositoryValue } from '@/features/practice/types'
@@ -98,7 +98,7 @@ export function LiveDagPanel({
   )
 }
 
-export function RepositoryStateDiagram({
+const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   title,
   snapshot,
   className,
@@ -117,7 +117,22 @@ export function RepositoryStateDiagram({
 }) {
   const colors = VARIANT_COLORS[variant]
   const normalizedSnapshot = useMemo(() => normalizeSnapshot(snapshot), [snapshot])
-  const { nodes, edges } = useMemo(() => buildGraph(normalizedSnapshot, variant), [normalizedSnapshot, variant])
+  const layoutSignature = useMemo(() => graphLayoutSignature(normalizedSnapshot), [normalizedSnapshot])
+  const layoutCacheRef = useRef<{ signature: string; positions: Map<string, { x: number; y: number }> } | null>(
+    null,
+  )
+  const { nodes, edges } = useMemo(() => {
+    const cached = layoutCacheRef.current
+    if (cached?.signature === layoutSignature) {
+      return buildGraph(normalizedSnapshot, cached.positions)
+    }
+    const graph = buildGraph(normalizedSnapshot)
+    layoutCacheRef.current = {
+      signature: layoutSignature,
+      positions: new Map(graph.nodes.map((node) => [node.id, node.position])),
+    }
+    return graph
+  }, [layoutSignature, normalizedSnapshot])
   const nodeTypes = useMemo(() => commitNodeTypes, [])
   const [activeCommitId, setActiveCommitId] = useState<string | null>(null)
   const dismissCommit = useCallback((commitId: string) => {
@@ -188,18 +203,18 @@ export function RepositoryStateDiagram({
             style={{ height: '100%', width: '100%', background: 'transparent' }}
             nodes={diagramNodes}
             edges={edges}
-            fitView
-            fitViewOptions={{ padding: fitViewPadding }}
             nodesDraggable={false}
             nodesConnectable={false}
             nodeTypes={nodeTypes}
             panOnScroll
+            onlyRenderVisibleElements
             minZoom={0.55}
             maxZoom={1.6}
             proOptions={{ hideAttribution: true }}
             onError={handleReactFlowError}
           >
-            <Background gap={18} color={colors.dotColor} size={1} />
+            <Background gap={18} color="rgba(255,255,255,0.05)" />
+            <FitViewOnTopologyChange layoutSignature={layoutSignature} fitViewPadding={fitViewPadding} />
           </ReactFlow>
           <CommitDetailsPanel data={activeCommitData ?? null} />
         </div>
@@ -207,6 +222,57 @@ export function RepositoryStateDiagram({
       </CardContent>
     </Card>
   )
+})
+
+export function RepositoryStateDiagram({
+  title,
+  snapshot,
+  className,
+  contentClassName,
+  showRepositoryDetails = false,
+  fitViewPadding = 0.08,
+}: {
+  title: string
+  snapshot: RepositorySnapshot
+  className?: string
+  contentClassName?: string
+  showRepositoryDetails?: boolean
+  fitViewPadding?: number
+}) {
+  return (
+    <ReactFlowProvider>
+      <RepositoryStateDiagramBody
+        title={title}
+        snapshot={snapshot}
+        className={className}
+        contentClassName={contentClassName}
+        showRepositoryDetails={showRepositoryDetails}
+        fitViewPadding={fitViewPadding}
+      />
+    </ReactFlowProvider>
+  )
+}
+
+function FitViewOnTopologyChange({
+  layoutSignature,
+  fitViewPadding,
+}: {
+  layoutSignature: string
+  fitViewPadding: number
+}) {
+  const { fitView } = useReactFlow()
+  const previousSignature = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (previousSignature.current === layoutSignature) return
+    previousSignature.current = layoutSignature
+    const frameId = window.requestAnimationFrame(() => {
+      void fitView({ padding: fitViewPadding, duration: 0 })
+    })
+    return () => window.cancelAnimationFrame(frameId)
+  }, [fitView, fitViewPadding, layoutSignature])
+
+  return null
 }
 
 function CommitNode({ data }: NodeProps<CommitNodeData>) {
@@ -445,7 +511,23 @@ function SummaryLine({ label, value }: { label: string; value: string }) {
   )
 }
 
-function buildGraph(snapshot: RepositorySnapshot, variant: DagVariant = 'cyan'): { nodes: Node[]; edges: Edge[] } {
+export function graphLayoutSignature(snapshot: RepositorySnapshot): string {
+  if (!snapshot.commits.length) return 'empty'
+  const commitIds = snapshot.commits
+    .map((commit) => commit.id)
+    .sort()
+    .join(',')
+  const edges = snapshot.commits
+    .flatMap((commit) => (commit.parents ?? []).map((parent) => `${parent}->${commit.id}`))
+    .sort()
+    .join(',')
+  return `${commitIds}|${edges}`
+}
+
+function buildGraph(
+  snapshot: RepositorySnapshot,
+  cachedPositions?: Map<string, { x: number; y: number }>,
+): { nodes: Node[]; edges: Edge[] } {
   const graph = new dagre.graphlib.Graph()
   graph.setDefaultEdgeLabel(() => ({}))
   graph.setGraph({ rankdir: 'TB', nodesep: 56, ranksep: 88 })
@@ -516,9 +598,13 @@ function buildGraph(snapshot: RepositorySnapshot, variant: DagVariant = 'cyan'):
     }
   }
 
-  dagre.layout(graph)
+  if (!cachedPositions) {
+    dagre.layout(graph)
+  }
   return {
     nodes: nodes.map((node) => {
+      const cachedPosition = cachedPositions?.get(node.id)
+      if (cachedPosition) return { ...node, position: cachedPosition }
       const point = graph.node(node.id)
       const size = nodeSizes.get(node.id) ?? { width: 144, height: 76 }
       return { ...node, position: { x: point.x - size.width / 2, y: point.y - size.height / 2 } }

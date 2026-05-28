@@ -5,10 +5,12 @@ import { Button } from '@/shared/components/Button'
 
 export function CommandInput({
   disabled,
+  runDisabled,
   processing,
   onSubmit,
 }: {
   disabled?: boolean
+  runDisabled?: boolean
   processing?: boolean
   onSubmit: (command: string) => void
 }) {
@@ -23,7 +25,7 @@ export function CommandInput({
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    if (disabled) return
+    if (disabled || runDisabled) return
     const command = value.trim()
     if (!command) return
     setHistory((items) => [...items, command])
@@ -76,7 +78,9 @@ export function CommandInput({
         autoFocus
         placeholder={processing ? 'Processing command…' : 'Type a git command'}
       />
-      <Button type="submit" size="sm" disabled={disabled}>{processing ? 'Running' : 'Run'}</Button>
+      <Button type="submit" size="sm" disabled={disabled || runDisabled}>
+        {processing ? 'Running' : 'Run'}
+      </Button>
     </form>
   )
 }

@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 from django.db import transaction
+from django.db.models import Prefetch
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
@@ -34,6 +35,15 @@ from scenarios.models import (
     DifficultyInstance,
     ScenarioSession,
     StepLog,
+)
+
+SESSION_HYDRATE_SELECT_RELATED = (
+    "scenario",
+    "learning_unit",
+    "difficulty_instance__command_policy",
+    "variant",
+    "prior_session",
+    "user",
 )
 from scenarios.selectors import required_successful_attempts_for_difficulty
 from simulator.command_engine import SimulatedGitCommandEngine
@@ -188,6 +198,25 @@ class VariantTargetStateHashCache:
 
 
 class ScenarioSessionService:
+    @staticmethod
+    def hydrate_session(
+        session: ScenarioSession | int,
+        *,
+        user=None,
+    ) -> ScenarioSession:
+        queryset = ScenarioSession.objects.select_related(
+            *SESSION_HYDRATE_SELECT_RELATED
+        ).prefetch_related(
+            Prefetch("step_logs", queryset=StepLog.objects.order_by("id")),
+        )
+        if isinstance(session, int):
+            queryset = queryset.filter(pk=session)
+        else:
+            queryset = queryset.filter(pk=session.pk)
+        if user is not None:
+            queryset = queryset.filter(user=user)
+        return queryset.get()
+
     @transaction.atomic
     def start_session(
         self,
@@ -234,6 +263,12 @@ class ScenarioSessionService:
                 raise Locked("Exit the current scenario before starting again.")
 
         variant_selector = VariantSelectionService()
+        published_variants = list(
+            difficulty_instance.variants.filter(is_published=True).order_by(
+                "semantic_key",
+                "id",
+            )
+        )
         with timing("scenario.variant_selection", difficulty_id=difficulty_instance.id, mode=mode):
             variant = (
                 self._review_variant(user=user, difficulty_instance=difficulty_instance)
@@ -242,11 +277,30 @@ class ScenarioSessionService:
                     user=user,
                     difficulty_instance=difficulty_instance,
                     prior_session=prior_session,
+                    published_variants=published_variants,
                 )
             )
+        # Retry/fresh-attempt sessions intentionally rotate variants when alternatives
+        # exist so learners do not get stuck replaying the same authored context.
         changed_variant = bool(
             prior_session
             and variant_selector.changed_between(prior=prior_session.variant, current=variant)
+        )
+        tried_keys = (
+            variant_selector._tried_variant_keys(
+                user=user,
+                difficulty_instance=difficulty_instance,
+            )
+            if prior_session
+            else set()
+        )
+        looped_variant = bool(
+            prior_session
+            and variant_selector.is_loopback_from_keys(
+                variants=published_variants,
+                selected_variant=variant,
+                tried_keys=tried_keys,
+            )
         )
         retry_index = prior_session.retry_index + 1 if prior_session else 0
 
@@ -269,6 +323,7 @@ class ScenarioSessionService:
             orientation_complete_at_start=orientation_complete,
             rta_eligible=rta_eligible,
             changed_variant=changed_variant,
+            looped_variant=looped_variant,
             retry_index=retry_index,
             command_policy_snapshot=policy,
             repository_state=variant.initial_state,
@@ -282,7 +337,7 @@ class ScenarioSessionService:
                     "orientation_complete_at_first_start",
                 ]
             )
-        return session
+        return self.hydrate_session(session)
 
     def _review_variant(self, *, user, difficulty_instance: DifficultyInstance):
         completion = (
@@ -305,19 +360,47 @@ class ScenarioSessionService:
         return session
 
 
+def _state_affects_visible_tree(previous_state: dict, next_state: dict) -> bool:
+    for key in ("commits", "staging", "working_tree", "conflicts", "branches", "head"):
+        if previous_state.get(key) != next_state.get(key):
+            return True
+    return False
+
+
+def _command_response_includes_project_tree(
+    *,
+    command_result,
+    previous_state: dict,
+    next_state: dict,
+) -> bool:
+    if not command_result.processed or command_result.diagnostic:
+        return False
+    return _state_affects_visible_tree(previous_state, next_state)
+
+
 class CommandProcessingService:
+    def __init__(self) -> None:
+        self.state_tools = RepositoryStateSimulator()
+        self.snapshotter = RepositorySnapshotService()
+        self.command_engine = SimulatedGitCommandEngine()
+
     @transaction.atomic
     def submit_command(self, *, session: ScenarioSession, command: str) -> dict:
         if session.status != SESSION_STATUS_STARTED:
             raise Locked("This session has already ended.")
 
-        state_tools = RepositoryStateSimulator()
-        snapshotter = RepositorySnapshotService()
-        command_engine = SimulatedGitCommandEngine()
+        state_tools = self.state_tools
+        snapshotter = self.snapshotter
+        command_engine = self.command_engine
         with timing("scenario.command.repository_state_clone", session_id=session.id):
             previous_state = state_tools.clone_state(session.repository_state)
+            working_state = state_tools.normalize_state(previous_state)
         with timing("scenario.command.parse_execute", session_id=session.id):
-            command_result = command_engine.process(previous_state, command)
+            command_result = command_engine.process(
+                working_state,
+                command,
+                mutate_in_place=True,
+            )
         with timing("scenario.command.repository_state_normalize", session_id=session.id):
             next_state = state_tools.normalize_state(command_result.state)
         classification, increment = CommandCountClassifier().classify(
@@ -330,7 +413,16 @@ class CommandProcessingService:
         result_category = RESULT_UNPROCESSABLE
         feedback = ""
         executed_commands: list[str] = []
+        state_hash = ""
+        expected_state_hash = ""
         if command_result.processed:
+            with timing("scenario.command.state_hash", session_id=session.id):
+                state_hash = state_tools.state_hash_for_normalized(next_state)
+            with timing("scenario.command.expected_state_hash", session_id=session.id):
+                expected_state_hash = VariantTargetStateHashCache().hash_for(
+                    variant=session.variant,
+                    state_tools=state_tools,
+                )
             with timing("scenario.command.history", session_id=session.id):
                 previous_history = CommandHistoryCache().history_for(session=session)
                 executed_commands = [*previous_history, command_result.normalized_command]
@@ -341,10 +433,15 @@ class CommandProcessingService:
                         previous_state=previous_state,
                         next_state=next_state,
                         executed_commands=executed_commands,
+                        next_state_hash=state_hash,
+                        expected_state_hash=expected_state_hash,
                     )
                 )
             result_category = evaluation.result_category
-            if session.difficulty_instance.difficulty == DIFFICULTY_EASY:
+            if (
+                session.difficulty_instance.difficulty == DIFFICULTY_EASY
+                and classification == COMMAND_COUNTED
+            ):
                 with timing("scenario.command.contextual_feedback", session_id=session.id):
                     feedback = FeedbackGenerationService().describe(
                         previous_state, next_state
@@ -365,13 +462,15 @@ class CommandProcessingService:
             session.first_attempt_star_eligible = False
         session.repository_state = next_state
 
-        with timing("scenario.command.state_hash", session_id=session.id):
-            state_hash = state_tools.state_hash_for_normalized(next_state)
-        with timing("scenario.command.expected_state_hash", session_id=session.id):
-            expected_state_hash = VariantTargetStateHashCache().hash_for(
-                variant=session.variant,
-                state_tools=state_tools,
-            )
+        if not command_result.processed:
+            with timing("scenario.command.state_hash", session_id=session.id):
+                state_hash = state_tools.state_hash_for_normalized(next_state)
+            with timing("scenario.command.expected_state_hash", session_id=session.id):
+                expected_state_hash = VariantTargetStateHashCache().hash_for(
+                    variant=session.variant,
+                    state_tools=state_tools,
+                )
+
         with timing("scenario.command.step_log_create", session_id=session.id):
             step = StepLog.objects.create(
                 session=session,
@@ -384,7 +483,6 @@ class CommandProcessingService:
                 counted_total_after=session.counted_action_total,
                 state_hash=state_hash,
                 expected_state_hash=expected_state_hash,
-                repository_state=next_state,
                 contextual_feedback=feedback,
             )
         with timing("scenario.command.command_log_create", session_id=session.id):
@@ -422,7 +520,16 @@ class CommandProcessingService:
         with timing("scenario.command.session_save", session_id=session.id):
             session.save(update_fields=sorted(update_fields))
         with timing("scenario.command.repository_snapshot", session_id=session.id):
-            repository_snapshot = snapshotter.snapshot(session.repository_state)
+            if _command_response_includes_project_tree(
+                command_result=command_result,
+                previous_state=previous_state,
+                next_state=next_state,
+            ):
+                repository_snapshot = snapshotter.snapshot(next_state, already_normalized=True)
+            else:
+                repository_snapshot = snapshotter.snapshot_for_command(
+                    next_state, already_normalized=True
+                )
         return {
             "session": session,
             "step": step,

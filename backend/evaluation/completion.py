@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from common.constants import RESULT_TARGET_MATCHED, RESULT_TARGET_NOT_YET_MATCHED
 from evaluation.services import EvaluationOutcome, StateBasedEvaluator
 from scenarios.models import ScenarioSession
+from simulator.services import RepositoryStateSimulator
 
 
 @dataclass(frozen=True)
@@ -12,6 +14,8 @@ class CompletionEvaluationContext:
     previous_state: dict
     next_state: dict
     executed_commands: list[str]
+    next_state_hash: str | None = None
+    expected_state_hash: str | None = None
 
 
 class ScenarioCompletionEvaluator:
@@ -32,6 +36,26 @@ class StateRuleCompletionEvaluator:
         rule = context.session.variant.target_rule
         if not rule:
             raise ValueError("Scenario variant is missing target_rule.")
+        learning_unit = getattr(context.session, "learning_unit", None)
+        if getattr(learning_unit, "number", None) == 4:
+            if context.next_state_hash is not None and context.expected_state_hash is not None:
+                matched = context.next_state_hash == context.expected_state_hash
+            else:
+                simulator = RepositoryStateSimulator()
+                next_hash = simulator.state_hash(context.next_state)
+                target_hash = simulator.state_hash(context.session.variant.target_state)
+                matched = next_hash == target_hash
+            return EvaluationOutcome(
+                result_category=(
+                    RESULT_TARGET_MATCHED if matched else RESULT_TARGET_NOT_YET_MATCHED
+                ),
+                target_matched=matched,
+                summary=(
+                    "Repository state matches expected Module 4 target state."
+                    if matched
+                    else "Repository state does not yet match expected Module 4 target state."
+                ),
+            )
         return StateBasedEvaluator().evaluate(
             context.next_state,
             rule,

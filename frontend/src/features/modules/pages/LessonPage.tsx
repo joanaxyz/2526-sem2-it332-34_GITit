@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 
 import { modulesApi } from '@/features/modules/api/modulesApi'
+import { LessonContentRenderer } from '@/features/modules/components/LessonContentRenderer'
 import { OrientationLessonWorkspace } from '@/features/modules/orientation/OrientationLessonWorkspace'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
@@ -23,5 +24,5 @@ export function LessonPage() {
     return <OrientationLessonWorkspace lesson={lesson} />
   }
 
-  return <ErrorState title="Lesson unavailable" description="This lesson is not available." />
+  return <LessonContentRenderer lesson={lesson} />
 }

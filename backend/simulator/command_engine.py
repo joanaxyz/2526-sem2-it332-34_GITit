@@ -50,7 +50,13 @@ class GitCommandExecutor:
         self.simulator = simulator or RepositoryStateSimulator()
         self.normalizer = normalizer or RepositoryStateNormalizer()
 
-    def execute(self, state: dict, command: str) -> CommandExecutionResult:
+    def execute(
+        self,
+        state: dict,
+        command: str,
+        *,
+        mutate_in_place: bool = False,
+    ) -> CommandExecutionResult:
         start = time.perf_counter()
         normalized_fallback = normalize_command(command)
         try:
@@ -127,8 +133,16 @@ class GitCommandExecutor:
                 start=start,
             )
 
-        normalized_state = self.normalizer.normalize(state)
-        result = self.simulator.process_parsed(normalized_state, parsed, validate=False)
+        if mutate_in_place:
+            normalized_state = state
+        else:
+            normalized_state = self.normalizer.normalize(state)
+        result = self.simulator.process_parsed(
+            normalized_state,
+            parsed,
+            validate=False,
+            mutate=mutate_in_place,
+        )
         return self._result(
             processed=result.processed,
             state=result.state,
@@ -182,8 +196,14 @@ class GitCommandEngine:
         self.timeout_seconds = timeout_seconds
         self.executor = GitCommandExecutor()
 
-    def process(self, state: dict, command: str) -> CommandExecutionResult:
-        return self.executor.execute(state, command)
+    def process(
+        self,
+        state: dict,
+        command: str,
+        *,
+        mutate_in_place: bool = False,
+    ) -> CommandExecutionResult:
+        return self.executor.execute(state, command, mutate_in_place=mutate_in_place)
 
 
 class SimulatedGitCommandEngine(GitCommandEngine):

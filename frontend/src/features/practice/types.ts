@@ -1,4 +1,4 @@
-import type { Difficulty } from '@/features/scenarios/types'
+import type { Difficulty, DifficultyAccess } from '@/features/scenarios/types'
 
 export type RepositoryValue =
   | string
@@ -100,6 +100,7 @@ export type ScenarioSession = {
     id: number
     label: string
     changed_variant: boolean
+    looped_variant?: boolean
   }
   mastery_progress: {
     mastered: number
@@ -142,6 +143,7 @@ export type ScenarioSession = {
     counted_action_total: number
     completed_at: string
   } | null
+  reviewable_difficulties?: DifficultyAccess[]
 }
 
 export type ScenarioStepLog = {

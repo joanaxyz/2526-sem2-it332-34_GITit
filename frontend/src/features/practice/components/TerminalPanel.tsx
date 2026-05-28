@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react'
+
 import type { TerminalLine } from '@/features/practice/types'
 import { cn } from '@/shared/utils/cn'
 import { CommandInput } from './CommandInput'
@@ -5,6 +7,7 @@ import { CommandInput } from './CommandInput'
 export function TerminalPanel({
   lines,
   disabled,
+  runDisabled,
   processing,
   onCommand,
   title = 'Terminal',
@@ -12,11 +15,20 @@ export function TerminalPanel({
 }: {
   lines: TerminalLine[]
   disabled?: boolean
+  runDisabled?: boolean
   processing?: boolean
   onCommand: (command: string) => void
   title?: string
   className?: string
 }) {
+  const outputRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const container = outputRef.current
+    if (!container) return
+    container.scrollTop = container.scrollHeight
+  }, [lines])
+
   return (
     <section
       aria-label={title}
@@ -59,8 +71,12 @@ export function TerminalPanel({
           </div>
         ))}
       </div>
-
-      <CommandInput disabled={disabled} processing={processing} onSubmit={onCommand} />
+      <CommandInput
+        disabled={disabled}
+        runDisabled={runDisabled}
+        processing={processing}
+        onSubmit={onCommand}
+      />
     </section>
   )
 }
