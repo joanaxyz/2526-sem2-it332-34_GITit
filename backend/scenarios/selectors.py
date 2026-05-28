@@ -340,6 +340,24 @@ def _scenario_status_payload_from_maps(
     return payload
 
 
+def reviewable_difficulties_for_session(*, session: ScenarioSession) -> list[dict]:
+    """Difficulties on the same skill focus that are eligible for review (excludes current)."""
+    scenario = scenario_queryset(include_variants=False).get(pk=session.scenario_id)
+    payloads = scenario_status_payloads(
+        user=session.user,
+        scenarios=[scenario],
+        include_preview=False,
+    )
+    if not payloads:
+        return []
+    current_difficulty = session.difficulty_instance.difficulty
+    return [
+        difficulty
+        for difficulty in payloads[0]["difficulties"]
+        if difficulty.get("review_available") and difficulty["difficulty"] != current_difficulty
+    ]
+
+
 def _command_preview_payload(scenario: ScenarioSkillFocus) -> dict:
     config = scenario.command_preview_config or {}
     if config:

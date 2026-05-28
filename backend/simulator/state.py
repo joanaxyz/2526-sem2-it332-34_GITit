@@ -237,7 +237,7 @@ class RepositoryStateNormalizer:
         commit = self.commit_by_id(state, self.head_commit_id(state))
         return copy.deepcopy((commit or {}).get("tree") or {})
 
-    def visible_project_tree(self, state: dict) -> dict[str, dict]:
+    def visible_project_tree(self, state: dict, *, assume_normalized: bool = False) -> dict[str, dict]:
         """Derive the user-visible file set from HEAD, index, and worktree.
 
         ``working_tree`` in authored scenarios intentionally stores only local
@@ -246,7 +246,7 @@ class RepositoryStateNormalizer:
         the HEAD tree and overlays staged and working-tree entries.
         """
 
-        normalized = self.normalize(state)
+        normalized = state if assume_normalized else self.normalize(state)
         visible: dict[str, dict] = {
             path: {"status": "clean", "source": "head", "content": copy.deepcopy(content)}
             for path, content in self.head_tree(normalized).items()

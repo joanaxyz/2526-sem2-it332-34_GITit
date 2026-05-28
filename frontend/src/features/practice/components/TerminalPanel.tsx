@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react'
+
 import type { TerminalLine } from '@/features/practice/types'
 import { cn } from '@/shared/utils/cn'
 import { CommandInput } from './CommandInput'
@@ -5,6 +7,7 @@ import { CommandInput } from './CommandInput'
 export function TerminalPanel({
   lines,
   disabled,
+  runDisabled,
   processing,
   onCommand,
   title = 'Terminal',
@@ -12,15 +15,24 @@ export function TerminalPanel({
 }: {
   lines: TerminalLine[]
   disabled?: boolean
+  runDisabled?: boolean
   processing?: boolean
   onCommand: (command: string) => void
   title?: string
   className?: string
 }) {
+  const outputRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const container = outputRef.current
+    if (!container) return
+    container.scrollTop = container.scrollHeight
+  }, [lines])
+
   return (
     <section className={cn('flex min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-black/40', className)}>
       <div className="border-b border-border px-3 py-2 font-mono text-[11px] text-muted-foreground">{title}</div>
-      <div className="min-h-0 flex-1 overflow-auto p-3 font-mono text-xs leading-6 app-scrollbar">
+      <div ref={outputRef} className="min-h-0 flex-1 overflow-auto p-3 font-mono text-xs leading-6 app-scrollbar">
         {lines.map((line) => (
           <div
             key={line.id}
@@ -37,7 +49,12 @@ export function TerminalPanel({
           </div>
         ))}
       </div>
-      <CommandInput disabled={disabled} processing={processing} onSubmit={onCommand} />
+      <CommandInput
+        disabled={disabled}
+        runDisabled={runDisabled}
+        processing={processing}
+        onSubmit={onCommand}
+      />
     </section>
   )
 }

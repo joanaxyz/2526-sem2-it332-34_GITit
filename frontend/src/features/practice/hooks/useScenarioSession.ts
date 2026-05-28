@@ -1,22 +1,31 @@
-import { useQuery } from '@tanstack/react-query'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { Dispatch, SetStateAction } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMemo } from 'react'
 
 import { practiceApi } from '@/features/practice/api/practiceApi'
+import { isEphemeralStep } from '@/features/practice/hooks/useCommandSubmission'
 import type { ScenarioSession, TerminalLine } from '@/features/practice/types'
+import { clearSessionBootstrap, readSessionBootstrap } from '@/features/scenarios/utils/sessionBootstrap'
 import { queryKeys } from '@/shared/api/queryKeys'
 
 const bootLines: TerminalLine[] = []
 
 function terminalLinesFromSession(session: ScenarioSession): TerminalLine[] {
   const lines = [...bootLines]
-  for (const step of session.steps) {
+  for (const step of session.steps ?? []) {
     lines.push(
       { id: `input-${step.id}`, kind: 'input', text: step.command_text },
       {
         id: `output-${step.id}`,
-        kind: step.result_category === 'TargetMatched' ? 'success' : 'output',
-        text: step.terminal_output,
+        kind:
+          step.result_category === 'TargetMatched'
+            ? 'success'
+            : step.result_category === 'Error'
+              ? 'warning'
+              : 'output',
+        text:
+          step.result_category === 'Pending'
+            ? '…'
+            : step.terminal_output,
       },
     )
   }
@@ -24,42 +33,33 @@ function terminalLinesFromSession(session: ScenarioSession): TerminalLine[] {
 }
 
 export function useScenarioSession(sessionId: number) {
-  const [lineOverride, setLineOverride] = useState<{ sessionId: number; lines: TerminalLine[] } | null>(null)
+  const queryClient = useQueryClient()
+  const bootstrapSession = Number.isFinite(sessionId) ? readSessionBootstrap(sessionId) : undefined
+  const cachedSession = Number.isFinite(sessionId)
+    ? queryClient.getQueryData<ScenarioSession>(queryKeys.scenarioSession(sessionId))
+    : undefined
+  const initialSession = cachedSession ?? bootstrapSession
+
   const query = useQuery({
     queryKey: queryKeys.scenarioSession(sessionId),
-    queryFn: () => practiceApi.getSession(sessionId),
-    enabled: Number.isFinite(sessionId),
-  })
-  const baseLines = useMemo(() => (query.data ? terminalLinesFromSession(query.data) : bootLines), [query.data])
-  const setLines: Dispatch<SetStateAction<TerminalLine[]>> = useCallback(
-    (value) => {
-      setLineOverride((current) => {
-        const currentLines = current?.sessionId === sessionId ? current.lines : baseLines
-        const lines = typeof value === 'function' ? value(currentLines) : value
-        return { sessionId, lines }
-      })
+    queryFn: async () => {
+      const session = await practiceApi.getSession(sessionId)
+      clearSessionBootstrap(sessionId)
+      return session
     },
-    [baseLines, sessionId],
-  )
-  const resetLocalSessionState = useCallback(() => {
-    setLineOverride(null)
-  }, [])
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(resetLocalSessionState, 0)
-    return () => window.clearTimeout(timeoutId)
-  }, [resetLocalSessionState, sessionId])
+    enabled: Number.isFinite(sessionId),
+    initialData: initialSession,
+    staleTime: 30_000,
+  })
 
   const session = query.data ?? null
-  const lines = lineOverride?.sessionId === sessionId ? lineOverride.lines : baseLines
-  const feedback = query.data?.steps.at(-1)?.contextual_feedback ?? ''
+  const lines = useMemo(() => (session ? terminalLinesFromSession(session) : bootLines), [session])
+  const feedback = session?.steps?.filter((step) => !isEphemeralStep(step)).at(-1)?.contextual_feedback ?? ''
 
   return {
     query,
     session,
     lines,
-    setLines,
     feedback,
-    resetLocalSessionState,
   }
 }
