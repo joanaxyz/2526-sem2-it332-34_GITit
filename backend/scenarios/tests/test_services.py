@@ -627,6 +627,85 @@ def test_retry_repeats_deterministically_when_only_one_authored_variant_is_avail
     assert retry.rta_eligible is False
 
 
+def test_retry_loops_after_all_available_variants_are_seen(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="stage-and-commit-basic-workflow",
+        difficulty="easy",
+    )
+    published = list(difficulty.variants.filter(is_published=True).order_by("semantic_key", "id"))
+    keep_ids = [variant.id for variant in published[:2]]
+    difficulty.variants.exclude(id__in=keep_ids).update(is_published=False)
+
+    first = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="module_card",
+    )
+    first.status = SESSION_STATUS_FAILED
+    first.ended_at = timezone.now()
+    first.save(update_fields=["status", "ended_at"])
+
+    second = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="retry",
+        prior_session=first,
+    )
+    second.status = SESSION_STATUS_FAILED
+    second.ended_at = timezone.now()
+    second.save(update_fields=["status", "ended_at"])
+
+    third = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="retry",
+        prior_session=second,
+    )
+
+    assert second.variant_id != first.variant_id
+    assert third.variant_id == first.variant_id
+    assert third.variant_id != second.variant_id
+
+
+def test_session_payload_marks_looped_variant_after_exhaustion(student):
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="stage-and-commit-basic-workflow",
+        difficulty="easy",
+    )
+    published = list(difficulty.variants.filter(is_published=True).order_by("semantic_key", "id"))
+    keep_ids = [variant.id for variant in published[:2]]
+    difficulty.variants.exclude(id__in=keep_ids).update(is_published=False)
+
+    first = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="module_card",
+    )
+    first.status = SESSION_STATUS_FAILED
+    first.ended_at = timezone.now()
+    first.save(update_fields=["status", "ended_at"])
+
+    second = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="retry",
+        prior_session=first,
+    )
+    second.status = SESSION_STATUS_FAILED
+    second.ended_at = timezone.now()
+    second.save(update_fields=["status", "ended_at"])
+
+    third = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="retry",
+        prior_session=second,
+    )
+
+    assert session_payload(second, include_steps=False)["variant"]["looped_variant"] is False
+    assert session_payload(third, include_steps=False)["variant"]["looped_variant"] is True
+
+
 def test_starting_session_without_authored_variants_fails_clearly(student):
     difficulty = DifficultyInstance.objects.get(
         scenario__slug="stage-and-commit-basic-workflow",
@@ -1554,6 +1633,29 @@ def test_authored_variants_do_not_contain_unresolved_target_placeholders(student
 
     assert "<" not in str(serialized)
     assert "{{" not in str(serialized)
+
+
+def test_module4_hard_reset_can_complete_without_required_command_sequence(student):
+    call_command("seed_module4_scenarios", "--reset", "--confirm", "--validate-build")
+    difficulty = DifficultyInstance.objects.get(
+        scenario__slug="recover-from-hard-reset-incident",
+        difficulty="easy",
+    )
+    session = ScenarioSessionService().start_session(
+        user=student,
+        difficulty_instance=difficulty,
+        source_entry_point="module_card",
+    )
+    recovery_branch = session.variant.parameter_context["recovery_branch"]
+    recovery_target = session.variant.parameter_context["recovery_target"]
+
+    CommandProcessingService().submit_command(
+        session=session,
+        command=f"git switch -c {recovery_branch} {recovery_target}",
+    )
+    session.refresh_from_db()
+
+    assert session.status == SESSION_STATUS_COMPLETED
 
 
 def test_authored_state_based_variants_require_focus_commands_and_hide_task_answers(student):

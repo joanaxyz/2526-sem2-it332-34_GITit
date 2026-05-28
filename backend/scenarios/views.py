@@ -1,3 +1,7 @@
+import json
+from pathlib import Path
+from time import time
+
 from django.db import transaction
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -32,6 +36,22 @@ from scenarios.services import (
 )
 from simulator.command_engine import GitCommandEngine
 from simulator.services import RepositorySnapshotService
+
+
+def _debug_log(*, run_id: str, hypothesis_id: str, location: str, message: str, data: dict) -> None:
+    payload = {
+        "sessionId": "8d9224",
+        "runId": run_id,
+        "hypothesisId": hypothesis_id,
+        "location": location,
+        "message": message,
+        "data": data,
+        "timestamp": int(time() * 1000),
+    }
+    # region agent log
+    with Path("debug-8d9224.log").open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload) + "\n")
+    # endregion
 
 
 class ModuleScenarioListAPIView(APIView):
@@ -145,6 +165,20 @@ class ScenarioSessionStartAPIView(APIView):
                 source_entry_point=serializer.validated_data["source_entry_point"],
                 prior_session=prior_session,
             )
+            # region agent log
+            _debug_log(
+                run_id="initial",
+                hypothesis_id="H3",
+                location="backend/scenarios/views.py:167",
+                message="session started",
+                data={
+                    "user_id": request.user.id,
+                    "session_id": session.id,
+                    "difficulty_instance_id": difficulty.id,
+                    "prior_session_id": prior_session.id if prior_session else None,
+                },
+            )
+            # endregion
             with timing("scenario.session_start.serialization", session_id=session.id):
                 payload = session_payload(session)
             return Response(payload, status=201)
@@ -152,16 +186,62 @@ class ScenarioSessionStartAPIView(APIView):
 
 class ScenarioSessionDetailAPIView(APIView):
     def get(self, request, session_id: int):
-        session = (
-            ScenarioSession.objects.select_related(
-                "scenario",
-                "learning_unit",
-                "difficulty_instance",
-                "variant",
-            )
-            .prefetch_related("step_logs")
-            .get(id=session_id, user=request.user)
+        # region agent log
+        _debug_log(
+            run_id="initial",
+            hypothesis_id="H1",
+            location="backend/scenarios/views.py:186",
+            message="session detail request",
+            data={
+                "session_id": session_id,
+                "user_id": request.user.id,
+                "exists_for_any_user": ScenarioSession.objects.filter(id=session_id).exists(),
+                "exists_for_request_user": ScenarioSession.objects.filter(
+                    id=session_id, user=request.user
+                ).exists(),
+                "latest_session_id_for_user": ScenarioSession.objects.filter(
+                    user=request.user
+                )
+                .order_by("-id")
+                .values_list("id", flat=True)
+                .first(),
+            },
         )
+        # endregion
+        try:
+            session = (
+                ScenarioSession.objects.select_related(
+                    "scenario",
+                    "learning_unit",
+                    "difficulty_instance",
+                    "variant",
+                )
+                .prefetch_related("step_logs")
+                .get(id=session_id, user=request.user)
+            )
+        except ScenarioSession.DoesNotExist:
+            # region agent log
+            _debug_log(
+                run_id="initial",
+                hypothesis_id="H2",
+                location="backend/scenarios/views.py:216",
+                message="session detail missing",
+                data={
+                    "session_id": session_id,
+                    "user_id": request.user.id,
+                    "matching_session_count": ScenarioSession.objects.filter(
+                        id=session_id, user=request.user
+                    ).count(),
+                    "latest_started_session_for_user": ScenarioSession.objects.filter(
+                        user=request.user, status=SESSION_STATUS_STARTED
+                    )
+                    .order_by("-id")
+                    .values_list("id", flat=True)
+                    .first(),
+                },
+            )
+            # endregion
+            raise
         return Response(session_payload(session))
 
 
@@ -288,4 +368,17 @@ class ScenarioRetryAPIView(APIView):
             source_entry_point="retry",
             prior_session=prior,
         )
+        # region agent log
+        _debug_log(
+            run_id="initial",
+            hypothesis_id="H4",
+            location="backend/scenarios/views.py:357",
+            message="retry created session",
+            data={
+                "user_id": request.user.id,
+                "prior_session_id": prior.id,
+                "new_session_id": session.id,
+            },
+        )
+        # endregion
         return Response(session_payload(session), status=201)

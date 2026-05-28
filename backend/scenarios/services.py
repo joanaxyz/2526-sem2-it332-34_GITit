@@ -244,6 +244,8 @@ class ScenarioSessionService:
                     prior_session=prior_session,
                 )
             )
+        # Retry/fresh-attempt sessions intentionally rotate variants when alternatives
+        # exist so learners do not get stuck replaying the same authored context.
         changed_variant = bool(
             prior_session
             and variant_selector.changed_between(prior=prior_session.variant, current=variant)

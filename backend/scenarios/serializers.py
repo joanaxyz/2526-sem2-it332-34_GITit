@@ -1,12 +1,34 @@
+import json
+from pathlib import Path
+from time import time
+
+from django.db import connection
 from rest_framework import serializers
 
 from common.constants import SESSION_STATUS_STARTED
+from retries.services import VariantSelectionService
 from scaffolding.services import ScaffoldingService
 from scenarios.models import CompletionRecord, DifficultyInstance
 from scenarios.selectors import required_successful_attempts_for_difficulty
 from simulator.services import RepositorySnapshotService
 
 DIFFICULTY_ORDER = ["easy", "medium", "hard"]
+
+
+def _debug_log(*, run_id: str, hypothesis_id: str, location: str, message: str, data: dict) -> None:
+    payload = {
+        "sessionId": "c81762",
+        "runId": run_id,
+        "hypothesisId": hypothesis_id,
+        "location": location,
+        "message": message,
+        "data": data,
+        "timestamp": int(time() * 1000),
+    }
+    # region agent log
+    with Path("debug-c81762.log").open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload) + "\n")
+    # endregion
 
 
 class ScenarioStartSerializer(serializers.Serializer):
@@ -39,9 +61,70 @@ class SkillFocusDemoCommandSerializer(serializers.Serializer):
 
 
 def session_payload(session, *, include_steps: bool = True) -> dict:
+    # region agent log
+    _debug_log(
+        run_id="initial",
+        hypothesis_id="H1",
+        location="backend/scenarios/serializers.py:60",
+        message="session_payload entry",
+        data={
+            "session_id": session.id,
+            "include_steps": include_steps,
+            "connection_usable": connection.is_usable(),
+            "connection_closed_state": connection.connection.closed if connection.connection else None,
+            "has_prefetched_step_logs": "step_logs" in getattr(session, "_prefetched_objects_cache", {}),
+        },
+    )
+    # endregion
     supports = ScaffoldingService().supports_for(session.difficulty_instance.difficulty)
     snapshotter = RepositorySnapshotService()
-    step_logs = session.step_logs.order_by("id") if include_steps else []
+    if include_steps:
+        step_logs_qs = session.step_logs.order_by("id")
+        # region agent log
+        _debug_log(
+            run_id="initial",
+            hypothesis_id="H3",
+            location="backend/scenarios/serializers.py:78",
+            message="step logs queryset prepared",
+            data={
+                "session_id": session.id,
+                "query_repr": str(step_logs_qs.query),
+            },
+        )
+        # endregion
+        try:
+            step_logs = list(step_logs_qs)
+            # region agent log
+            _debug_log(
+                run_id="initial",
+                hypothesis_id="H2",
+                location="backend/scenarios/serializers.py:90",
+                message="step logs materialized",
+                data={
+                    "session_id": session.id,
+                    "step_count": len(step_logs),
+                },
+            )
+            # endregion
+        except Exception as exc:
+            # region agent log
+            _debug_log(
+                run_id="initial",
+                hypothesis_id="H4",
+                location="backend/scenarios/serializers.py:101",
+                message="step logs materialization failed",
+                data={
+                    "session_id": session.id,
+                    "error_type": exc.__class__.__name__,
+                    "error_message": str(exc),
+                    "connection_usable_after_error": connection.is_usable(),
+                    "connection_closed_state_after_error": connection.connection.closed if connection.connection else None,
+                },
+            )
+            # endregion
+            raise
+    else:
+        step_logs = []
     mastery_progress = mastery_progress_payload(session)
     completion = completion_payload(session)
     student_context = session.variant.student_context or fallback_student_context(session)
@@ -73,6 +156,7 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
             "id": session.variant_id,
             "label": session.variant.label,
             "changed_variant": session.changed_variant,
+            "looped_variant": looped_variant_payload(session),
         },
         "mastery_progress": mastery_progress,
         "mastered_records": mastery_progress,
@@ -223,3 +307,14 @@ def next_difficulty_payload(session, *, mastery_progress: dict | None = None) ->
         "id": next_instance.id,
         "difficulty": next_instance.difficulty,
     }
+
+
+def looped_variant_payload(session) -> bool:
+    selector = VariantSelectionService()
+    return selector.is_loopback_selection(
+        user=session.user,
+        difficulty_instance=session.difficulty_instance,
+        selected_variant=session.variant,
+        prior_session=session.prior_session,
+        exclude_session_id=session.id,
+    )
