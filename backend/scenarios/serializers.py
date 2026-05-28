@@ -10,7 +10,7 @@ from common.constants import (
     SESSION_STATUS_STARTED,
 )
 from scaffolding.services import ScaffoldingService
-from scenarios.models import CompletionRecord, DifficultyInstance, ScenarioSession
+from scenarios.models import CompletionRecord, DifficultyInstance, ScenarioSession, ScenarioSkillFocus
 from scenarios.selectors import (
     required_successful_attempts_for_difficulty,
     reviewable_difficulties_for_session,
@@ -137,6 +137,12 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
             "focus": session.scenario.focus,
             "narrative": session.difficulty_instance.narrative or session.scenario.narrative,
             "student_context": student_context,
+            "lesson_number": ScenarioSkillFocus.objects.filter(
+            learning_unit=session.learning_unit,
+            is_published=True,
+            lesson__sort_order__lte=session.scenario.lesson.sort_order,
+            difficulty_instances__is_published=True,
+        ).distinct().count(),
         },
         "student_context": student_context,
         "module": {

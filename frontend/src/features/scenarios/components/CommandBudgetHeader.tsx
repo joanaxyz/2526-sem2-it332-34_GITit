@@ -38,10 +38,6 @@ export function CommandBudgetHeader({ session }: { session: ScenarioSession }) {
         <span className="hidden shrink-0 font-mono font-semibold text-foreground sm:inline">
           Actions {used} / {max}
         </span>
-        <span className="hidden shrink-0 text-muted-foreground xl:inline">Target {target}</span>
-        <span className={cn('hidden shrink-0 font-medium xl:inline', failed ? 'text-destructive' : 'text-primary')}>
-          {stateLabel}
-        </span>
         <span className="absolute inset-x-2 bottom-0 h-px overflow-hidden rounded-full bg-secondary">
           <span
             className={cn('block h-full rounded-full bg-primary transition-all', failed && 'bg-destructive')}
