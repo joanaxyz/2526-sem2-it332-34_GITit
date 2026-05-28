@@ -41,13 +41,15 @@ export function DifficultyActionButton({
 }) {
   const action = actionForDifficulty(difficulty)
   const buttonLabel =
-    action === 'review'
-      ? 'Review'
-      : action === 'continue' || action === 'resume'
-        ? 'Continue'
-      : action === 'retry'
-        ? 'Retry'
-        : 'Start'
+    difficulty.status === 'locked'
+      ? 'Locked'
+      : action === 'review'
+        ? 'Review'
+        : action === 'continue' || action === 'resume'
+          ? 'Continue'
+        : action === 'retry'
+          ? 'Retry'
+          : 'Start'
   const Icon =
     difficulty.status === 'locked'
       ? Lock
@@ -63,7 +65,10 @@ export function DifficultyActionButton({
   const masteredRecords = masteredRecordsFor(difficulty)
 
   return (
-    <div className="flex items-center gap-3 rounded-md border border-border bg-background/30 p-3">
+    <div className={cn(
+      'flex items-center gap-3 rounded-md border bg-background/30 p-3 transition-opacity',
+      difficulty.status === 'locked' ? 'border-border/35 opacity-50' : 'border-border',
+    )}>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <div className="text-sm font-bold capitalize">{difficulty.difficulty}</div>

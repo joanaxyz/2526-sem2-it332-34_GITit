@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { OrientationLessonCard } from '@/features/modules/components/OrientationLessonCard'
@@ -29,6 +30,28 @@ function practiceCompletionFromSummary(scenarios: ScenarioSkillFocus[] | undefin
   }
 }
 
+function StatusBadge({ progress }: { progress: number }) {
+  if (progress >= 100) {
+    return (
+      <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold leading-none text-emerald-400">
+        Completed
+      </span>
+    )
+  }
+  if (progress > 0) {
+    return (
+      <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold leading-none text-primary">
+        In Progress
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center rounded-full border border-border/60 bg-transparent px-2 py-0.5 text-[10px] font-semibold leading-none text-muted-foreground/70">
+      Not Started
+    </span>
+  )
+}
+
 export function ModuleCard({
   module,
   isExpanded,
@@ -42,6 +65,12 @@ export function ModuleCard({
   scenarioSummaryPending?: boolean
   onToggle: () => void
 }) {
+  const [everExpanded, setEverExpanded] = useState(isExpanded)
+
+  useEffect(() => {
+    if (isExpanded) setEverExpanded(true)
+  }, [isExpanded])
+
   const visibleLessons = module.is_orientation
     ? module.lessons.filter((lesson) => !['practice-rules', 'scaffolds-review'].includes(lesson.slug))
     : []
@@ -54,47 +83,64 @@ export function ModuleCard({
   const panelId = `module-panel-${module.id}`
 
   return (
-    <Card className="overflow-hidden shadow-none" data-module-id={module.id}>
+    <Card
+      className="module-card-hover overflow-hidden shadow-none"
+      style={{ borderLeft: '2px solid rgba(0,245,212,0.35)' }}
+    >
       <div className="grid w-full grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-4 p-5 text-left">
         <ModuleSymbol module={module} />
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-lg font-bold">{module.title}</h2>
+            <h2 className="text-lg font-bold">
+              <span className="text-aurora-cyan">Module {module.number}:</span>{' '}
+              {module.title}
+            </h2>
           </div>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">{module.description}</p>
-          <div className="mt-3 flex max-w-xl items-center gap-3">
-            <ProgressBar value={progressValue} className="flex-1" />
-            <span className="font-mono text-xs text-muted-foreground">{progressValue}%</span>
+          <div className="mt-3 flex max-w-xl flex-wrap items-center gap-3">
+            <ProgressBar value={progressValue} className="flex-1" glow fillAnimate />
+            <span className="font-mono text-xs text-primary/70">{progressValue}%</span>
+            <StatusBadge progress={progressValue} />
           </div>
         </div>
         <ExpandToggleButton expanded={isExpanded} controlsId={panelId} label={module.title} onToggle={onToggle} />
       </div>
-      {isExpanded ? (
-        <div className="border-t border-border bg-background/35 p-5" id={panelId}>
-          {module.is_orientation ? (
-            <div className="grid gap-3">
-              <p className="rounded-md border border-primary/25 bg-primary/5 px-3 py-2 text-sm text-muted-foreground">
-                Recommended before scenario practice: complete all {visibleLessons.length} orientation lessons at your
-                own pace.
-              </p>
-              <p className="font-mono text-xs text-muted-foreground">
-                {visibleLessons.filter((lesson) => lesson.is_complete).length} / {visibleLessons.length} complete
-              </p>
-              <div className="grid gap-2">
-                {visibleLessons.map((lesson) => (
-                  <OrientationLessonCard key={lesson.id} lesson={lesson} />
-                ))}
-              </div>
+      {everExpanded && (
+        <div
+          className="grid"
+          style={{
+            gridTemplateRows: isExpanded ? '1fr' : '0fr',
+            transition: 'grid-template-rows 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
+        >
+          <div style={{ overflow: 'hidden' }}>
+            <div className="border-t border-border/50 bg-secondary/20 p-5" id={panelId}>
+              {module.is_orientation ? (
+                <div className="grid gap-3">
+                  <p className="rounded-md border border-primary/25 bg-primary/5 px-3 py-2 text-sm text-muted-foreground">
+                    Recommended before starting the Core Modules: complete all {visibleLessons.length} orientation lessons at your
+                    own pace.
+                  </p>
+                  <p className="font-mono text-xs text-muted-foreground">
+                    {visibleLessons.filter((lesson) => lesson.is_complete).length} / {visibleLessons.length} complete
+                  </p>
+                  <div className="grid gap-2">
+                    {visibleLessons.map((lesson) => (
+                      <OrientationLessonCard key={lesson.id} lesson={lesson} />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <ModuleScenarioHub
+                  module={module}
+                  scenarioSummary={scenarioSummary}
+                  scenarioSummaryPending={scenarioSummaryPending}
+                />
+              )}
             </div>
-          ) : (
-            <ModuleScenarioHub
-              module={module}
-              scenarioSummary={scenarioSummary}
-              scenarioSummaryPending={scenarioSummaryPending}
-            />
-          )}
+          </div>
         </div>
-      ) : null}
+      )}
     </Card>
   )
 }

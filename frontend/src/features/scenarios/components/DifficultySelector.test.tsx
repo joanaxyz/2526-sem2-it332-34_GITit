@@ -58,9 +58,8 @@ describe('DifficultySelector', () => {
   it('renders available, locked, and review states', () => {
     render(<DifficultySelector difficulties={difficulties} onStart={vi.fn()} onReview={vi.fn()} />)
 
-    const startButtons = screen.getAllByRole('button', { name: /start/i })
-    expect(startButtons[0]).not.toBeDisabled()
-    expect(startButtons[1]).toBeDisabled()
+    expect(screen.getByRole('button', { name: /start/i })).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: /locked/i })).toBeDisabled()
     expect(screen.getByRole('button', { name: /review/i })).toBeInTheDocument()
     expect(screen.getByText('100%')).toBeInTheDocument()
     expect(screen.queryByText(/counted action/i)).not.toBeInTheDocument()

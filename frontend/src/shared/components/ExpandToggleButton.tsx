@@ -27,7 +27,7 @@ export function ExpandToggleButton({
         onToggle()
       }}
     >
-      <ChevronDown className={cn('size-5 transition-transform', expanded && 'rotate-180')} />
+      <ChevronDown className={cn('size-5 transition-transform duration-200 ease-out', expanded && 'rotate-180')} />
     </Button>
   )
 }

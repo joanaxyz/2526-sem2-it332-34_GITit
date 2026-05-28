@@ -35,7 +35,7 @@ export function ModuleSymbol({
   return (
     <div
       className={cn(
-        'flex size-12 flex-col items-center justify-center gap-0.5 rounded-md border border-border bg-secondary text-primary',
+        'flex size-12 flex-col items-center justify-center gap-0.5 rounded-md border border-primary/25 bg-secondary text-primary transition-all duration-200 hover:border-primary/50 hover:shadow-aurora-sm',
         className,
       )}
       title={`${shortLabel}: ${module.title}`}
