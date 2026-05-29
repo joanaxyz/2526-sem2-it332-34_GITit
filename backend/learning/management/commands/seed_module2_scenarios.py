@@ -11,6 +11,7 @@ from common.constants import (
     COMPLETION_STATE_BASED,
     DIFFICULTY_EASY,
     DIFFICULTY_HARD,
+    DIFFICULTY_MAX_COUNTED_COMMANDS,
     DIFFICULTY_MEDIUM,
 )
 from learning.models import LearningUnit, Lesson, OrientationProgress
@@ -2519,7 +2520,8 @@ class Command(BaseCommand):
                         "is_published": True,
                     },
                 )
-                min_count, max_count = dspec["policy"]
+                min_count, _ = dspec["policy"]
+                max_count = DIFFICULTY_MAX_COUNTED_COMMANDS[difficulty]
                 CommandCountPolicy.objects.update_or_create(
                     difficulty_instance=difficulty_instance,
                     defaults={
