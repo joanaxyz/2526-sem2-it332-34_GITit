@@ -29,16 +29,28 @@ export function ScenarioSkillFocusCard({
     <Card
       className={
         isPreviewOnly
-          ? 'shadow-none border-dashed border-primary/30 bg-primary/[0.025]'
-          : 'shadow-none'
+          ? 'scenario-card-hover shadow-none border-dashed'
+          : 'scenario-card-hover shadow-none'
       }
+      style={isPreviewOnly ? {
+        borderColor: 'var(--module-border-rest, rgba(0,212,170,0.3))',
+        background: 'color-mix(in srgb, var(--module-color, hsl(var(--primary))) 3%, transparent)',
+      } : undefined}
     >
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-primary">{cardLabel}</p>
+            <p
+              className="text-xs font-semibold"
+              style={{ color: 'var(--module-color, hsl(var(--primary)))' }}
+            >
+              {cardLabel}
+            </p>
             <CardTitle className="mt-1 flex items-center gap-2">
-              <GitPullRequest className="size-5 shrink-0 text-primary" />
+              <GitPullRequest
+                className="size-5 shrink-0"
+                style={{ color: 'var(--module-color, hsl(var(--primary)))' }}
+              />
               {scenario.title}
             </CardTitle>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -48,7 +60,7 @@ export function ScenarioSkillFocusCard({
                   <span className="tooltip-anchor">
                     <span
                       className="cursor-help"
-                      style={{ borderBottom: '1px dashed rgba(0,245,212,0.55)' }}
+                      style={{ borderBottom: '1px dashed var(--module-border-hover, rgba(0,212,170,0.55))' }}
                     >
                       diagnostic commands
                     </span>
@@ -56,8 +68,8 @@ export function ScenarioSkillFocusCard({
                       className="tooltip-popup rounded-md text-xs leading-5 text-muted-foreground"
                       style={{
                         background: 'hsl(var(--card))',
-                        border: '1px solid rgba(0,245,212,0.15)',
-                        borderLeft: '3px solid rgba(0,245,212,0.55)',
+                        border: '1px solid var(--module-border-rest, rgba(0,212,170,0.15))',
+                        borderLeft: '3px solid var(--module-border-hover, rgba(0,212,170,0.55))',
                         boxShadow: '0 4px 16px rgba(0,0,0,0.45)',
                         padding: '0.5rem 0.625rem',
                       }}
@@ -75,7 +87,10 @@ export function ScenarioSkillFocusCard({
               type="button"
               variant="outline"
               size="sm"
-              className={isPreviewOnly ? 'border-primary/50 text-primary hover:bg-primary/10' : undefined}
+              style={{
+                borderColor: 'var(--module-border-hover, rgba(0,212,170,0.5))',
+                color: 'var(--module-color, hsl(var(--primary)))',
+              }}
               onClick={() => onPreview(scenario)}
             >
               <BookOpen className="size-3.5" />
