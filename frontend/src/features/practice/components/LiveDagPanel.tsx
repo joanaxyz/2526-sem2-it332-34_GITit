@@ -48,16 +48,16 @@ const VARIANT_COLORS = {
     emptyPill: 'border-primary/50 bg-primary/10 text-primary shadow-[0_0_6px_rgba(0,245,212,0.2)]',
   },
   violet: {
-    border: 'rgba(167,139,250,0.42)',
-    headerBg: 'rgba(167,139,250,0.025)',
-    iconShadow: 'drop-shadow(0 0 4px rgba(167,139,250,0.55))',
-    titleClass: 'text-violet-400',
-    gradientBg: 'radial-gradient(ellipse at 30% 40%, rgba(167,139,250,0.05) 0%, transparent 62%)',
-    dotColor: 'rgba(167,139,250,0.06)',
-    headNode: 'border-2 border-violet-400 bg-violet-400/15 text-violet-400 dag-head-glow-violet',
-    activePill: 'border-violet-400/55 bg-violet-400/10 text-violet-400 shadow-[0_0_8px_rgba(167,139,250,0.22)]',
-    emptyHead: 'dag-head-glow-violet border-2 border-dashed border-violet-400 bg-violet-400/10 text-violet-400',
-    emptyPill: 'border-violet-400/50 bg-violet-400/10 text-violet-400 shadow-[0_0_6px_rgba(167,139,250,0.2)]',
+    border: 'rgba(168,85,247,0.42)',
+    headerBg: 'rgba(168,85,247,0.025)',
+    iconShadow: 'drop-shadow(0 0 4px rgba(168,85,247,0.55))',
+    titleClass: 'text-purple-500',
+    gradientBg: 'radial-gradient(ellipse at 30% 40%, rgba(168,85,247,0.05) 0%, transparent 62%)',
+    dotColor: 'rgba(168,85,247,0.06)',
+    headNode: 'border-2 border-purple-500 bg-purple-500/15 text-purple-500 dag-head-glow-violet',
+    activePill: 'border-purple-500/55 bg-purple-500/10 text-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.22)]',
+    emptyHead: 'dag-head-glow-violet border-2 border-dashed border-purple-500 bg-purple-500/10 text-purple-500',
+    emptyPill: 'border-purple-500/50 bg-purple-500/10 text-purple-500 shadow-[0_0_6px_rgba(168,85,247,0.2)]',
   },
 } as const
 
@@ -172,7 +172,7 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
         <div className="flex flex-wrap items-center gap-2">
           <GitCommitHorizontal
             className="size-4"
-            style={{ filter: colors.iconShadow, color: variant === 'violet' ? 'rgb(167,139,250)' : undefined }}
+            style={{ filter: colors.iconShadow, color: variant === 'violet' ? 'rgb(168,85,247)' : undefined }}
           />
           <span className={cn('text-sm font-bold tracking-wide', colors.titleClass)}>{title}</span>
           {normalizedSnapshot.commits.length > 0 && (
@@ -234,6 +234,7 @@ export function RepositoryStateDiagram({
   contentClassName,
   showRepositoryDetails = false,
   fitViewPadding = 0.08,
+  variant = 'cyan',
 }: {
   title: string
   snapshot: RepositorySnapshot
@@ -241,6 +242,7 @@ export function RepositoryStateDiagram({
   contentClassName?: string
   showRepositoryDetails?: boolean
   fitViewPadding?: number
+  variant?: DagVariant
 }) {
   return (
     <ReactFlowProvider>
@@ -251,6 +253,7 @@ export function RepositoryStateDiagram({
         contentClassName={contentClassName}
         showRepositoryDetails={showRepositoryDetails}
         fitViewPadding={fitViewPadding}
+        variant={variant}
       />
     </ReactFlowProvider>
   )
