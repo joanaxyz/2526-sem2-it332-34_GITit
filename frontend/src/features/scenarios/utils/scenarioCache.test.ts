@@ -91,6 +91,8 @@ const completedSession: ScenarioSession = {
     title: 'Branch rescue',
     focus: 'Branching',
     narrative: 'Move work safely.',
+    lesson_number: 2,
+    lesson_id: 5,
   },
   module: {
     id: 2,

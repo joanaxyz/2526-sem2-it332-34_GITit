@@ -100,50 +100,38 @@ MODULE_ONE_SCENARIO_ANCHORS = [
     (
         2,
         "initializing-a-local-repository",
-        "Initializing a Local Repository",
+        "Initializing Repositories",
         "Create Git metadata in an existing or named project folder.",
     ),
     (
         3,
         "cloning-a-remote-repository",
-        "Cloning a Remote Repository",
+        "Cloning Remote Repositories",
         "Create a local working copy and verify the origin relationship.",
     ),
     (
         4,
         "staging-and-committing-basic-workflow",
-        "Staging and Committing: The Basic Workflow",
+        "Staging and Committing",
         "Prepare intentional changes and save them with a clear message.",
     ),
     (
         5,
-        "ignoring-files-with-gitignore",
-        "Ignoring Files with .gitignore",
-        "Keep generated files, dependency folders, logs, and secrets out of history.",
-    ),
-    (
-        6,
         "partial-staging-and-git-add-p",
-        "Partial Staging and git add -p",
+        "Partial Staging",
         "Stage selected hunks so each commit has one clear purpose.",
     ),
     (
-        7,
+        6,
         "amending-commits",
         "Amending Commits",
         "Repair the latest commit message or contents before sharing it.",
     ),
     (
-        8,
+        7,
         "unstaging-and-discarding-changes",
         "Unstaging and Discarding Changes",
         "Move changes out of the index and safely discard unwanted work.",
-    ),
-    (
-        9,
-        "module-1-review-and-practice",
-        "Module 1 Review and Practice",
-        "Combine the local workflow skills in larger repository situations.",
     ),
 ]
 
@@ -332,11 +320,9 @@ def base_scenarios() -> list[dict[str, Any]]:
         init_scenario(),
         clone_scenario(),
         commit_scenario(base_tree),
-        gitignore_scenario(),
         partial_staging_scenario(),
         amend_scenario(),
         restore_scenario(),
-        review_scenario(),
     ]
 
 
@@ -413,11 +399,11 @@ def init_scenario() -> dict[str, Any]:
         "lesson": (
             2,
             "initializing-a-local-repository",
-            "Initializing a Local Repository",
+            "Initializing Repositories",
             "Create Git metadata in an existing or named project folder.",
         ),
         "slug": "initialize-local-repository",
-        "title": "Initialize a local repository",
+        "title": "Initializing Repositories",
         "focus": "git init",
         "summary": "Create repository metadata without staging or committing files.",
         "explanation": "Initialization creates Git metadata for a folder. It does not save a snapshot, stage files, or change file contents.",
@@ -1143,11 +1129,11 @@ def clone_scenario() -> dict[str, Any]:
         lesson=(
             3,
             "cloning-a-remote-repository",
-            "Cloning a Remote Repository",
+            "Cloning Remote Repositories",
             "Create a local working copy and verify the origin relationship.",
         ),
         slug="clone-remote-repository",
-        title="Clone a remote repository",
+        title="Cloning Remote Repositories",
         focus="git clone",
         summary="Create a local repository from a remote and verify the origin relationship.",
         explanation="Cloning creates a local repository, configures origin, checks out the selected branch, and records remote-tracking information.",
@@ -1550,11 +1536,11 @@ def commit_scenario(base_tree: dict[str, str]) -> dict[str, Any]:
         lesson=(
             4,
             "staging-and-committing-basic-workflow",
-            "Staging and Committing: The Basic Workflow",
+            "Staging and Committing",
             "Prepare intentional changes and save them with a clear message.",
         ),
         slug="stage-and-commit-basic-workflow",
-        title="Stage and commit the intended change",
+        title="Staging and Committing",
         focus="git commit",
         summary="Stage intended changes and create a focused commit.",
         explanation="A commit saves the staged snapshot and moves the current branch to the new commit.",
@@ -2112,13 +2098,13 @@ def partial_staging_scenario() -> dict[str, Any]:
     ]
     return scenario_dict(
         lesson=(
-            6,
+            5,
             "partial-staging-and-git-add-p",
-            "Partial Staging and git add -p",
+            "Partial Staging",
             "Stage selected hunks so each commit has one clear purpose.",
         ),
         slug="partial-staging-add-p",
-        title="Stage selected hunks",
+        title="Partial Staging",
         focus="git add -p",
         summary="Commit selected hunks while leaving other changes uncommitted.",
         explanation="Partial staging lets one file contribute only the selected logical change to the next commit.",
@@ -2401,13 +2387,13 @@ def amend_scenario() -> dict[str, Any]:
     ]
     return scenario_dict(
         lesson=(
-            7,
+            6,
             "amending-commits",
             "Amending Commits",
             "Repair the latest commit message or contents before sharing it.",
         ),
         slug="amend-latest-commit",
-        title="Amend the latest commit",
+        title="Amending Commits",
         focus="git commit --amend",
         summary="Repair the latest local commit instead of creating a follow-up commit.",
         explanation="Amend replaces the branch tip with a corrected commit that keeps the intended parent relationship.",
@@ -2671,13 +2657,13 @@ def restore_scenario() -> dict[str, Any]:
     ]
     return scenario_dict(
         lesson=(
-            8,
+            7,
             "unstaging-and-discarding-changes",
             "Unstaging and Discarding Changes",
             "Move changes out of the index and safely discard unwanted work.",
         ),
         slug="unstage-and-discard-changes",
-        title="Unstage and discard safely",
+        title="Unstaging and Discarding Changes",
         focus="git restore",
         summary="Keep selected changes as working-tree work and discard unwanted paths.",
         explanation="Restoring from the index and working tree are different state changes. One preserves work, the other removes it.",

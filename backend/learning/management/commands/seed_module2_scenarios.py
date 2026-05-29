@@ -133,8 +133,8 @@ MODULE_TWO_SCENARIO_ANCHORS = [
     ),
     (
         7,
-        "fast-forward-vs-three-way-merges",
-        "Fast-Forward vs Three-Way Merges",
+        "completing-branch-merges",
+        "Completing Branch Merges",
         "Choose the right merge strategy to produce the history shape the team requires.",
     ),
     (
@@ -2258,7 +2258,7 @@ def reconcile_scenario() -> dict[str, Any]:
     )
 
 
-# ── Lesson 2.7: Fast-Forward vs Three-Way Merges ─────────────────────────────
+# ── Lesson 2.7: Completing Branch Merges ─────────────────────────────
 
 def _ff_merge_easy_cases() -> list[dict[str, Any]]:
     """Three Easy cases: linear history, default FF merge."""
@@ -2532,12 +2532,12 @@ def ff_merge_scenario() -> dict[str, Any]:
     return scenario_dict(
         lesson=(
             7,
-            "fast-forward-vs-three-way-merges",
-            "Fast-Forward vs Three-Way Merges",
+            "completing-branch-merges",
+            "Completing Branch Merges",
             "Choose the right merge strategy to produce the history shape the team requires.",
         ),
-        slug="fast-forward-vs-noff-merge",
-        title="Fast-Forward vs Three-Way Merges",
+        slug="completing-branch-merges",
+        title="Completing Branch Merges",
         focus="git merge, git merge --no-ff",
         summary=(
             "A fast-forward merge advances the branch pointer when no divergence exists. "

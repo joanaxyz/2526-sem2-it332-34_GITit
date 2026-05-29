@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { GripHorizontal, GripVertical } from 'lucide-react'
+import { Toaster } from 'sonner'
 
 import { ScenarioContextPanel } from '@/features/scenarios/components/ScenarioContextPanel'
 import { ScenarioStatusHeader } from '@/features/scenarios/components/ScenarioStatusHeader'
@@ -19,10 +20,13 @@ import { useAuthStore } from '@/features/auth/hooks/useAuth'
 import { hasSeenScenarioTour, markScenarioTourSeen } from '@/features/practice/utils/scenarioTour'
 import { useCommandSubmission } from '@/features/practice/hooks/useCommandSubmission'
 import { useScenarioSession } from '@/features/practice/hooks/useScenarioSession'
+import { useScaffolding } from '@/features/practice/scaffolding/useScaffolding'
+import type { ScenarioSession } from '@/features/practice/types'
 import { reviewApi } from '@/features/review/api/reviewApi'
 import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import { invalidateScenarioProgressQueries, syncScenarioSessionInCache, updateScenarioSessionCache } from '@/features/scenarios/utils/scenarioCache'
 import { ErrorState } from '@/shared/components/ErrorState'
+import { queryKeys } from '@/shared/api/queryKeys'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
@@ -106,6 +110,10 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const sessionId = Number(params.sessionId)
   const { query, session, lines, feedback } = useScenarioSession(sessionId)
   const mutation = useCommandSubmission(sessionId, reviewMode)
+  const { clearToast, evaluateAndNotify } = useScaffolding(sessionId)
+  // True when "Proceed to Command Preview" was tapped — tells exitMutation.onSuccess to
+  // append ?preview=slug to the Modules navigation so the Learn modal auto-opens there.
+  const scaffoldExitPendingRef = useRef(false)
   const [dismissedCompletionSessionId, setDismissedCompletionSessionId] = useState<number | null>(null)
   const [terminalRatio, setTerminalRatio] = useState(DEFAULT_TERMINAL_RATIO)
   const [diagramRatio, setDiagramRatio] = useState(DEFAULT_DIAGRAM_RATIO)
@@ -120,6 +128,12 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const workspaceGridRef = useRef<HTMLElement>(null)
   const diagramGridRef = useRef<HTMLDivElement>(null)
   const terminalGridRef = useRef<HTMLDivElement>(null)
+  // Clear the scaffold flag whenever the exit modal closes without completing (Cancel or X).
+  // This prevents a later normal exit from accidentally appending ?preview= to the URL.
+  useEffect(() => {
+    if (!exitConfirmOpen) scaffoldExitPendingRef.current = false
+  }, [exitConfirmOpen])
+
   const exitMutation = useMutation({
     mutationFn: () => {
       if (!session) throw new Error('No session is available to exit.')
@@ -129,7 +143,10 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     onSuccess: (updatedSession) => {
       syncScenarioSessionInCache(queryClient, updatedSession)
       invalidateScenarioProgressQueries(queryClient)
-      navigate(`/modules?module=${updatedSession.module.id}`)
+      const pendingPreview = scaffoldExitPendingRef.current
+      scaffoldExitPendingRef.current = false
+      const base = `/modules?module=${updatedSession.module.id}`
+      navigate(pendingPreview ? `${base}&preview=${updatedSession.scenario.slug}` : base)
     },
   })
   const nextLevelMutation = useMutation({
@@ -199,10 +216,6 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   if (query.isError) return <ErrorState title="Could not load scenario workspace" description={query.error.message} />
   if (!session) return <ErrorState title="Could not load scenario workspace" description="The API returned no session data." />
 
-  // #region agent log
-  fetch('http://127.0.0.1:7681/ingest/62fc7eb8-c151-4a74-bb87-4f3717466167',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4d73ce'},body:JSON.stringify({sessionId:'4d73ce',location:'PracticeWorkspace.tsx:session-ready',message:'session loaded, rendering workspace',data:{hypothesisId:'B',sessionId:session.id,status:session.status,commitsCount:session.repository_state?.commits?.length??0},timestamp:Date.now(),runId:'post-fix'})}).catch(()=>{});
-  // #endregion
-
   const tourKey = `${user?.id ?? 'guest'}:${session.scenario.id}`
   const shouldAutoOpenTour = dismissedTourKey !== tourKey && !hasSeenScenarioTour(user?.id)
   const isTourOpen = tourOpen || shouldAutoOpenTour
@@ -212,6 +225,10 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
       setExitConfirmOpen(true)
       return
     }
+
+    // Phase 6D: clear any active scaffold toast before the next command is processed
+    clearToast()
+
     mutation.mutate(command, {
       onSuccess: (response) => {
         if (response.command_family === 'mergetool') {
@@ -220,6 +237,24 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
           const conflictPaths = snapshot.conflicts ?? []
           const nextPath = requestedPaths.find((path) => conflictPaths.includes(path)) ?? conflictPaths[0]
           if (nextPath) setWorkspaceEditorPath(nextPath)
+        }
+
+        // Scaffold pipeline — only in primary (non-review) mode
+        if (!reviewMode) {
+          // Read the freshly-merged session from cache (hook's onSuccess already ran)
+          const updatedSession = queryClient.getQueryData<ScenarioSession>(
+            queryKeys.scenarioSession(sessionId),
+          )
+          if (updatedSession) {
+            evaluateAndNotify(
+              updatedSession,
+              response.step.command_classification,
+              () => {
+                scaffoldExitPendingRef.current = true
+                setExitConfirmOpen(true)
+              },
+            )
+          }
         }
       },
     })
@@ -328,6 +363,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
+      <Toaster position="bottom-right" expand={false} />
       <ScenarioStatusHeader
         session={session}
         isExiting={exitMutation.isPending}

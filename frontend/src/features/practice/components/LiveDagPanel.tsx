@@ -5,7 +5,7 @@ import ReactFlow, { Background, Handle, Position, ReactFlowProvider, useReactFlo
 import type { Edge, Node, NodeProps } from 'reactflow'
 
 import type { RepositoryCommit, RepositorySnapshot, RepositoryValue } from '@/features/practice/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Card'
+import { Card, CardContent, CardHeader } from '@/shared/components/Card'
 import { cn } from '@/shared/utils/cn'
 
 type DagVariant = 'cyan' | 'violet'
@@ -116,9 +116,6 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   variant?: DagVariant
 }) {
   const colors = VARIANT_COLORS[variant]
-  // #region agent log
-  fetch('http://127.0.0.1:7681/ingest/62fc7eb8-c151-4a74-bb87-4f3717466167',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4d73ce'},body:JSON.stringify({sessionId:'4d73ce',location:'LiveDagPanel.tsx:RepositoryStateDiagramBody',message:'diagram body mount',data:{hypothesisId:'E',variantProp:variant,commitsCount:snapshot.commits?.length??0},timestamp:Date.now(),runId:'post-fix'})}).catch(()=>{});
-  // #endregion
   const normalizedSnapshot = useMemo(() => normalizeSnapshot(snapshot), [snapshot])
   const layoutSignature = useMemo(() => graphLayoutSignature(normalizedSnapshot), [normalizedSnapshot])
   const layoutCacheRef = useRef<{ signature: string; positions: Map<string, { x: number; y: number }> } | null>(
@@ -535,9 +532,6 @@ function buildGraph(
   variant: DagVariant,
   cachedPositions?: Map<string, { x: number; y: number }>,
 ): { nodes: Node[]; edges: Edge[] } {
-  // #region agent log
-  fetch('http://127.0.0.1:7681/ingest/62fc7eb8-c151-4a74-bb87-4f3717466167',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4d73ce'},body:JSON.stringify({sessionId:'4d73ce',location:'LiveDagPanel.tsx:buildGraph',message:'buildGraph entry',data:{hypothesisId:'A',variantParam:variant,commitsLength:snapshot.commits.length,emptyRepo:!snapshot.commits.length,hasCachedPositions:Boolean(cachedPositions)},timestamp:Date.now(),runId:'post-fix'})}).catch(()=>{});
-  // #endregion
   const graph = new dagre.graphlib.Graph()
   graph.setDefaultEdgeLabel(() => ({}))
   graph.setGraph({ rankdir: 'TB', nodesep: 56, ranksep: 88 })

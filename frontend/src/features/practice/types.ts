@@ -90,6 +90,7 @@ export type ScenarioSession = {
     narrative: string
     student_context?: ScenarioStudentContext
     lesson_number: number
+    lesson_id: number
   }
   student_context?: ScenarioStudentContext
   module: {

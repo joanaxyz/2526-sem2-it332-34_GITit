@@ -27,6 +27,8 @@ const baseSession: ScenarioSession = {
     title: 'Recover from a hard reset incident',
     focus: 'hard reset recovery',
     narrative: '',
+    lesson_number: 4,
+    lesson_id: 12,
   },
   module: { id: 4, number: 4, title: 'Advanced Recovery History' },
   difficulty: 'easy',
