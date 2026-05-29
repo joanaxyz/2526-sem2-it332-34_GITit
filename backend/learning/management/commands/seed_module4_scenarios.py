@@ -204,10 +204,10 @@ def revert_case(case_id: str, *, bad_commit: str, suffix: str) -> dict[str, Any]
 def rebase_case(case_id: str, *, suffix: str, interactive: bool = False) -> dict[str, Any]:
     state = repo_with_head(
         commits=[
-            commit("c0", f"Base {suffix}", {"src/app.ts": "base"}),
-            commit("c1", f"Main update {suffix}", {"src/app.ts": "main-v1"}, ["c0"]),
-            commit("c2", f"Feature update {suffix}", {"src/app.ts": "feature-v1"}, ["c0"]),
-            commit("c3", f"Feature follow-up {suffix}", {"src/app.ts": "feature-v2"}, ["c2"]),
+            commit("c0", f"Base {suffix}", {"src/app.ts": "base", "src/feature.ts": "feature-base"}),
+            commit("c1", f"Main update {suffix}", {"src/app.ts": "main-v1", "src/feature.ts": "feature-base"}, ["c0"]),
+            commit("c2", f"Feature update {suffix}", {"src/app.ts": "base", "src/feature.ts": "feature-v1"}, ["c0"]),
+            commit("c3", f"Feature follow-up {suffix}", {"src/app.ts": "base", "src/feature.ts": "feature-v2"}, ["c2"]),
         ],
         head="c3",
         branch="feature/recovery",
