@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { GripHorizontal, GripVertical } from 'lucide-react'
 
 import { ScenarioContextPanel } from '@/features/scenarios/components/ScenarioContextPanel'
@@ -22,9 +22,8 @@ import { useScenarioSession } from '@/features/practice/hooks/useScenarioSession
 import { reviewApi } from '@/features/review/api/reviewApi'
 import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import { invalidateScenarioProgressQueries, syncScenarioSessionInCache, updateScenarioSessionCache } from '@/features/scenarios/utils/scenarioCache'
-import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { PracticeWorkspaceSkeleton } from '@/shared/components/Skeleton'
+import { LoadingState } from '@/shared/components/LoadingState'
 import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
 import { cn } from '@/shared/utils/cn'
@@ -188,7 +187,15 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   })
   const reviewableDifficulties = session?.reviewable_difficulties ?? []
 
-  if (query.isLoading) return <PracticeWorkspaceSkeleton />
+  if (query.isLoading) {
+    return (
+      <LoadingState
+        description="Preparing the repository, terminal, and scenario workspace."
+        label="Loading scenario"
+        variant="screen"
+      />
+    )
+  }
   if (query.isError) return <ErrorState title="Could not load scenario workspace" description={query.error.message} />
   if (!session) return <ErrorState title="Could not load scenario workspace" description="The API returned no session data." />
 

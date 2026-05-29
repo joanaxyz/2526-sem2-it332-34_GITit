@@ -14,7 +14,15 @@ export function PerformancePage() {
     staleTime: 5 * 60 * 1000,
   })
 
-  if (isLoading) return <LoadingState label="Loading performance" />
+  if (isLoading) {
+    return (
+      <LoadingState
+        description="Collecting module progress and accuracy trends."
+        label="Loading performance"
+        variant="page"
+      />
+    )
+  }
   if (isError) return <ErrorState title="Could not load performance" description={error.message} />
   if (!data) return <ErrorState title="Could not load performance" description="The API returned no data." />
 

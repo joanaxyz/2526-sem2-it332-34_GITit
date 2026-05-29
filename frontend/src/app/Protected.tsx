@@ -22,7 +22,15 @@ export function Protected({ children }: { children: ReactElement }) {
     retry: false,
   })
 
-  if (!token && bootstrapQuery.isPending) return <LoadingState label="Restoring session" />
+  if (!token && bootstrapQuery.isPending) {
+    return (
+      <LoadingState
+        description="Checking your saved login before opening the workspace."
+        label="Restoring session"
+        variant="screen"
+      />
+    )
+  }
   if (!token) return <Navigate replace to="/login" />
   return children
 }

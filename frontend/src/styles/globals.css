@@ -321,6 +321,65 @@ textarea {
   50%       { text-shadow: 0 0 28px rgba(0, 245, 212, 0.75), 0 0 56px rgba(0, 180, 216, 0.35); }
 }
 
+@keyframes git-it-loading-letter-wave {
+  0%, 100% {
+    color: hsl(var(--primary));
+    text-shadow: 0 0 10px rgba(0, 245, 212, 0.35), 0 0 22px rgba(0, 180, 216, 0.18);
+    transform: translateY(0);
+  }
+  35% {
+    color: hsl(var(--foreground));
+    text-shadow: 0 0 16px rgba(0, 245, 212, 0.8), 0 0 34px rgba(0, 180, 216, 0.36);
+    transform: translateY(-0.42rem);
+  }
+  62% {
+    transform: translateY(0.08rem);
+  }
+}
+
+@keyframes git-it-loading-meter-sweep {
+  0% {
+    transform: translateX(-115%) scaleX(0.58);
+  }
+  48% {
+    transform: translateX(18%) scaleX(0.9);
+  }
+  100% {
+    transform: translateX(125%) scaleX(0.58);
+  }
+}
+
+@keyframes git-it-loading-grid-drift {
+  from {
+    background-position: 0 0, 0 0;
+  }
+  to {
+    background-position: 28px 28px, -28px 28px;
+  }
+}
+
+.git-it-loading-letter {
+  animation: git-it-loading-letter-wave 1.36s ease-in-out infinite;
+  display: inline-block;
+  transform-origin: center bottom;
+}
+
+.git-it-loading-meter {
+  animation: git-it-loading-meter-sweep 1.5s ease-in-out infinite;
+  box-shadow: 0 0 16px rgba(0, 245, 212, 0.58);
+  transform-origin: center;
+  width: 52%;
+}
+
+.git-it-loading-grid {
+  background-image:
+    linear-gradient(rgba(0, 245, 212, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 180, 216, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(to bottom, transparent, black 28%, black 72%, transparent);
+  animation: git-it-loading-grid-drift 5.5s linear infinite;
+}
+
 /* Aurora utility classes */
 .animate-fade-in-up {
   animation: fade-in-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -500,4 +559,13 @@ textarea {
     0 0 0 1px rgba(0, 245, 212, 0.12),
     0 0 18px rgba(0, 245, 212, 0.08),
     0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .git-it-loading-letter,
+  .git-it-loading-meter,
+  .git-it-loading-grid {
+    animation: none;
+    transform: none;
+  }
 }

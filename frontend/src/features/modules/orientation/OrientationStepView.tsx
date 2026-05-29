@@ -12,6 +12,7 @@ import { FourAreaPipelineDiagram } from '@/features/modules/orientation/visuals/
 import { PlatformWorkspaceDiagram } from '@/features/modules/orientation/visuals/PlatformWorkspaceDiagram'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
+import { LoadingState } from '@/shared/components/LoadingState'
 import { cn } from '@/shared/utils/cn'
 
 function shellOutput(command: string, cwd: string) {
@@ -262,7 +263,7 @@ export function OrientationStepView({
       case 'git_command':
         return (
           <div className="grid gap-2">
-            {sessionLoading ? <p className="text-sm text-muted-foreground">Preparing repository…</p> : null}
+            {sessionLoading ? <LoadingState label="Preparing repository" variant="compact" /> : null}
             <TerminalPanel
               className="h-64"
               lines={lines}

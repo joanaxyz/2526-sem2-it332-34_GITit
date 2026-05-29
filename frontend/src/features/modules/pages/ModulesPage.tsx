@@ -8,7 +8,7 @@ import { modulesApi } from '@/features/modules/api/modulesApi'
 import { ModuleCard } from '@/features/modules/components/ModuleCard'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { ModulesSkeleton } from '@/shared/components/Skeleton'
+import { LoadingState } from '@/shared/components/LoadingState'
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -79,7 +79,15 @@ export function ModulesPage() {
     }
   }, [queryClient, scenarioSummaryQuery.data])
 
-  if (isLoading) return <ModulesSkeleton />
+  if (isLoading) {
+    return (
+      <LoadingState
+        description="Getting your modules and practice progress ready."
+        label="Loading modules"
+        variant="page"
+      />
+    )
+  }
   if (isError) return <ErrorState title="Could not load modules" description={error.message} />
   if (!data) return <ErrorState title="Could not load modules" description="The API returned no module data." />
 

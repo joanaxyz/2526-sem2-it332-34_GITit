@@ -12,7 +12,7 @@ import { invalidateScenarioProgressQueries, syncScenarioSessionInCache } from '@
 import { queryKeys } from '@/shared/api/queryKeys'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { ScenarioListSkeleton } from '@/shared/components/Skeleton'
+import { LoadingState } from '@/shared/components/LoadingState'
 import { useRef, useState } from 'react'
 
 type ScenarioListProps =
@@ -108,7 +108,15 @@ export function ScenarioList(props: ScenarioListProps) {
     navigate(path)
   }
 
-  if (isLoading) return <ScenarioListSkeleton />
+  if (isLoading || shouldDeferModuleFetch) {
+    return (
+      <LoadingState
+        description="Preparing scenario choices for this module."
+        label="Loading scenarios"
+        variant="inline"
+      />
+    )
+  }
   if (isError) return <ErrorState title="Could not load scenarios" description={error.message} />
   if (!data?.length) return <EmptyState title="No scenarios here yet" description="This module does not have any published scenarios yet." />
 
