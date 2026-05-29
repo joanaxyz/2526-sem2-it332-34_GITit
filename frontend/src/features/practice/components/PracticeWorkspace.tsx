@@ -216,10 +216,6 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   if (query.isError) return <ErrorState title="Could not load scenario workspace" description={query.error.message} />
   if (!session) return <ErrorState title="Could not load scenario workspace" description="The API returned no session data." />
 
-  // #region agent log
-  fetch('http://127.0.0.1:7681/ingest/62fc7eb8-c151-4a74-bb87-4f3717466167',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4d73ce'},body:JSON.stringify({sessionId:'4d73ce',location:'PracticeWorkspace.tsx:session-ready',message:'session loaded, rendering workspace',data:{hypothesisId:'B',sessionId:session.id,status:session.status,commitsCount:session.repository_state?.commits?.length??0},timestamp:Date.now(),runId:'post-fix'})}).catch(()=>{});
-  // #endregion
-
   const tourKey = `${user?.id ?? 'guest'}:${session.scenario.id}`
   const shouldAutoOpenTour = dismissedTourKey !== tourKey && !hasSeenScenarioTour(user?.id)
   const isTourOpen = tourOpen || shouldAutoOpenTour

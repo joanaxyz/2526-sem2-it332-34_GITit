@@ -2,7 +2,7 @@ import { cn } from '@/shared/utils/cn'
 import { LiveDagPanel } from '@/features/practice/components/LiveDagPanel'
 import { ProjectStructurePanel } from '@/features/practice/components/ProjectStructurePanel'
 import { TerminalPanel } from '@/features/practice/components/TerminalPanel'
-import type { TerminalLine } from '@/features/practice/types'
+import type { RepositorySnapshot, TerminalLine } from '@/features/practice/types'
 
 const HOTSPOT_EXPLANATIONS: Record<string, string> = {
   narrative: 'Read the objective and constraints before running commands.',
@@ -20,7 +20,7 @@ const HOTSPOT_EXPLANATIONS: Record<string, string> = {
   no_answer: 'The platform does not reveal exact command sequences after failure.',
 }
 
-const PREVIEW_SNAPSHOT = {
+const PREVIEW_SNAPSHOT: RepositorySnapshot = {
   repository_initialized: true,
   commits: [],
   branches: { main: null },

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 
 import { OrientationLessonCard } from '@/features/modules/components/OrientationLessonCard'
 import { ModuleSymbol } from '@/features/modules/components/ModuleSymbol'
@@ -7,7 +6,6 @@ import { ModuleScenarioHub } from '@/features/modules/components/ModuleScenarioH
 import { getModuleAccent } from '@/features/modules/moduleColors'
 import type { ScenarioSkillFocus } from '@/features/scenarios/types'
 import type { LearningModule } from '@/features/modules/types'
-import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { ExpandToggleButton } from '@/shared/components/ExpandToggleButton'
 import { ProgressBar } from '@/shared/components/ProgressBar'

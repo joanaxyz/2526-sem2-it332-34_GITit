@@ -1,6 +1,3 @@
-import time
-
-from common.agent_debug_log import agent_debug_log
 from scenarios.builders import ScenarioVariantBuildError
 from scenarios.models import DifficultyInstance, ScenarioSession, ScenarioVariant
 
@@ -13,10 +10,8 @@ class VariantSelectionService:
         difficulty_instance: DifficultyInstance,
         prior_session: ScenarioSession | None = None,
         published_variants: list[ScenarioVariant] | None = None,
+        tried_variant_keys: set[str] | None = None,
     ) -> ScenarioVariant:
-        # #region agent log
-        select_t0 = time.perf_counter()
-        # #endregion
         variants = published_variants or list(
             difficulty_instance.variants.filter(is_published=True).order_by(
                 "semantic_key",
@@ -31,22 +26,14 @@ class VariantSelectionService:
             return variants[0]
 
         prior_key = self._identity(prior_session.variant)
-        tried_keys = self._tried_variant_keys(
-            user=user,
-            difficulty_instance=difficulty_instance,
+        tried_keys = (
+            tried_variant_keys
+            if tried_variant_keys is not None
+            else self._tried_variant_keys(
+                user=user,
+                difficulty_instance=difficulty_instance,
+            )
         )
-        # #region agent log
-        agent_debug_log(
-            location="retries/services.py:select_variant",
-            message="select_variant_retry_path",
-            data={
-                "elapsed_ms": round((time.perf_counter() - select_t0) * 1000, 2),
-                "variant_count": len(variants),
-                "tried_key_count": len(tried_keys),
-            },
-            hypothesis_id="C",
-        )
-        # #endregion
         for variant in variants:
             identity = self._identity(variant)
             if identity != prior_key and identity not in tried_keys:

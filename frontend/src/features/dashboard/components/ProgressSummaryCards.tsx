@@ -1,4 +1,4 @@
-import { useEffect, useState, type ComponentType } from 'react'
+import { useEffect, useState } from 'react'
 import { Activity, CheckCircle2, Crosshair, GitPullRequest, RotateCcw, ShieldCheck } from 'lucide-react'
 
 import type { DashboardSummary } from '@/features/dashboard/types'
