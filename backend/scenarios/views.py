@@ -17,6 +17,8 @@ from scenarios.selectors import (
     get_difficulty_instance,
     required_successful_attempts_for_difficulty,
     scenario_list_queryset,
+    scenario_preview_payload,
+    scenario_preview_queryset,
     scenario_queryset,
     scenario_status_payloads,
 )
@@ -77,12 +79,25 @@ class ModuleScenarioSummaryAPIView(APIView):
 class SkillFocusDetailAPIView(APIView):
     def get(self, request, slug: str):
         with timing("scenario.skill_focus_detail", slug=slug):
+            preview_command_index = _preview_command_index(
+                request.query_params.get("command_index")
+            )
+            if preview_command_index is not None:
+                scenario = scenario_preview_queryset().get(slug=slug)
+                return Response(
+                    scenario_preview_payload(
+                        scenario=scenario,
+                        preview_command_index=preview_command_index,
+                    )
+                )
+
             scenario = scenario_queryset(include_variants=False).get(slug=slug)
             return Response(
                 scenario_status_payloads(
                     user=request.user,
                     scenarios=[scenario],
                     include_preview=True,
+                    preview_command_index=preview_command_index,
                 )[0]
             )
 
@@ -131,6 +146,15 @@ class SkillFocusDemoCommandAPIView(APIView):
                     "command_classification": "diagnostic" if result.diagnostic else "counted",
                 }
             )
+
+
+def _preview_command_index(value: str | None) -> int | None:
+    if value is None:
+        return None
+    try:
+        return max(0, int(value))
+    except (TypeError, ValueError):
+        return 0
 
 
 class ScenarioSessionStartAPIView(APIView):
