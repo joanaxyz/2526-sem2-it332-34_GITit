@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { BarChart2, GitPullRequest, ShieldCheck } from 'lucide-react'
+import { BarChart2, CheckCircle2, GitPullRequest, RefreshCw, ShieldCheck } from 'lucide-react'
 
 import type { DashboardSummary, RateMetric } from '@/features/dashboard/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/Card'
@@ -8,8 +8,10 @@ type ModuleKey = '1' | '2' | '3' | '4'
 
 const MODULE_KEYS: ModuleKey[] = ['1', '2', '3', '4']
 
+const SCR_COLOR = '#00F5D4'
 const HLCR_COLOR = '#7DD3FC'
 const RTA_COLOR = '#34D399'
+const ARC_COLOR = '#A78BFA'
 
 function useAnimatedWidth(value: number | null, delay: number) {
   const [width, setWidth] = useState(0)
@@ -116,16 +118,20 @@ function MetricBar({
 
 function ModulePanel({
   moduleKey,
+  scr,
   hlcr,
   rta,
+  arc,
   index,
 }: {
   moduleKey: ModuleKey
+  scr: RateMetric
   hlcr: RateMetric
   rta: RateMetric
+  arc: RateMetric
   index: number
 }) {
-  const hasAnyData = hlcr.denominator > 0 || rta.denominator > 0
+  const hasAnyData = scr.denominator > 0 || hlcr.denominator > 0 || rta.denominator > 0 || arc.denominator > 0
   const barDelay = 200 + index * 120
 
   return (
@@ -171,7 +177,19 @@ function ModulePanel({
         )}
       </div>
 
-      {/* Two metric bars side by side */}
+      {/* SCR bar — validity gate, full width */}
+      <div className="mb-3">
+        <MetricBar
+          label="Scenario completion"
+          Icon={CheckCircle2}
+          metric={scr}
+          color={SCR_COLOR}
+          hasData={scr.denominator > 0}
+          barDelay={barDelay}
+        />
+      </div>
+
+      {/* HLCR + RTA side by side */}
       <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
         <MetricBar
           label="Hard completion"
@@ -189,6 +207,38 @@ function ModulePanel({
           hasData={rta.denominator > 0}
           barDelay={barDelay + 80}
         />
+      </div>
+
+      {/* ARC row — full width, raw count (not a percentage) */}
+      <div
+        className="flex items-center justify-between gap-2 pt-2.5"
+        style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+      >
+        <div className="flex items-center gap-1.5">
+          <RefreshCw
+            className="size-3.5 flex-shrink-0"
+            style={{ color: arc.denominator > 0 ? ARC_COLOR : 'rgba(255,255,255,0.2)' }}
+          />
+          <span
+            className="text-[0.65rem] font-semibold uppercase tracking-[0.1em]"
+            style={{ color: arc.denominator > 0 ? 'rgba(200,220,240,0.75)' : 'rgba(255,255,255,0.2)' }}
+          >
+            Avg retries
+          </span>
+        </div>
+        <div className="text-right">
+          <span
+            className="text-xs font-bold tabular-nums"
+            style={{ color: arc.denominator > 0 ? ARC_COLOR : 'rgba(255,255,255,0.18)' }}
+          >
+            {arc.denominator > 0 ? (arc.value?.toFixed(2) ?? '—') : '—'}
+          </span>
+          {arc.denominator > 0 && (
+            <p className="text-[0.6rem] text-muted-foreground">
+              {arc.denominator} completed sessions
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -231,6 +281,19 @@ export function ModulePerformanceCard({ summary }: { summary: DashboardSummary }
               {formatPercent(summary.kpis.rta.value)}
             </span>
           </span>
+          <span className="text-muted-foreground/30 select-none">·</span>
+          <span className="flex items-center gap-1.5">
+            <RefreshCw className="size-3.5" style={{ color: ARC_COLOR }} />
+            <span>Overall avg retries:</span>
+            <span
+              className="font-semibold"
+              style={{ color: ARC_COLOR }}
+            >
+              {summary.kpis.arc.denominator === 0 || summary.kpis.arc.value === null
+                ? '—'
+                : summary.kpis.arc.value.toFixed(2)}
+            </span>
+          </span>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -240,8 +303,10 @@ export function ModulePerformanceCard({ summary }: { summary: DashboardSummary }
             <ModulePanel
               key={moduleKey}
               moduleKey={moduleKey}
+              scr={moduleKpis.scr}
               hlcr={moduleKpis.hlcr}
               rta={moduleKpis.rta}
+              arc={moduleKpis.arc}
               index={index}
             />
           )
