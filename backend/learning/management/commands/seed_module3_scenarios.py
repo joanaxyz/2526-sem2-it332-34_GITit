@@ -116,7 +116,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
     }
     if kind == "conflict-diagnostics":
         return {
-            "story": "{{project}} is paused in a conflicted merge. Gather evidence before choosing a resolution.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Current branch", "value": "main"},
                 {"label": "Conflict file", "value": "{{conflict_path}}"},
@@ -128,7 +128,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
         }
     if kind == "conflict-identification":
         return {
-            "story": "{{project}} has parallel branch work. Start the merge that reveals the exact conflict file.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Current branch", "value": "main"},
                 {"label": "Source branch", "value": "{{source_branch}}"},
@@ -137,7 +137,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
         }
     if kind == "manual-resolution":
         return {
-            "story": "{{project}} is already stopped in a conflicted merge. Combine both changes manually.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Current branch", "value": "main"},
                 {"label": "Conflict file", "value": "{{conflict_path}}"},
@@ -149,7 +149,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
         }
     if kind == "accept-ours":
         return {
-            "story": "{{project}} is already stopped in a conflicted merge. Keep the current branch version of the conflicted file.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Current branch", "value": "main"},
                 {"label": "Conflict file", "value": "{{conflict_path}}"},
@@ -161,7 +161,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
         }
     if kind == "accept-theirs":
         return {
-            "story": "{{project}} is already stopped in a conflicted merge. Accept the incoming branch version of the conflicted file.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Current branch", "value": "main"},
                 {"label": "Incoming branch", "value": "{{source_branch}}"},
@@ -174,7 +174,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
         }
     if kind == "merge-abort":
         return {
-            "story": "{{project}} is in a conflicted merge. Cancel the merge and return to the pre-merge state.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Current branch", "value": "main"},
                 {"label": "Conflict file", "value": "{{conflict_path}}"},
@@ -183,7 +183,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
         }
     if kind == "mergetool":
         return {
-            "story": "{{project}} needs the configured merge tool to inspect and resolve the conflict.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Current branch", "value": "main"},
                 {"label": "Source branch", "value": "{{source_branch}}"},
@@ -196,7 +196,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
         }
     if kind == "prevention":
         return {
-            "story": "{{project}} needs a prevention check before anyone merges stale branch work.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Current branch", "value": "{{target_branch}}"},
                 {"label": "Remote", "value": "{{remote}}"},
@@ -210,7 +210,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
         }
     if kind == "cherry-pick":
         return {
-            "story": "{{project}} needs one selected commit applied to the current branch.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Current branch", "value": "{{target_branch}}"},
                 {"label": "Source commit", "value": "{{source_commit}}"},
@@ -220,7 +220,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
         }
     if kind == "cherry-pick-abort":
         return {
-            "story": "{{project}} has a cherry-pick in progress that should be canceled.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Current branch", "value": "{{target_branch}}"},
                 {"label": "Original branch tip", "value": "{{original_tip}}"},
@@ -228,7 +228,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
         }
     if kind == "capstone":
         return {
-            "story": "{{project}} has a remote branch conflict and a separate hotfix that both need to land cleanly.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Current branch", "value": "main"},
                 {"label": "Remote", "value": "{{remote}}"},
@@ -324,6 +324,7 @@ def scenario_dict(
 def conflict_repo_case(
     case_id: str,
     *,
+    context: str,
     project: str,
     conflict_path: str,
     base_content: str,
@@ -356,6 +357,7 @@ def conflict_repo_case(
     state["branches"][source_branch] = "c2"
     return {
         "case_id": case_id,
+        "context": context,
         "project": project,
         "conflict_path": conflict_path,
         "source_branch": source_branch,
@@ -438,6 +440,7 @@ def merge_abort_case(base_case: dict[str, Any]) -> dict[str, Any]:
 def cherry_pick_case(
     case_id: str,
     *,
+    context: str,
     project: str,
     target_branch: str,
     source_commit: str,
@@ -468,6 +471,7 @@ def cherry_pick_case(
     state["branches"]["main"] = "c2"
     return {
         "case_id": case_id,
+        "context": context,
         "project": project,
         "target_branch": target_branch,
         "source_commit": source_commit,
@@ -481,6 +485,7 @@ def cherry_pick_case(
 def prevention_case(
     case_id: str,
     *,
+    context: str,
     project: str,
     target_branch: str,
     remote: str,
@@ -506,6 +511,7 @@ def prevention_case(
     )
     return {
         "case_id": case_id,
+        "context": context,
         "project": project,
         "target_branch": target_branch,
         "remote": remote,
@@ -522,6 +528,7 @@ def prevention_case(
 def capstone_case(
     case_id: str,
     *,
+    context: str,
     project: str,
     conflict_path: str,
     hotfix_path: str,
@@ -575,6 +582,7 @@ def capstone_case(
     )
     return {
         "case_id": case_id,
+        "context": context,
         "project": project,
         "remote": "origin",
         "source_branch": source_branch,
@@ -594,6 +602,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
     easy_conflicts = [
         conflict_repo_case(
             "conflict-easy-auth-copy",
+            context="You're integrating a teammate's auth timeout changes into main. Both branches modified src/auth.js — yours increased the timeout, theirs lowered it. Git cannot auto-merge the conflicting values.",
             project="auth-service",
             conflict_path="src/auth.js",
             base_content="timeout=3000",
@@ -606,6 +615,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
         ),
         conflict_repo_case(
             "conflict-easy-profile-copy",
+            context="A profile page rebrand landed on two separate branches. Both changed src/profile.tsx — main updated the title to 'Account profile', the feature branch to 'Member profile'. Neither can auto-merge.",
             project="profile-ui",
             conflict_path="src/profile.tsx",
             base_content="title=Profile",
@@ -618,6 +628,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
         ),
         conflict_repo_case(
             "conflict-easy-billing-copy",
+            context="Two billing teams updated currency handling simultaneously. src/billing.py was changed on main to PHP and on the feature branch to EUR. The merge cannot proceed without a resolution.",
             project="billing-api",
             conflict_path="src/billing.py",
             base_content="currency='USD'",
@@ -628,10 +639,37 @@ def module_three_scenarios() -> list[dict[str, Any]]:
             source_branch="feature/regional-currency",
             answer_anchor="merge feature/regional-currency produces conflict in src/billing.py",
         ),
+        conflict_repo_case(
+            "conflict-easy-config-copy",
+            context="You're integrating a teammate's debug configuration changes into main. Both branches modified src/config.py — yours added a log level, theirs re-enabled debug mode. Git cannot auto-merge them.",
+            project="config-service",
+            conflict_path="src/config.py",
+            base_content="debug=False",
+            main_content="debug=False\nlog_level=INFO",
+            feature_content="debug=True\nlog_level=DEBUG",
+            resolution_content="debug=False\nlog_level=INFO\nverbose_errors=True",
+            resolution_token="verbose_errors=True",
+            source_branch="feature/debug-config",
+            answer_anchor="merge feature/debug-config produces conflict in src/config.py",
+        ),
+        conflict_repo_case(
+            "conflict-easy-navbar-copy",
+            context="A navbar rebrand landed on two branches simultaneously. Both changed src/components/Navbar.tsx — main updated the brand to 'MyApp', the feature branch to 'BetaApp'. The merge cannot proceed without a manual resolution.",
+            project="frontend-app",
+            conflict_path="src/components/Navbar.tsx",
+            base_content="brand=AppName",
+            main_content="brand=MyApp",
+            feature_content="brand=BetaApp",
+            resolution_content="brand=MyApp\ntagline=Beta",
+            resolution_token="tagline=Beta",
+            source_branch="feature/navbar-rebrand",
+            answer_anchor="merge feature/navbar-rebrand produces conflict in src/components/Navbar.tsx",
+        ),
     ]
     medium_conflicts = [
         conflict_repo_case(
             "conflict-medium-router",
+            context="Two teams updated the support portal's route configuration. main renamed '/help' to '/support' while the feature branch renamed it to '/help-center'. The routes.ts file now conflicts.",
             project="support-portal",
             conflict_path="src/routes.ts",
             base_content="route('/help')",
@@ -644,6 +682,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
         ),
         conflict_repo_case(
             "conflict-medium-policy",
+            context="Policy review modes diverged. main enforces strict review while the feature branch introduces assisted review. src/policy.yml has a merge conflict that needs manual resolution.",
             project="policy-engine",
             conflict_path="src/policy.yml",
             base_content="review: basic",
@@ -654,10 +693,24 @@ def module_three_scenarios() -> list[dict[str, Any]]:
             source_branch="feature/assisted-review",
             answer_anchor="merge feature/assisted-review conflicts in src/policy.yml",
         ),
+        conflict_repo_case(
+            "conflict-medium-gateway",
+            context="Two teams updated the API gateway timeout configuration. main increased the timeout to 60s, the feature branch decreased it to 15s for resilience testing. config/gateway.yml now has a conflict.",
+            project="api-gateway",
+            conflict_path="config/gateway.yml",
+            base_content="timeout: 30",
+            main_content="timeout: 60",
+            feature_content="timeout: 15",
+            resolution_content="timeout: 60\nretry_on_timeout: true",
+            resolution_token="retry_on_timeout: true",
+            source_branch="feature/gateway-resilience",
+            answer_anchor="merge feature/gateway-resilience conflicts in config/gateway.yml",
+        ),
     ]
     hard_conflicts = [
         conflict_repo_case(
             "conflict-hard-pricing",
+            context="Regional and loyalty discount logic landed on separate branches. Both modified the discount formula in src/pricing.rb — one uses regional_rate, the other loyalty_rate. The merge fails.",
             project="pricing-service",
             conflict_path="src/pricing.rb",
             base_content="discount = 0",
@@ -670,6 +723,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
         ),
         conflict_repo_case(
             "conflict-hard-schema",
+            context="Two database migrations modified the orders status column definition. main added varchar(24) while the feature added 'not null'. schema/orders.sql has a conflict that needs a combined resolution.",
             project="warehouse-sync",
             conflict_path="schema/orders.sql",
             base_content="status text",
@@ -680,6 +734,19 @@ def module_three_scenarios() -> list[dict[str, Any]]:
             source_branch="feature/order-status-required",
             answer_anchor="merge feature/order-status-required conflicts in schema/orders.sql",
         ),
+        conflict_repo_case(
+            "conflict-hard-migration",
+            context="Two database engineers modified the users email column definition simultaneously. main added 'unique', the feature branch changed the type to varchar(320). db/migrations/001_users.sql conflicts and needs a combined resolution.",
+            project="user-service",
+            conflict_path="db/migrations/001_users.sql",
+            base_content="email text",
+            main_content="email text unique",
+            feature_content="email varchar(320)",
+            resolution_content="email varchar(320) unique",
+            resolution_token="varchar(320) unique",
+            source_branch="feature/email-constraint",
+            answer_anchor="merge feature/email-constraint conflicts in db/migrations/001_users.sql",
+        ),
     ]
 
     manual_easy = [
@@ -688,27 +755,29 @@ def module_three_scenarios() -> list[dict[str, Any]]:
     ]
     manual_medium = [
         conflicted_case(case, commit_message="Resolve integration conflict")
-        for case in [*medium_conflicts, easy_conflicts[0]]
+        for case in medium_conflicts
     ]
     manual_hard = [
         conflicted_case(case, commit_message="Resolve release conflict")
-        for case in hard_conflicts
+        for case in [*hard_conflicts, medium_conflicts[0]]
     ]
     accept_ours_easy = [
         conflict_side_case(case, side="ours", commit_message="Keep current branch version")
-        for case in easy_conflicts[:2]
+        for case in easy_conflicts
     ]
     accept_theirs_medium = [
         conflict_side_case(case, side="theirs", commit_message="Accept incoming branch version")
-        for case in medium_conflicts
+        for case in [*medium_conflicts, easy_conflicts[0]]
     ]
     accept_side_hard = [
         conflict_side_case(hard_conflicts[0], side="ours", commit_message="Keep release branch version"),
         conflict_side_case(hard_conflicts[1], side="theirs", commit_message="Accept incoming schema version"),
+        conflict_side_case(hard_conflicts[2], side="ours", commit_message="Keep email constraint version"),
+        conflict_side_case(medium_conflicts[0], side="theirs", commit_message="Accept incoming route version"),
     ]
-    merge_abort_easy = [merge_abort_case(case) for case in easy_conflicts[:2]]
-    merge_abort_medium = [merge_abort_case(case) for case in medium_conflicts]
-    merge_abort_hard = [merge_abort_case(case) for case in hard_conflicts]
+    merge_abort_easy = [merge_abort_case(case) for case in easy_conflicts]
+    merge_abort_medium = [merge_abort_case(case) for case in [*medium_conflicts, easy_conflicts[0]]]
+    merge_abort_hard = [merge_abort_case(case) for case in [*hard_conflicts, medium_conflicts[0]]]
 
     diagnostic_case_fields = {"solution_workspace_files", "solution_commands", "commit_message"}
     diagnostic_easy = [
@@ -717,7 +786,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
     ]
     diagnostic_medium = [
         {key: value for key, value in case.items() if key not in diagnostic_case_fields}
-        for case in manual_medium[:2]
+        for case in manual_medium
     ]
     diagnostic_hard = [
         {key: value for key, value in case.items() if key not in diagnostic_case_fields}
@@ -727,6 +796,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
     cherry_easy = [
         cherry_pick_case(
             "cherry-easy-login-timeout",
+            context="The release/1.0 branch needs a critical login timeout fix that was already merged to main. You need to bring just that one patch to the release branch without pulling in any other main changes.",
             project="release-1.0",
             target_branch="release/1.0",
             source_commit="c1",
@@ -736,6 +806,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
         ),
         cherry_pick_case(
             "cherry-easy-invoice-rounding",
+            context="A rounding bug in the invoice service was patched on main. Your release/1.1 branch ships tomorrow and needs only that fix — not the other work that landed after it.",
             project="release-1.1",
             target_branch="release/1.1",
             source_commit="c1",
@@ -745,6 +816,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
         ),
         cherry_pick_case(
             "cherry-easy-export-null",
+            context="A null-export crash fix was committed to main as part of a larger feature. You're on release/2.0 and need to backport just the crash fix — not the surrounding feature changes.",
             project="release-2.0",
             target_branch="release/2.0",
             source_commit="c1",
@@ -752,12 +824,33 @@ def module_three_scenarios() -> list[dict[str, Any]]:
             expected_token="null-export-fix",
             answer_anchor="release branch receives export null patch as a new commit",
         ),
+        cherry_pick_case(
+            "cherry-easy-rate-limit",
+            context="A rate-limiter fix was merged into main after the release branch was cut. Cherry-pick just that commit onto release/1.2 to patch the rate limiting bug without pulling in unrelated main work.",
+            project="release-1.2",
+            target_branch="release/1.2",
+            source_commit="c1",
+            target_path="src/ratelimit.py",
+            expected_token="rate-limit-fix-v1",
+            answer_anchor="release branch receives rate limit patch as a new commit",
+        ),
+        cherry_pick_case(
+            "cherry-easy-null-check",
+            context="A null check fix for the parser was committed to main. The release/2.1 branch needs it immediately. Cherry-pick the specific commit rather than merging all of main into the release branch.",
+            project="release-2.1",
+            target_branch="release/2.1",
+            source_commit="c1",
+            target_path="src/parser.ts",
+            expected_token="null-check-fix-v1",
+            answer_anchor="release branch receives null check patch as a new commit",
+        ),
     ]
     cherry_medium = [
         *cherry_easy[:2],
         {
             **cherry_pick_case(
                 "cherry-medium-no-commit",
+                context="Your team wants to review the report hotfix content before it commits to release/review. Stage the cherry-picked changes for inspection without creating a commit.",
                 project="release-review",
                 target_branch="release/review",
                 source_commit="c1",
@@ -767,9 +860,33 @@ def module_three_scenarios() -> list[dict[str, Any]]:
             ),
             "solution_commands": ["git cherry-pick --no-commit c1"],
         },
+        {
+            **cherry_pick_case(
+                "cherry-medium-staged-review",
+                context="A cache hotfix needs to be staged on the release branch for review before committing. Use cherry-pick --no-commit to apply the changes from main so a teammate can inspect the diff first.",
+                project="release-staged",
+                target_branch="release/staged",
+                source_commit="c1",
+                target_path="src/cache.py",
+                expected_token="cache-hotfix",
+                answer_anchor="no-commit cherry-pick stages cache hotfix for review",
+            ),
+            "solution_commands": ["git cherry-pick --no-commit c1"],
+        },
     ]
+    cherry_hard_commit = cherry_pick_case(
+        "cherry-hard-no-commit-finalize",
+        context="A queue management hotfix must land on the release/finalize branch without staged review — cherry-pick it and finalize immediately with a clean commit.",
+        project="release-finalize",
+        target_branch="release/finalize",
+        source_commit="c1",
+        target_path="src/queue.ts",
+        expected_token="queue-hotfix",
+        answer_anchor="cherry-pick applied and committed to release/finalize",
+    )
     cherry_hard_abort = cherry_pick_case(
         "cherry-hard-abort",
+        context="A cherry-pick of the search hotfix is already in progress on release/abort but the changes conflict with local work. The cherry-pick must be canceled and the branch returned to its original state.",
         project="release-abort",
         target_branch="release/abort",
         source_commit="c1",
@@ -785,11 +902,17 @@ def module_three_scenarios() -> list[dict[str, Any]]:
     }
     cherry_hard_abort["original_tip"] = "c3"
     cherry_hard_abort["solution_commands"] = ["git cherry-pick --abort"]
-    cherry_hard = [cherry_easy[2], cherry_hard_abort]
+    cherry_hard = [
+        {**cherry_easy[2], "solution_commands": ["git cherry-pick c1"]},
+        cherry_hard_abort,
+        {**cherry_hard_commit, "solution_commands": ["git cherry-pick c1"]},
+        {**cherry_easy[3], "solution_commands": ["git cherry-pick c1"]},
+    ]
 
     prevention_easy = [
         prevention_case(
             "prevent-easy-docs-refresh",
+            context="Your team has been pushing doc updates to origin. Before you merge anything into main, you want to see what the remote has that you don't — without moving your local branch.",
             project="docs-portal",
             target_branch="main",
             remote="origin",
@@ -802,6 +925,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
         ),
         prevention_case(
             "prevent-easy-api-contract",
+            context="The API contracts repo has received updates from another team. You want to inspect what changed in openapi.yml on the remote before deciding whether to merge.",
             project="api-contracts",
             target_branch="main",
             remote="origin",
@@ -812,10 +936,37 @@ def module_three_scenarios() -> list[dict[str, Any]]:
             remote_content="contract-v2",
             answer_anchor="fetch updates origin/main without moving local main",
         ),
+        prevention_case(
+            "prevent-easy-config-sync",
+            context="Your config-sync main branch may be behind origin. Fetch origin to update remote-tracking refs, then compare local vs origin/main before merging to catch stale configuration.",
+            project="config-sync",
+            target_branch="main",
+            remote="origin",
+            remote_branch="origin/main",
+            local_tip="c1",
+            remote_tip="c2",
+            watched_path="config/app.yml",
+            remote_content="config-v2",
+            answer_anchor="fetch reveals origin/main is ahead; diff confirms config/app.yml changed",
+        ),
+        prevention_case(
+            "prevent-easy-auth-tokens",
+            context="The auth-tokens repo has upstream token rotation changes. Fetch origin and compare local vs origin/main to verify what changed in src/tokens.py before merging.",
+            project="auth-tokens",
+            target_branch="main",
+            remote="origin",
+            remote_branch="origin/main",
+            local_tip="c1",
+            remote_tip="c2",
+            watched_path="src/tokens.py",
+            remote_content="tokens-v2",
+            answer_anchor="fetch reveals origin/main is ahead; diff confirms src/tokens.py changed",
+        ),
     ]
     prevention_medium = [
         prevention_case(
             "prevent-medium-release-notes",
+            context="A release manager has been pushing changelog updates to origin/release-notes. You're planning a merge but want to review what's on that branch without integrating it yet.",
             project="release-notes",
             target_branch="main",
             remote="origin",
@@ -828,6 +979,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
         ),
         prevention_case(
             "prevent-medium-design-tokens",
+            context="The design team has been evolving the color token values on origin/design-tokens. You need to see what changed in tokens/colors.json before you integrate those tokens into main.",
             project="design-system",
             target_branch="main",
             remote="origin",
@@ -838,10 +990,37 @@ def module_three_scenarios() -> list[dict[str, Any]]:
             remote_content="tokens-v2",
             answer_anchor="fetch updates origin/design-tokens before integration",
         ),
+        prevention_case(
+            "prevent-medium-db-schema",
+            context="The db-schema repo has incoming schema changes from origin. Fetch and compare local main vs origin/db-schema to verify what changed in schema/users.sql before merging.",
+            project="db-schema",
+            target_branch="main",
+            remote="origin",
+            remote_branch="origin/db-schema",
+            local_tip="c1",
+            remote_tip="c2",
+            watched_path="schema/users.sql",
+            remote_content="schema-v2",
+            answer_anchor="fetch reveals origin/db-schema is ahead; diff confirms schema/users.sql changed",
+        ),
+        prevention_case(
+            "prevent-medium-notifications",
+            context="The notifications repo has upstream notify changes. Fetch and inspect origin/notifications-v2 vs local main to see what changed in src/notify.py before you merge.",
+            project="notifications",
+            target_branch="main",
+            remote="origin",
+            remote_branch="origin/notifications-v2",
+            local_tip="c1",
+            remote_tip="c2",
+            watched_path="src/notify.py",
+            remote_content="notify-v2",
+            answer_anchor="fetch reveals origin/notifications-v2 is ahead; diff confirms src/notify.py changed",
+        ),
     ]
     prevention_hard = [
         prevention_case(
             "prevent-hard-payments",
+            context="The payments reconciliation branch on origin has drifted significantly from your local main. Finance depends on the accuracy of src/reconcile.py — you need to know what changed remotely before any merge.",
             project="payments",
             target_branch="main",
             remote="origin",
@@ -854,6 +1033,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
         ),
         prevention_case(
             "prevent-hard-search",
+            context="A search ranking algorithm update was pushed to origin/search-ranking. Before merging it into main, you need to review the delta in src/ranking.ts without pulling any changes locally.",
             project="search",
             target_branch="main",
             remote="origin",
@@ -864,11 +1044,38 @@ def module_three_scenarios() -> list[dict[str, Any]]:
             remote_content="remote-ranking-v2",
             answer_anchor="fetch only updates remote tracking for search branch",
         ),
+        prevention_case(
+            "prevent-hard-billing-reconcile",
+            context="The billing-reconcile service has critical upstream changes. Fetch origin and carefully compare local main vs origin/billing-reconcile before merging — a stale merge here could break reconciliation.",
+            project="billing-reconcile",
+            target_branch="main",
+            remote="origin",
+            remote_branch="origin/billing-reconcile",
+            local_tip="c1",
+            remote_tip="c2",
+            watched_path="src/billing.py",
+            remote_content="billing-v2",
+            answer_anchor="fetch reveals origin/billing-reconcile is ahead; diff confirms src/billing.py changed",
+        ),
+        prevention_case(
+            "prevent-hard-infra-pipelines",
+            context="The infra-pipelines repo has CI/CD pipeline changes on origin. Fetch and compare before merging — changes to .github/workflows/deploy.yml affect production deployments.",
+            project="infra-pipelines",
+            target_branch="main",
+            remote="origin",
+            remote_branch="origin/infra-pipelines",
+            local_tip="c1",
+            remote_tip="c2",
+            watched_path=".github/workflows/deploy.yml",
+            remote_content="pipeline-v2",
+            answer_anchor="fetch reveals origin/infra-pipelines is ahead; diff confirms deploy.yml changed",
+        ),
     ]
 
     capstone_easy = [
         capstone_case(
             "capstone-easy-auth-hotfix",
+            context="The auth-service remote has new feature work that conflicts with your local timeout changes. A separate session hotfix was also committed on main. You need to land both: resolve the remote conflict with a merge tool, then cherry-pick the session fix.",
             project="auth-service",
             conflict_path="src/auth.js",
             hotfix_path="src/session.js",
@@ -884,6 +1091,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
         ),
         capstone_case(
             "capstone-easy-profile-hotfix",
+            context="A profile rebrand feature on the remote conflicts with your local copy changes. An avatar bug fix also needs to land. Your goal: resolve the remote conflict through the merge tool, then bring in only the avatar fix.",
             project="profile-ui",
             conflict_path="src/profile.tsx",
             hotfix_path="src/avatar.tsx",
@@ -897,10 +1105,43 @@ def module_three_scenarios() -> list[dict[str, Any]]:
             merge_tool="vimdiff",
             answer_anchor="fetch, resolve profile conflict, then cherry-pick avatar hotfix",
         ),
+        capstone_case(
+            "capstone-easy-config-hotfix",
+            context="config-service has a remote conflict and a separate hotfix that both need to land. Fetch the remote feature branch, configure vscode as the merge tool, resolve the conflict in src/config.py, then cherry-pick the hotfix.",
+            project="config-service",
+            conflict_path="src/config.py",
+            hotfix_path="src/feature_flags.py",
+            base_content="debug=False",
+            main_content="debug=False\nlog_level=INFO",
+            feature_content="debug=True\nlog_level=DEBUG",
+            resolution_content="debug=False\nlog_level=INFO\nverbose_errors=True",
+            resolution_token="verbose_errors=True",
+            hotfix_token="flags-hotfix-v1",
+            source_branch="origin/feature/debug-config",
+            merge_tool="vscode",
+            answer_anchor="config-service conflict resolved with vscode and hotfix cherry-picked",
+        ),
+        capstone_case(
+            "capstone-easy-navbar-hotfix",
+            context="frontend-app has a remote navbar conflict and a footer hotfix waiting. Fetch the rebrand branch, configure vimdiff, resolve the Navbar.tsx conflict, then cherry-pick the footer hotfix.",
+            project="frontend-app",
+            conflict_path="src/components/Navbar.tsx",
+            hotfix_path="src/components/Footer.tsx",
+            base_content="brand=AppName",
+            main_content="brand=MyApp",
+            feature_content="brand=BetaApp",
+            resolution_content="brand=MyApp\ntagline=Beta",
+            resolution_token="tagline=Beta",
+            hotfix_token="footer-hotfix-v1",
+            source_branch="origin/feature/navbar-rebrand",
+            merge_tool="vimdiff",
+            answer_anchor="frontend-app conflict resolved with vimdiff and footer hotfix cherry-picked",
+        ),
     ]
     capstone_medium = [
         capstone_case(
             "capstone-medium-support-hotfix",
+            context="Two teams renamed the help route differently — the conflict in src/routes.ts needs manual mergetool resolution. A ticket system hotfix also needs to land via cherry-pick after the merge is complete.",
             project="support-portal",
             conflict_path="src/routes.ts",
             hotfix_path="src/ticket.ts",
@@ -916,6 +1157,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
         ),
         capstone_case(
             "capstone-medium-policy-hotfix",
+            context="Policy configuration diverged between main and the remote feature branch. The src/policy.yml conflict needs mergetool resolution, and an audit system fix needs to be cherry-picked onto main afterward.",
             project="policy-engine",
             conflict_path="src/policy.yml",
             hotfix_path="src/audit.yml",
@@ -929,10 +1171,43 @@ def module_three_scenarios() -> list[dict[str, Any]]:
             merge_tool="vimdiff",
             answer_anchor="fetch, resolve policy conflict, then cherry-pick audit hotfix",
         ),
+        capstone_case(
+            "capstone-medium-gateway-hotfix",
+            context="api-gateway needs the resilience conflict resolved using vimdiff and an auth hotfix applied. Fetch, configure vimdiff, resolve the timeout conflict, commit, then cherry-pick the auth fix.",
+            project="api-gateway",
+            conflict_path="config/gateway.yml",
+            hotfix_path="config/auth.yml",
+            base_content="timeout: 30",
+            main_content="timeout: 60",
+            feature_content="timeout: 15",
+            resolution_content="timeout: 60\nretry_on_timeout: true",
+            resolution_token="retry_on_timeout: true",
+            hotfix_token="auth-hotfix-v1",
+            source_branch="origin/feature/gateway-resilience",
+            merge_tool="vimdiff",
+            answer_anchor="api-gateway conflict resolved with vimdiff and auth hotfix cherry-picked",
+        ),
+        capstone_case(
+            "capstone-medium-migration-hotfix",
+            context="user-service has an email column conflict and a database index hotfix. Fetch origin, configure vscode, resolve the migration conflict, commit, then cherry-pick the index hotfix.",
+            project="user-service",
+            conflict_path="db/migrations/001_users.sql",
+            hotfix_path="db/migrations/002_indexes.sql",
+            base_content="email text",
+            main_content="email text unique",
+            feature_content="email varchar(320)",
+            resolution_content="email varchar(320) unique",
+            resolution_token="varchar(320) unique",
+            hotfix_token="index-hotfix-v1",
+            source_branch="origin/feature/email-constraint",
+            merge_tool="vscode",
+            answer_anchor="user-service migration conflict resolved with vscode and index hotfix cherry-picked",
+        ),
     ]
     capstone_hard = [
         capstone_case(
             "capstone-hard-pricing-hotfix",
+            context="Regional and loyalty discount logic collided on separate branches. The src/pricing.rb conflict requires a combined resolution via mergetool. A tax calculation hotfix also needs to be selectively applied after the merge.",
             project="pricing-service",
             conflict_path="src/pricing.rb",
             hotfix_path="src/tax.rb",
@@ -948,6 +1223,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
         ),
         capstone_case(
             "capstone-hard-schema-hotfix",
+            context="Two database migrations modified the orders status column in incompatible ways. The schema/orders.sql conflict needs careful combined resolution. A shipment schema hotfix from main must also be cherry-picked once the merge is complete.",
             project="warehouse-sync",
             conflict_path="schema/orders.sql",
             hotfix_path="schema/shipments.sql",
@@ -960,6 +1236,38 @@ def module_three_scenarios() -> list[dict[str, Any]]:
             source_branch="origin/feature/order-status-required",
             merge_tool="vimdiff",
             answer_anchor="fetch, resolve schema conflict, then cherry-pick shipment hotfix",
+        ),
+        capstone_case(
+            "capstone-hard-gateway-vimdiff",
+            context="api-gateway has a critical timeout conflict and a production auth fix. Fetch, configure vimdiff carefully, resolve the gateway.yml conflict preserving resilience settings, then cherry-pick the auth hotfix.",
+            project="api-gateway",
+            conflict_path="config/gateway.yml",
+            hotfix_path="config/auth.yml",
+            base_content="timeout: 30",
+            main_content="timeout: 60",
+            feature_content="timeout: 15",
+            resolution_content="timeout: 60\nretry_on_timeout: true",
+            resolution_token="retry_on_timeout: true",
+            hotfix_token="auth-hotfix-v1",
+            source_branch="origin/feature/gateway-resilience",
+            merge_tool="vimdiff",
+            answer_anchor="api-gateway hard conflict resolved with vimdiff and auth hotfix cherry-picked",
+        ),
+        capstone_case(
+            "capstone-hard-migration-vimdiff",
+            context="user-service has a critical email column constraint conflict and an index hotfix. Fetch, configure vimdiff, resolve the migration carefully to preserve both constraints, then cherry-pick the index fix.",
+            project="user-service",
+            conflict_path="db/migrations/001_users.sql",
+            hotfix_path="db/migrations/002_indexes.sql",
+            base_content="email text",
+            main_content="email text unique",
+            feature_content="email varchar(320)",
+            resolution_content="email varchar(320) unique",
+            resolution_token="varchar(320) unique",
+            hotfix_token="index-hotfix-v1",
+            source_branch="origin/feature/email-constraint",
+            merge_tool="vimdiff",
+            answer_anchor="user-service migration hard conflict resolved with vimdiff and index hotfix cherry-picked",
         ),
     ]
 
@@ -1307,7 +1615,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                             slug="identify-conflict",
                             kind="conflict-identification",
                             signature="module3.conflict.identify.medium",
-                            cases=medium_conflicts,
+                            cases=[*medium_conflicts, easy_conflicts[0]],
                             initial_state="{{initial_state}}",
                             target_rule=conflict_target,
                             solution=["git merge {{source_branch}}"],
@@ -1325,7 +1633,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                             slug="identify-conflict",
                             kind="conflict-identification",
                             signature="module3.conflict.identify.hard",
-                            cases=hard_conflicts,
+                            cases=[*hard_conflicts, medium_conflicts[0]],
                             initial_state="{{initial_state}}",
                             target_rule=conflict_target,
                             solution=["git merge {{source_branch}}"],
@@ -1573,6 +1881,9 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                             cases=[
                                 {**easy_conflicts[0], "merge_tool": "vscode"},
                                 {**easy_conflicts[1], "merge_tool": "vimdiff"},
+                                {**easy_conflicts[2], "merge_tool": "vscode"},
+                                {**easy_conflicts[3], "merge_tool": "vimdiff"},
+                                {**easy_conflicts[4], "merge_tool": "vscode"},
                             ],
                             initial_state="{{initial_state}}",
                             target_rule=mergetool_target,
@@ -1608,6 +1919,8 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                             cases=[
                                 {**medium_conflicts[0], "merge_tool": "vscode"},
                                 {**medium_conflicts[1], "merge_tool": "vimdiff"},
+                                {**medium_conflicts[2], "merge_tool": "vscode"},
+                                {**easy_conflicts[0], "merge_tool": "vimdiff"},
                             ],
                             initial_state="{{initial_state}}",
                             target_rule=mergetool_target,
@@ -1643,6 +1956,8 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                             cases=[
                                 {**hard_conflicts[0], "merge_tool": "vscode"},
                                 {**hard_conflicts[1], "merge_tool": "vimdiff"},
+                                {**hard_conflicts[2], "merge_tool": "vscode"},
+                                {**medium_conflicts[0], "merge_tool": "vimdiff"},
                             ],
                             initial_state="{{initial_state}}",
                             target_rule=mergetool_target,
@@ -1800,7 +2115,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                             slug="cherry-no-commit",
                             kind="cherry-pick",
                             signature="module3.cherry.medium.no-commit",
-                            cases=[cherry_medium[2]],
+                            cases=[cherry_medium[2], cherry_medium[3]],
                             initial_state="{{initial_state}}",
                             target_rule=cherry_no_commit_target,
                             solution="{{solution_commands}}",
@@ -1818,9 +2133,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                             slug="cherry-pick",
                             kind="cherry-pick",
                             signature="module3.cherry.hard.commit",
-                            cases=[
-                                {**cherry_hard[0], "solution_commands": ["git cherry-pick c1"]}
-                            ],
+                            cases=[cherry_hard[0], cherry_hard[2], cherry_hard[3]],
                             initial_state="{{initial_state}}",
                             target_rule=cherry_target,
                             solution="{{solution_commands}}",
