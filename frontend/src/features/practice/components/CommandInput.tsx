@@ -70,6 +70,7 @@ export function CommandInput({
       </span>
       <input
         ref={inputRef}
+        data-command-input
         className="h-7 min-w-0 flex-1 bg-transparent font-mono text-xs text-foreground caret-primary outline-none placeholder:text-muted-foreground/35"
         value={value}
         onChange={(event) => setValue(event.target.value)}

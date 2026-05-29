@@ -283,6 +283,8 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
             difficulty_instances__is_published=True,
         ).distinct().count(),
 
+            "lesson_id": session.scenario.lesson_id,
+
         },
 
         "student_context": student_context,
