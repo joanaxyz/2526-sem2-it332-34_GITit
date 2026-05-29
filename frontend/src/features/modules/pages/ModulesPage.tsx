@@ -13,8 +13,8 @@ import { LoadingState } from '@/shared/components/LoadingState'
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <p
-      className="pl-3 text-[10px] font-bold uppercase tracking-[0.16em] text-primary/65"
-      style={{ borderLeft: '2px solid rgba(0,245,212,0.45)' }}
+      className="pl-3 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/70"
+      style={{ borderLeft: '2px solid hsl(var(--border))' }}
     >
       {children}
     </p>

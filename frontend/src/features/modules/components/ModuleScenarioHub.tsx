@@ -16,7 +16,14 @@ export function ModuleScenarioHub({
   return (
     <section className="grid gap-4">
       <div className="flex items-start gap-3">
-        <div className="grid size-10 place-items-center rounded-md border border-primary/30 bg-primary/10 text-primary">
+        <div
+          className="grid size-10 place-items-center rounded-md border"
+          style={{
+            borderColor: 'var(--module-border-rest, rgba(0,212,170,0.3))',
+            color: 'var(--module-color, hsl(var(--primary)))',
+            background: 'color-mix(in srgb, var(--module-color, hsl(var(--primary))) 10%, transparent)',
+          }}
+        >
           <Target className="size-5" />
         </div>
         <div>
