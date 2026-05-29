@@ -5,10 +5,12 @@ export type RateMetric = {
 }
 
 export type DashboardSummary = {
-  kpis: Record<'orientation_completion' | 'scr' | 'arc' | 'car' | 'hlcr' | 'rta' | 'sar' | 'review_scr', RateMetric>
+  kpis: Record<'orientation_completion' | 'scr' | 'arc' | 'car' | 'hlcr' | 'rta', RateMetric>
   module_kpis: Record<'1' | '2' | '3' | '4', {
+    scr: RateMetric
     hlcr: RateMetric
     rta: RateMetric
+    arc: RateMetric
   }>
   counts: {
     started: number
