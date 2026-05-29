@@ -14,6 +14,8 @@ class CompletionEvaluationContext:
     previous_state: dict
     next_state: dict
     executed_commands: list[str]
+    next_state_hash: str | None = None
+    expected_state_hash: str | None = None
 
 
 class ScenarioCompletionEvaluator:
@@ -36,10 +38,13 @@ class StateRuleCompletionEvaluator:
             raise ValueError("Scenario variant is missing target_rule.")
         learning_unit = getattr(context.session, "learning_unit", None)
         if getattr(learning_unit, "number", None) == 4:
-            simulator = RepositoryStateSimulator()
-            next_hash = simulator.state_hash(context.next_state)
-            target_hash = simulator.state_hash(context.session.variant.target_state)
-            matched = next_hash == target_hash
+            if context.next_state_hash is not None and context.expected_state_hash is not None:
+                matched = context.next_state_hash == context.expected_state_hash
+            else:
+                simulator = RepositoryStateSimulator()
+                next_hash = simulator.state_hash(context.next_state)
+                target_hash = simulator.state_hash(context.session.variant.target_state)
+                matched = next_hash == target_hash
             return EvaluationOutcome(
                 result_category=(
                     RESULT_TARGET_MATCHED if matched else RESULT_TARGET_NOT_YET_MATCHED

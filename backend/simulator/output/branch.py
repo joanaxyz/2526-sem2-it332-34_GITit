@@ -10,8 +10,10 @@ def format_branch(runtime, state: dict, outcome) -> str:
         return f"Deleted branch {details['deleted']} (was {target})."
 
     verbose = bool(details.get("verbose"))
+    show_all = bool(details.get("all"))
     current = runtime._head_branch(state)
     lines = []
+
     for name, target in sorted((state.get("branches") or {}).items()):
         marker = "*" if name == current else " "
         if verbose:
@@ -22,4 +24,16 @@ def format_branch(runtime, state: dict, outcome) -> str:
             lines.append(f"{marker} {name:<16} {target or '(no commits)'}{message}".rstrip())
         else:
             lines.append(f"{marker} {name}")
+
+    if show_all:
+        for name, target in sorted((state.get("remote_branches") or {}).items()):
+            if verbose:
+                message = ""
+                commit = runtime._commit_by_id(state, target)
+                if commit:
+                    message = f" {commit.get('message', '')}"
+                lines.append(f"  remotes/{name:<14} {target or '(no commits)'}{message}".rstrip())
+            else:
+                lines.append(f"  remotes/{name}")
+
     return "\n".join(lines)

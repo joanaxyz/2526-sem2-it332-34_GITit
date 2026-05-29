@@ -52,6 +52,24 @@ def test_repository_snapshot_preserves_index_and_worktree_state():
     assert snapshot["project_tree"]["draft.md"]["status"] == "untracked"
 
 
+def test_snapshot_for_command_omits_project_tree():
+    state = {
+        "commits": [
+            {"id": "c0", "message": "Base", "parents": [], "tree": {"README.md": "readme-v1"}},
+        ],
+        "branches": {"main": "c0"},
+        "head": {"type": "branch", "name": "main"},
+        "working_tree": {},
+        "staging": {},
+    }
+
+    snapshot = RepositorySnapshotService().snapshot_for_command(state)
+
+    assert snapshot["head"]["target"] == "c0"
+    assert "project_tree" not in snapshot
+    assert "visible_tree" not in snapshot
+
+
 def test_repository_snapshot_includes_conflict_details():
     state = {
         "commits": [

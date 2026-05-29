@@ -1,4 +1,4 @@
-import { AlertTriangle, ExternalLink, FilePlus, FileText, Folder, FolderOpen, Plus } from 'lucide-react'
+import { AlertTriangle, ChevronDown, ExternalLink, FilePlus, FileText, Folder, FolderOpen, Plus } from 'lucide-react'
 import type { FormEvent } from 'react'
 import { useMemo, useState } from 'react'
 
@@ -25,6 +25,8 @@ type ProjectStructurePanelProps = {
   className?: string
   selectedPath?: string | null
   createDisabled?: boolean
+  isOpen?: boolean
+  onToggle?: () => void
   onCreateFile?: (input: CreateFileInput) => Promise<unknown> | void
   onOpenFile?: (path: string) => void
 }
@@ -160,6 +162,8 @@ export function ProjectStructurePanel({
   className,
   selectedPath,
   createDisabled = false,
+  isOpen = true,
+  onToggle,
   onCreateFile,
   onOpenFile,
 }: ProjectStructurePanelProps) {
@@ -219,9 +223,15 @@ export function ProjectStructurePanel({
   }
 
   return (
-    <Card className={cn('flex min-h-[18rem] flex-col overflow-hidden shadow-none', className)}>
-      <CardHeader className="flex-row items-center justify-between gap-2 p-3">
-        <CardTitle className="text-sm">Project Files</CardTitle>
+    <Card
+      className={cn('flex flex-col overflow-hidden shadow-none', isOpen && 'min-h-[18rem]', className)}
+      style={{ borderTop: '1.5px solid rgba(0,245,212,0.42)' }}
+    >
+      <CardHeader
+        className="flex-row items-center justify-between gap-2 px-4 py-3"
+        style={{ background: 'rgba(0,245,212,0.025)' }}
+      >
+        <CardTitle className="text-sm font-bold tracking-wide text-primary">Project Files</CardTitle>
         <div className="flex items-center gap-1">
           {firstConflictPath && onOpenFile ? (
             <Button
@@ -250,9 +260,23 @@ export function ProjectStructurePanel({
               <FilePlus className="size-4" />
             </Button>
           ) : null}
+          {onToggle ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-7 rounded-sm"
+              title={isOpen ? 'Collapse Project Files' : 'Expand Project Files'}
+              aria-label={isOpen ? 'Collapse Project Files' : 'Expand Project Files'}
+              aria-expanded={isOpen}
+              onClick={onToggle}
+            >
+              <ChevronDown className={cn('size-4 transition-transform duration-200', !isOpen && 'rotate-180')} />
+            </Button>
+          ) : null}
         </div>
       </CardHeader>
-      <CardContent className="min-h-0 flex-1 p-2 pt-0">
+      {isOpen ? <CardContent className="min-h-0 flex-1 p-2 pt-0">
         <div className="h-full min-h-0 overflow-auto rounded-md border border-border/70 bg-background/35 p-1 app-scrollbar">
           {hasFiles ? (
             <div className="pb-1">
@@ -271,7 +295,7 @@ export function ProjectStructurePanel({
             <p className="px-2 py-1 text-xs text-muted-foreground">No project files yet.</p>
           )}
         </div>
-      </CardContent>
+      </CardContent> : null}
       <Modal
         open={modalOpen}
         title="Add file"

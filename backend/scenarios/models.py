@@ -201,6 +201,7 @@ class ScenarioSession(models.Model):
     rta_eligible = models.BooleanField(default=False)
     rta_success = models.BooleanField(default=False)
     changed_variant = models.BooleanField(default=False)
+    looped_variant = models.BooleanField(default=False)
     command_policy_snapshot = models.JSONField(default=dict)
     repository_state = models.JSONField(default=dict)
     counted_action_total = models.PositiveIntegerField(default=0)

@@ -98,9 +98,14 @@ class RepositoryStateSimulator:
         parsed: ParsedGitCommand,
         *,
         validate: bool = True,
+        mutate: bool = False,
     ) -> SimulatorResult:
-        next_state = self.clone_state(state)
-        self._ensure_state_shape(next_state)
+        if mutate:
+            next_state = state
+            self._ensure_state_shape(next_state)
+        else:
+            next_state = self.clone_state(state)
+            self._ensure_state_shape(next_state)
         action = parsed.subcommand
 
         handler = self.handlers.get(action)
@@ -384,24 +389,29 @@ class RepositoryStateSimulator:
         self.normalizer.normalize_commits(state)
 
 class RepositorySnapshotService:
-    def snapshot(self, state: dict) -> dict:
-        normalizer = RepositoryStateNormalizer()
-        state = normalizer.normalize(state)
+    def _head_target(self, state: dict) -> dict:
         branches = state.get("branches", {})
         head = state.get("head", {})
         head_target = (
             branches.get(head.get("name")) if head.get("type") == "branch" else head.get("target")
         )
-        visible_tree = normalizer.visible_project_tree(state)
+        return {**head, "target": head_target}
+
+    def snapshot_for_command(self, state: dict, *, already_normalized: bool = False) -> dict:
+        """Lightweight snapshot for command responses (DAG + index/worktree, no project tree)."""
+        normalizer = RepositoryStateNormalizer()
+        if not already_normalized:
+            state = normalizer.normalize(state)
+        conflicts = state.get("conflicts", [])
         return {
             "repository_initialized": state.get("repository_initialized", True),
             "commits": state.get("commits", []),
-            "branches": branches,
-            "head": {**head, "target": head_target},
+            "branches": state.get("branches", {}),
+            "head": self._head_target(state),
             "staging": state.get("staging", {}),
             "working_tree": state.get("working_tree", {}),
-            "conflicts": state.get("conflicts", []),
-            "conflict_details": self._conflict_details(normalizer, state),
+            "conflicts": conflicts,
+            "conflict_details": self._conflict_details(normalizer, state) if conflicts else {},
             "remotes": state.get("remotes", {}),
             "remote_branches": state.get("remote_branches", {}),
             "upstream_tracking": state.get("upstream_tracking", {}),
@@ -410,9 +420,17 @@ class RepositorySnapshotService:
             "replaced_commits": state.get("replaced_commits", {}),
             "reflog": state.get("reflog", []),
             "operation_metadata": state.get("operation_metadata", {}),
-            "project_tree": visible_tree,
-            "visible_tree": visible_tree,
         }
+
+    def snapshot(self, state: dict, *, already_normalized: bool = False) -> dict:
+        normalizer = RepositoryStateNormalizer()
+        if not already_normalized:
+            state = normalizer.normalize(state)
+        visible_tree = normalizer.visible_project_tree(state, assume_normalized=True)
+        payload = self.snapshot_for_command(state, already_normalized=True)
+        payload["project_tree"] = visible_tree
+        payload["visible_tree"] = visible_tree
+        return payload
 
     def _conflict_details(self, normalizer: RepositoryStateNormalizer, state: dict) -> dict:
         details: dict[str, dict] = {}

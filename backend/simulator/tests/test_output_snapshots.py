@@ -107,8 +107,8 @@ def test_log_and_graph_snapshots():
     oneline = run(state, "git log --oneline")
     graph = run(state, "git log --oneline --graph --all")
 
-    assert oneline.output == "c0 Add README"
-    assert graph.output == "* c0 Add README"
+    assert oneline.output == "c0 (main, HEAD) Add README"
+    assert graph.output == "* c0 (main, HEAD) Add README"
 
 
 def test_diff_and_staged_diff_snapshots():

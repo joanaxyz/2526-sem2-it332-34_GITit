@@ -14,6 +14,10 @@ def _normalize_database_url(url: str) -> str:
     return url
 
 
+def _clean_env_list(values: list[str]) -> list[str]:
+    return [value.strip() for value in values if value.strip()]
+
+
 env = environ.Env(
     DJANGO_DEBUG=(bool, True),
     DJANGO_ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
@@ -32,7 +36,7 @@ if (_os_database_url_before_read_env or "").startswith("jdbc:"):
 SECRET_KEY = env("DJANGO_SECRET_KEY", default="dev-only-change-me")
 DEBUG = env("DJANGO_DEBUG")
 PERFORMANCE_TIMING_ENABLED = env("PERFORMANCE_TIMING_ENABLED", default=DEBUG)
-ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS")
+ALLOWED_HOSTS = _clean_env_list(env("DJANGO_ALLOWED_HOSTS"))
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -94,6 +98,15 @@ DATABASES = {
 }
 DATABASES["default"]["CONN_MAX_AGE"] = env.int("DATABASE_CONN_MAX_AGE", default=0)
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = env.bool("DATABASE_CONN_HEALTH_CHECKS", default=False)
+if "sqlite3" in DATABASES["default"].get("ENGINE", ""):
+    from django.db.backends.signals import connection_created
+
+    def _enable_sqlite_wal(sender, connection, **kwargs):
+        if connection.vendor == "sqlite":
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA journal_mode=WAL;")
+
+    connection_created.connect(_enable_sqlite_wal, dispatch_uid="git_it.sqlite_wal")
 if "postgresql" in DATABASES["default"].get("ENGINE", ""):
     DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = env.bool(
         "DATABASE_DISABLE_SERVER_SIDE_CURSORS",
@@ -101,6 +114,7 @@ if "postgresql" in DATABASES["default"].get("ENGINE", ""):
     )
     if env.bool("DATABASE_DISABLE_PREPARED_STATEMENTS", default=True):
         DATABASES["default"].setdefault("OPTIONS", {})["prepare_threshold"] = None
+    DATABASES["default"].setdefault("OPTIONS", {})["options"] = "-c idle_in_transaction_session_timeout=5000"
 
 REDIS_URL = env("REDIS_URL", default="")
 # Refresh-token revocation is stored in the configured Django cache. The
@@ -140,7 +154,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CORS_ALLOWED_ORIGINS = env("DJANGO_CORS_ALLOWED_ORIGINS")
+CORS_ALLOWED_ORIGINS = _clean_env_list(env("DJANGO_CORS_ALLOWED_ORIGINS"))
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
 

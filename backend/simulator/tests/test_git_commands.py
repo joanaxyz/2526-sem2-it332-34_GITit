@@ -223,11 +223,7 @@ def test_parser_and_registry_support_module_three_forms(command):
 @pytest.mark.parametrize(
     "command",
     [
-        "git pull",
-        "git stash",
         "git tag v1",
-        "git branch feature",
-        "git branch -d stale",
         "git remote add origin https://example.test/repo.git",
         "git checkout main",
         "git reset HEAD README.md",
@@ -354,7 +350,7 @@ def test_engine_blocks_shell_and_unsupported_git_without_mutation():
     engine = GitCommandEngine()
 
     shell = engine.process(state, "powershell Remove-Item important.txt")
-    unsupported = engine.process(state, "git pull")
+    unsupported = engine.process(state, "git tag v1")
 
     assert shell.exit_code == 127
     assert shell.state == state

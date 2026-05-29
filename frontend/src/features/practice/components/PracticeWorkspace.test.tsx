@@ -92,8 +92,16 @@ vi.mock('@/features/practice/components/LiveDagPanel', () => ({
 }))
 
 vi.mock('@/features/practice/components/TerminalPanel', () => ({
-  TerminalPanel: ({ onCommand }: { onCommand?: (command: string) => void }) => (
-    <div>
+  TerminalPanel: ({
+    onCommand,
+    disabled,
+    runDisabled,
+  }: {
+    onCommand?: (command: string) => void
+    disabled?: boolean
+    runDisabled?: boolean
+  }) => (
+    <div data-testid="terminal-panel" data-disabled={String(Boolean(disabled))} data-run-disabled={String(Boolean(runDisabled))}>
       Terminal panel
       {onCommand ? (
         <button type="button" onClick={() => onCommand('git mergetool')}>
@@ -179,21 +187,19 @@ const baseSession: ScenarioSession = {
   completion: null,
 }
 
-function renderWorkspace(session: ScenarioSession, commandMutate = vi.fn()) {
+function renderWorkspace(session: ScenarioSession, commandMutate = vi.fn(), commandPending = false) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   vi.mocked(scenariosApi.listForModule).mockResolvedValue([])
   vi.mocked(scenariosApi.retrySession).mockResolvedValue({ ...session, id: session.id + 1, variant: { ...session.variant, label: 'Variant B' } })
   vi.mocked(useCommandSubmission).mockReturnValue({
-    isPending: false,
+    isPending: commandPending,
     mutate: commandMutate,
   } as unknown as ReturnType<typeof useCommandSubmission>)
   vi.mocked(useScenarioSession).mockReturnValue({
     query: { isLoading: false, isError: false },
     session,
     lines: [],
-    setLines: vi.fn(),
     feedback: '',
-    resetLocalSessionState: vi.fn(),
   } as unknown as ReturnType<typeof useScenarioSession>)
 
   return render(
@@ -211,6 +217,13 @@ describe('PracticeWorkspace', () => {
   afterEach(() => {
     cleanup()
     vi.clearAllMocks()
+  })
+
+  it('keeps the terminal input enabled while a command is running', () => {
+    renderWorkspace(baseSession, vi.fn(), true)
+
+    expect(screen.getByTestId('terminal-panel')).toHaveAttribute('data-disabled', 'false')
+    expect(screen.getByTestId('terminal-panel')).toHaveAttribute('data-run-disabled', 'true')
   })
 
   it('keeps the full workspace for state-based sessions', () => {

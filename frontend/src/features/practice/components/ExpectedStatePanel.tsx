@@ -17,6 +17,7 @@ export function ExpectedStatePanel({ session }: { session: ScenarioSession }) {
       snapshot={session.expected_state}
       className="flex h-full min-h-0 flex-col"
       contentClassName="h-full min-h-0 flex-1"
+      variant="violet"
     />
   )
 }

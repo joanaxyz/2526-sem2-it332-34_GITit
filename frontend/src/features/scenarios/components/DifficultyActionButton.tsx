@@ -2,6 +2,7 @@ import { ArrowRight, Lock, Play, RefreshCcw, RotateCcw, Star } from 'lucide-reac
 import type { CSSProperties } from 'react'
 
 import type { DifficultyAccess, DifficultyActionIntent } from '@/features/scenarios/types'
+import { meetsMasteryAccuracy, meetsProgressAccuracy } from '@/features/scenarios/utils/commandAccuracy'
 import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
 
@@ -12,8 +13,8 @@ function actionForDifficulty(difficulty: DifficultyAccess): DifficultyActionInte
     const progress = masteredRecordsFor(difficulty)
     const hasRequiredAttempts = progress.mastered >= progress.required
     const latestAccuracy = difficulty.latest_attempt?.accuracy_rate ?? null
-    const isAccurate = latestAccuracy !== null && latestAccuracy >= 100
-    if (isAccurate) return hasRequiredAttempts ? 'review' : 'continue'
+    if (difficulty.review_available && meetsMasteryAccuracy(latestAccuracy)) return 'review'
+    if (meetsProgressAccuracy(latestAccuracy)) return 'continue'
     return 'retry'
   }
   if (difficulty.status === 'failed' || difficulty.status === 'abandoned') return 'retry'
@@ -107,14 +108,17 @@ export function DifficultyActionButton({
 
 function MasteryProgress({ value }: { value: number | null }) {
   const progress = value ?? 0
-  const isPerfect = value !== null && value >= 100
+  const isPerfect = meetsMasteryAccuracy(value)
+  const meetsProgress = meetsProgressAccuracy(value)
   const hasValue = value !== null
 
   const color = !hasValue
     ? 'hsl(var(--muted-foreground))'
     : isPerfect
       ? 'hsl(var(--primary))'
-      : 'hsl(var(--destructive))'
+      : meetsProgress
+        ? 'hsl(var(--warning))'
+        : 'hsl(var(--destructive))'
   const label = !hasValue ? '-' : `${value}%`
 
   return (
@@ -138,7 +142,8 @@ function MasteryProgress({ value }: { value: number | null }) {
             'font-mono text-sm font-extrabold leading-none pb-px',
             !hasValue && 'text-muted-foreground',
             isPerfect && 'text-primary',
-            hasValue && !isPerfect && 'text-destructive'
+            hasValue && meetsProgress && !isPerfect && 'text-warning',
+            hasValue && !meetsProgress && 'text-destructive'
           )}
         >
           {label}

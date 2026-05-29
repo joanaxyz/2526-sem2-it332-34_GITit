@@ -13,7 +13,8 @@ export function RetryTrendCard({ summary }: { summary: DashboardSummary }) {
         </CardTitle>
         <CardDescription>Derived from completed, failed, and abandoned session logs.</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+      <CardContent>
+        <div className="app-scrollbar flex max-h-[320px] flex-col gap-3 overflow-y-auto">
         {summary.retry_trends.length ? (
           summary.retry_trends.map((trend) => {
             const pct = trend.attempts > 0
@@ -55,6 +56,7 @@ export function RetryTrendCard({ summary }: { summary: DashboardSummary }) {
         ) : (
           <p className="text-sm text-muted-foreground">No trend available.</p>
         )}
+        </div>
       </CardContent>
     </Card>
   )

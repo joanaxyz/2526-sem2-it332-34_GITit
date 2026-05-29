@@ -8,60 +8,87 @@ class SwitchCommandHandler(BaseCommandHandler):
     command = "switch"
 
     def apply(self, runtime, state: dict, intent: CommandIntent) -> CommandOutcome:
-        create = intent.first("CreateAndSwitchBranch")
-        if create:
-            name = str(create.params.get("branch") or "")
-            if not name:
-                raise SimulatorCommandError("fatal: branch name required", exit_code=128)
-            start_point = create.params.get("start_point")
-            head_commit = self._resolve_start_point(runtime, state, start_point) if start_point else runtime._head_commit(state)
-            if start_point and not head_commit:
-                raise SimulatorCommandError(f"fatal: invalid reference: {start_point}", exit_code=128)
-            state.setdefault("branches", {})[name] = head_commit
-            state["head"] = {"type": "branch", "name": name, "target": head_commit}
-            runtime._set_operation_metadata(
-                state,
-                last_switch_branch=name,
-                last_switch_created=True,
-            )
-            runtime._record_reflog(state, head_commit, f"switch: create {name}")
-            return CommandOutcome(command="switch", stdout=f"Switched to a new branch '{name}'")
+        operation = intent.operations[0]
+        if operation.name == "CreateAndSwitchBranch":
+            return self._create_and_switch(runtime, state, operation.params)
+        if operation.name == "DetachHead":
+            return self._detach(runtime, state, operation.params)
+        return self._switch(runtime, state, operation.params["name"])
 
-        move = intent.first("SwitchBranch")
-        if move is None:
-            raise SimulatorCommandError("fatal: unsupported switch operation", exit_code=129)
-        name = str(move.params.get("branch") or "")
-        if name not in state.get("branches", {}):
-            raise SimulatorCommandError(f"fatal: invalid reference: {name}", exit_code=128)
-        state["head"] = {
-            "type": "branch",
-            "name": name,
-            "target": state["branches"][name],
-        }
+    def _switch(self, runtime, state: dict, name: str) -> CommandOutcome:
+        branches = state.setdefault("branches", {})
+        if name not in branches:
+            remote_key = f"origin/{name}"
+            if remote_key in state.get("remote_branches", {}):
+                branches[name] = state["remote_branches"][remote_key]
+                state.setdefault("upstream_tracking", {})[name] = remote_key
+            else:
+                raise SimulatorCommandError(
+                    f"error: pathspec '{name}' did not match any file(s) known to git",
+                    exit_code=1,
+                )
+
+        if state.get("staging") or state.get("working_tree"):
+            raise SimulatorCommandError(
+                "error: Your local changes to the following files would be overwritten by checkout.\n"
+                "Please commit your changes or stash them before you switch branches.",
+                exit_code=1,
+            )
+
+        old_branch = runtime._head_branch(state)
+        state["head"] = {"type": "branch", "name": name}
+        target = branches.get(name)
+        runtime._record_reflog(state, target, f"switch: moving from {old_branch or 'HEAD'} to {name}")
+        runtime._set_operation_metadata(state, last_switch_branch=name, last_switched_to=name)
+        return CommandOutcome(command="switch", stdout=f"Switched to branch '{name}'")
+
+    def _create_and_switch(self, runtime, state: dict, params: dict) -> CommandOutcome:
+        name = params["name"]
+        start_point = params.get("start_point")
+        branches = state.setdefault("branches", {})
+
+        if name in branches:
+            raise SimulatorCommandError(
+                f"fatal: A branch named '{name}' already exists.",
+                exit_code=128,
+            )
+
+        if start_point:
+            target_id = self._resolve_ref(state, start_point)
+            if target_id is None:
+                raise SimulatorCommandError(
+                    f"fatal: invalid reference: {start_point}",
+                    exit_code=128,
+                )
+        else:
+            target_id = runtime._head_commit(state)
+
+        old_branch = runtime._head_branch(state)
+        branches[name] = target_id
+        state["head"] = {"type": "branch", "name": name}
+        runtime._record_reflog(state, target_id, f"switch: moving from {old_branch or 'HEAD'} to {name}")
         runtime._set_operation_metadata(
             state,
             last_switch_branch=name,
-            last_switch_created=False,
+            last_branch_created=name,
+            last_switched_to=name,
         )
-        runtime._record_reflog(state, state["branches"][name], f"switch: {name}")
-        return CommandOutcome(command="switch", stdout=f"Switched to branch '{name}'")
+        return CommandOutcome(command="switch", stdout=f"Switched to a new branch '{name}'")
 
-    def _resolve_start_point(self, runtime, state: dict, start_point: str | None) -> str | None:
-        if not start_point:
-            return runtime._head_commit(state)
-        if start_point in state.get("branches", {}):
-            return state["branches"][start_point]
-        if start_point in state.get("remote_branches", {}):
-            return state["remote_branches"][start_point]
-        if isinstance(start_point, str) and start_point.startswith("HEAD@{") and start_point.endswith("}"):
-            try:
-                index = int(start_point[6:-1])
-            except ValueError:
-                return None
-            reflog = state.get("reflog", [])
-            if 0 <= index < len(reflog):
-                return reflog[-(index + 1)].get("target")
-            return None
-        if runtime._commit_by_id(state, start_point):
-            return start_point
-        return None
+    def _detach(self, runtime, state: dict, params: dict) -> CommandOutcome:
+        target = params.get("target", "HEAD")
+        target_id = self._resolve_ref(state, target)
+        if target_id is None:
+            raise SimulatorCommandError(f"fatal: invalid reference: {target}", exit_code=128)
+        state["head"] = {"type": "detached", "target": target_id}
+        runtime._record_reflog(state, target_id, f"switch: moving to {target}")
+        runtime._set_operation_metadata(state, detached_head=True, last_detached_to=target_id)
+        short = target_id[:7] if target_id else target
+        return CommandOutcome(command="switch", stdout=f"HEAD is now at {short}")
+
+    def _resolve_ref(self, state: dict, ref: str) -> str | None:
+        if ref in state.get("branches", {}):
+            return state["branches"][ref]
+        if ref in state.get("remote_branches", {}):
+            return state["remote_branches"][ref]
+        return ref if any(c.get("id") == ref for c in state.get("commits", [])) else None

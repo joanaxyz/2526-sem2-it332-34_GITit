@@ -59,3 +59,21 @@ def test_simulated_command_engine_clones_without_system_git_or_network():
     assert result.exit_code == 0
     assert "Cloning into 'app'" in result.output
     assert "example.test" not in result.output
+
+
+def test_mutate_in_place_reuses_state_object_for_successful_command():
+    state = {
+        "repository_initialized": True,
+        "commits": [{"id": "c0", "message": "Base", "parents": []}],
+        "branches": {"main": "c0"},
+        "head": {"type": "branch", "name": "main"},
+        "working_tree": {"README.md": "untracked"},
+        "staging": {},
+        "conflicts": [],
+    }
+    state_id = id(state)
+
+    result = SimulatedGitCommandEngine().process(state, "git status", mutate_in_place=True)
+
+    assert result.processed is True
+    assert id(result.state) == state_id

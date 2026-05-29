@@ -108,6 +108,38 @@ def test_module4_completion_uses_state_match_without_required_command_history():
     assert result.result_category == RESULT_TARGET_MATCHED
 
 
+def test_module4_completion_uses_precomputed_state_hashes():
+    target_state = {
+        "repository_initialized": True,
+        "commits": [{"id": "c0", "message": "Base", "parents": []}],
+        "branches": {"main": "c0"},
+        "head": {"type": "branch", "name": "main"},
+        "working_tree": {},
+        "staging": {},
+        "conflicts": [],
+    }
+    state_hash = RepositoryStateSimulator().state_hash(target_state)
+    context = CompletionEvaluationContext(
+        session=SimpleNamespace(
+            learning_unit=SimpleNamespace(number=4),
+            variant=SimpleNamespace(
+                target_rule={"required_commands": ["git show"]},
+                target_state=target_state,
+                initial_state={"repository_initialized": False},
+            ),
+        ),
+        previous_state={"repository_initialized": False},
+        next_state=target_state,
+        executed_commands=["git status"],
+        next_state_hash=state_hash,
+        expected_state_hash=state_hash,
+    )
+
+    result = StateRuleCompletionEvaluator().evaluate(context)
+
+    assert result.result_category == RESULT_TARGET_MATCHED
+
+
 def test_non_module4_completion_still_enforces_required_commands():
     state = {
         "repository_initialized": True,

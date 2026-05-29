@@ -14,6 +14,7 @@ from simulator.commands.ls_files import LsFilesCommandHandler
 from simulator.commands.merge import MergeCommandHandler
 from simulator.commands.mergetool import MergetoolCommandHandler
 from simulator.commands.merge_base import MergeBaseCommandHandler
+from simulator.commands.pull import PullCommandHandler
 from simulator.commands.push import PushCommandHandler
 from simulator.commands.reflog import ReflogCommandHandler
 from simulator.commands.rebase import RebaseCommandHandler
@@ -24,6 +25,7 @@ from simulator.commands.rm import RmCommandHandler
 from simulator.commands.rev_list import RevListCommandHandler
 from simulator.commands.revert import RevertCommandHandler
 from simulator.commands.show import ShowCommandHandler
+from simulator.commands.stash import StashCommandHandler
 from simulator.commands.status import StatusCommandHandler
 from simulator.commands.switch import SwitchCommandHandler
 
@@ -53,11 +55,13 @@ def command_handlers() -> dict:
         CherryPickCommandHandler(),
         ResetCommandHandler(),
         RevertCommandHandler(),
-        PushCommandHandler(),
         RebaseCommandHandler(),
         MergeBaseCommandHandler(),
         RevListCommandHandler(),
         SwitchCommandHandler(),
+        StashCommandHandler(),
+        PushCommandHandler(),
+        PullCommandHandler(),
     ]
     return {handler.command: handler for handler in handlers}
 

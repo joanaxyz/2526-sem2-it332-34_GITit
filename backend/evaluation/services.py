@@ -17,9 +17,26 @@ class EvaluationOutcome:
     summary: str = ""
 
 
+def _canonical_form(command: str) -> str:
+    """Return the canonical normalized form of a command for comparison.
+
+    git checkout -b <branch> [<start>] is semantically identical to
+    git switch -c <branch> [<start>]; normalize both to the switch form so
+    command_matches() accepts either spelling.
+    """
+    normalized = normalize_command(command).lower()
+    # "git checkout -b <branch>" → "git switch -c <branch>"
+    parts = normalized.split()
+    if len(parts) >= 3 and parts[1] == "checkout" and parts[2] == "-b":
+        parts[1] = "switch"
+        parts[2] = "-c"
+        return " ".join(parts)
+    return normalized
+
+
 def command_matches(executed: str, required: str) -> bool:
-    executed = normalize_command(executed).lower()
-    required = normalize_command(required).lower()
+    executed = _canonical_form(executed)
+    required = _canonical_form(required)
     return executed == required or executed.startswith(f"{required} ")
 
 
@@ -104,6 +121,10 @@ class StateBasedEvaluator:
             rules.append({"type": "remote_exists", "remote": name})
         for name in target_rule.get("remote_branch_exists", []):
             rules.append({"type": "remote_branch_exists", "remote_branch": name})
+        for name in target_rule.get("remote_branch_absent", []):
+            rules.append({"type": "remote_branch_absent", "remote_branch": name})
+        for branch in target_rule.get("upstream_tracking_set", []):
+            rules.append({"type": "upstream_tracking_set", "branch": branch})
         for name, url in target_rule.get("remote_url_matches", {}).items():
             rules.append({"type": "remote_url_matches", "remote": name, "url": url})
         for branch, upstream in target_rule.get("upstream_tracking", {}).items():
@@ -288,6 +309,14 @@ class StateBasedEvaluator:
             name = rule.get("remote_branch")
             passed = name in state.get("remote_branches", {})
             return passed, f"Remote branch {name!r} {'exists' if passed else 'does not exist'}."
+        if rule_type == "remote_branch_absent":
+            name = rule.get("remote_branch")
+            passed = name not in state.get("remote_branches", {})
+            return passed, f"Remote branch {name!r} {'is absent' if passed else 'still exists'}."
+        if rule_type == "upstream_tracking_set":
+            branch = rule.get("branch")
+            passed = branch in state.get("upstream_tracking", {})
+            return passed, f"Upstream for {branch!r} is {'set' if passed else 'not set'}."
         if rule_type == "remote_branch_points_to":
             name = rule.get("remote_branch")
             target = self._resolve_expected(

@@ -6,6 +6,7 @@ import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import { ScenarioSkillFocusCard } from '@/features/scenarios/components/ScenarioSkillFocusCard'
 import { SkillFocusPreviewModal } from '@/features/scenarios/components/SkillFocusPreviewModal'
 import type { DifficultyAccess, DifficultyActionIntent, ScenarioSkillFocus } from '@/features/scenarios/types'
+import { meetsProgressAccuracy } from '@/features/scenarios/utils/commandAccuracy'
 import { nextAvailableDifficultyAfter } from '@/features/scenarios/utils/difficulty'
 import { invalidateScenarioProgressQueries, syncScenarioSessionInCache } from '@/features/scenarios/utils/scenarioCache'
 import { queryKeys } from '@/shared/api/queryKeys'
@@ -121,11 +122,11 @@ export function ScenarioList(props: ScenarioListProps) {
     }
     if (action === 'continue') {
       const nextDifficulty = nextDifficultyAfter(scenario, difficulty)
-      if (nextDifficulty && hasRequiredAccurateAttempts(difficulty)) {
+      if (nextDifficulty && hasRequiredProgressAttempts(difficulty)) {
         startMutation.mutate(nextDifficulty)
         return
       }
-      if (difficulty.review_available && hasRequiredAccurateAttempts(difficulty)) {
+      if (difficulty.review_available && hasRequiredProgressAttempts(difficulty)) {
         reviewMutation.mutate(difficulty)
         return
       }
@@ -214,12 +215,12 @@ export function ScenarioList(props: ScenarioListProps) {
   )
 }
 
-function hasRequiredAccurateAttempts(difficulty: DifficultyAccess) {
+function hasRequiredProgressAttempts(difficulty: DifficultyAccess) {
   const latestAccuracy = difficulty.latest_attempt?.accuracy_rate ?? null
   const progress = difficulty.successful_attempts
     ? { mastered: difficulty.successful_attempts.count, required: difficulty.successful_attempts.required }
     : difficulty.mastered_records ?? difficulty.mastery_progress
-  return latestAccuracy !== null && latestAccuracy >= 100 && progress.mastered >= progress.required
+  return meetsProgressAccuracy(latestAccuracy) && progress.mastered >= progress.required
 }
 
 function nextDifficultyAfter(scenario: ScenarioSkillFocus, difficulty: DifficultyAccess) {
