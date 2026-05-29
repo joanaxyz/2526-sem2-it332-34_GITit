@@ -1,16 +1,10 @@
 from __future__ import annotations
 
-import json
-import time
-import uuid
-from pathlib import Path
 from typing import Any
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from django.db import connection
 from django.db import transaction
-from django.db.utils import OperationalError
 
 from common.constants import (
     COMPLETION_STATE_BASED,
@@ -54,22 +48,6 @@ MODULE_FOUR_LESSONS = [
 ]
 
 
-def _debug_log(*, run_id: str, hypothesis_id: str, location: str, message: str, data: dict[str, Any]) -> None:
-    log_path = Path(__file__).resolve().parents[4] / "debug-f8332c.log"
-    payload = {
-        "sessionId": "f8332c",
-        "id": f"log_{int(time.time() * 1000)}_{uuid.uuid4().hex[:8]}",
-        "timestamp": int(time.time() * 1000),
-        "runId": run_id,
-        "hypothesisId": hypothesis_id,
-        "location": location,
-        "message": message,
-        "data": data,
-    }
-    with log_path.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(payload, ensure_ascii=True) + "\n")
-
-
 def template(
     *,
     slug: str,
@@ -107,6 +85,7 @@ def difficulty_spec(
     narrative: str,
     task: str,
     templates: list[dict[str, Any]],
+    required_attempts: int,
 ) -> dict[str, Any]:
     return {
         "policy": policy,
@@ -114,6 +93,7 @@ def difficulty_spec(
         "task": task,
         "templates": templates,
         "completion_type": COMPLETION_STATE_BASED,
+        "required_successful_attempts": required_attempts,
     }
 
 
@@ -260,7 +240,13 @@ def module_four_scenarios() -> list[dict[str, Any]]:
     rebase_medium = [rebase_case(f"4-3-m{i}", suffix=f"bm{i}", interactive=True) for i in range(1, 6)]
     rebase_hard = [rebase_case(f"4-3-h{i}", suffix=f"bh{i}", interactive=(i % 2 == 0)) for i in range(1, 6)]
 
-    hard_reset_target = {}
+    hard_reset_target = {
+        "skip_required_commands": True,
+        "branch_exists": ["{{recovery_branch}}"],
+        "branch_points_to": {"{{recovery_branch}}": "{{recovery_target}}"},
+        "staging_empty": True,
+        "working_tree_clean": True,
+    }
     revert_target = {
         "head_branch": "main",
         "working_tree_clean": True,
@@ -273,7 +259,24 @@ def module_four_scenarios() -> list[dict[str, Any]]:
             {"type": "push_moved_remote_to_local_tip", "branch": "main", "remote_branch": "origin/main"},
         ],
     }
-    rebase_target = {}
+    rebase_target = {
+        "skip_required_commands": True,
+        "head_branch": "feature/recovery",
+        "staging_empty": True,
+        "working_tree_clean": True,
+        "conflict_free": True,
+        "rules": [
+            {
+                "type": "branch_moved_back_from_initial",
+                "branch": "feature/recovery",
+            },
+            {
+                "type": "min_commits_on_branch",
+                "branch": "feature/recovery",
+                "minimum": 2,
+            },
+        ],
+    }
 
     return [
         scenario_dict(
@@ -299,6 +302,7 @@ def module_four_scenarios() -> list[dict[str, Any]]:
                         "You are a junior engineer handling a low-pressure rollback incident after a shallow mistaken reset."
                     ),
                     task="Find the most recent lost tip and restore it to the requested recovery branch.",
+                    required_attempts=2,
                     templates=[
                         template(
                             slug="recover-hard-reset",
@@ -308,7 +312,6 @@ def module_four_scenarios() -> list[dict[str, Any]]:
                             target_rule=hard_reset_target,
                             solution=[
                                 "git reflog",
-                                "git reset --hard HEAD",
                                 "git show {{recovery_target}}",
                                 "git switch -c {{recovery_branch}} {{recovery_target}}",
                             ],
@@ -322,6 +325,7 @@ def module_four_scenarios() -> list[dict[str, Any]]:
                         "You are the sprint lead responding to a deeper mistaken reset with limited guidance from teammates."
                     ),
                     task="Trace the correct history entry and restore the branch to the requested recovery point.",
+                    required_attempts=1,
                     templates=[
                         template(
                             slug="recover-hard-reset",
@@ -331,7 +335,6 @@ def module_four_scenarios() -> list[dict[str, Any]]:
                             target_rule=hard_reset_target,
                             solution=[
                                 "git reflog",
-                                "git reset --hard HEAD",
                                 "git show {{recovery_target}}",
                                 "git switch -c {{recovery_branch}} {{recovery_target}}",
                             ],
@@ -345,6 +348,7 @@ def module_four_scenarios() -> list[dict[str, Any]]:
                         "You are the incident commander recovering critical work from a noisy reset trail under release pressure."
                     ),
                     task="Disambiguate noisy history evidence and recover exactly the requested lost tip branch.",
+                    required_attempts=1,
                     templates=[
                         template(
                             slug="recover-hard-reset",
@@ -354,7 +358,6 @@ def module_four_scenarios() -> list[dict[str, Any]]:
                             target_rule=hard_reset_target,
                             solution=[
                                 "git reflog",
-                                "git reset --hard HEAD",
                                 "git show {{recovery_target}}",
                                 "git switch -c {{recovery_branch}} {{recovery_target}}",
                             ],
@@ -386,6 +389,7 @@ def module_four_scenarios() -> list[dict[str, Any]]:
                         "You are a developer handling a straightforward rollback request right after a bad push."
                     ),
                     task="Append the rollback commit for the target change and ensure remote main is updated.",
+                    required_attempts=2,
                     templates=[
                         template(
                             slug="revert-pushed",
@@ -404,6 +408,7 @@ def module_four_scenarios() -> list[dict[str, Any]]:
                         "You are supporting QA during regression triage, and the bad change is buried in published history."
                     ),
                     task="Identify the correct published change to roll back and synchronize the shared branch.",
+                    required_attempts=1,
                     templates=[
                         template(
                             slug="revert-pushed",
@@ -422,6 +427,7 @@ def module_four_scenarios() -> list[dict[str, Any]]:
                         "You are the release owner during a high-stakes deploy window with strict rollback constraints."
                     ),
                     task="Execute the required rollback while preserving shared history integrity across local and remote.",
+                    required_attempts=1,
                     templates=[
                         template(
                             slug="revert-pushed",
@@ -458,6 +464,7 @@ def module_four_scenarios() -> list[dict[str, Any]]:
                         "You are finishing a normal sprint task where your feature branch simply drifted from main."
                     ),
                     task="Recover the branch onto the current main line and confirm the repository is clean.",
+                    required_attempts=2,
                     templates=[
                         template(
                             slug="rebase-recovery",
@@ -466,7 +473,6 @@ def module_four_scenarios() -> list[dict[str, Any]]:
                             initial_state="{{initial_state}}",
                             target_rule=rebase_target,
                             solution=[
-                                "git status",
                                 "git rebase {{rebase_target}}",
                                 "git log --oneline --graph --all",
                             ],
@@ -480,6 +486,7 @@ def module_four_scenarios() -> list[dict[str, Any]]:
                         "You are coordinating with reviewers who need a refined commit sequence before acceptance."
                     ),
                     task="Run an interactive recovery flow and verify no incomplete rebase state remains.",
+                    required_attempts=1,
                     templates=[
                         template(
                             slug="rebase-recovery",
@@ -488,7 +495,6 @@ def module_four_scenarios() -> list[dict[str, Any]]:
                             initial_state="{{initial_state}}",
                             target_rule=rebase_target,
                             solution=[
-                                "git status",
                                 "git merge-base main feature/recovery",
                                 "git rebase -i {{rebase_target}}",
                                 "git rev-list --count main..feature/recovery",
@@ -504,6 +510,7 @@ def module_four_scenarios() -> list[dict[str, Any]]:
                         "You are driving final release cleanup, and branch integrity checks are stricter than usual."
                     ),
                     task="Complete the full recovery sequence and validate branch integrity with all required checks.",
+                    required_attempts=1,
                     templates=[
                         template(
                             slug="rebase-recovery",
@@ -512,7 +519,6 @@ def module_four_scenarios() -> list[dict[str, Any]]:
                             initial_state="{{initial_state}}",
                             target_rule=rebase_target,
                             solution=[
-                                "git status",
                                 "git rebase {{rebase_target}}",
                                 "git merge-base main feature/recovery",
                                 "git rev-list --count main..feature/recovery",
@@ -537,17 +543,6 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
-        # region agent log
-        _debug_log(
-            run_id="pre-fix",
-            hypothesis_id="H1",
-            location="seed_module4_scenarios.py:handle",
-            message="seed command entered",
-            data={"options_keys": sorted(options.keys()), "reset": bool(options.get("reset"))},
-        )
-        # endregion
-        self._ensure_lesson_kind_default()
-
         if options["reset"]:
             self._reset_module_four(confirm=options["confirm"])
 
@@ -618,7 +613,7 @@ class Command(BaseCommand):
                     difficulty=difficulty,
                     defaults={
                         "completion_type": dspec["completion_type"],
-                        "required_successful_attempts": 2 if difficulty == DIFFICULTY_EASY else 1,
+                        "required_successful_attempts": dspec["required_successful_attempts"],
                         "narrative": dspec["narrative"],
                         "task_prompt": dspec["task"],
                         "is_published": True,
@@ -704,107 +699,6 @@ class Command(BaseCommand):
         OrientationProgress.objects.filter(lesson__unit=unit).delete()
         unit.lessons.all().delete()
         unit.delete()
-
-    def _ensure_lesson_kind_default(self) -> None:
-        model_field_names = {field.name for field in Lesson._meta.get_fields() if hasattr(field, "name")}
-        # region agent log
-        _debug_log(
-            run_id="pre-fix",
-            hypothesis_id="H2",
-            location="seed_module4_scenarios.py:_ensure_lesson_kind_default",
-            message="entered ensure_lesson_kind_default",
-            data={"has_model_kind": "kind" in model_field_names, "db_vendor": connection.vendor},
-        )
-        # endregion
-        if "kind" in model_field_names:
-            return
-        if connection.vendor != "postgresql":
-            return
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT 1
-                FROM information_schema.columns
-                WHERE table_schema = current_schema()
-                  AND table_name = 'learning_lesson'
-                  AND column_name = 'kind'
-                """
-            )
-            if cursor.fetchone() is None:
-                # region agent log
-                _debug_log(
-                    run_id="pre-fix",
-                    hypothesis_id="H3",
-                    location="seed_module4_scenarios.py:_ensure_lesson_kind_default",
-                    message="kind column absent in physical table",
-                    data={"table": "learning_lesson"},
-                )
-                # endregion
-                return
-            cursor.execute("SHOW statement_timeout")
-            timeout_value = cursor.fetchone()
-            # region agent log
-            _debug_log(
-                run_id="pre-fix",
-                hypothesis_id="H4",
-                location="seed_module4_scenarios.py:_ensure_lesson_kind_default",
-                message="about to alter lesson.kind default",
-                data={"statement_timeout": timeout_value[0] if timeout_value else None},
-            )
-            # endregion
-            cursor.execute(
-                """
-                SELECT column_default
-                FROM information_schema.columns
-                WHERE table_schema = current_schema()
-                  AND table_name = 'learning_lesson'
-                  AND column_name = 'kind'
-                """
-            )
-            default_row = cursor.fetchone()
-            current_default = default_row[0] if default_row else None
-            # region agent log
-            _debug_log(
-                run_id="post-fix",
-                hypothesis_id="H6",
-                location="seed_module4_scenarios.py:_ensure_lesson_kind_default",
-                message="observed current lesson.kind default",
-                data={"current_default": current_default},
-            )
-            # endregion
-            if current_default and "scenario" in current_default:
-                # region agent log
-                _debug_log(
-                    run_id="post-fix",
-                    hypothesis_id="H6",
-                    location="seed_module4_scenarios.py:_ensure_lesson_kind_default",
-                    message="skipping alter; default already scenario",
-                    data={"current_default": current_default},
-                )
-                # endregion
-                return
-            try:
-                cursor.execute("ALTER TABLE learning_lesson ALTER COLUMN kind SET DEFAULT 'scenario'")
-            except OperationalError as exc:
-                # region agent log
-                _debug_log(
-                    run_id="post-fix",
-                    hypothesis_id="H7",
-                    location="seed_module4_scenarios.py:_ensure_lesson_kind_default",
-                    message="alter default failed; continuing seed",
-                    data={"error": str(exc)},
-                )
-                # endregion
-                return
-            # region agent log
-            _debug_log(
-                run_id="pre-fix",
-                hypothesis_id="H5",
-                location="seed_module4_scenarios.py:_ensure_lesson_kind_default",
-                message="alter default succeeded",
-                data={"table": "learning_lesson", "column": "kind", "default": "scenario"},
-            )
-            # endregion
 
     def _anchor_html(self, title: str, subtitle: str) -> str:
         return f"""

@@ -103,8 +103,8 @@ MODULE_TWO_SCENARIO_ANCHORS = [
     (
         2,
         "branch-naming-and-housekeeping",
-        "Branch Naming Conventions and Housekeeping",
-        "Keep the branch list tidy by safely deleting merged branches and force-removing abandoned work.",
+        "Branch Naming Conventions",
+        "Apply team branch naming conventions correctly and recognize names that violate them.",
     ),
     (
         3,
@@ -302,6 +302,18 @@ def student_context_template(kind: str) -> dict[str, Any]:
                 {"label": "Branch", "value": "{{branch_name}}"},
                 {"label": "Remote", "value": "origin"},
                 {"label": "Required outcome", "value": "{{action_required}}"},
+            ],
+        },
+        "branch-naming": {
+            "story": (
+                "You are working on {{project}}. "
+                "The team follows a specific branch naming convention — "
+                "branches that do not conform are rejected by the CI pipeline or flagged in code review."
+            ),
+            "required_details": [
+                {"label": "Project", "value": "{{project}}"},
+                {"label": "Convention", "value": "{{convention}}"},
+                {"label": "Required branch", "value": "{{required_branch}}"},
             ],
         },
     }
@@ -640,215 +652,271 @@ def branch_create_scenario() -> dict[str, Any]:
     )
 
 
-# ── Lesson 2.2: Branch Naming and Housekeeping ───────────────────────────────
+# ── Lesson 2.2: Branch Naming Conventions ────────────────────────────────────
 
-def _bm_easy_cases() -> list[dict[str, Any]]:
-    """Three Easy branch-delete cases: already on main, delete a single merged branch."""
-    entries = [
-        ("v22e-auth",    "feature/auth",           "ticketing-app",   "feature/auth has been fully merged into main"),
-        ("v22e-fix",     "bugfix/login-redirect",   "auth-service",    "bugfix/login-redirect has been fully merged into main"),
-        ("v22e-release", "release/v1",              "order-processor", "release/v1 has been fully merged into main"),
-    ]
+def _bn_easy_cases() -> list[dict[str, Any]]:
+    """Five Easy branch-naming cases: convention + exact required branch name both given in brief."""
     return [
         {
-            "case_id": case_id,
-            "old_branch": old_branch,
-            "project": project,
-            "manage_action": manage_action,
-            "answer_anchor": f"deleted {old_branch} (merged ancestor of main); HEAD remained on main",
-        }
-        for case_id, old_branch, project, manage_action in entries
-    ]
-
-
-def _bm_medium_cases() -> list[dict[str, Any]]:
-    """Three Medium branch-delete cases: HEAD is on the merged branch — must switch away first."""
-    return [
+            "case_id": "bn-easy-corp-jira",
+            "project": "ticketing-app",
+            "convention": "PROJ-{ticket-number}/{kebab-case-description}",
+            "required_branch": "PROJ-418/password-reset",
+            "answer_anchor": "created PROJ-418/password-reset; HEAD on new branch (Jira convention, exact name given)",
+        },
         {
-            "case_id": "v22m-on-feature",
-            "old_branch": "feature/payments",
+            "case_id": "bn-easy-startup-feat",
             "project": "e-commerce",
-            "manage_action": "You are on feature/payments which has been merged into main; clean up and return to main",
-            "initial_state": repo_with_head(
-                commits=[
-                    commit("c1", "Payment feature work", {"README.md": "v1", "src/payments.py": "pay-v1"}),
-                    commit("c2", "Integrate into main", {"README.md": "v1", "src/payments.py": "pay-v1", "src/app.py": "app-v1"}, ["c1"]),
-                ],
-                head="c1",
-                branch="feature/payments",
-                extra={
-                    "branches": {"feature/payments": "c1", "main": "c2"},
-                },
-            ),
-            "answer_anchor": "switched to main then deleted feature/payments (was on merged branch)",
+            "convention": "feature/<description> or bugfix/<description> or hotfix/<description> or chore/<description>",
+            "required_branch": "feature/shopping-cart",
+            "answer_anchor": "created feature/shopping-cart; HEAD on new branch (type/description convention)",
         },
         {
-            "case_id": "v22m-on-hotfix",
-            "old_branch": "hotfix/session",
-            "project": "user-service",
-            "manage_action": "You are on hotfix/session which has been merged into main; clean up and return to main",
-            "initial_state": repo_with_head(
-                commits=[
-                    commit("c1", "Session fix applied", {"README.md": "v1", "src/session.py": "ses-v1"}),
-                    commit("c2", "Integrate hotfix into main", {"README.md": "v1", "src/session.py": "ses-v1", "src/auth.py": "auth-v1"}, ["c1"]),
-                ],
-                head="c1",
-                branch="hotfix/session",
-                extra={
-                    "branches": {"hotfix/session": "c1", "main": "c2"},
-                },
-            ),
-            "answer_anchor": "switched to main then deleted hotfix/session (was on merged branch)",
+            "case_id": "bn-easy-oss-user",
+            "project": "oss-toolkit",
+            "convention": "<github-username>/<kebab-case-description>",
+            "required_branch": "jdelacruz/fix-parser-edge-case",
+            "answer_anchor": "created jdelacruz/fix-parser-edge-case; HEAD on new branch (username-prefix convention)",
         },
         {
-            "case_id": "v22m-on-release",
-            "old_branch": "release/v2",
-            "project": "payment-gateway",
-            "manage_action": "You are on release/v2 which has been merged into main; clean up and return to main",
-            "initial_state": repo_with_head(
-                commits=[
-                    commit("c1", "Release v2 preparation", {"README.md": "v1", "src/gateway.py": "gw-v1"}),
-                    commit("c2", "Integrate release into main", {"README.md": "v1", "src/gateway.py": "gw-v1", "CHANGELOG.md": "cl-v1"}, ["c1"]),
-                ],
-                head="c1",
-                branch="release/v2",
-                extra={
-                    "branches": {"release/v2": "c1", "main": "c2"},
-                },
-            ),
-            "answer_anchor": "switched to main then deleted release/v2 (was on merged branch)",
+            "case_id": "bn-easy-cap-initials",
+            "project": "library-system",
+            "convention": "feature/<member-initials>/<short-description>",
+            "required_branch": "feature/jm/database-models",
+            "answer_anchor": "created feature/jm/database-models; HEAD on new branch (initials-scoped convention)",
+        },
+        {
+            "case_id": "bn-easy-free-client",
+            "project": "client-portal",
+            "convention": "client/{ticket-id}-{description}",
+            "required_branch": "client/55-contact-form-redesign",
+            "answer_anchor": "created client/55-contact-form-redesign; HEAD on new branch (client-ticket convention)",
         },
     ]
 
 
-def _bm_hard_cases() -> list[dict[str, Any]]:
-    """Three Hard branch-delete cases: unmerged diverged branch — safe delete fails, force delete required."""
-    entries = [
-        ("v22h-unmerged-feat",   "feature/abandoned",  "data-pipeline",    "feature/abandoned was started but never merged into main — remove it from the branch list"),
-        ("v22h-stale-wip",       "wip/prototype",       "ide-platform",     "wip/prototype is an abandoned prototype that diverged from main — clean it up"),
-        ("v22h-old-experiment",  "experiment/cache",    "report-generator", "experiment/cache was an experiment that diverged from main and was never integrated"),
-    ]
+def _bn_medium_cases() -> list[dict[str, Any]]:
+    """Four Medium branch-naming cases: convention stated + task description given; student constructs slug."""
     return [
         {
-            "case_id": case_id,
-            "old_branch": old_branch,
-            "project": project,
-            "manage_action": manage_action,
-            "answer_anchor": f"force-deleted {old_branch} (diverged, unmerged — only -D works)",
-        }
-        for case_id, old_branch, project, manage_action in entries
+            "case_id": "bn-med-corp-notif",
+            "project": "ticketing-app",
+            "convention": "PROJ-{ticket-number}/{kebab-case-description}",
+            "required_branch": "PROJ-512/email-notification",
+            "answer_anchor": "created PROJ-512/email-notification; student derived slug from task description",
+        },
+        {
+            "case_id": "bn-med-startup-bugfix",
+            "project": "retail-app",
+            "convention": "feature/<desc> or bugfix/<desc> or hotfix/<desc> or chore/<desc>",
+            "required_branch": "bugfix/login-redirect",
+            "answer_anchor": "created bugfix/login-redirect; student chose correct type prefix for a bug fix",
+        },
+        {
+            "case_id": "bn-med-devops-scope",
+            "project": "api-gateway",
+            "convention": "<type>/<scope>/<description> — type: feat, fix, chore, infra",
+            "required_branch": "infra/api-gateway/log-rotation",
+            "answer_anchor": "created infra/api-gateway/log-rotation; student applied three-part scoped convention",
+        },
+        {
+            "case_id": "bn-med-oss-infer",
+            "project": "oss-toolkit",
+            "convention": "inferred from existing branches: fix/<desc> or feat/<desc>",
+            "required_branch": "fix/tokenizer-crash",
+            "answer_anchor": "created fix/tokenizer-crash; student inferred convention from git branch -a output",
+        },
     ]
 
 
-def branch_delete_scenario() -> dict[str, Any]:
-    # Easy: HEAD on main; old_branch is an ancestor (merged) — safe delete succeeds
+def _bn_hard_cases() -> list[dict[str, Any]]:
+    """Four Hard branch-naming cases: wrong branch already exists; student identifies violation and corrects it."""
+    return [
+        {
+            "case_id": "bn-hard-oss-rename",
+            "project": "oss-toolkit",
+            "convention": "fix/<kebab-case-description> or feat/<kebab-case-description>",
+            "required_branch": "fix/renderer-memory-leak",
+            "wrong_branch": "myFix",
+            "initial_state": repo_with_head(
+                commits=[
+                    commit("c1", "Bootstrap OSS project", {"README.md": "v1", "src/renderer.py": "rend-v1"}),
+                ],
+                head="c1",
+                branch="myFix",
+                extra={"branches": {"myFix": "c1", "main": "c1"}},
+            ),
+            "answer_anchor": "deleted myFix (CamelCase + no type prefix), created fix/renderer-memory-leak; HEAD on correct branch",
+        },
+        {
+            "case_id": "bn-hard-corp-rename",
+            "project": "ticketing-app",
+            "convention": "PROJ-{ticket-number}/{kebab-case-description}",
+            "required_branch": "PROJ-301/auth-module-update",
+            "wrong_branch": "auth-update",
+            "initial_state": repo_with_head(
+                commits=[
+                    commit("c1", "Bootstrap project", {"README.md": "v1", "src/auth.py": "auth-v1"}),
+                ],
+                head="c1",
+                branch="main",
+                extra={"branches": {"main": "c1", "auth-update": "c1"}},
+            ),
+            "answer_anchor": "deleted auth-update (missing PROJ ticket prefix), created PROJ-301/auth-module-update from main",
+        },
+        {
+            "case_id": "bn-hard-startup-prefix",
+            "project": "e-commerce",
+            "convention": "feature/<desc> or bugfix/<desc> or hotfix/<desc> or chore/<desc> — no other prefixes",
+            "required_branch": "bugfix/cart-total",
+            "wrong_branch": "fix/cart-total",
+            "initial_state": repo_with_head(
+                commits=[
+                    commit("c1", "Bootstrap e-commerce app", {"README.md": "v1", "src/cart.py": "cart-v1"}),
+                ],
+                head="c1",
+                branch="main",
+                extra={"branches": {"main": "c1", "fix/cart-total": "c1"}},
+            ),
+            "answer_anchor": "deleted fix/cart-total (invalid prefix), created bugfix/cart-total; HEAD on correct branch",
+        },
+        {
+            "case_id": "bn-hard-qa-camel",
+            "project": "qa-test-suite",
+            "convention": "test/<kebab-case-description>",
+            "required_branch": "test/login-flow",
+            "wrong_branch": "test/LoginFlow",
+            "initial_state": repo_with_head(
+                commits=[
+                    commit("c1", "Bootstrap QA suite", {"README.md": "v1", "tests/login.py": "test-v1"}),
+                ],
+                head="c1",
+                branch="main",
+                extra={"branches": {"main": "c1", "test/LoginFlow": "c1"}},
+            ),
+            "answer_anchor": "deleted test/LoginFlow (CamelCase violates kebab-case requirement), created test/login-flow",
+        },
+    ]
+
+
+def branch_naming_scenario() -> dict[str, Any]:
+    # Easy: single-commit main; student creates the exactly-named branch from HEAD
     easy_state = repo_with_head(
         commits=[
-            commit("c1", "Branch work completed", {"README.md": "v1", "src/feature.py": "feat-v1"}),
-            commit("c2", "Advance main past merged branch", {"README.md": "v1", "src/feature.py": "feat-v1", "src/app.py": "app-v1"}, ["c1"]),
+            commit("c1", "Initial project snapshot", {"README.md": "v1", "src/app.py": "app-v1"}),
         ],
-        head="c2",
+        head="c1",
         branch="main",
-        extra={"branches": {"main": "c2", "{{old_branch}}": "c1"}},
     )
 
     easy_bp = bp(
-        slug="branch-delete-easy",
-        kind="branch-manage",
-        signature="module2.branch-delete.easy",
-        subtemplate="delete-merged-at-head",
-        cases=_bm_easy_cases(),
+        slug="branch-naming-easy",
+        kind="branch-naming",
+        signature="module2.branch-naming.easy",
+        subtemplate="create-named-branch",
+        cases=_bn_easy_cases(),
         initial_state=easy_state,
         target_rule={
             "skip_required_commands": True,
-            "branch_absent": ["{{old_branch}}"],
+            "head_branch": "{{required_branch}}",
+            "branch_exists": ["{{required_branch}}"],
+            "branch_points_to": {"{{required_branch}}": "c1"},
         },
-        solution=["git branch -d {{old_branch}}"],
-        label="Delete merged branch {{old_branch}}",
-        slug_template="branch-delete-easy-{{case_id}}",
+        solution=["git switch -c {{required_branch}}"],
+        label="Create {{required_branch}} following the team convention",
+        slug_template="branch-naming-easy-{{case_id}}",
+    )
+
+    # Medium: single-commit main; student constructs the slug from convention + task description
+    medium_state = repo_with_head(
+        commits=[
+            commit("c1", "Initial project snapshot", {"README.md": "v1", "src/app.py": "app-v1"}),
+        ],
+        head="c1",
+        branch="main",
     )
 
     medium_bp = bp(
-        slug="branch-delete-medium",
-        kind="branch-manage",
-        signature="module2.branch-delete.medium",
-        subtemplate="delete-merged-switch-first",
-        cases=_bm_medium_cases(),
+        slug="branch-naming-medium",
+        kind="branch-naming",
+        signature="module2.branch-naming.medium",
+        subtemplate="construct-named-branch",
+        cases=_bn_medium_cases(),
+        initial_state=medium_state,
+        target_rule={
+            "skip_required_commands": True,
+            "head_branch": "{{required_branch}}",
+            "branch_exists": ["{{required_branch}}"],
+            "branch_points_to": {"{{required_branch}}": "c1"},
+        },
+        solution=["git switch -c {{required_branch}}"],
+        label="Construct and create {{required_branch}} from the convention",
+        slug_template="branch-naming-medium-{{case_id}}",
+    )
+
+    # Hard: wrong branch already exists; student deletes it and creates the correct one
+    hard_bp = bp(
+        slug="branch-naming-hard",
+        kind="branch-naming",
+        signature="module2.branch-naming.hard",
+        subtemplate="correct-branch-name-violation",
+        cases=_bn_hard_cases(),
         initial_state="{{initial_state}}",
         target_rule={
             "skip_required_commands": True,
-            "branch_absent": ["{{old_branch}}"],
-            "head_branch": "main",
+            "head_branch": "{{required_branch}}",
+            "branch_exists": ["{{required_branch}}"],
+            "branch_absent": ["{{wrong_branch}}"],
         },
-        solution=["git switch main", "git branch -d {{old_branch}}"],
-        label="Switch to main and delete merged branch {{old_branch}}",
-        slug_template="branch-delete-medium-{{case_id}}",
-    )
-
-    # Hard: HEAD on main; old_branch diverged (NOT an ancestor) — -d fails, must use -D
-    hard_state = repo_with_head(
-        commits=[
-            commit("c1", "Common ancestor commit", {"README.md": "v1"}),
-            commit("c2", "Main continues forward", {"README.md": "v1", "src/app.py": "app-v1"}, ["c1"]),
-            commit("c3", "Abandoned diverged work", {"README.md": "v1", "src/exp.py": "exp-v1"}, ["c1"]),
-        ],
-        head="c2",
-        branch="main",
-        extra={"branches": {"main": "c2", "{{old_branch}}": "c3"}},
-    )
-
-    hard_bp = bp(
-        slug="branch-delete-hard",
-        kind="branch-manage",
-        signature="module2.branch-delete.hard",
-        subtemplate="force-delete-unmerged",
-        cases=_bm_hard_cases(),
-        initial_state=hard_state,
-        target_rule={
-            "skip_required_commands": True,
-            "branch_absent": ["{{old_branch}}"],
-        },
-        solution=["git branch -D {{old_branch}}"],
-        label="Force-remove unmerged branch {{old_branch}}",
-        slug_template="branch-delete-hard-{{case_id}}",
+        solution=["git branch -D {{wrong_branch}}", "git switch -c {{required_branch}}"],
+        label="Delete {{wrong_branch}} and create correctly-named {{required_branch}}",
+        slug_template="branch-naming-hard-{{case_id}}",
     )
 
     return scenario_dict(
         lesson=(
             2,
             "branch-naming-and-housekeeping",
-            "Branch Naming Conventions and Housekeeping",
-            "Keep the branch list tidy by safely deleting merged branches and force-removing abandoned work.",
+            "Branch Naming Conventions",
+            "Apply team branch naming conventions correctly and recognize names that violate them.",
         ),
-        slug="delete-and-clean-branches",
-        title="Branch Naming Conventions and Housekeeping",
-        focus="git branch -d, git branch -D",
-        summary="Remove branches that are no longer needed, choosing between safe deletion and force removal based on merge status.",
+        slug="branch-naming-conventions",
+        title="Branch Naming Conventions",
+        focus="git switch -c",
+        summary=(
+            "Different teams use different branch naming conventions. "
+            "Creating a branch with the wrong name breaks CI pipelines, confuses reviewers, "
+            "and gets flagged in code review. The skill is reading the convention and applying it exactly."
+        ),
         explanation=(
-            "After a branch is merged or abandoned, leaving it in the branch list creates clutter. "
-            "The key distinction: -d refuses to delete unmerged work, protecting you from accidental loss; "
-            "-D bypasses that check when you intentionally want to discard the branch."
+            "Branch names are not arbitrary — teams use them to link work to tickets, identify contributors, "
+            "and automate CI checks. Common patterns include PROJ-{ticket}/{description}, "
+            "type/description (feature/, bugfix/, hotfix/), and username/description for OSS forks. "
+            "Kebab-case is the standard: no CamelCase, no underscores, no spaces."
         ),
-        primary=["git branch -d", "git branch -D"],
-        supporting=["git switch", "git branch", "git branch -v", "git log --oneline --graph --all", "git status"],
-        concepts=["branch-delete", "safe-delete", "force-delete", "merged-branch", "branch-housekeeping"],
+        primary=["git switch -c"],
+        supporting=["git branch", "git branch -v", "git branch -a", "git log --oneline --graph --all", "git status"],
+        concepts=["branch-naming", "naming-convention", "kebab-case", "convention-violation", "ci-pipeline"],
         difficulties={
             DIFFICULTY_EASY: diff(
                 (1, 2),
-                "Delete a merged branch that is no longer needed.",
-                "The feature work was integrated and the branch can now be cleaned up.",
+                "Create a branch whose exact name is given — apply the convention precisely.",
+                "Your team lead has told you both the convention and the required branch name. "
+                "Create it exactly as specified — wrong casing, wrong separators, or wrong order will fail.",
                 [easy_bp],
             ),
             DIFFICULTY_MEDIUM: diff(
-                (2, 3),
-                "Switch off the stale branch before deleting it.",
-                "You are currently on the branch that needs to be removed. Get back to main and clean up.",
+                (1, 3),
+                "Construct the correct branch name from the convention and task description.",
+                "You know the convention and the task. Derive the branch name yourself — "
+                "there is only one correct slug. Abbreviations, wrong casing, and wrong type prefixes all fail.",
                 [medium_bp],
             ),
             DIFFICULTY_HARD: diff(
-                (1, 3),
-                "Identify and force-remove a branch that was never merged.",
-                "The branch diverged from main and was abandoned. The safe delete path will refuse — use the override when certain.",
+                (2, 4),
+                "Identify a branch name that violates the convention and correct it.",
+                "A branch already exists with the wrong name. Figure out what the violation is, "
+                "delete the non-compliant branch, and create a correctly-named replacement.",
                 [hard_bp],
             ),
         },
@@ -2391,7 +2459,7 @@ def remote_branch_scenario() -> dict[str, Any]:
 def base_scenarios_m2() -> list[dict[str, Any]]:
     return [
         branch_create_scenario(),
-        branch_delete_scenario(),
+        branch_naming_scenario(),
         stash_scenario(),
         push_scenario(),
         fetch_pull_scenario(),
@@ -2927,6 +2995,12 @@ class Command(BaseCommand):
     def _demo_commands(self, spec: dict[str, Any]) -> list[str]:
         focus = " ".join(str(spec.get("focus", "")).split()).lower()
         mapping = {
+            "git switch -c": [
+                "git switch -c feature/my-feature",
+                "git branch -D wrong-branch-name",
+                "git branch -a",
+                "git log --oneline --graph --all",
+            ],
             "git switch, git branch, git checkout": [
                 "git branch",
                 "git switch feature/demo",
