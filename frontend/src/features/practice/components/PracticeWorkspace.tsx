@@ -115,6 +115,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const [tourOpen, setTourOpen] = useState(false)
   const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
   const [startOverConfirmOpen, setStartOverConfirmOpen] = useState(false)
+  const [exitConfirmOpen, setExitConfirmOpen] = useState(false)
   const [workspaceEditorPath, setWorkspaceEditorPath] = useState<string | null>(null)
   const user = useAuthStore((state) => state.user)
   const workspaceGridRef = useRef<HTMLElement>(null)
@@ -200,6 +201,10 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const isTourOpen = tourOpen || shouldAutoOpenTour
 
   function submit(command: string) {
+    if (command.trim().toLowerCase() === 'exit') {
+      setExitConfirmOpen(true)
+      return
+    }
     mutation.mutate(command, {
       onSuccess: (response) => {
         if (response.command_family === 'mergetool') {
@@ -320,7 +325,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         session={session}
         isExiting={exitMutation.isPending}
         isRetrying={retryMutation.isPending}
-        onExit={() => exitMutation.mutate()}
+        onExit={() => session.status === 'started' ? setExitConfirmOpen(true) : exitMutation.mutate()}
         onRetry={() => retryMutation.mutate()}
         onStartOver={() => setStartOverConfirmOpen(true)}
         onOpenTour={() => setTourOpen(true)}
@@ -459,6 +464,26 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
             : null
         }
       />
+      <Modal
+        open={exitConfirmOpen}
+        title="Exit lesson?"
+        className="w-full max-w-md"
+        onClose={() => setExitConfirmOpen(false)}
+      >
+        <div className="space-y-5">
+          <p className="text-sm leading-6 text-muted-foreground">
+            Are you sure you want to exit? You cannot go back. Your progress will be discarded and this session will be marked as abandoned.
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="ghost" disabled={exitMutation.isPending} onClick={() => setExitConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" variant="destructive" disabled={exitMutation.isPending} onClick={() => exitMutation.mutate()}>
+              {exitMutation.isPending ? 'Exiting…' : 'Exit Anyway'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
       <Modal
         open={startOverConfirmOpen}
         title="Start fresh attempt?"
