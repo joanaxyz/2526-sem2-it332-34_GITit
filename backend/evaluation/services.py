@@ -17,9 +17,26 @@ class EvaluationOutcome:
     summary: str = ""
 
 
+def _canonical_form(command: str) -> str:
+    """Return the canonical normalized form of a command for comparison.
+
+    git checkout -b <branch> [<start>] is semantically identical to
+    git switch -c <branch> [<start>]; normalize both to the switch form so
+    command_matches() accepts either spelling.
+    """
+    normalized = normalize_command(command).lower()
+    # "git checkout -b <branch>" → "git switch -c <branch>"
+    parts = normalized.split()
+    if len(parts) >= 3 and parts[1] == "checkout" and parts[2] == "-b":
+        parts[1] = "switch"
+        parts[2] = "-c"
+        return " ".join(parts)
+    return normalized
+
+
 def command_matches(executed: str, required: str) -> bool:
-    executed = normalize_command(executed).lower()
-    required = normalize_command(required).lower()
+    executed = _canonical_form(executed)
+    required = _canonical_form(required)
     return executed == required or executed.startswith(f"{required} ")
 
 

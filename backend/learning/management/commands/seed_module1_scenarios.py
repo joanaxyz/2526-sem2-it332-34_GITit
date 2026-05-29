@@ -224,7 +224,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
     }
     templates = {
         "init": {
-            "story": "You are preparing {{project}} for version control.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Project", "value": "{{project}}"},
                 {"label": "Target directory", "value": "{{target_directory}}"},
@@ -247,7 +247,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
             **common,
         },
         "clone": {
-            "story": "You need a local working copy of {{project}} from its remote repository.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Remote URL", "value": "{{remote_url}}"},
                 {"label": "Destination folder", "value": "{{destination_folder}}"},
@@ -259,7 +259,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
             **common,
         },
         "commit": {
-            "story": "You are preparing a focused project snapshot for {{project}}.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Target files", "value": "{{target_files}}"},
                 {"label": "Files to leave out", "value": "{{excluded_files}}"},
@@ -282,7 +282,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
             **common,
         },
         "partial": {
-            "story": "{{project}} has multiple changes, but only one logical hunk belongs in the next snapshot.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Target files", "value": "{{target_files}}"},
                 {"label": "Hunks to commit", "value": "{{target_hunks}}"},
@@ -293,7 +293,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
             **common,
         },
         "amend": {
-            "story": "The latest local snapshot in {{project}} needs to be repaired before it is considered final.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Commit to repair", "value": "{{commit_to_repair}}"},
                 {"label": "Corrected message", "value": "{{required_commit_message}}"},
@@ -302,7 +302,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
             **common,
         },
         "restore": {
-            "story": "{{project}} has mixed changes. Some should be kept for later, and some should be discarded.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Keep but unstage", "value": "{{keep_paths}}"},
                 {"label": "Discard from working tree", "value": "{{discard_paths}}"},
@@ -310,7 +310,7 @@ def student_context_template(kind: str) -> dict[str, Any]:
             **common,
         },
         "review": {
-            "story": "{{project}} combines several Module 1 local workflow skills in one task.",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Target files", "value": "{{target_files}}"},
                 {"label": "Files/hunks to leave out", "value": "{{excluded_files}}"},
@@ -445,6 +445,7 @@ def init_scenario() -> dict[str, Any]:
                         cases=[
                             {
                                 "case_id": "init-easy-current-empty",
+                                "context": "Your team just created a project folder but never initialized it as a Git repository. Initialize the current directory so the project can be version-controlled.",
                                 "project": "empty-lab",
                                 "target_directory": "current folder",
                                 "expected_untracked_paths": [],
@@ -462,6 +463,7 @@ def init_scenario() -> dict[str, Any]:
                             },
                             {
                                 "case_id": "init-easy-trunk-branch",
+                                "context": "Your team uses 'trunk' as the main branch name by convention. Initialize the current directory as a Git repository with 'trunk' as the initial branch.",
                                 "project": "trunk-lab",
                                 "target_directory": "current folder",
                                 "expected_untracked_paths": [],
@@ -476,6 +478,24 @@ def init_scenario() -> dict[str, Any]:
                                 "repository_status": "This is not an existing Git repository.",
                                 "expected_commit_count": 0,
                                 "answer_anchor": "initialized current folder with trunk as the first branch",
+                            },
+                            {
+                                "case_id": "init-easy-invoice",
+                                "context": "A client hired you to build a simple invoice tracker. You need to start the project from scratch with Git version control. Create and initialize a new Git repository named invoice-tracker.",
+                                "project": "invoice-tracker",
+                                "target_directory": "invoice-tracker",
+                                "expected_untracked_paths": [],
+                                "initial_state": uninitialized_state(),
+                                "solution_commands": ["git init invoice-tracker"],
+                                "expected_init_directory": "invoice-tracker",
+                                "expected_current_directory": False,
+                                "expected_initial_branch": "main",
+                                "expected_quiet": False,
+                                "quiet_requirement": "No quiet option required.",
+                                "expected_reinitialized": False,
+                                "repository_status": "This is not an existing Git repository.",
+                                "expected_commit_count": 0,
+                                "answer_anchor": "initialized invoice-tracker as a new named directory; zero commits",
                             },
                         ],
                         initial_state="{{initial_state}}",
@@ -499,7 +519,26 @@ def init_scenario() -> dict[str, Any]:
                         subtemplate="named-directory-options",
                         cases=[
                             {
+                                "case_id": "init-med-oss",
+                                "context": "You want to start contributing to an open-source project. Your mentor told you to first create a local scaffold directory called oss-contrib where you'll mirror your fork setup. Create and initialize the repo.",
+                                "project": "oss-scaffold",
+                                "target_directory": "oss-contrib",
+                                "expected_untracked_paths": [],
+                                "initial_state": uninitialized_state(),
+                                "solution_commands": ["git init oss-contrib"],
+                                "expected_init_directory": "oss-contrib",
+                                "expected_current_directory": False,
+                                "expected_initial_branch": "main",
+                                "expected_quiet": False,
+                                "quiet_requirement": "No quiet option required.",
+                                "expected_reinitialized": False,
+                                "repository_status": "This is not an existing Git repository.",
+                                "expected_commit_count": 0,
+                                "answer_anchor": "initialized oss-contrib as a new named directory; zero commits",
+                            },
+                            {
                                 "case_id": "init-medium-docs-site",
+                                "context": "Your team needs a dedicated Git repository for the project documentation site. Initialize a new repo named docs-site in your current workspace.",
                                 "project": "workspace",
                                 "target_directory": "docs-site",
                                 "expected_untracked_paths": [],
@@ -517,6 +556,7 @@ def init_scenario() -> dict[str, Any]:
                             },
                             {
                                 "case_id": "init-medium-trunk-api-playground",
+                                "context": "You're setting up a sandbox repo for API experiments. The team uses 'trunk' as the default branch. Initialize a new named directory api-playground with trunk as the initial branch.",
                                 "project": "workspace",
                                 "target_directory": "api-playground",
                                 "expected_untracked_paths": [],
@@ -534,6 +574,7 @@ def init_scenario() -> dict[str, Any]:
                             },
                             {
                                 "case_id": "init-medium-quiet-research-log",
+                                "context": "You're initializing a research notes repository called research-log. The CI script expects quiet output so nothing is printed to the console. Initialize it with quiet mode enabled.",
                                 "project": "workspace",
                                 "target_directory": "research-log",
                                 "expected_untracked_paths": [],
@@ -572,7 +613,32 @@ def init_scenario() -> dict[str, Any]:
                         subtemplate="combined-init-options",
                         cases=[
                             {
+                                "case_id": "init-hard-ci",
+                                "context": "You've been asked to create a versioned pipeline configuration store. The ops team refers to it as ci-configs. No step-by-step instructions were given — figure out what needs to be done and do it.",
+                                "project": "ci-configs",
+                                "target_directory": "ci-configs",
+                                "expected_untracked_paths": [],
+                                "answer_anchor": "initialized ci-configs only; parent workspace untouched",
+                                "initial_state": uninitialized_state(
+                                    working_tree={
+                                        "pipelines/build.yml": "untracked",
+                                    }
+                                ),
+                                "solution_commands": [
+                                    "git init ci-configs",
+                                ],
+                                "expected_init_directory": "ci-configs",
+                                "expected_current_directory": False,
+                                "expected_initial_branch": "main",
+                                "expected_quiet": False,
+                                "quiet_requirement": "No quiet option required.",
+                                "expected_reinitialized": False,
+                                "repository_status": "This is not an existing Git repository.",
+                                "expected_commit_count": 0,
+                            },
+                            {
                                 "case_id": "init-hard-research-log",
+                                "context": "You're working in a parent workspace with multiple subdirectories. Only the research-log subfolder should become a Git repository — the parent and sibling folders must not be affected. Initialize only that subdirectory, quietly.",
                                 "project": "parent-workspace",
                                 "target_directory": "research-log",
                                 "expected_untracked_paths": ["research-log/README.md"],
@@ -598,6 +664,7 @@ def init_scenario() -> dict[str, Any]:
                             },
                             {
                                 "case_id": "init-hard-ui-kit",
+                                "context": "You're in a design parent workspace. Only the ui-kit subfolder should be version-controlled — sibling folders like brand-assets and experiments must be left alone. Initialize ui-kit quietly with 'trunk' as the branch name.",
                                 "project": "design-parent",
                                 "target_directory": "ui-kit",
                                 "expected_untracked_paths": ["ui-kit/tokens.css"],
@@ -623,6 +690,7 @@ def init_scenario() -> dict[str, Any]:
                             },
                             {
                                 "case_id": "init-hard-safe-rerun",
+                                "context": "The release-notes directory is already a Git repository with one commit. A teammate ran a script that re-runs git init as a safety check. You need to safely reinitialize without losing the existing history. Run it quietly.",
                                 "project": "release-notes",
                                 "target_directory": "current folder",
                                 "expected_untracked_paths": ["notes/today.md"],
@@ -700,6 +768,7 @@ def clone_scenario() -> dict[str, Any]:
                 }
             ],
             "origin URL docs-portal; main/origin-main -> r10; docs tree checked out",
+            context="Your team's documentation portal is hosted remotely. Clone it so you can start contributing to the docs locally.",
             solution_command="git clone {{remote_url}}",
         ),
         remote_case(
@@ -718,6 +787,7 @@ def clone_scenario() -> dict[str, Any]:
                 }
             ],
             "custom folder api-workshop; main/origin-main -> r11; API tree checked out",
+            context="You're onboarding at a startup. The backend API is hosted remotely. Your team's convention is to store repos in a folder named api-workshop. Clone it into that folder.",
             solution_command="git clone {{remote_url}} {{destination_folder}}",
         ),
         remote_case(
@@ -750,12 +820,78 @@ def clone_scenario() -> dict[str, Any]:
                 }
             ],
             "specific starter branch; starter/origin-starter -> r13; starter notes checked out",
+            context="The profile site repo has a starter branch with template files ready to use. Clone it and check out the starter branch directly instead of main.",
             selected_branch="starter",
             default_head="r12",
             solution_command="git clone -b {{selected_branch}} {{remote_url}}",
         ),
+        remote_case(
+            "clone-easy-oss-ssh",
+            "oss-toolkit",
+            "git@github.com:open-dev/oss-toolkit.git",
+            "oss-toolkit",
+            "r40",
+            {"README.md": "oss-readme-v1", "src/toolkit.py": "toolkit-v1"},
+            [
+                {
+                    "id": "r40",
+                    "message": "Initial OSS toolkit commit",
+                    "parents": [],
+                    "tree": {"README.md": "oss-readme-v1", "src/toolkit.py": "toolkit-v1"},
+                }
+            ],
+            "SSH URL; default folder oss-toolkit; main/origin-main -> r40",
+            context="You've set up SSH keys and want to clone the OSS project you're contributing to. Clone it using the SSH URL.",
+            solution_command="git clone {{remote_url}}",
+        ),
+        remote_case(
+            "clone-easy-corp",
+            "audit-logs",
+            "https://git.corp.example/it/audit-logs.git",
+            "audit-logs-local",
+            "r41",
+            {"README.md": "audit-readme-v1", "logs/q1.csv": "q1-v1"},
+            [
+                {
+                    "id": "r41",
+                    "message": "Create audit logs repo",
+                    "parents": [],
+                    "tree": {"README.md": "audit-readme-v1", "logs/q1.csv": "q1-v1"},
+                }
+            ],
+            "corporate HTTPS URL; custom folder audit-logs-local; main/origin-main -> r41",
+            context="Your company hosts Git internally. Clone the internal audit logs repository into a local folder named audit-logs-local.",
+            solution_command="git clone {{remote_url}} {{destination_folder}}",
+        ),
     ]
     medium_cases = [
+        remote_case(
+            "clone-med-feature",
+            "backend-api",
+            "https://github.com/acme-startup/backend-api.git",
+            "backend-api",
+            "r50",
+            {"README.md": "api-readme-v1", "src/auth.py": "auth-v1"},
+            [
+                {
+                    "id": "r49",
+                    "message": "Initial API commit",
+                    "parents": [],
+                    "tree": {"README.md": "api-readme-v1"},
+                },
+                {
+                    "id": "r50",
+                    "message": "Add auth feature skeleton",
+                    "parents": ["r49"],
+                    "tree": {"README.md": "api-readme-v1", "src/auth.py": "auth-v1"},
+                },
+            ],
+            "branch feature/auth selected at clone; feature/auth -> r50; main -> r49",
+            context="The backend team is mid-sprint on a feature/auth branch. You need to clone the repo and start from that branch directly rather than switching after cloning.",
+            selected_branch="feature/auth",
+            default_head="r49",
+            solution_command="git clone -b {{selected_branch}} {{remote_url}}",
+        ),
         remote_case(
             "clone-medium-analytics-ssh",
             "analytics-lab",
@@ -795,6 +931,7 @@ def clone_scenario() -> dict[str, Any]:
                 },
             ],
             "SSH URL; custom folder analytics-worktree; three-commit history ending r30",
+            context="You've configured SSH access to the analytics lab repository. Clone it into a custom local folder named analytics-worktree using the SSH URL.",
             solution_command="git clone {{remote_url}} {{destination_folder}}",
         ),
         remote_case(
@@ -827,6 +964,7 @@ def clone_scenario() -> dict[str, Any]:
                 },
             ],
             "specific starter branch in cli-starter-lab; starter/origin-starter -> r20",
+            context="A CLI tool repo has a starter branch prepared for onboarding contributors. Clone it into a folder called cli-starter-lab, checking out the starter branch immediately.",
             selected_branch="starter",
             default_head="r19",
             solution_command=(
@@ -855,11 +993,40 @@ def clone_scenario() -> dict[str, Any]:
                 },
             ],
             "shallow depth 1 clone; main/origin-main -> r22; only tip history visible",
+            context="Your CI pipeline needs a lightweight clone of the CSS kit repository for a one-time build. Disk space is limited — use a shallow clone of depth 1 to keep it fast.",
             clone_depth=1,
             solution_command="git clone --depth {{clone_depth}} {{remote_url}}",
         ),
     ]
     hard_cases = [
+        remote_case(
+            "clone-hard-ssh-shallow",
+            "oss-toolkit",
+            "git@github.com:open-dev/oss-toolkit.git",
+            "oss-review",
+            "r60",
+            {"README.md": "oss-readme-v2", "src/toolkit.py": "toolkit-v2"},
+            [
+                {
+                    "id": "r59",
+                    "message": "Initial OSS commit",
+                    "parents": [],
+                    "tree": {"README.md": "oss-readme-v1"},
+                },
+                {
+                    "id": "r60",
+                    "message": "Improve toolkit utilities",
+                    "parents": ["r59"],
+                    "tree": {"README.md": "oss-readme-v2", "src/toolkit.py": "toolkit-v2"},
+                },
+            ],
+            "SSH URL; shallow depth 1; custom folder oss-review; main/origin-main -> r60",
+            context="You want a minimal clone of the OSS toolkit repository with only the latest commit using SSH, stored in a folder named oss-review. Combine shallow cloning with a custom destination.",
+            clone_depth=1,
+            solution_command=(
+                "git clone --depth {{clone_depth}} {{remote_url}} {{destination_folder}}"
+            ),
+        ),
         remote_case(
             "clone-hard-mobile-ui-shallow-branch",
             "mobile-ui",
@@ -890,6 +1057,7 @@ def clone_scenario() -> dict[str, Any]:
                 },
             ],
             "shallow starter branch in mobile-ui-lab; starter/origin-starter -> r31",
+            context="You need a lightweight copy of the mobile UI starter branch for a quick review. Clone only the tip of the starter branch into a folder named mobile-ui-lab — no full history needed.",
             selected_branch="starter",
             default_head="r23",
             clone_depth=1,
@@ -928,6 +1096,7 @@ def clone_scenario() -> dict[str, Any]:
                 },
             ],
             "shallow review branch in notebook-review using --branch; review/origin-review -> r32",
+            context="You need to review specific lab notebook entries on the review branch, but don't need the full commit history. Clone only the tip of the review branch into a folder named notebook-review.",
             selected_branch="review",
             default_head="r24",
             clone_depth=1,
@@ -966,6 +1135,7 @@ def clone_scenario() -> dict[str, Any]:
                 },
             ],
             "SSH URL; custom folder research-log-lab; research tree ending r34",
+            context="You've configured SSH access and need a full clone of the research log repository. Clone it via SSH into a local folder named research-log-lab for offline analysis.",
             solution_command="git clone {{remote_url}} {{destination_folder}}",
         ),
     ]
@@ -1044,6 +1214,7 @@ def remote_case(
     commits: list[dict[str, Any]],
     answer_anchor: str,
     *,
+    context: str = "",
     selected_branch: str = "main",
     default_branch: str = "main",
     default_head: str | None = None,
@@ -1064,6 +1235,7 @@ def remote_case(
     )
     return {
         "case_id": case_id,
+        "context": context,
         "project": project,
         "remote_url": url,
         "destination_folder": folder,
@@ -1161,6 +1333,46 @@ def clone_bp(slug: str, cases: list[dict[str, Any]], signature: str, subtemplate
 def commit_scenario(base_tree: dict[str, str]) -> dict[str, Any]:
     cases_easy = [
         commit_case(
+            "commit-easy-initial",
+            "library-system",
+            {
+                "README.md": "readme-init-v1",
+                "main.py": "main-init-v1",
+                "requirements.txt": "reqs-init-v1",
+            },
+            ["README.md", "main.py", "requirements.txt"],
+            [],
+            [],
+            {
+                "README.md": "readme-init-v1",
+                "main.py": "main-init-v1",
+                "requirements.txt": "reqs-init-v1",
+            },
+            "Initial commit",
+            "commit message Initial commit; three new files staged and committed",
+            context="You've just initialized the library-system repo. You have three files ready: README.md, main.py, and requirements.txt. Your group lead says 'do the initial commit.'",
+            stage_command="git add .",
+        ),
+        commit_case(
+            "commit-easy-auth-dir",
+            "auth-module",
+            {
+                "src/auth/login.py": "login-v1",
+                "src/auth/logout.py": "logout-v1",
+            },
+            ["src/auth/login.py", "src/auth/logout.py"],
+            [],
+            [],
+            {
+                "src/auth/login.py": "login-v1",
+                "src/auth/logout.py": "logout-v1",
+            },
+            "Add auth module",
+            "commit message Add auth module; directory staged with two new files",
+            context="You added a new src/auth/ directory containing login.py and logout.py. Both are new files. Stage the entire directory and commit it as one focused snapshot.",
+            stage_command="git add src/auth/",
+        ),
+        commit_case(
             "commit-easy-form-validation",
             "form-flow",
             {"src/form.js": "form-validation-v2"},
@@ -1170,6 +1382,7 @@ def commit_scenario(base_tree: dict[str, str]) -> dict[str, Any]:
             {"src/form.js": "form-validation-v2"},
             "Update form validation",
             "commit message and changed path src/form.js",
+            context="You updated the form validation logic in src/form.js. It's the only file changed and it's ready to commit.",
         ),
         commit_case(
             "commit-easy-readme-setup",
@@ -1181,6 +1394,7 @@ def commit_scenario(base_tree: dict[str, str]) -> dict[str, Any]:
             {"README.md": "readme-setup-v2"},
             "Clarify setup steps",
             "commit message and changed path README.md",
+            context="You revised the README.md to make the setup instructions clearer. Stage it and commit with the required message.",
             commit_command='git commit --message "Clarify setup steps"',
         ),
         commit_case(
@@ -1193,10 +1407,26 @@ def commit_scenario(base_tree: dict[str, str]) -> dict[str, Any]:
             {"styles/navbar.css": "navbar-spacing-v2"},
             "Adjust navbar spacing",
             "commit message and changed path styles/navbar.css",
+            context="You tweaked the navbar spacing in styles/navbar.css to fix a visual alignment issue. Stage and commit just that one file.",
             stage_command="git add -A",
         ),
     ]
     cases_medium = [
+        commit_case(
+            "commit-med-docker",
+            "devops-setup",
+            {
+                "Dockerfile": "dockerfile-v2",
+                ".env.example": "env-example-v1",
+            },
+            ["Dockerfile", ".env.example"],
+            [],
+            [],
+            {"Dockerfile": "dockerfile-v2", ".env.example": "env-example-v1"},
+            "Add Docker configuration",
+            "commit has Dockerfile and .env.example; working tree clean",
+            context="You updated Dockerfile and .env.example as part of a container setup. Stage both files and commit them together as one focused snapshot.",
+        ),
         commit_case(
             "commit-medium-profile-card",
             "profile-card",
@@ -1207,6 +1437,7 @@ def commit_scenario(base_tree: dict[str, str]) -> dict[str, Any]:
             {"src/profile-card.js": "profile-js-v2", "styles/profile-card.css": "profile-css-v2"},
             "Update profile card layout",
             "commit has two profile-card paths",
+            context="You redesigned the profile card component. Both the JavaScript logic and the CSS stylesheet are updated and ready to commit together.",
             stage_command="git add --all",
         ),
         commit_case(
@@ -1219,6 +1450,7 @@ def commit_scenario(base_tree: dict[str, str]) -> dict[str, Any]:
             {"src/search.js": "search-js-v2", "templates/search.html": "search-template-v2"},
             "Refine search results view",
             "commit has JS and template paths",
+            context="You refined the search results view — the JavaScript handler and the HTML template both changed. Commit both files together with the required message.",
             commit_command='git commit --message "Refine search results view"',
         ),
         commit_case(
@@ -1231,9 +1463,42 @@ def commit_scenario(base_tree: dict[str, str]) -> dict[str, Any]:
             {"src/export.py": "export-code-v2", "docs/export.md": "export-docs-v2"},
             "Document export flow update",
             "commit has code and docs paths",
+            context="You updated the export module and rewrote the matching documentation to reflect the new behavior. Commit both the code and the docs as one snapshot.",
         ),
     ]
     cases_hard = [
+        commit_case(
+            "commit-hard-selective",
+            "backend-api",
+            {
+                "api/handler.py": "handler-bugfix-v2",
+                "api/experimental.py": "experimental-wip-v1",
+            },
+            ["api/handler.py"],
+            ["api/experimental.py"],
+            ["api/experimental.py"],
+            {"api/handler.py": "handler-bugfix-v2"},
+            "Fix request handler null check",
+            "commit includes handler.py only; experimental.py remains uncommitted",
+            context="You've been working on two things: a bug fix in api/handler.py and experimental work in api/experimental.py. Only the bug fix is ready. Stage handler.py and leave the experimental file out.",
+        ),
+        commit_case(
+            "commit-hard-parser",
+            "oss-toolkit",
+            {
+                "src/parser.py": "parser-v2",
+                "tests/test_parser.py": "test-parser-v1",
+                "debug.log": "debug-draft",
+                "scratch.py": "scratch-draft",
+            },
+            ["src/parser.py", "tests/test_parser.py"],
+            ["debug.log", "scratch.py"],
+            ["debug.log", "scratch.py"],
+            {"src/parser.py": "parser-v2", "tests/test_parser.py": "test-parser-v1"},
+            "Add parser module with unit tests",
+            "commit includes parser and test; debug.log and scratch.py remain uncommitted",
+            context="You're preparing a PR for a new parser feature. The files ready to go are src/parser.py and tests/test_parser.py. A debug.log and scratch.py are also in the tree — keep them out of the commit.",
+        ),
         commit_case(
             "commit-hard-profile-distractor",
             "profile-card",
@@ -1247,6 +1512,7 @@ def commit_scenario(base_tree: dict[str, str]) -> dict[str, Any]:
             {"src/profile-card.js": "profile-js-v3"},
             "Update profile card behavior",
             "commit includes profile-card.js; notes remain uncommitted",
+            context="You updated the profile card behavior in src/profile-card.js. You also have a notes/profile-ideas.md scratch file in the working tree — that's not ready and should stay out of the commit.",
         ),
         commit_case(
             "commit-hard-export-distractor",
@@ -1261,6 +1527,7 @@ def commit_scenario(base_tree: dict[str, str]) -> dict[str, Any]:
             {"src/export.py": "export-code-v3"},
             "Fix export validation",
             "commit includes export.py; scratch output remains uncommitted",
+            context="You fixed the export validation logic in src/export.py. A scratch/export-test-output.txt file from your testing is also present — leave it uncommitted.",
         ),
         commit_case(
             "commit-hard-search-two-targets-one-distractor",
@@ -1276,6 +1543,7 @@ def commit_scenario(base_tree: dict[str, str]) -> dict[str, Any]:
             {"src/search.js": "search-js-v3", "templates/search.html": "search-template-v3"},
             "Refine search ranking display",
             "commit includes two target paths; notes remain uncommitted",
+            context="You refined the search ranking display — both src/search.js and templates/search.html are updated and ready. A notes/search-ranking.md scratch file is present but must stay out of this commit.",
         ),
     ]
     return scenario_dict(
@@ -1361,11 +1629,13 @@ def commit_case(
     message: str,
     answer_anchor: str,
     *,
+    context: str = "",
     stage_command: str | None = None,
     commit_command: str | None = None,
 ) -> dict[str, Any]:
     return {
         "case_id": case_id,
+        "context": context,
         "project": project,
         "base_commit": "c1",
         "working_tree": working_tree,
@@ -1693,6 +1963,28 @@ def ignore_bp(
 def partial_staging_scenario() -> dict[str, Any]:
     cases_easy = [
         partial_case(
+            "partial-easy-billing",
+            "invoice-tracker",
+            ["src/billing.py"],
+            ["billing-fix-hunk"],
+            ["billing-experimental-hunk"],
+            [],
+            "Fix billing calculation rounding error",
+            "commit contains billing-fix-hunk; working tree keeps billing-experimental-hunk",
+            context="You modified billing.py. The file has two changed sections: a rounding fix at the top and some experimental print statements at the bottom. Your client is waiting on the fix only — stage just that hunk.",
+        ),
+        partial_case(
+            "partial-easy-routes",
+            "api-service",
+            ["src/routes.py"],
+            ["routes-handler-hunk"],
+            ["routes-experimental-hunk"],
+            [],
+            "Update API route handlers",
+            "commit contains routes-handler-hunk; working tree keeps routes-experimental-hunk",
+            context="src/routes.py has two changed sections: updated route handlers (ready to commit) and a commented-out experimental auth middleware section (skip this for now). Use partial staging to commit only the handler update.",
+        ),
+        partial_case(
             "partial-easy-auth-validation",
             "auth-module",
             ["src/auth.py"],
@@ -1701,6 +1993,7 @@ def partial_staging_scenario() -> dict[str, Any]:
             [],
             "Isolate auth validation",
             "commit contains auth-validation-hunk; working tree keeps auth-refactor-hunk",
+            context="src/auth.py has two hunks: a validation fix that's ready and a larger refactor that's still in progress. Stage only the validation fix and leave the refactor in the working tree.",
         ),
         partial_case(
             "partial-easy-search-ranking",
@@ -1711,6 +2004,7 @@ def partial_staging_scenario() -> dict[str, Any]:
             [],
             "Isolate search ranking",
             "commit contains search-ranking-hunk; working tree keeps search-cleanup-hunk",
+            context="src/search.py has two hunks: a ranking algorithm fix (ready) and some cleanup refactoring (not ready). Commit only the ranking fix.",
         ),
         partial_case(
             "partial-easy-export-format",
@@ -1721,9 +2015,21 @@ def partial_staging_scenario() -> dict[str, Any]:
             [],
             "Isolate export formatting",
             "commit contains export-format-hunk; working tree keeps export-logging-hunk",
+            context="src/export.py has two changed sections: a formatting fix (stage this) and some added logging statements (leave these out for now). Use git add -p to commit only the formatting change.",
         ),
     ]
     cases_medium = [
+        partial_case(
+            "partial-med-three-hunk",
+            "oss-toolkit",
+            ["src/parser.py"],
+            ["parser-bugfix-hunk"],
+            ["parser-refactor-hunk", "parser-experimental-hunk"],
+            [],
+            "Fix parser bug and refactor token handling",
+            "bugfix hunk committed; refactor and experimental hunks remain in working tree",
+            context="src/parser.py has three hunks: a bug fix (stage), a refactor (skip — not ready), and an experimental section (skip). Use partial staging to commit only the bug fix.",
+        ),
         partial_case(
             "partial-medium-profile-validation",
             "profile-editor",
@@ -1733,6 +2039,7 @@ def partial_staging_scenario() -> dict[str, Any]:
             ["notes/profile-todo.md"],
             "Commit profile validation only",
             "validation hunk committed; two hunks and notes remain uncommitted",
+            context="src/profile.py has three changed sections: a validation fix (stage), a copy update (skip), and a cleanup block (skip). A notes/profile-todo.md file is also present — leave it out. Stage only the validation fix.",
         ),
         partial_case(
             "partial-medium-payment-rounding",
@@ -1743,6 +2050,7 @@ def partial_staging_scenario() -> dict[str, Any]:
             ["tmp/payment-scratch.txt"],
             "Commit payment rounding fix",
             "rounding hunk committed; logging/comment hunks remain",
+            context="src/payment.py has three changed sections: a rounding fix (stage), added logging (skip), and a comment update (skip). A tmp/payment-scratch.txt file is also in the working tree. Commit only the rounding fix.",
         ),
         partial_case(
             "partial-medium-dashboard-filter",
@@ -1753,9 +2061,21 @@ def partial_staging_scenario() -> dict[str, Any]:
             ["notes/dashboard-ideas.md"],
             "Commit dashboard filter change",
             "filter hunk committed; theme/console hunks remain",
+            context="src/dashboard.js has three hunks: a filter logic fix (stage), a theme update (skip), and some console.log statements (skip). A notes/dashboard-ideas.md is also present. Stage only the filter change.",
         ),
     ]
     cases_hard = [
+        partial_case(
+            "partial-hard-terraform",
+            "infra-repo",
+            ["terraform/main.tf"],
+            ["terraform-network-hunk"],
+            ["terraform-experimental-hunk"],
+            ["terraform/debug.txt"],
+            "Update network Terraform configuration",
+            "network config hunk committed; experimental hunk and debug file remain",
+            context="terraform/main.tf has two hunks: network configuration (stage) and experimental feature flags (skip). A terraform/debug.txt file is also in the workspace. Stage only the network hunk and leave everything else behind.",
+        ),
         partial_case(
             "partial-hard-auth-cross-file",
             "auth-module",
@@ -1765,6 +2085,7 @@ def partial_staging_scenario() -> dict[str, Any]:
             ["notes/auth-debug.md"],
             "Commit auth validation path",
             "two validation hunks committed across files; refactor/test cleanup and notes remain",
+            context="Two files are modified: src/auth.py (validation fix hunk to stage, refactor hunk to skip) and tests/test_auth.py (validation test hunk to stage, test cleanup hunk to skip). A notes/auth-debug.md is also present. Stage only the validation path across both files.",
         ),
         partial_case(
             "partial-hard-search-cross-file",
@@ -1775,6 +2096,7 @@ def partial_staging_scenario() -> dict[str, Any]:
             ["tmp/search-output.txt"],
             "Commit search ranking path",
             "ranking hunks committed across code/test; cleanup/fixture and tmp remain",
+            context="Two files are modified: src/search.py (ranking fix to stage, cleanup to skip) and tests/test_search.py (ranking test to stage, fixture cleanup to skip). A tmp/search-output.txt is also present. Stage only the ranking change across both files.",
         ),
         partial_case(
             "partial-hard-export-cross-file",
@@ -1785,6 +2107,7 @@ def partial_staging_scenario() -> dict[str, Any]:
             ["notes/export-followup.md"],
             "Commit export formatting path",
             "export formatting hunks committed; logging/test cleanup and notes remain",
+            context="Two files are modified: src/export.py (formatting fix to stage, logging additions to skip) and tests/test_export.py (formatting test to stage, test cleanup to skip). A notes/export-followup.md is also present. Stage only the formatting path.",
         ),
     ]
     return scenario_dict(
@@ -1859,6 +2182,7 @@ def partial_case(
     message: str,
     answer_anchor: str,
     *,
+    context: str = "",
     review_context: bool = False,
 ) -> dict[str, Any]:
     working: dict[str, Any] = {}
@@ -1876,6 +2200,7 @@ def partial_case(
         working[path] = "modified"
     payload = {
         "case_id": case_id,
+        "context": context,
         "project": project,
         "target_files": target_files,
         "target_hunks": target_hunks,
@@ -1940,6 +2265,26 @@ def partial_bp(
 def amend_scenario() -> dict[str, Any]:
     easy = [
         amend_case(
+            "amend-easy-typo",
+            "library-system",
+            ["main.py"],
+            "Initiall commit",
+            "Initial commit",
+            {},
+            "amended tip message corrected to Initial commit; no new commit added",
+            context="You committed with the message 'Initiall commit' — a typo. No file content needs to change, just the message. Amend the last commit to fix it.",
+        ),
+        amend_case(
+            "amend-easy-forgot",
+            "auth-service",
+            ["src/login.py", "src/logout.py"],
+            "Add auth module",
+            "Add auth module",
+            {"src/logout.py": "logout-v1"},
+            "amended tip includes logout.py added to the existing auth commit; no extra commit",
+            context="You committed login.py but forgot to include logout.py — it belongs in the same commit. Stage logout.py and amend the last commit to include it without changing the message.",
+        ),
+        amend_case(
             "amend-easy-login-copy-message",
             "login-copy",
             ["src/login.js"],
@@ -1947,6 +2292,7 @@ def amend_scenario() -> dict[str, Any]:
             "Clarify login copy",
             {},
             "branch tip is amended commit with message Clarify login copy; no extra commit",
+            context="Your last commit message says 'Update text' — too vague. It should be 'Clarify login copy'. No file content needs to change. Amend just the message.",
         ),
         amend_case(
             "amend-easy-readme-message",
@@ -1956,6 +2302,7 @@ def amend_scenario() -> dict[str, Any]:
             "Clarify setup requirements",
             {},
             "amended tip message Clarify setup requirements; same tree",
+            context="Your last commit message is 'Update README' — not specific enough. The correct message is 'Clarify setup requirements'. Amend the commit message without changing any files.",
         ),
         amend_case(
             "amend-easy-navbar-message",
@@ -1965,9 +2312,20 @@ def amend_scenario() -> dict[str, Any]:
             "Adjust navbar spacing",
             {},
             "amended tip message Adjust navbar spacing; same tree",
+            context="Your last commit message is 'CSS updates' — too generic. It should be 'Adjust navbar spacing'. No content changes needed — just fix the message.",
         ),
     ]
     medium = [
+        amend_case(
+            "amend-med-both",
+            "oss-toolkit",
+            ["src/parser.py", "docs/CHANGELOG.md"],
+            "update stuff",
+            "Add parser feature and update changelog",
+            {"docs/CHANGELOG.md": "changelog-v2"},
+            "amended tip has corrected message and changelog added; no extra commit",
+            context="Your last commit message was 'update stuff' (too vague) AND you forgot to include docs/CHANGELOG.md. Stage the changelog and fix the message in one amend operation.",
+        ),
         amend_case(
             "amend-medium-profile-missing-css",
             "profile-card",
@@ -1976,6 +2334,7 @@ def amend_scenario() -> dict[str, Any]:
             "Update profile card layout",
             {"styles/profile-card.css": "profile-css-v2"},
             "amended tip includes missing CSS without creating new commit",
+            context="You committed profile-card.js but forgot to include styles/profile-card.css — it belongs in the same commit. Stage the missing CSS file and amend without changing the commit message.",
         ),
         amend_case(
             "amend-medium-export-doc",
@@ -1985,6 +2344,7 @@ def amend_scenario() -> dict[str, Any]:
             "Document export flow update",
             {"docs/export.md": "export-docs-v2"},
             "amended tip includes export docs",
+            context="You committed the export module code but forgot to include docs/export.md. Amend the last commit to add the documentation without changing the message.",
         ),
         amend_case(
             "amend-medium-search-template",
@@ -1994,9 +2354,20 @@ def amend_scenario() -> dict[str, Any]:
             "Refine search results view",
             {"templates/search.html": "search-template-v2"},
             "amended tip includes search template",
+            context="You committed the search JavaScript but forgot to include templates/search.html — it belongs in the same snapshot. Stage the missing template and amend the commit without changing the message.",
         ),
     ]
     hard = [
+        amend_case(
+            "amend-hard-convention",
+            "infra-repo",
+            ["terraform/staging.tf"],
+            "terraform configs have been updated for staging env",
+            "Update Terraform staging environment configuration",
+            {},
+            "amended tip message corrected from passive verbose form to imperative convention; no extra commit",
+            context="Your last commit message is 'terraform configs have been updated for staging env' — passive voice, lowercase, too verbose. Correct it to follow Git imperative convention. No file content changes needed.",
+        ),
         amend_case(
             "amend-hard-profile-message-and-layout",
             "profile-card",
@@ -2005,6 +2376,7 @@ def amend_scenario() -> dict[str, Any]:
             "Polish profile card layout",
             {"styles/profile-layout.css": "profile-layout-css-v3"},
             "amended tip has corrected message and missing layout CSS; old tip replaced",
+            context="Your last commit has two problems: the message 'Update profile stuff' is too vague, and styles/profile-layout.css was left out by mistake. Fix both — correct the message and add the missing file in one amend.",
         ),
         amend_case(
             "amend-hard-auth-message-and-test",
@@ -2014,6 +2386,7 @@ def amend_scenario() -> dict[str, Any]:
             "Add auth validation coverage",
             {"tests/test_auth.py": "auth-test-v2"},
             "amended tip has corrected message and test path; no extra child commit",
+            context="Your last commit message is 'Auth changes' (too vague) and it's missing tests/test_auth.py. Fix both issues in one amend: correct the message and add the missing test file.",
         ),
         amend_case(
             "amend-hard-export-message-and-doc",
@@ -2023,6 +2396,7 @@ def amend_scenario() -> dict[str, Any]:
             "Document export validation behavior",
             {"docs/export.md": "export-docs-v3"},
             "amended tip has corrected message and docs; old tip replaced",
+            context="Your last commit message is 'Export update' (too vague) and docs/export.md is missing from the commit. Fix both: add the documentation file and correct the message in a single amend.",
         ),
     ]
     return scenario_dict(
@@ -2086,6 +2460,7 @@ def amend_case(
     working_tree: dict[str, Any],
     answer_anchor: str,
     *,
+    context: str = "",
     review_context: bool = False,
 ) -> dict[str, Any]:
     tree_c1 = {"README.md": "readme-v1"}
@@ -2093,6 +2468,7 @@ def amend_case(
     tree_c2 = {**tree_c1, **{path: f"{path}-committed-v1" for path in committed_files}}
     payload = {
         "case_id": case_id,
+        "context": context,
         "project": project,
         "target_files": target_files,
         "commit_to_repair": "c2",
@@ -2155,6 +2531,27 @@ def amend_bp(
 def restore_scenario() -> dict[str, Any]:
     easy = [
         restore_case(
+            "restore-easy-unstage",
+            "library-system",
+            {"notes.txt": "notes-draft"},
+            {},
+            ["notes.txt"],
+            [],
+            "notes.txt moved from staging to working tree; not discarded",
+            context="You ran git add . and accidentally staged notes.txt along with your intended files. The commit isn't ready yet. Unstage notes.txt while keeping your working-tree changes.",
+        ),
+        {
+            "case_id": "restore-easy-discard",
+            "context": "You made some experimental edits to config.py trying out a new approach that didn't work. Discard all working-tree changes to config.py and get back to the last committed state.",
+            "project": "startup-api",
+            "keep_paths": [],
+            "discard_paths": ["config.py"],
+            "staging": {},
+            "working_tree": {"config.py": "config-wrong-v2"},
+            "solution_commands": ["git restore config.py"],
+            "answer_anchor": "working-tree changes to config.py discarded; back to committed state",
+        },
+        restore_case(
             "restore-easy-unstage-app",
             "cleanup-lab",
             {"src/app.py": "app-change-v2"},
@@ -2162,6 +2559,7 @@ def restore_scenario() -> dict[str, Any]:
             ["src/app.py"],
             [],
             "src/app.py moves from staging to working_tree; no commit created",
+            context="You staged src/app.py but realize you're not ready to commit it yet. Unstage it so it stays as a working-tree change without being discarded.",
         ),
         restore_case(
             "restore-easy-unstage-guide",
@@ -2171,6 +2569,7 @@ def restore_scenario() -> dict[str, Any]:
             ["docs/guide.md"],
             [],
             "docs/guide.md unstaged and preserved",
+            context="You staged docs/guide.md, but you want to revise it more before committing. Unstage it — your edits should remain in the working tree, not be discarded.",
         ),
         restore_case(
             "restore-easy-unstage-css",
@@ -2180,9 +2579,20 @@ def restore_scenario() -> dict[str, Any]:
             ["styles/site.css"],
             [],
             "styles/site.css unstaged and preserved",
+            context="You staged styles/site.css but then realized another CSS change needs to be grouped with it. Unstage it for now so you can re-stage everything together later.",
         ),
     ]
     medium = [
+        restore_case(
+            "restore-med-unstage-discard",
+            "oss-toolkit",
+            {"experimental.py": "experimental-v1"},
+            {"README.md": "readme-wrong-v2"},
+            ["experimental.py"],
+            ["README.md"],
+            "experimental.py unstaged and preserved; README.md working-tree changes discarded",
+            context="You staged experimental.py (keep it as a working-tree change, not in the next commit) and also have working-tree edits to README.md that you want to throw away entirely. First unstage experimental.py, then discard the README changes.",
+        ),
         restore_case(
             "restore-medium-app-debug",
             "cleanup-lab",
@@ -2191,6 +2601,7 @@ def restore_scenario() -> dict[str, Any]:
             ["src/app.py"],
             ["debug.log"],
             "app.py preserved as working change; debug.log discarded",
+            context="You staged src/app.py but aren't ready to commit it yet, and you also have a debug.log in the working tree that you want to get rid of. Unstage app.py to preserve your work, then discard debug.log.",
         ),
         restore_case(
             "restore-medium-docs-scratch",
@@ -2200,6 +2611,7 @@ def restore_scenario() -> dict[str, Any]:
             ["docs/guide.md"],
             ["tmp/scratch.txt"],
             "guide preserved; scratch discarded",
+            context="You staged docs/guide.md for a later commit and also have a tmp/scratch.txt that was just temporary notes. Unstage the guide to continue editing it, and discard the scratch file entirely.",
         ),
         restore_case(
             "restore-medium-css-build",
@@ -2209,9 +2621,23 @@ def restore_scenario() -> dict[str, Any]:
             ["styles/site.css"],
             ["dist/site.css"],
             "source CSS preserved; generated dist discarded",
+            context="You staged styles/site.css for revision and also have a generated dist/site.css in your working tree from an old build. Unstage the source CSS to keep working on it, and discard the generated dist file.",
         ),
     ]
     hard = [
+        restore_case(
+            "restore-hard-cleanup",
+            "backend-api",
+            {
+                "debug.log": "debug-draft",
+                "scratch/notes.txt": "notes-draft",
+            },
+            {"api/experimental.py": "experimental-wrong-v1"},
+            ["debug.log", "scratch/notes.txt"],
+            ["api/experimental.py"],
+            "debug.log and notes.txt unstaged; experimental.py working-tree changes discarded",
+            context="You have a noisy mixed state: debug.log and scratch/notes.txt are staged (unstage them — don't discard, just move back to working tree), and api/experimental.py has working-tree changes you want to throw away. Clean up without making a commit.",
+        ),
         restore_case(
             "restore-hard-mixed-profile",
             "profile-card",
@@ -2220,6 +2646,7 @@ def restore_scenario() -> dict[str, Any]:
             ["src/profile-card.js"],
             ["debug/profile.log"],
             "all staging cleared; profile-card.js preserved; debug log discarded; no commit",
+            context="Two files are staged: src/profile-card.js (keep your edits as a working-tree change) and notes/profile-ideas.md (also keep, just unstage). A debug/profile.log in the working tree should be discarded entirely. Clean up without committing.",
         ),
         restore_case(
             "restore-hard-mixed-export",
@@ -2229,6 +2656,7 @@ def restore_scenario() -> dict[str, Any]:
             ["src/export.py"],
             ["tmp/export-output.txt"],
             "export.py preserved; notes unstaged; generated output discarded; no commit",
+            context="Two files are staged: src/export.py (keep the edits as a working-tree change) and notes/export-plan.md (also keep, just unstage). A tmp/export-output.txt generated file is in the working tree and should be discarded. No commit needed.",
         ),
         restore_case(
             "restore-hard-mixed-search",
@@ -2238,6 +2666,7 @@ def restore_scenario() -> dict[str, Any]:
             ["src/search.js"],
             ["debug/search.log"],
             "search.js preserved; notes unstaged; debug log discarded; no commit",
+            context="Two files are staged: src/search.js (preserve your edits, just unstage) and notes/search.md (also keep, just unstage). A debug/search.log in the working tree should be discarded entirely. Clean up without making a commit.",
         ),
     ]
     return scenario_dict(
@@ -2307,12 +2736,15 @@ def restore_case(
     keep_paths: list[str],
     discard_paths: list[str],
     answer_anchor: str,
+    *,
+    context: str = "",
 ) -> dict[str, Any]:
     commands = [f"git restore --staged {' '.join(initial_staging)}"]
     if discard_paths:
         commands.append(f"git restore {' '.join(discard_paths)}")
     return {
         "case_id": case_id,
+        "context": context,
         "project": project,
         "keep_paths": keep_paths,
         "discard_paths": discard_paths,
@@ -2364,12 +2796,31 @@ def restore_bp(
 def review_scenario() -> dict[str, Any]:
     clean_cases = [
         review_clean_case(
+            "cap1-easy-staged-with-ignore",
+            "auth-service",
+            ["src/auth.py", ".gitignore"],
+            ["logs/auth.log"],
+            "Add auth module",
+            "commit contains auth.py + .gitignore; log file excluded",
+            context="You added the auth module to the service. Stage src/auth.py and the .gitignore together — the logs/auth.log file is generated and must stay out of the commit.",
+        ),
+        review_clean_case(
+            "cap1-easy-two-source-ignore",
+            "data-pipeline",
+            ["src/pipeline.py", ".gitignore"],
+            ["output/results.csv"],
+            "Add data pipeline module",
+            "commit contains pipeline.py + .gitignore; output CSV excluded",
+            context="You added the data pipeline module. Commit src/pipeline.py and .gitignore together — the output/results.csv is a generated artifact and must not be included.",
+        ),
+        review_clean_case(
             "review-easy-docs-ignore",
             "docs-portal",
             ["docs/intro.md", ".gitignore"],
             ["dist/site.html"],
             "Prepare docs portal intro",
             "commit contains docs/intro.md + .gitignore; excludes dist/site.html",
+            context="You wrote the introductory docs page. Commit docs/intro.md and .gitignore together — dist/site.html is a build artifact and should remain excluded.",
         ),
         review_clean_case(
             "review-easy-profile-ignore",
@@ -2378,6 +2829,7 @@ def review_scenario() -> dict[str, Any]:
             ["dist/profile-card.js"],
             "Prepare profile card update",
             "commit contains profile-card.js + .gitignore; excludes dist artifact",
+            context="You updated the profile card component. Commit src/profile-card.js and .gitignore as one focused snapshot — the dist/profile-card.js build artifact must be left out.",
         ),
         review_clean_case(
             "review-easy-export-ignore",
@@ -2386,9 +2838,20 @@ def review_scenario() -> dict[str, Any]:
             ["output/export.csv"],
             "Prepare export workflow update",
             "commit contains export.py + .gitignore; excludes output CSV",
+            context="You updated the export workflow module. Stage src/export.py and .gitignore for a focused commit — the output/export.csv file is generated output and must stay out.",
         ),
     ]
     medium_cases = [
+        review_clean_case(
+            "cap1-med-api-with-note",
+            "backend-api",
+            ["src/api.py", "tests/test_api.py", ".gitignore"],
+            ["notes/api-design.md", "dist/api.js"],
+            "Add API module with tests",
+            "source/test/.gitignore committed; design note remains; dist ignored",
+            context="You added the API module with its tests. Commit src/api.py, tests/test_api.py, and .gitignore together. A notes/api-design.md personal note should stay in your working tree — don't commit it. The dist/api.js build artifact is ignored and must stay out.",
+            allowed_working_tree_paths=["notes/api-design.md"],
+        ),
         review_clean_case(
             "review-medium-profile-with-note",
             "profile-card",
@@ -2396,6 +2859,7 @@ def review_scenario() -> dict[str, Any]:
             ["notes/profile-ideas.md", "dist/profile-card.js"],
             "Finalize profile card update",
             "commit has two source files + .gitignore; note remains; dist ignored",
+            context="You finalized the profile card update. Commit src/profile-card.js, styles/profile-card.css, and .gitignore as one snapshot. A notes/profile-ideas.md personal note can stay in your working tree. The dist/profile-card.js build artifact must stay out.",
             allowed_working_tree_paths=["notes/profile-ideas.md"],
         ),
         review_clean_case(
@@ -2405,6 +2869,7 @@ def review_scenario() -> dict[str, Any]:
             ["notes/search-ranking.md", "output/search-results.json"],
             "Finalize search results update",
             "source/template committed; note remains; output ignored",
+            context="You finalized the search results view. Commit src/search.js, templates/search.html, and .gitignore. Your notes/search-ranking.md notes can stay in the working tree. The output/search-results.json generated file must remain excluded.",
             allowed_working_tree_paths=["notes/search-ranking.md"],
         ),
         review_clean_case(
@@ -2414,10 +2879,23 @@ def review_scenario() -> dict[str, Any]:
             ["notes/export-plan.md", "output/export.csv"],
             "Finalize export documentation update",
             "code/docs/.gitignore committed; note remains; output ignored",
+            context="You finalized the export module and its documentation. Commit src/export.py, docs/export.md, and .gitignore together. Your notes/export-plan.md personal notes can remain in the working tree. The output/export.csv generated file must stay out.",
             allowed_working_tree_paths=["notes/export-plan.md"],
         ),
     ]
     hard_partial_cases = [
+        partial_case(
+            "cap1-hard-infra-partial",
+            "infra-repo",
+            ["terraform/main.tf", "tests/test_infra.py"],
+            ["infra-network-hunk", "infra-test-coverage-hunk"],
+            ["infra-experimental-hunk", "infra-test-cleanup-hunk"],
+            ["notes/infra-plan.md"],
+            "Add network infrastructure and test coverage",
+            "network and test coverage hunks committed; experimental/cleanup and notes remain",
+            context="Two files are modified: terraform/main.tf (network config hunk to stage, experimental hunk to skip) and tests/test_infra.py (coverage test hunk to stage, cleanup hunk to skip). A notes/infra-plan.md is also present. Stage only the production-ready hunks across both files.",
+            review_context=True,
+        ),
         partial_case(
             "review-hard-auth-partial",
             "auth-module",
@@ -2427,6 +2905,7 @@ def review_scenario() -> dict[str, Any]:
             ["notes/auth-debug.md"],
             "Finalize auth validation change",
             "only validation hunks committed; leftovers and notes remain",
+            context="Two files are modified: src/auth.py (validation fix hunk to stage, refactor hunk to skip) and tests/test_auth.py (validation test hunk to stage, test cleanup hunk to skip). A notes/auth-debug.md is also present. Commit only the validation path.",
             review_context=True,
         ),
         partial_case(
@@ -2438,10 +2917,22 @@ def review_scenario() -> dict[str, Any]:
             ["tmp/search-output.json"],
             "Finalize search ranking behavior",
             "ranking hunks committed; theme/fixture/tmp leftovers remain",
+            context="Two files are modified: src/search.js (ranking fix hunk to stage, theme update hunk to skip) and tests/test_search.js (ranking test hunk to stage, fixture cleanup hunk to skip). A tmp/search-output.json is also present. Commit only the ranking change.",
             review_context=True,
         ),
     ]
     hard_amend_cases = [
+        amend_case(
+            "cap1-hard-api-amend",
+            "backend-api",
+            ["src/api.py", "tests/test_api.py"],
+            "WIP api stuff",
+            "Add API module with test coverage",
+            {"tests/test_api.py": "test-api-v2"},
+            "amended tip has corrected message and test file; no extra commit",
+            context="Your last commit message is 'WIP api stuff' (not ready for review) and it's missing tests/test_api.py. Fix both: add the test file and correct the message in one amend operation.",
+            review_context=True,
+        ),
         amend_case(
             "review-hard-export-amend",
             "export-flow",
@@ -2450,6 +2941,7 @@ def review_scenario() -> dict[str, Any]:
             "Finalize export validation behavior",
             {"docs/export.md": "export-docs-final"},
             "branch tip is amended commit with corrected message and docs; no extra commit",
+            context="Your last commit message is 'Export update' (too vague) and it's missing docs/export.md. Amend the commit to add the documentation and correct the message — without creating a new commit.",
             review_context=True,
         ),
     ]
@@ -2526,6 +3018,7 @@ def review_clean_case(
     message: str,
     answer_anchor: str,
     *,
+    context: str = "",
     allowed_working_tree_paths: list[str] | None = None,
 ) -> dict[str, Any]:
     working_tree: dict[str, Any] = {
@@ -2542,6 +3035,7 @@ def review_clean_case(
         )
     return {
         "case_id": case_id,
+        "context": context,
         "project": project,
         "target_files": target_files,
         "excluded_files": excluded_files,
