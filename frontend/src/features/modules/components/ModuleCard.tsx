@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { OrientationLessonCard } from '@/features/modules/components/OrientationLessonCard'
 import { ModuleSymbol } from '@/features/modules/components/ModuleSymbol'
 import { ModuleScenarioHub } from '@/features/modules/components/ModuleScenarioHub'
+import { getModuleAccent } from '@/features/modules/moduleColors'
 import type { ScenarioSkillFocus } from '@/features/scenarios/types'
 import type { LearningModule } from '@/features/modules/types'
 import { Button } from '@/shared/components/Button'
@@ -66,6 +67,7 @@ export function ModuleCard({
   onToggle: () => void
 }) {
   const [everExpanded, setEverExpanded] = useState(isExpanded)
+  const accent = getModuleAccent(module.number)
 
   useEffect(() => {
     if (isExpanded) setEverExpanded(true)
@@ -85,21 +87,26 @@ export function ModuleCard({
   return (
     <Card
       className="module-card-hover overflow-hidden shadow-none"
-      style={{ borderLeft: '2px solid rgba(0,245,212,0.35)' }}
+      style={{
+        '--module-color': accent.color,
+        '--module-border-rest': accent.borderRgba,
+        '--module-border-hover': accent.borderHoverRgba,
+        '--module-glow': accent.glowRgba,
+      } as React.CSSProperties}
     >
       <div className="grid w-full grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-4 p-5 text-left">
         <ModuleSymbol module={module} />
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-lg font-bold">
-              <span className="text-aurora-cyan">Module {module.number}:</span>{' '}
+              <span style={{ color: accent.color }}>Module {module.number}:</span>{' '}
               {module.title}
             </h2>
           </div>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">{module.description}</p>
           <div className="mt-3 flex max-w-xl flex-wrap items-center gap-3">
-            <ProgressBar value={progressValue} className="flex-1" glow fillAnimate />
-            <span className="font-mono text-xs text-primary/70">{progressValue}%</span>
+            <ProgressBar value={progressValue} className="flex-1" glow fillAnimate fillFrom={accent.color} fillTo={accent.gradientTo} />
+            <span className="font-mono text-xs" style={{ color: `${accent.color}B3` }}>{progressValue}%</span>
             <StatusBadge progress={progressValue} />
           </div>
         </div>
