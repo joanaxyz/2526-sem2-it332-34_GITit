@@ -93,7 +93,7 @@ function renderList(items: ScenarioSkillFocus[] = [scenario]) {
 }
 
 async function expandScenario() {
-  fireEvent.click(await screen.findByLabelText(/expand scenario 1/i))
+  fireEvent.click(await screen.findByLabelText(/expand lesson 1/i))
 }
 
 describe('ScenarioList preview gate', () => {
@@ -102,6 +102,22 @@ describe('ScenarioList preview gate', () => {
     localStorage.clear()
     vi.restoreAllMocks()
     vi.clearAllMocks()
+  })
+
+  it('shows a loader while module-card scenario summaries are still deferred', () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <ScenarioList scope="module" moduleId={1} source="module_card" deferFetch />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    expect(screen.getByRole('status', { name: 'Loading scenarios' })).toBeInTheDocument()
+    expect(screen.queryByText('No scenarios here yet')).not.toBeInTheDocument()
+    expect(scenariosApi.listForModule).not.toHaveBeenCalled()
   })
 
   it('opens command preview before the first Easy start', async () => {
@@ -139,17 +155,26 @@ describe('ScenarioList preview gate', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('opens command preview from the scenario-level view button without starting a session', async () => {
+  it('opens command preview from the scenario-level learn button without starting a session', async () => {
     renderList()
 
-    fireEvent.click(await screen.findByRole('button', { name: /view/i }))
+    fireEvent.click(await screen.findByRole('button', { name: /learn/i }))
 
     expect(await screen.findByRole('dialog')).toHaveTextContent('Command preview modal')
     expect(scenariosApi.startSession).not.toHaveBeenCalled()
   })
 
   it('starts Medium and Hard directly without opening preview', async () => {
-    renderList()
+    renderList([
+      {
+        ...scenario,
+        difficulties: [
+          difficulty({ id: 10, difficulty: 'easy', mastery_progress: { mastered: 1, required: 1 } }),
+          difficulty({ id: 20, difficulty: 'medium', mastery_progress: { mastered: 1, required: 1 } }),
+          difficulty({ id: 30, difficulty: 'hard' }),
+        ],
+      },
+    ])
     await expandScenario()
 
     const startButtons = screen.getAllByRole('button', { name: /start/i })
@@ -278,14 +303,11 @@ describe('ScenarioList preview gate', () => {
         difficulties: [],
       },
     ])
-    fireEvent.click(await screen.findByLabelText(/expand command preview/i))
-
-    expect(screen.getByText('Command preview')).toBeInTheDocument()
+    expect(await screen.findByText('Guided Preview')).toBeInTheDocument()
     expect(screen.queryByText('Scenario 1')).not.toBeInTheDocument()
-    expect(screen.getByText('Command preview only')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^start$/i })).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getAllByRole('button', { name: /view/i })[0])
+    fireEvent.click(screen.getAllByRole('button', { name: /learn/i })[0])
     expect(await screen.findByRole('dialog')).toHaveTextContent('Command preview modal')
     expect(scenariosApi.startSession).not.toHaveBeenCalled()
   })

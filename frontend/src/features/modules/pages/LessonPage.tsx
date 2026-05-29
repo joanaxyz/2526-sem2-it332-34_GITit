@@ -16,7 +16,15 @@ export function LessonPage() {
     queryFn: () => modulesApi.getLesson(lessonId),
     enabled: Number.isFinite(lessonId),
   })
-  if (isLoading) return <LoadingState label="Loading lesson" />
+  if (isLoading) {
+    return (
+      <LoadingState
+        description="Opening the lesson content and practice setup."
+        label="Loading lesson"
+        variant="page"
+      />
+    )
+  }
   if (isError) return <ErrorState title="Could not load lesson" description={error.message} />
   if (!lesson) return <ErrorState title="Could not load lesson" description="The API returned no lesson data." />
 

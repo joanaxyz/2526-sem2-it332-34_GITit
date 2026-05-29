@@ -17,7 +17,15 @@ export function DashboardPage() {
     staleTime: 5 * 60 * 1000,
   })
 
-  if (isLoading) return <LoadingState label="Loading dashboard" />
+  if (isLoading) {
+    return (
+      <LoadingState
+        description="Pulling your current track, streak, and recent practice activity."
+        label="Loading dashboard"
+        variant="page"
+      />
+    )
+  }
   if (isError) return <ErrorState title="Could not load dashboard" description={error.message} />
   if (!data) return <ErrorState title="Could not load dashboard" description="The API returned no dashboard data." />
 
