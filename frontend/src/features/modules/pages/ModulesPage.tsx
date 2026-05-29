@@ -6,9 +6,28 @@ import { useSearchParams } from 'react-router-dom'
 import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
 import { modulesApi } from '@/features/modules/api/modulesApi'
 import { ModuleCard } from '@/features/modules/components/ModuleCard'
+import { SkillFocusPreviewModal } from '@/features/scenarios/components/SkillFocusPreviewModal'
+import type { ScenarioSkillFocus } from '@/features/scenarios/types'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
+
+// SkillFocusPreviewModal only uses scenario.slug to fetch its own data internally;
+// all other fields are replaced by the API response before they are rendered.
+function previewScenarioStub(slug: string): ScenarioSkillFocus {
+  return {
+    id: 0,
+    slug,
+    title: '',
+    focus: '',
+    summary: '',
+    skill_focus_type: 'command_specific',
+    primary_focus_commands: [],
+    difficulties: [],
+    learning_unit_id: 0,
+    lesson_id: 0,
+  }
+}
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -23,10 +42,12 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 export function ModulesPage() {
   const queryClient = useQueryClient()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   // TODO(module-terminology): drop the legacy unit param after old links age out.
   const moduleParam = searchParams.get('module') ?? searchParams.get('unit')
   const focusedModuleId = moduleParam ? Number(moduleParam) : null
+  // ?preview=slug is appended when the student navigates here via scaffold "Proceed to Command Preview"
+  const autoPreviewSlug = searchParams.get('preview')
   const [expandedModuleIds, setExpandedModuleIds] = useState<Set<number>>(() => {
     if (focusedModuleId && Number.isFinite(focusedModuleId)) return new Set([focusedModuleId])
     return new Set()
@@ -176,6 +197,21 @@ export function ModulesPage() {
         <SectionLabel>Core Modules</SectionLabel>
         {coreModules.map((module, i) => renderCard(module, coreOffset + i))}
       </div>
+      {autoPreviewSlug ? (
+        <SkillFocusPreviewModal
+          scenario={previewScenarioStub(autoPreviewSlug)}
+          onClose={() => {
+            setSearchParams(
+              (prev) => {
+                const next = new URLSearchParams(prev)
+                next.delete('preview')
+                return next
+              },
+              { replace: true },
+            )
+          }}
+        />
+      ) : null}
     </div>
   )
 }

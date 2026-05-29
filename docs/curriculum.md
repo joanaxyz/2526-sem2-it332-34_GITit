@@ -999,7 +999,7 @@ Key concepts:
 
 ---
 
-### **Lesson 2.7 — Fast-Forward vs Three-Way Merges ◆**
+### **Lesson 2.7 — Completing Branch Merges ◆**
 
 **Scenario Skill Focus:** Merge type selection *Mapped to: SO 2.7*
 

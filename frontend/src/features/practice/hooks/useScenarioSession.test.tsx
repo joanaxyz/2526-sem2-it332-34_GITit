@@ -14,7 +14,7 @@ vi.mock('@/features/practice/api/practiceApi', () => ({
   },
 }))
 
-const bootstrapSession = { id: 7, status: 'started', steps: [] } as ScenarioSession
+const bootstrapSession = { id: 7, status: 'started', steps: [] } as unknown as ScenarioSession
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -43,7 +43,7 @@ describe('useScenarioSession', () => {
   })
 
   it('prefers react-query cache over bootstrap', async () => {
-    const cachedSession = { id: 7, status: 'completed', steps: [] } as ScenarioSession
+    const cachedSession = { id: 7, status: 'completed', steps: [] } as unknown as ScenarioSession
     writeSessionBootstrap(bootstrapSession)
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },

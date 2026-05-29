@@ -114,9 +114,11 @@ if "postgresql" in DATABASES["default"].get("ENGINE", ""):
     )
     if env.bool("DATABASE_DISABLE_PREPARED_STATEMENTS", default=True):
         DATABASES["default"].setdefault("OPTIONS", {})["prepare_threshold"] = None
-    DATABASES["default"].setdefault("OPTIONS", {})["options"] = "-c idle_in_transaction_session_timeout=5000"
+    DATABASES["default"].setdefault("OPTIONS", {})["options"] = (
+        "-c idle_in_transaction_session_timeout=5000"
+    )
 
-REDIS_URL = env("REDIS_URL", default="")
+REDIS_URL = env("REDIS_URL", default="").strip()
 # Refresh-token revocation is stored in the configured Django cache. The
 # process-local fallback is useful for development, but production needs a
 # shared cache so logout and rotated-token revocation apply across workers.
