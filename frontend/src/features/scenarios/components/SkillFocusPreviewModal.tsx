@@ -25,6 +25,7 @@ import type {
 import { queryKeys } from '@/shared/api/queryKeys'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
+import { LoadingState } from '@/shared/components/LoadingState'
 import { Modal } from '@/shared/components/Modal'
 import { cn } from '@/shared/utils/cn'
 
@@ -52,7 +53,11 @@ export function SkillFocusPreviewModal({
   if (detailQuery.isLoading) {
     return (
       <Modal open title="Command preview" onClose={onClose} className="w-full max-w-xl" contentClassName="p-5">
-        <div className="py-8 text-center text-sm text-muted-foreground">Loading preview...</div>
+        <LoadingState
+          description="Loading command guidance and the safe demo."
+          label="Loading preview"
+          variant="inline"
+        />
       </Modal>
     )
   }

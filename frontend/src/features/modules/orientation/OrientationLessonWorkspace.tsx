@@ -17,6 +17,7 @@ import { queryKeys } from '@/shared/api/queryKeys'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
+import { LoadingState } from '@/shared/components/LoadingState'
 import { cn } from '@/shared/utils/cn'
 
 export function OrientationLessonWorkspace({ lesson }: { lesson: LessonDetail }) {
@@ -151,7 +152,7 @@ export function OrientationLessonWorkspace({ lesson }: { lesson: LessonDetail })
             onContinueToNext={() => setStepIndex((current) => Math.min(current + 1, steps.length - 1))}
           />
         ) : (
-          <p className="text-sm text-muted-foreground">Loading practice session…</p>
+          <LoadingState label="Loading practice session" variant="inline" />
         )}
       </Card>
 
