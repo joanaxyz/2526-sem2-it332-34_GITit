@@ -1,7 +1,3 @@
-import json
-import time
-from pathlib import Path
-
 from django.conf import settings
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -17,26 +13,6 @@ from accounts.services import (
     clear_refresh_cookie,
     set_refresh_cookie,
 )
-
-_DEBUG_LOG_PATH = Path(__file__).resolve().parents[2] / "debug-4ce873.log"
-
-
-def _agent_debug_log(hypothesis_id: str, location: str, message: str, data: dict) -> None:
-    # #region agent log
-    try:
-        payload = {
-            "sessionId": "4ce873",
-            "hypothesisId": hypothesis_id,
-            "location": location,
-            "message": message,
-            "data": data,
-            "timestamp": int(time.time() * 1000),
-        }
-        with open(_DEBUG_LOG_PATH, "a", encoding="utf-8") as log_file:
-            log_file.write(json.dumps(payload) + "\n")
-    except OSError:
-        pass
-    # #endregion
 
 
 class RegisterAPIView(APIView):
@@ -66,30 +42,10 @@ class LoginAPIView(APIView):
         token_service = TokenService()
         identifier = serializer.validated_data["identifier"]
         ip_address = request.META.get("REMOTE_ADDR")
-        # #region agent log
-        _agent_debug_log(
-            "B",
-            "views.py:LoginAPIView.post",
-            "Login handler before lockout cache read",
-            {
-                "cache_backend": settings.CACHES["default"]["BACKEND"],
-                "debug_mode": settings.DEBUG,
-                "redis_url_configured": bool(getattr(settings, "REDIS_URL", "")),
-            },
-        )
-        # #endregion
         lockout_remaining = token_service.get_lockout_remaining(
             identifier=identifier,
             ip_address=ip_address,
         )
-        # #region agent log
-        _agent_debug_log(
-            "C",
-            "views.py:LoginAPIView.post",
-            "lockout check completed",
-            {"lockout_remaining": lockout_remaining, "runId": "post-fix"},
-        )
-        # #endregion
         if lockout_remaining > 0:
             return Response(
                 {
@@ -125,14 +81,6 @@ class LoginAPIView(APIView):
         tokens = token_service.issue_for_user(user, request=request)
         response = Response({"access": tokens.access, "user": UserSerializer(user).data})
         set_refresh_cookie(response, tokens.refresh)
-        # #region agent log
-        _agent_debug_log(
-            "E",
-            "views.py:LoginAPIView.post",
-            "login succeeded",
-            {"user_id": user.pk, "runId": "post-fix"},
-        )
-        # #endregion
         return response
 
 

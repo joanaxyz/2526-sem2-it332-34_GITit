@@ -36,16 +36,6 @@ from scenarios.models import (
     ScenarioSession,
     StepLog,
 )
-
-SESSION_HYDRATE_SELECT_RELATED = (
-    "scenario",
-    "scenario__lesson",
-    "learning_unit",
-    "difficulty_instance__command_policy",
-    "variant",
-    "prior_session",
-    "user",
-)
 from scenarios.selectors import (
     required_successful_attempts_for_difficulty,
     session_meets_progress_threshold,
@@ -58,6 +48,16 @@ from simulator.services import (
     normalize_command,
 )
 from simulator.workspace_files import WorkspaceFileError, WorkspaceFileStateService
+
+SESSION_HYDRATE_SELECT_RELATED = (
+    "scenario",
+    "scenario__lesson",
+    "learning_unit",
+    "difficulty_instance__command_policy",
+    "variant",
+    "prior_session",
+    "user",
+)
 
 
 class DifficultyAccessService:
@@ -236,7 +236,9 @@ class ScenarioSessionService:
         if prior_session and prior_session.status == SESSION_STATUS_STARTED:
             raise Locked("Exit the current scenario before retrying.")
         if difficulty_instance.completion_type not in COMPLETION_TYPES:
-            raise Locked("This scenario type is no longer playable. Use the lesson preview instead.")
+            raise Locked(
+                "This scenario type is no longer playable. Use the lesson preview instead."
+            )
 
         if mode == SESSION_MODE_PRIMARY and not DifficultyAccessService().is_unlocked(
             user=user, difficulty_instance=difficulty_instance
@@ -273,6 +275,14 @@ class ScenarioSessionService:
                 "id",
             )
         )
+        tried_keys = (
+            variant_selector._tried_variant_keys(
+                user=user,
+                difficulty_instance=difficulty_instance,
+            )
+            if prior_session
+            else set()
+        )
         with timing("scenario.variant_selection", difficulty_id=difficulty_instance.id, mode=mode):
             variant = (
                 self._review_variant(user=user, difficulty_instance=difficulty_instance)
@@ -282,6 +292,7 @@ class ScenarioSessionService:
                     difficulty_instance=difficulty_instance,
                     prior_session=prior_session,
                     published_variants=published_variants,
+                    tried_variant_keys=tried_keys,
                 )
             )
         # Retry/fresh-attempt sessions intentionally rotate variants when alternatives
@@ -289,14 +300,6 @@ class ScenarioSessionService:
         changed_variant = bool(
             prior_session
             and variant_selector.changed_between(prior=prior_session.variant, current=variant)
-        )
-        tried_keys = (
-            variant_selector._tried_variant_keys(
-                user=user,
-                difficulty_instance=difficulty_instance,
-            )
-            if prior_session
-            else set()
         )
         looped_variant = bool(
             prior_session
@@ -447,9 +450,7 @@ class CommandProcessingService:
                 and classification == COMMAND_COUNTED
             ):
                 with timing("scenario.command.contextual_feedback", session_id=session.id):
-                    feedback = FeedbackGenerationService().describe(
-                        previous_state, next_state
-                    )
+                    feedback = FeedbackGenerationService().describe(previous_state, next_state)
         else:
             result_category = (
                 RESULT_INVALID
@@ -635,7 +636,9 @@ class CommandProcessingService:
 
 class WorkspaceFileCreationService:
     @transaction.atomic
-    def create_file(self, *, session: ScenarioSession, path: str, content: str = "") -> ScenarioSession:
+    def create_file(
+        self, *, session: ScenarioSession, path: str, content: str = ""
+    ) -> ScenarioSession:
         if session.status != SESSION_STATUS_STARTED:
             raise Locked("This session has already ended.")
 
@@ -653,7 +656,9 @@ class WorkspaceFileCreationService:
         return session
 
     @transaction.atomic
-    def write_file(self, *, session: ScenarioSession, path: str, content: str = "") -> ScenarioSession:
+    def write_file(
+        self, *, session: ScenarioSession, path: str, content: str = ""
+    ) -> ScenarioSession:
         if session.status != SESSION_STATUS_STARTED:
             raise Locked("This session has already ended.")
 
@@ -669,4 +674,3 @@ class WorkspaceFileCreationService:
         session.repository_state = next_state
         session.save(update_fields=["repository_state"])
         return session
-

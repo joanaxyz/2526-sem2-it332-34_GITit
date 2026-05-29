@@ -59,14 +59,14 @@ describe('ModulePerformanceCard', () => {
       'Module 3',
       'Module 4',
     ])
-    expect(screen.getByText('66.7%')).toBeInTheDocument()
-    expect(screen.getByText('50%')).toBeInTheDocument()
+    expect(screen.getByLabelText('Hard completion: 66.7%')).toBeInTheDocument()
+    expect(screen.getByLabelText('Retry transfer: 50%')).toBeInTheDocument()
   })
 
   it('shows no-data fallback when module denominator is zero', () => {
     render(<ModulePerformanceCard summary={summary} />)
 
-    expect(screen.getAllByText('No data').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('no data yet').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Waiting for practice').length).toBeGreaterThan(0)
   })
 })

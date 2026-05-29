@@ -27,6 +27,8 @@ const session: ScenarioSession = {
     title: 'Commit the clean changes',
     focus: 'git commit',
     narrative: 'Legacy internal summary only.',
+    lesson_number: 1,
+    lesson_id: 5,
   },
   student_context: {
     story: 'Prepare one clean snapshot for the release notes.',

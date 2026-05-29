@@ -1,7 +1,4 @@
-import json
-import time
 from dataclasses import dataclass
-from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
@@ -15,26 +12,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from accounts.models import SessionRecord, StudentProfile
 from common.exceptions import Conflict
 from progress.models import StreakRecord, StudentProgress
-
-_DEBUG_LOG_PATH = Path(__file__).resolve().parents[2] / "debug-4ce873.log"
-
-
-def _agent_debug_log(hypothesis_id: str, location: str, message: str, data: dict) -> None:
-    # #region agent log
-    try:
-        payload = {
-            "sessionId": "4ce873",
-            "hypothesisId": hypothesis_id,
-            "location": location,
-            "message": message,
-            "data": data,
-            "timestamp": int(time.time() * 1000),
-        }
-        with open(_DEBUG_LOG_PATH, "a", encoding="utf-8") as log_file:
-            log_file.write(json.dumps(payload) + "\n")
-    except OSError:
-        pass
-    # #endregion
 
 
 @dataclass(frozen=True)
@@ -113,29 +90,9 @@ class TokenService:
 
     def get_lockout_remaining(self, *, identifier: str, ip_address: str | None) -> int:
         lockout_key = self._lockout_key(identifier, ip_address)
-        # #region agent log
-        _agent_debug_log(
-            "B",
-            "services.py:get_lockout_remaining",
-            "About to read lockout from cache",
-            {
-                "lockout_key_prefix": lockout_key.split(":")[0],
-                "cache_backend": settings.CACHES["default"]["BACKEND"],
-                "cache_location_redacted": str(settings.CACHES["default"].get("LOCATION", ""))[:80],
-            },
-        )
-        # #endregion
         try:
             lockout_until = cache.get(lockout_key)
-        except Exception as exc:
-            # #region agent log
-            _agent_debug_log(
-                "C",
-                "services.py:get_lockout_remaining",
-                "cache unavailable; skipping lockout check",
-                {"error_type": type(exc).__name__, "error": str(exc)[:300], "runId": "post-fix"},
-            )
-            # #endregion
+        except Exception:
             return 0
         if lockout_until is None:
             return 0
@@ -156,30 +113,16 @@ class TokenService:
                 cache.set(lockout_key, lockout_until, timeout=lockout_seconds)
                 cache.delete(attempt_key)
                 return lockout_seconds
-        except Exception as exc:
-            # #region agent log
-            _agent_debug_log(
-                "C",
-                "services.py:register_failed_login",
-                "cache unavailable; skipping failed-login tracking",
-                {"error_type": type(exc).__name__, "error": str(exc)[:300], "runId": "post-fix"},
-            )
-            # #endregion
+        except Exception:
+            pass
         return 0
 
     def clear_failed_login(self, *, identifier: str, ip_address: str | None) -> None:
         try:
             cache.delete(self._attempt_key(identifier, ip_address))
             cache.delete(self._lockout_key(identifier, ip_address))
-        except Exception as exc:
-            # #region agent log
-            _agent_debug_log(
-                "C",
-                "services.py:clear_failed_login",
-                "cache unavailable; skipping failed-login clear",
-                {"error_type": type(exc).__name__, "error": str(exc)[:300], "runId": "post-fix"},
-            )
-            # #endregion
+        except Exception:
+            pass
 
     def issue_for_user(self, user, request=None) -> IssuedTokens:
         refresh = RefreshToken.for_user(user)
