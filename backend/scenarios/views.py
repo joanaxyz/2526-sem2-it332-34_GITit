@@ -1,10 +1,7 @@
-import time
-
 from django.db import OperationalError, transaction
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from common.agent_debug_log import agent_debug_log
 from common.constants import (
     SESSION_MODE_PRIMARY,
     SESSION_STATUS_COMPLETED,
@@ -57,11 +54,7 @@ class ModuleScenarioSummaryAPIView(APIView):
     def get(self, request):
         with timing("scenario.module_summary"):
             raw_module_ids = request.query_params.get("module_ids", "")
-            module_ids = [
-                int(item)
-                for item in raw_module_ids.split(",")
-                if item.strip().isdigit()
-            ]
+            module_ids = [int(item) for item in raw_module_ids.split(",") if item.strip().isdigit()]
             scenarios = scenario_list_queryset()
             if module_ids:
                 scenarios = scenarios.filter(learning_unit_id__in=module_ids)
@@ -134,7 +127,9 @@ class SkillFocusDemoCommandAPIView(APIView):
                     status=400,
                 )
 
-            state = serializer.validated_data.get("repository_state") or scenario.demo_repository_state
+            state = (
+                serializer.validated_data.get("repository_state") or scenario.demo_repository_state
+            )
             result = GitCommandEngine().process(state, command)
             snapshot = RepositorySnapshotService().snapshot(result.state)
             return Response(
@@ -162,7 +157,9 @@ class ScenarioSessionStartAPIView(APIView):
         with timing("scenario.session_start"):
             serializer = ScenarioStartSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            difficulty = get_difficulty_instance(serializer.validated_data["difficulty_instance_id"])
+            difficulty = get_difficulty_instance(
+                serializer.validated_data["difficulty_instance_id"]
+            )
             prior_session = None
             prior_session_id = serializer.validated_data.get("prior_session_id")
             if prior_session_id:
@@ -286,35 +283,18 @@ class ScenarioSessionAbandonAPIView(APIView):
 class ScenarioRetryAPIView(APIView):
     @transaction.atomic
     def post(self, request, session_id: int):
-        # #region agent log
-        retry_t0 = time.perf_counter()
-        agent_debug_log(
-            location="scenarios/views.py:ScenarioRetryAPIView.post",
-            message="retry_request_start",
-            data={"session_id": session_id},
-            hypothesis_id="A",
-        )
-        # #endregion
         try:
-            prior = ScenarioSession.objects.select_for_update(nowait=True, of=("self",)).select_related(
-                "scenario",
-                "difficulty_instance",
-                "variant",
-            ).get(id=session_id, user=request.user)
+            prior = (
+                ScenarioSession.objects.select_for_update(nowait=True, of=("self",))
+                .select_related(
+                    "scenario",
+                    "difficulty_instance",
+                    "variant",
+                )
+                .get(id=session_id, user=request.user)
+            )
         except OperationalError:
             return Response({"detail": "Session busy, retry later."}, status=409)
-        # #region agent log
-        agent_debug_log(
-            location="scenarios/views.py:ScenarioRetryAPIView.post",
-            message="retry_prior_loaded",
-            data={
-                "elapsed_ms": round((time.perf_counter() - retry_t0) * 1000, 2),
-                "prior_status": prior.status,
-                "prior_variant_id": prior.variant_id,
-            },
-            hypothesis_id="A",
-        )
-        # #endregion
         if prior.mode != SESSION_MODE_PRIMARY:
             raise Locked("Review sessions cannot be retried.")
         # If the prior session is a completed, accurate primary session and the
@@ -337,56 +317,12 @@ class ScenarioRetryAPIView(APIView):
                 raise Locked("This scenario is already mastered. Use Review mode instead.")
         if prior.status == SESSION_STATUS_STARTED:
             prior = ScenarioSessionService().abandon(session=prior)
-        # #region agent log
-        start_session_t0 = time.perf_counter()
-        # #endregion
         session = ScenarioSessionService().start_session(
             user=request.user,
             difficulty_instance=prior.difficulty_instance,
             source_entry_point="retry",
             prior_session=prior,
         )
-        # #region agent log
-        agent_debug_log(
-            location="scenarios/views.py:ScenarioRetryAPIView.post",
-            message="retry_start_session_done",
-            data={
-                "elapsed_ms": round((time.perf_counter() - start_session_t0) * 1000, 2),
-                "total_elapsed_ms": round((time.perf_counter() - retry_t0) * 1000, 2),
-                "new_session_id": session.id,
-                "new_variant_id": session.variant_id,
-            },
-            hypothesis_id="C",
-        )
-        payload_t0 = time.perf_counter()
-        # #endregion
-        session = ScenarioSessionService.hydrate_session(session)
         prefetch_session_payload_context(session)
-        try:
-            payload = session_payload(session)
-        except Exception as exc:
-            # #region agent log
-            agent_debug_log(
-                location="scenarios/views.py:ScenarioRetryAPIView.post",
-                message="retry_session_payload_failed",
-                data={
-                    "elapsed_ms": round((time.perf_counter() - payload_t0) * 1000, 2),
-                    "total_elapsed_ms": round((time.perf_counter() - retry_t0) * 1000, 2),
-                    "error_type": type(exc).__name__,
-                },
-                hypothesis_id="B",
-            )
-            # #endregion
-            raise
-        # #region agent log
-        agent_debug_log(
-            location="scenarios/views.py:ScenarioRetryAPIView.post",
-            message="retry_session_payload_done",
-            data={
-                "elapsed_ms": round((time.perf_counter() - payload_t0) * 1000, 2),
-                "total_elapsed_ms": round((time.perf_counter() - retry_t0) * 1000, 2),
-            },
-            hypothesis_id="B",
-        )
-        # #endregion
+        payload = session_payload(session)
         return Response(payload, status=201)

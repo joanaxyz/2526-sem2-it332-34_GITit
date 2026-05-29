@@ -4,7 +4,7 @@
  * sonner's toast() is mocked so we can assert toast payloads without a DOM Toaster.
  */
 import { act, cleanup, renderHook } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { ScenarioSession } from '@/features/practice/types'
 import { evaluateScaffoldTriggers } from './evaluator'

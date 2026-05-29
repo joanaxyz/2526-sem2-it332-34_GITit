@@ -33,7 +33,7 @@ const scenario: ScenarioSkillFocus = {
 describe('ScenarioSkillFocusCard', () => {
   afterEach(() => cleanup())
 
-  it('labels scenario skill focuses as scenarios without the legacy label', () => {
+  it('labels scenario skill focuses as lessons without the legacy label', () => {
     render(
       <ScenarioSkillFocusCard
         scenario={scenario}
@@ -43,8 +43,8 @@ describe('ScenarioSkillFocusCard', () => {
       />,
     )
 
-    expect(screen.getByText('Scenario 2')).toBeInTheDocument()
-    expect(screen.getByLabelText(/expand scenario 2/i)).toBeInTheDocument()
+    expect(screen.getByText('Lesson 2')).toBeInTheDocument()
+    expect(screen.getByLabelText(/expand lesson 2/i)).toBeInTheDocument()
     expect(screen.queryByText(new RegExp('top' + 'ic', 'i'))).not.toBeInTheDocument()
   })
 })
