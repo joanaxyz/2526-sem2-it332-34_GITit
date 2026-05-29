@@ -14,6 +14,10 @@ def _normalize_database_url(url: str) -> str:
     return url
 
 
+def _clean_env_list(values: list[str]) -> list[str]:
+    return [value.strip() for value in values if value.strip()]
+
+
 env = environ.Env(
     DJANGO_DEBUG=(bool, True),
     DJANGO_ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
@@ -32,7 +36,7 @@ if (_os_database_url_before_read_env or "").startswith("jdbc:"):
 SECRET_KEY = env("DJANGO_SECRET_KEY", default="dev-only-change-me")
 DEBUG = env("DJANGO_DEBUG")
 PERFORMANCE_TIMING_ENABLED = env("PERFORMANCE_TIMING_ENABLED", default=DEBUG)
-ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS")
+ALLOWED_HOSTS = _clean_env_list(env("DJANGO_ALLOWED_HOSTS"))
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -150,7 +154,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CORS_ALLOWED_ORIGINS = env("DJANGO_CORS_ALLOWED_ORIGINS")
+CORS_ALLOWED_ORIGINS = _clean_env_list(env("DJANGO_CORS_ALLOWED_ORIGINS"))
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
 
