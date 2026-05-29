@@ -47,6 +47,7 @@ from scenarios.views import (
     CommandSubmitAPIView,
     ScenarioRetryAPIView,
     SkillFocusDemoCommandAPIView,
+    SkillFocusDetailAPIView,
     WorkspaceFileCreateAPIView,
 )
 
@@ -1061,6 +1062,43 @@ def test_scenario_summary_payload_excludes_heavy_preview_fields(student):
     assert "demo_repository_state" not in list_payload
     assert "demo_explanation_steps" not in list_payload
     assert "command_preview" not in list_payload
+
+
+def test_command_preview_detail_paginates_heavy_command_content(student):
+    scenario = ScenarioSkillFocus.objects.get(slug="inspect-repository-state", is_published=True)
+    full_payload = scenario_status_payload(user=student, scenario=scenario)
+    full_commands = full_payload["command_preview"]["commands"]
+
+    paged_payload = scenario_status_payload(
+        user=student,
+        scenario=scenario,
+        preview_command_index=1,
+    )
+    preview = paged_payload["command_preview"]
+
+    assert len(full_commands) > 1
+    assert preview["navigation"]["current_index"] == 1
+    assert preview["navigation"]["total_count"] == len(full_commands)
+    assert len(preview["commands"]) == len(full_commands)
+    assert preview["commands"][0]["pages"] == []
+    assert "page_count" in preview["commands"][0]
+    assert preview["commands"][1]["pages"] == full_commands[1]["pages"]
+
+
+def test_skill_focus_detail_uses_requested_preview_command_page(student):
+    scenario = ScenarioSkillFocus.objects.get(slug="inspect-repository-state", is_published=True)
+    request = APIRequestFactory().get(
+        f"/api/scenarios/skill-focus/{scenario.slug}/?command_index=1"
+    )
+    force_authenticate(request, user=student)
+
+    response = SkillFocusDetailAPIView.as_view()(request, slug=scenario.slug)
+    preview = response.data["command_preview"]
+
+    assert response.status_code == 200
+    assert preview["navigation"]["current_index"] == 1
+    assert preview["commands"][0]["pages"] == []
+    assert preview["commands"][1]["pages"]
 
 
 def test_command_preview_resolves_reusable_command_content(student):
