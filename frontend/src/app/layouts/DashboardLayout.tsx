@@ -4,6 +4,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 import { authApi } from '@/features/auth/api/authApi'
 import { useAuthStore } from '@/features/auth/hooks/useAuth'
+import { CursorGlow } from '@/shared/components/CursorGlow'
 import { cn } from '@/shared/utils/cn'
 
 const navItems = [
@@ -166,6 +167,7 @@ export function DashboardLayout() {
 
   return (
     <div className="min-h-screen">
+      <CursorGlow />
       <header
         className="sticky top-0 z-20 border-b border-primary/20 bg-background/60 backdrop-blur-md"
         style={{ boxShadow: '0 1px 10px rgba(0, 245, 212, 0.12), 0 1px 0 rgba(0, 245, 212, 0.18)' }}
