@@ -18,9 +18,9 @@ Design (this folder) → Review & Approval → Seed Implementation → Migration
 | [DESIGN_PRINCIPLES.md](DESIGN_PRINCIPLES.md) | Approved | Global standards for all scenario design |
 | [MODULE_1_GUIDE.md](MODULE_1_GUIDE.md) | **Implemented** ✅ | Full scenario library for Module 1; reference implementation |
 | [MODULE_1_ANSWERKEY.md](MODULE_1_ANSWERKEY.md) | **Live** ✅ | Instructor answer key — all Module 1 cases, contexts, solutions |
-| [MODULE_2_GUIDE.md](MODULE_2_GUIDE.md) | Approved — pool expansion pending | Full scenario library for Module 2 (36 new variants designed) |
-| [MODULE_3_GUIDE.md](MODULE_3_GUIDE.md) | Approved — pool expansion pending | Full scenario library for Module 3 (new variants designed) |
-| [MODULE_4_GUIDE.md](MODULE_4_GUIDE.md) | Approved — seed fixes pending | Full scenario library for Module 4 (seed bugs documented) |
+| [MODULE_2_GUIDE.md](MODULE_2_GUIDE.md) | **Implemented** ✅ | Full scenario library for Module 2 (117 variants seeded) |
+| [MODULE_3_GUIDE.md](MODULE_3_GUIDE.md) | **Implemented** ✅ | Full scenario library for Module 3 (pool expansion + context migration seeded) |
+| [MODULE_4_GUIDE.md](MODULE_4_GUIDE.md) | **Implemented** ✅ | Full scenario library for Module 4 (context migration seeded) |
 
 ## Relationship to Existing Docs
 
@@ -49,9 +49,7 @@ full reference implementation.
 dict passes a `context=` string containing the narrative paragraph from the guide.
 The materializer substitutes it into the Scenario Brief at render time.
 
-**Modules 2, 3, 4 seeds need this migration** — their templates currently return static
-strings. Each module's guide has a "Context string requirement" checklist in its Seed
-Implementation Notes section.
+**Modules 2, 3, 4 seeds have all been migrated** — all templates now return `"story": "{{context}}"` and all case dicts carry a `context=` key.
 
 ## Key Constraint: `git config` is Prior Knowledge
 
