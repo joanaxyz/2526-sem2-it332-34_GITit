@@ -75,10 +75,6 @@ class MetricsService:
                 filter=Q(mode=SESSION_MODE_PRIMARY, status=SESSION_STATUS_COMPLETED),
             ),
             review_started=Count("id", filter=Q(mode=SESSION_MODE_REVIEW)),
-            review_completed=Count(
-                "id",
-                filter=Q(mode=SESSION_MODE_REVIEW, status=SESSION_STATUS_COMPLETED),
-            ),
         )
         started = session_counts["started"] or 0
         completed = session_counts["completed"] or 0
@@ -87,7 +83,6 @@ class MetricsService:
         hard_started = session_counts["hard_started"] or 0
         hard_completed = session_counts["hard_completed"] or 0
         review_started = session_counts["review_started"] or 0
-        review_completed = session_counts["review_completed"] or 0
         orientation_counts = Lesson.objects.filter(
             unit__is_orientation=True,
             is_published=True,
@@ -147,6 +142,15 @@ class MetricsService:
                 ),
                 rta_success=Count("id", filter=Q(rta_eligible=True, rta_success=True)),
                 rta_total=Count("id", filter=Q(rta_eligible=True)),
+                started_count=Count("id"),
+                completed_count=Count(
+                    "id",
+                    filter=Q(status=SESSION_STATUS_COMPLETED),
+                ),
+                completed_retry_total=Sum(
+                    "retry_index",
+                    filter=Q(status=SESSION_STATUS_COMPLETED),
+                ),
             )
         )
         module_metrics_map = {
@@ -180,11 +184,13 @@ class MetricsService:
                     session_counts["rta_success"] or 0,
                     session_counts["rta_total"] or 0,
                 ),
-                "sar": self._rate(abandoned, started),
-                "review_scr": self._rate(review_completed, review_started),
             },
             "module_kpis": {
                 str(module_number): {
+                    "scr": self._rate(
+                        module_metrics_map.get(module_number, {}).get("completed_count") or 0,
+                        module_metrics_map.get(module_number, {}).get("started_count") or 0,
+                    ),
                     "hlcr": self._rate(
                         (
                             module_metrics_map.get(module_number, {}).get("hard_completed")
@@ -198,6 +204,10 @@ class MetricsService:
                     "rta": self._rate(
                         (module_metrics_map.get(module_number, {}).get("rta_success") or 0),
                         (module_metrics_map.get(module_number, {}).get("rta_total") or 0),
+                    ),
+                    "arc": self._average_retry_count_from_counts(
+                        module_metrics_map.get(module_number, {}).get("completed_retry_total") or 0,
+                        module_metrics_map.get(module_number, {}).get("completed_count") or 0,
                     ),
                 }
                 for module_number in [1, 2, 3, 4]

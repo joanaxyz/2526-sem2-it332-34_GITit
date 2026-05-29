@@ -1,5 +1,5 @@
 import { useEffect, useState, type ComponentType } from 'react'
-import { Activity, CheckCircle2, Crosshair, GitPullRequest, RotateCcw, ShieldCheck } from 'lucide-react'
+import { CheckCircle2, Crosshair, GitPullRequest, RefreshCw, ShieldCheck } from 'lucide-react'
 
 import type { DashboardSummary } from '@/features/dashboard/types'
 import { Card, CardContent } from '@/shared/components/Card'
@@ -37,18 +37,12 @@ const metricConfig = [
     topBorder: 'rgba(52,211,153,0.55)',
   },
   {
-    key: 'sar' as const,
-    label: 'Abandonment',
-    Icon: RotateCcw,
-    color: '#FCD34D',
-    topBorder: 'rgba(252,211,77,0.55)',
-  },
-  {
-    key: 'review_scr' as const,
-    label: 'Review completion',
-    Icon: Activity,
+    key: 'arc' as const,
+    label: 'Avg retry count',
+    Icon: RefreshCw,
     color: '#A78BFA',
     topBorder: 'rgba(167,139,250,0.55)',
+    format: 'count' as const,
   },
 ]
 
@@ -132,8 +126,9 @@ function StatCard({
   detail: string
   index: number
 }) {
+  const isCount = 'format' in config && config.format === 'count'
   const hasData = value !== null
-  const counted = useCountUp(value)
+  const counted = useCountUp(isCount ? null : value)
 
   return (
     <Card
@@ -165,7 +160,7 @@ function StatCard({
                   textShadow: `0 0 20px ${config.color}55`,
                 }}
               >
-                {counted}%
+                {isCount ? value!.toFixed(2) : `${counted}%`}
               </p>
             ) : (
               <p className="text-sm text-muted-foreground/50 font-mono leading-none mt-1">
@@ -178,8 +173,8 @@ function StatCard({
             </p>
           </div>
 
-          {/* Right: animated radial ring */}
-          <RadialRing counted={counted} hasData={hasData} color={config.color} />
+          {/* Right: animated radial ring — suppressed for count-format metrics */}
+          <RadialRing counted={counted} hasData={isCount ? false : hasData} color={config.color} />
         </div>
       </CardContent>
     </Card>
@@ -191,8 +186,10 @@ export function ProgressSummaryCards({ summary }: { summary: DashboardSummary })
     <section className="grid grid-cols-2 gap-3 2xl:grid-cols-3 max-md:grid-cols-1">
       {metricConfig.map((config, index) => {
         const metric = summary.kpis[config.key]
-        const detail =
-          config.key === 'car'
+        const isCount = 'format' in config && config.format === 'count'
+        const detail = isCount
+          ? `${metric.denominator} completed sessions`
+          : config.key === 'car'
             ? `${metric.denominator} completed attempts`
             : `${metric.numerator}/${metric.denominator} attempts`
         return (
