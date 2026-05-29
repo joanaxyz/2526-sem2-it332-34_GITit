@@ -36,9 +36,13 @@ export function ModuleSymbol({
   return (
     <div
       className={cn(
-        'flex size-12 flex-col items-center justify-center gap-0.5 rounded-md border border-primary/25 bg-secondary text-primary transition-all duration-200 hover:border-primary/50 hover:shadow-aurora-sm',
+        'flex size-12 flex-col items-center justify-center gap-0.5 rounded-md border bg-secondary transition-all duration-200 hover:brightness-110',
         className,
       )}
+      style={{
+        borderColor: 'var(--module-border-rest, rgba(0,212,170,0.25))',
+        color: 'var(--module-color, hsl(var(--primary)))',
+      }}
       title={`${shortLabel}: ${module.title}`}
       aria-label={`${shortLabel} module: ${module.title}`}
     >
