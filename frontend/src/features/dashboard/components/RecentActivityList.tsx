@@ -59,8 +59,6 @@ export function RecentActivityList({ summary }: { summary: DashboardSummary }) {
         <Outcome label="Started" value={summary.counts.started} />
         <Outcome label="Completed" value={summary.counts.completed} />
         <Outcome label="Failed" value={summary.counts.failed} />
-        <Outcome label="Abandoned" value={summary.counts.abandoned} />
-        <Outcome label="Review sessions" value={summary.counts.review_started} />
       </CardContent>
     </Card>
   )
