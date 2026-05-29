@@ -52,7 +52,7 @@ export function buildPreviewCommands(
   scenario: ScenarioSkillFocus,
   fallbackSnapshot: RepositorySnapshot,
 ): PreviewCommand[] {
-  const resolvedCommands = scenario.command_preview?.commands?.filter((command) => command.pages?.length || command.sections?.length) ?? []
+  const resolvedCommands = scenario.command_preview?.commands ?? []
   if (resolvedCommands.length) {
     return commandsFromResolvedCommands(resolvedCommands, fallbackSnapshot).filter(hasReadableCommand)
   }

@@ -129,6 +129,15 @@ export type CommandPreviewCommand = {
   sections?: CommandPreviewSection[]
   pages: CommandPreviewPage[]
   demo_steps?: DemoExplanationStep[]
+  page_count?: number
+  section_count?: number
+  demo_step_count?: number
+}
+
+export type CommandPreviewNavigation = {
+  current_index: number
+  total_count: number
+  commands: CommandPreviewCommand[]
 }
 
 export type CommandPreviewMetadata = {
@@ -139,6 +148,7 @@ export type CommandPreviewMetadata = {
   focus_label?: string
   command_title: string
   commands?: CommandPreviewCommand[]
+  navigation?: CommandPreviewNavigation
   command_refs?: Array<string | Record<string, unknown>>
   sections?: CommandPreviewSection[]
   syntax_examples: string[]

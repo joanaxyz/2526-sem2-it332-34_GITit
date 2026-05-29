@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { BookOpen, ChevronLeft, ChevronRight, ListTree, Play, SquareTerminal } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -44,13 +44,15 @@ export function SkillFocusPreviewModal({
   onClose: () => void
   onProceed?: () => void
 }) {
+  const [commandIndex, setCommandIndex] = useState(0)
   const detailQuery = useQuery({
-    queryKey: queryKeys.skillFocus(scenario.slug),
-    queryFn: () => scenariosApi.getSkillFocus(scenario.slug),
+    queryKey: queryKeys.skillFocus(scenario.slug, commandIndex),
+    queryFn: () => scenariosApi.getSkillFocus(scenario.slug, { commandIndex }),
+    placeholderData: keepPreviousData,
     staleTime: 5 * 60 * 1000,
   })
 
-  if (detailQuery.isLoading) {
+  if (detailQuery.isLoading && !detailQuery.data) {
     return (
       <Modal open title="Command preview" onClose={onClose} className="w-full max-w-xl" contentClassName="p-5">
         <LoadingState
@@ -78,7 +80,10 @@ export function SkillFocusPreviewModal({
       difficulty={difficulty}
       action={action}
       isProceeding={Boolean(isProceeding)}
+      isLoadingCommand={detailQuery.isFetching}
+      requestedCommandIndex={commandIndex}
       onClose={onClose}
+      onCommandIndexChange={setCommandIndex}
       onProceed={onProceed}
     />
   )
@@ -89,14 +94,20 @@ function SkillFocusPreviewContent({
   difficulty,
   action,
   isProceeding,
+  isLoadingCommand,
+  requestedCommandIndex,
   onClose,
+  onCommandIndexChange,
   onProceed,
 }: {
   scenario: ScenarioSkillFocus
   difficulty?: DifficultyAccess
   action?: DifficultyActionIntent
   isProceeding: boolean
+  isLoadingCommand: boolean
+  requestedCommandIndex: number
   onClose: () => void
+  onCommandIndexChange: (commandIndex: number) => void
   onProceed?: () => void
 }) {
   const preview = scenario.command_preview
@@ -115,10 +126,20 @@ function SkillFocusPreviewContent({
   )
   const commands = useMemo(() => buildPreviewCommands(scenario, initialSnapshot), [initialSnapshot, scenario])
   const navGroups = useMemo(() => navigationGroupsFromCommands(commands), [commands])
-  const [commandIndex, setCommandIndex] = useState(0)
+  const commandIndex = Math.min(
+    Math.max(preview?.navigation?.current_index ?? requestedCommandIndex, 0),
+    Math.max(commands.length - 1, 0),
+  )
   const [view, setView] = useState<'content' | 'demo'>('content')
   const [isNavigatorOpen, setIsNavigatorOpen] = useState(false)
-  const selectedCommand = commands[commandIndex] ?? commands[0]
+  const selectedCommand = commands[commandIndex] ?? commands[0] ?? {
+    id: 'command-preview-empty',
+    title: scenario.focus || 'Command',
+    command: scenario.primary_focus_commands[0],
+    baseCommand: scenario.focus || 'Command',
+    pages: [],
+    demo_steps: [],
+  }
   const selectedDemoStep = selectedCommand.demo_steps[0] ?? selectedCommand.pages.find((page) => page.demo_steps[0])?.demo_steps[0] ?? null
   const [snapshot, setSnapshot] = useState<RepositorySnapshot>(() => selectedDemoStep?.repository_state ?? initialSnapshot)
   const [terminalLines, setTerminalLines] = useState<TerminalLine[]>(demoBootLines)
@@ -162,12 +183,12 @@ function SkillFocusPreviewContent({
 
   function selectCommand(nextCommandIndex: number, anchorId = 'top') {
     const nextCommand = commands[nextCommandIndex]
-    if (!nextCommand) return
-    setCommandIndex(nextCommandIndex)
+    if (!nextCommand && nextCommandIndex < 0) return
+    onCommandIndexChange(nextCommandIndex)
     setView('content')
     setIsNavigatorOpen(false)
     setPendingScroll({ commandIndex: nextCommandIndex, anchorId, nonce: Date.now() })
-    setSnapshot(nextCommand.pages[0]?.demo_steps[0]?.repository_state ?? nextCommand.demo_steps[0]?.repository_state ?? initialSnapshot)
+    setSnapshot(nextCommand?.pages[0]?.demo_steps[0]?.repository_state ?? nextCommand?.demo_steps[0]?.repository_state ?? initialSnapshot)
   }
 
   async function runDemoCommand(command: string) {
@@ -175,7 +196,8 @@ function SkillFocusPreviewContent({
     setIsRunningDemo(true)
     const normalizedCommand = normalize(command)
     const nextCommandIndex = commands.findIndex((item) =>
-      item.demo_steps.some((step) => normalize(step.command) === normalizedCommand),
+      normalize(item.command ?? item.title) === normalizedCommand
+      || item.demo_steps.some((step) => normalize(step.command) === normalizedCommand),
     )
 
     try {
@@ -192,7 +214,7 @@ function SkillFocusPreviewContent({
     }
 
     if (nextCommandIndex >= 0) {
-      setCommandIndex(nextCommandIndex)
+      onCommandIndexChange(nextCommandIndex)
       setView('demo')
     }
   }
@@ -255,6 +277,12 @@ function SkillFocusPreviewContent({
                 lines={terminalLines}
                 snapshot={snapshot}
                 onCommand={runDemoCommand}
+              />
+            ) : isLoadingCommand && selectedCommand.pages.length === 0 ? (
+              <LoadingState
+                description="Loading this command guide."
+                label="Loading command"
+                variant="inline"
               />
             ) : (
               <PreviewCommandContent command={selectedCommand} />
