@@ -1,6 +1,6 @@
 # Module 3 — Scenario Design Guide
 
-**Status: Approved — pool expansion pending implementation**
+**Status: Implemented ✅**
 **Last updated: 2026-05-29**
 
 ---

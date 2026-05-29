@@ -16,8 +16,13 @@ export const scenariosApi = {
     const params = new URLSearchParams({ module_ids: moduleIds.join(',') })
     return apiRequest<Record<string, ScenarioSkillFocus[]>>(`/scenarios/modules/summary/?${params.toString()}`)
   },
-  getSkillFocus(skillFocusSlug: string) {
-    return apiRequest<ScenarioSkillFocus>(`/scenarios/skill-focus/${skillFocusSlug}/`)
+  getSkillFocus(skillFocusSlug: string, options?: { commandIndex?: number }) {
+    const params = new URLSearchParams()
+    if (options?.commandIndex !== undefined) {
+      params.set('command_index', String(options.commandIndex))
+    }
+    const query = params.toString()
+    return apiRequest<ScenarioSkillFocus>(`/scenarios/skill-focus/${skillFocusSlug}/${query ? `?${query}` : ''}`)
   },
   submitDemoCommand(skillFocusSlug: string, payload: { command: string; repository_state?: unknown }) {
     return apiRequest<DemoCommandResponse>(`/scenarios/skill-focus/${skillFocusSlug}/demo/commands/`, {

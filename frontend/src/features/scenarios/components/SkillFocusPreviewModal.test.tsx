@@ -184,6 +184,39 @@ function renderPreview() {
   )
 }
 
+function pagedScenario(commandIndex: number): ScenarioSkillFocus {
+  const preview = scenario.command_preview!
+  const commands = preview.commands!.map((command, index) => (
+    index === commandIndex
+      ? command
+      : {
+          ...command,
+          sections: [],
+          pages: [],
+          demo_steps: [],
+          page_count: command.pages.length,
+          demo_step_count: command.demo_steps?.length ?? 0,
+        }
+  ))
+  return {
+    ...scenario,
+    command_preview: {
+      ...preview,
+      commands,
+      navigation: {
+        current_index: commandIndex,
+        total_count: commands.length,
+        commands: commands.map((command) => ({
+          ...command,
+          sections: [],
+          pages: [],
+          demo_steps: [],
+        })),
+      },
+    },
+  }
+}
+
 describe('SkillFocusPreviewModal', () => {
   afterEach(() => {
     cleanup()
@@ -220,6 +253,34 @@ describe('SkillFocusPreviewModal', () => {
     expect(screen.getByText('Try it')).toBeInTheDocument()
     expect(screen.getByText('Inline command demo')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /back to command guide/i })).toBeInTheDocument()
+  })
+
+  it('requests the selected command page from the backend paginator', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    vi.mocked(scenariosApi.getSkillFocus).mockImplementation((_slug, options) =>
+      Promise.resolve(pagedScenario(options?.commandIndex ?? 0)),
+    )
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <SkillFocusPreviewModal
+          scenario={scenario}
+          difficulty={difficulty}
+          action="start"
+          isProceeding={false}
+          onClose={vi.fn()}
+          onProceed={vi.fn()}
+        />
+      </QueryClientProvider>,
+    )
+
+    await screen.findByText('What git status is for')
+    expect(screen.queryByText('Read the unstaged file changes before staging anything.')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /next command/i }))
+
+    await waitFor(() => expect(scenariosApi.getSkillFocus).toHaveBeenCalledWith(scenario.slug, { commandIndex: 1 }))
+    expect(await screen.findByText('Read the unstaged file changes before staging anything.')).toBeInTheDocument()
   })
 
   it('switches commands while preserving terminal history', async () => {
