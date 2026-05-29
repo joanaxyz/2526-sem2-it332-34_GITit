@@ -69,7 +69,7 @@ def template(
         "target_rule_template": target_rule,
         "solution_commands_template": solution,
         "student_context_template": {
-            "story": "{{incident}}",
+            "story": "{{context}}",
             "required_details": [
                 {"label": "Objective", "value": "{{objective}}"},
                 {"label": "Expected end state", "value": "{{expected_end_state}}"},
@@ -159,12 +159,14 @@ def hard_reset_case(case_id: str, *, depth: int, suffix: str) -> dict[str, Any]:
     reset_target = f"HEAD~{depth}"
     reset_state = simulator.process(state, f"git reset --hard {reset_target}").state
     expected = {"recovery_branch": f"recovery-{case_id}", "recovery_target": "c3"}
+    incident = (
+        "You are a release engineer in a software company. "
+        f"{incident_blurb} The destructive reset landed on {reset_target}."
+    )
     return {
         "case_id": case_id,
-        "incident": (
-            "You are a release engineer in a software company. "
-            f"{incident_blurb} The destructive reset landed on {reset_target}."
-        ),
+        "context": incident,
+        "incident": incident,
         "objective": "Recover the lost work from history evidence without rewriting shared history.",
         "expected_end_state": (
             f"Create branch {expected['recovery_branch']} at the recovered lost tip commit (c3)."
@@ -188,12 +190,14 @@ def revert_case(case_id: str, *, bad_commit: str, suffix: str) -> dict[str, Any]
         remote_branches={"origin/main": "c3"},
         upstream_tracking={"main": "origin/main"},
     )
+    incident = (
+        "You are a backend developer in a software company. A risky configuration change "
+        "was already pushed to main before QA flagged it as breaking production behavior."
+    )
     return {
         "case_id": case_id,
-        "incident": (
-            "You are a backend developer in a software company. A risky configuration change "
-            "was already pushed to main before QA flagged it as breaking production behavior."
-        ),
+        "context": incident,
+        "incident": incident,
         "objective": "Undo the bad change safely by appending corrective history and synchronizing remote.",
         "expected_end_state": "A new rollback commit is appended on main and origin/main matches the local tip.",
         "initial_state": state,
@@ -213,12 +217,14 @@ def rebase_case(case_id: str, *, suffix: str, interactive: bool = False) -> dict
         branch="feature/recovery",
     )
     state["branches"]["main"] = "c1"
+    incident = (
+        "You are a feature owner in a software company. Your branch diverged while main moved, "
+        "and a teammate needs a clean history before code freeze."
+    )
     return {
         "case_id": case_id,
-        "incident": (
-            "You are a feature owner in a software company. Your branch diverged while main moved, "
-            "and a teammate needs a clean history before code freeze."
-        ),
+        "context": incident,
+        "incident": incident,
         "objective": "Recover the branch by replaying feature work onto the latest main and validating history integrity.",
         "expected_end_state": "feature/recovery points to a clean rebased commit chain with no in-progress state.",
         "initial_state": state,
