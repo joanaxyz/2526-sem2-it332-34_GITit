@@ -143,6 +143,8 @@ const baseSession: ScenarioSession = {
     title: 'Inspect the repository',
     focus: 'git status',
     narrative: '',
+    lesson_number: 1,
+    lesson_id: 5,
   },
   module: {
     id: 3,

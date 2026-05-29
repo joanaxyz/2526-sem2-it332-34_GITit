@@ -13,6 +13,14 @@ import type { ScaffoldTriggerFlags } from './store'
 // Fixed toast ID ensures only one scaffold hint is visible at a time.
 // A subsequent trigger replaces the previous toast rather than stacking a second one.
 const SCAFFOLD_TOAST_ID = 'scaffold-hint'
+type ScaffoldDifficulty = 'easy' | 'medium' | 'hard'
+
+function scaffoldDifficultyFor(difficulty: ScenarioSession['difficulty']): ScaffoldDifficulty {
+  if (difficulty === 'easy') return 'easy'
+  if (difficulty === 'medium') return 'medium'
+  if (difficulty === 'hard') return 'hard'
+  return 'hard'
+}
 
 export function useScaffolding(sessionId: number) {
   const [flags, setFlags] = useState<ScaffoldTriggerFlags>(() => readScaffoldTriggers(sessionId))
@@ -33,14 +41,15 @@ export function useScaffolding(sessionId: number) {
     session: ScenarioSession,
     onProceedToCommandPreview: () => void,
   ) {
-    const message = getScaffoldMessage(trigger, session.difficulty)
+    const difficulty = scaffoldDifficultyFor(session.difficulty)
+    const message = getScaffoldMessage(trigger, difficulty)
 
     toast.custom(
       () => (
         <ScaffoldToast
           message={message}
           trigger={trigger}
-          difficulty={session.difficulty}
+          difficulty={difficulty}
           onProceedToCommandPreview={() => {
             // Session state is preserved in full while the modal is open:
             // (a) TanStack Query cache (in memory for the tab lifetime)

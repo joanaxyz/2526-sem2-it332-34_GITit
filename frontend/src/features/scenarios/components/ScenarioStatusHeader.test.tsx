@@ -27,6 +27,8 @@ const session: ScenarioSession = {
     title: 'Commit the clean changes',
     focus: 'git commit',
     narrative: '',
+    lesson_number: 1,
+    lesson_id: 5,
   },
   module: {
     id: 3,
@@ -77,8 +79,8 @@ describe('ScenarioStatusHeader', () => {
   it('renders a compact command budget in the header with detail text', () => {
     render(<ScenarioStatusHeader session={session} onExit={vi.fn()} />)
 
-    expect(screen.getByRole('button', { name: /actions 1 of 6/i })).toBeInTheDocument()
-    expect(screen.getByText('Target 3')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /actions 1 of 6.*target 3/i })).toBeInTheDocument()
+    expect(screen.getByText('Target/minimum command count')).toBeInTheDocument()
     expect(screen.getAllByText('5 left').length).toBeGreaterThan(0)
     expect(screen.getByText('Counted actions used')).toBeInTheDocument()
     expect(screen.getByText('Maximum/fail limit')).toBeInTheDocument()

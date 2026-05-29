@@ -10,8 +10,6 @@ function actionForDifficulty(difficulty: DifficultyAccess): DifficultyActionInte
   if (difficulty.status === 'locked') return null
   if (difficulty.status === 'in_progress') return difficulty.active_session_id ? 'resume' : null
   if (difficulty.status === 'completed') {
-    const progress = masteredRecordsFor(difficulty)
-    const hasRequiredAttempts = progress.mastered >= progress.required
     const latestAccuracy = difficulty.latest_attempt?.accuracy_rate ?? null
     if (difficulty.review_available && meetsMasteryAccuracy(latestAccuracy)) return 'review'
     if (meetsProgressAccuracy(latestAccuracy)) return 'continue'
