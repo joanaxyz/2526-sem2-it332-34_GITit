@@ -2,6 +2,22 @@ import copy
 
 DELETE_MARKERS = {"deleted", "removed", "delete", "remove"}
 
+DISPLAY_STATUS_ALIASES = {
+    "added": "added",
+    "add": "added",
+    "new": "added",
+    "untracked": "untracked",
+    "modified": "modified",
+    "changed": "modified",
+    "updated": "modified",
+    "staged": "staged",
+    "ignored": "ignored",
+    "conflict": "conflicted",
+    "conflicted": "conflicted",
+    "clean": "clean",
+    **{marker: "deleted" for marker in DELETE_MARKERS},
+}
+
 
 class RepositoryStateNormalizer:
     """Normalize authored repository JSON into the canonical teaching shape.
@@ -240,48 +256,53 @@ class RepositoryStateNormalizer:
     def visible_project_tree(self, state: dict, *, assume_normalized: bool = False) -> dict[str, dict]:
         """Derive the user-visible file set from HEAD, index, and worktree.
 
-        ``working_tree`` in authored scenarios intentionally stores only local
-        changes, not every committed file. The Project Structure panel needs the
-        merged view students would see in a checkout, so this helper starts with
-        the HEAD tree and overlays staged and working-tree entries.
+        ``working_tree`` in authored scenarios intentionally stores local file
+        contents, not status labels. Infer the display status from where the path
+        already exists instead of showing raw content such as ``readme-v2`` as a
+        badge in the Project Files panel.
         """
 
         normalized = state if assume_normalized else self.normalize(state)
+        head_tree = self.head_tree(normalized)
+
         visible: dict[str, dict] = {
             path: {"status": "clean", "source": "head", "content": copy.deepcopy(content)}
-            for path, content in self.head_tree(normalized).items()
+            for path, content in head_tree.items()
         }
 
         for path, value in (normalized.get("staging") or {}).items():
-            status = self.entry_status(value) or "modified"
+            status = self.entry_status(value)
             if self.is_delete_marker(status) or self.is_delete_marker(value):
                 visible[path] = {"status": "deleted", "source": "staging", "content": None}
                 continue
+
+            fallback = "modified" if path in head_tree else "added"
             visible[path] = {
-                "status": self.display_status(value, fallback="modified"),
+                "status": self.display_status(value, fallback=fallback),
                 "source": "staging",
                 "content": self.entry_content(value),
             }
 
+        staged_paths = set((normalized.get("staging") or {}).keys())
+
         for path, value in (normalized.get("working_tree") or {}).items():
-            status = self.entry_status(value) or "modified"
+            status = self.entry_status(value)
             if self.is_delete_marker(status) or self.is_delete_marker(value):
                 visible[path] = {"status": "deleted", "source": "working_tree", "content": None}
                 continue
+
+            fallback = "modified" if path in head_tree or path in staged_paths else "untracked"
             visible[path] = {
-                "status": self.display_status(value, fallback="modified"),
+                "status": self.display_status(value, fallback=fallback),
                 "source": "working_tree",
                 "content": self.entry_content(value),
             }
 
         return dict(sorted(visible.items()))
 
+
     def display_status(self, value: object | None, *, fallback: str = "changed") -> str:
         status = self.entry_status(value)
         if status in {"", "none"}:
             return fallback
-        if status in {"new", "added"}:
-            return "added"
-        if status in {"remove", "removed"}:
-            return "deleted"
-        return status
+        return DISPLAY_STATUS_ALIASES.get(status, fallback)
