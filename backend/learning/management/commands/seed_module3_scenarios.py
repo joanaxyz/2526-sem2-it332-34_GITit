@@ -1316,22 +1316,9 @@ def module_three_scenarios() -> list[dict[str, Any]]:
             },
         ],
     }
-    mergetool_target = {
-        **resolved_target,
-        "rules": [
-            *resolved_target["rules"],
-            {
-                "type": "operation_metadata_equals",
-                "key": "configured_merge_tool",
-                "value": "{{merge_tool}}",
-            },
-            {
-                "type": "operation_metadata_contains",
-                "key": "last_mergetool_paths",
-                "value": "{{conflict_path}}",
-            },
-        ],
-    }
+    # This scenario now validates the resolved merge state only.
+    # The authored solution intentionally does not require merge-tool configuration or launch commands.
+    mergetool_target = resolved_target
     cherry_target = {
         "staging_empty": True,
         "working_tree_clean": True,
@@ -1415,7 +1402,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
         "staging_empty": True,
         "working_tree_clean": True,
         "conflict_free": True,
-        "required_commands": ["git fetch", "git diff", "git merge", "git mergetool", "git cherry-pick"],
+        "required_commands": ["git fetch", "git diff", "git merge", "git cherry-pick"],
         "remote_branch_exists": ["{{source_branch}}"],
         "rules": [
             {
@@ -1427,11 +1414,6 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                 "type": "operation_metadata_equals",
                 "key": "last_merge_branch",
                 "value": "{{source_branch}}",
-            },
-            {
-                "type": "operation_metadata_contains",
-                "key": "last_mergetool_paths",
-                "value": "{{conflict_path}}",
             },
             {
                 "type": "operation_metadata_equals",
@@ -1537,16 +1519,16 @@ def module_three_scenarios() -> list[dict[str, Any]]:
             slug="use-merge-tool-workflow",
             title="Resolving Conflicts Using a Merge Tool",
             focus="git mergetool",
-            summary="Configure a merge tool, use it to resolve conflicts, and complete the merge.",
-            explanation="The simulator records the merge tool launch and opens the workspace conflict editor. Students still choose and save the resolution, stage the file, and complete the merge.",
-            primary=["git config", "git merge", "git mergetool", "git add", "git commit"],
+            summary="Use the merge tool workflow to resolve conflict content, then stage and commit the clean result.",
+            explanation="The simulator exposes the workspace conflict editor after the merge creates a conflict. Students choose and save the resolution, stage the resolved file, and complete the merge commit.",
+            primary=["git merge", "git add", "git commit"],
             supporting=["git status", "git diff --check", "git ls-files -u"],
             concepts=["merge tool", "LOCAL", "REMOTE", "BASE", "MERGED"],
             difficulties={
                 DIFFICULTY_EASY: diff(
-                    (4, 5),
-                    "Configure the requested merge tool and use it to finish the merge.",
-                    "Use the merge tool workflow for the named source branch.",
+                    (3, 3),
+                    "Resolve the conflict and finish the merge with the shortest valid workflow.",
+                    "Merge the named source branch, resolve the conflicted file, stage it, and commit.",
                     [
                         template(
                             slug="mergetool-resolution",
@@ -1562,9 +1544,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                             initial_state="{{initial_state}}",
                             target_rule=mergetool_target,
                             solution=[
-                                "git config --global merge.tool {{merge_tool}}",
                                 "git merge {{source_branch}}",
-                                "git mergetool",
                                 "git add {{conflict_path}}",
                                 "git commit",
                             ],
@@ -1573,18 +1553,18 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                                     "mode": "write",
                                     "path": "{{conflict_path}}",
                                     "content": "{{resolution_content}}",
-                                    "after_command": "git mergetool",
+                                    "after_command": "git merge {{source_branch}}",
                                 }
                             ],
-                            label="Resolve {{conflict_path}} with {{merge_tool}}",
+                            label="Resolve {{conflict_path}}",
                         )
                     ],
                     required_attempts=2,
                 ),
                 DIFFICULTY_MEDIUM: diff(
-                    (4, 5),
-                    "Use mergetool on branch conflicts with different file types.",
-                    "Configure the tool, launch it, and complete the merge.",
+                    (3, 3),
+                    "Resolve branch conflicts with different file types.",
+                    "Merge the named source branch, resolve the conflicted file, stage it, and commit.",
                     [
                         template(
                             slug="mergetool-resolution",
@@ -1599,9 +1579,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                             initial_state="{{initial_state}}",
                             target_rule=mergetool_target,
                             solution=[
-                                "git config --global merge.tool {{merge_tool}}",
                                 "git merge {{source_branch}}",
-                                "git mergetool",
                                 "git add {{conflict_path}}",
                                 "git commit",
                             ],
@@ -1610,18 +1588,18 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                                     "mode": "write",
                                     "path": "{{conflict_path}}",
                                     "content": "{{resolution_content}}",
-                                    "after_command": "git mergetool",
+                                    "after_command": "git merge {{source_branch}}",
                                 }
                             ],
-                            label="Resolve {{conflict_path}} with {{merge_tool}}",
+                            label="Resolve {{conflict_path}}",
                         )
                     ],
                     required_attempts=2,
                 ),
                 DIFFICULTY_HARD: diff(
-                    (4, 5),
-                    "Use the merge tool workflow without extra scaffolding.",
-                    "Finish the merge through the configured tool.",
+                    (3, 3),
+                    "Resolve the merge conflict without extra scaffolding.",
+                    "Merge the named source branch, resolve the conflicted file, stage it, and commit.",
                     [
                         template(
                             slug="mergetool-resolution",
@@ -1636,9 +1614,7 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                             initial_state="{{initial_state}}",
                             target_rule=mergetool_target,
                             solution=[
-                                "git config --global merge.tool {{merge_tool}}",
                                 "git merge {{source_branch}}",
-                                "git mergetool",
                                 "git add {{conflict_path}}",
                                 "git commit",
                             ],
@@ -1647,10 +1623,10 @@ def module_three_scenarios() -> list[dict[str, Any]]:
                                     "mode": "write",
                                     "path": "{{conflict_path}}",
                                     "content": "{{resolution_content}}",
-                                    "after_command": "git mergetool",
+                                    "after_command": "git merge {{source_branch}}",
                                 }
                             ],
-                            label="Resolve {{conflict_path}} with {{merge_tool}}",
+                            label="Resolve {{conflict_path}}",
                         )
                     ],
                     required_attempts=2,
@@ -1979,10 +1955,8 @@ class Command(BaseCommand):
                 "git merge --abort",
             ],
             "git mergetool": [
-                "git config --global merge.tool vscode",
                 "git merge feature/auth-timeout",
                 "git ls-files -u",
-                "git mergetool",
                 "git add src/auth.js",
                 "git commit",
                 "git status",
@@ -2003,7 +1977,6 @@ class Command(BaseCommand):
                 "git fetch origin",
                 "git diff main..origin/feature/auth-timeout",
                 "git merge origin/feature/auth-timeout",
-                "git mergetool --tool vscode src/auth.js",
                 "git add src/auth.js",
                 "git merge --continue",
                 "git cherry-pick c3",
