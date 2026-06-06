@@ -1,12 +1,12 @@
-import React from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
 
 import { ModulePracticeHub } from '@/features/modules/components/ModulePracticeHub'
 import { ModuleSymbol } from '@/features/modules/components/ModuleSymbol'
 import { getModuleAccent } from '@/features/modules/moduleColors'
 import type { LearningModule } from '@/features/modules/types'
-import { Card } from '@/shared/components/Card'
-import { ExpandToggleButton } from '@/shared/components/ExpandToggleButton'
 import { ProgressBar } from '@/shared/components/ProgressBar'
+import { cn } from '@/shared/utils/cn'
 
 function StatusBadge({ progress }: { progress: number }) {
   if (progress >= 100) {
@@ -30,65 +30,76 @@ function StatusBadge({ progress }: { progress: number }) {
   )
 }
 
+function useApproachingViewport() {
+  const ref = useRef<HTMLElement | null>(null)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    if (visible || !ref.current) return
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) setVisible(true)
+    }, { rootMargin: '420px' })
+    observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [visible])
+
+  return { ref, visible }
+}
+
 export function ModuleCard({
   module,
-  isExpanded,
-  onToggle,
+  index,
 }: {
   module: LearningModule
-  isExpanded: boolean
-  onToggle: () => void
+  index: number
 }) {
   const accent = getModuleAccent(module.number)
   const progressValue = Math.round(module.practice_completion?.value ?? 0)
-  const panelId = `module-panel-${module.id}`
+  const { ref, visible } = useApproachingViewport()
+  const side = index % 2 === 0 ? 'left' : 'right'
 
   return (
-    <Card
-      className="module-card-hover overflow-hidden shadow-none"
+    <article
+      ref={ref}
+      className={cn(
+        'learning-path-card relative w-full animate-fade-in-up rounded-lg border border-border bg-card/88 p-5 shadow-none backdrop-blur-sm',
+        side === 'right' && 'lg:ml-auto',
+      )}
       style={{
         '--module-color': accent.color,
         '--module-border-rest': accent.borderRgba,
         '--module-border-hover': accent.borderHoverRgba,
         '--module-glow': accent.glowRgba,
-      } as React.CSSProperties}
+        animationDelay: `${index * 80}ms`,
+      } as CSSProperties}
     >
-      <div className="grid w-full grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-4 p-5 text-left max-sm:grid-cols-[2.75rem_minmax(0,1fr)]">
-        <ModuleSymbol module={module} />
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-lg font-bold leading-tight">
-              <span style={{ color: accent.color }}>Module {module.number}:</span>{' '}
-              {module.title}
-            </h2>
+      <div className="learning-path-node" />
+      <div className="grid gap-5">
+        <div className="grid w-full grid-cols-[3rem_minmax(0,1fr)] gap-4 text-left sm:grid-cols-[3.25rem_minmax(0,1fr)_minmax(10rem,13rem)]">
+          <ModuleSymbol module={module} />
+          <div className="min-w-0">
+            <p className="font-mono text-xs font-bold" style={{ color: accent.color }}>
+              Module {module.number}
+            </p>
+            <h2 className="mt-1 text-xl font-extrabold leading-tight">{module.title}</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{module.description}</p>
           </div>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">{module.description}</p>
-          <div className="mt-3 flex max-w-xl flex-wrap items-center gap-3">
-            <ProgressBar value={progressValue} className="flex-1" glow fillAnimate fillFrom={accent.color} fillTo={accent.gradientTo} />
-            <span className="font-mono text-xs" style={{ color: `${accent.color}B3` }}>{progressValue}%</span>
-            <StatusBadge progress={progressValue} />
-            <span className="font-mono text-xs text-muted-foreground">
-              {module.command_topic_count} command topics / {module.workflow_scenario_count} workflows
-            </span>
-          </div>
-        </div>
-        <ExpandToggleButton expanded={isExpanded} controlsId={panelId} label={module.title} onToggle={onToggle} />
-      </div>
-      {isExpanded ? (
-        <div
-          className="grid"
-          style={{
-            gridTemplateRows: isExpanded ? '1fr' : '0fr',
-            transition: 'grid-template-rows 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-          }}
-        >
-          <div style={{ overflow: 'hidden' }}>
-            <div className="border-t border-border/50 bg-secondary/20 p-5" id={panelId}>
-              <ModulePracticeHub expanded={isExpanded} module={module} />
+          <div className="min-w-0 max-sm:col-span-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-bold uppercase tracking-normal text-muted-foreground">Overall progress</span>
+              <span className="font-mono text-xs" style={{ color: `${accent.color}B3` }}>{progressValue}%</span>
+            </div>
+            <ProgressBar value={progressValue} className="mt-2 h-2" glow fillAnimate fillFrom={accent.color} fillTo={accent.gradientTo} />
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <StatusBadge progress={progressValue} />
+              <span className="font-mono text-[11px] text-muted-foreground">
+                {module.command_topic_count} levels / {module.workflow_scenario_count} workflows
+              </span>
             </div>
           </div>
         </div>
-      ) : null}
-    </Card>
+        <ModulePracticeHub enabled={visible} module={module} />
+      </div>
+    </article>
   )
 }

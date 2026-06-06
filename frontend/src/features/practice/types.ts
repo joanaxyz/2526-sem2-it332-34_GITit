@@ -92,6 +92,15 @@ export type PracticeProblem =
       slug: string
       title: string
       summary: string
+      adventure?: {
+        title: string
+        description: string
+      }
+      command_level?: {
+        id: number
+        number: number
+        label: string
+      }
       topic: {
         id: number
         base_command: string
@@ -113,8 +122,10 @@ export type PracticeProblem =
     }
 
 export type RepositoryVisualization = {
+  schema_version?: number
   commit_dag: Record<string, RepositoryValue>
   state_lens: Record<string, RepositoryValue>
+  target_state_lens?: Record<string, RepositoryValue>
   command_effect_delta: Record<string, RepositoryValue>
 }
 
@@ -165,6 +176,7 @@ export type PracticeSession = {
     live_dag: boolean
     state_lens: boolean
     expected_state: boolean
+    target_state?: boolean
     contextual_feedback: boolean
   }
   repository_state: RepositorySnapshot

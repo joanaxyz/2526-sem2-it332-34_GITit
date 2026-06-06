@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query'
 
 import type { PracticeSession } from '@/features/practice/types'
-import { writeSessionBootstrap } from '@/features/scenarios/utils/sessionBootstrap'
+import { writeSessionBootstrap } from '@/features/practice/utils/sessionBootstrap'
 import { queryKeyRoots, queryKeys } from '@/shared/api/queryKeys'
 
 const practiceSessionSyncChannel = 'git-it:practice-session-sync'
@@ -60,11 +60,7 @@ export function subscribeToPracticeSessionSync(queryClient: QueryClient) {
   }
 }
 
-export function invalidateScenarioProgressQueries(queryClient: QueryClient) {
-  invalidatePracticeProgressQueries(queryClient)
-}
-
-function invalidatePracticeProgressQueries(queryClient: QueryClient) {
+export function invalidatePracticeProgressQueries(queryClient: QueryClient) {
   void queryClient.invalidateQueries({ queryKey: queryKeys.modules })
   void queryClient.invalidateQueries({ queryKey: queryKeys.dashboardSummary })
   void queryClient.invalidateQueries({ queryKey: queryKeyRoots.moduleContent })

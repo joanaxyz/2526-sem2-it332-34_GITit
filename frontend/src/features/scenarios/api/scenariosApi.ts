@@ -1,5 +1,6 @@
 import { apiRequest } from '@/shared/api/httpClient'
 import type {
+  CommandDrillAdventureSummary,
   CommandTopicSummary,
   CommandUsagePreview,
   ModuleContentPage,
@@ -24,7 +25,9 @@ export type PracticeStartPayload =
     }
 
 type ModuleContentResult<TSection extends ModuleContentSection> =
-  TSection extends 'command_topics'
+  TSection extends 'command_adventures'
+    ? ModuleContentPage<CommandDrillAdventureSummary>
+    : TSection extends 'command_topics'
     ? ModuleContentPage<CommandTopicSummary>
     : ModuleContentPage<WorkflowScenarioSummary>
 

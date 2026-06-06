@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
-import { subscribeToPracticeSessionSync } from '@/features/scenarios/utils/scenarioCache'
+import { subscribeToPracticeSessionSync } from '@/features/practice/utils/practiceCache'
 import { ApiError } from '@/shared/api/apiError'
 
 export function AppProviders({ children }: { children: ReactNode }) {

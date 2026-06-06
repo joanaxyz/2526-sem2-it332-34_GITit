@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { BookOpenText, Layers3 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
@@ -33,10 +33,6 @@ export function ModulesPage() {
   const [searchParams] = useSearchParams()
   const moduleParam = searchParams.get('module')
   const focusedModuleId = moduleParam ? Number(moduleParam) : null
-  const [expandedModuleIds, setExpandedModuleIds] = useState<Set<number>>(() => {
-    if (focusedModuleId && Number.isFinite(focusedModuleId)) return new Set([focusedModuleId])
-    return new Set()
-  })
   const foundationsQuery = useQuery({
     queryKey: queryKeys.foundations,
     queryFn: modulesApi.listFoundations,
@@ -48,15 +44,6 @@ export function ModulesPage() {
     staleTime: 5 * 60 * 1000,
   })
 
-  const toggleModule = useCallback((moduleId: number) => {
-    setExpandedModuleIds((current) => {
-      const next = new Set(current)
-      if (next.has(moduleId)) next.delete(moduleId)
-      else next.add(moduleId)
-      return next
-    })
-  }, [])
-
   useEffect(() => {
     if (focusedModuleId && Number.isFinite(focusedModuleId)) return
     window.scrollTo({ top: 0, behavior: 'auto' })
@@ -66,7 +53,7 @@ export function ModulesPage() {
     if (!focusedModuleId || !modulesQuery.data?.length) return
     window.requestAnimationFrame(() => {
       document.querySelector(`[data-module-id="${focusedModuleId}"]`)?.scrollIntoView({
-        block: 'start',
+        block: 'center',
         behavior: 'smooth',
       })
     })
@@ -75,7 +62,7 @@ export function ModulesPage() {
   if (foundationsQuery.isLoading || modulesQuery.isLoading) {
     return (
       <LoadingState
-        description="Getting foundations, command drills, and workflow scenarios ready."
+        description="Getting foundations, command adventures, and workflow scenarios ready."
         label="Loading curriculum"
         variant="page"
       />
@@ -92,17 +79,22 @@ export function ModulesPage() {
   const modules = modulesQuery.data ?? []
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <header className="grid gap-2">
-        <h1 className="text-3xl font-extrabold tracking-tight">Modules</h1>
-        <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-          Build up from Git foundations, drill individual commands, then solve workflow scenarios with increasing constraints.
-        </p>
+    <div className="flex w-full flex-col gap-8">
+      <header className="grid gap-3">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="font-mono text-xs font-bold uppercase tracking-normal text-primary">Curriculum V2</p>
+            <h1 className="mt-2 text-3xl font-extrabold tracking-normal">Learning Path</h1>
+          </div>
+          <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+            Build from foundations, clear command adventure levels, then solve workflows that combine the commands under Easy, Medium, and Hard constraints.
+          </p>
+        </div>
       </header>
 
       <section className="grid gap-3">
         <SectionHeader icon={BookOpenText} title="Foundations" meta={`${foundations.length} topics`} />
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {foundations.map((topic) => (
             <article className="rounded-md border border-border bg-background/40 p-4" key={topic.id}>
               <div className="flex items-start gap-3">
@@ -114,37 +106,23 @@ export function ModulesPage() {
                   <p className="mt-1 text-sm leading-6 text-muted-foreground">{topic.summary}</p>
                 </div>
               </div>
-              {topic.cards?.length ? (
-                <div className="mt-3 grid gap-2">
-                  {topic.cards.slice(0, 2).map((card) => (
-                    <div className="rounded-md border border-border/70 bg-secondary/25 px-3 py-2" key={card.title}>
-                      <p className="text-xs font-bold">{card.title}</p>
-                      <p className="mt-1 text-xs leading-5 text-muted-foreground">{card.body}</p>
-                      {card.command ? <code className="mt-2 block font-mono text-xs text-primary">{card.command}</code> : null}
-                    </div>
-                  ))}
-                </div>
-              ) : null}
             </article>
           ))}
         </div>
       </section>
 
-      <section className="grid gap-3">
-        <SectionHeader icon={Layers3} title="Command drills and workflow scenarios" meta={`${modules.length} modules`} />
-        <div className="flex flex-col gap-3">
+      <section className="grid gap-4">
+        <SectionHeader icon={Layers3} title="Command adventures and workflow scenarios" meta={`${modules.length} modules`} />
+        <div className="learning-path relative grid gap-8 py-2">
           {modules.map((module, index) => (
             <div
-              className="animate-fade-in-up"
+              className="relative grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
               data-module-id={module.id}
               key={module.id}
-              style={{ animationDelay: `${index * 70}ms` }}
             >
-              <ModuleCard
-                module={module}
-                isExpanded={expandedModuleIds.has(module.id)}
-                onToggle={() => toggleModule(module.id)}
-              />
+              <div className={index % 2 === 0 ? 'lg:pr-12' : 'lg:col-start-2 lg:pl-12'}>
+                <ModuleCard module={module} index={index} />
+              </div>
             </div>
           ))}
         </div>

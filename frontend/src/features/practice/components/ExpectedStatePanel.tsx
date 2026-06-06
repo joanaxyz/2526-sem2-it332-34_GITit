@@ -1,8 +1,20 @@
 import type { PracticeSession } from '@/features/practice/types'
 import { Card, CardTitle } from '@/shared/components/Card'
 import { RepositoryStateDiagram } from './LiveDagPanel'
+import { StateLensPanel } from './StateLensPanel'
 
 export function ExpectedStatePanel({ session }: { session: PracticeSession }) {
+  if (session.practice_kind === 'command_drill') {
+    return (
+      <StateLensPanel
+        title="Target State Lens"
+        lens={session.visualization.target_state_lens}
+        className="h-full"
+        tone="target"
+      />
+    )
+  }
+
   if (!session.scaffolding.expected_state || !session.expected_state) {
     return (
       <Card className="h-full p-3 opacity-70 shadow-none">

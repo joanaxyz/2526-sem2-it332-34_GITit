@@ -178,4 +178,59 @@ COMMAND_DRILLS = [
             }
         ],
     },
+    {
+        "usage": "git-switch/existing",
+        "slug": "switch-to-existing-branch",
+        "title": "Switch to an existing branch",
+        "summary": "Move HEAD to the requested branch without changing files.",
+        "required_successful_attempts": 2,
+        "min_counted_commands": 1,
+        "max_counted_commands": 3,
+        "student_context": {
+            "schema_version": 2,
+            "brief": {
+                "story": "Your teammate already created a docs-refresh branch for documentation work.",
+                "task": "Move your workspace onto docs-refresh.",
+            },
+            "repository": {"current_state": ["main and docs-refresh both point at the latest commit."]},
+            "objective": {
+                "outcome": "HEAD should point to the docs-refresh branch.",
+                "required_details": [{"label": "Final branch", "value": "docs-refresh"}],
+            },
+        },
+        "variants": [
+            {
+                "case_id": "switch-docs-refresh",
+                "slug_template": "switch-docs-refresh",
+                "label_template": "Branch handoff",
+                "initial_state_template": {
+                    "repository_initialized": True,
+                    "commits": [
+                        {
+                            "id": "c0",
+                            "message": "Initial project",
+                            "parents": [],
+                            "tree": {"README.md": "Project notes"},
+                            "changes": {"README.md": {"change_type": "added"}},
+                            "files": {"README.md": "added"},
+                        }
+                    ],
+                    "branches": {"main": "c0", "docs-refresh": "c0"},
+                    "head": {"type": "branch", "name": "main"},
+                    "working_tree": {},
+                    "staging": {},
+                    "conflicts": [],
+                },
+                "solution_commands_template": ["git switch docs-refresh"],
+                "evaluation_spec_template": {
+                    "state_requirements": {
+                        "head_branch": "docs-refresh",
+                        "staging_empty": True,
+                    },
+                    "process_requirements": {"required_commands": ["git switch"]},
+                    "completion_policy": {"mode": "rules"},
+                },
+            }
+        ],
+    },
 ]

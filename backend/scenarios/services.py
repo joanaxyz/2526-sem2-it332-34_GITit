@@ -10,6 +10,7 @@ from common.constants import (
     COMMAND_DIAGNOSTIC,
     COMMAND_UNPROCESSABLE,
     DIFFICULTY_EASY,
+    DIFFICULTY_MEDIUM,
     RESULT_INVALID,
     RESULT_TARGET_MATCHED,
     RESULT_UNPROCESSABLE,
@@ -431,7 +432,11 @@ class CommandProcessingService:
             session.first_attempt_star_eligible = False
         session.repository_state = next_state
 
-        visualization_snapshot = self.visualizer.snapshot(next_state, previous_state=previous_state)
+        visualization_snapshot = self.visualizer.snapshot(
+            next_state,
+            previous_state=previous_state,
+            target_state=_visible_target_state(session),
+        )
         step = StepLog.objects.create(
             session=session,
             command_text=command,
@@ -566,6 +571,14 @@ def _uses_contextual_feedback(session: PracticeSession) -> bool:
         session.practice_kind == PracticeKind.COMMAND_DRILL
         or session.difficulty == DIFFICULTY_EASY
     )
+
+
+def _visible_target_state(session: PracticeSession) -> dict | None:
+    if session.practice_kind == PracticeKind.COMMAND_DRILL:
+        return session.variant.target_state
+    if session.difficulty in (DIFFICULTY_EASY, DIFFICULTY_MEDIUM):
+        return session.variant.target_state
+    return None
 
 
 class WorkspaceFileCreationService:

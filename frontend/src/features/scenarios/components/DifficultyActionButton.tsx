@@ -2,7 +2,7 @@ import { ArrowRight, Lock, Play, RefreshCcw, RotateCcw, Star } from 'lucide-reac
 import type { CSSProperties } from 'react'
 
 import type { PracticeActionIntent, WorkflowLevelAccess } from '@/features/scenarios/types'
-import { meetsMasteryAccuracy, meetsProgressAccuracy } from '@/features/scenarios/utils/commandAccuracy'
+import { meetsMasteryAccuracy, meetsProgressAccuracy } from '@/features/practice/utils/commandAccuracy'
 import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
 

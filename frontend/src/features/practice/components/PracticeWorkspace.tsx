@@ -5,26 +5,27 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { GripHorizontal, GripVertical } from 'lucide-react'
 import { Toaster } from 'sonner'
 
-import { ScenarioContextPanel } from '@/features/scenarios/components/ScenarioContextPanel'
-import { ScenarioStatusHeader } from '@/features/scenarios/components/ScenarioStatusHeader'
+import { PracticeContextPanel } from '@/features/practice/components/PracticeContextPanel'
+import { PracticeStatusHeader } from '@/features/practice/components/PracticeStatusHeader'
 import { CompletionCelebrationModal } from '@/features/practice/components/CompletionCelebrationModal'
 import { ContextualFeedbackPanel } from '@/features/practice/components/ContextualFeedbackPanel'
 import { ExpectedStatePanel } from '@/features/practice/components/ExpectedStatePanel'
 import { LiveDagPanel } from '@/features/practice/components/LiveDagPanel'
 import { ProjectStructurePanel } from '@/features/practice/components/ProjectStructurePanel'
-import { ScenarioWorkspaceTour } from '@/features/practice/components/ScenarioWorkspaceTour'
+import { PracticeWorkspaceTour } from '@/features/practice/components/PracticeWorkspaceTour'
+import { StateLensPanel } from '@/features/practice/components/StateLensPanel'
 import { TerminalPanel } from '@/features/practice/components/TerminalPanel'
 import { WorkspaceEditorOverlay } from '@/features/practice/components/WorkspaceEditorOverlay'
 import { practiceApi } from '@/features/practice/api/practiceApi'
 import { useAuthStore } from '@/features/auth/hooks/useAuth'
-import { hasSeenScenarioTour, markScenarioTourSeen } from '@/features/practice/utils/scenarioTour'
+import { hasSeenPracticeTour, markPracticeTourSeen } from '@/features/practice/utils/practiceTour'
 import { useCommandSubmission } from '@/features/practice/hooks/useCommandSubmission'
 import { usePracticeSession } from '@/features/practice/hooks/usePracticeSession'
 import { useScaffolding } from '@/features/practice/scaffolding/useScaffolding'
 import type { PracticeSession } from '@/features/practice/types'
 import { reviewApi } from '@/features/review/api/reviewApi'
 import { scenariosApi, startPayloadForPractice } from '@/features/scenarios/api/scenariosApi'
-import { invalidateScenarioProgressQueries, syncPracticeSessionInCache, updatePracticeSessionCache } from '@/features/scenarios/utils/scenarioCache'
+import { invalidatePracticeProgressQueries, syncPracticeSessionInCache, updatePracticeSessionCache } from '@/features/practice/utils/practiceCache'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { LoadingState } from '@/shared/components/LoadingState'
@@ -46,6 +47,20 @@ function stringList(value: unknown): string[] {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
+}
+
+function commandDrillUsesDag(session: PracticeSession) {
+  if (session.practice_kind !== 'command_drill') return true
+  const target = session.expected_state
+  if (!target) return false
+  return (
+    JSON.stringify(session.repository_state.commits ?? []) !== JSON.stringify(target.commits ?? []) ||
+    JSON.stringify(session.repository_state.branches ?? {}) !== JSON.stringify(target.branches ?? {}) ||
+    JSON.stringify(session.repository_state.head ?? {}) !== JSON.stringify(target.head ?? {}) ||
+    JSON.stringify(session.repository_state.remote_branches ?? {}) !== JSON.stringify(target.remote_branches ?? {}) ||
+    JSON.stringify(session.repository_state.remotes ?? {}) !== JSON.stringify(target.remotes ?? {}) ||
+    JSON.stringify(session.repository_state.reflog ?? []) !== JSON.stringify(target.reflog ?? [])
+  )
 }
 
 function constrainedTerminalPaneRatio(clientX: number, bounds: DOMRect) {
@@ -134,7 +149,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     },
     onSuccess: (updatedSession) => {
       syncPracticeSessionInCache(queryClient, updatedSession)
-      invalidateScenarioProgressQueries(queryClient)
+      invalidatePracticeProgressQueries(queryClient)
       const base = `/modules?module=${updatedSession.module.id}`
       navigate(base)
     },
@@ -144,7 +159,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
       scenariosApi.startSession(startPayloadForPractice('workflow_scenario', session?.next_difficulty?.id ?? 0)),
     onSuccess: (next) => {
       syncPracticeSessionInCache(queryClient, next)
-      invalidateScenarioProgressQueries(queryClient)
+      invalidatePracticeProgressQueries(queryClient)
       if (session?.status === 'completed') setDismissedCompletionSessionId(session.id)
       navigate(`/practice/${next.id}`)
     },
@@ -154,7 +169,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
       reviewApi.startReviewSession(startPayloadForPractice('workflow_scenario', levelId, 'review')),
     onSuccess: (next) => {
       syncPracticeSessionInCache(queryClient, next)
-      invalidateScenarioProgressQueries(queryClient)
+      invalidatePracticeProgressQueries(queryClient)
       if (session?.status === 'completed') setDismissedCompletionSessionId(session.id)
       navigate(`/review/${next.id}`)
     },
@@ -166,7 +181,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     },
     onSuccess: (next) => {
       syncPracticeSessionInCache(queryClient, next)
-      invalidateScenarioProgressQueries(queryClient)
+      invalidatePracticeProgressQueries(queryClient)
       setDismissedCompletionSessionId(null)
       setStartOverConfirmOpen(false)
       navigate(`/practice/${next.id}`)
@@ -205,7 +220,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   if (!session) return <ErrorState title="Could not load practice workspace" description="The API returned no session data." />
 
   const tourKey = `${user?.id ?? 'guest'}:${session.practice_kind}:${session.problem.id}`
-  const shouldAutoOpenTour = dismissedTourKey !== tourKey && !hasSeenScenarioTour(user?.id)
+  const shouldAutoOpenTour = dismissedTourKey !== tourKey && !hasSeenPracticeTour(user?.id)
   const isTourOpen = tourOpen || shouldAutoOpenTour
 
   function submit(command: string) {
@@ -339,6 +354,8 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const workspaceGridStyle = {
     gridTemplateRows: `minmax(14rem, ${1 - terminalRatio}fr) 0.375rem minmax(10rem, ${terminalRatio}fr)`,
   }
+  const isCommandDrill = session.practice_kind === 'command_drill'
+  const showCommandDag = commandDrillUsesDag(session)
   const diagramGridStyle = {
     '--live-dag-size': `${diagramRatio}fr`,
     '--expected-dag-size': `${1 - diagramRatio}fr`,
@@ -351,7 +368,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <Toaster position="bottom-right" expand={false} />
-      <ScenarioStatusHeader
+      <PracticeStatusHeader
         session={session}
         isExiting={exitMutation.isPending}
         isRetrying={retryMutation.isPending}
@@ -370,10 +387,10 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
               : 'minmax(13rem, 1fr) auto',
           }}
           data-testid="workspace-sidebar"
-          data-tour-target="scenario-brief"
+          data-tour-target="practice-brief"
         >
-          <div className="min-h-0 overflow-y-auto app-scrollbar" data-testid="scenario-context-scroll">
-            <ScenarioContextPanel session={session} />
+          <div className="min-h-0 overflow-y-auto app-scrollbar" data-testid="practice-context-scroll">
+            <PracticeContextPanel session={session} />
           </div>
 
           <div className={cn('overflow-hidden', projectFilesOpen ? 'min-h-[14rem]' : '')} data-testid="project-structure-region">
@@ -398,28 +415,61 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
           className="grid min-h-0 gap-0 max-lg:min-h-[56rem]"
           style={workspaceGridStyle}
         >
-          <div
-            ref={diagramGridRef}
-            className="grid min-h-0 grid-cols-1 gap-2 xl:grid-cols-[minmax(0,var(--live-dag-size))_0.375rem_minmax(0,var(--expected-dag-size))] xl:gap-0"
-            style={diagramGridStyle}
-          >
-            <div className="h-full min-h-0" data-tour-target="live-dag">
-              <LiveDagPanel
-                snapshot={session.repository_state}
-                className="flex h-full min-h-0 flex-col"
-                contentClassName="h-full min-h-0 flex-1"
+          {isCommandDrill ? (
+            <div
+              className={cn(
+                'grid min-h-0 grid-cols-1 gap-2',
+                showCommandDag ? 'xl:grid-cols-3' : 'xl:grid-cols-2',
+              )}
+            >
+              <div className="h-full min-h-0" data-tour-target="live-dag">
+                <StateLensPanel
+                  title="Current State Lens"
+                  lens={session.visualization.state_lens}
+                  delta={session.visualization.command_effect_delta}
+                  className="h-full"
+                />
+              </div>
+              <div className="h-full min-h-0" data-tour-target="expected-state">
+                <ExpectedStatePanel session={session} />
+              </div>
+              {showCommandDag ? (
+                <div className="h-full min-h-0">
+                  <LiveDagPanel
+                    title="Command DAG"
+                    snapshot={session.repository_state}
+                    className="flex h-full min-h-0 flex-col"
+                    contentClassName="h-full min-h-0 flex-1"
+                  />
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <div
+              ref={diagramGridRef}
+              className="grid min-h-0 grid-cols-1 gap-2 xl:grid-cols-[minmax(0,var(--live-dag-size))_0.375rem_minmax(0,var(--expected-dag-size))] xl:gap-0"
+              style={diagramGridStyle}
+            >
+              <div className="h-full min-h-0" data-tour-target="live-dag">
+                <LiveDagPanel
+                  title="DAG and State Lens"
+                  snapshot={session.repository_state}
+                  className="flex h-full min-h-0 flex-col"
+                  contentClassName="h-full min-h-0 flex-1"
+                  showRepositoryDetails
+                />
+              </div>
+              <ResizeHandle
+                label="Resize diagrams"
+                orientation="vertical"
+                className="hidden xl:flex"
+                onPointerDown={beginDiagramResize}
               />
+              <div className="h-full min-h-0" data-tour-target="expected-state">
+                <ExpectedStatePanel session={session} />
+              </div>
             </div>
-            <ResizeHandle
-              label="Resize diagrams"
-              orientation="vertical"
-              className="hidden xl:flex"
-              onPointerDown={beginDiagramResize}
-            />
-            <div className="h-full min-h-0" data-tour-target="expected-state">
-              <ExpectedStatePanel session={session} />
-            </div>
-          </div>
+          )}
           <ResizeHandle
             label="Resize terminal height"
             orientation="horizontal"
@@ -539,11 +589,11 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         </div>
       </Modal>
       {isTourOpen ? (
-        <ScenarioWorkspaceTour
+        <PracticeWorkspaceTour
           key={tourKey}
           session={session}
           onClose={() => {
-            markScenarioTourSeen(user?.id)
+            markPracticeTourSeen(user?.id)
             setDismissedTourKey(tourKey)
             setTourOpen(false)
           }}

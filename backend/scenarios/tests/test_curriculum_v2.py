@@ -11,6 +11,7 @@ from scenarios.models import (
     WorkflowScenarioLevel,
 )
 from scenarios.selectors import module_content_page
+from scenarios.serializers import session_payload
 from scenarios.services import CommandProcessingService, PracticeSessionService
 from scenarios.visualization import RepositoryVisualizationService
 
@@ -75,12 +76,49 @@ def test_module_content_is_paginated_by_section(db, django_user_model):
         user=user,
         module_id=module.id,
         section="command_topics",
-        limit=2,
+        limit=1,
     )
 
     assert first_page["results"]
     assert first_page["results"][0]["item_type"] == "command_topic"
     assert first_page["next_cursor"] is not None
+
+
+def test_module_content_exposes_command_drill_adventure_levels_not_public_command_cards(db, django_user_model):
+    call_command("seed_curriculum_v2")
+    user = make_user(django_user_model)
+    module = LearningModule.objects.get(slug="tracking-changes-snapshots")
+
+    page = module_content_page(
+        user=user,
+        module_id=module.id,
+        section="command_adventures",
+        limit=8,
+    )
+
+    assert page["results"]
+    adventure = page["results"][0]
+    assert adventure["item_type"] == "command_drill_adventure"
+    assert adventure["title"] == "Preparing File Changes"
+    assert [level["label"] for level in adventure["levels"]] == ["Level 1", "Level 2"]
+    assert all("difficulty" not in level for level in adventure["levels"])
+    assert all("base_command" not in level for level in adventure["levels"])
+    assert adventure["levels"][0]["usage_count"] > 0
+    assert adventure["levels"][0]["next_practice"]["practice_kind"] == PracticeKind.COMMAND_DRILL
+
+
+def test_every_published_module_has_command_drill_adventure(db, django_user_model):
+    call_command("seed_curriculum_v2")
+    user = make_user(django_user_model)
+
+    for module in LearningModule.objects.filter(is_published=True):
+        page = module_content_page(
+            user=user,
+            module_id=module.id,
+            section="command_adventures",
+        )
+        assert page["results"], module.slug
+        assert page["results"][0]["levels"], module.slug
 
 
 def test_student_context_normalizer_strips_answers_and_evaluator_internals():
@@ -121,10 +159,74 @@ def test_visualization_state_lens_and_delta_work_without_new_commits():
 
     payload = RepositoryVisualizationService().snapshot(after, previous_state=before)
 
+    assert payload["schema_version"] == 2
     assert [commit["id"] for commit in payload["commit_dag"]["commits"]] == ["c0"]
     assert payload["state_lens"]["staging_area"][0]["path"] == "app.py"
     assert payload["command_effect_delta"]["files_staged"] == ["app.py"]
     assert payload["command_effect_delta"]["commits_created"] == []
+
+
+def test_command_drill_payload_exposes_target_state_lens(db, django_user_model):
+    call_command("seed_curriculum_v2")
+    user = make_user(django_user_model)
+    drill = CommandDrill.objects.get(slug="stage-one-file")
+    session = PracticeSessionService().start_session(
+        user=user,
+        problem=drill,
+        source_entry_point="module_page",
+    )
+
+    payload = session_payload(session)
+
+    assert payload["scaffolding"]["expected_state"] is True
+    assert payload["scaffolding"]["target_state"] is True
+    assert payload["expected_state"] is not None
+    assert payload["visualization"]["target_state_lens"]["staging_area"]
+    assert payload["difficulty"] is None
+
+
+def test_workflow_hard_payload_hides_expected_state(db, django_user_model):
+    call_command("seed_curriculum_v2")
+    user = make_user(django_user_model)
+    level = WorkflowScenarioLevel.objects.get(scenario__slug="stage-commit-switch", difficulty="hard")
+    variant = level.variants.get(is_published=True)
+    session = PracticeSession.objects.create(
+        user=user,
+        module=level.module,
+        practice_kind=PracticeKind.WORKFLOW_SCENARIO,
+        workflow_scenario=level.scenario,
+        workflow_level=level,
+        variant=variant,
+        source_entry_point="module_page",
+        difficulty=level.difficulty,
+        command_budget_snapshot={
+            "min_counted_commands": level.min_counted_commands,
+            "max_counted_commands": level.max_counted_commands,
+        },
+        repository_state=variant.initial_state,
+    )
+
+    payload = session_payload(session)
+
+    assert payload["scaffolding"]["expected_state"] is False
+    assert payload["expected_state"] is None
+    assert payload["visualization"]["target_state_lens"] == {}
+
+
+def test_unsupported_command_levels_are_not_published(db):
+    call_command("seed_curriculum_v2")
+
+    published_commands = set(
+        CommandTopic.objects.filter(is_published=True).values_list("base_command", flat=True)
+    )
+
+    assert published_commands == {"git init", "git status", "git add", "git commit", "git switch"}
+    assert not LearningModule.objects.filter(slug="integrated-workflows", is_published=True).exists()
+    assert not CommandTopic.objects.filter(base_command="git clone", is_published=True).exists()
+
+
+def test_seed_curriculum_v2_validate_passes_for_published_content(db):
+    call_command("seed_curriculum_v2", validate=True)
 
 
 def test_status_drill_completes_with_explicit_process_requirement(db, django_user_model):

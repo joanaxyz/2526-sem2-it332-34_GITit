@@ -7,9 +7,9 @@ import { cn } from '@/shared/utils/cn'
 
 const tourSteps = [
   {
-    target: 'scenario-brief',
+    target: 'practice-brief',
     icon: PanelLeft,
-    label: 'Scenario brief',
+    label: 'Practice brief',
     body: 'Story, required details, constraints, and attempt state live here. Read this before touching the terminal.',
     placement: 'right',
   },
@@ -38,7 +38,7 @@ const tourSteps = [
     target: 'feedback',
     icon: MessageSquareText,
     label: 'Feedback panel',
-    body: 'On guided levels, this explains what your last command changed without handing you the solution.',
+    body: 'When guidance is available, this explains what your last command changed without handing you the solution.',
     placement: 'top',
   },
 ] as const
@@ -92,7 +92,7 @@ function getCalloutLayout(target: TourTarget, rect: DOMRect): CalloutLayout {
   }
 }
 
-export function ScenarioWorkspaceTour({
+export function PracticeWorkspaceTour({
   session,
   onClose,
 }: {

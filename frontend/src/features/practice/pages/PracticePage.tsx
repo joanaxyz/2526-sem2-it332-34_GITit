@@ -1,5 +1,5 @@
 import { PracticeWorkspace } from '@/features/practice/components/PracticeWorkspace'
 
-export function ScenarioPracticePage() {
+export function PracticePage() {
   return <PracticeWorkspace />
 }

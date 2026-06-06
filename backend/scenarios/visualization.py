@@ -5,13 +5,21 @@ class RepositoryVisualizationService:
     def __init__(self) -> None:
         self.normalizer = RepositoryStateNormalizer()
 
-    def snapshot(self, state: dict, *, previous_state: dict | None = None) -> dict:
+    def snapshot(
+        self,
+        state: dict,
+        *,
+        previous_state: dict | None = None,
+        target_state: dict | None = None,
+    ) -> dict:
         current = self.normalizer.normalize(state)
         previous = self.normalizer.normalize(previous_state) if previous_state is not None else None
+        target = self.normalizer.normalize(target_state) if target_state is not None else None
         return {
-            "schema_version": 1,
+            "schema_version": 2,
             "commit_dag": self._commit_dag(current),
             "state_lens": self._state_lens(current),
+            "target_state_lens": self._state_lens(target) if target is not None else {},
             "command_effect_delta": self._delta(previous, current) if previous is not None else {},
         }
 

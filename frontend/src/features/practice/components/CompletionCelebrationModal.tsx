@@ -8,7 +8,7 @@ import {
   commandAccuracyFromSession,
   meetsMasteryAccuracy,
   meetsProgressAccuracy,
-} from '@/features/scenarios/utils/commandAccuracy'
+} from '@/features/practice/utils/commandAccuracy'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
@@ -112,12 +112,12 @@ export function CompletionCelebrationModal({
   const headline = isFailed
     ? 'Attempt limit reached'
     : shouldRetryForAccuracy
-      ? 'Scenario cleared, but accuracy needs a retry'
+      ? 'Practice cleared, but accuracy needs a retry'
       : canAdvance
         ? 'Level ready'
         : session.first_attempt_star_eligible && withinMasteryTarget
           ? 'Clean run logged'
-          : 'Scenario cleared'
+          : 'Practice cleared'
   const hitActionLimit = isFailed && session.counts.max_reached
   const message = isFailed
     ? hitActionLimit
@@ -132,13 +132,13 @@ export function CompletionCelebrationModal({
           : 'You completed the required successful attempts. The next level is ready.'
         : meetsProgress
           ? 'That run counts toward progress. Continue to start a fresh attempt for the remaining successful records.'
-          : 'Scenario cleared.'
+          : 'Practice cleared.'
   const Icon = isFailed ? XCircle : Sparkles
 
   return (
     <Modal
       open={open}
-      title={isFailed ? 'Scenario failed' : 'Scenario complete'}
+      title={isFailed ? 'Practice failed' : 'Practice complete'}
       className={cn(
         'w-full max-w-2xl overflow-hidden bg-card',
         isFailed

@@ -3,10 +3,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { practiceApi } from '@/features/practice/api/practiceApi'
 import { reviewApi } from '@/features/review/api/reviewApi'
 import {
-  invalidateScenarioProgressQueries,
+  invalidatePracticeProgressQueries,
   syncPracticeSessionInCache,
   updatePracticeSessionCache,
-} from '@/features/scenarios/utils/scenarioCache'
+} from '@/features/practice/utils/practiceCache'
 import type { CommandResponse, PracticeSession, PracticeStepLog } from '@/features/practice/types'
 import { queryKeys } from '@/shared/api/queryKeys'
 
@@ -83,7 +83,7 @@ export function useCommandSubmission(sessionId: number, reviewMode: boolean) {
 
       if (!reviewMode && response.session.status !== 'started') {
         syncPracticeSessionInCache(queryClient, updatedSession)
-        invalidateScenarioProgressQueries(queryClient)
+        invalidatePracticeProgressQueries(queryClient)
       }
     },
     onError: (error, command, context) => {

@@ -8,8 +8,8 @@ import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { DashboardPage } from '@/features/dashboard/pages/DashboardPage'
 import { PerformancePage } from '@/features/dashboard/pages/PerformancePage'
+import { PracticePage } from '@/features/practice/pages/PracticePage'
 import { ReviewPracticePage } from '@/features/review/pages/ReviewPracticePage'
-import { ScenarioPracticePage } from '@/features/scenarios/pages/ScenarioPracticePage'
 import { ModulesPage } from '@/features/modules/pages/ModulesPage'
 
 export const router = createBrowserRouter([
@@ -40,7 +40,7 @@ export const router = createBrowserRouter([
       </Protected>
     ),
     children: [
-      { path: '/practice/:sessionId', element: <ScenarioPracticePage /> },
+      { path: '/practice/:sessionId', element: <PracticePage /> },
       { path: '/review/:sessionId', element: <ReviewPracticePage /> },
     ],
   },

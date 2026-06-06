@@ -2,7 +2,7 @@ from learning.curriculum_v2.drills import REPO_WITH_WORKING_CHANGE
 
 WORKFLOW_SCENARIOS = [
     {
-        "module": "integrated-workflows",
+        "module": "branching-switching",
         "slug": "stage-commit-switch",
         "title": "Stage, Commit, Then Switch Branches",
         "summary": "Combine staging, committing, and branch switching in one practical flow.",

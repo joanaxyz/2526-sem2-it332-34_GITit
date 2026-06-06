@@ -5,9 +5,10 @@ from common.constants import (
     SESSION_STATUS_COMPLETED,
     SESSION_STATUS_STARTED,
 )
+from learning.curriculum_v2.adventures import command_drill_adventure_for
 from scaffolding.services import ScaffoldingService
 from scenarios.context import StudentContextNormalizer
-from scenarios.models import CompletionRecord, PracticeKind, PracticeSession
+from scenarios.models import CommandTopic, CompletionRecord, PracticeKind, PracticeSession
 from scenarios.selectors import (
     DIFFICULTY_ORDER,
     required_successful_attempts_for_problem,
@@ -68,9 +69,10 @@ def session_payload(session: PracticeSession, *, include_steps: bool = True) -> 
     problem = session.problem
     context = _student_context(session)
     repository_state = snapshotter.snapshot(session.repository_state, already_normalized=True)
-    visualization = visualizer.snapshot(session.repository_state)
-    expected_target = session.variant.expected_state_diagram or session.variant.target_state
     supports = _scaffolding_supports(session)
+    expected_target = session.variant.expected_state_diagram or session.variant.target_state
+    target_state = session.variant.target_state if supports["expected_state"] else None
+    visualization = visualizer.snapshot(session.repository_state, target_state=target_state)
     expected_state = (
         snapshotter.snapshot(expected_target, already_normalized=True)
         if supports["expected_state"] and expected_target
@@ -235,11 +237,19 @@ def _problem_payload(session: PracticeSession) -> dict:
     if session.practice_kind == PracticeKind.COMMAND_DRILL:
         usage = session.command_drill.usage
         topic = usage.topic
+        adventure = command_drill_adventure_for(topic.module)
+        level_number = _command_level_number(topic)
         return {
             "id": session.command_drill_id,
             "slug": session.command_drill.slug,
             "title": session.command_drill.title,
             "summary": session.command_drill.summary,
+            "adventure": adventure,
+            "command_level": {
+                "id": topic.id,
+                "number": level_number,
+                "label": f"Level {level_number}",
+            },
             "topic": {
                 "id": topic.id,
                 "base_command": topic.base_command,
@@ -272,8 +282,18 @@ def _scaffolding_supports(session: PracticeSession) -> dict:
         return {
             "live_dag": False,
             "state_lens": True,
-            "expected_state": False,
+            "expected_state": True,
+            "target_state": True,
             "contextual_feedback": True,
         }
     supports = ScaffoldingService().supports_for(session.workflow_level.difficulty)
-    return {**supports, "state_lens": True}
+    return {**supports, "state_lens": True, "target_state": supports["expected_state"]}
+
+
+def _command_level_number(topic: CommandTopic) -> int:
+    previous_published = CommandTopic.objects.filter(
+        module_id=topic.module_id,
+        is_published=True,
+        sort_order__lt=topic.sort_order,
+    ).count()
+    return previous_published + 1

@@ -54,6 +54,41 @@ export type CommandDrillAccess = PracticeAccess & {
   summary: string
 }
 
+export type CommandAdventureLevelSummary = {
+  id: number
+  slug: string
+  number: number
+  label: string
+  status: PracticeStatus
+  unlocked: boolean
+  usage_count: number
+  drill_count: number
+  variant_count: number
+  progress: {
+    value: number
+    numerator: number
+    denominator: number
+  }
+  next_practice: CommandDrillAccess | null
+}
+
+export type CommandDrillAdventureSummary = {
+  item_type: 'command_drill_adventure'
+  id: number
+  slug: string
+  title: string
+  description: string
+  practice_kind: 'command_drill'
+  progress: {
+    value: number
+    numerator: number
+    denominator: number
+    levels_completed: number
+    level_count: number
+  }
+  levels: CommandAdventureLevelSummary[]
+}
+
 export type CommandUsageSummary = {
   id: number
   slug: string
@@ -95,9 +130,9 @@ export type WorkflowScenarioSummary = {
   levels: WorkflowLevelAccess[]
 }
 
-export type ModuleContentSection = 'command_topics' | 'workflow_scenarios'
+export type ModuleContentSection = 'command_adventures' | 'command_topics' | 'workflow_scenarios'
 
-export type ModuleContentPage<T extends CommandTopicSummary | WorkflowScenarioSummary> = {
+export type ModuleContentPage<T extends CommandDrillAdventureSummary | CommandTopicSummary | WorkflowScenarioSummary> = {
   section: ModuleContentSection
   results: T[]
   next_cursor: number | null

@@ -11,6 +11,8 @@ from common.constants import (
     SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
+from learning.curriculum_v2.adventures import command_drill_adventure_for
+from learning.models import LearningModule
 from scenarios.models import (
     CommandDrill,
     CommandTopic,
@@ -69,6 +71,23 @@ def module_content_page(
     limit: int = 8,
 ) -> dict:
     limit = max(1, min(limit, 24))
+    if section == "command_adventures":
+        module = LearningModule.objects.get(id=module_id, is_published=True)
+        levels = list(command_topic_queryset(module_id=module_id))
+        return {
+            "section": section,
+            "results": [
+                command_drill_adventure_summary_payload(
+                    user=user,
+                    module=module,
+                    levels=levels,
+                )
+            ]
+            if levels
+            else [],
+            "next_cursor": None,
+        }
+
     if section == "workflow_scenarios":
         queryset = workflow_scenario_queryset(module_id=module_id)
         if cursor:
@@ -111,7 +130,7 @@ def command_topic_queryset(*, module_id: int):
                         queryset=CommandDrill.objects.filter(is_published=True).order_by(
                             "sort_order",
                             "id",
-                        ),
+                        ).prefetch_related("variants"),
                     )
                 ),
             )
@@ -164,6 +183,113 @@ def command_topic_summary_payload(*, user, topic: CommandTopic) -> dict:
         "progress": _progress_for_drills(user=user, usages=topic.usages.all()),
         "usages": usages,
     }
+
+
+def command_drill_adventure_summary_payload(
+    *,
+    user,
+    module: LearningModule,
+    levels: list[CommandTopic],
+) -> dict:
+    adventure = command_drill_adventure_for(module)
+    level_payloads = []
+    completed_levels = 0
+    numerator = 0
+    denominator = 0
+    previous_complete = True
+
+    for index, level in enumerate(levels, start=1):
+        payload = command_level_summary_payload(
+            user=user,
+            level=level,
+            level_number=index,
+            unlocked=previous_complete,
+        )
+        level_payloads.append(payload)
+        if payload["status"] == "completed":
+            completed_levels += 1
+        numerator += payload["progress"]["numerator"]
+        denominator += payload["progress"]["denominator"]
+        previous_complete = payload["status"] == "completed"
+
+    return {
+        "item_type": "command_drill_adventure",
+        "id": module.id,
+        "slug": f"{module.slug}-command-drill-adventure",
+        "title": adventure["title"],
+        "description": adventure["description"],
+        "practice_kind": PracticeKind.COMMAND_DRILL,
+        "progress": {
+            "value": round((numerator / denominator) * 100, 1) if denominator else 0.0,
+            "numerator": numerator,
+            "denominator": denominator,
+            "levels_completed": completed_levels,
+            "level_count": len(level_payloads),
+        },
+        "levels": level_payloads,
+    }
+
+
+def command_level_summary_payload(
+    *,
+    user,
+    level: CommandTopic,
+    level_number: int,
+    unlocked: bool,
+) -> dict:
+    drills = [drill for usage in level.usages.all() for drill in usage.drills.all()]
+    progress = _progress_for_drills(user=user, usages=level.usages.all())
+    completed = progress["denominator"] > 0 and progress["numerator"] >= progress["denominator"]
+    active = any(_active_session(user=user, command_drill=drill) for drill in drills)
+    if not unlocked:
+        status = "locked"
+    elif completed:
+        status = "completed"
+    elif active or progress["numerator"] > 0:
+        status = "in_progress"
+    else:
+        status = "not_started"
+
+    next_drill = _next_drill_for_level(user=user, drills=drills)
+    next_practice = command_drill_access_payload(user=user, drill=next_drill) if next_drill else None
+    if next_practice and not unlocked:
+        next_practice = {
+            **next_practice,
+            "status": "locked",
+            "active_session_id": None,
+        }
+
+    variant_count = sum(drill.variants.filter(is_published=True).count() for drill in drills)
+    return {
+        "id": level.id,
+        "slug": level.slug,
+        "number": level_number,
+        "label": f"Level {level_number}",
+        "status": status,
+        "unlocked": unlocked,
+        "usage_count": len([usage for usage in level.usages.all() if usage.drills.all()]),
+        "drill_count": len(drills),
+        "variant_count": variant_count,
+        "progress": progress,
+        "next_practice": next_practice,
+    }
+
+
+def _next_drill_for_level(*, user, drills: list[CommandDrill]) -> CommandDrill | None:
+    if not drills:
+        return None
+    for drill in drills:
+        if _active_session(user=user, command_drill=drill):
+            return drill
+    for drill in drills:
+        progress = _progress_payload(
+            user=user,
+            problem=drill,
+            practice_kind=PracticeKind.COMMAND_DRILL,
+        )
+        if progress["count"] < progress["required"]:
+            return drill
+    return drills[0]
 
 
 def command_drill_access_payload(*, user, drill: CommandDrill) -> dict:
@@ -227,6 +353,7 @@ def workflow_level_access_payload(*, user, level: WorkflowScenarioLevel) -> dict
             completion=completion,
             active_session=active_session,
         ),
+        "review_available": bool(completion),
         "required_successful_attempts": level.required_successful_attempts,
         "successful_attempts": progress,
         "active_session_id": active_session.id if active_session else None,

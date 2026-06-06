@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { practiceApi } from '@/features/practice/api/practiceApi'
 import { isEphemeralStep } from '@/features/practice/hooks/useCommandSubmission'
 import type { PracticeSession, TerminalLine } from '@/features/practice/types'
-import { clearSessionBootstrap, readSessionBootstrap } from '@/features/scenarios/utils/sessionBootstrap'
+import { clearSessionBootstrap, readSessionBootstrap } from '@/features/practice/utils/sessionBootstrap'
 import { queryKeys } from '@/shared/api/queryKeys'
 
 const bootLines: TerminalLine[] = []
