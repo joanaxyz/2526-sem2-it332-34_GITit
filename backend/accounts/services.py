@@ -9,7 +9,7 @@ from django.utils import timezone
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from accounts.models import SessionRecord, StudentProfile
+from accounts.models import SessionRecord
 from common.exceptions import Conflict
 from progress.models import StreakRecord, StudentProgress
 
@@ -23,21 +23,26 @@ class IssuedTokens:
 
 class UserService:
     @transaction.atomic
-    def register_student(
+    def register_account(
         self,
         *,
+        username: str,
         email: str,
         password: str,
         first_name: str,
         last_name: str,
     ):
         User = get_user_model()
+        normalized_username = username.strip()
         normalized_email = User.objects.normalize_email(email).lower()
+
+        if User.objects.filter(username__iexact=normalized_username).exists():
+            raise Conflict("An account already exists for this username.")
         if User.objects.filter(email__iexact=normalized_email).exists():
             raise Conflict("An account already exists for this email.")
 
         user = User.objects.create_user(
-            username=normalized_email,
+            username=normalized_username,
             email=normalized_email,
             password=password,
             first_name=first_name.strip(),
@@ -135,19 +140,15 @@ class TokenService:
         )
         return IssuedTokens(access=str(refresh.access_token), refresh=str(refresh), refresh_jti=jti)
 
-    def authenticate_student(self, *, identifier: str, password: str, request=None):
+    def authenticate_account(self, *, identifier: str, password: str, request=None):
         User = get_user_model()
         normalized_identifier = identifier.strip()
+
         if "@" in normalized_identifier:
             email = User.objects.normalize_email(normalized_identifier).lower()
             user = User.objects.filter(email__iexact=email).first()
         else:
-            profile = (
-                StudentProfile.objects.select_related("user")
-                .filter(student_id__iexact=normalized_identifier)
-                .first()
-            )
-            user = profile.user if profile else None
+            user = User.objects.filter(username__iexact=normalized_identifier).first()
 
         if user is None or user.is_staff:
             return None
@@ -190,4 +191,8 @@ def set_refresh_cookie(response, refresh_token: str) -> None:
 
 
 def clear_refresh_cookie(response) -> None:
-    response.delete_cookie(settings.GIT_IT_REFRESH_COOKIE, path="/api/auth/", samesite="Strict")
+    response.delete_cookie(
+        settings.GIT_IT_REFRESH_COOKIE,
+        path="/api/auth/",
+        samesite="Strict",
+    )

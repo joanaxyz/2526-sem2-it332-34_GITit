@@ -12,12 +12,16 @@ export function presentAuthError(error: unknown): AuthErrorPresentation {
   if (error instanceof ApiError) {
     const detail = String(error.message || '').toLowerCase()
 
+    if (error.status === 409 && detail.includes('username')) {
+      return { message: 'This username is already in use.', retryable: false }
+    }
+
     if (error.status === 409 && detail.includes('email')) {
       return { message: 'This email is already in use.', retryable: false }
     }
 
     if (error.status === 401) {
-      return { message: 'Incorrect email or password', retryable: false }
+      return { message: 'Incorrect username/email or password', retryable: false }
     }
 
     if (error.status === 429) {

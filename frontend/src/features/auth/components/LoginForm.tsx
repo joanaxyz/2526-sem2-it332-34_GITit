@@ -12,17 +12,16 @@ import { useAuthStore } from '@/features/auth/hooks/useAuth'
 import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
 
+const usernamePattern = /^[A-Za-z0-9._-]{3,30}$/
+
 const schema = z.object({
   identifier: z
     .string()
     .trim()
-    .min(1, 'Student ID or email is required.')
+    .min(1, 'Username or email is required.')
     .refine(
-      (value) =>
-        value.includes('@')
-          ? z.string().email().safeParse(value).success
-          : /^\d{2}-\d{4}-\d{3}$/.test(value),
-      'Use your student ID or a valid email address.',
+      (value) => (value.includes('@') ? z.string().email().safeParse(value).success : usernamePattern.test(value)),
+      'Use your username or a valid email address.',
     ),
   password: z.string().min(1, 'Password is required.'),
 })
@@ -89,7 +88,7 @@ export function LoginForm() {
       </div>
 
       <label className="flex flex-col gap-1.5 text-sm font-semibold">
-        Student ID or email
+        Username or email
         <input
           className={cn(inputClasses, form.formState.errors.identifier && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30')}
           autoComplete="username"
@@ -151,7 +150,6 @@ export function LoginForm() {
         {mutation.isPending ? 'Signing in…' : 'Sign in'}
       </Button>
 
-      {/* Feature highlights — fills dead space and reinforces value */}
       <div className="mt-auto flex flex-col gap-3">
         <div
           className="rounded-md p-3"

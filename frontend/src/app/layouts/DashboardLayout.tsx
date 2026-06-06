@@ -75,7 +75,7 @@ function ProfileDropdown({
   user,
   onLogout,
 }: {
-  user: { first_name: string; last_name: string; student_id: string; email: string }
+  user: { first_name: string; last_name: string; username: string; email: string }
   onLogout: () => void
 }) {
   const [open, setOpen] = useState(false)
