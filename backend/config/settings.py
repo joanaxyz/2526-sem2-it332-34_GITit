@@ -19,13 +19,34 @@ def _clean_env_list(values: list[str]) -> list[str]:
 
 
 env = environ.Env(
-    DJANGO_DEBUG=(bool, True),
-    DJANGO_ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
-    DJANGO_CORS_ALLOWED_ORIGINS=(list, ["http://localhost:5173", "http://127.0.0.1:5173"]),
+    # Safer default. Your local .env should explicitly set DJANGO_DEBUG=True.
+    DJANGO_DEBUG=(bool, False),
+
+    DJANGO_ALLOWED_HOSTS=(list, []),
+    DJANGO_CORS_ALLOWED_ORIGINS=(list, []),
+    DJANGO_CSRF_TRUSTED_ORIGINS=(list, []),
+    CORS_ALLOW_CREDENTIALS=(bool, True),
+
     PERFORMANCE_TIMING_ENABLED=(bool, False),
+
+    AUTH_LOGIN_MAX_ATTEMPTS=(int, 5),
+    AUTH_LOGIN_LOCKOUT_SECONDS=(int, 300),
+
+    JWT_ACCESS_TOKEN_LIFETIME_MINUTES=(int, 15),
+    JWT_REFRESH_TOKEN_LIFETIME_DAYS=(int, 7),
+    JWT_COOKIE_NAME=(str, "git_it_refresh"),
+    JWT_COOKIE_PATH=(str, "/api/auth/"),
+    JWT_COOKIE_DOMAIN=(str, ""),
+    JWT_COOKIE_SAMESITE=(str, "Strict"),
     JWT_COOKIE_SECURE=(bool, False),
+
     SECURE_SSL_REDIRECT=(bool, False),
+    SESSION_COOKIE_SECURE=(bool, False),
+    CSRF_COOKIE_SECURE=(bool, False),
+
+    API_VERSION=(str, "0.1.0"),
 )
+
 _os_database_url_before_read_env = os.environ.get("DATABASE_URL")
 env.read_env(BASE_DIR / ".env")
 # A system-level JDBC URL (common when copied from desktop DB tools) overrides
@@ -33,10 +54,29 @@ env.read_env(BASE_DIR / ".env")
 if (_os_database_url_before_read_env or "").startswith("jdbc:"):
     env.read_env(BASE_DIR / ".env", overwrite=True)
 
-SECRET_KEY = env("DJANGO_SECRET_KEY", default="dev-only-change-me")
 DEBUG = env("DJANGO_DEBUG")
+
+DEV_SECRET_KEY = "dev-local-change-before-production"
+
+if DEBUG:
+    SECRET_KEY = env("DJANGO_SECRET_KEY", default=DEV_SECRET_KEY)
+else:
+    SECRET_KEY = env("DJANGO_SECRET_KEY", default="").strip()
+
+    if not SECRET_KEY or SECRET_KEY == DEV_SECRET_KEY:
+        raise RuntimeError(
+            "DJANGO_SECRET_KEY must be set to a unique secret when DJANGO_DEBUG=False."
+        )
+    
 PERFORMANCE_TIMING_ENABLED = env("PERFORMANCE_TIMING_ENABLED", default=DEBUG)
+
 ALLOWED_HOSTS = _clean_env_list(env("DJANGO_ALLOWED_HOSTS"))
+
+if DEBUG and not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
+
+if not DEBUG and (not ALLOWED_HOSTS or "*" in ALLOWED_HOSTS):
+    raise RuntimeError("DJANGO_ALLOWED_HOSTS must be explicit when DJANGO_DEBUG=False.")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -157,12 +197,23 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOWED_ORIGINS = _clean_env_list(env("DJANGO_CORS_ALLOWED_ORIGINS"))
-CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
+
+if DEBUG and not CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ]
+
+CORS_ALLOW_CREDENTIALS = env("CORS_ALLOW_CREDENTIALS")
+
+CSRF_TRUSTED_ORIGINS = (
+    _clean_env_list(env("DJANGO_CSRF_TRUSTED_ORIGINS"))
+    or CORS_ALLOWED_ORIGINS
+)
 
 SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT")
-SESSION_COOKIE_SECURE = env("JWT_COOKIE_SECURE")
-CSRF_COOKIE_SECURE = env("JWT_COOKIE_SECURE")
+SESSION_COOKIE_SECURE = env("SESSION_COOKIE_SECURE", default=env("JWT_COOKIE_SECURE"))
+CSRF_COOKIE_SECURE = env("CSRF_COOKIE_SECURE", default=env("JWT_COOKIE_SECURE"))
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -173,18 +224,39 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
 }
 
+JWT_ACCESS_TOKEN_LIFETIME_MINUTES = env("JWT_ACCESS_TOKEN_LIFETIME_MINUTES")
+JWT_REFRESH_TOKEN_LIFETIME_DAYS = env("JWT_REFRESH_TOKEN_LIFETIME_DAYS")
+
+if JWT_ACCESS_TOKEN_LIFETIME_MINUTES <= 0:
+    raise RuntimeError("JWT_ACCESS_TOKEN_LIFETIME_MINUTES must be greater than 0.")
+
+if JWT_REFRESH_TOKEN_LIFETIME_DAYS <= 0:
+    raise RuntimeError("JWT_REFRESH_TOKEN_LIFETIME_DAYS must be greater than 0.")
+
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=JWT_ACCESS_TOKEN_LIFETIME_MINUTES),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=JWT_REFRESH_TOKEN_LIFETIME_DAYS),
     "ROTATE_REFRESH_TOKENS": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-GIT_IT_REFRESH_COOKIE = "git_it_refresh"
+GIT_IT_REFRESH_COOKIE = env("JWT_COOKIE_NAME")
 GIT_IT_REFRESH_COOKIE_SECURE = env("JWT_COOKIE_SECURE")
+GIT_IT_REFRESH_COOKIE_PATH = env("JWT_COOKIE_PATH").strip() or "/api/auth/"
+GIT_IT_REFRESH_COOKIE_DOMAIN = env("JWT_COOKIE_DOMAIN", default="").strip() or None
+GIT_IT_REFRESH_COOKIE_SAMESITE = env("JWT_COOKIE_SAMESITE").strip().capitalize()
+
+if GIT_IT_REFRESH_COOKIE_SAMESITE not in {"Strict", "Lax", "None"}:
+    raise RuntimeError("JWT_COOKIE_SAMESITE must be Strict, Lax, or None.")
+
+if GIT_IT_REFRESH_COOKIE_SAMESITE == "None" and not GIT_IT_REFRESH_COOKIE_SECURE:
+    raise RuntimeError("JWT_COOKIE_SAMESITE=None requires JWT_COOKIE_SECURE=True.")
+
+if not DEBUG and not GIT_IT_REFRESH_COOKIE_SECURE:
+    raise RuntimeError("JWT_COOKIE_SECURE must be True when DJANGO_DEBUG=False.")
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "GIT it! API",
     "DESCRIPTION": "Student-facing Git scenario practice API.",
-    "VERSION": "0.1.0",
+    "VERSION": env("API_VERSION"),
 }

@@ -174,21 +174,37 @@ class TokenService:
         )
 
 
+def _refresh_cookie_options() -> dict:
+    options = {
+        "httponly": True,
+        "secure": settings.GIT_IT_REFRESH_COOKIE_SECURE,
+        "samesite": settings.GIT_IT_REFRESH_COOKIE_SAMESITE,
+        "path": settings.GIT_IT_REFRESH_COOKIE_PATH,
+    }
+
+    if settings.GIT_IT_REFRESH_COOKIE_DOMAIN:
+        options["domain"] = settings.GIT_IT_REFRESH_COOKIE_DOMAIN
+
+    return options
+
+
 def set_refresh_cookie(response, refresh_token: str) -> None:
     response.set_cookie(
         settings.GIT_IT_REFRESH_COOKIE,
         refresh_token,
         max_age=int(settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()),
-        httponly=True,
-        secure=settings.GIT_IT_REFRESH_COOKIE_SECURE,
-        samesite="Strict",
-        path="/api/auth/",
+        **_refresh_cookie_options(),
     )
 
 
 def clear_refresh_cookie(response) -> None:
+    options = _refresh_cookie_options()
+
+    # delete_cookie does not need these.
+    options.pop("httponly", None)
+    options.pop("secure", None)
+
     response.delete_cookie(
         settings.GIT_IT_REFRESH_COOKIE,
-        path="/api/auth/",
-        samesite="Strict",
+        **options,
     )
