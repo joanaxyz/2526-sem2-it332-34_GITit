@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
 USERNAME_PATTERN = re.compile(r"^[A-Za-z0-9._-]{3,30}$")
-CIT_EMAIL_DOMAIN = "@cit.edu"
 
 
 class RegisterSerializer(serializers.Serializer):
@@ -32,10 +31,7 @@ class RegisterSerializer(serializers.Serializer):
         return value.strip()
 
     def validate_email(self, value: str) -> str:
-        email = get_user_model().objects.normalize_email(value).lower()
-        if not email.endswith(CIT_EMAIL_DOMAIN):
-            raise serializers.ValidationError("Use your CIT email address.")
-        return email
+        return get_user_model().objects.normalize_email(value).lower()
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password_confirm"]:

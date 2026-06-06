@@ -28,8 +28,7 @@ const schema = z
       .string()
       .trim()
       .email('Enter a valid email address.')
-      .transform((value) => value.toLowerCase())
-      .refine((value) => value.endsWith('@cit.edu'), 'Use your CIT email address.'),
+      .transform((value) => value.toLowerCase()),
     password: z.string().min(8, 'Use at least eight characters.'),
     password_confirm: z.string().min(8),
   })
@@ -103,7 +102,7 @@ export function RegisterForm() {
         {form.formState.errors.last_name ? <span className="text-xs font-normal text-destructive">{form.formState.errors.last_name.message}</span> : null}
       </label>
       <label className="flex flex-col gap-1.5 text-sm font-semibold">
-        CIT email
+        Email
         <input className={cn(inputClasses, form.formState.errors.email && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30')} autoComplete="email" {...form.register('email')} />
         {form.formState.errors.email ? <span className="text-xs font-normal text-destructive">{form.formState.errors.email.message}</span> : null}
       </label>

@@ -22,7 +22,7 @@ def registration_payload(**overrides):
         "username": "jcgako",
         "first_name": "Joana",
         "last_name": "Gako",
-        "email": "student@cit.edu",
+        "email": "student@example.com",
         "password": "Password123!",
         "password_confirm": "Password123!",
     }
@@ -33,7 +33,7 @@ def registration_payload(**overrides):
 def create_student_user(**overrides):
     data = {
         "username": "jcgako",
-        "email": "student@cit.edu",
+        "email": "student@example.com",
         "password": "Password123!",
         "first_name": "Joana",
         "last_name": "Gako",
@@ -42,23 +42,23 @@ def create_student_user(**overrides):
     return get_user_model().objects.create_user(**data)
 
 
-def test_register_creates_user_with_username_and_cit_email(db, api_client):
+def test_register_creates_user_with_username_and_email(db, api_client):
     response = api_client.post("/api/auth/register/", registration_payload(), format="json")
 
     assert response.status_code == status.HTTP_201_CREATED
     assert response.data["user"]["username"] == "jcgako"
     assert response.data["user"]["first_name"] == "Joana"
     assert response.data["user"]["last_name"] == "Gako"
-    assert response.data["user"]["email"] == "student@cit.edu"
+    assert response.data["user"]["email"] == "student@example.com"
     assert get_user_model().objects.get().username == "jcgako"
 
 
 def test_register_rejects_duplicate_username_case_insensitive(db, api_client):
-    create_student_user(username="JCGako", email="existing@cit.edu")
+    create_student_user(username="JCGako", email="existing@example.com")
 
     response = api_client.post(
         "/api/auth/register/",
-        registration_payload(username="jcgako", email="new@cit.edu"),
+        registration_payload(username="jcgako", email="new@example.com"),
         format="json",
     )
 
@@ -67,11 +67,11 @@ def test_register_rejects_duplicate_username_case_insensitive(db, api_client):
 
 
 def test_register_rejects_duplicate_email_case_insensitive(db, api_client):
-    create_student_user(username="existing", email="student@cit.edu")
+    create_student_user(username="existing", email="student@example.com")
 
     response = api_client.post(
         "/api/auth/register/",
-        registration_payload(username="newuser", email="STUDENT@cit.edu"),
+        registration_payload(username="newuser", email="STUDENT@example.com"),
         format="json",
     )
 
@@ -79,15 +79,15 @@ def test_register_rejects_duplicate_email_case_insensitive(db, api_client):
     assert "email" in str(response.data).lower()
 
 
-def test_register_rejects_non_cit_email(db, api_client):
+def test_register_accepts_non_cit_email(db, api_client):
     response = api_client.post(
         "/api/auth/register/",
-        registration_payload(email="student@example.com"),
+        registration_payload(email="student@gmail.com"),
         format="json",
     )
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "email" in response.data
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.data["user"]["email"] == "student@gmail.com"
 
 
 def test_register_rejects_invalid_username_format(db, api_client):
@@ -111,7 +111,7 @@ def test_login_accepts_username_or_email(db, api_client):
     )
     email_response = api_client.post(
         "/api/auth/login/",
-        {"identifier": "student@cit.edu", "password": "Password123!"},
+        {"identifier": "student@example.com", "password": "Password123!"},
         format="json",
     )
 
@@ -163,7 +163,7 @@ def test_refresh_succeeds_with_expired_access_token_header(db, api_client):
 
 
 def test_refresh_for_deleted_user_returns_401(db, api_client):
-    user = create_student_user(username="deleted", email="deleted@cit.edu")
+    user = create_student_user(username="deleted", email="deleted@example.com")
     tokens = TokenService().issue_for_user(user)
     user.delete()
     api_client.cookies[settings.GIT_IT_REFRESH_COOKIE] = tokens.refresh
@@ -174,7 +174,7 @@ def test_refresh_for_deleted_user_returns_401(db, api_client):
 
 
 def test_refresh_token_revocation_uses_configured_cache(db):
-    user = create_student_user(username="revoked", email="revoked@cit.edu")
+    user = create_student_user(username="revoked", email="revoked@example.com")
     tokens = TokenService().issue_for_user(user)
     blacklist = TokenBlacklistService()
 
