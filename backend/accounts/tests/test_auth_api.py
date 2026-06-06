@@ -20,8 +20,6 @@ def api_client():
 def registration_payload(**overrides):
     payload = {
         "username": "jcgako",
-        "first_name": "Joana",
-        "last_name": "Gako",
         "email": "student@example.com",
         "password": "Password123!",
         "password_confirm": "Password123!",
@@ -35,8 +33,6 @@ def create_student_user(**overrides):
         "username": "jcgako",
         "email": "student@example.com",
         "password": "Password123!",
-        "first_name": "Joana",
-        "last_name": "Gako",
     }
     data.update(overrides)
     return get_user_model().objects.create_user(**data)
@@ -47,8 +43,6 @@ def test_register_creates_user_with_username_and_email(db, api_client):
 
     assert response.status_code == status.HTTP_201_CREATED
     assert response.data["user"]["username"] == "jcgako"
-    assert response.data["user"]["first_name"] == "Joana"
-    assert response.data["user"]["last_name"] == "Gako"
     assert response.data["user"]["email"] == "student@example.com"
     assert get_user_model().objects.get().username == "jcgako"
 

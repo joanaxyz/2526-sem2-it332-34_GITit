@@ -29,8 +29,6 @@ class UserService:
         username: str,
         email: str,
         password: str,
-        first_name: str,
-        last_name: str,
     ):
         User = get_user_model()
         normalized_username = username.strip()
@@ -45,8 +43,6 @@ class UserService:
             username=normalized_username,
             email=normalized_email,
             password=password,
-            first_name=first_name.strip(),
-            last_name=last_name.strip(),
         )
         StudentProgress.objects.create(user=user)
         StreakRecord.objects.create(user=user)

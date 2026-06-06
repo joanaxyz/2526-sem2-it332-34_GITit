@@ -8,8 +8,6 @@ const user = {
   id: 1,
   email: 'student@example.com',
   username: 'studentuser',
-  first_name: 'Student',
-  last_name: 'User',
 }
 
 function jsonResponse(status: number, payload: unknown) {

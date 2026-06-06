@@ -10,8 +10,6 @@ USERNAME_PATTERN = re.compile(r"^[A-Za-z0-9._-]{3,30}$")
 
 class RegisterSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=30)
-    first_name = serializers.CharField(max_length=150)
-    last_name = serializers.CharField(max_length=150)
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True, min_length=8)
@@ -24,11 +22,6 @@ class RegisterSerializer(serializers.Serializer):
             )
         return username
 
-    def validate_first_name(self, value: str) -> str:
-        return value.strip()
-
-    def validate_last_name(self, value: str) -> str:
-        return value.strip()
 
     def validate_email(self, value: str) -> str:
         return get_user_model().objects.normalize_email(value).lower()
@@ -66,5 +59,3 @@ class UserSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     username = serializers.CharField()
     email = serializers.EmailField()
-    first_name = serializers.CharField()
-    last_name = serializers.CharField()

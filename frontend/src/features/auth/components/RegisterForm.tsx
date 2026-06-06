@@ -22,8 +22,6 @@ const schema = z
       .min(3, 'Use at least three characters.')
       .max(30, 'Use at most 30 characters.')
       .regex(usernamePattern, 'Use letters, numbers, dots, underscores, or hyphens only.'),
-    first_name: z.string().trim().min(1, 'First name is required.'),
-    last_name: z.string().trim().min(1, 'Last name is required.'),
     email: z
       .string()
       .trim()
@@ -67,8 +65,6 @@ export function RegisterForm() {
   function submitRegistration(values: FormValues) {
     mutation.mutate({
       username: values.username,
-      first_name: values.first_name,
-      last_name: values.last_name,
       email: values.email,
       password: values.password,
       password_confirm: values.password_confirm,
@@ -90,16 +86,6 @@ export function RegisterForm() {
         Username
         <input className={cn(inputClasses, form.formState.errors.username && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30')} autoComplete="username" {...form.register('username')} />
         {form.formState.errors.username ? <span className="text-xs font-normal text-destructive">{form.formState.errors.username.message}</span> : null}
-      </label>
-      <label className="flex flex-col gap-1.5 text-sm font-semibold">
-        First name
-        <input className={cn(inputClasses, form.formState.errors.first_name && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30')} autoComplete="given-name" {...form.register('first_name')} />
-        {form.formState.errors.first_name ? <span className="text-xs font-normal text-destructive">{form.formState.errors.first_name.message}</span> : null}
-      </label>
-      <label className="flex flex-col gap-1.5 text-sm font-semibold">
-        Last name
-        <input className={cn(inputClasses, form.formState.errors.last_name && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30')} autoComplete="family-name" {...form.register('last_name')} />
-        {form.formState.errors.last_name ? <span className="text-xs font-normal text-destructive">{form.formState.errors.last_name.message}</span> : null}
       </label>
       <label className="flex flex-col gap-1.5 text-sm font-semibold">
         Email

@@ -13,8 +13,8 @@ const navItems = [
   { to: '/performance', label: 'Performance', icon: BarChart2 },
 ]
 
-function getInitials(firstName: string, lastName: string) {
-  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+function getInitials(username: string) {
+  return username.slice(0, 2).toUpperCase()
 }
 
 function Avatar({
@@ -75,7 +75,7 @@ function ProfileDropdown({
   user,
   onLogout,
 }: {
-  user: { first_name: string; last_name: string; username: string; email: string }
+  user: { username: string; email: string }
   onLogout: () => void
 }) {
   const [open, setOpen] = useState(false)
@@ -90,8 +90,8 @@ function ProfileDropdown({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [open])
 
-  const initials = getInitials(user.first_name, user.last_name)
-  const fullName = `${user.last_name}, ${user.first_name}`
+  const initials = getInitials(user.username)
+  const displayName = user.username
 
   return (
     <div ref={ref} className="relative">
@@ -104,7 +104,7 @@ function ProfileDropdown({
         onClick={() => setOpen((v) => !v)}
       >
         <Avatar initials={initials} open={open} />
-        <span className="hidden text-sm font-semibold text-foreground md:inline">{fullName}</span>
+        <span className="hidden text-sm font-semibold text-foreground md:inline">{displayName}</span>
         <ChevronDown
           className={cn(
             'size-3.5 text-muted-foreground transition-transform duration-200',
@@ -123,7 +123,7 @@ function ProfileDropdown({
         >
           {/* Identity header — avatar + name + email */}
           <div className="border-b border-border/40 px-4 py-3">
-            <p className="truncate text-sm font-bold text-foreground">{fullName}</p>
+            <p className="truncate text-sm font-bold text-foreground">{displayName}</p>
             <p className="break-all text-xs leading-snug text-muted-foreground">{user.email}</p>
           </div>
 
