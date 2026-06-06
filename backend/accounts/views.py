@@ -21,7 +21,8 @@ class RegisterAPIView(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = UserService().register_student(
+        user = UserService().register_account(
+            username=serializer.validated_data["username"],
             email=serializer.validated_data["email"],
             password=serializer.validated_data["password"],
             first_name=serializer.validated_data["first_name"],
@@ -55,8 +56,8 @@ class LoginAPIView(APIView):
                 status=status.HTTP_429_TOO_MANY_REQUESTS,
             )
 
-        user = token_service.authenticate_student(
-            identifier=serializer.validated_data["identifier"],
+        user = token_service.authenticate_account(
+            identifier=identifier,
             password=serializer.validated_data["password"],
             request=request,
         )
@@ -74,7 +75,7 @@ class LoginAPIView(APIView):
                     status=status.HTTP_429_TOO_MANY_REQUESTS,
                 )
             return Response(
-                {"detail": "Incorrect email or password"},
+                {"detail": "Incorrect username/email or password"},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
         token_service.clear_failed_login(identifier=identifier, ip_address=ip_address)

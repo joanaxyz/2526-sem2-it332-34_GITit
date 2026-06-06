@@ -12,15 +12,24 @@ import { PasswordStrengthIndicator } from '@/features/auth/components/PasswordSt
 import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
 
+const usernamePattern = /^[A-Za-z0-9._-]{3,30}$/
+
 const schema = z
   .object({
+    username: z
+      .string()
+      .trim()
+      .min(3, 'Use at least three characters.')
+      .max(30, 'Use at most 30 characters.')
+      .regex(usernamePattern, 'Use letters, numbers, dots, underscores, or hyphens only.'),
     first_name: z.string().trim().min(1, 'First name is required.'),
     last_name: z.string().trim().min(1, 'Last name is required.'),
     email: z
       .string()
       .trim()
       .email('Enter a valid email address.')
-      .transform((value) => value.toLowerCase()),
+      .transform((value) => value.toLowerCase())
+      .refine((value) => value.endsWith('@cit.edu'), 'Use your CIT email address.'),
     password: z.string().min(8, 'Use at least eight characters.'),
     password_confirm: z.string().min(8),
   })
@@ -56,23 +65,33 @@ export function RegisterForm() {
     [mutation.error],
   )
 
+  function submitRegistration(values: FormValues) {
+    mutation.mutate({
+      username: values.username,
+      first_name: values.first_name,
+      last_name: values.last_name,
+      email: values.email,
+      password: values.password,
+      password_confirm: values.password_confirm,
+    })
+  }
+
   return (
     <form
       className="flex flex-col gap-2.5"
       onSubmit={form.handleSubmit((values) => {
         setLastSubmittedValues(values)
-        mutation.mutate({
-          first_name: values.first_name,
-          last_name: values.last_name,
-          email: values.email,
-          password: values.password,
-          password_confirm: values.password_confirm,
-        })
+        submitRegistration(values)
       })}
     >
       <div>
         <h2 className="text-2xl font-extrabold tracking-tight">Create account</h2>
       </div>
+      <label className="flex flex-col gap-1.5 text-sm font-semibold">
+        Username
+        <input className={cn(inputClasses, form.formState.errors.username && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30')} autoComplete="username" {...form.register('username')} />
+        {form.formState.errors.username ? <span className="text-xs font-normal text-destructive">{form.formState.errors.username.message}</span> : null}
+      </label>
       <label className="flex flex-col gap-1.5 text-sm font-semibold">
         First name
         <input className={cn(inputClasses, form.formState.errors.first_name && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30')} autoComplete="given-name" {...form.register('first_name')} />
@@ -84,7 +103,7 @@ export function RegisterForm() {
         {form.formState.errors.last_name ? <span className="text-xs font-normal text-destructive">{form.formState.errors.last_name.message}</span> : null}
       </label>
       <label className="flex flex-col gap-1.5 text-sm font-semibold">
-        Email
+        CIT email
         <input className={cn(inputClasses, form.formState.errors.email && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30')} autoComplete="email" {...form.register('email')} />
         {form.formState.errors.email ? <span className="text-xs font-normal text-destructive">{form.formState.errors.email.message}</span> : null}
       </label>
@@ -140,15 +159,7 @@ export function RegisterForm() {
             <button
               type="button"
               className="mt-2 text-xs font-semibold underline underline-offset-2"
-              onClick={() =>
-                mutation.mutate({
-                  first_name: lastSubmittedValues.first_name,
-                  last_name: lastSubmittedValues.last_name,
-                  email: lastSubmittedValues.email,
-                  password: lastSubmittedValues.password,
-                  password_confirm: lastSubmittedValues.password_confirm,
-                })
-              }
+              onClick={() => submitRegistration(lastSubmittedValues)}
             >
               Retry
             </button>

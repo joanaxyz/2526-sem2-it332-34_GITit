@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import AccessToken
 
-from accounts.models import SessionRecord, StudentProfile
+from accounts.models import SessionRecord
 from accounts.services import TokenBlacklistService, TokenService
 
 
@@ -19,7 +19,7 @@ def api_client():
 
 def registration_payload(**overrides):
     payload = {
-        "student_id": "23-0001-001",
+        "username": "jcgako",
         "first_name": "Joana",
         "last_name": "Gako",
         "email": "student@cit.edu",
@@ -30,15 +30,53 @@ def registration_payload(**overrides):
     return payload
 
 
-def test_register_creates_student_profile_with_cit_email(db, api_client):
+def create_student_user(**overrides):
+    data = {
+        "username": "jcgako",
+        "email": "student@cit.edu",
+        "password": "Password123!",
+        "first_name": "Joana",
+        "last_name": "Gako",
+    }
+    data.update(overrides)
+    return get_user_model().objects.create_user(**data)
+
+
+def test_register_creates_user_with_username_and_cit_email(db, api_client):
     response = api_client.post("/api/auth/register/", registration_payload(), format="json")
 
     assert response.status_code == status.HTTP_201_CREATED
-    assert response.data["user"]["student_id"] == "23-0001-001"
+    assert response.data["user"]["username"] == "jcgako"
     assert response.data["user"]["first_name"] == "Joana"
     assert response.data["user"]["last_name"] == "Gako"
     assert response.data["user"]["email"] == "student@cit.edu"
-    assert StudentProfile.objects.get().student_id == "23-0001-001"
+    assert get_user_model().objects.get().username == "jcgako"
+
+
+def test_register_rejects_duplicate_username_case_insensitive(db, api_client):
+    create_student_user(username="JCGako", email="existing@cit.edu")
+
+    response = api_client.post(
+        "/api/auth/register/",
+        registration_payload(username="jcgako", email="new@cit.edu"),
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_409_CONFLICT
+    assert "username" in str(response.data).lower()
+
+
+def test_register_rejects_duplicate_email_case_insensitive(db, api_client):
+    create_student_user(username="existing", email="student@cit.edu")
+
+    response = api_client.post(
+        "/api/auth/register/",
+        registration_payload(username="newuser", email="STUDENT@cit.edu"),
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_409_CONFLICT
+    assert "email" in str(response.data).lower()
 
 
 def test_register_rejects_non_cit_email(db, api_client):
@@ -52,30 +90,23 @@ def test_register_rejects_non_cit_email(db, api_client):
     assert "email" in response.data
 
 
-def test_register_rejects_invalid_student_id_format(db, api_client):
+def test_register_rejects_invalid_username_format(db, api_client):
     response = api_client.post(
         "/api/auth/register/",
-        registration_payload(student_id="2023-0001"),
+        registration_payload(username="bad username!"),
         format="json",
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert "student_id" in response.data
+    assert "username" in response.data
 
 
-def test_login_accepts_student_id_or_email(db, api_client):
-    user = get_user_model().objects.create_user(
-        username="student@cit.edu",
-        email="student@cit.edu",
-        password="Password123!",
-        first_name="Joana",
-        last_name="Gako",
-    )
-    StudentProfile.objects.create(user=user, student_id="23-0001-001")
+def test_login_accepts_username_or_email(db, api_client):
+    create_student_user()
 
-    student_id_response = api_client.post(
+    username_response = api_client.post(
         "/api/auth/login/",
-        {"identifier": "23-0001-001", "password": "Password123!"},
+        {"identifier": "jcgako", "password": "Password123!"},
         format="json",
     )
     email_response = api_client.post(
@@ -84,27 +115,23 @@ def test_login_accepts_student_id_or_email(db, api_client):
         format="json",
     )
 
-    assert student_id_response.status_code == status.HTTP_200_OK
+    assert username_response.status_code == status.HTTP_200_OK
     assert email_response.status_code == status.HTTP_200_OK
-    assert student_id_response.data["user"]["student_id"] == "23-0001-001"
-    assert email_response.data["user"]["student_id"] == "23-0001-001"
+    assert username_response.data["user"]["username"] == "jcgako"
+    assert email_response.data["user"]["username"] == "jcgako"
 
 
-def test_login_rejects_non_cit_email_identifier(db, api_client):
-    user = get_user_model().objects.create_user(
-        username="student@example.com",
-        email="student@example.com",
-        password="Password123!",
-    )
-    StudentProfile.objects.create(user=user, student_id="23-0001-001")
+def test_login_rejects_invalid_credentials_with_generic_message(db, api_client):
+    create_student_user()
 
     response = api_client.post(
         "/api/auth/login/",
-        {"identifier": "student@example.com", "password": "Password123!"},
+        {"identifier": "jcgako", "password": "wrong-password"},
         format="json",
     )
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.data["detail"] == "Incorrect username/email or password"
 
 
 def test_refresh_does_not_clear_refresh_cookie_on_token_error(db, api_client):
@@ -117,13 +144,7 @@ def test_refresh_does_not_clear_refresh_cookie_on_token_error(db, api_client):
 
 
 def test_refresh_succeeds_with_expired_access_token_header(db, api_client):
-    user = get_user_model().objects.create_user(
-        username="student@cit.edu",
-        email="student@cit.edu",
-        password="Password123!",
-    )
-    StudentProfile.objects.create(user=user, student_id="23-0001-001")
-
+    user = create_student_user()
     tokens = TokenService().issue_for_user(user)
     api_client.cookies[settings.GIT_IT_REFRESH_COOKIE] = tokens.refresh
 
@@ -142,12 +163,7 @@ def test_refresh_succeeds_with_expired_access_token_header(db, api_client):
 
 
 def test_refresh_for_deleted_user_returns_401(db, api_client):
-    user = get_user_model().objects.create_user(
-        username="deleted@cit.edu",
-        email="deleted@cit.edu",
-        password="Password123!",
-    )
-    StudentProfile.objects.create(user=user, student_id="23-0001-002")
+    user = create_student_user(username="deleted", email="deleted@cit.edu")
     tokens = TokenService().issue_for_user(user)
     user.delete()
     api_client.cookies[settings.GIT_IT_REFRESH_COOKIE] = tokens.refresh
@@ -158,12 +174,7 @@ def test_refresh_for_deleted_user_returns_401(db, api_client):
 
 
 def test_refresh_token_revocation_uses_configured_cache(db):
-    user = get_user_model().objects.create_user(
-        username="revoked@cit.edu",
-        email="revoked@cit.edu",
-        password="Password123!",
-    )
-    StudentProfile.objects.create(user=user, student_id="23-0001-003")
+    user = create_student_user(username="revoked", email="revoked@cit.edu")
     tokens = TokenService().issue_for_user(user)
     blacklist = TokenBlacklistService()
 
