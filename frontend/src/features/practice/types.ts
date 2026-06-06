@@ -1,4 +1,4 @@
-import type { Difficulty, DifficultyAccess } from '@/features/scenarios/types'
+import type { Difficulty, PracticeCompletion, PracticeKind, WorkflowLevelAccess } from '@/features/scenarios/types'
 
 export type RepositoryValue =
   | string
@@ -65,40 +65,75 @@ export type RepositorySnapshot = {
   visible_tree?: Record<string, RepositoryValue>
 }
 
-export type ScenarioStudentContext = {
-  story?: string
-  situation?: string
-  current_state?: string[]
-  required_details?: Array<{ label: string; value: string }>
-  constraints?: string[]
+export type RequiredDetail = {
+  label: string
+  value: string
 }
 
-export type ScenarioSession = {
+export type PracticeStudentContext = {
+  brief?: {
+    story?: string
+    task?: string
+  }
+  repository?: {
+    current_state?: string[]
+  }
+  objective?: {
+    outcome?: string
+    required_details?: RequiredDetail[]
+  }
+  constraints?: string[]
+  process_notes?: string[]
+}
+
+export type PracticeProblem =
+  | {
+      id: number
+      slug: string
+      title: string
+      summary: string
+      topic: {
+        id: number
+        base_command: string
+        title: string
+      }
+      usage: {
+        id: number
+        usage_form: string
+        label: string
+      }
+    }
+  | {
+      id: number
+      slug: string
+      title: string
+      summary: string
+      narrative: string
+      level_id: number
+    }
+
+export type RepositoryVisualization = {
+  commit_dag: Record<string, RepositoryValue>
+  state_lens: Record<string, RepositoryValue>
+  command_effect_delta: Record<string, RepositoryValue>
+}
+
+export type PracticeSession = {
   id: number
   mode: 'primary' | 'review'
   status: 'started' | 'completed' | 'failed' | 'abandoned'
   failure_reason?: string | null
-  difficulty_instance_id: number
+  practice_kind: PracticeKind
   completed_at: string | null
   first_attempt_star_eligible: boolean
-  completion_type: 'state_based' | 'expanded_state_based'
-  scenario: {
-    id: number
-    slug: string
-    title: string
-    focus: string
-    narrative: string
-    student_context?: ScenarioStudentContext
-    lesson_number: number
-    lesson_id: number
-  }
-  student_context?: ScenarioStudentContext
+  problem: PracticeProblem
+  student_context?: PracticeStudentContext
   module: {
     id: number
     number: number
     title: string
   }
-  difficulty: Difficulty
+  difficulty: Difficulty | null
   variant: {
     id: number
     label: string
@@ -114,10 +149,8 @@ export type ScenarioSession = {
     required: number
   }
   policy: {
-    id: number
     min_counted_commands: number
     max_counted_commands: number
-    non_counted_patterns: string[]
   }
   counts: {
     counted_action_total: number
@@ -130,32 +163,31 @@ export type ScenarioSession = {
   }
   scaffolding: {
     live_dag: boolean
+    state_lens: boolean
     expected_state: boolean
     contextual_feedback: boolean
   }
   repository_state: RepositorySnapshot
+  visualization: RepositoryVisualization
   expected_state: RepositorySnapshot | null
-  steps: ScenarioStepLog[]
+  steps: PracticeStepLog[]
   review_mode: boolean
   next_difficulty: {
     id: number
     difficulty: Difficulty
   } | null
-  completion?: {
-    first_attempt_star: boolean
-    counted_action_total: number
-    completed_at: string
-  } | null
-  reviewable_difficulties?: DifficultyAccess[]
+  completion?: PracticeCompletion | null
+  reviewable_difficulties?: WorkflowLevelAccess[]
 }
 
-export type ScenarioStepLog = {
+export type PracticeStepLog = {
   id: number
   command_text: string
   terminal_output: string
   result_category: string
   command_classification: string
   contextual_feedback: string
+  visualization_snapshot?: RepositoryVisualization
   created_at: string
 }
 
@@ -174,25 +206,28 @@ export type CommandResponse = {
     evaluation_result: string
     command_classification: string
     contextual_feedback: string
+    visualization_snapshot?: RepositoryVisualization
     created_at: string
   }
 }
 
 export type CommandSessionUpdate = Pick<
-  ScenarioSession,
+  PracticeSession,
   | 'id'
   | 'mode'
   | 'status'
-  | 'difficulty_instance_id'
+  | 'failure_reason'
+  | 'practice_kind'
   | 'completed_at'
   | 'first_attempt_star_eligible'
   | 'counts'
   | 'repository_state'
+  | 'visualization'
   | 'review_mode'
 > &
   Partial<
     Pick<
-      ScenarioSession,
+      PracticeSession,
       'mastery_progress' | 'mastered_records' | 'completion' | 'next_difficulty'
     >
   >

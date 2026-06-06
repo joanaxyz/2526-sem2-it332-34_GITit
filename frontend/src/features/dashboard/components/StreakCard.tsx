@@ -51,7 +51,7 @@ export function StreakCard({ summary }: { summary: DashboardSummary }) {
           <Flame className="flame-glow size-5 text-primary" />
           Streak
         </CardTitle>
-        <CardDescription>Updated on the first completed scenario session per day.</CardDescription>
+        <CardDescription>Updated on the first completed practice session per day.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="number-glow text-4xl font-extrabold text-primary">

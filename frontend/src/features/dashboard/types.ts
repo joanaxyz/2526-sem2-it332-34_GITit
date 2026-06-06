@@ -5,8 +5,8 @@ export type RateMetric = {
 }
 
 export type DashboardSummary = {
-  kpis: Record<'orientation_completion' | 'scr' | 'arc' | 'car' | 'hlcr' | 'rta', RateMetric>
-  module_kpis: Record<'1' | '2' | '3' | '4', {
+  kpis: Record<'practice_completion' | 'scr' | 'arc' | 'car' | 'hlcr' | 'rta', RateMetric>
+  module_kpis: Record<string, {
     scr: RateMetric
     hlcr: RateMetric
     rta: RateMetric
@@ -26,8 +26,8 @@ export type DashboardSummary = {
   }
   first_attempt_stars: number
   retry_trends: Array<{
-    scenario_id: number
-    scenario_title: string
+    practice_kind: 'command_drill' | 'workflow_scenario'
+    practice_title: string
     attempts: number
     retries: number
     label: string

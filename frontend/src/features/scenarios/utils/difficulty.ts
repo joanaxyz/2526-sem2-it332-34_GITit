@@ -1,4 +1,4 @@
-import type { DifficultyAccess } from '@/features/scenarios/types'
+import type { WorkflowLevelAccess } from '@/features/scenarios/types'
 
 export function nextDifficultyInSequence<T extends { difficulty: string }>(
   difficulties: readonly T[],
@@ -9,7 +9,7 @@ export function nextDifficultyInSequence<T extends { difficulty: string }>(
 }
 
 export function nextAvailableDifficultyAfter(
-  difficulties: readonly DifficultyAccess[],
+  difficulties: readonly WorkflowLevelAccess[],
   currentDifficulty: string,
 ) {
   const nextDifficulty = nextDifficultyInSequence(difficulties, currentDifficulty)

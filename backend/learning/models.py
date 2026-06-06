@@ -1,13 +1,11 @@
-from django.conf import settings
 from django.db import models
 
 
-class LearningUnit(models.Model):
+class LearningModule(models.Model):
     slug = models.SlugField(unique=True)
     number = models.PositiveIntegerField(unique=True)
     title = models.CharField(max_length=160)
     description = models.TextField()
-    is_orientation = models.BooleanField(default=False)
     is_published = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
 
@@ -15,51 +13,21 @@ class LearningUnit(models.Model):
         ordering = ["sort_order", "number"]
 
     def __str__(self) -> str:
-        return f"Unit {self.number}: {self.title}"
+        return f"Module {self.number}: {self.title}"
 
 
-class Lesson(models.Model):
-    unit = models.ForeignKey(LearningUnit, related_name="lessons", on_delete=models.CASCADE)
-    slug = models.SlugField()
-    title = models.CharField(max_length=180)
-    subtitle = models.CharField(max_length=240, blank=True)
-    content_html = models.TextField()
-    scoped_css = models.TextField(blank=True)
-    interaction_steps = models.JSONField(default=list, blank=True)
+class FoundationTopic(models.Model):
+    slug = models.SlugField(unique=True)
+    title = models.CharField(max_length=160)
+    summary = models.TextField(blank=True)
+    body = models.TextField(blank=True)
+    icon = models.CharField(max_length=40, blank=True)
+    cards = models.JSONField(default=list, blank=True)
     is_published = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
 
     class Meta:
-        ordering = ["unit__sort_order", "sort_order"]
-        unique_together = [("unit", "slug")]
+        ordering = ["sort_order", "title"]
 
     def __str__(self) -> str:
         return self.title
-
-
-class OrientationProgress(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
-    completed_at = models.DateTimeField(null=True, blank=True)
-    highest_step_seen = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        unique_together = [("user", "lesson")]
-
-    @property
-    def is_complete(self) -> bool:
-        return self.completed_at is not None
-
-
-class OrientationLessonSession(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    lesson = models.ForeignKey(Lesson, related_name="orientation_sessions", on_delete=models.CASCADE)
-    repository_state = models.JSONField(default=dict)
-    command_log = models.JSONField(default=list, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=["user", "lesson", "-updated_at"]),
-        ]

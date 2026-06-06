@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it } from 'vitest'
 
-import type { ScenarioSession } from '@/features/practice/types'
+import type { PracticeSession } from '@/features/practice/types'
 import {
   clearSessionBootstrap,
   readSessionBootstrap,
   writeSessionBootstrap,
 } from '@/features/scenarios/utils/sessionBootstrap'
 
-const session = { id: 42 } as ScenarioSession
+const session = { id: 42 } as PracticeSession
 
 afterEach(() => {
   clearSessionBootstrap(42)

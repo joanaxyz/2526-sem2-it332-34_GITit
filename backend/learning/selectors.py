@@ -1,161 +1,121 @@
-from django.db.models import BooleanField, Count, Exists, IntegerField, OuterRef, Prefetch, Q, Value
-from django.shortcuts import get_object_or_404
+from django.db.models import Count, Q
 
-from common.constants import COMPLETION_TYPES
-from learning.models import LearningUnit, Lesson, OrientationProgress
-from scenarios.models import DifficultyInstance, ScenarioSession
+from learning.models import FoundationTopic, LearningModule
+from scenarios.models import (
+    CommandDrill,
+    PracticeKind,
+    PracticeSession,
+    WorkflowScenarioLevel,
+)
+from scenarios.selectors import session_meets_progress_threshold
 
 
-def published_units(*, user=None):
-    user_is_authenticated = bool(getattr(user, "is_authenticated", False))
-    lesson_complete_annotation = (
-        Exists(
-            OrientationProgress.objects.filter(
-                user=user,
-                lesson_id=OuterRef("pk"),
-                completed_at__isnull=False,
-            )
-        )
-        if user_is_authenticated
-        else Value(False, output_field=BooleanField())
-    )
-    practice_completion_annotation = (
-        Count(
-            "scenarios__completionrecord__difficulty_instance_id",
-            filter=Q(
-                scenarios__completionrecord__user=user,
-                scenarios__completionrecord__difficulty_instance__is_published=True,
-            ),
-            distinct=True,
-        )
-        if user_is_authenticated
-        else Value(0, output_field=IntegerField())
-    )
-    lesson_queryset = (
-        Lesson.objects.filter(is_published=True, unit__is_orientation=True)
-        .only("id", "unit_id", "slug", "title", "subtitle", "sort_order")
-        .annotate(
-            is_complete_for_user=lesson_complete_annotation,
-            published_scenario_count=Count(
-                "scenarios",
-                filter=Q(
-                    scenarios__is_published=True,
-                    scenarios__difficulty_instances__is_published=True,
-                    scenarios__difficulty_instances__completion_type__in=COMPLETION_TYPES,
-                ),
-                distinct=True,
-            )
-        )
-    )
+def published_foundations():
+    return FoundationTopic.objects.filter(is_published=True).order_by("sort_order", "title")
+
+
+def published_modules():
     return (
-        LearningUnit.objects.filter(is_published=True)
-        .only("id", "slug", "number", "title", "description", "is_orientation", "sort_order")
-        .prefetch_related(Prefetch("lessons", queryset=lesson_queryset))
+        LearningModule.objects.filter(is_published=True)
         .annotate(
-            published_lesson_count=Count(
-                "lessons",
-                filter=Q(is_orientation=True, lessons__is_published=True),
+            command_topic_count=Count(
+                "command_topics",
+                filter=Q(command_topics__is_published=True),
                 distinct=True,
             ),
-            published_scenario_count=Count(
-                "scenarios",
-                filter=Q(
-                    scenarios__is_published=True,
-                    scenarios__difficulty_instances__is_published=True,
-                    scenarios__difficulty_instances__completion_type__in=COMPLETION_TYPES,
-                ),
+            workflow_scenario_count=Count(
+                "workflow_scenarios",
+                filter=Q(workflow_scenarios__is_published=True),
                 distinct=True,
             ),
-            practice_completion_count=practice_completion_annotation,
         )
         .order_by("sort_order", "number")
     )
 
 
-def published_lesson(lesson_id: int) -> Lesson:
-    return get_object_or_404(
-        Lesson.objects.select_related("unit"),
-        id=lesson_id,
-        is_published=True,
-        unit__is_published=True,
-    )
-
-
-def orientation_progress_map(user) -> dict[int, OrientationProgress]:
-    return {
-        item.lesson_id: item
-        for item in OrientationProgress.objects.filter(user=user).select_related("lesson")
-    }
-
-
-def practice_completion_count_map(*, user, unit_ids: list[int]) -> dict[int, int]:
-    if not getattr(user, "is_authenticated", False) or not unit_ids:
+def practice_completion_count_map(*, user, module_ids: list[int]) -> dict[int, int]:
+    if not getattr(user, "is_authenticated", False) or not module_ids:
         return {}
 
-    counts_by_instance: dict[int, int] = {}
-    unit_by_instance: dict[int, int] = {}
-    required_by_instance: dict[int, int] = {}
-    for session in (
-        ScenarioSession.objects.filter(
+    completion_by_module = {module_id: 0 for module_id in module_ids}
+    completed_sessions = (
+        PracticeSession.objects.filter(
             user=user,
             mode="primary",
             status="completed",
-            difficulty_instance__is_published=True,
-            difficulty_instance__completion_type__in=COMPLETION_TYPES,
-            scenario__is_published=True,
-            scenario__learning_unit_id__in=unit_ids,
+            module_id__in=module_ids,
         )
-        .select_related("difficulty_instance__command_policy")
+        .select_related("command_drill", "workflow_level")
         .only(
             "id",
-            "scenario__learning_unit_id",
-            "difficulty_instance_id",
-            "difficulty_instance__difficulty",
-            "difficulty_instance__required_successful_attempts",
-            "difficulty_instance__command_policy__min_counted_commands",
-            "status",
+            "module_id",
+            "practice_kind",
+            "command_drill_id",
+            "workflow_level_id",
             "counted_action_total",
+            "command_budget_snapshot",
+            "command_drill__required_successful_attempts",
+            "workflow_level__required_successful_attempts",
         )
-    ):
-        policy = session.difficulty_instance.command_policy
-        if session.counted_action_total > policy.min_counted_commands:
+    )
+    counts_by_problem: dict[tuple[str, int], int] = {}
+    required_by_problem: dict[tuple[str, int], int] = {}
+    module_by_problem: dict[tuple[str, int], int] = {}
+
+    for session in completed_sessions:
+        if not session_meets_progress_threshold(session=session):
             continue
-        counts_by_instance[session.difficulty_instance_id] = (
-            counts_by_instance.get(session.difficulty_instance_id, 0) + 1
+        if session.practice_kind == PracticeKind.COMMAND_DRILL:
+            problem_id = session.command_drill_id
+            required = session.command_drill.required_successful_attempts
+        else:
+            problem_id = session.workflow_level_id
+            required = session.workflow_level.required_successful_attempts
+        if not problem_id:
+            continue
+        key = (session.practice_kind, problem_id)
+        counts_by_problem[key] = counts_by_problem.get(key, 0) + 1
+        required_by_problem[key] = required
+        module_by_problem[key] = session.module_id
+
+    for key, count in counts_by_problem.items():
+        module_id = module_by_problem[key]
+        completion_by_module[module_id] = completion_by_module.get(module_id, 0) + min(
+            count,
+            required_by_problem.get(key, 1),
         )
-        unit_by_instance[session.difficulty_instance_id] = session.scenario.learning_unit_id
-        required_by_instance[session.difficulty_instance_id] = (
-            session.difficulty_instance.required_successful_attempts
-        )
-
-    completion_by_unit = {unit_id: 0 for unit_id in unit_ids}
-    for difficulty_instance_id, count in counts_by_instance.items():
-        unit_id = unit_by_instance[difficulty_instance_id]
-        required = required_by_instance.get(difficulty_instance_id, 2)
-        completion_by_unit[unit_id] = completion_by_unit.get(unit_id, 0) + min(count, required)
-    return completion_by_unit
+    return completion_by_module
 
 
-def practice_completion_denominator_map(*, unit_ids: list[int]) -> dict[int, int]:
-    if not unit_ids:
+def practice_completion_denominator_map(*, module_ids: list[int]) -> dict[int, int]:
+    if not module_ids:
         return {}
 
-    denominator_by_unit = {unit_id: 0 for unit_id in unit_ids}
-    for item in (
-        DifficultyInstance.objects.filter(
+    denominator_by_module = {module_id: 0 for module_id in module_ids}
+    for row in (
+        CommandDrill.objects.filter(
             is_published=True,
-            completion_type__in=COMPLETION_TYPES,
-            scenario__is_published=True,
-            scenario__learning_unit__is_published=True,
-            scenario__learning_unit_id__in=unit_ids,
+            usage__is_published=True,
+            usage__topic__is_published=True,
+            usage__topic__module_id__in=module_ids,
         )
-        .values(
-            "scenario__learning_unit_id",
-            "required_successful_attempts",
-        )
+        .values("usage__topic__module_id", "required_successful_attempts")
     ):
-        unit_id = item["scenario__learning_unit_id"]
-        denominator_by_unit[unit_id] = denominator_by_unit.get(unit_id, 0) + int(
-            item["required_successful_attempts"] or 0
+        module_id = row["usage__topic__module_id"]
+        denominator_by_module[module_id] = denominator_by_module.get(module_id, 0) + int(
+            row["required_successful_attempts"] or 0
         )
-    return denominator_by_unit
+
+    for row in (
+        WorkflowScenarioLevel.objects.filter(
+            is_published=True,
+            scenario__is_published=True,
+            scenario__module_id__in=module_ids,
+        )
+        .values("scenario__module_id", "required_successful_attempts")
+    ):
+        module_id = row["scenario__module_id"]
+        denominator_by_module[module_id] = denominator_by_module.get(module_id, 0) + int(
+            row["required_successful_attempts"] or 0
+        )
+    return denominator_by_module

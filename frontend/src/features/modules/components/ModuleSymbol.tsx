@@ -1,4 +1,4 @@
-import { BookOpen, Compass, FolderOpen, GitBranch, GitMerge, LifeBuoy, type LucideIcon } from 'lucide-react'
+import { BookOpen, FolderOpen, GitBranch, GitMerge, LifeBuoy, type LucideIcon } from 'lucide-react'
 
 import type { LearningModule } from '@/features/modules/types'
 import { cn } from '@/shared/utils/cn'
@@ -9,7 +9,6 @@ type ModuleSymbolConfig = {
 }
 
 const MODULE_SYMBOLS: Record<string, ModuleSymbolConfig> = {
-  orientation: { icon: Compass, shortLabel: 'Start' },
   'local-foundations': { icon: FolderOpen, shortLabel: 'Local' },
   'branching-navigation': { icon: GitBranch, shortLabel: 'Branch' },
   'collaboration-integration': { icon: GitMerge, shortLabel: 'Merge' },
@@ -19,8 +18,7 @@ const MODULE_SYMBOLS: Record<string, ModuleSymbolConfig> = {
 
 const FALLBACK_SYMBOL: ModuleSymbolConfig = { icon: BookOpen, shortLabel: 'Module' }
 
-function getModuleSymbol(module: Pick<LearningModule, 'slug' | 'is_orientation'>) {
-  if (module.is_orientation) return MODULE_SYMBOLS.orientation
+function getModuleSymbol(module: Pick<LearningModule, 'slug'>) {
   return MODULE_SYMBOLS[module.slug] ?? FALLBACK_SYMBOL
 }
 
@@ -28,7 +26,7 @@ export function ModuleSymbol({
   module,
   className,
 }: {
-  module: Pick<LearningModule, 'slug' | 'title' | 'is_orientation'>
+  module: Pick<LearningModule, 'slug' | 'title'>
   className?: string
 }) {
   const { icon: Icon, shortLabel } = getModuleSymbol(module)

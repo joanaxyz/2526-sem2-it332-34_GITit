@@ -4,14 +4,14 @@ import { practiceApi } from '@/features/practice/api/practiceApi'
 import { reviewApi } from '@/features/review/api/reviewApi'
 import {
   invalidateScenarioProgressQueries,
-  syncScenarioSessionInCache,
-  updateScenarioSessionCache,
+  syncPracticeSessionInCache,
+  updatePracticeSessionCache,
 } from '@/features/scenarios/utils/scenarioCache'
-import type { CommandResponse, ScenarioSession, ScenarioStepLog } from '@/features/practice/types'
+import type { CommandResponse, PracticeSession, PracticeStepLog } from '@/features/practice/types'
 import { queryKeys } from '@/shared/api/queryKeys'
 
 type CommandMutationContext = {
-  previous: ScenarioSession
+  previous: PracticeSession
   pendingId: number
 }
 
@@ -22,15 +22,15 @@ function nextEphemeralStepId() {
   return ephemeralStepId
 }
 
-export function isEphemeralStep(step: ScenarioStepLog) {
+export function isEphemeralStep(step: PracticeStepLog) {
   return step.id < 0
 }
 
-export function stripEphemeralSteps(steps: ScenarioStepLog[]) {
+export function stripEphemeralSteps(steps: PracticeStepLog[]) {
   return steps.filter((step) => !isEphemeralStep(step))
 }
 
-function createPendingStep(command: string, id: number): ScenarioStepLog {
+function createPendingStep(command: string, id: number): PracticeStepLog {
   return {
     id,
     command_text: command,
@@ -42,7 +42,7 @@ function createPendingStep(command: string, id: number): ScenarioStepLog {
   }
 }
 
-function createErrorStep(command: string, message: string, id: number): ScenarioStepLog {
+function createErrorStep(command: string, message: string, id: number): PracticeStepLog {
   return {
     id,
     command_text: command,
@@ -65,31 +65,31 @@ export function useCommandSubmission(sessionId: number, reviewMode: boolean) {
     mutationFn: (command: string) =>
       reviewMode ? reviewApi.submitCommand(sessionId, command) : practiceApi.submitCommand(sessionId, command),
     onMutate: (command) => {
-      const previous = queryClient.getQueryData<ScenarioSession>(queryKeys.scenarioSession(sessionId))
+      const previous = queryClient.getQueryData<PracticeSession>(queryKeys.practiceSession(sessionId))
       if (!previous) return undefined
 
       const pendingId = nextEphemeralStepId()
-      updateScenarioSessionCache(queryClient, {
+      updatePracticeSessionCache(queryClient, {
         ...previous,
         steps: [...stripEphemeralSteps(previous.steps), createPendingStep(command, pendingId)],
       })
-      void queryClient.cancelQueries({ queryKey: queryKeys.scenarioSession(sessionId) })
+      void queryClient.cancelQueries({ queryKey: queryKeys.practiceSession(sessionId) })
 
       return { previous, pendingId } satisfies CommandMutationContext
     },
     onSuccess: (response) => {
       const updatedSession = mergeCommandStepIntoSession(queryClient, response)
-      updateScenarioSessionCache(queryClient, updatedSession)
+      updatePracticeSessionCache(queryClient, updatedSession)
 
       if (!reviewMode && response.session.status !== 'started') {
-        syncScenarioSessionInCache(queryClient, updatedSession)
+        syncPracticeSessionInCache(queryClient, updatedSession)
         invalidateScenarioProgressQueries(queryClient)
       }
     },
     onError: (error, command, context) => {
       if (!context?.previous) return
 
-      updateScenarioSessionCache(queryClient, {
+      updatePracticeSessionCache(queryClient, {
         ...context.previous,
         steps: [
           ...stripEphemeralSteps(context.previous.steps),
@@ -103,8 +103,8 @@ export function useCommandSubmission(sessionId: number, reviewMode: boolean) {
 function mergeCommandStepIntoSession(
   queryClient: ReturnType<typeof useQueryClient>,
   response: CommandResponse,
-): ScenarioSession {
-  const previous = queryClient.getQueryData<ScenarioSession>(queryKeys.scenarioSession(response.session.id))
+): PracticeSession {
+  const previous = queryClient.getQueryData<PracticeSession>(queryKeys.practiceSession(response.session.id))
   const priorSteps = stripEphemeralSteps(previous?.steps ?? [])
   const step = {
     id: response.step.id,
@@ -118,7 +118,7 @@ function mergeCommandStepIntoSession(
 
   const hasCompletion = Object.prototype.hasOwnProperty.call(response.session, 'completion')
   const hasNextDifficulty = Object.prototype.hasOwnProperty.call(response.session, 'next_difficulty')
-  const session: ScenarioSession = previous
+  const session: PracticeSession = previous
     ? {
         ...previous,
         ...response.session,
@@ -132,7 +132,7 @@ function mergeCommandStepIntoSession(
         completion: hasCompletion ? response.session.completion ?? null : previous.completion,
         next_difficulty: hasNextDifficulty ? response.session.next_difficulty ?? null : previous.next_difficulty,
       }
-    : (response.session as ScenarioSession)
+    : (response.session as PracticeSession)
 
   return {
     ...session,
@@ -141,9 +141,9 @@ function mergeCommandStepIntoSession(
 }
 
 function mergeRepositoryState(
-  previous: ScenarioSession['repository_state'],
-  next: ScenarioSession['repository_state'],
-): ScenarioSession['repository_state'] {
+  previous: PracticeSession['repository_state'],
+  next: PracticeSession['repository_state'],
+): PracticeSession['repository_state'] {
   const hasProjectTree =
     next.project_tree !== undefined ||
     next.visible_tree !== undefined ||

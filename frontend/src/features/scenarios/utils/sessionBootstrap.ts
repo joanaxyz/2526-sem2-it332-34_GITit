@@ -1,10 +1,10 @@
-import type { ScenarioSession } from '@/features/practice/types'
+import type { PracticeSession } from '@/features/practice/types'
 
 const BOOTSTRAP_PREFIX = 'git-it:session-bootstrap:'
 const BOOTSTRAP_TTL_MS = 60_000
 
 type BootstrapEntry = {
-  session: ScenarioSession
+  session: PracticeSession
   storedAt: number
 }
 
@@ -12,7 +12,7 @@ function bootstrapKey(sessionId: number) {
   return `${BOOTSTRAP_PREFIX}${sessionId}`
 }
 
-export function writeSessionBootstrap(session: ScenarioSession) {
+export function writeSessionBootstrap(session: PracticeSession) {
   if (typeof window === 'undefined') return
   try {
     const entry: BootstrapEntry = { session, storedAt: Date.now() }
@@ -22,7 +22,7 @@ export function writeSessionBootstrap(session: ScenarioSession) {
   }
 }
 
-export function readSessionBootstrap(sessionId: number): ScenarioSession | undefined {
+export function readSessionBootstrap(sessionId: number): PracticeSession | undefined {
   if (typeof window === 'undefined') return undefined
   try {
     const raw = window.sessionStorage.getItem(bootstrapKey(sessionId))

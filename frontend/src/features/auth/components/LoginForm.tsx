@@ -33,7 +33,7 @@ const inputClasses =
 
 const highlights = [
   { Icon: ShieldCheck, text: 'Live DAG visualizations per command' },
-  { Icon: Zap, text: 'Consequence-safe scenario practice' },
+  { Icon: Zap, text: 'Consequence-safe practice sessions' },
   { Icon: GitMerge, text: 'Progress tracking across all modules' },
 ]
 

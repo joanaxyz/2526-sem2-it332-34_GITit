@@ -25,7 +25,7 @@ def _canonical_form(command: str) -> str:
     command_matches() accepts either spelling.
     """
     normalized = normalize_command(command).lower()
-    # "git checkout -b <branch>" → "git switch -c <branch>"
+    # "git checkout -b <branch>" is equivalent to "git switch -c <branch>".
     parts = normalized.split()
     if len(parts) >= 3 and parts[1] == "checkout" and parts[2] == "-b":
         parts[1] = "switch"
@@ -47,7 +47,7 @@ class StateBasedEvaluator:
     def evaluate(
         self,
         state: dict,
-        target_rule: dict,
+        state_requirements: dict,
         *,
         initial_state: dict | None = None,
         executed_commands: list[str] | None = None,
@@ -57,7 +57,7 @@ class StateBasedEvaluator:
             self.normalizer.normalize(initial_state) if initial_state is not None else None
         )
         executed_commands = executed_commands or []
-        rules = self._rules_from_target_rule(target_rule or {})
+        rules = self._rules_from_state_requirements(state_requirements or {})
         passed_rules: list[dict] = []
         failed_rules: list[dict] = []
 
@@ -89,45 +89,45 @@ class StateBasedEvaluator:
             summary=summary,
         )
 
-    def _rules_from_target_rule(self, target_rule: dict) -> list[dict]:
-        rules = [dict(rule) for rule in target_rule.get("rules", [])]
+    def _rules_from_state_requirements(self, state_requirements: dict) -> list[dict]:
+        rules = [dict(rule) for rule in state_requirements.get("rules", [])]
 
-        for required in target_rule.get("required_commands", []):
+        for required in state_requirements.get("required_commands", []):
             rules.append({"type": "required_command", "command": required})
-        for forbidden in target_rule.get("forbidden_commands", []):
+        for forbidden in state_requirements.get("forbidden_commands", []):
             rules.append({"type": "forbidden_command", "command": forbidden})
 
-        if "repository_initialized" in target_rule:
+        if "repository_initialized" in state_requirements:
             rules.append(
                 {
                     "type": "repository_initialized",
-                    "value": bool(target_rule["repository_initialized"]),
+                    "value": bool(state_requirements["repository_initialized"]),
                 }
             )
-        for name in target_rule.get("branch_exists", []):
+        for name in state_requirements.get("branch_exists", []):
             rules.append({"type": "branch_exists", "branch": name})
-        for name in target_rule.get("branch_absent", []):
+        for name in state_requirements.get("branch_absent", []):
             rules.append({"type": "branch_absent", "branch": name})
-        for name, commit_id in target_rule.get("branch_points_to", {}).items():
+        for name, commit_id in state_requirements.get("branch_points_to", {}).items():
             rules.append({"type": "branch_points_to", "branch": name, "commit": commit_id})
-        for name, commit_id in target_rule.get("remote_branch_points_to", {}).items():
+        for name, commit_id in state_requirements.get("remote_branch_points_to", {}).items():
             rules.append(
                 {"type": "remote_branch_points_to", "remote_branch": name, "commit": commit_id}
             )
-        if target_rule.get("head_branch"):
-            rules.append({"type": "head_branch_equals", "branch": target_rule["head_branch"]})
+        if state_requirements.get("head_branch"):
+            rules.append({"type": "head_branch_equals", "branch": state_requirements["head_branch"]})
 
-        for name in target_rule.get("remote_exists", []):
+        for name in state_requirements.get("remote_exists", []):
             rules.append({"type": "remote_exists", "remote": name})
-        for name in target_rule.get("remote_branch_exists", []):
+        for name in state_requirements.get("remote_branch_exists", []):
             rules.append({"type": "remote_branch_exists", "remote_branch": name})
-        for name in target_rule.get("remote_branch_absent", []):
+        for name in state_requirements.get("remote_branch_absent", []):
             rules.append({"type": "remote_branch_absent", "remote_branch": name})
-        for branch in target_rule.get("upstream_tracking_set", []):
+        for branch in state_requirements.get("upstream_tracking_set", []):
             rules.append({"type": "upstream_tracking_set", "branch": branch})
-        for name, url in target_rule.get("remote_url_matches", {}).items():
+        for name, url in state_requirements.get("remote_url_matches", {}).items():
             rules.append({"type": "remote_url_matches", "remote": name, "url": url})
-        for branch, upstream in target_rule.get("upstream_tracking", {}).items():
+        for branch, upstream in state_requirements.get("upstream_tracking", {}).items():
             rules.append(
                 {
                     "type": "upstream_tracking_equals",
@@ -135,14 +135,14 @@ class StateBasedEvaluator:
                     "upstream": upstream,
                 }
             )
-        if "remote_tracking_updated" in target_rule:
+        if "remote_tracking_updated" in state_requirements:
             rules.append(
                 {
                     "type": "remote_tracking_updated",
-                    "value": bool(target_rule["remote_tracking_updated"]),
+                    "value": bool(state_requirements["remote_tracking_updated"]),
                 }
             )
-        for remote_branch, local_branch in target_rule.get(
+        for remote_branch, local_branch in state_requirements.get(
             "remote_branch_matches_local", {}
         ).items():
             rules.append(
@@ -153,28 +153,28 @@ class StateBasedEvaluator:
                 }
             )
 
-        if target_rule.get("working_tree_clean"):
+        if state_requirements.get("working_tree_clean"):
             rules.append({"type": "working_tree_clean"})
-        if target_rule.get("staging_empty"):
+        if state_requirements.get("staging_empty"):
             rules.append({"type": "index_empty"})
-        if target_rule.get("conflict_free"):
+        if state_requirements.get("conflict_free"):
             rules.append({"type": "conflict_free"})
-        if target_rule.get("stash_stack_empty") or target_rule.get("stash_stack_empty_after_pop"):
+        if state_requirements.get("stash_stack_empty") or state_requirements.get("stash_stack_empty_after_pop"):
             rules.append({"type": "stash_stack_empty"})
 
-        for branch, minimum in target_rule.get("min_commits_on_branch", {}).items():
+        for branch, minimum in state_requirements.get("min_commits_on_branch", {}).items():
             rules.append({"type": "min_commits_on_branch", "branch": branch, "minimum": minimum})
-        for left, right in target_rule.get("branches_equal", []):
+        for left, right in state_requirements.get("branches_equal", []):
             rules.append({"type": "branches_equal", "left": left, "right": right})
 
-        for path in target_rule.get("working_tree_contains", []):
+        for path in state_requirements.get("working_tree_contains", []):
             rules.append({"type": "working_tree_contains", "path": path})
-        for path in target_rule.get("working_tree_absent", []):
+        for path in state_requirements.get("working_tree_absent", []):
             rules.append({"type": "working_tree_absent", "path": path})
-        for path in target_rule.get("staging_contains", []):
+        for path in state_requirements.get("staging_contains", []):
             rules.append({"type": "staging_contains", "path": path})
 
-        latest_commit_rule = target_rule.get("latest_commit", {})
+        latest_commit_rule = state_requirements.get("latest_commit", {})
         if latest_commit_rule:
             rules.append(
                 {
@@ -186,16 +186,16 @@ class StateBasedEvaluator:
                 }
             )
 
-        for expected in target_rule.get("reflog_contains", []):
+        for expected in state_requirements.get("reflog_contains", []):
             rules.append({"type": "reflog_contains", "expected": expected})
 
-        if target_rule.get("repository_state_unchanged"):
+        if state_requirements.get("repository_state_unchanged"):
             rules.append({"type": "repository_state_unchanged"})
-        if target_rule.get("repository_state_unchanged_except"):
+        if state_requirements.get("repository_state_unchanged_except"):
             rules.append(
                 {
                     "type": "repository_state_unchanged_except",
-                    "except": target_rule["repository_state_unchanged_except"],
+                    "except": state_requirements["repository_state_unchanged_except"],
                 }
             )
 

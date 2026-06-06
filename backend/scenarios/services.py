@@ -9,9 +9,7 @@ from common.constants import (
     COMMAND_COUNTED,
     COMMAND_DIAGNOSTIC,
     COMMAND_UNPROCESSABLE,
-    COMPLETION_TYPES,
     DIFFICULTY_EASY,
-    DIFFICULTY_MEDIUM,
     RESULT_INVALID,
     RESULT_TARGET_MATCHED,
     RESULT_UNPROCESSABLE,
@@ -24,22 +22,24 @@ from common.constants import (
 )
 from common.exceptions import Locked
 from common.performance import timing
-from evaluation.completion import CompletionEvaluationContext, ScenarioCompletionEvaluator
-from learning.services import OrientationService
+from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
 from progress.services import StreakService
-from retries.services import VariantSelectionService
-from scaffolding.services import FeedbackGenerationService, ScaffoldingService
+from scaffolding.services import FeedbackGenerationService
 from scenarios.models import (
+    CommandDrill,
     CommandLog,
     CompletionRecord,
-    DifficultyInstance,
-    ScenarioSession,
+    PracticeKind,
+    PracticeSession,
+    ProblemVariant,
     StepLog,
+    WorkflowScenarioLevel,
 )
 from scenarios.selectors import (
-    required_successful_attempts_for_difficulty,
+    required_successful_attempts_for_problem,
     session_meets_progress_threshold,
 )
+from scenarios.visualization import RepositoryVisualizationService
 from simulator.command_engine import SimulatedGitCommandEngine
 from simulator.services import (
     RepositorySnapshotService,
@@ -50,65 +50,14 @@ from simulator.services import (
 from simulator.workspace_files import WorkspaceFileError, WorkspaceFileStateService
 
 SESSION_HYDRATE_SELECT_RELATED = (
-    "scenario",
-    "scenario__lesson",
-    "learning_unit",
-    "difficulty_instance__command_policy",
+    "module",
+    "command_drill__usage__topic",
+    "workflow_scenario",
+    "workflow_level__scenario",
     "variant",
     "prior_session",
     "user",
 )
-
-
-class DifficultyAccessService:
-    def status_for(self, *, user, difficulty_instance: DifficultyInstance) -> str:
-        if CompletionRecord.objects.filter(
-            user=user, difficulty_instance=difficulty_instance
-        ).exists():
-            return "completed"
-        if ScenarioSession.objects.filter(
-            user=user,
-            difficulty_instance=difficulty_instance,
-            status=SESSION_STATUS_STARTED,
-            mode=SESSION_MODE_PRIMARY,
-        ).exists():
-            return "in_progress"
-        latest_retryable = self.latest_retryable_session(
-            user=user,
-            difficulty_instance=difficulty_instance,
-        )
-        if latest_retryable and self.is_unlocked(
-            user=user, difficulty_instance=difficulty_instance
-        ):
-            return latest_retryable.status
-        if self.is_unlocked(user=user, difficulty_instance=difficulty_instance):
-            return "not_started"
-        return "locked"
-
-    def latest_retryable_session(self, *, user, difficulty_instance: DifficultyInstance):
-        return (
-            ScenarioSession.objects.filter(
-                user=user,
-                difficulty_instance=difficulty_instance,
-                status__in=[SESSION_STATUS_FAILED, SESSION_STATUS_ABANDONED],
-                mode=SESSION_MODE_PRIMARY,
-            )
-            .order_by("-ended_at", "-id")
-            .first()
-        )
-
-    def is_unlocked(self, *, user, difficulty_instance: DifficultyInstance) -> bool:
-        difficulty = difficulty_instance.difficulty
-        if difficulty == DIFFICULTY_EASY:
-            return True
-        previous = DIFFICULTY_EASY if difficulty == DIFFICULTY_MEDIUM else DIFFICULTY_MEDIUM
-        previous_instance = DifficultyInstance.objects.get(
-            scenario=difficulty_instance.scenario,
-            difficulty=previous,
-        )
-        return CompletionRecord.objects.filter(
-            user=user, difficulty_instance=previous_instance
-        ).exists()
 
 
 class CommandCountClassifier:
@@ -116,7 +65,6 @@ class CommandCountClassifier:
         self,
         *,
         command: str,
-        policy_snapshot: dict,
         processed: bool,
         diagnostic: bool | None = None,
     ) -> tuple[str, int]:
@@ -132,16 +80,10 @@ class CommandCountClassifier:
 
 
 class CommandHistoryCache:
-    """Small process-local cache for normalized session command history.
-
-    The database remains the source of truth. The cache key includes the
-    session attempt count, so stale entries naturally miss after each command.
-    """
-
     _cache: OrderedDict[tuple[int, int], list[str]] = OrderedDict()
     _max_entries = 512
 
-    def history_for(self, *, session: ScenarioSession) -> list[str]:
+    def history_for(self, *, session: PracticeSession) -> list[str]:
         key = (session.id, session.total_attempts)
         cached = self._cache.get(key)
         if cached is not None:
@@ -159,7 +101,7 @@ class CommandHistoryCache:
     def remember_after_append(
         self,
         *,
-        session: ScenarioSession,
+        session: PracticeSession,
         previous_history: list[str],
         normalized_command: str,
     ) -> None:
@@ -176,17 +118,10 @@ class CommandHistoryCache:
 
 
 class VariantTargetStateHashCache:
-    """Process-local cache for authored target-state hashes.
-
-    Variant target states are authored static data. Keeping this tiny cache
-    avoids normalizing and hashing the unchanged target state after every
-    command in a session while leaving the database as the source of truth.
-    """
-
     _cache: OrderedDict[tuple[int, str], str] = OrderedDict()
     _max_entries = 512
 
-    def hash_for(self, *, variant, state_tools: RepositoryStateSimulator) -> str:
+    def hash_for(self, *, variant: ProblemVariant, state_tools: RepositoryStateSimulator) -> str:
         key = (variant.id, variant.semantic_key or "")
         cached = self._cache.get(key)
         if cached is not None:
@@ -201,16 +136,85 @@ class VariantTargetStateHashCache:
         return state_hash
 
 
-class ScenarioSessionService:
-    @staticmethod
-    def hydrate_session(
-        session: ScenarioSession | int,
+class VariantSelectionService:
+    def select_variant(
+        self,
         *,
-        user=None,
-    ) -> ScenarioSession:
-        queryset = ScenarioSession.objects.select_related(
-            *SESSION_HYDRATE_SELECT_RELATED
-        ).prefetch_related(
+        user,
+        problem,
+        prior_session: PracticeSession | None = None,
+        published_variants: list[ProblemVariant] | None = None,
+        tried_variant_keys: set[str] | None = None,
+    ) -> ProblemVariant:
+        variants = published_variants or list(problem.variants.filter(is_published=True).order_by("semantic_key", "id"))
+        if not variants:
+            raise Locked("This practice item has no published variants.")
+        if prior_session is None:
+            return variants[0]
+
+        prior_key = self.variant_identity(prior_session.variant)
+        tried_keys = tried_variant_keys if tried_variant_keys is not None else self._tried_variant_keys(user=user, problem=problem)
+        for variant in variants:
+            identity = self.variant_identity(variant)
+            if identity != prior_key and identity not in tried_keys:
+                return variant
+        for variant in variants:
+            if self.variant_identity(variant) != prior_key:
+                return variant
+        return variants[0]
+
+    def changed_between(self, *, prior: ProblemVariant, current: ProblemVariant) -> bool:
+        return self.variant_identity(prior) != self.variant_identity(current)
+
+    def is_loopback_from_keys(
+        self,
+        *,
+        variants: list[ProblemVariant],
+        selected_variant: ProblemVariant,
+        tried_keys: set[str],
+    ) -> bool:
+        if len(variants) <= 1:
+            return False
+        available = {self.variant_identity(variant) for variant in variants}
+        return (
+            len(tried_keys.intersection(available)) >= len(available)
+            and self.variant_identity(selected_variant) in tried_keys
+        )
+
+    def variant_identity(self, variant: ProblemVariant) -> str:
+        if variant.semantic_key:
+            return variant.semantic_key
+        if variant.case_id:
+            return f"case:{variant.case_id}"
+        case_id = (variant.parameter_context or {}).get("case_id")
+        if case_id:
+            return f"case:{case_id}"
+        if variant.structure_signature:
+            return f"structure:{variant.structure_signature}"
+        return f"id:{variant.id}"
+
+    def _tried_variant_keys(self, *, user, problem) -> set[str]:
+        filters = {"user": user}
+        if isinstance(problem, CommandDrill):
+            filters["command_drill"] = problem
+        else:
+            filters["workflow_level"] = problem
+        variant_ids = (
+            PracticeSession.objects.filter(**filters)
+            .exclude(variant_id__isnull=True)
+            .values_list("variant_id", flat=True)
+            .distinct()
+        )
+        return {
+            self.variant_identity(variant)
+            for variant in ProblemVariant.objects.filter(id__in=variant_ids)
+        }
+
+
+class PracticeSessionService:
+    @staticmethod
+    def hydrate_session(session: PracticeSession | int, *, user=None) -> PracticeSession:
+        queryset = PracticeSession.objects.select_related(*SESSION_HYDRATE_SELECT_RELATED).prefetch_related(
             Prefetch("step_logs", queryset=StepLog.objects.order_by("id")),
         )
         if isinstance(session, int):
@@ -226,138 +230,116 @@ class ScenarioSessionService:
         self,
         *,
         user,
-        difficulty_instance: DifficultyInstance,
+        problem,
         source_entry_point: str,
-        prior_session: ScenarioSession | None = None,
+        prior_session: PracticeSession | None = None,
         mode: str = SESSION_MODE_PRIMARY,
-    ) -> ScenarioSession:
-        if prior_session and prior_session.difficulty_instance_id != difficulty_instance.id:
-            raise Locked("Retry sessions must use the same scenario difficulty.")
+    ) -> PracticeSession:
+        practice_kind = (
+            PracticeKind.COMMAND_DRILL if isinstance(problem, CommandDrill) else PracticeKind.WORKFLOW_SCENARIO
+        )
+        if prior_session and prior_session.problem != problem:
+            raise Locked("Retry sessions must use the same practice item.")
         if prior_session and prior_session.status == SESSION_STATUS_STARTED:
-            raise Locked("Exit the current scenario before retrying.")
-        if difficulty_instance.completion_type not in COMPLETION_TYPES:
-            raise Locked(
-                "This scenario type is no longer playable. Use the lesson preview instead."
-            )
-
-        if mode == SESSION_MODE_PRIMARY and not DifficultyAccessService().is_unlocked(
-            user=user, difficulty_instance=difficulty_instance
-        ):
-            raise Locked("This difficulty is locked until the previous level is completed.")
-
-        student_progress = user.studentprogress
-        orientation_complete = OrientationService().is_orientation_complete(user)
-
+            raise Locked("Exit the current practice session before retrying.")
+        if mode == SESSION_MODE_PRIMARY and practice_kind == PracticeKind.WORKFLOW_SCENARIO:
+            self._ensure_workflow_unlocked(user=user, level=problem)
         if mode == SESSION_MODE_PRIMARY:
-            active_session = (
-                ScenarioSession.objects.select_related(
-                    "scenario",
-                    "learning_unit",
-                    "difficulty_instance",
-                    "variant",
-                )
-                .filter(
-                    user=user,
-                    difficulty_instance=difficulty_instance,
-                    status=SESSION_STATUS_STARTED,
-                    mode=SESSION_MODE_PRIMARY,
-                )
-                .exclude(id=prior_session.id if prior_session else None)
-                .first()
-            )
-            if active_session:
-                raise Locked("Exit the current scenario before starting again.")
+            active = self._active_session(user=user, problem=problem)
+            if active and (not prior_session or active.id != prior_session.id):
+                raise Locked("Exit the current practice session before starting again.")
 
-        variant_selector = VariantSelectionService()
-        published_variants = list(
-            difficulty_instance.variants.filter(is_published=True).order_by(
-                "semantic_key",
-                "id",
-            )
-        )
-        tried_keys = (
-            variant_selector._tried_variant_keys(
+        selector = VariantSelectionService()
+        published_variants = list(problem.variants.filter(is_published=True).order_by("semantic_key", "id"))
+        tried_keys = selector._tried_variant_keys(user=user, problem=problem) if prior_session else set()
+        variant = (
+            self._review_variant(user=user, problem=problem)
+            if mode == SESSION_MODE_REVIEW
+            else selector.select_variant(
                 user=user,
-                difficulty_instance=difficulty_instance,
+                problem=problem,
+                prior_session=prior_session,
+                published_variants=published_variants,
+                tried_variant_keys=tried_keys,
             )
-            if prior_session
-            else set()
         )
-        with timing("scenario.variant_selection", difficulty_id=difficulty_instance.id, mode=mode):
-            variant = (
-                self._review_variant(user=user, difficulty_instance=difficulty_instance)
-                if mode == SESSION_MODE_REVIEW
-                else variant_selector.select_variant(
-                    user=user,
-                    difficulty_instance=difficulty_instance,
-                    prior_session=prior_session,
-                    published_variants=published_variants,
-                    tried_variant_keys=tried_keys,
-                )
-            )
-        # Retry/fresh-attempt sessions intentionally rotate variants when alternatives
-        # exist so learners do not get stuck replaying the same authored context.
-        changed_variant = bool(
-            prior_session
-            and variant_selector.changed_between(prior=prior_session.variant, current=variant)
-        )
+        changed_variant = bool(prior_session and selector.changed_between(prior=prior_session.variant, current=variant))
         looped_variant = bool(
             prior_session
-            and variant_selector.is_loopback_from_keys(
+            and selector.is_loopback_from_keys(
                 variants=published_variants,
                 selected_variant=variant,
                 tried_keys=tried_keys,
             )
         )
         retry_index = prior_session.retry_index + 1 if prior_session else 0
-
         rta_eligible = bool(
             mode == SESSION_MODE_PRIMARY
             and prior_session
             and prior_session.status in (SESSION_STATUS_FAILED, SESSION_STATUS_ABANDONED)
             and changed_variant
         )
-        policy = difficulty_instance.command_policy.snapshot()
-        session = ScenarioSession.objects.create(
+        session = PracticeSession.objects.create(
             user=user,
-            learning_unit=difficulty_instance.scenario.learning_unit,
-            scenario=difficulty_instance.scenario,
-            difficulty_instance=difficulty_instance,
+            module=problem.module,
+            practice_kind=practice_kind,
+            command_drill=problem if practice_kind == PracticeKind.COMMAND_DRILL else None,
+            workflow_scenario=problem.scenario if practice_kind == PracticeKind.WORKFLOW_SCENARIO else None,
+            workflow_level=problem if practice_kind == PracticeKind.WORKFLOW_SCENARIO else None,
             variant=variant,
             prior_session=prior_session,
             source_entry_point=source_entry_point,
             mode=mode,
-            orientation_complete_at_start=orientation_complete,
+            difficulty=problem.difficulty if practice_kind == PracticeKind.WORKFLOW_SCENARIO else "",
             rta_eligible=rta_eligible,
             changed_variant=changed_variant,
             looped_variant=looped_variant,
             retry_index=retry_index,
-            command_policy_snapshot=policy,
+            command_budget_snapshot={
+                "min_counted_commands": problem.min_counted_commands,
+                "max_counted_commands": problem.max_counted_commands,
+            },
             repository_state=variant.initial_state,
         )
-        if mode == SESSION_MODE_PRIMARY and student_progress.first_scenario_started_at is None:
-            student_progress.first_scenario_started_at = session.started_at
-            student_progress.orientation_complete_at_first_start = orientation_complete
-            student_progress.save(
-                update_fields=[
-                    "first_scenario_started_at",
-                    "orientation_complete_at_first_start",
-                ]
-            )
         return self.hydrate_session(session)
 
-    def _review_variant(self, *, user, difficulty_instance: DifficultyInstance):
-        completion = (
-            CompletionRecord.objects.select_related("session__variant")
-            .filter(user=user, difficulty_instance=difficulty_instance)
-            .first()
-        )
+    def _active_session(self, *, user, problem):
+        filters = {
+            "user": user,
+            "status": SESSION_STATUS_STARTED,
+            "mode": SESSION_MODE_PRIMARY,
+        }
+        if isinstance(problem, CommandDrill):
+            filters["command_drill"] = problem
+        else:
+            filters["workflow_level"] = problem
+        return PracticeSession.objects.filter(**filters).first()
+
+    def _ensure_workflow_unlocked(self, *, user, level: WorkflowScenarioLevel) -> None:
+        if level.difficulty == DIFFICULTY_EASY:
+            return
+        previous = DIFFICULTY_EASY if level.difficulty == "medium" else "medium"
+        previous_level = WorkflowScenarioLevel.objects.filter(
+            scenario=level.scenario,
+            difficulty=previous,
+            is_published=True,
+        ).first()
+        if not previous_level or not CompletionRecord.objects.filter(user=user, workflow_level=previous_level).exists():
+            raise Locked("This workflow level is locked until the previous level is completed.")
+
+    def _review_variant(self, *, user, problem):
+        filters = {"user": user}
+        if isinstance(problem, CommandDrill):
+            filters["command_drill"] = problem
+        else:
+            filters["workflow_level"] = problem
+        completion = CompletionRecord.objects.select_related("session__variant").filter(**filters).first()
         if not completion:
-            raise Locked("Review Mode is available only after completing this difficulty.")
+            raise Locked("Review Mode is available only after completing this practice item.")
         return completion.session.variant
 
     @transaction.atomic
-    def abandon(self, *, session: ScenarioSession) -> ScenarioSession:
+    def abandon(self, *, session: PracticeSession) -> PracticeSession:
         if session.status != SESSION_STATUS_STARTED:
             return session
         session.status = SESSION_STATUS_ABANDONED
@@ -374,12 +356,7 @@ def _state_affects_visible_tree(previous_state: dict, next_state: dict) -> bool:
     return False
 
 
-def _command_response_includes_project_tree(
-    *,
-    command_result,
-    previous_state: dict,
-    next_state: dict,
-) -> bool:
+def _command_response_includes_project_tree(*, command_result, previous_state: dict, next_state: dict) -> bool:
     if not command_result.processed or command_result.diagnostic:
         return False
     return _state_affects_visible_tree(previous_state, next_state)
@@ -389,73 +366,60 @@ class CommandProcessingService:
     def __init__(self) -> None:
         self.state_tools = RepositoryStateSimulator()
         self.snapshotter = RepositorySnapshotService()
+        self.visualizer = RepositoryVisualizationService()
         self.command_engine = SimulatedGitCommandEngine()
 
     @transaction.atomic
-    def submit_command(self, *, session: ScenarioSession, command: str) -> dict:
+    def submit_command(self, *, session: PracticeSession, command: str) -> dict:
         if session.status != SESSION_STATUS_STARTED:
             raise Locked("This session has already ended.")
 
         state_tools = self.state_tools
-        snapshotter = self.snapshotter
-        command_engine = self.command_engine
-        with timing("scenario.command.repository_state_clone", session_id=session.id):
+        with timing("practice.command.repository_state_clone", session_id=session.id):
             previous_state = state_tools.clone_state(session.repository_state)
             working_state = state_tools.normalize_state(previous_state)
-        with timing("scenario.command.parse_execute", session_id=session.id):
-            command_result = command_engine.process(
-                working_state,
-                command,
-                mutate_in_place=True,
-            )
-        with timing("scenario.command.repository_state_normalize", session_id=session.id):
+        with timing("practice.command.parse_execute", session_id=session.id):
+            command_result = self.command_engine.process(working_state, command, mutate_in_place=True)
+        with timing("practice.command.repository_state_normalize", session_id=session.id):
             next_state = state_tools.normalize_state(command_result.state)
+
         classification, increment = CommandCountClassifier().classify(
             command=command,
-            policy_snapshot=session.command_policy_snapshot,
             processed=command_result.processed,
             diagnostic=command_result.diagnostic,
         )
-
         result_category = RESULT_UNPROCESSABLE
         feedback = ""
         executed_commands: list[str] = []
         state_hash = ""
         expected_state_hash = ""
         if command_result.processed:
-            with timing("scenario.command.state_hash", session_id=session.id):
-                state_hash = state_tools.state_hash_for_normalized(next_state)
-            with timing("scenario.command.expected_state_hash", session_id=session.id):
-                expected_state_hash = VariantTargetStateHashCache().hash_for(
-                    variant=session.variant,
-                    state_tools=state_tools,
+            state_hash = state_tools.state_hash_for_normalized(next_state)
+            expected_state_hash = VariantTargetStateHashCache().hash_for(
+                variant=session.variant,
+                state_tools=state_tools,
+            )
+            previous_history = CommandHistoryCache().history_for(session=session)
+            executed_commands = [*previous_history, command_result.normalized_command]
+            evaluation = PracticeCompletionEvaluator().evaluate(
+                CompletionEvaluationContext(
+                    session=session,
+                    previous_state=previous_state,
+                    next_state=next_state,
+                    executed_commands=executed_commands,
+                    next_state_hash=state_hash,
+                    expected_state_hash=expected_state_hash,
                 )
-            with timing("scenario.command.history", session_id=session.id):
-                previous_history = CommandHistoryCache().history_for(session=session)
-                executed_commands = [*previous_history, command_result.normalized_command]
-            with timing("scenario.command.evaluation", session_id=session.id):
-                evaluation = ScenarioCompletionEvaluator().evaluate(
-                    CompletionEvaluationContext(
-                        session=session,
-                        previous_state=previous_state,
-                        next_state=next_state,
-                        executed_commands=executed_commands,
-                        next_state_hash=state_hash,
-                        expected_state_hash=expected_state_hash,
-                    )
-                )
+            )
             result_category = evaluation.result_category
-            if (
-                session.difficulty_instance.difficulty == DIFFICULTY_EASY
-                and classification == COMMAND_COUNTED
-            ):
-                with timing("scenario.command.contextual_feedback", session_id=session.id):
-                    feedback = FeedbackGenerationService().describe(previous_state, next_state)
+            if _uses_contextual_feedback(session) and classification == COMMAND_COUNTED:
+                feedback = FeedbackGenerationService().describe(previous_state, next_state)
         else:
-            result_category = (
-                RESULT_INVALID
-                if command.strip().lower().startswith("git")
-                else RESULT_UNPROCESSABLE
+            result_category = RESULT_INVALID if command.strip().lower().startswith("git") else RESULT_UNPROCESSABLE
+            state_hash = state_tools.state_hash_for_normalized(next_state)
+            expected_state_hash = VariantTargetStateHashCache().hash_for(
+                variant=session.variant,
+                state_tools=state_tools,
             )
 
         if classification == COMMAND_COUNTED:
@@ -467,36 +431,27 @@ class CommandProcessingService:
             session.first_attempt_star_eligible = False
         session.repository_state = next_state
 
-        if not command_result.processed:
-            with timing("scenario.command.state_hash", session_id=session.id):
-                state_hash = state_tools.state_hash_for_normalized(next_state)
-            with timing("scenario.command.expected_state_hash", session_id=session.id):
-                expected_state_hash = VariantTargetStateHashCache().hash_for(
-                    variant=session.variant,
-                    state_tools=state_tools,
-                )
-
-        with timing("scenario.command.step_log_create", session_id=session.id):
-            step = StepLog.objects.create(
-                session=session,
-                command_text=command,
-                terminal_output=command_result.output,
-                result_category=result_category,
-                command_classification=classification,
-                counted_increment=increment,
-                attempt_number=session.total_attempts,
-                counted_total_after=session.counted_action_total,
-                state_hash=state_hash,
-                expected_state_hash=expected_state_hash,
-                contextual_feedback=feedback,
-            )
-        with timing("scenario.command.command_log_create", session_id=session.id):
-            CommandLog.objects.create(
-                step_log=step,
-                raw_command=command,
-                normalized_command=command_result.normalized_command,
-                was_processable=command_result.processed,
-            )
+        visualization_snapshot = self.visualizer.snapshot(next_state, previous_state=previous_state)
+        step = StepLog.objects.create(
+            session=session,
+            command_text=command,
+            terminal_output=command_result.output,
+            result_category=result_category,
+            command_classification=classification,
+            counted_increment=increment,
+            attempt_number=session.total_attempts,
+            counted_total_after=session.counted_action_total,
+            state_hash=state_hash,
+            expected_state_hash=expected_state_hash,
+            contextual_feedback=feedback,
+            visualization_snapshot=visualization_snapshot,
+        )
+        CommandLog.objects.create(
+            step_log=step,
+            raw_command=command,
+            normalized_command=command_result.normalized_command,
+            was_processable=command_result.processed,
+        )
         if command_result.processed:
             CommandHistoryCache().remember_after_append(
                 session=session,
@@ -504,12 +459,8 @@ class CommandProcessingService:
                 normalized_command=command_result.normalized_command,
             )
 
-        max_count = session.command_policy_snapshot["max_counted_commands"]
-        update_fields = {
-            "repository_state",
-            "total_attempts",
-            "first_attempt_star_eligible",
-        }
+        max_count = session.command_budget_snapshot["max_counted_commands"]
+        update_fields = {"repository_state", "total_attempts", "first_attempt_star_eligible"}
         if classification == COMMAND_COUNTED:
             update_fields.add("counted_action_total")
         elif classification == COMMAND_DIAGNOSTIC:
@@ -519,7 +470,7 @@ class CommandProcessingService:
         elif classification == COMMAND_COUNTED and session.counted_action_total >= max_count:
             target_matched = False
             if command_result.processed:
-                recheck = ScenarioCompletionEvaluator().evaluate(
+                recheck = PracticeCompletionEvaluator().evaluate(
                     CompletionEvaluationContext(
                         session=session,
                         previous_state=previous_state,
@@ -536,24 +487,18 @@ class CommandProcessingService:
             else:
                 session.status = SESSION_STATUS_FAILED
                 session.ended_at = timezone.now()
-                session.failure_reason = (
-                    "Action limit reached before the target repository state was reached."
-                )
+                session.failure_reason = "Action limit reached before the target repository state was reached."
                 update_fields.update({"status", "ended_at", "failure_reason"})
 
-        with timing("scenario.command.session_save", session_id=session.id):
-            session.save(update_fields=sorted(update_fields))
-        with timing("scenario.command.repository_snapshot", session_id=session.id):
-            if _command_response_includes_project_tree(
-                command_result=command_result,
-                previous_state=previous_state,
-                next_state=next_state,
-            ):
-                repository_snapshot = snapshotter.snapshot(next_state, already_normalized=True)
-            else:
-                repository_snapshot = snapshotter.snapshot_for_command(
-                    next_state, already_normalized=True
-                )
+        session.save(update_fields=sorted(update_fields))
+        if _command_response_includes_project_tree(
+            command_result=command_result,
+            previous_state=previous_state,
+            next_state=next_state,
+        ):
+            repository_snapshot = self.snapshotter.snapshot(next_state, already_normalized=True)
+        else:
+            repository_snapshot = self.snapshotter.snapshot_for_command(next_state, already_normalized=True)
         return {
             "session": session,
             "step": step,
@@ -564,51 +509,42 @@ class CommandProcessingService:
             "command_family": command_result.command_family,
             "diagnostic_metadata": command_result.diagnostic_metadata,
             "repository_state": repository_snapshot,
+            "visualization": visualization_snapshot,
             "evaluation_result": result_category,
             "command_classification": classification,
-            "remaining_counted_commands": max(0, max_count - session.counted_action_total),
             "contextual_feedback": feedback,
-            "scaffolding": ScaffoldingService().supports_for(
-                session.difficulty_instance.difficulty
-            ),
         }
 
-    def _complete_session(self, session: ScenarioSession) -> set[str]:
+    def _complete_session(self, session: PracticeSession) -> set[str]:
         session.status = SESSION_STATUS_COMPLETED
         session.completed_at = timezone.now()
         session.ended_at = session.completed_at
         session.rta_success = bool(session.rta_eligible and session.first_attempt_star_eligible)
         if session.mode == SESSION_MODE_PRIMARY:
-            # Only create or update a CompletionRecord once the user has reached
-            # the seeded number of successful accurate completions for this
-            # difficulty.
-            required = required_successful_attempts_for_difficulty(session.difficulty_instance)
+            required = required_successful_attempts_for_problem(session.problem)
             previous_progress = 0
-            for prior_session in (
-                ScenarioSession.objects.filter(
-                    user=session.user,
-                    mode=SESSION_MODE_PRIMARY,
-                    status=SESSION_STATUS_COMPLETED,
-                    difficulty_instance=session.difficulty_instance,
-                )
-                .exclude(pk=session.pk)
-                .select_related("difficulty_instance__command_policy")
-            ):
-                if session_meets_progress_threshold(
-                    session=prior_session,
-                    difficulty_instance=session.difficulty_instance,
-                ):
+            filters = {
+                "user": session.user,
+                "mode": SESSION_MODE_PRIMARY,
+                "status": SESSION_STATUS_COMPLETED,
+            }
+            if session.practice_kind == PracticeKind.COMMAND_DRILL:
+                filters["command_drill"] = session.command_drill
+            else:
+                filters["workflow_level"] = session.workflow_level
+            for prior_session in PracticeSession.objects.filter(**filters).exclude(pk=session.pk):
+                if session_meets_progress_threshold(session=prior_session):
                     previous_progress += 1
-            current_meets_progress = session_meets_progress_threshold(
-                session=session,
-                difficulty_instance=session.difficulty_instance,
-            )
-            progress_count = previous_progress + (1 if current_meets_progress else 0)
-            if progress_count >= required:
+            current_meets_progress = session_meets_progress_threshold(session=session)
+            if previous_progress + (1 if current_meets_progress else 0) >= required:
+                completion_filter = {
+                    "user": session.user,
+                    "practice_kind": session.practice_kind,
+                    "command_drill": session.command_drill,
+                    "workflow_level": session.workflow_level,
+                }
                 completion, created = CompletionRecord.objects.get_or_create(
-                    user=session.user,
-                    scenario=session.scenario,
-                    difficulty_instance=session.difficulty_instance,
+                    **completion_filter,
                     defaults={
                         "session": session,
                         "first_attempt_star": session.first_attempt_star_eligible,
@@ -620,28 +556,23 @@ class CommandProcessingService:
                     completion.first_attempt_star = session.first_attempt_star_eligible
                     completion.counted_action_total = session.counted_action_total
                     completion.completed_at = session.completed_at
-                    completion.save(
-                        update_fields=[
-                            "session",
-                            "first_attempt_star",
-                            "counted_action_total",
-                            "completed_at",
-                        ]
-                    )
-                StreakService().record_completion(
-                    user=session.user, completed_at=session.completed_at
-                )
+                    completion.save(update_fields=["session", "first_attempt_star", "counted_action_total", "completed_at"])
+                StreakService().record_completion(user=session.user, completed_at=session.completed_at)
         return {"status", "completed_at", "ended_at", "rta_success"}
+
+
+def _uses_contextual_feedback(session: PracticeSession) -> bool:
+    return (
+        session.practice_kind == PracticeKind.COMMAND_DRILL
+        or session.difficulty == DIFFICULTY_EASY
+    )
 
 
 class WorkspaceFileCreationService:
     @transaction.atomic
-    def create_file(
-        self, *, session: ScenarioSession, path: str, content: str = ""
-    ) -> ScenarioSession:
+    def create_file(self, *, session: PracticeSession, path: str, content: str = "") -> PracticeSession:
         if session.status != SESSION_STATUS_STARTED:
             raise Locked("This session has already ended.")
-
         try:
             next_state = WorkspaceFileStateService().create_file(
                 session.repository_state,
@@ -650,18 +581,14 @@ class WorkspaceFileCreationService:
             )
         except WorkspaceFileError as exc:
             raise ValidationError({"path": [str(exc)]}) from exc
-
         session.repository_state = next_state
         session.save(update_fields=["repository_state"])
         return session
 
     @transaction.atomic
-    def write_file(
-        self, *, session: ScenarioSession, path: str, content: str = ""
-    ) -> ScenarioSession:
+    def write_file(self, *, session: PracticeSession, path: str, content: str = "") -> PracticeSession:
         if session.status != SESSION_STATUS_STARTED:
             raise Locked("This session has already ended.")
-
         try:
             next_state = WorkspaceFileStateService().write_file(
                 session.repository_state,
@@ -670,7 +597,6 @@ class WorkspaceFileCreationService:
             )
         except WorkspaceFileError as exc:
             raise ValidationError({"path": [str(exc)]}) from exc
-
         session.repository_state = next_state
         session.save(update_fields=["repository_state"])
         return session

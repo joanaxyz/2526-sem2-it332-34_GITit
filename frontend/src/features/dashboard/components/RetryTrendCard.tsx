@@ -22,7 +22,7 @@ export function RetryTrendCard({ summary }: { summary: DashboardSummary }) {
               : 0
             return (
               <div
-                key={trend.scenario_id}
+                key={`${trend.practice_kind}:${trend.practice_title}`}
                 className="rounded-md p-3 transition-all duration-200 hover:-translate-y-0.5"
                 style={{
                   background: 'rgba(0,180,216,0.06)',
@@ -30,7 +30,10 @@ export function RetryTrendCard({ summary }: { summary: DashboardSummary }) {
                   borderTop: '1px solid rgba(0,245,212,0.2)',
                 }}
               >
-                <div className="font-semibold">{trend.scenario_title}</div>
+                <div className="font-semibold">{trend.practice_title}</div>
+                <div className="mt-1 font-mono text-[10px] uppercase text-muted-foreground/60">
+                  {trend.practice_kind.replace('_', ' ')}
+                </div>
                 <div className="mt-1 text-xs text-muted-foreground">{trend.label}</div>
                 {/* Retry ratio bar */}
                 <div

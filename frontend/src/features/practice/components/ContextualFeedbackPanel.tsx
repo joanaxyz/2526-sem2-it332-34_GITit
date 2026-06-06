@@ -1,9 +1,9 @@
 import { MessageSquareText } from 'lucide-react'
 
-import type { ScenarioSession } from '@/features/practice/types'
+import type { PracticeSession } from '@/features/practice/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Card'
 
-export function ContextualFeedbackPanel({ session, feedback }: { session: ScenarioSession; feedback: string }) {
+export function ContextualFeedbackPanel({ session, feedback }: { session: PracticeSession; feedback: string }) {
   if (!session.scaffolding.contextual_feedback) return null
   return (
     <Card className="h-full w-full min-w-0 shadow-none">

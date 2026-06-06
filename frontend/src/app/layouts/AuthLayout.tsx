@@ -4,10 +4,10 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 const loginHero = {
   title: 'Practice Git through repository state, not memorized answers.',
   description:
-    'Learn with rich orientation lessons, scenario practice, live DAG feedback, and consequence-safe command simulation.',
+    'Learn with foundations, command drills, workflow scenarios, live DAG feedback, and consequence-safe command simulation.',
   terminal: (
     <>
-      <span className="text-primary">student@git-it</span> ~/scenario $ git status
+      <span className="text-primary">student@git-it</span> ~/practice $ git status
       <br />
       On branch feature/login
       <br />
@@ -19,7 +19,7 @@ const loginHero = {
 const registerHero = {
   title: 'Create your account and start building real Git intuition.',
   description:
-    'Track your progress across lessons and scenarios, practice safely without touching a real shell, and grow confidence one command at a time.',
+    'Track your progress across drills and workflow scenarios, practice safely without touching a real shell, and grow confidence one command at a time.',
   terminal: (
     <>
       <span className="text-primary">you@git-it</span> ~/welcome $ git init

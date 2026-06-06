@@ -1,49 +1,85 @@
 import { apiRequest } from '@/shared/api/httpClient'
-import type { ScenarioSession } from '@/features/practice/types'
-import type { ScenarioSkillFocus } from '@/features/scenarios/types'
+import type {
+  CommandTopicSummary,
+  CommandUsagePreview,
+  ModuleContentPage,
+  ModuleContentSection,
+  PracticeKind,
+  WorkflowScenarioSummary,
+} from '@/features/scenarios/types'
+import type { PracticeSession } from '@/features/practice/types'
 
-type DemoCommandResponse = {
-  repository_state: unknown
-  terminal_output: string
-  was_processable: boolean
+export type PracticeStartPayload =
+  | {
+      problem_type: 'command_drill'
+      command_drill_id: number
+      source_entry_point: 'module_page' | 'retry' | 'review'
+      prior_session_id?: number | null
+    }
+  | {
+      problem_type: 'workflow_scenario'
+      workflow_level_id: number
+      source_entry_point: 'module_page' | 'retry' | 'review'
+      prior_session_id?: number | null
+    }
+
+type ModuleContentResult<TSection extends ModuleContentSection> =
+  TSection extends 'command_topics'
+    ? ModuleContentPage<CommandTopicSummary>
+    : ModuleContentPage<WorkflowScenarioSummary>
+
+export function startPayloadForPractice(
+  practiceKind: PracticeKind,
+  id: number,
+  sourceEntryPoint: 'module_page' | 'retry' | 'review' = 'module_page',
+  priorSessionId?: number | null,
+): PracticeStartPayload {
+  if (practiceKind === 'command_drill') {
+    return {
+      problem_type: 'command_drill',
+      command_drill_id: id,
+      source_entry_point: sourceEntryPoint,
+      prior_session_id: priorSessionId ?? null,
+    }
+  }
+  return {
+    problem_type: 'workflow_scenario',
+    workflow_level_id: id,
+    source_entry_point: sourceEntryPoint,
+    prior_session_id: priorSessionId ?? null,
+  }
 }
 
 export const scenariosApi = {
-  listForModule(moduleId: number) {
-    return apiRequest<ScenarioSkillFocus[]>(`/scenarios/modules/${moduleId}/`)
+  moduleContent<TSection extends ModuleContentSection>(
+    moduleId: number,
+    section: TSection,
+    options?: { cursor?: number | null; limit?: number },
+  ) {
+    const params = new URLSearchParams({ section })
+    if (options?.cursor) params.set('cursor', String(options.cursor))
+    if (options?.limit) params.set('limit', String(options.limit))
+    return apiRequest<ModuleContentResult<TSection>>(
+      `/scenarios/modules/${moduleId}/content/?${params.toString()}`,
+    )
   },
-  listForModules(moduleIds: number[]) {
-    const params = new URLSearchParams({ module_ids: moduleIds.join(',') })
-    return apiRequest<Record<string, ScenarioSkillFocus[]>>(`/scenarios/modules/summary/?${params.toString()}`)
+  commandUsagePreview(usageId: number) {
+    return apiRequest<CommandUsagePreview>(`/scenarios/command-usages/${usageId}/preview/`)
   },
-  getSkillFocus(skillFocusSlug: string, options?: { commandIndex?: number }) {
-    const params = new URLSearchParams()
-    if (options?.commandIndex !== undefined) {
-      params.set('command_index', String(options.commandIndex))
-    }
-    const query = params.toString()
-    return apiRequest<ScenarioSkillFocus>(`/scenarios/skill-focus/${skillFocusSlug}/${query ? `?${query}` : ''}`)
-  },
-  submitDemoCommand(skillFocusSlug: string, payload: { command: string; repository_state?: unknown }) {
-    return apiRequest<DemoCommandResponse>(`/scenarios/skill-focus/${skillFocusSlug}/demo/commands/`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    })
-  },
-  startSession(payload: { difficulty_instance_id: number; source_entry_point: 'module_card' | 'retry' | 'review'; prior_session_id?: number | null }) {
-    return apiRequest<ScenarioSession>('/scenarios/sessions/', {
+  startSession(payload: PracticeStartPayload) {
+    return apiRequest<PracticeSession>('/scenarios/sessions/', {
       method: 'POST',
       body: JSON.stringify(payload),
     })
   },
   retrySession(sessionId: number) {
-    return apiRequest<ScenarioSession>(`/scenarios/sessions/${sessionId}/retry/`, {
+    return apiRequest<PracticeSession>(`/scenarios/sessions/${sessionId}/retry/`, {
       method: 'POST',
       body: JSON.stringify({ source_entry_point: 'retry' }),
     })
   },
   abandonSession(sessionId: number) {
-    return apiRequest<ScenarioSession>(`/scenarios/sessions/${sessionId}/abandon/`, {
+    return apiRequest<PracticeSession>(`/scenarios/sessions/${sessionId}/abandon/`, {
       method: 'POST',
       body: JSON.stringify({}),
     })

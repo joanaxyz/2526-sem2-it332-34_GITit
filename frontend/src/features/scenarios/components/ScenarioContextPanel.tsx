@@ -1,43 +1,48 @@
 import { AlertTriangle, BookOpenText, ClipboardList, Target } from 'lucide-react'
 import type { ComponentType, ReactNode } from 'react'
 
-import type { ScenarioSession, ScenarioStudentContext } from '@/features/practice/types'
+import type { PracticeSession, PracticeStudentContext } from '@/features/practice/types'
 import { Badge } from '@/shared/components/Badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Card'
 import { cn } from '@/shared/utils/cn'
 
-export function ScenarioContextPanel({ session }: { session: ScenarioSession }) {
+export function ScenarioContextPanel({ session }: { session: PracticeSession }) {
   const context = contextForSession(session)
+  const difficultyLabel = session.difficulty ? session.difficulty : 'drill'
 
   return (
     <Card className="shadow-none">
       <CardHeader className="p-3">
         <div className="flex flex-wrap gap-2">
           <Badge variant="blue">Module {session.module.number}</Badge>
-          <Badge variant="default" className="capitalize">{session.difficulty}</Badge>
+          <Badge variant="default" className="capitalize">{difficultyLabel}</Badge>
           {session.review_mode ? <Badge variant="warning">Review Mode</Badge> : null}
           {session.variant.changed_variant ? <Badge variant="warning">Changed variant</Badge> : null}
         </div>
-        <CardTitle className="text-base leading-tight">{session.scenario.title}</CardTitle>
+        <CardTitle className="text-base leading-tight">{session.problem.title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 p-3 pt-0">
-        <Section icon={BookOpenText} title="Scenario Brief" hidden={!context.story}>
-          <p className="text-sm leading-5 text-muted-foreground">{context.story}</p>
+        <Section icon={BookOpenText} title="Practice brief" hidden={!context.story && !context.task}>
+          {context.story ? <p className="text-sm leading-5 text-muted-foreground">{context.story}</p> : null}
+          {context.task ? <p className="mt-2 text-sm leading-5 text-foreground">{context.task}</p> : null}
         </Section>
 
-        <Section icon={ClipboardList} title="Repository Brief" hidden={session.difficulty !== 'easy' || !context.current_state.length}>
+        <Section icon={ClipboardList} title="Repository state" hidden={!context.current_state.length}>
           <CompactList items={context.current_state} />
         </Section>
 
-        <Section icon={Target} title="Required Details" hidden={!context.required_details.length}>
-          <dl className="grid gap-2">
-            {context.required_details.map((item) => (
-              <div className="rounded-md border border-border bg-secondary/35 px-3 py-2.5" key={`${item.label}:${item.value}`}>
-                <dt className="text-[11px] font-bold uppercase text-muted-foreground">{item.label}</dt>
-                <dd className="mt-0.5 break-words font-mono text-xs text-foreground">{item.value}</dd>
-              </div>
-            ))}
-          </dl>
+        <Section icon={Target} title="Objective" hidden={!context.outcome && !context.required_details.length}>
+          {context.outcome ? <p className="text-sm leading-5 text-muted-foreground">{context.outcome}</p> : null}
+          {context.required_details.length ? (
+            <dl className="mt-2 grid gap-2">
+              {context.required_details.map((item) => (
+                <div className="rounded-md border border-border bg-secondary/35 px-3 py-2.5" key={`${item.label}:${item.value}`}>
+                  <dt className="text-[11px] font-bold uppercase text-muted-foreground">{item.label}</dt>
+                  <dd className="mt-0.5 break-words font-mono text-xs text-foreground">{item.value}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : null}
         </Section>
 
         <Section icon={AlertTriangle} title="Constraints" hidden={!context.constraints.length}>
@@ -85,7 +90,7 @@ function CompactList({
           <span
             className={cn(
               'mt-2 size-1.5 rounded-full bg-muted-foreground',
-              tone === 'warning' && 'bg-destructive'
+              tone === 'warning' && 'bg-destructive',
             )}
           />
           <span className={cn('min-w-0 text-muted-foreground', tone === 'warning' && 'text-foreground')}>{item}</span>
@@ -95,30 +100,32 @@ function CompactList({
   )
 }
 
-function contextForSession(session: ScenarioSession) {
-  const context = normalizeContext(session.student_context ?? session.scenario.student_context)
+function contextForSession(session: PracticeSession) {
+  const context = normalizeContext(session.student_context)
   const fallback = normalizeContext({
-    story: session.scenario.narrative,
+    brief: {
+      story: 'narrative' in session.problem ? session.problem.narrative : session.problem.summary,
+      task: session.problem.summary,
+    },
   })
   const hasStructuredContext =
     context.story ||
+    context.task ||
     context.current_state.length ||
+    context.outcome ||
     context.required_details.length ||
     context.constraints.length
 
-  const active = hasStructuredContext ? context : fallback
-  return {
-    ...active,
-    situation: active.situation,
-  }
+  return hasStructuredContext ? context : fallback
 }
 
-function normalizeContext(context?: ScenarioStudentContext | null) {
+function normalizeContext(context?: PracticeStudentContext | null) {
   return {
-    story: cleanText(context?.story),
-    situation: cleanText(context?.situation),
-    current_state: cleanList(context?.current_state),
-    required_details: (context?.required_details ?? [])
+    story: cleanText(context?.brief?.story),
+    task: cleanText(context?.brief?.task),
+    current_state: cleanList(context?.repository?.current_state),
+    outcome: cleanText(context?.objective?.outcome),
+    required_details: (context?.objective?.required_details ?? [])
       .map((item) => ({ label: cleanText(item.label), value: cleanText(item.value) }))
       .filter((item) => item.label && item.value),
     constraints: cleanList(context?.constraints),

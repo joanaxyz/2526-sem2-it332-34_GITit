@@ -1,13 +1,15 @@
-import type { ScenarioSession } from '@/features/practice/types'
+import type { PracticeSession } from '@/features/practice/types'
 import { Card, CardTitle } from '@/shared/components/Card'
 import { RepositoryStateDiagram } from './LiveDagPanel'
 
-export function ExpectedStatePanel({ session }: { session: ScenarioSession }) {
+export function ExpectedStatePanel({ session }: { session: PracticeSession }) {
   if (!session.scaffolding.expected_state || !session.expected_state) {
     return (
       <Card className="h-full p-3 opacity-70 shadow-none">
         <CardTitle className="text-base">Expected state hidden</CardTitle>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">Hard difficulty shows only the live DAG and narrative context.</p>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          Use the live DAG, workspace map, and brief to infer the repository state you need.
+        </p>
       </Card>
     )
   }

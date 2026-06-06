@@ -2,189 +2,150 @@ import type { RepositorySnapshot } from '@/features/practice/types'
 import type { KnownDifficulty } from '@/features/scenarios/constants'
 
 export type Difficulty = KnownDifficulty | (string & {})
-export type DifficultyStatus = 'not_started' | 'locked' | 'in_progress' | 'completed' | 'failed' | 'abandoned'
+export type PracticeKind = 'command_drill' | 'workflow_scenario'
+export type PracticeStatus = 'not_started' | 'locked' | 'in_progress' | 'completed' | 'failed' | 'abandoned'
 export type AttemptStatus = 'started' | 'completed' | 'failed' | 'abandoned'
-export type DifficultyActionIntent = 'start' | 'review' | 'retry' | 'continue' | 'resume'
-export type SkillFocusType = 'command_specific' | 'concept_specific' | 'workflow_specific'
+export type PracticeActionIntent = 'start' | 'review' | 'retry' | 'continue' | 'resume'
 
-export type CommandPolicy = {
-  id: number
+export type CommandBudget = {
   min_counted_commands: number
   max_counted_commands: number
-  non_counted_patterns?: string[]
 }
 
 export type LatestAttemptStats = {
   id: number
   status: AttemptStatus
   accuracy_rate: number | null
-  command_accurate: boolean | null
+  command_accurate?: boolean | null
   counted_action_total: number
   total_attempts: number
   completed_at: string | null
   ended_at: string | null
 }
 
-export type DifficultyAccess = {
+export type PracticeCompletion = {
+  first_attempt_star: boolean
+  counted_action_total: number
+  completed_at: string
+}
+
+export type PracticeProgress = {
+  count: number
+  required: number
+}
+
+export type PracticeAccess = {
   id: number
-  difficulty: Difficulty
-  completion_type?: 'state_based' | 'expanded_state_based'
-  status: DifficultyStatus
-  review_available: boolean
-  mastery_progress: {
-    mastered: number
-    required: number
-  }
-  mastered_records?: {
-    mastered: number
-    required: number
-  }
-  successful_attempts?: {
-    count: number
-    required: number
-  }
+  practice_kind: PracticeKind
+  status: PracticeStatus
+  required_successful_attempts: number
+  successful_attempts: PracticeProgress
   active_session_id: number | null
-  retry_session_id: number | null
-  policy: CommandPolicy
-  completion: null | {
-    first_attempt_star: boolean
-    counted_action_total: number
-    completed_at: string
-  }
   latest_attempt: LatestAttemptStats | null
+  completion: PracticeCompletion | null
+  review_available: boolean
+  command_budget: CommandBudget
 }
 
-export type DemoExplanationStep = {
-  command: string
-  title?: string
-  explanation: string
-  repository_state: RepositorySnapshot
-  common_mistake?: string
-  diagnostic?: boolean
-  counted?: boolean
-}
-
-export type CommandPreviewSection = {
-  id?: string
-  type?: 'overview' | 'syntax' | 'option' | 'argument' | 'effect' | 'mistake' | 'practice_note'
+export type CommandDrillAccess = PracticeAccess & {
+  practice_kind: 'command_drill'
+  slug: string
   title: string
+  summary: string
+}
+
+export type CommandUsageSummary = {
+  id: number
+  slug: string
+  usage_form: string
+  label: string
+  summary: string
+  drills: CommandDrillAccess[]
+}
+
+export type CommandTopicSummary = {
+  item_type: 'command_topic'
+  id: number
+  slug: string
+  base_command: string
+  title: string
+  summary: string
+  mental_model: Record<string, unknown>
+  progress: {
+    value: number
+    numerator: number
+    denominator: number
+  }
+  usages: CommandUsageSummary[]
+}
+
+export type WorkflowLevelAccess = PracticeAccess & {
+  practice_kind: 'workflow_scenario'
+  difficulty: Difficulty
+}
+
+export type WorkflowScenarioSummary = {
+  item_type: 'workflow_scenario'
+  id: number
+  slug: string
+  title: string
+  summary: string
+  narrative: string
+  command_topics: string[]
+  levels: WorkflowLevelAccess[]
+}
+
+export type ModuleContentSection = 'command_topics' | 'workflow_scenarios'
+
+export type ModuleContentPage<T extends CommandTopicSummary | WorkflowScenarioSummary> = {
+  section: ModuleContentSection
+  results: T[]
+  next_cursor: number | null
+}
+
+export type CommandPreviewBlock = {
+  type?: 'paragraph' | 'bullet_list' | 'list' | 'command' | 'code' | 'callout' | 'warning' | 'terminal_output'
+  title?: string
+  body?: string
+  text?: string
+  items?: string[]
   command?: string
-  token?: string
-  content?: CommandPreviewBlock[]
-  explanation?: string
-  pages?: CommandPreviewPage[]
-  syntax_examples?: string[]
-  what_changes?: string[]
-  what_does_not_change?: string[]
-  common_mistakes?: string[]
-  readiness_notes?: string[]
-  demo_steps?: DemoExplanationStep[]
+  language?: string
 }
 
 export type CommandPreviewPage = {
   id?: string
   title: string
   subtitle?: string
-  eyebrow?: string
-  heading?: string
   body?: string
-  section_type?: CommandPreviewSection['type']
   blocks?: CommandPreviewBlock[]
-  demo_steps?: DemoExplanationStep[]
-}
-
-export type CommandPreviewBlock = {
-  type?:
-    | 'paragraph'
-    | 'bullet_list'
-    | 'list'
-    | 'command'
-    | 'code'
-    | 'callout'
-    | 'warning'
-    | 'terminal_output'
-    | 'dag_note'
-    | 'demo_step_ref'
-  title?: string
-  subtitle?: string
-  body?: string
-  text?: string
-  items?: string[]
-  command?: string
-  language?: string
-  demo_step_id?: string
-}
-
-export type CommandPreviewCommand = {
-  id?: string
-  key?: string
-  base_command?: string
-  title: string
-  display_name?: string
-  command?: string
-  canonical_command?: string
-  aliases?: string[]
-  summary?: string
-  tags?: string[]
-  sections?: CommandPreviewSection[]
-  pages: CommandPreviewPage[]
-  demo_steps?: DemoExplanationStep[]
-  page_count?: number
-  section_count?: number
-  demo_step_count?: number
-}
-
-export type CommandPreviewNavigation = {
-  current_index: number
-  total_count: number
-  commands: CommandPreviewCommand[]
 }
 
 export type CommandPreviewMetadata = {
   schema_version?: number
-  title: string
+  title?: string
   intro?: string
   purpose?: string
-  focus_label?: string
-  command_title: string
-  commands?: CommandPreviewCommand[]
-  navigation?: CommandPreviewNavigation
-  command_refs?: Array<string | Record<string, unknown>>
-  sections?: CommandPreviewSection[]
-  syntax_examples: string[]
-  supported_demo_commands: string[]
-  demo_steps: DemoExplanationStep[]
-  demo_repository_state?: RepositorySnapshot
-  demo_dag_config?: Record<string, unknown>
-  before_state: RepositorySnapshot
-  after_state: RepositorySnapshot
-  short_explanation: string
-  what_changes?: string[]
-  what_does_not_change?: string[]
-  common_mistakes: string[]
+  command_title?: string
+  syntax_examples?: string[]
+  common_mistakes?: string[]
   readiness_notes?: string[]
-  diagnostic: boolean
-  counted: boolean
+  before_state?: RepositorySnapshot
+  after_state?: RepositorySnapshot
+  pages?: CommandPreviewPage[]
 }
 
-export type ScenarioSkillFocus = {
+export type CommandUsagePreview = {
   id: number
   slug: string
-  title: string
-  focus: string
+  usage_form: string
+  label: string
   summary: string
-  short_explanation?: string
-  skill_focus_type: SkillFocusType
-  primary_focus_commands: string[]
-  supporting_diagnostic_commands?: string[]
-  safe_demo_commands?: string[]
-  demo_repository_state?: RepositorySnapshot
-  demo_dag_config?: Record<string, unknown>
-  demo_explanation_steps?: DemoExplanationStep[]
-  command_preview?: CommandPreviewMetadata
-  related_git_concepts?: string[]
-  learning_unit_id: number
-  module_id?: number
-  lesson_id: number
-  difficulties: DifficultyAccess[]
+  topic: {
+    id: number
+    slug: string
+    base_command: string
+    title: string
+  }
+  command_preview: CommandPreviewMetadata
 }

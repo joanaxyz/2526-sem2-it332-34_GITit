@@ -98,10 +98,10 @@ export function CurrentTrackCard({ summary }: { summary: DashboardSummary }) {
             className="max-w-3xl text-4xl font-extrabold leading-tight tracking-tight"
             style={{ textShadow: '0 0 40px rgba(0,245,212,0.28), 0 0 80px rgba(0,180,216,0.14)' }}
           >
-            Build Git confidence through module lessons, practice repo state, and replayable scenarios.
+            Build Git confidence through foundations, command drills, and workflow scenarios.
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Start with the Git foundations when you need them, then choose a practice scenario and work from Easy toward Hard.
+            Start with foundations when you need them, drill single commands, then work through workflow scenarios from Easy toward Hard.
           </p>
         </div>
 

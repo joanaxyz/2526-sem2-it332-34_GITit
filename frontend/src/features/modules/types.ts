@@ -4,14 +4,19 @@ export type ModulePracticeMetric = {
   denominator: number
 }
 
-export type LessonSummary = {
+export type FoundationTopic = {
   id: number
   slug: string
   title: string
-  subtitle: string
+  summary: string
+  body: string
+  icon: string
+  cards: Array<{
+    title: string
+    body: string
+    command?: string
+  }>
   sort_order: number
-  is_complete: boolean
-  scenario_count: number
 }
 
 export type LearningModule = {
@@ -20,35 +25,8 @@ export type LearningModule = {
   number: number
   title: string
   description: string
-  is_orientation: boolean
   sort_order: number
-  lesson_count: number
-  scenario_count: number
+  command_topic_count: number
+  workflow_scenario_count: number
   practice_completion?: ModulePracticeMetric
-  lessons: LessonSummary[]
-}
-
-import type { OrientationStep } from '@/features/modules/orientation/types'
-
-export type LessonDetail = LessonSummary & {
-  content_html: string
-  scoped_css: string
-  interaction_steps: OrientationStep[]
-  module: {
-    id: number
-    slug: string
-    number: number
-    title: string
-    is_orientation: boolean
-  }
-}
-
-export type OrientationStatus = {
-  orientation_complete: boolean
-  lessons: Array<{
-    lesson_id: number
-    highest_step_seen: number
-    completed_at: string | null
-    is_complete: boolean
-  }>
 }

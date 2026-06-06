@@ -1,36 +1,37 @@
 from rest_framework import serializers
 
 from common.constants import (
-    SESSION_MODE_PRIMARY,
+    SESSION_MODE_REVIEW,
     SESSION_STATUS_COMPLETED,
-    SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
 from scaffolding.services import ScaffoldingService
-from scenarios.models import (
-    CompletionRecord,
-    DifficultyInstance,
-    ScenarioSession,
-    ScenarioSkillFocus,
-)
+from scenarios.context import StudentContextNormalizer
+from scenarios.models import CompletionRecord, PracticeKind, PracticeSession
 from scenarios.selectors import (
-    required_successful_attempts_for_difficulty,
-    reviewable_difficulties_for_session,
+    DIFFICULTY_ORDER,
+    required_successful_attempts_for_problem,
 )
+from scenarios.visualization import RepositoryVisualizationService
 from simulator.services import RepositorySnapshotService
 
-DIFFICULTY_ORDER = ["easy", "medium", "hard"]
 
-
-class ScenarioStartSerializer(serializers.Serializer):
-    difficulty_instance_id = serializers.IntegerField()
-
+class PracticeStartSerializer(serializers.Serializer):
+    problem_type = serializers.ChoiceField(choices=PracticeKind.values)
+    command_drill_id = serializers.IntegerField(required=False, allow_null=True)
+    workflow_level_id = serializers.IntegerField(required=False, allow_null=True)
     source_entry_point = serializers.ChoiceField(
-        choices=["module_card", "retry", "review"],
-        default="module_card",
+        choices=["module_page", "retry", "review"],
+        default="module_page",
     )
-
     prior_session_id = serializers.IntegerField(required=False, allow_null=True)
+
+    def validate(self, attrs):
+        if attrs["problem_type"] == PracticeKind.COMMAND_DRILL and not attrs.get("command_drill_id"):
+            raise serializers.ValidationError("command_drill_id is required for command drills.")
+        if attrs["problem_type"] == PracticeKind.WORKFLOW_SCENARIO and not attrs.get("workflow_level_id"):
+            raise serializers.ValidationError("workflow_level_id is required for workflow scenarios.")
+        return attrs
 
 
 class CommandSubmitSerializer(serializers.Serializer):
@@ -39,7 +40,6 @@ class CommandSubmitSerializer(serializers.Serializer):
 
 class WorkspaceFileCreateSerializer(serializers.Serializer):
     path = serializers.CharField(max_length=240)
-
     content = serializers.CharField(
         required=False,
         allow_blank=True,
@@ -49,123 +49,63 @@ class WorkspaceFileCreateSerializer(serializers.Serializer):
     )
 
 
-class SkillFocusDemoCommandSerializer(serializers.Serializer):
-    command = serializers.CharField(max_length=500)
-
-    repository_state = serializers.JSONField(required=False)
-
-
-def prefetch_session_payload_context(session: ScenarioSession) -> None:
-
+def prefetch_session_payload_context(session: PracticeSession) -> None:
     if getattr(session, "_payload_context_loaded", False):
         return
-
-    session._prefetched_completion = CompletionRecord.objects.filter(
-        user_id=session.user_id,
-        difficulty_instance_id=session.difficulty_instance_id,
-    ).first()
-
-    min_counted = session.difficulty_instance.command_policy.min_counted_commands
-
-    session._prefetched_mastery_count = ScenarioSession.objects.filter(
-        user_id=session.user_id,
-        mode=SESSION_MODE_PRIMARY,
-        status=SESSION_STATUS_COMPLETED,
-        difficulty_instance_id=session.difficulty_instance_id,
-        counted_action_total__lte=min_counted,
-    ).count()
-
+    completion_filter = {"user_id": session.user_id}
+    if session.practice_kind == PracticeKind.COMMAND_DRILL:
+        completion_filter["command_drill_id"] = session.command_drill_id
+    else:
+        completion_filter["workflow_level_id"] = session.workflow_level_id
+    session._prefetched_completion = CompletionRecord.objects.filter(**completion_filter).first()
     session._payload_context_loaded = True
 
 
-def session_payload(session, *, include_steps: bool = True) -> dict:
-
+def session_payload(session: PracticeSession, *, include_steps: bool = True) -> dict:
     prefetch_session_payload_context(session)
-
-    supports = ScaffoldingService().supports_for(session.difficulty_instance.difficulty)
-
     snapshotter = RepositorySnapshotService()
-
-    if include_steps:
-        prefetched_steps = getattr(session, "_prefetched_objects_cache", {}).get("step_logs")
-
-        step_logs = (
-            list(prefetched_steps)
-            if prefetched_steps is not None
-            else list(session.step_logs.order_by("id"))
-        )
-
-    else:
-        step_logs = []
-
-    mastery_progress = mastery_progress_payload(session)
-
-    completion = completion_payload(session)
-
-    student_context = session.variant.student_context or fallback_student_context(session)
-
-    counts = session_counts_payload(session)
-
+    visualizer = RepositoryVisualizationService()
+    problem = session.problem
+    context = _student_context(session)
     repository_state = snapshotter.snapshot(session.repository_state, already_normalized=True)
-
+    visualization = visualizer.snapshot(session.repository_state)
     expected_target = session.variant.expected_state_diagram or session.variant.target_state
-
+    supports = _scaffolding_supports(session)
     expected_state = (
         snapshotter.snapshot(expected_target, already_normalized=True)
         if supports["expected_state"] and expected_target
         else None
     )
 
-    reviewable_difficulties = (
-        reviewable_difficulties_for_session(session=session)
-        if session.status in {SESSION_STATUS_COMPLETED, SESSION_STATUS_FAILED}
-        else []
-    )
-
+    step_logs = list(session.step_logs.order_by("id")) if include_steps else []
     return {
         "id": session.id,
         "mode": session.mode,
         "status": session.status,
-        "difficulty_instance_id": session.difficulty_instance_id,
+        "failure_reason": session.failure_reason or None,
+        "practice_kind": session.practice_kind,
         "completed_at": session.completed_at,
         "first_attempt_star_eligible": session.first_attempt_star_eligible,
-        "scenario": {
-            "id": session.scenario_id,
-            "slug": session.scenario.slug,
-            "title": session.scenario.title,
-            "focus": session.scenario.focus,
-            "narrative": session.difficulty_instance.narrative or session.scenario.narrative,
-            "student_context": student_context,
-            "lesson_number": ScenarioSkillFocus.objects.filter(
-                learning_unit=session.learning_unit,
-                is_published=True,
-                lesson__sort_order__lte=session.scenario.lesson.sort_order,
-                difficulty_instances__is_published=True,
-            )
-            .distinct()
-            .count(),
-            "lesson_id": session.scenario.lesson_id,
-        },
-        "student_context": student_context,
+        "problem": _problem_payload(session),
+        "student_context": context,
         "module": {
-            "id": session.learning_unit_id,
-            "number": session.learning_unit.number,
-            "title": session.learning_unit.title,
+            "id": session.module_id,
+            "number": session.module.number,
+            "title": session.module.title,
         },
-        "difficulty": session.difficulty_instance.difficulty,
-        "completion_type": session.difficulty_instance.completion_type,
+        "difficulty": session.difficulty or None,
         "variant": {
             "id": session.variant_id,
             "label": session.variant.label,
             "changed_variant": session.changed_variant,
             "looped_variant": session.looped_variant,
         },
-        "mastery_progress": mastery_progress,
-        "mastered_records": mastery_progress,
-        "policy": session.command_policy_snapshot,
-        "counts": counts,
+        "mastery_progress": mastery_progress_payload(session, problem=problem),
+        "policy": session.command_budget_snapshot,
+        "counts": session_counts_payload(session),
         "scaffolding": supports,
         "repository_state": repository_state,
+        "visualization": visualization,
         "expected_state": expected_state,
         "steps": [
             {
@@ -175,165 +115,165 @@ def session_payload(session, *, include_steps: bool = True) -> dict:
                 "result_category": step.result_category,
                 "command_classification": step.command_classification,
                 "contextual_feedback": step.contextual_feedback,
+                "visualization_snapshot": step.visualization_snapshot,
                 "created_at": step.created_at,
             }
             for step in step_logs
         ],
-        "review_mode": session.mode == "review",
-        "next_difficulty": next_difficulty_payload(
-            session,
-            mastery_progress=mastery_progress,
-        ),
-        "completion": completion,
-        "reviewable_difficulties": reviewable_difficulties,
+        "review_mode": session.mode == SESSION_MODE_REVIEW,
+        "next_difficulty": next_difficulty_payload(session),
+        "completion": completion_payload(session),
     }
 
 
-def command_session_payload(session, *, repository_state: dict) -> dict:
-
+def command_session_payload(session: PracticeSession, *, repository_state: dict, visualization: dict) -> dict:
     payload = {
         "id": session.id,
         "mode": session.mode,
         "status": session.status,
-        "difficulty_instance_id": session.difficulty_instance_id,
+        "failure_reason": session.failure_reason or None,
+        "practice_kind": session.practice_kind,
         "completed_at": session.completed_at,
         "first_attempt_star_eligible": session.first_attempt_star_eligible,
         "counts": session_counts_payload(session),
         "repository_state": repository_state,
-        "review_mode": session.mode == "review",
+        "visualization": visualization,
+        "review_mode": session.mode == SESSION_MODE_REVIEW,
     }
-
-    if session.status == SESSION_STATUS_STARTED:
-        return payload
-
-    mastery_progress = mastery_progress_payload(session)
-
-    payload.update(
-        {
-            "mastery_progress": mastery_progress,
-            "mastered_records": mastery_progress,
-            "completion": completion_payload(session),
-            "next_difficulty": next_difficulty_payload(
-                session,
-                mastery_progress=mastery_progress,
-            ),
-        }
-    )
-
+    if session.status != SESSION_STATUS_STARTED:
+        payload.update(
+            {
+                "mastery_progress": mastery_progress_payload(session, problem=session.problem),
+                "completion": completion_payload(session),
+                "next_difficulty": next_difficulty_payload(session),
+            }
+        )
     return payload
 
 
-def mastery_progress_payload(session) -> dict:
-
-    required = required_successful_attempts_for_difficulty(session.difficulty_instance)
-
-    if hasattr(session, "_prefetched_mastery_count"):
-        mastered_count = session._prefetched_mastery_count
-
+def mastery_progress_payload(session: PracticeSession, *, problem) -> dict:
+    required = required_successful_attempts_for_problem(problem)
+    filters = {
+        "user_id": session.user_id,
+        "mode": "primary",
+        "status": "completed",
+        "counted_action_total__lte": session.command_budget_snapshot["min_counted_commands"],
+    }
+    if session.practice_kind == PracticeKind.COMMAND_DRILL:
+        filters["command_drill_id"] = session.command_drill_id
     else:
-        mastered_count = session.user.scenariosession_set.filter(
-            mode=SESSION_MODE_PRIMARY,
-            status=SESSION_STATUS_COMPLETED,
-            difficulty_instance=session.difficulty_instance,
-            counted_action_total__lte=session.difficulty_instance.command_policy.min_counted_commands,
-        ).count()
+        filters["workflow_level_id"] = session.workflow_level_id
+    mastered_count = PracticeSession.objects.filter(**filters).count()
+    return {"mastered": min(mastered_count, required), "required": required}
 
+
+def completion_payload(session: PracticeSession) -> dict | None:
+    completion = getattr(session, "_prefetched_completion", None)
+    if completion is None and not getattr(session, "_payload_context_loaded", False):
+        filters = {"user": session.user}
+        if session.practice_kind == PracticeKind.COMMAND_DRILL:
+            filters["command_drill"] = session.command_drill
+        else:
+            filters["workflow_level"] = session.workflow_level
+        completion = CompletionRecord.objects.filter(**filters).first()
+    if not completion:
+        return None
     return {
-        "mastered": min(mastered_count, required),
-        "required": required,
+        "first_attempt_star": completion.first_attempt_star,
+        "counted_action_total": completion.counted_action_total,
+        "completed_at": completion.completed_at,
     }
 
 
-def completion_payload(session) -> dict | None:
-
-    completion_record = getattr(session, "_prefetched_completion", None)
-
-    if completion_record is None and not getattr(session, "_payload_context_loaded", False):
-        completion_record = CompletionRecord.objects.filter(
-            user=session.user, difficulty_instance=session.difficulty_instance
-        ).first()
-
-    if completion_record:
-        return {
-            "first_attempt_star": completion_record.first_attempt_star,
-            "counted_action_total": completion_record.counted_action_total,
-            "completed_at": completion_record.completed_at,
-        }
-
-    return None
-
-
-def session_counts_payload(session) -> dict:
-
-    minimum_counted_commands = session.command_policy_snapshot["min_counted_commands"]
-
-    maximum_counted_commands = session.command_policy_snapshot["max_counted_commands"]
-
-    remaining_counted_commands = max(
-        0,
-        maximum_counted_commands - session.counted_action_total,
-    )
-
-    max_reached = session.counted_action_total >= maximum_counted_commands
-
+def session_counts_payload(session: PracticeSession) -> dict:
+    minimum = session.command_budget_snapshot["min_counted_commands"]
+    maximum = session.command_budget_snapshot["max_counted_commands"]
     return {
         "counted_action_total": session.counted_action_total,
-        "minimum_counted_commands": minimum_counted_commands,
-        "maximum_counted_commands": maximum_counted_commands,
+        "minimum_counted_commands": minimum,
+        "maximum_counted_commands": maximum,
         "non_counted_diagnostic_total": session.non_counted_diagnostic_total,
-        "remaining_counted_commands": remaining_counted_commands,
-        "max_reached": max_reached,
+        "remaining_counted_commands": max(0, maximum - session.counted_action_total),
+        "max_reached": session.counted_action_total >= maximum,
         "total_attempts": session.total_attempts,
     }
 
 
-def fallback_student_context(session) -> dict:
-
-    narrative = session.difficulty_instance.narrative or session.scenario.narrative
-
-    context = {
-        "story": narrative,
-    }
-
-    return {key: value for key, value in context.items() if value not in ("", [], None)}
-
-
-def next_difficulty_payload(session, *, mastery_progress: dict | None = None) -> dict | None:
-
-    if session.mode != "primary" or session.status != SESSION_STATUS_COMPLETED:
-        return None
-
-    progress = mastery_progress or mastery_progress_payload(session)
-
-    # Require the current completed attempt to be accurate (100% accuracy)
-
+def next_difficulty_payload(session: PracticeSession) -> dict | None:
     if (
-        session.counted_action_total
-        > session.difficulty_instance.command_policy.min_counted_commands
+        session.practice_kind != PracticeKind.WORKFLOW_SCENARIO
+        or session.mode != "primary"
+        or session.status != SESSION_STATUS_COMPLETED
+        or not session.workflow_level
     ):
         return None
-
+    progress = mastery_progress_payload(session, problem=session.workflow_level)
+    if session.counted_action_total > session.command_budget_snapshot["min_counted_commands"]:
+        return None
     if progress["mastered"] < progress["required"]:
         return None
-
     try:
-        current_index = DIFFICULTY_ORDER.index(session.difficulty_instance.difficulty)
-
-        next_difficulty = DIFFICULTY_ORDER[current_index + 1]
-
+        next_difficulty = DIFFICULTY_ORDER[DIFFICULTY_ORDER.index(session.workflow_level.difficulty) + 1]
     except (ValueError, IndexError):
         return None
-
-    next_instance = DifficultyInstance.objects.filter(
-        scenario=session.scenario,
+    next_level = session.workflow_level.scenario.levels.filter(
         difficulty=next_difficulty,
         is_published=True,
     ).first()
-
-    if not next_instance:
+    if not next_level:
         return None
+    return {"id": next_level.id, "difficulty": next_level.difficulty}
 
+
+def _student_context(session: PracticeSession) -> dict:
+    raw = session.variant.student_context or getattr(session.problem, "student_context", {})
+    fallback = _problem_narrative(session)
+    return StudentContextNormalizer().normalize(raw, fallback_story=fallback)
+
+
+def _problem_payload(session: PracticeSession) -> dict:
+    if session.practice_kind == PracticeKind.COMMAND_DRILL:
+        usage = session.command_drill.usage
+        topic = usage.topic
+        return {
+            "id": session.command_drill_id,
+            "slug": session.command_drill.slug,
+            "title": session.command_drill.title,
+            "summary": session.command_drill.summary,
+            "topic": {
+                "id": topic.id,
+                "base_command": topic.base_command,
+                "title": topic.title,
+            },
+            "usage": {
+                "id": usage.id,
+                "usage_form": usage.usage_form,
+                "label": usage.label,
+            },
+        }
     return {
-        "id": next_instance.id,
-        "difficulty": next_instance.difficulty,
+        "id": session.workflow_scenario_id,
+        "slug": session.workflow_scenario.slug,
+        "title": session.workflow_scenario.title,
+        "summary": session.workflow_scenario.summary,
+        "narrative": session.workflow_level.narrative or session.workflow_scenario.narrative,
+        "level_id": session.workflow_level_id,
     }
+
+
+def _problem_narrative(session: PracticeSession) -> str:
+    if session.practice_kind == PracticeKind.COMMAND_DRILL:
+        return session.command_drill.summary
+    return session.workflow_level.narrative or session.workflow_scenario.narrative
+
+
+def _scaffolding_supports(session: PracticeSession) -> dict:
+    if session.practice_kind == PracticeKind.COMMAND_DRILL:
+        return {
+            "live_dag": False,
+            "state_lens": True,
+            "expected_state": False,
+            "contextual_feedback": True,
+        }
+    supports = ScaffoldingService().supports_for(session.workflow_level.difficulty)
+    return {**supports, "state_lens": True}

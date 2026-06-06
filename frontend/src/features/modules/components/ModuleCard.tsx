@@ -1,33 +1,12 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
-import { OrientationLessonCard } from '@/features/modules/components/OrientationLessonCard'
+import { ModulePracticeHub } from '@/features/modules/components/ModulePracticeHub'
 import { ModuleSymbol } from '@/features/modules/components/ModuleSymbol'
-import { ModuleScenarioHub } from '@/features/modules/components/ModuleScenarioHub'
 import { getModuleAccent } from '@/features/modules/moduleColors'
-import type { ScenarioSkillFocus } from '@/features/scenarios/types'
 import type { LearningModule } from '@/features/modules/types'
 import { Card } from '@/shared/components/Card'
 import { ExpandToggleButton } from '@/shared/components/ExpandToggleButton'
 import { ProgressBar } from '@/shared/components/ProgressBar'
-
-function practiceCompletionFromSummary(scenarios: ScenarioSkillFocus[] | undefined) {
-  if (!scenarios) return null
-  const numerator = scenarios.reduce(
-    (total, scenario) =>
-      total + scenario.difficulties.reduce((sum, difficulty) => sum + difficulty.mastery_progress.mastered, 0),
-    0,
-  )
-  const denominator = scenarios.reduce(
-    (total, scenario) =>
-      total + scenario.difficulties.reduce((sum, difficulty) => sum + difficulty.mastery_progress.required, 0),
-    0,
-  )
-  return {
-    numerator,
-    denominator,
-    value: denominator ? Math.round((numerator / denominator) * 100) : 0,
-  }
-}
 
 function StatusBadge({ progress }: { progress: number }) {
   if (progress >= 100) {
@@ -54,32 +33,14 @@ function StatusBadge({ progress }: { progress: number }) {
 export function ModuleCard({
   module,
   isExpanded,
-  scenarioSummary,
-  scenarioSummaryPending = false,
   onToggle,
 }: {
   module: LearningModule
   isExpanded: boolean
-  scenarioSummary?: ScenarioSkillFocus[]
-  scenarioSummaryPending?: boolean
   onToggle: () => void
 }) {
-  const [everExpanded, setEverExpanded] = useState(isExpanded)
   const accent = getModuleAccent(module.number)
-
-  useEffect(() => {
-    if (isExpanded) setEverExpanded(true)
-  }, [isExpanded])
-
-  const visibleLessons = module.is_orientation
-    ? module.lessons.filter((lesson) => !['practice-rules', 'scaffolds-review'].includes(lesson.slug))
-    : []
-  const orientationProgress = Math.round(
-    (visibleLessons.filter((lesson) => lesson.is_complete).length / Math.max(visibleLessons.length, 1)) * 100,
-  )
-  const livePracticeCompletion = practiceCompletionFromSummary(scenarioSummary)
-  const practiceProgress = Math.round(livePracticeCompletion?.value ?? module.practice_completion?.value ?? 0)
-  const progressValue = module.is_orientation ? orientationProgress : practiceProgress
+  const progressValue = Math.round(module.practice_completion?.value ?? 0)
   const panelId = `module-panel-${module.id}`
 
   return (
@@ -92,11 +53,11 @@ export function ModuleCard({
         '--module-glow': accent.glowRgba,
       } as React.CSSProperties}
     >
-      <div className="grid w-full grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-4 p-5 text-left">
+      <div className="grid w-full grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-4 p-5 text-left max-sm:grid-cols-[2.75rem_minmax(0,1fr)]">
         <ModuleSymbol module={module} />
-        <div>
+        <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-lg font-bold">
+            <h2 className="text-lg font-bold leading-tight">
               <span style={{ color: accent.color }}>Module {module.number}:</span>{' '}
               {module.title}
             </h2>
@@ -106,11 +67,14 @@ export function ModuleCard({
             <ProgressBar value={progressValue} className="flex-1" glow fillAnimate fillFrom={accent.color} fillTo={accent.gradientTo} />
             <span className="font-mono text-xs" style={{ color: `${accent.color}B3` }}>{progressValue}%</span>
             <StatusBadge progress={progressValue} />
+            <span className="font-mono text-xs text-muted-foreground">
+              {module.command_topic_count} command topics / {module.workflow_scenario_count} workflows
+            </span>
           </div>
         </div>
         <ExpandToggleButton expanded={isExpanded} controlsId={panelId} label={module.title} onToggle={onToggle} />
       </div>
-      {everExpanded && (
+      {isExpanded ? (
         <div
           className="grid"
           style={{
@@ -120,32 +84,11 @@ export function ModuleCard({
         >
           <div style={{ overflow: 'hidden' }}>
             <div className="border-t border-border/50 bg-secondary/20 p-5" id={panelId}>
-              {module.is_orientation ? (
-                <div className="grid gap-3">
-                  <p className="rounded-md border border-primary/25 bg-primary/5 px-3 py-2 text-sm text-muted-foreground">
-                    Recommended before starting the Core Modules: complete all {visibleLessons.length} orientation lessons at your
-                    own pace.
-                  </p>
-                  <p className="font-mono text-xs text-muted-foreground">
-                    {visibleLessons.filter((lesson) => lesson.is_complete).length} / {visibleLessons.length} complete
-                  </p>
-                  <div className="grid gap-2">
-                    {visibleLessons.map((lesson) => (
-                      <OrientationLessonCard key={lesson.id} lesson={lesson} />
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <ModuleScenarioHub
-                  module={module}
-                  scenarioSummary={scenarioSummary}
-                  scenarioSummaryPending={scenarioSummaryPending}
-                />
-              )}
+              <ModulePracticeHub expanded={isExpanded} module={module} />
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </Card>
   )
 }

@@ -1,12 +1,12 @@
 import { ArrowRight, Lock, Play, RefreshCcw, RotateCcw, Star } from 'lucide-react'
 import type { CSSProperties } from 'react'
 
-import type { DifficultyAccess, DifficultyActionIntent } from '@/features/scenarios/types'
+import type { PracticeActionIntent, WorkflowLevelAccess } from '@/features/scenarios/types'
 import { meetsMasteryAccuracy, meetsProgressAccuracy } from '@/features/scenarios/utils/commandAccuracy'
 import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
 
-function actionForDifficulty(difficulty: DifficultyAccess): DifficultyActionIntent | null {
+function actionForDifficulty(difficulty: WorkflowLevelAccess): PracticeActionIntent | null {
   if (difficulty.status === 'locked') return null
   if (difficulty.status === 'in_progress') return difficulty.active_session_id ? 'resume' : null
   if (difficulty.status === 'completed') {
@@ -19,14 +19,11 @@ function actionForDifficulty(difficulty: DifficultyAccess): DifficultyActionInte
   return 'start'
 }
 
-function masteredRecordsFor(difficulty: DifficultyAccess) {
-  if (difficulty.successful_attempts) {
-    return {
-      mastered: difficulty.successful_attempts.count,
-      required: difficulty.successful_attempts.required,
-    }
+function masteredRecordsFor(difficulty: WorkflowLevelAccess) {
+  return {
+    mastered: difficulty.successful_attempts.count,
+    required: difficulty.successful_attempts.required,
   }
-  return difficulty.mastered_records ?? difficulty.mastery_progress
 }
 
 export function DifficultyActionButton({
@@ -34,9 +31,9 @@ export function DifficultyActionButton({
   disabled = false,
   onAction,
 }: {
-  difficulty: DifficultyAccess
+  difficulty: WorkflowLevelAccess
   disabled?: boolean
-  onAction: (difficulty: DifficultyAccess, action: DifficultyActionIntent) => void
+  onAction: (difficulty: WorkflowLevelAccess, action: PracticeActionIntent) => void
 }) {
   const action = actionForDifficulty(difficulty)
   const buttonLabel =

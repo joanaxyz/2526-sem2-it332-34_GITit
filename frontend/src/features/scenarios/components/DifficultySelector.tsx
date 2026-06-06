@@ -1,5 +1,5 @@
 import { DifficultyActionButton } from '@/features/scenarios/components/DifficultyActionButton'
-import type { DifficultyAccess } from '@/features/scenarios/types'
+import type { WorkflowLevelAccess } from '@/features/scenarios/types'
 
 export function DifficultySelector({
   difficulties,
@@ -7,10 +7,10 @@ export function DifficultySelector({
   onStart,
   onReview,
 }: {
-  difficulties: DifficultyAccess[]
+  difficulties: WorkflowLevelAccess[]
   disabled?: boolean
-  onStart: (difficulty: DifficultyAccess) => void
-  onReview: (difficulty: DifficultyAccess) => void
+  onStart: (difficulty: WorkflowLevelAccess) => void
+  onReview: (difficulty: WorkflowLevelAccess) => void
 }) {
   return (
     <div className="grid grid-cols-3 gap-2 max-md:grid-cols-1">

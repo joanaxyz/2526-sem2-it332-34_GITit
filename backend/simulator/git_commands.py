@@ -867,7 +867,7 @@ def _validate_add(parsed: ParsedGitCommand) -> str | None:
 
 def _validate_commit(parsed: ParsedGitCommand) -> str | None:
     if len(parsed.options.get("-m", ())) > 1:
-        return "error: only one -m option is supported in this lesson."
+        return "error: only one -m option is supported in this practice session."
     if parsed.has_option("--allow-empty"):
         return _unknown_option_message(parsed.subcommand, "--allow-empty")
     if parsed.has_option("--no-edit") and not parsed.has_option("--amend"):

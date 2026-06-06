@@ -1,6 +1,6 @@
 import { ArrowLeft, CircleHelp, GitBranch, RefreshCcw } from 'lucide-react'
 
-import type { ScenarioSession } from '@/features/practice/types'
+import type { PracticeSession } from '@/features/practice/types'
 import { CommandBudgetHeader } from '@/features/scenarios/components/CommandBudgetHeader'
 import {
   commandAccuracyFromSession,
@@ -20,7 +20,7 @@ export function ScenarioStatusHeader({
   onOpenTour,
   onContinue,
 }: {
-  session: ScenarioSession
+  session: PracticeSession
   isExiting?: boolean
   isRetrying?: boolean
   onExit?: () => void
@@ -31,7 +31,7 @@ export function ScenarioStatusHeader({
 }) {
   const exitLabel = session.status === 'started' ? 'Exit' : 'Back'
   const accuracy = commandAccuracyFromSession(session)
-  const requiredAttempts = session.mastery_progress?.required ?? 3
+  const requiredAttempts = session.mastery_progress?.required ?? 1
   const hasRequiredAttempts = (session.mastery_progress?.mastered ?? 0) >= requiredAttempts
   const meetsProgress = meetsProgressAccuracy(accuracy)
   const isMastered = session.status === 'completed' && hasRequiredAttempts && meetsMasteryAccuracy(accuracy)
@@ -57,7 +57,7 @@ export function ScenarioStatusHeader({
         </Button>
         <GitBranch className="size-5 text-primary" />
         <span className="truncate font-mono text-xs text-muted-foreground">
-          Module {session.module.number} / Lesson {session.scenario.lesson_number}
+          Module {session.module.number} / {session.practice_kind === 'command_drill' ? 'Command drill' : 'Workflow scenario'}
         </span>
       </div>
       <div className="flex min-w-0 items-center gap-2">

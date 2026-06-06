@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
-import { subscribeToScenarioSessionSync } from '@/features/scenarios/utils/scenarioCache'
+import { subscribeToPracticeSessionSync } from '@/features/scenarios/utils/scenarioCache'
 import { ApiError } from '@/shared/api/apiError'
 
 export function AppProviders({ children }: { children: ReactNode }) {
@@ -22,7 +22,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
       }),
   )
 
-  useEffect(() => subscribeToScenarioSessionSync(queryClient), [queryClient])
+  useEffect(() => subscribeToPracticeSessionSync(queryClient), [queryClient])
 
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 }

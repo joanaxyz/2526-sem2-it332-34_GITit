@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowRight, Award, PartyPopper, RefreshCcw, Sparkles, XCircle } from 'lucide-react'
 import type { CSSProperties } from 'react'
 
-import type { ScenarioSession } from '@/features/practice/types'
-import type { DifficultyAccess } from '@/features/scenarios/types'
+import type { PracticeSession } from '@/features/practice/types'
+import type { WorkflowLevelAccess } from '@/features/scenarios/types'
 import {
   commandAccuracyFromSession,
   meetsMasteryAccuracy,
@@ -35,7 +35,8 @@ const confettiPieces = Array.from({ length: 52 }, (_, index) => {
   }
 })
 
-function difficultyLabel(session: ScenarioSession) {
+function difficultyLabel(session: PracticeSession) {
+  if (!session.difficulty) return 'Drill'
   return session.difficulty.charAt(0).toUpperCase() + session.difficulty.slice(1)
 }
 
@@ -84,14 +85,14 @@ export function CompletionCelebrationModal({
   nextDifficultyLabel,
 }: {
   open: boolean
-  session: ScenarioSession
+  session: PracticeSession
   onClose: () => void
   onBackToModules: () => void
   onNextLevel?: () => void
   onContinue?: () => void
   onRetry?: () => void
-  onReviewDifficulty?: (difficulty: DifficultyAccess) => void
-  previousDifficulties?: DifficultyAccess[]
+  onReviewDifficulty?: (difficulty: WorkflowLevelAccess) => void
+  previousDifficulties?: WorkflowLevelAccess[]
   isStartingNextLevel?: boolean
   isContinuing?: boolean
   isRetrying?: boolean
@@ -218,7 +219,7 @@ export function CompletionCelebrationModal({
           <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground">{message}</p>
           {isFailed && session.variant.looped_variant ? (
             <p className="mx-auto mt-2 max-w-xl text-xs font-medium leading-5 text-warning">
-              You have cycled through all authored variants. Consider reviewing the lesson overview before this next attempt.
+              You have cycled through all authored variants. Consider reviewing the command preview or foundations before this next attempt.
             </p>
           ) : null}
 

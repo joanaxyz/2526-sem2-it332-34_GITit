@@ -1,9 +1,9 @@
 import { GaugeCircle } from 'lucide-react'
 
-import type { ScenarioSession } from '@/features/practice/types'
+import type { PracticeSession } from '@/features/practice/types'
 import { cn } from '@/shared/utils/cn'
 
-export function CommandBudgetHeader({ session }: { session: ScenarioSession }) {
+export function CommandBudgetHeader({ session }: { session: PracticeSession }) {
   const {
     counted_action_total: used,
     minimum_counted_commands: target,

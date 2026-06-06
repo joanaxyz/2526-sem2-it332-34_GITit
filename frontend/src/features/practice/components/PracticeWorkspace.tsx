@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -19,12 +19,12 @@ import { practiceApi } from '@/features/practice/api/practiceApi'
 import { useAuthStore } from '@/features/auth/hooks/useAuth'
 import { hasSeenScenarioTour, markScenarioTourSeen } from '@/features/practice/utils/scenarioTour'
 import { useCommandSubmission } from '@/features/practice/hooks/useCommandSubmission'
-import { useScenarioSession } from '@/features/practice/hooks/useScenarioSession'
+import { usePracticeSession } from '@/features/practice/hooks/usePracticeSession'
 import { useScaffolding } from '@/features/practice/scaffolding/useScaffolding'
-import type { ScenarioSession } from '@/features/practice/types'
+import type { PracticeSession } from '@/features/practice/types'
 import { reviewApi } from '@/features/review/api/reviewApi'
-import { scenariosApi } from '@/features/scenarios/api/scenariosApi'
-import { invalidateScenarioProgressQueries, syncScenarioSessionInCache, updateScenarioSessionCache } from '@/features/scenarios/utils/scenarioCache'
+import { scenariosApi, startPayloadForPractice } from '@/features/scenarios/api/scenariosApi'
+import { invalidateScenarioProgressQueries, syncPracticeSessionInCache, updatePracticeSessionCache } from '@/features/scenarios/utils/scenarioCache'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { LoadingState } from '@/shared/components/LoadingState'
@@ -108,12 +108,9 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const sessionId = Number(params.sessionId)
-  const { query, session, lines, feedback } = useScenarioSession(sessionId)
+  const { query, session, lines, feedback } = usePracticeSession(sessionId)
   const mutation = useCommandSubmission(sessionId, reviewMode)
   const { clearToast, evaluateAndNotify } = useScaffolding(sessionId)
-  // True when "Proceed to Command Preview" was tapped — tells exitMutation.onSuccess to
-  // append ?preview=slug to the Modules navigation so the Learn modal auto-opens there.
-  const scaffoldExitPendingRef = useRef(false)
   const [dismissedCompletionSessionId, setDismissedCompletionSessionId] = useState<number | null>(null)
   const [terminalRatio, setTerminalRatio] = useState(DEFAULT_TERMINAL_RATIO)
   const [diagramRatio, setDiagramRatio] = useState(DEFAULT_DIAGRAM_RATIO)
@@ -127,12 +124,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const user = useAuthStore((state) => state.user)
   const workspaceGridRef = useRef<HTMLElement>(null)
   const diagramGridRef = useRef<HTMLDivElement>(null)
-  const terminalGridRef = useRef<HTMLDivElement>(null)
-  // Clear the scaffold flag whenever the exit modal closes without completing (Cancel or X).
-  // This prevents a later normal exit from accidentally appending ?preview= to the URL.
-  useEffect(() => {
-    if (!exitConfirmOpen) scaffoldExitPendingRef.current = false
-  }, [exitConfirmOpen])
+  const terminalGridRef = useRef<HTMLDivElement>(null)
 
   const exitMutation = useMutation({
     mutationFn: () => {
@@ -141,31 +133,27 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
       return Promise.resolve(session)
     },
     onSuccess: (updatedSession) => {
-      syncScenarioSessionInCache(queryClient, updatedSession)
+      syncPracticeSessionInCache(queryClient, updatedSession)
       invalidateScenarioProgressQueries(queryClient)
-      const pendingPreview = scaffoldExitPendingRef.current
-      scaffoldExitPendingRef.current = false
       const base = `/modules?module=${updatedSession.module.id}`
-      navigate(pendingPreview ? `${base}&preview=${updatedSession.scenario.slug}` : base)
+      navigate(base)
     },
   })
   const nextLevelMutation = useMutation({
     mutationFn: () =>
-      scenariosApi.startSession({
-        difficulty_instance_id: session?.next_difficulty?.id ?? 0,
-        source_entry_point: 'module_card',
-      }),
+      scenariosApi.startSession(startPayloadForPractice('workflow_scenario', session?.next_difficulty?.id ?? 0)),
     onSuccess: (next) => {
-      syncScenarioSessionInCache(queryClient, next)
+      syncPracticeSessionInCache(queryClient, next)
       invalidateScenarioProgressQueries(queryClient)
       if (session?.status === 'completed') setDismissedCompletionSessionId(session.id)
       navigate(`/practice/${next.id}`)
     },
   })
   const reviewMutation = useMutation({
-    mutationFn: (difficultyInstanceId: number) => reviewApi.startReviewSession(difficultyInstanceId),
+    mutationFn: (levelId: number) =>
+      reviewApi.startReviewSession(startPayloadForPractice('workflow_scenario', levelId, 'review')),
     onSuccess: (next) => {
-      syncScenarioSessionInCache(queryClient, next)
+      syncPracticeSessionInCache(queryClient, next)
       invalidateScenarioProgressQueries(queryClient)
       if (session?.status === 'completed') setDismissedCompletionSessionId(session.id)
       navigate(`/review/${next.id}`)
@@ -177,7 +165,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
       return scenariosApi.retrySession(session.id)
     },
     onSuccess: (next) => {
-      syncScenarioSessionInCache(queryClient, next)
+      syncPracticeSessionInCache(queryClient, next)
       invalidateScenarioProgressQueries(queryClient)
       setDismissedCompletionSessionId(null)
       setStartOverConfirmOpen(false)
@@ -190,7 +178,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
       return practiceApi.createFile(session.id, input)
     },
     onSuccess: (updatedSession) => {
-      updateScenarioSessionCache(queryClient, updatedSession)
+      updatePracticeSessionCache(queryClient, updatedSession)
     },
   })
   const writeFileMutation = useMutation({
@@ -199,7 +187,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
       return practiceApi.writeFile(session.id, input)
     },
     onSuccess: (updatedSession) => {
-      updateScenarioSessionCache(queryClient, updatedSession)
+      updatePracticeSessionCache(queryClient, updatedSession)
     },
   })
   const reviewableDifficulties = session?.reviewable_difficulties ?? []
@@ -207,16 +195,16 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   if (query.isLoading) {
     return (
       <LoadingState
-        description="Preparing the repository, terminal, and scenario workspace."
-        label="Loading scenario"
+        description="Preparing the repository, terminal, and practice workspace."
+        label="Loading practice"
         variant="screen"
       />
     )
   }
-  if (query.isError) return <ErrorState title="Could not load scenario workspace" description={query.error.message} />
-  if (!session) return <ErrorState title="Could not load scenario workspace" description="The API returned no session data." />
+  if (query.isError) return <ErrorState title="Could not load practice workspace" description={query.error.message} />
+  if (!session) return <ErrorState title="Could not load practice workspace" description="The API returned no session data." />
 
-  const tourKey = `${user?.id ?? 'guest'}:${session.scenario.id}`
+  const tourKey = `${user?.id ?? 'guest'}:${session.practice_kind}:${session.problem.id}`
   const shouldAutoOpenTour = dismissedTourKey !== tourKey && !hasSeenScenarioTour(user?.id)
   const isTourOpen = tourOpen || shouldAutoOpenTour
 
@@ -242,15 +230,14 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         // Scaffold pipeline — only in primary (non-review) mode
         if (!reviewMode) {
           // Read the freshly-merged session from cache (hook's onSuccess already ran)
-          const updatedSession = queryClient.getQueryData<ScenarioSession>(
-            queryKeys.scenarioSession(sessionId),
+          const updatedSession = queryClient.getQueryData<PracticeSession>(
+            queryKeys.practiceSession(sessionId),
           )
           if (updatedSession) {
             evaluateAndNotify(
               updatedSession,
               response.step.command_classification,
               () => {
-                scaffoldExitPendingRef.current = true
                 setExitConfirmOpen(true)
               },
             )
@@ -509,7 +496,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
       />
       <Modal
         open={exitConfirmOpen}
-        title="Exit lesson?"
+        title="Exit practice?"
         className="w-full max-w-md"
         onClose={() => setExitConfirmOpen(false)}
       >

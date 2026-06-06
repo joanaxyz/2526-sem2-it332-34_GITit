@@ -18,10 +18,7 @@ body,
 
 body {
   margin: 0;
-  background:
-    radial-gradient(ellipse at -5% -5%, rgba(0, 245, 212, 0.07) 0%, transparent 40%),
-    radial-gradient(ellipse at 100% 0%, rgba(0, 180, 216, 0.05) 0%, transparent 35%),
-    hsl(var(--background));
+  background: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: Inter, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -32,48 +29,6 @@ button,
 input,
 textarea {
   font: inherit;
-}
-
-.lesson-copy {
-  color: hsl(var(--foreground));
-}
-
-.lesson-copy h1 {
-  font-size: clamp(2rem, 4vw, 3.35rem);
-  line-height: 1.05;
-  font-weight: 800;
-  margin: 0 0 1rem;
-}
-
-.lesson-copy h2 {
-  font-size: 1.35rem;
-  font-weight: 750;
-  margin: 2rem 0 0.75rem;
-}
-
-.lesson-copy p {
-  color: hsl(var(--muted-foreground));
-  line-height: 1.7;
-  margin: 0.8rem 0;
-}
-
-.lesson-copy pre {
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.65rem;
-  color: hsl(var(--accent));
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  overflow: auto;
-  padding: 1rem;
-}
-
-.lesson-copy .callout {
-  border: 1px solid rgba(0, 245, 212, 0.24);
-  background: rgba(0, 245, 212, 0.07);
-  border-radius: 0.75rem;
-  color: hsl(var(--foreground));
-  margin-top: 1rem;
-  padding: 1rem;
 }
 
 .react-flow__node {
@@ -424,23 +379,7 @@ textarea {
     0 8px 32px rgba(0, 0, 0, 0.45);
 }
 
-/* Lesson row inside an expanded orientation module — inherits --module-border-hover from parent card */
-.lesson-row-hover {
-  transition: background 0.18s ease, box-shadow 0.18s ease;
-}
-.lesson-row-hover:hover {
-  background: hsl(var(--secondary));
-  box-shadow: inset 3px 0 0 var(--module-border-hover, rgba(0, 212, 170, 0.5));
-}
 
-/* Scenario card inside an expanded core module — inherits --module-glow from parent card */
-.scenario-card-hover {
-  transition: box-shadow 0.22s ease, transform 0.22s ease;
-}
-.scenario-card-hover:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 0 14px 2px var(--module-glow, rgba(0, 212, 170, 0.25)), 0 4px 16px rgba(0, 0, 0, 0.35);
-}
 
 /* Progress bar — bright glowing tip gradient */
 .progress-glow-tip {

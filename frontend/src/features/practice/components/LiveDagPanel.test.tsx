@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import type { RepositorySnapshot, ScenarioSession } from '@/features/practice/types'
+import type { RepositorySnapshot, PracticeSession } from '@/features/practice/types'
 import { ExpectedStatePanel } from './ExpectedStatePanel'
 import { graphLayoutSignature, LiveDagPanel } from './LiveDagPanel'
 
@@ -84,7 +84,7 @@ describe('ExpectedStatePanel', () => {
     const session = {
       scaffolding: { expected_state: true, live_dag: true, contextual_feedback: true },
       expected_state: snapshot,
-    } as unknown as ScenarioSession
+    } as unknown as PracticeSession
 
     render(<ExpectedStatePanel session={session} />)
 

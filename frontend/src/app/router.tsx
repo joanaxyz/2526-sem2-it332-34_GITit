@@ -10,7 +10,6 @@ import { DashboardPage } from '@/features/dashboard/pages/DashboardPage'
 import { PerformancePage } from '@/features/dashboard/pages/PerformancePage'
 import { ReviewPracticePage } from '@/features/review/pages/ReviewPracticePage'
 import { ScenarioPracticePage } from '@/features/scenarios/pages/ScenarioPracticePage'
-import { LessonPage } from '@/features/modules/pages/LessonPage'
 import { ModulesPage } from '@/features/modules/pages/ModulesPage'
 
 export const router = createBrowserRouter([
@@ -30,11 +29,8 @@ export const router = createBrowserRouter([
     children: [
       { path: '/', element: <Navigate replace to="/dashboard" /> },
       { path: '/dashboard', element: <DashboardPage /> },
-      // TODO(module-terminology): remove this compatibility route after old shared links age out.
-      { path: '/units', element: <ModulesPage /> },
       { path: '/modules', element: <ModulesPage /> },
       { path: '/performance', element: <PerformancePage /> },
-      { path: '/lessons/:lessonId', element: <LessonPage /> },
     ],
   },
   {
