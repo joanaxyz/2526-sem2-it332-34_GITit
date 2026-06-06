@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { BarChart2, BookOpen, ChevronDown, Gauge, GitBranch, LogOut, Settings, User, type LucideIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
@@ -153,6 +154,7 @@ function ProfileDropdown({
 
 export function DashboardLayout() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const user = useAuthStore((state) => state.user)
   const clearSession = useAuthStore((state) => state.clearSession)
 
@@ -160,6 +162,7 @@ export function DashboardLayout() {
     try {
       await authApi.logout()
     } finally {
+      queryClient.clear()
       clearSession()
       navigate('/login')
     }

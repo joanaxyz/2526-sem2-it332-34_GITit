@@ -35,7 +35,10 @@ export const authApi = {
     })
   },
   logout() {
-    return apiRequest<null>('/auth/logout/', { method: 'POST' })
+    return apiRequest<null>('/auth/logout/', {
+      method: 'POST',
+      skipAuthRefresh: true,
+    })
   },
   refresh() {
     return apiRequest<RefreshResponse>('/auth/refresh/', {

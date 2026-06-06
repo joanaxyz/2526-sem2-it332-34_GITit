@@ -103,7 +103,8 @@ class RefreshAPIView(APIView):
 
 
 class LogoutAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    authentication_classes = []
+    permission_classes = [AllowAny]
 
     def post(self, request):
         refresh_token = request.COOKIES.get(settings.GIT_IT_REFRESH_COOKIE)

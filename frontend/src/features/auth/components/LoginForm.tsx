@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Eye, EyeOff, GitMerge, Loader2, LogIn, ShieldCheck, Zap } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -39,6 +39,7 @@ const highlights = [
 
 export function LoginForm() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const setSession = useAuthStore((state) => state.setSession)
   const [showPassword, setShowPassword] = useState(false)
   const [lastSubmittedValues, setLastSubmittedValues] = useState<FormValues | null>(null)
@@ -51,6 +52,7 @@ export function LoginForm() {
   const mutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
+      queryClient.clear()
       setSession(data.access, data.user)
       navigate('/dashboard')
     },
