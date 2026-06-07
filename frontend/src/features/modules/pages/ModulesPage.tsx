@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { BookOpenText, GitBranch, Layers3, Sparkles, TerminalSquare } from 'lucide-react'
+import { BookOpenText, GitBranch, Sparkles, TerminalSquare } from 'lucide-react'
 import { motion, useScroll, useSpring } from 'motion/react'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
@@ -19,25 +19,79 @@ function RouteKicker({ label, value }: { label: string; value: string | number }
   )
 }
 
-function SectionHeader({
-  icon: Icon,
-  title,
-  meta,
-}: {
-  icon: typeof BookOpenText
-  title: string
-  meta?: string
-}) {
+function FoundationModuleCard({ foundations }: { foundations: Awaited<ReturnType<typeof modulesApi.listFoundations>> }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="flex items-center gap-2">
-        <span className="grid size-8 place-items-center rounded-full border border-primary/20 bg-primary/10 text-primary">
-          <Icon className="size-4" />
-        </span>
-        <h2 className="text-xs font-extrabold uppercase tracking-[0.18em] text-muted-foreground">{title}</h2>
+    <motion.article
+      className="learning-branch-row foundation-module-row relative grid gap-4 lg:grid-cols-[minmax(0,1fr)_5.5rem_minmax(0,1fr)]"
+      initial={{ opacity: 0, y: 38, scale: 0.98 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ amount: 0.2, once: false, margin: '-10% 0px -10% 0px' }}
+      transition={{ duration: 0.58, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <motion.header
+        className="module-route-strip foundation-route-strip lg:col-span-3"
+        initial={{ opacity: 0, y: 12 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ amount: 0.7, once: false }}
+        transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
+            <BookOpenText className="size-5" />
+          </span>
+          <div className="min-w-0">
+            <h2 className="truncate text-lg font-black leading-tight md:text-xl">Foundations</h2>
+            <p className="mt-0.5 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+              {foundations.length} gates before the branch opens
+            </p>
+          </div>
+        </div>
+      </motion.header>
+
+      <div className="learning-branch-track relative hidden items-center justify-center lg:flex lg:col-start-2 lg:row-start-2">
+        <motion.div
+          className="learning-branch-node foundation-branch-node"
+          initial={{ scale: 0.6, opacity: 0 }}
+          whileInView={{ scale: 1, opacity: 1 }}
+          viewport={{ amount: 0.55, once: false }}
+          transition={{ duration: 0.42, type: 'spring', stiffness: 280, damping: 18 }}
+        >
+          <BookOpenText className="size-5" />
+        </motion.div>
+        <motion.div
+          className="learning-branch-connector"
+          initial={{ scaleX: 0, opacity: 0 }}
+          whileInView={{ scaleX: 1, opacity: 1 }}
+          viewport={{ amount: 0.5, once: false }}
+          transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+        />
       </div>
-      {meta ? <span className="font-mono text-xs text-muted-foreground">{meta}</span> : null}
-    </div>
+
+      <div className="lg:col-start-3 lg:row-start-2">
+        <div className="foundation-gate-grid grid gap-3 sm:grid-cols-2">
+          {foundations.map((topic, index) => (
+            <motion.article
+              className="foundation-gate rounded-2xl border border-border/70 bg-background/35 p-4 shadow-[0_14px_38px_rgba(0,0,0,0.16)]"
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ amount: 0.35, once: false }}
+              transition={{ duration: 0.38, delay: index * 0.03 }}
+              key={topic.id}
+            >
+              <div className="flex items-center gap-3">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-primary/25 bg-primary/10 font-mono text-sm font-bold text-primary">
+                  {topic.icon || topic.sort_order + 1}
+                </span>
+                <div className="min-w-0">
+                  <h3 className="truncate text-base font-black">{topic.title}</h3>
+                  <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{topic.summary}</p>
+                </div>
+              </div>
+            </motion.article>
+          ))}
+        </div>
+      </div>
+    </motion.article>
   )
 }
 
@@ -93,6 +147,7 @@ export function ModulesPage() {
   const foundations = foundationsQuery.data ?? []
   const modules = modulesQuery.data ?? []
   const totalChallenges = modules.reduce((sum, module) => sum + module.workflow_scenario_count, 0)
+  const displayedModules = foundations.length > 0 ? modules.length + 1 : modules.length
   const totalCommandLevels = modules.reduce((sum, module) => sum + module.command_topic_count, 0)
 
   return (
@@ -118,49 +173,23 @@ export function ModulesPage() {
             </p>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <RouteKicker label="Modules" value={modules.length} />
+            <RouteKicker label="Modules" value={displayedModules} />
             <RouteKicker label="Levels" value={totalCommandLevels} />
             <RouteKicker label="Towers" value={totalChallenges} />
           </div>
         </div>
       </motion.header>
 
-      <section className="grid gap-3">
-        <SectionHeader icon={BookOpenText} title="Foundations" meta={`${foundations.length} gates`} />
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {foundations.map((topic, index) => (
-            <motion.article
-              className="foundation-gate rounded-2xl border border-border/70 bg-background/35 p-4 shadow-[0_14px_38px_rgba(0,0,0,0.16)]"
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ amount: 0.35, once: false }}
-              transition={{ duration: 0.38, delay: index * 0.03 }}
-              key={topic.id}
-            >
-              <div className="flex items-center gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-primary/25 bg-primary/10 font-mono text-sm font-bold text-primary">
-                  {topic.icon || topic.sort_order + 1}
-                </span>
-                <div className="min-w-0">
-                  <h2 className="truncate text-base font-black">{topic.title}</h2>
-                  <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{topic.summary}</p>
-                </div>
-              </div>
-            </motion.article>
-          ))}
-        </div>
-      </section>
-
-      <section className="grid gap-4">
-        <SectionHeader icon={Layers3} title="Practice route" meta={`${modules.length} modules`} />
+      <section>
         <div ref={pathRef} className="learning-branch relative grid gap-12 py-4">
           <div className="learning-branch-spine" aria-hidden="true" />
           <motion.div className="learning-branch-spine-fill" style={{ scaleY: pathScaleY }} aria-hidden="true" />
           <div className="learning-branch-start" aria-hidden="true">
             <Sparkles className="size-4" />
           </div>
+          {foundations.length ? <FoundationModuleCard foundations={foundations} /> : null}
           {modules.map((module, index) => (
-            <ModuleCard module={module} index={index} key={module.id} />
+            <ModuleCard module={module} index={index + (foundations.length ? 1 : 0)} key={module.id} />
           ))}
           <div className="learning-branch-finish" aria-hidden="true">
             <TerminalSquare className="size-4" />
