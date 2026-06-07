@@ -1,5 +1,21 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { BarChart2, BookOpen, ChevronDown, Gauge, GitBranch, LogOut, Settings, User, type LucideIcon } from 'lucide-react'
+import {
+  BarChart2,
+  BookOpen,
+  CheckCircle2,
+  ChevronDown,
+  CircleHelp,
+  Gauge,
+  GitBranch,
+  Lock,
+  LogOut,
+  Settings,
+  Swords,
+  Trophy,
+  User,
+  X,
+  type LucideIcon,
+} from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 
@@ -152,11 +168,71 @@ function ProfileDropdown({
   )
 }
 
+function TowerHelpOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+  useEffect(() => {
+    if (!open) return
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose, open])
+
+  if (!open) return null
+
+  const items = [
+    { icon: Swords, copy: 'Clear each Command Adventure to unlock GIT Challenged.' },
+    { icon: Trophy, copy: 'Each challenge has Easy, Medium, and Hard levels.' },
+    { icon: Lock, copy: 'Clear the storey levels to advance the tower.' },
+    { icon: CheckCircle2, copy: 'Progress saves after every cleared practice.' },
+  ]
+
+  return (
+    <div className="tower-help-backdrop" role="presentation" onMouseDown={onClose}>
+      <section
+        aria-modal="true"
+        className="tower-help-overlay"
+        role="dialog"
+        aria-labelledby="tower-help-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 id="tower-help-title" className="text-xl font-black text-primary">How it works</h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Climb the tower by clearing each storey&apos;s adventure and challenge set.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="tower-help-close"
+            aria-label="Close tower help"
+            onClick={onClose}
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+        <ul className="mt-6 grid gap-5">
+          {items.map(({ icon: Icon, copy }) => (
+            <li className="tower-help-item" key={copy}>
+              <span className="tower-help-icon">
+                <Icon className="size-5" />
+              </span>
+              <span>{copy}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  )
+}
+
 export function DashboardLayout() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const user = useAuthStore((state) => state.user)
   const clearSession = useAuthStore((state) => state.clearSession)
+  const [towerHelpOpen, setTowerHelpOpen] = useState(false)
 
   async function logout() {
     try {
@@ -187,6 +263,15 @@ export function DashboardLayout() {
               </span>
             </div>
             <nav className="flex shrink-0 items-center gap-1">
+              <button
+                type="button"
+                className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-all duration-200 hover:bg-secondary hover:text-primary"
+                aria-label="Open tower guide"
+                title="How tower works"
+                onClick={() => setTowerHelpOpen(true)}
+              >
+                <CircleHelp className="size-4" />
+              </button>
               {navItems.map((item) => (
                 <NavLink
                   key={item.to}
@@ -215,6 +300,7 @@ export function DashboardLayout() {
       <main className="mx-auto max-w-[1440px] px-6 py-6 max-sm:px-4">
         <Outlet />
       </main>
+      <TowerHelpOverlay open={towerHelpOpen} onClose={() => setTowerHelpOpen(false)} />
     </div>
   )
 }

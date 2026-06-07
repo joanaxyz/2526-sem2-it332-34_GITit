@@ -5,6 +5,9 @@ import {
   CheckCircle2,
   Circle,
   Flag,
+  Gem,
+  Layers3,
+  ListChecks,
   Lock,
   Play,
   RefreshCcw,
@@ -32,7 +35,7 @@ import type {
   WorkflowLevelAccess,
   WorkflowScenarioSummary,
 } from '@/features/scenarios/types'
-import type { LearningTower } from '@/features/modules/types'
+import type { LearningStorey } from '@/features/modules/types'
 import { syncPracticeSessionInCache } from '@/features/practice/utils/practiceCache'
 import { meetsMasteryAccuracy, meetsProgressAccuracy } from '@/features/practice/utils/commandAccuracy'
 import { Button } from '@/shared/components/Button'
@@ -47,6 +50,16 @@ const DIFFICULTY_COPY: Record<string, { label: string }> = {
   easy: { label: 'Easy' },
   medium: { label: 'Medium' },
   hard: { label: 'Hard' },
+}
+const REWARD_MARKERS = [
+  { value: 25, label: '+25 XP' },
+  { value: 50, label: '+60 XP' },
+  { value: 75, label: '+100 XP' },
+  { value: 100, label: 'Crown chest' },
+]
+
+function nextReward(progress: number) {
+  return REWARD_MARKERS.find((marker) => progress < marker.value) ?? REWARD_MARKERS[REWARD_MARKERS.length - 1]
 }
 
 function useVisibleLoadMore(enabled: boolean, onVisible: () => void) {
@@ -64,11 +77,11 @@ function useVisibleLoadMore(enabled: boolean, onVisible: () => void) {
   return ref
 }
 
-function useTowerContent<T extends ContentItem>(towerId: number, section: TowerContentSection, enabled: boolean) {
+function useStoreyContent<T extends ContentItem>(storeyId: number, section: TowerContentSection, enabled: boolean) {
   return useInfiniteQuery({
-    queryKey: queryKeys.towerContent(towerId, section),
+    queryKey: queryKeys.storeyContent(storeyId, section),
     queryFn: ({ pageParam }) =>
-      scenariosApi.towerContent(towerId, section, {
+      scenariosApi.storeyContent(storeyId, section, {
         cursor: typeof pageParam === 'number' ? pageParam : null,
         limit: section === 'command_adventures' ? 1 : 6,
       }) as unknown as Promise<TowerContentPage<T>>,
@@ -160,7 +173,7 @@ function LoadingRows({ compact = false }: { compact?: boolean }) {
   )
 }
 
-function flattenPages<T extends ContentItem>(query: ReturnType<typeof useTowerContent<T>>) {
+function flattenPages<T extends ContentItem>(query: ReturnType<typeof useStoreyContent<T>>) {
   return query.data?.pages.flatMap((page) => page.results) ?? []
 }
 
@@ -185,27 +198,121 @@ function LevelStatusIcon({ level }: { level: WorkflowLevelAccess }) {
   return <Circle className="size-3.5" />
 }
 
-type TowerPracticeHubProps = {
-  tower: LearningTower
+function OverviewStat({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: LucideIcon
+  label: string
+  value: string | number
+}) {
+  return (
+    <div className="tower-overview-stat">
+      <span className="tower-overview-stat-icon">
+        <Icon className="size-4" />
+      </span>
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <strong className="ml-auto text-sm text-foreground">{value}</strong>
+    </div>
+  )
+}
+
+type StoreyPracticeHubProps = {
+  storey: LearningStorey
   displayTitle?: string
   isFirst?: boolean
   isLast?: boolean
   sequenceIndex?: number
 }
 
-export function TowerPracticeHub({
-  tower,
+function StoreyOverview({
+  storey,
+  title,
+  progress,
+}: {
+  storey: LearningStorey
+  title: string
+  progress: number
+}) {
+  const reward = nextReward(progress)
+  const levels = storey.workflow_scenario_count * 3
+
+  return (
+    <motion.aside
+      className="storey-overview"
+      initial={{ opacity: 0, x: -16 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ amount: 0.28, once: true, margin: '-4% 0px -4% 0px' }}
+      transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <div className="storey-overview-heading">
+        <div className="tower-heading-row">
+          <h2 className="storey-overview-title">{title}</h2>
+        </div>
+        <p className="mt-4 max-w-xs text-base leading-7 text-muted-foreground">
+          Storey overview for this Command Adventure and GIT Challenged set.
+        </p>
+      </div>
+
+      <section className="tower-side-panel storey-overview-card" aria-label={`${title} storey overview`}>
+        <div className="grid gap-4">
+          <OverviewStat icon={ListChecks} label="Commands to learn" value={storey.command_topic_count} />
+          <OverviewStat icon={Swords} label="GIT Challenged" value={storey.workflow_scenario_count} />
+          <OverviewStat icon={Layers3} label="Total levels" value={levels} />
+        </div>
+        <div className="tower-progress-block">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm text-muted-foreground">Storey Progress</span>
+            <strong className="font-mono text-sm text-foreground">{progress}%</strong>
+          </div>
+          <div className="tower-reward-rail">
+            <ProgressBar value={progress} className="h-3 bg-secondary/70" glow fillAnimate />
+            <div className="tower-reward-markers" aria-hidden="true">
+              {REWARD_MARKERS.map((marker) => (
+                <span
+                  className={marker.value <= progress ? 'is-earned' : undefined}
+                  key={marker.value}
+                  style={{ left: `${marker.value}%` }}
+                >
+                  <img src="/stage_reward_neon_chest.png" alt="" />
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="stage-reward-panel" aria-label={`${title} progress reward`}>
+        <div>
+          <p className="text-sm text-muted-foreground">Progress Reward</p>
+          <p className="mt-2 text-sm font-semibold text-foreground">Next chest at {reward.value}% storey progress</p>
+          <p className="mt-3 inline-flex items-center gap-1.5 text-2xl font-black text-foreground">
+            {reward.label} <Gem className="size-5 text-warning" />
+          </p>
+        </div>
+        <span className="stage-reward-icon">
+          <img className="stage-reward-chest" src="/stage_reward_neon_chest.png" alt="" aria-hidden="true" />
+        </span>
+      </section>
+
+    </motion.aside>
+  )
+}
+
+export function StoreyPracticeHub({
+  storey,
   displayTitle,
   isFirst = true,
   isLast = true,
   sequenceIndex = 0,
-}: TowerPracticeHubProps) {
+}: StoreyPracticeHubProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const hubRef = useRef<HTMLDivElement | null>(null)
+  const hubRef = useRef<HTMLElement | null>(null)
   const isInView = useInView(hubRef, { amount: 0.15, margin: '420px 0px 420px 0px' })
-  const adventureQuery = useTowerContent<CommandDrillAdventureSummary>(tower.id, 'command_adventures', isInView)
-  const workflowQuery = useTowerContent<WorkflowScenarioSummary>(tower.id, 'workflow_scenarios', isInView)
+  const adventureQuery = useStoreyContent<CommandDrillAdventureSummary>(storey.id, 'command_adventures', isInView)
+  const workflowQuery = useStoreyContent<WorkflowScenarioSummary>(storey.id, 'workflow_scenarios', isInView)
 
   const adventure = flattenPages(adventureQuery)[0] ?? null
   const workflowScenarios = flattenPages(workflowQuery)
@@ -245,159 +352,152 @@ export function TowerPracticeHub({
   }
 
   const actionPending = startMutation.isPending || reviewMutation.isPending
-  const title = displayTitle ?? tower.title
-  const progress = tower.practice_completion?.value ?? 0
-  const motionDelay = Math.min(sequenceIndex * 0.045, 0.18)
+  const title = displayTitle ?? storey.title
+  const progress = storey.practice_completion?.value ?? 0
+  const motionDelay = Math.min(sequenceIndex * 0.03, 0.12)
 
   return (
     <section
       ref={hubRef}
-      className={cn('learning-tower', !isFirst && 'learning-tower-continuation', !isLast && 'learning-tower-continues')}
-      aria-label={`${title} tower`}
-      data-tower-id={tower.id}
+      className="storey-section"
+      aria-label={`${title} storey`}
+      data-storey-id={storey.id}
     >
-      {isFirst ? (
-        <>
-          <div className="tower-flag-wrap" aria-hidden="true">
-            <span className="tower-flag-pole" />
-            <span className="tower-flag" />
-          </div>
+      <StoreyOverview storey={storey} title={title} progress={progress} />
 
-          <div className="tower-cap" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
-        </>
-      ) : null}
-
-      <motion.div
-        className="tower-shell"
-        initial={{ opacity: 0, y: 32, scale: 0.98 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ amount: 0.18, once: false, margin: '-8% 0px -8% 0px' }}
-        transition={{ duration: 0.62, delay: motionDelay, ease: [0.16, 1, 0.3, 1] }}
+      <div
+        className={cn('learning-tower', !isFirst && 'learning-tower-continuation', !isLast && 'learning-tower-continues')}
       >
-        <motion.header
-          className="tower-module-banner"
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ amount: 0.5, once: false }}
-          transition={{ duration: 0.42, delay: motionDelay, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <span>Tower {tower.number}</span>
-          <strong>{title}</strong>
-          <em>{progress}%</em>
-        </motion.header>
-
-        <motion.section
-          className="tower-floor adventure-floor"
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ amount: 0.45, once: false }}
-          transition={{ duration: 0.46, delay: motionDelay + 0.03, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <span className="tower-floor-icon">
-            <Swords className="size-7" />
-          </span>
-          <p className="tower-floor-label">Adventure Stage</p>
-          <h2 className="tower-floor-title">Command Adventure</h2>
-          <p className="tower-floor-copy">Master Git command forms through hands-on practice.</p>
-
-          {adventure ? (
-            <div className="adventure-progress">
-              <div className="adventure-progress-meta">
-                <span>{adventure.progress.numerator}/{adventure.progress.denominator}</span>
-                <span>{adventure.progress.value}%</span>
-              </div>
-              <ProgressBar value={adventure.progress.value} className="h-2.5 bg-secondary/65" glow fillAnimate />
+        {isFirst ? (
+          <>
+            <div className="tower-flag-wrap" aria-hidden="true">
+              <span className="tower-flag-pole" />
+              <span className="tower-flag" />
             </div>
-          ) : null}
 
-          {adventureQuery.isLoading ? <LoadingRows compact /> : null}
-          {!adventureQuery.isLoading && !adventure ? <EmptySection label="Command Adventures" /> : null}
-
-          {adventurePractice ? (
-            <PracticeActionButton
-              className="tower-action-button h-10 rounded-md px-5"
-              disabled={actionPending}
-              item={adventurePractice}
-              onAction={runPracticeAction}
-            />
-          ) : adventure && adventure.progress.value >= 100 ? (
-            <Button type="button" size="sm" variant="outline" className="tower-action-button h-10 rounded-md px-5" disabled>
-              <CheckCircle2 data-icon="inline-start" />
-              Complete
-            </Button>
-          ) : null}
-        </motion.section>
+            <div className="tower-cap" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
+          </>
+        ) : null}
 
         <motion.div
-          className="tower-divider"
-          aria-hidden="true"
-          initial={{ opacity: 0, scaleX: 0.36 }}
-          whileInView={{ opacity: 1, scaleX: 1 }}
-          viewport={{ amount: 0.6, once: false }}
-          transition={{ duration: 0.46, delay: motionDelay + 0.06, ease: [0.16, 1, 0.3, 1] }}
+          className="tower-shell"
+          initial={{ opacity: 0, y: 22, scale: 0.99 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ amount: 0.18, once: true, margin: '-6% 0px -6% 0px' }}
+          transition={{ duration: 0.68, delay: motionDelay, ease: [0.16, 1, 0.3, 1] }}
         >
-          <span />
-        </motion.div>
+          <motion.section
+            className="tower-floor adventure-floor"
+            initial={{ opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ amount: 0.42, once: true }}
+            transition={{ duration: 0.5, delay: motionDelay + 0.03, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <span className="tower-floor-icon">
+              <Swords className="size-7" />
+            </span>
+            <h2 className="tower-floor-title command-adventure-title">Command Adventure</h2>
+            <p className="tower-floor-copy">Master Git command forms through hands-on practice.</p>
 
-        <motion.section
-          className="tower-floor challenge-floor-zone"
-          initial={{ opacity: 0, y: 26 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ amount: 0.16, once: false, margin: '-8% 0px -8% 0px' }}
-          transition={{ duration: 0.55, delay: motionDelay + 0.08, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <span className="tower-floor-icon challenge-icon">
-            <Trophy className="size-7" />
-          </span>
-          <h2 className="tower-floor-title challenge-title">Git it Challenge</h2>
-          <p className="tower-floor-copy">Apply your skills in scenario challenges.</p>
+            {adventure ? (
+              <div className="adventure-progress">
+                <div className="adventure-progress-meta">
+                  <span>{adventure.progress.numerator}/{adventure.progress.denominator}</span>
+                  <span>{adventure.progress.value}%</span>
+                </div>
+                <ProgressBar value={adventure.progress.value} className="h-2.5 bg-secondary/65" glow fillAnimate />
+              </div>
+            ) : null}
 
-          {workflowQuery.isLoading ? <div className="mt-5"><LoadingRows /></div> : null}
-          {!workflowQuery.isLoading && workflowScenarios.length === 0 ? (
-            <div className="mt-5">
-              <EmptySection label="Git it Challenges" />
-            </div>
-          ) : null}
+            {adventureQuery.isLoading ? <LoadingRows compact /> : null}
+            {!adventureQuery.isLoading && !adventure ? <EmptySection label="Command Adventures" /> : null}
 
-          <div className="challenge-room-stack">
-            {workflowScenarios.map((scenario, index) => (
-              <ChallengeRoom
+            {adventurePractice ? (
+              <PracticeActionButton
+                className="tower-action-button h-10 rounded-full border border-primary/55 bg-primary/10 px-5 text-primary shadow-[0_0_22px_rgba(0,245,212,0.16)] hover:bg-primary/15 hover:text-primary"
                 disabled={actionPending}
-                index={index}
-                key={scenario.id}
-                scenario={scenario}
+                item={adventurePractice}
                 onAction={runPracticeAction}
               />
-            ))}
-          </div>
+            ) : adventure && adventure.progress.value >= 100 ? (
+              <Button type="button" size="sm" variant="outline" className="tower-action-button h-10 rounded-full px-5" disabled>
+                <CheckCircle2 data-icon="inline-start" />
+                Complete
+              </Button>
+            ) : null}
+          </motion.section>
 
-          <div ref={workflowLoadRef} />
-          {workflowQuery.isFetchingNextPage ? <div className="mt-3"><LoadingRows compact /></div> : null}
-          {workflowQuery.hasNextPage ? (
-            <Button
-              className="mt-4 h-9 rounded-md px-4"
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => void workflowQuery.fetchNextPage()}
-            >
-              More challenges
-              <ArrowRight data-icon="inline-end" />
-            </Button>
-          ) : null}
-        </motion.section>
-      </motion.div>
+          <motion.div
+            className="tower-divider"
+            aria-hidden="true"
+            initial={{ opacity: 0, scaleX: 0.52 }}
+            whileInView={{ opacity: 1, scaleX: 1 }}
+            viewport={{ amount: 0.6, once: true }}
+            transition={{ duration: 0.5, delay: motionDelay + 0.06, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <span />
+          </motion.div>
 
-      {isLast ? <div className="tower-base" aria-hidden="true" /> : <div className="tower-stack-connector" aria-hidden="true" />}
+          <motion.section
+            className="tower-floor challenge-floor-zone"
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ amount: 0.16, once: true, margin: '-6% 0px -6% 0px' }}
+            transition={{ duration: 0.58, delay: motionDelay + 0.08, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <span className="tower-floor-icon challenge-icon">
+              <Trophy className="size-7" />
+            </span>
+            <h2 className="tower-floor-title challenge-title">GIT Challenged</h2>
+            <p className="tower-floor-copy">Apply your skills in scenario challenges.</p>
+
+            {workflowQuery.isLoading ? <div className="mt-5"><LoadingRows /></div> : null}
+            {!workflowQuery.isLoading && workflowScenarios.length === 0 ? (
+              <div className="mt-5">
+                <EmptySection label="GIT Challenged" />
+              </div>
+            ) : null}
+
+            <div className="challenge-room-stack">
+              {workflowScenarios.map((scenario, index) => (
+                <ChallengeRoom
+                  disabled={actionPending}
+                  index={index}
+                  key={scenario.id}
+                  scenario={scenario}
+                  onAction={runPracticeAction}
+                />
+              ))}
+            </div>
+
+            <div ref={workflowLoadRef} />
+            {workflowQuery.isFetchingNextPage ? <div className="mt-3"><LoadingRows compact /></div> : null}
+            {workflowQuery.hasNextPage ? (
+              <Button
+                className="mt-4 h-9 rounded-full px-4"
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => void workflowQuery.fetchNextPage()}
+              >
+                More GIT Challenged
+                <ArrowRight data-icon="inline-end" />
+              </Button>
+            ) : null}
+          </motion.section>
+        </motion.div>
+
+        {isLast ? <div className="tower-base" aria-hidden="true" /> : <div className="tower-stack-connector" aria-hidden="true" />}
+      </div>
     </section>
   )
 }
 
-export const ModulePracticeHub = TowerPracticeHub
+export const ModulePracticeHub = StoreyPracticeHub
 
 function ChallengeRoom({
   scenario,
@@ -415,10 +515,10 @@ function ChallengeRoom({
   return (
     <motion.article
       className="challenge-room"
-      initial={{ opacity: 0, y: 28, scale: 0.98 }}
+      initial={{ opacity: 0, y: 18, scale: 0.99 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ amount: 0.24, once: false }}
-      transition={{ duration: 0.42, delay: index * 0.035, ease: [0.16, 1, 0.3, 1] }}
+      viewport={{ amount: 0.24, once: true }}
+      transition={{ duration: 0.44, delay: index * 0.025, ease: [0.16, 1, 0.3, 1] }}
     >
       <span className="challenge-room-badge" aria-hidden="true">
         <Icon className="size-4" />

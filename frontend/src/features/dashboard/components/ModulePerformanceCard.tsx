@@ -150,7 +150,7 @@ function TowerPanel({
         opacity: hasAnyData ? 1 : 0.45,
       }}
     >
-      {/* Tower header badge */}
+      {/* Storey header badge */}
       <div className="flex items-center gap-2 mb-3.5">
         <div
           className="flex items-center gap-1.5 rounded-md px-2 py-0.5"
@@ -167,7 +167,7 @@ function TowerPanel({
             className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.14em]"
             style={{ color: hasAnyData ? 'rgba(0,245,212,0.85)' : 'rgba(255,255,255,0.28)' }}
           >
-            Tower {towerKey}
+            Storey {towerKey}
           </span>
         </div>
         {!hasAnyData && (
@@ -259,7 +259,7 @@ export function TowerPerformanceCard({ summary }: { summary: DashboardSummary })
             className="size-5"
             style={{ color: '#00F5D4', filter: 'drop-shadow(0 0 6px rgba(0,245,212,0.5))' }}
           />
-          Tower hard + retry performance
+          Storey hard + retry performance
         </CardTitle>
         <CardDescription className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-0.5">
           <span className="flex items-center gap-1.5">

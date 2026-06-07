@@ -3,10 +3,10 @@ import { cleanup, render, screen, waitFor, within } from '@testing-library/react
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { TowerPracticeHub } from './ModulePracticeHub'
+import { StoreyPracticeHub } from './ModulePracticeHub'
 
 const mocks = vi.hoisted(() => ({
-  towerContent: vi.fn(),
+  storeyContent: vi.fn(),
   startSession: vi.fn(),
   startReviewSession: vi.fn(),
 }))
@@ -27,6 +27,7 @@ vi.mock('motion/react', async () => {
   return {
     motion: {
       article: createMotion('article'),
+      aside: createMotion('aside'),
       div: createMotion('div'),
       header: createMotion('header'),
       section: createMotion('section'),
@@ -37,7 +38,7 @@ vi.mock('motion/react', async () => {
 
 vi.mock('@/features/scenarios/api/scenariosApi', () => ({
   scenariosApi: {
-    towerContent: mocks.towerContent,
+    storeyContent: mocks.storeyContent,
     startSession: mocks.startSession,
   },
   startPayloadForPractice: (practiceKind: string, id: number) => (
@@ -63,8 +64,8 @@ function renderHub() {
   return render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
-        <TowerPracticeHub
-          tower={{
+        <StoreyPracticeHub
+          storey={{
             id: 2,
             slug: 'tracking-changes-snapshots',
             number: 2,
@@ -81,14 +82,14 @@ function renderHub() {
   )
 }
 
-describe('TowerPracticeHub', () => {
+describe('StoreyPracticeHub', () => {
   afterEach(() => {
     cleanup()
     vi.clearAllMocks()
   })
 
   it('shows one command adventure action instead of dumping every command level', async () => {
-    mocks.towerContent.mockImplementation((_towerId: number, section: string) => {
+    mocks.storeyContent.mockImplementation((_storeyId: number, section: string) => {
       if (section === 'command_adventures') {
         return Promise.resolve({
           section,

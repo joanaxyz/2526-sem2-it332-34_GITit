@@ -61,9 +61,9 @@ export function subscribeToPracticeSessionSync(queryClient: QueryClient) {
 }
 
 export function invalidatePracticeProgressQueries(queryClient: QueryClient) {
-  void queryClient.invalidateQueries({ queryKey: queryKeys.towers })
+  void queryClient.invalidateQueries({ queryKey: queryKeys.storeys })
   void queryClient.invalidateQueries({ queryKey: queryKeys.dashboardSummary })
-  void queryClient.invalidateQueries({ queryKey: queryKeyRoots.towerContent })
+  void queryClient.invalidateQueries({ queryKey: queryKeyRoots.storeyContent })
 }
 
 function broadcastPracticeSessionSync(session: PracticeSession) {

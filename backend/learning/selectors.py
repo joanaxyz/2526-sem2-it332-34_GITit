@@ -33,7 +33,7 @@ def published_modules():
     )
 
 
-def published_towers():
+def published_storeys():
     return published_modules()
 
 
@@ -91,8 +91,8 @@ def practice_completion_count_map(*, user, module_ids: list[int]) -> dict[int, i
     return completion_by_module
 
 
-def tower_completion_count_map(*, user, tower_ids: list[int]) -> dict[int, int]:
-    return practice_completion_count_map(user=user, module_ids=tower_ids)
+def storey_completion_count_map(*, user, storey_ids: list[int]) -> dict[int, int]:
+    return practice_completion_count_map(user=user, module_ids=storey_ids)
 
 
 def practice_completion_denominator_map(*, module_ids: list[int]) -> dict[int, int]:
@@ -129,5 +129,6 @@ def practice_completion_denominator_map(*, module_ids: list[int]) -> dict[int, i
     return denominator_by_module
 
 
-def tower_completion_denominator_map(*, tower_ids: list[int]) -> dict[int, int]:
-    return practice_completion_denominator_map(module_ids=tower_ids)
+def storey_completion_denominator_map(*, storey_ids: list[int]) -> dict[int, int]:
+    return practice_completion_denominator_map(module_ids=storey_ids)
+

@@ -18,7 +18,7 @@ class FoundationTopicSerializer(serializers.ModelSerializer):
         ]
 
 
-class TowerListSerializer(serializers.ModelSerializer):
+class StoreyListSerializer(serializers.ModelSerializer):
     command_topic_count = serializers.IntegerField(read_only=True)
     workflow_scenario_count = serializers.IntegerField(read_only=True)
     practice_completion = serializers.SerializerMethodField()
@@ -39,11 +39,11 @@ class TowerListSerializer(serializers.ModelSerializer):
 
     def get_practice_completion(self, obj) -> dict:
         denominator_map = self.context.get(
-            "tower_completion_denominator_map",
+            "storey_completion_denominator_map",
             self.context.get("practice_completion_denominator_map", {}),
         )
         count_map = self.context.get(
-            "tower_completion_count_map",
+            "storey_completion_count_map",
             self.context.get("practice_completion_count_map", {}),
         )
         denominator = int(
@@ -60,4 +60,4 @@ class TowerListSerializer(serializers.ModelSerializer):
         }
 
 
-ModuleListSerializer = TowerListSerializer
+ModuleListSerializer = StoreyListSerializer

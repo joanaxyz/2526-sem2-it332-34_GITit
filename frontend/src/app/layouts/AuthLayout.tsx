@@ -4,7 +4,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 const loginHero = {
   title: 'Practice Git through repository state, not memorized answers.',
   description:
-    'Learn with foundations, Command Adventure, Git it Challenge towers, live DAG feedback, and consequence-safe command simulation.',
+    'Learn with foundations, Command Adventure, GIT Challenged storeys, live DAG feedback, and consequence-safe command simulation.',
   terminal: (
     <>
       <span className="text-primary">student@git-it</span> ~/practice $ git status
@@ -19,7 +19,7 @@ const loginHero = {
 const registerHero = {
   title: 'Create your account and start building real Git intuition.',
   description:
-    'Track progress across Command Adventure and Git it Challenge towers, practice safely without touching a real shell, and grow confidence one command at a time.',
+    'Track progress across Command Adventure and GIT Challenged storeys, practice safely without touching a real shell, and grow confidence one command at a time.',
   terminal: (
     <>
       <span className="text-primary">you@git-it</span> ~/welcome $ git init

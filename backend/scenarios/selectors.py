@@ -118,17 +118,17 @@ def module_content_page(
     }
 
 
-def tower_content_page(
+def storey_content_page(
     *,
     user,
-    tower_id: int,
+    storey_id: int,
     section: str,
     cursor: int | None = None,
     limit: int = 8,
 ) -> dict:
     return module_content_page(
         user=user,
-        module_id=tower_id,
+        module_id=storey_id,
         section=section,
         cursor=cursor,
         limit=limit,

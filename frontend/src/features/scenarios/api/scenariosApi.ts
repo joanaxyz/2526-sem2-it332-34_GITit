@@ -54,8 +54,8 @@ export function startPayloadForPractice(
 }
 
 export const scenariosApi = {
-  towerContent<TSection extends TowerContentSection>(
-    towerId: number,
+  storeyContent<TSection extends TowerContentSection>(
+    storeyId: number,
     section: TSection,
     options?: { cursor?: number | null; limit?: number },
   ) {
@@ -63,7 +63,7 @@ export const scenariosApi = {
     if (options?.cursor) params.set('cursor', String(options.cursor))
     if (options?.limit) params.set('limit', String(options.limit))
     return apiRequest<TowerContentResult<TSection>>(
-      `/scenarios/towers/${towerId}/content/?${params.toString()}`,
+      `/scenarios/storeys/${storeyId}/content/?${params.toString()}`,
     )
   },
   moduleContent<TSection extends TowerContentSection>(
@@ -71,12 +71,7 @@ export const scenariosApi = {
     section: TSection,
     options?: { cursor?: number | null; limit?: number },
   ) {
-    const params = new URLSearchParams({ section })
-    if (options?.cursor) params.set('cursor', String(options.cursor))
-    if (options?.limit) params.set('limit', String(options.limit))
-    return apiRequest<TowerContentResult<TSection>>(
-      `/scenarios/towers/${moduleId}/content/?${params.toString()}`,
-    )
+    return this.storeyContent(moduleId, section, options)
   },
   commandUsagePreview(usageId: number) {
     return apiRequest<CommandUsagePreview>(`/scenarios/command-usages/${usageId}/preview/`)

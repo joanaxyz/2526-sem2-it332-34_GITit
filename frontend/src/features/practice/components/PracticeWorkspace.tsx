@@ -49,7 +49,7 @@ function clamp(value: number, min: number, max: number) {
 
 function towerUrlForSession(session: Pick<PracticeSession, 'tower' | 'module'>) {
   const tower = session.tower ?? session.module
-  return `/tower?tower=${tower.id}`
+  return `/tower?storey=${tower.id}`
 }
 
 function constrainedTerminalPaneRatio(clientX: number, bounds: DOMRect) {

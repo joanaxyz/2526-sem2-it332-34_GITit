@@ -98,10 +98,10 @@ export function CurrentTrackCard({ summary }: { summary: DashboardSummary }) {
             className="max-w-3xl text-4xl font-extrabold leading-tight tracking-tight"
             style={{ textShadow: '0 0 40px rgba(0,245,212,0.28), 0 0 80px rgba(0,180,216,0.14)' }}
           >
-            Build Git confidence through foundations, Command Adventure, and Git it Challenge towers.
+            Build Git confidence through foundations, Command Adventure, and GIT Challenged storeys.
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Start with foundations, clear command forms, then climb Git it Challenge towers from Easy toward Hard.
+            Start with foundations, clear command forms, then climb GIT Challenged levels from Easy toward Hard.
           </p>
         </div>
 
