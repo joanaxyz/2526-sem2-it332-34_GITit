@@ -124,9 +124,6 @@ export type PracticeProblem =
 export type RepositoryVisualization = {
   schema_version?: number
   commit_dag: Record<string, RepositoryValue>
-  state_lens: Record<string, RepositoryValue>
-  target_state_lens?: Record<string, RepositoryValue>
-  command_effect_delta: Record<string, RepositoryValue>
 }
 
 export type PracticeSession = {
@@ -174,9 +171,7 @@ export type PracticeSession = {
   }
   scaffolding: {
     live_dag: boolean
-    state_lens: boolean
     expected_state: boolean
-    target_state?: boolean
     contextual_feedback: boolean
   }
   repository_state: RepositorySnapshot

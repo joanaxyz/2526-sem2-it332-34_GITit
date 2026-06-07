@@ -44,7 +44,7 @@ MODULES = [
     {
         "slug": "integrated-workflows",
         "number": 8,
-        "title": "Integrated Workflow Scenarios",
+        "title": "Integrated Git it Challenges",
         "description": "Solve multi-command workflows that combine everything learned earlier.",
     },
 ]

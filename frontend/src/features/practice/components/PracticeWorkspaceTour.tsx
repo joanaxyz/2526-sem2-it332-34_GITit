@@ -23,8 +23,8 @@ const tourSteps = [
   {
     target: 'expected-state',
     icon: MonitorDot,
-    label: 'Target state',
-    body: 'On supported levels, this shows the shape you are trying to reach without giving away the command path.',
+    label: 'Target DAG',
+    body: 'On supported levels, this diagram shows the target repository shape without giving away the command path.',
     placement: 'bottom',
   },
   {

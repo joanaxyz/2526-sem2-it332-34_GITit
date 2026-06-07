@@ -19,6 +19,7 @@
     "clsx": "^2.1.1",
     "dagre": "^0.8.5",
     "lucide-react": "^0.561.0",
+    "motion": "^12.40.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-hook-form": "^7.68.0",

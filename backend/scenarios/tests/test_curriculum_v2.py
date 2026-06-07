@@ -141,32 +141,24 @@ def test_student_context_normalizer_strips_answers_and_evaluator_internals():
     assert context["objective"]["required_details"] == [{"label": "File", "value": "app.py"}]
 
 
-def test_visualization_state_lens_and_delta_work_without_new_commits():
-    before = {
+def test_visualization_payload_keeps_commit_dag_without_extra_lenses():
+    state = {
         "repository_initialized": True,
         "commits": [{"id": "c0", "message": "Base", "parents": [], "tree": {"app.py": "old"}}],
         "branches": {"main": "c0"},
         "head": {"type": "branch", "name": "main"},
-        "working_tree": {"app.py": "new"},
-        "staging": {},
-        "conflicts": [],
-    }
-    after = {
-        **before,
         "working_tree": {},
         "staging": {"app.py": "new"},
+        "conflicts": [],
     }
 
-    payload = RepositoryVisualizationService().snapshot(after, previous_state=before)
+    payload = RepositoryVisualizationService().snapshot(state)
 
     assert payload["schema_version"] == 2
     assert [commit["id"] for commit in payload["commit_dag"]["commits"]] == ["c0"]
-    assert payload["state_lens"]["staging_area"][0]["path"] == "app.py"
-    assert payload["command_effect_delta"]["files_staged"] == ["app.py"]
-    assert payload["command_effect_delta"]["commits_created"] == []
 
 
-def test_command_drill_payload_exposes_target_state_lens(db, django_user_model):
+def test_command_drill_payload_exposes_target_diagram(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
     drill = CommandDrill.objects.get(slug="stage-one-file")
@@ -178,10 +170,10 @@ def test_command_drill_payload_exposes_target_state_lens(db, django_user_model):
 
     payload = session_payload(session)
 
+    assert payload["scaffolding"]["live_dag"] is True
     assert payload["scaffolding"]["expected_state"] is True
-    assert payload["scaffolding"]["target_state"] is True
     assert payload["expected_state"] is not None
-    assert payload["visualization"]["target_state_lens"]["staging_area"]
+    assert "target_state" not in payload["scaffolding"]
     assert payload["difficulty"] is None
 
 
@@ -210,7 +202,6 @@ def test_workflow_hard_payload_hides_expected_state(db, django_user_model):
 
     assert payload["scaffolding"]["expected_state"] is False
     assert payload["expected_state"] is None
-    assert payload["visualization"]["target_state_lens"] == {}
 
 
 def test_unsupported_command_levels_are_not_published(db):

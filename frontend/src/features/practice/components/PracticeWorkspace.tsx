@@ -9,11 +9,9 @@ import { PracticeContextPanel } from '@/features/practice/components/PracticeCon
 import { PracticeStatusHeader } from '@/features/practice/components/PracticeStatusHeader'
 import { CompletionCelebrationModal } from '@/features/practice/components/CompletionCelebrationModal'
 import { ContextualFeedbackPanel } from '@/features/practice/components/ContextualFeedbackPanel'
-import { ExpectedStatePanel } from '@/features/practice/components/ExpectedStatePanel'
 import { LiveDagPanel } from '@/features/practice/components/LiveDagPanel'
 import { ProjectStructurePanel } from '@/features/practice/components/ProjectStructurePanel'
 import { PracticeWorkspaceTour } from '@/features/practice/components/PracticeWorkspaceTour'
-import { StateLensPanel } from '@/features/practice/components/StateLensPanel'
 import { TerminalPanel } from '@/features/practice/components/TerminalPanel'
 import { WorkspaceEditorOverlay } from '@/features/practice/components/WorkspaceEditorOverlay'
 import { practiceApi } from '@/features/practice/api/practiceApi'
@@ -34,7 +32,7 @@ import { Modal } from '@/shared/components/Modal'
 import { cn } from '@/shared/utils/cn'
 
 const DEFAULT_TERMINAL_RATIO = 0.28
-const DEFAULT_DIAGRAM_RATIO = 0.52
+const DEFAULT_TARGET_DIAGRAM_RATIO = 0.5
 const DEFAULT_TERMINAL_PANE_RATIO = 0.60
 const MIN_TERMINAL_PANE_WIDTH = 544
 const MIN_FEEDBACK_PANE_WIDTH = 288
@@ -47,20 +45,6 @@ function stringList(value: unknown): string[] {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
-}
-
-function commandDrillUsesDag(session: PracticeSession) {
-  if (session.practice_kind !== 'command_drill') return true
-  const target = session.expected_state
-  if (!target) return false
-  return (
-    JSON.stringify(session.repository_state.commits ?? []) !== JSON.stringify(target.commits ?? []) ||
-    JSON.stringify(session.repository_state.branches ?? {}) !== JSON.stringify(target.branches ?? {}) ||
-    JSON.stringify(session.repository_state.head ?? {}) !== JSON.stringify(target.head ?? {}) ||
-    JSON.stringify(session.repository_state.remote_branches ?? {}) !== JSON.stringify(target.remote_branches ?? {}) ||
-    JSON.stringify(session.repository_state.remotes ?? {}) !== JSON.stringify(target.remotes ?? {}) ||
-    JSON.stringify(session.repository_state.reflog ?? []) !== JSON.stringify(target.reflog ?? [])
-  )
 }
 
 function constrainedTerminalPaneRatio(clientX: number, bounds: DOMRect) {
@@ -128,7 +112,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const { clearToast, evaluateAndNotify } = useScaffolding(sessionId)
   const [dismissedCompletionSessionId, setDismissedCompletionSessionId] = useState<number | null>(null)
   const [terminalRatio, setTerminalRatio] = useState(DEFAULT_TERMINAL_RATIO)
-  const [diagramRatio, setDiagramRatio] = useState(DEFAULT_DIAGRAM_RATIO)
+  const [targetDiagramRatio, setTargetDiagramRatio] = useState(DEFAULT_TARGET_DIAGRAM_RATIO)
   const [terminalPaneRatio, setTerminalPaneRatio] = useState(DEFAULT_TERMINAL_PANE_RATIO)
   const [projectFilesOpen, setProjectFilesOpen] = useState(true)
   const [tourOpen, setTourOpen] = useState(false)
@@ -139,7 +123,8 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const user = useAuthStore((state) => state.user)
   const workspaceGridRef = useRef<HTMLElement>(null)
   const diagramGridRef = useRef<HTMLDivElement>(null)
-  const terminalGridRef = useRef<HTMLDivElement>(null)
+  const terminalGridRef = useRef<HTMLDivElement>(null)
+
 
   const exitMutation = useMutation({
     mutationFn: () => {
@@ -302,7 +287,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     event.preventDefault()
 
     function update(clientX: number) {
-      setDiagramRatio(clamp((clientX - resizeBounds.left) / resizeBounds.width, 0.34, 0.66))
+      setTargetDiagramRatio(clamp((clientX - resizeBounds.left) / resizeBounds.width, 0.34, 0.66))
     }
 
     function handlePointerMove(moveEvent: PointerEvent) {
@@ -354,11 +339,10 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
   const workspaceGridStyle = {
     gridTemplateRows: `minmax(14rem, ${1 - terminalRatio}fr) 0.375rem minmax(10rem, ${terminalRatio}fr)`,
   }
-  const isCommandDrill = session.practice_kind === 'command_drill'
-  const showCommandDag = commandDrillUsesDag(session)
+  const hasTargetDiagram = Boolean(session.scaffolding.expected_state && session.expected_state)
   const diagramGridStyle = {
-    '--live-dag-size': `${diagramRatio}fr`,
-    '--expected-dag-size': `${1 - diagramRatio}fr`,
+    '--live-dag-size': `${targetDiagramRatio}fr`,
+    '--expected-dag-size': `${1 - targetDiagramRatio}fr`,
   } as CSSProperties
   const terminalGridStyle = {
     '--terminal-pane-size': `${terminalPaneRatio}fr`,
@@ -415,61 +399,45 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
           className="grid min-h-0 gap-0 max-lg:min-h-[56rem]"
           style={workspaceGridStyle}
         >
-          {isCommandDrill ? (
-            <div
-              className={cn(
-                'grid min-h-0 grid-cols-1 gap-2',
-                showCommandDag ? 'xl:grid-cols-3' : 'xl:grid-cols-2',
-              )}
-            >
-              <div className="h-full min-h-0" data-tour-target="live-dag">
-                <StateLensPanel
-                  title="Current State Lens"
-                  lens={session.visualization.state_lens}
-                  delta={session.visualization.command_effect_delta}
-                  className="h-full"
+          <div
+            ref={diagramGridRef}
+            className={cn(
+              'grid min-h-0 grid-cols-1 gap-2',
+              hasTargetDiagram
+                ? 'xl:grid-cols-[minmax(0,var(--live-dag-size))_0.375rem_minmax(0,var(--expected-dag-size))] xl:gap-0'
+                : 'xl:grid-cols-1',
+            )}
+            style={diagramGridStyle}
+          >
+            <div className="h-full min-h-0" data-tour-target="live-dag">
+              <LiveDagPanel
+                title="Current DAG"
+                snapshot={session.repository_state}
+                className="flex h-full min-h-0 flex-col"
+                contentClassName="h-full min-h-0 flex-1"
+                showRepositoryDetails
+              />
+            </div>
+            {hasTargetDiagram ? (
+              <>
+                <ResizeHandle
+                  label="Resize diagrams"
+                  orientation="vertical"
+                  className="hidden xl:flex"
+                  onPointerDown={beginDiagramResize}
                 />
-              </div>
-              <div className="h-full min-h-0" data-tour-target="expected-state">
-                <ExpectedStatePanel session={session} />
-              </div>
-              {showCommandDag ? (
-                <div className="h-full min-h-0">
+                <div className="h-full min-h-0" data-tour-target="expected-state">
                   <LiveDagPanel
-                    title="Command DAG"
-                    snapshot={session.repository_state}
+                    title="Target DAG"
+                    snapshot={session.expected_state!}
                     className="flex h-full min-h-0 flex-col"
                     contentClassName="h-full min-h-0 flex-1"
+                    showRepositoryDetails
                   />
                 </div>
-              ) : null}
-            </div>
-          ) : (
-            <div
-              ref={diagramGridRef}
-              className="grid min-h-0 grid-cols-1 gap-2 xl:grid-cols-[minmax(0,var(--live-dag-size))_0.375rem_minmax(0,var(--expected-dag-size))] xl:gap-0"
-              style={diagramGridStyle}
-            >
-              <div className="h-full min-h-0" data-tour-target="live-dag">
-                <LiveDagPanel
-                  title="DAG and State Lens"
-                  snapshot={session.repository_state}
-                  className="flex h-full min-h-0 flex-col"
-                  contentClassName="h-full min-h-0 flex-1"
-                  showRepositoryDetails
-                />
-              </div>
-              <ResizeHandle
-                label="Resize diagrams"
-                orientation="vertical"
-                className="hidden xl:flex"
-                onPointerDown={beginDiagramResize}
-              />
-              <div className="h-full min-h-0" data-tour-target="expected-state">
-                <ExpectedStatePanel session={session} />
-              </div>
-            </div>
-          )}
+              </>
+            ) : null}
+          </div>
           <ResizeHandle
             label="Resize terminal height"
             orientation="horizontal"

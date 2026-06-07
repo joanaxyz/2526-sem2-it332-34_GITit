@@ -1,16 +1,24 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
-  BookOpenText,
+  ArrowRight,
   CheckCircle2,
+  ChevronsUp,
+  CircleDotDashed,
+  Flag,
   GitBranch,
+  GitCommitHorizontal,
   Lock,
-  Milestone,
+  MapPinned,
   Play,
   RefreshCcw,
   RotateCcw,
-  Route,
+  Swords,
+  TerminalSquare,
+  Trophy,
+  type LucideIcon,
 } from 'lucide-react'
+import { motion, useInView } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 
 import { reviewApi } from '@/features/review/api/reviewApi'
@@ -39,17 +47,21 @@ import { cn } from '@/shared/utils/cn'
 
 type ContentItem = CommandDrillAdventureSummary | CommandTopicSummary | WorkflowScenarioSummary
 
-function useVisibleLoadMore(
-  enabled: boolean,
-  onVisible: () => void,
-) {
+const CHALLENGE_ICONS: LucideIcon[] = [Flag, Swords, Trophy, GitBranch, MapPinned]
+const DIFFICULTY_COPY: Record<string, { label: string; hint: string }> = {
+  easy: { label: 'Easy', hint: 'Guided' },
+  medium: { label: 'Medium', hint: 'Less help' },
+  hard: { label: 'Hard', hint: 'DAG only' },
+}
+
+function useVisibleLoadMore(enabled: boolean, onVisible: () => void) {
   const ref = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (!enabled || !ref.current) return
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((entry) => entry.isIntersecting)) onVisible()
-    }, { rootMargin: '260px' })
+    }, { rootMargin: '320px' })
     observer.observe(ref.current)
     return () => observer.disconnect()
   }, [enabled, onVisible])
@@ -57,17 +69,13 @@ function useVisibleLoadMore(
   return ref
 }
 
-function useModuleContent<T extends ContentItem>(
-  moduleId: number,
-  section: ModuleContentSection,
-  enabled: boolean,
-) {
+function useModuleContent<T extends ContentItem>(moduleId: number, section: ModuleContentSection, enabled: boolean) {
   return useInfiniteQuery({
     queryKey: queryKeys.moduleContent(moduleId, section),
     queryFn: ({ pageParam }) =>
       scenariosApi.moduleContent(moduleId, section, {
         cursor: typeof pageParam === 'number' ? pageParam : null,
-        limit: section === 'command_adventures' ? 1 : 4,
+        limit: section === 'command_adventures' ? 1 : 6,
       }) as unknown as Promise<ModuleContentPage<T>>,
     initialPageParam: null as number | null,
     getNextPageParam: (lastPage) => lastPage.next_cursor,
@@ -113,10 +121,12 @@ function ActionIcon({ action, status }: { action: PracticeActionIntent | null; s
 function PracticeActionButton({
   item,
   disabled,
+  className,
   onAction,
 }: {
   item: PracticeAccess
   disabled: boolean
+  className?: string
   onAction: (item: PracticeAccess, action: PracticeActionIntent) => void
 }) {
   const action = actionForPractice(item)
@@ -124,6 +134,7 @@ function PracticeActionButton({
     <Button
       type="button"
       size="sm"
+      className={className}
       variant={action === 'start' || action === 'continue' || action === 'resume' ? 'default' : 'outline'}
       disabled={!action || disabled}
       onClick={() => {
@@ -136,26 +147,26 @@ function PracticeActionButton({
   )
 }
 
-function PracticeProgress({ item }: { item: PracticeAccess }) {
+function PracticeProgress({ item, compact = false }: { item: PracticeAccess; compact?: boolean }) {
   const pct = item.successful_attempts.required
     ? Math.round((item.successful_attempts.count / item.successful_attempts.required) * 100)
     : 0
   return (
-    <div className="flex min-w-[7.5rem] items-center gap-2">
-      <span className="font-mono text-xs font-bold text-muted-foreground">
+    <div className={cn('flex items-center gap-2', compact ? 'min-w-[5.5rem]' : 'min-w-[7.5rem]')}>
+      <ProgressBar value={pct} className="h-1.5 flex-1" glow={item.status !== 'locked'} />
+      <span className="font-mono text-[11px] text-muted-foreground">
         {item.successful_attempts.count}/{item.successful_attempts.required}
       </span>
-      <ProgressBar value={pct} className="h-1.5 flex-1" />
     </div>
   )
 }
 
 function statusClass(status: PracticeAccess['status']) {
   if (status === 'completed') return 'border-primary/35 bg-primary/10 text-primary'
-  if (status === 'in_progress') return 'border-sky-400/35 bg-sky-400/10 text-sky-300'
-  if (status === 'failed' || status === 'abandoned') return 'border-destructive/35 bg-destructive/10 text-destructive'
+  if (status === 'in_progress') return 'border-accent/35 bg-accent/10 text-accent'
+  if (status === 'failed' || status === 'abandoned') return 'border-accent/25 bg-accent/5 text-accent'
   if (status === 'locked') return 'border-border bg-muted/20 text-muted-foreground'
-  return 'border-border bg-background/40 text-muted-foreground'
+  return 'border-border bg-background/45 text-muted-foreground'
 }
 
 function StatusPill({ status }: { status: PracticeAccess['status'] }) {
@@ -168,17 +179,17 @@ function StatusPill({ status }: { status: PracticeAccess['status'] }) {
 
 function EmptySection({ label }: { label: string }) {
   return (
-    <div className="rounded-md border border-dashed border-border bg-background/30 px-4 py-5 text-sm text-muted-foreground">
+    <div className="rounded-2xl border border-dashed border-border/80 bg-background/30 px-5 py-7 text-sm text-muted-foreground">
       No {label} published yet.
     </div>
   )
 }
 
-function LoadingRows() {
+function LoadingRows({ compact = false }: { compact?: boolean }) {
   return (
     <div className="grid gap-2">
-      {Array.from({ length: 3 }, (_, index) => (
-        <div className="h-16 animate-pulse rounded-md border border-border bg-secondary/30" key={index} />
+      {Array.from({ length: compact ? 1 : 3 }, (_, index) => (
+        <div className="h-16 animate-pulse rounded-2xl border border-border bg-secondary/25" key={index} />
       ))}
     </div>
   )
@@ -188,23 +199,41 @@ function flattenPages<T extends ContentItem>(query: ReturnType<typeof useModuleC
   return query.data?.pages.flatMap((page) => page.results) ?? []
 }
 
-export function ModulePracticeHub({
-  module,
-  enabled,
-}: {
-  module: LearningModule
-  enabled: boolean
-}) {
+function nextAdventurePractice(adventure: CommandDrillAdventureSummary | null) {
+  if (!adventure) return null
+  const levels = adventure.levels.filter((level) => level.next_practice)
+  const preferred =
+    levels.find((level) => level.next_practice?.status === 'in_progress') ??
+    levels.find((level) => level.status !== 'completed' && level.status !== 'locked') ??
+    levels.find((level) => level.next_practice?.review_available) ??
+    levels[0]
+  return preferred?.next_practice ?? null
+}
+
+function adventureNextLabel(adventure: CommandDrillAdventureSummary | null) {
+  if (!adventure) return null
+  const current = adventure.levels.find((level) => level.status === 'in_progress') ??
+    adventure.levels.find((level) => level.unlocked && level.status !== 'completed') ??
+    adventure.levels.find((level) => level.status !== 'locked')
+  if (!current) return null
+  return current.next_practice?.title ?? `Level ${current.number}`
+}
+
+export function ModulePracticeHub({ module }: { module: LearningModule }) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const adventureQuery = useModuleContent<CommandDrillAdventureSummary>(module.id, 'command_adventures', enabled)
-  const workflowQuery = useModuleContent<WorkflowScenarioSummary>(module.id, 'workflow_scenarios', enabled)
+  const hubRef = useRef<HTMLDivElement | null>(null)
+  const isInView = useInView(hubRef, { amount: 0.15, margin: '420px 0px 420px 0px' })
+  const adventureQuery = useModuleContent<CommandDrillAdventureSummary>(module.id, 'command_adventures', isInView)
+  const workflowQuery = useModuleContent<WorkflowScenarioSummary>(module.id, 'workflow_scenarios', isInView)
 
   const adventure = flattenPages(adventureQuery)[0] ?? null
   const workflowScenarios = flattenPages(workflowQuery)
+  const adventurePractice = nextAdventurePractice(adventure)
+  const nextLabel = adventureNextLabel(adventure)
 
   const workflowLoadRef = useVisibleLoadMore(
-    Boolean(enabled && workflowQuery.hasNextPage && !workflowQuery.isFetchingNextPage),
+    Boolean(isInView && workflowQuery.hasNextPage && !workflowQuery.isFetchingNextPage),
     () => void workflowQuery.fetchNextPage(),
   )
 
@@ -239,205 +268,227 @@ export function ModulePracticeHub({
   const actionPending = startMutation.isPending || reviewMutation.isPending
 
   return (
-    <section className="grid gap-4">
-      <div className="grid gap-3 xl:grid-cols-[minmax(0,1.05fr)_minmax(24rem,0.95fr)]">
-        <section className="rounded-md border border-primary/25 bg-background/45 p-4 shadow-none">
-          <div className="flex flex-wrap items-start justify-between gap-3">
+    <div ref={hubRef} className="module-hub-stage grid gap-5">
+      <motion.section
+        className="command-adventure-card overflow-hidden rounded-[1.65rem] border border-primary/25 bg-card/80 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur"
+        initial={{ opacity: 0, y: 26, rotateX: -6 }}
+        whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+        viewport={{ amount: 0.35, once: false, margin: '-8% 0px -8% 0px' }}
+        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-5">
+          <div className="flex min-w-0 flex-1 items-center gap-4">
+            <span className="command-adventure-emblem">
+              <TerminalSquare className="size-5" />
+            </span>
             <div className="min-w-0">
-              <div className="flex items-center gap-2 text-primary">
-                <Route className="size-4" />
-                <h3 className="text-sm font-extrabold uppercase tracking-normal">Command Drill Adventure</h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-primary">Command Adventure</p>
+                {adventure?.progress.value === 100 ? <CheckCircle2 className="size-4 text-primary" /> : null}
               </div>
-              {adventure ? (
-                <>
-                  <h4 className="mt-2 text-xl font-extrabold leading-tight">{adventure.title}</h4>
-                  <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">{adventure.description}</p>
-                </>
-              ) : null}
+              <h3 className="mt-1 text-2xl font-black leading-tight">{adventure?.title ?? 'Loading route'}</h3>
+              <p className="mt-1 line-clamp-1 max-w-2xl text-sm text-muted-foreground">
+                {adventure?.description ?? 'Preparing command levels.'}
+              </p>
             </div>
-            {adventure ? (
-              <div className="min-w-[10rem]">
-                <ProgressBar value={adventure.progress.value} className="h-1.5" glow />
-                <p className="mt-1 font-mono text-xs text-muted-foreground">
-                  {adventure.progress.levels_completed}/{adventure.progress.level_count} levels complete
-                </p>
-              </div>
-            ) : null}
           </div>
 
-          {adventureQuery.isLoading ? <div className="mt-4"><LoadingRows /></div> : null}
-          {!adventureQuery.isLoading && !adventure ? <div className="mt-4"><EmptySection label="command adventures" /></div> : null}
           {adventure ? (
-            <div className="mt-4 grid gap-2 sm:grid-cols-2 2xl:grid-cols-3">
-              {adventure.levels.map((level) => (
-                <CommandLevelButton
-                  disabled={actionPending}
-                  key={level.id}
-                  level={level}
-                  onAction={runPracticeAction}
-                />
-              ))}
+            <div className="command-adventure-progress min-w-[13rem] flex-1 sm:max-w-[18rem]">
+              <div className="flex items-center justify-between gap-3 font-mono text-xs text-muted-foreground">
+                <span>{nextLabel ? `Next: ${nextLabel}` : 'Progress'}</span>
+                <span>{adventure.progress.numerator}/{adventure.progress.denominator}</span>
+              </div>
+              <ProgressBar value={adventure.progress.value} className="mt-2 h-2.5" glow fillAnimate />
             </div>
           ) : null}
-        </section>
 
-        <section className="rounded-md border border-border bg-background/35 p-4 shadow-none">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <GitBranch className="size-4 text-primary" />
-              <h3 className="text-sm font-extrabold uppercase tracking-normal">Workflow Scenarios</h3>
-            </div>
-            <span className="font-mono text-xs text-muted-foreground">
-              {module.workflow_scenario_count} scenarios
-            </span>
-          </div>
-          {workflowQuery.isLoading ? <div className="mt-4"><LoadingRows /></div> : null}
-          {!workflowQuery.isLoading && workflowScenarios.length === 0 ? <div className="mt-4"><EmptySection label="workflow scenarios" /></div> : null}
-          <div className="mt-4 grid gap-3">
-            {workflowScenarios.map((scenario) => (
-              <WorkflowScenarioCard
-                disabled={actionPending}
-                key={scenario.id}
-                scenario={scenario}
-                onAction={runPracticeAction}
-              />
-            ))}
-          </div>
-          <div ref={workflowLoadRef} />
-          {workflowQuery.isFetchingNextPage ? <div className="mt-3"><LoadingRows /></div> : null}
-          {workflowQuery.hasNextPage ? (
-            <Button className="mt-3" type="button" variant="ghost" size="sm" onClick={() => void workflowQuery.fetchNextPage()}>
-              Load more workflow scenarios
+          {adventurePractice ? (
+            <PracticeActionButton
+              className="h-11 rounded-full px-6"
+              disabled={actionPending}
+              item={adventurePractice}
+              onAction={runPracticeAction}
+            />
+          ) : adventure && adventure.progress.value >= 100 ? (
+            <Button type="button" size="sm" variant="outline" className="h-11 rounded-full px-6" disabled>
+              <CheckCircle2 data-icon="inline-start" />
+              Complete
             </Button>
           ) : null}
-        </section>
-      </div>
-    </section>
-  )
-}
-
-function CommandLevelButton({
-  level,
-  disabled,
-  onAction,
-}: {
-  level: CommandDrillAdventureSummary['levels'][number]
-  disabled: boolean
-  onAction: (item: PracticeAccess, action: PracticeActionIntent) => void
-}) {
-  const item = level.next_practice
-  const action = item ? actionForPractice(item) : null
-  const pct = level.progress.denominator
-    ? Math.round((level.progress.numerator / level.progress.denominator) * 100)
-    : 0
-
-  return (
-    <button
-      type="button"
-      className={cn(
-        'group min-h-28 rounded-md border p-3 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        level.status === 'completed'
-          ? 'border-primary/45 bg-primary/10'
-          : level.status === 'locked'
-            ? 'border-border/60 bg-muted/20 opacity-70'
-            : 'border-border bg-secondary/25 hover:border-primary/45 hover:bg-secondary/45',
-      )}
-      disabled={!item || !action || disabled}
-      onClick={() => {
-        if (item && action) onAction(item, action)
-      }}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <Milestone className={cn('size-4', level.status === 'locked' ? 'text-muted-foreground' : 'text-primary')} />
-            <span className="text-base font-extrabold">{level.label}</span>
-          </div>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">
-            {level.usage_count} usage{level.usage_count === 1 ? '' : 's'} / {level.variant_count} variant{level.variant_count === 1 ? '' : 's'}
-          </p>
         </div>
-        <StatusPill status={level.status} />
-      </div>
-      <div className="mt-3 flex items-center gap-2">
-        <ProgressBar value={pct} className="h-1.5 flex-1" />
-        <span className="font-mono text-xs text-muted-foreground">{level.progress.numerator}/{level.progress.denominator}</span>
-      </div>
-      <div className="mt-3 flex items-center justify-between gap-2 text-xs font-semibold text-muted-foreground">
-        <span>{level.status === 'locked' ? 'Complete the previous level first' : actionLabel(action, item?.status ?? 'locked')}</span>
-        {level.status === 'completed' ? <CheckCircle2 className="size-4 text-primary" /> : <ActionIcon action={action} status={item?.status ?? 'locked'} />}
-      </div>
-    </button>
+        {adventureQuery.isLoading ? <div className="mt-4"><LoadingRows compact /></div> : null}
+        {!adventureQuery.isLoading && !adventure ? <div className="mt-4"><EmptySection label="command adventures" /></div> : null}
+      </motion.section>
+
+      <motion.section
+        className="git-it-challenge-zone rounded-[1.65rem] border border-border/80 bg-background/35 p-5 shadow-[0_18px_56px_rgba(0,0,0,0.2)]"
+        initial={{ opacity: 0, y: 28 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ amount: 0.24, once: false, margin: '-8% 0px -8% 0px' }}
+        transition={{ duration: 0.52, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="grid size-10 place-items-center rounded-2xl border border-accent/25 bg-accent/10 text-accent">
+              <Swords className="size-5" />
+            </span>
+            <div>
+              <h3 className="text-lg font-black leading-tight">Git it Challenge</h3>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                {module.workflow_scenario_count} towers
+              </p>
+            </div>
+          </div>
+          <div className="hidden items-center gap-2 rounded-full border border-border/70 bg-card/45 px-3 py-1.5 font-mono text-xs text-muted-foreground sm:flex">
+            <ChevronsUp className="size-4 text-primary" />
+            Easy → Medium → Hard
+          </div>
+        </div>
+
+        {workflowQuery.isLoading ? <div className="mt-4"><LoadingRows /></div> : null}
+        {!workflowQuery.isLoading && workflowScenarios.length === 0 ? <div className="mt-4"><EmptySection label="Git it challenges" /></div> : null}
+
+        <div className="mt-5 grid gap-4 xl:grid-cols-2">
+          {workflowScenarios.map((scenario, index) => (
+            <ChallengeTowerCard
+              disabled={actionPending}
+              index={index}
+              key={scenario.id}
+              scenario={scenario}
+              onAction={runPracticeAction}
+            />
+          ))}
+        </div>
+        <div ref={workflowLoadRef} />
+        {workflowQuery.isFetchingNextPage ? <div className="mt-3"><LoadingRows compact /></div> : null}
+        {workflowQuery.hasNextPage ? (
+          <Button className="mt-4 rounded-full" type="button" variant="ghost" size="sm" onClick={() => void workflowQuery.fetchNextPage()}>
+            More towers
+            <ArrowRight data-icon="inline-end" />
+          </Button>
+        ) : null}
+      </motion.section>
+    </div>
   )
 }
 
-function WorkflowScenarioCard({
+function ChallengeTowerCard({
   scenario,
   disabled,
+  index,
   onAction,
 }: {
   scenario: WorkflowScenarioSummary
   disabled: boolean
+  index: number
   onAction: (item: PracticeAccess, action: PracticeActionIntent) => void
 }) {
+  const Icon = CHALLENGE_ICONS[index % CHALLENGE_ICONS.length]
+  const completeCount = useMemo(
+    () => scenario.levels.filter((level) => level.status === 'completed').length,
+    [scenario.levels],
+  )
+  const overall = scenario.levels.length ? Math.round((completeCount / scenario.levels.length) * 100) : 0
+
   return (
-    <article className="rounded-md border border-border bg-secondary/20 p-4">
+    <motion.article
+      className="challenge-tower-card rounded-[1.35rem] border border-border/75 bg-card/62 p-4 transition hover:border-primary/30 hover:bg-card/75"
+      initial={{ opacity: 0, y: 28, scale: 0.98 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ amount: 0.26, once: false }}
+      transition={{ duration: 0.42, delay: index * 0.035, ease: [0.16, 1, 0.3, 1] }}
+    >
       <div className="flex items-start gap-3">
-        <BookOpenText className="mt-1 size-4 shrink-0 text-primary" />
+        <span className="challenge-tower-icon">
+          <Icon className="size-5" />
+        </span>
         <div className="min-w-0 flex-1">
-          <h4 className="text-base font-bold">{scenario.title}</h4>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">{scenario.summary}</p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="font-mono text-[10px] font-black uppercase tracking-[0.18em] text-primary">Tower {index + 1}</p>
+              <h4 className="mt-1 text-lg font-black leading-tight">{scenario.title}</h4>
+              <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">{scenario.summary}</p>
+            </div>
+            <div className="min-w-[6rem] text-right">
+              <p className="font-mono text-xs text-muted-foreground">{completeCount}/{scenario.levels.length}</p>
+              <ProgressBar value={overall} className="mt-1.5 h-1.5" glow={overall > 0} />
+            </div>
+          </div>
+
           {scenario.command_topics.length ? (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {scenario.command_topics.map((topic) => (
-                <span className="rounded-sm border border-border bg-background/45 px-2 py-1 font-mono text-[11px] text-muted-foreground" key={topic}>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {scenario.command_topics.slice(0, 4).map((topic) => (
+                <span className="rounded-full border border-border/70 bg-background/55 px-2 py-1 font-mono text-[10px] text-muted-foreground" key={topic}>
                   {topic}
                 </span>
               ))}
             </div>
           ) : null}
+
+          <div className="challenge-tower-floors mt-4 grid gap-2">
+            {scenario.levels.map((level, floorIndex) => (
+              <ChallengeFloor
+                disabled={disabled}
+                floorIndex={floorIndex}
+                key={level.id}
+                level={level}
+                onAction={onAction}
+              />
+            ))}
+          </div>
         </div>
       </div>
-      <div className="mt-4 grid gap-2 md:grid-cols-3">
-        {scenario.levels.map((level) => (
-          <WorkflowLevelCard
-            disabled={disabled}
-            key={level.id}
-            level={level}
-            onAction={onAction}
-          />
-        ))}
-      </div>
-    </article>
+    </motion.article>
   )
 }
 
-function WorkflowLevelCard({
+function ChallengeFloor({
   level,
   disabled,
+  floorIndex,
   onAction,
 }: {
   level: WorkflowLevelAccess
   disabled: boolean
+  floorIndex: number
   onAction: (item: PracticeAccess, action: PracticeActionIntent) => void
 }) {
   const latestAccuracy = level.latest_attempt?.accuracy_rate
+  const difficulty = DIFFICULTY_COPY[String(level.difficulty)] ?? {
+    label: String(level.difficulty),
+    hint: 'Challenge',
+  }
+  const locked = level.status === 'locked'
+
   return (
-    <div className={cn('rounded-md border bg-background/35 p-3', level.status === 'locked' ? 'border-border/50 opacity-65' : 'border-border')}>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <p className="text-sm font-bold capitalize">{level.difficulty}</p>
-          <StatusPill status={level.status} />
+    <div
+      className={cn(
+        'challenge-floor rounded-2xl border bg-background/40 p-3',
+        locked ? 'border-border/45 opacity-60' : 'border-border/80',
+      )}
+      style={{ animationDelay: `${floorIndex * 50}ms` }}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className={cn('challenge-floor-dot', locked && 'challenge-floor-dot-locked')}>
+            {locked ? <Lock className="size-3.5" /> : <GitCommitHorizontal className="size-3.5" />}
+          </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-black">{difficulty.label}</p>
+              <StatusPill status={level.status} />
+            </div>
+            <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+              <CircleDotDashed className="size-3" />
+              {latestAccuracy !== null && latestAccuracy !== undefined ? `${latestAccuracy}% accuracy` : difficulty.hint}
+            </p>
+          </div>
         </div>
-        {latestAccuracy !== null && latestAccuracy !== undefined ? (
-          <span className="font-mono text-sm font-bold text-muted-foreground">{latestAccuracy}%</span>
-        ) : null}
-      </div>
-      <div className="mt-3">
-        <PracticeProgress item={level} />
-      </div>
-      <div className="mt-3">
-        <PracticeActionButton disabled={disabled} item={level} onAction={onAction} />
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <PracticeProgress item={level} compact />
+          <PracticeActionButton className="h-9 rounded-full px-4" disabled={disabled} item={level} onAction={onAction} />
+        </div>
       </div>
     </div>
   )

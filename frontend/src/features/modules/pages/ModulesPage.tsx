@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
-import { BookOpenText, Layers3 } from 'lucide-react'
+import { useEffect, useRef } from 'react'
+import { BookOpenText, GitBranch, Layers3, Sparkles, TerminalSquare } from 'lucide-react'
+import { motion, useScroll, useSpring } from 'motion/react'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
 
@@ -8,6 +9,15 @@ import { ModuleCard } from '@/features/modules/components/ModuleCard'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
+
+function RouteKicker({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-2xl border border-border/70 bg-background/35 px-4 py-3">
+      <p className="font-mono text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
+      <p className="mt-1 text-2xl font-black text-primary">{value}</p>
+    </div>
+  )
+}
 
 function SectionHeader({
   icon: Icon,
@@ -21,8 +31,10 @@ function SectionHeader({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-2">
-        <Icon className="size-4 text-primary" />
-        <h2 className="text-sm font-extrabold uppercase tracking-normal">{title}</h2>
+        <span className="grid size-8 place-items-center rounded-full border border-primary/20 bg-primary/10 text-primary">
+          <Icon className="size-4" />
+        </span>
+        <h2 className="text-xs font-extrabold uppercase tracking-[0.18em] text-muted-foreground">{title}</h2>
       </div>
       {meta ? <span className="font-mono text-xs text-muted-foreground">{meta}</span> : null}
     </div>
@@ -33,6 +45,9 @@ export function ModulesPage() {
   const [searchParams] = useSearchParams()
   const moduleParam = searchParams.get('module')
   const focusedModuleId = moduleParam ? Number(moduleParam) : null
+  const pathRef = useRef<HTMLDivElement | null>(null)
+  const { scrollYProgress } = useScroll({ target: pathRef, offset: ['start 82%', 'end 18%'] })
+  const pathScaleY = useSpring(scrollYProgress, { stiffness: 120, damping: 28, mass: 0.35 })
   const foundationsQuery = useQuery({
     queryKey: queryKeys.foundations,
     queryFn: modulesApi.listFoundations,
@@ -62,8 +77,8 @@ export function ModulesPage() {
   if (foundationsQuery.isLoading || modulesQuery.isLoading) {
     return (
       <LoadingState
-        description="Getting foundations, command adventures, and workflow scenarios ready."
-        label="Loading curriculum"
+        description="Building the practice map."
+        label="Loading route"
         variant="page"
       />
     )
@@ -77,54 +92,79 @@ export function ModulesPage() {
 
   const foundations = foundationsQuery.data ?? []
   const modules = modulesQuery.data ?? []
+  const totalChallenges = modules.reduce((sum, module) => sum + module.workflow_scenario_count, 0)
+  const totalCommandLevels = modules.reduce((sum, module) => sum + module.command_topic_count, 0)
 
   return (
-    <div className="flex w-full flex-col gap-8">
-      <header className="grid gap-3">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+    <div className="modules-page-shell flex w-full flex-col gap-8">
+      <motion.header
+        className="module-quest-hero relative overflow-hidden rounded-[2rem] border border-primary/20 bg-card/55 p-6 shadow-[0_28px_90px_rgba(0,0,0,0.26)] md:p-8"
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <div className="module-quest-hero-glow" aria-hidden="true" />
+        <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-end">
           <div>
-            <p className="font-mono text-xs font-bold uppercase tracking-normal text-primary">Curriculum V2</p>
-            <h1 className="mt-2 text-3xl font-extrabold tracking-normal">Learning Path</h1>
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 font-mono text-xs font-bold uppercase tracking-[0.16em] text-primary">
+              <GitBranch className="size-3.5" />
+              Branch map
+            </div>
+            <h1 className="mt-4 max-w-3xl text-4xl font-black tracking-tight md:text-6xl">
+              Pick a route. Clear the tower.
+            </h1>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
+              Command Adventure unlocks the skills. Git it Challenge tests the flow.
+            </p>
           </div>
-          <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-            Build from foundations, clear command adventure levels, then solve workflows that combine the commands under Easy, Medium, and Hard constraints.
-          </p>
+          <div className="grid grid-cols-3 gap-3">
+            <RouteKicker label="Modules" value={modules.length} />
+            <RouteKicker label="Levels" value={totalCommandLevels} />
+            <RouteKicker label="Towers" value={totalChallenges} />
+          </div>
         </div>
-      </header>
+      </motion.header>
 
       <section className="grid gap-3">
-        <SectionHeader icon={BookOpenText} title="Foundations" meta={`${foundations.length} topics`} />
+        <SectionHeader icon={BookOpenText} title="Foundations" meta={`${foundations.length} gates`} />
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {foundations.map((topic) => (
-            <article className="rounded-md border border-border bg-background/40 p-4" key={topic.id}>
-              <div className="flex items-start gap-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-md border border-primary/25 bg-primary/10 font-mono text-sm font-bold text-primary">
+          {foundations.map((topic, index) => (
+            <motion.article
+              className="foundation-gate rounded-2xl border border-border/70 bg-background/35 p-4 shadow-[0_14px_38px_rgba(0,0,0,0.16)]"
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ amount: 0.35, once: false }}
+              transition={{ duration: 0.38, delay: index * 0.03 }}
+              key={topic.id}
+            >
+              <div className="flex items-center gap-3">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-primary/25 bg-primary/10 font-mono text-sm font-bold text-primary">
                   {topic.icon || topic.sort_order + 1}
                 </span>
-                <div>
-                  <h2 className="text-base font-bold">{topic.title}</h2>
-                  <p className="mt-1 text-sm leading-6 text-muted-foreground">{topic.summary}</p>
+                <div className="min-w-0">
+                  <h2 className="truncate text-base font-black">{topic.title}</h2>
+                  <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{topic.summary}</p>
                 </div>
               </div>
-            </article>
+            </motion.article>
           ))}
         </div>
       </section>
 
       <section className="grid gap-4">
-        <SectionHeader icon={Layers3} title="Command adventures and workflow scenarios" meta={`${modules.length} modules`} />
-        <div className="learning-path relative grid gap-8 py-2">
+        <SectionHeader icon={Layers3} title="Practice route" meta={`${modules.length} modules`} />
+        <div ref={pathRef} className="learning-branch relative grid gap-12 py-4">
+          <div className="learning-branch-spine" aria-hidden="true" />
+          <motion.div className="learning-branch-spine-fill" style={{ scaleY: pathScaleY }} aria-hidden="true" />
+          <div className="learning-branch-start" aria-hidden="true">
+            <Sparkles className="size-4" />
+          </div>
           {modules.map((module, index) => (
-            <div
-              className="relative grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]"
-              data-module-id={module.id}
-              key={module.id}
-            >
-              <div className={index % 2 === 0 ? 'lg:pr-12' : 'lg:col-start-2 lg:pl-12'}>
-                <ModuleCard module={module} index={index} />
-              </div>
-            </div>
+            <ModuleCard module={module} index={index} key={module.id} />
           ))}
+          <div className="learning-branch-finish" aria-hidden="true">
+            <TerminalSquare className="size-4" />
+          </div>
         </div>
       </section>
     </div>

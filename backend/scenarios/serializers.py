@@ -280,14 +280,11 @@ def _problem_narrative(session: PracticeSession) -> str:
 def _scaffolding_supports(session: PracticeSession) -> dict:
     if session.practice_kind == PracticeKind.COMMAND_DRILL:
         return {
-            "live_dag": False,
-            "state_lens": True,
+            "live_dag": True,
             "expected_state": True,
-            "target_state": True,
             "contextual_feedback": True,
         }
-    supports = ScaffoldingService().supports_for(session.workflow_level.difficulty)
-    return {**supports, "state_lens": True, "target_state": supports["expected_state"]}
+    return ScaffoldingService().supports_for(session.workflow_level.difficulty)
 
 
 def _command_level_number(topic: CommandTopic) -> int:

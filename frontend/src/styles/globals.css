@@ -381,117 +381,134 @@ textarea {
 
 
 
-/* Progress bar — bright glowing tip gradient */
-.learning-path::before {
-  content: '';
+/* Branch map route styling */
+.modules-page-shell {
+  position: relative;
+}
+
+.learning-branch {
+  isolation: isolate;
+}
+
+.learning-branch-spine,
+.learning-branch-spine-fill {
   position: absolute;
-  inset-block: 0;
+  inset-block: 1.6rem;
   left: 50%;
   width: 2px;
-  transform: translateX(-50%) scaleY(0);
+  transform: translateX(-50%);
+  border-radius: 999px;
+}
+
+.learning-branch-spine {
+  background: linear-gradient(to bottom, hsla(var(--primary) / 0.12), hsla(var(--accent) / 0.18), hsla(var(--primary) / 0.1));
+}
+
+.learning-branch-spine-fill {
+  z-index: 1;
   transform-origin: top;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 245, 212, 0.1),
-    rgba(0, 245, 212, 0.65) 12%,
-    rgba(255, 199, 95, 0.55) 48%,
-    rgba(87, 188, 255, 0.6) 84%,
-    rgba(0, 245, 212, 0.12)
-  );
-  box-shadow: 0 0 18px rgba(0, 245, 212, 0.24);
-  animation: path-spine-grow 1.1s cubic-bezier(0.16, 1, 0.3, 1) 160ms forwards;
+  background: linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--primary)));
+  box-shadow: 0 0 18px hsla(var(--primary) / 0.28), 0 0 28px hsla(var(--accent) / 0.16);
 }
 
-.learning-path-card {
-  border-left: 3px solid var(--module-border-rest, rgba(0, 212, 170, 0.35));
-  transition: border-left-color 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
+.learning-branch-start {
+  position: absolute;
+  left: 50%;
+  top: 0.35rem;
+  z-index: 2;
+  display: grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  transform: translateX(-50%);
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid hsla(var(--primary) / 0.38);
+  background: hsl(var(--background));
+  color: hsl(var(--primary));
+  box-shadow: 0 0 0 7px hsla(var(--primary) / 0.08), 0 0 22px hsla(var(--primary) / 0.22);
 }
 
-.learning-path-card:hover {
-  border-left-color: var(--module-border-hover, rgba(0, 212, 170, 0.7));
-  transform: translateY(-2px);
-  box-shadow:
-    0 0 20px 4px var(--module-glow, rgba(0, 212, 170, 0.18)),
-    0 8px 32px rgba(0, 0, 0, 0.34);
+.learning-branch-row {
+  z-index: 2;
 }
 
-.learning-path-card::before {
+.module-route-label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: start;
+  border: 1px solid var(--module-border-rest, hsla(var(--primary) / 0.32));
+  border-radius: 1.2rem;
+  background: linear-gradient(135deg, hsla(var(--card) / 0.82), hsla(var(--background) / 0.62));
+  padding: 1rem;
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.2);
+}
+
+.learning-branch-track {
+  min-height: 12rem;
+}
+
+.learning-branch-node {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  width: 3.3rem;
+  height: 3.3rem;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--module-border-hover, hsla(var(--primary) / 0.6));
+  background: hsl(var(--background));
+  color: var(--module-color, hsl(var(--primary)));
+  box-shadow: 0 0 0 8px hsla(var(--background) / 0.86), 0 0 26px var(--module-glow, hsla(var(--primary) / 0.24));
+}
+
+.learning-branch-connector {
+  position: absolute;
+  left: 50%;
+  right: 0;
+  height: 2px;
+  transform-origin: left;
+  background: linear-gradient(to right, var(--module-border-hover, hsla(var(--primary) / 0.68)), transparent);
+}
+
+.learning-branch-connector-right {
+  left: 0;
+  right: 50%;
+  transform-origin: right;
+  background: linear-gradient(to left, var(--module-border-hover, hsla(var(--primary) / 0.68)), transparent);
+}
+
+.route-stop-card {
+  position: relative;
+}
+
+.route-stop-card::before {
   content: '';
   position: absolute;
-  top: 2.1rem;
-  width: clamp(2rem, 5vw, 4.5rem);
-  height: 2px;
-  background: linear-gradient(90deg, var(--module-border-hover, rgba(0, 212, 170, 0.7)), transparent);
-  opacity: 0;
-  transform: scaleX(0);
-  animation: path-branch-grow 0.7s cubic-bezier(0.16, 1, 0.3, 1) 280ms forwards;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(circle at 18% 0%, hsla(var(--primary) / 0.08), transparent 32%), radial-gradient(circle at 100% 12%, hsla(var(--accent) / 0.07), transparent 28%);
 }
 
-.learning-path-node {
-  position: absolute;
-  top: 1.78rem;
+.route-stop-card > * {
+  position: relative;
   z-index: 1;
-  display: none;
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 999px;
-  background: var(--module-color, hsl(var(--primary)));
-  box-shadow:
-    0 0 0 4px rgba(0, 0, 0, 0.35),
-    0 0 18px var(--module-glow, rgba(0, 212, 170, 0.25));
 }
 
-@keyframes path-spine-grow {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) scaleY(0);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) scaleY(1);
-  }
-}
-
-@keyframes path-branch-grow {
-  from {
-    opacity: 0;
-    transform: scaleX(0);
-  }
-  to {
-    opacity: 1;
-    transform: scaleX(1);
-  }
-}
-
-@media (min-width: 1024px) {
-  .learning-path-node {
-    display: block;
-  }
-
-  .learning-path > div:nth-child(odd) .learning-path-node {
-    right: -3.38rem;
-  }
-
-  .learning-path > div:nth-child(even) .learning-path-node {
-    left: -3.38rem;
-  }
-
-  .learning-path > div:nth-child(odd) .learning-path-card::before {
-    right: -3.05rem;
-    transform-origin: left;
-  }
-
-  .learning-path > div:nth-child(even) .learning-path-card::before {
-    left: -3.05rem;
-    transform-origin: right;
-    background: linear-gradient(270deg, var(--module-border-hover, rgba(0, 212, 170, 0.7)), transparent);
-  }
+.route-stop-card-primary {
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.25), 0 0 32px hsla(var(--primary) / 0.07);
 }
 
 @media (max-width: 1023px) {
-  .learning-path::before,
-  .learning-path-card::before {
-    display: none;
+  .learning-branch-spine,
+  .learning-branch-spine-fill,
+  .learning-branch-start {
+    left: 1.25rem;
+  }
+
+  .learning-branch {
+    padding-left: 2.3rem;
   }
 }
 
@@ -607,25 +624,6 @@ textarea {
   animation: dag-head-pulse 2.8s ease-in-out infinite;
 }
 
-@keyframes dag-head-pulse-violet {
-  0%, 100% {
-    box-shadow:
-      inset 0 0 8px rgba(168, 85, 247, 0.12),
-      0 0 0 3px rgba(168, 85, 247, 0.18),
-      0 0 16px rgba(168, 85, 247, 0.3);
-  }
-  50% {
-    box-shadow:
-      inset 0 0 12px rgba(168, 85, 247, 0.22),
-      0 0 0 5px rgba(168, 85, 247, 0.28),
-      0 0 28px rgba(168, 85, 247, 0.52);
-  }
-}
-
-.dag-head-glow-violet {
-  animation: dag-head-pulse-violet 2.8s ease-in-out infinite;
-}
-
 /* Dashboard animated background orbs */
 @keyframes bg-drift {
   0%   { transform: translate(0, 0) scale(1); }
@@ -650,14 +648,229 @@ textarea {
   .git-it-loading-letter,
   .git-it-loading-meter,
   .git-it-loading-grid,
-  .learning-path::before,
-  .learning-path-card::before {
-    animation: none;
-    transform: none;
+  .learning-branch-spine-fill {
+    transition: none;
   }
+}
 
-  .learning-path::before,
-  .learning-path-card::before {
-    opacity: 1;
+/* ─── Gamified module route v2 ───────────────────────────────────────────── */
+.module-quest-hero {
+  background:
+    linear-gradient(135deg, hsla(var(--card) / 0.78), hsla(var(--background) / 0.72)),
+    radial-gradient(circle at 16% 12%, hsla(var(--primary) / 0.18), transparent 30%),
+    radial-gradient(circle at 88% 10%, hsla(var(--accent) / 0.14), transparent 28%);
+}
+
+.module-quest-hero-glow {
+  position: absolute;
+  inset: -35%;
+  background:
+    radial-gradient(circle at 20% 40%, hsla(var(--primary) / 0.12), transparent 24%),
+    radial-gradient(circle at 70% 20%, hsla(var(--accent) / 0.1), transparent 28%);
+  filter: blur(12px);
+  animation: quest-hero-drift 9s ease-in-out infinite alternate;
+}
+
+@keyframes quest-hero-drift {
+  from { transform: translate3d(-1.5rem, -0.6rem, 0) rotate(0deg); }
+  to { transform: translate3d(1.5rem, 0.8rem, 0) rotate(3deg); }
+}
+
+.foundation-gate {
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.foundation-gate:hover {
+  transform: translateY(-2px);
+  border-color: hsla(var(--primary) / 0.28);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.2), 0 0 24px hsla(var(--primary) / 0.06);
+}
+
+.learning-branch {
+  min-height: 12rem;
+}
+
+.learning-branch-spine,
+.learning-branch-spine-fill {
+  width: 3px;
+}
+
+.learning-branch-spine {
+  background:
+    repeating-linear-gradient(to bottom, hsla(var(--primary) / 0.18) 0 0.75rem, transparent 0.75rem 1.25rem),
+    linear-gradient(to bottom, hsla(var(--primary) / 0.1), hsla(var(--accent) / 0.16), hsla(var(--primary) / 0.1));
+}
+
+.learning-branch-spine-fill {
+  background: linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--primary)));
+  box-shadow: 0 0 18px hsla(var(--primary) / 0.35), 0 0 34px hsla(var(--accent) / 0.18);
+}
+
+.learning-branch-node,
+.learning-branch-start,
+.learning-branch-finish {
+  background:
+    radial-gradient(circle at 35% 25%, hsla(var(--primary) / 0.2), transparent 42%),
+    hsl(var(--background));
+}
+
+.learning-branch-node {
+  width: 3.6rem;
+  height: 3.6rem;
+  border-width: 1.5px;
+}
+
+.learning-branch-finish {
+  position: absolute;
+  left: 50%;
+  bottom: -0.8rem;
+  z-index: 2;
+  display: grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  transform: translateX(-50%);
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid hsla(var(--accent) / 0.38);
+  color: hsl(var(--accent));
+  box-shadow: 0 0 0 7px hsla(var(--accent) / 0.08), 0 0 22px hsla(var(--accent) / 0.22);
+}
+
+.module-route-label {
+  border-radius: 1.45rem;
+  background:
+    linear-gradient(135deg, hsla(var(--card) / 0.88), hsla(var(--background) / 0.7)),
+    radial-gradient(circle at 0% 0%, var(--module-glow, hsla(var(--primary) / 0.16)), transparent 42%);
+  box-shadow: 0 22px 62px rgba(0, 0, 0, 0.22), inset 0 1px 0 hsla(var(--foreground) / 0.05);
+}
+
+.command-adventure-card,
+.git-it-challenge-zone,
+.challenge-tower-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.command-adventure-card::before,
+.git-it-challenge-zone::before,
+.challenge-tower-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.command-adventure-card::before {
+  background:
+    radial-gradient(circle at 12% 0%, hsla(var(--primary) / 0.16), transparent 34%),
+    radial-gradient(circle at 100% 30%, hsla(var(--accent) / 0.12), transparent 30%);
+}
+
+.command-adventure-emblem,
+.challenge-tower-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 1.2rem;
+  border: 1px solid hsla(var(--primary) / 0.28);
+  background: hsla(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+  box-shadow: 0 0 0 6px hsla(var(--primary) / 0.04);
+}
+
+.command-adventure-emblem {
+  width: 3.25rem;
+  height: 3.25rem;
+}
+
+.command-adventure-progress {
+  border-radius: 1rem;
+  border: 1px solid hsla(var(--primary) / 0.12);
+  background: hsla(var(--background) / 0.34);
+  padding: 0.7rem;
+}
+
+.git-it-challenge-zone::before {
+  background:
+    radial-gradient(circle at 8% 0%, hsla(var(--accent) / 0.12), transparent 30%),
+    linear-gradient(180deg, hsla(var(--card) / 0.1), transparent);
+}
+
+.challenge-tower-card {
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.18), inset 0 1px 0 hsla(var(--foreground) / 0.04);
+}
+
+.challenge-tower-card::before {
+  background:
+    linear-gradient(135deg, hsla(var(--primary) / 0.07), transparent 34%),
+    radial-gradient(circle at 100% 0%, hsla(var(--accent) / 0.1), transparent 28%);
+}
+
+.challenge-tower-icon {
+  width: 2.8rem;
+  height: 2.8rem;
+  border-color: hsla(var(--accent) / 0.28);
+  background: hsla(var(--accent) / 0.1);
+  color: hsl(var(--accent));
+  box-shadow: 0 0 0 6px hsla(var(--accent) / 0.04);
+}
+
+.challenge-tower-floors {
+  position: relative;
+}
+
+.challenge-tower-floors::before {
+  content: '';
+  position: absolute;
+  left: 1rem;
+  top: 0.8rem;
+  bottom: 0.8rem;
+  width: 2px;
+  border-radius: 999px;
+  background: linear-gradient(to bottom, hsla(var(--primary) / 0.28), hsla(var(--accent) / 0.18));
+}
+
+.challenge-floor {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.challenge-floor:hover {
+  transform: translateX(2px);
+  border-color: hsla(var(--primary) / 0.26);
+  background: hsla(var(--card) / 0.46);
+}
+
+.challenge-floor-dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid hsla(var(--primary) / 0.32);
+  background: hsl(var(--background));
+  color: hsl(var(--primary));
+  box-shadow: 0 0 0 5px hsla(var(--background) / 0.88);
+}
+
+.challenge-floor-dot-locked {
+  border-color: hsla(var(--muted-foreground) / 0.22);
+  color: hsl(var(--muted-foreground));
+}
+
+@media (max-width: 1023px) {
+  .learning-branch-finish {
+    left: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .module-quest-hero-glow {
+    animation: none;
   }
 }

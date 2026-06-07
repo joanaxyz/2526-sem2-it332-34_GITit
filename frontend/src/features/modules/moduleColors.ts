@@ -6,45 +6,31 @@ export type ModuleAccent = {
   glowRgba: string
 }
 
-export const MODULE_ACCENTS: Record<number, ModuleAccent> = {
-  1: {
-    color: '#3B82F6',
-    gradientTo: '#1D4ED8',
-    borderRgba: 'rgba(59, 130, 246, 0.35)',
-    borderHoverRgba: 'rgba(59, 130, 246, 0.7)',
-    glowRgba: 'rgba(59, 130, 246, 0.3)',
-  },
-  2: {
-    color: '#00D4AA',
-    gradientTo: '#00A896',
-    borderRgba: 'rgba(0, 212, 170, 0.35)',
-    borderHoverRgba: 'rgba(0, 212, 170, 0.7)',
-    glowRgba: 'rgba(0, 212, 170, 0.3)',
-  },
-  3: {
-    color: '#38BDF8',
-    gradientTo: '#0284C7',
-    borderRgba: 'rgba(56, 189, 248, 0.35)',
-    borderHoverRgba: 'rgba(56, 189, 248, 0.7)',
-    glowRgba: 'rgba(56, 189, 248, 0.3)',
-  },
-  4: {
-    color: '#A78BFA',
-    gradientTo: '#7C3AED',
-    borderRgba: 'rgba(167, 139, 250, 0.35)',
-    borderHoverRgba: 'rgba(167, 139, 250, 0.7)',
-    glowRgba: 'rgba(167, 139, 250, 0.3)',
-  },
-  5: {
-    color: '#FBBF24',
-    gradientTo: '#D97706',
-    borderRgba: 'rgba(251, 191, 36, 0.35)',
-    borderHoverRgba: 'rgba(251, 191, 36, 0.7)',
-    glowRgba: 'rgba(251, 191, 36, 0.22)',
-  },
+const BLUE: ModuleAccent = {
+  color: '#00B4D8',
+  gradientTo: '#0077B6',
+  borderRgba: 'rgba(0, 180, 216, 0.32)',
+  borderHoverRgba: 'rgba(0, 180, 216, 0.68)',
+  glowRgba: 'rgba(0, 180, 216, 0.22)',
 }
 
-const FALLBACK_ACCENT = MODULE_ACCENTS[1]
+const TEAL: ModuleAccent = {
+  color: '#00F5D4',
+  gradientTo: '#00A896',
+  borderRgba: 'rgba(0, 245, 212, 0.32)',
+  borderHoverRgba: 'rgba(0, 245, 212, 0.68)',
+  glowRgba: 'rgba(0, 245, 212, 0.22)',
+}
+
+export const MODULE_ACCENTS: Record<number, ModuleAccent> = {
+  1: BLUE,
+  2: TEAL,
+  3: BLUE,
+  4: TEAL,
+  5: BLUE,
+}
+
+const FALLBACK_ACCENT = BLUE
 
 export function getModuleAccent(moduleNumber: number): ModuleAccent {
   return MODULE_ACCENTS[moduleNumber] ?? FALLBACK_ACCENT

@@ -1,8 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import type { RepositorySnapshot, PracticeSession } from '@/features/practice/types'
-import { ExpectedStatePanel } from './ExpectedStatePanel'
+import type { RepositorySnapshot } from '@/features/practice/types'
 import { graphLayoutSignature, LiveDagPanel } from './LiveDagPanel'
 
 const snapshot: RepositorySnapshot = {
@@ -75,61 +74,14 @@ describe('LiveDagPanel', () => {
     expect(screen.getByText(/modified src\/form\.js/i)).toBeInTheDocument()
     expect(screen.getByText(/src\/form\.js @ form-validation-v2/i)).toBeInTheDocument()
   })
-})
 
-describe('ExpectedStatePanel', () => {
-  afterEach(() => cleanup())
+  it('keeps repository metadata inside the diagram panel', () => {
+    render(<LiveDagPanel title="Target DAG" snapshot={snapshot} showRepositoryDetails />)
 
-  it('renders the expected state with the shared repository diagram', () => {
-    const session = {
-      scaffolding: { expected_state: true, live_dag: true, contextual_feedback: true },
-      expected_state: snapshot,
-    } as unknown as PracticeSession
-
-    render(<ExpectedStatePanel session={session} />)
-
-    expect(screen.getByText('Expected-State Diagram')).toBeInTheDocument()
-    fireEvent.focus(screen.getByTitle(/commit c2/i))
-    expect(screen.getByText('Message: Update form validation')).toBeInTheDocument()
-  })
-
-  it('renders command drill target state as a lens instead of hidden expected state copy', () => {
-    const session = {
-      practice_kind: 'command_drill',
-      scaffolding: { expected_state: true, target_state: true, live_dag: false, state_lens: true, contextual_feedback: true },
-      expected_state: snapshot,
-      visualization: {
-        target_state_lens: {
-          working_directory: [],
-          staging_area: [{ path: 'src/form.js', status: 'modified', tokens: [] }],
-          local_repository: { commit_count: 2, head: { type: 'branch', name: 'main' } },
-          branch_pointers: { main: 'c2' },
-          remote_tracking_branches: {},
-          remotes: {},
-          conflicts: [],
-        },
-        state_lens: {},
-        command_effect_delta: {},
-        commit_dag: {},
-      },
-    } as unknown as PracticeSession
-
-    render(<ExpectedStatePanel session={session} />)
-
-    expect(screen.getByText('Target State Lens')).toBeInTheDocument()
-    expect(screen.getByText(/src\/form\.js - modified/i)).toBeInTheDocument()
-    expect(screen.queryByText('Expected state hidden')).not.toBeInTheDocument()
-  })
-
-  it('keeps hard workflow expected state hidden', () => {
-    const session = {
-      practice_kind: 'workflow_scenario',
-      scaffolding: { expected_state: false, live_dag: true, state_lens: true, contextual_feedback: false },
-      expected_state: null,
-    } as unknown as PracticeSession
-
-    render(<ExpectedStatePanel session={session} />)
-
-    expect(screen.getByText('Expected state hidden')).toBeInTheDocument()
+    expect(screen.getByText('Target DAG')).toBeInTheDocument()
+    expect(screen.getByText('Staged:')).toBeInTheDocument()
+    expect(screen.getByText('Working tree:')).toBeInTheDocument()
+    expect(screen.getByText('Remote branches:')).toBeInTheDocument()
+    expect(screen.getByTitle(/Staged: src\/form\.js/)).toBeInTheDocument()
   })
 })

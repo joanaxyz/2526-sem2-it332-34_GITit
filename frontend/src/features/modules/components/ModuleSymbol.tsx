@@ -1,4 +1,4 @@
-import { BookOpen, FolderOpen, GitBranch, GitMerge, LifeBuoy, type LucideIcon } from 'lucide-react'
+import { BookOpen, GitBranch, GitCommitHorizontal, GitMerge, History, LifeBuoy, PackageOpen, Radar, Route, Server, type LucideIcon } from 'lucide-react'
 
 import type { LearningModule } from '@/features/modules/types'
 import { cn } from '@/shared/utils/cn'
@@ -9,11 +9,15 @@ type ModuleSymbolConfig = {
 }
 
 const MODULE_SYMBOLS: Record<string, ModuleSymbolConfig> = {
-  'local-foundations': { icon: FolderOpen, shortLabel: 'Local' },
-  'branching-navigation': { icon: GitBranch, shortLabel: 'Branch' },
-  'collaboration-integration': { icon: GitMerge, shortLabel: 'Merge' },
-  'recovery-repair': { icon: LifeBuoy, shortLabel: 'Recover' },
-  'advanced-recovery-history': { icon: LifeBuoy, shortLabel: 'Recover' },
+  'creating-inspecting-repositories': { icon: Radar, shortLabel: 'Scout' },
+  'tracking-changes-snapshots': { icon: GitCommitHorizontal, shortLabel: 'Stage' },
+  'branching-switching': { icon: GitBranch, shortLabel: 'Branch' },
+  'merging-conflicts': { icon: GitMerge, shortLabel: 'Merge' },
+  'undoing-recovery': { icon: LifeBuoy, shortLabel: 'Undo' },
+  'temporary-work-patches': { icon: PackageOpen, shortLabel: 'Patch' },
+  'remotes-collaboration': { icon: Server, shortLabel: 'Remote' },
+  'integrated-workflows': { icon: Route, shortLabel: 'Quest' },
+  'advanced-recovery-history': { icon: History, shortLabel: 'Recover' },
 }
 
 const FALLBACK_SYMBOL: ModuleSymbolConfig = { icon: BookOpen, shortLabel: 'Module' }

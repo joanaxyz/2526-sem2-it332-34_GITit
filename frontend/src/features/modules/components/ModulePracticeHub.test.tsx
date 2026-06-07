@@ -11,6 +11,28 @@ const mocks = vi.hoisted(() => ({
   startReviewSession: vi.fn(),
 }))
 
+vi.mock('motion/react', async () => {
+  const React = await import('react')
+  const createMotion = (tag: keyof HTMLElementTagNameMap) => {
+    const Component = ({ children, ...props }: Record<string, unknown> & { children?: React.ReactNode }) => {
+      const domProps = { ...props }
+      delete domProps.initial
+      delete domProps.whileInView
+      delete domProps.viewport
+      delete domProps.transition
+      return React.createElement(tag, domProps, children)
+    }
+    return Component
+  }
+  return {
+    motion: {
+      article: createMotion('article'),
+      section: createMotion('section'),
+    },
+    useInView: () => true,
+  }
+})
+
 vi.mock('@/features/scenarios/api/scenariosApi', () => ({
   scenariosApi: {
     moduleContent: mocks.moduleContent,
@@ -40,7 +62,6 @@ function renderHub() {
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
         <ModulePracticeHub
-          enabled
           module={{
             id: 2,
             slug: 'tracking-changes-snapshots',
@@ -64,7 +85,7 @@ describe('ModulePracticeHub', () => {
     vi.clearAllMocks()
   })
 
-  it('shows command adventure levels instead of public command labels or difficulty buttons', async () => {
+  it('shows one command adventure action instead of dumping every command level', async () => {
     mocks.moduleContent.mockImplementation((_moduleId: number, section: string) => {
       if (section === 'command_adventures') {
         return Promise.resolve({
@@ -158,20 +179,22 @@ describe('ModulePracticeHub', () => {
     renderHub()
 
     await waitFor(() => expect(screen.getByText('Preparing File Changes')).toBeInTheDocument())
-    const adventureSection = screen.getByText('Command Drill Adventure').closest('section')
+    const adventureSection = screen.getByText('Command Adventure').closest('section')
     expect(adventureSection).not.toBeNull()
 
     const adventure = within(adventureSection as HTMLElement)
-    expect(adventure.getByText('Level 1')).toBeInTheDocument()
-    expect(adventure.getByText('Level 2')).toBeInTheDocument()
+    expect(adventure.getByText('0/5')).toBeInTheDocument()
+    expect(adventure.getByRole('button', { name: /start/i })).toBeInTheDocument()
+    expect(adventure.queryByText('Level 1')).not.toBeInTheDocument()
+    expect(adventure.queryByText('Level 2')).not.toBeInTheDocument()
     expect(adventure.queryByText(/git add/i)).not.toBeInTheDocument()
     expect(adventure.queryByText(/easy/i)).not.toBeInTheDocument()
     expect(adventure.queryByText(/medium/i)).not.toBeInTheDocument()
     expect(adventure.queryByText(/hard/i)).not.toBeInTheDocument()
 
     expect(screen.getByText('Stage, Commit, Then Switch Branches')).toBeInTheDocument()
-    expect(screen.getByText('easy')).toBeInTheDocument()
-    expect(screen.getByText('medium')).toBeInTheDocument()
-    expect(screen.getByText('hard')).toBeInTheDocument()
+    expect(screen.getAllByText(/easy/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/medium/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/hard/i).length).toBeGreaterThan(0)
   })
 })

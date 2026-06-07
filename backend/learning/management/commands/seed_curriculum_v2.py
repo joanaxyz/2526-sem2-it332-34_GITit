@@ -353,12 +353,9 @@ class Command(BaseCommand):
         if not outcome.target_matched:
             errors.append(f"{label}: official solution does not satisfy evaluation_spec: {outcome.summary}")
 
-        visualization = RepositoryVisualizationService().snapshot(
-            final_state,
-            target_state=variant.target_state,
-        )
-        if visualization.get("schema_version") != 2 or not visualization.get("target_state_lens"):
-            errors.append(f"{label}: target state visualization is missing")
+        visualization = RepositoryVisualizationService().snapshot(final_state)
+        if visualization.get("schema_version") != 2 or "commit_dag" not in visualization:
+            errors.append(f"{label}: repository visualization is missing")
 
     def _problem_slug(self, variant: ProblemVariant) -> str:
         if variant.command_drill_id:

@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
+import { Gamepad2, GitBranch, Route } from 'lucide-react'
+import { motion } from 'motion/react'
 
 import { ModulePracticeHub } from '@/features/modules/components/ModulePracticeHub'
 import { ModuleSymbol } from '@/features/modules/components/ModuleSymbol'
@@ -9,41 +10,21 @@ import { ProgressBar } from '@/shared/components/ProgressBar'
 import { cn } from '@/shared/utils/cn'
 
 function StatusBadge({ progress }: { progress: number }) {
-  if (progress >= 100) {
-    return (
-      <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold leading-none text-emerald-400">
-        Completed
-      </span>
-    )
-  }
-  if (progress > 0) {
-    return (
-      <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold leading-none text-primary">
-        In Progress
-      </span>
-    )
-  }
+  const label = progress >= 100 ? 'Cleared' : progress > 0 ? 'Active' : 'Ready'
   return (
-    <span className="inline-flex items-center rounded-full border border-border/60 bg-transparent px-2 py-0.5 text-[10px] font-semibold leading-none text-muted-foreground/70">
-      Not Started
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] leading-none',
+        progress >= 100
+          ? 'border-primary/30 bg-primary/10 text-primary'
+          : progress > 0
+            ? 'border-accent/30 bg-accent/10 text-accent'
+            : 'border-border/70 bg-background/45 text-muted-foreground',
+      )}
+    >
+      {label}
     </span>
   )
-}
-
-function useApproachingViewport() {
-  const ref = useRef<HTMLElement | null>(null)
-  const [visible, setVisible] = useState(false)
-
-  useEffect(() => {
-    if (visible || !ref.current) return
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) setVisible(true)
-    }, { rootMargin: '420px' })
-    observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [visible])
-
-  return { ref, visible }
 }
 
 export function ModuleCard({
@@ -55,51 +36,88 @@ export function ModuleCard({
 }) {
   const accent = getModuleAccent(module.number)
   const progressValue = Math.round(module.practice_completion?.value ?? 0)
-  const { ref, visible } = useApproachingViewport()
   const side = index % 2 === 0 ? 'left' : 'right'
 
   return (
-    <article
-      ref={ref}
-      className={cn(
-        'learning-path-card relative w-full animate-fade-in-up rounded-lg border border-border bg-card/88 p-5 shadow-none backdrop-blur-sm',
-        side === 'right' && 'lg:ml-auto',
-      )}
-      style={{
-        '--module-color': accent.color,
-        '--module-border-rest': accent.borderRgba,
-        '--module-border-hover': accent.borderHoverRgba,
-        '--module-glow': accent.glowRgba,
-        animationDelay: `${index * 80}ms`,
-      } as CSSProperties}
+    <motion.article
+      className="learning-branch-row relative grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_5.5rem_minmax(0,1.25fr)]"
+      data-module-id={module.id}
+      initial={{ opacity: 0, y: 38, scale: 0.98 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ amount: 0.2, once: false, margin: '-10% 0px -10% 0px' }}
+      transition={{ duration: 0.58, ease: [0.16, 1, 0.3, 1] }}
+      style={
+        {
+          '--module-color': accent.color,
+          '--module-border-rest': accent.borderRgba,
+          '--module-border-hover': accent.borderHoverRgba,
+          '--module-glow': accent.glowRgba,
+        } as CSSProperties
+      }
     >
-      <div className="learning-path-node" />
-      <div className="grid gap-5">
-        <div className="grid w-full grid-cols-[3rem_minmax(0,1fr)] gap-4 text-left sm:grid-cols-[3.25rem_minmax(0,1fr)_minmax(10rem,13rem)]">
-          <ModuleSymbol module={module} />
+      <div className={cn('hidden lg:block', side === 'right' && 'lg:col-start-3')}>
+        <motion.div
+          className="module-route-label lg:sticky lg:top-24"
+          initial={{ opacity: 0, x: side === 'left' ? -24 : 24, rotate: side === 'left' ? -1.5 : 1.5 }}
+          whileInView={{ opacity: 1, x: 0, rotate: 0 }}
+          viewport={{ amount: 0.6, once: false }}
+          transition={{ duration: 0.48, delay: 0.06 }}
+        >
+          <ModuleSymbol module={module} className="size-14 rounded-2xl" />
           <div className="min-w-0">
-            <p className="font-mono text-xs font-bold" style={{ color: accent.color }}>
+            <p className="font-mono text-xs font-black uppercase tracking-[0.18em]" style={{ color: accent.color }}>
               Module {module.number}
             </p>
-            <h2 className="mt-1 text-xl font-extrabold leading-tight">{module.title}</h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{module.description}</p>
-          </div>
-          <div className="min-w-0 max-sm:col-span-2">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-bold uppercase tracking-normal text-muted-foreground">Overall progress</span>
-              <span className="font-mono text-xs" style={{ color: `${accent.color}B3` }}>{progressValue}%</span>
-            </div>
-            <ProgressBar value={progressValue} className="mt-2 h-2" glow fillAnimate fillFrom={accent.color} fillTo={accent.gradientTo} />
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <h2 className="mt-1 line-clamp-2 text-xl font-black leading-tight">{module.title}</h2>
+            <div className="mt-3 flex items-center gap-2">
               <StatusBadge progress={progressValue} />
-              <span className="font-mono text-[11px] text-muted-foreground">
-                {module.command_topic_count} levels / {module.workflow_scenario_count} workflows
-              </span>
+              <span className="font-mono text-xs text-muted-foreground">{progressValue}%</span>
+            </div>
+            <ProgressBar value={progressValue} className="mt-2 h-1.5" glow fillAnimate fillFrom={accent.color} fillTo={accent.gradientTo} />
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="learning-branch-track relative hidden items-center justify-center lg:flex lg:col-start-2">
+        <motion.div
+          className="learning-branch-node"
+          initial={{ scale: 0.6, opacity: 0 }}
+          whileInView={{ scale: 1, opacity: 1 }}
+          viewport={{ amount: 0.55, once: false }}
+          transition={{ duration: 0.42, type: 'spring', stiffness: 280, damping: 18 }}
+        >
+          <GitBranch className="size-5" />
+        </motion.div>
+        <motion.div
+          className={cn('learning-branch-connector', side === 'right' && 'learning-branch-connector-right')}
+          initial={{ scaleX: 0, opacity: 0 }}
+          whileInView={{ scaleX: 1, opacity: 1 }}
+          viewport={{ amount: 0.5, once: false }}
+          transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+        />
+      </div>
+
+      <div className={cn('lg:col-start-3', side === 'right' && 'lg:col-start-1 lg:row-start-1')}>
+        <div className="mb-3 flex items-start gap-3 rounded-[1.35rem] border border-border/70 bg-card/50 p-4 lg:hidden">
+          <ModuleSymbol module={module} />
+          <div className="min-w-0 flex-1">
+            <p className="font-mono text-xs font-black uppercase tracking-[0.16em] text-primary">Module {module.number}</p>
+            <h2 className="mt-1 text-xl font-black leading-tight">{module.title}</h2>
+            <div className="mt-3 flex items-center gap-3">
+              <ProgressBar value={progressValue} className="h-1.5 flex-1" glow />
+              <span className="font-mono text-xs text-muted-foreground">{progressValue}%</span>
             </div>
           </div>
         </div>
-        <ModulePracticeHub enabled={visible} module={module} />
+        <div className="mb-3 hidden items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground lg:flex">
+          <Route className="size-4 text-primary" />
+          <span>{module.command_topic_count} command levels</span>
+          <span className="text-border">/</span>
+          <Gamepad2 className="size-4 text-accent" />
+          <span>{module.workflow_scenario_count} challenges</span>
+        </div>
+        <ModulePracticeHub module={module} />
       </div>
-    </article>
+    </motion.article>
   )
 }
