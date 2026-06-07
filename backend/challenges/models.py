@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from adventures.models import VariantBase
 from common.constants import (
     DIFFICULTY_EASY,
     DIFFICULTY_HARD,
@@ -13,7 +14,6 @@ from common.constants import (
     SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
-from adventures.models import VariantBase
 
 
 class Challenge(models.Model):

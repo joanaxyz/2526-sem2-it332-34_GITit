@@ -1,17 +1,17 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from evaluation.compiler import compile_evaluation_spec
-from evaluation.engine import EvaluationEngine
+from adventures.models import AdventureProblem, AdventureVariant, CommandAdventure
+from challenges.models import Challenge, ChallengeLevel, ChallengeVariant
+from curriculum.curriculum_v2.adventures import COMMAND_DRILL_ADVENTURES
 from curriculum.curriculum_v2.command_topics import COMMAND_TOPICS
 from curriculum.curriculum_v2.drills import COMMAND_DRILLS
 from curriculum.curriculum_v2.foundations import FOUNDATIONS
 from curriculum.curriculum_v2.modules import MODULES
 from curriculum.curriculum_v2.workflows import WORKFLOW_SCENARIOS
-from curriculum.curriculum_v2.adventures import COMMAND_DRILL_ADVENTURES
-from adventures.models import AdventureProblem, AdventureVariant, CommandAdventure
-from challenges.models import Challenge, ChallengeLevel, ChallengeVariant
 from curriculum.models import CommandForm, CommandSkill, ConceptPage, Storey
+from evaluation.compiler import compile_evaluation_spec
+from evaluation.engine import EvaluationEngine
 from practice.builders import StaticProblemVariantBuilder
 from practice.visualization import RepositoryVisualizationService
 from simulator.services import RepositoryStateSimulator

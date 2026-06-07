@@ -276,22 +276,6 @@ textarea {
   50%       { text-shadow: 0 0 28px rgba(0, 245, 212, 0.75), 0 0 56px rgba(0, 180, 216, 0.35); }
 }
 
-@keyframes git-it-loading-letter-wave {
-  0%, 100% {
-    color: hsl(var(--primary));
-    text-shadow: 0 0 10px rgba(0, 245, 212, 0.35), 0 0 22px rgba(0, 180, 216, 0.18);
-    transform: translateY(0);
-  }
-  35% {
-    color: hsl(var(--foreground));
-    text-shadow: 0 0 16px rgba(0, 245, 212, 0.8), 0 0 34px rgba(0, 180, 216, 0.36);
-    transform: translateY(-0.42rem);
-  }
-  62% {
-    transform: translateY(0.08rem);
-  }
-}
-
 @keyframes git-it-loading-meter-sweep {
   0% {
     transform: translateX(-115%) scaleX(0.58);
@@ -313,12 +297,6 @@ textarea {
   }
 }
 
-.git-it-loading-letter {
-  animation: git-it-loading-letter-wave 1.36s ease-in-out infinite;
-  display: inline-block;
-  transform-origin: center bottom;
-}
-
 .git-it-loading-meter {
   animation: git-it-loading-meter-sweep 1.5s ease-in-out infinite;
   box-shadow: 0 0 16px rgba(0, 245, 212, 0.58);
@@ -333,6 +311,180 @@ textarea {
   background-size: 28px 28px;
   mask-image: linear-gradient(to bottom, transparent, black 28%, black 72%, transparent);
   animation: git-it-loading-grid-drift 5.5s linear infinite;
+}
+
+/* GIT-IT fantasy-tower loader — neon medieval keep with clouds + dragons */
+.git-it-tower {
+  --t-cyan: 45, 245, 255;
+  --t-blue: 53, 143, 255;
+  --t-purple: 176, 74, 255;
+  width: 9rem;
+}
+
+.git-it-tower--md {
+  width: 9rem;
+}
+
+.git-it-tower--lg {
+  width: 12rem;
+}
+
+.git-it-tower-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.45));
+}
+
+/* Stonework */
+.git-it-stone {
+  fill: rgba(1, 8, 22, 0.62);
+  stroke: rgba(var(--t-cyan), 0.55);
+  stroke-width: 1.1;
+}
+
+.git-it-roof {
+  fill: rgba(6, 4, 28, 0.66);
+  stroke: rgba(var(--t-cyan), 0.6);
+  stroke-width: 1.1;
+  stroke-linejoin: round;
+}
+
+.git-it-chain {
+  stroke: rgba(var(--t-cyan), 0.78);
+  stroke-width: 1.4;
+  stroke-dasharray: 2 2;
+}
+
+.git-it-course line {
+  stroke: rgba(var(--t-cyan), 0.18);
+  stroke-width: 1;
+}
+
+.git-it-keep-ground {
+  fill: rgba(var(--t-blue), 0.18);
+}
+
+.git-it-door {
+  fill: rgba(2, 10, 30, 0.9);
+  stroke: rgba(var(--t-cyan), 0.4);
+  stroke-width: 1;
+}
+
+/* Lit windows — soft flicker */
+.git-it-window {
+  fill: rgba(var(--t-cyan), 0.85);
+  filter: drop-shadow(0 0 4px rgba(var(--t-cyan), 0.7));
+  animation: git-it-window-glow 2.6s ease-in-out infinite;
+}
+
+/* Flag on the keep */
+.git-it-flagpole {
+  stroke: rgba(var(--t-cyan), 0.85);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+
+.git-it-flag {
+  fill: rgba(var(--t-cyan), 0.55);
+  stroke: rgba(var(--t-cyan), 0.8);
+  stroke-width: 0.6;
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: git-it-flag-wave 2.6s ease-in-out infinite;
+}
+
+/* Construction scan sweeping up the body */
+.git-it-tower-scan {
+  fill: rgba(var(--t-cyan), 0.4);
+  filter: drop-shadow(0 0 6px rgba(var(--t-cyan), 0.55));
+  animation: git-it-tower-scan-rise 2.4s ease-in-out infinite;
+}
+
+/* Drifting clouds */
+.git-it-cloud {
+  fill: rgba(var(--t-cyan), 0.1);
+}
+
+.git-it-cloud--a {
+  animation: git-it-cloud-a 13s linear infinite;
+}
+
+.git-it-cloud--b {
+  fill: rgba(var(--t-blue), 0.1);
+  animation: git-it-cloud-b 18s linear infinite;
+}
+
+.git-it-cloud--c {
+  animation: git-it-cloud-c 16s linear infinite;
+}
+
+/* Dragons — outer group flies, inner path flaps */
+.git-it-dragon--a {
+  animation: git-it-dragon-a 9s ease-in-out infinite;
+}
+
+.git-it-dragon--b {
+  animation: git-it-dragon-b 11s ease-in-out infinite;
+}
+
+.git-it-dragon-body {
+  fill: rgba(8, 6, 26, 0.92);
+  stroke: rgba(var(--t-purple), 0.7);
+  stroke-width: 0.6;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: git-it-dragon-flap 0.5s ease-in-out infinite;
+}
+
+@keyframes git-it-window-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes git-it-flag-wave {
+  0%, 100% { transform: skewY(0deg) scaleX(1); }
+  50% { transform: skewY(-7deg) scaleX(1.05); }
+}
+
+@keyframes git-it-tower-scan-rise {
+  0% { transform: translateY(70px); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(-2px); opacity: 0; }
+}
+
+@keyframes git-it-cloud-a {
+  from { transform: translate(-48px, 30px); }
+  to { transform: translate(170px, 30px); }
+}
+
+@keyframes git-it-cloud-b {
+  from { transform: translate(170px, 58px) scale(0.7); }
+  to { transform: translate(-60px, 58px) scale(0.7); }
+}
+
+@keyframes git-it-cloud-c {
+  from { transform: translate(-50px, 92px) scale(0.85); }
+  to { transform: translate(170px, 92px) scale(0.85); }
+}
+
+@keyframes git-it-dragon-a {
+  0% { transform: translate(-26px, 30px) scale(0.9); }
+  50% { transform: translate(70px, 18px) scale(0.9); }
+  100% { transform: translate(168px, 34px) scale(0.9); }
+}
+
+@keyframes git-it-dragon-b {
+  0% { transform: translate(168px, 50px) scale(0.7) scaleX(-1); }
+  50% { transform: translate(74px, 40px) scale(0.7) scaleX(-1); }
+  100% { transform: translate(-26px, 56px) scale(0.7) scaleX(-1); }
+}
+
+@keyframes git-it-dragon-flap {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.62); }
 }
 
 /* Aurora utility classes */
@@ -391,6 +543,26 @@ textarea {
   box-shadow: 0 0 10px rgba(0, 245, 212, 0.65), 0 0 20px rgba(0, 180, 216, 0.35);
 }
 
+/* Progress landmark checkpoints */
+.progress-landmark {
+  position: absolute;
+  top: 50%;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 1.5px;
+  border: 1px solid rgba(0, 245, 212, 0.35);
+  background: hsl(var(--background));
+  transform: translate(-50%, -50%) rotate(45deg);
+  box-shadow: 0 0 0 2px hsl(var(--background));
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.progress-landmark[data-reached='true'] {
+  border-color: rgba(0, 245, 212, 0.9);
+  background: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 10px rgba(0, 245, 212, 0.7);
+}
+
 /* Tower page */
 .tower-page-shell {
   position: relative;
@@ -400,34 +572,135 @@ textarea {
   padding: clamp(1rem, 2vw, 1.5rem) 0 2.5rem;
 }
 
-.tower-page-shell::after {
-  content: '';
-  position: absolute;
-  inset-inline: -4rem;
-  bottom: -1px;
-  height: 11rem;
+.tower-sky {
+  position: fixed;
+  inset: 0;
   pointer-events: none;
-  background:
-    linear-gradient(145deg, transparent 0 14%, rgba(2, 9, 26, 0.92) 14.5% 46%, transparent 46.5%),
-    linear-gradient(32deg, transparent 0 26%, rgba(3, 13, 34, 0.9) 26.5% 57%, transparent 57.5%),
-    linear-gradient(to top, rgba(6, 3, 35, 0.85), transparent 72%);
-  opacity: 0.78;
+  overflow: hidden;
   z-index: -1;
+  background:
+    radial-gradient(120% 80% at 78% 6%, rgba(70, 96, 168, 0.32), transparent 52%),
+    radial-gradient(140% 95% at 12% 4%, rgba(96, 58, 196, 0.22), transparent 48%),
+    linear-gradient(to bottom, #05081d 0%, #0a1030 30%, #111a44 58%, #1a2350 78%, #243066 100%);
 }
 
-.tower-sky {
+/* ── Moon ── */
+.tower-moon {
   position: absolute;
-  inset: -5rem -2rem 0;
-  pointer-events: none;
+  top: 15%;
+  left: 12%;
+  width: 12rem;
+  height: 12rem;
+  border-radius: 50%;
+  will-change: transform;
+  background: radial-gradient(circle at 36% 34%, #f9fbff, #dde6f8 50%, #b7c4e3 73%, #94a3c9);
+  box-shadow:
+    0 0 78px rgba(196, 218, 255, 0.55),
+    0 0 190px rgba(126, 166, 255, 0.34),
+    inset -18px -14px 38px rgba(60, 80, 132, 0.52);
+}
+
+.tower-moon-crater {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(120, 134, 172, 0.45);
+  box-shadow: inset 1px 1px 2px rgba(60, 74, 112, 0.6);
+}
+
+.tower-moon-crater--a { width: 1.05rem; height: 1.05rem; top: 28%; left: 30%; }
+.tower-moon-crater--b { width: 0.7rem; height: 0.7rem; top: 55%; left: 58%; }
+.tower-moon-crater--c { width: 0.5rem; height: 0.5rem; top: 38%; left: 64%; }
+
+/* ── Stars (hand-scattered so they never read as a grid) ── */
+.tower-starfield {
+  position: absolute;
+  inset: -10% 0 30%;
+  background-repeat: no-repeat;
+  will-change: transform;
+}
+
+.tower-starfield--far {
   background-image:
-    radial-gradient(circle, rgba(45, 245, 255, 0.72) 0 1px, transparent 1.5px),
-    radial-gradient(circle, rgba(88, 141, 255, 0.54) 0 1px, transparent 1.5px),
-    linear-gradient(to bottom, rgba(0, 180, 216, 0.08), transparent 42%, rgba(94, 58, 255, 0.16));
-  background-position: 8% 18%, 60% 8%, 0 0;
-  background-size: 170px 145px, 230px 205px, 100% 100%;
-  mask-image: linear-gradient(to bottom, black, black 78%, transparent);
-  opacity: 0.62;
-  z-index: -1;
+    radial-gradient(1px 1px at 6% 12%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 17% 33%, rgba(198, 224, 255, 0.7), transparent),
+    radial-gradient(1.2px 1.2px at 23% 8%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1px 1px at 31% 22%, rgba(210, 230, 255, 0.65), transparent),
+    radial-gradient(1px 1px at 39% 47%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1.3px 1.3px at 47% 15%, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1px 1px at 53% 38%, rgba(190, 220, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 62% 27%, rgba(255, 255, 255, 0.78), transparent),
+    radial-gradient(1.2px 1.2px at 69% 9%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1px 1px at 74% 44%, rgba(205, 228, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 83% 19%, rgba(255, 255, 255, 0.72), transparent),
+    radial-gradient(1.2px 1.2px at 88% 36%, rgba(255, 255, 255, 0.82), transparent),
+    radial-gradient(1px 1px at 94% 24%, rgba(200, 224, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 12% 52%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1px 1px at 44% 58%, rgba(210, 230, 255, 0.5), transparent);
+  animation: tower-twinkle 5.5s ease-in-out infinite;
+}
+
+.tower-starfield--near {
+  background-image:
+    radial-gradient(1.6px 1.6px at 9% 18%, #ffffff, transparent),
+    radial-gradient(2px 2px at 28% 12%, #eaf3ff, transparent),
+    radial-gradient(1.6px 1.6px at 41% 30%, #ffffff, transparent),
+    radial-gradient(1.8px 1.8px at 57% 9%, #ffffff, transparent),
+    radial-gradient(2px 2px at 66% 34%, #dcebff, transparent),
+    radial-gradient(1.6px 1.6px at 79% 14%, #ffffff, transparent),
+    radial-gradient(1.8px 1.8px at 91% 28%, #ffffff, transparent),
+    radial-gradient(1.6px 1.6px at 20% 42%, #eaf3ff, transparent),
+    radial-gradient(1.8px 1.8px at 50% 48%, #ffffff, transparent),
+    radial-gradient(1.6px 1.6px at 85% 46%, #ffffff, transparent);
+  animation: tower-twinkle 3.8s ease-in-out 0.9s infinite;
+}
+
+/* ── Clouds: puffy silhouettes spread down the WHOLE tower (count + positions are
+      generated in StoreyMapPage and scale with the storey count). The field is as
+      tall as the tower and scrolls with it; each depth layer adds a scroll-linked
+      parallax offset that reverses on scroll-up. Top & bottom are masked so edge
+      clouds dissolve instead of being sliced. ── */
+.tower-cloudfield {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 2.5%, #000 97.5%, transparent 100%);
+          mask-image: linear-gradient(to bottom, transparent 0, #000 2.5%, #000 97.5%, transparent 100%);
+}
+
+/* Far/mid sit behind the tower (z 0); near drifts in front of it (z 2, grid is z 1). */
+.tower-cloudfield--back { z-index: 0; }
+.tower-cloudfield--front { z-index: 2; }
+
+.tower-cloud-layer {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.tower-cloud {
+  position: absolute;
+  height: auto;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 6px 14px rgba(4, 8, 26, 0.35));
+}
+
+.tower-cloud[data-layer='far'] {
+  filter: drop-shadow(0 4px 12px rgba(4, 8, 26, 0.28)) blur(1.4px);
+}
+
+.tower-cloud[data-layer='near'] {
+  filter: drop-shadow(0 9px 20px rgba(4, 8, 26, 0.42));
+}
+
+.tower-cloud path {
+  fill: #d2def5;
+  stroke: rgba(255, 255, 255, 0.24);
+  stroke-width: 0.5;
+}
+
+@keyframes tower-twinkle {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
 }
 
 .tower-stage-grid {
@@ -673,7 +946,7 @@ textarea {
   position: relative;
   justify-self: center;
   width: min(100%, 36rem);
-  padding-top: 4.9rem;
+  padding-top: 2.4rem;
 }
 
 .learning-tower-continuation {
@@ -681,21 +954,32 @@ textarea {
   padding-top: 0;
 }
 
+/* ── Tower peak: pointed roof + waving flag + crenellated crown. Sits at the very
+      TOP of the (upright) tower — first storey only. ── */
+.tower-peak {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 5rem; /* headroom for the flag standing above the roof */
+}
+
 .tower-flag-wrap {
   position: absolute;
   left: 50%;
   top: 0;
-  width: 8rem;
-  height: 5.4rem;
+  width: 7rem;
+  height: 5rem;
   transform: translateX(-50%);
 }
 
 .tower-flag-pole {
   position: absolute;
-  left: 2.35rem;
+  left: 50%;
   bottom: 0;
   width: 3px;
-  height: 5.3rem;
+  height: 5rem;
+  margin-left: -1.5px;
   border-radius: 999px;
   background: rgb(var(--tower-cyan));
   box-shadow: 0 0 16px rgba(var(--tower-cyan), 0.7);
@@ -703,42 +987,87 @@ textarea {
 
 .tower-flag {
   position: absolute;
-  left: 2.55rem;
-  top: 0.7rem;
-  width: 5.15rem;
-  height: 2.05rem;
+  left: 50%;
+  top: 0.3rem;
+  width: 4.4rem;
+  height: 1.95rem;
   border: 1px solid rgba(var(--tower-cyan), 0.82);
   border-left-width: 2px;
-  background: linear-gradient(90deg, rgba(0, 245, 212, 0.2), rgba(0, 180, 216, 0.08));
-  clip-path: polygon(0 0, 100% 18%, 70% 50%, 100% 82%, 0 100%);
+  background: linear-gradient(90deg, rgba(0, 245, 212, 0.26), rgba(0, 180, 216, 0.08));
+  clip-path: polygon(0 0, 100% 16%, 72% 50%, 100% 84%, 0 100%);
   filter: drop-shadow(0 0 13px rgba(var(--tower-cyan), 0.62));
-  animation: tower-flag-wave 4.8s ease-in-out infinite;
   transform-origin: left center;
+  animation: tower-flag-wave 4.4s ease-in-out infinite;
 }
 
-.tower-cap {
+/* Pointed roof crowning the tower. */
+.tower-peak-roof {
+  width: 7.5rem;
+  height: 3.4rem;
+  margin-bottom: -0.3rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.5);
+  border-bottom: none;
+  background:
+    linear-gradient(180deg, rgba(3, 30, 54, 0.82), rgba(1, 12, 28, 0.46)),
+    linear-gradient(90deg, rgba(0, 245, 212, 0.12), transparent 45%, rgba(0, 180, 216, 0.12));
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  filter: drop-shadow(0 -2px 14px rgba(var(--tower-cyan), 0.32));
+}
+
+/* Crenellated parapet that hands off into the shell. */
+.tower-crown {
   position: relative;
   display: flex;
   align-items: end;
   justify-content: space-around;
   width: 88%;
   max-width: 30.5rem;
-  height: 5.4rem;
+  height: 3.7rem;
   margin: 0 auto -0.35rem;
-  border: 1px solid rgba(var(--tower-cyan), 0.62);
-  border-bottom-color: rgba(var(--tower-cyan), 0.32);
+  border: 1px solid rgba(var(--tower-cyan), 0.6);
+  border-bottom-color: rgba(var(--tower-cyan), 0.3);
   background:
-    linear-gradient(180deg, rgba(2, 26, 48, 0.7), rgba(1, 10, 24, 0.38)),
+    linear-gradient(180deg, rgba(2, 26, 48, 0.7), rgba(1, 10, 24, 0.4)),
     linear-gradient(90deg, rgba(0, 245, 212, 0.1), transparent 42%, rgba(0, 180, 216, 0.12));
-  clip-path: polygon(0 32%, 12% 24%, 12% 0, 24% 0, 24% 22%, 44% 22%, 44% 0, 56% 0, 56% 22%, 76% 22%, 76% 0, 88% 0, 88% 24%, 100% 32%, 100% 78%, 90% 100%, 10% 100%, 0 78%);
-  box-shadow: 0 0 26px rgba(var(--tower-cyan), 0.28), inset 0 0 28px rgba(var(--tower-cyan), 0.08);
+  clip-path: polygon(0 26%, 12% 26%, 12% 0, 24% 0, 24% 26%, 44% 26%, 44% 0, 56% 0, 56% 26%, 76% 26%, 76% 0, 88% 0, 88% 26%, 100% 26%, 100% 100%, 0 100%);
+  box-shadow: 0 0 26px rgba(var(--tower-cyan), 0.26), inset 0 0 26px rgba(var(--tower-cyan), 0.08);
   animation: tower-neon-pulse 5.4s ease-in-out infinite;
 }
 
-.tower-cap span {
+.tower-crown span {
   width: 1px;
-  height: 76%;
+  height: 58%;
   background: rgba(var(--tower-cyan), 0.16);
+}
+
+/* ── Tower base: a widening brick plinth that grounds the tower — last storey only. ── */
+.tower-base {
+  position: relative;
+  width: 90%;
+  max-width: 31rem;
+  height: 4.4rem;
+  margin: -0.3rem auto 0;
+  border: 1px solid rgba(var(--tower-cyan), 0.5);
+  border-top: none;
+  background:
+    linear-gradient(180deg, rgba(2, 20, 42, 0.66), rgba(0, 6, 18, 0.5)),
+    repeating-linear-gradient(0deg, transparent 0 1rem, rgba(var(--tower-cyan), 0.06) 1rem 1.06rem),
+    repeating-linear-gradient(90deg, transparent 0 2.4rem, rgba(var(--tower-cyan), 0.05) 2.4rem 2.46rem);
+  clip-path: polygon(5% 0, 95% 0, 100% 100%, 0 100%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 26px rgba(var(--tower-blue), 0.2), inset 0 0 28px rgba(var(--tower-cyan), 0.06);
+}
+
+/* Soft ground glow the base rests on. */
+.tower-base-foot {
+  position: absolute;
+  left: 50%;
+  bottom: -0.55rem;
+  width: 116%;
+  height: 0.7rem;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(60% 100% at 50% 0%, rgba(var(--tower-cyan), 0.22), transparent 70%);
+  filter: blur(1px);
 }
 
 .tower-shell {
@@ -752,7 +1081,9 @@ textarea {
   border-top-color: rgba(var(--tower-cyan), 0.28);
   background:
     linear-gradient(90deg, rgba(2, 22, 44, 0.42), rgba(0, 0, 0, 0.08) 48%, rgba(2, 22, 44, 0.42)),
-    repeating-linear-gradient(90deg, transparent 0 3.3rem, rgba(var(--tower-cyan), 0.045) 3.35rem 3.42rem),
+    /* brick hint: horizontal mortar courses + vertical seams suggest masonry */
+    repeating-linear-gradient(0deg, transparent 0 1.55rem, rgba(var(--tower-cyan), 0.05) 1.55rem 1.62rem),
+    repeating-linear-gradient(90deg, transparent 0 2.6rem, rgba(var(--tower-cyan), 0.038) 2.6rem 2.67rem),
     rgba(1, 8, 22, 0.3);
   box-shadow:
     0 0 28px rgba(var(--tower-cyan), 0.22),
@@ -858,24 +1189,332 @@ textarea {
   line-height: 1.65;
 }
 
-.adventure-progress {
-  width: min(100%, 12.5rem);
-  margin: 1.25rem auto 1rem;
+/* Tower doors: block-framed fantasy gates that swing open on hover/focus. */
+.tower-door-mount {
+  margin-top: 1.35rem;
 }
 
-.adventure-progress-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.55rem;
-  color: hsl(var(--primary));
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  font-size: 0.75rem;
+.tower-door {
+  --door-rgb: var(--tower-purple);
+  --door-glow: 210, 149, 255;
+  --door-stone: 82, 42, 146;
+  --door-stone-hi: 230, 196, 255;
+  --door-shadow: 11, 6, 33;
+  --door-plank-a: 54, 22, 96;
+  --door-plank-b: 12, 7, 33;
+  --door-width: 5.05rem;
+  --door-height: 7.55rem;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tower-door[data-variant='adventure'] {
+  --door-rgb: var(--tower-cyan);
+  --door-glow: 0, 245, 212;
+  --door-stone: 8, 76, 96;
+  --door-stone-hi: 142, 253, 255;
+  --door-shadow: 1, 16, 33;
+  --door-plank-a: 7, 58, 75;
+  --door-plank-b: 2, 17, 38;
+  --door-width: 5.2rem;
+  --door-height: 8.05rem;
+}
+
+.tower-door:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.challenge-floor-zone.is-locked .tower-door:disabled {
+  opacity: 0.95;
+}
+
+.tower-door:focus-visible {
+  outline: none;
+}
+
+.tower-door-arch {
+  position: relative;
+  display: block;
+  width: var(--door-width);
+  height: var(--door-height);
+  overflow: visible;
+  perspective: 900px;
+  border-radius: 0.5rem 0.5rem 0.22rem 0.22rem;
+  background:
+    linear-gradient(180deg, rgba(var(--door-stone), 0.34), rgba(var(--door-shadow), 0.86)),
+    repeating-linear-gradient(0deg, transparent 0 0.82rem, rgba(var(--door-stone-hi), 0.12) 0.82rem 0.88rem),
+    repeating-linear-gradient(90deg, transparent 0 0.92rem, rgba(var(--door-stone-hi), 0.09) 0.92rem 0.98rem);
+  box-shadow:
+    0 0 0 1px rgba(var(--door-rgb), 0.2),
+    0 14px 30px rgba(0, 0, 0, 0.44),
+    inset 0 0 18px rgba(var(--door-rgb), 0.16);
+  transition: filter 0.5s ease, box-shadow 0.5s ease;
+}
+
+.tower-door-arch::after {
+  content: '';
+  position: absolute;
+  z-index: 5;
+  left: 0.32rem;
+  right: 0.32rem;
+  top: -0.42rem;
+  height: 0.62rem;
+  border: 1px solid rgba(var(--door-stone-hi), 0.56);
+  border-bottom: 0;
+  background:
+    linear-gradient(180deg, rgba(var(--door-stone-hi), 0.2), rgba(var(--door-stone), 0.26)),
+    repeating-linear-gradient(90deg, rgba(var(--door-stone), 0.46) 0 0.72rem, rgba(var(--door-shadow), 0.5) 0.72rem 0.82rem);
+  clip-path: polygon(0 42%, 18% 42%, 18% 0, 35% 0, 35% 42%, 65% 42%, 65% 0, 82% 0, 82% 42%, 100% 42%, 100% 100%, 0 100%);
+  box-shadow: 0 0 16px rgba(var(--door-glow), 0.18);
+  pointer-events: none;
+}
+
+.tower-door[data-variant='challenge'] .tower-door-arch::after {
+  left: 0.18rem;
+  right: 0.18rem;
+  top: -0.38rem;
+  height: 0.58rem;
+  clip-path: none;
+}
+
+.tower-door[data-variant='adventure'] .tower-door-arch {
+  border-radius: 2.55rem 2.55rem 0.22rem 0.22rem;
+}
+
+.tower-door[data-variant='adventure'] .tower-door-arch::after {
+  left: 0.36rem;
+  right: 0.36rem;
+  top: -0.28rem;
+  height: 0.56rem;
+  border-radius: 2rem 2rem 0.08rem 0.08rem;
+  clip-path: none;
+}
+
+/* Glowing room revealed behind the leaf. */
+.tower-door-interior {
+  position: absolute;
+  inset: 0.62rem 0.52rem 0.42rem;
+  border: 1px solid rgba(var(--door-glow), 0.28);
+  border-radius: 0.28rem 0.28rem 0.1rem 0.1rem;
+  background:
+    radial-gradient(120% 80% at 50% 100%, rgba(var(--door-glow), 0.6), transparent 70%),
+    linear-gradient(180deg, rgba(var(--door-rgb), 0.06), rgba(var(--door-glow), 0.24));
+  opacity: 0.22;
+  transition: opacity 0.6s ease;
+}
+
+.tower-door[data-variant='adventure'] .tower-door-interior,
+.tower-door[data-variant='adventure'] .tower-door-leaf {
+  border-radius: 2.18rem 2.18rem 0.1rem 0.1rem;
+  clip-path: none;
+}
+
+.tower-door-light {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 38%;
+  height: 80%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, transparent, rgba(var(--door-glow), 0.85));
+  filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+/* The swinging leaf, hinged on its left edge. */
+.tower-door-leaf {
+  position: absolute;
+  z-index: 2;
+  inset: 0.62rem 0.52rem 0.42rem;
+  transform-origin: left center;
+  transform: rotateY(0deg);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  border: 1px solid rgba(var(--door-stone-hi), 0.52);
+  border-radius: 0.28rem 0.28rem 0.1rem 0.1rem;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 0.78rem, rgba(var(--door-glow), 0.16) 0.78rem 0.84rem),
+    linear-gradient(180deg, rgba(var(--door-plank-a), 0.96), rgba(var(--door-plank-b), 0.98));
+  box-shadow: inset 0 0 16px rgba(var(--door-rgb), 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tower-door[data-variant='challenge'] .tower-door-leaf {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 1.12rem, rgba(var(--door-glow), 0.1) 1.12rem 1.18rem),
+    repeating-linear-gradient(90deg, transparent 0 0.96rem, rgba(var(--door-glow), 0.13) 0.96rem 1.02rem),
+    linear-gradient(180deg, rgba(var(--door-plank-a), 0.96), rgba(var(--door-plank-b), 0.98));
+}
+
+.tower-door-plank {
+  position: absolute;
+  top: 15%;
+  bottom: 9%;
+  width: 1px;
+  background: rgba(var(--door-glow), 0.22);
+}
+
+.tower-door-plank--left {
+  left: 38%;
+}
+
+.tower-door-plank--right {
+  left: 62%;
+}
+
+.tower-door-brace {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  height: 0.28rem;
+  border: 1px solid rgba(var(--door-stone-hi), 0.26);
+  background: linear-gradient(180deg, rgba(var(--door-rgb), 0.36), rgba(var(--door-shadow), 0.42));
+  box-shadow: 0 0 10px rgba(var(--door-rgb), 0.12);
+}
+
+.tower-door-brace--top {
+  top: 30%;
+}
+
+.tower-door-brace--bottom {
+  bottom: 25%;
+}
+
+.tower-door[data-variant='adventure'] .tower-door-brace {
+  height: 0.28rem;
+}
+
+.tower-door[data-variant='challenge'] .tower-door-brace {
+  left: 8%;
+  right: 8%;
+  height: 0.34rem;
+}
+
+.tower-door-handle {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  width: 0.42rem;
+  height: 0.42rem;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: rgba(var(--door-glow), 0.9);
+  box-shadow: 0 0 8px rgba(var(--door-glow), 0.85);
+}
+
+.tower-door[data-variant='challenge'] .tower-door-handle {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 2px;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.tower-door-frame {
+  position: absolute;
+  z-index: 4;
+  inset: -0.22rem -0.22rem -0.2rem;
+  padding: 0.56rem 0.48rem 0.34rem;
+  border: 1px solid rgba(var(--door-stone-hi), 0.66);
+  border-radius: 0.48rem 0.48rem 0.2rem 0.2rem;
+  background:
+    repeating-linear-gradient(0deg, rgba(var(--door-stone-hi), 0.08) 0 0.62rem, rgba(var(--door-shadow), 0.1) 0.62rem 1.24rem),
+    repeating-linear-gradient(90deg, rgba(var(--door-stone), 0.42) 0 0.78rem, rgba(var(--door-shadow), 0.32) 0.78rem 0.9rem);
+  box-shadow:
+    0 0 0 1px rgba(var(--door-rgb), 0.12),
+    0 0 18px rgba(var(--door-glow), 0.16),
+    inset 0 0 14px rgba(var(--door-rgb), 0.14);
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+}
+
+.tower-door[data-variant='challenge'] .tower-door-frame {
+  inset: -0.22rem -0.3rem -0.22rem;
+  padding: 0.48rem 0.64rem 0.34rem;
+  border-radius: 0.38rem 0.38rem 0.22rem 0.22rem;
+}
+
+.tower-door[data-variant='adventure'] .tower-door-frame {
+  inset: -0.24rem -0.24rem -0.2rem;
+  padding: 0.52rem 0.46rem 0.34rem;
+  border-radius: 2.78rem 2.78rem 0.2rem 0.2rem;
+}
+
+.tower-door-threshold {
+  position: absolute;
+  z-index: 5;
+  left: -0.32rem;
+  right: -0.32rem;
+  bottom: -0.31rem;
+  height: 0.42rem;
+  border: 1px solid rgba(var(--door-stone-hi), 0.5);
+  background:
+    linear-gradient(180deg, rgba(var(--door-stone-hi), 0.14), rgba(var(--door-stone), 0.32)),
+    repeating-linear-gradient(90deg, rgba(var(--door-stone), 0.4) 0 0.8rem, rgba(var(--door-shadow), 0.36) 0.8rem 0.92rem);
+  box-shadow: 0 0 16px rgba(var(--door-glow), 0.12);
+  pointer-events: none;
+}
+
+.tower-door-caption {
+  color: rgba(var(--door-glow), 0.62);
+  font-size: 0.72rem;
   font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  opacity: 0.72;
+  transition: opacity 0.4s ease, color 0.4s ease;
 }
 
-.tower-action-button {
-  margin-top: 0.2rem;
+.tower-door:not(:disabled):hover .tower-door-leaf,
+.tower-door:not(:disabled):focus-visible .tower-door-leaf {
+  transform: rotateY(-78deg);
+}
+
+.tower-door:not(:disabled):hover .tower-door-interior,
+.tower-door:not(:disabled):focus-visible .tower-door-interior,
+.tower-door:not(:disabled):hover .tower-door-light,
+.tower-door:not(:disabled):focus-visible .tower-door-light {
+  opacity: 1;
+}
+
+.tower-door:not(:disabled):hover .tower-door-arch,
+.tower-door:not(:disabled):focus-visible .tower-door-arch {
+  box-shadow:
+    0 0 0 1px rgba(var(--door-rgb), 0.3),
+    0 18px 40px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(var(--door-glow), 0.36),
+    inset 0 0 26px rgba(var(--door-rgb), 0.24);
+  filter: saturate(1.12);
+}
+
+.tower-door:not(:disabled):hover .tower-door-caption,
+.tower-door:not(:disabled):focus-visible .tower-door-caption {
+  color: rgb(var(--door-glow));
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tower-door-leaf {
+    transition: opacity 0.35s ease;
+  }
+
+  .tower-door:not(:disabled):hover .tower-door-leaf,
+  .tower-door:not(:disabled):focus-visible .tower-door-leaf {
+    transform: rotateY(0deg);
+    opacity: 0.12;
+  }
 }
 
 .tower-empty-state {
@@ -937,131 +1576,585 @@ textarea {
   padding-bottom: 2.2rem;
 }
 
+/* Challenge trials perch as carved gargoyle statues on tower stone. */
 .challenge-room-stack {
   display: grid;
-  gap: 1rem;
-  margin-top: 1.55rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.65rem;
+  width: min(100%, 19.5rem);
+  margin: 1.75rem auto 0;
+  justify-items: center;
 }
 
 .challenge-room {
-  position: relative;
-  display: grid;
-  grid-template-columns: 5.5rem minmax(0, 1fr);
-  min-height: 9.2rem;
-  overflow: hidden;
-  border: 1px solid rgba(var(--tower-purple), 0.52);
-  border-radius: 8px;
-  background:
-    linear-gradient(90deg, rgba(72, 31, 135, 0.18), rgba(5, 9, 28, 0.52)),
-    rgba(1, 4, 18, 0.38);
-  box-shadow: 0 0 22px rgba(var(--tower-purple), 0.18), inset 0 0 20px rgba(var(--tower-purple), 0.08);
+  width: 100%;
+  max-width: none;
 }
 
-.challenge-room::before {
+.challenge-gargoyle {
+  --trial-glow: var(--tower-purple);
+  --gargoyle-light: 178, 206, 242;
+  --gargoyle-mid: 83, 100, 148;
+  --gargoyle-dark: 27, 34, 72;
+  position: relative;
+  display: grid;
+  grid-template-areas:
+    'figure'
+    'plinth';
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  width: 100%;
+  min-height: 14.6rem;
+  isolation: isolate;
+  padding: 0.15rem 0 0.25rem;
+  border: 0;
+  background: transparent;
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.challenge-gargoyle::before,
+.challenge-gargoyle::after {
   content: '';
   position: absolute;
-  inset-inline: 0;
-  top: 0;
-  height: 1px;
-  background: linear-gradient(to right, rgba(var(--tower-purple), 0.75), rgba(var(--tower-cyan), 0.32), rgba(var(--tower-purple), 0.35));
   pointer-events: none;
 }
 
-.challenge-room-badge {
-  position: absolute;
-  left: 1rem;
-  top: 0;
+.challenge-gargoyle::before {
+  top: 0.4rem;
+  left: 50%;
+  z-index: 0;
+  width: min(100%, 14.6rem);
+  height: 10.4rem;
+  transform: translateX(-50%);
+  clip-path: polygon(11% 0, 89% 0, 100% 16%, 96% 88%, 82% 100%, 18% 100%, 4% 88%, 0 16%);
+  background:
+    radial-gradient(84% 56% at 50% 18%, rgba(var(--gargoyle-light), 0.2), transparent 56%),
+    linear-gradient(180deg, rgba(var(--gargoyle-mid), 0.34), rgba(var(--gargoyle-dark), 0.88)),
+    repeating-linear-gradient(90deg, rgba(var(--gargoyle-mid), 0.36) 0 1.18rem, rgba(7, 12, 34, 0.48) 1.18rem 1.32rem);
+  box-shadow:
+    0 0 0 1px rgba(var(--gargoyle-light), 0.22),
+    0 0 0 0.32rem rgba(2, 7, 24, 0.46),
+    0 15px 30px rgba(0, 0, 0, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -24px 36px rgba(0, 0, 0, 0.38),
+    inset 0 0 26px rgba(var(--trial-glow), 0.1);
+}
+
+.challenge-gargoyle::after {
+  top: 8.62rem;
+  left: 50%;
+  z-index: 1;
+  width: 11.8rem;
+  height: 2.25rem;
+  transform: translateX(-50%);
+  clip-path: polygon(8% 0, 92% 0, 100% 34%, 91% 100%, 9% 100%, 0 34%);
+  background:
+    linear-gradient(180deg, rgba(var(--gargoyle-light), 0.34), rgba(var(--gargoyle-mid), 0.4) 36%, rgba(var(--gargoyle-dark), 0.92)),
+    repeating-linear-gradient(90deg, transparent 0 1rem, rgba(var(--trial-glow), 0.12) 1rem 1.1rem);
+  box-shadow:
+    0 0 0 1px rgba(var(--gargoyle-light), 0.22),
+    0 12px 20px rgba(0, 0, 0, 0.34),
+    inset 0 -12px 16px rgba(0, 0, 0, 0.3);
+}
+
+.challenge-gargoyle[data-state='available'] {
+  --trial-glow: var(--tower-purple);
+}
+
+.challenge-gargoyle[data-state='in-progress'] {
+  --trial-glow: var(--tower-blue);
+}
+
+.challenge-gargoyle[data-state='completed'] {
+  --trial-glow: var(--tower-cyan);
+}
+
+.challenge-gargoyle:focus-visible {
+  outline: 2px solid rgba(var(--tower-cyan), 0.62);
+  outline-offset: 0.28rem;
+}
+
+.challenge-gargoyle:disabled {
+  cursor: not-allowed;
+}
+
+.challenge-gargoyle:disabled:not([data-state='locked']) {
+  opacity: 0.72;
+}
+
+.challenge-gargoyle-figure {
+  grid-area: figure;
+  position: relative;
+  z-index: 2;
   display: grid;
-  width: 2rem;
-  height: 3.6rem;
-  place-items: start center;
-  padding-top: 0.65rem;
-  border: 1px solid rgba(var(--tower-purple), 0.72);
-  border-top: 0;
-  color: rgb(210, 149, 255);
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
-  filter: drop-shadow(0 0 8px rgba(var(--tower-purple), 0.48));
+  width: 100%;
+  min-height: 10.7rem;
+  place-items: end center;
 }
 
-.challenge-room-door {
-  align-self: end;
-  justify-self: center;
-  width: 3rem;
+.challenge-gargoyle-figure::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 1rem;
+  z-index: 0;
+  width: 8.7rem;
+  height: 7.3rem;
+  transform: translateX(-50%);
+  clip-path: polygon(50% 0, 100% 22%, 92% 100%, 8% 100%, 0 22%);
+  background:
+    radial-gradient(82% 58% at 50% 18%, rgba(var(--gargoyle-light), 0.18), transparent 58%),
+    linear-gradient(180deg, rgba(20, 36, 76, 0.62), rgba(2, 7, 24, 0.2));
+  box-shadow:
+    inset 0 0 18px rgba(var(--trial-glow), 0.12),
+    0 0 0 1px rgba(var(--gargoyle-light), 0.1);
+}
+
+.challenge-gargoyle-figure::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 1.72rem;
+  z-index: 1;
+  width: 7.8rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.38);
+  filter: blur(4px);
+  transform: translateX(-50%) scaleX(1.22);
+}
+
+.challenge-gargoyle-aura {
+  position: absolute;
+  left: 50%;
+  bottom: 2.15rem;
+  z-index: 0;
+  width: 8rem;
   height: 5.8rem;
-  border: 1px solid rgba(var(--tower-purple), 0.55);
-  border-bottom: 0;
-  border-radius: 999px 999px 0 0;
-  background: linear-gradient(90deg, rgba(15, 14, 49, 0.86), rgba(3, 4, 19, 0.6));
-  box-shadow: inset 0 0 18px rgba(var(--tower-purple), 0.2), 0 0 14px rgba(var(--tower-purple), 0.12);
+  transform: translateX(-50%);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  background: linear-gradient(180deg, transparent, rgba(var(--trial-glow), 0.26));
+  filter: blur(3px);
+  opacity: 0.7;
 }
 
-.challenge-room-content {
-  min-width: 0;
-  padding: 1rem 1rem 1rem 0;
-  text-align: left;
+.challenge-gargoyle-art {
+  position: relative;
+  overflow: visible;
+  z-index: 2;
+  width: 10.1rem;
+  max-width: 100%;
+  height: auto;
+  transform: translateY(0);
+  transform-origin: bottom center;
+  filter:
+    drop-shadow(-3px -2px 2px rgba(255, 255, 255, 0.08))
+    drop-shadow(0 13px 16px rgba(0, 0, 0, 0.48))
+    drop-shadow(0 0 16px rgba(var(--trial-glow), 0.12));
+  transition: transform 0.52s cubic-bezier(0.16, 1, 0.3, 1), filter 0.52s ease, opacity 0.32s ease;
 }
 
-.challenge-room-label {
-  color: rgb(221, 166, 255);
-  font-size: 0.9rem;
-  font-weight: 900;
+.challenge-gargoyle[data-state='locked'] .challenge-gargoyle-art {
+  opacity: 0.82;
+  filter:
+    grayscale(0.36)
+    drop-shadow(0 12px 14px rgba(0, 0, 0, 0.42));
+}
+
+.challenge-gargoyle .gargoyle-shadow {
+  fill: rgba(0, 0, 0, 0.38);
+}
+
+.challenge-gargoyle .gargoyle-stone-fill {
+  stroke: rgba(var(--gargoyle-light), 0.54);
+  stroke-width: 2.1;
+  stroke-linejoin: round;
+}
+
+.challenge-gargoyle .gargoyle-stone-mid {
+  stroke: rgba(var(--gargoyle-light), 0.36);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+.challenge-gargoyle .gargoyle-stone-dark,
+.challenge-gargoyle .gargoyle-horn,
+.challenge-gargoyle .gargoyle-ear {
+  stroke: rgba(var(--gargoyle-light), 0.44);
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+
+.challenge-gargoyle .gargoyle-tail {
+  stroke: rgba(var(--gargoyle-dark), 0.96);
+  stroke-width: 11;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.challenge-gargoyle .gargoyle-brow,
+.challenge-gargoyle .gargoyle-nose,
+.challenge-gargoyle .gargoyle-jaw,
+.challenge-gargoyle .gargoyle-crack {
+  stroke: rgba(7, 12, 34, 0.78);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.challenge-gargoyle .gargoyle-stone-ridge,
+.challenge-gargoyle .gargoyle-highlight,
+.challenge-gargoyle .gargoyle-bevel {
+  stroke: rgba(var(--gargoyle-light), 0.42);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.challenge-gargoyle .gargoyle-underside,
+.challenge-gargoyle .gargoyle-core-shadow,
+.challenge-gargoyle .gargoyle-face-plane {
+  fill: rgba(5, 9, 26, 0.28);
+}
+
+.challenge-gargoyle .gargoyle-claw,
+.challenge-gargoyle .gargoyle-tooth {
+  stroke: rgba(220, 234, 255, 0.82);
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.challenge-gargoyle .gargoyle-eye {
+  filter: drop-shadow(0 0 5px rgba(var(--trial-glow), 0.72));
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+.challenge-gargoyle[data-state='locked'] .gargoyle-eye {
+  fill: rgba(144, 198, 255, 0.32);
+  opacity: 0.45;
+  filter: none;
+}
+
+.challenge-gargoyle .gargoyle-wing,
+.challenge-gargoyle .gargoyle-head,
+.challenge-gargoyle .gargoyle-arm,
+.challenge-gargoyle .gargoyle-jaw {
+  transform-box: fill-box;
+  transition: transform 0.52s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.challenge-gargoyle .gargoyle-wing-left {
+  transform-origin: 90% 78%;
+}
+
+.challenge-gargoyle .gargoyle-wing-right {
+  transform-origin: 10% 78%;
+}
+
+.challenge-gargoyle .gargoyle-head {
+  transform-origin: 50% 82%;
+}
+
+.challenge-gargoyle .gargoyle-arm-left {
+  transform-origin: 82% 18%;
+}
+
+.challenge-gargoyle .gargoyle-arm-right {
+  transform-origin: 18% 18%;
+}
+
+.challenge-gargoyle-plinth {
+  grid-area: plinth;
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: min(100%, 16.4rem);
+  gap: 0.32rem;
+  margin-top: -0.12rem;
+  padding: 0.82rem 0.95rem 0.9rem;
+}
+
+.challenge-gargoyle-plinth::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  clip-path: polygon(7% 0, 93% 0, 100% 100%, 0 100%);
+  background:
+    linear-gradient(180deg, rgba(var(--gargoyle-light), 0.24), rgba(14, 28, 64, 0.84) 18%, rgba(5, 10, 30, 0.9)),
+    repeating-linear-gradient(90deg, rgba(var(--gargoyle-mid), 0.2) 0 1.3rem, rgba(2, 7, 24, 0.18) 1.3rem 1.42rem);
+  box-shadow:
+    0 0 0 1px rgba(var(--gargoyle-light), 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -12px 18px rgba(0, 0, 0, 0.32),
+    0 10px 20px rgba(0, 0, 0, 0.28),
+    0 0 18px rgba(var(--trial-glow), 0.12);
+}
+
+.challenge-room-index {
+  color: rgba(144, 198, 255, 0.82);
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .challenge-room-title {
-  margin: 0.25rem 0 0;
-  color: hsl(var(--foreground));
-  font-size: 0.92rem;
-  font-weight: 700;
-  line-height: 1.35;
+  margin: 0;
+  color: rgb(221, 166, 255);
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.24;
+  text-align: center;
+  text-wrap: balance;
+  text-shadow: 0 0 16px rgba(var(--tower-purple), 0.45);
 }
 
-.difficulty-row-stack {
-  display: grid;
-  margin-top: 0.8rem;
+.challenge-gargoyle[data-state='completed'] .challenge-room-title {
+  color: rgb(153, 255, 237);
+  text-shadow: 0 0 16px rgba(var(--tower-cyan), 0.42);
 }
 
-.difficulty-row {
-  display: grid;
-  grid-template-columns: 1.55rem minmax(3.6rem, 1fr) auto auto;
+.challenge-gargoyle:not(:disabled):hover::before,
+.challenge-gargoyle:not(:disabled):focus-visible::before {
+  box-shadow:
+    0 0 0 1px rgba(var(--gargoyle-light), 0.28),
+    0 0 0 0.34rem rgba(2, 7, 24, 0.45),
+    0 0 28px rgba(var(--trial-glow), 0.24),
+    0 16px 30px rgba(0, 0, 0, 0.38),
+    inset 0 0 28px rgba(var(--trial-glow), 0.14);
+}
+
+.challenge-gargoyle:not(:disabled):hover .challenge-gargoyle-art,
+.challenge-gargoyle:not(:disabled):focus-visible .challenge-gargoyle-art {
+  transform: translateY(-0.36rem) scale(1.035);
+  filter:
+    drop-shadow(-3px -2px 2px rgba(255, 255, 255, 0.1))
+    drop-shadow(0 17px 19px rgba(0, 0, 0, 0.52))
+    drop-shadow(0 0 24px rgba(var(--trial-glow), 0.22));
+}
+
+.challenge-gargoyle:not(:disabled):hover .gargoyle-wing-left,
+.challenge-gargoyle:not(:disabled):focus-visible .gargoyle-wing-left {
+  transform: rotate(-7deg) translate(-1px, -2px);
+}
+
+.challenge-gargoyle:not(:disabled):hover .gargoyle-wing-right,
+.challenge-gargoyle:not(:disabled):focus-visible .gargoyle-wing-right {
+  transform: rotate(7deg) translate(1px, -2px);
+}
+
+.challenge-gargoyle:not(:disabled):hover .gargoyle-head,
+.challenge-gargoyle:not(:disabled):focus-visible .gargoyle-head {
+  transform: translateY(-3px) rotate(-2deg);
+}
+
+.challenge-gargoyle:not(:disabled):hover .gargoyle-arm-left,
+.challenge-gargoyle:not(:disabled):focus-visible .gargoyle-arm-left {
+  transform: rotate(-4deg) translateY(-1px);
+}
+
+.challenge-gargoyle:not(:disabled):hover .gargoyle-arm-right,
+.challenge-gargoyle:not(:disabled):focus-visible .gargoyle-arm-right {
+  transform: rotate(4deg) translateY(-1px);
+}
+
+.challenge-gargoyle:not(:disabled):hover .gargoyle-jaw,
+.challenge-gargoyle:not(:disabled):focus-visible .gargoyle-jaw {
+  transform: translateY(2px);
+}
+
+.challenge-gargoyle:not(:disabled):hover .gargoyle-eye,
+.challenge-gargoyle:not(:disabled):focus-visible .gargoyle-eye {
+  opacity: 1;
+  filter: drop-shadow(0 0 8px rgba(var(--trial-glow), 0.95));
+}
+
+/* ── Adventure modal ─────────────────────────────────────────────────── */
+.adventure-modal-body {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.45rem;
-  min-height: 2.15rem;
-  border-top: 1px solid rgba(99, 164, 255, 0.12);
-  color: hsl(var(--muted-foreground));
-  font-size: 0.82rem;
+  gap: 1.15rem;
+  padding: 1.6rem 1.5rem 1.75rem;
+  text-align: center;
 }
 
-.difficulty-status {
+.adventure-modal-icon {
   display: grid;
-  width: 1.45rem;
-  height: 1.45rem;
+  width: 3.4rem;
+  height: 3.4rem;
   place-items: center;
-  color: rgba(99, 164, 255, 0.72);
+  border: 1px solid rgba(var(--tower-cyan), 0.4);
+  border-radius: 999px;
+  background: rgba(var(--tower-cyan), 0.08);
+  color: hsl(var(--primary));
+  box-shadow: 0 0 26px rgba(0, 245, 212, 0.25);
 }
 
-.difficulty-name {
-  color: hsl(var(--foreground));
+.adventure-modal-copy {
+  max-width: 24rem;
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.92rem;
+  line-height: 1.6;
 }
 
-.difficulty-accuracy {
+.adventure-modal-progress {
+  width: 100%;
+}
+
+.adventure-modal-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
   color: hsl(var(--primary));
   font-family: JetBrains Mono, ui-monospace, monospace;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 800;
 }
 
-.difficulty-action {
-  min-width: 5.6rem;
+.adventure-modal-action {
+  width: 100%;
+  max-width: 16rem;
+  height: 2.75rem;
+}
+
+/* ── Challenge levels modal ──────────────────────────────────────────── */
+.challenge-levels-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.4rem 1.5rem 1.6rem;
+}
+
+.challenge-levels-summary {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.challenge-levels-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.challenge-levels-topic {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid rgba(var(--tower-purple), 0.35);
+  border-radius: 999px;
+  background: rgba(var(--tower-purple), 0.1);
+  color: rgb(221, 166, 255);
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.challenge-levels-list {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.level-card {
+  --level-accent: 176, 74, 255;
+  display: grid;
+  grid-template-columns: 2.4rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgba(var(--level-accent), 0.32);
+  border-left: 3px solid rgba(var(--level-accent), 0.75);
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(var(--level-accent), 0.08), rgba(4, 6, 22, 0.4));
+  opacity: 0;
+  animation: level-card-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.level-card.is-locked {
+  animation: none;
+  opacity: 0.55;
+  filter: grayscale(0.3);
+}
+
+.level-card-rank {
+  display: grid;
+  width: 2.2rem;
+  height: 2.2rem;
+  place-items: center;
+  border: 1px solid rgba(var(--level-accent), 0.4);
+  border-radius: 8px;
+  background: rgba(var(--level-accent), 0.12);
+  color: rgb(var(--level-accent));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.level-card-main {
+  min-width: 0;
+}
+
+.level-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.level-card-name {
+  color: hsl(var(--foreground));
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.level-card-status {
+  display: inline-grid;
+  place-items: center;
+  color: rgb(var(--level-accent));
+}
+
+.level-card.is-complete .level-card-status {
+  color: hsl(var(--primary));
+}
+
+.level-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+}
+
+.level-card-accuracy {
+  color: hsl(var(--primary));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-weight: 700;
+}
+
+.level-card-action {
   justify-self: end;
 }
 
-.difficulty-row.is-locked {
-  opacity: 0.6;
-}
-
-.difficulty-row.is-complete .difficulty-status,
-.difficulty-row.is-complete .difficulty-name {
-  color: hsl(var(--primary));
+@keyframes level-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .tower-base {
@@ -1132,7 +2225,9 @@ textarea {
 
 @keyframes tower-flag-wave {
   0%, 100% { transform: skewY(0deg) scaleX(1); }
-  50% { transform: skewY(-3deg) scaleX(1.04); }
+  25% { transform: skewY(-2.5deg) scaleX(1.035); }
+  50% { transform: skewY(1.5deg) scaleX(0.99); }
+  75% { transform: skewY(-1deg) scaleX(1.02); }
 }
 
 @keyframes tower-loading-sheen {
@@ -1177,7 +2272,7 @@ textarea {
 
   .learning-tower {
     width: min(100%, 29rem);
-    padding-top: 4.25rem;
+    padding-top: 1.75rem;
   }
 
   .learning-tower-continuation {
@@ -1188,7 +2283,7 @@ textarea {
     transform: translateX(-50%) scale(0.86);
   }
 
-  .tower-cap {
+  .tower-crown {
     width: 96%;
   }
 
@@ -1201,27 +2296,78 @@ textarea {
     padding-inline: 1rem;
   }
 
-  .challenge-room {
-    grid-template-columns: 3.5rem minmax(0, 1fr);
+  .challenge-room-stack {
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    gap: 0.9rem;
   }
 
-  .challenge-room-badge {
-    left: 0.55rem;
+  .tower-door {
+    --door-width: 4.55rem;
+    --door-height: 6.8rem;
   }
 
-  .challenge-room-door {
-    width: 2.25rem;
-    height: 4.6rem;
+  .tower-door[data-variant='adventure'] {
+    --door-width: 4.75rem;
+    --door-height: 7.35rem;
   }
 
-  .difficulty-row {
-    grid-template-columns: 1.45rem minmax(3rem, 1fr) auto;
-    padding-block: 0.2rem;
+  .tower-door[data-variant='challenge'] {
+    --door-width: 4.55rem;
+    --door-height: 6.65rem;
   }
 
-  .difficulty-action {
-    grid-column: 2 / -1;
-    justify-self: start;
+  .challenge-gargoyle {
+    min-height: 13.7rem;
+  }
+
+  .challenge-gargoyle-figure {
+    min-height: 10rem;
+  }
+
+  .challenge-gargoyle-art {
+    width: 9rem;
+  }
+
+  .challenge-gargoyle::before {
+    width: min(100%, 13.6rem);
+    height: 9.75rem;
+  }
+
+  .challenge-gargoyle::after {
+    top: 8.2rem;
+    width: 10.8rem;
+  }
+
+  .challenge-gargoyle-plinth {
+    width: min(100%, 15rem);
+    padding: 0.8rem 0.9rem 0.9rem;
+  }
+
+  .challenge-room-title {
+    font-size: 0.9rem;
+  }
+
+  .level-card {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    grid-template-areas:
+      'rank main'
+      'action action';
+    row-gap: 0.65rem;
+  }
+
+  .level-card-rank {
+    grid-area: rank;
+  }
+
+  .level-card-main {
+    grid-area: main;
+  }
+
+  .level-card-action {
+    grid-area: action;
+    justify-self: stretch;
+    width: 100%;
   }
 }
 
@@ -1406,13 +2552,21 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .git-it-loading-letter,
   .git-it-loading-meter,
   .git-it-loading-grid,
-  .tower-cap,
+  .git-it-cloud,
+  .git-it-dragon--a,
+  .git-it-dragon--b,
+  .git-it-dragon-body,
+  .git-it-window,
+  .git-it-flag,
+  .git-it-tower-scan,
+  .tower-crown,
   .tower-shell,
   .tower-base,
   .tower-flag,
+  .tower-starfield--far,
+  .tower-starfield--near,
   .tower-stack-connector,
   .tower-loading-row {
     animation: none;

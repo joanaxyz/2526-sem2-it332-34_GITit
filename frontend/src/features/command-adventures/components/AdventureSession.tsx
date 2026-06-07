@@ -62,7 +62,7 @@ export function AdventureSession({
             Problem {attempt.order + 1} of {run.total_problems}
           </span>
         </div>
-        <ProgressBar value={progressValue} glow />
+        <ProgressBar value={progressValue} glow segments={run.total_problems} />
       </header>
 
       <Card>

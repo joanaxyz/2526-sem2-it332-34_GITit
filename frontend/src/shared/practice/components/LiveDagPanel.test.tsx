@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import type { RepositorySnapshot } from '@/shared/practice/types'
@@ -64,16 +64,16 @@ describe('LiveDagPanel', () => {
     expect(graphLayoutSignature(snapshot)).toBe(graphLayoutSignature(movedPointerSnapshot))
   })
 
-  it('renders commit details in the diagram overlay when a node is active', () => {
+  it('renders a simplified commit summary in the diagram overlay when a node is active', () => {
     render(<LiveDagPanel snapshot={snapshot} />)
 
     const commitButton = screen.getByTitle(/commit c2/i)
     fireEvent.focus(commitButton)
 
-    expect(screen.getByTestId('commit-details-overlay')).toBeInTheDocument()
+    const overlay = screen.getByTestId('commit-details-overlay')
+    expect(overlay).toBeInTheDocument()
     expect(screen.getByText('Message: Update form validation')).toBeInTheDocument()
-    expect(screen.getByText(/modified src\/form\.js/i)).toBeInTheDocument()
-    expect(screen.getByText(/src\/form\.js @ form-validation-v2/i)).toBeInTheDocument()
+    expect(within(overlay).getByText('main')).toBeInTheDocument()
   })
 
   it('keeps repository metadata inside the diagram panel', () => {

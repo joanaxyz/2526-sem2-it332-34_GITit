@@ -131,17 +131,14 @@ describe('StoreyPracticeHub', () => {
 
     renderHub()
 
-    await waitFor(() => expect(screen.getByText('0/5')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByRole('button', { name: /open preparing file changes/i })).toBeInTheDocument())
     const adventureSection = screen.getByText('Command Adventure').closest('section')
     expect(adventureSection).not.toBeNull()
 
     const adventure = within(adventureSection as HTMLElement)
-    expect(adventure.getByText('0/5')).toBeInTheDocument()
-    expect(adventure.getByRole('button', { name: /start/i })).toBeInTheDocument()
+    expect(adventure.getByRole('button', { name: /open preparing file changes/i })).toBeInTheDocument()
 
     expect(screen.getByText('Stage, Commit, Then Switch Branches')).toBeInTheDocument()
-    expect(screen.getAllByText(/easy/i).length).toBeGreaterThan(0)
-    expect(screen.getAllByText(/medium/i).length).toBeGreaterThan(0)
-    expect(screen.getAllByText(/hard/i).length).toBeGreaterThan(0)
+    expect(screen.getByRole('button', { name: /open stage, commit, then switch branches/i })).toBeInTheDocument()
   })
 })

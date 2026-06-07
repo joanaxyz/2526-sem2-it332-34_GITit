@@ -358,4 +358,3 @@ def _ordered_levels(levels) -> list[ChallengeLevel]:
 
     order = {DIFFICULTY_EASY: 0, DIFFICULTY_MEDIUM: 1, DIFFICULTY_HARD: 2}
     return sorted(levels, key=lambda level: order.get(level.difficulty, 99))
-

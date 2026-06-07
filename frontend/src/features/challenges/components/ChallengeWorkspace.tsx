@@ -413,7 +413,6 @@ export function ChallengeWorkspace() {
                 snapshot={run.repository_state}
                 className="flex h-full min-h-0 flex-col"
                 contentClassName="h-full min-h-0 flex-1"
-                showRepositoryDetails
               />
             </div>
             {hasTargetDiagram ? (
@@ -430,7 +429,6 @@ export function ChallengeWorkspace() {
                     snapshot={run.expected_state!}
                     className="flex h-full min-h-0 flex-col"
                     contentClassName="h-full min-h-0 flex-1"
-                    showRepositoryDetails
                   />
                 </div>
               </>

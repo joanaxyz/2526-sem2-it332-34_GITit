@@ -56,14 +56,11 @@ export function ChallengeStatusHeader({
           {isExiting ? 'Exiting' : exitLabel}
         </Button>
         <GitBranch className="size-5 shrink-0 text-primary" />
-        <div className="min-w-0">
-          <span className="block truncate font-mono text-xs text-muted-foreground">
-            Storey {run.storey.number} / {run.challenge.title}
-          </span>
-          <span className="mt-0.5 block truncate text-xs text-foreground">
-            {run.difficulty ? `${run.difficulty} / ${run.counts.counted_action_total} actions used` : run.challenge.summary}
-          </span>
-        </div>
+        {run.difficulty ? (
+          <Badge variant="outline" className="shrink-0 capitalize">
+            {run.difficulty}
+          </Badge>
+        ) : null}
       </div>
       <div className="flex min-w-0 items-center gap-2">
         <CommandBudgetHeader run={run} />
@@ -87,10 +84,6 @@ export function ChallengeStatusHeader({
             {isRetrying ? 'Continuing' : 'Continue'}
           </Button>
         ) : null}
-
-        <Badge variant="outline" className="hidden sm:inline-flex">
-          {run.variant.label}
-        </Badge>
       </div>
     </header>
   )

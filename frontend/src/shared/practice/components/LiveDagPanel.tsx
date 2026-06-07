@@ -143,23 +143,18 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
       style={{ borderTop: `1.5px solid ${colors.border}` }}
     >
       <CardHeader className="p-3" style={{ background: colors.headerBg }}>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2">
           <GitCommitHorizontal
             className="size-4"
             style={{ filter: colors.iconShadow }}
           />
           <span className={cn('text-sm font-bold tracking-wide', colors.titleClass)}>{title}</span>
           {normalizedSnapshot.commits.length > 0 && (
-            <span className="text-[10px] font-normal text-muted-foreground/65">
-              Hover or click a commit for details.
+            <span className="ml-auto font-mono text-[10px] font-medium text-muted-foreground/60">
+              {normalizedSnapshot.commits.length} commit{normalizedSnapshot.commits.length === 1 ? '' : 's'}
             </span>
           )}
         </div>
-        {!normalizedSnapshot.commits.length && (
-          <p className="mt-0.5 text-[10px] text-muted-foreground/50">
-            No commit metadata yet.
-          </p>
-        )}
       </CardHeader>
       <CardContent
         className={cn(
@@ -338,85 +333,43 @@ function CommitNode({ data }: NodeProps<CommitNodeData>) {
 function CommitDetailsPanel({ data }: { data: CommitNodeData | null }) {
   if (!data) return null
 
-  const changedEntries = Object.entries(data.commit.changes ?? data.commit.files ?? {})
-  const treeEntries = Object.entries(data.commit.tree ?? {})
+  const isMerge = data.commit.is_merge || data.commit.parents.length > 1
 
   return (
     <div
-      className="pointer-events-none absolute right-3 top-3 z-50 max-h-[calc(100%-1.5rem)] w-72 max-w-[calc(100%-1.5rem)] overflow-hidden rounded-md border border-border/80 bg-card/85 p-3 text-left text-xs shadow-2xl shadow-black/25 backdrop-blur-md"
+      className="pointer-events-none absolute right-3 top-3 z-50 w-60 max-w-[calc(100%-1.5rem)] overflow-hidden rounded-md border border-border/80 bg-card/90 p-3 text-left text-xs shadow-2xl shadow-black/25 backdrop-blur-md"
       data-testid="commit-details-overlay"
       role="tooltip"
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="font-mono text-[11px] font-semibold text-foreground">Commit {data.commit.id}</p>
-          <p className="mt-1 truncate font-medium text-foreground" title={data.commit.message || '(empty)'}>
-            Message: {data.commit.message || '(empty)'}
-          </p>
-        </div>
+      <div className="flex items-center justify-between gap-2">
+        <p className="font-mono text-[11px] font-semibold text-foreground">{shortenHash(data.commit.id)}</p>
         {data.isHead ? (
           <span className="shrink-0 rounded-full border border-accent/45 bg-accent/15 px-2 py-0.5 text-[10px] font-semibold leading-none text-accent">
             HEAD
           </span>
         ) : null}
       </div>
-      <div className="mt-2 space-y-0.5 text-muted-foreground">
-        <p className="truncate" title={data.refs.length ? data.refs.map((ref) => ref.name).join(', ') : 'none'}>
-          Refs: {data.refs.length ? data.refs.map((ref) => ref.name).join(', ') : 'none'}
-        </p>
-        <p className="truncate" title={data.commit.parents.length ? data.commit.parents.join(', ') : 'none'}>
-          Parents: {data.commit.parents.length ? data.commit.parents.join(', ') : 'none'}
-        </p>
-        <p>Type: {data.commit.is_merge || data.commit.parents.length > 1 ? 'merge commit' : 'regular commit'}</p>
-      </div>
-      <DetailList
-        title="Changed paths"
-        empty="No recorded path changes."
-        items={changedEntries.map(([path, value]) => {
-          if (typeof value === 'string') return `${value} ${path}`
-          if (!value || typeof value !== 'object' || Array.isArray(value)) return `${formatValue(value)} ${path}`
-          const changeType = typeof value.change_type === 'string' ? value.change_type : 'modified'
-          return `${changeType} ${path}${formatTokens(value.after)}`
-        })}
-      />
-      <DetailList
-        title="Tree"
-        empty="No committed tree details."
-        items={treeEntries.map(([path, value]) => `${path} @ ${formatValue(value)}`)}
-        limit={8}
-      />
-    </div>
-  )
-}
-
-function DetailList({
-  title,
-  empty,
-  items,
-  limit = 6,
-}: {
-  title: string
-  empty: string
-  items: string[]
-  limit?: number
-}) {
-  const visible = items.slice(0, limit)
-  const remaining = items.length - visible.length
-  return (
-    <div className="mt-2">
-      <p className="font-semibold text-foreground">{title}:</p>
-      {visible.length ? (
-        <ul className="mt-1 space-y-0.5 text-muted-foreground">
-          {visible.map((item) => (
-            <li className="truncate" key={item} title={item}>
-              {item}
-            </li>
+      <p className="mt-1.5 line-clamp-2 font-medium text-foreground" title={data.commit.message || '(empty)'}>
+        Message: {data.commit.message || '(empty)'}
+      </p>
+      {data.refs.length || isMerge ? (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {isMerge ? (
+            <span className="rounded-full border border-accent/35 bg-accent/10 px-2 py-0.5 text-[10px] font-medium leading-none text-accent">
+              merge
+            </span>
+          ) : null}
+          {data.refs.map((ref) => (
+            <span
+              key={`${ref.kind}:${ref.name}`}
+              className="max-w-[10rem] truncate rounded-full border border-border bg-secondary px-2 py-0.5 text-[10px] font-medium leading-none text-muted-foreground"
+              title={ref.name}
+            >
+              {ref.name}
+            </span>
           ))}
-          {remaining > 0 ? <li>+{remaining} more</li> : null}
-        </ul>
-      ) : (
-        <p className="mt-1 text-muted-foreground">{empty}</p>
-      )}
+        </div>
+      ) : null}
     </div>
   )
 }
