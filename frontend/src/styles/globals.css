@@ -601,7 +601,9 @@ textarea {
 }
 
 .storey-section + .storey-section {
-  margin-top: -4.55rem;
+  /* Keep only a tiny seam overlap. The old -4.55rem pulled the next
+     storey over the full connector, so the wall painted on top of it. */
+  margin-top: -0.15rem;
 }
 
 .storey-overview {
@@ -1077,16 +1079,20 @@ textarea {
 
 .tower-stack-connector {
   position: relative;
+  z-index: 3;
   width: 70%;
   max-width: 23rem;
   height: 4.6rem;
-  margin: 0 auto;
+  margin: -0.05rem auto 0;
+  overflow: visible;
+  pointer-events: none;
 }
 
 .tower-stack-connector::before,
 .tower-stack-connector::after {
   content: '';
   position: absolute;
+  z-index: 1;
   top: 0;
   bottom: 0;
   width: 1px;
@@ -1186,7 +1192,8 @@ textarea {
     width: 96%;
   }
 
-  .tower-shell {
+  .tower-shell,
+  .tower-stack-connector {
     width: 88%;
   }
 
