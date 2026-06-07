@@ -9,12 +9,13 @@ import { cn } from '@/shared/utils/cn'
 export function PracticeContextPanel({ session }: { session: PracticeSession }) {
   const context = contextForSession(session)
   const difficultyLabel = session.difficulty ? session.difficulty : 'drill'
+  const tower = session.tower ?? session.module
 
   return (
     <Card className="shadow-none">
       <CardHeader className="p-3">
         <div className="flex flex-wrap gap-2">
-          <Badge variant="blue">Module {session.module.number}</Badge>
+          <Badge variant="blue">Tower {tower.number}</Badge>
           <Badge variant="default" className="capitalize">{difficultyLabel}</Badge>
           {session.review_mode ? <Badge variant="warning">Review Mode</Badge> : null}
           {session.variant.changed_variant ? <Badge variant="warning">Changed variant</Badge> : null}

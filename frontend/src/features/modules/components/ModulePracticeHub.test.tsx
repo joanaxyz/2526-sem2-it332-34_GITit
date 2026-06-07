@@ -3,10 +3,10 @@ import { cleanup, render, screen, waitFor, within } from '@testing-library/react
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { ModulePracticeHub } from './ModulePracticeHub'
+import { TowerPracticeHub } from './ModulePracticeHub'
 
 const mocks = vi.hoisted(() => ({
-  moduleContent: vi.fn(),
+  towerContent: vi.fn(),
   startSession: vi.fn(),
   startReviewSession: vi.fn(),
 }))
@@ -27,6 +27,8 @@ vi.mock('motion/react', async () => {
   return {
     motion: {
       article: createMotion('article'),
+      div: createMotion('div'),
+      header: createMotion('header'),
       section: createMotion('section'),
     },
     useInView: () => true,
@@ -35,13 +37,13 @@ vi.mock('motion/react', async () => {
 
 vi.mock('@/features/scenarios/api/scenariosApi', () => ({
   scenariosApi: {
-    moduleContent: mocks.moduleContent,
+    towerContent: mocks.towerContent,
     startSession: mocks.startSession,
   },
   startPayloadForPractice: (practiceKind: string, id: number) => (
     practiceKind === 'command_drill'
-      ? { problem_type: 'command_drill', command_drill_id: id, source_entry_point: 'module_page' }
-      : { problem_type: 'workflow_scenario', workflow_level_id: id, source_entry_point: 'module_page' }
+      ? { problem_type: 'command_drill', command_drill_id: id, source_entry_point: 'tower_page' }
+      : { problem_type: 'workflow_scenario', workflow_level_id: id, source_entry_point: 'tower_page' }
   ),
 }))
 
@@ -61,8 +63,8 @@ function renderHub() {
   return render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
-        <ModulePracticeHub
-          module={{
+        <TowerPracticeHub
+          tower={{
             id: 2,
             slug: 'tracking-changes-snapshots',
             number: 2,
@@ -79,14 +81,14 @@ function renderHub() {
   )
 }
 
-describe('ModulePracticeHub', () => {
+describe('TowerPracticeHub', () => {
   afterEach(() => {
     cleanup()
     vi.clearAllMocks()
   })
 
   it('shows one command adventure action instead of dumping every command level', async () => {
-    mocks.moduleContent.mockImplementation((_moduleId: number, section: string) => {
+    mocks.towerContent.mockImplementation((_towerId: number, section: string) => {
       if (section === 'command_adventures') {
         return Promise.resolve({
           section,
@@ -178,7 +180,7 @@ describe('ModulePracticeHub', () => {
 
     renderHub()
 
-    await waitFor(() => expect(screen.getByText('Preparing File Changes')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('0/5')).toBeInTheDocument())
     const adventureSection = screen.getByText('Command Adventure').closest('section')
     expect(adventureSection).not.toBeNull()
 

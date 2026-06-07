@@ -10,7 +10,7 @@ from scenarios.models import (
     WorkflowScenario,
     WorkflowScenarioLevel,
 )
-from scenarios.selectors import module_content_page
+from scenarios.selectors import module_content_page, tower_content_page
 from scenarios.serializers import session_payload
 from scenarios.services import CommandProcessingService, PracticeSessionService
 from scenarios.visualization import RepositoryVisualizationService
@@ -82,6 +82,21 @@ def test_module_content_is_paginated_by_section(db, django_user_model):
     assert first_page["results"]
     assert first_page["results"][0]["item_type"] == "command_topic"
     assert first_page["next_cursor"] is not None
+
+
+def test_tower_content_uses_tower_id_alias(db, django_user_model):
+    call_command("seed_curriculum_v2")
+    user = make_user(django_user_model)
+    tower = LearningModule.objects.get(slug="creating-inspecting-repositories")
+
+    page = tower_content_page(
+        user=user,
+        tower_id=tower.id,
+        section="command_adventures",
+    )
+
+    assert page["results"]
+    assert page["results"][0]["item_type"] == "command_drill_adventure"
 
 
 def test_module_content_exposes_command_drill_adventure_levels_not_public_command_cards(db, django_user_model):

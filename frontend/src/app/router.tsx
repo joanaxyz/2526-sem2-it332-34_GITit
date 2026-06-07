@@ -10,7 +10,7 @@ import { DashboardPage } from '@/features/dashboard/pages/DashboardPage'
 import { PerformancePage } from '@/features/dashboard/pages/PerformancePage'
 import { PracticePage } from '@/features/practice/pages/PracticePage'
 import { ReviewPracticePage } from '@/features/review/pages/ReviewPracticePage'
-import { ModulesPage } from '@/features/modules/pages/ModulesPage'
+import { TowerPage } from '@/features/modules/pages/ModulesPage'
 
 export const router = createBrowserRouter([
   {
@@ -29,7 +29,8 @@ export const router = createBrowserRouter([
     children: [
       { path: '/', element: <Navigate replace to="/dashboard" /> },
       { path: '/dashboard', element: <DashboardPage /> },
-      { path: '/modules', element: <ModulesPage /> },
+      { path: '/tower', element: <TowerPage /> },
+      { path: '/modules', element: <TowerPage /> },
       { path: '/performance', element: <PerformancePage /> },
     ],
   },

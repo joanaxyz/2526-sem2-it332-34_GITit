@@ -131,12 +131,14 @@ export type WorkflowScenarioSummary = {
 }
 
 export type ModuleContentSection = 'command_adventures' | 'command_topics' | 'workflow_scenarios'
+export type TowerContentSection = ModuleContentSection
 
 export type ModuleContentPage<T extends CommandDrillAdventureSummary | CommandTopicSummary | WorkflowScenarioSummary> = {
   section: ModuleContentSection
   results: T[]
   next_cursor: number | null
 }
+export type TowerContentPage<T extends CommandDrillAdventureSummary | CommandTopicSummary | WorkflowScenarioSummary> = ModuleContentPage<T>
 
 export type CommandPreviewBlock = {
   type?: 'paragraph' | 'bullet_list' | 'list' | 'command' | 'code' | 'callout' | 'warning' | 'terminal_output'

@@ -4,9 +4,9 @@ import { BarChart2, CheckCircle2, GitPullRequest, RefreshCw, ShieldCheck } from 
 import type { DashboardSummary, RateMetric } from '@/features/dashboard/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/Card'
 
-type ModuleKey = '1' | '2' | '3' | '4'
+type TowerKey = '1' | '2' | '3' | '4'
 
-const MODULE_KEYS: ModuleKey[] = ['1', '2', '3', '4']
+const TOWER_KEYS: TowerKey[] = ['1', '2', '3', '4']
 
 const SCR_COLOR = '#00F5D4'
 const HLCR_COLOR = '#7DD3FC'
@@ -116,15 +116,15 @@ function MetricBar({
   )
 }
 
-function ModulePanel({
-  moduleKey,
+function TowerPanel({
+  towerKey,
   scr,
   hlcr,
   rta,
   arc,
   index,
 }: {
-  moduleKey: ModuleKey
+  towerKey: TowerKey
   scr: RateMetric
   hlcr: RateMetric
   rta: RateMetric
@@ -136,7 +136,7 @@ function ModulePanel({
 
   return (
     <div
-      className="module-card-hover rounded-lg p-4 transition-all duration-200"
+      className="tower-performance-hover rounded-lg p-4 transition-all duration-200"
       style={{
         background: hasAnyData
           ? 'rgba(0,180,216,0.05)'
@@ -150,7 +150,7 @@ function ModulePanel({
         opacity: hasAnyData ? 1 : 0.45,
       }}
     >
-      {/* Module header badge */}
+      {/* Tower header badge */}
       <div className="flex items-center gap-2 mb-3.5">
         <div
           className="flex items-center gap-1.5 rounded-md px-2 py-0.5"
@@ -167,7 +167,7 @@ function ModulePanel({
             className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.14em]"
             style={{ color: hasAnyData ? 'rgba(0,245,212,0.85)' : 'rgba(255,255,255,0.28)' }}
           >
-            Module {moduleKey}
+            Tower {towerKey}
           </span>
         </div>
         {!hasAnyData && (
@@ -248,7 +248,9 @@ function formatPercent(value: number | null) {
   return value === null ? 'No data' : `${value}%`
 }
 
-export function ModulePerformanceCard({ summary }: { summary: DashboardSummary }) {
+export function TowerPerformanceCard({ summary }: { summary: DashboardSummary }) {
+  const towerKpis = summary.tower_kpis ?? summary.module_kpis ?? {}
+
   return (
     <Card>
       <CardHeader>
@@ -257,7 +259,7 @@ export function ModulePerformanceCard({ summary }: { summary: DashboardSummary }
             className="size-5"
             style={{ color: '#00F5D4', filter: 'drop-shadow(0 0 6px rgba(0,245,212,0.5))' }}
           />
-          Module hard + retry performance
+          Tower hard + retry performance
         </CardTitle>
         <CardDescription className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-0.5">
           <span className="flex items-center gap-1.5">
@@ -297,16 +299,17 @@ export function ModulePerformanceCard({ summary }: { summary: DashboardSummary }
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        {MODULE_KEYS.map((moduleKey, index) => {
-          const moduleKpis = summary.module_kpis[moduleKey]
+        {TOWER_KEYS.map((towerKey, index) => {
+          const towerMetrics = towerKpis[towerKey]
+          if (!towerMetrics) return null
           return (
-            <ModulePanel
-              key={moduleKey}
-              moduleKey={moduleKey}
-              scr={moduleKpis.scr}
-              hlcr={moduleKpis.hlcr}
-              rta={moduleKpis.rta}
-              arc={moduleKpis.arc}
+            <TowerPanel
+              key={towerKey}
+              towerKey={towerKey}
+              scr={towerMetrics.scr}
+              hlcr={towerMetrics.hlcr}
+              rta={towerMetrics.rta}
+              arc={towerMetrics.arc}
               index={index}
             />
           )
@@ -315,3 +318,5 @@ export function ModulePerformanceCard({ summary }: { summary: DashboardSummary }
     </Card>
   )
 }
+
+export const ModulePerformanceCard = TowerPerformanceCard

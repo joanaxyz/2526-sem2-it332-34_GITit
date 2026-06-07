@@ -54,6 +54,7 @@ export function PracticeStatusHeader({
     : 0
   const commandProblem = isCommandDrill && 'topic' in session.problem ? session.problem : null
   const workflowTitle = !isCommandDrill && 'narrative' in session.problem ? session.problem.title : null
+  const tower = session.tower ?? session.module
 
   return (
     <header className="relative flex min-h-14 items-center justify-between gap-3 border-b border-border bg-background px-3 py-2">
@@ -61,11 +62,11 @@ export function PracticeStatusHeader({
         <Button type="button" variant="ghost" size="sm" disabled={isExiting} onClick={onExit}>
           <ArrowLeft data-icon="inline-start" />
           {isExiting ? 'Exiting' : exitLabel}
-        </Button>
+          </Button>
         <GitBranch className="size-5 shrink-0 text-primary" />
         <div className="min-w-0">
           <span className="block truncate font-mono text-xs text-muted-foreground">
-            Module {session.module.number} / {isCommandDrill ? commandProblem?.adventure?.title ?? 'Command drill adventure' : workflowTitle ?? 'Workflow scenario'}
+            Tower {tower.number} / {isCommandDrill ? commandProblem?.adventure?.title ?? 'Command Adventure' : workflowTitle ?? 'Workflow scenario'}
           </span>
           <span className="mt-0.5 block truncate text-xs text-foreground">
             {isCommandDrill && commandProblem

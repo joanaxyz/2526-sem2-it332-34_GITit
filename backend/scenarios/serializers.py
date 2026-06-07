@@ -22,8 +22,8 @@ class PracticeStartSerializer(serializers.Serializer):
     command_drill_id = serializers.IntegerField(required=False, allow_null=True)
     workflow_level_id = serializers.IntegerField(required=False, allow_null=True)
     source_entry_point = serializers.ChoiceField(
-        choices=["module_page", "retry", "review"],
-        default="module_page",
+        choices=["tower_page", "module_page", "retry", "review"],
+        default="tower_page",
     )
     prior_session_id = serializers.IntegerField(required=False, allow_null=True)
 
@@ -78,6 +78,11 @@ def session_payload(session: PracticeSession, *, include_steps: bool = True) -> 
         if supports["expected_state"] and expected_target
         else None
     )
+    tower_payload = {
+        "id": session.module_id,
+        "number": session.module.number,
+        "title": session.module.title,
+    }
 
     step_logs = list(session.step_logs.order_by("id")) if include_steps else []
     return {
@@ -90,11 +95,8 @@ def session_payload(session: PracticeSession, *, include_steps: bool = True) -> 
         "first_attempt_star_eligible": session.first_attempt_star_eligible,
         "problem": _problem_payload(session),
         "student_context": context,
-        "module": {
-            "id": session.module_id,
-            "number": session.module.number,
-            "title": session.module.title,
-        },
+        "tower": tower_payload,
+        "module": tower_payload,
         "difficulty": session.difficulty or None,
         "variant": {
             "id": session.variant_id,

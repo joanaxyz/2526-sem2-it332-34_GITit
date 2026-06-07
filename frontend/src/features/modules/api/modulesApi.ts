@@ -1,11 +1,16 @@
 import { apiRequest } from '@/shared/api/httpClient'
-import type { FoundationTopic, LearningModule } from '@/features/modules/types'
+import type { FoundationTopic, LearningTower } from '@/features/modules/types'
 
-export const modulesApi = {
+export const towersApi = {
   listFoundations() {
     return apiRequest<FoundationTopic[]>('/learning/foundations/')
   },
+  listTowers() {
+    return apiRequest<LearningTower[]>('/learning/towers/')
+  },
   listModules() {
-    return apiRequest<LearningModule[]>('/learning/modules/')
+    return apiRequest<LearningTower[]>('/learning/towers/')
   },
 }
+
+export const modulesApi = towersApi

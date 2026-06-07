@@ -1,4 +1,4 @@
-export type ModulePracticeMetric = {
+export type TowerPracticeMetric = {
   value: number
   numerator: number
   denominator: number
@@ -19,7 +19,7 @@ export type FoundationTopic = {
   sort_order: number
 }
 
-export type LearningModule = {
+export type LearningTower = {
   id: number
   slug: string
   number: number
@@ -28,5 +28,8 @@ export type LearningModule = {
   sort_order: number
   command_topic_count: number
   workflow_scenario_count: number
-  practice_completion?: ModulePracticeMetric
+  practice_completion?: TowerPracticeMetric
 }
+
+export type ModulePracticeMetric = TowerPracticeMetric
+export type LearningModule = LearningTower

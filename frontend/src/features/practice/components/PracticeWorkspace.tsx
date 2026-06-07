@@ -47,6 +47,11 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
 }
 
+function towerUrlForSession(session: Pick<PracticeSession, 'tower' | 'module'>) {
+  const tower = session.tower ?? session.module
+  return `/tower?tower=${tower.id}`
+}
+
 function constrainedTerminalPaneRatio(clientX: number, bounds: DOMRect) {
   const usableWidth = Math.max(bounds.width - RESIZE_HANDLE_WIDTH, 1)
   const rawRatio = (clientX - bounds.left) / bounds.width
@@ -135,8 +140,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
     onSuccess: (updatedSession) => {
       syncPracticeSessionInCache(queryClient, updatedSession)
       invalidatePracticeProgressQueries(queryClient)
-      const base = `/modules?module=${updatedSession.module.id}`
-      navigate(base)
+      navigate(towerUrlForSession(updatedSession))
     },
   })
   const nextLevelMutation = useMutation({
@@ -496,7 +500,7 @@ export function PracticeWorkspace({ reviewMode = false }: { reviewMode?: boolean
         onClose={() => {
           setDismissedCompletionSessionId(session.id)
         }}
-        onBackToModules={() => navigate(`/modules?module=${session.module.id}`)}
+        onBackToTower={() => navigate(towerUrlForSession(session))}
         onRetry={() => retryMutation.mutate()}
         onContinue={() => retryMutation.mutate()}
         onReviewDifficulty={(difficulty) => reviewMutation.mutate(difficulty.id)}

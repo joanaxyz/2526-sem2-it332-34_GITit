@@ -136,6 +136,11 @@ export type PracticeSession = {
   first_attempt_star_eligible: boolean
   problem: PracticeProblem
   student_context?: PracticeStudentContext
+  tower?: {
+    id: number
+    number: number
+    title: string
+  }
   module: {
     id: number
     number: number

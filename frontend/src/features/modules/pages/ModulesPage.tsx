@@ -1,201 +1,199 @@
-import { useEffect, useRef } from 'react'
-import { BookOpenText, GitBranch, Sparkles, TerminalSquare } from 'lucide-react'
-import { motion, useScroll, useSpring } from 'motion/react'
+﻿import { CheckCircle2, Layers3, ListChecks, Lock, Route, Swords, Trophy, Zap, type LucideIcon } from 'lucide-react'
+import { motion } from 'motion/react'
+import { useEffect, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
 
-import { modulesApi } from '@/features/modules/api/modulesApi'
-import { ModuleCard } from '@/features/modules/components/ModuleCard'
+import { towersApi } from '@/features/modules/api/modulesApi'
+import { TowerPracticeHub } from '@/features/modules/components/ModulePracticeHub'
+import type { LearningTower } from '@/features/modules/types'
 import { queryKeys } from '@/shared/api/queryKeys'
+import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
+import { ProgressBar } from '@/shared/components/ProgressBar'
 
-function RouteKicker({ label, value }: { label: string; value: string | number }) {
+function isFoundationsTower(tower: LearningTower) {
+  return tower.number === 1 || tower.slug === 'creating-inspecting-repositories'
+}
+
+function towerTitle(tower: LearningTower) {
+  return isFoundationsTower(tower) ? 'Foundations' : tower.title
+}
+
+function towerTotals(towers: LearningTower[]) {
+  const commands = towers.reduce((sum, tower) => sum + tower.command_topic_count, 0)
+  const challenges = towers.reduce((sum, tower) => sum + tower.workflow_scenario_count, 0)
+  const numerator = towers.reduce((sum, tower) => sum + (tower.practice_completion?.numerator ?? 0), 0)
+  const denominator = towers.reduce((sum, tower) => sum + (tower.practice_completion?.denominator ?? 0), 0)
+  const progress = denominator ? Math.round((numerator / denominator) * 100) : 0
+
+  return {
+    commands,
+    challenges,
+    levels: challenges * 3,
+    progress,
+  }
+}
+
+function OverviewStat({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: LucideIcon
+  label: string
+  value: string | number
+}) {
   return (
-    <div className="rounded-2xl border border-border/70 bg-background/35 px-4 py-3">
-      <p className="font-mono text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
-      <p className="mt-1 text-2xl font-black text-primary">{value}</p>
+    <div className="tower-overview-stat">
+      <span className="tower-overview-stat-icon">
+        <Icon className="size-4" />
+      </span>
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <strong className="ml-auto text-sm text-foreground">{value}</strong>
     </div>
   )
 }
 
-function FoundationModuleCard({ foundations }: { foundations: Awaited<ReturnType<typeof modulesApi.listFoundations>> }) {
+function HowItWorksItem({ icon: Icon, children }: { icon: LucideIcon; children: string }) {
   return (
-    <motion.article
-      className="learning-branch-row foundation-module-row relative grid gap-4 lg:grid-cols-[minmax(0,1fr)_5.5rem_minmax(0,1fr)]"
-      initial={{ opacity: 0, y: 38, scale: 0.98 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ amount: 0.2, once: false, margin: '-10% 0px -10% 0px' }}
-      transition={{ duration: 0.58, ease: [0.16, 1, 0.3, 1] }}
-    >
-      <motion.header
-        className="module-route-strip foundation-route-strip lg:col-span-3"
-        initial={{ opacity: 0, y: 12 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ amount: 0.7, once: false }}
-        transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
-            <BookOpenText className="size-5" />
-          </span>
-          <div className="min-w-0">
-            <h2 className="truncate text-lg font-black leading-tight md:text-xl">Foundations</h2>
-            <p className="mt-0.5 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-              {foundations.length} gates before the branch opens
-            </p>
-          </div>
-        </div>
-      </motion.header>
-
-      <div className="learning-branch-track relative hidden items-center justify-center lg:flex lg:col-start-2 lg:row-start-2">
-        <motion.div
-          className="learning-branch-node foundation-branch-node"
-          initial={{ scale: 0.6, opacity: 0 }}
-          whileInView={{ scale: 1, opacity: 1 }}
-          viewport={{ amount: 0.55, once: false }}
-          transition={{ duration: 0.42, type: 'spring', stiffness: 280, damping: 18 }}
-        >
-          <BookOpenText className="size-5" />
-        </motion.div>
-        <motion.div
-          className="learning-branch-connector"
-          initial={{ scaleX: 0, opacity: 0 }}
-          whileInView={{ scaleX: 1, opacity: 1 }}
-          viewport={{ amount: 0.5, once: false }}
-          transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-        />
-      </div>
-
-      <div className="lg:col-start-3 lg:row-start-2">
-        <div className="foundation-gate-grid grid gap-3 sm:grid-cols-2">
-          {foundations.map((topic, index) => (
-            <motion.article
-              className="foundation-gate rounded-2xl border border-border/70 bg-background/35 p-4 shadow-[0_14px_38px_rgba(0,0,0,0.16)]"
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ amount: 0.35, once: false }}
-              transition={{ duration: 0.38, delay: index * 0.03 }}
-              key={topic.id}
-            >
-              <div className="flex items-center gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-primary/25 bg-primary/10 font-mono text-sm font-bold text-primary">
-                  {topic.icon || topic.sort_order + 1}
-                </span>
-                <div className="min-w-0">
-                  <h3 className="truncate text-base font-black">{topic.title}</h3>
-                  <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{topic.summary}</p>
-                </div>
-              </div>
-            </motion.article>
-          ))}
-        </div>
-      </div>
-    </motion.article>
+    <li className="tower-how-item">
+      <span className="tower-how-icon">
+        <Icon className="size-5" />
+      </span>
+      <span>{children}</span>
+    </li>
   )
 }
 
-export function ModulesPage() {
+export function TowerPage() {
   const [searchParams] = useSearchParams()
-  const moduleParam = searchParams.get('module')
-  const focusedModuleId = moduleParam ? Number(moduleParam) : null
-  const pathRef = useRef<HTMLDivElement | null>(null)
-  const { scrollYProgress } = useScroll({ target: pathRef, offset: ['start 82%', 'end 18%'] })
-  const pathScaleY = useSpring(scrollYProgress, { stiffness: 120, damping: 28, mass: 0.35 })
-  const foundationsQuery = useQuery({
-    queryKey: queryKeys.foundations,
-    queryFn: modulesApi.listFoundations,
-    staleTime: 5 * 60 * 1000,
-  })
-  const modulesQuery = useQuery({
-    queryKey: queryKeys.modules,
-    queryFn: modulesApi.listModules,
+  const towerParam = searchParams.get('tower') ?? searchParams.get('module')
+  const focusedTowerId = towerParam ? Number(towerParam) : null
+  const towersQuery = useQuery({
+    queryKey: queryKeys.towers,
+    queryFn: towersApi.listTowers,
     staleTime: 5 * 60 * 1000,
   })
 
-  useEffect(() => {
-    if (focusedModuleId && Number.isFinite(focusedModuleId)) return
-    window.scrollTo({ top: 0, behavior: 'auto' })
-  }, [focusedModuleId])
+  const towers = towersQuery.data ?? []
+  const totals = useMemo(() => towerTotals(towers), [towers])
 
   useEffect(() => {
-    if (!focusedModuleId || !modulesQuery.data?.length) return
+    if (!focusedTowerId || !Number.isFinite(focusedTowerId) || !towers.length) return
     window.requestAnimationFrame(() => {
-      document.querySelector(`[data-module-id="${focusedModuleId}"]`)?.scrollIntoView({
-        block: 'center',
+      document.querySelector(`[data-tower-id="${focusedTowerId}"]`)?.scrollIntoView({
+        block: 'start',
         behavior: 'smooth',
       })
     })
-  }, [modulesQuery.data, focusedModuleId])
+  }, [focusedTowerId, towers])
 
-  if (foundationsQuery.isLoading || modulesQuery.isLoading) {
+  if (towersQuery.isLoading) {
     return (
       <LoadingState
-        description="Building the practice map."
-        label="Loading route"
+        description="Preparing the tower."
+        label="Loading tower"
         variant="page"
       />
     )
   }
-  if (foundationsQuery.isError) {
-    return <ErrorState title="Could not load foundations" description={foundationsQuery.error.message} />
+  if (towersQuery.isError) {
+    return <ErrorState title="Could not load tower" description={towersQuery.error.message} />
   }
-  if (modulesQuery.isError) {
-    return <ErrorState title="Could not load modules" description={modulesQuery.error.message} />
+  if (!towers.length) {
+    return <EmptyState title="No tower available" description="Publish a learning tower to start the climb." />
   }
-
-  const foundations = foundationsQuery.data ?? []
-  const modules = modulesQuery.data ?? []
-  const totalChallenges = modules.reduce((sum, module) => sum + module.workflow_scenario_count, 0)
-  const displayedModules = foundations.length > 0 ? modules.length + 1 : modules.length
-  const totalCommandLevels = modules.reduce((sum, module) => sum + module.command_topic_count, 0)
 
   return (
-    <div className="modules-page-shell flex w-full flex-col gap-8">
-      <motion.header
-        className="module-quest-hero relative overflow-hidden rounded-[2rem] border border-primary/20 bg-card/55 p-6 shadow-[0_28px_90px_rgba(0,0,0,0.26)] md:p-8"
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <div className="module-quest-hero-glow" aria-hidden="true" />
-        <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-end">
+    <div className="tower-page-shell">
+      <div className="tower-sky" aria-hidden="true" />
+      <section className="tower-stage-grid" aria-labelledby="tower-title">
+        <motion.aside
+          className="tower-overview-column"
+          initial={{ opacity: 0, x: -18 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1] }}
+        >
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 font-mono text-xs font-bold uppercase tracking-[0.16em] text-primary">
-              <GitBranch className="size-3.5" />
-              Branch map
+            <div className="tower-heading-row">
+              <h1 id="tower-title" className="text-4xl font-black text-foreground">
+                Git Tower
+              </h1>
+              <span className="tower-index-pill">
+                <Zap className="size-3.5" />
+                {towers.length} Towers
+              </span>
             </div>
-            <h1 className="mt-4 max-w-3xl text-4xl font-black tracking-tight md:text-6xl">
-              Pick a route. Clear the tower.
-            </h1>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-              Command Adventure unlocks the skills. Git it Challenge tests the flow.
+            <p className="mt-4 max-w-xs text-base leading-7 text-muted-foreground">
+              Climb every Git tower in order. Each stage stacks directly below the last.
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            <RouteKicker label="Modules" value={displayedModules} />
-            <RouteKicker label="Levels" value={totalCommandLevels} />
-            <RouteKicker label="Towers" value={totalChallenges} />
-          </div>
-        </div>
-      </motion.header>
 
-      <section>
-        <div ref={pathRef} className="learning-branch relative grid gap-12 py-4">
-          <div className="learning-branch-spine" aria-hidden="true" />
-          <motion.div className="learning-branch-spine-fill" style={{ scaleY: pathScaleY }} aria-hidden="true" />
-          <div className="learning-branch-start" aria-hidden="true">
-            <Sparkles className="size-4" />
-          </div>
-          {foundations.length ? <FoundationModuleCard foundations={foundations} /> : null}
-          {modules.map((module, index) => (
-            <ModuleCard module={module} index={index + (foundations.length ? 1 : 0)} key={module.id} />
+          <section className="tower-side-panel" aria-label="Tower overview">
+            <div className="grid gap-4">
+              <OverviewStat icon={ListChecks} label="Commands to learn" value={totals.commands} />
+              <OverviewStat icon={Swords} label="Challenges" value={totals.challenges} />
+              <OverviewStat icon={Layers3} label="Total levels" value={totals.levels} />
+            </div>
+            <div className="tower-progress-block">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm text-muted-foreground">Tower Progress</span>
+                <strong className="font-mono text-sm text-foreground">{totals.progress}%</strong>
+              </div>
+              <ProgressBar value={totals.progress} className="mt-3 h-2.5 bg-secondary/70" glow fillAnimate />
+            </div>
+          </section>
+
+          <section className="stage-reward-panel" aria-label="Stage reward">
+            <div>
+              <p className="text-sm text-muted-foreground">Stage Reward</p>
+              <p className="mt-2 text-sm font-semibold text-foreground">Clear each Command Adventure</p>
+              <p className="mt-3 inline-flex items-center gap-1.5 text-2xl font-black text-foreground">
+                +25 <Zap className="size-5 text-warning" />
+              </p>
+            </div>
+            <span className="stage-reward-icon">
+              <img className="stage-reward-chest" src="/stage_reward_neon_chest.png" alt="" aria-hidden="true" />
+            </span>
+          </section>
+        </motion.aside>
+
+        <div className="tower-stack-column">
+          {towers.map((tower, index) => (
+            <TowerPracticeHub
+              displayTitle={towerTitle(tower)}
+              isFirst={index === 0}
+              isLast={index === towers.length - 1}
+              key={tower.id}
+              sequenceIndex={index}
+              tower={tower}
+            />
           ))}
-          <div className="learning-branch-finish" aria-hidden="true">
-            <TerminalSquare className="size-4" />
-          </div>
         </div>
+
+        <motion.aside
+          className="tower-how-panel"
+          initial={{ opacity: 0, x: 18 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
+        >
+          <h2 className="text-lg font-black text-primary">How it works</h2>
+          <ul className="mt-6 grid gap-6">
+            <HowItWorksItem icon={Swords}>Clear each Command Adventure to unlock challenges.</HowItWorksItem>
+            <HowItWorksItem icon={Trophy}>Each challenge has Easy, Medium, and Hard levels.</HowItWorksItem>
+            <HowItWorksItem icon={Lock}>Clear all stacked levels to complete the tower.</HowItWorksItem>
+            <HowItWorksItem icon={CheckCircle2}>Progress saves after every cleared practice.</HowItWorksItem>
+          </ul>
+          <div className="tower-how-footer" aria-hidden="true">
+            <Route className="size-4" />
+            <span>Climb the tower</span>
+          </div>
+        </motion.aside>
       </section>
     </div>
   )
 }
+
+export const ModulesPage = TowerPage

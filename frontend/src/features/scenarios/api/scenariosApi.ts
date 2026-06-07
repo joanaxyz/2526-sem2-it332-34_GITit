@@ -3,8 +3,8 @@ import type {
   CommandDrillAdventureSummary,
   CommandTopicSummary,
   CommandUsagePreview,
-  ModuleContentPage,
-  ModuleContentSection,
+  TowerContentPage,
+  TowerContentSection,
   PracticeKind,
   WorkflowScenarioSummary,
 } from '@/features/scenarios/types'
@@ -14,27 +14,27 @@ export type PracticeStartPayload =
   | {
       problem_type: 'command_drill'
       command_drill_id: number
-      source_entry_point: 'module_page' | 'retry' | 'review'
+      source_entry_point: 'tower_page' | 'module_page' | 'retry' | 'review'
       prior_session_id?: number | null
     }
   | {
       problem_type: 'workflow_scenario'
       workflow_level_id: number
-      source_entry_point: 'module_page' | 'retry' | 'review'
+      source_entry_point: 'tower_page' | 'module_page' | 'retry' | 'review'
       prior_session_id?: number | null
     }
 
-type ModuleContentResult<TSection extends ModuleContentSection> =
+type TowerContentResult<TSection extends TowerContentSection> =
   TSection extends 'command_adventures'
-    ? ModuleContentPage<CommandDrillAdventureSummary>
+    ? TowerContentPage<CommandDrillAdventureSummary>
     : TSection extends 'command_topics'
-    ? ModuleContentPage<CommandTopicSummary>
-    : ModuleContentPage<WorkflowScenarioSummary>
+    ? TowerContentPage<CommandTopicSummary>
+    : TowerContentPage<WorkflowScenarioSummary>
 
 export function startPayloadForPractice(
   practiceKind: PracticeKind,
   id: number,
-  sourceEntryPoint: 'module_page' | 'retry' | 'review' = 'module_page',
+  sourceEntryPoint: 'tower_page' | 'module_page' | 'retry' | 'review' = 'tower_page',
   priorSessionId?: number | null,
 ): PracticeStartPayload {
   if (practiceKind === 'command_drill') {
@@ -54,7 +54,19 @@ export function startPayloadForPractice(
 }
 
 export const scenariosApi = {
-  moduleContent<TSection extends ModuleContentSection>(
+  towerContent<TSection extends TowerContentSection>(
+    towerId: number,
+    section: TSection,
+    options?: { cursor?: number | null; limit?: number },
+  ) {
+    const params = new URLSearchParams({ section })
+    if (options?.cursor) params.set('cursor', String(options.cursor))
+    if (options?.limit) params.set('limit', String(options.limit))
+    return apiRequest<TowerContentResult<TSection>>(
+      `/scenarios/towers/${towerId}/content/?${params.toString()}`,
+    )
+  },
+  moduleContent<TSection extends TowerContentSection>(
     moduleId: number,
     section: TSection,
     options?: { cursor?: number | null; limit?: number },
@@ -62,8 +74,8 @@ export const scenariosApi = {
     const params = new URLSearchParams({ section })
     if (options?.cursor) params.set('cursor', String(options.cursor))
     if (options?.limit) params.set('limit', String(options.limit))
-    return apiRequest<ModuleContentResult<TSection>>(
-      `/scenarios/modules/${moduleId}/content/?${params.toString()}`,
+    return apiRequest<TowerContentResult<TSection>>(
+      `/scenarios/towers/${moduleId}/content/?${params.toString()}`,
     )
   },
   commandUsagePreview(usageId: number) {

@@ -524,7 +524,7 @@ class GitCommandSpec:
 
 
 class GitCommandRegistry:
-    """Supported Module 1 git command metadata and parser validation."""
+    """Supported Tower 1 git command metadata and parser validation."""
 
     def __init__(self) -> None:
         self._specs = {
@@ -799,7 +799,7 @@ def _unknown_option_message(subcommand: str, option: str) -> str:
     if subcommand == "clone":
         return (
             f"error: unknown option `{option}`. "
-            "Module 1 clone supports only -b/--branch and --depth."
+            "Tower 1 clone supports only -b/--branch and --depth."
         )
     if subcommand == "log":
         return f"fatal: unrecognized argument: {option}"
@@ -934,14 +934,14 @@ def _validate_remote(parsed: ParsedGitCommand) -> str | None:
         return None
     if not parsed.args:
         return None
-    return "Only git remote and git remote -v are supported in Module 1."
+    return "Only git remote and git remote -v are supported in Tower 1."
 
 
 def _validate_rm(parsed: ParsedGitCommand) -> str | None:
     if not parsed.pathspecs:
         return "fatal: No pathspec was given."
     if parsed.has_option("-r") and not parsed.has_option("--cached"):
-        return "fatal: git rm -r is only supported with --cached in Module 1"
+        return "fatal: git rm -r is only supported with --cached in Tower 1"
     return None
 
 

@@ -295,7 +295,7 @@ def test_registry_rejects_unsupported_flags_and_classifies_diagnostics():
     )
     unsupported_clone = parser.parse("git clone --bare https://example.test/repo.git")
     assert registry.require("clone").validate(unsupported_clone) == (
-        "error: unknown option `--bare`. Module 1 clone supports only -b/--branch and --depth."
+        "error: unknown option `--bare`. Tower 1 clone supports only -b/--branch and --depth."
     )
     with pytest.raises(GitCommandParseError, match="requires a value"):
         parser.parse("git clone -b")

@@ -13,7 +13,7 @@ class LearningModule(models.Model):
         ordering = ["sort_order", "number"]
 
     def __str__(self) -> str:
-        return f"Module {self.number}: {self.title}"
+        return f"Tower {self.number}: {self.title}"
 
 
 class FoundationTopic(models.Model):

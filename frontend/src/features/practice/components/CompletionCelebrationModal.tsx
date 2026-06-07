@@ -72,7 +72,7 @@ export function CompletionCelebrationModal({
   open,
   session,
   onClose,
-  onBackToModules,
+  onBackToTower,
   onNextLevel,
   onContinue,
   onRetry,
@@ -87,7 +87,7 @@ export function CompletionCelebrationModal({
   open: boolean
   session: PracticeSession
   onClose: () => void
-  onBackToModules: () => void
+  onBackToTower: () => void
   onNextLevel?: () => void
   onContinue?: () => void
   onRetry?: () => void
@@ -333,8 +333,8 @@ export function CompletionCelebrationModal({
                         : 'Start fresh variant'}
                   </Button>
                 ) : null}
-                <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToModules}>
-                  Back to Modules
+                <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToTower}>
+                  Back to Tower
                 </Button>
               </>
             ) : canAdvance ? (
@@ -357,13 +357,13 @@ export function CompletionCelebrationModal({
                     {isContinuing ? 'Continuing' : 'Continue'}
                   </Button>
                 ) : null}
-                <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToModules}>
-                  Back to Modules
+                <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToTower}>
+                  Back to Tower
                 </Button>
               </>
             ) : session.status === 'completed' && meetsProgress ? (
-              <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToModules}>
-                Back to Modules
+              <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToTower}>
+                Back to Tower
               </Button>
             ) : null}
           </div>

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { dashboardApi } from '@/features/dashboard/api/dashboardApi'
-import { ModulePerformanceCard } from '@/features/dashboard/components/ModulePerformanceCard'
+import { TowerPerformanceCard } from '@/features/dashboard/components/ModulePerformanceCard'
 import { ProgressSummaryCards } from '@/features/dashboard/components/ProgressSummaryCards'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
@@ -17,7 +17,7 @@ export function PerformancePage() {
   if (isLoading) {
     return (
       <LoadingState
-        description="Collecting module progress and accuracy trends."
+        description="Collecting tower progress and accuracy trends."
         label="Loading performance"
         variant="page"
       />
@@ -71,7 +71,7 @@ export function PerformancePage() {
         <ProgressSummaryCards summary={data} />
       </div>
       <div className="animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-        <ModulePerformanceCard summary={data} />
+        <TowerPerformanceCard summary={data} />
       </div>
     </div>
   )

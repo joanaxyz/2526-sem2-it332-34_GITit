@@ -36,7 +36,7 @@ export function useScaffolding(sessionId: number) {
   function showToast(
     trigger: 'T1' | 'T2' | 'T3',
     session: PracticeSession,
-    onReviewModule: () => void,
+    onReviewTower: () => void,
   ) {
     const difficulty = scaffoldDifficultyFor(session.difficulty)
     const message = getScaffoldMessage(trigger, difficulty)
@@ -47,9 +47,9 @@ export function useScaffolding(sessionId: number) {
           message={message}
           trigger={trigger}
           difficulty={difficulty}
-          onReviewModule={() => {
+          onReviewTower={() => {
             clearToast()
-            onReviewModule()
+            onReviewTower()
           }}
           onContinue={() => {
             clearToast()
@@ -65,7 +65,7 @@ export function useScaffolding(sessionId: number) {
   function evaluateAndNotify(
     session: PracticeSession,
     stepClassification: string,
-    onReviewModule: () => void,
+    onReviewTower: () => void,
   ) {
     if (session.status !== 'started') return
     if (stepClassification !== 'counted_action') return
@@ -94,7 +94,7 @@ export function useScaffolding(sessionId: number) {
     })
 
     markFired(trigger)
-    showToast(trigger, session, onReviewModule)
+    showToast(trigger, session, onReviewTower)
   }
 
   return { clearToast, evaluateAndNotify, flags }

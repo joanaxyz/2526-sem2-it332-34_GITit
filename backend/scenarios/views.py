@@ -10,7 +10,7 @@ from scenarios.selectors import (
     get_command_drill,
     get_command_usage,
     get_workflow_level,
-    module_content_page,
+    tower_content_page,
 )
 from scenarios.serializers import (
     CommandSubmitSerializer,
@@ -27,21 +27,26 @@ from scenarios.services import (
 )
 
 
-class ModuleContentAPIView(APIView):
-    def get(self, request, module_id: int):
+class TowerContentAPIView(APIView):
+    def get(self, request, tower_id: int):
         section = request.query_params.get("section") or "command_topics"
         cursor = _int_param(request.query_params.get("cursor"))
         limit = _int_param(request.query_params.get("limit")) or 8
-        with timing("practice.module_content", module_id=module_id, section=section):
+        with timing("practice.tower_content", tower_id=tower_id, section=section):
             return Response(
-                module_content_page(
+                tower_content_page(
                     user=request.user,
-                    module_id=module_id,
+                    tower_id=tower_id,
                     section=section,
                     cursor=cursor,
                     limit=limit,
                 )
             )
+
+
+class ModuleContentAPIView(TowerContentAPIView):
+    def get(self, request, module_id: int):
+        return super().get(request, tower_id=module_id)
 
 
 class CommandUsagePreviewAPIView(APIView):

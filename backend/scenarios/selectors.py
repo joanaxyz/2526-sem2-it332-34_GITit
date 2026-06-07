@@ -118,6 +118,23 @@ def module_content_page(
     }
 
 
+def tower_content_page(
+    *,
+    user,
+    tower_id: int,
+    section: str,
+    cursor: int | None = None,
+    limit: int = 8,
+) -> dict:
+    return module_content_page(
+        user=user,
+        module_id=tower_id,
+        section=section,
+        cursor=cursor,
+        limit=limit,
+    )
+
+
 def command_topic_queryset(*, module_id: int):
     return (
         CommandTopic.objects.filter(module_id=module_id, is_published=True)

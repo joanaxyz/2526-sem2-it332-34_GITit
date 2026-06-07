@@ -4,14 +4,17 @@ export type RateMetric = {
   denominator: number
 }
 
+export type TowerKpis = Record<string, {
+  scr: RateMetric
+  hlcr: RateMetric
+  rta: RateMetric
+  arc: RateMetric
+}>
+
 export type DashboardSummary = {
   kpis: Record<'practice_completion' | 'scr' | 'arc' | 'car' | 'hlcr' | 'rta', RateMetric>
-  module_kpis: Record<string, {
-    scr: RateMetric
-    hlcr: RateMetric
-    rta: RateMetric
-    arc: RateMetric
-  }>
+  tower_kpis: TowerKpis
+  module_kpis?: TowerKpis
   counts: {
     started: number
     completed: number

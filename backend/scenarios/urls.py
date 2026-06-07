@@ -8,10 +8,12 @@ from scenarios.views import (
     PracticeSessionAbandonAPIView,
     PracticeSessionDetailAPIView,
     PracticeSessionStartAPIView,
+    TowerContentAPIView,
     WorkspaceFileCreateAPIView,
 )
 
 urlpatterns = [
+    path("towers/<int:tower_id>/content/", TowerContentAPIView.as_view(), name="tower-content"),
     path("modules/<int:module_id>/content/", ModuleContentAPIView.as_view(), name="module-content"),
     path("command-usages/<int:usage_id>/preview/", CommandUsagePreviewAPIView.as_view(), name="command-usage-preview"),
     path("sessions/", PracticeSessionStartAPIView.as_view(), name="practice-session-start"),

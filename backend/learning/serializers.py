@@ -18,7 +18,7 @@ class FoundationTopicSerializer(serializers.ModelSerializer):
         ]
 
 
-class ModuleListSerializer(serializers.ModelSerializer):
+class TowerListSerializer(serializers.ModelSerializer):
     command_topic_count = serializers.IntegerField(read_only=True)
     workflow_scenario_count = serializers.IntegerField(read_only=True)
     practice_completion = serializers.SerializerMethodField()
@@ -38,11 +38,19 @@ class ModuleListSerializer(serializers.ModelSerializer):
         ]
 
     def get_practice_completion(self, obj) -> dict:
+        denominator_map = self.context.get(
+            "tower_completion_denominator_map",
+            self.context.get("practice_completion_denominator_map", {}),
+        )
+        count_map = self.context.get(
+            "tower_completion_count_map",
+            self.context.get("practice_completion_count_map", {}),
+        )
         denominator = int(
-            self.context.get("practice_completion_denominator_map", {}).get(obj.id, 0) or 0
+            denominator_map.get(obj.id, 0) or 0
         )
         numerator = int(
-            self.context.get("practice_completion_count_map", {}).get(obj.id, 0) or 0
+            count_map.get(obj.id, 0) or 0
         )
         value = round((numerator / denominator) * 100, 1) if denominator else 0.0
         return {
@@ -50,3 +58,6 @@ class ModuleListSerializer(serializers.ModelSerializer):
             "numerator": numerator,
             "denominator": denominator,
         }
+
+
+ModuleListSerializer = TowerListSerializer

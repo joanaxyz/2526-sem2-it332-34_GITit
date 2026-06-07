@@ -103,6 +103,27 @@ class MetricsService:
             for row in module_rows
             if row["module__number"] is not None
         }
+        tower_kpis = {
+            str(module_number): {
+                "scr": self._rate(
+                    module_metrics_map.get(module_number, {}).get("completed_count") or 0,
+                    module_metrics_map.get(module_number, {}).get("started_count") or 0,
+                ),
+                "hlcr": self._rate(
+                    module_metrics_map.get(module_number, {}).get("hard_completed") or 0,
+                    module_metrics_map.get(module_number, {}).get("hard_started") or 0,
+                ),
+                "rta": self._rate(
+                    module_metrics_map.get(module_number, {}).get("rta_success") or 0,
+                    module_metrics_map.get(module_number, {}).get("rta_total") or 0,
+                ),
+                "arc": self._average_retry_count_from_counts(
+                    module_metrics_map.get(module_number, {}).get("completed_retry_total") or 0,
+                    module_metrics_map.get(module_number, {}).get("completed_count") or 0,
+                ),
+            }
+            for module_number in sorted(module_metrics_map)
+        }
         streak = StreakRecord.objects.filter(user=user).only(
             "current_streak",
             "longest_streak",
@@ -120,27 +141,8 @@ class MetricsService:
                 "hlcr": self._rate(session_counts["hard_completed"] or 0, session_counts["hard_started"] or 0),
                 "rta": self._rate(session_counts["rta_success"] or 0, session_counts["rta_total"] or 0),
             },
-            "module_kpis": {
-                str(module_number): {
-                    "scr": self._rate(
-                        module_metrics_map.get(module_number, {}).get("completed_count") or 0,
-                        module_metrics_map.get(module_number, {}).get("started_count") or 0,
-                    ),
-                    "hlcr": self._rate(
-                        module_metrics_map.get(module_number, {}).get("hard_completed") or 0,
-                        module_metrics_map.get(module_number, {}).get("hard_started") or 0,
-                    ),
-                    "rta": self._rate(
-                        module_metrics_map.get(module_number, {}).get("rta_success") or 0,
-                        module_metrics_map.get(module_number, {}).get("rta_total") or 0,
-                    ),
-                    "arc": self._average_retry_count_from_counts(
-                        module_metrics_map.get(module_number, {}).get("completed_retry_total") or 0,
-                        module_metrics_map.get(module_number, {}).get("completed_count") or 0,
-                    ),
-                }
-                for module_number in sorted(module_metrics_map)
-            },
+            "tower_kpis": tower_kpis,
+            "module_kpis": tower_kpis,
             "counts": {
                 "started": started,
                 "completed": completed,

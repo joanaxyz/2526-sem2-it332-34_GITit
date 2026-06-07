@@ -119,8 +119,8 @@ export function CurrentTrackCard({ summary }: { summary: DashboardSummary }) {
 
         <div className="flex flex-wrap gap-2">
           <Button asChild className="btn-pulse">
-            <Link to="/modules">
-              Open Modules
+            <Link to="/tower">
+              Open Tower
               <ArrowRight data-icon="inline-end" />
             </Link>
           </Button>

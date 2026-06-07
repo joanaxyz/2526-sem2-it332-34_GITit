@@ -10,7 +10,7 @@ import { cn } from '@/shared/utils/cn'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: Gauge },
-  { to: '/modules', label: 'Modules', icon: BookOpen },
+  { to: '/tower', label: 'Tower', icon: BookOpen },
   { to: '/performance', label: 'Performance', icon: BarChart2 },
 ]
 
@@ -200,7 +200,7 @@ export function DashboardLayout() {
                   to={item.to}
                 >
                   <item.icon className="size-4" />
-                  {item.label}
+                  <span className="max-sm:hidden">{item.label}</span>
                 </NavLink>
               ))}
             </nav>

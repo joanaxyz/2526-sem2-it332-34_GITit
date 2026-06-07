@@ -707,7 +707,7 @@ def _verification_items(*, command: str, effects: list[str], boundaries: list[st
 
 def _state_language(*, command: str, effects: list[str], boundaries: list[str]) -> str:
     if command.startswith(("git status", "git log", "git diff", "git show", "git branch", "git remote", "git reflog", "git check-ignore", "git ls-files")):
-        return "This is a reading command in Module 1. It gives evidence for the next decision, but the repository state should remain unchanged after the preview command runs."
+        return "This is a reading command in Tower 1. It gives evidence for the next decision, but the repository state should remain unchanged after the preview command runs."
     if command.startswith("git add"):
         return "This command changes the index, which is the staged snapshot prepared for the next commit. It does not create history by itself."
     if command.startswith("git commit"):
@@ -1035,7 +1035,7 @@ def _git_log_sections() -> list[dict[str, Any]]:
                 ),
                 _callout(
                     "Mental model",
-                    "This is a reading command in Module 1. It gives evidence for the next decision, "
+                    "This is a reading command in Tower 1. It gives evidence for the next decision, "
                     "but the repository state should remain unchanged after the preview command runs.",
                 ),
                 _bullets(
@@ -1693,7 +1693,7 @@ GIT_COMMAND_CONTENT_LIBRARY: list[dict[str, Any]] = [
         ],
         boundaries=[
             "It does not modify the remote repository.",
-            "Module 1 does not support advanced clone options such as --bare, --mirror, submodules, filters, or templates.",
+            "Tower 1 does not support advanced clone options such as --bare, --mirror, submodules, filters, or templates.",
         ],
         watch_for="Use the exact destination, branch, and depth requested by the scenario.",
         readiness=[
@@ -1720,7 +1720,7 @@ GIT_COMMAND_CONTENT_LIBRARY: list[dict[str, Any]] = [
             {
                 "token": "<directory>",
                 "title": "Destination folder",
-                "body": "Optional. If omitted, Module 1 infers the folder name from the repository URL.",
+                "body": "Optional. If omitted, Tower 1 infers the folder name from the repository URL.",
             },
             {
                 "token": "<branch>",
@@ -1730,7 +1730,7 @@ GIT_COMMAND_CONTENT_LIBRARY: list[dict[str, Any]] = [
             {
                 "token": "<number>",
                 "title": "Depth",
-                "body": "Must be a positive integer. Module 1 uses it to mark the clone as shallow.",
+                "body": "Must be a positive integer. Tower 1 uses it to mark the clone as shallow.",
             },
         ],
     ),
@@ -2168,7 +2168,7 @@ GIT_COMMAND_CONTENT_LIBRARY: list[dict[str, Any]] = [
         watch_for="Adding ignore rules but forgetting to untrack a generated file already in Git.",
         readiness=["Pair ignore rules with git status and git rm --cached when needed."],
     ),
-    # ── Module 2 command content ──────────────────────────────────────────────
+    # ── Tower 2 command content ───────────────────────────────────────────────
     _content(
         key="git-switch",
         display_name="git switch",

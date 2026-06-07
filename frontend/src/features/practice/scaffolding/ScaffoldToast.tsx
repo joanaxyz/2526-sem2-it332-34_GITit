@@ -5,7 +5,7 @@ export type ScaffoldToastProps = {
   message: string
   trigger: 'T1' | 'T2' | 'T3'
   difficulty: 'easy' | 'medium' | 'hard'
-  onReviewModule: () => void
+  onReviewTower: () => void
   onContinue: () => void
 }
 
@@ -18,7 +18,7 @@ const BORDER_COLOR: Record<'T1' | 'T2' | 'T3', string> = {
 export function ScaffoldToast({
   message,
   trigger,
-  onReviewModule,
+  onReviewTower,
   onContinue,
 }: ScaffoldToastProps) {
   return (
@@ -31,7 +31,8 @@ export function ScaffoldToast({
         BORDER_COLOR[trigger],
       )}
     >
-      {/* Message is plain text; no markdown or anchor rendering. */}`r`n      <p className="whitespace-pre-line text-sm leading-6 text-foreground">{message}</p>
+      {/* Message is plain text; no markdown or anchor rendering. */}
+      <p className="whitespace-pre-line text-sm leading-6 text-foreground">{message}</p>
 
       <div className="mt-4 flex justify-end gap-2">
         <Button
@@ -47,10 +48,10 @@ export function ScaffoldToast({
           type="button"
           size="sm"
           variant="outline"
-          onClick={onReviewModule}
+          onClick={onReviewTower}
           data-testid="scaffold-proceed"
         >
-          Review module
+          Review tower
         </Button>
       </div>
     </div>
