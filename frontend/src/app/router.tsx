@@ -8,9 +8,10 @@ import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { DashboardPage } from '@/features/dashboard/pages/DashboardPage'
 import { PerformancePage } from '@/features/dashboard/pages/PerformancePage'
-import { PracticePage } from '@/features/practice/pages/PracticePage'
-import { ReviewPracticePage } from '@/features/review/pages/ReviewPracticePage'
-import { TowerPage } from '@/features/modules/pages/ModulesPage'
+import { AdventureRunPage } from '@/features/command-adventures/pages/AdventureRunPage'
+import { CommandAdventurePage } from '@/features/command-adventures/pages/CommandAdventurePage'
+import { ChallengeRunPage } from '@/features/challenges/pages/ChallengeRunPage'
+import { StoreyMapPage } from '@/features/storeys/pages/StoreyMapPage'
 
 export const router = createBrowserRouter([
   {
@@ -29,8 +30,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '/', element: <Navigate replace to="/dashboard" /> },
       { path: '/dashboard', element: <DashboardPage /> },
-      { path: '/tower', element: <TowerPage /> },
-      { path: '/modules', element: <TowerPage /> },
+      { path: '/tower', element: <StoreyMapPage /> },
       { path: '/performance', element: <PerformancePage /> },
     ],
   },
@@ -41,8 +41,9 @@ export const router = createBrowserRouter([
       </Protected>
     ),
     children: [
-      { path: '/practice/:sessionId', element: <PracticePage /> },
-      { path: '/review/:sessionId', element: <ReviewPracticePage /> },
+      { path: '/challenge-runs/:runId', element: <ChallengeRunPage /> },
+      { path: '/command-adventures/:adventureSlug', element: <CommandAdventurePage /> },
+      { path: '/adventure-runs/:runId', element: <AdventureRunPage /> },
     ],
   },
 ])

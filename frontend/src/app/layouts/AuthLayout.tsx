@@ -7,7 +7,7 @@ const loginHero = {
     'Learn with foundations, Command Adventure, GIT Challenged storeys, live DAG feedback, and consequence-safe command simulation.',
   terminal: (
     <>
-      <span className="text-primary">student@git-it</span> ~/practice $ git status
+      <span className="text-primary">student@git-it</span> ~/challenge $ git status
       <br />
       On branch feature/login
       <br />

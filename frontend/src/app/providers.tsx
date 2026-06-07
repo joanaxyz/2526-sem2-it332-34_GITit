@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
-import { subscribeToPracticeSessionSync } from '@/features/practice/utils/practiceCache'
+import { subscribeToChallengeRunSync } from '@/features/challenges/utils/challengeRunCache'
 import { ApiError } from '@/shared/api/apiError'
 
 export function AppProviders({ children }: { children: ReactNode }) {
@@ -22,7 +22,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
       }),
   )
 
-  useEffect(() => subscribeToPracticeSessionSync(queryClient), [queryClient])
+  useEffect(() => subscribeToChallengeRunSync(queryClient), [queryClient])
 
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 }

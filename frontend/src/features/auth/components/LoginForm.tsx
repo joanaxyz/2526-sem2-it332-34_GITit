@@ -65,7 +65,10 @@ export function LoginForm() {
 
   useEffect(() => {
     if (!errorPresentation?.retryAfterSeconds) return
-    setLockoutRemaining(errorPresentation.retryAfterSeconds)
+    const timeoutId = window.setTimeout(() => {
+      setLockoutRemaining(errorPresentation.retryAfterSeconds ?? 0)
+    }, 0)
+    return () => window.clearTimeout(timeoutId)
   }, [errorPresentation])
 
   useEffect(() => {

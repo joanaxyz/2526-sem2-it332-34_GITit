@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { Eye, EyeOff, Loader2, UserPlus } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
@@ -50,7 +50,7 @@ export function RegisterForm() {
     mode: 'onBlur',
     reValidateMode: 'onBlur',
   })
-  const passwordValue = form.watch('password') ?? ''
+  const passwordValue = useWatch({ control: form.control, name: 'password' }) ?? ''
   const mutation = useMutation({
     mutationFn: authApi.register,
     onSuccess: () => {

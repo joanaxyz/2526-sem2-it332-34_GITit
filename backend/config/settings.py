@@ -89,14 +89,13 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "accounts",
-    "learning",
-    "scenarios",
+    "curriculum",
+    "adventures",
+    "challenges",
+    "practice",
     "simulator",
     "evaluation",
-    "scaffolding",
-    "retries",
     "progress",
-    "review",
     "common",
 ]
 

@@ -7,9 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 function useCountUp(target: number, duration = 900): number {
   const [value, setValue] = useState(0)
   useEffect(() => {
-    if (target === 0) { setValue(0); return }
     const startTime = performance.now()
     const tick = (now: number) => {
+      if (target === 0) {
+        setValue(0)
+        return
+      }
       const p = Math.min((now - startTime) / duration, 1)
       setValue(Math.round((1 - Math.pow(1 - p, 3)) * target))
       if (p < 1) requestAnimationFrame(tick)

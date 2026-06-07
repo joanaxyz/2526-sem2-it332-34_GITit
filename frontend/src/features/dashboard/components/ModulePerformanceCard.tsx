@@ -25,8 +25,11 @@ function useAnimatedWidth(value: number | null, delay: number) {
 function useCountUp(target: number | null, duration = 900, delay = 0): number {
   const [value, setValue] = useState(0)
   useEffect(() => {
-    if (target === null || target === 0) { setValue(target ?? 0); return }
     const timer = setTimeout(() => {
+      if (target === null || target === 0) {
+        setValue(target ?? 0)
+        return
+      }
       const startTime = performance.now()
       const tick = (now: number) => {
         const p = Math.min((now - startTime) / duration, 1)
@@ -249,7 +252,7 @@ function formatPercent(value: number | null) {
 }
 
 export function TowerPerformanceCard({ summary }: { summary: DashboardSummary }) {
-  const towerKpis = summary.tower_kpis ?? summary.module_kpis ?? {}
+  const towerKpis = summary.storey_kpis ?? {}
 
   return (
     <Card>
