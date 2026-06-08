@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import {
   ArrowRight,
@@ -21,13 +21,13 @@ import type {
 } from '@/features/challenges/types'
 import type { LearningStorey } from '@/features/storeys/types'
 import {
+  actionForChallengeLevel,
+  actionLabel,
+  DIFFICULTY_ACCENT,
   difficultyLabel,
   nextReward,
   REWARD_MARKERS,
 } from '@/features/storeys/challengeUi'
-import { MonsterCrest, type MonsterVariant } from '@/features/storeys/components/MonsterCrest'
-import { TowerArtifact } from '@/features/storeys/components/TowerArtifact'
-import { TowerCrystal } from '@/features/storeys/components/TowerCrystal'
 import { isSelected, useTowerSelection } from '@/features/storeys/hooks/useTowerSelection'
 import { Button } from '@/shared/components/Button'
 import { ProgressBar } from '@/shared/components/ProgressBar'
@@ -84,13 +84,39 @@ function flattenPages<T extends ContentItem>(query: ReturnType<typeof useStoreyC
   return query.data?.pages.flatMap((page) => page.results) ?? []
 }
 
-function monsterVariant(difficulty: string): MonsterVariant {
-  if (difficulty === 'easy' || difficulty === 'medium' || difficulty === 'hard') return difficulty
-  return 'hard'
+// ── Windows storey: the lit-window band that tops every storey; the conical roof
+// only crowns the very first storey (the top of the whole tower). ──
+function WindowStorey({ crowned }: { crowned: boolean }) {
+  return (
+    <div className="tower-window-stage" aria-hidden="true">
+      {crowned ? (
+        <div className="tower-window-roof">
+          <span className="tower-window-roof-spire" />
+          <span className="tower-window-roof-peak" />
+          <span className="tower-window-roof-finial tower-window-roof-finial--left" />
+          <span className="tower-window-roof-finial tower-window-roof-finial--right" />
+        </div>
+      ) : null}
+      <div className="tower-window-storey">
+        <span className="tower-window-storey-window" />
+        <span className="tower-window-storey-window" />
+        <span className="tower-window-storey-window" />
+      </div>
+    </div>
+  )
 }
 
-// ── Command Adventure: a balcony gate with its own gabled roof + 3 dormer windows.
-function AdventureBalcony({
+// ── Battlemented belt with a gem medallion between sections / storeys. ──
+function TowerSectionSeparator({ continuation = false }: { continuation?: boolean }) {
+  return (
+    <div className={cn('tower-section-separator', continuation && 'is-continuation')} aria-hidden="true">
+      <span className="tower-section-separator-gem" />
+    </div>
+  )
+}
+
+// ── Command Adventure: a single arched neon gate, selectable. ──
+function AdventureDoor({
   adventure,
   selected,
   onSelect,
@@ -102,36 +128,32 @@ function AdventureBalcony({
   return (
     <button
       type="button"
-      className="balcony"
+      className="adventure-door"
       data-selected={selected ? 'true' : undefined}
       aria-pressed={selected}
       aria-label={`Select Command Adventure: ${adventure.title}`}
       onClick={onSelect}
     >
-      <span className="balcony-roof" aria-hidden="true">
-        <span className="balcony-roof-windows">
-          <span className="balcony-roof-window" />
-          <span className="balcony-roof-window" />
-          <span className="balcony-roof-window" />
+      <span className="adventure-door-frame" aria-hidden="true">
+        <span className="adventure-door-interior" />
+        <span className="adventure-door-leaf adventure-door-leaf--left">
+          <span className="adventure-door-plank" />
+          <span className="adventure-door-brace adventure-door-brace--top" />
+          <span className="adventure-door-brace adventure-door-brace--bottom" />
         </span>
-      </span>
-      <span className="balcony-door" aria-hidden="true">
-        <span className="balcony-door-leaf" />
-        <span className="balcony-door-glow" />
-      </span>
-      <span className="balcony-rail" aria-hidden="true">
-        <span />
-        <span />
-        <span />
-        <span />
-        <span />
+        <span className="adventure-door-leaf adventure-door-leaf--right">
+          <span className="adventure-door-plank" />
+          <span className="adventure-door-brace adventure-door-brace--top" />
+          <span className="adventure-door-brace adventure-door-brace--bottom" />
+        </span>
+        <span className="adventure-door-gem" />
       </span>
       <span className="door-ring" aria-hidden="true" />
     </button>
   )
 }
 
-// ── A single GIT Challenged level door, crowned with a monster crest. ──
+// ── A single GIT Challenged level door — selectable, framed by difficulty colour. ──
 function TrialDoor({
   scenario,
   scenarioIndex,
@@ -150,24 +172,34 @@ function TrialDoor({
     isSelected(state.selected, { kind: 'challenge', storeyId, scenarioIndex, scenario, level, locked }),
   )
   const difficulty = String(level.difficulty)
+  const accent = DIFFICULTY_ACCENT[difficulty]?.rgb ?? DIFFICULTY_ACCENT.hard.rgb
+  const isLocked = locked || level.status === 'locked'
+  const completed = level.status === 'completed'
+  const inProgress = level.status === 'in_progress'
 
   return (
     <button
       type="button"
-      className="trial-door"
+      className={cn('trial-door', isLocked && 'is-locked', completed && 'is-complete', inProgress && 'is-active')}
+      style={{ '--level-accent': accent, '--door-accent': accent } as CSSProperties}
       data-difficulty={difficulty}
       data-selected={selected ? 'true' : undefined}
-      data-locked={locked || level.status === 'locked' ? 'true' : undefined}
       aria-pressed={selected}
       aria-label={`Select ${scenario.title}: ${difficultyLabel(level)}`}
       onClick={() => select({ kind: 'challenge', storeyId, scenarioIndex, scenario, level, locked })}
     >
-      <MonsterCrest variant={monsterVariant(difficulty)} />
       <span className="trial-door-arch" aria-hidden="true">
-        <span className="trial-door-leaf" />
-        <span className="trial-door-glow" />
+        <span className="trial-door-interior" />
+        <span className="trial-door-leaf trial-door-leaf--left">
+          <span className="trial-door-plank" />
+        </span>
+        <span className="trial-door-leaf trial-door-leaf--right">
+          <span className="trial-door-plank" />
+        </span>
+        <span className="trial-door-gem" />
       </span>
       <span className="trial-door-label">{difficultyLabel(level)}</span>
+      <span className="trial-door-state">{actionLabel(actionForChallengeLevel(level), level.status)}</span>
       <span className="door-ring" aria-hidden="true" />
     </button>
   )
@@ -185,18 +217,18 @@ function ChallengeTrial({
   locked: boolean
 }) {
   return (
-    <motion.div
-      className="trial-group"
-      data-locked={locked ? 'true' : undefined}
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ amount: 0.3, once: true }}
-      transition={{ duration: 0.44, delay: index * 0.04, ease: [0.16, 1, 0.3, 1] }}
+    <motion.article
+      className="trial-room"
+      initial={{ opacity: 0, y: 18, scale: 0.99 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ amount: 0.24, once: true }}
+      transition={{ duration: 0.44, delay: index * 0.025, ease: [0.16, 1, 0.3, 1] }}
     >
-      <span className="trial-name">
-        <span className="trial-name-index">Trial {index + 1}</span>
-        {scenario.title}
-      </span>
+      <div className="trial-room-header">
+        <span className="trial-room-kicker">Trial {index + 1}</span>
+        <h3 className="trial-room-title">{scenario.title}</h3>
+      </div>
+      {scenario.summary?.trim() ? <p className="trial-room-summary">{scenario.summary}</p> : null}
       <div className="trial-door-row">
         {scenario.levels.map((level) => (
           <TrialDoor
@@ -209,7 +241,7 @@ function ChallengeTrial({
           />
         ))}
       </div>
-    </motion.div>
+    </motion.article>
   )
 }
 
@@ -351,43 +383,34 @@ export function StoreyPracticeHub({
       aria-label={`${title} storey`}
       data-storey-id={storey.id}
     >
-      <div
-        className={cn('learning-tower', !isFirst && 'learning-tower-continuation', !isLast && 'learning-tower-continues')}
-      >
-        {isFirst ? <TowerArtifact /> : null}
-
+      <div className={cn('learning-tower', !isFirst && 'learning-tower-continuation')}>
         <motion.div
-          className="tower-shell"
+          className="tower-repeater"
           initial={{ opacity: 0, y: 22, scale: 0.99 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ amount: 0.18, once: true, margin: '-6% 0px -6% 0px' }}
           transition={{ duration: 0.68, delay: motionDelay, ease: [0.16, 1, 0.3, 1] }}
         >
-          <span className="tower-rim tower-rim--top" aria-hidden="true" />
-          <span className="tower-facet tower-facet--left" aria-hidden="true" />
-          <span className="tower-facet tower-facet--right" aria-hidden="true" />
-          <span className="tower-rim tower-rim--bottom" aria-hidden="true" />
+          <WindowStorey crowned={isFirst} />
 
           <motion.section
-            className="tower-floor adventure-floor"
+            className="tower-adventure-stage"
             initial={{ opacity: 0, y: 14 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ amount: 0.42, once: true }}
             transition={{ duration: 0.5, delay: motionDelay + 0.03, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="tower-wall-window tower-wall-window--l" aria-hidden="true" style={{ top: '6.2rem' }} />
-            <span className="tower-wall-window tower-wall-window--r" aria-hidden="true" style={{ top: '6.2rem' }} />
-            <span className="tower-floor-icon">
-              <Swords className="size-7" />
+            <span className="tower-stage-icon tower-stage-icon--cyan">
+              <Swords className="size-6" />
             </span>
-            <h2 className="tower-floor-title command-adventure-title">Command Adventure</h2>
+            <h2 className="tower-stage-title tower-stage-title--adventure">Command Adventure</h2>
 
             {adventureQuery.isLoading ? <LoadingRows compact /> : null}
             {!adventureQuery.isLoading && !adventure ? <EmptySection label="Command Adventures" /> : null}
 
             {adventure ? (
-              <div className="tower-door-mount">
-                <AdventureBalcony
+              <div className="tower-adventure-door-wrap">
+                <AdventureDoor
                   adventure={adventure}
                   selected={adventureSelected}
                   onSelect={() => select({ kind: 'adventure', storeyId: storey.id, adventure })}
@@ -396,37 +419,32 @@ export function StoreyPracticeHub({
             ) : null}
           </motion.section>
 
-          <motion.div
-            className="tower-section-sep"
-            aria-hidden="true"
-            initial={{ opacity: 0, scaleX: 0.52 }}
-            whileInView={{ opacity: 1, scaleX: 1 }}
-            viewport={{ amount: 0.6, once: true }}
-            transition={{ duration: 0.5, delay: motionDelay + 0.06, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <span className="tower-section-sep-medallion" />
-          </motion.div>
+          <TowerSectionSeparator />
 
           <motion.section
-            className={cn('tower-floor challenge-floor-zone', challengesLocked && 'is-locked')}
+            className={cn('tower-challenges-stage', challengesLocked && 'is-locked')}
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ amount: 0.16, once: true, margin: '-6% 0px -6% 0px' }}
             transition={{ duration: 0.58, delay: motionDelay + 0.08, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="tower-floor-icon challenge-icon">
-              <Trophy className="size-7" />
+            <span className="tower-stage-icon tower-stage-icon--purple">
+              <Trophy className="size-6" />
             </span>
-            <h2 className="tower-floor-title challenge-title">GIT Challenged</h2>
+            <h2 className="tower-stage-title tower-stage-title--challenge">GIT Challenged</h2>
 
-            {workflowQuery.isLoading ? <div className="mt-5"><LoadingRows /></div> : null}
+            {workflowQuery.isLoading ? (
+              <div className="mt-5">
+                <LoadingRows />
+              </div>
+            ) : null}
             {!workflowQuery.isLoading && workflowScenarios.length === 0 ? (
               <div className="mt-5">
                 <EmptySection label="GIT Challenged" />
               </div>
             ) : null}
 
-            <div className="trial-stack">
+            <div className="challenge-room-stack">
               {workflowScenarios.map((scenario, index) => (
                 <ChallengeTrial
                   index={index}
@@ -439,7 +457,11 @@ export function StoreyPracticeHub({
             </div>
 
             <div ref={workflowLoadRef} />
-            {workflowQuery.isFetchingNextPage ? <div className="mt-3"><LoadingRows compact /></div> : null}
+            {workflowQuery.isFetchingNextPage ? (
+              <div className="mt-3">
+                <LoadingRows compact />
+              </div>
+            ) : null}
             {workflowQuery.hasNextPage ? (
               <Button
                 className="mt-4 h-9 rounded-full px-4"
@@ -453,9 +475,25 @@ export function StoreyPracticeHub({
               </Button>
             ) : null}
           </motion.section>
-        </motion.div>
 
-        {isLast ? <TowerCrystal /> : <div className="tower-stack-connector" aria-hidden="true" />}
+          {!isLast ? (
+            <TowerSectionSeparator continuation />
+          ) : (
+            <>
+              <div className="tower-crystal" aria-hidden="true" />
+              <div className="tower-floats" aria-hidden="true">
+                <span className="tower-float tower-float--1" />
+                <span className="tower-float tower-float--purple tower-float--2" />
+                <span className="tower-float tower-float--3" />
+                <span className="tower-float tower-float--purple tower-float--4" />
+                <span className="tower-float tower-float--5" />
+                <span className="tower-float tower-float--6" />
+                <span className="tower-float tower-float--7" />
+                <span className="tower-float tower-float--purple tower-float--8" />
+              </div>
+            </>
+          )}
+        </motion.div>
       </div>
     </section>
   )

@@ -1042,900 +1042,948 @@ textarea {
   font-size: 0.76rem;
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   TOWER — repeating neon keep: windows storey → adventure → separator →
+   challenges → separator. The conical roof crowns the FIRST storey only; the
+   lit-window band repeats atop every storey. Doors feed the selection model
+   (data-selected + .door-ring) so the sticky overview/action docks drive
+   interaction. Layout (page shell, docks, sky clock, sun/moon) lives elsewhere.
+   ════════════════════════════════════════════════════════════════════════ */
 .learning-tower {
-  --tower-cyan: 45, 245, 255;
-  --tower-blue: 53, 143, 255;
-  --tower-purple: 176, 74, 255;
+  --tower-wall-solid: #081b2f;
+  --tower-wall-shadow: #04111f;
+  --tower-wall-highlight: #0a2d46;
+  --tower-cyan-glow: rgba(45, 245, 255, 0.28);
+  --tower-purple-glow: rgba(176, 74, 255, 0.24);
   position: relative;
   justify-self: center;
-  width: min(100%, 36rem);
-  padding-top: 2.4rem;
+  width: min(100%, 40rem);
+  /* headroom so the conical roof clears the fixed top navbar */
+  padding-top: 3.25rem;
 }
 
 .learning-tower-continuation {
-  margin-top: -0.15rem;
+  margin-top: -0.2rem;
   padding-top: 0;
 }
 
-/* ── Tower peak: pointed roof + waving flag + crenellated crown. Sits at the very
-      TOP of the (upright) tower — first storey only. ── */
-.tower-peak {
+.tower-repeater {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 5rem; /* headroom for the flag standing above the roof */
+  display: grid;
+  justify-items: center;
+  width: 100%;
+  overflow: visible;
 }
 
-.tower-flag-wrap {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 7rem;
-  height: 5rem;
-  transform: translateX(-50%);
+.tower-window-stage {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  justify-items: center;
+  width: 100%;
 }
 
-.tower-flag-pole {
+.tower-window-roof {
+  position: relative;
+  width: min(76%, 18.5rem);
+  height: 7.3rem;
+  margin-bottom: -0.12rem;
+}
+
+.tower-window-roof-peak {
   position: absolute;
   left: 50%;
   bottom: 0;
-  width: 3px;
-  height: 5rem;
-  margin-left: -1.5px;
-  border-radius: 999px;
-  background: rgb(var(--tower-cyan));
-  box-shadow: 0 0 16px rgba(var(--tower-cyan), 0.7);
-}
-
-.tower-flag {
-  position: absolute;
-  left: 50%;
-  top: 0.3rem;
-  width: 4.4rem;
-  height: 1.95rem;
-  border: 1px solid rgba(var(--tower-cyan), 0.82);
-  border-left-width: 2px;
-  background: linear-gradient(90deg, rgba(0, 245, 212, 0.26), rgba(0, 180, 216, 0.08));
-  clip-path: polygon(0 0, 100% 16%, 72% 50%, 100% 84%, 0 100%);
-  filter: drop-shadow(0 0 13px rgba(var(--tower-cyan), 0.62));
-  transform-origin: left center;
-  animation: tower-flag-wave 4.4s ease-in-out infinite;
-}
-
-/* Tall conical "witch-hat" roof crowning the tower: shingle courses + left-lit
-   cone shading for a 3D read. */
-.tower-peak-roof {
-  position: relative;
-  width: 8.6rem;
-  height: 5.7rem;
-  margin-bottom: -0.3rem;
-  border: 1px solid rgba(var(--tower-cyan), 0.5);
-  border-bottom: none;
-  background:
-    linear-gradient(90deg, rgba(0, 245, 212, 0.22), transparent 40%, rgba(1, 10, 28, 0.5)),
-    repeating-linear-gradient(0deg, rgba(var(--tower-cyan), 0.14) 0 0.5rem, rgba(1, 12, 28, 0.5) 0.5rem 0.64rem),
-    linear-gradient(180deg, rgba(3, 30, 54, 0.9), rgba(1, 12, 28, 0.6));
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-  filter: drop-shadow(0 -2px 14px rgba(var(--tower-cyan), 0.32));
-}
-
-/* Machicolation corbel band: stepped brackets that carry the parapet out over
-   the wall. */
-.tower-corbels {
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  gap: 0.4rem;
-  width: 86%;
-  max-width: 29rem;
-  height: 0.95rem;
-  margin: 0 auto -0.08rem;
-  padding: 0 0.55rem;
-}
-
-.tower-corbels span {
-  flex: 1;
-  border: 1px solid rgba(var(--tower-cyan), 0.5);
-  border-top: none;
-  background: linear-gradient(180deg, rgba(2, 26, 48, 0.82), rgba(1, 10, 24, 0.5));
-  clip-path: polygon(0 0, 100% 0, 78% 100%, 22% 100%);
-  box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(var(--tower-cyan), 0.18);
-}
-
-/* Crenellated parapet that hands off into the shell. */
-.tower-crown {
-  position: relative;
-  display: flex;
-  align-items: end;
-  justify-content: space-around;
-  width: 88%;
-  max-width: 30.5rem;
-  height: 3.7rem;
-  margin: 0 auto -0.35rem;
-  border: 1px solid rgba(var(--tower-cyan), 0.6);
-  border-bottom-color: rgba(var(--tower-cyan), 0.3);
-  background:
-    linear-gradient(180deg, rgba(2, 26, 48, 0.7), rgba(1, 10, 24, 0.4)),
-    linear-gradient(90deg, rgba(0, 245, 212, 0.1), transparent 42%, rgba(0, 180, 216, 0.12));
-  clip-path: polygon(0 26%, 12% 26%, 12% 0, 24% 0, 24% 26%, 44% 26%, 44% 0, 56% 0, 56% 26%, 76% 26%, 76% 0, 88% 0, 88% 26%, 100% 26%, 100% 100%, 0 100%);
-  box-shadow: 0 0 26px rgba(var(--tower-cyan), 0.26), inset 0 0 26px rgba(var(--tower-cyan), 0.08);
-  animation: tower-neon-pulse 5.4s ease-in-out infinite;
-}
-
-.tower-crown span {
-  width: 1px;
-  height: 58%;
-  background: rgba(var(--tower-cyan), 0.16);
-}
-
-/* ── Tower base: a widening brick plinth that grounds the tower — last storey only. ── */
-.tower-base {
-  position: relative;
-  width: 90%;
-  max-width: 31rem;
-  height: 4.4rem;
-  margin: -0.3rem auto 0;
-  border: 1px solid rgba(var(--tower-cyan), 0.5);
-  border-top: none;
-  background:
-    linear-gradient(180deg, rgba(2, 20, 42, 0.66), rgba(0, 6, 18, 0.5)),
-    repeating-linear-gradient(0deg, transparent 0 1rem, rgba(var(--tower-cyan), 0.06) 1rem 1.06rem),
-    repeating-linear-gradient(90deg, transparent 0 2.4rem, rgba(var(--tower-cyan), 0.05) 2.4rem 2.46rem);
-  clip-path: polygon(5% 0, 95% 0, 100% 100%, 0 100%);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 26px rgba(var(--tower-blue), 0.2), inset 0 0 28px rgba(var(--tower-cyan), 0.06);
-}
-
-/* Soft ground glow the base rests on. */
-.tower-base-foot {
-  position: absolute;
-  left: 50%;
-  bottom: -0.55rem;
-  width: 116%;
-  height: 0.7rem;
+  width: 100%;
+  height: 6.15rem;
   transform: translateX(-50%);
-  border-radius: 50%;
-  background: radial-gradient(60% 100% at 50% 0%, rgba(var(--tower-cyan), 0.22), transparent 70%);
-  filter: blur(1px);
-}
-
-.tower-shell {
-  position: relative;
-  width: 78%;
-  max-width: 29rem;
-  min-height: 56rem;
-  margin: 0 auto;
-  overflow: visible;
-  isolation: isolate;
-  border: 1px solid rgba(var(--tower-cyan), 0.55);
-  border-top-color: rgba(var(--tower-cyan), 0.28);
-  border-radius: 0.6rem 0.6rem 0 0;
-  /* 3D cylindrical drum: an upper-left light source. A horizontal gradient sends
-     both sides into shadow while the centre catches the light, so the wall reads
-     as a round tower rather than a flat panel. Brick texture is layered on top by
-     the <TowerMasonry> SVG. */
+  border: 2.5px solid rgba(45, 245, 255, 0.9);
+  border-bottom-width: 3px;
   background:
-    linear-gradient(180deg, rgba(var(--tower-cyan), 0.12), transparent 20%),
-    linear-gradient(
-      90deg,
-      rgba(1, 6, 18, 0.72) 0%,
-      rgba(6, 20, 40, 0.4) 12%,
-      rgba(18, 40, 68, 0.12) 42%,
-      rgba(10, 28, 50, 0.18) 60%,
-      rgba(1, 6, 18, 0.78) 100%
-    ),
-    rgba(1, 8, 22, 0.42);
-  box-shadow:
-    0 0 28px rgba(var(--tower-cyan), 0.22),
-    0 0 68px rgba(var(--tower-blue), 0.15),
-    /* inner rounded-edge shadows reinforce the cylinder */
-    inset 2.6rem 0 3.4rem -2.4rem rgba(0, 0, 0, 0.55),
-    inset -2.6rem 0 3.4rem -2.4rem rgba(0, 0, 0, 0.55),
-    inset 0 0 42px rgba(var(--tower-cyan), 0.07);
-  animation: tower-neon-pulse 5.4s ease-in-out infinite;
+    radial-gradient(80% 70% at 50% 10%, rgba(45, 245, 255, 0.14), transparent 58%),
+    linear-gradient(180deg, rgba(9, 33, 52, 0.96), rgba(3, 13, 23, 0.96));
+  clip-path: polygon(50% 0, 87% 62%, 100% 62%, 94% 100%, 6% 100%, 0 62%, 13% 62%);
+  box-shadow: 0 0 26px var(--tower-cyan-glow), inset 0 -1.5rem 2rem rgba(0, 0, 0, 0.2);
 }
 
-/* Keep the floors and dividers above the decorative rims / courses. */
-.tower-shell > .tower-floor,
-.tower-shell > .tower-divider {
-  z-index: 2;
-}
-
-/* ── 3D cylinder cues: curved horizontal rims + string courses. A straight-sided
-      wall reads as a round drum once the top/bottom are elliptical and "hoops"
-      band the body. ── */
-.tower-rim {
-  position: absolute;
-  left: -1px;
-  right: -1px;
-  height: 1.7rem;
-  z-index: 1;
-  border-radius: 50%;
-  border: 1px solid rgba(var(--tower-cyan), 0.5);
-  pointer-events: none;
-}
-
-.tower-rim--top {
-  top: -0.85rem;
-  background: linear-gradient(180deg, rgba(2, 20, 40, 0.92), rgba(1, 8, 22, 0.12));
-  box-shadow: inset 0 7px 12px rgba(0, 0, 0, 0.55), 0 0 18px rgba(var(--tower-cyan), 0.26);
-}
-
-.tower-rim--bottom {
-  bottom: -0.85rem;
-  background: linear-gradient(0deg, rgba(2, 20, 40, 0.92), rgba(1, 8, 22, 0.12));
-  box-shadow: inset 0 -7px 12px rgba(0, 0, 0, 0.55), 0 0 18px rgba(var(--tower-cyan), 0.22);
-}
-
-.tower-course {
-  position: absolute;
-  left: -1px;
-  right: -1px;
-  height: 1.1rem;
-  z-index: 1;
-  border-radius: 50%;
-  border-top: 1px solid rgba(var(--tower-cyan), 0.34);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
-  background: linear-gradient(180deg, rgba(var(--tower-cyan), 0.08), transparent 60%);
-  pointer-events: none;
-}
-
-.tower-course--upper { top: 30%; }
-.tower-course--lower { top: 68%; }
-
-/* ════════════════════════════════════════════════════════════════════════
-   Floating-keep ARTIFACT — a purely decorative ornate spire that hovers above
-   the Command Adventure (aria-hidden, no interactions). Ogee roof + finial and
-   corner pinnacles, an octagonal lantern of three arched windows, a balcony,
-   a tapering body, and a faceted crystal it floats on, ringed by drifting rock.
-   Windows warm up with the living sky via --window-glow. Ref. floating-keep art.
-   ════════════════════════════════════════════════════════════════════════ */
-.tower-artifact {
-  display: block;
-  width: 66%;
-  max-width: 23.5rem;
-  height: auto;
-  margin: 0 auto -0.5rem;
-  filter:
-    drop-shadow(0 6px 22px rgba(0, 0, 0, 0.5))
-    drop-shadow(0 0 16px rgba(var(--tower-cyan), 0.26));
-}
-
-/* the faceted crystal the whole tower floats on (bottom of the last storey) */
-.tower-crystal {
-  display: block;
-  width: 82%;
-  max-width: 30rem;
-  height: auto;
-  margin: -0.5rem auto 0;
-  filter:
-    drop-shadow(0 8px 26px rgba(0, 0, 0, 0.5))
-    drop-shadow(0 0 18px rgba(var(--tower-purple), 0.3));
-}
-
-/* the widening separator that bridges the narrow adventure drum into the wider
-   challenge drum (own SVG so its outline matches the crown exactly) */
-.tower-sep {
-  display: block;
-  width: 82%;
-  max-width: 30rem;
-  height: auto;
-  margin: -0.3rem auto;
-  position: relative;
-  z-index: 3;
-  filter: drop-shadow(0 0 14px rgba(var(--tower-cyan), 0.26));
-}
-
-/* ════════════════════════════════════════════════════════════════════════
-   Crisp octagonal drum — same solid-outline language as the SVG crown so the
-   whole keep reads as ONE tower. A bright clip-path silhouette with a dark inset
-   clone leaves a sharp ~2px neon rim; a faceted seam pair + lit windows add the
-   detail. The adventure drum is narrower than the challenge drum.
-   ════════════════════════════════════════════════════════════════════════ */
-.kt-drum {
-  position: relative;
-  margin: 0 auto;
-}
-.kt-drum--adventure { width: 62%; max-width: 22.5rem; }
-.kt-drum--challenge { width: 82%; max-width: 30rem; }
-
-.kt-wall {
-  --oct: polygon(8% 0, 92% 0, 100% 13px, 100% calc(100% - 13px), 92% 100%, 8% 100%, 0 calc(100% - 13px), 0 13px);
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  clip-path: var(--oct);
-  background: linear-gradient(180deg, rgba(var(--tower-cyan), 0.9), rgba(var(--tower-blue), 0.7));
-  filter: drop-shadow(0 0 13px rgba(var(--tower-cyan), 0.24));
-}
-.kt-wall::before {
+.tower-window-roof-peak::before,
+.tower-window-roof-peak::after {
   content: '';
   position: absolute;
-  inset: 2px;
-  clip-path: var(--oct);
-  background:
-    linear-gradient(180deg, rgba(var(--tower-cyan), 0.1), transparent 14%),
-    linear-gradient(
-      90deg,
-      rgba(1, 6, 18, 0.92) 0%,
-      rgba(8, 24, 46, 0.6) 16%,
-      rgba(18, 40, 68, 0.3) 50%,
-      rgba(8, 24, 46, 0.48) 64%,
-      rgba(1, 6, 18, 0.93) 100%
-    );
-}
-/* faceted seams that read the drum as an octagon */
-.kt-wall::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  clip-path: var(--oct);
-  background:
-    linear-gradient(90deg, transparent 27.5%, rgba(var(--tower-cyan), 0.18) 28%, transparent 28.6%, transparent 71.4%, rgba(var(--tower-cyan), 0.18) 72%, transparent 72.5%);
+  left: 12%;
+  right: 12%;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(45, 245, 255, 0.38);
 }
 
-.kt-content {
-  position: relative;
-  z-index: 1;
-  padding: 2.1rem clamp(1rem, 4vw, 1.8rem) 2.1rem;
-  text-align: center;
+.tower-window-roof-peak::before {
+  top: 40%;
 }
 
-.ta-roof   { fill: rgba(2, 20, 40, 0.78); stroke: rgba(var(--tower-cyan), 0.85); stroke-width: 2; stroke-linejoin: round; }
-.ta-stroke { fill: rgba(2, 14, 32, 0.7);  stroke: rgba(var(--tower-cyan), 0.78); stroke-width: 2; stroke-linejoin: round; }
-.ta-line   { fill: none; stroke: rgba(var(--tower-cyan), 0.4); stroke-width: 1.2; stroke-linecap: round; }
-.ta-sheen  { fill: rgba(var(--tower-cyan), 0.12); stroke: none; }
-.ta-finial { fill: rgba(var(--tower-cyan), 0.5); stroke: rgba(var(--tower-cyan), 0.9); stroke-width: 2; stroke-linejoin: round; }
-.ta-window      { fill: rgba(6, 14, 30, 0.96); stroke: rgba(var(--tower-cyan), 0.72); stroke-width: 1.4; stroke-linejoin: round; }
-.ta-window-glow { fill: #ffb863; opacity: var(--window-glow, 0.6); transition: opacity 0.5s linear; }
-.ta-crystal {
-  fill: rgba(24, 46, 92, 0.5);
-  stroke: rgba(var(--tower-purple), 0.82);
-  stroke-width: 2;
-  stroke-linejoin: round;
-  filter: drop-shadow(0 0 12px rgba(var(--tower-purple), 0.45));
-}
-.ta-crystal-facet { fill: none; stroke: rgba(var(--tower-purple), 0.5); stroke-width: 1.1; }
-.ta-rock   { fill: rgba(6, 20, 40, 0.72); stroke: rgba(var(--tower-cyan), 0.5); stroke-width: 1.3; stroke-linejoin: round; }
-
-/* ── Make the drum body read as the same faceted octagonal keep as the crown:
-      two vertical facet seams down the wall + a pair of lit arched windows. ── */
-.tower-facet {
-  position: absolute;
-  top: 1.4rem;
-  bottom: 1.4rem;
-  width: 1px;
-  z-index: 1;
-  background: linear-gradient(to bottom, transparent, rgba(var(--tower-cyan), 0.26) 12%, rgba(var(--tower-cyan), 0.16) 80%, transparent);
-  pointer-events: none;
-}
-.tower-facet--left { left: 22%; }
-.tower-facet--right { right: 22%; }
-
-.tower-wall-window {
-  position: absolute;
-  z-index: 1;
-  width: 1.05rem;
-  height: 2.5rem;
-  overflow: hidden;
-  border: 1px solid rgba(var(--tower-cyan), 0.6);
-  border-radius: 0.55rem 0.55rem 0.06rem 0.06rem;
-  background: linear-gradient(180deg, rgba(8, 18, 36, 0.95), rgba(3, 9, 22, 0.96));
-  pointer-events: none;
-}
-.tower-wall-window::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 70%, #ffe6b0, #ffac52 55%, transparent 84%);
-  opacity: var(--window-glow, 0.55);
-  transition: opacity 0.5s linear;
-}
-.tower-wall-window--l { left: 8%; }
-.tower-wall-window--r { right: 8%; }
-
-/* ── Ornate section separator: a balcony/gallery ring that bands the tower at
-      the adventure → challenge boundary (replaces the old diamond divider). ── */
-.tower-section-sep {
-  position: relative;
-  z-index: 3;
-  display: grid;
-  place-items: center;
-  width: calc(100% + 2.4rem);
-  margin: 0.6rem -1.2rem 0.2rem;
-  height: 2.2rem;
-  border-block: 1px solid rgba(var(--tower-cyan), 0.55);
-  background:
-    linear-gradient(180deg, rgba(2, 26, 48, 0.82), rgba(1, 10, 24, 0.5)),
-    repeating-linear-gradient(90deg, transparent 0 0.78rem, rgba(var(--tower-cyan), 0.16) 0.78rem 0.86rem);
-  box-shadow: 0 0 20px rgba(var(--tower-cyan), 0.22), inset 0 0 18px rgba(var(--tower-cyan), 0.07);
-}
-/* corbel teeth under the gallery */
-.tower-section-sep::before {
-  content: '';
-  position: absolute;
-  left: 0.6rem;
-  right: 0.6rem;
-  bottom: -0.42rem;
-  height: 0.42rem;
-  background:
-    repeating-linear-gradient(90deg, rgba(var(--tower-cyan), 0.5) 0 0.18rem, transparent 0.18rem 1.05rem);
-  -webkit-mask: linear-gradient(180deg, #000, transparent);
-          mask: linear-gradient(180deg, #000, transparent);
-}
-.tower-section-sep-medallion {
-  position: relative;
-  width: 1.7rem;
-  height: 1.7rem;
-  background: rgba(1, 10, 28, 0.95);
-  border: 2px solid rgba(var(--tower-cyan), 0.9);
-  transform: rotate(45deg);
-  box-shadow: 0 0 18px rgba(var(--tower-cyan), 0.6), inset 0 0 10px rgba(var(--tower-cyan), 0.3);
-}
-.tower-section-sep-medallion::after {
-  content: '';
-  position: absolute;
-  inset: 0.32rem;
-  border: 1px solid rgba(var(--tower-purple), 0.7);
-  background: rgba(var(--tower-purple), 0.18);
+.tower-window-roof-peak::after {
+  top: 63%;
 }
 
-/* ── Slim separator between trials inside the challenge drum. ── */
-.trial-group + .trial-group {
-  position: relative;
-  margin-top: 0.4rem;
-  padding-top: 1.7rem;
-}
-.trial-group + .trial-group::before {
-  content: '';
+.tower-window-roof-spire {
   position: absolute;
-  top: 0;
-  left: 14%;
-  right: 14%;
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(var(--tower-purple), 0.55), rgba(var(--tower-cyan), 0.65), rgba(var(--tower-purple), 0.55), transparent);
-}
-.trial-group + .trial-group::after {
-  content: '';
-  position: absolute;
-  top: -0.34rem;
   left: 50%;
+  bottom: 5.75rem;
+  width: 2px;
+  height: 3.35rem;
+  transform: translateX(-50%);
+  background: rgba(45, 245, 255, 0.92);
+  box-shadow: 0 0 14px rgba(45, 245, 255, 0.42);
+}
+
+.tower-window-roof-spire::before,
+.tower-window-roof-spire::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.tower-window-roof-spire::before {
+  top: -1.4rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 2px solid rgba(45, 245, 255, 0.92);
+  background: rgba(8, 27, 47, 0.95);
+}
+
+.tower-window-roof-spire::after {
+  top: 0.3rem;
   width: 0.7rem;
   height: 0.7rem;
-  transform: translateX(-50%) rotate(45deg);
-  background: rgba(1, 10, 28, 0.95);
-  border: 1.5px solid rgba(var(--tower-cyan), 0.85);
-  box-shadow: 0 0 12px rgba(var(--tower-cyan), 0.5);
+  border: 2px solid rgba(45, 245, 255, 0.92);
+  border-radius: 999px;
+  background: rgba(8, 27, 47, 0.95);
 }
 
-.tower-stack-column .tower-shell {
-  min-height: auto;
+.tower-window-roof-finial {
+  position: absolute;
+  bottom: 0.55rem;
+  width: 0.2rem;
+  height: 3rem;
+  background: rgba(45, 245, 255, 0.88);
+  box-shadow: 0 0 14px rgba(45, 245, 255, 0.32);
 }
 
-.learning-tower-continuation .tower-shell {
-  border-top-color: rgba(var(--tower-cyan), 0.55);
-}
-
-.tower-shell::before,
-.tower-shell::after {
+.tower-window-roof-finial::before {
   content: '';
   position: absolute;
-  top: 1rem;
-  bottom: 1rem;
-  width: 1px;
-  background: linear-gradient(to bottom, transparent, rgba(var(--tower-cyan), 0.84), rgba(var(--tower-blue), 0.74), rgba(var(--tower-purple), 0.54), transparent);
-  box-shadow: 0 0 14px rgba(var(--tower-cyan), 0.58);
-  pointer-events: none;
+  left: 50%;
+  top: -0.5rem;
+  width: 0.65rem;
+  height: 0.65rem;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  border: 2px solid rgba(45, 245, 255, 0.92);
+  background: rgba(8, 27, 47, 0.95);
 }
 
-.tower-shell::before {
-  left: -0.52rem;
+.tower-window-roof-finial--left {
+  left: 10%;
 }
 
-.tower-shell::after {
-  right: -0.52rem;
+.tower-window-roof-finial--right {
+  right: 10%;
 }
 
-.tower-floor {
+.tower-window-storey {
   position: relative;
-  padding: 2.35rem clamp(1.1rem, 4vw, 2rem) 2.1rem;
-  text-align: center;
-}
-
-.adventure-floor {
-  min-height: 19rem;
-  border-bottom: 1px solid rgba(var(--tower-cyan), 0.14);
-}
-
-.tower-floor::before {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(var(--tower-cyan), 0.34), transparent);
-  pointer-events: none;
-}
-
-.tower-floor-icon {
-  display: grid;
-  width: 3.2rem;
-  height: 3.2rem;
-  place-items: center;
-  margin: 0.35rem auto 0.85rem;
-  color: hsl(var(--primary));
-  filter: drop-shadow(0 0 13px rgba(0, 245, 212, 0.62));
-}
-
-.challenge-icon {
-  color: rgb(205, 142, 255);
-  filter: drop-shadow(0 0 13px rgba(var(--tower-purple), 0.64));
-}
-
-.tower-floor-label {
-  margin: 0;
-  color: hsl(var(--primary));
-  font-size: 1.05rem;
-  font-weight: 900;
-}
-
-.command-adventure-title {
-  color: hsl(var(--primary));
-  text-shadow: 0 0 18px rgba(0, 245, 212, 0.34);
-}
-
-.tower-floor-title {
-  margin: 0.25rem 0 0;
-  color: hsl(var(--foreground));
-  font-size: clamp(1.25rem, 3vw, 1.75rem);
-  font-weight: 900;
-  line-height: 1.15;
-}
-
-.challenge-title {
-  color: rgb(221, 166, 255);
-  text-shadow: 0 0 18px rgba(var(--tower-purple), 0.42);
-}
-
-.tower-floor-copy {
-  max-width: 17rem;
-  margin: 0.85rem auto 0;
-  color: hsl(var(--muted-foreground));
-  font-size: 0.92rem;
-  line-height: 1.65;
-}
-
-/* Tower doors: block-framed fantasy gates that swing open on hover/focus. */
-.tower-door-mount {
   display: flex;
   justify-content: center;
-  width: 100%;
+  gap: 1.25rem;
+  width: min(74%, 18rem);
+  padding: 1.3rem 1rem 1.05rem;
+  border: 2.5px solid rgba(45, 245, 255, 0.9);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0, transparent 10%, transparent 90%, rgba(255, 255, 255, 0.03) 100%),
+    var(--tower-wall-solid);
+  box-shadow:
+    0 0 24px var(--tower-cyan-glow),
+    inset 0 -1.2rem 2rem rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.tower-window-storey::before {
+  content: '';
+  position: absolute;
+  left: -0.85rem;
+  right: -0.85rem;
+  bottom: -1.35rem;
+  height: 1.55rem;
+  border: 2.5px solid rgba(45, 245, 255, 0.88);
+  background: linear-gradient(180deg, rgba(11, 32, 50, 0.98), rgba(5, 18, 32, 0.98));
+  box-shadow: 0 0 18px var(--tower-cyan-glow);
+}
+
+.tower-window-storey::after {
+  content: '';
+  position: absolute;
+  left: -0.2rem;
+  right: -0.2rem;
+  bottom: -2.05rem;
+  height: 0.72rem;
+  border: 2px solid rgba(45, 245, 255, 0.75);
+  border-top: 0;
+  background: rgba(6, 18, 31, 0.98);
+}
+
+.tower-window-storey-window {
+  position: relative;
+  width: 2.3rem;
+  height: 3.9rem;
+  border: 2.5px solid rgba(45, 245, 255, 0.9);
+  border-radius: 1.35rem 1.35rem 0.2rem 0.2rem;
+  background: #061321;
+  box-shadow: 0 0 14px rgba(45, 245, 255, 0.2);
+}
+
+.tower-window-storey-window::before {
+  content: '';
+  position: absolute;
+  left: 0.38rem;
+  right: 0.38rem;
+  top: 0.42rem;
+  bottom: 0.36rem;
+  border-radius: 0.95rem 0.95rem 0.12rem 0.12rem;
+  background: linear-gradient(180deg, #ffd885 0%, #f1bb63 100%);
+  box-shadow: 0 0 16px rgba(255, 203, 109, 0.4);
+}
+
+.tower-adventure-stage,
+.tower-challenges-stage {
+  position: relative;
+  overflow: visible;
+  text-align: center;
+  border: 2.5px solid rgba(45, 245, 255, 0.9);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0, transparent 11%, transparent 89%, rgba(255, 255, 255, 0.028) 100%),
+    var(--tower-wall-solid);
+  box-shadow:
+    0 0 28px var(--tower-cyan-glow),
+    inset 0 0 0 2px rgba(5, 14, 24, 0.55),
+    inset 0 -2rem 3rem rgba(0, 0, 0, 0.18);
+}
+
+.tower-adventure-stage {
+  z-index: 3;
+  width: min(74%, 18rem);
+  margin-top: 2.25rem;
+  padding: 2.3rem 1.35rem 1.7rem;
+}
+
+.tower-adventure-stage::before,
+.tower-challenges-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0.65rem;
+  border-left: 1px solid rgba(45, 245, 255, 0.16);
+  border-right: 1px solid rgba(45, 245, 255, 0.16);
+  pointer-events: none;
+}
+
+.tower-stage-icon {
+  display: grid;
+  place-items: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  margin: 0 auto 0.85rem;
+}
+
+.tower-stage-icon--cyan {
+  color: rgb(45, 245, 255);
+  filter: drop-shadow(0 0 12px rgba(45, 245, 255, 0.38));
+}
+
+.tower-stage-icon--purple {
+  color: rgb(217, 145, 255);
+  filter: drop-shadow(0 0 12px rgba(176, 74, 255, 0.38));
+}
+
+.tower-stage-title {
+  margin: 0;
+  font-size: clamp(1.55rem, 2.2vw, 2rem);
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.tower-stage-title--adventure {
+  color: hsl(var(--foreground));
+}
+
+.tower-stage-title--challenge {
+  color: hsl(var(--foreground));
+}
+
+.tower-adventure-door-wrap {
   margin-top: 1.35rem;
 }
 
-.tower-door {
-  --door-rgb: var(--tower-purple);
-  --door-glow: 210, 149, 255;
-  --door-stone: 82, 42, 146;
-  --door-stone-hi: 230, 196, 255;
-  --door-shadow: 11, 6, 33;
-  --door-plank-a: 54, 22, 96;
-  --door-plank-b: 12, 7, 33;
-  --door-width: 5.05rem;
-  --door-height: 7.55rem;
+.adventure-door {
   display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.6rem;
   padding: 0;
   border: 0;
-  background: none;
+  background: transparent;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
-.tower-door[data-variant='adventure'] {
-  --door-rgb: var(--tower-cyan);
-  --door-glow: 0, 245, 212;
-  --door-stone: 8, 76, 96;
-  --door-stone-hi: 142, 253, 255;
-  --door-shadow: 1, 16, 33;
-  --door-plank-a: 7, 58, 75;
-  --door-plank-b: 2, 17, 38;
-  --door-width: 5.2rem;
-  --door-height: 8.05rem;
-}
-
-.tower-door:disabled {
+.adventure-door:disabled {
   cursor: not-allowed;
-  opacity: 0.72;
+  opacity: 0.7;
 }
 
-.challenge-floor-zone.is-locked .tower-door:disabled {
-  opacity: 0.95;
-}
-
-.tower-door:focus-visible {
-  outline: none;
-}
-
-.tower-door-arch {
+.adventure-door-frame {
   position: relative;
   display: block;
-  width: var(--door-width);
-  height: var(--door-height);
-  overflow: visible;
-  perspective: 900px;
-  border-radius: 0.5rem 0.5rem 0.22rem 0.22rem;
-  background:
-    linear-gradient(180deg, rgba(var(--door-stone), 0.34), rgba(var(--door-shadow), 0.86)),
-    repeating-linear-gradient(0deg, transparent 0 0.82rem, rgba(var(--door-stone-hi), 0.12) 0.82rem 0.88rem),
-    repeating-linear-gradient(90deg, transparent 0 0.92rem, rgba(var(--door-stone-hi), 0.09) 0.92rem 0.98rem);
-  box-shadow:
-    0 0 0 1px rgba(var(--door-rgb), 0.2),
-    0 14px 30px rgba(0, 0, 0, 0.44),
-    inset 0 0 18px rgba(var(--door-rgb), 0.16);
-  transition: filter 0.5s ease, box-shadow 0.5s ease;
+  width: 6.9rem;
+  height: 9.65rem;
+  border: 2.5px solid rgba(45, 245, 255, 0.95);
+  border-radius: 3rem 3rem 0.28rem 0.28rem;
+  background: linear-gradient(180deg, rgba(7, 31, 51, 0.97), rgba(3, 16, 28, 0.98));
+  box-shadow: 0 0 22px rgba(45, 245, 255, 0.22), inset 0 0 0 1px rgba(7, 18, 29, 0.75);
+  perspective: 950px;
 }
 
-.tower-door-arch::after {
+/* stepped plinth under the gate */
+.adventure-door-frame::before {
   content: '';
   position: absolute;
-  z-index: 5;
-  left: 0.32rem;
-  right: 0.32rem;
-  top: -0.42rem;
-  height: 0.62rem;
-  border: 1px solid rgba(var(--door-stone-hi), 0.56);
-  border-bottom: 0;
+  left: -0.55rem;
+  right: -0.55rem;
+  bottom: -0.82rem;
+  height: 0.95rem;
+  border: 2.5px solid rgba(45, 245, 255, 0.92);
+  background: var(--tower-wall-solid);
+}
+
+.adventure-door-frame::after {
+  content: '';
+  position: absolute;
+  left: -1rem;
+  right: -1rem;
+  bottom: -1.55rem;
+  height: 0.7rem;
+  border: 2.5px solid rgba(45, 245, 255, 0.88);
+  background: var(--tower-wall-solid);
+}
+
+/* warm doorway glow revealed when the leaves open */
+.adventure-door-interior {
+  position: absolute;
+  inset: 0.42rem;
+  border-radius: 2.55rem 2.55rem 0.14rem 0.14rem;
+  background: radial-gradient(120% 82% at 50% 100%, rgba(255, 209, 130, 0.62), rgba(255, 176, 84, 0.18) 46%, rgba(2, 12, 24, 0.96) 80%);
+  box-shadow: inset 0 0 22px rgba(255, 196, 107, 0.28);
+  opacity: 0.32;
+  transition: opacity 0.55s ease;
+}
+
+/* two hinged leaves that swing open */
+.adventure-door-leaf {
+  position: absolute;
+  top: 0.42rem;
+  bottom: 0.42rem;
+  width: calc(50% - 0.42rem);
+  z-index: 1;
   background:
-    linear-gradient(180deg, rgba(var(--door-stone-hi), 0.2), rgba(var(--door-stone), 0.26)),
-    repeating-linear-gradient(90deg, rgba(var(--door-stone), 0.46) 0 0.72rem, rgba(var(--door-shadow), 0.5) 0.72rem 0.82rem);
-  clip-path: polygon(0 42%, 18% 42%, 18% 0, 35% 0, 35% 42%, 65% 42%, 65% 0, 82% 0, 82% 42%, 100% 42%, 100% 100%, 0 100%);
-  box-shadow: 0 0 16px rgba(var(--door-glow), 0.18);
-  pointer-events: none;
-}
-
-.tower-door[data-variant='challenge'] .tower-door-arch::after {
-  left: 0.18rem;
-  right: 0.18rem;
-  top: -0.38rem;
-  height: 0.58rem;
-  clip-path: none;
-}
-
-.tower-door[data-variant='adventure'] .tower-door-arch {
-  border-radius: 2.55rem 2.55rem 0.22rem 0.22rem;
-}
-
-.tower-door[data-variant='adventure'] .tower-door-arch::after {
-  left: 0.36rem;
-  right: 0.36rem;
-  top: -0.28rem;
-  height: 0.56rem;
-  border-radius: 2rem 2rem 0.08rem 0.08rem;
-  clip-path: none;
-}
-
-/* Glowing room revealed behind the leaf. */
-.tower-door-interior {
-  position: absolute;
-  inset: 0.62rem 0.52rem 0.42rem;
-  border: 1px solid rgba(var(--door-glow), 0.28);
-  border-radius: 0.28rem 0.28rem 0.1rem 0.1rem;
-  background:
-    radial-gradient(120% 80% at 50% 100%, rgba(var(--door-glow), 0.6), transparent 70%),
-    linear-gradient(180deg, rgba(var(--door-rgb), 0.06), rgba(var(--door-glow), 0.24));
-  opacity: 0.22;
-  transition: opacity 0.6s ease;
-}
-
-.tower-door[data-variant='adventure'] .tower-door-interior,
-.tower-door[data-variant='adventure'] .tower-door-leaf {
-  border-radius: 2.18rem 2.18rem 0.1rem 0.1rem;
-  clip-path: none;
-}
-
-.tower-door-light {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: 38%;
-  height: 80%;
-  transform: translateX(-50%);
-  background: linear-gradient(180deg, transparent, rgba(var(--door-glow), 0.85));
-  filter: blur(6px);
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-
-/* The swinging leaf, hinged on its left edge. */
-.tower-door-leaf {
-  position: absolute;
-  z-index: 2;
-  inset: 0.62rem 0.52rem 0.42rem;
-  transform-origin: left center;
-  transform: rotateY(0deg);
-  transform-style: preserve-3d;
+    linear-gradient(180deg, rgba(8, 30, 50, 0.99), rgba(2, 13, 26, 0.99)),
+    repeating-linear-gradient(90deg, transparent 0 0.52rem, rgba(45, 245, 255, 0.12) 0.52rem 0.58rem);
+  box-shadow: inset 0 0 0 1.5px rgba(45, 245, 255, 0.34);
   backface-visibility: hidden;
-  border: 1px solid rgba(var(--door-stone-hi), 0.52);
-  border-radius: 0.28rem 0.28rem 0.1rem 0.1rem;
-  background:
-    repeating-linear-gradient(90deg, transparent 0 0.78rem, rgba(var(--door-glow), 0.16) 0.78rem 0.84rem),
-    linear-gradient(180deg, rgba(var(--door-plank-a), 0.96), rgba(var(--door-plank-b), 0.98));
-  box-shadow: inset 0 0 16px rgba(var(--door-rgb), 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.32, 1);
 }
 
-.tower-door[data-variant='challenge'] .tower-door-leaf {
-  background:
-    repeating-linear-gradient(0deg, transparent 0 1.12rem, rgba(var(--door-glow), 0.1) 1.12rem 1.18rem),
-    repeating-linear-gradient(90deg, transparent 0 0.96rem, rgba(var(--door-glow), 0.13) 0.96rem 1.02rem),
-    linear-gradient(180deg, rgba(var(--door-plank-a), 0.96), rgba(var(--door-plank-b), 0.98));
+.adventure-door-leaf--left {
+  left: 0.42rem;
+  transform-origin: left center;
+  border-radius: 2.45rem 0.06rem 0.08rem 0.08rem;
 }
 
-.tower-door-plank {
+.adventure-door-leaf--right {
+  right: 0.42rem;
+  transform-origin: right center;
+  border-radius: 0.06rem 2.45rem 0.08rem 0.08rem;
+}
+
+.adventure-door-plank {
   position: absolute;
-  top: 15%;
-  bottom: 9%;
-  width: 1px;
-  background: rgba(var(--door-glow), 0.22);
+  top: 0.8rem;
+  bottom: 0.7rem;
+  left: 50%;
+  width: 1.5px;
+  background: rgba(45, 245, 255, 0.3);
 }
 
-.tower-door-plank--left {
-  left: 38%;
-}
-
-.tower-door-plank--right {
-  left: 62%;
-}
-
-.tower-door-brace {
+.adventure-door-brace {
   position: absolute;
-  left: 10%;
-  right: 10%;
+  left: 14%;
+  right: 14%;
   height: 0.28rem;
-  border: 1px solid rgba(var(--door-stone-hi), 0.26);
-  background: linear-gradient(180deg, rgba(var(--door-rgb), 0.36), rgba(var(--door-shadow), 0.42));
-  box-shadow: 0 0 10px rgba(var(--door-rgb), 0.12);
+  border: 1px solid rgba(45, 245, 255, 0.32);
+  background: rgba(9, 35, 54, 0.7);
 }
 
-.tower-door-brace--top {
+.adventure-door-brace--top {
   top: 30%;
 }
 
-.tower-door-brace--bottom {
-  bottom: 25%;
+.adventure-door-brace--bottom {
+  bottom: 22%;
 }
 
-.tower-door[data-variant='adventure'] .tower-door-brace {
-  height: 0.28rem;
-}
-
-.tower-door[data-variant='challenge'] .tower-door-brace {
-  left: 8%;
-  right: 8%;
-  height: 0.34rem;
-}
-
-.tower-door-handle {
+/* diamond stud on the seam — fades as the doors open */
+.adventure-door-gem {
   position: absolute;
-  right: 0.5rem;
-  top: 50%;
-  width: 0.42rem;
-  height: 0.42rem;
-  transform: translateY(-50%);
-  border-radius: 999px;
-  background: rgba(var(--door-glow), 0.9);
-  box-shadow: 0 0 8px rgba(var(--door-glow), 0.85);
+  left: 50%;
+  top: 46%;
+  z-index: 2;
+  width: 0.95rem;
+  height: 0.95rem;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border: 2px solid rgba(45, 245, 255, 0.95);
+  background: rgba(8, 27, 47, 0.98);
+  box-shadow: 0 0 12px rgba(45, 245, 255, 0.4);
+  transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
-.tower-door[data-variant='challenge'] .tower-door-handle {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 2px;
-  transform: translateY(-50%) rotate(45deg);
+.adventure-door:not(:disabled):hover .adventure-door-leaf--left,
+.adventure-door[data-selected='true'] .adventure-door-leaf--left {
+  transform: rotateY(-76deg);
 }
 
-.tower-door-frame {
+.adventure-door:not(:disabled):hover .adventure-door-leaf--right,
+.adventure-door[data-selected='true'] .adventure-door-leaf--right {
+  transform: rotateY(76deg);
+}
+
+.adventure-door:not(:disabled):hover .adventure-door-interior,
+.adventure-door[data-selected='true'] .adventure-door-interior {
+  opacity: 1;
+}
+
+.adventure-door:not(:disabled):hover .adventure-door-gem,
+.adventure-door[data-selected='true'] .adventure-door-gem {
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(45deg) scale(0.55);
+}
+
+.adventure-door:not(:disabled):hover .adventure-door-frame,
+.adventure-door:not(:disabled):focus-visible .adventure-door-frame {
+  box-shadow: 0 0 32px rgba(45, 245, 255, 0.34), inset 0 0 0 1px rgba(7, 18, 29, 0.75);
+}
+
+.adventure-door:focus-visible,
+.trial-door:focus-visible {
+  outline: 2px solid rgba(45, 245, 255, 0.72);
+  outline-offset: 0.3rem;
+}
+
+.tower-section-separator {
+  position: relative;
+  z-index: 2;
+  width: min(96%, 23.5rem);
+  height: 6rem;
+  margin: -0.1rem auto 0;
+}
+
+/* the separator band reuses the exact wall language of the section frames */
+.tower-section-separator::before {
+  content: '';
   position: absolute;
-  z-index: 4;
-  inset: -0.22rem -0.22rem -0.2rem;
-  padding: 0.56rem 0.48rem 0.34rem;
-  border: 1px solid rgba(var(--door-stone-hi), 0.66);
-  border-radius: 0.48rem 0.48rem 0.2rem 0.2rem;
+  inset: 0 0 1.25rem;
+  border: 2.5px solid rgba(45, 245, 255, 0.92);
   background:
-    repeating-linear-gradient(0deg, rgba(var(--door-stone-hi), 0.08) 0 0.62rem, rgba(var(--door-shadow), 0.1) 0.62rem 1.24rem),
-    repeating-linear-gradient(90deg, rgba(var(--door-stone), 0.42) 0 0.78rem, rgba(var(--door-shadow), 0.32) 0.78rem 0.9rem);
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0, transparent 11%, transparent 89%, rgba(255, 255, 255, 0.028) 100%),
+    var(--tower-wall-solid);
   box-shadow:
-    0 0 0 1px rgba(var(--door-rgb), 0.12),
-    0 0 18px rgba(var(--door-glow), 0.16),
-    inset 0 0 14px rgba(var(--door-rgb), 0.14);
-  pointer-events: none;
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
+    0 0 28px var(--tower-cyan-glow),
+    inset 0 0 0 2px rgba(5, 14, 24, 0.55);
 }
 
-.tower-door[data-variant='challenge'] .tower-door-frame {
-  inset: -0.22rem -0.3rem -0.22rem;
-  padding: 0.48rem 0.64rem 0.34rem;
-  border-radius: 0.38rem 0.38rem 0.22rem 0.22rem;
-}
-
-.tower-door[data-variant='adventure'] .tower-door-frame {
-  inset: -0.24rem -0.24rem -0.2rem;
-  padding: 0.52rem 0.46rem 0.34rem;
-  border-radius: 2.78rem 2.78rem 0.2rem 0.2rem;
-}
-
-.tower-door-threshold {
+/* corbel ledge below the band — same frame language, sticks out a touch */
+.tower-section-separator::after {
+  content: '';
   position: absolute;
-  z-index: 5;
-  left: -0.32rem;
-  right: -0.32rem;
-  bottom: -0.31rem;
-  height: 0.42rem;
-  border: 1px solid rgba(var(--door-stone-hi), 0.5);
+  left: -0.9rem;
+  right: -0.9rem;
+  bottom: 0;
+  height: 1.45rem;
+  border: 2.5px solid rgba(45, 245, 255, 0.9);
   background:
-    linear-gradient(180deg, rgba(var(--door-stone-hi), 0.14), rgba(var(--door-stone), 0.32)),
-    repeating-linear-gradient(90deg, rgba(var(--door-stone), 0.4) 0 0.8rem, rgba(var(--door-shadow), 0.36) 0.8rem 0.92rem);
-  box-shadow: 0 0 16px rgba(var(--door-glow), 0.12);
-  pointer-events: none;
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0, transparent 12%, transparent 88%, rgba(255, 255, 255, 0.028) 100%),
+    var(--tower-wall-solid);
+  box-shadow: 0 0 18px var(--tower-cyan-glow);
 }
 
-.tower-door-caption {
-  color: rgba(var(--door-glow), 0.62);
-  font-size: 0.72rem;
-  font-weight: 800;
+.tower-section-separator.is-continuation {
+  margin-top: -0.1rem;
+  height: 4rem;
+}
+
+.tower-section-separator.is-continuation::before {
+  inset: 0 0 0.9rem;
+}
+
+.tower-section-separator.is-continuation::after {
+  bottom: 0;
+  height: 1.1rem;
+}
+
+/* gem medallion, centred on the band */
+.tower-section-separator-gem {
+  position: absolute;
+  left: 50%;
+  top: calc(50% - 0.625rem);
+  z-index: 3;
+  width: 2.9rem;
+  height: 2.9rem;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border: 2.5px solid rgba(176, 74, 255, 0.96);
+  background: var(--tower-wall-solid);
+  box-shadow: 0 0 20px var(--tower-purple-glow), 0 0 12px rgba(176, 74, 255, 0.4);
+}
+
+.tower-section-separator.is-continuation .tower-section-separator-gem {
+  top: calc(50% - 0.45rem);
+}
+
+.tower-section-separator-gem::before {
+  content: '';
+  position: absolute;
+  inset: 0.5rem;
+  border: 2px solid rgba(176, 74, 255, 0.96);
+  box-shadow: 0 0 10px rgba(176, 74, 255, 0.4);
+}
+
+.tower-challenges-stage {
+  z-index: 1;
+  width: min(96%, 24rem);
+  margin-top: -0.65rem;
+  padding: 2.4rem 1.4rem 2.2rem;
+}
+
+.tower-challenges-stage.is-locked {
+  opacity: 0.96;
+}
+
+.challenge-room-stack {
+  display: grid;
+  gap: 1.5rem;
+  width: min(100%, 21rem);
+  margin: 1.45rem auto 0;
+}
+
+.trial-room {
+  position: relative;
+  padding-top: 1.4rem;
+}
+
+.trial-room::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(to right, transparent, rgba(176, 74, 255, 0.75), transparent);
+}
+
+.trial-room:first-child {
+  padding-top: 0.15rem;
+}
+
+.trial-room:first-child::before {
+  display: none;
+}
+
+.trial-room-header {
+  position: relative;
+  display: grid;
+  gap: 0.3rem;
+  margin-bottom: 0.85rem;
+}
+
+.trial-room-header::before,
+.trial-room-header::after {
+  content: '';
+  position: absolute;
+  top: 0.6rem;
+  width: 31%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, rgba(176, 74, 255, 0.7));
+}
+
+.trial-room-header::after {
+  right: 0;
+  transform: scaleX(-1);
+}
+
+.trial-room-header::before {
+  left: 0;
+}
+
+.trial-room-kicker {
+  justify-self: center;
+  padding: 0 0.7rem;
+  color: rgb(217, 145, 255);
+  font-size: 0.92rem;
+  font-weight: 900;
+  line-height: 1;
   letter-spacing: 0;
-  text-transform: uppercase;
-  opacity: 0.72;
-  transition: opacity 0.4s ease, color 0.4s ease;
+  background: var(--tower-wall-solid);
 }
 
-.tower-door:not(:disabled):hover .tower-door-leaf,
-.tower-door:not(:disabled):focus-visible .tower-door-leaf {
-  transform: rotateY(-78deg);
+.trial-room-title {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.35;
 }
 
-.tower-door:not(:disabled):hover .tower-door-interior,
-.tower-door:not(:disabled):focus-visible .tower-door-interior,
-.tower-door:not(:disabled):hover .tower-door-light,
-.tower-door:not(:disabled):focus-visible .tower-door-light {
-  opacity: 1;
+.trial-room-summary {
+  margin: 0 0 1rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.83rem;
+  line-height: 1.55;
 }
 
-.tower-door:not(:disabled):hover .tower-door-arch,
-.tower-door:not(:disabled):focus-visible .tower-door-arch {
+.trial-door-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.trial-door {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0.45rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.trial-door:disabled {
+  cursor: not-allowed;
+}
+
+.trial-door-arch {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 0.82;
+  border: 2.5px solid rgba(var(--level-accent), 0.95);
+  border-radius: 2.5rem 2.5rem 0.22rem 0.22rem;
+  background: linear-gradient(180deg, rgba(9, 28, 45, 0.99), rgba(3, 14, 26, 0.99));
   box-shadow:
-    0 0 0 1px rgba(var(--door-rgb), 0.3),
-    0 18px 40px rgba(0, 0, 0, 0.5),
-    0 0 30px rgba(var(--door-glow), 0.36),
-    inset 0 0 26px rgba(var(--door-rgb), 0.24);
-  filter: saturate(1.12);
+    0 0 18px rgba(var(--level-accent), 0.2),
+    inset 0 0 0 1px rgba(2, 9, 18, 0.5);
+  perspective: 640px;
 }
 
-.tower-door:not(:disabled):hover .tower-door-caption,
-.tower-door:not(:disabled):focus-visible .tower-door-caption {
-  color: rgb(var(--door-glow));
+.trial-door-arch::before {
+  content: '';
+  position: absolute;
+  left: -0.45rem;
+  right: -0.45rem;
+  bottom: -0.72rem;
+  height: 0.85rem;
+  border: 2.5px solid rgba(var(--level-accent), 0.9);
+  background: var(--tower-wall-solid);
+}
+
+/* doorway glow behind the leaves */
+.trial-door-interior {
+  position: absolute;
+  inset: 0.34rem;
+  border-radius: 2.15rem 2.15rem 0.12rem 0.12rem;
+  background: radial-gradient(120% 84% at 50% 100%, rgba(var(--level-accent), 0.5), rgba(var(--level-accent), 0.12) 48%, rgba(2, 10, 20, 0.96) 82%);
+  box-shadow: inset 0 0 16px rgba(var(--level-accent), 0.25);
+  opacity: 0.3;
+  transition: opacity 0.5s ease;
+}
+
+.trial-door-leaf {
+  position: absolute;
+  top: 0.34rem;
+  bottom: 0.34rem;
+  width: calc(50% - 0.34rem);
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(8, 25, 42, 0.99), rgba(3, 14, 24, 0.99)),
+    repeating-linear-gradient(90deg, transparent 0 0.42rem, rgba(var(--level-accent), 0.12) 0.42rem 0.47rem);
+  box-shadow: inset 0 0 0 1.5px rgba(var(--level-accent), 0.3);
+  backface-visibility: hidden;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.32, 1);
+}
+
+.trial-door-leaf--left {
+  left: 0.34rem;
+  transform-origin: left center;
+  border-radius: 2.05rem 0.05rem 0.06rem 0.06rem;
+}
+
+.trial-door-leaf--right {
+  right: 0.34rem;
+  transform-origin: right center;
+  border-radius: 0.05rem 2.05rem 0.06rem 0.06rem;
+}
+
+.trial-door-plank {
+  position: absolute;
+  top: 0.5rem;
+  bottom: 0.45rem;
+  left: 50%;
+  width: 1px;
+  background: rgba(var(--level-accent), 0.3);
+}
+
+.trial-door-gem {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  z-index: 2;
+  width: 0.62rem;
+  height: 0.62rem;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border: 1.5px solid rgba(var(--level-accent), 0.95);
+  background: rgba(6, 18, 31, 0.98);
+  box-shadow: 0 0 8px rgba(var(--level-accent), 0.4);
+  transition: opacity 0.4s ease;
+}
+
+.trial-door-label {
+  margin-top: 0.35rem;
+  color: rgb(var(--level-accent));
+  font-size: 0.96rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.trial-door-state {
+  color: rgba(var(--level-accent), 0.76);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.trial-door.is-locked {
+  opacity: 0.52;
+}
+
+.trial-door.is-complete .trial-door-arch {
+  box-shadow: 0 0 24px rgba(var(--level-accent), 0.26), inset 0 0 0 1px rgba(2, 9, 18, 0.5);
+}
+
+.trial-door.is-active .trial-door-arch {
+  box-shadow: 0 0 24px rgba(var(--level-accent), 0.28), inset 0 0 0 1px rgba(2, 9, 18, 0.5);
+}
+
+/* trial doors swing open on hover / selection (locked stay shut) */
+.trial-door:not(.is-locked):hover .trial-door-leaf--left,
+.trial-door:not(.is-locked)[data-selected='true'] .trial-door-leaf--left {
+  transform: rotateY(-76deg);
+}
+
+.trial-door:not(.is-locked):hover .trial-door-leaf--right,
+.trial-door:not(.is-locked)[data-selected='true'] .trial-door-leaf--right {
+  transform: rotateY(76deg);
+}
+
+.trial-door:not(.is-locked):hover .trial-door-interior,
+.trial-door:not(.is-locked)[data-selected='true'] .trial-door-interior {
   opacity: 1;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .tower-door-leaf {
-    transition: opacity 0.35s ease;
-  }
+.trial-door:not(.is-locked):hover .trial-door-gem,
+.trial-door:not(.is-locked)[data-selected='true'] .trial-door-gem {
+  opacity: 0;
+}
 
-  .tower-door:not(:disabled):hover .tower-door-leaf,
-  .tower-door:not(:disabled):focus-visible .tower-door-leaf {
-    transform: rotateY(0deg);
-    opacity: 0.12;
+/* floating-island base: a purple faceted crystal the keep rests on (neon rim
+   via a clipped fill + an inset dark clone), tapering to a point */
+.tower-crystal {
+  --crystal-clip: polygon(0 0, 100% 0, 90% 25%, 68% 41%, 80% 60%, 56% 73%, 50% 100%, 44% 73%, 20% 60%, 32% 40%, 10% 25%);
+  position: relative;
+  display: block;
+  width: min(86%, 21rem);
+  height: 9rem;
+  margin: -0.6rem auto 0;
+  background: rgba(176, 74, 255, 0.92);
+  clip-path: var(--crystal-clip);
+  filter: drop-shadow(0 0 22px rgba(176, 74, 255, 0.42));
+}
+
+.tower-crystal::before {
+  content: '';
+  position: absolute;
+  inset: 2.5px;
+  background:
+    linear-gradient(180deg, rgba(34, 16, 60, 0.96), rgba(12, 6, 28, 1)),
+    var(--tower-wall-solid);
+  clip-path: var(--crystal-clip);
+}
+
+/* facet lines down the crystal */
+.tower-crystal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 1px), rgba(176, 74, 255, 0.55) 50%, transparent calc(50% + 1px)),
+    linear-gradient(116deg, transparent 49.4%, rgba(176, 74, 255, 0.34) 50%, transparent 50.6%),
+    linear-gradient(-116deg, transparent 49.4%, rgba(176, 74, 255, 0.34) 50%, transparent 50.6%);
+  clip-path: var(--crystal-clip);
+}
+
+/* rock fragments drifting around the whole floating tower */
+.tower-floats {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.tower-float {
+  position: absolute;
+  background: rgba(45, 245, 255, 0.72);
+  filter: drop-shadow(0 0 7px var(--tower-cyan-glow));
+  animation: tower-rock-bob var(--bob, 7s) ease-in-out infinite;
+  animation-delay: var(--bob-delay, 0s);
+}
+
+.tower-float::before {
+  content: '';
+  position: absolute;
+  inset: 1.5px;
+  background: var(--tower-wall-solid);
+  clip-path: inherit;
+}
+
+.tower-float--purple {
+  background: rgba(176, 74, 255, 0.72);
+  filter: drop-shadow(0 0 7px var(--tower-purple-glow));
+}
+
+.tower-float--1 { left: -2.2rem;  top: 13%; width: 1.7rem;  height: 1.3rem;  clip-path: polygon(22% 0, 72% 10%, 100% 44%, 82% 82%, 40% 100%, 6% 70%, 0 30%); --bob: 6.5s; }
+.tower-float--2 { right: -2.6rem; top: 29%; width: 2rem;    height: 1.5rem;  clip-path: polygon(34% 0, 100% 26%, 90% 66%, 52% 100%, 10% 84%, 0 38%, 16% 8%); --bob: 7.6s; --bob-delay: -1.4s; }
+.tower-float--3 { left: -1.7rem;  top: 50%; width: 1.2rem;  height: 1rem;    clip-path: polygon(22% 0, 72% 10%, 100% 44%, 82% 82%, 40% 100%, 6% 70%, 0 30%); --bob: 5.8s; --bob-delay: -0.6s; }
+.tower-float--4 { right: -1.9rem; top: 63%; width: 1.5rem;  height: 1.2rem;  clip-path: polygon(34% 0, 100% 26%, 90% 66%, 52% 100%, 10% 84%, 0 38%, 16% 8%); --bob: 6.9s; --bob-delay: -2.1s; }
+.tower-float--5 { left: -2.7rem;  top: 78%; width: 1rem;    height: 0.9rem;  clip-path: polygon(22% 0, 72% 10%, 100% 44%, 82% 82%, 40% 100%, 6% 70%, 0 30%); --bob: 8s;   --bob-delay: -3s; }
+.tower-float--6 { right: -2.3rem; top: 84%; width: 1.3rem;  height: 1.05rem; clip-path: polygon(34% 0, 100% 26%, 90% 66%, 52% 100%, 10% 84%, 0 38%, 16% 8%); --bob: 7.2s; --bob-delay: -1s; }
+.tower-float--7 { left: 4%;       bottom: -2.6rem; width: 1.4rem; height: 1.1rem;  clip-path: polygon(22% 0, 72% 10%, 100% 44%, 82% 82%, 40% 100%, 6% 70%, 0 30%); --bob: 6.2s; --bob-delay: -1.8s; }
+.tower-float--8 { right: 8%;      bottom: -3.2rem; width: 1.1rem; height: 0.95rem; clip-path: polygon(34% 0, 100% 26%, 90% 66%, 52% 100%, 10% 84%, 0 38%, 16% 8%); --bob: 7.8s; --bob-delay: -2.6s; }
+
+@keyframes tower-rock-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-0.55rem) rotate(4deg); }
+}
+
+@media (max-width: 860px) {
+  .tower-repeater {
+    width: min(100%, 30rem);
+    margin-inline: auto;
   }
 }
 
+@media (max-width: 640px) {
+  .learning-tower {
+    width: min(100%, 30rem);
+  }
+
+  .tower-window-roof {
+    width: min(80%, 16rem);
+    height: 6.2rem;
+  }
+
+  .tower-window-storey,
+  .tower-adventure-stage {
+    width: min(82%, 16.25rem);
+  }
+
+  .tower-challenges-stage,
+  .tower-section-separator {
+    width: min(98%, 21rem);
+  }
+
+  .tower-crystal {
+    width: min(82%, 18rem);
+  }
+
+  .tower-window-storey {
+    gap: 0.9rem;
+  }
+
+  .tower-window-storey-window {
+    width: 2rem;
+    height: 3.5rem;
+  }
+
+  .trial-door-row {
+    gap: 0.65rem;
+  }
+
+  .trial-room-header::before,
+  .trial-room-header::after {
+    width: 24%;
+  }
+}
+
+/* full-bleed trial row + brighter accent on hover/focus */
+.tower-repeater .trial-door-row {
+  width: 100%;
+}
+
+.tower-repeater .trial-door:not(:disabled):hover .trial-door-arch,
+.tower-repeater .trial-door:not(:disabled):focus-visible .trial-door-arch {
+  box-shadow:
+    0 0 22px rgba(var(--level-accent), 0.34),
+    inset 0 0 0 1px rgba(2, 9, 18, 0.5);
+}
+
+.tower-repeater .trial-door:not(:disabled):hover .trial-door-label,
+.tower-repeater .trial-door:not(:disabled):focus-visible .trial-door-label {
+  text-shadow: 0 0 10px rgba(var(--level-accent), 0.58);
+}
+
+/* ── Selection: the chosen door glows with a pulsing ring (drives the docks) ── */
+.adventure-door {
+  position: relative;
+  --door-accent: 45, 245, 255;
+}
+
+.adventure-door .door-ring {
+  inset: -0.55rem -1.05rem -1.95rem;
+  border-radius: 3.2rem 3.2rem 0.4rem 0.4rem;
+}
+
+.trial-door .door-ring {
+  inset: -0.45rem -0.55rem -1.65rem;
+  border-radius: 2.6rem 2.6rem 0.4rem 0.4rem;
+}
+
+.adventure-door[data-selected='true'] .adventure-door-frame {
+  box-shadow: 0 0 34px rgba(45, 245, 255, 0.42), inset 0 0 0 1px rgba(7, 18, 29, 0.75);
+}
+
+.trial-door[data-selected='true'] .trial-door-arch {
+  box-shadow:
+    0 0 28px rgba(var(--level-accent), 0.5),
+    inset 0 0 0 1px rgba(2, 9, 18, 0.5);
+}
+
+/* ── Section states + loaders reused by the tower ── */
 .tower-empty-state {
   margin: 1rem auto;
   border: 1px dashed rgba(var(--tower-cyan), 0.25);
@@ -1962,1014 +2010,6 @@ textarea {
   animation: tower-loading-sheen 1.35s ease-in-out infinite;
 }
 
-.tower-divider {
-  position: relative;
-  display: grid;
-  height: 3.2rem;
-  place-items: center;
-  transform-origin: center;
-}
-
-.tower-divider::before {
-  content: '';
-  position: absolute;
-  inset-inline: -1.7rem;
-  top: 50%;
-  height: 2px;
-  background: linear-gradient(to right, transparent, rgba(var(--tower-purple), 0.8), rgba(var(--tower-cyan), 0.9), rgba(var(--tower-purple), 0.8), transparent);
-  box-shadow: 0 0 16px rgba(var(--tower-purple), 0.48);
-}
-
-.tower-divider span {
-  position: relative;
-  width: 2.1rem;
-  height: 2.1rem;
-  border: 4px solid rgba(var(--tower-cyan), 0.9);
-  background: rgba(1, 10, 28, 0.92);
-  transform: rotate(45deg);
-  box-shadow: 0 0 22px rgba(var(--tower-cyan), 0.72);
-}
-
-.challenge-floor-zone {
-  padding-top: 1.75rem;
-  padding-bottom: 2.2rem;
-}
-
-/* Challenge trials perch as carved gargoyle statues on tower stone. */
-.challenge-room-stack {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 1.65rem;
-  width: min(100%, 19.5rem);
-  margin: 1.75rem auto 0;
-  justify-items: center;
-}
-
-.challenge-room {
-  width: 100%;
-  max-width: none;
-}
-
-.challenge-gargoyle {
-  --trial-glow: var(--tower-purple);
-  --gargoyle-light: 178, 206, 242;
-  --gargoyle-mid: 83, 100, 148;
-  --gargoyle-dark: 27, 34, 72;
-  position: relative;
-  display: grid;
-  grid-template-areas:
-    'figure'
-    'plinth';
-  grid-template-columns: minmax(0, 1fr);
-  justify-items: center;
-  width: 100%;
-  min-height: 14.6rem;
-  isolation: isolate;
-  padding: 0.15rem 0 0.25rem;
-  border: 0;
-  background: transparent;
-  color: hsl(var(--foreground));
-  cursor: pointer;
-  text-align: center;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.challenge-gargoyle::before,
-.challenge-gargoyle::after {
-  content: '';
-  position: absolute;
-  pointer-events: none;
-}
-
-.challenge-gargoyle::before {
-  top: 0.4rem;
-  left: 50%;
-  z-index: 0;
-  width: min(100%, 14.6rem);
-  height: 10.4rem;
-  transform: translateX(-50%);
-  clip-path: polygon(11% 0, 89% 0, 100% 16%, 96% 88%, 82% 100%, 18% 100%, 4% 88%, 0 16%);
-  background:
-    radial-gradient(84% 56% at 50% 18%, rgba(var(--gargoyle-light), 0.2), transparent 56%),
-    linear-gradient(180deg, rgba(var(--gargoyle-mid), 0.34), rgba(var(--gargoyle-dark), 0.88)),
-    repeating-linear-gradient(90deg, rgba(var(--gargoyle-mid), 0.36) 0 1.18rem, rgba(7, 12, 34, 0.48) 1.18rem 1.32rem);
-  box-shadow:
-    0 0 0 1px rgba(var(--gargoyle-light), 0.22),
-    0 0 0 0.32rem rgba(2, 7, 24, 0.46),
-    0 15px 30px rgba(0, 0, 0, 0.36),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 -24px 36px rgba(0, 0, 0, 0.38),
-    inset 0 0 26px rgba(var(--trial-glow), 0.1);
-}
-
-.challenge-gargoyle::after {
-  top: 8.62rem;
-  left: 50%;
-  z-index: 1;
-  width: 11.8rem;
-  height: 2.25rem;
-  transform: translateX(-50%);
-  clip-path: polygon(8% 0, 92% 0, 100% 34%, 91% 100%, 9% 100%, 0 34%);
-  background:
-    linear-gradient(180deg, rgba(var(--gargoyle-light), 0.34), rgba(var(--gargoyle-mid), 0.4) 36%, rgba(var(--gargoyle-dark), 0.92)),
-    repeating-linear-gradient(90deg, transparent 0 1rem, rgba(var(--trial-glow), 0.12) 1rem 1.1rem);
-  box-shadow:
-    0 0 0 1px rgba(var(--gargoyle-light), 0.22),
-    0 12px 20px rgba(0, 0, 0, 0.34),
-    inset 0 -12px 16px rgba(0, 0, 0, 0.3);
-}
-
-.challenge-gargoyle[data-state='available'] {
-  --trial-glow: var(--tower-purple);
-}
-
-.challenge-gargoyle[data-state='in-progress'] {
-  --trial-glow: var(--tower-blue);
-}
-
-.challenge-gargoyle[data-state='completed'] {
-  --trial-glow: var(--tower-cyan);
-}
-
-.challenge-gargoyle:focus-visible {
-  outline: 2px solid rgba(var(--tower-cyan), 0.62);
-  outline-offset: 0.28rem;
-}
-
-.challenge-gargoyle:disabled {
-  cursor: not-allowed;
-}
-
-.challenge-gargoyle:disabled:not([data-state='locked']) {
-  opacity: 0.72;
-}
-
-.challenge-gargoyle-figure {
-  grid-area: figure;
-  position: relative;
-  z-index: 2;
-  display: grid;
-  width: 100%;
-  min-height: 10.7rem;
-  place-items: end center;
-}
-
-.challenge-gargoyle-figure::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 1rem;
-  z-index: 0;
-  width: 8.7rem;
-  height: 7.3rem;
-  transform: translateX(-50%);
-  clip-path: polygon(50% 0, 100% 22%, 92% 100%, 8% 100%, 0 22%);
-  background:
-    radial-gradient(82% 58% at 50% 18%, rgba(var(--gargoyle-light), 0.18), transparent 58%),
-    linear-gradient(180deg, rgba(20, 36, 76, 0.62), rgba(2, 7, 24, 0.2));
-  box-shadow:
-    inset 0 0 18px rgba(var(--trial-glow), 0.12),
-    0 0 0 1px rgba(var(--gargoyle-light), 0.1);
-}
-
-.challenge-gargoyle-figure::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: 1.72rem;
-  z-index: 1;
-  width: 7.8rem;
-  height: 0.55rem;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.38);
-  filter: blur(4px);
-  transform: translateX(-50%) scaleX(1.22);
-}
-
-.challenge-gargoyle-aura {
-  position: absolute;
-  left: 50%;
-  bottom: 2.15rem;
-  z-index: 0;
-  width: 8rem;
-  height: 5.8rem;
-  transform: translateX(-50%);
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-  background: linear-gradient(180deg, transparent, rgba(var(--trial-glow), 0.26));
-  filter: blur(3px);
-  opacity: 0.7;
-}
-
-.challenge-gargoyle-art {
-  position: relative;
-  overflow: visible;
-  z-index: 2;
-  width: 10.1rem;
-  max-width: 100%;
-  height: auto;
-  transform: translateY(0);
-  transform-origin: bottom center;
-  filter:
-    drop-shadow(-3px -2px 2px rgba(255, 255, 255, 0.08))
-    drop-shadow(0 13px 16px rgba(0, 0, 0, 0.48))
-    drop-shadow(0 0 16px rgba(var(--trial-glow), 0.12));
-  transition: transform 0.52s cubic-bezier(0.16, 1, 0.3, 1), filter 0.52s ease, opacity 0.32s ease;
-}
-
-.challenge-gargoyle[data-state='locked'] .challenge-gargoyle-art {
-  opacity: 0.82;
-  filter:
-    grayscale(0.36)
-    drop-shadow(0 12px 14px rgba(0, 0, 0, 0.42));
-}
-
-.challenge-gargoyle .gargoyle-shadow {
-  fill: rgba(0, 0, 0, 0.38);
-}
-
-.challenge-gargoyle .gargoyle-stone-fill {
-  stroke: rgba(var(--gargoyle-light), 0.54);
-  stroke-width: 2.1;
-  stroke-linejoin: round;
-}
-
-.challenge-gargoyle .gargoyle-stone-mid {
-  stroke: rgba(var(--gargoyle-light), 0.36);
-  stroke-width: 1.4;
-  stroke-linejoin: round;
-}
-
-.challenge-gargoyle .gargoyle-stone-dark,
-.challenge-gargoyle .gargoyle-horn,
-.challenge-gargoyle .gargoyle-ear {
-  stroke: rgba(var(--gargoyle-light), 0.44);
-  stroke-width: 1.8;
-  stroke-linejoin: round;
-}
-
-.challenge-gargoyle .gargoyle-tail {
-  stroke: rgba(var(--gargoyle-dark), 0.96);
-  stroke-width: 11;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.challenge-gargoyle .gargoyle-brow,
-.challenge-gargoyle .gargoyle-nose,
-.challenge-gargoyle .gargoyle-jaw,
-.challenge-gargoyle .gargoyle-crack {
-  stroke: rgba(7, 12, 34, 0.78);
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.challenge-gargoyle .gargoyle-stone-ridge,
-.challenge-gargoyle .gargoyle-highlight,
-.challenge-gargoyle .gargoyle-bevel {
-  stroke: rgba(var(--gargoyle-light), 0.42);
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.challenge-gargoyle .gargoyle-underside,
-.challenge-gargoyle .gargoyle-core-shadow,
-.challenge-gargoyle .gargoyle-face-plane {
-  fill: rgba(5, 9, 26, 0.28);
-}
-
-.challenge-gargoyle .gargoyle-claw,
-.challenge-gargoyle .gargoyle-tooth {
-  stroke: rgba(220, 234, 255, 0.82);
-  stroke-width: 2.1;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.challenge-gargoyle .gargoyle-eye {
-  filter: drop-shadow(0 0 5px rgba(var(--trial-glow), 0.72));
-  transition: opacity 0.3s ease, filter 0.3s ease;
-}
-
-.challenge-gargoyle[data-state='locked'] .gargoyle-eye {
-  fill: rgba(144, 198, 255, 0.32);
-  opacity: 0.45;
-  filter: none;
-}
-
-.challenge-gargoyle .gargoyle-wing,
-.challenge-gargoyle .gargoyle-head,
-.challenge-gargoyle .gargoyle-arm,
-.challenge-gargoyle .gargoyle-jaw {
-  transform-box: fill-box;
-  transition: transform 0.52s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.challenge-gargoyle .gargoyle-wing-left {
-  transform-origin: 90% 78%;
-}
-
-.challenge-gargoyle .gargoyle-wing-right {
-  transform-origin: 10% 78%;
-}
-
-.challenge-gargoyle .gargoyle-head {
-  transform-origin: 50% 82%;
-}
-
-.challenge-gargoyle .gargoyle-arm-left {
-  transform-origin: 82% 18%;
-}
-
-.challenge-gargoyle .gargoyle-arm-right {
-  transform-origin: 18% 18%;
-}
-
-.challenge-gargoyle-plinth {
-  grid-area: plinth;
-  position: relative;
-  z-index: 2;
-  display: grid;
-  width: min(100%, 16.4rem);
-  gap: 0.32rem;
-  margin-top: -0.12rem;
-  padding: 0.82rem 0.95rem 0.9rem;
-}
-
-.challenge-gargoyle-plinth::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  clip-path: polygon(7% 0, 93% 0, 100% 100%, 0 100%);
-  background:
-    linear-gradient(180deg, rgba(var(--gargoyle-light), 0.24), rgba(14, 28, 64, 0.84) 18%, rgba(5, 10, 30, 0.9)),
-    repeating-linear-gradient(90deg, rgba(var(--gargoyle-mid), 0.2) 0 1.3rem, rgba(2, 7, 24, 0.18) 1.3rem 1.42rem);
-  box-shadow:
-    0 0 0 1px rgba(var(--gargoyle-light), 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 -12px 18px rgba(0, 0, 0, 0.32),
-    0 10px 20px rgba(0, 0, 0, 0.28),
-    0 0 18px rgba(var(--trial-glow), 0.12);
-}
-
-.challenge-room-index {
-  color: rgba(144, 198, 255, 0.82);
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.challenge-room-title {
-  margin: 0;
-  color: rgb(221, 166, 255);
-  font-size: 0.95rem;
-  font-weight: 800;
-  line-height: 1.24;
-  text-align: center;
-  text-wrap: balance;
-  text-shadow: 0 0 16px rgba(var(--tower-purple), 0.45);
-}
-
-.challenge-gargoyle[data-state='completed'] .challenge-room-title {
-  color: rgb(153, 255, 237);
-  text-shadow: 0 0 16px rgba(var(--tower-cyan), 0.42);
-}
-
-.challenge-gargoyle:not(:disabled):hover::before,
-.challenge-gargoyle:not(:disabled):focus-visible::before {
-  box-shadow:
-    0 0 0 1px rgba(var(--gargoyle-light), 0.28),
-    0 0 0 0.34rem rgba(2, 7, 24, 0.45),
-    0 0 28px rgba(var(--trial-glow), 0.24),
-    0 16px 30px rgba(0, 0, 0, 0.38),
-    inset 0 0 28px rgba(var(--trial-glow), 0.14);
-}
-
-.challenge-gargoyle:not(:disabled):hover .challenge-gargoyle-art,
-.challenge-gargoyle:not(:disabled):focus-visible .challenge-gargoyle-art {
-  transform: translateY(-0.36rem) scale(1.035);
-  filter:
-    drop-shadow(-3px -2px 2px rgba(255, 255, 255, 0.1))
-    drop-shadow(0 17px 19px rgba(0, 0, 0, 0.52))
-    drop-shadow(0 0 24px rgba(var(--trial-glow), 0.22));
-}
-
-.challenge-gargoyle:not(:disabled):hover .gargoyle-wing-left,
-.challenge-gargoyle:not(:disabled):focus-visible .gargoyle-wing-left {
-  transform: rotate(-7deg) translate(-1px, -2px);
-}
-
-.challenge-gargoyle:not(:disabled):hover .gargoyle-wing-right,
-.challenge-gargoyle:not(:disabled):focus-visible .gargoyle-wing-right {
-  transform: rotate(7deg) translate(1px, -2px);
-}
-
-.challenge-gargoyle:not(:disabled):hover .gargoyle-head,
-.challenge-gargoyle:not(:disabled):focus-visible .gargoyle-head {
-  transform: translateY(-3px) rotate(-2deg);
-}
-
-.challenge-gargoyle:not(:disabled):hover .gargoyle-arm-left,
-.challenge-gargoyle:not(:disabled):focus-visible .gargoyle-arm-left {
-  transform: rotate(-4deg) translateY(-1px);
-}
-
-.challenge-gargoyle:not(:disabled):hover .gargoyle-arm-right,
-.challenge-gargoyle:not(:disabled):focus-visible .gargoyle-arm-right {
-  transform: rotate(4deg) translateY(-1px);
-}
-
-.challenge-gargoyle:not(:disabled):hover .gargoyle-jaw,
-.challenge-gargoyle:not(:disabled):focus-visible .gargoyle-jaw {
-  transform: translateY(2px);
-}
-
-.challenge-gargoyle:not(:disabled):hover .gargoyle-eye,
-.challenge-gargoyle:not(:disabled):focus-visible .gargoyle-eye {
-  opacity: 1;
-  filter: drop-shadow(0 0 8px rgba(var(--trial-glow), 0.95));
-}
-
-/* ── Adventure modal ─────────────────────────────────────────────────── */
-/* Active inline challenge card overrides */
-.challenge-room-stack {
-  gap: 0.9rem;
-  width: min(100%, 28rem);
-  margin-top: 1.45rem;
-}
-
-.challenge-room-index {
-  color: rgb(var(--level-accent));
-  font-size: 0.64rem;
-  line-height: 1;
-}
-
-.challenge-room-title {
-  color: hsl(var(--foreground));
-  font-size: clamp(0.95rem, 2.2vw, 1.08rem);
-  line-height: 1.18;
-  text-align: left;
-  text-shadow: 0 0 16px rgba(var(--level-accent), 0.28);
-}
-
-.adventure-modal-body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.15rem;
-  padding: 1.6rem 1.5rem 1.75rem;
-  text-align: center;
-}
-
-.adventure-modal-icon {
-  display: grid;
-  width: 3.4rem;
-  height: 3.4rem;
-  place-items: center;
-  border: 1px solid rgba(var(--tower-cyan), 0.4);
-  border-radius: 999px;
-  background: rgba(var(--tower-cyan), 0.08);
-  color: hsl(var(--primary));
-  box-shadow: 0 0 26px rgba(0, 245, 212, 0.25);
-}
-
-.adventure-modal-copy {
-  max-width: 24rem;
-  margin: 0;
-  color: hsl(var(--muted-foreground));
-  font-size: 0.92rem;
-  line-height: 1.6;
-}
-
-.adventure-modal-progress {
-  width: 100%;
-}
-
-.adventure-modal-progress-meta {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-  color: hsl(var(--primary));
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  font-size: 0.78rem;
-  font-weight: 800;
-}
-
-.adventure-modal-action {
-  width: 100%;
-  max-width: 16rem;
-  height: 2.75rem;
-}
-
-/* ── Challenge levels modal ──────────────────────────────────────────── */
-.challenge-levels-body {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.4rem 1.5rem 1.6rem;
-}
-
-.challenge-levels-summary {
-  margin: 0;
-  color: hsl(var(--muted-foreground));
-  font-size: 0.9rem;
-  line-height: 1.6;
-}
-
-.challenge-levels-topics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.challenge-levels-topic {
-  padding: 0.2rem 0.6rem;
-  border: 1px solid rgba(var(--tower-purple), 0.35);
-  border-radius: 999px;
-  background: rgba(var(--tower-purple), 0.1);
-  color: rgb(221, 166, 255);
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-.challenge-levels-list {
-  display: grid;
-  gap: 0.7rem;
-  margin: 0.2rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.level-card {
-  --level-accent: 176, 74, 255;
-  display: grid;
-  grid-template-columns: 2.4rem minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.9rem;
-  padding: 0.8rem 0.9rem;
-  border: 1px solid rgba(var(--level-accent), 0.32);
-  border-left: 3px solid rgba(var(--level-accent), 0.75);
-  border-radius: 10px;
-  background: linear-gradient(90deg, rgba(var(--level-accent), 0.08), rgba(4, 6, 22, 0.4));
-  opacity: 0;
-  animation: level-card-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.level-card.is-locked {
-  animation: none;
-  opacity: 0.55;
-  filter: grayscale(0.3);
-}
-
-.level-card-rank {
-  display: grid;
-  width: 2.2rem;
-  height: 2.2rem;
-  place-items: center;
-  border: 1px solid rgba(var(--level-accent), 0.4);
-  border-radius: 8px;
-  background: rgba(var(--level-accent), 0.12);
-  color: rgb(var(--level-accent));
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  font-size: 0.95rem;
-  font-weight: 800;
-}
-
-.level-card-main {
-  min-width: 0;
-}
-
-.level-card-head {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.level-card-name {
-  color: hsl(var(--foreground));
-  font-size: 0.92rem;
-  font-weight: 800;
-}
-
-.level-card-status {
-  display: inline-grid;
-  place-items: center;
-  color: rgb(var(--level-accent));
-}
-
-.level-card.is-complete .level-card-status {
-  color: hsl(var(--primary));
-}
-
-.level-card-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 0.25rem;
-  color: hsl(var(--muted-foreground));
-  font-size: 0.75rem;
-}
-
-.level-card-accuracy {
-  color: hsl(var(--primary));
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  font-weight: 700;
-}
-
-.level-card-action {
-  justify-self: end;
-}
-
-@keyframes level-card-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Inline tower challenge doors */
-.tower-door[data-variant='adventure'] .tower-door-frame {
-  display: none;
-}
-
-.tower-door-accuracy {
-  position: absolute;
-  left: 50%;
-  top: 54%;
-  z-index: 4;
-  display: grid;
-  min-width: 3.1rem;
-  justify-items: center;
-  transform: translate(-50%, -50%);
-  color: rgb(var(--door-glow));
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  pointer-events: none;
-  text-align: center;
-  text-shadow: 0 0 10px rgba(var(--door-glow), 0.72), 0 1px 7px rgba(0, 0, 0, 0.72);
-}
-
-.tower-door-accuracy strong {
-  font-size: 1.02rem;
-  font-weight: 900;
-  line-height: 1;
-}
-
-.tower-door-accuracy span {
-  margin-top: 0.18rem;
-  color: rgba(238, 254, 255, 0.72);
-  font-size: 0.52rem;
-  font-weight: 900;
-  letter-spacing: 0;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.tower-inline-progress {
-  width: min(100%, 17.5rem);
-  margin: 1.05rem auto 0;
-  padding: 0.85rem 0.9rem 0.95rem;
-  border: 1px solid rgba(var(--tower-cyan), 0.24);
-  border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(2, 20, 44, 0.62), rgba(1, 8, 22, 0.54)),
-    radial-gradient(90% 120% at 50% 0%, rgba(var(--tower-cyan), 0.14), transparent 60%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 0 24px rgba(var(--tower-cyan), 0.14);
-}
-
-.tower-inline-progress-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.8rem;
-  margin-bottom: 0.5rem;
-  color: rgba(198, 226, 255, 0.82);
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  font-size: 0.72rem;
-  font-weight: 800;
-}
-
-.tower-inline-progress-meta strong {
-  color: hsl(var(--primary));
-  font-size: 0.82rem;
-}
-
-.challenge-room-stack {
-  gap: 0.9rem;
-  width: min(100%, 28rem);
-  margin-top: 1.45rem;
-}
-
-.challenge-room {
-  --level-accent: var(--tower-purple);
-  position: relative;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) 6.8rem;
-  align-items: center;
-  gap: 0.85rem;
-  min-height: 9.7rem;
-  padding: 0.95rem;
-  border: 1px solid rgba(var(--level-accent), 0.34);
-  border-radius: 8px;
-  background:
-    linear-gradient(120deg, rgba(var(--level-accent), 0.18), transparent 38%),
-    radial-gradient(110% 95% at 0% 0%, rgba(var(--level-accent), 0.2), transparent 52%),
-    linear-gradient(180deg, rgba(3, 13, 34, 0.88), rgba(2, 7, 22, 0.78));
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 16px 34px rgba(0, 0, 0, 0.32),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    inset 0 0 30px rgba(var(--level-accent), 0.09);
-  overflow: hidden;
-}
-
-.challenge-room::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(90deg, transparent 0 42%, rgba(var(--level-accent), 0.15) 50%, transparent 58%),
-    repeating-linear-gradient(90deg, transparent 0 1.35rem, rgba(var(--level-accent), 0.045) 1.35rem 1.4rem);
-  opacity: 0.68;
-}
-
-.challenge-room::after {
-  content: '';
-  position: absolute;
-  left: 0.75rem;
-  right: 0.75rem;
-  bottom: 0.55rem;
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(var(--level-accent), 0.65), transparent);
-  box-shadow: 0 0 16px rgba(var(--level-accent), 0.28);
-  pointer-events: none;
-}
-
-.challenge-room[data-state='locked'] {
-  --level-accent: 125, 145, 175;
-  filter: grayscale(0.16);
-}
-
-.challenge-room[data-state='completed'] {
-  --level-accent: var(--tower-cyan);
-}
-
-.challenge-room[data-state='in-progress'] {
-  --level-accent: var(--tower-blue);
-}
-
-.challenge-room-door,
-.challenge-room-copy,
-.challenge-level-rail {
-  position: relative;
-  z-index: 1;
-}
-
-.challenge-room-door {
-  display: grid;
-  place-items: center;
-}
-
-.challenge-room-copy {
-  min-width: 0;
-  text-align: left;
-}
-
-.challenge-room-index {
-  display: inline-flex;
-  align-items: center;
-  height: 1.35rem;
-  padding: 0 0.42rem;
-  border: 1px solid rgba(var(--level-accent), 0.34);
-  border-radius: 6px;
-  background: rgba(var(--level-accent), 0.1);
-  color: rgb(var(--level-accent));
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  font-size: 0.64rem;
-  font-weight: 900;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
-.challenge-room-title {
-  margin: 0.48rem 0 0;
-  color: hsl(var(--foreground));
-  font-size: clamp(0.95rem, 2.2vw, 1.08rem);
-  font-weight: 900;
-  line-height: 1.18;
-  text-align: left;
-  text-wrap: balance;
-  text-shadow: 0 0 16px rgba(var(--level-accent), 0.28);
-}
-
-.challenge-room-summary {
-  display: -webkit-box;
-  margin: 0.42rem 0 0;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  color: hsl(var(--muted-foreground));
-  font-size: 0.76rem;
-  line-height: 1.45;
-}
-
-.challenge-room-topics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.32rem;
-  margin-top: 0.58rem;
-}
-
-.challenge-room-topic {
-  max-width: 7.4rem;
-  overflow: hidden;
-  padding: 0.18rem 0.42rem;
-  border: 1px solid rgba(var(--level-accent), 0.25);
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.18);
-  color: rgba(226, 241, 255, 0.78);
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  font-size: 0.62rem;
-  font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.challenge-room-progress {
-  margin-top: 0.72rem;
-}
-
-.challenge-room-progress-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.65rem;
-  margin-bottom: 0.42rem;
-  color: rgba(200, 220, 245, 0.72);
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  font-size: 0.62rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.challenge-room-progress-meta strong {
-  color: rgb(var(--level-accent));
-}
-
-.challenge-level-rail {
-  display: grid;
-  gap: 0.42rem;
-}
-
-.challenge-level-pill {
-  --level-accent: var(--tower-purple);
-  display: grid;
-  gap: 0.2rem;
-  width: 100%;
-  min-height: 2.35rem;
-  padding: 0.42rem 0.52rem;
-  border: 1px solid rgba(var(--level-accent), 0.28);
-  border-radius: 7px;
-  background:
-    linear-gradient(90deg, rgba(var(--level-accent), 0.1), rgba(3, 9, 28, 0.54)),
-    rgba(0, 0, 0, 0.08);
-  color: rgba(226, 241, 255, 0.82);
-  cursor: pointer;
-  text-align: left;
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-}
-
-.challenge-level-pill-main {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.4rem;
-}
-
-.challenge-level-name {
-  overflow: hidden;
-  color: hsl(var(--foreground));
-  font-size: 0.72rem;
-  font-weight: 900;
-  line-height: 1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.challenge-level-status {
-  display: inline-grid;
-  place-items: center;
-  color: rgb(var(--level-accent));
-}
-
-.challenge-level-progress {
-  color: rgba(192, 213, 240, 0.72);
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  font-size: 0.62rem;
-  font-weight: 900;
-}
-
-.challenge-level-pill.is-selected {
-  border-color: rgba(var(--level-accent), 0.78);
-  background:
-    linear-gradient(90deg, rgba(var(--level-accent), 0.26), rgba(3, 9, 28, 0.64)),
-    rgba(var(--level-accent), 0.08);
-  box-shadow:
-    0 0 0 1px rgba(var(--level-accent), 0.13),
-    0 0 18px rgba(var(--level-accent), 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.challenge-level-pill.is-locked {
-  opacity: 0.72;
-}
-
-.challenge-level-pill:not(:disabled):hover,
-.challenge-level-pill:not(:disabled):focus-visible {
-  outline: none;
-  transform: translateX(-0.08rem);
-  border-color: rgba(var(--level-accent), 0.72);
-  box-shadow: 0 0 16px rgba(var(--level-accent), 0.22);
-}
-
-.challenge-level-pill:disabled {
-  cursor: not-allowed;
-  opacity: 0.62;
-}
-
-.tower-base {
-  width: 94%;
-  height: 3.4rem;
-  margin: -0.1rem auto 0;
-  border: 1px solid rgba(var(--tower-blue), 0.72);
-  background:
-    linear-gradient(180deg, rgba(1, 9, 28, 0.66), rgba(4, 4, 31, 0.48)),
-    linear-gradient(90deg, rgba(var(--tower-cyan), 0.13), rgba(var(--tower-purple), 0.16), rgba(var(--tower-cyan), 0.13));
-  clip-path: polygon(8% 0, 92% 0, 100% 38%, 96% 100%, 4% 100%, 0 38%);
-  box-shadow: 0 0 34px rgba(var(--tower-blue), 0.32), 0 0 46px rgba(var(--tower-purple), 0.16);
-  animation: tower-neon-pulse 5.4s ease-in-out infinite;
-}
-
-.tower-stack-connector {
-  position: relative;
-  z-index: 3;
-  width: 70%;
-  max-width: 23rem;
-  height: 4.6rem;
-  margin: -0.05rem auto 0;
-  overflow: visible;
-  pointer-events: none;
-}
-
-.tower-stack-connector::before,
-.tower-stack-connector::after {
-  content: '';
-  position: absolute;
-  z-index: 1;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: linear-gradient(to bottom, rgba(var(--tower-cyan), 0.85), rgba(var(--tower-blue), 0.6), rgba(var(--tower-purple), 0.72));
-  box-shadow: 0 0 15px rgba(var(--tower-cyan), 0.48), 0 0 28px rgba(var(--tower-purple), 0.24);
-}
-
-.tower-stack-connector::before {
-  left: -0.52rem;
-}
-
-.tower-stack-connector::after {
-  right: -0.52rem;
-}
-
-.tower-stack-connector {
-  background:
-    linear-gradient(
-      to bottom,
-      rgba(var(--tower-cyan), 0.04),
-      rgba(var(--tower-cyan), 0.2) 42%,
-      rgba(var(--tower-purple), 0.16) 58%,
-      rgba(var(--tower-blue), 0.04)
-    );
-  background-size: 100% 220%;
-  animation: tower-linear-flow 3.6s linear infinite;
-}
-
-/* ════════════════════════════════════════════════════════════════════════
-   Door selection, balcony adventure gate, monster trial doors, door overview,
-   action dock
-   ════════════════════════════════════════════════════════════════════════ */
-
 /* ── Shared selection ring (wraps any selected door) ── */
 .door-ring {
   position: absolute;
@@ -2993,347 +2033,6 @@ textarea {
 @keyframes tower-door-ring-pulse {
   0%, 100% { box-shadow: 0 0 14px rgba(var(--door-accent), 0.5), inset 0 0 10px rgba(var(--door-accent), 0.3); }
   50% { box-shadow: 0 0 32px rgba(var(--door-accent), 0.9), inset 0 0 16px rgba(var(--door-accent), 0.5); }
-}
-
-/* ── Command Adventure: balcony gate with its own roof + dormer windows ── */
-.balcony {
-  --door-accent: 0, 245, 212;
-  position: relative;
-  display: grid;
-  justify-items: center;
-  grid-template-rows: auto auto auto;
-  width: 8.6rem;
-  margin-inline: auto;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  isolation: isolate;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.balcony .door-ring {
-  inset: -0.35rem;
-  border-radius: 1rem;
-}
-
-.balcony-roof {
-  position: relative;
-  z-index: 2;
-  width: 7.6rem;
-  height: 2.7rem;
-  border: 1px solid rgba(var(--door-accent), 0.55);
-  border-bottom: none;
-  background:
-    linear-gradient(90deg, rgba(var(--door-accent), 0.24), transparent 42%, rgba(1, 12, 28, 0.45)),
-    repeating-linear-gradient(0deg, rgba(var(--door-accent), 0.14) 0 0.4rem, rgba(1, 12, 28, 0.42) 0.4rem 0.5rem),
-    linear-gradient(180deg, rgba(3, 30, 54, 0.9), rgba(1, 12, 28, 0.6));
-  clip-path: polygon(50% 0, 100% 64%, 100% 100%, 0 100%, 0 64%);
-  filter: drop-shadow(0 -2px 10px rgba(var(--door-accent), 0.3));
-}
-
-.balcony-roof-windows {
-  position: absolute;
-  left: 50%;
-  bottom: 0.3rem;
-  display: flex;
-  gap: 0.42rem;
-  transform: translateX(-50%);
-}
-
-.balcony-roof-window {
-  position: relative;
-  width: 0.56rem;
-  height: 0.95rem;
-  overflow: hidden;
-  border: 1px solid rgba(var(--door-accent), 0.62);
-  border-radius: 0.4rem 0.4rem 0.06rem 0.06rem;
-  background: linear-gradient(180deg, rgba(8, 18, 36, 0.95), rgba(3, 9, 22, 0.96));
-}
-
-.balcony-roof-window::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 66%, #ffe6b0, #ffac52 55%, transparent 84%);
-  opacity: var(--window-glow, 0.6);
-  transition: opacity 0.5s linear;
-}
-
-.balcony-door {
-  position: relative;
-  z-index: 1;
-  justify-self: center;
-  width: 3.7rem;
-  height: 5rem;
-  margin-top: -1px;
-  overflow: hidden;
-  border: 1px solid rgba(var(--door-accent), 0.6);
-  border-radius: 1.85rem 1.85rem 0.2rem 0.2rem;
-  background: linear-gradient(90deg, rgba(var(--door-accent), 0.16), rgba(1, 12, 28, 0.5));
-  box-shadow: inset 0 0 18px rgba(var(--door-accent), 0.18), 0 12px 26px rgba(0, 0, 0, 0.42);
-}
-
-.balcony-door-leaf {
-  position: absolute;
-  inset: 0.32rem;
-  border-radius: 1.6rem 1.6rem 0.12rem 0.12rem;
-  background:
-    repeating-linear-gradient(90deg, transparent 0 0.7rem, rgba(var(--door-accent), 0.14) 0.7rem 0.78rem),
-    linear-gradient(180deg, rgba(7, 40, 58, 0.96), rgba(2, 14, 32, 0.98));
-  transform-origin: left center;
-  backface-visibility: hidden;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.balcony-door-glow {
-  position: absolute;
-  inset: 0.32rem;
-  border-radius: 1.6rem 1.6rem 0.12rem 0.12rem;
-  background: radial-gradient(120% 80% at 50% 100%, rgba(var(--door-accent), 0.65), transparent 70%);
-  opacity: 0.22;
-  transition: opacity 0.5s ease;
-}
-
-.balcony-rail {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  gap: 0.32rem;
-  width: 8rem;
-  height: 1.25rem;
-  margin-top: -1px;
-  padding: 0.2rem 0.45rem;
-  border: 1px solid rgba(var(--door-accent), 0.55);
-  background: linear-gradient(180deg, rgba(2, 26, 48, 0.72), rgba(1, 10, 24, 0.52));
-}
-
-.balcony-rail::before {
-  content: '';
-  position: absolute;
-  left: -0.3rem;
-  right: -0.3rem;
-  top: -0.2rem;
-  height: 0.24rem;
-  border: 1px solid rgba(var(--door-accent), 0.6);
-  background: rgba(2, 20, 42, 0.82);
-  box-shadow: 0 0 10px rgba(var(--door-accent), 0.22);
-}
-
-.balcony-rail span {
-  width: 2px;
-  border-radius: 2px;
-  background: rgba(var(--door-accent), 0.5);
-}
-
-.balcony:hover .balcony-door-leaf,
-.balcony[data-selected='true'] .balcony-door-leaf {
-  transform: rotateY(-72deg);
-}
-
-.balcony:hover .balcony-door-glow,
-.balcony[data-selected='true'] .balcony-door-glow {
-  opacity: 1;
-}
-
-/* ── GIT Challenged: a trial = a name + easy/medium/hard monster doors ── */
-.trial-stack {
-  display: grid;
-  gap: 1.8rem;
-  width: min(100%, 25rem);
-  margin: 1.7rem auto 0;
-}
-
-.trial-group {
-  display: grid;
-  justify-items: center;
-  gap: 0.85rem;
-}
-
-.trial-group[data-locked='true'] {
-  opacity: 0.85;
-}
-
-.trial-name {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.45rem;
-  max-width: 22rem;
-  color: hsl(var(--foreground));
-  font-size: 0.92rem;
-  font-weight: 900;
-  text-align: center;
-  text-wrap: balance;
-}
-
-.trial-name-index {
-  padding: 0.1rem 0.4rem;
-  border: 1px solid rgba(176, 74, 255, 0.42);
-  border-radius: 6px;
-  color: rgb(221, 166, 255);
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  font-size: 0.6rem;
-  font-weight: 900;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-.trial-door-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1.15rem;
-}
-
-.trial-door {
-  --door-accent: 176, 74, 255;
-  position: relative;
-  display: grid;
-  justify-items: center;
-  gap: 0.32rem;
-  width: 5rem;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.trial-door[data-difficulty='easy'] { --door-accent: 0, 245, 212; }
-.trial-door[data-difficulty='medium'] { --door-accent: 53, 143, 255; }
-.trial-door[data-difficulty='hard'] { --door-accent: 176, 74, 255; }
-
-.trial-door .door-ring {
-  inset: -0.3rem;
-  border-radius: 0.8rem;
-}
-
-.monster-crest {
-  position: relative;
-  z-index: 3;
-  width: 4.7rem;
-  height: auto;
-  margin-bottom: -0.7rem;
-  overflow: visible;
-  filter: drop-shadow(0 0 6px rgba(var(--door-accent), 0.5));
-}
-
-.trial-door[data-difficulty='hard'] .monster-crest {
-  filter: drop-shadow(0 0 10px rgba(176, 74, 255, 0.72));
-}
-
-.monster-head {
-  fill: rgba(var(--door-accent), 0.14);
-  stroke: rgba(var(--door-accent), 0.82);
-  stroke-width: 2.2;
-  stroke-linejoin: round;
-}
-
-.monster-horn {
-  fill: rgba(var(--door-accent), 0.22);
-  stroke: rgba(var(--door-accent), 0.92);
-  stroke-width: 2.2;
-  stroke-linejoin: round;
-}
-
-.monster-brow {
-  fill: none;
-  stroke: rgba(var(--door-accent), 0.85);
-  stroke-width: 2.4;
-  stroke-linecap: round;
-}
-
-.monster-eye {
-  fill: #ffffff;
-  filter: drop-shadow(0 0 4px rgba(var(--door-accent), 0.95));
-}
-
-.monster-snarl {
-  fill: none;
-  stroke: rgba(var(--door-accent), 0.7);
-  stroke-width: 2;
-  stroke-linecap: round;
-}
-
-.monster-fang {
-  fill: #eafffb;
-}
-
-.monster-thirdeye {
-  fill: #ffd9ff;
-  filter: drop-shadow(0 0 5px rgba(176, 74, 255, 0.95));
-}
-
-.trial-door-arch {
-  position: relative;
-  z-index: 1;
-  width: 4.2rem;
-  height: 5.4rem;
-  overflow: hidden;
-  border: 1px solid rgba(var(--door-accent), 0.6);
-  border-radius: 2.1rem 2.1rem 0.2rem 0.2rem;
-  background: linear-gradient(90deg, rgba(var(--door-accent), 0.14), rgba(1, 10, 24, 0.5));
-  box-shadow: inset 0 0 16px rgba(var(--door-accent), 0.16), 0 12px 26px rgba(0, 0, 0, 0.42);
-}
-
-/* Hard = gothic pointed (devilish) doorway. */
-.trial-door[data-difficulty='hard'] .trial-door-arch {
-  border-radius: 0.2rem;
-  clip-path: polygon(0 14%, 50% 0, 100% 14%, 100% 100%, 0 100%);
-}
-
-.trial-door-leaf {
-  position: absolute;
-  inset: 0.3rem;
-  border-radius: 1.9rem 1.9rem 0.12rem 0.12rem;
-  background:
-    repeating-linear-gradient(0deg, transparent 0 0.9rem, rgba(var(--door-accent), 0.1) 0.9rem 0.98rem),
-    linear-gradient(180deg, rgba(10, 20, 44, 0.96), rgba(2, 8, 22, 0.98));
-  transform-origin: left center;
-  backface-visibility: hidden;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.trial-door[data-difficulty='hard'] .trial-door-leaf {
-  border-radius: 0.12rem;
-}
-
-.trial-door-glow {
-  position: absolute;
-  inset: 0.3rem;
-  border-radius: inherit;
-  background: radial-gradient(120% 80% at 50% 100%, rgba(var(--door-accent), 0.65), transparent 70%);
-  opacity: 0.22;
-  transition: opacity 0.5s ease;
-}
-
-.trial-door-label {
-  color: rgba(var(--door-accent), 0.95);
-  font-size: 0.68rem;
-  font-weight: 900;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  text-shadow: 0 0 10px rgba(var(--door-accent), 0.5);
-}
-
-.trial-door:hover .trial-door-leaf,
-.trial-door[data-selected='true'] .trial-door-leaf {
-  transform: rotateY(-72deg);
-}
-
-.trial-door:hover .trial-door-glow,
-.trial-door[data-selected='true'] .trial-door-glow {
-  opacity: 1;
-}
-
-.trial-door[data-locked='true'] {
-  opacity: 0.68;
-}
-
-.trial-door[data-locked='true'] .trial-door-leaf {
-  filter: grayscale(0.42);
 }
 
 /* ── Door overview (in the sticky storey rail) ── */
@@ -3741,27 +2440,6 @@ textarea {
   [data-selected='true'] > .door-ring {
     animation: none;
   }
-
-  .balcony[data-selected='true'] .balcony-door-leaf,
-  .trial-door[data-selected='true'] .trial-door-leaf {
-    transform: none;
-  }
-}
-
-@keyframes tower-neon-pulse {
-  0%, 100% {
-    filter: drop-shadow(0 0 8px rgba(45, 245, 255, 0.2));
-  }
-  50% {
-    filter: drop-shadow(0 0 15px rgba(45, 245, 255, 0.36));
-  }
-}
-
-@keyframes tower-flag-wave {
-  0%, 100% { transform: skewY(0deg) scaleX(1); }
-  25% { transform: skewY(-2.5deg) scaleX(1.035); }
-  50% { transform: skewY(1.5deg) scaleX(0.99); }
-  75% { transform: skewY(-1deg) scaleX(1.02); }
 }
 
 @keyframes tower-loading-sheen {
@@ -3818,127 +2496,15 @@ textarea {
 
   .learning-tower {
     width: min(100%, 29rem);
-    padding-top: 1.75rem;
+    padding-top: 0;
   }
 
   .learning-tower-continuation {
     padding-top: 0;
   }
 
-  .tower-flag-wrap {
-    transform: translateX(-50%) scale(0.86);
-  }
-
-  .tower-crown {
-    width: 96%;
-  }
-
-  .tower-shell,
-  .tower-stack-connector {
-    width: 88%;
-  }
-
-  .tower-floor {
-    padding-inline: 1rem;
-  }
-
   .challenge-room-stack {
-    grid-template-columns: minmax(0, 1fr);
     width: 100%;
-    gap: 0.9rem;
-  }
-
-  .tower-door {
-    --door-width: 4.55rem;
-    --door-height: 6.8rem;
-  }
-
-  .tower-door[data-variant='adventure'] {
-    --door-width: 4.75rem;
-    --door-height: 7.35rem;
-  }
-
-  .tower-door[data-variant='challenge'] {
-    --door-width: 4.55rem;
-    --door-height: 6.65rem;
-  }
-
-  .challenge-gargoyle {
-    min-height: 13.7rem;
-  }
-
-  .challenge-gargoyle-figure {
-    min-height: 10rem;
-  }
-
-  .challenge-gargoyle-art {
-    width: 9rem;
-  }
-
-  .challenge-gargoyle::before {
-    width: min(100%, 13.6rem);
-    height: 9.75rem;
-  }
-
-  .challenge-gargoyle::after {
-    top: 8.2rem;
-    width: 10.8rem;
-  }
-
-  .challenge-gargoyle-plinth {
-    width: min(100%, 15rem);
-    padding: 0.8rem 0.9rem 0.9rem;
-  }
-
-  .challenge-room-title {
-    font-size: 0.9rem;
-  }
-
-  .level-card {
-    grid-template-columns: 2rem minmax(0, 1fr);
-    grid-template-areas:
-      'rank main'
-      'action action';
-    row-gap: 0.65rem;
-  }
-
-  .level-card-rank {
-    grid-area: rank;
-  }
-
-  .level-card-main {
-    grid-area: main;
-  }
-
-  .level-card-action {
-    grid-area: action;
-    justify-self: stretch;
-    width: 100%;
-  }
-
-  .challenge-room {
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-areas:
-      'door levels'
-      'copy copy';
-    gap: 0.9rem;
-    padding: 0.9rem;
-  }
-
-  .challenge-room-door {
-    grid-area: door;
-  }
-
-  .challenge-room-copy {
-    grid-area: copy;
-  }
-
-  .challenge-level-rail {
-    grid-area: levels;
-  }
-
-  .tower-inline-progress {
-    width: min(100%, 15.5rem);
   }
 }
 
@@ -4166,13 +2732,8 @@ textarea {
   .git-it-window,
   .git-it-flag,
   .git-it-tower-scan,
-  .tower-crown,
-  .tower-shell,
-  .tower-base,
-  .tower-flag,
   .tower-starfield--far,
   .tower-starfield--near,
-  .tower-stack-connector,
   .tower-loading-row {
     animation: none;
     transition: none;
