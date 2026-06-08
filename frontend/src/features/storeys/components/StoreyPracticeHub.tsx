@@ -93,17 +93,17 @@ function WindowStorey({ crowned }: { crowned: boolean }) {
         <div className="tower-window-roof">
           <span className="tower-window-roof-spire" />
           <span className="tower-window-roof-flag">
-            <svg className="tower-window-roof-flag-logo" viewBox="0 0 64 64" aria-hidden="true">
-              <path className="tower-window-roof-flag-logo-line" d="M18 18 L34 34 M34 34 L48 20 M34 34 V50" />
-              <circle className="tower-window-roof-flag-logo-node" cx="18" cy="18" r="6" />
-              <circle className="tower-window-roof-flag-logo-node" cx="48" cy="20" r="6" />
-              <circle className="tower-window-roof-flag-logo-node" cx="34" cy="34" r="6" />
-              <circle className="tower-window-roof-flag-logo-node" cx="34" cy="50" r="6" />
-            </svg>
+            <span className="tower-window-roof-flag-diamond" />
+            <span className="tower-window-roof-flag-cloth">
+              <svg className="tower-window-roof-flag-logo" viewBox="0 0 64 40" aria-hidden="true">
+                <path className="tower-window-roof-flag-logo-line" d="M14 10 L30 20 M30 20 L46 10 M30 20 V30" />
+                <circle className="tower-window-roof-flag-logo-node" cx="14" cy="10" r="4.4" />
+                <circle className="tower-window-roof-flag-logo-node" cx="46" cy="10" r="4.4" />
+                <circle className="tower-window-roof-flag-logo-node" cx="30" cy="20" r="4.4" />
+              </svg>
+            </span>
           </span>
           <span className="tower-window-roof-peak" />
-          <span className="tower-window-roof-finial tower-window-roof-finial--left" />
-          <span className="tower-window-roof-finial tower-window-roof-finial--right" />
         </div>
       ) : null}
       <div className="tower-window-storey">
