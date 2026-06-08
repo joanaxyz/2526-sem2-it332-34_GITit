@@ -92,6 +92,15 @@ function WindowStorey({ crowned }: { crowned: boolean }) {
       {crowned ? (
         <div className="tower-window-roof">
           <span className="tower-window-roof-spire" />
+          <span className="tower-window-roof-flag">
+            <svg className="tower-window-roof-flag-logo" viewBox="0 0 64 64" aria-hidden="true">
+              <path className="tower-window-roof-flag-logo-line" d="M18 18 L34 34 M34 34 L48 20 M34 34 V50" />
+              <circle className="tower-window-roof-flag-logo-node" cx="18" cy="18" r="6" />
+              <circle className="tower-window-roof-flag-logo-node" cx="48" cy="20" r="6" />
+              <circle className="tower-window-roof-flag-logo-node" cx="34" cy="34" r="6" />
+              <circle className="tower-window-roof-flag-logo-node" cx="34" cy="50" r="6" />
+            </svg>
+          </span>
           <span className="tower-window-roof-peak" />
           <span className="tower-window-roof-finial tower-window-roof-finial--left" />
           <span className="tower-window-roof-finial tower-window-roof-finial--right" />
@@ -106,7 +115,7 @@ function WindowStorey({ crowned }: { crowned: boolean }) {
   )
 }
 
-// Section belt between tower rooms. The challenge-after belt gets its own wind banner.
+// Section belt between tower rooms. Challenge-after belts get physical crenels that keep their side outlines closed.
 function TowerSectionSeparator({
   continuation = false,
   base = false,
@@ -126,8 +135,14 @@ function TowerSectionSeparator({
       )}
       aria-hidden="true"
     >
+      {afterChallenges ? (
+        <span className="tower-section-separator-crenels">
+          {Array.from({ length: 9 }, (_, index) => (
+            <span key={index} />
+          ))}
+        </span>
+      ) : null}
       <span className="tower-section-separator-backplate" />
-      {afterChallenges ? <span className="tower-section-separator-banner" /> : null}
     </div>
   )
 }
