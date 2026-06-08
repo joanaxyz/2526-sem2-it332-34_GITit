@@ -1043,8 +1043,8 @@ textarea {
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   TOWER — reference-locked neon keep: windows storey → adventure → gemmed
-   separator → challenges → base separator. Layout (page shell, docks, sky
+   TOWER: reference-locked neon keep: windows storey → adventure →
+   section separator → challenges → bannered base separator. Layout (page shell, docks, sky
    clock, sun/moon) lives elsewhere.
    ════════════════════════════════════════════════════════════════════════ */
 .learning-tower {
@@ -1285,11 +1285,18 @@ textarea {
   z-index: 2;
 }
 
+.tower-challenges-stage::before {
+  top: 1.2rem;
+  right: 0.65rem;
+  bottom: 0.65rem;
+  left: 0.65rem;
+}
+
 .tower-adventure-stage {
   z-index: 3;
   width: min(82%, 23rem);
   margin-top: 1.55rem;
-  padding: 2.35rem 1.55rem 2.05rem;
+  padding: 2.35rem 1.55rem 1.15rem;
 }
 
 .tower-adventure-stage::after {
@@ -1378,9 +1385,9 @@ textarea {
 .adventure-door-frame::after {
   content: '';
   position: absolute;
-  left: -1.05rem;
-  right: -1.05rem;
-  bottom: -1.56rem;
+  left: -1.5rem;
+  right: -1.5rem;
+  bottom: -1.36rem;
   height: 0.72rem;
   border: 2.5px solid rgba(45, 245, 255, 0.88);
   background: var(--tower-wall-solid);
@@ -1505,19 +1512,19 @@ textarea {
   position: relative;
   z-index: 4;
   width: min(100%, 34.5rem);
-  height: 3.82rem;
-  margin: -0.14rem auto -0.18rem;
+  height: 4.15rem;
+  margin: -0.2rem auto -0.22rem;
   isolation: isolate;
 }
 
 .tower-section-separator::before {
   content: '';
   position: absolute;
-  left: -0.12rem;
-  right: -0.12rem;
+  left: -0.2rem;
+  right: -0.2rem;
   top: 0;
   z-index: 5;
-  height: 1.28rem;
+  height: 1.34rem;
   border: 2px solid rgba(45, 245, 255, 0.94);
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.034) 0, transparent 11%, transparent 89%, rgba(255, 255, 255, 0.03) 100%),
@@ -1531,11 +1538,11 @@ textarea {
 .tower-section-separator::after {
   content: '';
   position: absolute;
-  left: -0.42rem;
-  right: -0.42rem;
-  top: 2.52rem;
+  left: -0.54rem;
+  right: -0.54rem;
+  top: 2.44rem;
   z-index: 6;
-  height: 0.88rem;
+  height: 1.12rem;
   border: 2px solid rgba(45, 245, 255, 0.9);
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.028) 0, transparent 12%, transparent 88%, rgba(255, 255, 255, 0.024) 100%),
@@ -1543,23 +1550,23 @@ textarea {
   clip-path: polygon(2.3% 0, 97.7% 0, 100% 100%, 0 100%);
   box-shadow:
     0 0 16px var(--tower-cyan-glow),
-    inset 0 -0.18rem 0 rgba(0, 0, 0, 0.22);
+    inset 0 -0.24rem 0 rgba(0, 0, 0, 0.22);
 }
 
 .tower-section-separator-backplate {
   position: absolute;
-  left: 0.62rem;
-  right: 0.62rem;
+  left: 0.7rem;
+  right: 0.7rem;
   top: 1.12rem;
   z-index: 3;
-  height: 1.48rem;
+  height: 1.54rem;
   border: 1.5px solid rgba(45, 245, 255, 0.82);
   border-top: 0;
   background:
     repeating-linear-gradient(
       90deg,
       transparent 0 3.45rem,
-      rgba(45, 245, 255, 0.5) 3.45rem calc(3.45rem + 1px),
+      rgba(45, 245, 255, 0.36) 3.45rem calc(3.45rem + 1px),
       transparent calc(3.45rem + 1px) 4.45rem
     ),
     linear-gradient(180deg, rgba(6, 24, 39, 0.98), rgba(2, 11, 21, 0.995));
@@ -1580,63 +1587,170 @@ textarea {
   box-shadow: 0 0 8px rgba(45, 245, 255, 0.14);
 }
 
-.tower-section-separator-logo {
-  position: absolute;
-  left: 50%;
-  top: 0.56rem;
-  z-index: 8;
-  display: grid;
-  width: 3.06rem;
-  height: 3.06rem;
-  box-sizing: border-box;
-  place-items: center;
-  transform: translateX(-50%);
+.tower-section-separator.is-after-challenges {
+  width: min(100%, 37rem);
+  height: 4.7rem;
+  margin-top: -0.08rem;
+  margin-bottom: -0.68rem;
+}
+
+.tower-section-separator.is-after-challenges::before {
+  left: 0.18rem;
+  right: 0.18rem;
+  top: 0.16rem;
+  height: 1.56rem;
+  border: 2px solid rgba(45, 245, 255, 0.94);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0, transparent 12%, transparent 88%, rgba(255, 255, 255, 0.026) 100%),
+    linear-gradient(180deg, rgba(12, 37, 56, 0.99), rgba(4, 16, 30, 0.995));
+  clip-path: polygon(
+    0 100%, 0 26%, 3.4% 26%, 3.4% 0, 7.8% 0, 7.8% 26%,
+    14.2% 26%, 14.2% 0, 18.6% 0, 18.6% 26%,
+    25% 26%, 25% 0, 29.4% 0, 29.4% 26%,
+    35.8% 26%, 35.8% 0, 40.2% 0, 40.2% 26%,
+    46.6% 26%, 46.6% 0, 53.4% 0, 53.4% 26%,
+    59.8% 26%, 59.8% 0, 64.2% 0, 64.2% 26%,
+    70.6% 26%, 70.6% 0, 75% 0, 75% 26%,
+    81.4% 26%, 81.4% 0, 85.8% 0, 85.8% 26%,
+    92.2% 26%, 92.2% 0, 96.6% 0, 96.6% 26%, 100% 26%, 100% 100%
+  );
+  box-shadow:
+    0 0 18px var(--tower-cyan-glow),
+    inset 0 -0.32rem 0 rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(5, 14, 24, 0.56);
+  filter: drop-shadow(0 0 1px rgba(45, 245, 255, 0.22));
+}
+
+.tower-section-separator.is-after-challenges::after {
+  left: -0.72rem;
+  right: -0.72rem;
+  top: 2.72rem;
+  height: 1.46rem;
   border: 2px solid rgba(45, 245, 255, 0.9);
   background:
-    radial-gradient(circle at 50% 45%, rgba(176, 74, 255, 0.15), transparent 54%),
-    linear-gradient(180deg, rgba(7, 27, 46, 0.995), rgba(3, 13, 25, 1));
+    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 0, transparent 12%, transparent 88%, rgba(255, 255, 255, 0.024) 100%),
+    linear-gradient(180deg, rgba(7, 28, 45, 0.99), rgba(2, 12, 23, 0.998));
+  clip-path: polygon(1.8% 0, 98.2% 0, 100% 100%, 0 100%);
   box-shadow:
-    0 0 17px var(--tower-purple-glow),
-    0 0 12px rgba(45, 245, 255, 0.16),
-    inset 0 0 0 1px rgba(2, 10, 20, 0.7);
+    0 0 16px var(--tower-cyan-glow),
+    inset 0 -0.24rem 0 rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-.tower-section-separator-logo-icon {
-  width: 1.58rem;
-  height: 1.58rem;
-  color: rgb(209, 96, 255);
-  filter: drop-shadow(0 0 9px rgba(176, 74, 255, 0.58));
-  stroke-width: 2.5;
+.tower-section-separator.is-after-challenges .tower-section-separator-backplate {
+  left: 0.78rem;
+  right: 0.78rem;
+  top: 1.34rem;
+  height: 1.72rem;
+  border-top: 1.5px solid rgba(45, 245, 255, 0.82);
+  background:
+    linear-gradient(90deg, rgba(45, 245, 255, 0.34) 0 1px, transparent 1px calc(50% - 2rem), rgba(45, 245, 255, 0.28) calc(50% - 2rem) calc(50% - 1.95rem), transparent calc(50% - 1.95rem) calc(50% + 1.95rem), rgba(45, 245, 255, 0.28) calc(50% + 1.95rem) calc(50% + 2rem), transparent calc(50% + 2rem) calc(100% - 1px), rgba(45, 245, 255, 0.34) calc(100% - 1px)),
+    linear-gradient(180deg, rgba(6, 24, 39, 0.98), rgba(2, 11, 21, 0.995));
+  box-shadow:
+    inset 0 -0.28rem 0 rgba(0, 0, 0, 0.2),
+    0 0 12px rgba(45, 245, 255, 0.14);
 }
 
-.tower-section-separator.is-continuation,
-.tower-section-separator.is-base {
+.tower-section-separator-banner {
+  position: absolute;
+  left: 50%;
+  top: 0.48rem;
+  z-index: 9;
+  width: 4.05rem;
+  height: 4.95rem;
+  transform: translateX(-50%) skewX(0deg);
+  transform-origin: 50% 0;
+  border: 2px solid rgba(216, 95, 255, 0.96);
+  border-top-color: rgba(45, 245, 255, 0.74);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.055), transparent 18% 78%, rgba(255, 255, 255, 0.035)),
+    linear-gradient(180deg, rgba(42, 18, 68, 0.98), rgba(19, 9, 42, 0.995));
+  clip-path: polygon(0 0, 100% 0, 100% 72%, 75% 72%, 50% 100%, 25% 72%, 0 72%);
+  box-shadow:
+    0 0 18px rgba(176, 74, 255, 0.36),
+    0 0 10px rgba(45, 245, 255, 0.14),
+    inset 0 0 0 1px rgba(2, 10, 20, 0.72);
+  animation: towerBannerWind 4.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.tower-section-separator-banner::before,
+.tower-section-separator-banner::after {
+  content: '';
+  position: absolute;
+  left: 0.58rem;
+  right: 0.58rem;
+  pointer-events: none;
+}
+
+.tower-section-separator-banner::before {
+  top: 0.42rem;
+  bottom: 1.34rem;
+  left: 0.46rem;
+  right: 0.46rem;
+  background: url('/favicon.svg') center / contain no-repeat;
+  filter:
+    drop-shadow(0 0 8px rgba(176, 74, 255, 0.28))
+    drop-shadow(0 0 6px rgba(45, 245, 255, 0.18));
+  opacity: 0.98;
+}
+
+.tower-section-separator-banner::after {
+  top: 3.36rem;
+  height: 2px;
+  left: 0.78rem;
+  right: 0.78rem;
+  background: linear-gradient(90deg, transparent, rgba(216, 95, 255, 0.82), transparent);
+  box-shadow:
+    0 -0.5rem 0 rgba(45, 245, 255, 0.28),
+    0 0.5rem 0 rgba(216, 95, 255, 0.42),
+    0 0 10px rgba(176, 74, 255, 0.26);
+}
+
+@keyframes towerBannerWind {
+  0%, 100% {
+    transform: translateX(-50%) skewX(0deg);
+    clip-path: polygon(0 0, 100% 0, 100% 72%, 75% 72%, 50% 100%, 25% 72%, 0 72%);
+  }
+
+  32% {
+    transform: translateX(-50%) skewX(-2.4deg);
+    clip-path: polygon(0 0, 100% 0, 96% 72%, 73% 73%, 47% 100%, 24% 71%, 3% 72%);
+  }
+
+  66% {
+    transform: translateX(-50%) skewX(2deg);
+    clip-path: polygon(0 0, 100% 0, 98% 71%, 76% 72%, 53% 100%, 27% 73%, 0 73%);
+  }
+}
+
+.tower-section-separator.is-continuation {
   margin-top: -0.08rem;
 }
 
 .tower-section-separator.is-base {
-  width: min(100%, 35.5rem);
-  height: 3.9rem;
+  width: min(100%, 37.5rem);
+  height: 4.85rem;
   margin-bottom: 0;
 }
 
 .tower-section-separator.is-base::before {
-  left: -0.1rem;
-  right: -0.1rem;
-  top: 0.08rem;
+  left: 0.1rem;
+  right: 0.1rem;
+  top: 0.24rem;
 }
 
 .tower-section-separator.is-base::after {
-  top: 2.62rem;
-  height: 0.9rem;
+  top: 2.98rem;
+  height: 1.34rem;
 }
 
 .tower-section-separator.is-base .tower-section-separator-backplate {
-  top: 1.2rem;
+  top: 1.44rem;
 }
 
-.tower-section-separator.is-base .tower-section-separator-logo {
-  top: 0.64rem;
+.tower-section-separator.is-base .tower-section-separator-banner {
+  top: 0.5rem;
 }
 
 .tower-challenges-stage {
@@ -1980,15 +2094,24 @@ textarea {
       repeating-linear-gradient(
         90deg,
         transparent 0 2.45rem,
-        rgba(45, 245, 255, 0.48) 2.45rem calc(2.45rem + 1px),
+        rgba(45, 245, 255, 0.36) 2.45rem calc(2.45rem + 1px),
         transparent calc(2.45rem + 1px) 3.25rem
       ),
       linear-gradient(180deg, rgba(6, 24, 39, 0.98), rgba(2, 11, 21, 0.995));
   }
 
-  .tower-section-separator-logo {
-    width: 2.72rem;
-    height: 2.72rem;
+  .tower-section-separator.is-after-challenges {
+    width: min(98%, 24.2rem);
+  }
+
+  .tower-section-separator.is-after-challenges .tower-section-separator-backplate {
+    left: 0.58rem;
+    right: 0.58rem;
+  }
+
+  .tower-section-separator-banner {
+    width: 3.15rem;
+    height: 4rem;
   }
 
   .trial-door-row {

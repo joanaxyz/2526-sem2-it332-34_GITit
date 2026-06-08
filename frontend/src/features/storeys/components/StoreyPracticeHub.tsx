@@ -3,7 +3,6 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import {
   ArrowRight,
   Gem,
-  GitBranch,
   Layers3,
   ListChecks,
   Swords,
@@ -107,17 +106,28 @@ function WindowStorey({ crowned }: { crowned: boolean }) {
   )
 }
 
-// ── Battlemented belt with a central gem panel between sections / storeys. ──
-function TowerSectionSeparator({ continuation = false, base = false }: { continuation?: boolean; base?: boolean }) {
+// Section belt between tower rooms. The challenge-after belt gets its own wind banner.
+function TowerSectionSeparator({
+  continuation = false,
+  base = false,
+  afterChallenges = false,
+}: {
+  continuation?: boolean
+  base?: boolean
+  afterChallenges?: boolean
+}) {
   return (
     <div
-      className={cn('tower-section-separator', continuation && 'is-continuation', base && 'is-base')}
+      className={cn(
+        'tower-section-separator',
+        continuation && 'is-continuation',
+        base && 'is-base',
+        afterChallenges && 'is-after-challenges',
+      )}
       aria-hidden="true"
     >
       <span className="tower-section-separator-backplate" />
-      <span className="tower-section-separator-logo">
-        <GitBranch className="tower-section-separator-logo-icon" aria-hidden="true" />
-      </span>
+      {afterChallenges ? <span className="tower-section-separator-banner" /> : null}
     </div>
   )
 }
@@ -479,7 +489,7 @@ export function StoreyPracticeHub({
             ) : null}
           </motion.section>
 
-          {!isLast ? <TowerSectionSeparator continuation /> : <TowerSectionSeparator base />}
+          {!isLast ? <TowerSectionSeparator afterChallenges continuation /> : <TowerSectionSeparator afterChallenges base />}
         </motion.div>
       </div>
     </section>
