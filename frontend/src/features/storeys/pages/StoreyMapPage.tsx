@@ -1,15 +1,34 @@
-import { useEffect, useMemo, type CSSProperties } from 'react'
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { motion, useScroll, useSpring, useTransform } from 'motion/react'
 import { useSearchParams } from 'react-router-dom'
 
 import { storeysApi } from '@/features/storeys/api/storeysApi'
-import { StoreyPracticeHub } from '@/features/storeys/components/StoreyPracticeHub'
+import { DoorOverview } from '@/features/storeys/components/DoorOverview'
+import { StoreyOverview, StoreyPracticeHub } from '@/features/storeys/components/StoreyPracticeHub'
+import { SkyClock } from '@/features/storeys/components/SkyClock'
+import { TowerActionButton } from '@/features/storeys/components/TowerActionButton'
+import { useTowerSelection } from '@/features/storeys/hooks/useTowerSelection'
+import { computeSky } from '@/features/storeys/sky/useTowerSky'
+import { clamp, lerp, mulberry32 } from '@/features/storeys/towerRandom'
 import type { LearningStorey } from '@/features/storeys/types'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
+
+// One in-app day takes this long in real time when the cycle is auto-advancing.
+const DAY_LENGTH_MS = 18 * 60 * 1000
+const wrap24 = (hour: number) => ((hour % 24) + 24) % 24
 
 function isFoundationsStorey(storey: LearningStorey) {
   return storey.number === 1 || storey.slug === 'creating-inspecting-repositories'
@@ -22,17 +41,14 @@ function storeyTitle(storey: LearningStorey) {
 // Crisp-edged puffy clouds. Three silhouettes for variety; transparency, size and
 // position come from CSS per instance.
 const CLOUD_SHAPES = {
-  // wide, balanced cumulus
   a: {
     viewBox: '0 0 120 54',
     d: 'M14 47 C5 47 1 40 4 33 C6 27 13 26 17 28 C16 17 27 10 36 14 C40 5 52 3 59 9 C65 2 77 4 80 13 C90 9 100 14 100 23 C110 22 117 29 114 37 C112 43 105 47 97 47 Z',
   },
-  // long, low and flat
   b: {
     viewBox: '0 0 130 44',
     d: 'M9 38 C2 38 0 32 3 28 C5 24 12 24 15 26 C16 18 26 16 32 20 C36 12 49 12 53 19 C60 13 73 14 76 21 C84 16 97 18 99 24 C109 22 122 25 123 31 C124 36 117 38 110 38 Z',
   },
-  // tall, puffy multi-lobe
   c: {
     viewBox: '0 0 116 64',
     d: 'M16 56 C6 56 1 47 6 39 C2 31 10 23 19 27 C20 14 35 8 45 16 C49 4 66 4 72 15 C79 6 94 9 95 21 C107 18 116 27 110 36 C120 38 119 51 109 53 C110 57 101 56 95 56 Z',
@@ -60,15 +76,12 @@ function CloudShape({
   )
 }
 
-// Depth bands, far → near. Each gets its own size/opacity range and its own scroll
-// speed, so the field reads as 3D atmosphere rather than a flat sticker.
 type CloudLayer = 'far' | 'mid' | 'near'
 
 const CLOUD_VARIANTS: CloudVariant[] = ['a', 'b', 'c']
 const LAYER_STYLE: Record<CloudLayer, { width: [number, number]; opacity: [number, number] }> = {
   far: { width: [18, 25], opacity: [0.08, 0.14] },
   mid: { width: [13, 20], opacity: [0.13, 0.23] },
-  // `near` renders in FRONT of the tower, so keep it light enough to read through.
   near: { width: [10, 16], opacity: [0.18, 0.32] },
 }
 
@@ -82,30 +95,12 @@ type SeededCloud = {
   opacity: number
 }
 
-const clamp = (value: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, value))
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t
-
-// Tiny deterministic PRNG so the layout is generated once and stays put across
-// renders (no reshuffle / flicker) while still looking hand-scattered.
-function mulberry32(seed: number) {
-  return () => {
-    seed = (seed + 0x6d2b79f5) | 0
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
-
-// Build a cloud field that scales with the tower: ~1.6 clouds per storey, stratified
-// down the full height so they never clump and never leave gaps. Add storeys and they
-// get their own clouds for free — nothing here is hand-placed to a fixed viewport.
 function buildCloudField(floors: number): SeededCloud[] {
   const count = Math.max(4, Math.round(floors * 0.9))
   const rand = mulberry32(0x7a9c13)
   return Array.from({ length: count }, (_, i): SeededCloud => {
     const layer = i % 5 === 0 ? 'far' : i % 5 === 3 ? 'mid' : 'near'
     const range = LAYER_STYLE[layer]
-    // One cloud per evenly spaced band + sub-band jitter → scattered but gap-free.
     const band = (i + 0.5) / count
     const top = clamp(band + (rand() - 0.5) * (1.05 / count), 0.04, 0.96) * 100
     const leftSide = rand() < 0.5
@@ -124,6 +119,25 @@ function buildCloudField(floors: number): SeededCloud[] {
   })
 }
 
+// The storey stack is the heavy part of the tree; memo it so the once-a-second
+// clock-label re-render (from the sky cycle) never re-renders every storey.
+const TowerStoreys = memo(function TowerStoreys({ storeys }: { storeys: LearningStorey[] }) {
+  return (
+    <div className="tower-stack-column">
+      {storeys.map((storey, index) => (
+        <StoreyPracticeHub
+          displayTitle={storeyTitle(storey)}
+          isFirst={index === 0}
+          isLast={index === storeys.length - 1}
+          key={storey.id}
+          sequenceIndex={index}
+          storey={storey}
+        />
+      ))}
+    </div>
+  )
+})
+
 export function StoreyMapPage() {
   const [searchParams] = useSearchParams()
   const storeyParam = searchParams.get('storey')
@@ -135,19 +149,100 @@ export function StoreyMapPage() {
   })
 
   const storeys = useMemo(() => storeysQuery.data ?? [], [storeysQuery.data])
-
   const cloudField = useMemo(() => buildCloudField(storeys.length), [storeys.length])
+  const clearSelection = useTowerSelection((state) => state.clear)
+  const selectedStoreyId = useTowerSelection((state) => state.selected?.storeyId ?? null)
+  const [activeStoreyId, setActiveStoreyId] = useState<number | null>(null)
+  const activeStorey = useMemo(
+    () => storeys.find((storey) => storey.id === activeStoreyId) ?? storeys[0] ?? null,
+    [activeStoreyId, storeys],
+  )
+  const doorOverviewStoreyId = selectedStoreyId ?? activeStorey?.id ?? null
 
-  // Moon + stars sit on the fixed backdrop and ease with normalised progress.
+  // ── Living sky ──────────────────────────────────────────────────────────
+  const pageRef = useRef<HTMLDivElement | null>(null)
+  const prefersReduced = useMemo(
+    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    [],
+  )
+  const initialTime = useMemo(() => {
+    const now = new Date()
+    return now.getHours() + now.getMinutes() / 60
+  }, [])
+  const timeRef = useRef(initialTime)
+  const runningRef = useRef(!prefersReduced)
+  const [timeOfDay, setTimeOfDay] = useState(initialTime)
+  const [running, setRunning] = useState(!prefersReduced)
+  const [phaseLabel, setPhaseLabel] = useState(() => computeSky(initialTime).phaseLabel)
+
+  const applySky = useCallback((hour: number) => {
+    const el = pageRef.current
+    if (!el) return
+    const sky = computeSky(hour)
+    for (const key in sky.vars) el.style.setProperty(key, sky.vars[key])
+  }, [])
+
+  // Paint the correct sky before first frame (no flash of the fallback palette).
+  useLayoutEffect(() => {
+    applySky(timeRef.current)
+  }, [applySky])
+
+  // Auto-advance loop: write CSS vars imperatively each frame; surface a throttled
+  // time/label to React (~1/sec) only so the clock hand + readout track along.
+  useEffect(() => {
+    let raf = 0
+    let last = performance.now()
+    let lastLabel = 0
+    let applied = NaN
+
+    const tick = (now: number) => {
+      const dt = now - last
+      last = now
+      if (runningRef.current && !document.hidden) {
+        timeRef.current = wrap24(timeRef.current + (dt / DAY_LENGTH_MS) * 24)
+      }
+      if (timeRef.current !== applied) {
+        applied = timeRef.current
+        applySky(timeRef.current)
+      }
+      if (now - lastLabel > 1000) {
+        lastLabel = now
+        setTimeOfDay(timeRef.current)
+        setPhaseLabel(computeSky(timeRef.current).phaseLabel)
+      }
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [applySky])
+
+  // Reset the selection when leaving the tower.
+  useEffect(() => () => clearSelection(), [clearSelection])
+
+  const handleScrub = useCallback(
+    (hour: number) => {
+      runningRef.current = false
+      setRunning(false)
+      timeRef.current = hour
+      setTimeOfDay(hour)
+      setPhaseLabel(computeSky(hour).phaseLabel)
+      applySky(hour)
+    },
+    [applySky],
+  )
+
+  const toggleRunning = useCallback(() => {
+    runningRef.current = !runningRef.current
+    setRunning(runningRef.current)
+  }, [])
+
+  // ── Scroll-linked parallax (composed on top of the time-driven positions) ──
   const { scrollY, scrollYProgress } = useScroll()
   const skyProgress = useSpring(scrollYProgress, { stiffness: 70, damping: 24, mass: 0.5 })
-  const moonY = useTransform(skyProgress, [0, 1], ['0px', '-130px'])
+  const moonY = useTransform(skyProgress, [0, 1], ['0px', '-90px'])
+  const sunY = useTransform(skyProgress, [0, 1], ['0px', '-60px'])
   const starsFarY = useTransform(skyProgress, [0, 1], ['0px', '-45px'])
 
-  // Clouds live in the scrolling tower, so they already travel with the content.
-  // These per-layer offsets are driven by raw scroll *pixels* (not progress) to add
-  // depth on top — far clouds lag, near clouds lead — at a drift speed that stays
-  // the same however tall the tower grows. Scroll up and it all reverses.
   const cloudSpring = { stiffness: 60, damping: 22, mass: 0.4 }
   const cloudFarY = useSpring(useTransform(scrollY, (v) => v * 0.12), cloudSpring)
   const cloudMidY = useSpring(useTransform(scrollY, (v) => v * -0.02), cloudSpring)
@@ -185,6 +280,58 @@ export function StoreyMapPage() {
     })
   }, [focusedStoreyId, storeys])
 
+  useEffect(() => {
+    if (!storeys.length) return
+    setActiveStoreyId((current) => {
+      if (current && storeys.some((storey) => storey.id === current)) return current
+      return storeys[0]?.id ?? null
+    })
+  }, [storeys])
+
+  useEffect(() => {
+    if (!storeys.length) return
+
+    let frame = 0
+    const updateActiveStorey = () => {
+      frame = 0
+      const page = pageRef.current
+      if (!page) return
+
+      const sections = Array.from(page.querySelectorAll<HTMLElement>('[data-storey-id]'))
+      if (!sections.length) return
+
+      const threshold = Math.min(window.innerHeight * 0.38, 340)
+      let nextId = Number(sections[0].dataset.storeyId)
+
+      for (const section of sections) {
+        const rect = section.getBoundingClientRect()
+        const storeyId = Number(section.dataset.storeyId)
+        if (!Number.isFinite(storeyId)) continue
+        if (rect.top <= threshold) nextId = storeyId
+        if (rect.top <= threshold && rect.bottom >= threshold) {
+          nextId = storeyId
+          break
+        }
+      }
+
+      if (Number.isFinite(nextId)) setActiveStoreyId(nextId)
+    }
+
+    const scheduleActiveStoreyUpdate = () => {
+      if (frame) return
+      frame = window.requestAnimationFrame(updateActiveStorey)
+    }
+
+    scheduleActiveStoreyUpdate()
+    window.addEventListener('scroll', scheduleActiveStoreyUpdate, { passive: true })
+    window.addEventListener('resize', scheduleActiveStoreyUpdate)
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', scheduleActiveStoreyUpdate)
+      window.removeEventListener('resize', scheduleActiveStoreyUpdate)
+    }
+  }, [storeys.length])
+
   if (storeysQuery.isLoading) {
     return (
       <LoadingState
@@ -202,8 +349,12 @@ export function StoreyMapPage() {
   }
 
   return (
-    <div className="tower-page-shell">
+    <div className="tower-page-shell" ref={pageRef}>
       <div className="tower-sky" aria-hidden="true">
+        <motion.span className="tower-sun" style={{ y: sunY }}>
+          <span className="tower-sun-core" />
+          <span className="tower-sun-flare" />
+        </motion.span>
         <motion.span className="tower-moon" style={{ y: moonY }}>
           <span className="tower-moon-crater tower-moon-crater--a" />
           <span className="tower-moon-crater tower-moon-crater--b" />
@@ -212,25 +363,43 @@ export function StoreyMapPage() {
         <motion.div className="tower-starfield tower-starfield--far" style={{ y: starsFarY }} />
         <div className="tower-starfield tower-starfield--near" />
       </div>
+
+      <SkyClock
+        timeOfDay={timeOfDay}
+        onScrub={handleScrub}
+        running={running}
+        onToggleRunning={toggleRunning}
+        phaseLabel={phaseLabel}
+      />
+
+      {activeStorey ? (
+        <aside className="tower-storey-dock" aria-label="Current storey overview">
+          <StoreyOverview
+            key={activeStorey.id}
+            storey={activeStorey}
+            title={storeyTitle(activeStorey)}
+            progress={activeStorey.practice_completion?.value ?? 0}
+          />
+        </aside>
+      ) : null}
+
+      {activeStorey ? (
+        <aside className="tower-door-dock" aria-label="Selected door controls">
+          {doorOverviewStoreyId ? <DoorOverview storeyId={doorOverviewStoreyId} /> : null}
+          <TowerActionButton />
+        </aside>
+      ) : null}
+
       {/* Far + mid clouds sit BEHIND the tower as depth. */}
       <div className="tower-cloudfield tower-cloudfield--back" aria-hidden="true">
         {(['far', 'mid'] as const).map(renderCloudLayer)}
       </div>
+
       <h1 className="sr-only">Git Tower</h1>
       <section className="tower-stage-grid" aria-label="Git Tower storeys">
-        <div className="tower-stack-column">
-          {storeys.map((storey, index) => (
-            <StoreyPracticeHub
-              displayTitle={storeyTitle(storey)}
-              isFirst={index === 0}
-              isLast={index === storeys.length - 1}
-              key={storey.id}
-              sequenceIndex={index}
-              storey={storey}
-            />
-          ))}
-        </div>
+        <TowerStoreys storeys={storeys} />
       </section>
+
       {/* Near clouds drift in FRONT of the tower so the sky isn't all hidden behind it. */}
       <div className="tower-cloudfield tower-cloudfield--front" aria-hidden="true">
         {(['near'] as const).map(renderCloudLayer)}

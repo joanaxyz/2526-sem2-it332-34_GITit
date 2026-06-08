@@ -1,9 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { DoorOverview } from './DoorOverview'
 import { StoreyPracticeHub } from './StoreyPracticeHub'
+import { TowerActionButton } from './TowerActionButton'
+import { useTowerSelection } from '@/features/storeys/hooks/useTowerSelection'
 
 const mocks = vi.hoisted(() => ({
   storeyContent: vi.fn(),
@@ -31,6 +34,7 @@ vi.mock('motion/react', async () => {
       div: createMotion('div'),
       header: createMotion('header'),
       section: createMotion('section'),
+      span: createMotion('span'),
     },
     useInView: () => true,
   }
@@ -43,6 +47,58 @@ vi.mock('@/features/challenges/api/challengesApi', () => ({
     retryChallengeRun: mocks.retryChallengeRun,
   },
 }))
+
+function mockCanonicalStoreyContent() {
+  mocks.storeyContent.mockImplementation((_storeyId: number, section: string) => {
+    if (section === 'command_adventures') {
+      return Promise.resolve({
+        section,
+        next_cursor: null,
+        results: [
+          {
+            item_type: 'command_adventure',
+            id: 2,
+            slug: 'tracking-command-adventure',
+            title: 'Preparing File Changes',
+            description: 'Learn how to inspect, stage, and save file changes.',
+            status: 'not_started',
+            active_run_id: null,
+            latest_run_id: null,
+            problem_count: 5,
+            progress: { value: 0, numerator: 0, denominator: 5 },
+          },
+        ],
+      })
+    }
+    return Promise.resolve({
+      section,
+      next_cursor: null,
+      results: [
+        {
+          item_type: 'challenge',
+          id: 30,
+          slug: 'stage-commit-switch',
+          title: 'Stage, Commit, Then Switch Branches',
+          summary: 'Combine staging, committing, and branch switching.',
+          narrative: '',
+          command_topics: ['git add', 'git commit', 'git switch'],
+          levels: ['easy', 'medium', 'hard'].map((difficulty, index) => ({
+            id: 300 + index,
+            difficulty,
+            status: difficulty === 'easy' ? 'not_started' : 'locked',
+            required_successful_attempts: 2,
+            successful_attempts: { count: 0, required: 2 },
+            active_run_id: null,
+            latest_attempt: null,
+            completion: null,
+            review_available: false,
+            command_budget: { min_counted_commands: 3, max_counted_commands: 6 },
+          })),
+        },
+      ],
+    })
+  })
+}
 
 function renderHub() {
   const queryClient = new QueryClient({
@@ -67,6 +123,8 @@ function renderHub() {
             practice_completion: { value: 0, numerator: 0, denominator: 5 },
           }}
         />
+        <DoorOverview storeyId={2} />
+        <TowerActionButton />
       </MemoryRouter>
     </QueryClientProvider>,
   )
@@ -76,69 +134,55 @@ describe('StoreyPracticeHub', () => {
   afterEach(() => {
     cleanup()
     vi.clearAllMocks()
+    useTowerSelection.setState({ selected: null })
   })
 
-  it('renders command adventure and challenge content from canonical storey payloads', async () => {
-    mocks.storeyContent.mockImplementation((_storeyId: number, section: string) => {
-      if (section === 'command_adventures') {
-        return Promise.resolve({
-          section,
-          next_cursor: null,
-          results: [
-            {
-              item_type: 'command_adventure',
-              id: 2,
-              slug: 'tracking-command-adventure',
-              title: 'Preparing File Changes',
-              description: 'Learn how to inspect, stage, and save file changes.',
-              status: 'not_started',
-              active_run_id: null,
-              latest_run_id: null,
-              problem_count: 5,
-              progress: { value: 0, numerator: 0, denominator: 5 },
-            },
-          ],
-        })
-      }
-      return Promise.resolve({
-        section,
-        next_cursor: null,
-        results: [
-          {
-            item_type: 'challenge',
-            id: 30,
-            slug: 'stage-commit-switch',
-            title: 'Stage, Commit, Then Switch Branches',
-            summary: 'Combine staging, committing, and branch switching.',
-            narrative: '',
-            command_topics: ['git add', 'git commit', 'git switch'],
-            levels: ['easy', 'medium', 'hard'].map((difficulty, index) => ({
-              id: 300 + index,
-              difficulty,
-              status: difficulty === 'easy' ? 'not_started' : 'locked',
-              required_successful_attempts: 2,
-              successful_attempts: { count: 0, required: 2 },
-              active_run_id: null,
-              latest_attempt: null,
-              completion: null,
-              review_available: false,
-              command_budget: { min_counted_commands: 3, max_counted_commands: 6 },
-            })),
-          },
-        ],
-      })
-    })
-
+  it('renders a balcony adventure door and one door per challenge level', async () => {
+    mockCanonicalStoreyContent()
     renderHub()
 
-    await waitFor(() => expect(screen.getByRole('button', { name: /open preparing file changes/i })).toBeInTheDocument())
-    const adventureSection = screen.getByText('Command Adventure').closest('section')
-    expect(adventureSection).not.toBeNull()
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: /select command adventure: preparing file changes/i }),
+      ).toBeInTheDocument(),
+    )
+    expect(
+      screen.getByRole('button', { name: /select stage, commit, then switch branches: easy/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /select stage, commit, then switch branches: medium/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /select stage, commit, then switch branches: hard/i }),
+    ).toBeInTheDocument()
+  })
 
-    const adventure = within(adventureSection as HTMLElement)
-    expect(adventure.getByRole('button', { name: /open preparing file changes/i })).toBeInTheDocument()
+  it('shows the adventure overview + Play action when its door is selected', async () => {
+    mockCanonicalStoreyContent()
+    renderHub()
 
-    expect(screen.getByText('Stage, Commit, Then Switch Branches')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /open stage, commit, then switch branches/i })).toBeInTheDocument()
+    const door = await screen.findByRole('button', { name: /select command adventure: preparing file changes/i })
+    fireEvent.click(door)
+
+    const overview = screen.getByLabelText('Selected stage')
+    expect(within(overview).getByText('Preparing File Changes')).toBeInTheDocument()
+    expect(within(overview).getByText('0/5 solved')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^play$/i })).toBeInTheDocument()
+  })
+
+  it('shows the chosen level overview with accuracy + attempts when a trial door is selected', async () => {
+    mockCanonicalStoreyContent()
+    renderHub()
+
+    const easyDoor = await screen.findByRole('button', {
+      name: /select stage, commit, then switch branches: easy/i,
+    })
+    fireEvent.click(easyDoor)
+
+    const overview = screen.getByLabelText('Selected stage')
+    expect(within(overview).getByText('Stage, Commit, Then Switch Branches')).toBeInTheDocument()
+    expect(within(overview).getByText('Easy')).toBeInTheDocument()
+    // Accuracy with no attempts yet renders as a placeholder.
+    expect(within(overview).getByText('--%')).toBeInTheDocument()
   })
 })

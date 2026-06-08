@@ -1,0 +1,46 @@
+import { create } from 'zustand'
+
+import type {
+  ChallengeLevelAccess,
+  ChallengeSummary,
+  CommandAdventureSummary,
+} from '@/features/challenges/types'
+
+// The whole tower is a single selection surface: one door is "selected" at a
+// time. The storey rail shows its overview; the lower-left dock shows its action.
+// Each challenge level is now its own door, so a challenge selection carries the
+// exact level chosen.
+export type TowerSelection =
+  | { kind: 'adventure'; storeyId: number; adventure: CommandAdventureSummary }
+  | {
+      kind: 'challenge'
+      storeyId: number
+      scenarioIndex: number
+      scenario: ChallengeSummary
+      level: ChallengeLevelAccess
+      locked: boolean
+    }
+
+type TowerSelectionState = {
+  selected: TowerSelection | null
+  select: (selection: TowerSelection) => void
+  clear: () => void
+}
+
+export const useTowerSelection = create<TowerSelectionState>((set) => ({
+  selected: null,
+  select: (selection) => set({ selected: selection }),
+  clear: () => set({ selected: null }),
+}))
+
+/** True when `selection` points at the same door as the current store value. */
+export function isSelected(current: TowerSelection | null, candidate: TowerSelection): boolean {
+  if (!current || current.kind !== candidate.kind) return false
+  if (current.kind === 'adventure' && candidate.kind === 'adventure') {
+    return current.adventure.id === candidate.adventure.id
+  }
+  if (current.kind === 'challenge' && candidate.kind === 'challenge') {
+    return current.level.id === candidate.level.id
+  }
+  return false
+}
