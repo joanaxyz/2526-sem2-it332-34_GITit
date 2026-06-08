@@ -379,22 +379,6 @@ textarea {
   animation: git-it-window-glow 2.6s ease-in-out infinite;
 }
 
-/* Flag on the keep */
-.git-it-flagpole {
-  stroke: rgba(var(--t-cyan), 0.85);
-  stroke-width: 1.2;
-  stroke-linecap: round;
-}
-
-.git-it-flag {
-  fill: rgba(var(--t-cyan), 0.55);
-  stroke: rgba(var(--t-cyan), 0.8);
-  stroke-width: 0.6;
-  transform-box: fill-box;
-  transform-origin: left center;
-  animation: git-it-flag-wave 2.6s ease-in-out infinite;
-}
-
 /* Construction scan sweeping up the body */
 .git-it-tower-scan {
   fill: rgba(var(--t-cyan), 0.4);
@@ -441,11 +425,6 @@ textarea {
 @keyframes git-it-window-glow {
   0%, 100% { opacity: 0.5; }
   50% { opacity: 1; }
-}
-
-@keyframes git-it-flag-wave {
-  0%, 100% { transform: skewY(0deg) scaleX(1); }
-  50% { transform: skewY(-7deg) scaleX(1.05); }
 }
 
 @keyframes git-it-tower-scan-rise {
@@ -1158,143 +1137,6 @@ textarea {
   background: rgba(8, 27, 47, 0.95);
 }
 
-.tower-window-roof-flag {
-  position: absolute;
-  left: calc(50% + 0.08rem);
-  bottom: 8.84rem;
-  z-index: 8;
-  display: block;
-  width: 5.25rem;
-  height: 3.45rem;
-  pointer-events: none;
-}
-
-.tower-window-roof-flag::before {
-  content: '';
-  position: absolute;
-  left: 0.38rem;
-  top: 0.7rem;
-  bottom: 0.04rem;
-  width: 0.16rem;
-  border-radius: 999px;
-  background: rgba(45, 245, 255, 0.96);
-  box-shadow: 0 0 12px rgba(45, 245, 255, 0.34);
-}
-
-.tower-window-roof-flag-diamond {
-  position: absolute;
-  left: 0.02rem;
-  top: 0.02rem;
-  width: 0.82rem;
-  height: 0.82rem;
-  transform: rotate(45deg);
-  border: 2px solid rgba(45, 245, 255, 0.94);
-  background: rgba(8, 27, 47, 0.95);
-  box-shadow:
-    0 0 12px rgba(45, 245, 255, 0.22),
-    inset 0 0 0 1px rgba(216, 95, 255, 0.24);
-}
-
-.tower-window-roof-flag-ring {
-  position: absolute;
-  left: 0.12rem;
-  top: 0.96rem;
-  width: 0.62rem;
-  height: 0.62rem;
-  border: 2px solid rgba(45, 245, 255, 0.94);
-  border-radius: 999px;
-  background: rgba(8, 27, 47, 0.95);
-  box-shadow: 0 0 10px rgba(45, 245, 255, 0.18);
-}
-
-.tower-window-roof-flag-cloth {
-  position: absolute;
-  left: 0.92rem;
-  top: 0.56rem;
-  display: block;
-  width: 3.98rem;
-  height: 2.14rem;
-  transform-origin: 0 50%;
-  border: 2px solid rgba(216, 95, 255, 0.96);
-  border-radius: 0.12rem 0.28rem 0.28rem 0.12rem;
-  clip-path: polygon(0 0, 93% 0, 100% 26%, 95% 50%, 100% 74%, 93% 100%, 0 100%);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 28%),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0 0.28rem, rgba(255, 255, 255, 0.02) 0.28rem 0.52rem, transparent 0.52rem),
-    linear-gradient(180deg, rgba(58, 23, 91, 0.99), rgba(22, 9, 48, 0.995));
-  box-shadow:
-    0 0 16px rgba(176, 74, 255, 0.3),
-    0 0 8px rgba(45, 245, 255, 0.14),
-    inset 0 0 0 1px rgba(2, 10, 20, 0.48),
-    inset 0.48rem 0 0 rgba(255, 255, 255, 0.05);
-  animation: towerRoofFlagWind 3.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
-  will-change: transform;
-}
-
-.tower-window-roof-flag-cloth::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 34%, rgba(5, 12, 24, 0.12) 70%, rgba(255, 255, 255, 0.03) 100%);
-  opacity: 0.9;
-}
-
-.tower-window-roof-flag-cloth::after {
-  content: '';
-  position: absolute;
-  inset: 0.28rem 0.42rem 0.28rem 0.72rem;
-  border-top: 1px solid rgba(45, 245, 255, 0.16);
-  border-bottom: 1px solid rgba(216, 95, 255, 0.18);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-  pointer-events: none;
-}
-
-.tower-window-roof-flag-logo {
-  position: absolute;
-  top: 0.42rem;
-  left: 0.98rem;
-  z-index: 2;
-  width: 2.2rem;
-  height: 1.32rem;
-  overflow: visible;
-  filter:
-    drop-shadow(0 0 6px rgba(176, 74, 255, 0.34))
-    drop-shadow(0 0 4px rgba(45, 245, 255, 0.14));
-}
-
-.tower-window-roof-flag-logo-line {
-  fill: none;
-  stroke: rgba(45, 245, 255, 0.9);
-  stroke-width: 4.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.tower-window-roof-flag-logo-node {
-  fill: rgba(216, 95, 255, 0.96);
-  stroke: rgba(238, 225, 255, 0.96);
-  stroke-width: 2.25;
-}
-
-@keyframes towerRoofFlagWind {
-  0%,
-  100% {
-    transform: perspective(14rem) rotateY(0deg) rotate(-1deg) skewY(0deg) translateY(0);
-  }
-
-  26% {
-    transform: perspective(14rem) rotateY(-5deg) rotate(-0.2deg) skewY(-1.2deg) translateY(-0.03rem);
-  }
-
-  58% {
-    transform: perspective(14rem) rotateY(3deg) rotate(0.4deg) skewY(0.9deg) translateY(0.02rem);
-  }
-
-  82% {
-    transform: perspective(14rem) rotateY(-2deg) rotate(-0.35deg) skewY(-0.45deg) translateY(0.01rem);
-  }
-}
-
 .tower-window-roof-finial {
   position: absolute;
   bottom: 0.62rem;
@@ -1944,44 +1786,101 @@ textarea {
 
 .trial-door-arch {
   position: relative;
-  width: min(100%, 5.9rem);
-  aspect-ratio: 0.72;
-  border: 2.5px solid rgba(var(--level-accent), 0.95);
-  border-radius: 2.8rem 2.8rem 0.16rem 0.16rem;
-  background: linear-gradient(180deg, rgba(9, 28, 45, 0.99), rgba(3, 14, 26, 0.99));
+  width: min(100%, 5.55rem);
+  aspect-ratio: 0.69;
+  border: 2px solid rgba(var(--level-accent), 0.96);
+  border-radius: 2.65rem 2.65rem 0.18rem 0.18rem;
+  background:
+    radial-gradient(92% 70% at 50% 18%, rgba(var(--level-accent), 0.1), transparent 58%),
+    linear-gradient(180deg, rgba(8, 28, 46, 0.99), rgba(2, 12, 24, 0.995));
   box-shadow:
-    0 0 18px rgba(var(--level-accent), 0.2),
-    inset 0 0 0 0.28rem rgba(2, 9, 18, 0.72),
-    inset 0 0 0 0.46rem rgba(var(--level-accent), 0.24);
+    0 0 18px rgba(var(--level-accent), 0.22),
+    inset 0 0 0 0.24rem rgba(2, 9, 18, 0.78),
+    inset 0 0 0 0.39rem rgba(var(--level-accent), 0.22);
   overflow: hidden;
 }
 
 .trial-door-arch::before {
   content: '';
   position: absolute;
-  inset: 0.34rem;
-  border: 1.5px solid rgba(var(--level-accent), 0.5);
-  border-radius: 2.25rem 2.25rem 0.08rem 0.08rem;
+  inset: 0.42rem 0.46rem 0.36rem;
+  z-index: 3;
+  border: 1.5px solid rgba(var(--level-accent), 0.62);
+  border-radius: 2.05rem 2.05rem 0.08rem 0.08rem;
+  pointer-events: none;
+}
+
+.trial-door-arch::after {
+  content: '';
+  position: absolute;
+  left: 0.62rem;
+  right: 0.62rem;
+  bottom: 0.34rem;
+  z-index: 4;
+  height: 0.14rem;
+  background: rgba(var(--level-accent), 0.72);
+  box-shadow: 0 0 8px rgba(var(--level-accent), 0.25);
   pointer-events: none;
 }
 
 .trial-door-interior {
   position: absolute;
-  inset: 0.46rem;
-  border-radius: 2.15rem 2.15rem 0.08rem 0.08rem;
+  inset: 0.5rem 0.56rem 0.38rem;
+  border-radius: 1.92rem 1.92rem 0.08rem 0.08rem;
   background:
-    linear-gradient(180deg, rgba(var(--level-accent), 0.05), rgba(var(--level-accent), 0.01) 40%, rgba(2, 10, 20, 0.96) 100%),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03), transparent 20% 80%, rgba(255, 255, 255, 0.02));
-  box-shadow: inset 0 0 16px rgba(var(--level-accent), 0.18);
-  opacity: 0.82;
+    repeating-linear-gradient(90deg, rgba(var(--level-accent), 0.08) 0 1px, transparent 1px 0.66rem),
+    radial-gradient(76% 56% at 50% 28%, rgba(var(--level-accent), 0.12), transparent 70%),
+    linear-gradient(180deg, rgba(2, 11, 22, 0.74), rgba(1, 6, 16, 0.99));
+  box-shadow: inset 0 0 18px rgba(var(--level-accent), 0.16);
+  opacity: 0.92;
+}
+
+.trial-door-rivets {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.trial-door-rivet {
+  position: absolute;
+  width: 0.2rem;
+  height: 0.2rem;
+  border: 1px solid rgba(var(--level-accent), 0.95);
+  border-radius: 999px;
+  background: rgba(2, 10, 20, 0.95);
+  box-shadow: 0 0 7px rgba(var(--level-accent), 0.38);
+}
+
+.trial-door-rivet:nth-child(1) { left: 0.56rem; bottom: 1.02rem; }
+.trial-door-rivet:nth-child(2) { left: 0.54rem; bottom: 2.12rem; }
+.trial-door-rivet:nth-child(3) { left: 0.64rem; top: 2.38rem; }
+.trial-door-rivet:nth-child(4) { left: 0.96rem; top: 1.48rem; }
+.trial-door-rivet:nth-child(5) { left: 1.62rem; top: 0.82rem; }
+.trial-door-rivet:nth-child(6) { left: 2.42rem; top: 0.54rem; }
+.trial-door-rivet:nth-child(7) { right: 2.42rem; top: 0.54rem; }
+.trial-door-rivet:nth-child(8) { right: 1.62rem; top: 0.82rem; }
+.trial-door-rivet:nth-child(9) { right: 0.96rem; top: 1.48rem; }
+.trial-door-rivet:nth-child(10) { right: 0.64rem; top: 2.38rem; }
+.trial-door-rivet:nth-child(11) { right: 0.54rem; bottom: 2.12rem; }
+.trial-door-rivet:nth-child(12) { right: 0.56rem; bottom: 1.02rem; }
+.trial-door-rivet:nth-child(13) { left: 50%; top: 0.48rem; transform: translateX(-50%); }
+.trial-door-rivet:nth-child(14) { left: 50%; bottom: 0.62rem; transform: translateX(-50%); }
+
+.trial-door-gate {
+  position: absolute;
+  left: 0.74rem;
+  right: 0.74rem;
+  top: 0.62rem;
+  bottom: 0.34rem;
+  z-index: 2;
+  transition: transform 0.56s cubic-bezier(0.18, 0.88, 0.22, 1);
+  will-change: transform;
 }
 
 .trial-door-bars {
   position: absolute;
-  left: 0.74rem;
-  right: 0.74rem;
-  top: 0.64rem;
-  bottom: 0.5rem;
+  inset: 0;
   display: flex;
   align-items: stretch;
   justify-content: space-between;
@@ -1990,34 +1889,39 @@ textarea {
 
 .trial-door-bar {
   position: relative;
-  width: 0.28rem;
+  width: 0.22rem;
   border-radius: 999px;
-  background: linear-gradient(180deg, rgba(var(--level-accent), 0.96), rgba(var(--level-accent), 0.64));
-  box-shadow: 0 0 8px rgba(var(--level-accent), 0.28);
-  transition: transform 0.42s cubic-bezier(0.22, 1, 0.32, 1);
+  background: linear-gradient(180deg, rgba(var(--level-accent), 0.98), rgba(var(--level-accent), 0.66));
+  box-shadow:
+    0 0 8px rgba(var(--level-accent), 0.32),
+    inset 0.06rem 0 0 rgba(255, 255, 255, 0.14),
+    inset -0.06rem 0 0 rgba(0, 0, 0, 0.34);
 }
 
 .trial-door-bar::before {
   content: '';
   position: absolute;
   left: 50%;
-  top: 0.22rem;
-  width: 0.12rem;
-  height: calc(100% - 0.44rem);
+  top: 0.2rem;
+  width: 0.08rem;
+  height: calc(100% - 0.4rem);
   transform: translateX(-50%);
   border-radius: 999px;
-  background: rgba(2, 10, 20, 0.42);
+  background: rgba(2, 10, 20, 0.35);
 }
 
 .trial-door-crossbar {
   position: absolute;
-  left: 1rem;
-  right: 1rem;
+  left: -0.08rem;
+  right: -0.08rem;
   top: 53%;
-  height: 0.18rem;
+  height: 0.2rem;
   transform: translateY(-50%);
-  background: linear-gradient(90deg, rgba(var(--level-accent), 0.9), rgba(var(--level-accent), 0.62));
-  box-shadow: 0 0 8px rgba(var(--level-accent), 0.24);
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(var(--level-accent), 0.96), rgba(var(--level-accent), 0.68));
+  box-shadow:
+    0 0 9px rgba(var(--level-accent), 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 .trial-door-crossbar::before,
@@ -2025,18 +1929,18 @@ textarea {
   content: '';
   position: absolute;
   top: 50%;
-  width: 0.42rem;
-  height: 0.16rem;
+  width: 0.38rem;
+  height: 0.14rem;
   transform: translateY(-50%);
-  background: rgba(var(--level-accent), 0.85);
+  background: rgba(var(--level-accent), 0.9);
 }
 
 .trial-door-crossbar::before {
-  left: -0.08rem;
+  left: 0;
 }
 
 .trial-door-crossbar::after {
-  right: -0.08rem;
+  right: 0;
 }
 
 .trial-door-gem {
@@ -2044,31 +1948,35 @@ textarea {
   left: 50%;
   top: 53%;
   z-index: 2;
-  width: 0.72rem;
-  height: 0.72rem;
+  width: 0.7rem;
+  height: 0.7rem;
   transform: translate(-50%, -50%) rotate(45deg);
-  border: 1.5px solid rgba(var(--level-accent), 0.88);
+  border: 1.5px solid rgba(var(--level-accent), 0.9);
   background: rgba(6, 18, 31, 0.98);
-  box-shadow: 0 0 10px rgba(var(--level-accent), 0.32);
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  box-shadow: 0 0 10px rgba(var(--level-accent), 0.34);
+  transition: box-shadow 0.4s ease;
 }
 
 .trial-door-label {
   position: relative;
-  z-index: 3;
+  z-index: 6;
   display: grid;
   place-items: center;
-  width: min(100%, 5.65rem);
-  min-height: 1.98rem;
-  margin-top: -0.62rem;
-  border: 2px solid rgba(var(--level-accent), 0.9);
-  background: linear-gradient(180deg, rgba(8, 25, 42, 0.99), rgba(3, 13, 24, 0.99));
+  width: min(100%, 5.8rem);
+  min-height: 1.96rem;
+  margin-top: -0.58rem;
+  border: 2px solid rgba(var(--level-accent), 0.94);
+  border-radius: 0.04rem;
+  background: linear-gradient(180deg, rgba(8, 25, 42, 0.995), rgba(3, 13, 24, 0.995));
   color: rgb(var(--level-accent));
   font-size: 0.9rem;
   font-weight: 900;
   line-height: 1;
   text-transform: uppercase;
-  box-shadow: 0 0 14px rgba(var(--level-accent), 0.2), inset 0 0 0 1px rgba(2, 9, 18, 0.55);
+  letter-spacing: 0.03em;
+  box-shadow:
+    0 0 14px rgba(var(--level-accent), 0.22),
+    inset 0 0 0 1px rgba(2, 9, 18, 0.55);
 }
 
 .trial-door-state {
@@ -2081,32 +1989,26 @@ textarea {
 
 .trial-door.is-complete .trial-door-arch {
   box-shadow:
-    0 0 24px rgba(var(--level-accent), 0.26),
-    inset 0 0 0 0.28rem rgba(2, 9, 18, 0.72),
-    inset 0 0 0 0.46rem rgba(var(--level-accent), 0.24);
+    0 0 24px rgba(var(--level-accent), 0.28),
+    inset 0 0 0 0.24rem rgba(2, 9, 18, 0.78),
+    inset 0 0 0 0.39rem rgba(var(--level-accent), 0.3);
 }
 
 .trial-door.is-active .trial-door-arch {
   box-shadow:
-    0 0 24px rgba(var(--level-accent), 0.28),
-    inset 0 0 0 0.28rem rgba(2, 9, 18, 0.72),
-    inset 0 0 0 0.46rem rgba(var(--level-accent), 0.24);
+    0 0 24px rgba(var(--level-accent), 0.3),
+    inset 0 0 0 0.24rem rgba(2, 9, 18, 0.78),
+    inset 0 0 0 0.39rem rgba(var(--level-accent), 0.3);
 }
 
-.trial-door:not(.is-locked):hover .trial-door-bar:nth-child(odd),
-.trial-door:not(.is-locked)[data-selected='true'] .trial-door-bar:nth-child(odd) {
-  transform: translateY(-0.72rem);
-}
-
-.trial-door:not(.is-locked):hover .trial-door-bar:nth-child(even),
-.trial-door:not(.is-locked)[data-selected='true'] .trial-door-bar:nth-child(even) {
-  transform: translateY(0.62rem);
+.trial-door:not(.is-locked):hover .trial-door-gate,
+.trial-door:not(.is-locked)[data-selected='true'] .trial-door-gate {
+  transform: translateY(-76%);
 }
 
 .trial-door:not(.is-locked):hover .trial-door-gem,
 .trial-door:not(.is-locked)[data-selected='true'] .trial-door-gem {
-  transform: translate(-50%, -50%) rotate(45deg) scale(1.06);
-  box-shadow: 0 0 12px rgba(var(--level-accent), 0.4);
+  box-shadow: 0 0 14px rgba(var(--level-accent), 0.5);
 }
 
 @media (max-width: 860px) {
@@ -2175,37 +2077,6 @@ textarea {
     right: 0.58rem;
   }
 
-  .tower-window-roof-flag {
-    bottom: 7.18rem;
-    width: 4.6rem;
-    height: 3rem;
-  }
-
-  .tower-window-roof-flag-diamond {
-    width: 0.7rem;
-    height: 0.7rem;
-  }
-
-  .tower-window-roof-flag-ring {
-    top: 0.82rem;
-    width: 0.56rem;
-    height: 0.56rem;
-  }
-
-  .tower-window-roof-flag-cloth {
-    left: 0.82rem;
-    top: 0.5rem;
-    width: 3.46rem;
-    height: 1.92rem;
-  }
-
-  .tower-window-roof-flag-logo {
-    top: 0.34rem;
-    left: 0.82rem;
-    width: 1.9rem;
-    height: 1.12rem;
-  }
-
   .tower-section-separator-crenels {
     gap: 0.32rem;
     padding-inline: 0.28rem;
@@ -2234,8 +2105,8 @@ textarea {
 .tower-repeater .trial-door:not(:disabled):focus-visible .trial-door-arch {
   box-shadow:
     0 0 22px rgba(var(--level-accent), 0.34),
-    inset 0 0 0 0.32rem rgba(2, 9, 18, 0.72),
-    inset 0 0 0 0.5rem rgba(var(--level-accent), 0.32);
+    inset 0 0 0 0.24rem rgba(2, 9, 18, 0.78),
+    inset 0 0 0 0.39rem rgba(var(--level-accent), 0.32);
 }
 
 .tower-repeater .trial-door:not(:disabled):hover .trial-door-label,
@@ -2269,8 +2140,8 @@ textarea {
 .trial-door[data-selected='true'] .trial-door-arch {
   box-shadow:
     0 0 28px rgba(var(--level-accent), 0.5),
-    inset 0 0 0 0.32rem rgba(2, 9, 18, 0.72),
-    inset 0 0 0 0.5rem rgba(var(--level-accent), 0.34);
+    inset 0 0 0 0.24rem rgba(2, 9, 18, 0.78),
+    inset 0 0 0 0.39rem rgba(var(--level-accent), 0.34);
 }
 
 /* ── Section states + loaders reused by the tower ── */
@@ -3020,9 +2891,6 @@ textarea {
   .git-it-dragon--b,
   .git-it-dragon-body,
   .git-it-window,
-  .git-it-flag,
-  .tower-window-roof-flag,
-  .tower-window-roof-flag-cloth,
   .git-it-tower-scan,
   .tower-starfield--far,
   .tower-starfield--near,

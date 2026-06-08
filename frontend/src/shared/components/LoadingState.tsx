@@ -73,7 +73,7 @@ function FantasyTower({ variant }: { variant: LoadingStateVariant }) {
           <line className="git-it-chain" x1="92" y1="6" x2="92" y2="15" />
         </g>
 
-        {/* The keep — hung upside down so the spire + flag point downward */}
+        {/* The keep — hung upside down so the spire points downward */}
         <g className="git-it-keep" transform="translate(0 150) scale(1 -1)">
           {/* ground glow + plinth */}
           <ellipse className="git-it-keep-ground" cx="80" cy="140" rx="46" ry="5" />
@@ -104,10 +104,8 @@ function FantasyTower({ variant }: { variant: LoadingStateVariant }) {
             <rect x="94" y="51" width="6" height="6" />
           </g>
 
-          {/* conical roof + flag */}
+          {/* conical roof */}
           <path className="git-it-roof" d="M80 28 L102 56 L58 56 Z" />
-          <line className="git-it-flagpole" x1="80" y1="28" x2="80" y2="16" />
-          <path className="git-it-flag" d="M80 17 L92 20.5 L80 24 Z" />
 
           {/* lit windows + arched door */}
           <circle className="git-it-window" cx="80" cy="72" r="4" style={{ animationDelay: '0s' }} />

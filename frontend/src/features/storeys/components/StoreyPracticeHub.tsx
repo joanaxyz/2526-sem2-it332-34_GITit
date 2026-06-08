@@ -92,18 +92,6 @@ function WindowStorey({ crowned }: { crowned: boolean }) {
       {crowned ? (
         <div className="tower-window-roof">
           <span className="tower-window-roof-spire" />
-          <span className="tower-window-roof-flag">
-            <span className="tower-window-roof-flag-diamond" />
-            <span className="tower-window-roof-flag-ring" />
-            <span className="tower-window-roof-flag-cloth">
-              <svg className="tower-window-roof-flag-logo" viewBox="0 0 64 40" aria-hidden="true">
-                <path className="tower-window-roof-flag-logo-line" d="M14 10 L30 20 M30 20 L46 10 M30 20 V30" />
-                <circle className="tower-window-roof-flag-logo-node" cx="14" cy="10" r="4.4" />
-                <circle className="tower-window-roof-flag-logo-node" cx="46" cy="10" r="4.4" />
-                <circle className="tower-window-roof-flag-logo-node" cx="30" cy="20" r="4.4" />
-              </svg>
-            </span>
-          </span>
           <span className="tower-window-roof-peak" />
         </div>
       ) : null}
@@ -219,13 +207,20 @@ function TrialDoor({
     >
       <span className="trial-door-arch" aria-hidden="true">
         <span className="trial-door-interior" />
-        <span className="trial-door-bars">
-          {Array.from({ length: 5 }, (_, index) => (
-            <span className="trial-door-bar" key={index} />
+        <span className="trial-door-rivets">
+          {Array.from({ length: 14 }, (_, index) => (
+            <span className="trial-door-rivet" key={index} />
           ))}
         </span>
-        <span className="trial-door-crossbar" />
-        <span className="trial-door-gem" />
+        <span className="trial-door-gate">
+          <span className="trial-door-bars">
+            {Array.from({ length: 5 }, (_, index) => (
+              <span className="trial-door-bar" key={index} />
+            ))}
+          </span>
+          <span className="trial-door-crossbar" />
+          <span className="trial-door-gem" />
+        </span>
       </span>
       <span className="trial-door-label">{difficultyLabel(level)}</span>
       <span className="trial-door-state">{actionLabel(actionForChallengeLevel(level), level.status)}</span>
