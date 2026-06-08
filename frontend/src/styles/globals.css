@@ -1283,6 +1283,231 @@ textarea {
 .tower-course--upper { top: 30%; }
 .tower-course--lower { top: 68%; }
 
+/* ════════════════════════════════════════════════════════════════════════
+   Floating-keep ARTIFACT — a purely decorative ornate spire that hovers above
+   the Command Adventure (aria-hidden, no interactions). Ogee roof + finial and
+   corner pinnacles, an octagonal lantern of three arched windows, a balcony,
+   a tapering body, and a faceted crystal it floats on, ringed by drifting rock.
+   Windows warm up with the living sky via --window-glow. Ref. floating-keep art.
+   ════════════════════════════════════════════════════════════════════════ */
+.tower-artifact {
+  display: block;
+  width: 66%;
+  max-width: 23.5rem;
+  height: auto;
+  margin: 0 auto -0.5rem;
+  filter:
+    drop-shadow(0 6px 22px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 0 16px rgba(var(--tower-cyan), 0.26));
+}
+
+/* the faceted crystal the whole tower floats on (bottom of the last storey) */
+.tower-crystal {
+  display: block;
+  width: 82%;
+  max-width: 30rem;
+  height: auto;
+  margin: -0.5rem auto 0;
+  filter:
+    drop-shadow(0 8px 26px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 0 18px rgba(var(--tower-purple), 0.3));
+}
+
+/* the widening separator that bridges the narrow adventure drum into the wider
+   challenge drum (own SVG so its outline matches the crown exactly) */
+.tower-sep {
+  display: block;
+  width: 82%;
+  max-width: 30rem;
+  height: auto;
+  margin: -0.3rem auto;
+  position: relative;
+  z-index: 3;
+  filter: drop-shadow(0 0 14px rgba(var(--tower-cyan), 0.26));
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Crisp octagonal drum — same solid-outline language as the SVG crown so the
+   whole keep reads as ONE tower. A bright clip-path silhouette with a dark inset
+   clone leaves a sharp ~2px neon rim; a faceted seam pair + lit windows add the
+   detail. The adventure drum is narrower than the challenge drum.
+   ════════════════════════════════════════════════════════════════════════ */
+.kt-drum {
+  position: relative;
+  margin: 0 auto;
+}
+.kt-drum--adventure { width: 62%; max-width: 22.5rem; }
+.kt-drum--challenge { width: 82%; max-width: 30rem; }
+
+.kt-wall {
+  --oct: polygon(8% 0, 92% 0, 100% 13px, 100% calc(100% - 13px), 92% 100%, 8% 100%, 0 calc(100% - 13px), 0 13px);
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  clip-path: var(--oct);
+  background: linear-gradient(180deg, rgba(var(--tower-cyan), 0.9), rgba(var(--tower-blue), 0.7));
+  filter: drop-shadow(0 0 13px rgba(var(--tower-cyan), 0.24));
+}
+.kt-wall::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  clip-path: var(--oct);
+  background:
+    linear-gradient(180deg, rgba(var(--tower-cyan), 0.1), transparent 14%),
+    linear-gradient(
+      90deg,
+      rgba(1, 6, 18, 0.92) 0%,
+      rgba(8, 24, 46, 0.6) 16%,
+      rgba(18, 40, 68, 0.3) 50%,
+      rgba(8, 24, 46, 0.48) 64%,
+      rgba(1, 6, 18, 0.93) 100%
+    );
+}
+/* faceted seams that read the drum as an octagon */
+.kt-wall::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  clip-path: var(--oct);
+  background:
+    linear-gradient(90deg, transparent 27.5%, rgba(var(--tower-cyan), 0.18) 28%, transparent 28.6%, transparent 71.4%, rgba(var(--tower-cyan), 0.18) 72%, transparent 72.5%);
+}
+
+.kt-content {
+  position: relative;
+  z-index: 1;
+  padding: 2.1rem clamp(1rem, 4vw, 1.8rem) 2.1rem;
+  text-align: center;
+}
+
+.ta-roof   { fill: rgba(2, 20, 40, 0.78); stroke: rgba(var(--tower-cyan), 0.85); stroke-width: 2; stroke-linejoin: round; }
+.ta-stroke { fill: rgba(2, 14, 32, 0.7);  stroke: rgba(var(--tower-cyan), 0.78); stroke-width: 2; stroke-linejoin: round; }
+.ta-line   { fill: none; stroke: rgba(var(--tower-cyan), 0.4); stroke-width: 1.2; stroke-linecap: round; }
+.ta-sheen  { fill: rgba(var(--tower-cyan), 0.12); stroke: none; }
+.ta-finial { fill: rgba(var(--tower-cyan), 0.5); stroke: rgba(var(--tower-cyan), 0.9); stroke-width: 2; stroke-linejoin: round; }
+.ta-window      { fill: rgba(6, 14, 30, 0.96); stroke: rgba(var(--tower-cyan), 0.72); stroke-width: 1.4; stroke-linejoin: round; }
+.ta-window-glow { fill: #ffb863; opacity: var(--window-glow, 0.6); transition: opacity 0.5s linear; }
+.ta-crystal {
+  fill: rgba(24, 46, 92, 0.5);
+  stroke: rgba(var(--tower-purple), 0.82);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 12px rgba(var(--tower-purple), 0.45));
+}
+.ta-crystal-facet { fill: none; stroke: rgba(var(--tower-purple), 0.5); stroke-width: 1.1; }
+.ta-rock   { fill: rgba(6, 20, 40, 0.72); stroke: rgba(var(--tower-cyan), 0.5); stroke-width: 1.3; stroke-linejoin: round; }
+
+/* ── Make the drum body read as the same faceted octagonal keep as the crown:
+      two vertical facet seams down the wall + a pair of lit arched windows. ── */
+.tower-facet {
+  position: absolute;
+  top: 1.4rem;
+  bottom: 1.4rem;
+  width: 1px;
+  z-index: 1;
+  background: linear-gradient(to bottom, transparent, rgba(var(--tower-cyan), 0.26) 12%, rgba(var(--tower-cyan), 0.16) 80%, transparent);
+  pointer-events: none;
+}
+.tower-facet--left { left: 22%; }
+.tower-facet--right { right: 22%; }
+
+.tower-wall-window {
+  position: absolute;
+  z-index: 1;
+  width: 1.05rem;
+  height: 2.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(var(--tower-cyan), 0.6);
+  border-radius: 0.55rem 0.55rem 0.06rem 0.06rem;
+  background: linear-gradient(180deg, rgba(8, 18, 36, 0.95), rgba(3, 9, 22, 0.96));
+  pointer-events: none;
+}
+.tower-wall-window::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 70%, #ffe6b0, #ffac52 55%, transparent 84%);
+  opacity: var(--window-glow, 0.55);
+  transition: opacity 0.5s linear;
+}
+.tower-wall-window--l { left: 8%; }
+.tower-wall-window--r { right: 8%; }
+
+/* ── Ornate section separator: a balcony/gallery ring that bands the tower at
+      the adventure → challenge boundary (replaces the old diamond divider). ── */
+.tower-section-sep {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: calc(100% + 2.4rem);
+  margin: 0.6rem -1.2rem 0.2rem;
+  height: 2.2rem;
+  border-block: 1px solid rgba(var(--tower-cyan), 0.55);
+  background:
+    linear-gradient(180deg, rgba(2, 26, 48, 0.82), rgba(1, 10, 24, 0.5)),
+    repeating-linear-gradient(90deg, transparent 0 0.78rem, rgba(var(--tower-cyan), 0.16) 0.78rem 0.86rem);
+  box-shadow: 0 0 20px rgba(var(--tower-cyan), 0.22), inset 0 0 18px rgba(var(--tower-cyan), 0.07);
+}
+/* corbel teeth under the gallery */
+.tower-section-sep::before {
+  content: '';
+  position: absolute;
+  left: 0.6rem;
+  right: 0.6rem;
+  bottom: -0.42rem;
+  height: 0.42rem;
+  background:
+    repeating-linear-gradient(90deg, rgba(var(--tower-cyan), 0.5) 0 0.18rem, transparent 0.18rem 1.05rem);
+  -webkit-mask: linear-gradient(180deg, #000, transparent);
+          mask: linear-gradient(180deg, #000, transparent);
+}
+.tower-section-sep-medallion {
+  position: relative;
+  width: 1.7rem;
+  height: 1.7rem;
+  background: rgba(1, 10, 28, 0.95);
+  border: 2px solid rgba(var(--tower-cyan), 0.9);
+  transform: rotate(45deg);
+  box-shadow: 0 0 18px rgba(var(--tower-cyan), 0.6), inset 0 0 10px rgba(var(--tower-cyan), 0.3);
+}
+.tower-section-sep-medallion::after {
+  content: '';
+  position: absolute;
+  inset: 0.32rem;
+  border: 1px solid rgba(var(--tower-purple), 0.7);
+  background: rgba(var(--tower-purple), 0.18);
+}
+
+/* ── Slim separator between trials inside the challenge drum. ── */
+.trial-group + .trial-group {
+  position: relative;
+  margin-top: 0.4rem;
+  padding-top: 1.7rem;
+}
+.trial-group + .trial-group::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14%;
+  right: 14%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(var(--tower-purple), 0.55), rgba(var(--tower-cyan), 0.65), rgba(var(--tower-purple), 0.55), transparent);
+}
+.trial-group + .trial-group::after {
+  content: '';
+  position: absolute;
+  top: -0.34rem;
+  left: 50%;
+  width: 0.7rem;
+  height: 0.7rem;
+  transform: translateX(-50%) rotate(45deg);
+  background: rgba(1, 10, 28, 0.95);
+  border: 1.5px solid rgba(var(--tower-cyan), 0.85);
+  box-shadow: 0 0 12px rgba(var(--tower-cyan), 0.5);
+}
+
 .tower-stack-column .tower-shell {
   min-height: auto;
 }

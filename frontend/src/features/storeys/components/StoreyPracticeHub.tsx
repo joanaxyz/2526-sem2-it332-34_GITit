@@ -26,6 +26,8 @@ import {
   REWARD_MARKERS,
 } from '@/features/storeys/challengeUi'
 import { MonsterCrest, type MonsterVariant } from '@/features/storeys/components/MonsterCrest'
+import { TowerArtifact } from '@/features/storeys/components/TowerArtifact'
+import { TowerCrystal } from '@/features/storeys/components/TowerCrystal'
 import { isSelected, useTowerSelection } from '@/features/storeys/hooks/useTowerSelection'
 import { Button } from '@/shared/components/Button'
 import { ProgressBar } from '@/shared/components/ProgressBar'
@@ -352,27 +354,7 @@ export function StoreyPracticeHub({
       <div
         className={cn('learning-tower', !isFirst && 'learning-tower-continuation', !isLast && 'learning-tower-continues')}
       >
-        {isFirst ? (
-          <div className="tower-peak" aria-hidden="true">
-            <div className="tower-flag-wrap">
-              <span className="tower-flag-pole" />
-              <span className="tower-flag" />
-            </div>
-            <div className="tower-peak-roof" />
-            <div className="tower-corbels">
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-            </div>
-            <div className="tower-crown">
-              <span />
-              <span />
-              <span />
-            </div>
-          </div>
-        ) : null}
+        {isFirst ? <TowerArtifact /> : null}
 
         <motion.div
           className="tower-shell"
@@ -382,8 +364,8 @@ export function StoreyPracticeHub({
           transition={{ duration: 0.68, delay: motionDelay, ease: [0.16, 1, 0.3, 1] }}
         >
           <span className="tower-rim tower-rim--top" aria-hidden="true" />
-          <span className="tower-course tower-course--upper" aria-hidden="true" />
-          <span className="tower-course tower-course--lower" aria-hidden="true" />
+          <span className="tower-facet tower-facet--left" aria-hidden="true" />
+          <span className="tower-facet tower-facet--right" aria-hidden="true" />
           <span className="tower-rim tower-rim--bottom" aria-hidden="true" />
 
           <motion.section
@@ -393,6 +375,8 @@ export function StoreyPracticeHub({
             viewport={{ amount: 0.42, once: true }}
             transition={{ duration: 0.5, delay: motionDelay + 0.03, ease: [0.16, 1, 0.3, 1] }}
           >
+            <span className="tower-wall-window tower-wall-window--l" aria-hidden="true" style={{ top: '6.2rem' }} />
+            <span className="tower-wall-window tower-wall-window--r" aria-hidden="true" style={{ top: '6.2rem' }} />
             <span className="tower-floor-icon">
               <Swords className="size-7" />
             </span>
@@ -413,14 +397,14 @@ export function StoreyPracticeHub({
           </motion.section>
 
           <motion.div
-            className="tower-divider"
+            className="tower-section-sep"
             aria-hidden="true"
             initial={{ opacity: 0, scaleX: 0.52 }}
             whileInView={{ opacity: 1, scaleX: 1 }}
             viewport={{ amount: 0.6, once: true }}
             transition={{ duration: 0.5, delay: motionDelay + 0.06, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span />
+            <span className="tower-section-sep-medallion" />
           </motion.div>
 
           <motion.section
@@ -471,13 +455,7 @@ export function StoreyPracticeHub({
           </motion.section>
         </motion.div>
 
-        {isLast ? (
-          <div className="tower-base" aria-hidden="true">
-            <span className="tower-base-foot" />
-          </div>
-        ) : (
-          <div className="tower-stack-connector" aria-hidden="true" />
-        )}
+        {isLast ? <TowerCrystal /> : <div className="tower-stack-connector" aria-hidden="true" />}
       </div>
     </section>
   )

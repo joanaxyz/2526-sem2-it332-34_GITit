@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tower preview (dev harness)</title>
+<link rel="stylesheet" href="src/styles/globals.css" />
+<style>
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background:
+      radial-gradient(130% 80% at 50% 108%, rgba(70,96,168,0.32), transparent 60%),
+      linear-gradient(to bottom, #05081d 0%, #111a44 52%, #243066 100%);
+    padding: 2.5rem 0 6rem;
+  }
+  .note { color:#9fb3d8; text-align:center; font:600 12px/1 Inter, sans-serif; letter-spacing:.16em; text-transform:uppercase; padding-bottom:1.25rem; }
+  .learning-tower { --window-glow: 0.85; width: min(100%, 34rem); margin: 0 auto; }
+</style>
+</head>
+<body>
+  <div class="note">tower preview — dev harness (not shipped)</div>
+  <section class="storey-section" aria-label="preview storey">
+    <div class="learning-tower">
+
+      <!-- ════ CROWN ════ -->
+      <svg class="tower-artifact" viewBox="0 0 240 248" aria-hidden="true">
+        <path class="ta-stroke" d="M8 246 L232 246 L232 230 L8 230 Z"/>
+        <path class="ta-stroke" d="M42 209 L198 209 L218 230 L22 230 Z"/>
+        <g class="ta-line">
+          <path d="M58 211 L56 229"/><path d="M84 211 L82 229"/><path d="M110 211 L109 229"/>
+          <path d="M130 211 L131 229"/><path d="M156 211 L158 229"/><path d="M182 211 L184 229"/>
+        </g>
+        <g class="ta-stroke">
+          <path d="M12 230 L12 222 L28 222 L28 230 Z"/><path d="M40 230 L40 222 L56 222 L56 230 Z"/>
+          <path d="M68 230 L68 222 L84 222 L84 230 Z"/><path d="M96 230 L96 222 L112 222 L112 230 Z"/>
+          <path d="M124 230 L124 222 L140 222 L140 230 Z"/><path d="M152 230 L152 222 L168 222 L168 230 Z"/>
+          <path d="M180 230 L180 222 L196 222 L196 230 Z"/><path d="M208 230 L208 222 L224 222 L224 230 Z"/>
+        </g>
+        <path class="ta-stroke" d="M48 198 L192 198 L192 208 L48 208 Z"/>
+        <line class="ta-line" x1="46" y1="197" x2="194" y2="197"/>
+        <g class="ta-line">
+          <line x1="56" y1="200" x2="56" y2="207"/><line x1="68" y1="200" x2="68" y2="207"/>
+          <line x1="80" y1="200" x2="80" y2="207"/><line x1="92" y1="200" x2="92" y2="207"/>
+          <line x1="104" y1="200" x2="104" y2="207"/><line x1="116" y1="200" x2="116" y2="207"/>
+          <line x1="124" y1="200" x2="124" y2="207"/><line x1="136" y1="200" x2="136" y2="207"/>
+          <line x1="148" y1="200" x2="148" y2="207"/><line x1="160" y1="200" x2="160" y2="207"/>
+          <line x1="172" y1="200" x2="172" y2="207"/><line x1="184" y1="200" x2="184" y2="207"/>
+        </g>
+        <path class="ta-stroke" d="M74 144 L166 144 L172 152 L172 188 L166 196 L74 196 L68 188 L68 152 Z"/>
+        <g>
+          <path class="ta-window" d="M89 186 L89 163 A7 7 0 0 1 103 163 L103 186 Z"/>
+          <path class="ta-window-glow" d="M92 184 L92 165 A4 4 0 0 1 100 165 L100 184 Z"/>
+          <path class="ta-window" d="M113 186 L113 163 A7 7 0 0 1 127 163 L127 186 Z"/>
+          <path class="ta-window-glow" d="M116 184 L116 165 A4 4 0 0 1 124 165 L124 184 Z"/>
+          <path class="ta-window" d="M137 186 L137 163 A7 7 0 0 1 151 163 L151 186 Z"/>
+          <path class="ta-window-glow" d="M140 184 L140 165 A4 4 0 0 1 148 165 L148 184 Z"/>
+        </g>
+        <path class="ta-roof" d="M52 130 L188 130 L178 142 Q120 150 62 142 Z"/>
+        <path class="ta-roof" d="M120 52 C 104 80 80 106 58 130 L 182 130 C 160 106 136 80 120 52 Z"/>
+        <path class="ta-sheen" d="M120 56 L80 130 L98 130 Z"/>
+        <path class="ta-line" d="M92 84 Q120 92 148 84"/>
+        <path class="ta-line" d="M80 106 Q120 116 160 106"/>
+        <path class="ta-line" d="M68 124 Q120 134 172 124"/>
+        <path class="ta-roof" d="M62 130 L68 102 L74 130 Z"/>
+        <path class="ta-roof" d="M166 130 L172 102 L178 130 Z"/>
+        <line class="ta-finial" x1="68" y1="102" x2="68" y2="95"/>
+        <line class="ta-finial" x1="172" y1="102" x2="172" y2="95"/>
+        <path class="ta-finial" d="M120 6 L124 13 L120 20 L116 13 Z"/>
+        <line class="ta-finial" x1="120" y1="20" x2="120" y2="52"/>
+        <circle class="ta-finial" cx="120" cy="36" r="3.4"/>
+      </svg>
+
+      <!-- ════ ADVENTURE drum (narrower) ════ -->
+      <div class="kt-drum kt-drum--adventure">
+        <div class="kt-wall" aria-hidden="true"></div>
+        <section class="kt-content">
+          <span class="tower-wall-window tower-wall-window--l" aria-hidden="true" style="top:5.6rem"></span>
+          <span class="tower-wall-window tower-wall-window--r" aria-hidden="true" style="top:5.6rem"></span>
+          <span class="tower-floor-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/></svg>
+          </span>
+          <h2 class="tower-floor-title command-adventure-title">Command Adventure</h2>
+          <div class="tower-door-mount">
+            <button type="button" class="balcony" data-selected="true">
+              <span class="balcony-roof"><span class="balcony-roof-windows"><span class="balcony-roof-window"></span><span class="balcony-roof-window"></span><span class="balcony-roof-window"></span></span></span>
+              <span class="balcony-door"><span class="balcony-door-leaf"></span><span class="balcony-door-glow"></span></span>
+              <span class="balcony-rail"><span></span><span></span><span></span><span></span><span></span></span>
+              <span class="door-ring"></span>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- ════ SEPARATOR (widening) ════ -->
+      <svg class="tower-sep" viewBox="0 0 240 74" aria-hidden="true">
+        <path class="ta-stroke" d="M30 8 L210 8 L232 48 L8 48 Z"/>
+        <g class="ta-line">
+          <path d="M42 10 L36 47"/><path d="M64 10 L60 47"/><path d="M86 10 L84 47"/>
+          <path d="M156 10 L158 47"/><path d="M178 10 L182 47"/><path d="M200 10 L206 47"/>
+        </g>
+        <path class="ta-stroke" d="M2 50 L238 50 L238 62 L2 62 Z"/>
+        <line class="ta-line" x1="2" y1="56" x2="238" y2="56"/>
+        <g transform="translate(120 28) rotate(45)">
+          <rect class="ta-stroke" x="-11" y="-11" width="22" height="22"/>
+          <rect class="ta-crystal" x="-5" y="-5" width="10" height="10"/>
+        </g>
+      </svg>
+
+      <!-- ════ CHALLENGE drum (wider) ════ -->
+      <div class="kt-drum kt-drum--challenge">
+        <div class="kt-wall" aria-hidden="true"></div>
+        <section class="kt-content">
+          <span class="tower-floor-icon challenge-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          </span>
+          <h2 class="tower-floor-title challenge-title">GIT Challenged</h2>
+          <div class="trial-stack">
+            <div class="trial-group">
+              <span class="trial-name"><span class="trial-name-index">Trial 1</span>Rebase the Rapids</span>
+              <div class="trial-door-row">
+                <button type="button" class="trial-door" data-difficulty="easy">
+                  <svg class="monster-crest" data-variant="easy" viewBox="0 0 120 80" aria-hidden="true"><path class="monster-horn" d="M44 24 C40 16 33 14 30 18 C35 19 39 22 43 28 Z M76 24 C80 16 87 14 90 18 C85 19 81 22 77 28 Z"/><path class="monster-head" d="M32 30 L46 22 L74 22 L88 30 L82 54 L60 74 L38 54 Z"/><path class="monster-brow" d="M40 36 L54 41 M80 36 L66 41"/><path class="monster-eye" d="M45 40 L55 43 L50 49 L43 46 Z"/><path class="monster-eye" d="M75 40 L65 43 L70 49 L77 46 Z"/><path class="monster-snarl" d="M48 58 L60 62 L72 58"/><path class="monster-fang" d="M53 59 L57 59 L55 65 Z"/><path class="monster-fang" d="M63 59 L67 59 L65 65 Z"/></svg>
+                  <span class="trial-door-arch"><span class="trial-door-leaf"></span><span class="trial-door-glow"></span></span>
+                  <span class="trial-door-label">Easy</span><span class="door-ring"></span>
+                </button>
+                <button type="button" class="trial-door" data-difficulty="medium">
+                  <svg class="monster-crest" data-variant="medium" viewBox="0 0 120 80" aria-hidden="true"><path class="monster-horn" d="M45 24 C36 14 24 12 18 18 C28 17 35 21 44 30 Z M75 24 C84 14 96 12 102 18 C92 17 85 21 76 30 Z"/><path class="monster-head" d="M32 30 L46 22 L74 22 L88 30 L82 54 L60 74 L38 54 Z"/><path class="monster-brow" d="M40 36 L54 41 M80 36 L66 41"/><path class="monster-eye" d="M45 40 L55 43 L50 49 L43 46 Z"/><path class="monster-eye" d="M75 40 L65 43 L70 49 L77 46 Z"/><path class="monster-snarl" d="M48 58 L60 62 L72 58"/><path class="monster-fang" d="M53 59 L57 59 L55 65 Z"/><path class="monster-fang" d="M63 59 L67 59 L65 65 Z"/></svg>
+                  <span class="trial-door-arch"><span class="trial-door-leaf"></span><span class="trial-door-glow"></span></span>
+                  <span class="trial-door-label">Medium</span><span class="door-ring"></span>
+                </button>
+                <button type="button" class="trial-door" data-difficulty="hard">
+                  <svg class="monster-crest" data-variant="hard" viewBox="0 0 120 80" aria-hidden="true"><path class="monster-horn" d="M46 23 C36 8 20 2 10 8 C16 12 18 18 20 24 C30 18 38 19 45 30 Z M74 23 C84 8 100 2 110 8 C104 12 102 18 100 24 C90 18 82 19 75 30 Z"/><path class="monster-head" d="M32 30 L46 22 L74 22 L88 30 L82 54 L60 74 L38 54 Z"/><path class="monster-brow" d="M40 36 L54 41 M80 36 L66 41"/><path class="monster-eye" d="M45 40 L55 43 L50 49 L43 46 Z"/><path class="monster-eye" d="M75 40 L65 43 L70 49 L77 46 Z"/><path class="monster-snarl" d="M48 58 L60 62 L72 58"/><path class="monster-fang" d="M53 59 L57 59 L55 65 Z"/><path class="monster-fang" d="M63 59 L67 59 L65 65 Z"/><path class="monster-thirdeye" d="M60 30 L64 35 L60 40 L56 35 Z"/></svg>
+                  <span class="trial-door-arch"><span class="trial-door-leaf"></span><span class="trial-door-glow"></span></span>
+                  <span class="trial-door-label">Hard</span><span class="door-ring"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="trial-group">
+              <span class="trial-name"><span class="trial-name-index">Trial 2</span>Merge the Maelstrom</span>
+              <div class="trial-door-row">
+                <button type="button" class="trial-door" data-difficulty="easy">
+                  <svg class="monster-crest" data-variant="easy" viewBox="0 0 120 80" aria-hidden="true"><path class="monster-horn" d="M44 24 C40 16 33 14 30 18 C35 19 39 22 43 28 Z M76 24 C80 16 87 14 90 18 C85 19 81 22 77 28 Z"/><path class="monster-head" d="M32 30 L46 22 L74 22 L88 30 L82 54 L60 74 L38 54 Z"/><path class="monster-brow" d="M40 36 L54 41 M80 36 L66 41"/><path class="monster-eye" d="M45 40 L55 43 L50 49 L43 46 Z"/><path class="monster-eye" d="M75 40 L65 43 L70 49 L77 46 Z"/><path class="monster-snarl" d="M48 58 L60 62 L72 58"/><path class="monster-fang" d="M53 59 L57 59 L55 65 Z"/><path class="monster-fang" d="M63 59 L67 59 L65 65 Z"/></svg>
+                  <span class="trial-door-arch"><span class="trial-door-leaf"></span><span class="trial-door-glow"></span></span>
+                  <span class="trial-door-label">Easy</span><span class="door-ring"></span>
+                </button>
+                <button type="button" class="trial-door" data-difficulty="medium">
+                  <svg class="monster-crest" data-variant="medium" viewBox="0 0 120 80" aria-hidden="true"><path class="monster-horn" d="M45 24 C36 14 24 12 18 18 C28 17 35 21 44 30 Z M75 24 C84 14 96 12 102 18 C92 17 85 21 76 30 Z"/><path class="monster-head" d="M32 30 L46 22 L74 22 L88 30 L82 54 L60 74 L38 54 Z"/><path class="monster-brow" d="M40 36 L54 41 M80 36 L66 41"/><path class="monster-eye" d="M45 40 L55 43 L50 49 L43 46 Z"/><path class="monster-eye" d="M75 40 L65 43 L70 49 L77 46 Z"/><path class="monster-snarl" d="M48 58 L60 62 L72 58"/><path class="monster-fang" d="M53 59 L57 59 L55 65 Z"/><path class="monster-fang" d="M63 59 L67 59 L65 65 Z"/></svg>
+                  <span class="trial-door-arch"><span class="trial-door-leaf"></span><span class="trial-door-glow"></span></span>
+                  <span class="trial-door-label">Medium</span><span class="door-ring"></span>
+                </button>
+                <button type="button" class="trial-door" data-difficulty="hard">
+                  <svg class="monster-crest" data-variant="hard" viewBox="0 0 120 80" aria-hidden="true"><path class="monster-horn" d="M46 23 C36 8 20 2 10 8 C16 12 18 18 20 24 C30 18 38 19 45 30 Z M74 23 C84 8 100 2 110 8 C104 12 102 18 100 24 C90 18 82 19 75 30 Z"/><path class="monster-head" d="M32 30 L46 22 L74 22 L88 30 L82 54 L60 74 L38 54 Z"/><path class="monster-brow" d="M40 36 L54 41 M80 36 L66 41"/><path class="monster-eye" d="M45 40 L55 43 L50 49 L43 46 Z"/><path class="monster-eye" d="M75 40 L65 43 L70 49 L77 46 Z"/><path class="monster-snarl" d="M48 58 L60 62 L72 58"/><path class="monster-fang" d="M53 59 L57 59 L55 65 Z"/><path class="monster-fang" d="M63 59 L67 59 L65 65 Z"/><path class="monster-thirdeye" d="M60 30 L64 35 L60 40 L56 35 Z"/></svg>
+                  <span class="trial-door-arch"><span class="trial-door-leaf"></span><span class="trial-door-glow"></span></span>
+                  <span class="trial-door-label">Hard</span><span class="door-ring"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ════ CRYSTAL (floating base) ════ -->
+      <svg class="tower-crystal" viewBox="0 0 240 168" aria-hidden="true">
+        <g>
+          <path class="ta-rock" d="M30 40 L42 35 L47 47 L37 54 L26 48 Z"/>
+          <path class="ta-rock" d="M198 52 L210 48 L214 60 L204 66 L194 60 Z"/>
+          <path class="ta-rock" d="M18 96 L29 92 L33 103 L23 109 Z"/>
+          <path class="ta-rock" d="M212 104 L224 100 L228 113 L217 119 L208 112 Z"/>
+          <path class="ta-rock" d="M104 150 L114 147 L117 158 L107 161 Z"/>
+          <circle class="ta-rock" cx="46" cy="128" r="2.6"/>
+          <circle class="ta-rock" cx="196" cy="138" r="3"/>
+        </g>
+        <path class="ta-crystal" d="M8 6 L232 6 L236 28 L4 28 Z"/>
+        <path class="ta-crystal" d="M4 28 L120 160 L236 28 Z"/>
+        <g class="ta-crystal-facet">
+          <line x1="120" y1="28" x2="120" y2="160"/>
+          <line x1="58" y1="28" x2="120" y2="160"/>
+          <line x1="182" y1="28" x2="120" y2="160"/>
+          <line x1="4" y1="28" x2="86" y2="92"/>
+          <line x1="236" y1="28" x2="154" y2="92"/>
+          <line x1="60" y1="6" x2="58" y2="28"/>
+          <line x1="120" y1="6" x2="120" y2="28"/>
+          <line x1="180" y1="6" x2="182" y2="28"/>
+        </g>
+      </svg>
+
+    </div>
+  </section>
+</body>
+</html>
