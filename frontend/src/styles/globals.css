@@ -1160,84 +1160,106 @@ textarea {
 
 .tower-window-roof-flag {
   position: absolute;
-  left: calc(50% + 0.04rem);
-  bottom: 8.9rem;
+  left: calc(50% + 0.08rem);
+  bottom: 8.84rem;
   z-index: 8;
   display: block;
-  width: 5.35rem;
-  height: 3.25rem;
+  width: 5.25rem;
+  height: 3.45rem;
   pointer-events: none;
 }
 
 .tower-window-roof-flag::before {
   content: '';
   position: absolute;
-  left: 0.18rem;
-  top: 0.72rem;
-  bottom: 0.02rem;
-  width: 0.18rem;
+  left: 0.38rem;
+  top: 0.7rem;
+  bottom: 0.04rem;
+  width: 0.16rem;
   border-radius: 999px;
   background: rgba(45, 245, 255, 0.96);
-  box-shadow: 0 0 12px rgba(45, 245, 255, 0.36);
+  box-shadow: 0 0 12px rgba(45, 245, 255, 0.34);
 }
 
 .tower-window-roof-flag-diamond {
   position: absolute;
-  left: -0.05rem;
-  top: 0.1rem;
-  width: 0.78rem;
-  height: 0.78rem;
+  left: 0.02rem;
+  top: 0.02rem;
+  width: 0.82rem;
+  height: 0.82rem;
   transform: rotate(45deg);
   border: 2px solid rgba(45, 245, 255, 0.94);
   background: rgba(8, 27, 47, 0.95);
   box-shadow:
     0 0 12px rgba(45, 245, 255, 0.22),
-    inset 0 0 0 1px rgba(216, 95, 255, 0.3);
+    inset 0 0 0 1px rgba(216, 95, 255, 0.24);
+}
+
+.tower-window-roof-flag-ring {
+  position: absolute;
+  left: 0.12rem;
+  top: 0.96rem;
+  width: 0.62rem;
+  height: 0.62rem;
+  border: 2px solid rgba(45, 245, 255, 0.94);
+  border-radius: 999px;
+  background: rgba(8, 27, 47, 0.95);
+  box-shadow: 0 0 10px rgba(45, 245, 255, 0.18);
 }
 
 .tower-window-roof-flag-cloth {
   position: absolute;
-  left: 0.74rem;
-  top: 0.54rem;
+  left: 0.92rem;
+  top: 0.56rem;
   display: block;
-  width: 4.2rem;
-  height: 2.28rem;
+  width: 3.98rem;
+  height: 2.14rem;
   transform-origin: 0 50%;
   border: 2px solid rgba(216, 95, 255, 0.96);
-  border-left-color: rgba(45, 245, 255, 0.92);
-  border-radius: 0.14rem 0.3rem 0.3rem 0.14rem;
+  border-radius: 0.12rem 0.28rem 0.28rem 0.12rem;
+  clip-path: polygon(0 0, 93% 0, 100% 26%, 95% 50%, 100% 74%, 93% 100%, 0 100%);
   background:
-    linear-gradient(90deg, rgba(45, 245, 255, 0.18) 0 0.34rem, transparent 0.34rem),
-    linear-gradient(180deg, rgba(55, 22, 85, 0.98), rgba(20, 8, 44, 0.995));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 28%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0 0.28rem, rgba(255, 255, 255, 0.02) 0.28rem 0.52rem, transparent 0.52rem),
+    linear-gradient(180deg, rgba(58, 23, 91, 0.99), rgba(22, 9, 48, 0.995));
   box-shadow:
-    0 0 16px rgba(176, 74, 255, 0.32),
-    0 0 8px rgba(45, 245, 255, 0.16),
-    inset 0 0 0 1px rgba(2, 10, 20, 0.62);
-  animation: towerRoofFlagWind 3.4s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    0 0 16px rgba(176, 74, 255, 0.3),
+    0 0 8px rgba(45, 245, 255, 0.14),
+    inset 0 0 0 1px rgba(2, 10, 20, 0.48),
+    inset 0.48rem 0 0 rgba(255, 255, 255, 0.05);
+  animation: towerRoofFlagWind 3.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
   will-change: transform;
+}
+
+.tower-window-roof-flag-cloth::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 34%, rgba(5, 12, 24, 0.12) 70%, rgba(255, 255, 255, 0.03) 100%);
+  opacity: 0.9;
 }
 
 .tower-window-roof-flag-cloth::after {
   content: '';
   position: absolute;
-  inset: 0.32rem 0.42rem 0.32rem 0.68rem;
-  border-top: 1px solid rgba(45, 245, 255, 0.22);
-  border-bottom: 1px solid rgba(216, 95, 255, 0.24);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.07), transparent);
+  inset: 0.28rem 0.42rem 0.28rem 0.72rem;
+  border-top: 1px solid rgba(45, 245, 255, 0.16);
+  border-bottom: 1px solid rgba(216, 95, 255, 0.18);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
   pointer-events: none;
 }
 
 .tower-window-roof-flag-logo {
   position: absolute;
-  top: 0.44rem;
-  left: 1rem;
+  top: 0.42rem;
+  left: 0.98rem;
   z-index: 2;
-  width: 2.32rem;
-  height: 1.38rem;
+  width: 2.2rem;
+  height: 1.32rem;
   overflow: visible;
   filter:
-    drop-shadow(0 0 6px rgba(176, 74, 255, 0.42))
-    drop-shadow(0 0 4px rgba(45, 245, 255, 0.18));
+    drop-shadow(0 0 6px rgba(176, 74, 255, 0.34))
+    drop-shadow(0 0 4px rgba(45, 245, 255, 0.14));
 }
 
 .tower-window-roof-flag-logo-line {
@@ -1257,23 +1279,19 @@ textarea {
 @keyframes towerRoofFlagWind {
   0%,
   100% {
-    transform: rotate(-0.8deg) skewY(0deg) translateY(0) scaleY(1);
+    transform: perspective(14rem) rotateY(0deg) rotate(-1deg) skewY(0deg) translateY(0);
   }
 
-  18% {
-    transform: rotate(-0.15deg) skewY(-0.8deg) translateY(-0.03rem) scaleY(1.01);
+  26% {
+    transform: perspective(14rem) rotateY(-5deg) rotate(-0.2deg) skewY(-1.2deg) translateY(-0.03rem);
   }
 
-  44% {
-    transform: rotate(0.9deg) skewY(-2.1deg) translateY(-0.05rem) scaleY(0.995);
+  58% {
+    transform: perspective(14rem) rotateY(3deg) rotate(0.4deg) skewY(0.9deg) translateY(0.02rem);
   }
 
-  68% {
-    transform: rotate(0.2deg) skewY(1.15deg) translateY(0.02rem) scaleY(1);
-  }
-
-  84% {
-    transform: rotate(-0.2deg) skewY(-0.55deg) translateY(0.01rem) scaleY(1.005);
+  82% {
+    transform: perspective(14rem) rotateY(-2deg) rotate(-0.35deg) skewY(-0.45deg) translateY(0.01rem);
   }
 }
 
@@ -1926,122 +1944,113 @@ textarea {
 
 .trial-door-arch {
   position: relative;
-  width: min(100%, 6.8rem);
-  aspect-ratio: 0.78;
+  width: min(100%, 5.9rem);
+  aspect-ratio: 0.72;
   border: 2.5px solid rgba(var(--level-accent), 0.95);
-  border-radius: 3rem 3rem 0.18rem 0.18rem;
+  border-radius: 2.8rem 2.8rem 0.16rem 0.16rem;
   background: linear-gradient(180deg, rgba(9, 28, 45, 0.99), rgba(3, 14, 26, 0.99));
   box-shadow:
     0 0 18px rgba(var(--level-accent), 0.2),
-    inset 0 0 0 0.32rem rgba(2, 9, 18, 0.72),
-    inset 0 0 0 0.5rem rgba(var(--level-accent), 0.28);
-  perspective: 640px;
+    inset 0 0 0 0.28rem rgba(2, 9, 18, 0.72),
+    inset 0 0 0 0.46rem rgba(var(--level-accent), 0.24);
+  overflow: hidden;
 }
 
 .trial-door-arch::before {
   content: '';
   position: absolute;
-  inset: 0.36rem;
-  border: 1.5px solid rgba(var(--level-accent), 0.45);
-  border-radius: 2.45rem 2.45rem 0.1rem 0.1rem;
+  inset: 0.34rem;
+  border: 1.5px solid rgba(var(--level-accent), 0.5);
+  border-radius: 2.25rem 2.25rem 0.08rem 0.08rem;
   pointer-events: none;
 }
 
 .trial-door-interior {
   position: absolute;
-  inset: 0.44rem;
-  border-radius: 2.35rem 2.35rem 0.1rem 0.1rem;
-  background: radial-gradient(120% 84% at 50% 100%, rgba(var(--level-accent), 0.42), rgba(var(--level-accent), 0.1) 48%, rgba(2, 10, 20, 0.96) 82%);
-  box-shadow: inset 0 0 16px rgba(var(--level-accent), 0.22);
-  opacity: 0.25;
-  transition: opacity 0.5s ease;
-}
-
-.trial-door-interior::before,
-.trial-door-interior::after {
-  content: '';
-  position: absolute;
-  background: rgba(var(--level-accent), 0.17);
-}
-
-.trial-door-interior::before {
-  left: 16%;
-  right: 16%;
-  top: 48%;
-  height: 1px;
-}
-
-.trial-door-interior::after {
-  top: 18%;
-  bottom: 12%;
-  left: 50%;
-  width: 1px;
-}
-
-.trial-door-leaf {
-  position: absolute;
-  top: 0.44rem;
-  bottom: 0.44rem;
-  width: calc(50% - 0.44rem);
-  z-index: 1;
+  inset: 0.46rem;
+  border-radius: 2.15rem 2.15rem 0.08rem 0.08rem;
   background:
-    linear-gradient(180deg, rgba(8, 25, 42, 0.99), rgba(3, 14, 24, 0.99)),
-    repeating-linear-gradient(90deg, transparent 0 0.42rem, rgba(var(--level-accent), 0.11) 0.42rem 0.47rem);
-  box-shadow: inset 0 0 0 1.5px rgba(var(--level-accent), 0.3);
-  backface-visibility: hidden;
-  transition: transform 0.55s cubic-bezier(0.22, 1, 0.32, 1);
+    linear-gradient(180deg, rgba(var(--level-accent), 0.05), rgba(var(--level-accent), 0.01) 40%, rgba(2, 10, 20, 0.96) 100%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03), transparent 20% 80%, rgba(255, 255, 255, 0.02));
+  box-shadow: inset 0 0 16px rgba(var(--level-accent), 0.18);
+  opacity: 0.82;
 }
 
-.trial-door-leaf::before {
+.trial-door-bars {
+  position: absolute;
+  left: 0.74rem;
+  right: 0.74rem;
+  top: 0.64rem;
+  bottom: 0.5rem;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.trial-door-bar {
+  position: relative;
+  width: 0.28rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(var(--level-accent), 0.96), rgba(var(--level-accent), 0.64));
+  box-shadow: 0 0 8px rgba(var(--level-accent), 0.28);
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.32, 1);
+}
+
+.trial-door-bar::before {
   content: '';
   position: absolute;
-  top: 18%;
-  bottom: 14%;
-  width: 1px;
-  background: rgba(var(--level-accent), 0.16);
-}
-
-.trial-door-leaf--left {
-  left: 0.44rem;
-  transform-origin: left center;
-  border-radius: 2.2rem 0.05rem 0.06rem 0.06rem;
-}
-
-.trial-door-leaf--left::before {
-  right: 24%;
-}
-
-.trial-door-leaf--right {
-  right: 0.44rem;
-  transform-origin: right center;
-  border-radius: 0.05rem 2.2rem 0.06rem 0.06rem;
-}
-
-.trial-door-leaf--right::before {
-  left: 24%;
-}
-
-.trial-door-plank {
-  position: absolute;
-  top: 0.55rem;
-  bottom: 0.5rem;
   left: 50%;
-  width: 1px;
-  background: rgba(var(--level-accent), 0.24);
+  top: 0.22rem;
+  width: 0.12rem;
+  height: calc(100% - 0.44rem);
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: rgba(2, 10, 20, 0.42);
+}
+
+.trial-door-crossbar {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  top: 53%;
+  height: 0.18rem;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg, rgba(var(--level-accent), 0.9), rgba(var(--level-accent), 0.62));
+  box-shadow: 0 0 8px rgba(var(--level-accent), 0.24);
+}
+
+.trial-door-crossbar::before,
+.trial-door-crossbar::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 0.42rem;
+  height: 0.16rem;
+  transform: translateY(-50%);
+  background: rgba(var(--level-accent), 0.85);
+}
+
+.trial-door-crossbar::before {
+  left: -0.08rem;
+}
+
+.trial-door-crossbar::after {
+  right: -0.08rem;
 }
 
 .trial-door-gem {
   position: absolute;
   left: 50%;
-  top: 48%;
+  top: 53%;
   z-index: 2;
-  width: 0.56rem;
-  height: 0.56rem;
+  width: 0.72rem;
+  height: 0.72rem;
   transform: translate(-50%, -50%) rotate(45deg);
   border: 1.5px solid rgba(var(--level-accent), 0.88);
   background: rgba(6, 18, 31, 0.98);
-  box-shadow: 0 0 8px rgba(var(--level-accent), 0.36);
-  transition: opacity 0.4s ease;
+  box-shadow: 0 0 10px rgba(var(--level-accent), 0.32);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
 
 .trial-door-label {
@@ -2049,9 +2058,9 @@ textarea {
   z-index: 3;
   display: grid;
   place-items: center;
-  width: min(100%, 6.2rem);
-  min-height: 2.05rem;
-  margin-top: -1.05rem;
+  width: min(100%, 5.65rem);
+  min-height: 1.98rem;
+  margin-top: -0.62rem;
   border: 2px solid rgba(var(--level-accent), 0.9);
   background: linear-gradient(180deg, rgba(8, 25, 42, 0.99), rgba(3, 13, 24, 0.99));
   color: rgb(var(--level-accent));
@@ -2073,35 +2082,31 @@ textarea {
 .trial-door.is-complete .trial-door-arch {
   box-shadow:
     0 0 24px rgba(var(--level-accent), 0.26),
-    inset 0 0 0 0.32rem rgba(2, 9, 18, 0.72),
-    inset 0 0 0 0.5rem rgba(var(--level-accent), 0.28);
+    inset 0 0 0 0.28rem rgba(2, 9, 18, 0.72),
+    inset 0 0 0 0.46rem rgba(var(--level-accent), 0.24);
 }
 
 .trial-door.is-active .trial-door-arch {
   box-shadow:
     0 0 24px rgba(var(--level-accent), 0.28),
-    inset 0 0 0 0.32rem rgba(2, 9, 18, 0.72),
-    inset 0 0 0 0.5rem rgba(var(--level-accent), 0.28);
+    inset 0 0 0 0.28rem rgba(2, 9, 18, 0.72),
+    inset 0 0 0 0.46rem rgba(var(--level-accent), 0.24);
 }
 
-.trial-door:not(.is-locked):hover .trial-door-leaf--left,
-.trial-door:not(.is-locked)[data-selected='true'] .trial-door-leaf--left {
-  transform: rotateY(-74deg);
+.trial-door:not(.is-locked):hover .trial-door-bar:nth-child(odd),
+.trial-door:not(.is-locked)[data-selected='true'] .trial-door-bar:nth-child(odd) {
+  transform: translateY(-0.72rem);
 }
 
-.trial-door:not(.is-locked):hover .trial-door-leaf--right,
-.trial-door:not(.is-locked)[data-selected='true'] .trial-door-leaf--right {
-  transform: rotateY(74deg);
-}
-
-.trial-door:not(.is-locked):hover .trial-door-interior,
-.trial-door:not(.is-locked)[data-selected='true'] .trial-door-interior {
-  opacity: 1;
+.trial-door:not(.is-locked):hover .trial-door-bar:nth-child(even),
+.trial-door:not(.is-locked)[data-selected='true'] .trial-door-bar:nth-child(even) {
+  transform: translateY(0.62rem);
 }
 
 .trial-door:not(.is-locked):hover .trial-door-gem,
 .trial-door:not(.is-locked)[data-selected='true'] .trial-door-gem {
-  opacity: 0;
+  transform: translate(-50%, -50%) rotate(45deg) scale(1.06);
+  box-shadow: 0 0 12px rgba(var(--level-accent), 0.4);
 }
 
 @media (max-width: 860px) {
@@ -2171,20 +2176,25 @@ textarea {
   }
 
   .tower-window-roof-flag {
-    bottom: 7.25rem;
-    width: 4.45rem;
-    height: 2.72rem;
+    bottom: 7.18rem;
+    width: 4.6rem;
+    height: 3rem;
   }
 
   .tower-window-roof-flag-diamond {
-    width: 0.66rem;
-    height: 0.66rem;
-    top: 0.02rem;
+    width: 0.7rem;
+    height: 0.7rem;
+  }
+
+  .tower-window-roof-flag-ring {
+    top: 0.82rem;
+    width: 0.56rem;
+    height: 0.56rem;
   }
 
   .tower-window-roof-flag-cloth {
-    left: 0.62rem;
-    top: 0.48rem;
+    left: 0.82rem;
+    top: 0.5rem;
     width: 3.46rem;
     height: 1.92rem;
   }

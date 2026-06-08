@@ -94,6 +94,7 @@ function WindowStorey({ crowned }: { crowned: boolean }) {
           <span className="tower-window-roof-spire" />
           <span className="tower-window-roof-flag">
             <span className="tower-window-roof-flag-diamond" />
+            <span className="tower-window-roof-flag-ring" />
             <span className="tower-window-roof-flag-cloth">
               <svg className="tower-window-roof-flag-logo" viewBox="0 0 64 40" aria-hidden="true">
                 <path className="tower-window-roof-flag-logo-line" d="M14 10 L30 20 M30 20 L46 10 M30 20 V30" />
@@ -218,12 +219,12 @@ function TrialDoor({
     >
       <span className="trial-door-arch" aria-hidden="true">
         <span className="trial-door-interior" />
-        <span className="trial-door-leaf trial-door-leaf--left">
-          <span className="trial-door-plank" />
+        <span className="trial-door-bars">
+          {Array.from({ length: 5 }, (_, index) => (
+            <span className="trial-door-bar" key={index} />
+          ))}
         </span>
-        <span className="trial-door-leaf trial-door-leaf--right">
-          <span className="trial-door-plank" />
-        </span>
+        <span className="trial-door-crossbar" />
         <span className="trial-door-gem" />
       </span>
       <span className="trial-door-label">{difficultyLabel(level)}</span>
