@@ -1043,22 +1043,19 @@ textarea {
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   TOWER — repeating neon keep: windows storey → adventure → separator →
-   challenges → separator. The conical roof crowns the FIRST storey only; the
-   lit-window band repeats atop every storey. Doors feed the selection model
-   (data-selected + .door-ring) so the sticky overview/action docks drive
-   interaction. Layout (page shell, docks, sky clock, sun/moon) lives elsewhere.
+   TOWER — reference-locked neon keep: windows storey → adventure → gemmed
+   separator → challenges → base separator. Layout (page shell, docks, sky
+   clock, sun/moon) lives elsewhere.
    ════════════════════════════════════════════════════════════════════════ */
 .learning-tower {
   --tower-wall-solid: #081b2f;
-  --tower-wall-shadow: #04111f;
+  --tower-wall-shadow: #03101f;
   --tower-wall-highlight: #0a2d46;
   --tower-cyan-glow: rgba(45, 245, 255, 0.28);
   --tower-purple-glow: rgba(176, 74, 255, 0.24);
   position: relative;
   justify-self: center;
   width: min(100%, 40rem);
-  /* headroom so the conical roof clears the fixed top navbar */
   padding-top: 3.25rem;
 }
 
@@ -1077,7 +1074,7 @@ textarea {
 
 .tower-window-stage {
   position: relative;
-  z-index: 4;
+  z-index: 5;
   display: grid;
   justify-items: center;
   width: 100%;
@@ -1085,9 +1082,9 @@ textarea {
 
 .tower-window-roof {
   position: relative;
-  width: min(76%, 18.5rem);
-  height: 7.3rem;
-  margin-bottom: -0.12rem;
+  width: min(90%, 28.5rem);
+  height: 9.25rem;
+  margin-bottom: -0.18rem;
 }
 
 .tower-window-roof-peak {
@@ -1095,14 +1092,14 @@ textarea {
   left: 50%;
   bottom: 0;
   width: 100%;
-  height: 6.15rem;
+  height: 7.5rem;
   transform: translateX(-50%);
-  border: 2.5px solid rgba(45, 245, 255, 0.9);
+  border: 2.5px solid rgba(45, 245, 255, 0.92);
   border-bottom-width: 3px;
   background:
-    radial-gradient(80% 70% at 50% 10%, rgba(45, 245, 255, 0.14), transparent 58%),
-    linear-gradient(180deg, rgba(9, 33, 52, 0.96), rgba(3, 13, 23, 0.96));
-  clip-path: polygon(50% 0, 87% 62%, 100% 62%, 94% 100%, 6% 100%, 0 62%, 13% 62%);
+    radial-gradient(76% 72% at 50% 6%, rgba(45, 245, 255, 0.16), transparent 58%),
+    linear-gradient(180deg, rgba(9, 34, 53, 0.96), rgba(3, 12, 23, 0.97));
+  clip-path: polygon(50% 0, 86% 62%, 100% 62%, 94% 100%, 6% 100%, 0 62%, 14% 62%);
   box-shadow: 0 0 26px var(--tower-cyan-glow), inset 0 -1.5rem 2rem rgba(0, 0, 0, 0.2);
 }
 
@@ -1114,25 +1111,25 @@ textarea {
   right: 12%;
   height: 2px;
   border-radius: 999px;
-  background: rgba(45, 245, 255, 0.38);
+  background: rgba(45, 245, 255, 0.42);
 }
 
 .tower-window-roof-peak::before {
-  top: 40%;
+  top: 42%;
 }
 
 .tower-window-roof-peak::after {
-  top: 63%;
+  top: 65%;
 }
 
 .tower-window-roof-spire {
   position: absolute;
   left: 50%;
-  bottom: 5.75rem;
+  bottom: 7rem;
   width: 2px;
-  height: 3.35rem;
+  height: 3.75rem;
   transform: translateX(-50%);
-  background: rgba(45, 245, 255, 0.92);
+  background: rgba(45, 245, 255, 0.94);
   box-shadow: 0 0 14px rgba(45, 245, 255, 0.42);
 }
 
@@ -1145,28 +1142,28 @@ textarea {
 }
 
 .tower-window-roof-spire::before {
-  top: -1.4rem;
-  width: 1.15rem;
-  height: 1.15rem;
-  border: 2px solid rgba(45, 245, 255, 0.92);
+  top: -1.55rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid rgba(45, 245, 255, 0.94);
   background: rgba(8, 27, 47, 0.95);
 }
 
 .tower-window-roof-spire::after {
   top: 0.3rem;
-  width: 0.7rem;
-  height: 0.7rem;
-  border: 2px solid rgba(45, 245, 255, 0.92);
+  width: 0.78rem;
+  height: 0.78rem;
+  border: 2px solid rgba(45, 245, 255, 0.94);
   border-radius: 999px;
   background: rgba(8, 27, 47, 0.95);
 }
 
 .tower-window-roof-finial {
   position: absolute;
-  bottom: 0.55rem;
+  bottom: 0.62rem;
   width: 0.2rem;
-  height: 3rem;
-  background: rgba(45, 245, 255, 0.88);
+  height: 3.2rem;
+  background: rgba(45, 245, 255, 0.9);
   box-shadow: 0 0 14px rgba(45, 245, 255, 0.32);
 }
 
@@ -1174,31 +1171,31 @@ textarea {
   content: '';
   position: absolute;
   left: 50%;
-  top: -0.5rem;
-  width: 0.65rem;
-  height: 0.65rem;
+  top: -0.52rem;
+  width: 0.68rem;
+  height: 0.68rem;
   transform: translateX(-50%);
+  border: 2px solid rgba(45, 245, 255, 0.94);
   border-radius: 999px;
-  border: 2px solid rgba(45, 245, 255, 0.92);
   background: rgba(8, 27, 47, 0.95);
 }
 
 .tower-window-roof-finial--left {
-  left: 10%;
+  left: 9.5%;
 }
 
 .tower-window-roof-finial--right {
-  right: 10%;
+  right: 9.5%;
 }
 
 .tower-window-storey {
   position: relative;
   display: flex;
   justify-content: center;
-  gap: 1.25rem;
-  width: min(74%, 18rem);
-  padding: 1.3rem 1rem 1.05rem;
-  border: 2.5px solid rgba(45, 245, 255, 0.9);
+  gap: 1.35rem;
+  width: min(86%, 25.5rem);
+  padding: 1.4rem 1.35rem 1.05rem;
+  border: 2.5px solid rgba(45, 245, 255, 0.92);
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0, transparent 10%, transparent 90%, rgba(255, 255, 255, 0.03) 100%),
     var(--tower-wall-solid);
@@ -1211,35 +1208,37 @@ textarea {
 .tower-window-storey::before {
   content: '';
   position: absolute;
-  left: -0.85rem;
-  right: -0.85rem;
-  bottom: -1.35rem;
-  height: 1.55rem;
-  border: 2.5px solid rgba(45, 245, 255, 0.88);
-  background: linear-gradient(180deg, rgba(11, 32, 50, 0.98), rgba(5, 18, 32, 0.98));
+  left: -1rem;
+  right: -1rem;
+  bottom: -1.45rem;
+  height: 1.6rem;
+  border: 2.5px solid rgba(45, 245, 255, 0.9);
+  background:
+    repeating-linear-gradient(90deg, rgba(45, 245, 255, 0.22) 0 1px, transparent 1px 2.4rem),
+    linear-gradient(180deg, rgba(11, 32, 50, 0.98), rgba(5, 18, 32, 0.98));
   box-shadow: 0 0 18px var(--tower-cyan-glow);
 }
 
 .tower-window-storey::after {
   content: '';
   position: absolute;
-  left: -0.2rem;
-  right: -0.2rem;
-  bottom: -2.05rem;
-  height: 0.72rem;
-  border: 2px solid rgba(45, 245, 255, 0.75);
+  left: -0.28rem;
+  right: -0.28rem;
+  bottom: -2.15rem;
+  height: 0.76rem;
+  border: 2px solid rgba(45, 245, 255, 0.76);
   border-top: 0;
   background: rgba(6, 18, 31, 0.98);
 }
 
 .tower-window-storey-window {
   position: relative;
-  width: 2.3rem;
-  height: 3.9rem;
-  border: 2.5px solid rgba(45, 245, 255, 0.9);
+  width: 2.35rem;
+  height: 3.95rem;
+  border: 2.5px solid rgba(45, 245, 255, 0.92);
   border-radius: 1.35rem 1.35rem 0.2rem 0.2rem;
   background: #061321;
-  box-shadow: 0 0 14px rgba(45, 245, 255, 0.2);
+  box-shadow: 0 0 14px rgba(45, 245, 255, 0.2), inset 0 0 0 3px rgba(2, 10, 20, 0.7);
 }
 
 .tower-window-storey-window::before {
@@ -1259,7 +1258,7 @@ textarea {
   position: relative;
   overflow: visible;
   text-align: center;
-  border: 2.5px solid rgba(45, 245, 255, 0.9);
+  border: 2.5px solid rgba(45, 245, 255, 0.92);
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0, transparent 11%, transparent 89%, rgba(255, 255, 255, 0.028) 100%),
     var(--tower-wall-solid);
@@ -1269,29 +1268,49 @@ textarea {
     inset 0 -2rem 3rem rgba(0, 0, 0, 0.18);
 }
 
-.tower-adventure-stage {
-  z-index: 3;
-  width: min(74%, 18rem);
-  margin-top: 2.25rem;
-  padding: 2.3rem 1.35rem 1.7rem;
-}
-
 .tower-adventure-stage::before,
 .tower-challenges-stage::before {
   content: '';
   position: absolute;
   inset: 0.65rem;
-  border-left: 1px solid rgba(45, 245, 255, 0.16);
-  border-right: 1px solid rgba(45, 245, 255, 0.16);
+  z-index: 0;
+  border-left: 1px solid rgba(45, 245, 255, 0.17);
+  border-right: 1px solid rgba(45, 245, 255, 0.17);
   pointer-events: none;
+}
+
+.tower-adventure-stage > *,
+.tower-challenges-stage > * {
+  position: relative;
+  z-index: 2;
+}
+
+.tower-adventure-stage {
+  z-index: 3;
+  width: min(82%, 23rem);
+  margin-top: 1.55rem;
+  padding: 2.35rem 1.55rem 2.05rem;
+}
+
+.tower-adventure-stage::after {
+  content: '';
+  position: absolute;
+  left: -1.25rem;
+  right: -1.25rem;
+  bottom: -1.2rem;
+  z-index: 1;
+  height: 1.28rem;
+  border: 2.5px solid rgba(45, 245, 255, 0.9);
+  background: linear-gradient(180deg, rgba(10, 30, 48, 0.98), rgba(4, 16, 29, 0.98));
+  box-shadow: 0 0 18px var(--tower-cyan-glow);
 }
 
 .tower-stage-icon {
   display: grid;
   place-items: center;
-  width: 2.8rem;
-  height: 2.8rem;
-  margin: 0 auto 0.85rem;
+  width: 2.6rem;
+  height: 2.6rem;
+  margin: 0 auto 0.75rem;
 }
 
 .tower-stage-icon--cyan {
@@ -1306,17 +1325,10 @@ textarea {
 
 .tower-stage-title {
   margin: 0;
-  font-size: clamp(1.55rem, 2.2vw, 2rem);
+  color: hsl(var(--foreground));
+  font-size: clamp(1.5rem, 2.2vw, 1.95rem);
   font-weight: 900;
   line-height: 1.1;
-}
-
-.tower-stage-title--adventure {
-  color: hsl(var(--foreground));
-}
-
-.tower-stage-title--challenge {
-  color: hsl(var(--foreground));
 }
 
 .tower-adventure-door-wrap {
@@ -1340,21 +1352,23 @@ textarea {
 .adventure-door-frame {
   position: relative;
   display: block;
-  width: 6.9rem;
-  height: 9.65rem;
-  border: 2.5px solid rgba(45, 245, 255, 0.95);
-  border-radius: 3rem 3rem 0.28rem 0.28rem;
+  width: 7.2rem;
+  height: 9.95rem;
+  border: 2.5px solid rgba(45, 245, 255, 0.96);
+  border-radius: 3.15rem 3.15rem 0.28rem 0.28rem;
   background: linear-gradient(180deg, rgba(7, 31, 51, 0.97), rgba(3, 16, 28, 0.98));
-  box-shadow: 0 0 22px rgba(45, 245, 255, 0.22), inset 0 0 0 1px rgba(7, 18, 29, 0.75);
+  box-shadow:
+    0 0 22px rgba(45, 245, 255, 0.24),
+    inset 0 0 0 0.36rem rgba(2, 10, 20, 0.72),
+    inset 0 0 0 0.56rem rgba(45, 245, 255, 0.4);
   perspective: 950px;
 }
 
-/* stepped plinth under the gate */
 .adventure-door-frame::before {
   content: '';
   position: absolute;
-  left: -0.55rem;
-  right: -0.55rem;
+  left: -0.6rem;
+  right: -0.6rem;
   bottom: -0.82rem;
   height: 0.95rem;
   border: 2.5px solid rgba(45, 245, 255, 0.92);
@@ -1364,86 +1378,87 @@ textarea {
 .adventure-door-frame::after {
   content: '';
   position: absolute;
-  left: -1rem;
-  right: -1rem;
-  bottom: -1.55rem;
-  height: 0.7rem;
+  left: -1.05rem;
+  right: -1.05rem;
+  bottom: -1.56rem;
+  height: 0.72rem;
   border: 2.5px solid rgba(45, 245, 255, 0.88);
   background: var(--tower-wall-solid);
 }
 
-/* warm doorway glow revealed when the leaves open */
 .adventure-door-interior {
   position: absolute;
-  inset: 0.42rem;
-  border-radius: 2.55rem 2.55rem 0.14rem 0.14rem;
+  inset: 0.48rem;
+  border-radius: 2.6rem 2.6rem 0.14rem 0.14rem;
   background: radial-gradient(120% 82% at 50% 100%, rgba(255, 209, 130, 0.62), rgba(255, 176, 84, 0.18) 46%, rgba(2, 12, 24, 0.96) 80%);
   box-shadow: inset 0 0 22px rgba(255, 196, 107, 0.28);
-  opacity: 0.32;
+  opacity: 0.26;
   transition: opacity 0.55s ease;
 }
 
-/* two hinged leaves that swing open */
 .adventure-door-leaf {
   position: absolute;
-  top: 0.42rem;
-  bottom: 0.42rem;
-  width: calc(50% - 0.42rem);
+  top: 0.48rem;
+  bottom: 0.48rem;
+  width: calc(50% - 0.48rem);
   z-index: 1;
   background:
     linear-gradient(180deg, rgba(8, 30, 50, 0.99), rgba(2, 13, 26, 0.99)),
-    repeating-linear-gradient(90deg, transparent 0 0.52rem, rgba(45, 245, 255, 0.12) 0.52rem 0.58rem);
+    repeating-linear-gradient(90deg, transparent 0 0.54rem, rgba(45, 245, 255, 0.12) 0.54rem 0.6rem);
   box-shadow: inset 0 0 0 1.5px rgba(45, 245, 255, 0.34);
   backface-visibility: hidden;
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.32, 1);
 }
 
+.adventure-door-leaf::before {
+  content: '';
+  position: absolute;
+  top: 18%;
+  bottom: 16%;
+  width: 1px;
+  background: rgba(45, 245, 255, 0.2);
+}
+
 .adventure-door-leaf--left {
-  left: 0.42rem;
+  left: 0.48rem;
   transform-origin: left center;
   border-radius: 2.45rem 0.06rem 0.08rem 0.08rem;
 }
 
+.adventure-door-leaf--left::before {
+  right: 22%;
+}
+
 .adventure-door-leaf--right {
-  right: 0.42rem;
+  right: 0.48rem;
   transform-origin: right center;
   border-radius: 0.06rem 2.45rem 0.08rem 0.08rem;
 }
 
+.adventure-door-leaf--right::before {
+  left: 22%;
+}
+
 .adventure-door-plank {
   position: absolute;
-  top: 0.8rem;
-  bottom: 0.7rem;
+  top: 0.7rem;
+  bottom: 0.68rem;
   left: 50%;
   width: 1.5px;
-  background: rgba(45, 245, 255, 0.3);
+  background: rgba(45, 245, 255, 0.28);
 }
 
 .adventure-door-brace {
-  position: absolute;
-  left: 14%;
-  right: 14%;
-  height: 0.28rem;
-  border: 1px solid rgba(45, 245, 255, 0.32);
-  background: rgba(9, 35, 54, 0.7);
+  display: none;
 }
 
-.adventure-door-brace--top {
-  top: 30%;
-}
-
-.adventure-door-brace--bottom {
-  bottom: 22%;
-}
-
-/* diamond stud on the seam — fades as the doors open */
 .adventure-door-gem {
   position: absolute;
   left: 50%;
-  top: 46%;
+  top: 50%;
   z-index: 2;
-  width: 0.95rem;
-  height: 0.95rem;
+  width: 0.9rem;
+  height: 0.9rem;
   transform: translate(-50%, -50%) rotate(45deg);
   border: 2px solid rgba(45, 245, 255, 0.95);
   background: rgba(8, 27, 47, 0.98);
@@ -1453,12 +1468,12 @@ textarea {
 
 .adventure-door:not(:disabled):hover .adventure-door-leaf--left,
 .adventure-door[data-selected='true'] .adventure-door-leaf--left {
-  transform: rotateY(-76deg);
+  transform: rotateY(-74deg);
 }
 
 .adventure-door:not(:disabled):hover .adventure-door-leaf--right,
 .adventure-door[data-selected='true'] .adventure-door-leaf--right {
-  transform: rotateY(76deg);
+  transform: rotateY(74deg);
 }
 
 .adventure-door:not(:disabled):hover .adventure-door-interior,
@@ -1474,7 +1489,10 @@ textarea {
 
 .adventure-door:not(:disabled):hover .adventure-door-frame,
 .adventure-door:not(:disabled):focus-visible .adventure-door-frame {
-  box-shadow: 0 0 32px rgba(45, 245, 255, 0.34), inset 0 0 0 1px rgba(7, 18, 29, 0.75);
+  box-shadow:
+    0 0 32px rgba(45, 245, 255, 0.34),
+    inset 0 0 0 0.36rem rgba(2, 10, 20, 0.72),
+    inset 0 0 0 0.56rem rgba(45, 245, 255, 0.45);
 }
 
 .adventure-door:focus-visible,
@@ -1485,86 +1503,147 @@ textarea {
 
 .tower-section-separator {
   position: relative;
-  z-index: 2;
-  width: min(96%, 23.5rem);
-  height: 6rem;
-  margin: -0.1rem auto 0;
+  z-index: 4;
+  width: min(100%, 34.5rem);
+  height: 3.82rem;
+  margin: -0.14rem auto -0.18rem;
+  isolation: isolate;
 }
 
-/* the separator band reuses the exact wall language of the section frames */
 .tower-section-separator::before {
   content: '';
   position: absolute;
-  inset: 0 0 1.25rem;
-  border: 2.5px solid rgba(45, 245, 255, 0.92);
+  left: -0.12rem;
+  right: -0.12rem;
+  top: 0;
+  z-index: 5;
+  height: 1.28rem;
+  border: 2px solid rgba(45, 245, 255, 0.94);
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0, transparent 11%, transparent 89%, rgba(255, 255, 255, 0.028) 100%),
-    var(--tower-wall-solid);
+    linear-gradient(90deg, rgba(255, 255, 255, 0.034) 0, transparent 11%, transparent 89%, rgba(255, 255, 255, 0.03) 100%),
+    linear-gradient(180deg, rgba(10, 34, 54, 0.99), rgba(3, 15, 28, 0.995));
   box-shadow:
-    0 0 28px var(--tower-cyan-glow),
-    inset 0 0 0 2px rgba(5, 14, 24, 0.55);
+    0 0 18px var(--tower-cyan-glow),
+    inset 0 -0.34rem 0 rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(5, 14, 24, 0.62);
 }
 
-/* corbel ledge below the band — same frame language, sticks out a touch */
 .tower-section-separator::after {
   content: '';
   position: absolute;
-  left: -0.9rem;
-  right: -0.9rem;
-  bottom: 0;
-  height: 1.45rem;
-  border: 2.5px solid rgba(45, 245, 255, 0.9);
+  left: -0.42rem;
+  right: -0.42rem;
+  top: 2.52rem;
+  z-index: 6;
+  height: 0.88rem;
+  border: 2px solid rgba(45, 245, 255, 0.9);
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0, transparent 12%, transparent 88%, rgba(255, 255, 255, 0.028) 100%),
-    var(--tower-wall-solid);
-  box-shadow: 0 0 18px var(--tower-cyan-glow);
+    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 0, transparent 12%, transparent 88%, rgba(255, 255, 255, 0.024) 100%),
+    linear-gradient(180deg, rgba(7, 28, 45, 0.99), rgba(2, 12, 23, 0.998));
+  clip-path: polygon(2.3% 0, 97.7% 0, 100% 100%, 0 100%);
+  box-shadow:
+    0 0 16px var(--tower-cyan-glow),
+    inset 0 -0.18rem 0 rgba(0, 0, 0, 0.22);
 }
 
-.tower-section-separator.is-continuation {
-  margin-top: -0.1rem;
-  height: 4rem;
-}
-
-.tower-section-separator.is-continuation::before {
-  inset: 0 0 0.9rem;
-}
-
-.tower-section-separator.is-continuation::after {
-  bottom: 0;
-  height: 1.1rem;
-}
-
-/* gem medallion, centred on the band */
-.tower-section-separator-gem {
+.tower-section-separator-backplate {
   position: absolute;
-  left: 50%;
-  top: calc(50% - 0.625rem);
+  left: 0.62rem;
+  right: 0.62rem;
+  top: 1.12rem;
   z-index: 3;
-  width: 2.9rem;
-  height: 2.9rem;
-  transform: translate(-50%, -50%) rotate(45deg);
-  border: 2.5px solid rgba(176, 74, 255, 0.96);
-  background: var(--tower-wall-solid);
-  box-shadow: 0 0 20px var(--tower-purple-glow), 0 0 12px rgba(176, 74, 255, 0.4);
+  height: 1.48rem;
+  border: 1.5px solid rgba(45, 245, 255, 0.82);
+  border-top: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 3.45rem,
+      rgba(45, 245, 255, 0.5) 3.45rem calc(3.45rem + 1px),
+      transparent calc(3.45rem + 1px) 4.45rem
+    ),
+    linear-gradient(180deg, rgba(6, 24, 39, 0.98), rgba(2, 11, 21, 0.995));
+  box-shadow:
+    inset 0 -0.28rem 0 rgba(0, 0, 0, 0.2),
+    0 0 12px rgba(45, 245, 255, 0.1);
+  pointer-events: none;
 }
 
-.tower-section-separator.is-continuation .tower-section-separator-gem {
-  top: calc(50% - 0.45rem);
-}
-
-.tower-section-separator-gem::before {
+.tower-section-separator-backplate::before {
   content: '';
   position: absolute;
-  inset: 0.5rem;
-  border: 2px solid rgba(176, 74, 255, 0.96);
-  box-shadow: 0 0 10px rgba(176, 74, 255, 0.4);
+  left: -0.02rem;
+  right: -0.02rem;
+  top: 0;
+  height: 1px;
+  background: rgba(45, 245, 255, 0.32);
+  box-shadow: 0 0 8px rgba(45, 245, 255, 0.14);
+}
+
+.tower-section-separator-logo {
+  position: absolute;
+  left: 50%;
+  top: 0.56rem;
+  z-index: 8;
+  display: grid;
+  width: 3.06rem;
+  height: 3.06rem;
+  box-sizing: border-box;
+  place-items: center;
+  transform: translateX(-50%);
+  border: 2px solid rgba(45, 245, 255, 0.9);
+  background:
+    radial-gradient(circle at 50% 45%, rgba(176, 74, 255, 0.15), transparent 54%),
+    linear-gradient(180deg, rgba(7, 27, 46, 0.995), rgba(3, 13, 25, 1));
+  box-shadow:
+    0 0 17px var(--tower-purple-glow),
+    0 0 12px rgba(45, 245, 255, 0.16),
+    inset 0 0 0 1px rgba(2, 10, 20, 0.7);
+}
+
+.tower-section-separator-logo-icon {
+  width: 1.58rem;
+  height: 1.58rem;
+  color: rgb(209, 96, 255);
+  filter: drop-shadow(0 0 9px rgba(176, 74, 255, 0.58));
+  stroke-width: 2.5;
+}
+
+.tower-section-separator.is-continuation,
+.tower-section-separator.is-base {
+  margin-top: -0.08rem;
+}
+
+.tower-section-separator.is-base {
+  width: min(100%, 35.5rem);
+  height: 3.9rem;
+  margin-bottom: 0;
+}
+
+.tower-section-separator.is-base::before {
+  left: -0.1rem;
+  right: -0.1rem;
+  top: 0.08rem;
+}
+
+.tower-section-separator.is-base::after {
+  top: 2.62rem;
+  height: 0.9rem;
+}
+
+.tower-section-separator.is-base .tower-section-separator-backplate {
+  top: 1.2rem;
+}
+
+.tower-section-separator.is-base .tower-section-separator-logo {
+  top: 0.64rem;
 }
 
 .tower-challenges-stage {
   z-index: 1;
-  width: min(96%, 24rem);
-  margin-top: -0.65rem;
-  padding: 2.4rem 1.4rem 2.2rem;
+  width: min(96%, 29rem);
+  margin-top: -0.55rem;
+  padding: 2.35rem 1.55rem 2.05rem;
 }
 
 .tower-challenges-stage.is-locked {
@@ -1573,8 +1652,8 @@ textarea {
 
 .challenge-room-stack {
   display: grid;
-  gap: 1.5rem;
-  width: min(100%, 21rem);
+  gap: 1.65rem;
+  width: min(100%, 25rem);
   margin: 1.45rem auto 0;
 }
 
@@ -1605,17 +1684,17 @@ textarea {
   position: relative;
   display: grid;
   gap: 0.3rem;
-  margin-bottom: 0.85rem;
+  margin-bottom: 1.15rem;
 }
 
 .trial-room-header::before,
 .trial-room-header::after {
   content: '';
   position: absolute;
-  top: 0.6rem;
-  width: 31%;
+  top: 0.57rem;
+  width: 32%;
   height: 2px;
-  background: linear-gradient(to right, transparent, rgba(176, 74, 255, 0.7));
+  background: linear-gradient(to right, transparent, rgba(217, 145, 255, 0.74));
 }
 
 .trial-room-header::after {
@@ -1631,32 +1710,24 @@ textarea {
   justify-self: center;
   padding: 0 0.7rem;
   color: rgb(217, 145, 255);
-  font-size: 0.92rem;
+  font-size: 1.08rem;
   font-weight: 900;
   line-height: 1;
   letter-spacing: 0;
   background: var(--tower-wall-solid);
+  text-shadow: 0 0 10px rgba(176, 74, 255, 0.34);
 }
 
-.trial-room-title {
-  margin: 0;
-  color: hsl(var(--foreground));
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1.35;
-}
-
+.trial-room-title,
 .trial-room-summary {
-  margin: 0 0 1rem;
-  color: hsl(var(--muted-foreground));
-  font-size: 0.83rem;
-  line-height: 1.55;
+  display: none;
 }
 
 .trial-door-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.9rem;
+  gap: clamp(0.65rem, 2.4vw, 1.45rem);
+  align-items: end;
 }
 
 .trial-door {
@@ -1664,7 +1735,8 @@ textarea {
   display: grid;
   justify-items: center;
   align-content: start;
-  gap: 0.45rem;
+  gap: 0;
+  min-width: 0;
   padding: 0;
   border: 0;
   background: transparent;
@@ -1679,103 +1751,144 @@ textarea {
 
 .trial-door-arch {
   position: relative;
-  width: 100%;
-  aspect-ratio: 0.82;
+  width: min(100%, 6.8rem);
+  aspect-ratio: 0.78;
   border: 2.5px solid rgba(var(--level-accent), 0.95);
-  border-radius: 2.5rem 2.5rem 0.22rem 0.22rem;
+  border-radius: 3rem 3rem 0.18rem 0.18rem;
   background: linear-gradient(180deg, rgba(9, 28, 45, 0.99), rgba(3, 14, 26, 0.99));
   box-shadow:
     0 0 18px rgba(var(--level-accent), 0.2),
-    inset 0 0 0 1px rgba(2, 9, 18, 0.5);
+    inset 0 0 0 0.32rem rgba(2, 9, 18, 0.72),
+    inset 0 0 0 0.5rem rgba(var(--level-accent), 0.28);
   perspective: 640px;
 }
 
 .trial-door-arch::before {
   content: '';
   position: absolute;
-  left: -0.45rem;
-  right: -0.45rem;
-  bottom: -0.72rem;
-  height: 0.85rem;
-  border: 2.5px solid rgba(var(--level-accent), 0.9);
-  background: var(--tower-wall-solid);
+  inset: 0.36rem;
+  border: 1.5px solid rgba(var(--level-accent), 0.45);
+  border-radius: 2.45rem 2.45rem 0.1rem 0.1rem;
+  pointer-events: none;
 }
 
-/* doorway glow behind the leaves */
 .trial-door-interior {
   position: absolute;
-  inset: 0.34rem;
-  border-radius: 2.15rem 2.15rem 0.12rem 0.12rem;
-  background: radial-gradient(120% 84% at 50% 100%, rgba(var(--level-accent), 0.5), rgba(var(--level-accent), 0.12) 48%, rgba(2, 10, 20, 0.96) 82%);
-  box-shadow: inset 0 0 16px rgba(var(--level-accent), 0.25);
-  opacity: 0.3;
+  inset: 0.44rem;
+  border-radius: 2.35rem 2.35rem 0.1rem 0.1rem;
+  background: radial-gradient(120% 84% at 50% 100%, rgba(var(--level-accent), 0.42), rgba(var(--level-accent), 0.1) 48%, rgba(2, 10, 20, 0.96) 82%);
+  box-shadow: inset 0 0 16px rgba(var(--level-accent), 0.22);
+  opacity: 0.25;
   transition: opacity 0.5s ease;
+}
+
+.trial-door-interior::before,
+.trial-door-interior::after {
+  content: '';
+  position: absolute;
+  background: rgba(var(--level-accent), 0.17);
+}
+
+.trial-door-interior::before {
+  left: 16%;
+  right: 16%;
+  top: 48%;
+  height: 1px;
+}
+
+.trial-door-interior::after {
+  top: 18%;
+  bottom: 12%;
+  left: 50%;
+  width: 1px;
 }
 
 .trial-door-leaf {
   position: absolute;
-  top: 0.34rem;
-  bottom: 0.34rem;
-  width: calc(50% - 0.34rem);
+  top: 0.44rem;
+  bottom: 0.44rem;
+  width: calc(50% - 0.44rem);
   z-index: 1;
   background:
     linear-gradient(180deg, rgba(8, 25, 42, 0.99), rgba(3, 14, 24, 0.99)),
-    repeating-linear-gradient(90deg, transparent 0 0.42rem, rgba(var(--level-accent), 0.12) 0.42rem 0.47rem);
+    repeating-linear-gradient(90deg, transparent 0 0.42rem, rgba(var(--level-accent), 0.11) 0.42rem 0.47rem);
   box-shadow: inset 0 0 0 1.5px rgba(var(--level-accent), 0.3);
   backface-visibility: hidden;
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.32, 1);
 }
 
+.trial-door-leaf::before {
+  content: '';
+  position: absolute;
+  top: 18%;
+  bottom: 14%;
+  width: 1px;
+  background: rgba(var(--level-accent), 0.16);
+}
+
 .trial-door-leaf--left {
-  left: 0.34rem;
+  left: 0.44rem;
   transform-origin: left center;
-  border-radius: 2.05rem 0.05rem 0.06rem 0.06rem;
+  border-radius: 2.2rem 0.05rem 0.06rem 0.06rem;
+}
+
+.trial-door-leaf--left::before {
+  right: 24%;
 }
 
 .trial-door-leaf--right {
-  right: 0.34rem;
+  right: 0.44rem;
   transform-origin: right center;
-  border-radius: 0.05rem 2.05rem 0.06rem 0.06rem;
+  border-radius: 0.05rem 2.2rem 0.06rem 0.06rem;
+}
+
+.trial-door-leaf--right::before {
+  left: 24%;
 }
 
 .trial-door-plank {
   position: absolute;
-  top: 0.5rem;
-  bottom: 0.45rem;
+  top: 0.55rem;
+  bottom: 0.5rem;
   left: 50%;
   width: 1px;
-  background: rgba(var(--level-accent), 0.3);
+  background: rgba(var(--level-accent), 0.24);
 }
 
 .trial-door-gem {
   position: absolute;
   left: 50%;
-  top: 46%;
+  top: 48%;
   z-index: 2;
-  width: 0.62rem;
-  height: 0.62rem;
+  width: 0.56rem;
+  height: 0.56rem;
   transform: translate(-50%, -50%) rotate(45deg);
-  border: 1.5px solid rgba(var(--level-accent), 0.95);
+  border: 1.5px solid rgba(var(--level-accent), 0.88);
   background: rgba(6, 18, 31, 0.98);
-  box-shadow: 0 0 8px rgba(var(--level-accent), 0.4);
+  box-shadow: 0 0 8px rgba(var(--level-accent), 0.36);
   transition: opacity 0.4s ease;
 }
 
 .trial-door-label {
-  margin-top: 0.35rem;
+  position: relative;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: min(100%, 6.2rem);
+  min-height: 2.05rem;
+  margin-top: -1.05rem;
+  border: 2px solid rgba(var(--level-accent), 0.9);
+  background: linear-gradient(180deg, rgba(8, 25, 42, 0.99), rgba(3, 13, 24, 0.99));
   color: rgb(var(--level-accent));
-  font-size: 0.96rem;
+  font-size: 0.9rem;
   font-weight: 900;
   line-height: 1;
   text-transform: uppercase;
+  box-shadow: 0 0 14px rgba(var(--level-accent), 0.2), inset 0 0 0 1px rgba(2, 9, 18, 0.55);
 }
 
 .trial-door-state {
-  color: rgba(var(--level-accent), 0.76);
-  font-size: 0.72rem;
-  font-weight: 700;
-  line-height: 1;
-  text-transform: uppercase;
+  display: none;
 }
 
 .trial-door.is-locked {
@@ -1783,22 +1896,27 @@ textarea {
 }
 
 .trial-door.is-complete .trial-door-arch {
-  box-shadow: 0 0 24px rgba(var(--level-accent), 0.26), inset 0 0 0 1px rgba(2, 9, 18, 0.5);
+  box-shadow:
+    0 0 24px rgba(var(--level-accent), 0.26),
+    inset 0 0 0 0.32rem rgba(2, 9, 18, 0.72),
+    inset 0 0 0 0.5rem rgba(var(--level-accent), 0.28);
 }
 
 .trial-door.is-active .trial-door-arch {
-  box-shadow: 0 0 24px rgba(var(--level-accent), 0.28), inset 0 0 0 1px rgba(2, 9, 18, 0.5);
+  box-shadow:
+    0 0 24px rgba(var(--level-accent), 0.28),
+    inset 0 0 0 0.32rem rgba(2, 9, 18, 0.72),
+    inset 0 0 0 0.5rem rgba(var(--level-accent), 0.28);
 }
 
-/* trial doors swing open on hover / selection (locked stay shut) */
 .trial-door:not(.is-locked):hover .trial-door-leaf--left,
 .trial-door:not(.is-locked)[data-selected='true'] .trial-door-leaf--left {
-  transform: rotateY(-76deg);
+  transform: rotateY(-74deg);
 }
 
 .trial-door:not(.is-locked):hover .trial-door-leaf--right,
 .trial-door:not(.is-locked)[data-selected='true'] .trial-door-leaf--right {
-  transform: rotateY(76deg);
+  transform: rotateY(74deg);
 }
 
 .trial-door:not(.is-locked):hover .trial-door-interior,
@@ -1809,85 +1927,6 @@ textarea {
 .trial-door:not(.is-locked):hover .trial-door-gem,
 .trial-door:not(.is-locked)[data-selected='true'] .trial-door-gem {
   opacity: 0;
-}
-
-/* floating-island base: a purple faceted crystal the keep rests on (neon rim
-   via a clipped fill + an inset dark clone), tapering to a point */
-.tower-crystal {
-  --crystal-clip: polygon(0 0, 100% 0, 90% 25%, 68% 41%, 80% 60%, 56% 73%, 50% 100%, 44% 73%, 20% 60%, 32% 40%, 10% 25%);
-  position: relative;
-  display: block;
-  width: min(86%, 21rem);
-  height: 9rem;
-  margin: -0.6rem auto 0;
-  background: rgba(176, 74, 255, 0.92);
-  clip-path: var(--crystal-clip);
-  filter: drop-shadow(0 0 22px rgba(176, 74, 255, 0.42));
-}
-
-.tower-crystal::before {
-  content: '';
-  position: absolute;
-  inset: 2.5px;
-  background:
-    linear-gradient(180deg, rgba(34, 16, 60, 0.96), rgba(12, 6, 28, 1)),
-    var(--tower-wall-solid);
-  clip-path: var(--crystal-clip);
-}
-
-/* facet lines down the crystal */
-.tower-crystal::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, transparent calc(50% - 1px), rgba(176, 74, 255, 0.55) 50%, transparent calc(50% + 1px)),
-    linear-gradient(116deg, transparent 49.4%, rgba(176, 74, 255, 0.34) 50%, transparent 50.6%),
-    linear-gradient(-116deg, transparent 49.4%, rgba(176, 74, 255, 0.34) 50%, transparent 50.6%);
-  clip-path: var(--crystal-clip);
-}
-
-/* rock fragments drifting around the whole floating tower */
-.tower-floats {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.tower-float {
-  position: absolute;
-  background: rgba(45, 245, 255, 0.72);
-  filter: drop-shadow(0 0 7px var(--tower-cyan-glow));
-  animation: tower-rock-bob var(--bob, 7s) ease-in-out infinite;
-  animation-delay: var(--bob-delay, 0s);
-}
-
-.tower-float::before {
-  content: '';
-  position: absolute;
-  inset: 1.5px;
-  background: var(--tower-wall-solid);
-  clip-path: inherit;
-}
-
-.tower-float--purple {
-  background: rgba(176, 74, 255, 0.72);
-  filter: drop-shadow(0 0 7px var(--tower-purple-glow));
-}
-
-.tower-float--1 { left: -2.2rem;  top: 13%; width: 1.7rem;  height: 1.3rem;  clip-path: polygon(22% 0, 72% 10%, 100% 44%, 82% 82%, 40% 100%, 6% 70%, 0 30%); --bob: 6.5s; }
-.tower-float--2 { right: -2.6rem; top: 29%; width: 2rem;    height: 1.5rem;  clip-path: polygon(34% 0, 100% 26%, 90% 66%, 52% 100%, 10% 84%, 0 38%, 16% 8%); --bob: 7.6s; --bob-delay: -1.4s; }
-.tower-float--3 { left: -1.7rem;  top: 50%; width: 1.2rem;  height: 1rem;    clip-path: polygon(22% 0, 72% 10%, 100% 44%, 82% 82%, 40% 100%, 6% 70%, 0 30%); --bob: 5.8s; --bob-delay: -0.6s; }
-.tower-float--4 { right: -1.9rem; top: 63%; width: 1.5rem;  height: 1.2rem;  clip-path: polygon(34% 0, 100% 26%, 90% 66%, 52% 100%, 10% 84%, 0 38%, 16% 8%); --bob: 6.9s; --bob-delay: -2.1s; }
-.tower-float--5 { left: -2.7rem;  top: 78%; width: 1rem;    height: 0.9rem;  clip-path: polygon(22% 0, 72% 10%, 100% 44%, 82% 82%, 40% 100%, 6% 70%, 0 30%); --bob: 8s;   --bob-delay: -3s; }
-.tower-float--6 { right: -2.3rem; top: 84%; width: 1.3rem;  height: 1.05rem; clip-path: polygon(34% 0, 100% 26%, 90% 66%, 52% 100%, 10% 84%, 0 38%, 16% 8%); --bob: 7.2s; --bob-delay: -1s; }
-.tower-float--7 { left: 4%;       bottom: -2.6rem; width: 1.4rem; height: 1.1rem;  clip-path: polygon(22% 0, 72% 10%, 100% 44%, 82% 82%, 40% 100%, 6% 70%, 0 30%); --bob: 6.2s; --bob-delay: -1.8s; }
-.tower-float--8 { right: 8%;      bottom: -3.2rem; width: 1.1rem; height: 0.95rem; clip-path: polygon(34% 0, 100% 26%, 90% 66%, 52% 100%, 10% 84%, 0 38%, 16% 8%); --bob: 7.8s; --bob-delay: -2.6s; }
-
-@keyframes tower-rock-bob {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-0.55rem) rotate(4deg); }
 }
 
 @media (max-width: 860px) {
@@ -1903,31 +1942,53 @@ textarea {
   }
 
   .tower-window-roof {
-    width: min(80%, 16rem);
-    height: 6.2rem;
+    width: min(94%, 21rem);
+    height: 7.2rem;
   }
 
-  .tower-window-storey,
-  .tower-adventure-stage {
-    width: min(82%, 16.25rem);
+  .tower-window-roof-peak {
+    height: 5.95rem;
   }
 
-  .tower-challenges-stage,
-  .tower-section-separator {
-    width: min(98%, 21rem);
-  }
-
-  .tower-crystal {
-    width: min(82%, 18rem);
+  .tower-window-roof-spire {
+    bottom: 5.45rem;
   }
 
   .tower-window-storey {
-    gap: 0.9rem;
+    width: min(92%, 20rem);
+    gap: 1rem;
   }
 
   .tower-window-storey-window {
     width: 2rem;
     height: 3.5rem;
+  }
+
+  .tower-adventure-stage {
+    width: min(86%, 18.5rem);
+  }
+
+  .tower-challenges-stage,
+  .tower-section-separator {
+    width: min(98%, 23rem);
+  }
+
+  .tower-section-separator-backplate {
+    left: 0.48rem;
+    right: 0.48rem;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        transparent 0 2.45rem,
+        rgba(45, 245, 255, 0.48) 2.45rem calc(2.45rem + 1px),
+        transparent calc(2.45rem + 1px) 3.25rem
+      ),
+      linear-gradient(180deg, rgba(6, 24, 39, 0.98), rgba(2, 11, 21, 0.995));
+  }
+
+  .tower-section-separator-logo {
+    width: 2.72rem;
+    height: 2.72rem;
   }
 
   .trial-door-row {
@@ -1949,7 +2010,8 @@ textarea {
 .tower-repeater .trial-door:not(:disabled):focus-visible .trial-door-arch {
   box-shadow:
     0 0 22px rgba(var(--level-accent), 0.34),
-    inset 0 0 0 1px rgba(2, 9, 18, 0.5);
+    inset 0 0 0 0.32rem rgba(2, 9, 18, 0.72),
+    inset 0 0 0 0.5rem rgba(var(--level-accent), 0.32);
 }
 
 .tower-repeater .trial-door:not(:disabled):hover .trial-door-label,
@@ -1974,13 +2036,17 @@ textarea {
 }
 
 .adventure-door[data-selected='true'] .adventure-door-frame {
-  box-shadow: 0 0 34px rgba(45, 245, 255, 0.42), inset 0 0 0 1px rgba(7, 18, 29, 0.75);
+  box-shadow:
+    0 0 34px rgba(45, 245, 255, 0.42),
+    inset 0 0 0 0.36rem rgba(2, 10, 20, 0.72),
+    inset 0 0 0 0.56rem rgba(45, 245, 255, 0.45);
 }
 
 .trial-door[data-selected='true'] .trial-door-arch {
   box-shadow:
     0 0 28px rgba(var(--level-accent), 0.5),
-    inset 0 0 0 1px rgba(2, 9, 18, 0.5);
+    inset 0 0 0 0.32rem rgba(2, 9, 18, 0.72),
+    inset 0 0 0 0.5rem rgba(var(--level-accent), 0.34);
 }
 
 /* ── Section states + loaders reused by the tower ── */

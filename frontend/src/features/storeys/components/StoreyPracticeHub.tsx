@@ -3,6 +3,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import {
   ArrowRight,
   Gem,
+  GitBranch,
   Layers3,
   ListChecks,
   Swords,
@@ -106,11 +107,17 @@ function WindowStorey({ crowned }: { crowned: boolean }) {
   )
 }
 
-// ── Battlemented belt with a gem medallion between sections / storeys. ──
-function TowerSectionSeparator({ continuation = false }: { continuation?: boolean }) {
+// ── Battlemented belt with a central gem panel between sections / storeys. ──
+function TowerSectionSeparator({ continuation = false, base = false }: { continuation?: boolean; base?: boolean }) {
   return (
-    <div className={cn('tower-section-separator', continuation && 'is-continuation')} aria-hidden="true">
-      <span className="tower-section-separator-gem" />
+    <div
+      className={cn('tower-section-separator', continuation && 'is-continuation', base && 'is-base')}
+      aria-hidden="true"
+    >
+      <span className="tower-section-separator-backplate" />
+      <span className="tower-section-separator-logo">
+        <GitBranch className="tower-section-separator-logo-icon" aria-hidden="true" />
+      </span>
     </div>
   )
 }
@@ -138,13 +145,9 @@ function AdventureDoor({
         <span className="adventure-door-interior" />
         <span className="adventure-door-leaf adventure-door-leaf--left">
           <span className="adventure-door-plank" />
-          <span className="adventure-door-brace adventure-door-brace--top" />
-          <span className="adventure-door-brace adventure-door-brace--bottom" />
         </span>
         <span className="adventure-door-leaf adventure-door-leaf--right">
           <span className="adventure-door-plank" />
-          <span className="adventure-door-brace adventure-door-brace--top" />
-          <span className="adventure-door-brace adventure-door-brace--bottom" />
         </span>
         <span className="adventure-door-gem" />
       </span>
@@ -431,7 +434,7 @@ export function StoreyPracticeHub({
             <span className="tower-stage-icon tower-stage-icon--purple">
               <Trophy className="size-6" />
             </span>
-            <h2 className="tower-stage-title tower-stage-title--challenge">GIT Challenged</h2>
+            <h2 className="tower-stage-title tower-stage-title--challenge">Challenges</h2>
 
             {workflowQuery.isLoading ? (
               <div className="mt-5">
@@ -476,23 +479,7 @@ export function StoreyPracticeHub({
             ) : null}
           </motion.section>
 
-          {!isLast ? (
-            <TowerSectionSeparator continuation />
-          ) : (
-            <>
-              <div className="tower-crystal" aria-hidden="true" />
-              <div className="tower-floats" aria-hidden="true">
-                <span className="tower-float tower-float--1" />
-                <span className="tower-float tower-float--purple tower-float--2" />
-                <span className="tower-float tower-float--3" />
-                <span className="tower-float tower-float--purple tower-float--4" />
-                <span className="tower-float tower-float--5" />
-                <span className="tower-float tower-float--6" />
-                <span className="tower-float tower-float--7" />
-                <span className="tower-float tower-float--purple tower-float--8" />
-              </div>
-            </>
-          )}
+          {!isLast ? <TowerSectionSeparator continuation /> : <TowerSectionSeparator base />}
         </motion.div>
       </div>
     </section>
