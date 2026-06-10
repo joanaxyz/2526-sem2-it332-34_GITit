@@ -8,7 +8,7 @@ import { bookAnchorDomId, bookNavAnchors } from '@/features/storeys/book/bookNav
 import { queryKeys } from '@/shared/api/queryKeys'
 import { Button } from '@/shared/components/Button'
 import { EmptyState } from '@/shared/components/EmptyState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { BookLoadingState } from '@/features/storeys/book/BookLoadingState'
 import { Modal } from '@/shared/components/Modal'
 import { cn } from '@/shared/utils/cn'
 
@@ -32,7 +32,7 @@ export function StoreyBookModal({
   if (bookQuery.isLoading && !bookQuery.data) {
     return (
       <Modal open title={title} onClose={onClose} className="w-full max-w-xl" contentClassName="p-5">
-        <LoadingState description="Opening the storey book." label="Loading book" variant="inline" />
+        <BookLoadingState description="Linking command notes into the field guide." label="Opening field guide" />
       </Modal>
     )
   }

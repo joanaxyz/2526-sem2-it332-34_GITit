@@ -4075,3 +4075,201 @@ textarea {
 }
 
 /* ─── Gamified module route v2 ───────────────────────────────────────────── */
+
+/* ── Book modal loader: Obsidian-like command graph ───────────────────── */
+.book-graph-loader {
+  min-height: 20rem;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  overflow: hidden;
+}
+
+.book-graph-loader-card {
+  width: min(100%, 28rem);
+  display: grid;
+  gap: 1.1rem;
+  justify-items: center;
+  border: 1px solid rgba(45, 212, 191, 0.28);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(45, 212, 191, 0.13), transparent 42%),
+    radial-gradient(circle at 22% 28%, rgba(168, 85, 247, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(5, 22, 28, 0.92), rgba(2, 10, 14, 0.96));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 22px 60px rgba(0, 0, 0, 0.28);
+  padding: 1.4rem 1.2rem 1.25rem;
+}
+
+.book-graph-orbit {
+  position: relative;
+  width: 13.75rem;
+  height: 10.625rem;
+  animation: book-graph-drift 5.4s ease-in-out infinite;
+}
+
+.book-graph-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.book-graph-link {
+  fill: none;
+  stroke: rgba(45, 212, 191, 0.42);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 72;
+  stroke-dashoffset: 72;
+  filter: drop-shadow(0 0 7px rgba(45, 212, 191, 0.34));
+  animation: book-graph-link-draw 2.8s ease-in-out infinite;
+}
+
+.book-graph-link--b { animation-delay: 0.12s; }
+.book-graph-link--c { animation-delay: 0.24s; }
+.book-graph-link--d { animation-delay: 0.36s; }
+.book-graph-link--e { animation-delay: 0.48s; }
+.book-graph-link--f { animation-delay: 0.60s; stroke: rgba(168, 85, 247, 0.36); }
+.book-graph-link--g { animation-delay: 0.72s; stroke: rgba(168, 85, 247, 0.34); }
+.book-graph-link--h { animation-delay: 0.84s; stroke: rgba(168, 85, 247, 0.32); }
+
+.book-graph-node {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1.5px solid rgba(45, 212, 191, 0.86);
+  background: radial-gradient(circle at 35% 30%, rgba(237, 255, 252, 0.92), rgba(45, 212, 191, 0.86) 34%, rgba(7, 36, 42, 0.98) 72%);
+  box-shadow:
+    0 0 0 0 rgba(45, 212, 191, 0.28),
+    0 0 16px rgba(45, 212, 191, 0.48);
+  transform: translate(-50%, -50%);
+  animation: book-graph-node-pulse 2.8s ease-in-out infinite;
+}
+
+.book-graph-node--core {
+  left: 50%;
+  top: 50%;
+  width: 3.65rem;
+  height: 3.65rem;
+  color: rgb(2, 38, 43);
+  border-color: rgba(209, 250, 244, 0.95);
+  background: linear-gradient(135deg, rgb(77, 255, 231), rgb(168, 85, 247));
+  box-shadow:
+    0 0 0 0 rgba(45, 212, 191, 0.35),
+    0 0 28px rgba(45, 212, 191, 0.68),
+    0 0 42px rgba(168, 85, 247, 0.34);
+  animation-delay: 0s;
+}
+
+.book-graph-node--syntax {
+  left: 28%;
+  top: 26%;
+  width: 1.35rem;
+  height: 1.35rem;
+  animation-delay: 0.15s;
+}
+
+.book-graph-node--branch {
+  left: 74%;
+  top: 25%;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-color: rgba(192, 132, 252, 0.86);
+  animation-delay: 0.3s;
+}
+
+.book-graph-node--commit {
+  left: 84%;
+  top: 62%;
+  width: 1.15rem;
+  height: 1.15rem;
+  animation-delay: 0.45s;
+}
+
+.book-graph-node--merge {
+  left: 49%;
+  top: 82%;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-color: rgba(192, 132, 252, 0.82);
+  animation-delay: 0.6s;
+}
+
+.book-graph-node--push {
+  left: 17%;
+  top: 65%;
+  width: 1.2rem;
+  height: 1.2rem;
+  animation-delay: 0.75s;
+}
+
+.book-graph-copy {
+  display: grid;
+  gap: 0.35rem;
+  text-align: center;
+}
+
+.book-graph-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: rgb(236, 254, 255);
+}
+
+.book-graph-description {
+  max-width: 20rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: rgba(204, 251, 241, 0.72);
+}
+
+.tower-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: hsl(var(--background));
+}
+
+@keyframes book-graph-drift {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-0.35rem) scale(1.018); }
+}
+
+@keyframes book-graph-link-draw {
+  0% { stroke-dashoffset: 72; opacity: 0.16; }
+  38%, 70% { stroke-dashoffset: 0; opacity: 0.9; }
+  100% { stroke-dashoffset: -72; opacity: 0.18; }
+}
+
+@keyframes book-graph-node-pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(0.92);
+    box-shadow:
+      0 0 0 0 rgba(45, 212, 191, 0.24),
+      0 0 14px rgba(45, 212, 191, 0.42);
+  }
+  42%, 68% {
+    transform: translate(-50%, -50%) scale(1.08);
+    box-shadow:
+      0 0 0 0.55rem rgba(45, 212, 191, 0),
+      0 0 22px rgba(45, 212, 191, 0.72),
+      0 0 30px rgba(168, 85, 247, 0.26);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .book-graph-orbit,
+  .book-graph-link,
+  .book-graph-node {
+    animation: none;
+  }
+
+  .book-graph-link {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    opacity: 0.65;
+  }
+}
