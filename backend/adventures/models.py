@@ -20,6 +20,9 @@ class CommandAdventure(models.Model):
     description = models.TextField(blank=True)
     is_published = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
+    # Fraction of total achievable mastery points a learner must reach to pass
+    # this adventure (and unlock Challenge). Null falls back to PASS_BAR_FRACTION.
+    pass_bar_fraction = models.FloatField(null=True, blank=True)
 
     class Meta:
         ordering = ["sort_order", "id"]
@@ -36,16 +39,30 @@ class AdventureProblem(models.Model):
     )
     slug = models.SlugField()
     title = models.CharField(max_length=180)
-    summary = models.TextField(blank=True)
     required_successful_attempts = models.PositiveIntegerField(default=3)
+    # Command budget is authored on the problem and shared by all its variants:
+    # min_counted_commands is the efficiency target ("par"), max is the hard cap.
     min_counted_commands = models.PositiveIntegerField(default=1)
     max_counted_commands = models.PositiveIntegerField(default=4)
-    ideal_counted_commands = models.PositiveIntegerField(default=1)
     is_required = models.BooleanField(default=True)
     evaluation_spec = models.JSONField(default=dict, blank=True)
-    student_context = models.JSONField(default=dict, blank=True)
+    scenario_context = models.JSONField(default=dict, blank=True)
+    # Adventure-only live checklist, authored as [{label, requirement}]. The
+    # requirement predicates are server-side answers and must never be
+    # serialized to the client; payloads expose evaluated {label, satisfied}
+    # rows instead. Challenges deliberately have no counterpart field.
+    objective_checks = models.JSONField(default=list, blank=True)
     is_published = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
+    # Explicit prerequisite graph (DAG): this command can only be introduced once
+    # every prerequisite has been solved at least once. Strengthens the implicit
+    # sort_order ordering; validated acyclic + preceding at seed time.
+    prerequisites = models.ManyToManyField(
+        "self",
+        symmetrical=False,
+        blank=True,
+        related_name="dependents",
+    )
 
     class Meta:
         ordering = ["usage__topic__sort_order", "usage__sort_order", "sort_order"]
@@ -66,19 +83,17 @@ class AdventureProblem(models.Model):
 class VariantBase(models.Model):
     slug = models.SlugField()
     label = models.CharField(max_length=80)
-    structure_signature = models.CharField(max_length=120, blank=True)
     initial_state = models.JSONField(default=dict)
     evaluation_spec = models.JSONField(default=dict, blank=True)
     target_state = models.JSONField(default=dict, blank=True)
-    expected_state_diagram = models.JSONField(default=dict, blank=True)
     solution_commands = models.JSONField(default=list, blank=True)
+    # case_id (human-readable) and parameter_context (render inputs) record the
+    # authoring provenance of a generated variant. semantic_key is the identity
+    # used for dedup/selection; the others are not part of identity.
     case_id = models.CharField(max_length=160, blank=True)
     semantic_key = models.CharField(max_length=240, blank=True)
     parameter_context = models.JSONField(default=dict, blank=True)
-    student_context = models.JSONField(default=dict, blank=True)
-    min_counted_commands = models.PositiveIntegerField(default=1)
-    max_counted_commands = models.PositiveIntegerField(default=8)
-    ideal_counted_commands = models.PositiveIntegerField(default=1)
+    scenario_context = models.JSONField(default=dict, blank=True)
     hint_set = models.JSONField(default=list, blank=True)
     scaffold_policy = models.JSONField(default=dict, blank=True)
     is_published = models.BooleanField(default=True)
@@ -123,9 +138,14 @@ class AdventureRun(models.Model):
     status = models.CharField(max_length=16, choices=Status.choices, default=SESSION_STATUS_STARTED)
     current_problem_index = models.PositiveIntegerField(default=0)
     total_score = models.PositiveIntegerField(default=0)
+    # Accumulating mastery points this session (sum of box-advance × quality).
+    session_score = models.PositiveIntegerField(default=0)
     mastery_progress_gained = models.FloatField(default=0.0)
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+    # Set the moment session_score crosses the pass bar (with the per-command
+    # floor met). Drives Challenge unlock; independent of run status.
+    passed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         indexes = [
@@ -176,3 +196,30 @@ class AdventureProblemAttempt(models.Model):
 
     def __str__(self) -> str:
         return f"AdventureProblemAttempt({self.id}, run={self.run_id}, {self.status})"
+
+
+class AdventureMastery(models.Model):
+    """Per-user Leitner state for one command-problem. Drives the spaced-repetition
+    scheduler: `strength` is the box (0..N where N = problem.required_successful_attempts),
+    and `last_seen_seq` is the user's adventure encounter index when last served, so
+    spacing is measured in encounters rather than wall-clock time. Persists across runs."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    adventure_problem = models.ForeignKey(
+        AdventureProblem,
+        related_name="mastery_states",
+        on_delete=models.CASCADE,
+    )
+    strength = models.PositiveIntegerField(default=0)
+    introduced = models.BooleanField(default=False)
+    last_seen_seq = models.PositiveIntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = [("user", "adventure_problem")]
+        indexes = [
+            models.Index(fields=["user", "adventure_problem"], name="advmastery_user_problem_idx"),
+        ]
+
+    def __str__(self) -> str:
+        return f"AdventureMastery(user={self.user_id}, problem={self.adventure_problem_id}, box={self.strength})"

@@ -1,7 +1,13 @@
-import { AlertTriangle, BookOpenText, ClipboardList, Target } from 'lucide-react'
+import { AlertTriangle, BookOpenText, Check, ClipboardList, Target } from 'lucide-react'
 import type { ComponentType, ReactNode } from 'react'
 
-import type { ChallengeRun, PracticeStudentContext } from '@/shared/practice/types'
+import type { ChallengeRun } from '@/shared/practice/types'
+import {
+  hasPracticeContext,
+  normalizePracticeContext,
+  type NormalizedPracticeContext,
+  type ObjectiveCheck,
+} from '@/shared/practice/utils/practiceContext'
 import { Badge } from '@/shared/components/Badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Card'
 import { cn } from '@/shared/utils/cn'
@@ -11,15 +17,47 @@ export function PracticeContextPanel({ run }: { run: ChallengeRun }) {
   const difficultyLabel = run.difficulty ? run.difficulty : 'challenge'
 
   return (
-    <Card className="shadow-none">
-      <CardHeader className="p-3">
-        <div className="flex flex-wrap gap-2">
+    <PracticeBriefCard
+      title={run.challenge.title}
+      context={context}
+      badges={
+        <>
           <Badge variant="blue">Storey {run.storey.number}</Badge>
           <Badge variant="default" className="capitalize">{difficultyLabel}</Badge>
           {run.review_mode ? <Badge variant="warning">Review Mode</Badge> : null}
           {run.variant.changed_variant ? <Badge variant="warning">Changed variant</Badge> : null}
-        </div>
-        <CardTitle className="text-base leading-tight">{run.challenge.title}</CardTitle>
+        </>
+      }
+    />
+  )
+}
+
+/**
+ * Presentational scenario brief shared by the challenge and adventure workspaces.
+ * Renders a normalized context; callers supply the heading and any badges.
+ *
+ * The live objective checklist is an adventure-only scaffold and is not part of
+ * the scenario context: the adventure caller passes the evaluated rows via
+ * `checks`. Challenges pass none and rely on the expected-state reveal instead.
+ */
+export function PracticeBriefCard({
+  title,
+  context,
+  badges,
+  className,
+  checks,
+}: {
+  title: string
+  context: NormalizedPracticeContext
+  badges?: ReactNode
+  className?: string
+  checks?: ObjectiveCheck[]
+}) {
+  return (
+    <Card className={cn('shadow-none', className)}>
+      <CardHeader className="p-3">
+        {badges ? <div className="flex flex-wrap gap-2">{badges}</div> : null}
+        <CardTitle className="text-base leading-tight">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 p-3 pt-0">
         <Section icon={BookOpenText} title="Practice brief" hidden={!context.story && !context.task}>
@@ -27,22 +65,41 @@ export function PracticeContextPanel({ run }: { run: ChallengeRun }) {
           {context.task ? <p className="mt-2 text-sm leading-5 text-foreground">{context.task}</p> : null}
         </Section>
 
-        <Section icon={ClipboardList} title="Repository state" hidden={!context.current_state.length}>
-          <CompactList items={context.current_state} />
+        <Section icon={Target} title="Objective" hidden={!checks?.length}>
+          <ul className="space-y-1.5 text-sm leading-5">
+            {(checks ?? []).map((check) => (
+              <li className="grid grid-cols-[auto_minmax(0,1fr)] gap-2" key={check.label}>
+                {check.satisfied ? (
+                  <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <Check className="size-3" />
+                  </span>
+                ) : (
+                  <span className="mt-0.5 size-4 shrink-0 rounded-full border border-muted-foreground/40" />
+                )}
+                <span
+                  className={cn(
+                    'min-w-0',
+                    check.satisfied
+                      ? 'text-foreground line-through decoration-muted-foreground/40'
+                      : 'text-muted-foreground',
+                  )}
+                >
+                  {check.label}
+                </span>
+              </li>
+            ))}
+          </ul>
         </Section>
 
-        <Section icon={Target} title="Objective" hidden={!context.outcome && !context.required_details.length}>
-          {context.outcome ? <p className="text-sm leading-5 text-muted-foreground">{context.outcome}</p> : null}
-          {context.required_details.length ? (
-            <dl className="mt-2 grid gap-2">
-              {context.required_details.map((item) => (
-                <div className="rounded-md border border-border bg-secondary/35 px-3 py-2.5" key={`${item.label}:${item.value}`}>
-                  <dt className="text-[11px] font-bold uppercase text-muted-foreground">{item.label}</dt>
-                  <dd className="mt-0.5 break-words font-mono text-xs text-foreground">{item.value}</dd>
-                </div>
-              ))}
-            </dl>
-          ) : null}
+        <Section icon={ClipboardList} title="Key details" hidden={!context.details.length}>
+          <dl className="grid gap-2">
+            {context.details.map((item) => (
+              <div className="rounded-md border border-border bg-secondary/35 px-3 py-2.5" key={`${item.label}:${item.value}`}>
+                <dt className="text-[11px] font-bold uppercase text-muted-foreground">{item.label}</dt>
+                <dd className="mt-0.5 break-words font-mono text-xs text-foreground">{item.value}</dd>
+              </div>
+            ))}
+          </dl>
         </Section>
 
         <Section icon={AlertTriangle} title="Constraints" hidden={!context.constraints.length}>
@@ -101,41 +158,11 @@ function CompactList({
 }
 
 function contextForRun(run: ChallengeRun) {
-  const context = normalizeContext(run.student_context)
-  const fallback = normalizeContext({
-    brief: {
-      story: run.challenge.narrative,
-      task: run.challenge.summary,
-    },
+  const context = normalizePracticeContext(run.scenario_context)
+  const fallback = normalizePracticeContext({
+    story: run.challenge.narrative,
+    task: run.challenge.summary,
   })
-  const hasStructuredContext =
-    context.story ||
-    context.task ||
-    context.current_state.length ||
-    context.outcome ||
-    context.required_details.length ||
-    context.constraints.length
 
-  return hasStructuredContext ? context : fallback
-}
-
-function normalizeContext(context?: PracticeStudentContext | null) {
-  return {
-    story: cleanText(context?.brief?.story),
-    task: cleanText(context?.brief?.task),
-    current_state: cleanList(context?.repository?.current_state),
-    outcome: cleanText(context?.objective?.outcome),
-    required_details: (context?.objective?.required_details ?? [])
-      .map((item) => ({ label: cleanText(item.label), value: cleanText(item.value) }))
-      .filter((item) => item.label && item.value),
-    constraints: cleanList(context?.constraints),
-  }
-}
-
-function cleanList(values?: string[]) {
-  return (values ?? []).map(cleanText).filter(Boolean)
-}
-
-function cleanText(value?: string) {
-  return (value ?? '').trim()
+  return hasPracticeContext(context) ? context : fallback
 }

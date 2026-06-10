@@ -33,6 +33,7 @@ import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { cn } from '@/shared/utils/cn'
+import { usePersistentState } from '@/shared/utils/persistentState'
 
 const DEFAULT_TERMINAL_RATIO = 0.28
 const DEFAULT_TARGET_DIAGRAM_RATIO = 0.5
@@ -41,6 +42,19 @@ const MIN_TERMINAL_PANE_WIDTH = 544
 const MIN_FEEDBACK_PANE_WIDTH = 288
 const MAX_FEEDBACK_PANE_WIDTH = 480
 const RESIZE_HANDLE_WIDTH = 6
+
+// Persisted workspace layout. One shared zoom key keeps both DAG panels at the
+// learner's chosen zoom across commands and sessions (see LiveDagPanel).
+const TERMINAL_RATIO_KEY = 'workspace:terminal-ratio'
+const TARGET_DIAGRAM_RATIO_KEY = 'workspace:target-diagram-ratio'
+const TERMINAL_PANE_RATIO_KEY = 'workspace:terminal-pane-ratio'
+const PROJECT_FILES_OPEN_KEY = 'workspace:project-files-open'
+const DAG_ZOOM_KEY = 'workspace:dag-zoom'
+
+function ratioSanitizer(min: number, max: number, fallback: number) {
+  return (value: number) =>
+    typeof value === 'number' && Number.isFinite(value) ? clamp(value, min, max) : fallback
+}
 
 function stringList(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
@@ -118,10 +132,22 @@ export function ChallengeWorkspace() {
   const mutation = useChallengeCommandSubmission(runId)
   const { clearToast, evaluateAndNotify } = useScaffolding(runId)
   const [dismissedCompletionRunId, setDismissedCompletionRunId] = useState<number | null>(null)
-  const [terminalRatio, setTerminalRatio] = useState(DEFAULT_TERMINAL_RATIO)
-  const [targetDiagramRatio, setTargetDiagramRatio] = useState(DEFAULT_TARGET_DIAGRAM_RATIO)
-  const [terminalPaneRatio, setTerminalPaneRatio] = useState(DEFAULT_TERMINAL_PANE_RATIO)
-  const [projectFilesOpen, setProjectFilesOpen] = useState(true)
+  const [terminalRatio, setTerminalRatio] = usePersistentState(
+    TERMINAL_RATIO_KEY,
+    DEFAULT_TERMINAL_RATIO,
+    ratioSanitizer(0.22, 0.58, DEFAULT_TERMINAL_RATIO),
+  )
+  const [targetDiagramRatio, setTargetDiagramRatio] = usePersistentState(
+    TARGET_DIAGRAM_RATIO_KEY,
+    DEFAULT_TARGET_DIAGRAM_RATIO,
+    ratioSanitizer(0.34, 0.66, DEFAULT_TARGET_DIAGRAM_RATIO),
+  )
+  const [terminalPaneRatio, setTerminalPaneRatio] = usePersistentState(
+    TERMINAL_PANE_RATIO_KEY,
+    DEFAULT_TERMINAL_PANE_RATIO,
+    ratioSanitizer(0.4, 0.92, DEFAULT_TERMINAL_PANE_RATIO),
+  )
+  const [projectFilesOpen, setProjectFilesOpen] = usePersistentState(PROJECT_FILES_OPEN_KEY, true)
   const [tourOpen, setTourOpen] = useState(false)
   const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
   const [startOverConfirmOpen, setStartOverConfirmOpen] = useState(false)
@@ -413,6 +439,7 @@ export function ChallengeWorkspace() {
                 snapshot={run.repository_state}
                 className="flex h-full min-h-0 flex-col"
                 contentClassName="h-full min-h-0 flex-1"
+                zoomStorageKey={DAG_ZOOM_KEY}
               />
             </div>
             {hasTargetDiagram ? (
@@ -429,6 +456,7 @@ export function ChallengeWorkspace() {
                     snapshot={run.expected_state!}
                     className="flex h-full min-h-0 flex-col"
                     contentClassName="h-full min-h-0 flex-1"
+                    zoomStorageKey={DAG_ZOOM_KEY}
                   />
                 </div>
               </>

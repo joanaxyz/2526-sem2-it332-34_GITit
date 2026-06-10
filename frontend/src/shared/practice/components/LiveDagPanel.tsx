@@ -7,7 +7,11 @@ import type { Edge, Node, NodeProps } from 'reactflow'
 import type { RepositoryCommit, RepositorySnapshot, RepositoryValue } from '@/shared/practice/types'
 import { Card, CardContent, CardHeader } from '@/shared/components/Card'
 import { graphLayoutSignature } from '@/shared/practice/utils/graphLayoutSignature'
+import { readPreference, writePreference } from '@/shared/utils/persistentState'
 import { cn } from '@/shared/utils/cn'
+
+const MIN_DAG_ZOOM = 0.55
+const MAX_DAG_ZOOM = 1.6
 
 type DagVariant = 'cyan'
 
@@ -67,6 +71,7 @@ export function LiveDagPanel({
   contentClassName,
   showRepositoryDetails = false,
   fitViewPadding = 0.08,
+  zoomStorageKey,
 }: {
   title?: string
   snapshot: RepositorySnapshot
@@ -74,6 +79,11 @@ export function LiveDagPanel({
   contentClassName?: string
   showRepositoryDetails?: boolean
   fitViewPadding?: number
+  /**
+   * When set, the learner's manual zoom is remembered under this key and kept
+   * across topology changes (auto-fit re-centers but no longer overrides zoom).
+   */
+  zoomStorageKey?: string
 }) {
   return (
     <RepositoryStateDiagram
@@ -83,6 +93,7 @@ export function LiveDagPanel({
       contentClassName={contentClassName}
       showRepositoryDetails={showRepositoryDetails}
       fitViewPadding={fitViewPadding}
+      zoomStorageKey={zoomStorageKey}
     />
   )
 }
@@ -95,6 +106,7 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   showRepositoryDetails = false,
   fitViewPadding = 0.08,
   variant = 'cyan',
+  zoomStorageKey,
 }: {
   title: string
   snapshot: RepositorySnapshot
@@ -103,6 +115,7 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   showRepositoryDetails?: boolean
   fitViewPadding?: number
   variant?: DagVariant
+  zoomStorageKey?: string
 }) {
   const colors = VARIANT_COLORS[variant]
   const normalizedSnapshot = useMemo(() => normalizeSnapshot(snapshot), [snapshot])
@@ -180,13 +193,22 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
             nodeTypes={nodeTypes}
             panOnScroll
             onlyRenderVisibleElements
-            minZoom={0.55}
-            maxZoom={1.6}
+            minZoom={MIN_DAG_ZOOM}
+            maxZoom={MAX_DAG_ZOOM}
             proOptions={{ hideAttribution: true }}
             onError={handleReactFlowError}
+            onMoveEnd={
+              zoomStorageKey
+                ? (_event, viewport) => writePreference(zoomStorageKey, viewport.zoom)
+                : undefined
+            }
           >
             <Background gap={18} color="rgba(255,255,255,0.05)" />
-            <FitViewOnTopologyChange layoutSignature={layoutSignature} fitViewPadding={fitViewPadding} />
+            <FitViewOnTopologyChange
+              layoutSignature={layoutSignature}
+              fitViewPadding={fitViewPadding}
+              zoomStorageKey={zoomStorageKey}
+            />
           </ReactFlow>
           <CommitDetailsPanel data={activeCommitData ?? null} />
         </div>
@@ -204,6 +226,7 @@ export function RepositoryStateDiagram({
   showRepositoryDetails = false,
   fitViewPadding = 0.08,
   variant = 'cyan',
+  zoomStorageKey,
 }: {
   title: string
   snapshot: RepositorySnapshot
@@ -212,6 +235,7 @@ export function RepositoryStateDiagram({
   showRepositoryDetails?: boolean
   fitViewPadding?: number
   variant?: DagVariant
+  zoomStorageKey?: string
 }) {
   return (
     <ReactFlowProvider>
@@ -223,6 +247,7 @@ export function RepositoryStateDiagram({
         showRepositoryDetails={showRepositoryDetails}
         fitViewPadding={fitViewPadding}
         variant={variant}
+        zoomStorageKey={zoomStorageKey}
       />
     </ReactFlowProvider>
   )
@@ -231,9 +256,11 @@ export function RepositoryStateDiagram({
 function FitViewOnTopologyChange({
   layoutSignature,
   fitViewPadding,
+  zoomStorageKey,
 }: {
   layoutSignature: string
   fitViewPadding: number
+  zoomStorageKey?: string
 }) {
   const { fitView } = useReactFlow()
   const previousSignature = useRef<string | null>(null)
@@ -242,10 +269,18 @@ function FitViewOnTopologyChange({
     if (previousSignature.current === layoutSignature) return
     previousSignature.current = layoutSignature
     const frameId = window.requestAnimationFrame(() => {
-      void fitView({ padding: fitViewPadding, duration: 0 })
+      // Pinning fitView's min/max zoom to the saved level makes it re-center the
+      // graph at the learner's chosen zoom instead of refitting to the contents.
+      const savedZoom = zoomStorageKey ? readPreference<number | null>(zoomStorageKey, null) : null
+      if (savedZoom != null && Number.isFinite(savedZoom)) {
+        const zoom = Math.min(Math.max(savedZoom, MIN_DAG_ZOOM), MAX_DAG_ZOOM)
+        void fitView({ padding: fitViewPadding, duration: 0, minZoom: zoom, maxZoom: zoom })
+      } else {
+        void fitView({ padding: fitViewPadding, duration: 0 })
+      }
     })
     return () => window.cancelAnimationFrame(frameId)
-  }, [fitView, fitViewPadding, layoutSignature])
+  }, [fitView, fitViewPadding, layoutSignature, zoomStorageKey])
 
   return null
 }

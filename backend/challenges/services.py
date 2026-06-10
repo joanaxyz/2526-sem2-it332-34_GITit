@@ -67,16 +67,9 @@ class VariantSelectionService:
         )
 
     def variant_identity(self, variant) -> str:
-        if variant.semantic_key:
-            return variant.semantic_key
-        if variant.case_id:
-            return f"case:{variant.case_id}"
-        case_id = (variant.parameter_context or {}).get("case_id")
-        if case_id:
-            return f"case:{case_id}"
-        if variant.structure_signature:
-            return f"structure:{variant.structure_signature}"
-        return f"id:{variant.id}"
+        # Seeded variants always carry a semantic_key (a content hash). The id
+        # fallback only guards unsaved/legacy rows that predate that guarantee.
+        return variant.semantic_key or f"id:{variant.id}"
 
     def _tried_variant_keys(self, *, user, level: ChallengeLevel) -> set[str]:
         variant_ids = (
@@ -200,8 +193,8 @@ class ChallengeRunService:
             looped_variant=looped_variant,
             retry_index=retry_index,
             command_budget_snapshot={
-                "min_counted_commands": variant.min_counted_commands,
-                "max_counted_commands": variant.max_counted_commands,
+                "min_counted_commands": level.min_counted_commands,
+                "max_counted_commands": level.max_counted_commands,
             },
             repository_state=variant.initial_state,
         )
@@ -217,6 +210,9 @@ class ChallengeRunService:
 
     def _ensure_unlocked(self, *, user, level: ChallengeLevel) -> None:
         if level.difficulty == DIFFICULTY_EASY:
+            # Entry into a storey's challenges is gated on passing its Command
+            # Adventure (the learn-by-doing mode that teaches the commands first).
+            self._ensure_adventure_passed(user=user, module=level.module)
             return
         previous = DIFFICULTY_EASY if level.difficulty == DIFFICULTY_MEDIUM else DIFFICULTY_MEDIUM
         previous_level = ChallengeLevel.objects.filter(
@@ -226,6 +222,20 @@ class ChallengeRunService:
         ).first()
         if not previous_level or not ProblemCompletion.objects.filter(user=user, challenge_level=previous_level).exists():
             raise Locked("This challenge level is locked until the previous level is completed.")
+
+    def _ensure_adventure_passed(self, *, user, module) -> None:
+        # Lazy import: adventures.models is a leaf w.r.t. challenges, but keep the
+        # dependency local to this gate.
+        from adventures.models import AdventureRun, CommandAdventure
+
+        adventure = CommandAdventure.objects.filter(module=module, is_published=True).first()
+        if adventure is None:
+            return  # storey has no Command Adventure to gate on
+        passed = AdventureRun.objects.filter(
+            user=user, command_adventure=adventure, passed_at__isnull=False
+        ).exists()
+        if not passed:
+            raise Locked("Complete this storey's Command Adventure to unlock its challenges.")
 
     def _review_variant(self, *, user, level: ChallengeLevel):
         completion = ProblemCompletion.objects.select_related("challenge_run__challenge_variant").filter(

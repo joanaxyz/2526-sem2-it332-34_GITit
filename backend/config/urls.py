@@ -7,6 +7,7 @@ from adventures.views import (
     AdventureRunFinishAPIView,
     AdventureRunSubmitCommandAPIView,
     AdventureRunUseHintAPIView,
+    AdventureWorkspaceFileAPIView,
     CommandAdventureRunStartAPIView,
 )
 from challenges.views import (
@@ -38,6 +39,7 @@ urlpatterns = [
     path("api/adventure-runs/<int:run_id>/", AdventureRunDetailAPIView.as_view(), name="adventure-run-detail"),
     path("api/adventure-runs/<int:run_id>/submit-command/", AdventureRunSubmitCommandAPIView.as_view(), name="adventure-run-submit-command"),
     path("api/adventure-runs/<int:run_id>/use-hint/", AdventureRunUseHintAPIView.as_view(), name="adventure-run-use-hint"),
+    path("api/adventure-runs/<int:run_id>/files/", AdventureWorkspaceFileAPIView.as_view(), name="adventure-run-files"),
     path("api/adventure-runs/<int:run_id>/finish/", AdventureRunFinishAPIView.as_view(), name="adventure-run-finish"),
     path("api/challenge-levels/<int:level_id>/runs/", ChallengeRunStartAPIView.as_view(), name="challenge-run-start"),
     path("api/challenge-runs/<int:run_id>/", ChallengeRunDetailAPIView.as_view(), name="challenge-run-detail"),

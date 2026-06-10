@@ -3,7 +3,7 @@ from rest_framework import serializers
 from common.constants import SESSION_MODE_REVIEW, SESSION_STATUS_COMPLETED, SESSION_STATUS_STARTED
 from challenges.models import ChallengeRun
 from challenges.selectors import minimum_counted_for_session, required_successful_attempts_for_problem
-from practice.context import StudentContextNormalizer
+from practice.context import ScenarioContextNormalizer
 from practice.scaffolding import ScaffoldingService
 from practice.visualization import RepositoryVisualizationService
 from progress.models import ProblemCompletion
@@ -50,10 +50,10 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
     prefetch_run_payload_context(run)
     snapshotter = RepositorySnapshotService()
     visualizer = RepositoryVisualizationService()
-    context = _student_context(run)
+    context = _scenario_context(run)
     repository_state = snapshotter.snapshot(run.repository_state, already_normalized=True)
     supports = ScaffoldingService().supports_for(run.challenge_level.difficulty)
-    expected_target = run.variant.expected_state_diagram or run.variant.target_state
+    expected_target = run.variant.target_state
     target_state = run.variant.target_state if supports["expected_state"] else None
     visualization = visualizer.snapshot(run.repository_state, target_state=target_state)
     expected_state = (
@@ -76,7 +76,7 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
         "completed_at": run.completed_at,
         "first_attempt_star_eligible": run.first_attempt_star_eligible,
         "challenge": _challenge_payload(run),
-        "student_context": context,
+        "scenario_context": context,
         "storey": storey_payload,
         "difficulty": run.difficulty or None,
         "variant": {
@@ -199,10 +199,12 @@ def next_difficulty_payload(run: ChallengeRun) -> dict | None:
     return {"id": next_level.id, "difficulty": next_level.difficulty}
 
 
-def _student_context(run: ChallengeRun) -> dict:
-    raw = run.variant.student_context or run.challenge_level.student_context
-    fallback = run.challenge_level.narrative or run.workflow_scenario.narrative
-    return StudentContextNormalizer().normalize(raw, fallback_story=fallback)
+def _scenario_context(run: ChallengeRun) -> dict:
+    # The brief is authored on the level and shared across its variants; the
+    # variant only carries a generated fallback, so the level's authored context
+    # wins.
+    raw = run.challenge_level.scenario_context or run.variant.scenario_context
+    return ScenarioContextNormalizer().normalize(raw, fallback_story=run.workflow_scenario.narrative)
 
 
 def _challenge_payload(run: ChallengeRun) -> dict:
@@ -211,6 +213,6 @@ def _challenge_payload(run: ChallengeRun) -> dict:
         "slug": run.workflow_scenario.slug,
         "title": run.workflow_scenario.title,
         "summary": run.workflow_scenario.summary,
-        "narrative": run.challenge_level.narrative or run.workflow_scenario.narrative,
+        "narrative": run.workflow_scenario.narrative,
         "level_id": run.challenge_level_id,
     }

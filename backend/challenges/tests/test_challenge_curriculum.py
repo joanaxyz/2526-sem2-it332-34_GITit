@@ -1,13 +1,14 @@
 from django.core.management import call_command
+from django.utils import timezone
 from rest_framework.test import APIClient
 
-from adventures.models import AdventureProblem, CommandAdventure
+from adventures.models import AdventureProblem, AdventureRun, CommandAdventure
 from challenges.models import Challenge, ChallengeLevel, ChallengeRun
 from challenges.serializers import challenge_run_payload
 from challenges.services import ChallengeRunService
 from curriculum.models import CommandSkill, ConceptPage, Storey
 from curriculum.selectors import storey_content_page
-from practice.context import StudentContextNormalizer
+from practice.context import ScenarioContextNormalizer
 from practice.services import CommandProcessingService
 from practice.visualization import RepositoryVisualizationService
 from progress.models import ProblemCompletion
@@ -19,6 +20,16 @@ def make_user(django_user_model, username: str = "student"):
         email=f"{username}@example.com",
         password="pass12345",
     )
+
+
+def pass_adventure_for(user, module):
+    """Mark the storey's Command Adventure as passed so its EASY challenge unlocks.
+    Challenge entry is now gated on passing the storey's adventure first."""
+    adventure = CommandAdventure.objects.filter(module=module, is_published=True).first()
+    if adventure is not None:
+        AdventureRun.objects.create(
+            user=user, command_adventure=adventure, passed_at=timezone.now()
+        )
 
 
 def test_seed_curriculum_v2_creates_feature_owned_content(db):
@@ -70,6 +81,7 @@ def test_challenge_run_payload_uses_challenge_and_storey_terms(db, django_user_m
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
     level = ChallengeLevel.objects.get(scenario__slug="stage-commit-switch", difficulty="easy")
+    pass_adventure_for(user, level.module)
 
     run = ChallengeRunService().start_run(
         user=user,
@@ -94,6 +106,7 @@ def test_challenge_run_http_lifecycle_retry_and_review(db, django_user_model):
     level = ChallengeLevel.objects.get(scenario__slug="stage-commit-switch", difficulty="easy")
     level.required_successful_attempts = 1
     level.save(update_fields=["required_successful_attempts"])
+    pass_adventure_for(user, level.module)
     client = APIClient()
     client.force_authenticate(user=user)
 
@@ -149,14 +162,16 @@ def test_review_mode_is_gated_until_completion(db, django_user_model):
     assert response.status_code == 423
 
 
-def test_student_context_normalizer_strips_answers_and_evaluator_internals():
-    context = StudentContextNormalizer().normalize(
+def test_scenario_context_normalizer_strips_answers_and_evaluator_internals():
+    context = ScenarioContextNormalizer().normalize(
         {
-            "schema_version": 2,
-            "brief": {"story": "Reach the target."},
-            "objective": {
-                "required_details": [{"label": "File", "value": "app.py"}],
-            },
+            "schema_version": 3,
+            "story": "Reach the target.",
+            "task": "Finish the handoff.",
+            "details": [{"label": "File", "value": "app.py"}],
+            # Anything outside the v3 whitelist must never reach the learner.
+            "objective": {"checks": [{"requirement": {"head_branch": "secret-branch-xyz"}}]},
+            "repository": {"current_state": ["app.py is staged."]},
             "solution_commands": ["git add app.py"],
             "required_commands": ["git add"],
             "evaluation_spec": {"state_requirements": {"staging_contains": ["app.py"]}},
@@ -166,7 +181,27 @@ def test_student_context_normalizer_strips_answers_and_evaluator_internals():
     flattened = str(context).lower()
     assert "git add" not in flattened
     assert "evaluation_spec" not in flattened
-    assert context["objective"]["required_details"] == [{"label": "File", "value": "app.py"}]
+    assert "secret-branch-xyz" not in flattened
+    # The whole objective checklist lives on AdventureProblem.objective_checks
+    # now; scenario_context is whitelist-only and never carries it. Repository
+    # prose was dropped in v3 (the live panels already show that state).
+    assert "objective" not in context
+    assert "repository" not in context
+    assert context["details"] == [{"label": "File", "value": "app.py"}]
+    assert context["story"] == "Reach the target."
+    assert context["task"] == "Finish the handoff."
+
+
+def test_scenario_context_normalizer_falls_back_on_unknown_schema():
+    context = ScenarioContextNormalizer().normalize(
+        {"schema_version": 2, "brief": {"story": "Old shape."}},
+        fallback_story="Reach the requested repository outcome cleanly.",
+    )
+
+    assert context == {
+        "schema_version": 3,
+        "story": "Reach the requested repository outcome cleanly.",
+    }
 
 
 def test_visualization_payload_keeps_commit_dag_without_extra_lenses():
@@ -232,6 +267,7 @@ def test_status_challenge_completes_with_explicit_process_requirement(db, django
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
     level = ChallengeLevel.objects.get(scenario__slug="wake-the-repository", difficulty="easy")
+    pass_adventure_for(user, level.module)
     run = ChallengeRunService().start_run(
         user=user,
         level=level,

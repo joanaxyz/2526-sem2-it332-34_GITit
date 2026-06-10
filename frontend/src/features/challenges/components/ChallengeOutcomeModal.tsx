@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
-import { ArrowRight, Award, PartyPopper, RefreshCcw, Sparkles, XCircle } from 'lucide-react'
+import { ArrowRight, Award, Castle, RefreshCcw, Sparkles, XCircle } from 'lucide-react'
 import type { CSSProperties } from 'react'
 
 import type { ChallengeRun } from '@/shared/practice/types'
@@ -9,63 +8,17 @@ import {
   meetsMasteryAccuracy,
   meetsProgressAccuracy,
 } from '@/shared/practice/utils/commandAccuracy'
+import { CompletionConfetti } from '@/shared/practice/components/completion/CompletionConfetti'
+import { CompletionStatTile } from '@/shared/practice/components/completion/CompletionStatTile'
+import { TILE_ACCENTS } from '@/shared/practice/components/completion/tileAccents'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
 import { cn } from '@/shared/utils/cn'
 
-const TILE_ACCENTS = ['#00d68f', '#5aaeff', '#a78bfa', '#fbbf24', '#f472b6'] as const
-
-const confettiColors = ['#00d68f', '#5aaeff', '#fbbf24', '#f472b6', '#a78bfa', '#f87171']
-
-const confettiPieces = Array.from({ length: 52 }, (_, index) => {
-  const side = index % 2 === 0 ? -1 : 1
-  const lane = Math.floor(index / 2)
-  const x = side * (38 + ((lane * 18) % 220))
-  const y = 80 + ((index * 29) % 200)
-  return {
-    color: confettiColors[index % confettiColors.length],
-    delay: `${(index % 10) * 42}ms`,
-    duration: `${1700 + (index % 7) * 120}ms`,
-    height: `${7 + (index % 4) * 2}px`,
-    rotate: `${side * (210 + (index % 8) * 32)}deg`,
-    width: `${4 + (index % 4)}px`,
-    x: `${x}px`,
-    y: `${y}px`,
-  }
-})
-
 function difficultyLabel(run: ChallengeRun) {
   if (!run.difficulty) return 'Challenge'
   return run.difficulty.charAt(0).toUpperCase() + run.difficulty.slice(1)
-}
-
-function useCountUp(target: number, duration: number, delay = 0): number {
-  const [value, setValue] = useState(0)
-  const frameRef = useRef<number | null>(null)
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      const start = performance.now()
-      function step(now: number) {
-        const elapsed = now - start
-        const progress = Math.min(elapsed / duration, 1)
-        const eased = 1 - Math.pow(1 - progress, 3)
-        setValue(Math.round(eased * target))
-        if (progress < 1) {
-          frameRef.current = requestAnimationFrame(step)
-        }
-      }
-      frameRef.current = requestAnimationFrame(step)
-    }, delay)
-
-    return () => {
-      clearTimeout(timeout)
-      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current)
-    }
-  }, [target, duration, delay])
-
-  return value
 }
 
 export function CompletionCelebrationModal({
@@ -149,36 +102,7 @@ export function CompletionCelebrationModal({
       onClose={onClose}
     >
       <div className="relative overflow-hidden">
-        {!isFailed ? (
-          <>
-            <div className="completion-party-popper completion-party-popper-left" aria-hidden="true">
-              <PartyPopper className="size-10 text-accent" />
-            </div>
-            <div className="completion-party-popper completion-party-popper-right" aria-hidden="true">
-              <PartyPopper className="size-10 -scale-x-100 text-primary" />
-            </div>
-            <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-              {confettiPieces.map((piece, index) => (
-                <span
-                  className="completion-confetti"
-                  key={`${piece.x}-${piece.y}-${index}`}
-                  style={
-                    {
-                      '--confetti-color': piece.color,
-                      '--confetti-delay': piece.delay,
-                      '--confetti-duration': piece.duration,
-                      '--confetti-height': piece.height,
-                      '--confetti-rotate': piece.rotate,
-                      '--confetti-width': piece.width,
-                      '--confetti-x': piece.x,
-                      '--confetti-y': piece.y,
-                    } as CSSProperties
-                  }
-                />
-              ))}
-            </div>
-          </>
-        ) : null}
+        {!isFailed ? <CompletionConfetti /> : null}
 
         <div className="relative px-5 pb-5 pt-5 text-center">
           <div
@@ -224,7 +148,7 @@ export function CompletionCelebrationModal({
           ) : null}
 
           <div className="mt-4 grid grid-cols-2 gap-2 text-left max-sm:grid-cols-1">
-            <StatTile
+            <CompletionStatTile
               label="Accuracy"
               numerator={accuracy ?? 0}
               suffix="%"
@@ -238,7 +162,7 @@ export function CompletionCelebrationModal({
               accentColor={TILE_ACCENTS[0]}
               animationDelay={160}
             />
-            <StatTile
+            <CompletionStatTile
               label="Counted actions"
               numerator={run.counts.counted_action_total}
               denominator={run.policy.min_counted_commands}
@@ -246,21 +170,21 @@ export function CompletionCelebrationModal({
               accentColor={TILE_ACCENTS[1]}
               animationDelay={220}
             />
-            <StatTile
+            <CompletionStatTile
               label="Submissions"
               numerator={run.counts.total_attempts}
               helper="All terminal entries"
               accentColor={TILE_ACCENTS[2]}
               animationDelay={280}
             />
-            <StatTile
+            <CompletionStatTile
               label="Free diagnostics"
               numerator={run.counts.non_counted_diagnostic_total}
               helper="Diagnostics excluded from accuracy"
               accentColor={TILE_ACCENTS[3]}
               animationDelay={340}
             />
-            <StatTile
+            <CompletionStatTile
               label="Successful attempts"
               numerator={run.mastery_progress.mastered}
               denominator={run.mastery_progress.required}
@@ -334,6 +258,7 @@ export function CompletionCelebrationModal({
                   </Button>
                 ) : null}
                 <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToTower}>
+                  <Castle data-icon="inline-start" />
                   Back to Tower
                 </Button>
               </>
@@ -358,11 +283,13 @@ export function CompletionCelebrationModal({
                   </Button>
                 ) : null}
                 <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToTower}>
+                  <Castle data-icon="inline-start" />
                   Back to Tower
                 </Button>
               </>
             ) : run.status === 'completed' && meetsProgress ? (
               <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToTower}>
+                <Castle data-icon="inline-start" />
                 Back to Tower
               </Button>
             ) : null}
@@ -370,46 +297,5 @@ export function CompletionCelebrationModal({
         </div>
       </div>
     </Modal>
-  )
-}
-
-function StatTile({
-  label,
-  numerator,
-  denominator,
-  suffix = '',
-  helper,
-  accentColor,
-  animationDelay,
-}: {
-  label: string
-  numerator: number
-  denominator?: number
-  suffix?: string
-  helper: string
-  accentColor: string
-  animationDelay: number
-}) {
-  const animatedNum = useCountUp(numerator, 900, animationDelay + 50)
-
-  return (
-    <div
-      className="completion-stat-tile rounded-lg border border-border bg-background/50 p-2.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-      style={
-        {
-          animationDelay: `${animationDelay}ms`,
-          borderTopColor: accentColor,
-          borderTopWidth: '2px',
-        } as CSSProperties
-      }
-    >
-      <div className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-muted-foreground">{label}</div>
-      <div className="mt-1.5 text-lg font-extrabold tracking-tight">
-        {animatedNum}
-        {suffix}
-        {denominator !== undefined ? `/${denominator}` : ''}
-      </div>
-      <div className="mt-0.5 text-xs text-muted-foreground">{helper}</div>
-    </div>
   )
 }

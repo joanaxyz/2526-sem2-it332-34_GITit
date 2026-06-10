@@ -91,6 +91,15 @@ def mastery_gain_for(*, final_score: int, solved: bool) -> float:
     return round(0.4 + ((final_score - PASS_THRESHOLD) / span) * 0.6, 4)
 
 
+def mastery_points(*, box_advanced: bool, final_score: int, box_value: int) -> int:
+    """Mastery points for one encounter: the box value scaled by solve quality,
+    awarded only when the attempt actually advanced a Leitner box. Re-solving an
+    already-mastered command advances no box, so it earns nothing (no farming)."""
+    if not box_advanced:
+        return 0
+    return int(round(box_value * (final_score / 100)))
+
+
 class AdventureScoringService:
     def score_attempt(
         self,

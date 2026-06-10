@@ -11,38 +11,31 @@ LEAKY_KEYS = {
     "forbidden_commands",
 }
 
+# The learner-facing brief is deliberately flat and whitelist-only so the
+# frontend can render it without guessing. The objective checklist is NOT part
+# of this schema: it lives on AdventureProblem.objective_checks (server-side
+# requirements) and reaches the client only as evaluated {label, satisfied}
+# rows in the attempt payload.
+ALLOWED_KEYS = {"schema_version", "story", "task", "details", "constraints"}
 
-class StudentContextNormalizer:
+
+class ScenarioContextNormalizer:
     def normalize(self, raw: dict[str, Any] | None, *, fallback_story: str = "") -> dict:
         cleaned = self._strip_leaky_keys(raw or {})
-        if cleaned.get("schema_version") != 2:
+        if cleaned.get("schema_version") != 3:
             cleaned = {
-                "schema_version": 2,
-                "brief": {"story": fallback_story},
+                "schema_version": 3,
+                "story": fallback_story,
             }
-        return self._normalize_v2(cleaned, fallback_story=fallback_story)
+        return self._normalize_v3(cleaned, fallback_story=fallback_story)
 
-    def _normalize_v2(self, context: dict, *, fallback_story: str) -> dict:
-        brief = context.get("brief") if isinstance(context.get("brief"), dict) else {}
-        repository = (
-            context.get("repository") if isinstance(context.get("repository"), dict) else {}
-        )
-        objective = context.get("objective") if isinstance(context.get("objective"), dict) else {}
+    def _normalize_v3(self, context: dict, *, fallback_story: str) -> dict:
         normalized = {
-            "schema_version": 2,
-            "brief": {
-                "story": self._text(brief.get("story") or fallback_story),
-                "task": self._text(brief.get("task")),
-            },
-            "repository": {
-                "current_state": self._string_list(repository.get("current_state")),
-            },
-            "objective": {
-                "outcome": self._text(objective.get("outcome")),
-                "required_details": self._details(objective.get("required_details")),
-            },
+            "schema_version": 3,
+            "story": self._text(context.get("story") or fallback_story),
+            "task": self._text(context.get("task")),
+            "details": self._details(context.get("details")),
             "constraints": self._string_list(context.get("constraints")),
-            "process_notes": self._string_list(context.get("process_notes")),
         }
         return self._drop_empty(normalized)
 

@@ -25,10 +25,16 @@ import { queryKeys } from '@/shared/api/queryKeys'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
+import { readPreference, writePreference } from '@/shared/utils/persistentState'
 
 // One in-app day takes this long in real time when the cycle is auto-advancing.
 const DAY_LENGTH_MS = 18 * 60 * 1000
 const wrap24 = (hour: number) => ((hour % 24) + 24) % 24
+
+// Remembered day-night clock state. `timeOfDay` is only restored when the cycle
+// was paused; while running we resume from the real wall-clock time of day.
+const CLOCK_PREFERENCE_KEY = 'tower:clock'
+type ClockPreference = { running: boolean; timeOfDay: number }
 
 function isFoundationsStorey(storey: LearningStorey) {
   return storey.number === 1 || storey.slug === 'creating-inspecting-repositories'
@@ -121,10 +127,42 @@ function buildCloudField(floors: number): SeededCloud[] {
 
 // The storey stack is the heavy part of the tree; memo it so the once-a-second
 // clock-label re-render (from the sky cycle) never re-renders every storey.
-const TowerStoreys = memo(function TowerStoreys({ storeys }: { storeys: LearningStorey[] }) {
+//
+// Storeys mount progressively: only the slice the user has scrolled to exists in
+// the DOM, so the page height grows with the climb instead of pre-rendering the
+// whole tower. The build zone at the bottom is the growth sentinel.
+const TowerStoreys = memo(function TowerStoreys({
+  storeys,
+  mountedCount,
+  onGrow,
+}: {
+  storeys: LearningStorey[]
+  mountedCount: number
+  onGrow: () => void
+}) {
+  const growRef = useRef<HTMLDivElement | null>(null)
+  const allMounted = mountedCount >= storeys.length
+
+  // Recreated after every growth step: the fresh observer fires its initial
+  // callback immediately, so storeys keep mounting one by one while the build
+  // zone sits inside the scroll margin and stop as soon as it drops below it.
+  useEffect(() => {
+    if (allMounted) return
+    const el = growRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) onGrow()
+      },
+      { rootMargin: '0px 0px 480px 0px' },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [allMounted, mountedCount, onGrow])
+
   return (
     <div className="tower-stack-column">
-      {storeys.map((storey, index) => (
+      {storeys.slice(0, mountedCount).map((storey, index) => (
         <StoreyPracticeHub
           displayTitle={storeyTitle(storey)}
           isFirst={index === 0}
@@ -134,6 +172,16 @@ const TowerStoreys = memo(function TowerStoreys({ storeys }: { storeys: Learning
           storey={storey}
         />
       ))}
+      {!allMounted ? (
+        <div className="tower-build-zone" ref={growRef} aria-hidden="true">
+          <div className="tower-build-ghost">
+            <span className="tower-build-ghost-window" />
+            <span className="tower-build-ghost-window" />
+            <span className="tower-build-ghost-window" />
+          </div>
+          <span className="tower-build-beam" />
+        </div>
+      ) : null}
     </div>
   )
 })
@@ -150,6 +198,20 @@ export function StoreyMapPage() {
 
   const storeys = useMemo(() => storeysQuery.data ?? [], [storeysQuery.data])
   const cloudField = useMemo(() => buildCloudField(storeys.length), [storeys.length])
+  // How many storeys exist in the DOM. Starts at one; the build-zone observer
+  // raises it as the user scrolls down. A ?storey= deep link raises the floor
+  // so the target storey is already mounted on first render.
+  const focusIndex = useMemo(
+    () => (focusedStoreyId ? storeys.findIndex((storey) => storey.id === focusedStoreyId) : -1),
+    [focusedStoreyId, storeys],
+  )
+  const mountedFloor = focusIndex >= 0 ? focusIndex + 1 : 1
+  const [mountedRaw, setMountedRaw] = useState(1)
+  const mountedCount = Math.max(mountedRaw, mountedFloor)
+  const growTower = useCallback(
+    () => setMountedRaw((count) => Math.max(count, mountedFloor) + 1),
+    [mountedFloor],
+  )
   const clearSelection = useTowerSelection((state) => state.clear)
   const selectedStoreyId = useTowerSelection((state) => state.selected?.storeyId ?? null)
   const [activeStoreyId, setActiveStoreyId] = useState<number | null>(null)
@@ -165,14 +227,19 @@ export function StoreyMapPage() {
     () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     [],
   )
+  const initialClockPref = useMemo(() => readPreference<ClockPreference | null>(CLOCK_PREFERENCE_KEY, null), [])
+  const initialRunning = initialClockPref?.running ?? !prefersReduced
   const initialTime = useMemo(() => {
+    if (initialClockPref && !initialClockPref.running && Number.isFinite(initialClockPref.timeOfDay)) {
+      return wrap24(initialClockPref.timeOfDay)
+    }
     const now = new Date()
     return now.getHours() + now.getMinutes() / 60
-  }, [])
+  }, [initialClockPref])
   const timeRef = useRef(initialTime)
-  const runningRef = useRef(!prefersReduced)
+  const runningRef = useRef(initialRunning)
   const [timeOfDay, setTimeOfDay] = useState(initialTime)
-  const [running, setRunning] = useState(!prefersReduced)
+  const [running, setRunning] = useState(initialRunning)
   const [phaseLabel, setPhaseLabel] = useState(() => computeSky(initialTime).phaseLabel)
 
   const applySky = useCallback((hour: number) => {
@@ -227,6 +294,8 @@ export function StoreyMapPage() {
       setTimeOfDay(hour)
       setPhaseLabel(computeSky(hour).phaseLabel)
       applySky(hour)
+      // Scrubbing pauses the cycle and freezes the chosen time; remember both.
+      writePreference<ClockPreference>(CLOCK_PREFERENCE_KEY, { running: false, timeOfDay: hour })
     },
     [applySky],
   )
@@ -234,6 +303,10 @@ export function StoreyMapPage() {
   const toggleRunning = useCallback(() => {
     runningRef.current = !runningRef.current
     setRunning(runningRef.current)
+    writePreference<ClockPreference>(CLOCK_PREFERENCE_KEY, {
+      running: runningRef.current,
+      timeOfDay: timeRef.current,
+    })
   }, [])
 
   // ── Scroll-linked parallax (composed on top of the time-driven positions) ──
@@ -270,15 +343,20 @@ export function StoreyMapPage() {
     </motion.div>
   )
 
+  // The mount floor guarantees the deep-linked storey is in the DOM by the time
+  // this effect runs, so it only has to scroll there (once per focus target).
+  const focusHandledRef = useRef<number | null>(null)
   useEffect(() => {
-    if (!focusedStoreyId || !Number.isFinite(focusedStoreyId) || !storeys.length) return
+    if (!focusedStoreyId || focusIndex === -1) return
+    if (focusHandledRef.current === focusedStoreyId) return
+    focusHandledRef.current = focusedStoreyId
     window.requestAnimationFrame(() => {
       document.querySelector(`[data-storey-id="${focusedStoreyId}"]`)?.scrollIntoView({
         block: 'start',
         behavior: 'smooth',
       })
     })
-  }, [focusedStoreyId, storeys])
+  }, [focusedStoreyId, focusIndex])
 
   useEffect(() => {
     if (!storeys.length) return
@@ -397,7 +475,7 @@ export function StoreyMapPage() {
 
       <h1 className="sr-only">Git Tower</h1>
       <section className="tower-stage-grid" aria-label="Git Tower storeys">
-        <TowerStoreys storeys={storeys} />
+        <TowerStoreys storeys={storeys} mountedCount={mountedCount} onGrow={growTower} />
       </section>
 
       {/* Near clouds drift in FRONT of the tower so the sky isn't all hidden behind it. */}

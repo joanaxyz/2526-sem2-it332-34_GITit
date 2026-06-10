@@ -8,49 +8,38 @@ const run: AdventureRun = {
   id: 1,
   status: 'completed',
   command_adventure: { id: 1, slug: 'repo-basecamp', title: 'Repository Basecamp', description: '' },
+  storey_id: 1,
   current_problem_index: 2,
   total_problems: 2,
-  total_score: 90,
+  session_score: 50,
+  passed: true,
   mastery_progress_gained: 0.85,
+  mastery: {
+    commands: [
+      { slug: 'git-init', title: 'git init', strength: 2, mastered_bar: 2, introduced: true, mastered: true },
+      { slug: 'git-status', title: 'git status', strength: 1, mastered_bar: 2, introduced: true, mastered: false },
+    ],
+    commands_mastered: 1,
+    total_commands: 2,
+    session_score: 50,
+    pass_bar: 36,
+    total_achievable: 80,
+    passed: true,
+  },
   completed_at: '2026-06-07T00:00:00Z',
   current_attempt: null,
-  results: [
-    {
-      id: 10,
-      order: 0,
-      status: 'completed',
-      correctness_score: 100,
-      efficiency_score: 100,
-      independence_score: 100,
-      final_score: 100,
-      mastery_gain: 1,
-      hint_count: 0,
-      counted_command_count: 1,
-    },
-    {
-      id: 11,
-      order: 1,
-      status: 'failed',
-      correctness_score: 0,
-      efficiency_score: 0,
-      independence_score: 0,
-      final_score: 40,
-      mastery_gain: 0,
-      hint_count: 2,
-      counted_command_count: 5,
-    },
-  ],
+  results: [],
   progress: { completed: 2, total: 2 },
 }
 
 describe('AdventureResult', () => {
   afterEach(() => cleanup())
 
-  it('shows mastery percent, overall score, and per-problem bands', () => {
+  it('surfaces the pass state, session score, and per-command mastery', () => {
     render(<AdventureResult run={run} onRestart={vi.fn()} />)
-    expect(screen.getByText('85%')).toBeInTheDocument()
-    expect(screen.getByText('90')).toBeInTheDocument()
+    expect(screen.getByText('Challenge unlocked')).toBeInTheDocument()
+    expect(screen.getByText('50')).toBeInTheDocument()
     expect(screen.getByText('Mastered')).toBeInTheDocument()
-    expect(screen.getByText('Failed')).toBeInTheDocument()
+    expect(screen.getByText('In progress')).toBeInTheDocument()
   })
 })

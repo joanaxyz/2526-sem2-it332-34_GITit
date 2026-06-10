@@ -1,4 +1,7 @@
 from collections import OrderedDict
+from contextlib import nullcontext
+from dataclasses import dataclass
+from typing import Any
 
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
@@ -54,6 +57,74 @@ class CommandCountClassifier:
         return COMMAND_COUNTED, 1
 
 
+@dataclass(frozen=True)
+class ExecutedCommand:
+    """Outcome of running a single command through the simulated git engine,
+    before any feature-specific evaluation or persistence."""
+
+    previous_state: dict
+    next_state: dict
+    result: Any
+    classification: str
+    increment: int
+
+
+class CommandExecutor:
+    """Shared command-execution primitive for both the challenge and adventure
+    flows: clone the repository state, run the simulated git engine, normalize the
+    result, and classify the command. Each flow layers its own evaluation,
+    persistence, and scoring on top; only this raw execution is identical.
+
+    Challenge passes `timing_label`/`run_id` to keep its per-stage timing spans;
+    adventure omits them, so it stays uninstrumented exactly as before."""
+
+    def __init__(self) -> None:
+        self.state_tools = RepositoryStateSimulator()
+        self.command_engine = SimulatedGitCommandEngine()
+
+    def execute(
+        self,
+        *,
+        repository_state: dict,
+        command: str,
+        timing_label: str | None = None,
+        run_id: int | None = None,
+    ) -> ExecutedCommand:
+        tools = self.state_tools
+
+        def span(stage: str):
+            return timing(f"{timing_label}.{stage}", run_id=run_id) if timing_label else nullcontext()
+
+        with span("repository_state_clone"):
+            previous_state = tools.clone_state(repository_state)
+            working_state = tools.normalize_state(previous_state)
+        with span("parse_execute"):
+            result = self.command_engine.process(working_state, command, mutate_in_place=True)
+        with span("repository_state_normalize"):
+            next_state = tools.normalize_state(result.state)
+
+        classification, increment = CommandCountClassifier().classify(
+            command=command, processed=result.processed, diagnostic=result.diagnostic
+        )
+        return ExecutedCommand(
+            previous_state=previous_state,
+            next_state=next_state,
+            result=result,
+            classification=classification,
+            increment=increment,
+        )
+
+
+def log_command_step(step: CommandStep, *, command: str, result: Any) -> None:
+    """Persist the raw/normalized command for a step. Identical across flows."""
+    CommandLog.objects.create(
+        step_log=step,
+        raw_command=command,
+        normalized_command=result.normalized_command,
+        was_processable=result.processed,
+    )
+
+
 class VariantTargetStateHashCache:
     _cache: OrderedDict[tuple[int, str], str] = OrderedDict()
     _max_entries = 512
@@ -91,7 +162,7 @@ class CommandProcessingService:
         self.state_tools = RepositoryStateSimulator()
         self.snapshotter = RepositorySnapshotService()
         self.visualizer = RepositoryVisualizationService()
-        self.command_engine = SimulatedGitCommandEngine()
+        self.executor = CommandExecutor()
 
     @transaction.atomic
     def submit_command(self, *, run: ChallengeRun, command: str) -> dict:
@@ -99,19 +170,16 @@ class CommandProcessingService:
             raise Locked("This challenge run has already ended.")
 
         state_tools = self.state_tools
-        with timing("challenge.command.repository_state_clone", run_id=run.id):
-            previous_state = state_tools.clone_state(run.repository_state)
-            working_state = state_tools.normalize_state(previous_state)
-        with timing("challenge.command.parse_execute", run_id=run.id):
-            command_result = self.command_engine.process(working_state, command, mutate_in_place=True)
-        with timing("challenge.command.repository_state_normalize", run_id=run.id):
-            next_state = state_tools.normalize_state(command_result.state)
-
-        classification, increment = CommandCountClassifier().classify(
+        execution = self.executor.execute(
+            repository_state=run.repository_state,
             command=command,
-            processed=command_result.processed,
-            diagnostic=command_result.diagnostic,
+            timing_label="challenge.command",
+            run_id=run.id,
         )
+        previous_state = execution.previous_state
+        next_state = execution.next_state
+        command_result = execution.result
+        classification, increment = execution.classification, execution.increment
         result_category = RESULT_UNPROCESSABLE
         feedback = ""
         executed_commands: list[str] = []
@@ -174,12 +242,7 @@ class CommandProcessingService:
             contextual_feedback=feedback,
             visualization_snapshot=visualization_snapshot,
         )
-        CommandLog.objects.create(
-            step_log=step,
-            raw_command=command,
-            normalized_command=command_result.normalized_command,
-            was_processable=command_result.processed,
-        )
+        log_command_step(step, command=command, result=command_result)
         if command_result.processed:
             CommandHistoryCache().remember_after_append(
                 run=run,

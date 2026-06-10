@@ -1,14 +1,27 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ArrowLeft, GitBranch } from 'lucide-react'
 
-import { CommandInput } from '@/shared/practice/components/CommandInput'
+import { AdventureCommandBudget } from '@/features/command-adventures/components/AdventureCommandBudget'
+import { AdventureCompletionModal } from '@/features/command-adventures/components/AdventureCompletionModal'
+import { AdventureContextPanel } from '@/features/command-adventures/components/AdventureContextPanel'
+import { AdventureHintPanel, type RevealedHint } from '@/features/command-adventures/components/AdventureHintPanel'
+import { AdventureMasteryPanel } from '@/features/command-adventures/components/AdventureMasteryPanel'
+import { AdventureProgressBar } from '@/features/command-adventures/components/AdventureProgressBar'
 import { AdventureResult } from '@/features/command-adventures/components/AdventureResult'
+import { useAdventureCommandSubmission } from '@/features/command-adventures/hooks/useAdventureCommandSubmission'
 import { useAdventureRun } from '@/features/command-adventures/hooks/useAdventureRun'
 import type { AdventureRun } from '@/features/command-adventures/types'
+import { ProjectStructurePanel } from '@/shared/practice/components/ProjectStructurePanel'
+import { TerminalPanel } from '@/shared/practice/components/TerminalPanel'
+import { WorkspaceEditorOverlay } from '@/shared/practice/components/WorkspaceEditorOverlay'
 import { Button } from '@/shared/components/Button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Card'
-import { ProgressBar } from '@/shared/components/ProgressBar'
+import { LoadingState } from '@/shared/components/LoadingState'
+import { usePersistentState } from '@/shared/utils/persistentState'
 
-type TerminalLine = { command: string; output: string; solved: boolean }
+// Shared with ChallengeWorkspace so the collapse preference follows the
+// learner across both practice surfaces.
+const PROJECT_FILES_OPEN_KEY = 'workspace:project-files-open'
 
 export function AdventureSession({
   runId,
@@ -17,109 +30,152 @@ export function AdventureSession({
   runId: number
   onRestart?: () => void
 }) {
-  const { query, submitCommand, useHint } = useAdventureRun(runId)
-  const [lines, setLines] = useState<TerminalLine[]>([])
+  const { query, lines, useHint, createFile, writeFile } = useAdventureRun(runId)
+  const submitCommand = useAdventureCommandSubmission(runId)
+  const navigate = useNavigate()
+  const [hint, setHint] = useState<RevealedHint | null>(null)
+  const [completionDismissed, setCompletionDismissed] = useState(false)
+  const [projectFilesOpen, setProjectFilesOpen] = usePersistentState(PROJECT_FILES_OPEN_KEY, true)
+  const [workspaceEditorPath, setWorkspaceEditorPath] = useState<string | null>(null)
+  const attemptId = query.data?.current_attempt?.id ?? null
+  const lastAttemptId = useRef(attemptId)
 
-  if (query.isLoading) return <p className="p-8 text-sm text-muted-foreground">Loading adventure…</p>
+  // The terminal now resets itself when the attempt advances (its lines derive
+  // from the new attempt's empty step history); only the revealed hint and the
+  // open file editor are local state that still needs clearing per problem.
+  useEffect(() => {
+    if (lastAttemptId.current !== attemptId) {
+      lastAttemptId.current = attemptId
+      setHint(null)
+      setWorkspaceEditorPath(null)
+    }
+  }, [attemptId])
+
+  if (query.isLoading) {
+    return (
+      <LoadingState
+        description="Preparing the repository, terminal, and command challenge."
+        label="Loading adventure"
+        variant="screen"
+      />
+    )
+  }
   if (query.isError || !query.data)
     return <p className="p-8 text-sm text-red-400">Could not load this adventure run.</p>
 
   const run: AdventureRun = query.data
-  const restart = onRestart ?? (() => {
-    window.location.assign(`/command-adventures/${run.command_adventure.slug}`)
-  })
+  const restart =
+    onRestart ?? (() => window.location.assign(`/command-adventures/${run.command_adventure.slug}`))
+  const backToTower = () => navigate(`/tower?storey=${run.storey_id}`)
 
   if (run.status !== 'started') {
-    return <AdventureResult run={run} onRestart={restart} />
+    return (
+      <>
+        <AdventureResult run={run} onRestart={restart} onBackToTower={backToTower} />
+        <AdventureCompletionModal
+          open={!completionDismissed}
+          run={run}
+          onClose={() => setCompletionDismissed(true)}
+          onBackToTower={backToTower}
+          onRestart={restart}
+        />
+      </>
+    )
   }
 
   const attempt = run.current_attempt
-  if (!attempt) return <p className="p-8 text-sm text-muted-foreground">Preparing next problem…</p>
+  if (!attempt) {
+    return <LoadingState description="Setting up the next repository." label="Preparing next problem" variant="screen" />
+  }
 
-  const progressValue = run.total_problems
-    ? Math.round((run.progress.completed / run.total_problems) * 100)
-    : 0
-  const budget = attempt.command_budget
-  const counted = attempt.counts.counted_command_count
-
-  function handleSubmit(command: string) {
-    submitCommand.mutate(command, {
-      onSuccess: (response) => {
-        setLines((prev) => [
-          ...prev,
-          { command, output: response.terminal_output || response.stdout || response.stderr, solved: response.solved },
-        ])
-      },
+  function revealHint() {
+    useHint.mutate(undefined, {
+      onSuccess: (response) => setHint({ number: response.hint_number, text: response.hint }),
     })
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 p-6">
-      <header className="space-y-2">
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>{run.command_adventure.title}</span>
-          <span>
-            Problem {attempt.order + 1} of {run.total_problems}
+    <div className="flex h-screen flex-col overflow-hidden bg-background">
+      <header className="shrink-0 border-b border-border bg-background px-3 py-2.5">
+        <div className="flex items-center gap-3">
+          <Button type="button" variant="ghost" size="sm" onClick={() => navigate(-1)}>
+            <ArrowLeft className="size-4" />
+            Back
+          </Button>
+          <GitBranch className="size-5 shrink-0 text-primary" />
+          <span className="min-w-0 truncate text-sm font-semibold text-foreground">
+            {run.command_adventure.title}
           </span>
+          <div className="ml-auto">
+            <AdventureCommandBudget attempt={attempt} />
+          </div>
         </div>
-        <ProgressBar value={progressValue} glow segments={run.total_problems} />
+        <div className="mt-2.5">
+          <AdventureProgressBar run={run} />
+        </div>
       </header>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{attempt.problem.title}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {attempt.student_context.task ? (
-            <p className="text-sm text-foreground">{attempt.student_context.task}</p>
-          ) : (
-            <p className="text-sm text-muted-foreground">{attempt.problem.summary}</p>
-          )}
-          <p className="text-xs text-muted-foreground">
-            Commands used: {counted}/{budget.max_counted_commands} · Ideal: {budget.ideal_counted_commands} · Hints:{' '}
-            {attempt.counts.hint_count}
-          </p>
-        </CardContent>
-      </Card>
-
-      <div className="overflow-hidden rounded-lg border border-border bg-[#0d1017]">
-        <div className="max-h-64 min-h-[6rem] space-y-2 overflow-y-auto p-3 font-mono text-xs">
-          {lines.length === 0 ? (
-            <p className="text-muted-foreground/60">Run a git command to begin.</p>
-          ) : (
-            lines.map((line, index) => (
-              <div key={index}>
-                <div className="text-emerald-400">$ {line.command}</div>
-                {line.output ? <pre className="whitespace-pre-wrap text-foreground/85">{line.output}</pre> : null}
-              </div>
-            ))
-          )}
-        </div>
-        <CommandInput
-          onSubmit={handleSubmit}
-          processing={submitCommand.isPending}
-          disabled={submitCommand.isPending}
-        />
-      </div>
-
-      {useHint.data?.hint ? (
-        <Card className="border-amber-500/30 bg-amber-500/[0.06]">
-          <CardContent className="py-3 text-sm text-amber-200/90">
-            <span className="font-semibold">Hint {useHint.data.hint_number}:</span> {useHint.data.hint}
-          </CardContent>
-        </Card>
-      ) : null}
-
-      <div className="flex justify-end">
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => useHint.mutate()}
-          disabled={useHint.isPending}
+      <main className="relative grid min-h-0 flex-1 grid-cols-[24rem_minmax(0,1fr)] gap-2 p-2 max-xl:grid-cols-[21rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
+        <aside
+          className="grid min-h-0 gap-2 overflow-hidden max-lg:min-h-[44rem]"
+          style={{
+            gridTemplateRows: projectFilesOpen
+              ? 'minmax(10rem, 1fr) auto minmax(12rem, 0.75fr)'
+              : 'minmax(10rem, 1fr) auto auto',
+          }}
         >
-          Use a hint
-        </Button>
-      </div>
+          <div className="min-h-0 overflow-y-auto app-scrollbar">
+            <AdventureContextPanel run={run} attempt={attempt} />
+          </div>
+          <AdventureMasteryPanel run={run} className="shrink-0" />
+          <div className="min-h-0 overflow-hidden">
+            <ProjectStructurePanel
+              snapshot={attempt.repository_state}
+              className="h-full"
+              selectedPath={workspaceEditorPath}
+              createDisabled={createFile.isPending}
+              isOpen={projectFilesOpen}
+              onToggle={() => setProjectFilesOpen((v) => !v)}
+              onCreateFile={async (input) => {
+                const updatedRun = await createFile.mutateAsync(input)
+                setWorkspaceEditorPath(input.path)
+                return updatedRun
+              }}
+              onOpenFile={setWorkspaceEditorPath}
+            />
+          </div>
+        </aside>
+
+        <section className="flex min-h-0 flex-col gap-2 max-lg:min-h-[36rem]">
+          <div className="min-h-0 flex-1">
+            <TerminalPanel
+              lines={lines}
+              processing={submitCommand.isPending}
+              runDisabled={submitCommand.isPending}
+              className="h-full"
+              onCommand={(command) => submitCommand.mutate(command)}
+            />
+          </div>
+
+          {attempt.scaffolding.hints ? (
+            <AdventureHintPanel
+              className="shrink-0"
+              hint={hint}
+              hintCount={attempt.counts.hint_count}
+              isRevealing={useHint.isPending}
+              onReveal={revealHint}
+            />
+          ) : null}
+        </section>
+        <WorkspaceEditorOverlay
+          snapshot={attempt.repository_state}
+          filePath={workspaceEditorPath}
+          open={Boolean(workspaceEditorPath)}
+          writeDisabled={writeFile.isPending}
+          onClose={() => setWorkspaceEditorPath(null)}
+          onWriteFile={(input) => writeFile.mutateAsync(input)}
+        />
+      </main>
     </div>
   )
 }

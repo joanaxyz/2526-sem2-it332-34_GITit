@@ -7,6 +7,12 @@ import {
   updateChallengeRunCache,
 } from '@/features/challenges/utils/challengeRunCache'
 import type { ChallengeCommandResponse, ChallengeRun, ChallengeStepLog } from '@/shared/practice/types'
+import {
+  createErrorStep as makeErrorStep,
+  createPendingStep as makePendingStep,
+  nextEphemeralStepId,
+  stripEphemeralSteps,
+} from '@/shared/practice/terminalSteps'
 import { queryKeys } from '@/shared/api/queryKeys'
 
 type CommandMutationContext = {
@@ -14,43 +20,20 @@ type CommandMutationContext = {
   pendingId: number
 }
 
-let ephemeralStepId = 0
-
-function nextEphemeralStepId() {
-  ephemeralStepId -= 1
-  return ephemeralStepId
-}
-
-export function isEphemeralStep(step: ChallengeStepLog) {
-  return step.id < 0
-}
-
-export function stripEphemeralSteps(steps: ChallengeStepLog[]) {
-  return steps.filter((step) => !isEphemeralStep(step))
-}
+// Challenge steps carry richer fields than the shared TerminalStep core; the
+// optimistic placeholders fill them with empty values until the real step lands.
+const challengeStepExtras = () => ({
+  command_classification: '',
+  contextual_feedback: '',
+  created_at: new Date().toISOString(),
+})
 
 function createPendingStep(command: string, id: number): ChallengeStepLog {
-  return {
-    id,
-    command_text: command,
-    terminal_output: '',
-    result_category: 'Pending',
-    command_classification: '',
-    contextual_feedback: '',
-    created_at: new Date().toISOString(),
-  }
+  return { ...makePendingStep(command, id), ...challengeStepExtras() }
 }
 
 function createErrorStep(command: string, message: string, id: number): ChallengeStepLog {
-  return {
-    id,
-    command_text: command,
-    terminal_output: message,
-    result_category: 'Error',
-    command_classification: '',
-    contextual_feedback: '',
-    created_at: new Date().toISOString(),
-  }
+  return { ...makeErrorStep(command, message, id), ...challengeStepExtras() }
 }
 
 function errorMessage(error: unknown) {

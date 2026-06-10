@@ -6,9 +6,10 @@ from typing import Any
 
 from evaluation.compiler import compile_evaluation_spec
 from evaluation.engine import EvaluationEngine
+from evaluation.services import StateBasedEvaluator
 from adventures.models import AdventureProblem, AdventureVariant
 from challenges.models import ChallengeLevel, ChallengeVariant
-from practice.context import StudentContextNormalizer
+from practice.context import ALLOWED_KEYS as SCENARIO_CONTEXT_ALLOWED_KEYS, ScenarioContextNormalizer
 from simulator.services import RepositorySnapshotService, RepositoryStateSimulator
 from simulator.workspace_files import WorkspaceFileError, WorkspaceFileStateService
 
@@ -75,8 +76,10 @@ class StaticProblemVariantBuilder:
         )
         if not evaluation_spec:
             evaluation_spec = {"completion_policy": {"mode": "state_hash"}}
-        student_context = StudentContextNormalizer().normalize(
-            self.materializer.render(template.get("student_context_template", {}), context),
+        rendered_context = self.materializer.render(template.get("scenario_context_template", {}), context)
+        self._assert_v3_context(rendered_context)
+        scenario_context = ScenarioContextNormalizer().normalize(
+            rendered_context,
             fallback_story="Reach the requested repository outcome cleanly.",
         )
         if isinstance(problem, AdventureProblem):
@@ -91,34 +94,49 @@ class StaticProblemVariantBuilder:
             **parent_kwargs,
             slug=self.materializer.render(template.get("slug_template", "{{case_id}}"), context),
             label=self.materializer.render(template.get("label_template", "Variant {{index}}"), context),
-            structure_signature=str(template.get("structure_key") or template.get("slug") or "variant"),
             initial_state=initial_state,
             evaluation_spec=evaluation_spec,
             target_state=target_state,
-            expected_state_diagram=self.snapshotter.snapshot(target_state),
             solution_commands=solution_commands,
             case_id=case_id,
             semantic_key=self.semantic_key(problem=problem, template=template, case_id=case_id),
             parameter_context=context,
-            student_context=student_context,
+            scenario_context=scenario_context,
             hint_set=list(self.materializer.render(template.get("hint_set_template", []), context)),
             scaffold_policy=dict(self.materializer.render(template.get("scaffold_policy_template", {}), context)),
             is_published=True,
         )
-        self.validate(variant)
+        self.validate(variant, objective_checks=getattr(problem, "objective_checks", None) or [])
         return variant
 
-    def validate(self, variant) -> None:
+    def _assert_v3_context(self, rendered: Any) -> None:
+        """Seed-time strictness: an authored scenario_context_template must be a
+        v3 brief with only whitelisted keys, so nothing unpredictable ever
+        reaches the frontend. An empty template is fine — the normalizer fills
+        in the minimal fallback brief."""
+        if not rendered:
+            return
+        if not isinstance(rendered, dict):
+            raise ProblemVariantBuildError(f"scenario_context_template must render to an object: {rendered!r}")
+        if rendered.get("schema_version") != 3:
+            raise ProblemVariantBuildError("scenario_context_template must declare schema_version 3.")
+        unknown = set(map(str, rendered)) - SCENARIO_CONTEXT_ALLOWED_KEYS
+        if unknown:
+            raise ProblemVariantBuildError(
+                f"scenario_context_template has unknown keys: {sorted(unknown)!r}"
+            )
+
+    def validate(self, variant, *, objective_checks: list | None = None) -> None:
         if not variant.initial_state:
             raise ProblemVariantBuildError("Practice variant has no initial state.")
         if not variant.target_state:
             raise ProblemVariantBuildError("Practice variant has no target state.")
-        if not variant.student_context:
-            raise ProblemVariantBuildError("Practice variant has no student context.")
-        flattened_context = json.dumps(variant.student_context, sort_keys=True).lower()
+        if not variant.scenario_context:
+            raise ProblemVariantBuildError("Practice variant has no scenario context.")
+        flattened_context = json.dumps(variant.scenario_context, sort_keys=True).lower()
         for command in variant.solution_commands:
             if command and command.lower() in flattened_context:
-                raise ProblemVariantBuildError("Student context exposes a solution command.")
+                raise ProblemVariantBuildError("Scenario context exposes a solution command.")
         outcome = EvaluationEngine().evaluate(
             spec=compile_evaluation_spec(variant.evaluation_spec),
             next_state=variant.target_state,
@@ -129,6 +147,34 @@ class StaticProblemVariantBuilder:
         )
         if not outcome.target_matched:
             raise ProblemVariantBuildError(f"Authored solution does not satisfy evaluation spec: {outcome.summary}")
+        self._validate_objective_checks(variant, checks=objective_checks or [])
+
+    def _validate_objective_checks(self, variant, *, checks: list) -> None:
+        """Every authored objective check must (a) carry a label + requirement and
+        (b) be satisfied by the solution's target state, so the live checklist
+        actually reaches all-green when the learner solves the problem. Checks
+        are authored once on the problem but validated against each variant's
+        own target state."""
+        evaluator = StateBasedEvaluator()
+        for check in checks:
+            if not isinstance(check, dict):
+                raise ProblemVariantBuildError(f"Objective check must be an object: {check!r}")
+            label = str(check.get("label", "")).strip()
+            requirement = check.get("requirement") or {}
+            if not label or not requirement:
+                raise ProblemVariantBuildError(
+                    f"Objective check needs a label and a requirement: {check!r}"
+                )
+            result = evaluator.evaluate(
+                variant.target_state,
+                requirement,
+                initial_state=variant.initial_state,
+                executed_commands=variant.solution_commands,
+            )
+            if not result.target_matched:
+                raise ProblemVariantBuildError(
+                    f"Objective check is not satisfied by the authored solution: {label!r} ({result.summary})"
+                )
 
     def _target_state_from_solution(
         self,

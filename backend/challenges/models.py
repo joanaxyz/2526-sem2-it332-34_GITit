@@ -46,13 +46,11 @@ class ChallengeLevel(models.Model):
 
     scenario = models.ForeignKey(Challenge, related_name="levels", on_delete=models.CASCADE)
     difficulty = models.CharField(max_length=12, choices=Difficulty.choices)
-    narrative = models.TextField(blank=True)
-    task_prompt = models.TextField(blank=True)
     required_successful_attempts = models.PositiveIntegerField(default=2)
     min_counted_commands = models.PositiveIntegerField(default=1)
     max_counted_commands = models.PositiveIntegerField(default=8)
     evaluation_spec = models.JSONField(default=dict, blank=True)
-    student_context = models.JSONField(default=dict, blank=True)
+    scenario_context = models.JSONField(default=dict, blank=True)
     is_published = models.BooleanField(default=True)
 
     class Meta:
@@ -127,6 +125,10 @@ class ChallengeRun(models.Model):
     first_attempt_star_eligible = models.BooleanField(default=True)
     failure_reason = models.CharField(max_length=160, blank=True)
     started_at = models.DateTimeField(auto_now_add=True)
+    # completed_at is set only on a successful completion; ended_at is set on any
+    # terminal outcome (completed, failed, or abandoned). On success both are set
+    # to the same instant. Use ended_at for "is this run over?" and completed_at
+    # for "did this run succeed?".
     completed_at = models.DateTimeField(null=True, blank=True)
     ended_at = models.DateTimeField(null=True, blank=True)
 

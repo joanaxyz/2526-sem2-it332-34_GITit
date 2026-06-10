@@ -1,4 +1,5 @@
-import type { RepositorySnapshot } from '@/shared/practice/types'
+import type { PracticeScenarioContext, RepositorySnapshot, TerminalStep } from '@/shared/practice/types'
+import type { ObjectiveCheck } from '@/shared/practice/utils/practiceContext'
 
 export type AdventureRunStatus = 'started' | 'completed' | 'failed' | 'abandoned'
 export type AttemptStatus = 'started' | 'completed' | 'failed'
@@ -13,7 +14,6 @@ export type AdventureScaffolding = {
 export type AdventureCommandBudget = {
   min_counted_commands: number
   max_counted_commands: number
-  ideal_counted_commands: number
 }
 
 export type AdventureAttemptCounts = {
@@ -26,15 +26,19 @@ export type AdventureProblemRef = {
   id: number
   slug: string
   title: string
-  summary: string
   is_required: boolean
 }
 
-export type AdventureStudentContext = {
-  story?: string
-  task?: string
-  [key: string]: unknown
-}
+/**
+ * Adventure attempts carry the same strict schema_version 3 scenario context as
+ * challenges (story / task / details / constraints), normalized by the backend
+ * `ScenarioContextNormalizer`. The live objective checklist arrives separately
+ * as the attempt's `objective_checks` field.
+ */
+export type AdventureScenarioContext = PracticeScenarioContext
+
+/** One persisted command in an attempt's terminal history. */
+export type AdventureStepLog = TerminalStep
 
 export type AdventureAttempt = {
   id: number
@@ -42,11 +46,19 @@ export type AdventureAttempt = {
   status: AttemptStatus
   problem: AdventureProblemRef
   variant: { id: number; label: string }
-  student_context: AdventureStudentContext
+  scenario_context: AdventureScenarioContext
+  /**
+   * Adventure-only live checklist: each authored check is evaluated server-side
+   * against the current repository state, so `satisfied` ticks as the learner
+   * progresses. Updated mid-attempt by `AdventureRunPatch.objective_checks`.
+   */
+  objective_checks: ObjectiveCheck[]
   scaffolding: AdventureScaffolding
   command_budget: AdventureCommandBudget
   counts: AdventureAttemptCounts
   repository_state: RepositorySnapshot
+  /** Terminal history for this attempt; the terminal derives its lines from this. */
+  steps: AdventureStepLog[]
 }
 
 export type AdventureAttemptResult = {
@@ -62,14 +74,37 @@ export type AdventureAttemptResult = {
   counted_command_count: number
 }
 
+export type AdventureMasteryCommand = {
+  slug: string
+  title: string
+  strength: number
+  mastered_bar: number
+  introduced: boolean
+  mastered: boolean
+}
+
+export type AdventureMastery = {
+  commands: AdventureMasteryCommand[]
+  commands_mastered: number
+  total_commands: number
+  session_score: number
+  pass_bar: number
+  total_achievable: number
+  passed: boolean
+}
+
 export type AdventureRun = {
   id: number
   status: AdventureRunStatus
   command_adventure: { id: number; slug: string; title: string; description: string }
+  /** The adventure's storey (module) id, used to navigate back to the Tower. */
+  storey_id: number
   current_problem_index: number
   total_problems: number
-  total_score: number
+  session_score: number
+  passed: boolean
   mastery_progress_gained: number
+  mastery: AdventureMastery
   completed_at: string | null
   current_attempt: AdventureAttempt | null
   results: AdventureAttemptResult[]
@@ -82,12 +117,34 @@ export type AdventureHintResponse = {
   hint_number: number
 }
 
+/**
+ * Slim per-command patch returned while an attempt is still in progress. The
+ * backend sends this instead of the full run (mirroring the challenge
+ * command/run payload split); only the live attempt state changes, so the
+ * client merges these fields into the cached run. A transition (solved / budget
+ * spent) returns a full `AdventureRun` instead, flagged by the absence of
+ * `partial`.
+ */
+export type AdventureRunPatch = {
+  partial: true
+  id: number
+  status: AdventureRunStatus
+  current_attempt: {
+    id: number
+    counts: AdventureAttemptCounts
+    repository_state: RepositorySnapshot
+    objective_checks: ObjectiveCheck[] | null
+  } | null
+}
+
 export type AdventureCommandResponse = {
-  run: AdventureRun
+  run: AdventureRun | AdventureRunPatch
   solved: boolean
   stdout: string
   stderr: string
   exit_code: number
   terminal_output: string
   command_classification: string
+  /** The persisted step; replaces the client's optimistic pending placeholder. */
+  step: AdventureStepLog
 }

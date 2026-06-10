@@ -17,6 +17,34 @@ from practice.visualization import RepositoryVisualizationService
 from simulator.services import RepositoryStateSimulator
 
 
+def _find_prerequisite_cycle(graph: dict[int, list[int]]) -> list[int] | None:
+    """Return one cycle (as a node path) in the prerequisite graph, or None."""
+    WHITE, GRAY, BLACK = 0, 1, 2
+    color = {node: WHITE for node in graph}
+    stack: list[int] = []
+
+    def visit(node: int) -> list[int] | None:
+        color[node] = GRAY
+        stack.append(node)
+        for nxt in graph.get(node, ()):
+            if color.get(nxt, WHITE) == GRAY:
+                return stack[stack.index(nxt):] + [nxt]
+            if color.get(nxt, WHITE) == WHITE:
+                found = visit(nxt)
+                if found:
+                    return found
+        stack.pop()
+        color[node] = BLACK
+        return None
+
+    for node in graph:
+        if color[node] == WHITE:
+            found = visit(node)
+            if found:
+                return found
+    return None
+
+
 class Command(BaseCommand):
     help = "Seed the v2 command drill and workflow scenario curriculum."
 
@@ -157,6 +185,7 @@ class Command(BaseCommand):
     def _seed_command_drills(self, usages: dict[str, CommandForm]) -> None:
         builder = StaticProblemVariantBuilder()
         live_drill_ids = []
+        drills_by_slug: dict[str, AdventureProblem] = {}
         for index, spec in enumerate(COMMAND_DRILLS, start=1):
             usage = usages[spec["usage"]]
             drill, _ = AdventureProblem.objects.update_or_create(
@@ -164,18 +193,29 @@ class Command(BaseCommand):
                 slug=spec["slug"],
                 defaults={
                     "title": spec["title"],
-                    "summary": spec["summary"],
                     "required_successful_attempts": spec["required_successful_attempts"],
                     "min_counted_commands": spec["min_counted_commands"],
                     "max_counted_commands": spec["max_counted_commands"],
-                    "ideal_counted_commands": spec.get("ideal_counted_commands", spec["min_counted_commands"]),
-                    "student_context": spec["student_context"],
+                    "scenario_context": spec["scenario_context"],
+                    "objective_checks": spec.get("objective_checks", []),
                     "sort_order": index,
                     "is_published": True,
                 },
             )
             live_drill_ids.append(drill.id)
+            drills_by_slug[spec["slug"]] = drill
             self._sync_variants(problem=drill, variant_specs=spec["variants"], builder=builder)
+        # Second pass: wire the explicit prerequisite graph now that every drill
+        # exists. Prerequisites are authored as a list of drill slugs.
+        for spec in COMMAND_DRILLS:
+            drill = drills_by_slug[spec["slug"]]
+            try:
+                prereqs = [drills_by_slug[slug] for slug in spec.get("prerequisites", [])]
+            except KeyError as missing:
+                raise CommandError(
+                    f"Drill {spec['slug']!r} lists unknown prerequisite {missing}."
+                )
+            drill.prerequisites.set(prereqs)
         AdventureProblem.objects.exclude(id__in=live_drill_ids).update(is_published=False)
 
     def _seed_workflows(self, modules: dict[str, Storey]) -> None:
@@ -201,12 +241,10 @@ class Command(BaseCommand):
                     scenario=scenario,
                     difficulty=level_spec["difficulty"],
                     defaults={
-                        "narrative": level_spec["narrative"],
-                        "task_prompt": level_spec["task_prompt"],
                         "required_successful_attempts": level_spec["required_successful_attempts"],
                         "min_counted_commands": level_spec["min_counted_commands"],
                         "max_counted_commands": level_spec["max_counted_commands"],
-                        "student_context": level_spec["student_context"],
+                        "scenario_context": level_spec["scenario_context"],
                         "is_published": scenario.is_published,
                     },
                 )
@@ -238,24 +276,17 @@ class Command(BaseCommand):
                 defaults={
                     "slug": variant.slug,
                     "label": variant.label,
-                    "structure_signature": variant.structure_signature,
                     "initial_state": variant.initial_state,
                     "evaluation_spec": variant.evaluation_spec,
                     "target_state": variant.target_state,
-                    "expected_state_diagram": variant.expected_state_diagram,
                     "solution_commands": variant.solution_commands,
                     "case_id": variant.case_id,
                     "parameter_context": variant.parameter_context,
-                    "student_context": variant.student_context,
+                    "scenario_context": variant.scenario_context,
                     "hint_set": variant.hint_set,
                     "scaffold_policy": variant.scaffold_policy,
-                    # Budget is authoritative on the variant; denormalized from
-                    # the parent problem/level spec (same for all its variants).
-                    "min_counted_commands": problem.min_counted_commands,
-                    "max_counted_commands": problem.max_counted_commands,
-                    "ideal_counted_commands": getattr(
-                        problem, "ideal_counted_commands", problem.min_counted_commands
-                    ),
+                    # Command budget lives on the parent problem/level, not the
+                    # variant — all variants of a problem share the same budget.
                     "is_published": True,
                 },
             )
@@ -316,9 +347,37 @@ class Command(BaseCommand):
             for level in levels:
                 self._validate_problem_variants(problem=level, errors=errors)
 
+        self._validate_prerequisites(errors=errors)
+
         if errors:
             raise CommandError("Curriculum validation failed:\n" + "\n".join(f"- {error}" for error in errors))
         self.stdout.write(self.style.SUCCESS("Validated v2 curriculum."))
+
+    def _validate_prerequisites(self, *, errors: list[str]) -> None:
+        """Adventure prerequisite graph must be a DAG, and every prerequisite must
+        be published, in the same adventure, and precede its dependent in order."""
+        ordered = list(
+            AdventureProblem.objects.filter(is_published=True)
+            .order_by("usage__topic__sort_order", "usage__sort_order", "sort_order", "id")
+            .prefetch_related("prerequisites")
+            .select_related("usage__topic")
+        )
+        position = {problem.id: index for index, problem in enumerate(ordered)}
+        graph: dict[int, list[int]] = {}
+        for problem in ordered:
+            prereqs = list(problem.prerequisites.all())
+            graph[problem.id] = [pre.id for pre in prereqs]
+            for pre in prereqs:
+                if not pre.is_published:
+                    errors.append(f"{problem.slug}: prerequisite {pre.slug} is not published")
+                elif pre.usage.topic.module_id != problem.usage.topic.module_id:
+                    errors.append(f"{problem.slug}: prerequisite {pre.slug} is in a different adventure")
+                elif position.get(pre.id, 1 << 30) >= position[problem.id]:
+                    errors.append(f"{problem.slug}: prerequisite {pre.slug} must precede it in sort order")
+        cycle = _find_prerequisite_cycle(graph)
+        if cycle:
+            slugs = {p.id: p.slug for p in ordered}
+            errors.append("prerequisite graph has a cycle: " + " -> ".join(slugs[i] for i in cycle))
 
     def _validate_command_level(self, *, level: CommandSkill, errors: list[str]) -> None:
         if not level.base_command:
@@ -340,6 +399,17 @@ class Command(BaseCommand):
         if not variants:
             errors.append(f"{self._problem_name(problem)}: published practice item has no variants")
             return
+        # Mastery reviews must vary the scenario: a drill needs at least as many
+        # variants as the masteries it demands, or repeated reviews show the same
+        # screen. Warn (not error) so under-authored content still seeds + runs.
+        if isinstance(problem, AdventureProblem) and len(variants) < problem.required_successful_attempts:
+            self.stdout.write(
+                self.style.WARNING(
+                    f"{self._problem_name(problem)}: {len(variants)} variant(s) for "
+                    f"{problem.required_successful_attempts} required masteries; "
+                    "reviews will repeat scenarios until more variants are authored."
+                )
+            )
         for variant in variants:
             self._validate_variant(variant=variant, errors=errors)
 
@@ -351,7 +421,6 @@ class Command(BaseCommand):
             "target_state": variant.target_state,
             "evaluation_spec": variant.evaluation_spec,
             "solution_commands": variant.solution_commands,
-            "expected_state_diagram": variant.expected_state_diagram,
         }
         for field, value in required_fields.items():
             if not value:

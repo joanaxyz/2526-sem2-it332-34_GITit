@@ -70,20 +70,16 @@ export type RequiredDetail = {
   value: string
 }
 
-export type PracticeStudentContext = {
-  brief?: {
-    story?: string
-    task?: string
-  }
-  repository?: {
-    current_state?: string[]
-  }
-  objective?: {
-    outcome?: string
-    required_details?: RequiredDetail[]
-  }
+// Strict schema_version 3 brief: the backend normalizer whitelists exactly
+// these keys, so the frontend never has to guess. The adventure objective
+// checklist is NOT part of this shape — it arrives as a separate top-level
+// `objective_checks` payload field.
+export type PracticeScenarioContext = {
+  schema_version?: number
+  story?: string
+  task?: string
+  details?: RequiredDetail[]
   constraints?: string[]
-  process_notes?: string[]
 }
 
 export type ChallengeProblem = {
@@ -108,7 +104,7 @@ export type ChallengeRun = {
   completed_at: string | null
   first_attempt_star_eligible: boolean
   challenge: ChallengeProblem
-  student_context?: PracticeStudentContext
+  scenario_context?: PracticeScenarioContext
   storey: {
     id: number
     number: number
@@ -160,11 +156,17 @@ export type ChallengeRun = {
   reviewable_difficulties?: ChallengeLevelAccess[]
 }
 
-export type ChallengeStepLog = {
+// The minimal shape the shared terminal needs to render a command + its output.
+// Both ChallengeStepLog and the adventure step payload satisfy this, so terminal
+// line derivation (and the optimistic pending/error placeholders) are shared.
+export type TerminalStep = {
   id: number
   command_text: string
   terminal_output: string
   result_category: string
+}
+
+export type ChallengeStepLog = TerminalStep & {
   command_classification: string
   contextual_feedback: string
   visualization_snapshot?: RepositoryVisualization

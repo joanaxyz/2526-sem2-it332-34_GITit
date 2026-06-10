@@ -70,11 +70,25 @@ function EmptySection({ label }: { label: string }) {
   return <div className="tower-empty-state">No {label} published yet.</div>
 }
 
-function LoadingRows({ compact = false }: { compact?: boolean }) {
+// Loading placeholders shaped like the doors they will become, so the tower
+// visibly assembles piece by piece instead of flashing generic rows.
+function AdventureDoorSkeleton() {
   return (
-    <div className="tower-loading-stack">
-      {Array.from({ length: compact ? 1 : 3 }, (_, index) => (
-        <div className="tower-loading-row" key={index} />
+    <div className="tower-adventure-door-wrap" aria-hidden="true">
+      <span className="tower-door-skeleton tower-door-skeleton--gate" />
+    </div>
+  )
+}
+
+function TrialRoomSkeleton() {
+  return (
+    <div className="tower-door-skeleton-row" aria-hidden="true">
+      {Array.from({ length: 3 }, (_, index) => (
+        <span
+          className="tower-door-skeleton tower-door-skeleton--trial"
+          key={index}
+          style={{ '--skeleton-index': index } as CSSProperties}
+        />
       ))}
     </div>
   )
@@ -84,11 +98,20 @@ function flattenPages<T extends ContentItem>(query: ReturnType<typeof useStoreyC
   return query.data?.pages.flatMap((page) => page.results) ?? []
 }
 
+const PIECE_EASE = [0.16, 1, 0.3, 1] as const
+
 // ── Windows storey: the lit-window band that tops every storey; the conical roof
 // only crowns the very first storey (the top of the whole tower). ──
 function WindowStorey({ crowned }: { crowned: boolean }) {
   return (
-    <div className="tower-window-stage" aria-hidden="true">
+    <motion.div
+      className="tower-window-stage"
+      aria-hidden="true"
+      initial={{ opacity: 0, y: -22 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ amount: 0.3, once: true }}
+      transition={{ duration: 0.55, ease: PIECE_EASE }}
+    >
       {crowned ? (
         <div className="tower-window-roof">
           <span className="tower-window-roof-spire" />
@@ -100,7 +123,7 @@ function WindowStorey({ crowned }: { crowned: boolean }) {
         <span className="tower-window-storey-window" />
         <span className="tower-window-storey-window" />
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -115,7 +138,7 @@ function TowerSectionSeparator({
   afterChallenges?: boolean
 }) {
   return (
-    <div
+    <motion.div
       className={cn(
         'tower-section-separator',
         continuation && 'is-continuation',
@@ -123,6 +146,10 @@ function TowerSectionSeparator({
         afterChallenges && 'is-after-challenges',
       )}
       aria-hidden="true"
+      initial={{ opacity: 0, scaleX: 0.86 }}
+      whileInView={{ opacity: 1, scaleX: 1 }}
+      viewport={{ amount: 0.4, once: true }}
+      transition={{ duration: 0.5, ease: PIECE_EASE }}
     >
       {afterChallenges ? (
         <span className="tower-section-separator-crenels">
@@ -132,11 +159,12 @@ function TowerSectionSeparator({
         </span>
       ) : null}
       <span className="tower-section-separator-backplate" />
-    </div>
+    </motion.div>
   )
 }
 
-// ── Command Adventure: a single arched neon gate, selectable. ──
+// ── Command Adventure: a single arched neon gate, selectable. The gate
+// materializes out of the wall when it scrolls into view. ──
 function AdventureDoor({
   adventure,
   selected,
@@ -147,13 +175,17 @@ function AdventureDoor({
   onSelect: () => void
 }) {
   return (
-    <button
+    <motion.button
       type="button"
       className="adventure-door"
       data-selected={selected ? 'true' : undefined}
       aria-pressed={selected}
       aria-label={`Select Command Adventure: ${adventure.title}`}
       onClick={onSelect}
+      initial={{ opacity: 0, y: 26, scale: 0.9, rotateX: -18, transformPerspective: 760 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0, transformPerspective: 760 }}
+      viewport={{ amount: 0.3, once: true }}
+      transition={{ duration: 0.62, ease: PIECE_EASE }}
     >
       <span className="adventure-door-frame" aria-hidden="true">
         <span className="adventure-door-interior" />
@@ -165,9 +197,34 @@ function AdventureDoor({
         </span>
         <span className="adventure-door-gem" />
       </span>
-      <span className="door-ring" aria-hidden="true" />
-    </button>
+    </motion.button>
   )
+}
+
+// Door reveal choreography: the row staggers its doors one by one; each door
+// rises out of the floor, then its portcullis bars drop in sequence. The bars
+// keep `x: '-50%'` in both poses because the CSS centring translate would
+// otherwise be clobbered by the motion transform.
+const trialDoorRowVariants = {
+  hidden: {},
+  shown: { transition: { staggerChildren: 0.14, delayChildren: 0.05 } },
+}
+
+const trialDoorVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.94, rotateX: -22, transformPerspective: 640 },
+  shown: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    rotateX: 0,
+    transformPerspective: 640,
+    transition: { duration: 0.55, ease: PIECE_EASE, staggerChildren: 0.07, delayChildren: 0.16 },
+  },
+}
+
+const trialDoorBarVariants = {
+  hidden: { x: '-50%', scaleY: 0, originY: 0 },
+  shown: { x: '-50%', scaleY: 1, originY: 0, transition: { duration: 0.34, ease: PIECE_EASE } },
 }
 
 // ── A single GIT Challenged level door — selectable, framed by difficulty colour. ──
@@ -195,7 +252,7 @@ function TrialDoor({
   const inProgress = level.status === 'in_progress'
 
   return (
-    <button
+    <motion.button
       type="button"
       className={cn('trial-door', isLocked && 'is-locked', completed && 'is-complete', inProgress && 'is-active')}
       style={{ '--level-accent': accent, '--door-accent': accent } as CSSProperties}
@@ -204,28 +261,22 @@ function TrialDoor({
       aria-pressed={selected}
       aria-label={`Select ${scenario.title}: ${difficultyLabel(level)}`}
       onClick={() => select({ kind: 'challenge', storeyId, scenarioIndex, scenario, level, locked })}
+      variants={trialDoorVariants}
     >
       <span className="trial-door-arch" aria-hidden="true">
         <span className="trial-door-interior" />
-        <span className="trial-door-rivets">
-          {Array.from({ length: 14 }, (_, index) => (
-            <span className="trial-door-rivet" key={index} />
-          ))}
-        </span>
         <span className="trial-door-gate">
           <span className="trial-door-bars">
-            {Array.from({ length: 5 }, (_, index) => (
-              <span className="trial-door-bar" key={index} />
+            {Array.from({ length: 4 }, (_, index) => (
+              <motion.span className="trial-door-bar" key={index} variants={trialDoorBarVariants} />
             ))}
           </span>
           <span className="trial-door-crossbar" />
-          <span className="trial-door-gem" />
         </span>
       </span>
       <span className="trial-door-label">{difficultyLabel(level)}</span>
       <span className="trial-door-state">{actionLabel(actionForChallengeLevel(level), level.status)}</span>
-      <span className="door-ring" aria-hidden="true" />
-    </button>
+    </motion.button>
   )
 }
 
@@ -253,7 +304,13 @@ function ChallengeTrial({
         <h3 className="trial-room-title">{scenario.title}</h3>
       </div>
       {scenario.summary?.trim() ? <p className="trial-room-summary">{scenario.summary}</p> : null}
-      <div className="trial-door-row">
+      <motion.div
+        className="trial-door-row"
+        initial="hidden"
+        whileInView="shown"
+        viewport={{ amount: 0.3, once: true }}
+        variants={trialDoorRowVariants}
+      >
         {scenario.levels.map((level) => (
           <TrialDoor
             key={level.id}
@@ -264,7 +321,7 @@ function ChallengeTrial({
             locked={locked}
           />
         ))}
-      </div>
+      </motion.div>
     </motion.article>
   )
 }
@@ -371,7 +428,9 @@ export function StoreyPracticeHub({
   sequenceIndex = 0,
 }: StoreyPracticeHubProps) {
   const hubRef = useRef<HTMLElement | null>(null)
-  const nearViewport = useInView(hubRef, { margin: '1100px 0px 1100px 0px' })
+  // Storeys only mount when scrolled to, so a short prefetch margin is enough:
+  // content starts loading just before the storey enters the viewport.
+  const nearViewport = useInView(hubRef, { margin: '600px 0px 600px 0px' })
   const [shouldLoad, setShouldLoad] = useState(false)
   useEffect(() => {
     if (!nearViewport || shouldLoad) return
@@ -408,13 +467,9 @@ export function StoreyPracticeHub({
       data-storey-id={storey.id}
     >
       <div className={cn('learning-tower', !isFirst && 'learning-tower-continuation')}>
-        <motion.div
-          className="tower-repeater"
-          initial={{ opacity: 0, y: 22, scale: 0.99 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ amount: 0.18, once: true, margin: '-6% 0px -6% 0px' }}
-          transition={{ duration: 0.68, delay: motionDelay, ease: [0.16, 1, 0.3, 1] }}
-        >
+        {/* Each tower piece (window band, stages, separators, doors) owns its
+            entrance animation, so the storey assembles piece by piece. */}
+        <div className="tower-repeater">
           <WindowStorey crowned={isFirst} />
 
           <motion.section
@@ -429,7 +484,7 @@ export function StoreyPracticeHub({
             </span>
             <h2 className="tower-stage-title tower-stage-title--adventure">Command Adventure</h2>
 
-            {adventureQuery.isLoading ? <LoadingRows compact /> : null}
+            {adventureQuery.isLoading ? <AdventureDoorSkeleton /> : null}
             {!adventureQuery.isLoading && !adventure ? <EmptySection label="Command Adventures" /> : null}
 
             {adventure ? (
@@ -459,7 +514,7 @@ export function StoreyPracticeHub({
 
             {workflowQuery.isLoading ? (
               <div className="mt-5">
-                <LoadingRows />
+                <TrialRoomSkeleton />
               </div>
             ) : null}
             {!workflowQuery.isLoading && workflowScenarios.length === 0 ? (
@@ -483,7 +538,7 @@ export function StoreyPracticeHub({
             <div ref={workflowLoadRef} />
             {workflowQuery.isFetchingNextPage ? (
               <div className="mt-3">
-                <LoadingRows compact />
+                <TrialRoomSkeleton />
               </div>
             ) : null}
             {workflowQuery.hasNextPage ? (
@@ -501,7 +556,7 @@ export function StoreyPracticeHub({
           </motion.section>
 
           {!isLast ? <TowerSectionSeparator afterChallenges continuation /> : <TowerSectionSeparator afterChallenges base />}
-        </motion.div>
+        </div>
       </div>
     </section>
   )

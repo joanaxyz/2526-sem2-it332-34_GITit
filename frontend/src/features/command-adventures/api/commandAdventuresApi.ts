@@ -21,6 +21,18 @@ export const commandAdventuresApi = {
       body: JSON.stringify({ command }),
     })
   },
+  createFile(runId: number, input: { path: string; content: string }) {
+    return apiRequest<AdventureRun>(`/adventure-runs/${runId}/files/`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    })
+  },
+  writeFile(runId: number, input: { path: string; content: string }) {
+    return apiRequest<AdventureRun>(`/adventure-runs/${runId}/files/`, {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    })
+  },
   useHint(runId: number) {
     return apiRequest<AdventureHintResponse>(`/adventure-runs/${runId}/use-hint/`, {
       method: 'POST',

@@ -1,3 +1,5 @@
+from dataclasses import dataclass, field
+
 from django.db.models import Count, Q
 
 from adventures.models import AdventureProblem, AdventureRun, CommandAdventure
@@ -6,6 +8,7 @@ from challenges.selectors import (
     command_accuracy_rate,
     session_meets_progress_threshold,
 )
+from common.constants import DIFFICULTY_EASY, DIFFICULTY_HARD, DIFFICULTY_MEDIUM
 from curriculum.models import CommandForm, CommandSkill, ConceptPage, Storey
 
 
@@ -125,9 +128,10 @@ def storey_content_page(
             queryset = queryset.filter(id__gt=cursor)
         items = list(queryset[: limit + 1])
         visible = items[:limit]
+        access = _build_challenge_access(user=user, storey_id=storey_id, challenges=visible)
         return {
             "section": section,
-            "results": [challenge_summary_payload(user=user, challenge=challenge) for challenge in visible],
+            "results": [challenge_summary_payload(challenge=challenge, access=access) for challenge in visible],
             "next_cursor": visible[-1].id if len(items) > limit and visible else None,
         }
 
@@ -158,8 +162,70 @@ def command_skill_queryset(*, storey_id: int):
 def challenge_queryset(*, storey_id: int):
     return (
         Challenge.objects.filter(module_id=storey_id, is_published=True)
-        .prefetch_related("levels", "levels__variants")
+        .prefetch_related("levels")
         .order_by("sort_order", "id")
+    )
+
+
+@dataclass(frozen=True)
+class ChallengeAccessContext:
+    """Per-page batch of every user-specific fact the level payloads need, so
+    serializing a page of challenges costs a fixed handful of queries instead
+    of several per level."""
+
+    completions: dict[int, object] = field(default_factory=dict)
+    active_runs: dict[int, ChallengeRun] = field(default_factory=dict)
+    latest_runs: dict[int, ChallengeRun] = field(default_factory=dict)
+    progress_counts: dict[int, int] = field(default_factory=dict)
+    adventure_passed: bool = False
+
+
+def _build_challenge_access(*, user, storey_id: int, challenges: list[Challenge]) -> ChallengeAccessContext:
+    from progress.models import ProblemCompletion
+
+    if not getattr(user, "is_authenticated", False):
+        return ChallengeAccessContext()
+    level_ids = [level.id for challenge in challenges for level in challenge.levels.all()]
+    if not level_ids:
+        return ChallengeAccessContext(adventure_passed=_adventure_passed(user=user, storey_id=storey_id))
+
+    completions = {
+        completion.challenge_level_id: completion
+        for completion in ProblemCompletion.objects.filter(user=user, challenge_level_id__in=level_ids)
+    }
+
+    active_runs: dict[int, ChallengeRun] = {}
+    latest_runs: dict[int, ChallengeRun] = {}
+    progress_counts: dict[int, int] = {}
+    runs = (
+        ChallengeRun.objects.filter(user=user, challenge_level_id__in=level_ids)
+        .order_by("id")
+        .only(
+            "id",
+            "mode",
+            "status",
+            "challenge_level_id",
+            "counted_action_total",
+            "command_budget_snapshot",
+            "total_attempts",
+            "completed_at",
+            "ended_at",
+        )
+    )
+    for run in runs:
+        # Ascending id order: the last run seen per level is the latest one.
+        latest_runs[run.challenge_level_id] = run
+        if run.mode == "primary" and run.status == "started":
+            active_runs[run.challenge_level_id] = run
+        if run.mode == "primary" and run.status == "completed" and session_meets_progress_threshold(session=run):
+            progress_counts[run.challenge_level_id] = progress_counts.get(run.challenge_level_id, 0) + 1
+
+    return ChallengeAccessContext(
+        completions=completions,
+        active_runs=active_runs,
+        latest_runs=latest_runs,
+        progress_counts=progress_counts,
+        adventure_passed=_adventure_passed(user=user, storey_id=storey_id),
     )
 
 
@@ -221,8 +287,12 @@ def command_skill_summary_payload(*, user, skill: CommandSkill) -> dict:
     }
 
 
-def challenge_summary_payload(*, user, challenge: Challenge) -> dict:
-    levels = [challenge_level_access_payload(user=user, level=level) for level in _ordered_levels(challenge.levels.all())]
+def challenge_summary_payload(*, challenge: Challenge, access: ChallengeAccessContext) -> dict:
+    ordered = _ordered_levels(challenge.levels.all())
+    levels = [
+        challenge_level_access_payload(level=level, access=access, scenario_levels=ordered)
+        for level in ordered
+    ]
     return {
         "item_type": "challenge",
         "id": challenge.id,
@@ -235,22 +305,27 @@ def challenge_summary_payload(*, user, challenge: Challenge) -> dict:
     }
 
 
-def challenge_level_access_payload(*, user, level: ChallengeLevel) -> dict:
-    from progress.models import ProblemCompletion
-
-    completion = ProblemCompletion.objects.filter(user=user, challenge_level=level).first()
-    active_run = _active_challenge_run(user=user, challenge_level=level)
-    latest_run = _latest_challenge_run(user=user, challenge_level=level)
-    progress = _challenge_progress_payload(user=user, level=level)
+def challenge_level_access_payload(
+    *,
+    level: ChallengeLevel,
+    access: ChallengeAccessContext,
+    scenario_levels: list[ChallengeLevel],
+) -> dict:
+    completion = access.completions.get(level.id)
+    active_run = access.active_runs.get(level.id)
+    required = int(level.required_successful_attempts or 1)
     return {
         "id": level.id,
         "difficulty": level.difficulty,
-        "status": _challenge_status(user=user, level=level, completion=completion, active_run=active_run),
+        "status": _challenge_status(level=level, access=access, scenario_levels=scenario_levels),
         "review_available": bool(completion),
         "required_successful_attempts": level.required_successful_attempts,
-        "successful_attempts": progress,
+        "successful_attempts": {
+            "count": min(access.progress_counts.get(level.id, 0), required),
+            "required": required,
+        },
         "active_run_id": active_run.id if active_run else None,
-        "latest_attempt": _latest_attempt_payload(latest_run),
+        "latest_attempt": _latest_attempt_payload(access.latest_runs.get(level.id)),
         "completion": _completion_payload(completion),
         "command_budget": {
             "min_counted_commands": level.min_counted_commands,
@@ -281,48 +356,47 @@ def get_challenge_level(level_id: int) -> ChallengeLevel:
     )
 
 
-def _challenge_progress_payload(*, user, level: ChallengeLevel) -> dict:
-    required = int(level.required_successful_attempts or 1)
-    count = 0
-    for run in ChallengeRun.objects.filter(user=user, challenge_level=level, mode="primary", status="completed"):
-        if session_meets_progress_threshold(session=run):
-            count += 1
-    return {"count": min(count, required), "required": required}
-
-
-def _challenge_status(*, user, level: ChallengeLevel, completion, active_run) -> str:
-    if completion:
+def _challenge_status(
+    *,
+    level: ChallengeLevel,
+    access: ChallengeAccessContext,
+    scenario_levels: list[ChallengeLevel],
+) -> str:
+    if level.id in access.completions:
         return "completed"
-    if active_run:
+    if level.id in access.active_runs:
         return "in_progress"
-    if _challenge_unlocked(user=user, level=level):
-        latest = _latest_challenge_run(user=user, challenge_level=level)
+    if _challenge_unlocked(level=level, access=access, scenario_levels=scenario_levels):
+        latest = access.latest_runs.get(level.id)
         return latest.status if latest and latest.status in {"failed", "abandoned"} else "not_started"
     return "locked"
 
 
-def _challenge_unlocked(*, user, level: ChallengeLevel) -> bool:
-    from common.constants import DIFFICULTY_EASY, DIFFICULTY_MEDIUM
-    from progress.models import ProblemCompletion
-
+def _challenge_unlocked(
+    *,
+    level: ChallengeLevel,
+    access: ChallengeAccessContext,
+    scenario_levels: list[ChallengeLevel],
+) -> bool:
     if level.difficulty == DIFFICULTY_EASY:
-        return True
+        # Mirrors ChallengeRunService._ensure_adventure_passed: a storey's
+        # challenges open once its Command Adventure has been passed.
+        return access.adventure_passed
     previous = DIFFICULTY_EASY if level.difficulty == DIFFICULTY_MEDIUM else DIFFICULTY_MEDIUM
-    previous_level = ChallengeLevel.objects.filter(scenario=level.scenario, difficulty=previous, is_published=True).first()
-    return bool(previous_level and ProblemCompletion.objects.filter(user=user, challenge_level=previous_level).exists())
+    previous_level = next(
+        (candidate for candidate in scenario_levels if candidate.difficulty == previous and candidate.is_published),
+        None,
+    )
+    return bool(previous_level and previous_level.id in access.completions)
 
 
-def _active_challenge_run(*, user, challenge_level=None):
-    return ChallengeRun.objects.filter(
-        user=user,
-        challenge_level=challenge_level,
-        status="started",
-        mode="primary",
-    ).order_by("-id").first()
-
-
-def _latest_challenge_run(*, user, challenge_level=None):
-    return ChallengeRun.objects.filter(user=user, challenge_level=challenge_level).order_by("-id").first()
+def _adventure_passed(*, user, storey_id: int) -> bool:
+    adventure = CommandAdventure.objects.filter(module_id=storey_id, is_published=True).first()
+    if adventure is None:
+        return True  # storey has no Command Adventure to gate on
+    return AdventureRun.objects.filter(
+        user=user, command_adventure=adventure, passed_at__isnull=False
+    ).exists()
 
 
 def _latest_attempt_payload(run) -> dict | None:
@@ -354,7 +428,5 @@ def _completion_payload(completion) -> dict | None:
 
 
 def _ordered_levels(levels) -> list[ChallengeLevel]:
-    from common.constants import DIFFICULTY_EASY, DIFFICULTY_HARD, DIFFICULTY_MEDIUM
-
     order = {DIFFICULTY_EASY: 0, DIFFICULTY_MEDIUM: 1, DIFFICULTY_HARD: 2}
     return sorted(levels, key=lambda level: order.get(level.difficulty, 99))

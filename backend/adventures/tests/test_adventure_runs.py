@@ -1,7 +1,7 @@
 from django.core.management import call_command
 
-from adventures.services import AdventureRunService, ordered_problems_for
 from adventures.models import AdventureRun, CommandAdventure
+from adventures.scheduler import pass_bar_for
 from adventures.scoring import (
     BAND_FAILED,
     BAND_MASTERED,
@@ -9,6 +9,7 @@ from adventures.scoring import (
     AdventureScoringService,
     band_for,
 )
+from adventures.services import AdventureRunService, ordered_problems_for
 
 
 def make_user(django_user_model, username="adventurer"):
@@ -85,7 +86,22 @@ def _adventure_with_problems():
     raise AssertionError("No published adventure with problems was seeded.")
 
 
-def test_run_completes_when_all_problems_solved(db, django_user_model):
+def _solve_current(service, run, *, solved=True) -> bool:
+    """Drive the run's current attempt; returns False once the session is over."""
+    attempt = service.current_attempt(run=run)
+    if attempt is None:
+        return False
+    service.record_attempt_result(
+        attempt=attempt,
+        solved=solved,
+        counted_command_count=attempt.adventure_problem.min_counted_commands or 1,
+        command_count=1,
+        hint_count=0,
+    )
+    return True
+
+
+def test_run_completes_when_all_commands_mastered(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
     adventure = _adventure_with_problems()
@@ -94,58 +110,85 @@ def test_run_completes_when_all_problems_solved(db, django_user_model):
     run = service.start_run(user=user, adventure=adventure)
     assert run.status == "started"
 
-    problems = ordered_problems_for(adventure)
-    for _ in problems:
-        attempt = service.current_attempt(run=run)
-        assert attempt is not None
-        service.record_attempt_result(
-            attempt=attempt,
-            solved=True,
-            counted_command_count=attempt.adventure_problem.ideal_counted_commands or 1,
-            command_count=1,
-            hint_count=0,
-        )
+    # Clean solves advance Leitner boxes; the scheduler interleaves the commands
+    # and the session ends only once every command reaches mastery (box N).
+    for _ in range(500):
+        if not _solve_current(service, run):
+            break
+    else:
+        raise AssertionError("adventure did not reach full mastery within the cap")
 
     run.refresh_from_db()
     assert run.status == "completed"
     assert service.current_attempt(run=run) is None
-    assert run.mastery_progress_gained > 0
-    assert run.total_score >= 70
+    assert run.passed_at is not None
+    assert run.session_score >= pass_bar_for(adventure)
+    assert run.mastery_progress_gained == 1.0
 
 
-def test_run_fails_when_required_problem_unsolved(db, django_user_model):
+def test_run_never_passes_while_a_command_is_unsolved(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
     adventure = _adventure_with_problems()
     service = AdventureRunService()
 
     run = service.start_run(user=user, adventure=adventure)
-    problems = ordered_problems_for(adventure)
-    for index, _ in enumerate(problems):
+    first_id = ordered_problems_for(adventure)[0].id
+
+    # Solve every command except the first, which we always fail. The per-command
+    # floor (every command solved at least once) is never met, so the adventure
+    # can never pass and the session never completes.
+    for _ in range(200):
         attempt = service.current_attempt(run=run)
+        if attempt is None:
+            break
         service.record_attempt_result(
             attempt=attempt,
-            solved=index != 0,  # fail the first (required) problem
+            solved=attempt.adventure_problem_id != first_id,
             counted_command_count=1,
             command_count=1,
             hint_count=0,
         )
 
     run.refresh_from_db()
-    assert run.status == "failed"
+    assert run.passed_at is None
+    assert run.status == "started"
+    assert service.current_attempt(run=run) is not None
 
 
-def test_cannot_start_two_active_runs(db, django_user_model):
+def test_starting_again_resumes_the_active_run(db, django_user_model):
+    """Re-entering an adventure with a run in progress resumes it (no lockout,
+    no duplicate run), preserving the one-active-run-per-adventure invariant."""
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
     adventure = _adventure_with_problems()
     service = AdventureRunService()
-    service.start_run(user=user, adventure=adventure)
-    try:
-        service.start_run(user=user, adventure=adventure)
-        raise AssertionError("Expected Locked when starting a second active run.")
-    except Exception as exc:  # Locked
-        assert "active run" in str(exc)
+    first = service.start_run(user=user, adventure=adventure)
+    second = service.start_run(user=user, adventure=adventure)
+
+    assert second.id == first.id
+    active_runs = AdventureRun.objects.filter(
+        user=user, command_adventure=adventure, status="started"
+    )
+    assert active_runs.count() == 1
+
+
+def test_terminal_run_does_not_block_a_replay(db, django_user_model):
+    """A terminal (abandoned/completed) run never blocks a new one; resume only
+    applies to an in-progress run."""
+    call_command("seed_curriculum_v2")
+    user = make_user(django_user_model)
+    adventure = _adventure_with_problems()
+    service = AdventureRunService()
+
+    first = service.start_run(user=user, adventure=adventure)
+    service.abandon(run=first)
+    first.refresh_from_db()
+    assert first.status == "abandoned"
+
+    replay = service.start_run(user=user, adventure=adventure)
+    assert replay.id != first.id
+    assert replay.status == "started"
 
 
 # ---- HTTP integration -----------------------------------------------------
@@ -192,6 +235,33 @@ def test_adventure_run_http_flow_solves_a_problem(db, django_user_model):
     assert attempt_obj.final_score >= 70
 
 
+def test_objective_checklist_ticks_off_as_state_reaches_target(db, django_user_model):
+    """The adventure brief exposes a live objective checklist; each check flips to
+    satisfied once the repository state meets its server-side requirement."""
+    from adventures.serializers import attempt_payload
+
+    call_command("seed_curriculum_v2")
+    user = make_user(django_user_model, "checklist")
+    adventure = _adventure_with_problems()
+    service = AdventureRunService()
+    run = service.start_run(user=user, adventure=adventure)
+    attempt = service.current_attempt(run=run)
+
+    payload = attempt_payload(attempt)
+    checks = payload["objective_checks"]
+    assert checks, "adventure attempt should expose an objective checklist"
+    assert all({"label", "satisfied"} <= set(check) for check in checks)
+    # The checklist is a dedicated payload field; the scenario brief stays pure.
+    assert "objective" not in payload["scenario_context"]
+
+    # The build step guarantees the solution's target state satisfies every
+    # authored check, so the checklist reads all-green at the target state.
+    attempt.repository_state = attempt.selected_variant.target_state
+    attempt.save(update_fields=["repository_state"])
+    solved_checks = attempt_payload(attempt)["objective_checks"]
+    assert solved_checks and all(check["satisfied"] for check in solved_checks)
+
+
 def test_use_hint_endpoint_increments_hint_count(db, django_user_model):
     from rest_framework.test import APIClient
 
@@ -208,6 +278,43 @@ def test_use_hint_endpoint_increments_hint_count(db, django_user_model):
     assert body["run"]["current_attempt"]["counts"]["hint_count"] == 1
     assert body["hint_number"] == 1
     assert isinstance(body["hint"], str) and body["hint"]
+
+
+def test_workspace_file_endpoint_creates_and_edits_files(db, django_user_model):
+    from rest_framework.test import APIClient
+
+    call_command("seed_curriculum_v2")
+    user = make_user(django_user_model, "filer")
+    adventure = _adventure_with_problems()
+    client = APIClient()
+    client.force_authenticate(user=user)
+
+    run_id = client.post(f"/api/command-adventures/{adventure.slug}/runs/").json()["id"]
+
+    created = client.post(
+        f"/api/adventure-runs/{run_id}/files/",
+        {"path": "notes/todo.txt", "content": "first draft"},
+        format="json",
+    )
+    assert created.status_code == 200
+    working_tree = created.json()["current_attempt"]["repository_state"]["working_tree"]
+    assert working_tree["notes/todo.txt"]["content"] == "first draft"
+
+    edited = client.patch(
+        f"/api/adventure-runs/{run_id}/files/",
+        {"path": "notes/todo.txt", "content": "second draft"},
+        format="json",
+    )
+    assert edited.status_code == 200
+    working_tree = edited.json()["current_attempt"]["repository_state"]["working_tree"]
+    assert working_tree["notes/todo.txt"]["content"] == "second draft"
+
+    duplicate = client.post(
+        f"/api/adventure-runs/{run_id}/files/",
+        {"path": "notes/todo.txt", "content": ""},
+        format="json",
+    )
+    assert duplicate.status_code == 400
 
 
 def test_authored_hint_set_is_served_in_order(db, django_user_model):
@@ -231,3 +338,38 @@ def test_authored_hint_set_is_served_in_order(db, django_user_model):
     assert third["hint"] not in {"First nudge", "Second nudge"}
     attempt.refresh_from_db()
     assert attempt.hint_count == 3
+
+
+def test_submit_returns_step_and_run_payload_carries_terminal_history(db, django_user_model):
+    """The submit response returns the persisted step (symmetric to challenges)
+    and the run detail payload carries the live attempt's terminal history, so
+    the frontend can render an optimistic placeholder and rehydrate on refresh."""
+    from rest_framework.test import APIClient
+
+    call_command("seed_curriculum_v2")
+    user = make_user(django_user_model, "stephistory")
+    adventure = _adventure_with_problems()
+    client = APIClient()
+    client.force_authenticate(user=user)
+
+    start = client.post(f"/api/command-adventures/{adventure.slug}/runs/")
+    run_id = start.json()["id"]
+    # A fresh attempt has no terminal history yet.
+    assert start.json()["current_attempt"]["steps"] == []
+
+    # A diagnostic command keeps the attempt in progress (not solved / not over
+    # budget), so the same attempt accumulates the step.
+    resp = client.post(
+        f"/api/adventure-runs/{run_id}/submit-command/",
+        {"command": "git status"},
+        format="json",
+    )
+    assert resp.status_code == 200
+    step = resp.json()["step"]
+    assert {"id", "command_text", "terminal_output", "result_category"} <= set(step)
+    assert step["command_text"] == "git status"
+
+    detail = client.get(f"/api/adventure-runs/{run_id}/")
+    steps = detail.json()["current_attempt"]["steps"]
+    assert [s["command_text"] for s in steps] == ["git status"]
+    assert steps[0]["id"] == step["id"]

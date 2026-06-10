@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMemo } from 'react'
 
 import { commandAdventuresApi } from '@/features/command-adventures/api/commandAdventuresApi'
 import type { AdventureRun } from '@/features/command-adventures/types'
+import { terminalLinesFromSteps } from '@/shared/practice/terminalSteps'
 import { queryKeys } from '@/shared/api/queryKeys'
 
 export function useAdventureRun(runId: number | null) {
@@ -18,10 +20,14 @@ export function useAdventureRun(runId: number | null) {
     queryClient.setQueryData(queryKeys.adventureRun(run.id), run)
   }
 
-  const submitCommand = useMutation({
-    mutationFn: (command: string) => commandAdventuresApi.submitCommand(runId as number, command),
-    onSuccess: (response) => writeRun(response.run),
-  })
+  // The terminal derives its lines from the live attempt's cached step history,
+  // so an optimistic placeholder appears instantly and the history survives a
+  // refresh. Switching problems resets the terminal for free (new empty steps).
+  const run = query.data ?? null
+  const lines = useMemo(
+    () => terminalLinesFromSteps(run?.current_attempt?.steps ?? []),
+    [run],
+  )
 
   const useHint = useMutation({
     mutationFn: () => commandAdventuresApi.useHint(runId as number),
@@ -33,7 +39,19 @@ export function useAdventureRun(runId: number | null) {
     onSuccess: writeRun,
   })
 
-  return { query, submitCommand, useHint, finishRun, writeRun }
+  const createFile = useMutation({
+    mutationFn: (input: { path: string; content: string }) =>
+      commandAdventuresApi.createFile(runId as number, input),
+    onSuccess: writeRun,
+  })
+
+  const writeFile = useMutation({
+    mutationFn: (input: { path: string; content: string }) =>
+      commandAdventuresApi.writeFile(runId as number, input),
+    onSuccess: writeRun,
+  })
+
+  return { query, lines, useHint, finishRun, createFile, writeFile, writeRun }
 }
 
 export function useStartAdventureRun() {

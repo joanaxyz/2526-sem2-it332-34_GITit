@@ -23,6 +23,7 @@ vi.mock('motion/react', async () => {
       delete domProps.whileInView
       delete domProps.viewport
       delete domProps.transition
+      delete domProps.variants
       return React.createElement(tag, domProps, children)
     }
     return Component
@@ -31,6 +32,7 @@ vi.mock('motion/react', async () => {
     motion: {
       article: createMotion('article'),
       aside: createMotion('aside'),
+      button: createMotion('button'),
       div: createMotion('div'),
       header: createMotion('header'),
       section: createMotion('section'),
