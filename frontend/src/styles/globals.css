@@ -1298,6 +1298,383 @@ textarea {
 }
 
 /* ════════════════════════════════════════════════════════════════════════
+   STOREY BOOK: a 3D neon field guide in the overview. The cover is a teal→
+   purple gradient; on hover the cover opens and the pages riffle. Clicking it
+   opens the reference modal. Diagram blocks render as neon SVG.
+   ════════════════════════════════════════════════════════════════════════ */
+.storey-book {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem 1.15rem;
+  border-radius: 8px;
+  border: 1px solid rgba(176, 74, 255, 0.3);
+  background:
+    linear-gradient(180deg, rgba(22, 13, 44, 0.7), rgba(7, 9, 28, 0.72)),
+    rgba(7, 10, 30, 0.7);
+  box-shadow: inset 0 1px 0 rgba(176, 74, 255, 0.14), 0 18px 55px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.storey-book:hover {
+  transform: translateY(-2px);
+  border-color: rgba(176, 74, 255, 0.6);
+  box-shadow:
+    inset 0 1px 0 rgba(176, 74, 255, 0.2),
+    0 0 22px rgba(176, 74, 255, 0.22),
+    0 0 30px rgba(45, 245, 255, 0.12),
+    0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.storey-book:focus-visible {
+  outline: none;
+  border-color: rgba(45, 245, 255, 0.75);
+  box-shadow: 0 0 0 2px rgba(45, 245, 255, 0.55), 0 0 22px rgba(176, 74, 255, 0.25);
+}
+
+.storey-book-stage {
+  position: relative;
+  width: 4.4rem;
+  height: 5.5rem;
+  flex-shrink: 0;
+  perspective: 850px;
+}
+
+.storey-book-3d {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateY(-26deg) rotateX(7deg);
+  transition: transform 360ms ease;
+}
+
+.storey-book:hover .storey-book-3d {
+  transform: rotateY(-15deg) rotateX(5deg);
+}
+
+.storey-book-back,
+.storey-book-cover,
+.storey-book-leaf {
+  position: absolute;
+  top: 0.18rem;
+  left: 0.85rem;
+  width: 3rem;
+  height: 5.1rem;
+  border-radius: 3px 7px 7px 3px;
+  transform-origin: left center;
+}
+
+/* Back board of the book — sits behind the pages. */
+.storey-book-back {
+  background: linear-gradient(135deg, rgba(16, 40, 70, 0.96), rgba(8, 10, 30, 0.98));
+  border: 1px solid rgba(45, 245, 255, 0.3);
+  transform: translateZ(-0.02rem);
+  box-shadow: 0 0 16px rgba(45, 245, 255, 0.14);
+}
+
+.storey-book-leaves {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.storey-book-leaf {
+  background: linear-gradient(90deg, rgba(244, 250, 255, 0.95), rgba(206, 226, 245, 0.82));
+  border-radius: 1px 5px 5px 1px;
+  box-shadow: inset -2px 0 4px rgba(120, 150, 190, 0.35);
+}
+
+.storey-book-leaf:nth-child(1) { transform: translateZ(0.3rem); }
+.storey-book-leaf:nth-child(2) { transform: translateZ(0.24rem); }
+.storey-book-leaf:nth-child(3) { transform: translateZ(0.18rem); }
+.storey-book-leaf:nth-child(4) { transform: translateZ(0.12rem); }
+
+/* Front cover — teal→purple neon gradient with the field-guide emblem. */
+.storey-book-cover {
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(135deg, rgba(45, 245, 255, 0.92), rgba(176, 74, 255, 0.94));
+  border: 1px solid rgba(126, 249, 255, 0.6);
+  transform: translateZ(0.38rem);
+  box-shadow:
+    inset 0 0 14px rgba(255, 255, 255, 0.22),
+    0 0 18px rgba(176, 74, 255, 0.4);
+  transition: transform 380ms ease;
+  backface-visibility: visible;
+}
+
+.storey-book:hover .storey-book-cover {
+  transform: translateZ(0.38rem) rotateY(-118deg);
+}
+
+.storey-book-emblem {
+  width: 1.85rem;
+  height: 1.85rem;
+  color: rgba(7, 9, 28, 0.82);
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.45));
+}
+
+/* Spine down the hinge edge. */
+.storey-book-spine {
+  position: absolute;
+  top: 0.18rem;
+  left: 0.8rem;
+  width: 0.42rem;
+  height: 5.1rem;
+  transform: rotateY(90deg) translateZ(0.06rem);
+  transform-origin: left center;
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(45, 245, 255, 0.85), rgba(176, 74, 255, 0.85));
+  box-shadow: 0 0 12px rgba(176, 74, 255, 0.4);
+}
+
+.storey-book:hover .storey-book-leaf {
+  animation: storey-book-riffle 1.7s ease-in-out infinite;
+}
+
+.storey-book:hover .storey-book-leaf:nth-child(1) { animation-delay: 0ms; }
+.storey-book:hover .storey-book-leaf:nth-child(2) { animation-delay: 180ms; }
+.storey-book:hover .storey-book-leaf:nth-child(3) { animation-delay: 360ms; }
+.storey-book:hover .storey-book-leaf:nth-child(4) { animation-delay: 540ms; }
+
+@keyframes storey-book-riffle {
+  0%, 70%, 100% { transform: translateZ(0.3rem) rotateY(0deg); }
+  35% { transform: translateZ(0.3rem) rotateY(-150deg); }
+}
+
+.storey-book-meta {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.storey-book-kicker {
+  color: rgba(196, 158, 255, 0.95);
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.storey-book-title {
+  color: hsl(var(--foreground));
+  font-size: 1.02rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.storey-book-sub {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.74rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .storey-book:hover .storey-book-leaf {
+    animation: none;
+  }
+  .storey-book:hover .storey-book-cover {
+    transform: translateZ(0.38rem) rotateY(-40deg);
+  }
+  .storey-book-3d,
+  .storey-book-cover {
+    transition: none;
+  }
+}
+
+/* ── Book modal ─────────────────────────────────────────────────────────── */
+.book-modal {
+  background:
+    linear-gradient(180deg, rgba(7, 12, 28, 0.6), rgba(4, 7, 20, 0.6));
+}
+
+.book-modal-rail {
+  padding: 1rem 0.85rem;
+  border-right: 1px solid rgba(45, 245, 255, 0.16);
+  background: rgba(4, 9, 22, 0.5);
+}
+
+.book-modal-rail-kicker {
+  margin: 0 0 0.65rem 0.35rem;
+  color: hsl(var(--muted-foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.book-modal-rail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.82rem;
+  text-align: left;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.book-modal-rail-item:hover {
+  background: rgba(45, 245, 255, 0.07);
+  color: hsl(var(--foreground));
+}
+
+.book-modal-rail-item.is-active {
+  color: hsl(var(--foreground));
+  background: linear-gradient(90deg, rgba(45, 245, 255, 0.14), rgba(176, 74, 255, 0.12));
+  border-color: rgba(126, 249, 255, 0.32);
+}
+
+/* Option/argument sub-nav under the active command. */
+.book-modal-rail-anchors {
+  display: grid;
+  gap: 0.1rem;
+  margin: 0.2rem 0 0.35rem;
+  padding: 0 0 0 0.85rem;
+  list-style: none;
+  border-left: 1px solid rgba(45, 245, 255, 0.18);
+  margin-left: 0.85rem;
+}
+
+.book-modal-rail-anchor {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  min-height: 1.9rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.76rem;
+  text-align: left;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.book-modal-rail-anchor::before {
+  content: '';
+  width: 0.32rem;
+  height: 0.32rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: rgba(45, 245, 255, 0.7);
+}
+
+.book-modal-rail-anchor.is-argument::before {
+  background: rgba(176, 74, 255, 0.75);
+}
+
+.book-modal-rail-anchor:hover {
+  background: rgba(45, 245, 255, 0.06);
+  color: hsl(var(--foreground));
+}
+
+.book-modal-head {
+  padding: 1.15rem 1.4rem;
+  border-bottom: 1px solid rgba(45, 245, 255, 0.16);
+  background: rgba(6, 12, 28, 0.55);
+}
+
+.book-modal-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 1.1rem;
+  border-top: 1px solid rgba(45, 245, 255, 0.16);
+  background: rgba(6, 12, 28, 0.6);
+}
+
+/* ── Authored diagrams ──────────────────────────────────────────────────── */
+.book-diagram {
+  margin: 0;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(176, 74, 255, 0.28);
+  background:
+    radial-gradient(120% 120% at 50% 0%, rgba(45, 245, 255, 0.07), transparent 60%),
+    linear-gradient(180deg, rgba(14, 16, 38, 0.7), rgba(7, 9, 26, 0.72));
+}
+
+.book-diagram-title {
+  margin-bottom: 0.75rem;
+  color: hsl(var(--foreground));
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.book-diagram-canvas {
+  display: grid;
+  place-items: center;
+  overflow-x: auto;
+  padding: 0.35rem 0;
+}
+
+.book-diagram-svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.book-diagram-node-label {
+  fill: hsl(var(--foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.book-diagram-edge-label {
+  fill: hsl(var(--muted-foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 10px;
+}
+
+.book-diagram-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.74rem;
+}
+
+.book-diagram-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.book-diagram-legend-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+}
+
+.book-diagram-caption {
+  margin: 0.75rem 0 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.book-diagram-empty {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8rem;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
    TOWER: reference-locked neon keep: windows storey → adventure →
    section separator → challenges → bannered base separator. Layout (page shell, docks, sky
    clock, sun/moon) lives elsewhere.

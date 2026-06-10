@@ -14,6 +14,7 @@ from common.constants import (
     DIFFICULTY_MEDIUM,
     SESSION_MODE_PRIMARY,
 )
+from curriculum.command_content import command_content_entry_for_command
 from curriculum.models import CommandForm, CommandSkill, ConceptPage, Storey
 
 
@@ -171,6 +172,70 @@ def command_skill_queryset(*, storey_id: int):
         )
         .order_by("sort_order", "id")
     )
+
+
+def storey_book(*, storey_id: int) -> dict | None:
+    """The Storey Book: every command registered for the storey, each resolved to
+    its rich authored content from the command library.
+
+    There is no terminal demo here — the book is reference material. Content pages
+    come from the shared command-content library (`command_content.py`); a skill's
+    own authored `command_preview.pages` win when present, and a minimal summary
+    page is synthesized as a last resort so a registered command never renders
+    empty."""
+    storey = (
+        Storey.objects.filter(id=storey_id, is_published=True)
+        .only("id", "slug", "number", "title", "description")
+        .first()
+    )
+    if storey is None:
+        return None
+
+    commands = [
+        book_command_payload(skill=skill)
+        for skill in CommandSkill.objects.filter(module_id=storey_id, is_published=True).order_by(
+            "sort_order", "id"
+        )
+    ]
+    return {
+        "storey_id": storey.id,
+        "slug": storey.slug,
+        "number": storey.number,
+        "title": storey.title,
+        "description": storey.description,
+        "command_count": len(commands),
+        "commands": commands,
+    }
+
+
+def book_command_payload(*, skill: CommandSkill) -> dict:
+    entry = command_content_entry_for_command(skill.base_command)
+    preview = skill.command_preview if isinstance(skill.command_preview, dict) else {}
+    authored_pages = preview.get("pages") if isinstance(preview.get("pages"), list) else []
+    if authored_pages:
+        pages = authored_pages
+    elif entry and entry.get("pages"):
+        pages = entry["pages"]
+    else:
+        pages = [
+            {
+                "id": f"{skill.slug}-overview",
+                "title": "Overview",
+                "heading": skill.title,
+                "eyebrow": skill.base_command,
+                "section_type": "overview",
+                "blocks": [{"type": "paragraph", "body": skill.summary}] if skill.summary else [],
+            }
+        ]
+    return {
+        "id": skill.id,
+        "slug": skill.slug,
+        "base_command": skill.base_command,
+        "title": skill.title,
+        "summary": skill.summary,
+        "tags": entry.get("tags", []) if entry else [],
+        "pages": pages,
+    }
 
 
 def challenge_queryset(*, storey_id: int):

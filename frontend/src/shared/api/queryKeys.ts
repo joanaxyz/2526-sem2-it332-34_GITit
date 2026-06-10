@@ -7,6 +7,7 @@ export const queryKeys = {
   storeys: ['storeys'] as const,
   storeyContent: (storeyId: number | null | undefined, section: StoreyContentSection) =>
     ['storey-content', storeyId, section] as const,
+  storeyBook: (storeyId: number | null | undefined) => ['storey-book', storeyId] as const,
   commandFormPreview: (formId: number) => ['command-form-preview', formId] as const,
   challengeRun: (runId: number) => ['challenge-run', runId] as const,
   adventureRun: (runId: number) => ['adventure-run', runId] as const,

@@ -6,6 +6,7 @@ from curriculum.selectors import (
     get_command_form,
     published_foundations,
     published_storeys,
+    storey_book,
     storey_completion_count_map,
     storey_completion_denominator_map,
     storey_content_page,
@@ -53,6 +54,15 @@ class StoreyContentAPIView(APIView):
                     limit=limit,
                 )
             )
+
+
+class StoreyBookAPIView(APIView):
+    def get(self, request, storey_id: int):
+        with timing("curriculum.storey_book", storey_id=storey_id):
+            book = storey_book(storey_id=storey_id)
+        if book is None:
+            return Response({"detail": "Storey not found."}, status=404)
+        return Response(book)
 
 
 class CommandFormPreviewAPIView(APIView):

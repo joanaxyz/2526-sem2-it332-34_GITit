@@ -19,6 +19,7 @@ import type {
   StoreyContentPage,
   StoreyContentSection,
 } from '@/features/challenges/types'
+import { StoreyBookCard } from '@/features/storeys/book/StoreyBookCard'
 import type { LearningStorey } from '@/features/storeys/types'
 import {
   actionForChallengeLevel,
@@ -395,6 +396,8 @@ export function StoreyOverview({
           </div>
         </div>
       </section>
+
+      <StoreyBookCard storeyId={storey.id} storeyTitle={title} commandCount={storey.command_skill_count} />
 
       <section className="stage-reward-panel" aria-label={`${title} progress reward`}>
         <div>
