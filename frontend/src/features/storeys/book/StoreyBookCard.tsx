@@ -2,8 +2,9 @@ import { useState } from 'react'
 
 import { StoreyBookModal } from '@/features/storeys/book/StoreyBookModal'
 
-// The Storey Book lives in the storey overview. It's a 3D neon book whose pages
-// riffle on hover (CSS); clicking it opens the reference modal for this storey.
+// The Storey Book lives in the storey overview. It's a 3D neon book whose
+// cover swings open and pages fan out once on hover (CSS transitions, no
+// loop); clicking it opens the reference modal for this storey.
 export function StoreyBookCard({
   storeyId,
   storeyTitle,
@@ -33,6 +34,7 @@ export function StoreyBookCard({
               <span className="storey-book-leaf" />
               <span className="storey-book-leaf" />
             </span>
+            <span className="storey-book-fore" />
             <span className="storey-book-cover">
               <svg className="storey-book-emblem" viewBox="0 0 48 48" aria-hidden="true">
                 {/* a tiny commit graph: the field guide's mark */}

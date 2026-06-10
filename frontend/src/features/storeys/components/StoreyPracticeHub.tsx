@@ -397,8 +397,6 @@ export function StoreyOverview({
         </div>
       </section>
 
-      <StoreyBookCard storeyId={storey.id} storeyTitle={title} commandCount={storey.command_skill_count} />
-
       <section className="stage-reward-panel" aria-label={`${title} progress reward`}>
         <div>
           <p className="text-sm text-muted-foreground">Progress Reward</p>
@@ -411,6 +409,8 @@ export function StoreyOverview({
           <img className="stage-reward-chest" src="/stage_reward_neon_chest.png" alt="" aria-hidden="true" />
         </span>
       </section>
+
+      <StoreyBookCard storeyId={storey.id} storeyTitle={title} commandCount={storey.command_skill_count} />
     </motion.aside>
   )
 }

@@ -1298,63 +1298,78 @@ textarea {
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   STOREY BOOK: a 3D neon field guide in the overview. The cover is a teal→
-   purple gradient; on hover the cover opens and the pages riffle. Clicking it
-   opens the reference modal. Diagram blocks render as neon SVG.
+   STOREY BOOK: a 3D neon field guide in the overview — bare (no card chrome).
+   Dark-teal cover and spine, neon-teal page block with a striated fore-edge
+   (the visible thickness), purple aura + glow while the book opens. Hover
+   swings the cover and fans the pages once via transitions (no loop), so it
+   reverses cleanly on mouse-out. Clicking opens the reference modal.
    ════════════════════════════════════════════════════════════════════════ */
 .storey-book {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.1rem;
   width: 100%;
-  padding: 1rem 1.15rem;
-  border-radius: 8px;
-  border: 1px solid rgba(176, 74, 255, 0.3);
-  background:
-    linear-gradient(180deg, rgba(22, 13, 44, 0.7), rgba(7, 9, 28, 0.72)),
-    rgba(7, 10, 30, 0.7);
-  box-shadow: inset 0 1px 0 rgba(176, 74, 255, 0.14), 0 18px 55px rgba(0, 0, 0, 0.24);
-  backdrop-filter: blur(12px);
+  padding: 0.35rem 0.25rem;
+  border: 0;
+  background: none;
   cursor: pointer;
   text-align: left;
-  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+  transition: transform 220ms ease;
 }
 
 .storey-book:hover {
   transform: translateY(-2px);
-  border-color: rgba(176, 74, 255, 0.6);
-  box-shadow:
-    inset 0 1px 0 rgba(176, 74, 255, 0.2),
-    0 0 22px rgba(176, 74, 255, 0.22),
-    0 0 30px rgba(45, 245, 255, 0.12),
-    0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
 .storey-book:focus-visible {
-  outline: none;
-  border-color: rgba(45, 245, 255, 0.75);
-  box-shadow: 0 0 0 2px rgba(45, 245, 255, 0.55), 0 0 22px rgba(176, 74, 255, 0.25);
+  outline: 2px solid rgba(45, 245, 255, 0.6);
+  outline-offset: 4px;
+  border-radius: 10px;
 }
 
 .storey-book-stage {
   position: relative;
-  width: 4.4rem;
-  height: 5.5rem;
+  width: 4.9rem;
+  height: 5.9rem;
   flex-shrink: 0;
-  perspective: 850px;
+  perspective: 680px;
+}
+
+/* Purple aura that blooms behind the book while it opens. */
+.storey-book-stage::before {
+  content: '';
+  position: absolute;
+  inset: -1.1rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(176, 74, 255, 0.45),
+    rgba(176, 74, 255, 0.16) 55%,
+    transparent 78%
+  );
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 420ms ease, transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.storey-book:hover .storey-book-stage::before,
+.storey-book:focus-visible .storey-book-stage::before {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .storey-book-3d {
   position: absolute;
   inset: 0;
   transform-style: preserve-3d;
-  transform: rotateY(-26deg) rotateX(7deg);
-  transition: transform 360ms ease;
+  /* Negative rotateY turns the fore-edge (right side) toward the viewer. */
+  transform: rotateY(-32deg) rotateX(8deg);
+  transition: transform 480ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .storey-book:hover .storey-book-3d {
-  transform: rotateY(-15deg) rotateX(5deg);
+  transform: rotateY(-18deg) rotateX(6deg) translateZ(0.2rem);
 }
 
 .storey-book-back,
@@ -1362,19 +1377,19 @@ textarea {
 .storey-book-leaf {
   position: absolute;
   top: 0.18rem;
-  left: 0.85rem;
-  width: 3rem;
-  height: 5.1rem;
+  left: 0.95rem;
+  width: 3.1rem;
+  height: 5.3rem;
   border-radius: 3px 7px 7px 3px;
   transform-origin: left center;
 }
 
-/* Back board of the book — sits behind the pages. */
+/* Back board of the book — dark teal, sits behind the pages. */
 .storey-book-back {
-  background: linear-gradient(135deg, rgba(16, 40, 70, 0.96), rgba(8, 10, 30, 0.98));
-  border: 1px solid rgba(45, 245, 255, 0.3);
-  transform: translateZ(-0.02rem);
-  box-shadow: 0 0 16px rgba(45, 245, 255, 0.14);
+  background: linear-gradient(135deg, rgba(9, 50, 58, 0.98), rgba(4, 24, 32, 0.98));
+  border: 1px solid rgba(45, 245, 255, 0.35);
+  transform: translateZ(-0.05rem);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), 0 0 16px rgba(45, 245, 255, 0.14);
 }
 
 .storey-book-leaves {
@@ -1383,69 +1398,106 @@ textarea {
   transform-style: preserve-3d;
 }
 
+/* Pages — neon teal, spread across the book's depth so the block reads
+   thick from the side. Hover fans each leaf open once (transition, not a
+   looping animation); delays cascade both opening and closing. */
 .storey-book-leaf {
-  background: linear-gradient(90deg, rgba(244, 250, 255, 0.95), rgba(206, 226, 245, 0.82));
+  background: linear-gradient(90deg, rgba(168, 252, 255, 0.98), rgba(45, 245, 255, 0.82));
   border-radius: 1px 5px 5px 1px;
-  box-shadow: inset -2px 0 4px rgba(120, 150, 190, 0.35);
+  box-shadow:
+    inset -3px 0 6px rgba(0, 140, 165, 0.5),
+    0 0 10px rgba(45, 245, 255, 0.3);
+  transition: transform 560ms cubic-bezier(0.3, 1.15, 0.4, 1);
 }
 
-.storey-book-leaf:nth-child(1) { transform: translateZ(0.3rem); }
-.storey-book-leaf:nth-child(2) { transform: translateZ(0.24rem); }
-.storey-book-leaf:nth-child(3) { transform: translateZ(0.18rem); }
-.storey-book-leaf:nth-child(4) { transform: translateZ(0.12rem); }
+.storey-book-leaf:nth-child(1) { transform: translateZ(0.5rem); }
+.storey-book-leaf:nth-child(2) { transform: translateZ(0.38rem); }
+.storey-book-leaf:nth-child(3) { transform: translateZ(0.26rem); }
+.storey-book-leaf:nth-child(4) { transform: translateZ(0.14rem); }
 
-/* Front cover — teal→purple neon gradient with the field-guide emblem. */
+@media (prefers-reduced-motion: no-preference) {
+  .storey-book:hover .storey-book-leaf:nth-child(1) {
+    transform: translateZ(0.5rem) rotateY(-136deg);
+    transition-delay: 60ms;
+  }
+  .storey-book:hover .storey-book-leaf:nth-child(2) {
+    transform: translateZ(0.38rem) rotateY(-116deg);
+    transition-delay: 160ms;
+  }
+  .storey-book:hover .storey-book-leaf:nth-child(3) {
+    transform: translateZ(0.26rem) rotateY(-94deg);
+    transition-delay: 260ms;
+  }
+  .storey-book:hover .storey-book-leaf:nth-child(4) {
+    transform: translateZ(0.14rem) rotateY(-70deg);
+    transition-delay: 360ms;
+  }
+}
+
+/* Fore-edge: the page block's right side, facing the viewer at rest. The
+   stripes are the stacked page edges — this is what makes the book read as
+   a solid object instead of a flat icon. */
+.storey-book-fore {
+  position: absolute;
+  top: 0.3rem;
+  left: calc(0.95rem + 3.1rem);
+  width: 0.55rem;
+  height: 5.06rem;
+  transform: rotateY(-90deg);
+  transform-origin: left center;
+  border-radius: 0 2px 2px 0;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(190, 253, 255, 0.95) 0,
+    rgba(190, 253, 255, 0.95) 2px,
+    rgba(45, 245, 255, 0.5) 2px,
+    rgba(45, 245, 255, 0.5) 4px
+  );
+  box-shadow: 0 0 8px rgba(45, 245, 255, 0.3);
+}
+
+/* Front cover — dark teal with a neon-teal field-guide emblem. Opening it
+   trades the teal rim light for purple. */
 .storey-book-cover {
   display: grid;
   place-items: center;
-  background:
-    linear-gradient(135deg, rgba(45, 245, 255, 0.92), rgba(176, 74, 255, 0.94));
-  border: 1px solid rgba(126, 249, 255, 0.6);
-  transform: translateZ(0.38rem);
+  background: linear-gradient(135deg, rgba(11, 64, 73, 0.99), rgba(4, 30, 40, 0.99));
+  border: 1px solid rgba(45, 245, 255, 0.5);
+  transform: translateZ(0.6rem);
   box-shadow:
-    inset 0 0 14px rgba(255, 255, 255, 0.22),
-    0 0 18px rgba(176, 74, 255, 0.4);
-  transition: transform 380ms ease;
+    inset 0 0 14px rgba(45, 245, 255, 0.16),
+    0 0 14px rgba(45, 245, 255, 0.2);
+  transition: transform 620ms cubic-bezier(0.34, 1.1, 0.4, 1), box-shadow 420ms ease;
   backface-visibility: visible;
 }
 
 .storey-book:hover .storey-book-cover {
-  transform: translateZ(0.38rem) rotateY(-118deg);
+  transform: translateZ(0.6rem) rotateY(-128deg);
+  box-shadow:
+    inset 0 0 14px rgba(176, 74, 255, 0.3),
+    0 0 24px rgba(176, 74, 255, 0.55);
 }
 
 .storey-book-emblem {
   width: 1.85rem;
   height: 1.85rem;
-  color: rgba(7, 9, 28, 0.82);
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.45));
+  color: rgba(126, 249, 255, 0.95);
+  filter: drop-shadow(0 0 5px rgba(45, 245, 255, 0.55));
 }
 
-/* Spine down the hinge edge. */
+/* Spine down the hinge edge — dark teal, spans the full page-block depth. */
 .storey-book-spine {
   position: absolute;
   top: 0.18rem;
-  left: 0.8rem;
-  width: 0.42rem;
-  height: 5.1rem;
-  transform: rotateY(90deg) translateZ(0.06rem);
+  left: 0.92rem;
+  width: 0.65rem;
+  height: 5.3rem;
+  transform: rotateY(-90deg);
   transform-origin: left center;
   border-radius: 2px;
-  background: linear-gradient(180deg, rgba(45, 245, 255, 0.85), rgba(176, 74, 255, 0.85));
-  box-shadow: 0 0 12px rgba(176, 74, 255, 0.4);
-}
-
-.storey-book:hover .storey-book-leaf {
-  animation: storey-book-riffle 1.7s ease-in-out infinite;
-}
-
-.storey-book:hover .storey-book-leaf:nth-child(1) { animation-delay: 0ms; }
-.storey-book:hover .storey-book-leaf:nth-child(2) { animation-delay: 180ms; }
-.storey-book:hover .storey-book-leaf:nth-child(3) { animation-delay: 360ms; }
-.storey-book:hover .storey-book-leaf:nth-child(4) { animation-delay: 540ms; }
-
-@keyframes storey-book-riffle {
-  0%, 70%, 100% { transform: translateZ(0.3rem) rotateY(0deg); }
-  35% { transform: translateZ(0.3rem) rotateY(-150deg); }
+  background: linear-gradient(180deg, rgba(10, 58, 68, 0.98), rgba(5, 28, 38, 0.98));
+  border: 1px solid rgba(45, 245, 255, 0.3);
+  box-shadow: 0 0 10px rgba(45, 245, 255, 0.2);
 }
 
 .storey-book-meta {
@@ -1476,14 +1528,13 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .storey-book:hover .storey-book-leaf {
-    animation: none;
-  }
   .storey-book:hover .storey-book-cover {
-    transform: translateZ(0.38rem) rotateY(-40deg);
+    transform: translateZ(0.6rem) rotateY(-40deg);
   }
   .storey-book-3d,
-  .storey-book-cover {
+  .storey-book-cover,
+  .storey-book-leaf,
+  .storey-book-stage::before {
     transition: none;
   }
 }
