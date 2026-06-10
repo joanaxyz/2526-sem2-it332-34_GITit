@@ -17,7 +17,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { authApi } from '@/features/auth/api/authApi'
 import { useAuthStore } from '@/features/auth/hooks/useAuth'
@@ -229,10 +229,12 @@ function TowerHelpOverlay({ open, onClose }: { open: boolean; onClose: () => voi
 
 export function DashboardLayout() {
   const navigate = useNavigate()
+  const location = useLocation()
   const queryClient = useQueryClient()
   const user = useAuthStore((state) => state.user)
   const clearSession = useAuthStore((state) => state.clearSession)
   const [towerHelpOpen, setTowerHelpOpen] = useState(false)
+  const isTowerPage = location.pathname.startsWith('/tower')
 
   async function logout() {
     try {
@@ -263,15 +265,6 @@ export function DashboardLayout() {
               </span>
             </div>
             <nav className="flex shrink-0 items-center gap-1">
-              <button
-                type="button"
-                className="grid size-8 place-items-center rounded-md border border-border/40 bg-secondary/40 text-muted-foreground transition-all duration-200 hover:border-primary/40 hover:bg-primary/10 hover:text-primary hover:shadow-[0_0_10px_rgba(0,245,212,0.18)]"
-                aria-label="Open tower guide"
-                title="How tower works"
-                onClick={() => setTowerHelpOpen(true)}
-              >
-                <CircleHelp className="size-4" />
-              </button>
               {navItems.map((item) => (
                 <NavLink
                   key={item.to}
@@ -279,7 +272,7 @@ export function DashboardLayout() {
                     cn(
                       'inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-muted-foreground transition-all duration-200 hover:bg-secondary hover:text-foreground',
                       isActive &&
-                        'bg-primary/10 text-primary shadow-[0_0_14px_rgba(0,245,212,0.28),inset_0_-2px_0_rgba(0,245,212,0.60)] ring-1 ring-inset ring-primary/30',
+                      'bg-primary/10 text-primary shadow-[0_0_14px_rgba(0,245,212,0.28),inset_0_-2px_0_rgba(0,245,212,0.60)] ring-1 ring-inset ring-primary/30',
                     )
                   }
                   to={item.to}
@@ -298,9 +291,22 @@ export function DashboardLayout() {
         </div>
       </header>
       <main className="mx-auto max-w-[1440px] px-6 py-6 max-sm:px-4">
-        <Outlet />
-      </main>
-      <TowerHelpOverlay open={towerHelpOpen} onClose={() => setTowerHelpOpen(false)} />
+  <Outlet />
+</main>
+
+{isTowerPage ? (
+  <button
+    type="button"
+    className="tower-help-launcher"
+    aria-label="Open tower guide"
+    title="How tower works"
+    onClick={() => setTowerHelpOpen(true)}
+  >
+    <CircleHelp className="size-5" />
+  </button>
+) : null}
+
+<TowerHelpOverlay open={towerHelpOpen} onClose={() => setTowerHelpOpen(false)} />
     </div>
   )
 }
