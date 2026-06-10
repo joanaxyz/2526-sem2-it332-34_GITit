@@ -41,13 +41,13 @@ class MetricsService:
             abandoned=Count("id", filter=Q(mode=SESSION_MODE_PRIMARY, status=SESSION_STATUS_ABANDONED)),
             hard_started=Count(
                 "id",
-                filter=Q(mode=SESSION_MODE_PRIMARY, challenge_level__difficulty=DIFFICULTY_HARD),
+                filter=Q(mode=SESSION_MODE_PRIMARY, challenge_quest__difficulty=DIFFICULTY_HARD),
             ),
             hard_completed=Count(
                 "id",
                 filter=Q(
                     mode=SESSION_MODE_PRIMARY,
-                    challenge_level__difficulty=DIFFICULTY_HARD,
+                    challenge_quest__difficulty=DIFFICULTY_HARD,
                     status=SESSION_STATUS_COMPLETED,
                 ),
             ),
@@ -84,10 +84,10 @@ class MetricsService:
             ChallengeRun.objects.filter(user=user, mode=SESSION_MODE_PRIMARY)
             .values("module__number")
             .annotate(
-                hard_started=Count("id", filter=Q(challenge_level__difficulty=DIFFICULTY_HARD)),
+                hard_started=Count("id", filter=Q(challenge_quest__difficulty=DIFFICULTY_HARD)),
                 hard_completed=Count(
                     "id",
-                    filter=Q(challenge_level__difficulty=DIFFICULTY_HARD, status=SESSION_STATUS_COMPLETED),
+                    filter=Q(challenge_quest__difficulty=DIFFICULTY_HARD, status=SESSION_STATUS_COMPLETED),
                 ),
                 rta_success=Count("id", filter=Q(rta_eligible=True, rta_success=True)),
                 rta_total=Count("id", filter=Q(rta_eligible=True)),

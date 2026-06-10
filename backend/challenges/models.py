@@ -38,7 +38,7 @@ class Challenge(models.Model):
         return self.title
 
 
-class ChallengeLevel(models.Model):
+class ChallengeQuest(models.Model):
     class Difficulty(models.TextChoices):
         EASY = DIFFICULTY_EASY, "Easy"
         MEDIUM = DIFFICULTY_MEDIUM, "Medium"
@@ -66,8 +66,8 @@ class ChallengeLevel(models.Model):
 
 
 class ChallengeVariant(VariantBase):
-    challenge_level = models.ForeignKey(
-        ChallengeLevel,
+    challenge_quest = models.ForeignKey(
+        ChallengeQuest,
         related_name="variants",
         on_delete=models.CASCADE,
     )
@@ -75,11 +75,11 @@ class ChallengeVariant(VariantBase):
 
     class Meta(VariantBase.Meta):
         abstract = False
-        ordering = ["challenge_level_id", "semantic_key", "id"]
+        ordering = ["challenge_quest_id", "semantic_key", "id"]
 
     @property
     def problem(self):
-        return self.challenge_level
+        return self.challenge_quest
 
     def __str__(self) -> str:
         return f"challenge:{self.slug}"
@@ -99,7 +99,7 @@ class ChallengeRun(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     module = models.ForeignKey("curriculum.Storey", on_delete=models.PROTECT)
     workflow_scenario = models.ForeignKey(Challenge, on_delete=models.PROTECT)
-    challenge_level = models.ForeignKey(ChallengeLevel, on_delete=models.PROTECT)
+    challenge_quest = models.ForeignKey(ChallengeQuest, on_delete=models.PROTECT)
     challenge_variant = models.ForeignKey(ChallengeVariant, on_delete=models.PROTECT)
     prior_session = models.ForeignKey(
         "self",
@@ -135,16 +135,16 @@ class ChallengeRun(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["user", "mode", "status"], name="challenge_user_mode_status_idx"),
-            models.Index(fields=["user", "challenge_level", "-id"], name="chal_user_level_latest_idx"),
+            models.Index(fields=["user", "challenge_quest", "-id"], name="chal_user_level_latest_idx"),
         ]
 
     def clean(self) -> None:
-        if self.workflow_scenario_id != self.challenge_level.scenario_id:
+        if self.workflow_scenario_id != self.challenge_quest.scenario_id:
             raise ValidationError("Challenge run level must belong to the selected challenge.")
 
     @property
     def problem(self):
-        return self.challenge_level
+        return self.challenge_quest
 
     @property
     def variant(self):

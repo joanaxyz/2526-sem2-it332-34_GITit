@@ -2,8 +2,8 @@ from django.core.management import call_command
 from django.utils import timezone
 from rest_framework.test import APIClient
 
-from adventures.models import AdventureProblem, AdventureRun, CommandAdventure
-from challenges.models import Challenge, ChallengeLevel, ChallengeRun
+from adventures.models import AdventureQuest, AdventureRun, CommandAdventure
+from challenges.models import Challenge, ChallengeQuest, ChallengeRun
 from challenges.serializers import challenge_run_payload
 from challenges.services import ChallengeRunService
 from curriculum.models import CommandSkill, ConceptPage, Storey
@@ -39,7 +39,7 @@ def test_seed_curriculum_v2_creates_feature_owned_content(db):
     assert not Storey.objects.filter(number=0).exists()
     assert CommandSkill.objects.filter(base_command="git add").exists()
     assert CommandAdventure.objects.filter(slug="tracking-changes-snapshots-command-adventure").exists()
-    assert AdventureProblem.objects.filter(usage__usage_form="git add <file>").exists()
+    assert AdventureQuest.objects.filter(usage__usage_form="git add <file>").exists()
     challenge = Challenge.objects.get(slug="stage-commit-switch")
     assert set(challenge.levels.values_list("difficulty", flat=True)) == {"easy", "medium", "hard"}
 
@@ -80,7 +80,7 @@ def test_storey_content_page_returns_canonical_sections(db, django_user_model):
 def test_challenge_run_payload_uses_challenge_and_storey_terms(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    level = ChallengeLevel.objects.get(scenario__slug="stage-commit-switch", difficulty="easy")
+    level = ChallengeQuest.objects.get(scenario__slug="stage-commit-switch", difficulty="easy")
     pass_adventure_for(user, level.module)
 
     run = ChallengeRunService().start_run(
@@ -103,7 +103,7 @@ def test_challenge_run_payload_uses_challenge_and_storey_terms(db, django_user_m
 def test_challenge_run_http_lifecycle_retry_and_review(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    level = ChallengeLevel.objects.get(scenario__slug="stage-commit-switch", difficulty="easy")
+    level = ChallengeQuest.objects.get(scenario__slug="stage-commit-switch", difficulty="easy")
     level.required_successful_attempts = 1
     level.save(update_fields=["required_successful_attempts"])
     pass_adventure_for(user, level.module)
@@ -127,7 +127,7 @@ def test_challenge_run_http_lifecycle_retry_and_review(db, django_user_model):
         assert response.status_code == 200
     run.refresh_from_db()
     assert run.status == "completed"
-    assert ProblemCompletion.objects.filter(user=user, challenge_level=level).exists()
+    assert ProblemCompletion.objects.filter(user=user, challenge_quest=level).exists()
 
     retry = client.post(f"/api/challenge-runs/{run.id}/retry/")
     assert retry.status_code == 201
@@ -149,7 +149,7 @@ def test_challenge_run_http_lifecycle_retry_and_review(db, django_user_model):
 def test_review_mode_is_gated_until_completion(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    level = ChallengeLevel.objects.get(scenario__slug="stage-commit-switch", difficulty="easy")
+    level = ChallengeQuest.objects.get(scenario__slug="stage-commit-switch", difficulty="easy")
     client = APIClient()
     client.force_authenticate(user=user)
 
@@ -182,7 +182,7 @@ def test_scenario_context_normalizer_strips_answers_and_evaluator_internals():
     assert "git add" not in flattened
     assert "evaluation_spec" not in flattened
     assert "secret-branch-xyz" not in flattened
-    # The whole objective checklist lives on AdventureProblem.objective_checks
+    # The whole objective checklist lives on AdventureQuest.objective_checks
     # now; scenario_context is whitelist-only and never carries it. Repository
     # prose was dropped in v3 (the live panels already show that state).
     assert "objective" not in context
@@ -224,13 +224,13 @@ def test_visualization_payload_keeps_commit_dag_without_extra_lenses():
 def test_hard_challenge_payload_hides_expected_state(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    level = ChallengeLevel.objects.get(scenario__slug="stage-commit-switch", difficulty="hard")
+    level = ChallengeQuest.objects.get(scenario__slug="stage-commit-switch", difficulty="hard")
     variant = level.variants.get(is_published=True)
     run = ChallengeRun.objects.create(
         user=user,
         module=level.module,
         workflow_scenario=level.scenario,
-        challenge_level=level,
+        challenge_quest=level,
         challenge_variant=variant,
         source_entry_point="tower_page",
         difficulty=level.difficulty,
@@ -266,7 +266,7 @@ def test_seed_curriculum_v2_validate_passes_for_published_content(db):
 def test_status_challenge_completes_with_explicit_process_requirement(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    level = ChallengeLevel.objects.get(scenario__slug="wake-the-repository", difficulty="easy")
+    level = ChallengeQuest.objects.get(scenario__slug="wake-the-repository", difficulty="easy")
     pass_adventure_for(user, level.module)
     run = ChallengeRunService().start_run(
         user=user,
@@ -279,4 +279,4 @@ def test_status_challenge_completes_with_explicit_process_requirement(db, django
     run.refresh_from_db()
     assert result["evaluation_result"] == "TargetMatched"
     assert run.status == "completed"
-    assert ChallengeRun.objects.filter(user=user, challenge_level=level).count() == 1
+    assert ChallengeRun.objects.filter(user=user, challenge_quest=level).count() == 1

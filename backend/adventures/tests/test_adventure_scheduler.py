@@ -4,7 +4,7 @@ from django.utils import timezone
 
 from adventures.models import (
     AdventureMastery,
-    AdventureProblemAttempt,
+    AdventureQuestAttempt,
     AdventureRun,
     AdventureVariant,
     CommandAdventure,
@@ -81,12 +81,12 @@ def test_prerequisite_blocks_introduction_until_solved(db, django_user_model):
     # p0 introduced but unsolved (box 0): p1 is gated, so it is never served next
     # even though it is the next command in order — the scheduler falls back to p0.
     AdventureMastery.objects.create(
-        user=user, adventure_problem=p0, strength=0, introduced=True, last_seen_seq=0
+        user=user, adventure_quest=p0, strength=0, introduced=True, last_seen_seq=0
     )
     assert scheduler.next_problem(user=user, adventure=adventure).id != p1.id
 
     # Solve p0 (box 1): p1's prerequisite is met, so it unblocks and goes next.
-    AdventureMastery.objects.filter(user=user, adventure_problem=p0).update(strength=1)
+    AdventureMastery.objects.filter(user=user, adventure_quest=p0).update(strength=1)
     assert scheduler.next_problem(user=user, adventure=adventure).id == p1.id
 
 
@@ -97,7 +97,7 @@ def test_variant_selection_prefers_unused(db, django_user_model):
     problem = ordered_problems_for(adventure)[0]
     base = problem.variants.filter(is_published=True).first()
     AdventureVariant.objects.create(
-        adventure_problem=problem,
+        adventure_quest=problem,
         slug=f"{base.slug}-b",
         label="Variant B",
         initial_state=base.initial_state,
@@ -112,8 +112,8 @@ def test_variant_selection_prefers_unused(db, django_user_model):
     run = AdventureRun.objects.create(user=user, command_adventure=adventure)
 
     first = scheduler.select_variant(user=user, problem=problem)
-    AdventureProblemAttempt.objects.create(
-        run=run, adventure_problem=problem, selected_variant=first, order=0, repository_state={}
+    AdventureQuestAttempt.objects.create(
+        run=run, adventure_quest=problem, selected_variant=first, order=0, repository_state={}
     )
     # Next pick rotates to the variant this user has not seen yet.
     assert scheduler.select_variant(user=user, problem=problem).id != first.id
@@ -132,7 +132,7 @@ def test_is_passed_requires_both_floor_and_bar(db, django_user_model):
     for problem in problems[:-1]:
         AdventureMastery.objects.create(
             user=user,
-            adventure_problem=problem,
+            adventure_quest=problem,
             strength=problem.required_successful_attempts,
             introduced=True,
         )
@@ -140,19 +140,19 @@ def test_is_passed_requires_both_floor_and_bar(db, django_user_model):
 
     # Give the last command its first solve (box 1) -> floor met -> passes.
     AdventureMastery.objects.create(
-        user=user, adventure_problem=problems[-1], strength=1, introduced=True
+        user=user, adventure_quest=problems[-1], strength=1, introduced=True
     )
     assert pass_bar_for(adventure) <= ceiling
     assert is_passed(user=user, adventure=adventure, session_score=ceiling) is True
 
 
 def test_easy_challenge_locked_until_adventure_passed(db, django_user_model):
-    from challenges.models import ChallengeLevel
+    from challenges.models import ChallengeQuest
     from challenges.services import ChallengeRunService
 
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    level = ChallengeLevel.objects.get(scenario__slug="stage-commit-switch", difficulty="easy")
+    level = ChallengeQuest.objects.get(scenario__slug="stage-commit-switch", difficulty="easy")
 
     with pytest.raises(Locked):
         ChallengeRunService().start_run(

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from adventures.models import AdventureProblemAttempt, AdventureRun, CommandAdventure
+from adventures.models import AdventureQuestAttempt, AdventureRun, CommandAdventure
 from adventures.serializers import adventure_command_payload, adventure_run_payload
 from adventures.services import (
     AdventureCommandService,
@@ -34,13 +34,13 @@ def _get_run(run_id: int, user) -> AdventureRun:
     )
 
 
-def _run_with_active_attempt(run_id: int, user) -> tuple[AdventureRun, AdventureProblemAttempt]:
+def _run_with_active_attempt(run_id: int, user) -> tuple[AdventureRun, AdventureQuestAttempt]:
     """One query for the live attempt plus everything the submit path touches
     (run, adventure, problem, variant). The returned run is the same instance the
     services mutate, so callers never need a refresh round trip."""
     attempt = (
-        AdventureProblemAttempt.objects.select_related(
-            "run__command_adventure", "adventure_problem", "selected_variant"
+        AdventureQuestAttempt.objects.select_related(
+            "run__command_adventure", "adventure_quest", "selected_variant"
         )
         .filter(run_id=run_id, run__user=user, status=SESSION_STATUS_STARTED)
         .order_by("order")

@@ -14,13 +14,13 @@ from common.constants import (
     SESSION_STATUS_STARTED,
 )
 from common.exceptions import Locked
-from challenges.models import ChallengeLevel, ChallengeRun, ChallengeVariant
+from challenges.models import ChallengeQuest, ChallengeRun, ChallengeVariant
 from progress.models import ProblemCompletion
 
 RUN_HYDRATE_SELECT_RELATED = (
     "module",
     "workflow_scenario",
-    "challenge_level__scenario",
+    "challenge_quest__scenario",
     "challenge_variant",
     "prior_session",
     "user",
@@ -32,7 +32,7 @@ class VariantSelectionService:
         self,
         *,
         user,
-        level: ChallengeLevel,
+        level: ChallengeQuest,
         prior_run: ChallengeRun | None = None,
         published_variants: list[ChallengeVariant] | None = None,
         tried_variant_keys: set[str] | None = None,
@@ -71,9 +71,9 @@ class VariantSelectionService:
         # fallback only guards unsaved/legacy rows that predate that guarantee.
         return variant.semantic_key or f"id:{variant.id}"
 
-    def _tried_variant_keys(self, *, user, level: ChallengeLevel) -> set[str]:
+    def _tried_variant_keys(self, *, user, level: ChallengeQuest) -> set[str]:
         variant_ids = (
-            ChallengeRun.objects.filter(user=user, challenge_level=level)
+            ChallengeRun.objects.filter(user=user, challenge_quest=level)
             .values_list("challenge_variant_id", flat=True)
             .distinct()
         )
@@ -133,12 +133,12 @@ class ChallengeRunService:
         self,
         *,
         user,
-        level: ChallengeLevel,
+        level: ChallengeQuest,
         source_entry_point: str,
         prior_run: ChallengeRun | None = None,
         mode: str = SESSION_MODE_PRIMARY,
     ) -> ChallengeRun:
-        if prior_run and prior_run.challenge_level_id != level.id:
+        if prior_run and prior_run.challenge_quest_id != level.id:
             raise Locked("Retry runs must use the same challenge level.")
         if prior_run and prior_run.status == SESSION_STATUS_STARTED:
             raise Locked("Exit the current challenge run before retrying.")
@@ -182,7 +182,7 @@ class ChallengeRunService:
             user=user,
             module=level.module,
             workflow_scenario=level.scenario,
-            challenge_level=level,
+            challenge_quest=level,
             challenge_variant=variant,
             prior_session=prior_run,
             source_entry_point=source_entry_point,
@@ -200,27 +200,27 @@ class ChallengeRunService:
         )
         return self.hydrate_run(run)
 
-    def _active_run(self, *, user, level: ChallengeLevel):
+    def _active_run(self, *, user, level: ChallengeQuest):
         return ChallengeRun.objects.filter(
             user=user,
-            challenge_level=level,
+            challenge_quest=level,
             status=SESSION_STATUS_STARTED,
             mode=SESSION_MODE_PRIMARY,
         ).first()
 
-    def _ensure_unlocked(self, *, user, level: ChallengeLevel) -> None:
+    def _ensure_unlocked(self, *, user, level: ChallengeQuest) -> None:
         if level.difficulty == DIFFICULTY_EASY:
             # Entry into a storey's challenges is gated on passing its Command
             # Adventure (the learn-by-doing mode that teaches the commands first).
             self._ensure_adventure_passed(user=user, module=level.module)
             return
         previous = DIFFICULTY_EASY if level.difficulty == DIFFICULTY_MEDIUM else DIFFICULTY_MEDIUM
-        previous_level = ChallengeLevel.objects.filter(
+        previous_level = ChallengeQuest.objects.filter(
             scenario=level.scenario,
             difficulty=previous,
             is_published=True,
         ).first()
-        if not previous_level or not ProblemCompletion.objects.filter(user=user, challenge_level=previous_level).exists():
+        if not previous_level or not ProblemCompletion.objects.filter(user=user, challenge_quest=previous_level).exists():
             raise Locked("This challenge level is locked until the previous level is completed.")
 
     def _ensure_adventure_passed(self, *, user, module) -> None:
@@ -237,10 +237,10 @@ class ChallengeRunService:
         if not passed:
             raise Locked("Complete this storey's Command Adventure to unlock its challenges.")
 
-    def _review_variant(self, *, user, level: ChallengeLevel):
+    def _review_variant(self, *, user, level: ChallengeQuest):
         completion = ProblemCompletion.objects.select_related("challenge_run__challenge_variant").filter(
             user=user,
-            challenge_level=level,
+            challenge_quest=level,
         ).first()
         if not completion or not completion.challenge_run:
             raise Locked("Free play is available only after completing this challenge level.")

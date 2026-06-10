@@ -94,7 +94,7 @@ def _solve_current(service, run, *, solved=True) -> bool:
     service.record_attempt_result(
         attempt=attempt,
         solved=solved,
-        counted_command_count=attempt.adventure_problem.min_counted_commands or 1,
+        counted_command_count=attempt.adventure_quest.min_counted_commands or 1,
         command_count=1,
         hint_count=0,
     )
@@ -144,7 +144,7 @@ def test_run_never_passes_while_a_command_is_unsolved(db, django_user_model):
             break
         service.record_attempt_result(
             attempt=attempt,
-            solved=attempt.adventure_problem_id != first_id,
+            solved=attempt.adventure_quest_id != first_id,
             counted_command_count=1,
             command_count=1,
             hint_count=0,
@@ -263,9 +263,9 @@ def test_adventure_run_http_flow_solves_a_problem(db, django_user_model):
 
     run_id = body["id"]
     # Drive the authored solution for the first problem's selected variant.
-    from adventures.models import AdventureProblemAttempt
+    from adventures.models import AdventureQuestAttempt
 
-    attempt_obj = AdventureProblemAttempt.objects.get(id=attempt["id"])
+    attempt_obj = AdventureQuestAttempt.objects.get(id=attempt["id"])
     solution = attempt_obj.selected_variant.solution_commands
     assert solution, "seed variant should have an official solution"
 

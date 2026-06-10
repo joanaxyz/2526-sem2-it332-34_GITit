@@ -4,7 +4,7 @@ from common.constants import (
     SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
-from challenges.models import ChallengeLevel, ChallengeRun
+from challenges.models import ChallengeQuest, ChallengeRun
 
 
 def required_successful_attempts_for_problem(problem) -> int:
@@ -42,9 +42,9 @@ def session_meets_progress_threshold(*, session: ChallengeRun) -> bool:
     return rate is not None and rate >= COMMAND_ACCURACY_PROGRESS_THRESHOLD
 
 
-def get_challenge_level(level_id: int) -> ChallengeLevel:
+def get_challenge_quest(level_id: int) -> ChallengeQuest:
     return (
-        ChallengeLevel.objects.select_related("scenario", "scenario__module")
+        ChallengeQuest.objects.select_related("scenario", "scenario__module")
         .prefetch_related("variants")
         .get(
             id=level_id,

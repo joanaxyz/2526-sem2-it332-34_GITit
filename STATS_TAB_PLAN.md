@@ -62,7 +62,47 @@ Daily series over last ~14–30 days: **problems completed per day** (primary li
 
 ---
 
+## Phase 0 — Model rename: `*Level`/`*Problem` → `*Quest` (do first, backend-only)
+
+Decision: symmetric rename, parent `Challenge` and the `.scenario` FK stay. Frontend is insulated — it reads JSON keys (`level_id`, `scenario`, …), not these FK names; the only frontend hits are a local `challengeLevelAccent` UI helper, which we leave alone. So this is a backend-internal refactor (~124 class refs + ~129 field refs, ~25 files).
+
+### Rename map
+| Kind | Old | New |
+|---|---|---|
+| model | `ChallengeLevel` | `ChallengeQuest` |
+| model | `AdventureProblem` | `AdventureQuest` |
+| model | `AdventureProblemAttempt` | `AdventureQuestAttempt` (carries the old word) |
+| FK field | `ChallengeVariant.challenge_level`, `ChallengeRun.challenge_level`, `ProblemCompletion.challenge_level` | `…challenge_quest` |
+| FK field | `AdventureVariant.adventure_problem`, `AdventureQuestAttempt.adventure_problem`, `AdventureMastery.adventure_problem`, `ProblemCompletion.adventure_problem` | `…adventure_quest` |
+| related_name | `Challenge.levels` (on `ChallengeQuest.scenario`) | `Challenge.quests` |
+| constraint | `unique_challenge_level_completion`, `unique_adventure_problem_completion` | `unique_challenge_quest_completion`, `unique_adventure_quest_completion` |
+| `__str__`/literals | `"AdventureProblemAttempt(...)"` etc. | follow the token rename |
+
+Unchanged: parent `Challenge`, `ChallengeRun.workflow_scenario`/`workflow_scenarios`, `scenario`/`scenario_context` fields, `CommandAdventure`, `AdventureRun`, `*Variant` model names, `ChallengeVariant.command_budget`. **Out of scope (note for later):** `ProblemCompletion` model name keeps "Problem" (generic concept, in `progress`); DB index names (`advmastery_user_problem_idx`, `chal_user_level_latest_idx`, etc.) are opaque — leave to avoid extra migration ops, or rename in a follow-up.
+
+### Mechanical edit (safe substring tokens, backend `*.py` excluding `migrations/`)
+Apply across `backend/` source (NOT the existing `migrations/` files — those get fresh migrations):
+1. `ChallengeLevel` → `ChallengeQuest`
+2. `AdventureProblem` → `AdventureQuest`  *(auto-covers `AdventureProblemAttempt`→`AdventureQuestAttempt`)*
+3. `challenge_level` → `challenge_quest`  *(covers `_id`, `__difficulty`, `get_challenge_level`→`get_challenge_quest`, constraint name)*
+4. `adventure_problem` → `adventure_quest`  *(covers `_id`, `__in`, `adventure_problem_id`, constraint name)*
+5. Targeted: `related_name="levels"` → `related_name="quests"` and the accessor `.scenario.levels` → `.scenario.quests` (e.g. [challenges/services.py:193](backend/challenges/services.py#L193)).
+
+Files touched (from grep): `challenges/{models,services,selectors,views,serializers,admin}.py` + tests; `adventures/{models,services,scheduler,serializers,views,admin}.py` + tests; `progress/{models,services}.py` + `tests/test_wallet.py`; `practice/{models,builders,services,context}.py`; `curriculum/selectors.py` + `management/commands/seed_curriculum_v2.py`. After editing, **re-grep** `ChallengeLevel|AdventureProblem|challenge_level|adventure_problem` over `backend/` (excluding `migrations/`) to confirm zero remaining.
+
+### Migrations (data-preserving, reversible)
+Hand-author (or interactive `makemigrations`) one migration per app, ordered after current latest:
+- `challenges`: `RenameModel(ChallengeLevel→ChallengeQuest)`, `RenameField` on `ChallengeVariant` + `ChallengeRun` (`challenge_level→challenge_quest`). (`related_name` change is Python-only — no migration. `RenameModel` auto-repoints FKs.)
+- `adventures`: `RenameModel(AdventureProblem→AdventureQuest)`, `RenameModel(AdventureProblemAttempt→AdventureQuestAttempt)`, `RenameField(adventure_problem→adventure_quest)` on `AdventureVariant`/`AdventureQuestAttempt`/`AdventureMastery`, `AlterUniqueTogether(AdventureMastery)`.
+- `progress`: `RenameField` on `ProblemCompletion` (both FKs), `RemoveConstraint`+`AddConstraint` for the two renamed unique constraints. (Cross-app `RenameModel` updates the FK target state automatically; add `dependencies` on the challenges/adventures migrations.)
+
+Verify: `python backend/manage.py makemigrations --check --dry-run` (clean), `python backend/manage.py migrate`, then `python backend/manage.py test` (full suite green) **before** starting the Stats feature so it's built on the new names.
+
+---
+
 ## Backend changes
+
+> Names below use the **post-Phase-0** identifiers: `AdventureQuestAttempt` (was `AdventureProblemAttempt`), `AdventureQuest`/`ChallengeQuest`, FK `adventure_quest`/`challenge_quest`. `AdventureMastery` keeps its name.
 
 **New endpoint:** `GET /api/progress/stats/` → `StatsSummaryAPIView`.
 - `backend/progress/services.py`: add `MetricsService.stats_summary(user)` returning:

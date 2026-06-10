@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import random
 
-from adventures.models import AdventureMastery, AdventureProblem, AdventureProblemAttempt
+from adventures.models import AdventureMastery, AdventureQuest, AdventureQuestAttempt
 
 # --- tunables --------------------------------------------------------------
 BOX_VALUE = 10               # mastery points awarded per box advanced
@@ -33,12 +33,12 @@ def interval_for(strength: int) -> int:
 
 def encounter_index(*, user, adventure) -> int:
     """The user's running encounter count for this adventure (across runs)."""
-    return AdventureProblemAttempt.objects.filter(
+    return AdventureQuestAttempt.objects.filter(
         run__user=user, run__command_adventure=adventure
     ).count()
 
 
-def _ordered_problems(adventure, *, with_prerequisites: bool = False) -> list[AdventureProblem]:
+def _ordered_problems(adventure, *, with_prerequisites: bool = False) -> list[AdventureQuest]:
     # Imported lazily to avoid a services <-> scheduler import cycle.
     from adventures.services import ordered_problems_for
 
@@ -48,15 +48,15 @@ def _ordered_problems(adventure, *, with_prerequisites: bool = False) -> list[Ad
 class AdventureScheduler:
     """Stateless picker; all state lives in AdventureMastery rows."""
 
-    def _mastery_map(self, *, user, problems: list[AdventureProblem]) -> dict[int, AdventureMastery]:
+    def _mastery_map(self, *, user, problems: list[AdventureQuest]) -> dict[int, AdventureMastery]:
         rows = AdventureMastery.objects.filter(
-            user=user, adventure_problem__in=[p.id for p in problems]
+            user=user, adventure_quest__in=[p.id for p in problems]
         )
-        return {row.adventure_problem_id: row for row in rows}
+        return {row.adventure_quest_id: row for row in rows}
 
     def next_problem(
-        self, *, user, adventure, problems: list[AdventureProblem] | None = None
-    ) -> AdventureProblem | None:
+        self, *, user, adventure, problems: list[AdventureQuest] | None = None
+    ) -> AdventureQuest | None:
         """Pick the next command-problem to serve, or None when the session is
         complete (every command mastered / nothing left to introduce). Callers
         that already resolved the ordered problems (with prerequisites) pass them
@@ -102,7 +102,7 @@ class AdventureScheduler:
             return self._weakest(pool, idx=idx, strength=strength, last_seen=last_seen)
         return None
 
-    def _weakest(self, items, *, idx, strength, last_seen) -> AdventureProblem:
+    def _weakest(self, items, *, idx, strength, last_seen) -> AdventureQuest:
         """Lowest box first, then most overdue, with a random tie-break."""
         best = min((strength(p), -(idx - last_seen(p))) for p in items)
         tied = [p for p in items if (strength(p), -(idx - last_seen(p))) == best]
@@ -115,7 +115,7 @@ class AdventureScheduler:
         if not variants:
             return None
         recent = (
-            AdventureProblemAttempt.objects.filter(run__user=user, adventure_problem=problem)
+            AdventureQuestAttempt.objects.filter(run__user=user, adventure_quest=problem)
             .order_by("-id")
             .values_list("selected_variant_id", flat=True)
         )
@@ -133,7 +133,7 @@ class AdventureScheduler:
         return variants[0]
 
     def mark_served(self, *, user, problem, idx: int) -> AdventureMastery:
-        row, _ = AdventureMastery.objects.get_or_create(user=user, adventure_problem=problem)
+        row, _ = AdventureMastery.objects.get_or_create(user=user, adventure_quest=problem)
         row.introduced = True
         row.last_seen_seq = idx
         row.save(update_fields=["introduced", "last_seen_seq", "updated_at"])
@@ -142,7 +142,7 @@ class AdventureScheduler:
     def apply_result(self, *, user, problem, passed: bool, solved: bool) -> bool:
         """Update the Leitner box after an attempt. Returns whether a box advanced
         (which is what earns mastery points)."""
-        row, _ = AdventureMastery.objects.get_or_create(user=user, adventure_problem=problem)
+        row, _ = AdventureMastery.objects.get_or_create(user=user, adventure_quest=problem)
         ceiling = problem.required_successful_attempts
         box_advanced = False
         if passed and row.strength < ceiling:
@@ -171,8 +171,8 @@ def floor_met(*, user, adventure, problems=None) -> bool:
     problems = problems if problems is not None else _ordered_problems(adventure)
     strengths = dict(
         AdventureMastery.objects.filter(
-            user=user, adventure_problem__in=[p.id for p in problems]
-        ).values_list("adventure_problem_id", "strength")
+            user=user, adventure_quest__in=[p.id for p in problems]
+        ).values_list("adventure_quest_id", "strength")
     )
     return all(strengths.get(p.id, 0) >= FLOOR_STRENGTH for p in problems)
 

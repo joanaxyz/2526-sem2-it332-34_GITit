@@ -68,6 +68,10 @@ class ExecutedCommand:
     result: Any
     classification: str
     increment: int
+    # True only when the command actually changed repository state. Read-only
+    # (diagnostic), unprocessable, and invalid commands leave the state untouched,
+    # so callers can skip persisting the full repository_state JSON for them.
+    state_mutated: bool
 
 
 class CommandExecutor:
@@ -97,8 +101,13 @@ class CommandExecutor:
             return timing(f"{timing_label}.{stage}", run_id=run_id) if timing_label else nullcontext()
 
         with span("repository_state_clone"):
-            previous_state = tools.clone_state(repository_state)
-            working_state = tools.normalize_state(previous_state)
+            # normalize_state() deep-copies internally, so working_state (which the
+            # engine mutates in place) is already independent of the caller's stored
+            # state. previous_state is only read afterwards (contextual feedback +
+            # visible-tree diff), so the extra defensive clone this used to take was
+            # pure overhead — one deep copy per command saved.
+            previous_state = repository_state
+            working_state = tools.normalize_state(repository_state)
         with span("parse_execute"):
             result = self.command_engine.process(working_state, command, mutate_in_place=True)
         with span("repository_state_normalize"):
@@ -113,6 +122,8 @@ class CommandExecutor:
             result=result,
             classification=classification,
             increment=increment,
+            # Only processed, non-diagnostic commands write to the repository.
+            state_mutated=result.processed and not result.diagnostic,
         )
 
 
@@ -171,6 +182,10 @@ class CommandProcessingService:
             raise Locked("This challenge run has already ended.")
 
         state_tools = self.state_tools
+
+        def span(stage: str):
+            return timing(f"challenge.command.{stage}", run_id=run.id)
+
         execution = self.executor.execute(
             repository_state=run.repository_state,
             command=command,
@@ -187,26 +202,27 @@ class CommandProcessingService:
         state_hash = ""
         expected_state_hash = ""
         if command_result.processed:
-            state_hash = state_tools.state_hash_for_normalized(next_state)
-            expected_state_hash = VariantTargetStateHashCache().hash_for(
-                variant=run.variant,
-                state_tools=state_tools,
-            )
-            previous_history = CommandHistoryCache().history_for(run=run)
-            executed_commands = [*previous_history, command_result.normalized_command]
-            evaluation = PracticeCompletionEvaluator().evaluate(
-                CompletionEvaluationContext(
-                    session=run,
-                    previous_state=previous_state,
-                    next_state=next_state,
-                    executed_commands=executed_commands,
-                    next_state_hash=state_hash,
-                    expected_state_hash=expected_state_hash,
+            with span("evaluate"):
+                state_hash = state_tools.state_hash_for_normalized(next_state)
+                expected_state_hash = VariantTargetStateHashCache().hash_for(
+                    variant=run.variant,
+                    state_tools=state_tools,
                 )
-            )
-            result_category = evaluation.result_category
-            if _uses_contextual_feedback(run) and classification == COMMAND_COUNTED:
-                feedback = FeedbackGenerationService().describe(previous_state, next_state)
+                previous_history = CommandHistoryCache().history_for(run=run)
+                executed_commands = [*previous_history, command_result.normalized_command]
+                evaluation = PracticeCompletionEvaluator().evaluate(
+                    CompletionEvaluationContext(
+                        session=run,
+                        previous_state=previous_state,
+                        next_state=next_state,
+                        executed_commands=executed_commands,
+                        next_state_hash=state_hash,
+                        expected_state_hash=expected_state_hash,
+                    )
+                )
+                result_category = evaluation.result_category
+                if _uses_contextual_feedback(run) and classification == COMMAND_COUNTED:
+                    feedback = FeedbackGenerationService().describe(previous_state, next_state)
         else:
             result_category = RESULT_INVALID if command.strip().lower().startswith("git") else RESULT_UNPROCESSABLE
             state_hash = state_tools.state_hash_for_normalized(next_state)
@@ -222,28 +238,32 @@ class CommandProcessingService:
         run.total_attempts += 1
         if result_category != RESULT_TARGET_MATCHED:
             run.first_attempt_star_eligible = False
-        run.repository_state = next_state
 
-        visualization_snapshot = self.visualizer.snapshot(
-            next_state,
-            previous_state=previous_state,
-            target_state=_visible_target_state(run),
-        )
-        step = CommandStep.objects.create(
-            session=run,
-            command_text=command,
-            terminal_output=command_result.output,
-            result_category=result_category,
-            command_classification=classification,
-            counted_increment=increment,
-            attempt_number=run.total_attempts,
-            counted_total_after=run.counted_action_total,
-            state_hash=state_hash,
-            expected_state_hash=expected_state_hash,
-            contextual_feedback=feedback,
-            visualization_snapshot=visualization_snapshot,
-        )
-        log_command_step(step, command=command, result=command_result)
+        with span("visualization"):
+            # next_state is already normalized by the executor; skip re-normalizing.
+            visualization_snapshot = self.visualizer.snapshot(
+                next_state,
+                previous_state=previous_state,
+                target_state=_visible_target_state(run),
+                already_normalized=True,
+            )
+        with span("step_create"):
+            step = CommandStep.objects.create(
+                session=run,
+                command_text=command,
+                terminal_output=command_result.output,
+                result_category=result_category,
+                command_classification=classification,
+                counted_increment=increment,
+                attempt_number=run.total_attempts,
+                counted_total_after=run.counted_action_total,
+                state_hash=state_hash,
+                expected_state_hash=expected_state_hash,
+                contextual_feedback=feedback,
+                visualization_snapshot=visualization_snapshot,
+            )
+        with span("log_create"):
+            log_command_step(step, command=command, result=command_result)
         if command_result.processed:
             CommandHistoryCache().remember_after_append(
                 run=run,
@@ -252,7 +272,13 @@ class CommandProcessingService:
             )
 
         max_count = run.command_budget_snapshot["max_counted_commands"]
-        update_fields = {"repository_state", "total_attempts", "first_attempt_star_eligible"}
+        update_fields = {"total_attempts", "first_attempt_star_eligible"}
+        # Only persist the (large) repository_state JSON when the command actually
+        # changed it. Read-only/invalid commands leave it identical, so re-writing
+        # the blob is wasted I/O on the hot path.
+        if execution.state_mutated:
+            run.repository_state = next_state
+            update_fields.add("repository_state")
         if classification == COMMAND_COUNTED:
             update_fields.add("counted_action_total")
         elif classification == COMMAND_DIAGNOSTIC:
@@ -267,17 +293,19 @@ class CommandProcessingService:
             run.failure_reason = "Action limit reached before the target repository state was reached."
             update_fields.update({"status", "ended_at", "failure_reason"})
 
-        run.save(update_fields=sorted(update_fields))
+        with span("run_save"):
+            run.save(update_fields=sorted(update_fields))
         if getattr(run, "_chest_check_pending", False):
             StoreyChestService().award_chests(user=run.user, storey=run.module)
-        if _command_response_includes_project_tree(
-            command_result=command_result,
-            previous_state=previous_state,
-            next_state=next_state,
-        ):
-            repository_snapshot = self.snapshotter.snapshot(next_state, already_normalized=True)
-        else:
-            repository_snapshot = self.snapshotter.snapshot_for_command(next_state, already_normalized=True)
+        with span("response_snapshot"):
+            if _command_response_includes_project_tree(
+                command_result=command_result,
+                previous_state=previous_state,
+                next_state=next_state,
+            ):
+                repository_snapshot = self.snapshotter.snapshot(next_state, already_normalized=True)
+            else:
+                repository_snapshot = self.snapshotter.snapshot_for_command(next_state, already_normalized=True)
         return {
             "run": run,
             "step": step,
@@ -302,7 +330,7 @@ class CommandProcessingService:
         run.ended_at = run.completed_at
         run.rta_success = bool(run.rta_eligible and run.first_attempt_star_eligible)
         if run.mode == SESSION_MODE_PRIMARY:
-            required = required_successful_attempts_for_problem(run.challenge_level)
+            required = required_successful_attempts_for_problem(run.challenge_quest)
             previous_progress = 0
             # only(): the threshold check reads three small fields; without it every
             # prior run ships its full repository_state JSON over the wire.
@@ -310,7 +338,7 @@ class CommandProcessingService:
                 user=run.user,
                 mode=SESSION_MODE_PRIMARY,
                 status=SESSION_STATUS_COMPLETED,
-                challenge_level=run.challenge_level,
+                challenge_quest=run.challenge_quest,
             ).exclude(pk=run.pk).only("status", "counted_action_total", "command_budget_snapshot"):
                 if session_meets_progress_threshold(session=prior_run):
                     previous_progress += 1
@@ -318,7 +346,7 @@ class CommandProcessingService:
             if previous_progress + (1 if current_meets_progress else 0) >= required:
                 completion, created = ProblemCompletion.objects.get_or_create(
                     user=run.user,
-                    challenge_level=run.challenge_level,
+                    challenge_quest=run.challenge_quest,
                     defaults={
                         "challenge_run": run,
                         "first_attempt_star": run.first_attempt_star_eligible,

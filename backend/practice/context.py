@@ -13,7 +13,7 @@ LEAKY_KEYS = {
 
 # The learner-facing brief is deliberately flat and whitelist-only so the
 # frontend can render it without guessing. The objective checklist is NOT part
-# of this schema: it lives on AdventureProblem.objective_checks (server-side
+# of this schema: it lives on AdventureQuest.objective_checks (server-side
 # requirements) and reaches the client only as evaluated {label, satisfied}
 # rows in the attempt payload.
 ALLOWED_KEYS = {"schema_version", "story", "task", "details", "constraints"}

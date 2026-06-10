@@ -1,6 +1,6 @@
 from django.db.models import Prefetch
 
-from adventures.models import AdventureMastery, AdventureProblemAttempt, AdventureRun
+from adventures.models import AdventureMastery, AdventureQuestAttempt, AdventureRun
 from adventures.scheduler import pass_bar_for, total_achievable
 from adventures.services import ordered_problems_for
 from common.constants import SESSION_STATUS_STARTED
@@ -12,14 +12,14 @@ from simulator.services import RepositorySnapshotService
 _snapshotter = RepositorySnapshotService()
 
 
-def _live_objective_checks(attempt: AdventureProblemAttempt) -> list:
+def _live_objective_checks(attempt: AdventureQuestAttempt) -> list:
     """Evaluate the adventure-only objective checklist against the attempt's
     current repository state. Shared by the full attempt payload and the slim
     per-command payload so the checklist ticks off identically on both paths.
     Checks are authored on the problem (`objective_checks`); their server-side
     requirements never leave the backend — only {label, satisfied} rows do."""
     return ObjectiveChecklistEvaluator().evaluate(
-        attempt.adventure_problem.objective_checks,
+        attempt.adventure_quest.objective_checks,
         state=attempt.repository_state,
         initial_state=attempt.selected_variant.initial_state,
     )
@@ -30,9 +30,9 @@ def _mastery_payload(run: AdventureRun, problems: list) -> dict:
     progress. Drives the mastery UI (boxes, commands mastered, score vs bar).
     `problems` is passed in so the ordered-problems join runs once per request."""
     rows = {
-        m.adventure_problem_id: m
+        m.adventure_quest_id: m
         for m in AdventureMastery.objects.filter(
-            user_id=run.user_id, adventure_problem__in=[p.id for p in problems]
+            user_id=run.user_id, adventure_quest__in=[p.id for p in problems]
         )
     }
     commands = []
@@ -64,8 +64,8 @@ def _mastery_payload(run: AdventureRun, problems: list) -> dict:
     }
 
 
-def attempt_payload(attempt: AdventureProblemAttempt) -> dict:
-    problem = attempt.adventure_problem
+def attempt_payload(attempt: AdventureQuestAttempt) -> dict:
+    problem = attempt.adventure_quest
     variant = attempt.selected_variant
     # The narrative is authored on the problem and shared across its variants;
     # the variant only carries a generated fallback, so the problem's authored
@@ -133,7 +133,7 @@ def attempt_payload(attempt: AdventureProblemAttempt) -> dict:
     }
 
 
-def attempt_result_payload(attempt: AdventureProblemAttempt) -> dict:
+def attempt_result_payload(attempt: AdventureQuestAttempt) -> dict:
     return {
         "id": attempt.id,
         "order": attempt.order,
@@ -153,7 +153,7 @@ def adventure_run_payload(run: AdventureRun) -> dict:
     # and the pass-bar math; resolve it once per request instead of 4x.
     problems = ordered_problems_for(run.command_adventure)
     attempts = list(
-        run.attempts.select_related("adventure_problem", "selected_variant").prefetch_related(
+        run.attempts.select_related("adventure_quest", "selected_variant").prefetch_related(
             Prefetch("steps", queryset=CommandStep.objects.order_by("id"))
         )
     )
@@ -195,7 +195,7 @@ def adventure_run_payload(run: AdventureRun) -> dict:
     }
 
 
-def adventure_command_payload(run: AdventureRun, *, attempt: AdventureProblemAttempt) -> dict:
+def adventure_command_payload(run: AdventureRun, *, attempt: AdventureQuestAttempt) -> dict:
     """Lightweight per-command payload, returned while an attempt is still in
     progress. Mirrors the challenge `command_run_payload` split: mid-attempt only
     the live attempt state changes (repository, counts, objective checklist), so

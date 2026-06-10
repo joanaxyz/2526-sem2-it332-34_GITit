@@ -2,8 +2,8 @@ from dataclasses import dataclass, field
 
 from django.db.models import Count, Q
 
-from adventures.models import AdventureProblem, AdventureRun, CommandAdventure
-from challenges.models import Challenge, ChallengeLevel, ChallengeRun
+from adventures.models import AdventureQuest, AdventureRun, CommandAdventure
+from challenges.models import Challenge, ChallengeQuest, ChallengeRun
 from challenges.selectors import (
     command_accuracy_rate,
     session_meets_progress_threshold,
@@ -72,21 +72,21 @@ def storey_completion_count_map(*, user, storey_ids: list[int]) -> dict[int, int
             status="completed",
             module_id__in=storey_ids,
         )
-        .select_related("challenge_level")
+        .select_related("challenge_quest")
         .only(
             "id",
             "module_id",
-            "challenge_level_id",
+            "challenge_quest_id",
             "counted_action_total",
             "command_budget_snapshot",
-            "challenge_level__required_successful_attempts",
+            "challenge_quest__required_successful_attempts",
         )
     ):
         if not session_meets_progress_threshold(session=run):
             continue
-        level_id = run.challenge_level_id
+        level_id = run.challenge_quest_id
         challenge_counts[(run.module_id, level_id)] = challenge_counts.get((run.module_id, level_id), 0) + 1
-        required_by_level[level_id] = run.challenge_level.required_successful_attempts
+        required_by_level[level_id] = run.challenge_quest.required_successful_attempts
         storey_by_level[level_id] = run.module_id
 
     for (_, level_id), count in challenge_counts.items():
@@ -104,7 +104,7 @@ def storey_completion_denominator_map(*, storey_ids: list[int]) -> dict[int, int
         denominator_by_storey[adventure.module_id] += 1
 
     for row in (
-        ChallengeLevel.objects.filter(
+        ChallengeQuest.objects.filter(
             is_published=True,
             scenario__is_published=True,
             scenario__module_id__in=storey_ids,
@@ -269,21 +269,21 @@ def _build_challenge_access(*, user, storey_id: int, challenges: list[Challenge]
         return ChallengeAccessContext(adventure_passed=_adventure_passed(user=user, storey_id=storey_id))
 
     completions = {
-        completion.challenge_level_id: completion
-        for completion in ProblemCompletion.objects.filter(user=user, challenge_level_id__in=level_ids)
+        completion.challenge_quest_id: completion
+        for completion in ProblemCompletion.objects.filter(user=user, challenge_quest_id__in=level_ids)
     }
 
     active_runs: dict[int, ChallengeRun] = {}
     latest_runs: dict[int, ChallengeRun] = {}
     progress_counts: dict[int, int] = {}
     runs = (
-        ChallengeRun.objects.filter(user=user, challenge_level_id__in=level_ids)
+        ChallengeRun.objects.filter(user=user, challenge_quest_id__in=level_ids)
         .order_by("id")
         .only(
             "id",
             "mode",
             "status",
-            "challenge_level_id",
+            "challenge_quest_id",
             "counted_action_total",
             "command_budget_snapshot",
             "total_attempts",
@@ -293,11 +293,11 @@ def _build_challenge_access(*, user, storey_id: int, challenges: list[Challenge]
     )
     for run in runs:
         # Ascending id order: the last run seen per level is the latest one.
-        latest_runs[run.challenge_level_id] = run
+        latest_runs[run.challenge_quest_id] = run
         if run.mode == "primary" and run.status == "started":
-            active_runs[run.challenge_level_id] = run
+            active_runs[run.challenge_quest_id] = run
         if run.mode == "primary" and run.status == "completed" and session_meets_progress_threshold(session=run):
-            progress_counts[run.challenge_level_id] = progress_counts.get(run.challenge_level_id, 0) + 1
+            progress_counts[run.challenge_quest_id] = progress_counts.get(run.challenge_quest_id, 0) + 1
 
     return ChallengeAccessContext(
         completions=completions,
@@ -317,7 +317,7 @@ def command_adventure_summary_payload(*, user, adventure: CommandAdventure) -> d
         if authenticated
         else None
     )
-    problem_count = AdventureProblem.objects.filter(
+    problem_count = AdventureQuest.objects.filter(
         usage__topic__module=adventure.module,
         is_published=True,
         usage__is_published=True,
@@ -380,7 +380,7 @@ def command_skill_summary_payload(*, user, skill: CommandSkill) -> dict:
 def challenge_summary_payload(*, challenge: Challenge, access: ChallengeAccessContext) -> dict:
     ordered = _ordered_levels(challenge.levels.all())
     levels = [
-        challenge_level_access_payload(level=level, access=access, scenario_levels=ordered)
+        challenge_quest_access_payload(level=level, access=access, scenario_levels=ordered)
         for level in ordered
     ]
     return {
@@ -395,11 +395,11 @@ def challenge_summary_payload(*, challenge: Challenge, access: ChallengeAccessCo
     }
 
 
-def challenge_level_access_payload(
+def challenge_quest_access_payload(
     *,
-    level: ChallengeLevel,
+    level: ChallengeQuest,
     access: ChallengeAccessContext,
-    scenario_levels: list[ChallengeLevel],
+    scenario_levels: list[ChallengeQuest],
 ) -> dict:
     completion = access.completions.get(level.id)
     active_run = access.active_runs.get(level.id)
@@ -433,9 +433,9 @@ def get_command_form(form_id: int) -> CommandForm:
     )
 
 
-def get_challenge_level(level_id: int) -> ChallengeLevel:
+def get_challenge_quest(level_id: int) -> ChallengeQuest:
     return (
-        ChallengeLevel.objects.select_related("scenario", "scenario__module")
+        ChallengeQuest.objects.select_related("scenario", "scenario__module")
         .prefetch_related("variants")
         .get(
             id=level_id,
@@ -448,9 +448,9 @@ def get_challenge_level(level_id: int) -> ChallengeLevel:
 
 def _challenge_status(
     *,
-    level: ChallengeLevel,
+    level: ChallengeQuest,
     access: ChallengeAccessContext,
-    scenario_levels: list[ChallengeLevel],
+    scenario_levels: list[ChallengeQuest],
 ) -> str:
     if level.id in access.completions:
         return "completed"
@@ -464,9 +464,9 @@ def _challenge_status(
 
 def _challenge_unlocked(
     *,
-    level: ChallengeLevel,
+    level: ChallengeQuest,
     access: ChallengeAccessContext,
-    scenario_levels: list[ChallengeLevel],
+    scenario_levels: list[ChallengeQuest],
 ) -> bool:
     if level.difficulty == DIFFICULTY_EASY:
         # Mirrors ChallengeRunService._ensure_adventure_passed: a storey's
@@ -517,6 +517,6 @@ def _completion_payload(completion) -> dict | None:
     }
 
 
-def _ordered_levels(levels) -> list[ChallengeLevel]:
+def _ordered_levels(levels) -> list[ChallengeQuest]:
     order = {DIFFICULTY_EASY: 0, DIFFICULTY_MEDIUM: 1, DIFFICULTY_HARD: 2}
     return sorted(levels, key=lambda level: order.get(level.difficulty, 99))

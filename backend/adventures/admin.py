@@ -1,8 +1,8 @@
 from django.contrib import admin
 
 from adventures.models import (
-    AdventureProblem,
-    AdventureProblemAttempt,
+    AdventureQuest,
+    AdventureQuestAttempt,
     AdventureRun,
     AdventureVariant,
     CommandAdventure,
@@ -16,8 +16,8 @@ class CommandAdventureAdmin(admin.ModelAdmin):
     search_fields = ("title", "slug")
 
 
-@admin.register(AdventureProblem)
-class AdventureProblemAdmin(admin.ModelAdmin):
+@admin.register(AdventureQuest)
+class AdventureQuestAdmin(admin.ModelAdmin):
     list_display = ("slug", "title", "usage", "is_published", "sort_order")
     list_filter = ("is_published",)
     search_fields = ("title", "slug")
@@ -25,7 +25,7 @@ class AdventureProblemAdmin(admin.ModelAdmin):
 
 @admin.register(AdventureVariant)
 class AdventureVariantAdmin(admin.ModelAdmin):
-    list_display = ("slug", "adventure_problem", "is_published")
+    list_display = ("slug", "adventure_quest", "is_published")
     list_filter = ("is_published",)
 
 
@@ -35,7 +35,7 @@ class AdventureRunAdmin(admin.ModelAdmin):
     list_filter = ("status",)
 
 
-@admin.register(AdventureProblemAttempt)
-class AdventureProblemAttemptAdmin(admin.ModelAdmin):
-    list_display = ("id", "run", "adventure_problem", "status", "final_score")
+@admin.register(AdventureQuestAttempt)
+class AdventureQuestAttemptAdmin(admin.ModelAdmin):
+    list_display = ("id", "run", "adventure_quest", "status", "final_score")
     list_filter = ("status",)

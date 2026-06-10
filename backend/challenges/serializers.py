@@ -41,7 +41,7 @@ def prefetch_run_payload_context(run: ChallengeRun) -> None:
         return
     run._prefetched_completion = ProblemCompletion.objects.filter(
         user_id=run.user_id,
-        challenge_level_id=run.challenge_level_id,
+        challenge_quest_id=run.challenge_quest_id,
     ).first()
     run._payload_context_loaded = True
 
@@ -52,10 +52,14 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
     visualizer = RepositoryVisualizationService()
     context = _scenario_context(run)
     repository_state = snapshotter.snapshot(run.repository_state, already_normalized=True)
-    supports = ScaffoldingService().supports_for(run.challenge_level.difficulty)
+    supports = ScaffoldingService().supports_for(run.challenge_quest.difficulty)
     expected_target = run.variant.target_state
     target_state = run.variant.target_state if supports["expected_state"] else None
-    visualization = visualizer.snapshot(run.repository_state, target_state=target_state)
+    # Stored repository_state is already normalized (the snapshotter calls beside
+    # this rely on the same invariant), so the DAG snapshot can skip a redundant pass.
+    visualization = visualizer.snapshot(
+        run.repository_state, target_state=target_state, already_normalized=True
+    )
     expected_state = (
         snapshotter.snapshot(expected_target, already_normalized=True)
         if supports["expected_state"] and expected_target
@@ -136,12 +140,12 @@ def command_run_payload(run: ChallengeRun, *, repository_state: dict, visualizat
 
 
 def mastery_progress_payload(run: ChallengeRun) -> dict:
-    required = required_successful_attempts_for_problem(run.challenge_level)
+    required = required_successful_attempts_for_problem(run.challenge_quest)
     mastered_count = ChallengeRun.objects.filter(
         user_id=run.user_id,
         mode="primary",
         status="completed",
-        challenge_level_id=run.challenge_level_id,
+        challenge_quest_id=run.challenge_quest_id,
         counted_action_total__lte=run.command_budget_snapshot["min_counted_commands"],
     ).count()
     return {"mastered": min(mastered_count, required), "required": required}
@@ -150,7 +154,7 @@ def mastery_progress_payload(run: ChallengeRun) -> dict:
 def completion_payload(run: ChallengeRun) -> dict | None:
     completion = getattr(run, "_prefetched_completion", None)
     if completion is None and not getattr(run, "_payload_context_loaded", False):
-        completion = ProblemCompletion.objects.filter(user=run.user, challenge_level=run.challenge_level).first()
+        completion = ProblemCompletion.objects.filter(user=run.user, challenge_quest=run.challenge_quest).first()
     if not completion:
         return None
     return {
@@ -178,7 +182,7 @@ def next_difficulty_payload(run: ChallengeRun) -> dict | None:
     if (
         run.mode != "primary"
         or run.status != SESSION_STATUS_COMPLETED
-        or not run.challenge_level
+        or not run.challenge_quest
     ):
         return None
     progress = mastery_progress_payload(run)
@@ -187,10 +191,10 @@ def next_difficulty_payload(run: ChallengeRun) -> dict | None:
     if progress["mastered"] < progress["required"]:
         return None
     try:
-        next_difficulty = DIFFICULTY_ORDER[DIFFICULTY_ORDER.index(run.challenge_level.difficulty) + 1]
+        next_difficulty = DIFFICULTY_ORDER[DIFFICULTY_ORDER.index(run.challenge_quest.difficulty) + 1]
     except (ValueError, IndexError):
         return None
-    next_level = run.challenge_level.scenario.levels.filter(
+    next_level = run.challenge_quest.scenario.levels.filter(
         difficulty=next_difficulty,
         is_published=True,
     ).first()
@@ -203,7 +207,7 @@ def _scenario_context(run: ChallengeRun) -> dict:
     # The brief is authored on the level and shared across its variants; the
     # variant only carries a generated fallback, so the level's authored context
     # wins.
-    raw = run.challenge_level.scenario_context or run.variant.scenario_context
+    raw = run.challenge_quest.scenario_context or run.variant.scenario_context
     return ScenarioContextNormalizer().normalize(raw, fallback_story=run.workflow_scenario.narrative)
 
 
@@ -214,5 +218,5 @@ def _challenge_payload(run: ChallengeRun) -> dict:
         "title": run.workflow_scenario.title,
         "summary": run.workflow_scenario.summary,
         "narrative": run.workflow_scenario.narrative,
-        "level_id": run.challenge_level_id,
+        "level_id": run.challenge_quest_id,
     }

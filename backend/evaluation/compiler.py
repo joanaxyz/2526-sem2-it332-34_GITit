@@ -1,8 +1,35 @@
+from collections import OrderedDict
 from typing import Any
 
 from evaluation.types import CompletionPolicy, EvaluationSpec, ProcessRequirements
 
 VALID_COMPLETION_MODES = {"rules", "state_hash", "rules_then_hash"}
+
+
+class CompiledEvaluationSpecCache:
+    """Compile authored evaluation specs once per variant/problem.
+
+    The compiled EvaluationSpec is an immutable dataclass derived purely from
+    authored JSON, and the evaluator only reads it (``as_rule_payload`` returns a
+    fresh shallow copy each call), so it is safe to memoize across requests. The
+    key mirrors VariantTargetStateHashCache (``id`` + ``semantic_key``) so
+    re-authoring transparently recompiles; any miss falls back to a fresh compile.
+    """
+
+    _cache: "OrderedDict[tuple, EvaluationSpec]" = OrderedDict()
+    _max_entries = 512
+
+    def spec_for(self, *, key: tuple, raw_spec: dict[str, Any] | None) -> EvaluationSpec:
+        cached = self._cache.get(key)
+        if cached is not None:
+            self._cache.move_to_end(key)
+            return cached
+        spec = compile_evaluation_spec(raw_spec)
+        self._cache[key] = spec
+        self._cache.move_to_end(key)
+        while len(self._cache) > self._max_entries:
+            self._cache.popitem(last=False)
+        return spec
 
 
 def compile_evaluation_spec(raw_spec: dict[str, Any] | None) -> EvaluationSpec:

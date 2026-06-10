@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from adventures.models import AdventureProblem, AdventureVariant, CommandAdventure
-from challenges.models import Challenge, ChallengeLevel, ChallengeVariant
+from adventures.models import AdventureQuest, AdventureVariant, CommandAdventure
+from challenges.models import Challenge, ChallengeQuest, ChallengeVariant
 from curriculum.curriculum_v2.adventures import COMMAND_DRILL_ADVENTURES
 from curriculum.curriculum_v2.command_topics import COMMAND_TOPICS
 from curriculum.curriculum_v2.drills import COMMAND_DRILLS
@@ -118,7 +118,7 @@ class Command(BaseCommand):
         """One CommandAdventure per Storey that has published adventure problems."""
         live_ids = []
         for index, (slug, module) in enumerate(modules.items(), start=1):
-            has_problems = AdventureProblem.objects.filter(
+            has_problems = AdventureQuest.objects.filter(
                 usage__topic__module=module, is_published=True
             ).exists()
             if not has_problems:
@@ -192,10 +192,10 @@ class Command(BaseCommand):
     def _seed_command_drills(self, usages: dict[str, CommandForm]) -> None:
         builder = StaticProblemVariantBuilder()
         live_drill_ids = []
-        drills_by_slug: dict[str, AdventureProblem] = {}
+        drills_by_slug: dict[str, AdventureQuest] = {}
         for index, spec in enumerate(COMMAND_DRILLS, start=1):
             usage = usages[spec["usage"]]
-            drill, _ = AdventureProblem.objects.update_or_create(
+            drill, _ = AdventureQuest.objects.update_or_create(
                 usage=usage,
                 slug=spec["slug"],
                 defaults={
@@ -223,7 +223,7 @@ class Command(BaseCommand):
                     f"Drill {spec['slug']!r} lists unknown prerequisite {missing}."
                 )
             drill.prerequisites.set(prereqs)
-        AdventureProblem.objects.exclude(id__in=live_drill_ids).update(is_published=False)
+        AdventureQuest.objects.exclude(id__in=live_drill_ids).update(is_published=False)
 
     def _seed_workflows(self, modules: dict[str, Storey]) -> None:
         builder = StaticProblemVariantBuilder()
@@ -244,7 +244,7 @@ class Command(BaseCommand):
             live_scenario_ids.append(scenario.id)
             live_level_ids = []
             for level_spec in spec.get("levels", []):
-                level, _ = ChallengeLevel.objects.update_or_create(
+                level, _ = ChallengeQuest.objects.update_or_create(
                     scenario=scenario,
                     difficulty=level_spec["difficulty"],
                     defaults={
@@ -261,7 +261,7 @@ class Command(BaseCommand):
                     variant_specs=level_spec["variants"],
                     builder=builder,
                 )
-            ChallengeLevel.objects.filter(scenario=scenario).exclude(id__in=live_level_ids).update(
+            ChallengeQuest.objects.filter(scenario=scenario).exclude(id__in=live_level_ids).update(
                 is_published=False
             )
         Challenge.objects.exclude(id__in=live_scenario_ids).update(is_published=False)
@@ -272,12 +272,12 @@ class Command(BaseCommand):
             case = {"case_id": variant_spec["case_id"]}
             variant = builder.build(problem=problem, template=variant_spec, case=case, index=index)
             filters = {"semantic_key": variant.semantic_key}
-            if isinstance(problem, AdventureProblem):
+            if isinstance(problem, AdventureQuest):
                 variant_model = AdventureVariant
-                filters["adventure_problem"] = problem
+                filters["adventure_quest"] = problem
             else:
                 variant_model = ChallengeVariant
-                filters["challenge_level"] = problem
+                filters["challenge_quest"] = problem
             saved, _ = variant_model.objects.update_or_create(
                 **filters,
                 defaults={
@@ -298,12 +298,12 @@ class Command(BaseCommand):
                 },
             )
             live_ids.append(saved.id)
-        if isinstance(problem, AdventureProblem):
-            AdventureVariant.objects.filter(adventure_problem=problem).exclude(id__in=live_ids).update(
+        if isinstance(problem, AdventureQuest):
+            AdventureVariant.objects.filter(adventure_quest=problem).exclude(id__in=live_ids).update(
                 is_published=False
             )
         else:
-            ChallengeVariant.objects.filter(challenge_level=problem).exclude(id__in=live_ids).update(
+            ChallengeVariant.objects.filter(challenge_quest=problem).exclude(id__in=live_ids).update(
                 is_published=False
             )
 
@@ -364,7 +364,7 @@ class Command(BaseCommand):
         """Adventure prerequisite graph must be a DAG, and every prerequisite must
         be published, in the same adventure, and precede its dependent in order."""
         ordered = list(
-            AdventureProblem.objects.filter(is_published=True)
+            AdventureQuest.objects.filter(is_published=True)
             .order_by("usage__topic__sort_order", "usage__sort_order", "sort_order", "id")
             .prefetch_related("prerequisites")
             .select_related("usage__topic")
@@ -409,7 +409,7 @@ class Command(BaseCommand):
         # Mastery reviews must vary the scenario: a drill needs at least as many
         # variants as the masteries it demands, or repeated reviews show the same
         # screen. Warn (not error) so under-authored content still seeds + runs.
-        if isinstance(problem, AdventureProblem) and len(variants) < problem.required_successful_attempts:
+        if isinstance(problem, AdventureQuest) and len(variants) < problem.required_successful_attempts:
             self.stdout.write(
                 self.style.WARNING(
                     f"{self._problem_name(problem)}: {len(variants)} variant(s) for "
@@ -421,7 +421,7 @@ class Command(BaseCommand):
             self._validate_variant(variant=variant, errors=errors)
 
     def _validate_variant(self, *, variant, errors: list[str]) -> None:
-        domain = "command_adventure" if hasattr(variant, "adventure_problem_id") else "challenge"
+        domain = "command_adventure" if hasattr(variant, "adventure_quest_id") else "challenge"
         label = f"{domain}:{self._problem_slug(variant)}/{variant.slug}"
         required_fields = {
             "initial_state": variant.initial_state,
@@ -466,12 +466,12 @@ class Command(BaseCommand):
             errors.append(f"{label}: repository visualization is missing")
 
     def _problem_slug(self, variant) -> str:
-        if getattr(variant, "adventure_problem_id", None):
-            return variant.adventure_problem.slug
-        level = variant.challenge_level
+        if getattr(variant, "adventure_quest_id", None):
+            return variant.adventure_quest.slug
+        level = variant.challenge_quest
         return f"{level.scenario.slug}/{level.difficulty}"
 
     def _problem_name(self, problem) -> str:
-        if isinstance(problem, AdventureProblem):
+        if isinstance(problem, AdventureQuest):
             return problem.slug
         return f"{problem.scenario.slug}/{problem.difficulty}"

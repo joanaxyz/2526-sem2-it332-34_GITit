@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from common.constants import SESSION_MODE_PRIMARY, SESSION_MODE_REVIEW, SESSION_STATUS_STARTED
 from common.exceptions import Locked
 from challenges.models import ChallengeRun
-from challenges.selectors import get_challenge_level
+from challenges.selectors import get_challenge_quest
 from challenges.serializers import (
     ChallengeRunStartSerializer,
     CommandSubmitSerializer,
@@ -22,7 +22,7 @@ class ChallengeRunStartAPIView(APIView):
     def post(self, request, level_id: int):
         serializer = ChallengeRunStartSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        level = get_challenge_level(level_id)
+        level = get_challenge_quest(level_id)
         prior_run = None
         prior_run_id = serializer.validated_data.get("prior_run_id")
         if prior_run_id:
@@ -53,7 +53,7 @@ class ChallengeCommandSubmitAPIView(APIView):
         run = ChallengeRun.objects.select_related(
             "module",
             "workflow_scenario",
-            "challenge_level__scenario",
+            "challenge_quest__scenario",
             "challenge_variant",
         ).get(id=run_id, user=request.user)
         result = CommandProcessingService().submit_command(
@@ -133,7 +133,7 @@ class ChallengeRetryAPIView(APIView):
         try:
             prior = (
                 ChallengeRun.objects.select_for_update(nowait=True, of=("self",))
-                .select_related("challenge_level__scenario", "challenge_variant")
+                .select_related("challenge_quest__scenario", "challenge_variant")
                 .get(id=run_id, user=request.user)
             )
         except OperationalError:
@@ -144,7 +144,7 @@ class ChallengeRetryAPIView(APIView):
             prior = ChallengeRunService().abandon(run=prior)
         run = ChallengeRunService().start_run(
             user=request.user,
-            level=prior.challenge_level,
+            level=prior.challenge_quest,
             source_entry_point="retry",
             prior_run=prior,
         )
@@ -156,6 +156,6 @@ def _get_workspace_run(run_id: int, user):
     return ChallengeRun.objects.select_related(
         "module",
         "workflow_scenario",
-        "challenge_level__scenario",
+        "challenge_quest__scenario",
         "challenge_variant",
     ).get(id=run_id, user=user)

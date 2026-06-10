@@ -135,7 +135,10 @@ _database_url = _normalize_database_url(
 DATABASES = {
     "default": env.db_url_config(_database_url),
 }
-DATABASES["default"]["CONN_MAX_AGE"] = env.int("DATABASE_CONN_MAX_AGE", default=0)
+# Persist DB connections for 60s by default so each command submit doesn't pay a
+# fresh connect/handshake (notably costly against a remote Postgres pooler).
+# Override with DATABASE_CONN_MAX_AGE=0 to restore close-after-request behavior.
+DATABASES["default"]["CONN_MAX_AGE"] = env.int("DATABASE_CONN_MAX_AGE", default=60)
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = env.bool("DATABASE_CONN_HEALTH_CHECKS", default=False)
 if "sqlite3" in DATABASES["default"].get("ENGINE", ""):
     from django.db.backends.signals import connection_created

@@ -31,7 +31,7 @@ class CommandStep(models.Model):
         on_delete=models.CASCADE,
     )
     attempt = models.ForeignKey(
-        "adventures.AdventureProblemAttempt",
+        "adventures.AdventureQuestAttempt",
         null=True,
         blank=True,
         related_name="steps",
@@ -54,6 +54,9 @@ class CommandStep(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["session", "id"], name="cmdstep_session_id_idx"),
+            # Adventure history is queried by attempt (attempt.steps ordered by id,
+            # plus the command-history join); mirror the session index for it.
+            models.Index(fields=["attempt", "id"], name="cmdstep_attempt_id_idx"),
         ]
 
 

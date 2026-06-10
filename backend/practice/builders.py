@@ -4,8 +4,8 @@ import json
 import re
 from typing import Any
 
-from adventures.models import AdventureProblem, AdventureVariant
-from challenges.models import ChallengeLevel, ChallengeVariant
+from adventures.models import AdventureQuest, AdventureVariant
+from challenges.models import ChallengeQuest, ChallengeVariant
 from evaluation.compiler import compile_evaluation_spec
 from evaluation.engine import EvaluationEngine
 from evaluation.services import StateBasedEvaluator
@@ -83,12 +83,12 @@ class StaticProblemVariantBuilder:
             rendered_context,
             fallback_story="Reach the requested repository outcome cleanly.",
         )
-        if isinstance(problem, AdventureProblem):
+        if isinstance(problem, AdventureQuest):
             variant_model = AdventureVariant
-            parent_kwargs = {"adventure_problem": problem}
-        elif isinstance(problem, ChallengeLevel):
+            parent_kwargs = {"adventure_quest": problem}
+        elif isinstance(problem, ChallengeQuest):
             variant_model = ChallengeVariant
-            parent_kwargs = {"challenge_level": problem}
+            parent_kwargs = {"challenge_quest": problem}
         else:
             raise ProblemVariantBuildError("Unknown problem type for variant build.")
         variant = variant_model(

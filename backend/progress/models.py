@@ -58,14 +58,14 @@ class CoinTransaction(models.Model):
 
 class ProblemCompletion(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    adventure_problem = models.ForeignKey(
-        "adventures.AdventureProblem",
+    adventure_quest = models.ForeignKey(
+        "adventures.AdventureQuest",
         null=True,
         blank=True,
         on_delete=models.CASCADE,
     )
-    challenge_level = models.ForeignKey(
-        "challenges.ChallengeLevel",
+    challenge_quest = models.ForeignKey(
+        "challenges.ChallengeQuest",
         null=True,
         blank=True,
         on_delete=models.CASCADE,
@@ -83,17 +83,17 @@ class ProblemCompletion(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "adventure_problem"],
-                name="unique_adventure_problem_completion",
-                condition=models.Q(adventure_problem__isnull=False),
+                fields=["user", "adventure_quest"],
+                name="unique_adventure_quest_completion",
+                condition=models.Q(adventure_quest__isnull=False),
             ),
             models.UniqueConstraint(
-                fields=["user", "challenge_level"],
-                name="unique_challenge_level_completion",
-                condition=models.Q(challenge_level__isnull=False),
+                fields=["user", "challenge_quest"],
+                name="unique_challenge_quest_completion",
+                condition=models.Q(challenge_quest__isnull=False),
             ),
         ]
 
     @property
     def problem(self):
-        return self.adventure_problem or self.challenge_level
+        return self.adventure_quest or self.challenge_quest

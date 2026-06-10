@@ -33,7 +33,7 @@ class CommandAdventure(models.Model):
         return self.title
 
 
-class AdventureProblem(models.Model):
+class AdventureQuest(models.Model):
     usage = models.ForeignKey(
         "curriculum.CommandForm",
         related_name="drills",
@@ -106,19 +106,19 @@ class VariantBase(models.Model):
 
 
 class AdventureVariant(VariantBase):
-    adventure_problem = models.ForeignKey(
-        AdventureProblem,
+    adventure_quest = models.ForeignKey(
+        AdventureQuest,
         related_name="variants",
         on_delete=models.CASCADE,
     )
 
     class Meta(VariantBase.Meta):
         abstract = False
-        ordering = ["adventure_problem_id", "semantic_key", "id"]
+        ordering = ["adventure_quest_id", "semantic_key", "id"]
 
     @property
     def problem(self):
-        return self.adventure_problem
+        return self.adventure_quest
 
     def __str__(self) -> str:
         return f"command_adventure:{self.slug}"
@@ -166,15 +166,15 @@ class AdventureRun(models.Model):
         return f"AdventureRun({self.id}, {self.command_adventure_id}, {self.status})"
 
 
-class AdventureProblemAttempt(models.Model):
+class AdventureQuestAttempt(models.Model):
     class Status(models.TextChoices):
         STARTED = SESSION_STATUS_STARTED, "Started"
         COMPLETED = SESSION_STATUS_COMPLETED, "Completed"
         FAILED = SESSION_STATUS_FAILED, "Failed"
 
     run = models.ForeignKey(AdventureRun, related_name="attempts", on_delete=models.CASCADE)
-    adventure_problem = models.ForeignKey(
-        AdventureProblem,
+    adventure_quest = models.ForeignKey(
+        AdventureQuest,
         related_name="attempts",
         on_delete=models.PROTECT,
     )
@@ -205,7 +205,7 @@ class AdventureProblemAttempt(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"AdventureProblemAttempt({self.id}, run={self.run_id}, {self.status})"
+        return f"AdventureQuestAttempt({self.id}, run={self.run_id}, {self.status})"
 
 
 class AdventureMastery(models.Model):
@@ -215,8 +215,8 @@ class AdventureMastery(models.Model):
     spacing is measured in encounters rather than wall-clock time. Persists across runs."""
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    adventure_problem = models.ForeignKey(
-        AdventureProblem,
+    adventure_quest = models.ForeignKey(
+        AdventureQuest,
         related_name="mastery_states",
         on_delete=models.CASCADE,
     )
@@ -226,10 +226,10 @@ class AdventureMastery(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = [("user", "adventure_problem")]
+        unique_together = [("user", "adventure_quest")]
         indexes = [
-            models.Index(fields=["user", "adventure_problem"], name="advmastery_user_problem_idx"),
+            models.Index(fields=["user", "adventure_quest"], name="advmastery_user_problem_idx"),
         ]
 
     def __str__(self) -> str:
-        return f"AdventureMastery(user={self.user_id}, problem={self.adventure_problem_id}, box={self.strength})"
+        return f"AdventureMastery(user={self.user_id}, problem={self.adventure_quest_id}, box={self.strength})"

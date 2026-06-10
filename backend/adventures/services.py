@@ -13,8 +13,8 @@ from rest_framework.exceptions import ValidationError
 
 from adventures.models import (
     AdventureMastery,
-    AdventureProblem,
-    AdventureProblemAttempt,
+    AdventureQuest,
+    AdventureQuestAttempt,
     AdventureRun,
     CommandAdventure,
 )
@@ -34,7 +34,8 @@ from common.constants import (
     SESSION_STATUS_STARTED,
 )
 from common.exceptions import Locked
-from evaluation.compiler import compile_evaluation_spec
+from common.performance import timing
+from evaluation.compiler import CompiledEvaluationSpecCache
 from evaluation.engine import EvaluationEngine
 from practice.models import CommandLog, CommandStep
 from practice.services import CommandExecutor, VariantTargetStateHashCache, log_command_step
@@ -45,8 +46,8 @@ from simulator.workspace_files import WorkspaceFileError, WorkspaceFileStateServ
 
 def ordered_problems_for(
     adventure: CommandAdventure, *, with_prerequisites: bool = False
-) -> list[AdventureProblem]:
-    queryset = AdventureProblem.objects.filter(
+) -> list[AdventureQuest]:
+    queryset = AdventureQuest.objects.filter(
         usage__topic__module_id=adventure.module_id,
         is_published=True,
         usage__is_published=True,
@@ -68,7 +69,7 @@ class AdventureCommandHistoryCache:
     _cache: OrderedDict[tuple[int, int], list[str]] = OrderedDict()
     _max_entries = 512
 
-    def history_for(self, *, attempt: AdventureProblemAttempt, log_count: int) -> list[str]:
+    def history_for(self, *, attempt: AdventureQuestAttempt, log_count: int) -> list[str]:
         key = (attempt.id, log_count)
         cached = self._cache.get(key)
         if cached is not None:
@@ -84,7 +85,7 @@ class AdventureCommandHistoryCache:
         return history
 
     def remember(
-        self, *, attempt: AdventureProblemAttempt, log_count: int, history: list[str]
+        self, *, attempt: AdventureQuestAttempt, log_count: int, history: list[str]
     ) -> None:
         self._remember((attempt.id, log_count), history)
 
@@ -134,7 +135,7 @@ class AdventureRunService:
         self._open_next(run=run)
         return run
 
-    def current_attempt(self, *, run: AdventureRun) -> AdventureProblemAttempt | None:
+    def current_attempt(self, *, run: AdventureRun) -> AdventureQuestAttempt | None:
         return run.attempts.filter(status=SESSION_STATUS_STARTED).order_by("order").first()
 
     # savepoint=False: when nested inside the submit transaction this joins it
@@ -144,19 +145,19 @@ class AdventureRunService:
     def record_attempt_result(
         self,
         *,
-        attempt: AdventureProblemAttempt,
+        attempt: AdventureQuestAttempt,
         solved: bool,
         counted_command_count: int,
         command_count: int,
         hint_count: int = 0,
         repository_state: dict | None = None,
-    ) -> AdventureProblemAttempt:
+    ) -> AdventureQuestAttempt:
         if attempt.status != SESSION_STATUS_STARTED:
             raise Locked("This attempt has already been scored.")
         score = self.scorer.score_attempt(
             solved=solved,
             counted_commands=counted_command_count,
-            ideal_commands=attempt.adventure_problem.min_counted_commands,
+            ideal_commands=attempt.adventure_quest.min_counted_commands,
             hint_count=hint_count,
         )
         attempt.correctness_score = score.correctness_score
@@ -198,7 +199,7 @@ class AdventureRunService:
         if run.mode != SESSION_MODE_REPLAY:
             box_advanced = self.scheduler.apply_result(
                 user=run.user,
-                problem=attempt.adventure_problem,
+                problem=attempt.adventure_quest,
                 passed=score.passed,
                 solved=solved,
             )
@@ -226,8 +227,8 @@ class AdventureRunService:
         return attempt
 
     def _open_next(
-        self, *, run: AdventureRun, problems: list[AdventureProblem] | None = None
-    ) -> AdventureProblemAttempt | None:
+        self, *, run: AdventureRun, problems: list[AdventureQuest] | None = None
+    ) -> AdventureQuestAttempt | None:
         """Open the next command-problem, or finish the session when there is
         nothing left to serve. Primary runs ask the mastery scheduler; replays
         walk the adventure once, ignoring mastery, so a passed adventure stays
@@ -246,17 +247,17 @@ class AdventureRunService:
         return self._open_attempt(run=run, problem=problem)
 
     def _next_replay_problem(
-        self, *, run: AdventureRun, problems: list[AdventureProblem]
-    ) -> AdventureProblem | None:
+        self, *, run: AdventureRun, problems: list[AdventureQuest]
+    ) -> AdventureQuest | None:
         """Next unplayed command in this replay: a single linear walk through the
         adventure's ordered problems, decoupled from the global mastery view."""
-        served_ids = set(run.attempts.values_list("adventure_problem_id", flat=True))
+        served_ids = set(run.attempts.values_list("adventure_quest_id", flat=True))
         for problem in problems:
             if problem.id not in served_ids:
                 return problem
         return None
 
-    def _finish(self, *, run: AdventureRun, problems: list[AdventureProblem]) -> None:
+    def _finish(self, *, run: AdventureRun, problems: list[AdventureQuest]) -> None:
         # Primary: reached only when the scheduler has nothing left to serve, i.e.
         # every command is mastered. The pass milestone (passed_at) is set earlier
         # and independently, the instant the session score crosses the pass bar.
@@ -269,15 +270,15 @@ class AdventureRunService:
         )
         run.save(update_fields=["status", "completed_at", "mastery_progress_gained"])
 
-    def _mastery_fraction(self, run: AdventureRun, problems: list[AdventureProblem]) -> float:
+    def _mastery_fraction(self, run: AdventureRun, problems: list[AdventureQuest]) -> float:
         """Share of total Leitner boxes filled across the adventure, in [0, 1]."""
         ceiling = sum(p.required_successful_attempts for p in problems)
         if not ceiling:
             return 0.0
         strengths = dict(
             AdventureMastery.objects.filter(
-                user_id=run.user_id, adventure_problem__in=[p.id for p in problems]
-            ).values_list("adventure_problem_id", "strength")
+                user_id=run.user_id, adventure_quest__in=[p.id for p in problems]
+            ).values_list("adventure_quest_id", "strength")
         )
         filled = sum(
             min(strengths.get(p.id, 0), p.required_successful_attempts) for p in problems
@@ -297,14 +298,14 @@ class AdventureRunService:
         return run
 
     def _open_attempt(
-        self, *, run: AdventureRun, problem: AdventureProblem
-    ) -> AdventureProblemAttempt:
+        self, *, run: AdventureRun, problem: AdventureQuest
+    ) -> AdventureQuestAttempt:
         variant = self.scheduler.select_variant(user=run.user, problem=problem)
         if variant is None:
             raise Locked("This adventure problem has no published variants.")
-        attempt = AdventureProblemAttempt.objects.create(
+        attempt = AdventureQuestAttempt.objects.create(
             run=run,
-            adventure_problem=problem,
+            adventure_quest=problem,
             selected_variant=variant,
             order=run.attempts.count(),
             repository_state=variant.initial_state,
@@ -322,7 +323,7 @@ class AdventureRunService:
             run.current_problem_index = (
                 AdventureMastery.objects.filter(
                     user=run.user,
-                    adventure_problem__usage__topic__module=run.command_adventure.module,
+                    adventure_quest__usage__topic__module=run.command_adventure.module,
                     introduced=True,
                 ).count()
             )
@@ -338,7 +339,7 @@ class AdventureRunService:
     ]
 
     @transaction.atomic
-    def use_hint(self, *, attempt: AdventureProblemAttempt) -> dict:
+    def use_hint(self, *, attempt: AdventureQuestAttempt) -> dict:
         if attempt.status != SESSION_STATUS_STARTED:
             raise Locked("This attempt has already been scored.")
         index = attempt.hint_count
@@ -361,8 +362,8 @@ class AdventureWorkspaceFileService:
 
     @transaction.atomic
     def create_file(
-        self, *, attempt: AdventureProblemAttempt, path: str, content: str = ""
-    ) -> AdventureProblemAttempt:
+        self, *, attempt: AdventureQuestAttempt, path: str, content: str = ""
+    ) -> AdventureQuestAttempt:
         if attempt.status != SESSION_STATUS_STARTED:
             raise Locked("This attempt has already ended.")
         try:
@@ -377,8 +378,8 @@ class AdventureWorkspaceFileService:
 
     @transaction.atomic
     def write_file(
-        self, *, attempt: AdventureProblemAttempt, path: str, content: str = ""
-    ) -> AdventureProblemAttempt:
+        self, *, attempt: AdventureQuestAttempt, path: str, content: str = ""
+    ) -> AdventureQuestAttempt:
         if attempt.status != SESSION_STATUS_STARTED:
             raise Locked("This attempt has already ended.")
         try:
@@ -393,7 +394,7 @@ class AdventureWorkspaceFileService:
 
 
 class AdventureCommandService:
-    """Processes a submitted command for one AdventureProblemAttempt.
+    """Processes a submitted command for one AdventureQuestAttempt.
 
     Reuses the shared simulator + evaluator engines but never the challenge
     completion flow. On reaching the target (or exhausting the command budget)
@@ -406,12 +407,20 @@ class AdventureCommandService:
         self.runs = AdventureRunService()
 
     @transaction.atomic
-    def submit(self, *, attempt: AdventureProblemAttempt, command: str) -> dict:
+    def submit(self, *, attempt: AdventureQuestAttempt, command: str) -> dict:
         if attempt.status != SESSION_STATUS_STARTED:
             raise Locked("This attempt has already ended.")
+        run_id = attempt.run_id
+
+        def span(stage: str):
+            return timing(f"adventure.command.{stage}", run_id=run_id)
+
         variant = attempt.selected_variant
         execution = self.executor.execute(
-            repository_state=attempt.repository_state, command=command
+            repository_state=attempt.repository_state,
+            command=command,
+            timing_label="adventure.command",
+            run_id=run_id,
         )
         result = execution.result
         next_state = execution.next_state
@@ -424,50 +433,62 @@ class AdventureCommandService:
         solved = False
         executed: list[str] = []
         if result.processed:
-            # Every submit logs exactly one CommandLog, so the pre-increment
-            # command count equals the number of logs already persisted — the
-            # cache key the previous submit remembered its history under.
-            history = AdventureCommandHistoryCache().history_for(
-                attempt=attempt, log_count=attempt.command_count - 1
-            )
-            executed = [*history, result.normalized_command]
-            outcome = EvaluationEngine().evaluate(
-                spec=compile_evaluation_spec(variant.evaluation_spec),
-                next_state=next_state,
-                initial_state=variant.initial_state,
-                executed_commands=executed,
-                next_state_hash=self.sim.state_hash_for_normalized(next_state),
-                expected_state_hash=VariantTargetStateHashCache().hash_for(
-                    variant=variant, state_tools=self.sim
-                ),
-            )
-            solved = outcome.target_matched
+            with span("evaluate"):
+                # Every submit logs exactly one CommandLog, so the pre-increment
+                # command count equals the number of logs already persisted — the
+                # cache key the previous submit remembered its history under.
+                history = AdventureCommandHistoryCache().history_for(
+                    attempt=attempt, log_count=attempt.command_count - 1
+                )
+                executed = [*history, result.normalized_command]
+                outcome = EvaluationEngine().evaluate(
+                    spec=CompiledEvaluationSpecCache().spec_for(
+                        key=("variant", variant.id, variant.semantic_key or ""),
+                        raw_spec=variant.evaluation_spec,
+                    ),
+                    next_state=next_state,
+                    initial_state=variant.initial_state,
+                    executed_commands=executed,
+                    next_state_hash=self.sim.state_hash_for_normalized(next_state),
+                    expected_state_hash=VariantTargetStateHashCache().hash_for(
+                        variant=variant, state_tools=self.sim
+                    ),
+                )
+                solved = outcome.target_matched
 
-        step = CommandStep.objects.create(
-            attempt=attempt,
-            command_text=command,
-            terminal_output=result.output,
-            result_category=CommandStep.ResultCategory.TARGET_MATCHED
-            if solved
-            else CommandStep.ResultCategory.TARGET_NOT_YET_MATCHED
-            if result.processed
-            else CommandStep.ResultCategory.UNPROCESSABLE,
-            command_classification=classification,
-            counted_increment=increment,
-            attempt_number=attempt.command_count,
-            counted_total_after=attempt.counted_command_count,
-            repository_state=next_state,
-        )
-        log_command_step(step, command=command, result=result)
+        with span("step_create"):
+            step = CommandStep.objects.create(
+                attempt=attempt,
+                command_text=command,
+                terminal_output=result.output,
+                result_category=CommandStep.ResultCategory.TARGET_MATCHED
+                if solved
+                else CommandStep.ResultCategory.TARGET_NOT_YET_MATCHED
+                if result.processed
+                else CommandStep.ResultCategory.UNPROCESSABLE,
+                command_classification=classification,
+                counted_increment=increment,
+                attempt_number=attempt.command_count,
+                counted_total_after=attempt.counted_command_count,
+                # repository_state intentionally omitted: the live attempt already
+                # holds current state, and this column is write-only (no replay path
+                # reads it), so persisting the full JSON here was a duplicate write.
+            )
+        with span("log_create"):
+            log_command_step(step, command=command, result=result)
         if result.processed:
             AdventureCommandHistoryCache().remember(
                 attempt=attempt, log_count=attempt.command_count, history=executed
             )
-        attempt.save(
-            update_fields=["command_count", "counted_command_count", "repository_state"]
-        )
+        # The big repository_state JSON is persisted only when the command actually
+        # changed it; read-only/invalid commands leave it identical.
+        update_fields = ["command_count", "counted_command_count"]
+        if execution.state_mutated:
+            update_fields.append("repository_state")
+        with span("attempt_save"):
+            attempt.save(update_fields=update_fields)
 
-        max_counted = attempt.adventure_problem.max_counted_commands
+        max_counted = attempt.adventure_quest.max_counted_commands
         budget_exhausted = attempt.counted_command_count >= max_counted
         if solved or budget_exhausted:
             # repository_state is omitted: this submit already persisted

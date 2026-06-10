@@ -120,9 +120,23 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   const colors = VARIANT_COLORS[variant]
   const normalizedSnapshot = useMemo(() => normalizeSnapshot(snapshot), [snapshot])
   const layoutSignature = useMemo(() => graphLayoutSignature(normalizedSnapshot), [normalizedSnapshot])
+  // dagre layout is the heaviest per-command cost, but node positions depend only
+  // on commit topology (exactly what layoutSignature captures). Cache positions per
+  // topology so ref/HEAD/staging-only commands (git add, branch, switch, status…)
+  // refresh the cheap node data without re-running a full graph layout.
+  const positionsRef = useRef<{ signature: string; positions: Map<string, { x: number; y: number }> } | null>(null)
   const { nodes, edges } = useMemo(() => {
-    return buildGraph(normalizedSnapshot, variant)
-  }, [normalizedSnapshot, variant])
+    const cached =
+      positionsRef.current?.signature === layoutSignature ? positionsRef.current.positions : undefined
+    const graph = buildGraph(normalizedSnapshot, variant, cached)
+    if (!cached) {
+      positionsRef.current = {
+        signature: layoutSignature,
+        positions: new Map(graph.nodes.map((node) => [node.id, node.position])),
+      }
+    }
+    return graph
+  }, [normalizedSnapshot, variant, layoutSignature])
   const nodeTypes = useMemo(() => commitNodeTypes, [])
   const [activeCommitId, setActiveCommitId] = useState<string | null>(null)
   const dismissCommit = useCallback((commitId: string) => {
