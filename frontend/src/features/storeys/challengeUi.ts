@@ -5,6 +5,7 @@ import type {
   ChallengeLevelAccess,
   CommandAdventureSummary,
 } from '@/features/challenges/types'
+import type { ChestReward, LearningStorey } from '@/features/storeys/types'
 
 // Per-difficulty label + accent (RGB triplet consumed via `rgba(var(--…), …)`).
 export const DIFFICULTY_ACCENT: Record<string, { label: string; rgb: string }> = {
@@ -13,15 +14,20 @@ export const DIFFICULTY_ACCENT: Record<string, { label: string; rgb: string }> =
   hard: { label: 'Hard', rgb: '176, 74, 255' },
 }
 
-export const REWARD_MARKERS = [
-  { value: 25, label: '+25 XP' },
-  { value: 50, label: '+60 XP' },
-  { value: 75, label: '+100 XP' },
-  { value: 100, label: 'Crown chest' },
+// Fallback while the API has no chest config; mirrors the backend defaults.
+export const DEFAULT_CHEST_REWARDS: ChestReward[] = [
+  { threshold: 25, coins: 25 },
+  { threshold: 50, coins: 60 },
+  { threshold: 75, coins: 100 },
+  { threshold: 100, coins: 150 },
 ]
 
-export function nextReward(progress: number) {
-  return REWARD_MARKERS.find((marker) => progress < marker.value) ?? REWARD_MARKERS[REWARD_MARKERS.length - 1]
+export function chestRewards(storey: Pick<LearningStorey, 'chest_rewards'>): ChestReward[] {
+  return storey.chest_rewards?.length ? storey.chest_rewards : DEFAULT_CHEST_REWARDS
+}
+
+export function nextReward(rewards: ChestReward[], progress: number) {
+  return rewards.find((chest) => progress < chest.threshold) ?? rewards[rewards.length - 1]
 }
 
 export function adventureActionLabel(adventure: CommandAdventureSummary) {

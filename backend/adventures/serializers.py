@@ -32,7 +32,7 @@ def _mastery_payload(run: AdventureRun, problems: list) -> dict:
     rows = {
         m.adventure_problem_id: m
         for m in AdventureMastery.objects.filter(
-            user=run.user, adventure_problem__in=[p.id for p in problems]
+            user_id=run.user_id, adventure_problem__in=[p.id for p in problems]
         )
     }
     commands = []
@@ -168,7 +168,7 @@ def adventure_run_payload(run: AdventureRun) -> dict:
         # Stable across re-runs: a replay never clears this, so the outcome UI and
         # challenge gate can rely on it instead of the latest run's status.
         "is_passed": run.command_adventure.runs.filter(
-            user=run.user, passed_at__isnull=False
+            user_id=run.user_id, passed_at__isnull=False
         ).exists(),
         "command_adventure": {
             "id": run.command_adventure_id,

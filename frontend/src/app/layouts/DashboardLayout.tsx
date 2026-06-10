@@ -21,6 +21,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { authApi } from '@/features/auth/api/authApi'
 import { useAuthStore } from '@/features/auth/hooks/useAuth'
+import { WalletBadge } from '@/features/wallet/components/WalletBadge'
 import { CursorGlow } from '@/shared/components/CursorGlow'
 import { cn } from '@/shared/utils/cn'
 
@@ -284,29 +285,30 @@ export function DashboardLayout() {
             </nav>
           </div>
 
-          {/* Right: profile dropdown */}
-          <div className="ml-auto">
+          {/* Right: GitCoin balance + profile dropdown */}
+          <div className="ml-auto flex items-center gap-3">
+            {user && <WalletBadge />}
             {user && <ProfileDropdown user={user} onLogout={logout} />}
           </div>
         </div>
       </header>
       <main className="mx-auto max-w-[1440px] px-6 py-6 max-sm:px-4">
-  <Outlet />
-</main>
+        <Outlet />
+      </main>
 
-{isTowerPage ? (
-  <button
-    type="button"
-    className="tower-help-launcher"
-    aria-label="Open tower guide"
-    title="How tower works"
-    onClick={() => setTowerHelpOpen(true)}
-  >
-    <CircleHelp className="size-5" />
-  </button>
-) : null}
+      {isTowerPage ? (
+        <button
+          type="button"
+          className="tower-help-launcher"
+          aria-label="Open tower guide"
+          title="How tower works"
+          onClick={() => setTowerHelpOpen(true)}
+        >
+          <CircleHelp className="size-5" />
+        </button>
+      ) : null}
 
-<TowerHelpOverlay open={towerHelpOpen} onClose={() => setTowerHelpOpen(false)} />
+      <TowerHelpOverlay open={towerHelpOpen} onClose={() => setTowerHelpOpen(false)} />
     </div>
   )
 }

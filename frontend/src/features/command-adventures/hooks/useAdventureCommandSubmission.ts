@@ -92,6 +92,12 @@ export function useAdventureCommandSubmission(runId: number | null) {
     },
     onSuccess: (response) => {
       const previous = queryClient.getQueryData<AdventureRun>(key)
+      const earnedCoins =
+        (response.run.is_passed && previous && !previous.is_passed) ||
+        (response.run.status === 'completed' && previous?.status !== 'completed')
+      if (earnedCoins) {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.wallet })
+      }
       const merged = mergeCommandRun(previous, response.run)
       if (!merged) {
         void queryClient.invalidateQueries({ queryKey: key })

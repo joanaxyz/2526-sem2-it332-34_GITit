@@ -3,6 +3,7 @@ import type { StoreyContentSection } from '@/features/challenges/types'
 export const queryKeys = {
   authBootstrap: ['auth-bootstrap'] as const,
   dashboardSummary: ['dashboard-summary'] as const,
+  wallet: ['wallet'] as const,
   foundations: ['foundations'] as const,
   storeys: ['storeys'] as const,
   storeyContent: (storeyId: number | null | undefined, section: StoreyContentSection) =>

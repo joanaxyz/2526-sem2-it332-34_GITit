@@ -5,6 +5,8 @@ Kept separate from the challenge/session flow so adventure progression
 completion/unlock behavior.
 """
 
+from collections import OrderedDict
+
 from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
@@ -35,20 +37,62 @@ from common.exceptions import Locked
 from evaluation.compiler import compile_evaluation_spec
 from evaluation.engine import EvaluationEngine
 from practice.models import CommandLog, CommandStep
-from practice.services import CommandExecutor, log_command_step
+from practice.services import CommandExecutor, VariantTargetStateHashCache, log_command_step
+from progress.chests import StoreyChestService
 from simulator.services import RepositoryStateSimulator
 from simulator.workspace_files import WorkspaceFileError, WorkspaceFileStateService
 
 
-def ordered_problems_for(adventure: CommandAdventure) -> list[AdventureProblem]:
-    return list(
-        AdventureProblem.objects.filter(
-            usage__topic__module=adventure.module,
-            is_published=True,
-            usage__is_published=True,
-            usage__topic__is_published=True,
-        ).order_by("usage__topic__sort_order", "usage__sort_order", "sort_order", "id")
-    )
+def ordered_problems_for(
+    adventure: CommandAdventure, *, with_prerequisites: bool = False
+) -> list[AdventureProblem]:
+    queryset = AdventureProblem.objects.filter(
+        usage__topic__module_id=adventure.module_id,
+        is_published=True,
+        usage__is_published=True,
+        usage__topic__is_published=True,
+    ).order_by("usage__topic__sort_order", "usage__sort_order", "sort_order", "id")
+    if with_prerequisites:
+        # The scheduler walks problem.prerequisites for every candidate; the
+        # prefetch turns that per-problem N+1 into a single extra query.
+        queryset = queryset.prefetch_related("prerequisites")
+    return list(queryset)
+
+
+class AdventureCommandHistoryCache:
+    """Process-local LRU of an attempt's normalized command history, mirroring
+    challenges.services.CommandHistoryCache. The key includes the attempt's log
+    count, so a stale entry is never served: any miss (other worker, rollback,
+    restart) falls back to the DB query."""
+
+    _cache: OrderedDict[tuple[int, int], list[str]] = OrderedDict()
+    _max_entries = 512
+
+    def history_for(self, *, attempt: AdventureProblemAttempt, log_count: int) -> list[str]:
+        key = (attempt.id, log_count)
+        cached = self._cache.get(key)
+        if cached is not None:
+            self._cache.move_to_end(key)
+            return list(cached)
+
+        history = list(
+            CommandLog.objects.filter(step_log__attempt=attempt)
+            .order_by("step_log_id")
+            .values_list("normalized_command", flat=True)
+        )
+        self._remember(key, history)
+        return history
+
+    def remember(
+        self, *, attempt: AdventureProblemAttempt, log_count: int, history: list[str]
+    ) -> None:
+        self._remember((attempt.id, log_count), history)
+
+    def _remember(self, key: tuple[int, int], history: list[str]) -> None:
+        self._cache[key] = list(history)
+        self._cache.move_to_end(key)
+        while len(self._cache) > self._max_entries:
+            self._cache.popitem(last=False)
 
 
 class AdventureRunService:
@@ -93,7 +137,10 @@ class AdventureRunService:
     def current_attempt(self, *, run: AdventureRun) -> AdventureProblemAttempt | None:
         return run.attempts.filter(status=SESSION_STATUS_STARTED).order_by("order").first()
 
-    @transaction.atomic
+    # savepoint=False: when nested inside the submit transaction this joins it
+    # instead of paying SAVEPOINT/RELEASE round trips; standalone callers still
+    # get their own transaction.
+    @transaction.atomic(savepoint=False)
     def record_attempt_result(
         self,
         *,
@@ -122,11 +169,29 @@ class AdventureRunService:
         attempt.counted_command_count = counted_command_count
         attempt.status = SESSION_STATUS_COMPLETED if score.passed else SESSION_STATUS_FAILED
         attempt.completed_at = timezone.now()
+        update_fields = [
+            "correctness_score",
+            "efficiency_score",
+            "independence_score",
+            "final_score",
+            "mastery_gain",
+            "hint_count",
+            "command_count",
+            "counted_command_count",
+            "status",
+            "completed_at",
+        ]
         if repository_state is not None:
             attempt.repository_state = repository_state
-        attempt.save()
+            update_fields.append("repository_state")
+        # update_fields keeps the big repository_state JSON off the wire unless it
+        # actually changed (the submit path has already persisted it).
+        attempt.save(update_fields=update_fields)
 
         run = attempt.run
+        # The ordered-problems join feeds the pass check, the scheduler, and the
+        # mastery fraction below; resolve it once per transition.
+        problems = ordered_problems_for(run.command_adventure, with_prerequisites=True)
         # Replays are uncounted free-play: the attempt is still scored (so the
         # learner sees how the run went), but mastery, session score, and the
         # pass milestone are left untouched. Primary runs alone drive progress.
@@ -140,39 +205,58 @@ class AdventureRunService:
             run.session_score += mastery_points(
                 box_advanced=box_advanced, final_score=score.final_score, box_value=BOX_VALUE
             )
-            if run.passed_at is None and is_passed(
-                user=run.user, adventure=run.command_adventure, session_score=run.session_score
-            ):
+            newly_passed = run.passed_at is None and is_passed(
+                user=run.user,
+                adventure=run.command_adventure,
+                session_score=run.session_score,
+                problems=problems,
+            )
+            if newly_passed:
                 run.passed_at = timezone.now()
             run.save(update_fields=["session_score", "passed_at"])
+            if newly_passed:
+                # Passing the adventure moves the storey progress bar; GitCoins
+                # come from the progress chests, so check them now that
+                # passed_at is persisted.
+                StoreyChestService().award_chests(
+                    user=run.user, storey=run.command_adventure.module
+                )
 
-        self._open_next(run=run)
+        self._open_next(run=run, problems=problems)
         return attempt
 
-    def _open_next(self, *, run: AdventureRun) -> AdventureProblemAttempt | None:
+    def _open_next(
+        self, *, run: AdventureRun, problems: list[AdventureProblem] | None = None
+    ) -> AdventureProblemAttempt | None:
         """Open the next command-problem, or finish the session when there is
         nothing left to serve. Primary runs ask the mastery scheduler; replays
         walk the adventure once, ignoring mastery, so a passed adventure stays
         fully playable instead of finishing the instant it starts."""
+        if problems is None:
+            problems = ordered_problems_for(run.command_adventure, with_prerequisites=True)
         if run.mode == SESSION_MODE_REPLAY:
-            problem = self._next_replay_problem(run=run)
+            problem = self._next_replay_problem(run=run, problems=problems)
         else:
-            problem = self.scheduler.next_problem(user=run.user, adventure=run.command_adventure)
+            problem = self.scheduler.next_problem(
+                user=run.user, adventure=run.command_adventure, problems=problems
+            )
         if problem is None:
-            self._finish(run=run)
+            self._finish(run=run, problems=problems)
             return None
         return self._open_attempt(run=run, problem=problem)
 
-    def _next_replay_problem(self, *, run: AdventureRun) -> AdventureProblem | None:
+    def _next_replay_problem(
+        self, *, run: AdventureRun, problems: list[AdventureProblem]
+    ) -> AdventureProblem | None:
         """Next unplayed command in this replay: a single linear walk through the
         adventure's ordered problems, decoupled from the global mastery view."""
         served_ids = set(run.attempts.values_list("adventure_problem_id", flat=True))
-        for problem in ordered_problems_for(run.command_adventure):
+        for problem in problems:
             if problem.id not in served_ids:
                 return problem
         return None
 
-    def _finish(self, *, run: AdventureRun) -> None:
+    def _finish(self, *, run: AdventureRun, problems: list[AdventureProblem]) -> None:
         # Primary: reached only when the scheduler has nothing left to serve, i.e.
         # every command is mastered. The pass milestone (passed_at) is set earlier
         # and independently, the instant the session score crosses the pass bar.
@@ -181,19 +265,18 @@ class AdventureRunService:
         run.status = SESSION_STATUS_COMPLETED
         run.completed_at = timezone.now()
         run.mastery_progress_gained = (
-            0.0 if run.mode == SESSION_MODE_REPLAY else self._mastery_fraction(run)
+            0.0 if run.mode == SESSION_MODE_REPLAY else self._mastery_fraction(run, problems)
         )
         run.save(update_fields=["status", "completed_at", "mastery_progress_gained"])
 
-    def _mastery_fraction(self, run: AdventureRun) -> float:
+    def _mastery_fraction(self, run: AdventureRun, problems: list[AdventureProblem]) -> float:
         """Share of total Leitner boxes filled across the adventure, in [0, 1]."""
-        problems = ordered_problems_for(run.command_adventure)
         ceiling = sum(p.required_successful_attempts for p in problems)
         if not ceiling:
             return 0.0
         strengths = dict(
             AdventureMastery.objects.filter(
-                user=run.user, adventure_problem__in=[p.id for p in problems]
+                user_id=run.user_id, adventure_problem__in=[p.id for p in problems]
             ).values_list("adventure_problem_id", "strength")
         )
         filled = sum(
@@ -339,11 +422,13 @@ class AdventureCommandService:
         attempt.repository_state = next_state
 
         solved = False
+        executed: list[str] = []
         if result.processed:
-            history = list(
-                CommandLog.objects.filter(step_log__attempt=attempt)
-                .order_by("step_log_id")
-                .values_list("normalized_command", flat=True)
+            # Every submit logs exactly one CommandLog, so the pre-increment
+            # command count equals the number of logs already persisted — the
+            # cache key the previous submit remembered its history under.
+            history = AdventureCommandHistoryCache().history_for(
+                attempt=attempt, log_count=attempt.command_count - 1
             )
             executed = [*history, result.normalized_command]
             outcome = EvaluationEngine().evaluate(
@@ -352,7 +437,9 @@ class AdventureCommandService:
                 initial_state=variant.initial_state,
                 executed_commands=executed,
                 next_state_hash=self.sim.state_hash_for_normalized(next_state),
-                expected_state_hash=self.sim.state_hash(variant.target_state),
+                expected_state_hash=VariantTargetStateHashCache().hash_for(
+                    variant=variant, state_tools=self.sim
+                ),
             )
             solved = outcome.target_matched
 
@@ -372,6 +459,10 @@ class AdventureCommandService:
             repository_state=next_state,
         )
         log_command_step(step, command=command, result=result)
+        if result.processed:
+            AdventureCommandHistoryCache().remember(
+                attempt=attempt, log_count=attempt.command_count, history=executed
+            )
         attempt.save(
             update_fields=["command_count", "counted_command_count", "repository_state"]
         )
@@ -379,13 +470,14 @@ class AdventureCommandService:
         max_counted = attempt.adventure_problem.max_counted_commands
         budget_exhausted = attempt.counted_command_count >= max_counted
         if solved or budget_exhausted:
+            # repository_state is omitted: this submit already persisted
+            # next_state on the attempt, so re-sending the JSON blob is waste.
             self.runs.record_attempt_result(
                 attempt=attempt,
                 solved=solved,
                 counted_command_count=attempt.counted_command_count,
                 command_count=attempt.command_count,
                 hint_count=attempt.hint_count,
-                repository_state=next_state,
             )
             attempt.refresh_from_db()
 

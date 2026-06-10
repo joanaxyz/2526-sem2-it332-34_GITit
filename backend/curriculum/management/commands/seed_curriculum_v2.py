@@ -9,7 +9,13 @@ from curriculum.curriculum_v2.drills import COMMAND_DRILLS
 from curriculum.curriculum_v2.foundations import FOUNDATIONS
 from curriculum.curriculum_v2.modules import MODULES
 from curriculum.curriculum_v2.workflows import WORKFLOW_SCENARIOS
-from curriculum.models import CommandForm, CommandSkill, ConceptPage, Storey
+from curriculum.models import (
+    CommandForm,
+    CommandSkill,
+    ConceptPage,
+    Storey,
+    default_chest_rewards,
+)
 from evaluation.compiler import compile_evaluation_spec
 from evaluation.engine import EvaluationEngine
 from practice.builders import StaticProblemVariantBuilder
@@ -101,6 +107,7 @@ class Command(BaseCommand):
                     "description": spec["description"],
                     "sort_order": index,
                     "is_published": is_published,
+                    "chest_rewards": spec.get("chest_rewards", default_chest_rewards()),
                 },
             )
             modules[spec["slug"]] = module

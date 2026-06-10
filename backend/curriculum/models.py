@@ -1,5 +1,18 @@
 from django.db import models
 
+# Default GitCoin chests along the storey progress bar. Seeds may override
+# per storey via the module spec's "chest_rewards".
+DEFAULT_CHEST_REWARDS = [
+    {"threshold": 25, "coins": 25},
+    {"threshold": 50, "coins": 60},
+    {"threshold": 75, "coins": 100},
+    {"threshold": 100, "coins": 150},
+]
+
+
+def default_chest_rewards() -> list[dict]:
+    return [dict(chest) for chest in DEFAULT_CHEST_REWARDS]
+
 
 class Storey(models.Model):
     slug = models.SlugField(unique=True)
@@ -8,6 +21,8 @@ class Storey(models.Model):
     description = models.TextField()
     is_published = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
+    # [{"threshold": <progress percent>, "coins": <GitCoins>}, ...]
+    chest_rewards = models.JSONField(default=default_chest_rewards, blank=True)
 
     class Meta:
         ordering = ["sort_order", "number"]

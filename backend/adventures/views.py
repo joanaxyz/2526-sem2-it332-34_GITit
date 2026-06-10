@@ -10,6 +10,7 @@ from adventures.services import (
     AdventureWorkspaceFileService,
 )
 from common.constants import SESSION_STATUS_STARTED
+from common.exceptions import Locked
 
 
 class _CommandSerializer(serializers.Serializer):
@@ -33,13 +34,26 @@ def _get_run(run_id: int, user) -> AdventureRun:
     )
 
 
-def _active_attempt(run: AdventureRun) -> AdventureProblemAttempt:
-    attempt = AdventureRunService().current_attempt(run=run)
+def _run_with_active_attempt(run_id: int, user) -> tuple[AdventureRun, AdventureProblemAttempt]:
+    """One query for the live attempt plus everything the submit path touches
+    (run, adventure, problem, variant). The returned run is the same instance the
+    services mutate, so callers never need a refresh round trip."""
+    attempt = (
+        AdventureProblemAttempt.objects.select_related(
+            "run__command_adventure", "adventure_problem", "selected_variant"
+        )
+        .filter(run_id=run_id, run__user=user, status=SESSION_STATUS_STARTED)
+        .order_by("order")
+        .first()
+    )
     if attempt is None:
-        from common.exceptions import Locked
-
+        _get_run(run_id, user)  # missing/foreign run raises DoesNotExist as before
         raise Locked("This run has no active attempt.")
-    return attempt
+    run = attempt.run
+    # The requester is the run's owner (filtered above); priming the relation
+    # spares every downstream `run.user` access a lazy query.
+    run.user = user
+    return run, attempt
 
 
 class CommandAdventureRunStartAPIView(APIView):
@@ -59,12 +73,12 @@ class AdventureRunSubmitCommandAPIView(APIView):
     def post(self, request, run_id: int):
         serializer = _CommandSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        run = _get_run(run_id, request.user)
-        attempt = _active_attempt(run)
+        run, attempt = _run_with_active_attempt(run_id, request.user)
         result = AdventureCommandService().submit(
             attempt=attempt, command=serializer.validated_data["command"]
         )
-        run.refresh_from_db()
+        # `run` is the instance the service just mutated and saved (scores,
+        # status, next attempt), so its in-memory state is already current.
         # A transition (solved / budget spent) advances mastery and opens the next
         # problem, so the client needs the full run. A plain mid-attempt command
         # only moves the live attempt state, so a slim patch is enough.
@@ -102,10 +116,8 @@ class AdventureRunSubmitCommandAPIView(APIView):
 
 class AdventureRunUseHintAPIView(APIView):
     def post(self, request, run_id: int):
-        run = _get_run(run_id, request.user)
-        attempt = _active_attempt(run)
+        run, attempt = _run_with_active_attempt(run_id, request.user)
         result = AdventureRunService().use_hint(attempt=attempt)
-        run.refresh_from_db()
         return Response(
             {
                 "run": adventure_run_payload(run),
@@ -125,8 +137,7 @@ class AdventureWorkspaceFileAPIView(APIView):
     def _mutate_file(self, request, run_id: int, mutate):
         serializer = _WorkspaceFileSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        run = _get_run(run_id, request.user)
-        attempt = _active_attempt(run)
+        run, attempt = _run_with_active_attempt(run_id, request.user)
         mutate(
             attempt=attempt,
             path=serializer.validated_data["path"],

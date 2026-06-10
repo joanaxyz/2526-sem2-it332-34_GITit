@@ -64,6 +64,7 @@ export function invalidatePracticeProgressQueries(queryClient: QueryClient) {
   void queryClient.invalidateQueries({ queryKey: queryKeys.storeys })
   void queryClient.invalidateQueries({ queryKey: queryKeys.dashboardSummary })
   void queryClient.invalidateQueries({ queryKey: queryKeyRoots.storeyContent })
+  void queryClient.invalidateQueries({ queryKey: queryKeys.wallet })
 }
 
 function broadcastChallengeRunSync(run: ChallengeRun) {

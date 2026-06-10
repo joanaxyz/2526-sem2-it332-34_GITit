@@ -6,6 +6,12 @@ from typing import Any
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
+from challenges.models import ChallengeRun
+from challenges.selectors import (
+    required_successful_attempts_for_problem,
+    session_meets_progress_threshold,
+)
+from challenges.services import CommandHistoryCache
 from common.constants import (
     COMMAND_COUNTED,
     COMMAND_DIAGNOSTIC,
@@ -23,17 +29,12 @@ from common.constants import (
 from common.exceptions import Locked
 from common.performance import timing
 from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
-from progress.models import ProblemCompletion
-from progress.services import StreakService
-from challenges.models import ChallengeRun
-from challenges.selectors import (
-    required_successful_attempts_for_problem,
-    session_meets_progress_threshold,
-)
-from challenges.services import CommandHistoryCache
 from practice.models import CommandLog, CommandStep
 from practice.scaffolding import FeedbackGenerationService
 from practice.visualization import RepositoryVisualizationService
+from progress.chests import StoreyChestService
+from progress.models import ProblemCompletion
+from progress.services import StreakService
 from simulator.command_engine import SimulatedGitCommandEngine
 from simulator.services import (
     RepositorySnapshotService,
@@ -267,6 +268,8 @@ class CommandProcessingService:
             update_fields.update({"status", "ended_at", "failure_reason"})
 
         run.save(update_fields=sorted(update_fields))
+        if getattr(run, "_chest_check_pending", False):
+            StoreyChestService().award_chests(user=run.user, storey=run.module)
         if _command_response_includes_project_tree(
             command_result=command_result,
             previous_state=previous_state,
@@ -301,12 +304,14 @@ class CommandProcessingService:
         if run.mode == SESSION_MODE_PRIMARY:
             required = required_successful_attempts_for_problem(run.challenge_level)
             previous_progress = 0
+            # only(): the threshold check reads three small fields; without it every
+            # prior run ships its full repository_state JSON over the wire.
             for prior_run in ChallengeRun.objects.filter(
                 user=run.user,
                 mode=SESSION_MODE_PRIMARY,
                 status=SESSION_STATUS_COMPLETED,
                 challenge_level=run.challenge_level,
-            ).exclude(pk=run.pk):
+            ).exclude(pk=run.pk).only("status", "counted_action_total", "command_budget_snapshot"):
                 if session_meets_progress_threshold(session=prior_run):
                     previous_progress += 1
             current_meets_progress = session_meets_progress_threshold(session=run)
@@ -327,6 +332,10 @@ class CommandProcessingService:
                     completion.completed_at = run.completed_at
                     completion.save(update_fields=["challenge_run", "first_attempt_star", "counted_action_total", "completed_at"])
                 StreakService().record_completion(user=run.user, completed_at=run.completed_at)
+            # GitCoins come from the storey progress chests. The chest check
+            # reads completed runs from the DB, so it must wait until the
+            # caller persists this run — flag it for after run.save().
+            run._chest_check_pending = current_meets_progress
         return {"status", "completed_at", "ended_at", "rta_success"}
 
 

@@ -19,6 +19,11 @@ export type FoundationTopic = {
   sort_order: number
 }
 
+export type ChestReward = {
+  threshold: number
+  coins: number
+}
+
 export type LearningStorey = {
   id: number
   slug: string
@@ -29,4 +34,5 @@ export type LearningStorey = {
   command_skill_count: number
   challenge_count: number
   practice_completion?: StoreyPracticeMetric
+  chest_rewards?: ChestReward[]
 }

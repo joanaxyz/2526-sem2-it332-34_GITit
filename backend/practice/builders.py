@@ -4,12 +4,13 @@ import json
 import re
 from typing import Any
 
+from adventures.models import AdventureProblem, AdventureVariant
+from challenges.models import ChallengeLevel, ChallengeVariant
 from evaluation.compiler import compile_evaluation_spec
 from evaluation.engine import EvaluationEngine
 from evaluation.services import StateBasedEvaluator
-from adventures.models import AdventureProblem, AdventureVariant
-from challenges.models import ChallengeLevel, ChallengeVariant
-from practice.context import ALLOWED_KEYS as SCENARIO_CONTEXT_ALLOWED_KEYS, ScenarioContextNormalizer
+from practice.context import ALLOWED_KEYS as SCENARIO_CONTEXT_ALLOWED_KEYS
+from practice.context import ScenarioContextNormalizer
 from simulator.services import RepositorySnapshotService, RepositoryStateSimulator
 from simulator.workspace_files import WorkspaceFileError, WorkspaceFileStateService
 

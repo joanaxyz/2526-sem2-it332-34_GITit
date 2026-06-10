@@ -35,6 +35,7 @@ class StoreyListSerializer(serializers.ModelSerializer):
             "command_skill_count",
             "challenge_count",
             "practice_completion",
+            "chest_rewards",
         ]
 
     def get_practice_completion(self, obj) -> dict:

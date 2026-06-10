@@ -4484,3 +4484,31 @@ textarea {
     transform: scale(1);
   }
 }
+
+/* GitCoin wallet badge — pops when the balance goes up */
+.wallet-badge-earned {
+  animation: wallet-badge-pop 0.9s cubic-bezier(0.2, 0.92, 0.25, 1.1) both;
+}
+
+@keyframes wallet-badge-pop {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 245, 212, 0);
+  }
+
+  35% {
+    transform: scale(1.12);
+    box-shadow: 0 0 18px rgba(0, 245, 212, 0.45);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 245, 212, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wallet-badge-earned {
+    animation: none;
+  }
+}

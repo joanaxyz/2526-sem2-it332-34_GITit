@@ -22,6 +22,40 @@ class StreakRecord(models.Model):
         return f"Streak({self.user_id}: {self.current_streak})"
 
 
+class Wallet(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="wallet"
+    )
+    balance = models.PositiveIntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"Wallet({self.user_id}: {self.balance})"
+
+
+class CoinTransaction(models.Model):
+    """GitCoin ledger entry. ``award_key`` makes every grant idempotent: a
+    reward source (first clear of a level, passing an adventure) can be
+    retried safely and never pays out twice."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="coin_transactions"
+    )
+    amount = models.IntegerField()
+    reason = models.CharField(max_length=64)
+    award_key = models.CharField(max_length=128)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        constraints = [
+            models.UniqueConstraint(fields=["user", "award_key"], name="unique_award_per_user"),
+        ]
+
+    def __str__(self) -> str:
+        return f"CoinTransaction({self.user_id}: {self.amount} {self.reason})"
+
+
 class ProblemCompletion(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     adventure_problem = models.ForeignKey(

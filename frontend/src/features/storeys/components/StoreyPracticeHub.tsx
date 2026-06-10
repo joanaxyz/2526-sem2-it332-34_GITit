@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import {
   ArrowRight,
-  Gem,
   Layers3,
   ListChecks,
   Swords,
@@ -21,13 +20,14 @@ import type {
 } from '@/features/challenges/types'
 import { StoreyBookCard } from '@/features/storeys/book/StoreyBookCard'
 import type { LearningStorey } from '@/features/storeys/types'
+import { GitCoinIcon } from '@/features/wallet/components/GitCoinIcon'
 import {
   actionForChallengeLevel,
   actionLabel,
+  chestRewards,
   DIFFICULTY_ACCENT,
   difficultyLabel,
   nextReward,
-  REWARD_MARKERS,
 } from '@/features/storeys/challengeUi'
 import { isSelected, useTowerSelection } from '@/features/storeys/hooks/useTowerSelection'
 import { Button } from '@/shared/components/Button'
@@ -348,7 +348,8 @@ export function StoreyOverview({
   title: string
   progress: number
 }) {
-  const reward = nextReward(progress)
+  const rewards = chestRewards(storey)
+  const reward = nextReward(rewards, progress)
   const levels = storey.challenge_count * 3
 
   return (
@@ -383,11 +384,11 @@ export function StoreyOverview({
           <div className="tower-reward-rail">
             <ProgressBar value={progress} className="h-3 bg-secondary/70" glow fillAnimate />
             <div className="tower-reward-markers" aria-hidden="true">
-              {REWARD_MARKERS.map((marker) => (
+              {rewards.map((chest) => (
                 <span
-                  className={marker.value <= progress ? 'is-earned' : undefined}
-                  key={marker.value}
-                  style={{ left: `${marker.value}%` }}
+                  className={chest.threshold <= progress ? 'is-earned' : undefined}
+                  key={chest.threshold}
+                  style={{ left: `${chest.threshold}%` }}
                 >
                   <img src="/stage_reward_neon_chest.png" alt="" />
                 </span>
@@ -400,9 +401,16 @@ export function StoreyOverview({
       <section className="stage-reward-panel" aria-label={`${title} progress reward`}>
         <div>
           <p className="text-sm text-muted-foreground">Progress Reward</p>
-          <p className="mt-2 text-sm font-semibold text-foreground">Next chest at {reward.value}% storey progress</p>
-          <p className="mt-3 inline-flex items-center gap-1.5 text-2xl font-black text-foreground">
-            {reward.label} <Gem className="size-5 text-warning" />
+          <p className="mt-2 text-sm font-semibold text-foreground">Next chest at {reward.threshold}% storey progress</p>
+          <p
+            className="mt-3 inline-flex items-center gap-2 text-2xl font-black"
+            style={{
+              color: 'rgb(176, 74, 255)',
+              textShadow: '0 0 16px rgba(176, 74, 255, 0.45)',
+            }}
+          >
+            +{reward.coins} coins
+            <GitCoinIcon className="size-6 drop-shadow-[0_0_6px_rgba(0,245,212,0.4)]" />
           </p>
         </div>
         <span className="stage-reward-icon">

@@ -38,11 +38,11 @@ def encounter_index(*, user, adventure) -> int:
     ).count()
 
 
-def _ordered_problems(adventure) -> list[AdventureProblem]:
+def _ordered_problems(adventure, *, with_prerequisites: bool = False) -> list[AdventureProblem]:
     # Imported lazily to avoid a services <-> scheduler import cycle.
     from adventures.services import ordered_problems_for
 
-    return ordered_problems_for(adventure)
+    return ordered_problems_for(adventure, with_prerequisites=with_prerequisites)
 
 
 class AdventureScheduler:
@@ -54,10 +54,15 @@ class AdventureScheduler:
         )
         return {row.adventure_problem_id: row for row in rows}
 
-    def next_problem(self, *, user, adventure) -> AdventureProblem | None:
+    def next_problem(
+        self, *, user, adventure, problems: list[AdventureProblem] | None = None
+    ) -> AdventureProblem | None:
         """Pick the next command-problem to serve, or None when the session is
-        complete (every command mastered / nothing left to introduce)."""
-        problems = _ordered_problems(adventure)
+        complete (every command mastered / nothing left to introduce). Callers
+        that already resolved the ordered problems (with prerequisites) pass them
+        in so the join runs once per request."""
+        if problems is None:
+            problems = _ordered_problems(adventure, with_prerequisites=True)
         if not problems:
             return None
         mastery = self._mastery_map(user=user, problems=problems)
@@ -161,9 +166,9 @@ def pass_bar_for(adventure, *, problems=None) -> float:
     return total_achievable(adventure, problems=problems) * fraction
 
 
-def floor_met(*, user, adventure) -> bool:
+def floor_met(*, user, adventure, problems=None) -> bool:
     """Every command in the adventure has been solved at least once (box >= floor)."""
-    problems = _ordered_problems(adventure)
+    problems = problems if problems is not None else _ordered_problems(adventure)
     strengths = dict(
         AdventureMastery.objects.filter(
             user=user, adventure_problem__in=[p.id for p in problems]
@@ -172,5 +177,8 @@ def floor_met(*, user, adventure) -> bool:
     return all(strengths.get(p.id, 0) >= FLOOR_STRENGTH for p in problems)
 
 
-def is_passed(*, user, adventure, session_score: int) -> bool:
-    return session_score >= pass_bar_for(adventure) and floor_met(user=user, adventure=adventure)
+def is_passed(*, user, adventure, session_score: int, problems=None) -> bool:
+    problems = problems if problems is not None else _ordered_problems(adventure)
+    return session_score >= pass_bar_for(adventure, problems=problems) and floor_met(
+        user=user, adventure=adventure, problems=problems
+    )
