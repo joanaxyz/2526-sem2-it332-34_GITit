@@ -388,7 +388,7 @@ export function ChallengeWorkspace() {
   } as CSSProperties
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-background">
+    <div className="workspace-bg flex h-screen flex-col overflow-hidden">
       <Toaster position="bottom-right" expand={false} />
       <ChallengeStatusHeader
         run={run}

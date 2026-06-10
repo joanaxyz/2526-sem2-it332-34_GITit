@@ -56,13 +56,18 @@ export function ChallengeStatusHeader({
   const replayLabel = run.status === 'started' ? 'Start over' : 'Play again'
 
   return (
-    <header className="relative flex min-h-14 items-center justify-between gap-3 border-b border-border bg-background px-3 py-2">
+    <header
+      className="relative flex min-h-14 items-center justify-between gap-3 border-b border-primary/20 bg-background/80 px-3 py-2 backdrop-blur-sm"
+      style={{ boxShadow: '0 1px 8px rgba(0,245,212,0.10), 0 1px 0 rgba(0,245,212,0.14)' }}
+    >
       <div className="flex min-w-0 items-center gap-3">
         <Button type="button" variant="ghost" size="sm" disabled={isExiting} onClick={onExit}>
           <ArrowLeft data-icon="inline-start" />
           {isExiting ? 'Exiting' : exitLabel}
         </Button>
-        <GitBranch className="size-5 shrink-0 text-primary" />
+        <span className="grid shrink-0 size-8 place-items-center rounded-md border border-primary/30 bg-primary/10 text-primary shadow-[0_0_10px_rgba(0,245,212,0.18)]">
+          <GitBranch className="size-4" />
+        </span>
         {run.difficulty ? (
           <Badge variant="outline" className="shrink-0 capitalize">
             {run.difficulty}

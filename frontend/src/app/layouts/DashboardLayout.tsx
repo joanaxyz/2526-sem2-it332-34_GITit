@@ -255,7 +255,7 @@ export function DashboardLayout() {
           {/* Left: logo + nav links grouped together */}
           <div className="flex items-center gap-6">
             <div className="flex min-w-0 items-center gap-3">
-              <span className="grid size-9 place-items-center rounded-md border border-primary/30 bg-primary/10 text-primary transition-all duration-200 hover:border-primary/60 hover:shadow-[0_0_14px_rgba(0,245,212,0.55)]">
+              <span className="logo-badge grid size-9 place-items-center rounded-md border border-primary/30 bg-primary/10 text-primary transition-all duration-200 hover:border-primary/60">
                 <GitBranch />
               </span>
               <span className="whitespace-nowrap text-xl font-extrabold tracking-tight max-sm:text-lg">
@@ -265,7 +265,7 @@ export function DashboardLayout() {
             <nav className="flex shrink-0 items-center gap-1">
               <button
                 type="button"
-                className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-all duration-200 hover:bg-secondary hover:text-primary"
+                className="grid size-8 place-items-center rounded-md border border-border/40 bg-secondary/40 text-muted-foreground transition-all duration-200 hover:border-primary/40 hover:bg-primary/10 hover:text-primary hover:shadow-[0_0_10px_rgba(0,245,212,0.18)]"
                 aria-label="Open tower guide"
                 title="How tower works"
                 onClick={() => setTowerHelpOpen(true)}
@@ -279,7 +279,7 @@ export function DashboardLayout() {
                     cn(
                       'inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-muted-foreground transition-all duration-200 hover:bg-secondary hover:text-foreground',
                       isActive &&
-                        'bg-primary/10 text-primary ring-1 ring-inset ring-primary/30 shadow-[0_0_10px_rgba(0,245,212,0.2)]',
+                        'bg-primary/10 text-primary shadow-[0_0_14px_rgba(0,245,212,0.28),inset_0_-2px_0_rgba(0,245,212,0.60)] ring-1 ring-inset ring-primary/30',
                     )
                   }
                   to={item.to}

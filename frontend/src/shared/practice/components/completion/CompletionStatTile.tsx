@@ -27,7 +27,7 @@ export function CompletionStatTile({
 
   return (
     <div
-      className="completion-stat-tile rounded-lg border border-border bg-background/50 p-2.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+      className="completion-stat-tile rounded-lg border border-border/60 bg-card/80 p-2.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,245,212,0.12)]"
       style={
         {
           animationDelay: `${animationDelay}ms`,

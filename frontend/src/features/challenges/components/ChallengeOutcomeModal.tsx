@@ -100,7 +100,7 @@ export function ChallengeOutcomeModal({
         'w-full max-w-2xl overflow-hidden bg-card',
         isFailed
           ? 'border-destructive/30 shadow-[0_28px_110px_rgba(248,113,113,0.16)]'
-          : 'border-primary/30 shadow-[0_28px_110px_rgba(0,214,143,0.18)]',
+          : 'border-primary/30 shadow-[0_28px_110px_rgba(0,245,212,0.18)]',
       )}
       contentClassName="p-0"
       onClose={onClose}
@@ -115,7 +115,7 @@ export function ChallengeOutcomeModal({
               !isFailed && 'completion-sparkle-glow',
               isFailed
                 ? 'border-destructive/30 bg-destructive/10 shadow-[0_0_42px_rgba(248,113,113,0.16)]'
-                : 'border-primary/30 bg-primary/10',
+                : 'border-primary/40 bg-primary/10 shadow-[0_0_32px_rgba(0,245,212,0.35),0_0_60px_rgba(0,180,216,0.18)]',
             )}
           >
             <Icon className={cn('size-6', isFailed ? 'text-destructive' : 'text-primary')} />

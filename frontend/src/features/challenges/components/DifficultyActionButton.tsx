@@ -121,7 +121,7 @@ function MasteryProgress({ value }: { value: number | null }) {
       aria-label={!hasValue ? 'No accuracy data' : `Accuracy ${value}%`}
       className={cn(
         'relative flex size-[3.25rem] shrink-0 items-center justify-center rounded-full',
-        isPerfect && 'shadow-[0_0_12px_rgba(0,214,143,0.35)]'
+        isPerfect && 'shadow-[0_0_12px_rgba(0,245,212,0.35)]'
       )}
       style={
         {

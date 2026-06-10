@@ -59,7 +59,7 @@ export function AdventureSession({
     )
   }
   if (query.isError || !query.data)
-    return <p className="p-8 text-sm text-red-400">Could not load this adventure run.</p>
+    return <p className="p-8 text-sm text-destructive">Could not load this adventure run.</p>
 
   const run: AdventureRun = query.data
   const restart =
@@ -82,14 +82,19 @@ export function AdventureSession({
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-background">
-      <header className="shrink-0 border-b border-border bg-background px-3 py-2.5">
+    <div className="workspace-bg flex h-screen flex-col overflow-hidden">
+      <header
+        className="shrink-0 border-b border-primary/20 bg-background/80 px-3 py-2.5 backdrop-blur-sm"
+        style={{ boxShadow: '0 1px 8px rgba(0,245,212,0.10), 0 1px 0 rgba(0,245,212,0.14)' }}
+      >
         <div className="flex items-center gap-3">
           <Button type="button" variant="ghost" size="sm" onClick={() => navigate(-1)}>
             <ArrowLeft className="size-4" />
             Back
           </Button>
-          <GitBranch className="size-5 shrink-0 text-primary" />
+          <span className="grid shrink-0 size-8 place-items-center rounded-md border border-primary/30 bg-primary/10 text-primary shadow-[0_0_10px_rgba(0,245,212,0.18)]">
+            <GitBranch className="size-4" />
+          </span>
           <span className="min-w-0 truncate text-sm font-semibold text-foreground">
             {run.command_adventure.title}
           </span>
