@@ -4076,200 +4076,378 @@ textarea {
 
 /* ─── Gamified module route v2 ───────────────────────────────────────────── */
 
-/* ── Book modal loader: Obsidian-like command graph ───────────────────── */
-.book-graph-loader {
-  min-height: 20rem;
-  display: grid;
-  place-items: center;
-  padding: 1.5rem;
-  overflow: hidden;
-}
+/* GIT-IT glyph/text loader: lightweight shared loader for modals */
+/* GIT-IT glyph/text loader: container-less shared loader for modals */
+.git-it-glyph-loader {
+  --glyph-cyan: 45, 245, 255;
+  --glyph-blue: 53, 143, 255;
+  --glyph-purple: 176, 74, 255;
 
-.book-graph-loader-card {
-  width: min(100%, 28rem);
-  display: grid;
-  gap: 1.1rem;
-  justify-items: center;
-  border: 1px solid rgba(45, 212, 191, 0.28);
-  border-radius: 1.5rem;
-  background:
-    radial-gradient(circle at 50% 45%, rgba(45, 212, 191, 0.13), transparent 42%),
-    radial-gradient(circle at 22% 28%, rgba(168, 85, 247, 0.16), transparent 34%),
-    linear-gradient(180deg, rgba(5, 22, 28, 0.92), rgba(2, 10, 14, 0.96));
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 22px 60px rgba(0, 0, 0, 0.28);
-  padding: 1.4rem 1.2rem 1.25rem;
-}
-
-.book-graph-orbit {
   position: relative;
-  width: 13.75rem;
-  height: 10.625rem;
-  animation: book-graph-drift 5.4s ease-in-out infinite;
-}
-
-.book-graph-lines {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.book-graph-link {
-  fill: none;
-  stroke: rgba(45, 212, 191, 0.42);
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-dasharray: 72;
-  stroke-dashoffset: 72;
-  filter: drop-shadow(0 0 7px rgba(45, 212, 191, 0.34));
-  animation: book-graph-link-draw 2.8s ease-in-out infinite;
-}
-
-.book-graph-link--b { animation-delay: 0.12s; }
-.book-graph-link--c { animation-delay: 0.24s; }
-.book-graph-link--d { animation-delay: 0.36s; }
-.book-graph-link--e { animation-delay: 0.48s; }
-.book-graph-link--f { animation-delay: 0.60s; stroke: rgba(168, 85, 247, 0.36); }
-.book-graph-link--g { animation-delay: 0.72s; stroke: rgba(168, 85, 247, 0.34); }
-.book-graph-link--h { animation-delay: 0.84s; stroke: rgba(168, 85, 247, 0.32); }
-
-.book-graph-node {
-  position: absolute;
   display: grid;
+  width: min(23rem, 82vw);
+  min-height: 6.5rem;
   place-items: center;
-  border-radius: 999px;
-  border: 1.5px solid rgba(45, 212, 191, 0.86);
-  background: radial-gradient(circle at 35% 30%, rgba(237, 255, 252, 0.92), rgba(45, 212, 191, 0.86) 34%, rgba(7, 36, 42, 0.98) 72%);
-  box-shadow:
-    0 0 0 0 rgba(45, 212, 191, 0.28),
-    0 0 16px rgba(45, 212, 191, 0.48);
-  transform: translate(-50%, -50%);
-  animation: book-graph-node-pulse 2.8s ease-in-out infinite;
+  overflow: visible;
+  padding: 2rem 1rem 1rem;
 }
 
-.book-graph-node--core {
+.git-it-glyph-loader--small {
+  width: min(19rem, 76vw);
+  min-height: 5.5rem;
+  padding: 1.65rem 0.75rem 0.75rem;
+}
+
+.git-it-glyph-loader--compact {
+  width: min(14rem, 72vw);
+  min-height: 3.75rem;
+  padding: 1rem 0.5rem 0.5rem;
+}
+
+.git-it-glyph-loader::before {
+  content: '';
+  position: absolute;
+  inset: 18% 8% 12%;
+  z-index: -1;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, rgba(var(--glyph-cyan), 0.24), transparent 54%),
+    radial-gradient(circle at 70% 45%, rgba(var(--glyph-purple), 0.18), transparent 48%);
+  filter: blur(18px);
+  opacity: 0.72;
+  animation: git-it-glyph-ambient-pulse 2.8s ease-in-out infinite;
+}
+
+.git-it-glyph-loader::after {
+  content: '';
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 0.8rem;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(var(--glyph-cyan), 0.7),
+    rgba(var(--glyph-purple), 0.45),
+    transparent
+  );
+  opacity: 0.6;
+  animation: git-it-glyph-base-pulse 2.4s ease-in-out infinite;
+}
+
+.git-it-glyph-loader__ring,
+.git-it-glyph-loader__orbit {
+  display: none;
+}
+.git-it-glyph-loader__path {
+  position: absolute;
+  top: 1rem;
   left: 50%;
+  width: min(10.5rem, 58%);
+  height: 1rem;
+  transform: translateX(-50%);
+}
+
+.git-it-glyph-loader__path::before {
+  content: '';
+  position: absolute;
+  left: 0.35rem;
+  right: 0.35rem;
   top: 50%;
-  width: 3.65rem;
-  height: 3.65rem;
-  color: rgb(2, 38, 43);
-  border-color: rgba(209, 250, 244, 0.95);
-  background: linear-gradient(135deg, rgb(77, 255, 231), rgb(168, 85, 247));
-  box-shadow:
-    0 0 0 0 rgba(45, 212, 191, 0.35),
-    0 0 28px rgba(45, 212, 191, 0.68),
-    0 0 42px rgba(168, 85, 247, 0.34);
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--glyph-cyan), 0.18),
+    rgba(var(--glyph-cyan), 0.82),
+    rgba(var(--glyph-purple), 0.62)
+  );
+  transform: translateY(-50%);
+  animation: git-it-glyph-path-charge 2.2s ease-in-out infinite;
+}
+
+.git-it-glyph-loader__node {
+  position: absolute;
+  top: 50%;
+  width: 0.56rem;
+  height: 0.56rem;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--glyph-cyan), 0.92);
+  background: rgba(4, 18, 34, 0.96);
+  box-shadow: 0 0 10px rgba(var(--glyph-cyan), 0.42);
+  transform: translate(-50%, -50%) scale(0.72);
+  animation: git-it-glyph-node-pop 2.2s cubic-bezier(0.18, 1.35, 0.32, 1) infinite both;
+}
+
+.git-it-glyph-loader__node--a {
+  left: 0%;
   animation-delay: 0s;
 }
 
-.book-graph-node--syntax {
-  left: 28%;
-  top: 26%;
-  width: 1.35rem;
-  height: 1.35rem;
-  animation-delay: 0.15s;
+.git-it-glyph-loader__node--b {
+  left: 50%;
+  animation-delay: 0.16s;
 }
 
-.book-graph-node--branch {
-  left: 74%;
-  top: 25%;
-  width: 1.65rem;
-  height: 1.65rem;
-  border-color: rgba(192, 132, 252, 0.86);
-  animation-delay: 0.3s;
+.git-it-glyph-loader__node--c {
+  left: 100%;
+  border-color: rgba(var(--glyph-purple), 0.92);
+  box-shadow: 0 0 10px rgba(var(--glyph-purple), 0.42);
+  animation-delay: 0.32s;
 }
 
-.book-graph-node--commit {
-  left: 84%;
-  top: 62%;
-  width: 1.15rem;
-  height: 1.15rem;
-  animation-delay: 0.45s;
+.git-it-glyph-loader__text {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.015em;
+  max-width: 100%;
+  margin: 0;
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: clamp(1.05rem, 2.4vw, 1.55rem);
+  font-weight: 900;
+  letter-spacing: 0.035em;
+  line-height: 1.15;
+  text-transform: uppercase;
+  text-shadow: 0 0 18px rgba(var(--glyph-cyan), 0.28);
 }
 
-.book-graph-node--merge {
-  left: 49%;
-  top: 82%;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-color: rgba(192, 132, 252, 0.82);
-  animation-delay: 0.6s;
+.git-it-glyph-loader--small .git-it-glyph-loader__text {
+  font-size: clamp(0.92rem, 2.1vw, 1.15rem);
 }
 
-.book-graph-node--push {
-  left: 17%;
-  top: 65%;
-  width: 1.2rem;
-  height: 1.2rem;
-  animation-delay: 0.75s;
+.git-it-glyph-loader--compact .git-it-glyph-loader__text {
+  font-size: 0.72rem;
 }
 
-.book-graph-copy {
-  display: grid;
-  gap: 0.35rem;
-  text-align: center;
+.git-it-glyph-loader__char {
+  display: inline-block;
+  background: linear-gradient(180deg, #ffffff 0%, rgb(var(--glyph-cyan)) 48%, rgb(var(--glyph-purple)) 120%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  opacity: 0;
+  transform: translateY(-0.7rem) scale(0.82);
+  animation: git-it-glyph-char-build 2.55s cubic-bezier(0.18, 1.22, 0.25, 1) var(--glyph-char-delay) infinite both;
 }
 
-.book-graph-title {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: rgb(236, 254, 255);
+.git-it-glyph-loader__char.is-space {
+  width: 0.55em;
 }
 
-.book-graph-description {
-  max-width: 20rem;
-  font-size: 0.82rem;
-  line-height: 1.55;
-  color: rgba(204, 251, 241, 0.72);
+.git-it-glyph-loader__cursor {
+  display: inline-block;
+  width: 0.42rem;
+  height: 1.15em;
+  margin-left: 0.12rem;
+  border-radius: 999px;
+  background: rgba(var(--glyph-cyan), 0.86);
+  box-shadow:
+    0 0 12px rgba(var(--glyph-cyan), 0.55),
+    0 0 22px rgba(var(--glyph-blue), 0.26);
+  animation: git-it-glyph-cursor 0.78s steps(2, end) infinite;
 }
 
-.tower-loading-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 80;
-  background: hsl(var(--background));
+.git-it-glyph-loader__spark {
+  position: absolute;
+  z-index: 1;
+  width: 0.52rem;
+  height: 0.52rem;
+  border: 1px solid rgba(var(--glyph-cyan), 0.86);
+  background: rgba(4, 18, 34, 0.88);
+  box-shadow:
+    0 0 12px rgba(var(--glyph-cyan), 0.5),
+    inset 0 0 8px rgba(var(--glyph-purple), 0.14);
+  opacity: 0;
+  transform: rotate(45deg) scale(0.6);
+  animation: git-it-glyph-spark-float 2.55s ease-out infinite both;
 }
 
-@keyframes book-graph-drift {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-0.35rem) scale(1.018); }
+.git-it-glyph-loader__spark--a {
+  left: 12%;
+  bottom: 1.2rem;
+  animation-delay: 0.22s;
 }
 
-@keyframes book-graph-link-draw {
-  0% { stroke-dashoffset: 72; opacity: 0.16; }
-  38%, 70% { stroke-dashoffset: 0; opacity: 0.9; }
-  100% { stroke-dashoffset: -72; opacity: 0.18; }
+.git-it-glyph-loader__spark--b {
+  right: 14%;
+  top: 1.85rem;
+  border-color: rgba(var(--glyph-purple), 0.78);
+  animation-delay: 0.72s;
 }
 
-@keyframes book-graph-node-pulse {
-  0%, 100% {
-    transform: translate(-50%, -50%) scale(0.92);
-    box-shadow:
-      0 0 0 0 rgba(45, 212, 191, 0.24),
-      0 0 14px rgba(45, 212, 191, 0.42);
+.git-it-glyph-loader__spark--c {
+  right: 24%;
+  bottom: 1rem;
+  width: 0.38rem;
+  height: 0.38rem;
+  animation-delay: 1.08s;
+}
+
+@keyframes git-it-glyph-char-build {
+  0%,
+  10% {
+    opacity: 0;
+    transform: translateY(-0.7rem) scale(0.82);
+    filter: blur(2px);
   }
-  42%, 68% {
-    transform: translate(-50%, -50%) scale(1.08);
-    box-shadow:
-      0 0 0 0.55rem rgba(45, 212, 191, 0),
-      0 0 22px rgba(45, 212, 191, 0.72),
-      0 0 30px rgba(168, 85, 247, 0.26);
+
+  24% {
+    opacity: 1;
+    transform: translateY(0.14rem) scale(1.08);
+    filter: blur(0);
+  }
+
+  34%,
+  74% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+
+  100% {
+    opacity: 0.18;
+    transform: translateY(0.42rem) scale(0.96);
+    filter: blur(1px);
+  }
+}
+
+@keyframes git-it-glyph-cursor {
+  0%,
+  42% {
+    opacity: 1;
+  }
+
+  43%,
+  100% {
+    opacity: 0.18;
+  }
+}
+
+@keyframes git-it-glyph-aurora-turn {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes git-it-glyph-base-pulse {
+  0%,
+  100% {
+    opacity: 0.34;
+    transform: scaleX(0.64);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes git-it-glyph-orbit-spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes git-it-glyph-path-charge {
+  0%,
+  100% {
+    opacity: 0.34;
+    transform: translateY(-50%) scaleX(0.42);
+    transform-origin: left;
+  }
+
+  45%,
+  70% {
+    opacity: 1;
+    transform: translateY(-50%) scaleX(1);
+    transform-origin: left;
+  }
+}
+
+@keyframes git-it-glyph-node-pop {
+  0%,
+  12% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.52);
+  }
+
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.22);
+  }
+
+  38%,
+  78% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  100% {
+    opacity: 0.2;
+    transform: translate(-50%, -50%) scale(0.68);
+  }
+}
+
+@keyframes git-it-glyph-spark-float {
+  0%,
+  16% {
+    opacity: 0;
+    transform: translateY(0.4rem) rotate(45deg) scale(0.42);
+  }
+
+  34% {
+    opacity: 1;
+    transform: translateY(0) rotate(45deg) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-2.4rem) rotate(135deg) scale(0.26);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .book-graph-orbit,
-  .book-graph-link,
-  .book-graph-node {
+  .git-it-glyph-loader,
+  .git-it-glyph-loader::before,
+  .git-it-glyph-loader::after,
+  .git-it-glyph-loader__orbit,
+  .git-it-glyph-loader__path::before,
+  .git-it-glyph-loader__node,
+  .git-it-glyph-loader__char,
+  .git-it-glyph-loader__cursor,
+  .git-it-glyph-loader__spark {
     animation: none;
   }
 
-  .book-graph-link {
-    stroke-dasharray: none;
-    stroke-dashoffset: 0;
-    opacity: 0.65;
+  .git-it-glyph-loader__char,
+  .git-it-glyph-loader__node {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes git-it-glyph-ambient-pulse {
+  0%,
+  100% {
+    opacity: 0.38;
+    transform: scale(0.86);
+  }
+
+  50% {
+    opacity: 0.78;
+    transform: scale(1);
   }
 }

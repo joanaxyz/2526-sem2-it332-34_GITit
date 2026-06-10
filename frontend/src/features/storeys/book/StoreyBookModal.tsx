@@ -8,7 +8,7 @@ import { bookAnchorDomId, bookNavAnchors } from '@/features/storeys/book/bookNav
 import { queryKeys } from '@/shared/api/queryKeys'
 import { Button } from '@/shared/components/Button'
 import { EmptyState } from '@/shared/components/EmptyState'
-import { BookLoadingState } from '@/features/storeys/book/BookLoadingState'
+import { GlyphLoadingState } from '@/shared/components/GlyphLoadingState'
 import { Modal } from '@/shared/components/Modal'
 import { cn } from '@/shared/utils/cn'
 
@@ -22,17 +22,21 @@ export function StoreyBookModal({
   onClose: () => void
 }) {
   const bookQuery = useQuery({
-    queryKey: queryKeys.storeyBook(storeyId),
-    queryFn: () => storeysApi.getStoreyBook(storeyId),
-    staleTime: 5 * 60 * 1000,
-  })
+  queryKey: queryKeys.storeyBook(storeyId),
+  queryFn: async () => {
+    await new Promise((resolve) => window.setTimeout(resolve, 1600))
+    return storeysApi.getStoreyBook(storeyId)
+  },
+  staleTime: 0,
+  gcTime: 0,
+})
 
   const title = `${storeyTitle} · Field Guide`
 
   if (bookQuery.isLoading && !bookQuery.data) {
     return (
       <Modal open title={title} onClose={onClose} className="w-full max-w-xl" contentClassName="p-5">
-        <BookLoadingState description="Linking command notes into the field guide." label="Opening field guide" />
+        <GlyphLoadingState description="Opening the field guide." label="Loading field guide" variant="inline" />
       </Modal>
     )
   }
