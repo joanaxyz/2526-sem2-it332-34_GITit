@@ -1298,19 +1298,22 @@ textarea {
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   STOREY BOOK: a 3D neon field guide in the overview — bare (no card chrome).
-   Dark-teal cover and spine, neon-teal page block with a striated fore-edge
-   (the visible thickness), purple aura + glow while the book opens. Hover
-   swings the cover and fans the pages once via transitions (no loop), so it
-   reverses cleanly on mouse-out. Clicking opens the reference modal.
+   STOREY BOOK: aurora charge first, then delayed opening
    ════════════════════════════════════════════════════════════════════════ */
 .storey-book {
+  --book-blue: #2df5ff;
+  --book-purple: #b04aff;
+  --book-pink: #e58cff;
+  --book-cover-top: #0a4c55;
+  --book-cover-bottom: #031923;
+  --book-page: #fffdf7;
+
   position: relative;
   display: flex;
   align-items: center;
-  gap: 1.1rem;
+  gap: 1.25rem;
   width: 100%;
-  padding: 0.35rem 0.25rem;
+  padding: 0.5rem 0.75rem 0.5rem 1.55rem;
   border: 0;
   background: none;
   cursor: pointer;
@@ -1323,53 +1326,84 @@ textarea {
 }
 
 .storey-book:focus-visible {
-  outline: 2px solid rgba(45, 245, 255, 0.6);
+  outline: 2px solid var(--book-blue);
   outline-offset: 4px;
   border-radius: 10px;
 }
 
 .storey-book-stage {
   position: relative;
-  width: 4.9rem;
-  height: 5.9rem;
+  width: 5.75rem;
+  height: 6rem;
   flex-shrink: 0;
-  perspective: 680px;
+  perspective: 760px;
 }
 
-/* Purple aura that blooms behind the book while it opens. */
+/* Keep old particle spans harmless if they still exist in TSX. */
+.storey-book-particles,
+.storey-book-diamond {
+  display: none;
+}
+
+/* A very soft hidden bloom that appears only during the opening moment. */
 .storey-book-stage::before {
   content: '';
   position: absolute;
-  inset: -1.1rem;
-  border-radius: 50%;
-  background: radial-gradient(
-    closest-side,
-    rgba(176, 74, 255, 0.45),
-    rgba(176, 74, 255, 0.16) 55%,
-    transparent 78%
-  );
+  left: 0.35rem;
+  top: 0.35rem;
+  width: 4.8rem;
+  height: 5.15rem;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(176, 74, 255, 0.34), transparent 52%),
+    radial-gradient(circle at 50% 52%, rgba(45, 245, 255, 0.18), transparent 68%);
   opacity: 0;
-  transform: scale(0.7);
-  transition: opacity 420ms ease, transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scale(0.68);
+  pointer-events: none;
+  filter: blur(7px);
+  z-index: 0;
 }
 
 .storey-book:hover .storey-book-stage::before,
 .storey-book:focus-visible .storey-book-stage::before {
-  opacity: 1;
-  transform: scale(1);
+  animation: storey-book-opening-bloom 1350ms ease-out both;
+}
+
+@keyframes storey-book-opening-bloom {
+  0% {
+    opacity: 0;
+    transform: scale(0.62);
+  }
+
+  35% {
+    opacity: 0.65;
+    transform: scale(0.82);
+  }
+
+  72% {
+    opacity: 0.42;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
 }
 
 .storey-book-3d {
   position: absolute;
   inset: 0;
+  z-index: 1;
   transform-style: preserve-3d;
-  /* Negative rotateY turns the fore-edge (right side) toward the viewer. */
   transform: rotateY(-32deg) rotateX(8deg);
-  transition: transform 480ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.storey-book:hover .storey-book-3d {
-  transform: rotateY(-18deg) rotateX(6deg) translateZ(0.2rem);
+.storey-book:hover .storey-book-3d,
+.storey-book:focus-visible .storey-book-3d {
+  transform: rotateY(-18deg) rotateX(6deg) translateZ(0.18rem);
+  transition-delay: 760ms;
 }
 
 .storey-book-back,
@@ -1384,12 +1418,12 @@ textarea {
   transform-origin: left center;
 }
 
-/* Back board of the book — dark teal, sits behind the pages. */
+/* Back cover */
 .storey-book-back {
-  background: linear-gradient(135deg, rgba(9, 50, 58, 0.98), rgba(4, 24, 32, 0.98));
-  border: 1px solid rgba(45, 245, 255, 0.35);
-  transform: translateZ(-0.05rem);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), 0 0 16px rgba(45, 245, 255, 0.14);
+  background: linear-gradient(135deg, var(--book-cover-top), var(--book-cover-bottom));
+  border: 2px solid var(--book-blue);
+  transform: translateZ(-0.08rem);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.45);
 }
 
 .storey-book-leaves {
@@ -1398,106 +1432,341 @@ textarea {
   transform-style: preserve-3d;
 }
 
-/* Pages — neon teal, spread across the book's depth so the block reads
-   thick from the side. Hover fans each leaf open once (transition, not a
-   looping animation); delays cascade both opening and closing. */
-.storey-book-leaf {
-  background: linear-gradient(90deg, rgba(168, 252, 255, 0.98), rgba(45, 245, 255, 0.82));
-  border-radius: 1px 5px 5px 1px;
-  box-shadow:
-    inset -3px 0 6px rgba(0, 140, 165, 0.5),
-    0 0 10px rgba(45, 245, 255, 0.3);
-  transition: transform 560ms cubic-bezier(0.3, 1.15, 0.4, 1);
-}
-
-.storey-book-leaf:nth-child(1) { transform: translateZ(0.5rem); }
-.storey-book-leaf:nth-child(2) { transform: translateZ(0.38rem); }
-.storey-book-leaf:nth-child(3) { transform: translateZ(0.26rem); }
-.storey-book-leaf:nth-child(4) { transform: translateZ(0.14rem); }
-
-@media (prefers-reduced-motion: no-preference) {
-  .storey-book:hover .storey-book-leaf:nth-child(1) {
-    transform: translateZ(0.5rem) rotateY(-136deg);
-    transition-delay: 60ms;
-  }
-  .storey-book:hover .storey-book-leaf:nth-child(2) {
-    transform: translateZ(0.38rem) rotateY(-116deg);
-    transition-delay: 160ms;
-  }
-  .storey-book:hover .storey-book-leaf:nth-child(3) {
-    transform: translateZ(0.26rem) rotateY(-94deg);
-    transition-delay: 260ms;
-  }
-  .storey-book:hover .storey-book-leaf:nth-child(4) {
-    transform: translateZ(0.14rem) rotateY(-70deg);
-    transition-delay: 360ms;
-  }
-}
-
-/* Fore-edge: the page block's right side, facing the viewer at rest. The
-   stripes are the stacked page edges — this is what makes the book read as
-   a solid object instead of a flat icon. */
-.storey-book-fore {
+/* Inner purple light appears only after the aurora charge, then fades. */
+.storey-book-leaves::after {
+  content: '';
   position: absolute;
-  top: 0.3rem;
-  left: calc(0.95rem + 3.1rem);
-  width: 0.55rem;
-  height: 5.06rem;
-  transform: rotateY(-90deg);
+  top: 0.62rem;
+  left: 1.1rem;
+  width: 2.65rem;
+  height: 4.35rem;
+  border-radius: 3px 6px 6px 3px;
+  background:
+    radial-gradient(circle at 15% 45%, rgba(229, 140, 255, 0.42), transparent 44%),
+    linear-gradient(
+      90deg,
+      rgba(176, 74, 255, 0.34),
+      rgba(176, 74, 255, 0.12) 48%,
+      transparent 78%
+    );
+  opacity: 0;
+  transform: translateZ(0.18rem) scaleX(0.5);
   transform-origin: left center;
-  border-radius: 0 2px 2px 0;
+  pointer-events: none;
+}
+
+.storey-book:hover .storey-book-leaves::after,
+.storey-book:focus-visible .storey-book-leaves::after {
+  animation: storey-book-inner-light 900ms ease-out 760ms both;
+}
+
+@keyframes storey-book-inner-light {
+  0% {
+    opacity: 0;
+    transform: translateZ(0.18rem) scaleX(0.45);
+  }
+
+  45% {
+    opacity: 0.9;
+    transform: translateZ(0.18rem) scaleX(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateZ(0.18rem) scaleX(1.08);
+  }
+}
+
+/* White pages. Kept behind the cover so they do not overlap the front. */
+.storey-book-leaf {
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, #ffffff 0%, var(--book-page) 72%, #eaffff 100%);
+  border: 1.5px solid var(--book-blue);
+  border-radius: 1px 6px 6px 1px;
+  box-shadow:
+    inset -4px 0 7px rgba(0, 120, 145, 0.13),
+    0 4px 8px rgba(0, 0, 0, 0.12);
+  transition:
+    transform 560ms cubic-bezier(0.3, 1.15, 0.4, 1),
+    border-color 260ms ease;
+}
+
+.storey-book-leaf::before {
+  content: '';
+  position: absolute;
+  inset: 0.45rem 0.42rem;
+  border-radius: inherit;
   background: repeating-linear-gradient(
     180deg,
-    rgba(190, 253, 255, 0.95) 0,
-    rgba(190, 253, 255, 0.95) 2px,
-    rgba(45, 245, 255, 0.5) 2px,
-    rgba(45, 245, 255, 0.5) 4px
+    transparent 0,
+    transparent 0.42rem,
+    rgba(5, 50, 65, 0.14) 0.47rem,
+    transparent 0.52rem
   );
-  box-shadow: 0 0 8px rgba(45, 245, 255, 0.3);
+  opacity: 0.5;
 }
 
-/* Front cover — dark teal with a neon-teal field-guide emblem. Opening it
-   trades the teal rim light for purple. */
+.storey-book-leaf:nth-child(1) { transform: translateZ(0.16rem); }
+.storey-book-leaf:nth-child(2) { transform: translateZ(0.11rem); }
+.storey-book-leaf:nth-child(3) { transform: translateZ(0.06rem); }
+.storey-book-leaf:nth-child(4) { transform: translateZ(0.02rem); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .storey-book:hover .storey-book-leaf:nth-child(1),
+  .storey-book:focus-visible .storey-book-leaf:nth-child(1) {
+    transform: translateZ(0.16rem) rotateY(-38deg);
+    border-color: var(--book-purple);
+    transition-delay: 860ms;
+  }
+
+  .storey-book:hover .storey-book-leaf:nth-child(2),
+  .storey-book:focus-visible .storey-book-leaf:nth-child(2) {
+    transform: translateZ(0.11rem) rotateY(-27deg);
+    border-color: rgba(176, 74, 255, 0.82);
+    transition-delay: 930ms;
+  }
+
+  .storey-book:hover .storey-book-leaf:nth-child(3),
+  .storey-book:focus-visible .storey-book-leaf:nth-child(3) {
+    transform: translateZ(0.06rem) rotateY(-16deg);
+    border-color: rgba(176, 74, 255, 0.68);
+    transition-delay: 1000ms;
+  }
+
+  .storey-book:hover .storey-book-leaf:nth-child(4),
+  .storey-book:focus-visible .storey-book-leaf:nth-child(4) {
+    transform: translateZ(0.02rem) rotateY(-7deg);
+    border-color: rgba(176, 74, 255, 0.56);
+    transition-delay: 1070ms;
+  }
+}
+
+/* Thin white page edge. */
+.storey-book-fore {
+  position: absolute;
+  top: 0.34rem;
+  left: calc(0.95rem + 3.02rem);
+  width: 0.22rem;
+  height: 4.98rem;
+  transform: translateZ(0.12rem) rotateY(-90deg);
+  transform-origin: left center;
+  border-radius: 0 3px 3px 0;
+  border: 1.5px solid var(--book-blue);
+  background: repeating-linear-gradient(
+    180deg,
+    #ffffff 0,
+    #ffffff 2px,
+    #dffcff 2px,
+    #dffcff 4px
+  );
+  box-shadow: inset -2px 0 4px rgba(0, 120, 145, 0.14);
+}
+
+/* Front cover. Solid teal outline by default. */
 .storey-book-cover {
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, rgba(11, 64, 73, 0.99), rgba(4, 30, 40, 0.99));
-  border: 1px solid rgba(45, 245, 255, 0.5);
-  transform: translateZ(0.6rem);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(45, 245, 255, 0.1), transparent 44%),
+    linear-gradient(135deg, var(--book-cover-top), var(--book-cover-bottom));
+  border: 2px solid var(--book-blue);
+  transform: translateZ(0.86rem);
   box-shadow:
-    inset 0 0 14px rgba(45, 245, 255, 0.16),
-    0 0 14px rgba(45, 245, 255, 0.2);
-  transition: transform 620ms cubic-bezier(0.34, 1.1, 0.4, 1), box-shadow 420ms ease;
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 10px 18px rgba(0, 0, 0, 0.28);
+  transition:
+    transform 620ms cubic-bezier(0.34, 1.1, 0.4, 1),
+    border-color 300ms ease,
+    box-shadow 300ms ease;
   backface-visibility: visible;
 }
 
-.storey-book:hover .storey-book-cover {
-  transform: translateZ(0.6rem) rotateY(-128deg);
-  box-shadow:
-    inset 0 0 14px rgba(176, 74, 255, 0.3),
-    0 0 24px rgba(176, 74, 255, 0.55);
+.storey-book-cover::before {
+  content: '';
+  position: absolute;
+  inset: 0.35rem;
+  border-radius: 2px 5px 5px 2px;
+  border: 1.5px solid var(--book-blue);
+  opacity: 0.6;
+}
+
+/* Aurora sweep across the cover before it opens. */
+.storey-book-cover::after {
+  content: '';
+  position: absolute;
+  inset: -45%;
+  background:
+    linear-gradient(
+      115deg,
+      transparent 26%,
+      rgba(45, 245, 255, 0.08) 36%,
+      rgba(176, 74, 255, 0.58) 45%,
+      rgba(229, 140, 255, 0.78) 50%,
+      rgba(45, 245, 255, 0.48) 56%,
+      transparent 70%
+    );
+  opacity: 0;
+  transform: translateX(-55%) rotate(10deg);
+  pointer-events: none;
+}
+
+.storey-book:hover .storey-book-cover,
+.storey-book:focus-visible .storey-book-cover {
+  transform: translateZ(0.86rem) rotateY(-118deg);
+  border-color: var(--book-purple);
+  transition-delay: 780ms;
+  animation: storey-book-edge-charge 1450ms ease-out both;
+}
+
+.storey-book:hover .storey-book-cover::after,
+.storey-book:focus-visible .storey-book-cover::after {
+  animation: storey-book-aurora-sweep 1450ms ease-out both;
+}
+
+@keyframes storey-book-edge-charge {
+  0% {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 10px 18px rgba(0, 0, 0, 0.28);
+  }
+
+  22% {
+    box-shadow:
+      0 0 7px rgba(45, 245, 255, 0.65),
+      0 0 16px rgba(176, 74, 255, 0.28),
+      inset 0 0 8px rgba(45, 245, 255, 0.16),
+      0 10px 18px rgba(0, 0, 0, 0.28);
+  }
+
+  54% {
+    box-shadow:
+      0 0 10px rgba(45, 245, 255, 0.78),
+      0 0 22px rgba(176, 74, 255, 0.45),
+      inset 0 0 12px rgba(229, 140, 255, 0.22),
+      0 10px 18px rgba(0, 0, 0, 0.28);
+  }
+
+  82% {
+    box-shadow:
+      0 0 8px rgba(176, 74, 255, 0.45),
+      inset 0 0 8px rgba(176, 74, 255, 0.14),
+      0 10px 18px rgba(0, 0, 0, 0.28);
+  }
+
+  100% {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+      0 10px 18px rgba(0, 0, 0, 0.28);
+  }
+}
+
+@keyframes storey-book-aurora-sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-55%) rotate(10deg);
+  }
+
+  20% {
+    opacity: 0.72;
+  }
+
+  58% {
+    opacity: 0.95;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(55%) rotate(10deg);
+  }
 }
 
 .storey-book-emblem {
+  position: relative;
+  z-index: 1;
   width: 1.85rem;
   height: 1.85rem;
-  color: rgba(126, 249, 255, 0.95);
-  filter: drop-shadow(0 0 5px rgba(45, 245, 255, 0.55));
+  color: #e8ffff;
 }
 
-/* Spine down the hinge edge — dark teal, spans the full page-block depth. */
+.storey-book:hover .storey-book-emblem,
+.storey-book:focus-visible .storey-book-emblem {
+  animation: storey-book-icon-charge 1450ms ease-out both;
+}
+
+@keyframes storey-book-icon-charge {
+  0% {
+    color: #e8ffff;
+    filter: none;
+    transform: scale(1);
+  }
+
+  24% {
+    color: #ffffff;
+    filter:
+      drop-shadow(0 0 5px rgba(45, 245, 255, 0.85))
+      drop-shadow(0 0 12px rgba(176, 74, 255, 0.42));
+    transform: scale(1.04);
+  }
+
+  52% {
+    color: #f4e8ff;
+    filter:
+      drop-shadow(0 0 7px rgba(229, 140, 255, 0.95))
+      drop-shadow(0 0 16px rgba(45, 245, 255, 0.5));
+    transform: scale(1.09);
+  }
+
+  82% {
+    color: #f4e8ff;
+    filter:
+      drop-shadow(0 0 5px rgba(176, 74, 255, 0.62));
+    transform: scale(1.02);
+  }
+
+  100% {
+    color: #f4e8ff;
+    filter: none;
+    transform: scale(1);
+  }
+}
+
+/* Spine: solid teal outline, dark teal body. */
 .storey-book-spine {
   position: absolute;
   top: 0.18rem;
   left: 0.92rem;
-  width: 0.65rem;
+  width: 0.68rem;
   height: 5.3rem;
   transform: rotateY(-90deg);
   transform-origin: left center;
-  border-radius: 2px;
-  background: linear-gradient(180deg, rgba(10, 58, 68, 0.98), rgba(5, 28, 38, 0.98));
-  border: 1px solid rgba(45, 245, 255, 0.3);
-  box-shadow: 0 0 10px rgba(45, 245, 255, 0.2);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #0a4a55, #031822);
+  border: 2px solid var(--book-blue);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.22);
+}
+
+.storey-book:hover .storey-book-spine,
+.storey-book:focus-visible .storey-book-spine {
+  animation: storey-book-spine-charge 1450ms ease-out both;
+}
+
+@keyframes storey-book-spine-charge {
+  0% {
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.22);
+  }
+
+  45% {
+    box-shadow:
+      0 0 8px rgba(45, 245, 255, 0.72),
+      0 0 15px rgba(176, 74, 255, 0.34),
+      0 10px 18px rgba(0, 0, 0, 0.22);
+  }
+
+  100% {
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.22);
+  }
 }
 
 .storey-book-meta {
@@ -1528,14 +1797,36 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .storey-book:hover .storey-book-cover {
-    transform: translateZ(0.6rem) rotateY(-40deg);
+  .storey-book:hover .storey-book-3d,
+  .storey-book:focus-visible .storey-book-3d {
+    transition-delay: 0ms;
   }
+
+  .storey-book:hover .storey-book-cover,
+  .storey-book:focus-visible .storey-book-cover {
+    transform: translateZ(0.86rem) rotateY(-42deg);
+    transition-delay: 0ms;
+  }
+
   .storey-book-3d,
   .storey-book-cover,
-  .storey-book-leaf,
-  .storey-book-stage::before {
+  .storey-book-leaf {
     transition: none;
+  }
+
+  .storey-book:hover .storey-book-stage::before,
+  .storey-book:focus-visible .storey-book-stage::before,
+  .storey-book:hover .storey-book-leaves::after,
+  .storey-book:focus-visible .storey-book-leaves::after,
+  .storey-book:hover .storey-book-cover,
+  .storey-book:focus-visible .storey-book-cover,
+  .storey-book:hover .storey-book-cover::after,
+  .storey-book:focus-visible .storey-book-cover::after,
+  .storey-book:hover .storey-book-emblem,
+  .storey-book:focus-visible .storey-book-emblem,
+  .storey-book:hover .storey-book-spine,
+  .storey-book:focus-visible .storey-book-spine {
+    animation: none;
   }
 }
 
