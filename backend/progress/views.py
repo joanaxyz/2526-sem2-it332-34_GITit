@@ -10,6 +10,11 @@ class DashboardSummaryAPIView(APIView):
         return Response(MetricsService().dashboard_summary(user=request.user))
 
 
+class StatsSummaryAPIView(APIView):
+    def get(self, request):
+        return Response(MetricsService().stats_summary(user=request.user))
+
+
 class WalletSummaryAPIView(APIView):
     def get(self, request):
         return Response(WalletService().summary(user=request.user))

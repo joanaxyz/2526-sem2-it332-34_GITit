@@ -1,39 +1,40 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { dashboardApi } from '@/features/dashboard/api/dashboardApi'
-import { TowerPerformanceCard } from '@/features/dashboard/components/ModulePerformanceCard'
-import { ProgressSummaryCards } from '@/features/dashboard/components/ProgressSummaryCards'
+import { statsApi } from '@/features/stats/api/statsApi'
+import { ActivityTrendChart } from '@/features/stats/components/ActivityTrendChart'
+import { SkillProfileRadar } from '@/features/stats/components/SkillProfileRadar'
+import { StatHighlightCards } from '@/features/stats/components/StatHighlightCards'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 
-export function PerformancePage() {
+export function StatsPage() {
   const { data, error, isError, isLoading } = useQuery({
-    queryKey: queryKeys.dashboardSummary,
-    queryFn: dashboardApi.summary,
+    queryKey: queryKeys.statsSummary,
+    queryFn: statsApi.summary,
     staleTime: 5 * 60 * 1000,
   })
 
   if (isLoading) {
     return (
       <LoadingState
-        description="Collecting tower progress and accuracy trends."
-        label="Loading performance"
+        description="Crunching your skill profile, trends, and milestones."
+        label="Loading stats"
         variant="page"
       />
     )
   }
-  if (isError) return <ErrorState title="Could not load performance" description={error.message} />
-  if (!data) return <ErrorState title="Could not load performance" description="The API returned no data." />
+  if (isError) return <ErrorState title="Could not load stats" description={error.message} />
+  if (!data) return <ErrorState title="Could not load stats" description="The API returned no stats data." />
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Animated background — same aurora orbs as dashboard */}
+      {/* Animated background — same aurora orbs as the rest of the app */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div
           className="absolute"
           style={{
-            width: '50%', height: '55%', left: '-6%', top: '20%',
+            width: '50%', height: '55%', left: '-6%', top: '18%',
             background: 'radial-gradient(ellipse at center, rgba(0,245,212,0.04) 0%, transparent 70%)',
             filter: 'blur(50px)',
             animation: 'bg-drift 20s ease-in-out infinite alternate',
@@ -48,15 +49,6 @@ export function PerformancePage() {
             animation: 'bg-drift 26s ease-in-out infinite alternate-reverse',
           }}
         />
-        <div
-          className="absolute"
-          style={{
-            width: '30%', height: '35%', right: '15%', top: '5%',
-            background: 'radial-gradient(ellipse at center, rgba(125,211,252,0.025) 0%, transparent 70%)',
-            filter: 'blur(60px)',
-            animation: 'bg-drift 32s ease-in-out infinite alternate',
-          }}
-        />
       </div>
 
       <div className="animate-fade-in-up">
@@ -64,14 +56,23 @@ export function PerformancePage() {
           className="text-4xl font-extrabold tracking-tight"
           style={{ textShadow: '0 0 30px rgba(0,245,212,0.35), 0 0 60px rgba(0,180,216,0.18)' }}
         >
-          Performance
+          Stats
         </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          How you're growing as a git user — across both adventures and challenges.
+        </p>
       </div>
-      <div className="animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-        <ProgressSummaryCards summary={data} />
+
+      <div className="animate-fade-in-up" style={{ animationDelay: '80ms' }}>
+        <StatHighlightCards summary={data} />
       </div>
-      <div className="animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-        <TowerPerformanceCard summary={data} />
+
+      <div
+        className="animate-fade-in-up grid grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-4 max-xl:grid-cols-1"
+        style={{ animationDelay: '160ms' }}
+      >
+        <SkillProfileRadar axes={data.skill_profile} />
+        <ActivityTrendChart trend={data.activity_trend} />
       </div>
     </div>
   )

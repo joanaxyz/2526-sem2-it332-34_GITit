@@ -55,8 +55,8 @@ export function RecentActivityList({ summary }: { summary: DashboardSummary }) {
   return (
     <Card className="dash-card-hover" style={{ borderLeft: '2px solid rgba(0,245,212,0.3)' }}>
       <CardHeader>
-        <CardTitle>Session outcomes</CardTitle>
-        <CardDescription>Primary and review activity split stays visible.</CardDescription>
+        <CardTitle>Your quests</CardTitle>
+        <CardDescription>How your quest attempts have gone so far.</CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-2 gap-3 text-sm">
         <Outcome label="Started" value={summary.counts.started} />

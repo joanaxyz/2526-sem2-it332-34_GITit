@@ -1,6 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
 import {
-  BarChart2,
   BookOpen,
   CheckCircle2,
   ChevronDown,
@@ -9,6 +8,7 @@ import {
   GitBranch,
   Lock,
   LogOut,
+  Radar,
   Settings,
   Swords,
   Trophy,
@@ -28,7 +28,7 @@ import { cn } from '@/shared/utils/cn'
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: Gauge },
   { to: '/tower', label: 'Tower', icon: BookOpen },
-  { to: '/performance', label: 'Performance', icon: BarChart2 },
+  { to: '/stats', label: 'Stats', icon: Radar },
 ]
 
 function getInitials(username: string) {

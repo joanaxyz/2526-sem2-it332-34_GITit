@@ -7,7 +7,7 @@ import { Protected } from '@/app/Protected'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { DashboardPage } from '@/features/dashboard/pages/DashboardPage'
-import { PerformancePage } from '@/features/dashboard/pages/PerformancePage'
+import { StatsPage } from '@/features/stats/pages/StatsPage'
 import { AdventureRunPage } from '@/features/command-adventures/pages/AdventureRunPage'
 import { CommandAdventurePage } from '@/features/command-adventures/pages/CommandAdventurePage'
 import { ChallengeRunPage } from '@/features/challenges/pages/ChallengeRunPage'
@@ -31,7 +31,8 @@ export const router = createBrowserRouter([
       { path: '/', element: <Navigate replace to="/dashboard" /> },
       { path: '/dashboard', element: <DashboardPage /> },
       { path: '/tower', element: <StoreyMapPage /> },
-      { path: '/performance', element: <PerformancePage /> },
+      { path: '/stats', element: <StatsPage /> },
+      { path: '/performance', element: <Navigate replace to="/stats" /> },
     ],
   },
   {
