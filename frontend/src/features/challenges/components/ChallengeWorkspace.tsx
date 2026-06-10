@@ -8,7 +8,7 @@ import { Toaster } from 'sonner'
 import { challengesApi } from '@/features/challenges/api/challengesApi'
 import { challengeRunsApi } from '@/features/challenges/api/challengeRunsApi'
 import { ChallengeStatusHeader } from '@/features/challenges/components/ChallengeStatusHeader'
-import { CompletionCelebrationModal } from '@/features/challenges/components/CompletionCelebrationModal'
+import { ChallengeOutcomeModal } from '@/features/challenges/components/ChallengeOutcomeModal'
 import { useChallengeCommandSubmission } from '@/features/challenges/hooks/useChallengeCommandSubmission'
 import { useChallengeRun } from '@/features/challenges/hooks/useChallengeRun'
 import {
@@ -179,12 +179,15 @@ export function ChallengeWorkspace() {
       navigate(`/challenge-runs/${next.id}`)
     },
   })
+  // Replaying a free-play (review) run starts a fresh uncounted run on the same
+  // level — never the retry endpoint, which rejects non-primary runs. This keeps
+  // "Play again" working for already-completed levels without touching progress.
   const reviewMutation = useMutation({
     mutationFn: (levelId: number) => challengesApi.startChallengeRun(levelId, { review: true }),
     onSuccess: (next) => {
       syncChallengeRunInCache(queryClient, next)
       invalidatePracticeProgressQueries(queryClient)
-      if (run?.status === 'completed') setDismissedCompletionRunId(run.id)
+      setDismissedCompletionRunId(null)
       navigate(`/challenge-runs/${next.id}`)
     },
   })
@@ -219,8 +222,6 @@ export function ChallengeWorkspace() {
       updateChallengeRunCache(queryClient, updatedRun)
     },
   })
-  const reviewableDifficulties = run?.reviewable_difficulties ?? []
-
   if (query.isLoading) {
     return (
       <LoadingState
@@ -274,6 +275,19 @@ export function ChallengeWorkspace() {
   function startFreshAttempt() {
     retryMutation.mutate()
   }
+
+  // "Play again" routes by mode: a free-play (review) run can't use the retry
+  // endpoint, so it starts a fresh uncounted run; a primary run keeps the retry
+  // flow that carries prior-attempt context.
+  function playAgain() {
+    if (run?.review_mode) {
+      reviewMutation.mutate(run.challenge.level_id)
+    } else {
+      retryMutation.mutate()
+    }
+  }
+
+  const isReplaying = retryMutation.isPending || reviewMutation.isPending
 
   function beginTerminalResize(event: ReactPointerEvent<HTMLDivElement>) {
     const bounds = workspaceGridRef.current?.getBoundingClientRect()
@@ -379,12 +393,13 @@ export function ChallengeWorkspace() {
       <ChallengeStatusHeader
         run={run}
         isExiting={exitMutation.isPending}
-        isRetrying={retryMutation.isPending}
+        isRetrying={isReplaying}
         onExit={() => run.status === 'started' ? setExitConfirmOpen(true) : exitMutation.mutate()}
         onRetry={() => retryMutation.mutate()}
         onStartOver={() => setStartOverConfirmOpen(true)}
         onOpenTour={() => setTourOpen(true)}
         onContinue={() => retryMutation.mutate()}
+        onReplay={() => reviewMutation.mutate(run.challenge.level_id)}
       />
       <main className="relative grid min-h-0 flex-1 grid-cols-[27rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[26rem_minmax(0,1fr)] max-xl:grid-cols-[23rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
         <aside
@@ -514,20 +529,17 @@ export function ChallengeWorkspace() {
           onWriteFile={(input) => writeFileMutation.mutateAsync(input)}
         />
       </main>
-      <CompletionCelebrationModal
+      <ChallengeOutcomeModal
         open={(run.status === 'completed' || run.status === 'failed') && dismissedCompletionRunId !== run.id}
         run={run}
         onClose={() => {
           setDismissedCompletionRunId(run.id)
         }}
         onBackToTower={() => navigate(towerUrlForRun(run))}
-        onRetry={() => retryMutation.mutate()}
-        onContinue={() => retryMutation.mutate()}
-        onReviewDifficulty={(difficulty) => reviewMutation.mutate(difficulty.id)}
-        previousDifficulties={reviewableDifficulties}
-        isReviewing={reviewMutation.isPending}
-        isRetrying={retryMutation.isPending}
-        isContinuing={retryMutation.isPending}
+        onRetry={playAgain}
+        onContinue={playAgain}
+        isRetrying={isReplaying}
+        isContinuing={isReplaying}
         onNextLevel={run.next_difficulty ? () => nextLevelMutation.mutate() : undefined}
         isStartingNextLevel={nextLevelMutation.isPending}
         nextDifficultyLabel={

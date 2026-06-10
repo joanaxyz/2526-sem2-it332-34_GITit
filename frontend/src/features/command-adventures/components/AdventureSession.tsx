@@ -3,12 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, GitBranch } from 'lucide-react'
 
 import { AdventureCommandBudget } from '@/features/command-adventures/components/AdventureCommandBudget'
-import { AdventureCompletionModal } from '@/features/command-adventures/components/AdventureCompletionModal'
 import { AdventureContextPanel } from '@/features/command-adventures/components/AdventureContextPanel'
 import { AdventureHintPanel, type RevealedHint } from '@/features/command-adventures/components/AdventureHintPanel'
 import { AdventureMasteryPanel } from '@/features/command-adventures/components/AdventureMasteryPanel'
 import { AdventureProgressBar } from '@/features/command-adventures/components/AdventureProgressBar'
-import { AdventureResult } from '@/features/command-adventures/components/AdventureResult'
+import { AdventureRunOutcome } from '@/features/command-adventures/components/AdventureRunOutcome'
 import { useAdventureCommandSubmission } from '@/features/command-adventures/hooks/useAdventureCommandSubmission'
 import { useAdventureRun } from '@/features/command-adventures/hooks/useAdventureRun'
 import type { AdventureRun } from '@/features/command-adventures/types'
@@ -34,7 +33,6 @@ export function AdventureSession({
   const submitCommand = useAdventureCommandSubmission(runId)
   const navigate = useNavigate()
   const [hint, setHint] = useState<RevealedHint | null>(null)
-  const [completionDismissed, setCompletionDismissed] = useState(false)
   const [projectFilesOpen, setProjectFilesOpen] = usePersistentState(PROJECT_FILES_OPEN_KEY, true)
   const [workspaceEditorPath, setWorkspaceEditorPath] = useState<string | null>(null)
   const attemptId = query.data?.current_attempt?.id ?? null
@@ -69,18 +67,7 @@ export function AdventureSession({
   const backToTower = () => navigate(`/tower?storey=${run.storey_id}`)
 
   if (run.status !== 'started') {
-    return (
-      <>
-        <AdventureResult run={run} onRestart={restart} onBackToTower={backToTower} />
-        <AdventureCompletionModal
-          open={!completionDismissed}
-          run={run}
-          onClose={() => setCompletionDismissed(true)}
-          onBackToTower={backToTower}
-          onRestart={restart}
-        />
-      </>
-    )
+    return <AdventureRunOutcome run={run} onRestart={restart} onBackToTower={backToTower} />
   }
 
   const attempt = run.current_attempt

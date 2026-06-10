@@ -93,9 +93,15 @@ export type AdventureMastery = {
   passed: boolean
 }
 
+export type AdventureRunMode = 'primary' | 'replay'
+
 export type AdventureRun = {
   id: number
   status: AdventureRunStatus
+  /** Primary is the counted first playthrough; replay is uncounted free-play. */
+  mode: AdventureRunMode
+  /** Stable across re-runs: true once this adventure has ever been passed. */
+  is_passed: boolean
   command_adventure: { id: number; slug: string; title: string; description: string }
   /** The adventure's storey (module) id, used to navigate back to the Tower. */
   storey_id: number

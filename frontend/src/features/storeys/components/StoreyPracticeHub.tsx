@@ -454,7 +454,10 @@ export function StoreyPracticeHub({
     state.selected?.kind === 'adventure' ? state.selected.adventure.id : null,
   )
 
-  const challengesLocked = adventure !== null && adventure.status !== 'completed'
+  // Gate on the stable "ever passed" flag, not the latest run status: a player
+  // who passed once then replays-and-abandons must not see challenges relock
+  // (the backend unlock keys off passed_at, so the UI must agree).
+  const challengesLocked = adventure !== null && !adventure.is_passed
   const title = displayTitle ?? storey.title
   const motionDelay = Math.min(sequenceIndex * 0.03, 0.12)
   const adventureSelected = adventure !== null && selectedAdventureId === adventure.id

@@ -243,7 +243,7 @@ class ChallengeRunService:
             challenge_level=level,
         ).first()
         if not completion or not completion.challenge_run:
-            raise Locked("Review Mode is available only after completing this challenge level.")
+            raise Locked("Free play is available only after completing this challenge level.")
         return completion.challenge_run.variant
 
     @transaction.atomic

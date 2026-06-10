@@ -1,4 +1,4 @@
-import type { ChallengeLevelAccess, Difficulty, PracticeCompletion } from '@/features/challenges/types'
+import type { Difficulty, PracticeCompletion } from '@/features/challenges/types'
 
 export type RepositoryValue =
   | string
@@ -153,7 +153,6 @@ export type ChallengeRun = {
     difficulty: Difficulty
   } | null
   completion?: PracticeCompletion | null
-  reviewable_difficulties?: ChallengeLevelAccess[]
 }
 
 // The minimal shape the shared terminal needs to render a command + its output.

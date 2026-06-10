@@ -8,7 +8,12 @@ from challenges.selectors import (
     command_accuracy_rate,
     session_meets_progress_threshold,
 )
-from common.constants import DIFFICULTY_EASY, DIFFICULTY_HARD, DIFFICULTY_MEDIUM
+from common.constants import (
+    DIFFICULTY_EASY,
+    DIFFICULTY_HARD,
+    DIFFICULTY_MEDIUM,
+    SESSION_MODE_PRIMARY,
+)
 from curriculum.models import CommandForm, CommandSkill, ConceptPage, Storey
 
 
@@ -40,12 +45,21 @@ def storey_completion_count_map(*, user, storey_ids: list[int]) -> dict[int, int
         return {}
 
     completion_by_storey = {storey_id: 0 for storey_id in storey_ids}
-    for run in AdventureRun.objects.filter(
-        user=user,
-        status="completed",
-        command_adventure__module_id__in=storey_ids,
-    ).select_related("command_adventure"):
-        completion_by_storey[run.command_adventure.module_id] += 1
+    # Count each Command Adventure at most once per storey: the milestone is
+    # *passing* the adventure (passed_at), not how many times it was run. Replays
+    # never set passed_at, so they cannot inflate progress past the 1-per-storey
+    # denominator. Distinct on the adventure id keeps this idempotent across runs.
+    for module_id in (
+        AdventureRun.objects.filter(
+            user=user,
+            mode=SESSION_MODE_PRIMARY,
+            passed_at__isnull=False,
+            command_adventure__module_id__in=storey_ids,
+        )
+        .values_list("command_adventure__module_id", flat=True)
+        .distinct()
+    ):
+        completion_by_storey[module_id] += 1
 
     challenge_counts: dict[tuple[int, int], int] = {}
     required_by_level: dict[int, int] = {}
@@ -230,11 +244,12 @@ def _build_challenge_access(*, user, storey_id: int, challenges: list[Challenge]
 
 
 def command_adventure_summary_payload(*, user, adventure: CommandAdventure) -> dict:
+    authenticated = getattr(user, "is_authenticated", False)
     latest = (
         AdventureRun.objects.filter(user=user, command_adventure=adventure)
         .order_by("-id")
         .first()
-        if getattr(user, "is_authenticated", False)
+        if authenticated
         else None
     )
     problem_count = AdventureProblem.objects.filter(
@@ -243,7 +258,16 @@ def command_adventure_summary_payload(*, user, adventure: CommandAdventure) -> d
         usage__is_published=True,
         usage__topic__is_published=True,
     ).count()
-    completed = 1 if latest and latest.status == "completed" else 0
+    # Progress and the challenge gate key off whether the adventure has ever been
+    # passed, not the latest run's status. Otherwise a post-pass replay that is
+    # abandoned/failed would visibly relock challenges and zero out progress.
+    is_passed = bool(
+        authenticated
+        and AdventureRun.objects.filter(
+            user=user, command_adventure=adventure, passed_at__isnull=False
+        ).exists()
+    )
+    completed = 1 if is_passed else 0
     return {
         "item_type": "command_adventure",
         "id": adventure.id,
@@ -251,6 +275,7 @@ def command_adventure_summary_payload(*, user, adventure: CommandAdventure) -> d
         "title": adventure.title,
         "description": adventure.description,
         "status": latest.status if latest else "not_started",
+        "is_passed": is_passed,
         "active_run_id": latest.id if latest and latest.status == "started" else None,
         "latest_run_id": latest.id if latest else None,
         "problem_count": problem_count,

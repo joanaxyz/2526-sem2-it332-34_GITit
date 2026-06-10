@@ -164,6 +164,12 @@ def adventure_run_payload(run: AdventureRun) -> dict:
     return {
         "id": run.id,
         "status": run.status,
+        "mode": run.mode,
+        # Stable across re-runs: a replay never clears this, so the outcome UI and
+        # challenge gate can rely on it instead of the latest run's status.
+        "is_passed": run.command_adventure.runs.filter(
+            user=run.user, passed_at__isnull=False
+        ).exists(),
         "command_adventure": {
             "id": run.command_adventure_id,
             "slug": run.command_adventure.slug,

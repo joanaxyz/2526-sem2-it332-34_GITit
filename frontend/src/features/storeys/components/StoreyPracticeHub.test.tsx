@@ -64,6 +64,7 @@ function mockCanonicalStoreyContent() {
             title: 'Preparing File Changes',
             description: 'Learn how to inspect, stage, and save file changes.',
             status: 'not_started',
+            is_passed: false,
             active_run_id: null,
             latest_run_id: null,
             problem_count: 5,

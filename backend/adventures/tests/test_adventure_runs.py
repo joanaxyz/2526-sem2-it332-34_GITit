@@ -173,6 +173,55 @@ def test_starting_again_resumes_the_active_run(db, django_user_model):
     assert active_runs.count() == 1
 
 
+def test_replay_after_pass_is_playable_but_uncounted(db, django_user_model):
+    """Once an adventure is passed, the next run is an uncounted free-play replay:
+    it stays fully playable (the scheduler would otherwise have nothing left to
+    serve) yet never touches mastery, the pass milestone, or the session score."""
+    from adventures.models import AdventureMastery
+
+    call_command("seed_curriculum_v2")
+    user = make_user(django_user_model, "replayer")
+    adventure = _adventure_with_problems()
+    service = AdventureRunService()
+
+    primary = service.start_run(user=user, adventure=adventure)
+    for _ in range(500):
+        if not _solve_current(service, primary):
+            break
+    primary.refresh_from_db()
+    assert primary.mode == "primary"
+    assert primary.passed_at is not None
+
+    mastery_before = dict(
+        AdventureMastery.objects.filter(user=user).values_list("id", "strength")
+    )
+
+    replay = service.start_run(user=user, adventure=adventure)
+    assert replay.id != primary.id
+    assert replay.mode == "replay"
+    assert replay.status == "started"
+    # Mastery would leave nothing to serve; the replay's linear walk still does.
+    assert service.current_attempt(run=replay) is not None
+
+    served = 0
+    for _ in range(500):
+        if not _solve_current(service, replay):
+            break
+        served += 1
+    replay.refresh_from_db()
+    assert replay.status == "completed"
+    assert served == len(ordered_problems_for(adventure))
+    # Uncounted: no pass milestone, no session score, no mastery progress.
+    assert replay.passed_at is None
+    assert replay.session_score == 0
+    assert replay.mastery_progress_gained == 0.0
+    # Replay never writes mastery rows.
+    mastery_after = dict(
+        AdventureMastery.objects.filter(user=user).values_list("id", "strength")
+    )
+    assert mastery_after == mastery_before
+
+
 def test_terminal_run_does_not_block_a_replay(db, django_user_model):
     """A terminal (abandoned/completed) run never blocks a new one; resume only
     applies to an in-progress run."""

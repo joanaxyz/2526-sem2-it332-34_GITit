@@ -5,7 +5,6 @@ import type {
   ChallengeLevelAccess,
   CommandAdventureSummary,
 } from '@/features/challenges/types'
-import { meetsMasteryAccuracy, meetsProgressAccuracy } from '@/shared/practice/utils/commandAccuracy'
 
 // Per-difficulty label + accent (RGB triplet consumed via `rgba(var(--…), …)`).
 export const DIFFICULTY_ACCENT: Record<string, { label: string; rgb: string }> = {
@@ -67,11 +66,12 @@ export function actionForChallengeLevel(item: ChallengeLevelAccess): ChallengeAc
   if (item.status === 'locked') return null
   if (item.status === 'in_progress') return item.active_run_id ? 'resume' : null
   if (item.status === 'completed') {
-    const progressComplete = item.successful_attempts.count >= item.successful_attempts.required
-    const latestAccuracy = item.latest_attempt?.accuracy_rate ?? null
-    if (item.review_available && progressComplete && meetsMasteryAccuracy(latestAccuracy)) return 'review'
-    if (meetsProgressAccuracy(latestAccuracy)) return 'continue'
-    return 'retry'
+    // A completed level is already counted; the only door action is an uncounted
+    // free-play replay ("Replay"). Routing it through the review run avoids the
+    // retry endpoint, which rejects non-primary runs — the latest run here may
+    // itself be a prior replay.
+    if (item.review_available) return 'review'
+    return null
   }
   if (item.status === 'failed' || item.status === 'abandoned') return 'retry'
   return 'start'
@@ -79,7 +79,9 @@ export function actionForChallengeLevel(item: ChallengeLevelAccess): ChallengeAc
 
 export function actionLabel(action: ChallengeActionIntent | null, status: ChallengeLevelAccess['status']) {
   if (status === 'locked') return 'Locked'
-  if (action === 'review') return 'Review'
+  // 'review' is the internal mode for an uncounted free-play run; players just
+  // see "Replay".
+  if (action === 'review') return 'Replay'
   if (action === 'continue' || action === 'resume') return 'Continue'
   if (action === 'retry') return 'Retry'
   return 'Play'

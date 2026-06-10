@@ -11,6 +11,10 @@ DIFFICULTY_MAX_COUNTED_COMMANDS = {
 
 SESSION_MODE_PRIMARY = "primary"
 SESSION_MODE_REVIEW = "review"
+# Adventure free-play: a playable but uncounted re-run of an already-passed
+# adventure. Never touches mastery, progress, or KPIs (mirrors review for
+# challenges, but player-facing it is "Play again", never "Review").
+SESSION_MODE_REPLAY = "replay"
 
 SESSION_STATUS_STARTED = "started"
 SESSION_STATUS_COMPLETED = "completed"

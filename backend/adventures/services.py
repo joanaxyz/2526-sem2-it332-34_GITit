@@ -25,6 +25,8 @@ from adventures.scheduler import (
 from adventures.scoring import AdventureScoringService, mastery_points
 from common.constants import (
     COMMAND_COUNTED,
+    SESSION_MODE_PRIMARY,
+    SESSION_MODE_REPLAY,
     SESSION_STATUS_COMPLETED,
     SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
@@ -73,7 +75,18 @@ class AdventureRunService:
         )
         if active:
             return active
-        run = AdventureRun.objects.create(user=user, command_adventure=adventure)
+        # Once the adventure has been passed, every further playthrough is an
+        # uncounted free-play replay: it stays fully playable (the scheduler's
+        # mastery view would otherwise have nothing left to serve and finish the
+        # run instantly) but never touches mastery, the pass milestone, or KPIs.
+        mode = (
+            SESSION_MODE_REPLAY
+            if AdventureRun.objects.filter(
+                user=user, command_adventure=adventure, passed_at__isnull=False
+            ).exists()
+            else SESSION_MODE_PRIMARY
+        )
+        run = AdventureRun.objects.create(user=user, command_adventure=adventure, mode=mode)
         self._open_next(run=run)
         return run
 
@@ -114,40 +127,62 @@ class AdventureRunService:
         attempt.save()
 
         run = attempt.run
-        box_advanced = self.scheduler.apply_result(
-            user=run.user,
-            problem=attempt.adventure_problem,
-            passed=score.passed,
-            solved=solved,
-        )
-        run.session_score += mastery_points(
-            box_advanced=box_advanced, final_score=score.final_score, box_value=BOX_VALUE
-        )
-        if run.passed_at is None and is_passed(
-            user=run.user, adventure=run.command_adventure, session_score=run.session_score
-        ):
-            run.passed_at = timezone.now()
-        run.save(update_fields=["session_score", "passed_at"])
+        # Replays are uncounted free-play: the attempt is still scored (so the
+        # learner sees how the run went), but mastery, session score, and the
+        # pass milestone are left untouched. Primary runs alone drive progress.
+        if run.mode != SESSION_MODE_REPLAY:
+            box_advanced = self.scheduler.apply_result(
+                user=run.user,
+                problem=attempt.adventure_problem,
+                passed=score.passed,
+                solved=solved,
+            )
+            run.session_score += mastery_points(
+                box_advanced=box_advanced, final_score=score.final_score, box_value=BOX_VALUE
+            )
+            if run.passed_at is None and is_passed(
+                user=run.user, adventure=run.command_adventure, session_score=run.session_score
+            ):
+                run.passed_at = timezone.now()
+            run.save(update_fields=["session_score", "passed_at"])
 
         self._open_next(run=run)
         return attempt
 
     def _open_next(self, *, run: AdventureRun) -> AdventureProblemAttempt | None:
-        """Ask the scheduler for the next command-problem; open it, or finish the
-        session when every command is mastered."""
-        problem = self.scheduler.next_problem(user=run.user, adventure=run.command_adventure)
+        """Open the next command-problem, or finish the session when there is
+        nothing left to serve. Primary runs ask the mastery scheduler; replays
+        walk the adventure once, ignoring mastery, so a passed adventure stays
+        fully playable instead of finishing the instant it starts."""
+        if run.mode == SESSION_MODE_REPLAY:
+            problem = self._next_replay_problem(run=run)
+        else:
+            problem = self.scheduler.next_problem(user=run.user, adventure=run.command_adventure)
         if problem is None:
             self._finish(run=run)
             return None
         return self._open_attempt(run=run, problem=problem)
 
+    def _next_replay_problem(self, *, run: AdventureRun) -> AdventureProblem | None:
+        """Next unplayed command in this replay: a single linear walk through the
+        adventure's ordered problems, decoupled from the global mastery view."""
+        served_ids = set(run.attempts.values_list("adventure_problem_id", flat=True))
+        for problem in ordered_problems_for(run.command_adventure):
+            if problem.id not in served_ids:
+                return problem
+        return None
+
     def _finish(self, *, run: AdventureRun) -> None:
-        # Reached only when the scheduler has nothing left to serve, i.e. every
-        # command is mastered. The pass milestone (passed_at) is set earlier and
-        # independently, the instant the session score crosses the pass bar.
+        # Primary: reached only when the scheduler has nothing left to serve, i.e.
+        # every command is mastered. The pass milestone (passed_at) is set earlier
+        # and independently, the instant the session score crosses the pass bar.
+        # Replay: reached once the linear walk is exhausted; it earns no mastery
+        # progress because it is uncounted.
         run.status = SESSION_STATUS_COMPLETED
         run.completed_at = timezone.now()
-        run.mastery_progress_gained = self._mastery_fraction(run)
+        run.mastery_progress_gained = (
+            0.0 if run.mode == SESSION_MODE_REPLAY else self._mastery_fraction(run)
+        )
         run.save(update_fields=["status", "completed_at", "mastery_progress_gained"])
 
     def _mastery_fraction(self, run: AdventureRun) -> float:
@@ -191,17 +226,23 @@ class AdventureRunService:
             order=run.attempts.count(),
             repository_state=variant.initial_state,
         )
-        idx = encounter_index(user=run.user, adventure=run.command_adventure)
-        self.scheduler.mark_served(user=run.user, problem=problem, idx=idx)
-        # current_problem_index now tracks distinct commands introduced (progress
-        # hint for the UI); the linear walk it once meant no longer applies.
-        run.current_problem_index = (
-            AdventureMastery.objects.filter(
-                user=run.user,
-                adventure_problem__usage__topic__module=run.command_adventure.module,
-                introduced=True,
-            ).count()
-        )
+        if run.mode == SESSION_MODE_REPLAY:
+            # Free-play never mutates mastery; progress is just the linear walk's
+            # position through this replay's problems.
+            run.current_problem_index = run.attempts.count()
+        else:
+            idx = encounter_index(user=run.user, adventure=run.command_adventure)
+            self.scheduler.mark_served(user=run.user, problem=problem, idx=idx)
+            # current_problem_index now tracks distinct commands introduced
+            # (progress hint for the UI); the linear walk it once meant no longer
+            # applies.
+            run.current_problem_index = (
+                AdventureMastery.objects.filter(
+                    user=run.user,
+                    adventure_problem__usage__topic__module=run.command_adventure.module,
+                    introduced=True,
+                ).count()
+            )
         run.save(update_fields=["current_problem_index"])
         return attempt
 

@@ -2,6 +2,8 @@ from django.conf import settings
 from django.db import models
 
 from common.constants import (
+    SESSION_MODE_PRIMARY,
+    SESSION_MODE_REPLAY,
     SESSION_STATUS_ABANDONED,
     SESSION_STATUS_COMPLETED,
     SESSION_STATUS_FAILED,
@@ -129,6 +131,10 @@ class AdventureRun(models.Model):
         FAILED = SESSION_STATUS_FAILED, "Failed"
         ABANDONED = SESSION_STATUS_ABANDONED, "Abandoned"
 
+    class Mode(models.TextChoices):
+        PRIMARY = SESSION_MODE_PRIMARY, "Primary"
+        REPLAY = SESSION_MODE_REPLAY, "Replay"
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     command_adventure = models.ForeignKey(
         CommandAdventure,
@@ -136,6 +142,10 @@ class AdventureRun(models.Model):
         on_delete=models.CASCADE,
     )
     status = models.CharField(max_length=16, choices=Status.choices, default=SESSION_STATUS_STARTED)
+    # Primary is the first counted playthrough (drives mastery, pass, KPIs);
+    # replay is an uncounted free-play re-run started once the adventure is
+    # already passed. Replay never reads or writes AdventureMastery.
+    mode = models.CharField(max_length=16, choices=Mode.choices, default=SESSION_MODE_PRIMARY)
     current_problem_index = models.PositiveIntegerField(default=0)
     total_score = models.PositiveIntegerField(default=0)
     # Accumulating mastery points this session (sum of box-advance × quality).

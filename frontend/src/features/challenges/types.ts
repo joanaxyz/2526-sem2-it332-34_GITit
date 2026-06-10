@@ -53,6 +53,9 @@ export type CommandAdventureSummary = {
   title: string
   description: string
   status: 'not_started' | 'started' | 'completed' | 'failed' | 'abandoned'
+  // Stable across re-runs: true once the adventure has ever been passed. Drives
+  // the challenge gate and progress so a post-pass replay can't relock anything.
+  is_passed: boolean
   active_run_id: number | null
   latest_run_id: number | null
   problem_count: number

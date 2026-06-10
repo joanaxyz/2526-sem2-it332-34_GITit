@@ -56,7 +56,9 @@ class MetricsService:
             completed_retry_total=Sum("retry_index", filter=Q(mode=SESSION_MODE_PRIMARY, status=SESSION_STATUS_COMPLETED)),
             review_started=Count("id", filter=Q(mode=SESSION_MODE_REVIEW)),
         )
-        adventure_counts = AdventureRun.objects.filter(user=user).aggregate(
+        adventure_counts = AdventureRun.objects.filter(
+            user=user, mode=SESSION_MODE_PRIMARY
+        ).aggregate(
             started=Count("id"),
             completed=Count("id", filter=Q(status=SESSION_STATUS_COMPLETED)),
             failed=Count("id", filter=Q(status=SESSION_STATUS_FAILED)),

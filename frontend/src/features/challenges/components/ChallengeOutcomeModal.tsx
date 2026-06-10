@@ -2,7 +2,6 @@ import { ArrowRight, Award, Castle, RefreshCcw, Sparkles, XCircle } from 'lucide
 import type { CSSProperties } from 'react'
 
 import type { ChallengeRun } from '@/shared/practice/types'
-import type { ChallengeLevelAccess } from '@/features/challenges/types'
 import {
   commandAccuracyFromSession,
   meetsMasteryAccuracy,
@@ -21,7 +20,7 @@ function difficultyLabel(run: ChallengeRun) {
   return run.difficulty.charAt(0).toUpperCase() + run.difficulty.slice(1)
 }
 
-export function CompletionCelebrationModal({
+export function ChallengeOutcomeModal({
   open,
   run,
   onClose,
@@ -29,12 +28,9 @@ export function CompletionCelebrationModal({
   onNextLevel,
   onContinue,
   onRetry,
-  onReviewDifficulty,
-  previousDifficulties = [],
   isStartingNextLevel = false,
   isContinuing = false,
   isRetrying = false,
-  isReviewing = false,
   nextDifficultyLabel,
 }: {
   open: boolean
@@ -44,48 +40,56 @@ export function CompletionCelebrationModal({
   onNextLevel?: () => void
   onContinue?: () => void
   onRetry?: () => void
-  onReviewDifficulty?: (difficulty: ChallengeLevelAccess) => void
-  previousDifficulties?: ChallengeLevelAccess[]
   isStartingNextLevel?: boolean
   isContinuing?: boolean
   isRetrying?: boolean
-  isReviewing?: boolean
   nextDifficultyLabel?: string | null
 }) {
   const accuracy = commandAccuracyFromSession(run)
   const isFailed = run.status === 'failed'
+  // Free-play replays are uncounted: no progress, no unlocks, no retry-for-
+  // accuracy. They just recap the run and offer "Play again".
+  const isReplay = run.review_mode
   const withinMasteryTarget = meetsMasteryAccuracy(accuracy)
   const meetsProgress = meetsProgressAccuracy(accuracy)
-  const isNavigating = isStartingNextLevel || isContinuing || isRetrying || isReviewing
+  const isNavigating = isStartingNextLevel || isContinuing || isRetrying
   const requiredAttempts = run.mastery_progress?.required ?? 3
   const hasRequiredAttempts = (run.mastery_progress?.mastered ?? 0) >= requiredAttempts
-  const canAdvance = run.status === 'completed' && hasRequiredAttempts && meetsProgress
-  const shouldContinueAttempt = run.status === 'completed' && !hasRequiredAttempts && meetsProgress
-  const shouldRetryForAccuracy = run.status === 'completed' && !meetsProgress
-  const headline = isFailed
-    ? 'Attempt limit reached'
-    : shouldRetryForAccuracy
-      ? 'Practice cleared, but accuracy needs a retry'
-      : canAdvance
-        ? 'Level ready'
-        : run.first_attempt_star_eligible && withinMasteryTarget
-          ? 'Clean run logged'
-          : 'Practice cleared'
+  const canAdvance = !isReplay && run.status === 'completed' && hasRequiredAttempts && meetsProgress
+  const shouldContinueAttempt = !isReplay && run.status === 'completed' && !hasRequiredAttempts && meetsProgress
+  const shouldRetryForAccuracy = !isReplay && run.status === 'completed' && !meetsProgress
+  const headline = isReplay
+    ? isFailed
+      ? 'Replay ended'
+      : 'Replay complete'
+    : isFailed
+      ? 'Attempt limit reached'
+      : shouldRetryForAccuracy
+        ? 'Practice cleared, but accuracy needs a retry'
+        : canAdvance
+          ? 'Level ready'
+          : run.first_attempt_star_eligible && withinMasteryTarget
+            ? 'Clean run logged'
+            : 'Practice cleared'
   const hitActionLimit = isFailed && run.counts.max_reached
-  const message = isFailed
-    ? hitActionLimit
-      ? run.failure_reason ??
-        'You used every counted action allowed for this attempt without reaching the target repository state. Check that you chose the correct conflict side, staged the file, and completed the merge commit, then start a fresh variant.'
-      : 'This attempt ended before the repository reached the target state. Start a fresh variant and try again with a clean workspace.'
-    : shouldRetryForAccuracy
-      ? 'The target state was reached, but command accuracy was below 70%. Retry this level to count the run toward progress.'
-      : canAdvance
-        ? withinMasteryTarget
-          ? 'You completed the required successful attempts at 100% accuracy. The next level is ready.'
-          : 'You completed the required successful attempts. The next level is ready.'
-        : meetsProgress
-          ? 'That run counts toward progress. Continue to start a fresh attempt for the remaining successful records.'
-          : 'Practice cleared.'
+  const message = isReplay
+    ? isFailed
+      ? 'This free-play run ended before reaching the target state. It doesn’t affect your saved progress — play again whenever you like.'
+      : 'Free play complete. This run is just for practice and doesn’t change your saved progress.'
+    : isFailed
+      ? hitActionLimit
+        ? run.failure_reason ??
+          'You used every counted action allowed for this attempt without reaching the target repository state. Check that you chose the correct conflict side, staged the file, and completed the merge commit, then start a fresh variant.'
+        : 'This attempt ended before the repository reached the target state. Start a fresh variant and try again with a clean workspace.'
+      : shouldRetryForAccuracy
+        ? 'The target state was reached, but command accuracy was below 70%. Retry this level to count the run toward progress.'
+        : canAdvance
+          ? withinMasteryTarget
+            ? 'You completed the required successful attempts at 100% accuracy. The next level is ready.'
+            : 'You completed the required successful attempts. The next level is ready.'
+          : meetsProgress
+            ? 'That run counts toward progress. Continue to start a fresh attempt for the remaining successful records.'
+            : 'Practice cleared.'
   const Icon = isFailed ? XCircle : Sparkles
 
   return (
@@ -194,58 +198,21 @@ export function CompletionCelebrationModal({
             />
           </div>
 
-          {previousDifficulties.length > 0 && !isFailed ? (
-            <div className="mt-4">
-              <div className="mb-2 flex items-center gap-3">
-                <div className="h-px flex-1 bg-border/60" />
-                <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Previous levels
-                </span>
-                <div className="h-px flex-1 bg-border/60" />
-              </div>
-              <div className="grid grid-cols-2 gap-2 max-sm:grid-cols-1">
-                {previousDifficulties.map((difficulty) => (
-                  <button
-                    key={difficulty.id}
-                    type="button"
-                    disabled={!difficulty.review_available || isNavigating}
-                    onClick={() => onReviewDifficulty?.(difficulty)}
-                    className={cn(
-                      'flex items-center justify-between rounded-lg border border-border bg-background/50 px-3 py-2 text-left transition-all duration-200',
-                      difficulty.review_available && !isNavigating
-                        ? 'hover:-translate-y-0.5 hover:border-primary/30 hover:bg-primary/5 hover:shadow-md'
-                        : 'cursor-not-allowed opacity-50',
-                    )}
-                  >
-                    <div>
-                      <div className="text-sm font-bold capitalize">{difficulty.difficulty}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {difficulty.review_available ? 'Review available' : 'Locked'}
-                      </div>
-                    </div>
-                    {difficulty.latest_attempt?.accuracy_rate !== null &&
-                    difficulty.latest_attempt?.accuracy_rate !== undefined ? (
-                      <span
-                        className={cn(
-                          'font-mono text-sm font-extrabold',
-                          meetsMasteryAccuracy(difficulty.latest_attempt.accuracy_rate)
-                            ? 'completion-perfect-score text-primary'
-                            : meetsProgressAccuracy(difficulty.latest_attempt.accuracy_rate)
-                              ? 'text-warning'
-                              : 'text-destructive',
-                        )}
-                      >
-                        {difficulty.latest_attempt.accuracy_rate}%
-                      </span>
-                    ) : null}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
           <div className="mt-4 flex flex-wrap justify-center gap-3">
-            {isFailed || shouldRetryForAccuracy ? (
+            {isReplay ? (
+              <>
+                {onRetry ? (
+                  <Button type="button" disabled={isNavigating} onClick={onRetry}>
+                    <RefreshCcw data-icon="inline-start" />
+                    {isRetrying ? 'Starting fresh run' : 'Play again'}
+                  </Button>
+                ) : null}
+                <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToTower}>
+                  <Castle data-icon="inline-start" />
+                  Back to Tower
+                </Button>
+              </>
+            ) : isFailed || shouldRetryForAccuracy ? (
               <>
                 {onRetry ? (
                   <Button type="button" variant="destructive" disabled={isNavigating} onClick={onRetry}>
