@@ -395,6 +395,19 @@ def challenge_summary_payload(*, challenge: Challenge, access: ChallengeAccessCo
     }
 
 
+def scenario_levels_access_payload(*, user, scenario: Challenge) -> list[dict]:
+    """Per-level access for every sibling level of a challenge scenario, ordered
+    easy→hard. Reuses the same access context the Tower uses so statuses
+    (locked / in_progress / completed) match exactly between the Tower and the
+    in-run level navigator."""
+    access = _build_challenge_access(user=user, storey_id=scenario.module_id, challenges=[scenario])
+    ordered = _ordered_levels(scenario.levels.all())
+    return [
+        challenge_quest_access_payload(level=level, access=access, scenario_levels=ordered)
+        for level in ordered
+    ]
+
+
 def challenge_quest_access_payload(
     *,
     level: ChallengeQuest,

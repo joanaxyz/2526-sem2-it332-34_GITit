@@ -1,19 +1,16 @@
-import { ArrowRight, Award, Castle, RefreshCcw, Sparkles, XCircle } from 'lucide-react'
+import { Activity, ArrowRight, Award, Castle, RefreshCcw, Send, Sparkles, Stethoscope, Target, Trophy, XCircle } from 'lucide-react'
 import type { CSSProperties } from 'react'
 
+import { ChallengeLevelNav } from '@/features/challenges/components/ChallengeLevelNav'
 import type { ChallengeRun } from '@/shared/practice/types'
 import {
   commandAccuracyFromSession,
   meetsMasteryAccuracy,
   meetsProgressAccuracy,
 } from '@/shared/practice/utils/commandAccuracy'
-import { CompletionConfetti } from '@/shared/practice/components/completion/CompletionConfetti'
-import { CompletionStatTile } from '@/shared/practice/components/completion/CompletionStatTile'
-import { TILE_ACCENTS } from '@/shared/practice/components/completion/tileAccents'
+import { CompletionModal, type CompletionStat } from '@/shared/practice/components/completion/CompletionModal'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
-import { Modal } from '@/shared/components/Modal'
-import { cn } from '@/shared/utils/cn'
 
 function difficultyLabel(run: ChallengeRun) {
   if (!run.difficulty) return 'Challenge'
@@ -28,6 +25,8 @@ export function ChallengeOutcomeModal({
   onNextLevel,
   onContinue,
   onRetry,
+  onSelectLevel,
+  busyLevelId,
   isStartingNextLevel = false,
   isContinuing = false,
   isRetrying = false,
@@ -40,6 +39,9 @@ export function ChallengeOutcomeModal({
   onNextLevel?: () => void
   onContinue?: () => void
   onRetry?: () => void
+  /** Start a fresh run on an arbitrary sibling level from the level navigator. */
+  onSelectLevel?: (levelId: number) => void
+  busyLevelId?: number | null
   isStartingNextLevel?: boolean
   isContinuing?: boolean
   isRetrying?: boolean
@@ -52,7 +54,7 @@ export function ChallengeOutcomeModal({
   const isReplay = run.review_mode
   const withinMasteryTarget = meetsMasteryAccuracy(accuracy)
   const meetsProgress = meetsProgressAccuracy(accuracy)
-  const isNavigating = isStartingNextLevel || isContinuing || isRetrying
+  const isNavigating = isStartingNextLevel || isContinuing || isRetrying || Boolean(busyLevelId)
   const requiredAttempts = run.mastery_progress?.required ?? 3
   const hasRequiredAttempts = (run.mastery_progress?.mastered ?? 0) >= requiredAttempts
   const canAdvance = !isReplay && run.status === 'completed' && hasRequiredAttempts && meetsProgress
@@ -92,177 +94,158 @@ export function ChallengeOutcomeModal({
             : 'Practice cleared.'
   const Icon = isFailed ? XCircle : Sparkles
 
+  const stats: CompletionStat[] = [
+    {
+      label: 'Accuracy',
+      numerator: accuracy ?? 0,
+      suffix: '%',
+      helper: withinMasteryTarget
+        ? 'At mastery target'
+        : meetsProgress
+          ? 'Counts toward progress'
+          : 'Below progress threshold',
+      icon: Target,
+    },
+    {
+      label: 'Counted actions',
+      numerator: run.counts.counted_action_total,
+      denominator: run.policy.min_counted_commands,
+      helper: 'Used / mastery target',
+      icon: Activity,
+    },
+    {
+      label: 'Submissions',
+      numerator: run.counts.total_attempts,
+      helper: 'All terminal entries',
+      icon: Send,
+    },
+    {
+      label: 'Free diagnostics',
+      numerator: run.counts.non_counted_diagnostic_total,
+      helper: 'Excluded from accuracy',
+      icon: Stethoscope,
+    },
+    {
+      label: 'Successful attempts',
+      numerator: run.mastery_progress.mastered,
+      denominator: run.mastery_progress.required,
+      helper: 'Progress records',
+      icon: Trophy,
+    },
+  ]
+
+  const badges = (
+    <>
+      <Badge
+        variant={isFailed ? 'destructive' : 'default'}
+        className="completion-badge"
+        style={{ animationDelay: '60ms' } as CSSProperties}
+      >
+        {difficultyLabel(run)} {isFailed ? 'failed' : 'complete'}
+      </Badge>
+      {!isFailed && run.first_attempt_star_eligible ? (
+        <Badge
+          variant="warning"
+          className="completion-badge"
+          style={{ animationDelay: '140ms' } as CSSProperties}
+        >
+          <Award className="size-3.5" />
+          First-attempt star
+        </Badge>
+      ) : null}
+    </>
+  )
+
+  const actions = isReplay ? (
+    <>
+      {onRetry ? (
+        <Button type="button" disabled={isNavigating} onClick={onRetry}>
+          <RefreshCcw data-icon="inline-start" />
+          {isRetrying ? 'Starting fresh run' : 'Play again'}
+        </Button>
+      ) : null}
+      <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToTower}>
+        <Castle data-icon="inline-start" />
+        Back to Tower
+      </Button>
+    </>
+  ) : isFailed || shouldRetryForAccuracy ? (
+    <>
+      {onRetry ? (
+        <Button type="button" variant="destructive" disabled={isNavigating} onClick={onRetry}>
+          <RefreshCcw data-icon="inline-start" />
+          {isRetrying
+            ? 'Starting fresh variant'
+            : shouldRetryForAccuracy
+              ? 'Retry for accuracy'
+              : 'Start fresh variant'}
+        </Button>
+      ) : null}
+      <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToTower}>
+        <Castle data-icon="inline-start" />
+        Back to Tower
+      </Button>
+    </>
+  ) : canAdvance ? (
+    <>
+      {onNextLevel && nextDifficultyLabel ? (
+        <Button type="button" disabled={isNavigating} onClick={onNextLevel}>
+          <ArrowRight data-icon="inline-start" />
+          {isStartingNextLevel ? 'Opening next level' : `Next: ${nextDifficultyLabel}`}
+        </Button>
+      ) : null}
+      <Button type="button" variant="secondary" disabled={isNavigating} onClick={onClose}>
+        Stay in workspace
+      </Button>
+    </>
+  ) : shouldContinueAttempt ? (
+    <>
+      {onContinue ? (
+        <Button type="button" disabled={isNavigating} onClick={onContinue}>
+          <ArrowRight data-icon="inline-start" />
+          {isContinuing ? 'Continuing' : 'Continue'}
+        </Button>
+      ) : null}
+      <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToTower}>
+        <Castle data-icon="inline-start" />
+        Back to Tower
+      </Button>
+    </>
+  ) : run.status === 'completed' && meetsProgress ? (
+    <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToTower}>
+      <Castle data-icon="inline-start" />
+      Back to Tower
+    </Button>
+  ) : null
+
   return (
-    <Modal
+    <CompletionModal
       open={open}
-      title={isFailed ? 'Practice failed' : 'Practice complete'}
-      className={cn(
-        'w-full max-w-2xl overflow-hidden bg-card',
-        isFailed
-          ? 'border-destructive/30 shadow-[0_28px_110px_rgba(248,113,113,0.16)]'
-          : 'border-primary/30 shadow-[0_28px_110px_rgba(0,245,212,0.18)]',
-      )}
-      contentClassName="p-0"
       onClose={onClose}
+      title={isFailed ? 'Practice failed' : 'Practice complete'}
+      tone={isFailed ? 'failure' : 'success'}
+      icon={Icon}
+      badges={badges}
+      headline={headline}
+      message={message}
+      note={
+        isFailed && run.variant.looped_variant
+          ? 'You have cycled through all authored variants. Consider reviewing the command preview or foundations before this next attempt.'
+          : undefined
+      }
+      stats={stats}
+      actions={actions}
     >
-      <div className="relative overflow-hidden">
-        {!isFailed ? <CompletionConfetti /> : null}
-
-        <div className="relative px-5 pb-5 pt-5 text-center">
-          <div
-            className={cn(
-              'mx-auto grid size-12 place-items-center rounded-full border',
-              !isFailed && 'completion-sparkle-glow',
-              isFailed
-                ? 'border-destructive/30 bg-destructive/10 shadow-[0_0_42px_rgba(248,113,113,0.16)]'
-                : 'border-primary/40 bg-primary/10 shadow-[0_0_32px_rgba(0,245,212,0.35),0_0_60px_rgba(0,180,216,0.18)]',
-            )}
-          >
-            <Icon className={cn('size-6', isFailed ? 'text-destructive' : 'text-primary')} />
-          </div>
-
-          <div className="mt-3 flex flex-wrap justify-center gap-2">
-            <Badge
-              variant={isFailed ? 'destructive' : 'default'}
-              className="completion-badge"
-              style={{ animationDelay: '60ms' } as CSSProperties}
-            >
-              {difficultyLabel(run)} {isFailed ? 'failed' : 'complete'}
-            </Badge>
-            {!isFailed && run.first_attempt_star_eligible ? (
-              <Badge
-                variant="warning"
-                className="completion-badge"
-                style={{ animationDelay: '140ms' } as CSSProperties}
-              >
-                <Award className="size-3.5" />
-                First-attempt star
-              </Badge>
-            ) : null}
-          </div>
-
-          <h3 className="completion-headline mx-auto mt-3 max-w-xl text-balance text-xl font-extrabold tracking-tight sm:text-2xl">
-            {headline}
-          </h3>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground">{message}</p>
-          {isFailed && run.variant.looped_variant ? (
-            <p className="mx-auto mt-2 max-w-xl text-xs font-medium leading-5 text-warning">
-              You have cycled through all authored variants. Consider reviewing the command preview or foundations before this next attempt.
-            </p>
-          ) : null}
-
-          <div className="mt-4 grid grid-cols-2 gap-2 text-left max-sm:grid-cols-1">
-            <CompletionStatTile
-              label="Accuracy"
-              numerator={accuracy ?? 0}
-              suffix="%"
-              helper={
-                withinMasteryTarget
-                  ? 'At mastery target'
-                  : meetsProgress
-                    ? 'Counts toward progress'
-                    : 'Below progress threshold'
-              }
-              accentColor={TILE_ACCENTS[0]}
-              animationDelay={160}
-            />
-            <CompletionStatTile
-              label="Counted actions"
-              numerator={run.counts.counted_action_total}
-              denominator={run.policy.min_counted_commands}
-              helper="Used / mastery target"
-              accentColor={TILE_ACCENTS[1]}
-              animationDelay={220}
-            />
-            <CompletionStatTile
-              label="Submissions"
-              numerator={run.counts.total_attempts}
-              helper="All terminal entries"
-              accentColor={TILE_ACCENTS[2]}
-              animationDelay={280}
-            />
-            <CompletionStatTile
-              label="Free diagnostics"
-              numerator={run.counts.non_counted_diagnostic_total}
-              helper="Diagnostics excluded from accuracy"
-              accentColor={TILE_ACCENTS[3]}
-              animationDelay={340}
-            />
-            <CompletionStatTile
-              label="Successful attempts"
-              numerator={run.mastery_progress.mastered}
-              denominator={run.mastery_progress.required}
-              helper="Progress records"
-              accentColor={TILE_ACCENTS[4]}
-              animationDelay={400}
-            />
-          </div>
-
-          <div className="mt-4 flex flex-wrap justify-center gap-3">
-            {isReplay ? (
-              <>
-                {onRetry ? (
-                  <Button type="button" disabled={isNavigating} onClick={onRetry}>
-                    <RefreshCcw data-icon="inline-start" />
-                    {isRetrying ? 'Starting fresh run' : 'Play again'}
-                  </Button>
-                ) : null}
-                <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToTower}>
-                  <Castle data-icon="inline-start" />
-                  Back to Tower
-                </Button>
-              </>
-            ) : isFailed || shouldRetryForAccuracy ? (
-              <>
-                {onRetry ? (
-                  <Button type="button" variant="destructive" disabled={isNavigating} onClick={onRetry}>
-                    <RefreshCcw data-icon="inline-start" />
-                    {isRetrying
-                      ? 'Starting fresh variant'
-                      : shouldRetryForAccuracy
-                        ? 'Retry for accuracy'
-                        : 'Start fresh variant'}
-                  </Button>
-                ) : null}
-                <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToTower}>
-                  <Castle data-icon="inline-start" />
-                  Back to Tower
-                </Button>
-              </>
-            ) : canAdvance ? (
-              <>
-                {onNextLevel && nextDifficultyLabel ? (
-                  <Button type="button" disabled={isNavigating} onClick={onNextLevel}>
-                    <ArrowRight data-icon="inline-start" />
-                    {isStartingNextLevel ? 'Opening next level' : `Next: ${nextDifficultyLabel}`}
-                  </Button>
-                ) : null}
-                <Button type="button" variant="secondary" disabled={isNavigating} onClick={onClose}>
-                  Stay in workspace
-                </Button>
-              </>
-            ) : shouldContinueAttempt ? (
-              <>
-                {onContinue ? (
-                  <Button type="button" disabled={isNavigating} onClick={onContinue}>
-                    <ArrowRight data-icon="inline-start" />
-                    {isContinuing ? 'Continuing' : 'Continue'}
-                  </Button>
-                ) : null}
-                <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToTower}>
-                  <Castle data-icon="inline-start" />
-                  Back to Tower
-                </Button>
-              </>
-            ) : run.status === 'completed' && meetsProgress ? (
-              <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToTower}>
-                <Castle data-icon="inline-start" />
-                Back to Tower
-              </Button>
-            ) : null}
-          </div>
-        </div>
-      </div>
-    </Modal>
+      {/* Level navigation is challenge-only — the adventure modal omits it. */}
+      {!isReplay && onSelectLevel && run.sibling_levels && run.difficulty ? (
+        <ChallengeLevelNav
+          levels={run.sibling_levels}
+          currentLevelId={run.challenge.level_id}
+          onSelectLevel={onSelectLevel}
+          busyLevelId={busyLevelId}
+          disabled={isNavigating}
+        />
+      ) : null}
+    </CompletionModal>
   )
 }

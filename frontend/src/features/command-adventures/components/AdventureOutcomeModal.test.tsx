@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { AdventureRunOutcome } from './AdventureRunOutcome'
+import { AdventureOutcomeModal } from './AdventureOutcomeModal'
 import type { AdventureRun } from '@/features/command-adventures/types'
 
 const run: AdventureRun = {
@@ -34,13 +34,13 @@ const run: AdventureRun = {
   progress: { completed: 2, total: 2 },
 }
 
-describe('AdventureRunOutcome', () => {
+describe('AdventureOutcomeModal', () => {
   afterEach(() => cleanup())
 
-  it('surfaces the pass state, session score, and per-command mastery', () => {
-    render(<AdventureRunOutcome run={run} onRestart={vi.fn()} />)
+  it('surfaces the pass state, session-score stats, and per-command mastery', () => {
+    render(<AdventureOutcomeModal open run={run} onRestart={vi.fn()} onClose={vi.fn()} />)
     expect(screen.getByText('Challenge unlocked')).toBeInTheDocument()
-    expect(screen.getByText('50')).toBeInTheDocument()
+    expect(screen.getByText('Session score')).toBeInTheDocument()
     expect(screen.getByText('Mastered')).toBeInTheDocument()
     expect(screen.getByText('In progress')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /play again/i })).toBeInTheDocument()
@@ -48,9 +48,11 @@ describe('AdventureRunOutcome', () => {
 
   it('frames a replay as uncounted free-play instead of a pass', () => {
     render(
-      <AdventureRunOutcome
+      <AdventureOutcomeModal
+        open
         run={{ ...run, mode: 'replay', passed: false, mastery: { ...run.mastery, passed: false } }}
         onRestart={vi.fn()}
+        onClose={vi.fn()}
       />,
     )
     expect(screen.getByText('Free play')).toBeInTheDocument()

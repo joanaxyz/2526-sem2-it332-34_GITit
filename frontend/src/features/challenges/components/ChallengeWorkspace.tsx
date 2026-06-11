@@ -170,8 +170,11 @@ export function ChallengeWorkspace() {
       navigate(towerUrlForRun(updatedRun))
     },
   })
-  const nextLevelMutation = useMutation({
-    mutationFn: () => challengesApi.startChallengeRun(run?.next_difficulty?.id ?? 0),
+  // Starts a fresh run on any level — the "Next level" CTA and the completion
+  // modal's level navigator both route through here, so jumping to a lower level
+  // works exactly like advancing to the next one.
+  const startLevelMutation = useMutation({
+    mutationFn: (levelId: number) => challengesApi.startChallengeRun(levelId),
     onSuccess: (next) => {
       syncChallengeRunInCache(queryClient, next)
       invalidatePracticeProgressQueries(queryClient)
@@ -540,8 +543,12 @@ export function ChallengeWorkspace() {
         onContinue={playAgain}
         isRetrying={isReplaying}
         isContinuing={isReplaying}
-        onNextLevel={run.next_difficulty ? () => nextLevelMutation.mutate() : undefined}
-        isStartingNextLevel={nextLevelMutation.isPending}
+        onNextLevel={run.next_difficulty ? () => startLevelMutation.mutate(run.next_difficulty!.id) : undefined}
+        isStartingNextLevel={
+          startLevelMutation.isPending && startLevelMutation.variables === run.next_difficulty?.id
+        }
+        onSelectLevel={(levelId) => startLevelMutation.mutate(levelId)}
+        busyLevelId={startLevelMutation.isPending ? startLevelMutation.variables : null}
         nextDifficultyLabel={
           run.next_difficulty
             ? run.next_difficulty.difficulty.charAt(0).toUpperCase() + run.next_difficulty.difficulty.slice(1)

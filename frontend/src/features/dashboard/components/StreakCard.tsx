@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Flame } from 'lucide-react'
 
 import type { DashboardSummary } from '@/features/dashboard/types'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/Card'
+import { GamePanel } from '@/shared/components/GamePanel'
 
 function useCountUp(target: number, duration = 900): number {
   const [value, setValue] = useState(0)
@@ -48,63 +48,66 @@ export function StreakCard({ summary }: { summary: DashboardSummary }) {
   const days = getDaysGrid(summary.streak.current, summary.streak.last_completed_on)
 
   return (
-    <Card className="dash-card-hover" style={{ borderLeft: '2px solid rgba(0,245,212,0.3)' }}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Flame className="flame-glow size-5 text-primary" />
-          Streak
-        </CardTitle>
-        <CardDescription>Updated on the first completed practice session per day.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="number-glow text-4xl font-extrabold text-primary">
-          {current}
+    <GamePanel className="p-5">
+      <div className="relative z-[1] mb-3 flex items-center gap-2">
+        <span className="game-chip size-8">
+          <Flame className="flame-glow size-4 text-primary" />
+        </span>
+        <div>
+          <h3 className="text-lg font-bold leading-none tracking-tight">Streak</h3>
+          <p className="mt-1 text-xs text-muted-foreground">First completed session each day keeps it alive.</p>
         </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <span
-            className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
-            style={{
-              background: 'rgba(0,245,212,0.1)',
-              border: '1px solid rgba(0,245,212,0.35)',
-              color: '#00F5D4',
-              boxShadow: '0 0 8px rgba(0,245,212,0.2)',
-            }}
-          >
-            Longest {longest}
-          </span>
-          <span
-            className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
-            style={{
-              background: 'rgba(0,180,216,0.08)',
-              border: '1px solid rgba(0,180,216,0.3)',
-              color: '#00B4D8',
-            }}
-          >
-            {summary.streak.last_completed_on ?? 'No completion yet'}
-          </span>
-        </div>
+      </div>
 
-        {/* 7-day activity grid */}
-        <div className="mt-4">
-          <div className="flex gap-1.5">
-            {days.map(({ day, active }, i) => (
-              <div key={i} className="flex flex-col items-center gap-1">
-                <div
-                  className="size-7 rounded-sm"
-                  style={{
-                    background: active ? 'rgba(0,245,212,0.28)' : 'rgba(0,180,216,0.07)',
-                    border: active ? '1px solid rgba(0,245,212,0.5)' : '1px solid rgba(0,180,216,0.12)',
-                    boxShadow: active ? '0 0 6px rgba(0,245,212,0.22)' : 'none',
-                    transition: 'background 0.2s ease',
-                  }}
-                />
-                <span className="text-[9px] text-muted-foreground/45">{day}</span>
-              </div>
-            ))}
-          </div>
-          <p className="mt-1.5 text-[10px] text-muted-foreground/35">based on current streak</p>
+      <div className="relative z-[1] flex items-end gap-2">
+        <span className="number-glow text-5xl font-extrabold leading-none text-primary">{current}</span>
+        <span className="pb-1 text-sm font-semibold text-muted-foreground">day{current === 1 ? '' : 's'}</span>
+      </div>
+
+      <div className="relative z-[1] mt-3 flex flex-wrap gap-2">
+        <span
+          className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
+          style={{
+            background: 'rgba(0,245,212,0.1)',
+            border: '1px solid rgba(0,245,212,0.35)',
+            color: '#00F5D4',
+            boxShadow: '0 0 8px rgba(0,245,212,0.2)',
+          }}
+        >
+          Longest {longest}
+        </span>
+        <span
+          className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
+          style={{
+            background: 'rgba(0,180,216,0.08)',
+            border: '1px solid rgba(0,180,216,0.3)',
+            color: '#00B4D8',
+          }}
+        >
+          {summary.streak.last_completed_on ?? 'No completion yet'}
+        </span>
+      </div>
+
+      {/* 7-day activity grid */}
+      <div className="relative z-[1] mt-4">
+        <div className="flex gap-1.5">
+          {days.map(({ day, active }, i) => (
+            <div key={i} className="flex flex-col items-center gap-1">
+              <div
+                className="size-7 rounded-md"
+                style={{
+                  background: active ? 'rgba(0,245,212,0.28)' : 'rgba(0,180,216,0.07)',
+                  border: active ? '1px solid rgba(0,245,212,0.5)' : '1px solid rgba(0,180,216,0.12)',
+                  boxShadow: active ? '0 0 6px rgba(0,245,212,0.22)' : 'none',
+                  transition: 'background 0.2s ease',
+                }}
+              />
+              <span className="text-[9px] text-muted-foreground/45">{day}</span>
+            </div>
+          ))}
         </div>
-      </CardContent>
-    </Card>
+        <p className="mt-1.5 text-[10px] text-muted-foreground/35">based on current streak</p>
+      </div>
+    </GamePanel>
   )
 }

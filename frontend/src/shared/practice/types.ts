@@ -1,4 +1,4 @@
-import type { Difficulty, PracticeCompletion } from '@/features/challenges/types'
+import type { ChallengeLevelAccess, Difficulty, PracticeCompletion } from '@/features/challenges/types'
 
 export type RepositoryValue =
   | string
@@ -152,6 +152,12 @@ export type ChallengeRun = {
     id: number
     difficulty: Difficulty
   } | null
+  /**
+   * Every level of this run's scenario (easy→hard) with the user's access state.
+   * Drives the completion modal's level navigator so learners can jump to any
+   * unlocked level — including lower ones — without leaving the modal.
+   */
+  sibling_levels?: ChallengeLevelAccess[]
   completion?: PracticeCompletion | null
 }
 
@@ -208,7 +214,7 @@ export type ChallengeRunUpdate = Pick<
   Partial<
     Pick<
       ChallengeRun,
-      'mastery_progress' | 'mastered_records' | 'completion' | 'next_difficulty'
+      'mastery_progress' | 'mastered_records' | 'completion' | 'next_difficulty' | 'sibling_levels'
     >
   >
 

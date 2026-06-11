@@ -7,33 +7,25 @@ import { CurrentTrackCard } from '@/features/dashboard/components/CurrentTrackCa
 import { RecentActivityList } from '@/features/dashboard/components/RecentActivityList'
 import { StreakCard } from '@/features/dashboard/components/StreakCard'
 import { queryKeys } from '@/shared/api/queryKeys'
-import { Card, CardContent } from '@/shared/components/Card'
+import { GamePanel } from '@/shared/components/GamePanel'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 
 function StatsCtaCard() {
   return (
     <Link to="/stats" className="group block h-full">
-      <Card
-        className="dash-card-hover h-full overflow-hidden"
-        style={{ borderLeft: '2px solid rgba(0,180,216,0.35)' }}
-      >
-        <CardContent className="flex h-full items-center gap-4 p-5">
-          <div
-            className="flex size-12 flex-shrink-0 items-center justify-center rounded-xl"
-            style={{ background: 'radial-gradient(circle at 30% 30%, rgba(0,245,212,0.22), rgba(0,180,216,0.08))' }}
-          >
-            <Radar className="size-6 text-aurora-cyan transition-transform group-hover:scale-110" />
-          </div>
-          <div className="min-w-0">
-            <p className="font-bold tracking-tight">See your skill profile</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Accuracy, efficiency, mastery and more — across adventures and challenges.
-            </p>
-          </div>
-          <ArrowRight className="ml-auto size-5 flex-shrink-0 text-aurora-blue/70 transition-transform group-hover:translate-x-1" />
-        </CardContent>
-      </Card>
+      <GamePanel className="flex h-full items-center gap-4 p-5">
+        <span className="game-chip size-12 shrink-0">
+          <Radar className="size-6 text-aurora-cyan transition-transform group-hover:scale-110" />
+        </span>
+        <div className="relative z-[1] min-w-0">
+          <p className="font-bold tracking-tight">See your skill profile</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Accuracy, efficiency, mastery and more — across adventures and challenges.
+          </p>
+        </div>
+        <ArrowRight className="relative z-[1] ml-auto size-5 flex-shrink-0 text-aurora-blue/70 transition-transform group-hover:translate-x-1" />
+      </GamePanel>
     </Link>
   )
 }

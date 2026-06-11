@@ -111,6 +111,7 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
         ],
         "review_mode": run.mode == SESSION_MODE_REVIEW,
         "next_difficulty": next_difficulty_payload(run),
+        "sibling_levels": sibling_levels_payload(run),
         "completion": completion_payload(run),
     }
 
@@ -134,6 +135,7 @@ def command_run_payload(run: ChallengeRun, *, repository_state: dict, visualizat
                 "mastery_progress": mastery_progress_payload(run),
                 "completion": completion_payload(run),
                 "next_difficulty": next_difficulty_payload(run),
+                "sibling_levels": sibling_levels_payload(run),
             }
         )
     return payload
@@ -201,6 +203,17 @@ def next_difficulty_payload(run: ChallengeRun) -> dict | None:
     if not next_level:
         return None
     return {"id": next_level.id, "difficulty": next_level.difficulty}
+
+
+def sibling_levels_payload(run: ChallengeRun) -> list[dict]:
+    """Every level of this run's scenario (easy→hard) with the user's access state,
+    powering the completion modal's level navigator. Imported lazily to avoid a
+    challenges⇄curriculum import cycle at module load."""
+    if not run.challenge_quest:
+        return []
+    from curriculum.selectors import scenario_levels_access_payload
+
+    return scenario_levels_access_payload(user=run.user, scenario=run.challenge_quest.scenario)
 
 
 def _scenario_context(run: ChallengeRun) -> dict:

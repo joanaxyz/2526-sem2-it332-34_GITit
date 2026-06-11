@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import {
-  BookOpen,
+  Castle,
   CheckCircle2,
   ChevronDown,
   CircleHelp,
@@ -27,7 +27,7 @@ import { cn } from '@/shared/utils/cn'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: Gauge },
-  { to: '/tower', label: 'Tower', icon: BookOpen },
+  { to: '/tower', label: 'Tower', icon: Castle },
   { to: '/stats', label: 'Stats', icon: Radar },
 ]
 

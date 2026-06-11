@@ -7,7 +7,7 @@ import { AdventureContextPanel } from '@/features/command-adventures/components/
 import { AdventureHintPanel, type RevealedHint } from '@/features/command-adventures/components/AdventureHintPanel'
 import { AdventureMasteryPanel } from '@/features/command-adventures/components/AdventureMasteryPanel'
 import { AdventureProgressBar } from '@/features/command-adventures/components/AdventureProgressBar'
-import { AdventureRunOutcome } from '@/features/command-adventures/components/AdventureRunOutcome'
+import { AdventureOutcomeModal } from '@/features/command-adventures/components/AdventureOutcomeModal'
 import { useAdventureCommandSubmission } from '@/features/command-adventures/hooks/useAdventureCommandSubmission'
 import { useAdventureRun } from '@/features/command-adventures/hooks/useAdventureRun'
 import type { AdventureRun } from '@/features/command-adventures/types'
@@ -67,7 +67,15 @@ export function AdventureSession({
   const backToTower = () => navigate(`/tower?storey=${run.storey_id}`)
 
   if (run.status !== 'started') {
-    return <AdventureRunOutcome run={run} onRestart={restart} onBackToTower={backToTower} />
+    return (
+      <AdventureOutcomeModal
+        open
+        run={run}
+        onRestart={restart}
+        onBackToTower={backToTower}
+        onClose={backToTower}
+      />
+    )
   }
 
   const attempt = run.current_attempt

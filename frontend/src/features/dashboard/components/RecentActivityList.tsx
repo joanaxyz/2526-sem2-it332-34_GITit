@@ -1,7 +1,8 @@
+import { ListChecks } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import type { DashboardSummary } from '@/features/dashboard/types'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/Card'
+import { GamePanel } from '@/shared/components/GamePanel'
 
 function useCountUp(target: number, duration = 900): number {
   const [value, setValue] = useState(0)
@@ -22,28 +23,25 @@ function useCountUp(target: number, duration = 900): number {
   return value
 }
 
-type OutcomeStyle = { bg: string; border: string; numberColor: string }
+type OutcomeStyle = { color: string; label: string }
 
-const OUTCOME_STYLES: Record<string, OutcomeStyle> = {
-  Started:         { bg: 'rgba(0,245,212,0.07)',   border: 'rgba(0,245,212,0.2)',   numberColor: '#00F5D4' },
-  Completed:       { bg: 'rgba(34,197,94,0.07)',   border: 'rgba(34,197,94,0.22)',  numberColor: 'rgb(74,222,128)' },
-  Failed:          { bg: 'rgba(239,68,68,0.06)',   border: 'rgba(239,68,68,0.2)',   numberColor: 'rgb(248,113,113)' },
-  Abandoned:       { bg: 'rgba(100,116,139,0.07)', border: 'rgba(100,116,139,0.18)',numberColor: 'rgb(148,163,184)' },
-  'Review sessions': { bg: 'rgba(59,130,246,0.07)', border: 'rgba(59,130,246,0.2)', numberColor: 'rgb(96,165,250)' },
-}
+const OUTCOMES: { key: 'started' | 'completed' | 'failed'; style: OutcomeStyle }[] = [
+  { key: 'started', style: { color: '#00F5D4', label: 'Started' } },
+  { key: 'completed', style: { color: '#34D399', label: 'Completed' } },
+  { key: 'failed', style: { color: '#FB7185', label: 'Failed' } },
+]
 
-function Outcome({ label, value }: { label: string; value: number }) {
+function Outcome({ label, value, color }: { label: string; value: number; color: string }) {
   const count = useCountUp(value)
-  const style = OUTCOME_STYLES[label] ?? OUTCOME_STYLES['Abandoned']
   return (
     <div
-      className="rounded-md p-3 transition-all duration-200 hover:-translate-y-0.5"
-      style={{ background: style.bg, border: `1px solid ${style.border}` }}
+      className="stat-tile p-3"
+      style={{ ['--tile-accent' as string]: color }}
     >
-      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="relative z-[1] text-xs text-muted-foreground">{label}</div>
       <div
-        className="mt-1 text-2xl font-extrabold"
-        style={{ color: style.numberColor }}
+        className="relative z-[1] mt-1 text-2xl font-extrabold leading-none"
+        style={{ color, textShadow: `0 0 18px ${color}55` }}
       >
         {count}
       </div>
@@ -53,16 +51,21 @@ function Outcome({ label, value }: { label: string; value: number }) {
 
 export function RecentActivityList({ summary }: { summary: DashboardSummary }) {
   return (
-    <Card className="dash-card-hover" style={{ borderLeft: '2px solid rgba(0,245,212,0.3)' }}>
-      <CardHeader>
-        <CardTitle>Your quests</CardTitle>
-        <CardDescription>How your quest attempts have gone so far.</CardDescription>
-      </CardHeader>
-      <CardContent className="grid grid-cols-2 gap-3 text-sm">
-        <Outcome label="Started" value={summary.counts.started} />
-        <Outcome label="Completed" value={summary.counts.completed} />
-        <Outcome label="Failed" value={summary.counts.failed} />
-      </CardContent>
-    </Card>
+    <GamePanel className="p-5">
+      <div className="relative z-[1] mb-4 flex items-center gap-2">
+        <span className="game-chip size-8">
+          <ListChecks className="size-4 text-aurora-cyan" />
+        </span>
+        <div>
+          <h3 className="text-lg font-bold leading-none tracking-tight">Your quests</h3>
+          <p className="mt-1 text-xs text-muted-foreground">How your quest attempts have gone so far.</p>
+        </div>
+      </div>
+      <div className="relative z-[1] grid grid-cols-3 gap-3">
+        {OUTCOMES.map(({ key, style }) => (
+          <Outcome key={key} label={style.label} value={summary.counts[key]} color={style.color} />
+        ))}
+      </div>
+    </GamePanel>
   )
 }
