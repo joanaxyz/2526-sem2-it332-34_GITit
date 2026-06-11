@@ -4,7 +4,7 @@ import { cn } from '@/shared/utils/cn'
 
 /**
  * Glassy neon HUD panel with a top light-bar, scanline texture and engraved
- * corner brackets. The shared gamified surface for Dashboard + Stats.
+ * corner brackets. The shared gamified surface for the Home hub.
  */
 export function GamePanel({
   className,

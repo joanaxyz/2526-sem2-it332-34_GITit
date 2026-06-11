@@ -33,7 +33,7 @@ export type ChallengeProgress = {
   required: number
 }
 
-export type ChallengeLevelAccess = {
+export type ChallengeQuestAccess = {
   id: number
   difficulty: Difficulty
   status: ChallengeStatus
@@ -58,7 +58,7 @@ export type CommandAdventureSummary = {
   is_passed: boolean
   active_run_id: number | null
   latest_run_id: number | null
-  problem_count: number
+  quest_count: number
   progress: {
     value: number
     numerator: number
@@ -72,7 +72,7 @@ export type CommandFormSummary = {
   usage_form: string
   label: string
   summary: string
-  problem_count: number
+  quest_count: number
 }
 
 export type CommandSkillSummary = {
@@ -93,8 +93,7 @@ export type ChallengeSummary = {
   title: string
   summary: string
   narrative: string
-  command_topics: string[]
-  levels: ChallengeLevelAccess[]
+  quests: ChallengeQuestAccess[]
 }
 
 export type StoreyContentSection = 'command_adventures' | 'command_skills' | 'challenges'

@@ -46,7 +46,7 @@ export function AdventureHintPanel({
           </p>
         ) : (
           <p className="text-sm leading-6 text-muted-foreground">
-            Stuck? Reveal a hint — using one lowers your independence score for this problem.
+            Stuck? Reveal a hint — using one lowers your independence score for this quest.
           </p>
         )}
       </CardContent>

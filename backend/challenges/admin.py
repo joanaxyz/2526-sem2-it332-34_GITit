@@ -5,14 +5,14 @@ from challenges.models import Challenge, ChallengeQuest, ChallengeRun, Challenge
 
 @admin.register(Challenge)
 class ChallengeAdmin(admin.ModelAdmin):
-    list_display = ("slug", "title", "module", "is_published", "sort_order")
+    list_display = ("slug", "title", "storey", "is_published", "sort_order")
     list_filter = ("is_published",)
     search_fields = ("title", "slug")
 
 
 @admin.register(ChallengeQuest)
 class ChallengeQuestAdmin(admin.ModelAdmin):
-    list_display = ("scenario", "difficulty", "is_published")
+    list_display = ("challenge", "difficulty", "is_published")
     list_filter = ("difficulty", "is_published")
 
 
@@ -24,6 +24,6 @@ class ChallengeVariantAdmin(admin.ModelAdmin):
 
 @admin.register(ChallengeRun)
 class ChallengeRunAdmin(admin.ModelAdmin):
-    list_display = ("id", "user", "workflow_scenario", "challenge_quest", "status", "mode", "started_at")
+    list_display = ("id", "user", "challenge", "challenge_quest", "status", "mode", "started_at")
     list_filter = ("status", "mode", "difficulty")
-    search_fields = ("user__email", "workflow_scenario__title")
+    search_fields = ("user__email", "challenge__title")

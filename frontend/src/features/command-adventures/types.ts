@@ -22,7 +22,7 @@ export type AdventureAttemptCounts = {
   hint_count: number
 }
 
-export type AdventureProblemRef = {
+export type AdventureQuestRef = {
   id: number
   slug: string
   title: string
@@ -44,7 +44,7 @@ export type AdventureAttempt = {
   id: number
   order: number
   status: AttemptStatus
-  problem: AdventureProblemRef
+  quest: AdventureQuestRef
   variant: { id: number; label: string }
   scenario_context: AdventureScenarioContext
   /**
@@ -103,10 +103,10 @@ export type AdventureRun = {
   /** Stable across re-runs: true once this adventure has ever been passed. */
   is_passed: boolean
   command_adventure: { id: number; slug: string; title: string; description: string }
-  /** The adventure's storey (module) id, used to navigate back to the Tower. */
+  /** The adventure's storey id, used to navigate back to the Tower. */
   storey_id: number
-  current_problem_index: number
-  total_problems: number
+  current_quest_index: number
+  total_quests: number
   session_score: number
   passed: boolean
   mastery_progress_gained: number

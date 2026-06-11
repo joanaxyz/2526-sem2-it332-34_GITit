@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 /**
  * Compact neon ring gauge for rate metrics (0–100). Animates from empty on
  * mount; renders a dimmed dashed track with "—" semantics when value is null.
- * Shared by the dashboard KPI strip and the stats headline band.
+ * Shared by the home KPI strip and the stats headline band.
  */
 export function RingGauge({
   value,

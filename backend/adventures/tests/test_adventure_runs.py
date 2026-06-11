@@ -9,7 +9,7 @@ from adventures.scoring import (
     AdventureScoringService,
     band_for,
 )
-from adventures.services import AdventureRunService, ordered_problems_for
+from adventures.services import AdventureRunService, ordered_quests_for
 
 
 def make_user(django_user_model, username="adventurer"):
@@ -79,11 +79,11 @@ def test_bare_pass_yields_partial_mastery_not_full():
 
 # ---- Run orchestration ----------------------------------------------------
 
-def _adventure_with_problems():
+def _adventure_with_quests():
     for adventure in CommandAdventure.objects.filter(is_published=True):
-        if ordered_problems_for(adventure):
+        if ordered_quests_for(adventure):
             return adventure
-    raise AssertionError("No published adventure with problems was seeded.")
+    raise AssertionError("No published adventure with quests was seeded.")
 
 
 def _solve_current(service, run, *, solved=True) -> bool:
@@ -104,7 +104,7 @@ def _solve_current(service, run, *, solved=True) -> bool:
 def test_run_completes_when_all_commands_mastered(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    adventure = _adventure_with_problems()
+    adventure = _adventure_with_quests()
     service = AdventureRunService()
 
     run = service.start_run(user=user, adventure=adventure)
@@ -129,11 +129,11 @@ def test_run_completes_when_all_commands_mastered(db, django_user_model):
 def test_run_never_passes_while_a_command_is_unsolved(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    adventure = _adventure_with_problems()
+    adventure = _adventure_with_quests()
     service = AdventureRunService()
 
     run = service.start_run(user=user, adventure=adventure)
-    first_id = ordered_problems_for(adventure)[0].id
+    first_id = ordered_quests_for(adventure)[0].id
 
     # Solve every command except the first, which we always fail. The per-command
     # floor (every command solved at least once) is never met, so the adventure
@@ -161,7 +161,7 @@ def test_starting_again_resumes_the_active_run(db, django_user_model):
     no duplicate run), preserving the one-active-run-per-adventure invariant."""
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    adventure = _adventure_with_problems()
+    adventure = _adventure_with_quests()
     service = AdventureRunService()
     first = service.start_run(user=user, adventure=adventure)
     second = service.start_run(user=user, adventure=adventure)
@@ -181,7 +181,7 @@ def test_replay_after_pass_is_playable_but_uncounted(db, django_user_model):
 
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model, "replayer")
-    adventure = _adventure_with_problems()
+    adventure = _adventure_with_quests()
     service = AdventureRunService()
 
     primary = service.start_run(user=user, adventure=adventure)
@@ -210,7 +210,7 @@ def test_replay_after_pass_is_playable_but_uncounted(db, django_user_model):
         served += 1
     replay.refresh_from_db()
     assert replay.status == "completed"
-    assert served == len(ordered_problems_for(adventure))
+    assert served == len(ordered_quests_for(adventure))
     # Uncounted: no pass milestone, no session score, no mastery progress.
     assert replay.passed_at is None
     assert replay.session_score == 0
@@ -227,7 +227,7 @@ def test_terminal_run_does_not_block_a_replay(db, django_user_model):
     applies to an in-progress run."""
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    adventure = _adventure_with_problems()
+    adventure = _adventure_with_quests()
     service = AdventureRunService()
 
     first = service.start_run(user=user, adventure=adventure)
@@ -242,12 +242,12 @@ def test_terminal_run_does_not_block_a_replay(db, django_user_model):
 
 # ---- HTTP integration -----------------------------------------------------
 
-def test_adventure_run_http_flow_solves_a_problem(db, django_user_model):
+def test_adventure_run_http_flow_solves_a_quest(db, django_user_model):
     from rest_framework.test import APIClient
 
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model, "httpadv")
-    adventure = _adventure_with_problems()
+    adventure = _adventure_with_quests()
     client = APIClient()
     client.force_authenticate(user=user)
 
@@ -262,7 +262,7 @@ def test_adventure_run_http_flow_solves_a_problem(db, django_user_model):
     assert attempt["scaffolding"]["hints"] is True
 
     run_id = body["id"]
-    # Drive the authored solution for the first problem's selected variant.
+    # Drive the authored solution for the first quest's selected variant.
     from adventures.models import AdventureQuestAttempt
 
     attempt_obj = AdventureQuestAttempt.objects.get(id=attempt["id"])
@@ -291,7 +291,7 @@ def test_objective_checklist_ticks_off_as_state_reaches_target(db, django_user_m
 
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model, "checklist")
-    adventure = _adventure_with_problems()
+    adventure = _adventure_with_quests()
     service = AdventureRunService()
     run = service.start_run(user=user, adventure=adventure)
     attempt = service.current_attempt(run=run)
@@ -316,7 +316,7 @@ def test_use_hint_endpoint_increments_hint_count(db, django_user_model):
 
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model, "hinter")
-    adventure = _adventure_with_problems()
+    adventure = _adventure_with_quests()
     client = APIClient()
     client.force_authenticate(user=user)
 
@@ -334,7 +334,7 @@ def test_workspace_file_endpoint_creates_and_edits_files(db, django_user_model):
 
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model, "filer")
-    adventure = _adventure_with_problems()
+    adventure = _adventure_with_quests()
     client = APIClient()
     client.force_authenticate(user=user)
 
@@ -371,7 +371,7 @@ def test_authored_hint_set_is_served_in_order(db, django_user_model):
 
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model, "authoredhints")
-    adventure = _adventure_with_problems()
+    adventure = _adventure_with_quests()
     service = AdventureRunService()
     run = service.start_run(user=user, adventure=adventure)
     attempt = service.current_attempt(run=run)
@@ -397,7 +397,7 @@ def test_submit_returns_step_and_run_payload_carries_terminal_history(db, django
 
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model, "stephistory")
-    adventure = _adventure_with_problems()
+    adventure = _adventure_with_quests()
     client = APIClient()
     client.force_authenticate(user=user)
 

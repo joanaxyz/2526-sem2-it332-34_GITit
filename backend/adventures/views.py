@@ -36,7 +36,7 @@ def _get_run(run_id: int, user) -> AdventureRun:
 
 def _run_with_active_attempt(run_id: int, user) -> tuple[AdventureRun, AdventureQuestAttempt]:
     """One query for the live attempt plus everything the submit path touches
-    (run, adventure, problem, variant). The returned run is the same instance the
+    (run, adventure, quest, variant). The returned run is the same instance the
     services mutate, so callers never need a refresh round trip."""
     attempt = (
         AdventureQuestAttempt.objects.select_related(
@@ -80,7 +80,7 @@ class AdventureRunSubmitCommandAPIView(APIView):
         # `run` is the instance the service just mutated and saved (scores,
         # status, next attempt), so its in-memory state is already current.
         # A transition (solved / budget spent) advances mastery and opens the next
-        # problem, so the client needs the full run. A plain mid-attempt command
+        # quest, so the client needs the full run. A plain mid-attempt command
         # only moves the live attempt state, so a slim patch is enough.
         submitted_attempt = result["attempt"]
         transitioned = (

@@ -1,12 +1,12 @@
-import { ArrowRight, Lock, Play, RefreshCcw, RotateCcw, Star } from 'lucide-react'
+﻿import { ArrowRight, Lock, Play, RefreshCcw, RotateCcw, Star } from 'lucide-react'
 import type { CSSProperties } from 'react'
 
-import type { ChallengeActionIntent, ChallengeLevelAccess } from '@/features/challenges/types'
+import type { ChallengeActionIntent, ChallengeQuestAccess } from '@/features/challenges/types'
 import { meetsMasteryAccuracy, meetsProgressAccuracy } from '@/shared/practice/utils/commandAccuracy'
 import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
 
-function actionForDifficulty(difficulty: ChallengeLevelAccess): ChallengeActionIntent | null {
+function actionForDifficulty(difficulty: ChallengeQuestAccess): ChallengeActionIntent | null {
   if (difficulty.status === 'locked') return null
   if (difficulty.status === 'in_progress') return difficulty.active_run_id ? 'resume' : null
   if (difficulty.status === 'completed') {
@@ -19,7 +19,7 @@ function actionForDifficulty(difficulty: ChallengeLevelAccess): ChallengeActionI
   return 'start'
 }
 
-function masteredRecordsFor(difficulty: ChallengeLevelAccess) {
+function masteredRecordsFor(difficulty: ChallengeQuestAccess) {
   return {
     mastered: difficulty.successful_attempts.count,
     required: difficulty.successful_attempts.required,
@@ -31,9 +31,9 @@ export function DifficultyActionButton({
   disabled = false,
   onAction,
 }: {
-  difficulty: ChallengeLevelAccess
+  difficulty: ChallengeQuestAccess
   disabled?: boolean
-  onAction: (difficulty: ChallengeLevelAccess, action: ChallengeActionIntent) => void
+  onAction: (difficulty: ChallengeQuestAccess, action: ChallengeActionIntent) => void
 }) {
   const action = actionForDifficulty(difficulty)
   const buttonLabel =

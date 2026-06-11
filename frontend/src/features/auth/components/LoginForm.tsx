@@ -54,7 +54,7 @@ export function LoginForm() {
     onSuccess: (data) => {
       queryClient.clear()
       setSession(data.access, data.user)
-      navigate('/dashboard')
+      navigate('/home')
     },
   })
   const errorPresentation = useMemo(
@@ -89,7 +89,7 @@ export function LoginForm() {
     >
       <div>
         <h2 className="text-2xl font-extrabold tracking-tight">Sign in</h2>
-        <p className="mt-1 text-sm leading-5 text-muted-foreground">Continue your Git practice dashboard.</p>
+        <p className="mt-1 text-sm leading-5 text-muted-foreground">Continue your Git practice journey.</p>
       </div>
 
       <label className="flex flex-col gap-1.5 text-sm font-semibold">

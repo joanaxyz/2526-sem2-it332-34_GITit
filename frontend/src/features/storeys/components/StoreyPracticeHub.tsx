@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+﻿import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import {
   ArrowRight,
@@ -12,7 +12,7 @@ import { motion, useInView } from 'motion/react'
 
 import { challengesApi } from '@/features/challenges/api/challengesApi'
 import type {
-  ChallengeLevelAccess,
+  ChallengeQuestAccess,
   ChallengeSummary,
   CommandAdventureSummary,
   StoreyContentPage,
@@ -22,7 +22,7 @@ import { StoreyBookCard } from '@/features/storeys/book/StoreyBookCard'
 import type { LearningStorey } from '@/features/storeys/types'
 import { GitCoinIcon } from '@/features/wallet/components/GitCoinIcon'
 import {
-  actionForChallengeLevel,
+  actionForChallengeQuest,
   actionLabel,
   chestRewards,
   DIFFICULTY_ACCENT,
@@ -228,29 +228,29 @@ const trialDoorBarVariants = {
   shown: { x: '-50%', scaleY: 1, originY: 0, transition: { duration: 0.34, ease: PIECE_EASE } },
 }
 
-// ── A single GIT Challenged level door — selectable, framed by difficulty colour. ──
+// ── A single GIT Challenged quest door — selectable, framed by difficulty colour. ──
 function TrialDoor({
-  scenario,
-  scenarioIndex,
-  level,
+  challenge,
+  challengeIndex,
+  quest,
   storeyId,
   locked,
 }: {
-  scenario: ChallengeSummary
-  scenarioIndex: number
-  level: ChallengeLevelAccess
+  challenge: ChallengeSummary
+  challengeIndex: number
+  quest: ChallengeQuestAccess
   storeyId: number
   locked: boolean
 }) {
   const select = useTowerSelection((state) => state.select)
   const selected = useTowerSelection((state) =>
-    isSelected(state.selected, { kind: 'challenge', storeyId, scenarioIndex, scenario, level, locked }),
+    isSelected(state.selected, { kind: 'challenge', storeyId, challengeIndex, challenge, quest, locked }),
   )
-  const difficulty = String(level.difficulty)
+  const difficulty = String(quest.difficulty)
   const accent = DIFFICULTY_ACCENT[difficulty]?.rgb ?? DIFFICULTY_ACCENT.hard.rgb
-  const isLocked = locked || level.status === 'locked'
-  const completed = level.status === 'completed'
-  const inProgress = level.status === 'in_progress'
+  const isLocked = locked || quest.status === 'locked'
+  const completed = quest.status === 'completed'
+  const inProgress = quest.status === 'in_progress'
 
   return (
     <motion.button
@@ -260,8 +260,8 @@ function TrialDoor({
       data-difficulty={difficulty}
       data-selected={selected ? 'true' : undefined}
       aria-pressed={selected}
-      aria-label={`Select ${scenario.title}: ${difficultyLabel(level)}`}
-      onClick={() => select({ kind: 'challenge', storeyId, scenarioIndex, scenario, level, locked })}
+      aria-label={`Select ${challenge.title}: ${difficultyLabel(quest)}`}
+      onClick={() => select({ kind: 'challenge', storeyId, challengeIndex, challenge, quest, locked })}
       variants={trialDoorVariants}
     >
       <span className="trial-door-arch" aria-hidden="true">
@@ -275,19 +275,19 @@ function TrialDoor({
           <span className="trial-door-crossbar" />
         </span>
       </span>
-      <span className="trial-door-label">{difficultyLabel(level)}</span>
-      <span className="trial-door-state">{actionLabel(actionForChallengeLevel(level), level.status)}</span>
+      <span className="trial-door-label">{difficultyLabel(quest)}</span>
+      <span className="trial-door-state">{actionLabel(actionForChallengeQuest(quest), quest.status)}</span>
     </motion.button>
   )
 }
 
 function ChallengeTrial({
-  scenario,
+  challenge,
   index,
   storeyId,
   locked,
 }: {
-  scenario: ChallengeSummary
+  challenge: ChallengeSummary
   index: number
   storeyId: number
   locked: boolean
@@ -302,9 +302,9 @@ function ChallengeTrial({
     >
       <div className="trial-room-header">
         <span className="trial-room-kicker">Trial {index + 1}</span>
-        <h3 className="trial-room-title">{scenario.title}</h3>
+        <h3 className="trial-room-title">{challenge.title}</h3>
       </div>
-      {scenario.summary?.trim() ? <p className="trial-room-summary">{scenario.summary}</p> : null}
+      {challenge.summary?.trim() ? <p className="trial-room-summary">{challenge.summary}</p> : null}
       <motion.div
         className="trial-door-row"
         initial="hidden"
@@ -312,12 +312,12 @@ function ChallengeTrial({
         viewport={{ amount: 0.3, once: true }}
         variants={trialDoorRowVariants}
       >
-        {scenario.levels.map((level) => (
+        {challenge.quests.map((quest) => (
           <TrialDoor
-            key={level.id}
-            scenario={scenario}
-            scenarioIndex={index}
-            level={level}
+            key={quest.id}
+            challenge={challenge}
+            challengeIndex={index}
+            quest={quest}
             storeyId={storeyId}
             locked={locked}
           />
@@ -350,7 +350,7 @@ export function StoreyOverview({
 }) {
   const rewards = chestRewards(storey)
   const reward = nextReward(rewards, progress)
-  const levels = storey.challenge_count * 3
+  const quests = storey.challenge_count * 3
 
   return (
     <motion.aside
@@ -374,7 +374,7 @@ export function StoreyOverview({
         <div className="grid gap-4">
           <OverviewStat icon={ListChecks} label="Command skills" value={storey.command_skill_count} />
           <OverviewStat icon={Swords} label="GIT Challenged" value={storey.challenge_count} />
-          <OverviewStat icon={Layers3} label="Total levels" value={levels} />
+          <OverviewStat icon={Layers3} label="Total quests" value={quests} />
         </div>
         <div className="tower-progress-block">
           <div className="flex items-center justify-between gap-3">
@@ -453,7 +453,7 @@ export function StoreyPracticeHub({
   const workflowQuery = useStoreyContent<ChallengeSummary>(storey.id, 'challenges', shouldLoad)
 
   const adventure = flattenPages(adventureQuery)[0] ?? null
-  const workflowScenarios = flattenPages(workflowQuery)
+  const challenges = flattenPages(workflowQuery)
 
   const workflowLoadRef = useVisibleLoadMore(
     Boolean(shouldLoad && workflowQuery.hasNextPage && !workflowQuery.isFetchingNextPage),
@@ -531,19 +531,19 @@ export function StoreyPracticeHub({
                 <TrialRoomSkeleton />
               </div>
             ) : null}
-            {!workflowQuery.isLoading && workflowScenarios.length === 0 ? (
+            {!workflowQuery.isLoading && challenges.length === 0 ? (
               <div className="mt-5">
                 <EmptySection label="GIT Challenged" />
               </div>
             ) : null}
 
             <div className="challenge-room-stack">
-              {workflowScenarios.map((scenario, index) => (
+              {challenges.map((challenge, index) => (
                 <ChallengeTrial
                   index={index}
-                  key={scenario.id}
+                  key={challenge.id}
                   locked={challengesLocked}
-                  scenario={scenario}
+                  challenge={challenge}
                   storeyId={storey.id}
                 />
               ))}

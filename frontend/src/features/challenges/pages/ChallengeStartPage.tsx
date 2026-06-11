@@ -26,15 +26,15 @@ const loadingCopy: Record<ChallengeStartMode, { label: string; description: stri
 }
 
 export function ChallengeStartPage({ mode = 'start' }: { mode?: ChallengeStartMode }) {
-  const { levelId, runId } = useParams<{ levelId?: string; runId?: string }>()
+  const { questId, runId } = useParams<{ questId?: string; runId?: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const targetId = Number(mode === 'retry' ? runId : levelId)
+  const targetId = Number(mode === 'retry' ? runId : questId)
 
   const start = useMutation({
     mutationFn: async (): Promise<ChallengeRun> => {
       if (!Number.isFinite(targetId)) {
-        throw new Error(mode === 'retry' ? 'Missing challenge run.' : 'Missing challenge level.')
+        throw new Error(mode === 'retry' ? 'Missing challenge run.' : 'Missing challenge quest.')
       }
       if (mode === 'retry') return challengesApi.retryChallengeRun(targetId)
       return challengesApi.startChallengeRun(targetId, { review: mode === 'review' })

@@ -4,16 +4,18 @@ import { Flame, Medal, Sparkles, Star, Swords, TerminalSquare } from 'lucide-rea
 import type { StatsSummary } from '@/features/stats/types'
 import { useCountUp } from '@/features/stats/useCountUp'
 
+const CYAN = '#00F5D4'
+const BLUE = '#00B4D8'
+
 type Metric = {
   label: string
   value: number | null
   Icon: ComponentType<{ className?: string }>
-  color: string
   note?: string
   micro?: ReactNode
 }
 
-function StarRow({ count, color }: { count: number; color: string }) {
+function StarRow({ count }: { count: number }) {
   return (
     <span className="flex gap-0.5" aria-hidden="true">
       {Array.from({ length: 5 }, (_, i) => (
@@ -22,7 +24,7 @@ function StarRow({ count, color }: { count: number; color: string }) {
           className="size-2.5"
           style={
             i < Math.min(count, 5)
-              ? { color, fill: color, filter: `drop-shadow(0 0 3px ${color}88)` }
+              ? { color: CYAN, fill: CYAN, filter: `drop-shadow(0 0 3px ${CYAN}88)` }
               : { color: 'rgba(255,255,255,0.14)' }
           }
         />
@@ -31,7 +33,7 @@ function StarRow({ count, color }: { count: number; color: string }) {
   )
 }
 
-function DotRow({ active, color }: { active: number; color: string }) {
+function DotRow({ active }: { active: number }) {
   return (
     <span className="flex gap-1" aria-hidden="true">
       {Array.from({ length: 7 }, (_, i) => (
@@ -40,7 +42,7 @@ function DotRow({ active, color }: { active: number; color: string }) {
           className="size-1.5 rounded-full"
           style={
             i < Math.min(active, 7)
-              ? { background: color, boxShadow: `0 0 4px ${color}aa` }
+              ? { background: CYAN, boxShadow: `0 0 4px ${CYAN}aa` }
               : { background: 'rgba(255,255,255,0.1)' }
           }
         />
@@ -49,7 +51,7 @@ function DotRow({ active, color }: { active: number; color: string }) {
   )
 }
 
-function CommandSparkline({ points, color }: { points: number[]; color: string }) {
+function CommandSparkline({ points }: { points: number[] }) {
   const max = Math.max(...points, 1)
   return (
     <span className="flex h-3.5 items-end gap-[2px]" aria-hidden="true">
@@ -59,7 +61,7 @@ function CommandSparkline({ points, color }: { points: number[]; color: string }
           className="w-[3px] rounded-sm"
           style={{
             height: `${Math.max(12, (v / max) * 100)}%`,
-            background: v > 0 ? color : 'rgba(255,255,255,0.12)',
+            background: v > 0 ? BLUE : 'rgba(255,255,255,0.12)',
             opacity: v > 0 ? 0.45 + (v / max) * 0.55 : 1,
           }}
         />
@@ -68,105 +70,87 @@ function CommandSparkline({ points, color }: { points: number[]; color: string }
   )
 }
 
-function MetricTile({ metric, index }: { metric: Metric; index: number }) {
-  const hasData = metric.value !== null
+function MetricRow({ metric, index }: { metric: Metric; index: number }) {
   const counted = useCountUp(metric.value)
+  const hasData = metric.value !== null
+  const accent = index % 2 === 0 ? CYAN : BLUE
+
   return (
     <div
-      className="stat-tile group animate-fade-in-up p-3.5"
-      style={{ ['--tile-accent' as string]: metric.color, animationDelay: `${index * 55}ms` }}
+      className="metric-line animate-fade-in-up"
+      style={{ ['--line-accent' as string]: accent, animationDelay: `${index * 45}ms` }}
     >
-      <div className="relative z-[1] flex items-start justify-between gap-2">
-        <p className="font-mono text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-aurora-blue/80">
+      <span className="metric-line-icon" aria-hidden="true">
+        <metric.Icon className="size-4" />
+      </span>
+      <div className="min-w-0">
+        <p className="truncate font-mono text-[0.62rem] font-semibold uppercase tracking-[0.15em] text-aurora-blue/80">
           {metric.label}
         </p>
-        <span
-          className="game-chip size-7 transition-transform duration-200 group-hover:scale-110"
-          style={{ borderColor: `${metric.color}55` }}
-        >
-          <metric.Icon className="size-3.5" />
-        </span>
+        {metric.note && <p className="mt-1 truncate text-xs text-muted-foreground/85">{metric.note}</p>}
       </div>
-      {hasData ? (
-        <p
-          className="relative z-[1] mt-1.5 text-[1.7rem] font-extrabold leading-none tracking-tight"
-          style={{ color: metric.color, textShadow: `0 0 20px ${metric.color}55` }}
-        >
-          {Math.round(counted)}
-        </p>
-      ) : (
-        <p className="relative z-[1] mt-1.5 text-[1.7rem] font-extrabold leading-none text-muted-foreground/40">—</p>
-      )}
-      <div className="relative z-[1] mt-2 flex min-h-[0.9rem] items-center justify-between gap-2">
-        {metric.micro ?? <span />}
-        {metric.note && (
-          <p className="truncate text-right font-mono text-[0.58rem] text-muted-foreground/65">{metric.note}</p>
-        )}
-      </div>
+      <div className="metric-line-micro">{metric.micro}</div>
+      <p className="metric-line-value">{hasData ? Math.round(counted).toLocaleString() : '-'}</p>
     </div>
   )
 }
 
-/**
- * Secondary milestone metrics with per-metric accent colors and embedded
- * micro-visuals (star rows, streak dots, command sparkline).
- */
+/** Secondary milestone metrics as a compact ledger instead of a card grid. */
 export function MetricGrid({ summary }: { summary: StatsSummary }) {
   const h = summary.headline
   const commandPoints = summary.activity_trend.slice(-10).map((p) => p.commands_run)
 
   const metrics: Metric[] = [
     {
-      label: 'Perfect Clears',
+      label: 'Perfect clears',
       value: h.perfect_clears,
       Icon: Star,
-      color: '#FBBF24',
       note: 'no-retry wins',
-      micro: <StarRow count={h.perfect_clears} color="#FBBF24" />,
+      micro: <StarRow count={h.perfect_clears} />,
     },
     {
-      label: 'Boss Floors',
+      label: 'Boss floors',
       value: h.boss_floors.value,
       Icon: Swords,
-      color: '#A78BFA',
       note: h.boss_floors.scope,
     },
     {
       label: 'Comebacks',
       value: h.comebacks.value,
       Icon: Sparkles,
-      color: '#F472B6',
       note: h.comebacks.scope,
     },
     {
-      label: 'Commands Run',
+      label: 'Commands run',
       value: h.commands_run,
       Icon: TerminalSquare,
-      color: '#7DD3FC',
       note: 'all time',
-      micro: commandPoints.length > 0 ? <CommandSparkline points={commandPoints} color="#7DD3FC" /> : undefined,
+      micro: commandPoints.length > 0 ? <CommandSparkline points={commandPoints} /> : undefined,
     },
     {
-      label: 'Day Streak',
+      label: 'Day streak',
       value: h.day_streak,
       Icon: Flame,
-      color: '#FB923C',
-      micro: <DotRow active={h.day_streak} color="#FB923C" />,
+      note: 'current rhythm',
+      micro: <DotRow active={h.day_streak} />,
     },
     {
-      label: 'Longest Streak',
+      label: 'Longest streak',
       value: h.longest_streak,
       Icon: Medal,
-      color: '#34D399',
       note: 'personal best',
     },
   ]
 
   return (
-    <section aria-label="Milestone metrics" className="grid grid-cols-3 gap-3 max-md:grid-cols-2">
-      {metrics.map((metric, index) => (
-        <MetricTile key={metric.label} metric={metric} index={index} />
-      ))}
+    <section className="flex h-full flex-col" aria-label="Milestones">
+      <h3 className="text-[0.95rem] font-bold tracking-tight">Milestones</h3>
+
+      <div className="mt-2 grid">
+        {metrics.map((metric, index) => (
+          <MetricRow key={metric.label} metric={metric} index={index} />
+        ))}
+      </div>
     </section>
   )
 }

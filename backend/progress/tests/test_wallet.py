@@ -52,10 +52,10 @@ def test_wallet_endpoint_returns_balance_and_recent(db, django_user_model):
 def test_storey_chest_awards_gitcoins_when_progress_crosses_threshold(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    level = ChallengeQuest.objects.get(scenario__slug="stage-commit-switch", difficulty="easy")
-    level.required_successful_attempts = 1
-    level.save(update_fields=["required_successful_attempts"])
-    storey = level.module
+    quest = ChallengeQuest.objects.get(challenge__slug="stage-commit-switch", difficulty="easy")
+    quest.required_successful_attempts = 1
+    quest.save(update_fields=["required_successful_attempts"])
+    storey = quest.storey
     # A tiny threshold guarantees the first progress tick crosses it.
     storey.chest_rewards = [{"threshold": 1, "coins": 60}]
     storey.save(update_fields=["chest_rewards"])
@@ -67,14 +67,14 @@ def test_storey_chest_awards_gitcoins_when_progress_crosses_threshold(db, django
 
     from adventures.models import AdventureRun, CommandAdventure
 
-    adventure = CommandAdventure.objects.filter(module=storey, is_published=True).first()
+    adventure = CommandAdventure.objects.filter(storey=storey, is_published=True).first()
     if adventure is not None:
         AdventureRun.objects.create(
             user=user, command_adventure=adventure, mode="primary", passed_at=timezone.now()
         )
 
     start = client.post(
-        f"/api/challenge-levels/{level.id}/runs/",
+        f"/api/challenge-quests/{quest.id}/runs/",
         {"source_entry_point": "tower_page"},
         format="json",
     )

@@ -1,4 +1,4 @@
-from curriculum.curriculum_v2.drills import EMPTY_FOLDER_STATE, REPO_WITH_WORKING_CHANGE
+﻿from curriculum.curriculum_v2.drills import EMPTY_FOLDER_STATE, REPO_WITH_WORKING_CHANGE
 
 WORKFLOW_SCENARIOS = [
 
@@ -8,7 +8,6 @@ WORKFLOW_SCENARIOS = [
         "title": "Wake the Repository",
         "summary": "Turn a plain folder into a tracked project base.",
         "narrative": "A project folder exists, but it has no repository metadata yet.",
-        "command_topics": ["git init"],
         "levels": [
             {
                 "difficulty": "easy",
@@ -99,7 +98,6 @@ WORKFLOW_SCENARIOS = [
         "title": "Scout the Worktree",
         "summary": "Read what changed without touching files.",
         "narrative": "A teammate asks for a quick state check before anyone stages work.",
-        "command_topics": ["git status"],
         "levels": [
             {
                 "difficulty": "easy",
@@ -184,7 +182,6 @@ WORKFLOW_SCENARIOS = [
         "title": "Basecamp Sweep",
         "summary": "Create the repository, then verify its first signal.",
         "narrative": "A fresh project needs to become a repository before the first inspection makes sense.",
-        "command_topics": ["git init", "git status"],
         "levels": [
             {
                 "difficulty": "easy",
@@ -269,7 +266,6 @@ WORKFLOW_SCENARIOS = [
         "title": "Stage, Commit, Then Switch Branches",
         "summary": "Combine staging, committing, and branch switching in one practical flow.",
         "narrative": "You finished one small change on main and need to preserve it before switching to a feature branch.",
-        "command_topics": ["git add", "git commit", "git switch"],
         "levels": [
             {
                 "difficulty": "easy",

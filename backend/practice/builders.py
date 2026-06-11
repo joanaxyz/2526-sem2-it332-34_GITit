@@ -17,7 +17,7 @@ from simulator.workspace_files import WorkspaceFileError, WorkspaceFileStateServ
 PLACEHOLDER_RE = re.compile(r"{{\s*([a-zA-Z0-9_]+)\s*}}")
 
 
-class ProblemVariantBuildError(ValueError):
+class QuestVariantBuildError(ValueError):
     pass
 
 
@@ -43,17 +43,17 @@ class StaticTemplateMaterializer:
         return PLACEHOLDER_RE.sub(replace, value)
 
 
-class StaticProblemVariantBuilder:
+class StaticQuestVariantBuilder:
     def __init__(self) -> None:
         self.simulator = RepositoryStateSimulator()
         self.snapshotter = RepositorySnapshotService()
         self.materializer = StaticTemplateMaterializer()
 
-    def build(self, *, problem, template: dict[str, Any], case: dict[str, Any], index: int):
+    def build(self, *, quest, template: dict[str, Any], case: dict[str, Any], index: int):
         context = {**case, "index": index}
         case_id = str(context.get("case_id") or "").strip()
         if not case_id:
-            raise ProblemVariantBuildError("Authored practice case is missing case_id.")
+            raise QuestVariantBuildError("Authored practice case is missing case_id.")
 
         initial_state = self.simulator.normalize_state(
             self.materializer.render(template.get("initial_state_template", {}), context)
@@ -83,14 +83,14 @@ class StaticProblemVariantBuilder:
             rendered_context,
             fallback_story="Reach the requested repository outcome cleanly.",
         )
-        if isinstance(problem, AdventureQuest):
+        if isinstance(quest, AdventureQuest):
             variant_model = AdventureVariant
-            parent_kwargs = {"adventure_quest": problem}
-        elif isinstance(problem, ChallengeQuest):
+            parent_kwargs = {"adventure_quest": quest}
+        elif isinstance(quest, ChallengeQuest):
             variant_model = ChallengeVariant
-            parent_kwargs = {"challenge_quest": problem}
+            parent_kwargs = {"challenge_quest": quest}
         else:
-            raise ProblemVariantBuildError("Unknown problem type for variant build.")
+            raise QuestVariantBuildError("Unknown quest type for variant build.")
         variant = variant_model(
             **parent_kwargs,
             slug=self.materializer.render(template.get("slug_template", "{{case_id}}"), context),
@@ -100,14 +100,14 @@ class StaticProblemVariantBuilder:
             target_state=target_state,
             solution_commands=solution_commands,
             case_id=case_id,
-            semantic_key=self.semantic_key(problem=problem, template=template, case_id=case_id),
+            semantic_key=self.semantic_key(quest=quest, template=template, case_id=case_id),
             parameter_context=context,
             scenario_context=scenario_context,
             hint_set=list(self.materializer.render(template.get("hint_set_template", []), context)),
             scaffold_policy=dict(self.materializer.render(template.get("scaffold_policy_template", {}), context)),
             is_published=True,
         )
-        self.validate(variant, objective_checks=getattr(problem, "objective_checks", None) or [])
+        self.validate(variant, objective_checks=getattr(quest, "objective_checks", None) or [])
         return variant
 
     def _assert_v3_context(self, rendered: Any) -> None:
@@ -118,26 +118,26 @@ class StaticProblemVariantBuilder:
         if not rendered:
             return
         if not isinstance(rendered, dict):
-            raise ProblemVariantBuildError(f"scenario_context_template must render to an object: {rendered!r}")
+            raise QuestVariantBuildError(f"scenario_context_template must render to an object: {rendered!r}")
         if rendered.get("schema_version") != 3:
-            raise ProblemVariantBuildError("scenario_context_template must declare schema_version 3.")
+            raise QuestVariantBuildError("scenario_context_template must declare schema_version 3.")
         unknown = set(map(str, rendered)) - SCENARIO_CONTEXT_ALLOWED_KEYS
         if unknown:
-            raise ProblemVariantBuildError(
+            raise QuestVariantBuildError(
                 f"scenario_context_template has unknown keys: {sorted(unknown)!r}"
             )
 
     def validate(self, variant, *, objective_checks: list | None = None) -> None:
         if not variant.initial_state:
-            raise ProblemVariantBuildError("Practice variant has no initial state.")
+            raise QuestVariantBuildError("Practice variant has no initial state.")
         if not variant.target_state:
-            raise ProblemVariantBuildError("Practice variant has no target state.")
+            raise QuestVariantBuildError("Practice variant has no target state.")
         if not variant.scenario_context:
-            raise ProblemVariantBuildError("Practice variant has no scenario context.")
+            raise QuestVariantBuildError("Practice variant has no scenario context.")
         flattened_context = json.dumps(variant.scenario_context, sort_keys=True).lower()
         for command in variant.solution_commands:
             if command and command.lower() in flattened_context:
-                raise ProblemVariantBuildError("Scenario context exposes a solution command.")
+                raise QuestVariantBuildError("Scenario context exposes a solution command.")
         outcome = EvaluationEngine().evaluate(
             spec=compile_evaluation_spec(variant.evaluation_spec),
             next_state=variant.target_state,
@@ -147,23 +147,23 @@ class StaticProblemVariantBuilder:
             expected_state_hash=self.simulator.state_hash(variant.target_state),
         )
         if not outcome.target_matched:
-            raise ProblemVariantBuildError(f"Authored solution does not satisfy evaluation spec: {outcome.summary}")
+            raise QuestVariantBuildError(f"Authored solution does not satisfy evaluation spec: {outcome.summary}")
         self._validate_objective_checks(variant, checks=objective_checks or [])
 
     def _validate_objective_checks(self, variant, *, checks: list) -> None:
         """Every authored objective check must (a) carry a label + requirement and
         (b) be satisfied by the solution's target state, so the live checklist
-        actually reaches all-green when the learner solves the problem. Checks
-        are authored once on the problem but validated against each variant's
+        actually reaches all-green when the learner solves the quest. Checks
+        are authored once on the quest but validated against each variant's
         own target state."""
         evaluator = StateBasedEvaluator()
         for check in checks:
             if not isinstance(check, dict):
-                raise ProblemVariantBuildError(f"Objective check must be an object: {check!r}")
+                raise QuestVariantBuildError(f"Objective check must be an object: {check!r}")
             label = str(check.get("label", "")).strip()
             requirement = check.get("requirement") or {}
             if not label or not requirement:
-                raise ProblemVariantBuildError(
+                raise QuestVariantBuildError(
                     f"Objective check needs a label and a requirement: {check!r}"
                 )
             result = evaluator.evaluate(
@@ -173,7 +173,7 @@ class StaticProblemVariantBuilder:
                 executed_commands=variant.solution_commands,
             )
             if not result.target_matched:
-                raise ProblemVariantBuildError(
+                raise QuestVariantBuildError(
                     f"Objective check is not satisfied by the authored solution: {label!r} ({result.summary})"
                 )
 
@@ -188,11 +188,11 @@ class StaticProblemVariantBuilder:
         try:
             state = self._apply_workspace_files(state, workspace_files or [], command_index=0)
         except WorkspaceFileError as exc:
-            raise ProblemVariantBuildError(f"Could not apply solution workspace file: {exc}") from exc
+            raise QuestVariantBuildError(f"Could not apply solution workspace file: {exc}") from exc
         for index, command in enumerate(solution_commands, start=1):
             result = self.simulator.process(state, command)
             if not result.processed:
-                raise ProblemVariantBuildError(f"Solution command is not processable: {command}")
+                raise QuestVariantBuildError(f"Solution command is not processable: {command}")
             state = result.state
             try:
                 state = self._apply_workspace_files(
@@ -202,7 +202,7 @@ class StaticProblemVariantBuilder:
                     command_index=index,
                 )
             except WorkspaceFileError as exc:
-                raise ProblemVariantBuildError(
+                raise QuestVariantBuildError(
                     f"Could not apply solution workspace file after {command!r}: {exc}"
                 ) from exc
         return self.simulator.normalize_state(state)
@@ -230,9 +230,12 @@ class StaticProblemVariantBuilder:
             )
         return next_state
 
-    def semantic_key(self, *, problem, template: dict, case_id: str) -> str:
+    def semantic_key(self, *, quest, template: dict, case_id: str) -> str:
+        # The "problem" payload key is frozen: it feeds the content hash that is
+        # every seeded variant's stored identity (semantic_key). Renaming it would
+        # re-key all existing variants on the next seed run.
         payload = {
-            "problem": getattr(problem, "slug", ""),
+            "problem": getattr(quest, "slug", ""),
             "template": template.get("slug") or template.get("structure_key") or "variant",
             "case_id": case_id,
         }

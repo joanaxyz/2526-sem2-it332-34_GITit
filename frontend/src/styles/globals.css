@@ -768,18 +768,18 @@ textarea {
 /* Glassy neon panel with a top light-bar and engraved corner brackets. */
 .game-panel {
   position: relative;
-  border-radius: 14px;
-  border: 1px solid rgba(0, 245, 212, 0.18);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 245, 212, 0.16);
   background:
-    radial-gradient(120% 80% at 50% -10%, rgba(0, 245, 212, 0.07), transparent 60%),
-    linear-gradient(180deg, rgba(9, 27, 49, 0.92), rgba(4, 13, 28, 0.94));
+    linear-gradient(180deg, rgba(8, 25, 45, 0.82), rgba(3, 12, 24, 0.94)),
+    rgba(2, 8, 18, 0.92);
   box-shadow:
-    inset 0 1px 0 rgba(0, 245, 212, 0.10),
-    0 14px 40px rgba(0, 0, 0, 0.36);
+    inset 0 1px 0 rgba(125, 211, 252, 0.08),
+    0 12px 32px rgba(0, 0, 0, 0.34);
   -webkit-backdrop-filter: blur(10px);
           backdrop-filter: blur(10px);
   overflow: hidden;
-  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  transition: box-shadow 0.22s ease, border-color 0.22s ease;
 }
 
 /* Top neon light-bar */
@@ -787,9 +787,9 @@ textarea {
   content: '';
   position: absolute;
   inset: 0 0 auto 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(0, 245, 212, 0.75), rgba(0, 180, 216, 0.55), transparent);
-  opacity: 0.85;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 245, 212, 0.62), rgba(0, 180, 216, 0.45), transparent);
+  opacity: 0.75;
 }
 
 /* Faint scanline texture for the gamified HUD feel */
@@ -805,26 +805,25 @@ textarea {
     transparent 1px,
     transparent 5px
   );
-  opacity: 0.5;
+  opacity: 0.32;
   -webkit-mask-image: linear-gradient(180deg, #000, transparent 70%);
           mask-image: linear-gradient(180deg, #000, transparent 70%);
 }
 
 .game-panel:hover {
-  transform: translateY(-3px);
-  border-color: rgba(0, 245, 212, 0.42);
+  border-color: rgba(0, 245, 212, 0.28);
   box-shadow:
-    inset 0 1px 0 rgba(0, 245, 212, 0.18),
-    0 0 26px rgba(0, 245, 212, 0.12),
-    0 18px 48px rgba(0, 0, 0, 0.46);
+    inset 0 1px 0 rgba(125, 211, 252, 0.12),
+    0 0 22px rgba(0, 245, 212, 0.08),
+    0 16px 42px rgba(0, 0, 0, 0.42);
 }
 
 /* Engraved corner brackets — sit above the scanline layer */
 .game-corner {
   position: absolute;
-  width: 14px;
-  height: 14px;
-  border-color: rgba(0, 245, 212, 0.55);
+  width: 12px;
+  height: 12px;
+  border-color: rgba(190, 235, 255, 0.72);
   pointer-events: none;
   z-index: 1;
 }
@@ -838,12 +837,12 @@ textarea {
   position: relative;
   display: grid;
   place-items: center;
-  border-radius: 12px;
-  border: 1px solid rgba(0, 245, 212, 0.28);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 245, 212, 0.26);
   background:
-    radial-gradient(circle at 32% 26%, rgba(0, 245, 212, 0.22), rgba(0, 180, 216, 0.06) 70%),
+    radial-gradient(circle at 32% 26%, rgba(0, 245, 212, 0.18), rgba(0, 180, 216, 0.05) 70%),
     rgba(4, 16, 32, 0.7);
-  box-shadow: inset 0 0 10px rgba(0, 245, 212, 0.12), 0 0 16px rgba(0, 245, 212, 0.10);
+  box-shadow: inset 0 0 10px rgba(0, 245, 212, 0.10), 0 0 14px rgba(0, 245, 212, 0.08);
 }
 
 /* Compact KPI tile — accent-tinted top edge, big neon stat */
@@ -884,6 +883,160 @@ textarea {
 .stat-tile:hover::after {
   opacity: 0.26;
   transform: scale(1.15);
+}
+
+/* Stats tab readout rails and ledgers. These replace dense card grids. */
+.stats-deck {
+  color: hsl(var(--foreground));
+}
+
+/* The one deliberate glass element of the stats deck — a chamfered readout
+   slat in the hero plaques' vocabulary. Every other section sits open on
+   the night sky. */
+.stats-glass-band {
+  --cut: 0.9rem;
+  --chamfer-tint: rgba(125, 211, 252, 0.22);
+  --chamfer-tint-soft: rgba(0, 180, 216, 0.08);
+  filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.35));
+}
+
+.stats-glass-band .chamfer-body {
+  background:
+    radial-gradient(120% 150% at 10% -40%, rgba(0, 245, 212, 0.06), transparent 55%),
+    linear-gradient(180deg, rgba(8, 20, 38, 0.84), rgba(3, 10, 22, 0.88));
+  -webkit-backdrop-filter: blur(14px);
+          backdrop-filter: blur(14px);
+}
+
+.stats-readout-primary,
+.stats-readout-item,
+.stats-readout-wallet {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.stats-readout-primary {
+  padding-right: 1.25rem;
+}
+
+.stats-readout-item {
+  min-height: 4.3rem;
+  border-left: 1px solid rgba(0, 245, 212, 0.18);
+  padding-left: 1rem;
+}
+
+.stats-readout-wallet {
+  justify-self: end;
+  border-left: 1px solid rgba(0, 245, 212, 0.16);
+  padding: 0.55rem 0 0.55rem 1.15rem;
+}
+
+.stats-readout-footer {
+  margin-top: -0.4rem;
+  border-top: 1px solid rgba(125, 211, 252, 0.08);
+  padding-top: 0.85rem;
+  color: hsl(var(--muted-foreground) / 0.78);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stats-readout-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+/* Open ledger rows — no boxes; rhythm comes from hairline rules and light. */
+.metric-line,
+.kpi-line {
+  --line-accent: #00f5d4;
+  display: grid;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+  border-bottom: 1px solid rgba(125, 211, 252, 0.08);
+}
+
+.metric-line {
+  grid-template-columns: 1.7rem minmax(0, 1fr) minmax(3rem, auto) auto;
+  min-height: 3.7rem;
+  padding: 0.6rem 0.15rem;
+}
+
+.kpi-line {
+  grid-template-columns: 2.4rem minmax(0, 1fr) auto;
+  min-height: 3.7rem;
+  padding: 0.55rem 0.15rem;
+}
+
+.metric-line-icon,
+.kpi-line-icon {
+  display: grid;
+  place-items: center;
+  height: 2rem;
+  color: var(--line-accent);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--line-accent) 45%, transparent));
+}
+
+.metric-line-icon {
+  width: 1.7rem;
+}
+
+.kpi-line-icon {
+  width: 2.4rem;
+}
+
+.metric-line-micro {
+  justify-self: end;
+  min-width: 0;
+  color: var(--line-accent);
+}
+
+.metric-line-value,
+.kpi-line-value {
+  justify-self: end;
+  color: var(--line-accent);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 0 16px color-mix(in srgb, var(--line-accent) 34%, transparent);
+}
+
+.kpi-line-value span {
+  margin-left: 0.08rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.stats-radar-panel .recharts-wrapper {
+  filter: drop-shadow(0 0 16px rgba(0, 245, 212, 0.08));
+}
+
+@media (max-width: 640px) {
+  .stats-readout-item,
+  .stats-readout-wallet {
+    border-left: 0;
+    border-top: 1px solid rgba(0, 245, 212, 0.12);
+    padding-left: 0;
+    padding-top: 0.85rem;
+    justify-self: stretch;
+  }
+
+  .metric-line {
+    grid-template-columns: 2.1rem minmax(0, 1fr) auto;
+  }
+
+  .metric-line-micro {
+    grid-column: 2 / -1;
+    justify-self: start;
+  }
 }
 
 /* Recharts theming overrides to match the neon HUD */
@@ -4839,32 +4992,21 @@ textarea {
 /* ── Match-history rows (recent runs) ── */
 
 .match-row {
-  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.6rem 0.85rem 0.6rem 1rem;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  background: linear-gradient(135deg, rgba(var(--run-accent-rgb), 0.10), rgba(10, 28, 50, 0.55) 38%, rgba(4, 13, 28, 0.7));
-  overflow: hidden;
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  gap: 0.85rem;
+  padding: 0.62rem 0.15rem;
+  border-bottom: 1px solid rgba(125, 211, 252, 0.07);
 }
 
-.match-row::before {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
+.match-dot {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 999px;
   background: var(--run-accent, #00f5d4);
-  box-shadow: 0 0 10px var(--run-accent, #00f5d4);
-}
-
-.match-row:hover {
-  transform: translateX(3px);
-  border-color: rgba(var(--run-accent-rgb), 0.4);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), 0 0 14px rgba(var(--run-accent-rgb), 0.12);
+  box-shadow: 0 0 8px rgba(var(--run-accent-rgb, 0, 245, 212), 0.7);
 }
 
 /* ── Storey progress door motif ── */
@@ -4910,5 +5052,597 @@ textarea {
   .sprite-stage-float,
   .sprite-pedestal {
     animation: none;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   HOME HUB — game-launcher home page (angled nav, env hero, sub-tab deck)
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Break a section out of the centered max-width container to span the viewport. */
+.full-bleed {
+  position: relative;
+  left: 50%;
+  right: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+/* ── Chamfer frame system: angular octagon panels with a 1px neon "border".
+      Outer .chamfer-frame paints the edge tint and clips; the inner
+      .chamfer-body re-clips 1px inside, leaving the frame visible. ── */
+.chamfer-frame {
+  --cut: 0.8rem;
+  --chamfer-tint: rgba(0, 245, 212, 0.34);
+  --chamfer-tint-soft: rgba(0, 180, 216, 0.14);
+  padding: 1px;
+  clip-path: polygon(
+    var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut),
+    100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%,
+    var(--cut) 100%, 0 calc(100% - var(--cut)), 0 var(--cut)
+  );
+  background: linear-gradient(180deg, var(--chamfer-tint), var(--chamfer-tint-soft));
+}
+
+.chamfer-body {
+  clip-path: inherit;
+  background: linear-gradient(180deg, rgba(8, 22, 42, 0.88), rgba(3, 10, 22, 0.92));
+  height: 100%;
+  width: 100%;
+}
+
+/* ── Angled top navbar: \  Home | Tower  / ── */
+.hub-nav-frame {
+  clip-path: polygon(0 0, 100% 0, calc(100% - 1.7rem) 100%, 1.7rem 100%);
+  padding: 0 1px 1.5px;
+  background: linear-gradient(90deg, transparent 4%, rgba(0, 245, 212, 0.55), rgba(0, 180, 216, 0.4), transparent 96%);
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.45)) drop-shadow(0 2px 10px rgba(0, 245, 212, 0.10));
+}
+
+.hub-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 4.6rem; /* taller than the 4rem header band so the blade dips below it */
+  padding: 0.55rem 3rem 0.9rem;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 1.7rem) 100%, 1.7rem 100%);
+  background:
+    radial-gradient(120% 90% at 50% -30%, rgba(0, 245, 212, 0.10), transparent 60%),
+    linear-gradient(180deg, rgba(7, 19, 37, 0.96), rgba(2, 8, 19, 0.94));
+  -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
+}
+
+.hub-nav-link {
+  position: relative;
+  padding: 0.2rem 1.1rem 0.3rem;
+  color: hsl(var(--muted-foreground) / 0.85);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.hub-nav-link:hover {
+  color: hsl(var(--foreground));
+}
+
+.hub-nav-link.is-active {
+  color: hsl(var(--foreground));
+  text-shadow: 0 0 14px rgba(0, 245, 212, 0.55);
+}
+
+/* Glowing underline blade beneath the active link */
+.hub-nav-link::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -0.42rem;
+  width: 2rem;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #00f5d4, #00b4d8, transparent);
+  box-shadow: 0 0 12px rgba(0, 245, 212, 0.85), 0 -4px 16px rgba(0, 245, 212, 0.35);
+  transform: translateX(-50%) scaleX(0);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hub-nav-link.is-active::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+.hub-nav-divider {
+  width: 1px;
+  height: 1.1rem;
+  background: linear-gradient(180deg, transparent, rgba(0, 245, 212, 0.35), transparent);
+}
+
+/* ── Environment hero banner ── */
+.hub-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  min-height: clamp(26rem, 58vh, 37rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.hub-hero-media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Skin the placeholder loop toward the app's aurora palette. */
+  filter: saturate(0.85) hue-rotate(-12deg) brightness(0.8);
+}
+
+/* Palette veil: tint + letterbox the env art and dissolve it into the page. */
+.hub-hero-veil {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(2, 7, 17, 0.78) 0%, rgba(2, 7, 17, 0.12) 26%, rgba(2, 7, 17, 0.05) 48%, rgba(3, 10, 22, 0.62) 74%, hsl(var(--background)) 97%),
+    radial-gradient(90% 70% at 50% 38%, transparent 30%, rgba(2, 7, 17, 0.55) 100%),
+    linear-gradient(180deg, rgba(0, 180, 216, 0.10), rgba(0, 245, 212, 0.05) 40%, rgba(167, 139, 250, 0.08));
+}
+
+/* Fine scanlines over the env art — ties the video frame into the HUD look. */
+.hub-hero-scan {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.16) 0, rgba(0, 0, 0, 0.16) 1px, transparent 1px, transparent 4px);
+  opacity: 0.35;
+}
+
+/* ── Game wordmark plate (the HALO-style angular frame) ── */
+.hub-logo-frame {
+  --notch: 2.6rem;
+  position: relative;
+  padding: 1.5px;
+  clip-path: polygon(var(--notch) 0, calc(100% - var(--notch)) 0, 100% 50%, calc(100% - var(--notch)) 100%, var(--notch) 100%, 0 50%);
+  background: linear-gradient(90deg, rgba(0, 245, 212, 0.05), rgba(0, 245, 212, 0.65) 18%, rgba(125, 211, 252, 0.55) 50%, rgba(167, 139, 250, 0.55) 82%, rgba(167, 139, 250, 0.05));
+  filter: drop-shadow(0 14px 40px rgba(0, 0, 0, 0.55));
+}
+
+.hub-logo-frame-body {
+  clip-path: inherit;
+  padding: 1.6rem 4.6rem 1.8rem;
+  text-align: center;
+  background:
+    radial-gradient(120% 130% at 50% -20%, rgba(0, 245, 212, 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(6, 17, 33, 0.82), rgba(2, 8, 19, 0.86));
+  -webkit-backdrop-filter: blur(6px);
+          backdrop-filter: blur(6px);
+}
+
+/* Diamond glyph perched on the frame's top edge */
+.hub-logo-glyph {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  transform: translate(-50%, -58%) rotate(45deg);
+  border: 1.5px solid rgba(0, 245, 212, 0.75);
+  background: linear-gradient(135deg, #0a2440, #050f20);
+  box-shadow: 0 0 18px rgba(0, 245, 212, 0.45), inset 0 0 10px rgba(0, 245, 212, 0.18);
+}
+
+.hub-logo-glyph > * {
+  transform: rotate(-45deg);
+}
+
+.hub-logo-wordmark {
+  margin: 0;
+  font-size: clamp(2.6rem, 6vw, 4.2rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em; /* optically recenters tracked-out caps */
+  text-transform: uppercase;
+  text-shadow: 0 0 34px rgba(0, 245, 212, 0.40), 0 0 90px rgba(0, 180, 216, 0.25);
+}
+
+.hub-logo-tagline {
+  margin-top: 0.45rem;
+  color: rgba(125, 211, 252, 0.78);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.55em;
+  text-indent: 0.55em;
+  text-transform: uppercase;
+}
+
+/* ── Hero CTAs: angular launcher buttons ── */
+.hub-cta {
+  --cut: 0.55rem;
+  --chamfer-tint: rgba(0, 245, 212, 0.55);
+  --chamfer-tint-soft: rgba(0, 180, 216, 0.30);
+  display: inline-block;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.45));
+}
+
+.hub-cta:hover {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 14px rgba(0, 245, 212, 0.30));
+}
+
+.hub-cta:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 3px;
+}
+
+.hub-cta .chamfer-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 11.5rem;
+  padding: 0.82rem 1.6rem;
+  color: #9ff5e8;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background:
+    radial-gradient(130% 120% at 50% -30%, rgba(0, 245, 212, 0.20), transparent 60%),
+    linear-gradient(180deg, rgba(8, 24, 44, 0.92), rgba(3, 11, 24, 0.94));
+}
+
+.hub-cta--ghost {
+  --chamfer-tint: rgba(148, 163, 184, 0.45);
+  --chamfer-tint-soft: rgba(148, 163, 184, 0.18);
+}
+
+.hub-cta--ghost .chamfer-body {
+  color: hsl(var(--foreground) / 0.82);
+  background: linear-gradient(180deg, rgba(10, 20, 36, 0.82), rgba(4, 11, 23, 0.86));
+}
+
+.hub-cta--ghost:hover {
+  filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 12px rgba(125, 211, 252, 0.22));
+}
+
+/* ── Hero corner info cards (streak / latest achievement) ── */
+.hub-info-card {
+  --cut: 0.7rem;
+  --chamfer-tint: rgba(0, 245, 212, 0.26);
+  --chamfer-tint-soft: rgba(0, 180, 216, 0.10);
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.45));
+}
+
+.hub-info-card .chamfer-body {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.72rem 1.2rem 0.72rem 0.85rem;
+  background:
+    radial-gradient(140% 150% at 0% -40%, rgba(0, 245, 212, 0.10), transparent 55%),
+    linear-gradient(180deg, rgba(6, 16, 31, 0.86), rgba(2, 8, 19, 0.9));
+  -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+}
+
+.hub-info-card--end .chamfer-body {
+  flex-direction: row-reverse;
+  text-align: right;
+  padding: 0.72rem 0.85rem 0.72rem 1.2rem;
+  background:
+    radial-gradient(140% 150% at 100% -40%, rgba(167, 139, 250, 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(6, 16, 31, 0.86), rgba(2, 8, 19, 0.9));
+}
+
+.hub-info-card--end {
+  --chamfer-tint: rgba(167, 139, 250, 0.32);
+  --chamfer-tint-soft: rgba(167, 139, 250, 0.12);
+}
+
+/* ── Sub-tab deck: ‹ Stats · Achievements · Hero Showcase › ── */
+.hub-tab {
+  position: relative;
+  padding: 0.55rem 1.4rem 0.8rem;
+  color: hsl(var(--muted-foreground) / 0.38);
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color 0.22s ease, text-shadow 0.22s ease;
+}
+
+.hub-tab:hover {
+  color: hsl(var(--muted-foreground));
+}
+
+.hub-tab[aria-selected='true'] {
+  color: hsl(var(--foreground));
+  text-shadow: 0 0 18px rgba(0, 245, 212, 0.45);
+}
+
+/* Underline blade + upward glow bloom, like a lit console tab */
+.hub-tab::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 2.6rem;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #00f5d4, #00b4d8, transparent);
+  box-shadow: 0 0 14px rgba(0, 245, 212, 0.9), 0 -6px 22px rgba(0, 245, 212, 0.4);
+  transform: translateX(-50%) scaleX(0);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hub-tab[aria-selected='true']::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+.hub-tab-arrow {
+  --cut: 0.45rem;
+  --chamfer-tint: rgba(0, 245, 212, 0.22);
+  --chamfer-tint-soft: rgba(0, 180, 216, 0.08);
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.hub-tab-arrow .chamfer-body {
+  display: grid;
+  place-items: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.hub-tab-arrow:hover {
+  filter: drop-shadow(0 0 10px rgba(0, 245, 212, 0.25));
+}
+
+.hub-tab-arrow:hover .chamfer-body {
+  color: hsl(var(--primary));
+}
+
+.hub-tab-arrow:active {
+  transform: scale(0.94);
+}
+
+/* ── Time-range pills inside chart panels ── */
+.hub-pill {
+  border-radius: 6px;
+  background: rgba(125, 211, 252, 0.07);
+  padding: 0.32rem 0.7rem;
+  color: hsl(var(--muted-foreground) / 0.95);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.hub-pill:hover {
+  background: rgba(125, 211, 252, 0.13);
+  color: hsl(var(--foreground));
+}
+
+.hub-pill[aria-pressed='true'] {
+  background: rgba(0, 245, 212, 0.16);
+  color: #aef9ee;
+}
+
+/* ── "Your Activity" vertical thermometer bars ── */
+.activity-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-track {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 1.15rem;
+  height: 100%;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+  padding: 3px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.activity-col:hover .activity-track {
+  border-color: rgba(0, 245, 212, 0.35);
+  box-shadow: 0 0 12px rgba(0, 245, 212, 0.12);
+}
+
+.activity-col[data-today='true'] .activity-track {
+  border-color: rgba(0, 245, 212, 0.45);
+  background: linear-gradient(180deg, rgba(0, 245, 212, 0.07), rgba(0, 245, 212, 0.02));
+  box-shadow: 0 0 16px rgba(0, 245, 212, 0.18), inset 0 0 10px rgba(0, 245, 212, 0.05);
+}
+
+.activity-fill {
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #00f5d4, #00b4d8 80%);
+  box-shadow: 0 0 10px rgba(0, 245, 212, 0.55), 0 0 22px rgba(0, 180, 216, 0.25);
+  transition: height 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.activity-fill[data-zero='true'] {
+  background: rgba(255, 255, 255, 0.10);
+  box-shadow: none;
+}
+
+.activity-day {
+  color: hsl(var(--muted-foreground) / 0.78);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.activity-col[data-today='true'] .activity-day {
+  color: hsl(var(--primary));
+  text-shadow: 0 0 8px rgba(0, 245, 212, 0.5);
+}
+
+/* ── Achievement tiles ── */
+.achv-tile {
+  --achv-accent: #00f5d4;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(160deg, rgba(10, 28, 50, 0.9), rgba(4, 13, 28, 0.92));
+  /* Sliced top-right corner — the angular launcher motif */
+  clip-path: polygon(0 0, calc(100% - 1.1rem) 0, 100% 1.1rem, 100% 100%, 0 100%);
+  padding: 1rem;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.achv-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--achv-accent), transparent 70%);
+  opacity: 0.8;
+}
+
+.achv-tile:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--achv-accent) 40%, transparent);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45), 0 0 18px color-mix(in srgb, var(--achv-accent) 18%, transparent);
+}
+
+.achv-tile[data-locked='true'] {
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.achv-tile[data-locked='true']::before {
+  opacity: 0.18;
+}
+
+.achv-tile[data-locked='true'] .achv-icon {
+  filter: grayscale(0.9) brightness(0.7);
+}
+
+.achv-icon {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--achv-accent) 45%, transparent);
+  background: radial-gradient(circle at 32% 26%, color-mix(in srgb, var(--achv-accent) 26%, transparent), rgba(4, 16, 32, 0.7) 72%);
+  box-shadow: inset 0 0 10px color-mix(in srgb, var(--achv-accent) 14%, transparent), 0 0 14px color-mix(in srgb, var(--achv-accent) 14%, transparent);
+  color: var(--achv-accent);
+}
+
+.achv-points {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  background: rgba(251, 191, 36, 0.08);
+  padding: 0.18rem 0.55rem;
+  color: #fbbf24;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.achv-tile[data-locked='true'] .achv-points {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: hsl(var(--muted-foreground) / 0.6);
+}
+
+/* ── Showcase tier ladder ── */
+.tier-rung {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.55rem 0.8rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.tier-rung[data-state='current'] {
+  border-color: color-mix(in srgb, var(--tier-color, #00f5d4) 55%, transparent);
+  background: color-mix(in srgb, var(--tier-color, #00f5d4) 9%, transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--tier-color, #00f5d4) 18%, transparent);
+}
+
+.tier-rung[data-state='locked'] {
+  opacity: 0.45;
+}
+
+.tier-diamond {
+  width: 0.7rem;
+  height: 0.7rem;
+  flex-shrink: 0;
+  transform: rotate(45deg);
+  border-radius: 2px;
+  background: var(--tier-color, #00f5d4);
+  box-shadow: 0 0 8px var(--tier-color, #00f5d4);
+}
+
+.tier-rung[data-state='locked'] .tier-diamond {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: none;
+}
+
+@media (max-width: 860px) {
+  .hub-logo-frame-body {
+    padding: 1.2rem 2.8rem 1.4rem;
+  }
+
+  .hub-nav {
+    min-height: 4.3rem;
+    padding: 0.5rem 1.9rem 0.75rem;
+  }
+
+  .hub-nav-link {
+    padding: 0.2rem 0.7rem 0.3rem;
+    font-size: 0.74rem;
+  }
+
+  .hub-tab {
+    padding: 0.5rem 0.8rem 0.75rem;
+    font-size: 0.74rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hub-nav-link::after,
+  .hub-tab::after,
+  .activity-fill,
+  .hub-cta,
+  .achv-tile {
+    transition: none;
   }
 }

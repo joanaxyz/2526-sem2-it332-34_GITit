@@ -1,5 +1,5 @@
-import { DifficultyActionButton } from '@/features/challenges/components/DifficultyActionButton'
-import type { ChallengeLevelAccess } from '@/features/challenges/types'
+﻿import { DifficultyActionButton } from '@/features/challenges/components/DifficultyActionButton'
+import type { ChallengeQuestAccess } from '@/features/challenges/types'
 
 export function DifficultySelector({
   difficulties,
@@ -7,10 +7,10 @@ export function DifficultySelector({
   onStart,
   onReview,
 }: {
-  difficulties: ChallengeLevelAccess[]
+  difficulties: ChallengeQuestAccess[]
   disabled?: boolean
-  onStart: (difficulty: ChallengeLevelAccess) => void
-  onReview: (difficulty: ChallengeLevelAccess) => void
+  onStart: (difficulty: ChallengeQuestAccess) => void
+  onReview: (difficulty: ChallengeQuestAccess) => void
 }) {
   return (
     <div className="grid grid-cols-3 gap-2 max-md:grid-cols-1">

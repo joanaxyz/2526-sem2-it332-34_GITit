@@ -18,7 +18,7 @@ from curriculum.models import (
 )
 from evaluation.compiler import compile_evaluation_spec
 from evaluation.engine import EvaluationEngine
-from practice.builders import StaticProblemVariantBuilder
+from practice.builders import StaticQuestVariantBuilder
 from practice.visualization import RepositoryVisualizationService
 from simulator.services import RepositoryStateSimulator
 
@@ -63,14 +63,16 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
-        self.supported_usage_keys = {spec["usage"] for spec in COMMAND_DRILLS}
-        self.published_module_slugs = self._published_module_slugs()
+        # Seed-spec dict keys ("module", "usage", "levels", ...) are the frozen
+        # authoring format of curriculum_v2; only the ORM names are normalized.
+        self.supported_form_keys = {spec["usage"] for spec in COMMAND_DRILLS}
+        self.published_storey_slugs = self._published_storey_slugs()
         self._seed_foundations()
-        modules = self._seed_modules()
-        usages = self._seed_command_topics(modules)
-        self._seed_command_drills(usages)
-        self._seed_command_adventures(modules)
-        self._seed_workflows(modules)
+        storeys = self._seed_storeys()
+        forms = self._seed_command_skills(storeys)
+        self._seed_adventure_quests(forms)
+        self._seed_command_adventures(storeys)
+        self._seed_challenges(storeys)
         if options.get("validate"):
             self._validate_curriculum()
         self.stdout.write(self.style.SUCCESS("Seeded v2 curriculum."))
@@ -93,13 +95,13 @@ class Command(BaseCommand):
             )
         ConceptPage.objects.exclude(slug__in=live_slugs).update(is_published=False)
 
-    def _seed_modules(self) -> dict[str, Storey]:
-        modules = {}
+    def _seed_storeys(self) -> dict[str, Storey]:
+        storeys = {}
         live_slugs = []
         for index, spec in enumerate(MODULES, start=1):
             live_slugs.append(spec["slug"])
-            is_published = spec["slug"] in self.published_module_slugs
-            module, _ = Storey.objects.update_or_create(
+            is_published = spec["slug"] in self.published_storey_slugs
+            storey, _ = Storey.objects.update_or_create(
                 slug=spec["slug"],
                 defaults={
                     "number": spec["number"],
@@ -110,45 +112,45 @@ class Command(BaseCommand):
                     "chest_rewards": spec.get("chest_rewards", default_chest_rewards()),
                 },
             )
-            modules[spec["slug"]] = module
+            storeys[spec["slug"]] = storey
         Storey.objects.exclude(slug__in=live_slugs).update(is_published=False)
-        return modules
+        return storeys
 
-    def _seed_command_adventures(self, modules: dict[str, Storey]) -> None:
-        """One CommandAdventure per Storey that has published adventure problems."""
+    def _seed_command_adventures(self, storeys: dict[str, Storey]) -> None:
+        """One CommandAdventure per Storey that has published adventure quests."""
         live_ids = []
-        for index, (slug, module) in enumerate(modules.items(), start=1):
-            has_problems = AdventureQuest.objects.filter(
-                usage__topic__module=module, is_published=True
+        for index, (slug, storey) in enumerate(storeys.items(), start=1):
+            has_quests = AdventureQuest.objects.filter(
+                command_form__command_skill__storey=storey, is_published=True
             ).exists()
-            if not has_problems:
+            if not has_quests:
                 continue
             configured = COMMAND_DRILL_ADVENTURES.get(slug, {})
             adventure, _ = CommandAdventure.objects.update_or_create(
-                module=module,
+                storey=storey,
                 defaults={
                     "slug": f"{slug}-command-adventure",
-                    "title": configured.get("title") or f"{module.title} Adventure",
-                    "description": configured.get("description") or module.description,
+                    "title": configured.get("title") or f"{storey.title} Adventure",
+                    "description": configured.get("description") or storey.description,
                     "sort_order": index,
-                    "is_published": module.is_published,
+                    "is_published": storey.is_published,
                 },
             )
             live_ids.append(adventure.id)
         CommandAdventure.objects.exclude(id__in=live_ids).update(is_published=False)
 
-    def _seed_command_topics(self, modules: dict[str, Storey]) -> dict[str, CommandForm]:
-        usages = {}
-        live_topic_ids = []
-        for topic_index, spec in enumerate(COMMAND_TOPICS, start=1):
-            module = modules[spec["module"]]
-            usage_keys = {
-                f"{spec['slug']}/{usage_spec['slug']}"
-                for usage_spec in spec.get("usages", [])
+    def _seed_command_skills(self, storeys: dict[str, Storey]) -> dict[str, CommandForm]:
+        forms = {}
+        live_skill_ids = []
+        for skill_index, spec in enumerate(COMMAND_TOPICS, start=1):
+            storey = storeys[spec["module"]]
+            form_keys = {
+                f"{spec['slug']}/{form_spec['slug']}"
+                for form_spec in spec.get("usages", [])
             }
-            topic_is_published = bool(module.is_published and usage_keys.intersection(self.supported_usage_keys))
-            topic, _ = CommandSkill.objects.update_or_create(
-                module=module,
+            skill_is_published = bool(storey.is_published and form_keys.intersection(self.supported_form_keys))
+            skill, _ = CommandSkill.objects.update_or_create(
+                storey=storey,
                 slug=spec["slug"],
                 defaults={
                     "base_command": spec["base_command"],
@@ -156,47 +158,47 @@ class Command(BaseCommand):
                     "summary": spec["summary"],
                     "mental_model": spec.get("mental_model", {}),
                     "command_preview": self._preview(spec["title"], spec["summary"]),
-                    "sort_order": topic_index,
-                    "is_published": topic_is_published,
+                    "sort_order": skill_index,
+                    "is_published": skill_is_published,
                 },
             )
-            live_topic_ids.append(topic.id)
-            live_usage_ids = []
-            for usage_index, usage_spec in enumerate(spec.get("usages", []), start=1):
-                usage_key = f"{spec['slug']}/{usage_spec['slug']}"
-                usage_is_published = topic_is_published and usage_key in self.supported_usage_keys
-                usage, _ = CommandForm.objects.update_or_create(
-                    topic=topic,
-                    slug=usage_spec["slug"],
+            live_skill_ids.append(skill.id)
+            live_form_ids = []
+            for form_index, form_spec in enumerate(spec.get("usages", []), start=1):
+                form_key = f"{spec['slug']}/{form_spec['slug']}"
+                form_is_published = skill_is_published and form_key in self.supported_form_keys
+                form, _ = CommandForm.objects.update_or_create(
+                    command_skill=skill,
+                    slug=form_spec["slug"],
                     defaults={
-                        "usage_form": usage_spec["usage_form"],
-                        "label": usage_spec["label"],
-                        "summary": usage_spec.get("summary", ""),
+                        "usage_form": form_spec["usage_form"],
+                        "label": form_spec["label"],
+                        "summary": form_spec.get("summary", ""),
                         "command_preview": self._preview(
-                            usage_spec["usage_form"],
-                            usage_spec.get("summary") or spec["summary"],
-                            syntax=usage_spec["usage_form"],
+                            form_spec["usage_form"],
+                            form_spec.get("summary") or spec["summary"],
+                            syntax=form_spec["usage_form"],
                         ),
-                        "sort_order": usage_index,
-                        "is_published": usage_is_published,
+                        "sort_order": form_index,
+                        "is_published": form_is_published,
                     },
                 )
-                usages[usage_key] = usage
-                live_usage_ids.append(usage.id)
-            CommandForm.objects.filter(topic=topic).exclude(id__in=live_usage_ids).update(
+                forms[form_key] = form
+                live_form_ids.append(form.id)
+            CommandForm.objects.filter(command_skill=skill).exclude(id__in=live_form_ids).update(
                 is_published=False
             )
-        CommandSkill.objects.exclude(id__in=live_topic_ids).update(is_published=False)
-        return usages
+        CommandSkill.objects.exclude(id__in=live_skill_ids).update(is_published=False)
+        return forms
 
-    def _seed_command_drills(self, usages: dict[str, CommandForm]) -> None:
-        builder = StaticProblemVariantBuilder()
-        live_drill_ids = []
-        drills_by_slug: dict[str, AdventureQuest] = {}
+    def _seed_adventure_quests(self, forms: dict[str, CommandForm]) -> None:
+        builder = StaticQuestVariantBuilder()
+        live_quest_ids = []
+        quests_by_slug: dict[str, AdventureQuest] = {}
         for index, spec in enumerate(COMMAND_DRILLS, start=1):
-            usage = usages[spec["usage"]]
-            drill, _ = AdventureQuest.objects.update_or_create(
-                usage=usage,
+            form = forms[spec["usage"]]
+            quest, _ = AdventureQuest.objects.update_or_create(
+                command_form=form,
                 slug=spec["slug"],
                 defaults={
                     "title": spec["title"],
@@ -209,75 +211,74 @@ class Command(BaseCommand):
                     "is_published": True,
                 },
             )
-            live_drill_ids.append(drill.id)
-            drills_by_slug[spec["slug"]] = drill
-            self._sync_variants(problem=drill, variant_specs=spec["variants"], builder=builder)
-        # Second pass: wire the explicit prerequisite graph now that every drill
-        # exists. Prerequisites are authored as a list of drill slugs.
+            live_quest_ids.append(quest.id)
+            quests_by_slug[spec["slug"]] = quest
+            self._sync_variants(quest=quest, variant_specs=spec["variants"], builder=builder)
+        # Second pass: wire the explicit prerequisite graph now that every quest
+        # exists. Prerequisites are authored as a list of quest slugs.
         for spec in COMMAND_DRILLS:
-            drill = drills_by_slug[spec["slug"]]
+            quest = quests_by_slug[spec["slug"]]
             try:
-                prereqs = [drills_by_slug[slug] for slug in spec.get("prerequisites", [])]
+                prereqs = [quests_by_slug[slug] for slug in spec.get("prerequisites", [])]
             except KeyError as missing:
                 raise CommandError(
-                    f"Drill {spec['slug']!r} lists unknown prerequisite {missing}."
+                    f"Adventure quest {spec['slug']!r} lists unknown prerequisite {missing}."
                 )
-            drill.prerequisites.set(prereqs)
-        AdventureQuest.objects.exclude(id__in=live_drill_ids).update(is_published=False)
+            quest.prerequisites.set(prereqs)
+        AdventureQuest.objects.exclude(id__in=live_quest_ids).update(is_published=False)
 
-    def _seed_workflows(self, modules: dict[str, Storey]) -> None:
-        builder = StaticProblemVariantBuilder()
-        live_scenario_ids = []
+    def _seed_challenges(self, storeys: dict[str, Storey]) -> None:
+        builder = StaticQuestVariantBuilder()
+        live_challenge_ids = []
         for index, spec in enumerate(WORKFLOW_SCENARIOS, start=1):
-            scenario, _ = Challenge.objects.update_or_create(
-                module=modules[spec["module"]],
+            challenge, _ = Challenge.objects.update_or_create(
+                storey=storeys[spec["module"]],
                 slug=spec["slug"],
                 defaults={
                     "title": spec["title"],
                     "summary": spec["summary"],
                     "narrative": spec["narrative"],
-                    "command_topics": spec.get("command_topics", []),
                     "sort_order": index,
-                    "is_published": modules[spec["module"]].is_published,
+                    "is_published": storeys[spec["module"]].is_published,
                 },
             )
-            live_scenario_ids.append(scenario.id)
-            live_level_ids = []
-            for level_spec in spec.get("levels", []):
-                level, _ = ChallengeQuest.objects.update_or_create(
-                    scenario=scenario,
-                    difficulty=level_spec["difficulty"],
+            live_challenge_ids.append(challenge.id)
+            live_quest_ids = []
+            for quest_spec in spec.get("levels", []):
+                quest, _ = ChallengeQuest.objects.update_or_create(
+                    challenge=challenge,
+                    difficulty=quest_spec["difficulty"],
                     defaults={
-                        "required_successful_attempts": level_spec["required_successful_attempts"],
-                        "min_counted_commands": level_spec["min_counted_commands"],
-                        "max_counted_commands": level_spec["max_counted_commands"],
-                        "scenario_context": level_spec["scenario_context"],
-                        "is_published": scenario.is_published,
+                        "required_successful_attempts": quest_spec["required_successful_attempts"],
+                        "min_counted_commands": quest_spec["min_counted_commands"],
+                        "max_counted_commands": quest_spec["max_counted_commands"],
+                        "scenario_context": quest_spec["scenario_context"],
+                        "is_published": challenge.is_published,
                     },
                 )
-                live_level_ids.append(level.id)
+                live_quest_ids.append(quest.id)
                 self._sync_variants(
-                    problem=level,
-                    variant_specs=level_spec["variants"],
+                    quest=quest,
+                    variant_specs=quest_spec["variants"],
                     builder=builder,
                 )
-            ChallengeQuest.objects.filter(scenario=scenario).exclude(id__in=live_level_ids).update(
+            ChallengeQuest.objects.filter(challenge=challenge).exclude(id__in=live_quest_ids).update(
                 is_published=False
             )
-        Challenge.objects.exclude(id__in=live_scenario_ids).update(is_published=False)
+        Challenge.objects.exclude(id__in=live_challenge_ids).update(is_published=False)
 
-    def _sync_variants(self, *, problem, variant_specs: list[dict], builder: StaticProblemVariantBuilder) -> None:
+    def _sync_variants(self, *, quest, variant_specs: list[dict], builder: StaticQuestVariantBuilder) -> None:
         live_ids = []
         for index, variant_spec in enumerate(variant_specs, start=1):
             case = {"case_id": variant_spec["case_id"]}
-            variant = builder.build(problem=problem, template=variant_spec, case=case, index=index)
+            variant = builder.build(quest=quest, template=variant_spec, case=case, index=index)
             filters = {"semantic_key": variant.semantic_key}
-            if isinstance(problem, AdventureQuest):
+            if isinstance(quest, AdventureQuest):
                 variant_model = AdventureVariant
-                filters["adventure_quest"] = problem
+                filters["adventure_quest"] = quest
             else:
                 variant_model = ChallengeVariant
-                filters["challenge_quest"] = problem
+                filters["challenge_quest"] = quest
             saved, _ = variant_model.objects.update_or_create(
                 **filters,
                 defaults={
@@ -292,18 +293,18 @@ class Command(BaseCommand):
                     "scenario_context": variant.scenario_context,
                     "hint_set": variant.hint_set,
                     "scaffold_policy": variant.scaffold_policy,
-                    # Command budget lives on the parent problem/level, not the
-                    # variant — all variants of a problem share the same budget.
+                    # Command budget lives on the parent quest, not the
+                    # variant — all variants of a quest share the same budget.
                     "is_published": True,
                 },
             )
             live_ids.append(saved.id)
-        if isinstance(problem, AdventureQuest):
-            AdventureVariant.objects.filter(adventure_quest=problem).exclude(id__in=live_ids).update(
+        if isinstance(quest, AdventureQuest):
+            AdventureVariant.objects.filter(adventure_quest=quest).exclude(id__in=live_ids).update(
                 is_published=False
             )
         else:
-            ChallengeVariant.objects.filter(challenge_quest=problem).exclude(id__in=live_ids).update(
+            ChallengeVariant.objects.filter(challenge_quest=quest).exclude(id__in=live_ids).update(
                 is_published=False
             )
 
@@ -316,43 +317,43 @@ class Command(BaseCommand):
             "syntax_examples": syntax_examples,
         }
 
-    def _published_module_slugs(self) -> set[str]:
-        usage_to_module = {}
-        for topic in COMMAND_TOPICS:
-            for usage in topic.get("usages", []):
-                usage_to_module[f"{topic['slug']}/{usage['slug']}"] = topic["module"]
-        command_modules = {
-            usage_to_module[spec["usage"]]
+    def _published_storey_slugs(self) -> set[str]:
+        form_to_storey = {}
+        for skill_spec in COMMAND_TOPICS:
+            for form_spec in skill_spec.get("usages", []):
+                form_to_storey[f"{skill_spec['slug']}/{form_spec['slug']}"] = skill_spec["module"]
+        command_storeys = {
+            form_to_storey[spec["usage"]]
             for spec in COMMAND_DRILLS
-            if spec["usage"] in usage_to_module
+            if spec["usage"] in form_to_storey
         }
-        workflow_modules = {
+        challenge_storeys = {
             spec["module"]
             for spec in WORKFLOW_SCENARIOS
-            if spec["module"] in command_modules
+            if spec["module"] in command_storeys
         }
-        return command_modules | workflow_modules
+        return command_storeys | challenge_storeys
 
     def _validate_curriculum(self) -> None:
         errors: list[str] = []
-        modules = list(Storey.objects.filter(is_published=True).order_by("sort_order", "number"))
-        for module in modules:
-            levels = list(
-                CommandSkill.objects.filter(module=module, is_published=True).order_by("sort_order", "id")
+        storeys = list(Storey.objects.filter(is_published=True).order_by("sort_order", "number"))
+        for storey in storeys:
+            skills = list(
+                CommandSkill.objects.filter(storey=storey, is_published=True).order_by("sort_order", "id")
             )
-            if not levels:
-                errors.append(f"{module.slug}: missing command drill adventure levels")
+            if not skills:
+                errors.append(f"{storey.slug}: missing command skills")
                 continue
-            for level in levels:
-                self._validate_command_level(level=level, errors=errors)
+            for skill in skills:
+                self._validate_command_skill(skill=skill, errors=errors)
 
-        for scenario in Challenge.objects.filter(is_published=True):
-            levels = list(scenario.levels.filter(is_published=True))
-            difficulties = {level.difficulty for level in levels}
+        for challenge in Challenge.objects.filter(is_published=True):
+            quests = list(challenge.challenge_quests.filter(is_published=True))
+            difficulties = {quest.difficulty for quest in quests}
             if difficulties != {"easy", "medium", "hard"}:
-                errors.append(f"{scenario.slug}: workflow scenarios must publish Easy, Medium, and Hard")
-            for level in levels:
-                self._validate_problem_variants(problem=level, errors=errors)
+                errors.append(f"{challenge.slug}: challenges must publish Easy, Medium, and Hard")
+            for quest in quests:
+                self._validate_quest_variants(quest=quest, errors=errors)
 
         self._validate_prerequisites(errors=errors)
 
@@ -365,55 +366,58 @@ class Command(BaseCommand):
         be published, in the same adventure, and precede its dependent in order."""
         ordered = list(
             AdventureQuest.objects.filter(is_published=True)
-            .order_by("usage__topic__sort_order", "usage__sort_order", "sort_order", "id")
+            .order_by("command_form__command_skill__sort_order", "command_form__sort_order", "sort_order", "id")
             .prefetch_related("prerequisites")
-            .select_related("usage__topic")
+            .select_related("command_form__command_skill")
         )
-        position = {problem.id: index for index, problem in enumerate(ordered)}
+        position = {quest.id: index for index, quest in enumerate(ordered)}
         graph: dict[int, list[int]] = {}
-        for problem in ordered:
-            prereqs = list(problem.prerequisites.all())
-            graph[problem.id] = [pre.id for pre in prereqs]
+        for quest in ordered:
+            prereqs = list(quest.prerequisites.all())
+            graph[quest.id] = [pre.id for pre in prereqs]
             for pre in prereqs:
                 if not pre.is_published:
-                    errors.append(f"{problem.slug}: prerequisite {pre.slug} is not published")
-                elif pre.usage.topic.module_id != problem.usage.topic.module_id:
-                    errors.append(f"{problem.slug}: prerequisite {pre.slug} is in a different adventure")
-                elif position.get(pre.id, 1 << 30) >= position[problem.id]:
-                    errors.append(f"{problem.slug}: prerequisite {pre.slug} must precede it in sort order")
+                    errors.append(f"{quest.slug}: prerequisite {pre.slug} is not published")
+                elif pre.command_form.command_skill.storey_id != quest.command_form.command_skill.storey_id:
+                    errors.append(f"{quest.slug}: prerequisite {pre.slug} is in a different adventure")
+                elif position.get(pre.id, 1 << 30) >= position[quest.id]:
+                    errors.append(f"{quest.slug}: prerequisite {pre.slug} must precede it in sort order")
         cycle = _find_prerequisite_cycle(graph)
         if cycle:
-            slugs = {p.id: p.slug for p in ordered}
+            slugs = {q.id: q.slug for q in ordered}
             errors.append("prerequisite graph has a cycle: " + " -> ".join(slugs[i] for i in cycle))
 
-    def _validate_command_level(self, *, level: CommandSkill, errors: list[str]) -> None:
-        if not level.base_command:
-            errors.append(f"{level.slug}: command level is missing a base command")
-        usages = list(level.usages.filter(is_published=True).order_by("sort_order", "id"))
-        if not usages:
-            errors.append(f"{level.slug}: command level has no published usages/options")
+    def _validate_command_skill(self, *, skill: CommandSkill, errors: list[str]) -> None:
+        if not skill.base_command:
+            errors.append(f"{skill.slug}: command skill is missing a base command")
+        forms = list(skill.command_forms.filter(is_published=True).order_by("sort_order", "id"))
+        if not forms:
+            errors.append(f"{skill.slug}: command skill has no published forms")
             return
-        for usage in usages:
-            drills = list(usage.drills.filter(is_published=True).order_by("sort_order", "id"))
-            if not drills:
-                errors.append(f"{level.slug}/{usage.slug}: published usage has no command drills")
+        for form in forms:
+            quests = list(form.adventure_quests.filter(is_published=True).order_by("sort_order", "id"))
+            if not quests:
+                errors.append(f"{skill.slug}/{form.slug}: published form has no adventure quests")
                 continue
-            for drill in drills:
-                self._validate_problem_variants(problem=drill, errors=errors)
+            for quest in quests:
+                self._validate_quest_variants(quest=quest, errors=errors)
 
-    def _validate_problem_variants(self, *, problem, errors: list[str]) -> None:
-        variants = list(problem.variants.filter(is_published=True).order_by("semantic_key", "id"))
+    def _validate_quest_variants(self, *, quest, errors: list[str]) -> None:
+        if isinstance(quest, AdventureQuest):
+            variants = list(quest.adventure_variants.filter(is_published=True).order_by("semantic_key", "id"))
+        else:
+            variants = list(quest.challenge_variants.filter(is_published=True).order_by("semantic_key", "id"))
         if not variants:
-            errors.append(f"{self._problem_name(problem)}: published practice item has no variants")
+            errors.append(f"{self._quest_name(quest)}: published practice item has no variants")
             return
-        # Mastery reviews must vary the scenario: a drill needs at least as many
+        # Mastery reviews must vary the scenario: a quest needs at least as many
         # variants as the masteries it demands, or repeated reviews show the same
         # screen. Warn (not error) so under-authored content still seeds + runs.
-        if isinstance(problem, AdventureQuest) and len(variants) < problem.required_successful_attempts:
+        if isinstance(quest, AdventureQuest) and len(variants) < quest.required_successful_attempts:
             self.stdout.write(
                 self.style.WARNING(
-                    f"{self._problem_name(problem)}: {len(variants)} variant(s) for "
-                    f"{problem.required_successful_attempts} required masteries; "
+                    f"{self._quest_name(quest)}: {len(variants)} variant(s) for "
+                    f"{quest.required_successful_attempts} required masteries; "
                     "reviews will repeat scenarios until more variants are authored."
                 )
             )
@@ -422,7 +426,7 @@ class Command(BaseCommand):
 
     def _validate_variant(self, *, variant, errors: list[str]) -> None:
         domain = "command_adventure" if hasattr(variant, "adventure_quest_id") else "challenge"
-        label = f"{domain}:{self._problem_slug(variant)}/{variant.slug}"
+        label = f"{domain}:{self._quest_slug(variant)}/{variant.slug}"
         required_fields = {
             "initial_state": variant.initial_state,
             "target_state": variant.target_state,
@@ -465,13 +469,13 @@ class Command(BaseCommand):
         if visualization.get("schema_version") != 2 or "commit_dag" not in visualization:
             errors.append(f"{label}: repository visualization is missing")
 
-    def _problem_slug(self, variant) -> str:
+    def _quest_slug(self, variant) -> str:
         if getattr(variant, "adventure_quest_id", None):
             return variant.adventure_quest.slug
-        level = variant.challenge_quest
-        return f"{level.scenario.slug}/{level.difficulty}"
+        quest = variant.challenge_quest
+        return f"{quest.challenge.slug}/{quest.difficulty}"
 
-    def _problem_name(self, problem) -> str:
-        if isinstance(problem, AdventureQuest):
-            return problem.slug
-        return f"{problem.scenario.slug}/{problem.difficulty}"
+    def _quest_name(self, quest) -> str:
+        if isinstance(quest, AdventureQuest):
+            return quest.slug
+        return f"{quest.challenge.slug}/{quest.difficulty}"

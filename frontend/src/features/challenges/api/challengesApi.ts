@@ -32,8 +32,8 @@ export const challengesApi = {
   commandFormPreview(formId: number) {
     return apiRequest<CommandFormPreview>(`/command-forms/${formId}/preview/`)
   },
-  startChallengeRun(levelId: number, input?: { prior_run_id?: number | null; review?: boolean }) {
-    return apiRequest<ChallengeRun>(`/challenge-levels/${levelId}/runs/`, {
+  startChallengeRun(questId: number, input?: { prior_run_id?: number | null; review?: boolean }) {
+    return apiRequest<ChallengeRun>(`/challenge-quests/${questId}/runs/`, {
       method: 'POST',
       body: JSON.stringify({
         source_entry_point: input?.review ? 'review' : 'tower_page',

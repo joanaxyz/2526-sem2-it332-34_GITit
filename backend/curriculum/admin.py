@@ -19,13 +19,13 @@ class ConceptPageAdmin(admin.ModelAdmin):
 
 @admin.register(CommandSkill)
 class CommandSkillAdmin(admin.ModelAdmin):
-    list_display = ("slug", "base_command", "module", "is_published", "sort_order")
+    list_display = ("slug", "base_command", "storey", "is_published", "sort_order")
     list_filter = ("is_published", "base_command")
     search_fields = ("title", "slug", "base_command")
 
 
 @admin.register(CommandForm)
 class CommandFormAdmin(admin.ModelAdmin):
-    list_display = ("slug", "usage_form", "topic", "is_published", "sort_order")
+    list_display = ("slug", "usage_form", "command_skill", "is_published", "sort_order")
     list_filter = ("is_published",)
     search_fields = ("label", "usage_form", "slug")

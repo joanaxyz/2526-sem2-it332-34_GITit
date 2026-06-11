@@ -67,7 +67,7 @@ function mockCanonicalStoreyContent() {
             is_passed: false,
             active_run_id: null,
             latest_run_id: null,
-            problem_count: 5,
+            quest_count: 5,
             progress: { value: 0, numerator: 0, denominator: 5 },
           },
         ],
@@ -84,8 +84,7 @@ function mockCanonicalStoreyContent() {
           title: 'Stage, Commit, Then Switch Branches',
           summary: 'Combine staging, committing, and branch switching.',
           narrative: '',
-          command_topics: ['git add', 'git commit', 'git switch'],
-          levels: ['easy', 'medium', 'hard'].map((difficulty, index) => ({
+          quests: ['easy', 'medium', 'hard'].map((difficulty, index) => ({
             id: 300 + index,
             difficulty,
             status: difficulty === 'easy' ? 'not_started' : 'locked',
@@ -140,7 +139,7 @@ describe('StoreyPracticeHub', () => {
     useTowerSelection.setState({ selected: null })
   })
 
-  it('renders a balcony adventure door and one door per challenge level', async () => {
+  it('renders a balcony adventure door and one door per challenge quest', async () => {
     mockCanonicalStoreyContent()
     renderHub()
 
@@ -173,7 +172,7 @@ describe('StoreyPracticeHub', () => {
     expect(screen.getByRole('button', { name: /^play$/i })).toBeInTheDocument()
   })
 
-  it('shows the chosen level overview with accuracy + attempts when a trial door is selected', async () => {
+  it('shows the chosen quest overview with accuracy + attempts when a trial door is selected', async () => {
     mockCanonicalStoreyContent()
     renderHub()
 

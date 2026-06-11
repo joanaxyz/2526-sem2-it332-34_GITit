@@ -1,4 +1,4 @@
-import type { ChallengeLevelAccess, Difficulty, PracticeCompletion } from '@/features/challenges/types'
+import type { ChallengeQuestAccess, Difficulty, PracticeCompletion } from '@/features/challenges/types'
 
 export type RepositoryValue =
   | string
@@ -82,13 +82,13 @@ export type PracticeScenarioContext = {
   constraints?: string[]
 }
 
-export type ChallengeProblem = {
+export type ChallengeRef = {
   id: number
   slug: string
   title: string
   summary: string
   narrative: string
-  level_id: number
+  quest_id: number
 }
 
 export type RepositoryVisualization = {
@@ -103,7 +103,7 @@ export type ChallengeRun = {
   failure_reason?: string | null
   completed_at: string | null
   first_attempt_star_eligible: boolean
-  challenge: ChallengeProblem
+  challenge: ChallengeRef
   scenario_context?: PracticeScenarioContext
   storey: {
     id: number
@@ -153,11 +153,11 @@ export type ChallengeRun = {
     difficulty: Difficulty
   } | null
   /**
-   * Every level of this run's scenario (easy→hard) with the user's access state.
-   * Drives the completion modal's level navigator so learners can jump to any
-   * unlocked level — including lower ones — without leaving the modal.
+   * Every quest of this run's challenge (easy→hard) with the user's access state.
+   * Drives the completion modal's quest navigator so learners can jump to any
+   * unlocked quest — including lower ones — without leaving the modal.
    */
-  sibling_levels?: ChallengeLevelAccess[]
+  sibling_quests?: ChallengeQuestAccess[]
   completion?: PracticeCompletion | null
 }
 
@@ -214,7 +214,7 @@ export type ChallengeRunUpdate = Pick<
   Partial<
     Pick<
       ChallengeRun,
-      'mastery_progress' | 'mastered_records' | 'completion' | 'next_difficulty' | 'sibling_levels'
+      'mastery_progress' | 'mastered_records' | 'completion' | 'next_difficulty' | 'sibling_quests'
     >
   >
 

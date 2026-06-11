@@ -23,11 +23,11 @@ class CommandStep(models.Model):
         DIAGNOSTIC = COMMAND_DIAGNOSTIC, "Non-counted diagnostic"
         UNPROCESSABLE = COMMAND_UNPROCESSABLE, "Unprocessable"
 
-    session = models.ForeignKey(
+    challenge_run = models.ForeignKey(
         "challenges.ChallengeRun",
         null=True,
         blank=True,
-        related_name="step_logs",
+        related_name="steps",
         on_delete=models.CASCADE,
     )
     attempt = models.ForeignKey(
@@ -53,15 +53,15 @@ class CommandStep(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=["session", "id"], name="cmdstep_session_id_idx"),
+            models.Index(fields=["challenge_run", "id"], name="cmdstep_run_id_idx"),
             # Adventure history is queried by attempt (attempt.steps ordered by id,
-            # plus the command-history join); mirror the session index for it.
+            # plus the command-history join); mirror the run index for it.
             models.Index(fields=["attempt", "id"], name="cmdstep_attempt_id_idx"),
         ]
 
 
 class CommandLog(models.Model):
-    step_log = models.OneToOneField(CommandStep, related_name="command_log", on_delete=models.CASCADE)
+    step = models.OneToOneField(CommandStep, related_name="command_log", on_delete=models.CASCADE)
     raw_command = models.TextField()
     normalized_command = models.TextField()
     was_processable = models.BooleanField(default=False)

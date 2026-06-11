@@ -76,12 +76,12 @@ class CommandFormPreviewAPIView(APIView):
                 "label": form.label,
                 "summary": form.summary,
                 "skill": {
-                    "id": form.topic_id,
-                    "slug": form.topic.slug,
-                    "base_command": form.topic.base_command,
-                    "title": form.topic.title,
+                    "id": form.command_skill_id,
+                    "slug": form.command_skill.slug,
+                    "base_command": form.command_skill.base_command,
+                    "title": form.command_skill.title,
                 },
-                "command_preview": form.command_preview or form.topic.command_preview or {},
+                "command_preview": form.command_preview or form.command_skill.command_preview or {},
             }
         )
 

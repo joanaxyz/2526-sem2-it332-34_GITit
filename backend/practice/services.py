@@ -8,8 +8,8 @@ from rest_framework.exceptions import ValidationError
 
 from challenges.models import ChallengeRun
 from challenges.selectors import (
-    required_successful_attempts_for_problem,
-    session_meets_progress_threshold,
+    required_successful_attempts_for_quest,
+    run_meets_progress_threshold,
 )
 from challenges.services import CommandHistoryCache
 from common.constants import (
@@ -33,7 +33,7 @@ from practice.models import CommandLog, CommandStep
 from practice.scaffolding import FeedbackGenerationService
 from practice.visualization import RepositoryVisualizationService
 from progress.chests import StoreyChestService
-from progress.models import ProblemCompletion
+from progress.models import QuestCompletion
 from progress.services import StreakService
 from simulator.command_engine import SimulatedGitCommandEngine
 from simulator.services import (
@@ -130,7 +130,7 @@ class CommandExecutor:
 def log_command_step(step: CommandStep, *, command: str, result: Any) -> None:
     """Persist the raw/normalized command for a step. Identical across flows."""
     CommandLog.objects.create(
-        step_log=step,
+        step=step,
         raw_command=command,
         normalized_command=result.normalized_command,
         was_processable=result.processed,
@@ -212,7 +212,7 @@ class CommandProcessingService:
                 executed_commands = [*previous_history, command_result.normalized_command]
                 evaluation = PracticeCompletionEvaluator().evaluate(
                     CompletionEvaluationContext(
-                        session=run,
+                        run=run,
                         previous_state=previous_state,
                         next_state=next_state,
                         executed_commands=executed_commands,
@@ -249,7 +249,7 @@ class CommandProcessingService:
             )
         with span("step_create"):
             step = CommandStep.objects.create(
-                session=run,
+                challenge_run=run,
                 command_text=command,
                 terminal_output=command_result.output,
                 result_category=result_category,
@@ -296,7 +296,7 @@ class CommandProcessingService:
         with span("run_save"):
             run.save(update_fields=sorted(update_fields))
         if getattr(run, "_chest_check_pending", False):
-            StoreyChestService().award_chests(user=run.user, storey=run.module)
+            StoreyChestService().award_chests(user=run.user, storey=run.storey)
         with span("response_snapshot"):
             if _command_response_includes_project_tree(
                 command_result=command_result,
@@ -330,7 +330,7 @@ class CommandProcessingService:
         run.ended_at = run.completed_at
         run.rta_success = bool(run.rta_eligible and run.first_attempt_star_eligible)
         if run.mode == SESSION_MODE_PRIMARY:
-            required = required_successful_attempts_for_problem(run.challenge_quest)
+            required = required_successful_attempts_for_quest(run.challenge_quest)
             previous_progress = 0
             # only(): the threshold check reads three small fields; without it every
             # prior run ships its full repository_state JSON over the wire.
@@ -340,11 +340,11 @@ class CommandProcessingService:
                 status=SESSION_STATUS_COMPLETED,
                 challenge_quest=run.challenge_quest,
             ).exclude(pk=run.pk).only("status", "counted_action_total", "command_budget_snapshot"):
-                if session_meets_progress_threshold(session=prior_run):
+                if run_meets_progress_threshold(run=prior_run):
                     previous_progress += 1
-            current_meets_progress = session_meets_progress_threshold(session=run)
+            current_meets_progress = run_meets_progress_threshold(run=run)
             if previous_progress + (1 if current_meets_progress else 0) >= required:
-                completion, created = ProblemCompletion.objects.get_or_create(
+                completion, created = QuestCompletion.objects.get_or_create(
                     user=run.user,
                     challenge_quest=run.challenge_quest,
                     defaults={

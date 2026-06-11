@@ -1,7 +1,7 @@
 import { Activity, ArrowRight, Award, Castle, RefreshCcw, Send, Sparkles, Stethoscope, Target, Trophy, XCircle } from 'lucide-react'
 import type { CSSProperties } from 'react'
 
-import { ChallengeLevelNav } from '@/features/challenges/components/ChallengeLevelNav'
+import { ChallengeQuestNav } from '@/features/challenges/components/ChallengeQuestNav'
 import type { ChallengeRun } from '@/shared/practice/types'
 import {
   commandAccuracyFromSession,
@@ -22,12 +22,12 @@ export function ChallengeOutcomeModal({
   run,
   onClose,
   onBackToTower,
-  onNextLevel,
+  onNextQuest,
   onContinue,
   onRetry,
-  onSelectLevel,
-  busyLevelId,
-  isStartingNextLevel = false,
+  onSelectQuest,
+  busyQuestId,
+  isStartingNextQuest = false,
   isContinuing = false,
   isRetrying = false,
   nextDifficultyLabel,
@@ -36,13 +36,13 @@ export function ChallengeOutcomeModal({
   run: ChallengeRun
   onClose: () => void
   onBackToTower: () => void
-  onNextLevel?: () => void
+  onNextQuest?: () => void
   onContinue?: () => void
   onRetry?: () => void
-  /** Start a fresh run on an arbitrary sibling level from the level navigator. */
-  onSelectLevel?: (levelId: number) => void
-  busyLevelId?: number | null
-  isStartingNextLevel?: boolean
+  /** Start a fresh run on an arbitrary sibling quest from the quest navigator. */
+  onSelectQuest?: (questId: number) => void
+  busyQuestId?: number | null
+  isStartingNextQuest?: boolean
   isContinuing?: boolean
   isRetrying?: boolean
   nextDifficultyLabel?: string | null
@@ -54,7 +54,7 @@ export function ChallengeOutcomeModal({
   const isReplay = run.review_mode
   const withinMasteryTarget = meetsMasteryAccuracy(accuracy)
   const meetsProgress = meetsProgressAccuracy(accuracy)
-  const isNavigating = isStartingNextLevel || isContinuing || isRetrying || Boolean(busyLevelId)
+  const isNavigating = isStartingNextQuest || isContinuing || isRetrying || Boolean(busyQuestId)
   const requiredAttempts = run.mastery_progress?.required ?? 3
   const hasRequiredAttempts = (run.mastery_progress?.mastered ?? 0) >= requiredAttempts
   const canAdvance = !isReplay && run.status === 'completed' && hasRequiredAttempts && meetsProgress
@@ -69,7 +69,7 @@ export function ChallengeOutcomeModal({
       : shouldRetryForAccuracy
         ? 'Practice cleared, but accuracy needs a retry'
         : canAdvance
-          ? 'Level ready'
+          ? 'Quest ready'
           : run.first_attempt_star_eligible && withinMasteryTarget
             ? 'Clean run logged'
             : 'Practice cleared'
@@ -84,11 +84,11 @@ export function ChallengeOutcomeModal({
           'You used every counted action allowed for this attempt without reaching the target repository state. Check that you chose the correct conflict side, staged the file, and completed the merge commit, then start a fresh variant.'
         : 'This attempt ended before the repository reached the target state. Start a fresh variant and try again with a clean workspace.'
       : shouldRetryForAccuracy
-        ? 'The target state was reached, but command accuracy was below 70%. Retry this level to count the run toward progress.'
+        ? 'The target state was reached, but command accuracy was below 70%. Retry this quest to count the run toward progress.'
         : canAdvance
           ? withinMasteryTarget
-            ? 'You completed the required successful attempts at 100% accuracy. The next level is ready.'
-            : 'You completed the required successful attempts. The next level is ready.'
+            ? 'You completed the required successful attempts at 100% accuracy. The next quest is ready.'
+            : 'You completed the required successful attempts. The next quest is ready.'
           : meetsProgress
             ? 'That run counts toward progress. Continue to start a fresh attempt for the remaining successful records.'
             : 'Practice cleared.'
@@ -188,10 +188,10 @@ export function ChallengeOutcomeModal({
     </>
   ) : canAdvance ? (
     <>
-      {onNextLevel && nextDifficultyLabel ? (
-        <Button type="button" disabled={isNavigating} onClick={onNextLevel}>
+      {onNextQuest && nextDifficultyLabel ? (
+        <Button type="button" disabled={isNavigating} onClick={onNextQuest}>
           <ArrowRight data-icon="inline-start" />
-          {isStartingNextLevel ? 'Opening next level' : `Next: ${nextDifficultyLabel}`}
+          {isStartingNextQuest ? 'Opening next quest' : `Next: ${nextDifficultyLabel}`}
         </Button>
       ) : null}
       <Button type="button" variant="secondary" disabled={isNavigating} onClick={onClose}>
@@ -236,13 +236,13 @@ export function ChallengeOutcomeModal({
       stats={stats}
       actions={actions}
     >
-      {/* Level navigation is challenge-only — the adventure modal omits it. */}
-      {!isReplay && onSelectLevel && run.sibling_levels && run.difficulty ? (
-        <ChallengeLevelNav
-          levels={run.sibling_levels}
-          currentLevelId={run.challenge.level_id}
-          onSelectLevel={onSelectLevel}
-          busyLevelId={busyLevelId}
+      {/* Quest navigation is challenge-only — the adventure modal omits it. */}
+      {!isReplay && onSelectQuest && run.sibling_quests && run.difficulty ? (
+        <ChallengeQuestNav
+          quests={run.sibling_quests}
+          currentQuestId={run.challenge.quest_id}
+          onSelectQuest={onSelectQuest}
+          busyQuestId={busyQuestId}
           disabled={isNavigating}
         />
       ) : null}

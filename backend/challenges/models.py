@@ -17,22 +17,21 @@ from common.constants import (
 
 
 class Challenge(models.Model):
-    module = models.ForeignKey(
+    storey = models.ForeignKey(
         "curriculum.Storey",
-        related_name="workflow_scenarios",
+        related_name="challenges",
         on_delete=models.CASCADE,
     )
     slug = models.SlugField()
     title = models.CharField(max_length=180)
     summary = models.TextField(blank=True)
     narrative = models.TextField(blank=True)
-    command_topics = models.JSONField(default=list, blank=True)
     is_published = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
 
     class Meta:
-        ordering = ["module__sort_order", "sort_order", "title"]
-        unique_together = [("module", "slug")]
+        ordering = ["storey__sort_order", "sort_order", "title"]
+        unique_together = [("storey", "slug")]
 
     def __str__(self) -> str:
         return self.title
@@ -44,7 +43,7 @@ class ChallengeQuest(models.Model):
         MEDIUM = DIFFICULTY_MEDIUM, "Medium"
         HARD = DIFFICULTY_HARD, "Hard"
 
-    scenario = models.ForeignKey(Challenge, related_name="levels", on_delete=models.CASCADE)
+    challenge = models.ForeignKey(Challenge, related_name="challenge_quests", on_delete=models.CASCADE)
     difficulty = models.CharField(max_length=12, choices=Difficulty.choices)
     required_successful_attempts = models.PositiveIntegerField(default=2)
     min_counted_commands = models.PositiveIntegerField(default=1)
@@ -54,21 +53,21 @@ class ChallengeQuest(models.Model):
     is_published = models.BooleanField(default=True)
 
     class Meta:
-        ordering = ["scenario__sort_order", "difficulty"]
-        unique_together = [("scenario", "difficulty")]
+        ordering = ["challenge__sort_order", "difficulty"]
+        unique_together = [("challenge", "difficulty")]
 
     def __str__(self) -> str:
-        return f"{self.scenario} / {self.difficulty}"
+        return f"{self.challenge} / {self.difficulty}"
 
     @property
-    def module(self):
-        return self.scenario.module
+    def storey(self):
+        return self.challenge.storey
 
 
 class ChallengeVariant(VariantBase):
     challenge_quest = models.ForeignKey(
         ChallengeQuest,
-        related_name="variants",
+        related_name="challenge_variants",
         on_delete=models.CASCADE,
     )
     command_budget = models.JSONField(default=dict, blank=True)
@@ -78,7 +77,7 @@ class ChallengeVariant(VariantBase):
         ordering = ["challenge_quest_id", "semantic_key", "id"]
 
     @property
-    def problem(self):
+    def quest(self):
         return self.challenge_quest
 
     def __str__(self) -> str:
@@ -97,15 +96,15 @@ class ChallengeRun(models.Model):
         REVIEW = SESSION_MODE_REVIEW, "Review"
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    module = models.ForeignKey("curriculum.Storey", on_delete=models.PROTECT)
-    workflow_scenario = models.ForeignKey(Challenge, on_delete=models.PROTECT)
+    storey = models.ForeignKey("curriculum.Storey", on_delete=models.PROTECT)
+    challenge = models.ForeignKey(Challenge, on_delete=models.PROTECT)
     challenge_quest = models.ForeignKey(ChallengeQuest, on_delete=models.PROTECT)
     challenge_variant = models.ForeignKey(ChallengeVariant, on_delete=models.PROTECT)
-    prior_session = models.ForeignKey(
+    prior_run = models.ForeignKey(
         "self",
         null=True,
         blank=True,
-        related_name="retry_sessions",
+        related_name="retry_runs",
         on_delete=models.SET_NULL,
     )
     source_entry_point = models.CharField(max_length=40)
@@ -135,15 +134,15 @@ class ChallengeRun(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["user", "mode", "status"], name="challenge_user_mode_status_idx"),
-            models.Index(fields=["user", "challenge_quest", "-id"], name="chal_user_level_latest_idx"),
+            models.Index(fields=["user", "challenge_quest", "-id"], name="chal_user_quest_latest_idx"),
         ]
 
     def clean(self) -> None:
-        if self.workflow_scenario_id != self.challenge_quest.scenario_id:
-            raise ValidationError("Challenge run level must belong to the selected challenge.")
+        if self.challenge_id != self.challenge_quest.challenge_id:
+            raise ValidationError("Challenge run quest must belong to the selected challenge.")
 
     @property
-    def problem(self):
+    def quest(self):
         return self.challenge_quest
 
     @property

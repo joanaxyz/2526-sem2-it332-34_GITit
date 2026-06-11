@@ -8,7 +8,7 @@ from evaluation.services import EvaluationOutcome
 
 @dataclass
 class CompletionEvaluationContext:
-    session: Any
+    run: Any
     previous_state: dict
     next_state: dict
     executed_commands: list[str] = field(default_factory=list)
@@ -18,7 +18,7 @@ class CompletionEvaluationContext:
 
 class PracticeCompletionEvaluator:
     def evaluate(self, context: CompletionEvaluationContext) -> EvaluationOutcome:
-        variant = context.session.variant
+        variant = context.run.variant
         raw_spec = getattr(variant, "evaluation_spec", None)
         variant_id = getattr(variant, "id", None)
         if raw_spec and variant_id is not None:
@@ -31,15 +31,15 @@ class PracticeCompletionEvaluator:
         elif raw_spec:
             spec = compile_evaluation_spec(raw_spec)
         else:
-            # Problem-level fallback is rare and not keyed by a stable cache id, so
+            # Quest-level fallback is rare and not keyed by a stable cache id, so
             # compile it directly.
             spec = compile_evaluation_spec(
-                getattr(context.session.problem, "evaluation_spec", None)
+                getattr(context.run.quest, "evaluation_spec", None)
             )
         return EvaluationEngine().evaluate(
             spec=spec,
             next_state=context.next_state,
-            initial_state=getattr(context.session.variant, "initial_state", None),
+            initial_state=getattr(context.run.variant, "initial_state", None),
             executed_commands=context.executed_commands,
             next_state_hash=context.next_state_hash,
             expected_state_hash=context.expected_state_hash,

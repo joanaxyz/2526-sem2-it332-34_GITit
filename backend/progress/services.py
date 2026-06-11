@@ -16,9 +16,9 @@ from common.constants import (
 )
 from adventures.models import AdventureMastery, AdventureQuest, AdventureQuestAttempt, AdventureRun
 from challenges.models import ChallengeQuest, ChallengeRun
-from challenges.selectors import command_accuracy_rate, minimum_counted_for_session
+from challenges.selectors import command_accuracy_rate, minimum_counted_for_run
 from practice.models import CommandStep
-from progress.models import ProblemCompletion, StreakRecord, Wallet
+from progress.models import QuestCompletion, StreakRecord, Wallet
 
 
 # Trailing window (days) for the activity trend and the consistency axis.
@@ -89,12 +89,12 @@ class MetricsService:
         failed = (challenge_counts["failed"] or 0) + (adventure_counts["failed"] or 0)
         abandoned = (challenge_counts["abandoned"] or 0) + (adventure_counts["abandoned"] or 0)
 
-        completion_records = ProblemCompletion.objects.filter(user=user).select_related("challenge_run")
+        completion_records = QuestCompletion.objects.filter(user=user).select_related("challenge_run")
         accuracy_values = [
             command_accuracy_rate(
                 status=record.challenge_run.status,
                 counted_action_total=record.counted_action_total,
-                minimum_counted_commands=minimum_counted_for_session(session=record.challenge_run),
+                minimum_counted_commands=minimum_counted_for_run(run=record.challenge_run),
             )
             or 0
             for record in completion_records
@@ -102,7 +102,7 @@ class MetricsService:
         ]
         storey_rows = (
             ChallengeRun.objects.filter(user=user, mode=SESSION_MODE_PRIMARY)
-            .values("module__number")
+            .values("storey__number")
             .annotate(
                 hard_started=Count("id", filter=Q(challenge_quest__difficulty=DIFFICULTY_HARD)),
                 hard_completed=Count(
@@ -117,9 +117,9 @@ class MetricsService:
             )
         )
         storey_metrics_map = {
-            int(row["module__number"]): row
+            int(row["storey__number"]): row
             for row in storey_rows
-            if row["module__number"] is not None
+            if row["storey__number"] is not None
         }
         storey_kpis = {
             str(storey_number): {
@@ -169,7 +169,7 @@ class MetricsService:
                 "longest": streak.longest_streak if streak else 0,
                 "last_completed_on": streak.last_completed_on if streak else None,
             },
-            "first_attempt_stars": ProblemCompletion.objects.filter(user=user, first_attempt_star=True).count(),
+            "first_attempt_stars": QuestCompletion.objects.filter(user=user, first_attempt_star=True).count(),
             "retry_trends": self._retry_trends(user=user, started=started),
         }
 
@@ -183,8 +183,8 @@ class MetricsService:
         today = timezone.localdate()
 
         # Accuracy + total volume from the unified command log (spans both modes
-        # via session=ChallengeRun and attempt=AdventureQuestAttempt).
-        steps = CommandStep.objects.filter(Q(session__user=user) | Q(attempt__run__user=user))
+        # via challenge_run=ChallengeRun and attempt=AdventureQuestAttempt).
+        steps = CommandStep.objects.filter(Q(challenge_run__user=user) | Q(attempt__run__user=user))
         step_totals = steps.aggregate(
             total=Count("id"),
             unclean=Count("id", filter=Q(result_category__in=[RESULT_INVALID, RESULT_UNPROCESSABLE])),
@@ -203,14 +203,14 @@ class MetricsService:
             independence=Avg("independence_score"),
             n=Count("id"),
         )
-        chal_completion = ProblemCompletion.objects.filter(
+        chal_completion = QuestCompletion.objects.filter(
             user=user, challenge_run__isnull=False
         ).select_related("challenge_run")
         chal_eff_values = [
             command_accuracy_rate(
                 status=record.challenge_run.status,
                 counted_action_total=record.counted_action_total,
-                minimum_counted_commands=minimum_counted_for_session(session=record.challenge_run),
+                minimum_counted_commands=minimum_counted_for_run(run=record.challenge_run),
             )
             or 0
             for record in chal_completion
@@ -256,8 +256,8 @@ class MetricsService:
         )
 
         # Coverage: distinct quests completed over all published quests (both ladders).
-        adv_done = ProblemCompletion.objects.filter(user=user, adventure_quest__isnull=False).count()
-        chal_done = ProblemCompletion.objects.filter(user=user, challenge_quest__isnull=False).count()
+        adv_done = QuestCompletion.objects.filter(user=user, adventure_quest__isnull=False).count()
+        chal_done = QuestCompletion.objects.filter(user=user, challenge_quest__isnull=False).count()
         total_quests = (
             AdventureQuest.objects.filter(is_published=True).count()
             + ChallengeQuest.objects.filter(is_published=True).count()
@@ -304,7 +304,7 @@ class MetricsService:
             # instead of implying they cover adventures.
             "boss_floors": {"value": chal_counts["hard_completed"] or 0, "scope": "challenge"},
             "comebacks": {"value": chal_counts["comebacks"] or 0, "scope": "challenge"},
-            "perfect_clears": ProblemCompletion.objects.filter(user=user, first_attempt_star=True).count(),
+            "perfect_clears": QuestCompletion.objects.filter(user=user, first_attempt_star=True).count(),
             "day_streak": streak.current_streak if streak else 0,
             "longest_streak": streak.longest_streak if streak else 0,
             "gitcoins": wallet.balance if wallet else 0,
@@ -335,14 +335,14 @@ class MetricsService:
 
     def _active_days(self, *, user, since) -> set:
         completion_days = (
-            ProblemCompletion.objects.filter(user=user, completed_at__gte=since)
+            QuestCompletion.objects.filter(user=user, completed_at__gte=since)
             .annotate(day=TruncDate("completed_at"))
             .values_list("day", flat=True)
             .distinct()
         )
         step_days = (
             CommandStep.objects.filter(
-                Q(session__user=user) | Q(attempt__run__user=user), created_at__gte=since
+                Q(challenge_run__user=user) | Q(attempt__run__user=user), created_at__gte=since
             )
             .annotate(day=TruncDate("created_at"))
             .values_list("day", flat=True)
@@ -352,7 +352,7 @@ class MetricsService:
 
     def _activity_trend(self, *, user, since, today) -> list[dict]:
         completed_by_day = dict(
-            ProblemCompletion.objects.filter(user=user, completed_at__gte=since)
+            QuestCompletion.objects.filter(user=user, completed_at__gte=since)
             .annotate(day=TruncDate("completed_at"))
             .values("day")
             .annotate(count=Count("id"))
@@ -360,7 +360,7 @@ class MetricsService:
         )
         commands_by_day = dict(
             CommandStep.objects.filter(
-                Q(session__user=user) | Q(attempt__run__user=user), created_at__gte=since
+                Q(challenge_run__user=user) | Q(attempt__run__user=user), created_at__gte=since
             )
             .annotate(day=TruncDate("created_at"))
             .values("day")
@@ -373,7 +373,7 @@ class MetricsService:
             trend.append(
                 {
                     "date": day.isoformat(),
-                    "problems_completed": completed_by_day.get(day, 0),
+                    "quests_completed": completed_by_day.get(day, 0),
                     "commands_run": commands_by_day.get(day, 0),
                 }
             )
@@ -405,16 +405,16 @@ class MetricsService:
             return []
         rows = (
             ChallengeRun.objects.filter(user=user, mode=SESSION_MODE_PRIMARY)
-            .values("workflow_scenario__title")
+            .values("challenge__title")
             .annotate(
                 attempts=Count("id"),
-                retries=Count("id", filter=Q(prior_session__isnull=False)),
+                retries=Count("id", filter=Q(prior_run__isnull=False)),
             )
             .order_by("-retries")[:6]
         )
         return [
             {
-                "practice_title": row["workflow_scenario__title"],
+                "practice_title": row["challenge__title"],
                 "attempts": row["attempts"],
                 "retries": row["retries"],
                 "label": "No trend available" if row["attempts"] < 2 else f"{row['retries']} retry runs",

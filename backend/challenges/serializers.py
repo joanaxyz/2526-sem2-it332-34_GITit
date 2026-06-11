@@ -2,11 +2,11 @@ from rest_framework import serializers
 
 from common.constants import SESSION_MODE_REVIEW, SESSION_STATUS_COMPLETED, SESSION_STATUS_STARTED
 from challenges.models import ChallengeRun
-from challenges.selectors import minimum_counted_for_session, required_successful_attempts_for_problem
+from challenges.selectors import required_successful_attempts_for_quest
 from practice.context import ScenarioContextNormalizer
 from practice.scaffolding import ScaffoldingService
 from practice.visualization import RepositoryVisualizationService
-from progress.models import ProblemCompletion
+from progress.models import QuestCompletion
 from simulator.services import RepositorySnapshotService
 
 DIFFICULTY_ORDER = ["easy", "medium", "hard"]
@@ -39,7 +39,7 @@ class WorkspaceFileCreateSerializer(serializers.Serializer):
 def prefetch_run_payload_context(run: ChallengeRun) -> None:
     if getattr(run, "_payload_context_loaded", False):
         return
-    run._prefetched_completion = ProblemCompletion.objects.filter(
+    run._prefetched_completion = QuestCompletion.objects.filter(
         user_id=run.user_id,
         challenge_quest_id=run.challenge_quest_id,
     ).first()
@@ -66,12 +66,12 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
         else None
     )
     storey_payload = {
-        "id": run.module_id,
-        "number": run.module.number,
-        "title": run.module.title,
+        "id": run.storey_id,
+        "number": run.storey.number,
+        "title": run.storey.title,
     }
 
-    step_logs = list(run.step_logs.order_by("id")) if include_steps else []
+    steps = list(run.steps.order_by("id")) if include_steps else []
     return {
         "id": run.id,
         "mode": run.mode,
@@ -107,11 +107,11 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
                 "visualization_snapshot": step.visualization_snapshot,
                 "created_at": step.created_at,
             }
-            for step in step_logs
+            for step in steps
         ],
         "review_mode": run.mode == SESSION_MODE_REVIEW,
         "next_difficulty": next_difficulty_payload(run),
-        "sibling_levels": sibling_levels_payload(run),
+        "sibling_quests": sibling_quests_payload(run),
         "completion": completion_payload(run),
     }
 
@@ -135,14 +135,14 @@ def command_run_payload(run: ChallengeRun, *, repository_state: dict, visualizat
                 "mastery_progress": mastery_progress_payload(run),
                 "completion": completion_payload(run),
                 "next_difficulty": next_difficulty_payload(run),
-                "sibling_levels": sibling_levels_payload(run),
+                "sibling_quests": sibling_quests_payload(run),
             }
         )
     return payload
 
 
 def mastery_progress_payload(run: ChallengeRun) -> dict:
-    required = required_successful_attempts_for_problem(run.challenge_quest)
+    required = required_successful_attempts_for_quest(run.challenge_quest)
     mastered_count = ChallengeRun.objects.filter(
         user_id=run.user_id,
         mode="primary",
@@ -156,7 +156,7 @@ def mastery_progress_payload(run: ChallengeRun) -> dict:
 def completion_payload(run: ChallengeRun) -> dict | None:
     completion = getattr(run, "_prefetched_completion", None)
     if completion is None and not getattr(run, "_payload_context_loaded", False):
-        completion = ProblemCompletion.objects.filter(user=run.user, challenge_quest=run.challenge_quest).first()
+        completion = QuestCompletion.objects.filter(user=run.user, challenge_quest=run.challenge_quest).first()
     if not completion:
         return None
     return {
@@ -196,40 +196,40 @@ def next_difficulty_payload(run: ChallengeRun) -> dict | None:
         next_difficulty = DIFFICULTY_ORDER[DIFFICULTY_ORDER.index(run.challenge_quest.difficulty) + 1]
     except (ValueError, IndexError):
         return None
-    next_level = run.challenge_quest.scenario.levels.filter(
+    next_quest = run.challenge_quest.challenge.challenge_quests.filter(
         difficulty=next_difficulty,
         is_published=True,
     ).first()
-    if not next_level:
+    if not next_quest:
         return None
-    return {"id": next_level.id, "difficulty": next_level.difficulty}
+    return {"id": next_quest.id, "difficulty": next_quest.difficulty}
 
 
-def sibling_levels_payload(run: ChallengeRun) -> list[dict]:
-    """Every level of this run's scenario (easy→hard) with the user's access state,
-    powering the completion modal's level navigator. Imported lazily to avoid a
+def sibling_quests_payload(run: ChallengeRun) -> list[dict]:
+    """Every quest of this run's challenge (easy→hard) with the user's access state,
+    powering the completion modal's quest navigator. Imported lazily to avoid a
     challenges⇄curriculum import cycle at module load."""
     if not run.challenge_quest:
         return []
-    from curriculum.selectors import scenario_levels_access_payload
+    from curriculum.selectors import challenge_quests_access_payload
 
-    return scenario_levels_access_payload(user=run.user, scenario=run.challenge_quest.scenario)
+    return challenge_quests_access_payload(user=run.user, challenge=run.challenge_quest.challenge)
 
 
 def _scenario_context(run: ChallengeRun) -> dict:
-    # The brief is authored on the level and shared across its variants; the
-    # variant only carries a generated fallback, so the level's authored context
+    # The brief is authored on the quest and shared across its variants; the
+    # variant only carries a generated fallback, so the quest's authored context
     # wins.
     raw = run.challenge_quest.scenario_context or run.variant.scenario_context
-    return ScenarioContextNormalizer().normalize(raw, fallback_story=run.workflow_scenario.narrative)
+    return ScenarioContextNormalizer().normalize(raw, fallback_story=run.challenge.narrative)
 
 
 def _challenge_payload(run: ChallengeRun) -> dict:
     return {
-        "id": run.workflow_scenario_id,
-        "slug": run.workflow_scenario.slug,
-        "title": run.workflow_scenario.title,
-        "summary": run.workflow_scenario.summary,
-        "narrative": run.workflow_scenario.narrative,
-        "level_id": run.challenge_quest_id,
+        "id": run.challenge_id,
+        "slug": run.challenge.slug,
+        "title": run.challenge.title,
+        "summary": run.challenge.summary,
+        "narrative": run.challenge.narrative,
+        "quest_id": run.challenge_quest_id,
     }

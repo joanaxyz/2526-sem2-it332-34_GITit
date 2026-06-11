@@ -35,7 +35,7 @@ class Wallet(models.Model):
 
 class CoinTransaction(models.Model):
     """GitCoin ledger entry. ``award_key`` makes every grant idempotent: a
-    reward source (first clear of a level, passing an adventure) can be
+    reward source (first clear of a quest, passing an adventure) can be
     retried safely and never pays out twice."""
 
     user = models.ForeignKey(
@@ -56,7 +56,7 @@ class CoinTransaction(models.Model):
         return f"CoinTransaction({self.user_id}: {self.amount} {self.reason})"
 
 
-class ProblemCompletion(models.Model):
+class QuestCompletion(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     adventure_quest = models.ForeignKey(
         "adventures.AdventureQuest",
@@ -95,5 +95,5 @@ class ProblemCompletion(models.Model):
         ]
 
     @property
-    def problem(self):
+    def quest(self):
         return self.adventure_quest or self.challenge_quest

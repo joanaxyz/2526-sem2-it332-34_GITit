@@ -12,7 +12,7 @@ from common.constants import (
 
 
 class CommandAdventure(models.Model):
-    module = models.OneToOneField(
+    storey = models.OneToOneField(
         "curriculum.Storey",
         related_name="command_adventure",
         on_delete=models.CASCADE,
@@ -34,15 +34,15 @@ class CommandAdventure(models.Model):
 
 
 class AdventureQuest(models.Model):
-    usage = models.ForeignKey(
+    command_form = models.ForeignKey(
         "curriculum.CommandForm",
-        related_name="drills",
+        related_name="adventure_quests",
         on_delete=models.CASCADE,
     )
     slug = models.SlugField()
     title = models.CharField(max_length=180)
     required_successful_attempts = models.PositiveIntegerField(default=3)
-    # Command budget is authored on the problem and shared by all its variants:
+    # Command budget is authored on the quest and shared by all its variants:
     # min_counted_commands is the efficiency target ("par"), max is the hard cap.
     min_counted_commands = models.PositiveIntegerField(default=1)
     max_counted_commands = models.PositiveIntegerField(default=4)
@@ -67,19 +67,19 @@ class AdventureQuest(models.Model):
     )
 
     class Meta:
-        ordering = ["usage__topic__sort_order", "usage__sort_order", "sort_order"]
-        unique_together = [("usage", "slug")]
+        ordering = ["command_form__command_skill__sort_order", "command_form__sort_order", "sort_order"]
+        unique_together = [("command_form", "slug")]
 
     def __str__(self) -> str:
         return self.title
 
     @property
-    def module(self):
-        return self.usage.topic.module
+    def storey(self):
+        return self.command_form.command_skill.storey
 
     @property
     def command_adventure(self):
-        return getattr(self.usage.topic.module, "command_adventure", None)
+        return getattr(self.command_form.command_skill.storey, "command_adventure", None)
 
 
 class VariantBase(models.Model):
@@ -108,7 +108,7 @@ class VariantBase(models.Model):
 class AdventureVariant(VariantBase):
     adventure_quest = models.ForeignKey(
         AdventureQuest,
-        related_name="variants",
+        related_name="adventure_variants",
         on_delete=models.CASCADE,
     )
 
@@ -117,7 +117,7 @@ class AdventureVariant(VariantBase):
         ordering = ["adventure_quest_id", "semantic_key", "id"]
 
     @property
-    def problem(self):
+    def quest(self):
         return self.adventure_quest
 
     def __str__(self) -> str:
@@ -146,7 +146,7 @@ class AdventureRun(models.Model):
     # replay is an uncounted free-play re-run started once the adventure is
     # already passed. Replay never reads or writes AdventureMastery.
     mode = models.CharField(max_length=16, choices=Mode.choices, default=SESSION_MODE_PRIMARY)
-    current_problem_index = models.PositiveIntegerField(default=0)
+    current_quest_index = models.PositiveIntegerField(default=0)
     total_score = models.PositiveIntegerField(default=0)
     # Accumulating mastery points this session (sum of box-advance × quality).
     session_score = models.PositiveIntegerField(default=0)
@@ -209,8 +209,8 @@ class AdventureQuestAttempt(models.Model):
 
 
 class AdventureMastery(models.Model):
-    """Per-user Leitner state for one command-problem. Drives the spaced-repetition
-    scheduler: `strength` is the box (0..N where N = problem.required_successful_attempts),
+    """Per-user Leitner state for one command-quest. Drives the spaced-repetition
+    scheduler: `strength` is the box (0..N where N = quest.required_successful_attempts),
     and `last_seen_seq` is the user's adventure encounter index when last served, so
     spacing is measured in encounters rather than wall-clock time. Persists across runs."""
 
@@ -228,8 +228,8 @@ class AdventureMastery(models.Model):
     class Meta:
         unique_together = [("user", "adventure_quest")]
         indexes = [
-            models.Index(fields=["user", "adventure_quest"], name="advmastery_user_problem_idx"),
+            models.Index(fields=["user", "adventure_quest"], name="advmastery_user_quest_idx"),
         ]
 
     def __str__(self) -> str:
-        return f"AdventureMastery(user={self.user_id}, problem={self.adventure_quest_id}, box={self.strength})"
+        return f"AdventureMastery(user={self.user_id}, quest={self.adventure_quest_id}, box={self.strength})"

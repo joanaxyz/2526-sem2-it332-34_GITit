@@ -24,7 +24,7 @@ const tourSteps = [
     target: 'expected-state',
     icon: MonitorDot,
     label: 'Target DAG',
-    body: 'On supported levels, this diagram shows the target repository shape without giving away the command path.',
+    body: 'On supported quests, this diagram shows the target repository shape without giving away the command path.',
     placement: 'bottom',
   },
   {

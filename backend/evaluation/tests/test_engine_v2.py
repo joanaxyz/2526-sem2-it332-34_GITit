@@ -51,7 +51,7 @@ def test_state_hash_completion_policy_uses_hashes():
 
 
 def test_completion_evaluator_reads_normalized_variant_spec():
-    session = SimpleNamespace(
+    run = SimpleNamespace(
         variant=SimpleNamespace(
             evaluation_spec={
                 "state_requirements": {"repository_initialized": True},
@@ -59,11 +59,11 @@ def test_completion_evaluator_reads_normalized_variant_spec():
             },
             initial_state={"repository_initialized": False},
         ),
-        problem=SimpleNamespace(evaluation_spec={}),
+        quest=SimpleNamespace(evaluation_spec={}),
     )
     outcome = PracticeCompletionEvaluator().evaluate(
         CompletionEvaluationContext(
-            session=session,
+            run=run,
             previous_state={"repository_initialized": False},
             next_state={"repository_initialized": True},
             executed_commands=[],
@@ -73,11 +73,11 @@ def test_completion_evaluator_reads_normalized_variant_spec():
 
 
 def test_completion_evaluator_rejects_missing_evaluation_spec():
-    session = SimpleNamespace(
+    run = SimpleNamespace(
         variant=SimpleNamespace(evaluation_spec={}, initial_state={}),
-        problem=SimpleNamespace(evaluation_spec={}),
+        quest=SimpleNamespace(evaluation_spec={}),
     )
     with pytest.raises(ValueError, match="missing evaluation_spec"):
         PracticeCompletionEvaluator().evaluate(
-            CompletionEvaluationContext(session=session, previous_state={}, next_state={})
+            CompletionEvaluationContext(run=run, previous_state={}, next_state={})
         )

@@ -1,8 +1,8 @@
-import { useNavigate } from 'react-router-dom'
+﻿import { useNavigate } from 'react-router-dom'
 
 import type {
   ChallengeActionIntent,
-  ChallengeLevelAccess,
+  ChallengeQuestAccess,
   CommandAdventureSummary,
 } from '@/features/challenges/types'
 
@@ -14,20 +14,20 @@ import type {
 export function useTowerDoorNavigation() {
   const navigate = useNavigate()
 
-  function openChallengeDoor(item: ChallengeLevelAccess, action: ChallengeActionIntent) {
+  function openChallengeDoor(item: ChallengeQuestAccess, action: ChallengeActionIntent) {
     if (action === 'resume' && item.active_run_id) {
       navigate(`/challenge-runs/${item.active_run_id}`)
       return
     }
     if (action === 'review') {
-      navigate(`/challenge-levels/${item.id}/review`)
+      navigate(`/challenge-quests/${item.id}/review`)
       return
     }
     if (action === 'retry' && item.latest_attempt?.id) {
       navigate(`/challenge-runs/${item.latest_attempt.id}/retry`)
       return
     }
-    navigate(`/challenge-levels/${item.id}`)
+    navigate(`/challenge-quests/${item.id}`)
   }
 
   function openAdventureDoor(adventure: CommandAdventureSummary) {

@@ -40,7 +40,7 @@ export function AdventureSession({
 
   // The terminal now resets itself when the attempt advances (its lines derive
   // from the new attempt's empty step history); only the revealed hint and the
-  // open file editor are local state that still needs clearing per problem.
+  // open file editor are local state that still needs clearing per quest.
   useEffect(() => {
     if (lastAttemptId.current !== attemptId) {
       lastAttemptId.current = attemptId
@@ -80,7 +80,7 @@ export function AdventureSession({
 
   const attempt = run.current_attempt
   if (!attempt) {
-    return <LoadingState description="Setting up the next repository." label="Preparing next problem" variant="screen" />
+    return <LoadingState description="Setting up the next repository." label="Preparing next quest" variant="screen" />
   }
 
   function revealHint() {

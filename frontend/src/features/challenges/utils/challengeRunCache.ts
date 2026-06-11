@@ -62,7 +62,8 @@ export function subscribeToChallengeRunSync(queryClient: QueryClient) {
 
 export function invalidatePracticeProgressQueries(queryClient: QueryClient) {
   void queryClient.invalidateQueries({ queryKey: queryKeys.storeys })
-  void queryClient.invalidateQueries({ queryKey: queryKeys.dashboardSummary })
+  void queryClient.invalidateQueries({ queryKey: queryKeys.homeSummary })
+  void queryClient.invalidateQueries({ queryKey: queryKeys.statsSummary })
   void queryClient.invalidateQueries({ queryKey: queryKeyRoots.storeyContent })
   void queryClient.invalidateQueries({ queryKey: queryKeys.wallet })
 }

@@ -2,10 +2,10 @@ import { type CSSProperties } from 'react'
 
 import { Button } from '@/shared/components/Button'
 import {
-  actionForChallengeLevel,
+  actionForChallengeQuest,
   actionLabel,
   adventureActionLabel,
-  challengeLevelAccent,
+  challengeQuestAccent,
 } from '@/features/storeys/challengeUi'
 import { useTowerDoorNavigation } from '@/features/storeys/hooks/useTowerDoorNavigation'
 import { useTowerSelection } from '@/features/storeys/hooks/useTowerSelection'
@@ -37,9 +37,9 @@ export function TowerActionButton() {
     )
   }
 
-  const { level, locked } = selected
-  const action = actionForChallengeLevel(level)
-  const accent = challengeLevelAccent(level)
+  const { quest, locked } = selected
+  const action = actionForChallengeQuest(quest)
+  const accent = challengeQuestAccent(quest)
   const disabled = locked || !action
 
   return (
@@ -50,10 +50,10 @@ export function TowerActionButton() {
           className="tower-action-button"
           disabled={disabled}
           onClick={() => {
-            if (action) openChallengeDoor(level, action)
+            if (action) openChallengeDoor(quest, action)
           }}
         >
-          {actionLabel(action, level.status)}
+          {actionLabel(action, quest.status)}
         </Button>
       </div>
     </>

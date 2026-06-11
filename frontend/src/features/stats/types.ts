@@ -13,7 +13,7 @@ export type SkillAxis = {
 
 export type TrendPoint = {
   date: string
-  problems_completed: number
+  quests_completed: number
   commands_run: number
 }
 

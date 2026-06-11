@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-/** Cubic ease-out count-up, matching the dashboard's number animations. */
+/** Cubic ease-out count-up, matching the home hub's number animations. */
 export function useCountUp(target: number | null, duration = 900): number {
   const [value, setValue] = useState(0)
   useEffect(() => {

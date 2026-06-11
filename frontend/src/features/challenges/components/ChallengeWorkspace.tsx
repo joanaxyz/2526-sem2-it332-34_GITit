@@ -170,11 +170,11 @@ export function ChallengeWorkspace() {
       navigate(towerUrlForRun(updatedRun))
     },
   })
-  // Starts a fresh run on any level — the "Next level" CTA and the completion
-  // modal's level navigator both route through here, so jumping to a lower level
+  // Starts a fresh run on any quest — the "Next quest" CTA and the completion
+  // modal's quest navigator both route through here, so jumping to a lower quest
   // works exactly like advancing to the next one.
-  const startLevelMutation = useMutation({
-    mutationFn: (levelId: number) => challengesApi.startChallengeRun(levelId),
+  const startQuestMutation = useMutation({
+    mutationFn: (questId: number) => challengesApi.startChallengeRun(questId),
     onSuccess: (next) => {
       syncChallengeRunInCache(queryClient, next)
       invalidatePracticeProgressQueries(queryClient)
@@ -183,10 +183,10 @@ export function ChallengeWorkspace() {
     },
   })
   // Replaying a free-play (review) run starts a fresh uncounted run on the same
-  // level — never the retry endpoint, which rejects non-primary runs. This keeps
-  // "Play again" working for already-completed levels without touching progress.
+  // quest — never the retry endpoint, which rejects non-primary runs. This keeps
+  // "Play again" working for already-completed quests without touching progress.
   const reviewMutation = useMutation({
-    mutationFn: (levelId: number) => challengesApi.startChallengeRun(levelId, { review: true }),
+    mutationFn: (questId: number) => challengesApi.startChallengeRun(questId, { review: true }),
     onSuccess: (next) => {
       syncChallengeRunInCache(queryClient, next)
       invalidatePracticeProgressQueries(queryClient)
@@ -237,7 +237,7 @@ export function ChallengeWorkspace() {
   if (query.isError) return <ErrorState title="Could not load challenge workspace" description={query.error.message} />
   if (!run) return <ErrorState title="Could not load challenge workspace" description="The API returned no run data." />
 
-  const tourKey = `${user?.id ?? 'guest'}:challenge:${run.challenge.level_id}`
+  const tourKey = `${user?.id ?? 'guest'}:challenge:${run.challenge.quest_id}`
   const shouldAutoOpenTour = dismissedTourKey !== tourKey && !hasSeenPracticeTour(user?.id)
   const isTourOpen = tourOpen || shouldAutoOpenTour
 
@@ -284,7 +284,7 @@ export function ChallengeWorkspace() {
   // flow that carries prior-attempt context.
   function playAgain() {
     if (run?.review_mode) {
-      reviewMutation.mutate(run.challenge.level_id)
+      reviewMutation.mutate(run.challenge.quest_id)
     } else {
       retryMutation.mutate()
     }
@@ -402,7 +402,7 @@ export function ChallengeWorkspace() {
         onStartOver={() => setStartOverConfirmOpen(true)}
         onOpenTour={() => setTourOpen(true)}
         onContinue={() => retryMutation.mutate()}
-        onReplay={() => reviewMutation.mutate(run.challenge.level_id)}
+        onReplay={() => reviewMutation.mutate(run.challenge.quest_id)}
       />
       <main className="relative grid min-h-0 flex-1 grid-cols-[27rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[26rem_minmax(0,1fr)] max-xl:grid-cols-[23rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
         <aside
@@ -543,12 +543,12 @@ export function ChallengeWorkspace() {
         onContinue={playAgain}
         isRetrying={isReplaying}
         isContinuing={isReplaying}
-        onNextLevel={run.next_difficulty ? () => startLevelMutation.mutate(run.next_difficulty!.id) : undefined}
-        isStartingNextLevel={
-          startLevelMutation.isPending && startLevelMutation.variables === run.next_difficulty?.id
+        onNextQuest={run.next_difficulty ? () => startQuestMutation.mutate(run.next_difficulty!.id) : undefined}
+        isStartingNextQuest={
+          startQuestMutation.isPending && startQuestMutation.variables === run.next_difficulty?.id
         }
-        onSelectLevel={(levelId) => startLevelMutation.mutate(levelId)}
-        busyLevelId={startLevelMutation.isPending ? startLevelMutation.variables : null}
+        onSelectQuest={(questId) => startQuestMutation.mutate(questId)}
+        busyQuestId={startQuestMutation.isPending ? startQuestMutation.variables : null}
         nextDifficultyLabel={
           run.next_difficulty
             ? run.next_difficulty.difficulty.charAt(0).toUpperCase() + run.next_difficulty.difficulty.slice(1)

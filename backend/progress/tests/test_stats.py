@@ -9,7 +9,7 @@ from adventures.models import (
     CommandAdventure,
 )
 from practice.models import CommandStep
-from progress.models import ProblemCompletion
+from progress.models import QuestCompletion
 from progress.services import TREND_DAYS
 
 
@@ -49,7 +49,7 @@ def test_stats_empty_user_is_graceful(db, django_user_model):
 
     # Trend is zero-filled for the whole window.
     assert len(body["activity_trend"]) == TREND_DAYS
-    assert all(point["problems_completed"] == 0 and point["commands_run"] == 0 for point in body["activity_trend"])
+    assert all(point["quests_completed"] == 0 and point["commands_run"] == 0 for point in body["activity_trend"])
 
     headline = body["headline"]
     assert headline["quests_completed"] == 0
@@ -69,11 +69,13 @@ def test_stats_adventure_only_user_gets_full_radar(db, django_user_model):
 
     adventure = CommandAdventure.objects.filter(is_published=True).first()
     quest = (
-        AdventureQuest.objects.filter(usage__topic__module=adventure.module, variants__isnull=False)
+        AdventureQuest.objects.filter(
+            command_form__command_skill__storey=adventure.storey, adventure_variants__isnull=False
+        )
         .distinct()
         .first()
     )
-    variant = quest.variants.first()
+    variant = quest.adventure_variants.first()
 
     run = AdventureRun.objects.create(user=user, command_adventure=adventure, mode="primary")
     attempt = AdventureQuestAttempt.objects.create(
@@ -110,7 +112,7 @@ def test_stats_adventure_only_user_gets_full_radar(db, django_user_model):
         strength=quest.required_successful_attempts,
         introduced=True,
     )
-    ProblemCompletion.objects.create(
+    QuestCompletion.objects.create(
         user=user, adventure_quest=quest, first_attempt_star=True, counted_action_total=2
     )
 
@@ -138,4 +140,4 @@ def test_stats_adventure_only_user_gets_full_radar(db, django_user_model):
 
     # Today registered as an active day in the trend.
     assert body["activity_trend"][-1]["commands_run"] == 2
-    assert body["activity_trend"][-1]["problems_completed"] == 1
+    assert body["activity_trend"][-1]["quests_completed"] == 1

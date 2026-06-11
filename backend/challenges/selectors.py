@@ -7,12 +7,12 @@ from common.constants import (
 from challenges.models import ChallengeQuest, ChallengeRun
 
 
-def required_successful_attempts_for_problem(problem) -> int:
-    return int(getattr(problem, "required_successful_attempts", 1) or 1)
+def required_successful_attempts_for_quest(quest) -> int:
+    return int(getattr(quest, "required_successful_attempts", 1) or 1)
 
 
-def minimum_counted_for_session(*, session: ChallengeRun) -> int:
-    snapshot = session.command_budget_snapshot or {}
+def minimum_counted_for_run(*, run: ChallengeRun) -> int:
+    snapshot = run.command_budget_snapshot or {}
     return int(snapshot.get("min_counted_commands", 0) or 0)
 
 
@@ -33,23 +33,23 @@ def command_accuracy_rate(
     return round((minimum_counted_commands / counted_action_total) * 100)
 
 
-def session_meets_progress_threshold(*, session: ChallengeRun) -> bool:
+def run_meets_progress_threshold(*, run: ChallengeRun) -> bool:
     rate = command_accuracy_rate(
-        status=session.status,
-        counted_action_total=session.counted_action_total,
-        minimum_counted_commands=minimum_counted_for_session(session=session),
+        status=run.status,
+        counted_action_total=run.counted_action_total,
+        minimum_counted_commands=minimum_counted_for_run(run=run),
     )
     return rate is not None and rate >= COMMAND_ACCURACY_PROGRESS_THRESHOLD
 
 
-def get_challenge_quest(level_id: int) -> ChallengeQuest:
+def get_challenge_quest(quest_id: int) -> ChallengeQuest:
     return (
-        ChallengeQuest.objects.select_related("scenario", "scenario__module")
-        .prefetch_related("variants")
+        ChallengeQuest.objects.select_related("challenge", "challenge__storey")
+        .prefetch_related("challenge_variants")
         .get(
-            id=level_id,
+            id=quest_id,
             is_published=True,
-            scenario__is_published=True,
-            scenario__module__is_published=True,
+            challenge__is_published=True,
+            challenge__storey__is_published=True,
         )
     )

@@ -6,7 +6,7 @@ from adventures.models import AdventureQuest, AdventureRun, CommandAdventure
 from challenges.models import Challenge, ChallengeQuest, ChallengeRun
 from challenges.selectors import (
     command_accuracy_rate,
-    session_meets_progress_threshold,
+    run_meets_progress_threshold,
 )
 from common.constants import (
     DIFFICULTY_EASY,
@@ -27,13 +27,13 @@ def published_storeys():
         Storey.objects.filter(is_published=True)
         .annotate(
             command_skill_count=Count(
-                "command_topics",
-                filter=Q(command_topics__is_published=True),
+                "command_skills",
+                filter=Q(command_skills__is_published=True),
                 distinct=True,
             ),
             challenge_count=Count(
-                "workflow_scenarios",
-                filter=Q(workflow_scenarios__is_published=True),
+                "challenges",
+                filter=Q(challenges__is_published=True),
                 distinct=True,
             ),
         )
@@ -50,48 +50,48 @@ def storey_completion_count_map(*, user, storey_ids: list[int]) -> dict[int, int
     # *passing* the adventure (passed_at), not how many times it was run. Replays
     # never set passed_at, so they cannot inflate progress past the 1-per-storey
     # denominator. Distinct on the adventure id keeps this idempotent across runs.
-    for module_id in (
+    for storey_id in (
         AdventureRun.objects.filter(
             user=user,
             mode=SESSION_MODE_PRIMARY,
             passed_at__isnull=False,
-            command_adventure__module_id__in=storey_ids,
+            command_adventure__storey_id__in=storey_ids,
         )
-        .values_list("command_adventure__module_id", flat=True)
+        .values_list("command_adventure__storey_id", flat=True)
         .distinct()
     ):
-        completion_by_storey[module_id] += 1
+        completion_by_storey[storey_id] += 1
 
     challenge_counts: dict[tuple[int, int], int] = {}
-    required_by_level: dict[int, int] = {}
-    storey_by_level: dict[int, int] = {}
+    required_by_quest: dict[int, int] = {}
+    storey_by_quest: dict[int, int] = {}
     for run in (
         ChallengeRun.objects.filter(
             user=user,
             mode="primary",
             status="completed",
-            module_id__in=storey_ids,
+            storey_id__in=storey_ids,
         )
         .select_related("challenge_quest")
         .only(
             "id",
-            "module_id",
+            "storey_id",
             "challenge_quest_id",
             "counted_action_total",
             "command_budget_snapshot",
             "challenge_quest__required_successful_attempts",
         )
     ):
-        if not session_meets_progress_threshold(session=run):
+        if not run_meets_progress_threshold(run=run):
             continue
-        level_id = run.challenge_quest_id
-        challenge_counts[(run.module_id, level_id)] = challenge_counts.get((run.module_id, level_id), 0) + 1
-        required_by_level[level_id] = run.challenge_quest.required_successful_attempts
-        storey_by_level[level_id] = run.module_id
+        quest_id = run.challenge_quest_id
+        challenge_counts[(run.storey_id, quest_id)] = challenge_counts.get((run.storey_id, quest_id), 0) + 1
+        required_by_quest[quest_id] = run.challenge_quest.required_successful_attempts
+        storey_by_quest[quest_id] = run.storey_id
 
-    for (_, level_id), count in challenge_counts.items():
-        storey_id = storey_by_level[level_id]
-        completion_by_storey[storey_id] += min(count, required_by_level.get(level_id, 1))
+    for (_, quest_id), count in challenge_counts.items():
+        storey_id = storey_by_quest[quest_id]
+        completion_by_storey[storey_id] += min(count, required_by_quest.get(quest_id, 1))
     return completion_by_storey
 
 
@@ -100,18 +100,18 @@ def storey_completion_denominator_map(*, storey_ids: list[int]) -> dict[int, int
         return {}
 
     denominator_by_storey = {storey_id: 0 for storey_id in storey_ids}
-    for adventure in CommandAdventure.objects.filter(module_id__in=storey_ids, is_published=True):
-        denominator_by_storey[adventure.module_id] += 1
+    for adventure in CommandAdventure.objects.filter(storey_id__in=storey_ids, is_published=True):
+        denominator_by_storey[adventure.storey_id] += 1
 
     for row in (
         ChallengeQuest.objects.filter(
             is_published=True,
-            scenario__is_published=True,
-            scenario__module_id__in=storey_ids,
+            challenge__is_published=True,
+            challenge__storey_id__in=storey_ids,
         )
-        .values("scenario__module_id", "required_successful_attempts")
+        .values("challenge__storey_id", "required_successful_attempts")
     ):
-        storey_id = row["scenario__module_id"]
+        storey_id = row["challenge__storey_id"]
         denominator_by_storey[storey_id] += int(row["required_successful_attempts"] or 0)
     return denominator_by_storey
 
@@ -127,8 +127,8 @@ def storey_content_page(
     limit = max(1, min(limit, 24))
     if section == "command_adventures":
         adventure = (
-            CommandAdventure.objects.filter(module_id=storey_id, is_published=True)
-            .select_related("module")
+            CommandAdventure.objects.filter(storey_id=storey_id, is_published=True)
+            .select_related("storey")
             .first()
         )
         return {
@@ -164,11 +164,11 @@ def storey_content_page(
 
 def command_skill_queryset(*, storey_id: int):
     return (
-        CommandSkill.objects.filter(module_id=storey_id, is_published=True)
+        CommandSkill.objects.filter(storey_id=storey_id, is_published=True)
         .prefetch_related(
-            "usages",
-            "usages__drills",
-            "usages__drills__variants",
+            "command_forms",
+            "command_forms__adventure_quests",
+            "command_forms__adventure_quests__adventure_variants",
         )
         .order_by("sort_order", "id")
     )
@@ -193,7 +193,7 @@ def storey_book(*, storey_id: int) -> dict | None:
 
     commands = [
         book_command_payload(skill=skill)
-        for skill in CommandSkill.objects.filter(module_id=storey_id, is_published=True).order_by(
+        for skill in CommandSkill.objects.filter(storey_id=storey_id, is_published=True).order_by(
             "sort_order", "id"
         )
     ]
@@ -240,17 +240,17 @@ def book_command_payload(*, skill: CommandSkill) -> dict:
 
 def challenge_queryset(*, storey_id: int):
     return (
-        Challenge.objects.filter(module_id=storey_id, is_published=True)
-        .prefetch_related("levels")
+        Challenge.objects.filter(storey_id=storey_id, is_published=True)
+        .prefetch_related("challenge_quests")
         .order_by("sort_order", "id")
     )
 
 
 @dataclass(frozen=True)
 class ChallengeAccessContext:
-    """Per-page batch of every user-specific fact the level payloads need, so
+    """Per-page batch of every user-specific fact the quest payloads need, so
     serializing a page of challenges costs a fixed handful of queries instead
-    of several per level."""
+    of several per quest."""
 
     completions: dict[int, object] = field(default_factory=dict)
     active_runs: dict[int, ChallengeRun] = field(default_factory=dict)
@@ -260,24 +260,24 @@ class ChallengeAccessContext:
 
 
 def _build_challenge_access(*, user, storey_id: int, challenges: list[Challenge]) -> ChallengeAccessContext:
-    from progress.models import ProblemCompletion
+    from progress.models import QuestCompletion
 
     if not getattr(user, "is_authenticated", False):
         return ChallengeAccessContext()
-    level_ids = [level.id for challenge in challenges for level in challenge.levels.all()]
-    if not level_ids:
+    quest_ids = [quest.id for challenge in challenges for quest in challenge.challenge_quests.all()]
+    if not quest_ids:
         return ChallengeAccessContext(adventure_passed=_adventure_passed(user=user, storey_id=storey_id))
 
     completions = {
         completion.challenge_quest_id: completion
-        for completion in ProblemCompletion.objects.filter(user=user, challenge_quest_id__in=level_ids)
+        for completion in QuestCompletion.objects.filter(user=user, challenge_quest_id__in=quest_ids)
     }
 
     active_runs: dict[int, ChallengeRun] = {}
     latest_runs: dict[int, ChallengeRun] = {}
     progress_counts: dict[int, int] = {}
     runs = (
-        ChallengeRun.objects.filter(user=user, challenge_quest_id__in=level_ids)
+        ChallengeRun.objects.filter(user=user, challenge_quest_id__in=quest_ids)
         .order_by("id")
         .only(
             "id",
@@ -292,11 +292,11 @@ def _build_challenge_access(*, user, storey_id: int, challenges: list[Challenge]
         )
     )
     for run in runs:
-        # Ascending id order: the last run seen per level is the latest one.
+        # Ascending id order: the last run seen per quest is the latest one.
         latest_runs[run.challenge_quest_id] = run
         if run.mode == "primary" and run.status == "started":
             active_runs[run.challenge_quest_id] = run
-        if run.mode == "primary" and run.status == "completed" and session_meets_progress_threshold(session=run):
+        if run.mode == "primary" and run.status == "completed" and run_meets_progress_threshold(run=run):
             progress_counts[run.challenge_quest_id] = progress_counts.get(run.challenge_quest_id, 0) + 1
 
     return ChallengeAccessContext(
@@ -317,11 +317,11 @@ def command_adventure_summary_payload(*, user, adventure: CommandAdventure) -> d
         if authenticated
         else None
     )
-    problem_count = AdventureQuest.objects.filter(
-        usage__topic__module=adventure.module,
+    quest_count = AdventureQuest.objects.filter(
+        command_form__command_skill__storey=adventure.storey,
         is_published=True,
-        usage__is_published=True,
-        usage__topic__is_published=True,
+        command_form__is_published=True,
+        command_form__command_skill__is_published=True,
     ).count()
     # Progress and the challenge gate key off whether the adventure has ever been
     # passed, not the latest run's status. Otherwise a post-pass replay that is
@@ -343,18 +343,18 @@ def command_adventure_summary_payload(*, user, adventure: CommandAdventure) -> d
         "is_passed": is_passed,
         "active_run_id": latest.id if latest and latest.status == "started" else None,
         "latest_run_id": latest.id if latest else None,
-        "problem_count": problem_count,
+        "quest_count": quest_count,
         "progress": {
             "value": 100.0 if completed else 0.0,
             "numerator": completed,
-            "denominator": 1 if problem_count else 0,
+            "denominator": 1 if quest_count else 0,
         },
     }
 
 
 def command_skill_summary_payload(*, user, skill: CommandSkill) -> dict:
     forms = []
-    for form in skill.usages.all():
+    for form in skill.command_forms.all():
         forms.append(
             {
                 "id": form.id,
@@ -362,7 +362,7 @@ def command_skill_summary_payload(*, user, skill: CommandSkill) -> dict:
                 "usage_form": form.usage_form,
                 "label": form.label,
                 "summary": form.summary,
-                "problem_count": len([problem for problem in form.drills.all() if problem.is_published]),
+                "quest_count": len([quest for quest in form.adventure_quests.all() if quest.is_published]),
             }
         )
     return {
@@ -378,10 +378,10 @@ def command_skill_summary_payload(*, user, skill: CommandSkill) -> dict:
 
 
 def challenge_summary_payload(*, challenge: Challenge, access: ChallengeAccessContext) -> dict:
-    ordered = _ordered_levels(challenge.levels.all())
-    levels = [
-        challenge_quest_access_payload(level=level, access=access, scenario_levels=ordered)
-        for level in ordered
+    ordered = _ordered_quests(challenge.challenge_quests.all())
+    quests = [
+        challenge_quest_access_payload(quest=quest, access=access, sibling_quests=ordered)
+        for quest in ordered
     ]
     return {
         "item_type": "challenge",
@@ -390,111 +390,110 @@ def challenge_summary_payload(*, challenge: Challenge, access: ChallengeAccessCo
         "title": challenge.title,
         "summary": challenge.summary,
         "narrative": challenge.narrative,
-        "command_topics": challenge.command_topics,
-        "levels": levels,
+        "quests": quests,
     }
 
 
-def scenario_levels_access_payload(*, user, scenario: Challenge) -> list[dict]:
-    """Per-level access for every sibling level of a challenge scenario, ordered
+def challenge_quests_access_payload(*, user, challenge: Challenge) -> list[dict]:
+    """Per-quest access for every sibling quest of a challenge, ordered
     easy→hard. Reuses the same access context the Tower uses so statuses
     (locked / in_progress / completed) match exactly between the Tower and the
-    in-run level navigator."""
-    access = _build_challenge_access(user=user, storey_id=scenario.module_id, challenges=[scenario])
-    ordered = _ordered_levels(scenario.levels.all())
+    in-run quest navigator."""
+    access = _build_challenge_access(user=user, storey_id=challenge.storey_id, challenges=[challenge])
+    ordered = _ordered_quests(challenge.challenge_quests.all())
     return [
-        challenge_quest_access_payload(level=level, access=access, scenario_levels=ordered)
-        for level in ordered
+        challenge_quest_access_payload(quest=quest, access=access, sibling_quests=ordered)
+        for quest in ordered
     ]
 
 
 def challenge_quest_access_payload(
     *,
-    level: ChallengeQuest,
+    quest: ChallengeQuest,
     access: ChallengeAccessContext,
-    scenario_levels: list[ChallengeQuest],
+    sibling_quests: list[ChallengeQuest],
 ) -> dict:
-    completion = access.completions.get(level.id)
-    active_run = access.active_runs.get(level.id)
-    required = int(level.required_successful_attempts or 1)
+    completion = access.completions.get(quest.id)
+    active_run = access.active_runs.get(quest.id)
+    required = int(quest.required_successful_attempts or 1)
     return {
-        "id": level.id,
-        "difficulty": level.difficulty,
-        "status": _challenge_status(level=level, access=access, scenario_levels=scenario_levels),
+        "id": quest.id,
+        "difficulty": quest.difficulty,
+        "status": _challenge_status(quest=quest, access=access, sibling_quests=sibling_quests),
         "review_available": bool(completion),
-        "required_successful_attempts": level.required_successful_attempts,
+        "required_successful_attempts": quest.required_successful_attempts,
         "successful_attempts": {
-            "count": min(access.progress_counts.get(level.id, 0), required),
+            "count": min(access.progress_counts.get(quest.id, 0), required),
             "required": required,
         },
         "active_run_id": active_run.id if active_run else None,
-        "latest_attempt": _latest_attempt_payload(access.latest_runs.get(level.id)),
+        "latest_attempt": _latest_attempt_payload(access.latest_runs.get(quest.id)),
         "completion": _completion_payload(completion),
         "command_budget": {
-            "min_counted_commands": level.min_counted_commands,
-            "max_counted_commands": level.max_counted_commands,
+            "min_counted_commands": quest.min_counted_commands,
+            "max_counted_commands": quest.max_counted_commands,
         },
     }
 
 
 def get_command_form(form_id: int) -> CommandForm:
-    return CommandForm.objects.select_related("topic", "topic__module").get(
+    return CommandForm.objects.select_related("command_skill", "command_skill__storey").get(
         id=form_id,
         is_published=True,
-        topic__is_published=True,
-        topic__module__is_published=True,
+        command_skill__is_published=True,
+        command_skill__storey__is_published=True,
     )
 
 
-def get_challenge_quest(level_id: int) -> ChallengeQuest:
+def get_challenge_quest(quest_id: int) -> ChallengeQuest:
     return (
-        ChallengeQuest.objects.select_related("scenario", "scenario__module")
-        .prefetch_related("variants")
+        ChallengeQuest.objects.select_related("challenge", "challenge__storey")
+        .prefetch_related("challenge_variants")
         .get(
-            id=level_id,
+            id=quest_id,
             is_published=True,
-            scenario__is_published=True,
-            scenario__module__is_published=True,
+            challenge__is_published=True,
+            challenge__storey__is_published=True,
         )
     )
 
 
 def _challenge_status(
     *,
-    level: ChallengeQuest,
+    quest: ChallengeQuest,
     access: ChallengeAccessContext,
-    scenario_levels: list[ChallengeQuest],
+    sibling_quests: list[ChallengeQuest],
 ) -> str:
-    if level.id in access.completions:
+    if quest.id in access.completions:
         return "completed"
-    if level.id in access.active_runs:
+    if quest.id in access.active_runs:
         return "in_progress"
-    if _challenge_unlocked(level=level, access=access, scenario_levels=scenario_levels):
-        latest = access.latest_runs.get(level.id)
+    if _challenge_unlocked(quest=quest, access=access, sibling_quests=sibling_quests):
+        latest = access.latest_runs.get(quest.id)
         return latest.status if latest and latest.status in {"failed", "abandoned"} else "not_started"
     return "locked"
 
 
 def _challenge_unlocked(
     *,
-    level: ChallengeQuest,
+    quest: ChallengeQuest,
     access: ChallengeAccessContext,
-    scenario_levels: list[ChallengeQuest],
+    sibling_quests: list[ChallengeQuest],
 ) -> bool:
-    if level.difficulty == DIFFICULTY_EASY:
+    if quest.difficulty == DIFFICULTY_EASY:
         # Mirrors ChallengeRunService._ensure_adventure_passed: a storey's
         # challenges open once its Command Adventure has been passed.
         return access.adventure_passed
-    previous = DIFFICULTY_EASY if level.difficulty == DIFFICULTY_MEDIUM else DIFFICULTY_MEDIUM
-    previous_level = next(
-        (candidate for candidate in scenario_levels if candidate.difficulty == previous and candidate.is_published),
+    previous = DIFFICULTY_EASY if quest.difficulty == DIFFICULTY_MEDIUM else DIFFICULTY_MEDIUM
+    previous_quest = next(
+        (candidate for candidate in sibling_quests if candidate.difficulty == previous and candidate.is_published),
         None,
     )
-    return bool(previous_level and previous_level.id in access.completions)
+    return bool(previous_quest and previous_quest.id in access.completions)
 
 
 def _adventure_passed(*, user, storey_id: int) -> bool:
-    adventure = CommandAdventure.objects.filter(module_id=storey_id, is_published=True).first()
+    adventure = CommandAdventure.objects.filter(storey_id=storey_id, is_published=True).first()
     if adventure is None:
         return True  # storey has no Command Adventure to gate on
     return AdventureRun.objects.filter(
@@ -530,6 +529,6 @@ def _completion_payload(completion) -> dict | None:
     }
 
 
-def _ordered_levels(levels) -> list[ChallengeQuest]:
+def _ordered_quests(quests) -> list[ChallengeQuest]:
     order = {DIFFICULTY_EASY: 0, DIFFICULTY_MEDIUM: 1, DIFFICULTY_HARD: 2}
-    return sorted(levels, key=lambda level: order.get(level.difficulty, 99))
+    return sorted(quests, key=lambda quest: order.get(quest.difficulty, 99))

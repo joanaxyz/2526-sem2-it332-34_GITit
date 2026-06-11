@@ -11,14 +11,14 @@ from adventures.models import (
 
 @admin.register(CommandAdventure)
 class CommandAdventureAdmin(admin.ModelAdmin):
-    list_display = ("slug", "title", "module", "is_published", "sort_order")
+    list_display = ("slug", "title", "storey", "is_published", "sort_order")
     list_filter = ("is_published",)
     search_fields = ("title", "slug")
 
 
 @admin.register(AdventureQuest)
 class AdventureQuestAdmin(admin.ModelAdmin):
-    list_display = ("slug", "title", "usage", "is_published", "sort_order")
+    list_display = ("slug", "title", "command_form", "is_published", "sort_order")
     list_filter = ("is_published",)
     search_fields = ("title", "slug")
 

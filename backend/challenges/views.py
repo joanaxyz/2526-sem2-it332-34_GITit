@@ -19,10 +19,10 @@ from practice.services import CommandProcessingService, WorkspaceFileCreationSer
 
 
 class ChallengeRunStartAPIView(APIView):
-    def post(self, request, level_id: int):
+    def post(self, request, quest_id: int):
         serializer = ChallengeRunStartSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        level = get_challenge_quest(level_id)
+        quest = get_challenge_quest(quest_id)
         prior_run = None
         prior_run_id = serializer.validated_data.get("prior_run_id")
         if prior_run_id:
@@ -30,7 +30,7 @@ class ChallengeRunStartAPIView(APIView):
         mode = SESSION_MODE_REVIEW if serializer.validated_data.get("review") else SESSION_MODE_PRIMARY
         run = ChallengeRunService().start_run(
             user=request.user,
-            level=level,
+            quest=quest,
             source_entry_point=serializer.validated_data["source_entry_point"],
             prior_run=prior_run,
             mode=mode,
@@ -51,9 +51,9 @@ class ChallengeCommandSubmitAPIView(APIView):
         serializer = CommandSubmitSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         run = ChallengeRun.objects.select_related(
-            "module",
-            "workflow_scenario",
-            "challenge_quest__scenario",
+            "storey",
+            "challenge",
+            "challenge_quest__challenge",
             "challenge_variant",
         ).get(id=run_id, user=request.user)
         result = CommandProcessingService().submit_command(
@@ -133,7 +133,7 @@ class ChallengeRetryAPIView(APIView):
         try:
             prior = (
                 ChallengeRun.objects.select_for_update(nowait=True, of=("self",))
-                .select_related("challenge_quest__scenario", "challenge_variant")
+                .select_related("challenge_quest__challenge", "challenge_variant")
                 .get(id=run_id, user=request.user)
             )
         except OperationalError:
@@ -144,7 +144,7 @@ class ChallengeRetryAPIView(APIView):
             prior = ChallengeRunService().abandon(run=prior)
         run = ChallengeRunService().start_run(
             user=request.user,
-            level=prior.challenge_quest,
+            quest=prior.challenge_quest,
             source_entry_point="retry",
             prior_run=prior,
         )
@@ -154,8 +154,8 @@ class ChallengeRetryAPIView(APIView):
 
 def _get_workspace_run(run_id: int, user):
     return ChallengeRun.objects.select_related(
-        "module",
-        "workflow_scenario",
-        "challenge_quest__scenario",
+        "storey",
+        "challenge",
+        "challenge_quest__challenge",
         "challenge_variant",
     ).get(id=run_id, user=user)

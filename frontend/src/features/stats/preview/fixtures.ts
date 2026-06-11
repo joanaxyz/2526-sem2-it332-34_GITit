@@ -1,10 +1,10 @@
-/**
+﻿/**
  * ⚠ DEV-ONLY DESIGN FIXTURES — never imported by production routes.
- * Realistic mid-progress player data used by /design-preview/stats.
+ * Realistic mid-progress player data used by /design-preview/home.
  */
 import type { StatsSummary } from '@/features/stats/types'
 
-/** Mirrors the dashboard preview player: 43 quests, 12-day streak, 1240 coins. */
+/** Mirrors the home preview player: 43 quests, 12-day streak, 1240 coins. */
 export const richStatsFixture: StatsSummary = {
   skill_profile: [
     { key: 'accuracy', label: 'Accuracy', hint: 'How often your commands are accepted first time', value: 91 },
@@ -15,20 +15,20 @@ export const richStatsFixture: StatsSummary = {
     { key: 'coverage', label: 'Coverage', hint: 'Breadth of git commands you have used', value: 69 },
   ],
   activity_trend: [
-    { date: '2026-05-29', problems_completed: 2, commands_run: 38 },
-    { date: '2026-05-30', problems_completed: 1, commands_run: 22 },
-    { date: '2026-05-31', problems_completed: 3, commands_run: 51 },
-    { date: '2026-06-01', problems_completed: 2, commands_run: 44 },
-    { date: '2026-06-02', problems_completed: 0, commands_run: 9 },
-    { date: '2026-06-03', problems_completed: 4, commands_run: 67 },
-    { date: '2026-06-04', problems_completed: 2, commands_run: 41 },
-    { date: '2026-06-05', problems_completed: 3, commands_run: 58 },
-    { date: '2026-06-06', problems_completed: 1, commands_run: 26 },
-    { date: '2026-06-07', problems_completed: 4, commands_run: 72 },
-    { date: '2026-06-08', problems_completed: 2, commands_run: 39 },
-    { date: '2026-06-09', problems_completed: 5, commands_run: 84 },
-    { date: '2026-06-10', problems_completed: 3, commands_run: 55 },
-    { date: '2026-06-11', problems_completed: 2, commands_run: 47 },
+    { date: '2026-05-29', quests_completed: 2, commands_run: 38 },
+    { date: '2026-05-30', quests_completed: 1, commands_run: 22 },
+    { date: '2026-05-31', quests_completed: 3, commands_run: 51 },
+    { date: '2026-06-01', quests_completed: 2, commands_run: 44 },
+    { date: '2026-06-02', quests_completed: 0, commands_run: 9 },
+    { date: '2026-06-03', quests_completed: 4, commands_run: 67 },
+    { date: '2026-06-04', quests_completed: 2, commands_run: 41 },
+    { date: '2026-06-05', quests_completed: 3, commands_run: 58 },
+    { date: '2026-06-06', quests_completed: 1, commands_run: 26 },
+    { date: '2026-06-07', quests_completed: 4, commands_run: 72 },
+    { date: '2026-06-08', quests_completed: 2, commands_run: 39 },
+    { date: '2026-06-09', quests_completed: 5, commands_run: 84 },
+    { date: '2026-06-10', quests_completed: 3, commands_run: 55 },
+    { date: '2026-06-11', quests_completed: 2, commands_run: 47 },
   ],
   headline: {
     quests_completed: 43,

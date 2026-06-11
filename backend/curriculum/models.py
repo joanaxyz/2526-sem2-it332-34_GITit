@@ -49,9 +49,9 @@ class ConceptPage(models.Model):
 
 
 class CommandSkill(models.Model):
-    module = models.ForeignKey(
+    storey = models.ForeignKey(
         Storey,
-        related_name="command_topics",
+        related_name="command_skills",
         on_delete=models.CASCADE,
     )
     slug = models.SlugField()
@@ -64,15 +64,15 @@ class CommandSkill(models.Model):
     sort_order = models.PositiveIntegerField(default=0)
 
     class Meta:
-        ordering = ["module__sort_order", "sort_order", "base_command"]
-        unique_together = [("module", "slug")]
+        ordering = ["storey__sort_order", "sort_order", "base_command"]
+        unique_together = [("storey", "slug")]
 
     def __str__(self) -> str:
         return self.title
 
 
 class CommandForm(models.Model):
-    topic = models.ForeignKey(CommandSkill, related_name="usages", on_delete=models.CASCADE)
+    command_skill = models.ForeignKey(CommandSkill, related_name="command_forms", on_delete=models.CASCADE)
     slug = models.SlugField()
     usage_form = models.CharField(max_length=140)
     label = models.CharField(max_length=180)
@@ -82,8 +82,8 @@ class CommandForm(models.Model):
     sort_order = models.PositiveIntegerField(default=0)
 
     class Meta:
-        ordering = ["topic__sort_order", "sort_order", "usage_form"]
-        unique_together = [("topic", "slug")]
+        ordering = ["command_skill__sort_order", "sort_order", "usage_form"]
+        unique_together = [("command_skill", "slug")]
 
     def __str__(self) -> str:
         return self.label
