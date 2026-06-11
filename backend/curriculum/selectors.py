@@ -445,19 +445,6 @@ def get_command_form(form_id: int) -> CommandForm:
     )
 
 
-def get_challenge_quest(quest_id: int) -> ChallengeQuest:
-    return (
-        ChallengeQuest.objects.select_related("challenge", "challenge__storey")
-        .prefetch_related("challenge_variants")
-        .get(
-            id=quest_id,
-            is_published=True,
-            challenge__is_published=True,
-            challenge__storey__is_published=True,
-        )
-    )
-
-
 def _challenge_status(
     *,
     quest: ChallengeQuest,

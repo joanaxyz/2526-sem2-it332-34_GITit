@@ -3,14 +3,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from challenges.models import ChallengeRun
+from challenges.payloads import (
+    challenge_run_payload,
+    command_run_payload,
+    prefetch_run_payload_context,
+)
 from challenges.selectors import get_challenge_quest
 from challenges.serializers import (
     ChallengeRunStartSerializer,
     CommandSubmitSerializer,
     WorkspaceFileCreateSerializer,
-    challenge_run_payload,
-    command_run_payload,
-    prefetch_run_payload_context,
 )
 from challenges.services import ChallengeRunService
 from common.constants import SESSION_MODE_PRIMARY, SESSION_MODE_REVIEW, SESSION_STATUS_STARTED

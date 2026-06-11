@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 
 from adventures.models import AdventureQuest, AdventureRun, CommandAdventure
 from challenges.models import Challenge, ChallengeQuest, ChallengeRun
-from challenges.serializers import challenge_run_payload
+from challenges.payloads import challenge_run_payload
 from challenges.services import ChallengeRunService
 from curriculum.models import CommandSkill, ConceptPage, Storey
 from curriculum.selectors import storey_content_page

@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from adventures.models import AdventureQuestAttempt, AdventureRun, CommandAdventure
-from adventures.serializers import adventure_command_payload, adventure_run_payload
+from adventures.payloads import adventure_command_payload, adventure_run_payload
 from adventures.services import (
     AdventureCommandService,
     AdventureRunService,

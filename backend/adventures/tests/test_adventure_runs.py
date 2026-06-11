@@ -287,7 +287,7 @@ def test_adventure_run_http_flow_solves_a_quest(db, django_user_model):
 def test_objective_checklist_ticks_off_as_state_reaches_target(db, django_user_model):
     """The adventure brief exposes a live objective checklist; each check flips to
     satisfied once the repository state meets its server-side requirement."""
-    from adventures.serializers import attempt_payload
+    from adventures.payloads import attempt_payload
 
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model, "checklist")
