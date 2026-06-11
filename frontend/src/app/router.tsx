@@ -1,4 +1,4 @@
-import { Navigate, createBrowserRouter } from 'react-router-dom'
+import { Navigate, createBrowserRouter, type RouteObject } from 'react-router-dom'
 
 import { AuthLayout } from '@/app/layouts/AuthLayout'
 import { DashboardLayout } from '@/app/layouts/DashboardLayout'
@@ -13,7 +13,32 @@ import { CommandAdventurePage } from '@/features/command-adventures/pages/Comman
 import { ChallengeRunPage } from '@/features/challenges/pages/ChallengeRunPage'
 import { StoreyMapPage } from '@/features/storeys/pages/StoreyMapPage'
 
+/**
+ * ⚠ Dev-only design previews: the real Dashboard/Stats views inside the real
+ * layout chrome, fed by fixture data instead of the API (no auth required).
+ * `import.meta.env.DEV` is statically false in production builds, so these
+ * routes — and their lazily imported fixture modules — are compiled away.
+ */
+const designPreviewRoutes: RouteObject[] = import.meta.env.DEV
+  ? [
+      {
+        element: <DashboardLayout />,
+        children: [
+          {
+            path: '/design-preview/dashboard',
+            lazy: () => import('@/features/dashboard/preview/DashboardPreviewPage'),
+          },
+          {
+            path: '/design-preview/stats',
+            lazy: () => import('@/features/stats/preview/StatsPreviewPage'),
+          },
+        ],
+      },
+    ]
+  : []
+
 export const router = createBrowserRouter([
+  ...designPreviewRoutes,
   {
     element: <AuthLayout />,
     children: [

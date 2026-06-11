@@ -92,9 +92,12 @@ export function useAdventureCommandSubmission(runId: number | null) {
     },
     onSuccess: (response) => {
       const previous = queryClient.getQueryData<AdventureRun>(key)
+      // Mid-attempt patches (`partial: true`) never carry `is_passed`; only a
+      // full run payload can signal a fresh pass that mints coins.
+      const run = response.run
       const earnedCoins =
-        (response.run.is_passed && previous && !previous.is_passed) ||
-        (response.run.status === 'completed' && previous?.status !== 'completed')
+        (!('partial' in run) && run.is_passed && previous && !previous.is_passed) ||
+        (run.status === 'completed' && previous?.status !== 'completed')
       if (earnedCoins) {
         void queryClient.invalidateQueries({ queryKey: queryKeys.wallet })
       }

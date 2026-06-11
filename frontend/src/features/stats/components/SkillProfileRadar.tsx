@@ -50,6 +50,7 @@ function AxisTick({
         fill={val === null ? 'rgba(255,255,255,0.32)' : CYAN}
         fontSize={10}
         fontWeight={600}
+        fontFamily="JetBrains Mono, ui-monospace, monospace"
       >
         {val === null ? '—' : Math.round(val)}
       </text>
@@ -68,22 +69,27 @@ export function SkillProfileRadar({ axes }: { axes: SkillAxis[] }) {
   }))
 
   return (
-    <GamePanel className="flex flex-col p-5">
-      <div className="relative z-[1] mb-1">
-        <div className="flex items-center gap-2">
-          <span className="game-chip size-7">
-            <span className="size-3 rounded-[3px]" style={{ background: CYAN, boxShadow: `0 0 8px ${CYAN}` }} />
+    <GamePanel className="flex h-full flex-col p-5">
+      <div className="relative z-[1]">
+        <div className="flex items-center gap-2.5">
+          <span className="game-chip size-8">
+            <span
+              className="size-3.5 rotate-45 rounded-[3px]"
+              style={{ background: CYAN, boxShadow: `0 0 8px ${CYAN}` }}
+            />
           </span>
-          <h2 className="text-lg font-bold tracking-tight">Your skill profile</h2>
+          <div>
+            <p className="font-mono text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-aurora-blue/80">
+              Skill Profile
+            </p>
+            <h2 className="text-base font-bold leading-tight tracking-tight">Six disciplines of the tower</h2>
+          </div>
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Six qualities that grow as you play. The wider the shape, the stronger you are.
-        </p>
       </div>
 
-      <div className="relative z-[1] mx-auto w-full max-w-[420px]" style={{ height: 320 }}>
+      <div className="relative z-[1] mx-auto w-full max-w-[440px] flex-1" style={{ minHeight: 340 }}>
         <ResponsiveContainer width="100%" height="100%">
-          <RadarChart data={data} outerRadius="72%" margin={{ top: 24, right: 36, bottom: 24, left: 36 }}>
+          <RadarChart data={data} outerRadius="74%" margin={{ top: 26, right: 38, bottom: 26, left: 38 }}>
             <defs>
               <radialGradient id="radar-fill" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stopColor={CYAN} stopOpacity={0.5} />
@@ -115,18 +121,42 @@ export function SkillProfileRadar({ axes }: { axes: SkillAxis[] }) {
         </ResponsiveContainer>
       </div>
 
+      {/* Accessible fallback for the chart */}
+      <p className="sr-only">
+        {hasAny
+          ? `Skill profile: ${data
+              .map((d) => `${d.label} ${d.shown === null ? 'no data' : `${Math.round(d.shown)} out of 100`}`)
+              .join(', ')}.`
+          : 'Skill profile: no data yet.'}
+      </p>
+
       {!hasAny && (
-        <p className="relative z-[1] -mt-4 text-center text-sm text-muted-foreground/70">
+        <p className="relative z-[1] -mt-3 text-center text-sm text-muted-foreground/70">
           Play a few quests and your profile will start to take shape.
         </p>
       )}
 
-      {/* Plain-language legend */}
-      <ul className="relative z-[1] mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 max-sm:grid-cols-1">
+      {/* Compact legend — hover a chip for what each axis measures */}
+      <ul className="relative z-[1] mt-2 flex flex-wrap justify-center gap-1.5">
         {axes.map((axis) => (
-          <li key={axis.key} className="flex items-baseline gap-1.5 text-[0.7rem] leading-snug text-muted-foreground">
-            <span className="font-semibold text-foreground/80">{axis.label}:</span>
-            <span>{axis.hint}</span>
+          <li key={axis.key}>
+            <span
+              className="inline-flex cursor-help items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 font-mono text-[0.6rem] font-semibold uppercase tracking-[0.06em] text-muted-foreground transition-colors hover:border-aurora-cyan/40 hover:text-foreground"
+              title={axis.hint}
+            >
+              <span
+                className="size-1.5 rounded-full"
+                style={{
+                  background: axis.value === null ? 'rgba(255,255,255,0.2)' : CYAN,
+                  boxShadow: axis.value === null ? 'none' : `0 0 4px ${CYAN}`,
+                }}
+                aria-hidden="true"
+              />
+              {axis.label}
+              <span style={{ color: axis.value === null ? 'rgba(255,255,255,0.3)' : CYAN }}>
+                {axis.value === null ? '—' : Math.round(axis.value)}
+              </span>
+            </span>
           </li>
         ))}
       </ul>

@@ -4646,3 +4646,269 @@ textarea {
     animation: none;
   }
 }
+
+/* ─── Player hub & performance profile (Dashboard + Stats redesign) ─────── */
+
+/* Rank emblem — layered CSS-art hexagon crest with a glowing tower glyph.
+   Tier color arrives via --rank-color (hex) / --rank-color-rgb (r,g,b). */
+.rank-emblem {
+  position: relative;
+  width: 7.25rem;
+  height: 8.25rem;
+  display: grid;
+  place-items: center;
+  perspective: 540px;
+}
+
+.rank-emblem-halo {
+  position: absolute;
+  inset: -18%;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(var(--rank-color-rgb), 0.30), transparent 56%),
+    radial-gradient(circle at 50% 60%, rgba(0, 180, 216, 0.16), transparent 70%);
+  filter: blur(10px);
+  animation: rank-halo-pulse 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes rank-halo-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.94); }
+  50%      { opacity: 1; transform: scale(1.05); }
+}
+
+.rank-emblem-frame {
+  position: relative;
+  width: 6.5rem;
+  height: 7.5rem;
+  clip-path: polygon(50% 0, 96% 25%, 96% 75%, 50% 100%, 4% 75%, 4% 25%);
+  background: linear-gradient(160deg, rgba(var(--rank-color-rgb), 0.95), rgba(var(--rank-color-rgb), 0.45) 55%, rgba(0, 180, 216, 0.55));
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.5));
+}
+
+.rank-emblem:hover .rank-emblem-frame {
+  transform: rotateY(14deg) rotateX(8deg) translateZ(8px);
+}
+
+.rank-emblem-face {
+  position: absolute;
+  inset: 3px;
+  clip-path: polygon(50% 0, 96% 25%, 96% 75%, 50% 100%, 4% 75%, 4% 25%);
+  background:
+    radial-gradient(90% 60% at 50% 0%, rgba(var(--rank-color-rgb), 0.28), transparent 62%),
+    radial-gradient(120% 70% at 50% 110%, rgba(0, 119, 182, 0.30), transparent 64%),
+    linear-gradient(180deg, #0b1d36 0%, #050d1d 100%);
+  display: grid;
+  place-items: center;
+}
+
+/* Faceted shine sweeping across the crest face */
+.rank-emblem-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.10) 46%, rgba(255, 255, 255, 0.02) 54%, transparent 70%);
+  background-size: 250% 250%;
+  animation: aurora-shimmer 6s ease infinite;
+  pointer-events: none;
+}
+
+/* Mini tower glyph inside the crest — gradient masonry + lit door, same
+   technique as the tower build loader. */
+.rank-emblem-tower {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: end;
+  width: 3.2rem;
+  height: 4.1rem;
+  filter: drop-shadow(0 0 8px rgba(var(--rank-color-rgb), 0.45));
+}
+
+.rank-emblem-tower-roof {
+  width: 2.5rem;
+  height: 1.05rem;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  background: linear-gradient(180deg, rgba(var(--rank-color-rgb), 0.95), rgba(var(--rank-color-rgb), 0.5));
+}
+
+.rank-emblem-tower-spire {
+  position: absolute;
+  top: -0.5rem;
+  left: 50%;
+  width: 2px;
+  height: 0.65rem;
+  transform: translateX(-50%);
+  background: rgba(var(--rank-color-rgb), 0.95);
+  box-shadow: 0 0 6px rgba(var(--rank-color-rgb), 0.8);
+}
+
+.rank-emblem-tower-body {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 2.5rem;
+  border: 1.5px solid rgba(var(--rank-color-rgb), 0.85);
+  border-bottom: 0;
+  background: linear-gradient(180deg, rgba(10, 30, 56, 0.95), rgba(4, 13, 28, 0.98));
+  box-shadow: inset 0 0 8px rgba(var(--rank-color-rgb), 0.16);
+}
+
+.rank-emblem-tower-door {
+  width: 0.62rem;
+  height: 0.95rem;
+  margin-top: 0.85rem;
+  border-radius: 0.4rem 0.4rem 0 0;
+  background: radial-gradient(100% 78% at 50% 100%, rgba(255, 209, 130, 0.92), rgba(255, 176, 84, 0.34) 56%, rgba(2, 12, 24, 0.9) 92%);
+  box-shadow: 0 0 8px rgba(255, 196, 107, 0.5);
+  animation: git-it-build-window-flicker 2.4s ease-in-out infinite;
+}
+
+.rank-emblem-tower-base {
+  width: 2.5rem;
+  height: 0.5rem;
+  border: 1.5px solid rgba(var(--rank-color-rgb), 0.85);
+  background: rgba(4, 18, 34, 0.95);
+}
+
+/* Laurel dots flanking the tower */
+.rank-emblem-pip {
+  position: absolute;
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: 999px;
+  background: rgba(var(--rank-color-rgb), 0.9);
+  box-shadow: 0 0 6px rgba(var(--rank-color-rgb), 0.7);
+}
+
+.rank-emblem-pip--left  { left: 0.55rem; bottom: 1.4rem; }
+.rank-emblem-pip--right { right: 0.55rem; bottom: 1.4rem; }
+
+/* ── Character showcase: pedestal + floating sprite ── */
+
+.sprite-stage {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-items: end;
+}
+
+.sprite-stage-aura {
+  position: absolute;
+  inset: 6% 4% 10%;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 62%, rgba(0, 245, 212, 0.20), transparent 48%),
+    radial-gradient(circle at 44% 38%, rgba(0, 180, 216, 0.16), transparent 52%),
+    radial-gradient(circle at 58% 46%, rgba(167, 139, 250, 0.12), transparent 56%);
+  filter: blur(14px);
+  animation: rank-halo-pulse 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.sprite-stage-float {
+  position: relative;
+  z-index: 1;
+  animation: sprite-hover-float 3s ease-in-out infinite;
+}
+
+@keyframes sprite-hover-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-7px); }
+}
+
+.sprite-pedestal {
+  position: relative;
+  z-index: 0;
+  width: 72%;
+  height: 1.1rem;
+  margin-top: -0.9rem;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgba(0, 245, 212, 0.5), rgba(0, 180, 216, 0.18) 55%, transparent 75%);
+  filter: blur(4px);
+  animation: sprite-pedestal-pulse 3s ease-in-out infinite;
+}
+
+@keyframes sprite-pedestal-pulse {
+  0%, 100% { opacity: 0.55; transform: scaleX(0.92); }
+  50%      { opacity: 1; transform: scaleX(1.04); }
+}
+
+/* ── Match-history rows (recent runs) ── */
+
+.match-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.85rem 0.6rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(135deg, rgba(var(--run-accent-rgb), 0.10), rgba(10, 28, 50, 0.55) 38%, rgba(4, 13, 28, 0.7));
+  overflow: hidden;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.match-row::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--run-accent, #00f5d4);
+  box-shadow: 0 0 10px var(--run-accent, #00f5d4);
+}
+
+.match-row:hover {
+  transform: translateX(3px);
+  border-color: rgba(var(--run-accent-rgb), 0.4);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), 0 0 14px rgba(var(--run-accent-rgb), 0.12);
+}
+
+/* ── Storey progress door motif ── */
+
+.storey-door-chip {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.8rem;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(0, 245, 212, 0.5);
+  border-radius: 1.1rem 1.1rem 3px 3px;
+  background:
+    radial-gradient(110% 75% at 50% 100%, rgba(255, 209, 130, 0.40), rgba(255, 176, 84, 0.12) 50%, rgba(2, 12, 24, 0.96) 86%);
+  box-shadow: inset 0 0 10px rgba(0, 245, 212, 0.14), 0 0 12px rgba(0, 245, 212, 0.12);
+  color: #aef9ee;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(0, 245, 212, 0.6);
+}
+
+/* ── Hero band identity backdrop ── */
+
+.hero-identity-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0, 245, 212, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 245, 212, 0.035) 1px, transparent 1px);
+  background-size: 34px 34px;
+  -webkit-mask-image: radial-gradient(85% 90% at 28% 30%, #000 10%, transparent 78%);
+          mask-image: radial-gradient(85% 90% at 28% 30%, #000 10%, transparent 78%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rank-emblem-halo,
+  .rank-emblem-face::after,
+  .rank-emblem-tower-door,
+  .sprite-stage-aura,
+  .sprite-stage-float,
+  .sprite-pedestal {
+    animation: none;
+  }
+}
