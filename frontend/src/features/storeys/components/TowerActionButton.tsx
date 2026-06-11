@@ -7,7 +7,7 @@ import {
   adventureActionLabel,
   challengeLevelAccent,
 } from '@/features/storeys/challengeUi'
-import { useChallengeActions } from '@/features/storeys/hooks/useChallengeActions'
+import { useTowerDoorNavigation } from '@/features/storeys/hooks/useTowerDoorNavigation'
 import { useTowerSelection } from '@/features/storeys/hooks/useTowerSelection'
 
 const ADVENTURE_ACCENT = '0, 245, 212'
@@ -15,7 +15,7 @@ const ADVENTURE_ACCENT = '0, 245, 212'
 // The single floating action for whatever door is selected, pinned lower-left.
 export function TowerActionButton() {
   const selected = useTowerSelection((state) => state.selected)
-  const { runChallengeAction, runAdventureAction } = useChallengeActions()
+  const { openChallengeDoor, openAdventureDoor } = useTowerDoorNavigation()
 
   if (!selected) return null
 
@@ -28,7 +28,7 @@ export function TowerActionButton() {
           <Button
             type="button"
             className="tower-action-button"
-            onClick={() => runAdventureAction(adventure)}
+            onClick={() => openAdventureDoor(adventure)}
           >
             {adventureActionLabel(adventure)}
           </Button>
@@ -50,7 +50,7 @@ export function TowerActionButton() {
           className="tower-action-button"
           disabled={disabled}
           onClick={() => {
-            if (action) runChallengeAction(level, action)
+            if (action) openChallengeDoor(level, action)
           }}
         >
           {actionLabel(action, level.status)}

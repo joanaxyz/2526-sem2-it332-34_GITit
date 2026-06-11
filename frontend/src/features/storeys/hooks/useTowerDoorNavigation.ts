@@ -7,14 +7,14 @@ import type {
 } from '@/features/challenges/types'
 
 /**
- * Opens the selected tower door. Challenge start/review/retry work is routed to
- * dedicated practice pages so the full-screen loader belongs to the destination
- * flow instead of being rendered inside the tower dock.
+ * The tower should not start or retry runs directly. It only routes the learner
+ * to the selected door's entry or active run page; each practice feature owns
+ * its own mutations and full-screen loading state.
  */
-export function useChallengeActions() {
+export function useTowerDoorNavigation() {
   const navigate = useNavigate()
 
-  function runChallengeAction(item: ChallengeLevelAccess, action: ChallengeActionIntent) {
+  function openChallengeDoor(item: ChallengeLevelAccess, action: ChallengeActionIntent) {
     if (action === 'resume' && item.active_run_id) {
       navigate(`/challenge-runs/${item.active_run_id}`)
       return
@@ -30,7 +30,7 @@ export function useChallengeActions() {
     navigate(`/challenge-levels/${item.id}`)
   }
 
-  function runAdventureAction(adventure: CommandAdventureSummary) {
+  function openAdventureDoor(adventure: CommandAdventureSummary) {
     if (adventure.active_run_id) {
       navigate(`/adventure-runs/${adventure.active_run_id}`)
       return
@@ -38,5 +38,5 @@ export function useChallengeActions() {
     navigate(`/command-adventures/${adventure.slug}`)
   }
 
-  return { runChallengeAction, runAdventureAction }
+  return { openChallengeDoor, openAdventureDoor }
 }

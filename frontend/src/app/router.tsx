@@ -9,7 +9,7 @@ import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { DashboardPage } from '@/features/dashboard/pages/DashboardPage'
 import { StatsPage } from '@/features/stats/pages/StatsPage'
 import { AdventureRunPage } from '@/features/command-adventures/pages/AdventureRunPage'
-import { CommandAdventurePage } from '@/features/command-adventures/pages/CommandAdventurePage'
+import { AdventureStartPage } from '@/features/command-adventures/pages/AdventureStartPage'
 import { ChallengeRunPage } from '@/features/challenges/pages/ChallengeRunPage'
 import { ChallengeStartPage } from '@/features/challenges/pages/ChallengeStartPage'
 import { StoreyMapPage } from '@/features/storeys/pages/StoreyMapPage'
@@ -72,7 +72,7 @@ export const router = createBrowserRouter([
       { path: '/challenge-levels/:levelId/review', element: <ChallengeStartPage mode="review" /> },
       { path: '/challenge-runs/:runId/retry', element: <ChallengeStartPage mode="retry" /> },
       { path: '/challenge-runs/:runId', element: <ChallengeRunPage /> },
-      { path: '/command-adventures/:adventureSlug', element: <CommandAdventurePage /> },
+      { path: '/command-adventures/:adventureSlug', element: <AdventureStartPage /> },
       { path: '/adventure-runs/:runId', element: <AdventureRunPage /> },
     ],
   },
