@@ -50,10 +50,7 @@ Thumbs.db
 .vscode/
 
 # Project-specific generated folders
-scripts/
 md_files/
 
-
-frontend/src/features/auth/components/LoginForm.test.tsx
-frontend/src/features/auth/components/RegisterForm.test.tsx
-frontend/src/features/auth/utils/passwordStrength.test.ts
+# Claude Code local skills (memory under .claude/projects stays tracked)
+.claude/skills/
