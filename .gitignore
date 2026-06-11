@@ -54,3 +54,4 @@ md_files/
 
 # Claude Code local skills (memory under .claude/projects stays tracked)
 .claude/skills/
+git-it.zip

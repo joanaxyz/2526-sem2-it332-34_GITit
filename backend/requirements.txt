@@ -1,0 +1,11 @@
+Django==6.0.5
+djangorestframework==3.17.1
+djangorestframework_simplejwt==5.5.1
+django-cors-headers==4.9.0
+django-environ==0.13.0
+django-redis==6.0.0
+redis==7.4.0
+drf-spectacular==0.29.0
+psycopg[binary]==3.3.4
+# Production WSGI server (POSIX-only; Windows dev uses manage.py runserver)
+gunicorn==23.0.0; sys_platform != "win32"
