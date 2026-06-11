@@ -120,20 +120,14 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   const colors = VARIANT_COLORS[variant]
   const normalizedSnapshot = useMemo(() => normalizeSnapshot(snapshot), [snapshot])
   const layoutSignature = useMemo(() => graphLayoutSignature(normalizedSnapshot), [normalizedSnapshot])
-  // dagre layout is the heaviest per-command cost, but node positions depend only
-  // on commit topology (exactly what layoutSignature captures). Cache positions per
-  // topology so ref/HEAD/staging-only commands (git add, branch, switch, status…)
-  // refresh the cheap node data without re-running a full graph layout.
-  const positionsRef = useRef<{ signature: string; positions: Map<string, { x: number; y: number }> } | null>(null)
   const { nodes, edges } = useMemo(() => {
-    const cached =
-      positionsRef.current?.signature === layoutSignature ? positionsRef.current.positions : undefined
+    const cached = layoutPositionsCache.get(layoutSignature)
     const graph = buildGraph(normalizedSnapshot, variant, cached)
     if (!cached) {
-      positionsRef.current = {
-        signature: layoutSignature,
-        positions: new Map(graph.nodes.map((node) => [node.id, node.position])),
-      }
+      rememberLayoutPositions(
+        layoutSignature,
+        new Map(graph.nodes.map((node) => [node.id, node.position])),
+      )
     }
     return graph
   }, [normalizedSnapshot, variant, layoutSignature])
@@ -491,6 +485,27 @@ function SummaryLine({ label, value }: { label: string; value: string }) {
       <span className="font-semibold text-foreground">{label}:</span> {value}
     </p>
   )
+}
+
+// dagre layout is the heaviest per-command cost, but node positions depend only
+// on commit topology (exactly what graphLayoutSignature captures). Cache positions
+// per topology so ref/HEAD/staging-only commands (git add, branch, switch, status…)
+// refresh the cheap node data without re-running a full graph layout. Module level
+// so the cache is shared across diagram instances (live + expected often match)
+// and stays out of render-time ref/state mutation territory.
+const layoutPositionsCache = new Map<string, Map<string, { x: number; y: number }>>()
+const LAYOUT_CACHE_MAX_ENTRIES = 64
+
+function rememberLayoutPositions(
+  signature: string,
+  positions: Map<string, { x: number; y: number }>,
+) {
+  layoutPositionsCache.set(signature, positions)
+  while (layoutPositionsCache.size > LAYOUT_CACHE_MAX_ENTRIES) {
+    const oldest = layoutPositionsCache.keys().next().value
+    if (oldest === undefined) break
+    layoutPositionsCache.delete(oldest)
+  }
 }
 
 function buildGraph(

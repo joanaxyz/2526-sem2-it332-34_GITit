@@ -5,8 +5,10 @@ export function useCountUp(target: number | null, duration = 900): number {
   const [value, setValue] = useState(0)
   useEffect(() => {
     if (target === null || target === 0) {
-      setValue(target ?? 0)
-      return
+      // Settle on the next frame: setting state synchronously inside an effect
+      // forces a cascading re-render (react-hooks/set-state-in-effect).
+      const frame = requestAnimationFrame(() => setValue(target ?? 0))
+      return () => cancelAnimationFrame(frame)
     }
     const startTime = performance.now()
     let frame = 0

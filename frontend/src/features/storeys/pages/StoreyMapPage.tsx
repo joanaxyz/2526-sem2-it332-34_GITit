@@ -358,13 +358,8 @@ export function StoreyMapPage() {
     })
   }, [focusedStoreyId, focusIndex])
 
-  useEffect(() => {
-    if (!storeys.length) return
-    setActiveStoreyId((current) => {
-      if (current && storeys.some((storey) => storey.id === current)) return current
-      return storeys[0]?.id ?? null
-    })
-  }, [storeys])
+  // No reset effect needed when storeys change: the activeStorey memo above
+  // already falls back to storeys[0] whenever the stored id is stale or null.
 
   useEffect(() => {
     if (!storeys.length) return
