@@ -2,6 +2,22 @@
 
 Audit date: 2026-06-11. Goal: clean up quality/dead code, solidify architecture & structure, and meet NFRs so 100+ concurrent users can use the site without performance degradation.
 
+## Execution status (2026-06-11, branch `chore/codebase-improvements`)
+
+**Done:** Phases 0–3 and 5 fully; Phase 4 except the god-component splits.
+Throttling, pagination clamp, 256KB state guard, duplicate-COUNT fix, repo
+hygiene (zip untracked, deps pinned, dead files removed), LOGGING + /api/health/,
+payload-builder extraction, evaluation rule decomposition (guarded by
+test_rule_builders), all 7 frontend lint errors fixed, route-level code
+splitting (entry chunk 1,433→350 kB), AppErrorBoundary, practice tests, CI.
+
+**Deliberately deferred:**
+- God-component splits (LiveDagPanel 717, ChallengeWorkspace 615, StoreyPracticeHub) — StoreyPracticeHub is in the `refactor/auth` WIP; do after the redesign lands
+- Inline style → token consolidation — same WIP overlap (HeroBanner, HomeLayout, AchievementsTab)
+- `frontend/public/dashboard_video/tower.mp4` (4MB, untracked) — re-encode + `preload="none"` when the redesign wires it in; no ffmpeg on this machine
+- Adventure transition-path query dedup (33 queries once per quest completion) — needs a mastery-map threaded through scheduler/services/payloads; real regression risk for a rare event
+- Sentry init, load test against deployed Postgres (`hey -c 100` on submit-command), git-history rewrite of the zip
+
 ## Audit verdict (TL;DR)
 
 The codebase is in better shape than feared — frontend is high quality (consistent feature folders, zero `any`, no console.logs, mature error handling), backend layering (views → services/selectors → models) is mostly respected, and the Postgres/pooler config is already tuned for the 200ms-RTT Supabase setup. The real gaps for 100+ users are **operational, not architectural**:
