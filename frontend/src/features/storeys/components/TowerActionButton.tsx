@@ -1,7 +1,6 @@
 import { type CSSProperties } from 'react'
 
 import { Button } from '@/shared/components/Button'
-import { LoadingState } from '@/shared/components/LoadingState'
 import {
   actionForChallengeLevel,
   actionLabel,
@@ -16,19 +15,9 @@ const ADVENTURE_ACCENT = '0, 245, 212'
 // The single floating action for whatever door is selected, pinned lower-left.
 export function TowerActionButton() {
   const selected = useTowerSelection((state) => state.selected)
-  const { runChallengeAction, runAdventureAction, actionPending } = useChallengeActions()
+  const { runChallengeAction, runAdventureAction } = useChallengeActions()
 
   if (!selected) return null
-
-  const pendingOverlay = actionPending ? (
-    <div className="tower-loading-overlay">
-      <LoadingState
-        description="Preparing the repository, terminal, and stage data."
-        label={selected.kind === 'adventure' ? 'Loading adventure' : 'Loading challenge'}
-        variant="screen"
-      />
-    </div>
-  ) : null
 
   if (selected.kind === 'adventure') {
     const { adventure } = selected
@@ -39,13 +28,11 @@ export function TowerActionButton() {
           <Button
             type="button"
             className="tower-action-button"
-            disabled={actionPending}
             onClick={() => runAdventureAction(adventure)}
           >
             {adventureActionLabel(adventure)}
           </Button>
         </div>
-        {pendingOverlay}
       </>
     )
   }
@@ -53,7 +40,7 @@ export function TowerActionButton() {
   const { level, locked } = selected
   const action = actionForChallengeLevel(level)
   const accent = challengeLevelAccent(level)
-  const disabled = actionPending || locked || !action
+  const disabled = locked || !action
 
   return (
     <>
@@ -69,7 +56,6 @@ export function TowerActionButton() {
           {actionLabel(action, level.status)}
         </Button>
       </div>
-      {pendingOverlay}
     </>
   )
 }

@@ -1,8 +1,5 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 
-import { challengesApi } from '@/features/challenges/api/challengesApi'
-import { syncChallengeRunInCache } from '@/features/challenges/utils/challengeRunCache'
 import type {
   ChallengeActionIntent,
   ChallengeLevelAccess,
@@ -10,35 +7,12 @@ import type {
 } from '@/features/challenges/types'
 
 /**
- * Start / resume / retry / review a challenge level, or open a command
- * adventure. Extracted from StoreyPracticeHub so the page-level inspector can
- * own the actions while the doors stay presentational selectors.
+ * Opens the selected tower door. Challenge start/review/retry work is routed to
+ * dedicated practice pages so the full-screen loader belongs to the destination
+ * flow instead of being rendered inside the tower dock.
  */
 export function useChallengeActions() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-
-  const startMutation = useMutation({
-    mutationFn: (levelId: number) => challengesApi.startChallengeRun(levelId),
-    onSuccess: (run) => {
-      syncChallengeRunInCache(queryClient, run)
-      navigate(`/challenge-runs/${run.id}`)
-    },
-  })
-  const reviewMutation = useMutation({
-    mutationFn: (levelId: number) => challengesApi.startChallengeRun(levelId, { review: true }),
-    onSuccess: (run) => {
-      syncChallengeRunInCache(queryClient, run)
-      navigate(`/challenge-runs/${run.id}`)
-    },
-  })
-  const retryMutation = useMutation({
-    mutationFn: (runId: number) => challengesApi.retryChallengeRun(runId),
-    onSuccess: (run) => {
-      syncChallengeRunInCache(queryClient, run)
-      navigate(`/challenge-runs/${run.id}`)
-    },
-  })
 
   function runChallengeAction(item: ChallengeLevelAccess, action: ChallengeActionIntent) {
     if (action === 'resume' && item.active_run_id) {
@@ -46,14 +20,14 @@ export function useChallengeActions() {
       return
     }
     if (action === 'review') {
-      reviewMutation.mutate(item.id)
+      navigate(`/challenge-levels/${item.id}/review`)
       return
     }
     if (action === 'retry' && item.latest_attempt?.id) {
-      retryMutation.mutate(item.latest_attempt.id)
+      navigate(`/challenge-runs/${item.latest_attempt.id}/retry`)
       return
     }
-    startMutation.mutate(item.id)
+    navigate(`/challenge-levels/${item.id}`)
   }
 
   function runAdventureAction(adventure: CommandAdventureSummary) {
@@ -64,7 +38,5 @@ export function useChallengeActions() {
     navigate(`/command-adventures/${adventure.slug}`)
   }
 
-  const actionPending = startMutation.isPending || reviewMutation.isPending || retryMutation.isPending
-
-  return { runChallengeAction, runAdventureAction, actionPending }
+  return { runChallengeAction, runAdventureAction }
 }

@@ -11,6 +11,7 @@ import { StatsPage } from '@/features/stats/pages/StatsPage'
 import { AdventureRunPage } from '@/features/command-adventures/pages/AdventureRunPage'
 import { CommandAdventurePage } from '@/features/command-adventures/pages/CommandAdventurePage'
 import { ChallengeRunPage } from '@/features/challenges/pages/ChallengeRunPage'
+import { ChallengeStartPage } from '@/features/challenges/pages/ChallengeStartPage'
 import { StoreyMapPage } from '@/features/storeys/pages/StoreyMapPage'
 
 /**
@@ -67,6 +68,9 @@ export const router = createBrowserRouter([
       </Protected>
     ),
     children: [
+      { path: '/challenge-levels/:levelId', element: <ChallengeStartPage mode="start" /> },
+      { path: '/challenge-levels/:levelId/review', element: <ChallengeStartPage mode="review" /> },
+      { path: '/challenge-runs/:runId/retry', element: <ChallengeStartPage mode="retry" /> },
       { path: '/challenge-runs/:runId', element: <ChallengeRunPage /> },
       { path: '/command-adventures/:adventureSlug', element: <CommandAdventurePage /> },
       { path: '/adventure-runs/:runId', element: <AdventureRunPage /> },
