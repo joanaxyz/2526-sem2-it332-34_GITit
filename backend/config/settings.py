@@ -183,6 +183,34 @@ else:
         }
     }
 
+# Structured console logging: one line per event to stdout, which any host
+# (Render/Fly/Railway/systemd) captures. DJANGO_LOG_LEVEL tunes verbosity.
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {name} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "verbose"},
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": env("DJANGO_LOG_LEVEL", default="INFO"),
+    },
+    "loggers": {
+        # Unhandled view exceptions (500s) with tracebacks.
+        "django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False},
+        # Flip to DEBUG locally to trace SQL.
+        "django.db.backends": {"level": "WARNING"},
+        # Per-stage timing spans (enabled via PERFORMANCE_TIMING_ENABLED).
+        "git_it.performance": {"level": "INFO"},
+    },
+}
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},

@@ -3,18 +3,17 @@ from collections import OrderedDict
 from django.db import transaction
 from django.utils import timezone
 
+from challenges.models import ChallengeQuest, ChallengeRun, ChallengeVariant
 from common.constants import (
     DIFFICULTY_EASY,
     DIFFICULTY_MEDIUM,
     SESSION_MODE_PRIMARY,
     SESSION_MODE_REVIEW,
     SESSION_STATUS_ABANDONED,
-    SESSION_STATUS_COMPLETED,
     SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
 from common.exceptions import Locked
-from challenges.models import ChallengeQuest, ChallengeRun, ChallengeVariant
 from progress.models import QuestCompletion
 
 RUN_HYDRATE_SELECT_RELATED = (
@@ -120,6 +119,7 @@ class ChallengeRunService:
     @staticmethod
     def hydrate_run(run: ChallengeRun | int, *, user=None) -> ChallengeRun:
         from django.db.models import Prefetch
+
         from practice.models import CommandStep
 
         queryset = ChallengeRun.objects.select_related(*RUN_HYDRATE_SELECT_RELATED).prefetch_related(

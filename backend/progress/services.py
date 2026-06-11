@@ -4,6 +4,9 @@ from django.db.models import Avg, Count, Q, Sum
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 
+from adventures.models import AdventureMastery, AdventureQuest, AdventureQuestAttempt, AdventureRun
+from challenges.models import ChallengeQuest, ChallengeRun
+from challenges.selectors import command_accuracy_rate, minimum_counted_for_run
 from common.constants import (
     DIFFICULTY_HARD,
     RESULT_INVALID,
@@ -14,12 +17,8 @@ from common.constants import (
     SESSION_STATUS_COMPLETED,
     SESSION_STATUS_FAILED,
 )
-from adventures.models import AdventureMastery, AdventureQuest, AdventureQuestAttempt, AdventureRun
-from challenges.models import ChallengeQuest, ChallengeRun
-from challenges.selectors import command_accuracy_rate, minimum_counted_for_run
 from practice.models import CommandStep
 from progress.models import QuestCompletion, StreakRecord, Wallet
-
 
 # Trailing window (days) for the activity trend and the consistency axis.
 TREND_DAYS = 14

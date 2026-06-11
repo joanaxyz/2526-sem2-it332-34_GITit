@@ -1,10 +1,10 @@
+from challenges.models import ChallengeQuest, ChallengeRun
 from common.constants import (
     COMMAND_ACCURACY_PROGRESS_THRESHOLD,
     SESSION_STATUS_ABANDONED,
     SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
-from challenges.models import ChallengeQuest, ChallengeRun
 
 
 def required_successful_attempts_for_quest(quest) -> int:

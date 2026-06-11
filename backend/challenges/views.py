@@ -2,8 +2,6 @@ from django.db import OperationalError, transaction
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from common.constants import SESSION_MODE_PRIMARY, SESSION_MODE_REVIEW, SESSION_STATUS_STARTED
-from common.exceptions import Locked
 from challenges.models import ChallengeRun
 from challenges.selectors import get_challenge_quest
 from challenges.serializers import (
@@ -15,6 +13,8 @@ from challenges.serializers import (
     prefetch_run_payload_context,
 )
 from challenges.services import ChallengeRunService
+from common.constants import SESSION_MODE_PRIMARY, SESSION_MODE_REVIEW, SESSION_STATUS_STARTED
+from common.exceptions import Locked
 from practice.services import CommandProcessingService, WorkspaceFileCreationService
 
 

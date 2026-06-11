@@ -45,7 +45,6 @@ from simulator.services import (
 )
 from simulator.workspace_files import WorkspaceFileError, WorkspaceFileStateService
 
-
 # Cap for the serialized repository_state JSON. Stored states are typically a
 # few KB; anything near this size means a runaway command sequence, and letting
 # it grow bloats the DB row and every subsequent response payload.

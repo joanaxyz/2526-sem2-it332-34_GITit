@@ -84,8 +84,8 @@ class MergeCommandHandler(BaseCommandHandler):
         return CommandOutcome(
             command="merge",
             stdout=(
-                f"Squash commit -- not updating HEAD\n"
-                f"Automatic merge went well; stopped before committing as requested"
+                "Squash commit -- not updating HEAD\n"
+                "Automatic merge went well; stopped before committing as requested"
             ),
         )
 

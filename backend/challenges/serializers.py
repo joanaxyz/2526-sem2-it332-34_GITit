@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
-from common.constants import SESSION_MODE_REVIEW, SESSION_STATUS_COMPLETED, SESSION_STATUS_STARTED
 from challenges.models import ChallengeRun
 from challenges.selectors import required_successful_attempts_for_quest
+from common.constants import SESSION_MODE_REVIEW, SESSION_STATUS_COMPLETED, SESSION_STATUS_STARTED
 from practice.context import ScenarioContextNormalizer
 from practice.scaffolding import ScaffoldingService
 from practice.visualization import RepositoryVisualizationService

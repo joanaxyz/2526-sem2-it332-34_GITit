@@ -18,6 +18,7 @@ from challenges.views import (
     ChallengeRunStartAPIView,
     ChallengeWorkspaceFileAPIView,
 )
+from common.views import HealthAPIView
 from curriculum.views import (
     CommandFormPreviewAPIView,
     FoundationTopicListAPIView,
@@ -28,6 +29,7 @@ from curriculum.views import (
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("api/health/", HealthAPIView.as_view(), name="health"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("api/auth/", include("accounts.urls")),

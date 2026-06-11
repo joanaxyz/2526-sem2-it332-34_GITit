@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 
 from django.conf import settings
@@ -12,6 +13,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from accounts.models import SessionRecord
 from common.exceptions import Conflict
 from progress.models import StreakRecord, StudentProgress
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -55,6 +58,10 @@ class TokenBlacklistService:
     def revoke(self, refresh_token: str) -> None:
         try:
             token = RefreshToken(refresh_token)
+        except TokenError:
+            # Logout with an expired/garbage cookie is routine; nothing to revoke.
+            return
+        try:
             jti = token["jti"]
             exp = token["exp"]
             ttl = max(0, exp - int(timezone.now().timestamp()))
@@ -63,13 +70,19 @@ class TokenBlacklistService:
                 revoked_at=timezone.now()
             )
         except Exception:
-            return
+            # Keep logout graceful, but a failed revocation write means the token
+            # stays usable until expiry — that must be visible in production logs.
+            logger.warning("Refresh-token revocation write failed.", exc_info=True)
 
     def is_revoked(self, refresh_token: str) -> bool:
         try:
             token = RefreshToken(refresh_token)
+        except TokenError:
+            return False
+        try:
             return bool(cache.get(f"{self.key_prefix}{token['jti']}"))
         except Exception:
+            logger.warning("Revocation-cache read failed; treating token as valid.", exc_info=True)
             return False
 
 
@@ -94,6 +107,7 @@ class TokenService:
         try:
             lockout_until = cache.get(lockout_key)
         except Exception:
+            logger.warning("Login-lockout cache read failed.", exc_info=True)
             return 0
         if lockout_until is None:
             return 0
@@ -115,7 +129,8 @@ class TokenService:
                 cache.delete(attempt_key)
                 return lockout_seconds
         except Exception:
-            pass
+            # Without the cache the brute-force counter is inert — log it.
+            logger.warning("Failed-login counter cache write failed.", exc_info=True)
         return 0
 
     def clear_failed_login(self, *, identifier: str, ip_address: str | None) -> None:
@@ -123,7 +138,7 @@ class TokenService:
             cache.delete(self._attempt_key(identifier, ip_address))
             cache.delete(self._lockout_key(identifier, ip_address))
         except Exception:
-            pass
+            logger.warning("Failed-login counter cache clear failed.", exc_info=True)
 
     def issue_for_user(self, user, request=None) -> IssuedTokens:
         refresh = RefreshToken.for_user(user)
