@@ -5,7 +5,7 @@ import { deriveAchievements, latestAchievement } from '@/features/home/achieveme
 import { AchievementsTab } from '@/features/home/components/AchievementsTab'
 import { HeroBanner } from '@/features/home/components/HeroBanner'
 import { HubTabs } from '@/features/home/components/HubTabs'
-import { HUB_TABS, type HubTabId } from '@/features/home/hubTabs'
+import { DEFAULT_HUB_TAB, HUB_TABS, type HubTabId } from '@/features/home/hubTabs'
 import { ShowcaseTab } from '@/features/home/components/ShowcaseTab'
 import { StatsTab } from '@/features/home/components/StatsTab'
 import type { HomeSummary } from '@/features/home/types'
@@ -33,7 +33,7 @@ export function HomeHubView({
 }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const tabParam = searchParams.get('tab')
-  const active: HubTabId = isHubTabId(tabParam) ? tabParam : 'stats'
+  const active: HubTabId = isHubTabId(tabParam) ? tabParam : DEFAULT_HUB_TAB
   const deckRef = useRef<HTMLDivElement>(null)
 
   const achievements = useMemo(() => deriveAchievements(home, stats), [home, stats])
@@ -41,7 +41,7 @@ export function HomeHubView({
 
   const selectTab = useCallback(
     (id: HubTabId) => {
-      setSearchParams(id === 'stats' ? {} : { tab: id }, { replace: true })
+      setSearchParams(id === DEFAULT_HUB_TAB ? {} : { tab: id }, { replace: true })
     },
     [setSearchParams],
   )

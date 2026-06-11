@@ -246,42 +246,41 @@ export function HomeLayout() {
   return (
     <div className="min-h-screen" style={{ overflowX: 'clip' }}>
       <CursorGlow />
-      <header className="sticky top-0 z-20 border-b border-primary/10 bg-background/70 backdrop-blur-md">
-        <div className="relative mx-auto flex min-h-16 max-w-[1440px] items-center px-6 max-sm:px-4">
-          {/* Left: logo */}
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="logo-badge grid size-9 place-items-center rounded-md border border-primary/30 bg-primary/10 text-primary transition-all duration-200 hover:border-primary/60">
-              <GitBranch />
-            </span>
-            <span className="whitespace-nowrap text-xl font-extrabold tracking-tight max-md:hidden">
-              GIT <span className="text-primary">it!</span>
-            </span>
+      {/* No header bar — only the wide launcher blade, with the logo and
+          wallet/profile floating loose in the top corners (Halo-style). */}
+      <header className="pointer-events-none sticky top-0 z-20 h-0">
+        {/* Centered wide blade: \ Home | Tower / */}
+        <div className="pointer-events-auto mx-auto w-fit">
+          <div className="hub-nav-frame">
+            <nav className="hub-nav" aria-label="Primary">
+              {navItems.map((item, i) => (
+                <span key={item.to} className="flex items-center gap-1.5">
+                  {i > 0 && <span className="hub-nav-divider" aria-hidden="true" />}
+                  <NavLink
+                    className={({ isActive }) => cn('hub-nav-link', isActive && 'is-active')}
+                    to={item.to}
+                  >
+                    {item.label}
+                  </NavLink>
+                </span>
+              ))}
+            </nav>
           </div>
+        </div>
 
-          {/* Center: angled launcher nav — \ Home | Tower / */}
-          <div className="absolute left-1/2 top-0 z-[1] -translate-x-1/2">
-            <div className="hub-nav-frame">
-              <nav className="hub-nav" aria-label="Primary">
-                {navItems.map((item, i) => (
-                  <span key={item.to} className="flex items-center gap-1.5">
-                    {i > 0 && <span className="hub-nav-divider" aria-hidden="true" />}
-                    <NavLink
-                      className={({ isActive }) => cn('hub-nav-link', isActive && 'is-active')}
-                      to={item.to}
-                    >
-                      {item.label}
-                    </NavLink>
-                  </span>
-                ))}
-              </nav>
-            </div>
-          </div>
+        {/* Floating logo chip — top left */}
+        <NavLink
+          to="/home"
+          aria-label="GIT it! home"
+          className="logo-badge pointer-events-auto absolute left-5 top-3 grid size-9 place-items-center rounded-md border border-primary/30 bg-background/55 text-primary backdrop-blur-md transition-all duration-200 hover:border-primary/60 max-sm:hidden"
+        >
+          <GitBranch />
+        </NavLink>
 
-          {/* Right: GitCoin balance + profile dropdown */}
-          <div className="ml-auto flex items-center gap-3">
-            {user && <WalletBadge />}
-            {user && <ProfileDropdown user={user} onLogout={logout} />}
-          </div>
+        {/* Floating wallet + profile — top right */}
+        <div className="pointer-events-auto absolute right-5 top-2.5 flex items-center gap-3 max-sm:right-3">
+          {user && <WalletBadge />}
+          {user && <ProfileDropdown user={user} onLogout={logout} />}
         </div>
       </header>
       <main className="mx-auto max-w-[1440px] px-6 py-6 max-sm:px-4">

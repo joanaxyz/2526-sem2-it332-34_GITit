@@ -1114,7 +1114,9 @@ textarea {
   /* No overflow:hidden here — it would trap the sticky storey rail. Clouds are
      clipped by .tower-cloudfield instead. */
   isolation: isolate;
-  padding: clamp(1rem, 2vw, 1.5rem) 0 2.5rem;
+  /* Top padding clears the floating nav blade (no header bar since 2026-06)
+     so the spire never tucks under it. */
+  padding: clamp(4.5rem, 9vh, 6rem) 0 2.5rem;
   scroll-padding-top: clamp(9.5rem, 21vh, 14rem);
 }
 
@@ -5094,24 +5096,29 @@ textarea {
 
 /* ── Angled top navbar: \  Home | Tower  / ── */
 .hub-nav-frame {
-  clip-path: polygon(0 0, 100% 0, calc(100% - 1.7rem) 100%, 1.7rem 100%);
+  --nav-cut: 2.4rem;
+  clip-path: polygon(0 0, 100% 0, calc(100% - var(--nav-cut)) 100%, var(--nav-cut) 100%);
   padding: 0 1px 1.5px;
   background: linear-gradient(90deg, transparent 4%, rgba(0, 245, 212, 0.55), rgba(0, 180, 216, 0.4), transparent 96%);
   filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.45)) drop-shadow(0 2px 10px rgba(0, 245, 212, 0.10));
 }
 
+/* The wide launcher blade \ Home | Tower / — the only top chrome. Glass:
+   the page (or hero art) reads through the blur. */
 .hub-nav {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  min-height: 4.6rem; /* taller than the 4rem header band so the blade dips below it */
-  padding: 0.55rem 3rem 0.9rem;
-  clip-path: polygon(0 0, 100% 0, calc(100% - 1.7rem) 100%, 1.7rem 100%);
+  justify-content: center;
+  gap: 1.6rem;
+  width: min(94vw, 50rem);
+  min-height: 3.9rem;
+  padding: 0.5rem 4.5rem 0.85rem;
+  clip-path: polygon(0 0, 100% 0, calc(100% - var(--nav-cut)) 100%, var(--nav-cut) 100%);
   background:
     radial-gradient(120% 90% at 50% -30%, rgba(0, 245, 212, 0.10), transparent 60%),
-    linear-gradient(180deg, rgba(7, 19, 37, 0.96), rgba(2, 8, 19, 0.94));
-  -webkit-backdrop-filter: blur(10px);
-          backdrop-filter: blur(10px);
+    linear-gradient(180deg, rgba(7, 19, 37, 0.78), rgba(2, 8, 19, 0.72));
+  -webkit-backdrop-filter: blur(14px);
+          backdrop-filter: blur(14px);
 }
 
 .hub-nav-link {
@@ -5163,11 +5170,91 @@ textarea {
 /* ── Environment hero banner ── */
 .hub-hero {
   position: relative;
-  overflow: hidden;
+  /* overflow stays visible so the wordmark plate can straddle the bottom edge */
   isolation: isolate;
-  min-height: clamp(26rem, 58vh, 37rem);
+  min-height: clamp(23rem, 52vh, 33rem);
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
+}
+
+/* Hatched glass band across the hero's bottom — the launcher's intel shelf.
+   The diagonal hatch is the reference's pattern; the plaques sit on it. */
+.hub-hero-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5.4rem;
+  pointer-events: none;
+  border-top: 1px solid rgba(125, 211, 252, 0.10);
+  background:
+    repeating-linear-gradient(-45deg, rgba(125, 211, 252, 0.045) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, rgba(2, 8, 19, 0.30), rgba(2, 8, 19, 0.62));
+  -webkit-backdrop-filter: blur(6px);
+          backdrop-filter: blur(6px);
+}
+
+/* Bottom assembly: plaque — wordmark plate — plaque. The plate is taller
+   than the plaques, so centring the row makes it dip below the hero edge
+   exactly like the reference. */
+.hub-hero-ledge {
+  --ledge-drop: 44%;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1.25rem;
+  padding-inline: 2.5rem;
+  transform: translateY(var(--ledge-drop));
+}
+
+.hub-hero-ledge > :first-child {
+  justify-self: start;
+}
+
+.hub-hero-ledge > :last-child {
+  justify-self: end;
+}
+
+/* CTA row sits below the hero, clearing the straddling plate */
+.hub-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 4.4rem;
+}
+
+@media (max-width: 900px) {
+  .hub-hero-ledge {
+    --ledge-drop: 0%;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 0.8rem;
+    padding-inline: 1rem;
+    padding-bottom: 1.1rem;
+  }
+
+  .hub-hero-ledge > :first-child,
+  .hub-hero-ledge > :last-child {
+    justify-self: stretch;
+  }
+
+  .hub-hero-ledge > .hub-logo-frame {
+    order: -1;
+  }
+
+  .hub-hero-band {
+    height: 100%;
+    max-height: 16rem;
+  }
+
+  .hub-cta-row {
+    margin-top: 1.5rem;
+  }
 }
 
 .hub-hero-media {
@@ -5212,15 +5299,16 @@ textarea {
   filter: drop-shadow(0 14px 40px rgba(0, 0, 0, 0.55));
 }
 
+/* True glass: the environment art reads through the plate. */
 .hub-logo-frame-body {
   clip-path: inherit;
-  padding: 1.6rem 4.6rem 1.8rem;
+  padding: 1.35rem 4.2rem 1.5rem;
   text-align: center;
   background:
-    radial-gradient(120% 130% at 50% -20%, rgba(0, 245, 212, 0.12), transparent 55%),
-    linear-gradient(180deg, rgba(6, 17, 33, 0.82), rgba(2, 8, 19, 0.86));
-  -webkit-backdrop-filter: blur(6px);
-          backdrop-filter: blur(6px);
+    radial-gradient(120% 130% at 50% -20%, rgba(0, 245, 212, 0.10), transparent 55%),
+    linear-gradient(180deg, rgba(6, 17, 33, 0.42), rgba(2, 8, 19, 0.52));
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+          backdrop-filter: blur(16px) saturate(1.15);
 }
 
 /* Diamond glyph perched on the frame's top edge */
@@ -5245,7 +5333,7 @@ textarea {
 
 .hub-logo-wordmark {
   margin: 0;
-  font-size: clamp(2.6rem, 6vw, 4.2rem);
+  font-size: clamp(2rem, 3.6vw, 3rem);
   font-weight: 900;
   line-height: 0.95;
   letter-spacing: 0.22em;
@@ -5256,7 +5344,7 @@ textarea {
 
 .hub-logo-tagline {
   margin-top: 0.45rem;
-  color: rgba(125, 211, 252, 0.78);
+  color: rgba(174, 226, 255, 0.92);
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 0.62rem;
   font-weight: 600;
@@ -5299,8 +5387,10 @@ textarea {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   background:
-    radial-gradient(130% 120% at 50% -30%, rgba(0, 245, 212, 0.20), transparent 60%),
-    linear-gradient(180deg, rgba(8, 24, 44, 0.92), rgba(3, 11, 24, 0.94));
+    radial-gradient(130% 120% at 50% -30%, rgba(0, 245, 212, 0.18), transparent 60%),
+    linear-gradient(180deg, rgba(8, 24, 44, 0.55), rgba(3, 11, 24, 0.62));
+  -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
 }
 
 .hub-cta--ghost {
@@ -5310,7 +5400,9 @@ textarea {
 
 .hub-cta--ghost .chamfer-body {
   color: hsl(var(--foreground) / 0.82);
-  background: linear-gradient(180deg, rgba(10, 20, 36, 0.82), rgba(4, 11, 23, 0.86));
+  background: linear-gradient(180deg, rgba(10, 20, 36, 0.5), rgba(4, 11, 23, 0.58));
+  -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
 }
 
 .hub-cta--ghost:hover {
@@ -5332,9 +5424,9 @@ textarea {
   padding: 0.72rem 1.2rem 0.72rem 0.85rem;
   background:
     radial-gradient(140% 150% at 0% -40%, rgba(0, 245, 212, 0.10), transparent 55%),
-    linear-gradient(180deg, rgba(6, 16, 31, 0.86), rgba(2, 8, 19, 0.9));
-  -webkit-backdrop-filter: blur(8px);
-          backdrop-filter: blur(8px);
+    linear-gradient(180deg, rgba(6, 16, 31, 0.62), rgba(2, 8, 19, 0.72));
+  -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(12px);
 }
 
 .hub-info-card--end .chamfer-body {
@@ -5343,7 +5435,7 @@ textarea {
   padding: 0.72rem 0.85rem 0.72rem 1.2rem;
   background:
     radial-gradient(140% 150% at 100% -40%, rgba(167, 139, 250, 0.12), transparent 55%),
-    linear-gradient(180deg, rgba(6, 16, 31, 0.86), rgba(2, 8, 19, 0.9));
+    linear-gradient(180deg, rgba(6, 16, 31, 0.62), rgba(2, 8, 19, 0.72));
 }
 
 .hub-info-card--end {
@@ -5618,7 +5710,13 @@ textarea {
 
 @media (max-width: 860px) {
   .hub-logo-frame-body {
-    padding: 1.2rem 2.8rem 1.4rem;
+    padding: 1.1rem 2.4rem 1.25rem;
+  }
+
+  .hub-logo-tagline {
+    letter-spacing: 0.28em;
+    text-indent: 0.28em;
+    white-space: nowrap;
   }
 
   .hub-nav {

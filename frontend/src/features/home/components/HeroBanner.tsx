@@ -16,9 +16,11 @@ function getInitials(username: string) {
 }
 
 /**
- * Game-launcher hero: full-bleed environment loop with the GIT IT! wordmark
- * in an angular plate, flanked at the bottom by streak + latest-achievement
- * cards, with launcher CTAs underneath the logo.
+ * Game-launcher hero, composed like the reference: the environment loop
+ * fills the banner; a hatched glass band shelves its bottom edge; the
+ * glass GIT IT! plate straddles that edge at center, flanked by the
+ * streak and latest-achievement plaques; the launcher CTAs sit below
+ * the hero on the page itself.
  */
 export function HeroBanner({
   summary,
@@ -34,43 +36,20 @@ export function HeroBanner({
   const streak = summary.streak
 
   return (
-    <section className="full-bleed hub-hero" aria-label="Player hub">
-      <img
-        src={HERO_ENVIRONMENT_SRC}
-        alt=""
-        aria-hidden="true"
-        className="hub-hero-media"
-      />
-      <div className="hub-hero-veil" aria-hidden="true" />
-      <div className="hub-hero-scan" aria-hidden="true" />
+    <>
+      <section className="full-bleed hub-hero" aria-label="Player hub">
+        <img
+          src={HERO_ENVIRONMENT_SRC}
+          alt=""
+          aria-hidden="true"
+          className="hub-hero-media"
+        />
+        <div className="hub-hero-veil" aria-hidden="true" />
+        <div className="hub-hero-scan" aria-hidden="true" />
+        <div className="hub-hero-band" aria-hidden="true" />
 
-      {/* Centerpiece: wordmark plate + launcher CTAs */}
-      <div className="relative z-[1] flex flex-1 flex-col items-center justify-center gap-7 px-6 pb-24 pt-16 max-md:pb-32">
-        <div className="hub-logo-frame animate-fade-in-up">
-          <span className="hub-logo-glyph">
-            <GitBranch aria-hidden="true" className="size-4 text-aurora-cyan" />
-          </span>
-          <div className="hub-logo-frame-body">
-            <h1 className="hub-logo-wordmark">
-              GIT <span className="text-primary">it!</span>
-            </h1>
-            <p className="hub-logo-tagline">Tower of Version Control</p>
-          </div>
-        </div>
-
-        <div className="animate-fade-in-up flex flex-wrap items-center justify-center gap-4" style={{ animationDelay: '120ms' }}>
-          <Link className="hub-cta chamfer-frame" to="/tower">
-            <span className="chamfer-body">Enter Tower</span>
-          </Link>
-          <button type="button" className="hub-cta hub-cta--ghost chamfer-frame" onClick={onViewStats}>
-            <span className="chamfer-body">View Stats</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Bottom corner intel cards */}
-      <div className="absolute inset-x-0 bottom-6 z-[1]">
-        <div className="mx-auto flex max-w-[1440px] items-end justify-between gap-4 px-6 max-md:flex-col max-md:items-stretch max-sm:px-4">
+        {/* Bottom assembly: plaque — glass wordmark plate — plaque */}
+        <div className="hub-hero-ledge">
           <div className="hub-info-card chamfer-frame animate-fade-in-up" style={{ animationDelay: '200ms' }}>
             <div className="chamfer-body">
               <span
@@ -95,6 +74,18 @@ export function HeroBanner({
                   </span>
                 </p>
               </div>
+            </div>
+          </div>
+
+          <div className="hub-logo-frame animate-fade-in-up">
+            <span className="hub-logo-glyph">
+              <GitBranch aria-hidden="true" className="size-4 text-aurora-cyan" />
+            </span>
+            <div className="hub-logo-frame-body">
+              <h1 className="hub-logo-wordmark">
+                GIT <span className="text-primary">it!</span>
+              </h1>
+              <p className="hub-logo-tagline">Tower of Version Control</p>
             </div>
           </div>
 
@@ -130,7 +121,17 @@ export function HeroBanner({
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Launcher CTAs — below the hero, clearing the straddling plate */}
+      <div className="hub-cta-row animate-fade-in-up" style={{ animationDelay: '120ms' }}>
+        <Link className="hub-cta chamfer-frame" to="/tower">
+          <span className="chamfer-body">Enter Tower</span>
+        </Link>
+        <button type="button" className="hub-cta hub-cta--ghost chamfer-frame" onClick={onViewStats}>
+          <span className="chamfer-body">View Stats</span>
+        </button>
       </div>
-    </section>
+    </>
   )
 }

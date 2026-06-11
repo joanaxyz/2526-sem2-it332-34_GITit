@@ -1,7 +1,6 @@
 import { Lock, Star } from 'lucide-react'
 
 import type { Achievement } from '@/features/home/achievements'
-import { GamePanel } from '@/shared/components/GamePanel'
 
 function AchievementTile({ achievement, index }: { achievement: Achievement; index: number }) {
   const a = achievement
@@ -77,48 +76,47 @@ export function AchievementsTab({ achievements }: { achievements: Achievement[] 
   const pct = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0
 
   return (
-    <div className="flex flex-col gap-4">
-      <GamePanel className="animate-fade-in-up p-5">
-        <div className="relative z-[1] flex flex-wrap items-center gap-x-8 gap-y-4">
-          <div>
-            <p className="font-mono text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-aurora-blue/80">
-              Badges Earned
-            </p>
-            <p className="mt-1 text-3xl font-extrabold leading-none tracking-tight text-aurora-cyan" style={{ textShadow: '0 0 24px rgba(0,245,212,0.4)' }}>
-              {unlocked.length}
-              <span className="text-base font-bold text-muted-foreground">/{achievements.length}</span>
-            </p>
+    <div className="flex flex-col gap-6">
+      {/* Open gamerscore readout — no panel; a hairline shelves it off the grid */}
+      <div className="animate-fade-in-up flex flex-wrap items-center gap-x-10 gap-y-4 border-b border-[rgba(125,211,252,0.08)] pb-5">
+        <div>
+          <p className="font-mono text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-aurora-blue/80">
+            Badges Earned
+          </p>
+          <p className="mt-1 text-3xl font-extrabold leading-none tracking-tight text-aurora-cyan" style={{ textShadow: '0 0 24px rgba(0,245,212,0.4)' }}>
+            {unlocked.length}
+            <span className="text-base font-bold text-muted-foreground">/{achievements.length}</span>
+          </p>
+        </div>
+        <span aria-hidden="true" className="h-10 w-px bg-white/[0.07] max-md:hidden" />
+        <div>
+          <p className="font-mono text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-aurora-blue/80">
+            Star Score
+          </p>
+          <p className="mt-1 inline-flex items-baseline gap-1.5 text-3xl font-extrabold leading-none tracking-tight text-[#FBBF24]" style={{ textShadow: '0 0 24px rgba(251,191,36,0.4)' }}>
+            <Star aria-hidden="true" className="size-5 translate-y-0.5 fill-current" />
+            {earnedPoints}
+            <span className="text-base font-bold text-muted-foreground">/{totalPoints}</span>
+          </p>
+        </div>
+        <div className="min-w-48 flex-1">
+          <div className="mb-1.5 flex justify-between font-mono text-[0.6rem] uppercase tracking-[0.14em] text-muted-foreground">
+            <span>Collection</span>
+            <span className="text-aurora-cyan">{pct}%</span>
           </div>
-          <span aria-hidden="true" className="h-10 w-px bg-white/[0.07] max-md:hidden" />
-          <div>
-            <p className="font-mono text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-aurora-blue/80">
-              Star Score
-            </p>
-            <p className="mt-1 inline-flex items-baseline gap-1.5 text-3xl font-extrabold leading-none tracking-tight text-[#FBBF24]" style={{ textShadow: '0 0 24px rgba(251,191,36,0.4)' }}>
-              <Star aria-hidden="true" className="size-5 translate-y-0.5 fill-current" />
-              {earnedPoints}
-              <span className="text-base font-bold text-muted-foreground">/{totalPoints}</span>
-            </p>
-          </div>
-          <div className="min-w-48 flex-1">
-            <div className="mb-1.5 flex justify-between font-mono text-[0.6rem] uppercase tracking-[0.14em] text-muted-foreground">
-              <span>Collection</span>
-              <span className="text-aurora-cyan">{pct}%</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${pct}%`,
-                  background: 'linear-gradient(90deg, #00F5D4, #00B4D8)',
-                  boxShadow: '0 0 10px rgba(0,245,212,0.5)',
-                  transition: 'width 1.1s cubic-bezier(0.16, 1, 0.3, 1)',
-                }}
-              />
-            </div>
+          <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
+            <div
+              className="h-full rounded-full"
+              style={{
+                width: `${pct}%`,
+                background: 'linear-gradient(90deg, #00F5D4, #00B4D8)',
+                boxShadow: '0 0 10px rgba(0,245,212,0.5)',
+                transition: 'width 1.1s cubic-bezier(0.16, 1, 0.3, 1)',
+              }}
+            />
           </div>
         </div>
-      </GamePanel>
+      </div>
 
       <section
         aria-label="Achievements"

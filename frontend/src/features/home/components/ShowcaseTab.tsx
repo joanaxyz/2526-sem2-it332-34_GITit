@@ -5,7 +5,6 @@ import { RankEmblem } from '@/features/home/components/RankEmblem'
 import { RANK_TIERS, deriveRank } from '@/features/home/rank'
 import type { HomeSummary } from '@/features/home/types'
 import { useCountUp } from '@/features/stats/useCountUp'
-import { GamePanel } from '@/shared/components/GamePanel'
 import { ProgressBar } from '@/shared/components/ProgressBar'
 
 function StatChip({
@@ -20,12 +19,14 @@ function StatChip({
   color: string
 }) {
   return (
-    <div
-      className="flex items-center gap-2.5 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2"
-    >
-      <Icon aria-hidden="true" className="size-4 shrink-0" style={{ color }} />
+    <div className="flex items-center gap-2.5 border-b border-[rgba(125,211,252,0.08)] px-1 py-2.5">
+      <Icon
+        aria-hidden="true"
+        className="size-4 shrink-0"
+        style={{ color, filter: `drop-shadow(0 0 6px ${color}55)` }}
+      />
       <div className="min-w-0">
-        <p className="font-mono text-[0.56rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
+        <p className="font-mono text-[0.56rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground/85">
           {label}
         </p>
         <p className="truncate font-mono text-sm font-bold leading-tight" style={{ color }}>
@@ -56,7 +57,7 @@ export function ShowcaseTab({
   const currentTierIndex = RANK_TIERS.findIndex((t) => t.name === rank.tier.name)
 
   return (
-    <GamePanel className="animate-fade-in-up p-0">
+    <section className="animate-fade-in-up relative" aria-label="Hero showcase">
       <div className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-aurora-cyan opacity-[0.05] blur-3xl" />
       <div
         className="pointer-events-none absolute -right-16 bottom-0 h-72 w-72 rounded-full opacity-[0.07] blur-3xl"
@@ -64,7 +65,7 @@ export function ShowcaseTab({
       />
       <div className="hero-identity-grid" aria-hidden="true" />
 
-      <div className="relative z-[1] grid grid-cols-[15rem_minmax(0,1fr)_19rem] items-center gap-8 p-8 max-xl:grid-cols-[minmax(0,1fr)_19rem] max-md:grid-cols-1 max-md:justify-items-center max-md:text-center">
+      <div className="relative z-[1] grid grid-cols-[15rem_minmax(0,1fr)_19rem] items-center gap-8 px-6 py-7 max-xl:grid-cols-[minmax(0,1fr)_19rem] max-md:grid-cols-1 max-md:justify-items-center max-md:px-2 max-md:text-center">
         {/* Rank crest + tier ladder */}
         <div className="flex flex-col items-center gap-5 max-xl:order-2 max-xl:col-start-2 max-xl:row-span-2 max-xl:row-start-1 max-md:order-none max-md:col-auto max-md:row-auto">
           <RankEmblem tier={rank.tier} />
@@ -142,6 +143,6 @@ export function ShowcaseTab({
           </div>
         </div>
       </div>
-    </GamePanel>
+    </section>
   )
 }

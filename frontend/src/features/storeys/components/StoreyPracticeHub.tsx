@@ -405,8 +405,8 @@ export function StoreyOverview({
           <p
             className="mt-3 inline-flex items-center gap-2 text-2xl font-black"
             style={{
-              color: 'rgb(176, 74, 255)',
-              textShadow: '0 0 16px rgba(176, 74, 255, 0.45)',
+              color: '#00F5D4',
+              textShadow: '0 0 16px rgba(0, 245, 212, 0.45)',
             }}
           >
             +{reward.coins} coins
