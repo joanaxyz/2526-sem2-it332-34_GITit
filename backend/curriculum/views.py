@@ -43,7 +43,8 @@ class StoreyContentAPIView(APIView):
     def get(self, request, storey_id: int):
         section = request.query_params.get("section") or "command_skills"
         cursor = _int_param(request.query_params.get("cursor"))
-        limit = _int_param(request.query_params.get("limit")) or 8
+        # Clamp so a client can't request an unbounded page (?limit=999999).
+        limit = min(max(_int_param(request.query_params.get("limit")) or 8, 1), 50)
         with timing("curriculum.storey_content", storey_id=storey_id, section=section):
             return Response(
                 storey_content_page(

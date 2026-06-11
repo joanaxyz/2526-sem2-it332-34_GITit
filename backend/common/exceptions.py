@@ -11,3 +11,9 @@ class Locked(APIException):
     status_code = 423
     default_detail = "The requested resource is locked."
     default_code = "locked"
+
+
+class PayloadTooLarge(APIException):
+    status_code = 413
+    default_detail = "The resulting repository state is too large."
+    default_code = "payload_too_large"

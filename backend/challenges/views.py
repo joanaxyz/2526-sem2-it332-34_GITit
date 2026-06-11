@@ -47,6 +47,8 @@ class ChallengeRunDetailAPIView(APIView):
 
 
 class ChallengeCommandSubmitAPIView(APIView):
+    throttle_scope = "command_submit"
+
     def post(self, request, run_id: int):
         serializer = CommandSubmitSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -91,6 +93,8 @@ class ChallengeCommandSubmitAPIView(APIView):
 
 
 class ChallengeWorkspaceFileAPIView(APIView):
+    throttle_scope = "command_submit"
+
     def post(self, request, run_id: int):
         serializer = WorkspaceFileCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

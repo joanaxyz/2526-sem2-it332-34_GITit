@@ -142,6 +142,11 @@ def command_run_payload(run: ChallengeRun, *, repository_state: dict, visualizat
 
 
 def mastery_progress_payload(run: ChallengeRun) -> dict:
+    # Memoized on the run: the full payload needs this both directly and inside
+    # next_difficulty_payload, and each COUNT costs a DB round trip.
+    cached = getattr(run, "_mastery_progress_payload", None)
+    if cached is not None:
+        return cached
     required = required_successful_attempts_for_quest(run.challenge_quest)
     mastered_count = ChallengeRun.objects.filter(
         user_id=run.user_id,
@@ -150,7 +155,9 @@ def mastery_progress_payload(run: ChallengeRun) -> dict:
         challenge_quest_id=run.challenge_quest_id,
         counted_action_total__lte=run.command_budget_snapshot["min_counted_commands"],
     ).count()
-    return {"mastered": min(mastered_count, required), "required": required}
+    payload = {"mastered": min(mastered_count, required), "required": required}
+    run._mastery_progress_payload = payload
+    return payload
 
 
 def completion_payload(run: ChallengeRun) -> dict | None:

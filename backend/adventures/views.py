@@ -70,6 +70,8 @@ class AdventureRunDetailAPIView(APIView):
 
 
 class AdventureRunSubmitCommandAPIView(APIView):
+    throttle_scope = "command_submit"
+
     def post(self, request, run_id: int):
         serializer = _CommandSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -128,6 +130,8 @@ class AdventureRunUseHintAPIView(APIView):
 
 
 class AdventureWorkspaceFileAPIView(APIView):
+    throttle_scope = "command_submit"
+
     def post(self, request, run_id: int):
         return self._mutate_file(request, run_id, AdventureWorkspaceFileService().create_file)
 

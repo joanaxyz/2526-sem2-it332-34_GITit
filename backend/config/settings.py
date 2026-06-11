@@ -224,6 +224,15 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
+    # ScopedRateThrottle only limits views that declare a `throttle_scope`.
+    # Anonymous scopes (register/refresh) key on client IP — classrooms share a
+    # NAT IP, so those rates carry headroom for ~30 students behind one address.
+    "DEFAULT_THROTTLE_CLASSES": ("rest_framework.throttling.ScopedRateThrottle",),
+    "DEFAULT_THROTTLE_RATES": {
+        "auth_register": env("THROTTLE_AUTH_REGISTER", default="60/hour"),
+        "auth_refresh": env("THROTTLE_AUTH_REFRESH", default="600/hour"),
+        "command_submit": env("THROTTLE_COMMAND_SUBMIT", default="120/min"),
+    },
 }
 
 JWT_ACCESS_TOKEN_LIFETIME_MINUTES = env("JWT_ACCESS_TOKEN_LIFETIME_MINUTES")

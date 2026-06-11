@@ -24,3 +24,15 @@ CACHES = {
         "LOCATION": "git-it-test-cache",
     }
 }
+
+# Throttle counters live in the shared locmem cache and user/IP keys repeat
+# across tests, so real rates would trip mid-suite. Throttle tests override
+# these locally.
+REST_FRAMEWORK = {
+    **REST_FRAMEWORK,
+    "DEFAULT_THROTTLE_RATES": {
+        "auth_register": "10000/hour",
+        "auth_refresh": "10000/hour",
+        "command_submit": "10000/min",
+    },
+}

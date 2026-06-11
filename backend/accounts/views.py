@@ -17,6 +17,7 @@ from accounts.services import (
 
 class RegisterAPIView(APIView):
     permission_classes = [AllowAny]
+    throttle_scope = "auth_register"
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -86,6 +87,7 @@ class LoginAPIView(APIView):
 class RefreshAPIView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
+    throttle_scope = "auth_refresh"
 
     def post(self, request):
         refresh_token = request.COOKIES.get(settings.GIT_IT_REFRESH_COOKIE)

@@ -1,3 +1,4 @@
+import json
 from collections import OrderedDict
 from contextlib import nullcontext
 from dataclasses import dataclass
@@ -26,7 +27,7 @@ from common.constants import (
     SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
-from common.exceptions import Locked
+from common.exceptions import Locked, PayloadTooLarge
 from common.performance import timing
 from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
 from practice.models import CommandLog, CommandStep
@@ -43,6 +44,12 @@ from simulator.services import (
     normalize_command,
 )
 from simulator.workspace_files import WorkspaceFileError, WorkspaceFileStateService
+
+
+# Cap for the serialized repository_state JSON. Stored states are typically a
+# few KB; anything near this size means a runaway command sequence, and letting
+# it grow bloats the DB row and every subsequent response payload.
+MAX_REPOSITORY_STATE_BYTES = 256 * 1024
 
 
 class CommandCountClassifier:
@@ -112,6 +119,17 @@ class CommandExecutor:
             result = self.command_engine.process(working_state, command, mutate_in_place=True)
         with span("repository_state_normalize"):
             next_state = tools.normalize_state(result.state)
+
+        # Repository state is stored as an unbounded JSON column and shipped in
+        # every payload; a pathological command sequence (mass file/commit
+        # creation) must not grow it past what a row and response can carry.
+        if result.processed and not result.diagnostic:
+            state_size = len(json.dumps(next_state, separators=(",", ":"), default=str))
+            if state_size > MAX_REPOSITORY_STATE_BYTES:
+                raise PayloadTooLarge(
+                    "This scenario's repository grew too large to continue. "
+                    "Retry the run to start from a clean state."
+                )
 
         classification, increment = CommandCountClassifier().classify(
             command=command, processed=result.processed, diagnostic=result.diagnostic
