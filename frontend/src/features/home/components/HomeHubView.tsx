@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react'
+import { Suspense, lazy, useCallback, useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import { deriveAchievements, latestAchievement } from '@/features/home/achievements'
@@ -7,9 +7,15 @@ import { HeroBanner } from '@/features/home/components/HeroBanner'
 import { HubTabs } from '@/features/home/components/HubTabs'
 import { DEFAULT_HUB_TAB, HUB_TABS, type HubTabId } from '@/features/home/hubTabs'
 import { ShowcaseTab } from '@/features/home/components/ShowcaseTab'
-import { StatsTab } from '@/features/home/components/StatsTab'
 import type { HomeSummary } from '@/features/home/types'
 import type { StatsSummary } from '@/features/stats/types'
+import { LoadingState } from '@/shared/components/LoadingState'
+
+// Stats charts pull in recharts; lazy-load so the hub's default tab doesn't
+// pay for it in the entry chunk.
+const StatsTab = lazy(() =>
+  import('@/features/home/components/StatsTab').then((m) => ({ default: m.StatsTab })),
+)
 
 function isHubTabId(value: string | null): value is HubTabId {
   return HUB_TABS.some((t) => t.id === value)
@@ -66,7 +72,11 @@ export function HomeHubView({
           aria-labelledby="hub-tab-stats"
           hidden={active !== 'stats'}
         >
-          {active === 'stats' && <StatsTab home={home} stats={stats} />}
+          {active === 'stats' && (
+            <Suspense fallback={<LoadingState variant="panel" label="Loading stats" />}>
+              <StatsTab home={home} stats={stats} />
+            </Suspense>
+          )}
         </div>
         <div
           role="tabpanel"

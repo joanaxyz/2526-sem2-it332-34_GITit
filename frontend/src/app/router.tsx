@@ -7,11 +7,8 @@ import { Protected } from '@/app/Protected'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { HomePage } from '@/features/home/pages/HomePage'
-import { AdventureRunPage } from '@/features/command-adventures/pages/AdventureRunPage'
 import { AdventureStartPage } from '@/features/command-adventures/pages/AdventureStartPage'
-import { ChallengeRunPage } from '@/features/challenges/pages/ChallengeRunPage'
 import { ChallengeStartPage } from '@/features/challenges/pages/ChallengeStartPage'
-import { StoreyMapPage } from '@/features/storeys/pages/StoreyMapPage'
 
 /**
  * ⚠ Dev-only design preview: the real Home hub view inside the real layout
@@ -51,7 +48,15 @@ export const router = createBrowserRouter([
     children: [
       { path: '/', element: <Navigate replace to="/home" /> },
       { path: '/home', element: <HomePage /> },
-      { path: '/tower', element: <StoreyMapPage /> },
+      // Route-level code splitting: the tower (motion) and the run pages
+      // (reactflow + dagre via the practice workspace) carry the heaviest
+      // dependencies, so they load on navigation instead of in the entry chunk.
+      {
+        path: '/tower',
+        lazy: async () => ({
+          Component: (await import('@/features/storeys/pages/StoreyMapPage')).StoreyMapPage,
+        }),
+      },
       /* Legacy routes — stats/performance now live on Home's Stats tab. */
       { path: '/dashboard', element: <Navigate replace to="/home" /> },
       { path: '/stats', element: <Navigate replace to="/home?tab=stats" /> },
@@ -68,9 +73,20 @@ export const router = createBrowserRouter([
       { path: '/challenge-quests/:questId', element: <ChallengeStartPage mode="start" /> },
       { path: '/challenge-quests/:questId/review', element: <ChallengeStartPage mode="review" /> },
       { path: '/challenge-runs/:runId/retry', element: <ChallengeStartPage mode="retry" /> },
-      { path: '/challenge-runs/:runId', element: <ChallengeRunPage /> },
+      {
+        path: '/challenge-runs/:runId',
+        lazy: async () => ({
+          Component: (await import('@/features/challenges/pages/ChallengeRunPage')).ChallengeRunPage,
+        }),
+      },
       { path: '/command-adventures/:adventureSlug', element: <AdventureStartPage /> },
-      { path: '/adventure-runs/:runId', element: <AdventureRunPage /> },
+      {
+        path: '/adventure-runs/:runId',
+        lazy: async () => ({
+          Component: (await import('@/features/command-adventures/pages/AdventureRunPage'))
+            .AdventureRunPage,
+        }),
+      },
     ],
   },
 ])
