@@ -40,6 +40,133 @@ def command_matches(executed: str, required: str) -> bool:
     return executed == required or executed.startswith(f"{required} ")
 
 
+def _each(spec: dict, key: str, rule_type: str, field: str) -> list[dict]:
+    """One rule per item of a list-valued spec key."""
+    return [{"type": rule_type, field: item} for item in spec.get(key, [])]
+
+
+def _pairs(spec: dict, key: str, rule_type: str, left: str, right: str) -> list[dict]:
+    """One rule per entry of a mapping-valued spec key."""
+    return [{"type": rule_type, left: k, right: v} for k, v in spec.get(key, {}).items()]
+
+
+def _flag(spec: dict, key: str, rule_type: str) -> list[dict]:
+    """A bare rule when a boolean spec key is truthy."""
+    return [{"type": rule_type}] if spec.get(key) else []
+
+
+def _presence_bool(spec: dict, key: str, rule_type: str) -> list[dict]:
+    """A valued rule whenever the key is present — False is a real requirement."""
+    return [{"type": rule_type, "value": bool(spec[key])}] if key in spec else []
+
+
+def _command_rules(spec: dict) -> list[dict]:
+    return [
+        *_each(spec, "required_commands", "required_command", "command"),
+        *_each(spec, "forbidden_commands", "forbidden_command", "command"),
+    ]
+
+
+def _branch_rules(spec: dict) -> list[dict]:
+    return [
+        *_presence_bool(spec, "repository_initialized", "repository_initialized"),
+        *_each(spec, "branch_exists", "branch_exists", "branch"),
+        *_each(spec, "branch_absent", "branch_absent", "branch"),
+        *_pairs(spec, "branch_points_to", "branch_points_to", "branch", "commit"),
+        *_pairs(
+            spec, "remote_branch_points_to", "remote_branch_points_to", "remote_branch", "commit"
+        ),
+        *(
+            [{"type": "head_branch_equals", "branch": spec["head_branch"]}]
+            if spec.get("head_branch")
+            else []
+        ),
+    ]
+
+
+def _remote_rules(spec: dict) -> list[dict]:
+    return [
+        *_each(spec, "remote_exists", "remote_exists", "remote"),
+        *_each(spec, "remote_branch_exists", "remote_branch_exists", "remote_branch"),
+        *_each(spec, "remote_branch_absent", "remote_branch_absent", "remote_branch"),
+        *_each(spec, "upstream_tracking_set", "upstream_tracking_set", "branch"),
+        *_pairs(spec, "remote_url_matches", "remote_url_matches", "remote", "url"),
+        *_pairs(spec, "upstream_tracking", "upstream_tracking_equals", "branch", "upstream"),
+        *_presence_bool(spec, "remote_tracking_updated", "remote_tracking_updated"),
+        *_pairs(
+            spec,
+            "remote_branch_matches_local",
+            "remote_branch_matches_local",
+            "remote_branch",
+            "branch",
+        ),
+    ]
+
+
+def _cleanliness_rules(spec: dict) -> list[dict]:
+    stash_required = spec.get("stash_stack_empty") or spec.get("stash_stack_empty_after_pop")
+    return [
+        *_flag(spec, "working_tree_clean", "working_tree_clean"),
+        *_flag(spec, "staging_empty", "index_empty"),
+        *_flag(spec, "conflict_free", "conflict_free"),
+        *([{"type": "stash_stack_empty"}] if stash_required else []),
+    ]
+
+
+def _commit_graph_rules(spec: dict) -> list[dict]:
+    return [
+        *_pairs(spec, "min_commits_on_branch", "min_commits_on_branch", "branch", "minimum"),
+        *(
+            {"type": "branches_equal", "left": left, "right": right}
+            for left, right in spec.get("branches_equal", [])
+        ),
+    ]
+
+
+def _path_rules(spec: dict) -> list[dict]:
+    return [
+        *_each(spec, "working_tree_contains", "working_tree_contains", "path"),
+        *_each(spec, "working_tree_absent", "working_tree_absent", "path"),
+        *_each(spec, "staging_contains", "staging_contains", "path"),
+    ]
+
+
+def _history_rules(spec: dict) -> list[dict]:
+    latest_commit = spec.get("latest_commit", {})
+    return [
+        *(
+            [
+                {
+                    "type": "branch_tip_commit",
+                    "branch": latest_commit.get("branch"),
+                    "changes_include": latest_commit.get("contains_paths", []),
+                    "changes_exclude": latest_commit.get("excludes_paths", []),
+                    "message_contains": latest_commit.get("message_contains", []),
+                }
+            ]
+            if latest_commit
+            else []
+        ),
+        *_each(spec, "reflog_contains", "reflog_contains", "expected"),
+    ]
+
+
+def _invariance_rules(spec: dict) -> list[dict]:
+    return [
+        *_flag(spec, "repository_state_unchanged", "repository_state_unchanged"),
+        *(
+            [
+                {
+                    "type": "repository_state_unchanged_except",
+                    "except": spec["repository_state_unchanged_except"],
+                }
+            ]
+            if spec.get("repository_state_unchanged_except")
+            else []
+        ),
+    ]
+
+
 class StateBasedEvaluator:
     def __init__(self) -> None:
         self.normalizer = RepositoryStateNormalizer()
@@ -90,116 +217,23 @@ class StateBasedEvaluator:
         )
 
     def _rules_from_state_requirements(self, state_requirements: dict) -> list[dict]:
-        rules = [dict(rule) for rule in state_requirements.get("rules", [])]
+        """Expand a seed-authored state_requirements spec into flat rule dicts.
 
-        for required in state_requirements.get("required_commands", []):
-            rules.append({"type": "required_command", "command": required})
-        for forbidden in state_requirements.get("forbidden_commands", []):
-            rules.append({"type": "forbidden_command", "command": forbidden})
-
-        if "repository_initialized" in state_requirements:
-            rules.append(
-                {
-                    "type": "repository_initialized",
-                    "value": bool(state_requirements["repository_initialized"]),
-                }
-            )
-        for name in state_requirements.get("branch_exists", []):
-            rules.append({"type": "branch_exists", "branch": name})
-        for name in state_requirements.get("branch_absent", []):
-            rules.append({"type": "branch_absent", "branch": name})
-        for name, commit_id in state_requirements.get("branch_points_to", {}).items():
-            rules.append({"type": "branch_points_to", "branch": name, "commit": commit_id})
-        for name, commit_id in state_requirements.get("remote_branch_points_to", {}).items():
-            rules.append(
-                {"type": "remote_branch_points_to", "remote_branch": name, "commit": commit_id}
-            )
-        if state_requirements.get("head_branch"):
-            rules.append({"type": "head_branch_equals", "branch": state_requirements["head_branch"]})
-
-        for name in state_requirements.get("remote_exists", []):
-            rules.append({"type": "remote_exists", "remote": name})
-        for name in state_requirements.get("remote_branch_exists", []):
-            rules.append({"type": "remote_branch_exists", "remote_branch": name})
-        for name in state_requirements.get("remote_branch_absent", []):
-            rules.append({"type": "remote_branch_absent", "remote_branch": name})
-        for branch in state_requirements.get("upstream_tracking_set", []):
-            rules.append({"type": "upstream_tracking_set", "branch": branch})
-        for name, url in state_requirements.get("remote_url_matches", {}).items():
-            rules.append({"type": "remote_url_matches", "remote": name, "url": url})
-        for branch, upstream in state_requirements.get("upstream_tracking", {}).items():
-            rules.append(
-                {
-                    "type": "upstream_tracking_equals",
-                    "branch": branch,
-                    "upstream": upstream,
-                }
-            )
-        if "remote_tracking_updated" in state_requirements:
-            rules.append(
-                {
-                    "type": "remote_tracking_updated",
-                    "value": bool(state_requirements["remote_tracking_updated"]),
-                }
-            )
-        for remote_branch, local_branch in state_requirements.get(
-            "remote_branch_matches_local", {}
-        ).items():
-            rules.append(
-                {
-                    "type": "remote_branch_matches_local",
-                    "remote_branch": remote_branch,
-                    "branch": local_branch,
-                }
-            )
-
-        if state_requirements.get("working_tree_clean"):
-            rules.append({"type": "working_tree_clean"})
-        if state_requirements.get("staging_empty"):
-            rules.append({"type": "index_empty"})
-        if state_requirements.get("conflict_free"):
-            rules.append({"type": "conflict_free"})
-        if state_requirements.get("stash_stack_empty") or state_requirements.get("stash_stack_empty_after_pop"):
-            rules.append({"type": "stash_stack_empty"})
-
-        for branch, minimum in state_requirements.get("min_commits_on_branch", {}).items():
-            rules.append({"type": "min_commits_on_branch", "branch": branch, "minimum": minimum})
-        for left, right in state_requirements.get("branches_equal", []):
-            rules.append({"type": "branches_equal", "left": left, "right": right})
-
-        for path in state_requirements.get("working_tree_contains", []):
-            rules.append({"type": "working_tree_contains", "path": path})
-        for path in state_requirements.get("working_tree_absent", []):
-            rules.append({"type": "working_tree_absent", "path": path})
-        for path in state_requirements.get("staging_contains", []):
-            rules.append({"type": "staging_contains", "path": path})
-
-        latest_commit_rule = state_requirements.get("latest_commit", {})
-        if latest_commit_rule:
-            rules.append(
-                {
-                    "type": "branch_tip_commit",
-                    "branch": latest_commit_rule.get("branch"),
-                    "changes_include": latest_commit_rule.get("contains_paths", []),
-                    "changes_exclude": latest_commit_rule.get("excludes_paths", []),
-                    "message_contains": latest_commit_rule.get("message_contains", []),
-                }
-            )
-
-        for expected in state_requirements.get("reflog_contains", []):
-            rules.append({"type": "reflog_contains", "expected": expected})
-
-        if state_requirements.get("repository_state_unchanged"):
-            rules.append({"type": "repository_state_unchanged"})
-        if state_requirements.get("repository_state_unchanged_except"):
-            rules.append(
-                {
-                    "type": "repository_state_unchanged_except",
-                    "except": state_requirements["repository_state_unchanged_except"],
-                }
-            )
-
-        return rules
+        Group order is part of the contract (pinned by test_rule_builders):
+        the failed-rules list surfaces to learners in spec order.
+        """
+        spec = state_requirements
+        return [
+            *(dict(rule) for rule in spec.get("rules", [])),
+            *_command_rules(spec),
+            *_branch_rules(spec),
+            *_remote_rules(spec),
+            *_cleanliness_rules(spec),
+            *_commit_graph_rules(spec),
+            *_path_rules(spec),
+            *_history_rules(spec),
+            *_invariance_rules(spec),
+        ]
 
     def _check_rule(
         self,
