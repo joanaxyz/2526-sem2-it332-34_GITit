@@ -1,5 +1,6 @@
 import type { RepositorySnapshot } from '@/shared/practice/types'
 import type { KnownDifficulty } from '@/features/challenges/constants'
+import type { BookPage } from '@/features/storeys/book/bookTypes'
 
 export type Difficulty = KnownDifficulty | (string & {})
 export type ChallengeStatus = 'not_started' | 'locked' | 'in_progress' | 'completed' | 'failed' | 'abandoned'
@@ -96,9 +97,25 @@ export type ChallengeSummary = {
   quests: ChallengeQuestAccess[]
 }
 
-export type StoreyContentSection = 'command_adventures' | 'command_skills' | 'challenges'
+// Tower slots a tome can be authored into. Mirrors backend Tome.placement.
+export type TomePlacement = 'above_adventure' | 'below_adventure' | 'below_challenges'
 
-export type StoreyContentPage<T extends CommandAdventureSummary | CommandSkillSummary | ChallengeSummary> = {
+export type TomeSummary = {
+  item_type: 'tome'
+  id: number
+  slug: string
+  title: string
+  summary: string
+  placement: TomePlacement
+  // Pages ship inline (tomes are small), so opening the reader needs no fetch.
+  pages: BookPage[]
+}
+
+export type StoreyContentSection = 'command_adventures' | 'command_skills' | 'challenges' | 'tomes'
+
+export type StoreyContentPage<
+  T extends CommandAdventureSummary | CommandSkillSummary | ChallengeSummary | TomeSummary,
+> = {
   section: StoreyContentSection
   results: T[]
   next_cursor: number | null

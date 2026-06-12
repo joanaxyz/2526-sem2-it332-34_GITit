@@ -14,12 +14,8 @@ from common.constants import (
     DIFFICULTY_MEDIUM,
     SESSION_MODE_PRIMARY,
 )
-from curriculum.command_content import command_content_entry_for_command
-from curriculum.models import CommandForm, CommandSkill, ConceptPage, Storey
-
-
-def published_foundations():
-    return ConceptPage.objects.filter(is_published=True).order_by("sort_order", "title")
+from curriculum.library import library_key_for_command
+from curriculum.models import CommandForm, CommandSkill, LibraryEntry, Storey, Tome
 
 
 def published_storeys():
@@ -137,6 +133,14 @@ def storey_content_page(
             "next_cursor": None,
         }
 
+    if section == "tomes":
+        tomes = Tome.objects.filter(storey_id=storey_id, is_published=True).order_by("sort_order", "id")
+        return {
+            "section": section,
+            "results": [tome_summary_payload(tome=tome) for tome in tomes],
+            "next_cursor": None,
+        }
+
     if section == "challenges":
         queryset = challenge_queryset(storey_id=storey_id)
         if cursor:
@@ -176,12 +180,12 @@ def command_skill_queryset(*, storey_id: int):
 
 def storey_book(*, storey_id: int) -> dict | None:
     """The Storey Book: every command registered for the storey, each resolved to
-    its rich authored content from the command library.
+    its rich authored content from the library.
 
-    There is no terminal demo here — the book is reference material. Content pages
-    come from the shared command-content library (`command_content.py`); a skill's
-    own authored `command_preview.pages` win when present, and a minimal summary
-    page is synthesized as a last resort so a registered command never renders
+    There is no terminal demo here — the book is reference material. Pages come
+    from the seeded ``LibraryEntry`` for the skill's command (authored in
+    ``library.py``, persisted by ``seed_command_library``); a minimal summary
+    page is synthesized as a fallback so a registered command never renders
     empty."""
     storey = (
         Storey.objects.filter(id=storey_id, is_published=True)
@@ -191,11 +195,22 @@ def storey_book(*, storey_id: int) -> dict | None:
     if storey is None:
         return None
 
+    skills = list(
+        CommandSkill.objects.filter(storey_id=storey_id, is_published=True).order_by("sort_order", "id")
+    )
+    # One query for the whole book: resolve every skill's library entry in bulk
+    # so a storey with N commands does not cost N round trips.
+    keys = {library_key_for_command(skill.base_command) for skill in skills if skill.base_command}
+    entries = {
+        entry.command_key: entry
+        for entry in LibraryEntry.objects.filter(command_key__in=keys, is_published=True)
+    }
     commands = [
-        book_command_payload(skill=skill)
-        for skill in CommandSkill.objects.filter(storey_id=storey_id, is_published=True).order_by(
-            "sort_order", "id"
+        book_command_payload(
+            skill=skill,
+            entry=entries.get(library_key_for_command(skill.base_command)) if skill.base_command else None,
         )
+        for skill in skills
     ]
     return {
         "storey_id": storey.id,
@@ -208,14 +223,9 @@ def storey_book(*, storey_id: int) -> dict | None:
     }
 
 
-def book_command_payload(*, skill: CommandSkill) -> dict:
-    entry = command_content_entry_for_command(skill.base_command)
-    preview = skill.command_preview if isinstance(skill.command_preview, dict) else {}
-    authored_pages = preview.get("pages") if isinstance(preview.get("pages"), list) else []
-    if authored_pages:
-        pages = authored_pages
-    elif entry and entry.get("pages"):
-        pages = entry["pages"]
+def book_command_payload(*, skill: CommandSkill, entry: LibraryEntry | None) -> dict:
+    if entry and entry.pages:
+        pages = entry.pages
     else:
         pages = [
             {
@@ -233,8 +243,22 @@ def book_command_payload(*, skill: CommandSkill) -> dict:
         "base_command": skill.base_command,
         "title": skill.title,
         "summary": skill.summary,
-        "tags": entry.get("tags", []) if entry else [],
+        "tags": list(entry.tags) if entry and entry.tags else [],
         "pages": pages,
+    }
+
+
+def tome_summary_payload(*, tome: Tome) -> dict:
+    """Tomes are always-unlocked reading: pages ship inline so opening the
+    reader needs no second request."""
+    return {
+        "item_type": "tome",
+        "id": tome.id,
+        "slug": tome.slug,
+        "title": tome.title,
+        "summary": tome.summary,
+        "placement": tome.placement,
+        "pages": tome.pages,
     }
 
 

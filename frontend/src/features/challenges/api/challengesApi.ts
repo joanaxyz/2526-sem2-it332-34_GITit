@@ -6,6 +6,7 @@ import type {
   StoreyContentPage,
   StoreyContentSection,
   ChallengeSummary,
+  TomeSummary,
 } from '@/features/challenges/types'
 import type { ChallengeRun } from '@/shared/practice/types'
 
@@ -14,6 +15,8 @@ type StoreyContentResult<TSection extends StoreyContentSection> =
     ? StoreyContentPage<CommandAdventureSummary>
     : TSection extends 'command_skills'
     ? StoreyContentPage<CommandSkillSummary>
+    : TSection extends 'tomes'
+    ? StoreyContentPage<TomeSummary>
     : StoreyContentPage<ChallengeSummary>
 
 export const challengesApi = {

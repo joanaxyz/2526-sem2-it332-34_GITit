@@ -4,7 +4,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 const loginHero = {
   title: 'Practice Git through repository state, not memorized answers.',
   description:
-    'Learn with foundations, Command Adventure, GIT Challenged storeys, live DAG feedback, and consequence-safe command simulation.',
+    'Learn with tomes, Command Adventure, GIT Challenged storeys, live DAG feedback, and consequence-safe command simulation.',
   terminal: (
     <>
       <span className="text-primary">student@git-it</span> ~/challenge $ git status

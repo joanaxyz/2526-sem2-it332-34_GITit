@@ -43,6 +43,9 @@ export const SpriteAnimator = forwardRef<
   animRef.current = anim
   const fpsRef = useRef(fps)
   fpsRef.current = fps
+  // Pending completion callback for the current non-looping animation.
+  // Replaced (not fired) whenever a new animation is swapped in.
+  const completeRef = useRef<(() => void) | null>(null)
 
   // Keep internal animation in sync when the prop changes.
   useEffect(() => {
@@ -79,8 +82,11 @@ export const SpriteAnimator = forwardRef<
       frameRef.current = Math.max(0, Math.min(animRef.current.frameCount - 1, frame))
       paintFrame(frameRef.current)
     },
-    setAnimation: (next: SpriteAnimation) => {
+    getFrame: () => frameRef.current,
+    setAnimation: (next: SpriteAnimation, opts?: { onComplete?: () => void }) => {
+      completeRef.current = opts?.onComplete ?? null
       frameRef.current = 0
+      playingRef.current = true
       setAnim(next)
     },
     setFlipX: (next: boolean) => {
@@ -110,6 +116,9 @@ export const SpriteAnimator = forwardRef<
             paintFrame(0)
           } else {
             playingRef.current = false
+            const onComplete = completeRef.current
+            completeRef.current = null
+            onComplete?.()
           }
         } else {
           frameRef.current = next

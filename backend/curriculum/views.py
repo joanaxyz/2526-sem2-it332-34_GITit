@@ -4,19 +4,13 @@ from rest_framework.views import APIView
 from common.performance import timing
 from curriculum.selectors import (
     get_command_form,
-    published_foundations,
     published_storeys,
     storey_book,
     storey_completion_count_map,
     storey_completion_denominator_map,
     storey_content_page,
 )
-from curriculum.serializers import FoundationTopicSerializer, StoreyListSerializer
-
-
-class FoundationTopicListAPIView(APIView):
-    def get(self, request):
-        return Response(FoundationTopicSerializer(published_foundations(), many=True).data)
+from curriculum.serializers import StoreyListSerializer
 
 
 class StoreyListAPIView(APIView):

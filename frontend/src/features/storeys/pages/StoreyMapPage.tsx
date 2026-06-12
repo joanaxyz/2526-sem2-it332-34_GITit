@@ -13,6 +13,7 @@ import { motion, useScroll, useSpring, useTransform } from 'motion/react'
 import { useSearchParams } from 'react-router-dom'
 
 import { storeysApi } from '@/features/storeys/api/storeysApi'
+import { TowerCharacter } from '@/features/storeys/character/TowerCharacter'
 import { DoorOverview } from '@/features/storeys/components/DoorOverview'
 import { StoreyOverview, StoreyPracticeHub } from '@/features/storeys/components/StoreyPracticeHub'
 import { SkyClock } from '@/features/storeys/components/SkyClock'
@@ -26,6 +27,7 @@ import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { readPreference, writePreference } from '@/shared/utils/persistentState'
+import { BLUE } from '@/shared/sprites/characters'
 
 // One in-app day takes this long in real time when the cycle is auto-advancing.
 const DAY_LENGTH_MS = 18 * 60 * 1000
@@ -45,19 +47,21 @@ function storeyTitle(storey: LearningStorey) {
 }
 
 // Crisp-edged puffy clouds. Three silhouettes for variety; transparency, size and
-// position come from CSS per instance.
+// position come from CSS per instance. Every coordinate (including bezier
+// control points) stays inside the viewBox — points outside it render as
+// straight clipped edges on the cloud.
 const CLOUD_SHAPES = {
   a: {
-    viewBox: '0 0 120 54',
-    d: 'M14 47 C5 47 1 40 4 33 C6 27 13 26 17 28 C16 17 27 10 36 14 C40 5 52 3 59 9 C65 2 77 4 80 13 C90 9 100 14 100 23 C110 22 117 29 114 37 C112 43 105 47 97 47 Z',
+    viewBox: '0 0 120 58',
+    d: 'M18 50 C9 50 4 44 7 38 C3 31 9 24 17 26 C18 15 30 9 39 15 C44 5 58 4 64 12 C71 5 83 7 87 15 C96 12 105 18 104 26 C112 27 116 34 113 41 C111 47 104 50 97 50 Z',
   },
   b: {
-    viewBox: '0 0 130 44',
-    d: 'M9 38 C2 38 0 32 3 28 C5 24 12 24 15 26 C16 18 26 16 32 20 C36 12 49 12 53 19 C60 13 73 14 76 21 C84 16 97 18 99 24 C109 22 122 25 123 31 C124 36 117 38 110 38 Z',
+    viewBox: '0 0 134 46',
+    d: 'M14 39 C6 39 2 33 5 28 C8 24 14 23 18 25 C19 16 30 12 37 17 C42 9 56 8 61 16 C67 10 79 11 83 18 C90 13 102 15 105 22 C114 20 125 24 126 31 C127 36 120 39 112 39 Z',
   },
   c: {
-    viewBox: '0 0 116 64',
-    d: 'M16 56 C6 56 1 47 6 39 C2 31 10 23 19 27 C20 14 35 8 45 16 C49 4 66 4 72 15 C79 6 94 9 95 21 C107 18 116 27 110 36 C120 38 119 51 109 53 C110 57 101 56 95 56 Z',
+    viewBox: '0 0 112 62',
+    d: 'M20 54 C11 54 5 47 9 40 C4 33 11 25 19 28 C19 16 32 10 42 16 C46 6 62 6 67 15 C74 8 87 11 88 21 C97 19 105 26 101 34 C108 38 105 50 95 52 C91 54 85 54 80 54 Z',
   },
 } as const
 
@@ -86,9 +90,9 @@ type CloudLayer = 'far' | 'mid' | 'near'
 
 const CLOUD_VARIANTS: CloudVariant[] = ['a', 'b', 'c']
 const LAYER_STYLE: Record<CloudLayer, { width: [number, number]; opacity: [number, number] }> = {
-  far: { width: [18, 25], opacity: [0.08, 0.14] },
-  mid: { width: [13, 20], opacity: [0.13, 0.23] },
-  near: { width: [10, 16], opacity: [0.18, 0.32] },
+  far: { width: [18, 25], opacity: [0.22, 0.3] },
+  mid: { width: [13, 20], opacity: [0.34, 0.46] },
+  near: { width: [10, 16], opacity: [0.5, 0.66] },
 }
 
 type SeededCloud = {
@@ -477,6 +481,9 @@ export function StoreyMapPage() {
       <div className="tower-cloudfield tower-cloudfield--front" aria-hidden="true">
         {(['near'] as const).map(renderCloudLayer)}
       </div>
+
+      {/* Companion sprite — must stay a direct child of the page shell. */}
+      <TowerCharacter character={BLUE} />
     </div>
   )
 }

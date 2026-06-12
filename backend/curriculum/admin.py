@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from curriculum.models import CommandForm, CommandSkill, ConceptPage, Storey
+from curriculum.models import CommandForm, CommandSkill, LibraryEntry, Storey, Tome
 
 
 @admin.register(Storey)
@@ -10,11 +10,18 @@ class StoreyAdmin(admin.ModelAdmin):
     search_fields = ("title", "slug")
 
 
-@admin.register(ConceptPage)
-class ConceptPageAdmin(admin.ModelAdmin):
-    list_display = ("title", "slug", "is_published", "sort_order")
-    list_filter = ("is_published",)
+@admin.register(Tome)
+class TomeAdmin(admin.ModelAdmin):
+    list_display = ("title", "slug", "storey", "placement", "is_published", "sort_order")
+    list_filter = ("is_published", "placement")
     search_fields = ("title", "slug")
+
+
+@admin.register(LibraryEntry)
+class LibraryEntryAdmin(admin.ModelAdmin):
+    list_display = ("command_key", "title", "is_published")
+    list_filter = ("is_published",)
+    search_fields = ("command_key", "title")
 
 
 @admin.register(CommandSkill)

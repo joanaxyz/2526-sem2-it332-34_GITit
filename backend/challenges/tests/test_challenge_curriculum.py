@@ -6,7 +6,7 @@ from adventures.models import AdventureQuest, AdventureRun, CommandAdventure
 from challenges.models import Challenge, ChallengeQuest, ChallengeRun
 from challenges.payloads import challenge_run_payload
 from challenges.services import ChallengeRunService
-from curriculum.models import CommandSkill, ConceptPage, Storey
+from curriculum.models import CommandSkill, Storey, Tome
 from curriculum.selectors import storey_content_page
 from practice.context import ScenarioContextNormalizer
 from practice.services import CommandProcessingService
@@ -35,7 +35,7 @@ def pass_adventure_for(user, storey):
 def test_seed_curriculum_v2_creates_feature_owned_content(db):
     call_command("seed_curriculum_v2")
 
-    assert ConceptPage.objects.count() >= 2
+    assert Tome.objects.filter(is_published=True).exists()
     assert not Storey.objects.filter(number=0).exists()
     assert CommandSkill.objects.filter(base_command="git add").exists()
     assert CommandAdventure.objects.filter(slug="tracking-changes-snapshots-command-adventure").exists()

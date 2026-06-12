@@ -4,21 +4,6 @@ export type StoreyPracticeMetric = {
   denominator: number
 }
 
-export type FoundationTopic = {
-  id: number
-  slug: string
-  title: string
-  summary: string
-  body: string
-  icon: string
-  cards: Array<{
-    title: string
-    body: string
-    command?: string
-  }>
-  sort_order: number
-}
-
 export type ChestReward = {
   threshold: number
   coins: number

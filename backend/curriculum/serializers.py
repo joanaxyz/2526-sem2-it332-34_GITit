@@ -1,21 +1,6 @@
 from rest_framework import serializers
 
-from curriculum.models import ConceptPage, Storey
-
-
-class FoundationTopicSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ConceptPage
-        fields = [
-            "id",
-            "slug",
-            "title",
-            "summary",
-            "body",
-            "icon",
-            "cards",
-            "sort_order",
-        ]
+from curriculum.models import Storey
 
 
 class StoreyListSerializer(serializers.ModelSerializer):

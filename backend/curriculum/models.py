@@ -31,21 +31,65 @@ class Storey(models.Model):
         return f"Storey {self.number}: {self.title}"
 
 
-class ConceptPage(models.Model):
-    slug = models.SlugField(unique=True)
+# Tower slots a tome can be authored into. The tower renders sections in a
+# fixed designed sequence, so placement is a named insertion point, not a
+# free ordinal.
+TOME_PLACEMENT_ABOVE_ADVENTURE = "above_adventure"
+TOME_PLACEMENT_BELOW_ADVENTURE = "below_adventure"
+TOME_PLACEMENT_BELOW_CHALLENGES = "below_challenges"
+TOME_PLACEMENTS = [
+    (TOME_PLACEMENT_ABOVE_ADVENTURE, "Above the adventure"),
+    (TOME_PLACEMENT_BELOW_ADVENTURE, "Below the adventure"),
+    (TOME_PLACEMENT_BELOW_CHALLENGES, "Below the challenges"),
+]
+
+
+class Tome(models.Model):
+    """A general lesson (not a command) that opens as a book in the tower.
+
+    Tomes appear only on storeys where they are authored, at the authored
+    placement slot. They are pure reading — no runs, attempts, or locking."""
+
+    storey = models.ForeignKey(Storey, related_name="tomes", on_delete=models.CASCADE)
+    slug = models.SlugField()
     title = models.CharField(max_length=160)
     summary = models.TextField(blank=True)
-    body = models.TextField(blank=True)
-    icon = models.CharField(max_length=40, blank=True)
-    cards = models.JSONField(default=list, blank=True)
+    # list[BookPage] — the same page/block schema the Storey Book renders.
+    pages = models.JSONField(default=list, blank=True)
+    placement = models.CharField(
+        max_length=32, choices=TOME_PLACEMENTS, default=TOME_PLACEMENT_ABOVE_ADVENTURE
+    )
     is_published = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
 
     class Meta:
-        ordering = ["sort_order", "title"]
+        ordering = ["storey__sort_order", "sort_order", "id"]
+        unique_together = [("storey", "slug")]
 
     def __str__(self) -> str:
         return self.title
+
+
+class LibraryEntry(models.Model):
+    """Authored reference content for one command, keyed by its canonical
+    library key (``library_key_for_command``). The Storey Book resolves each
+    registered CommandSkill to its entry here; commands without an entry fall
+    back to a synthesized summary page."""
+
+    command_key = models.CharField(max_length=80, unique=True)
+    title = models.CharField(max_length=160, blank=True)
+    summary = models.TextField(blank=True)
+    tags = models.JSONField(default=list, blank=True)
+    # list[BookPage] — the same page/block schema the Storey Book renders.
+    pages = models.JSONField(default=list, blank=True)
+    is_published = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["command_key"]
+        verbose_name_plural = "library entries"
+
+    def __str__(self) -> str:
+        return self.command_key
 
 
 class CommandSkill(models.Model):

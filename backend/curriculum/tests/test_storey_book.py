@@ -18,10 +18,43 @@ def test_storey_book_lists_every_registered_command(db):
     first = book["commands"][0]
     assert first["base_command"]
     assert first["title"]
-    # The library is seeded content and is empty until that seed is wired, so the
-    # book renders the synthesized summary page rather than rich library content.
+    # Without seeded library entries the book falls back to the synthesized
+    # summary page, so a registered command never renders empty.
     assert first["pages"]
     assert all("blocks" in page for page in first["pages"])
+
+
+def test_storey_book_prefers_seeded_library_entries(db):
+    call_command("seed_curriculum_v2")
+    call_command("seed_command_library")
+
+    from curriculum.library import library_key_for_command
+    from curriculum.models import LibraryEntry
+
+    storey = next(s for s in published_storeys() if s.command_skill_count > 0)
+    book = storey_book(storey_id=storey.id)
+    seeded_keys = set(
+        LibraryEntry.objects.filter(is_published=True).values_list("command_key", flat=True)
+    )
+    assert seeded_keys, "seed_command_library should persist at least one entry"
+
+    seeded_commands = [
+        command
+        for command in book["commands"]
+        if library_key_for_command(command["base_command"]) in seeded_keys
+    ]
+    assert seeded_commands, "storey 1 registers git init, which ships a library entry"
+    for command in seeded_commands:
+        # Seeded entries carry rich multi-page content, not the one-page fallback.
+        assert len(command["pages"]) > 1
+        assert command["tags"]
+
+    # Unpublishing the entry drops the book back to the synthesized fallback.
+    LibraryEntry.objects.update(is_published=False)
+    book = storey_book(storey_id=storey.id)
+    refreshed = next(c for c in book["commands"] if c["id"] == seeded_commands[0]["id"])
+    assert len(refreshed["pages"]) == 1
+    assert refreshed["tags"] == []
 
 
 def test_storey_book_endpoint_ok_and_404(db, django_user_model):
@@ -43,17 +76,15 @@ def test_storey_book_endpoint_ok_and_404(db, django_user_model):
     assert missing.status_code == 404
 
 
-def test_command_library_seed_template_builds_pages_and_diagram():
-    # The seed scaffold is the authoring home for the (currently unbaked) library.
-    # Building its template through the shared helpers proves the authoring path —
-    # including option/argument sub-sections and authored diagram blocks — still
-    # works after the baked content was removed.
-    from curriculum.command_content import _content
-    from curriculum.management.commands.seed_command_library import COMMAND_LIBRARY_ENTRIES
+def test_command_library_entries_build_pages_and_diagram():
+    # Authored library entries live in library.py. Building them through the
+    # shared helpers proves the authoring path — including option/argument
+    # sub-sections and authored diagram blocks — end to end.
+    from curriculum.library import LIBRARY_ENTRIES, _content
 
-    assert COMMAND_LIBRARY_ENTRIES, "the seed template should ship at least one example entry"
+    assert LIBRARY_ENTRIES, "the library should ship at least one authored entry"
 
-    entry = _content(**COMMAND_LIBRARY_ENTRIES[0])
+    entry = _content(**LIBRARY_ENTRIES[0])
     assert entry["pages"], "an authored entry should build into renderable pages"
 
     section_types = {page.get("section_type") for page in entry["pages"]}
@@ -68,6 +99,12 @@ def test_command_library_seed_template_builds_pages_and_diagram():
     assert diagram_kinds, "the template demonstrates an authored diagram block"
 
 
-def test_seed_command_library_runs():
-    # The management command validates the template end to end without raising.
+def test_seed_command_library_persists_entries(db):
+    from curriculum.models import LibraryEntry
+
     call_command("seed_command_library")
+
+    entry = LibraryEntry.objects.get(command_key="git-init")
+    assert entry.is_published
+    assert entry.pages
+    assert entry.tags

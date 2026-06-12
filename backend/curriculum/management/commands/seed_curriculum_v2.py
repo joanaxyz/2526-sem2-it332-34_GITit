@@ -3,17 +3,17 @@ from django.db import transaction
 
 from adventures.models import AdventureQuest, AdventureVariant, CommandAdventure
 from challenges.models import Challenge, ChallengeQuest, ChallengeVariant
-from curriculum.curriculum_v2.adventures import COMMAND_DRILL_ADVENTURES
-from curriculum.curriculum_v2.command_topics import COMMAND_TOPICS
-from curriculum.curriculum_v2.drills import COMMAND_DRILLS
-from curriculum.curriculum_v2.foundations import FOUNDATIONS
-from curriculum.curriculum_v2.modules import MODULES
-from curriculum.curriculum_v2.workflows import WORKFLOW_SCENARIOS
+from curriculum.curriculum_v2.adventure_quests import ADVENTURE_QUESTS
+from curriculum.curriculum_v2.adventures import COMMAND_ADVENTURES
+from curriculum.curriculum_v2.challenges import CHALLENGES
+from curriculum.curriculum_v2.command_catalog import COMMAND_CATALOG
+from curriculum.curriculum_v2.storeys import STOREYS
+from curriculum.curriculum_v2.tomes import TOMES
 from curriculum.models import (
     CommandForm,
     CommandSkill,
-    ConceptPage,
     Storey,
+    Tome,
     default_chest_rewards,
 )
 from evaluation.compiler import compile_evaluation_spec
@@ -52,7 +52,7 @@ def _find_prerequisite_cycle(graph: dict[int, list[int]]) -> list[int] | None:
 
 
 class Command(BaseCommand):
-    help = "Seed the v2 command drill and workflow scenario curriculum."
+    help = "Seed the v2 curriculum: storeys, command catalog, adventures, challenges, tomes."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -60,45 +60,37 @@ class Command(BaseCommand):
             action="store_true",
             help="Validate published curriculum shape, simulator support, and official solutions.",
         )
+        parser.add_argument(
+            "--reset",
+            action="store_true",
+            help=(
+                "Clear seeded curriculum content and dependent practice/progress rows "
+                "before rebuilding the v2 curriculum."
+            ),
+        )
 
     @transaction.atomic
     def handle(self, *args, **options):
         # Seed-spec dict keys ("module", "usage", "levels", ...) are the frozen
         # authoring format of curriculum_v2; only the ORM names are normalized.
-        self.supported_form_keys = {spec["usage"] for spec in COMMAND_DRILLS}
+        if options.get("reset"):
+            self._reset_seeded_data()
+        self.supported_form_keys = {spec["usage"] for spec in ADVENTURE_QUESTS}
         self.published_storey_slugs = self._published_storey_slugs()
-        self._seed_foundations()
         storeys = self._seed_storeys()
         forms = self._seed_command_skills(storeys)
         self._seed_adventure_quests(forms)
         self._seed_command_adventures(storeys)
         self._seed_challenges(storeys)
+        self._seed_tomes(storeys)
         if options.get("validate"):
             self._validate_curriculum()
         self.stdout.write(self.style.SUCCESS("Seeded v2 curriculum."))
 
-    def _seed_foundations(self) -> None:
-        live_slugs = []
-        for index, spec in enumerate(FOUNDATIONS, start=1):
-            live_slugs.append(spec["slug"])
-            ConceptPage.objects.update_or_create(
-                slug=spec["slug"],
-                defaults={
-                    "title": spec["title"],
-                    "summary": spec["summary"],
-                    "body": spec["body"],
-                    "icon": spec.get("icon", ""),
-                    "cards": spec.get("cards", []),
-                    "sort_order": index,
-                    "is_published": True,
-                },
-            )
-        ConceptPage.objects.exclude(slug__in=live_slugs).update(is_published=False)
-
     def _seed_storeys(self) -> dict[str, Storey]:
         storeys = {}
         live_slugs = []
-        for index, spec in enumerate(MODULES, start=1):
+        for index, spec in enumerate(STOREYS, start=1):
             live_slugs.append(spec["slug"])
             is_published = spec["slug"] in self.published_storey_slugs
             storey, _ = Storey.objects.update_or_create(
@@ -125,7 +117,7 @@ class Command(BaseCommand):
             ).exists()
             if not has_quests:
                 continue
-            configured = COMMAND_DRILL_ADVENTURES.get(slug, {})
+            configured = COMMAND_ADVENTURES.get(slug, {})
             adventure, _ = CommandAdventure.objects.update_or_create(
                 storey=storey,
                 defaults={
@@ -142,7 +134,7 @@ class Command(BaseCommand):
     def _seed_command_skills(self, storeys: dict[str, Storey]) -> dict[str, CommandForm]:
         forms = {}
         live_skill_ids = []
-        for skill_index, spec in enumerate(COMMAND_TOPICS, start=1):
+        for skill_index, spec in enumerate(COMMAND_CATALOG, start=1):
             storey = storeys[spec["module"]]
             form_keys = {
                 f"{spec['slug']}/{form_spec['slug']}"
@@ -195,7 +187,7 @@ class Command(BaseCommand):
         builder = StaticQuestVariantBuilder()
         live_quest_ids = []
         quests_by_slug: dict[str, AdventureQuest] = {}
-        for index, spec in enumerate(COMMAND_DRILLS, start=1):
+        for index, spec in enumerate(ADVENTURE_QUESTS, start=1):
             form = forms[spec["usage"]]
             quest, _ = AdventureQuest.objects.update_or_create(
                 command_form=form,
@@ -216,7 +208,7 @@ class Command(BaseCommand):
             self._sync_variants(quest=quest, variant_specs=spec["variants"], builder=builder)
         # Second pass: wire the explicit prerequisite graph now that every quest
         # exists. Prerequisites are authored as a list of quest slugs.
-        for spec in COMMAND_DRILLS:
+        for spec in ADVENTURE_QUESTS:
             quest = quests_by_slug[spec["slug"]]
             try:
                 prereqs = [quests_by_slug[slug] for slug in spec.get("prerequisites", [])]
@@ -230,7 +222,7 @@ class Command(BaseCommand):
     def _seed_challenges(self, storeys: dict[str, Storey]) -> None:
         builder = StaticQuestVariantBuilder()
         live_challenge_ids = []
-        for index, spec in enumerate(WORKFLOW_SCENARIOS, start=1):
+        for index, spec in enumerate(CHALLENGES, start=1):
             challenge, _ = Challenge.objects.update_or_create(
                 storey=storeys[spec["module"]],
                 slug=spec["slug"],
@@ -266,6 +258,27 @@ class Command(BaseCommand):
                 is_published=False
             )
         Challenge.objects.exclude(id__in=live_challenge_ids).update(is_published=False)
+
+    def _seed_tomes(self, storeys: dict[str, Storey]) -> None:
+        """Tomes are general lessons authored per storey with an explicit
+        placement slot; they appear in the tower only where authored."""
+        live_ids = []
+        for index, spec in enumerate(TOMES, start=1):
+            storey = storeys[spec["module"]]
+            tome, _ = Tome.objects.update_or_create(
+                storey=storey,
+                slug=spec["slug"],
+                defaults={
+                    "title": spec["title"],
+                    "summary": spec.get("summary", ""),
+                    "pages": spec["pages"],
+                    "placement": spec["placement"],
+                    "sort_order": index,
+                    "is_published": storey.is_published,
+                },
+            )
+            live_ids.append(tome.id)
+        Tome.objects.exclude(id__in=live_ids).update(is_published=False)
 
     def _sync_variants(self, *, quest, variant_specs: list[dict], builder: StaticQuestVariantBuilder) -> None:
         live_ids = []
@@ -319,20 +332,49 @@ class Command(BaseCommand):
 
     def _published_storey_slugs(self) -> set[str]:
         form_to_storey = {}
-        for skill_spec in COMMAND_TOPICS:
+        for skill_spec in COMMAND_CATALOG:
             for form_spec in skill_spec.get("usages", []):
                 form_to_storey[f"{skill_spec['slug']}/{form_spec['slug']}"] = skill_spec["module"]
         command_storeys = {
             form_to_storey[spec["usage"]]
-            for spec in COMMAND_DRILLS
+            for spec in ADVENTURE_QUESTS
             if spec["usage"] in form_to_storey
         }
-        challenge_storeys = {
-            spec["module"]
-            for spec in WORKFLOW_SCENARIOS
-            if spec["module"] in command_storeys
-        }
+        challenge_storeys = {spec["module"] for spec in CHALLENGES}
         return command_storeys | challenge_storeys
+
+    def _reset_seeded_data(self) -> None:
+        """Delete curriculum-owned rows plus dependent run/progress rows.
+
+        This keeps user accounts intact while making local reseeds predictable
+        after major curriculum edits. The delete order starts with session data
+        because several run/attempt models protect their selected quests and
+        variants.
+        """
+        from adventures.models import AdventureMastery, AdventureQuestAttempt, AdventureRun
+        from challenges.models import ChallengeRun
+        from practice.models import CommandLog, CommandStep
+        from progress.models import QuestCompletion
+
+        CommandLog.objects.all().delete()
+        CommandStep.objects.all().delete()
+        QuestCompletion.objects.all().delete()
+        ChallengeRun.objects.all().delete()
+        AdventureQuestAttempt.objects.all().delete()
+        AdventureRun.objects.all().delete()
+        AdventureMastery.objects.all().delete()
+
+        ChallengeVariant.objects.all().delete()
+        AdventureVariant.objects.all().delete()
+        ChallengeQuest.objects.all().delete()
+        AdventureQuest.objects.all().delete()
+        Challenge.objects.all().delete()
+        CommandAdventure.objects.all().delete()
+        CommandForm.objects.all().delete()
+        CommandSkill.objects.all().delete()
+        Tome.objects.all().delete()
+        Storey.objects.all().delete()
+        self.stdout.write(self.style.WARNING("Reset v2 curriculum rows and dependent run/progress rows."))
 
     def _validate_curriculum(self) -> None:
         errors: list[str] = []
@@ -356,6 +398,7 @@ class Command(BaseCommand):
                 self._validate_quest_variants(quest=quest, errors=errors)
 
         self._validate_prerequisites(errors=errors)
+        self._validate_challenge_intro_contract(errors=errors)
 
         if errors:
             raise CommandError("Curriculum validation failed:\n" + "\n".join(f"- {error}" for error in errors))
@@ -423,6 +466,71 @@ class Command(BaseCommand):
             )
         for variant in variants:
             self._validate_variant(variant=variant, errors=errors)
+
+
+    def _validate_challenge_intro_contract(self, *, errors: list[str]) -> None:
+        """Challenges must apply, not introduce, Git concepts.
+
+        A Challenge level declares the Adventure quests it depends on through
+        ``uses_adventure_quests``. Every listed quest must exist, and it must
+        belong to the same storey or an earlier storey. This keeps Challenge
+        scenario quality high without shrinking the curriculum to whatever the
+        current command evaluator already supports. The authored evaluation spec
+        also carries a curriculum_contract.dag_transition so future engine work
+        knows what graph behavior the scenario is teaching.
+        """
+        module_order = {spec["slug"]: spec["number"] for spec in STOREYS}
+        usage_to_module = {}
+        for skill_spec in COMMAND_CATALOG:
+            for form_spec in skill_spec.get("usages", []):
+                usage_to_module[f"{skill_spec['slug']}/{form_spec['slug']}"] = skill_spec["module"]
+        quest_to_module = {
+            spec["slug"]: usage_to_module.get(spec["usage"])
+            for spec in ADVENTURE_QUESTS
+        }
+
+        for scenario in CHALLENGES:
+            challenge_module = scenario.get("module")
+            challenge_order = module_order.get(challenge_module, 1 << 30)
+            for level_spec in scenario.get("levels", []):
+                difficulty = level_spec.get("difficulty")
+                used_quests = list(level_spec.get("uses_adventure_quests") or [])
+                if not used_quests:
+                    errors.append(
+                        f"{scenario.get('slug')}/{difficulty}: missing uses_adventure_quests contract"
+                    )
+                    continue
+                for quest_slug in used_quests:
+                    quest_module = quest_to_module.get(quest_slug)
+                    if not quest_module:
+                        errors.append(
+                            f"{scenario.get('slug')}/{difficulty}: unknown Adventure quest dependency {quest_slug!r}"
+                        )
+                        continue
+                    if module_order.get(quest_module, 1 << 30) > challenge_order:
+                        errors.append(
+                            f"{scenario.get('slug')}/{difficulty}: uses {quest_slug!r} before its Adventure storey"
+                        )
+
+                for variant_spec in level_spec.get("variants", []):
+                    initial = variant_spec.get("initial_state_template") or {}
+                    remote_fixture = initial.get("remote_fixtures") or {}
+                    has_history = bool(initial.get("commits")) or bool(
+                        isinstance(remote_fixture, dict) and remote_fixture.get("commits")
+                    )
+                    if not has_history:
+                        errors.append(
+                            f"{scenario.get('slug')}/{difficulty}/{variant_spec.get('case_id')}: "
+                            "Challenge variants must start from authored local or remote commit history"
+                        )
+                    eval_spec = variant_spec.get("evaluation_spec_template") or {}
+                    contract = eval_spec.get("curriculum_contract") or {}
+                    dag_transition = contract.get("dag_transition") or {}
+                    if contract.get("challenge_type") != "scenario_graph_transition" or not dag_transition:
+                        errors.append(
+                            f"{scenario.get('slug')}/{difficulty}/{variant_spec.get('case_id')}: "
+                            "missing curriculum_contract.dag_transition"
+                        )
 
     def _validate_variant(self, *, variant, errors: list[str]) -> None:
         domain = "command_adventure" if hasattr(variant, "adventure_quest_id") else "challenge"

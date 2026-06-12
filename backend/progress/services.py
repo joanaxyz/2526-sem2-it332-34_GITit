@@ -31,7 +31,7 @@ SKILL_AXES = [
     ("efficiency", "Efficiency", "How close to the ideal number of commands you solve in."),
     ("independence", "Independence", "Solving on your own, without leaning on hints."),
     ("consistency", "Consistency", f"How many of the last {TREND_DAYS} days you showed up to practice."),
-    ("mastery", "Mastery", "How deeply you've drilled the commands you've met."),
+    ("mastery", "Mastery", "How deeply you've practiced the commands you've met."),
     ("coverage", "Coverage", "The share of all quests you've completed at least once."),
 ]
 

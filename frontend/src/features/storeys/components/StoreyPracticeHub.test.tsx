@@ -73,6 +73,31 @@ function mockCanonicalStoreyContent() {
         ],
       })
     }
+    if (section === 'tomes') {
+      return Promise.resolve({
+        section,
+        next_cursor: null,
+        results: [
+          {
+            item_type: 'tome',
+            id: 7,
+            slug: 'how-git-thinks',
+            title: 'How Git Thinks',
+            summary: 'The four places your work lives.',
+            placement: 'above_adventure',
+            pages: [
+              {
+                id: 'overview',
+                title: 'The four places',
+                heading: 'The four places',
+                section_type: 'overview',
+                blocks: [{ type: 'paragraph', body: 'Every Git command moves work between four places.' }],
+              },
+            ],
+          },
+        ],
+      })
+    }
     return Promise.resolve({
       section,
       next_cursor: null,
@@ -170,6 +195,39 @@ describe('StoreyPracticeHub', () => {
     expect(within(overview).getByText('Preparing File Changes')).toBeInTheDocument()
     expect(within(overview).getByText('0/5 solved')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^play$/i })).toBeInTheDocument()
+  })
+
+  it('renders the tome lectern above the adventure and opens the reader via Read', async () => {
+    mockCanonicalStoreyContent()
+    renderHub()
+
+    const lectern = await screen.findByRole('button', { name: /select tome: how git thinks/i })
+    const adventureDoor = await screen.findByRole('button', {
+      name: /select command adventure: preparing file changes/i,
+    })
+    // The tome section is authored above the adventure gate.
+    expect(lectern.compareDocumentPosition(adventureDoor) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+
+    fireEvent.click(lectern)
+
+    const overview = screen.getByLabelText('Selected stage')
+    expect(within(overview).getByText('Tome')).toBeInTheDocument()
+    expect(within(overview).getByText('How Git Thinks')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /^read$/i }))
+    await waitFor(() => expect(screen.getByText('The four places')).toBeInTheDocument())
+  })
+
+  it('does not render a tome section when the storey has no authored tome', async () => {
+    mocks.storeyContent.mockImplementation((_storeyId: number, section: string) => {
+      if (section === 'tomes') return Promise.resolve({ section, next_cursor: null, results: [] })
+      return Promise.resolve({ section, next_cursor: null, results: [] })
+    })
+    renderHub()
+
+    await waitFor(() => expect(mocks.storeyContent).toHaveBeenCalled())
+    expect(screen.queryByRole('button', { name: /select tome/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /^tome$/i })).not.toBeInTheDocument()
   })
 
   it('shows the chosen quest overview with accuracy + attempts when a trial door is selected', async () => {

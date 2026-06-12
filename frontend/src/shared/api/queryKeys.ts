@@ -5,7 +5,6 @@ export const queryKeys = {
   homeSummary: ['home-summary'] as const,
   statsSummary: ['stats-summary'] as const,
   wallet: ['wallet'] as const,
-  foundations: ['foundations'] as const,
   storeys: ['storeys'] as const,
   storeyContent: (storeyId: number | null | undefined, section: StoreyContentSection) =>
     ['storey-content', storeyId, section] as const,

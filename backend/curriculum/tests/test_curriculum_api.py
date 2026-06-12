@@ -1,17 +1,7 @@
 from django.core.management import call_command
 from rest_framework.test import APIClient
 
-from curriculum.models import ConceptPage, Storey
-from curriculum.selectors import published_foundations, published_storeys
-
-
-def test_foundations_are_first_class_not_a_numbered_module(db):
-    call_command("seed_curriculum_v2")
-
-    assert ConceptPage.objects.filter(slug="git-mental-model").exists()
-    assert not Storey.objects.filter(slug="orientation").exists()
-    assert not Storey.objects.filter(number=0).exists()
-    assert len(list(published_foundations())) == ConceptPage.objects.filter(is_published=True).count()
+from curriculum.selectors import published_storeys
 
 
 def test_storeys_have_command_skill_and_challenge_counts(db):

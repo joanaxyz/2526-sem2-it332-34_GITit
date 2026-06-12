@@ -1,6 +1,8 @@
-import { type CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 
 import { Button } from '@/shared/components/Button'
+import type { TomeSummary } from '@/features/challenges/types'
+import { TomeReaderModal } from '@/features/storeys/book/TomeReaderModal'
 import {
   actionForChallengeQuest,
   actionLabel,
@@ -16,8 +18,24 @@ const ADVENTURE_ACCENT = '0, 245, 212'
 export function TowerActionButton() {
   const selected = useTowerSelection((state) => state.selected)
   const { openChallengeDoor, openAdventureDoor } = useTowerDoorNavigation()
+  // Tomes open in place (a reader modal), not via navigation like the doors.
+  const [openTome, setOpenTome] = useState<TomeSummary | null>(null)
 
   if (!selected) return null
+
+  if (selected.kind === 'tome') {
+    const { tome } = selected
+    return (
+      <>
+        <div className="tower-action-dock" style={{ '--action-accent': ADVENTURE_ACCENT } as CSSProperties}>
+          <Button type="button" className="tower-action-button" onClick={() => setOpenTome(tome)}>
+            Read
+          </Button>
+        </div>
+        {openTome ? <TomeReaderModal tome={openTome} onClose={() => setOpenTome(null)} /> : null}
+      </>
+    )
+  }
 
   if (selected.kind === 'adventure') {
     const { adventure } = selected

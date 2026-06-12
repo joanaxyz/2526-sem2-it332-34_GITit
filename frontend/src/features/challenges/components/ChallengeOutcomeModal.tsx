@@ -230,7 +230,7 @@ export function ChallengeOutcomeModal({
       message={message}
       note={
         isFailed && run.variant.looped_variant
-          ? 'You have cycled through all authored variants. Consider reviewing the command preview or foundations before this next attempt.'
+          ? 'You have cycled through all authored variants. Consider reviewing the command preview or the field guide before this next attempt.'
           : undefined
       }
       stats={stats}

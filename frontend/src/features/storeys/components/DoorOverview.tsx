@@ -1,5 +1,5 @@
 import { type CSSProperties } from 'react'
-import { Crosshair, Lock, Swords, Target, Trophy } from 'lucide-react'
+import { BookOpen, Crosshair, Lock, Swords, Target, Trophy } from 'lucide-react'
 
 import { ProgressBar } from '@/shared/components/ProgressBar'
 import {
@@ -55,6 +55,24 @@ export function DoorOverview({ storeyId }: { storeyId: number }) {
           <strong>{progress.value}%</strong>
         </div>
         <ProgressBar value={progress.value} className="h-2.5 bg-secondary/60" glow fillAnimate />
+      </section>
+    )
+  }
+
+  if (selected.kind === 'tome') {
+    const { tome } = selected
+    return (
+      <section
+        className="door-overview"
+        aria-label="Selected stage"
+        style={{ '--door-overview-accent': ADVENTURE_ACCENT } as CSSProperties}
+      >
+        <span className="door-overview-kind">
+          <BookOpen className="size-3.5" />
+          Tome
+        </span>
+        <h3 className="door-overview-title">{tome.title}</h3>
+        {tome.summary ? <p className="door-overview-summary">{tome.summary}</p> : null}
       </section>
     )
   }

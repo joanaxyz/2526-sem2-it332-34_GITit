@@ -1,11 +1,11 @@
 import type { RankTier } from '@/features/home/rank'
-import { CHARACTER1 } from '@/shared/sprites/characters'
+import { BLUE } from '@/shared/sprites/characters'
 import { SpriteAnimator } from '@/shared/sprites/SpriteAnimator'
 
 /**
  * Game-client agent showcase: the player's animated character floating over
  * a glowing pedestal, with a name + rank caption. Uses the shared
- * SpriteAnimator (character1 idle sheet).
+ * SpriteAnimator (blue idle sheet).
  */
 export function CharacterShowcase({
   playerName,
@@ -23,7 +23,7 @@ export function CharacterShowcase({
         <span className="sprite-stage-aura" aria-hidden="true" />
         <div className="sprite-stage-float">
           <SpriteAnimator
-            animation={CHARACTER1.idle}
+            animation={BLUE.sprites.idle}
             scale={scale}
             aria-label={`${playerName}'s character, idle animation`}
           />

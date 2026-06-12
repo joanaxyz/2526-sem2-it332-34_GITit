@@ -2,6 +2,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import {
   ArrowRight,
+  BookOpen,
   Layers3,
   ListChecks,
   Swords,
@@ -10,6 +11,7 @@ import {
 } from 'lucide-react'
 import { motion, useInView } from 'motion/react'
 
+import rewardChest from '@/assets/images/reward-chest-neon.png'
 import { challengesApi } from '@/features/challenges/api/challengesApi'
 import type {
   ChallengeQuestAccess,
@@ -17,6 +19,7 @@ import type {
   CommandAdventureSummary,
   StoreyContentPage,
   StoreyContentSection,
+  TomeSummary,
 } from '@/features/challenges/types'
 import { StoreyBookCard } from '@/features/storeys/book/StoreyBookCard'
 import type { LearningStorey } from '@/features/storeys/types'
@@ -29,13 +32,14 @@ import {
   difficultyLabel,
   nextReward,
 } from '@/features/storeys/challengeUi'
+import { TomeLecternArt } from '@/features/storeys/components/TomeLecternArt'
 import { isSelected, useTowerSelection } from '@/features/storeys/hooks/useTowerSelection'
 import { Button } from '@/shared/components/Button'
 import { ProgressBar } from '@/shared/components/ProgressBar'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { cn } from '@/shared/utils/cn'
 
-type ContentItem = CommandAdventureSummary | ChallengeSummary
+type ContentItem = CommandAdventureSummary | ChallengeSummary | TomeSummary
 
 function useVisibleLoadMore(enabled: boolean, onVisible: () => void) {
   const ref = useRef<HTMLDivElement | null>(null)
@@ -199,6 +203,96 @@ function AdventureDoor({
         <span className="adventure-door-gem" />
       </span>
     </motion.button>
+  )
+}
+
+// ── Tome: a singular lectern with an open book resting on it. Not a doorway —
+// furniture you approach. Appears only on storeys where a tome is authored, so
+// it never becomes a repeating pattern like the gate or the trial rooms. ──
+function TomeArtifact({ tome, storeyId }: { tome: TomeSummary; storeyId: number }) {
+  const select = useTowerSelection((state) => state.select)
+  const selected = useTowerSelection((state) =>
+    isSelected(state.selected, { kind: 'tome', storeyId, tome }),
+  )
+  return (
+    <motion.button
+      type="button"
+      className="tome-lectern"
+      data-selected={selected ? 'true' : undefined}
+      aria-pressed={selected}
+      aria-label={`Select Tome: ${tome.title}`}
+      onClick={() => select({ kind: 'tome', storeyId, tome })}
+      initial={{ opacity: 0, y: 24, scale: 0.92, rotateX: -14, transformPerspective: 720 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0, transformPerspective: 720 }}
+      viewport={{ amount: 0.3, once: true }}
+      transition={{ duration: 0.58, ease: PIECE_EASE }}
+    >
+      <TomeLecternArt />
+      <span className="tome-lectern-label">{tome.title}</span>
+    </motion.button>
+  )
+}
+
+// The belt under the scriptorium carries a single carved keystone bearing the
+// open-book sigil — quiet masonry, not decoration, and only tome storeys earn
+// it. Drawn as SVG so the tapered keystone keeps its full neon outline.
+function TomeSeparator() {
+  return (
+    <motion.div
+      className="tower-tome-separator"
+      aria-hidden="true"
+      initial={{ opacity: 0, scaleX: 0.88 }}
+      whileInView={{ opacity: 1, scaleX: 1 }}
+      viewport={{ amount: 0.4, once: true }}
+      transition={{ duration: 0.5, ease: PIECE_EASE }}
+    >
+      <span className="tower-tome-separator-beam" />
+      <span className="tower-tome-separator-keystone">
+        <svg viewBox="0 0 56 46" aria-hidden="true" focusable="false">
+          <path
+            d="M4 1 H52 L45 45 H11 Z"
+            fill="#0a2238"
+            stroke="rgba(45, 245, 255, 0.94)"
+            strokeWidth="2"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M28 14 C25 11.6 20.4 11.1 16.6 12.4 L16.6 27 C20.4 25.7 25 26.2 28 28.6 C31 26.2 35.6 25.7 39.4 27 L39.4 12.4 C35.6 11.1 31 11.6 28 14 Z"
+            fill="rgba(2, 12, 22, 0.6)"
+            stroke="rgba(45, 245, 255, 0.62)"
+            strokeWidth="1.6"
+            strokeLinejoin="round"
+          />
+          <path d="M28 14 V28.6" stroke="rgba(45, 245, 255, 0.45)" strokeWidth="1.3" />
+        </svg>
+      </span>
+      <span className="tower-tome-separator-ledge" />
+    </motion.div>
+  )
+}
+
+function TomeSection({ tomes, storeyId }: { tomes: TomeSummary[]; storeyId: number }) {
+  return (
+    <>
+      <motion.section
+        className="tower-tome-stage"
+        initial={{ opacity: 0, y: 14 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ amount: 0.42, once: true }}
+        transition={{ duration: 0.5, ease: PIECE_EASE }}
+      >
+        <span className="tower-stage-icon tower-stage-icon--cyan">
+          <BookOpen className="size-6" />
+        </span>
+        <h2 className="tower-stage-title tower-stage-title--tome">Tome</h2>
+        <div className="tower-tome-row">
+          {tomes.map((tome) => (
+            <TomeArtifact key={tome.id} tome={tome} storeyId={storeyId} />
+          ))}
+        </div>
+      </motion.section>
+      <TomeSeparator />
+    </>
   )
 }
 
@@ -390,7 +484,7 @@ export function StoreyOverview({
                   key={chest.threshold}
                   style={{ left: `${chest.threshold}%` }}
                 >
-                  <img src="/stage_reward_neon_chest.png" alt="" />
+                  <img src={rewardChest} alt="" />
                 </span>
               ))}
             </div>
@@ -414,7 +508,7 @@ export function StoreyOverview({
           </p>
         </div>
         <span className="stage-reward-icon">
-          <img className="stage-reward-chest" src="/stage_reward_neon_chest.png" alt="" aria-hidden="true" />
+          <img className="stage-reward-chest" src={rewardChest} alt="" aria-hidden="true" />
         </span>
       </section>
 
@@ -450,14 +544,20 @@ export function StoreyPracticeHub({
   }, [nearViewport, shouldLoad])
 
   const adventureQuery = useStoreyContent<CommandAdventureSummary>(storey.id, 'command_adventures', shouldLoad)
-  const workflowQuery = useStoreyContent<ChallengeSummary>(storey.id, 'challenges', shouldLoad)
+  const challengesQuery = useStoreyContent<ChallengeSummary>(storey.id, 'challenges', shouldLoad)
+  const tomesQuery = useStoreyContent<TomeSummary>(storey.id, 'tomes', shouldLoad)
 
   const adventure = flattenPages(adventureQuery)[0] ?? null
-  const challenges = flattenPages(workflowQuery)
+  const challenges = flattenPages(challengesQuery)
+  // Tomes render only where authored; each placement slot filters its own list,
+  // so non-authored storeys keep the exact current layout.
+  const tomesAboveAdventure = flattenPages(tomesQuery).filter(
+    (tome) => tome.placement === 'above_adventure',
+  )
 
-  const workflowLoadRef = useVisibleLoadMore(
-    Boolean(shouldLoad && workflowQuery.hasNextPage && !workflowQuery.isFetchingNextPage),
-    () => void workflowQuery.fetchNextPage(),
+  const challengeLoadRef = useVisibleLoadMore(
+    Boolean(shouldLoad && challengesQuery.hasNextPage && !challengesQuery.isFetchingNextPage),
+    () => void challengesQuery.fetchNextPage(),
   )
 
   const select = useTowerSelection((state) => state.select)
@@ -485,6 +585,10 @@ export function StoreyPracticeHub({
             entrance animation, so the storey assembles piece by piece. */}
         <div className="tower-repeater">
           <WindowStorey crowned={isFirst} />
+
+          {tomesAboveAdventure.length > 0 ? (
+            <TomeSection tomes={tomesAboveAdventure} storeyId={storey.id} />
+          ) : null}
 
           <motion.section
             className="tower-adventure-stage"
@@ -526,12 +630,12 @@ export function StoreyPracticeHub({
             </span>
             <h2 className="tower-stage-title tower-stage-title--challenge">Challenges</h2>
 
-            {workflowQuery.isLoading ? (
+            {challengesQuery.isLoading ? (
               <div className="mt-5">
                 <TrialRoomSkeleton />
               </div>
             ) : null}
-            {!workflowQuery.isLoading && challenges.length === 0 ? (
+            {!challengesQuery.isLoading && challenges.length === 0 ? (
               <div className="mt-5">
                 <EmptySection label="GIT Challenged" />
               </div>
@@ -549,19 +653,19 @@ export function StoreyPracticeHub({
               ))}
             </div>
 
-            <div ref={workflowLoadRef} />
-            {workflowQuery.isFetchingNextPage ? (
+            <div ref={challengeLoadRef} />
+            {challengesQuery.isFetchingNextPage ? (
               <div className="mt-3">
                 <TrialRoomSkeleton />
               </div>
             ) : null}
-            {workflowQuery.hasNextPage ? (
+            {challengesQuery.hasNextPage ? (
               <Button
                 className="mt-4 h-9 rounded-full px-4"
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => void workflowQuery.fetchNextPage()}
+                onClick={() => void challengesQuery.fetchNextPage()}
               >
                 More GIT Challenged
                 <ArrowRight data-icon="inline-end" />

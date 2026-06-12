@@ -21,7 +21,6 @@ from challenges.views import (
 from common.views import HealthAPIView
 from curriculum.views import (
     CommandFormPreviewAPIView,
-    FoundationTopicListAPIView,
     StoreyBookAPIView,
     StoreyContentAPIView,
     StoreyListAPIView,
@@ -37,7 +36,6 @@ urlpatterns = [
     path("api/storeys/", StoreyListAPIView.as_view(), name="storeys"),
     path("api/storeys/<int:storey_id>/content/", StoreyContentAPIView.as_view(), name="storey-content"),
     path("api/storeys/<int:storey_id>/book/", StoreyBookAPIView.as_view(), name="storey-book"),
-    path("api/concept-pages/", FoundationTopicListAPIView.as_view(), name="concept-pages"),
     path("api/command-forms/<int:form_id>/preview/", CommandFormPreviewAPIView.as_view(), name="command-form-preview"),
     path("api/command-adventures/<slug:adventure_slug>/runs/", CommandAdventureRunStartAPIView.as_view(), name="adventure-run-start"),
     path("api/adventure-runs/<int:run_id>/", AdventureRunDetailAPIView.as_view(), name="adventure-run-detail"),

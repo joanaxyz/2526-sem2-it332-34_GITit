@@ -8,11 +8,17 @@ import { cn } from '@/shared/utils/cn'
 // Renders one command's authored pages. Mirrors the scenario command preview's
 // block vocabulary, minus the terminal demo and plus authored diagram blocks.
 export function BookContent({ command }: { command: BookCommand }) {
+  return <BookPages anchorScope={command.slug} pages={command.pages} />
+}
+
+// Shared page renderer: command library entries and tomes author the same
+// BookPage/BookBlock vocabulary, so both read through this.
+export function BookPages({ pages, anchorScope }: { pages: BookPage[]; anchorScope: string }) {
   return (
     <article className="book-content mx-auto grid min-w-0 max-w-3xl gap-6">
-      {command.pages.map((page, index) => (
+      {pages.map((page, index) => (
         <BookSection
-          commandSlug={command.slug}
+          anchorScope={anchorScope}
           isFirst={index === 0}
           key={page.id ?? `${page.title}-${index}`}
           page={page}
@@ -26,15 +32,15 @@ export function BookContent({ command }: { command: BookCommand }) {
 function BookSection({
   page,
   pageIndex,
-  commandSlug,
+  anchorScope,
   isFirst,
 }: {
   page: BookPage
   pageIndex: number
-  commandSlug: string
+  anchorScope: string
   isFirst: boolean
 }) {
-  const domId = bookAnchorDomId(commandSlug, bookPageId(page.id, page.title, pageIndex))
+  const domId = bookAnchorDomId(anchorScope, bookPageId(page.id, page.title, pageIndex))
   return (
     <section className={cn('scroll-mt-5', !isFirst && 'border-t border-border/70 pt-5')} id={domId} data-book-anchor>
       <div className="mb-4">

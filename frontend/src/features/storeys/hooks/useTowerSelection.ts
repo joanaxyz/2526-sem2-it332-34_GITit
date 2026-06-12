@@ -4,6 +4,7 @@ import type {
   ChallengeQuestAccess,
   ChallengeSummary,
   CommandAdventureSummary,
+  TomeSummary,
 } from '@/features/challenges/types'
 
 // The whole tower is a single selection surface: one door is "selected" at a
@@ -20,6 +21,7 @@ export type TowerSelection =
       quest: ChallengeQuestAccess
       locked: boolean
     }
+  | { kind: 'tome'; storeyId: number; tome: TomeSummary }
 
 type TowerSelectionState = {
   selected: TowerSelection | null
@@ -41,6 +43,9 @@ export function isSelected(current: TowerSelection | null, candidate: TowerSelec
   }
   if (current.kind === 'challenge' && candidate.kind === 'challenge') {
     return current.quest.id === candidate.quest.id
+  }
+  if (current.kind === 'tome' && candidate.kind === 'tome') {
+    return current.tome.id === candidate.tome.id
   }
   return false
 }
