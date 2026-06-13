@@ -22,6 +22,13 @@ class CommandAdventure(models.Model):
     description = models.TextField(blank=True)
     is_published = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
+    source_content_definition = models.ForeignKey(
+        "authoring.ContentDefinition",
+        null=True,
+        blank=True,
+        related_name="runtime_command_adventures",
+        on_delete=models.SET_NULL,
+    )
     # Fraction of total achievable mastery points a learner must reach to pass
     # this adventure (and unlock Challenge). Null falls back to PASS_BAR_FRACTION.
     pass_bar_fraction = models.FloatField(null=True, blank=True)

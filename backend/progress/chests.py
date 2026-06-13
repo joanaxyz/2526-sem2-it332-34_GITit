@@ -8,6 +8,11 @@ class StoreyChestService:
     milestones. Each chest pays out once per (user, storey, threshold)."""
 
     def award_chests(self, *, user, storey) -> None:
+        # Hidden runtime storeys back user-authored content. They should not
+        # award official tower progress chests unless the product later adds a
+        # separate community-content reward track.
+        if not getattr(storey, "is_published", False):
+            return
         # Local import: curriculum.selectors pulls in the adventure/challenge
         # model graph, which itself reaches back into progress.
         from curriculum.selectors import (

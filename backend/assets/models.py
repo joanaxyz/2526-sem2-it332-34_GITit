@@ -14,20 +14,40 @@ size, so an admin (and, later, a user) only uploads a sheet — no manual counts
 from __future__ import annotations
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 
-# Asset kinds. Monsters ship first (Phase 1); the rest are the same shape and
-# arrive in later phases (characters, draggable tower artifacts, projectiles).
-KIND_MONSTER = "monster"
-KIND_CHARACTER = "character"
-KIND_TOWER_ARTIFACT = "tower_artifact"
-KIND_PROJECTILE = "projectile"
-ASSET_KINDS = [
-    (KIND_MONSTER, "Monster"),
-    (KIND_CHARACTER, "Character"),
-    (KIND_TOWER_ARTIFACT, "Tower artifact"),
-    (KIND_PROJECTILE, "Projectile"),
-]
+class AssetKind(models.TextChoices):
+    MONSTER = "monster", "Monster"
+    CHARACTER = "character", "Character"
+    PROJECTILE = "projectile", "Projectile"
+    TOWER_PIECE = "tower_piece", "Tower piece"
+    TOWER_ARTIFACT = "tower_artifact", "Tower artifact"
+
+
+KIND_MONSTER = AssetKind.MONSTER
+KIND_CHARACTER = AssetKind.CHARACTER
+KIND_PROJECTILE = AssetKind.PROJECTILE
+KIND_TOWER_PIECE = AssetKind.TOWER_PIECE
+KIND_TOWER_ARTIFACT = AssetKind.TOWER_ARTIFACT
+ASSET_KINDS = AssetKind.choices
+
+
+class TowerPieceType(models.TextChoices):
+    SPIRE = "spire", "Spire"
+    LANDING = "landing", "Landing"
+    DOOR = "door", "Door"
+    ADVENTURE_SECTION = "adventure_section", "Adventure section"
+    CHALLENGE_SECTION = "challenge_section", "Challenge section"
+    TOME = "tome", "Tome"
+
+
+TOWER_PIECE_SPIRE = TowerPieceType.SPIRE
+TOWER_PIECE_LANDING = TowerPieceType.LANDING
+TOWER_PIECE_DOOR = TowerPieceType.DOOR
+TOWER_PIECE_ADVENTURE_SECTION = TowerPieceType.ADVENTURE_SECTION
+TOWER_PIECE_CHALLENGE_SECTION = TowerPieceType.CHALLENGE_SECTION
+TOWER_PIECE_TOME = TowerPieceType.TOME
 
 # Sharing model: official content has no owner; user content is private until
 # published public/to the store (the gallery + store land in later phases).
@@ -89,6 +109,39 @@ class Asset(models.Model):
         return f"Asset({self.kind}:{self.slug})"
 
 
+class TowerPieceAsset(models.Model):
+    """Tower-specific detail for assets that define structural tower geometry."""
+
+    asset = models.OneToOneField(
+        Asset, related_name="tower_piece", on_delete=models.CASCADE
+    )
+    piece_type = models.CharField(max_length=32, choices=TowerPieceType.choices)
+    view_box = models.CharField(max_length=80, blank=True)
+    anchors = models.JSONField(default=dict, blank=True)
+    bounds = models.JSONField(default=dict, blank=True)
+    interaction_zones = models.JSONField(default=dict, blank=True)
+    state_variants = models.JSONField(default=dict, blank=True)
+    svg_sanitized = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["piece_type", "asset__slug"]
+        indexes = [models.Index(fields=["piece_type"])]
+
+    def __str__(self) -> str:
+        return f"TowerPieceAsset({self.piece_type}:{self.asset.slug})"
+
+    def clean(self) -> None:
+        super().clean()
+        if self.asset_id and self.asset.kind != KIND_TOWER_PIECE:
+            raise ValidationError(
+                {"asset": "Tower piece metadata can only be attached to tower_piece assets."}
+            )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+
 class AssetSprite(models.Model):
     """One animation/image for an asset, keyed by a free-form ``action`` slug.
 
@@ -130,6 +183,10 @@ class AssetSprite(models.Model):
         Best-effort: vector (SVG) or unreadable images fall back to a single
         frame, which is correct for static png/svg artifacts.
         """
+        if _is_vector_image(self.image):
+            self.columns = self.rows = self.frame_count = 1
+            return
+
         width, height = _image_dimensions(self.image)
         if not width or not height:
             self.columns = self.rows = self.frame_count = 1
@@ -150,6 +207,9 @@ class AssetSprite(models.Model):
 
 def _image_dimensions(image_field) -> tuple[int, int]:
     """(width, height) of a raster image, or (0, 0) if it can't be read."""
+    if _is_vector_image(image_field):
+        return (0, 0)
+
     try:
         from PIL import Image
     except ImportError:  # Pillow optional at import time; required to upload.
@@ -170,3 +230,8 @@ def _image_dimensions(image_field) -> tuple[int, int]:
         except (ValueError, AttributeError):
             pass
     return (int(size[0]), int(size[1]))
+
+
+def _is_vector_image(image_field) -> bool:
+    name = str(getattr(image_field, "name", "") or "").lower()
+    return name.endswith(".svg")

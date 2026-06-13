@@ -25,6 +25,9 @@ import { cn } from '@/shared/utils/cn'
 const navItems = [
   { to: '/home', label: 'Home' },
   { to: '/tower', label: 'Tower' },
+  { to: '/my-tower', label: 'Mine' },
+  { to: '/authoring', label: 'Create' },
+  { to: '/store', label: 'Store' },
 ]
 
 function getInitials(username: string) {

@@ -7,7 +7,7 @@ import type { CharacterDefinition, SpriteAnimatorHandle } from '@/shared/sprites
 /**
  * The player's companion on the tower page. Renders a pointer-transparent
  * layer over the whole page shell; the controller hook listens for shell
- * clicks and drives the sprite around (walk the separators, fly, teleport).
+ * clicks and drives the sprite around (walk the landings, fly, teleport).
  *
  * Must be a direct child of `.tower-page-shell` — the controller anchors to
  * `parentElement` for coordinates and click capture.

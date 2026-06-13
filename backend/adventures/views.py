@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -60,6 +61,11 @@ def _run_with_active_attempt(run_id: int, user) -> tuple[AdventureRun, Adventure
 class CommandAdventureRunStartAPIView(APIView):
     def post(self, request, adventure_slug: str):
         adventure = CommandAdventure.objects.get(slug=adventure_slug, is_published=True)
+        if adventure.source_content_definition_id:
+            from marketplace.access import can_launch
+
+            if not can_launch(request.user, adventure.source_content_definition):
+                raise PermissionDenied("You do not have access to this adventure.")
         run = AdventureRunService().start_run(user=request.user, adventure=adventure)
         return Response(adventure_run_payload(run), status=201)
 

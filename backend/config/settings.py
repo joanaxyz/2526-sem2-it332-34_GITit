@@ -93,6 +93,9 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "accounts",
     "assets",
+    "authoring",
+    "towers",
+    "marketplace",
     "curriculum",
     "adventures",
     "challenges",
@@ -176,7 +179,13 @@ if REDIS_URL:
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": REDIS_URL,
-            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "SOCKET_CONNECT_TIMEOUT": env.float(
+                    "REDIS_SOCKET_CONNECT_TIMEOUT", default=0.5
+                ),
+                "SOCKET_TIMEOUT": env.float("REDIS_SOCKET_TIMEOUT", default=0.5),
+            },
         }
     }
 else:

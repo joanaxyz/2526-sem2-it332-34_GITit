@@ -1,4 +1,5 @@
 from django.db import OperationalError, transaction
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -26,6 +27,11 @@ class ChallengeRunStartAPIView(APIView):
         serializer = ChallengeRunStartSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         level = get_challenge_level(level_id)
+        if level.challenge.source_content_definition_id:
+            from marketplace.access import can_launch
+
+            if not can_launch(request.user, level.challenge.source_content_definition):
+                raise PermissionDenied("You do not have access to this challenge.")
         prior_run = None
         prior_run_id = serializer.validated_data.get("prior_run_id")
         if prior_run_id:

@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from challenges.models import ChallengeLevel, ChallengeRun
 from common.constants import (
     COMMAND_ACCURACY_PROGRESS_THRESHOLD,
@@ -46,10 +48,10 @@ def get_challenge_level(level_id: int) -> ChallengeLevel:
     return (
         ChallengeLevel.objects.select_related("challenge", "challenge__storey")
         .prefetch_related("challenge_variants")
+        .filter(Q(challenge__storey__is_published=True) | Q(challenge__source_content_definition__isnull=False))
         .get(
             id=level_id,
             is_published=True,
             challenge__is_published=True,
-            challenge__storey__is_published=True,
         )
     )

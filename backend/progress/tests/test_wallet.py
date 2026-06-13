@@ -34,6 +34,18 @@ def test_award_rejects_non_positive_amounts(db, django_user_model):
     assert not Wallet.objects.filter(user=user).exists()
 
 
+def test_spend_debits_balance_once_per_key(db, django_user_model):
+    user = make_user(django_user_model)
+    service = WalletService()
+    service.award(user=user, amount=75, reason="seed", award_key="seed:spend")
+
+    assert service.spend(user=user, amount=25, reason="store_purchase", award_key="purchase:1") is True
+    assert service.spend(user=user, amount=25, reason="store_purchase", award_key="purchase:1") is False
+
+    assert Wallet.objects.get(user=user).balance == 50
+    assert CoinTransaction.objects.filter(user=user, amount=-25, reason="store_purchase").count() == 1
+
+
 def test_wallet_endpoint_returns_balance_and_recent(db, django_user_model):
     user = make_user(django_user_model)
     WalletService().award(user=user, amount=30, reason="adventure_pass", award_key="adventure-pass:1")
@@ -52,7 +64,8 @@ def test_wallet_endpoint_returns_balance_and_recent(db, django_user_model):
 def test_storey_chest_awards_gitcoins_when_progress_crosses_threshold(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    level = ChallengeLevel.objects.get(challenge__slug="stage-commit-switch", difficulty="easy")
+    level = ChallengeLevel.objects.filter(difficulty="easy", is_published=True).select_related("challenge").first()
+    assert level is not None
     level.required_successful_attempts = 1
     level.save(update_fields=["required_successful_attempts"])
     storey = level.storey

@@ -10,6 +10,7 @@ import { useTowerSelection } from '@/features/storeys/hooks/useTowerSelection'
 
 const mocks = vi.hoisted(() => ({
   getStoreyOverview: vi.fn(),
+  getAssetDescriptors: vi.fn(),
   startChallengeRun: vi.fn(),
   retryChallengeRun: vi.fn(),
 }))
@@ -45,6 +46,12 @@ vi.mock('motion/react', async () => {
 vi.mock('@/features/storeys/api/storeysApi', () => ({
   storeysApi: {
     getStoreyOverview: mocks.getStoreyOverview,
+  },
+}))
+
+vi.mock('@/shared/assets/assetsApi', () => ({
+  assetsApi: {
+    getDescriptors: mocks.getAssetDescriptors,
   },
 }))
 
@@ -108,6 +115,96 @@ const CANONICAL_CHALLENGE = {
   })),
 }
 
+function canonicalTowerLayout(storeyId: number) {
+  return {
+    storeyId,
+    pieces: [
+      { instanceId: `storey-${storeyId}-spire`, assetSlug: 'official-spire', pieceType: 'spire' },
+      {
+        instanceId: `storey-${storeyId}-tome-${CANONICAL_TOME.id}`,
+        assetSlug: 'official-tome',
+        pieceType: 'tome',
+        contentBinding: { kind: 'tome', id: CANONICAL_TOME.id },
+      },
+      {
+        instanceId: `storey-${storeyId}-landing-after-tomes`,
+        assetSlug: 'official-landing',
+        pieceType: 'landing',
+      },
+      {
+        instanceId: `storey-${storeyId}-adventure`,
+        assetSlug: 'official-adventure-section',
+        pieceType: 'adventure_section',
+        contentBinding: { kind: 'adventure', id: CANONICAL_ADVENTURE.id },
+      },
+      {
+        instanceId: `storey-${storeyId}-landing-after-adventure`,
+        assetSlug: 'official-landing',
+        pieceType: 'landing',
+      },
+      {
+        instanceId: `storey-${storeyId}-challenge-${CANONICAL_CHALLENGE.id}`,
+        assetSlug: 'official-challenge-section',
+        pieceType: 'challenge_section',
+        contentBinding: { kind: 'challenge', id: CANONICAL_CHALLENGE.id },
+      },
+      {
+        instanceId: `storey-${storeyId}-landing-after-challenges`,
+        assetSlug: 'official-landing',
+        pieceType: 'landing',
+      },
+    ],
+  } as const
+}
+
+const TOWER_SPRITE = {
+  url: '/media/assets/sprites/official-piece.svg',
+  frame_count: 1,
+  columns: 1,
+  rows: 1,
+  frame_width: 1,
+  frame_height: 1,
+  fps: 1,
+  loops: true,
+}
+
+function towerPieceDescriptor(slug: string, pieceType: string, anchors = {}) {
+  return {
+    slug,
+    label: slug,
+    kind: 'tower_piece',
+    scale: 1,
+    config: {},
+    sprites: { default: TOWER_SPRITE },
+    piece_type: pieceType,
+    tower_piece: {
+      piece_type: pieceType,
+      view_box: '0 0 220 48',
+      anchors,
+      bounds: {},
+      interaction_zones: {},
+      state_variants: {},
+      svg_sanitized: true,
+    },
+  }
+}
+
+function mockTowerPieceDescriptors() {
+  mocks.getAssetDescriptors.mockResolvedValue({
+    kind: 'tower_piece',
+    results: {
+      'official-spire': towerPieceDescriptor('official-spire', 'spire'),
+      'official-tome': towerPieceDescriptor('official-tome', 'tome'),
+      'official-landing': towerPieceDescriptor('official-landing', 'landing', {
+        walk_rail: { x1: 18, y1: 18, x2: 202, y2: 18 },
+      }),
+      'official-adventure-section': towerPieceDescriptor('official-adventure-section', 'adventure_section'),
+      'official-challenge-section': towerPieceDescriptor('official-challenge-section', 'challenge_section'),
+      'official-door': towerPieceDescriptor('official-door', 'door'),
+    },
+  })
+}
+
 function mockCanonicalStoreyContent() {
   mocks.getStoreyOverview.mockImplementation((storeyId: number) =>
     Promise.resolve({
@@ -115,11 +212,13 @@ function mockCanonicalStoreyContent() {
       command_adventure: CANONICAL_ADVENTURE,
       tomes: [CANONICAL_TOME],
       challenges: [CANONICAL_CHALLENGE],
+      tower_layout: canonicalTowerLayout(storeyId),
     }),
   )
 }
 
 function renderHub() {
+  mockTowerPieceDescriptors()
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -174,6 +273,17 @@ describe('StoreyLevelHub', () => {
     expect(
       screen.getByRole('button', { name: /select stage, commit, then switch branches: hard/i }),
     ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /select command adventure/i })).toHaveAttribute(
+      'data-piece-id',
+      'storey-2-adventure',
+    )
+    await waitFor(() =>
+      expect(document.querySelector('[data-piece-id="storey-2-landing-after-adventure"]')).toHaveAttribute(
+        'data-walk-rail-x1',
+        '18',
+      ),
+    )
+    expect(document.querySelector('.tower-piece-svg')).toBeInTheDocument()
   })
 
   it('shows the adventure overview + Play action when its door is selected', async () => {

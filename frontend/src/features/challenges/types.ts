@@ -1,6 +1,7 @@
 import type { RepositorySnapshot } from '@/shared/level/types'
 import type { KnownDifficulty } from '@/features/challenges/constants'
 import type { BookPage } from '@/features/storeys/book/bookTypes'
+import type { TowerLayoutDescriptor } from '@/shared/assets/types'
 
 export type Difficulty = KnownDifficulty | (string & {})
 export type ChallengeStatus = 'not_started' | 'locked' | 'in_progress' | 'completed' | 'failed' | 'abandoned'
@@ -128,6 +129,7 @@ export type StoreyContentOverview = {
   command_adventure: CommandAdventureSummary | null
   tomes: TomeSummary[]
   challenges: ChallengeSummary[]
+  tower_layout?: TowerLayoutDescriptor
 }
 
 export type CommandPreviewBlock = {

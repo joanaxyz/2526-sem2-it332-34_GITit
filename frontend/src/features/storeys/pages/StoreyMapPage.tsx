@@ -23,11 +23,12 @@ import { computeSky } from '@/features/storeys/sky/useTowerSky'
 import { clamp, lerp, mulberry32 } from '@/features/storeys/towerRandom'
 import type { LearningStorey } from '@/features/storeys/types'
 import { queryKeys } from '@/shared/api/queryKeys'
+import { assetsApi } from '@/shared/assets/assetsApi'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { readPreference, writePreference } from '@/shared/utils/persistentState'
-import { BLUE } from '@/shared/sprites/characters'
+import { BLUE, characterFromDescriptor } from '@/shared/sprites/characters'
 
 // One in-app day takes this long in real time when the cycle is auto-advancing.
 const DAY_LENGTH_MS = 18 * 60 * 1000
@@ -199,8 +200,19 @@ export function StoreyMapPage() {
     queryFn: storeysApi.listStoreys,
     staleTime: 5 * 60 * 1000,
   })
+  const characterQuery = useQuery({
+    queryKey: queryKeys.assetDescriptors('character'),
+    queryFn: () => assetsApi.getDescriptors('character'),
+    staleTime: 10 * 60 * 1000,
+    retry: 1,
+  })
 
   const storeys = useMemo(() => storeysQuery.data ?? [], [storeysQuery.data])
+  const activeCharacter = useMemo(() => {
+    const descriptor = characterQuery.data?.results.blue
+    if (descriptor?.kind !== 'character') return BLUE
+    return characterFromDescriptor(descriptor) ?? BLUE
+  }, [characterQuery.data])
   const cloudField = useMemo(() => buildCloudField(storeys.length), [storeys.length])
   // How many storeys exist in the DOM. Starts at one; the build-zone observer
   // raises it as the user scrolls down. A ?storey= deep link raises the floor
@@ -483,7 +495,7 @@ export function StoreyMapPage() {
       </div>
 
       {/* Companion sprite — must stay a direct child of the page shell. */}
-      <TowerCharacter character={BLUE} />
+      <TowerCharacter character={activeCharacter} />
     </div>
   )
 }

@@ -3179,6 +3179,55 @@ textarea {
   box-shadow: 0 0 16px var(--tower-cyan-glow);
 }
 
+.tower-piece-svg-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.14;
+  mix-blend-mode: screen;
+}
+
+.tower-piece-svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 14px rgba(45, 245, 255, 0.2));
+}
+
+.tower-window-stage > .tower-piece-svg-layer {
+  inset: 0 3rem;
+}
+
+.tower-adventure-stage > .tower-piece-svg-layer,
+.tower-challenges-stage > .tower-piece-svg-layer,
+.tower-tome-stage > .tower-piece-svg-layer {
+  inset: -0.45rem;
+  z-index: 0;
+  opacity: 0.1;
+}
+
+.tower-landing > .tower-piece-svg-layer {
+  inset: -0.25rem;
+  z-index: 1;
+  opacity: 0.2;
+}
+
+.adventure-door,
+.tome-lectern {
+  position: relative;
+}
+
+.adventure-door > .tower-piece-svg-layer,
+.trial-door > .tower-piece-svg-layer,
+.tome-lectern > .tower-piece-svg-layer {
+  inset: -0.55rem;
+  opacity: 0.16;
+}
+
 /* ── Tower companion: the click-driven character sprite. The layer covers the
    whole page shell in document space (so a grounded character scrolls with
    its separator for free) and never intercepts pointer events — the

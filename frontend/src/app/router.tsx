@@ -61,6 +61,54 @@ export const router = createBrowserRouter([
           Component: (await import('@/features/storeys/pages/StoreyMapPage')).StoreyMapPage,
         }),
       },
+      {
+        path: '/my-tower',
+        lazy: async () => ({
+          Component: (await import('@/features/towers/pages/MyTowerPage')).MyTowerPage,
+        }),
+      },
+      {
+        path: '/tower/editor',
+        lazy: async () => ({
+          Component: (await import('@/features/towers/pages/TowerEditorPage')).TowerEditorPage,
+        }),
+      },
+      {
+        path: '/tower/editor/:designId',
+        lazy: async () => ({
+          Component: (await import('@/features/towers/pages/TowerEditorPage')).TowerEditorPage,
+        }),
+      },
+      {
+        path: '/authoring',
+        lazy: async () => ({
+          Component: (await import('@/features/authoring/pages/AuthoringLibraryPage')).AuthoringLibraryPage,
+        }),
+      },
+      {
+        path: '/authoring/new/:kind',
+        lazy: async () => ({
+          Component: (await import('@/features/authoring/pages/ContentEditorPage')).ContentEditorPage,
+        }),
+      },
+      {
+        path: '/authoring/:definitionId',
+        lazy: async () => ({
+          Component: (await import('@/features/authoring/pages/ContentEditorPage')).ContentEditorPage,
+        }),
+      },
+      {
+        path: '/store',
+        lazy: async () => ({
+          Component: (await import('@/features/store/pages/StorePage')).StorePage,
+        }),
+      },
+      {
+        path: '/gallery',
+        lazy: async () => ({
+          Component: (await import('@/features/gallery/pages/GalleryPage')).GalleryPage,
+        }),
+      },
       /* Legacy routes — stats/performance now live on Home's Stats tab. */
       { path: '/dashboard', element: <Navigate replace to="/home" /> },
       { path: '/stats', element: <Navigate replace to="/home?tab=stats" /> },

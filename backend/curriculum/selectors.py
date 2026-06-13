@@ -2,6 +2,13 @@ from dataclasses import dataclass, field
 
 from django.db.models import Count, Q
 
+from assets.models import (
+    TOWER_PIECE_ADVENTURE_SECTION,
+    TOWER_PIECE_CHALLENGE_SECTION,
+    TOWER_PIECE_LANDING,
+    TOWER_PIECE_SPIRE,
+    TOWER_PIECE_TOME,
+)
 from adventures.models import AdventureLevel, AdventureRun, CommandAdventure
 from challenges.models import Challenge, ChallengeLevel, ChallengeRun
 from challenges.selectors import (
@@ -16,6 +23,15 @@ from common.constants import (
 )
 from curriculum.library import library_key_for_command
 from curriculum.models import CommandForm, CommandSkill, LibraryEntry, Storey, Tome
+
+
+OFFICIAL_TOWER_ASSET_SLUGS = {
+    TOWER_PIECE_SPIRE: "official-spire",
+    TOWER_PIECE_LANDING: "official-landing",
+    TOWER_PIECE_ADVENTURE_SECTION: "official-adventure-section",
+    TOWER_PIECE_CHALLENGE_SECTION: "official-challenge-section",
+    TOWER_PIECE_TOME: "official-tome",
+}
 
 
 def published_storeys():
@@ -191,7 +207,108 @@ def storey_content_overview(*, user, storey_id: int) -> dict:
         "challenges": [
             challenge_summary_payload(challenge=challenge, access=access) for challenge in challenges
         ],
+        "tower_layout": tower_layout_payload(
+            storey_id=storey_id,
+            adventure=adventure,
+            tomes=list(tomes),
+            challenges=challenges,
+        ),
     }
+
+
+def tower_layout_payload(
+    *,
+    storey_id: int,
+    adventure: CommandAdventure | None,
+    tomes: list[Tome],
+    challenges: list[Challenge],
+) -> dict:
+    pieces: list[dict] = [
+        _tower_piece(
+            storey_id=storey_id,
+            name="spire",
+            piece_type=TOWER_PIECE_SPIRE,
+        )
+    ]
+
+    above_adventure_tomes = [tome for tome in tomes if tome.placement == "above_adventure"]
+    for tome in above_adventure_tomes:
+        pieces.append(
+            _tower_piece(
+                storey_id=storey_id,
+                name=f"tome-{tome.id}",
+                piece_type=TOWER_PIECE_TOME,
+                content_binding={"kind": "tome", "id": tome.id},
+            )
+        )
+    if above_adventure_tomes:
+        pieces.append(
+            _tower_piece(
+                storey_id=storey_id,
+                name="landing-after-tomes",
+                piece_type=TOWER_PIECE_LANDING,
+            )
+        )
+
+    pieces.append(
+        _tower_piece(
+            storey_id=storey_id,
+            name="adventure",
+            piece_type=TOWER_PIECE_ADVENTURE_SECTION,
+            content_binding={"kind": "adventure", "id": adventure.id} if adventure else None,
+        )
+    )
+    pieces.append(
+        _tower_piece(
+            storey_id=storey_id,
+            name="landing-after-adventure",
+            piece_type=TOWER_PIECE_LANDING,
+        )
+    )
+
+    if challenges:
+        for challenge in challenges:
+            pieces.append(
+                _tower_piece(
+                    storey_id=storey_id,
+                    name=f"challenge-{challenge.id}",
+                    piece_type=TOWER_PIECE_CHALLENGE_SECTION,
+                    content_binding={"kind": "challenge", "id": challenge.id},
+                )
+            )
+    else:
+        pieces.append(
+            _tower_piece(
+                storey_id=storey_id,
+                name="challenges",
+                piece_type=TOWER_PIECE_CHALLENGE_SECTION,
+            )
+        )
+    pieces.append(
+        _tower_piece(
+            storey_id=storey_id,
+            name="landing-after-challenges",
+            piece_type=TOWER_PIECE_LANDING,
+        )
+    )
+    return {"storeyId": storey_id, "pieces": pieces}
+
+
+def _tower_piece(
+    *,
+    storey_id: int,
+    name: str,
+    piece_type: str,
+    content_binding: dict | None = None,
+) -> dict:
+    payload = {
+        "instanceId": f"storey-{storey_id}-{name}",
+        "assetSlug": OFFICIAL_TOWER_ASSET_SLUGS[piece_type],
+        "pieceType": piece_type,
+    }
+    if content_binding:
+        payload["contentBinding"] = content_binding
+    return payload
 
 
 def command_skill_queryset(*, storey_id: int):

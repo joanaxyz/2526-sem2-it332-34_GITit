@@ -1,0 +1,150 @@
+from __future__ import annotations
+
+import copy
+
+from django.db import transaction
+from django.utils import timezone
+from rest_framework.exceptions import PermissionDenied, ValidationError
+
+from authoring.compiler import ContentRuntimeCompiler
+from authoring.models import (
+    STATUS_PUBLISHED,
+    STATUS_TESTABLE,
+    ContentDefinition,
+)
+from authoring.validators import ContentDefinitionValidator
+
+
+class ContentDefinitionService:
+    def assert_owner(self, *, user, content: ContentDefinition) -> None:
+        if not getattr(user, "is_staff", False) and content.owner_id != getattr(user, "id", None):
+            raise PermissionDenied("You do not own this content definition.")
+
+    @transaction.atomic
+    def create(self, *, user, data: dict) -> ContentDefinition:
+        content = ContentDefinition(owner=user, **_content_fields(data))
+        content.full_clean()
+        content.save()
+        return content
+
+    @transaction.atomic
+    def update(self, *, user, content: ContentDefinition, data: dict) -> ContentDefinition:
+        self.assert_owner(user=user, content=content)
+        if content.status == STATUS_PUBLISHED and not data.get("visibility"):
+            raise ValidationError({"status": "Published content can only be relisted or remixed, not edited in place."})
+        for field, value in _content_fields(data, partial=True).items():
+            setattr(content, field, value)
+        content.full_clean()
+        content.save()
+        return content
+
+    @transaction.atomic
+    def validate(self, *, user, content: ContentDefinition) -> dict:
+        self.assert_owner(user=user, content=content)
+        result = ContentDefinitionValidator().validate(content)
+        content.validation_errors = result.errors
+        if result.valid and content.status not in {STATUS_TESTABLE, STATUS_PUBLISHED}:
+            content.status = STATUS_TESTABLE
+            content.save(update_fields=["validation_errors", "status", "updated_at"])
+        else:
+            content.save(update_fields=["validation_errors", "updated_at"])
+        return {"valid": result.valid, "errors": result.errors}
+
+    @transaction.atomic
+    def publish(self, *, user, content: ContentDefinition) -> ContentDefinition:
+        self.assert_owner(user=user, content=content)
+        result = ContentDefinitionValidator().validate(content)
+        if not result.valid:
+            content.validation_errors = result.errors
+            content.save(update_fields=["validation_errors", "updated_at"])
+            raise ValidationError({"validation_errors": result.errors})
+        content.status = STATUS_PUBLISHED
+        content.validation_errors = []
+        content.published_at = timezone.now()
+        content.save(update_fields=["status", "validation_errors", "published_at", "updated_at"])
+        ContentRuntimeCompiler().compile(content=content)
+        return content
+
+    @transaction.atomic
+    def test_run(self, *, user, content: ContentDefinition) -> dict:
+        self.assert_owner(user=user, content=content)
+        result = ContentDefinitionValidator().validate(content)
+        if not result.valid:
+            content.validation_errors = result.errors
+            content.save(update_fields=["validation_errors", "updated_at"])
+            raise ValidationError({"validation_errors": result.errors})
+        if content.status != STATUS_PUBLISHED:
+            content.status = STATUS_TESTABLE
+            content.validation_errors = []
+            content.save(update_fields=["status", "validation_errors", "updated_at"])
+        runtime = ContentRuntimeCompiler().compile(content=content)
+        return _runtime_entry(runtime)
+
+    @transaction.atomic
+    def remix(self, *, user, content: ContentDefinition) -> ContentDefinition:
+        clone = ContentDefinition.objects.create(
+            kind=content.kind,
+            owner=user,
+            source_definition=content,
+            visibility="private",
+            status="draft",
+            slug=_next_remix_slug(user=user, source=content),
+            title=f"{content.title} Remix",
+            summary=content.summary,
+            tags=copy.deepcopy(content.tags),
+            command_family=content.command_family,
+            difficulty=content.difficulty,
+            definition=copy.deepcopy(content.definition),
+        )
+        return clone
+
+
+def _content_fields(data: dict, *, partial: bool = False) -> dict:
+    allowed = {
+        "kind",
+        "visibility",
+        "slug",
+        "title",
+        "summary",
+        "tags",
+        "command_family",
+        "difficulty",
+        "definition",
+    }
+    fields = {key: data[key] for key in allowed if key in data}
+    if not partial:
+        fields.setdefault("summary", "")
+        fields.setdefault("tags", [])
+        fields.setdefault("command_family", "")
+        fields.setdefault("difficulty", "")
+        fields.setdefault("definition", {})
+    return fields
+
+
+def _runtime_entry(runtime) -> dict:
+    if runtime.command_adventure_id:
+        return {
+            "kind": "adventure",
+            "runtime_id": runtime.command_adventure_id,
+            "start_path": f"/command-adventures/{runtime.command_adventure.slug}",
+        }
+    if runtime.challenge_id:
+        level = runtime.challenge.challenge_levels.filter(is_published=True).order_by("id").first()
+        return {
+            "kind": "challenge",
+            "runtime_id": runtime.challenge_id,
+            "start_path": f"/challenge-levels/{level.id}" if level else None,
+        }
+    if runtime.tome_id:
+        return {"kind": "tome", "runtime_id": runtime.tome_id, "pages": runtime.tome.pages}
+    return {"kind": "unknown", "runtime_id": None}
+
+
+def _next_remix_slug(*, user, source: ContentDefinition) -> str:
+    base = f"{source.slug}-remix"
+    slug = base
+    index = 2
+    while ContentDefinition.objects.filter(owner=user, kind=source.kind, slug=slug).exists():
+        slug = f"{base}-{index}"
+        index += 1
+    return slug

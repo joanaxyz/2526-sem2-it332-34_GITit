@@ -1,4 +1,5 @@
 import type { StoreyContentSection } from '@/features/challenges/types'
+import type { AssetKind } from '@/shared/assets/types'
 
 export const queryKeys = {
   authBootstrap: ['auth-bootstrap'] as const,
@@ -6,6 +7,15 @@ export const queryKeys = {
   statsSummary: ['stats-summary'] as const,
   wallet: ['wallet'] as const,
   storeys: ['storeys'] as const,
+  authoringContent: (kind?: string) => ['authoring-content', kind ?? 'all'] as const,
+  authoringContentDetail: (id: number) => ['authoring-content-detail', id] as const,
+  towerDesigns: ['tower-designs'] as const,
+  myTower: ['my-tower'] as const,
+  storeListings: ['store-listings'] as const,
+  galleryAssets: ['gallery-assets'] as const,
+  galleryContent: ['gallery-content'] as const,
+  galleryTowerDesigns: ['gallery-tower-designs'] as const,
+  assetDescriptors: (kind: AssetKind) => ['asset-descriptors', kind] as const,
   storeyContent: (storeyId: number | null | undefined, section: StoreyContentSection) =>
     ['storey-content', storeyId, section] as const,
   storeyOverview: (storeyId: number | null | undefined) => ['storey-overview', storeyId] as const,

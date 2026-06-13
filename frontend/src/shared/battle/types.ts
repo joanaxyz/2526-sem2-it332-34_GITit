@@ -7,35 +7,10 @@
  * shape client-side, so the stage consumes exactly one contract.
  */
 
-export type BattleSpriteDescriptor = {
-  url: string
-  frame_count: number
-  columns: number
-  rows: number
-  frame_width: number
-  frame_height: number
-  fps: number
-  loops?: boolean
-}
+import type { AssetSpriteDescriptor, MonsterAssetDescriptor } from '@/shared/assets/types'
 
-export type BattleMonsterDescriptor = {
-  slug: string
-  label: string
-  kind: string
-  scale?: number
-  tier?: 'mob' | 'elite' | 'boss' | (string & {})
-  attack?: {
-    kind?: 'melee' | 'projectile' | (string & {})
-    hit_frame?: number
-    lunge_px?: number
-    projectile?: string
-  }
-  metrics?: {
-    foot_offset?: number
-    hp_bar_fraction?: number
-  }
-  sprites: Record<string, BattleSpriteDescriptor>
-}
+export type BattleSpriteDescriptor = AssetSpriteDescriptor
+export type BattleMonsterDescriptor = MonsterAssetDescriptor
 
 export type BattleMonster = {
   /** Stable within the encounter; event `monster`/`target` fields point here. */

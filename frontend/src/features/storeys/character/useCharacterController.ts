@@ -13,7 +13,7 @@ import type {
  *
  * The character lives in shell coordinates (document space inside
  * `.tower-page-shell`), so a grounded character scrolls glued to its
- * separator ledge with zero per-scroll work. All position writes are
+ * landing ledge with zero per-scroll work. All position writes are
  * imperative transforms — no React re-renders while moving.
  *
  * Movement rules:
@@ -25,7 +25,7 @@ import type {
  * - While idle, one-shot "random" fidget sheets play on a randomized timer.
  */
 
-const LEDGE_INSET_PX = 14 // keep feet off the separator's flared ends
+const LEDGE_INSET_PX = 14 // fallback inset for CSS-painted landing ends
 const WALK_BAND_PX = 48 // click this close (vertically) to a ledge targets it
 const RUN_DISTANCE_PX = 220 // ground moves longer than this sprint instead of walking
 const ARRIVE_PX = 6
@@ -136,12 +136,45 @@ export function useCharacterController({
       }deg)`
     }
 
-    // The walk surface is the separator's top rail — its ::before band, whose
-    // offset differs per variant (standard/base/after-challenges). Reading the
-    // computed style gives the actual rail line with no maintained constants;
-    // the tome separator has no ::before and its beam sits at the box top, so
-    // the NaN fallback of 0 is exact there too.
+    function numberData(el: HTMLElement, name: string): number | null {
+      const value = el.dataset[name]
+      if (value === undefined) return null
+      const parsed = Number(value)
+      return Number.isFinite(parsed) ? parsed : null
+    }
+
+    function measureAnchorLedge(el: HTMLElement, shellRect: DOMRect): Ledge | null {
+      const rect = el.getBoundingClientRect()
+      if (rect.width === 0) return null
+
+      const viewBoxWidth = numberData(el, 'viewboxWidth')
+      const viewBoxHeight = numberData(el, 'viewboxHeight')
+      const x1 = numberData(el, 'walkRailX1')
+      const y1 = numberData(el, 'walkRailY1')
+      const x2 = numberData(el, 'walkRailX2')
+      const y2 = numberData(el, 'walkRailY2')
+      if (!viewBoxWidth || !viewBoxHeight || x1 === null || y1 === null || x2 === null || y2 === null) {
+        return null
+      }
+
+      return {
+        el,
+        left: rect.left - shellRect.left + (Math.min(x1, x2) / viewBoxWidth) * rect.width,
+        right: rect.left - shellRect.left + (Math.max(x1, x2) / viewBoxWidth) * rect.width,
+        y: rect.top - shellRect.top + (((y1 + y2) / 2) / viewBoxHeight) * rect.height,
+      }
+    }
+
+    // Prefer authored landing anchors from tower-piece descriptors. The CSS
+    // separator scan below is an explicit migration shim until every rendered
+    // landing carries a walk_rail anchor.
     function measureLedge(el: HTMLElement, shellRect: DOMRect): Ledge | null {
+      const anchored = measureAnchorLedge(el, shellRect)
+      if (anchored) return anchored
+
+      // Fallback: the CSS separator's top rail is its ::before band, whose
+      // offset differs per variant. Tome separator beams sit at the box top,
+      // so the NaN fallback of 0 is exact there too.
       const rect = el.getBoundingClientRect()
       if (rect.width === 0) return null
       const railTop = Number.parseFloat(window.getComputedStyle(el, '::before').top)
@@ -155,7 +188,10 @@ export function useCharacterController({
 
     function scanLedges(): Ledge[] {
       const shellRect = shell.getBoundingClientRect()
-      const nodes = shell.querySelectorAll<HTMLElement>('.tower-section-separator, .tower-tome-separator')
+      const anchoredNodes = shell.querySelectorAll<HTMLElement>('.tower-landing[data-walk-rail-x1]')
+      const nodes = anchoredNodes.length
+        ? anchoredNodes
+        : shell.querySelectorAll<HTMLElement>('.tower-section-separator, .tower-tome-separator')
       const ledges: Ledge[] = []
       for (const el of Array.from(nodes)) {
         const ledge = measureLedge(el, shellRect)
@@ -281,7 +317,7 @@ export function useCharacterController({
       scheduleRandom()
     }
 
-    // Layout shifts (lazy storey mounts, viewport resize) move the separators;
+    // Layout shifts (lazy storey mounts, viewport resize) move the landings;
     // a grounded character re-derives its position from the stored anchor.
     function reanchor() {
       if (disposed) return

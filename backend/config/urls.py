@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from assets.views import AssetDescriptorAPIView
 from adventures.views import (
     AdventureRunDetailAPIView,
     AdventureRunFinishAPIView,
@@ -36,6 +37,10 @@ urlpatterns = [
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("api/auth/", include("accounts.urls")),
+    path("api/assets/descriptors/", AssetDescriptorAPIView.as_view(), name="asset-descriptors"),
+    path("api/authoring/", include("authoring.urls")),
+    path("api/", include("towers.urls")),
+    path("api/", include("marketplace.urls")),
     path("api/progress/", include("progress.urls")),
     path("api/storeys/", StoreyListAPIView.as_view(), name="storeys"),
     path("api/storeys/<int:storey_id>/content/", StoreyContentAPIView.as_view(), name="storey-content"),

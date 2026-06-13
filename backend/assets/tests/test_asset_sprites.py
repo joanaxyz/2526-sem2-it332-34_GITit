@@ -45,3 +45,28 @@ def test_sprite_save_counts_explicit_grid(tmp_path, settings):
     assert sprite.columns == 3
     assert sprite.rows == 2
     assert sprite.frame_count == 6
+
+
+@pytest.mark.django_db
+def test_svg_sprite_keeps_authored_static_frame(tmp_path, settings):
+    settings.MEDIA_ROOT = tmp_path
+    asset = Asset.objects.create(kind=KIND_MONSTER, slug="test-svg", label="Test SVG")
+    sprite = AssetSprite(
+        asset=asset,
+        action="default",
+        frame_width=220,
+        frame_height=48,
+        fps=1,
+    )
+
+    sprite.image.save(
+        "landing.svg",
+        ContentFile(b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48"></svg>'),
+        save=True,
+    )
+
+    assert sprite.frame_width == 220
+    assert sprite.frame_height == 48
+    assert sprite.columns == 1
+    assert sprite.rows == 1
+    assert sprite.frame_count == 1
