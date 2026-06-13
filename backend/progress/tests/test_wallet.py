@@ -1,7 +1,7 @@
 from django.core.management import call_command
 from rest_framework.test import APIClient
 
-from challenges.models import ChallengeQuest, ChallengeRun
+from challenges.models import ChallengeLevel, ChallengeRun
 from progress.models import CoinTransaction, Wallet
 from progress.wallet import WalletService
 
@@ -52,10 +52,10 @@ def test_wallet_endpoint_returns_balance_and_recent(db, django_user_model):
 def test_storey_chest_awards_gitcoins_when_progress_crosses_threshold(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    quest = ChallengeQuest.objects.get(challenge__slug="stage-commit-switch", difficulty="easy")
-    quest.required_successful_attempts = 1
-    quest.save(update_fields=["required_successful_attempts"])
-    storey = quest.storey
+    level = ChallengeLevel.objects.get(challenge__slug="stage-commit-switch", difficulty="easy")
+    level.required_successful_attempts = 1
+    level.save(update_fields=["required_successful_attempts"])
+    storey = level.storey
     # A tiny threshold guarantees the first progress tick crosses it.
     storey.chest_rewards = [{"threshold": 1, "coins": 60}]
     storey.save(update_fields=["chest_rewards"])
@@ -74,7 +74,7 @@ def test_storey_chest_awards_gitcoins_when_progress_crosses_threshold(db, django
         )
 
     start = client.post(
-        f"/api/challenge-quests/{quest.id}/runs/",
+        f"/api/challenge-levels/{level.id}/runs/",
         {"source_entry_point": "tower_page"},
         format="json",
     )

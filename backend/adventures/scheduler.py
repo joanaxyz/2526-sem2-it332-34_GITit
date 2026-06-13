@@ -5,7 +5,7 @@ Turns an adventure into an interleaved mastery session: an *introduction front*
 *review pool* (introduced-but-unmastered commands, resurfaced when due, weakest
 first). Spacing is measured in encounters, not wall-clock time.
 
-Mastery is a Leitner box 0..N per (user, quest), where N is the quest's
+Mastery is a Leitner box 0..N per (user, level), where N is the level's
 `required_successful_attempts`. A passing solve advances a box; a failure demotes.
 Each command's box decides how long it rests before it is due again.
 """
@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import random
 
-from adventures.models import AdventureMastery, AdventureQuest, AdventureQuestAttempt
+from adventures.models import AdventureMastery, AdventureLevel, AdventureLevelAttempt
 
 # --- tunables --------------------------------------------------------------
 BOX_VALUE = 10               # mastery points awarded per box advanced
@@ -33,39 +33,39 @@ def interval_for(strength: int) -> int:
 
 def encounter_index(*, user, adventure) -> int:
     """The user's running encounter count for this adventure (across runs)."""
-    return AdventureQuestAttempt.objects.filter(
+    return AdventureLevelAttempt.objects.filter(
         run__user=user, run__command_adventure=adventure
     ).count()
 
 
-def _ordered_quests(adventure, *, with_prerequisites: bool = False) -> list[AdventureQuest]:
+def _ordered_levels(adventure, *, with_prerequisites: bool = False) -> list[AdventureLevel]:
     # Imported lazily to avoid a services <-> scheduler import cycle.
-    from adventures.services import ordered_quests_for
+    from adventures.services import ordered_levels_for
 
-    return ordered_quests_for(adventure, with_prerequisites=with_prerequisites)
+    return ordered_levels_for(adventure, with_prerequisites=with_prerequisites)
 
 
 class AdventureScheduler:
     """Stateless picker; all state lives in AdventureMastery rows."""
 
-    def _mastery_map(self, *, user, quests: list[AdventureQuest]) -> dict[int, AdventureMastery]:
+    def _mastery_map(self, *, user, levels: list[AdventureLevel]) -> dict[int, AdventureMastery]:
         rows = AdventureMastery.objects.filter(
-            user=user, adventure_quest__in=[q.id for q in quests]
+            user=user, adventure_level__in=[q.id for q in levels]
         )
-        return {row.adventure_quest_id: row for row in rows}
+        return {row.adventure_level_id: row for row in rows}
 
-    def next_quest(
-        self, *, user, adventure, quests: list[AdventureQuest] | None = None
-    ) -> AdventureQuest | None:
-        """Pick the next command-quest to serve, or None when the session is
+    def next_level(
+        self, *, user, adventure, levels: list[AdventureLevel] | None = None
+    ) -> AdventureLevel | None:
+        """Pick the next command-level to serve, or None when the session is
         complete (every command mastered / nothing left to introduce). Callers
-        that already resolved the ordered quests (with prerequisites) pass them
+        that already resolved the ordered levels (with prerequisites) pass them
         in so the join runs once per request."""
-        if quests is None:
-            quests = _ordered_quests(adventure, with_prerequisites=True)
-        if not quests:
+        if levels is None:
+            levels = _ordered_levels(adventure, with_prerequisites=True)
+        if not levels:
             return None
-        mastery = self._mastery_map(user=user, quests=quests)
+        mastery = self._mastery_map(user=user, levels=levels)
         idx = encounter_index(user=user, adventure=adventure)
 
         def strength(q):
@@ -86,13 +86,13 @@ class AdventureScheduler:
         def prereqs_met(q):
             return all(strength(pre) >= PREREQ_STRENGTH for pre in q.prerequisites.all())
 
-        introduced_quests = [q for q in quests if introduced(q)]
-        pool = [q for q in introduced_quests if not mastered(q)]
-        new = [q for q in quests if not introduced(q) and prereqs_met(q)]
+        introduced_levels = [q for q in levels if introduced(q)]
+        pool = [q for q in introduced_levels if not mastered(q)]
+        new = [q for q in levels if not introduced(q) and prereqs_met(q)]
         due = [q for q in pool if idx - last_seen(q) >= interval_for(strength(q))]
 
         # Warm-up: introduce sequentially until there is enough to interleave.
-        if len(introduced_quests) < WARMUP_K and new:
+        if len(introduced_levels) < WARMUP_K and new:
             return new[0]
         if due:
             return self._weakest(due, idx=idx, strength=strength, last_seen=last_seen)
@@ -102,20 +102,20 @@ class AdventureScheduler:
             return self._weakest(pool, idx=idx, strength=strength, last_seen=last_seen)
         return None
 
-    def _weakest(self, items, *, idx, strength, last_seen) -> AdventureQuest:
+    def _weakest(self, items, *, idx, strength, last_seen) -> AdventureLevel:
         """Lowest box first, then most overdue, with a random tie-break."""
         best = min((strength(q), -(idx - last_seen(q))) for q in items)
         tied = [q for q in items if (strength(q), -(idx - last_seen(q))) == best]
         return random.choice(tied)
 
-    def select_variant(self, *, user, quest):
-        """Least-recently-used published variant for this user+quest; cycles when
+    def select_variant(self, *, user, level):
+        """Least-recently-used published variant for this user+level; cycles when
         fewer variants exist than needed (graceful degradation)."""
-        variants = list(quest.adventure_variants.filter(is_published=True).order_by("semantic_key", "id"))
+        variants = list(level.adventure_variants.filter(is_published=True).order_by("semantic_key", "id"))
         if not variants:
             return None
         recent = (
-            AdventureQuestAttempt.objects.filter(run__user=user, adventure_quest=quest)
+            AdventureLevelAttempt.objects.filter(run__user=user, adventure_level=level)
             .order_by("-id")
             .values_list("selected_variant_id", flat=True)
         )
@@ -132,18 +132,18 @@ class AdventureScheduler:
         variants.sort(key=sort_key)
         return variants[0]
 
-    def mark_served(self, *, user, quest, idx: int) -> AdventureMastery:
-        row, _ = AdventureMastery.objects.get_or_create(user=user, adventure_quest=quest)
+    def mark_served(self, *, user, level, idx: int) -> AdventureMastery:
+        row, _ = AdventureMastery.objects.get_or_create(user=user, adventure_level=level)
         row.introduced = True
         row.last_seen_seq = idx
         row.save(update_fields=["introduced", "last_seen_seq", "updated_at"])
         return row
 
-    def apply_result(self, *, user, quest, passed: bool, solved: bool) -> bool:
+    def apply_result(self, *, user, level, passed: bool, solved: bool) -> bool:
         """Update the Leitner box after an attempt. Returns whether a box advanced
         (which is what earns mastery points)."""
-        row, _ = AdventureMastery.objects.get_or_create(user=user, adventure_quest=quest)
-        ceiling = quest.required_successful_attempts
+        row, _ = AdventureMastery.objects.get_or_create(user=user, adventure_level=level)
+        ceiling = level.required_successful_attempts
         box_advanced = False
         if passed and row.strength < ceiling:
             row.strength += 1
@@ -156,29 +156,29 @@ class AdventureScheduler:
 
 # --- pass-bar helpers ------------------------------------------------------
 
-def total_achievable(adventure, *, quests=None) -> int:
-    quests = quests if quests is not None else _ordered_quests(adventure)
-    return sum(q.required_successful_attempts * BOX_VALUE for q in quests)
+def total_achievable(adventure, *, levels=None) -> int:
+    levels = levels if levels is not None else _ordered_levels(adventure)
+    return sum(q.required_successful_attempts * BOX_VALUE for q in levels)
 
 
-def pass_bar_for(adventure, *, quests=None) -> float:
+def pass_bar_for(adventure, *, levels=None) -> float:
     fraction = adventure.pass_bar_fraction or PASS_BAR_FRACTION
-    return total_achievable(adventure, quests=quests) * fraction
+    return total_achievable(adventure, levels=levels) * fraction
 
 
-def floor_met(*, user, adventure, quests=None) -> bool:
+def floor_met(*, user, adventure, levels=None) -> bool:
     """Every command in the adventure has been solved at least once (box >= floor)."""
-    quests = quests if quests is not None else _ordered_quests(adventure)
+    levels = levels if levels is not None else _ordered_levels(adventure)
     strengths = dict(
         AdventureMastery.objects.filter(
-            user=user, adventure_quest__in=[q.id for q in quests]
-        ).values_list("adventure_quest_id", "strength")
+            user=user, adventure_level__in=[q.id for q in levels]
+        ).values_list("adventure_level_id", "strength")
     )
-    return all(strengths.get(q.id, 0) >= FLOOR_STRENGTH for q in quests)
+    return all(strengths.get(q.id, 0) >= FLOOR_STRENGTH for q in levels)
 
 
-def is_passed(*, user, adventure, session_score: int, quests=None) -> bool:
-    quests = quests if quests is not None else _ordered_quests(adventure)
-    return session_score >= pass_bar_for(adventure, quests=quests) and floor_met(
-        user=user, adventure=adventure, quests=quests
+def is_passed(*, user, adventure, session_score: int, levels=None) -> bool:
+    levels = levels if levels is not None else _ordered_levels(adventure)
+    return session_score >= pass_bar_for(adventure, levels=levels) and floor_met(
+        user=user, adventure=adventure, levels=levels
     )

@@ -1,4 +1,4 @@
-export type StoreyPracticeMetric = {
+export type StoreyLevelMetric = {
   value: number
   numerator: number
   denominator: number
@@ -18,6 +18,6 @@ export type LearningStorey = {
   sort_order: number
   command_skill_count: number
   challenge_count: number
-  practice_completion?: StoreyPracticeMetric
+  level_completion?: StoreyLevelMetric
   chest_rewards?: ChestReward[]
 }

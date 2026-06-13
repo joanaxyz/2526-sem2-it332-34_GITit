@@ -2,7 +2,7 @@ import { Navigate, createBrowserRouter, type RouteObject } from 'react-router-do
 
 import { AuthLayout } from '@/app/layouts/AuthLayout'
 import { HomeLayout } from '@/app/layouts/HomeLayout'
-import { PracticeLayout } from '@/app/layouts/PracticeLayout'
+import { LevelLayout } from '@/app/layouts/LevelLayout'
 import { Protected } from '@/app/Protected'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
@@ -27,6 +27,10 @@ const designPreviewRoutes: RouteObject[] = import.meta.env.DEV
           },
         ],
       },
+      {
+        path: '/dev/battle',
+        lazy: () => import('@/features/dev/BattlePlayground'),
+      },
     ]
   : []
 
@@ -49,7 +53,7 @@ export const router = createBrowserRouter([
       { path: '/', element: <Navigate replace to="/home" /> },
       { path: '/home', element: <HomePage /> },
       // Route-level code splitting: the tower (motion) and the run pages
-      // (reactflow + dagre via the practice workspace) carry the heaviest
+      // (reactflow + dagre via the level workspace) carry the heaviest
       // dependencies, so they load on navigation instead of in the entry chunk.
       {
         path: '/tower',
@@ -66,12 +70,12 @@ export const router = createBrowserRouter([
   {
     element: (
       <Protected>
-        <PracticeLayout />
+        <LevelLayout />
       </Protected>
     ),
     children: [
-      { path: '/challenge-quests/:questId', element: <ChallengeStartPage mode="start" /> },
-      { path: '/challenge-quests/:questId/review', element: <ChallengeStartPage mode="review" /> },
+      { path: '/challenge-levels/:levelId', element: <ChallengeStartPage mode="start" /> },
+      { path: '/challenge-levels/:levelId/review', element: <ChallengeStartPage mode="review" /> },
       { path: '/challenge-runs/:runId/retry', element: <ChallengeStartPage mode="retry" /> },
       {
         path: '/challenge-runs/:runId',

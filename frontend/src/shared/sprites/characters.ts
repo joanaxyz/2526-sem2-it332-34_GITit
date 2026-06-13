@@ -1,5 +1,7 @@
+import blueCast from '@/assets/sprites/character/blue/cast.png'
 import blueFloat from '@/assets/sprites/character/blue/float.png'
 import blueFly from '@/assets/sprites/character/blue/fly.png'
+import blueHurt from '@/assets/sprites/character/blue/hurt.png'
 import blueIdle from '@/assets/sprites/character/blue/idle.png'
 import blueLand from '@/assets/sprites/character/blue/land.png'
 import blueRandom1 from '@/assets/sprites/character/blue/random1.png'
@@ -53,8 +55,26 @@ export const BLUE: CharacterDefinition = {
     // take_off frames 0–44 are the upright crouch/wing-unfurl (rise straight
     // up); from cell 45 the sheet is in horizontal flight poses.
     takeOffAirborneFrame: 45,
+    takeOffLiftSpeed: 55,
     // land frames 0–31 are flight/braking flare; from cell 32 the pose is an
     // upright wings-flared drop, touching down around cell 40.
     landFallFrame: 32,
   },
+}
+
+/**
+ * Battle-only sheets for Blue, kept out of `CharacterDefinition` so the tower
+ * controller's MoveName contract is untouched. Blue rests on the shared `idle`
+ * sheet (BLUE.sprites.idle) and plays one `cast` action for every spell — the
+ * spell's projectile/effect is drawn by the battle effect layer, not the sprite.
+ *
+ * `miss` has no dedicated sheet yet, so it deliberately reuses the idle frames
+ * (played once) as a placeholder beat when a spell fizzles; swap in a real
+ * sheet later without touching the director. `hurt` is retained for legacy
+ * callers but the tower-defense loop has monsters strike the crystal, not Blue.
+ */
+export const BLUE_BATTLE: Record<'cast' | 'hurt' | 'miss', SpriteAnimation> = {
+  cast: sheet('blue.cast', blueCast, 8, 32, false),
+  hurt: sheet('blue.hurt', blueHurt, 5, 20, false),
+  miss: sheet('blue.miss', blueIdle, 5, 10, false),
 }

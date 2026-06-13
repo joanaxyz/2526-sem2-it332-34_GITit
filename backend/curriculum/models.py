@@ -23,6 +23,12 @@ class Storey(models.Model):
     sort_order = models.PositiveIntegerField(default=0)
     # [{"threshold": <progress percent>, "coins": <GitCoins>}, ...]
     chest_rewards = models.JSONField(default=default_chest_rewards, blank=True)
+    # Monster palette for this storey's battles: adventure encounters cycle
+    # `mob_roster`, challenge bosses cycle `boss_roster`. Each level still picks
+    # its species deterministically (stable hash of the level slug) from the
+    # list. Empty falls back to the global cycles in battle/constants.py.
+    mob_roster = models.JSONField(default=list, blank=True)
+    boss_roster = models.JSONField(default=list, blank=True)
 
     class Meta:
         ordering = ["sort_order", "number"]

@@ -5,24 +5,28 @@ used to live in serializers.py; serializers now hold input validation only.
 Payload shapes are part of the frontend contract — change them deliberately.
 """
 
+from battle.payloads import battle_block
 from challenges.models import ChallengeRun
-from challenges.selectors import required_successful_attempts_for_quest
-from common.constants import SESSION_MODE_REVIEW, SESSION_STATUS_COMPLETED, SESSION_STATUS_STARTED
+from challenges.selectors import required_successful_attempts_for_level
+from common.constants import (
+    DIFFICULTIES,
+    SESSION_MODE_PRIMARY,
+    SESSION_MODE_REVIEW,
+    SESSION_STATUS_COMPLETED,
+    SESSION_STATUS_STARTED,
+)
 from practice.context import ScenarioContextNormalizer
 from practice.scaffolding import ScaffoldingService
 from practice.visualization import RepositoryVisualizationService
-from progress.models import QuestCompletion
+from progress.models import LevelCompletion
 from simulator.services import RepositorySnapshotService
-
-DIFFICULTY_ORDER = ["easy", "medium", "hard"]
-
 
 def prefetch_run_payload_context(run: ChallengeRun) -> None:
     if getattr(run, "_payload_context_loaded", False):
         return
-    run._prefetched_completion = QuestCompletion.objects.filter(
+    run._prefetched_completion = LevelCompletion.objects.filter(
         user_id=run.user_id,
-        challenge_quest_id=run.challenge_quest_id,
+        challenge_level_id=run.challenge_level_id,
     ).first()
     run._payload_context_loaded = True
 
@@ -33,7 +37,7 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
     visualizer = RepositoryVisualizationService()
     context = _scenario_context(run)
     repository_state = snapshotter.snapshot(run.repository_state, already_normalized=True)
-    supports = ScaffoldingService().supports_for(run.challenge_quest.difficulty)
+    supports = ScaffoldingService().supports_for(run.challenge_level.difficulty)
     expected_target = run.variant.target_state
     target_state = run.variant.target_state if supports["expected_state"] else None
     # Stored repository_state is already normalized (the snapshotter calls beside
@@ -77,6 +81,9 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
         "repository_state": repository_state,
         "visualization": visualization,
         "expected_state": expected_state,
+        # Boss roster for the battle strip; events ride only the per-command
+        # response. Null for pre-battle runs → the client derives a fallback.
+        "battle": battle_block(run.battle_state),
         "steps": [
             {
                 "id": step.id,
@@ -92,7 +99,7 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
         ],
         "review_mode": run.mode == SESSION_MODE_REVIEW,
         "next_difficulty": next_difficulty_payload(run),
-        "sibling_quests": sibling_quests_payload(run),
+        "sibling_levels": sibling_levels_payload(run),
         "completion": completion_payload(run),
     }
 
@@ -116,7 +123,7 @@ def command_run_payload(run: ChallengeRun, *, repository_state: dict, visualizat
                 "mastery_progress": mastery_progress_payload(run),
                 "completion": completion_payload(run),
                 "next_difficulty": next_difficulty_payload(run),
-                "sibling_quests": sibling_quests_payload(run),
+                "sibling_levels": sibling_levels_payload(run),
             }
         )
     return payload
@@ -128,12 +135,12 @@ def mastery_progress_payload(run: ChallengeRun) -> dict:
     cached = getattr(run, "_mastery_progress_payload", None)
     if cached is not None:
         return cached
-    required = required_successful_attempts_for_quest(run.challenge_quest)
+    required = required_successful_attempts_for_level(run.challenge_level)
     mastered_count = ChallengeRun.objects.filter(
         user_id=run.user_id,
-        mode="primary",
-        status="completed",
-        challenge_quest_id=run.challenge_quest_id,
+        mode=SESSION_MODE_PRIMARY,
+        status=SESSION_STATUS_COMPLETED,
+        challenge_level_id=run.challenge_level_id,
         counted_action_total__lte=run.command_budget_snapshot["min_counted_commands"],
     ).count()
     payload = {"mastered": min(mastered_count, required), "required": required}
@@ -144,7 +151,7 @@ def mastery_progress_payload(run: ChallengeRun) -> dict:
 def completion_payload(run: ChallengeRun) -> dict | None:
     completion = getattr(run, "_prefetched_completion", None)
     if completion is None and not getattr(run, "_payload_context_loaded", False):
-        completion = QuestCompletion.objects.filter(user=run.user, challenge_quest=run.challenge_quest).first()
+        completion = LevelCompletion.objects.filter(user=run.user, challenge_level=run.challenge_level).first()
     if not completion:
         return None
     return {
@@ -172,7 +179,7 @@ def next_difficulty_payload(run: ChallengeRun) -> dict | None:
     if (
         run.mode != "primary"
         or run.status != SESSION_STATUS_COMPLETED
-        or not run.challenge_quest
+        or not run.challenge_level
     ):
         return None
     progress = mastery_progress_payload(run)
@@ -181,34 +188,34 @@ def next_difficulty_payload(run: ChallengeRun) -> dict | None:
     if progress["mastered"] < progress["required"]:
         return None
     try:
-        next_difficulty = DIFFICULTY_ORDER[DIFFICULTY_ORDER.index(run.challenge_quest.difficulty) + 1]
+        next_difficulty = DIFFICULTIES[DIFFICULTIES.index(run.challenge_level.difficulty) + 1]
     except (ValueError, IndexError):
         return None
-    next_quest = run.challenge_quest.challenge.challenge_quests.filter(
+    next_level = run.challenge_level.challenge.challenge_levels.filter(
         difficulty=next_difficulty,
         is_published=True,
     ).first()
-    if not next_quest:
+    if not next_level:
         return None
-    return {"id": next_quest.id, "difficulty": next_quest.difficulty}
+    return {"id": next_level.id, "difficulty": next_level.difficulty}
 
 
-def sibling_quests_payload(run: ChallengeRun) -> list[dict]:
-    """Every quest of this run's challenge (easy→hard) with the user's access state,
-    powering the completion modal's quest navigator. Imported lazily to avoid a
+def sibling_levels_payload(run: ChallengeRun) -> list[dict]:
+    """Every level of this run's challenge (easy→hard) with the user's access state,
+    powering the completion modal's level navigator. Imported lazily to avoid a
     challenges⇄curriculum import cycle at module load."""
-    if not run.challenge_quest:
+    if not run.challenge_level:
         return []
-    from curriculum.selectors import challenge_quests_access_payload
+    from curriculum.selectors import challenge_levels_access_payload
 
-    return challenge_quests_access_payload(user=run.user, challenge=run.challenge_quest.challenge)
+    return challenge_levels_access_payload(user=run.user, challenge=run.challenge_level.challenge)
 
 
 def _scenario_context(run: ChallengeRun) -> dict:
-    # The brief is authored on the quest and shared across its variants; the
-    # variant only carries a generated fallback, so the quest's authored context
+    # The brief is authored on the level and shared across its variants; the
+    # variant only carries a generated fallback, so the level's authored context
     # wins.
-    raw = run.challenge_quest.scenario_context or run.variant.scenario_context
+    raw = run.challenge_level.scenario_context or run.variant.scenario_context
     return ScenarioContextNormalizer().normalize(raw, fallback_story=run.challenge.narrative)
 
 
@@ -219,5 +226,5 @@ def _challenge_payload(run: ChallengeRun) -> dict:
         "title": run.challenge.title,
         "summary": run.challenge.summary,
         "narrative": run.challenge.narrative,
-        "quest_id": run.challenge_quest_id,
+        "level_id": run.challenge_level_id,
     }

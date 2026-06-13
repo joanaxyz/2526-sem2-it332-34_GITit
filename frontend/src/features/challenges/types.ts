@@ -1,4 +1,4 @@
-import type { RepositorySnapshot } from '@/shared/practice/types'
+import type { RepositorySnapshot } from '@/shared/level/types'
 import type { KnownDifficulty } from '@/features/challenges/constants'
 import type { BookPage } from '@/features/storeys/book/bookTypes'
 
@@ -23,7 +23,7 @@ export type LatestAttemptStats = {
   ended_at: string | null
 }
 
-export type PracticeCompletion = {
+export type LevelRunCompletion = {
   first_attempt_star: boolean
   counted_action_total: number
   completed_at: string
@@ -34,7 +34,7 @@ export type ChallengeProgress = {
   required: number
 }
 
-export type ChallengeQuestAccess = {
+export type ChallengeLevelAccess = {
   id: number
   difficulty: Difficulty
   status: ChallengeStatus
@@ -42,7 +42,7 @@ export type ChallengeQuestAccess = {
   successful_attempts: ChallengeProgress
   active_run_id: number | null
   latest_attempt: LatestAttemptStats | null
-  completion: PracticeCompletion | null
+  completion: LevelRunCompletion | null
   review_available: boolean
   command_budget: CommandBudget
 }
@@ -59,7 +59,7 @@ export type CommandAdventureSummary = {
   is_passed: boolean
   active_run_id: number | null
   latest_run_id: number | null
-  quest_count: number
+  level_count: number
   progress: {
     value: number
     numerator: number
@@ -73,7 +73,7 @@ export type CommandFormSummary = {
   usage_form: string
   label: string
   summary: string
-  quest_count: number
+  level_count: number
 }
 
 export type CommandSkillSummary = {
@@ -94,7 +94,7 @@ export type ChallengeSummary = {
   title: string
   summary: string
   narrative: string
-  quests: ChallengeQuestAccess[]
+  levels: ChallengeLevelAccess[]
 }
 
 // Tower slots a tome can be authored into. Mirrors backend Tome.placement.
@@ -119,6 +119,15 @@ export type StoreyContentPage<
   section: StoreyContentSection
   results: T[]
   next_cursor: number | null
+}
+
+// Every Tower section for one storey, fetched in a single request. Storeys
+// hold only a handful of challenges/tomes, so the lists are returned whole.
+export type StoreyContentOverview = {
+  storey_id: number
+  command_adventure: CommandAdventureSummary | null
+  tomes: TomeSummary[]
+  challenges: ChallengeSummary[]
 }
 
 export type CommandPreviewBlock = {

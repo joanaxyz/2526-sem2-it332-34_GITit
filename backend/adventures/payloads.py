@@ -1,8 +1,9 @@
 from django.db.models import Prefetch
 
-from adventures.models import AdventureMastery, AdventureQuestAttempt, AdventureRun
+from adventures.models import AdventureMastery, AdventureLevelAttempt, AdventureRun
 from adventures.scheduler import pass_bar_for, total_achievable
-from adventures.services import ordered_quests_for
+from adventures.services import ordered_levels_for
+from battle.payloads import battle_block
 from common.constants import SESSION_STATUS_STARTED
 from evaluation.checklist import ObjectiveChecklistEvaluator
 from practice.context import ScenarioContextNormalizer
@@ -12,41 +13,41 @@ from simulator.services import RepositorySnapshotService
 _snapshotter = RepositorySnapshotService()
 
 
-def _live_objective_checks(attempt: AdventureQuestAttempt) -> list:
+def _live_objective_checks(attempt: AdventureLevelAttempt) -> list:
     """Evaluate the adventure-only objective checklist against the attempt's
     current repository state. Shared by the full attempt payload and the slim
     per-command payload so the checklist ticks off identically on both paths.
-    Checks are authored on the quest (`objective_checks`); their server-side
+    Checks are authored on the level (`objective_checks`); their server-side
     requirements never leave the backend — only {label, satisfied} rows do."""
     return ObjectiveChecklistEvaluator().evaluate(
-        attempt.adventure_quest.objective_checks,
+        attempt.adventure_level.objective_checks,
         state=attempt.repository_state,
         initial_state=attempt.selected_variant.initial_state,
     )
 
 
-def _mastery_payload(run: AdventureRun, quests: list) -> dict:
+def _mastery_payload(run: AdventureRun, levels: list) -> dict:
     """Per-command Leitner state for the adventure, plus the session's pass-bar
     progress. Drives the mastery UI (boxes, commands mastered, score vs bar).
-    `quests` is passed in so the ordered-quests join runs once per request."""
+    `levels` is passed in so the ordered-levels join runs once per request."""
     rows = {
-        m.adventure_quest_id: m
+        m.adventure_level_id: m
         for m in AdventureMastery.objects.filter(
-            user_id=run.user_id, adventure_quest__in=[q.id for q in quests]
+            user_id=run.user_id, adventure_level__in=[q.id for q in levels]
         )
     }
     commands = []
     mastered = 0
-    for quest in quests:
-        row = rows.get(quest.id)
+    for level in levels:
+        row = rows.get(level.id)
         strength = row.strength if row else 0
-        ceiling = quest.required_successful_attempts
+        ceiling = level.required_successful_attempts
         is_mastered = strength >= ceiling
         mastered += int(is_mastered)
         commands.append(
             {
-                "slug": quest.slug,
-                "title": quest.title,
+                "slug": level.slug,
+                "title": level.title,
                 "strength": strength,
                 "mastered_bar": ceiling,
                 "introduced": bool(row and row.introduced),
@@ -56,21 +57,21 @@ def _mastery_payload(run: AdventureRun, quests: list) -> dict:
     return {
         "commands": commands,
         "commands_mastered": mastered,
-        "total_commands": len(quests),
+        "total_commands": len(levels),
         "session_score": run.session_score,
-        "pass_bar": round(pass_bar_for(run.command_adventure, quests=quests)),
-        "total_achievable": total_achievable(run.command_adventure, quests=quests),
+        "pass_bar": round(pass_bar_for(run.command_adventure, levels=levels)),
+        "total_achievable": total_achievable(run.command_adventure, levels=levels),
         "passed": run.passed_at is not None,
     }
 
 
-def attempt_payload(attempt: AdventureQuestAttempt) -> dict:
-    quest = attempt.adventure_quest
+def attempt_payload(attempt: AdventureLevelAttempt) -> dict:
+    level = attempt.adventure_level
     variant = attempt.selected_variant
-    # The narrative is authored on the quest and shared across its variants;
-    # the variant only carries a generated fallback, so the quest's authored
+    # The narrative is authored on the level and shared across its variants;
+    # the variant only carries a generated fallback, so the level's authored
     # context wins.
-    raw_context = quest.scenario_context or variant.scenario_context or {}
+    raw_context = level.scenario_context or variant.scenario_context or {}
     context = ScenarioContextNormalizer().normalize(
         raw_context,
         fallback_story="Reach the requested repository outcome cleanly.",
@@ -79,11 +80,11 @@ def attempt_payload(attempt: AdventureQuestAttempt) -> dict:
         "id": attempt.id,
         "order": attempt.order,
         "status": attempt.status,
-        "quest": {
-            "id": quest.id,
-            "slug": quest.slug,
-            "title": quest.title,
-            "is_required": quest.is_required,
+        "level": {
+            "id": level.id,
+            "slug": level.slug,
+            "title": level.title,
+            "is_required": level.is_required,
         },
         "variant": {"id": variant.id, "label": variant.label},
         "scenario_context": context,
@@ -106,8 +107,8 @@ def attempt_payload(attempt: AdventureQuestAttempt) -> dict:
         },
         "available_hints": len(variant.hint_set or []),
         "command_budget": {
-            "min_counted_commands": quest.min_counted_commands,
-            "max_counted_commands": quest.max_counted_commands,
+            "min_counted_commands": level.min_counted_commands,
+            "max_counted_commands": level.max_counted_commands,
         },
         "counts": {
             "command_count": attempt.command_count,
@@ -117,6 +118,10 @@ def attempt_payload(attempt: AdventureQuestAttempt) -> dict:
         "repository_state": _snapshotter.snapshot(
             attempt.repository_state, already_normalized=True
         ),
+        # Encounter roster for the battle stage (events ride only the
+        # per-command response). Null for pre-battle attempts → the client
+        # derives a fallback roster.
+        "battle": battle_block(attempt.battle_state),
         # Command history for the terminal. Mirrors the challenge `steps` payload
         # so the frontend can derive terminal lines from cached server state
         # (and rehydrate on refresh) instead of ephemeral component state. Only
@@ -133,7 +138,7 @@ def attempt_payload(attempt: AdventureQuestAttempt) -> dict:
     }
 
 
-def attempt_result_payload(attempt: AdventureQuestAttempt) -> dict:
+def attempt_result_payload(attempt: AdventureLevelAttempt) -> dict:
     return {
         "id": attempt.id,
         "order": attempt.order,
@@ -149,18 +154,18 @@ def attempt_result_payload(attempt: AdventureQuestAttempt) -> dict:
 
 
 def adventure_run_payload(run: AdventureRun) -> dict:
-    # The ordered-quests join is shared by total_quests, the mastery panel,
+    # The ordered-levels join is shared by total_levels, the mastery panel,
     # and the pass-bar math; resolve it once per request instead of 4x.
-    quests = ordered_quests_for(run.command_adventure)
+    levels = ordered_levels_for(run.command_adventure)
     attempts = list(
-        run.attempts.select_related("adventure_quest", "selected_variant").prefetch_related(
+        run.attempts.select_related("adventure_level", "selected_variant").prefetch_related(
             Prefetch("steps", queryset=CommandStep.objects.order_by("id"))
         )
     )
     current = next(
         (a for a in attempts if a.status == SESSION_STATUS_STARTED), None
     )
-    total_quests = len(quests)
+    total_levels = len(levels)
     return {
         "id": run.id,
         "status": run.status,
@@ -179,30 +184,30 @@ def adventure_run_payload(run: AdventureRun) -> dict:
         # The adventure's storey is its OneToOne owner; surfaced so the
         # completion modal's "Back to Tower" lands on the right storey.
         "storey_id": run.command_adventure.storey_id,
-        "current_quest_index": run.current_quest_index,
-        "total_quests": total_quests,
+        "current_level_index": run.current_level_index,
+        "total_levels": total_levels,
         "session_score": run.session_score,
         "passed": run.passed_at is not None,
         "mastery_progress_gained": run.mastery_progress_gained,
-        "mastery": _mastery_payload(run, quests),
+        "mastery": _mastery_payload(run, levels),
         "completed_at": run.completed_at,
         "current_attempt": attempt_payload(current) if current else None,
         "results": [attempt_result_payload(a) for a in attempts],
         "progress": {
             "completed": sum(1 for a in attempts if a.status != SESSION_STATUS_STARTED),
-            "total": total_quests,
+            "total": total_levels,
         },
     }
 
 
-def adventure_command_payload(run: AdventureRun, *, attempt: AdventureQuestAttempt) -> dict:
+def adventure_command_payload(run: AdventureRun, *, attempt: AdventureLevelAttempt) -> dict:
     """Lightweight per-command payload, returned while an attempt is still in
     progress. Mirrors the challenge `command_run_payload` split: mid-attempt only
     the live attempt state changes (repository, counts, objective checklist), so
-    the mastery panel, results list, quest text, and scenario normalization are
+    the mastery panel, results list, level text, and scenario normalization are
     all skipped. The full `adventure_run_payload` is sent only when the attempt
     transitions (solved / budget spent) — which is when mastery and the next
-    quest actually change. The frontend merges this patch into the cached run."""
+    level actually change. The frontend merges this patch into the cached run."""
     return {
         "partial": True,
         "id": run.id,

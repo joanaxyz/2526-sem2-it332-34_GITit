@@ -59,7 +59,7 @@ def test_completion_evaluator_reads_normalized_variant_spec():
             },
             initial_state={"repository_initialized": False},
         ),
-        quest=SimpleNamespace(evaluation_spec={}),
+        level=SimpleNamespace(evaluation_spec={}),
     )
     outcome = PracticeCompletionEvaluator().evaluate(
         CompletionEvaluationContext(
@@ -75,7 +75,7 @@ def test_completion_evaluator_reads_normalized_variant_spec():
 def test_completion_evaluator_rejects_missing_evaluation_spec():
     run = SimpleNamespace(
         variant=SimpleNamespace(evaluation_spec={}, initial_state={}),
-        quest=SimpleNamespace(evaluation_spec={}),
+        level=SimpleNamespace(evaluation_spec={}),
     )
     with pytest.raises(ValueError, match="missing evaluation_spec"):
         PracticeCompletionEvaluator().evaluate(

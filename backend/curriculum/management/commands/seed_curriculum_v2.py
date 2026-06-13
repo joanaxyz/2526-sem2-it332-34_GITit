@@ -1,9 +1,11 @@
+from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from adventures.models import AdventureQuest, AdventureVariant, CommandAdventure
-from challenges.models import Challenge, ChallengeQuest, ChallengeVariant
-from curriculum.curriculum_v2.adventure_quests import ADVENTURE_QUESTS
+from adventures.models import AdventureLevel, AdventureVariant, CommandAdventure
+from assets.models import KIND_MONSTER, Asset
+from challenges.models import Challenge, ChallengeLevel, ChallengeVariant
+from curriculum.curriculum_v2.adventure_levels import ADVENTURE_LEVELS
 from curriculum.curriculum_v2.adventures import COMMAND_ADVENTURES
 from curriculum.curriculum_v2.challenges import CHALLENGES
 from curriculum.curriculum_v2.command_catalog import COMMAND_CATALOG
@@ -18,9 +20,39 @@ from curriculum.models import (
 )
 from evaluation.compiler import compile_evaluation_spec
 from evaluation.engine import EvaluationEngine
-from practice.builders import StaticQuestVariantBuilder
+from practice.builders import StaticLevelVariantBuilder
 from practice.visualization import RepositoryVisualizationService
 from simulator.services import RepositoryStateSimulator
+
+
+def battle_asset_slug_errors(monster_slugs: set[str]) -> list[str]:
+    errors: list[str] = []
+
+    def check(label: str, slug: str) -> None:
+        if slug and slug not in monster_slugs:
+            errors.append(f"{label}: unknown monster asset slug {slug!r}")
+
+    for storey in STOREYS:
+        for slug in storey.get("mob_roster", []):
+            check(f"storey {storey['slug']} mob_roster", str(slug))
+        for slug in storey.get("boss_roster", []):
+            check(f"storey {storey['slug']} boss_roster", str(slug))
+
+    for level in ADVENTURE_LEVELS:
+        for index, entry in enumerate(level.get("encounter_spec", [])):
+            check(
+                f"adventure {level['slug']} encounter_spec[{index}]", str(entry.get("species", ""))
+            )
+
+    for challenge in CHALLENGES:
+        for level in challenge.get("levels", []):
+            boss = level.get("boss_spec", {})
+            check(
+                f"challenge {challenge['slug']}/{level['difficulty']} boss_spec",
+                str(boss.get("species", "")),
+            )
+
+    return errors
 
 
 def _find_prerequisite_cycle(graph: dict[int, list[int]]) -> list[int] | None:
@@ -34,7 +66,7 @@ def _find_prerequisite_cycle(graph: dict[int, list[int]]) -> list[int] | None:
         stack.append(node)
         for nxt in graph.get(node, ()):
             if color.get(nxt, WHITE) == GRAY:
-                return stack[stack.index(nxt):] + [nxt]
+                return stack[stack.index(nxt) :] + [nxt]
             if color.get(nxt, WHITE) == WHITE:
                 found = visit(nxt)
                 if found:
@@ -75,11 +107,13 @@ class Command(BaseCommand):
         # authoring format of curriculum_v2; only the ORM names are normalized.
         if options.get("reset"):
             self._reset_seeded_data()
-        self.supported_form_keys = {spec["usage"] for spec in ADVENTURE_QUESTS}
+        call_command("seed_assets", verbosity=options.get("verbosity", 1))
+        self._validate_battle_asset_slugs()
+        self.supported_form_keys = {spec["usage"] for spec in ADVENTURE_LEVELS}
         self.published_storey_slugs = self._published_storey_slugs()
         storeys = self._seed_storeys()
         forms = self._seed_command_skills(storeys)
-        self._seed_adventure_quests(forms)
+        self._seed_adventure_levels(forms)
         self._seed_command_adventures(storeys)
         self._seed_challenges(storeys)
         self._seed_tomes(storeys)
@@ -102,6 +136,8 @@ class Command(BaseCommand):
                     "sort_order": index,
                     "is_published": is_published,
                     "chest_rewards": spec.get("chest_rewards", default_chest_rewards()),
+                    "mob_roster": spec.get("mob_roster", []),
+                    "boss_roster": spec.get("boss_roster", []),
                 },
             )
             storeys[spec["slug"]] = storey
@@ -109,13 +145,13 @@ class Command(BaseCommand):
         return storeys
 
     def _seed_command_adventures(self, storeys: dict[str, Storey]) -> None:
-        """One CommandAdventure per Storey that has published adventure quests."""
+        """One CommandAdventure per Storey that has published adventure levels."""
         live_ids = []
         for index, (slug, storey) in enumerate(storeys.items(), start=1):
-            has_quests = AdventureQuest.objects.filter(
+            has_levels = AdventureLevel.objects.filter(
                 command_form__command_skill__storey=storey, is_published=True
             ).exists()
-            if not has_quests:
+            if not has_levels:
                 continue
             configured = COMMAND_ADVENTURES.get(slug, {})
             adventure, _ = CommandAdventure.objects.update_or_create(
@@ -137,10 +173,11 @@ class Command(BaseCommand):
         for skill_index, spec in enumerate(COMMAND_CATALOG, start=1):
             storey = storeys[spec["module"]]
             form_keys = {
-                f"{spec['slug']}/{form_spec['slug']}"
-                for form_spec in spec.get("usages", [])
+                f"{spec['slug']}/{form_spec['slug']}" for form_spec in spec.get("usages", [])
             }
-            skill_is_published = bool(storey.is_published and form_keys.intersection(self.supported_form_keys))
+            skill_is_published = bool(
+                storey.is_published and form_keys.intersection(self.supported_form_keys)
+            )
             skill, _ = CommandSkill.objects.update_or_create(
                 storey=storey,
                 slug=spec["slug"],
@@ -183,13 +220,13 @@ class Command(BaseCommand):
         CommandSkill.objects.exclude(id__in=live_skill_ids).update(is_published=False)
         return forms
 
-    def _seed_adventure_quests(self, forms: dict[str, CommandForm]) -> None:
-        builder = StaticQuestVariantBuilder()
-        live_quest_ids = []
-        quests_by_slug: dict[str, AdventureQuest] = {}
-        for index, spec in enumerate(ADVENTURE_QUESTS, start=1):
+    def _seed_adventure_levels(self, forms: dict[str, CommandForm]) -> None:
+        builder = StaticLevelVariantBuilder()
+        live_level_ids = []
+        levels_by_slug: dict[str, AdventureLevel] = {}
+        for index, spec in enumerate(ADVENTURE_LEVELS, start=1):
             form = forms[spec["usage"]]
-            quest, _ = AdventureQuest.objects.update_or_create(
+            level, _ = AdventureLevel.objects.update_or_create(
                 command_form=form,
                 slug=spec["slug"],
                 defaults={
@@ -199,28 +236,29 @@ class Command(BaseCommand):
                     "max_counted_commands": spec["max_counted_commands"],
                     "scenario_context": spec["scenario_context"],
                     "objective_checks": spec.get("objective_checks", []),
+                    "encounter_spec": spec.get("encounter_spec", []),
                     "sort_order": index,
                     "is_published": True,
                 },
             )
-            live_quest_ids.append(quest.id)
-            quests_by_slug[spec["slug"]] = quest
-            self._sync_variants(quest=quest, variant_specs=spec["variants"], builder=builder)
-        # Second pass: wire the explicit prerequisite graph now that every quest
-        # exists. Prerequisites are authored as a list of quest slugs.
-        for spec in ADVENTURE_QUESTS:
-            quest = quests_by_slug[spec["slug"]]
+            live_level_ids.append(level.id)
+            levels_by_slug[spec["slug"]] = level
+            self._sync_variants(level=level, variant_specs=spec["variants"], builder=builder)
+        # Second pass: wire the explicit prerequisite graph now that every level
+        # exists. Prerequisites are authored as a list of level slugs.
+        for spec in ADVENTURE_LEVELS:
+            level = levels_by_slug[spec["slug"]]
             try:
-                prereqs = [quests_by_slug[slug] for slug in spec.get("prerequisites", [])]
+                prereqs = [levels_by_slug[slug] for slug in spec.get("prerequisites", [])]
             except KeyError as missing:
                 raise CommandError(
-                    f"Adventure quest {spec['slug']!r} lists unknown prerequisite {missing}."
+                    f"Adventure level {spec['slug']!r} lists unknown prerequisite {missing}."
                 )
-            quest.prerequisites.set(prereqs)
-        AdventureQuest.objects.exclude(id__in=live_quest_ids).update(is_published=False)
+            level.prerequisites.set(prereqs)
+        AdventureLevel.objects.exclude(id__in=live_level_ids).update(is_published=False)
 
     def _seed_challenges(self, storeys: dict[str, Storey]) -> None:
-        builder = StaticQuestVariantBuilder()
+        builder = StaticLevelVariantBuilder()
         live_challenge_ids = []
         for index, spec in enumerate(CHALLENGES, start=1):
             challenge, _ = Challenge.objects.update_or_create(
@@ -235,28 +273,29 @@ class Command(BaseCommand):
                 },
             )
             live_challenge_ids.append(challenge.id)
-            live_quest_ids = []
-            for quest_spec in spec.get("levels", []):
-                quest, _ = ChallengeQuest.objects.update_or_create(
+            live_level_ids = []
+            for level_spec in spec.get("levels", []):
+                level, _ = ChallengeLevel.objects.update_or_create(
                     challenge=challenge,
-                    difficulty=quest_spec["difficulty"],
+                    difficulty=level_spec["difficulty"],
                     defaults={
-                        "required_successful_attempts": quest_spec["required_successful_attempts"],
-                        "min_counted_commands": quest_spec["min_counted_commands"],
-                        "max_counted_commands": quest_spec["max_counted_commands"],
-                        "scenario_context": quest_spec["scenario_context"],
+                        "required_successful_attempts": level_spec["required_successful_attempts"],
+                        "min_counted_commands": level_spec["min_counted_commands"],
+                        "max_counted_commands": level_spec["max_counted_commands"],
+                        "scenario_context": level_spec["scenario_context"],
+                        "boss_spec": level_spec.get("boss_spec", {}),
                         "is_published": challenge.is_published,
                     },
                 )
-                live_quest_ids.append(quest.id)
+                live_level_ids.append(level.id)
                 self._sync_variants(
-                    quest=quest,
-                    variant_specs=quest_spec["variants"],
+                    level=level,
+                    variant_specs=level_spec["variants"],
                     builder=builder,
                 )
-            ChallengeQuest.objects.filter(challenge=challenge).exclude(id__in=live_quest_ids).update(
-                is_published=False
-            )
+            ChallengeLevel.objects.filter(challenge=challenge).exclude(
+                id__in=live_level_ids
+            ).update(is_published=False)
         Challenge.objects.exclude(id__in=live_challenge_ids).update(is_published=False)
 
     def _seed_tomes(self, storeys: dict[str, Storey]) -> None:
@@ -280,44 +319,44 @@ class Command(BaseCommand):
             live_ids.append(tome.id)
         Tome.objects.exclude(id__in=live_ids).update(is_published=False)
 
-    def _sync_variants(self, *, quest, variant_specs: list[dict], builder: StaticQuestVariantBuilder) -> None:
+    def _sync_variants(
+        self, *, level, variant_specs: list[dict], builder: StaticLevelVariantBuilder
+    ) -> None:
         live_ids = []
         for index, variant_spec in enumerate(variant_specs, start=1):
             case = {"case_id": variant_spec["case_id"]}
-            variant = builder.build(quest=quest, template=variant_spec, case=case, index=index)
+            variant = builder.build(level=level, template=variant_spec, case=case, index=index)
             filters = {"semantic_key": variant.semantic_key}
-            if isinstance(quest, AdventureQuest):
+            defaults = {
+                "slug": variant.slug,
+                "label": variant.label,
+                "initial_state": variant.initial_state,
+                "evaluation_spec": variant.evaluation_spec,
+                "target_state": variant.target_state,
+                "solution_commands": variant.solution_commands,
+                "case_id": variant.case_id,
+                "parameter_context": variant.parameter_context,
+                "scenario_context": variant.scenario_context,
+                "hint_set": variant.hint_set,
+                "scaffold_policy": variant.scaffold_policy,
+                # Command budget lives on the parent level, not the
+                # variant — all variants of a level share the same budget.
+                "is_published": True,
+            }
+            if isinstance(level, AdventureLevel):
                 variant_model = AdventureVariant
-                filters["adventure_quest"] = quest
+                filters["adventure_level"] = level
             else:
                 variant_model = ChallengeVariant
-                filters["challenge_quest"] = quest
-            saved, _ = variant_model.objects.update_or_create(
-                **filters,
-                defaults={
-                    "slug": variant.slug,
-                    "label": variant.label,
-                    "initial_state": variant.initial_state,
-                    "evaluation_spec": variant.evaluation_spec,
-                    "target_state": variant.target_state,
-                    "solution_commands": variant.solution_commands,
-                    "case_id": variant.case_id,
-                    "parameter_context": variant.parameter_context,
-                    "scenario_context": variant.scenario_context,
-                    "hint_set": variant.hint_set,
-                    "scaffold_policy": variant.scaffold_policy,
-                    # Command budget lives on the parent quest, not the
-                    # variant — all variants of a quest share the same budget.
-                    "is_published": True,
-                },
-            )
+                filters["challenge_level"] = level
+            saved, _ = variant_model.objects.update_or_create(**filters, defaults=defaults)
             live_ids.append(saved.id)
-        if isinstance(quest, AdventureQuest):
-            AdventureVariant.objects.filter(adventure_quest=quest).exclude(id__in=live_ids).update(
+        if isinstance(level, AdventureLevel):
+            AdventureVariant.objects.filter(adventure_level=level).exclude(id__in=live_ids).update(
                 is_published=False
             )
         else:
-            ChallengeVariant.objects.filter(challenge_quest=quest).exclude(id__in=live_ids).update(
+            ChallengeVariant.objects.filter(challenge_level=level).exclude(id__in=live_ids).update(
                 is_published=False
             )
 
@@ -337,7 +376,7 @@ class Command(BaseCommand):
                 form_to_storey[f"{skill_spec['slug']}/{form_spec['slug']}"] = skill_spec["module"]
         command_storeys = {
             form_to_storey[spec["usage"]]
-            for spec in ADVENTURE_QUESTS
+            for spec in ADVENTURE_LEVELS
             if spec["usage"] in form_to_storey
         }
         challenge_storeys = {spec["module"] for spec in CHALLENGES}
@@ -348,40 +387,44 @@ class Command(BaseCommand):
 
         This keeps user accounts intact while making local reseeds predictable
         after major curriculum edits. The delete order starts with session data
-        because several run/attempt models protect their selected quests and
+        because several run/attempt models protect their selected levels and
         variants.
         """
-        from adventures.models import AdventureMastery, AdventureQuestAttempt, AdventureRun
+        from adventures.models import AdventureLevelAttempt, AdventureMastery, AdventureRun
         from challenges.models import ChallengeRun
         from practice.models import CommandLog, CommandStep
-        from progress.models import QuestCompletion
+        from progress.models import LevelCompletion
 
         CommandLog.objects.all().delete()
         CommandStep.objects.all().delete()
-        QuestCompletion.objects.all().delete()
+        LevelCompletion.objects.all().delete()
         ChallengeRun.objects.all().delete()
-        AdventureQuestAttempt.objects.all().delete()
+        AdventureLevelAttempt.objects.all().delete()
         AdventureRun.objects.all().delete()
         AdventureMastery.objects.all().delete()
 
         ChallengeVariant.objects.all().delete()
         AdventureVariant.objects.all().delete()
-        ChallengeQuest.objects.all().delete()
-        AdventureQuest.objects.all().delete()
+        ChallengeLevel.objects.all().delete()
+        AdventureLevel.objects.all().delete()
         Challenge.objects.all().delete()
         CommandAdventure.objects.all().delete()
         CommandForm.objects.all().delete()
         CommandSkill.objects.all().delete()
         Tome.objects.all().delete()
         Storey.objects.all().delete()
-        self.stdout.write(self.style.WARNING("Reset v2 curriculum rows and dependent run/progress rows."))
+        self.stdout.write(
+            self.style.WARNING("Reset v2 curriculum rows and dependent run/progress rows.")
+        )
 
     def _validate_curriculum(self) -> None:
         errors: list[str] = []
         storeys = list(Storey.objects.filter(is_published=True).order_by("sort_order", "number"))
         for storey in storeys:
             skills = list(
-                CommandSkill.objects.filter(storey=storey, is_published=True).order_by("sort_order", "id")
+                CommandSkill.objects.filter(storey=storey, is_published=True).order_by(
+                    "sort_order", "id"
+                )
             )
             if not skills:
                 errors.append(f"{storey.slug}: missing command skills")
@@ -390,41 +433,67 @@ class Command(BaseCommand):
                 self._validate_command_skill(skill=skill, errors=errors)
 
         for challenge in Challenge.objects.filter(is_published=True):
-            quests = list(challenge.challenge_quests.filter(is_published=True))
-            difficulties = {quest.difficulty for quest in quests}
+            levels = list(challenge.challenge_levels.filter(is_published=True))
+            difficulties = {level.difficulty for level in levels}
             if difficulties != {"easy", "medium", "hard"}:
                 errors.append(f"{challenge.slug}: challenges must publish Easy, Medium, and Hard")
-            for quest in quests:
-                self._validate_quest_variants(quest=quest, errors=errors)
+            for level in levels:
+                self._validate_level_variants(level=level, errors=errors)
 
         self._validate_prerequisites(errors=errors)
         self._validate_challenge_intro_contract(errors=errors)
 
         if errors:
-            raise CommandError("Curriculum validation failed:\n" + "\n".join(f"- {error}" for error in errors))
+            raise CommandError(
+                "Curriculum validation failed:\n" + "\n".join(f"- {error}" for error in errors)
+            )
         self.stdout.write(self.style.SUCCESS("Validated v2 curriculum."))
+
+    def _validate_battle_asset_slugs(self) -> None:
+        monster_slugs = set(
+            Asset.objects.filter(
+                kind=KIND_MONSTER, owner__isnull=True, is_published=True
+            ).values_list("slug", flat=True)
+        )
+        errors = battle_asset_slug_errors(monster_slugs)
+        if errors:
+            raise CommandError(
+                "Battle asset validation failed:\n" + "\n".join(f"- {error}" for error in errors)
+            )
 
     def _validate_prerequisites(self, *, errors: list[str]) -> None:
         """Adventure prerequisite graph must be a DAG, and every prerequisite must
         be published, in the same adventure, and precede its dependent in order."""
         ordered = list(
-            AdventureQuest.objects.filter(is_published=True)
-            .order_by("command_form__command_skill__sort_order", "command_form__sort_order", "sort_order", "id")
+            AdventureLevel.objects.filter(is_published=True)
+            .order_by(
+                "command_form__command_skill__sort_order",
+                "command_form__sort_order",
+                "sort_order",
+                "id",
+            )
             .prefetch_related("prerequisites")
             .select_related("command_form__command_skill")
         )
-        position = {quest.id: index for index, quest in enumerate(ordered)}
+        position = {level.id: index for index, level in enumerate(ordered)}
         graph: dict[int, list[int]] = {}
-        for quest in ordered:
-            prereqs = list(quest.prerequisites.all())
-            graph[quest.id] = [pre.id for pre in prereqs]
+        for level in ordered:
+            prereqs = list(level.prerequisites.all())
+            graph[level.id] = [pre.id for pre in prereqs]
             for pre in prereqs:
                 if not pre.is_published:
-                    errors.append(f"{quest.slug}: prerequisite {pre.slug} is not published")
-                elif pre.command_form.command_skill.storey_id != quest.command_form.command_skill.storey_id:
-                    errors.append(f"{quest.slug}: prerequisite {pre.slug} is in a different adventure")
-                elif position.get(pre.id, 1 << 30) >= position[quest.id]:
-                    errors.append(f"{quest.slug}: prerequisite {pre.slug} must precede it in sort order")
+                    errors.append(f"{level.slug}: prerequisite {pre.slug} is not published")
+                elif (
+                    pre.command_form.command_skill.storey_id
+                    != level.command_form.command_skill.storey_id
+                ):
+                    errors.append(
+                        f"{level.slug}: prerequisite {pre.slug} is in a different adventure"
+                    )
+                elif position.get(pre.id, 1 << 30) >= position[level.id]:
+                    errors.append(
+                        f"{level.slug}: prerequisite {pre.slug} must precede it in sort order"
+                    )
         cycle = _find_prerequisite_cycle(graph)
         if cycle:
             slugs = {q.id: q.slug for q in ordered}
@@ -438,41 +507,46 @@ class Command(BaseCommand):
             errors.append(f"{skill.slug}: command skill has no published forms")
             return
         for form in forms:
-            quests = list(form.adventure_quests.filter(is_published=True).order_by("sort_order", "id"))
-            if not quests:
-                errors.append(f"{skill.slug}/{form.slug}: published form has no adventure quests")
+            levels = list(
+                form.adventure_levels.filter(is_published=True).order_by("sort_order", "id")
+            )
+            if not levels:
+                errors.append(f"{skill.slug}/{form.slug}: published form has no adventure levels")
                 continue
-            for quest in quests:
-                self._validate_quest_variants(quest=quest, errors=errors)
+            for level in levels:
+                self._validate_level_variants(level=level, errors=errors)
 
-    def _validate_quest_variants(self, *, quest, errors: list[str]) -> None:
-        if isinstance(quest, AdventureQuest):
-            variants = list(quest.adventure_variants.filter(is_published=True).order_by("semantic_key", "id"))
+    def _validate_level_variants(self, *, level, errors: list[str]) -> None:
+        if isinstance(level, AdventureLevel):
+            variants = list(
+                level.adventure_variants.filter(is_published=True).order_by("semantic_key", "id")
+            )
         else:
-            variants = list(quest.challenge_variants.filter(is_published=True).order_by("semantic_key", "id"))
+            variants = list(
+                level.challenge_variants.filter(is_published=True).order_by("semantic_key", "id")
+            )
         if not variants:
-            errors.append(f"{self._quest_name(quest)}: published practice item has no variants")
+            errors.append(f"{self._level_name(level)}: published practice item has no variants")
             return
-        # Mastery reviews must vary the scenario: a quest needs at least as many
+        # Mastery reviews must vary the scenario: a level needs at least as many
         # variants as the masteries it demands, or repeated reviews show the same
         # screen. Warn (not error) so under-authored content still seeds + runs.
-        if isinstance(quest, AdventureQuest) and len(variants) < quest.required_successful_attempts:
+        if isinstance(level, AdventureLevel) and len(variants) < level.required_successful_attempts:
             self.stdout.write(
                 self.style.WARNING(
-                    f"{self._quest_name(quest)}: {len(variants)} variant(s) for "
-                    f"{quest.required_successful_attempts} required masteries; "
+                    f"{self._level_name(level)}: {len(variants)} variant(s) for "
+                    f"{level.required_successful_attempts} required masteries; "
                     "reviews will repeat scenarios until more variants are authored."
                 )
             )
         for variant in variants:
             self._validate_variant(variant=variant, errors=errors)
 
-
     def _validate_challenge_intro_contract(self, *, errors: list[str]) -> None:
         """Challenges must apply, not introduce, Git concepts.
 
-        A Challenge level declares the Adventure quests it depends on through
-        ``uses_adventure_quests``. Every listed quest must exist, and it must
+        A Challenge level declares the Adventure levels it depends on through
+        ``uses_adventure_levels``. Every listed level must exist, and it must
         belong to the same storey or an earlier storey. This keeps Challenge
         scenario quality high without shrinking the curriculum to whatever the
         current command evaluator already supports. The authored evaluation spec
@@ -484,9 +558,8 @@ class Command(BaseCommand):
         for skill_spec in COMMAND_CATALOG:
             for form_spec in skill_spec.get("usages", []):
                 usage_to_module[f"{skill_spec['slug']}/{form_spec['slug']}"] = skill_spec["module"]
-        quest_to_module = {
-            spec["slug"]: usage_to_module.get(spec["usage"])
-            for spec in ADVENTURE_QUESTS
+        level_to_module = {
+            spec["slug"]: usage_to_module.get(spec["usage"]) for spec in ADVENTURE_LEVELS
         }
 
         for scenario in CHALLENGES:
@@ -494,22 +567,22 @@ class Command(BaseCommand):
             challenge_order = module_order.get(challenge_module, 1 << 30)
             for level_spec in scenario.get("levels", []):
                 difficulty = level_spec.get("difficulty")
-                used_quests = list(level_spec.get("uses_adventure_quests") or [])
-                if not used_quests:
+                used_levels = list(level_spec.get("uses_adventure_levels") or [])
+                if not used_levels:
                     errors.append(
-                        f"{scenario.get('slug')}/{difficulty}: missing uses_adventure_quests contract"
+                        f"{scenario.get('slug')}/{difficulty}: missing uses_adventure_levels contract"
                     )
                     continue
-                for quest_slug in used_quests:
-                    quest_module = quest_to_module.get(quest_slug)
-                    if not quest_module:
+                for level_slug in used_levels:
+                    level_module = level_to_module.get(level_slug)
+                    if not level_module:
                         errors.append(
-                            f"{scenario.get('slug')}/{difficulty}: unknown Adventure quest dependency {quest_slug!r}"
+                            f"{scenario.get('slug')}/{difficulty}: unknown Adventure level dependency {level_slug!r}"
                         )
                         continue
-                    if module_order.get(quest_module, 1 << 30) > challenge_order:
+                    if module_order.get(level_module, 1 << 30) > challenge_order:
                         errors.append(
-                            f"{scenario.get('slug')}/{difficulty}: uses {quest_slug!r} before its Adventure storey"
+                            f"{scenario.get('slug')}/{difficulty}: uses {level_slug!r} before its Adventure storey"
                         )
 
                 for variant_spec in level_spec.get("variants", []):
@@ -526,15 +599,18 @@ class Command(BaseCommand):
                     eval_spec = variant_spec.get("evaluation_spec_template") or {}
                     contract = eval_spec.get("curriculum_contract") or {}
                     dag_transition = contract.get("dag_transition") or {}
-                    if contract.get("challenge_type") != "scenario_graph_transition" or not dag_transition:
+                    if (
+                        contract.get("challenge_type") != "scenario_graph_transition"
+                        or not dag_transition
+                    ):
                         errors.append(
                             f"{scenario.get('slug')}/{difficulty}/{variant_spec.get('case_id')}: "
                             "missing curriculum_contract.dag_transition"
                         )
 
     def _validate_variant(self, *, variant, errors: list[str]) -> None:
-        domain = "command_adventure" if hasattr(variant, "adventure_quest_id") else "challenge"
-        label = f"{domain}:{self._quest_slug(variant)}/{variant.slug}"
+        domain = "command_adventure" if hasattr(variant, "adventure_level_id") else "challenge"
+        label = f"{domain}:{self._level_slug(variant)}/{variant.slug}"
         required_fields = {
             "initial_state": variant.initial_state,
             "target_state": variant.target_state,
@@ -551,7 +627,9 @@ class Command(BaseCommand):
         for command in variant.solution_commands or []:
             result = simulator.process(state, command)
             if not result.processed:
-                errors.append(f"{label}: solution command is not supported by the simulator: {command}")
+                errors.append(
+                    f"{label}: solution command is not supported by the simulator: {command}"
+                )
                 return
             executed_commands.append(result.normalized_command)
             state = result.state
@@ -571,19 +649,21 @@ class Command(BaseCommand):
             expected_state_hash=simulator.state_hash(variant.target_state),
         )
         if not outcome.target_matched:
-            errors.append(f"{label}: official solution does not satisfy evaluation_spec: {outcome.summary}")
+            errors.append(
+                f"{label}: official solution does not satisfy evaluation_spec: {outcome.summary}"
+            )
 
         visualization = RepositoryVisualizationService().snapshot(final_state)
         if visualization.get("schema_version") != 2 or "commit_dag" not in visualization:
             errors.append(f"{label}: repository visualization is missing")
 
-    def _quest_slug(self, variant) -> str:
-        if getattr(variant, "adventure_quest_id", None):
-            return variant.adventure_quest.slug
-        quest = variant.challenge_quest
-        return f"{quest.challenge.slug}/{quest.difficulty}"
+    def _level_slug(self, variant) -> str:
+        if getattr(variant, "adventure_level_id", None):
+            return variant.adventure_level.slug
+        level = variant.challenge_level
+        return f"{level.challenge.slug}/{level.difficulty}"
 
-    def _quest_name(self, quest) -> str:
-        if isinstance(quest, AdventureQuest):
-            return quest.slug
-        return f"{quest.challenge.slug}/{quest.difficulty}"
+    def _level_name(self, level) -> str:
+        if isinstance(level, AdventureLevel):
+            return level.slug
+        return f"{level.challenge.slug}/{level.difficulty}"

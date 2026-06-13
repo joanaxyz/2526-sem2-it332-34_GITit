@@ -8,7 +8,7 @@ import type {
   ChallengeSummary,
   TomeSummary,
 } from '@/features/challenges/types'
-import type { ChallengeRun } from '@/shared/practice/types'
+import type { ChallengeRun } from '@/shared/level/types'
 
 type StoreyContentResult<TSection extends StoreyContentSection> =
   TSection extends 'command_adventures'
@@ -35,8 +35,8 @@ export const challengesApi = {
   commandFormPreview(formId: number) {
     return apiRequest<CommandFormPreview>(`/command-forms/${formId}/preview/`)
   },
-  startChallengeRun(questId: number, input?: { prior_run_id?: number | null; review?: boolean }) {
-    return apiRequest<ChallengeRun>(`/challenge-quests/${questId}/runs/`, {
+  startChallengeRun(levelId: number, input?: { prior_run_id?: number | null; review?: boolean }) {
+    return apiRequest<ChallengeRun>(`/challenge-levels/${levelId}/runs/`, {
       method: 'POST',
       body: JSON.stringify({
         source_entry_point: input?.review ? 'review' : 'tower_page',

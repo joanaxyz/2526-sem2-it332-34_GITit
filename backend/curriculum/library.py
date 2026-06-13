@@ -971,14 +971,14 @@ def _sections(
             _section(
                 section_id="practice-notes",
                 section_type="practice_note",
-                title="Practice notes",
+                title="Field notes",
                 content=[
                     _paragraph(
-                        "Use this page as the last check before opening an authored practice variant. The preview teaches behavior; the scenario will still require you to apply the exact values from its brief."
+                        "Use this page as the last check before opening an authored level variant. The preview teaches behavior; the scenario will still require you to apply the exact values from its brief."
                     ),
                     _bullets("Before running it", readiness),
                     _bullets(
-                        "During practice",
+                        "While solving",
                         _clean_items(
                             [
                                 "Keep diagnostic commands separate from counted action commands.",

@@ -3,13 +3,13 @@ from rest_framework.test import APIClient
 
 from adventures.models import (
     AdventureMastery,
-    AdventureQuest,
-    AdventureQuestAttempt,
+    AdventureLevel,
+    AdventureLevelAttempt,
     AdventureRun,
     CommandAdventure,
 )
 from practice.models import CommandStep
-from progress.models import QuestCompletion
+from progress.models import LevelCompletion
 from progress.services import TREND_DAYS
 
 
@@ -49,10 +49,10 @@ def test_stats_empty_user_is_graceful(db, django_user_model):
 
     # Trend is zero-filled for the whole window.
     assert len(body["activity_trend"]) == TREND_DAYS
-    assert all(point["quests_completed"] == 0 and point["commands_run"] == 0 for point in body["activity_trend"])
+    assert all(point["levels_completed"] == 0 and point["commands_run"] == 0 for point in body["activity_trend"])
 
     headline = body["headline"]
-    assert headline["quests_completed"] == 0
+    assert headline["levels_completed"] == 0
     assert headline["commands_run"] == 0
     assert headline["gitcoins"] == 0
     assert headline["day_streak"] == 0
@@ -68,19 +68,19 @@ def test_stats_adventure_only_user_gets_full_radar(db, django_user_model):
     user = make_user(django_user_model)
 
     adventure = CommandAdventure.objects.filter(is_published=True).first()
-    quest = (
-        AdventureQuest.objects.filter(
+    level = (
+        AdventureLevel.objects.filter(
             command_form__command_skill__storey=adventure.storey, adventure_variants__isnull=False
         )
         .distinct()
         .first()
     )
-    variant = quest.adventure_variants.first()
+    variant = level.adventure_variants.first()
 
     run = AdventureRun.objects.create(user=user, command_adventure=adventure, mode="primary")
-    attempt = AdventureQuestAttempt.objects.create(
+    attempt = AdventureLevelAttempt.objects.create(
         run=run,
-        adventure_quest=quest,
+        adventure_level=level,
         selected_variant=variant,
         status="completed",
         correctness_score=100,
@@ -108,12 +108,12 @@ def test_stats_adventure_only_user_gets_full_radar(db, django_user_model):
     )
     AdventureMastery.objects.create(
         user=user,
-        adventure_quest=quest,
-        strength=quest.required_successful_attempts,
+        adventure_level=level,
+        strength=level.required_successful_attempts,
         introduced=True,
     )
-    QuestCompletion.objects.create(
-        user=user, adventure_quest=quest, first_attempt_star=True, counted_action_total=2
+    LevelCompletion.objects.create(
+        user=user, adventure_level=level, first_attempt_star=True, counted_action_total=2
     )
 
     client = APIClient()
@@ -131,7 +131,7 @@ def test_stats_adventure_only_user_gets_full_radar(db, django_user_model):
     assert axis(body, "consistency")["value"] is not None
 
     headline = body["headline"]
-    assert headline["quests_completed"] == 1
+    assert headline["levels_completed"] == 1
     assert headline["perfect_clears"] == 1
     assert headline["commands_run"] == 2
     # Challenge-scoped numbers stay zero (and flagged), never faked from adventures.
@@ -140,4 +140,4 @@ def test_stats_adventure_only_user_gets_full_radar(db, django_user_model):
 
     # Today registered as an active day in the trend.
     assert body["activity_trend"][-1]["commands_run"] == 2
-    assert body["activity_trend"][-1]["quests_completed"] == 1
+    assert body["activity_trend"][-1]["levels_completed"] == 1

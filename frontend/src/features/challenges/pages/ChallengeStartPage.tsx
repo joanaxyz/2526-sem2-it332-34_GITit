@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { challengesApi } from '@/features/challenges/api/challengesApi'
 import { syncChallengeRunInCache } from '@/features/challenges/utils/challengeRunCache'
-import type { ChallengeRun } from '@/shared/practice/types'
+import type { ChallengeRun } from '@/shared/level/types'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 
@@ -26,15 +26,15 @@ const loadingCopy: Record<ChallengeStartMode, { label: string; description: stri
 }
 
 export function ChallengeStartPage({ mode = 'start' }: { mode?: ChallengeStartMode }) {
-  const { questId, runId } = useParams<{ questId?: string; runId?: string }>()
+  const { levelId, runId } = useParams<{ levelId?: string; runId?: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const targetId = Number(mode === 'retry' ? runId : questId)
+  const targetId = Number(mode === 'retry' ? runId : levelId)
 
   const start = useMutation({
     mutationFn: async (): Promise<ChallengeRun> => {
       if (!Number.isFinite(targetId)) {
-        throw new Error(mode === 'retry' ? 'Missing challenge run.' : 'Missing challenge quest.')
+        throw new Error(mode === 'retry' ? 'Missing challenge run.' : 'Missing challenge level.')
       }
       if (mode === 'retry') return challengesApi.retryChallengeRun(targetId)
       return challengesApi.startChallengeRun(targetId, { review: mode === 'review' })

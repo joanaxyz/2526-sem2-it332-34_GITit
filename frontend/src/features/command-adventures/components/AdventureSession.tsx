@@ -2,25 +2,23 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, GitBranch } from 'lucide-react'
 
-import { AdventureCommandBudget } from '@/features/command-adventures/components/AdventureCommandBudget'
+import { AdventureBattlePanel } from '@/features/command-adventures/components/AdventureBattlePanel'
 import { AdventureContextPanel } from '@/features/command-adventures/components/AdventureContextPanel'
 import { AdventureHintPanel, type RevealedHint } from '@/features/command-adventures/components/AdventureHintPanel'
 import { AdventureMasteryPanel } from '@/features/command-adventures/components/AdventureMasteryPanel'
-import { AdventureProgressBar } from '@/features/command-adventures/components/AdventureProgressBar'
 import { AdventureOutcomeModal } from '@/features/command-adventures/components/AdventureOutcomeModal'
 import { useAdventureCommandSubmission } from '@/features/command-adventures/hooks/useAdventureCommandSubmission'
 import { useAdventureRun } from '@/features/command-adventures/hooks/useAdventureRun'
 import type { AdventureRun } from '@/features/command-adventures/types'
-import { ProjectStructurePanel } from '@/shared/practice/components/ProjectStructurePanel'
-import { TerminalPanel } from '@/shared/practice/components/TerminalPanel'
-import { WorkspaceEditorOverlay } from '@/shared/practice/components/WorkspaceEditorOverlay'
+import { commandSkill, countSatisfied, deriveBattleEvents } from '@/shared/battle/deriveBattleEvents'
+import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
+import { ProjectStructurePanel } from '@/shared/level/components/ProjectStructurePanel'
+import { TerminalPanel } from '@/shared/level/components/TerminalPanel'
+import { WorkspaceEditorOverlay } from '@/shared/level/components/WorkspaceEditorOverlay'
+import { PROJECT_FILES_OPEN_KEY } from '@/shared/level/workspaceKeys'
 import { Button } from '@/shared/components/Button'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { usePersistentState } from '@/shared/utils/persistentState'
-
-// Shared with ChallengeWorkspace so the collapse preference follows the
-// learner across both practice surfaces.
-const PROJECT_FILES_OPEN_KEY = 'workspace:project-files-open'
 
 export function AdventureSession({
   runId,
@@ -31,6 +29,7 @@ export function AdventureSession({
 }) {
   const { query, lines, useHint, createFile, writeFile } = useAdventureRun(runId)
   const submitCommand = useAdventureCommandSubmission(runId)
+  const director = useBattleDirector()
   const navigate = useNavigate()
   const [hint, setHint] = useState<RevealedHint | null>(null)
   const [projectFilesOpen, setProjectFilesOpen] = usePersistentState(PROJECT_FILES_OPEN_KEY, true)
@@ -40,7 +39,7 @@ export function AdventureSession({
 
   // The terminal now resets itself when the attempt advances (its lines derive
   // from the new attempt's empty step history); only the revealed hint and the
-  // open file editor are local state that still needs clearing per quest.
+  // open file editor are local state that still needs clearing per level.
   useEffect(() => {
     if (lastAttemptId.current !== attemptId) {
       lastAttemptId.current = attemptId
@@ -80,12 +79,42 @@ export function AdventureSession({
 
   const attempt = run.current_attempt
   if (!attempt) {
-    return <LoadingState description="Setting up the next repository." label="Preparing next quest" variant="screen" />
+    return <LoadingState description="Setting up the next repository." label="Preparing next level" variant="screen" />
   }
 
   function revealHint() {
     useHint.mutate(undefined, {
       onSuccess: (response) => setHint({ number: response.hint_number, text: response.hint }),
+    })
+  }
+
+  function handleCommand(command: string) {
+    const checksBefore = countSatisfied(attempt?.objective_checks)
+    director.onCastStart()
+    submitCommand.mutate(command, {
+      onSuccess: (response) => {
+        // Authoritative battle outcome once the backend block ships; until
+        // then, synthesize the same events from the signals already present.
+        if (response.battle) {
+          director.onResolve(response.battle)
+          return
+        }
+        const isTransition = !('partial' in response.run)
+        const patchChecks =
+          'partial' in response.run ? response.run.current_attempt?.objective_checks : null
+        director.onResolve(
+          deriveBattleEvents({
+            solved: response.solved,
+            counted: response.command_classification === 'counted',
+            progressed: response.solved || countSatisfied(patchChecks) > checksBefore,
+            skill: commandSkill(command),
+            // A transition without a solve is the budget running dry.
+            defeated: isTransition && !response.solved,
+            monsters: director.currentMonsters(),
+          }),
+        )
+      },
+      onError: () => director.onError(),
     })
   }
 
@@ -106,12 +135,6 @@ export function AdventureSession({
           <span className="min-w-0 truncate text-sm font-semibold text-foreground">
             {run.command_adventure.title}
           </span>
-          <div className="ml-auto">
-            <AdventureCommandBudget attempt={attempt} />
-          </div>
-        </div>
-        <div className="mt-2.5">
-          <AdventureProgressBar run={run} />
         </div>
       </header>
 
@@ -147,13 +170,19 @@ export function AdventureSession({
         </aside>
 
         <section className="flex min-h-0 flex-col gap-2 max-lg:min-h-[36rem]">
+          <AdventureBattlePanel
+            run={run}
+            attempt={attempt}
+            director={director}
+            className="h-44 shrink-0 max-lg:h-36"
+          />
           <div className="min-h-0 flex-1">
             <TerminalPanel
               lines={lines}
               processing={submitCommand.isPending}
               runDisabled={submitCommand.isPending}
               className="h-full"
-              onCommand={(command) => submitCommand.mutate(command)}
+              onCommand={handleCommand}
             />
           </div>
 

@@ -1,12 +1,12 @@
 import { ArrowLeft, CircleHelp, GitBranch, RefreshCcw } from 'lucide-react'
 
 import { CommandBudgetHeader } from '@/features/challenges/components/CommandBudgetHeader'
-import type { ChallengeRun } from '@/shared/practice/types'
+import type { ChallengeRun } from '@/shared/level/types'
 import {
   commandAccuracyFromSession,
   meetsMasteryAccuracy,
   meetsProgressAccuracy,
-} from '@/shared/practice/utils/commandAccuracy'
+} from '@/shared/level/utils/commandAccuracy'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 

@@ -2,7 +2,7 @@ import { GitBranch, ShieldCheck, TerminalSquare } from 'lucide-react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 
 const loginHero = {
-  title: 'Practice Git through repository state, not memorized answers.',
+  title: 'Learn Git through repository state, not memorized answers.',
   description:
     'Learn with tomes, Command Adventure, GIT Challenged storeys, live DAG feedback, and consequence-safe command simulation.',
   terminal: (
@@ -19,14 +19,14 @@ const loginHero = {
 const registerHero = {
   title: 'Create your account and start building real Git intuition.',
   description:
-    'Track progress across Command Adventure and GIT Challenged storeys, practice safely without touching a real shell, and grow confidence one command at a time.',
+    'Track progress across Command Adventure and GIT Challenged storeys, experiment safely without touching a real shell, and grow confidence one command at a time.',
   terminal: (
     <>
       <span className="text-primary">you@git-it</span> ~/welcome $ git init
       <br />
       Initialized empty Git repository
       <br />
-      Your practice journey starts here.
+      Your level journey starts here.
     </>
   ),
 }
@@ -34,7 +34,7 @@ const registerHero = {
 const featureBadges = [
   {
     Icon: ShieldCheck,
-    label: 'Consequence-safe practice',
+    label: 'Consequence-safe runs',
     borderAccent: 'rgba(0,245,212,0.65)',
     border: 'rgba(0,245,212,0.22)',
     bg: 'rgba(0,245,212,0.06)',

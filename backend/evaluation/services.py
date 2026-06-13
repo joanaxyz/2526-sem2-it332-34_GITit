@@ -167,6 +167,28 @@ def _invariance_rules(spec: dict) -> list[dict]:
     ]
 
 
+def rules_from_state_requirements(state_requirements: dict | None) -> list[dict]:
+    """Expand a seed-authored state_requirements spec into flat rule dicts.
+
+    Module-level so non-evaluation callers (e.g. the battle layer deriving
+    monster HP from "distance to target") can count rules without instantiating
+    an evaluator. Group order is part of the contract (pinned by
+    test_rule_builders): the failed-rules list surfaces to learners in spec order.
+    """
+    spec = state_requirements or {}
+    return [
+        *(dict(rule) for rule in spec.get("rules", [])),
+        *_command_rules(spec),
+        *_branch_rules(spec),
+        *_remote_rules(spec),
+        *_cleanliness_rules(spec),
+        *_commit_graph_rules(spec),
+        *_path_rules(spec),
+        *_history_rules(spec),
+        *_invariance_rules(spec),
+    ]
+
+
 class StateBasedEvaluator:
     def __init__(self) -> None:
         self.normalizer = RepositoryStateNormalizer()
@@ -217,23 +239,7 @@ class StateBasedEvaluator:
         )
 
     def _rules_from_state_requirements(self, state_requirements: dict) -> list[dict]:
-        """Expand a seed-authored state_requirements spec into flat rule dicts.
-
-        Group order is part of the contract (pinned by test_rule_builders):
-        the failed-rules list surfaces to learners in spec order.
-        """
-        spec = state_requirements
-        return [
-            *(dict(rule) for rule in spec.get("rules", [])),
-            *_command_rules(spec),
-            *_branch_rules(spec),
-            *_remote_rules(spec),
-            *_cleanliness_rules(spec),
-            *_commit_graph_rules(spec),
-            *_path_rules(spec),
-            *_history_rules(spec),
-            *_invariance_rules(spec),
-        ]
+        return rules_from_state_requirements(state_requirements)
 
     def _check_rule(
         self,

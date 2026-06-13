@@ -6,7 +6,7 @@ from curriculum.models import Storey
 class StoreyListSerializer(serializers.ModelSerializer):
     command_skill_count = serializers.IntegerField(read_only=True)
     challenge_count = serializers.IntegerField(read_only=True)
-    practice_completion = serializers.SerializerMethodField()
+    level_completion = serializers.SerializerMethodField()
 
     class Meta:
         model = Storey
@@ -19,11 +19,11 @@ class StoreyListSerializer(serializers.ModelSerializer):
             "sort_order",
             "command_skill_count",
             "challenge_count",
-            "practice_completion",
+            "level_completion",
             "chest_rewards",
         ]
 
-    def get_practice_completion(self, obj) -> dict:
+    def get_level_completion(self, obj) -> dict:
         denominator_map = self.context.get("storey_completion_denominator_map", {})
         count_map = self.context.get("storey_completion_count_map", {})
         denominator = int(

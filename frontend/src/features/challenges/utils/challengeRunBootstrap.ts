@@ -1,4 +1,4 @@
-import type { ChallengeRun } from '@/shared/practice/types'
+import type { ChallengeRun } from '@/shared/level/types'
 
 const BOOTSTRAP_PREFIX = 'git-it:challenge-run-bootstrap:'
 const BOOTSTRAP_TTL_MS = 60_000

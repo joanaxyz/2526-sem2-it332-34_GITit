@@ -4,8 +4,8 @@ from django.db.models import Avg, Count, Q, Sum
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 
-from adventures.models import AdventureMastery, AdventureQuest, AdventureQuestAttempt, AdventureRun
-from challenges.models import ChallengeQuest, ChallengeRun
+from adventures.models import AdventureMastery, AdventureLevel, AdventureLevelAttempt, AdventureRun
+from challenges.models import ChallengeLevel, ChallengeRun
 from challenges.selectors import command_accuracy_rate, minimum_counted_for_run
 from common.constants import (
     DIFFICULTY_HARD,
@@ -18,7 +18,7 @@ from common.constants import (
     SESSION_STATUS_FAILED,
 )
 from practice.models import CommandStep
-from progress.models import QuestCompletion, StreakRecord, Wallet
+from progress.models import LevelCompletion, StreakRecord, Wallet
 
 # Trailing window (days) for the activity trend and the consistency axis.
 TREND_DAYS = 14
@@ -30,9 +30,9 @@ SKILL_AXES = [
     ("accuracy", "Accuracy", "How many of your commands run cleanly, with no typos or invalid git."),
     ("efficiency", "Efficiency", "How close to the ideal number of commands you solve in."),
     ("independence", "Independence", "Solving on your own, without leaning on hints."),
-    ("consistency", "Consistency", f"How many of the last {TREND_DAYS} days you showed up to practice."),
-    ("mastery", "Mastery", "How deeply you've practiced the commands you've met."),
-    ("coverage", "Coverage", "The share of all quests you've completed at least once."),
+    ("consistency", "Consistency", f"How many of the last {TREND_DAYS} days you showed up to train."),
+    ("mastery", "Mastery", "How deeply you've drilled the commands you've met."),
+    ("coverage", "Coverage", "The share of all levels you've completed at least once."),
 ]
 
 
@@ -60,13 +60,13 @@ class MetricsService:
             abandoned=Count("id", filter=Q(mode=SESSION_MODE_PRIMARY, status=SESSION_STATUS_ABANDONED)),
             hard_started=Count(
                 "id",
-                filter=Q(mode=SESSION_MODE_PRIMARY, challenge_quest__difficulty=DIFFICULTY_HARD),
+                filter=Q(mode=SESSION_MODE_PRIMARY, challenge_level__difficulty=DIFFICULTY_HARD),
             ),
             hard_completed=Count(
                 "id",
                 filter=Q(
                     mode=SESSION_MODE_PRIMARY,
-                    challenge_quest__difficulty=DIFFICULTY_HARD,
+                    challenge_level__difficulty=DIFFICULTY_HARD,
                     status=SESSION_STATUS_COMPLETED,
                 ),
             ),
@@ -88,7 +88,7 @@ class MetricsService:
         failed = (challenge_counts["failed"] or 0) + (adventure_counts["failed"] or 0)
         abandoned = (challenge_counts["abandoned"] or 0) + (adventure_counts["abandoned"] or 0)
 
-        completion_records = QuestCompletion.objects.filter(user=user).select_related("challenge_run")
+        completion_records = LevelCompletion.objects.filter(user=user).select_related("challenge_run")
         accuracy_values = [
             command_accuracy_rate(
                 status=record.challenge_run.status,
@@ -103,10 +103,10 @@ class MetricsService:
             ChallengeRun.objects.filter(user=user, mode=SESSION_MODE_PRIMARY)
             .values("storey__number")
             .annotate(
-                hard_started=Count("id", filter=Q(challenge_quest__difficulty=DIFFICULTY_HARD)),
+                hard_started=Count("id", filter=Q(challenge_level__difficulty=DIFFICULTY_HARD)),
                 hard_completed=Count(
                     "id",
-                    filter=Q(challenge_quest__difficulty=DIFFICULTY_HARD, status=SESSION_STATUS_COMPLETED),
+                    filter=Q(challenge_level__difficulty=DIFFICULTY_HARD, status=SESSION_STATUS_COMPLETED),
                 ),
                 rta_success=Count("id", filter=Q(rta_eligible=True, rta_success=True)),
                 rta_total=Count("id", filter=Q(rta_eligible=True)),
@@ -148,7 +148,6 @@ class MetricsService:
         ).first()
         return {
             "kpis": {
-                "practice_completion": self._rate(completed, started),
                 "scr": self._rate(completed, started),
                 "arc": self._average_retry_count_from_counts(challenge_counts["completed_retry_total"] or 0, completed),
                 "car": self._average_percent(accuracy_values),
@@ -168,7 +167,7 @@ class MetricsService:
                 "longest": streak.longest_streak if streak else 0,
                 "last_completed_on": streak.last_completed_on if streak else None,
             },
-            "first_attempt_stars": QuestCompletion.objects.filter(user=user, first_attempt_star=True).count(),
+            "first_attempt_stars": LevelCompletion.objects.filter(user=user, first_attempt_star=True).count(),
             "retry_trends": self._retry_trends(user=user, started=started),
         }
 
@@ -182,7 +181,7 @@ class MetricsService:
         today = timezone.localdate()
 
         # Accuracy + total volume from the unified command log (spans both modes
-        # via challenge_run=ChallengeRun and attempt=AdventureQuestAttempt).
+        # via challenge_run=ChallengeRun and attempt=AdventureLevelAttempt).
         steps = CommandStep.objects.filter(Q(challenge_run__user=user) | Q(attempt__run__user=user))
         step_totals = steps.aggregate(
             total=Count("id"),
@@ -196,13 +195,13 @@ class MetricsService:
         )
 
         # Efficiency: adventure efficiency_score + challenge command-accuracy rate.
-        adv_attempts = AdventureQuestAttempt.objects.filter(run__user=user, status=SESSION_STATUS_COMPLETED)
+        adv_attempts = AdventureLevelAttempt.objects.filter(run__user=user, status=SESSION_STATUS_COMPLETED)
         adv_scores = adv_attempts.aggregate(
             efficiency=Avg("efficiency_score"),
             independence=Avg("independence_score"),
             n=Count("id"),
         )
-        chal_completion = QuestCompletion.objects.filter(
+        chal_completion = LevelCompletion.objects.filter(
             user=user, challenge_run__isnull=False
         ).select_related("challenge_run")
         chal_eff_values = [
@@ -230,20 +229,20 @@ class MetricsService:
         consistency = round(min(1.0, len(active_days) / TREND_DAYS) * 100, 1) if total_steps else None
 
         # Mastery: adventure Leitner depth (box / required) + challenge clear ratio.
-        masteries = AdventureMastery.objects.filter(user=user, introduced=True).select_related("adventure_quest")
+        masteries = AdventureMastery.objects.filter(user=user, introduced=True).select_related("adventure_level")
         adv_ratios = [
-            min(1.0, mastery.strength / (mastery.adventure_quest.required_successful_attempts or 1)) * 100
+            min(1.0, mastery.strength / (mastery.adventure_level.required_successful_attempts or 1)) * 100
             for mastery in masteries
         ]
         chal_attempted = (
             ChallengeRun.objects.filter(user=user, mode=SESSION_MODE_PRIMARY)
-            .values("challenge_quest")
+            .values("challenge_level")
             .distinct()
             .count()
         )
         chal_cleared = (
             ChallengeRun.objects.filter(user=user, mode=SESSION_MODE_PRIMARY, status=SESSION_STATUS_COMPLETED)
-            .values("challenge_quest")
+            .values("challenge_level")
             .distinct()
             .count()
         )
@@ -254,14 +253,14 @@ class MetricsService:
             ]
         )
 
-        # Coverage: distinct quests completed over all published quests (both ladders).
-        adv_done = QuestCompletion.objects.filter(user=user, adventure_quest__isnull=False).count()
-        chal_done = QuestCompletion.objects.filter(user=user, challenge_quest__isnull=False).count()
-        total_quests = (
-            AdventureQuest.objects.filter(is_published=True).count()
-            + ChallengeQuest.objects.filter(is_published=True).count()
+        # Coverage: distinct levels completed over all published levels (both ladders).
+        adv_done = LevelCompletion.objects.filter(user=user, adventure_level__isnull=False).count()
+        chal_done = LevelCompletion.objects.filter(user=user, challenge_level__isnull=False).count()
+        total_levels = (
+            AdventureLevel.objects.filter(is_published=True).count()
+            + ChallengeLevel.objects.filter(is_published=True).count()
         )
-        coverage = round((adv_done + chal_done) / total_quests * 100, 1) if total_quests else None
+        coverage = round((adv_done + chal_done) / total_levels * 100, 1) if total_levels else None
 
         axis_values = {
             "accuracy": accuracy,
@@ -281,7 +280,7 @@ class MetricsService:
             started=Count("id"),
             completed=Count("id", filter=Q(status=SESSION_STATUS_COMPLETED)),
             hard_completed=Count(
-                "id", filter=Q(status=SESSION_STATUS_COMPLETED, challenge_quest__difficulty=DIFFICULTY_HARD)
+                "id", filter=Q(status=SESSION_STATUS_COMPLETED, challenge_level__difficulty=DIFFICULTY_HARD)
             ),
             comebacks=Count("id", filter=Q(rta_eligible=True, rta_success=True)),
         )
@@ -295,7 +294,7 @@ class MetricsService:
         wallet = Wallet.objects.filter(user=user).only("balance").first()
 
         headline = {
-            "quests_completed": adv_done + chal_done,
+            "levels_completed": adv_done + chal_done,
             "finish_rate": self._rate(completed, started),
             "accuracy": accuracy,
             # boss_floors / comebacks are challenge-only concepts (difficulty tiers,
@@ -303,7 +302,7 @@ class MetricsService:
             # instead of implying they cover adventures.
             "boss_floors": {"value": chal_counts["hard_completed"] or 0, "scope": "challenge"},
             "comebacks": {"value": chal_counts["comebacks"] or 0, "scope": "challenge"},
-            "perfect_clears": QuestCompletion.objects.filter(user=user, first_attempt_star=True).count(),
+            "perfect_clears": LevelCompletion.objects.filter(user=user, first_attempt_star=True).count(),
             "day_streak": streak.current_streak if streak else 0,
             "longest_streak": streak.longest_streak if streak else 0,
             "gitcoins": wallet.balance if wallet else 0,
@@ -334,7 +333,7 @@ class MetricsService:
 
     def _active_days(self, *, user, since) -> set:
         completion_days = (
-            QuestCompletion.objects.filter(user=user, completed_at__gte=since)
+            LevelCompletion.objects.filter(user=user, completed_at__gte=since)
             .annotate(day=TruncDate("completed_at"))
             .values_list("day", flat=True)
             .distinct()
@@ -351,7 +350,7 @@ class MetricsService:
 
     def _activity_trend(self, *, user, since, today) -> list[dict]:
         completed_by_day = dict(
-            QuestCompletion.objects.filter(user=user, completed_at__gte=since)
+            LevelCompletion.objects.filter(user=user, completed_at__gte=since)
             .annotate(day=TruncDate("completed_at"))
             .values("day")
             .annotate(count=Count("id"))
@@ -372,7 +371,7 @@ class MetricsService:
             trend.append(
                 {
                     "date": day.isoformat(),
-                    "quests_completed": completed_by_day.get(day, 0),
+                    "levels_completed": completed_by_day.get(day, 0),
                     "commands_run": commands_by_day.get(day, 0),
                 }
             )
@@ -413,7 +412,7 @@ class MetricsService:
         )
         return [
             {
-                "practice_title": row["challenge__title"],
+                "level_title": row["challenge__title"],
                 "attempts": row["attempts"],
                 "retries": row["retries"],
                 "label": "No trend available" if row["attempts"] < 2 else f"{row['retries']} retry runs",

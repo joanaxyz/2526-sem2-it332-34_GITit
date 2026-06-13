@@ -1,4 +1,4 @@
-﻿import type { ChallengeQuestAccess } from '@/features/challenges/types'
+﻿import type { ChallengeLevelAccess } from '@/features/challenges/types'
 
 export function nextDifficultyInSequence<T extends { difficulty: string }>(
   difficulties: readonly T[],
@@ -9,7 +9,7 @@ export function nextDifficultyInSequence<T extends { difficulty: string }>(
 }
 
 export function nextAvailableDifficultyAfter(
-  difficulties: readonly ChallengeQuestAccess[],
+  difficulties: readonly ChallengeLevelAccess[],
   currentDifficulty: string,
 ) {
   const nextDifficulty = nextDifficultyInSequence(difficulties, currentDifficulty)

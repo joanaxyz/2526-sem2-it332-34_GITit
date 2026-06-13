@@ -31,7 +31,7 @@ class CommandStep(models.Model):
         on_delete=models.CASCADE,
     )
     attempt = models.ForeignKey(
-        "adventures.AdventureQuestAttempt",
+        "adventures.AdventureLevelAttempt",
         null=True,
         blank=True,
         related_name="steps",

@@ -8,10 +8,9 @@ import type { HomeSummary } from '@/features/home/types'
 export const previewPlayerName = 'riconalla'
 export const previewGitcoins = 1240
 
-/** Mid-tier player: Warden rank, 40+ quests, mixed retry history, 5 storeys, 12-day streak. */
+/** Mid-tier player: Warden rank, 40+ levels, mixed retry history, 5 storeys, 12-day streak. */
 export const richHomeFixture: HomeSummary = {
   kpis: {
-    practice_completion: { value: 78, numerator: 32, denominator: 41 },
     scr: { value: 83, numerator: 39, denominator: 47 },
     arc: { value: 1.6, numerator: 74, denominator: 47 },
     car: { value: 91, numerator: 412, denominator: 453 },
@@ -64,21 +63,20 @@ export const richHomeFixture: HomeSummary = {
   },
   first_attempt_stars: 26,
   retry_trends: [
-    { practice_title: 'Rebase the Haunted Branch', attempts: 1, retries: 0, label: 'Storey 5 · Challenge · Hard' },
-    { practice_title: 'Cherry-pick the Lost Relics', attempts: 3, retries: 2, label: 'Storey 4 · Challenge · Medium' },
-    { practice_title: 'git stash — Vault of Half-Work', attempts: 1, retries: 0, label: 'Storey 4 · Adventure' },
-    { practice_title: 'Merge of the Twin Towers', attempts: 6, retries: 5, label: 'Storey 4 · Challenge · Hard' },
-    { practice_title: 'Detached HEAD in the Catacombs', attempts: 4, retries: 3, label: 'Storey 3 · Challenge · Medium' },
-    { practice_title: 'git branch — Forking Paths', attempts: 2, retries: 1, label: 'Storey 3 · Adventure' },
-    { practice_title: 'Amend the Royal Decree', attempts: 1, retries: 0, label: 'Storey 2 · Challenge · Easy' },
-    { practice_title: 'Reset the Cursed Commit', attempts: 3, retries: 2, label: 'Storey 2 · Challenge · Medium' },
+    { level_title: 'Rebase the Haunted Branch', attempts: 1, retries: 0, label: 'Storey 5 · Challenge · Hard' },
+    { level_title: 'Cherry-pick the Lost Relics', attempts: 3, retries: 2, label: 'Storey 4 · Challenge · Medium' },
+    { level_title: 'git stash — Vault of Half-Work', attempts: 1, retries: 0, label: 'Storey 4 · Adventure' },
+    { level_title: 'Merge of the Twin Towers', attempts: 6, retries: 5, label: 'Storey 4 · Challenge · Hard' },
+    { level_title: 'Detached HEAD in the Catacombs', attempts: 4, retries: 3, label: 'Storey 3 · Challenge · Medium' },
+    { level_title: 'git branch — Forking Paths', attempts: 2, retries: 1, label: 'Storey 3 · Adventure' },
+    { level_title: 'Amend the Royal Decree', attempts: 1, retries: 0, label: 'Storey 2 · Challenge · Easy' },
+    { level_title: 'Reset the Cursed Commit', attempts: 3, retries: 2, label: 'Storey 2 · Challenge · Medium' },
   ],
 }
 
 /** Brand-new account: everything null/zero — exercises the empty states. */
 export const emptyHomeFixture: HomeSummary = {
   kpis: {
-    practice_completion: { value: null, numerator: 0, denominator: 0 },
     scr: { value: null, numerator: 0, denominator: 0 },
     arc: { value: null, numerator: 0, denominator: 0 },
     car: { value: null, numerator: 0, denominator: 0 },

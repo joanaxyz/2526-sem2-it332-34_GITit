@@ -1,33 +1,33 @@
-﻿import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import type {
   ChallengeActionIntent,
-  ChallengeQuestAccess,
+  ChallengeLevelAccess,
   CommandAdventureSummary,
 } from '@/features/challenges/types'
 
 /**
  * The tower should not start or retry runs directly. It only routes the learner
- * to the selected door's entry or active run page; each practice feature owns
+ * to the selected door's entry or active run page; each level feature owns
  * its own mutations and full-screen loading state.
  */
 export function useTowerDoorNavigation() {
   const navigate = useNavigate()
 
-  function openChallengeDoor(item: ChallengeQuestAccess, action: ChallengeActionIntent) {
+  function openChallengeDoor(item: ChallengeLevelAccess, action: ChallengeActionIntent) {
     if (action === 'resume' && item.active_run_id) {
       navigate(`/challenge-runs/${item.active_run_id}`)
       return
     }
     if (action === 'review') {
-      navigate(`/challenge-quests/${item.id}/review`)
+      navigate(`/challenge-levels/${item.id}/review`)
       return
     }
     if (action === 'retry' && item.latest_attempt?.id) {
       navigate(`/challenge-runs/${item.latest_attempt.id}/retry`)
       return
     }
-    navigate(`/challenge-quests/${item.id}`)
+    navigate(`/challenge-levels/${item.id}`)
   }
 
   function openAdventureDoor(adventure: CommandAdventureSummary) {

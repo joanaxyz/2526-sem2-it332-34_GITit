@@ -45,6 +45,9 @@ env = environ.Env(
     CSRF_COOKIE_SECURE=(bool, False),
 
     API_VERSION=(str, "0.1.0"),
+
+    DJANGO_MEDIA_URL=(str, "/media/"),
+    DJANGO_MEDIA_ROOT=(str, ""),
 )
 
 _os_database_url_before_read_env = os.environ.get("DATABASE_URL")
@@ -89,6 +92,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "accounts",
+    "assets",
     "curriculum",
     "adventures",
     "challenges",
@@ -224,6 +228,14 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+
+# Uploaded visual assets (monster/character/tower sprites). The DB stores only
+# the file path; bytes live on disk in dev. In production point these at object
+# storage (Supabase Storage / S3 via django-storages) so the app server stays
+# stateless and files are CDN-cacheable.
+MEDIA_URL = env("DJANGO_MEDIA_URL") or "/media/"
+MEDIA_ROOT = env("DJANGO_MEDIA_ROOT") or str(BASE_DIR / "media")
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOWED_ORIGINS = _clean_env_list(env("DJANGO_CORS_ALLOWED_ORIGINS"))
@@ -296,6 +308,6 @@ if not DEBUG and not GIT_IT_REFRESH_COOKIE_SECURE:
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "GIT it! API",
-    "DESCRIPTION": "Student-facing Git scenario practice API.",
+    "DESCRIPTION": "Student-facing Git scenario level API.",
     "VERSION": env("API_VERSION"),
 }

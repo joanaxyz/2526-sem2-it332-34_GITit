@@ -29,7 +29,7 @@ function RingStat({ label, value, color, sub }: { label: string; value: number |
  */
 export function HeadlineBand({ summary }: { summary: StatsSummary }) {
   const h = summary.headline
-  const quests = useCountUp(h.quests_completed)
+  const levels = useCountUp(h.levels_completed)
   const coins = useCountUp(h.gitcoins)
 
   return (
@@ -44,10 +44,10 @@ export function HeadlineBand({ summary }: { summary: StatsSummary }) {
               className="text-[2.45rem] font-extrabold leading-none tracking-tight text-aurora-cyan"
               style={{ textShadow: '0 0 28px rgba(0,245,212,0.45), 0 0 56px rgba(0,180,216,0.2)' }}
             >
-              {Math.round(quests)}
+              {Math.round(levels)}
             </p>
             <p className="mt-1 font-mono text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-aurora-blue/80">
-              Quests Completed
+              Levels Completed
             </p>
           </div>
         </div>

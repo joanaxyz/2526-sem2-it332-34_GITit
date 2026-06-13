@@ -4,10 +4,12 @@ from rest_framework.views import APIView
 from common.performance import timing
 from curriculum.selectors import (
     get_command_form,
+    learned_command_skills,
     published_storeys,
     storey_book,
     storey_completion_count_map,
     storey_completion_denominator_map,
+    storey_content_overview,
     storey_content_page,
 )
 from curriculum.serializers import StoreyListSerializer
@@ -51,6 +53,14 @@ class StoreyContentAPIView(APIView):
             )
 
 
+class StoreyContentOverviewAPIView(APIView):
+    def get(self, request, storey_id: int):
+        with timing("curriculum.storey_overview", storey_id=storey_id):
+            return Response(
+                storey_content_overview(user=request.user, storey_id=storey_id)
+            )
+
+
 class StoreyBookAPIView(APIView):
     def get(self, request, storey_id: int):
         with timing("curriculum.storey_book", storey_id=storey_id):
@@ -58,6 +68,14 @@ class StoreyBookAPIView(APIView):
         if book is None:
             return Response({"detail": "Storey not found."}, status=404)
         return Response(book)
+
+
+class LearnedSkillsAPIView(APIView):
+    """The player's registry of learned commands (their spellbook)."""
+
+    def get(self, request):
+        with timing("curriculum.learned_skills"):
+            return Response({"results": learned_command_skills(user=request.user)})
 
 
 class CommandFormPreviewAPIView(APIView):

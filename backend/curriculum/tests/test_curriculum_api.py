@@ -29,4 +29,4 @@ def test_storeys_endpoint_uses_storey_language_and_progress_payload(db, django_u
 
     assert response.status_code == 200
     assert len(response.json()) == len(storeys)
-    assert response.json()[0]["practice_completion"]["denominator"] > 0
+    assert response.json()[0]["level_completion"]["denominator"] > 0

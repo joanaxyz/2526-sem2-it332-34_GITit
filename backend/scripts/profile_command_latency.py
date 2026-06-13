@@ -12,7 +12,7 @@ from django.test.utils import CaptureQueriesContext
 from rest_framework.test import APIClient
 
 from adventures.models import AdventureRun, CommandAdventure
-from challenges.models import ChallengeQuest
+from challenges.models import ChallengeLevel
 from challenges.services import ChallengeRunService
 
 
@@ -64,15 +64,15 @@ def test_profile_challenge_submit(db, django_user_model):
     client = APIClient()
     client.force_authenticate(user=user)
 
-    quest = ChallengeQuest.objects.get(challenge__slug="stage-commit-switch", difficulty="easy")
+    level = ChallengeLevel.objects.get(challenge__slug="stage-commit-switch", difficulty="easy")
     adventure = CommandAdventure.objects.filter(
-        storey=quest.challenge.storey, is_published=True
+        storey=level.challenge.storey, is_published=True
     ).first()
     if adventure is not None:
         from django.utils import timezone
 
         AdventureRun.objects.create(user=user, command_adventure=adventure, passed_at=timezone.now())
-    run = ChallengeRunService().start_run(user=user, quest=quest, source_entry_point="tower_page")
+    run = ChallengeRunService().start_run(user=user, level=level, source_entry_point="tower_page")
 
     url = f"/api/challenge-runs/{run.id}/submit-command/"
     _timed_post(client, url, {"command": "git status"}, "challenge: diagnostic cmd")

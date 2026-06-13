@@ -5376,23 +5376,21 @@ textarea {
 /* ── Angled top navbar — the launcher blade per the reference: a compact
       dark trapezoid with a small index tab dipping from its bottom centre. ── */
 .hub-nav-frame {
-  --nav-cut: 1.9rem;
-  --nav-tab-w: 1.6rem;
-  --nav-tab-h: 0.42rem;
-  --nav-tab-slant: 0.5rem;
+  --nav-cut: 1.5rem;
+  --nav-tab-w: 1.22rem;
+  --nav-tab-h: 0.38rem;
   --nav-base: calc(100% - var(--nav-tab-h));
   --nav-clip: polygon(
     0 0, 100% 0,
     calc(100% - var(--nav-cut)) var(--nav-base),
     calc(50% + var(--nav-tab-w)) var(--nav-base),
-    calc(50% + var(--nav-tab-w) - var(--nav-tab-slant)) 100%,
-    calc(50% - var(--nav-tab-w) + var(--nav-tab-slant)) 100%,
+    50% 100%,
     calc(50% - var(--nav-tab-w)) var(--nav-base),
     var(--nav-cut) var(--nav-base)
   );
-  clip-path: var(--nav-clip);
-  padding: 0 1px 1.5px;
-  background: linear-gradient(90deg, transparent 3%, rgba(174, 226, 255, 0.42) 22%, rgba(174, 226, 255, 0.42) 78%, transparent 97%);
+  position: relative;
+  padding: 0;
+  background: transparent;
   filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.45));
 }
 
@@ -5402,25 +5400,29 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.1rem;
-  width: min(94vw, 30rem);
-  min-height: 3.2rem;
-  padding: 0.35rem 3rem calc(0.45rem + var(--nav-tab-h));
+  gap: 1.08rem;
+  width: min(90vw, 31rem);
+  min-height: 3.1rem;
+  padding: 0.32rem 3.2rem calc(0.42rem + var(--nav-tab-h));
   clip-path: var(--nav-clip);
   background:
-    radial-gradient(120% 90% at 50% -30%, rgba(125, 211, 252, 0.08), transparent 60%),
-    linear-gradient(180deg, rgba(5, 13, 26, 0.9), rgba(2, 7, 16, 0.86));
-  -webkit-backdrop-filter: blur(14px);
-          backdrop-filter: blur(14px);
+    radial-gradient(120% 90% at 50% -30%, rgba(125, 211, 252, 0.12), transparent 58%),
+    linear-gradient(180deg, rgba(4, 12, 25, 0.92), rgba(1, 7, 16, 0.86));
+  box-shadow:
+    inset 0 0 0 1px rgba(174, 226, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 245, 212, 0.14);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+          backdrop-filter: blur(16px) saturate(1.2);
 }
 
 .hub-nav-link {
   position: relative;
-  padding: 0.2rem 1.1rem 0.3rem;
+  padding: 0.2rem 1.12rem 0.32rem;
   color: hsl(var(--muted-foreground) / 0.85);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   white-space: nowrap;
   transition: color 0.2s ease, text-shadow 0.2s ease;
@@ -5440,12 +5442,12 @@ textarea {
   content: '';
   position: absolute;
   left: 50%;
-  bottom: -0.42rem;
-  width: 2rem;
-  height: 3px;
+  bottom: -0.38rem;
+  width: 2.1rem;
+  height: 2px;
   border-radius: 2px;
   background: linear-gradient(90deg, transparent, #00f5d4, #00b4d8, transparent);
-  box-shadow: 0 0 12px rgba(0, 245, 212, 0.85), 0 -4px 16px rgba(0, 245, 212, 0.35);
+  box-shadow: 0 0 10px rgba(0, 245, 212, 0.72), 0 -4px 14px rgba(0, 245, 212, 0.28);
   transform: translateX(-50%) scaleX(0);
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -5462,51 +5464,71 @@ textarea {
 
 /* ── Environment hero banner ── */
 .hub-hero {
+  --hub-hero-window-width: min(92vw, 84rem);
+  --hub-hero-window-ratio: 1280 / 500;
   position: relative;
-  /* overflow stays visible so the wordmark plate can straddle the bottom edge */
+  /* Overflow stays visible so the wordmark plate can straddle the video shelf. */
+  display: grid;
+  justify-items: center;
   isolation: isolate;
-  min-height: clamp(23rem, 52vh, 33rem);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  min-height: 0;
+  overflow: visible;
+  padding-top: 0.35rem;
+}
+
+.hub-hero-window {
+  position: relative;
+  width: var(--hub-hero-window-width);
+  aspect-ratio: var(--hub-hero-window-ratio);
+  overflow: hidden;
+  border: 1px solid rgba(174, 226, 255, 0.12);
+  border-radius: 4px;
+  background: rgba(6, 15, 28, 0.42);
+  box-shadow:
+    0 18px 60px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+  isolation: isolate;
 }
 
 /* Hatched glass band across the hero's bottom — the launcher's intel shelf.
    The diagonal hatch is the reference's pattern; the plaques sit on it. */
-.hub-hero-band {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 5.2rem;
-  pointer-events: none;
-  border-top: 1px solid rgba(174, 226, 255, 0.2);
-  background:
-    repeating-linear-gradient(-45deg, rgba(125, 211, 252, 0.045) 0 2px, transparent 2px 9px),
-    linear-gradient(180deg, rgba(2, 8, 19, 0.36), rgba(2, 8, 19, 0.66));
-  -webkit-backdrop-filter: blur(6px);
-          backdrop-filter: blur(6px);
-}
-
 /* Bottom assembly: readout — wordmark plate — readout. The plate is taller
    than the band, so anchoring the row to the hero's bottom edge makes it
    rise out of the band exactly like the reference; the readouts centre
    themselves in the band via their own margin. */
-.hub-hero-ledge {
-  position: relative;
-  z-index: 1;
+.hub-hero-divider {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: 100%;
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: end;
-  gap: 1.25rem;
-  padding-inline: 2.2rem;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  column-gap: clamp(0.75rem, 2vw, 1.5rem);
+  width: min(96vw, 84rem);
+  padding-inline: clamp(0.25rem, 1vw, 0.75rem);
+  isolation: isolate;
+  transform: translateX(-50%);
 }
 
-.hub-hero-ledge > :first-child {
+.hub-hero-divider::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  left: clamp(1.5rem, 5vw, 5rem);
+  right: clamp(1.5rem, 5vw, 5rem);
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(174, 226, 255, 0.24) 12%, rgba(0, 245, 212, 0.18) 38%, rgba(0, 245, 212, 0.18) 62%, rgba(174, 226, 255, 0.24) 88%, transparent);
+  box-shadow: 0 0 16px rgba(0, 245, 212, 0.2);
+  pointer-events: none;
+}
+
+.hub-hero-divider > :first-child {
   justify-self: start;
 }
 
-.hub-hero-ledge > :last-child {
+.hub-hero-divider > :last-child {
   justify-self: end;
 }
 
@@ -5517,68 +5539,106 @@ textarea {
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  margin-top: 2.1rem;
+  margin-top: clamp(6.4rem, 7.2vw, 7.6rem);
 }
 
-@media (max-width: 900px) {
-  .hub-hero-ledge {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    gap: 1rem;
-    padding-inline: 1rem;
-    padding-bottom: 1.1rem;
+@media (max-width: 1024px) {
+  .hub-hero {
+    --hub-hero-window-width: min(96vw, 74rem);
+    --hub-hero-window-ratio: 1280 / 520;
   }
 
-  .hub-hero-ledge > :first-child,
-  .hub-hero-ledge > :last-child {
-    justify-self: center;
-  }
-
-  .hub-hero-ledge > .hub-logo-frame {
-    order: -1;
+  .hub-hero-divider {
+    column-gap: clamp(0.6rem, 1.8vw, 1.1rem);
+    width: min(96vw, 70rem);
   }
 
   .hub-stat {
-    margin-bottom: 0;
+    min-height: 4.05rem;
+    padding-block: 0.55rem;
   }
 
-  .hub-hero-band {
-    height: 100%;
-    max-height: 18rem;
+  .hub-stat-divider {
+    margin-inline: 0.38rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .hub-hero {
+    --hub-hero-window-width: min(calc(100vw - 0.75rem), 42rem);
+    --hub-hero-window-ratio: 16 / 9;
+  }
+
+  .hub-hero-divider {
+    top: calc(100% - 2.25rem);
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 0.75rem;
+    width: min(calc(100vw - 1rem), 25rem);
+    padding-inline: 0;
+    transform: translateX(-50%);
+  }
+
+  .hub-hero-divider > :first-child,
+  .hub-hero-divider > :last-child {
+    justify-self: center;
+  }
+
+  .hub-hero-divider > .hub-logo-frame {
+    order: -1;
+  }
+
+  .hub-stat,
+  .hub-stat--left,
+  .hub-stat--right {
+    width: min(100%, 20rem);
+    margin: 0;
   }
 
   .hub-cta-row {
-    margin-top: 1.5rem;
+    gap: 0.8rem;
+    margin-top: 13.5rem;
   }
+}
+
+@media (max-width: 520px) {
+  .hub-hero {
+    --hub-hero-window-ratio: 1.9 / 1;
+  }
+
+  .hub-cta-row {
+    margin-top: 13rem;
+  }
+
 }
 
 .hub-hero-media {
   position: absolute;
   inset: 0;
-  z-index: -2;
+  z-index: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Pull the loop down so the ledge plaques stay legible over it. */
-  filter: brightness(0.8);
+  object-position: 61% 43%;
+  filter: brightness(0.84) contrast(1.08) saturate(1.02);
 }
 
 /* Palette veil: tint + letterbox the env art and dissolve it into the page. */
 .hub-hero-veil {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 1;
   background:
-    linear-gradient(180deg, rgba(2, 7, 17, 0.78) 0%, rgba(2, 7, 17, 0.12) 26%, rgba(2, 7, 17, 0.05) 48%, rgba(3, 10, 22, 0.62) 74%, hsl(var(--background)) 97%),
-    radial-gradient(90% 70% at 50% 38%, transparent 30%, rgba(2, 7, 17, 0.55) 100%),
-    linear-gradient(180deg, rgba(0, 180, 216, 0.10), rgba(0, 245, 212, 0.05) 40%, rgba(167, 139, 250, 0.08));
+    linear-gradient(180deg, rgba(2, 7, 17, 0.56) 0%, rgba(2, 7, 17, 0.08) 25%, rgba(2, 7, 17, 0.04) 50%, rgba(3, 10, 22, 0.42) 78%, rgba(3, 10, 22, 0.66) 100%),
+    radial-gradient(84% 68% at 50% 34%, transparent 34%, rgba(2, 7, 17, 0.5) 100%),
+    linear-gradient(180deg, rgba(0, 180, 216, 0.075), rgba(0, 245, 212, 0.035) 42%, rgba(8, 24, 44, 0.14));
 }
 
 /* Fine scanlines over the env art — ties the video frame into the HUD look. */
 .hub-hero-scan {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 2;
   pointer-events: none;
   background-image: repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.16) 0, rgba(0, 0, 0, 0.16) 1px, transparent 1px, transparent 4px);
   opacity: 0.35;
@@ -5588,119 +5648,215 @@ textarea {
       chamfers flare to side points just below the middle, cut back in to a
       wide base, and a small index tab dips from the bottom centre. ── */
 .hub-logo-frame {
-  --notch-top: 3.4rem;
-  --notch-bottom: 1.7rem;
-  --plate-mid: 60%;
-  --tab-w: 2.2rem;
-  --tab-slant: 0.45rem;
-  --tab-h: 0.5rem;
-  --plate-base: calc(100% - var(--tab-h));
+  --notch-top: clamp(3.45rem, 5vw, 5rem);
+  --notch-soft: 0.42rem;
   --plate-clip: polygon(
-    var(--notch-top) 0,
-    calc(100% - var(--notch-top)) 0,
-    100% var(--plate-mid),
-    calc(100% - var(--notch-bottom)) var(--plate-base),
-    calc(50% + var(--tab-w)) var(--plate-base),
-    calc(50% + var(--tab-w) - var(--tab-slant)) 100%,
-    calc(50% - var(--tab-w) + var(--tab-slant)) 100%,
-    calc(50% - var(--tab-w)) var(--plate-base),
-    var(--notch-bottom) var(--plate-base),
-    0 var(--plate-mid)
+    calc(var(--notch-top) + var(--notch-soft)) 0,
+    calc(100% - var(--notch-top) - var(--notch-soft)) 0,
+    calc(100% - var(--notch-soft)) calc(50% - 0.42rem),
+    100% 50%,
+    calc(100% - var(--notch-soft)) calc(50% + 0.42rem),
+    calc(100% - var(--notch-top) - var(--notch-soft)) 100%,
+    calc(var(--notch-top) + var(--notch-soft)) 100%,
+    var(--notch-soft) calc(50% + 0.42rem),
+    0 50%,
+    var(--notch-soft) calc(50% - 0.42rem)
   );
-  min-width: min(88vw, 26rem);
-  margin-bottom: 0.45rem;
+  position: relative;
+  z-index: 6;
+  display: grid;
+  width: clamp(24.5rem, 37vw, 33rem);
+  min-height: clamp(5.25rem, 6vw, 6.25rem);
+  margin-top: clamp(-3.35rem, -3.8vw, -2.85rem);
   padding: 1.5px;
   clip-path: var(--plate-clip);
-  background: linear-gradient(180deg, rgba(190, 233, 255, 0.6), rgba(132, 188, 226, 0.34) 58%, rgba(174, 226, 255, 0.52));
-  filter: drop-shadow(0 14px 40px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 22px rgba(0, 180, 216, 0.16));
+  background:
+    linear-gradient(135deg, rgba(174, 226, 255, 0.46), rgba(0, 180, 216, 0.2) 48%, rgba(174, 226, 255, 0.34)),
+    linear-gradient(180deg, rgba(98, 169, 211, 0.24), rgba(15, 52, 82, 0.12));
+  filter:
+    drop-shadow(0 20px 38px rgba(0, 0, 0, 0.62))
+    drop-shadow(0 0 22px rgba(0, 245, 212, 0.18));
 }
 
 /* True glass: the environment art reads through the plate. */
 .hub-logo-frame-body {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
   clip-path: inherit;
-  padding: 1.05rem 4.4rem calc(1.05rem + var(--tab-h));
+  min-height: inherit;
+  padding: 0.82rem clamp(3rem, 5vw, 4.8rem) 0.9rem;
   text-align: center;
   background:
-    radial-gradient(120% 130% at 50% -20%, rgba(125, 211, 252, 0.10), transparent 55%),
-    linear-gradient(180deg, rgba(8, 20, 38, 0.4), rgba(3, 9, 20, 0.55));
-  -webkit-backdrop-filter: blur(16px) saturate(1.15);
-          backdrop-filter: blur(16px) saturate(1.15);
+    linear-gradient(110deg, rgba(255, 255, 255, 0.09), transparent 30%, rgba(255, 255, 255, 0.035) 62%, transparent),
+    radial-gradient(110% 130% at 50% -20%, rgba(174, 226, 255, 0.18), transparent 62%),
+    linear-gradient(180deg, rgba(8, 24, 43, 0.58), rgba(3, 11, 24, 0.72));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(210, 236, 249, 0.18),
+    inset 0 0 42px rgba(0, 245, 212, 0.08);
+  -webkit-backdrop-filter: blur(22px) saturate(1.25);
+          backdrop-filter: blur(22px) saturate(1.25);
+}
+
+.hub-logo-frame-body::before,
+.hub-logo-frame-body::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.hub-logo-frame-body::before {
+  inset: 1px;
+  clip-path: inherit;
+  background:
+    repeating-linear-gradient(-45deg, rgba(174, 226, 255, 0.04) 0 1px, transparent 1px 7px),
+    linear-gradient(90deg, rgba(0, 245, 212, 0.1), transparent 25%, transparent 75%, rgba(125, 211, 252, 0.09));
+  opacity: 0.72;
+}
+
+.hub-logo-frame-body::after {
+  left: 16%;
+  right: 16%;
+  top: 13%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.78), transparent);
+  box-shadow: 0 0 16px rgba(220, 246, 255, 0.42);
+  opacity: 0.62;
 }
 
 /* Emblem inside the plate, above the logotype — like the ring above HALO */
-.hub-logo-emblem {
-  width: 1.3rem;
-  height: 1.3rem;
-  margin-inline: auto;
-  color: #00f5d4;
-  filter: drop-shadow(0 0 10px rgba(0, 245, 212, 0.6));
-}
-
 /* Stacked logotype: small tracked word over the big one (HALO / INFINITE) */
 .hub-logo-stack {
+  position: relative;
+  z-index: 1;
   display: grid;
-  gap: 0.3rem;
-  margin: 0.4rem 0 0;
+  gap: 0.12rem;
+  margin: 0;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
 
 .hub-logo-title {
-  font-size: 0.95rem;
-  font-weight: 800;
+  font-size: clamp(0.7rem, 1.1vw, 0.86rem);
+  font-weight: 600;
   line-height: 1;
-  letter-spacing: 0.62em;
-  text-indent: 0.62em; /* optically recenters tracked-out caps */
+  letter-spacing: 0.74em;
+  text-indent: 0.74em; /* optically recenters tracked-out caps */
   text-transform: uppercase;
-  color: hsl(var(--foreground) / 0.94);
-  text-shadow: 0 0 18px rgba(0, 245, 212, 0.3);
+  color: rgba(244, 253, 255, 0.94);
+  text-shadow: 0 0 14px rgba(0, 245, 212, 0.34), 0 0 30px rgba(255, 255, 255, 0.24);
 }
 
 .hub-logo-wordmark {
-  font-size: clamp(2.1rem, 3.4vw, 2.7rem);
-  font-weight: 900;
+  font-size: clamp(2.35rem, 4.25vw, 3.55rem);
+  font-weight: 500;
   line-height: 0.95;
-  letter-spacing: 0.3em;
-  text-indent: 0.3em;
+  letter-spacing: 0.38em;
+  text-indent: 0.38em;
   text-transform: uppercase;
-  text-shadow: 0 0 34px rgba(0, 245, 212, 0.4), 0 0 90px rgba(0, 180, 216, 0.25);
+  color: rgba(245, 252, 255, 0.96);
+  text-shadow: 0 0 24px rgba(0, 245, 212, 0.36), 0 0 72px rgba(0, 180, 216, 0.22);
 }
 
 /* ── Band-mounted readouts (streak / latest achievement) — content sits
       directly on the hatched band, no card chrome, per the reference. ── */
 .hub-stat {
+  --stat-cut: clamp(2.1rem, 3vw, 3.3rem);
+  --stat-corner: 0.55rem;
+  --stat-clip: polygon(
+    var(--stat-corner) 0,
+    calc(100% - var(--stat-cut)) 0,
+    100% calc(100% - var(--stat-corner)),
+    calc(100% - var(--stat-corner)) 100%,
+    var(--stat-corner) 100%,
+    0 calc(100% - var(--stat-corner)),
+    0 var(--stat-corner)
+  );
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  justify-content: flex-start;
+  width: min(100%, 24.5rem);
+  min-height: 4.35rem;
   min-width: 0;
-  margin-bottom: 1.3rem;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0.72rem 1.55rem 0.72rem 1.45rem;
+  clip-path: var(--stat-clip);
+  border-radius: 6px;
+  background:
+    linear-gradient(135deg, rgba(174, 226, 255, 0.38), rgba(0, 180, 216, 0.16) 48%, rgba(174, 226, 255, 0.28)),
+    linear-gradient(180deg, rgba(98, 169, 211, 0.22), rgba(15, 52, 82, 0.1));
+  filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.42));
 }
 
-.hub-stat-icon {
-  display: grid;
-  flex-shrink: 0;
-  place-items: center;
-  width: 2.6rem;
-  height: 2.6rem;
-  border: 1px solid rgba(174, 226, 255, 0.32);
-  border-radius: 3px;
-  background: linear-gradient(135deg, rgba(12, 30, 56, 0.85), rgba(6, 16, 32, 0.9));
-  color: rgba(0, 245, 212, 0.88);
-  font-size: 0.72rem;
-  font-weight: 800;
+.hub-stat::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  clip-path: inherit;
+  background:
+    linear-gradient(110deg, rgba(255, 255, 255, 0.09), transparent 30%, rgba(255, 255, 255, 0.035) 62%, transparent),
+    linear-gradient(180deg, rgba(8, 24, 43, 0.64), rgba(3, 11, 24, 0.76));
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+          backdrop-filter: blur(18px) saturate(1.2);
+}
+
+.hub-stat::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  clip-path: inherit;
+  background:
+    repeating-linear-gradient(-45deg, rgba(174, 226, 255, 0.045) 0 1px, transparent 1px 7px),
+    linear-gradient(90deg, rgba(0, 245, 212, 0.12), transparent 24%, transparent 76%, rgba(125, 211, 252, 0.1));
+  opacity: 0.7;
+}
+
+.hub-stat--left {
+  justify-self: stretch;
+  margin-right: 0;
+}
+
+.hub-stat--right {
+  --stat-clip: polygon(
+    var(--stat-cut) 0,
+    calc(100% - var(--stat-corner)) 0,
+    100% var(--stat-corner),
+    100% calc(100% - var(--stat-corner)),
+    calc(100% - var(--stat-corner)) 100%,
+    var(--stat-corner) 100%,
+    0 calc(100% - var(--stat-corner))
+  );
+  justify-self: stretch;
+  margin-left: 0;
+  padding-right: 1.45rem;
+  padding-left: calc(var(--stat-cut) + 1.05rem);
+}
+
+.hub-stat > .min-w-0 {
+  width: 100%;
 }
 
 .hub-stat-label {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 0.58rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
+  font-size: clamp(0.48rem, 0.8vw, 0.58rem);
+  font-weight: 500;
+  letter-spacing: 0.32em;
   text-transform: uppercase;
   color: rgba(174, 226, 255, 0.85);
 }
 
 .hub-stat-value {
   margin-top: 0.18rem;
-  font-size: 0.92rem;
-  font-weight: 700;
+  font-size: clamp(0.68rem, 1vw, 0.88rem);
+  font-weight: 600;
   color: hsl(var(--foreground));
 }
 
@@ -6048,22 +6204,23 @@ textarea {
 
 @media (max-width: 860px) {
   .hub-logo-frame {
-    min-width: min(92vw, 21rem);
-    --notch-top: 2.4rem;
+    --notch-top: clamp(2.55rem, 5vw, 3.45rem);
+    width: min(calc(100vw - 2rem), clamp(18rem, 42vw, 23rem));
+    min-height: clamp(4.85rem, 7vw, 5.75rem);
   }
 
   .hub-logo-frame-body {
-    padding: 0.95rem 2.4rem calc(1rem + var(--tab-h));
+    padding: 0.74rem clamp(2rem, 4vw, 3rem) 0.82rem;
   }
 
   .hub-logo-title {
-    letter-spacing: 0.4em;
-    text-indent: 0.4em;
+    letter-spacing: 0.56em;
+    text-indent: 0.56em;
   }
 
   .hub-nav {
-    min-height: 3rem;
-    padding: 0.35rem 1.9rem calc(0.45rem + var(--nav-tab-h));
+    min-height: 2.75rem;
+    padding: 0.28rem 1.8rem calc(0.36rem + var(--nav-tab-h));
   }
 
   .hub-nav-link {
@@ -6084,5 +6241,157 @@ textarea {
   .hub-cta,
   .achv-tile {
     transition: none;
+  }
+}
+
+/* ── Battle stage ───────────────────────────────────────────────────────── */
+
+/* Ambient nebula drift on the battle stage cloud band. Background repeats
+   every 480px, so the loop is seamless. */
+.battle-clouds {
+  animation: battle-clouds-drift 60s linear infinite;
+}
+
+@keyframes battle-clouds-drift {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: -520px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-clouds {
+    animation: none;
+  }
+}
+
+/* The stone ledge each tower-defense floor stands on — a stone slab with a neon
+   cyan top edge and battlement crenels, echoing the /tower page separators. */
+.battle-ledge {
+  background-image:
+    linear-gradient(to bottom, rgba(0, 245, 212, 0.55) 0, rgba(0, 245, 212, 0.55) 2px, transparent 2px),
+    repeating-linear-gradient(90deg, rgba(0, 245, 212, 0.05) 0 2px, transparent 2px 60px),
+    linear-gradient(to bottom, #141b30 0%, #0b1020 60%, #070a16 100%);
+  box-shadow:
+    0 -8px 22px rgba(0, 245, 212, 0.12),
+    inset 0 2px 0 rgba(0, 245, 212, 0.25);
+}
+
+.battle-ledge-crenels {
+  position: absolute;
+  inset-inline: 0;
+  top: -6px;
+  height: 6px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    #141b30 0 18px,
+    transparent 18px 34px
+  );
+  filter: drop-shadow(0 -1px 0 rgba(0, 245, 212, 0.4));
+}
+
+/* The tower crystal Blue defends: a floating arcane gem on a glowing base. */
+.tower-crystal-gem {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 100%;
+  height: 70%;
+  transform: translateX(-50%);
+  clip-path: polygon(50% 0%, 100% 32%, 78% 100%, 22% 100%, 0% 32%);
+  background: linear-gradient(150deg, #7af5ff 0%, #00b4d8 42%, #7c3aed 100%);
+  box-shadow: 0 0 14px rgba(0, 245, 212, 0.55);
+  filter: drop-shadow(0 0 8px rgba(124, 58, 237, 0.5));
+  animation: tower-crystal-pulse 2.6s ease-in-out infinite;
+}
+
+.tower-crystal-base {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 60%;
+  height: 18%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 245, 212, 0.55), rgba(0, 245, 212, 0) 70%);
+}
+
+.tower-crystal--broken {
+  filter: grayscale(1) brightness(0.5);
+}
+
+@keyframes tower-crystal-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 12px rgba(0, 245, 212, 0.45);
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 245, 212, 0.7);
+    transform: translateX(-50%) translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tower-crystal-gem {
+    animation: none;
+  }
+}
+
+/* Per-command DAG deltas (LiveDagPanel animateChanges). The pop-in runs on the
+   node's inner div — the ReactFlow node wrapper's transform is positioning. */
+.dag-node-enter {
+  animation: dag-node-enter 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes dag-node-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.dag-edge-enter .react-flow__edge-path {
+  stroke-dasharray: 140;
+  stroke-dashoffset: 140;
+  animation: dag-edge-draw 450ms ease-out 120ms forwards;
+}
+
+@keyframes dag-edge-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.dag-ref-enter {
+  animation: dag-ref-enter 300ms ease-out both;
+}
+
+@keyframes dag-ref-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dag-node-enter,
+  .dag-edge-enter .react-flow__edge-path,
+  .dag-ref-enter {
+    animation: none;
   }
 }

@@ -35,7 +35,7 @@ class Wallet(models.Model):
 
 class CoinTransaction(models.Model):
     """GitCoin ledger entry. ``award_key`` makes every grant idempotent: a
-    reward source (first clear of a quest, passing an adventure) can be
+    reward source (first clear of a level, passing an adventure) can be
     retried safely and never pays out twice."""
 
     user = models.ForeignKey(
@@ -56,16 +56,16 @@ class CoinTransaction(models.Model):
         return f"CoinTransaction({self.user_id}: {self.amount} {self.reason})"
 
 
-class QuestCompletion(models.Model):
+class LevelCompletion(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    adventure_quest = models.ForeignKey(
-        "adventures.AdventureQuest",
+    adventure_level = models.ForeignKey(
+        "adventures.AdventureLevel",
         null=True,
         blank=True,
         on_delete=models.CASCADE,
     )
-    challenge_quest = models.ForeignKey(
-        "challenges.ChallengeQuest",
+    challenge_level = models.ForeignKey(
+        "challenges.ChallengeLevel",
         null=True,
         blank=True,
         on_delete=models.CASCADE,
@@ -83,17 +83,17 @@ class QuestCompletion(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "adventure_quest"],
-                name="unique_adventure_quest_completion",
-                condition=models.Q(adventure_quest__isnull=False),
+                fields=["user", "adventure_level"],
+                name="unique_adventure_level_completion",
+                condition=models.Q(adventure_level__isnull=False),
             ),
             models.UniqueConstraint(
-                fields=["user", "challenge_quest"],
-                name="unique_challenge_quest_completion",
-                condition=models.Q(challenge_quest__isnull=False),
+                fields=["user", "challenge_level"],
+                name="unique_challenge_level_completion",
+                condition=models.Q(challenge_level__isnull=False),
             ),
         ]
 
     @property
-    def quest(self):
-        return self.adventure_quest or self.challenge_quest
+    def level(self):
+        return self.adventure_level or self.challenge_level

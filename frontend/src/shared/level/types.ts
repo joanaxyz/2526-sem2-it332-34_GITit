@@ -1,0 +1,235 @@
+import type { ChallengeLevelAccess, Difficulty, LevelRunCompletion } from '@/features/challenges/types'
+
+export type RepositoryValue =
+  | string
+  | number
+  | boolean
+  | null
+  | RepositoryValue[]
+  | { [key: string]: RepositoryValue }
+
+export type RepositoryCommit = {
+  id: string
+  message: string
+  parents: string[]
+  tree?: Record<string, RepositoryValue>
+  changes?: Record<
+    string,
+    {
+      change_type?: string
+      before?: RepositoryValue
+      after?: RepositoryValue
+    }
+  >
+  files?: Record<string, RepositoryValue>
+  author?: string
+  order?: number
+  is_merge?: boolean
+}
+
+export type ConflictDetail = {
+  base?: RepositoryValue
+  ours?: RepositoryValue
+  theirs?: RepositoryValue
+  resolution?: RepositoryValue
+  merged?: RepositoryValue
+  merge_branch?: string
+}
+
+export type RepositorySnapshot = {
+  repository_initialized?: boolean
+  commits: RepositoryCommit[]
+  branches: Record<string, string | null>
+  head: {
+    type: 'branch' | 'detached'
+    name?: string
+    target?: string | null
+  }
+  staging: Record<string, RepositoryValue>
+  working_tree: Record<string, RepositoryValue>
+  conflicts: string[]
+  conflict_details?: Record<string, ConflictDetail>
+  remotes?: Record<string, string>
+  remote_branches?: Record<string, string | null>
+  upstream_tracking?: Record<string, string>
+  stash_stack?: Array<{
+    working_tree?: Record<string, RepositoryValue>
+    staging?: Record<string, RepositoryValue>
+    conflicts?: string[]
+  }>
+  reflog?: Array<Record<string, string | null>>
+  partial_hunks?: Record<string, RepositoryValue>
+  replaced_commits?: Record<string, string>
+  operation_metadata?: Record<string, RepositoryValue>
+  project_tree?: Record<string, RepositoryValue>
+  visible_tree?: Record<string, RepositoryValue>
+}
+
+export type RequiredDetail = {
+  label: string
+  value: string
+}
+
+// Strict schema_version 3 brief: the backend normalizer whitelists exactly
+// these keys, so the frontend never has to guess. The adventure objective
+// checklist is NOT part of this shape — it arrives as a separate top-level
+// `objective_checks` payload field.
+export type LevelScenarioContext = {
+  schema_version?: number
+  story?: string
+  task?: string
+  details?: RequiredDetail[]
+  constraints?: string[]
+}
+
+export type ChallengeRef = {
+  id: number
+  slug: string
+  title: string
+  summary: string
+  narrative: string
+  level_id: number
+}
+
+export type RepositoryVisualization = {
+  schema_version?: number
+  commit_dag: Record<string, RepositoryValue>
+}
+
+export type ChallengeRun = {
+  id: number
+  mode: 'primary' | 'review'
+  status: 'started' | 'completed' | 'failed' | 'abandoned'
+  failure_reason?: string | null
+  completed_at: string | null
+  first_attempt_star_eligible: boolean
+  challenge: ChallengeRef
+  scenario_context?: LevelScenarioContext
+  storey: {
+    id: number
+    number: number
+    title: string
+  }
+  difficulty: Difficulty | null
+  variant: {
+    id: number
+    label: string
+    changed_variant: boolean
+    looped_variant?: boolean
+  }
+  mastery_progress: {
+    mastered: number
+    required: number
+  }
+  mastered_records?: {
+    mastered: number
+    required: number
+  }
+  policy: {
+    min_counted_commands: number
+    max_counted_commands: number
+  }
+  counts: {
+    counted_action_total: number
+    minimum_counted_commands: number
+    maximum_counted_commands: number
+    non_counted_diagnostic_total: number
+    remaining_counted_commands: number
+    max_reached: boolean
+    total_attempts: number
+  }
+  scaffolding: {
+    live_dag: boolean
+    expected_state: boolean
+    contextual_feedback: boolean
+  }
+  repository_state: RepositorySnapshot
+  visualization: RepositoryVisualization
+  expected_state: RepositorySnapshot | null
+  steps: ChallengeStepLog[]
+  review_mode: boolean
+  next_difficulty: {
+    id: number
+    difficulty: Difficulty
+  } | null
+  /**
+   * Every level of this run's challenge (easy→hard) with the user's access state.
+   * Drives the completion modal's level navigator so learners can jump to any
+   * unlocked level — including lower ones — without leaving the modal.
+   */
+  sibling_levels?: ChallengeLevelAccess[]
+  completion?: LevelRunCompletion | null
+  /** Authoritative boss roster for the battle strip; absent → the client
+   *  derives a deterministic fallback. */
+  battle?: import('@/shared/battle/types').BattleBlock | null
+}
+
+/** `result_category` value the backend sends when the command reached the
+ * scenario's target repository state (mirrors RESULT_TARGET_MATCHED in
+ * common/constants.py). The solve signal the battle stage keys off of. */
+export const RESULT_TARGET_MATCHED = 'TargetMatched'
+
+// The minimal shape the shared terminal needs to render a command + its output.
+// Both ChallengeStepLog and the adventure step payload satisfy this, so terminal
+// line derivation (and the optimistic pending/error placeholders) are shared.
+export type TerminalStep = {
+  id: number
+  command_text: string
+  terminal_output: string
+  result_category: string
+}
+
+export type ChallengeStepLog = TerminalStep & {
+  command_classification: string
+  contextual_feedback: string
+  visualization_snapshot?: RepositoryVisualization
+  created_at: string
+}
+
+export type ChallengeCommandResponse = {
+  run: ChallengeRunUpdate
+  /** Boss roster after this command plus the turn's ordered battle events. */
+  battle?: import('@/shared/battle/types').BattleBlock | null
+  stdout?: string
+  stderr?: string
+  exit_code?: number
+  command_family?: string
+  diagnostic_metadata?: string[]
+  step: {
+    id: number
+    command_text: string
+    terminal_output: string
+    result_category: string
+    evaluation_result: string
+    command_classification: string
+    contextual_feedback: string
+    visualization_snapshot?: RepositoryVisualization
+    created_at: string
+  }
+}
+
+export type ChallengeRunUpdate = Pick<
+  ChallengeRun,
+  | 'id'
+  | 'mode'
+  | 'status'
+  | 'failure_reason'
+  | 'completed_at'
+  | 'first_attempt_star_eligible'
+  | 'counts'
+  | 'repository_state'
+  | 'visualization'
+  | 'review_mode'
+> &
+  Partial<
+    Pick<
+      ChallengeRun,
+      'mastery_progress' | 'mastered_records' | 'completion' | 'next_difficulty' | 'sibling_levels'
+    >
+  >
+
+export type TerminalLine = {
+  id: string
+  kind: 'system' | 'input' | 'output' | 'warning' | 'success'
+  text: string
+}

@@ -68,7 +68,7 @@ export function WeeklyActivityBars({ trend }: { trend: TrendPoint[] }) {
                 key={point.date}
                 className="activity-col"
                 data-today={isToday(point.date)}
-                title={`${dayLabel(point.date)} — ${point.commands_run} commands, ${point.quests_completed} quests`}
+                title={`${dayLabel(point.date)} — ${point.commands_run} commands, ${point.levels_completed} levels`}
               >
                 <div className="activity-track">
                   <div

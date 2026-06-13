@@ -1,11 +1,9 @@
 """CommandAdventure run orchestration.
 
 Kept separate from the challenge/session flow so adventure progression
-(ordered quests, mastery weighting) never shares logic with challenge
+(ordered levels, mastery weighting) never shares logic with challenge
 completion/unlock behavior.
 """
-
-from collections import OrderedDict
 
 from django.db import transaction
 from django.utils import timezone
@@ -13,8 +11,8 @@ from rest_framework.exceptions import ValidationError
 
 from adventures.models import (
     AdventureMastery,
-    AdventureQuest,
-    AdventureQuestAttempt,
+    AdventureLevel,
+    AdventureLevelAttempt,
     AdventureRun,
     CommandAdventure,
 )
@@ -25,6 +23,8 @@ from adventures.scheduler import (
     is_passed,
 )
 from adventures.scoring import AdventureScoringService, mastery_points
+from battle.state import initial_adventure_battle_state
+from battle.turn import apply_battle_turn
 from common.constants import (
     COMMAND_COUNTED,
     SESSION_MODE_PRIMARY,
@@ -34,6 +34,7 @@ from common.constants import (
     SESSION_STATUS_STARTED,
 )
 from common.exceptions import Locked
+from common.lru import LRUCommandHistoryCache
 from common.performance import timing
 from evaluation.compiler import CompiledEvaluationSpecCache
 from evaluation.engine import EvaluationEngine
@@ -44,38 +45,35 @@ from simulator.services import RepositoryStateSimulator
 from simulator.workspace_files import WorkspaceFileError, WorkspaceFileStateService
 
 
-def ordered_quests_for(
+def ordered_levels_for(
     adventure: CommandAdventure, *, with_prerequisites: bool = False
-) -> list[AdventureQuest]:
-    queryset = AdventureQuest.objects.filter(
+) -> list[AdventureLevel]:
+    queryset = AdventureLevel.objects.filter(
         command_form__command_skill__storey_id=adventure.storey_id,
         is_published=True,
         command_form__is_published=True,
         command_form__command_skill__is_published=True,
+    ).select_related(
+        # `level.storey` (for the battle-state mob roster) walks this chain;
+        # selecting it here keeps attempt creation from issuing extra queries.
+        "command_form__command_skill__storey",
     ).order_by("command_form__command_skill__sort_order", "command_form__sort_order", "sort_order", "id")
     if with_prerequisites:
-        # The scheduler walks quest.prerequisites for every candidate; the
-        # prefetch turns that per-quest N+1 into a single extra query.
+        # The scheduler walks level.prerequisites for every candidate; the
+        # prefetch turns that per-level N+1 into a single extra query.
         queryset = queryset.prefetch_related("prerequisites")
     return list(queryset)
 
 
-class AdventureCommandHistoryCache:
-    """Process-local LRU of an attempt's normalized command history, mirroring
-    challenges.services.CommandHistoryCache. The key includes the attempt's log
-    count, so a stale entry is never served: any miss (other worker, rollback,
-    restart) falls back to the DB query."""
+class AdventureCommandHistoryCache(LRUCommandHistoryCache):
+    """Per-attempt command history, keyed by the attempt's log count so a stale
+    entry is never served. See common.lru.LRUCommandHistoryCache."""
 
-    _cache: OrderedDict[tuple[int, int], list[str]] = OrderedDict()
-    _max_entries = 512
-
-    def history_for(self, *, attempt: AdventureQuestAttempt, log_count: int) -> list[str]:
+    def history_for(self, *, attempt: AdventureLevelAttempt, log_count: int) -> list[str]:
         key = (attempt.id, log_count)
-        cached = self._cache.get(key)
+        cached = self._cached(key)
         if cached is not None:
-            self._cache.move_to_end(key)
-            return list(cached)
-
+            return cached
         history = list(
             CommandLog.objects.filter(step__attempt=attempt)
             .order_by("step_id")
@@ -85,15 +83,9 @@ class AdventureCommandHistoryCache:
         return history
 
     def remember(
-        self, *, attempt: AdventureQuestAttempt, log_count: int, history: list[str]
+        self, *, attempt: AdventureLevelAttempt, log_count: int, history: list[str]
     ) -> None:
         self._remember((attempt.id, log_count), history)
-
-    def _remember(self, key: tuple[int, int], history: list[str]) -> None:
-        self._cache[key] = list(history)
-        self._cache.move_to_end(key)
-        while len(self._cache) > self._max_entries:
-            self._cache.popitem(last=False)
 
 
 class AdventureRunService:
@@ -103,9 +95,9 @@ class AdventureRunService:
 
     @transaction.atomic
     def start_run(self, *, user, adventure: CommandAdventure) -> AdventureRun:
-        quests = ordered_quests_for(adventure)
-        if not quests:
-            raise Locked("This adventure has no published quests.")
+        levels = ordered_levels_for(adventure)
+        if not levels:
+            raise Locked("This adventure has no published levels.")
         # Re-entering an adventure (replay, refresh, or navigating back in)
         # resumes the run already in progress rather than locking the user out.
         # This keeps the "one active run per adventure" invariant while letting
@@ -135,7 +127,7 @@ class AdventureRunService:
         self._open_next(run=run)
         return run
 
-    def current_attempt(self, *, run: AdventureRun) -> AdventureQuestAttempt | None:
+    def current_attempt(self, *, run: AdventureRun) -> AdventureLevelAttempt | None:
         return run.attempts.filter(status=SESSION_STATUS_STARTED).order_by("order").first()
 
     # savepoint=False: when nested inside the submit transaction this joins it
@@ -145,19 +137,19 @@ class AdventureRunService:
     def record_attempt_result(
         self,
         *,
-        attempt: AdventureQuestAttempt,
+        attempt: AdventureLevelAttempt,
         solved: bool,
         counted_command_count: int,
         command_count: int,
         hint_count: int = 0,
         repository_state: dict | None = None,
-    ) -> AdventureQuestAttempt:
+    ) -> AdventureLevelAttempt:
         if attempt.status != SESSION_STATUS_STARTED:
             raise Locked("This attempt has already been scored.")
         score = self.scorer.score_attempt(
             solved=solved,
             counted_commands=counted_command_count,
-            ideal_commands=attempt.adventure_quest.min_counted_commands,
+            ideal_commands=attempt.adventure_level.min_counted_commands,
             hint_count=hint_count,
         )
         attempt.correctness_score = score.correctness_score
@@ -190,16 +182,16 @@ class AdventureRunService:
         attempt.save(update_fields=update_fields)
 
         run = attempt.run
-        # The ordered-quests join feeds the pass check, the scheduler, and the
+        # The ordered-levels join feeds the pass check, the scheduler, and the
         # mastery fraction below; resolve it once per transition.
-        quests = ordered_quests_for(run.command_adventure, with_prerequisites=True)
+        levels = ordered_levels_for(run.command_adventure, with_prerequisites=True)
         # Replays are uncounted free-play: the attempt is still scored (so the
         # learner sees how the run went), but mastery, session score, and the
         # pass milestone are left untouched. Primary runs alone drive progress.
         if run.mode != SESSION_MODE_REPLAY:
             box_advanced = self.scheduler.apply_result(
                 user=run.user,
-                quest=attempt.adventure_quest,
+                level=attempt.adventure_level,
                 passed=score.passed,
                 solved=solved,
             )
@@ -210,7 +202,7 @@ class AdventureRunService:
                 user=run.user,
                 adventure=run.command_adventure,
                 session_score=run.session_score,
-                quests=quests,
+                levels=levels,
             )
             if newly_passed:
                 run.passed_at = timezone.now()
@@ -223,41 +215,41 @@ class AdventureRunService:
                     user=run.user, storey=run.command_adventure.storey
                 )
 
-        self._open_next(run=run, quests=quests)
+        self._open_next(run=run, levels=levels)
         return attempt
 
     def _open_next(
-        self, *, run: AdventureRun, quests: list[AdventureQuest] | None = None
-    ) -> AdventureQuestAttempt | None:
-        """Open the next command-quest, or finish the session when there is
+        self, *, run: AdventureRun, levels: list[AdventureLevel] | None = None
+    ) -> AdventureLevelAttempt | None:
+        """Open the next command-level, or finish the session when there is
         nothing left to serve. Primary runs ask the mastery scheduler; replays
         walk the adventure once, ignoring mastery, so a passed adventure stays
         fully playable instead of finishing the instant it starts."""
-        if quests is None:
-            quests = ordered_quests_for(run.command_adventure, with_prerequisites=True)
+        if levels is None:
+            levels = ordered_levels_for(run.command_adventure, with_prerequisites=True)
         if run.mode == SESSION_MODE_REPLAY:
-            quest = self._next_replay_quest(run=run, quests=quests)
+            level = self._next_replay_level(run=run, levels=levels)
         else:
-            quest = self.scheduler.next_quest(
-                user=run.user, adventure=run.command_adventure, quests=quests
+            level = self.scheduler.next_level(
+                user=run.user, adventure=run.command_adventure, levels=levels
             )
-        if quest is None:
-            self._finish(run=run, quests=quests)
+        if level is None:
+            self._finish(run=run, levels=levels)
             return None
-        return self._open_attempt(run=run, quest=quest)
+        return self._open_attempt(run=run, level=level)
 
-    def _next_replay_quest(
-        self, *, run: AdventureRun, quests: list[AdventureQuest]
-    ) -> AdventureQuest | None:
+    def _next_replay_level(
+        self, *, run: AdventureRun, levels: list[AdventureLevel]
+    ) -> AdventureLevel | None:
         """Next unplayed command in this replay: a single linear walk through the
-        adventure's ordered quests, decoupled from the global mastery view."""
-        served_ids = set(run.attempts.values_list("adventure_quest_id", flat=True))
-        for quest in quests:
-            if quest.id not in served_ids:
-                return quest
+        adventure's ordered levels, decoupled from the global mastery view."""
+        served_ids = set(run.attempts.values_list("adventure_level_id", flat=True))
+        for level in levels:
+            if level.id not in served_ids:
+                return level
         return None
 
-    def _finish(self, *, run: AdventureRun, quests: list[AdventureQuest]) -> None:
+    def _finish(self, *, run: AdventureRun, levels: list[AdventureLevel]) -> None:
         # Primary: reached only when the scheduler has nothing left to serve, i.e.
         # every command is mastered. The pass milestone (passed_at) is set earlier
         # and independently, the instant the session score crosses the pass bar.
@@ -266,22 +258,22 @@ class AdventureRunService:
         run.status = SESSION_STATUS_COMPLETED
         run.completed_at = timezone.now()
         run.mastery_progress_gained = (
-            0.0 if run.mode == SESSION_MODE_REPLAY else self._mastery_fraction(run, quests)
+            0.0 if run.mode == SESSION_MODE_REPLAY else self._mastery_fraction(run, levels)
         )
         run.save(update_fields=["status", "completed_at", "mastery_progress_gained"])
 
-    def _mastery_fraction(self, run: AdventureRun, quests: list[AdventureQuest]) -> float:
+    def _mastery_fraction(self, run: AdventureRun, levels: list[AdventureLevel]) -> float:
         """Share of total Leitner boxes filled across the adventure, in [0, 1]."""
-        ceiling = sum(q.required_successful_attempts for q in quests)
+        ceiling = sum(q.required_successful_attempts for q in levels)
         if not ceiling:
             return 0.0
         strengths = dict(
             AdventureMastery.objects.filter(
-                user_id=run.user_id, adventure_quest__in=[q.id for q in quests]
-            ).values_list("adventure_quest_id", "strength")
+                user_id=run.user_id, adventure_level__in=[q.id for q in levels]
+            ).values_list("adventure_level_id", "strength")
         )
         filled = sum(
-            min(strengths.get(q.id, 0), q.required_successful_attempts) for q in quests
+            min(strengths.get(q.id, 0), q.required_successful_attempts) for q in levels
         )
         return round(filled / ceiling, 4)
 
@@ -298,36 +290,37 @@ class AdventureRunService:
         return run
 
     def _open_attempt(
-        self, *, run: AdventureRun, quest: AdventureQuest
-    ) -> AdventureQuestAttempt:
-        variant = self.scheduler.select_variant(user=run.user, quest=quest)
+        self, *, run: AdventureRun, level: AdventureLevel
+    ) -> AdventureLevelAttempt:
+        variant = self.scheduler.select_variant(user=run.user, level=level)
         if variant is None:
-            raise Locked("This adventure quest has no published variants.")
-        attempt = AdventureQuestAttempt.objects.create(
+            raise Locked("This adventure level has no published variants.")
+        attempt = AdventureLevelAttempt.objects.create(
             run=run,
-            adventure_quest=quest,
+            adventure_level=level,
             selected_variant=variant,
             order=run.attempts.count(),
             repository_state=variant.initial_state,
+            battle_state=initial_adventure_battle_state(level, variant),
         )
         if run.mode == SESSION_MODE_REPLAY:
             # Free-play never mutates mastery; progress is just the linear walk's
-            # position through this replay's quests.
-            run.current_quest_index = run.attempts.count()
+            # position through this replay's levels.
+            run.current_level_index = run.attempts.count()
         else:
             idx = encounter_index(user=run.user, adventure=run.command_adventure)
-            self.scheduler.mark_served(user=run.user, quest=quest, idx=idx)
-            # current_quest_index now tracks distinct commands introduced
+            self.scheduler.mark_served(user=run.user, level=level, idx=idx)
+            # current_level_index now tracks distinct commands introduced
             # (progress hint for the UI); the linear walk it once meant no longer
             # applies.
-            run.current_quest_index = (
+            run.current_level_index = (
                 AdventureMastery.objects.filter(
                     user=run.user,
-                    adventure_quest__command_form__command_skill__storey=run.command_adventure.storey,
+                    adventure_level__command_form__command_skill__storey=run.command_adventure.storey,
                     introduced=True,
                 ).count()
             )
-        run.save(update_fields=["current_quest_index"])
+        run.save(update_fields=["current_level_index"])
         return attempt
 
     # Non-answer-revealing nudges used when a variant authors no hint_set, or
@@ -339,7 +332,7 @@ class AdventureRunService:
     ]
 
     @transaction.atomic
-    def use_hint(self, *, attempt: AdventureQuestAttempt) -> dict:
+    def use_hint(self, *, attempt: AdventureLevelAttempt) -> dict:
         if attempt.status != SESSION_STATUS_STARTED:
             raise Locked("This attempt has already been scored.")
         index = attempt.hint_count
@@ -362,8 +355,8 @@ class AdventureWorkspaceFileService:
 
     @transaction.atomic
     def create_file(
-        self, *, attempt: AdventureQuestAttempt, path: str, content: str = ""
-    ) -> AdventureQuestAttempt:
+        self, *, attempt: AdventureLevelAttempt, path: str, content: str = ""
+    ) -> AdventureLevelAttempt:
         if attempt.status != SESSION_STATUS_STARTED:
             raise Locked("This attempt has already ended.")
         try:
@@ -378,8 +371,8 @@ class AdventureWorkspaceFileService:
 
     @transaction.atomic
     def write_file(
-        self, *, attempt: AdventureQuestAttempt, path: str, content: str = ""
-    ) -> AdventureQuestAttempt:
+        self, *, attempt: AdventureLevelAttempt, path: str, content: str = ""
+    ) -> AdventureLevelAttempt:
         if attempt.status != SESSION_STATUS_STARTED:
             raise Locked("This attempt has already ended.")
         try:
@@ -394,7 +387,7 @@ class AdventureWorkspaceFileService:
 
 
 class AdventureCommandService:
-    """Processes a submitted command for one AdventureQuestAttempt.
+    """Processes a submitted command for one AdventureLevelAttempt.
 
     Reuses the shared simulator + evaluator engines but never the challenge
     completion flow. On reaching the target (or exhausting the command budget)
@@ -407,7 +400,7 @@ class AdventureCommandService:
         self.runs = AdventureRunService()
 
     @transaction.atomic
-    def submit(self, *, attempt: AdventureQuestAttempt, command: str) -> dict:
+    def submit(self, *, attempt: AdventureLevelAttempt, command: str) -> dict:
         if attempt.status != SESSION_STATUS_STARTED:
             raise Locked("This attempt has already ended.")
         run_id = attempt.run_id
@@ -431,6 +424,7 @@ class AdventureCommandService:
         attempt.repository_state = next_state
 
         solved = False
+        rules_passing: int | None = None
         executed: list[str] = []
         if result.processed:
             with span("evaluate"):
@@ -455,6 +449,22 @@ class AdventureCommandService:
                     ),
                 )
                 solved = outcome.target_matched
+                rules_passing = len(outcome.passed_rules)
+
+        max_counted = attempt.adventure_level.max_counted_commands
+        budget_exhausted = attempt.counted_command_count >= max_counted
+        # Battle turn: pure function over signals computed above; the state
+        # rides the attempt save below — zero extra queries.
+        battle_events, battle_changed = apply_battle_turn(
+            attempt,
+            lambda: initial_adventure_battle_state(attempt.adventure_level, variant),
+            counted=classification == COMMAND_COUNTED,
+            processed=result.processed,
+            solved=solved,
+            rules_passing=rules_passing,
+            skill=result.command_family or "default",
+            defeated=budget_exhausted and not solved,
+        )
 
         with span("step_create"):
             step = CommandStep.objects.create(
@@ -485,11 +495,11 @@ class AdventureCommandService:
         update_fields = ["command_count", "counted_command_count"]
         if execution.state_mutated:
             update_fields.append("repository_state")
+        if battle_changed:
+            update_fields.append("battle_state")
         with span("attempt_save"):
             attempt.save(update_fields=update_fields)
 
-        max_counted = attempt.adventure_quest.max_counted_commands
-        budget_exhausted = attempt.counted_command_count >= max_counted
         if solved or budget_exhausted:
             # repository_state is omitted: this submit already persisted
             # next_state on the attempt, so re-sending the JSON blob is waste.
@@ -512,4 +522,5 @@ class AdventureCommandService:
             "terminal_output": result.output,
             "command_classification": classification,
             "repository_state": next_state,
+            "battle_events": battle_events,
         }

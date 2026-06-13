@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
 import { cn } from '@/shared/utils/cn'
-import type { SpriteAnimation, SpriteAnimatorHandle } from '@/shared/sprites/types'
+import type { FrameSegment, SpriteAnimation, SpriteAnimatorHandle } from '@/shared/sprites/types'
 
 /**
  * Zero-dependency spritesheet animator.
@@ -46,12 +46,22 @@ export const SpriteAnimator = forwardRef<
   // Pending completion callback for the current non-looping animation.
   // Replaced (not fired) whenever a new animation is swapped in.
   const completeRef = useRef<(() => void) | null>(null)
+  // Active frame range within the current sheet; null = whole sheet. Battle
+  // cast phases (windup / hold-loop / release) are segments of one sheet.
+  const segmentRef = useRef<FrameSegment | null>(null)
 
   // Keep internal animation in sync when the prop changes.
   useEffect(() => {
     setAnim(animation)
     frameRef.current = 0
+    segmentRef.current = null
   }, [animation])
+
+  function clampSegment(segment: FrameSegment, frameCount: number): FrameSegment {
+    const to = Math.max(0, Math.min(frameCount - 1, segment.to))
+    const from = Math.max(0, Math.min(to, segment.from))
+    return { from, to, loop: segment.loop }
+  }
 
   useEffect(() => {
     setFlipped(flipX)
@@ -83,11 +93,21 @@ export const SpriteAnimator = forwardRef<
       paintFrame(frameRef.current)
     },
     getFrame: () => frameRef.current,
-    setAnimation: (next: SpriteAnimation, opts?: { onComplete?: () => void }) => {
+    setAnimation: (next: SpriteAnimation, opts?: { onComplete?: () => void; segment?: FrameSegment }) => {
       completeRef.current = opts?.onComplete ?? null
-      frameRef.current = 0
+      const segment = opts?.segment ? clampSegment(opts.segment, next.frameCount) : null
+      segmentRef.current = segment
+      frameRef.current = segment?.from ?? 0
       playingRef.current = true
       setAnim(next)
+    },
+    playSegment: (segment: FrameSegment, opts?: { onComplete?: () => void }) => {
+      completeRef.current = opts?.onComplete ?? null
+      const clamped = clampSegment(segment, animRef.current.frameCount)
+      segmentRef.current = clamped
+      frameRef.current = clamped.from
+      playingRef.current = true
+      paintFrame(clamped.from)
     },
     setFlipX: (next: boolean) => {
       setFlipped(next)
@@ -109,11 +129,15 @@ export const SpriteAnimator = forwardRef<
       const interval = 1000 / (fpsRef.current ?? a.fps)
       if (playingRef.current && now - lastTick >= interval) {
         lastTick = now - ((now - lastTick) % interval)
+        const segment = segmentRef.current
+        const end = segment ? segment.to + 1 : a.frameCount
+        const loop = segment ? Boolean(segment.loop) : a.loop
+        const start = segment ? segment.from : 0
         const next = frameRef.current + 1
-        if (next >= a.frameCount) {
-          if (a.loop) {
-            frameRef.current = 0
-            paintFrame(0)
+        if (next >= end) {
+          if (loop) {
+            frameRef.current = start
+            paintFrame(start)
           } else {
             playingRef.current = false
             const onComplete = completeRef.current

@@ -4,10 +4,10 @@ import { Button } from '@/shared/components/Button'
 import type { TomeSummary } from '@/features/challenges/types'
 import { TomeReaderModal } from '@/features/storeys/book/TomeReaderModal'
 import {
-  actionForChallengeQuest,
+  actionForChallengeLevel,
   actionLabel,
   adventureActionLabel,
-  challengeQuestAccent,
+  challengeLevelAccent,
 } from '@/features/storeys/challengeUi'
 import { useTowerDoorNavigation } from '@/features/storeys/hooks/useTowerDoorNavigation'
 import { useTowerSelection } from '@/features/storeys/hooks/useTowerSelection'
@@ -55,9 +55,9 @@ export function TowerActionButton() {
     )
   }
 
-  const { quest, locked } = selected
-  const action = actionForChallengeQuest(quest)
-  const accent = challengeQuestAccent(quest)
+  const { level, locked } = selected
+  const action = actionForChallengeLevel(level)
+  const accent = challengeLevelAccent(level)
   const disabled = locked || !action
 
   return (
@@ -68,10 +68,10 @@ export function TowerActionButton() {
           className="tower-action-button"
           disabled={disabled}
           onClick={() => {
-            if (action) openChallengeDoor(quest, action)
+            if (action) openChallengeDoor(level, action)
           }}
         >
-          {actionLabel(action, quest.status)}
+          {actionLabel(action, level.status)}
         </Button>
       </div>
     </>

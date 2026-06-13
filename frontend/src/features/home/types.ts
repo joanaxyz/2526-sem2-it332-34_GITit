@@ -12,7 +12,7 @@ export type StoreyKpis = Record<string, {
 }>
 
 export type HomeSummary = {
-  kpis: Record<'practice_completion' | 'scr' | 'arc' | 'car' | 'hlcr' | 'rta', RateMetric>
+  kpis: Record<'scr' | 'arc' | 'car' | 'hlcr' | 'rta', RateMetric>
   storey_kpis: StoreyKpis
   counts: {
     started: number
@@ -28,7 +28,7 @@ export type HomeSummary = {
   }
   first_attempt_stars: number
   retry_trends: Array<{
-    practice_title: string
+    level_title: string
     attempts: number
     retries: number
     label: string

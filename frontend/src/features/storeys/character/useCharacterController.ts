@@ -435,7 +435,7 @@ export function useCharacterController({
           currentSheet === character.sprites.take_off &&
           (spriteRef.current?.getFrame() ?? Infinity) < metrics.takeOffAirborneFrame
         ) {
-          pos.y -= TAKEOFF_LIFT_SPEED * dt
+          pos.y -= (metrics.takeOffLiftSpeed ?? TAKEOFF_LIFT_SPEED) * dt
           paint()
           return
         }

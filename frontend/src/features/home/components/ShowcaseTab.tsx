@@ -2,6 +2,7 @@ import { Coins, Flame, Star, Swords } from 'lucide-react'
 
 import { CharacterShowcase } from '@/features/home/components/CharacterShowcase'
 import { RankEmblem } from '@/features/home/components/RankEmblem'
+import { SpellbookPanel } from '@/features/skills/components/SpellbookPanel'
 import { RANK_TIERS, deriveRank } from '@/features/home/rank'
 import type { HomeSummary } from '@/features/home/types'
 import { useCountUp } from '@/features/stats/useCountUp'
@@ -131,7 +132,7 @@ export function ShowcaseTab({
           </div>
 
           <div className="mt-5 grid grid-cols-2 gap-2 max-md:grid-cols-2">
-            <StatChip icon={Swords} label="Quests Done" value={String(home.counts.completed)} color="#34D399" />
+            <StatChip icon={Swords} label="Levels Done" value={String(home.counts.completed)} color="#34D399" />
             <StatChip icon={Flame} label="Day Streak" value={`${home.streak.current} days`} color="#FB923C" />
             <StatChip icon={Star} label="First-Try Stars" value={String(home.first_attempt_stars)} color="#FBBF24" />
             <StatChip
@@ -143,6 +144,8 @@ export function ShowcaseTab({
           </div>
         </div>
       </div>
+
+      <SpellbookPanel />
     </section>
   )
 }

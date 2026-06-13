@@ -1,32 +1,37 @@
 import { useRef, useState } from 'react'
-import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
+import type { CSSProperties } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { GripHorizontal, GripVertical } from 'lucide-react'
 import { Toaster } from 'sonner'
 
 import { challengesApi } from '@/features/challenges/api/challengesApi'
 import { challengeRunsApi } from '@/features/challenges/api/challengeRunsApi'
+import { ChallengeBattleStrip } from '@/features/challenges/components/ChallengeBattleStrip'
 import { ChallengeStatusHeader } from '@/features/challenges/components/ChallengeStatusHeader'
 import { ChallengeOutcomeModal } from '@/features/challenges/components/ChallengeOutcomeModal'
 import { useChallengeCommandSubmission } from '@/features/challenges/hooks/useChallengeCommandSubmission'
 import { useChallengeRun } from '@/features/challenges/hooks/useChallengeRun'
 import {
-  invalidatePracticeProgressQueries,
+  invalidateLevelProgressQueries,
   syncChallengeRunInCache,
   updateChallengeRunCache,
 } from '@/features/challenges/utils/challengeRunCache'
 import { useAuthStore } from '@/features/auth/hooks/useAuth'
-import { PracticeContextPanel } from '@/shared/practice/components/PracticeContextPanel'
-import { ContextualFeedbackPanel } from '@/shared/practice/components/ContextualFeedbackPanel'
-import { LiveDagPanel } from '@/shared/practice/components/LiveDagPanel'
-import { ProjectStructurePanel } from '@/shared/practice/components/ProjectStructurePanel'
-import { ChallengeWorkspaceTour } from '@/shared/practice/components/PracticeWorkspaceTour'
-import { TerminalPanel } from '@/shared/practice/components/TerminalPanel'
-import { WorkspaceEditorOverlay } from '@/shared/practice/components/WorkspaceEditorOverlay'
-import { useScaffolding } from '@/shared/practice/scaffolding/useScaffolding'
-import { hasSeenPracticeTour, markPracticeTourSeen } from '@/shared/practice/utils/practiceTour'
-import type { ChallengeRun } from '@/shared/practice/types'
+import { LevelContextPanel } from '@/shared/level/components/LevelContextPanel'
+import { ContextualFeedbackPanel } from '@/shared/level/components/ContextualFeedbackPanel'
+import { LiveDagPanel } from '@/shared/level/components/LiveDagPanel'
+import { ProjectStructurePanel } from '@/shared/level/components/ProjectStructurePanel'
+import { ChallengeWorkspaceTour } from '@/shared/level/components/LevelWorkspaceTour'
+import { ResizeHandle } from '@/shared/level/components/ResizeHandle'
+import { TerminalPanel } from '@/shared/level/components/TerminalPanel'
+import { WorkspaceEditorOverlay } from '@/shared/level/components/WorkspaceEditorOverlay'
+import { useDragResize } from '@/shared/level/hooks/useDragResize'
+import { useScaffolding } from '@/shared/level/scaffolding/useScaffolding'
+import { PROJECT_FILES_OPEN_KEY } from '@/shared/level/workspaceKeys'
+import { hasSeenLevelTour, markLevelTourSeen } from '@/shared/level/utils/levelTour'
+import { commandSkill, deriveBattleEvents } from '@/shared/battle/deriveBattleEvents'
+import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
+import { RESULT_TARGET_MATCHED, type ChallengeRun } from '@/shared/level/types'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { Button } from '@/shared/components/Button'
@@ -48,8 +53,8 @@ const RESIZE_HANDLE_WIDTH = 6
 const TERMINAL_RATIO_KEY = 'workspace:terminal-ratio'
 const TARGET_DIAGRAM_RATIO_KEY = 'workspace:target-diagram-ratio'
 const TERMINAL_PANE_RATIO_KEY = 'workspace:terminal-pane-ratio'
-const PROJECT_FILES_OPEN_KEY = 'workspace:project-files-open'
 const DAG_ZOOM_KEY = 'workspace:dag-zoom'
+const BATTLE_OPEN_KEY = 'workspace:battle-open'
 
 function ratioSanitizer(min: number, max: number, fallback: number) {
   return (value: number) =>
@@ -84,45 +89,6 @@ function constrainedTerminalPaneRatio(clientX: number, bounds: DOMRect) {
   return clamp(rawRatio, minRatio, maxRatio)
 }
 
-function ResizeHandle({
-  label,
-  orientation,
-  className,
-  onPointerDown,
-}: {
-  label: string
-  orientation: 'horizontal' | 'vertical'
-  className?: string
-  onPointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void
-}) {
-  const isVertical = orientation === 'vertical'
-  const Icon = isVertical ? GripVertical : GripHorizontal
-
-  return (
-    <div
-      aria-label={label}
-      aria-orientation={orientation}
-      className={cn(
-        'group relative z-10 flex shrink-0 items-center justify-center',
-        isVertical ? 'h-full cursor-col-resize px-1' : 'w-full cursor-row-resize py-1',
-        className,
-      )}
-      role="separator"
-      onPointerDown={onPointerDown}
-    >
-      <span
-        className={cn(
-          'rounded-full bg-border/70 transition-colors group-hover:bg-primary/70 group-active:bg-primary',
-          isVertical ? 'h-full w-px' : 'h-px w-full',
-        )}
-      />
-      <span className="absolute grid size-5 place-items-center rounded-full border border-border bg-background/95 text-muted-foreground shadow-sm transition-colors group-hover:border-primary/60 group-hover:text-primary group-active:text-primary">
-        <Icon className="size-3" />
-      </span>
-    </div>
-  )
-}
-
 export function ChallengeWorkspace() {
   const params = useParams()
   const navigate = useNavigate()
@@ -148,6 +114,8 @@ export function ChallengeWorkspace() {
     ratioSanitizer(0.4, 0.92, DEFAULT_TERMINAL_PANE_RATIO),
   )
   const [projectFilesOpen, setProjectFilesOpen] = usePersistentState(PROJECT_FILES_OPEN_KEY, true)
+  const [battleOpen, setBattleOpen] = usePersistentState(BATTLE_OPEN_KEY, true)
+  const director = useBattleDirector()
   const [tourOpen, setTourOpen] = useState(false)
   const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
   const [startOverConfirmOpen, setStartOverConfirmOpen] = useState(false)
@@ -157,6 +125,15 @@ export function ChallengeWorkspace() {
   const workspaceGridRef = useRef<HTMLElement>(null)
   const diagramGridRef = useRef<HTMLDivElement>(null)
   const terminalGridRef = useRef<HTMLDivElement>(null)
+  const beginTerminalResize = useDragResize(workspaceGridRef, 'row-resize', (event, bounds) => {
+    setTerminalRatio(clamp((bounds.bottom - event.clientY) / bounds.height, 0.22, 0.58))
+  })
+  const beginDiagramResize = useDragResize(diagramGridRef, 'col-resize', (event, bounds) => {
+    setTargetDiagramRatio(clamp((event.clientX - bounds.left) / bounds.width, 0.34, 0.66))
+  })
+  const beginTerminalPaneResize = useDragResize(terminalGridRef, 'col-resize', (event, bounds) => {
+    setTerminalPaneRatio(constrainedTerminalPaneRatio(event.clientX, bounds))
+  })
 
   const exitMutation = useMutation({
     mutationFn: () => {
@@ -166,30 +143,30 @@ export function ChallengeWorkspace() {
     },
     onSuccess: (updatedRun) => {
       syncChallengeRunInCache(queryClient, updatedRun)
-      invalidatePracticeProgressQueries(queryClient)
+      invalidateLevelProgressQueries(queryClient)
       navigate(towerUrlForRun(updatedRun))
     },
   })
-  // Starts a fresh run on any quest — the "Next quest" CTA and the completion
-  // modal's quest navigator both route through here, so jumping to a lower quest
+  // Starts a fresh run on any level — the "Next level" CTA and the completion
+  // modal's level navigator both route through here, so jumping to a lower level
   // works exactly like advancing to the next one.
-  const startQuestMutation = useMutation({
-    mutationFn: (questId: number) => challengesApi.startChallengeRun(questId),
+  const startLevelMutation = useMutation({
+    mutationFn: (levelId: number) => challengesApi.startChallengeRun(levelId),
     onSuccess: (next) => {
       syncChallengeRunInCache(queryClient, next)
-      invalidatePracticeProgressQueries(queryClient)
+      invalidateLevelProgressQueries(queryClient)
       if (run?.status === 'completed') setDismissedCompletionRunId(run.id)
       navigate(`/challenge-runs/${next.id}`)
     },
   })
   // Replaying a free-play (review) run starts a fresh uncounted run on the same
-  // quest — never the retry endpoint, which rejects non-primary runs. This keeps
-  // "Play again" working for already-completed quests without touching progress.
+  // level — never the retry endpoint, which rejects non-primary runs. This keeps
+  // "Play again" working for already-completed levels without touching progress.
   const reviewMutation = useMutation({
-    mutationFn: (questId: number) => challengesApi.startChallengeRun(questId, { review: true }),
+    mutationFn: (levelId: number) => challengesApi.startChallengeRun(levelId, { review: true }),
     onSuccess: (next) => {
       syncChallengeRunInCache(queryClient, next)
-      invalidatePracticeProgressQueries(queryClient)
+      invalidateLevelProgressQueries(queryClient)
       setDismissedCompletionRunId(null)
       navigate(`/challenge-runs/${next.id}`)
     },
@@ -201,7 +178,7 @@ export function ChallengeWorkspace() {
     },
     onSuccess: (next) => {
       syncChallengeRunInCache(queryClient, next)
-      invalidatePracticeProgressQueries(queryClient)
+      invalidateLevelProgressQueries(queryClient)
       setDismissedCompletionRunId(null)
       setStartOverConfirmOpen(false)
       navigate(`/challenge-runs/${next.id}`)
@@ -237,8 +214,8 @@ export function ChallengeWorkspace() {
   if (query.isError) return <ErrorState title="Could not load challenge workspace" description={query.error.message} />
   if (!run) return <ErrorState title="Could not load challenge workspace" description="The API returned no run data." />
 
-  const tourKey = `${user?.id ?? 'guest'}:challenge:${run.challenge.quest_id}`
-  const shouldAutoOpenTour = dismissedTourKey !== tourKey && !hasSeenPracticeTour(user?.id)
+  const tourKey = `${user?.id ?? 'guest'}:challenge:${run.challenge.level_id}`
+  const shouldAutoOpenTour = dismissedTourKey !== tourKey && !hasSeenLevelTour(user?.id)
   const isTourOpen = tourOpen || shouldAutoOpenTour
 
   function submit(command: string) {
@@ -248,9 +225,22 @@ export function ChallengeWorkspace() {
     }
 
     clearToast()
+    director.onCastStart()
 
     mutation.mutate(command, {
       onSuccess: (response) => {
+        const block =
+          response.battle ??
+          deriveBattleEvents({
+            solved: response.step.result_category === RESULT_TARGET_MATCHED,
+            counted: response.step.command_classification === 'counted',
+            progressed: (response.exit_code ?? 1) === 0,
+            skill: response.command_family || commandSkill(command),
+            defeated: response.run.status === 'failed',
+            monsters: director.currentMonsters(),
+          })
+        director.onResolve(block)
+
         if (response.command_family === 'mergetool') {
           const snapshot = response.run.repository_state
           const requestedPaths = stringList(snapshot.operation_metadata?.last_mergetool_paths)
@@ -272,6 +262,7 @@ export function ChallengeWorkspace() {
           }
         }
       },
+      onError: () => director.onError(),
     })
   }
 
@@ -284,7 +275,7 @@ export function ChallengeWorkspace() {
   // flow that carries prior-attempt context.
   function playAgain() {
     if (run?.review_mode) {
-      reviewMutation.mutate(run.challenge.quest_id)
+      reviewMutation.mutate(run.challenge.level_id)
     } else {
       retryMutation.mutate()
     }
@@ -292,93 +283,10 @@ export function ChallengeWorkspace() {
 
   const isReplaying = retryMutation.isPending || reviewMutation.isPending
 
-  function beginTerminalResize(event: ReactPointerEvent<HTMLDivElement>) {
-    const bounds = workspaceGridRef.current?.getBoundingClientRect()
-    if (!bounds) return
-    const resizeBounds = bounds
-    event.preventDefault()
-
-    function update(clientY: number) {
-      const bottomHeight = resizeBounds.bottom - clientY
-      setTerminalRatio(clamp(bottomHeight / resizeBounds.height, 0.22, 0.58))
-    }
-
-    function handlePointerMove(moveEvent: PointerEvent) {
-      update(moveEvent.clientY)
-    }
-
-    function handlePointerUp() {
-      window.removeEventListener('pointermove', handlePointerMove)
-      window.removeEventListener('pointerup', handlePointerUp)
-      document.body.style.cursor = ''
-      document.body.style.userSelect = ''
-    }
-
-    document.body.style.cursor = 'row-resize'
-    document.body.style.userSelect = 'none'
-    update(event.clientY)
-    window.addEventListener('pointermove', handlePointerMove)
-    window.addEventListener('pointerup', handlePointerUp, { once: true })
-  }
-
-  function beginDiagramResize(event: ReactPointerEvent<HTMLDivElement>) {
-    const bounds = diagramGridRef.current?.getBoundingClientRect()
-    if (!bounds) return
-    const resizeBounds = bounds
-    event.preventDefault()
-
-    function update(clientX: number) {
-      setTargetDiagramRatio(clamp((clientX - resizeBounds.left) / resizeBounds.width, 0.34, 0.66))
-    }
-
-    function handlePointerMove(moveEvent: PointerEvent) {
-      update(moveEvent.clientX)
-    }
-
-    function handlePointerUp() {
-      window.removeEventListener('pointermove', handlePointerMove)
-      window.removeEventListener('pointerup', handlePointerUp)
-      document.body.style.cursor = ''
-      document.body.style.userSelect = ''
-    }
-
-    document.body.style.cursor = 'col-resize'
-    document.body.style.userSelect = 'none'
-    update(event.clientX)
-    window.addEventListener('pointermove', handlePointerMove)
-    window.addEventListener('pointerup', handlePointerUp, { once: true })
-  }
-
-  function beginTerminalPaneResize(event: ReactPointerEvent<HTMLDivElement>) {
-    const bounds = terminalGridRef.current?.getBoundingClientRect()
-    if (!bounds) return
-    const resizeBounds = bounds
-    event.preventDefault()
-
-    function update(clientX: number) {
-      setTerminalPaneRatio(constrainedTerminalPaneRatio(clientX, resizeBounds))
-    }
-
-    function handlePointerMove(moveEvent: PointerEvent) {
-      update(moveEvent.clientX)
-    }
-
-    function handlePointerUp() {
-      window.removeEventListener('pointermove', handlePointerMove)
-      window.removeEventListener('pointerup', handlePointerUp)
-      document.body.style.cursor = ''
-      document.body.style.userSelect = ''
-    }
-
-    document.body.style.cursor = 'col-resize'
-    document.body.style.userSelect = 'none'
-    update(event.clientX)
-    window.addEventListener('pointermove', handlePointerMove)
-    window.addEventListener('pointerup', handlePointerUp, { once: true })
-  }
-
   const workspaceGridStyle = {
-    gridTemplateRows: `minmax(14rem, ${1 - terminalRatio}fr) 0.375rem minmax(10rem, ${terminalRatio}fr)`,
+    // Leading row = the battle strip (boss arena), uppermost in this column;
+    // collapses to a slim HP bar. The DAG/terminal rows keep their resize.
+    gridTemplateRows: `${battleOpen ? '10.5rem' : '2.25rem'} minmax(14rem, ${1 - terminalRatio}fr) 0.375rem minmax(10rem, ${terminalRatio}fr)`,
   }
   const hasTargetDiagram = Boolean(run.scaffolding.expected_state && run.expected_state)
   const diagramGridStyle = {
@@ -402,7 +310,7 @@ export function ChallengeWorkspace() {
         onStartOver={() => setStartOverConfirmOpen(true)}
         onOpenTour={() => setTourOpen(true)}
         onContinue={() => retryMutation.mutate()}
-        onReplay={() => reviewMutation.mutate(run.challenge.quest_id)}
+        onReplay={() => reviewMutation.mutate(run.challenge.level_id)}
       />
       <main className="relative grid min-h-0 flex-1 grid-cols-[27rem_minmax(0,1fr)] gap-2 p-2 max-2xl:grid-cols-[26rem_minmax(0,1fr)] max-xl:grid-cols-[23rem_minmax(0,1fr)] max-lg:grid-cols-1 max-lg:overflow-auto">
         <aside
@@ -413,10 +321,10 @@ export function ChallengeWorkspace() {
               : 'minmax(13rem, 1fr) auto',
           }}
           data-testid="workspace-sidebar"
-          data-tour-target="practice-brief"
+          data-tour-target="level-brief"
         >
-          <div className="min-h-0 overflow-y-auto app-scrollbar" data-testid="practice-context-scroll">
-            <PracticeContextPanel run={run} />
+          <div className="min-h-0 overflow-y-auto app-scrollbar" data-testid="level-context-scroll">
+            <LevelContextPanel run={run} />
           </div>
 
           <div className={cn('overflow-hidden', projectFilesOpen ? 'min-h-[14rem]' : '')} data-testid="project-structure-region">
@@ -441,6 +349,13 @@ export function ChallengeWorkspace() {
           className="grid min-h-0 gap-0 max-lg:min-h-[56rem]"
           style={workspaceGridStyle}
         >
+          <ChallengeBattleStrip
+            run={run}
+            director={director}
+            open={battleOpen}
+            onToggle={() => setBattleOpen((value) => !value)}
+            className="mb-2 min-h-0"
+          />
           <div
             ref={diagramGridRef}
             className={cn(
@@ -458,6 +373,7 @@ export function ChallengeWorkspace() {
                 className="flex h-full min-h-0 flex-col"
                 contentClassName="h-full min-h-0 flex-1"
                 zoomStorageKey={DAG_ZOOM_KEY}
+                animateChanges
               />
             </div>
             {hasTargetDiagram ? (
@@ -518,9 +434,7 @@ export function ChallengeWorkspace() {
               <div className="h-full min-h-0 w-full min-w-0" data-tour-target="feedback">
                 <ContextualFeedbackPanel run={run} feedback={feedback} />
               </div>
-            ) : (
-              <ContextualFeedbackPanel run={run} feedback={feedback} />
-            )}
+            ) : null}
           </div>
         </section>
         <WorkspaceEditorOverlay
@@ -543,12 +457,12 @@ export function ChallengeWorkspace() {
         onContinue={playAgain}
         isRetrying={isReplaying}
         isContinuing={isReplaying}
-        onNextQuest={run.next_difficulty ? () => startQuestMutation.mutate(run.next_difficulty!.id) : undefined}
-        isStartingNextQuest={
-          startQuestMutation.isPending && startQuestMutation.variables === run.next_difficulty?.id
+        onNextLevel={run.next_difficulty ? () => startLevelMutation.mutate(run.next_difficulty!.id) : undefined}
+        isStartingNextLevel={
+          startLevelMutation.isPending && startLevelMutation.variables === run.next_difficulty?.id
         }
-        onSelectQuest={(questId) => startQuestMutation.mutate(questId)}
-        busyQuestId={startQuestMutation.isPending ? startQuestMutation.variables : null}
+        onSelectLevel={(levelId) => startLevelMutation.mutate(levelId)}
+        busyLevelId={startLevelMutation.isPending ? startLevelMutation.variables : null}
         nextDifficultyLabel={
           run.next_difficulty
             ? run.next_difficulty.difficulty.charAt(0).toUpperCase() + run.next_difficulty.difficulty.slice(1)
@@ -604,7 +518,7 @@ export function ChallengeWorkspace() {
           key={tourKey}
           run={run}
           onClose={() => {
-            markPracticeTourSeen(user?.id)
+            markLevelTourSeen(user?.id)
             setDismissedTourKey(tourKey)
             setTourOpen(false)
           }}

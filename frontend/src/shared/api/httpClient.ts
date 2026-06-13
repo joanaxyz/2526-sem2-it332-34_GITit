@@ -1,7 +1,7 @@
 import { ApiError } from './apiError'
 import { getStoredAccessToken, useAuthStore } from '@/features/auth/hooks/useAuth'
 
-const API_BASE_URL = resolveApiBaseUrl()
+export const API_BASE_URL = resolveApiBaseUrl()
 
 type RequestOptions = RequestInit & { skipAuthRefresh?: boolean }
 
@@ -46,6 +46,12 @@ function resolveApiBaseUrl() {
 
 function removeTrailingSlash(value: string) {
   return value.endsWith('/') ? value.slice(0, -1) : value
+}
+
+export function backendUrl(path: string): string {
+  if (!path.startsWith('/')) return path
+  if (API_BASE_URL.startsWith('/')) return path
+  return new URL(path, new URL(API_BASE_URL).origin).toString()
 }
 
 function defaultApiBaseUrl() {

@@ -6,8 +6,8 @@ import {
   clearChallengeRunBootstrap,
   readChallengeRunBootstrap,
 } from '@/features/challenges/utils/challengeRunBootstrap'
-import type { ChallengeRun, TerminalLine } from '@/shared/practice/types'
-import { isEphemeralStep, terminalLinesFromSteps } from '@/shared/practice/terminalSteps'
+import type { ChallengeRun, TerminalLine } from '@/shared/level/types'
+import { isEphemeralStep, terminalLinesFromSteps } from '@/shared/level/terminalSteps'
 import { queryKeys } from '@/shared/api/queryKeys'
 
 const bootLines: TerminalLine[] = []

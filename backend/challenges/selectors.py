@@ -1,4 +1,4 @@
-from challenges.models import ChallengeQuest, ChallengeRun
+from challenges.models import ChallengeLevel, ChallengeRun
 from common.constants import (
     COMMAND_ACCURACY_PROGRESS_THRESHOLD,
     SESSION_STATUS_ABANDONED,
@@ -7,8 +7,8 @@ from common.constants import (
 )
 
 
-def required_successful_attempts_for_quest(quest) -> int:
-    return int(getattr(quest, "required_successful_attempts", 1) or 1)
+def required_successful_attempts_for_level(level) -> int:
+    return int(getattr(level, "required_successful_attempts", 1) or 1)
 
 
 def minimum_counted_for_run(*, run: ChallengeRun) -> int:
@@ -42,12 +42,12 @@ def run_meets_progress_threshold(*, run: ChallengeRun) -> bool:
     return rate is not None and rate >= COMMAND_ACCURACY_PROGRESS_THRESHOLD
 
 
-def get_challenge_quest(quest_id: int) -> ChallengeQuest:
+def get_challenge_level(level_id: int) -> ChallengeLevel:
     return (
-        ChallengeQuest.objects.select_related("challenge", "challenge__storey")
+        ChallengeLevel.objects.select_related("challenge", "challenge__storey")
         .prefetch_related("challenge_variants")
         .get(
-            id=quest_id,
+            id=level_id,
             is_published=True,
             challenge__is_published=True,
             challenge__storey__is_published=True,

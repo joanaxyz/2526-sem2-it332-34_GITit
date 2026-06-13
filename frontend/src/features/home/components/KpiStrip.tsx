@@ -61,7 +61,7 @@ function RetryRow({ metric, index }: { metric: RateMetric; index: number }) {
         <p className="truncate font-mono text-[0.6rem] font-semibold uppercase tracking-[0.14em] text-aurora-blue/80">
           Avg Retries
         </p>
-        <p className="mt-0.5 truncate font-mono text-[0.6rem] text-muted-foreground/85">per quest, lower is better</p>
+        <p className="mt-0.5 truncate font-mono text-[0.6rem] text-muted-foreground/85">per level, lower is better</p>
       </div>
       <p className="kpi-line-value">
         {hasData ? (
@@ -83,8 +83,7 @@ export function KpiStrip({ summary }: { summary: HomeSummary }) {
   const rates: RateKpi[] = [
     { key: 'car', label: 'Cmd Accuracy', metric: k.car, unit: 'commands' },
     { key: 'scr', label: 'Scenario Clear', metric: k.scr, unit: 'scenarios' },
-    { key: 'practice_completion', label: 'Practice Done', metric: k.practice_completion, unit: 'practices' },
-    { key: 'hlcr', label: 'Hard Clear', metric: k.hlcr, unit: 'hard quests' },
+    { key: 'hlcr', label: 'Hard Clear', metric: k.hlcr, unit: 'hard levels' },
     { key: 'rta', label: 'Retry Transfer', metric: k.rta, unit: 'retried wins' },
   ]
 

@@ -2,7 +2,7 @@ import { Castle, DoorOpen, Flag, RefreshCcw, Sparkles, Target, Trophy, XCircle }
 import type { CSSProperties } from 'react'
 
 import type { AdventureRun } from '@/features/command-adventures/types'
-import { CompletionModal, type CompletionStat } from '@/shared/practice/components/completion/CompletionModal'
+import { CompletionModal, type CompletionStat } from '@/shared/level/components/completion/CompletionModal'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
@@ -31,7 +31,7 @@ export function AdventureOutcomeModal({
 
   const headline = isReplay ? 'Replay complete' : passed ? 'Adventure passed' : 'Adventure ended'
   const message = isReplay
-    ? 'Free play complete. This run is just for practice and doesn’t change your saved progress.'
+    ? 'Free play complete. This run is just a replay and doesn’t change your saved progress.'
     : passed
       ? 'You cleared the pass bar and unlocked this storey’s Challenge. Replay any time to sharpen your commands.'
       : 'This run ended before clearing the pass bar. Try again to grow your command mastery and unlock the Challenge.'

@@ -117,7 +117,7 @@ export function SkillProfileRadar({ axes }: { axes: SkillAxis[] }) {
 
       {!hasAny && (
         <p className="-mt-3 text-center text-sm text-muted-foreground/85">
-          Play a few quests and your profile will start to take shape.
+          Play a few levels and your profile will start to take shape.
         </p>
       )}
     </section>

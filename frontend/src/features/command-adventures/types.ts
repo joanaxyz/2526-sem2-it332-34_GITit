@@ -1,5 +1,6 @@
-import type { PracticeScenarioContext, RepositorySnapshot, TerminalStep } from '@/shared/practice/types'
-import type { ObjectiveCheck } from '@/shared/practice/utils/practiceContext'
+import type { BattleBlock } from '@/shared/battle/types'
+import type { LevelScenarioContext, RepositorySnapshot, TerminalStep } from '@/shared/level/types'
+import type { ObjectiveCheck } from '@/shared/level/utils/levelContext'
 
 export type AdventureRunStatus = 'started' | 'completed' | 'failed' | 'abandoned'
 export type AttemptStatus = 'started' | 'completed' | 'failed'
@@ -22,7 +23,7 @@ export type AdventureAttemptCounts = {
   hint_count: number
 }
 
-export type AdventureQuestRef = {
+export type AdventureLevelRef = {
   id: number
   slug: string
   title: string
@@ -35,7 +36,7 @@ export type AdventureQuestRef = {
  * `ScenarioContextNormalizer`. The live objective checklist arrives separately
  * as the attempt's `objective_checks` field.
  */
-export type AdventureScenarioContext = PracticeScenarioContext
+export type AdventureScenarioContext = LevelScenarioContext
 
 /** One persisted command in an attempt's terminal history. */
 export type AdventureStepLog = TerminalStep
@@ -44,7 +45,7 @@ export type AdventureAttempt = {
   id: number
   order: number
   status: AttemptStatus
-  quest: AdventureQuestRef
+  level: AdventureLevelRef
   variant: { id: number; label: string }
   scenario_context: AdventureScenarioContext
   /**
@@ -59,6 +60,9 @@ export type AdventureAttempt = {
   repository_state: RepositorySnapshot
   /** Terminal history for this attempt; the terminal derives its lines from this. */
   steps: AdventureStepLog[]
+  /** Authoritative encounter state once the backend battle block ships;
+   *  absent → the client derives a deterministic roster. */
+  battle?: BattleBlock | null
 }
 
 export type AdventureAttemptResult = {
@@ -105,8 +109,8 @@ export type AdventureRun = {
   command_adventure: { id: number; slug: string; title: string; description: string }
   /** The adventure's storey id, used to navigate back to the Tower. */
   storey_id: number
-  current_quest_index: number
-  total_quests: number
+  current_level_index: number
+  total_levels: number
   session_score: number
   passed: boolean
   mastery_progress_gained: number
@@ -153,4 +157,6 @@ export type AdventureCommandResponse = {
   command_classification: string
   /** The persisted step; replaces the client's optimistic pending placeholder. */
   step: AdventureStepLog
+  /** Authoritative battle outcome of this command; absent → client-derived. */
+  battle?: BattleBlock | null
 }

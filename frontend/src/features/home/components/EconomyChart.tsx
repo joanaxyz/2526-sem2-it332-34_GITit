@@ -36,7 +36,7 @@ function ChartTooltip({ active, payload }: { active?: boolean; payload?: Tooltip
         <span className="font-mono font-bold">{point.commands_run}</span> commands
       </p>
       <p className="text-xs" style={{ color: BLUE }}>
-        <span className="font-mono font-bold">{point.quests_completed}</span> quests
+        <span className="font-mono font-bold">{point.levels_completed}</span> levels
       </p>
     </div>
   )
@@ -57,7 +57,7 @@ export function EconomyChart({ trend }: { trend: TrendPoint[] }) {
     return data.reduce((best, p) => (p.commands_run > best.commands_run ? p : best))
   }, [data])
 
-  const hasData = data.some((p) => p.commands_run > 0 || p.quests_completed > 0)
+  const hasData = data.some((p) => p.commands_run > 0 || p.levels_completed > 0)
 
   return (
     <section className="flex flex-col" aria-label="Activity economy">
@@ -70,7 +70,7 @@ export function EconomyChart({ trend }: { trend: TrendPoint[] }) {
           </span>
           <span className="inline-flex items-center gap-1.5">
             <span className="size-2 rounded-full" style={{ background: BLUE, boxShadow: `0 0 6px ${BLUE}` }} />
-            Quests Finished
+            Levels Finished
           </span>
         </div>
       </div>
@@ -134,7 +134,7 @@ export function EconomyChart({ trend }: { trend: TrendPoint[] }) {
             />
             <Area
               type="monotone"
-              dataKey="quests_completed"
+              dataKey="levels_completed"
               stroke={BLUE}
               strokeWidth={2}
               fill="transparent"
@@ -162,7 +162,7 @@ export function EconomyChart({ trend }: { trend: TrendPoint[] }) {
       {/* Accessible fallback for the chart */}
       <p className="sr-only">
         Activity over the selected range:{' '}
-        {data.map((p) => `${shortDate(p.date)}: ${p.commands_run} commands, ${p.quests_completed} quests`).join('; ')}
+        {data.map((p) => `${shortDate(p.date)}: ${p.commands_run} commands, ${p.levels_completed} levels`).join('; ')}
       </p>
     </section>
   )

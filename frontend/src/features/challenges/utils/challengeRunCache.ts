@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query'
 
 import { writeChallengeRunBootstrap } from '@/features/challenges/utils/challengeRunBootstrap'
-import type { ChallengeRun } from '@/shared/practice/types'
+import type { ChallengeRun } from '@/shared/level/types'
 import { queryKeyRoots, queryKeys } from '@/shared/api/queryKeys'
 
 const challengeRunSyncChannel = 'git-it:challenge-run-sync'
@@ -21,7 +21,7 @@ export function syncChallengeRunInCache(
     broadcastChallengeRunSync(run)
   }
 
-  invalidatePracticeProgressQueries(queryClient)
+  invalidateLevelProgressQueries(queryClient)
 }
 
 export function updateChallengeRunCache(queryClient: QueryClient, run: ChallengeRun) {
@@ -60,11 +60,13 @@ export function subscribeToChallengeRunSync(queryClient: QueryClient) {
   }
 }
 
-export function invalidatePracticeProgressQueries(queryClient: QueryClient) {
+export function invalidateLevelProgressQueries(queryClient: QueryClient) {
   void queryClient.invalidateQueries({ queryKey: queryKeys.storeys })
   void queryClient.invalidateQueries({ queryKey: queryKeys.homeSummary })
   void queryClient.invalidateQueries({ queryKey: queryKeys.statsSummary })
   void queryClient.invalidateQueries({ queryKey: queryKeyRoots.storeyContent })
+  void queryClient.invalidateQueries({ queryKey: queryKeyRoots.storeyOverview })
+  void queryClient.invalidateQueries({ queryKey: queryKeys.learnedSkills })
   void queryClient.invalidateQueries({ queryKey: queryKeys.wallet })
 }
 

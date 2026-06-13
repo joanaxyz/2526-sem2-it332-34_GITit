@@ -8,9 +8,9 @@ export type RevealedHint = { number: number; text: string }
 
 /**
  * Hint surface for the adventure workspace. Mirrors the challenge
- * {@link import('@/shared/practice/components/ContextualFeedbackPanel').ContextualFeedbackPanel}
+ * {@link import('@/shared/level/components/ContextualFeedbackPanel').ContextualFeedbackPanel}
  * design — a quiet card with an icon-led title and a single body line — so the
- * two practice modes feel like one product.
+ * two level modes feel like one product.
  */
 export function AdventureHintPanel({
   hint,
@@ -46,7 +46,7 @@ export function AdventureHintPanel({
           </p>
         ) : (
           <p className="text-sm leading-6 text-muted-foreground">
-            Stuck? Reveal a hint — using one lowers your independence score for this quest.
+            Stuck? Reveal a hint — using one lowers your independence score for this level.
           </p>
         )}
       </CardContent>

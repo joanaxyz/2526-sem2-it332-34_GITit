@@ -15,7 +15,7 @@ import { useSearchParams } from 'react-router-dom'
 import { storeysApi } from '@/features/storeys/api/storeysApi'
 import { TowerCharacter } from '@/features/storeys/character/TowerCharacter'
 import { DoorOverview } from '@/features/storeys/components/DoorOverview'
-import { StoreyOverview, StoreyPracticeHub } from '@/features/storeys/components/StoreyPracticeHub'
+import { StoreyOverview, StoreyLevelHub } from '@/features/storeys/components/StoreyLevelHub'
 import { SkyClock } from '@/features/storeys/components/SkyClock'
 import { TowerActionButton } from '@/features/storeys/components/TowerActionButton'
 import { useTowerSelection } from '@/features/storeys/hooks/useTowerSelection'
@@ -167,7 +167,7 @@ const TowerStoreys = memo(function TowerStoreys({
   return (
     <div className="tower-stack-column">
       {storeys.slice(0, mountedCount).map((storey, index) => (
-        <StoreyPracticeHub
+        <StoreyLevelHub
           displayTitle={storeyTitle(storey)}
           isFirst={index === 0}
           isLast={index === storeys.length - 1}
@@ -455,7 +455,7 @@ export function StoreyMapPage() {
             key={activeStorey.id}
             storey={activeStorey}
             title={storeyTitle(activeStorey)}
-            progress={activeStorey.practice_completion?.value ?? 0}
+            progress={activeStorey.level_completion?.value ?? 0}
           />
         </aside>
       ) : null}

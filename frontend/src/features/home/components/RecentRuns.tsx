@@ -48,12 +48,12 @@ export function RecentRuns({ summary }: { summary: HomeSummary }) {
       <h3 className="text-[0.95rem] font-bold tracking-tight">Recent Runs</h3>
 
       {runs.length > 0 ? (
-        <ol className="mt-2 flex flex-col" aria-label="Recent quest runs">
+        <ol className="mt-2 flex flex-col" aria-label="Recent level runs">
           {runs.map((run, i) => {
             const accent = runAccent(run.retries)
             return (
               <li
-                key={`${run.practice_title}-${i}`}
+                key={`${run.level_title}-${i}`}
                 className="match-row animate-fade-in-up"
                 style={{
                   ['--run-accent' as string]: accent.hex,
@@ -63,7 +63,7 @@ export function RecentRuns({ summary }: { summary: HomeSummary }) {
               >
                 <span className="match-dot" aria-hidden="true" />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold leading-tight">{run.practice_title}</p>
+                  <p className="truncate text-sm font-semibold leading-tight">{run.level_title}</p>
                   <p className="mt-0.5 truncate font-mono text-[0.6rem] uppercase tracking-[0.08em] text-muted-foreground/85">
                     {run.label}
                   </p>
@@ -96,7 +96,7 @@ export function RecentRuns({ summary }: { summary: HomeSummary }) {
           </span>
           <p className="text-sm font-semibold">No runs on record yet</p>
           <p className="max-w-xs text-xs leading-5 text-muted-foreground">
-            Enter the tower and clear your first quest — every attempt lands here as match history.
+            Enter the tower and clear your first level — every attempt lands here as match history.
           </p>
         </div>
       )}

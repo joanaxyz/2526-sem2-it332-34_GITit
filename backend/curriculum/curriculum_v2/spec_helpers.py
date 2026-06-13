@@ -1,6 +1,6 @@
 """Shared builders for authoring curriculum_v2 repository-state specs.
 
-Both the adventure quest specs (``adventure_quests.py``) and the challenge
+Both the adventure level specs (``adventure_levels.py``) and the challenge
 specs (``challenges.py``) author initial repository states and evaluation
 specs with these helpers.
 """

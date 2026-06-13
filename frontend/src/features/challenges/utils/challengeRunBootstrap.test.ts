@@ -5,7 +5,7 @@ import {
   readChallengeRunBootstrap,
   writeChallengeRunBootstrap,
 } from '@/features/challenges/utils/challengeRunBootstrap'
-import type { ChallengeRun } from '@/shared/practice/types'
+import type { ChallengeRun } from '@/shared/level/types'
 
 const run = { id: 42 } as ChallengeRun
 

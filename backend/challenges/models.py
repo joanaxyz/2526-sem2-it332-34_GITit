@@ -37,19 +37,22 @@ class Challenge(models.Model):
         return self.title
 
 
-class ChallengeQuest(models.Model):
+class ChallengeLevel(models.Model):
     class Difficulty(models.TextChoices):
         EASY = DIFFICULTY_EASY, "Easy"
         MEDIUM = DIFFICULTY_MEDIUM, "Medium"
         HARD = DIFFICULTY_HARD, "Hard"
 
-    challenge = models.ForeignKey(Challenge, related_name="challenge_quests", on_delete=models.CASCADE)
+    challenge = models.ForeignKey(Challenge, related_name="challenge_levels", on_delete=models.CASCADE)
     difficulty = models.CharField(max_length=12, choices=Difficulty.choices)
     required_successful_attempts = models.PositiveIntegerField(default=2)
     min_counted_commands = models.PositiveIntegerField(default=1)
     max_counted_commands = models.PositiveIntegerField(default=8)
     evaluation_spec = models.JSONField(default=dict, blank=True)
     scenario_context = models.JSONField(default=dict, blank=True)
+    # Authored battle boss for this level, {"species": ..., "hp": ...}. Empty
+    # dict = deterministic default derived at run start (battle.state).
+    boss_spec = models.JSONField(default=dict, blank=True)
     is_published = models.BooleanField(default=True)
 
     class Meta:
@@ -65,8 +68,8 @@ class ChallengeQuest(models.Model):
 
 
 class ChallengeVariant(VariantBase):
-    challenge_quest = models.ForeignKey(
-        ChallengeQuest,
+    challenge_level = models.ForeignKey(
+        ChallengeLevel,
         related_name="challenge_variants",
         on_delete=models.CASCADE,
     )
@@ -74,11 +77,11 @@ class ChallengeVariant(VariantBase):
 
     class Meta(VariantBase.Meta):
         abstract = False
-        ordering = ["challenge_quest_id", "semantic_key", "id"]
+        ordering = ["challenge_level_id", "semantic_key", "id"]
 
     @property
-    def quest(self):
-        return self.challenge_quest
+    def level(self):
+        return self.challenge_level
 
     def __str__(self) -> str:
         return f"challenge:{self.slug}"
@@ -98,7 +101,7 @@ class ChallengeRun(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     storey = models.ForeignKey("curriculum.Storey", on_delete=models.PROTECT)
     challenge = models.ForeignKey(Challenge, on_delete=models.PROTECT)
-    challenge_quest = models.ForeignKey(ChallengeQuest, on_delete=models.PROTECT)
+    challenge_level = models.ForeignKey(ChallengeLevel, on_delete=models.PROTECT)
     challenge_variant = models.ForeignKey(ChallengeVariant, on_delete=models.PROTECT)
     prior_run = models.ForeignKey(
         "self",
@@ -117,6 +120,9 @@ class ChallengeRun(models.Model):
     looped_variant = models.BooleanField(default=False)
     command_budget_snapshot = models.JSONField(default=dict)
     repository_state = models.JSONField(default=dict)
+    # Boss roster + turn bookkeeping for the battle layer (battle.state).
+    # Written inside the save() the submit path already performs.
+    battle_state = models.JSONField(default=dict, blank=True)
     counted_action_total = models.PositiveIntegerField(default=0)
     non_counted_diagnostic_total = models.PositiveIntegerField(default=0)
     total_attempts = models.PositiveIntegerField(default=0)
@@ -134,16 +140,16 @@ class ChallengeRun(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["user", "mode", "status"], name="challenge_user_mode_status_idx"),
-            models.Index(fields=["user", "challenge_quest", "-id"], name="chal_user_quest_latest_idx"),
+            models.Index(fields=["user", "challenge_level", "-id"], name="chal_user_level_latest_idx"),
         ]
 
     def clean(self) -> None:
-        if self.challenge_id != self.challenge_quest.challenge_id:
-            raise ValidationError("Challenge run quest must belong to the selected challenge.")
+        if self.challenge_id != self.challenge_level.challenge_id:
+            raise ValidationError("Challenge run level must belong to the selected challenge.")
 
     @property
-    def quest(self):
-        return self.challenge_quest
+    def level(self):
+        return self.challenge_level
 
     @property
     def variant(self):

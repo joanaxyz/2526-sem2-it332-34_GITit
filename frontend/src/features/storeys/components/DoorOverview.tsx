@@ -4,9 +4,9 @@ import { BookOpen, Crosshair, Lock, Swords, Target, Trophy } from 'lucide-react'
 import { ProgressBar } from '@/shared/components/ProgressBar'
 import {
   accuracyLabel,
-  challengeQuestAccent,
+  challengeLevelAccent,
   difficultyLabel,
-  questProgress,
+  levelProgress,
 } from '@/features/storeys/challengeUi'
 import { useTowerSelection } from '@/features/storeys/hooks/useTowerSelection'
 
@@ -77,8 +77,8 @@ export function DoorOverview({ storeyId }: { storeyId: number }) {
     )
   }
 
-  const { challenge, challengeIndex, quest, locked } = selected
-  const accent = challengeQuestAccent(quest)
+  const { challenge, challengeIndex, level, locked } = selected
+  const accent = challengeLevelAccent(level)
   return (
     <section
       className="door-overview"
@@ -90,7 +90,7 @@ export function DoorOverview({ storeyId }: { storeyId: number }) {
         GIT Challenged · Trial {challengeIndex + 1}
       </span>
       <h3 className="door-overview-title">{challenge.title}</h3>
-      <span className="door-overview-difficulty">{difficultyLabel(quest)}</span>
+      <span className="door-overview-difficulty">{difficultyLabel(level)}</span>
 
       {locked ? (
         <p className="door-overview-locked">
@@ -100,19 +100,19 @@ export function DoorOverview({ storeyId }: { storeyId: number }) {
       ) : null}
 
       <div className="door-overview-stats">
-        <Stat icon={Target} label="Accuracy" value={accuracyLabel(quest)} />
+        <Stat icon={Target} label="Accuracy" value={accuracyLabel(level)} />
         <Stat
           icon={Crosshair}
           label="Cleared"
-          value={`${quest.successful_attempts.count}/${quest.successful_attempts.required}`}
+          value={`${level.successful_attempts.count}/${level.successful_attempts.required}`}
         />
       </div>
       <div className="door-overview-progress-meta">
-        <span>{difficultyLabel(quest)} progress</span>
-        <strong>{questProgress(quest)}%</strong>
+        <span>{difficultyLabel(level)} progress</span>
+        <strong>{levelProgress(level)}%</strong>
       </div>
       <ProgressBar
-        value={questProgress(quest)}
+        value={levelProgress(level)}
         className="h-2.5 bg-secondary/55"
         fillFrom={`rgb(${accent})`}
         fillTo="rgb(234, 255, 252)"

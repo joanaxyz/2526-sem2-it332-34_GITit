@@ -3,7 +3,7 @@ import type { HomeSummary } from '@/features/home/types'
 /**
  * Medieval ranked ladder derived deterministically from home-summary data.
  *
- * Rank rating = 2 points per completed quest + 1 point per first-attempt
+ * Rank rating = 2 points per completed level + 1 point per first-attempt
  * star. Tiers are fixed thresholds, and the title is flavored with the
  * highest tower storey the player has touched.
  */

@@ -1,5 +1,5 @@
 import { apiRequest } from '@/shared/api/httpClient'
-import type { ChallengeCommandResponse, ChallengeRun } from '@/shared/practice/types'
+import type { ChallengeCommandResponse, ChallengeRun } from '@/shared/level/types'
 
 export const challengeRunsApi = {
   getRun(runId: number) {

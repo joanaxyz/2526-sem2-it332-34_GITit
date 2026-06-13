@@ -1,9 +1,8 @@
-from collections import OrderedDict
-
 from django.db import transaction
 from django.utils import timezone
 
-from challenges.models import ChallengeQuest, ChallengeRun, ChallengeVariant
+from battle.state import initial_challenge_battle_state
+from challenges.models import ChallengeLevel, ChallengeRun, ChallengeVariant
 from common.constants import (
     DIFFICULTY_EASY,
     DIFFICULTY_MEDIUM,
@@ -14,12 +13,13 @@ from common.constants import (
     SESSION_STATUS_STARTED,
 )
 from common.exceptions import Locked
-from progress.models import QuestCompletion
+from common.lru import LRUCommandHistoryCache
+from progress.models import LevelCompletion
 
 RUN_HYDRATE_SELECT_RELATED = (
     "storey",
     "challenge",
-    "challenge_quest__challenge",
+    "challenge_level__challenge",
     "challenge_variant",
     "prior_run",
     "user",
@@ -31,21 +31,21 @@ class VariantSelectionService:
         self,
         *,
         user,
-        quest: ChallengeQuest,
+        level: ChallengeLevel,
         prior_run: ChallengeRun | None = None,
         published_variants: list[ChallengeVariant] | None = None,
         tried_variant_keys: set[str] | None = None,
     ) -> ChallengeVariant:
         variants = published_variants or list(
-            quest.challenge_variants.filter(is_published=True).order_by("semantic_key", "id")
+            level.challenge_variants.filter(is_published=True).order_by("semantic_key", "id")
         )
         if not variants:
-            raise Locked("This challenge quest has no published variants.")
+            raise Locked("This challenge level has no published variants.")
         if prior_run is None:
             return variants[0]
 
         prior_key = self.variant_identity(prior_run.variant)
-        tried_keys = tried_variant_keys if tried_variant_keys is not None else self._tried_variant_keys(user=user, quest=quest)
+        tried_keys = tried_variant_keys if tried_variant_keys is not None else self._tried_variant_keys(user=user, level=level)
         for variant in variants:
             identity = self.variant_identity(variant)
             if identity != prior_key and identity not in tried_keys:
@@ -72,9 +72,9 @@ class VariantSelectionService:
         # fallback only guards unsaved/legacy rows that predate that guarantee.
         return variant.semantic_key or f"id:{variant.id}"
 
-    def _tried_variant_keys(self, *, user, quest: ChallengeQuest) -> set[str]:
+    def _tried_variant_keys(self, *, user, level: ChallengeLevel) -> set[str]:
         variant_ids = (
-            ChallengeRun.objects.filter(user=user, challenge_quest=quest)
+            ChallengeRun.objects.filter(user=user, challenge_level=level)
             .values_list("challenge_variant_id", flat=True)
             .distinct()
         )
@@ -84,19 +84,14 @@ class VariantSelectionService:
         }
 
 
-class CommandHistoryCache:
-    _cache: OrderedDict[tuple[int, int], list[str]] = OrderedDict()
-    _max_entries = 512
-
+class CommandHistoryCache(LRUCommandHistoryCache):
     def history_for(self, *, run: ChallengeRun) -> list[str]:
         from practice.models import CommandLog
 
         key = (run.id, run.total_attempts)
-        cached = self._cache.get(key)
+        cached = self._cached(key)
         if cached is not None:
-            self._cache.move_to_end(key)
-            return list(cached)
-
+            return cached
         history = list(
             CommandLog.objects.filter(step__challenge_run=run)
             .order_by("step_id")
@@ -107,12 +102,6 @@ class CommandHistoryCache:
 
     def remember_after_append(self, *, run: ChallengeRun, previous_history: list[str], normalized_command: str) -> None:
         self._remember((run.id, run.total_attempts), [*previous_history, normalized_command])
-
-    def _remember(self, key: tuple[int, int], history: list[str]) -> None:
-        self._cache[key] = list(history)
-        self._cache.move_to_end(key)
-        while len(self._cache) > self._max_entries:
-            self._cache.popitem(last=False)
 
 
 class ChallengeRunService:
@@ -135,32 +124,32 @@ class ChallengeRunService:
         self,
         *,
         user,
-        quest: ChallengeQuest,
+        level: ChallengeLevel,
         source_entry_point: str,
         prior_run: ChallengeRun | None = None,
         mode: str = SESSION_MODE_PRIMARY,
     ) -> ChallengeRun:
-        if prior_run and prior_run.challenge_quest_id != quest.id:
-            raise Locked("Retry runs must use the same challenge quest.")
+        if prior_run and prior_run.challenge_level_id != level.id:
+            raise Locked("Retry runs must use the same challenge level.")
         if prior_run and prior_run.status == SESSION_STATUS_STARTED:
             raise Locked("Exit the current challenge run before retrying.")
         if mode == SESSION_MODE_PRIMARY:
-            self._ensure_unlocked(user=user, quest=quest)
-            active = self._active_run(user=user, quest=quest)
+            self._ensure_unlocked(user=user, level=level)
+            active = self._active_run(user=user, level=level)
             if active and (not prior_run or active.id != prior_run.id):
                 raise Locked("Exit the current challenge run before starting again.")
 
         selector = VariantSelectionService()
         published_variants = list(
-            quest.challenge_variants.filter(is_published=True).order_by("semantic_key", "id")
+            level.challenge_variants.filter(is_published=True).order_by("semantic_key", "id")
         )
-        tried_keys = selector._tried_variant_keys(user=user, quest=quest) if prior_run else set()
+        tried_keys = selector._tried_variant_keys(user=user, level=level) if prior_run else set()
         variant = (
-            self._review_variant(user=user, quest=quest)
+            self._review_variant(user=user, level=level)
             if mode == SESSION_MODE_REVIEW
             else selector.select_variant(
                 user=user,
-                quest=quest,
+                level=level,
                 prior_run=prior_run,
                 published_variants=published_variants,
                 tried_variant_keys=tried_keys,
@@ -184,48 +173,49 @@ class ChallengeRunService:
         )
         run = ChallengeRun.objects.create(
             user=user,
-            storey=quest.storey,
-            challenge=quest.challenge,
-            challenge_quest=quest,
+            storey=level.storey,
+            challenge=level.challenge,
+            challenge_level=level,
             challenge_variant=variant,
             prior_run=prior_run,
             source_entry_point=source_entry_point,
             mode=mode,
-            difficulty=quest.difficulty,
+            difficulty=level.difficulty,
             rta_eligible=rta_eligible,
             changed_variant=changed_variant,
             looped_variant=looped_variant,
             retry_index=retry_index,
             command_budget_snapshot={
-                "min_counted_commands": quest.min_counted_commands,
-                "max_counted_commands": quest.max_counted_commands,
+                "min_counted_commands": level.min_counted_commands,
+                "max_counted_commands": level.max_counted_commands,
             },
             repository_state=variant.initial_state,
+            battle_state=initial_challenge_battle_state(level, variant),
         )
         return self.hydrate_run(run)
 
-    def _active_run(self, *, user, quest: ChallengeQuest):
+    def _active_run(self, *, user, level: ChallengeLevel):
         return ChallengeRun.objects.filter(
             user=user,
-            challenge_quest=quest,
+            challenge_level=level,
             status=SESSION_STATUS_STARTED,
             mode=SESSION_MODE_PRIMARY,
         ).first()
 
-    def _ensure_unlocked(self, *, user, quest: ChallengeQuest) -> None:
-        if quest.difficulty == DIFFICULTY_EASY:
+    def _ensure_unlocked(self, *, user, level: ChallengeLevel) -> None:
+        if level.difficulty == DIFFICULTY_EASY:
             # Entry into a storey's challenges is gated on passing its Command
             # Adventure (the learn-by-doing mode that teaches the commands first).
-            self._ensure_adventure_passed(user=user, storey=quest.storey)
+            self._ensure_adventure_passed(user=user, storey=level.storey)
             return
-        previous = DIFFICULTY_EASY if quest.difficulty == DIFFICULTY_MEDIUM else DIFFICULTY_MEDIUM
-        previous_quest = ChallengeQuest.objects.filter(
-            challenge=quest.challenge,
+        previous = DIFFICULTY_EASY if level.difficulty == DIFFICULTY_MEDIUM else DIFFICULTY_MEDIUM
+        previous_level = ChallengeLevel.objects.filter(
+            challenge=level.challenge,
             difficulty=previous,
             is_published=True,
         ).first()
-        if not previous_quest or not QuestCompletion.objects.filter(user=user, challenge_quest=previous_quest).exists():
-            raise Locked("This challenge quest is locked until the previous quest is completed.")
+        if not previous_level or not LevelCompletion.objects.filter(user=user, challenge_level=previous_level).exists():
+            raise Locked("This challenge level is locked until the previous level is completed.")
 
     def _ensure_adventure_passed(self, *, user, storey) -> None:
         # Lazy import: adventures.models is a leaf w.r.t. challenges, but keep the
@@ -241,13 +231,13 @@ class ChallengeRunService:
         if not passed:
             raise Locked("Complete this storey's Command Adventure to unlock its challenges.")
 
-    def _review_variant(self, *, user, quest: ChallengeQuest):
-        completion = QuestCompletion.objects.select_related("challenge_run__challenge_variant").filter(
+    def _review_variant(self, *, user, level: ChallengeLevel):
+        completion = LevelCompletion.objects.select_related("challenge_run__challenge_variant").filter(
             user=user,
-            challenge_quest=quest,
+            challenge_level=level,
         ).first()
         if not completion or not completion.challenge_run:
-            raise Locked("Free play is available only after completing this challenge quest.")
+            raise Locked("Free play is available only after completing this challenge level.")
         return completion.challenge_run.variant
 
     @transaction.atomic

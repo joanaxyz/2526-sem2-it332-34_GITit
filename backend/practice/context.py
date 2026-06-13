@@ -13,7 +13,7 @@ LEAKY_KEYS = {
 
 # The learner-facing brief is deliberately flat and whitelist-only so the
 # frontend can render it without guessing. The objective checklist is NOT part
-# of this schema: it lives on AdventureQuest.objective_checks (server-side
+# of this schema: it lives on AdventureLevel.objective_checks (server-side
 # requirements) and reaches the client only as evaluated {label, satisfied}
 # rows in the attempt payload.
 ALLOWED_KEYS = {"schema_version", "story", "task", "details", "constraints"}
@@ -80,15 +80,8 @@ class ScenarioContextNormalizer:
 
     def _drop_empty(self, value: Any) -> Any:
         if isinstance(value, dict):
-            cleaned = {
-                key: self._drop_empty(item)
-                for key, item in value.items()
-            }
-            return {
-                key: item
-                for key, item in cleaned.items()
-                if item not in ("", [], {}, None)
-            }
+            cleaned = {key: self._drop_empty(item) for key, item in value.items()}
+            return {key: item for key, item in cleaned.items() if item not in ("", [], {}, None)}
         if isinstance(value, list):
             return [self._drop_empty(item) for item in value if item not in ("", [], {}, None)]
         return value

@@ -33,7 +33,7 @@ const inputClasses =
 
 const highlights = [
   { Icon: ShieldCheck, text: 'Live DAG visualizations per command' },
-  { Icon: Zap, text: 'Consequence-safe practice sessions' },
+  { Icon: Zap, text: 'Consequence-safe runs' },
   { Icon: GitMerge, text: 'Progress tracking across all towers' },
 ]
 
@@ -89,7 +89,7 @@ export function LoginForm() {
     >
       <div>
         <h2 className="text-2xl font-extrabold tracking-tight">Sign in</h2>
-        <p className="mt-1 text-sm leading-5 text-muted-foreground">Continue your Git practice journey.</p>
+        <p className="mt-1 text-sm leading-5 text-muted-foreground">Continue your Git level journey.</p>
       </div>
 
       <label className="flex flex-col gap-1.5 text-sm font-semibold">

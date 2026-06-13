@@ -64,10 +64,10 @@ export function deriveAchievements(home: HomeSummary, stats: StatsSummary): Achi
   })
 
   return [
-    make('first-clear', 'First Clear', 'Complete your first quest', Swords, '#34D399', 10, home.counts.completed, 1),
-    make('quest-adept', 'Quest Adept', 'Complete 10 quests', Swords, '#7DD3FC', 15, home.counts.completed, 10),
-    make('quest-veteran', 'Quest Veteran', 'Complete 25 quests', Medal, '#00F5D4', 20, home.counts.completed, 25),
-    make('quest-champion', 'Quest Champion', 'Complete 50 quests', Crown, '#FBBF24', 30, home.counts.completed, 50),
+    make('first-clear', 'First Clear', 'Complete your first level', Swords, '#34D399', 10, home.counts.completed, 1),
+    make('level-adept', 'Level Adept', 'Complete 10 levels', Swords, '#7DD3FC', 15, home.counts.completed, 10),
+    make('level-veteran', 'Level Veteran', 'Complete 25 levels', Medal, '#00F5D4', 20, home.counts.completed, 25),
+    make('level-champion', 'Level Champion', 'Complete 50 levels', Crown, '#FBBF24', 30, home.counts.completed, 50),
     make('streak-spark', 'Streak Spark', 'Reach a 3-day streak', Flame, '#FB923C', 10, home.streak.longest, 3),
     make('weeklong-flame', 'Weeklong Flame', 'Reach a 7-day streak', Flame, '#FB923C', 20, home.streak.longest, 7),
     make('fortnight-blaze', 'Fortnight Blaze', 'Reach a 14-day streak', Flame, '#F472B6', 35, home.streak.longest, 14),

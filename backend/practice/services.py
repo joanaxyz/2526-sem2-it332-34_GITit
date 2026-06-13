@@ -5,11 +5,14 @@ from dataclasses import dataclass
 from typing import Any
 
 from django.db import transaction
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
+from battle.state import initial_challenge_battle_state
+from battle.turn import apply_battle_turn
 from challenges.models import ChallengeRun
 from challenges.selectors import (
-    required_successful_attempts_for_quest,
+    required_successful_attempts_for_level,
     run_meets_progress_threshold,
 )
 from challenges.services import CommandHistoryCache
@@ -34,7 +37,7 @@ from practice.models import CommandLog, CommandStep
 from practice.scaffolding import FeedbackGenerationService
 from practice.visualization import RepositoryVisualizationService
 from progress.chests import StoreyChestService
-from progress.models import QuestCompletion
+from progress.models import LevelCompletion
 from progress.services import StreakService
 from simulator.command_engine import SimulatedGitCommandEngine
 from simulator.services import (
@@ -218,6 +221,7 @@ class CommandProcessingService:
         executed_commands: list[str] = []
         state_hash = ""
         expected_state_hash = ""
+        rules_passing: int | None = None
         if command_result.processed:
             with span("evaluate"):
                 state_hash = state_tools.state_hash_for_normalized(next_state)
@@ -238,6 +242,7 @@ class CommandProcessingService:
                     )
                 )
                 result_category = evaluation.result_category
+                rules_passing = len(evaluation.passed_rules)
                 if _uses_contextual_feedback(run) and classification == COMMAND_COUNTED:
                     feedback = FeedbackGenerationService().describe(previous_state, next_state)
         else:
@@ -255,6 +260,26 @@ class CommandProcessingService:
         run.total_attempts += 1
         if result_category != RESULT_TARGET_MATCHED:
             run.first_attempt_star_eligible = False
+
+        # Battle turn: a pure function over the signals computed above. The
+        # state rides the run save below — no new query.
+        solved = result_category == RESULT_TARGET_MATCHED
+        max_count = run.command_budget_snapshot["max_counted_commands"]
+        battle_defeated = (
+            not solved
+            and classification == COMMAND_COUNTED
+            and run.counted_action_total >= max_count
+        )
+        battle_events, battle_changed = apply_battle_turn(
+            run,
+            lambda: initial_challenge_battle_state(run.challenge_level, run.challenge_variant),
+            counted=classification == COMMAND_COUNTED,
+            processed=command_result.processed,
+            solved=solved,
+            rules_passing=rules_passing,
+            skill=command_result.command_family or "default",
+            defeated=battle_defeated,
+        )
 
         with span("visualization"):
             # next_state is already normalized by the executor; skip re-normalizing.
@@ -288,8 +313,9 @@ class CommandProcessingService:
                 normalized_command=command_result.normalized_command,
             )
 
-        max_count = run.command_budget_snapshot["max_counted_commands"]
         update_fields = {"total_attempts", "first_attempt_star_eligible"}
+        if battle_changed:
+            update_fields.add("battle_state")
         # Only persist the (large) repository_state JSON when the command actually
         # changed it. Read-only/invalid commands leave it identical, so re-writing
         # the blob is wasted I/O on the hot path.
@@ -300,19 +326,19 @@ class CommandProcessingService:
             update_fields.add("counted_action_total")
         elif classification == COMMAND_DIAGNOSTIC:
             update_fields.add("non_counted_diagnostic_total")
+        chest_pending = False
         if result_category == RESULT_TARGET_MATCHED:
-            update_fields.update(self._complete_run(run))
+            completion_fields, chest_pending = self._complete_run(run)
+            update_fields.update(completion_fields)
         elif classification == COMMAND_COUNTED and run.counted_action_total >= max_count:
             run.status = SESSION_STATUS_FAILED
-            from django.utils import timezone
-
             run.ended_at = timezone.now()
             run.failure_reason = "Action limit reached before the target repository state was reached."
             update_fields.update({"status", "ended_at", "failure_reason"})
 
         with span("run_save"):
             run.save(update_fields=sorted(update_fields))
-        if getattr(run, "_chest_check_pending", False):
+        if chest_pending:
             StoreyChestService().award_chests(user=run.user, storey=run.storey)
         with span("response_snapshot"):
             if _command_response_includes_project_tree(
@@ -337,17 +363,20 @@ class CommandProcessingService:
             "evaluation_result": result_category,
             "command_classification": classification,
             "contextual_feedback": feedback,
+            "battle_events": battle_events,
         }
 
-    def _complete_run(self, run: ChallengeRun) -> set[str]:
-        from django.utils import timezone
-
+    def _complete_run(self, run: ChallengeRun) -> tuple[set[str], bool]:
+        """Mark the run completed and record level progress. Returns the saved
+        field names plus whether a storey-chest check should run after the
+        caller persists this run (the check reads completed runs from the DB)."""
         run.status = SESSION_STATUS_COMPLETED
         run.completed_at = timezone.now()
         run.ended_at = run.completed_at
         run.rta_success = bool(run.rta_eligible and run.first_attempt_star_eligible)
+        chest_pending = False
         if run.mode == SESSION_MODE_PRIMARY:
-            required = required_successful_attempts_for_quest(run.challenge_quest)
+            required = required_successful_attempts_for_level(run.challenge_level)
             previous_progress = 0
             # only(): the threshold check reads three small fields; without it every
             # prior run ships its full repository_state JSON over the wire.
@@ -355,15 +384,15 @@ class CommandProcessingService:
                 user=run.user,
                 mode=SESSION_MODE_PRIMARY,
                 status=SESSION_STATUS_COMPLETED,
-                challenge_quest=run.challenge_quest,
+                challenge_level=run.challenge_level,
             ).exclude(pk=run.pk).only("status", "counted_action_total", "command_budget_snapshot"):
                 if run_meets_progress_threshold(run=prior_run):
                     previous_progress += 1
             current_meets_progress = run_meets_progress_threshold(run=run)
             if previous_progress + (1 if current_meets_progress else 0) >= required:
-                completion, created = QuestCompletion.objects.get_or_create(
+                completion, created = LevelCompletion.objects.get_or_create(
                     user=run.user,
-                    challenge_quest=run.challenge_quest,
+                    challenge_level=run.challenge_level,
                     defaults={
                         "challenge_run": run,
                         "first_attempt_star": run.first_attempt_star_eligible,
@@ -379,9 +408,9 @@ class CommandProcessingService:
                 StreakService().record_completion(user=run.user, completed_at=run.completed_at)
             # GitCoins come from the storey progress chests. The chest check
             # reads completed runs from the DB, so it must wait until the
-            # caller persists this run — flag it for after run.save().
-            run._chest_check_pending = current_meets_progress
-        return {"status", "completed_at", "ended_at", "rta_success"}
+            # caller persists this run — report it back for after run.save().
+            chest_pending = current_meets_progress
+        return {"status", "completed_at", "ended_at", "rta_success"}, chest_pending
 
 
 def _uses_contextual_feedback(run: ChallengeRun) -> bool:

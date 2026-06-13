@@ -1,5 +1,5 @@
 // Shared deterministic helpers for the tower's procedural scatter (clouds in
-// StoreyMapPage, windows in StoreyPracticeHub). Seeded so layouts are generated
+// StoreyMapPage, windows in StoreyLevelHub). Seeded so layouts are generated
 // once and stay put across renders — no reshuffle / flicker.
 
 export const clamp = (value: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, value))

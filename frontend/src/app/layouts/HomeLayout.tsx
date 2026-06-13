@@ -28,7 +28,7 @@ const navItems = [
 ]
 
 function getInitials(username: string) {
-  return username.slice(0, 2).toUpperCase()
+  return (username?.slice(0, 2) || '??').toUpperCase()
 }
 
 function Avatar({
@@ -105,7 +105,7 @@ function ProfileDropdown({
   }, [open])
 
   const initials = getInitials(user.username)
-  const displayName = user.username
+  const displayName = user.username || 'Adventurer'
 
   return (
     <div ref={ref} className="relative">
@@ -181,7 +181,7 @@ function TowerHelpOverlay({ open, onClose }: { open: boolean; onClose: () => voi
     { icon: Swords, copy: 'Clear each Command Adventure to unlock GIT Challenged.' },
     { icon: Trophy, copy: 'Each challenge has Easy, Medium, and Hard levels.' },
     { icon: Lock, copy: 'Clear the storey levels to advance the tower.' },
-    { icon: CheckCircle2, copy: 'Progress saves after every cleared practice.' },
+    { icon: CheckCircle2, copy: 'Progress saves after every cleared level.' },
   ]
 
   return (

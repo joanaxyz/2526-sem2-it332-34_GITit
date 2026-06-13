@@ -1,0 +1,88 @@
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { afterEach, describe, expect, it } from 'vitest'
+
+import type { RepositorySnapshot } from '@/shared/level/types'
+import { graphLayoutSignature } from '@/shared/level/utils/graphLayoutSignature'
+import { LiveDagPanel } from './LiveDagPanel'
+
+const snapshot: RepositorySnapshot = {
+  repository_initialized: true,
+  commits: [
+    {
+      id: 'c1',
+      message: 'Base',
+      parents: [],
+      tree: {
+        'README.md': 'readme-v1',
+        'src/form.js': 'form-validation-v1',
+      },
+      changes: {
+        'README.md': { change_type: 'added', before: null, after: 'readme-v1' },
+      },
+    },
+    {
+      id: 'c2',
+      message: 'Update form validation',
+      parents: ['c1'],
+      tree: {
+        'README.md': 'readme-v1',
+        'src/form.js': 'form-validation-v2',
+      },
+      changes: {
+        'src/form.js': {
+          change_type: 'modified',
+          before: 'form-validation-v1',
+          after: 'form-validation-v2',
+        },
+      },
+    },
+  ],
+  branches: { main: 'c2' },
+  head: { type: 'branch' as const, name: 'main', target: 'c2' },
+  staging: { 'src/form.js': 'form-validation-v2' },
+  working_tree: { 'debug.log': 'debug-v1' },
+  conflicts: [],
+  remotes: { origin: 'https://example.test/repo.git' },
+  remote_branches: { 'origin/main': 'c1' },
+  upstream_tracking: { main: 'origin/main' },
+  stash_stack: [{ working_tree: { 'notes.md': 'draft' }, staging: {}, conflicts: [] }],
+  reflog: [],
+  partial_hunks: {},
+  operation_metadata: {},
+}
+
+describe('LiveDagPanel', () => {
+  afterEach(() => cleanup())
+
+  it('keeps the same layout signature when only branch pointers move', () => {
+    const movedPointerSnapshot: RepositorySnapshot = {
+      ...snapshot,
+      branches: { main: 'c1', feature: 'c2' },
+      head: { type: 'branch', name: 'feature', target: 'c2' },
+    }
+
+    expect(graphLayoutSignature(snapshot)).toBe(graphLayoutSignature(movedPointerSnapshot))
+  })
+
+  it('renders a simplified commit summary in the diagram overlay when a node is active', () => {
+    render(<LiveDagPanel snapshot={snapshot} />)
+
+    const commitButton = screen.getByTitle(/commit c2/i)
+    fireEvent.focus(commitButton)
+
+    const overlay = screen.getByTestId('commit-details-overlay')
+    expect(overlay).toBeInTheDocument()
+    expect(screen.getByText('Message: Update form validation')).toBeInTheDocument()
+    expect(within(overlay).getByText('main')).toBeInTheDocument()
+  })
+
+  it('keeps repository metadata inside the diagram panel', () => {
+    render(<LiveDagPanel title="Target DAG" snapshot={snapshot} showRepositoryDetails />)
+
+    expect(screen.getByText('Target DAG')).toBeInTheDocument()
+    expect(screen.getByText('Staged:')).toBeInTheDocument()
+    expect(screen.getByText('Working tree:')).toBeInTheDocument()
+    expect(screen.getByText('Remote branches:')).toBeInTheDocument()
+    expect(screen.getByTitle(/Staged: src\/form\.js/)).toBeInTheDocument()
+  })
+})

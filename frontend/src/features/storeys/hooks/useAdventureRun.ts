@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 
 import { commandAdventuresApi } from '@/features/command-adventures/api/commandAdventuresApi'
 import type { AdventureRun } from '@/features/command-adventures/types'
-import { terminalLinesFromSteps } from '@/shared/practice/terminalSteps'
+import { terminalLinesFromSteps } from '@/shared/level/terminalSteps'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { syncAdventureRunInCache } from '@/features/command-adventures/utils/adventureRunCache'
 

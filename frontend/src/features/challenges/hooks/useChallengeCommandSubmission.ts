@@ -2,17 +2,17 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { challengeRunsApi } from '@/features/challenges/api/challengeRunsApi'
 import {
-  invalidatePracticeProgressQueries,
+  invalidateLevelProgressQueries,
   syncChallengeRunInCache,
   updateChallengeRunCache,
 } from '@/features/challenges/utils/challengeRunCache'
-import type { ChallengeCommandResponse, ChallengeRun, ChallengeStepLog } from '@/shared/practice/types'
+import type { ChallengeCommandResponse, ChallengeRun, ChallengeStepLog } from '@/shared/level/types'
 import {
   createErrorStep as makeErrorStep,
   createPendingStep as makePendingStep,
   nextEphemeralStepId,
   stripEphemeralSteps,
-} from '@/shared/practice/terminalSteps'
+} from '@/shared/level/terminalSteps'
 import { queryKeys } from '@/shared/api/queryKeys'
 
 type CommandMutationContext = {
@@ -64,7 +64,7 @@ export function useChallengeCommandSubmission(runId: number) {
 
       if (!response.run.review_mode && response.run.status !== 'started') {
         syncChallengeRunInCache(queryClient, updatedRun)
-        invalidatePracticeProgressQueries(queryClient)
+        invalidateLevelProgressQueries(queryClient)
       }
     },
     onError: (error, command, context) => {
@@ -125,13 +125,12 @@ function mergeRepositoryState(
   previous: ChallengeRun['repository_state'],
   next: ChallengeRun['repository_state'],
 ): ChallengeRun['repository_state'] {
-  const hasProjectTree =
-    next.project_tree !== undefined ||
-    next.visible_tree !== undefined ||
-    Object.keys(next.project_tree ?? {}).length > 0 ||
-    Object.keys(next.visible_tree ?? {}).length > 0
-
-  if (hasProjectTree) {
+  // The command response carries the tree only when it changed; an absent tree
+  // means "unchanged", so we fall back to the previous one below. (Checking the
+  // keys' length would be redundant: a present tree is authoritative even when
+  // empty — e.g. a freshly cleared workspace.)
+  const carriesTree = next.project_tree !== undefined || next.visible_tree !== undefined
+  if (carriesTree) {
     return next
   }
 

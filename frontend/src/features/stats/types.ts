@@ -13,7 +13,7 @@ export type SkillAxis = {
 
 export type TrendPoint = {
   date: string
-  quests_completed: number
+  levels_completed: number
   commands_run: number
 }
 
@@ -26,7 +26,7 @@ export type StatsSummary = {
   skill_profile: SkillAxis[]
   activity_trend: TrendPoint[]
   headline: {
-    quests_completed: number
+    levels_completed: number
     finish_rate: RateMetric
     accuracy: number | null
     boss_floors: ScopedCount

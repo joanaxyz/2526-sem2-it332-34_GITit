@@ -31,10 +31,10 @@ class PracticeCompletionEvaluator:
         elif raw_spec:
             spec = compile_evaluation_spec(raw_spec)
         else:
-            # Quest-level fallback is rare and not keyed by a stable cache id, so
+            # Level fallback is rare and not keyed by a stable cache id, so
             # compile it directly.
             spec = compile_evaluation_spec(
-                getattr(context.run.quest, "evaluation_spec", None)
+                getattr(context.run.level, "evaluation_spec", None)
             )
         return EvaluationEngine().evaluate(
             spec=spec,

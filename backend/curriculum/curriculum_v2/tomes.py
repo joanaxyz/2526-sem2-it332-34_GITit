@@ -94,7 +94,7 @@ TOMES = [
                     "type": "practice-notes",
                     "content": [
                         _paragraph(
-                            "Every quest in this tower starts the same way: look at the repository "
+                            "Every level in this tower starts the same way: look at the repository "
                             "diagram and status signals first, then decide which arrow you need. "
                             "The answer is always a repository state, never a memorized command string."
                         ),

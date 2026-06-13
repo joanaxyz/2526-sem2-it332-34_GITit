@@ -12,7 +12,7 @@ import { LoadingState } from '@/shared/components/LoadingState'
  *
  * The tower should only navigate here. This page owns the start mutation,
  * caches the created run, then replaces itself with the real run workspace.
- * That keeps the loading screen inside the practice flow instead of the tower.
+ * That keeps the loading screen inside the level flow instead of the tower.
  */
 export function AdventureStartPage() {
   const { adventureSlug } = useParams<{ adventureSlug: string }>()

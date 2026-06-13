@@ -33,16 +33,16 @@ class CommandAdventure(models.Model):
         return self.title
 
 
-class AdventureQuest(models.Model):
+class AdventureLevel(models.Model):
     command_form = models.ForeignKey(
         "curriculum.CommandForm",
-        related_name="adventure_quests",
+        related_name="adventure_levels",
         on_delete=models.CASCADE,
     )
     slug = models.SlugField()
     title = models.CharField(max_length=180)
     required_successful_attempts = models.PositiveIntegerField(default=3)
-    # Command budget is authored on the quest and shared by all its variants:
+    # Command budget is authored on the level and shared by all its variants:
     # min_counted_commands is the efficiency target ("par"), max is the hard cap.
     min_counted_commands = models.PositiveIntegerField(default=1)
     max_counted_commands = models.PositiveIntegerField(default=4)
@@ -56,6 +56,10 @@ class AdventureQuest(models.Model):
     objective_checks = models.JSONField(default=list, blank=True)
     is_published = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
+    # Authored battle roster for this level's encounter, [{species, hp, tier}].
+    # Empty list = deterministic default derived from the level at attempt
+    # start (battle.state), so unauthored levels need no seed changes.
+    encounter_spec = models.JSONField(default=list, blank=True)
     # Explicit prerequisite graph (DAG): this command can only be introduced once
     # every prerequisite has been solved at least once. Strengthens the implicit
     # sort_order ordering; validated acyclic + preceding at seed time.
@@ -106,19 +110,19 @@ class VariantBase(models.Model):
 
 
 class AdventureVariant(VariantBase):
-    adventure_quest = models.ForeignKey(
-        AdventureQuest,
+    adventure_level = models.ForeignKey(
+        AdventureLevel,
         related_name="adventure_variants",
         on_delete=models.CASCADE,
     )
 
     class Meta(VariantBase.Meta):
         abstract = False
-        ordering = ["adventure_quest_id", "semantic_key", "id"]
+        ordering = ["adventure_level_id", "semantic_key", "id"]
 
     @property
-    def quest(self):
-        return self.adventure_quest
+    def level(self):
+        return self.adventure_level
 
     def __str__(self) -> str:
         return f"command_adventure:{self.slug}"
@@ -146,7 +150,7 @@ class AdventureRun(models.Model):
     # replay is an uncounted free-play re-run started once the adventure is
     # already passed. Replay never reads or writes AdventureMastery.
     mode = models.CharField(max_length=16, choices=Mode.choices, default=SESSION_MODE_PRIMARY)
-    current_quest_index = models.PositiveIntegerField(default=0)
+    current_level_index = models.PositiveIntegerField(default=0)
     total_score = models.PositiveIntegerField(default=0)
     # Accumulating mastery points this session (sum of box-advance × quality).
     session_score = models.PositiveIntegerField(default=0)
@@ -166,15 +170,15 @@ class AdventureRun(models.Model):
         return f"AdventureRun({self.id}, {self.command_adventure_id}, {self.status})"
 
 
-class AdventureQuestAttempt(models.Model):
+class AdventureLevelAttempt(models.Model):
     class Status(models.TextChoices):
         STARTED = SESSION_STATUS_STARTED, "Started"
         COMPLETED = SESSION_STATUS_COMPLETED, "Completed"
         FAILED = SESSION_STATUS_FAILED, "Failed"
 
     run = models.ForeignKey(AdventureRun, related_name="attempts", on_delete=models.CASCADE)
-    adventure_quest = models.ForeignKey(
-        AdventureQuest,
+    adventure_level = models.ForeignKey(
+        AdventureLevel,
         related_name="attempts",
         on_delete=models.PROTECT,
     )
@@ -195,6 +199,9 @@ class AdventureQuestAttempt(models.Model):
     counted_command_count = models.PositiveIntegerField(default=0)
     retry_count = models.PositiveIntegerField(default=0)
     repository_state = models.JSONField(default=dict, blank=True)
+    # Monster roster + turn bookkeeping for the battle layer (battle.state).
+    # Written in the same save() the submit path already performs.
+    battle_state = models.JSONField(default=dict, blank=True)
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
 
@@ -205,18 +212,18 @@ class AdventureQuestAttempt(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"AdventureQuestAttempt({self.id}, run={self.run_id}, {self.status})"
+        return f"AdventureLevelAttempt({self.id}, run={self.run_id}, {self.status})"
 
 
 class AdventureMastery(models.Model):
-    """Per-user Leitner state for one command-quest. Drives the spaced-repetition
-    scheduler: `strength` is the box (0..N where N = quest.required_successful_attempts),
+    """Per-user Leitner state for one command-level. Drives the spaced-repetition
+    scheduler: `strength` is the box (0..N where N = level.required_successful_attempts),
     and `last_seen_seq` is the user's adventure encounter index when last served, so
     spacing is measured in encounters rather than wall-clock time. Persists across runs."""
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    adventure_quest = models.ForeignKey(
-        AdventureQuest,
+    adventure_level = models.ForeignKey(
+        AdventureLevel,
         related_name="mastery_states",
         on_delete=models.CASCADE,
     )
@@ -226,10 +233,10 @@ class AdventureMastery(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = [("user", "adventure_quest")]
+        unique_together = [("user", "adventure_level")]
         indexes = [
-            models.Index(fields=["user", "adventure_quest"], name="advmastery_user_quest_idx"),
+            models.Index(fields=["user", "adventure_level"], name="advmastery_user_level_idx"),
         ]
 
     def __str__(self) -> str:
-        return f"AdventureMastery(user={self.user_id}, quest={self.adventure_quest_id}, box={self.strength})"
+        return f"AdventureMastery(user={self.user_id}, level={self.adventure_level_id}, box={self.strength})"

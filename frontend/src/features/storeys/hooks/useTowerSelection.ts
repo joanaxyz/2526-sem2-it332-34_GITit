@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 
 import type {
-  ChallengeQuestAccess,
+  ChallengeLevelAccess,
   ChallengeSummary,
   CommandAdventureSummary,
   TomeSummary,
@@ -9,8 +9,8 @@ import type {
 
 // The whole tower is a single selection surface: one door is "selected" at a
 // time. The storey rail shows its overview; the lower-left dock shows its action.
-// Each challenge quest is now its own door, so a challenge selection carries the
-// exact quest chosen.
+// Each challenge level is now its own door, so a challenge selection carries the
+// exact level chosen.
 export type TowerSelection =
   | { kind: 'adventure'; storeyId: number; adventure: CommandAdventureSummary }
   | {
@@ -18,7 +18,7 @@ export type TowerSelection =
       storeyId: number
       challengeIndex: number
       challenge: ChallengeSummary
-      quest: ChallengeQuestAccess
+      level: ChallengeLevelAccess
       locked: boolean
     }
   | { kind: 'tome'; storeyId: number; tome: TomeSummary }
@@ -42,7 +42,7 @@ export function isSelected(current: TowerSelection | null, candidate: TowerSelec
     return current.adventure.id === candidate.adventure.id
   }
   if (current.kind === 'challenge' && candidate.kind === 'challenge') {
-    return current.quest.id === candidate.quest.id
+    return current.level.id === candidate.level.id
   }
   if (current.kind === 'tome' && candidate.kind === 'tome') {
     return current.tome.id === candidate.tome.id

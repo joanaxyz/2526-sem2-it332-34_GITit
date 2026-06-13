@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react'
 
 import type {
   ChallengeActionIntent,
-  ChallengeQuestAccess,
+  ChallengeLevelAccess,
   CommandAdventureSummary,
 } from '@/features/challenges/types'
 import type { ChestReward, LearningStorey } from '@/features/storeys/types'
@@ -37,42 +37,42 @@ export function adventureActionLabel(adventure: CommandAdventureSummary) {
   return 'Play'
 }
 
-export function difficultyLabel(quest: ChallengeQuestAccess) {
-  return DIFFICULTY_ACCENT[String(quest.difficulty)]?.label ?? String(quest.difficulty)
+export function difficultyLabel(level: ChallengeLevelAccess) {
+  return DIFFICULTY_ACCENT[String(level.difficulty)]?.label ?? String(level.difficulty)
 }
 
-export function accuracyLabel(quest: ChallengeQuestAccess | null) {
-  const accuracy = quest?.latest_attempt?.accuracy_rate
+export function accuracyLabel(level: ChallengeLevelAccess | null) {
+  const accuracy = level?.latest_attempt?.accuracy_rate
   return accuracy !== null && accuracy !== undefined ? `${accuracy}%` : '--%'
 }
 
-export function challengeQuestAccent(quest: ChallengeQuestAccess | null) {
-  if (!quest) return DIFFICULTY_ACCENT.hard.rgb
-  return DIFFICULTY_ACCENT[String(quest.difficulty)]?.rgb ?? DIFFICULTY_ACCENT.hard.rgb
+export function challengeLevelAccent(level: ChallengeLevelAccess | null) {
+  if (!level) return DIFFICULTY_ACCENT.hard.rgb
+  return DIFFICULTY_ACCENT[String(level.difficulty)]?.rgb ?? DIFFICULTY_ACCENT.hard.rgb
 }
 
-export function questProgress(quest: ChallengeQuestAccess) {
-  const required = quest.successful_attempts.required
+export function levelProgress(level: ChallengeLevelAccess) {
+  const required = level.successful_attempts.required
   if (required <= 0) return 0
-  return Math.min(100, Math.round((quest.successful_attempts.count / required) * 100))
+  return Math.min(100, Math.round((level.successful_attempts.count / required) * 100))
 }
 
-export function preferredChallengeQuest(quests: ChallengeQuestAccess[]) {
+export function preferredChallengeLevel(levels: ChallengeLevelAccess[]) {
   return (
-    quests.find((quest) => quest.status === 'in_progress') ??
-    quests.find((quest) => quest.status === 'failed' || quest.status === 'abandoned') ??
-    quests.find((quest) => quest.status !== 'locked' && quest.status !== 'completed') ??
-    quests.find((quest) => quest.status === 'completed') ??
-    quests[0] ??
+    levels.find((level) => level.status === 'in_progress') ??
+    levels.find((level) => level.status === 'failed' || level.status === 'abandoned') ??
+    levels.find((level) => level.status !== 'locked' && level.status !== 'completed') ??
+    levels.find((level) => level.status === 'completed') ??
+    levels[0] ??
     null
   )
 }
 
-export function actionForChallengeQuest(item: ChallengeQuestAccess): ChallengeActionIntent | null {
+export function actionForChallengeLevel(item: ChallengeLevelAccess): ChallengeActionIntent | null {
   if (item.status === 'locked') return null
   if (item.status === 'in_progress') return item.active_run_id ? 'resume' : null
   if (item.status === 'completed') {
-    // A completed quest is already counted; the only door action is an uncounted
+    // A completed level is already counted; the only door action is an uncounted
     // free-play replay ("Replay"). Routing it through the review run avoids the
     // retry endpoint, which rejects non-primary runs — the latest run here may
     // itself be a prior replay.
@@ -83,7 +83,7 @@ export function actionForChallengeQuest(item: ChallengeQuestAccess): ChallengeAc
   return 'start'
 }
 
-export function actionLabel(action: ChallengeActionIntent | null, status: ChallengeQuestAccess['status']) {
+export function actionLabel(action: ChallengeActionIntent | null, status: ChallengeLevelAccess['status']) {
   if (status === 'locked') return 'Locked'
   // 'review' is the internal mode for an uncounted free-play run; players just
   // see "Replay".
@@ -93,15 +93,15 @@ export function actionLabel(action: ChallengeActionIntent | null, status: Challe
   return 'Play'
 }
 
-export function doorStyleForQuest(quest: ChallengeQuestAccess | null): CSSProperties {
-  if (!quest) {
+export function doorStyleForLevel(level: ChallengeLevelAccess | null): CSSProperties {
+  if (!level) {
     return {
       '--door-rgb': '125, 145, 175',
       '--door-glow': '144, 198, 255',
     } as CSSProperties
   }
 
-  const accent = challengeQuestAccent(quest)
+  const accent = challengeLevelAccent(level)
   return {
     '--door-rgb': accent,
     '--door-glow': accent,

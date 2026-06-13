@@ -2,13 +2,14 @@ from django.db import OperationalError, transaction
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from battle.payloads import battle_block
 from challenges.models import ChallengeRun
 from challenges.payloads import (
     challenge_run_payload,
     command_run_payload,
     prefetch_run_payload_context,
 )
-from challenges.selectors import get_challenge_quest
+from challenges.selectors import get_challenge_level
 from challenges.serializers import (
     ChallengeRunStartSerializer,
     CommandSubmitSerializer,
@@ -21,10 +22,10 @@ from practice.services import CommandProcessingService, WorkspaceFileCreationSer
 
 
 class ChallengeRunStartAPIView(APIView):
-    def post(self, request, quest_id: int):
+    def post(self, request, level_id: int):
         serializer = ChallengeRunStartSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        quest = get_challenge_quest(quest_id)
+        level = get_challenge_level(level_id)
         prior_run = None
         prior_run_id = serializer.validated_data.get("prior_run_id")
         if prior_run_id:
@@ -32,7 +33,7 @@ class ChallengeRunStartAPIView(APIView):
         mode = SESSION_MODE_REVIEW if serializer.validated_data.get("review") else SESSION_MODE_PRIMARY
         run = ChallengeRunService().start_run(
             user=request.user,
-            quest=quest,
+            level=level,
             source_entry_point=serializer.validated_data["source_entry_point"],
             prior_run=prior_run,
             mode=mode,
@@ -57,7 +58,7 @@ class ChallengeCommandSubmitAPIView(APIView):
         run = ChallengeRun.objects.select_related(
             "storey",
             "challenge",
-            "challenge_quest__challenge",
+            "challenge_level__challenge",
             "challenge_variant",
         ).get(id=run_id, user=request.user)
         result = CommandProcessingService().submit_command(
@@ -74,6 +75,9 @@ class ChallengeCommandSubmitAPIView(APIView):
         return Response(
             {
                 "run": payload,
+                # Boss roster after this command plus the turn's ordered
+                # events (attacks, defeat) the stage animates.
+                "battle": battle_block(result["run"].battle_state, result["battle_events"]),
                 "stdout": result["stdout"],
                 "stderr": result["stderr"],
                 "exit_code": result["exit_code"],
@@ -139,7 +143,7 @@ class ChallengeRetryAPIView(APIView):
         try:
             prior = (
                 ChallengeRun.objects.select_for_update(nowait=True, of=("self",))
-                .select_related("challenge_quest__challenge", "challenge_variant")
+                .select_related("challenge_level__challenge", "challenge_variant")
                 .get(id=run_id, user=request.user)
             )
         except OperationalError:
@@ -150,7 +154,7 @@ class ChallengeRetryAPIView(APIView):
             prior = ChallengeRunService().abandon(run=prior)
         run = ChallengeRunService().start_run(
             user=request.user,
-            quest=prior.challenge_quest,
+            level=prior.challenge_level,
             source_entry_point="retry",
             prior_run=prior,
         )
@@ -162,6 +166,6 @@ def _get_workspace_run(run_id: int, user):
     return ChallengeRun.objects.select_related(
         "storey",
         "challenge",
-        "challenge_quest__challenge",
+        "challenge_level__challenge",
         "challenge_variant",
     ).get(id=run_id, user=user)

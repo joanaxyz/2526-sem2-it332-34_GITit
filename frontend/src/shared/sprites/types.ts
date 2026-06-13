@@ -24,6 +24,15 @@ export type SpriteAnimation = {
   loop: boolean
 }
 
+/** A playable sub-range of a sheet, e.g. the windup frames of a cast.
+ *  `loop: true` cycles [from, to] until the next swap; otherwise playback
+ *  stops at `to` and fires the pending onComplete. */
+export type FrameSegment = {
+  from: number
+  to: number
+  loop?: boolean
+}
+
 /** Imperative API exposed by SpriteAnimator via ref — drives the tower-page
  *  character (play/pause, swap animation, flip facing). */
 export type SpriteAnimatorHandle = {
@@ -36,8 +45,15 @@ export type SpriteAnimatorHandle = {
   getFrame: () => number
   /** Swap the running animation (e.g. idle → walk) without remounting and
    *  start playing it. `onComplete` fires once when a non-looping animation
-   *  reaches its last frame; it is dropped if another swap happens first. */
-  setAnimation: (animation: SpriteAnimation, opts?: { onComplete?: () => void }) => void
+   *  (or the given segment) reaches its last frame; it is dropped if another
+   *  swap happens first. `segment` restricts playback to a frame range. */
+  setAnimation: (
+    animation: SpriteAnimation,
+    opts?: { onComplete?: () => void; segment?: FrameSegment },
+  ) => void
+  /** Play a frame range of the CURRENT sheet (battle cast phases). Replaces
+   *  any pending onComplete without firing it, like setAnimation. */
+  playSegment: (segment: FrameSegment, opts?: { onComplete?: () => void }) => void
   /** Face left (true) or right (false). */
   setFlipX: (flipped: boolean) => void
 }
@@ -88,6 +104,9 @@ export type CharacterDefinition = {
      *  frames rise straight up, later ones travel toward the target.
      *  Omit to head for the target from the first frame. */
     takeOffAirborneFrame?: number
+    /** Vertical lift speed in px/s during pre-airborne take_off frames.
+     *  Defaults to the controller's standard takeoff lift. */
+    takeOffLiftSpeed?: number
     /** land sheet frame at which the character starts dropping straight
      *  down: earlier frames brake at a hover point above the ledge, later
      *  ones descend vertically onto it. Omit to land standing in place. */

@@ -19,6 +19,8 @@ STOREYS = [
             "Start from empty or remote projects, then read branch and commit-history signals "
             "before changing anything."
         ),
+        "mob_roster": ["slime", "skeleton", "archer"],
+        "boss_roster": ["werebear"],
     },
     {
         "slug": "tracking-changes-snapshots",
@@ -27,6 +29,8 @@ STOREYS = [
         "description": (
             "Use diff, staging, commits, restore, and tracked-file removal to create intentional snapshots."
         ),
+        "mob_roster": ["skeleton", "archer", "skeleton-archer"],
+        "boss_roster": ["werewolf"],
     },
     {
         "slug": "branching-switching",
@@ -35,6 +39,8 @@ STOREYS = [
         "description": (
             "Create branch pointers, move HEAD safely, branch from old commits, and clean up merged branches."
         ),
+        "mob_roster": ["archer", "skeleton-archer", "swordsman"],
+        "boss_roster": ["elite-orc"],
     },
     {
         "slug": "merging-conflicts",
@@ -43,6 +49,8 @@ STOREYS = [
         "description": (
             "Integrate branch histories, recognize fast-forward versus merge commits, and finish conflicted merges."
         ),
+        "mob_roster": ["skeleton-archer", "swordsman", "armored-orc"],
+        "boss_roster": ["knight-templar"],
     },
     {
         "slug": "undoing-recovery",
@@ -51,6 +59,8 @@ STOREYS = [
         "description": (
             "Choose between restore, amend, reset, revert, and reflog-based recovery based on history safety."
         ),
+        "mob_roster": ["swordsman", "armored-orc", "skeleton"],
+        "boss_roster": ["wizard"],
     },
     {
         "slug": "temporary-work-patches",
@@ -59,6 +69,8 @@ STOREYS = [
         "description": (
             "Shelve unfinished work and transplant selected commits without dragging an entire branch history."
         ),
+        "mob_roster": ["armored-orc", "swordsman", "skeleton-archer"],
+        "boss_roster": ["priest"],
     },
     {
         "slug": "remotes-collaboration",
@@ -67,5 +79,7 @@ STOREYS = [
         "description": (
             "Read remote relationships, update remote-tracking refs, pull, publish, and handle collaboration history."
         ),
+        "mob_roster": ["armored-orc", "swordsman", "archer"],
+        "boss_roster": ["knight-templar", "wizard"],
     },
 ]

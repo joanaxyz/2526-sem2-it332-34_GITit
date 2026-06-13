@@ -12,7 +12,7 @@ import {
   createPendingStep,
   nextEphemeralStepId,
   stripEphemeralSteps,
-} from '@/shared/practice/terminalSteps'
+} from '@/shared/level/terminalSteps'
 import { queryKeys } from '@/shared/api/queryKeys'
 
 function isRunPatch(run: AdventureRun | AdventureRunPatch): run is AdventureRunPatch {
