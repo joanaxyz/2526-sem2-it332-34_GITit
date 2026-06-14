@@ -9,25 +9,26 @@ from marketplace.selectors import (
     gallery_content,
     gallery_tower_designs,
     listing_payload,
+    listing_payloads,
 )
 from marketplace.services import MarketplaceService
-from towers.selectors import tower_design_payload
+from tower_designs.selectors import tower_design_payload
 
 
-class StoreListingListCreateAPIView(APIView):
+class MarketplaceListingListCreateAPIView(APIView):
     def get(self, request):
         queryset = active_listings(user=request.user)
         item_kind = request.query_params.get("item_kind")
         if item_kind:
             queryset = queryset.filter(item_kind=item_kind)
-        return Response({"results": [listing_payload(listing, user=request.user) for listing in queryset]})
+        return Response({"results": listing_payloads(list(queryset), user=request.user)})
 
     def post(self, request):
         listing = MarketplaceService().create_listing(user=request.user, data=request.data)
         return Response(listing_payload(listing, user=request.user), status=201)
 
 
-class StoreListingDetailAPIView(APIView):
+class MarketplaceListingDetailAPIView(APIView):
     def get(self, request, listing_id: int):
         listing = active_listings(user=request.user).get(id=listing_id)
         return Response(listing_payload(listing, user=request.user))
@@ -38,7 +39,7 @@ class StoreListingDetailAPIView(APIView):
         return Response(listing_payload(listing, user=request.user))
 
 
-class StoreListingPurchaseAPIView(APIView):
+class MarketplaceListingPurchaseAPIView(APIView):
     def post(self, request, listing_id: int):
         listing = StoreListing.objects.select_related("asset", "content_definition", "tower_design").get(id=listing_id)
         result = MarketplaceService().purchase(user=request.user, listing=listing)

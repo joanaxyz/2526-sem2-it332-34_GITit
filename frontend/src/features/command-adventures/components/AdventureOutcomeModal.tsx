@@ -31,9 +31,9 @@ export function AdventureOutcomeModal({
 
   const headline = isReplay ? 'Replay complete' : passed ? 'Adventure passed' : 'Adventure ended'
   const message = isReplay
-    ? 'Free play complete. This run is just a replay and doesn’t change your saved progress.'
+    ? 'Free play complete. This run is just a replay and doesnt change your saved progress.'
     : passed
-      ? 'You cleared the pass bar and unlocked this storey’s Challenge. Replay any time to sharpen your commands.'
+      ? 'You cleared the pass bar and unlocked this storeys Challenge. Replay any time to sharpen your commands.'
       : 'This run ended before clearing the pass bar. Try again to grow your command mastery and unlock the Challenge.'
 
   const playAgainLabel = isReplay || passed ? 'Play again' : 'Try again'
@@ -104,7 +104,7 @@ export function AdventureOutcomeModal({
     <CompletionModal
       open={open}
       onClose={onClose}
-      title={`${headline} — ${run.command_adventure.title}`}
+      title={`${headline} - ${run.command_adventure.title}`}
       tone={isFailed ? 'failure' : 'success'}
       icon={isFailed ? XCircle : Sparkles}
       badges={badges}

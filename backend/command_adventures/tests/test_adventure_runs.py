@@ -1,15 +1,19 @@
 from django.core.management import call_command
 
-from adventures.models import AdventureRun, CommandAdventure
-from adventures.scheduler import pass_bar_for
-from adventures.scoring import (
+from command_adventures.models import AdventureRun, CommandAdventure
+from command_adventures.scheduler import pass_bar_for
+from command_adventures.scoring import (
     BAND_FAILED,
     BAND_MASTERED,
     BAND_PASSED,
     AdventureScoringService,
     band_for,
 )
-from adventures.services import AdventureRunService, ordered_levels_for
+from command_adventures.services import (
+    AdventureCommandService,
+    AdventureRunService,
+    ordered_levels_for,
+)
 
 
 def make_user(django_user_model, username="adventurer"):
@@ -177,7 +181,7 @@ def test_replay_after_pass_is_playable_but_uncounted(db, django_user_model):
     """Once an adventure is passed, the next run is an uncounted free-play replay:
     it stays fully playable (the scheduler would otherwise have nothing left to
     serve) yet never touches mastery, the pass milestone, or the session score."""
-    from adventures.models import AdventureMastery
+    from command_adventures.models import AdventureMastery
 
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model, "replayer")
@@ -263,7 +267,7 @@ def test_adventure_run_http_flow_solves_a_level(db, django_user_model):
 
     run_id = body["id"]
     # Drive the authored solution for the first level's selected variant.
-    from adventures.models import AdventureLevelAttempt
+    from command_adventures.models import AdventureLevelAttempt
 
     attempt_obj = AdventureLevelAttempt.objects.get(id=attempt["id"])
     solution = attempt_obj.selected_variant.solution_commands
@@ -287,7 +291,7 @@ def test_adventure_run_http_flow_solves_a_level(db, django_user_model):
 def test_objective_checklist_ticks_off_as_state_reaches_target(db, django_user_model):
     """The adventure brief exposes a live objective checklist; each check flips to
     satisfied once the repository state meets its server-side requirement."""
-    from adventures.payloads import attempt_payload
+    from command_adventures.payloads import attempt_payload
 
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model, "checklist")
@@ -303,10 +307,14 @@ def test_objective_checklist_ticks_off_as_state_reaches_target(db, django_user_m
     # The checklist is a dedicated payload field; the scenario brief stays pure.
     assert "objective" not in payload["scenario_context"]
 
-    # The build step guarantees the solution's target state satisfies every
-    # authored check, so the checklist reads all-green at the target state.
-    attempt.repository_state = attempt.selected_variant.target_state
-    attempt.save(update_fields=["repository_state"])
+    # The authored solution satisfies both state and process-backed objective
+    # checks, so the checklist reads all-green after the command is submitted.
+    for command in attempt.selected_variant.solution_commands:
+        AdventureCommandService().submit(attempt=attempt, command=command)
+        attempt.refresh_from_db()
+        if attempt.status == "completed":
+            break
+    attempt.refresh_from_db()
     solved_checks = attempt_payload(attempt)["objective_checks"]
     assert solved_checks and all(check["satisfied"] for check in solved_checks)
 
@@ -367,7 +375,7 @@ def test_workspace_file_endpoint_creates_and_edits_files(db, django_user_model):
 
 
 def test_authored_hint_set_is_served_in_order(db, django_user_model):
-    from adventures.services import AdventureRunService
+    from command_adventures.services import AdventureRunService
 
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model, "authoredhints")

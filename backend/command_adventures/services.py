@@ -9,22 +9,22 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
-from adventures.models import (
-    AdventureMastery,
+from battle.state import initial_adventure_battle_state
+from battle.turn import apply_battle_turn
+from command_adventures.models import (
     AdventureLevel,
     AdventureLevelAttempt,
+    AdventureMastery,
     AdventureRun,
     CommandAdventure,
 )
-from adventures.scheduler import (
+from command_adventures.scheduler import (
     BOX_VALUE,
     AdventureScheduler,
     encounter_index,
     is_passed,
 )
-from adventures.scoring import AdventureScoringService, mastery_points
-from battle.state import initial_adventure_battle_state
-from battle.turn import apply_battle_turn
+from command_adventures.scoring import AdventureScoringService, mastery_points
 from common.constants import (
     COMMAND_COUNTED,
     SESSION_MODE_PRIMARY,
@@ -429,7 +429,7 @@ class AdventureCommandService:
         if result.processed:
             with span("evaluate"):
                 # Every submit logs exactly one CommandLog, so the pre-increment
-                # command count equals the number of logs already persisted — the
+                # command count equals the number of logs already persisted - the
                 # cache key the previous submit remembered its history under.
                 history = AdventureCommandHistoryCache().history_for(
                     attempt=attempt, log_count=attempt.command_count - 1
@@ -454,7 +454,7 @@ class AdventureCommandService:
         max_counted = attempt.adventure_level.max_counted_commands
         budget_exhausted = attempt.counted_command_count >= max_counted
         # Battle turn: pure function over signals computed above; the state
-        # rides the attempt save below — zero extra queries.
+        # rides the attempt save below - zero extra queries.
         battle_events, battle_changed = apply_battle_turn(
             attempt,
             lambda: initial_adventure_battle_state(attempt.adventure_level, variant),

@@ -18,15 +18,15 @@ export type MonsterActorHandle = {
   hurt: () => Promise<void>
   /** Death strip, hold last frame, fade out. Resolves after the fade. */
   die: () => Promise<void>
-  /** Entrance: walk in from offstage right. */
+  /** Entrance: charge in from offstage left toward the crystal. */
   walkIn: (fromPx?: number, ms?: number) => Promise<void>
   element: () => HTMLDivElement | null
 }
 
 /**
  * One monster on the stage: sprite + floating HP bar, all verbs imperative.
- * Monsters face left (toward Blue) — the source strips face right, so the
- * sprite is flipped.
+ * Monsters face right (toward the crystal they besiege) - the source strips
+ * already face right, so no flip. Blue strikes them from the left.
  */
 export const MonsterActor = forwardRef<
   MonsterActorHandle,
@@ -39,7 +39,7 @@ export const MonsterActor = forwardRef<
 >(function MonsterActor({ monster, scale = 1, className }, ref) {
   const def = useMemo(
     () => definitionForMonster(monster),
-    [monster.descriptor, monster.scale, monster.species, monster.tier],
+    [monster],
   )
   const spriteRef = useRef<SpriteAnimatorHandle | null>(null)
   const wrapRef = useRef<HTMLDivElement | null>(null)
@@ -80,8 +80,8 @@ export const MonsterActor = forwardRef<
           const lunge = node.animate(
             [
               { transform: 'translateX(0)' },
-              { transform: `translateX(${-def.attack.lungePx}px)`, offset: 0.55 },
-              { transform: `translateX(${-def.attack.lungePx}px)`, offset: 0.75 },
+              { transform: `translateX(${def.attack.lungePx}px)`, offset: 0.55 },
+              { transform: `translateX(${def.attack.lungePx}px)`, offset: 0.75 },
               { transform: 'translateX(0)' },
             ],
             { duration: lungeMs + 360, easing: 'ease-in-out' },
@@ -128,7 +128,7 @@ export const MonsterActor = forwardRef<
         if (!node || !sprite) return resolve()
         sprite.setAnimation(def.sprites.walk)
         const entrance = node.animate(
-          [{ transform: `translateX(${fromPx}px)`, opacity: 0.4 }, { transform: 'translateX(0)', opacity: 1 }],
+          [{ transform: `translateX(${-fromPx}px)`, opacity: 0.4 }, { transform: 'translateX(0)', opacity: 1 }],
           { duration: ms, easing: 'ease-out' },
         )
         entrance.finished
@@ -157,7 +157,6 @@ export const MonsterActor = forwardRef<
         ref={spriteRef}
         animation={def.sprites.idle}
         scale={effectiveScale}
-        flipX
         pixelated
         aria-label={def.label}
       />

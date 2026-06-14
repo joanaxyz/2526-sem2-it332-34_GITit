@@ -18,7 +18,7 @@ import type { StatsSummary } from '@/features/stats/types'
 
 /**
  * Client-derived achievement ledger. There is no achievements table in the
- * backend (yet) — every badge below is computed deterministically from the
+ * backend (yet) - every badge below is computed deterministically from the
  * home + stats summaries, so the set stays consistent across reloads.
  * `points` are cosmetic gamerscore-style stars, NOT GitCoins (coins only
  * ever come from storey chests).

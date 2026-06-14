@@ -44,7 +44,7 @@ export function CompletionStatTile({
         } as CSSProperties
       }
     >
-      {/* Soft accent bloom in the corner — pure eye-candy. */}
+      {/* Soft accent bloom in the corner - pure eye-candy. */}
       <div
         aria-hidden
         className="pointer-events-none absolute -right-5 -top-6 size-16 rounded-full opacity-30 blur-2xl transition-opacity duration-200 group-hover:opacity-60"

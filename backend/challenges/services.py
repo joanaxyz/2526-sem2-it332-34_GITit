@@ -220,7 +220,7 @@ class ChallengeRunService:
     def _ensure_adventure_passed(self, *, user, storey) -> None:
         # Lazy import: adventures.models is a leaf w.r.t. challenges, but keep the
         # dependency local to this gate.
-        from adventures.models import AdventureRun, CommandAdventure
+        from command_adventures.models import AdventureRun, CommandAdventure
 
         adventure = CommandAdventure.objects.filter(storey=storey, is_published=True).first()
         if adventure is None:

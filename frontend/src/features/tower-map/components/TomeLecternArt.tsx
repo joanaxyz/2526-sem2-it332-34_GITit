@@ -1,8 +1,8 @@
 import { useId } from 'react'
 
 // The lectern is drawn as a single self-contained SVG so it reads as furniture
-// standing in the room — grounded by its own floor shadow and lit by the open
-// pages — rather than flat boxes against the wall. Inline (not an asset file)
+// standing in the room - grounded by its own floor shadow and lit by the open
+// pages - rather than flat boxes against the wall. Inline (not an asset file)
 // because hover/selected re-light the pages, aura, and motes via CSS classes.
 // Gradient ids are namespaced per instance: a storey may render several tomes.
 export function TomeLecternArt() {
@@ -43,7 +43,7 @@ export function TomeLecternArt() {
         </radialGradient>
       </defs>
 
-      {/* Light rising off the pages — wakes on hover/selected. */}
+      {/* Light rising off the pages - wakes on hover/selected. */}
       <ellipse className="tome-svg-aura" cx="100" cy="48" rx="60" ry="36" fill={ref('aura')} />
 
       {/* Floor shadow grounds the piece on the storey floor. */}
@@ -137,7 +137,7 @@ export function TomeLecternArt() {
         opacity="0.55"
       />
 
-      {/* The lit pages — window-amber belongs to book interiors, the one warm
+      {/* The lit pages - window-amber belongs to book interiors, the one warm
           note the world allows outside windows and doors. */}
       <g className="tome-svg-pages">
         <path
@@ -159,7 +159,7 @@ export function TomeLecternArt() {
       </g>
       <path d="M100 49.5 V75" stroke="rgba(45, 245, 255, 0.6)" strokeWidth="1.8" />
 
-      {/* Arcane motes drifting off the pages — only while lit. */}
+      {/* Arcane motes drifting off the pages - only while lit. */}
       <g className="tome-svg-motes" fill="#ffd98f">
         <circle className="tome-svg-mote" cx="87" cy="27" r="1.6" />
         <circle className="tome-svg-mote" cx="113" cy="20" r="2" />

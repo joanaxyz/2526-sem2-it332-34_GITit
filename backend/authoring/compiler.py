@@ -7,14 +7,24 @@ from typing import Any
 from django.db import transaction
 from django.utils.text import slugify
 
-from adventures.models import AdventureLevel, AdventureVariant, CommandAdventure
 from authoring.models import ContentDefinition, ContentKind, PublishedContentRuntime
 from authoring.schemas import content_levels
 from challenges.models import Challenge, ChallengeLevel, ChallengeVariant
-from curriculum.models import CommandForm, CommandSkill, Storey, Tome
+from command_adventures.models import AdventureLevel, AdventureVariant, CommandAdventure
+from curriculum.models import (
+    TOME_PLACEMENTS,
+    CommandForm,
+    CommandSkill,
+    Storey,
+    Tome,
+    default_chest_rewards,
+)
 from simulator.services import RepositoryStateSimulator
 
 HIDDEN_STOREY_NUMBER_BASE = 900_000
+# Storey-grouped content shares one runtime storey, numbered in a distinct range
+# from the per-content (storeyless/legacy) hidden storeys above.
+GROUPED_STOREY_NUMBER_BASE = 800_000
 
 
 class ContentRuntimeCompiler:
@@ -48,31 +58,76 @@ class ContentRuntimeCompiler:
         return runtime
 
     def _runtime_storey(self, content: ContentDefinition) -> Storey:
-        number = HIDDEN_STOREY_NUMBER_BASE + content.id
-        slug = f"ugc-{content.kind}-{content.id}"
+        # Content authored INTO a storey shares one runtime storey carrying the
+        # storey's settings (reward checkpoints + rosters). Storeyless/legacy
+        # content keeps a per-content hidden storey reading from its definition.
+        if content.storey_id is not None:
+            storey = content.storey
+            number = GROUPED_STOREY_NUMBER_BASE + storey.id
+            slug = f"ugc-storey-{storey.id}"
+            chest_rewards = storey.chest_rewards or default_chest_rewards()
+            mob_roster = storey.mob_roster or []
+            boss_roster = storey.boss_roster or []
+            title = storey.title
+            description = storey.summary
+        else:
+            definition = content.definition or {}
+            number = HIDDEN_STOREY_NUMBER_BASE + content.id
+            slug = f"ugc-{content.kind}-{content.id}"
+            chest_rewards = definition.get("chest_rewards")
+            if not isinstance(chest_rewards, list) or not chest_rewards:
+                chest_rewards = default_chest_rewards()
+            mob_roster = definition.get("mob_roster") if isinstance(definition.get("mob_roster"), list) else []
+            boss_roster = definition.get("boss_roster") if isinstance(definition.get("boss_roster"), list) else []
+            title = content.title
+            description = content.summary
+        # GitCoin progress chests are reserved for admin-authored / official
+        # towers. Player-authored custom towers never grant coins, no matter
+        # what reward checkpoints were entered — strip them at compile time so
+        # the runtime storey drops nothing.
+        if not self._author_grants_coins(content):
+            chest_rewards = []
         return Storey.objects.update_or_create(
             slug=slug,
             defaults={
                 "number": number,
-                "title": content.title,
-                "description": content.summary,
+                "title": title,
+                "description": description,
                 "is_published": False,
                 "sort_order": number,
-                "chest_rewards": [],
+                "chest_rewards": chest_rewards,
+                "mob_roster": mob_roster,
+                "boss_roster": boss_roster,
             },
         )[0]
 
+    @staticmethod
+    def _author_grants_coins(content: ContentDefinition) -> bool:
+        """Only admin authors (staff/superuser), or unowned/system content,
+        produce coin-bearing storeys. Regular players' custom towers do not."""
+        owner = content.storey.owner if content.storey_id else content.owner
+        if owner is None:
+            return True
+        return bool(owner.is_staff or owner.is_superuser)
+
     def _compile_adventure(self, content: ContentDefinition, storey: Storey) -> CommandAdventure:
+        definition = content.definition or {}
+        adventure_defaults = {
+            "storey": storey,
+            "title": content.title,
+            "description": content.summary,
+            "is_published": True,
+            "sort_order": 0,
+            "source_content_definition": content,
+        }
+        # Authored mastery threshold that unlocks the storey's Challenge — the
+        # storey's value wins, falling back to a per-content definition value.
+        pass_bar = content.storey.pass_bar_fraction if content.storey_id else definition.get("pass_bar_fraction")
+        if isinstance(pass_bar, (int, float)) and 0 < float(pass_bar) <= 1:
+            adventure_defaults["pass_bar_fraction"] = float(pass_bar)
         adventure, _created = CommandAdventure.objects.update_or_create(
             slug=f"ugc-adventure-{content.id}",
-            defaults={
-                "storey": storey,
-                "title": content.title,
-                "description": content.summary,
-                "is_published": True,
-                "sort_order": 0,
-                "source_content_definition": content,
-            },
+            defaults=adventure_defaults,
         )
         levels = content_levels(content.definition)
         base_command = content.command_family or str(content.definition.get("base_command") or "git")
@@ -198,14 +253,19 @@ class ContentRuntimeCompiler:
         )
 
     def _compile_tome(self, content: ContentDefinition, storey: Storey) -> Tome:
+        definition = content.definition or {}
+        placement = definition.get("placement")
+        valid_placements = {value for value, _label in TOME_PLACEMENTS}
+        if placement not in valid_placements:
+            placement = "above_adventure"
         return Tome.objects.update_or_create(
             storey=storey,
             slug=f"ugc-tome-{content.id}",
             defaults={
                 "title": content.title,
                 "summary": content.summary,
-                "pages": content.definition.get("pages") or [],
-                "placement": "above_adventure",
+                "pages": definition.get("pages") or [],
+                "placement": placement,
                 "is_published": True,
                 "sort_order": 0,
                 "source_content_definition": content,

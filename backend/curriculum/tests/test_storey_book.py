@@ -78,8 +78,8 @@ def test_storey_book_endpoint_ok_and_404(db, django_user_model):
 
 def test_command_library_entries_build_pages_and_diagram():
     # Authored library entries live in library.py. Building them through the
-    # shared helpers proves the authoring path — including option/argument
-    # sub-sections and authored diagram blocks — end to end.
+    # shared helpers proves the authoring path - including option/argument
+    # sub-sections and authored diagram blocks - end to end.
     from curriculum.library import LIBRARY_ENTRIES, _content
 
     assert LIBRARY_ENTRIES, "the library should ship at least one authored entry"

@@ -38,7 +38,7 @@ def _challenge_level(challenge_slug="onboard", boss_spec=None, pk=1, boss_roster
 def test_adventure_default_roster_hp_tracks_rule_count():
     state = initial_adventure_battle_state(_level(), _variant(rule_count=4))
     monsters = state["monsters"]
-    # 4 rules → 3 monsters totalling 4 HP, so each rule-advancing command chips a monster.
+    # 4 rules -> 3 monsters totalling 4 HP, so each rule-advancing command chips a monster.
     assert len(monsters) == 3
     assert sum(m["hp"] for m in monsters) == 4
     assert all(m["alive"] for m in monsters)

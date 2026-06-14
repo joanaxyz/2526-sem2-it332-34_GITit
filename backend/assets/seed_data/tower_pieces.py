@@ -1,11 +1,19 @@
-"""Official structural tower-piece asset seed specs."""
+"""Official structural tower-piece asset seed specs.
+
+These six pieces are the **Arcane Spire** starter set: they are tagged
+``arcane-spire`` and granted to every player's asset registry on sign-up, so a
+new author opens the tower editor with a usable, on-brand kit by default.
+"""
+
+ARCANE_SPIRE_TAG = "arcane-spire"
 
 OFFICIAL_TOWER_PIECE_SPECS = [
     {
         "slug": "official-spire",
-        "label": "Official Spire",
+        "label": "Arcane Spire",
         "piece_type": "spire",
         "svg": "spire.svg",
+        "tags": [ARCANE_SPIRE_TAG],
         "view_box": "0 0 200 120",
         "anchors": {
             "center": {"x": 100, "y": 76},
@@ -15,9 +23,10 @@ OFFICIAL_TOWER_PIECE_SPECS = [
     },
     {
         "slug": "official-landing",
-        "label": "Official Landing",
+        "label": "Arcane Landing",
         "piece_type": "landing",
         "svg": "landing.svg",
+        "tags": [ARCANE_SPIRE_TAG],
         "view_box": "0 0 220 48",
         "anchors": {
             "walk_rail": {"x1": 18, "y1": 18, "x2": 202, "y2": 18},
@@ -27,9 +36,10 @@ OFFICIAL_TOWER_PIECE_SPECS = [
     },
     {
         "slug": "official-door",
-        "label": "Official Door",
+        "label": "Arcane Door",
         "piece_type": "door",
         "svg": "door.svg",
+        "tags": [ARCANE_SPIRE_TAG],
         "view_box": "0 0 120 160",
         "anchors": {
             "door_center": {"x": 60, "y": 88},
@@ -46,9 +56,10 @@ OFFICIAL_TOWER_PIECE_SPECS = [
     },
     {
         "slug": "official-adventure-section",
-        "label": "Official Adventure Section",
+        "label": "Arcane Adventure Hall",
         "piece_type": "adventure_section",
         "svg": "adventure-section.svg",
+        "tags": [ARCANE_SPIRE_TAG],
         "view_box": "0 0 260 220",
         "anchors": {
             "door_center": {"x": 130, "y": 136},
@@ -58,9 +69,10 @@ OFFICIAL_TOWER_PIECE_SPECS = [
     },
     {
         "slug": "official-challenge-section",
-        "label": "Official Challenge Section",
+        "label": "Arcane Challenge Hall",
         "piece_type": "challenge_section",
         "svg": "challenge-section.svg",
+        "tags": [ARCANE_SPIRE_TAG],
         "view_box": "0 0 300 240",
         "anchors": {
             "door_row": {"x1": 44, "y1": 174, "x2": 256, "y2": 174},
@@ -70,9 +82,10 @@ OFFICIAL_TOWER_PIECE_SPECS = [
     },
     {
         "slug": "official-tome",
-        "label": "Official Tome",
+        "label": "Arcane Tome",
         "piece_type": "tome",
         "svg": "tome.svg",
+        "tags": [ARCANE_SPIRE_TAG],
         "view_box": "0 0 180 160",
         "anchors": {
             "tome_center": {"x": 90, "y": 78},
@@ -84,4 +97,3 @@ OFFICIAL_TOWER_PIECE_SPECS = [
         },
     },
 ]
-

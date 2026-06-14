@@ -25,7 +25,7 @@ function formatClock(timeOfDay: number) {
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
 }
 
-// Noon sits at the top of the dial, midnight at the bottom (a sundial). 0° points
+// Noon sits at the top of the dial, midnight at the bottom (a sundial). 0 points
 // up; the angle grows clockwise so morning is on the left, evening on the right.
 function hourToAngle(hour: number) {
   return (wrap24(hour) - 12) * 15
@@ -59,7 +59,7 @@ export function SkyClock({ timeOfDay, onScrub, running, onToggleRunning, phaseLa
     const cy = rect.top + rect.height / 2
     const dx = event.clientX - cx
     const dy = event.clientY - cy
-    // atan2(dx, -dy): up = 0°, right = +90°, matching hourToAngle.
+    // atan2(dx, -dy): up = 0, right = +90, matching hourToAngle.
     const deg = (Math.atan2(dx, -dy) * 180) / Math.PI
     return wrap24(12 + deg / 15)
   }

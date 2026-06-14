@@ -1,9 +1,9 @@
 import { apiRequest } from '@/shared/api/httpClient'
 import type { StoreyContentOverview } from '@/features/challenges/types'
-import type { StoreyBook } from '@/features/storeys/book/bookTypes'
-import type { LearningStorey } from '@/features/storeys/types'
+import type { StoreyBook } from '@/features/tower-map/book/bookTypes'
+import type { LearningStorey } from '@/features/tower-map/types'
 
-export const storeysApi = {
+export const towerMapApi = {
   listStoreys() {
     return apiRequest<LearningStorey[]>('/storeys/')
   },

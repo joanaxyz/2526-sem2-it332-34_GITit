@@ -1,7 +1,7 @@
 // Living-sky engine. A single `timeOfDay` value (0..24 hours) drives the whole
 // backdrop: gradient, cloud tint/opacity, star + window glow, and the sun/moon
 // arc. Everything is interpolated between the keyframes below so the sky eases
-// from night → dawn → day → sunset → dusk like an RPG day-night cycle.
+// from night -> dawn -> day -> sunset -> dusk like an RPG day-night cycle.
 
 export type RGB = readonly [number, number, number]
 
@@ -11,9 +11,9 @@ export type SkyPhase = {
   skyTop: RGB
   skyMid: RGB
   skyBottom: RGB
-  /** Ambient radial wash colour (consumed via `rgba(var(--sky-glow), …)`). */
+  /** Ambient radial wash color (consumed via `rgba(var(--sky-glow), )`). */
   skyGlow: RGB
-  /** Cloud fill colour for this time of day. */
+  /** Cloud fill color for this time of day. */
   cloudTint: RGB
   /** 0..1 multipliers / strengths. */
   cloudOpacity: number
@@ -25,7 +25,7 @@ export type SkyPhase = {
 }
 
 // Anchored, sorted by hour. The gap between the last (22:00) and first (5:00)
-// keyframe wraps through midnight — handled in `computeSky`.
+// keyframe wraps through midnight - handled in `computeSky`.
 export const SKY_PHASES: readonly SkyPhase[] = [
   {
     hour: 0, // deep night
@@ -54,7 +54,7 @@ export const SKY_PHASES: readonly SkyPhase[] = [
     windowGlow: 0.85,
   },
   {
-    hour: 6.5, // sunrise — pink / orange
+    hour: 6.5, // sunrise - pink / orange
     skyTop: [60, 78, 150],
     skyMid: [222, 132, 132],
     skyBottom: [255, 182, 122],
@@ -80,7 +80,7 @@ export const SKY_PHASES: readonly SkyPhase[] = [
     windowGlow: 0.18,
   },
   {
-    hour: 12, // midday — bright azure
+    hour: 12, // midday - bright azure
     skyTop: [40, 110, 210],
     skyMid: [92, 162, 236],
     skyBottom: [178, 216, 246],
@@ -106,7 +106,7 @@ export const SKY_PHASES: readonly SkyPhase[] = [
     windowGlow: 0.24,
   },
   {
-    hour: 18.5, // sunset — pink / orange / red
+    hour: 18.5, // sunset - pink / orange / red
     skyTop: [40, 50, 112],
     skyMid: [202, 92, 122],
     skyBottom: [255, 142, 92],
@@ -119,7 +119,7 @@ export const SKY_PHASES: readonly SkyPhase[] = [
     windowGlow: 0.55,
   },
   {
-    hour: 20, // dusk — violet
+    hour: 20, // dusk - violet
     skyTop: [12, 16, 50],
     skyMid: [48, 40, 96],
     skyBottom: [96, 70, 122],
@@ -166,7 +166,7 @@ function wrapHour(hour: number) {
 }
 
 // Find the two phases bracketing `hour` and the 0..1 blend between them,
-// wrapping across midnight (22:00 → 5:00).
+// wrapping across midnight (22:00 -> 5:00).
 function bracket(hour: number): { from: SkyPhase; to: SkyPhase; t: number } {
   const h = wrapHour(hour)
   const phases = SKY_PHASES
@@ -174,7 +174,7 @@ function bracket(hour: number): { from: SkyPhase; to: SkyPhase; t: number } {
     const from = phases[i]
     const to = phases[(i + 1) % phases.length]
     const start = from.hour
-    // The wrap segment (last→first) spans from 22:00 up to 5:00+24.
+    // The wrap segment (last->first) spans from 22:00 up to 5:00+24.
     const end = to.hour > from.hour ? to.hour : to.hour + 24
     const hh = h >= start ? h : h + 24
     if (hh >= start && hh < end) {
@@ -185,10 +185,10 @@ function bracket(hour: number): { from: SkyPhase; to: SkyPhase; t: number } {
 }
 
 // Sun/moon travel a shallow arc. `param` runs 0 (rising at the eastern horizon)
-// → 1 (setting at the western horizon); the peak sits at param 0.5.
+// -> 1 (setting at the western horizon); the peak sits at param 0.5.
 function arc(param: number) {
   const x = lerp(8, 92, clamp(param, -0.2, 1.2))
-  const y = 80 - Math.sin(clamp(param, 0, 1) * Math.PI) * 66 // 80% (low) → 14% (high)
+  const y = 80 - Math.sin(clamp(param, 0, 1) * Math.PI) * 66 // 80% (low) -> 14% (high)
   return { x, y }
 }
 
@@ -234,8 +234,8 @@ export function computeSky(timeOfDay: number): SkyState {
   const windowGlow = lerp(from.windowGlow, to.windowGlow, t)
 
   const h = wrapHour(timeOfDay)
-  const sun = arc((h - 6) / 12) // sun is up ~06:00 → 18:00
-  const moon = arc(wrapHour(h - 18) / 12) // moon is up ~18:00 → 06:00
+  const sun = arc((h - 6) / 12) // sun is up ~06:00 -> 18:00
+  const moon = arc(wrapHour(h - 18) / 12) // moon is up ~18:00 -> 06:00
 
   const vars: SkyVars = {
     '--sky-top': rgb(skyTop),

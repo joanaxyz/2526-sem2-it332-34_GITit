@@ -1,18 +1,22 @@
 from django.urls import path
 
-from towers.views import (
+from tower_designs.views import (
     ArtifactPlacementCreateAPIView,
     ArtifactPlacementDetailAPIView,
     MyTowerOverviewAPIView,
+    SharedTowerOverviewAPIView,
+    TowerStoreyCreateAPIView,
     TowerBindingCreateAPIView,
     TowerBindingDetailAPIView,
     TowerDesignDetailAPIView,
     TowerDesignLayoutAPIView,
     TowerDesignListCreateAPIView,
     TowerDesignMineAPIView,
+    TowerDesignOfficialForkAPIView,
     TowerDesignPublishAPIView,
     TowerDesignRemixAPIView,
     TowerDesignSetActiveAPIView,
+    TowerDesignShareAPIView,
     TowerPieceDetailAPIView,
     TowerPieceListCreateAPIView,
 )
@@ -20,12 +24,16 @@ from towers.views import (
 urlpatterns = [
     path("my-tower/overview/", MyTowerOverviewAPIView.as_view(), name="my-tower-overview"),
     path("tower-designs/mine/", TowerDesignMineAPIView.as_view(), name="tower-design-mine"),
+    path("tower-designs/official-fork/", TowerDesignOfficialForkAPIView.as_view(), name="tower-design-official-fork"),
+    path("tower-designs/shared/<int:design_id>/", SharedTowerOverviewAPIView.as_view(), name="tower-design-shared"),
     path("tower-designs/", TowerDesignListCreateAPIView.as_view(), name="tower-design-create"),
     path("tower-designs/<int:design_id>/", TowerDesignDetailAPIView.as_view(), name="tower-design-detail"),
     path("tower-designs/<int:design_id>/set-active/", TowerDesignSetActiveAPIView.as_view(), name="tower-design-set-active"),
     path("tower-designs/<int:design_id>/publish/", TowerDesignPublishAPIView.as_view(), name="tower-design-publish"),
+    path("tower-designs/<int:design_id>/share/", TowerDesignShareAPIView.as_view(), name="tower-design-share"),
     path("tower-designs/<int:design_id>/remix/", TowerDesignRemixAPIView.as_view(), name="tower-design-remix"),
     path("tower-designs/<int:design_id>/layout/", TowerDesignLayoutAPIView.as_view(), name="tower-design-layout"),
+    path("tower-designs/<int:design_id>/storeys/", TowerStoreyCreateAPIView.as_view(), name="tower-storey-create"),
     path("tower-designs/<int:design_id>/pieces/", TowerPieceListCreateAPIView.as_view(), name="tower-piece-create"),
     path("tower-designs/<int:design_id>/pieces/<int:piece_id>/", TowerPieceDetailAPIView.as_view(), name="tower-piece-detail"),
     path("tower-designs/<int:design_id>/bindings/", TowerBindingCreateAPIView.as_view(), name="tower-binding-create"),

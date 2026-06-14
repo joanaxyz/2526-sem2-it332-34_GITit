@@ -10,9 +10,45 @@ from authoring.compiler import ContentRuntimeCompiler
 from authoring.models import (
     STATUS_PUBLISHED,
     STATUS_TESTABLE,
+    AuthoringStorey,
     ContentDefinition,
 )
 from authoring.validators import ContentDefinitionValidator
+
+
+class AuthoringStoreyService:
+    _FIELDS = ("slug", "title", "summary", "sort_order", "chest_rewards", "mob_roster", "boss_roster", "pass_bar_fraction")
+
+    def assert_owner(self, *, user, storey: AuthoringStorey) -> None:
+        if not getattr(user, "is_staff", False) and storey.owner_id != getattr(user, "id", None):
+            raise PermissionDenied("You do not own this storey.")
+
+    @transaction.atomic
+    def create(self, *, user, data: dict) -> AuthoringStorey:
+        fields = {key: data[key] for key in self._FIELDS if key in data}
+        fields.setdefault("title", "New storey")
+        fields.setdefault("slug", _unique_storey_slug(user=user, base=fields.get("slug") or fields["title"]))
+        if "sort_order" not in fields:
+            fields["sort_order"] = AuthoringStorey.objects.filter(owner=user).count()
+        storey = AuthoringStorey(owner=user, **fields)
+        storey.full_clean()
+        storey.save()
+        return storey
+
+    @transaction.atomic
+    def update(self, *, user, storey: AuthoringStorey, data: dict) -> AuthoringStorey:
+        self.assert_owner(user=user, storey=storey)
+        for field in self._FIELDS:
+            if field in data:
+                setattr(storey, field, data[field])
+        storey.full_clean()
+        storey.save()
+        return storey
+
+    @transaction.atomic
+    def delete(self, *, user, storey: AuthoringStorey) -> None:
+        self.assert_owner(user=user, storey=storey)
+        storey.delete()  # content.storey FK is SET_NULL, so content survives orphaned
 
 
 class ContentDefinitionService:
@@ -23,6 +59,8 @@ class ContentDefinitionService:
     @transaction.atomic
     def create(self, *, user, data: dict) -> ContentDefinition:
         content = ContentDefinition(owner=user, **_content_fields(data))
+        if "storey" in data:
+            content.storey = _resolve_storey(user=user, storey_id=data.get("storey"))
         content.full_clean()
         content.save()
         return content
@@ -34,6 +72,8 @@ class ContentDefinitionService:
             raise ValidationError({"status": "Published content can only be relisted or remixed, not edited in place."})
         for field, value in _content_fields(data, partial=True).items():
             setattr(content, field, value)
+        if "storey" in data:
+            content.storey = _resolve_storey(user=user, storey_id=data.get("storey"))
         content.full_clean()
         content.save()
         return content
@@ -86,6 +126,7 @@ class ContentDefinitionService:
             kind=content.kind,
             owner=user,
             source_definition=content,
+            storey=content.storey if content.storey_id and content.storey.owner_id == user.id else None,
             visibility="private",
             status="draft",
             slug=_next_remix_slug(user=user, source=content),
@@ -97,6 +138,27 @@ class ContentDefinitionService:
             definition=copy.deepcopy(content.definition),
         )
         return clone
+
+
+def _resolve_storey(*, user, storey_id) -> AuthoringStorey | None:
+    if not storey_id:
+        return None
+    try:
+        return AuthoringStorey.objects.get(id=storey_id, owner=user)
+    except AuthoringStorey.DoesNotExist as exc:
+        raise ValidationError({"storey": "Unknown storey."}) from exc
+
+
+def _unique_storey_slug(*, user, base: str) -> str:
+    from django.utils.text import slugify
+
+    root = slugify(base) or "storey"
+    slug = root
+    index = 2
+    while AuthoringStorey.objects.filter(owner=user, slug=slug).exists():
+        slug = f"{root}-{index}"
+        index += 1
+    return slug
 
 
 def _content_fields(data: dict, *, partial: bool = False) -> dict:

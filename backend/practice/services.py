@@ -114,7 +114,7 @@ class CommandExecutor:
             # engine mutates in place) is already independent of the caller's stored
             # state. previous_state is only read afterwards (contextual feedback +
             # visible-tree diff), so the extra defensive clone this used to take was
-            # pure overhead — one deep copy per command saved.
+            # pure overhead - one deep copy per command saved.
             previous_state = repository_state
             working_state = tools.normalize_state(repository_state)
         with span("parse_execute"):
@@ -262,7 +262,7 @@ class CommandProcessingService:
             run.first_attempt_star_eligible = False
 
         # Battle turn: a pure function over the signals computed above. The
-        # state rides the run save below — no new query.
+        # state rides the run save below - no new query.
         solved = result_category == RESULT_TARGET_MATCHED
         max_count = run.command_budget_snapshot["max_counted_commands"]
         battle_defeated = (
@@ -408,7 +408,7 @@ class CommandProcessingService:
                 StreakService().record_completion(user=run.user, completed_at=run.completed_at)
             # GitCoins come from the storey progress chests. The chest check
             # reads completed runs from the DB, so it must wait until the
-            # caller persists this run — report it back for after run.save().
+            # caller persists this run - report it back for after run.save().
             chest_pending = current_meets_progress
         return {"status", "completed_at", "ended_at", "rta_success"}, chest_pending
 

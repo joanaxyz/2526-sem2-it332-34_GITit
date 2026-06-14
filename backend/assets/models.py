@@ -1,14 +1,14 @@
-"""Owned, uploadable visual assets — the foundation of the UGC tower platform.
+"""Owned, uploadable visual assets - the foundation of the UGC tower platform.
 
 Monsters, characters, and tower artifacts are one family: an :class:`Asset`
 (metadata + gameplay config) with one or more :class:`AssetSprite` images. The
-image *files* live in media storage (``ImageField`` → path in DB, bytes on
+image *files* live in media storage (``ImageField`` -> path in DB, bytes on
 disk/object storage), never as DB blobs, so serving them is HTTP/CDN-cacheable
 and never touches query latency.
 
 Frame counts are *counted by the system*: ``AssetSprite.save`` reads the image
 with Pillow and derives ``columns``/``rows``/``frame_count`` from the frame cell
-size, so an admin (and, later, a user) only uploads a sheet — no manual counts.
+size, so an admin (and, later, a user) only uploads a sheet - no manual counts.
 """
 
 from __future__ import annotations
@@ -17,12 +17,16 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
+
 class AssetKind(models.TextChoices):
     MONSTER = "monster", "Monster"
     CHARACTER = "character", "Character"
     PROJECTILE = "projectile", "Projectile"
     TOWER_PIECE = "tower_piece", "Tower piece"
     TOWER_ARTIFACT = "tower_artifact", "Tower artifact"
+    # Set-pieces that live on the battle stage rather than in the tower
+    # structure - currently the crystal Blue defends.
+    BATTLE_ARTIFACT = "battle_artifact", "Battle artifact"
 
 
 KIND_MONSTER = AssetKind.MONSTER
@@ -30,6 +34,7 @@ KIND_CHARACTER = AssetKind.CHARACTER
 KIND_PROJECTILE = AssetKind.PROJECTILE
 KIND_TOWER_PIECE = AssetKind.TOWER_PIECE
 KIND_TOWER_ARTIFACT = AssetKind.TOWER_ARTIFACT
+KIND_BATTLE_ARTIFACT = AssetKind.BATTLE_ARTIFACT
 ASSET_KINDS = AssetKind.choices
 
 
@@ -93,6 +98,9 @@ class Asset(models.Model):
 
     slug = models.SlugField(unique=True)
     label = models.CharField(max_length=160)
+    # Free-form descriptive tags (biome/era/palette, e.g. ["medieval", "neon"]).
+    # Used for editor/shop filtering; not shown in the shop UI yet. See assets.tags.
+    tags = models.JSONField(default=list, blank=True)
     # Display scale relative to the source frame; a level may override per-encounter.
     default_scale = models.FloatField(default=1.0)
     config = models.JSONField(default=dict, blank=True)
@@ -145,8 +153,8 @@ class TowerPieceAsset(models.Model):
 class AssetSprite(models.Model):
     """One animation/image for an asset, keyed by a free-form ``action`` slug.
 
-    The action set is open (idle/walk/attack/hurt/death/portrait/projectile/…)
-    so new "action categories" need no schema change — they are discovered from
+    The action set is open (idle/walk/attack/hurt/death/portrait/projectile/)
+    so new "action categories" need no schema change - they are discovered from
     whatever the uploader provides.
     """
 
@@ -155,12 +163,12 @@ class AssetSprite(models.Model):
     image = models.ImageField(upload_to="assets/sprites/")
 
     # Frame cell size. Leave 0 to auto-treat the sheet as a horizontal strip of
-    # square cells (cell = image height) — the common monster case. Grids
-    # (e.g. 256×256 characters) set the cell size once.
+    # square cells (cell = image height) - the common monster case. Grids
+    # (e.g. 256x256 characters) set the cell size once.
     frame_width = models.PositiveIntegerField(default=0)
     frame_height = models.PositiveIntegerField(default=0)
 
-    # Derived on save() — never entered by hand.
+    # Derived on save() - never entered by hand.
     columns = models.PositiveIntegerField(default=1)
     rows = models.PositiveIntegerField(default=1)
     frame_count = models.PositiveIntegerField(default=1)

@@ -1,6 +1,11 @@
 from django.contrib import admin
 
-from towers.models import ArtifactPlacement, TowerContentBinding, TowerDesign, TowerPieceInstance
+from tower_designs.models import (
+    ArtifactPlacement,
+    TowerContentBinding,
+    TowerDesign,
+    TowerPieceInstance,
+)
 
 
 class TowerPieceInstanceInline(admin.TabularInline):

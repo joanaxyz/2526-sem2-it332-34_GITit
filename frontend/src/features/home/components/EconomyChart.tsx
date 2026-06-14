@@ -43,7 +43,7 @@ function ChartTooltip({ active, payload }: { active?: boolean; payload?: Tooltip
 }
 
 /**
- * "Tokens Economy"-style dual-series chart sitting open on the page —
+ * "Tokens Economy"-style dual-series chart sitting open on the page -
  * title + range pills + legend up top, the aurora area chart below.
  * No panel chrome; the chart itself is the surface.
  */
@@ -91,7 +91,7 @@ export function EconomyChart({ trend }: { trend: TrendPoint[] }) {
 
       {!hasData ? (
         <div className="grid place-items-center" style={{ height: 250 }}>
-          <p className="text-xs text-muted-foreground/85">No activity yet — your first commands will chart here.</p>
+          <p className="text-xs text-muted-foreground/85">No activity yet - your first commands will chart here.</p>
         </div>
       ) : (
       <div className="relative" style={{ height: 250 }}>

@@ -128,7 +128,7 @@ function mergeRepositoryState(
   // The command response carries the tree only when it changed; an absent tree
   // means "unchanged", so we fall back to the previous one below. (Checking the
   // keys' length would be redundant: a present tree is authoritative even when
-  // empty — e.g. a freshly cleared workspace.)
+  // empty - e.g. a freshly cleared workspace.)
   const carriesTree = next.project_tree !== undefined || next.visible_tree !== undefined
   if (carriesTree) {
     return next

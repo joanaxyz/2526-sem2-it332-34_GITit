@@ -15,7 +15,7 @@ describe('computeBudgetConsumedPct', () => {
     expect(computeBudgetConsumedPct(4, 3, 12)).toBeCloseTo(11.11, 1)
   })
 
-  it('returns ~44.4 at 7 used (min=3, max=12) — crosses T1 at 40%', () => {
+  it('returns ~44.4 at 7 used (min=3, max=12) - crosses T1 at 40%', () => {
     expect(computeBudgetConsumedPct(7, 3, 12)).toBeCloseTo(44.44, 1)
   })
 

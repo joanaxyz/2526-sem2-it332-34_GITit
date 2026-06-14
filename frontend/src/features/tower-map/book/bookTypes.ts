@@ -1,6 +1,6 @@
 // The Storey Book is a read-only reference: every command registered for a storey,
 // resolved to its rich authored content from the command library. Unlike the
-// scenario command preview it carries no terminal demo — its blocks instead support
+// scenario command preview it carries no terminal demo - its blocks instead support
 // richer authored content such as diagrams.
 
 export type BookDiagramNode = {

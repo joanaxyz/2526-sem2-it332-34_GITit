@@ -7,10 +7,44 @@ export type ValidationErrorRow = {
   message: string
 }
 
+export type ChestRewardRow = { threshold: number; coins: number }
+
+/** A user-authored storey (floor): groups 1 adventure + 1+ challenges/tomes. */
+export type AuthoringStorey = {
+  id: number
+  owner_id: number | null
+  slug: string
+  title: string
+  summary: string
+  sort_order: number
+  chest_rewards: ChestRewardRow[]
+  mob_roster: string[]
+  boss_roster: string[]
+  pass_bar_fraction: number
+  created_at: string
+  updated_at: string
+}
+
+export type AuthoringStoreyList = {
+  results: AuthoringStorey[]
+}
+
+export type AuthoringStoreyInput = {
+  title?: string
+  slug?: string
+  summary?: string
+  sort_order?: number
+  chest_rewards?: ChestRewardRow[]
+  mob_roster?: string[]
+  boss_roster?: string[]
+  pass_bar_fraction?: number
+}
+
 export type ContentDefinition = {
   id: number
   kind: ContentKind
   owner_id: number | null
+  storey_id: number | null
   source_definition_id: number | null
   visibility: Visibility
   status: ContentStatus

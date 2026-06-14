@@ -5,7 +5,7 @@ import type { AdventureAttempt, AdventureRun } from '@/features/command-adventur
 
 /**
  * Scenario brief for an adventure level. Reuses the challenge workspace's
- * {@link LevelBriefCard}, passing the attempt's live objective checklist —
+ * {@link LevelBriefCard}, passing the attempt's live objective checklist -
  * the objective scaffold is adventure-only.
  */
 export function AdventureContextPanel({

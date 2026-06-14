@@ -118,7 +118,7 @@ export function ShowcaseTab({
                 <span className="text-muted-foreground">/{rank.ratingForNext}</span>
               </span>
               <span className="text-aurora-blue/80">
-                {rank.nextTier ? `→ ${rank.nextTier.name}` : 'Max tier'}
+                {rank.nextTier ? `-> ${rank.nextTier.name}` : 'Max tier'}
               </span>
             </div>
             <ProgressBar
@@ -138,7 +138,7 @@ export function ShowcaseTab({
             <StatChip
               icon={Coins}
               label="GitCoins"
-              value={gitcoins === null ? '—' : Math.round(coins).toLocaleString()}
+              value={gitcoins === null ? '-' : Math.round(coins).toLocaleString()}
               color="#c4b5fd"
             />
           </div>

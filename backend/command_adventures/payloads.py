@@ -1,9 +1,9 @@
 from django.db.models import Prefetch
 
-from adventures.models import AdventureMastery, AdventureLevelAttempt, AdventureRun
-from adventures.scheduler import pass_bar_for, total_achievable
-from adventures.services import ordered_levels_for
 from battle.payloads import battle_block
+from command_adventures.models import AdventureLevelAttempt, AdventureMastery, AdventureRun
+from command_adventures.scheduler import pass_bar_for, total_achievable
+from command_adventures.services import ordered_levels_for
 from common.constants import SESSION_STATUS_STARTED
 from evaluation.checklist import ObjectiveChecklistEvaluator
 from practice.context import ScenarioContextNormalizer
@@ -18,11 +18,13 @@ def _live_objective_checks(attempt: AdventureLevelAttempt) -> list:
     current repository state. Shared by the full attempt payload and the slim
     per-command payload so the checklist ticks off identically on both paths.
     Checks are authored on the level (`objective_checks`); their server-side
-    requirements never leave the backend — only {label, satisfied} rows do."""
+    requirements never leave the backend - only {label, satisfied} rows do."""
+    executed_commands = [step.command_text for step in attempt.steps.all()]
     return ObjectiveChecklistEvaluator().evaluate(
         attempt.adventure_level.objective_checks,
         state=attempt.repository_state,
         initial_state=attempt.selected_variant.initial_state,
+        executed_commands=executed_commands,
     )
 
 
@@ -90,7 +92,7 @@ def attempt_payload(attempt: AdventureLevelAttempt) -> dict:
         "scenario_context": context,
         # The objective checklist is adventure-only and ticks off live: each
         # authored check's server-side requirement is evaluated against the
-        # current attempt state. Display-only — completion is still governed by
+        # current attempt state. Display-only - completion is still governed by
         # evaluation_spec. Same shape as the per-command patch field.
         "objective_checks": _live_objective_checks(attempt),
         # Adventure scaffolding is deliberately minimal: hints only, no
@@ -119,9 +121,9 @@ def attempt_payload(attempt: AdventureLevelAttempt) -> dict:
             attempt.repository_state, already_normalized=True
         ),
         # Encounter roster for the battle stage (events ride only the
-        # per-command response). Null for pre-battle attempts → the client
+        # per-command response). Null for pre-battle attempts -> the client
         # derives a fallback roster.
-        "battle": battle_block(attempt.battle_state),
+        "battle": battle_block(attempt.battle_state, user=attempt.run.user),
         # Command history for the terminal. Mirrors the challenge `steps` payload
         # so the frontend can derive terminal lines from cached server state
         # (and rehydrate on refresh) instead of ephemeral component state. Only
@@ -206,7 +208,7 @@ def adventure_command_payload(run: AdventureRun, *, attempt: AdventureLevelAttem
     the live attempt state changes (repository, counts, objective checklist), so
     the mastery panel, results list, level text, and scenario normalization are
     all skipped. The full `adventure_run_payload` is sent only when the attempt
-    transitions (solved / budget spent) — which is when mastery and the next
+    transitions (solved / budget spent) - which is when mastery and the next
     level actually change. The frontend merges this patch into the cached run."""
     return {
         "partial": True,

@@ -7,7 +7,7 @@ import { cn } from '@/shared/utils/cn'
 /**
  * Mastery meter for an adventure session: the running session score climbing
  * toward the pass bar that unlocks Challenge, with a gate marker at the bar and
- * a tally of commands mastered. Replaces the old linear per-problem walk —
+ * a tally of commands mastered. Replaces the old linear per-problem walk -
  * under spaced repetition commands repeat, so a fixed node-per-problem track no
  * longer fits.
  *

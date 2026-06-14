@@ -14,6 +14,17 @@ TOWER_STATUSES = [
     (STATUS_ARCHIVED, "Archived"),
 ]
 
+# A user has two distinct design surfaces:
+#   - `personal`: their own creation, publishable + shareable to everyone.
+#   - `official_fork`: a private copy of the official tower they tweak; never
+#     publishable/shareable, visible only to them.
+ORIGIN_PERSONAL = "personal"
+ORIGIN_OFFICIAL_FORK = "official_fork"
+TOWER_ORIGINS = [
+    (ORIGIN_PERSONAL, "Personal"),
+    (ORIGIN_OFFICIAL_FORK, "Official fork"),
+]
+
 COMPATIBLE_BINDINGS = {
     "adventure_section": "adventure",
     "challenge_section": "challenge",
@@ -40,6 +51,7 @@ class TowerDesign(models.Model):
         max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_PRIVATE
     )
     status = models.CharField(max_length=16, choices=TOWER_STATUSES, default=STATUS_DRAFT)
+    origin = models.CharField(max_length=16, choices=TOWER_ORIGINS, default=ORIGIN_PERSONAL)
     slug = models.SlugField()
     title = models.CharField(max_length=180)
     summary = models.TextField(blank=True)
@@ -72,6 +84,9 @@ class TowerPieceInstance(models.Model):
     tower_design = models.ForeignKey(TowerDesign, related_name="pieces", on_delete=models.CASCADE)
     piece_asset = models.ForeignKey("assets.Asset", on_delete=models.PROTECT)
     piece_type = models.CharField(max_length=32)
+    # Which storey (floor) this piece belongs to. Pieces group into floors so the
+    # editor can show storey bands and the author knows which storey content binds to.
+    storey_index = models.PositiveIntegerField(default=0)
     sort_order = models.PositiveIntegerField(default=0)
     parent_instance = models.ForeignKey(
         "self", null=True, blank=True, related_name="children", on_delete=models.CASCADE

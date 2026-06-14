@@ -32,7 +32,7 @@ class ObjectiveChecklistEvaluator:
             requirement = check.get("requirement") or {}
             if not label:
                 continue
-            # An empty requirement would match vacuously (no rules → no failures),
+            # An empty requirement would match vacuously (no rules -> no failures),
             # so a check with no requirement is reported unsatisfied rather than
             # silently always-green. Authoring validation forbids this case.
             satisfied = bool(

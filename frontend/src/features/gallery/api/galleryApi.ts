@@ -1,6 +1,6 @@
 import { apiRequest } from '@/shared/api/httpClient'
 import type { ContentDefinition } from '@/features/authoring/types'
-import type { TowerDesign } from '@/features/towers/types'
+import type { TowerDesign } from '@/features/tower-designs/types'
 import type { AssetKind } from '@/shared/assets/types'
 
 export type GalleryAsset = {

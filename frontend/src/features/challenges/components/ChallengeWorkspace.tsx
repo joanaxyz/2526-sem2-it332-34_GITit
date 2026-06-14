@@ -147,7 +147,7 @@ export function ChallengeWorkspace() {
       navigate(towerUrlForRun(updatedRun))
     },
   })
-  // Starts a fresh run on any level — the "Next level" CTA and the completion
+  // Starts a fresh run on any level - the "Next level" CTA and the completion
   // modal's level navigator both route through here, so jumping to a lower level
   // works exactly like advancing to the next one.
   const startLevelMutation = useMutation({
@@ -160,7 +160,7 @@ export function ChallengeWorkspace() {
     },
   })
   // Replaying a free-play (review) run starts a fresh uncounted run on the same
-  // level — never the retry endpoint, which rejects non-primary runs. This keeps
+  // level - never the retry endpoint, which rejects non-primary runs. This keeps
   // "Play again" working for already-completed levels without touching progress.
   const reviewMutation = useMutation({
     mutationFn: (levelId: number) => challengesApi.startChallengeRun(levelId, { review: true }),

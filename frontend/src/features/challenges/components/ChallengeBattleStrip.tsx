@@ -12,7 +12,7 @@ import { cn } from '@/shared/utils/cn'
 /**
  * Challenge adapter for the battle stage: one boss arena (no travel) at the
  * top of the workspace column. Collapsible to a slim HP-only bar for short
- * viewports — collapsed, the actors unmount entirely (their rAF loops stop),
+ * viewports - collapsed, the actors unmount entirely (their rAF loops stop),
  * but the director's roster state keeps the numbers honest.
  */
 export function ChallengeBattleStrip({

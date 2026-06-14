@@ -1,8 +1,8 @@
 import { AlertTriangle, Code2, GitBranch, SquareTerminal } from 'lucide-react'
 
-import { BookDiagram } from '@/features/storeys/book/BookDiagram'
-import { bookAnchorDomId, bookPageId } from '@/features/storeys/book/bookNav'
-import type { BookBlock, BookCommand, BookPage } from '@/features/storeys/book/bookTypes'
+import { BookDiagram } from '@/features/tower-map/book/BookDiagram'
+import { bookAnchorDomId, bookPageId } from '@/features/tower-map/book/bookNav'
+import type { BookBlock, BookCommand, BookPage } from '@/features/tower-map/book/bookTypes'
 import { cn } from '@/shared/utils/cn'
 
 // Renders one command's authored pages. Mirrors the scenario command preview's

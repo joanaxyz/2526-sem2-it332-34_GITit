@@ -1,6 +1,6 @@
 import type { RepositorySnapshot } from '@/shared/level/types'
 import type { KnownDifficulty } from '@/features/challenges/constants'
-import type { BookPage } from '@/features/storeys/book/bookTypes'
+import type { BookPage } from '@/features/tower-map/book/bookTypes'
 import type { TowerLayoutDescriptor } from '@/shared/assets/types'
 
 export type Difficulty = KnownDifficulty | (string & {})

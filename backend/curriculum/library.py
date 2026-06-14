@@ -153,9 +153,9 @@ def _diagram(
     """Authorable diagram block.
 
     ``kind`` selects how the Storey Book renders it:
-      - ``"dag"`` — a commit graph. ``nodes`` are ``{id, label, lane, type}``
+      - ``"dag"`` - a commit graph. ``nodes`` are ``{id, label, lane, type}``
         (type one of commit/head/branch/merge); ``edges`` are ``{from, to}``.
-      - ``"flow"`` — left-to-right stages (e.g. working tree → staging → repo).
+      - ``"flow"`` - left-to-right stages (e.g. working tree -> staging -> repo).
         ``nodes`` are ``{id, label, accent}``; ``edges`` are ``{from, to, label}``.
 
     The payload is stored verbatim, so new diagram kinds can be authored without a
@@ -1067,7 +1067,7 @@ def tome_pages(sections: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return pages_from_command_sections(sections)
 
 
-# ── Authored library entries ─────────────────────────────────────────────────
+# -- Authored library entries -------------------------------------------------
 # The command library is seeded content: entries are authored here and persisted
 # to the ``LibraryEntry`` model by ``python manage.py seed_command_library``.
 # Each dict maps 1:1 to the arguments of ``_content`` above. Copy the ``git init``
@@ -1086,7 +1086,7 @@ LIBRARY_ENTRIES: list[dict[str, Any]] = [
         "aliases": ["git init <directory>", "git init -b <branch>", "git init -q"],
         # One-paragraph summary shown at the top of the command.
         "summary": "git init creates Git metadata for a folder so future snapshots can be tracked there.",
-        # Free-form tags (diagnostic/action/…); surfaced to the book payload.
+        # Free-form tags (diagnostic/action/); surfaced to the book payload.
         "tags": ["action", "setup"],
         # Authored syntax examples; each becomes a syntax page.
         "syntax": [
@@ -1100,9 +1100,9 @@ LIBRARY_ENTRIES: list[dict[str, Any]] = [
         "watch_for": "Running it inside a folder that is already a repository.",
         "readiness": ["Confirm you are in the intended folder before initializing."],
         "terminal_output": "Initialized empty Git repository in /path/.git/",
-        # ── Sub-navigation: options & arguments ──────────────────────────────
+        # -- Sub-navigation: options & arguments ------------------------------
         # Each option/argument becomes its own page AND a sub-nav item in the
-        # Storey Book (e.g. git init → -q / --quiet, -b / --initial-branch).
+        # Storey Book (e.g. git init -> -q / --quiet, -b / --initial-branch).
         "options": [
             {
                 "token": "-b / --initial-branch",
@@ -1122,7 +1122,7 @@ LIBRARY_ENTRIES: list[dict[str, Any]] = [
                 "body": "Initializes the named folder instead of the current working directory.",
             },
         ],
-        # ── Authored diagram (optional) ──────────────────────────────────────
+        # -- Authored diagram (optional) --------------------------------------
         # Rendered as neon SVG in the book. kind="flow" | "dag".
         "diagram": _diagram(
             kind="flow",

@@ -1,4 +1,10 @@
-export type AssetKind = 'monster' | 'character' | 'projectile' | 'tower_piece' | 'tower_artifact'
+export type AssetKind =
+  | 'monster'
+  | 'character'
+  | 'projectile'
+  | 'tower_piece'
+  | 'tower_artifact'
+  | 'battle_artifact'
 
 export type AssetSpriteDescriptor = {
   url: string
@@ -11,11 +17,21 @@ export type AssetSpriteDescriptor = {
   loops?: boolean
 }
 
+/** Where an owned-map descriptor came from, relative to the requesting user. */
+export type AssetSource = 'official' | 'owned' | 'purchased'
+
 export type BaseAssetDescriptor<K extends AssetKind = AssetKind> = {
+  id: number
   slug: string
   label: string
   kind: K
   scale?: number
+  owner_id?: number | null
+  visibility?: 'private' | 'public' | 'store'
+  price?: number
+  tags?: string[]
+  /** Present only on owned-map responses (getOwnedDescriptors). */
+  source?: AssetSource
   config?: Record<string, unknown>
   sprites: Record<string, AssetSpriteDescriptor>
 }
@@ -74,12 +90,17 @@ export type TowerPieceAssetDescriptor = BaseAssetDescriptor<'tower_piece'> & {
 export type TowerArtifactAssetDescriptor = BaseAssetDescriptor<'tower_artifact'>
 export type ProjectileAssetDescriptor = BaseAssetDescriptor<'projectile'>
 
+/** A battle-stage set piece (e.g. the crystal Blue defends). `config.foot_offset`
+ *  is the source-pixel padding below its base, used to stand it on the ledge. */
+export type BattleArtifactAssetDescriptor = BaseAssetDescriptor<'battle_artifact'>
+
 export type AssetDescriptor =
   | MonsterAssetDescriptor
   | CharacterAssetDescriptor
   | TowerPieceAssetDescriptor
   | TowerArtifactAssetDescriptor
   | ProjectileAssetDescriptor
+  | BattleArtifactAssetDescriptor
 
 export type TowerContentBinding = {
   kind: 'adventure' | 'challenge' | 'tome'
@@ -90,6 +111,7 @@ export type TowerLayoutPieceDescriptor = {
   instanceId: string
   assetSlug: string
   pieceType: TowerPieceType
+  storeyIndex?: number
   contentBinding?: TowerContentBinding
 }
 

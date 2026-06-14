@@ -31,7 +31,7 @@ type CommitNodeData = {
   variant: DagVariant
   isActive?: boolean
   /** Commit appeared this command: play the pop-in on the node's inner div
-   *  (the ReactFlow wrapper's transform is positioning — never animate it). */
+   *  (the ReactFlow wrapper's transform is positioning - never animate it). */
   isEntering?: boolean
   /** Ref pills that just moved onto this commit: slide-up + fade. */
   enteringRefs?: string[]
@@ -123,7 +123,7 @@ function snapshotDelta(prev: RepositorySnapshot, next: RepositorySnapshot): Ente
   const collect = (nextRefs: Record<string, string | null>, prevRefs: Record<string, string | null>) => {
     for (const [name, target] of Object.entries(nextRefs)) {
       if (!target || prevRefs[name] === target) continue
-      // Moved or newly created ref → animate its pill on the commit it landed on.
+      // Moved or newly created ref -> animate its pill on the commit it landed on.
       if (prevRefs[name] !== undefined || prev.repository_initialized) {
         refsByCommit.set(target, [...(refsByCommit.get(target) ?? []), name])
       }
@@ -560,7 +560,7 @@ function SummaryLine({ label, value }: { label: string; value: string }) {
 
 // dagre layout is the heaviest per-command cost, but node positions depend only
 // on commit topology (exactly what graphLayoutSignature captures). Cache positions
-// per topology so ref/HEAD/staging-only commands (git add, branch, switch, status…)
+// per topology so ref/HEAD/staging-only commands (git add, branch, switch, status)
 // refresh the cheap node data without re-running a full graph layout. Module level
 // so the cache is shared across diagram instances (live + expected often match)
 // and stays out of render-time ref/state mutation territory.

@@ -3,14 +3,14 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from adventures.models import AdventureLevelAttempt, AdventureRun, CommandAdventure
-from adventures.payloads import adventure_command_payload, adventure_run_payload
-from adventures.services import (
+from battle.payloads import battle_block
+from command_adventures.models import AdventureLevelAttempt, AdventureRun, CommandAdventure
+from command_adventures.payloads import adventure_command_payload, adventure_run_payload
+from command_adventures.services import (
     AdventureCommandService,
     AdventureRunService,
     AdventureWorkspaceFileService,
 )
-from battle.payloads import battle_block
 from common.constants import SESSION_STATUS_STARTED
 from common.exceptions import Locked
 
@@ -116,7 +116,7 @@ class AdventureRunSubmitCommandAPIView(APIView):
                 # roster is the SUBMITTED attempt's final state; the next
                 # attempt's fresh roster rides run.current_attempt.battle.
                 "battle": battle_block(
-                    submitted_attempt.battle_state, result["battle_events"]
+                    submitted_attempt.battle_state, result["battle_events"], user=request.user
                 ),
                 # Symmetric to the challenge submit response: lets the client
                 # replace its optimistic pending step with the persisted one.

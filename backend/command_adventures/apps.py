@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 
 
-class AdventuresConfig(AppConfig):
+class CommandAdventuresConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "adventures"
+    name = "command_adventures"
+    label = "adventures"

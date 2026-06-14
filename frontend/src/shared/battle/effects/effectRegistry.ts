@@ -59,7 +59,7 @@ function burst(layer: HTMLElement, at: { x: number; y: number }, color: string, 
   ).finally(() => ring.remove())
 }
 
-/** commit — Seal of Record: an amber rune disc arcs in and stamps the target. */
+/** commit - Seal of Record: an amber rune disc arcs in and stamps the target. */
 const commitSeal: BattleEffect = async ({ layer, from, to }) => {
   const size = 22
   const disc = el(layer, {
@@ -85,7 +85,7 @@ const commitSeal: BattleEffect = async ({ layer, from, to }) => {
   burst(layer, to, 'rgba(245,158,11,0.85)')
 }
 
-/** merge — Converging Streams: two streaks meet exactly at the target. */
+/** merge - Converging Streams: two streaks meet exactly at the target. */
 const mergeStreams: BattleEffect = async ({ layer, from, to }) => {
   const mk = (offsetY: number, color: string) => {
     const streak = el(layer, {
@@ -109,7 +109,7 @@ const mergeStreams: BattleEffect = async ({ layer, from, to }) => {
   burst(layer, to, 'rgba(255,255,255,0.9)', 44)
 }
 
-/** push — Repulsor Wave: staggered chevrons sweep into the target. */
+/** push - Repulsor Wave: staggered chevrons sweep into the target. */
 const pushWave: BattleEffect = async ({ layer, from, to }) => {
   const flights: Promise<void>[] = []
   for (let i = 0; i < 3; i++) {
@@ -136,7 +136,7 @@ const pushWave: BattleEffect = async ({ layer, from, to }) => {
   burst(layer, to, 'rgba(0,245,212,0.85)')
 }
 
-/** Default — a cyan arcane bolt. */
+/** Default - a cyan arcane bolt. */
 const arcaneBolt: BattleEffect = async ({ layer, from, to }) => {
   const size = 14
   const bolt = el(layer, {
@@ -184,7 +184,7 @@ export const fizzle: BattleEffect = async ({ layer, from, to }) => {
 
 /**
  * Sprite-strip projectile (monster arrows/magic, and sprite-skinned skills).
- * Renders the strip's first frame as a background and flies it from→to;
+ * Renders the strip's first frame as a background and flies it from->to;
  * `hue` recolors a shared sheet per skill.
  */
 export function spriteProjectile(sheet: SpriteAnimation, opts?: { hue?: number; flip?: boolean }): BattleEffect {
@@ -228,7 +228,7 @@ const EFFECTS: Record<string, BattleEffect> = {
   default: arcaneBolt,
 }
 
-/** Resolve the effect for a command family ("commit", "merge", …). */
+/** Resolve the effect for a command family ("commit", "merge", ). */
 export function effectForSkill(skill: string): BattleEffect {
   return EFFECTS[skill] ?? EFFECTS.default
 }

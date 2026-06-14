@@ -1,11 +1,24 @@
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
 
+from assets.models import KIND_TOWER_PIECE, Asset
 from marketplace.access import can_remix
-from towers.models import ArtifactPlacement, TowerContentBinding, TowerDesign, TowerPieceInstance
-from towers.selectors import tower_design_overview, tower_design_payload, visible_tower_designs
-from towers.services import TowerDesignService
+from tower_designs.models import (
+    ORIGIN_PERSONAL,
+    STATUS_PUBLISHED,
+    ArtifactPlacement,
+    TowerContentBinding,
+    TowerDesign,
+    TowerPieceInstance,
+)
+from tower_designs.selectors import (
+    tower_design_overview,
+    tower_design_payload,
+    visible_tower_designs,
+)
+from tower_designs.services import TowerDesignService
 
 
 class TowerDesignMineAPIView(APIView):
@@ -16,7 +29,9 @@ class TowerDesignMineAPIView(APIView):
 
 class TowerDesignListCreateAPIView(APIView):
     def post(self, request):
-        design = TowerDesignService().create(user=request.user, data=request.data)
+        # Idempotent: "Raise your Tower" returns the existing personal tower
+        # instead of erroring on the one-per-user cap.
+        design = TowerDesignService().get_or_create_personal(user=request.user, data=request.data)
         return Response(tower_design_payload(design), status=201)
 
 
@@ -43,6 +58,41 @@ class TowerDesignPublishAPIView(APIView):
         design = TowerDesign.objects.get(id=design_id)
         design = TowerDesignService().publish(user=request.user, design=design)
         return Response(tower_design_payload(design))
+
+
+class TowerDesignOfficialForkAPIView(APIView):
+    """Get-or-create the user's private fork of the official tower."""
+
+    def post(self, request):
+        design = TowerDesignService().get_or_create_official_fork(user=request.user)
+        return Response(tower_design_payload(design, include_layout=True), status=201)
+
+
+class TowerDesignShareAPIView(APIView):
+    """Publish + make a personal tower public, returning its shareable identity."""
+
+    def post(self, request, design_id: int):
+        design = TowerDesign.objects.get(id=design_id)
+        design = TowerDesignService().share(user=request.user, design=design)
+        payload = tower_design_payload(design)
+        payload["share_path"] = f"/tower/shared/{design.id}"
+        return Response(payload)
+
+
+class SharedTowerOverviewAPIView(APIView):
+    """Public, read-only overview of a shared personal tower (no auth)."""
+
+    permission_classes = [AllowAny]
+
+    def get(self, request, design_id: int):
+        try:
+            design = TowerDesign.objects.get(id=design_id)
+        except TowerDesign.DoesNotExist as exc:
+            raise NotFound("Tower not found.") from exc
+        is_public = design.status == STATUS_PUBLISHED and design.visibility in {"public", "store"}
+        if not is_public or design.origin != ORIGIN_PERSONAL:
+            raise NotFound("Tower not found.")
+        return Response(tower_design_overview(design=design))
 
 
 class TowerDesignRemixAPIView(APIView):
@@ -72,6 +122,17 @@ class MyTowerOverviewAPIView(APIView):
         return Response(tower_design_overview(design=design))
 
 
+class TowerStoreyCreateAPIView(APIView):
+    """Append a new storey (floor) of pieces to the design."""
+
+    def post(self, request, design_id: int):
+        design = TowerDesign.objects.get(id=design_id)
+        storey_index = TowerDesignService().add_storey(user=request.user, design=design)
+        payload = tower_design_overview(design=design)
+        payload["added_storey_index"] = storey_index
+        return Response(payload, status=201)
+
+
 class TowerPieceListCreateAPIView(APIView):
     def post(self, request, design_id: int):
         design = TowerDesign.objects.get(id=design_id)
@@ -84,9 +145,16 @@ class TowerPieceDetailAPIView(APIView):
         design = TowerDesign.objects.get(id=design_id)
         TowerDesignService().assert_owner(user=request.user, design=design)
         piece = design.pieces.get(id=piece_id)
+        # Swapping which asset fills a structural slot keeps the slot's piece_type.
+        if "piece_asset_id" in request.data:
+            asset = Asset.objects.get(id=request.data["piece_asset_id"])
+            if asset.kind != KIND_TOWER_PIECE:
+                raise ValidationError({"piece_asset_id": "Asset must be a tower piece."})
+            piece.piece_asset = asset
         for field in ("sort_order", "transform", "config"):
             if field in request.data:
                 setattr(piece, field, request.data[field])
+        piece.full_clean()
         piece.save()
         return Response(_piece_payload(piece))
 
@@ -143,6 +211,7 @@ def _piece_payload(piece: TowerPieceInstance) -> dict:
         "tower_design_id": piece.tower_design_id,
         "piece_asset_id": piece.piece_asset_id,
         "piece_type": piece.piece_type,
+        "storey_index": piece.storey_index,
         "sort_order": piece.sort_order,
         "parent_instance_id": piece.parent_instance_id,
         "transform": piece.transform,

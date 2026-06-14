@@ -4,7 +4,7 @@ The battle payload merges these into each `battle_state` monster. The descriptor
 map for a kind is tiny and changes only when an admin/user edits an asset, so we
 build it once and cache it; :mod:`assets.signals` busts the cache on write. The
 per-command submit path therefore adds **zero** asset queries (latency budget is
-SQL round trips — see backend/scripts/profile_command_latency.py).
+SQL round trips - see backend/scripts/profile_command_latency.py).
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from django.core.cache import cache
 
 from assets.models import KIND_CHARACTER, KIND_MONSTER, KIND_TOWER_PIECE, Asset, TowerPieceAsset
 
-_CACHE_VERSION = 2
+_CACHE_VERSION = 4
 logger = logging.getLogger(__name__)
 
 
@@ -39,10 +39,15 @@ def sprite_descriptor(sprite) -> dict:
 def asset_descriptor(asset: Asset) -> dict:
     config = asset.config or {}
     payload = {
+        "id": asset.id,
         "slug": asset.slug,
         "label": asset.label,
         "kind": asset.kind,
         "scale": asset.default_scale,
+        "owner_id": asset.owner_id,
+        "visibility": asset.visibility,
+        "price": asset.price,
+        "tags": list(asset.tags or []),
         "config": config,
         "sprites": {s.action: sprite_descriptor(s) for s in asset.sprites.all()},
     }
@@ -88,6 +93,66 @@ def descriptor_map(kind: str = KIND_MONSTER) -> dict[str, dict]:
     built = {asset.slug: asset_descriptor(asset) for asset in assets}
     cache.set(key, built, timeout=None)
     return built
+
+
+def owned_descriptor_map(user, kind: str) -> dict[str, dict]:
+    """Official published assets PLUS the user's own AND purchased assets of `kind`.
+
+    Used by the editor/private tower (and owner-aware battle resolution) so a
+    user's uploaded private assets and store purchases are visible to them
+    without ever entering the global (cross-user) cached map. Each descriptor is
+    stamped with a ``source`` (``official`` | ``owned`` | ``purchased``) for
+    frontend filtering. The official entries are copied before stamping so the
+    shared cached map is never mutated.
+    """
+    base: dict[str, dict] = {}
+    for slug, descriptor in descriptor_map(kind).items():
+        base[slug] = {**descriptor, "source": "official"}
+    if not getattr(user, "is_authenticated", False):
+        return base
+
+    owned = (
+        Asset.objects.filter(owner=user, kind=kind)
+        .select_related("tower_piece")
+        .prefetch_related("sprites")
+    )
+    for asset in owned:
+        base[asset.slug] = {**asset_descriptor(asset), "source": "owned"}
+
+    for asset in _entitled_assets(user, kind):
+        # Don't override an asset the user also owns; ownership wins.
+        if asset.owner_id == getattr(user, "id", None):
+            continue
+        # Default-granted official assets (the Arcane Spire starter kit) are
+        # entitled too, but they are not purchases — keep them labelled official
+        # rather than downgrading the source the palette/shop filters on. Key off
+        # the asset's real owner (None == official), not the base source label,
+        # since the base map also carries other users' published store assets.
+        if asset.owner_id is None and asset.slug in base:
+            continue
+        base[asset.slug] = {**asset_descriptor(asset), "source": "purchased"}
+    return base
+
+
+def _entitled_assets(user, kind: str):
+    """Assets of `kind` the user has purchased (via marketplace entitlements).
+
+    Imported locally to avoid an app-load import cycle (marketplace imports
+    assets). Returns an empty list if the marketplace app is unavailable.
+    """
+    try:
+        from marketplace.models import Entitlement
+    except Exception:  # pragma: no cover - marketplace app optional at import time
+        return []
+    return list(
+        Asset.objects.filter(
+            kind=kind,
+            entitlement__user=user,
+        )
+        .select_related("tower_piece")
+        .prefetch_related("sprites")
+        .distinct()
+    )
 
 
 def clear_descriptor_cache() -> None:

@@ -41,7 +41,7 @@ class Command(BaseCommand):
             )
             live_ids.append(entry.id)
             self.stdout.write(
-                f"  • {content['key']}: {len(content['pages'])} pages ({content['display_name']})"
+                f"   {content['key']}: {len(content['pages'])} pages ({content['display_name']})"
             )
         LibraryEntry.objects.exclude(id__in=live_ids).update(is_published=False)
         self.stdout.write(

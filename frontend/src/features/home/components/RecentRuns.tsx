@@ -96,12 +96,12 @@ export function RecentRuns({ summary }: { summary: HomeSummary }) {
           </span>
           <p className="text-sm font-semibold">No runs on record yet</p>
           <p className="max-w-xs text-xs leading-5 text-muted-foreground">
-            Enter the tower and clear your first level — every attempt lands here as match history.
+            Enter the tower and clear your first level - every attempt lands here as match history.
           </p>
         </div>
       )}
 
-      {/* Outcome ledger — every session ever, by how it ended */}
+      {/* Outcome ledger - every session ever, by how it ended */}
       <div className="mt-4 pt-3">
         <OutcomeChips counts={summary.counts} />
       </div>

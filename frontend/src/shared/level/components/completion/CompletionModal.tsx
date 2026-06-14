@@ -18,9 +18,9 @@ export type CompletionStat = {
 
 /**
  * Shared celebration / outcome modal for the challenge and adventure level
- * surfaces. It owns the chrome that should stay identical across both — the
+ * surfaces. It owns the chrome that should stay identical across both - the
  * confetti, the glowing status crest, the headline/message block, and the
- * animated stat grid — while leaving every caller-specific bit (badges, extra
+ * animated stat grid - while leaving every caller-specific bit (badges, extra
  * sections, footer actions) as slots so each surface keeps its own flavour.
  *
  * Stat accents and entrance delays are assigned by position here so callers only

@@ -2,9 +2,9 @@ from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from adventures.models import AdventureLevel, AdventureVariant, CommandAdventure
 from assets.models import KIND_MONSTER, Asset
 from challenges.models import Challenge, ChallengeLevel, ChallengeVariant
+from command_adventures.models import AdventureLevel, AdventureVariant, CommandAdventure
 from curriculum.curriculum_v2.adventure_levels import ADVENTURE_LEVELS
 from curriculum.curriculum_v2.adventures import COMMAND_ADVENTURES
 from curriculum.curriculum_v2.challenges import CHALLENGES
@@ -23,6 +23,7 @@ from evaluation.engine import EvaluationEngine
 from practice.builders import StaticLevelVariantBuilder
 from practice.visualization import RepositoryVisualizationService
 from simulator.services import RepositoryStateSimulator
+from simulator.workspace_files import WorkspaceFileError, WorkspaceFileStateService
 
 
 def battle_asset_slug_errors(monster_slugs: set[str]) -> list[str]:
@@ -340,7 +341,7 @@ class Command(BaseCommand):
                 "hint_set": variant.hint_set,
                 "scaffold_policy": variant.scaffold_policy,
                 # Command budget lives on the parent level, not the
-                # variant — all variants of a level share the same budget.
+                # variant - all variants of a level share the same budget.
                 "is_published": True,
             }
             if isinstance(level, AdventureLevel):
@@ -390,8 +391,8 @@ class Command(BaseCommand):
         because several run/attempt models protect their selected levels and
         variants.
         """
-        from adventures.models import AdventureLevelAttempt, AdventureMastery, AdventureRun
         from challenges.models import ChallengeRun
+        from command_adventures.models import AdventureLevelAttempt, AdventureMastery, AdventureRun
         from practice.models import CommandLog, CommandStep
         from progress.models import LevelCompletion
 
@@ -463,15 +464,10 @@ class Command(BaseCommand):
 
     def _validate_prerequisites(self, *, errors: list[str]) -> None:
         """Adventure prerequisite graph must be a DAG, and every prerequisite must
-        be published, in the same adventure, and precede its dependent in order."""
+        be published in an earlier point of the curriculum."""
         ordered = list(
             AdventureLevel.objects.filter(is_published=True)
-            .order_by(
-                "command_form__command_skill__sort_order",
-                "command_form__sort_order",
-                "sort_order",
-                "id",
-            )
+            .order_by("sort_order", "id")
             .prefetch_related("prerequisites")
             .select_related("command_form__command_skill")
         )
@@ -483,16 +479,9 @@ class Command(BaseCommand):
             for pre in prereqs:
                 if not pre.is_published:
                     errors.append(f"{level.slug}: prerequisite {pre.slug} is not published")
-                elif (
-                    pre.command_form.command_skill.storey_id
-                    != level.command_form.command_skill.storey_id
-                ):
-                    errors.append(
-                        f"{level.slug}: prerequisite {pre.slug} is in a different adventure"
-                    )
                 elif position.get(pre.id, 1 << 30) >= position[level.id]:
                     errors.append(
-                        f"{level.slug}: prerequisite {pre.slug} must precede it in sort order"
+                        f"{level.slug}: prerequisite {pre.slug} must precede it in curriculum order"
                     )
         cycle = _find_prerequisite_cycle(graph)
         if cycle:
@@ -623,8 +612,14 @@ class Command(BaseCommand):
 
         simulator = RepositoryStateSimulator()
         state = simulator.normalize_state(variant.initial_state)
+        workspace_files = (variant.parameter_context or {}).get("solution_workspace_files") or []
+        try:
+            state = self._apply_solution_workspace_files(state, workspace_files, command_index=0)
+        except WorkspaceFileError as exc:
+            errors.append(f"{label}: solution workspace file is invalid: {exc}")
+            return
         executed_commands = []
-        for command in variant.solution_commands or []:
+        for index, command in enumerate(variant.solution_commands or [], start=1):
             result = simulator.process(state, command)
             if not result.processed:
                 errors.append(
@@ -633,6 +628,16 @@ class Command(BaseCommand):
                 return
             executed_commands.append(result.normalized_command)
             state = result.state
+            try:
+                state = self._apply_solution_workspace_files(
+                    state,
+                    workspace_files,
+                    command=command,
+                    command_index=index,
+                )
+            except WorkspaceFileError as exc:
+                errors.append(f"{label}: solution workspace file is invalid after {command!r}: {exc}")
+                return
 
         final_state = simulator.normalize_state(state)
         try:
@@ -656,6 +661,29 @@ class Command(BaseCommand):
         visualization = RepositoryVisualizationService().snapshot(final_state)
         if visualization.get("schema_version") != 2 or "commit_dag" not in visualization:
             errors.append(f"{label}: repository visualization is missing")
+
+    def _apply_solution_workspace_files(
+        self,
+        state: dict,
+        workspace_files: list[dict],
+        *,
+        command: str | None = None,
+        command_index: int,
+    ) -> dict:
+        next_state = state
+        for spec in workspace_files:
+            applies_after = spec.get("after_command")
+            applies_after_index = spec.get("after_command_index")
+            if applies_after is not None and applies_after != command:
+                continue
+            if applies_after_index is not None and int(applies_after_index) != command_index:
+                continue
+            next_state = WorkspaceFileStateService().write_file(
+                next_state,
+                path=spec["path"],
+                content=spec.get("content", ""),
+            )
+        return next_state
 
     def _level_slug(self, variant) -> str:
         if getattr(variant, "adventure_level_id", None):

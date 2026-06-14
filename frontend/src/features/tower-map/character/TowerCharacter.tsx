@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 
-import { useCharacterController } from '@/features/storeys/character/useCharacterController'
+import { useCharacterController } from '@/features/tower-map/character/useCharacterController'
 import { SpriteAnimator } from '@/shared/sprites/SpriteAnimator'
 import type { CharacterDefinition, SpriteAnimatorHandle } from '@/shared/sprites/types'
 
@@ -9,7 +9,7 @@ import type { CharacterDefinition, SpriteAnimatorHandle } from '@/shared/sprites
  * layer over the whole page shell; the controller hook listens for shell
  * clicks and drives the sprite around (walk the landings, fly, teleport).
  *
- * Must be a direct child of `.tower-page-shell` — the controller anchors to
+ * Must be a direct child of `.tower-page-shell` - the controller anchors to
  * `parentElement` for coordinates and click capture.
  */
 export function TowerCharacter({ character }: { character: CharacterDefinition }) {

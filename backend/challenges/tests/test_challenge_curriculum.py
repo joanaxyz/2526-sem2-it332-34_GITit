@@ -2,16 +2,18 @@ from django.core.management import call_command
 from django.utils import timezone
 from rest_framework.test import APIClient
 
-from adventures.models import AdventureLevel, AdventureRun, CommandAdventure
 from challenges.models import Challenge, ChallengeLevel, ChallengeRun
 from challenges.payloads import challenge_run_payload
 from challenges.services import ChallengeRunService
+from command_adventures.models import AdventureLevel, AdventureRun, CommandAdventure
 from curriculum.models import CommandSkill, Storey, Tome
 from curriculum.selectors import storey_content_page
 from practice.context import ScenarioContextNormalizer
 from practice.services import CommandProcessingService
 from practice.visualization import RepositoryVisualizationService
 from progress.models import LevelCompletion
+
+CANONICAL_CHALLENGE_SLUG = "compose-clean-history"
 
 
 def make_user(django_user_model, username: str = "student"):
@@ -40,7 +42,7 @@ def test_seed_curriculum_v2_creates_feature_owned_content(db):
     assert CommandSkill.objects.filter(base_command="git add").exists()
     assert CommandAdventure.objects.filter(slug="tracking-changes-snapshots-command-adventure").exists()
     assert AdventureLevel.objects.filter(command_form__usage_form="git add <file>").exists()
-    challenge = Challenge.objects.get(slug="stage-commit-switch")
+    challenge = Challenge.objects.get(slug=CANONICAL_CHALLENGE_SLUG)
     assert set(challenge.challenge_levels.values_list("difficulty", flat=True)) == {"easy", "medium", "hard"}
 
 
@@ -81,7 +83,7 @@ def test_storey_content_page_returns_canonical_sections(db, django_user_model):
 def test_challenge_run_payload_uses_challenge_and_storey_terms(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    level = ChallengeLevel.objects.get(challenge__slug="stage-commit-switch", difficulty="easy")
+    level = ChallengeLevel.objects.get(challenge__slug=CANONICAL_CHALLENGE_SLUG, difficulty="easy")
     pass_adventure_for(user, level.storey)
 
     run = ChallengeRunService().start_run(
@@ -99,14 +101,13 @@ def test_challenge_run_payload_uses_challenge_and_storey_terms(db, django_user_m
     assert "problem" not in payload
     assert "module" not in payload
     assert "tower" not in payload
-    assert "sibling_levels" not in payload
-    assert "level_id" not in payload["challenge"]
+    assert [sibling["difficulty"] for sibling in payload["sibling_levels"]] == ["easy", "medium", "hard"]
 
 
 def test_challenge_run_http_lifecycle_retry_and_review(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    level = ChallengeLevel.objects.get(challenge__slug="stage-commit-switch", difficulty="easy")
+    level = ChallengeLevel.objects.get(challenge__slug=CANONICAL_CHALLENGE_SLUG, difficulty="easy")
     level.required_successful_attempts = 1
     level.save(update_fields=["required_successful_attempts"])
     pass_adventure_for(user, level.storey)
@@ -152,7 +153,7 @@ def test_challenge_run_http_lifecycle_retry_and_review(db, django_user_model):
 def test_review_mode_is_gated_until_completion(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    level = ChallengeLevel.objects.get(challenge__slug="stage-commit-switch", difficulty="easy")
+    level = ChallengeLevel.objects.get(challenge__slug=CANONICAL_CHALLENGE_SLUG, difficulty="easy")
     client = APIClient()
     client.force_authenticate(user=user)
 
@@ -227,7 +228,7 @@ def test_visualization_payload_keeps_commit_dag_without_extra_lenses():
 def test_hard_challenge_payload_hides_expected_state(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    level = ChallengeLevel.objects.get(challenge__slug="stage-commit-switch", difficulty="hard")
+    level = ChallengeLevel.objects.get(challenge__slug=CANONICAL_CHALLENGE_SLUG, difficulty="hard")
     variant = level.challenge_variants.get(is_published=True)
     run = ChallengeRun.objects.create(
         user=user,
@@ -250,16 +251,16 @@ def test_hard_challenge_payload_hides_expected_state(db, django_user_model):
     assert payload["expected_state"] is None
 
 
-def test_unsupported_command_skills_are_not_published(db):
+def test_expanded_command_catalog_is_published(db):
     call_command("seed_curriculum_v2")
 
     published_commands = set(
         CommandSkill.objects.filter(is_published=True).values_list("base_command", flat=True)
     )
 
-    assert published_commands == {"git init", "git status", "git add", "git commit", "git switch"}
-    assert not Storey.objects.filter(slug="integrated-workflows", is_published=True).exists()
-    assert not CommandSkill.objects.filter(base_command="git clone", is_published=True).exists()
+    assert {"git init", "git status", "git add", "git commit", "git switch"} <= published_commands
+    assert {"git clone", "git fetch", "git pull", "git push"} <= published_commands
+    assert Storey.objects.filter(is_published=True).count() == 7
 
 
 def test_seed_curriculum_v2_validate_passes_for_published_content(db):
@@ -269,7 +270,7 @@ def test_seed_curriculum_v2_validate_passes_for_published_content(db):
 def test_status_challenge_completes_with_explicit_process_requirement(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    level = ChallengeLevel.objects.get(challenge__slug="wake-the-repository", difficulty="easy")
+    level = ChallengeLevel.objects.get(challenge__slug=CANONICAL_CHALLENGE_SLUG, difficulty="easy")
     pass_adventure_for(user, level.storey)
     run = ChallengeRunService().start_run(
         user=user,
@@ -277,9 +278,15 @@ def test_status_challenge_completes_with_explicit_process_requirement(db, django
         source_entry_point="tower_page",
     )
 
-    result = CommandProcessingService().submit_command(run=run, command="git init")
+    result = None
+    for command in run.variant.solution_commands:
+        result = CommandProcessingService().submit_command(run=run, command=command)
+        run.refresh_from_db()
+        if run.status == "completed":
+            break
 
     run.refresh_from_db()
+    assert result is not None
     assert result["evaluation_result"] == "TargetMatched"
     assert run.status == "completed"
     assert ChallengeRun.objects.filter(user=user, challenge_level=level).count() == 1

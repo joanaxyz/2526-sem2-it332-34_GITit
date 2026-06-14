@@ -29,14 +29,14 @@ function MiniBar({ label, metric, color }: { label: string; metric: RateMetric; 
         className="w-8 shrink-0 text-right font-mono text-[0.6rem] font-bold"
         style={{ color: hasData ? color : 'rgba(255,255,255,0.3)' }}
       >
-        {hasData ? `${Math.round(pct)}%` : '—'}
+        {hasData ? `${Math.round(pct)}%` : '-'}
       </span>
     </div>
   )
 }
 
 /**
- * Per-storey tower record — glowing door motif per floor with scenario/hard
+ * Per-storey tower record - glowing door motif per floor with scenario/hard
  * clear bars and retry micro-stats. The "Most Played" analog.
  */
 export function StoreyProgress({ summary }: { summary: HomeSummary }) {
@@ -69,8 +69,8 @@ export function StoreyProgress({ summary }: { summary: HomeSummary }) {
                 <div className="mb-1 flex items-baseline justify-between gap-2">
                   <p className="text-xs font-bold tracking-tight">Storey {storey}</p>
                   <p className="font-mono text-[0.56rem] text-muted-foreground/60">
-                    rta {kpis.rta.value === null ? '—' : `${Math.round(kpis.rta.value)}%`} · ret{' '}
-                    {kpis.arc.value === null ? '—' : `${kpis.arc.value.toFixed(1)}×`}
+                    rta {kpis.rta.value === null ? '-' : `${Math.round(kpis.rta.value)}%`} - ret{' '}
+                    {kpis.arc.value === null ? '-' : `${kpis.arc.value.toFixed(1)}x`}
                   </p>
                 </div>
                 <div className="flex flex-col gap-1">
@@ -94,7 +94,7 @@ export function StoreyProgress({ summary }: { summary: HomeSummary }) {
             to="/tower"
             className="font-mono text-[0.64rem] font-semibold uppercase tracking-[0.1em] text-aurora-cyan/80 transition-colors hover:text-aurora-cyan"
           >
-            Climb the tower →
+            {'Climb the tower ->'}
           </Link>
         </div>
       )}

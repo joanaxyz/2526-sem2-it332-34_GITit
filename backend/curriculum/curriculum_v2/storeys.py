@@ -6,7 +6,7 @@ but it must never introduce a Git problem type before Adventure has taught the
 pieces needed to solve it.
 
 Note: across curriculum_v2 specs, the frozen authoring key ``"module"`` means
-"storey slug" — it predates the storey naming and stays frozen so authored
+"storey slug" - it predates the storey naming and stays frozen so authored
 entries never need rewriting.
 """
 

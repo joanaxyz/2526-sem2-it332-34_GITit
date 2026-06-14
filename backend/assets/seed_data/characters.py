@@ -11,6 +11,8 @@ CHARACTER_SPECS = [
         "slug": "blue",
         "label": "Blue",
         "scale": 0.65,
+        # Blue is part of the default Arcane Spire kit granted to every player.
+        "tags": ["arcane-spire"],
         "metrics": {
             "walk_speed": 140,
             "run_speed": 280,

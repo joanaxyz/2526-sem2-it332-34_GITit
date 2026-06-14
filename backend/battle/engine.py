@@ -3,18 +3,18 @@
 A battle turn is a function over signals the submit paths already compute:
 command classification (counted?), execution success (processed?), the
 evaluation outcome (solved? how many rules pass now?). The damage signal is
-the count of passing evaluation rules — "distance to target" — which credits
+the count of passing evaluation rules - "distance to target" - which credits
 intermediate progress (e.g. the `git add` before the `git commit`).
 
 Turn rules:
 - Diagnostics / non-git noise: free, no turn, no events.
-- Solved: finishing blow — every living monster dies, never a miss.
+- Solved: finishing blow - every living monster dies, never a miss.
 - HIT (counted + processed + more rules passing than last turn): damage equal
   to the number of newly satisfied rules, dealt front-to-back across the roster.
   Total HP equals the rule count, so a clean run kills everything exactly as the
   repo reaches target.
 - MISS (counted but failed, or no new progress): one monster attacks. Pure
-  drama — the real cost was the counted command (the player's mana).
+  drama - the real cost was the counted command (the player's mana).
 - Defeat (budget exhausted, decided by the caller): `player_defeat` appended.
 
 The player has no HP field anywhere; see battle/constants.py.
@@ -42,9 +42,9 @@ class TurnInput:
     processed: bool
     solved: bool
     # len(EvaluationOutcome.passed_rules); None when the command never reached
-    # evaluation (unprocessable input) — treated as "no new progress".
+    # evaluation (unprocessable input) - treated as "no new progress".
     rules_passing: int | None
-    # Command family for the frontend effect registry ("commit", "merge", …).
+    # Command family for the frontend effect registry ("commit", "merge", ).
     skill: str = "default"
     # Budget exhausted by this command (the caller owns that decision).
     defeated: bool = False
@@ -152,5 +152,5 @@ def _hit(living: list[dict], damage: int, skill: str) -> list[dict]:
 
 def _miss(attacker: dict) -> list[dict]:
     """No new progress: the roster's rear (an elite/boss when present) takes the
-    shot. Pure drama — the real cost was the counted command (the mana)."""
+    shot. Pure drama - the real cost was the counted command (the mana)."""
     return [{"type": EVENT_MONSTER_ATTACK, "monster": attacker["id"], "cause": CAUSE_MISS}]

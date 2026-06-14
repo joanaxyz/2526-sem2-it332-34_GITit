@@ -1,15 +1,15 @@
 import type { TomeSummary } from '@/features/challenges/types'
-import { BookPages } from '@/features/storeys/book/BookContent'
+import { BookPages } from '@/features/tower-map/book/BookContent'
 import { Modal } from '@/shared/components/Modal'
 
 // Reader for a tome (general lesson). Tomes are a single authored document of
-// BookPage[] — no command rail, no sub-navigation, no prev/next. Pages ship
+// BookPage[] - no command rail, no sub-navigation, no prev/next. Pages ship
 // inline on the tome summary, so the reader renders synchronously.
 export function TomeReaderModal({ tome, onClose }: { tome: TomeSummary; onClose: () => void }) {
   return (
     <Modal
       open
-      title={`${tome.title} · Tome`}
+      title={`${tome.title} - Tome`}
       onClose={onClose}
       className="max-h-[94vh] w-full max-w-3xl overflow-hidden"
       contentClassName="h-[calc(94vh-4.5rem)] overflow-hidden p-0"

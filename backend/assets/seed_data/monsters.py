@@ -1,6 +1,6 @@
 """Official monster asset specs (migrated from the old frontend monsters.ts).
 
-Frame counts are NOT listed here — the seed importer reads each PNG and counts
+Frame counts are NOT listed here - the seed importer reads each PNG and counts
 frames itself (assets.models.AssetSprite.recompute_frames). Each spec only
 carries what an image can't express: tier, display scale, attack tuning,
 hp-bar/foot metrics, and which file + fps maps to each action category.
@@ -15,7 +15,7 @@ from __future__ import annotations
 # action -> (filename, fps). The "attack" action selects the right attackNN.png.
 # A "projectile" action (path under projectiles/) is added for ranged attackers.
 MONSTER_SPECS: list[dict] = [
-    # ── Mobs ──────────────────────────────────────────────────────────────
+    # -- Mobs --------------------------------------------------------------
     {
         "slug": "slime", "label": "Slime", "tier": "mob", "scale": 1.0,
         "attack": {"kind": "melee", "hit_frame": 3, "lunge_px": 48},
@@ -74,7 +74,7 @@ MONSTER_SPECS: list[dict] = [
         },
     },
 
-    # ── Elites ────────────────────────────────────────────────────────────
+    # -- Elites ------------------------------------------------------------
     {
         "slug": "armored-skeleton", "label": "Armored Skeleton", "tier": "elite", "scale": 1.1,
         "attack": {"kind": "melee", "hit_frame": 5, "lunge_px": 60},
@@ -112,7 +112,7 @@ MONSTER_SPECS: list[dict] = [
         },
     },
 
-    # ── Bosses (rendered 1.5–2×) ──────────────────────────────────────────
+    # -- Bosses (rendered 1.5"2x) ------------------------------------------
     {
         "slug": "elite-orc", "label": "Elite Orc", "tier": "boss", "scale": 1.6,
         "attack": {"kind": "melee", "hit_frame": 7, "lunge_px": 72},
@@ -171,5 +171,6 @@ MONSTER_SPECS: list[dict] = [
     },
 ]
 
-# Actions that loop while displayed; the rest play once.
-LOOPING_ACTIONS = {"idle", "walk", "projectile"}
+# Actions that loop while displayed; the rest play once. Canonical definition
+# lives in assets.sprite_actions; re-exported here for the seed importer.
+from assets.sprite_actions import LOOPING_ACTIONS  # noqa: E402,F401

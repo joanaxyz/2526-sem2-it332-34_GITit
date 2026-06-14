@@ -4,15 +4,23 @@ from marketplace.views import (
     GalleryAssetListAPIView,
     GalleryContentListAPIView,
     GalleryTowerDesignListAPIView,
-    StoreListingDetailAPIView,
-    StoreListingListCreateAPIView,
-    StoreListingPurchaseAPIView,
+    MarketplaceListingDetailAPIView,
+    MarketplaceListingListCreateAPIView,
+    MarketplaceListingPurchaseAPIView,
 )
 
 urlpatterns = [
-    path("store/listings/", StoreListingListCreateAPIView.as_view(), name="store-listing-list"),
-    path("store/listings/<int:listing_id>/", StoreListingDetailAPIView.as_view(), name="store-listing-detail"),
-    path("store/listings/<int:listing_id>/purchase/", StoreListingPurchaseAPIView.as_view(), name="store-listing-purchase"),
+    path("marketplace/listings/", MarketplaceListingListCreateAPIView.as_view(), name="marketplace-listing-list"),
+    path(
+        "marketplace/listings/<int:listing_id>/",
+        MarketplaceListingDetailAPIView.as_view(),
+        name="marketplace-listing-detail",
+    ),
+    path(
+        "marketplace/listings/<int:listing_id>/purchase/",
+        MarketplaceListingPurchaseAPIView.as_view(),
+        name="marketplace-listing-purchase",
+    ),
     path("gallery/assets/", GalleryAssetListAPIView.as_view(), name="gallery-assets"),
     path("gallery/content/", GalleryContentListAPIView.as_view(), name="gallery-content"),
     path("gallery/tower-designs/", GalleryTowerDesignListAPIView.as_view(), name="gallery-tower-designs"),

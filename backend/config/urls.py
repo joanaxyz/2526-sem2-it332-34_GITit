@@ -4,14 +4,10 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-from assets.views import AssetDescriptorAPIView
-from adventures.views import (
-    AdventureRunDetailAPIView,
-    AdventureRunFinishAPIView,
-    AdventureRunSubmitCommandAPIView,
-    AdventureRunUseHintAPIView,
-    AdventureWorkspaceFileAPIView,
-    CommandAdventureRunStartAPIView,
+from assets.views import (
+    AssetDescriptorAPIView,
+    AssetUploadAPIView,
+    MonsterUploadAPIView,
 )
 from challenges.views import (
     ChallengeCommandSubmitAPIView,
@@ -20,6 +16,14 @@ from challenges.views import (
     ChallengeRunFinishAPIView,
     ChallengeRunStartAPIView,
     ChallengeWorkspaceFileAPIView,
+)
+from command_adventures.views import (
+    AdventureRunDetailAPIView,
+    AdventureRunFinishAPIView,
+    AdventureRunSubmitCommandAPIView,
+    AdventureRunUseHintAPIView,
+    AdventureWorkspaceFileAPIView,
+    CommandAdventureRunStartAPIView,
 )
 from common.views import HealthAPIView
 from curriculum.views import (
@@ -38,8 +42,10 @@ urlpatterns = [
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("api/auth/", include("accounts.urls")),
     path("api/assets/descriptors/", AssetDescriptorAPIView.as_view(), name="asset-descriptors"),
+    path("api/assets/monsters/", MonsterUploadAPIView.as_view(), name="asset-monster-upload"),
+    path("api/assets/", AssetUploadAPIView.as_view(), name="asset-upload"),
     path("api/authoring/", include("authoring.urls")),
-    path("api/", include("towers.urls")),
+    path("api/", include("tower_designs.urls")),
     path("api/", include("marketplace.urls")),
     path("api/progress/", include("progress.urls")),
     path("api/storeys/", StoreyListAPIView.as_view(), name="storeys"),

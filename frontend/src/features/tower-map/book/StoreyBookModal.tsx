@@ -2,9 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 import { BookOpen, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
-import { storeysApi } from '@/features/storeys/api/storeysApi'
-import { BookContent } from '@/features/storeys/book/BookContent'
-import { bookAnchorDomId, bookNavAnchors } from '@/features/storeys/book/bookNav'
+import { towerMapApi } from '@/features/tower-map/api/towerMapApi'
+import { BookContent } from '@/features/tower-map/book/BookContent'
+import { bookAnchorDomId, bookNavAnchors } from '@/features/tower-map/book/bookNav'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { Button } from '@/shared/components/Button'
 import { EmptyState } from '@/shared/components/EmptyState'
@@ -25,13 +25,13 @@ export function StoreyBookModal({
   queryKey: queryKeys.storeyBook(storeyId),
   queryFn: async () => {
     await new Promise((resolve) => window.setTimeout(resolve, 1600))
-    return storeysApi.getStoreyBook(storeyId)
+    return towerMapApi.getStoreyBook(storeyId)
   },
   staleTime: 0,
   gcTime: 0,
 })
 
-  const title = `${storeyTitle} · Field Guide`
+  const title = `${storeyTitle} - Field Guide`
 
   if (bookQuery.isLoading && !bookQuery.data) {
     return (
@@ -59,7 +59,7 @@ function StoreyBookReader({
   title,
   onClose,
 }: {
-  book: import('@/features/storeys/book/bookTypes').StoreyBook
+  book: import('@/features/tower-map/book/bookTypes').StoreyBook
   title: string
   onClose: () => void
 }) {
@@ -153,7 +153,7 @@ function StoreyBookReader({
             <div className="min-w-0">
               <p className="font-mono text-xs font-semibold text-primary">Command</p>
               <h3 className="mt-1 truncate font-mono text-xl font-extrabold leading-tight">
-                {activeCommand ? activeCommand.base_command : '—'}
+                {activeCommand ? activeCommand.base_command : '-'}
               </h3>
               {activeCommand?.summary ? (
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{activeCommand.summary}</p>

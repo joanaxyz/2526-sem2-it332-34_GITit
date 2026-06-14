@@ -11,9 +11,9 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from rest_framework.test import APIClient
 
-from adventures.models import AdventureRun, CommandAdventure
 from challenges.models import ChallengeLevel
 from challenges.services import ChallengeRunService
+from command_adventures.models import AdventureRun, CommandAdventure
 
 
 def make_user(django_user_model, username="profiler"):
@@ -64,7 +64,7 @@ def test_profile_challenge_submit(db, django_user_model):
     client = APIClient()
     client.force_authenticate(user=user)
 
-    level = ChallengeLevel.objects.get(challenge__slug="stage-commit-switch", difficulty="easy")
+    level = ChallengeLevel.objects.get(challenge__slug="compose-clean-history", difficulty="easy")
     adventure = CommandAdventure.objects.filter(
         storey=level.challenge.storey, is_published=True
     ).first()

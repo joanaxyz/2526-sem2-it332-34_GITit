@@ -1,10 +1,10 @@
 from django.core.management import call_command
 from rest_framework.test import APIClient
 
-from adventures.models import (
-    AdventureMastery,
+from command_adventures.models import (
     AdventureLevel,
     AdventureLevelAttempt,
+    AdventureMastery,
     AdventureRun,
     CommandAdventure,
 )
@@ -35,7 +35,7 @@ def test_stats_empty_user_is_graceful(db, django_user_model):
     assert response.status_code == 200
     body = response.json()
 
-    # All six axes present, each null (no data) — never NaN or a misleading 0.
+    # All six axes present, each null (no data) - never NaN or a misleading 0.
     assert [item["key"] for item in body["skill_profile"]] == [
         "accuracy",
         "efficiency",
@@ -62,7 +62,7 @@ def test_stats_empty_user_is_graceful(db, django_user_model):
 
 def test_stats_adventure_only_user_gets_full_radar(db, django_user_model):
     """An adventure-only learner (no challenges) still gets non-null Accuracy,
-    Efficiency, Independence, Mastery, and Coverage — the whole point of the
+    Efficiency, Independence, Mastery, and Coverage - the whole point of the
     rework is that adventures are first-class in the metrics."""
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
@@ -91,7 +91,7 @@ def test_stats_adventure_only_user_gets_full_radar(db, django_user_model):
         command_count=3,
         counted_command_count=2,
     )
-    # One clean command, one invalid — accuracy should be 50%.
+    # One clean command, one invalid - accuracy should be 50%.
     CommandStep.objects.create(
         attempt=attempt,
         command_text="git status",
@@ -134,7 +134,7 @@ def test_stats_adventure_only_user_gets_full_radar(db, django_user_model):
     assert headline["levels_completed"] == 1
     assert headline["perfect_clears"] == 1
     assert headline["commands_run"] == 2
-    # Challenge-scoped numbers stay zero (and flagged), never faked from adventures.
+    # Challenge-scoped numbers stay zero (and flagged), never faked from command_adventures.
     assert headline["boss_floors"] == {"value": 0, "scope": "challenge"}
     assert headline["comebacks"] == {"value": 0, "scope": "challenge"}
 

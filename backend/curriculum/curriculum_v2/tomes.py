@@ -3,13 +3,13 @@
 A tome is not a command. It teaches an idea (mental models, platform rules,
 workflow philosophy) with the same section/block vocabulary the command
 library uses, so the book reader renders both. Unlike adventures and
-challenges, tomes are not a repeating per-storey pattern — each one is
+challenges, tomes are not a repeating per-storey pattern - each one is
 authored onto a specific storey (the frozen ``"module"`` key = storey slug)
 at an explicit ``placement`` slot:
 
-  * ``above_adventure``  — before the storey's Command Adventure gate
-  * ``below_adventure``  — between the adventure and the challenges
-  * ``below_challenges`` — after the storey's challenges
+  * ``above_adventure``  - before the storey's Command Adventure gate
+  * ``below_adventure``  - between the adventure and the challenges
+  * ``below_challenges`` - after the storey's challenges
 
 Pages are built at import time through ``tome_pages`` so the seed persists
 ready-to-render pages, exactly like seeded command library entries.
@@ -25,8 +25,8 @@ TOMES = [
         "slug": "how-git-thinks",
         "title": "How Git Thinks",
         "summary": (
-            "The four places your work lives — working directory, staging area, "
-            "commit history, and HEAD — and how every Git command moves changes between them."
+            "The four places your work lives - working directory, staging area, "
+            "commit history, and HEAD - and how every Git command moves changes between them."
         ),
         "placement": "above_adventure",
         "pages": tome_pages(
@@ -38,16 +38,16 @@ TOMES = [
                     "content": [
                         _paragraph(
                             "Every Git command you will ever run moves information between four "
-                            "places. Once you can name them, no command is mysterious — each one "
+                            "places. Once you can name them, no command is mysterious - each one "
                             "is just an arrow between two of these places."
                         ),
                         _bullets(
                             "The places",
                             [
-                                "Working directory — the files you actually edit.",
-                                "Staging area — the snapshot you are assembling for the next commit.",
-                                "Commit history — permanent snapshots, linked into a graph.",
-                                "HEAD — the marker for where you are standing in that graph.",
+                                "Working directory - the files you actually edit.",
+                                "Staging area - the snapshot you are assembling for the next commit.",
+                                "Commit history - permanent snapshots, linked into a graph.",
+                                "HEAD - the marker for where you are standing in that graph.",
                             ],
                         ),
                         _diagram(
@@ -72,7 +72,7 @@ TOMES = [
                     "type": "concept",
                     "content": [
                         _paragraph(
-                            "A commit is not a 'save' of one file — it is a snapshot of the whole "
+                            "A commit is not a 'save' of one file - it is a snapshot of the whole "
                             "project at one moment, plus a link to the snapshot that came before it. "
                             "That chain of links is the commit graph you see in the tower's diagrams."
                         ),
@@ -101,7 +101,7 @@ TOMES = [
                         _bullets(
                             "Before every command, ask",
                             [
-                                "Where is the change I care about right now — working directory, staging, or history?",
+                                "Where is the change I care about right now - working directory, staging, or history?",
                                 "Where does it need to end up?",
                                 "Which command moves work between exactly those two places?",
                             ],

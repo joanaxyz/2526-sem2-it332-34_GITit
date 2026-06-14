@@ -68,7 +68,7 @@ export function WeeklyActivityBars({ trend }: { trend: TrendPoint[] }) {
                 key={point.date}
                 className="activity-col"
                 data-today={isToday(point.date)}
-                title={`${dayLabel(point.date)} — ${point.commands_run} commands, ${point.levels_completed} levels`}
+                title={`${dayLabel(point.date)} - ${point.commands_run} commands, ${point.levels_completed} levels`}
               >
                 <div className="activity-track">
                   <div
@@ -84,7 +84,7 @@ export function WeeklyActivityBars({ trend }: { trend: TrendPoint[] }) {
         </div>
       ) : (
         <div className="grid flex-1 place-items-center" style={{ minHeight: 250 }}>
-          <p className="text-xs text-muted-foreground/85">No sessions yet — play a day to light a bar.</p>
+          <p className="text-xs text-muted-foreground/85">No sessions yet - play a day to light a bar.</p>
         </div>
       )}
     </section>

@@ -38,8 +38,8 @@ def test_purchase_debits_wallet_and_grants_entitlement_once(django_user_model):
     client = APIClient()
     client.force_authenticate(user=buyer)
 
-    first = client.post(f"/api/store/listings/{listing.id}/purchase/")
-    second = client.post(f"/api/store/listings/{listing.id}/purchase/")
+    first = client.post(f"/api/marketplace/listings/{listing.id}/purchase/")
+    second = client.post(f"/api/marketplace/listings/{listing.id}/purchase/")
 
     assert first.status_code == 201
     assert second.status_code == 201
@@ -70,7 +70,7 @@ def test_store_purchase_rejects_insufficient_balance(django_user_model):
     client = APIClient()
     client.force_authenticate(user=buyer)
 
-    response = client.post(f"/api/store/listings/{listing.id}/purchase/")
+    response = client.post(f"/api/marketplace/listings/{listing.id}/purchase/")
 
     assert response.status_code == 400
     assert not Entitlement.objects.filter(user=buyer, asset=asset).exists()

@@ -1,5 +1,8 @@
 import { apiRequest } from '@/shared/api/httpClient'
 import type {
+  AuthoringStorey,
+  AuthoringStoreyInput,
+  AuthoringStoreyList,
   ContentDefinition,
   ContentDefinitionList,
   ContentKind,
@@ -17,10 +20,23 @@ export type ContentDefinitionInput = {
   tags?: string[]
   command_family?: string
   difficulty?: string
+  storey?: number | null
   definition?: Record<string, unknown>
 }
 
 export const authoringApi = {
+  storeys() {
+    return apiRequest<AuthoringStoreyList>('/authoring/storeys/')
+  },
+  createStorey(input: AuthoringStoreyInput) {
+    return apiRequest<AuthoringStorey>('/authoring/storeys/', { method: 'POST', body: JSON.stringify(input) })
+  },
+  updateStorey(id: number, input: AuthoringStoreyInput) {
+    return apiRequest<AuthoringStorey>(`/authoring/storeys/${id}/`, { method: 'PATCH', body: JSON.stringify(input) })
+  },
+  deleteStorey(id: number) {
+    return apiRequest<null>(`/authoring/storeys/${id}/`, { method: 'DELETE' })
+  },
   list(kind?: ContentKind) {
     const suffix = kind ? `?kind=${encodeURIComponent(kind)}` : ''
     return apiRequest<ContentDefinitionList>(`/authoring/content-definitions/${suffix}`)

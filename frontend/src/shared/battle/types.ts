@@ -33,7 +33,7 @@ export type MonsterAttackCause = 'miss' | 'timeout'
 export type BattleEvent =
   | {
       type: 'player_attack'
-      /** Command family, e.g. "commit" — keys the effect registry. */
+      /** Command family, e.g. "commit" - keys the effect registry. */
       skill: string
       target: number
       damage: number

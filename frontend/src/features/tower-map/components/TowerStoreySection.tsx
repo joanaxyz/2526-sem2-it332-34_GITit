@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { memo, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   BookOpen,
@@ -17,9 +17,9 @@ import type {
   CommandAdventureSummary,
   TomeSummary,
 } from '@/features/challenges/types'
-import { storeysApi } from '@/features/storeys/api/storeysApi'
-import { StoreyBookCard } from '@/features/storeys/book/StoreyBookCard'
-import type { LearningStorey } from '@/features/storeys/types'
+import { towerMapApi } from '@/features/tower-map/api/towerMapApi'
+import { StoreyBookCard } from '@/features/tower-map/book/StoreyBookCard'
+import type { LearningStorey } from '@/features/tower-map/types'
 import { GitCoinIcon } from '@/features/wallet/components/GitCoinIcon'
 import {
   AdventureSectionPiece,
@@ -28,9 +28,8 @@ import {
   LandingPiece,
   SpirePiece,
   TomePiece,
-  towerDescriptorFor,
-  towerPieceAttrs,
-} from '@/features/storeys/components/TowerPieces'
+} from '@/features/tower-map/components/TowerPieces'
+import { towerDescriptorFor, towerPieceAttrs } from '@/features/tower-map/components/towerPieceData'
 import { assetsApi } from '@/shared/assets/assetsApi'
 import type { TowerLayoutDescriptor, TowerLayoutPieceDescriptor, TowerPieceAssetDescriptor } from '@/shared/assets/types'
 import {
@@ -40,9 +39,9 @@ import {
   DIFFICULTY_ACCENT,
   difficultyLabel,
   nextReward,
-} from '@/features/storeys/challengeUi'
-import { TomeLecternArt } from '@/features/storeys/components/TomeLecternArt'
-import { isSelected, useTowerSelection } from '@/features/storeys/hooks/useTowerSelection'
+} from '@/features/tower-map/challengeUi'
+import { TomeLecternArt } from '@/features/tower-map/components/TomeLecternArt'
+import { isSelected, useTowerSelection } from '@/features/tower-map/hooks/useTowerSelection'
 import { ProgressBar } from '@/shared/components/ProgressBar'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { cn } from '@/shared/utils/cn'
@@ -113,9 +112,11 @@ function TrialRoomSkeleton() {
 }
 
 const PIECE_EASE = [0.16, 1, 0.3, 1] as const
+const EMPTY_TOMES: TomeSummary[] = []
+const EMPTY_CHALLENGES: ChallengeSummary[] = []
 
-// ── Windows storey: the lit-window band that tops every storey; the conical roof
-// only crowns the very first storey (the top of the whole tower). ──
+// -- Windows storey: the lit-window band that tops every storey; the conical roof
+// only crowns the very first storey (the top of the whole tower). --
 function WindowStorey({
   crowned,
   piece,
@@ -196,8 +197,8 @@ function TowerLanding({
   )
 }
 
-// ── Command Adventure: a single arched neon gate, selectable. The gate
-// materializes out of the wall when it scrolls into view. ──
+// -- Command Adventure: a single arched neon gate, selectable. The gate
+// materializes out of the wall when it scrolls into view. --
 function AdventureDoor({
   adventure,
   selected,
@@ -240,9 +241,9 @@ function AdventureDoor({
   )
 }
 
-// ── Tome: a singular lectern with an open book resting on it. Not a doorway —
+// -- Tome: a singular lectern with an open book resting on it. Not a doorway -
 // furniture you approach. Appears only on storeys where a tome is authored, so
-// it never becomes a repeating pattern like the gate or the trial rooms. ──
+// it never becomes a repeating pattern like the gate or the trial rooms. --
 function TomeArtifact({
   tome,
   storeyId,
@@ -280,7 +281,7 @@ function TomeArtifact({
 }
 
 // The belt under the scriptorium carries a single carved keystone bearing the
-// open-book sigil — quiet masonry, not decoration, and only tome storeys earn
+// open-book sigil - quiet masonry, not decoration, and only tome storeys earn
 // it. Drawn as SVG so the tapered keystone keeps its full neon outline.
 function TomeLanding({
   piece,
@@ -399,7 +400,7 @@ const trialDoorBarVariants = {
   shown: { x: '-50%', scaleY: 1, originY: 0, transition: { duration: 0.34, ease: PIECE_EASE } },
 }
 
-// ── A single GIT Challenged level door — selectable, framed by difficulty colour. ──
+// -- A single Challenges level door - selectable, framed by difficulty color. --
 function TrialDoor({
   challenge,
   challengeIndex,
@@ -548,14 +549,14 @@ export function StoreyOverview({
           <h2 className="storey-overview-title">{title}</h2>
         </div>
         <p className="mt-4 max-w-xs text-base leading-7 text-muted-foreground">
-          Storey overview for this Command Adventure and GIT Challenged set.
+          Storey overview for this Command Adventure and Challenge set.
         </p>
       </div>
 
       <section className="tower-side-panel storey-overview-card" aria-label={`${title} storey overview`}>
         <div className="grid gap-4">
           <OverviewStat icon={ListChecks} label="Command skills" value={storey.command_skill_count} />
-          <OverviewStat icon={Swords} label="GIT Challenged" value={storey.challenge_count} />
+          <OverviewStat icon={Swords} label="Challenges" value={storey.challenge_count} />
           <OverviewStat icon={Layers3} label="Total levels" value={levels} />
         </div>
         <div className="tower-progress-block">
@@ -605,7 +606,7 @@ export function StoreyOverview({
   )
 }
 
-type StoreyLevelHubProps = {
+type TowerStoreySectionProps = {
   storey: LearningStorey
   displayTitle?: string
   isFirst?: boolean
@@ -613,13 +614,13 @@ type StoreyLevelHubProps = {
   sequenceIndex?: number
 }
 
-export function StoreyLevelHub({
+function TowerStoreySectionInner({
   storey,
   displayTitle,
   isFirst = true,
   isLast = true,
   sequenceIndex = 0,
-}: StoreyLevelHubProps) {
+}: TowerStoreySectionProps) {
   const hubRef = useRef<HTMLElement | null>(null)
   // Storeys only mount when scrolled to, so a short prefetch margin is enough:
   // content starts loading just before the storey enters the viewport.
@@ -635,7 +636,7 @@ export function StoreyLevelHub({
   // together instead of as 2-3 separate round trips.
   const overviewQuery = useQuery({
     queryKey: queryKeys.storeyOverview(storey.id),
-    queryFn: () => storeysApi.getStoreyOverview(storey.id),
+    queryFn: () => towerMapApi.getStoreyOverview(storey.id),
     enabled: shouldLoad,
     staleTime: 2 * 60 * 1000,
   })
@@ -648,41 +649,56 @@ export function StoreyLevelHub({
   })
   const overview = overviewQuery.data ?? null
   const contentLoading = !shouldLoad || overviewQuery.isLoading
-  const towerPieceDescriptors: Record<string, TowerPieceAssetDescriptor> = {}
-  for (const [slug, descriptor] of Object.entries(towerPiecesQuery.data?.results ?? {})) {
-    if (descriptor.kind === 'tower_piece') towerPieceDescriptors[slug] = descriptor
-  }
+  const towerPieceDescriptors = useMemo<Record<string, TowerPieceAssetDescriptor>>(() => {
+    const descriptors: Record<string, TowerPieceAssetDescriptor> = {}
+    for (const [slug, descriptor] of Object.entries(towerPiecesQuery.data?.results ?? {})) {
+      if (descriptor.kind === 'tower_piece') descriptors[slug] = descriptor
+    }
+    return descriptors
+  }, [towerPiecesQuery.data])
 
   const layout = overview?.tower_layout ?? null
   const adventure: CommandAdventureSummary | null = overview?.command_adventure ?? null
-  const rawChallenges: ChallengeSummary[] = overview?.challenges ?? []
+  const rawTomes: TomeSummary[] = overview?.tomes ?? EMPTY_TOMES
+  const rawChallenges: ChallengeSummary[] = overview?.challenges ?? EMPTY_CHALLENGES
   // Tomes render only where authored; each placement slot filters its own list,
   // so non-authored storeys keep the exact current layout.
-  const tomesAboveAdventure: TomeSummary[] = orderedByLayout(
-    (overview?.tomes ?? []).filter((tome) => tome.placement === 'above_adventure'),
-    layout,
-    'tome',
-    'tome',
+  const tomesAboveAdventure = useMemo(
+    () => orderedByLayout(rawTomes.filter((tome) => tome.placement === 'above_adventure'), layout, 'tome', 'tome'),
+    [layout, rawTomes],
   )
-  const challenges: ChallengeSummary[] = orderedByLayout(
-    rawChallenges,
-    layout,
-    'challenge',
-    'challenge_section',
+  const challenges = useMemo(
+    () => orderedByLayout(rawChallenges, layout, 'challenge', 'challenge_section'),
+    [layout, rawChallenges],
   )
-  const tomePieceById = contentPieceMap(layout, 'tome', 'tome')
-  const adventurePieceById = contentPieceMap(layout, 'adventure', 'adventure_section')
-  const challengePieceById = contentPieceMap(layout, 'challenge', 'challenge_section')
-  const spirePiece = pieceByType(layout, 'spire')
-  const adventurePiece = adventure
-    ? adventurePieceById.get(String(adventure.id))
-    : pieceByType(layout, 'adventure_section')
-  const tomeLandingPiece = pieceBySuffix(layout, 'landing-after-tomes')
-  const adventureLandingPiece = pieceBySuffix(layout, 'landing-after-adventure')
-  const challengeStagePiece = challenges.length
-    ? challengePieceById.get(String(challenges[0].id))
-    : pieceBySuffix(layout, 'challenges') ?? pieceByType(layout, 'challenge_section')
-  const challengeLandingPiece = pieceBySuffix(layout, 'landing-after-challenges')
+  const {
+    tomePieceById,
+    adventurePiece,
+    tomeLandingPiece,
+    adventureLandingPiece,
+    challengePieceById,
+    challengeStagePiece,
+    challengeLandingPiece,
+    spirePiece,
+  } = useMemo(() => {
+    const nextTomePieceById = contentPieceMap(layout, 'tome', 'tome')
+    const adventurePieceById = contentPieceMap(layout, 'adventure', 'adventure_section')
+    const nextChallengePieceById = contentPieceMap(layout, 'challenge', 'challenge_section')
+    return {
+      tomePieceById: nextTomePieceById,
+      adventurePiece: adventure
+        ? adventurePieceById.get(String(adventure.id))
+        : pieceByType(layout, 'adventure_section'),
+      tomeLandingPiece: pieceBySuffix(layout, 'landing-after-tomes'),
+      adventureLandingPiece: pieceBySuffix(layout, 'landing-after-adventure'),
+      challengePieceById: nextChallengePieceById,
+      challengeStagePiece: challenges.length
+        ? nextChallengePieceById.get(String(challenges[0].id))
+        : pieceBySuffix(layout, 'challenges') ?? pieceByType(layout, 'challenge_section'),
+      challengeLandingPiece: pieceBySuffix(layout, 'landing-after-challenges'),
+      spirePiece: pieceByType(layout, 'spire'),
+    }
+  }, [adventure, challenges, layout])
   const spireDescriptor = towerDescriptorFor(spirePiece, towerPieceDescriptors)
   const adventureDescriptor = towerDescriptorFor(adventurePiece, towerPieceDescriptors)
   const adventureLandingDescriptor = towerDescriptorFor(adventureLandingPiece, towerPieceDescriptors)
@@ -779,7 +795,7 @@ export function StoreyLevelHub({
             ) : null}
             {!contentLoading && challenges.length === 0 ? (
               <div className="mt-5">
-                <EmptySection label="GIT Challenged" />
+                <EmptySection label="Challenges" />
               </div>
             ) : null}
 
@@ -814,3 +830,6 @@ export function StoreyLevelHub({
     </section>
   )
 }
+
+export const TowerStoreySection = memo(TowerStoreySectionInner)
+TowerStoreySection.displayName = 'TowerStoreySection'

@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import random
 
-from adventures.models import AdventureMastery, AdventureLevel, AdventureLevelAttempt
+from command_adventures.models import AdventureLevel, AdventureLevelAttempt, AdventureMastery
 
 # --- tunables --------------------------------------------------------------
 BOX_VALUE = 10               # mastery points awarded per box advanced
@@ -40,7 +40,7 @@ def encounter_index(*, user, adventure) -> int:
 
 def _ordered_levels(adventure, *, with_prerequisites: bool = False) -> list[AdventureLevel]:
     # Imported lazily to avoid a services <-> scheduler import cycle.
-    from adventures.services import ordered_levels_for
+    from command_adventures.services import ordered_levels_for
 
     return ordered_levels_for(adventure, with_prerequisites=with_prerequisites)
 

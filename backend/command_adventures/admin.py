@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from adventures.models import (
+from command_adventures.models import (
     AdventureLevel,
     AdventureLevelAttempt,
     AdventureRun,

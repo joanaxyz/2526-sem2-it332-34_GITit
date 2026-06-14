@@ -4,7 +4,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 const loginHero = {
   title: 'Learn Git through repository state, not memorized answers.',
   description:
-    'Learn with tomes, Command Adventure, GIT Challenged storeys, live DAG feedback, and consequence-safe command simulation.',
+    'Learn with tomes, Command Adventures, Challenges, live DAG feedback, and consequence-safe command simulation.',
   terminal: (
     <>
       <span className="text-primary">student@git-it</span> ~/challenge $ git status
@@ -19,7 +19,7 @@ const loginHero = {
 const registerHero = {
   title: 'Create your account and start building real Git intuition.',
   description:
-    'Track progress across Command Adventure and GIT Challenged storeys, experiment safely without touching a real shell, and grow confidence one command at a time.',
+    'Track progress across Command Adventures and Challenges, experiment safely without touching a real shell, and grow confidence one command at a time.',
   terminal: (
     <>
       <span className="text-primary">you@git-it</span> ~/welcome $ git init
@@ -63,7 +63,7 @@ export function AuthLayout() {
       <div className="pointer-events-none absolute -left-40 -top-40 h-96 w-96 rounded-full bg-aurora-cyan opacity-[0.05] blur-3xl" />
 
       <section className="grid w-full max-w-6xl grid-cols-[minmax(0,1.1fr)_minmax(320px,420px)] gap-4 max-md:grid-cols-1 md:min-h-[min(760px,90dvh)]">
-        {/* ── Left: hero panel ── */}
+        {/* -- Left: hero panel -- */}
         <div
           className="relative overflow-hidden rounded-lg border border-primary/15 bg-gradient-to-br from-secondary to-background p-6 max-md:hidden md:min-h-[min(760px,90dvh)]"
           style={{ boxShadow: panelShadow }}
@@ -87,7 +87,7 @@ export function AuthLayout() {
               <h1 className="text-4xl font-extrabold leading-[1.08] tracking-tight">{hero.title}</h1>
               <p className="mt-4 text-sm leading-6 text-muted-foreground">{hero.description}</p>
 
-              {/* Feature badges — vertical, prominent */}
+              {/* Feature badges - vertical, prominent */}
               <div className="mt-6 flex flex-col gap-2.5">
                 {featureBadges.map(({ Icon, label, borderAccent, border, bg, color }) => (
                   <div
@@ -134,7 +134,7 @@ export function AuthLayout() {
           </div>
         </div>
 
-        {/* ── Right: form panel ── */}
+        {/* -- Right: form panel -- */}
         <div
           className="overflow-hidden rounded-lg border border-primary/15 bg-card p-5 sm:p-6 md:min-h-[min(760px,90dvh)]"
           style={{ boxShadow: panelShadow }}

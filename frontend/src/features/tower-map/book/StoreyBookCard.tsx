@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { StoreyBookModal } from '@/features/storeys/book/StoreyBookModal'
+import { StoreyBookModal } from '@/features/tower-map/book/StoreyBookModal'
 
 // The Storey Book lives in the storey overview. It's a 3D neon book whose
 // cover swings open and pages fan out once on hover (CSS transitions, no

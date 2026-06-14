@@ -1,4 +1,4 @@
-﻿"""Authored v2 adventure level curriculum.
+"""Authored v2 adventure level curriculum.
 
 The goal of this file is not to dump command trivia. Each level teaches one Git
 move in the smallest realistic situation where that move matters. Challenges in
@@ -146,7 +146,7 @@ REMOTE_FIXTURE_HISTORY = {
 }
 
 ADVENTURE_LEVELS = [
-    # Storey 1 â€” Repository Foundations
+    # Storey 1 - Repository Foundations
     q(
         "git-init/current-directory",
         "init-current-folder",
@@ -302,7 +302,7 @@ ADVENTURE_LEVELS = [
 ]
 
 ADVENTURE_LEVELS += [
-    # Storey 2 â€” Tracking Changes and Snapshots
+    # Storey 2 - Tracking Changes and Snapshots
     q(
         "git-diff/working",
         "inspect-working-diff",
@@ -471,7 +471,7 @@ BRANCH_BASE = [
 ]
 
 ADVENTURE_LEVELS += [
-    # Storey 3 â€” Branch Navigation
+    # Storey 3 - Branch Navigation
     q(
         "git-branch/list",
         "list-local-branches",
@@ -614,7 +614,7 @@ RESOLVED_MERGE = repo(
 )
 
 ADVENTURE_LEVELS += [
-    # Storey 4 â€” Merging and Conflict Resolution
+    # Storey 4 - Merging and Conflict Resolution
     q(
         "git-merge/branch",
         "merge-fast-forward-branch",
@@ -701,7 +701,7 @@ RECOVERY_COMMITS = [
 ]
 
 ADVENTURE_LEVELS += [
-    # Storey 5 â€” Undoing and Recovery
+    # Storey 5 - Undoing and Recovery
     q(
         "git-commit/amend",
         "amend-latest-commit-message",
@@ -795,7 +795,7 @@ CHERRY_REPO = repo(
 )
 
 ADVENTURE_LEVELS += [
-    # Storey 6 â€” Temporary Work and Patch Movement
+    # Storey 6 - Temporary Work and Patch Movement
     q(
         "git-stash/push",
         "stash-local-work",
@@ -911,7 +911,7 @@ PUSH_REPO = repo(
 )
 
 ADVENTURE_LEVELS += [
-    # Storey 7 â€” Remotes and Collaboration
+    # Storey 7 - Remotes and Collaboration
     q(
         "git-remote/verbose",
         "inspect-remote-urls",

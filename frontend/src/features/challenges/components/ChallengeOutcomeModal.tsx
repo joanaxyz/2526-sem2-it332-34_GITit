@@ -76,8 +76,8 @@ export function ChallengeOutcomeModal({
   const hitActionLimit = isFailed && run.counts.max_reached
   const message = isReplay
     ? isFailed
-      ? 'This free-play run ended before reaching the target state. It doesn’t affect your saved progress — play again whenever you like.'
-      : 'Free play complete. This run is just a replay and doesn’t change your saved progress.'
+      ? 'This free-play run ended before reaching the target state. It doesnt affect your saved progress - play again whenever you like.'
+      : 'Free play complete. This run is just a replay and doesnt change your saved progress.'
     : isFailed
       ? hitActionLimit
         ? run.failure_reason ??
@@ -236,7 +236,7 @@ export function ChallengeOutcomeModal({
       stats={stats}
       actions={actions}
     >
-      {/* Level navigation is challenge-only — the adventure modal omits it. */}
+      {/* Level navigation is challenge-only - the adventure modal omits it. */}
       {!isReplay && onSelectLevel && run.sibling_levels && run.difficulty ? (
         <ChallengeLevelNav
           levels={run.sibling_levels}

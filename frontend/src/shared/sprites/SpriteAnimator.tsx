@@ -7,7 +7,7 @@ import type { FrameSegment, SpriteAnimation, SpriteAnimatorHandle } from '@/shar
  * Zero-dependency spritesheet animator.
  *
  * Steps frames with requestAnimationFrame and paints them by shifting the
- * sheet's background-position — no per-frame React re-renders. Exposes an
+ * sheet's background-position - no per-frame React re-renders. Exposes an
  * imperative handle (play/pause/setAnimation/setFlipX) so the character can
  * later be driven around the tower page.
  *
@@ -72,7 +72,7 @@ export const SpriteAnimator = forwardRef<
     const a = animRef.current
     if (!node) return
     // Percentage positioning: p% aligns the p% point of the oversized sheet
-    // with the p% point of the frame box, so column c maps to c/(cols-1)·100%.
+    // with the p% point of the frame box, so column c maps to c/(cols-1)-100%.
     const col = frame % a.columns
     const row = Math.floor(frame / a.columns)
     const x = a.columns > 1 ? (col * 100) / (a.columns - 1) : 0

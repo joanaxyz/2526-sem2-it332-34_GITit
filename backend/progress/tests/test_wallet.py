@@ -78,7 +78,7 @@ def test_storey_chest_awards_gitcoins_when_progress_crosses_threshold(db, django
     # Challenge entry is gated on passing the storey's adventure first.
     from django.utils import timezone
 
-    from adventures.models import AdventureRun, CommandAdventure
+    from command_adventures.models import AdventureRun, CommandAdventure
 
     adventure = CommandAdventure.objects.filter(storey=storey, is_published=True).first()
     if adventure is not None:

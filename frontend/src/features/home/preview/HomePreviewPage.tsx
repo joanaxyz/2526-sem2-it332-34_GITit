@@ -1,10 +1,10 @@
 /**
- * ⚠ DEV-ONLY DESIGN PREVIEW — registered in the router only when
+ * DEV-ONLY DESIGN PREVIEW - registered in the router only when
  * import.meta.env.DEV. Renders the real HomeHubView with fixture data so
  * the hub can be evaluated in a browser without auth or live data.
  *
- * /design-preview/home          → rich mid-progress player
- * /design-preview/home?empty=1  → brand-new user (empty states)
+ * /design-preview/home          -> rich mid-progress player
+ * /design-preview/home?empty=1  -> brand-new user (empty states)
  */
 import { useSearchParams } from 'react-router-dom'
 

@@ -1,7 +1,7 @@
 from django.db.models import Q
 
 from authoring.selectors import content_payload
-from towers.models import STATUS_PUBLISHED, TowerDesign
+from tower_designs.models import STATUS_PUBLISHED, TowerDesign
 
 
 def visible_tower_designs(*, user):
@@ -20,6 +20,7 @@ def tower_design_payload(design: TowerDesign, *, include_layout: bool = False) -
         "source_design_id": design.source_design_id,
         "visibility": design.visibility,
         "status": design.status,
+        "origin": design.origin,
         "slug": design.slug,
         "title": design.title,
         "summary": design.summary,
@@ -51,6 +52,7 @@ def tower_design_overview(*, design: TowerDesign) -> dict:
                 "instanceId": f"tower-{design.id}-piece-{piece.id}",
                 "assetSlug": piece.piece_asset.slug,
                 "pieceType": piece.piece_type,
+                "storeyIndex": piece.storey_index,
                 "contentBinding": binding_payload,
                 "transform": piece.transform,
                 "config": piece.config,

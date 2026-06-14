@@ -4,9 +4,9 @@ attempt, ordered events per command, defeat = the existing budget exhaustion."""
 from django.core.management import call_command
 from rest_framework.test import APIClient
 
-from adventures.models import AdventureLevelAttempt, CommandAdventure
-from adventures.services import ordered_levels_for
 from battle.state import _target_hp
+from command_adventures.models import AdventureLevelAttempt, CommandAdventure
+from command_adventures.services import ordered_levels_for
 
 
 def _client(django_user_model, username="battler"):

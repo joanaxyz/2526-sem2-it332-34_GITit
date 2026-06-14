@@ -2,7 +2,7 @@ from django.db import transaction
 from rest_framework.exceptions import PermissionDenied
 
 from marketplace.access import can_remix, entitlement_kwargs_for
-from marketplace.models import Entitlement, LISTING_ACTIVE, StoreListing
+from marketplace.models import LISTING_ACTIVE, Entitlement, StoreListing
 from progress.wallet import WalletService
 
 

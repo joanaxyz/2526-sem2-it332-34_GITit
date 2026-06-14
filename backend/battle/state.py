@@ -1,7 +1,7 @@
 """Initial battle-state builders.
 
 `battle_state` lives as JSON on AdventureLevelAttempt / ChallengeRun and is
-written inside saves the submit path already performs — never a new query.
+written inside saves the submit path already performs - never a new query.
 
 Shape (schema 1):
     {
@@ -41,7 +41,7 @@ def _target_hp(evaluation_spec) -> int:
     """Monster/boss HP = number of evaluation rules to reach `target_state`.
 
     State-hash variants expose no granular rules (progress is invisible until
-    the hash matches), so they fall back to 1 — the solve is the only blow.
+    the hash matches), so they fall back to 1 - the solve is the only blow.
     """
     try:
         spec = compile_evaluation_spec(evaluation_spec)
@@ -61,7 +61,7 @@ def _roster_for(level, attr: str, fallback: tuple[str, ...]) -> tuple[str, ...]:
 
     Reads `level.storey.<attr>` (mob_roster / boss_roster); a missing storey or
     an empty roster falls back to the shared default cycle. Storey access is
-    resolved once at run/attempt creation — callers select_related the chain —
+    resolved once at run/attempt creation - callers select_related the chain -
     so this never adds a per-command round trip.
     """
     storey = getattr(level, "storey", None)

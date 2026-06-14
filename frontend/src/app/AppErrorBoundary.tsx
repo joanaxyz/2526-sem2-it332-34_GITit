@@ -27,7 +27,7 @@ export class AppErrorBoundary extends Component<
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-6 text-center">
         <h1 className="text-xl font-semibold text-foreground">Something broke in the tower.</h1>
         <p className="max-w-md text-sm text-muted-foreground">
-          An unexpected error interrupted the page. Your progress on the server is safe —
+          An unexpected error interrupted the page. Your progress on the server is safe -
           reload to pick up where you left off.
         </p>
         <Button onClick={() => window.location.assign('/')}>Reload GIT it!</Button>

@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { HUB_TABS, type HubTabId } from '@/features/home/hubTabs'
 
 /**
- * Launcher-style sub-tab deck: ‹ Stats · Achievements · Hero Showcase ›.
+ * Launcher-style sub-tab deck:  Stats - Achievements - Hero Showcase .
  * Inactive tabs sit dimmed; the active one lights up with an underline
  * blade. The chevrons cycle through tabs (wrapping at the ends).
  */

@@ -33,7 +33,7 @@ const TONE_ICON: Record<NodeTone, ComponentType<{ className?: string }>> = {
 /**
  * Level navigator for the challenge completion modal. Renders every level of the
  * challenge as a connected stepper so a learner on a higher level can drop back to
- * any unlocked (or completed) level — and, once the whole challenge is cleared,
+ * any unlocked (or completed) level - and, once the whole challenge is cleared,
  * jump freely between all of them. Locked levels stay visible but disabled.
  */
 export function ChallengeLevelNav({

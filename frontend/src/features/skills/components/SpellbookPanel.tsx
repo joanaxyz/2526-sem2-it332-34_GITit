@@ -35,7 +35,7 @@ function SpellRune({ skill, index }: { skill: LearnedSkill; index: number }) {
         backdropFilter: 'blur(6px)',
       }}
     >
-      {/* Rune glyph — a diamond crystal bearing the verb's initial, breathing. */}
+      {/* Rune glyph - a diamond crystal bearing the verb's initial, breathing. */}
       <motion.span
         aria-hidden="true"
         className="grid size-7 shrink-0 place-items-center font-mono text-[0.62rem] font-black uppercase"
@@ -51,7 +51,7 @@ function SpellRune({ skill, index }: { skill: LearnedSkill; index: number }) {
           color: CYAN,
           background: 'radial-gradient(circle at 50% 35%, rgba(0,245,212,0.18), rgba(9,20,40,0.6))',
           border: '1px solid rgba(0,245,212,0.45)',
-          // 45°-rotated square reads as a crystal/rune; counter-rotate the text.
+          // 45-rotated square reads as a crystal/rune; counter-rotate the text.
           clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
         }}
       >
@@ -88,7 +88,7 @@ function RuneSkeleton({ index }: { index: number }) {
 
 /**
  * The player's spellbook: the commands they've learned, rendered as animated
- * HTML runes (no sprites yet). Open, container-light section — a hairline rule
+ * HTML runes (no sprites yet). Open, container-light section - a hairline rule
  * and a row of runes, not a boxed panel.
  */
 export function SpellbookPanel() {

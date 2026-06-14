@@ -49,6 +49,11 @@ class UserService:
         )
         StudentProgress.objects.create(user=user)
         StreakRecord.objects.create(user=user)
+        # Every new player starts owning the default Arcane Spire kit (Blue +
+        # the starter tower pieces) in their asset registry.
+        from assets.services import grant_default_assets
+
+        grant_default_assets(user)
         return user
 
 
@@ -71,7 +76,7 @@ class TokenBlacklistService:
             )
         except Exception:
             # Keep logout graceful, but a failed revocation write means the token
-            # stays usable until expiry — that must be visible in production logs.
+            # stays usable until expiry - that must be visible in production logs.
             logger.warning("Refresh-token revocation write failed.", exc_info=True)
 
     def is_revoked(self, refresh_token: str) -> bool:
@@ -129,7 +134,7 @@ class TokenService:
                 cache.delete(attempt_key)
                 return lockout_seconds
         except Exception:
-            # Without the cache the brute-force counter is inert — log it.
+            # Without the cache the brute-force counter is inert - log it.
             logger.warning("Failed-login counter cache write failed.", exc_info=True)
         return 0
 

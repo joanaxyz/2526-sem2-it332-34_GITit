@@ -5,8 +5,8 @@ import { clientAdventureRoster, clientChallengeRoster, deriveBattleEvents } from
 import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 
 /**
- * ⚠ Dev-only battle sandbox (/dev/battle): every actor, cast phase, effect and
- * choreography beat, driven by buttons and a fake-latency slider — no run, no
+ * Dev-only battle sandbox (/dev/battle): every actor, cast phase, effect and
+ * choreography beat, driven by buttons and a fake-latency slider - no run, no
  * backend. Compiled away in production builds (DEV-gated route).
  */
 export function BattlePlayground() {

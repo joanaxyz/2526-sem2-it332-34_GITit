@@ -33,7 +33,7 @@ function AchievementTile({ achievement, index }: { achievement: Achievement; ind
             className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em]"
             style={{ color: a.color, textShadow: `0 0 10px ${a.color}66` }}
           >
-            ✓ Unlocked
+            " Unlocked
           </p>
         ) : (
           <div>
@@ -66,7 +66,7 @@ function AchievementTile({ achievement, index }: { achievement: Achievement; ind
 
 /**
  * Achievements sub-tab: gamerscore-style ledger header plus the full badge
- * grid — unlocked tiles glow in their accent color, locked ones show a
+ * grid - unlocked tiles glow in their accent color, locked ones show a
  * progress bar toward the unlock condition.
  */
 export function AchievementsTab({ achievements }: { achievements: Achievement[] }) {
@@ -77,7 +77,7 @@ export function AchievementsTab({ achievements }: { achievements: Achievement[] 
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Open gamerscore readout — no panel; a hairline shelves it off the grid */}
+      {/* Open gamerscore readout - no panel; a hairline shelves it off the grid */}
       <div className="animate-fade-in-up flex flex-wrap items-center gap-x-10 gap-y-4 border-b border-[rgba(125,211,252,0.08)] pb-5">
         <div>
           <p className="font-mono text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-aurora-blue/80">

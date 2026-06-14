@@ -2,22 +2,22 @@ import pytest
 from django.core.management import call_command
 from django.utils import timezone
 
-from adventures.models import (
-    AdventureMastery,
+from command_adventures.models import (
     AdventureLevelAttempt,
+    AdventureMastery,
     AdventureRun,
     AdventureVariant,
     CommandAdventure,
 )
-from adventures.scheduler import (
+from command_adventures.scheduler import (
     AdventureScheduler,
     interval_for,
     is_passed,
     pass_bar_for,
     total_achievable,
 )
-from adventures.scoring import mastery_points
-from adventures.services import ordered_levels_for
+from command_adventures.scoring import mastery_points
+from command_adventures.services import ordered_levels_for
 from common.exceptions import Locked
 from curriculum.management.commands.seed_curriculum_v2 import _find_prerequisite_cycle
 
@@ -79,7 +79,7 @@ def test_prerequisite_blocks_introduction_until_solved(db, django_user_model):
     scheduler = AdventureScheduler()
 
     # q0 introduced but unsolved (box 0): q1 is gated, so it is never served next
-    # even though it is the next command in order — the scheduler falls back to q0.
+    # even though it is the next command in order - the scheduler falls back to q0.
     AdventureMastery.objects.create(
         user=user, adventure_level=q0, strength=0, introduced=True, last_seen_seq=0
     )
@@ -152,7 +152,7 @@ def test_easy_challenge_locked_until_adventure_passed(db, django_user_model):
 
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    level = ChallengeLevel.objects.get(challenge__slug="stage-commit-switch", difficulty="easy")
+    level = ChallengeLevel.objects.get(challenge__slug="compose-clean-history", difficulty="easy")
 
     with pytest.raises(Locked):
         ChallengeRunService().start_run(

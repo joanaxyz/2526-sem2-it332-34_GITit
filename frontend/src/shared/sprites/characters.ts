@@ -1,74 +1,32 @@
-import blueCast from '@/assets/sprites/character/blue/cast.png'
-import blueFloat from '@/assets/sprites/character/blue/float.png'
-import blueFly from '@/assets/sprites/character/blue/fly.png'
-import blueHurt from '@/assets/sprites/character/blue/hurt.png'
-import blueIdle from '@/assets/sprites/character/blue/idle.png'
-import blueLand from '@/assets/sprites/character/blue/land.png'
-import blueRandom1 from '@/assets/sprites/character/blue/random1.png'
-import blueRun from '@/assets/sprites/character/blue/run.png'
-import blueTakeOff from '@/assets/sprites/character/blue/take_off.png'
-import blueWalk from '@/assets/sprites/character/blue/walk.png'
 import { backendUrl } from '@/shared/api/httpClient'
 import type { AssetSpriteDescriptor, CharacterAssetDescriptor } from '@/shared/assets/types'
 import type { CharacterDefinition, MoveName, SpriteAnimation } from '@/shared/sprites/types'
 
 /**
- * Named character definitions. Sheets live in src/assets/sprites/character/.
- * Frames are always 256×256; sheets come in two layouts — the original 5×5
- * (25 frames) and the newer 8×8 (64 frames).
+ * Character rendering is descriptor-driven: sprite sheets are seeded into the
+ * backend (backend/assets/seed_assets/character/) and served as media, exactly
+ * like monsters. The frontend ships no character image files — it builds a
+ * `CharacterDefinition` from the API descriptor at runtime.
  *
- * To add a move or a whole character, add config here — no component changes.
+ * To add a move or a whole character, seed it on the backend — no component
+ * changes. Frames are always 256x256.
  */
-function sheet(name: string, src: string, grid: 5 | 8, fps: number, loop: boolean): SpriteAnimation {
-  return {
-    name,
-    src,
-    frameWidth: 256,
-    frameHeight: 256,
-    columns: grid,
-    rows: grid,
-    frameCount: grid * grid,
-    fps,
-    loop,
-  }
-}
-
-export const BLUE_FALLBACK: CharacterDefinition = {
-  id: 'blue',
-  sprites: {
-    idle: sheet('blue.idle', blueIdle, 5, 10, true),
-    walk: sheet('blue.walk', blueWalk, 5, 12, true),
-    run: sheet('blue.run', blueRun, 5, 14, true),
-    fly: sheet('blue.fly', blueFly, 8, 24, true),
-    float: sheet('blue.float', blueFloat, 5, 8, true),
-    take_off: sheet('blue.take_off', blueTakeOff, 8, 40, false),
-    land: sheet('blue.land', blueLand, 8, 40, false),
-    // dive: none yet — the controller tilts the fly sheet nose-down instead.
-  },
-  randoms: [sheet('blue.random1', blueRandom1, 8, 20, false)],
-  metrics: {
-    scale: 0.65,
-    walkSpeed: 140,
-    runSpeed: 280,
-    flySpeed: 380,
-    // Measured from the idle sheet: lowest opaque pixel sits at y=204 of the
-    // 256px frame in every cell, so the foot line is 51 source px up.
-    footOffset: 51,
-    // take_off frames 0–44 are the upright crouch/wing-unfurl (rise straight
-    // up); from cell 45 the sheet is in horizontal flight poses.
-    takeOffAirborneFrame: 45,
-    takeOffLiftSpeed: 55,
-    // land frames 0–31 are flight/braking flare; from cell 32 the pose is an
-    // upright wings-flared drop, touching down around cell 40.
-    landFallFrame: 32,
-  },
-}
-export const BLUE = BLUE_FALLBACK
 
 const CHARACTER_FRAME_SIZE = 256
 const CHARACTER_MOVES: MoveName[] = ['idle', 'walk', 'run', 'fly', 'float', 'dive', 'take_off', 'land']
 const REQUIRED_CHARACTER_MOVES: Array<'idle' | 'walk' | 'fly'> = ['idle', 'walk', 'fly']
-const DEFAULT_CHARACTER_METRICS = BLUE_FALLBACK.metrics
+
+/** Tuning fallbacks for metrics a descriptor omits (Blue's measured values). */
+const DEFAULT_CHARACTER_METRICS: CharacterDefinition['metrics'] = {
+  scale: 0.65,
+  walkSpeed: 140,
+  runSpeed: 280,
+  flySpeed: 380,
+  footOffset: 51,
+  takeOffAirborneFrame: 45,
+  takeOffLiftSpeed: 55,
+  landFallFrame: 32,
+}
 
 export function characterFromDescriptor(descriptor: CharacterAssetDescriptor): CharacterDefinition | null {
   const sprites = Object.fromEntries(
@@ -78,7 +36,16 @@ export function characterFromDescriptor(descriptor: CharacterAssetDescriptor): C
     }),
   ) as Partial<Record<MoveName, SpriteAnimation>>
 
-  if (REQUIRED_CHARACTER_MOVES.some((moveName) => !sprites[moveName])) return null
+  const missing = REQUIRED_CHARACTER_MOVES.filter((moveName) => !sprites[moveName])
+  if (missing.length > 0) {
+    if (import.meta.env.DEV) {
+      console.warn(
+        `[characters] "${descriptor.slug}" is missing required sprite sheet(s): ${missing.join(', ')}. ` +
+          'Run `python manage.py seed_assets` to (re)seed character assets.',
+      )
+    }
+    return null
+  }
 
   const randomActions = descriptor.random_actions?.length
     ? descriptor.random_actions
@@ -104,6 +71,26 @@ export function characterFromDescriptor(descriptor: CharacterAssetDescriptor): C
       takeOffLiftSpeed: optionalPositiveNumber(metrics.take_off_lift_speed),
       landFallFrame: optionalPositiveNumber(metrics.land_fall_frame),
     },
+  }
+}
+
+/**
+ * Battle-only sheets for a character, kept out of `CharacterDefinition` so the
+ * tower controller's MoveName contract is untouched. `cast` plays once per
+ * spell; `miss` has no dedicated sheet yet, so it reuses the idle frames as a
+ * placeholder beat. Returns null until the descriptor has the needed actions.
+ */
+export type CharacterBattleSheets = { cast: SpriteAnimation; miss: SpriteAnimation }
+
+export function characterBattleFromDescriptor(
+  descriptor: CharacterAssetDescriptor,
+): CharacterBattleSheets | null {
+  const idle = descriptor.sprites.idle
+  const cast = descriptor.sprites.cast ?? idle
+  if (!idle || !cast) return null
+  return {
+    cast: animationFromDescriptor(cast, `${descriptor.slug}.cast`, false),
+    miss: animationFromDescriptor(idle, `${descriptor.slug}.miss`, false),
   }
 }
 
@@ -138,21 +125,4 @@ function positiveNumber(value: unknown, fallback: number): number {
 function optionalPositiveNumber(value: unknown): number | undefined {
   const parsed = Number(value)
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined
-}
-
-/**
- * Battle-only sheets for Blue, kept out of `CharacterDefinition` so the tower
- * controller's MoveName contract is untouched. Blue rests on the shared `idle`
- * sheet (BLUE.sprites.idle) and plays one `cast` action for every spell — the
- * spell's projectile/effect is drawn by the battle effect layer, not the sprite.
- *
- * `miss` has no dedicated sheet yet, so it deliberately reuses the idle frames
- * (played once) as a placeholder beat when a spell fizzles; swap in a real
- * sheet later without touching the director. `hurt` is retained for legacy
- * callers but the tower-defense loop has monsters strike the crystal, not Blue.
- */
-export const BLUE_BATTLE: Record<'cast' | 'hurt' | 'miss', SpriteAnimation> = {
-  cast: sheet('blue.cast', blueCast, 8, 32, false),
-  hurt: sheet('blue.hurt', blueHurt, 5, 20, false),
-  miss: sheet('blue.miss', blueIdle, 5, 10, false),
 }

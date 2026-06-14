@@ -46,7 +46,7 @@ def test_tomes_endpoint_and_unauthored_storey_is_empty(db, django_user_model):
     assert response.status_code == 200
     assert response.json()["results"][0]["slug"] == tome.slug
 
-    # Storeys without an authored tome return an empty section — the tower
+    # Storeys without an authored tome return an empty section - the tower
     # renders nothing there, keeping non-authored storeys unchanged.
     from curriculum.models import Storey
 

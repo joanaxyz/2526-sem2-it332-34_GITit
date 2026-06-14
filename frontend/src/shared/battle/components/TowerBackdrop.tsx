@@ -4,7 +4,7 @@ import { cn } from '@/shared/utils/cn'
 
 export type TowerBackdropHandle = {
   /**
-   * Pan the star/cloud field downward over `ms` to sell Blue rising a floor —
+   * Pan the star/cloud field downward over `ms` to sell Blue rising a floor -
    * the vertical counterpart of the old horizontal parallax travel. Offsets are
    * cumulative so successive climbs keep flowing on the repeating tiles.
    */

@@ -66,7 +66,7 @@ function writeAttemptSteps(run: AdventureRun, steps: AdventureStepLog[]): Advent
 /**
  * Submits a command and drives the terminal optimistically, mirroring the
  * challenge flow: a `Pending` placeholder is inserted the instant the user hits
- * Run (so the terminal shows `cmd` + `…` with no round-trip wait), then replaced
+ * Run (so the terminal shows `cmd` + `` with no round-trip wait), then replaced
  * by the persisted step on success. A transition (solved / budget spent) returns
  * a full run whose next attempt has its own empty step list, which naturally
  * resets the terminal for the next problem.

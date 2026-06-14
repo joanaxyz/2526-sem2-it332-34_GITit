@@ -25,9 +25,7 @@ import { cn } from '@/shared/utils/cn'
 const navItems = [
   { to: '/home', label: 'Home' },
   { to: '/tower', label: 'Tower' },
-  { to: '/my-tower', label: 'Mine' },
-  { to: '/authoring', label: 'Create' },
-  { to: '/store', label: 'Store' },
+  { to: '/shop', label: 'Shop' },
 ]
 
 function getInitials(username: string) {
@@ -138,7 +136,7 @@ function ProfileDropdown({
             boxShadow: '0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(0,245,212,0.18)',
           }}
         >
-          {/* Identity header — avatar + name + email */}
+          {/* Identity header - avatar + name + email */}
           <div className="border-b border-border/40 px-4 py-3">
             <p className="truncate text-sm font-bold text-foreground">{displayName}</p>
             <p className="break-all text-xs leading-snug text-muted-foreground">{user.email}</p>
@@ -181,7 +179,7 @@ function TowerHelpOverlay({ open, onClose }: { open: boolean; onClose: () => voi
   if (!open) return null
 
   const items = [
-    { icon: Swords, copy: 'Clear each Command Adventure to unlock GIT Challenged.' },
+    { icon: Swords, copy: 'Clear each Command Adventure to unlock Challenges.' },
     { icon: Trophy, copy: 'Each challenge has Easy, Medium, and Hard levels.' },
     { icon: Lock, copy: 'Clear the storey levels to advance the tower.' },
     { icon: CheckCircle2, copy: 'Progress saves after every cleared level.' },
@@ -234,7 +232,8 @@ export function HomeLayout() {
   const user = useAuthStore((state) => state.user)
   const clearSession = useAuthStore((state) => state.clearSession)
   const [towerHelpOpen, setTowerHelpOpen] = useState(false)
-  const isTowerPage = location.pathname.startsWith('/tower')
+  const isTowerPage =
+    location.pathname.startsWith('/tower') && !location.pathname.includes('/editor')
 
   async function logout() {
     try {
@@ -249,7 +248,7 @@ export function HomeLayout() {
   return (
     <div className="min-h-screen" style={{ overflowX: 'clip' }}>
       <CursorGlow />
-      {/* No header bar — only the wide launcher blade, with the logo and
+      {/* No header bar - only the wide launcher blade, with the logo and
           wallet/profile floating loose in the top corners (Halo-style). */}
       <header className="pointer-events-none sticky top-0 z-20 h-0">
         {/* Centered wide blade: \ Home | Tower / */}
@@ -271,7 +270,7 @@ export function HomeLayout() {
           </div>
         </div>
 
-        {/* Floating logo chip — top left */}
+        {/* Floating logo chip - top left */}
         <NavLink
           to="/home"
           aria-label="GIT it! home"
@@ -280,7 +279,7 @@ export function HomeLayout() {
           <GitBranch />
         </NavLink>
 
-        {/* Floating wallet + profile — top right */}
+        {/* Floating wallet + profile - top right */}
         <div className="pointer-events-auto absolute right-5 top-2.5 flex items-center gap-3 max-sm:right-3">
           {user && <WalletBadge />}
           {user && <ProfileDropdown user={user} onLogout={logout} />}

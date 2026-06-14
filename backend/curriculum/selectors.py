@@ -9,12 +9,12 @@ from assets.models import (
     TOWER_PIECE_SPIRE,
     TOWER_PIECE_TOME,
 )
-from adventures.models import AdventureLevel, AdventureRun, CommandAdventure
 from challenges.models import Challenge, ChallengeLevel, ChallengeRun
 from challenges.selectors import (
     command_accuracy_rate,
     run_meets_progress_threshold,
 )
+from command_adventures.models import AdventureLevel, AdventureRun, CommandAdventure
 from common.constants import (
     DIFFICULTY_EASY,
     DIFFICULTY_HARD,
@@ -23,7 +23,6 @@ from common.constants import (
 )
 from curriculum.library import library_key_for_command
 from curriculum.models import CommandForm, CommandSkill, LibraryEntry, Storey, Tome
-
 
 OFFICIAL_TOWER_ASSET_SLUGS = {
     TOWER_PIECE_SPIRE: "official-spire",
@@ -185,8 +184,8 @@ def storey_content_page(
 def storey_content_overview(*, user, storey_id: int) -> dict:
     """Every tower section for one storey in a single payload.
 
-    The Tower renders three sections per storey — its Command Adventure (always
-    one), its tomes, and its challenges — each of which was previously a separate
+    The Tower renders three sections per storey - its Command Adventure (always
+    one), its tomes, and its challenges - each of which was previously a separate
     request. Storeys hold only a handful of challenges/tomes, so this returns them
     all (no cursor): collapsing 2-3 round trips per storey into one is the win.
     """
@@ -327,7 +326,7 @@ def learned_command_skills(*, user) -> list[dict]:
     """The player's registry of learned commands.
 
     A CommandSkill is "learned" once the player has passed the Command Adventure
-    that teaches it — the same pass milestone (`passed_at`) that unlocks the
+    that teaches it - the same pass milestone (`passed_at`) that unlocks the
     storey's challenges. Passing a storey's adventure therefore grants every
     published command-skill in that storey. Derived (not stored) so it can never
     drift from the progression that produced it.
@@ -365,7 +364,7 @@ def storey_book(*, storey_id: int) -> dict | None:
     """The Storey Book: every command registered for the storey, each resolved to
     its rich authored content from the library.
 
-    There is no terminal demo here — the book is reference material. Pages come
+    There is no terminal demo here - the book is reference material. Pages come
     from the seeded ``LibraryEntry`` for the skill's command (authored in
     ``library.py``, persisted by ``seed_command_library``); a minimal summary
     page is synthesized as a fallback so a registered command never renders
@@ -603,7 +602,7 @@ def challenge_summary_payload(*, challenge: Challenge, access: ChallengeAccessCo
 
 def challenge_levels_access_payload(*, user, challenge: Challenge) -> list[dict]:
     """Per-level access for every sibling level of a challenge, ordered
-    easy→hard. Reuses the same access context the Tower uses so statuses
+    easy-to-hard. Reuses the same access context the Tower uses so statuses
     (locked / in_progress / completed) match exactly between the Tower and the
     in-run level navigator."""
     access = _build_challenge_access(user=user, storey_id=challenge.storey_id, challenges=[challenge])

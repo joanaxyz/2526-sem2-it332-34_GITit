@@ -26,11 +26,11 @@ export function WalletBadge() {
         'flex items-center gap-2 rounded-full border border-primary/25 bg-secondary/40 py-1 pl-1.5 pr-3.5',
         justEarned && 'wallet-badge-earned',
       )}
-      title="GitCoins — earned by passing adventures and clearing challenges"
+      title="GitCoins - earned by passing adventures and clearing challenges"
     >
       <GitCoinIcon className="size-6 drop-shadow-[0_0_6px_rgba(0,245,212,0.4)]" />
       <span className="text-sm font-bold tabular-nums text-primary">
-        {isPending ? '· · ·' : (balance ?? 0).toLocaleString()}
+        {isPending ? '---' : (balance ?? 0).toLocaleString()}
       </span>
     </div>
   )

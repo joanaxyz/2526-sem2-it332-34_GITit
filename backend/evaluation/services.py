@@ -56,7 +56,7 @@ def _flag(spec: dict, key: str, rule_type: str) -> list[dict]:
 
 
 def _presence_bool(spec: dict, key: str, rule_type: str) -> list[dict]:
-    """A valued rule whenever the key is present — False is a real requirement."""
+    """A valued rule whenever the key is present - False is a real requirement."""
     return [{"type": rule_type, "value": bool(spec[key])}] if key in spec else []
 
 

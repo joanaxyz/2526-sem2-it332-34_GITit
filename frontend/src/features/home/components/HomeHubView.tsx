@@ -23,7 +23,7 @@ function isHubTabId(value: string | null): value is HubTabId {
 
 /**
  * Game-launcher home hub: environment hero banner up top, then the
- * ‹ Stats · Achievements · Hero Showcase › sub-tab deck. The active tab is
+ *  Stats - Achievements - Hero Showcase  sub-tab deck. The active tab is
  * mirrored into ?tab= so /stats-era links can deep-link straight to a tab.
  */
 export function HomeHubView({

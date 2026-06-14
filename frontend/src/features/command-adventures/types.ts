@@ -61,7 +61,7 @@ export type AdventureAttempt = {
   /** Terminal history for this attempt; the terminal derives its lines from this. */
   steps: AdventureStepLog[]
   /** Authoritative encounter state once the backend battle block ships;
-   *  absent → the client derives a deterministic roster. */
+   *  absent -> the client derives a deterministic roster. */
   battle?: BattleBlock | null
 }
 
@@ -157,6 +157,6 @@ export type AdventureCommandResponse = {
   command_classification: string
   /** The persisted step; replaces the client's optimistic pending placeholder. */
   step: AdventureStepLog
-  /** Authoritative battle outcome of this command; absent → client-derived. */
+  /** Authoritative battle outcome of this command; absent -> client-derived. */
   battle?: BattleBlock | null
 }

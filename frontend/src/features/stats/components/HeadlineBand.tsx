@@ -23,7 +23,7 @@ function RingStat({ label, value, color, sub }: { label: string; value: number |
 }
 
 /**
- * Headline readout for the stats tab's primary performance numbers —
+ * Headline readout for the stats tab's primary performance numbers -
  * a chamfered glass slat in the hero plaques' vocabulary; the only
  * glass element of the deck.
  */

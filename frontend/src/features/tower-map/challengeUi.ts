@@ -5,9 +5,9 @@ import type {
   ChallengeLevelAccess,
   CommandAdventureSummary,
 } from '@/features/challenges/types'
-import type { ChestReward, LearningStorey } from '@/features/storeys/types'
+import type { ChestReward, LearningStorey } from '@/features/tower-map/types'
 
-// Per-difficulty label + accent (RGB triplet consumed via `rgba(var(--…), …)`).
+// Per-difficulty label + accent (RGB triplet consumed via `rgba(var(--), )`).
 export const DIFFICULTY_ACCENT: Record<string, { label: string; rgb: string }> = {
   easy: { label: 'Easy', rgb: '0, 245, 212' },
   medium: { label: 'Medium', rgb: '53, 143, 255' },
@@ -74,7 +74,7 @@ export function actionForChallengeLevel(item: ChallengeLevelAccess): ChallengeAc
   if (item.status === 'completed') {
     // A completed level is already counted; the only door action is an uncounted
     // free-play replay ("Replay"). Routing it through the review run avoids the
-    // retry endpoint, which rejects non-primary runs — the latest run here may
+    // retry endpoint, which rejects non-primary runs - the latest run here may
     // itself be a prior replay.
     if (item.review_available) return 'review'
     return null

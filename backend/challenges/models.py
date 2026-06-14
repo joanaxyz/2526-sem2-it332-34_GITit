@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from adventures.models import VariantBase
+from command_adventures.models import VariantBase
 from common.constants import (
     DIFFICULTY_EASY,
     DIFFICULTY_HARD,

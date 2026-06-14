@@ -9,7 +9,7 @@ challenge and adventure paths can never drift.
 
 from __future__ import annotations
 
-from typing import Callable
+from collections.abc import Callable
 
 from battle.engine import BattleEngine, TurnInput
 
@@ -29,7 +29,7 @@ def apply_battle_turn(
 
     Lazily builds `holder.battle_state` for pre-battle rows, runs the engine,
     writes the new state back, and returns ``(events, changed)``. The state
-    rides the save the submit path already performs — no extra query.
+    rides the save the submit path already performs - no extra query.
     """
     if not holder.battle_state:
         holder.battle_state = build_initial()

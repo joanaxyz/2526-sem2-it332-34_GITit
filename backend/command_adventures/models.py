@@ -159,7 +159,7 @@ class AdventureRun(models.Model):
     mode = models.CharField(max_length=16, choices=Mode.choices, default=SESSION_MODE_PRIMARY)
     current_level_index = models.PositiveIntegerField(default=0)
     total_score = models.PositiveIntegerField(default=0)
-    # Accumulating mastery points this session (sum of box-advance × quality).
+    # Accumulating mastery points this session (sum of box-advance x quality).
     session_score = models.PositiveIntegerField(default=0)
     mastery_progress_gained = models.FloatField(default=0.0)
     started_at = models.DateTimeField(auto_now_add=True)

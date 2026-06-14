@@ -1,11 +1,16 @@
+import { useQuery } from '@tanstack/react-query'
+import { useMemo } from 'react'
+
 import type { RankTier } from '@/features/home/rank'
-import { BLUE } from '@/shared/sprites/characters'
+import { queryKeys } from '@/shared/api/queryKeys'
+import { assetsApi } from '@/shared/assets/assetsApi'
+import { characterFromDescriptor } from '@/shared/sprites/characters'
 import { SpriteAnimator } from '@/shared/sprites/SpriteAnimator'
 
 /**
  * Game-client agent showcase: the player's animated character floating over
- * a glowing pedestal, with a name + rank caption. Uses the shared
- * SpriteAnimator (blue idle sheet).
+ * a glowing pedestal, with a name + rank caption. Renders Blue's idle sheet
+ * from his seeded descriptor (no local sprite copy).
  */
 export function CharacterShowcase({
   playerName,
@@ -17,16 +22,29 @@ export function CharacterShowcase({
   /** Sprite display scale (0.8 = compact card, ~1.2 = showcase stage). */
   scale?: number
 }) {
+  const characterQuery = useQuery({
+    queryKey: queryKeys.assetDescriptors('character'),
+    queryFn: () => assetsApi.getDescriptors('character'),
+    staleTime: 10 * 60 * 1000,
+  })
+  const idle = useMemo(() => {
+    const descriptor = characterQuery.data?.results.blue
+    if (descriptor?.kind !== 'character') return null
+    return characterFromDescriptor(descriptor)?.sprites.idle ?? null
+  }, [characterQuery.data])
+
   return (
     <div className="flex flex-col items-center">
       <div className="sprite-stage">
         <span className="sprite-stage-aura" aria-hidden="true" />
         <div className="sprite-stage-float">
-          <SpriteAnimator
-            animation={BLUE.sprites.idle}
-            scale={scale}
-            aria-label={`${playerName}'s character, idle animation`}
-          />
+          {idle ? (
+            <SpriteAnimator
+              animation={idle}
+              scale={scale}
+              aria-label={`${playerName}'s character, idle animation`}
+            />
+          ) : null}
         </div>
       </div>
       <div className="sprite-pedestal" aria-hidden="true" />

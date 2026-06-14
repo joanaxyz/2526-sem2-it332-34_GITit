@@ -1,5 +1,5 @@
-﻿/**
- * ⚠ DEV-ONLY DESIGN FIXTURES — never imported by production routes.
+/**
+ * DEV-ONLY DESIGN FIXTURES - never imported by production routes.
  * Realistic mid-progress player data used by /design-preview/home.
  */
 import type { StatsSummary } from '@/features/stats/types'
@@ -44,7 +44,7 @@ export const richStatsFixture: StatsSummary = {
   },
 }
 
-/** Brand-new account: everything null/zero — exercises the empty states. */
+/** Brand-new account: everything null/zero - exercises the empty states. */
 export const emptyStatsFixture: StatsSummary = {
   skill_profile: [
     { key: 'accuracy', label: 'Accuracy', hint: 'How often your commands are accepted first time', value: null },

@@ -5,7 +5,7 @@ selectors are exercised in isolation."""
 from django.contrib.auth.models import AnonymousUser
 from django.utils import timezone
 
-from adventures.models import AdventureRun, CommandAdventure
+from command_adventures.models import AdventureRun, CommandAdventure
 from curriculum.models import CommandSkill, Storey, Tome
 from curriculum.selectors import learned_command_skills, storey_content_overview
 

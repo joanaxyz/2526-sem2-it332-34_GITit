@@ -9,7 +9,7 @@ export type BudgetMeterRow = { label: string; value: ReactNode }
 /**
  * Shared shell for the command-budget meters on both level surfaces: a
  * compact `used / max` button with a thin progress underline and a hover/focus
- * tooltip breakdown. It owns only the markup and interaction — every surface
+ * tooltip breakdown. It owns only the markup and interaction - every surface
  * difference (labels, colors, tooltip rows, copy) arrives as data, so the
  * challenge and adventure meters stay distinct in wording while sharing one
  * structure. Callers compute the danger state and progress color themselves.

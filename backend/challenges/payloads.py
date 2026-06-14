@@ -2,7 +2,7 @@
 
 These are presenter-layer functions (DB reads, snapshots, visualization) that
 used to live in serializers.py; serializers now hold input validation only.
-Payload shapes are part of the frontend contract — change them deliberately.
+Payload shapes are part of the frontend contract - change them deliberately.
 """
 
 from battle.payloads import battle_block
@@ -20,6 +20,7 @@ from practice.scaffolding import ScaffoldingService
 from practice.visualization import RepositoryVisualizationService
 from progress.models import LevelCompletion
 from simulator.services import RepositorySnapshotService
+
 
 def prefetch_run_payload_context(run: ChallengeRun) -> None:
     if getattr(run, "_payload_context_loaded", False):
@@ -82,8 +83,8 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
         "visualization": visualization,
         "expected_state": expected_state,
         # Boss roster for the battle strip; events ride only the per-command
-        # response. Null for pre-battle runs → the client derives a fallback.
-        "battle": battle_block(run.battle_state),
+        # response. Null for pre-battle runs means the client derives a fallback.
+        "battle": battle_block(run.battle_state, user=run.user),
         "steps": [
             {
                 "id": step.id,
@@ -201,9 +202,9 @@ def next_difficulty_payload(run: ChallengeRun) -> dict | None:
 
 
 def sibling_levels_payload(run: ChallengeRun) -> list[dict]:
-    """Every level of this run's challenge (easy→hard) with the user's access state,
+    """Every level of this run's challenge (easy-to-hard) with the user's access state,
     powering the completion modal's level navigator. Imported lazily to avoid a
-    challenges⇄curriculum import cycle at module load."""
+    challenges/curriculum import cycle at module load."""
     if not run.challenge_level:
         return []
     from curriculum.selectors import challenge_levels_access_payload

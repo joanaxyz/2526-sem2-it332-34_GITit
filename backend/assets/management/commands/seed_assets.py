@@ -2,7 +2,7 @@
 
 Idempotent: each run upserts the Asset rows and rebuilds their sprites from
 ``assets/seed_assets``, letting ``AssetSprite.save`` count frames from the image.
-Only official assets (``owner=None``) are touched — user uploads are left alone.
+Only official assets (``owner=None``) are touched - user uploads are left alone.
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ from django.core.files import File
 from django.core.management.base import BaseCommand, CommandError
 
 from assets.models import (
+    KIND_BATTLE_ARTIFACT,
     KIND_CHARACTER,
     KIND_MONSTER,
     KIND_TOWER_PIECE,
@@ -20,14 +21,21 @@ from assets.models import (
     AssetSprite,
     TowerPieceAsset,
 )
+from assets.seed_data.battle_artifacts import BATTLE_ARTIFACT_SPECS
 from assets.seed_data.characters import CHARACTER_SPECS
 from assets.seed_data.monsters import LOOPING_ACTIONS, MONSTER_SPECS
 from assets.seed_data.tower_pieces import OFFICIAL_TOWER_PIECE_SPECS
 
-MONSTERS_ROOT = Path(__file__).resolve().parents[2] / "seed_assets" / "monsters"
-TOWER_PIECES_ROOT = Path(__file__).resolve().parents[2] / "seed_assets" / "tower_pieces"
-PROJECT_ROOT = Path(__file__).resolve().parents[4]
-CHARACTERS_ROOT = PROJECT_ROOT / "frontend" / "src" / "assets" / "sprites" / "character"
+# All official sprite source files live under backend/assets/seed_assets/ and are
+# the single committed source of truth (the frontend renders them from media via
+# descriptors — it no longer ships its own copies).
+SEED_ASSETS_ROOT = Path(__file__).resolve().parents[2] / "seed_assets"
+MONSTERS_ROOT = SEED_ASSETS_ROOT / "monsters"
+TOWER_PIECES_ROOT = SEED_ASSETS_ROOT / "tower_pieces"
+CHARACTERS_ROOT = SEED_ASSETS_ROOT / "character"
+# Battle artifacts (e.g. crystal/) each live in their own folder under the seed
+# root, alongside character/.
+ARTIFACTS_ROOT = SEED_ASSETS_ROOT
 
 
 class Command(BaseCommand):
@@ -41,12 +49,14 @@ class Command(BaseCommand):
 
         monster_count, monster_stale = self._seed_monsters()
         character_count, character_stale = self._seed_characters()
+        artifact_count, artifact_stale = self._seed_battle_artifacts()
         tower_piece_count, tower_piece_stale = self._seed_tower_pieces()
         self.stdout.write(
             self.style.SUCCESS(
                 "Seeded "
                 f"{monster_count} monsters ({monster_stale} retired), "
                 f"{character_count} characters ({character_stale} retired), "
+                f"{artifact_count} battle artifacts ({artifact_stale} retired), "
                 f"{tower_piece_count} tower pieces ({tower_piece_stale} retired)."
             )
         )
@@ -81,6 +91,27 @@ class Command(BaseCommand):
 
         stale = (
             Asset.objects.filter(kind=KIND_CHARACTER, owner__isnull=True)
+            .exclude(slug__in=seeded_slugs)
+            .update(is_published=False)
+        )
+        return len(seeded_slugs), stale
+
+    def _seed_battle_artifacts(self) -> tuple[int, int]:
+        if not ARTIFACTS_ROOT.exists():
+            self.stdout.write(
+                self.style.WARNING(
+                    f"Skipping battle artifacts; missing sprite dir: {ARTIFACTS_ROOT}"
+                )
+            )
+            return 0, 0
+
+        seeded_slugs: list[str] = []
+        for spec in BATTLE_ARTIFACT_SPECS:
+            self._seed_battle_artifact(spec)
+            seeded_slugs.append(spec["slug"])
+
+        stale = (
+            Asset.objects.filter(kind=KIND_BATTLE_ARTIFACT, owner__isnull=True)
             .exclude(slug__in=seeded_slugs)
             .update(is_published=False)
         )
@@ -142,6 +173,7 @@ class Command(BaseCommand):
                 "owner": None,
                 "label": spec["label"],
                 "default_scale": spec.get("scale", 1.0),
+                "tags": spec.get("tags", []),
                 "config": {
                     "metrics": spec.get("metrics", {}),
                     "random_actions": spec.get("random_actions", []),
@@ -170,6 +202,41 @@ class Command(BaseCommand):
                 sprite.image.save(f"{slug}__{action}.png", File(handle), save=False)
                 sprite.save()
 
+    def _seed_battle_artifact(self, spec: dict) -> None:
+        slug = spec["slug"]
+        asset, _ = Asset.objects.update_or_create(
+            slug=slug,
+            defaults={
+                "kind": KIND_BATTLE_ARTIFACT,
+                "owner": None,
+                "label": spec["label"],
+                "default_scale": spec.get("scale", 1.0),
+                "tags": spec.get("tags", []),
+                "config": spec.get("config", {}),
+                "is_published": True,
+            },
+        )
+
+        for old in asset.sprites.all():
+            old.image.delete(save=False)
+            old.delete()
+
+        for action, sprite_spec in spec["actions"].items():
+            path = ARTIFACTS_ROOT / slug / sprite_spec["file"]
+            if not path.exists():
+                raise CommandError(f"{slug}: missing battle artifact sprite file {path}")
+            sprite = AssetSprite(
+                asset=asset,
+                action=action,
+                frame_width=sprite_spec.get("frame_width", 256),
+                frame_height=sprite_spec.get("frame_height", 256),
+                fps=sprite_spec["fps"],
+                loops=sprite_spec["loops"],
+            )
+            with path.open("rb") as handle:
+                sprite.image.save(f"{slug}__{action}.png", File(handle), save=False)
+                sprite.save()
+
     def _seed_tower_piece(self, spec: dict) -> None:
         asset, _ = Asset.objects.update_or_create(
             slug=spec["slug"],
@@ -178,6 +245,7 @@ class Command(BaseCommand):
                 "owner": None,
                 "label": spec["label"],
                 "default_scale": 1.0,
+                "tags": spec.get("tags", []),
                 "config": {},
                 "is_published": True,
             },

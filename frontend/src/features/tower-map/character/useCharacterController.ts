@@ -1,6 +1,6 @@
-import { useEffect, type RefObject } from 'react'
+import { useEffect, useRef, type RefObject } from 'react'
 
-import { clamp } from '@/features/storeys/towerRandom'
+import { clamp } from '@/features/tower-map/towerLayoutRandom'
 import type {
   CharacterDefinition,
   MoveName,
@@ -14,14 +14,14 @@ import type {
  * The character lives in shell coordinates (document space inside
  * `.tower-page-shell`), so a grounded character scrolls glued to its
  * landing ledge with zero per-scroll work. All position writes are
- * imperative transforms — no React re-renders while moving.
+ * imperative transforms - no React re-renders while moving.
  *
  * Movement rules:
- * - Click on the current ledge → walk along it.
- * - Click anywhere else → take_off → fly straight there; dive (fly sheet
+ * - Click on the current ledge -> walk along it.
+ * - Click anywhere else -> take_off -> fly straight there; dive (fly sheet
  *   tilted nose-down) when the target is well below.
- * - Arrive on a ledge → land → idle; arrive in open air → float.
- * - Click farther than the teleport distance → fade out, reappear there.
+ * - Arrive on a ledge -> land -> idle; arrive in open air -> float.
+ * - Click farther than the teleport distance -> fade out, reappear there.
  * - While idle, one-shot "random" fidget sheets play on a randomized timer.
  */
 
@@ -30,7 +30,7 @@ const WALK_BAND_PX = 48 // click this close (vertically) to a ledge targets it
 const RUN_DISTANCE_PX = 220 // ground moves longer than this sprint instead of walking
 const ARRIVE_PX = 6
 const FLIP_DEADZONE_PX = 4 // no facing flips on sub-pixel jitter near arrival
-const DIVE_DROP_PX = 120 // remaining drop that swaps fly → dive
+const DIVE_DROP_PX = 120 // remaining drop that swaps fly -> dive
 const DIVE_TILT_DEG = 38
 const TILT_EASE_DEG_PER_S = 220
 const TAKEOFF_LIFT_SPEED = 150 // px/s straight up while the lift-off frames play
@@ -46,6 +46,10 @@ const INTERACTIVE_SELECTOR =
 type Ledge = { el: HTMLElement; left: number; right: number; y: number }
 type Target = { x: number; y: number; ledge: Ledge | null }
 type Mode = 'hidden' | 'idle' | 'walk' | 'take_off' | 'air' | 'land' | 'float' | 'teleport'
+/** Resting state kept across effect re-inits (e.g. the active character swaps
+ *  from the bundled fallback to the loaded descriptor) so the companion stays
+ *  put instead of teleporting back to the base ledge. */
+type Persisted = { pos: { x: number; y: number }; anchor: { el: HTMLElement; xFraction: number } | null }
 
 /** Looping moves substitute a simpler sheet when theirs is missing;
  *  transitions (take_off/land) just skip instead. */
@@ -76,6 +80,10 @@ export function useCharacterController({
   bodyRef: RefObject<HTMLDivElement | null>
   spriteRef: RefObject<SpriteAnimatorHandle | null>
 }) {
+  // Survives effect re-runs (refs persist for the component's lifetime), so a
+  // character-identity change re-mounts the controller without losing position.
+  const persistedRef = useRef<Persisted | null>(null)
+
   useEffect(() => {
     const layer = layerRef.current
     const bodyEl = bodyRef.current
@@ -115,7 +123,7 @@ export function useCharacterController({
         opts?.onComplete?.()
         return
       }
-      // fly ↔ dive resolve to the same sheet — don't restart its frames.
+      // fly ->" dive resolve to the same sheet - don't restart its frames.
       if (sheet === currentSheet && sheet.loop && !opts?.onComplete) return
       currentSheet = sheet
       spriteRef.current?.setAnimation(sheet, opts)
@@ -214,7 +222,7 @@ export function useCharacterController({
       return best
     }
 
-    // ── Idle fidgets: one-shot random sheets on a randomized timer ─────────
+    // -- Idle fidgets: one-shot random sheets on a randomized timer ---------
     function cancelRandom() {
       if (randomTimer) {
         window.clearTimeout(randomTimer)
@@ -241,6 +249,14 @@ export function useCharacterController({
       }, delay)
     }
 
+    // Snapshot the current resting state so a controller re-init can restore it.
+    function remember() {
+      persistedRef.current = {
+        pos: { x: pos.x, y: pos.y },
+        anchor: anchor ? { el: anchor.el, xFraction: anchor.xFraction } : null,
+      }
+    }
+
     function settle(ledge: Ledge) {
       anchor = {
         el: ledge.el,
@@ -250,6 +266,7 @@ export function useCharacterController({
       tiltGoal = 0
       setMove('idle')
       scheduleRandom()
+      remember()
     }
 
     function arriveAirborne() {
@@ -260,6 +277,7 @@ export function useCharacterController({
         target = null
         mode = 'float'
         setMove('float')
+        remember()
         return
       }
       mode = 'land'
@@ -270,7 +288,7 @@ export function useCharacterController({
         onComplete: () => {
           if (disposed || mode !== 'land') return
           // The drop is tuned to touch down before the sheet ends, but never
-          // trust the timing — snap the last few px on completion.
+          // trust the timing - snap the last few px on completion.
           pos = { x: dest.x, y: dest.y }
           target = null
           paint()
@@ -298,12 +316,13 @@ export function useCharacterController({
         } else {
           mode = 'float'
           setMove('float')
+          remember()
         }
         body.classList.remove('is-teleporting')
       }, TELEPORT_PHASE_MS)
     }
 
-    // ── Spawn + re-anchor ───────────────────────────────────────────────────
+    // -- Spawn + re-anchor ---------------------------------------------------
     function trySpawn() {
       const ledges = scanLedges()
       if (!ledges.length) return
@@ -315,6 +334,32 @@ export function useCharacterController({
       paint()
       body.classList.remove('is-unspawned')
       scheduleRandom()
+      remember()
+    }
+
+    // Re-init after a character swap: drop the companion back where he was
+    // (re-measured against the live ledge) instead of spawning at the base.
+    // Returns false when there's nothing to restore (first mount).
+    function restoreSpawn(): boolean {
+      const saved = persistedRef.current
+      if (!saved) return false
+      const grounded = saved.anchor && saved.anchor.el.isConnected ? saved.anchor : null
+      anchor = grounded
+      pos = { x: saved.pos.x, y: saved.pos.y }
+      // Mid-move states don't survive a re-init; settle to a resting pose.
+      mode = grounded ? 'idle' : 'float'
+      if (grounded) {
+        const ledge = measureLedge(grounded.el, shell.getBoundingClientRect())
+        if (ledge) {
+          pos = { x: ledge.left + grounded.xFraction * (ledge.right - ledge.left), y: ledge.y }
+        }
+      }
+      setMove(mode === 'float' ? 'float' : 'idle')
+      paint()
+      body.classList.remove('is-unspawned')
+      if (mode === 'idle') scheduleRandom()
+      remember()
+      return true
     }
 
     // Layout shifts (lazy storey mounts, viewport resize) move the landings;
@@ -344,7 +389,7 @@ export function useCharacterController({
       paint()
     }
 
-    // ── Click handling ──────────────────────────────────────────────────────
+    // -- Click handling ------------------------------------------------------
     function onPointerDown(e: PointerEvent) {
       pointerDown = { x: e.clientX, y: e.clientY }
     }
@@ -407,11 +452,11 @@ export function useCharacterController({
           })
         }
       } else if (mode !== 'take_off') {
-        mode = 'air' // airborne retarget — tick picks fly/dive
+        mode = 'air' // airborne retarget - tick picks fly/dive
       }
     }
 
-    // ── Frame loop ──────────────────────────────────────────────────────────
+    // -- Frame loop ----------------------------------------------------------
     let raf = 0
     let last = performance.now()
     function tick(now: number) {
@@ -484,7 +529,7 @@ export function useCharacterController({
         if (mode === 'air') {
           if (dy > DIVE_DROP_PX) {
             setMove('dive')
-            // No dive sheet → reuse fly tilted nose-down toward the travel side.
+            // No dive sheet -> reuse fly tilted nose-down toward the travel side.
             tiltGoal = character.sprites.dive ? 0 : DIVE_TILT_DEG
           } else {
             setMove('fly')
@@ -506,7 +551,7 @@ export function useCharacterController({
     resizeObserver.observe(shell)
     shell.addEventListener('pointerdown', onPointerDown)
     shell.addEventListener('click', onClick)
-    trySpawn()
+    if (!restoreSpawn()) trySpawn()
     raf = requestAnimationFrame(tick)
 
     return () => {

@@ -7,8 +7,8 @@ import type { PointerEvent as ReactPointerEvent, RefObject } from 'react'
  * Each pane resize is the same gesture: measure a container's bounds, then map
  * the pointer position to a ratio while listening on `window` (so the drag
  * survives the cursor leaving the handle) and locking the page cursor until
- * release. Only the container ref, the cursor, and the position→ratio mapping
- * differ — those are the arguments here; everything else lives once.
+ * release. Only the container ref, the cursor, and the position->ratio mapping
+ * differ - those are the arguments here; everything else lives once.
  */
 export function useDragResize(
   containerRef: RefObject<HTMLElement | null>,

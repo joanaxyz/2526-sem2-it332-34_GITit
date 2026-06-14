@@ -5,7 +5,7 @@ import { cn } from '@/shared/utils/cn'
 const REEDED_EDGE_TICKS = Array.from({ length: 28 }, (_, i) => (i * 360) / 28)
 
 /**
- * The GitCoin: a minted coin in the tower's aurora palette — cyan-to-ocean
+ * The GitCoin: a minted coin in the tower's aurora palette - cyan-to-ocean
  * rim with a reeded edge, dark navy face, and an embossed git-branch emblem.
  */
 export function GitCoinIcon({ className }: { className?: string }) {

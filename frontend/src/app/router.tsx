@@ -11,10 +11,10 @@ import { AdventureStartPage } from '@/features/command-adventures/pages/Adventur
 import { ChallengeStartPage } from '@/features/challenges/pages/ChallengeStartPage'
 
 /**
- * ⚠ Dev-only design preview: the real Home hub view inside the real layout
+ * Dev-only design preview: the real Home hub view inside the real layout
  * chrome, fed by fixture data instead of the API (no auth required).
  * `import.meta.env.DEV` is statically false in production builds, so this
- * route — and its lazily imported fixture modules — are compiled away.
+ * route - and its lazily imported fixture modules - are compiled away.
  */
 const designPreviewRoutes: RouteObject[] = import.meta.env.DEV
   ? [
@@ -43,6 +43,13 @@ export const router = createBrowserRouter([
       { path: '/register', element: <RegisterPage /> },
     ],
   },
+  // Public, no-auth view of a shared tower (copiable link target).
+  {
+    path: '/tower/shared/:designId',
+    lazy: async () => ({
+      Component: (await import('@/features/tower-designs/pages/SharedTowerPage')).SharedTowerPage,
+    }),
+  },
   {
     element: (
       <Protected>
@@ -58,25 +65,21 @@ export const router = createBrowserRouter([
       {
         path: '/tower',
         lazy: async () => ({
-          Component: (await import('@/features/storeys/pages/StoreyMapPage')).StoreyMapPage,
+          Component: (await import('@/features/tower-map/pages/TowerMapPage')).TowerMapPage,
         }),
       },
-      {
-        path: '/my-tower',
-        lazy: async () => ({
-          Component: (await import('@/features/towers/pages/MyTowerPage')).MyTowerPage,
-        }),
-      },
+      /* Mine moved inside the Tower page via the in-tower picker (?view=mine). */
+      { path: '/my-tower', element: <Navigate replace to="/tower?view=mine" /> },
       {
         path: '/tower/editor',
         lazy: async () => ({
-          Component: (await import('@/features/towers/pages/TowerEditorPage')).TowerEditorPage,
+          Component: (await import('@/features/tower-designs/pages/TowerEditorPage')).TowerEditorPage,
         }),
       },
       {
         path: '/tower/editor/:designId',
         lazy: async () => ({
-          Component: (await import('@/features/towers/pages/TowerEditorPage')).TowerEditorPage,
+          Component: (await import('@/features/tower-designs/pages/TowerEditorPage')).TowerEditorPage,
         }),
       },
       {
@@ -97,10 +100,12 @@ export const router = createBrowserRouter([
           Component: (await import('@/features/authoring/pages/ContentEditorPage')).ContentEditorPage,
         }),
       },
+      { path: '/store', element: <Navigate replace to="/shop" /> },
+      { path: '/marketplace', element: <Navigate replace to="/shop" /> },
       {
-        path: '/store',
+        path: '/shop',
         lazy: async () => ({
-          Component: (await import('@/features/store/pages/StorePage')).StorePage,
+          Component: (await import('@/features/marketplace/pages/MarketplacePage')).MarketplacePage,
         }),
       },
       {
@@ -109,7 +114,7 @@ export const router = createBrowserRouter([
           Component: (await import('@/features/gallery/pages/GalleryPage')).GalleryPage,
         }),
       },
-      /* Legacy routes — stats/performance now live on Home's Stats tab. */
+      /* Legacy routes - stats/performance now live on Home's Stats tab. */
       { path: '/dashboard', element: <Navigate replace to="/home" /> },
       { path: '/stats', element: <Navigate replace to="/home?tab=stats" /> },
       { path: '/performance', element: <Navigate replace to="/home?tab=stats" /> },

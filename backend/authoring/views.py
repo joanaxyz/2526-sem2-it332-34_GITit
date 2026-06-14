@@ -1,12 +1,34 @@
 from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from authoring.models import ContentDefinition
-from authoring.selectors import content_payload, visible_content_definitions
-from authoring.services import ContentDefinitionService
+from authoring.models import AuthoringStorey, ContentDefinition
+from authoring.selectors import content_payload, storey_payload, visible_content_definitions
+from authoring.services import AuthoringStoreyService, ContentDefinitionService
 from marketplace.access import can_remix
-from rest_framework.exceptions import PermissionDenied
+
+
+class AuthoringStoreyListCreateAPIView(APIView):
+    def get(self, request):
+        storeys = AuthoringStorey.objects.filter(owner=request.user)
+        return Response({"results": [storey_payload(row) for row in storeys]})
+
+    def post(self, request):
+        storey = AuthoringStoreyService().create(user=request.user, data=request.data)
+        return Response(storey_payload(storey), status=201)
+
+
+class AuthoringStoreyDetailAPIView(APIView):
+    def patch(self, request, storey_id: int):
+        storey = get_object_or_404(AuthoringStorey, id=storey_id)
+        storey = AuthoringStoreyService().update(user=request.user, storey=storey, data=request.data)
+        return Response(storey_payload(storey))
+
+    def delete(self, request, storey_id: int):
+        storey = get_object_or_404(AuthoringStorey, id=storey_id)
+        AuthoringStoreyService().delete(user=request.user, storey=storey)
+        return Response(status=204)
 
 
 class ContentDefinitionListCreateAPIView(APIView):

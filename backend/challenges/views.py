@@ -83,7 +83,7 @@ class ChallengeCommandSubmitAPIView(APIView):
                 "run": payload,
                 # Boss roster after this command plus the turn's ordered
                 # events (attacks, defeat) the stage animates.
-                "battle": battle_block(result["run"].battle_state, result["battle_events"]),
+                "battle": battle_block(result["run"].battle_state, result["battle_events"], user=request.user),
                 "stdout": result["stdout"],
                 "stderr": result["stderr"],
                 "exit_code": result["exit_code"],

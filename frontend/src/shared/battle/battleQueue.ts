@@ -1,10 +1,10 @@
 /**
  * Sequential choreography queue for the battle stage.
  *
- * The server answers a command in ~200–800ms but its choreography (cast →
- * projectile → hurt → HP drain → death) takes seconds, and the learner can
+ * The server answers a command in ~200-800ms but its choreography (cast ->
+ * projectile -> hurt -> HP drain -> death) takes seconds, and the learner can
  * submit again mid-sequence. Steps are tagged `cosmetic` (flourishes safe to
- * skip) or state-snapping (HP bar values, deaths, DAG reveals — must always
+ * skip) or state-snapping (HP bar values, deaths, DAG reveals - must always
  * run). `fastForward()` drops queued cosmetic steps and lets snap steps run
  * instantly, so the stage never lies about authoritative state for more than
  * the one step already playing.

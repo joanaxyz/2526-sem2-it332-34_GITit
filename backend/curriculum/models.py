@@ -54,13 +54,13 @@ class Tome(models.Model):
     """A general lesson (not a command) that opens as a book in the tower.
 
     Tomes appear only on storeys where they are authored, at the authored
-    placement slot. They are pure reading — no runs, attempts, or locking."""
+    placement slot. They are pure reading - no runs, attempts, or locking."""
 
     storey = models.ForeignKey(Storey, related_name="tomes", on_delete=models.CASCADE)
     slug = models.SlugField()
     title = models.CharField(max_length=160)
     summary = models.TextField(blank=True)
-    # list[BookPage] — the same page/block schema the Storey Book renders.
+    # list[BookPage] - the same page/block schema the Storey Book renders.
     pages = models.JSONField(default=list, blank=True)
     placement = models.CharField(
         max_length=32, choices=TOME_PLACEMENTS, default=TOME_PLACEMENT_ABOVE_ADVENTURE
@@ -93,7 +93,7 @@ class LibraryEntry(models.Model):
     title = models.CharField(max_length=160, blank=True)
     summary = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
-    # list[BookPage] — the same page/block schema the Storey Book renders.
+    # list[BookPage] - the same page/block schema the Storey Book renders.
     pages = models.JSONField(default=list, blank=True)
     is_published = models.BooleanField(default=True)
 

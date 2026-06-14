@@ -1,7 +1,7 @@
-import type { BookCommand } from '@/features/storeys/book/bookTypes'
+import type { BookCommand } from '@/features/tower-map/book/bookTypes'
 
 // Sub-navigation for a command: the option and argument sections it teaches
-// (e.g. `git init` → `-q / --quiet`, `-b / --initial-branch`, `<directory>`).
+// (e.g. `git init` -> `-q / --quiet`, `-b / --initial-branch`, `<directory>`).
 export type BookNavAnchor = {
   // The page id the anchor scrolls to.
   pageId: string

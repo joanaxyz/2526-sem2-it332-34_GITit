@@ -15,7 +15,7 @@ export type EncounterOptions = {
 }
 
 export type BattleDirector = {
-  /** Current roster — render one MonsterActor per entry. */
+  /** Current roster - render one MonsterActor per entry. */
   roster: BattleMonster[]
   defeated: boolean
   /** Callback refs the TowerBattleStage wires up (functions, not ref objects, so
@@ -42,12 +42,12 @@ function prefersReducedMotion(): boolean {
 /**
  * Translates command-lifecycle calls into sequential stage choreography. In the
  * tower-defense loop the player guards a crystal: a counted command casts at the
- * monsters; a miss lets a monster strike the crystal (pure drama — the cost was
+ * monsters; a miss lets a monster strike the crystal (pure drama - the cost was
  * the mana); running the mana dry shatters the crystal (defeat). Clearing a
  * level flies Blue up to the next floor.
  *
  * All per-frame work happens through imperative handles; React state changes are
- * limited to roster/HP snapshots (≤2 per command).
+ * limited to roster/HP snapshots (<2 per command).
  */
 export function useBattleDirector(): BattleDirector {
   const [roster, setRosterState] = useState<BattleMonster[]>([])
@@ -114,7 +114,7 @@ export function useBattleDirector(): BattleDirector {
     if (defeatedRef.current) return
     castPendingRef.current = true
     if (queue.busy) queue.fastForward()
-    // The cast sprite plays on resolve (idle → cast → idle), not on submit.
+    // The cast sprite plays on resolve (idle -> cast -> idle), not on submit.
   }, [queue])
 
   const onError = useCallback(() => {
@@ -130,7 +130,7 @@ export function useBattleDirector(): BattleDirector {
       const hasPlayerAttack = events.some((e) => e.type === 'player_attack')
       const hasMiss = events.some((e) => e.type === 'monster_attack')
 
-      // Play the cast for the resolved outcome: idle → cast → idle, once.
+      // Play the cast for the resolved outcome: idle -> cast -> idle, once.
       // Skipped on fast-forward / reduced motion (the state-snap steps below
       // still apply HP and deaths). A miss that drew a crystal strike gets a
       // fizzle so the spell visibly comes to nothing.
@@ -190,7 +190,7 @@ export function useBattleDirector(): BattleDirector {
           }
           case 'monster_attack': {
             // A miss: the rear monster lunges at the crystal. Non-cosmetic so a
-            // miss is never silently dropped on fast-forward — there we just
+            // miss is never silently dropped on fast-forward - there we just
             // jolt the crystal; otherwise the full lunge + projectile + shake.
             queue.enqueue({
               run: async (ctx) => {
@@ -208,10 +208,12 @@ export function useBattleDirector(): BattleDirector {
                 const layer = effectLayerRef.current
                 const crystalEl = crystal.element()
                 if (def?.attack.kind === 'projectile' && layer && crystalEl) {
-                  await spriteProjectile(def.attack.sheet, { flip: true })({
+                  // Monster (left of the crystal) looses rightward at it; the
+                  // source sheet already faces right, so no flip.
+                  await spriteProjectile(def.attack.sheet)({
                     layer,
-                    from: anchor(handle.element(), -14, -6),
-                    to: anchor(crystalEl, 6, 0),
+                    from: anchor(handle.element(), 14, -6),
+                    to: anchor(crystalEl, -6, 0),
                   })
                 }
                 await crystal.shake()
@@ -272,11 +274,15 @@ export function useBattleDirector(): BattleDirector {
         cosmetic: true,
         run: async () => {
           if (reduced) return
-          // Actors mount on the next frame; Blue descends onto the new floor as
-          // the monsters march in.
+          // Actors mount on the next frame; Blue descends onto the new floor (on
+          // a level-up) or dashes in to lock range near the tower (encounter
+          // start) as the monsters march in. The fight reads as starting once
+          // Blue is in position.
           await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
           await Promise.all([
-            opts?.travel ? (playerRef.current?.landIn() ?? Promise.resolve()) : Promise.resolve(),
+            opts?.travel
+              ? (playerRef.current?.landIn() ?? Promise.resolve())
+              : (playerRef.current?.runIn() ?? Promise.resolve()),
             ...next.map(
               (m, i) =>
                 new Promise<void>((resolve) => {

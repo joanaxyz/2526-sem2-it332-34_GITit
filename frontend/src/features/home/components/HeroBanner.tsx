@@ -40,7 +40,7 @@ export function HeroBanner({
           <div className="hub-hero-scan" />
         </div>
 
-        {/* Bottom assembly: readout — glass hexagon plate — readout */}
+        {/* Bottom assembly: readout - glass hexagon plate - readout */}
         <div className="hub-hero-divider">
           <div className="hub-stat hub-stat--left animate-fade-in-up" style={{ animationDelay: '200ms' }}>
             <div className="min-w-0">
@@ -72,18 +72,18 @@ export function HeroBanner({
                   {latest.title}
                   <span className="hub-stat-divider" aria-hidden="true" />
                   <span className="font-mono text-[0.66rem] font-semibold text-[#FBBF24]">
-                    ★ {latest.points}
+                    ... {latest.points}
                   </span>
                 </p>
               ) : (
-                <p className="hub-stat-value truncate text-muted-foreground">None yet — climb!</p>
+                <p className="hub-stat-value truncate text-muted-foreground">None yet - climb!</p>
               )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Launcher CTAs — identical steel slabs below the hero, per the reference */}
+      {/* Launcher CTAs - identical steel slabs below the hero, per the reference */}
       <div className="hub-cta-row animate-fade-in-up" style={{ animationDelay: '120ms' }}>
         <Link className="hub-cta chamfer-frame" to="/tower">
           <span className="chamfer-body">Enter Tower</span>

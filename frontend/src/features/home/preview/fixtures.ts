@@ -1,5 +1,5 @@
 /**
- * ⚠ DEV-ONLY DESIGN FIXTURES — never imported by production routes.
+ * DEV-ONLY DESIGN FIXTURES - never imported by production routes.
  * Realistic mid-progress player data used by /design-preview/home to
  * evaluate the hub without auth or live API data.
  */
@@ -63,18 +63,18 @@ export const richHomeFixture: HomeSummary = {
   },
   first_attempt_stars: 26,
   retry_trends: [
-    { level_title: 'Rebase the Haunted Branch', attempts: 1, retries: 0, label: 'Storey 5 · Challenge · Hard' },
-    { level_title: 'Cherry-pick the Lost Relics', attempts: 3, retries: 2, label: 'Storey 4 · Challenge · Medium' },
-    { level_title: 'git stash — Vault of Half-Work', attempts: 1, retries: 0, label: 'Storey 4 · Adventure' },
-    { level_title: 'Merge of the Twin Towers', attempts: 6, retries: 5, label: 'Storey 4 · Challenge · Hard' },
-    { level_title: 'Detached HEAD in the Catacombs', attempts: 4, retries: 3, label: 'Storey 3 · Challenge · Medium' },
-    { level_title: 'git branch — Forking Paths', attempts: 2, retries: 1, label: 'Storey 3 · Adventure' },
-    { level_title: 'Amend the Royal Decree', attempts: 1, retries: 0, label: 'Storey 2 · Challenge · Easy' },
-    { level_title: 'Reset the Cursed Commit', attempts: 3, retries: 2, label: 'Storey 2 · Challenge · Medium' },
+    { level_title: 'Rebase the Haunted Branch', attempts: 1, retries: 0, label: 'Storey 5 - Challenge - Hard' },
+    { level_title: 'Cherry-pick the Lost Relics', attempts: 3, retries: 2, label: 'Storey 4 - Challenge - Medium' },
+    { level_title: 'git stash - Vault of Half-Work', attempts: 1, retries: 0, label: 'Storey 4 - Adventure' },
+    { level_title: 'Merge of the Twin Towers', attempts: 6, retries: 5, label: 'Storey 4 - Challenge - Hard' },
+    { level_title: 'Detached HEAD in the Catacombs', attempts: 4, retries: 3, label: 'Storey 3 - Challenge - Medium' },
+    { level_title: 'git branch - Forking Paths', attempts: 2, retries: 1, label: 'Storey 3 - Adventure' },
+    { level_title: 'Amend the Royal Decree', attempts: 1, retries: 0, label: 'Storey 2 - Challenge - Easy' },
+    { level_title: 'Reset the Cursed Commit', attempts: 3, retries: 2, label: 'Storey 2 - Challenge - Medium' },
   ],
 }
 
-/** Brand-new account: everything null/zero — exercises the empty states. */
+/** Brand-new account: everything null/zero - exercises the empty states. */
 export const emptyHomeFixture: HomeSummary = {
   kpis: {
     scr: { value: null, numerator: 0, denominator: 0 },

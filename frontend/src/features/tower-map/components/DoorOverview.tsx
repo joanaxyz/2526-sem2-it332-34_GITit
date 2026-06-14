@@ -7,8 +7,8 @@ import {
   challengeLevelAccent,
   difficultyLabel,
   levelProgress,
-} from '@/features/storeys/challengeUi'
-import { useTowerSelection } from '@/features/storeys/hooks/useTowerSelection'
+} from '@/features/tower-map/challengeUi'
+import { useTowerSelection } from '@/features/tower-map/hooks/useTowerSelection'
 
 const ADVENTURE_ACCENT = '0, 245, 212'
 
@@ -87,7 +87,7 @@ export function DoorOverview({ storeyId }: { storeyId: number }) {
     >
       <span className="door-overview-kind is-challenge">
         <Trophy className="size-3.5" />
-        GIT Challenged · Trial {challengeIndex + 1}
+        Challenges - Trial {challengeIndex + 1}
       </span>
       <h3 className="door-overview-title">{challenge.title}</h3>
       <span className="door-overview-difficulty">{difficultyLabel(level)}</span>

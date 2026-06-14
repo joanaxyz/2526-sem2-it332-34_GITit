@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import type { BookBlock, BookDiagramEdge, BookDiagramNode } from '@/features/storeys/book/bookTypes'
+import type { BookBlock, BookDiagramEdge, BookDiagramNode } from '@/features/tower-map/book/bookTypes'
 
 const ACCENT_RGB: Record<string, string> = {
   cyan: '45, 245, 255',

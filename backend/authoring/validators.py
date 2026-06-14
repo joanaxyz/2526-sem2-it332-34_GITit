@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from django.db.models import Q
+
 from assets.models import KIND_MONSTER, Asset
 from authoring.models import ContentDefinition, ContentKind
 from authoring.schemas import BOOK_BLOCK_TYPES, content_levels
@@ -25,13 +27,35 @@ class ContentDefinitionValidator:
         errors: list[dict[str, str]] = []
         if not definition.title.strip():
             errors.append(_error("title", "Title is required."))
+        self._validate_chest_rewards(definition.definition, errors)
         if definition.kind == ContentKind.TOME:
             self._validate_tome(definition.definition, errors)
         elif definition.kind in {ContentKind.ADVENTURE, ContentKind.CHALLENGE}:
-            self._validate_playable(definition, errors)
+            self._validate_playable(definition, errors, owner=definition.owner)
         else:
             errors.append(_error("kind", "Unknown content kind."))
         return ValidationResult(valid=not errors, errors=errors)
+
+    def _validate_chest_rewards(self, definition: dict[str, Any], errors: list[dict[str, str]]) -> None:
+        """Reward checkpoints are optional; when present each row must be a
+        {threshold (0-100), coins} object so the storey can drop chests."""
+        rewards = (definition or {}).get("chest_rewards")
+        if rewards is None:
+            return
+        if not isinstance(rewards, list):
+            errors.append(_error("definition.chest_rewards", "Reward checkpoints must be a list."))
+            return
+        for index, row in enumerate(rewards):
+            path = f"definition.chest_rewards[{index}]"
+            if not isinstance(row, dict):
+                errors.append(_error(path, "Each reward checkpoint must be an object."))
+                continue
+            threshold = row.get("threshold")
+            coins = row.get("coins")
+            if not isinstance(threshold, (int, float)) or not 0 <= float(threshold) <= 100:
+                errors.append(_error(f"{path}.threshold", "Threshold must be a percent between 0 and 100."))
+            if not isinstance(coins, (int, float)) or float(coins) < 0:
+                errors.append(_error(f"{path}.coins", "Coins must be a non-negative number."))
 
     def _validate_tome(self, definition: dict[str, Any], errors: list[dict[str, str]]) -> None:
         pages = definition.get("pages")
@@ -62,15 +86,15 @@ class ContentDefinitionValidator:
                         )
                     )
 
-    def _validate_playable(self, content: ContentDefinition, errors: list[dict[str, str]]) -> None:
+    def _validate_playable(self, content: ContentDefinition, errors: list[dict[str, str]], *, owner=None) -> None:
         levels = content_levels(content.definition)
         if not levels:
             errors.append(_error("definition.levels", "At least one level is required."))
             return
         for index, level in enumerate(levels):
-            self._validate_level(level, f"definition.levels[{index}]", errors)
+            self._validate_level(level, f"definition.levels[{index}]", errors, owner=owner)
 
-    def _validate_level(self, level: dict[str, Any], path: str, errors: list[dict[str, str]]) -> None:
+    def _validate_level(self, level: dict[str, Any], path: str, errors: list[dict[str, str]], *, owner=None) -> None:
         if not str(level.get("slug") or "").strip():
             errors.append(_error(f"{path}.slug", "Level slug is required."))
         if not str(level.get("title") or "").strip():
@@ -123,9 +147,9 @@ class ContentDefinitionValidator:
             return
         if not outcome.target_matched:
             errors.append(_error(f"{path}.evaluation_spec", f"Solution does not satisfy evaluator: {outcome.summary}"))
-        self._validate_monsters(level, path, errors)
+        self._validate_monsters(level, path, errors, owner=owner)
 
-    def _validate_monsters(self, level: dict[str, Any], path: str, errors: list[dict[str, str]]) -> None:
+    def _validate_monsters(self, level: dict[str, Any], path: str, errors: list[dict[str, str]], *, owner=None) -> None:
         slugs: set[str] = set()
         for row in level.get("encounter_spec") or []:
             if isinstance(row, dict) and row.get("species"):
@@ -135,8 +159,14 @@ class ContentDefinitionValidator:
             slugs.add(str(boss["species"]))
         if not slugs:
             return
+        # An author may reference official monsters, their own uploads (any
+        # publish state), or monsters they have purchased.
+        accessible = Q(kind=KIND_MONSTER, is_published=True, owner__isnull=True)
+        if owner is not None:
+            accessible |= Q(kind=KIND_MONSTER, owner=owner)
+            accessible |= Q(kind=KIND_MONSTER, entitlement__user=owner)
         existing = set(
-            Asset.objects.filter(kind=KIND_MONSTER, slug__in=slugs, is_published=True).values_list("slug", flat=True)
+            Asset.objects.filter(slug__in=slugs).filter(accessible).values_list("slug", flat=True)
         )
         for slug in sorted(slugs - existing):
             errors.append(_error(path, f"Unknown monster asset slug: {slug}."))

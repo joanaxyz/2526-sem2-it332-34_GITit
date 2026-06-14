@@ -29,8 +29,62 @@ class ContentKind(models.TextChoices):
     TOME = "tome", "Tome"
 
 
+def _default_chest_rewards() -> list[dict]:
+    # Mirror curriculum.DEFAULT_CHEST_REWARDS without importing at module load.
+    return [
+        {"threshold": 25, "coins": 25},
+        {"threshold": 50, "coins": 60},
+        {"threshold": 75, "coins": 100},
+        {"threshold": 100, "coins": 150},
+    ]
+
+
+class AuthoringStorey(models.Model):
+    """A user-authored storey: a floor of their tower that GROUPS content.
+
+    One storey holds at most one adventure but 1+ challenges and 1+ tomes, and
+    carries the floor-level settings shared by all of them: reward checkpoints
+    (GitCoin chests dropped along the storey's combined progress), the monster
+    rosters its battles draw from, and the mastery pass-bar that unlocks the
+    storey's Challenge. Content authored "into" a storey compiles to one shared
+    runtime curriculum.Storey.
+    """
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="authoring_storeys",
+        on_delete=models.CASCADE,
+    )
+    slug = models.SlugField()
+    title = models.CharField(max_length=180)
+    summary = models.TextField(blank=True)
+    sort_order = models.PositiveIntegerField(default=0)
+    chest_rewards = models.JSONField(default=_default_chest_rewards, blank=True)
+    mob_roster = models.JSONField(default=list, blank=True)
+    boss_roster = models.JSONField(default=list, blank=True)
+    pass_bar_fraction = models.FloatField(default=0.6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["sort_order", "id"]
+        constraints = [
+            models.UniqueConstraint(fields=["owner", "slug"], name="unique_authoring_storey_slug_per_owner"),
+        ]
+
+    def __str__(self) -> str:
+        return f"AuthoringStorey({self.slug})"
+
+
 class ContentDefinition(models.Model):
     kind = models.CharField(max_length=20, choices=ContentKind.choices)
+    storey = models.ForeignKey(
+        AuthoringStorey,
+        null=True,
+        blank=True,
+        related_name="contents",
+        on_delete=models.SET_NULL,
+    )
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,

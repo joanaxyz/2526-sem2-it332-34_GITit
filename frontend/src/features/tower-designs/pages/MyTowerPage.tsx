@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 
-import { towersApi } from '@/features/towers/api/towersApi'
+import { towerDesignsApi } from '@/features/tower-designs/api/towerDesignsApi'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { Button } from '@/shared/components/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/Card'
@@ -11,7 +11,7 @@ import { LoadingState } from '@/shared/components/LoadingState'
 export function MyTowerPage() {
   const query = useQuery({
     queryKey: queryKeys.myTower,
-    queryFn: towersApi.overview,
+    queryFn: towerDesignsApi.overview,
     retry: false,
   })
 

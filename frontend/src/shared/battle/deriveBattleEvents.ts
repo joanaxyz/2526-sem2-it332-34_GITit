@@ -19,15 +19,15 @@ export type DeriveInput = {
   counted: boolean
   /** Made measurable progress (new objective checks satisfied, or solved). */
   progressed: boolean
-  /** Command family for the effect registry ("commit", "merge", …). */
+  /** Command family for the effect registry ("commit", "merge", ). */
   skill: string
-  /** Budget exhausted by this command → defeat. */
+  /** Budget exhausted by this command -> defeat. */
   defeated: boolean
   /** Roster before this command (the director's local copy). */
   monsters: BattleMonster[]
 }
 
-/** Command family for the effect registry: "git commit -m x" → "commit". */
+/** Command family for the effect registry: "git commit -m x" -> "commit". */
 export function commandSkill(command: string): string {
   const tokens = command.trim().split(/\s+/)
   if (tokens[0] !== 'git' || !tokens[1]) return 'default'
@@ -41,7 +41,7 @@ export function countSatisfied(checks: Array<{ satisfied: boolean }> | null | un
 
 /**
  * Deterministic adventure roster for level N of M when the server doesn't
- * provide one: early levels get 1–2 mobs, the back third adds an elite.
+ * provide one: early levels get 1"2 mobs, the back third adds an elite.
  */
 export function clientAdventureRoster(levelIndex: number, totalLevels: number): BattleMonster[] {
   const lateGame = totalLevels > 0 && levelIndex >= Math.floor((totalLevels * 2) / 3)
@@ -131,7 +131,7 @@ export function deriveBattleEvents(input: DeriveInput): BattleBlock {
       }
     }
   } else if (input.counted) {
-    // Miss: a monster takes the free shot. Pure drama — the cost was the mana.
+    // Miss: a monster takes the free shot. Pure drama - the cost was the mana.
     const attacker = alive()[alive().length - 1]
     if (attacker) {
       events.push({ type: 'monster_attack', monster: attacker.id, cause: 'miss' })

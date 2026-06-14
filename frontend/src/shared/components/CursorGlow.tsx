@@ -9,7 +9,7 @@ export function CursorGlow() {
     if (!window.matchMedia('(pointer: fine)').matches) return
 
     function handleMouseMove(e: MouseEvent) {
-      // Skip if an RAF is already queued — at most one update per frame
+      // Skip if an RAF is already queued - at most one update per frame
       if (rafRef.current !== null) return
       rafRef.current = requestAnimationFrame(() => {
         if (glowRef.current) {

@@ -1,12 +1,12 @@
 import { forwardRef, useImperativeHandle, useRef } from 'react'
 
-import { BLUE, BLUE_BATTLE } from '@/shared/sprites/characters'
+import type { CharacterBattleSheets } from '@/shared/sprites/characters'
 import { SpriteAnimator } from '@/shared/sprites/SpriteAnimator'
-import type { SpriteAnimatorHandle } from '@/shared/sprites/types'
+import type { CharacterDefinition, SpriteAnimatorHandle } from '@/shared/sprites/types'
 
 export type PlayerActorHandle = {
   /**
-   * Play the cast sheet once and settle back to idle (idle → cast → idle).
+   * Play the cast sheet once and settle back to idle (idle -> cast -> idle).
    * Resolves when the sheet finishes, so the director can spawn the spell
    * effect and move on. The cast plays on the resolved outcome, not on submit.
    */
@@ -17,18 +17,24 @@ export type PlayerActorHandle = {
    */
   miss: () => Promise<void>
   /**
-   * Level cleared — Blue takes off and rises off the top of the stage, then
+   * Level cleared - Blue takes off and rises off the top of the stage, then
    * holds in flight. Resolves once airborne so the director can restage the
    * next floor underneath him.
    */
   liftOff: () => Promise<void>
   /** Descend onto the new floor: drop in from above, land, settle to idle. */
   landIn: () => Promise<void>
+  /**
+   * Encounter start - Blue dashes in from the landing edge to lock range near
+   * the tower, then settles to idle. The fight's first beat waits on this.
+   */
+  runIn: () => Promise<void>
   /** Anchor element for effect launch positions. */
   element: () => HTMLDivElement | null
 }
 
 const RISE_PX = 220
+const RUN_IN_PX = 150
 
 /**
  * Blue on the tower-defense stage. He rests on the shared idle sheet and guards
@@ -36,14 +42,16 @@ const RISE_PX = 220
  * React re-renders happen mid-choreography. Climbing between levels reuses the
  * tower character's take_off / fly / land sheets.
  */
-export const PlayerActor = forwardRef<PlayerActorHandle, { scale?: number; className?: string }>(
-  function PlayerActor({ scale = 0.5, className }, ref) {
-    const spriteRef = useRef<SpriteAnimatorHandle | null>(null)
-    const wrapRef = useRef<HTMLDivElement | null>(null)
+export const PlayerActor = forwardRef<
+  PlayerActorHandle,
+  { character: CharacterDefinition; battle: CharacterBattleSheets; scale?: number; className?: string }
+>(function PlayerActor({ character, battle, scale = 0.5, className }, ref) {
+  const spriteRef = useRef<SpriteAnimatorHandle | null>(null)
+  const wrapRef = useRef<HTMLDivElement | null>(null)
 
-    function rest() {
-      spriteRef.current?.setAnimation(BLUE.sprites.idle)
-    }
+  function rest() {
+    spriteRef.current?.setAnimation(character.sprites.idle)
+  }
 
     useImperativeHandle(ref, () => ({
       cast: () =>
@@ -53,7 +61,7 @@ export const PlayerActor = forwardRef<PlayerActorHandle, { scale?: number; class
             resolve()
             return
           }
-          sprite.setAnimation(BLUE_BATTLE.cast, {
+          sprite.setAnimation(battle.cast, {
             onComplete: () => {
               rest()
               resolve()
@@ -77,7 +85,7 @@ export const PlayerActor = forwardRef<PlayerActorHandle, { scale?: number; class
             resolve()
             return
           }
-          sprite.setAnimation(BLUE_BATTLE.miss, {
+          sprite.setAnimation(battle.miss, {
             onComplete: () => {
               rest()
               resolve()
@@ -89,8 +97,8 @@ export const PlayerActor = forwardRef<PlayerActorHandle, { scale?: number; class
         new Promise<void>((resolve) => {
           const sprite = spriteRef.current
           const node = wrapRef.current
-          const takeOff = BLUE.sprites.take_off ?? BLUE.sprites.idle
-          const fly = BLUE.sprites.fly ?? BLUE.sprites.idle
+          const takeOff = character.sprites.take_off ?? character.sprites.idle
+          const fly = character.sprites.fly ?? character.sprites.idle
           if (sprite) {
             sprite.setAnimation(takeOff, {
               onComplete: () => spriteRef.current?.setAnimation(fly),
@@ -121,7 +129,7 @@ export const PlayerActor = forwardRef<PlayerActorHandle, { scale?: number; class
         new Promise<void>((resolve) => {
           const sprite = spriteRef.current
           const node = wrapRef.current
-          sprite?.setAnimation(BLUE.sprites.land ?? BLUE.sprites.idle, {
+          sprite?.setAnimation(character.sprites.land ?? character.sprites.idle, {
             onComplete: () => rest(),
           })
           if (!node) {
@@ -148,6 +156,32 @@ export const PlayerActor = forwardRef<PlayerActorHandle, { scale?: number; class
             })
         }),
 
+      runIn: () =>
+        new Promise<void>((resolve) => {
+          const sprite = spriteRef.current
+          const node = wrapRef.current
+          const run = character.sprites.run ?? character.sprites.walk ?? character.sprites.idle
+          sprite?.setAnimation(run)
+          if (!node) {
+            resolve()
+            return
+          }
+          const dash = node.animate(
+            [{ transform: `translateX(-${RUN_IN_PX}px)` }, { transform: 'translateX(0)' }],
+            { duration: 640, easing: 'cubic-bezier(0.3, 0.7, 0.3, 1)', fill: 'forwards' },
+          )
+          dash.finished
+            .then(() => {
+              node.style.transform = 'translateX(0)'
+              dash.cancel()
+            })
+            .catch(() => {})
+            .finally(() => {
+              rest()
+              resolve()
+            })
+        }),
+
       element: () => wrapRef.current,
     }))
 
@@ -155,7 +189,7 @@ export const PlayerActor = forwardRef<PlayerActorHandle, { scale?: number; class
       <div ref={wrapRef} className={className}>
         <SpriteAnimator
           ref={spriteRef}
-          animation={BLUE.sprites.idle}
+          animation={character.sprites.idle}
           scale={scale}
           aria-label="Blue, your spellcaster"
         />

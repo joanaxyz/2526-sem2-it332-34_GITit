@@ -31,7 +31,7 @@ export type RankInfo = {
   /** Rating progress inside the current tier (e.g. 22/70 toward next). */
   ratingInTier: number
   ratingForNext: number
-  /** 0–100 toward the next tier (100 when at the top tier). */
+  /** 0"100 toward the next tier (100 when at the top tier). */
   progressPct: number
   /** Flavored title, e.g. "Knight of the Third Storey". */
   title: string

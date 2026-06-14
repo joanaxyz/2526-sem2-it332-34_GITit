@@ -2,15 +2,15 @@ import { useState, type CSSProperties } from 'react'
 
 import { Button } from '@/shared/components/Button'
 import type { TomeSummary } from '@/features/challenges/types'
-import { TomeReaderModal } from '@/features/storeys/book/TomeReaderModal'
+import { TomeReaderModal } from '@/features/tower-map/book/TomeReaderModal'
 import {
   actionForChallengeLevel,
   actionLabel,
   adventureActionLabel,
   challengeLevelAccent,
-} from '@/features/storeys/challengeUi'
-import { useTowerDoorNavigation } from '@/features/storeys/hooks/useTowerDoorNavigation'
-import { useTowerSelection } from '@/features/storeys/hooks/useTowerSelection'
+} from '@/features/tower-map/challengeUi'
+import { useTowerDoorNavigation } from '@/features/tower-map/hooks/useTowerDoorNavigation'
+import { useTowerSelection } from '@/features/tower-map/hooks/useTowerSelection'
 
 const ADVENTURE_ACCENT = '0, 245, 212'
 

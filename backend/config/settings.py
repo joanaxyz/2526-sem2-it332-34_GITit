@@ -94,10 +94,10 @@ INSTALLED_APPS = [
     "accounts",
     "assets",
     "authoring",
-    "towers",
+    "tower_designs.apps.TowerDesignsConfig",
     "marketplace",
     "curriculum",
-    "adventures",
+    "command_adventures.apps.CommandAdventuresConfig",
     "challenges",
     "practice",
     "simulator",
@@ -274,7 +274,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     # ScopedRateThrottle only limits views that declare a `throttle_scope`.
-    # Anonymous scopes (register/refresh) key on client IP — classrooms share a
+    # Anonymous scopes (register/refresh) key on client IP - classrooms share a
     # NAT IP, so those rates carry headroom for ~30 students behind one address.
     "DEFAULT_THROTTLE_CLASSES": ("rest_framework.throttling.ScopedRateThrottle",),
     "DEFAULT_THROTTLE_RATES": {

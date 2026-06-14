@@ -4,8 +4,8 @@ import json
 import re
 from typing import Any
 
-from adventures.models import AdventureLevel, AdventureVariant
 from challenges.models import ChallengeLevel, ChallengeVariant
+from command_adventures.models import AdventureLevel, AdventureVariant
 from evaluation.compiler import compile_evaluation_spec
 from evaluation.engine import EvaluationEngine
 from evaluation.services import StateBasedEvaluator
@@ -113,7 +113,7 @@ class StaticLevelVariantBuilder:
     def _assert_v3_context(self, rendered: Any) -> None:
         """Seed-time strictness: an authored scenario_context_template must be a
         v3 brief with only whitelisted keys, so nothing unpredictable ever
-        reaches the frontend. An empty template is fine — the normalizer fills
+        reaches the frontend. An empty template is fine - the normalizer fills
         in the minimal fallback brief."""
         if not rendered:
             return

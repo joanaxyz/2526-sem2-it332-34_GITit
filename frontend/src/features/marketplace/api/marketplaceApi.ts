@@ -2,7 +2,7 @@ import { apiRequest } from '@/shared/api/httpClient'
 import type { ContentDefinition } from '@/features/authoring/types'
 import type { WalletSummary } from '@/features/wallet/api/walletApi'
 
-export type StoreListing = {
+export type MarketplaceListing = {
   id: number
   item_kind: 'asset' | 'content_definition' | 'tower_design'
   item_id: number
@@ -18,17 +18,18 @@ export type StoreListing = {
     label?: string
     title?: string
     visibility?: string
+    tags?: string[]
   }
 }
 
-export type StoreListingList = {
-  results: StoreListing[]
+export type MarketplaceListingList = {
+  results: MarketplaceListing[]
 }
 
 export type PurchaseResult = {
   entitlement: {
     id: number
-    item_kind: StoreListing['item_kind']
+    item_kind: MarketplaceListing['item_kind']
     asset_id: number | null
     content_definition_id: number | null
     tower_design_id: number | null
@@ -38,11 +39,11 @@ export type PurchaseResult = {
   wallet: WalletSummary
 }
 
-export const storeApi = {
+export const marketplaceApi = {
   listings() {
-    return apiRequest<StoreListingList>('/store/listings/')
+    return apiRequest<MarketplaceListingList>('/marketplace/listings/')
   },
   purchase(listingId: number) {
-    return apiRequest<PurchaseResult>(`/store/listings/${listingId}/purchase/`, { method: 'POST' })
+    return apiRequest<PurchaseResult>(`/marketplace/listings/${listingId}/purchase/`, { method: 'POST' })
   },
 }

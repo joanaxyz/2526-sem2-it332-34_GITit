@@ -4,9 +4,9 @@ import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { DoorOverview } from './DoorOverview'
-import { StoreyLevelHub } from './StoreyLevelHub'
+import { TowerStoreySection } from './TowerStoreySection'
 import { TowerActionButton } from './TowerActionButton'
-import { useTowerSelection } from '@/features/storeys/hooks/useTowerSelection'
+import { useTowerSelection } from '@/features/tower-map/hooks/useTowerSelection'
 
 const mocks = vi.hoisted(() => ({
   getStoreyOverview: vi.fn(),
@@ -43,8 +43,8 @@ vi.mock('motion/react', async () => {
   }
 })
 
-vi.mock('@/features/storeys/api/storeysApi', () => ({
-  storeysApi: {
+vi.mock('@/features/tower-map/api/towerMapApi', () => ({
+  towerMapApi: {
     getStoreyOverview: mocks.getStoreyOverview,
   },
 }))
@@ -97,9 +97,9 @@ const CANONICAL_TOME = {
 const CANONICAL_CHALLENGE = {
   item_type: 'challenge',
   id: 30,
-  slug: 'stage-commit-switch',
-  title: 'Stage, Commit, Then Switch Branches',
-  summary: 'Combine staging, committing, and branch switching.',
+  slug: 'compose-clean-history',
+  title: 'Compose Clean History',
+  summary: 'Turn workspace changes into focused commits.',
   narrative: '',
   levels: ['easy', 'medium', 'hard'].map((difficulty, index) => ({
     id: 300 + index,
@@ -228,7 +228,7 @@ function renderHub() {
   return render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
-        <StoreyLevelHub
+        <TowerStoreySection
           storey={{
             id: 2,
             slug: 'tracking-changes-snapshots',
@@ -248,7 +248,7 @@ function renderHub() {
   )
 }
 
-describe('StoreyLevelHub', () => {
+describe('TowerStoreySection', () => {
   afterEach(() => {
     cleanup()
     vi.clearAllMocks()
@@ -265,13 +265,13 @@ describe('StoreyLevelHub', () => {
       ).toBeInTheDocument(),
     )
     expect(
-      screen.getByRole('button', { name: /select stage, commit, then switch branches: easy/i }),
+      screen.getByRole('button', { name: /select compose clean history: easy/i }),
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('button', { name: /select stage, commit, then switch branches: medium/i }),
+      screen.getByRole('button', { name: /select compose clean history: medium/i }),
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('button', { name: /select stage, commit, then switch branches: hard/i }),
+      screen.getByRole('button', { name: /select compose clean history: hard/i }),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /select command adventure/i })).toHaveAttribute(
       'data-piece-id',
@@ -341,12 +341,12 @@ describe('StoreyLevelHub', () => {
     renderHub()
 
     const easyDoor = await screen.findByRole('button', {
-      name: /select stage, commit, then switch branches: easy/i,
+      name: /select compose clean history: easy/i,
     })
     fireEvent.click(easyDoor)
 
     const overview = screen.getByLabelText('Selected stage')
-    expect(within(overview).getByText('Stage, Commit, Then Switch Branches')).toBeInTheDocument()
+    expect(within(overview).getByText('Compose Clean History')).toBeInTheDocument()
     expect(within(overview).getByText('Easy')).toBeInTheDocument()
     // Accuracy with no attempts yet renders as a placeholder.
     expect(within(overview).getByText('--%')).toBeInTheDocument()

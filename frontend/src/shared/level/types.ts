@@ -72,7 +72,7 @@ export type RequiredDetail = {
 
 // Strict schema_version 3 brief: the backend normalizer whitelists exactly
 // these keys, so the frontend never has to guess. The adventure objective
-// checklist is NOT part of this shape — it arrives as a separate top-level
+// checklist is NOT part of this shape - it arrives as a separate top-level
 // `objective_checks` payload field.
 export type LevelScenarioContext = {
   schema_version?: number
@@ -153,13 +153,13 @@ export type ChallengeRun = {
     difficulty: Difficulty
   } | null
   /**
-   * Every level of this run's challenge (easy→hard) with the user's access state.
+   * Every level of this run's challenge (easy-to-hard) with the user's access state.
    * Drives the completion modal's level navigator so learners can jump to any
-   * unlocked level — including lower ones — without leaving the modal.
+   * unlocked level - including lower ones - without leaving the modal.
    */
   sibling_levels?: ChallengeLevelAccess[]
   completion?: LevelRunCompletion | null
-  /** Authoritative boss roster for the battle strip; absent → the client
+  /** Authoritative boss roster for the battle strip; absent means the client
    *  derives a deterministic fallback. */
   battle?: import('@/shared/battle/types').BattleBlock | null
 }

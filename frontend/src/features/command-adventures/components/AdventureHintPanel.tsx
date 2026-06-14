@@ -9,7 +9,7 @@ export type RevealedHint = { number: number; text: string }
 /**
  * Hint surface for the adventure workspace. Mirrors the challenge
  * {@link import('@/shared/level/components/ContextualFeedbackPanel').ContextualFeedbackPanel}
- * design — a quiet card with an icon-led title and a single body line — so the
+ * design - a quiet card with an icon-led title and a single body line - so the
  * two level modes feel like one product.
  */
 export function AdventureHintPanel({
@@ -36,7 +36,7 @@ export function AdventureHintPanel({
           ) : null}
         </CardTitle>
         <Button type="button" variant="secondary" size="sm" onClick={onReveal} disabled={isRevealing}>
-          {isRevealing ? 'Revealing…' : hint ? 'Next hint' : 'Reveal hint'}
+          {isRevealing ? 'Revealing' : hint ? 'Next hint' : 'Reveal hint'}
         </Button>
       </CardHeader>
       <CardContent className="p-3 pt-0">
@@ -46,7 +46,7 @@ export function AdventureHintPanel({
           </p>
         ) : (
           <p className="text-sm leading-6 text-muted-foreground">
-            Stuck? Reveal a hint — using one lowers your independence score for this level.
+            Stuck? Reveal a hint - using one lowers your independence score for this level.
           </p>
         )}
       </CardContent>

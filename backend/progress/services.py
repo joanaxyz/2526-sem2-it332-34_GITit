@@ -4,9 +4,14 @@ from django.db.models import Avg, Count, Q, Sum
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 
-from adventures.models import AdventureMastery, AdventureLevel, AdventureLevelAttempt, AdventureRun
 from challenges.models import ChallengeLevel, ChallengeRun
 from challenges.selectors import command_accuracy_rate, minimum_counted_for_run
+from command_adventures.models import (
+    AdventureLevel,
+    AdventureLevelAttempt,
+    AdventureMastery,
+    AdventureRun,
+)
 from common.constants import (
     DIFFICULTY_HARD,
     RESULT_INVALID,
