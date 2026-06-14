@@ -11,6 +11,8 @@ import { computeSky } from '@/features/tower-map/sky/skyPhases'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { assetsApi } from '@/shared/assets/assetsApi'
 import type { BattleArtifactAssetDescriptor, CharacterAssetDescriptor } from '@/shared/assets/types'
+import type { BattleStage } from '@/shared/battle/types'
+import { backendUrl } from '@/shared/api/httpClient'
 import { characterBattleFromDescriptor, characterFromDescriptor } from '@/shared/sprites/characters'
 import { crystalFromDescriptor } from '@/shared/sprites/crystal'
 import { cn } from '@/shared/utils/cn'
@@ -32,6 +34,7 @@ export function TowerBattleStage({
   mana,
   timeOfDay,
   groundFooter,
+  stage,
   className,
 }: {
   director: BattleDirector
@@ -41,6 +44,8 @@ export function TowerBattleStage({
   /** 0..24 hour; defaults to now so the battle sky matches the live tower sky. */
   timeOfDay?: number
   groundFooter?: ReactNode
+  /** Authored stage dressing (backdrop + artifacts). Null -> default sky only. */
+  stage?: BattleStage | null
   className?: string
 }) {
   const isBossStage = variant === 'challenge'
@@ -95,6 +100,9 @@ export function TowerBattleStage({
       data-testid="battle-stage"
     >
       <TowerBackdrop ref={bindBackdrop} />
+
+      {/* Authored stage dressing sits over the sky but behind the ledge/actors. */}
+      <BattleStageDressing stage={stage} />
 
       {/* The stone ledge - this floor of the tower, echoing the page separators. */}
       <div className="battle-ledge absolute inset-x-0 bottom-0" style={{ height: `${LEDGE_PCT}%` }} aria-hidden>
@@ -161,6 +169,42 @@ export function TowerBattleStage({
       ) : null}
 
       {groundFooter ? <div className="absolute inset-x-2 bottom-1 z-20">{groundFooter}</div> : null}
+    </div>
+  )
+}
+
+/**
+ * Renders the storey's authored battle-stage dressing: an optional backdrop
+ * image over the sky, plus decorative artifacts at normalized positions. Purely
+ * cosmetic and pointer-transparent; sits behind the actors (z below z-6).
+ */
+function BattleStageDressing({ stage }: { stage?: BattleStage | null }) {
+  if (!stage || (!stage.background && stage.artifacts.length === 0)) return null
+  return (
+    <div className="pointer-events-none absolute inset-0 z-[2]" aria-hidden>
+      {stage.background ? (
+        <img
+          src={backendUrl(stage.background.url)}
+          alt=""
+          className="absolute inset-0 size-full object-cover opacity-80"
+          draggable={false}
+        />
+      ) : null}
+      {stage.artifacts.map((artifact, index) => (
+        <img
+          key={`${artifact.slug}-${index}`}
+          src={backendUrl(artifact.url)}
+          alt=""
+          draggable={false}
+          className="absolute"
+          style={{
+            left: `${artifact.x * 100}%`,
+            top: `${artifact.y * 100}%`,
+            transform: `translate(-50%, -50%) scale(${artifact.scale}) rotate(${artifact.rotation}deg)`,
+            zIndex: Math.max(0, Math.min(5, artifact.z)),
+          }}
+        />
+      ))}
     </div>
   )
 }

@@ -1,7 +1,21 @@
 import type {
+  TowerLayoutDescriptor,
   TowerLayoutPieceDescriptor,
   TowerPieceAssetDescriptor,
 } from '@/shared/assets/types'
+
+/** First layout piece of a given structural type (spire, landing, …). */
+export function pieceByType(
+  layout: TowerLayoutDescriptor | null,
+  pieceType: TowerLayoutPieceDescriptor['pieceType'],
+) {
+  return layout?.pieces.find((piece) => piece.pieceType === pieceType) ?? null
+}
+
+/** Layout piece whose instanceId ends with a suffix (e.g. `landing-after-adventure`). */
+export function pieceBySuffix(layout: TowerLayoutDescriptor | null, suffix: string) {
+  return layout?.pieces.find((piece) => piece.instanceId.endsWith(suffix)) ?? null
+}
 
 export function towerDescriptorFor(
   piece: TowerLayoutPieceDescriptor | null | undefined,

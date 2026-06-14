@@ -9,6 +9,22 @@ export type ValidationErrorRow = {
 
 export type ChestRewardRow = { threshold: number; coins: number }
 
+/** One authored battle-stage prop. Coordinates are normalized (0..1). */
+export type BattleStageArtifactConfig = {
+  slug: string
+  x: number
+  y: number
+  scale: number
+  rotation: number
+  z: number
+}
+
+/** Authored battle-stage dressing for a storey (backdrop slug + props). */
+export type BattleStageConfig = {
+  background: string | null
+  artifacts: BattleStageArtifactConfig[]
+}
+
 /** A user-authored storey (floor): groups 1 adventure + 1+ challenges/tomes. */
 export type AuthoringStorey = {
   id: number
@@ -21,6 +37,7 @@ export type AuthoringStorey = {
   mob_roster: string[]
   boss_roster: string[]
   pass_bar_fraction: number
+  battle_stage?: BattleStageConfig
   created_at: string
   updated_at: string
 }
@@ -38,6 +55,7 @@ export type AuthoringStoreyInput = {
   mob_roster?: string[]
   boss_roster?: string[]
   pass_bar_fraction?: number
+  battle_stage?: BattleStageConfig
 }
 
 export type ContentDefinition = {

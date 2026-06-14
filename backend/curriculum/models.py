@@ -29,6 +29,12 @@ class Storey(models.Model):
     # list. Empty falls back to the global cycles in battle/constants.py.
     mob_roster = models.JSONField(default=list, blank=True)
     boss_roster = models.JSONField(default=list, blank=True)
+    # Authored battle-stage dressing rendered behind the actors during this
+    # storey's battles. Stamped from the AuthoringStorey at compile time.
+    # Shape: {"background": "<asset-slug>"|null,
+    #         "artifacts": [{"slug", "x", "y", "scale", "rotation", "z"}]}
+    # Coordinates are normalized (0..1) so they render at any stage size.
+    battle_stage = models.JSONField(default=dict, blank=True)
 
     class Meta:
         ordering = ["sort_order", "number"]

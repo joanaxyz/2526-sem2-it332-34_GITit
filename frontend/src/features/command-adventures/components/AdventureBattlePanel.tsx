@@ -48,6 +48,7 @@ export function AdventureBattlePanel({
       variant="adventure"
       mana={{ current: mana, max: maxMana }}
       groundFooter={<AdventureProgressBar run={run} variant="battle" />}
+      stage={run.battle_stage}
       className={className}
     />
   )

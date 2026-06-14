@@ -110,6 +110,8 @@ export type ChallengeRun = {
     number: number
     title: string
   }
+  /** Authored battle-stage dressing for this storey (null -> default sky). */
+  battle_stage?: import('@/shared/battle/types').BattleStage | null
   difficulty: Difficulty | null
   variant: {
     id: number

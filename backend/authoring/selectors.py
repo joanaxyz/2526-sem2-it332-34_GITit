@@ -21,6 +21,7 @@ def storey_payload(storey: AuthoringStorey) -> dict:
         "mob_roster": storey.mob_roster,
         "boss_roster": storey.boss_roster,
         "pass_bar_fraction": storey.pass_bar_fraction,
+        "battle_stage": storey.battle_stage,
         "created_at": storey.created_at,
         "updated_at": storey.updated_at,
     }

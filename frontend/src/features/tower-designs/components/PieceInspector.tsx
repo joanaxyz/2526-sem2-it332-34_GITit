@@ -30,10 +30,16 @@ export function PieceInspector({
   overview,
   selectedPieceId,
   editor,
+  previewAssetId,
+  onPreviewSwap,
 }: {
   overview: TowerDesignOverview
   selectedPieceId: number | null
   editor: Editor
+  /** Asset id picked-but-not-yet-applied for the selected piece (highlights it). */
+  previewAssetId: number | null
+  /** Pick a skin → stage a preview (Apply, in the toolbar, persists it). */
+  onPreviewSwap: (pieceId: number, assetId: number) => void
 }) {
   const piece = selectedPieceId
     ? overview.tower_layout.pieces.find((p) => editor.pieceIdFromInstance(p.instanceId) === selectedPieceId) ?? null
@@ -54,7 +60,13 @@ export function PieceInspector({
     <aside className="editor-inspector" aria-label="Piece inspector">
       <h2 className="editor-rail-title">{PIECE_TYPE_LABEL[piece.pieceType as TowerPieceType]}</h2>
 
-      <SkinPanel piece={piece} pieceId={selectedPieceId} editor={editor} />
+      <SkinPanel
+        piece={piece}
+        pieceId={selectedPieceId}
+        editor={editor}
+        previewAssetId={previewAssetId}
+        onPreviewSwap={onPreviewSwap}
+      />
 
       {bindableKind ? (
         <BindingPanel
@@ -80,10 +92,14 @@ function SkinPanel({
   piece,
   pieceId,
   editor,
+  previewAssetId,
+  onPreviewSwap,
 }: {
   piece: TowerLayoutPieceDescriptor
   pieceId: number
   editor: Editor
+  previewAssetId: number | null
+  onPreviewSwap: (pieceId: number, assetId: number) => void
 }) {
   const skins = editor.pieceDescriptors.filter((d) => descriptorPieceType(d) === piece.pieceType)
 
@@ -95,7 +111,10 @@ function SkinPanel({
       ) : (
         <div className="editor-skin-grid">
           {skins.map((descriptor) => {
-            const isActive = descriptor.slug === piece.assetSlug
+            // A staged preview wins over the committed slug, so the grid shows
+            // what's currently rendered on the canvas, applied or not.
+            const isActive =
+              previewAssetId !== null ? descriptor.id === previewAssetId : descriptor.slug === piece.assetSlug
             const thumb = pieceThumb(descriptor)
             return (
               <button
@@ -105,9 +124,8 @@ function SkinPanel({
                 title={descriptor.label}
                 aria-label={descriptor.label}
                 aria-pressed={isActive}
-                disabled={editor.swapAsset.isPending}
                 onClick={() => {
-                  if (!isActive) editor.swapAsset.mutate({ pieceId, assetId: descriptor.id })
+                  if (!isActive) onPreviewSwap(pieceId, descriptor.id)
                 }}
               >
                 <span className="editor-skin-thumb">

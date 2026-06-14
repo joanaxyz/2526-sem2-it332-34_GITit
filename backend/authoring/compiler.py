@@ -68,6 +68,7 @@ class ContentRuntimeCompiler:
             chest_rewards = storey.chest_rewards or default_chest_rewards()
             mob_roster = storey.mob_roster or []
             boss_roster = storey.boss_roster or []
+            battle_stage = storey.battle_stage or {}
             title = storey.title
             description = storey.summary
         else:
@@ -79,6 +80,7 @@ class ContentRuntimeCompiler:
                 chest_rewards = default_chest_rewards()
             mob_roster = definition.get("mob_roster") if isinstance(definition.get("mob_roster"), list) else []
             boss_roster = definition.get("boss_roster") if isinstance(definition.get("boss_roster"), list) else []
+            battle_stage = definition.get("battle_stage") if isinstance(definition.get("battle_stage"), dict) else {}
             title = content.title
             description = content.summary
         # GitCoin progress chests are reserved for admin-authored / official
@@ -98,6 +100,7 @@ class ContentRuntimeCompiler:
                 "chest_rewards": chest_rewards,
                 "mob_roster": mob_roster,
                 "boss_roster": boss_roster,
+                "battle_stage": battle_stage,
             },
         )[0]
 

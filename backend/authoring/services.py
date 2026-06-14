@@ -17,7 +17,17 @@ from authoring.validators import ContentDefinitionValidator
 
 
 class AuthoringStoreyService:
-    _FIELDS = ("slug", "title", "summary", "sort_order", "chest_rewards", "mob_roster", "boss_roster", "pass_bar_fraction")
+    _FIELDS = (
+        "slug",
+        "title",
+        "summary",
+        "sort_order",
+        "chest_rewards",
+        "mob_roster",
+        "boss_roster",
+        "pass_bar_fraction",
+        "battle_stage",
+    )
 
     def assert_owner(self, *, user, storey: AuthoringStorey) -> None:
         if not getattr(user, "is_staff", False) and storey.owner_id != getattr(user, "id", None):

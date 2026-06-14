@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Footprints, Upload } from 'lucide-react'
 
+import { PieceFilterDropdown } from '@/features/tower-designs/components/PieceFilterDropdown'
 import { PALETTE_GROUPS, PIECE_TYPE_LABEL } from '@/features/tower-designs/editorUtils'
 import { pieceHasWalkRail } from '@/features/tower-map/components/towerPieceData'
 import { backendUrl } from '@/shared/api/httpClient'
@@ -118,16 +119,25 @@ export function PiecePalette({
   const [group, setGroup] = useState<PaletteGroup | 'all'>('all')
   const [source, setSource] = useState<AssetSource | 'all'>('all')
   const [tags, setTags] = useState<Set<string>>(new Set())
+  const [query, setQuery] = useState('')
   const [activeLabel, setActiveLabel] = useState<string | null>(null)
 
   const visible = useMemo(() => {
+    const needle = query.trim().toLowerCase()
     return items.filter((item) => {
       if (group !== 'all' && item.group !== group) return false
       if (source !== 'all' && item.assetSource !== source) return false
       if (tags.size && !item.tags.some((tag) => tags.has(tag))) return false
+      if (
+        needle &&
+        !item.label.toLowerCase().includes(needle) &&
+        !item.tags.some((tag) => tag.toLowerCase().includes(needle))
+      ) {
+        return false
+      }
       return true
     })
-  }, [items, group, source, tags])
+  }, [items, group, source, tags, query])
 
   function toggleTag(tag: string) {
     setTags((prev) => {
@@ -174,15 +184,14 @@ export function PiecePalette({
           </div>
         ) : null}
 
-        {allTags.length ? (
-          <div className="editor-filter-row" role="group" aria-label="Filter by tag">
-            {allTags.map((tag) => (
-              <FilterChip key={tag} subtle active={tags.has(tag)} onClick={() => toggleTag(tag)}>
-                #{tag}
-              </FilterChip>
-            ))}
-          </div>
-        ) : null}
+        <PieceFilterDropdown
+          tags={allTags}
+          selected={tags}
+          onToggle={toggleTag}
+          onClear={() => setTags(new Set())}
+          query={query}
+          onQueryChange={setQuery}
+        />
       </div>
 
       <div className="editor-palette-grid">

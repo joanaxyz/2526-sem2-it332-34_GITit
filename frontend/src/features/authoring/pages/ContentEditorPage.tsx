@@ -11,6 +11,7 @@ import {
   initialForm,
   type AuthoringForm,
 } from '@/features/authoring/authoringModel'
+import { BattleStageEditor } from '@/features/authoring/components/BattleStageEditor'
 import { LevelsEditor } from '@/features/authoring/components/LevelsEditor'
 import { MonsterUploadDialog } from '@/features/authoring/components/MonsterUploadDialog'
 import { StoreySettingsCard } from '@/features/authoring/components/StoreySettingsCard'
@@ -102,6 +103,7 @@ export function ContentEditorPage() {
           mob_roster: storeyEdit.mob_roster,
           boss_roster: storeyEdit.boss_roster,
           pass_bar_fraction: storeyEdit.pass_bar_fraction,
+          battle_stage: storeyEdit.battle_stage,
         })
       }
       const input = buildInput()
@@ -218,11 +220,17 @@ export function ContentEditorPage() {
       </section>
 
       {storeyEdit ? (
-        <StoreySettingsCard
-          kind={form.kind}
-          storey={storeyEdit}
-          onChange={(patch) => setStoreyEdit({ ...storeyEdit, ...patch })}
-        />
+        <>
+          <StoreySettingsCard
+            kind={form.kind}
+            storey={storeyEdit}
+            onChange={(patch) => setStoreyEdit({ ...storeyEdit, ...patch })}
+          />
+          <BattleStageEditor
+            value={storeyEdit.battle_stage}
+            onChange={(battle_stage) => setStoreyEdit({ ...storeyEdit, battle_stage })}
+          />
+        </>
       ) : (
         <p className="author-hint author-storey-empty">Assign or create a storey to set reward checkpoints and monster rosters.</p>
       )}

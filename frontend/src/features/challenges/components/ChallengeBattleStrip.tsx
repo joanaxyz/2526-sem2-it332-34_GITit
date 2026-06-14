@@ -78,7 +78,7 @@ export function ChallengeBattleStrip({
 
   return (
     <div className={cn('relative', className)}>
-      <TowerBattleStage director={director} variant="challenge" mana={mana} className="h-full w-full" />
+      <TowerBattleStage director={director} variant="challenge" mana={mana} stage={run.battle_stage} className="h-full w-full" />
       <button
         type="button"
         onClick={onToggle}

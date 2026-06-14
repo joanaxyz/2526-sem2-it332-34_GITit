@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { Copy, Eye, Layers, Maximize2, Minus, Plus, Share2, UploadCloud } from 'lucide-react'
 
-import { EditorCanvas } from '@/features/tower-designs/components/EditorCanvas'
+import { EditorStorey } from '@/features/tower-designs/components/EditorStorey'
 import { PiecePalette } from '@/features/tower-designs/components/PiecePalette'
 import { PieceInspector } from '@/features/tower-designs/components/PieceInspector'
 import { UploadAssetDialog } from '@/features/tower-designs/components/UploadAssetDialog'
+import { pieceIdFromInstance } from '@/features/tower-designs/editorUtils'
 import { useDesignEditor } from '@/features/tower-designs/hooks/useDesignEditor'
 import { towerDescriptorFor, pieceHasWalkRail } from '@/features/tower-map/components/towerPieceData'
 import { SectionEditor } from '@/features/tower-map/editor/SectionEditor'
@@ -73,6 +74,15 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit: 
   const [sectionPieceId, setSectionPieceId] = useState<number | null>(null)
   const [uploadOpen, setUploadOpen] = useState(false)
   const [copied, setCopied] = useState(false)
+  // pieceId → asset id picked but not yet committed. The canvas previews these
+  // live; Apply persists them in one go, Cancel discards them.
+  const [pendingSwaps, setPendingSwaps] = useState<Map<number, number>>(new Map())
+  const [applying, setApplying] = useState(false)
+
+  const pieceDescriptorById = useMemo(
+    () => new Map(editor.pieceDescriptors.map((d) => [d.id, d])),
+    [editor.pieceDescriptors],
+  )
 
   const shared = editor.share.data
   const shareUrl = shared?.share_path ? `${window.location.origin}${shared.share_path}` : null
@@ -85,14 +95,15 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit: 
       .filter((p) => !pieceHasWalkRail(editor.pieceDescriptorBySlug[p.assetSlug]))
   }, [editor.overview, editor.pieceDescriptorBySlug])
 
+  const overviewForSection = editor.overview
   const sectionPiece = useMemo(() => {
-    if (sectionPieceId === null || !editor.overview) return null
+    if (sectionPieceId === null || !overviewForSection) return null
     return (
-      editor.overview.tower_layout.pieces.find(
-        (p) => editor.pieceIdFromInstance(p.instanceId) === sectionPieceId,
+      overviewForSection.tower_layout.pieces.find(
+        (p) => pieceIdFromInstance(p.instanceId) === sectionPieceId,
       ) ?? null
     )
-  }, [sectionPieceId, editor.overview, editor.pieceIdFromInstance])
+  }, [sectionPieceId, overviewForSection])
 
   function copyShareUrl() {
     if (!shareUrl) return
@@ -110,6 +121,33 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit: 
   const overview = editor.overview
   const isFork = overview.design.origin === 'official_fork'
   const publishError = publishErrorMessage(editor.publish.error)
+
+  // Stage a skin pick as a preview. Picking the piece's already-committed asset
+  // clears its preview, so reverting by hand doesn't leave a no-op pending change.
+  function pickSwap(pieceId: number, assetId: number) {
+    const piece = overview.tower_layout.pieces.find((p) => pieceIdFromInstance(p.instanceId) === pieceId)
+    const committedId = piece ? editor.pieceDescriptorBySlug[piece.assetSlug]?.id ?? null : null
+    setPendingSwaps((prev) => {
+      const next = new Map(prev)
+      if (assetId === committedId) next.delete(pieceId)
+      else next.set(pieceId, assetId)
+      return next
+    })
+  }
+
+  async function applyPending() {
+    setApplying(true)
+    try {
+      await Promise.all(
+        [...pendingSwaps.entries()].map(([pieceId, assetId]) => editor.swapAsset.mutateAsync({ pieceId, assetId })),
+      )
+      setPendingSwaps(new Map())
+    } finally {
+      setApplying(false)
+    }
+  }
+
+  const previewAssetId = selectedPieceId !== null ? pendingSwaps.get(selectedPieceId) ?? null : null
 
   return (
     <div className="in-tower-editor">
@@ -190,22 +228,18 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit: 
       {uploadOpen ? <UploadAssetDialog onClose={() => setUploadOpen(false)} /> : null}
 
       <div className="ite-grid">
-        <PiecePalette
-          pieces={editor.pieceDescriptors}
-          artifacts={editor.artifactDescriptors}
-          onUploadClick={() => setUploadOpen(true)}
-        />
-
         <div className="ite-canvas-viewport" onWheel={zoom.onWheel} onPointerDown={zoom.onPanStart}>
           <p className="ite-canvas-hint">Click a section to select · double-click to edit it · scroll to zoom · drag the sky to pan</p>
           <div className="ite-canvas-content" style={zoom.style}>
-            <EditorCanvas
+            <EditorStorey
               overview={overview}
               pieceDescriptorBySlug={editor.pieceDescriptorBySlug}
+              pieceDescriptorById={pieceDescriptorById}
               artifactDescriptorBySlug={editor.artifactDescriptorBySlug}
               selectedPieceId={selectedPieceId}
+              pendingSwaps={pendingSwaps}
               onSelectPiece={setSelectedPieceId}
-              onSwapAsset={(pieceId, assetId) => editor.swapAsset.mutate({ pieceId, assetId })}
+              onSwapAsset={pickSwap}
               onPlaceArtifact={(pieceId, assetId, x, y) =>
                 editor.placeArtifact.mutate({ target_piece_instance_id: pieceId, artifact_asset_id: assetId, x, y })
               }
@@ -213,9 +247,46 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit: 
               onOpenSection={setSectionPieceId}
             />
           </div>
+
+          {pendingSwaps.size > 0 ? (
+            <div
+              className="ite-apply-bar"
+              role="region"
+              aria-label="Pending changes"
+              onPointerDown={(event) => event.stopPropagation()}
+            >
+              <span className="ite-apply-bar-label">
+                {pendingSwaps.size} pending change{pendingSwaps.size > 1 ? 's' : ''}
+              </span>
+              <Button size="sm" variant="outline" disabled={applying} onClick={() => setPendingSwaps(new Map())}>
+                Cancel
+              </Button>
+              <Button size="sm" disabled={applying} onClick={applyPending}>
+                {applying ? 'Applying…' : `Apply${pendingSwaps.size > 1 ? ` ${pendingSwaps.size}` : ''}`}
+              </Button>
+            </div>
+          ) : null}
         </div>
 
-        <PieceInspector overview={overview} selectedPieceId={selectedPieceId} editor={editor} />
+        {/* Right dock: pick pieces from the palette; the inspector for the
+            selected piece appears below it (and frees the palette's full height
+            when nothing is selected). */}
+        <aside className="ite-dock">
+          <PiecePalette
+            pieces={editor.pieceDescriptors}
+            artifacts={editor.artifactDescriptors}
+            onUploadClick={() => setUploadOpen(true)}
+          />
+          {selectedPieceId !== null ? (
+            <PieceInspector
+              overview={overview}
+              selectedPieceId={selectedPieceId}
+              editor={editor}
+              previewAssetId={previewAssetId}
+              onPreviewSwap={pickSwap}
+            />
+          ) : null}
+        </aside>
       </div>
 
       {sectionPiece ? (

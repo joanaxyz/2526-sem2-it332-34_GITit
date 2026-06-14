@@ -59,3 +59,24 @@ export type BattleBlock = {
   monsters: BattleMonster[]
   events: BattleEvent[]
 }
+
+/** One authored prop on the battle stage. Coordinates are normalized (0..1). */
+export type BattleStageArtifact = {
+  slug: string
+  url: string
+  x: number
+  y: number
+  scale: number
+  rotation: number
+  z: number
+}
+
+/**
+ * Authored battle-stage dressing for a storey: an optional backdrop image and
+ * scattered decorative artifacts rendered behind the actors. Resolved on the
+ * run-detail payload (constant per storey). Null/absent -> default sky + ledge.
+ */
+export type BattleStage = {
+  background: { slug: string; url: string } | null
+  artifacts: BattleStageArtifact[]
+}

@@ -6755,7 +6755,7 @@ textarea {
 
 .ite-grid {
   display: grid;
-  grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr) minmax(15rem, 19rem);
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
   gap: 1rem;
   align-items: start;
   flex: 1;
@@ -6764,6 +6764,26 @@ textarea {
 @media (max-width: 1080px) {
   .ite-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* The canvas stays wide; the palette + inspector share a single sticky dock on
+   the right. The dock owns the stickiness so the two panels never fight over
+   `top`; each panel scrolls within its flex share. */
+.ite-dock {
+  position: sticky;
+  top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+  max-height: calc(100vh - 2rem);
+}
+
+@media (max-width: 1080px) {
+  .ite-dock {
+    position: static;
+    max-height: none;
   }
 }
 
@@ -6806,6 +6826,31 @@ textarea {
   justify-content: center;
   padding: 3.25rem 1rem 1rem;
   will-change: transform;
+}
+
+/* Floats over the canvas while skin picks are staged — commit or discard them. */
+.ite-apply-bar {
+  position: absolute;
+  z-index: 4;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.5rem 0.45rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--tower-purple), 0.5);
+  background: rgba(8, 12, 24, 0.94);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  cursor: default;
+}
+
+.ite-apply-bar-label {
+  color: hsl(var(--foreground));
+  font-size: 0.78rem;
+  font-weight: 600;
 }
 
 /* -- Focused single-section editor (also the battle-stage dressing surface) -- */
@@ -6932,10 +6977,19 @@ textarea {
   border: 1px solid rgba(var(--tower-cyan), 0.18);
   background: linear-gradient(165deg, rgba(8, 16, 28, 0.7), rgba(5, 10, 18, 0.6));
   backdrop-filter: blur(10px);
-  position: sticky;
-  top: 1rem;
-  max-height: calc(100vh - 2rem);
+  min-height: 0;
   overflow-y: auto;
+}
+
+/* Inside the dock: the palette takes the free height, the inspector sits below
+   capped to its share so both stay reachable when a piece is selected. */
+.ite-dock .editor-palette {
+  flex: 1 1 auto;
+}
+
+.ite-dock .editor-inspector {
+  flex: 0 1 auto;
+  max-height: 48%;
 }
 
 .editor-rail-title {
@@ -6967,6 +7021,174 @@ textarea {
 .editor-palette-filters {
   display: grid;
   gap: 0.4rem;
+}
+
+/* -- Scalable tag filter: a single popover trigger with an internal search and
+   a scrollable tag checklist (replaces the unbounded one-chip-per-tag row). -- */
+.editor-filter {
+  position: relative;
+  justify-self: start;
+}
+
+.editor-filter-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.6rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.24);
+  border-radius: 999px;
+  background: rgba(10, 20, 34, 0.5);
+  color: hsl(var(--muted-foreground));
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.editor-filter-trigger:hover {
+  color: hsl(var(--foreground));
+  border-color: rgba(var(--tower-cyan), 0.5);
+}
+
+.editor-filter-trigger.is-active {
+  color: hsl(var(--foreground));
+  background: rgba(var(--tower-purple), 0.16);
+  border-color: rgba(var(--tower-purple), 0.5);
+}
+
+.editor-filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.05rem;
+  height: 1.05rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: rgba(var(--tower-purple), 0.45);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+.editor-filter-pop {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  width: min(17rem, 80vw);
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.6rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.28);
+  background: linear-gradient(165deg, rgba(10, 18, 32, 0.98), rgba(6, 11, 20, 0.98));
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(14px);
+}
+
+.editor-filter-search {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.2);
+  background: rgba(4, 9, 17, 0.6);
+  color: hsl(var(--muted-foreground));
+}
+
+.editor-filter-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-size: 0.78rem;
+  outline: none;
+}
+
+.editor-filter-search-clear {
+  display: inline-flex;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+}
+
+.editor-filter-search-clear:hover {
+  color: hsl(var(--foreground));
+}
+
+.editor-filter-list {
+  display: grid;
+  gap: 0.15rem;
+  max-height: 13rem;
+  overflow-y: auto;
+}
+
+.editor-filter-option {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.74rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.editor-filter-option:hover {
+  background: rgba(var(--tower-cyan), 0.1);
+  color: hsl(var(--foreground));
+}
+
+.editor-filter-option.is-on {
+  color: hsl(var(--foreground));
+}
+
+.editor-filter-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 0.3rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.4);
+  color: hsl(var(--primary));
+}
+
+.editor-filter-option.is-on .editor-filter-check {
+  background: rgba(var(--tower-cyan), 0.2);
+  border-color: rgba(var(--tower-cyan), 0.7);
+}
+
+.editor-filter-tag {
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.7rem;
+}
+
+.editor-filter-none {
+  margin: 0;
+  padding: 0.4rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.72rem;
+}
+
+.editor-filter-clear {
+  justify-self: start;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.2);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.editor-filter-clear:hover {
+  color: hsl(var(--foreground));
+  border-color: rgba(var(--tower-cyan), 0.45);
 }
 
 .editor-filter-row {
@@ -7196,6 +7418,47 @@ textarea {
 .editor-empty {
   color: hsl(var(--muted-foreground));
   padding: 2rem;
+}
+
+/* Real tower pieces (WindowStorey, stages, landings) rendered as selectable
+   pieces in the editor canvas. Feedback uses outline + a layout-neutral
+   box-shadow so the piece geometry never shifts when selected. */
+.editor-piece {
+  cursor: pointer;
+  border-radius: 0.4rem;
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+  transition: outline-color 0.15s, box-shadow 0.15s;
+}
+
+.editor-piece:hover {
+  outline-color: rgba(var(--tower-cyan), 0.32);
+}
+
+.editor-piece:focus-visible {
+  outline-color: rgba(var(--tower-cyan), 0.6);
+}
+
+.editor-piece--selected,
+.editor-piece--selected:hover {
+  outline-color: rgba(var(--tower-cyan), 0.85);
+  box-shadow: 0 0 0 1px rgba(var(--tower-cyan), 0.4), 0 0 22px rgba(var(--tower-cyan), 0.28);
+}
+
+/* A staged (picked, not yet applied) skin: a purple ring via box-shadow so it
+   reads as "pending" on top of any selection outline without shifting layout. */
+.editor-piece--pending {
+  box-shadow: 0 0 0 2px rgba(var(--tower-purple), 0.75), 0 0 20px rgba(var(--tower-purple), 0.3);
+}
+
+.editor-piece--drop {
+  outline-color: rgba(var(--primary), 0.85);
+  box-shadow: 0 0 16px rgba(0, 245, 212, 0.3);
+}
+
+.editor-piece--reject {
+  outline-color: rgba(255, 99, 99, 0.85);
+  box-shadow: 0 0 16px rgba(255, 99, 99, 0.3);
 }
 
 .editor-slot {
@@ -7840,6 +8103,110 @@ textarea {
   border: 1px solid hsl(var(--border) / 0.6);
   border-radius: 0.6rem;
   background: hsl(var(--muted) / 0.25);
+}
+
+/* -- Battle stage editor -- */
+.stage-ed-canvas {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.22);
+  background: #060b16;
+  touch-action: none;
+  user-select: none;
+}
+
+.stage-ed-bg,
+.stage-ed-sky {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stage-ed-sky {
+  background: linear-gradient(180deg, #1a2a52 0%, #2a3a6a 45%, #45406e 100%);
+}
+
+.stage-ed-ledge {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 26%;
+  background: linear-gradient(180deg, rgba(20, 26, 40, 0.6), rgba(8, 12, 22, 0.95));
+  border-top: 2px solid rgba(var(--tower-cyan), 0.25);
+}
+
+.stage-ed-artifact {
+  position: absolute;
+  cursor: grab;
+  display: grid;
+  place-items: center;
+}
+
+.stage-ed-artifact:active {
+  cursor: grabbing;
+}
+
+.stage-ed-artifact img {
+  max-width: 5rem;
+  max-height: 5rem;
+  pointer-events: none;
+}
+
+.stage-ed-artifact.is-selected {
+  outline: 2px solid rgba(var(--tower-cyan), 0.85);
+  outline-offset: 3px;
+  border-radius: 0.3rem;
+}
+
+.stage-ed-hero {
+  position: absolute;
+  left: 12%;
+  bottom: 26%;
+  transform: translateY(50%);
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(var(--tower-cyan), 0.18);
+  border: 1px dashed rgba(var(--tower-cyan), 0.5);
+  color: rgb(var(--tower-cyan));
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.stage-ed-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.author-field--inline {
+  grid-auto-flow: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stage-ed-section {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.stage-ed-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.stage-ed-palette {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(3.2rem, 1fr));
+  gap: 0.5rem;
 }
 
 .author-input {

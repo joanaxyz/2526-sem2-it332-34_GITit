@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react'
 import { Trash2, X } from 'lucide-react'
 
-import { pieceArt } from '@/features/tower-designs/components/EditorCanvas'
 import type { PaletteDragPayload } from '@/features/tower-designs/components/PiecePalette'
 import { PIECE_TYPE_LABEL } from '@/features/tower-designs/editorUtils'
 import type { ArtifactPlacementDescriptor, TowerDesignOverview } from '@/features/tower-designs/types'
+import { PieceArt } from '@/features/tower-map/components/PieceArt'
 import { towerPieceAttrs } from '@/features/tower-map/components/towerPieceData'
 import { backendUrl } from '@/shared/api/httpClient'
 import type {
@@ -107,7 +107,7 @@ export function SectionEditor({
           onClick={() => setSelectedArtifact(null)}
         >
           <span className="editor-slot-art" aria-hidden="true">
-            {pieceArt(piece.pieceType, descriptor, false)}
+            <PieceArt pieceType={piece.pieceType} descriptor={descriptor} />
           </span>
 
           {artifacts.map((artifact) => (

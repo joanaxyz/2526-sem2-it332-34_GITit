@@ -1,4 +1,4 @@
-import type { BattleBlock } from '@/shared/battle/types'
+import type { BattleBlock, BattleStage } from '@/shared/battle/types'
 import type { LevelScenarioContext, RepositorySnapshot, TerminalStep } from '@/shared/level/types'
 import type { ObjectiveCheck } from '@/shared/level/utils/levelContext'
 
@@ -109,6 +109,8 @@ export type AdventureRun = {
   command_adventure: { id: number; slug: string; title: string; description: string }
   /** The adventure's storey id, used to navigate back to the Tower. */
   storey_id: number
+  /** Authored battle-stage dressing for this storey (null -> default sky). */
+  battle_stage?: BattleStage | null
   current_level_index: number
   total_levels: number
   session_score: number

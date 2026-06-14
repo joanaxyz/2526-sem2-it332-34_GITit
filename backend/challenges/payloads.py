@@ -5,7 +5,7 @@ used to live in serializers.py; serializers now hold input validation only.
 Payload shapes are part of the frontend contract - change them deliberately.
 """
 
-from battle.payloads import battle_block
+from battle.payloads import battle_block, stage_payload
 from challenges.models import ChallengeRun
 from challenges.selectors import required_successful_attempts_for_level
 from common.constants import (
@@ -68,6 +68,9 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
         "challenge": _challenge_payload(run),
         "scenario_context": context,
         "storey": storey_payload,
+        # Authored battle-stage dressing (background + artifacts); constant per
+        # storey so it rides the run payload, not the per-command patch.
+        "battle_stage": stage_payload(run.storey, user=run.user),
         "difficulty": run.difficulty or None,
         "variant": {
             "id": run.variant_id,

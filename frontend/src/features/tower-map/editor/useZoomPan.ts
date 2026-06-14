@@ -42,7 +42,7 @@ export function useZoomPan(): ZoomPan {
     (event: React.PointerEvent) => {
       if (event.button !== 0 && event.button !== 1) return
       // Only the background pans — grabbing a piece or artifact must not.
-      if ((event.target as HTMLElement).closest('.editor-slot, .editor-artifact')) return
+      if ((event.target as HTMLElement).closest('.editor-piece, .editor-slot, .editor-artifact')) return
       drag.current = { x: event.clientX, y: event.clientY, tx, ty }
       const move = (ev: PointerEvent) => {
         if (!drag.current) return

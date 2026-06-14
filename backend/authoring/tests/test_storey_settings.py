@@ -161,6 +161,28 @@ def test_storey_groups_content_into_one_runtime_storey_with_its_rewards(django_u
 
 
 @pytest.mark.django_db
+def test_authored_battle_stage_reaches_runtime(django_user_model):
+    # The storey's authored battle-stage dressing compiles onto the runtime
+    # Storey so the live battle can render it.
+    user = make_user(django_user_model)
+    stage = {
+        "background": "arcane-backdrop",
+        "artifacts": [{"slug": "banner", "x": 0.5, "y": 0.8, "scale": 1.2, "rotation": 0, "z": 1}],
+    }
+    storey = AuthoringStorey.objects.create(
+        owner=user, slug="dressed-floor", title="Dressed Floor", battle_stage=stage
+    )
+    content = ContentDefinition.objects.create(
+        owner=user, kind="adventure", storey=storey, slug="adv-stage", title="Adv",
+        command_family="git status", definition=_playable_definition(),
+    )
+
+    runtime = ContentRuntimeCompiler().compile(content=content)
+
+    assert runtime.storey.battle_stage == stage
+
+
+@pytest.mark.django_db
 def test_invalid_chest_rewards_fail_validation(django_user_model):
     user = make_user(django_user_model)
     content = ContentDefinition.objects.create(

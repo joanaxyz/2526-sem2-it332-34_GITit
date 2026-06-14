@@ -1,4 +1,13 @@
-import { memo, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import {
+  memo,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type HTMLAttributes,
+  type ReactNode,
+} from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   BookOpen,
@@ -29,7 +38,12 @@ import {
   SpirePiece,
   TomePiece,
 } from '@/features/tower-map/components/TowerPieces'
-import { towerDescriptorFor, towerPieceAttrs } from '@/features/tower-map/components/towerPieceData'
+import {
+  pieceByType,
+  pieceBySuffix,
+  towerDescriptorFor,
+  towerPieceAttrs,
+} from '@/features/tower-map/components/towerPieceData'
 import { assetsApi } from '@/shared/assets/assetsApi'
 import type { TowerLayoutDescriptor, TowerLayoutPieceDescriptor, TowerPieceAssetDescriptor } from '@/shared/assets/types'
 import {
@@ -48,14 +62,6 @@ import { cn } from '@/shared/utils/cn'
 
 function EmptySection({ label }: { label: string }) {
   return <div className="tower-empty-state">No {label} published yet.</div>
-}
-
-function pieceByType(layout: TowerLayoutDescriptor | null, pieceType: TowerLayoutPieceDescriptor['pieceType']) {
-  return layout?.pieces.find((piece) => piece.pieceType === pieceType) ?? null
-}
-
-function pieceBySuffix(layout: TowerLayoutDescriptor | null, suffix: string) {
-  return layout?.pieces.find((piece) => piece.instanceId.endsWith(suffix)) ?? null
 }
 
 function contentPieceMap(
@@ -117,25 +123,26 @@ const EMPTY_CHALLENGES: ChallengeSummary[] = []
 
 // -- Windows storey: the lit-window band that tops every storey; the conical roof
 // only crowns the very first storey (the top of the whole tower). --
-function WindowStorey({
+// `animate={false}` drops the scroll-entrance so the tower editor can reuse this
+// exact markup as a static, selectable piece (extra props/children land on the
+// root). The live tower passes neither, so its motion path is unchanged.
+export function WindowStorey({
   crowned,
   piece,
   descriptor,
+  animate = true,
+  className,
+  children,
+  ...rest
 }: {
   crowned: boolean
   piece?: TowerLayoutPieceDescriptor | null
   descriptor?: TowerPieceAssetDescriptor | null
-}) {
-  return (
-    <motion.div
-      className="tower-window-stage"
-      {...towerPieceAttrs(piece, descriptor)}
-      aria-hidden="true"
-      initial={{ opacity: 0, y: -22 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ amount: 0.3, once: true }}
-      transition={{ duration: 0.55, ease: PIECE_EASE }}
-    >
+  animate?: boolean
+  children?: ReactNode
+} & HTMLAttributes<HTMLDivElement>) {
+  const content = (
+    <>
       <SpirePiece descriptor={descriptor} />
       {crowned ? (
         <div className="tower-window-roof">
@@ -148,6 +155,29 @@ function WindowStorey({
         <span className="tower-window-storey-window" />
         <span className="tower-window-storey-window" />
       </div>
+    </>
+  )
+
+  if (!animate) {
+    return (
+      <div className={cn('tower-window-stage', className)} {...towerPieceAttrs(piece, descriptor)} {...rest}>
+        {content}
+        {children}
+      </div>
+    )
+  }
+
+  return (
+    <motion.div
+      className="tower-window-stage"
+      {...towerPieceAttrs(piece, descriptor)}
+      aria-hidden="true"
+      initial={{ opacity: 0, y: -22 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ amount: 0.3, once: true }}
+      transition={{ duration: 0.55, ease: PIECE_EASE }}
+    >
+      {content}
     </motion.div>
   )
 }
@@ -155,35 +185,35 @@ function WindowStorey({
 // Walkable landing between tower rooms. Challenge-after landings get physical
 // crenels that keep their side outlines closed. The old separator class names
 // remain as compatibility hooks for the current character controller.
-function TowerLanding({
+export function TowerLanding({
   continuation = false,
   base = false,
   afterChallenges = false,
   piece,
   descriptor,
+  animate = true,
+  className,
+  children,
+  ...rest
 }: {
   continuation?: boolean
   base?: boolean
   afterChallenges?: boolean
   piece?: TowerLayoutPieceDescriptor | null
   descriptor?: TowerPieceAssetDescriptor | null
-}) {
-  return (
-    <motion.div
-      className={cn(
-        'tower-landing',
-        'tower-section-separator',
-        continuation && 'is-continuation',
-        base && 'is-base',
-        afterChallenges && 'is-after-challenges',
-      )}
-      {...towerPieceAttrs(piece, descriptor)}
-      aria-hidden="true"
-      initial={{ opacity: 0, scaleX: 0.86 }}
-      whileInView={{ opacity: 1, scaleX: 1 }}
-      viewport={{ amount: 0.4, once: true }}
-      transition={{ duration: 0.5, ease: PIECE_EASE }}
-    >
+  animate?: boolean
+  children?: ReactNode
+} & HTMLAttributes<HTMLDivElement>) {
+  const cls = cn(
+    'tower-landing',
+    'tower-section-separator',
+    continuation && 'is-continuation',
+    base && 'is-base',
+    afterChallenges && 'is-after-challenges',
+    className,
+  )
+  const content = (
+    <>
       <LandingPiece descriptor={descriptor} />
       {afterChallenges ? (
         <span className="tower-section-separator-crenels">
@@ -193,6 +223,29 @@ function TowerLanding({
         </span>
       ) : null}
       <span className="tower-section-separator-backplate" />
+    </>
+  )
+
+  if (!animate) {
+    return (
+      <div className={cls} {...towerPieceAttrs(piece, descriptor)} {...rest}>
+        {content}
+        {children}
+      </div>
+    )
+  }
+
+  return (
+    <motion.div
+      className={cls}
+      {...towerPieceAttrs(piece, descriptor)}
+      aria-hidden="true"
+      initial={{ opacity: 0, scaleX: 0.86 }}
+      whileInView={{ opacity: 1, scaleX: 1 }}
+      viewport={{ amount: 0.4, once: true }}
+      transition={{ duration: 0.5, ease: PIECE_EASE }}
+    >
+      {content}
     </motion.div>
   )
 }
@@ -283,23 +336,22 @@ function TomeArtifact({
 // The belt under the scriptorium carries a single carved keystone bearing the
 // open-book sigil - quiet masonry, not decoration, and only tome storeys earn
 // it. Drawn as SVG so the tapered keystone keeps its full neon outline.
-function TomeLanding({
+export function TomeLanding({
   piece,
   descriptor,
+  animate = true,
+  className,
+  children,
+  ...rest
 }: {
   piece?: TowerLayoutPieceDescriptor | null
   descriptor?: TowerPieceAssetDescriptor | null
-}) {
-  return (
-    <motion.div
-      className="tower-landing tower-tome-separator"
-      {...towerPieceAttrs(piece, descriptor)}
-      aria-hidden="true"
-      initial={{ opacity: 0, scaleX: 0.88 }}
-      whileInView={{ opacity: 1, scaleX: 1 }}
-      viewport={{ amount: 0.4, once: true }}
-      transition={{ duration: 0.5, ease: PIECE_EASE }}
-    >
+  animate?: boolean
+  children?: ReactNode
+} & HTMLAttributes<HTMLDivElement>) {
+  const cls = cn('tower-landing', 'tower-tome-separator', className)
+  const content = (
+    <>
       <LandingPiece descriptor={descriptor} />
       <span className="tower-tome-separator-beam" />
       <span className="tower-tome-separator-keystone">
@@ -322,6 +374,29 @@ function TomeLanding({
         </svg>
       </span>
       <span className="tower-tome-separator-ledge" />
+    </>
+  )
+
+  if (!animate) {
+    return (
+      <div className={cls} {...towerPieceAttrs(piece, descriptor)} {...rest}>
+        {content}
+        {children}
+      </div>
+    )
+  }
+
+  return (
+    <motion.div
+      className={cls}
+      {...towerPieceAttrs(piece, descriptor)}
+      aria-hidden="true"
+      initial={{ opacity: 0, scaleX: 0.88 }}
+      whileInView={{ opacity: 1, scaleX: 1 }}
+      viewport={{ amount: 0.4, once: true }}
+      transition={{ duration: 0.5, ease: PIECE_EASE }}
+    >
+      {content}
     </motion.div>
   )
 }

@@ -1,6 +1,6 @@
 from django.db.models import Prefetch
 
-from battle.payloads import battle_block
+from battle.payloads import battle_block, stage_payload
 from command_adventures.models import AdventureLevelAttempt, AdventureMastery, AdventureRun
 from command_adventures.scheduler import pass_bar_for, total_achievable
 from command_adventures.services import ordered_levels_for
@@ -186,6 +186,10 @@ def adventure_run_payload(run: AdventureRun) -> dict:
         # The adventure's storey is its OneToOne owner; surfaced so the
         # completion modal's "Back to Tower" lands on the right storey.
         "storey_id": run.command_adventure.storey_id,
+        # Authored battle-stage dressing (background + artifacts). Constant per
+        # storey, so it rides the run payload once; the per-command patch omits
+        # it (the stage never changes mid-run). Null -> default sky + ledge.
+        "battle_stage": stage_payload(run.command_adventure.storey, user=run.user),
         "current_level_index": run.current_level_index,
         "total_levels": total_levels,
         "session_score": run.session_score,

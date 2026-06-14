@@ -63,6 +63,10 @@ class AuthoringStorey(models.Model):
     mob_roster = models.JSONField(default=list, blank=True)
     boss_roster = models.JSONField(default=list, blank=True)
     pass_bar_fraction = models.FloatField(default=0.6)
+    # Authored battle-stage dressing (background + draggable artifacts) rendered
+    # behind the actors during this storey's battles. Compiled onto the runtime
+    # curriculum.Storey. See Storey.battle_stage for the shape.
+    battle_stage = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
