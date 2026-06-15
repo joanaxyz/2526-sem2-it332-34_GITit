@@ -222,14 +222,18 @@ class ChallengeRunService:
         # dependency local to this gate.
         from command_adventures.models import AdventureRun, CommandAdventure
 
-        adventure = CommandAdventure.objects.filter(storey=storey, is_published=True).first()
-        if adventure is None:
+        adventure_ids = list(
+            CommandAdventure.objects.filter(storey=storey, is_published=True).values_list("id", flat=True)
+        )
+        if not adventure_ids:
             return  # storey has no Command Adventure to gate on
-        passed = AdventureRun.objects.filter(
-            user=user, command_adventure=adventure, passed_at__isnull=False
-        ).exists()
-        if not passed:
-            raise Locked("Complete this storey's Command Adventure to unlock its challenges.")
+        passed_ids = set(
+            AdventureRun.objects.filter(
+                user=user, command_adventure_id__in=adventure_ids, passed_at__isnull=False
+            ).values_list("command_adventure_id", flat=True)
+        )
+        if not set(adventure_ids).issubset(passed_ids):
+            raise Locked("Complete this storey's Command Adventures to unlock its challenges.")
 
     def _review_variant(self, *, user, level: ChallengeLevel):
         completion = LevelCompletion.objects.select_related("challenge_run__challenge_variant").filter(

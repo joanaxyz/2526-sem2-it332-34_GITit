@@ -7,6 +7,7 @@ Only official assets (``owner=None``) are touched - user uploads are left alone.
 
 from __future__ import annotations
 
+import shutil
 import tempfile
 import zipfile
 from contextlib import ExitStack
@@ -104,6 +105,7 @@ class Command(BaseCommand):
             artifact_count, artifact_stale = self._seed_battle_artifacts()
             tower_artifact_count, tower_artifact_stale = self._seed_tower_artifacts()
             tower_piece_count, tower_piece_stale = self._seed_tower_pieces()
+        self._cleanup_uncompressed_seed_sources()
         self.stdout.write(
             self.style.SUCCESS(
                 "Seeded "
@@ -453,6 +455,30 @@ class Command(BaseCommand):
         if required:
             raise CommandError(f"Missing {label}: expected {archive} or {root}")
         return _StaticSource(root)
+
+    def _cleanup_uncompressed_seed_sources(self) -> None:
+        """Archives are the committed source of truth.
+
+        If a developer or older seed flow left extracted folders beside the zip,
+        remove them after a successful seed so the source tree does not drift or
+        bloat. Only known seed folders under ``seed_assets`` are eligible.
+        """
+        targets: list[Path] = []
+        if MONSTERS_ZIP.exists():
+            targets.append(MONSTERS_ROOT)
+        if CHARACTERS_ZIP.exists():
+            targets.append(CHARACTERS_ROOT)
+        if TOWER_ASSETS_ZIP.exists():
+            targets.extend([TOWER_ASSETS_ROOT, LEGACY_TOWER_PIECES_ROOT])
+        if BATTLE_ARTIFACTS_ZIP.exists():
+            targets.extend(SEED_ASSETS_ROOT / spec["slug"] for spec in BATTLE_ARTIFACT_SPECS)
+
+        seed_root = SEED_ASSETS_ROOT.resolve()
+        for target in targets:
+            resolved = target.resolve()
+            if not target.exists() or resolved == seed_root or seed_root not in resolved.parents:
+                continue
+            shutil.rmtree(target)
 
 
 class _StaticSource:

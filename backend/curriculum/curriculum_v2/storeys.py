@@ -10,6 +10,48 @@ Note: across curriculum_v2 specs, the frozen authoring key ``"module"`` means
 entries never need rewriting.
 """
 
+def tower_layout(
+    *,
+    adventure_section: str = "official-hall-section",
+    adventure_landing: str = "official-landing",
+    challenge_section: str = "official-trial-section",
+    challenge_landing: str = "official-challenge-landing",
+    tome_section: str = "official-window-section",
+    tome_landing: str = "official-tome-landing",
+) -> dict:
+    """Asset-level visual defaults for one official storey.
+
+    These are authored data, not renderer assumptions: each storey can choose
+    different structural art and artifact defaults while the frontend still
+    renders only crown/section/landing plus placed artifacts.
+    """
+
+    return {
+        "crown": {"asset_slug": "official-crown"},
+        "slots": {
+            "tome": {
+                "section_asset_slug": tome_section,
+                "landing_asset_slug": tome_landing,
+                "artifact_asset_slug": "official-tome-artifact",
+                "artifact": {"x": 184, "y": 112, "width": 96, "height": 88, "z_index": 12},
+            },
+            "adventure": {
+                "section_asset_slug": adventure_section,
+                "landing_asset_slug": adventure_landing,
+                "artifact_asset_slug": "official-gate-artifact",
+                "artifact": {"x": 184, "y": 122, "width": 116, "height": 134, "z_index": 12},
+            },
+            "challenge": {
+                "section_asset_slug": challenge_section,
+                "landing_asset_slug": challenge_landing,
+                "artifact_asset_slug": "official-portcullis-artifact",
+                "artifact": {"x": 184, "y": 124, "width": 90, "height": 132, "z_index": 12},
+            },
+            "empty_challenge": {"section_asset_slug": challenge_section},
+        },
+    }
+
+
 STOREYS = [
     {
         "slug": "creating-inspecting-repositories",
@@ -21,6 +63,7 @@ STOREYS = [
         ),
         "mob_roster": ["slime", "skeleton", "archer"],
         "boss_roster": ["werebear"],
+        "tower_layout": tower_layout(adventure_section="official-window-section"),
     },
     {
         "slug": "tracking-changes-snapshots",
@@ -31,6 +74,7 @@ STOREYS = [
         ),
         "mob_roster": ["skeleton", "archer", "skeleton-archer"],
         "boss_roster": ["werewolf"],
+        "tower_layout": tower_layout(tome_section="official-hall-section"),
     },
     {
         "slug": "branching-switching",
@@ -41,6 +85,7 @@ STOREYS = [
         ),
         "mob_roster": ["archer", "skeleton-archer", "swordsman"],
         "boss_roster": ["elite-orc"],
+        "tower_layout": tower_layout(adventure_landing="official-tome-landing"),
     },
     {
         "slug": "merging-conflicts",
@@ -51,6 +96,7 @@ STOREYS = [
         ),
         "mob_roster": ["skeleton-archer", "swordsman", "armored-orc"],
         "boss_roster": ["knight-templar"],
+        "tower_layout": tower_layout(challenge_section="official-window-section"),
     },
     {
         "slug": "undoing-recovery",
@@ -61,6 +107,7 @@ STOREYS = [
         ),
         "mob_roster": ["swordsman", "armored-orc", "skeleton"],
         "boss_roster": ["wizard"],
+        "tower_layout": tower_layout(adventure_section="official-trial-section"),
     },
     {
         "slug": "temporary-work-patches",
@@ -71,6 +118,7 @@ STOREYS = [
         ),
         "mob_roster": ["armored-orc", "swordsman", "skeleton-archer"],
         "boss_roster": ["priest"],
+        "tower_layout": tower_layout(challenge_landing="official-landing"),
     },
     {
         "slug": "remotes-collaboration",
@@ -81,5 +129,9 @@ STOREYS = [
         ),
         "mob_roster": ["armored-orc", "swordsman", "archer"],
         "boss_roster": ["knight-templar", "wizard"],
+        "tower_layout": tower_layout(
+            adventure_section="official-window-section",
+            challenge_landing="official-tome-landing",
+        ),
     },
 ]

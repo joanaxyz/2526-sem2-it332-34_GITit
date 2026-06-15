@@ -35,6 +35,11 @@ class Storey(models.Model):
     #         "artifacts": [{"slug", "x", "y", "scale", "rotation", "z"}]}
     # Coordinates are normalized (0..1) so they render at any stage size.
     battle_stage = models.JSONField(default=dict, blank=True)
+    # Per-storey visual authoring for the official/runtime tower. Structure is
+    # intentionally asset-slug based so a storey can choose different sections,
+    # landings, transforms, and artifact placement defaults without frontend
+    # role-specific rendering logic.
+    tower_layout = models.JSONField(default=dict, blank=True)
 
     class Meta:
         ordering = ["sort_order", "number"]

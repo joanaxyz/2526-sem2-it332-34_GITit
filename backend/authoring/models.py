@@ -42,7 +42,7 @@ def _default_chest_rewards() -> list[dict]:
 class AuthoringStorey(models.Model):
     """A user-authored storey: a floor of their tower that GROUPS content.
 
-    One storey holds at most one adventure but 1+ challenges and 1+ tomes, and
+    One storey can hold multiple adventures plus 1+ challenges and 1+ tomes, and
     carries the floor-level settings shared by all of them: reward checkpoints
     (GitCoin chests dropped along the storey's combined progress), the monster
     rosters its battles draw from, and the mastery pass-bar that unlocks the

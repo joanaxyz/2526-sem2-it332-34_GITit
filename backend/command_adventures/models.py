@@ -12,9 +12,9 @@ from common.constants import (
 
 
 class CommandAdventure(models.Model):
-    storey = models.OneToOneField(
+    storey = models.ForeignKey(
         "curriculum.Storey",
-        related_name="command_adventure",
+        related_name="command_adventures",
         on_delete=models.CASCADE,
     )
     slug = models.SlugField(unique=True)
@@ -67,6 +67,15 @@ class AdventureLevel(models.Model):
     # Empty list = deterministic default derived from the level at attempt
     # start (battle.state), so unauthored levels need no seed changes.
     encounter_spec = models.JSONField(default=list, blank=True)
+    # The runtime adventure this level belongs to. Legacy seeded rows may be
+    # null until reseeded; services fall back to the storey's first adventure.
+    command_adventure = models.ForeignKey(
+        CommandAdventure,
+        null=True,
+        blank=True,
+        related_name="levels",
+        on_delete=models.CASCADE,
+    )
     # Explicit prerequisite graph (DAG): this command can only be introduced once
     # every prerequisite has been solved at least once. Strengthens the implicit
     # sort_order ordering; validated acyclic + preceding at seed time.
@@ -87,10 +96,6 @@ class AdventureLevel(models.Model):
     @property
     def storey(self):
         return self.command_form.command_skill.storey
-
-    @property
-    def command_adventure(self):
-        return getattr(self.command_form.command_skill.storey, "command_adventure", None)
 
 
 class VariantBase(models.Model):

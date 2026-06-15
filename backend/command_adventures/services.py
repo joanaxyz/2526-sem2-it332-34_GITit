@@ -6,6 +6,7 @@ completion/unlock behavior.
 """
 
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
@@ -48,7 +49,7 @@ from simulator.workspace_files import WorkspaceFileError, WorkspaceFileStateServ
 def ordered_levels_for(
     adventure: CommandAdventure, *, with_prerequisites: bool = False
 ) -> list[AdventureLevel]:
-    queryset = AdventureLevel.objects.filter(
+    base_queryset = AdventureLevel.objects.filter(
         command_form__command_skill__storey_id=adventure.storey_id,
         is_published=True,
         command_form__is_published=True,
@@ -58,6 +59,9 @@ def ordered_levels_for(
         # selecting it here keeps attempt creation from issuing extra queries.
         "command_form__command_skill__storey",
     ).order_by("command_form__command_skill__sort_order", "command_form__sort_order", "sort_order", "id")
+    queryset = base_queryset.filter(command_adventure=adventure)
+    if not queryset.exists():
+        queryset = base_queryset.filter(command_adventure__isnull=True)
     if with_prerequisites:
         # The scheduler walks level.prerequisites for every candidate; the
         # prefetch turns that per-level N+1 into a single extra query.
@@ -315,8 +319,12 @@ class AdventureRunService:
             # applies.
             run.current_level_index = (
                 AdventureMastery.objects.filter(
+                    Q(adventure_level__command_adventure=run.command_adventure)
+                    | Q(
+                        adventure_level__command_adventure__isnull=True,
+                        adventure_level__command_form__command_skill__storey=run.command_adventure.storey,
+                    ),
                     user=run.user,
-                    adventure_level__command_form__command_skill__storey=run.command_adventure.storey,
                     introduced=True,
                 ).count()
             )

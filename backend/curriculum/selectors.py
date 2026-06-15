@@ -65,14 +65,14 @@ def storey_completion_count_map(*, user, storey_ids: list[int]) -> dict[int, int
     # *passing* the adventure (passed_at), not how many times it was run. Replays
     # never set passed_at, so they cannot inflate progress past the 1-per-storey
     # denominator. Distinct on the adventure id keeps this idempotent across runs.
-    for storey_id in (
+    for storey_id, _adventure_id in (
         AdventureRun.objects.filter(
             user=user,
             mode=SESSION_MODE_PRIMARY,
             passed_at__isnull=False,
             command_adventure__storey_id__in=storey_ids,
         )
-        .values_list("command_adventure__storey_id", flat=True)
+        .values_list("command_adventure__storey_id", "command_adventure_id")
         .distinct()
     ):
         completion_by_storey[storey_id] += 1
@@ -141,14 +141,17 @@ def storey_content_page(
 ) -> dict:
     limit = max(1, min(limit, 24))
     if section == "command_adventures":
-        adventure = (
+        adventures = list(
             CommandAdventure.objects.filter(storey_id=storey_id, is_published=True)
             .select_related("storey")
-            .first()
+            .order_by("sort_order", "id")
         )
         return {
             "section": section,
-            "results": [command_adventure_summary_payload(user=user, adventure=adventure)] if adventure else [],
+            "results": [
+                command_adventure_summary_payload(user=user, adventure=adventure)
+                for adventure in adventures
+            ],
             "next_cursor": None,
         }
 
@@ -193,25 +196,30 @@ def storey_content_overview(*, user, storey_id: int) -> dict:
     request. Storeys hold only a handful of challenges/tomes, so this returns them
     all (no cursor): collapsing 2-3 round trips per storey into one is the win.
     """
-    adventure = (
+    adventures = list(
         CommandAdventure.objects.filter(storey_id=storey_id, is_published=True)
         .select_related("storey")
-        .first()
+        .order_by("sort_order", "id")
     )
     tomes = Tome.objects.filter(storey_id=storey_id, is_published=True).order_by("sort_order", "id")
     challenges = list(challenge_queryset(storey_id=storey_id))
     access = _build_challenge_access(user=user, storey_id=storey_id, challenges=challenges)
+    storey = Storey.objects.get(id=storey_id)
     layout = tower_layout_payload(
+        storey=storey,
         storey_id=storey_id,
-        adventure=adventure,
+        adventures=adventures,
         tomes=list(tomes),
         challenges=challenges,
     )
+    adventure_payloads = [
+        command_adventure_summary_payload(user=user, adventure=adventure)
+        for adventure in adventures
+    ]
     return {
         "storey_id": storey_id,
-        "command_adventure": (
-            command_adventure_summary_payload(user=user, adventure=adventure) if adventure else None
-        ),
+        "command_adventure": adventure_payloads[0] if adventure_payloads else None,
+        "command_adventures": adventure_payloads,
         "tomes": [tome_summary_payload(tome=tome) for tome in tomes],
         "challenges": [
             challenge_summary_payload(challenge=challenge, access=access) for challenge in challenges
@@ -223,16 +231,21 @@ def storey_content_overview(*, user, storey_id: int) -> dict:
 
 def tower_layout_payload(
     *,
+    storey: Storey | None = None,
     storey_id: int,
-    adventure: CommandAdventure | None,
+    adventures: list[CommandAdventure] | None = None,
     tomes: list[Tome],
     challenges: list[Challenge],
 ) -> dict:
+    layout_config = storey.tower_layout if storey is not None and isinstance(storey.tower_layout, dict) else {}
     pieces: list[dict] = [
         _tower_piece(
             storey_id=storey_id,
             name="crown",
             piece_type=TOWER_PIECE_CROWN,
+            asset_slug=_slot_asset(layout_config, "crown", "asset_slug", OFFICIAL_TOWER_ASSET_SLUGS[TOWER_PIECE_CROWN]),
+            config=_slot_config(layout_config, "crown"),
+            transform=_slot_transform(layout_config, "crown"),
         )
     ]
     artifacts: list[dict] = []
@@ -240,113 +253,151 @@ def tower_layout_payload(
     above_adventure_tomes = [tome for tome in tomes if tome.placement == "above_adventure"]
     for tome in above_adventure_tomes:
         section_name = f"tome-section-{tome.id}"
+        slot = _slot(layout_config, "tome")
         pieces.append(
             _tower_piece(
                 storey_id=storey_id,
                 name=section_name,
                 piece_type=TOWER_PIECE_SECTION,
-                asset_slug=OFFICIAL_TOWER_ASSET_SLUGS["hall_section"],
+                asset_slug=_slot_value(slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["hall_section"]),
+                config=_slot_value(slot, "section_config", {}),
+                transform=_slot_value(slot, "section_transform", {}),
             )
         )
+        artifact_defaults = _slot_value(slot, "artifact", {})
         artifacts.append(
             _tower_artifact(
                 storey_id=storey_id,
                 name=f"tome-{tome.id}",
                 target_name=section_name,
                 role="tome",
-                asset_slug=OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["tome"],
+                asset_slug=_slot_value(slot, "artifact_asset_slug", OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["tome"]),
                 content_binding={"kind": "tome", "id": tome.id},
-                x=184,
-                y=112,
-                width=96,
-                height=88,
-                z_index=12,
+                x=_slot_value(artifact_defaults, "x", 184),
+                y=_slot_value(artifact_defaults, "y", 112),
+                width=_slot_value(artifact_defaults, "width", 96),
+                height=_slot_value(artifact_defaults, "height", 88),
+                z_index=_slot_value(artifact_defaults, "z_index", 12),
             )
         )
     if above_adventure_tomes:
+        slot = _slot(layout_config, "tome")
         pieces.append(
             _tower_piece(
                 storey_id=storey_id,
                 name="landing-after-tomes",
                 piece_type=TOWER_PIECE_LANDING,
-                asset_slug=OFFICIAL_TOWER_ASSET_SLUGS["tome_landing"],
+                asset_slug=_slot_value(slot, "landing_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["tome_landing"]),
+                config=_slot_value(slot, "landing_config", {}),
+                transform=_slot_value(slot, "landing_transform", {}),
             )
         )
 
-    section_name = "section"
-    pieces.append(
-        _tower_piece(
-            storey_id=storey_id,
-            name=section_name,
-            piece_type=TOWER_PIECE_SECTION,
-            asset_slug=OFFICIAL_TOWER_ASSET_SLUGS["hall_section"],
+    adventure_list = adventures or []
+    for adventure in adventure_list:
+        slot = _slot(layout_config, "adventure")
+        section_name = "section" if len(adventure_list) == 1 else f"adventure-section-{adventure.id}"
+        landing_name = "landing-after-adventure" if len(adventure_list) == 1 else f"landing-after-adventure-{adventure.id}"
+        pieces.append(
+            _tower_piece(
+                storey_id=storey_id,
+                name=section_name,
+                piece_type=TOWER_PIECE_SECTION,
+                asset_slug=_slot_value(slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["hall_section"]),
+                config=_slot_value(slot, "section_config", {}),
+                transform=_slot_value(slot, "section_transform", {}),
+            )
         )
-    )
-    if adventure:
+        artifact_defaults = _slot_value(slot, "artifact", {})
         artifacts.append(
             _tower_artifact(
                 storey_id=storey_id,
-                name="adventure",
+                name=f"adventure-{adventure.id}",
                 target_name=section_name,
                 role="adventure",
-                asset_slug=OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["adventure"],
+                asset_slug=_slot_value(slot, "artifact_asset_slug", OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["adventure"]),
                 content_binding={"kind": "adventure", "id": adventure.id},
-                x=184,
-                y=122,
-                width=116,
-                height=134,
-                z_index=12,
+                x=_slot_value(artifact_defaults, "x", 184),
+                y=_slot_value(artifact_defaults, "y", 122),
+                width=_slot_value(artifact_defaults, "width", 116),
+                height=_slot_value(artifact_defaults, "height", 134),
+                z_index=_slot_value(artifact_defaults, "z_index", 12),
             )
         )
-    pieces.append(
-        _tower_piece(
-            storey_id=storey_id,
-            name="landing-after-adventure",
-            piece_type=TOWER_PIECE_LANDING,
+        pieces.append(
+            _tower_piece(
+                storey_id=storey_id,
+                name=landing_name,
+                piece_type=TOWER_PIECE_LANDING,
+                asset_slug=_slot_value(slot, "landing_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS[TOWER_PIECE_LANDING]),
+                config=_slot_value(slot, "landing_config", {}),
+                transform=_slot_value(slot, "landing_transform", {}),
+            )
         )
-    )
+    if not adventure_list:
+        slot = _slot(layout_config, "adventure")
+        pieces.append(
+            _tower_piece(
+                storey_id=storey_id,
+                name="section",
+                piece_type=TOWER_PIECE_SECTION,
+                asset_slug=_slot_value(slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["hall_section"]),
+                config=_slot_value(slot, "section_config", {}),
+                transform=_slot_value(slot, "section_transform", {}),
+            )
+        )
 
     if challenges:
         for challenge in challenges:
             section_name = f"challenge-section-{challenge.id}"
+            slot = _slot(layout_config, "challenge")
             pieces.append(
                 _tower_piece(
                     storey_id=storey_id,
                     name=section_name,
                     piece_type=TOWER_PIECE_SECTION,
-                    asset_slug=OFFICIAL_TOWER_ASSET_SLUGS["trial_section"],
+                    asset_slug=_slot_value(slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["trial_section"]),
+                    config=_slot_value(slot, "section_config", {}),
+                    transform=_slot_value(slot, "section_transform", {}),
                 )
             )
+            artifact_defaults = _slot_value(slot, "artifact", {})
             artifacts.append(
                 _tower_artifact(
                     storey_id=storey_id,
                     name=f"challenge-{challenge.id}",
                     target_name=section_name,
                     role="challenge",
-                    asset_slug=OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["challenge"],
+                    asset_slug=_slot_value(slot, "artifact_asset_slug", OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["challenge"]),
                     content_binding={"kind": "challenge", "id": challenge.id},
-                    x=184,
-                    y=124,
-                    width=90,
-                    height=132,
-                    z_index=12,
+                    x=_slot_value(artifact_defaults, "x", 184),
+                    y=_slot_value(artifact_defaults, "y", 124),
+                    width=_slot_value(artifact_defaults, "width", 90),
+                    height=_slot_value(artifact_defaults, "height", 132),
+                    z_index=_slot_value(artifact_defaults, "z_index", 12),
                 )
             )
     else:
+        slot = _slot(layout_config, "empty_challenge")
         pieces.append(
             _tower_piece(
                 storey_id=storey_id,
                 name="challenge-section-empty",
                 piece_type=TOWER_PIECE_SECTION,
-                asset_slug=OFFICIAL_TOWER_ASSET_SLUGS["trial_section"],
+                asset_slug=_slot_value(slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["trial_section"]),
+                config=_slot_value(slot, "section_config", {}),
+                transform=_slot_value(slot, "section_transform", {}),
             )
         )
+    challenge_slot = _slot(layout_config, "challenge")
     pieces.append(
         _tower_piece(
             storey_id=storey_id,
             name="landing-after-challenges",
             piece_type=TOWER_PIECE_LANDING,
-            asset_slug=OFFICIAL_TOWER_ASSET_SLUGS["challenge_landing"],
+            asset_slug=_slot_value(challenge_slot, "landing_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["challenge_landing"]),
+            config=_slot_value(challenge_slot, "landing_config", {}),
+            transform=_slot_value(challenge_slot, "landing_transform", {}),
         )
     )
     return {"storeyId": storey_id, "pieces": pieces, "artifacts": artifacts}
@@ -358,12 +409,18 @@ def _tower_piece(
     name: str,
     piece_type: str,
     asset_slug: str | None = None,
+    config: dict | None = None,
+    transform: dict | None = None,
 ) -> dict:
     payload = {
         "instanceId": f"storey-{storey_id}-{name}",
         "assetSlug": asset_slug or OFFICIAL_TOWER_ASSET_SLUGS[piece_type],
         "pieceType": piece_type,
     }
+    if config:
+        payload["config"] = config
+    if transform:
+        payload["transform"] = transform
     return payload
 
 
@@ -398,6 +455,45 @@ def _tower_artifact(
     if content_binding:
         payload["contentBinding"] = content_binding
     return payload
+
+
+def _slot(layout_config: dict, name: str) -> dict:
+    slots = layout_config.get("slots")
+    if not isinstance(slots, dict):
+        return {}
+    value = slots.get(name)
+    return value if isinstance(value, dict) else {}
+
+
+def _slot_config(layout_config: dict, name: str) -> dict:
+    value = layout_config.get(name)
+    if not isinstance(value, dict):
+        return {}
+    config = value.get("config")
+    return config if isinstance(config, dict) else {}
+
+
+def _slot_transform(layout_config: dict, name: str) -> dict:
+    value = layout_config.get(name)
+    if not isinstance(value, dict):
+        return {}
+    transform = value.get("transform")
+    return transform if isinstance(transform, dict) else {}
+
+
+def _slot_asset(layout_config: dict, name: str, key: str, fallback: str) -> str:
+    value = layout_config.get(name)
+    if not isinstance(value, dict):
+        return fallback
+    asset_slug = value.get(key)
+    return str(asset_slug) if asset_slug else fallback
+
+
+def _slot_value(slot: dict, key: str, fallback):
+    value = slot.get(key)
+    if isinstance(fallback, dict):
+        return value if isinstance(value, dict) else fallback
+    return value if value not in (None, "") else fallback
 
 
 def command_skill_queryset(*, storey_id: int):
@@ -614,11 +710,19 @@ def command_adventure_summary_payload(*, user, adventure: CommandAdventure) -> d
         else None
     )
     level_count = AdventureLevel.objects.filter(
-        command_form__command_skill__storey=adventure.storey,
+        command_adventure=adventure,
         is_published=True,
         command_form__is_published=True,
         command_form__command_skill__is_published=True,
     ).count()
+    if level_count == 0:
+        level_count = AdventureLevel.objects.filter(
+            command_adventure__isnull=True,
+            command_form__command_skill__storey=adventure.storey,
+            is_published=True,
+            command_form__is_published=True,
+            command_form__command_skill__is_published=True,
+        ).count()
     # Progress and the challenge gate key off whether the adventure has ever been
     # passed, not the latest run's status. Otherwise a post-pass replay that is
     # abandoned/failed would visibly relock challenges and zero out progress.
@@ -776,12 +880,17 @@ def _challenge_unlocked(
 
 
 def _adventure_passed(*, user, storey_id: int) -> bool:
-    adventure = CommandAdventure.objects.filter(storey_id=storey_id, is_published=True).first()
-    if adventure is None:
+    adventure_ids = list(
+        CommandAdventure.objects.filter(storey_id=storey_id, is_published=True).values_list("id", flat=True)
+    )
+    if not adventure_ids:
         return True  # storey has no Command Adventure to gate on
-    return AdventureRun.objects.filter(
-        user=user, command_adventure=adventure, passed_at__isnull=False
-    ).exists()
+    passed_ids = set(
+        AdventureRun.objects.filter(
+            user=user, command_adventure_id__in=adventure_ids, passed_at__isnull=False
+        ).values_list("command_adventure_id", flat=True)
+    )
+    return set(adventure_ids).issubset(passed_ids)
 
 
 def _latest_attempt_payload(run) -> dict | None:

@@ -101,6 +101,11 @@ class Command(BaseCommand):
                 "before rebuilding the v2 curriculum."
             ),
         )
+        parser.add_argument(
+            "--skip-asset-grant",
+            action="store_true",
+            help="Seed official assets without backfilling default-kit entitlements.",
+        )
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -108,14 +113,17 @@ class Command(BaseCommand):
         # authoring format of curriculum_v2; only the ORM names are normalized.
         if options.get("reset"):
             self._reset_seeded_data()
-        call_command("seed_assets", verbosity=options.get("verbosity", 1))
+        seed_asset_args = ["seed_assets"]
+        if options.get("skip_asset_grant"):
+            seed_asset_args.append("--skip-grant")
+        call_command(*seed_asset_args, verbosity=options.get("verbosity", 1))
         self._validate_battle_asset_slugs()
         self.supported_form_keys = {spec["usage"] for spec in ADVENTURE_LEVELS}
         self.published_storey_slugs = self._published_storey_slugs()
         storeys = self._seed_storeys()
         forms = self._seed_command_skills(storeys)
-        self._seed_adventure_levels(forms)
-        self._seed_command_adventures(storeys)
+        adventures = self._seed_command_adventures(storeys)
+        self._seed_adventure_levels(forms, adventures)
         self._seed_challenges(storeys)
         self._seed_tomes(storeys)
         if options.get("validate"):
@@ -139,34 +147,102 @@ class Command(BaseCommand):
                     "chest_rewards": spec.get("chest_rewards", default_chest_rewards()),
                     "mob_roster": spec.get("mob_roster", []),
                     "boss_roster": spec.get("boss_roster", []),
+                    "tower_layout": spec.get("tower_layout", {}),
                 },
             )
             storeys[spec["slug"]] = storey
-        Storey.objects.exclude(slug__in=live_slugs).update(is_published=False)
+        Storey.objects.exclude(slug__in=live_slugs).exclude(slug__startswith="ugc-").update(
+            is_published=False
+        )
         return storeys
 
-    def _seed_command_adventures(self, storeys: dict[str, Storey]) -> None:
-        """One CommandAdventure per Storey that has published adventure levels."""
+    def _seed_command_adventures(self, storeys: dict[str, Storey]) -> dict[str, CommandAdventure]:
+        """Seed the authored CommandAdventures per storey.
+
+        A storey may now host more than one adventure. The official seed still
+        authors one adventure per storey today, but the data path is slug-based
+        and no longer relies on a storey-level one-to-one relationship.
+        """
+        usage_to_storey = self._usage_to_storey_slug()
+        storey_slugs_with_levels = {
+            usage_to_storey[spec["usage"]]
+            for spec in ADVENTURE_LEVELS
+            if spec["usage"] in usage_to_storey
+        }
         live_ids = []
+        primary_by_storey_slug: dict[str, CommandAdventure] = {}
         for index, (slug, storey) in enumerate(storeys.items(), start=1):
-            has_levels = AdventureLevel.objects.filter(
-                command_form__command_skill__storey=storey, is_published=True
-            ).exists()
-            if not has_levels:
+            if slug not in storey_slugs_with_levels:
                 continue
-            configured = COMMAND_ADVENTURES.get(slug, {})
-            adventure, _ = CommandAdventure.objects.update_or_create(
-                storey=storey,
+            configured_specs = COMMAND_ADVENTURES.get(slug, {})
+            if isinstance(configured_specs, dict):
+                configured_specs = [configured_specs]
+            for adventure_index, configured in enumerate(configured_specs or [{}], start=1):
+                suffix = "" if adventure_index == 1 else f"-{adventure_index}"
+                adventure_slug = configured.get("slug") or f"{slug}-command-adventure{suffix}"
+                adventure, _ = CommandAdventure.objects.update_or_create(
+                    slug=adventure_slug,
+                    defaults={
+                        "storey": storey,
+                        "title": configured.get("title") or f"{storey.title} Adventure",
+                        "description": configured.get("description") or storey.description,
+                        "sort_order": index * 100 + adventure_index,
+                        "is_published": storey.is_published,
+                    },
+                )
+                live_ids.append(adventure.id)
+                primary_by_storey_slug.setdefault(slug, adventure)
+        CommandAdventure.objects.filter(source_content_definition__isnull=True).exclude(
+            id__in=live_ids
+        ).update(is_published=False)
+        return primary_by_storey_slug
+
+    def _seed_adventure_levels(
+        self,
+        forms: dict[str, CommandForm],
+        adventures: dict[str, CommandAdventure],
+    ) -> None:
+        builder = StaticLevelVariantBuilder()
+        live_level_ids = []
+        levels_by_slug: dict[str, AdventureLevel] = {}
+        usage_to_storey = self._usage_to_storey_slug()
+        for index, spec in enumerate(ADVENTURE_LEVELS, start=1):
+            form = forms[spec["usage"]]
+            storey_slug = usage_to_storey.get(spec["usage"])
+            level, _ = AdventureLevel.objects.update_or_create(
+                command_form=form,
+                slug=spec["slug"],
                 defaults={
-                    "slug": f"{slug}-command-adventure",
-                    "title": configured.get("title") or f"{storey.title} Adventure",
-                    "description": configured.get("description") or storey.description,
+                    "command_adventure": adventures.get(storey_slug),
+                    "title": spec["title"],
+                    "required_successful_attempts": spec["required_successful_attempts"],
+                    "min_counted_commands": spec["min_counted_commands"],
+                    "max_counted_commands": spec["max_counted_commands"],
+                    "scenario_context": spec["scenario_context"],
+                    "objective_checks": spec.get("objective_checks", []),
+                    "encounter_spec": spec.get("encounter_spec", []),
                     "sort_order": index,
-                    "is_published": storey.is_published,
+                    "is_published": True,
                 },
             )
-            live_ids.append(adventure.id)
-        CommandAdventure.objects.exclude(id__in=live_ids).update(is_published=False)
+            live_level_ids.append(level.id)
+            levels_by_slug[spec["slug"]] = level
+            self._sync_variants(level=level, variant_specs=spec["variants"], builder=builder)
+        # Second pass: wire the explicit prerequisite graph now that every level
+        # exists. Prerequisites are authored as a list of level slugs.
+        for spec in ADVENTURE_LEVELS:
+            level = levels_by_slug[spec["slug"]]
+            try:
+                prereqs = [levels_by_slug[slug] for slug in spec.get("prerequisites", [])]
+            except KeyError as missing:
+                raise CommandError(
+                    f"Adventure level {spec['slug']!r} lists unknown prerequisite {missing}."
+                )
+            level.prerequisites.set(prereqs)
+        official_storey_slugs = [spec["slug"] for spec in STOREYS]
+        AdventureLevel.objects.filter(
+            command_form__command_skill__storey__slug__in=official_storey_slugs
+        ).exclude(id__in=live_level_ids).update(is_published=False)
 
     def _seed_command_skills(self, storeys: dict[str, Storey]) -> dict[str, CommandForm]:
         forms = {}
@@ -218,45 +294,10 @@ class Command(BaseCommand):
             CommandForm.objects.filter(command_skill=skill).exclude(id__in=live_form_ids).update(
                 is_published=False
             )
-        CommandSkill.objects.exclude(id__in=live_skill_ids).update(is_published=False)
+        CommandSkill.objects.filter(storey__slug__in=list(storeys.keys())).exclude(
+            id__in=live_skill_ids
+        ).update(is_published=False)
         return forms
-
-    def _seed_adventure_levels(self, forms: dict[str, CommandForm]) -> None:
-        builder = StaticLevelVariantBuilder()
-        live_level_ids = []
-        levels_by_slug: dict[str, AdventureLevel] = {}
-        for index, spec in enumerate(ADVENTURE_LEVELS, start=1):
-            form = forms[spec["usage"]]
-            level, _ = AdventureLevel.objects.update_or_create(
-                command_form=form,
-                slug=spec["slug"],
-                defaults={
-                    "title": spec["title"],
-                    "required_successful_attempts": spec["required_successful_attempts"],
-                    "min_counted_commands": spec["min_counted_commands"],
-                    "max_counted_commands": spec["max_counted_commands"],
-                    "scenario_context": spec["scenario_context"],
-                    "objective_checks": spec.get("objective_checks", []),
-                    "encounter_spec": spec.get("encounter_spec", []),
-                    "sort_order": index,
-                    "is_published": True,
-                },
-            )
-            live_level_ids.append(level.id)
-            levels_by_slug[spec["slug"]] = level
-            self._sync_variants(level=level, variant_specs=spec["variants"], builder=builder)
-        # Second pass: wire the explicit prerequisite graph now that every level
-        # exists. Prerequisites are authored as a list of level slugs.
-        for spec in ADVENTURE_LEVELS:
-            level = levels_by_slug[spec["slug"]]
-            try:
-                prereqs = [levels_by_slug[slug] for slug in spec.get("prerequisites", [])]
-            except KeyError as missing:
-                raise CommandError(
-                    f"Adventure level {spec['slug']!r} lists unknown prerequisite {missing}."
-                )
-            level.prerequisites.set(prereqs)
-        AdventureLevel.objects.exclude(id__in=live_level_ids).update(is_published=False)
 
     def _seed_challenges(self, storeys: dict[str, Storey]) -> None:
         builder = StaticLevelVariantBuilder()
@@ -297,7 +338,9 @@ class Command(BaseCommand):
             ChallengeLevel.objects.filter(challenge=challenge).exclude(
                 id__in=live_level_ids
             ).update(is_published=False)
-        Challenge.objects.exclude(id__in=live_challenge_ids).update(is_published=False)
+        Challenge.objects.filter(source_content_definition__isnull=True).exclude(
+            id__in=live_challenge_ids
+        ).update(is_published=False)
 
     def _seed_tomes(self, storeys: dict[str, Storey]) -> None:
         """Tomes are general lessons authored per storey with an explicit
@@ -318,7 +361,9 @@ class Command(BaseCommand):
                 },
             )
             live_ids.append(tome.id)
-        Tome.objects.exclude(id__in=live_ids).update(is_published=False)
+        Tome.objects.filter(source_content_definition__isnull=True).exclude(id__in=live_ids).update(
+            is_published=False
+        )
 
     def _sync_variants(
         self, *, level, variant_specs: list[dict], builder: StaticLevelVariantBuilder
@@ -370,11 +415,15 @@ class Command(BaseCommand):
             "syntax_examples": syntax_examples,
         }
 
-    def _published_storey_slugs(self) -> set[str]:
-        form_to_storey = {}
+    def _usage_to_storey_slug(self) -> dict[str, str]:
+        usage_to_storey = {}
         for skill_spec in COMMAND_CATALOG:
             for form_spec in skill_spec.get("usages", []):
-                form_to_storey[f"{skill_spec['slug']}/{form_spec['slug']}"] = skill_spec["module"]
+                usage_to_storey[f"{skill_spec['slug']}/{form_spec['slug']}"] = skill_spec["module"]
+        return usage_to_storey
+
+    def _published_storey_slugs(self) -> set[str]:
+        form_to_storey = self._usage_to_storey_slug()
         command_storeys = {
             form_to_storey[spec["usage"]]
             for spec in ADVENTURE_LEVELS

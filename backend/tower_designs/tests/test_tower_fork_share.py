@@ -1,6 +1,7 @@
 """Phase 3: private official fork + share-link behavior."""
 
 import pytest
+from django.core.management import call_command
 from rest_framework.test import APIClient
 
 from assets.models import (
@@ -12,7 +13,14 @@ from assets.models import (
     TowerPieceAsset,
 )
 from authoring.models import ContentDefinition
-from tower_designs.models import ORIGIN_OFFICIAL_FORK, ORIGIN_PERSONAL, TowerDesign
+from command_adventures.models import CommandAdventure
+from curriculum.models import Storey, Tome
+from tower_designs.models import (
+    ORIGIN_OFFICIAL_FORK,
+    ORIGIN_PERSONAL,
+    ArtifactPlacement,
+    TowerDesign,
+)
 
 
 def make_user(django_user_model, username="builder"):
@@ -50,6 +58,58 @@ def test_official_fork_is_idempotent_and_coexists_with_personal(django_user_mode
     assert personal.status_code == 201
     assert personal.json()["origin"] == ORIGIN_PERSONAL
     assert TowerDesign.objects.filter(owner=user).count() == 2
+
+
+@pytest.mark.django_db
+def test_official_fork_seeds_and_refreshes_authored_artifacts(
+    django_user_model,
+    settings,
+    tmp_path,
+):
+    settings.MEDIA_ROOT = tmp_path
+    call_command("seed_assets", "--skip-grant", verbosity=0)
+
+    storey = Storey.objects.create(
+        slug="official-storey",
+        number=1,
+        title="Official Storey",
+        description="Seeded",
+        is_published=True,
+    )
+    CommandAdventure.objects.create(
+        storey=storey,
+        slug="official-storey-adventure",
+        title="Adventure",
+        description="Seeded",
+        is_published=True,
+    )
+    Tome.objects.create(
+        storey=storey,
+        slug="official-storey-tome",
+        title="Tome",
+        placement="above_adventure",
+        pages=[],
+        is_published=True,
+    )
+    user = make_user(django_user_model)
+    client = APIClient()
+    client.force_authenticate(user=user)
+
+    first = client.post("/api/tower-designs/official-fork/")
+    assert first.status_code == 201, first.content
+    fork_id = first.json()["design"]["id"]
+    assert {artifact["role"] for artifact in first.json()["artifacts"]} == {"adventure", "tome"}
+    assert ArtifactPlacement.objects.filter(tower_design_id=fork_id).count() == 2
+
+    ArtifactPlacement.objects.filter(tower_design_id=fork_id).delete()
+    refreshed = client.post("/api/tower-designs/official-fork/")
+
+    assert refreshed.status_code == 201, refreshed.content
+    assert refreshed.json()["design"]["id"] == fork_id
+    assert {artifact["role"] for artifact in refreshed.json()["artifacts"]} == {
+        "adventure",
+        "tome",
+    }
 
 
 @pytest.mark.django_db

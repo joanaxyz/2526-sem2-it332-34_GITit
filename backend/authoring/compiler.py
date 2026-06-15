@@ -101,6 +101,7 @@ class ContentRuntimeCompiler:
                 "mob_roster": mob_roster,
                 "boss_roster": boss_roster,
                 "battle_stage": battle_stage,
+                "tower_layout": {},
             },
         )[0]
 
@@ -156,15 +157,22 @@ class ContentRuntimeCompiler:
                 "sort_order": 0,
             },
         )[0]
-        self._replace_adventure_levels(form=form, levels=levels)
+        self._replace_adventure_levels(form=form, command_adventure=adventure, levels=levels)
         return adventure
 
-    def _replace_adventure_levels(self, *, form: CommandForm, levels: list[dict[str, Any]]) -> None:
+    def _replace_adventure_levels(
+        self,
+        *,
+        form: CommandForm,
+        command_adventure: CommandAdventure,
+        levels: list[dict[str, Any]],
+    ) -> None:
         AdventureLevel.objects.filter(command_form=form).delete()
         for index, authored in enumerate(levels):
             budget = authored.get("command_budget") or {}
             level = AdventureLevel.objects.create(
                 command_form=form,
+                command_adventure=command_adventure,
                 slug=authored["slug"],
                 title=authored["title"],
                 required_successful_attempts=int(authored.get("required_successful_attempts") or 1),
