@@ -118,6 +118,8 @@ def test_storey_overview_emits_challenge_artifact_per_difficulty(db, django_user
         "official-portcullis-artifact",
         "official-trial-gate-hard-artifact",
     ]
+    assert [artifact["x"] for artifact in challenge_artifacts] == [112, 184, 256]
+    assert {artifact["y"] for artifact in challenge_artifacts} == {124}
     assert [artifact["contentBinding"]["difficulty"] for artifact in challenge_artifacts] == [
         "easy",
         "medium",

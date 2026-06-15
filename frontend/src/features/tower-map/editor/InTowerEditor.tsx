@@ -1,23 +1,28 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Check, Copy, Layers, Maximize2, PencilLine, Share2, Swords, Trash2, UploadCloud } from 'lucide-react'
+import { Check, Copy, Layers, Maximize2, PencilLine, Share2, Trash2, UploadCloud } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { authoringApi } from '@/features/authoring/api/authoringApi'
 import type { ContentDefinition, ContentKind } from '@/features/authoring/types'
 import {
   ARTIFACT_ROLE_LABEL,
+  ARTIFACT_ROTATION_RANGE,
+  ARTIFACT_SCALE_RANGE,
   INTERACTABLE_ROLES,
   IDENTITY_PIECE_TRANSFORM,
   PIECE_ROTATION_RANGE,
   PIECE_SCALE_RANGE,
   PIECE_TYPE_LABEL,
   type ArtifactEdit,
+  type ArtifactTransform,
   type PieceTransform,
+  clampNumber,
   pieceIdFromInstance,
   pieceTransformIsIdentity,
   pieceTransformToRecord,
   pieceTransformsEqual,
+  readArtifactTransform,
   readPieceTransform,
 } from '@/features/tower-designs/editorUtils'
 import {
@@ -32,7 +37,13 @@ import { pieceHasWalkRail } from '@/features/tower-map/components/towerPieceData
 import { useZoomPan, type ZoomPan } from '@/features/tower-map/editor/useZoomPan'
 import { backendUrl } from '@/shared/api/httpClient'
 import { queryKeys } from '@/shared/api/queryKeys'
-import type { TowerArtifactRole, TowerLayoutPieceDescriptor, TowerPieceAssetDescriptor, TowerPieceType } from '@/shared/assets/types'
+import type {
+  TowerArtifactAssetDescriptor,
+  TowerArtifactRole,
+  TowerLayoutPieceDescriptor,
+  TowerPieceAssetDescriptor,
+  TowerPieceType,
+} from '@/shared/assets/types'
 import { ApiError } from '@/shared/api/apiError'
 import { Button } from '@/shared/components/Button'
 import { ErrorState } from '@/shared/components/ErrorState'
@@ -92,6 +103,7 @@ export function InTowerEditor({
   const editor = useDesignEditor(designId)
   const zoom = useZoomPan()
   const [selectedPieceId, setSelectedPieceId] = useState<number | null>(null)
+  const [selectedArtifactId, setSelectedArtifactId] = useState<number | string | null>(null)
   const [uploadOpen, setUploadOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const [placementDraft, setPlacementDraft] = useState<PlacementDraft>(null)
@@ -172,10 +184,18 @@ export function InTowerEditor({
     })
   }
 
-  function scaleArtifact(artifact: ArtifactPlacementDescriptor, scale: number) {
+  function transformArtifact(artifact: ArtifactPlacementDescriptor, transform: ArtifactTransform) {
     setArtifactEdits((prev) => {
       const map = new Map(prev)
-      const next: ArtifactEdit = { ...(map.get(artifact.id) ?? {}), scale }
+      const next: ArtifactEdit = {
+        ...(map.get(artifact.id) ?? {}),
+        x: transform.x,
+        y: transform.y,
+        scale: transform.scale,
+        rotation: transform.rotation,
+        width: transform.width,
+        height: transform.height,
+      }
       if (editMatchesBase(next, artifact)) map.delete(artifact.id)
       else map.set(artifact.id, next)
       return map
@@ -184,6 +204,7 @@ export function InTowerEditor({
 
   function removeArtifact(placementId: number | string) {
     if (typeof placementId === 'number') editor.deleteArtifact.mutate(placementId)
+    setSelectedArtifactId((id) => (id === placementId ? null : id))
     setArtifactEdits((prev) => {
       if (!prev.has(placementId)) return prev
       const map = new Map(prev)
@@ -246,13 +267,16 @@ export function InTowerEditor({
   const selectedPiece = selectedPieceId
     ? overview.tower_layout.pieces.find((p) => pieceIdFromInstance(p.instanceId) === selectedPieceId) ?? null
     : null
-  const selectedArtifacts = selectedPiece
-    ? overview.artifacts.filter((artifact) => artifact.targetInstanceId === selectedPiece.instanceId)
-    : []
+  const selectedArtifact = selectedArtifactId !== null
+    ? overview.artifacts.find((artifact) => artifact.id === selectedArtifactId) ?? null
+    : null
   const selectedTransform =
     selectedPiece && selectedPieceId !== null
       ? pieceTransforms.get(selectedPieceId) ?? readPieceTransform(selectedPiece.transform)
       : IDENTITY_PIECE_TRANSFORM
+  const selectedArtifactTransform = selectedArtifact
+    ? readArtifactTransform(selectedArtifact, artifactEdits.get(selectedArtifact.id))
+    : null
 
   return (
     <div className="in-tower-editor">
@@ -271,12 +295,19 @@ export function InTowerEditor({
           pieceDescriptorById={pieceDescriptorById}
           artifactDescriptorBySlug={editor.artifactDescriptorBySlug}
           selectedPieceId={selectedPieceId}
+          selectedArtifactId={selectedArtifactId}
           pendingSwaps={pendingSwaps}
           pieceTransforms={pieceTransforms}
           artifactEdits={artifactEdits}
           zoomScale={zoom.scale}
           placementDraft={placementDraft}
           onSelectPiece={(pieceId) => {
+            setSelectedPieceId(pieceId)
+            setSelectedArtifactId(null)
+            setPlacementDraft(null)
+          }}
+          onSelectArtifact={(artifactId, pieceId) => {
+            setSelectedArtifactId(artifactId)
             setSelectedPieceId(pieceId)
             setPlacementDraft(null)
           }}
@@ -296,6 +327,10 @@ export function InTowerEditor({
             setPlacementDraft(null)
           }}
           onMoveArtifact={moveArtifact}
+          onTransformArtifact={(placementId, next) => {
+            const artifact = overview.artifacts.find((item) => item.id === placementId)
+            if (artifact) transformArtifact(artifact, next)
+          }}
           onTransformPiece={stagePieceTransform}
         />
       </section>
@@ -340,7 +375,7 @@ export function InTowerEditor({
               />
             )}
             <p className="ite-substat">
-              {storeyIndexes.length} storey{storeyIndexes.length === 1 ? '' : 's'} · {pieceCount} piece
+              {storeyIndexes.length} storey{storeyIndexes.length === 1 ? '' : 's'} - {pieceCount} piece
               {pieceCount === 1 ? '' : 's'}
             </p>
           </div>
@@ -387,103 +422,351 @@ export function InTowerEditor({
         ) : null}
         {publishError ? <p className="editor-warning is-error">{publishError}</p> : null}
 
-        <ContextualPieceEditor
+        <StoragePanel
           overview={overview}
           editor={editor}
-          selectedPieceId={selectedPieceId}
-          selectedTransform={selectedTransform}
-          stagedAssetId={stagedAssetId}
-          artifactEdits={artifactEdits}
           placementDraft={placementDraft}
-          onStageSwap={pickSwap}
-          onTransformPiece={stagePieceTransform}
-          onScaleArtifact={scaleArtifact}
-          onRemoveArtifact={removeArtifact}
           onUploadClick={() => setUploadOpen(true)}
           onPlacementDraft={setPlacementDraft}
         />
       </aside>
 
-      <EditorQuestDock artifacts={selectedArtifacts} overview={overview} />
+      <aside
+        className="ite-properties-dock"
+        aria-label="Tower editor properties"
+        onPointerDown={(event) => event.stopPropagation()}
+      >
+        <PropertiesPanel
+          overview={overview}
+          editor={editor}
+          selectedPieceId={selectedPieceId}
+          selectedArtifact={selectedArtifact}
+          selectedTransform={selectedTransform}
+          selectedArtifactTransform={selectedArtifactTransform}
+          stagedAssetId={stagedAssetId}
+          onStageSwap={pickSwap}
+          onTransformPiece={stagePieceTransform}
+          onTransformArtifact={(artifact, next) => transformArtifact(artifact, next)}
+          onRemovePiece={(pieceId) => {
+            editor.deletePiece.mutate(pieceId)
+            setSelectedPieceId(null)
+            setSelectedArtifactId(null)
+          }}
+          onRemoveArtifact={removeArtifact}
+          onUploadClick={() => setUploadOpen(true)}
+        />
+      </aside>
+
     </div>
   )
 }
 
-function EditorQuestDock({
-  artifacts,
-  overview,
-}: {
-  artifacts: ArtifactPlacementDescriptor[]
-  overview: TowerDesignOverview
-}) {
-  const questArtifacts = artifacts.filter((artifact) => artifact.role !== 'normal')
-  if (!questArtifacts.length) return null
-  return (
-    <aside className="ite-quest-dock" aria-label="Quest authoring">
-      <h2 className="editor-rail-title">Quest levels</h2>
-      {questArtifacts.map((artifact) => {
-        const content = contentForArtifact(overview, artifact)
-        const authorHref = content ? `/authoring/${content.id}` : `/authoring/new/${artifact.role}`
-        return (
-          <section className="ite-quest-row" key={artifact.id}>
-            <div className="ite-quest-main">
-              <span className={cn('ite-quest-role', `is-${artifact.role}`)}>{ARTIFACT_ROLE_LABEL[artifact.role]}</span>
-              <strong>{content?.title ?? artifact.assetSlug}</strong>
-            </div>
-            <div className="ite-quest-actions">
-              <Link className="ite-quest-action" to={authorHref}>
-                <PencilLine className="size-3.5" aria-hidden="true" />
-                Author content
-              </Link>
-              <button className="ite-quest-action" type="button" disabled title="Deferred">
-                <Swords className="size-3.5" aria-hidden="true" />
-                Customize battle
-              </button>
-            </div>
-          </section>
-        )
-      })}
-    </aside>
-  )
-}
-
-function ContextualPieceEditor({
+function StoragePanel({
   overview,
   editor,
-  selectedPieceId,
-  selectedTransform,
-  stagedAssetId,
-  artifactEdits,
   placementDraft,
-  onStageSwap,
-  onTransformPiece,
-  onScaleArtifact,
-  onRemoveArtifact,
   onUploadClick,
   onPlacementDraft,
 }: {
   overview: TowerDesignOverview
   editor: ReturnType<typeof useDesignEditor>
-  selectedPieceId: number | null
-  selectedTransform: PieceTransform
-  stagedAssetId: number | null
-  artifactEdits: Map<number | string, ArtifactEdit>
   placementDraft: PlacementDraft
-  onStageSwap: (pieceId: number, assetId: number) => void
-  onTransformPiece: (pieceId: number, next: PieceTransform) => void
-  onScaleArtifact: (artifact: ArtifactPlacementDescriptor, scale: number) => void
-  onRemoveArtifact: (placementId: number | string) => void
   onUploadClick: () => void
   onPlacementDraft: (draft: PlacementDraft) => void
+}) {
+  const [role, setRole] = useState<TowerArtifactRole>('adventure')
+  const [contentId, setContentId] = useState<number | null>(null)
+  const contentKind = role as ContentKind
+  const contentQuery = useQuery({
+    queryKey: queryKeys.authoringContent(contentKind),
+    queryFn: () => authoringApi.list(contentKind),
+  })
+  const contentOptions = (contentQuery.data?.results ?? []).filter(
+    (content) => content.status === 'published' || content.status === 'testable',
+  )
+  const selectedContentId = contentId ?? contentOptions[0]?.id ?? null
+  const spires = editor.pieceDescriptors.filter((descriptor) => descriptorPieceType(descriptor) === 'crown')
+  const sections = editor.pieceDescriptors.filter((descriptor) => descriptorPieceType(descriptor) === 'section')
+  const landings = editor.pieceDescriptors.filter((descriptor) => descriptorPieceType(descriptor) === 'landing')
+
+  return (
+    <div className="ite-inspector" aria-label="Asset storage">
+      <div className="ite-section ite-section--head">
+        <div>
+          <p className="ite-eyebrow">Storage</p>
+          <h2 className="ite-section-heading">{overview.tower_layout.pieces.length} assets placed</h2>
+        </div>
+        <Button size="sm" variant="outline" onClick={onUploadClick}>
+          <UploadCloud className="size-4" aria-hidden="true" />
+          Upload
+        </Button>
+      </div>
+
+      <StoragePieceShelf title="Spire" descriptors={spires} />
+      <StoragePieceShelf title="Sections" descriptors={sections} />
+      <StoragePieceShelf title="Landings" descriptors={landings} />
+      <StorageArtifactShelf
+        title="Normal artifacts"
+        descriptors={editor.artifactDescriptors}
+        payloadFor={(descriptor) => ({
+          source: 'asset-artifact',
+          assetId: descriptor.id,
+          slug: descriptor.slug,
+          role: 'normal',
+        })}
+        active={placementDraft}
+        onPlacementDraft={onPlacementDraft}
+      />
+      <section className="ite-section">
+        <div className="ite-section-head">
+          <h3 className="ite-section-title">Interactive artifacts</h3>
+          <span className="ite-rule-pill">{role === 'challenge' ? 'max 3' : 'max 1'}</span>
+        </div>
+        <div className="editor-role-row">
+          {INTERACTABLE_ROLES.map((value) => (
+            <button
+              key={value}
+              type="button"
+              className={cn('editor-filter-chip', role === value && 'is-active')}
+              aria-pressed={role === value}
+              onClick={() => {
+                setRole(value)
+                setContentId(null)
+                onPlacementDraft(null)
+              }}
+            >
+              {ARTIFACT_ROLE_LABEL[value]}
+            </button>
+          ))}
+        </div>
+        <label className="ite-field ite-field--wide">
+          <span className="ite-field-label">Content</span>
+          <select
+            className="ite-field-input"
+            value={selectedContentId ?? ''}
+            onChange={(event) => setContentId(Number(event.target.value))}
+          >
+            {contentOptions.map((content) => (
+              <option key={content.id} value={content.id}>
+                {content.title}
+              </option>
+            ))}
+          </select>
+        </label>
+        {contentOptions.length === 0 ? (
+          <p className="ite-empty ite-empty--inline">Publish or test content before placing an interactive artifact.</p>
+        ) : null}
+        <StorageArtifactGrid
+          descriptors={editor.artifactDescriptors}
+          disabled={selectedContentId === null}
+          active={placementDraft}
+          payloadFor={(descriptor) => ({
+            source: 'asset-artifact',
+            assetId: descriptor.id,
+            slug: descriptor.slug,
+            role,
+            contentDefinitionId: selectedContentId,
+          })}
+          onPlacementDraft={onPlacementDraft}
+        />
+      </section>
+      {placementDraft ? <p className="editor-palette-active">Drag to a tower piece, or click the destination piece.</p> : null}
+    </div>
+  )
+}
+
+function StoragePieceShelf({
+  title,
+  descriptors,
+}: {
+  title: string
+  descriptors: TowerPieceAssetDescriptor[]
+}) {
+  return (
+    <section className="ite-section">
+      <div className="ite-section-head">
+        <h3 className="ite-section-title">{title}</h3>
+        <span className="ite-rule-pill">{descriptors.length}</span>
+      </div>
+      <div className="editor-skin-grid">
+        {descriptors.map((descriptor) => {
+          const payload: EditorDragPayload = {
+            source: 'asset-piece',
+            assetId: descriptor.id,
+            slug: descriptor.slug,
+            pieceType: descriptorPieceType(descriptor) ?? 'section',
+          }
+          const thumb = thumbUrl(descriptor)
+          return (
+            <button
+              key={descriptor.slug}
+              type="button"
+              className={cn('editor-skin-cell', `is-${descriptor.source ?? 'official'}`)}
+              draggable
+              title={descriptor.label}
+              aria-label={`Drag ${descriptor.label}`}
+              onDragStart={(event) => setDrag(event, payload)}
+            >
+              <span className="editor-skin-thumb">
+                {thumb ? <img src={thumb} alt="" draggable={false} /> : null}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function StorageArtifactShelf({
+  title,
+  descriptors,
+  payloadFor,
+  active,
+  onPlacementDraft,
+}: {
+  title: string
+  descriptors: TowerArtifactAssetDescriptor[]
+  payloadFor: (descriptor: TowerArtifactAssetDescriptor) => Exclude<PlacementDraft, null>
+  active: PlacementDraft
+  onPlacementDraft: (draft: PlacementDraft) => void
+}) {
+  return (
+    <section className="ite-section">
+      <div className="ite-section-head">
+        <h3 className="ite-section-title">{title}</h3>
+        <span className="ite-rule-pill">{descriptors.length}</span>
+      </div>
+      <StorageArtifactGrid
+        descriptors={descriptors}
+        payloadFor={payloadFor}
+        active={active}
+        onPlacementDraft={onPlacementDraft}
+      />
+    </section>
+  )
+}
+
+function StorageArtifactGrid({
+  descriptors,
+  payloadFor,
+  active,
+  disabled = false,
+  onPlacementDraft,
+}: {
+  descriptors: TowerArtifactAssetDescriptor[]
+  payloadFor: (descriptor: TowerArtifactAssetDescriptor) => Exclude<PlacementDraft, null>
+  active: PlacementDraft
+  disabled?: boolean
+  onPlacementDraft: (draft: PlacementDraft) => void
+}) {
+  return (
+    <div className="editor-artifact-grid">
+      {descriptors.map((descriptor) => {
+        const payload = payloadFor(descriptor)
+        const isActive =
+          payload.source === 'asset-artifact' &&
+          active?.source === 'asset-artifact' &&
+          active.assetId === payload.assetId &&
+          active.role === payload.role
+        return (
+          <button
+            type="button"
+            key={`${payload.role}-${descriptor.slug}`}
+            className={cn('editor-palette-cell', isActive && 'is-applicable')}
+            draggable={!disabled}
+            disabled={disabled}
+            title={descriptor.label}
+            aria-label={`Place ${descriptor.label}`}
+            onClick={() => onPlacementDraft(disabled ? null : payload)}
+            onDragStart={(event) => {
+              if (!disabled) setDrag(event, payload)
+            }}
+          >
+            <span className="editor-palette-thumb">
+              {thumbUrl(descriptor) ? <img src={thumbUrl(descriptor) ?? ''} alt="" draggable={false} /> : null}
+            </span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+function PropertiesPanel({
+  overview,
+  editor,
+  selectedPieceId,
+  selectedArtifact,
+  selectedTransform,
+  selectedArtifactTransform,
+  stagedAssetId,
+  onStageSwap,
+  onTransformPiece,
+  onTransformArtifact,
+  onRemovePiece,
+  onRemoveArtifact,
+  onUploadClick,
+}: {
+  overview: TowerDesignOverview
+  editor: ReturnType<typeof useDesignEditor>
+  selectedPieceId: number | null
+  selectedArtifact: ArtifactPlacementDescriptor | null
+  selectedTransform: PieceTransform
+  selectedArtifactTransform: ArtifactTransform | null
+  stagedAssetId: number | null
+  onStageSwap: (pieceId: number, assetId: number) => void
+  onTransformPiece: (pieceId: number, next: PieceTransform) => void
+  onTransformArtifact: (artifact: ArtifactPlacementDescriptor, next: ArtifactTransform) => void
+  onRemovePiece: (pieceId: number) => void
+  onRemoveArtifact: (placementId: number | string) => void
+  onUploadClick: () => void
 }) {
   const piece = selectedPieceId
     ? overview.tower_layout.pieces.find((p) => pieceIdFromInstance(p.instanceId) === selectedPieceId) ?? null
     : null
 
+  if (selectedArtifact && selectedArtifactTransform) {
+    const content = contentForArtifact(overview, selectedArtifact)
+    const authorHref = content ? `/authoring/${content.id}` : `/authoring/new/${selectedArtifact.role}`
+    return (
+      <div className="ite-inspector" aria-label="Artifact properties">
+        <div className="ite-section ite-section--head">
+          <div>
+            <p className="ite-eyebrow">Artifact</p>
+            <h2 className="ite-section-heading">{ARTIFACT_ROLE_LABEL[selectedArtifact.role]}</h2>
+          </div>
+          <button
+            type="button"
+            className="editor-icon-btn"
+            aria-label="Remove artifact"
+            onClick={() => onRemoveArtifact(selectedArtifact.id)}
+          >
+            <Trash2 className="size-3.5" aria-hidden="true" />
+          </button>
+        </div>
+        <ArtifactTransformPanel
+          artifact={selectedArtifact}
+          transform={selectedArtifactTransform}
+          onChange={(next) => onTransformArtifact(selectedArtifact, next)}
+        />
+        {selectedArtifact.role !== 'normal' ? (
+          <section className="ite-section">
+            <h3 className="ite-section-title">Content</h3>
+            <Link className="ite-quest-action" to={authorHref}>
+              <PencilLine className="size-3.5" aria-hidden="true" />
+              {content ? `Author ${content.title}` : 'Author content'}
+            </Link>
+          </section>
+        ) : null}
+      </div>
+    )
+  }
+
   if (!piece || selectedPieceId === null) {
     return (
-      <div className="ite-inspector ite-inspector--empty" aria-label="Piece editor">
-        <p className="ite-empty">Select a tower piece to swap its art, drop artifacts, or transform it on the canvas.</p>
+      <div className="ite-inspector ite-inspector--empty" aria-label="Properties">
+        <p className="ite-empty">Select a tower piece to edit its properties, or pick an artifact to transform it.</p>
         <Button size="sm" variant="outline" onClick={onUploadClick}>
           <UploadCloud className="size-4" aria-hidden="true" />
           Upload asset
@@ -493,19 +776,22 @@ function ContextualPieceEditor({
   }
 
   const pieceType = piece.pieceType as TowerPieceType
-  const artifacts = overview.artifacts.filter((a) => a.targetInstanceId === piece.instanceId)
 
   return (
-    <div className="ite-inspector" aria-label="Piece editor">
+    <div className="ite-inspector" aria-label="Piece properties">
       <div className="ite-section ite-section--head">
         <div>
-          <p className="ite-eyebrow">Selected</p>
+          <p className="ite-eyebrow">Piece</p>
           <h2 className="ite-section-heading">{PIECE_TYPE_LABEL[pieceType]}</h2>
         </div>
-        <Button size="sm" variant="outline" onClick={onUploadClick}>
-          <UploadCloud className="size-4" aria-hidden="true" />
-          Upload
-        </Button>
+        <button
+          type="button"
+          className="editor-danger-icon"
+          aria-label="Delete selected piece"
+          onClick={() => onRemovePiece(selectedPieceId)}
+        >
+          <Trash2 className="size-3.5" aria-hidden="true" />
+        </button>
       </div>
 
       <SkinPanel
@@ -521,19 +807,6 @@ function ContextualPieceEditor({
         transform={selectedTransform}
         onChange={onTransformPiece}
       />
-
-      {pieceType === 'section' || pieceType === 'landing' ? (
-        <ArtifactPanel
-          piece={piece}
-          editor={editor}
-          artifacts={artifacts}
-          artifactEdits={artifactEdits}
-          placementDraft={placementDraft}
-          onPlacementDraft={onPlacementDraft}
-          onScaleArtifact={onScaleArtifact}
-          onRemoveArtifact={onRemoveArtifact}
-        />
-      ) : null}
     </div>
   )
 }
@@ -626,13 +899,13 @@ function TransformPanel({
           Reset
         </button>
       </div>
-      <p className="ite-hint">Drag the frame on the tower to move, scale, or rotate — or set exact values.</p>
+      <p className="ite-hint">Drag the frame on the tower to move, scale, or rotate, or set exact values.</p>
       <div className="ite-field-grid">
         <NumberField label="X" unit="px" value={transform.x} step={1} onCommit={(v) => update('x', v)} />
         <NumberField label="Y" unit="px" value={transform.y} step={1} onCommit={(v) => update('y', v)} />
         <NumberField
           label="Scale"
-          unit="×"
+          unit="x"
           value={transform.scale}
           step={0.05}
           min={PIECE_SCALE_RANGE.min}
@@ -641,13 +914,81 @@ function TransformPanel({
         />
         <NumberField
           label="Rotate"
-          unit="°"
+          unit="deg"
           value={transform.rotation}
           step={1}
           min={PIECE_ROTATION_RANGE.min}
           max={PIECE_ROTATION_RANGE.max}
           onCommit={(v) => update('rotation', v)}
         />
+      </div>
+    </section>
+  )
+}
+
+function ArtifactTransformPanel({
+  artifact,
+  transform,
+  onChange,
+}: {
+  artifact: ArtifactPlacementDescriptor
+  transform: ArtifactTransform
+  onChange: (next: ArtifactTransform) => void
+}) {
+  function update(field: keyof ArtifactTransform, value: number) {
+    if (!Number.isFinite(value)) return
+    const next = {
+      ...transform,
+      [field]:
+        field === 'scale'
+          ? clampNumber(value, ARTIFACT_SCALE_RANGE.min, ARTIFACT_SCALE_RANGE.max)
+          : field === 'rotation'
+            ? clampNumber(value, ARTIFACT_ROTATION_RANGE.min, ARTIFACT_ROTATION_RANGE.max)
+            : value,
+    }
+    onChange(next)
+  }
+
+  const committed = readArtifactTransform(artifact)
+  const canReset = (Object.keys(transform) as (keyof ArtifactTransform)[]).some((key) => transform[key] !== committed[key])
+
+  return (
+    <section className="ite-section">
+      <div className="ite-section-head">
+        <h3 className="ite-section-title">Transform</h3>
+        <button
+          type="button"
+          className="ite-mini-btn"
+          disabled={!canReset}
+          onClick={() => onChange(committed)}
+        >
+          Reset
+        </button>
+      </div>
+      <p className="ite-hint">Drag the artifact frame, or set exact placement values.</p>
+      <div className="ite-field-grid">
+        <NumberField label="X" unit="px" value={transform.x} step={1} onCommit={(v) => update('x', v)} />
+        <NumberField label="Y" unit="px" value={transform.y} step={1} onCommit={(v) => update('y', v)} />
+        <NumberField
+          label="Scale"
+          unit="x"
+          value={transform.scale}
+          step={0.05}
+          min={ARTIFACT_SCALE_RANGE.min}
+          max={ARTIFACT_SCALE_RANGE.max}
+          onCommit={(v) => update('scale', v)}
+        />
+        <NumberField
+          label="Rotate"
+          unit="deg"
+          value={transform.rotation}
+          step={1}
+          min={ARTIFACT_ROTATION_RANGE.min}
+          max={ARTIFACT_ROTATION_RANGE.max}
+          onCommit={(v) => update('rotation', v)}
+        />
+        <NumberField label="Width" unit="px" value={transform.width} step={1} min={1} onCommit={(v) => update('width', v)} />
+        <NumberField label="Height" unit="px" value={transform.height} step={1} min={1} onCommit={(v) => update('height', v)} />
       </div>
     </section>
   )
@@ -686,175 +1027,6 @@ function NumberField({
         onChange={(event) => onCommit(Number(event.target.value))}
       />
     </label>
-  )
-}
-
-function ArtifactPanel({
-  piece,
-  editor,
-  artifacts,
-  artifactEdits,
-  placementDraft,
-  onPlacementDraft,
-  onScaleArtifact,
-  onRemoveArtifact,
-}: {
-  piece: TowerLayoutPieceDescriptor
-  editor: ReturnType<typeof useDesignEditor>
-  artifacts: ArtifactPlacementDescriptor[]
-  artifactEdits: Map<number | string, ArtifactEdit>
-  placementDraft: PlacementDraft
-  onPlacementDraft: (draft: PlacementDraft) => void
-  onScaleArtifact: (artifact: ArtifactPlacementDescriptor, scale: number) => void
-  onRemoveArtifact: (placementId: number | string) => void
-}) {
-  const [role, setRole] = useState<TowerArtifactRole>('normal')
-  const [contentId, setContentId] = useState<number | null>(null)
-  const allowedRoles: TowerArtifactRole[] = piece.pieceType === 'landing' ? ['normal'] : ['normal', ...INTERACTABLE_ROLES]
-  const activeRole = allowedRoles.includes(role) ? role : allowedRoles[0]
-  const contentKind = activeRole === 'normal' ? null : (activeRole as ContentKind)
-  const contentQuery = useQuery({
-    queryKey: contentKind ? queryKeys.authoringContent(contentKind) : ['authoring-content-disabled'],
-    queryFn: () => authoringApi.list(contentKind as ContentKind),
-    enabled: contentKind !== null,
-  })
-  const contentOptions = (contentQuery.data?.results ?? []).filter(
-    (content) => content.status === 'published' || content.status === 'testable',
-  )
-  const selectedContentId = contentKind ? contentId ?? contentOptions[0]?.id ?? null : null
-  const roleConflict = activeRole !== 'normal' && artifacts.some((artifact) => artifact.role !== 'normal' && artifact.role !== activeRole)
-
-  return (
-    <section className="ite-section">
-      <h3 className="ite-section-title">Artifacts</h3>
-      <div className="editor-role-row">
-        {allowedRoles.map((value) => (
-          <button
-            key={value}
-            type="button"
-            className={cn('editor-filter-chip', activeRole === value && 'is-active')}
-            aria-pressed={activeRole === value}
-            onClick={() => {
-              setRole(value)
-              onPlacementDraft(null)
-            }}
-          >
-            {ARTIFACT_ROLE_LABEL[value]}
-          </button>
-        ))}
-      </div>
-
-      {contentKind ? (
-        <label className="ite-field ite-field--wide">
-          <span className="ite-field-label">Content</span>
-          <select
-            className="ite-field-input"
-            value={selectedContentId ?? ''}
-            onChange={(event) => setContentId(Number(event.target.value))}
-          >
-            {contentOptions.map((content) => (
-              <option key={content.id} value={content.id}>
-                {content.title}
-              </option>
-            ))}
-          </select>
-        </label>
-      ) : null}
-
-      {roleConflict ? (
-        <p className="editor-warning is-error">This section already has a different interactable artifact type.</p>
-      ) : null}
-
-      <div className="editor-artifact-grid">
-        {editor.artifactDescriptors.map((descriptor) => {
-          const payload: EditorDragPayload = {
-            source: 'asset-artifact',
-            assetId: descriptor.id,
-            slug: descriptor.slug,
-            role: activeRole,
-            contentDefinitionId: selectedContentId,
-          }
-          const active =
-            placementDraft?.source === 'asset-artifact' &&
-            placementDraft.assetId === descriptor.id &&
-            placementDraft.role === activeRole
-          const disabled = roleConflict || (activeRole !== 'normal' && selectedContentId === null)
-          return (
-            <button
-              type="button"
-              key={descriptor.slug}
-              className={cn('editor-palette-cell', active && 'is-applicable')}
-              draggable={!disabled}
-              disabled={disabled}
-              title={descriptor.label}
-              aria-label={`Place ${descriptor.label}`}
-              onClick={() => onPlacementDraft(disabled ? null : payload)}
-              onDragStart={(event) => {
-                if (!disabled) setDrag(event, payload)
-              }}
-            >
-              <span className="editor-palette-thumb">
-                {thumbUrl(descriptor) ? <img src={thumbUrl(descriptor) ?? ''} alt="" draggable={false} /> : null}
-              </span>
-            </button>
-          )
-        })}
-      </div>
-
-      {placementDraft ? (
-        <p className="editor-palette-active">Click the piece or drag the asset onto the exact spot.</p>
-      ) : null}
-
-      <PlacedArtifactList
-        artifacts={artifacts}
-        artifactEdits={artifactEdits}
-        onScaleArtifact={onScaleArtifact}
-        onRemoveArtifact={onRemoveArtifact}
-      />
-    </section>
-  )
-}
-
-function PlacedArtifactList({
-  artifacts,
-  artifactEdits,
-  onScaleArtifact,
-  onRemoveArtifact,
-}: {
-  artifacts: ArtifactPlacementDescriptor[]
-  artifactEdits: Map<number | string, ArtifactEdit>
-  onScaleArtifact: (artifact: ArtifactPlacementDescriptor, scale: number) => void
-  onRemoveArtifact: (placementId: number | string) => void
-}) {
-  if (!artifacts.length) return <p className="ite-empty ite-empty--inline">No artifacts placed on this piece.</p>
-  return (
-    <ul className="editor-artifact-list">
-      {artifacts.map((artifact) => {
-        const scale = artifactEdits.get(artifact.id)?.scale ?? artifact.scale
-        return (
-          <li key={artifact.id} className="editor-artifact-row">
-            <span className="editor-artifact-slug">{artifact.assetSlug}</span>
-            <input
-              aria-label={`Size ${artifact.assetSlug}`}
-              type="range"
-              min="0.25"
-              max="2.5"
-              step="0.05"
-              value={scale}
-              onChange={(event) => onScaleArtifact(artifact, Number(event.target.value))}
-            />
-            <button
-              type="button"
-              className="editor-icon-btn"
-              aria-label="Remove artifact"
-              onClick={() => onRemoveArtifact(artifact.id)}
-            >
-              <Trash2 className="size-3.5" aria-hidden="true" />
-            </button>
-          </li>
-        )
-      })}
-    </ul>
   )
 }
 

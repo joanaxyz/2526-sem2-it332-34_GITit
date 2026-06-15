@@ -388,6 +388,16 @@ describe('TowerStoreySection', () => {
     expect(
       screen.getByRole('button', { name: /select compose clean history: hard/i }),
     ).toBeInTheDocument()
+    const easyDoor = screen.getByRole('button', { name: /select compose clean history: easy/i })
+    const mediumDoor = screen.getByRole('button', { name: /select compose clean history: medium/i })
+    const hardDoor = screen.getByRole('button', { name: /select compose clean history: hard/i })
+    const challengeSection = document.querySelector('[data-piece-id="storey-2-challenge-section-30"]') as HTMLElement
+    expect(challengeSection.style.getPropertyValue('--tower-piece-aspect')).toBe(String(220 / 48))
+    expect(new Set([easyDoor.style.top, mediumDoor.style.top, hardDoor.style.top])).toEqual(
+      new Set([easyDoor.style.top]),
+    )
+    expect(parseFloat(easyDoor.style.left)).toBeLessThan(parseFloat(mediumDoor.style.left))
+    expect(parseFloat(mediumDoor.style.left)).toBeLessThan(parseFloat(hardDoor.style.left))
     expect(screen.getByRole('button', { name: /select command adventure/i })).toHaveAttribute(
       'data-piece-id',
       'storey-2-adventure-section',

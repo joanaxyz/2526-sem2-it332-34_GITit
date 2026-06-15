@@ -126,3 +126,111 @@ def test_tower_piece_rejects_non_piece_asset(django_user_model):
             piece_asset=artifact,
             piece_type="section",
         )
+
+
+@pytest.mark.django_db
+def test_section_allows_only_one_non_challenge_interactable(django_user_model):
+    user = make_user(django_user_model)
+    design, piece, artifact = _design_piece_and_artifact(user)
+    first = ContentDefinition.objects.create(
+        owner=user,
+        kind="adventure",
+        status="published",
+        slug="adventure-a",
+        title="Adventure A",
+    )
+    second = ContentDefinition.objects.create(
+        owner=user,
+        kind="adventure",
+        status="published",
+        slug="adventure-b",
+        title="Adventure B",
+    )
+
+    ArtifactPlacement.objects.create(
+        tower_design=design,
+        target_piece_instance=piece,
+        artifact_asset=artifact,
+        role="adventure",
+        content_definition=first,
+    )
+
+    with pytest.raises(ValidationError):
+        ArtifactPlacement.objects.create(
+            tower_design=design,
+            target_piece_instance=piece,
+            artifact_asset=artifact,
+            role="adventure",
+            content_definition=second,
+        )
+
+
+@pytest.mark.django_db
+def test_section_allows_up_to_three_challenge_interactables_only(django_user_model):
+    user = make_user(django_user_model)
+    design, piece, artifact = _design_piece_and_artifact(user)
+    challenges = [
+        ContentDefinition.objects.create(
+            owner=user,
+            kind="challenge",
+            status="published",
+            slug=f"challenge-{index}",
+            title=f"Challenge {index}",
+        )
+        for index in range(4)
+    ]
+    adventure = ContentDefinition.objects.create(
+        owner=user,
+        kind="adventure",
+        status="published",
+        slug="adventure",
+        title="Adventure",
+    )
+
+    for content in challenges[:3]:
+        ArtifactPlacement.objects.create(
+            tower_design=design,
+            target_piece_instance=piece,
+            artifact_asset=artifact,
+            role="challenge",
+            content_definition=content,
+        )
+
+    with pytest.raises(ValidationError):
+        ArtifactPlacement.objects.create(
+            tower_design=design,
+            target_piece_instance=piece,
+            artifact_asset=artifact,
+            role="challenge",
+            content_definition=challenges[3],
+        )
+
+    with pytest.raises(ValidationError):
+        ArtifactPlacement.objects.create(
+            tower_design=design,
+            target_piece_instance=piece,
+            artifact_asset=artifact,
+            role="adventure",
+            content_definition=adventure,
+        )
+
+
+def _design_piece_and_artifact(user):
+    piece_asset = Asset.objects.create(
+        kind=KIND_TOWER_PIECE,
+        slug=f"piece-{user.id}",
+        label="Tower Section",
+    )
+    TowerPieceAsset.objects.create(asset=piece_asset, piece_type=TOWER_PIECE_SECTION)
+    artifact = Asset.objects.create(
+        kind=KIND_TOWER_ARTIFACT,
+        slug=f"artifact-{user.id}",
+        label="Artifact",
+    )
+    design = TowerDesign.objects.create(owner=user, slug=f"tower-{user.id}", title="Tower")
+    piece = TowerPieceInstance.objects.create(
+        tower_design=design,
+        piece_asset=piece_asset,
+        piece_type=TOWER_PIECE_SECTION,
+    )
+    return design, piece, artifact

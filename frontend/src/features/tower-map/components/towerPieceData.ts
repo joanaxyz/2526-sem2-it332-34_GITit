@@ -105,6 +105,11 @@ export function pieceViewBoxString(descriptor?: TowerPieceAssetDescriptor | null
   return `${box.x} ${box.y} ${box.width} ${box.height}`
 }
 
+export function pieceAspectRatio(descriptor?: TowerPieceAssetDescriptor | null, variant?: string) {
+  const box = pieceViewBox(descriptor, variant)
+  return box.width / Math.max(box.height, 1)
+}
+
 export function artifactSafeBounds(descriptor?: TowerPieceAssetDescriptor | null, variant?: string) {
   const detail = variantDetail(descriptor, variant)
   const safe = isRecord(detail.bounds.artifact_safe_bounds) ? detail.bounds.artifact_safe_bounds : detail.bounds

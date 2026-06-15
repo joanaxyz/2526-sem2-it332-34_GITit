@@ -540,7 +540,7 @@ export function TowerMapPage() {
         <>
           {view === 'official' && activeStorey ? (
             <aside className="tower-artifact-dock" aria-label="Selected artifact controls">
-              {artifactOverviewStoreyId ? <ArtifactOverview storeyId={artifactOverviewStoreyId} /> : null}
+              {artifactOverviewStoreyId ? <ArtifactOverview storeyId={artifactOverviewStoreyId} storey={activeStorey} /> : null}
               <TowerActionButton />
             </aside>
           ) : null}

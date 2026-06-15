@@ -24,6 +24,10 @@ def test_seed_assets_registers_tower_assets_from_archives(settings, tmp_path):
     assert AssetSprite.objects.filter(asset__slug__in=piece_slugs | artifact_slugs).count() == (
         len(piece_slugs) + len(artifact_slugs)
     )
+    hall_piece = TowerPieceAsset.objects.get(asset__slug="official-hall-section")
+    hall_sprite = AssetSprite.objects.get(asset__slug="official-hall-section", action="default")
+    assert hall_piece.view_box == "-23.25 -2 414.5 224"
+    assert f'viewBox="{hall_piece.view_box}"'.encode() in hall_sprite.image.read()
 
 
 @pytest.mark.django_db

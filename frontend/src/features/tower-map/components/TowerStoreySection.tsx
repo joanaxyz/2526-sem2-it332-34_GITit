@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState, type HTMLAttributes, type ReactNode } from 'react'
+import { memo, useEffect, useMemo, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { BookOpen, Swords, Trophy } from 'lucide-react'
 
@@ -20,6 +20,7 @@ import {
 } from '@/features/tower-map/challengeUi'
 import { isSelected, useTowerSelection } from '@/features/tower-map/hooks/useTowerSelection'
 import {
+  pieceAspectRatio,
   pieceVariant,
   pieceTransformStyle,
   towerDescriptorFor,
@@ -123,10 +124,15 @@ export function TowerSectionShell({
     artifactRole === 'challenge' ? 'Challenges' : artifactRole === 'tome' ? 'Tome' : artifactRole === 'adventure' ? 'Command Adventure' : ''
   const Icon = artifactRole === 'challenge' ? Trophy : artifactRole === 'tome' ? BookOpen : Swords
   const variant = artifactRole === 'normal' ? pieceVariant(null, piece) : artifactRole
+  const frameStyle = {
+    ...(style ?? {}),
+    '--tower-piece-aspect': pieceAspectRatio(descriptor, variant),
+    ...(pieceTransformStyle(piece) ?? {}),
+  } as CSSProperties
   return (
     <section
       className={cn(roleClass, artifactRole === 'normal' && 'tower-generic-stage', className)}
-      style={{ ...(style ?? {}), ...(pieceTransformStyle(piece) ?? {}) }}
+      style={frameStyle}
       {...towerPieceAttrs(piece, descriptor, { variant })}
       {...rest}
     >

@@ -60,8 +60,8 @@ export function TowerControls({
       setPickerOpen(false)
       // Editing happens in-page: swap the tower stage for the editor.
       navigate(`/tower?view=mine&mode=edit&design=${created.id}`)
-    } catch {
-      setActionError('Could not raise your tower. Please try again.')
+    } catch (error) {
+      setActionError(actionErrorMessage(error, 'Could not raise your tower.'))
     }
   }
 
@@ -88,8 +88,8 @@ export function TowerControls({
       }
       if (hasDesign && design) navigate(`/tower?view=mine&mode=edit&design=${design.id}`)
       else await handleRaiseSpire()
-    } catch {
-      setActionError('Could not open the editor. Please try again.')
+    } catch (error) {
+      setActionError(actionErrorMessage(error, 'Could not open the editor.'))
     }
   }
 
@@ -200,4 +200,11 @@ export function TowerControls({
       ) : null}
     </div>
   )
+}
+
+function actionErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message.trim()) {
+    return `${fallback} ${error.message}`
+  }
+  return `${fallback} Please try again.`
 }

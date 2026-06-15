@@ -229,6 +229,22 @@ class ArtifactPlacement(models.Model):
                     )
                 }
             )
+        same_role = ArtifactPlacement.objects.filter(
+            target_piece_instance=self.target_piece_instance,
+            role=self.role,
+        )
+        if self.pk:
+            same_role = same_role.exclude(pk=self.pk)
+        limit = 3 if self.role == ARTIFACT_ROLE_CHALLENGE else 1
+        if same_role.count() >= limit:
+            label = "challenge artifacts" if self.role == ARTIFACT_ROLE_CHALLENGE else "interactable artifact"
+            raise ValidationError(
+                {
+                    "role": (
+                        f"A section can hold at most {limit} {label}."
+                    )
+                }
+            )
 
     def _validate_safe_bounds(self) -> None:
         if not self.target_piece_instance_id:

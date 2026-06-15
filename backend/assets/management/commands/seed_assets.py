@@ -10,6 +10,7 @@ from __future__ import annotations
 import shutil
 import tempfile
 import zipfile
+from io import BytesIO
 from contextlib import ExitStack
 from pathlib import Path
 
@@ -26,6 +27,7 @@ from assets.models import (
     AssetSprite,
     TowerPieceAsset,
 )
+from assets.svg_crop import crop_svg_markup
 from assets.seed_data.battle_artifacts import BATTLE_ARTIFACT_SPECS
 from assets.seed_data.characters import CHARACTER_SPECS
 from assets.seed_data.monsters import LOOPING_ACTIONS, MONSTER_SPECS
@@ -33,7 +35,7 @@ from assets.seed_data.tower_pieces import OFFICIAL_TOWER_ARTIFACT_SPECS, OFFICIA
 
 # All official sprite source files live under backend/assets/seed_assets/ and are
 # the single committed source of truth (the frontend renders them from media via
-# descriptors — it no longer ships its own copies).
+# descriptors; it no longer ships its own copies).
 SEED_ASSETS_ROOT = Path(__file__).resolve().parents[2] / "seed_assets"
 MONSTERS_ROOT = SEED_ASSETS_ROOT / "monsters"
 MONSTERS_ZIP = SEED_ASSETS_ROOT / "monsters.zip"
@@ -123,7 +125,7 @@ class Command(BaseCommand):
         """Grant the (re)seeded default kit to existing players. Adding a piece to
         the Arcane Spire kit (e.g. the window section / portcullis) would otherwise
         only reach new sign-ups; this keeps existing authors' palettes in sync.
-        Idempotent — only missing entitlements are created (see ``grant_default_assets``).
+        Idempotent: only missing entitlements are created (see ``grant_default_assets``).
         """
         from django.contrib.auth import get_user_model
 
@@ -324,6 +326,13 @@ class Command(BaseCommand):
                 sprite.save()
 
     def _seed_tower_piece(self, spec: dict) -> None:
+        path = self._tower_assets_root / spec["svg"]
+        if not path.exists():
+            raise CommandError(f"{spec['slug']}: missing tower piece SVG {path}")
+        raw_svg = path.read_bytes()
+        seeded_svg, cropped_view_box = crop_svg_markup(raw_svg)
+        view_box = cropped_view_box or spec.get("view_box", "")
+
         asset, _ = Asset.objects.update_or_create(
             slug=spec["slug"],
             defaults={
@@ -340,7 +349,7 @@ class Command(BaseCommand):
             asset=asset,
             defaults={
                 "piece_type": spec["piece_type"],
-                "view_box": spec.get("view_box", ""),
+                "view_box": view_box,
                 "anchors": spec.get("anchors", {}),
                 "bounds": spec.get("bounds", {}),
                 "interaction_zones": spec.get("interaction_zones", {}),
@@ -349,10 +358,7 @@ class Command(BaseCommand):
             },
         )
 
-        path = self._tower_assets_root / spec["svg"]
-        if not path.exists():
-            raise CommandError(f"{spec['slug']}: missing tower piece SVG {path}")
-        frame_width, frame_height = _view_box_size(spec.get("view_box", ""))
+        frame_width, frame_height = _view_box_size(view_box)
         sprite, _ = AssetSprite.objects.get_or_create(
             asset=asset,
             action="default",
@@ -372,7 +378,7 @@ class Command(BaseCommand):
             old.image.delete(save=False)
             old.delete()
 
-        with path.open("rb") as handle:
+        with BytesIO(seeded_svg) as handle:
             _replace_sprite_file(sprite, f"{spec['slug']}__default.svg", handle)
             sprite.save()
 

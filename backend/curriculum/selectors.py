@@ -395,11 +395,7 @@ def tower_layout_payload(
                             "levelId": level.id,
                             "difficulty": difficulty,
                         },
-                        x=_slot_value(
-                            artifact_defaults,
-                            "x",
-                            OFFICIAL_CHALLENGE_ARTIFACT_X.get(difficulty, 184),
-                        ),
+                        x=_challenge_artifact_x(slot=slot, difficulty=difficulty),
                         y=_slot_value(artifact_defaults, "y", 124),
                         width=_slot_value(artifact_defaults, "width", 62),
                         height=_slot_value(artifact_defaults, "height", 94),
@@ -541,6 +537,21 @@ def _challenge_artifact_slug(*, slot: dict, difficulty: str) -> str:
         difficulty,
         _slot_value(slot, "artifact_asset_slug", OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["challenge"]),
     )
+
+
+def _challenge_artifact_x(*, slot: dict, difficulty: str) -> int:
+    """Keep the three trial doors aligned horizontally.
+
+    Older seeded rows contain one shared ``artifact.x`` value for the old
+    single-door layout. Ignore that scalar for challenge doors so a stale DB
+    still renders easy / medium / hard as a row.
+    """
+    positions = slot.get("artifact_x")
+    if isinstance(positions, dict):
+        value = positions.get(difficulty)
+        if isinstance(value, (int, float)):
+            return int(value)
+    return OFFICIAL_CHALLENGE_ARTIFACT_X.get(difficulty, 184)
 
 
 def command_skill_queryset(*, storey_id: int):
