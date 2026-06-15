@@ -9,17 +9,19 @@ import {
   type CSSProperties,
 } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Maximize2 } from 'lucide-react'
 import { motion, useScroll, useSpring, useTransform } from 'motion/react'
 import { useSearchParams } from 'react-router-dom'
 
 import { towerMapApi } from '@/features/tower-map/api/towerMapApi'
 import { TowerCharacter } from '@/features/tower-map/character/TowerCharacter'
-import { DoorOverview } from '@/features/tower-map/components/DoorOverview'
-import { StoreyOverview, TowerStoreySection } from '@/features/tower-map/components/TowerStoreySection'
+import { ArtifactOverview } from '@/features/tower-map/components/ArtifactOverview'
+import { TowerStoreySection } from '@/features/tower-map/components/TowerStoreySection'
 import { SkyClock } from '@/features/tower-map/components/SkyClock'
 import { TowerActionButton } from '@/features/tower-map/components/TowerActionButton'
 import { TowerControls, type TowerView } from '@/features/tower-map/components/TowerControls'
 import { InTowerEditor } from '@/features/tower-map/editor/InTowerEditor'
+import { useZoomPan, type ZoomPan } from '@/features/tower-map/editor/useZoomPan'
 import { PrivateTowerStack } from '@/features/tower-designs/components/PrivateTowerStack'
 import { useTowerDesignEditor } from '@/features/tower-designs/hooks/useTowerDesignEditor'
 import { useTowerSelection } from '@/features/tower-map/hooks/useTowerSelection'
@@ -272,7 +274,8 @@ export function TowerMapPage() {
     () => storeys.find((storey) => storey.id === activeStoreyId) ?? storeys[0] ?? null,
     [activeStoreyId, storeys],
   )
-  const doorOverviewStoreyId = selectedStoreyId ?? activeStorey?.id ?? null
+  const artifactOverviewStoreyId = selectedStoreyId ?? activeStorey?.id ?? null
+  const towerZoom = useZoomPan()
   const activeStoreyIdRef = useRef<number | null>(null)
   useEffect(() => {
     activeStoreyIdRef.current = activeStoreyId
@@ -516,10 +519,17 @@ export function TowerMapPage() {
         phaseLabel={phaseLabel}
       />
 
+      <TowerControls
+        view={view}
+        editMode={editMode}
+        onViewChange={setView}
+        onEditModeExit={exitEdit}
+      />
+
       {editMode ? (
         // Edit mode keeps only the living sky + clock; the editor takes the rest.
         editDesignId !== null ? (
-          <InTowerEditor designId={editDesignId} onExit={exitEdit} />
+          <InTowerEditor designId={editDesignId} storeyId={activeStoreyId} />
         ) : (
           <EmptyState
             title="No tower to edit"
@@ -528,22 +538,9 @@ export function TowerMapPage() {
         )
       ) : (
         <>
-          <TowerControls view={view} onViewChange={setView} />
-
           {view === 'official' && activeStorey ? (
-            <aside className="tower-storey-dock" aria-label="Current storey overview">
-              <StoreyOverview
-                key={activeStorey.id}
-                storey={activeStorey}
-                title={storeyTitle(activeStorey)}
-                progress={activeStorey.level_completion?.value ?? 0}
-              />
-            </aside>
-          ) : null}
-
-          {view === 'official' && activeStorey ? (
-            <aside className="tower-door-dock" aria-label="Selected door controls">
-              {doorOverviewStoreyId ? <DoorOverview storeyId={doorOverviewStoreyId} /> : null}
+            <aside className="tower-artifact-dock" aria-label="Selected artifact controls">
+              {artifactOverviewStoreyId ? <ArtifactOverview storeyId={artifactOverviewStoreyId} /> : null}
               <TowerActionButton />
             </aside>
           ) : null}
@@ -557,6 +554,8 @@ export function TowerMapPage() {
           <section
             className="tower-stage-grid"
             aria-label={view === 'mine' ? 'Your Tower' : 'The Arcane Spire storeys'}
+            onPointerDown={towerZoom.onPanStart}
+            style={towerZoom.style}
           >
             {view === 'mine' ? (
               <PrivateTowerStack />
@@ -571,6 +570,7 @@ export function TowerMapPage() {
                 section) for coordinates + clicks, so it stays self-consistent. */}
             {activeCharacter ? <TowerCharacter character={activeCharacter} /> : null}
           </section>
+          <TowerZoomControl zoom={towerZoom} />
 
           {/* Near clouds drift in FRONT of the tower so the sky isn't all hidden behind it. */}
           <div className="tower-cloudfield tower-cloudfield--front" aria-hidden="true">
@@ -578,6 +578,25 @@ export function TowerMapPage() {
           </div>
         </>
       )}
+    </div>
+  )
+}
+
+function TowerZoomControl({ zoom }: { zoom: ZoomPan }) {
+  return (
+    <div className="tower-zoom-control" onPointerDown={(event) => event.stopPropagation()}>
+      <input
+        aria-label="Tower zoom"
+        type="range"
+        min="0.45"
+        max="2.6"
+        step="0.01"
+        value={zoom.scale}
+        onChange={(event) => zoom.setScale(Number(event.target.value))}
+      />
+      <button type="button" aria-label="Reset tower view" onClick={zoom.reset}>
+        <Maximize2 className="size-4" aria-hidden="true" />
+      </button>
     </div>
   )
 }

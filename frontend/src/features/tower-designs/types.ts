@@ -1,5 +1,5 @@
 import type { ContentDefinition } from '@/features/authoring/types'
-import type { TowerLayoutDescriptor } from '@/shared/assets/types'
+import type { TowerArtifactRole, TowerContentBinding, TowerLayoutDescriptor } from '@/shared/assets/types'
 
 export type TowerOrigin = 'personal' | 'official_fork'
 
@@ -25,12 +25,16 @@ export type TowerDesignList = {
 }
 
 export type ArtifactPlacementDescriptor = {
-  id: number
+  id: number | string
   targetInstanceId: string
   assetSlug: string
+  role: TowerArtifactRole
+  contentBinding?: TowerContentBinding | null
   x: number
   y: number
   scale: number
+  width: number
+  height: number
   rotation: number
   anchor: string
   zIndex: number
@@ -53,6 +57,7 @@ export type TowerPieceInstancePayload = {
   tower_design_id: number
   piece_asset_id: number
   piece_type: string
+  storey_index: number
   sort_order: number
   parent_instance_id: number | null
   transform: Record<string, unknown>
@@ -73,7 +78,11 @@ export type ArtifactPlacementPayload = {
   x: number
   y: number
   scale: number
+  width: number
+  height: number
   rotation: number
   anchor: string
   z_index: number
+  role: TowerArtifactRole
+  content_definition_id: number | null
 }

@@ -6,7 +6,7 @@ import { TowerStack } from '@/features/tower-designs/components/PrivateTowerStac
 import { towerDesignsApi } from '@/features/tower-designs/api/towerDesignsApi'
 import { assetsApi } from '@/shared/assets/assetsApi'
 import { queryKeys } from '@/shared/api/queryKeys'
-import type { TowerPieceAssetDescriptor } from '@/shared/assets/types'
+import type { TowerArtifactAssetDescriptor, TowerPieceAssetDescriptor } from '@/shared/assets/types'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 
@@ -30,6 +30,11 @@ export function SharedTowerPage() {
     queryFn: () => assetsApi.getDescriptors('tower_piece'),
     staleTime: 5 * 60 * 1000,
   })
+  const artifactsQuery = useQuery({
+    queryKey: queryKeys.assetDescriptors('tower_artifact'),
+    queryFn: () => assetsApi.getDescriptors('tower_artifact'),
+    staleTime: 5 * 60 * 1000,
+  })
 
   const descriptors = useMemo<Record<string, TowerPieceAssetDescriptor>>(() => {
     const map: Record<string, TowerPieceAssetDescriptor> = {}
@@ -38,6 +43,14 @@ export function SharedTowerPage() {
     }
     return map
   }, [piecesQuery.data])
+
+  const artifactDescriptors = useMemo<Record<string, TowerArtifactAssetDescriptor>>(() => {
+    const map: Record<string, TowerArtifactAssetDescriptor> = {}
+    for (const [slug, descriptor] of Object.entries(artifactsQuery.data?.results ?? {})) {
+      if (descriptor.kind === 'tower_artifact') map[slug] = descriptor
+    }
+    return map
+  }, [artifactsQuery.data])
 
   if (id === null) return <ErrorState title="Tower not found" description="This share link is invalid." />
   if (overviewQuery.isLoading) return <LoadingState label="Loading tower" variant="page" />
@@ -50,7 +63,7 @@ export function SharedTowerPage() {
     )
   }
 
-  const { design, tower_layout } = overviewQuery.data
+  const { design, tower_layout, artifacts } = overviewQuery.data
   return (
     <div className="shared-tower-page">
       <header className="shared-tower-head">
@@ -58,7 +71,12 @@ export function SharedTowerPage() {
         <h1 className="shared-tower-title">{design.title}</h1>
         {design.summary ? <p className="shared-tower-summary">{design.summary}</p> : null}
       </header>
-      <TowerStack pieces={tower_layout.pieces} descriptors={descriptors} />
+      <TowerStack
+        pieces={tower_layout.pieces}
+        artifacts={artifacts}
+        descriptors={descriptors}
+        artifactDescriptors={artifactDescriptors}
+      />
     </div>
   )
 }

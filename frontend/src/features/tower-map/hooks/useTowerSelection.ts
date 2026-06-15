@@ -7,10 +7,10 @@ import type {
   TomeSummary,
 } from '@/features/challenges/types'
 
-// The whole tower is a single selection surface: one door is "selected" at a
-// time. The storey rail shows its overview; the lower-left dock shows its action.
-// Each challenge level is now its own door, so a challenge selection carries the
-// exact level chosen.
+// The whole tower is a single selection surface: one interactable artifact is
+// selected at a time. The storey rail shows its overview; the lower-left dock
+// shows its action. A challenge artifact resolves to the preferred challenge
+// level, so the selection carries the exact level chosen.
 export type TowerSelection =
   | { kind: 'adventure'; storeyId: number; adventure: CommandAdventureSummary }
   | {
@@ -35,7 +35,7 @@ export const useTowerSelection = create<TowerSelectionState>((set) => ({
   clear: () => set({ selected: null }),
 }))
 
-/** True when `selection` points at the same door as the current store value. */
+/** True when `selection` points at the same artifact target as the current store value. */
 export function isSelected(current: TowerSelection | null, candidate: TowerSelection): boolean {
   if (!current || current.kind !== candidate.kind) return false
   if (current.kind === 'adventure' && candidate.kind === 'adventure') {

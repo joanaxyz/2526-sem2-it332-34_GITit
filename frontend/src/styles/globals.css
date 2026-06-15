@@ -1500,7 +1500,7 @@ textarea {
 }
 
 .tower-storey-dock,
-.tower-door-dock {
+.tower-artifact-dock {
   position: fixed;
   z-index: 34;
   display: grid;
@@ -1514,7 +1514,7 @@ textarea {
   left: clamp(1rem, 2.5vw, 2rem);
 }
 
-.tower-door-dock {
+.tower-artifact-dock {
   top: auto;
   right: clamp(1rem, 2.5vw, 2rem);
   bottom: clamp(2rem, 7vh, 4.5rem);
@@ -1522,8 +1522,58 @@ textarea {
 }
 
 .tower-storey-dock > *,
-.tower-door-dock > * {
+.tower-artifact-dock > * {
   pointer-events: auto;
+}
+
+.tower-zoom-control {
+  position: fixed;
+  z-index: 45;
+  left: 50%;
+  bottom: clamp(0.85rem, 2.5vh, 1.6rem);
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: min(18rem, calc(100vw - 2rem));
+  padding: 0.42rem 0.52rem 0.42rem 0.7rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.2);
+  border-radius: 999px;
+  background: rgba(6, 14, 26, 0.36);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px) saturate(1.15);
+  opacity: 0.46;
+  transform: translateX(-50%);
+  transition: opacity 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  pointer-events: auto;
+}
+
+.tower-zoom-control:hover,
+.tower-zoom-control:focus-within {
+  opacity: 0.94;
+  border-color: rgba(var(--tower-cyan), 0.42);
+  background: rgba(6, 14, 26, 0.68);
+}
+
+.tower-zoom-control input[type='range'] {
+  flex: 1;
+  min-width: 0;
+  accent-color: rgb(var(--tower-cyan));
+}
+
+.tower-zoom-control button {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.22);
+  border-radius: 999px;
+  background: rgba(10, 20, 34, 0.48);
+  color: hsl(var(--foreground));
+  cursor: pointer;
+}
+
+.tower-zoom-control--editor {
+  bottom: clamp(0.85rem, 2.5vh, 1.6rem);
 }
 
 /* -- In-tower control cluster: compact tower picker + Edit/Author icons, docked
@@ -2845,6 +2895,65 @@ textarea {
   outline-offset: 4px;
 }
 
+.tower-artifact {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  transform-origin: center;
+  pointer-events: auto;
+}
+
+.tower-artifact img,
+.tower-artifact .sprite-animator {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.tower-artifact--interactive {
+  cursor: pointer;
+}
+
+.tower-artifact--interactive:focus-visible {
+  outline: 2px solid rgba(var(--artifact-accent, 0, 245, 212), 0.9);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+.tower-artifact.is-selected::after {
+  content: '';
+  position: absolute;
+  inset: -0.4rem;
+  border: 1.5px solid rgba(var(--artifact-accent, 0, 245, 212), 0.9);
+  border-radius: 10px;
+  box-shadow:
+    0 0 18px rgba(var(--artifact-accent, 0, 245, 212), 0.45),
+    inset 0 0 12px rgba(var(--artifact-accent, 0, 245, 212), 0.18);
+  pointer-events: none;
+}
+
+.tower-artifact.is-locked {
+  filter: grayscale(0.38) saturate(0.72);
+  opacity: 0.82;
+}
+
+.editor-artifact {
+  cursor: grab;
+  touch-action: none;
+}
+
+.editor-artifact:active {
+  cursor: grabbing;
+}
+
 .adventure-door {
   position: relative;
   display: inline-flex;
@@ -3072,37 +3181,6 @@ textarea {
 }
 
 /* Interior base colour is baked in the SVG; CSS only animates the hover light. */
-.trial-door-interior {
-  transition: fill 0.4s ease;
-}
-
-.trial-door-gate {
-  transform-box: fill-box;
-  transition: transform 0.56s cubic-bezier(0.18, 0.88, 0.22, 1);
-  will-change: transform;
-}
-
-/* One asset holds all three tiers; reveal only the one matching the door's
-   difficulty. Outside a difficulty context (editor palette / inspector) the
-   medium iron gate stands in as the representative trial door. Show rules trail
-   the hide rules at equal specificity so the active tier wins. */
-.piece-svg [data-door-tier] {
-  display: none;
-}
-.piece-svg [data-door-tier='medium'] {
-  display: inline;
-}
-.trial-door[data-difficulty='easy'] [data-door-tier],
-.trial-door[data-difficulty='medium'] [data-door-tier],
-.trial-door[data-difficulty='hard'] [data-door-tier] {
-  display: none;
-}
-.trial-door[data-difficulty='easy'] [data-door-tier='easy'],
-.trial-door[data-difficulty='medium'] [data-door-tier='medium'],
-.trial-door[data-difficulty='hard'] [data-door-tier='hard'] {
-  display: inline;
-}
-
 .trial-door.is-locked {
   opacity: 0.52;
 }
@@ -3113,22 +3191,12 @@ textarea {
 }
 
 /* The portcullis gate slides up to reveal the lit interior. */
-.trial-door:not(.is-locked):hover .trial-door-gate,
-.trial-door:not(.is-locked)[data-selected='true'] .trial-door-gate {
-  transform: translateY(-76%);
-}
-
 .trial-door:not(.is-locked):hover .trial-door-art,
 .trial-door:not(.is-locked)[data-selected='true'] .trial-door-art {
   filter: drop-shadow(0 0 16px rgba(var(--level-accent), 0.34));
 }
 
-.trial-door:not(.is-locked):hover .trial-door-interior,
-.trial-door:not(.is-locked)[data-selected='true'] .trial-door-interior {
-  fill: rgba(255, 196, 107, 0.42);
-}
-
-/* The chosen door reads as selected via a brighter accent glow on its art. */
+/* Legacy challenge art selection glow. */
 .trial-door[data-selected='true'] .trial-door-art {
   filter: drop-shadow(0 0 20px rgba(var(--level-accent), 0.5));
 }
@@ -3205,10 +3273,7 @@ textarea {
   filter: drop-shadow(0 0 18px rgba(var(--level-accent), 0.4));
 }
 
-/* ── Data-driven piece art: inline SVG (`PieceSvg`) + safe animation presets.
-   The SVG's parts carry `data-role` tags; a `.piece-anim--*` class moves them
-   when an interactive ancestor (door button, etc.) is hovered/selected. No user
-   code runs — presets are a closed, platform-defined set. ── */
+/* Inline structural SVG art. Visual states come from uploaded asset data. */
 .piece-svg {
   display: block;
 }
@@ -3224,120 +3289,7 @@ textarea {
   height: 100%;
 }
 
-.piece-svg[data-piece-variant] [data-variant] {
-  display: none;
-}
-
-.piece-svg[data-piece-variant='crowned'] [data-variant='crowned'],
-.piece-svg[data-piece-variant='plain'] [data-variant='plain'],
-.piece-svg[data-piece-variant='regular'] [data-variant='regular'],
-.piece-svg[data-piece-variant='after-challenges'] [data-variant='after-challenges'],
-.piece-svg[data-piece-variant='tome'] [data-variant='tome'],
-.piece-svg[data-piece-variant='adventure'] [data-variant='adventure'],
-.piece-svg[data-piece-variant='challenge'] [data-variant='challenge'],
-.piece-svg[data-piece-variant='portcullis'] [data-variant='portcullis'] {
-  display: inline;
-}
-
-/* swing-open: leaves foreshorten from their hinges; interior lights; accent fades */
-.piece-anim--swing [data-role='leaf-left'],
-.piece-anim--swing [data-role='leaf-right'],
-.piece-anim--swing [data-role='accent'],
-.piece-anim--swing [data-role='interior'] {
-  transform-box: fill-box;
-  transition:
-    transform var(--piece-anim-duration) var(--piece-anim-ease),
-    opacity var(--piece-anim-duration) ease;
-}
-.piece-anim--swing [data-role='leaf-left'] {
-  transform-origin: left center;
-}
-.piece-anim--swing [data-role='leaf-right'] {
-  transform-origin: right center;
-}
-.piece-anim--swing [data-role='accent'] {
-  transform-origin: center;
-}
-.piece-anim--swing [data-role='interior'] {
-  opacity: 0.26;
-}
-:where(:hover, [data-selected='true']) > .piece-anim--swing [data-role='leaf-left'],
-:where(:hover, [data-selected='true']) > .piece-anim--swing [data-role='leaf-right'] {
-  transform: scaleX(0.28);
-}
-:where(:hover, [data-selected='true']) > .piece-anim--swing [data-role='interior'] {
-  opacity: 1;
-}
-:where(:hover, [data-selected='true']) > .piece-anim--swing [data-role='accent'] {
-  opacity: 0;
-  transform: scale(0.55);
-}
-
-/* swing-single: one panel hinged on the left foreshortens fully open */
-.piece-anim--swing-single [data-role='leaf'],
-.piece-anim--swing-single [data-role='accent'],
-.piece-anim--swing-single [data-role='interior'] {
-  transform-box: fill-box;
-  transition:
-    transform var(--piece-anim-duration) var(--piece-anim-ease),
-    opacity var(--piece-anim-duration) ease;
-}
-.piece-anim--swing-single [data-role='leaf'] {
-  transform-origin: left center;
-}
-.piece-anim--swing-single [data-role='accent'] {
-  transform-origin: center;
-}
-.piece-anim--swing-single [data-role='interior'] {
-  opacity: 0.26;
-}
-:where(:hover, [data-selected='true']) > .piece-anim--swing-single [data-role='leaf'] {
-  transform: scaleX(0.12);
-}
-:where(:hover, [data-selected='true']) > .piece-anim--swing-single [data-role='interior'] {
-  opacity: 1;
-}
-:where(:hover, [data-selected='true']) > .piece-anim--swing-single [data-role='accent'] {
-  opacity: 0;
-  transform: scale(0.55);
-}
-
-/* slide-up: a gate group lifts to reveal what's behind it (portcullis) */
-.piece-anim--slide [data-role='gate'] {
-  transform-box: fill-box;
-  transition: transform var(--piece-anim-duration) var(--piece-anim-ease);
-}
-:where(:hover, [data-selected='true']) > .piece-anim--slide [data-role='gate'] {
-  transform: translateY(-76%);
-}
-
-/* fade: the whole piece brightens on focus */
-.piece-anim--fade > svg {
-  transition: filter var(--piece-anim-duration) ease;
-}
-:where(:hover, [data-selected='true']) > .piece-anim--fade > svg {
-  filter: drop-shadow(0 0 14px rgba(45, 245, 255, 0.4));
-}
-
-/* pulse: a gentle, always-on glow */
-.piece-anim--pulse > svg {
-  animation: piece-pulse var(--piece-anim-duration) ease-in-out infinite alternate;
-}
-@keyframes piece-pulse {
-  from {
-    filter: drop-shadow(0 0 4px rgba(45, 245, 255, 0.18));
-  }
-  to {
-    filter: drop-shadow(0 0 13px rgba(45, 245, 255, 0.45));
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .piece-anim--pulse > svg {
-    animation: none;
-  }
-}
-
-/* ── Selection: the chosen door glows with a pulsing ring (drives the docks) ── */
+/* Legacy selection ring for older tower controls. */
 .adventure-door {
   position: relative;
   --door-accent: 45, 245, 255;
@@ -3498,13 +3450,13 @@ textarea {
 }
 
 /* ── Door overview (in the sticky storey rail) ── */
-.door-overview {
-  --door-overview-accent: 0, 245, 212;
+.artifact-overview {
+  --artifact-overview-accent: 0, 245, 212;
   display: grid;
   gap: 0.55rem;
   align-self: start;
   padding: 1rem 1.1rem 1.15rem;
-  border: 1px solid rgba(var(--door-overview-accent), 0.35);
+  border: 1px solid rgba(var(--artifact-overview-accent), 0.35);
   border-radius: 12px;
   background: linear-gradient(180deg, rgba(5, 18, 38, 0.82), rgba(2, 9, 24, 0.76));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 14px 40px rgba(0, 0, 0, 0.24);
@@ -3512,19 +3464,19 @@ textarea {
   pointer-events: auto;
 }
 
-.door-overview.is-empty {
+.artifact-overview.is-empty {
   border-style: dashed;
   border-color: rgba(126, 200, 255, 0.2);
   background: rgba(2, 9, 24, 0.4);
 }
 
-.door-overview-hint {
+.artifact-overview-hint {
   margin: 0;
   color: hsl(var(--muted-foreground));
   font-size: 0.8rem;
 }
 
-.door-overview-kind {
+.artifact-overview-kind {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -3536,11 +3488,11 @@ textarea {
   text-transform: uppercase;
 }
 
-.door-overview-kind.is-challenge {
-  color: rgb(var(--door-overview-accent));
+.artifact-overview-kind.is-challenge {
+  color: rgb(var(--artifact-overview-accent));
 }
 
-.door-overview-title {
+.artifact-overview-title {
   margin: 0;
   color: hsl(var(--foreground));
   font-size: 1.02rem;
@@ -3549,26 +3501,26 @@ textarea {
   text-wrap: balance;
 }
 
-.door-overview-summary {
+.artifact-overview-summary {
   margin: 0;
   color: hsl(var(--muted-foreground));
   font-size: 0.8rem;
   line-height: 1.5;
 }
 
-.door-overview-difficulty {
+.artifact-overview-difficulty {
   justify-self: start;
   padding: 0.12rem 0.45rem;
-  border: 1px solid rgba(var(--door-overview-accent), 0.42);
+  border: 1px solid rgba(var(--artifact-overview-accent), 0.42);
   border-radius: 6px;
-  color: rgb(var(--door-overview-accent));
+  color: rgb(var(--artifact-overview-accent));
   font-family: JetBrains Mono, ui-monospace, monospace;
   font-size: 0.62rem;
   font-weight: 900;
   text-transform: uppercase;
 }
 
-.door-overview-locked {
+.artifact-overview-locked {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -3577,18 +3529,18 @@ textarea {
   font-size: 0.74rem;
 }
 
-.door-overview-stats {
+.artifact-overview-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.5rem;
 }
 
-.door-overview-stat {
+.artifact-overview-stat {
   display: flex;
   align-items: center;
   gap: 0.4rem;
   padding: 0.5rem 0.55rem;
-  border: 1px solid rgba(var(--door-overview-accent), 0.24);
+  border: 1px solid rgba(var(--artifact-overview-accent), 0.24);
   border-radius: 9px;
   background: rgba(0, 6, 18, 0.4);
   color: rgba(206, 224, 248, 0.78);
@@ -3598,18 +3550,18 @@ textarea {
   text-transform: uppercase;
 }
 
-.door-overview-stat svg {
-  color: rgb(var(--door-overview-accent));
+.artifact-overview-stat svg {
+  color: rgb(var(--artifact-overview-accent));
 }
 
-.door-overview-stat strong {
+.artifact-overview-stat strong {
   margin-left: auto;
   color: hsl(var(--foreground));
   font-family: JetBrains Mono, ui-monospace, monospace;
   font-size: 0.8rem;
 }
 
-.door-overview-progress-meta {
+.artifact-overview-progress-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3622,8 +3574,8 @@ textarea {
   text-transform: uppercase;
 }
 
-.door-overview-progress-meta strong {
-  color: rgb(var(--door-overview-accent));
+.artifact-overview-progress-meta strong {
+  color: rgb(var(--artifact-overview-accent));
   font-size: 0.78rem;
 }
 
@@ -4022,7 +3974,7 @@ textarea {
   }
 
   .tower-storey-dock,
-  .tower-door-dock {
+  .tower-artifact-dock {
     position: static;
     width: min(100%, 38rem);
     min-width: 0;
@@ -4030,7 +3982,7 @@ textarea {
     pointer-events: auto;
   }
 
-  .tower-door-dock {
+  .tower-artifact-dock {
     gap: 0.75rem;
   }
 
@@ -4096,7 +4048,7 @@ textarea {
     height: 5.8rem;
   }
 
-  .door-overview {
+  .artifact-overview {
     padding: 0.85rem 0.95rem;
   }
 }
@@ -6092,21 +6044,20 @@ textarea {
 .in-tower-editor {
   position: relative;
   z-index: 6;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  width: min(100%, 1500px);
+  width: 100%;
   margin: 0 auto;
-  padding: 5rem 1.25rem 2rem;
-  min-height: 100vh;
+  padding: 0 0 6rem;
+  min-height: calc(100vh - 7rem);
 }
 
 .ite-bar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  align-items: flex-start;
+  justify-content: stretch;
+  gap: 0.75rem;
   flex-wrap: wrap;
+  width: 100%;
+  margin: 0;
   padding: 0.6rem 0.85rem;
   border-radius: 0.9rem;
   border: 1px solid rgba(var(--tower-cyan), 0.18);
@@ -6118,6 +6069,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 0.85rem;
+  min-width: 0;
 }
 
 .ite-title-block {
@@ -6127,7 +6079,7 @@ textarea {
 .ite-name-input {
   margin: 0.1rem 0 0;
   padding: 0.1rem 0.35rem;
-  width: min(60vw, 18rem);
+  width: min(100%, 18rem);
   border: 1px solid transparent;
   border-radius: 0.4rem;
   background: transparent;
@@ -6167,85 +6119,63 @@ textarea {
   flex-wrap: wrap;
 }
 
-.ite-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
-  gap: 1rem;
-  align-items: start;
-  flex: 1;
+.tower-stage-grid--editor {
+  min-height: calc(100vh - 14rem);
+  padding-bottom: 4.5rem;
+  touch-action: none;
+  cursor: grab;
+  will-change: transform;
 }
 
-@media (max-width: 1080px) {
-  .ite-grid {
-    grid-template-columns: 1fr;
-  }
+.tower-stage-grid--editor:active {
+  cursor: grabbing;
 }
 
-/* The canvas stays wide; the palette + inspector share a single sticky dock on
-   the right. The dock owns the stickiness so the two panels never fight over
-   `top`; each panel scrolls within its flex share. */
+/* The canvas stays wide; editor controls reuse the tower's left-side dock
+   position so the tower does not jump between view and edit modes. */
 .ite-dock {
-  position: sticky;
-  top: 1rem;
+  position: fixed;
+  z-index: 44;
+  top: clamp(9rem, 18vh, 12rem);
+  left: clamp(1rem, 2.5vw, 2rem);
+  bottom: clamp(5.3rem, 11vh, 7rem);
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: min(20rem, calc((100vw - 42rem) / 2 - 2rem));
+  min-width: 16rem;
   min-height: 0;
-  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  pointer-events: auto;
 }
 
-@media (max-width: 1080px) {
+.editor-storey-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0.55rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.16);
+  border-radius: 0.75rem;
+  background: rgba(5, 12, 23, 0.58);
+  backdrop-filter: blur(10px);
+}
+
+@media (max-width: 1180px) {
   .ite-dock {
     position: static;
+    width: min(42rem, calc(100vw - 2rem));
+    margin: 1rem auto 0;
     max-height: none;
   }
 }
 
 /* Container-less: the tower floats directly on the living sky — no boxy frame
    around the canvas (just the zoom/pan surface). */
-.ite-canvas-viewport {
-  position: relative;
-  overflow: hidden;
-  min-height: 62vh;
-  touch-action: none;
-  cursor: grab;
-}
-
-.ite-canvas-viewport:active {
-  cursor: grabbing;
-}
-
-.ite-canvas-hint {
-  position: absolute;
-  top: 0.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-  margin: 0;
-  padding: 0.25rem 0.7rem;
-  border-radius: 999px;
-  background: rgba(4, 9, 17, 0.62);
-  color: hsl(var(--muted-foreground));
-  font-size: 0.68rem;
-  pointer-events: none;
-  white-space: nowrap;
-  max-width: 92%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.ite-canvas-content {
-  display: flex;
-  justify-content: center;
-  padding: 3.25rem 1rem 1rem;
-  will-change: transform;
-}
-
 /* Floats over the canvas while skin picks are staged — commit or discard them. */
 .ite-apply-bar {
-  position: absolute;
-  z-index: 4;
-  bottom: 1rem;
+  position: fixed;
+  z-index: 46;
+  bottom: clamp(4rem, 8vh, 5.2rem);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -6340,7 +6270,7 @@ textarea {
   overflow-y: auto;
 }
 
-.section-editor-artifact-grid {
+.editor-artifact-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(3.2rem, 1fr));
   gap: 0.5rem;
@@ -6383,6 +6313,12 @@ textarea {
   width: 100%;
   accent-color: rgb(var(--tower-cyan));
   cursor: pointer;
+}
+
+.editor-transform-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
 }
 
 .editor-artifact.is-selected {
@@ -6430,8 +6366,9 @@ textarea {
 }
 
 .ite-dock .editor-inspector {
-  flex: 0 1 auto;
-  max-height: 48%;
+  flex: 1 1 auto;
+  max-height: none;
+  overflow: auto;
 }
 
 .editor-rail-title {
@@ -6445,6 +6382,19 @@ textarea {
   margin: 0;
   color: hsl(var(--muted-foreground));
   font-size: 0.74rem;
+}
+
+.editor-context-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.editor-role-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }
 
 .editor-palette-head {
@@ -6850,27 +6800,6 @@ textarea {
   color: hsl(var(--muted-foreground));
 }
 
-/* -- Stage / canvas -- */
-.editor-stage {
-  display: grid;
-  gap: 0.6rem;
-  justify-items: center;
-  padding: 1rem;
-  border-radius: 0.9rem;
-  border: 1px solid rgba(var(--tower-cyan), 0.14);
-  background:
-    radial-gradient(120% 80% at 50% 0%, rgba(18, 34, 58, 0.5), transparent 60%),
-    linear-gradient(180deg, rgba(6, 12, 22, 0.65), rgba(3, 7, 14, 0.7));
-}
-
-.editor-stage-kicker {
-  margin: 0;
-  color: hsl(var(--muted-foreground));
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.05em;
-}
-
 .editor-empty {
   color: hsl(var(--muted-foreground));
   padding: 2rem;
@@ -6984,24 +6913,6 @@ textarea {
   font-size: 0.58rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-}
-
-.editor-artifact {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  cursor: grab;
-  touch-action: none;
-}
-
-.editor-artifact:active {
-  cursor: grabbing;
-}
-
-.editor-artifact img {
-  max-width: 4rem;
-  max-height: 4rem;
-  pointer-events: none;
 }
 
 /* -- Inspector panels -- */
@@ -7381,7 +7292,9 @@ textarea {
 .upload-dialog {
   display: grid;
   gap: 0.85rem;
-  width: min(28rem, 100%);
+  width: min(34rem, 100%);
+  max-height: min(86vh, 48rem);
+  overflow-y: auto;
   padding: 1.25rem;
   border-radius: 0.9rem;
   border: 1px solid rgba(var(--tower-cyan), 0.3);
@@ -7443,6 +7356,75 @@ textarea {
   justify-content: flex-end;
   gap: 0.5rem;
   margin-top: 0.4rem;
+}
+
+.upload-animation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.upload-viewbox-field {
+  gap: 0.45rem;
+}
+
+.upload-viewbox-preview {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  width: 100%;
+  min-height: 12rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.22);
+  border-radius: 0.65rem;
+  background:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.035) 25%, transparent 25% 75%, rgba(255, 255, 255, 0.035) 75%),
+    linear-gradient(45deg, rgba(255, 255, 255, 0.035) 25%, transparent 25% 75%, rgba(255, 255, 255, 0.035) 75%),
+    rgba(2, 8, 16, 0.72);
+  background-position: 0 0, 8px 8px, 0 0;
+  background-size: 16px 16px, 16px 16px, auto;
+}
+
+.upload-viewbox-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+}
+
+.upload-viewbox-box {
+  position: absolute;
+  border: 2px solid rgba(var(--tower-cyan), 0.95);
+  background: rgba(var(--tower-cyan), 0.08);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.38), 0 0 18px rgba(var(--tower-cyan), 0.38);
+  cursor: move;
+  touch-action: none;
+}
+
+.upload-viewbox-handle {
+  position: absolute;
+  right: -0.45rem;
+  bottom: -0.45rem;
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 999px;
+  background: rgb(var(--tower-cyan));
+  cursor: nwse-resize;
+}
+
+.upload-viewbox-output {
+  min-height: 1rem;
+  color: hsl(var(--foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.68rem;
+}
+
+.upload-viewbox-output.is-empty {
+  color: hsl(var(--muted-foreground));
+  font-family: inherit;
 }
 
 .upload-grid-2 {

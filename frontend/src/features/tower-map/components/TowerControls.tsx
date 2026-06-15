@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Castle, Check, Feather, PencilRuler, Plus } from 'lucide-react'
+import { Castle, Check, Eye, Feather, PencilRuler, Plus } from 'lucide-react'
 
 import { useTowerDesignEditor } from '@/features/tower-designs/hooks/useTowerDesignEditor'
 import { cn } from '@/shared/utils/cn'
@@ -16,10 +16,14 @@ const OFFICIAL_LABEL = 'The Arcane Spire'
  */
 export function TowerControls({
   view,
+  editMode = false,
   onViewChange,
+  onEditModeExit,
 }: {
   view: TowerView
+  editMode?: boolean
   onViewChange: (view: TowerView) => void
+  onEditModeExit?: () => void
 }) {
   const navigate = useNavigate()
   const { design, hasDesign, canCreate, isCreating, isForking, raiseSpire, openOfficialFork } =
@@ -72,6 +76,10 @@ export function TowerControls({
     // tweaks there stay yours. Editing your own tower opens your design. Both
     // stay on this page — `?mode=edit` swaps in the editor over the same sky.
     setActionError(null)
+    if (editMode) {
+      onEditModeExit?.()
+      return
+    }
     try {
       if (view === 'official') {
         const fork = await openOfficialFork()
@@ -148,14 +156,18 @@ export function TowerControls({
         type="button"
         className="tower-control-chip tower-control-chip--icon"
         data-hint={
-          view === 'official'
+          editMode
+            ? 'Return to tower'
+            : view === 'official'
             ? `Edit ${OFFICIAL_LABEL} (private to you)`
             : hasDesign
               ? `Edit ${mineLabel}`
               : 'Raise your Tower'
         }
         aria-label={
-          view === 'official'
+          editMode
+            ? 'Return to tower'
+            : view === 'official'
             ? `Edit ${OFFICIAL_LABEL} privately`
             : hasDesign
               ? `Edit ${mineLabel}`
@@ -164,7 +176,7 @@ export function TowerControls({
         disabled={isCreating || isForking}
         onClick={() => void openEditor()}
       >
-        <PencilRuler className="size-4" aria-hidden="true" />
+        {editMode ? <Eye className="size-4" aria-hidden="true" /> : <PencilRuler className="size-4" aria-hidden="true" />}
       </button>
 
       {/* Authoring belongs to YOUR tower only: the button shows on your personal

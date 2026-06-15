@@ -7,6 +7,7 @@ import type {
   TowerDesignOverview,
   TowerPieceInstancePayload,
 } from '@/features/tower-designs/types'
+import type { TowerArtifactRole } from '@/shared/assets/types'
 
 export const towerDesignsApi = {
   mine() {
@@ -66,6 +67,7 @@ export const towerDesignsApi = {
       piece_asset_id: number
       piece_type: string
       sort_order?: number
+      storey_index?: number
       parent_instance_id?: number | null
       transform?: Record<string, unknown>
       config?: Record<string, unknown>
@@ -112,9 +114,13 @@ export const towerDesignsApi = {
     input: {
       target_piece_instance_id: number
       artifact_asset_id: number
+      role?: TowerArtifactRole
+      content_definition_id?: number | null
       x?: number
       y?: number
       scale?: number
+      width?: number
+      height?: number
       rotation?: number
       anchor?: string
       z_index?: number
@@ -127,8 +133,19 @@ export const towerDesignsApi = {
   },
   updateArtifact(
     designId: number,
-    placementId: number,
-    input: { x?: number; y?: number; scale?: number; rotation?: number; anchor?: string; z_index?: number },
+    placementId: number | string,
+    input: {
+      x?: number
+      y?: number
+      scale?: number
+      width?: number
+      height?: number
+      rotation?: number
+      anchor?: string
+      z_index?: number
+      role?: TowerArtifactRole
+      content_definition_id?: number | null
+    },
   ) {
     return apiRequest<ArtifactPlacementPayload>(`/tower-designs/${designId}/artifacts/${placementId}/`, {
       method: 'PATCH',

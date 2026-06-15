@@ -14,6 +14,7 @@ export type ZoomPan = {
   onPanStart: (event: React.PointerEvent) => void
   zoomIn: () => void
   zoomOut: () => void
+  setScale: (scale: number) => void
   reset: () => void
 }
 
@@ -42,7 +43,11 @@ export function useZoomPan(): ZoomPan {
     (event: React.PointerEvent) => {
       if (event.button !== 0 && event.button !== 1) return
       // Only the background pans — grabbing a piece or artifact must not.
-      if ((event.target as HTMLElement).closest('.editor-piece, .editor-slot, .editor-artifact')) return
+      if (
+        (event.target as HTMLElement).closest(
+          'button, a, input, select, textarea, [role="button"], .editor-piece, .editor-slot, .editor-artifact, .tower-artifact',
+        )
+      ) return
       drag.current = { x: event.clientX, y: event.clientY, tx, ty }
       const move = (ev: PointerEvent) => {
         if (!drag.current) return
@@ -62,6 +67,7 @@ export function useZoomPan(): ZoomPan {
 
   const zoomIn = useCallback(() => setScale((s) => clamp(s * 1.2, MIN, MAX)), [])
   const zoomOut = useCallback(() => setScale((s) => clamp(s / 1.2, MIN, MAX)), [])
+  const setScaleDirect = useCallback((next: number) => setScale(clamp(next, MIN, MAX)), [])
   const reset = useCallback(() => {
     setScale(1)
     setTx(0)
@@ -80,6 +86,7 @@ export function useZoomPan(): ZoomPan {
     onPanStart,
     zoomIn,
     zoomOut,
+    setScale: setScaleDirect,
     reset,
   }
 }

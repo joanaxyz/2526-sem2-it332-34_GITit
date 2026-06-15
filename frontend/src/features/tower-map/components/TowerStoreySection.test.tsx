@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { DoorOverview } from './DoorOverview'
+import { ArtifactOverview } from './ArtifactOverview'
 import { TowerStoreySection } from './TowerStoreySection'
 import { TowerActionButton } from './TowerActionButton'
 import { useTowerSelection } from '@/features/tower-map/hooks/useTowerSelection'
@@ -62,6 +62,26 @@ vi.mock('@/features/challenges/api/challengesApi', () => ({
   },
 }))
 
+class ImmediateIntersectionObserver {
+  private callback: IntersectionObserverCallback
+
+  constructor(callback: IntersectionObserverCallback) {
+    this.callback = callback
+  }
+
+  observe(target: Element) {
+    this.callback([{ isIntersecting: true, target } as IntersectionObserverEntry], this as unknown as IntersectionObserver)
+  }
+
+  disconnect() {}
+  unobserve() {}
+  takeRecords() {
+    return []
+  }
+}
+
+vi.stubGlobal('IntersectionObserver', ImmediateIntersectionObserver)
+
 const CANONICAL_ADVENTURE = {
   item_type: 'command_adventure',
   id: 2,
@@ -119,28 +139,21 @@ function canonicalTowerLayout(storeyId: number) {
   return {
     storeyId,
     pieces: [
-      { instanceId: `storey-${storeyId}-spire`, assetSlug: 'official-spire', pieceType: 'spire' },
+      { instanceId: `storey-${storeyId}-crown`, assetSlug: 'official-crown', pieceType: 'crown' },
       {
-        instanceId: `storey-${storeyId}-window-section`,
-        assetSlug: 'official-window-section',
-        pieceType: 'window_section',
-      },
-      {
-        instanceId: `storey-${storeyId}-tome-${CANONICAL_TOME.id}`,
-        assetSlug: 'official-tome',
-        pieceType: 'tome',
-        contentBinding: { kind: 'tome', id: CANONICAL_TOME.id },
+        instanceId: `storey-${storeyId}-tome-section-${CANONICAL_TOME.id}`,
+        assetSlug: 'official-hall-section',
+        pieceType: 'section',
       },
       {
         instanceId: `storey-${storeyId}-landing-after-tomes`,
-        assetSlug: 'official-landing',
+        assetSlug: 'official-tome-landing',
         pieceType: 'landing',
       },
       {
-        instanceId: `storey-${storeyId}-adventure`,
-        assetSlug: 'official-adventure-section',
-        pieceType: 'adventure_section',
-        contentBinding: { kind: 'adventure', id: CANONICAL_ADVENTURE.id },
+        instanceId: `storey-${storeyId}-adventure-section`,
+        assetSlug: 'official-hall-section',
+        pieceType: 'section',
       },
       {
         instanceId: `storey-${storeyId}-landing-after-adventure`,
@@ -148,18 +161,71 @@ function canonicalTowerLayout(storeyId: number) {
         pieceType: 'landing',
       },
       {
-        instanceId: `storey-${storeyId}-challenge-${CANONICAL_CHALLENGE.id}`,
-        assetSlug: 'official-challenge-section',
-        pieceType: 'challenge_section',
-        contentBinding: { kind: 'challenge', id: CANONICAL_CHALLENGE.id },
+        instanceId: `storey-${storeyId}-challenge-section-${CANONICAL_CHALLENGE.id}`,
+        assetSlug: 'official-trial-section',
+        pieceType: 'section',
       },
       {
         instanceId: `storey-${storeyId}-landing-after-challenges`,
-        assetSlug: 'official-landing',
+        assetSlug: 'official-challenge-landing',
         pieceType: 'landing',
       },
     ],
   } as const
+}
+
+function canonicalArtifacts(storeyId: number, includeTome = true) {
+  return [
+    ...(includeTome
+      ? [
+          {
+            id: `storey-${storeyId}-artifact-tome-${CANONICAL_TOME.id}`,
+            targetInstanceId: `storey-${storeyId}-tome-section-${CANONICAL_TOME.id}`,
+            assetSlug: 'official-tome-artifact',
+            role: 'tome',
+            contentBinding: { kind: 'tome', id: CANONICAL_TOME.id },
+            x: 184,
+            y: 112,
+            scale: 1,
+            width: 96,
+            height: 88,
+            rotation: 0,
+            anchor: '',
+            zIndex: 12,
+          },
+        ]
+      : []),
+    {
+      id: `storey-${storeyId}-artifact-adventure`,
+      targetInstanceId: `storey-${storeyId}-adventure-section`,
+      assetSlug: 'official-gate-artifact',
+      role: 'adventure',
+      contentBinding: { kind: 'adventure', id: CANONICAL_ADVENTURE.id },
+      x: 184,
+      y: 122,
+      scale: 1,
+      width: 116,
+      height: 134,
+      rotation: 0,
+      anchor: '',
+      zIndex: 12,
+    },
+    {
+      id: `storey-${storeyId}-artifact-challenge-${CANONICAL_CHALLENGE.id}`,
+      targetInstanceId: `storey-${storeyId}-challenge-section-${CANONICAL_CHALLENGE.id}`,
+      assetSlug: 'official-portcullis-artifact',
+      role: 'challenge',
+      contentBinding: { kind: 'challenge', id: CANONICAL_CHALLENGE.id },
+      x: 184,
+      y: 124,
+      scale: 1,
+      width: 90,
+      height: 132,
+      rotation: 0,
+      anchor: '',
+      zIndex: 12,
+    },
+  ] as const
 }
 
 const TOWER_SPRITE = {
@@ -195,22 +261,48 @@ function towerPieceDescriptor(slug: string, pieceType: string, anchors = {}) {
   }
 }
 
+function towerArtifactDescriptor(slug: string) {
+  return {
+    slug,
+    label: slug,
+    kind: 'tower_artifact',
+    scale: 1,
+    config: {},
+    sprites: { default: TOWER_SPRITE },
+  }
+}
+
 function mockTowerPieceDescriptors() {
-  mocks.getAssetDescriptors.mockResolvedValue({
-    kind: 'tower_piece',
-    results: {
-      'official-spire': towerPieceDescriptor('official-spire', 'spire'),
-      'official-window-section': towerPieceDescriptor('official-window-section', 'window_section'),
-      'official-tome': towerPieceDescriptor('official-tome', 'tome'),
-      'official-landing': towerPieceDescriptor('official-landing', 'landing', {
-        walk_rail: { x1: 18, y1: 18, x2: 202, y2: 18 },
-      }),
-      'official-adventure-section': towerPieceDescriptor('official-adventure-section', 'adventure_section'),
-      'official-challenge-section': towerPieceDescriptor('official-challenge-section', 'challenge_section'),
-      'official-door': towerPieceDescriptor('official-door', 'door'),
-      'official-portcullis': towerPieceDescriptor('official-portcullis', 'door'),
-    },
-  })
+  mocks.getAssetDescriptors.mockImplementation((kind: string) =>
+    Promise.resolve(
+      kind === 'tower_artifact'
+        ? {
+            kind: 'tower_artifact',
+            results: {
+              'official-gate-artifact': towerArtifactDescriptor('official-gate-artifact'),
+              'official-portcullis-artifact': towerArtifactDescriptor('official-portcullis-artifact'),
+              'official-tome-artifact': towerArtifactDescriptor('official-tome-artifact'),
+            },
+          }
+        : {
+            kind: 'tower_piece',
+            results: {
+              'official-crown': towerPieceDescriptor('official-crown', 'crown'),
+              'official-hall-section': towerPieceDescriptor('official-hall-section', 'section'),
+              'official-trial-section': towerPieceDescriptor('official-trial-section', 'section'),
+              'official-landing': towerPieceDescriptor('official-landing', 'landing', {
+                walk_rail: { x1: 18, y1: 18, x2: 202, y2: 18 },
+              }),
+              'official-challenge-landing': towerPieceDescriptor('official-challenge-landing', 'landing', {
+                walk_rail: { x1: 16, y1: 16, x2: 204, y2: 16 },
+              }),
+              'official-tome-landing': towerPieceDescriptor('official-tome-landing', 'landing', {
+                walk_rail: { x1: 20, y1: 14, x2: 200, y2: 14 },
+              }),
+            },
+          },
+    ),
+  )
 }
 
 function mockCanonicalStoreyContent() {
@@ -221,6 +313,7 @@ function mockCanonicalStoreyContent() {
       tomes: [CANONICAL_TOME],
       challenges: [CANONICAL_CHALLENGE],
       tower_layout: canonicalTowerLayout(storeyId),
+      artifacts: canonicalArtifacts(storeyId),
     }),
   )
 }
@@ -249,7 +342,7 @@ function renderHub() {
             level_completion: { value: 0, numerator: 0, denominator: 5 },
           }}
         />
-        <DoorOverview storeyId={2} />
+        <ArtifactOverview storeyId={2} />
         <TowerActionButton />
       </MemoryRouter>
     </QueryClientProvider>,
@@ -263,7 +356,7 @@ describe('TowerStoreySection', () => {
     useTowerSelection.setState({ selected: null })
   })
 
-  it('renders a balcony adventure door and one door per challenge level', async () => {
+  it('renders adventure, tome, and challenge artifacts on generic sections', async () => {
     mockCanonicalStoreyContent()
     renderHub()
 
@@ -275,15 +368,9 @@ describe('TowerStoreySection', () => {
     expect(
       screen.getByRole('button', { name: /select compose clean history: easy/i }),
     ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /select compose clean history: medium/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /select compose clean history: hard/i }),
-    ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /select command adventure/i })).toHaveAttribute(
       'data-piece-id',
-      'storey-2-adventure',
+      'storey-2-adventure-section',
     )
     await waitFor(() =>
       expect(document.querySelector('[data-piece-id="storey-2-landing-after-adventure"]')).toHaveAttribute(
@@ -292,17 +379,17 @@ describe('TowerStoreySection', () => {
       ),
     )
     expect(document.querySelector('.tower-roof-art')).toBeInTheDocument()
-    expect(document.querySelector('.tower-window-band-art')).toBeInTheDocument()
+    expect(document.querySelector('.tower-hall-art')).toBeInTheDocument()
   })
 
-  it('shows the adventure overview + Play action when its door is selected', async () => {
+  it('shows the adventure overview + Play action when its artifact is selected', async () => {
     mockCanonicalStoreyContent()
     renderHub()
 
-    const door = await screen.findByRole('button', { name: /select command adventure: preparing file changes/i })
-    fireEvent.click(door)
+    const artifact = await screen.findByRole('button', { name: /select command adventure: preparing file changes/i })
+    fireEvent.click(artifact)
 
-    const overview = screen.getByLabelText('Selected stage')
+    const overview = screen.getByLabelText('Selected artifact')
     expect(within(overview).getByText('Preparing File Changes')).toBeInTheDocument()
     expect(within(overview).getByText('0/5 solved')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^play$/i })).toBeInTheDocument()
@@ -321,7 +408,7 @@ describe('TowerStoreySection', () => {
 
     fireEvent.click(lectern)
 
-    const overview = screen.getByLabelText('Selected stage')
+    const overview = screen.getByLabelText('Selected artifact')
     expect(within(overview).getByText('Tome')).toBeInTheDocument()
     expect(within(overview).getByText('How Git Thinks')).toBeInTheDocument()
 
@@ -336,6 +423,15 @@ describe('TowerStoreySection', () => {
         command_adventure: CANONICAL_ADVENTURE,
         tomes: [],
         challenges: [CANONICAL_CHALLENGE],
+        tower_layout: {
+          storeyId,
+          pieces: canonicalTowerLayout(storeyId).pieces.filter(
+            (piece) =>
+              !piece.instanceId.includes('tome-section') &&
+              !piece.instanceId.includes('landing-after-tomes'),
+          ),
+        },
+        artifacts: canonicalArtifacts(storeyId, false),
       }),
     )
     renderHub()
@@ -345,7 +441,7 @@ describe('TowerStoreySection', () => {
     expect(screen.queryByRole('heading', { name: /^tome$/i })).not.toBeInTheDocument()
   })
 
-  it('shows the chosen level overview with accuracy + attempts when a trial door is selected', async () => {
+  it('shows the chosen level overview with accuracy + attempts when a challenge artifact is selected', async () => {
     mockCanonicalStoreyContent()
     renderHub()
 
@@ -354,7 +450,7 @@ describe('TowerStoreySection', () => {
     })
     fireEvent.click(easyDoor)
 
-    const overview = screen.getByLabelText('Selected stage')
+    const overview = screen.getByLabelText('Selected artifact')
     expect(within(overview).getByText('Compose Clean History')).toBeInTheDocument()
     expect(within(overview).getByText('Easy')).toBeInTheDocument()
     // Accuracy with no attempts yet renders as a placeholder.

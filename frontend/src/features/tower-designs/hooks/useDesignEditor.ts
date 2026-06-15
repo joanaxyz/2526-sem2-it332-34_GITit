@@ -6,6 +6,7 @@ import { pieceIdFromInstance } from '@/features/tower-designs/editorUtils'
 import { assetsApi } from '@/shared/assets/assetsApi'
 import { queryKeys } from '@/shared/api/queryKeys'
 import type {
+  TowerArtifactRole,
   TowerArtifactAssetDescriptor,
   TowerPieceAssetDescriptor,
 } from '@/shared/assets/types'
@@ -69,8 +70,25 @@ export function useDesignEditor(designId: number) {
       towerDesignsApi.updatePiece(designId, pieceId, { piece_asset_id: assetId }),
     onSuccess: invalidate,
   })
+  const updatePiece = useMutation({
+    mutationFn: ({
+      pieceId,
+      input,
+    }: {
+      pieceId: number
+      input: Parameters<typeof towerDesignsApi.updatePiece>[2]
+    }) => towerDesignsApi.updatePiece(designId, pieceId, input),
+    onSuccess: invalidate,
+  })
   const addPiece = useMutation({
-    mutationFn: (input: { piece_asset_id: number; piece_type: string; sort_order?: number }) =>
+    mutationFn: (input: {
+      piece_asset_id: number
+      piece_type: string
+      sort_order?: number
+      storey_index?: number
+      parent_instance_id?: number | null
+      config?: Record<string, unknown>
+    }) =>
       towerDesignsApi.addPiece(designId, input),
     onSuccess: invalidate,
   })
@@ -92,12 +110,31 @@ export function useDesignEditor(designId: number) {
     onSuccess: invalidate,
   })
   const placeArtifact = useMutation({
-    mutationFn: (input: { target_piece_instance_id: number; artifact_asset_id: number; x?: number; y?: number }) =>
+    mutationFn: (input: {
+      target_piece_instance_id: number
+      artifact_asset_id: number
+      role?: TowerArtifactRole
+      content_definition_id?: number | null
+      x?: number
+      y?: number
+      width?: number
+      height?: number
+    }) =>
       towerDesignsApi.placeArtifact(designId, input),
     onSuccess: invalidate,
   })
   const updateArtifact = useMutation({
-    mutationFn: ({ placementId, ...input }: { placementId: number; x?: number; y?: number; scale?: number; rotation?: number }) =>
+    mutationFn: ({ placementId, ...input }: {
+      placementId: number | string
+      x?: number
+      y?: number
+      scale?: number
+      width?: number
+      height?: number
+      rotation?: number
+      role?: TowerArtifactRole
+      content_definition_id?: number | null
+    }) =>
       towerDesignsApi.updateArtifact(designId, placementId, input),
     onSuccess: invalidate,
   })
@@ -132,6 +169,7 @@ export function useDesignEditor(designId: number) {
     pieceIdFromInstance,
     rename,
     swapAsset,
+    updatePiece,
     addPiece,
     addStorey,
     deletePiece,

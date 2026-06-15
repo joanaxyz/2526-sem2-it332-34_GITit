@@ -1,35 +1,34 @@
-import { useState, type KeyboardEvent, type ReactNode } from 'react'
-import { BookOpen, Swords, Trophy } from 'lucide-react'
+import { type ReactNode, useMemo, useState } from 'react'
 
-import type { PaletteDragPayload } from '@/features/tower-designs/components/PiecePalette'
 import { pieceIdFromInstance } from '@/features/tower-designs/editorUtils'
 import type { ArtifactPlacementDescriptor, TowerDesignOverview } from '@/features/tower-designs/types'
-import { PieceArt } from '@/features/tower-map/components/PieceArt'
-import { RoofSpire, TomeLanding, TowerLanding, WindowStorey } from '@/features/tower-map/components/TowerStoreySection'
+import { RoofSpire, TowerLanding, TowerSectionShell } from '@/features/tower-map/components/TowerStoreySection'
+import { TowerArtifact } from '@/features/tower-map/components/TowerArtifact'
 import {
   clientPointToPiecePoint,
-  pieceByType,
-  piecePointToCss,
   pieceVariant,
   towerDescriptorFor,
-  towerPieceAttrs,
 } from '@/features/tower-map/components/towerPieceData'
 import type {
   TowerArtifactAssetDescriptor,
+  TowerArtifactRole,
   TowerLayoutPieceDescriptor,
   TowerPieceAssetDescriptor,
 } from '@/shared/assets/types'
-import { backendUrl } from '@/shared/api/httpClient'
 import { cn } from '@/shared/utils/cn'
 
-/**
- * The editor canvas: ONE representative storey (the body repeats up the tower)
- * plus the crowning spire/roof. It renders the *real* tower piece components and
- * `tower-*` CSS — the same building blocks the live `/tower` view uses — so the
- * canvas reads as the actual tower, just static (no entrance animation) and with
- * the pieces made selectable/droppable. Editing this one storey edits every
- * repeat, because the live tower reuses the same shared layout template.
- */
+export type EditorDragPayload =
+  | { source: 'asset-piece'; assetId: number; slug: string; pieceType: string }
+  | {
+      source: 'asset-artifact'
+      assetId: number
+      slug: string
+      role: TowerArtifactRole
+      contentDefinitionId?: number | null
+    }
+
+export type PlacementDraft = Extract<EditorDragPayload, { source: 'asset-artifact' }> | null
+
 export function EditorStorey({
   overview,
   pieceDescriptorBySlug,
@@ -37,31 +36,38 @@ export function EditorStorey({
   artifactDescriptorBySlug,
   selectedPieceId,
   pendingSwaps,
+  placementDraft,
+  storeyIndex,
   onSelectPiece,
   onSwapAsset,
   onPlaceArtifact,
   onMoveArtifact,
-  onOpenSection,
 }: {
   overview: TowerDesignOverview
   pieceDescriptorBySlug: Record<string, TowerPieceAssetDescriptor>
   pieceDescriptorById: Map<number, TowerPieceAssetDescriptor>
   artifactDescriptorBySlug: Record<string, TowerArtifactAssetDescriptor>
   selectedPieceId: number | null
-  /** pieceId → asset id chosen but not yet committed; previewed live on the canvas. */
   pendingSwaps: Map<number, number>
+  placementDraft: PlacementDraft
+  storeyIndex?: number | null
   onSelectPiece: (pieceId: number) => void
   onSwapAsset: (pieceId: number, assetId: number) => void
-  onPlaceArtifact: (pieceId: number, assetId: number, x: number, y: number) => void
-  onMoveArtifact: (placementId: number, x: number, y: number) => void
-  /** Double-click / Shift+Enter on a piece opens the focused section editor. */
-  onOpenSection?: (pieceId: number) => void
+  onPlaceArtifact: (
+    pieceId: number,
+    assetId: number,
+    role: TowerArtifactRole,
+    contentDefinitionId: number | null | undefined,
+    x: number,
+    y: number,
+  ) => void
+  onMoveArtifact: (placementId: number | string, x: number, y: number) => void
 }) {
   const layout = overview.tower_layout
-  const artifactsByInstance = groupArtifacts(overview.artifacts)
+  const artifactsByInstance = useMemo(() => groupArtifacts(overview.artifacts), [overview.artifacts])
+  const [dropHoverId, setDropHoverId] = useState<number | null>(null)
+  const [rejectedId, setRejectedId] = useState<number | null>(null)
 
-  // A pending pick previews live: render the chosen asset in the slot instead of
-  // the committed one. Apply (in the toolbar) is what actually persists it.
   function descriptorFor(piece: TowerLayoutPieceDescriptor): TowerPieceAssetDescriptor | null {
     const pieceId = pieceIdFromInstance(piece.instanceId)
     if (pieceId !== null) {
@@ -71,16 +77,11 @@ export function EditorStorey({
     return towerDescriptorFor(piece, pieceDescriptorBySlug)
   }
 
-  const [dropHoverId, setDropHoverId] = useState<number | null>(null)
-  const [rejectedId, setRejectedId] = useState<number | null>(null)
-
   function flashReject(pieceId: number) {
     setRejectedId(pieceId)
-    window.setTimeout(() => setRejectedId((id) => (id === pieceId ? null : id)), 1100)
+    window.setTimeout(() => setRejectedId((id) => (id === pieceId ? null : id)), 900)
   }
 
-  // The base `editor-piece` marker lets the zoom/pan handler ignore grabs that
-  // land on a piece (only the sky pans); the modifiers paint editor feedback.
   function regionClass(pieceId: number | null): string {
     return cn(
       'editor-piece',
@@ -91,6 +92,36 @@ export function EditorStorey({
     )
   }
 
+  function canPlaceArtifact(piece: TowerLayoutPieceDescriptor, payload: PlacementDraft) {
+    if (!payload) return false
+    if (payload.role === 'normal') return true
+    return piece.pieceType === 'section'
+  }
+
+  function placePayloadOnPiece(
+    piece: TowerLayoutPieceDescriptor,
+    payload: PlacementDraft,
+    target: HTMLElement,
+    clientX: number,
+    clientY: number,
+  ) {
+    const pieceId = pieceIdFromInstance(piece.instanceId)
+    if (pieceId === null || !payload) return
+    if (!canPlaceArtifact(piece, payload)) {
+      flashReject(pieceId)
+      return
+    }
+    const point = clientPointToPiecePoint(clientX, clientY, target, descriptorFor(piece), variantForPiece(piece))
+    onPlaceArtifact(
+      pieceId,
+      payload.assetId,
+      payload.role,
+      payload.contentDefinitionId,
+      Math.round(point.x),
+      Math.round(point.y),
+    )
+  }
+
   function regionHandlers(piece: TowerLayoutPieceDescriptor, pieceId: number | null) {
     if (pieceId === null) return {}
     return {
@@ -98,13 +129,17 @@ export function EditorStorey({
       tabIndex: 0,
       'aria-pressed': pieceId === selectedPieceId,
       'aria-label': `${piece.pieceType} piece`,
-      onClick: () => onSelectPiece(pieceId),
-      onDoubleClick: () => onOpenSection?.(pieceId),
-      onKeyDown: (event: KeyboardEvent) => {
+      onClick: (event: React.MouseEvent<HTMLElement>) => {
+        if (placementDraft) {
+          placePayloadOnPiece(piece, placementDraft, event.currentTarget, event.clientX, event.clientY)
+          return
+        }
+        onSelectPiece(pieceId)
+      },
+      onKeyDown: (event: React.KeyboardEvent) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault()
-          if (event.shiftKey) onOpenSection?.(pieceId)
-          else onSelectPiece(pieceId)
+          onSelectPiece(pieceId)
         }
       },
       onDragOver: (event: React.DragEvent) => {
@@ -113,31 +148,17 @@ export function EditorStorey({
         setDropHoverId(pieceId)
       },
       onDragLeave: () => setDropHoverId((id) => (id === pieceId ? null : id)),
-      onDrop: (event: React.DragEvent) => {
+      onDrop: (event: React.DragEvent<HTMLElement>) => {
         event.preventDefault()
         setDropHoverId(null)
         const payload = readDrag(event)
         if (!payload) return
-        if (payload.source === 'palette-piece') {
+        if (payload.source === 'asset-piece') {
           if (payload.pieceType === piece.pieceType) onSwapAsset(pieceId, payload.assetId)
           else flashReject(pieceId)
           return
         }
-        if (payload.source === 'palette-artifact') {
-          const point = clientPointToPiecePoint(
-            event.clientX,
-            event.clientY,
-            event.currentTarget as HTMLElement,
-            descriptorFor(piece),
-            variantForPiece(piece),
-          )
-          onPlaceArtifact(
-            pieceId,
-            payload.assetId,
-            Math.round(point.x),
-            Math.round(point.y),
-          )
-        }
+        placePayloadOnPiece(piece, payload, event.currentTarget, event.clientX, event.clientY)
       },
     }
   }
@@ -154,7 +175,7 @@ export function EditorStorey({
     const placements = artifactsByInstance.get(piece.instanceId)
     if (!placements?.length) return null
     return placements.map((artifact) => (
-      <ArtifactOverlay
+      <EditableArtifact
         key={artifact.id}
         artifact={artifact}
         artifactDescriptor={artifactDescriptorBySlug[artifact.assetSlug] ?? null}
@@ -165,195 +186,79 @@ export function EditorStorey({
     ))
   }
 
-  const spirePiece = pieceByType(layout, 'spire')
-  const windowPiece = pieceByType(layout, 'window_section')
-  const tomePiece = pieceByType(layout, 'tome')
-  const adventurePiece = pieceByType(layout, 'adventure_section')
-  const challengePiece = pieceByType(layout, 'challenge_section')
-  // Landings are identified by the section they cap, not by instanceId — saved
-  // designs use numeric `…-piece-<n>` ids that carry no semantic suffix.
-  const landings = layout.pieces.filter((piece) => piece.pieceType === 'landing')
-  const tomeLanding = landings.find((piece) => pieceVariant(layout, piece) === 'tome') ?? null
-  const adventureLanding = landings.find((piece) => pieceVariant(layout, piece) === 'regular') ?? null
-  const challengeLanding =
-    landings.find((piece) => pieceVariant(layout, piece) === 'after-challenges') ?? null
-
   if (layout.pieces.length === 0) {
     return (
-      <div className="editor-stage" aria-label="Tower editor canvas">
-        <p className="editor-empty">This tower has no pieces yet.</p>
+      <div className="tower-stack-column tower-stack-column--editor" aria-label="Tower editor canvas">
+        <section className="storey-section storey-section--editor">
+          <div className="learning-tower">
+            <p className="editor-empty">This tower has no pieces yet.</p>
+          </div>
+        </section>
       </div>
     )
   }
 
+  const pieces = visibleStoreyPieces(layout.pieces, storeyIndex)
   return (
-    <div className="editor-stage" aria-label="Tower editor canvas">
-      <p className="editor-stage-kicker">A storey repeats up the tower — design it once.</p>
-      <div className="learning-tower">
-        <div className="tower-repeater">
-          {spirePiece ? (
-            <RoofSpire
-              animate={false}
-              piece={spirePiece}
-              descriptor={descriptorFor(spirePiece)}
-              className={regionClass(pieceIdFromInstance(spirePiece.instanceId))}
-              {...regionHandlers(spirePiece, pieceIdFromInstance(spirePiece.instanceId))}
-            >
-              {artifactsFor(spirePiece, descriptorFor(spirePiece), 'roof')}
-            </RoofSpire>
-          ) : null}
-
-          {windowPiece ? (
-            <WindowStorey
-              animate={false}
-              piece={windowPiece}
-              descriptor={descriptorFor(windowPiece)}
-              className={regionClass(pieceIdFromInstance(windowPiece.instanceId))}
-              {...regionHandlers(windowPiece, pieceIdFromInstance(windowPiece.instanceId))}
-            >
-              {artifactsFor(windowPiece, descriptorFor(windowPiece), 'regular')}
-            </WindowStorey>
-          ) : null}
-
-          {tomePiece ? (
-            <StageShell
-              kind="tome"
-              piece={tomePiece}
-              descriptor={descriptorFor(tomePiece)}
-              className={regionClass(pieceIdFromInstance(tomePiece.instanceId))}
-              handlers={regionHandlers(tomePiece, pieceIdFromInstance(tomePiece.instanceId))}
-            >
-              {artifactsFor(tomePiece, descriptorFor(tomePiece))}
-            </StageShell>
-          ) : null}
-
-          {tomeLanding ? (
-            <TomeLanding
-              animate={false}
-              piece={tomeLanding}
-              descriptor={descriptorFor(tomeLanding)}
-              className={regionClass(pieceIdFromInstance(tomeLanding.instanceId))}
-              {...regionHandlers(tomeLanding, pieceIdFromInstance(tomeLanding.instanceId))}
-            >
-              {artifactsFor(tomeLanding, descriptorFor(tomeLanding), 'tome')}
-            </TomeLanding>
-          ) : null}
-
-          {adventurePiece ? (
-            <StageShell
-              kind="adventure"
-              piece={adventurePiece}
-              descriptor={descriptorFor(adventurePiece)}
-              className={regionClass(pieceIdFromInstance(adventurePiece.instanceId))}
-              handlers={regionHandlers(adventurePiece, pieceIdFromInstance(adventurePiece.instanceId))}
-            >
-              {artifactsFor(adventurePiece, descriptorFor(adventurePiece), 'adventure')}
-            </StageShell>
-          ) : null}
-
-          {adventureLanding ? (
-            <TowerLanding
-              animate={false}
-              piece={adventureLanding}
-              descriptor={descriptorFor(adventureLanding)}
-              className={regionClass(pieceIdFromInstance(adventureLanding.instanceId))}
-              {...regionHandlers(adventureLanding, pieceIdFromInstance(adventureLanding.instanceId))}
-            >
-              {artifactsFor(adventureLanding, descriptorFor(adventureLanding), 'regular')}
-            </TowerLanding>
-          ) : null}
-
-          {challengePiece ? (
-            <StageShell
-              kind="challenge"
-              piece={challengePiece}
-              descriptor={descriptorFor(challengePiece)}
-              className={regionClass(pieceIdFromInstance(challengePiece.instanceId))}
-              handlers={regionHandlers(challengePiece, pieceIdFromInstance(challengePiece.instanceId))}
-            >
-              {artifactsFor(challengePiece, descriptorFor(challengePiece), 'challenge')}
-            </StageShell>
-          ) : null}
-
-          {challengeLanding ? (
-            <TowerLanding
-              animate={false}
-              afterChallenges
-              base
-              piece={challengeLanding}
-              descriptor={descriptorFor(challengeLanding)}
-              className={regionClass(pieceIdFromInstance(challengeLanding.instanceId))}
-              {...regionHandlers(challengeLanding, pieceIdFromInstance(challengeLanding.instanceId))}
-            >
-              {artifactsFor(challengeLanding, descriptorFor(challengeLanding), 'after-challenges')}
-            </TowerLanding>
-          ) : null}
+    <div className="tower-stack-column tower-stack-column--editor" aria-label="Tower editor canvas">
+      <section className="storey-section storey-section--editor">
+        <div className="learning-tower">
+          <div className="tower-repeater">
+            {pieces.map((piece) => {
+              const pieceId = pieceIdFromInstance(piece.instanceId)
+              const descriptor = descriptorFor(piece)
+              const artifacts = artifactsByInstance.get(piece.instanceId) ?? []
+              const role = firstInteractableRole(artifacts)
+              const handlers = regionHandlers(piece, pieceId)
+              if (piece.pieceType === 'crown') {
+                return (
+                  <RoofSpire
+                    key={piece.instanceId}
+                    piece={piece}
+                    descriptor={descriptor}
+                    className={regionClass(pieceId)}
+                    {...handlers}
+                  >
+                    {artifactsFor(piece, descriptor, 'roof')}
+                  </RoofSpire>
+                )
+              }
+              if (piece.pieceType === 'landing') {
+                const variant = variantForPiece(piece)
+                return (
+                  <TowerLanding
+                    key={piece.instanceId}
+                    variant={variant}
+                    piece={piece}
+                    descriptor={descriptor}
+                    className={regionClass(pieceId)}
+                    {...handlers}
+                  >
+                    {artifactsFor(piece, descriptor, variant)}
+                  </TowerLanding>
+                )
+              }
+              return (
+                <TowerSectionShell
+                  key={piece.instanceId}
+                  artifactRole={role}
+                  piece={piece}
+                  descriptor={descriptor}
+                  className={regionClass(pieceId)}
+                  {...handlers}
+                >
+                  {artifactsFor(piece, descriptor, role)}
+                </TowerSectionShell>
+              )
+            })}
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   )
 }
 
-const STAGE_SHELL = {
-  adventure: {
-    stageClass: 'tower-adventure-stage',
-    iconClass: 'tower-stage-icon--cyan',
-    titleClass: 'tower-stage-title--adventure',
-    title: 'Command Adventure',
-    Icon: Swords,
-  },
-  challenge: {
-    stageClass: 'tower-challenges-stage',
-    iconClass: 'tower-stage-icon--purple',
-    titleClass: 'tower-stage-title--challenge',
-    title: 'Challenges',
-    Icon: Trophy,
-  },
-  tome: {
-    stageClass: 'tower-tome-stage',
-    iconClass: 'tower-stage-icon--cyan',
-    titleClass: 'tower-stage-title--tome',
-    title: 'Tome',
-    Icon: BookOpen,
-  },
-} as const
-
-// The neon stage shell (background piece + icon + title), drawn with the real
-// `tower-*-stage` classes so it matches the live tower exactly. Content (live
-// doors/trials/lecterns) is a live-view concern, so the editor leaves it empty.
-function StageShell({
-  kind,
-  piece,
-  descriptor,
-  className,
-  handlers,
-  children,
-}: {
-  kind: 'adventure' | 'challenge' | 'tome'
-  piece: TowerLayoutPieceDescriptor
-  descriptor: TowerPieceAssetDescriptor | null
-  className: string
-  handlers: Record<string, unknown>
-  children?: ReactNode
-}) {
-  const { stageClass, iconClass, titleClass, title, Icon } = STAGE_SHELL[kind]
-  return (
-    <section
-      className={cn(stageClass, className)}
-      {...towerPieceAttrs(piece, descriptor, { variant: kind })}
-      {...handlers}
-    >
-      <PieceArt pieceType={piece.pieceType} descriptor={descriptor} variant={kind} />
-      <span className={cn('tower-stage-icon', iconClass)}>
-        <Icon className="size-6" />
-      </span>
-      <h2 className={cn('tower-stage-title', titleClass)}>{title}</h2>
-      {children}
-    </section>
-  )
-}
-
-function ArtifactOverlay({
+function EditableArtifact({
   artifact,
   artifactDescriptor,
   pieceDescriptor,
@@ -364,15 +269,11 @@ function ArtifactOverlay({
   artifactDescriptor: TowerArtifactAssetDescriptor | null
   pieceDescriptor: TowerPieceAssetDescriptor | null
   pieceVariant?: string
-  onMoveArtifact: (placementId: number, x: number, y: number) => void
+  onMoveArtifact: (placementId: number | string, x: number, y: number) => void
 }) {
-  const sprite = artifactDescriptor?.sprites.default ?? (artifactDescriptor ? Object.values(artifactDescriptor.sprites)[0] : null)
-
-  function onPointerDown(event: React.PointerEvent) {
+  function onPointerDown(event: React.PointerEvent<HTMLElement>) {
     event.stopPropagation()
     event.preventDefault()
-    // Coords are stored relative to the host piece; find it via the data marker
-    // both render paths stamp, so no React ref into the reused piece is needed.
     const host = (event.currentTarget as HTMLElement).closest('[data-piece-id]')
     if (!(host instanceof HTMLElement)) return
     const hostEl: HTMLElement = host
@@ -389,26 +290,27 @@ function ArtifactOverlay({
   }
 
   return (
-    <span
-      className="editor-artifact"
-      style={{
-        ...piecePointToCss(artifact.x, artifact.y, pieceDescriptor, pieceVariant),
-        transform: `translate(-50%, -50%) scale(${artifact.scale}) rotate(${artifact.rotation}deg)`,
-        zIndex: artifact.zIndex,
-      }}
+    <TowerArtifact
+      artifact={artifact}
+      descriptor={artifactDescriptor}
+      pieceDescriptor={pieceDescriptor}
+      pieceVariant={pieceVariant}
       onPointerDown={onPointerDown}
-    >
-      {sprite?.url ? <img src={backendUrl(sprite.url)} alt="" draggable={false} /> : null}
-    </span>
+      className="editor-artifact"
+    />
   )
 }
 
-function readDrag(event: React.DragEvent): PaletteDragPayload | null {
+function readDrag(event: React.DragEvent): EditorDragPayload | null {
   try {
-    return JSON.parse(event.dataTransfer.getData('application/json')) as PaletteDragPayload
+    return JSON.parse(event.dataTransfer.getData('application/json')) as EditorDragPayload
   } catch {
     return null
   }
+}
+
+function firstInteractableRole(artifacts: ArtifactPlacementDescriptor[]): TowerArtifactRole {
+  return artifacts.find((artifact) => artifact.role !== 'normal')?.role ?? 'normal'
 }
 
 function groupArtifacts(artifacts: ArtifactPlacementDescriptor[]) {
@@ -419,4 +321,20 @@ function groupArtifacts(artifacts: ArtifactPlacementDescriptor[]) {
     map.set(artifact.targetInstanceId, list)
   }
   return map
+}
+
+function visibleStoreyPieces(pieces: TowerLayoutPieceDescriptor[], storeyIndex: number | null | undefined) {
+  const nonCrown = pieces.filter((piece) => piece.pieceType !== 'crown')
+  const fallbackIndex = normalizedStoreyIndex(nonCrown[0])
+  const activeIndex = storeyIndex ?? fallbackIndex
+  const crown =
+    pieces.find((piece) => piece.pieceType === 'crown' && normalizedStoreyIndex(piece) === activeIndex) ??
+    pieces.find((piece) => piece.pieceType === 'crown') ??
+    null
+  const storeyPieces = nonCrown.filter((piece) => normalizedStoreyIndex(piece) === activeIndex)
+  return crown ? [crown, ...storeyPieces] : storeyPieces
+}
+
+function normalizedStoreyIndex(piece: TowerLayoutPieceDescriptor | undefined | null) {
+  return typeof piece?.storeyIndex === 'number' ? piece.storeyIndex : 0
 }

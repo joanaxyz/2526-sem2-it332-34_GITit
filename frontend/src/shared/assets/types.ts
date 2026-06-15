@@ -45,17 +45,11 @@ export type MonsterAssetDescriptor = BaseAssetDescriptor<'monster'> & {
     projectile?: string
   }
   metrics?: {
-    foot_offset?: number
-    hp_bar_fraction?: number
-  }
-}
-
-export type CharacterAssetDescriptor = BaseAssetDescriptor<'character'> & {
-  metrics?: {
     walk_speed?: number
     run_speed?: number
     fly_speed?: number
     foot_offset?: number
+    hp_bar_fraction?: number
     teleport_distance?: number
     take_off_airborne_frame?: number
     take_off_lift_speed?: number
@@ -64,26 +58,24 @@ export type CharacterAssetDescriptor = BaseAssetDescriptor<'character'> & {
   random_actions?: string[]
 }
 
-export type TowerPieceType =
-  | 'spire'
-  | 'window_section'
-  | 'landing'
-  | 'door'
-  | 'adventure_section'
-  | 'challenge_section'
-  | 'tome'
-
-/** Safe, named animation presets (no user code is ever executed).
- *  `swing-open` = double-panel door (two leaves); `swing-single` = one panel. */
-export type PiecePreset = 'none' | 'swing-open' | 'swing-single' | 'slide-up' | 'fade' | 'pulse'
-
-export type PieceAnimationConfig = {
-  preset: PiecePreset
-  /** Animation duration in ms (preset default used when omitted). */
-  durationMs?: number
-  /** CSS easing (preset default used when omitted). */
-  easing?: string
+export type CharacterAssetDescriptor = BaseAssetDescriptor<'character'> & {
+  metrics?: {
+    walk_speed?: number
+    run_speed?: number
+    fly_speed?: number
+    foot_offset?: number
+    hp_bar_fraction?: number
+    teleport_distance?: number
+    take_off_airborne_frame?: number
+    take_off_lift_speed?: number
+    land_fall_frame?: number
+  }
+  random_actions?: string[]
 }
+
+export type TowerPieceType = 'crown' | 'section' | 'landing'
+
+export type TowerArtifactRole = 'normal' | 'adventure' | 'challenge' | 'tome'
 
 export type TowerPieceAssetDetail = {
   piece_type: TowerPieceType
@@ -93,12 +85,9 @@ export type TowerPieceAssetDetail = {
   interaction_zones: Record<string, unknown>
   state_variants: Record<string, unknown>
   svg_sanitized: boolean
-  /** Inline (sanitized) SVG markup for the piece. Served inline — not as an
-   *  <img> — so the art can be styled/animated. Parts are tagged with
-   *  `data-role` so animation presets know what to move. */
+  /** Inline sanitized SVG markup for structural pieces. Asset states come from
+   *  uploaded sprite actions or authored SVG data, not frontend presets. */
   svg?: string
-  /** Named animation preset + params; interpreted by the platform, never code. */
-  animation?: PieceAnimationConfig
 }
 
 export type TowerPieceAssetDescriptor = BaseAssetDescriptor<'tower_piece'> & {
@@ -131,7 +120,9 @@ export type TowerLayoutPieceDescriptor = {
   assetSlug: string
   pieceType: TowerPieceType
   storeyIndex?: number
-  contentBinding?: TowerContentBinding
+  parentInstanceId?: string | null
+  transform?: Record<string, unknown>
+  config?: Record<string, unknown>
 }
 
 export type TowerLayoutDescriptor = {

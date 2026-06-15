@@ -1,6 +1,7 @@
 import type { RepositorySnapshot } from '@/shared/level/types'
 import type { KnownDifficulty } from '@/features/challenges/constants'
 import type { BookPage } from '@/features/tower-map/book/bookTypes'
+import type { ArtifactPlacementDescriptor } from '@/features/tower-designs/types'
 import type { TowerLayoutDescriptor } from '@/shared/assets/types'
 
 export type Difficulty = KnownDifficulty | (string & {})
@@ -130,6 +131,7 @@ export type StoreyContentOverview = {
   tomes: TomeSummary[]
   challenges: ChallengeSummary[]
   tower_layout?: TowerLayoutDescriptor
+  artifacts?: ArtifactPlacementDescriptor[]
 }
 
 export type CommandPreviewBlock = {

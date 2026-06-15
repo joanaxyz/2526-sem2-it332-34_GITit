@@ -41,7 +41,7 @@ const RANDOM_DELAY_MIN_MS = 6000
 const RANDOM_DELAY_MAX_MS = 14000
 
 const INTERACTIVE_SELECTOR =
-  'button, a, input, select, textarea, [role="button"], [role="slider"], .sky-clock, .tower-storey-dock, .tower-door-dock'
+  'button, a, input, select, textarea, [role="button"], [role="slider"], .sky-clock, .tower-artifact-dock, .tower-zoom-control'
 
 type Ledge = { el: HTMLElement; left: number; right: number; y: number }
 type Target = { x: number; y: number; ledge: Ledge | null }

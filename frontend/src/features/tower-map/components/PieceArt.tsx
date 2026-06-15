@@ -4,13 +4,8 @@ import { resolvePieceArt } from '@/features/tower-map/pieces/resolvePieceArt'
 import type { TowerPieceAssetDescriptor } from '@/shared/assets/types'
 
 /**
- * Renders a tower piece from its asset's inline SVG. The art (shape, colour,
- * animation) is owned entirely by the asset — the frontend never re-draws or
- * recolours a piece, it only positions the SVG and applies the named animation
- * preset. When a descriptor has no SVG yet (e.g. a fresh user upload, or a DB
- * that hasn't run `seed_assets`), there is deliberately no fallback art: dev
- * surfaces a labelled placeholder so the missing seed is obvious; prod renders
- * nothing rather than substituting some other piece's art.
+ * Renders structural tower art from asset-owned SVG data. Structural pieces are
+ * deliberately generic: crown, section, and landing.
  */
 export function PieceArt({
   pieceType,
@@ -27,7 +22,6 @@ export function PieceArt({
     return (
       <PieceSvg
         svg={resolved.svg}
-        animation={resolved.animation}
         className={classNameFor(pieceType, renderVariant)}
         viewBox={pieceViewBoxString(descriptor, renderVariant)}
         variant={renderVariant}
@@ -52,19 +46,12 @@ export function PieceArt({
 
 function classNameFor(pieceType: string, variant?: string) {
   switch (pieceType) {
-    case 'spire':
+    case 'crown':
       return 'tower-roof-art'
-    case 'window_section':
-      return 'tower-window-band-art'
     case 'landing':
       return variant === 'tome' ? 'tower-landing-art tower-landing-art--tome' : 'tower-landing-art'
-    case 'adventure_section':
-    case 'challenge_section':
+    case 'section':
       return 'tower-hall-art'
-    case 'tome':
-      return 'tome-lectern-art'
-    case 'door':
-      return variant === 'portcullis' ? 'trial-door-art' : 'adventure-door-art'
     default:
       return undefined
   }
@@ -72,16 +59,12 @@ function classNameFor(pieceType: string, variant?: string) {
 
 function defaultVariantFor(pieceType: string) {
   switch (pieceType) {
-    case 'spire':
+    case 'crown':
       return 'roof'
-    case 'window_section':
-      return 'regular'
     case 'landing':
       return 'regular'
-    case 'adventure_section':
-      return 'adventure'
-    case 'challenge_section':
-      return 'challenge'
+    case 'section':
+      return 'regular'
     default:
       return undefined
   }

@@ -1,5 +1,3 @@
-import type { CSSProperties } from 'react'
-
 import type {
   ChallengeActionIntent,
   ChallengeLevelAccess,
@@ -72,7 +70,7 @@ export function actionForChallengeLevel(item: ChallengeLevelAccess): ChallengeAc
   if (item.status === 'locked') return null
   if (item.status === 'in_progress') return item.active_run_id ? 'resume' : null
   if (item.status === 'completed') {
-    // A completed level is already counted; the only door action is an uncounted
+    // A completed level is already counted; the only artifact action is an uncounted
     // free-play replay ("Replay"). Routing it through the review run avoids the
     // retry endpoint, which rejects non-primary runs - the latest run here may
     // itself be a prior replay.
@@ -91,19 +89,4 @@ export function actionLabel(action: ChallengeActionIntent | null, status: Challe
   if (action === 'continue' || action === 'resume') return 'Continue'
   if (action === 'retry') return 'Retry'
   return 'Play'
-}
-
-export function doorStyleForLevel(level: ChallengeLevelAccess | null): CSSProperties {
-  if (!level) {
-    return {
-      '--door-rgb': '125, 145, 175',
-      '--door-glow': '144, 198, 255',
-    } as CSSProperties
-  }
-
-  const accent = challengeLevelAccent(level)
-  return {
-    '--door-rgb': accent,
-    '--door-glow': accent,
-  } as CSSProperties
 }

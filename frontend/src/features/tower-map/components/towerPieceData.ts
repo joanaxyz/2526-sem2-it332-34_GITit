@@ -4,7 +4,6 @@ import type {
   TowerPieceAssetDescriptor,
 } from '@/shared/assets/types'
 
-/** First layout piece of a given structural type (spire, landing, …). */
 export function pieceByType(
   layout: TowerLayoutDescriptor | null,
   pieceType: TowerLayoutPieceDescriptor['pieceType'],
@@ -12,50 +11,38 @@ export function pieceByType(
   return layout?.pieces.find((piece) => piece.pieceType === pieceType) ?? null
 }
 
-/** Layout piece whose instanceId ends with a suffix (e.g. `landing-after-adventure`). */
 export function pieceBySuffix(layout: TowerLayoutDescriptor | null, suffix: string) {
   return layout?.pieces.find((piece) => piece.instanceId.endsWith(suffix)) ?? null
 }
 
-/**
- * The render variant for a layout piece. For landings this is derived from
- * *position* — which section the landing caps — not from the instanceId, so it
- * is correct for both live storeys (semantic instanceIds) and saved tower
- * designs (numeric `…-piece-<n>` instanceIds). Returns `undefined` for pieces
- * that have no variant (e.g. the tome lectern / a door artifact).
- */
 export function pieceVariant(
-  layout: TowerLayoutDescriptor | null,
+  _layout: TowerLayoutDescriptor | null,
   piece: TowerLayoutPieceDescriptor,
 ): string | undefined {
   switch (piece.pieceType) {
-    case 'spire':
+    case 'crown':
       return 'roof'
-    case 'window_section':
-      return 'regular'
-    case 'adventure_section':
-      return 'adventure'
-    case 'challenge_section':
-      return 'challenge'
+    case 'section':
+      return typeof piece.config?.variant === 'string' ? piece.config.variant : 'regular'
     case 'landing':
-      return landingVariant(layout, piece)
+      return typeof piece.config?.variant === 'string' ? piece.config.variant : 'regular'
     default:
       return undefined
   }
 }
 
-/** A landing's variant is decided by the nearest non-landing piece above it. */
-function landingVariant(layout: TowerLayoutDescriptor | null, piece: TowerLayoutPieceDescriptor) {
-  const pieces = layout?.pieces ?? []
-  const index = pieces.findIndex((entry) => entry.instanceId === piece.instanceId)
-  for (let i = index - 1; i >= 0; i--) {
-    const type = pieces[i].pieceType
-    if (type === 'landing') continue
-    if (type === 'challenge_section') return 'after-challenges'
-    if (type === 'tome') return 'tome'
-    return 'regular'
+export function pieceTransformStyle(piece: TowerLayoutPieceDescriptor | null | undefined) {
+  const transform = piece?.transform
+  if (!isRecord(transform)) return undefined
+  const x = finiteNumber(transform.x) ?? 0
+  const y = finiteNumber(transform.y) ?? 0
+  const scale = positiveNumber(transform.scale) ?? 1
+  const rotation = finiteNumber(transform.rotation) ?? finiteNumber(transform.rotate) ?? 0
+  if (x === 0 && y === 0 && scale === 1 && rotation === 0) return undefined
+  return {
+    transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
+    transformOrigin: 'center center',
   }
-  return 'regular'
 }
 
 export function towerDescriptorFor(
@@ -93,7 +80,6 @@ export function towerPieceAttrs(
   }
 }
 
-/** Whether a piece asset carries a valid walk_rail anchor, i.e. Blue can stand on it. */
 export function pieceHasWalkRail(descriptor?: TowerPieceAssetDescriptor | null) {
   return walkRailAnchor(descriptor) !== null
 }
@@ -155,6 +141,19 @@ export function piecePointToCss(
   return {
     left: `${((x - box.x) / Math.max(box.width, 1)) * 100}%`,
     top: `${((y - box.y) / Math.max(box.height, 1)) * 100}%`,
+  }
+}
+
+export function pieceSizeToCss(
+  width: number,
+  height: number,
+  descriptor?: TowerPieceAssetDescriptor | null,
+  variant?: string,
+) {
+  const box = pieceViewBox(descriptor, variant)
+  return {
+    width: width > 0 ? `${(width / Math.max(box.width, 1)) * 100}%` : undefined,
+    height: height > 0 ? `${(height / Math.max(box.height, 1)) * 100}%` : undefined,
   }
 }
 

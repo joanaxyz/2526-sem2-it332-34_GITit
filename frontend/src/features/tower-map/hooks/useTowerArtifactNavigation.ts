@@ -7,14 +7,14 @@ import type {
 } from '@/features/challenges/types'
 
 /**
- * The tower should not start or retry runs directly. It only routes the learner
- * to the selected door's entry or active run page; each level feature owns
- * its own mutations and full-screen loading state.
+ * The tower routes from the selected interactable artifact into the owning
+ * feature. It does not start or retry runs directly; challenges and adventures
+ * own their own mutations and full-screen loading state.
  */
-export function useTowerDoorNavigation() {
+export function useTowerArtifactNavigation() {
   const navigate = useNavigate()
 
-  function openChallengeDoor(item: ChallengeLevelAccess, action: ChallengeActionIntent) {
+  function openChallengeArtifact(item: ChallengeLevelAccess, action: ChallengeActionIntent) {
     if (action === 'resume' && item.active_run_id) {
       navigate(`/challenge-runs/${item.active_run_id}`)
       return
@@ -30,7 +30,7 @@ export function useTowerDoorNavigation() {
     navigate(`/challenge-levels/${item.id}`)
   }
 
-  function openAdventureDoor(adventure: CommandAdventureSummary) {
+  function openAdventureArtifact(adventure: CommandAdventureSummary) {
     if (adventure.active_run_id) {
       navigate(`/adventure-runs/${adventure.active_run_id}`)
       return
@@ -38,5 +38,5 @@ export function useTowerDoorNavigation() {
     navigate(`/command-adventures/${adventure.slug}`)
   }
 
-  return { openChallengeDoor, openAdventureDoor }
+  return { openChallengeArtifact, openAdventureArtifact }
 }

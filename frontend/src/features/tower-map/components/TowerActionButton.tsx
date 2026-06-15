@@ -9,16 +9,16 @@ import {
   adventureActionLabel,
   challengeLevelAccent,
 } from '@/features/tower-map/challengeUi'
-import { useTowerDoorNavigation } from '@/features/tower-map/hooks/useTowerDoorNavigation'
+import { useTowerArtifactNavigation } from '@/features/tower-map/hooks/useTowerArtifactNavigation'
 import { useTowerSelection } from '@/features/tower-map/hooks/useTowerSelection'
 
 const ADVENTURE_ACCENT = '0, 245, 212'
 
-// The single floating action for whatever door is selected, pinned lower-left.
+// The single floating action for whatever interactable artifact is selected.
 export function TowerActionButton() {
   const selected = useTowerSelection((state) => state.selected)
-  const { openChallengeDoor, openAdventureDoor } = useTowerDoorNavigation()
-  // Tomes open in place (a reader modal), not via navigation like the doors.
+  const { openChallengeArtifact, openAdventureArtifact } = useTowerArtifactNavigation()
+  // Tomes open in place through a reader modal.
   const [openTome, setOpenTome] = useState<TomeSummary | null>(null)
 
   if (!selected) return null
@@ -46,7 +46,7 @@ export function TowerActionButton() {
           <Button
             type="button"
             className="tower-action-button"
-            onClick={() => openAdventureDoor(adventure)}
+            onClick={() => openAdventureArtifact(adventure)}
           >
             {adventureActionLabel(adventure)}
           </Button>
@@ -68,7 +68,7 @@ export function TowerActionButton() {
           className="tower-action-button"
           disabled={disabled}
           onClick={() => {
-            if (action) openChallengeDoor(level, action)
+            if (action) openChallengeArtifact(level, action)
           }}
         >
           {actionLabel(action, level.status)}
