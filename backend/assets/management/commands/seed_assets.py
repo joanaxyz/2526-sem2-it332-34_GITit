@@ -247,7 +247,7 @@ class Command(BaseCommand):
                 asset=asset, action=action, fps=fps, loops=action in LOOPING_ACTIONS
             )
             with path.open("rb") as handle:
-                sprite.image.save(f"{slug}__{action}.png", File(handle), save=False)
+                _replace_sprite_file(sprite, f"{slug}__{action}.png", handle)
                 sprite.save()  # recompute_frames reads the stored image
 
     def _seed_character(self, spec: dict) -> None:
@@ -285,7 +285,7 @@ class Command(BaseCommand):
                 loops=sprite_spec["loops"],
             )
             with path.open("rb") as handle:
-                sprite.image.save(f"{slug}__{action}.png", File(handle), save=False)
+                _replace_sprite_file(sprite, f"{slug}__{action}.png", handle)
                 sprite.save()
 
     def _seed_battle_artifact(self, spec: dict) -> None:
@@ -320,7 +320,7 @@ class Command(BaseCommand):
                 loops=sprite_spec["loops"],
             )
             with path.open("rb") as handle:
-                sprite.image.save(f"{slug}__{action}.png", File(handle), save=False)
+                _replace_sprite_file(sprite, f"{slug}__{action}.png", handle)
                 sprite.save()
 
     def _seed_tower_piece(self, spec: dict) -> None:
@@ -517,15 +517,31 @@ class _ZipSource:
 
 
 def _replace_sprite_file(sprite: AssetSprite, filename: str, handle) -> None:
-    """Replace sprite bytes without deleting the row before the new file exists."""
-    if sprite.image.name:
+    """Store official seed sprites at deterministic paths.
+
+    Django's storage layer appends a random suffix when the requested filename
+    already exists. That is useful for user uploads, but bad for idempotent seed
+    data: stale generated files would make every seed run create another copy.
+    """
+    storage = sprite.image.storage
+    target_name = sprite.image.field.generate_filename(sprite, filename)
+    previous_name = sprite.image.name
+
+    if previous_name == target_name:
         try:
-            with sprite.image.storage.open(sprite.image.name, "wb") as target:
+            with storage.open(target_name, "wb") as target:
                 target.write(handle.read())
             return
         except Exception:
             handle.seek(0)
 
+    if previous_name:
+        sprite.image.delete(save=False)
+
+    if storage.exists(target_name):
+        storage.delete(target_name)
+
+    handle.seek(0)
     sprite.image.save(filename, File(handle), save=False)
 
 

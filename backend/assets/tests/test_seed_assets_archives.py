@@ -24,3 +24,17 @@ def test_seed_assets_registers_tower_assets_from_archives(settings, tmp_path):
     assert AssetSprite.objects.filter(asset__slug__in=piece_slugs | artifact_slugs).count() == (
         len(piece_slugs) + len(artifact_slugs)
     )
+
+
+@pytest.mark.django_db
+def test_seed_assets_overwrites_stale_seed_sprite_without_suffix(settings, tmp_path):
+    settings.MEDIA_ROOT = tmp_path
+    stale_sprite = tmp_path / "assets" / "sprites" / "blue__idle.png"
+    stale_sprite.parent.mkdir(parents=True)
+    stale_sprite.write_bytes(b"stale")
+
+    call_command("seed_assets", "--skip-grant", verbosity=0)
+
+    sprite = AssetSprite.objects.get(asset__slug="blue", action="idle")
+    assert sprite.image.name == "assets/sprites/blue__idle.png"
+    assert not list(stale_sprite.parent.glob("blue__idle_*.png"))

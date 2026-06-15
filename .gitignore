@@ -25,6 +25,7 @@ htmlcov/
 
 # Django/local backend artifacts
 backend/db.sqlite3
+backend/media/
 *.sqlite3
 *.sqlite3-shm
 *.sqlite3-wal
@@ -51,6 +52,14 @@ Thumbs.db
 
 # Project-specific generated folders
 md_files/
+.tmp/
 
-# Agent skills are project assets and should remain trackable.
+# Local agent/workbench state
+.agents/
+.claude/
+.codex/
+.impeccable/
+
+# Large local archives/backups
 git-it.zip
+git.zip
