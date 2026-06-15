@@ -2577,8 +2577,7 @@ textarea {
   overflow: visible;
 }
 
-.tower-roof-stage,
-.tower-window-stage {
+.tower-roof-stage {
   position: relative;
   z-index: 5;
   display: grid;
@@ -2595,24 +2594,9 @@ textarea {
   margin-bottom: -1.35rem;
 }
 
-/* The window band is a structural wall piece, not a free-floating cap: it must
-   tuck into the hall below it like every other joint (which all use negative
-   margins). Without this the band sat detached above the hall, because the
-   stage below carries a positive `margin-top: 0.45rem`. */
-.tower-window-stage {
-  margin-bottom: -1rem;
-}
-
 .tower-roof-art {
   display: block;
   width: min(116%, 38rem);
-  height: auto;
-  overflow: visible;
-}
-
-.tower-window-band-art {
-  display: block;
-  width: min(92%, 30rem);
   height: auto;
   overflow: visible;
 }
@@ -2631,16 +2615,8 @@ textarea {
   font-size: 0.7rem;
 }
 
-.tower-crown-art {
-  display: block;
-  width: min(92%, 30rem);
-  height: auto;
-  overflow: visible;
-}
-
-/* Hall walls are drawn as inline SVG (`HallArt`) that stretches with the box;
-   the element only handles layout — the SVG paints the neon wall, inner frame
-   and (adventure) foot-rail. The outer glow is a uniform drop-shadow filter. */
+/* Section walls are authored SVG assets. The wrapper handles layout;
+   the authored SVG paints the tower wall and the outer glow is uniform. */
 .tower-adventure-stage,
 .tower-challenges-stage,
 .tower-tome-stage {
@@ -2658,18 +2634,6 @@ textarea {
   overflow: visible;
   pointer-events: none;
   filter: drop-shadow(0 0 14px var(--tower-cyan-glow));
-}
-
-.tower-hall-foot {
-  position: absolute;
-  left: -1.25rem;
-  right: -1.25rem;
-  bottom: -1.2rem;
-  z-index: 1;
-  height: 1.28rem;
-  overflow: visible;
-  pointer-events: none;
-  filter: drop-shadow(0 0 10px var(--tower-cyan-glow));
 }
 
 .tower-adventure-stage > *:not(svg):not(.tower-hall-art),
@@ -2738,161 +2702,13 @@ textarea {
   transform: translate(-50%, 0);
 }
 
-.tower-adventure-door-wrap {
-  margin-top: 1.35rem;
-}
-
-/* ── Tome stage: a singular lectern artifact. Not a doorway — furniture you
-   approach. Only renders on storeys that author a tome, so the silhouette never
-   repeats down the tower the way gates and trial rooms do. ── */
+/* Tome stage: structural art comes from the section asset; the tome itself is a
+   placed artifact. */
 .tower-tome-stage {
   z-index: 3;
   width: min(78%, 21rem);
   margin-top: 0.45rem;
   padding: 1.7rem 1.4rem 0.55rem;
-}
-
-.tower-tome-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-end;
-  gap: 1.5rem;
-  margin-top: 0.85rem;
-}
-
-.tome-lectern {
-  display: inline-grid;
-  justify-items: center;
-  gap: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* The lectern artwork (TomeLecternArt) carries its own floor shadow; the
-   button only adds the cyan wake-up glow so light stays a signal. */
-.tome-lectern-art {
-  display: block;
-  width: 9.75rem;
-  height: auto;
-  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45));
-  transition: filter 0.45s ease;
-}
-
-.tome-lectern:hover .tome-lectern-art,
-.tome-lectern[data-selected='true'] .tome-lectern-art {
-  filter:
-    drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45))
-    drop-shadow(0 0 18px rgba(45, 245, 255, 0.2));
-}
-
-.tome-svg-aura {
-  opacity: 0.22;
-  transition: opacity 0.5s ease;
-}
-
-.tome-svg-pages {
-  opacity: 0.34;
-  transition: opacity 0.5s ease;
-}
-
-.tome-svg-desk-face {
-  transition: stroke 0.4s ease;
-}
-
-.tome-svg-motes {
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-
-.tome-svg-mote {
-  animation: tome-mote-float 3.2s ease-in-out infinite;
-}
-
-.tome-svg-mote:nth-child(2) {
-  animation-delay: -1.1s;
-}
-
-.tome-svg-mote:nth-child(3) {
-  animation-delay: -2.2s;
-}
-
-@keyframes tome-mote-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tome-svg-mote {
-    animation: none;
-  }
-}
-
-.tome-lectern-label {
-  position: absolute;
-  left: 50%;
-  top: calc(100% + 0.28rem);
-  z-index: 7;
-  max-width: 9.5rem;
-  padding: 0.18rem 0.45rem;
-  border: 1px solid rgba(45, 245, 255, 0.28);
-  border-radius: 0.2rem;
-  background: rgba(2, 11, 22, 0.88);
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  font-size: 0.66rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  line-height: 1.35;
-  text-transform: uppercase;
-  color: hsl(var(--muted-foreground));
-  opacity: 0;
-  transform: translate(-50%, -0.16rem);
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease, color 0.35s ease, text-shadow 0.35s ease;
-}
-
-/* Cyan wakes on hover and holds while selected; the pages light to read. */
-.tome-lectern:hover .tome-svg-desk-face,
-.tome-lectern[data-selected='true'] .tome-svg-desk-face {
-  stroke: rgba(45, 245, 255, 0.95);
-}
-
-.tome-lectern:hover .tome-svg-pages,
-.tome-lectern[data-selected='true'] .tome-svg-pages {
-  opacity: 1;
-}
-
-.tome-lectern:hover .tome-svg-aura,
-.tome-lectern[data-selected='true'] .tome-svg-aura {
-  opacity: 0.7;
-}
-
-.tome-lectern:hover .tome-svg-motes,
-.tome-lectern[data-selected='true'] .tome-svg-motes {
-  opacity: 1;
-}
-
-.tome-lectern:hover .tome-lectern-label,
-.tome-lectern:focus-visible .tome-lectern-label,
-.tome-lectern[data-selected='true'] .tome-lectern-label {
-  color: rgb(45, 245, 255);
-  opacity: 1;
-  transform: translate(-50%, 0);
-  text-shadow: 0 0 12px rgba(45, 245, 255, 0.45);
-}
-
-.tome-lectern:focus-visible {
-  outline: 2px solid rgba(45, 245, 255, 0.9);
-  outline-offset: 4px;
 }
 
 .tower-artifact {
@@ -2954,51 +2770,8 @@ textarea {
   cursor: grabbing;
 }
 
-.adventure-door {
-  position: relative;
-  display: inline-flex;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  --door-accent: 45, 245, 255;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.adventure-door:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-/* The gate is inline SVG (`AdventureDoorArt`); these rules size it and drive the
-   open/glow/gem interactions by transforming the SVG groups. The leaves "swing"
-   open via a 2D scaleX from each hinge. */
-.adventure-door-art {
-  display: block;
-  width: 10.2rem;
-  height: auto;
-  overflow: visible;
-  filter: drop-shadow(0 0 12px rgba(45, 245, 255, 0.26));
-  transition: filter 0.4s ease;
-}
-
-.adventure-door:not(:disabled):hover .adventure-door-art,
-.adventure-door:not(:disabled):focus-visible .adventure-door-art {
-  filter: drop-shadow(0 0 20px rgba(45, 245, 255, 0.42));
-}
-
-.adventure-door[data-selected='true'] .adventure-door-art {
-  filter: drop-shadow(0 0 24px rgba(45, 245, 255, 0.55));
-}
-
-.adventure-door:focus-visible,
-.trial-door:focus-visible {
-  outline: 2px solid rgba(45, 245, 255, 0.72);
-  outline-offset: 0.3rem;
-}
-
-/* Landings/separators are drawn as inline SVG (`LandingArt` / `TomeLandingArt`);
-   the container only sizes, positions and tucks the belt into its neighbours. */
+/* Landings/separators are authored SVG assets; the container only sizes,
+   positions, and tucks the belt into its neighbours. */
 .tower-section-separator {
   position: relative;
   z-index: 4;
@@ -3014,13 +2787,6 @@ textarea {
   overflow: visible;
 }
 
-.tower-section-separator.is-after-challenges {
-  z-index: 6;
-  width: min(100%, 37rem);
-  margin-top: -1.06rem;
-  margin-bottom: -0.58rem;
-}
-
 .tower-section-separator.is-continuation {
   margin-bottom: -0.82rem;
 }
@@ -3028,28 +2794,6 @@ textarea {
 .tower-section-separator.is-base {
   width: min(100%, 37.5rem);
   margin-bottom: 0;
-}
-
-/* ── Tome separator: the belt under the scriptorium carries a single carved
-   keystone bearing the open-book sigil — a separator only tome storeys earn.
-   Both joints are flush: the beam overlaps the stage above, and the stage
-   below tucks behind the ledge (see the sibling rule), so no sky leaks
-   through the masonry. ── */
-.tower-tome-separator {
-  position: relative;
-  z-index: 4;
-  width: min(100%, 30rem);
-  margin: -0.55rem auto 0;
-  isolation: isolate;
-}
-
-.tower-tome-separator + .tower-adventure-stage {
-  margin-top: -0.5rem;
-}
-
-.adventure-door,
-.tome-lectern {
-  position: relative;
 }
 
 /* ── Tower companion: the click-driven character sprite. The layer covers the
@@ -3109,98 +2853,6 @@ textarea {
   opacity: 0.96;
 }
 
-.challenge-room-stack {
-  display: grid;
-  gap: 1.65rem;
-  width: min(100%, 25rem);
-  margin: 1.45rem auto 0;
-}
-
-.trial-room {
-  position: relative;
-  padding-top: 1.4rem;
-}
-
-.trial-room::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 2px;
-  background: linear-gradient(to right, transparent, rgba(176, 74, 255, 0.75), transparent);
-}
-
-.trial-room:first-child {
-  padding-top: 0.15rem;
-}
-
-.trial-room:first-child::before {
-  display: none;
-}
-
-.trial-door-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(0.65rem, 2.4vw, 1.45rem);
-  align-items: end;
-}
-
-.trial-door {
-  position: relative;
-  display: grid;
-  justify-items: center;
-  align-content: start;
-  gap: 0;
-  min-width: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: hsl(var(--foreground));
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.trial-door:disabled {
-  cursor: not-allowed;
-}
-
-/* The trial gate is inline SVG (seeded `portcullis.svg`, three difficulty tiers
-   in one asset). Its colours are baked into the art so a skinned or uploaded
-   door renders correctly anywhere (shop, editor, palette) without these rules —
-   CSS here only sizes it and drives interaction: the accent glow + the `gate`
-   slide-up reveal of the lit interior. The matching tier is chosen by the toggle
-   rules further down. */
-.trial-door-art {
-  display: block;
-  width: min(100%, 5.55rem);
-  height: auto;
-  overflow: visible;
-  filter: drop-shadow(0 0 9px rgba(var(--level-accent), 0.24));
-  transition: filter 0.4s ease;
-}
-
-/* Interior base colour is baked in the SVG; CSS only animates the hover light. */
-.trial-door.is-locked {
-  opacity: 0.52;
-}
-
-.trial-door.is-complete .trial-door-art,
-.trial-door.is-active .trial-door-art {
-  filter: drop-shadow(0 0 16px rgba(var(--level-accent), 0.32));
-}
-
-/* The portcullis gate slides up to reveal the lit interior. */
-.trial-door:not(.is-locked):hover .trial-door-art,
-.trial-door:not(.is-locked)[data-selected='true'] .trial-door-art {
-  filter: drop-shadow(0 0 16px rgba(var(--level-accent), 0.34));
-}
-
-/* Legacy challenge art selection glow. */
-.trial-door[data-selected='true'] .trial-door-art {
-  filter: drop-shadow(0 0 20px rgba(var(--level-accent), 0.5));
-}
-
 @media (max-width: 860px) {
   .tower-repeater {
     width: min(100%, 30rem);
@@ -3213,24 +2865,8 @@ textarea {
     width: min(100%, 30rem);
   }
 
-  .tower-roof-art,
-  .tower-skel-roof {
+  .tower-roof-art {
     width: min(118%, 30rem);
-  }
-
-  .tower-window-band-art,
-  .tower-skel-window,
-  .tower-crown-art {
-    width: min(94%, 24rem);
-  }
-
-  .tower-skel-stage--adventure {
-    width: min(86%, 18.5rem);
-  }
-
-  .tower-skel-stage--challenge,
-  .tower-skel-landing {
-    width: min(98%, 23rem);
   }
 
   .tower-adventure-stage {
@@ -3246,31 +2882,6 @@ textarea {
     width: min(86%, 18.5rem);
   }
 
-  .tower-tome-separator {
-    width: min(98%, 23rem);
-  }
-
-  .tome-lectern-art {
-    width: 8.5rem;
-  }
-
-  .tower-section-separator.is-after-challenges {
-    width: min(98%, 24.2rem);
-  }
-
-  .trial-door-row {
-    gap: 0.65rem;
-  }
-}
-
-/* full-bleed trial row + brighter accent on hover/focus */
-.tower-repeater .trial-door-row {
-  width: 100%;
-}
-
-.tower-repeater .trial-door:not(:disabled):hover .trial-door-art,
-.tower-repeater .trial-door:not(:disabled):focus-visible .trial-door-art {
-  filter: drop-shadow(0 0 18px rgba(var(--level-accent), 0.4));
 }
 
 /* Inline structural SVG art. Visual states come from uploaded asset data. */
@@ -3287,22 +2898,6 @@ textarea {
 
 .piece-svg.tower-hall-art > svg {
   height: 100%;
-}
-
-/* Legacy selection ring for older tower controls. */
-.adventure-door {
-  position: relative;
-  --door-accent: 45, 245, 255;
-}
-
-.adventure-door .door-ring {
-  inset: -0.55rem -1.05rem -1.95rem;
-  border-radius: 3.2rem 3.2rem 0.4rem 0.4rem;
-}
-
-.trial-door .door-ring {
-  inset: -0.45rem -0.55rem -1.65rem;
-  border-radius: 2.6rem 2.6rem 0.4rem 0.4rem;
 }
 
 /* ── Section states + loaders reused by the tower ── */
@@ -3328,22 +2923,8 @@ textarea {
   position: relative;
   display: grid;
   justify-items: center;
-  width: 100%;
-}
-
-.tower-skel-stage--adventure {
-  width: min(82%, 23rem);
-  margin-top: 0.45rem;
-}
-
-.tower-skel-stage--challenge {
-  width: min(96%, 29rem);
-  margin-top: -0.55rem;
-}
-
-.tower-skel-landing {
   width: min(100%, 34.5rem);
-  margin: -0.4rem auto -0.28rem;
+  margin: 0.45rem auto 0;
 }
 
 .tower-skel-art {
@@ -3352,14 +2933,6 @@ textarea {
   overflow: visible;
   filter: drop-shadow(0 0 9px rgba(var(--tower-cyan), 0.16));
   animation: tower-skeleton-breathe 2s ease-in-out infinite;
-}
-
-.tower-skel-roof {
-  width: min(116%, 38rem);
-}
-
-.tower-skel-window {
-  width: min(92%, 30rem);
 }
 
 .tower-skel-fill {
@@ -3429,27 +3002,7 @@ textarea {
   animation: tower-loading-sheen 1.6s ease-in-out infinite;
 }
 
-/* ── Shared selection ring (wraps any selected door) ── */
-.door-ring {
-  position: absolute;
-  inset: -0.5rem;
-  z-index: 7;
-  border-radius: 0.85rem;
-  border: 1.5px solid rgba(var(--door-accent, 0, 245, 212), 0.95);
-  opacity: 0;
-  pointer-events: none;
-  box-shadow:
-    0 0 18px rgba(var(--door-accent, 0, 245, 212), 0.6),
-    inset 0 0 12px rgba(var(--door-accent, 0, 245, 212), 0.4);
-  transition: opacity 0.3s ease;
-}
-
-@keyframes tower-door-ring-pulse {
-  0%, 100% { box-shadow: 0 0 14px rgba(var(--door-accent), 0.5), inset 0 0 10px rgba(var(--door-accent), 0.3); }
-  50% { box-shadow: 0 0 32px rgba(var(--door-accent), 0.9), inset 0 0 16px rgba(var(--door-accent), 0.5); }
-}
-
-/* ── Door overview (in the sticky storey rail) ── */
+/* ── Artifact overview (in the sticky storey rail) ── */
 .artifact-overview {
   --artifact-overview-accent: 0, 245, 212;
   display: grid;
@@ -3942,12 +3495,6 @@ textarea {
   box-shadow: 0 0 12px rgba(var(--tower-cyan), 0.32);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  [data-selected='true'] > .door-ring {
-    animation: none;
-  }
-}
-
 @keyframes tower-loading-sheen {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -4014,9 +3561,6 @@ textarea {
     padding-top: 0;
   }
 
-  .challenge-room-stack {
-    width: 100%;
-  }
 }
 
 /* Compact clock + full-width action button on small screens. */
@@ -6132,32 +5676,431 @@ textarea {
 }
 
 /* The canvas stays wide; editor controls reuse the tower's left-side dock
-   position so the tower does not jump between view and edit modes. */
+   position so the tower does not jump between view and edit modes. The dock is
+   a single glass plaque — sections inside it are split by hairlines, never by
+   nested boxes. */
 .ite-dock {
   position: fixed;
   z-index: 44;
-  top: clamp(9rem, 18vh, 12rem);
+  top: clamp(8.5rem, 17vh, 11.5rem);
   left: clamp(1rem, 2.5vw, 2rem);
   bottom: clamp(5.3rem, 11vh, 7rem);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  width: min(20rem, calc((100vw - 42rem) / 2 - 2rem));
-  min-width: 16rem;
+  width: min(21rem, calc((100vw - 42rem) / 2 - 1.5rem));
+  min-width: 17rem;
   min-height: 0;
-  overflow: auto;
+  overflow: hidden auto;
+  border-radius: 0.95rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.18);
+  background: linear-gradient(168deg, rgba(8, 16, 28, 0.86), rgba(5, 10, 18, 0.78));
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(14px);
   pointer-events: auto;
 }
 
-.editor-storey-picker {
+.ite-head {
   display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
   flex-wrap: wrap;
-  gap: 0.45rem;
-  padding: 0.55rem;
+  padding: 0.95rem 0.95rem 0.9rem;
+}
+
+.ite-head-id {
+  min-width: 0;
+  line-height: 1.1;
+}
+
+.ite-eyebrow {
+  margin: 0;
+  color: hsl(var(--primary));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.ite-name {
+  margin: 0.15rem 0 0;
+  color: hsl(var(--foreground));
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  font-weight: 900;
+}
+
+.ite-substat {
+  margin: 0.3rem 0 0;
+  color: hsl(var(--muted-foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ite-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ite-note {
+  margin: 0;
+  padding: 0.65rem 0.95rem;
+  border-top: 1px solid rgba(var(--tower-cyan), 0.1);
+  color: hsl(var(--muted-foreground));
+  font-size: 0.74rem;
+  font-style: italic;
+}
+
+.ite-dock > .editor-share-bar,
+.ite-dock > .editor-warning {
+  margin: 0.7rem 0.85rem 0;
+}
+
+/* Inspector: a stack of hairline-split sections, no inner panels. */
+.ite-inspector {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.ite-inspector--empty {
+  gap: 0.7rem;
+  padding: 1rem 0.95rem 1.1rem;
+  border-top: 1px solid rgba(var(--tower-cyan), 0.1);
+}
+
+.ite-section {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.9rem 0.95rem;
+  border-top: 1px solid rgba(var(--tower-cyan), 0.1);
+}
+
+.ite-section--head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.ite-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.ite-section-title {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ite-section-heading {
+  margin: 0.12rem 0 0;
+  color: hsl(var(--foreground));
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.ite-hint {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.ite-empty {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.ite-empty--inline {
+  font-size: 0.74rem;
+}
+
+.ite-mini-btn {
+  padding: 0.2rem 0.55rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.22);
+  border-radius: 0.45rem;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.ite-mini-btn:hover:not(:disabled) {
+  color: hsl(var(--foreground));
+  border-color: rgba(var(--tower-cyan), 0.5);
+}
+
+.ite-mini-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Numeric property fields (the customizable mirror of the on-canvas gizmo). */
+.ite-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.ite-field {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.ite-field--wide {
+  grid-column: 1 / -1;
+}
+
+.ite-field-label {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ite-field-unit {
+  color: rgba(var(--tower-cyan), 0.7);
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.62rem;
+  text-transform: none;
+}
+
+.ite-field-input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.2);
+  border-radius: 0.5rem;
+  background: rgba(4, 9, 17, 0.6);
+  color: hsl(var(--foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.ite-field-input:focus-visible {
+  outline: none;
+  border-color: rgba(var(--tower-cyan), 0.65);
+  box-shadow: 0 0 0 2px rgba(var(--tower-cyan), 0.22);
+}
+
+/* On-canvas transform gizmo for the selected piece. No explicit z-index: it
+   paints above the piece art (which is non-positioned) but below the placed
+   artifacts (later in DOM, same stacking group), so artifacts stay draggable
+   and the body only catches piece-move drags on empty areas. */
+.ed-tf {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid rgba(var(--tower-cyan), 0.9);
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px rgba(3, 12, 18, 0.55), 0 0 18px rgba(0, 245, 212, 0.22);
+  cursor: move;
+  touch-action: none;
+}
+
+.ed-tf-handle {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  margin: -7px;
+  border-radius: 3px;
+  border: 1.5px solid rgba(var(--tower-cyan), 0.95);
+  background: #061018;
+  box-shadow: 0 0 8px rgba(0, 245, 212, 0.5);
+  transform: scale(var(--ed-inv, 1));
+  touch-action: none;
+}
+
+.ed-tf-handle:hover {
+  background: rgba(0, 245, 212, 0.25);
+}
+
+.ed-tf-handle--nw {
+  top: 0;
+  left: 0;
+  cursor: nwse-resize;
+}
+
+.ed-tf-handle--ne {
+  top: 0;
+  right: 0;
+  cursor: nesw-resize;
+}
+
+.ed-tf-handle--se {
+  bottom: 0;
+  right: 0;
+  cursor: nwse-resize;
+}
+
+.ed-tf-handle--sw {
+  bottom: 0;
+  left: 0;
+  cursor: nesw-resize;
+}
+
+.ed-tf-rotate {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(var(--tower-cyan), 0.95);
+  background: #061018;
+  box-shadow: 0 0 10px rgba(0, 245, 212, 0.5);
+  color: rgb(var(--tower-cyan));
+  cursor: grab;
+  transform: translate(-50%, calc(-100% - 16px)) scale(var(--ed-inv, 1));
+  touch-action: none;
+}
+
+.ed-tf-rotate::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 1.5px;
+  height: 16px;
+  background: rgba(var(--tower-cyan), 0.7);
+  transform: translateX(-50%);
+}
+
+.ed-tf-rotate:active {
+  cursor: grabbing;
+}
+
+.ed-tf-rotate-icon {
+  width: 12px;
+  height: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ed-tf-handle,
+  .ed-tf-rotate {
+    transition: none;
+  }
+}
+
+.editor-storey-count {
+  padding: 0.55rem 0.65rem;
   border: 1px solid rgba(var(--tower-cyan), 0.16);
-  border-radius: 0.75rem;
+  border-radius: 0.65rem;
   background: rgba(5, 12, 23, 0.58);
+  color: hsl(var(--muted-foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   backdrop-filter: blur(10px);
+}
+
+.ite-quest-dock {
+  position: fixed;
+  z-index: 44;
+  top: clamp(9rem, 18vh, 12rem);
+  right: clamp(1rem, 2.5vw, 2rem);
+  display: grid;
+  gap: 0.7rem;
+  width: min(19rem, calc((100vw - 42rem) / 2 - 2rem));
+  min-width: 15rem;
+  pointer-events: auto;
+}
+
+.ite-quest-row {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.18);
+  border-radius: 0.7rem;
+  background: linear-gradient(165deg, rgba(5, 12, 23, 0.72), rgba(3, 8, 16, 0.64));
+  backdrop-filter: blur(12px);
+}
+
+.ite-quest-main {
+  display: grid;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.ite-quest-main strong {
+  overflow: hidden;
+  color: hsl(var(--foreground));
+  font-size: 0.84rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ite-quest-role {
+  color: hsl(var(--primary));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ite-quest-role.is-challenge {
+  color: rgb(var(--tower-purple));
+}
+
+.ite-quest-role.is-tome {
+  color: #f3d27a;
+}
+
+.ite-quest-actions {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.ite-quest-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.22);
+  border-radius: 0.5rem;
+  background: rgba(4, 10, 18, 0.58);
+  color: hsl(var(--foreground));
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ite-quest-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 @media (max-width: 1180px) {
@@ -6167,11 +6110,19 @@ textarea {
     margin: 1rem auto 0;
     max-height: none;
   }
+
+  .ite-quest-dock {
+    position: static;
+    width: min(42rem, calc(100vw - 2rem));
+    margin: 0 auto;
+  }
 }
 
 /* Container-less: the tower floats directly on the living sky — no boxy frame
    around the canvas (just the zoom/pan surface). */
-/* Floats over the canvas while skin picks are staged — commit or discard them. */
+/* Floats over the canvas while edits are staged — commit or discard them. The
+   single source of "save"; nothing in the editor writes to the server until the
+   user applies from here. */
 .ite-apply-bar {
   position: fixed;
   z-index: 46;
@@ -6180,109 +6131,48 @@ textarea {
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.45rem 0.5rem 0.45rem 0.85rem;
+  gap: 0.55rem;
+  padding: 0.4rem 0.45rem 0.4rem 0.85rem;
   border-radius: 999px;
-  border: 1px solid rgba(var(--tower-purple), 0.5);
-  background: rgba(8, 12, 24, 0.94);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(var(--tower-cyan), 0.4);
+  background: rgba(8, 12, 24, 0.95);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 26px rgba(0, 245, 212, 0.12);
   backdrop-filter: blur(12px);
   cursor: default;
 }
 
+.ite-apply-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: rgb(var(--tower-cyan));
+  box-shadow: 0 0 10px rgba(0, 245, 212, 0.7);
+  animation: ite-apply-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes ite-apply-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
 .ite-apply-bar-label {
+  margin-right: 0.15rem;
   color: hsl(var(--foreground));
   font-size: 0.78rem;
   font-weight: 600;
 }
 
-/* -- Focused single-section editor (also the battle-stage dressing surface) -- */
-.section-editor-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.25rem;
-  background: rgba(3, 7, 14, 0.82);
-  backdrop-filter: blur(14px);
-}
-
-.section-editor-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.section-editor-hint {
-  flex: 1;
-  margin: 0;
-  text-align: center;
-  color: hsl(var(--muted-foreground));
-  font-size: 0.8rem;
-}
-
-.section-editor-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem);
-  gap: 1rem;
-  flex: 1;
-  min-height: 0;
-}
-
-@media (max-width: 900px) {
-  .section-editor-body {
-    grid-template-columns: 1fr;
+@media (prefers-reduced-motion: reduce) {
+  .ite-apply-dot {
+    animation: none;
+    opacity: 1;
   }
-}
-
-.section-editor-stage {
-  position: relative;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  min-height: 50vh;
-  border-radius: 1rem;
-  border: 1px solid rgba(var(--tower-cyan), 0.2);
-  background: radial-gradient(circle at 50% 30%, rgba(20, 40, 70, 0.5), rgba(4, 9, 17, 0.72));
-}
-
-.section-editor-stage.is-drop-target {
-  outline: 2px dashed rgba(var(--tower-cyan), 0.6);
-  outline-offset: -6px;
-}
-
-.section-editor-stage .editor-slot-art {
-  position: absolute;
-  inset: 8%;
-}
-
-.section-editor-rail {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 0.9rem;
-  border-radius: 0.9rem;
-  border: 1px solid rgba(var(--tower-cyan), 0.18);
-  background: linear-gradient(165deg, rgba(8, 16, 28, 0.82), rgba(5, 10, 18, 0.74));
-  overflow-y: auto;
 }
 
 .editor-artifact-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(3.2rem, 1fr));
   gap: 0.5rem;
-}
-
-.section-editor-selected {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding-top: 0.85rem;
-  border-top: 1px solid rgba(var(--tower-cyan), 0.14);
 }
 
 /* Transform controls for the selected artifact (size / rotation). */
@@ -6805,7 +6695,7 @@ textarea {
   padding: 2rem;
 }
 
-/* Real tower pieces (RoofSpire, WindowStorey, stages, landings) rendered as selectable
+/* Real tower pieces (crown, sections, and landings) rendered as selectable
    pieces in the editor canvas. Feedback uses outline + a layout-neutral
    box-shadow so the piece geometry never shifts when selected. */
 .editor-piece {
@@ -7853,22 +7743,6 @@ textarea {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.editor-storey-label {
-  position: absolute;
-  top: 0.2rem;
-  left: 0.4rem;
-  z-index: 6;
-  padding: 0.08rem 0.45rem;
-  border-radius: 0.3rem;
-  background: rgba(0, 245, 212, 0.14);
-  border: 1px solid rgba(0, 245, 212, 0.35);
-  color: #8ff7e6;
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  font-size: 0.58rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 /* ============================================================

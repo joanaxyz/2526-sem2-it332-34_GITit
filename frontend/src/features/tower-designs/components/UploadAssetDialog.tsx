@@ -122,7 +122,10 @@ export function UploadAssetDialog({ onClose }: { onClose: () => void }) {
           <input
             type="file"
             accept={IMAGE_ACCEPT}
-            onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+            onChange={(event) => {
+              setFile(event.target.files?.[0] ?? null)
+              setViewBox('')
+            }}
           />
         </label>
 
@@ -182,27 +185,15 @@ function ViewBoxScope({
   onViewBoxChange: (value: string) => void
 }) {
   const previewRef = useRef<HTMLDivElement | null>(null)
-  const [url, setUrl] = useState<string | null>(null)
   const [metrics, setMetrics] = useState<ImageMetrics | null>(null)
   const [box, setBox] = useState<ScopeBox | null>(null)
+  const url = useMemo(() => (file ? URL.createObjectURL(file) : null), [file])
 
   useEffect(() => {
-    if (!file) {
-      setUrl(null)
-      setMetrics(null)
-      setBox(null)
-      onViewBoxChange('')
-      return
+    return () => {
+      if (url) URL.revokeObjectURL(url)
     }
-    const nextUrl = URL.createObjectURL(file)
-    setUrl(nextUrl)
-    return () => URL.revokeObjectURL(nextUrl)
-  }, [file, onViewBoxChange])
-
-  useEffect(() => {
-    if (!metrics || !box) return
-    onViewBoxChange(formatBox(box))
-  }, [box, metrics, onViewBoxChange])
+  }, [url])
 
   const previewStyle = useMemo(() => {
     if (!metrics) return undefined
@@ -214,8 +205,10 @@ function ViewBoxScope({
     const width = image.naturalWidth || 512
     const height = image.naturalHeight || 512
     const size = Math.min(width, height)
+    const nextBox = { x: (width - size) / 2, y: (height - size) / 2, size }
     setMetrics({ width, height })
-    setBox({ x: (width - size) / 2, y: (height - size) / 2, size })
+    setBox(nextBox)
+    onViewBoxChange(formatBox(nextBox))
   }
 
   function pointFor(event: React.PointerEvent | PointerEvent) {
@@ -249,6 +242,7 @@ function ViewBoxScope({
         imageMetrics,
       )
       setBox(next)
+      onViewBoxChange(formatBox(next))
     }
     function up() {
       window.removeEventListener('pointermove', move)
@@ -270,7 +264,9 @@ function ViewBoxScope({
       const point = pointFor(ev)
       if (!point) return
       const delta = Math.max(point.x - initialPoint.x, point.y - initialPoint.y)
-      setBox(clampBox({ ...start, size: start.size + delta }, imageMetrics))
+      const next = clampBox({ ...start, size: start.size + delta }, imageMetrics)
+      setBox(next)
+      onViewBoxChange(formatBox(next))
     }
     function up() {
       window.removeEventListener('pointermove', move)

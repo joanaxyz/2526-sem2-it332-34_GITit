@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle2, Code2, Ghost, Layers, Plus, Rocket, Save } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { authoringApi, type ContentDefinitionInput } from '@/features/authoring/api/authoringApi'
@@ -57,12 +57,11 @@ export function ContentEditorPage() {
   const loadedForm = useMemo(() => (detail.data ? formFromContent(detail.data) : null), [detail.data])
   const sourceKey = detail.data ? `content:${detail.data.id}` : initialSourceKey
   const form = draft.sourceKey === sourceKey ? draft.form : loadedForm ?? initialForm(newKind)
-
-  // Keep the storey-settings draft in sync with the selected storey.
-  useEffect(() => {
-    const selected = storeys.find((s) => s.id === form.storeyId) ?? null
-    setStoreyEdit((prev) => (prev && prev.id === selected?.id ? prev : selected))
-  }, [form.storeyId, storeys])
+  const selectedStorey = useMemo(
+    () => storeys.find((storey) => storey.id === form.storeyId) ?? null,
+    [form.storeyId, storeys],
+  )
+  const activeStoreyEdit = storeyEdit?.id === selectedStorey?.id ? storeyEdit : selectedStorey
 
   function setForm(next: AuthoringForm) {
     setDraft({ sourceKey, form: next })
@@ -97,13 +96,13 @@ export function ContentEditorPage() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       // Persist storey-setting edits first so the content's storey is current.
-      if (storeyEdit) {
-        await authoringApi.updateStorey(storeyEdit.id, {
-          title: storeyEdit.title,
-          mob_roster: storeyEdit.mob_roster,
-          boss_roster: storeyEdit.boss_roster,
-          pass_bar_fraction: storeyEdit.pass_bar_fraction,
-          battle_stage: storeyEdit.battle_stage,
+      if (activeStoreyEdit) {
+        await authoringApi.updateStorey(activeStoreyEdit.id, {
+          title: activeStoreyEdit.title,
+          mob_roster: activeStoreyEdit.mob_roster,
+          boss_roster: activeStoreyEdit.boss_roster,
+          pass_bar_fraction: activeStoreyEdit.pass_bar_fraction,
+          battle_stage: activeStoreyEdit.battle_stage,
         })
       }
       const input = buildInput()
@@ -175,7 +174,7 @@ export function ContentEditorPage() {
           <h2 className="author-card-title">
             <Layers className="size-4" aria-hidden="true" /> Storey
           </h2>
-          <p className="author-card-sub">Which floor of your tower this belongs to. A storey holds one adventure and many challenges/tomes.</p>
+          <p className="author-card-sub">Which floor of your tower this belongs to. A storey can hold multiple adventures, challenges, and tomes.</p>
         </header>
         <div className="author-inline-row">
           <select
@@ -219,16 +218,16 @@ export function ContentEditorPage() {
         ) : null}
       </section>
 
-      {storeyEdit ? (
+      {activeStoreyEdit ? (
         <>
           <StoreySettingsCard
             kind={form.kind}
-            storey={storeyEdit}
-            onChange={(patch) => setStoreyEdit({ ...storeyEdit, ...patch })}
+            storey={activeStoreyEdit}
+            onChange={(patch) => setStoreyEdit({ ...activeStoreyEdit, ...patch })}
           />
           <BattleStageEditor
-            value={storeyEdit.battle_stage}
-            onChange={(battle_stage) => setStoreyEdit({ ...storeyEdit, battle_stage })}
+            value={activeStoreyEdit.battle_stage}
+            onChange={(battle_stage) => setStoreyEdit({ ...activeStoreyEdit, battle_stage })}
           />
         </>
       ) : (

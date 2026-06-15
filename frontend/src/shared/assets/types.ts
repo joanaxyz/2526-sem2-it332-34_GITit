@@ -126,7 +126,7 @@ export type TowerLayoutPieceDescriptor = {
 }
 
 export type TowerLayoutDescriptor = {
-  storeyId: number
+  storeyId: number | null
   pieces: TowerLayoutPieceDescriptor[]
 }
 

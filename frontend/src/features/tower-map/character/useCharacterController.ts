@@ -182,9 +182,7 @@ export function useCharacterController({
       const anchored = measureAnchorLedge(el, shellRect)
       if (anchored) return anchored
 
-      // Fallback: the CSS separator's top rail is its ::before band, whose
-      // offset differs per variant. Tome separator beams sit at the box top,
-      // so the NaN fallback of 0 is exact there too.
+      // Fallback: use the CSS separator's top edge when authored anchor data is absent.
       const rect = el.getBoundingClientRect()
       if (rect.width === 0) return null
       const railTop = Number.parseFloat(window.getComputedStyle(el, '::before').top)
@@ -201,7 +199,7 @@ export function useCharacterController({
       const anchoredNodes = shell.querySelectorAll<HTMLElement>('.tower-landing[data-walk-rail-x1]')
       const nodes = anchoredNodes.length
         ? anchoredNodes
-        : shell.querySelectorAll<HTMLElement>('.tower-section-separator, .tower-tome-separator')
+        : shell.querySelectorAll<HTMLElement>('.tower-section-separator')
       const ledges: Ledge[] = []
       for (const el of Array.from(nodes)) {
         const ledge = measureLedge(el, shellRect)

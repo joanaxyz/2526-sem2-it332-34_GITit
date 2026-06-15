@@ -1,6 +1,17 @@
-import { type ReactNode, useMemo, useState } from 'react'
+import { type CSSProperties, type ReactNode, useMemo, useState } from 'react'
+import { RotateCw } from 'lucide-react'
 
-import { pieceIdFromInstance } from '@/features/tower-designs/editorUtils'
+import {
+  type ArtifactEdit,
+  type PieceTransform,
+  PIECE_ROTATION_RANGE,
+  PIECE_SCALE_RANGE,
+  clampNumber,
+  pieceIdFromInstance,
+  pieceTransformToRecord,
+  readPieceTransform,
+  roundTo,
+} from '@/features/tower-designs/editorUtils'
 import type { ArtifactPlacementDescriptor, TowerDesignOverview } from '@/features/tower-designs/types'
 import { RoofSpire, TowerLanding, TowerSectionShell } from '@/features/tower-map/components/TowerStoreySection'
 import { TowerArtifact } from '@/features/tower-map/components/TowerArtifact'
@@ -36,12 +47,15 @@ export function EditorStorey({
   artifactDescriptorBySlug,
   selectedPieceId,
   pendingSwaps,
+  pieceTransforms,
+  artifactEdits,
+  zoomScale,
   placementDraft,
-  storeyIndex,
   onSelectPiece,
   onSwapAsset,
   onPlaceArtifact,
   onMoveArtifact,
+  onTransformPiece,
 }: {
   overview: TowerDesignOverview
   pieceDescriptorBySlug: Record<string, TowerPieceAssetDescriptor>
@@ -49,8 +63,10 @@ export function EditorStorey({
   artifactDescriptorBySlug: Record<string, TowerArtifactAssetDescriptor>
   selectedPieceId: number | null
   pendingSwaps: Map<number, number>
+  pieceTransforms: Map<number, PieceTransform>
+  artifactEdits: Map<number | string, ArtifactEdit>
+  zoomScale: number
   placementDraft: PlacementDraft
-  storeyIndex?: number | null
   onSelectPiece: (pieceId: number) => void
   onSwapAsset: (pieceId: number, assetId: number) => void
   onPlaceArtifact: (
@@ -62,6 +78,7 @@ export function EditorStorey({
     y: number,
   ) => void
   onMoveArtifact: (placementId: number | string, x: number, y: number) => void
+  onTransformPiece: (pieceId: number, next: PieceTransform) => void
 }) {
   const layout = overview.tower_layout
   const artifactsByInstance = useMemo(() => groupArtifacts(overview.artifacts), [overview.artifacts])
@@ -71,8 +88,8 @@ export function EditorStorey({
   function descriptorFor(piece: TowerLayoutPieceDescriptor): TowerPieceAssetDescriptor | null {
     const pieceId = pieceIdFromInstance(piece.instanceId)
     if (pieceId !== null) {
-      const previewAssetId = pendingSwaps.get(pieceId)
-      if (previewAssetId !== undefined) return pieceDescriptorById.get(previewAssetId) ?? null
+      const stagedAssetId = pendingSwaps.get(pieceId)
+      if (stagedAssetId !== undefined) return pieceDescriptorById.get(stagedAssetId) ?? null
     }
     return towerDescriptorFor(piece, pieceDescriptorBySlug)
   }
@@ -174,16 +191,19 @@ export function EditorStorey({
   ): ReactNode {
     const placements = artifactsByInstance.get(piece.instanceId)
     if (!placements?.length) return null
-    return placements.map((artifact) => (
-      <EditableArtifact
-        key={artifact.id}
-        artifact={artifact}
-        artifactDescriptor={artifactDescriptorBySlug[artifact.assetSlug] ?? null}
-        pieceDescriptor={pieceDescriptor}
-        pieceVariant={variant}
-        onMoveArtifact={onMoveArtifact}
-      />
-    ))
+    return placements.map((artifact) => {
+      const edit = artifactEdits.get(artifact.id)
+      return (
+        <EditableArtifact
+          key={artifact.id}
+          artifact={edit ? { ...artifact, ...edit } : artifact}
+          artifactDescriptor={artifactDescriptorBySlug[artifact.assetSlug] ?? null}
+          pieceDescriptor={pieceDescriptor}
+          pieceVariant={variant}
+          onMoveArtifact={onMoveArtifact}
+        />
+      )
+    })
   }
 
   if (layout.pieces.length === 0) {
@@ -198,64 +218,186 @@ export function EditorStorey({
     )
   }
 
-  const pieces = visibleStoreyPieces(layout.pieces, storeyIndex)
+  const { crown, storeys } = editorTowerPieces(layout.pieces)
+  const renderPiece = (piece: TowerLayoutPieceDescriptor) => {
+    const pieceId = pieceIdFromInstance(piece.instanceId)
+    const descriptor = descriptorFor(piece)
+    const artifacts = artifactsByInstance.get(piece.instanceId) ?? []
+    const role = firstInteractableRole(artifacts)
+    const handlers = regionHandlers(piece, pieceId)
+    // The visible transform is the staged override (live edit) layered over the
+    // committed server value, so the canvas reflects unsaved tweaks instantly.
+    const staged = pieceId !== null ? pieceTransforms.get(pieceId) : undefined
+    const effective = staged ?? readPieceTransform(piece.transform)
+    const renderedPiece = staged ? { ...piece, transform: pieceTransformToRecord(staged) } : piece
+    const showFrame = pieceId !== null && pieceId === selectedPieceId && !placementDraft
+    const frame = showFrame ? (
+      <PieceTransformFrame
+        transform={effective}
+        zoomScale={zoomScale}
+        onChange={(next) => onTransformPiece(pieceId as number, next)}
+      />
+    ) : null
+
+    if (piece.pieceType === 'crown') {
+      return (
+        <RoofSpire
+          key={piece.instanceId}
+          piece={renderedPiece}
+          descriptor={descriptor}
+          className={regionClass(pieceId)}
+          {...handlers}
+        >
+          {frame}
+          {artifactsFor(piece, descriptor, 'roof')}
+        </RoofSpire>
+      )
+    }
+    if (piece.pieceType === 'landing') {
+      const variant = variantForPiece(piece)
+      return (
+        <TowerLanding
+          key={piece.instanceId}
+          variant={variant}
+          piece={renderedPiece}
+          descriptor={descriptor}
+          className={regionClass(pieceId)}
+          {...handlers}
+        >
+          {frame}
+          {artifactsFor(piece, descriptor, variant)}
+        </TowerLanding>
+      )
+    }
+    return (
+      <TowerSectionShell
+        key={piece.instanceId}
+        artifactRole={role}
+        piece={renderedPiece}
+        descriptor={descriptor}
+        className={regionClass(pieceId)}
+        {...handlers}
+      >
+        {frame}
+        {artifactsFor(piece, descriptor, role)}
+      </TowerSectionShell>
+    )
+  }
+
   return (
     <div className="tower-stack-column tower-stack-column--editor" aria-label="Tower editor canvas">
       <section className="storey-section storey-section--editor">
         <div className="learning-tower">
           <div className="tower-repeater">
-            {pieces.map((piece) => {
-              const pieceId = pieceIdFromInstance(piece.instanceId)
-              const descriptor = descriptorFor(piece)
-              const artifacts = artifactsByInstance.get(piece.instanceId) ?? []
-              const role = firstInteractableRole(artifacts)
-              const handlers = regionHandlers(piece, pieceId)
-              if (piece.pieceType === 'crown') {
-                return (
-                  <RoofSpire
-                    key={piece.instanceId}
-                    piece={piece}
-                    descriptor={descriptor}
-                    className={regionClass(pieceId)}
-                    {...handlers}
-                  >
-                    {artifactsFor(piece, descriptor, 'roof')}
-                  </RoofSpire>
-                )
-              }
-              if (piece.pieceType === 'landing') {
-                const variant = variantForPiece(piece)
-                return (
-                  <TowerLanding
-                    key={piece.instanceId}
-                    variant={variant}
-                    piece={piece}
-                    descriptor={descriptor}
-                    className={regionClass(pieceId)}
-                    {...handlers}
-                  >
-                    {artifactsFor(piece, descriptor, variant)}
-                  </TowerLanding>
-                )
-              }
-              return (
-                <TowerSectionShell
-                  key={piece.instanceId}
-                  artifactRole={role}
-                  piece={piece}
-                  descriptor={descriptor}
-                  className={regionClass(pieceId)}
-                  {...handlers}
-                >
-                  {artifactsFor(piece, descriptor, role)}
-                </TowerSectionShell>
-              )
-            })}
+            {crown ? renderPiece(crown) : null}
+            {storeys.map((group, order) => (
+              <div className="editor-storey-band" key={group.storeyIndex} aria-label={`Storey ${order + 1}`}>
+                {group.pieces.map(renderPiece)}
+              </div>
+            ))}
           </div>
         </div>
       </section>
     </div>
   )
+}
+
+/**
+ * The on-canvas transform gizmo for the selected piece. It lives INSIDE the
+ * piece element, so it inherits the piece's translate/scale/rotate and stays
+ * glued to the art. Dragging the body moves; corner handles scale uniformly
+ * around the centre; the top handle rotates. Edits are staged (no network) and
+ * only committed when the user applies — see InTowerEditor.
+ */
+function PieceTransformFrame({
+  transform,
+  zoomScale,
+  onChange,
+}: {
+  transform: PieceTransform
+  zoomScale: number
+  onChange: (next: PieceTransform) => void
+}) {
+  function centreOf(target: HTMLElement) {
+    const host = (target.closest('[data-piece-id]') as HTMLElement | null) ?? target
+    const rect = host.getBoundingClientRect()
+    return { cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2 }
+  }
+
+  function beginMove(event: React.PointerEvent<HTMLDivElement>) {
+    // Only the frame body moves; clicks that land on a handle are theirs.
+    if (event.target !== event.currentTarget) return
+    event.stopPropagation()
+    event.preventDefault()
+    const start = transform
+    const startX = event.clientX
+    const startY = event.clientY
+    const z = zoomScale || 1
+    trackPointer((moveEvent) => {
+      const dx = (moveEvent.clientX - startX) / z
+      const dy = (moveEvent.clientY - startY) / z
+      onChange({ ...start, x: Math.round(start.x + dx), y: Math.round(start.y + dy) })
+    })
+  }
+
+  function beginScale(event: React.PointerEvent<HTMLSpanElement>) {
+    event.stopPropagation()
+    event.preventDefault()
+    const start = transform
+    const { cx, cy } = centreOf(event.currentTarget)
+    const startDistance = Math.hypot(event.clientX - cx, event.clientY - cy) || 1
+    trackPointer((moveEvent) => {
+      const distance = Math.hypot(moveEvent.clientX - cx, moveEvent.clientY - cy)
+      const scale = clampNumber(
+        roundTo(start.scale * (distance / startDistance), 2),
+        PIECE_SCALE_RANGE.min,
+        PIECE_SCALE_RANGE.max,
+      )
+      onChange({ ...start, scale })
+    })
+  }
+
+  function beginRotate(event: React.PointerEvent<HTMLSpanElement>) {
+    event.stopPropagation()
+    event.preventDefault()
+    const start = transform
+    const { cx, cy } = centreOf(event.currentTarget)
+    const startAngle = Math.atan2(event.clientY - cy, event.clientX - cx)
+    trackPointer((moveEvent) => {
+      const angle = Math.atan2(moveEvent.clientY - cy, moveEvent.clientX - cx)
+      const rotation = clampNumber(
+        Math.round(start.rotation + ((angle - startAngle) * 180) / Math.PI),
+        PIECE_ROTATION_RANGE.min,
+        PIECE_ROTATION_RANGE.max,
+      )
+      onChange({ ...start, rotation })
+    })
+  }
+
+  // Handles counter-scale by the piece's own scale so the grips stay a usable
+  // size whether the piece is shrunk or blown up. (Canvas zoom still applies.)
+  const style = { '--ed-inv': 1 / Math.max(transform.scale, 0.001) } as CSSProperties
+
+  return (
+    <div className="ed-tf" style={style} onPointerDown={beginMove} aria-hidden="true">
+      <span className="ed-tf-handle ed-tf-handle--nw" onPointerDown={beginScale} />
+      <span className="ed-tf-handle ed-tf-handle--ne" onPointerDown={beginScale} />
+      <span className="ed-tf-handle ed-tf-handle--se" onPointerDown={beginScale} />
+      <span className="ed-tf-handle ed-tf-handle--sw" onPointerDown={beginScale} />
+      <span className="ed-tf-rotate" onPointerDown={beginRotate}>
+        <RotateCw className="ed-tf-rotate-icon" aria-hidden="true" />
+      </span>
+    </div>
+  )
+}
+
+function trackPointer(move: (event: PointerEvent) => void) {
+  const up = () => {
+    window.removeEventListener('pointermove', move)
+    window.removeEventListener('pointerup', up)
+  }
+  window.addEventListener('pointermove', move)
+  window.addEventListener('pointerup', up)
 }
 
 function EditableArtifact({
@@ -323,18 +465,20 @@ function groupArtifacts(artifacts: ArtifactPlacementDescriptor[]) {
   return map
 }
 
-function visibleStoreyPieces(pieces: TowerLayoutPieceDescriptor[], storeyIndex: number | null | undefined) {
-  const nonCrown = pieces.filter((piece) => piece.pieceType !== 'crown')
-  const fallbackIndex = normalizedStoreyIndex(nonCrown[0])
-  const activeIndex = storeyIndex ?? fallbackIndex
-  const crown =
-    pieces.find((piece) => piece.pieceType === 'crown' && normalizedStoreyIndex(piece) === activeIndex) ??
-    pieces.find((piece) => piece.pieceType === 'crown') ??
-    null
-  const storeyPieces = nonCrown.filter((piece) => normalizedStoreyIndex(piece) === activeIndex)
-  return crown ? [crown, ...storeyPieces] : storeyPieces
-}
-
-function normalizedStoreyIndex(piece: TowerLayoutPieceDescriptor | undefined | null) {
-  return typeof piece?.storeyIndex === 'number' ? piece.storeyIndex : 0
+function editorTowerPieces(pieces: TowerLayoutPieceDescriptor[]) {
+  const crown = pieces.find((piece) => piece.pieceType === 'crown') ?? null
+  const groups = new Map<number, TowerLayoutPieceDescriptor[]>()
+  for (const piece of pieces) {
+    if (piece.pieceType === 'crown') continue
+    const storeyIndex = typeof piece.storeyIndex === 'number' ? piece.storeyIndex : 0
+    const group = groups.get(storeyIndex) ?? []
+    group.push(piece)
+    groups.set(storeyIndex, group)
+  }
+  return {
+    crown,
+    storeys: [...groups.entries()]
+      .sort(([a], [b]) => a - b)
+      .map(([storeyIndex, storeyPieces]) => ({ storeyIndex, pieces: storeyPieces })),
+  }
 }

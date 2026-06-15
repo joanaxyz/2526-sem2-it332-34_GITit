@@ -22,7 +22,7 @@ export function PieceArt({
     return (
       <PieceSvg
         svg={resolved.svg}
-        className={classNameFor(pieceType, renderVariant)}
+        className={classNameFor(pieceType)}
         viewBox={pieceViewBoxString(descriptor, renderVariant)}
         variant={renderVariant}
       />
@@ -44,12 +44,12 @@ export function PieceArt({
   return null
 }
 
-function classNameFor(pieceType: string, variant?: string) {
+function classNameFor(pieceType: string) {
   switch (pieceType) {
     case 'crown':
       return 'tower-roof-art'
     case 'landing':
-      return variant === 'tome' ? 'tower-landing-art tower-landing-art--tome' : 'tower-landing-art'
+      return 'tower-landing-art'
     case 'section':
       return 'tower-hall-art'
     default:

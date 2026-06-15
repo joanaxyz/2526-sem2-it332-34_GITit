@@ -529,7 +529,7 @@ export function TowerMapPage() {
       {editMode ? (
         // Edit mode keeps only the living sky + clock; the editor takes the rest.
         editDesignId !== null ? (
-          <InTowerEditor designId={editDesignId} storeyId={activeStoreyId} />
+          <InTowerEditor designId={editDesignId} />
         ) : (
           <EmptyState
             title="No tower to edit"

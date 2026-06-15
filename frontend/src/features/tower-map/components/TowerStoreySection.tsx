@@ -91,7 +91,6 @@ export function TowerLanding({
         'tower-section-separator',
         continuation && 'is-continuation',
         base && 'is-base',
-        renderVariant === 'after-challenges' && 'is-after-challenges',
         className,
       )}
       style={{ ...(style ?? {}), ...(pieceTransformStyle(piece) ?? {}) }}
@@ -215,10 +214,12 @@ function TowerStoreySectionInner({
 
   const layout = overview?.tower_layout ?? null
   const artifactsByTarget = useMemo(() => groupArtifacts(overview?.artifacts ?? []), [overview?.artifacts])
-  const adventure: CommandAdventureSummary | null = overview?.command_adventure ?? null
+  const adventures: CommandAdventureSummary[] = overview?.command_adventures ?? (
+    overview?.command_adventure ? [overview.command_adventure] : []
+  )
   const tomes: TomeSummary[] = overview?.tomes ?? EMPTY_TOMES
   const challenges: ChallengeSummary[] = overview?.challenges ?? EMPTY_CHALLENGES
-  const challengesLocked = adventure !== null && !adventure.is_passed
+  const challengesLocked = adventures.length > 0 && adventures.some((adventure) => !adventure.is_passed)
   const title = displayTitle ?? storey.title
 
   return (
@@ -238,7 +239,7 @@ function TowerStoreySectionInner({
               layout={layout}
               pieceDescriptors={pieceDescriptors}
               storeyId={storey.id}
-              adventure={adventure}
+              adventures={adventures}
               tomes={tomes}
             />
           )}
@@ -254,7 +255,7 @@ function RenderedPieces({
   artifactDescriptors,
   artifactsByTarget,
   storeyId,
-  adventure,
+  adventures,
   tomes,
   challenges,
   challengesLocked,
@@ -266,7 +267,7 @@ function RenderedPieces({
   artifactDescriptors: Record<string, TowerArtifactAssetDescriptor>
   artifactsByTarget: Map<string, ArtifactPlacementDescriptor[]>
   storeyId: number
-  adventure: CommandAdventureSummary | null
+  adventures: CommandAdventureSummary[]
   tomes: TomeSummary[]
   challenges: ChallengeSummary[]
   challengesLocked: boolean
@@ -306,7 +307,7 @@ function RenderedPieces({
                 pieceDescriptor={descriptor}
                 role={artifact.role}
                 storeyId={storeyId}
-                adventure={adventure}
+                adventures={adventures}
                 tomes={tomes}
                 challenges={challenges}
                 challengesLocked={challengesLocked}
@@ -327,7 +328,7 @@ function PlayableArtifact({
   pieceDescriptor,
   role,
   storeyId,
-  adventure,
+  adventures,
   tomes,
   challenges,
   challengesLocked,
@@ -338,7 +339,7 @@ function PlayableArtifact({
   pieceDescriptor: TowerPieceAssetDescriptor | null
   role: TowerArtifactRole
   storeyId: number
-  adventure: CommandAdventureSummary | null
+  adventures: CommandAdventureSummary[]
   tomes: TomeSummary[]
   challenges: ChallengeSummary[]
   challengesLocked: boolean
@@ -347,7 +348,9 @@ function PlayableArtifact({
   const selected = useTowerSelection((state) => state.selected)
   const variant = role === 'normal' ? pieceVariant(null, piece) : role
 
-  if (role === 'adventure' && adventure) {
+  if (role === 'adventure') {
+    const adventure = findContent(adventures, artifact.contentBinding?.id) ?? adventures[0] ?? null
+    if (!adventure) return null
     const isCurrent = isSelected(selected, { kind: 'adventure', storeyId, adventure })
     return (
       <TowerArtifact

@@ -128,6 +128,7 @@ export type StoreyContentPage<
 export type StoreyContentOverview = {
   storey_id: number
   command_adventure: CommandAdventureSummary | null
+  command_adventures?: CommandAdventureSummary[]
   tomes: TomeSummary[]
   challenges: ChallengeSummary[]
   tower_layout?: TowerLayoutDescriptor
