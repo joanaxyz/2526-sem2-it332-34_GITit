@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from assets.models import KIND_TOWER_ARTIFACT, KIND_TOWER_PIECE
+from assets.models import KIND_TOWER_ARTIFACT, KIND_TOWER_PIECE, TOWER_PIECE_LANDING, TOWER_PIECE_SECTION
 from authoring.models import VISIBILITY_CHOICES, VISIBILITY_PRIVATE
 
 STATUS_DRAFT = "draft"
@@ -25,11 +25,21 @@ TOWER_ORIGINS = [
     (ORIGIN_OFFICIAL_FORK, "Official fork"),
 ]
 
-COMPATIBLE_BINDINGS = {
-    "adventure_section": "adventure",
-    "challenge_section": "challenge",
-    "tome": "tome",
+ARTIFACT_ROLE_NORMAL = "normal"
+ARTIFACT_ROLE_ADVENTURE = "adventure"
+ARTIFACT_ROLE_CHALLENGE = "challenge"
+ARTIFACT_ROLE_TOME = "tome"
+INTERACTABLE_ARTIFACT_ROLES = {
+    ARTIFACT_ROLE_ADVENTURE,
+    ARTIFACT_ROLE_CHALLENGE,
+    ARTIFACT_ROLE_TOME,
 }
+ARTIFACT_ROLE_CHOICES = [
+    (ARTIFACT_ROLE_NORMAL, "Normal"),
+    (ARTIFACT_ROLE_ADVENTURE, "Adventure"),
+    (ARTIFACT_ROLE_CHALLENGE, "Challenge"),
+    (ARTIFACT_ROLE_TOME, "Tome"),
+]
 
 
 class TowerDesign(models.Model):
@@ -131,10 +141,9 @@ class TowerContentBinding(models.Model):
     def clean(self) -> None:
         super().clean()
         if self.piece_instance_id and self.content_definition_id:
-            expected = COMPATIBLE_BINDINGS.get(self.piece_instance.piece_type)
-            if expected != self.content_definition.kind:
+            if self.piece_instance.piece_type != TOWER_PIECE_SECTION:
                 raise ValidationError(
-                    {"content_definition": "Content kind is not compatible with this tower piece."}
+                    {"piece_instance": "Legacy content bindings can only target tower sections."}
                 )
 
     def save(self, *args, **kwargs):
@@ -153,9 +162,21 @@ class ArtifactPlacement(models.Model):
     x = models.FloatField(default=0)
     y = models.FloatField(default=0)
     scale = models.FloatField(default=1)
+    width = models.FloatField(default=0)
+    height = models.FloatField(default=0)
     rotation = models.FloatField(default=0)
     anchor = models.CharField(max_length=80, blank=True)
     z_index = models.IntegerField(default=0)
+    role = models.CharField(
+        max_length=16, choices=ARTIFACT_ROLE_CHOICES, default=ARTIFACT_ROLE_NORMAL
+    )
+    content_definition = models.ForeignKey(
+        "authoring.ContentDefinition",
+        null=True,
+        blank=True,
+        related_name="tower_artifact_placements",
+        on_delete=models.PROTECT,
+    )
 
     class Meta:
         ordering = ["tower_design_id", "z_index", "id"]
@@ -168,7 +189,46 @@ class ArtifactPlacement(models.Model):
             raise ValidationError({"artifact_asset": "Artifact placements require tower_artifact assets."})
         if self.scale <= 0:
             raise ValidationError({"scale": "Scale must be greater than zero."})
+        if self.width < 0 or self.height < 0:
+            raise ValidationError({"width": "Artifact size cannot be negative."})
+        if self.role in INTERACTABLE_ARTIFACT_ROLES:
+            self._validate_interactable_role()
+        elif self.content_definition_id:
+            raise ValidationError(
+                {"content_definition": "Normal artifacts cannot bind playable content."}
+            )
         self._validate_safe_bounds()
+
+    def _validate_interactable_role(self) -> None:
+        if not self.target_piece_instance_id:
+            return
+        if self.target_piece_instance.piece_type == TOWER_PIECE_LANDING:
+            raise ValidationError(
+                {"target_piece_instance": "Interactable artifacts cannot be placed on landings."}
+            )
+        if self.target_piece_instance.piece_type != TOWER_PIECE_SECTION:
+            raise ValidationError(
+                {"target_piece_instance": "Interactable artifacts must be placed on a section."}
+            )
+        if self.content_definition_id and self.content_definition.kind != self.role:
+            raise ValidationError(
+                {"content_definition": "Content kind must match the interactable artifact role."}
+            )
+        conflicting = ArtifactPlacement.objects.filter(
+            target_piece_instance=self.target_piece_instance,
+            role__in=INTERACTABLE_ARTIFACT_ROLES,
+        ).exclude(role=self.role)
+        if self.pk:
+            conflicting = conflicting.exclude(pk=self.pk)
+        if conflicting.exists():
+            raise ValidationError(
+                {
+                    "role": (
+                        "A section can hold interactable artifacts for only one content "
+                        "kind."
+                    )
+                }
+            )
 
     def _validate_safe_bounds(self) -> None:
         if not self.target_piece_instance_id:

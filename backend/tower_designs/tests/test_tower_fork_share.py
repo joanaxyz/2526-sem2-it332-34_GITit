@@ -5,8 +5,9 @@ from rest_framework.test import APIClient
 
 from assets.models import (
     KIND_MONSTER,
+    KIND_TOWER_ARTIFACT,
     KIND_TOWER_PIECE,
-    TOWER_PIECE_ADVENTURE_SECTION,
+    TOWER_PIECE_SECTION,
     Asset,
     TowerPieceAsset,
 )
@@ -24,9 +25,9 @@ def make_section_asset() -> Asset:
     # A non-"official-*" slug so the default skeleton stays empty and the test
     # controls exactly one (bound) interactive piece.
     asset = Asset.objects.create(
-        kind=KIND_TOWER_PIECE, slug="custom-adventure-section", label="Adventure Section"
+        kind=KIND_TOWER_PIECE, slug="custom-section", label="Tower Section"
     )
-    TowerPieceAsset.objects.create(asset=asset, piece_type=TOWER_PIECE_ADVENTURE_SECTION)
+    TowerPieceAsset.objects.create(asset=asset, piece_type=TOWER_PIECE_SECTION)
     return asset
 
 
@@ -68,6 +69,13 @@ def test_official_fork_cannot_be_published_or_shared(django_user_model):
 def test_share_publishes_monster_and_serves_public_overview(django_user_model):
     author = make_user(django_user_model, "author")
     section = make_section_asset()
+    artifact = Asset.objects.create(
+        kind=KIND_TOWER_ARTIFACT,
+        owner=author,
+        slug="custom-adventure-artifact",
+        label="Adventure Artifact",
+        is_published=False,
+    )
     monster = Asset.objects.create(
         kind=KIND_MONSTER, owner=author, slug="pet-slime", label="Pet Slime", is_published=False
     )
@@ -94,12 +102,21 @@ def test_share_publishes_monster_and_serves_public_overview(django_user_model):
     design_id = client.post("/api/tower-designs/", {"slug": "mine", "title": "Mine"}, format="json").json()["id"]
     piece = client.post(
         f"/api/tower-designs/{design_id}/pieces/",
-        {"piece_asset_id": section.id, "piece_type": "adventure_section"},
+        {"piece_asset_id": section.id, "piece_type": "section"},
         format="json",
     )
     client.post(
-        f"/api/tower-designs/{design_id}/bindings/",
-        {"piece_instance_id": piece.json()["id"], "content_definition_id": content.id},
+        f"/api/tower-designs/{design_id}/artifacts/",
+        {
+            "target_piece_instance_id": piece.json()["id"],
+            "artifact_asset_id": artifact.id,
+            "role": "adventure",
+            "content_definition_id": content.id,
+            "x": 20,
+            "y": 12,
+            "width": 40,
+            "height": 64,
+        },
         format="json",
     )
 

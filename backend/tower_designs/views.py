@@ -192,7 +192,18 @@ class ArtifactPlacementDetailAPIView(APIView):
         design = TowerDesign.objects.get(id=design_id)
         TowerDesignService().assert_owner(user=request.user, design=design)
         placement = ArtifactPlacement.objects.get(id=placement_id, tower_design=design)
-        for field in ("x", "y", "scale", "rotation", "anchor", "z_index"):
+        for field in (
+            "x",
+            "y",
+            "scale",
+            "width",
+            "height",
+            "rotation",
+            "anchor",
+            "z_index",
+            "role",
+            "content_definition_id",
+        ):
             if field in request.data:
                 setattr(placement, field, request.data[field])
         placement.save()
@@ -236,7 +247,11 @@ def _artifact_payload(placement: ArtifactPlacement) -> dict:
         "x": placement.x,
         "y": placement.y,
         "scale": placement.scale,
+        "width": placement.width,
+        "height": placement.height,
         "rotation": placement.rotation,
         "anchor": placement.anchor,
         "z_index": placement.z_index,
+        "role": placement.role,
+        "content_definition_id": placement.content_definition_id,
     }

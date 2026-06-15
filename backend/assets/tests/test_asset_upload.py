@@ -3,7 +3,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIClient
 
-from assets.models import Asset, TowerPieceAsset
+from assets.models import Asset, AssetSprite, TowerPieceAsset
 from assets.sanitize import sanitize_svg
 
 SAFE_SVG = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10"/></svg>'
@@ -54,8 +54,38 @@ def test_upload_creates_owned_private_tower_piece(django_user_model):
     assert asset.visibility == "private"
     assert asset.is_published is False
     piece = TowerPieceAsset.objects.get(asset=asset)
-    # Uploaded landings get a synthesized walk rail so Blue can stand on them.
-    assert "walk_rail" in piece.anchors
+    assert piece.view_box == "0 0 220 48"
+    assert piece.anchors == {}
+
+
+@pytest.mark.django_db
+def test_upload_tower_artifact_stores_authored_bounds_and_action_sprites(django_user_model):
+    user = make_user(django_user_model)
+    client = APIClient()
+    client.force_authenticate(user=user)
+
+    response = client.post(
+        "/api/assets/",
+        {
+            "kind": "tower_artifact",
+            "label": "Quest Relic",
+            "view_box": "2 4 32 32",
+            "file": SimpleUploadedFile("relic.svg", SAFE_SVG, content_type="image/svg+xml"),
+            "file_hover": SimpleUploadedFile("relic-hover.svg", SAFE_SVG, content_type="image/svg+xml"),
+            "file_click": SimpleUploadedFile("relic-click.svg", SAFE_SVG, content_type="image/svg+xml"),
+        },
+        format="multipart",
+    )
+
+    assert response.status_code == 201, response.content
+    asset = Asset.objects.get(owner=user, label="Quest Relic")
+    assert asset.config["view_box"] == "2 4 32 32"
+    assert asset.config["bounds"] == {"x": 2.0, "y": 4.0, "width": 32.0, "height": 32.0}
+    assert set(AssetSprite.objects.filter(asset=asset).values_list("action", flat=True)) == {
+        "default",
+        "hover",
+        "click",
+    }
 
 
 @pytest.mark.django_db

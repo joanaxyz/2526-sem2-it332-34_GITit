@@ -72,9 +72,8 @@ def test_add_storey_appends_a_floor(django_user_model):
     from assets.models import KIND_TOWER_PIECE, Asset, TowerPieceAsset
 
     for slug, ptype in [
-        ("official-adventure-section", "adventure_section"),
+        ("official-hall-section", "section"),
         ("official-landing", "landing"),
-        ("official-challenge-section", "challenge_section"),
     ]:
         asset = Asset.objects.create(kind=KIND_TOWER_PIECE, slug=slug, label=slug)
         TowerPieceAsset.objects.create(asset=asset, piece_type=ptype)

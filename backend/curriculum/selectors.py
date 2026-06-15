@@ -3,12 +3,9 @@ from dataclasses import dataclass, field
 from django.db.models import Count, Q
 
 from assets.models import (
-    TOWER_PIECE_ADVENTURE_SECTION,
-    TOWER_PIECE_CHALLENGE_SECTION,
+    TOWER_PIECE_CROWN,
     TOWER_PIECE_LANDING,
-    TOWER_PIECE_SPIRE,
-    TOWER_PIECE_TOME,
-    TOWER_PIECE_WINDOW_SECTION,
+    TOWER_PIECE_SECTION,
 )
 from challenges.models import Challenge, ChallengeLevel, ChallengeRun
 from challenges.selectors import (
@@ -26,12 +23,17 @@ from curriculum.library import library_key_for_command
 from curriculum.models import CommandForm, CommandSkill, LibraryEntry, Storey, Tome
 
 OFFICIAL_TOWER_ASSET_SLUGS = {
-    TOWER_PIECE_SPIRE: "official-spire",
-    TOWER_PIECE_WINDOW_SECTION: "official-window-section",
+    TOWER_PIECE_CROWN: "official-crown",
     TOWER_PIECE_LANDING: "official-landing",
-    TOWER_PIECE_ADVENTURE_SECTION: "official-adventure-section",
-    TOWER_PIECE_CHALLENGE_SECTION: "official-challenge-section",
-    TOWER_PIECE_TOME: "official-tome",
+    "challenge_landing": "official-challenge-landing",
+    "hall_section": "official-hall-section",
+    "tome_landing": "official-tome-landing",
+    "trial_section": "official-trial-section",
+}
+OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS = {
+    "adventure": "official-gate-artifact",
+    "challenge": "official-portcullis-artifact",
+    "tome": "official-tome-artifact",
 }
 
 
@@ -199,6 +201,12 @@ def storey_content_overview(*, user, storey_id: int) -> dict:
     tomes = Tome.objects.filter(storey_id=storey_id, is_published=True).order_by("sort_order", "id")
     challenges = list(challenge_queryset(storey_id=storey_id))
     access = _build_challenge_access(user=user, storey_id=storey_id, challenges=challenges)
+    layout = tower_layout_payload(
+        storey_id=storey_id,
+        adventure=adventure,
+        tomes=list(tomes),
+        challenges=challenges,
+    )
     return {
         "storey_id": storey_id,
         "command_adventure": (
@@ -208,12 +216,8 @@ def storey_content_overview(*, user, storey_id: int) -> dict:
         "challenges": [
             challenge_summary_payload(challenge=challenge, access=access) for challenge in challenges
         ],
-        "tower_layout": tower_layout_payload(
-            storey_id=storey_id,
-            adventure=adventure,
-            tomes=list(tomes),
-            challenges=challenges,
-        ),
+        "tower_layout": {"storeyId": storey_id, "pieces": layout["pieces"]},
+        "artifacts": layout["artifacts"],
     }
 
 
@@ -227,24 +231,36 @@ def tower_layout_payload(
     pieces: list[dict] = [
         _tower_piece(
             storey_id=storey_id,
-            name="spire",
-            piece_type=TOWER_PIECE_SPIRE,
-        ),
-        _tower_piece(
-            storey_id=storey_id,
-            name="window-section",
-            piece_type=TOWER_PIECE_WINDOW_SECTION,
+            name="crown",
+            piece_type=TOWER_PIECE_CROWN,
         )
     ]
+    artifacts: list[dict] = []
 
     above_adventure_tomes = [tome for tome in tomes if tome.placement == "above_adventure"]
     for tome in above_adventure_tomes:
+        section_name = f"tome-section-{tome.id}"
         pieces.append(
             _tower_piece(
                 storey_id=storey_id,
+                name=section_name,
+                piece_type=TOWER_PIECE_SECTION,
+                asset_slug=OFFICIAL_TOWER_ASSET_SLUGS["hall_section"],
+            )
+        )
+        artifacts.append(
+            _tower_artifact(
+                storey_id=storey_id,
                 name=f"tome-{tome.id}",
-                piece_type=TOWER_PIECE_TOME,
+                target_name=section_name,
+                role="tome",
+                asset_slug=OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["tome"],
                 content_binding={"kind": "tome", "id": tome.id},
+                x=184,
+                y=112,
+                width=96,
+                height=88,
+                z_index=12,
             )
         )
     if above_adventure_tomes:
@@ -253,17 +269,35 @@ def tower_layout_payload(
                 storey_id=storey_id,
                 name="landing-after-tomes",
                 piece_type=TOWER_PIECE_LANDING,
+                asset_slug=OFFICIAL_TOWER_ASSET_SLUGS["tome_landing"],
             )
         )
 
+    section_name = "section"
     pieces.append(
         _tower_piece(
             storey_id=storey_id,
-            name="adventure",
-            piece_type=TOWER_PIECE_ADVENTURE_SECTION,
-            content_binding={"kind": "adventure", "id": adventure.id} if adventure else None,
+            name=section_name,
+            piece_type=TOWER_PIECE_SECTION,
+            asset_slug=OFFICIAL_TOWER_ASSET_SLUGS["hall_section"],
         )
     )
+    if adventure:
+        artifacts.append(
+            _tower_artifact(
+                storey_id=storey_id,
+                name="adventure",
+                target_name=section_name,
+                role="adventure",
+                asset_slug=OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["adventure"],
+                content_binding={"kind": "adventure", "id": adventure.id},
+                x=184,
+                y=122,
+                width=116,
+                height=134,
+                z_index=12,
+            )
+        )
     pieces.append(
         _tower_piece(
             storey_id=storey_id,
@@ -274,20 +308,37 @@ def tower_layout_payload(
 
     if challenges:
         for challenge in challenges:
+            section_name = f"challenge-section-{challenge.id}"
             pieces.append(
                 _tower_piece(
                     storey_id=storey_id,
+                    name=section_name,
+                    piece_type=TOWER_PIECE_SECTION,
+                    asset_slug=OFFICIAL_TOWER_ASSET_SLUGS["trial_section"],
+                )
+            )
+            artifacts.append(
+                _tower_artifact(
+                    storey_id=storey_id,
                     name=f"challenge-{challenge.id}",
-                    piece_type=TOWER_PIECE_CHALLENGE_SECTION,
+                    target_name=section_name,
+                    role="challenge",
+                    asset_slug=OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["challenge"],
                     content_binding={"kind": "challenge", "id": challenge.id},
+                    x=184,
+                    y=124,
+                    width=90,
+                    height=132,
+                    z_index=12,
                 )
             )
     else:
         pieces.append(
             _tower_piece(
                 storey_id=storey_id,
-                name="challenges",
-                piece_type=TOWER_PIECE_CHALLENGE_SECTION,
+                name="challenge-section-empty",
+                piece_type=TOWER_PIECE_SECTION,
+                asset_slug=OFFICIAL_TOWER_ASSET_SLUGS["trial_section"],
             )
         )
     pieces.append(
@@ -295,9 +346,10 @@ def tower_layout_payload(
             storey_id=storey_id,
             name="landing-after-challenges",
             piece_type=TOWER_PIECE_LANDING,
+            asset_slug=OFFICIAL_TOWER_ASSET_SLUGS["challenge_landing"],
         )
     )
-    return {"storeyId": storey_id, "pieces": pieces}
+    return {"storeyId": storey_id, "pieces": pieces, "artifacts": artifacts}
 
 
 def _tower_piece(
@@ -305,12 +357,43 @@ def _tower_piece(
     storey_id: int,
     name: str,
     piece_type: str,
-    content_binding: dict | None = None,
+    asset_slug: str | None = None,
 ) -> dict:
     payload = {
         "instanceId": f"storey-{storey_id}-{name}",
-        "assetSlug": OFFICIAL_TOWER_ASSET_SLUGS[piece_type],
+        "assetSlug": asset_slug or OFFICIAL_TOWER_ASSET_SLUGS[piece_type],
         "pieceType": piece_type,
+    }
+    return payload
+
+
+def _tower_artifact(
+    *,
+    storey_id: int,
+    name: str,
+    target_name: str,
+    role: str,
+    asset_slug: str,
+    content_binding: dict | None,
+    x: float,
+    y: float,
+    width: float,
+    height: float,
+    z_index: int,
+) -> dict:
+    payload = {
+        "id": f"storey-{storey_id}-artifact-{name}",
+        "targetInstanceId": f"storey-{storey_id}-{target_name}",
+        "assetSlug": asset_slug,
+        "role": role,
+        "x": x,
+        "y": y,
+        "scale": 1,
+        "width": width,
+        "height": height,
+        "rotation": 0,
+        "anchor": "",
+        "zIndex": z_index,
     }
     if content_binding:
         payload["contentBinding"] = content_binding

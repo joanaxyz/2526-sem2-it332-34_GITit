@@ -9,6 +9,8 @@ from assets.models import Asset
 from authoring.models import STATUS_PUBLISHED as CONTENT_STATUS_PUBLISHED
 from authoring.models import ContentDefinition
 from tower_designs.models import (
+    ARTIFACT_ROLE_NORMAL,
+    INTERACTABLE_ARTIFACT_ROLES,
     ORIGIN_OFFICIAL_FORK,
     ORIGIN_PERSONAL,
     STATUS_ARCHIVED,
@@ -85,6 +87,7 @@ class TowerDesignService:
             .first()
         )
         if existing:
+            self._refresh_legacy_official_fork_if_needed(design=existing)
             return existing
         with transaction.atomic():
             design = TowerDesign.objects.create(
@@ -96,60 +99,157 @@ class TowerDesignService:
                 origin=ORIGIN_OFFICIAL_FORK,
                 is_active=False,
             )
-            self._seed_default_skeleton(design=design)
+            self._seed_official_fork_skeleton(design=design)
         return design
 
     def _seed_default_skeleton(self, *, design: TowerDesign) -> None:
         """A walkable single storey + roof from official pieces, so the editor
         opens with a sensible tower the user can customise rather than a blank slate."""
         skeleton = [
-            ("official-spire", "spire"),
-            ("official-window-section", "window_section"),
-            ("official-adventure-section", "adventure_section"),
-            ("official-landing", "landing"),
-            ("official-challenge-section", "challenge_section"),
-            ("official-landing", "landing"),
+            ("official-crown", "crown", None),
+            ("official-hall-section", "section", None),
+            ("official-landing", "landing", 1),
+            ("official-trial-section", "section", None),
+            ("official-challenge-landing", "landing", 3),
         ]
-        for sort_order, (slug, piece_type) in enumerate(skeleton):
+        created: dict[int, TowerPieceInstance] = {}
+        for sort_order, (slug, piece_type, parent_position) in enumerate(skeleton):
             asset = Asset.objects.filter(slug=slug, kind="tower_piece").first()
             if asset is None:
                 continue
-            TowerPieceInstance.objects.create(
+            parent = created.get(parent_position) if parent_position is not None else None
+            created[sort_order] = TowerPieceInstance.objects.create(
                 tower_design=design,
                 piece_asset=asset,
                 piece_type=piece_type,
+                parent_instance=parent,
+                storey_index=0,
                 sort_order=sort_order,
             )
 
-    # The repeating floor unit appended by "Add storey": an adventure section and
-    # a challenge section, each capped by a walkable landing.
+    def _refresh_legacy_official_fork_if_needed(self, *, design: TowerDesign) -> None:
+        """Replace only the untouched old five-piece official fork skeleton.
+
+        Users may already have real edits in their fork. We only refresh when the
+        fork still has the exact legacy seed shape: no artifacts, at most five
+        official starter pieces, and no custom asset swaps.
+        """
+        pieces = list(design.pieces.select_related("piece_asset").order_by("sort_order", "id"))
+        legacy_slugs = {
+            "official-crown",
+            "official-hall-section",
+            "official-trial-section",
+            "official-landing",
+        }
+        if (
+            not pieces
+            or len(pieces) > 5
+            or design.artifact_placements.exists()
+            or any(piece.piece_asset.slug not in legacy_slugs for piece in pieces)
+        ):
+            return
+        with transaction.atomic():
+            design.pieces.all().delete()
+            self._seed_official_fork_skeleton(design=design)
+
+    def _seed_official_fork_skeleton(self, *, design: TowerDesign) -> None:
+        """Mirror the current published Arcane Spire layout into an editable fork."""
+        from challenges.models import Challenge
+        from command_adventures.models import CommandAdventure
+        from curriculum.models import Tome
+        from curriculum.selectors import published_storeys, tower_layout_payload
+
+        sort_order = 0
+        created_any = False
+        for storey in published_storeys():
+            adventure = (
+                CommandAdventure.objects.filter(storey=storey, is_published=True)
+                .select_related("storey")
+                .first()
+            )
+            tomes = list(Tome.objects.filter(storey=storey, is_published=True).order_by("sort_order", "id"))
+            challenges = list(Challenge.objects.filter(storey=storey, is_published=True).order_by("sort_order", "id"))
+            layout = tower_layout_payload(
+                storey_id=storey.id,
+                adventure=adventure,
+                tomes=tomes,
+                challenges=challenges,
+            )
+            piece_map: dict[str, TowerPieceInstance] = {}
+            for piece_payload in layout["pieces"]:
+                asset = Asset.objects.filter(
+                    slug=piece_payload["assetSlug"], kind="tower_piece"
+                ).first()
+                if asset is None:
+                    continue
+                piece = TowerPieceInstance.objects.create(
+                    tower_design=design,
+                    piece_asset=asset,
+                    piece_type=piece_payload["pieceType"],
+                    storey_index=storey.id,
+                    sort_order=sort_order,
+                    config=piece_payload.get("config") or {},
+                )
+                piece_map[piece_payload["instanceId"]] = piece
+                sort_order += 1
+                created_any = True
+
+            for artifact_payload in layout["artifacts"]:
+                target = piece_map.get(artifact_payload["targetInstanceId"])
+                asset = Asset.objects.filter(
+                    slug=artifact_payload["assetSlug"], kind="tower_artifact"
+                ).first()
+                if target is None or asset is None:
+                    continue
+                ArtifactPlacement.objects.create(
+                    tower_design=design,
+                    target_piece_instance=target,
+                    artifact_asset=asset,
+                    x=artifact_payload.get("x", 0),
+                    y=artifact_payload.get("y", 0),
+                    scale=artifact_payload.get("scale", 1),
+                    width=artifact_payload.get("width", 0),
+                    height=artifact_payload.get("height", 0),
+                    rotation=artifact_payload.get("rotation", 0),
+                    anchor=artifact_payload.get("anchor", ""),
+                    z_index=artifact_payload.get("zIndex", 0),
+                    role=artifact_payload.get("role", ARTIFACT_ROLE_NORMAL),
+                )
+
+        if not created_any:
+            self._seed_default_skeleton(design=design)
+
+    # The repeating unit appended by "Add section": one generic section with an
+    # optional landing child. Content type is determined by interactable artifact
+    # placement, not by the structural section.
     _STOREY_FLOOR = [
-        ("official-window-section", "window_section"),
-        ("official-adventure-section", "adventure_section"),
-        ("official-landing", "landing"),
-        ("official-challenge-section", "challenge_section"),
+        ("official-hall-section", "section"),
         ("official-landing", "landing"),
     ]
 
     @transaction.atomic
     def add_storey(self, *, user, design: TowerDesign) -> int:
-        """Append a new floor of pieces to the design and return its storey_index."""
+        """Append a new repeatable section unit and return its storey_index."""
         self.assert_owner(user=user, design=design)
         next_index = (
             design.pieces.aggregate(models.Max("storey_index"))["storey_index__max"] or 0
         ) + 1
         sort_base = (design.pieces.aggregate(models.Max("sort_order"))["sort_order__max"] or 0) + 1
+        parent = None
         for offset, (slug, piece_type) in enumerate(self._STOREY_FLOOR):
             asset = Asset.objects.filter(slug=slug, kind="tower_piece").first()
             if asset is None:
                 continue
-            TowerPieceInstance.objects.create(
+            piece = TowerPieceInstance.objects.create(
                 tower_design=design,
                 piece_asset=asset,
                 piece_type=piece_type,
+                parent_instance=parent if piece_type == "landing" else None,
                 storey_index=next_index,
                 sort_order=sort_base + offset,
             )
+            if piece_type == "section":
+                parent = piece
         return next_index
 
     @transaction.atomic
@@ -225,11 +325,10 @@ class TowerDesignService:
 
     def _referenced_monster_slugs(self, *, design: TowerDesign) -> set[str]:
         slugs: set[str] = set()
-        for piece in design.pieces.prefetch_related("content_binding__content_definition"):
-            binding = getattr(piece, "content_binding", None)
-            if not binding:
+        for placement in design.artifact_placements.select_related("content_definition"):
+            if placement.role not in INTERACTABLE_ARTIFACT_ROLES or not placement.content_definition_id:
                 continue
-            definition = binding.content_definition.definition or {}
+            definition = placement.content_definition.definition or {}
             levels = definition.get("levels") or []
             if isinstance(definition.get("level"), dict):
                 levels = [definition["level"], *levels]
@@ -246,15 +345,34 @@ class TowerDesignService:
 
     def publish_errors(self, *, design: TowerDesign) -> list[dict[str, str]]:
         errors: list[dict[str, str]] = []
-        for piece in design.pieces.prefetch_related("content_binding__content_definition"):
-            if piece.piece_type not in {"adventure_section", "challenge_section", "tome"}:
+        for placement in design.artifact_placements.select_related(
+            "content_definition", "target_piece_instance"
+        ):
+            if placement.role not in INTERACTABLE_ARTIFACT_ROLES:
                 continue
-            binding = getattr(piece, "content_binding", None)
-            if not binding:
-                errors.append({"field": f"piece:{piece.id}", "message": "Interactive piece needs a content binding."})
+            if placement.target_piece_instance.piece_type != "section":
+                errors.append(
+                    {
+                        "field": f"artifact:{placement.id}",
+                        "message": "Interactable artifacts must live on tower sections.",
+                    }
+                )
                 continue
-            if binding.content_definition.status != CONTENT_STATUS_PUBLISHED:
-                errors.append({"field": f"piece:{piece.id}", "message": "Bound content must be published."})
+            if not placement.content_definition_id:
+                errors.append(
+                    {
+                        "field": f"artifact:{placement.id}",
+                        "message": "Interactable artifact needs a content binding.",
+                    }
+                )
+                continue
+            if placement.content_definition.status != CONTENT_STATUS_PUBLISHED:
+                errors.append(
+                    {
+                        "field": f"artifact:{placement.id}",
+                        "message": "Bound content must be published.",
+                    }
+                )
         return errors
 
     @transaction.atomic
@@ -266,6 +384,7 @@ class TowerDesignService:
             piece_asset=asset,
             piece_type=data.get("piece_type") or asset.tower_piece.piece_type,
             sort_order=data.get("sort_order", design.pieces.count()),
+            storey_index=data.get("storey_index", 0),
             parent_instance_id=data.get("parent_instance_id"),
             transform=data.get("transform") or {},
             config=data.get("config") or {},
@@ -293,9 +412,13 @@ class TowerDesignService:
             x=data.get("x", 0),
             y=data.get("y", 0),
             scale=data.get("scale", 1),
+            width=data.get("width", 0),
+            height=data.get("height", 0),
             rotation=data.get("rotation", 0),
             anchor=data.get("anchor", ""),
             z_index=data.get("z_index", 0),
+            role=data.get("role", ARTIFACT_ROLE_NORMAL),
+            content_definition_id=data.get("content_definition_id"),
         )
         return placement
 
@@ -319,13 +442,23 @@ class TowerDesignService:
                 piece_asset=piece.piece_asset,
                 piece_type=piece.piece_type,
                 sort_order=piece.sort_order,
+                storey_index=piece.storey_index,
                 transform=copy.deepcopy(piece.transform),
                 config=copy.deepcopy(piece.config),
             )
             piece_map[piece.id] = copied
+        for source_id, copied in piece_map.items():
+            source = next((p for p in design.pieces.all() if p.id == source_id), None)
+            if source and source.parent_instance_id:
+                copied.parent_instance = piece_map.get(source.parent_instance_id)
+                copied.save(update_fields=["parent_instance"])
+        for piece in design.pieces.order_by("sort_order", "id"):
             binding = getattr(piece, "content_binding", None)
             if binding:
-                TowerContentBinding.objects.create(piece_instance=copied, content_definition=binding.content_definition)
+                TowerContentBinding.objects.create(
+                    piece_instance=piece_map[piece.id],
+                    content_definition=binding.content_definition,
+                )
         for placement in design.artifact_placements.order_by("id"):
             ArtifactPlacement.objects.create(
                 tower_design=clone,
@@ -334,9 +467,13 @@ class TowerDesignService:
                 x=placement.x,
                 y=placement.y,
                 scale=placement.scale,
+                width=placement.width,
+                height=placement.height,
                 rotation=placement.rotation,
                 anchor=placement.anchor,
                 z_index=placement.z_index,
+                role=placement.role,
+                content_definition=placement.content_definition,
             )
         return clone
 

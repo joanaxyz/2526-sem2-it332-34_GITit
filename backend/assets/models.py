@@ -39,22 +39,14 @@ ASSET_KINDS = AssetKind.choices
 
 
 class TowerPieceType(models.TextChoices):
-    SPIRE = "spire", "Spire"
-    WINDOW_SECTION = "window_section", "Window section"
+    CROWN = "crown", "Crown"
+    SECTION = "section", "Section"
     LANDING = "landing", "Landing"
-    DOOR = "door", "Door"
-    ADVENTURE_SECTION = "adventure_section", "Adventure section"
-    CHALLENGE_SECTION = "challenge_section", "Challenge section"
-    TOME = "tome", "Tome"
 
 
-TOWER_PIECE_SPIRE = TowerPieceType.SPIRE
-TOWER_PIECE_WINDOW_SECTION = TowerPieceType.WINDOW_SECTION
+TOWER_PIECE_CROWN = TowerPieceType.CROWN
+TOWER_PIECE_SECTION = TowerPieceType.SECTION
 TOWER_PIECE_LANDING = TowerPieceType.LANDING
-TOWER_PIECE_DOOR = TowerPieceType.DOOR
-TOWER_PIECE_ADVENTURE_SECTION = TowerPieceType.ADVENTURE_SECTION
-TOWER_PIECE_CHALLENGE_SECTION = TowerPieceType.CHALLENGE_SECTION
-TOWER_PIECE_TOME = TowerPieceType.TOME
 
 # Sharing model: official content has no owner; user content is private until
 # published public/to the store (the gallery + store land in later phases).

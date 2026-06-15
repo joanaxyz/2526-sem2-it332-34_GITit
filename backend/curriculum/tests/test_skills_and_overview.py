@@ -60,20 +60,31 @@ def test_storey_overview_bundles_adventure_tomes_and_challenges(db, django_user_
     assert overview["challenges"] == []
     assert overview["tower_layout"]["storeyId"] == storey.id
     assert [piece["pieceType"] for piece in overview["tower_layout"]["pieces"]] == [
-        "spire",
-        "window_section",
-        "tome",
+        "crown",
+        "section",
         "landing",
-        "adventure_section",
+        "section",
         "landing",
-        "challenge_section",
+        "section",
         "landing",
     ]
-    tome_piece = overview["tower_layout"]["pieces"][2]
-    assert tome_piece["assetSlug"] == "official-tome"
-    assert tome_piece["contentBinding"] == {"kind": "tome", "id": overview["tomes"][0]["id"]}
-    adventure_piece = overview["tower_layout"]["pieces"][4]
-    assert adventure_piece["contentBinding"] == {
+    assert [
+        piece["assetSlug"]
+        for piece in overview["tower_layout"]["pieces"]
+        if piece["pieceType"] == "landing"
+    ] == [
+        "official-tome-landing",
+        "official-landing",
+        "official-challenge-landing",
+    ]
+    assert [artifact["role"] for artifact in overview["artifacts"]] == ["tome", "adventure"]
+    tome_artifact = overview["artifacts"][0]
+    assert tome_artifact["assetSlug"] == "official-tome-artifact"
+    assert tome_artifact["targetInstanceId"] == f"storey-{storey.id}-tome-section-{overview['tomes'][0]['id']}"
+    assert tome_artifact["contentBinding"] == {"kind": "tome", "id": overview["tomes"][0]["id"]}
+    adventure_artifact = overview["artifacts"][1]
+    assert adventure_artifact["assetSlug"] == "official-gate-artifact"
+    assert adventure_artifact["contentBinding"] == {
         "kind": "adventure",
         "id": overview["command_adventure"]["id"],
     }

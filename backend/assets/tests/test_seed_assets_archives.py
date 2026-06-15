@@ -1,0 +1,26 @@
+import pytest
+from django.core.management import call_command
+
+from assets.models import KIND_TOWER_ARTIFACT, KIND_TOWER_PIECE, Asset, AssetSprite, TowerPieceAsset
+from assets.seed_data.tower_pieces import OFFICIAL_TOWER_ARTIFACT_SPECS, OFFICIAL_TOWER_PIECE_SPECS
+
+
+@pytest.mark.django_db
+def test_seed_assets_registers_tower_assets_from_archives(settings, tmp_path):
+    settings.MEDIA_ROOT = tmp_path
+
+    call_command("seed_assets", "--skip-grant", verbosity=0)
+
+    piece_slugs = {spec["slug"] for spec in OFFICIAL_TOWER_PIECE_SPECS}
+    artifact_slugs = {spec["slug"] for spec in OFFICIAL_TOWER_ARTIFACT_SPECS}
+
+    assert set(
+        Asset.objects.filter(kind=KIND_TOWER_PIECE).values_list("slug", flat=True)
+    ) == piece_slugs
+    assert set(
+        Asset.objects.filter(kind=KIND_TOWER_ARTIFACT).values_list("slug", flat=True)
+    ) == artifact_slugs
+    assert TowerPieceAsset.objects.filter(asset__slug__in=piece_slugs).count() == len(piece_slugs)
+    assert AssetSprite.objects.filter(asset__slug__in=piece_slugs | artifact_slugs).count() == (
+        len(piece_slugs) + len(artifact_slugs)
+    )

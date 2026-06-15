@@ -7,6 +7,9 @@ Only official assets (``owner=None``) are touched - user uploads are left alone.
 
 from __future__ import annotations
 
+import tempfile
+import zipfile
+from contextlib import ExitStack
 from pathlib import Path
 
 from django.core.files import File
@@ -16,6 +19,7 @@ from assets.models import (
     KIND_BATTLE_ARTIFACT,
     KIND_CHARACTER,
     KIND_MONSTER,
+    KIND_TOWER_ARTIFACT,
     KIND_TOWER_PIECE,
     Asset,
     AssetSprite,
@@ -24,18 +28,24 @@ from assets.models import (
 from assets.seed_data.battle_artifacts import BATTLE_ARTIFACT_SPECS
 from assets.seed_data.characters import CHARACTER_SPECS
 from assets.seed_data.monsters import LOOPING_ACTIONS, MONSTER_SPECS
-from assets.seed_data.tower_pieces import OFFICIAL_TOWER_PIECE_SPECS
+from assets.seed_data.tower_pieces import OFFICIAL_TOWER_ARTIFACT_SPECS, OFFICIAL_TOWER_PIECE_SPECS
 
 # All official sprite source files live under backend/assets/seed_assets/ and are
 # the single committed source of truth (the frontend renders them from media via
 # descriptors — it no longer ships its own copies).
 SEED_ASSETS_ROOT = Path(__file__).resolve().parents[2] / "seed_assets"
 MONSTERS_ROOT = SEED_ASSETS_ROOT / "monsters"
-TOWER_PIECES_ROOT = SEED_ASSETS_ROOT / "tower_pieces"
+MONSTERS_ZIP = SEED_ASSETS_ROOT / "monsters.zip"
+TOWER_ASSETS_ROOT = SEED_ASSETS_ROOT / "tower_assets"
+TOWER_ASSETS_ZIP = SEED_ASSETS_ROOT / "tower_assets.zip"
+LEGACY_TOWER_PIECES_ROOT = SEED_ASSETS_ROOT / "tower_pieces"
+LEGACY_TOWER_PIECES_ZIP = SEED_ASSETS_ROOT / "tower_pieces.zip"
 CHARACTERS_ROOT = SEED_ASSETS_ROOT / "character"
+CHARACTERS_ZIP = SEED_ASSETS_ROOT / "character.zip"
 # Battle artifacts (e.g. crystal/) each live in their own folder under the seed
 # root, alongside character/.
-ARTIFACTS_ROOT = SEED_ASSETS_ROOT
+BATTLE_ARTIFACTS_ROOT = SEED_ASSETS_ROOT
+BATTLE_ARTIFACTS_ZIP = SEED_ASSETS_ROOT / "battle_artifacts.zip"
 
 
 class Command(BaseCommand):
@@ -49,21 +59,58 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        if not MONSTERS_ROOT.exists():
-            raise CommandError(f"Missing monster sprite dir: {MONSTERS_ROOT}")
-        if not TOWER_PIECES_ROOT.exists():
-            raise CommandError(f"Missing tower piece sprite dir: {TOWER_PIECES_ROOT}")
-
-        monster_count, monster_stale = self._seed_monsters()
-        character_count, character_stale = self._seed_characters()
-        artifact_count, artifact_stale = self._seed_battle_artifacts()
-        tower_piece_count, tower_piece_stale = self._seed_tower_pieces()
+        with ExitStack() as stack:
+            self._monsters_root = stack.enter_context(
+                self._asset_source(
+                    "monster sprites",
+                    MONSTERS_ROOT,
+                    MONSTERS_ZIP,
+                    nested_name="monsters",
+                    required=True,
+                )
+            )
+            self._characters_root = stack.enter_context(
+                self._asset_source(
+                    "character sprites",
+                    CHARACTERS_ROOT,
+                    CHARACTERS_ZIP,
+                    nested_name="character",
+                    required=False,
+                )
+            )
+            self._battle_artifacts_root = stack.enter_context(
+                self._asset_source(
+                    "battle artifact sprites",
+                    BATTLE_ARTIFACTS_ROOT,
+                    BATTLE_ARTIFACTS_ZIP,
+                    nested_name="battle_artifacts",
+                    required=False,
+                )
+            )
+            self._tower_assets_root = stack.enter_context(
+                self._asset_source(
+                    "tower assets",
+                    TOWER_ASSETS_ROOT,
+                    TOWER_ASSETS_ZIP,
+                    nested_name="tower_assets",
+                    required=True,
+                    fallback_roots=[LEGACY_TOWER_PIECES_ROOT],
+                    fallback_archives=[LEGACY_TOWER_PIECES_ZIP],
+                    fallback_nested_names=["tower_pieces"],
+                )
+            )
+            monster_count, monster_stale = self._seed_monsters()
+            character_count, character_stale = self._seed_characters()
+            artifact_count, artifact_stale = self._seed_battle_artifacts()
+            tower_artifact_count, tower_artifact_stale = self._seed_tower_artifacts()
+            tower_piece_count, tower_piece_stale = self._seed_tower_pieces()
         self.stdout.write(
             self.style.SUCCESS(
                 "Seeded "
                 f"{monster_count} monsters ({monster_stale} retired), "
                 f"{character_count} characters ({character_stale} retired), "
                 f"{artifact_count} battle artifacts ({artifact_stale} retired), "
+                f"{tower_artifact_count} tower artifacts ({tower_artifact_stale} retired), "
                 f"{tower_piece_count} tower pieces ({tower_piece_stale} retired)."
             )
         )
@@ -100,10 +147,10 @@ class Command(BaseCommand):
         return len(seeded_slugs), stale
 
     def _seed_characters(self) -> tuple[int, int]:
-        if not CHARACTERS_ROOT.exists():
+        if not self._characters_root.exists():
             self.stdout.write(
                 self.style.WARNING(
-                    f"Skipping character assets; missing sprite dir: {CHARACTERS_ROOT}"
+                    f"Skipping character assets; missing sprite source: {self._characters_root}"
                 )
             )
             return 0, 0
@@ -121,10 +168,10 @@ class Command(BaseCommand):
         return len(seeded_slugs), stale
 
     def _seed_battle_artifacts(self) -> tuple[int, int]:
-        if not ARTIFACTS_ROOT.exists():
+        if not self._battle_artifacts_root.exists():
             self.stdout.write(
                 self.style.WARNING(
-                    f"Skipping battle artifacts; missing sprite dir: {ARTIFACTS_ROOT}"
+                    f"Skipping battle artifacts; missing sprite source: {self._battle_artifacts_root}"
                 )
             )
             return 0, 0
@@ -136,6 +183,19 @@ class Command(BaseCommand):
 
         stale = (
             Asset.objects.filter(kind=KIND_BATTLE_ARTIFACT, owner__isnull=True)
+            .exclude(slug__in=seeded_slugs)
+            .update(is_published=False)
+        )
+        return len(seeded_slugs), stale
+
+    def _seed_tower_artifacts(self) -> tuple[int, int]:
+        seeded_slugs: list[str] = []
+        for spec in OFFICIAL_TOWER_ARTIFACT_SPECS:
+            self._seed_tower_artifact(spec)
+            seeded_slugs.append(spec["slug"])
+
+        stale = (
+            Asset.objects.filter(kind=KIND_TOWER_ARTIFACT, owner__isnull=True)
             .exclude(slug__in=seeded_slugs)
             .update(is_published=False)
         )
@@ -211,7 +271,7 @@ class Command(BaseCommand):
             old.delete()
 
         for action, sprite_spec in spec["actions"].items():
-            path = CHARACTERS_ROOT / slug / sprite_spec["file"]
+            path = self._characters_root / slug / sprite_spec["file"]
             if not path.exists():
                 raise CommandError(f"{slug}: missing character sprite file {path}")
             sprite = AssetSprite(
@@ -246,7 +306,7 @@ class Command(BaseCommand):
             old.delete()
 
         for action, sprite_spec in spec["actions"].items():
-            path = ARTIFACTS_ROOT / slug / sprite_spec["file"]
+            path = self._battle_artifacts_root / slug / sprite_spec["file"]
             if not path.exists():
                 raise CommandError(f"{slug}: missing battle artifact sprite file {path}")
             sprite = AssetSprite(
@@ -262,11 +322,6 @@ class Command(BaseCommand):
                 sprite.save()
 
     def _seed_tower_piece(self, spec: dict) -> None:
-        # Animation is a safe, named preset (+ params) — never user code. It rides
-        # in config so the descriptor can serve it alongside the inline SVG.
-        config: dict = {}
-        if spec.get("animation"):
-            config["animation"] = spec["animation"]
         asset, _ = Asset.objects.update_or_create(
             slug=spec["slug"],
             defaults={
@@ -275,7 +330,7 @@ class Command(BaseCommand):
                 "label": spec["label"],
                 "default_scale": 1.0,
                 "tags": spec.get("tags", []),
-                "config": config,
+                "config": spec.get("config", {}),
                 "is_published": True,
             },
         )
@@ -292,7 +347,7 @@ class Command(BaseCommand):
             },
         )
 
-        path = TOWER_PIECES_ROOT / spec["svg"]
+        path = self._tower_assets_root / spec["svg"]
         if not path.exists():
             raise CommandError(f"{spec['slug']}: missing tower piece SVG {path}")
         frame_width, frame_height = _view_box_size(spec.get("view_box", ""))
@@ -319,13 +374,120 @@ class Command(BaseCommand):
             _replace_sprite_file(sprite, f"{spec['slug']}__default.svg", handle)
             sprite.save()
 
-    @staticmethod
-    def _resolve(slug: str, filename: str) -> Path:
+    def _seed_tower_artifact(self, spec: dict) -> None:
+        asset, _ = Asset.objects.update_or_create(
+            slug=spec["slug"],
+            defaults={
+                "kind": KIND_TOWER_ARTIFACT,
+                "owner": None,
+                "label": spec["label"],
+                "default_scale": spec.get("scale", 1.0),
+                "tags": spec.get("tags", []),
+                "config": spec.get("config", {}),
+                "is_published": True,
+            },
+        )
+        TowerPieceAsset.objects.filter(asset=asset).delete()
+
+        path = self._tower_assets_root / spec["svg"]
+        if not path.exists():
+            raise CommandError(f"{spec['slug']}: missing tower artifact SVG {path}")
+        frame_width, frame_height = _view_box_size(spec.get("view_box", ""))
+        sprite, _ = AssetSprite.objects.get_or_create(
+            asset=asset,
+            action="default",
+            defaults={
+                "frame_width": frame_width,
+                "frame_height": frame_height,
+                "fps": 1,
+                "loops": True,
+            },
+        )
+        sprite.frame_width = frame_width
+        sprite.frame_height = frame_height
+        sprite.fps = 1
+        sprite.loops = True
+
+        for old in asset.sprites.exclude(pk=sprite.pk):
+            old.image.delete(save=False)
+            old.delete()
+
+        with path.open("rb") as handle:
+            _replace_sprite_file(sprite, f"{spec['slug']}__default.svg", handle)
+            sprite.save()
+
+    def _resolve(self, slug: str, filename: str) -> Path:
         # Paths with a slash (projectiles/arrow.png) are relative to the monsters
         # root; bare names live in the monster's own folder.
         if "/" in filename:
-            return MONSTERS_ROOT / filename
-        return MONSTERS_ROOT / slug / filename
+            return self._monsters_root / filename
+        return self._monsters_root / slug / filename
+
+    def _asset_source(
+        self,
+        label: str,
+        root: Path,
+        archive: Path,
+        *,
+        nested_name: str,
+        required: bool,
+        fallback_roots: list[Path] | None = None,
+        fallback_archives: list[Path] | None = None,
+        fallback_nested_names: list[str] | None = None,
+    ):
+        if archive.exists():
+            return _ZipSource(archive, nested_name=nested_name)
+        for index, fallback_archive in enumerate(fallback_archives or []):
+            if fallback_archive.exists():
+                nested = (
+                    fallback_nested_names[index]
+                    if fallback_nested_names and index < len(fallback_nested_names)
+                    else nested_name
+                )
+                return _ZipSource(fallback_archive, nested_name=nested)
+        if root.exists():
+            return _StaticSource(root)
+        for fallback_root in fallback_roots or []:
+            if fallback_root.exists():
+                return _StaticSource(fallback_root)
+        if required:
+            raise CommandError(f"Missing {label}: expected {archive} or {root}")
+        return _StaticSource(root)
+
+
+class _StaticSource:
+    def __init__(self, path: Path):
+        self.path = path
+
+    def __enter__(self) -> Path:
+        return self.path
+
+    def __exit__(self, exc_type, exc, tb) -> None:
+        return None
+
+
+class _ZipSource:
+    def __init__(self, path: Path, *, nested_name: str):
+        self.path = path
+        self.nested_name = nested_name
+        self._tmp: tempfile.TemporaryDirectory | None = None
+
+    def __enter__(self) -> Path:
+        self._tmp = tempfile.TemporaryDirectory(prefix="git-it-seed-assets-")
+        root = Path(self._tmp.name)
+        with zipfile.ZipFile(self.path) as archive:
+            root_path = root.resolve()
+            for member in archive.infolist():
+                target = (root / member.filename).resolve()
+                if target != root_path and root_path not in target.parents:
+                    raise CommandError(f"Unsafe path in seed archive {self.path}: {member.filename}")
+            archive.extractall(root)
+        nested = root / self.nested_name
+        return nested if nested.exists() else root
+
+    def __exit__(self, exc_type, exc, tb) -> None:
+        if self._tmp:
+            self._tmp.cleanup()
 
 
 def _replace_sprite_file(sprite: AssetSprite, filename: str, handle) -> None:

@@ -14,7 +14,6 @@ from assets.models import (
     KIND_TOWER_ARTIFACT,
     KIND_TOWER_PIECE,
     MONSTER_TIERS,
-    TOWER_PIECE_LANDING,
     Asset,
     AssetSprite,
     TowerPieceAsset,
@@ -77,13 +76,7 @@ class AssetUploadAPIView(APIView):
         if upload is None:
             raise ValidationError({"file": "A file is required."})
 
-        name = (upload.name or "").lower()
-        sanitized = False
-        if name.endswith(".svg"):
-            upload = ContentFile(sanitize_svg(upload.read()), name=upload.name)
-            sanitized = True
-        elif not name.endswith((".png", ".webp", ".gif", ".jpg", ".jpeg")):
-            raise ValidationError({"file": "Upload an SVG or PNG image."})
+        upload, sanitized = _prepare_tower_upload(upload, field="file")
 
         piece_type = None
         if kind == KIND_TOWER_PIECE:
@@ -102,24 +95,49 @@ class AssetUploadAPIView(APIView):
             tags=tags,
             is_published=False,
         )
-        AssetSprite.objects.create(asset=asset, action="default", image=upload)
+        AssetSprite.objects.create(
+            asset=asset,
+            action="default",
+            image=upload,
+            fps=_safe_int(request.data.get("fps_default"), default=12),
+            loops=True,
+        )
+        for action in ("hover", "click"):
+            action_upload = request.FILES.get(f"file_{action}") or request.FILES.get(f"sprite_{action}")
+            if action_upload is None:
+                continue
+            prepared, _action_sanitized = _prepare_tower_upload(
+                action_upload, field=f"file_{action}"
+            )
+            AssetSprite.objects.create(
+                asset=asset,
+                action=action,
+                image=prepared,
+                fps=_safe_int(request.data.get(f"fps_{action}"), default=12),
+                loops=action != "click",
+            )
+
+        view_box = (request.data.get("view_box") or "").strip()
+        parsed_view_box = _parse_view_box(view_box) if view_box else None
 
         if kind == KIND_TOWER_PIECE:
-            view_box = request.data.get("view_box", "") or ""
+            normalized_view_box = _format_view_box(parsed_view_box) if parsed_view_box else ""
             anchors = _parse_json(request.data.get("anchors")) or {}
-            # An uploaded landing must be walkable by Blue, so synthesize a default
-            # walk rail from the view box when the uploader didn't supply one.
-            if piece_type == TOWER_PIECE_LANDING and "walk_rail" not in anchors:
-                rail = _default_walk_rail(view_box)
-                if rail:
-                    anchors["walk_rail"] = rail
             TowerPieceAsset.objects.create(
                 asset=asset,
                 piece_type=piece_type,
-                view_box=view_box,
+                view_box=normalized_view_box,
                 anchors=anchors,
                 svg_sanitized=sanitized,
             )
+        elif parsed_view_box:
+            x, y, width, height = parsed_view_box
+            asset.config = {
+                **asset.config,
+                "view_box": _format_view_box(parsed_view_box),
+                "bounds": {"x": x, "y": y, "width": width, "height": height},
+            }
+            asset.save(update_fields=["config", "updated_at"])
 
         return Response(asset_descriptor(asset), status=201)
 
@@ -227,6 +245,15 @@ def _safe_int(value, *, default: int) -> int:
         return default
 
 
+def _prepare_tower_upload(upload, *, field: str):
+    name = (upload.name or "").lower()
+    if name.endswith(".svg"):
+        return ContentFile(sanitize_svg(upload.read()), name=upload.name), True
+    if not name.endswith((".png", ".webp", ".gif", ".jpg", ".jpeg")):
+        raise ValidationError({field: "Upload an SVG or raster sprite image."})
+    return upload, False
+
+
 def _unique_slug(*, user, label: str) -> str:
     base = slugify(label) or "asset"
     base = f"{base}-{user.id}"
@@ -249,15 +276,18 @@ def _parse_json(value):
         raise ValidationError({"anchors": "anchors must be valid JSON."})
 
 
-def _default_walk_rail(view_box: str) -> dict | None:
-    parts = view_box.split()
+def _parse_view_box(value: str) -> tuple[float, float, float, float]:
+    parts = value.replace(",", " ").split()
     if len(parts) != 4:
-        return None
+        raise ValidationError({"view_box": "View box must contain x, y, width, and height."})
     try:
-        width = float(parts[2])
-        height = float(parts[3])
-    except ValueError:
-        return None
-    inset = width * 0.08
-    y = height * 0.35
-    return {"x1": inset, "y1": y, "x2": width - inset, "y2": y}
+        x, y, width, height = (float(part) for part in parts)
+    except ValueError as exc:
+        raise ValidationError({"view_box": "View box values must be numbers."}) from exc
+    if width <= 0 or height <= 0:
+        raise ValidationError({"view_box": "View box width and height must be positive."})
+    return x, y, width, height
+
+
+def _format_view_box(view_box: tuple[float, float, float, float]) -> str:
+    return " ".join(f"{value:g}" for value in view_box)

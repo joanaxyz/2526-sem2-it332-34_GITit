@@ -1,7 +1,7 @@
 from django.db.models import Q
 
 from authoring.selectors import content_payload
-from tower_designs.models import STATUS_PUBLISHED, TowerDesign
+from tower_designs.models import ARTIFACT_ROLE_NORMAL, STATUS_PUBLISHED, TowerDesign
 
 
 def visible_tower_designs(*, user):
@@ -34,44 +34,56 @@ def tower_design_payload(design: TowerDesign, *, include_layout: bool = False) -
 
 
 def tower_design_overview(*, design: TowerDesign) -> dict:
-    pieces = list(
-        design.pieces.select_related("piece_asset", "content_binding__content_definition").order_by("sort_order", "id")
-    )
+    pieces = list(design.pieces.select_related("piece_asset").order_by("sort_order", "id"))
     layout_pieces = []
     content = {"adventures": {}, "challenges": {}, "tomes": {}}
     for piece in pieces:
-        binding = getattr(piece, "content_binding", None)
-        binding_payload = None
-        if binding:
-            definition = binding.content_definition
-            binding_payload = {"kind": definition.kind, "id": definition.id}
-            bucket = {"adventure": "adventures", "challenge": "challenges", "tome": "tomes"}[definition.kind]
-            content[bucket][str(definition.id)] = content_payload(definition, include_definition=definition.kind == "tome")
         layout_pieces.append(
             {
                 "instanceId": f"tower-{design.id}-piece-{piece.id}",
                 "assetSlug": piece.piece_asset.slug,
                 "pieceType": piece.piece_type,
                 "storeyIndex": piece.storey_index,
-                "contentBinding": binding_payload,
+                "parentInstanceId": (
+                    f"tower-{design.id}-piece-{piece.parent_instance_id}"
+                    if piece.parent_instance_id
+                    else None
+                ),
                 "transform": piece.transform,
                 "config": piece.config,
             }
         )
-    artifacts = [
-        {
-            "id": placement.id,
-            "targetInstanceId": f"tower-{design.id}-piece-{placement.target_piece_instance_id}",
-            "assetSlug": placement.artifact_asset.slug,
-            "x": placement.x,
-            "y": placement.y,
-            "scale": placement.scale,
-            "rotation": placement.rotation,
-            "anchor": placement.anchor,
-            "zIndex": placement.z_index,
-        }
-        for placement in design.artifact_placements.select_related("artifact_asset").order_by("z_index", "id")
-    ]
+    artifacts = []
+    for placement in design.artifact_placements.select_related(
+        "artifact_asset", "content_definition"
+    ).order_by("z_index", "id"):
+        binding_payload = None
+        if placement.role != ARTIFACT_ROLE_NORMAL and placement.content_definition_id:
+            definition = placement.content_definition
+            binding_payload = {"kind": definition.kind, "id": definition.id}
+            bucket = {"adventure": "adventures", "challenge": "challenges", "tome": "tomes"}[
+                definition.kind
+            ]
+            content[bucket][str(definition.id)] = content_payload(
+                definition, include_definition=definition.kind == "tome"
+            )
+        artifacts.append(
+            {
+                "id": placement.id,
+                "targetInstanceId": f"tower-{design.id}-piece-{placement.target_piece_instance_id}",
+                "assetSlug": placement.artifact_asset.slug,
+                "role": placement.role,
+                "contentBinding": binding_payload,
+                "x": placement.x,
+                "y": placement.y,
+                "scale": placement.scale,
+                "width": placement.width,
+                "height": placement.height,
+                "rotation": placement.rotation,
+                "anchor": placement.anchor,
+                "zIndex": placement.z_index,
+            }
+        )
     return {
         "design": tower_design_payload(design, include_layout=False),
         "tower_layout": {"storeyId": None, "designId": design.id, "pieces": layout_pieces},

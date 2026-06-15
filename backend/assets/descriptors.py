@@ -15,7 +15,7 @@ from django.core.cache import cache
 
 from assets.models import KIND_CHARACTER, KIND_MONSTER, KIND_TOWER_PIECE, Asset, TowerPieceAsset
 
-_CACHE_VERSION = 5
+_CACHE_VERSION = 6
 logger = logging.getLogger(__name__)
 
 
@@ -95,10 +95,7 @@ def asset_descriptor(asset: Asset) -> dict:
                 "interaction_zones": tower_piece.interaction_zones or {},
                 "state_variants": tower_piece.state_variants or {},
                 "svg_sanitized": tower_piece.svg_sanitized,
-                # Inline SVG + safe animation preset drive the data-driven
-                # renderer (PieceSvg): the art is styled/animated, not a flat img.
                 "svg": _inline_svg(asset),
-                "animation": config.get("animation"),
             }
     return payload
 
