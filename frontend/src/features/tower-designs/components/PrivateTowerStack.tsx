@@ -3,14 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 
 import { towerDesignsApi } from '@/features/tower-designs/api/towerDesignsApi'
-import {
-  AdventureSectionPiece,
-  ChallengeSectionPiece,
-  DoorPiece,
-  LandingPiece,
-  SpirePiece,
-  TomePiece,
-} from '@/features/tower-map/components/TowerPieces'
+import { PieceArt } from '@/features/tower-map/components/PieceArt'
 import { towerDescriptorFor, towerPieceAttrs } from '@/features/tower-map/components/towerPieceData'
 import { assetsApi } from '@/shared/assets/assetsApi'
 import type { TowerLayoutPieceDescriptor, TowerPieceAssetDescriptor } from '@/shared/assets/types'
@@ -81,12 +74,11 @@ export function TowerStack({
     <div className="tower-stack-column">
       <div className="learning-tower">
         <div className="tower-repeater">
-          {pieces.map((piece, index) => (
+          {pieces.map((piece) => (
             <PrivatePiece
               key={piece.instanceId}
               piece={piece}
               descriptor={towerDescriptorFor(piece, descriptors)}
-              isFirst={index === 0}
             />
           ))}
         </div>
@@ -98,67 +90,81 @@ export function TowerStack({
 function PrivatePiece({
   piece,
   descriptor,
-  isFirst,
 }: {
   piece: TowerLayoutPieceDescriptor
   descriptor: TowerPieceAssetDescriptor | null
-  isFirst: boolean
 }) {
-  const attrs = towerPieceAttrs(piece, descriptor)
+  const variant = variantForPrivatePiece(piece)
+  const attrs = towerPieceAttrs(piece, descriptor, { variant })
 
   switch (piece.pieceType) {
     case 'spire':
       return (
+        <div className="tower-roof-stage" {...attrs} aria-hidden="true">
+          <PieceArt pieceType="spire" descriptor={descriptor} variant={variant} />
+        </div>
+      )
+    case 'window_section':
+      return (
         <div className="tower-window-stage" {...attrs} aria-hidden="true">
-          <SpirePiece descriptor={descriptor} />
-          {isFirst ? (
-            <div className="tower-window-roof">
-              <span className="tower-window-roof-spire" />
-              <span className="tower-window-roof-peak" />
-            </div>
-          ) : null}
-          <div className="tower-window-storey">
-            <span className="tower-window-storey-window" />
-            <span className="tower-window-storey-window" />
-            <span className="tower-window-storey-window" />
-          </div>
+          <PieceArt pieceType="window_section" descriptor={descriptor} variant={variant} />
         </div>
       )
     case 'landing':
       return (
-        <div className={cn('tower-landing', 'tower-section-separator')} {...attrs} aria-hidden="true">
-          <LandingPiece descriptor={descriptor} />
-          <span className="tower-section-separator-backplate" />
+        <div
+          className={cn(
+            'tower-landing',
+            variant === 'tome' ? 'tower-tome-separator' : 'tower-section-separator',
+            variant === 'after-challenges' && 'is-after-challenges',
+          )}
+          {...attrs}
+          aria-hidden="true"
+        >
+          <PieceArt pieceType="landing" descriptor={descriptor} variant={variant} />
         </div>
       )
     case 'adventure_section':
       return (
         <section className="tower-adventure-stage" {...attrs}>
-          <AdventureSectionPiece descriptor={descriptor} />
+          <PieceArt pieceType="adventure_section" descriptor={descriptor} variant="adventure" />
           <h2 className="tower-stage-title tower-stage-title--adventure">Command Adventure</h2>
         </section>
       )
     case 'challenge_section':
       return (
         <section className="tower-challenges-stage" {...attrs}>
-          <ChallengeSectionPiece descriptor={descriptor} />
+          <PieceArt pieceType="challenge_section" descriptor={descriptor} variant="challenge" />
           <h2 className="tower-stage-title tower-stage-title--challenge">Challenges</h2>
         </section>
       )
     case 'tome':
       return (
         <section className="tower-tome-stage" {...attrs}>
-          <TomePiece descriptor={descriptor} />
+          <PieceArt pieceType="tome" descriptor={descriptor} />
           <h2 className="tower-stage-title tower-stage-title--tome">Tome</h2>
         </section>
       )
     case 'door':
       return (
         <div className="tower-private-door" {...attrs} aria-hidden="true">
-          <DoorPiece descriptor={descriptor} />
+          <PieceArt pieceType="door" descriptor={descriptor} />
         </div>
       )
     default:
       return null
   }
+}
+
+function variantForPrivatePiece(piece: TowerLayoutPieceDescriptor) {
+  if (piece.pieceType === 'spire') return 'roof'
+  if (piece.pieceType === 'window_section') return 'regular'
+  if (piece.pieceType === 'landing') {
+    if (piece.instanceId.endsWith('landing-after-tomes')) return 'tome'
+    if (piece.instanceId.endsWith('landing-after-challenges')) return 'after-challenges'
+    return 'regular'
+  }
+  if (piece.pieceType === 'adventure_section') return 'adventure'
+  if (piece.pieceType === 'challenge_section') return 'challenge'
+  return undefined
 }

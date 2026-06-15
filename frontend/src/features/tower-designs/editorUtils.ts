@@ -16,6 +16,7 @@ export const BINDABLE_KIND: Partial<Record<TowerPieceType, ContentKind>> = {
 
 export const PIECE_TYPE_LABEL: Record<TowerPieceType, string> = {
   spire: 'Spire / Roof',
+  window_section: 'Window Section',
   landing: 'Landing',
   door: 'Door',
   adventure_section: 'Adventure Section',
@@ -25,6 +26,7 @@ export const PIECE_TYPE_LABEL: Record<TowerPieceType, string> = {
 
 export const PALETTE_GROUPS: TowerPieceType[] = [
   'spire',
+  'window_section',
   'adventure_section',
   'challenge_section',
   'tome',

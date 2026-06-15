@@ -122,7 +122,7 @@ export function TowerBattleStage({
 
         {/* Blue holds the left flank, blasting monsters off the crystal. */}
         {player ? (
-          <div className="absolute left-[8%] z-10" style={{ bottom: `calc(${LEDGE_PCT}% - 6px)` }}>
+          <div className="absolute left-[8%] z-10" style={{ bottom: `${LEDGE_PCT}%` }}>
             <PlayerActor ref={bindPlayer} character={player.character} battle={player.battle} scale={playerScale} />
           </div>
         ) : null}

@@ -11,6 +11,7 @@ import { Button } from '@/shared/components/Button'
 
 const PIECE_TYPES: TowerPieceType[] = [
   'spire',
+  'window_section',
   'landing',
   'door',
   'adventure_section',

@@ -30,14 +30,9 @@ import { towerMapApi } from '@/features/tower-map/api/towerMapApi'
 import { StoreyBookCard } from '@/features/tower-map/book/StoreyBookCard'
 import type { LearningStorey } from '@/features/tower-map/types'
 import { GitCoinIcon } from '@/features/wallet/components/GitCoinIcon'
-import {
-  AdventureSectionPiece,
-  ChallengeSectionPiece,
-  DoorPiece,
-  LandingPiece,
-  SpirePiece,
-  TomePiece,
-} from '@/features/tower-map/components/TowerPieces'
+import { HallArt } from '@/features/tower-map/components/art/HallArt'
+import { PieceArt } from '@/features/tower-map/components/PieceArt'
+import { TowerStoreySkeleton } from '@/features/tower-map/components/TowerStoreySkeleton'
 import {
   pieceByType,
   pieceBySuffix,
@@ -47,14 +42,11 @@ import {
 import { assetsApi } from '@/shared/assets/assetsApi'
 import type { TowerLayoutDescriptor, TowerLayoutPieceDescriptor, TowerPieceAssetDescriptor } from '@/shared/assets/types'
 import {
-  actionForChallengeLevel,
-  actionLabel,
   chestRewards,
   DIFFICULTY_ACCENT,
   difficultyLabel,
   nextReward,
 } from '@/features/tower-map/challengeUi'
-import { TomeLecternArt } from '@/features/tower-map/components/TomeLecternArt'
 import { isSelected, useTowerSelection } from '@/features/tower-map/hooks/useTowerSelection'
 import { ProgressBar } from '@/shared/components/ProgressBar'
 import { queryKeys } from '@/shared/api/queryKeys'
@@ -93,41 +85,16 @@ function orderedByLayout<T extends { id: number | string }>(
   return ordered
 }
 
-// Loading placeholders shaped like the doors they will become, so the tower
-// visibly assembles piece by piece instead of flashing generic rows.
-function AdventureDoorSkeleton() {
-  return (
-    <div className="tower-adventure-door-wrap" aria-hidden="true">
-      <span className="tower-door-skeleton tower-door-skeleton--gate" />
-    </div>
-  )
-}
-
-function TrialRoomSkeleton() {
-  return (
-    <div className="tower-door-skeleton-row" aria-hidden="true">
-      {Array.from({ length: 3 }, (_, index) => (
-        <span
-          className="tower-door-skeleton tower-door-skeleton--trial"
-          key={index}
-          style={{ '--skeleton-index': index } as CSSProperties}
-        />
-      ))}
-    </div>
-  )
-}
-
 const PIECE_EASE = [0.16, 1, 0.3, 1] as const
 const EMPTY_TOMES: TomeSummary[] = []
 const EMPTY_CHALLENGES: ChallengeSummary[] = []
 
-// -- Windows storey: the lit-window band that tops every storey; the conical roof
-// only crowns the very first storey (the top of the whole tower). --
+// -- Roof crown: the one-off tower cap. The lit-window band is a separate
+// backend piece so repeating storeys never repeat the roof. --
 // `animate={false}` drops the scroll-entrance so the tower editor can reuse this
 // exact markup as a static, selectable piece (extra props/children land on the
 // root). The live tower passes neither, so its motion path is unchanged.
-export function WindowStorey({
-  crowned,
+export function RoofSpire({
   piece,
   descriptor,
   animate = true,
@@ -135,32 +102,58 @@ export function WindowStorey({
   children,
   ...rest
 }: {
-  crowned: boolean
   piece?: TowerLayoutPieceDescriptor | null
   descriptor?: TowerPieceAssetDescriptor | null
   animate?: boolean
   children?: ReactNode
 } & HTMLAttributes<HTMLDivElement>) {
-  const content = (
-    <>
-      <SpirePiece descriptor={descriptor} />
-      {crowned ? (
-        <div className="tower-window-roof">
-          <span className="tower-window-roof-spire" />
-          <span className="tower-window-roof-peak" />
-        </div>
-      ) : null}
-      <div className="tower-window-storey">
-        <span className="tower-window-storey-window" />
-        <span className="tower-window-storey-window" />
-        <span className="tower-window-storey-window" />
-      </div>
-    </>
-  )
+  const variant = 'roof'
+  const content = <PieceArt pieceType="spire" descriptor={descriptor} variant={variant} />
 
   if (!animate) {
     return (
-      <div className={cn('tower-window-stage', className)} {...towerPieceAttrs(piece, descriptor)} {...rest}>
+      <div className={cn('tower-roof-stage', className)} {...towerPieceAttrs(piece, descriptor, { variant })} {...rest}>
+        {content}
+        {children}
+      </div>
+    )
+  }
+
+  return (
+    <motion.div
+      className="tower-roof-stage"
+      {...towerPieceAttrs(piece, descriptor, { variant })}
+      aria-hidden="true"
+      initial={{ opacity: 0, y: -28, scale: 0.98 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ amount: 0.3, once: true }}
+      transition={{ duration: 0.62, ease: PIECE_EASE }}
+    >
+      {content}
+    </motion.div>
+  )
+}
+
+// -- Windows storey: the lit-window band that tops every storey. --
+export function WindowStorey({
+  piece,
+  descriptor,
+  animate = true,
+  className,
+  children,
+  ...rest
+}: {
+  piece?: TowerLayoutPieceDescriptor | null
+  descriptor?: TowerPieceAssetDescriptor | null
+  animate?: boolean
+  children?: ReactNode
+} & HTMLAttributes<HTMLDivElement>) {
+  const variant = 'regular'
+  const content = <PieceArt pieceType="window_section" descriptor={descriptor} variant={variant} />
+
+  if (!animate) {
+    return (
+      <div className={cn('tower-window-stage', className)} {...towerPieceAttrs(piece, descriptor, { variant })} {...rest}>
         {content}
         {children}
       </div>
@@ -170,12 +163,12 @@ export function WindowStorey({
   return (
     <motion.div
       className="tower-window-stage"
-      {...towerPieceAttrs(piece, descriptor)}
+      {...towerPieceAttrs(piece, descriptor, { variant })}
       aria-hidden="true"
-      initial={{ opacity: 0, y: -22 }}
+      initial={{ opacity: 0, y: -18 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ amount: 0.3, once: true }}
-      transition={{ duration: 0.55, ease: PIECE_EASE }}
+      transition={{ duration: 0.5, ease: PIECE_EASE }}
     >
       {content}
     </motion.div>
@@ -212,23 +205,12 @@ export function TowerLanding({
     afterChallenges && 'is-after-challenges',
     className,
   )
-  const content = (
-    <>
-      <LandingPiece descriptor={descriptor} />
-      {afterChallenges ? (
-        <span className="tower-section-separator-crenels">
-          {Array.from({ length: 9 }, (_, index) => (
-            <span key={index} />
-          ))}
-        </span>
-      ) : null}
-      <span className="tower-section-separator-backplate" />
-    </>
-  )
+  const variant = afterChallenges ? 'after-challenges' : 'regular'
+  const content = <PieceArt pieceType="landing" descriptor={descriptor} variant={variant} />
 
   if (!animate) {
     return (
-      <div className={cls} {...towerPieceAttrs(piece, descriptor)} {...rest}>
+      <div className={cls} {...towerPieceAttrs(piece, descriptor, { variant })} {...rest}>
         {content}
         {children}
       </div>
@@ -238,7 +220,7 @@ export function TowerLanding({
   return (
     <motion.div
       className={cls}
-      {...towerPieceAttrs(piece, descriptor)}
+      {...towerPieceAttrs(piece, descriptor, { variant })}
       aria-hidden="true"
       initial={{ opacity: 0, scaleX: 0.86 }}
       whileInView={{ opacity: 1, scaleX: 1 }}
@@ -279,17 +261,7 @@ function AdventureDoor({
       viewport={{ amount: 0.3, once: true }}
       transition={{ duration: 0.62, ease: PIECE_EASE }}
     >
-      <DoorPiece descriptor={descriptor} />
-      <span className="adventure-door-frame" aria-hidden="true">
-        <span className="adventure-door-interior" />
-        <span className="adventure-door-leaf adventure-door-leaf--left">
-          <span className="adventure-door-plank" />
-        </span>
-        <span className="adventure-door-leaf adventure-door-leaf--right">
-          <span className="adventure-door-plank" />
-        </span>
-        <span className="adventure-door-gem" />
-      </span>
+      <PieceArt pieceType="door" descriptor={descriptor} />
     </motion.button>
   )
 }
@@ -326,8 +298,7 @@ function TomeArtifact({
       viewport={{ amount: 0.3, once: true }}
       transition={{ duration: 0.58, ease: PIECE_EASE }}
     >
-      <TomePiece descriptor={descriptor} />
-      <TomeLecternArt />
+      <PieceArt pieceType="tome" descriptor={descriptor} />
       <span className="tome-lectern-label">{tome.title}</span>
     </motion.button>
   )
@@ -350,36 +321,12 @@ export function TomeLanding({
   children?: ReactNode
 } & HTMLAttributes<HTMLDivElement>) {
   const cls = cn('tower-landing', 'tower-tome-separator', className)
-  const content = (
-    <>
-      <LandingPiece descriptor={descriptor} />
-      <span className="tower-tome-separator-beam" />
-      <span className="tower-tome-separator-keystone">
-        <svg viewBox="0 0 56 46" aria-hidden="true" focusable="false">
-          <path
-            d="M4 1 H52 L45 45 H11 Z"
-            fill="#0a2238"
-            stroke="rgba(45, 245, 255, 0.94)"
-            strokeWidth="2"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M28 14 C25 11.6 20.4 11.1 16.6 12.4 L16.6 27 C20.4 25.7 25 26.2 28 28.6 C31 26.2 35.6 25.7 39.4 27 L39.4 12.4 C35.6 11.1 31 11.6 28 14 Z"
-            fill="rgba(2, 12, 22, 0.6)"
-            stroke="rgba(45, 245, 255, 0.62)"
-            strokeWidth="1.6"
-            strokeLinejoin="round"
-          />
-          <path d="M28 14 V28.6" stroke="rgba(45, 245, 255, 0.45)" strokeWidth="1.3" />
-        </svg>
-      </span>
-      <span className="tower-tome-separator-ledge" />
-    </>
-  )
+  const variant = 'tome'
+  const content = <PieceArt pieceType="landing" descriptor={descriptor} variant={variant} />
 
   if (!animate) {
     return (
-      <div className={cls} {...towerPieceAttrs(piece, descriptor)} {...rest}>
+      <div className={cls} {...towerPieceAttrs(piece, descriptor, { variant })} {...rest}>
         {content}
         {children}
       </div>
@@ -389,7 +336,7 @@ export function TomeLanding({
   return (
     <motion.div
       className={cls}
-      {...towerPieceAttrs(piece, descriptor)}
+      {...towerPieceAttrs(piece, descriptor, { variant })}
       aria-hidden="true"
       initial={{ opacity: 0, scaleX: 0.88 }}
       whileInView={{ opacity: 1, scaleX: 1 }}
@@ -414,20 +361,17 @@ function TomeSection({
   landingPiece?: TowerLayoutPieceDescriptor | null
   pieceDescriptors: Record<string, TowerPieceAssetDescriptor>
 }) {
-  const sectionPiece = tomes.length ? pieceByTomeId.get(String(tomes[0].id)) : null
-  const sectionDescriptor = towerDescriptorFor(sectionPiece, pieceDescriptors)
   const landingDescriptor = towerDescriptorFor(landingPiece, pieceDescriptors)
   return (
     <>
       <motion.section
         className="tower-tome-stage"
-        {...towerPieceAttrs(sectionPiece, sectionDescriptor)}
         initial={{ opacity: 0, y: 14 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ amount: 0.42, once: true }}
         transition={{ duration: 0.5, ease: PIECE_EASE }}
       >
-        <TomePiece descriptor={sectionDescriptor} />
+        <HallArt variant="tome" />
         <span className="tower-stage-icon tower-stage-icon--cyan">
           <BookOpen className="size-6" />
         </span>
@@ -470,11 +414,6 @@ const trialDoorVariants = {
   },
 }
 
-const trialDoorBarVariants = {
-  hidden: { x: '-50%', scaleY: 0, originY: 0 },
-  shown: { x: '-50%', scaleY: 1, originY: 0, transition: { duration: 0.34, ease: PIECE_EASE } },
-}
-
 // -- A single Challenges level door - selectable, framed by difficulty color. --
 function TrialDoor({
   challenge,
@@ -513,20 +452,10 @@ function TrialDoor({
       onClick={() => select({ kind: 'challenge', storeyId, challengeIndex, challenge, level, locked })}
       variants={trialDoorVariants}
     >
-      <DoorPiece descriptor={descriptor} />
-      <span className="trial-door-arch" aria-hidden="true">
-        <span className="trial-door-interior" />
-        <span className="trial-door-gate">
-          <span className="trial-door-bars">
-            {Array.from({ length: 4 }, (_, index) => (
-              <motion.span className="trial-door-bar" key={index} variants={trialDoorBarVariants} />
-            ))}
-          </span>
-          <span className="trial-door-crossbar" />
-        </span>
-      </span>
-      <span className="trial-door-label">{difficultyLabel(level)}</span>
-      <span className="trial-door-state">{actionLabel(actionForChallengeLevel(level), level.status)}</span>
+      {/* Difficulty now reads from the gate art itself (distinct silhouette +
+          engraved numeral + accent), so no text tag rides under the door. The
+          aria-label still names it for assistive tech. */}
+      <PieceArt pieceType="door" descriptor={descriptor} variant="portcullis" />
     </motion.button>
   )
 }
@@ -538,7 +467,7 @@ function ChallengeTrial({
   locked,
   piece,
   descriptor,
-  doorDescriptor,
+  gateDescriptor,
 }: {
   challenge: ChallengeSummary
   index: number
@@ -546,22 +475,21 @@ function ChallengeTrial({
   locked: boolean
   piece?: TowerLayoutPieceDescriptor | null
   descriptor?: TowerPieceAssetDescriptor | null
-  doorDescriptor?: TowerPieceAssetDescriptor | null
+  /** The interactable gate asset for each level (the portcullis). */
+  gateDescriptor?: TowerPieceAssetDescriptor | null
 }) {
   return (
     <motion.article
       className="trial-room"
-      {...towerPieceAttrs(piece, descriptor)}
+      {...towerPieceAttrs(piece, descriptor, { variant: 'challenge' })}
       initial={{ opacity: 0, y: 18, scale: 0.99 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ amount: 0.24, once: true }}
       transition={{ duration: 0.44, delay: index * 0.025, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="trial-room-header">
-        <span className="trial-room-kicker">Trial {index + 1}</span>
-        <h3 className="trial-room-title">{challenge.title}</h3>
-      </div>
-      {challenge.summary?.trim() ? <p className="trial-room-summary">{challenge.summary}</p> : null}
+      {/* Title/summary stay out of the tower (terse by design); the "Trial N"
+          kicker is gone too. Multiple trials are separated by the room's top
+          hairline (`.trial-room::before`). */}
       <motion.div
         className="trial-door-row"
         initial="hidden"
@@ -577,7 +505,7 @@ function ChallengeTrial({
             level={level}
             storeyId={storeyId}
             locked={locked}
-            descriptor={doorDescriptor}
+            descriptor={gateDescriptor}
           />
         ))}
       </motion.div>
@@ -723,7 +651,11 @@ function TowerStoreySectionInner({
     retry: 1,
   })
   const overview = overviewQuery.data ?? null
-  const contentLoading = !shouldLoad || overviewQuery.isLoading
+  // While the storey's content OR its piece art is still in flight, draw the
+  // outline skeleton instead of the finished pieces. Gating the whole structure
+  // (not just the doors) keeps loading from flashing the detailed fallback art —
+  // and stops the crowned fallback from doubling the window band.
+  const structureLoading = !shouldLoad || overviewQuery.isLoading || towerPiecesQuery.isLoading
   const towerPieceDescriptors = useMemo<Record<string, TowerPieceAssetDescriptor>>(() => {
     const descriptors: Record<string, TowerPieceAssetDescriptor> = {}
     for (const [slug, descriptor] of Object.entries(towerPiecesQuery.data?.results ?? {})) {
@@ -755,6 +687,7 @@ function TowerStoreySectionInner({
     challengeStagePiece,
     challengeLandingPiece,
     spirePiece,
+    windowPiece,
   } = useMemo(() => {
     const nextTomePieceById = contentPieceMap(layout, 'tome', 'tome')
     const adventurePieceById = contentPieceMap(layout, 'adventure', 'adventure_section')
@@ -772,14 +705,21 @@ function TowerStoreySectionInner({
         : pieceBySuffix(layout, 'challenges') ?? pieceByType(layout, 'challenge_section'),
       challengeLandingPiece: pieceBySuffix(layout, 'landing-after-challenges'),
       spirePiece: pieceByType(layout, 'spire'),
+      windowPiece: pieceByType(layout, 'window_section'),
     }
   }, [adventure, challenges, layout])
   const spireDescriptor = towerDescriptorFor(spirePiece, towerPieceDescriptors)
+  const windowDescriptor =
+    towerDescriptorFor(windowPiece, towerPieceDescriptors) ?? towerPieceDescriptors['official-window-section'] ?? null
   const adventureDescriptor = towerDescriptorFor(adventurePiece, towerPieceDescriptors)
   const adventureLandingDescriptor = towerDescriptorFor(adventureLandingPiece, towerPieceDescriptors)
   const challengeStageDescriptor = towerDescriptorFor(challengeStagePiece, towerPieceDescriptors)
   const challengeLandingDescriptor = towerDescriptorFor(challengeLandingPiece, towerPieceDescriptors)
   const doorDescriptor = towerPieceDescriptors['official-door'] ?? null
+  // The portcullis is its own asset (its own silhouette + slide-up animation).
+  // Never fall back to the door art here: a door descriptor rendered with the
+  // 'portcullis' variant would draw the swing-open gate, not a portcullis.
+  const portcullisDescriptor = towerPieceDescriptors['official-portcullis'] ?? null
 
   const select = useTowerSelection((state) => state.select)
   const selectedAdventureId = useTowerSelection((state) =>
@@ -803,102 +743,104 @@ function TowerStoreySectionInner({
     >
       <div className={cn('learning-tower', !isFirst && 'learning-tower-continuation')}>
         {/* Each tower piece (window band, stages, landings, doors) owns its
-            entrance animation, so the storey assembles piece by piece. */}
+            entrance animation, so the storey assembles piece by piece — over the
+            outline skeleton drawn while content + art load. */}
         <div className="tower-repeater">
-          <WindowStorey crowned={isFirst} descriptor={spireDescriptor} piece={spirePiece} />
+          {structureLoading ? (
+            <TowerStoreySkeleton isFirst={isFirst} />
+          ) : (
+            <>
+              {isFirst ? <RoofSpire descriptor={spireDescriptor} piece={spirePiece} /> : null}
+              <WindowStorey descriptor={windowDescriptor} piece={windowPiece} />
 
-          {tomesAboveAdventure.length > 0 ? (
-            <TomeSection
-              landingPiece={tomeLandingPiece}
-              pieceByTomeId={tomePieceById}
-              pieceDescriptors={towerPieceDescriptors}
-              tomes={tomesAboveAdventure}
-              storeyId={storey.id}
-            />
-          ) : null}
-
-          <motion.section
-            className="tower-adventure-stage"
-            {...towerPieceAttrs(adventurePiece, adventureDescriptor)}
-            initial={{ opacity: 0, y: 14 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ amount: 0.42, once: true }}
-            transition={{ duration: 0.5, delay: motionDelay + 0.03, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <AdventureSectionPiece descriptor={adventureDescriptor} />
-            <span className="tower-stage-icon tower-stage-icon--cyan">
-              <Swords className="size-6" />
-            </span>
-            <h2 className="tower-stage-title tower-stage-title--adventure">Command Adventure</h2>
-
-            {contentLoading ? <AdventureDoorSkeleton /> : null}
-            {!contentLoading && !adventure ? <EmptySection label="Command Adventures" /> : null}
-
-            {adventure ? (
-              <div className="tower-adventure-door-wrap">
-                <AdventureDoor
-                  adventure={adventure}
-                  descriptor={doorDescriptor}
-                  piece={adventurePiece}
-                  selected={adventureSelected}
-                  onSelect={() => select({ kind: 'adventure', storeyId: storey.id, adventure })}
-                />
-              </div>
-            ) : null}
-          </motion.section>
-
-          <TowerLanding descriptor={adventureLandingDescriptor} piece={adventureLandingPiece} />
-
-          <motion.section
-            className={cn('tower-challenges-stage', challengesLocked && 'is-locked')}
-            {...towerPieceAttrs(challengeStagePiece, challengeStageDescriptor)}
-            initial={{ opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ amount: 0.16, once: true, margin: '-6% 0px -6% 0px' }}
-            transition={{ duration: 0.58, delay: motionDelay + 0.08, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <ChallengeSectionPiece descriptor={challengeStageDescriptor} />
-            <span className="tower-stage-icon tower-stage-icon--purple">
-              <Trophy className="size-6" />
-            </span>
-            <h2 className="tower-stage-title tower-stage-title--challenge">Challenges</h2>
-
-            {contentLoading ? (
-              <div className="mt-5">
-                <TrialRoomSkeleton />
-              </div>
-            ) : null}
-            {!contentLoading && challenges.length === 0 ? (
-              <div className="mt-5">
-                <EmptySection label="Challenges" />
-              </div>
-            ) : null}
-
-            <div className="challenge-room-stack">
-              {challenges.map((challenge, index) => (
-                <ChallengeTrial
-                  index={index}
-                  key={challenge.id}
-                  locked={challengesLocked}
-                  descriptor={towerDescriptorFor(challengePieceById.get(String(challenge.id)), towerPieceDescriptors)}
-                  doorDescriptor={doorDescriptor}
-                  piece={challengePieceById.get(String(challenge.id))}
-                  challenge={challenge}
+              {tomesAboveAdventure.length > 0 ? (
+                <TomeSection
+                  landingPiece={tomeLandingPiece}
+                  pieceByTomeId={tomePieceById}
+                  pieceDescriptors={towerPieceDescriptors}
+                  tomes={tomesAboveAdventure}
                   storeyId={storey.id}
                 />
-              ))}
-            </div>
-          </motion.section>
+              ) : null}
 
-          {!isLast ? (
-            <TowerLanding
-              afterChallenges
-              continuation
-              descriptor={challengeLandingDescriptor}
-              piece={challengeLandingPiece}
-            />
-          ) : (
-            <TowerLanding afterChallenges base descriptor={challengeLandingDescriptor} piece={challengeLandingPiece} />
+              <motion.section
+                className="tower-adventure-stage"
+                {...towerPieceAttrs(adventurePiece, adventureDescriptor, { variant: 'adventure' })}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ amount: 0.42, once: true }}
+                transition={{ duration: 0.5, delay: motionDelay + 0.03, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <PieceArt pieceType="adventure_section" descriptor={adventureDescriptor} variant="adventure" />
+                <span className="tower-stage-icon tower-stage-icon--cyan">
+                  <Swords className="size-6" />
+                </span>
+                <h2 className="tower-stage-title tower-stage-title--adventure">Command Adventure</h2>
+
+                {!adventure ? <EmptySection label="Command Adventures" /> : null}
+
+                {adventure ? (
+                  <div className="tower-adventure-door-wrap">
+                    <AdventureDoor
+                      adventure={adventure}
+                      descriptor={doorDescriptor}
+                      piece={adventurePiece}
+                      selected={adventureSelected}
+                      onSelect={() => select({ kind: 'adventure', storeyId: storey.id, adventure })}
+                    />
+                  </div>
+                ) : null}
+              </motion.section>
+
+              <TowerLanding descriptor={adventureLandingDescriptor} piece={adventureLandingPiece} />
+
+              <motion.section
+                className={cn('tower-challenges-stage', challengesLocked && 'is-locked')}
+                {...towerPieceAttrs(challengeStagePiece, challengeStageDescriptor, { variant: 'challenge' })}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ amount: 0.16, once: true, margin: '-6% 0px -6% 0px' }}
+                transition={{ duration: 0.58, delay: motionDelay + 0.08, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <PieceArt pieceType="challenge_section" descriptor={challengeStageDescriptor} variant="challenge" />
+                <span className="tower-stage-icon tower-stage-icon--purple">
+                  <Trophy className="size-6" />
+                </span>
+                <h2 className="tower-stage-title tower-stage-title--challenge">Challenges</h2>
+
+                {challenges.length === 0 ? (
+                  <div className="mt-5">
+                    <EmptySection label="Challenges" />
+                  </div>
+                ) : null}
+
+                <div className="challenge-room-stack">
+                  {challenges.map((challenge, index) => (
+                    <ChallengeTrial
+                      index={index}
+                      key={challenge.id}
+                      locked={challengesLocked}
+                      descriptor={towerDescriptorFor(challengePieceById.get(String(challenge.id)), towerPieceDescriptors)}
+                      gateDescriptor={portcullisDescriptor}
+                      piece={challengePieceById.get(String(challenge.id))}
+                      challenge={challenge}
+                      storeyId={storey.id}
+                    />
+                  ))}
+                </div>
+              </motion.section>
+
+              {!isLast ? (
+                <TowerLanding
+                  afterChallenges
+                  continuation
+                  descriptor={challengeLandingDescriptor}
+                  piece={challengeLandingPiece}
+                />
+              ) : (
+                <TowerLanding afterChallenges base descriptor={challengeLandingDescriptor} piece={challengeLandingPiece} />
+              )}
+            </>
           )}
         </div>
       </div>

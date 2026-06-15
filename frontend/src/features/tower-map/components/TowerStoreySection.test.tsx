@@ -121,6 +121,11 @@ function canonicalTowerLayout(storeyId: number) {
     pieces: [
       { instanceId: `storey-${storeyId}-spire`, assetSlug: 'official-spire', pieceType: 'spire' },
       {
+        instanceId: `storey-${storeyId}-window-section`,
+        assetSlug: 'official-window-section',
+        pieceType: 'window_section',
+      },
+      {
         instanceId: `storey-${storeyId}-tome-${CANONICAL_TOME.id}`,
         assetSlug: 'official-tome',
         pieceType: 'tome',
@@ -185,6 +190,7 @@ function towerPieceDescriptor(slug: string, pieceType: string, anchors = {}) {
       interaction_zones: {},
       state_variants: {},
       svg_sanitized: true,
+      svg: '<svg data-piece-art="arcane-spire-test" viewBox="0 0 220 48" xmlns="http://www.w3.org/2000/svg"></svg>',
     },
   }
 }
@@ -194,6 +200,7 @@ function mockTowerPieceDescriptors() {
     kind: 'tower_piece',
     results: {
       'official-spire': towerPieceDescriptor('official-spire', 'spire'),
+      'official-window-section': towerPieceDescriptor('official-window-section', 'window_section'),
       'official-tome': towerPieceDescriptor('official-tome', 'tome'),
       'official-landing': towerPieceDescriptor('official-landing', 'landing', {
         walk_rail: { x1: 18, y1: 18, x2: 202, y2: 18 },
@@ -201,6 +208,7 @@ function mockTowerPieceDescriptors() {
       'official-adventure-section': towerPieceDescriptor('official-adventure-section', 'adventure_section'),
       'official-challenge-section': towerPieceDescriptor('official-challenge-section', 'challenge_section'),
       'official-door': towerPieceDescriptor('official-door', 'door'),
+      'official-portcullis': towerPieceDescriptor('official-portcullis', 'door'),
     },
   })
 }
@@ -283,7 +291,8 @@ describe('TowerStoreySection', () => {
         '18',
       ),
     )
-    expect(document.querySelector('.tower-piece-svg')).toBeInTheDocument()
+    expect(document.querySelector('.tower-roof-art')).toBeInTheDocument()
+    expect(document.querySelector('.tower-window-band-art')).toBeInTheDocument()
   })
 
   it('shows the adventure overview + Play action when its door is selected', async () => {

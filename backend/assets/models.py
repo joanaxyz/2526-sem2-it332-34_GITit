@@ -40,6 +40,7 @@ ASSET_KINDS = AssetKind.choices
 
 class TowerPieceType(models.TextChoices):
     SPIRE = "spire", "Spire"
+    WINDOW_SECTION = "window_section", "Window section"
     LANDING = "landing", "Landing"
     DOOR = "door", "Door"
     ADVENTURE_SECTION = "adventure_section", "Adventure section"
@@ -48,6 +49,7 @@ class TowerPieceType(models.TextChoices):
 
 
 TOWER_PIECE_SPIRE = TowerPieceType.SPIRE
+TOWER_PIECE_WINDOW_SECTION = TowerPieceType.WINDOW_SECTION
 TOWER_PIECE_LANDING = TowerPieceType.LANDING
 TOWER_PIECE_DOOR = TowerPieceType.DOOR
 TOWER_PIECE_ADVENTURE_SECTION = TowerPieceType.ADVENTURE_SECTION

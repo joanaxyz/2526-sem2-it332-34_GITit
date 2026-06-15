@@ -186,7 +186,11 @@ export const PlayerActor = forwardRef<
     }))
 
     return (
-      <div ref={wrapRef} className={className}>
+      <div
+        ref={wrapRef}
+        className={className}
+        style={{ marginBottom: -character.metrics.footOffset * scale }}
+      >
         <SpriteAnimator
           ref={spriteRef}
           animation={character.sprites.idle}

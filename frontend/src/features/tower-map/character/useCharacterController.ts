@@ -11,9 +11,9 @@ import type {
 /**
  * Click-driven character movement on the tower page.
  *
- * The character lives in shell coordinates (document space inside
- * `.tower-page-shell`), so a grounded character scrolls glued to its
- * landing ledge with zero per-scroll work. All position writes are
+ * The character lives in stage-grid coordinates (document space inside
+ * `.tower-stage-grid`, the layer's parent), so a grounded character scrolls
+ * glued to its landing ledge with zero per-scroll work. All position writes are
  * imperative transforms - no React re-renders while moving.
  *
  * Movement rules:
@@ -157,6 +157,8 @@ export function useCharacterController({
 
       const viewBoxWidth = numberData(el, 'viewboxWidth')
       const viewBoxHeight = numberData(el, 'viewboxHeight')
+      const viewBoxX = numberData(el, 'viewboxX') ?? 0
+      const viewBoxY = numberData(el, 'viewboxY') ?? 0
       const x1 = numberData(el, 'walkRailX1')
       const y1 = numberData(el, 'walkRailY1')
       const x2 = numberData(el, 'walkRailX2')
@@ -167,9 +169,9 @@ export function useCharacterController({
 
       return {
         el,
-        left: rect.left - shellRect.left + (Math.min(x1, x2) / viewBoxWidth) * rect.width,
-        right: rect.left - shellRect.left + (Math.max(x1, x2) / viewBoxWidth) * rect.width,
-        y: rect.top - shellRect.top + (((y1 + y2) / 2) / viewBoxHeight) * rect.height,
+        left: rect.left - shellRect.left + ((Math.min(x1, x2) - viewBoxX) / viewBoxWidth) * rect.width,
+        right: rect.left - shellRect.left + ((Math.max(x1, x2) - viewBoxX) / viewBoxWidth) * rect.width,
+        y: rect.top - shellRect.top + ((((y1 + y2) / 2) - viewBoxY) / viewBoxHeight) * rect.height,
       }
     }
 

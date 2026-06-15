@@ -104,6 +104,7 @@ class TowerDesignService:
         opens with a sensible tower the user can customise rather than a blank slate."""
         skeleton = [
             ("official-spire", "spire"),
+            ("official-window-section", "window_section"),
             ("official-adventure-section", "adventure_section"),
             ("official-landing", "landing"),
             ("official-challenge-section", "challenge_section"),
@@ -123,6 +124,7 @@ class TowerDesignService:
     # The repeating floor unit appended by "Add storey": an adventure section and
     # a challenge section, each capped by a walkable landing.
     _STOREY_FLOOR = [
+        ("official-window-section", "window_section"),
         ("official-adventure-section", "adventure_section"),
         ("official-landing", "landing"),
         ("official-challenge-section", "challenge_section"),

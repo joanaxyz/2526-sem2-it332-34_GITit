@@ -15,8 +15,26 @@ from django.core.cache import cache
 
 from assets.models import KIND_CHARACTER, KIND_MONSTER, KIND_TOWER_PIECE, Asset, TowerPieceAsset
 
-_CACHE_VERSION = 4
+_CACHE_VERSION = 5
 logger = logging.getLogger(__name__)
+
+
+def _inline_svg(asset) -> str | None:
+    """The piece's default SVG markup, read inline so the frontend can animate it
+    (vs. a flat ``<img>``). Returns ``None`` for non-SVG sprites or read errors.
+    Cached with the descriptor, so this file read happens only on cache rebuild.
+    """
+    sprite = next((s for s in asset.sprites.all() if s.action == "default"), None)
+    if sprite is None or not sprite.image:
+        return None
+    if not str(sprite.image.name or "").lower().endswith(".svg"):
+        return None
+    try:
+        with sprite.image.open("rb") as handle:
+            return handle.read().decode("utf-8")
+    except Exception as exc:  # pragma: no cover - storage/encoding edge cases
+        logger.warning("Could not inline SVG for %s: %s", asset.slug, exc)
+        return None
 
 
 def _cache_key(kind: str) -> str:
@@ -77,6 +95,10 @@ def asset_descriptor(asset: Asset) -> dict:
                 "interaction_zones": tower_piece.interaction_zones or {},
                 "state_variants": tower_piece.state_variants or {},
                 "svg_sanitized": tower_piece.svg_sanitized,
+                # Inline SVG + safe animation preset drive the data-driven
+                # renderer (PieceSvg): the art is styled/animated, not a flat img.
+                "svg": _inline_svg(asset),
+                "animation": config.get("animation"),
             }
     return payload
 

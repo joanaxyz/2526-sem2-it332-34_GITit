@@ -1,6 +1,111 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48">
-  <path d="M10 16 H210 L194 42 H26 Z" fill="#123049" stroke="#2df5ff" stroke-width="4" />
-  <path d="M24 16 H196" stroke="#9afcff" stroke-width="3" stroke-linecap="round" />
-  <path d="M42 28 H178" stroke="#17415f" stroke-width="6" stroke-linecap="round" />
-</svg>
+<svg data-piece-art="arcane-spire-v2" viewBox="0 0 592 73.28" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="rail" x="-30%" y="-150%" width="160%" height="400%">
+      <feDropShadow dx="0" dy="0" stdDeviation="6.5" flood-color="rgb(45,245,255)" flood-opacity="0.28"/>
+    </filter>
+    <filter id="soft" x="-30%" y="-150%" width="160%" height="400%">
+      <feDropShadow dx="0" dy="0" stdDeviation="4.2" flood-color="rgb(45,245,255)" flood-opacity="0.18"/>
+    </filter>
+    <filter id="keyGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="rgb(45,245,255)" flood-opacity="0.22"/>
+    </filter>
+    <linearGradient id="railTop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgb(10,34,54)" stop-opacity="0.99"/>
+      <stop offset="100%" stop-color="rgb(3,15,28)" stop-opacity="0.995"/>
+    </linearGradient>
+    <linearGradient id="railTopCrenel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgb(12,37,56)" stop-opacity="0.99"/>
+      <stop offset="100%" stop-color="rgb(4,16,30)" stop-opacity="0.995"/>
+    </linearGradient>
+    <linearGradient id="railBot" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgb(7,28,45)" stop-opacity="0.99"/>
+      <stop offset="100%" stop-color="rgb(2,12,23)" stop-opacity="0.998"/>
+    </linearGradient>
+    <linearGradient id="plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgb(6,24,39)" stop-opacity="0.98"/>
+      <stop offset="100%" stop-color="rgb(2,11,21)" stop-opacity="0.995"/>
+    </linearGradient>
+    <linearGradient id="merlon" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgb(14,42,64)" stop-opacity="0.99"/>
+      <stop offset="100%" stop-color="rgb(5,18,32)" stop-opacity="0.995"/>
+    </linearGradient>
+    <linearGradient id="beamBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgb(10,34,54)" stop-opacity="0.99"/>
+      <stop offset="100%" stop-color="rgb(3,15,28)" stop-opacity="0.995"/>
+    </linearGradient>
+    <linearGradient id="ledgeBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgb(7,28,45)" stop-opacity="0.99"/>
+      <stop offset="100%" stop-color="rgb(2,12,23)" stop-opacity="0.998"/>
+    </linearGradient>
+  </defs>
 
+  <g data-variant="regular">
+    <g>
+      <rect x="11.2" y="19.52" width="529.6" height="24" fill="url(#plate)"/>
+      <rect x="55.2" y="19.52" width="1" height="24" fill="rgba(45,245,255,0.36)"/>
+      <rect x="126.4" y="19.52" width="1" height="24" fill="rgba(45,245,255,0.36)"/>
+      <rect x="197.6" y="19.52" width="1" height="24" fill="rgba(45,245,255,0.36)"/>
+      <rect x="268.8" y="19.52" width="1" height="24" fill="rgba(45,245,255,0.36)"/>
+      <rect x="340" y="19.52" width="1" height="24" fill="rgba(45,245,255,0.36)"/>
+      <rect x="411.2" y="19.52" width="1" height="24" fill="rgba(45,245,255,0.36)"/>
+      <rect x="482.4" y="19.52" width="1" height="24" fill="rgba(45,245,255,0.36)"/>
+      <path d="M11.2 19.52 V43.52 H540.8 V19.52" fill="none" stroke="rgba(45,245,255,0.82)" stroke-width="1.5"/>
+      <rect x="11.2" y="19.52" width="529.6" height="1" fill="rgba(45,245,255,0.32)"/>
+    </g>
+    <g filter="url(#rail)">
+      <rect x="-3.2" y="2.24" width="558.4" height="21.44" fill="url(#railTop)" stroke="rgba(45,245,255,0.94)" stroke-width="2"/>
+      <rect x="-3.2" y="18.3" width="558.4" height="5.4" fill="rgba(0,0,0,0.22)"/>
+    </g>
+    <g filter="url(#rail)">
+      <path d="M4.45 39.04 L547.55 39.04 L560.64 56.96 L-8.64 56.96 Z" fill="url(#railBot)"/>
+      <path d="M4.45 39.04 L-8.64 56.96 L560.64 56.96 L547.55 39.04" fill="none" stroke="rgba(45,245,255,0.9)" stroke-width="2"/>
+    </g>
+  </g>
+
+  <g data-variant="after-challenges">
+    <g filter="url(#soft)">
+      <rect x="12.48" y="26.56" width="567.04" height="24.64" fill="url(#plate)" stroke="rgba(45,245,255,0.82)" stroke-width="1.5"/>
+      <rect x="264" y="26.56" width="1" height="24.64" fill="rgba(45,245,255,0.28)"/>
+      <rect x="328" y="26.56" width="1" height="24.64" fill="rgba(45,245,255,0.28)"/>
+    </g>
+    <g filter="url(#rail)">
+      <rect x="-1.28" y="12.48" width="594.56" height="17.28" fill="url(#railTopCrenel)" stroke="rgba(45,245,255,0.96)" stroke-width="2"/>
+    </g>
+    <g filter="url(#soft)" fill="url(#merlon)" stroke="rgba(45,245,255,0.96)" stroke-width="2">
+      <path d="M6.72 15.36 V0.8 H38.72 V15.36"/>
+      <path d="M75.04 15.36 V0.8 H107.04 V15.36"/>
+      <path d="M143.36 15.36 V0.8 H175.36 V15.36"/>
+      <path d="M211.68 15.36 V0.8 H243.68 V15.36"/>
+      <path d="M280 15.36 V0.8 H312 V15.36"/>
+      <path d="M348.32 15.36 V0.8 H380.32 V15.36"/>
+      <path d="M416.64 15.36 V0.8 H448.64 V15.36"/>
+      <path d="M484.96 15.36 V0.8 H516.96 V15.36"/>
+      <path d="M553.28 15.36 V0.8 H585.28 V15.36"/>
+    </g>
+    <g filter="url(#rail)">
+      <path d="M-0.45 48 L592.45 48 L603.52 69.44 L-11.52 69.44 Z" fill="url(#railBot)"/>
+      <path d="M-0.45 48 L-11.52 69.44 L603.52 69.44 L592.45 48" fill="none" stroke="rgba(45,245,255,0.9)" stroke-width="2"/>
+    </g>
+  </g>
+
+  <g data-variant="tome">
+    <g filter="url(#rail)">
+      <rect x="-3.2" y="0" width="486.4" height="31.2" fill="url(#beamBody)" stroke="rgba(45,245,255,0.94)" stroke-width="2"/>
+      <rect x="55.2" y="0" width="1" height="31.2" fill="rgba(45,245,255,0.2)"/>
+      <rect x="126.4" y="0" width="1" height="31.2" fill="rgba(45,245,255,0.2)"/>
+      <rect x="197.6" y="0" width="1" height="31.2" fill="rgba(45,245,255,0.2)"/>
+      <rect x="268.8" y="0" width="1" height="31.2" fill="rgba(45,245,255,0.2)"/>
+      <rect x="340" y="0" width="1" height="31.2" fill="rgba(45,245,255,0.2)"/>
+      <rect x="411.2" y="0" width="1" height="31.2" fill="rgba(45,245,255,0.2)"/>
+    </g>
+    <g filter="url(#rail)">
+      <path d="M2.08 30.88 L477.92 30.88 L489.92 46.08 L-9.92 46.08 Z" fill="url(#ledgeBody)"/>
+      <path d="M2.08 30.88 L-9.92 46.08 L489.92 46.08 L477.92 30.88" fill="none" stroke="rgba(45,245,255,0.9)" stroke-width="2"/>
+    </g>
+    <g filter="url(#keyGlow)" transform="translate(217.6 -5.6) scale(0.8)">
+      <path d="M4 1 H52 L45 45 H11 Z" fill="#0a2238" stroke="rgba(45,245,255,0.94)" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M28 14 C25 11.6 20.4 11.1 16.6 12.4 L16.6 27 C20.4 25.7 25 26.2 28 28.6 C31 26.2 35.6 25.7 39.4 27 L39.4 12.4 C35.6 11.1 31 11.6 28 14 Z" fill="rgba(2,12,22,0.6)" stroke="rgba(45,245,255,0.62)" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M28 14 V28.6" stroke="rgba(45,245,255,0.45)" stroke-width="1.3"/>
+    </g>
+  </g>
+</svg>

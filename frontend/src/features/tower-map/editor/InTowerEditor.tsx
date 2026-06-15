@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Copy, Eye, Layers, Maximize2, Minus, Plus, Share2, UploadCloud } from 'lucide-react'
 
 import { EditorStorey } from '@/features/tower-designs/components/EditorStorey'
-import { PiecePalette } from '@/features/tower-designs/components/PiecePalette'
+import { PiecePalette, type PaletteDragPayload } from '@/features/tower-designs/components/PiecePalette'
 import { PieceInspector } from '@/features/tower-designs/components/PieceInspector'
 import { UploadAssetDialog } from '@/features/tower-designs/components/UploadAssetDialog'
 import { pieceIdFromInstance } from '@/features/tower-designs/editorUtils'
@@ -149,6 +149,19 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit: 
 
   const previewAssetId = selectedPieceId !== null ? pendingSwaps.get(selectedPieceId) ?? null : null
 
+  // Click-to-apply: with a slot selected, clicking a same-type palette piece
+  // stages it as a preview (Apply commits). Drag-and-drop still works too.
+  const selectedPiece =
+    selectedPieceId === null
+      ? null
+      : overview.tower_layout.pieces.find((p) => pieceIdFromInstance(p.instanceId) === selectedPieceId) ?? null
+
+  function pickFromPalette(payload: PaletteDragPayload) {
+    if (payload.source !== 'palette-piece' || selectedPieceId === null) return
+    if (!selectedPiece || selectedPiece.pieceType !== payload.pieceType) return
+    pickSwap(selectedPieceId, payload.assetId)
+  }
+
   return (
     <div className="in-tower-editor">
       <header className="ite-bar">
@@ -276,6 +289,8 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit: 
             pieces={editor.pieceDescriptors}
             artifacts={editor.artifactDescriptors}
             onUploadClick={() => setUploadOpen(true)}
+            selectedPieceType={selectedPiece?.pieceType ?? null}
+            onPickPiece={pickFromPalette}
           />
           {selectedPieceId !== null ? (
             <PieceInspector
@@ -300,6 +315,7 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit: 
             editor.placeArtifact.mutate({ target_piece_instance_id: pieceId, artifact_asset_id: assetId, x, y })
           }
           onMoveArtifact={(placementId, x, y) => editor.updateArtifact.mutate({ placementId, x, y })}
+          onUpdateArtifact={(placementId, patch) => editor.updateArtifact.mutate({ placementId, ...patch })}
           onDeleteArtifact={(placementId) => editor.deleteArtifact.mutate(placementId)}
           onClose={() => setSectionPieceId(null)}
         />

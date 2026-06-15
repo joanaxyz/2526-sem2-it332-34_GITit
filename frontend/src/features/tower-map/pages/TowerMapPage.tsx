@@ -563,15 +563,19 @@ export function TowerMapPage() {
             ) : (
               <TowerStoreys storeys={storeys} mountedCount={mountedCount} onGrow={growTower} />
             )}
+
+            {/* Companion sprite. He lives INSIDE the stage grid (its own stacking
+                context) so the tower's crenel parapets can paint above him — he
+                stands in front of walls/ledges but tucks his feet behind the
+                battlements. The controller anchors to `parentElement` (this
+                section) for coordinates + clicks, so it stays self-consistent. */}
+            {activeCharacter ? <TowerCharacter character={activeCharacter} /> : null}
           </section>
 
           {/* Near clouds drift in FRONT of the tower so the sky isn't all hidden behind it. */}
           <div className="tower-cloudfield tower-cloudfield--front" aria-hidden="true">
             {(['near'] as const).map(renderCloudLayer)}
           </div>
-
-          {/* Companion sprite - must stay a direct child of the page shell. */}
-          {activeCharacter ? <TowerCharacter character={activeCharacter} /> : null}
         </>
       )}
     </div>

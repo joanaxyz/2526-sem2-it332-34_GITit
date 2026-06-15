@@ -1,7 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 240">
-  <path d="M24 232 V44 L54 16 H246 L276 44 V232 Z" fill="#111d3a" stroke="#c084fc" stroke-width="4" />
-  <path d="M46 212 H254" stroke="#2df5ff" stroke-width="5" stroke-linecap="round" />
-  <path d="M62 194 V118 C62 94 82 82 96 82 C110 82 130 94 130 118 V194 Z" fill="#251846" stroke="#c084fc" stroke-width="2" />
-  <path d="M170 194 V118 C170 94 190 82 204 82 C218 82 238 94 238 118 V194 Z" fill="#251846" stroke="#c084fc" stroke-width="2" />
+<svg data-piece-art="arcane-spire-v2" viewBox="0 0 368 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a2236"/>
+      <stop offset="70%" stop-color="#081b2f"/>
+      <stop offset="100%" stop-color="#050f1d"/>
+    </linearGradient>
+    <linearGradient id="accentWash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="rgba(217,145,255,0.16)"/>
+      <stop offset="45%" stop-color="rgba(45,245,255,0)"/>
+      <stop offset="100%" stop-color="rgba(45,245,255,0.08)"/>
+    </linearGradient>
+  </defs>
+  <rect x="1.25" y="1.25" width="365.5" height="197.5" fill="url(#wall)" stroke="rgba(45,245,255,0.92)" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+  <rect x="1.25" y="1.25" width="365.5" height="197.5" fill="url(#accentWash)" vector-effect="non-scaling-stroke"/>
+  <rect x="3.25" y="3.25" width="361.5" height="193.5" fill="none" stroke="rgba(5,14,24,0.55)" stroke-width="2" vector-effect="non-scaling-stroke"/>
+  <line x1="10.4" y1="19.2" x2="10.4" y2="189.6" stroke="rgba(217,145,255,0.2)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <line x1="357.6" y1="19.2" x2="357.6" y2="189.6" stroke="rgba(217,145,255,0.2)" stroke-width="1" vector-effect="non-scaling-stroke"/>
 </svg>
-

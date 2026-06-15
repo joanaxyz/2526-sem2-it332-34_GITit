@@ -1,0 +1,48 @@
+<svg data-piece-art="arcane-spire-v3" viewBox="0 0 480 140" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cyanGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feDropShadow dx="0" dy="0" stdDeviation="9" flood-color="rgb(45,245,255)" flood-opacity="0.28"/>
+    </filter>
+    <filter id="cyanSoft" x="-80%" y="-80%" width="260%" height="260%">
+      <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="rgb(45,245,255)" flood-opacity="0.4"/>
+    </filter>
+    <filter id="goldGlow" x="-90%" y="-90%" width="280%" height="280%">
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="rgb(255,203,109)" flood-opacity="0.55"/>
+    </filter>
+    <linearGradient id="wallBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a2236"/>
+      <stop offset="72%" stop-color="#081b2f"/>
+      <stop offset="100%" stop-color="#040f1d"/>
+    </linearGradient>
+    <linearGradient id="paneGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd885"/>
+      <stop offset="100%" stop-color="#f1bb63"/>
+    </linearGradient>
+    <linearGradient id="beltBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgb(11,32,50)"/>
+      <stop offset="100%" stop-color="rgb(5,18,32)"/>
+    </linearGradient>
+    <pattern id="beltStripes" width="38.4" height="25.6" patternUnits="userSpaceOnUse">
+      <rect width="38.4" height="25.6" fill="url(#beltBody)"/>
+      <rect width="1" height="25.6" fill="rgba(45,245,255,0.22)"/>
+    </pattern>
+  </defs>
+
+  <g filter="url(#cyanGlow)">
+    <rect x="36" y="0" width="408" height="104" fill="url(#wallBody)" stroke="rgba(45,245,255,0.92)" stroke-width="2.5"/>
+  </g>
+
+  <path d="M162,42.8 A18.8 18.8 0 0 1 199.6,42.8 L199.6,84 Q199.6,87.2 196.4,87.2 L165.2,87.2 Q162,87.2 162,84 Z" fill="#061321" stroke="rgba(45,245,255,0.92)" stroke-width="2.5"/>
+  <path d="M221.2,42.8 A18.8 18.8 0 0 1 258.8,42.8 L258.8,84 Q258.8,87.2 255.6,87.2 L224.4,87.2 Q221.2,87.2 221.2,84 Z" fill="#061321" stroke="rgba(45,245,255,0.92)" stroke-width="2.5"/>
+  <path d="M280.4,42.8 A18.8 18.8 0 0 1 318,42.8 L318,84 Q318,87.2 314.8,87.2 L283.6,87.2 Q280.4,87.2 280.4,84 Z" fill="#061321" stroke="rgba(45,245,255,0.92)" stroke-width="2.5"/>
+  <g filter="url(#goldGlow)">
+    <path d="M168,43.5 A12.8 12.8 0 0 1 193.6,43.5 L193.6,79.4 Q193.6,81.4 191.6,81.4 L170,81.4 Q168,81.4 168,79.4 Z" fill="url(#paneGold)"/>
+    <path d="M227.2,43.5 A12.8 12.8 0 0 1 252.8,43.5 L252.8,79.4 Q252.8,81.4 250.8,81.4 L229.2,81.4 Q227.2,81.4 227.2,79.4 Z" fill="url(#paneGold)"/>
+    <path d="M286.4,43.5 A12.8 12.8 0 0 1 312,43.5 L312,79.4 Q312,81.4 310,81.4 L288.4,81.4 Q286.4,81.4 286.4,79.4 Z" fill="url(#paneGold)"/>
+  </g>
+
+  <g filter="url(#cyanSoft)">
+    <rect x="20" y="101.6" width="440" height="25.6" fill="url(#beltStripes)" stroke="rgba(45,245,255,0.9)" stroke-width="2.5"/>
+  </g>
+  <path d="M31.5 124.8 H448.5 V138.2 H31.5 Z" fill="rgba(6,18,31,0.98)" stroke="rgba(45,245,255,0.76)" stroke-width="2"/>
+</svg>

@@ -8,6 +8,7 @@ from assets.models import (
     TOWER_PIECE_LANDING,
     TOWER_PIECE_SPIRE,
     TOWER_PIECE_TOME,
+    TOWER_PIECE_WINDOW_SECTION,
 )
 from challenges.models import Challenge, ChallengeLevel, ChallengeRun
 from challenges.selectors import (
@@ -26,6 +27,7 @@ from curriculum.models import CommandForm, CommandSkill, LibraryEntry, Storey, T
 
 OFFICIAL_TOWER_ASSET_SLUGS = {
     TOWER_PIECE_SPIRE: "official-spire",
+    TOWER_PIECE_WINDOW_SECTION: "official-window-section",
     TOWER_PIECE_LANDING: "official-landing",
     TOWER_PIECE_ADVENTURE_SECTION: "official-adventure-section",
     TOWER_PIECE_CHALLENGE_SECTION: "official-challenge-section",
@@ -227,6 +229,11 @@ def tower_layout_payload(
             storey_id=storey_id,
             name="spire",
             piece_type=TOWER_PIECE_SPIRE,
+        ),
+        _tower_piece(
+            storey_id=storey_id,
+            name="window-section",
+            piece_type=TOWER_PIECE_WINDOW_SECTION,
         )
     ]
 

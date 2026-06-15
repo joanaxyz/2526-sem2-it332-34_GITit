@@ -92,10 +92,17 @@ export function PiecePalette({
   pieces,
   artifacts,
   onUploadClick,
+  selectedPieceType = null,
+  onPickPiece,
 }: {
   pieces: TowerPieceAssetDescriptor[]
   artifacts: TowerArtifactAssetDescriptor[]
   onUploadClick?: () => void
+  /** The structural type of the currently selected slot, so the palette can
+   *  highlight pieces that can be applied to it by a click. */
+  selectedPieceType?: TowerPieceType | null
+  /** Click-to-apply: pick a piece for the selected slot (no drag needed). */
+  onPickPiece?: (payload: PaletteDragPayload) => void
 }) {
   const items = useMemo(() => buildItems(pieces, artifacts), [pieces, artifacts])
 
@@ -155,7 +162,10 @@ export function PiecePalette({
         {/* Single dynamic label: reflects the hovered/focused piece, replacing
             per-row labels so the grid stays compact. */}
         <p className="editor-palette-active" aria-live="polite">
-          {activeLabel ?? 'Hover a piece to see its name — drag it onto a matching slot.'}
+          {activeLabel ??
+            (selectedPieceType
+              ? `Click a ${PIECE_TYPE_LABEL[selectedPieceType]} below to swap the selected slot.`
+              : 'Select a slot in the tower, then click a piece to apply it (or drag it on).')}
         </p>
       </header>
 
@@ -195,15 +205,20 @@ export function PiecePalette({
       </div>
 
       <div className="editor-palette-grid">
-        {visible.map((item) => (
+        {visible.map((item) => {
+          const applicable = selectedPieceType != null && item.group === selectedPieceType
+          return (
           <button
             type="button"
             key={`${item.group}:${item.slug}`}
-            className={cn('editor-palette-cell', `is-${item.assetSource}`)}
+            className={cn('editor-palette-cell', `is-${item.assetSource}`, applicable && 'is-applicable')}
             draggable
             title={item.label}
-            aria-label={item.label}
+            aria-label={applicable ? `Apply ${item.label} to the selected slot` : item.label}
             onDragStart={(event) => setDrag(event, item.payload)}
+            onClick={() => {
+              if (applicable && onPickPiece) onPickPiece(item.payload)
+            }}
             onMouseEnter={() => setActiveLabel(item.label)}
             onFocus={() => setActiveLabel(item.label)}
             onMouseLeave={() => setActiveLabel(null)}
@@ -218,7 +233,8 @@ export function PiecePalette({
               </span>
             ) : null}
           </button>
-        ))}
+          )
+        })}
         {visible.length === 0 ? (
           <p className="editor-palette-empty">No pieces match these filters.</p>
         ) : null}

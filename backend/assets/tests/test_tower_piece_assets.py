@@ -1,13 +1,16 @@
 import pytest
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 
 from assets.descriptors import clear_descriptor_cache, descriptor_map
 from assets.models import (
     KIND_MONSTER,
     KIND_TOWER_ARTIFACT,
     KIND_TOWER_PIECE,
+    TOWER_PIECE_DOOR,
     TOWER_PIECE_LANDING,
     Asset,
+    AssetSprite,
     TowerPieceAsset,
 )
 
@@ -56,7 +59,38 @@ def test_tower_piece_descriptor_includes_piece_metadata():
         "interaction_zones": {},
         "state_variants": {},
         "svg_sanitized": True,
+        "svg": None,
+        "animation": None,
     }
+
+
+@pytest.mark.django_db
+def test_tower_piece_descriptor_serves_inline_svg_and_animation(tmp_path, settings):
+    settings.MEDIA_ROOT = tmp_path
+    clear_descriptor_cache()
+    asset = Asset.objects.create(
+        kind=KIND_TOWER_PIECE,
+        slug="official-door",
+        label="Arcane Door",
+        config={"animation": {"preset": "swing-single"}},
+    )
+    TowerPieceAsset.objects.create(
+        asset=asset,
+        piece_type=TOWER_PIECE_DOOR,
+        view_box="0 0 120 160",
+        svg_sanitized=True,
+    )
+    markup = b'<svg viewBox="0 0 120 160"><path data-role="leaf"/></svg>'
+    sprite = AssetSprite(asset=asset, action="default", frame_width=120, frame_height=160, fps=1)
+    sprite.image.save("official-door__default.svg", ContentFile(markup), save=True)
+
+    tower_piece = descriptor_map(KIND_TOWER_PIECE)["official-door"]["tower_piece"]
+
+    # The SVG is served inline (so it can be animated) with its data-role parts,
+    # and the safe animation preset rides alongside it.
+    assert tower_piece["svg"] is not None
+    assert 'data-role="leaf"' in tower_piece["svg"]
+    assert tower_piece["animation"] == {"preset": "swing-single"}
 
 
 def test_clear_descriptor_cache_tolerates_cache_backend_failure(monkeypatch):

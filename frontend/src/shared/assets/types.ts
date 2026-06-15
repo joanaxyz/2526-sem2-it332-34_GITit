@@ -66,11 +66,24 @@ export type CharacterAssetDescriptor = BaseAssetDescriptor<'character'> & {
 
 export type TowerPieceType =
   | 'spire'
+  | 'window_section'
   | 'landing'
   | 'door'
   | 'adventure_section'
   | 'challenge_section'
   | 'tome'
+
+/** Safe, named animation presets (no user code is ever executed).
+ *  `swing-open` = double-panel door (two leaves); `swing-single` = one panel. */
+export type PiecePreset = 'none' | 'swing-open' | 'swing-single' | 'slide-up' | 'fade' | 'pulse'
+
+export type PieceAnimationConfig = {
+  preset: PiecePreset
+  /** Animation duration in ms (preset default used when omitted). */
+  durationMs?: number
+  /** CSS easing (preset default used when omitted). */
+  easing?: string
+}
 
 export type TowerPieceAssetDetail = {
   piece_type: TowerPieceType
@@ -80,6 +93,12 @@ export type TowerPieceAssetDetail = {
   interaction_zones: Record<string, unknown>
   state_variants: Record<string, unknown>
   svg_sanitized: boolean
+  /** Inline (sanitized) SVG markup for the piece. Served inline — not as an
+   *  <img> — so the art can be styled/animated. Parts are tagged with
+   *  `data-role` so animation presets know what to move. */
+  svg?: string
+  /** Named animation preset + params; interpreted by the platform, never code. */
+  animation?: PieceAnimationConfig
 }
 
 export type TowerPieceAssetDescriptor = BaseAssetDescriptor<'tower_piece'> & {
@@ -124,4 +143,3 @@ export type AssetDescriptorResponse = {
   kind: AssetKind
   results: Record<string, AssetDescriptor>
 }
-

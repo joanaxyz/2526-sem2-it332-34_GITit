@@ -61,6 +61,7 @@ def test_storey_overview_bundles_adventure_tomes_and_challenges(db, django_user_
     assert overview["tower_layout"]["storeyId"] == storey.id
     assert [piece["pieceType"] for piece in overview["tower_layout"]["pieces"]] == [
         "spire",
+        "window_section",
         "tome",
         "landing",
         "adventure_section",
@@ -68,10 +69,10 @@ def test_storey_overview_bundles_adventure_tomes_and_challenges(db, django_user_
         "challenge_section",
         "landing",
     ]
-    tome_piece = overview["tower_layout"]["pieces"][1]
+    tome_piece = overview["tower_layout"]["pieces"][2]
     assert tome_piece["assetSlug"] == "official-tome"
     assert tome_piece["contentBinding"] == {"kind": "tome", "id": overview["tomes"][0]["id"]}
-    adventure_piece = overview["tower_layout"]["pieces"][3]
+    adventure_piece = overview["tower_layout"]["pieces"][4]
     assert adventure_piece["contentBinding"] == {
         "kind": "adventure",
         "id": overview["command_adventure"]["id"],

@@ -41,6 +41,13 @@ ARTIFACTS_ROOT = SEED_ASSETS_ROOT
 class Command(BaseCommand):
     help = "Seed official monster (and future) visual assets from committed sheets."
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--skip-grant",
+            action="store_true",
+            help="Don't backfill newly-seeded default-kit assets into existing players' registries.",
+        )
+
     def handle(self, *args, **options):
         if not MONSTERS_ROOT.exists():
             raise CommandError(f"Missing monster sprite dir: {MONSTERS_ROOT}")
@@ -60,6 +67,23 @@ class Command(BaseCommand):
                 f"{tower_piece_count} tower pieces ({tower_piece_stale} retired)."
             )
         )
+        if not options.get("skip_grant"):
+            self._backfill_default_kit()
+
+    def _backfill_default_kit(self) -> None:
+        """Grant the (re)seeded default kit to existing players. Adding a piece to
+        the Arcane Spire kit (e.g. the window section / portcullis) would otherwise
+        only reach new sign-ups; this keeps existing authors' palettes in sync.
+        Idempotent — only missing entitlements are created (see ``grant_default_assets``).
+        """
+        from django.contrib.auth import get_user_model
+
+        from assets.services import grant_default_assets
+
+        granted = 0
+        for user in get_user_model().objects.filter(is_staff=False).iterator():
+            granted += grant_default_assets(user)
+        self.stdout.write(self.style.SUCCESS(f"Backfilled {granted} default-kit entitlements."))
 
     def _seed_monsters(self) -> tuple[int, int]:
         seeded_slugs: list[str] = []
@@ -238,6 +262,11 @@ class Command(BaseCommand):
                 sprite.save()
 
     def _seed_tower_piece(self, spec: dict) -> None:
+        # Animation is a safe, named preset (+ params) — never user code. It rides
+        # in config so the descriptor can serve it alongside the inline SVG.
+        config: dict = {}
+        if spec.get("animation"):
+            config["animation"] = spec["animation"]
         asset, _ = Asset.objects.update_or_create(
             slug=spec["slug"],
             defaults={
@@ -246,7 +275,7 @@ class Command(BaseCommand):
                 "label": spec["label"],
                 "default_scale": 1.0,
                 "tags": spec.get("tags", []),
-                "config": {},
+                "config": config,
                 "is_published": True,
             },
         )
