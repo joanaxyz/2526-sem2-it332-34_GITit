@@ -162,6 +162,9 @@ export function useDesignEditor(designId: number) {
     isLoading: layoutQuery.isLoading,
     isError: layoutQuery.isError,
     error: layoutQuery.error,
+    /** Await a fresh layout — used after Apply so staged edits are cleared only
+     *  once the server values have landed (no flash back to the old transform). */
+    refetchLayout: () => layoutQuery.refetch(),
     pieceDescriptors,
     pieceDescriptorBySlug,
     artifactDescriptors,

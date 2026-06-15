@@ -141,13 +141,13 @@ function canonicalTowerLayout(storeyId: number) {
     pieces: [
       { instanceId: `storey-${storeyId}-crown`, assetSlug: 'official-crown', pieceType: 'crown' },
       {
-        instanceId: `storey-${storeyId}-tome-section-${CANONICAL_TOME.id}`,
-        assetSlug: 'official-hall-section',
+        instanceId: `storey-${storeyId}-window-section`,
+        assetSlug: 'official-window-section',
         pieceType: 'section',
       },
       {
-        instanceId: `storey-${storeyId}-landing-after-tomes`,
-        assetSlug: 'official-tome-landing',
+        instanceId: `storey-${storeyId}-landing-after-window`,
+        assetSlug: 'official-landing',
         pieceType: 'landing',
       },
       {
@@ -175,12 +175,37 @@ function canonicalTowerLayout(storeyId: number) {
 }
 
 function canonicalArtifacts(storeyId: number, includeTome = true) {
+  const challengeArtifacts = CANONICAL_CHALLENGE.levels.map((level, index) => ({
+    id: `storey-${storeyId}-artifact-challenge-${CANONICAL_CHALLENGE.id}-${level.difficulty}`,
+    targetInstanceId: `storey-${storeyId}-challenge-section-${CANONICAL_CHALLENGE.id}`,
+    assetSlug:
+      level.difficulty === 'easy'
+        ? 'official-trial-gate-easy-artifact'
+        : level.difficulty === 'hard'
+          ? 'official-trial-gate-hard-artifact'
+          : 'official-portcullis-artifact',
+    role: 'challenge',
+    contentBinding: {
+      kind: 'challenge',
+      id: CANONICAL_CHALLENGE.id,
+      levelId: level.id,
+      difficulty: level.difficulty,
+    },
+    x: [112, 184, 256][index] ?? 184,
+    y: 124,
+    scale: 1,
+    width: 62,
+    height: 94,
+    rotation: 0,
+    anchor: '',
+    zIndex: 12 + index,
+  }))
   return [
     ...(includeTome
       ? [
           {
             id: `storey-${storeyId}-artifact-tome-${CANONICAL_TOME.id}`,
-            targetInstanceId: `storey-${storeyId}-tome-section-${CANONICAL_TOME.id}`,
+            targetInstanceId: `storey-${storeyId}-window-section`,
             assetSlug: 'official-tome-artifact',
             role: 'tome',
             contentBinding: { kind: 'tome', id: CANONICAL_TOME.id },
@@ -210,21 +235,7 @@ function canonicalArtifacts(storeyId: number, includeTome = true) {
       anchor: '',
       zIndex: 12,
     },
-    {
-      id: `storey-${storeyId}-artifact-challenge-${CANONICAL_CHALLENGE.id}`,
-      targetInstanceId: `storey-${storeyId}-challenge-section-${CANONICAL_CHALLENGE.id}`,
-      assetSlug: 'official-portcullis-artifact',
-      role: 'challenge',
-      contentBinding: { kind: 'challenge', id: CANONICAL_CHALLENGE.id },
-      x: 184,
-      y: 124,
-      scale: 1,
-      width: 90,
-      height: 132,
-      rotation: 0,
-      anchor: '',
-      zIndex: 12,
-    },
+    ...challengeArtifacts,
   ] as const
 }
 
@@ -280,7 +291,9 @@ function mockTowerPieceDescriptors() {
             kind: 'tower_artifact',
             results: {
               'official-gate-artifact': towerArtifactDescriptor('official-gate-artifact'),
+              'official-trial-gate-easy-artifact': towerArtifactDescriptor('official-trial-gate-easy-artifact'),
               'official-portcullis-artifact': towerArtifactDescriptor('official-portcullis-artifact'),
+              'official-trial-gate-hard-artifact': towerArtifactDescriptor('official-trial-gate-hard-artifact'),
               'official-tome-artifact': towerArtifactDescriptor('official-tome-artifact'),
             },
           }
@@ -290,6 +303,7 @@ function mockTowerPieceDescriptors() {
               'official-crown': towerPieceDescriptor('official-crown', 'crown'),
               'official-hall-section': towerPieceDescriptor('official-hall-section', 'section'),
               'official-trial-section': towerPieceDescriptor('official-trial-section', 'section'),
+              'official-window-section': towerPieceDescriptor('official-window-section', 'section'),
               'official-landing': towerPieceDescriptor('official-landing', 'landing', {
                 walk_rail: { x1: 18, y1: 18, x2: 202, y2: 18 },
               }),
@@ -368,6 +382,12 @@ describe('TowerStoreySection', () => {
     expect(
       screen.getByRole('button', { name: /select compose clean history: easy/i }),
     ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /select compose clean history: medium/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /select compose clean history: hard/i }),
+    ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /select command adventure/i })).toHaveAttribute(
       'data-piece-id',
       'storey-2-adventure-section',
@@ -416,7 +436,7 @@ describe('TowerStoreySection', () => {
     await waitFor(() => expect(screen.getByText('The four places')).toBeInTheDocument())
   })
 
-  it('does not render a tome section when the storey has no authored tome', async () => {
+  it('does not render a tome artifact when the storey has no authored tome', async () => {
     mocks.getStoreyOverview.mockImplementation((storeyId: number) =>
       Promise.resolve({
         storey_id: storeyId,
@@ -425,11 +445,7 @@ describe('TowerStoreySection', () => {
         challenges: [CANONICAL_CHALLENGE],
         tower_layout: {
           storeyId,
-          pieces: canonicalTowerLayout(storeyId).pieces.filter(
-            (piece) =>
-              !piece.instanceId.includes('tome-section') &&
-              !piece.instanceId.includes('landing-after-tomes'),
-          ),
+          pieces: canonicalTowerLayout(storeyId).pieces,
         },
         artifacts: canonicalArtifacts(storeyId, false),
       }),

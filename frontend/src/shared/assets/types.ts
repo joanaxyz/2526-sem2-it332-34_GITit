@@ -113,6 +113,8 @@ export type AssetDescriptor =
 export type TowerContentBinding = {
   kind: 'adventure' | 'challenge' | 'tome'
   id: number | string
+  levelId?: number | string
+  difficulty?: string
 }
 
 export type TowerLayoutPieceDescriptor = {

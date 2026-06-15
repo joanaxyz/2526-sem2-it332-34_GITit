@@ -387,7 +387,7 @@ function PlayableArtifact({
   if (role === 'challenge') {
     const challenge = findContent(challenges, artifact.contentBinding?.id)
     if (!challenge) return null
-    const level = preferredChallengeLevel(challenge.levels, challengesLocked)
+    const level = challengeLevelForArtifact(challenge, artifact.contentBinding, challengesLocked)
     if (!level) return null
     const challengeIndex = challenges.findIndex((item) => item.id === challenge.id)
     const isCurrent = isSelected(selected, {
@@ -443,6 +443,20 @@ function preferredChallengeLevel(levels: ChallengeLevelAccess[], locked: boolean
     levels.find((level) => level.status !== 'locked') ??
     levels[0]
   )
+}
+
+function challengeLevelForArtifact(
+  challenge: ChallengeSummary,
+  binding: ArtifactPlacementDescriptor['contentBinding'] | undefined | null,
+  locked: boolean,
+) {
+  const boundLevel =
+    binding?.levelId !== undefined
+      ? challenge.levels.find((level) => String(level.id) === String(binding.levelId))
+      : binding?.difficulty
+        ? challenge.levels.find((level) => String(level.difficulty) === String(binding.difficulty))
+        : null
+  return boundLevel ?? preferredChallengeLevel(challenge.levels, locked)
 }
 
 function findContent<T extends { id: number | string }>(items: T[], id: number | string | undefined) {

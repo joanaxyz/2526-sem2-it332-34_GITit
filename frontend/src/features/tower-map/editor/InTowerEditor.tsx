@@ -216,6 +216,9 @@ export function InTowerEditor({
         jobs.push(editor.updateArtifact.mutateAsync({ placementId, ...edit }))
       }
       await Promise.all(jobs)
+      // Clear the overlay only after fresh layout lands, so the canvas never
+      // flashes back to the pre-apply transform between commit and refetch.
+      await editor.refetchLayout()
       discardChanges()
     } finally {
       setApplying(false)

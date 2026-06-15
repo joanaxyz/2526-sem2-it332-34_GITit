@@ -11,12 +11,21 @@ from __future__ import annotations
 
 import logging
 
+from django.conf import settings
 from django.core.cache import cache
 
 from assets.models import KIND_CHARACTER, KIND_MONSTER, KIND_TOWER_PIECE, Asset, TowerPieceAsset
 
 _CACHE_VERSION = 6
 logger = logging.getLogger(__name__)
+
+# Production caches descriptors indefinitely (busted by `assets.signals` on write)
+# so the per-command submit hot path adds zero asset queries. In dev the cache is
+# a per-process LocMemCache, so a `seed_assets` run in a separate process can't
+# bust a running dev server's copy via signals - the map would stay stale (showing
+# pre-reseed slugs/art) until a manual restart. A short DEBUG-only TTL lets a
+# re-seed surface on its own within a few seconds.
+_DESCRIPTOR_CACHE_TTL = 10 if settings.DEBUG else None
 
 
 def _inline_svg(asset) -> str | None:
@@ -110,7 +119,7 @@ def descriptor_map(kind: str = KIND_MONSTER) -> dict[str, dict]:
         "tower_piece"
     ).prefetch_related("sprites")
     built = {asset.slug: asset_descriptor(asset) for asset in assets}
-    cache.set(key, built, timeout=None)
+    cache.set(key, built, timeout=_DESCRIPTOR_CACHE_TTL)
     return built
 
 

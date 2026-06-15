@@ -52,6 +52,5 @@ Thumbs.db
 # Project-specific generated folders
 md_files/
 
-# Claude Code local skills (memory under .claude/projects stays tracked)
-.claude/skills/
+# Agent skills are project assets and should remain trackable.
 git-it.zip

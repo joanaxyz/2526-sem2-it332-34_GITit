@@ -16,8 +16,9 @@ def tower_layout(
     adventure_landing: str = "official-landing",
     challenge_section: str = "official-trial-section",
     challenge_landing: str = "official-challenge-landing",
-    tome_section: str = "official-window-section",
-    tome_landing: str = "official-tome-landing",
+    window_section: str = "official-window-section",
+    window_landing: str = "official-landing",
+    tome_artifact: str = "official-tome-artifact",
 ) -> dict:
     """Asset-level visual defaults for one official storey.
 
@@ -29,10 +30,10 @@ def tower_layout(
     return {
         "crown": {"asset_slug": "official-crown"},
         "slots": {
-            "tome": {
-                "section_asset_slug": tome_section,
-                "landing_asset_slug": tome_landing,
-                "artifact_asset_slug": "official-tome-artifact",
+            "window": {
+                "section_asset_slug": window_section,
+                "landing_asset_slug": window_landing,
+                "artifact_asset_slug": tome_artifact,
                 "artifact": {"x": 184, "y": 112, "width": 96, "height": 88, "z_index": 12},
             },
             "adventure": {
@@ -44,8 +45,7 @@ def tower_layout(
             "challenge": {
                 "section_asset_slug": challenge_section,
                 "landing_asset_slug": challenge_landing,
-                "artifact_asset_slug": "official-portcullis-artifact",
-                "artifact": {"x": 184, "y": 124, "width": 90, "height": 132, "z_index": 12},
+                "artifact": {"y": 124, "width": 62, "height": 94, "z_index": 12},
             },
             "empty_challenge": {"section_asset_slug": challenge_section},
         },
@@ -63,7 +63,7 @@ STOREYS = [
         ),
         "mob_roster": ["slime", "skeleton", "archer"],
         "boss_roster": ["werebear"],
-        "tower_layout": tower_layout(adventure_section="official-window-section"),
+        "tower_layout": tower_layout(),
     },
     {
         "slug": "tracking-changes-snapshots",
@@ -74,7 +74,7 @@ STOREYS = [
         ),
         "mob_roster": ["skeleton", "archer", "skeleton-archer"],
         "boss_roster": ["werewolf"],
-        "tower_layout": tower_layout(tome_section="official-hall-section"),
+        "tower_layout": tower_layout(),
     },
     {
         "slug": "branching-switching",
@@ -85,7 +85,7 @@ STOREYS = [
         ),
         "mob_roster": ["archer", "skeleton-archer", "swordsman"],
         "boss_roster": ["elite-orc"],
-        "tower_layout": tower_layout(adventure_landing="official-tome-landing"),
+        "tower_layout": tower_layout(),
     },
     {
         "slug": "merging-conflicts",
@@ -96,7 +96,7 @@ STOREYS = [
         ),
         "mob_roster": ["skeleton-archer", "swordsman", "armored-orc"],
         "boss_roster": ["knight-templar"],
-        "tower_layout": tower_layout(challenge_section="official-window-section"),
+        "tower_layout": tower_layout(),
     },
     {
         "slug": "undoing-recovery",
@@ -107,7 +107,7 @@ STOREYS = [
         ),
         "mob_roster": ["swordsman", "armored-orc", "skeleton"],
         "boss_roster": ["wizard"],
-        "tower_layout": tower_layout(adventure_section="official-trial-section"),
+        "tower_layout": tower_layout(),
     },
     {
         "slug": "temporary-work-patches",
@@ -118,7 +118,7 @@ STOREYS = [
         ),
         "mob_roster": ["armored-orc", "swordsman", "skeleton-archer"],
         "boss_roster": ["priest"],
-        "tower_layout": tower_layout(challenge_landing="official-landing"),
+        "tower_layout": tower_layout(),
     },
     {
         "slug": "remotes-collaboration",
@@ -129,9 +129,6 @@ STOREYS = [
         ),
         "mob_roster": ["armored-orc", "swordsman", "archer"],
         "boss_roster": ["knight-templar", "wizard"],
-        "tower_layout": tower_layout(
-            adventure_section="official-window-section",
-            challenge_landing="official-tome-landing",
-        ),
+        "tower_layout": tower_layout(),
     },
 ]

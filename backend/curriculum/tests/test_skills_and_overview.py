@@ -5,6 +5,7 @@ selectors are exercised in isolation."""
 from django.contrib.auth.models import AnonymousUser
 from django.utils import timezone
 
+from challenges.models import Challenge, ChallengeLevel
 from command_adventures.models import AdventureRun, CommandAdventure
 from curriculum.models import CommandSkill, Storey, Tome
 from curriculum.selectors import learned_command_skills, storey_content_overview
@@ -73,14 +74,14 @@ def test_storey_overview_bundles_adventure_tomes_and_challenges(db, django_user_
         for piece in overview["tower_layout"]["pieces"]
         if piece["pieceType"] == "landing"
     ] == [
-        "official-tome-landing",
+        "official-landing",
         "official-landing",
         "official-challenge-landing",
     ]
     assert [artifact["role"] for artifact in overview["artifacts"]] == ["tome", "adventure"]
     tome_artifact = overview["artifacts"][0]
     assert tome_artifact["assetSlug"] == "official-tome-artifact"
-    assert tome_artifact["targetInstanceId"] == f"storey-{storey.id}-tome-section-{overview['tomes'][0]['id']}"
+    assert tome_artifact["targetInstanceId"] == f"storey-{storey.id}-window-section"
     assert tome_artifact["contentBinding"] == {"kind": "tome", "id": overview["tomes"][0]["id"]}
     adventure_artifact = overview["artifacts"][1]
     assert adventure_artifact["assetSlug"] == "official-gate-artifact"
@@ -88,3 +89,40 @@ def test_storey_overview_bundles_adventure_tomes_and_challenges(db, django_user_
         "kind": "adventure",
         "id": overview["command_adventure"]["id"],
     }
+
+
+def test_storey_overview_emits_challenge_artifact_per_difficulty(db, django_user_model):
+    user = django_user_model.objects.create_user(
+        username="u3", email="u3@example.com", password="pass12345"
+    )
+    storey = _storey(slug="s3", number=3)
+    CommandAdventure.objects.create(storey=storey, slug="s3-adv", title="Adv", description="d")
+    challenge = Challenge.objects.create(
+        storey=storey,
+        slug="challenge",
+        title="Challenge",
+        summary="d",
+    )
+    levels = [
+        ChallengeLevel.objects.create(challenge=challenge, difficulty=difficulty)
+        for difficulty in ("easy", "medium", "hard")
+    ]
+
+    overview = storey_content_overview(user=user, storey_id=storey.id)
+    challenge_artifacts = [
+        artifact for artifact in overview["artifacts"] if artifact["role"] == "challenge"
+    ]
+
+    assert [artifact["assetSlug"] for artifact in challenge_artifacts] == [
+        "official-trial-gate-easy-artifact",
+        "official-portcullis-artifact",
+        "official-trial-gate-hard-artifact",
+    ]
+    assert [artifact["contentBinding"]["difficulty"] for artifact in challenge_artifacts] == [
+        "easy",
+        "medium",
+        "hard",
+    ]
+    assert [artifact["contentBinding"]["levelId"] for artifact in challenge_artifacts] == [
+        level.id for level in levels
+    ]

@@ -29,11 +29,22 @@ OFFICIAL_TOWER_ASSET_SLUGS = {
     "hall_section": "official-hall-section",
     "tome_landing": "official-tome-landing",
     "trial_section": "official-trial-section",
+    "window_section": "official-window-section",
 }
 OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS = {
     "adventure": "official-gate-artifact",
     "challenge": "official-portcullis-artifact",
     "tome": "official-tome-artifact",
+}
+OFFICIAL_CHALLENGE_ARTIFACT_SLUGS = {
+    DIFFICULTY_EASY: "official-trial-gate-easy-artifact",
+    DIFFICULTY_MEDIUM: "official-portcullis-artifact",
+    DIFFICULTY_HARD: "official-trial-gate-hard-artifact",
+}
+OFFICIAL_CHALLENGE_ARTIFACT_X = {
+    DIFFICULTY_EASY: 112,
+    DIFFICULTY_MEDIUM: 184,
+    DIFFICULTY_HARD: 256,
 }
 
 
@@ -251,27 +262,31 @@ def tower_layout_payload(
     artifacts: list[dict] = []
 
     above_adventure_tomes = [tome for tome in tomes if tome.placement == "above_adventure"]
-    for tome in above_adventure_tomes:
-        section_name = f"tome-section-{tome.id}"
-        slot = _slot(layout_config, "tome")
-        pieces.append(
-            _tower_piece(
-                storey_id=storey_id,
-                name=section_name,
-                piece_type=TOWER_PIECE_SECTION,
-                asset_slug=_slot_value(slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["hall_section"]),
-                config=_slot_value(slot, "section_config", {}),
-                transform=_slot_value(slot, "section_transform", {}),
-            )
+    window_slot = _slot(layout_config, "window") or _slot(layout_config, "tome")
+    window_section_name = "window-section"
+    pieces.append(
+        _tower_piece(
+            storey_id=storey_id,
+            name=window_section_name,
+            piece_type=TOWER_PIECE_SECTION,
+            asset_slug=_slot_value(
+                window_slot,
+                "section_asset_slug",
+                OFFICIAL_TOWER_ASSET_SLUGS["window_section"],
+            ),
+            config=_slot_value(window_slot, "section_config", {}),
+            transform=_slot_value(window_slot, "section_transform", {}),
         )
-        artifact_defaults = _slot_value(slot, "artifact", {})
+    )
+    for tome in above_adventure_tomes:
+        artifact_defaults = _slot_value(window_slot, "artifact", {})
         artifacts.append(
             _tower_artifact(
                 storey_id=storey_id,
                 name=f"tome-{tome.id}",
-                target_name=section_name,
+                target_name=window_section_name,
                 role="tome",
-                asset_slug=_slot_value(slot, "artifact_asset_slug", OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["tome"]),
+                asset_slug=_slot_value(window_slot, "artifact_asset_slug", OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["tome"]),
                 content_binding={"kind": "tome", "id": tome.id},
                 x=_slot_value(artifact_defaults, "x", 184),
                 y=_slot_value(artifact_defaults, "y", 112),
@@ -280,18 +295,16 @@ def tower_layout_payload(
                 z_index=_slot_value(artifact_defaults, "z_index", 12),
             )
         )
-    if above_adventure_tomes:
-        slot = _slot(layout_config, "tome")
-        pieces.append(
-            _tower_piece(
-                storey_id=storey_id,
-                name="landing-after-tomes",
-                piece_type=TOWER_PIECE_LANDING,
-                asset_slug=_slot_value(slot, "landing_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["tome_landing"]),
-                config=_slot_value(slot, "landing_config", {}),
-                transform=_slot_value(slot, "landing_transform", {}),
-            )
+    pieces.append(
+        _tower_piece(
+            storey_id=storey_id,
+            name="landing-after-window",
+            piece_type=TOWER_PIECE_LANDING,
+            asset_slug=_slot_value(window_slot, "landing_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS[TOWER_PIECE_LANDING]),
+            config=_slot_value(window_slot, "landing_config", {}),
+            transform=_slot_value(window_slot, "landing_transform", {}),
         )
+    )
 
     adventure_list = adventures or []
     for adventure in adventure_list:
@@ -362,21 +375,43 @@ def tower_layout_payload(
                 )
             )
             artifact_defaults = _slot_value(slot, "artifact", {})
-            artifacts.append(
-                _tower_artifact(
-                    storey_id=storey_id,
-                    name=f"challenge-{challenge.id}",
-                    target_name=section_name,
-                    role="challenge",
-                    asset_slug=_slot_value(slot, "artifact_asset_slug", OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["challenge"]),
-                    content_binding={"kind": "challenge", "id": challenge.id},
-                    x=_slot_value(artifact_defaults, "x", 184),
-                    y=_slot_value(artifact_defaults, "y", 124),
-                    width=_slot_value(artifact_defaults, "width", 90),
-                    height=_slot_value(artifact_defaults, "height", 132),
-                    z_index=_slot_value(artifact_defaults, "z_index", 12),
+            levels = [
+                level
+                for level in _ordered_levels(challenge.challenge_levels.all())
+                if getattr(level, "is_published", True)
+            ]
+            for level in levels:
+                difficulty = str(level.difficulty)
+                artifacts.append(
+                    _tower_artifact(
+                        storey_id=storey_id,
+                        name=f"challenge-{challenge.id}-{difficulty}",
+                        target_name=section_name,
+                        role="challenge",
+                        asset_slug=_challenge_artifact_slug(slot=slot, difficulty=difficulty),
+                        content_binding={
+                            "kind": "challenge",
+                            "id": challenge.id,
+                            "levelId": level.id,
+                            "difficulty": difficulty,
+                        },
+                        x=_slot_value(
+                            artifact_defaults,
+                            "x",
+                            OFFICIAL_CHALLENGE_ARTIFACT_X.get(difficulty, 184),
+                        ),
+                        y=_slot_value(artifact_defaults, "y", 124),
+                        width=_slot_value(artifact_defaults, "width", 62),
+                        height=_slot_value(artifact_defaults, "height", 94),
+                        z_index=_slot_value(
+                            artifact_defaults,
+                            "z_index",
+                            12 + list(OFFICIAL_CHALLENGE_ARTIFACT_X).index(difficulty)
+                            if difficulty in OFFICIAL_CHALLENGE_ARTIFACT_X
+                            else 12,
+                        ),
+                    )
                 )
-            )
     else:
         slot = _slot(layout_config, "empty_challenge")
         pieces.append(
@@ -494,6 +529,18 @@ def _slot_value(slot: dict, key: str, fallback):
     if isinstance(fallback, dict):
         return value if isinstance(value, dict) else fallback
     return value if value not in (None, "") else fallback
+
+
+def _challenge_artifact_slug(*, slot: dict, difficulty: str) -> str:
+    asset_slugs = slot.get("artifact_asset_slugs")
+    if isinstance(asset_slugs, dict):
+        value = asset_slugs.get(difficulty)
+        if value:
+            return str(value)
+    return OFFICIAL_CHALLENGE_ARTIFACT_SLUGS.get(
+        difficulty,
+        _slot_value(slot, "artifact_asset_slug", OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["challenge"]),
+    )
 
 
 def command_skill_queryset(*, storey_id: int):
