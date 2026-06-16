@@ -20,6 +20,7 @@ from tower_designs.models import (
     ARTIFACT_ROLE_NORMAL,
     ORIGIN_OFFICIAL_FORK,
     ORIGIN_PERSONAL,
+    STOREY_TEMPLATE_INDEX,
     ArtifactPlacement,
     TowerDesign,
     TowerPieceInstance,
@@ -161,7 +162,7 @@ def test_official_fork_resyncs_unedited_snapshot_after_storey_reseed(
         piece.storey_index
         for piece in TowerPieceInstance.objects.filter(tower_design_id=fork_id)
         if piece.piece_type != "crown"
-    } == {old_storey.id}
+    } == {STOREY_TEMPLATE_INDEX}
 
     Storey.objects.all().delete()
     new_storey = make_official_storey(slug="resync-storey")
@@ -174,7 +175,7 @@ def test_official_fork_resyncs_unedited_snapshot_after_storey_reseed(
         piece.storey_index
         for piece in TowerPieceInstance.objects.filter(tower_design_id=fork_id)
         if piece.piece_type != "crown"
-    } == {new_storey.id}
+    } == {STOREY_TEMPLATE_INDEX}
     assert {artifact["role"] for artifact in refreshed.json()["artifacts"]} == {
         "adventure",
         "tome",
@@ -182,7 +183,7 @@ def test_official_fork_resyncs_unedited_snapshot_after_storey_reseed(
 
     overview = storey_content_overview(user=user, storey_id=new_storey.id)
     assert all(
-        piece["instanceId"].startswith(f"tower-{fork_id}-")
+        piece["instanceId"].startswith(f"tower-{fork_id}-storey-{new_storey.id}-")
         for piece in overview["tower_layout"]["pieces"]
     )
 
@@ -222,7 +223,7 @@ def test_official_fork_resync_preserves_edited_snapshot_after_storey_reseed(
         piece.storey_index
         for piece in TowerPieceInstance.objects.filter(tower_design_id=fork_id)
         if piece.piece_type != "crown"
-    } == {old_storey.id}
+    } == {STOREY_TEMPLATE_INDEX}
 
 
 @pytest.mark.django_db
@@ -324,6 +325,101 @@ def test_official_view_reflects_fork_skin_transform_and_decoration(
 
     # The curriculum's interactive learning artifacts survive the overlay.
     assert {"adventure", "tome"} <= {a["role"] for a in artifacts}
+
+
+@pytest.mark.django_db
+def test_official_fork_template_repeats_with_runtime_ids_and_storey_bindings(
+    django_user_model,
+    settings,
+    tmp_path,
+):
+    settings.MEDIA_ROOT = tmp_path
+    call_command("seed_assets", "--skip-grant", verbosity=0)
+    first_storey = make_official_storey(slug="repeat-one", number=1)
+    second_storey = make_official_storey(slug="repeat-two", number=2)
+
+    user = make_user(django_user_model)
+    client = APIClient()
+    client.force_authenticate(user=user)
+    fork_id = client.post("/api/tower-designs/official-fork/").json()["design"]["id"]
+
+    fork_section = (
+        TowerPieceInstance.objects.filter(tower_design_id=fork_id, piece_type="section")
+        .order_by("sort_order", "id")
+        .first()
+    )
+    fork_section.transform = {"x": 22, "scale": 1.2}
+    fork_section.save(update_fields=["transform"])
+
+    first_overview = storey_content_overview(user=user, storey_id=first_storey.id)
+    second_overview = storey_content_overview(user=user, storey_id=second_storey.id)
+    first_piece = next(
+        piece
+        for piece in first_overview["tower_layout"]["pieces"]
+        if piece.get("transform") == {"x": 22, "scale": 1.2}
+    )
+    second_piece = next(
+        piece
+        for piece in second_overview["tower_layout"]["pieces"]
+        if piece.get("transform") == {"x": 22, "scale": 1.2}
+    )
+
+    assert first_piece["instanceId"] != second_piece["instanceId"]
+    assert first_piece["instanceId"].startswith(
+        f"tower-{fork_id}-storey-{first_storey.id}-piece-"
+    )
+    assert second_piece["instanceId"].startswith(
+        f"tower-{fork_id}-storey-{second_storey.id}-piece-"
+    )
+
+    first_gate = next(a for a in first_overview["artifacts"] if a["role"] == "adventure")
+    second_gate = next(a for a in second_overview["artifacts"] if a["role"] == "adventure")
+    first_adventure = CommandAdventure.objects.get(storey=first_storey)
+    second_adventure = CommandAdventure.objects.get(storey=second_storey)
+
+    assert first_gate["id"] != second_gate["id"]
+    assert first_gate["contentBinding"] == {"kind": "adventure", "id": first_adventure.id}
+    assert second_gate["contentBinding"] == {"kind": "adventure", "id": second_adventure.id}
+
+
+@pytest.mark.django_db
+def test_official_view_uses_template_when_fork_storey_index_is_stale(
+    django_user_model,
+    settings,
+    tmp_path,
+):
+    settings.MEDIA_ROOT = tmp_path
+    call_command("seed_assets", "--skip-grant", verbosity=0)
+    storey = make_official_storey(slug="stale-template")
+
+    user = make_user(django_user_model)
+    client = APIClient()
+    client.force_authenticate(user=user)
+    fork_id = client.post("/api/tower-designs/official-fork/").json()["design"]["id"]
+
+    fork_section = (
+        TowerPieceInstance.objects.filter(tower_design_id=fork_id, piece_type="section")
+        .order_by("sort_order", "id")
+        .first()
+    )
+    fork_section.transform = {"y": 44}
+    fork_section.save(update_fields=["transform"])
+    TowerPieceInstance.objects.filter(tower_design_id=fork_id).exclude(piece_type="crown").update(
+        storey_index=999999
+    )
+
+    overview = storey_content_overview(user=user, storey_id=storey.id)
+    transformed = [
+        piece
+        for piece in overview["tower_layout"]["pieces"]
+        if piece.get("transform") == {"y": 44}
+    ]
+
+    assert transformed
+    assert all(
+        piece["instanceId"].startswith(f"tower-{fork_id}-storey-{storey.id}-piece-")
+        for piece in overview["tower_layout"]["pieces"]
+    )
 
 
 @pytest.mark.django_db

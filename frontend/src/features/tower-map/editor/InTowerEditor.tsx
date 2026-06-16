@@ -128,7 +128,6 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
   const staged = useStagedEdits()
   const [selectedPieceId, setSelectedPieceId] = useState<number | null>(null)
   const [selectedArtifactId, setSelectedArtifactId] = useState<number | string | null>(null)
-  const [activeStorey, setActiveStorey] = useState<number | null>(null)
   const [uploadOpen, setUploadOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const [placementDraft, setPlacementDraft] = useState<PlacementDraft>(null)
@@ -149,23 +148,51 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
       .filter((p) => p.pieceType === 'landing')
       .filter((p) => !pieceHasWalkRail(editor.pieceDescriptorBySlug[p.assetSlug]))
   }, [editor.overview, editor.pieceDescriptorBySlug])
-  const storeyIndexes = useMemo(() => uniqueStoreyIndexes(editor.overview), [editor.overview])
   const issues = useMemo<DesignIssue[]>(
     () => (editor.overview ? validateDesign(editor.overview) : []),
     [editor.overview],
   )
 
-  function flashToast(message: string, kind: 'error' | 'info' = 'error') {
+  const flashToast = useCallback((message: string, kind: 'error' | 'info' = 'error') => {
     setToast({ kind, message })
     window.clearTimeout(toastTimer.current)
     toastTimer.current = window.setTimeout(() => setToast(null), 3600)
-  }
+  }, [])
 
   const clearSelection = useCallback(() => {
     setSelectedPieceId(null)
     setSelectedArtifactId(null)
     setPlacementDraft(null)
   }, [])
+
+  const removeArtifact = useCallback(
+    (placementId: number | string) => {
+      const currentOverview = editor.overview
+      if (!currentOverview) return
+      // The official tower's interactive doors are the curriculum's - on the fork
+      // you may move or re-skin them, but removing one would hide a learning step,
+      // so deletion is blocked (decorative artifacts you added stay removable).
+      const target = currentOverview.artifacts.find((item) => item.id === placementId) ?? null
+      if (currentOverview.design.origin === 'official_fork' && target && target.role !== 'normal') {
+        flashToast('Interactive doors on the official tower can be moved or re-skinned, but not removed.', 'info')
+        return
+      }
+      if (typeof placementId === 'number') {
+        editor.deleteArtifact.mutate(placementId, {
+          onError: (error) => flashToast(apiErrorMessage(error) ?? 'Could not remove artifact.'),
+        })
+      }
+      setSelectedArtifactId((id) => (id === placementId ? null : id))
+      staged.commit((state) => {
+        if (!state.artifactEdits.has(placementId)) return state
+        const map = new Map(state.artifactEdits)
+        map.delete(placementId)
+        return { ...state, artifactEdits: map }
+      })
+      staged.endGesture()
+    },
+    [editor.deleteArtifact, editor.overview, flashToast, staged],
+  )
 
   const deleteSelection = useCallback(() => {
     const currentOverview = editor.overview
@@ -210,7 +237,7 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
 
     staged.endGesture()
     clearSelection()
-  }, [clearSelection, editor.deletePiece, editor.overview, selectedArtifactId, selectedPieceId, staged])
+  }, [clearSelection, editor.deletePiece, editor.overview, flashToast, removeArtifact, selectedArtifactId, selectedPieceId, staged])
 
   // Editor hotkeys. Defer to native text editing while a form control is focused.
   const { undo: undoEdit, redo: redoEdit } = staged
@@ -269,11 +296,6 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
   ])
 
   useEffect(() => () => window.clearTimeout(toastTimer.current), [])
-
-  // The canvas edits one storey at a time. Fall back to the first storey when the
-  // tracked tab no longer exists (e.g. after deleting the storey's last piece).
-  const activeStoreyIndex =
-    activeStorey !== null && storeyIndexes.includes(activeStorey) ? activeStorey : storeyIndexes[0] ?? null
 
   if (editor.isLoading) return <LoadingState label="Opening the editor" variant="page" />
   if (editor.isError || !editor.overview) {
@@ -354,30 +376,6 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
     }, `artifact:${artifact.id}`)
   }
 
-  function removeArtifact(placementId: number | string) {
-    // The official tower's interactive doors are the curriculum's — on the fork
-    // you may move or re-skin them, but removing one would hide a learning step,
-    // so deletion is blocked (decorative artifacts you added stay removable).
-    const target = overview.artifacts.find((item) => item.id === placementId) ?? null
-    if (isFork && target && target.role !== 'normal') {
-      flashToast('Interactive doors on the official tower can be moved or re-skinned, but not removed.', 'info')
-      return
-    }
-    if (typeof placementId === 'number') {
-      editor.deleteArtifact.mutate(placementId, {
-        onError: (error) => flashToast(apiErrorMessage(error) ?? 'Could not remove artifact.'),
-      })
-    }
-    setSelectedArtifactId((id) => (id === placementId ? null : id))
-    staged.commit((state) => {
-      if (!state.artifactEdits.has(placementId)) return state
-      const map = new Map(state.artifactEdits)
-      map.delete(placementId)
-      return { ...state, artifactEdits: map }
-    })
-    staged.endGesture()
-  }
-
   async function applyChanges() {
     setApplying(true)
     try {
@@ -414,28 +412,7 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
     }
   }
 
-  function selectStorey(storeyIndex: number) {
-    setActiveStorey(storeyIndex)
-    setSelectedPieceId(null)
-    setSelectedArtifactId(null)
-    setPlacementDraft(null)
-  }
-
-  function addStorey() {
-    editor.addStorey.mutate(undefined, {
-      onSuccess: (data) => {
-        // Jump straight to the freshly raised storey so the new section is in view.
-        setActiveStorey(data.added_storey_index)
-        setSelectedPieceId(null)
-        setSelectedArtifactId(null)
-        setPlacementDraft(null)
-      },
-      onError: (error) => flashToast(apiErrorMessage(error) ?? 'Could not raise a storey.'),
-    })
-  }
-
   function focusIssue(issue: DesignIssue) {
-    setActiveStorey(issue.storeyIndex)
     setSelectedPieceId(pieceIdFromInstance(issue.instanceId))
     setSelectedArtifactId(null)
     setPlacementDraft(null)
@@ -474,13 +451,7 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
         onExit={onExit}
         renamePending={editor.rename.isPending}
         onRename={(next) => editor.rename.mutate(next)}
-        storeyCount={storeyIndexes.length}
         pieceCount={pieceCount}
-        storeyIndexes={storeyIndexes}
-        activeStoreyIndex={activeStoreyIndex}
-        addingStorey={editor.addStorey.isPending}
-        onSelectStorey={selectStorey}
-        onAddStorey={addStorey}
         zoom={zoom}
         canUndo={staged.canUndo}
         canRedo={staged.canRedo}
@@ -549,7 +520,6 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
               artifactDescriptorBySlug={editor.artifactDescriptorBySlug}
               selectedPieceId={selectedPieceId}
               selectedArtifactId={selectedArtifactId}
-              activeStoreyIndex={activeStoreyIndex}
               pendingSwaps={pendingSwaps}
               pieceTransforms={pieceTransforms}
               artifactEdits={artifactEdits}
@@ -656,13 +626,7 @@ function EditorCommandBar({
   onExit,
   renamePending,
   onRename,
-  storeyCount,
   pieceCount,
-  storeyIndexes,
-  activeStoreyIndex,
-  addingStorey,
-  onSelectStorey,
-  onAddStorey,
   zoom,
   canUndo,
   canRedo,
@@ -681,13 +645,7 @@ function EditorCommandBar({
   onExit?: () => void
   renamePending: boolean
   onRename: (next: string) => void
-  storeyCount: number
   pieceCount: number
-  storeyIndexes: number[]
-  activeStoreyIndex: number | null
-  addingStorey: boolean
-  onSelectStorey: (storeyIndex: number) => void
-  onAddStorey: () => void
   zoom: ZoomPan
   canUndo: boolean
   canRedo: boolean
@@ -722,17 +680,14 @@ function EditorCommandBar({
           <TowerNameField title={overview.design.title} pending={renamePending} onRename={onRename} />
         )}
         <p className="ite-substat">
-          {storeyCount} storey{storeyCount === 1 ? '' : 's'} · {pieceCount} piece{pieceCount === 1 ? '' : 's'}
+          Spire + repeating storey · {pieceCount} piece{pieceCount === 1 ? '' : 's'}
         </p>
       </div>
 
-      <StoreyTabs
-        storeyIndexes={storeyIndexes}
-        activeStoreyIndex={activeStoreyIndex}
-        adding={addingStorey}
-        onSelect={onSelectStorey}
-        onAdd={onAddStorey}
-      />
+      <div className="ite-cmd-template" aria-label="Tower template">
+        <span className="ite-template-label">Tower Template</span>
+        <span className="ite-template-copy">Spire + Repeating Storey</span>
+      </div>
 
       <div className="ite-cmd-actions">
         <div className="ite-cmd-cluster" role="group" aria-label="History">
@@ -789,53 +744,6 @@ function EditorCommandBar({
   )
 }
 
-// Storey switcher: one tab per storey (the canvas edits a single storey at a
-// time) plus a trailing button that raises a new storey. Labels are 1-based by
-// stacking order, independent of the raw storey_index values.
-function StoreyTabs({
-  storeyIndexes,
-  activeStoreyIndex,
-  adding,
-  onSelect,
-  onAdd,
-}: {
-  storeyIndexes: number[]
-  activeStoreyIndex: number | null
-  adding: boolean
-  onSelect: (storeyIndex: number) => void
-  onAdd: () => void
-}) {
-  return (
-    <div className="ite-cmd-storeys" role="tablist" aria-label="Tower storeys">
-      {storeyIndexes.map((storeyIndex, order) => {
-        const active = storeyIndex === activeStoreyIndex
-        return (
-          <button
-            key={storeyIndex}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            className={cn('ite-storey-tab', active && 'is-active')}
-            onClick={() => onSelect(storeyIndex)}
-          >
-            Storey {order + 1}
-          </button>
-        )
-      })}
-      <button
-        type="button"
-        className="ite-storey-tab ite-storey-tab--add"
-        disabled={adding}
-        aria-label="Add storey"
-        onClick={onAdd}
-      >
-        <Plus className="size-4" aria-hidden="true" />
-        {adding ? 'Adding…' : 'Storey'}
-      </button>
-    </div>
-  )
-}
-
 // --- Status line ------------------------------------------------------------
 // Drops below the command bar only when there's something to say: the share
 // link, publish errors, walk-rail warnings, or the expanded issue list.
@@ -874,7 +782,7 @@ function EditorStatusLine({
             <li key={issue.id}>
               <button type="button" className="ite-issue" onClick={() => onFocusIssue(issue)}>
                 <AlertTriangle className="size-3.5" aria-hidden="true" />
-                <span className="ite-issue-storey">Storey {issue.storeyIndex + 1}</span>
+                <span className="ite-issue-storey">Template</span>
                 <span className="ite-issue-msg">{issue.message}</span>
               </button>
             </li>
@@ -1621,18 +1529,6 @@ function editMatchesBase(edit: ArtifactEdit, base: ArtifactPlacementDescriptor):
   return (Object.keys(edit) as (keyof ArtifactEdit)[])
     .filter((key) => key !== 'targetInstanceId')
     .every((key) => edit[key] === base[key])
-}
-
-function uniqueStoreyIndexes(overview: TowerDesignOverview | null) {
-  const indexes = new Set<number>()
-  for (const piece of overview?.tower_layout.pieces ?? []) {
-    if (piece.pieceType !== 'crown') indexes.add(normalizedStoreyIndex(piece))
-  }
-  return [...indexes].sort((a, b) => a - b)
-}
-
-function normalizedStoreyIndex(piece: TowerLayoutPieceDescriptor) {
-  return typeof piece.storeyIndex === 'number' ? piece.storeyIndex : 0
 }
 
 function isBounds(value: unknown): value is { width: number; height: number } {

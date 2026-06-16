@@ -4,10 +4,10 @@ import copy
 import json
 from collections import Counter
 
-from django.db import models, transaction
+from django.db import transaction
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from assets.models import Asset
+from assets.models import Asset, TOWER_PIECE_CROWN
 from authoring.models import STATUS_PUBLISHED as CONTENT_STATUS_PUBLISHED
 from authoring.models import ContentDefinition
 from tower_designs.models import (
@@ -15,8 +15,10 @@ from tower_designs.models import (
     INTERACTABLE_ARTIFACT_ROLES,
     ORIGIN_OFFICIAL_FORK,
     ORIGIN_PERSONAL,
+    SPIRE_STOREY_INDEX,
     STATUS_ARCHIVED,
     STATUS_PUBLISHED,
+    STOREY_TEMPLATE_INDEX,
     ArtifactPlacement,
     TowerContentBinding,
     TowerDesign,
@@ -125,7 +127,11 @@ class TowerDesignService:
                 piece_asset=asset,
                 piece_type=piece_type,
                 parent_instance=parent,
-                storey_index=0,
+                storey_index=(
+                    SPIRE_STOREY_INDEX
+                    if piece_type == TOWER_PIECE_CROWN
+                    else STOREY_TEMPLATE_INDEX
+                ),
                 sort_order=sort_order,
             )
 
@@ -216,6 +222,12 @@ class TowerDesignService:
         if piece_signature == current_pieces and artifact_signature == current_artifacts:
             return True
         if piece_signature == current_pieces and bool(current_artifacts) and not placements:
+            return True
+
+        legacy_pieces, legacy_artifacts = self._current_official_multistorey_layout_signatures()
+        if piece_signature == legacy_pieces and artifact_signature == legacy_artifacts:
+            return True
+        if piece_signature == legacy_pieces and bool(legacy_artifacts) and not placements:
             return True
         if self._same_signature_items_ignoring_storey(piece_signature, current_pieces):
             return self._same_signature_items_ignoring_storey(
@@ -313,37 +325,54 @@ class TowerDesignService:
     def _current_official_layout_signatures(
         self,
     ) -> tuple[list[tuple], list[tuple]]:
-        from challenges.models import Challenge
-        from command_adventures.models import CommandAdventure
-        from curriculum.models import Tome
-        from curriculum.selectors import published_storeys, tower_layout_payload
+        layout = self._official_template_layout_payload()
+        if layout is None:
+            return self._default_official_layout_signatures()
 
+        piece_signature: list[tuple] = []
+        target_order = {
+            piece["instanceId"]: index for index, piece in enumerate(layout["pieces"])
+        }
+        for piece in layout["pieces"]:
+            piece_signature.append(
+                (
+                    None if piece["pieceType"] == TOWER_PIECE_CROWN else STOREY_TEMPLATE_INDEX,
+                    piece["pieceType"],
+                    piece["assetSlug"],
+                    _json_signature(piece.get("transform")),
+                    _json_signature(piece.get("config")),
+                )
+            )
+
+        artifact_signature: list[tuple] = []
+        for artifact in layout["artifacts"]:
+            artifact_signature.append(
+                (
+                    STOREY_TEMPLATE_INDEX,
+                    target_order.get(artifact["targetInstanceId"]),
+                    artifact["role"],
+                    artifact["assetSlug"],
+                    artifact.get("x", 0),
+                    artifact.get("y", 0),
+                    artifact.get("scale", 1),
+                    artifact.get("width", 0),
+                    artifact.get("height", 0),
+                    artifact.get("rotation", 0),
+                    artifact.get("anchor", ""),
+                    artifact.get("zIndex", 0),
+                )
+            )
+        return piece_signature, artifact_signature
+
+    def _current_official_multistorey_layout_signatures(
+        self,
+    ) -> tuple[list[tuple], list[tuple]]:
         piece_signature: list[tuple] = []
         artifact_signature: list[tuple] = []
         crown_seen = False
-        for storey in published_storeys():
-            adventures = list(
-                CommandAdventure.objects.filter(storey=storey, is_published=True)
-                .select_related("storey")
-                .order_by("sort_order", "id")
-            )
-            tomes = list(
-                Tome.objects.filter(storey=storey, is_published=True).order_by("sort_order", "id")
-            )
-            challenges = list(
-                Challenge.objects.filter(storey=storey, is_published=True).order_by(
-                    "sort_order", "id"
-                )
-            )
-            layout = tower_layout_payload(
-                storey=storey,
-                storey_id=storey.id,
-                adventures=adventures,
-                tomes=tomes,
-                challenges=challenges,
-            )
+        for storey, layout in self._official_layout_payloads():
             for piece in layout["pieces"]:
-                if piece["pieceType"] == "crown":
+                if piece["pieceType"] == TOWER_PIECE_CROWN:
                     if crown_seen:
                         continue
                     crown_seen = True
@@ -388,16 +417,17 @@ class TowerDesignService:
                 )
         return piece_signature, artifact_signature
 
-    def _seed_official_fork_skeleton(self, *, design: TowerDesign) -> None:
-        """Mirror the current published Arcane Spire layout into an editable fork."""
+    def _official_template_layout_payload(self) -> dict | None:
+        layouts = self._official_layout_payloads()
+        return layouts[0][1] if layouts else None
+
+    def _official_layout_payloads(self) -> list[tuple[object, dict]]:
         from challenges.models import Challenge
         from command_adventures.models import CommandAdventure
         from curriculum.models import Tome
         from curriculum.selectors import published_storeys, tower_layout_payload
 
-        sort_order = 0
-        created_any = False
-        crown_created = False
+        payloads: list[tuple[object, dict]] = []
         for storey in published_storeys():
             adventures = list(
                 CommandAdventure.objects.filter(storey=storey, is_published=True)
@@ -412,94 +442,118 @@ class TowerDesignService:
                     "sort_order", "id"
                 )
             )
-            layout = tower_layout_payload(
-                storey=storey,
-                storey_id=storey.id,
-                adventures=adventures,
-                tomes=tomes,
-                challenges=challenges,
+            payloads.append(
+                (
+                    storey,
+                    tower_layout_payload(
+                        storey=storey,
+                        storey_id=storey.id,
+                        adventures=adventures,
+                        tomes=tomes,
+                        challenges=challenges,
+                    ),
+                )
             )
-            piece_map: dict[str, TowerPieceInstance] = {}
-            for piece_payload in layout["pieces"]:
-                if piece_payload["pieceType"] == "crown":
-                    if crown_created:
-                        continue
-                    crown_created = True
-                asset = Asset.objects.filter(
-                    slug=piece_payload["assetSlug"], kind="tower_piece"
-                ).first()
-                if asset is None:
-                    continue
-                piece = TowerPieceInstance.objects.create(
-                    tower_design=design,
-                    piece_asset=asset,
-                    piece_type=piece_payload["pieceType"],
-                    storey_index=storey.id,
-                    sort_order=sort_order,
-                    transform=piece_payload.get("transform") or {},
-                    config=piece_payload.get("config") or {},
-                )
-                piece_map[piece_payload["instanceId"]] = piece
-                sort_order += 1
-                created_any = True
+        return payloads
 
-            for artifact_payload in layout["artifacts"]:
-                target = piece_map.get(artifact_payload["targetInstanceId"])
-                asset = Asset.objects.filter(
-                    slug=artifact_payload["assetSlug"], kind="tower_artifact"
-                ).first()
-                if target is None or asset is None:
-                    continue
-                ArtifactPlacement.objects.create(
-                    tower_design=design,
-                    target_piece_instance=target,
-                    artifact_asset=asset,
-                    x=artifact_payload.get("x", 0),
-                    y=artifact_payload.get("y", 0),
-                    scale=artifact_payload.get("scale", 1),
-                    width=artifact_payload.get("width", 0),
-                    height=artifact_payload.get("height", 0),
-                    rotation=artifact_payload.get("rotation", 0),
-                    anchor=artifact_payload.get("anchor", ""),
-                    z_index=artifact_payload.get("zIndex", 0),
-                    role=artifact_payload.get("role", ARTIFACT_ROLE_NORMAL),
-                )
+    def _default_official_layout_signatures(self) -> tuple[list[tuple], list[tuple]]:
+        return [
+            (None, "crown", "official-crown", _json_signature({}), _json_signature({})),
+            (
+                STOREY_TEMPLATE_INDEX,
+                "section",
+                "official-hall-section",
+                _json_signature({}),
+                _json_signature({}),
+            ),
+            (
+                STOREY_TEMPLATE_INDEX,
+                "landing",
+                "official-landing",
+                _json_signature({}),
+                _json_signature({}),
+            ),
+            (
+                STOREY_TEMPLATE_INDEX,
+                "section",
+                "official-trial-section",
+                _json_signature({}),
+                _json_signature({}),
+            ),
+            (
+                STOREY_TEMPLATE_INDEX,
+                "landing",
+                "official-challenge-landing",
+                _json_signature({}),
+                _json_signature({}),
+            ),
+        ], []
 
-        if not created_any:
+    def _seed_official_fork_skeleton(self, *, design: TowerDesign) -> None:
+        """Seed one editable Arcane Spire template: crown + repeatable storey."""
+        layout = self._official_template_layout_payload()
+        if layout is None:
             self._seed_default_skeleton(design=design)
-
-    # The repeating unit appended by "Add section": one generic section with an
-    # optional landing child. Content type is determined by interactable artifact
-    # placement, not by the structural section.
-    _STOREY_FLOOR = [
-        ("official-hall-section", "section"),
-        ("official-landing", "landing"),
-    ]
-
-    @transaction.atomic
-    def add_storey(self, *, user, design: TowerDesign) -> int:
-        """Append a new repeatable section unit and return its storey_index."""
-        self.assert_owner(user=user, design=design)
-        next_index = (
-            design.pieces.aggregate(models.Max("storey_index"))["storey_index__max"] or 0
-        ) + 1
-        sort_base = (design.pieces.aggregate(models.Max("sort_order"))["sort_order__max"] or 0) + 1
-        parent = None
-        for offset, (slug, piece_type) in enumerate(self._STOREY_FLOOR):
-            asset = Asset.objects.filter(slug=slug, kind="tower_piece").first()
+            return
+        sort_order = 0
+        created_any = False
+        piece_map: dict[str, TowerPieceInstance] = {}
+        for piece_payload in layout["pieces"]:
+            asset = Asset.objects.filter(slug=piece_payload["assetSlug"], kind="tower_piece").first()
             if asset is None:
                 continue
+            piece_type = piece_payload["pieceType"]
             piece = TowerPieceInstance.objects.create(
                 tower_design=design,
                 piece_asset=asset,
                 piece_type=piece_type,
-                parent_instance=parent if piece_type == "landing" else None,
-                storey_index=next_index,
-                sort_order=sort_base + offset,
+                storey_index=(
+                    SPIRE_STOREY_INDEX
+                    if piece_type == TOWER_PIECE_CROWN
+                    else STOREY_TEMPLATE_INDEX
+                ),
+                sort_order=sort_order,
+                transform=piece_payload.get("transform") or {},
+                config=piece_payload.get("config") or {},
             )
-            if piece_type == "section":
-                parent = piece
-        return next_index
+            piece_map[piece_payload["instanceId"]] = piece
+            sort_order += 1
+            created_any = True
+
+        for artifact_payload in layout["artifacts"]:
+            target = piece_map.get(artifact_payload["targetInstanceId"])
+            asset = Asset.objects.filter(
+                slug=artifact_payload["assetSlug"], kind="tower_artifact"
+            ).first()
+            if target is None or asset is None:
+                continue
+            ArtifactPlacement.objects.create(
+                tower_design=design,
+                target_piece_instance=target,
+                artifact_asset=asset,
+                x=artifact_payload.get("x", 0),
+                y=artifact_payload.get("y", 0),
+                scale=artifact_payload.get("scale", 1),
+                width=artifact_payload.get("width", 0),
+                height=artifact_payload.get("height", 0),
+                rotation=artifact_payload.get("rotation", 0),
+                anchor=artifact_payload.get("anchor", ""),
+                z_index=artifact_payload.get("zIndex", 0),
+                role=artifact_payload.get("role", ARTIFACT_ROLE_NORMAL),
+            )
+
+        if not created_any:
+            self._seed_default_skeleton(design=design)
+
+    @transaction.atomic
+    def add_storey(self, *, user, design: TowerDesign) -> int:
+        """Compatibility no-op.
+
+        Tower visuals are now one spire plus one repeatable storey template, so
+        callers must not create another unique visual storey.
+        """
+        self.assert_owner(user=user, design=design)
+        return STOREY_TEMPLATE_INDEX
 
     @transaction.atomic
     def update(self, *, user, design: TowerDesign, data: dict) -> TowerDesign:
@@ -628,12 +682,17 @@ class TowerDesignService:
     def add_piece(self, *, user, design: TowerDesign, data: dict) -> TowerPieceInstance:
         self.assert_owner(user=user, design=design)
         asset = Asset.objects.get(id=data["piece_asset_id"])
+        piece_type = data.get("piece_type") or asset.tower_piece.piece_type
         piece = TowerPieceInstance.objects.create(
             tower_design=design,
             piece_asset=asset,
-            piece_type=data.get("piece_type") or asset.tower_piece.piece_type,
+            piece_type=piece_type,
             sort_order=data.get("sort_order", design.pieces.count()),
-            storey_index=data.get("storey_index", 0),
+            storey_index=(
+                SPIRE_STOREY_INDEX
+                if piece_type == TOWER_PIECE_CROWN
+                else STOREY_TEMPLATE_INDEX
+            ),
             parent_instance_id=data.get("parent_instance_id"),
             transform=data.get("transform") or {},
             config=data.get("config") or {},

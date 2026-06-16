@@ -67,9 +67,10 @@ def test_cannot_assign_another_users_storey(django_user_model):
 
 
 @pytest.mark.django_db
-def test_add_storey_appends_a_floor(django_user_model):
+def test_add_storey_keeps_single_visual_template(django_user_model):
     user = make_user(django_user_model)
     from assets.models import KIND_TOWER_PIECE, Asset, TowerPieceAsset
+    from tower_designs.models import STOREY_TEMPLATE_INDEX, TowerPieceInstance
 
     for slug, ptype in [
         ("official-hall-section", "section"),
@@ -81,9 +82,11 @@ def test_add_storey_appends_a_floor(django_user_model):
     client = APIClient()
     client.force_authenticate(user=user)
     design_id = client.post("/api/tower-designs/", {"slug": "t", "title": "T"}, format="json").json()["id"]
+    before_count = TowerPieceInstance.objects.filter(tower_design_id=design_id).count()
 
     response = client.post(f"/api/tower-designs/{design_id}/storeys/")
     assert response.status_code == 201
-    assert response.json()["added_storey_index"] == 1
+    assert response.json()["added_storey_index"] == STOREY_TEMPLATE_INDEX
+    assert TowerPieceInstance.objects.filter(tower_design_id=design_id).count() == before_count
     indices = {p["storeyIndex"] for p in response.json()["tower_layout"]["pieces"]}
-    assert indices == {0, 1}
+    assert indices == {STOREY_TEMPLATE_INDEX}

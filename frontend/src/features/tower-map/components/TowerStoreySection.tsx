@@ -353,10 +353,18 @@ function PlayableArtifact({
   const select = useTowerSelection((state) => state.select)
   const selected = useTowerSelection((state) => state.selected)
   const variant = role === 'normal' ? pieceVariant(null, piece) : role
+  const staticArtifact = (
+    <TowerArtifact
+      artifact={artifact}
+      descriptor={descriptor}
+      pieceDescriptor={pieceDescriptor}
+      pieceVariant={variant}
+    />
+  )
 
   if (role === 'adventure') {
-    const adventure = findContent(adventures, artifact.contentBinding?.id) ?? adventures[0] ?? null
-    if (!adventure) return null
+    const adventure = findContent(adventures, artifact.contentBinding?.id)
+    if (!adventure) return staticArtifact
     const isCurrent = isSelected(selected, { kind: 'adventure', storeyId, adventure })
     return (
       <TowerArtifact
@@ -374,7 +382,7 @@ function PlayableArtifact({
 
   if (role === 'tome') {
     const tome = findContent(tomes, artifact.contentBinding?.id)
-    if (!tome) return null
+    if (!tome) return staticArtifact
     const isCurrent = isSelected(selected, { kind: 'tome', storeyId, tome })
     return (
       <TowerArtifact
@@ -392,9 +400,9 @@ function PlayableArtifact({
 
   if (role === 'challenge') {
     const challenge = findContent(challenges, artifact.contentBinding?.id)
-    if (!challenge) return null
+    if (!challenge) return staticArtifact
     const level = challengeLevelForArtifact(challenge, artifact.contentBinding, challengesLocked)
-    if (!level) return null
+    if (!level) return staticArtifact
     const challengeIndex = challenges.findIndex((item) => item.id === challenge.id)
     const isCurrent = isSelected(selected, {
       kind: 'challenge',
@@ -430,14 +438,7 @@ function PlayableArtifact({
     )
   }
 
-  return (
-    <TowerArtifact
-      artifact={artifact}
-      descriptor={descriptor}
-      pieceDescriptor={pieceDescriptor}
-      pieceVariant={variant}
-    />
-  )
+  return staticArtifact
 }
 
 function preferredChallengeLevel(levels: ChallengeLevelAccess[], locked: boolean) {

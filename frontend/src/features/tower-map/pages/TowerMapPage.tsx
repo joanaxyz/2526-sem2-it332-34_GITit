@@ -526,20 +526,19 @@ export function TowerMapPage() {
         className="tower-stage-grid"
         aria-label={view === 'mine' ? 'Your Tower' : 'The Arcane Spire storeys'}
         onPointerDown={towerZoom.onPanStart}
-        style={towerZoom.style}
       >
-        {view === 'mine' ? (
-          <PrivateTowerStack />
-        ) : (
-          <TowerStoreys storeys={storeys} mountedCount={mountedCount} onGrow={growTower} />
-        )}
+        <div className="tower-canvas-content" style={towerZoom.style}>
+          {view === 'mine' ? (
+            <PrivateTowerStack />
+          ) : (
+            <TowerStoreys storeys={storeys} mountedCount={mountedCount} onGrow={growTower} />
+          )}
 
-        {/* Companion sprite. He lives INSIDE the stage grid (its own stacking
-            context) so the tower's crenel parapets can paint above him — he
-            stands in front of walls/ledges but tucks his feet behind the
-            battlements. The controller anchors to `parentElement` (this
-            section) for coordinates + clicks, so it stays self-consistent. */}
-        {activeCharacter ? <TowerCharacter character={activeCharacter} /> : null}
+          {/* Companion sprite. He lives inside the transformed canvas layer so
+              zoom/pan applies to him and the tower together. The controller
+              anchors to `parentElement` for coordinates + clicks. */}
+          {activeCharacter ? <TowerCharacter character={activeCharacter} /> : null}
+        </div>
       </section>
       <TowerZoomControl zoom={towerZoom} />
 

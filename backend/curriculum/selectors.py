@@ -277,38 +277,40 @@ def _viewer_official_fork(*, user):
 
 
 def _fork_storey_layout(*, fork, storey_id: int, curriculum_layout: dict) -> dict | None:
-    """Build one storey's layout from the viewer's fork — the SAME pieces and
-    artifacts its editor renders, so scale/position/structure match exactly —
-    and bind the curriculum's interactive content onto the fork's interactive
-    doors by ``(role, ordinal-within-storey)``.
+    """Build one rendered storey from the viewer's fork template.
 
-    The fork is the single source of truth for structure; the curriculum supplies
-    only *what* each door opens. The fork is seeded from the curriculum in the
-    same order, and interactive doors can't be deleted on the fork, so the
-    ordinals line up. Returns ``None`` when the fork has no pieces for this
-    storey, so the caller falls back to the plain curriculum layout.
+    The fork stores one spire and one repeatable storey template. The visual
+    template repeats for every curriculum storey; the curriculum supplies only
+    what each interactive artifact opens.
     """
-    from tower_designs.models import ARTIFACT_ROLE_NORMAL
+    from tower_designs.models import ARTIFACT_ROLE_NORMAL, STOREY_TEMPLATE_INDEX
+    from tower_designs.selectors import canonical_design_pieces
 
-    fork_pieces = list(
-        fork.pieces.select_related("piece_asset", "parent_instance")
-        .filter(storey_index=storey_id)
-        .order_by("sort_order", "id")
+    all_fork_pieces = list(
+        fork.pieces.select_related("piece_asset", "parent_instance").order_by(
+            "sort_order", "id"
+        )
     )
+    fork_pieces = canonical_design_pieces(all_fork_pieces)
     if not fork_pieces:
         return None
 
     def instance_id(piece_pk) -> str | None:
-        return f"tower-{fork.id}-piece-{piece_pk}" if piece_pk else None
+        return f"tower-{fork.id}-storey-{storey_id}-piece-{piece_pk}" if piece_pk else None
 
+    visible_piece_ids = {piece.id for piece in fork_pieces}
     pieces = []
     for piece in fork_pieces:
         payload = {
             "instanceId": instance_id(piece.id),
             "assetSlug": piece.piece_asset.slug,
             "pieceType": piece.piece_type,
-            "storeyIndex": piece.storey_index,
-            "parentInstanceId": instance_id(piece.parent_instance_id),
+            "storeyIndex": STOREY_TEMPLATE_INDEX,
+            "parentInstanceId": (
+                instance_id(piece.parent_instance_id)
+                if piece.parent_instance_id in visible_piece_ids
+                else None
+            ),
         }
         if piece.transform:
             payload["transform"] = piece.transform
@@ -329,11 +331,11 @@ def _fork_storey_layout(*, fork, storey_id: int, curriculum_layout: dict) -> dic
     interactive_seen: dict[str, int] = {}
     for placement in (
         fork.artifact_placements.select_related("artifact_asset")
-        .filter(target_piece_instance__storey_index=storey_id)
+        .filter(target_piece_instance_id__in=visible_piece_ids)
         .order_by("z_index", "id")
     ):
         payload = {
-            "id": placement.id,
+            "id": f"{placement.id}:storey:{storey_id}",
             "targetInstanceId": instance_id(placement.target_piece_instance_id),
             "assetSlug": placement.artifact_asset.slug,
             "role": placement.role,

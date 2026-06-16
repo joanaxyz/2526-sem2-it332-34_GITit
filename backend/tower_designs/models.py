@@ -43,6 +43,12 @@ ARTIFACT_ROLE_CHOICES = [
     (ARTIFACT_ROLE_TOME, "Tome"),
 ]
 
+# Tower visuals are a template, not a floor-by-floor design. The crown/spire is
+# stored once and the body is stored once, then repeated for every curriculum
+# storey at render time.
+SPIRE_STOREY_INDEX = 0
+STOREY_TEMPLATE_INDEX = 1
+
 
 class TowerDesign(models.Model):
     owner = models.ForeignKey(
@@ -96,8 +102,9 @@ class TowerPieceInstance(models.Model):
     tower_design = models.ForeignKey(TowerDesign, related_name="pieces", on_delete=models.CASCADE)
     piece_asset = models.ForeignKey("assets.Asset", on_delete=models.PROTECT)
     piece_type = models.CharField(max_length=32)
-    # Which storey (floor) this piece belongs to. Pieces group into floors so the
-    # editor can show storey bands and the author knows which storey content binds to.
+    # Canonical visual group: 0 is the one-off spire/crown, 1 is the repeatable
+    # storey template. Older rows may contain live curriculum Storey IDs; read
+    # selectors normalize them without destroying user data.
     storey_index = models.PositiveIntegerField(default=0)
     sort_order = models.PositiveIntegerField(default=0)
     parent_instance = models.ForeignKey(

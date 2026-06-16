@@ -76,7 +76,6 @@ export function EditorStorey({
   artifactDescriptorBySlug,
   selectedPieceId,
   selectedArtifactId,
-  activeStoreyIndex,
   pendingSwaps,
   pieceTransforms,
   artifactEdits,
@@ -97,7 +96,6 @@ export function EditorStorey({
   artifactDescriptorBySlug: Record<string, TowerArtifactAssetDescriptor>
   selectedPieceId: number | null
   selectedArtifactId: number | string | null
-  activeStoreyIndex: number | null
   pendingSwaps: ReadonlyMap<number, number>
   pieceTransforms: ReadonlyMap<number, PieceTransform>
   artifactEdits: ReadonlyMap<number | string, ArtifactEdit>
@@ -570,13 +568,7 @@ export function EditorStorey({
     )
   }
 
-  const { crown, storeys } = editorTowerPieces(layout.pieces)
-  // The editor edits one storey at a time (storeys are tabs in InTowerEditor);
-  // the canvas only mounts the active storey so authors aren't lost in a tall
-  // stack. The crown caps the topmost storey only.
-  const activeStorey = storeys.find((group) => group.storeyIndex === activeStoreyIndex) ?? storeys[0] ?? null
-  const showCrown =
-    crown !== null && (activeStorey === null || storeys[0]?.storeyIndex === activeStorey.storeyIndex)
+  const { crown, templatePieces } = editorTowerPieces(layout.pieces)
   const renderPiece = (piece: TowerLayoutPieceDescriptor) => {
     const pieceId = pieceIdFromInstance(piece.instanceId)
     const descriptor = descriptorFor(piece)
@@ -622,6 +614,7 @@ export function EditorStorey({
         <TowerLanding
           key={piece.instanceId}
           variant={variant}
+          continuation
           piece={renderedPiece}
           descriptor={descriptor}
           className={regionClass(pieceId)}
@@ -652,12 +645,8 @@ export function EditorStorey({
       <section className="storey-section storey-section--editor">
         <div className="learning-tower">
           <div className="tower-repeater">
-            {showCrown && crown ? renderPiece(crown) : null}
-            {activeStorey ? (
-              <div className="editor-storey-band" key={activeStorey.storeyIndex} aria-label="Active storey">
-                {activeStorey.pieces.map(renderPiece)}
-              </div>
-            ) : null}
+            {crown ? renderPiece(crown) : null}
+            {templatePieces.map(renderPiece)}
           </div>
         </div>
       </section>
@@ -1065,18 +1054,9 @@ function groupArtifacts(
 
 function editorTowerPieces(pieces: TowerLayoutPieceDescriptor[]) {
   const crown = pieces.find((piece) => piece.pieceType === 'crown') ?? null
-  const groups = new Map<number, TowerLayoutPieceDescriptor[]>()
-  for (const piece of pieces) {
-    if (piece.pieceType === 'crown') continue
-    const storeyIndex = typeof piece.storeyIndex === 'number' ? piece.storeyIndex : 0
-    const group = groups.get(storeyIndex) ?? []
-    group.push(piece)
-    groups.set(storeyIndex, group)
-  }
+  const templatePieces = pieces.filter((piece) => piece.pieceType !== 'crown')
   return {
     crown,
-    storeys: [...groups.entries()]
-      .sort(([a], [b]) => a - b)
-      .map(([storeyIndex, storeyPieces]) => ({ storeyIndex, pieces: storeyPieces })),
+    templatePieces,
   }
 }

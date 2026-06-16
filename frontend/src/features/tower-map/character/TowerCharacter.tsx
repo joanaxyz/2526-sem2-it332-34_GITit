@@ -9,10 +9,9 @@ import type { CharacterDefinition, SpriteAnimatorHandle } from '@/shared/sprites
  * layer over the tower stage; the controller hook listens for clicks on the
  * parent and drives the sprite around (walk the landings, fly, teleport).
  *
- * Must be a direct child of `.tower-stage-grid` - the controller anchors to
+ * Must be a direct child of `.tower-canvas-content` - the controller anchors to
  * `parentElement` for coordinates and click capture, and living inside the
- * stage grid's stacking context is what lets the crenel parapets paint over
- * the companion's feet (see `.tower-character-layer` z-index).
+ * transformed canvas keeps zoom/pan aligned with the tower.
  */
 export function TowerCharacter({ character }: { character: CharacterDefinition }) {
   const layerRef = useRef<HTMLDivElement | null>(null)
