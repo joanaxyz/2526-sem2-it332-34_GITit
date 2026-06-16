@@ -41,10 +41,12 @@ export function pieceTransformStyle(piece: TowerLayoutPieceDescriptor | null | u
   const scaleX = positiveNumber(transform.scaleX) ?? legacy ?? 1
   const scaleY = positiveNumber(transform.scaleY) ?? legacy ?? 1
   const rotation = finiteNumber(transform.rotation) ?? finiteNumber(transform.rotate) ?? 0
-  if (x === 0 && y === 0 && scaleX === 1 && scaleY === 1 && rotation === 0) return undefined
+  const zIndex = finiteNumber(transform.zIndex) ?? 0
+  if (x === 0 && y === 0 && scaleX === 1 && scaleY === 1 && rotation === 0 && zIndex === 0) return undefined
   return {
     transform: `translate(${x}px, ${y}px) scale(${scaleX}, ${scaleY}) rotate(${rotation}deg)`,
     transformOrigin: 'center center',
+    ...(zIndex !== 0 ? { position: 'relative' as const, zIndex } : {}),
   }
 }
 

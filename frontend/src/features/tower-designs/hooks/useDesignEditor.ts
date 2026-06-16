@@ -126,12 +126,14 @@ export function useDesignEditor(designId: number) {
   const updateArtifact = useMutation({
     mutationFn: ({ placementId, ...input }: {
       placementId: number | string
+      target_piece_instance_id?: number
       x?: number
       y?: number
       scale?: number
       width?: number
       height?: number
       rotation?: number
+      z_index?: number
       role?: TowerArtifactRole
       content_definition_id?: number | null
     }) =>

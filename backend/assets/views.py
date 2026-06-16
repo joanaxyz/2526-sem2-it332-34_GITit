@@ -20,6 +20,7 @@ from assets.models import (
     TowerPieceType,
 )
 from assets.sanitize import sanitize_svg
+from assets.svg_crop import crop_svg_markup
 from assets.sprite_actions import (
     LOOPING_ACTIONS,
     MONSTER_ACTIONS,
@@ -76,7 +77,7 @@ class AssetUploadAPIView(APIView):
         if upload is None:
             raise ValidationError({"file": "A file is required."})
 
-        upload, sanitized = _prepare_tower_upload(upload, field="file")
+        upload, sanitized, cropped_view_box = _prepare_tower_upload(upload, field="file")
 
         piece_type = None
         if kind == KIND_TOWER_PIECE:
@@ -106,7 +107,7 @@ class AssetUploadAPIView(APIView):
             action_upload = request.FILES.get(f"file_{action}") or request.FILES.get(f"sprite_{action}")
             if action_upload is None:
                 continue
-            prepared, _action_sanitized = _prepare_tower_upload(
+            prepared, _, _ = _prepare_tower_upload(
                 action_upload, field=f"file_{action}"
             )
             AssetSprite.objects.create(
@@ -117,11 +118,13 @@ class AssetUploadAPIView(APIView):
                 loops=action != "click",
             )
 
-        view_box = (request.data.get("view_box") or "").strip()
-        parsed_view_box = _parse_view_box(view_box) if view_box else None
+        # `view_box` is kept as a legacy API fallback. SVG uploads now derive it
+        # from the sanitized/cropped image instead of asking authors to scope it.
+        manual_view_box = (request.data.get("view_box") or "").strip()
+        parsed_view_box = _parse_view_box(manual_view_box) if manual_view_box and not cropped_view_box else None
 
         if kind == KIND_TOWER_PIECE:
-            normalized_view_box = _format_view_box(parsed_view_box) if parsed_view_box else ""
+            normalized_view_box = cropped_view_box or (_format_view_box(parsed_view_box) if parsed_view_box else "")
             anchors = _parse_json(request.data.get("anchors")) or {}
             TowerPieceAsset.objects.create(
                 asset=asset,
@@ -130,11 +133,15 @@ class AssetUploadAPIView(APIView):
                 anchors=anchors,
                 svg_sanitized=sanitized,
             )
-        elif parsed_view_box:
-            x, y, width, height = parsed_view_box
+        else:
+            asset_view_box = cropped_view_box or (_format_view_box(parsed_view_box) if parsed_view_box else "")
+            bounds = _parse_view_box(asset_view_box) if asset_view_box else None
+            if not bounds:
+                return Response(asset_descriptor(asset), status=201)
+            x, y, width, height = bounds
             asset.config = {
                 **asset.config,
-                "view_box": _format_view_box(parsed_view_box),
+                "view_box": _format_view_box(bounds),
                 "bounds": {"x": x, "y": y, "width": width, "height": height},
             }
             asset.save(update_fields=["config", "updated_at"])
@@ -248,10 +255,12 @@ def _safe_int(value, *, default: int) -> int:
 def _prepare_tower_upload(upload, *, field: str):
     name = (upload.name or "").lower()
     if name.endswith(".svg"):
-        return ContentFile(sanitize_svg(upload.read()), name=upload.name), True
+        sanitized = sanitize_svg(upload.read())
+        cropped, view_box = crop_svg_markup(sanitized)
+        return ContentFile(cropped, name=upload.name), True, view_box
     if not name.endswith((".png", ".webp", ".gif", ".jpg", ".jpeg")):
         raise ValidationError({field: "Upload an SVG or raster sprite image."})
-    return upload, False
+    return upload, False, None
 
 
 def _unique_slug(*, user, label: str) -> str:

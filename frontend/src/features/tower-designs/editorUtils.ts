@@ -22,16 +22,18 @@ export const INTERACTABLE_ROLES: TowerArtifactRole[] = ['adventure', 'challenge'
 
 /** A piece's free transform, normalized to concrete numbers. Scale is per-axis
  *  (scaleX/scaleY) so pieces can be stretched, not only scaled uniformly. */
-export type PieceTransform = { x: number; y: number; scaleX: number; scaleY: number; rotation: number }
+export type PieceTransform = { x: number; y: number; scaleX: number; scaleY: number; rotation: number; zIndex: number }
 
 /** A staged artifact tweak - only the fields the user changed are present. */
 export type ArtifactEdit = {
+  targetInstanceId?: string
   x?: number
   y?: number
   scale?: number
   rotation?: number
   width?: number
   height?: number
+  zIndex?: number
 }
 
 export type ArtifactTransform = {
@@ -41,9 +43,10 @@ export type ArtifactTransform = {
   rotation: number
   width: number
   height: number
+  zIndex: number
 }
 
-export const IDENTITY_PIECE_TRANSFORM: PieceTransform = { x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: 0 }
+export const IDENTITY_PIECE_TRANSFORM: PieceTransform = { x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: 0, zIndex: 0 }
 
 export const PIECE_SCALE_RANGE = { min: 0.2, max: 2.5 } as const
 export const PIECE_ROTATION_RANGE = { min: -180, max: 180 } as const
@@ -60,6 +63,7 @@ export function readPieceTransform(transform: Record<string, unknown> | null | u
     scaleX: positiveNumber(transform?.scaleX) ?? legacy ?? 1,
     scaleY: positiveNumber(transform?.scaleY) ?? legacy ?? 1,
     rotation: finiteNumber(transform?.rotation) ?? finiteNumber(transform?.rotate) ?? 0,
+    zIndex: finiteNumber(transform?.zIndex) ?? 0,
   }
 }
 
@@ -69,7 +73,8 @@ export function pieceTransformIsIdentity(transform: PieceTransform): boolean {
     transform.y === 0 &&
     transform.scaleX === 1 &&
     transform.scaleY === 1 &&
-    transform.rotation === 0
+    transform.rotation === 0 &&
+    transform.zIndex === 0
   )
 }
 
@@ -83,7 +88,8 @@ export function pieceTransformsEqual(a: PieceTransform, b: PieceTransform): bool
     a.y === b.y &&
     a.scaleX === b.scaleX &&
     a.scaleY === b.scaleY &&
-    a.rotation === b.rotation
+    a.rotation === b.rotation &&
+    a.zIndex === b.zIndex
   )
 }
 
@@ -98,6 +104,7 @@ export function pieceTransformToRecord(transform: PieceTransform): Record<string
     scaleX: transform.scaleX,
     scaleY: transform.scaleY,
     rotation: transform.rotation,
+    zIndex: transform.zIndex,
   }
   if (transform.scaleX === transform.scaleY) record.scale = transform.scaleX
   return record
@@ -111,6 +118,7 @@ export function readArtifactTransform(
     rotation: number
     width: number
     height: number
+    zIndex: number
   },
   edit?: ArtifactEdit,
 ): ArtifactTransform {
@@ -121,6 +129,7 @@ export function readArtifactTransform(
     rotation: finiteNumber(edit?.rotation) ?? artifact.rotation,
     width: positiveNumber(edit?.width) ?? artifact.width,
     height: positiveNumber(edit?.height) ?? artifact.height,
+    zIndex: finiteNumber(edit?.zIndex) ?? artifact.zIndex,
   }
 }
 

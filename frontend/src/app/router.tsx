@@ -1,4 +1,4 @@
-import { Navigate, createBrowserRouter, type RouteObject } from 'react-router-dom'
+import { Navigate, Outlet, createBrowserRouter, type RouteObject } from 'react-router-dom'
 
 import { AuthLayout } from '@/app/layouts/AuthLayout'
 import { HomeLayout } from '@/app/layouts/HomeLayout'
@@ -73,18 +73,6 @@ export const router = createBrowserRouter([
       /* Mine moved inside the Tower page via the in-tower picker (?view=mine). */
       { path: '/my-tower', element: <Navigate replace to="/tower?view=mine" /> },
       {
-        path: '/tower/editor',
-        lazy: async () => ({
-          Component: (await import('@/features/tower-designs/pages/TowerEditorPage')).TowerEditorPage,
-        }),
-      },
-      {
-        path: '/tower/editor/:designId',
-        lazy: async () => ({
-          Component: (await import('@/features/tower-designs/pages/TowerEditorPage')).TowerEditorPage,
-        }),
-      },
-      {
         path: '/authoring',
         lazy: async () => ({
           Component: (await import('@/features/authoring/pages/AuthoringLibraryPage')).AuthoringLibraryPage,
@@ -120,6 +108,29 @@ export const router = createBrowserRouter([
       { path: '/dashboard', element: <Navigate replace to="/home" /> },
       { path: '/stats', element: <Navigate replace to="/home?tab=stats" /> },
       { path: '/performance', element: <Navigate replace to="/home?tab=stats" /> },
+    ],
+  },
+  // The tower editor is its own full-screen surface (no hub chrome, no living
+  // sky) — a focused authoring tool rather than an overlay on the tower page.
+  {
+    element: (
+      <Protected>
+        <Outlet />
+      </Protected>
+    ),
+    children: [
+      {
+        path: '/tower/editor',
+        lazy: async () => ({
+          Component: (await import('@/features/tower-designs/pages/TowerEditorPage')).TowerEditorPage,
+        }),
+      },
+      {
+        path: '/tower/editor/:designId',
+        lazy: async () => ({
+          Component: (await import('@/features/tower-designs/pages/TowerEditorPage')).TowerEditorPage,
+        }),
+      },
     ],
   },
   {

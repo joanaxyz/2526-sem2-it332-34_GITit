@@ -95,7 +95,8 @@ function pieceTransformMapsEqual(a: ReadonlyMap<number, PieceTransform>, b: Read
       value.y !== other.y ||
       value.scaleX !== other.scaleX ||
       value.scaleY !== other.scaleY ||
-      value.rotation !== other.rotation
+      value.rotation !== other.rotation ||
+      value.zIndex !== other.zIndex
     ) {
       return false
     }
@@ -117,7 +118,9 @@ function artifactEditMapsEqual(
       value.scale !== other.scale ||
       value.rotation !== other.rotation ||
       value.width !== other.width ||
-      value.height !== other.height
+      value.height !== other.height ||
+      value.zIndex !== other.zIndex ||
+      value.targetInstanceId !== other.targetInstanceId
     ) {
       return false
     }

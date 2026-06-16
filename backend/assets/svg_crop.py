@@ -1,8 +1,8 @@
-"""Small SVG geometry cropper for deterministic seed assets.
+"""Small SVG geometry cropper for deterministic tower assets.
 
 This intentionally avoids a runtime renderer dependency. The official tower
 piece SVGs are authored from basic SVG primitives, so a conservative geometry
-bounds pass is enough to normalize their root viewBox at seed time.
+bounds pass is enough to normalize their root viewBox at seed/upload time.
 """
 
 from __future__ import annotations

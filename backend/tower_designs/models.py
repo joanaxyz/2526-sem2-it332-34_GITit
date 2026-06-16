@@ -1,3 +1,5 @@
+import math
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -200,51 +202,13 @@ class ArtifactPlacement(models.Model):
         self._validate_safe_bounds()
 
     def _validate_interactable_role(self) -> None:
-        if not self.target_piece_instance_id:
-            return
-        if self.target_piece_instance.piece_type == TOWER_PIECE_LANDING:
-            raise ValidationError(
-                {"target_piece_instance": "Interactable artifacts cannot be placed on landings."}
-            )
-        if self.target_piece_instance.piece_type != TOWER_PIECE_SECTION:
-            raise ValidationError(
-                {"target_piece_instance": "Interactable artifacts must be placed on a section."}
-            )
         if self.content_definition_id and self.content_definition.kind != self.role:
             raise ValidationError(
                 {"content_definition": "Content kind must match the interactable artifact role."}
             )
-        conflicting = ArtifactPlacement.objects.filter(
-            target_piece_instance=self.target_piece_instance,
-            role__in=INTERACTABLE_ARTIFACT_ROLES,
-        ).exclude(role=self.role)
-        if self.pk:
-            conflicting = conflicting.exclude(pk=self.pk)
-        if conflicting.exists():
-            raise ValidationError(
-                {
-                    "role": (
-                        "A section can hold interactable artifacts for only one content "
-                        "kind."
-                    )
-                }
-            )
-        same_role = ArtifactPlacement.objects.filter(
-            target_piece_instance=self.target_piece_instance,
-            role=self.role,
-        )
-        if self.pk:
-            same_role = same_role.exclude(pk=self.pk)
-        limit = 3 if self.role == ARTIFACT_ROLE_CHALLENGE else 1
-        if same_role.count() >= limit:
-            label = "challenge artifacts" if self.role == ARTIFACT_ROLE_CHALLENGE else "interactable artifact"
-            raise ValidationError(
-                {
-                    "role": (
-                        f"A section can hold at most {limit} {label}."
-                    )
-                }
-            )
+        # No per-piece count, single-kind, or structural caps: the author decides
+        # where interactables go. The only role rule is that bound content matches
+        # the artifact role.
 
     def _validate_safe_bounds(self) -> None:
         if not self.target_piece_instance_id:
@@ -258,8 +222,32 @@ class ArtifactPlacement(models.Model):
         min_y = float(bounds["y"])
         max_x = min_x + float(bounds["width"])
         max_y = min_y + float(bounds["height"])
-        if not (min_x <= self.x <= max_x and min_y <= self.y <= max_y):
+        center_inside = min_x <= self.x <= max_x and min_y <= self.y <= max_y
+        landing_bottom_on_rail = (
+            self.target_piece_instance.piece_type == TOWER_PIECE_LANDING
+            and min_x <= self.x <= max_x
+            and self._bottom_edge_hits_landing_rail(detail, min_y, max_y)
+        )
+        if not (center_inside or landing_bottom_on_rail):
             raise ValidationError({"x": "Artifact placement is outside the piece safe bounds."})
+
+    def _bottom_edge_hits_landing_rail(self, detail, min_y: float, max_y: float) -> bool:
+        anchors = getattr(detail, "anchors", None) or {}
+        rail = anchors.get("walk_rail") if isinstance(anchors, dict) else None
+        if not isinstance(rail, dict):
+            return False
+        try:
+            rail_y = (float(rail["y1"]) + float(rail["y2"])) / 2
+        except (KeyError, TypeError, ValueError):
+            return False
+        bottom_y = self.y + self._artifact_vertical_radius()
+        return min_y <= bottom_y <= max_y and abs(bottom_y - rail_y) <= 1.0
+
+    def _artifact_vertical_radius(self) -> float:
+        width = max(0.0, float(self.width or 0) * float(self.scale or 1))
+        height = max(0.0, float(self.height or 0) * float(self.scale or 1))
+        radians = math.radians(float(self.rotation or 0))
+        return (abs(math.sin(radians)) * width + abs(math.cos(radians)) * height) / 2
 
     def save(self, *args, **kwargs):
         self.full_clean()

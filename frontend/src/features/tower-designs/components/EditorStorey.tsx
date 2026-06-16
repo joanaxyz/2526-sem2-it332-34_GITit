@@ -22,9 +22,12 @@ import type { ArtifactPlacementDescriptor, TowerDesignOverview } from '@/feature
 import { RoofSpire, TowerLanding, TowerSectionShell } from '@/features/tower-map/components/TowerStoreySection'
 import { TowerArtifact } from '@/features/tower-map/components/TowerArtifact'
 import {
+  artifactSafeBounds,
   clientPointToPiecePoint,
   pieceVariant,
+  pieceViewBox,
   towerDescriptorFor,
+  walkRailAnchor,
 } from '@/features/tower-map/components/towerPieceData'
 import type {
   TowerArtifactAssetDescriptor,
@@ -36,15 +39,24 @@ import { cn } from '@/shared/utils/cn'
 
 export type EditorDragPayload =
   | { source: 'asset-piece'; assetId: number; slug: string; pieceType: string }
-  | {
-    source: 'asset-artifact'
-    assetId: number
-    slug: string
-    role: TowerArtifactRole
-    contentDefinitionId?: number | null
-  }
+  // Artifacts always place as `normal`; the author promotes one to interactive
+  // (and binds content) from the inspector, so the payload carries no role.
+  | { source: 'asset-artifact'; assetId: number; slug: string }
 
 export type PlacementDraft = Extract<EditorDragPayload, { source: 'asset-artifact' }> | null
+
+type ArtifactDropResolution =
+  | { status: 'ok'; pieceId: number; targetInstanceId: string; x: number; y: number }
+  | { status: 'none' }
+
+type PieceDropTarget = {
+  piece: TowerLayoutPieceDescriptor
+  pieceId: number
+  element: HTMLElement
+}
+type PiecePoint = { x: number; y: number }
+type WalkRail = { x1: number; y1: number; x2: number; y2: number }
+type ArtifactFootprint = Pick<ArtifactPlacementDescriptor, 'width' | 'height' | 'scale' | 'rotation'>
 
 // Placed artifacts layer above a selected piece's transform frame (z-index 1)
 // so they keep receiving pointer events; see the gizmo z-index note in CSS.
@@ -52,6 +64,9 @@ const ARTIFACT_Z_BASE = 10
 // Smallest on-screen artifact box, in piece viewBox units, so a resize can't
 // collapse a placement to nothing.
 const ARTIFACT_MIN_DISPLAY = 6
+const CENTER_SNAP_PX = 16
+const LANDING_TARGET_BAND_PX = 28
+const LANDING_TARGET_X_PAD_PX = 10
 
 const RESIZE_HANDLES: ResizeHandle[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w']
 
@@ -76,7 +91,6 @@ export function EditorStorey({
   onTransformArtifact,
   onTransformPiece,
   onGestureEnd,
-  onRejectPlacement,
 }: {
   overview: TowerDesignOverview
   pieceDescriptorBySlug: Record<string, TowerPieceAssetDescriptor>
@@ -93,25 +107,17 @@ export function EditorStorey({
   onSelectPiece: (pieceId: number) => void
   onSelectArtifact: (artifactId: number | string, pieceId: number | null) => void
   onSwapAsset: (pieceId: number, assetId: number) => void
-  onPlaceArtifact: (
-    pieceId: number,
-    assetId: number,
-    role: TowerArtifactRole,
-    contentDefinitionId: number | null | undefined,
-    x: number,
-    y: number,
-  ) => void
-  onMoveArtifact: (placementId: number | string, x: number, y: number) => void
+  onPlaceArtifact: (pieceId: number, assetId: number, x: number, y: number) => void
+  onMoveArtifact: (placementId: number | string, targetInstanceId: string, x: number, y: number) => void
   onTransformArtifact: (placementId: number | string, next: ArtifactTransform) => void
   onTransformPiece: (pieceId: number, next: PieceTransform) => void
   /** Close the current undo-coalescing window when a drag gesture ends. */
   onGestureEnd: () => void
-  /** Explain why a drop was refused, so the canvas isn't a silent red flash. */
-  onRejectPlacement?: (reason: string) => void
 }) {
   const layout = overview.tower_layout
-  const artifactsByInstance = useMemo(() => groupArtifacts(overview.artifacts), [overview.artifacts])
+  const artifactsByInstance = useMemo(() => groupArtifacts(overview.artifacts, artifactEdits), [overview.artifacts, artifactEdits])
   const [dropHoverId, setDropHoverId] = useState<number | null>(null)
+  const [dropRejectHoverId, setDropRejectHoverId] = useState<number | null>(null)
   const [rejectedId, setRejectedId] = useState<number | null>(null)
 
   function descriptorFor(piece: TowerLayoutPieceDescriptor): TowerPieceAssetDescriptor | null {
@@ -139,59 +145,290 @@ export function EditorStorey({
       isArtifactContext && 'editor-piece--artifact-context',
       pieceId !== null && pendingSwaps.has(pieceId) && 'editor-piece--pending',
       pieceId !== null && pieceId === dropHoverId && 'editor-piece--drop',
-      pieceId !== null && pieceId === rejectedId && 'editor-piece--reject',
+      pieceId !== null && (pieceId === dropRejectHoverId || pieceId === rejectedId) && 'editor-piece--reject',
     )
   }
 
-  // Returns null when the drop is allowed, or a human reason when it is not.
-  // Mirrors the server's ArtifactPlacement validation so the canvas refuses the
-  // same drops the API would, but with an explanation instead of a 400.
-  function placeRejectReason(piece: TowerLayoutPieceDescriptor, payload: PlacementDraft): string | null {
-    if (!payload) return 'Nothing to place.'
-    if (payload.role === 'normal') return null
-    if (piece.pieceType !== 'section') return 'Interactive artifacts can only sit on a tower section.'
-    const interactables = (artifactsByInstance.get(piece.instanceId) ?? []).filter(
-      (artifact) => artifact.role !== 'normal',
-    )
-    if (payload.role === 'challenge') {
-      if (interactables.some((artifact) => artifact.role !== 'challenge')) {
-        return 'This section already holds a different content kind.'
-      }
-      if (interactables.length >= 3) return 'A section holds at most three challenges.'
-      return null
-    }
-    if (interactables.length > 0) return 'This section already has an interactive artifact (only one is allowed).'
-    return null
-  }
-
-  function canPlaceArtifact(piece: TowerLayoutPieceDescriptor, payload: PlacementDraft) {
-    return placeRejectReason(piece, payload) === null
-  }
-
-  function placePayloadOnPiece(
-    piece: TowerLayoutPieceDescriptor,
+  function placePayloadAtPoint(
     payload: PlacementDraft,
-    target: HTMLElement,
     clientX: number,
     clientY: number,
+    fallback?: PieceDropTarget,
   ) {
-    const pieceId = pieceIdFromInstance(piece.instanceId)
-    if (pieceId === null || !payload) return
-    const reason = placeRejectReason(piece, payload)
-    if (reason !== null) {
-      flashReject(pieceId)
-      onRejectPlacement?.(reason)
-      return
+    if (!payload) return
+    const footprint = artifactFootprintForPayload(payload)
+    const target = pieceDropTargetAtPoint(clientX, clientY, fallback, footprint)
+    if (!target) return
+    // Every placed artifact starts normal, so a drop is always allowed anywhere.
+    const point = artifactPointForDrop(target, clientX, clientY, footprint)
+    onPlaceArtifact(target.pieceId, payload.assetId, point.x, point.y)
+  }
+
+  function artifactFootprintForPayload(payload: PlacementDraft): ArtifactFootprint {
+    const descriptor = payload ? artifactDescriptorBySlug[payload.slug] ?? null : null
+    const size = artifactDefaultSize(descriptor)
+    return { width: size.width, height: size.height, scale: 1, rotation: 0 }
+  }
+
+  function artifactDefaultSize(descriptor: TowerArtifactAssetDescriptor | null) {
+    const bounds = descriptor?.config?.bounds
+    if (isArtifactBounds(bounds)) return { width: bounds.width, height: bounds.height }
+    const sprite = descriptor?.sprites.default ?? (descriptor ? Object.values(descriptor.sprites)[0] : null)
+    return { width: sprite?.frame_width || 64, height: sprite?.frame_height || 64 }
+  }
+
+  function targetFromElement(element: HTMLElement): PieceDropTarget | null {
+    const instanceId = element.dataset.pieceId
+    if (!instanceId) return null
+    const piece = layout.pieces.find((candidate) => candidate.instanceId === instanceId) ?? null
+    const pieceId = piece ? pieceIdFromInstance(piece.instanceId) : null
+    if (!piece || pieceId === null) return null
+    return { piece, pieceId, element }
+  }
+
+  function pieceDropTargetsAtPoint(clientX: number, clientY: number): PieceDropTarget[] {
+    const seen = new Set<HTMLElement>()
+    const targets: PieceDropTarget[] = []
+    for (const element of document.elementsFromPoint(clientX, clientY)) {
+      if (!(element instanceof HTMLElement)) continue
+      const pieceElement = element.closest<HTMLElement>('.editor-piece[data-piece-id]')
+      if (!pieceElement || seen.has(pieceElement)) continue
+      seen.add(pieceElement)
+      const target = targetFromElement(pieceElement)
+      if (target) targets.push(target)
     }
-    const point = clientPointToPiecePoint(clientX, clientY, target, descriptorFor(piece), variantForPiece(piece))
-    onPlaceArtifact(
-      pieceId,
-      payload.assetId,
-      payload.role,
-      payload.contentDefinitionId,
-      Math.round(point.x),
-      Math.round(point.y),
+    return targets
+  }
+
+  function pieceDropTargetAtPoint(
+    clientX: number,
+    clientY: number,
+    fallback?: PieceDropTarget,
+    footprint?: ArtifactFootprint,
+  ) {
+    const railTarget = landingRailTargetAtPoint(clientX, clientY, footprint)
+    if (railTarget) return railTarget
+
+    const targets = pieceDropTargetsAtPoint(clientX, clientY)
+    if (fallback && !targets.some((target) => target.element === fallback.element)) targets.push(fallback)
+    if (!targets.length) return null
+
+    const landing = bestLandingTarget(targets, clientX, clientY, footprint)
+    return landing ?? targets[0]
+  }
+
+  function pieceDropTargetForInstance(targetInstanceId: string): PieceDropTarget | null {
+    const piece = layout.pieces.find((candidate) => candidate.instanceId === targetInstanceId) ?? null
+    const pieceId = piece ? pieceIdFromInstance(piece.instanceId) : null
+    if (!piece || pieceId === null) return null
+    const element =
+      Array.from(document.querySelectorAll<HTMLElement>('.editor-piece[data-piece-id]')).find(
+        (candidate) => candidate.dataset.pieceId === targetInstanceId,
+      ) ?? null
+    if (!element) return null
+    return { piece, pieceId, element }
+  }
+
+  function landingRailTargetAtPoint(clientX: number, clientY: number, footprint?: ArtifactFootprint) {
+    return Array.from(document.querySelectorAll<HTMLElement>('.editor-piece[data-piece-id]'))
+      .map(targetFromElement)
+      .filter((target): target is PieceDropTarget => target?.piece.pieceType === 'landing')
+      .map((target) => ({ target, distance: landingRailDistancePx(target, clientY, footprint) }))
+      .filter(({ target, distance }) => isLandingRailCandidate(target, clientX, clientY, distance, footprint))
+      .sort((a, b) => a.distance - b.distance)[0]?.target ?? null
+  }
+
+  function bestLandingTarget(
+    targets: PieceDropTarget[],
+    clientX: number,
+    clientY: number,
+    footprint?: ArtifactFootprint,
+  ) {
+    return targets
+      .filter((target) => target.piece.pieceType === 'landing')
+      .map((target) => ({ target, distance: landingRailDistancePx(target, clientY, footprint) }))
+      .filter(({ target, distance }) => isLandingRailCandidate(target, clientX, clientY, distance, footprint))
+      .sort((a, b) => a.distance - b.distance)[0]?.target ?? null
+  }
+
+  function artifactPointForDrop(
+    target: PieceDropTarget,
+    clientX: number,
+    clientY: number,
+    footprint: ArtifactFootprint,
+  ) {
+    const descriptor = descriptorFor(target.piece)
+    const variant = variantForPiece(target.piece)
+    const point = clientPointToPiecePoint(clientX, clientY, target.element, descriptor, variant)
+    return snapArtifactPoint(target, point, footprint, { clientX, clientY })
+  }
+
+  function snapArtifactPointForInstance(
+    targetInstanceId: string,
+    x: number,
+    y: number,
+    footprint: ArtifactFootprint,
+  ): PiecePoint {
+    const target = pieceDropTargetForInstance(targetInstanceId)
+    return target ? snapArtifactPoint(target, { x, y }, footprint) : { x: Math.round(x), y: Math.round(y) }
+  }
+
+  function snapArtifactPoint(
+    target: PieceDropTarget,
+    point: PiecePoint,
+    footprint: ArtifactFootprint,
+    pointer?: { clientX: number; clientY: number },
+  ): PiecePoint {
+    const descriptor = descriptorFor(target.piece)
+    const variant = variantForPiece(target.piece)
+    const bounds = artifactSafeBounds(descriptor, variant) ?? pieceViewBox(descriptor, variant)
+    let x = clampNumber(point.x, bounds.x, bounds.x + bounds.width)
+    let y = clampNumber(point.y, bounds.y, bounds.y + bounds.height)
+
+    if (target.piece.pieceType === 'landing') {
+      const rail = numericWalkRail(descriptor, variant)
+      if (rail) {
+        const railMinX = Math.max(bounds.x, Math.min(rail.x1, rail.x2))
+        const railMaxX = Math.min(bounds.x + bounds.width, Math.max(rail.x1, rail.x2))
+        const railCenterX = railMinX <= railMaxX ? (railMinX + railMaxX) / 2 : bounds.x + bounds.width / 2
+        x = railMinX <= railMaxX ? clampNumber(x, railMinX, railMaxX) : x
+        y = (rail.y1 + rail.y2) / 2 - artifactVerticalRadius(footprint)
+        if (shouldSnapAxis(target.element, descriptor, variant, 'x', x, railCenterX, pointer?.clientX)) {
+          x = railCenterX
+        }
+      } else {
+        y = bounds.y - artifactVerticalRadius(footprint)
+        const centerX = bounds.x + bounds.width / 2
+        if (shouldSnapAxis(target.element, descriptor, variant, 'x', x, centerX, pointer?.clientX)) x = centerX
+      }
+      return { x: Math.round(x), y: Math.round(y) }
+    }
+
+    const centerX = bounds.x + bounds.width / 2
+    const centerY = bounds.y + bounds.height / 2
+    if (shouldSnapAxis(target.element, descriptor, variant, 'x', x, centerX, pointer?.clientX)) x = centerX
+    if (shouldSnapAxis(target.element, descriptor, variant, 'y', y, centerY, pointer?.clientY)) y = centerY
+    return { x: Math.round(x), y: Math.round(y) }
+  }
+
+  function landingRailDistancePx(target: PieceDropTarget, clientY: number, footprint?: ArtifactFootprint) {
+    const descriptor = descriptorFor(target.piece)
+    const variant = variantForPiece(target.piece)
+    const rail = numericWalkRail(descriptor, variant)
+    if (!rail) return Math.abs(clientY - target.element.getBoundingClientRect().top)
+    const railY = (rail.y1 + rail.y2) / 2
+    const railClientY = pieceCoordToClient(target.element, descriptor, variant, 'y', railY)
+    const centerDistance = Math.abs(clientY - railClientY)
+    if (!footprint) return centerDistance
+    const bottomDistance = Math.abs(clientY + artifactVerticalRadiusPx(target, footprint) - railClientY)
+    return Math.min(centerDistance, bottomDistance)
+  }
+
+  function isLandingRailCandidate(
+    target: PieceDropTarget,
+    clientX: number,
+    clientY: number,
+    distance: number,
+    footprint?: ArtifactFootprint,
+  ) {
+    if (pointInsideElement(target.element, clientX, clientY)) return true
+    if (distance > LANDING_TARGET_BAND_PX) return false
+    const rail = landingRailClientXRange(target)
+    if (!rail) return pointInsideElement(target.element, clientX, clientY)
+    const horizontalRadius = footprint ? artifactHorizontalRadiusPx(target, footprint) : 0
+    return (
+      clientX >= rail.min - LANDING_TARGET_X_PAD_PX - horizontalRadius &&
+      clientX <= rail.max + LANDING_TARGET_X_PAD_PX + horizontalRadius
     )
+  }
+
+  function landingRailClientXRange(target: PieceDropTarget) {
+    const descriptor = descriptorFor(target.piece)
+    const variant = variantForPiece(target.piece)
+    const rail = numericWalkRail(descriptor, variant)
+    if (!rail) return null
+    const x1 = pieceCoordToClient(target.element, descriptor, variant, 'x', rail.x1)
+    const x2 = pieceCoordToClient(target.element, descriptor, variant, 'x', rail.x2)
+    return { min: Math.min(x1, x2), max: Math.max(x1, x2) }
+  }
+
+  function artifactHorizontalRadiusPx(target: PieceDropTarget, footprint: ArtifactFootprint) {
+    const descriptor = descriptorFor(target.piece)
+    const variant = variantForPiece(target.piece)
+    const box = pieceViewBox(descriptor, variant)
+    const rect = target.element.getBoundingClientRect()
+    return (artifactHorizontalRadius(footprint) / Math.max(box.width, 1)) * rect.width
+  }
+
+  function artifactVerticalRadiusPx(target: PieceDropTarget, footprint: ArtifactFootprint) {
+    const descriptor = descriptorFor(target.piece)
+    const variant = variantForPiece(target.piece)
+    const box = pieceViewBox(descriptor, variant)
+    const rect = target.element.getBoundingClientRect()
+    return (artifactVerticalRadius(footprint) / Math.max(box.height, 1)) * rect.height
+  }
+
+  function pointInsideElement(element: HTMLElement, clientX: number, clientY: number) {
+    const rect = element.getBoundingClientRect()
+    return clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom
+  }
+
+  function shouldSnapAxis(
+    element: HTMLElement,
+    descriptor: TowerPieceAssetDescriptor | null,
+    variant: string | undefined,
+    axis: 'x' | 'y',
+    value: number,
+    targetValue: number,
+    pointerClientValue?: number,
+  ) {
+    const valueClient = pointerClientValue ?? pieceCoordToClient(element, descriptor, variant, axis, value)
+    const targetClient = pieceCoordToClient(element, descriptor, variant, axis, targetValue)
+    return Math.abs(valueClient - targetClient) <= CENTER_SNAP_PX
+  }
+
+  function pieceCoordToClient(
+    element: HTMLElement,
+    descriptor: TowerPieceAssetDescriptor | null,
+    variant: string | undefined,
+    axis: 'x' | 'y',
+    value: number,
+  ) {
+    const rect = element.getBoundingClientRect()
+    const box = pieceViewBox(descriptor, variant)
+    if (axis === 'x') return rect.left + ((value - box.x) / Math.max(box.width, 1)) * rect.width
+    return rect.top + ((value - box.y) / Math.max(box.height, 1)) * rect.height
+  }
+
+  function resolveArtifactDrop(
+    artifact: ArtifactFootprint,
+    clientX: number,
+    clientY: number,
+  ): ArtifactDropResolution {
+    const target = pieceDropTargetAtPoint(clientX, clientY, undefined, artifact)
+    if (!target) {
+      setDropHoverId(null)
+      setDropRejectHoverId(null)
+      return { status: 'none' }
+    }
+
+    setDropHoverId(target.pieceId)
+    setDropRejectHoverId(null)
+
+    const point = artifactPointForDrop(target, clientX, clientY, artifact)
+    return {
+      status: 'ok',
+      pieceId: target.pieceId,
+      targetInstanceId: target.piece.instanceId,
+      x: point.x,
+      y: point.y,
+    }
+  }
+
+  function finishArtifactDrag() {
+    setDropHoverId(null)
+    setDropRejectHoverId(null)
+    onGestureEnd()
   }
 
   function regionHandlers(piece: TowerLayoutPieceDescriptor, pieceId: number | null) {
@@ -211,7 +448,11 @@ export function EditorStorey({
         }
 
         if (placementDraft) {
-          placePayloadOnPiece(piece, placementDraft, event.currentTarget, event.clientX, event.clientY)
+          placePayloadAtPoint(placementDraft, event.clientX, event.clientY, {
+            piece,
+            pieceId,
+            element: event.currentTarget,
+          })
           return
         }
 
@@ -223,22 +464,35 @@ export function EditorStorey({
           onSelectPiece(pieceId)
         }
       },
-      onDragOver: (event: React.DragEvent) => {
+      onDragOver: (event: React.DragEvent<HTMLElement>) => {
         event.preventDefault()
         const payload = readDrag(event)
-        const canDrop =
-          payload?.source === 'asset-piece'
-            ? payload.pieceType === piece.pieceType
-            : payload?.source === 'asset-artifact'
-              ? canPlaceArtifact(piece, payload)
-              : false
+        // Artifacts place as normal anywhere; pieces must match the slot type.
+        if (payload?.source === 'asset-artifact') {
+          const footprint = artifactFootprintForPayload(payload)
+          const target = pieceDropTargetAtPoint(event.clientX, event.clientY, {
+            piece,
+            pieceId,
+            element: event.currentTarget,
+          }, footprint)
+          event.dataTransfer.dropEffect = target ? 'copy' : 'none'
+          setDropHoverId(target?.pieceId ?? null)
+          setDropRejectHoverId(null)
+          return
+        }
+        const canDrop = payload?.source === 'asset-piece' && payload.pieceType === piece.pieceType
         event.dataTransfer.dropEffect = canDrop ? 'copy' : 'none'
         setDropHoverId(pieceId)
+        setDropRejectHoverId(canDrop ? null : pieceId)
       },
-      onDragLeave: () => setDropHoverId((id) => (id === pieceId ? null : id)),
+      onDragLeave: () => {
+        setDropHoverId((id) => (id === pieceId ? null : id))
+        setDropRejectHoverId((id) => (id === pieceId ? null : id))
+      },
       onDrop: (event: React.DragEvent<HTMLElement>) => {
         event.preventDefault()
         setDropHoverId(null)
+        setDropRejectHoverId(null)
         const payload = readDrag(event)
         if (!payload) return
         if (payload.source === 'asset-piece') {
@@ -246,7 +500,11 @@ export function EditorStorey({
           else flashReject(pieceId)
           return
         }
-        placePayloadOnPiece(piece, payload, event.currentTarget, event.clientX, event.clientY)
+        placePayloadAtPoint(payload, event.clientX, event.clientY, {
+          piece,
+          pieceId,
+          element: event.currentTarget,
+        })
       },
     }
   }
@@ -263,10 +521,8 @@ export function EditorStorey({
   ): ReactNode {
     const placements = artifactsByInstance.get(piece.instanceId)
     if (!placements?.length) return null
-    // Artifacts sit above the piece's transform frame (ARTIFACT_Z_BASE) so they
-    // stay clickable while the piece is selected. The selected artifact rides one
-    // step above its siblings rather than at an arbitrary 100000.
-    const topSiblingZ = Math.max(0, ...placements.map((artifact) => artifact.zIndex ?? 0))
+    // Artifacts sit above the piece's transform frame by default, then the
+    // author's z-index value controls ordering among sibling artifacts.
     return placements.map((artifact) => {
       const edit = artifactEdits.get(artifact.id)
       const transformed = readArtifactTransform(artifact, edit)
@@ -276,8 +532,9 @@ export function EditorStorey({
           key={artifact.id}
           artifact={{
             ...artifact,
+            targetInstanceId: edit?.targetInstanceId ?? artifact.targetInstanceId,
             ...transformed,
-            zIndex: ARTIFACT_Z_BASE + (selected ? topSiblingZ + 1 : artifact.zIndex ?? 0),
+            zIndex: ARTIFACT_Z_BASE + transformed.zIndex,
           }}
           artifactDescriptor={artifactDescriptorBySlug[artifact.assetSlug] ?? null}
           pieceDescriptor={pieceDescriptor}
@@ -286,8 +543,10 @@ export function EditorStorey({
           zoomScale={zoomScale}
           onSelectArtifact={() => onSelectArtifact(artifact.id, pieceId ?? null)}
           onMoveArtifact={onMoveArtifact}
+          onResolveArtifactDrop={resolveArtifactDrop}
+          onSnapArtifactPoint={snapArtifactPointForInstance}
           onTransformArtifact={(next) => onTransformArtifact(artifact.id, next)}
-          onGestureEnd={onGestureEnd}
+          onArtifactDragEnd={finishArtifactDrag}
         />
       )
     })
@@ -544,8 +803,10 @@ function EditableArtifact({
   zoomScale,
   onSelectArtifact,
   onMoveArtifact,
+  onResolveArtifactDrop,
+  onSnapArtifactPoint,
   onTransformArtifact,
-  onGestureEnd,
+  onArtifactDragEnd,
 }: {
   artifact: ArtifactPlacementDescriptor
   artifactDescriptor: TowerArtifactAssetDescriptor | null
@@ -554,22 +815,22 @@ function EditableArtifact({
   selected: boolean
   zoomScale: number
   onSelectArtifact: () => void
-  onMoveArtifact: (placementId: number | string, x: number, y: number) => void
+  onMoveArtifact: (placementId: number | string, targetInstanceId: string, x: number, y: number) => void
+  onResolveArtifactDrop: (artifact: ArtifactFootprint, clientX: number, clientY: number) => ArtifactDropResolution
+  onSnapArtifactPoint: (targetInstanceId: string, x: number, y: number, footprint: ArtifactFootprint) => PiecePoint
   onTransformArtifact: (next: ArtifactTransform) => void
-  onGestureEnd: () => void
+  onArtifactDragEnd: () => void
 }) {
   function onPointerDown(event: React.PointerEvent<HTMLElement>) {
     event.stopPropagation()
     event.preventDefault()
     onSelectArtifact()
-    const host = (event.currentTarget as HTMLElement).closest('.editor-piece')
-    if (!(host instanceof HTMLElement)) return
-    const hostEl: HTMLElement = host
     function move(ev: PointerEvent) {
-      const point = clientPointToPiecePoint(ev.clientX, ev.clientY, hostEl, pieceDescriptor, pieceVariant)
-      onMoveArtifact(artifact.id, Math.round(point.x), Math.round(point.y))
+      const drop = onResolveArtifactDrop(artifact, ev.clientX, ev.clientY)
+      if (drop.status !== 'ok') return
+      onMoveArtifact(artifact.id, drop.targetInstanceId, drop.x, drop.y)
     }
-    trackPointer(move, onGestureEnd)
+    trackPointer(move, onArtifactDragEnd)
   }
 
   return (
@@ -587,8 +848,12 @@ function EditableArtifact({
           pieceDescriptor={pieceDescriptor}
           pieceVariant={pieceVariant}
           zoomScale={zoomScale}
+          onMoveArtifact={onMoveArtifact}
+          onResolveArtifactDrop={onResolveArtifactDrop}
+          onSnapArtifactPoint={onSnapArtifactPoint}
           onChange={onTransformArtifact}
-          onGestureEnd={onGestureEnd}
+          onArtifactDragEnd={onArtifactDragEnd}
+          onGestureEnd={onArtifactDragEnd}
         />
       ) : null}
     </TowerArtifact>
@@ -600,14 +865,22 @@ function ArtifactTransformFrame({
   pieceDescriptor,
   pieceVariant,
   zoomScale,
+  onMoveArtifact,
+  onResolveArtifactDrop,
+  onSnapArtifactPoint,
   onChange,
+  onArtifactDragEnd,
   onGestureEnd,
 }: {
   artifact: ArtifactPlacementDescriptor
   pieceDescriptor: TowerPieceAssetDescriptor | null
   pieceVariant?: string
   zoomScale: number
+  onMoveArtifact: (placementId: number | string, targetInstanceId: string, x: number, y: number) => void
+  onResolveArtifactDrop: (artifact: ArtifactFootprint, clientX: number, clientY: number) => ArtifactDropResolution
+  onSnapArtifactPoint: (targetInstanceId: string, x: number, y: number, footprint: ArtifactFootprint) => PiecePoint
   onChange: (next: ArtifactTransform) => void
+  onArtifactDragEnd: () => void
   onGestureEnd: () => void
 }) {
   const transform = readArtifactTransform(artifact)
@@ -625,13 +898,28 @@ function ArtifactTransformFrame({
     const startPoint = clientPointToPiecePoint(event.clientX, event.clientY, host, pieceDescriptor, pieceVariant)
     const start = transform
     trackPointer((moveEvent) => {
+      const drop = onResolveArtifactDrop(artifact, moveEvent.clientX, moveEvent.clientY)
+      if (drop.status !== 'ok') return
+
+      if (drop.targetInstanceId !== artifact.targetInstanceId) {
+        onMoveArtifact(artifact.id, drop.targetInstanceId, drop.x, drop.y)
+        return
+      }
+
       const point = clientPointToPiecePoint(moveEvent.clientX, moveEvent.clientY, host, pieceDescriptor, pieceVariant)
-      onChange({
-        ...start,
-        x: Math.round(start.x + point.x - startPoint.x),
-        y: Math.round(start.y + point.y - startPoint.y),
-      })
-    }, onGestureEnd)
+      const next = onSnapArtifactPoint(
+        artifact.targetInstanceId,
+        start.x + point.x - startPoint.x,
+        start.y + point.y - startPoint.y,
+        artifact,
+      )
+      onMoveArtifact(
+        artifact.id,
+        artifact.targetInstanceId,
+        next.x,
+        next.y,
+      )
+    }, onArtifactDragEnd)
   }
 
   // Handles drive the artifact's box (width/height) non-uniformly while its
@@ -719,16 +1007,52 @@ function readDrag(event: React.DragEvent): EditorDragPayload | null {
   }
 }
 
+function numericWalkRail(
+  descriptor: TowerPieceAssetDescriptor | null,
+  variant?: string,
+): WalkRail | null {
+  const rail = walkRailAnchor(descriptor, variant)
+  if (!rail) return null
+  const { x1, y1, x2, y2 } = rail
+  if (x1 === null || y1 === null || x2 === null || y2 === null) return null
+  return { x1, y1, x2, y2 }
+}
+
+function artifactHorizontalRadius(footprint: ArtifactFootprint) {
+  const width = Math.max(0, footprint.width * footprint.scale)
+  const height = Math.max(0, footprint.height * footprint.scale)
+  const radians = (footprint.rotation * Math.PI) / 180
+  return (Math.abs(Math.cos(radians)) * width + Math.abs(Math.sin(radians)) * height) / 2
+}
+
+function artifactVerticalRadius(footprint: ArtifactFootprint) {
+  const width = Math.max(0, footprint.width * footprint.scale)
+  const height = Math.max(0, footprint.height * footprint.scale)
+  const radians = (footprint.rotation * Math.PI) / 180
+  return (Math.abs(Math.sin(radians)) * width + Math.abs(Math.cos(radians)) * height) / 2
+}
+
+function isArtifactBounds(value: unknown): value is { width: number; height: number } {
+  if (typeof value !== 'object' || value === null) return false
+  const maybe = value as { width?: unknown; height?: unknown }
+  return Number.isFinite(Number(maybe.width)) && Number.isFinite(Number(maybe.height))
+}
+
 function firstInteractableRole(artifacts: ArtifactPlacementDescriptor[]): TowerArtifactRole {
   return artifacts.find((artifact) => artifact.role !== 'normal')?.role ?? 'normal'
 }
 
-function groupArtifacts(artifacts: ArtifactPlacementDescriptor[]) {
+function groupArtifacts(
+  artifacts: ArtifactPlacementDescriptor[],
+  artifactEdits?: ReadonlyMap<number | string, ArtifactEdit>,
+) {
   const map = new Map<string, ArtifactPlacementDescriptor[]>()
   for (const artifact of artifacts) {
-    const list = map.get(artifact.targetInstanceId) ?? []
-    list.push(artifact)
-    map.set(artifact.targetInstanceId, list)
+    const targetInstanceId = artifactEdits?.get(artifact.id)?.targetInstanceId ?? artifact.targetInstanceId
+    const placed = targetInstanceId === artifact.targetInstanceId ? artifact : { ...artifact, targetInstanceId }
+    const list = map.get(targetInstanceId) ?? []
+    list.push(placed)
+    map.set(targetInstanceId, list)
   }
   return map
 }

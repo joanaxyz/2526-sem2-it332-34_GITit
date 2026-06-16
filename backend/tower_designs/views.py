@@ -193,6 +193,7 @@ class ArtifactPlacementDetailAPIView(APIView):
         TowerDesignService().assert_owner(user=request.user, design=design)
         placement = ArtifactPlacement.objects.get(id=placement_id, tower_design=design)
         for field in (
+            "target_piece_instance_id",
             "x",
             "y",
             "scale",

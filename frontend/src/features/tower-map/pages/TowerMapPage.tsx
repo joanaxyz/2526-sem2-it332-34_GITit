@@ -21,10 +21,8 @@ import { TowerStoreySection } from '@/features/tower-map/components/TowerStoreyS
 import { SkyClock } from '@/features/tower-map/components/SkyClock'
 import { TowerActionButton } from '@/features/tower-map/components/TowerActionButton'
 import { TowerControls, type TowerView } from '@/features/tower-map/components/TowerControls'
-import { InTowerEditor } from '@/features/tower-map/editor/InTowerEditor'
 import { useZoomPan, type ZoomPan } from '@/features/tower-map/editor/useZoomPan'
 import { PrivateTowerStack } from '@/features/tower-designs/components/PrivateTowerStack'
-import { useTowerDesignEditor } from '@/features/tower-designs/hooks/useTowerDesignEditor'
 import { useTowerSelection } from '@/features/tower-map/hooks/useTowerSelection'
 import { computeSky } from '@/features/tower-map/sky/useTowerSky'
 import { clamp, lerp, mulberry32 } from '@/features/tower-map/towerLayoutRandom'
@@ -203,7 +201,6 @@ export function TowerMapPage() {
   const storeyParam = searchParams.get('storey')
   const focusedStoreyId = storeyParam ? Number(storeyParam) : null
   const view: TowerView = searchParams.get('view') === 'mine' ? 'mine' : 'official'
-  const editMode = searchParams.get('mode') === 'edit'
   const setView = useCallback(
     (next: TowerView) => {
       setSearchParams(
@@ -217,22 +214,6 @@ export function TowerMapPage() {
     },
     [setSearchParams],
   )
-  // Editing happens IN this page (no route change): `?mode=edit` swaps the
-  // stage for the editor; `?design=<id>` targets a specific design (the personal
-  // tower by default, or the official fork when editing the official tower).
-  const { design: personalDesign } = useTowerDesignEditor()
-  const editDesignParam = searchParams.get('design')
-  const editDesignId = editDesignParam ? Number(editDesignParam) : personalDesign?.id ?? null
-  const exitEdit = useCallback(() => {
-    setSearchParams(
-      (params) => {
-        params.delete('mode')
-        params.delete('design')
-        return params
-      },
-      { replace: true },
-    )
-  }, [setSearchParams])
   const storeysQuery = useQuery({
     queryKey: queryKeys.storeys,
     queryFn: towerMapApi.listStoreys,
@@ -478,7 +459,7 @@ export function TowerMapPage() {
     }
   }, [storeys.length])
 
-  if (view === 'official' && !editMode) {
+  if (view === 'official') {
     if (storeysQuery.isLoading) {
       return (
         <LoadingState
@@ -512,87 +493,60 @@ export function TowerMapPage() {
         <div className="tower-starfield tower-starfield--near" />
       </div>
 
-      {/* In edit mode the editor owns all the chrome (its command bar carries the
-          exit, zoom, and identity), so the view-mode clock dial and control
-          cluster are suppressed to keep the right side clear. The ambient sky
-          above still animates. */}
-      {!editMode ? (
-        <>
-          <SkyClock
-            timeOfDay={timeOfDay}
-            onScrub={handleScrub}
-            running={running}
-            onToggleRunning={toggleRunning}
-            phaseLabel={phaseLabel}
-          />
+      <SkyClock
+        timeOfDay={timeOfDay}
+        onScrub={handleScrub}
+        running={running}
+        onToggleRunning={toggleRunning}
+        phaseLabel={phaseLabel}
+      />
 
-          <TowerControls
-            view={view}
-            editMode={editMode}
-            onViewChange={setView}
-            onEditModeExit={exitEdit}
-          />
-        </>
+      <TowerControls view={view} onViewChange={setView} />
+
+      {view === 'official' && activeStorey ? (
+        <aside className="tower-storey-dock" aria-label="Current storey overview">
+          <StoreyOverview key={activeStorey.id} storey={activeStorey} />
+        </aside>
       ) : null}
 
-      {editMode ? (
-        // Edit mode keeps only the living sky; the editor takes the rest.
-        editDesignId !== null ? (
-          <InTowerEditor designId={editDesignId} onExit={exitEdit} />
+      {view === 'official' && activeStorey ? (
+        <aside className="tower-artifact-dock" aria-label="Selected artifact controls">
+          {artifactOverviewStoreyId ? <ArtifactOverview storeyId={artifactOverviewStoreyId} /> : null}
+          <TowerActionButton />
+        </aside>
+      ) : null}
+
+      {/* Far + mid clouds sit BEHIND the tower as depth. */}
+      <div className="tower-cloudfield tower-cloudfield--back" aria-hidden="true">
+        {(['far', 'mid'] as const).map(renderCloudLayer)}
+      </div>
+
+      <h1 className="sr-only">{view === 'mine' ? 'Your Tower' : 'The Arcane Spire'}</h1>
+      <section
+        className="tower-stage-grid"
+        aria-label={view === 'mine' ? 'Your Tower' : 'The Arcane Spire storeys'}
+        onPointerDown={towerZoom.onPanStart}
+        style={towerZoom.style}
+      >
+        {view === 'mine' ? (
+          <PrivateTowerStack />
         ) : (
-          <EmptyState
-            title="No tower to edit"
-            description="Raise your tower first, then come back to design it."
-          />
-        )
-      ) : (
-        <>
-          {view === 'official' && activeStorey ? (
-            <aside className="tower-storey-dock" aria-label="Current storey overview">
-              <StoreyOverview key={activeStorey.id} storey={activeStorey} />
-            </aside>
-          ) : null}
+          <TowerStoreys storeys={storeys} mountedCount={mountedCount} onGrow={growTower} />
+        )}
 
-          {view === 'official' && activeStorey ? (
-            <aside className="tower-artifact-dock" aria-label="Selected artifact controls">
-              {artifactOverviewStoreyId ? <ArtifactOverview storeyId={artifactOverviewStoreyId} /> : null}
-              <TowerActionButton />
-            </aside>
-          ) : null}
+        {/* Companion sprite. He lives INSIDE the stage grid (its own stacking
+            context) so the tower's crenel parapets can paint above him — he
+            stands in front of walls/ledges but tucks his feet behind the
+            battlements. The controller anchors to `parentElement` (this
+            section) for coordinates + clicks, so it stays self-consistent. */}
+        {activeCharacter ? <TowerCharacter character={activeCharacter} /> : null}
+      </section>
+      <TowerZoomControl zoom={towerZoom} />
 
-          {/* Far + mid clouds sit BEHIND the tower as depth. */}
-          <div className="tower-cloudfield tower-cloudfield--back" aria-hidden="true">
-            {(['far', 'mid'] as const).map(renderCloudLayer)}
-          </div>
-
-          <h1 className="sr-only">{view === 'mine' ? 'Your Tower' : 'The Arcane Spire'}</h1>
-          <section
-            className="tower-stage-grid"
-            aria-label={view === 'mine' ? 'Your Tower' : 'The Arcane Spire storeys'}
-            onPointerDown={towerZoom.onPanStart}
-            style={towerZoom.style}
-          >
-            {view === 'mine' ? (
-              <PrivateTowerStack />
-            ) : (
-              <TowerStoreys storeys={storeys} mountedCount={mountedCount} onGrow={growTower} />
-            )}
-
-            {/* Companion sprite. He lives INSIDE the stage grid (its own stacking
-                context) so the tower's crenel parapets can paint above him — he
-                stands in front of walls/ledges but tucks his feet behind the
-                battlements. The controller anchors to `parentElement` (this
-                section) for coordinates + clicks, so it stays self-consistent. */}
-            {activeCharacter ? <TowerCharacter character={activeCharacter} /> : null}
-          </section>
-          <TowerZoomControl zoom={towerZoom} />
-
-          {/* Near clouds drift in FRONT of the tower so the sky isn't all hidden behind it. */}
-          <div className="tower-cloudfield tower-cloudfield--front" aria-hidden="true">
-            {(['near'] as const).map(renderCloudLayer)}
-          </div>
-        </>
-      )}
+      {/* Near clouds drift in FRONT of the tower so the sky isn't all hidden behind it. */}
+      <div className="tower-cloudfield tower-cloudfield--front" aria-hidden="true">
+        {(['near'] as const).map(renderCloudLayer)}
+      </div>
     </div>
   )
 }

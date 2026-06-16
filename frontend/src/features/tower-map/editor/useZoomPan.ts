@@ -21,6 +21,7 @@ export type ZoomPan = {
 const MIN = 0.45
 const MAX = 2.6
 const STEP = 0.0016
+const PAN_PRECISION = 1
 
 /**
  * Lightweight wheel-zoom + drag-pan for the tower editor canvas. No dependency:
@@ -79,7 +80,7 @@ export function useZoomPan(): ZoomPan {
     tx,
     ty,
     style: {
-      transform: `translate(${tx}px, ${ty}px) scale(${scale})`,
+      transform: `translate(${roundForPaint(tx)}px, ${roundForPaint(ty)}px) scale(${scale})`,
       transformOrigin: 'center top',
     },
     onWheel,
@@ -89,4 +90,8 @@ export function useZoomPan(): ZoomPan {
     setScale: setScaleDirect,
     reset,
   }
+}
+
+function roundForPaint(value: number) {
+  return Math.round(value * PAN_PRECISION) / PAN_PRECISION
 }

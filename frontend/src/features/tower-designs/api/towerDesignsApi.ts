@@ -135,6 +135,7 @@ export const towerDesignsApi = {
     designId: number,
     placementId: number | string,
     input: {
+      target_piece_instance_id?: number
       x?: number
       y?: number
       scale?: number

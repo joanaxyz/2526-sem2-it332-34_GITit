@@ -13,7 +13,7 @@ export const assetsApi = {
       `/assets/descriptors/?kind=${encodeURIComponent(kind)}&mine=1`,
     )
   },
-  /** Upload an owned tower piece / artifact. FormData fields: file, kind, label, piece_type?, view_box?, tags?. */
+  /** Upload an owned tower piece / artifact. FormData fields: file, kind, label, piece_type?, tags?. */
   upload(form: FormData): Promise<AssetDescriptor> {
     return postFormData('/assets/', form)
   },

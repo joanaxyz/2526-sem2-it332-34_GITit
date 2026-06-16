@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Castle, Check, Eye, Feather, PencilRuler, Plus } from 'lucide-react'
+import { Castle, Check, Feather, PencilRuler, Plus } from 'lucide-react'
 
 import { useTowerDesignEditor } from '@/features/tower-designs/hooks/useTowerDesignEditor'
 import { cn } from '@/shared/utils/cn'
@@ -16,14 +16,10 @@ const OFFICIAL_LABEL = 'The Arcane Spire'
  */
 export function TowerControls({
   view,
-  editMode = false,
   onViewChange,
-  onEditModeExit,
 }: {
   view: TowerView
-  editMode?: boolean
   onViewChange: (view: TowerView) => void
-  onEditModeExit?: () => void
 }) {
   const navigate = useNavigate()
   const { design, hasDesign, canCreate, isCreating, isForking, raiseSpire, openOfficialFork } =
@@ -58,8 +54,7 @@ export function TowerControls({
     try {
       const created = await raiseSpire()
       setPickerOpen(false)
-      // Editing happens in-page: swap the tower stage for the editor.
-      navigate(`/tower?view=mine&mode=edit&design=${created.id}`)
+      navigate(`/tower/editor/${created.id}`)
     } catch (error) {
       setActionError(actionErrorMessage(error, 'Could not raise your tower.'))
     }
@@ -73,20 +68,16 @@ export function TowerControls({
 
   async function openEditor() {
     // Editing while viewing the official tower opens a private fork of it; your
-    // tweaks there stay yours. Editing your own tower opens your design. Both
-    // stay on this page — `?mode=edit` swaps in the editor over the same sky.
+    // tweaks there stay yours. Editing your own tower opens your design. The
+    // editor is its own full-screen route (`/tower/editor/:designId`).
     setActionError(null)
-    if (editMode) {
-      onEditModeExit?.()
-      return
-    }
     try {
       if (view === 'official') {
         const fork = await openOfficialFork()
-        navigate(`/tower?mode=edit&design=${fork.design.id}`)
+        navigate(`/tower/editor/${fork.design.id}`)
         return
       }
-      if (hasDesign && design) navigate(`/tower?view=mine&mode=edit&design=${design.id}`)
+      if (hasDesign && design) navigate(`/tower/editor/${design.id}`)
       else await handleRaiseSpire()
     } catch (error) {
       setActionError(actionErrorMessage(error, 'Could not open the editor.'))
@@ -156,18 +147,14 @@ export function TowerControls({
         type="button"
         className="tower-control-chip tower-control-chip--icon"
         data-hint={
-          editMode
-            ? 'Return to tower'
-            : view === 'official'
+          view === 'official'
             ? `Edit ${OFFICIAL_LABEL} (private to you)`
             : hasDesign
               ? `Edit ${mineLabel}`
               : 'Raise your Tower'
         }
         aria-label={
-          editMode
-            ? 'Return to tower'
-            : view === 'official'
+          view === 'official'
             ? `Edit ${OFFICIAL_LABEL} privately`
             : hasDesign
               ? `Edit ${mineLabel}`
@@ -176,7 +163,7 @@ export function TowerControls({
         disabled={isCreating || isForking}
         onClick={() => void openEditor()}
       >
-        {editMode ? <Eye className="size-4" aria-hidden="true" /> : <PencilRuler className="size-4" aria-hidden="true" />}
+        <PencilRuler className="size-4" aria-hidden="true" />
       </button>
 
       {/* Authoring belongs to YOUR tower only: the button shows on your personal
@@ -187,7 +174,7 @@ export function TowerControls({
           className="tower-control-chip tower-control-chip--icon"
           data-hint="Author content"
           aria-label="Author content — The Scriptorium"
-          onClick={() => navigate(`/tower?view=mine&mode=edit&design=${design.id}`)}
+          onClick={() => navigate(`/tower/editor/${design.id}`)}
         >
           <Feather className="size-4" aria-hidden="true" />
         </button>

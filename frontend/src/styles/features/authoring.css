@@ -260,69 +260,6 @@
   gap: 0.6rem;
 }
 
-.upload-viewbox-field {
-  gap: 0.45rem;
-}
-
-.upload-viewbox-preview {
-  position: relative;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  width: 100%;
-  min-height: 12rem;
-  border: 1px solid rgba(var(--tower-cyan), 0.22);
-  border-radius: 0.65rem;
-  background:
-    linear-gradient(45deg, rgba(255, 255, 255, 0.035) 25%, transparent 25% 75%, rgba(255, 255, 255, 0.035) 75%),
-    linear-gradient(45deg, rgba(255, 255, 255, 0.035) 25%, transparent 25% 75%, rgba(255, 255, 255, 0.035) 75%),
-    rgba(2, 8, 16, 0.72);
-  background-position: 0 0, 8px 8px, 0 0;
-  background-size: 16px 16px, 16px 16px, auto;
-}
-
-.upload-viewbox-preview img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  user-select: none;
-  pointer-events: none;
-}
-
-.upload-viewbox-box {
-  position: absolute;
-  border: 2px solid rgba(var(--tower-cyan), 0.95);
-  background: rgba(var(--tower-cyan), 0.08);
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.38), 0 0 18px rgba(var(--tower-cyan), 0.38);
-  cursor: move;
-  touch-action: none;
-}
-
-.upload-viewbox-handle {
-  position: absolute;
-  right: -0.45rem;
-  bottom: -0.45rem;
-  width: 0.9rem;
-  height: 0.9rem;
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  border-radius: 999px;
-  background: rgb(var(--tower-cyan));
-  cursor: nwse-resize;
-}
-
-.upload-viewbox-output {
-  min-height: 1rem;
-  color: hsl(var(--foreground));
-  font-family: JetBrains Mono, ui-monospace, monospace;
-  font-size: 0.68rem;
-}
-
-.upload-viewbox-output.is-empty {
-  color: hsl(var(--muted-foreground));
-  font-family: inherit;
-}
-
 .upload-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -796,4 +733,3 @@
   opacity: 0.6;
   cursor: default;
 }
-

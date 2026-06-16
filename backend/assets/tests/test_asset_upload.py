@@ -43,7 +43,6 @@ def test_upload_creates_owned_private_tower_piece(django_user_model):
             "kind": "tower_piece",
             "label": "Glow Landing",
             "piece_type": "landing",
-            "view_box": "0 0 220 48",
             "file": SimpleUploadedFile("landing.svg", SAFE_SVG, content_type="image/svg+xml"),
         },
         format="multipart",
@@ -54,12 +53,14 @@ def test_upload_creates_owned_private_tower_piece(django_user_model):
     assert asset.visibility == "private"
     assert asset.is_published is False
     piece = TowerPieceAsset.objects.get(asset=asset)
-    assert piece.view_box == "0 0 220 48"
+    assert piece.view_box == "-2.5 -2.5 15 15"
     assert piece.anchors == {}
+    sprite = AssetSprite.objects.get(asset=asset, action="default")
+    assert b'viewBox="-2.5 -2.5 15 15"' in sprite.image.read()
 
 
 @pytest.mark.django_db
-def test_upload_tower_artifact_stores_authored_bounds_and_action_sprites(django_user_model):
+def test_upload_tower_artifact_stores_cropped_bounds_and_action_sprites(django_user_model):
     user = make_user(django_user_model)
     client = APIClient()
     client.force_authenticate(user=user)
@@ -69,7 +70,6 @@ def test_upload_tower_artifact_stores_authored_bounds_and_action_sprites(django_
         {
             "kind": "tower_artifact",
             "label": "Quest Relic",
-            "view_box": "2 4 32 32",
             "file": SimpleUploadedFile("relic.svg", SAFE_SVG, content_type="image/svg+xml"),
             "file_hover": SimpleUploadedFile("relic-hover.svg", SAFE_SVG, content_type="image/svg+xml"),
             "file_click": SimpleUploadedFile("relic-click.svg", SAFE_SVG, content_type="image/svg+xml"),
@@ -79,8 +79,8 @@ def test_upload_tower_artifact_stores_authored_bounds_and_action_sprites(django_
 
     assert response.status_code == 201, response.content
     asset = Asset.objects.get(owner=user, label="Quest Relic")
-    assert asset.config["view_box"] == "2 4 32 32"
-    assert asset.config["bounds"] == {"x": 2.0, "y": 4.0, "width": 32.0, "height": 32.0}
+    assert asset.config["view_box"] == "-2.5 -2.5 15 15"
+    assert asset.config["bounds"] == {"x": -2.5, "y": -2.5, "width": 15.0, "height": 15.0}
     assert set(AssetSprite.objects.filter(asset=asset).values_list("action", flat=True)) == {
         "default",
         "hover",

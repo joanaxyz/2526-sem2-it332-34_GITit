@@ -9,7 +9,6 @@ from assets.models import Asset
 from authoring.models import STATUS_PUBLISHED as CONTENT_STATUS_PUBLISHED
 from authoring.models import ContentDefinition
 from tower_designs.models import (
-    ARTIFACT_ROLE_CHALLENGE,
     ARTIFACT_ROLE_NORMAL,
     INTERACTABLE_ARTIFACT_ROLES,
     ORIGIN_OFFICIAL_FORK,
@@ -428,27 +427,13 @@ class TowerDesignService:
 
     def publish_errors(self, *, design: TowerDesign) -> list[dict[str, str]]:
         errors: list[dict[str, str]] = []
-        # Track challenge artifacts per section to enforce the "exactly three"
-        # completeness rule below. Placement validation already caps a section at
-        # three challenges (or one of any other interactable kind); publish adds
-        # that a challenge section must hold the *full* Easy/Medium/Hard chain.
-        challenge_counts: dict[int, int] = {}
+        # Per-artifact guardrails only: an interactable artifact must carry
+        # published content. There is deliberately no per-piece
+        # count rule — a section may hold any number of interactables, or none.
         for placement in design.artifact_placements.select_related(
             "content_definition", "target_piece_instance"
         ):
             if placement.role not in INTERACTABLE_ARTIFACT_ROLES:
-                continue
-            if placement.role == ARTIFACT_ROLE_CHALLENGE:
-                challenge_counts[placement.target_piece_instance_id] = (
-                    challenge_counts.get(placement.target_piece_instance_id, 0) + 1
-                )
-            if placement.target_piece_instance.piece_type != "section":
-                errors.append(
-                    {
-                        "field": f"artifact:{placement.id}",
-                        "message": "Interactable artifacts must live on tower sections.",
-                    }
-                )
                 continue
             if not placement.content_definition_id:
                 errors.append(
@@ -463,16 +448,6 @@ class TowerDesignService:
                     {
                         "field": f"artifact:{placement.id}",
                         "message": "Bound content must be published.",
-                    }
-                )
-        for section_id, count in challenge_counts.items():
-            if count != 3:
-                errors.append(
-                    {
-                        "field": f"section:{section_id}",
-                        "message": (
-                            f"A challenge section needs exactly three challenges — has {count}."
-                        ),
                     }
                 )
         return errors

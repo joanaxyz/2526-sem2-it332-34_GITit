@@ -141,16 +141,16 @@ describe('piece transform serialization', () => {
   })
 
   it('round-trips per-axis scale and mirrors `scale` only when uniform', () => {
-    const stretched = pieceTransformToRecord({ x: 0, y: 0, scaleX: 2, scaleY: 0.5, rotation: 0 })
+    const stretched = pieceTransformToRecord({ x: 0, y: 0, scaleX: 2, scaleY: 0.5, rotation: 0, zIndex: 0 })
     expect(stretched.scaleX).toBe(2)
     expect(stretched.scaleY).toBe(0.5)
     expect(stretched.scale).toBeUndefined()
 
-    const uniform = pieceTransformToRecord({ x: 0, y: 0, scaleX: 1.25, scaleY: 1.25, rotation: 0 })
+    const uniform = pieceTransformToRecord({ x: 0, y: 0, scaleX: 1.25, scaleY: 1.25, rotation: 0, zIndex: 0 })
     expect(uniform.scale).toBe(1.25)
   })
 
   it('serializes the identity transform to an empty record', () => {
-    expect(pieceTransformToRecord({ x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: 0 })).toEqual({})
+    expect(pieceTransformToRecord({ x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: 0, zIndex: 0 })).toEqual({})
   })
 })

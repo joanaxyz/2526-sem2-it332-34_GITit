@@ -23,7 +23,7 @@ function stagePieceTransform(state: StagedState, pieceId: number, transform: Pie
 }
 
 function transform(x: number): PieceTransform {
-  return { x, y: 0, scaleX: 1, scaleY: 1, rotation: 0 }
+  return { x, y: 0, scaleX: 1, scaleY: 1, rotation: 0, zIndex: 0 }
 }
 
 describe('useStagedEdits', () => {

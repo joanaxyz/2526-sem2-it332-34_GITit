@@ -73,26 +73,65 @@
   }
 }
 
-/* -- In-page editor: the editor rendered over the living tower sky -- */
-.in-tower-editor {
-  position: relative;
-  z-index: 6;
+/* -- Full-screen editor app shell. A solid docked toolbar, real Library /
+   Inspector columns, and the canvas as a true center region on a calm dark
+   workspace — no living sky, no floating glass. The editor is its own route
+   now, so it re-declares the --tower-* accent triples it inherited from
+   .tower-page-shell. -- */
+.ite-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100vh;
+  height: 100dvh;
   width: 100%;
-  margin: 0 auto;
-  padding: 0 0 6rem;
-  min-height: calc(100vh - 7rem);
-  /* One semantic z-index scale for all editor chrome, so nothing reaches for a
-     stray 9999/100000 again. The on-canvas gizmo deliberately sits BELOW the
-     placed artifacts (which layer at +10) and is handled inline, not here. */
-  --z-ed-canvas: 0;
-  --z-ed-rail: 30;
-  --z-ed-toolbar: 40;
-  --z-ed-floating: 45;
-  --z-ed-toast: 55;
-  /* Side-rail width; the canvas reserves a matching gutter so the tower never
-     hides behind a rail. */
-  --ite-rail-w: clamp(16rem, 21vw, 21rem);
-  --ite-cmdbar-h: 4.4rem;
+  background: #080c14;
+  color: hsl(var(--foreground));
+  --tower-cyan: 45, 245, 255;
+  --tower-blue: 53, 143, 255;
+  --tower-purple: 176, 74, 255;
+  /* Side-column width; the canvas takes everything left over. */
+  --ite-rail-w: clamp(15rem, 18vw, 19rem);
+  --z-ed-toast: 60;
+}
+
+.ite-shell--message {
+  place-items: center;
+}
+
+.ite-shell-message {
+  display: grid;
+  gap: 0.85rem;
+  justify-items: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.ite-shell-message h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: hsl(var(--foreground));
+}
+
+.ite-shell-message p {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.9rem;
+}
+
+/* Body row: Library | canvas | Inspector as real grid columns. */
+.ite-body {
+  display: grid;
+  grid-template-columns: var(--ite-rail-w) minmax(0, 1fr) var(--ite-rail-w);
+  min-height: 0;
+}
+
+.ite-canvas-col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
 }
 
 .ite-bar {
@@ -164,48 +203,56 @@
   flex-wrap: wrap;
 }
 
+/* The canvas fills its grid cell. No rail-clearing gutters any more — the rails
+   are real columns beside it, not overlays on top of it. This element is the
+   fixed VIEWPORT: it owns the clip (overflow:hidden) and the pan cursor, and is
+   never transformed, so it stays confined to its cell and the grab cursor can't
+   bleed onto the rails. The zoom/pan transform lives on .ite-canvas-content. */
 .tower-stage-grid--editor {
-  min-height: calc(100vh - 14rem);
-  /* Clear the fixed command bar at the top and the apply pill at the bottom, and
-     reserve a gutter on each side so the centred tower lands between the rails
-     instead of behind them. */
-  padding-top: calc(var(--ite-cmdbar-h) + 1.5rem);
-  padding-bottom: 5.5rem;
-  padding-inline: calc(var(--ite-rail-w) + 1.5rem);
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  /* minmax(0, 1fr) caps the track at the available width so a wide piece is
+     clipped by the viewport rather than widening the whole shell. */
+  grid-template-columns: minmax(0, 1fr);
+  /* Anchor the storey to the top (the zoom/pan transform-origin is center top),
+     so a tall storey reads from its roof down and pans, instead of being
+     vertically centred and clipped at both ends. */
+  align-items: start;
+  justify-items: stretch;
+  max-width: none;
+  margin: 0;
+  padding: 1.5rem 1.5rem 3rem;
+  overflow: hidden;
   touch-action: none;
   cursor: grab;
-  will-change: transform;
-}
-
-@media (max-width: 1180px) {
-  .tower-stage-grid--editor {
-    padding-inline: 1rem;
-  }
 }
 
 .tower-stage-grid--editor:active {
   cursor: grabbing;
 }
 
+/* The transformed content layer. Because the clip frame above stays put, a tower
+   taller or wider than the viewport can be panned fully into view (the old setup
+   transformed the clip itself, so clipped ends were unreachable). */
+.ite-canvas-content {
+  width: 100%;
+  transform-origin: center top;
+}
+
 /* -- Command bar: one glass blade across the top. Identity (left), storey
    switcher (centre), history · zoom · validation · publish/share (right). -- */
 .ite-cmdbar {
-  position: fixed;
-  z-index: var(--z-ed-toolbar);
-  top: clamp(0.75rem, 2vh, 1.4rem);
-  left: clamp(1rem, 2.5vw, 2rem);
-  right: clamp(1rem, 2.5vw, 2rem);
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   gap: 1rem;
-  min-height: var(--ite-cmdbar-h);
-  padding: 0.5rem 0.7rem 0.5rem 1rem;
-  border-radius: 1rem;
-  border: 1px solid rgba(var(--tower-cyan), 0.2);
-  background: linear-gradient(168deg, rgba(8, 16, 28, 0.9), rgba(5, 10, 18, 0.82));
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(16px);
-  pointer-events: auto;
+  min-height: 3.6rem;
+  padding: 0.5rem 0.85rem 0.5rem 0.7rem;
+  border-bottom: 1px solid rgba(var(--tower-cyan), 0.14);
+  background: #0b111c;
 }
 
 .ite-cmd-exit {
@@ -354,49 +401,31 @@
 /* -- Side rails: library (left) + inspector (right). Each is one glass plaque
    with hairline-split sections, never nested boxes. -- */
 .ite-rail {
-  position: fixed;
-  z-index: var(--z-ed-rail);
-  top: calc(clamp(0.75rem, 2vh, 1.4rem) + var(--ite-cmdbar-h) + 0.8rem);
-  bottom: clamp(5rem, 10vh, 6.5rem);
   display: flex;
   flex-direction: column;
-  width: var(--ite-rail-w);
   min-height: 0;
   overflow: hidden auto;
-  border-radius: 0.95rem;
-  border: 1px solid rgba(var(--tower-cyan), 0.18);
-  background: linear-gradient(168deg, rgba(8, 16, 28, 0.86), rgba(5, 10, 18, 0.78));
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(14px);
-  pointer-events: auto;
+  background: #0c1320;
 }
 
 .ite-rail--library {
-  left: clamp(1rem, 2.5vw, 2rem);
+  border-right: 1px solid rgba(var(--tower-cyan), 0.12);
 }
 
 .ite-rail--inspector {
-  right: clamp(1rem, 2.5vw, 2rem);
+  border-left: 1px solid rgba(var(--tower-cyan), 0.12);
 }
 
-/* -- Status line: drops into the canvas column under the command bar only when
+/* -- Status line: sits in flow at the top of the canvas column, shown only when
    there's something to report (issues, warnings, the share link). -- */
 .ite-statusline {
-  position: fixed;
-  z-index: var(--z-ed-floating);
-  top: calc(clamp(0.75rem, 2vh, 1.4rem) + var(--ite-cmdbar-h) + 0.6rem);
-  left: calc(clamp(1rem, 2.5vw, 2rem) + var(--ite-rail-w) + 1rem);
-  right: calc(clamp(1rem, 2.5vw, 2rem) + var(--ite-rail-w) + 1rem);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  max-height: 46vh;
+  flex: 0 0 auto;
+  max-height: 40vh;
   overflow-y: auto;
-  pointer-events: none;
-}
-
-.ite-statusline > * {
-  pointer-events: auto;
+  padding: 0.7rem 0.9rem 0;
 }
 
 .ite-status-msg {
@@ -669,6 +698,38 @@
   text-transform: uppercase;
 }
 
+/* Compact tag dropdown in the Library's Artifacts header (replaces the old
+   one-chip-per-tag row). */
+/* Library-wide tag filter row: tags belong to every asset, so the control sits
+   above all the shelves rather than inside the Artifacts section. */
+.ite-library-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.1rem;
+}
+
+.ite-library-filter .ite-tag-filter {
+  flex: 1 1 auto;
+  max-width: none;
+}
+
+.ite-tag-filter {
+  max-width: 10rem;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.2);
+  border-radius: 0.45rem;
+  background: rgba(4, 9, 17, 0.6);
+  color: hsl(var(--foreground));
+  font-size: 0.72rem;
+}
+
+.ite-tag-filter:focus-visible {
+  outline: none;
+  border-color: rgba(var(--tower-cyan), 0.65);
+  box-shadow: 0 0 0 2px rgba(var(--tower-cyan), 0.22);
+}
+
 /* Numeric property fields (the customizable mirror of the on-canvas gizmo). */
 .ite-field-grid {
   display: grid;
@@ -723,16 +784,15 @@
   box-shadow: 0 0 0 2px rgba(var(--tower-cyan), 0.22);
 }
 
-/* On-canvas transform gizmo. The selected piece is lifted above neighboring
-   tower pieces, while the frame sits above the piece art/title layers but below
-   placed artifacts, so artifacts remain clickable. */
+/* On-canvas transform gizmo. The frame sits above the piece art/title layers but
+   below placed artifacts, so artifacts remain clickable. */
 .ed-tf {
   position: absolute;
   inset: 0;
   z-index: 8;
   border: 1.5px solid rgba(var(--tower-cyan), 0.9);
   border-radius: 4px;
-  box-shadow: 0 0 0 1px rgba(3, 12, 18, 0.55), 0 0 18px rgba(0, 245, 212, 0.22);
+  box-shadow: none;
   cursor: move;
   pointer-events: auto;
   touch-action: none;
@@ -742,7 +802,7 @@
   inset: -2px;
   z-index: 2;
   border-color: rgba(var(--tower-purple), 0.95);
-  box-shadow: 0 0 0 1px rgba(3, 12, 18, 0.7), 0 0 20px rgba(var(--tower-purple), 0.32);
+  box-shadow: none;
 }
 
 .ed-tf-handle {
@@ -753,7 +813,7 @@
   border-radius: 3px;
   border: 1.5px solid rgba(var(--tower-cyan), 0.95);
   background: #061018;
-  box-shadow: 0 0 8px rgba(0, 245, 212, 0.5);
+  box-shadow: none;
   /* Counter the box's own scale (per-axis for pieces) and the canvas zoom so the
      grips stay a constant on-screen size. */
   transform: scale(var(--ed-inv-x, var(--ed-inv, 1)), var(--ed-inv-y, var(--ed-inv, 1)));
@@ -827,7 +887,7 @@
   border-radius: 999px;
   border: 1.5px solid rgba(var(--tower-cyan), 0.95);
   background: #061018;
-  box-shadow: 0 0 10px rgba(0, 245, 212, 0.5);
+  box-shadow: none;
   color: rgb(var(--tower-cyan));
   cursor: grab;
   transform: translate(-50%, calc(-100% - 16px))
@@ -956,11 +1016,15 @@
   cursor: not-allowed;
 }
 
-@media (max-width: 1180px) {
-  /* Below tablet the rails can't float beside the canvas; stack everything in
-     normal flow under the command bar so nothing overlaps the tower. */
+@media (max-width: 1024px) {
+  /* Side columns can't sit beside a usable canvas on narrow widths: stack the
+     shell into a single scrolling column (canvas first, then the panels). */
+  .ite-shell {
+    height: auto;
+    min-height: 100dvh;
+  }
+
   .ite-cmdbar {
-    position: sticky;
     flex-wrap: wrap;
     row-gap: 0.5rem;
   }
@@ -971,48 +1035,48 @@
     justify-content: flex-start;
   }
 
-  .ite-statusline {
-    position: static;
-    max-height: none;
-    margin: 0.75rem auto 0;
-    width: min(42rem, calc(100vw - 2rem));
+  .ite-body {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .ite-rail {
-    position: static;
-    width: min(42rem, calc(100vw - 2rem));
-    margin: 1rem auto 0;
-    max-height: none;
+  .ite-canvas-col {
+    order: 1;
+    min-height: 60vh;
   }
 
-  .ite-quest-dock {
-    position: static;
-    width: min(42rem, calc(100vw - 2rem));
-    margin: 0 auto;
+  .ite-rail--inspector {
+    order: 2;
+    max-height: 20rem;
+    border-left: 0;
+    border-top: 1px solid rgba(var(--tower-cyan), 0.12);
+  }
+
+  .ite-rail--library {
+    order: 3;
+    max-height: 20rem;
+    border-right: 0;
+    border-top: 1px solid rgba(var(--tower-cyan), 0.12);
   }
 }
 
-/* Container-less: the tower floats directly on the living sky — no boxy frame
-   around the canvas (just the zoom/pan surface). */
-/* Floats over the canvas while edits are staged — commit or discard them. The
-   single source of "save"; nothing in the editor writes to the server until the
+/* Footer: the save bar as a solid docked row (replaces the floating pill). The
+   single source of "save"; the canvas writes nothing to the server until the
    user applies from here. */
-.ite-apply-bar {
-  position: fixed;
-  z-index: var(--z-ed-floating);
-  bottom: clamp(4rem, 8vh, 5.2rem);
-  left: 50%;
-  transform: translateX(-50%);
+.ite-footer {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.4rem 0.45rem 0.4rem 0.85rem;
-  border-radius: 999px;
-  border: 1px solid rgba(var(--tower-cyan), 0.4);
-  background: rgba(8, 12, 24, 0.95);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 26px rgba(0, 245, 212, 0.12);
-  backdrop-filter: blur(12px);
-  cursor: default;
+  gap: 0.7rem;
+  min-height: 2.4rem;
+  padding: 0.35rem 0.9rem;
+  border-top: 1px solid rgba(var(--tower-cyan), 0.14);
+  background: #0b111c;
+}
+
+.ite-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
 }
 
 .ite-apply-dot {
@@ -1020,7 +1084,7 @@
   height: 0.55rem;
   border-radius: 999px;
   background: rgb(var(--tower-cyan));
-  box-shadow: 0 0 10px rgba(0, 245, 212, 0.7);
+  box-shadow: none;
   animation: ite-apply-pulse 1.8s ease-in-out infinite;
 }
 
@@ -1421,7 +1485,7 @@
   cursor: pointer;
   border-color: rgba(var(--tower-cyan), 0.55);
   background: rgba(14, 32, 52, 0.85);
-  box-shadow: 0 0 0 1px rgba(var(--tower-cyan), 0.3), 0 0 14px rgba(var(--tower-cyan), 0.18);
+  box-shadow: none;
 }
 
 .editor-palette-cell.is-applicable:hover,
@@ -1572,8 +1636,8 @@
 }
 
 /* Real tower pieces (crown, sections, and landings) rendered as selectable
-   pieces in the editor canvas. Feedback uses outline + a layout-neutral
-   box-shadow so the piece geometry never shifts when selected. */
+   pieces in the editor canvas. Hover stays quiet; selection is handled by the
+   transform gizmo, and drop feedback traces the SVG silhouette. */
 .editor-piece {
   cursor: pointer;
   border-radius: 0.4rem;
@@ -1582,35 +1646,49 @@
   transition: outline-color 0.15s, box-shadow 0.15s;
 }
 
-.editor-piece:hover {
-  outline-color: rgba(var(--tower-cyan), 0.32);
-}
-
 .editor-piece:focus-visible {
   outline-color: rgba(var(--tower-cyan), 0.6);
 }
 
 .editor-piece--selected,
 .editor-piece--selected:hover {
-  z-index: 20;
   outline-color: transparent;
   box-shadow: none;
 }
 
-/* A staged (picked, not yet applied) skin: a purple ring via box-shadow so it
-   reads as "pending" on top of any selection outline without shifting layout. */
+/* A staged (picked, not yet applied) skin: a purple outline, no glow. */
 .editor-piece--pending {
-  box-shadow: 0 0 0 2px rgba(var(--tower-purple), 0.75), 0 0 20px rgba(var(--tower-purple), 0.3);
+  outline-color: rgba(var(--tower-purple), 0.8);
+  box-shadow: none;
 }
 
-.editor-piece--drop {
-  outline-color: rgba(var(--primary), 0.85);
-  box-shadow: 0 0 16px rgba(0, 245, 212, 0.3);
+/* Drop feedback hugs the piece's own vector geometry. It deliberately avoids
+   shadow/filter effects because those outline the SVG's neon alpha instead of
+   the shape itself. Purple = droppable here, red = rejected. */
+.editor-piece.editor-piece--drop,
+.editor-piece.editor-piece--reject {
+  outline-color: transparent;
+  box-shadow: none;
 }
 
-.editor-piece--reject {
-  outline-color: rgba(255, 99, 99, 0.85);
-  box-shadow: 0 0 16px rgba(255, 99, 99, 0.3);
+.editor-piece--drop .piece-svg,
+.editor-piece--drop .piece-svg *,
+.editor-piece--reject .piece-svg,
+.editor-piece--reject .piece-svg * {
+  filter: none !important;
+  animation: none;
+}
+
+.editor-piece--drop .piece-svg svg :is(path, rect, circle, ellipse, line, polyline, polygon) {
+  stroke: rgb(var(--tower-purple)) !important;
+  stroke-width: 1.25px !important;
+  vector-effect: non-scaling-stroke;
+}
+
+.editor-piece--reject .piece-svg svg :is(path, rect, circle, ellipse, line, polyline, polygon) {
+  stroke: rgb(255, 99, 99) !important;
+  stroke-width: 1.25px !important;
+  vector-effect: non-scaling-stroke;
 }
 
 .editor-slot {
@@ -1630,19 +1708,19 @@
 
 .editor-slot.is-selected {
   border-color: rgba(var(--tower-cyan), 0.7);
-  box-shadow: 0 0 0 1px rgba(var(--tower-cyan), 0.4), 0 0 18px rgba(var(--tower-cyan), 0.25);
+  box-shadow: none;
 }
 
 .editor-slot.is-drop-target {
   border-color: rgba(var(--primary), 0.8);
   border-style: solid;
-  box-shadow: 0 0 16px rgba(0, 245, 212, 0.3);
+  box-shadow: none;
 }
 
 .editor-slot.is-drop-reject {
   border-color: rgba(255, 99, 99, 0.8);
   border-style: solid;
-  box-shadow: 0 0 16px rgba(255, 99, 99, 0.3);
+  box-shadow: none;
 }
 
 .editor-slot-reject {
@@ -1896,11 +1974,32 @@
   isolation: isolate;
 }
 
-.tower-repeater .editor-piece.editor-piece--selected,
-.tower-repeater .editor-piece.editor-piece--selected:hover,
-.tower-repeater .editor-piece.editor-piece--artifact-context,
-.tower-repeater .editor-piece.editor-piece--artifact-context:hover {
-  z-index: 120 !important;
+.tower-repeater .editor-piece.editor-piece--selected:not(.editor-piece--drop):not(.editor-piece--reject),
+.tower-repeater .editor-piece.editor-piece--selected:not(.editor-piece--drop):not(.editor-piece--reject):hover,
+.tower-repeater .editor-piece.editor-piece--artifact-context:not(.editor-piece--drop):not(.editor-piece--reject),
+.tower-repeater .editor-piece.editor-piece--artifact-context:not(.editor-piece--drop):not(.editor-piece--reject):hover {
   outline-color: transparent !important;
   box-shadow: none !important;
+}
+
+.tower-repeater .editor-piece.editor-piece--drop,
+.tower-repeater .editor-piece.editor-piece--drop:hover {
+  outline-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.tower-repeater .editor-piece.editor-piece--reject,
+.tower-repeater .editor-piece.editor-piece--reject:hover {
+  outline-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.tower-repeater .editor-piece--drop .piece-svg {
+  filter: none !important;
+  animation: none !important;
+}
+
+.tower-repeater .editor-piece--reject .piece-svg {
+  filter: none !important;
+  animation: none !important;
 }

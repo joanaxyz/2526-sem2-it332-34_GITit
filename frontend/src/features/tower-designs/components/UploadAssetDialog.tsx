@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { X } from 'lucide-react'
 
@@ -8,28 +8,15 @@ import type { TowerPieceType } from '@/shared/assets/types'
 import { ApiError } from '@/shared/api/apiError'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { Button } from '@/shared/components/Button'
-import { cn } from '@/shared/utils/cn'
 
 const PIECE_TYPES: TowerPieceType[] = ['crown', 'section', 'landing']
 const IMAGE_ACCEPT = '.svg,.png,.webp,.gif,.jpg,.jpeg'
-
-type ScopeBox = {
-  x: number
-  y: number
-  size: number
-}
-
-type ImageMetrics = {
-  width: number
-  height: number
-}
 
 export function UploadAssetDialog({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient()
   const [kind, setKind] = useState<'tower_piece' | 'tower_artifact'>('tower_piece')
   const [label, setLabel] = useState('')
   const [pieceType, setPieceType] = useState<TowerPieceType>('section')
-  const [viewBox, setViewBox] = useState('')
   const [tags, setTags] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [hoverFile, setHoverFile] = useState<File | null>(null)
@@ -44,7 +31,6 @@ export function UploadAssetDialog({ onClose }: { onClose: () => void }) {
       if (file) form.append('file', file)
       if (hoverFile) form.append('file_hover', hoverFile)
       if (clickFile) form.append('file_click', clickFile)
-      if (viewBox.trim()) form.append('view_box', viewBox.trim())
       if (kind === 'tower_piece') {
         form.append('piece_type', pieceType)
       }
@@ -122,14 +108,9 @@ export function UploadAssetDialog({ onClose }: { onClose: () => void }) {
           <input
             type="file"
             accept={IMAGE_ACCEPT}
-            onChange={(event) => {
-              setFile(event.target.files?.[0] ?? null)
-              setViewBox('')
-            }}
+            onChange={(event) => setFile(event.target.files?.[0] ?? null)}
           />
         </label>
-
-        <ViewBoxScope file={file} viewBox={viewBox} onViewBoxChange={setViewBox} />
 
         <div className="upload-animation-grid">
           <label className="upload-field">
@@ -173,159 +154,4 @@ export function UploadAssetDialog({ onClose }: { onClose: () => void }) {
       </div>
     </div>
   )
-}
-
-function ViewBoxScope({
-  file,
-  viewBox,
-  onViewBoxChange,
-}: {
-  file: File | null
-  viewBox: string
-  onViewBoxChange: (value: string) => void
-}) {
-  const previewRef = useRef<HTMLDivElement | null>(null)
-  const [metrics, setMetrics] = useState<ImageMetrics | null>(null)
-  const [box, setBox] = useState<ScopeBox | null>(null)
-  const url = useMemo(() => (file ? URL.createObjectURL(file) : null), [file])
-
-  useEffect(() => {
-    return () => {
-      if (url) URL.revokeObjectURL(url)
-    }
-  }, [url])
-
-  const previewStyle = useMemo(() => {
-    if (!metrics) return undefined
-    const ratio = metrics.height / Math.max(metrics.width, 1)
-    return { aspectRatio: `${metrics.width} / ${metrics.height}`, maxHeight: `${Math.max(220, 360 * ratio)}px` }
-  }, [metrics])
-
-  function initializeBox(image: HTMLImageElement) {
-    const width = image.naturalWidth || 512
-    const height = image.naturalHeight || 512
-    const size = Math.min(width, height)
-    const nextBox = { x: (width - size) / 2, y: (height - size) / 2, size }
-    setMetrics({ width, height })
-    setBox(nextBox)
-    onViewBoxChange(formatBox(nextBox))
-  }
-
-  function pointFor(event: React.PointerEvent | PointerEvent) {
-    const preview = previewRef.current
-    if (!preview || !metrics) return null
-    const rect = preview.getBoundingClientRect()
-    const scaleX = metrics.width / Math.max(rect.width, 1)
-    const scaleY = metrics.height / Math.max(rect.height, 1)
-    return {
-      x: (event.clientX - rect.left) * scaleX,
-      y: (event.clientY - rect.top) * scaleY,
-    }
-  }
-
-  function startMove(event: React.PointerEvent<HTMLDivElement>) {
-    event.preventDefault()
-    const startPoint = pointFor(event)
-    if (!startPoint || !metrics || !box) return
-    const initialPoint = startPoint
-    const imageMetrics = metrics
-    const start = box
-    function move(ev: PointerEvent) {
-      const point = pointFor(ev)
-      if (!point) return
-      const next = clampBox(
-        {
-          ...start,
-          x: start.x + point.x - initialPoint.x,
-          y: start.y + point.y - initialPoint.y,
-        },
-        imageMetrics,
-      )
-      setBox(next)
-      onViewBoxChange(formatBox(next))
-    }
-    function up() {
-      window.removeEventListener('pointermove', move)
-      window.removeEventListener('pointerup', up)
-    }
-    window.addEventListener('pointermove', move)
-    window.addEventListener('pointerup', up)
-  }
-
-  function startResize(event: React.PointerEvent<HTMLButtonElement>) {
-    event.stopPropagation()
-    event.preventDefault()
-    const startPoint = pointFor(event)
-    if (!startPoint || !metrics || !box) return
-    const initialPoint = startPoint
-    const imageMetrics = metrics
-    const start = box
-    function move(ev: PointerEvent) {
-      const point = pointFor(ev)
-      if (!point) return
-      const delta = Math.max(point.x - initialPoint.x, point.y - initialPoint.y)
-      const next = clampBox({ ...start, size: start.size + delta }, imageMetrics)
-      setBox(next)
-      onViewBoxChange(formatBox(next))
-    }
-    function up() {
-      window.removeEventListener('pointermove', move)
-      window.removeEventListener('pointerup', up)
-    }
-    window.addEventListener('pointermove', move)
-    window.addEventListener('pointerup', up)
-  }
-
-  if (!url) return null
-
-  const boxStyle = metrics && box ? boxToStyle(box, metrics) : undefined
-
-  return (
-    <div className="upload-field upload-viewbox-field">
-      <span className="upload-label">Visible scope</span>
-      <div ref={previewRef} className="upload-viewbox-preview" style={previewStyle}>
-        <img src={url} alt="" onLoad={(event) => initializeBox(event.currentTarget)} />
-        {boxStyle ? (
-          <div className="upload-viewbox-box" style={boxStyle} onPointerDown={startMove}>
-            <button
-              type="button"
-              className="upload-viewbox-handle"
-              aria-label="Resize visible scope"
-              onPointerDown={startResize}
-            />
-          </div>
-        ) : null}
-      </div>
-      <output className={cn('upload-viewbox-output', !viewBox && 'is-empty')}>
-        {viewBox || 'Move and resize the square to scope the asset.'}
-      </output>
-    </div>
-  )
-}
-
-function clampBox(box: ScopeBox, metrics: ImageMetrics): ScopeBox {
-  const maxSize = Math.min(metrics.width, metrics.height)
-  const size = clamp(box.size, 16, maxSize)
-  return {
-    size,
-    x: clamp(box.x, 0, metrics.width - size),
-    y: clamp(box.y, 0, metrics.height - size),
-  }
-}
-
-function boxToStyle(box: ScopeBox, metrics: ImageMetrics) {
-  return {
-    left: `${(box.x / metrics.width) * 100}%`,
-    top: `${(box.y / metrics.height) * 100}%`,
-    width: `${(box.size / metrics.width) * 100}%`,
-    height: `${(box.size / metrics.height) * 100}%`,
-  }
-}
-
-function formatBox(box: ScopeBox) {
-  return [box.x, box.y, box.size, box.size].map((value) => Math.round(value).toString()).join(' ')
-}
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max)
 }

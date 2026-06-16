@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 from assets.models import (
     KIND_TOWER_ARTIFACT,
     KIND_TOWER_PIECE,
+    TOWER_PIECE_LANDING,
     TOWER_PIECE_SECTION,
     Asset,
     TowerPieceAsset,
@@ -129,44 +130,38 @@ def test_tower_piece_rejects_non_piece_asset(django_user_model):
 
 
 @pytest.mark.django_db
-def test_section_allows_only_one_non_challenge_interactable(django_user_model):
+def test_section_holds_multiple_interactables_of_one_kind(django_user_model):
+    """The per-section count cap is gone: a section may hold any number of
+    interactable artifacts of the same kind."""
     user = make_user(django_user_model)
     design, piece, artifact = _design_piece_and_artifact(user)
-    first = ContentDefinition.objects.create(
-        owner=user,
-        kind="adventure",
-        status="published",
-        slug="adventure-a",
-        title="Adventure A",
-    )
-    second = ContentDefinition.objects.create(
-        owner=user,
-        kind="adventure",
-        status="published",
-        slug="adventure-b",
-        title="Adventure B",
-    )
+    contents = [
+        ContentDefinition.objects.create(
+            owner=user,
+            kind="adventure",
+            status="published",
+            slug=f"adventure-{index}",
+            title=f"Adventure {index}",
+        )
+        for index in range(2)
+    ]
 
-    ArtifactPlacement.objects.create(
-        tower_design=design,
-        target_piece_instance=piece,
-        artifact_asset=artifact,
-        role="adventure",
-        content_definition=first,
-    )
-
-    with pytest.raises(ValidationError):
+    for content in contents:
         ArtifactPlacement.objects.create(
             tower_design=design,
             target_piece_instance=piece,
             artifact_asset=artifact,
             role="adventure",
-            content_definition=second,
+            content_definition=content,
         )
+
+    assert design.artifact_placements.filter(role="adventure").count() == 2
 
 
 @pytest.mark.django_db
-def test_section_allows_up_to_three_challenge_interactables_only(django_user_model):
+def test_section_holds_mixed_interactable_kinds(django_user_model):
+    """A section may mix interactable kinds and hold more than three of one. The
+    only role rule left is that bound content kind matches the artifact role."""
     user = make_user(django_user_model)
     design, piece, artifact = _design_piece_and_artifact(user)
     challenges = [
@@ -187,7 +182,7 @@ def test_section_allows_up_to_three_challenge_interactables_only(django_user_mod
         title="Adventure",
     )
 
-    for content in challenges[:3]:
+    for content in challenges:
         ArtifactPlacement.objects.create(
             tower_design=design,
             target_piece_instance=piece,
@@ -195,28 +190,39 @@ def test_section_allows_up_to_three_challenge_interactables_only(django_user_mod
             role="challenge",
             content_definition=content,
         )
+    # A different kind on the same section is fine too.
+    ArtifactPlacement.objects.create(
+        tower_design=design,
+        target_piece_instance=piece,
+        artifact_asset=artifact,
+        role="adventure",
+        content_definition=adventure,
+    )
 
+    assert design.artifact_placements.count() == 5
+
+    # Content kind must still match the artifact role.
+    mismatched = ContentDefinition.objects.create(
+        owner=user,
+        kind="tome",
+        status="published",
+        slug="tome",
+        title="Tome",
+    )
     with pytest.raises(ValidationError):
         ArtifactPlacement.objects.create(
             tower_design=design,
             target_piece_instance=piece,
             artifact_asset=artifact,
             role="challenge",
-            content_definition=challenges[3],
-        )
-
-    with pytest.raises(ValidationError):
-        ArtifactPlacement.objects.create(
-            tower_design=design,
-            target_piece_instance=piece,
-            artifact_asset=artifact,
-            role="adventure",
-            content_definition=adventure,
+            content_definition=mismatched,
         )
 
 
 @pytest.mark.django_db
-def test_publish_requires_full_challenge_chain(django_user_model):
+def test_publish_allows_any_number_of_challenges(django_user_model):
+    """No per-section count rule: a section may hold any number of interactable
+    artifacts. Publish only flags interactables that lack published content."""
     from tower_designs.services import TowerDesignService
 
     user = make_user(django_user_model)
@@ -229,11 +235,12 @@ def test_publish_requires_full_challenge_chain(django_user_model):
             slug=f"chain-{index}",
             title=f"Chain {index}",
         )
-        for index in range(3)
+        for index in range(2)
     ]
 
-    # Two of three challenges placed — the Easy/Medium/Hard chain is incomplete.
-    for content in challenges[:2]:
+    # Two challenges on one section — previously rejected as an "incomplete chain",
+    # now perfectly valid.
+    for content in challenges:
         ArtifactPlacement.objects.create(
             tower_design=design,
             target_piece_instance=piece,
@@ -242,18 +249,66 @@ def test_publish_requires_full_challenge_chain(django_user_model):
             content_definition=content,
         )
     errors = TowerDesignService().publish_errors(design=design)
-    assert any("three challenges" in error["message"] for error in errors)
-
-    # Completing the chain clears the completeness error.
-    ArtifactPlacement.objects.create(
-        tower_design=design,
-        target_piece_instance=piece,
-        artifact_asset=artifact,
-        role="challenge",
-        content_definition=challenges[2],
-    )
-    errors = TowerDesignService().publish_errors(design=design)
     assert not any("three challenges" in error["message"] for error in errors)
+    assert errors == []
+
+
+@pytest.mark.django_db
+def test_interactable_artifact_can_live_on_landing(django_user_model):
+    from tower_designs.services import TowerDesignService
+
+    user = make_user(django_user_model)
+    piece_asset = Asset.objects.create(
+        kind=KIND_TOWER_PIECE,
+        slug=f"landing-{user.id}",
+        label="Tower Landing",
+    )
+    TowerPieceAsset.objects.create(
+        asset=piece_asset,
+        piece_type=TOWER_PIECE_LANDING,
+        anchors={"walk_rail": {"x1": 12, "y1": 2, "x2": 580, "y2": 2}},
+        bounds={
+            "x": 0,
+            "y": 0,
+            "width": 592,
+            "height": 73,
+            "artifact_safe_bounds": {"x": 44, "y": 0, "width": 504, "height": 24},
+        },
+    )
+    artifact = Asset.objects.create(
+        kind=KIND_TOWER_ARTIFACT,
+        slug=f"landing-artifact-{user.id}",
+        label="Landing Artifact",
+    )
+    content = ContentDefinition.objects.create(
+        owner=user,
+        kind="tome",
+        status="published",
+        slug="landing-tome",
+        title="Landing Tome",
+    )
+    design = TowerDesign.objects.create(owner=user, slug=f"landing-tower-{user.id}", title="Tower")
+    landing = TowerPieceInstance.objects.create(
+        tower_design=design,
+        piece_asset=piece_asset,
+        piece_type=TOWER_PIECE_LANDING,
+    )
+
+    placement = ArtifactPlacement.objects.create(
+        tower_design=design,
+        target_piece_instance=landing,
+        artifact_asset=artifact,
+        role="tome",
+        content_definition=content,
+        x=296,
+        y=-48,
+        width=80,
+        height=100,
+    )
+
+    assert placement.target_piece_instance.piece_type == TOWER_PIECE_LANDING
+    assert placement.y < 0
+    assert TowerDesignService().publish_errors(design=design) == []
 
 
 def _design_piece_and_artifact(user):
