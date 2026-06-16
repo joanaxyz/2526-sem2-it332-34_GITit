@@ -723,15 +723,13 @@
   box-shadow: 0 0 0 2px rgba(var(--tower-cyan), 0.22);
 }
 
-/* On-canvas transform gizmo. The PIECE frame deliberately sits at z-index 1 —
-   below the placed artifacts (which layer at ARTIFACT_Z_BASE = 10) so artifacts
-   stay clickable while a piece is selected, and the body only catches
-   piece-move drags on the empty areas between them. The ARTIFACT frame rides
-   inside its own (lifted) artifact, so it sits above its sprite. */
+/* On-canvas transform gizmo. The selected piece is lifted above neighboring
+   tower pieces, while the frame sits above the piece art/title layers but below
+   placed artifacts, so artifacts remain clickable. */
 .ed-tf {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 8;
   border: 1.5px solid rgba(var(--tower-cyan), 0.9);
   border-radius: 4px;
   box-shadow: 0 0 0 1px rgba(3, 12, 18, 0.55), 0 0 18px rgba(0, 245, 212, 0.22);
@@ -1598,6 +1596,7 @@
 
 .editor-piece--selected,
 .editor-piece--selected:hover {
+  z-index: 20;
   outline-color: rgba(var(--tower-cyan), 0.85);
   box-shadow: 0 0 0 1px rgba(var(--tower-cyan), 0.4), 0 0 22px rgba(var(--tower-cyan), 0.28);
 }
@@ -1894,3 +1893,14 @@
   background: rgba(80, 20, 20, 0.52);
 }
 
+/* Editor z-index fix:
+   keep the selected tower piece above overlapping landings/separators. */
+.tower-repeater .editor-piece {
+  position: relative;
+  isolation: isolate;
+}
+
+.tower-repeater .editor-piece.editor-piece--selected,
+.tower-repeater .editor-piece.editor-piece--selected:hover {
+  z-index: 120 !important;
+}
