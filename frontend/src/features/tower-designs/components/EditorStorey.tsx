@@ -37,12 +37,12 @@ import { cn } from '@/shared/utils/cn'
 export type EditorDragPayload =
   | { source: 'asset-piece'; assetId: number; slug: string; pieceType: string }
   | {
-      source: 'asset-artifact'
-      assetId: number
-      slug: string
-      role: TowerArtifactRole
-      contentDefinitionId?: number | null
-    }
+    source: 'asset-artifact'
+    assetId: number
+    slug: string
+    role: TowerArtifactRole
+    contentDefinitionId?: number | null
+  }
 
 export type PlacementDraft = Extract<EditorDragPayload, { source: 'asset-artifact' }> | null
 
@@ -129,9 +129,14 @@ export function EditorStorey({
   }
 
   function regionClass(pieceId: number | null): string {
+    const isActivePiece = pieceId !== null && pieceId === selectedPieceId
+    const isPieceSelection = isActivePiece && selectedArtifactId === null
+    const isArtifactContext = isActivePiece && selectedArtifactId !== null
+
     return cn(
       'editor-piece',
-      pieceId !== null && pieceId === selectedPieceId && 'editor-piece--selected',
+      isPieceSelection && 'editor-piece--selected',
+      isArtifactContext && 'editor-piece--artifact-context',
       pieceId !== null && pendingSwaps.has(pieceId) && 'editor-piece--pending',
       pieceId !== null && pieceId === dropHoverId && 'editor-piece--drop',
       pieceId !== null && pieceId === rejectedId && 'editor-piece--reject',
@@ -197,10 +202,19 @@ export function EditorStorey({
       'aria-pressed': pieceId === selectedPieceId,
       'aria-label': `${piece.pieceType} piece`,
       onClick: (event: React.MouseEvent<HTMLElement>) => {
+        const target = event.target
+
+        // Clicking an artifact or its transform gizmo should not bubble into
+        // the parent piece selection, otherwise artifact selection disappears.
+        if (target instanceof HTMLElement && target.closest('.editor-artifact, .ed-tf')) {
+          return
+        }
+
         if (placementDraft) {
           placePayloadOnPiece(piece, placementDraft, event.currentTarget, event.clientX, event.clientY)
           return
         }
+
         onSelectPiece(pieceId)
       },
       onKeyDown: (event: React.KeyboardEvent) => {
@@ -309,7 +323,11 @@ export function EditorStorey({
     const staged = pieceId !== null ? pieceTransforms.get(pieceId) : undefined
     const effective = staged ?? readPieceTransform(piece.transform)
     const renderedPiece = staged ? { ...piece, transform: pieceTransformToRecord(staged) } : piece
-    const showFrame = pieceId !== null && pieceId === selectedPieceId && !placementDraft
+    const showFrame =
+      pieceId !== null &&
+      pieceId === selectedPieceId &&
+      selectedArtifactId === null &&
+      !placementDraft
     const frame = showFrame ? (
       <PieceTransformFrame
         transform={effective}
@@ -561,7 +579,7 @@ function EditableArtifact({
       pieceDescriptor={pieceDescriptor}
       pieceVariant={pieceVariant}
       onPointerDown={onPointerDown}
-      className={cn('editor-artifact', selected && 'is-selected')}
+      className="editor-artifact"
     >
       {selected ? (
         <ArtifactTransformFrame

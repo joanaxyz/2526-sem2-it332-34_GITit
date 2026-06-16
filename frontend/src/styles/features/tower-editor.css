@@ -1085,11 +1085,7 @@
   gap: 0.55rem;
 }
 
-.editor-artifact.is-selected {
-  outline: 2px solid rgba(var(--tower-cyan), 0.8);
-  outline-offset: 2px;
-  border-radius: 0.3rem;
-}
+
 
 .editor-danger-btn {
   display: inline-flex;
@@ -1597,8 +1593,8 @@
 .editor-piece--selected,
 .editor-piece--selected:hover {
   z-index: 20;
-  outline-color: rgba(var(--tower-cyan), 0.85);
-  box-shadow: 0 0 0 1px rgba(var(--tower-cyan), 0.4), 0 0 22px rgba(var(--tower-cyan), 0.28);
+  outline-color: transparent;
+  box-shadow: none;
 }
 
 /* A staged (picked, not yet applied) skin: a purple ring via box-shadow so it
@@ -1894,13 +1890,17 @@
 }
 
 /* Editor z-index fix:
-   keep the selected tower piece above overlapping landings/separators. */
+   keep the active tower piece above overlapping landings/separators. */
 .tower-repeater .editor-piece {
   position: relative;
   isolation: isolate;
 }
 
 .tower-repeater .editor-piece.editor-piece--selected,
-.tower-repeater .editor-piece.editor-piece--selected:hover {
+.tower-repeater .editor-piece.editor-piece--selected:hover,
+.tower-repeater .editor-piece.editor-piece--artifact-context,
+.tower-repeater .editor-piece.editor-piece--artifact-context:hover {
   z-index: 120 !important;
+  outline-color: transparent !important;
+  box-shadow: none !important;
 }
