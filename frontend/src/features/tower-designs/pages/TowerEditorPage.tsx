@@ -14,11 +14,15 @@ import { LoadingState } from '@/shared/components/LoadingState'
 export function TowerEditorPage() {
   const { designId } = useParams()
   const navigate = useNavigate()
-  const { design, isLoading } = useTowerDesignEditor()
+  const { design, fork, isLoading } = useTowerDesignEditor()
 
   const routeId = designId ? Number(designId) : null
   const id = routeId ?? design?.id ?? null
-  const exit = () => navigate('/tower?view=mine')
+  // Return to the tower the editor was opened from: the official view when
+  // editing the private fork of the Arcane Spire, your own tower otherwise.
+  // (Hardcoding ?view=mine dropped fork editors onto the wrong tower.)
+  const editingFork = fork?.id != null && id === fork.id
+  const exit = () => navigate(editingFork ? '/tower' : '/tower?view=mine')
 
   // Only the no-id entry has to wait on the personal design to resolve; a routed
   // id opens straight away.

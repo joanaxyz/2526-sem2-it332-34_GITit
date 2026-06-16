@@ -355,6 +355,14 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
   }
 
   function removeArtifact(placementId: number | string) {
+    // The official tower's interactive doors are the curriculum's — on the fork
+    // you may move or re-skin them, but removing one would hide a learning step,
+    // so deletion is blocked (decorative artifacts you added stay removable).
+    const target = overview.artifacts.find((item) => item.id === placementId) ?? null
+    if (isFork && target && target.role !== 'normal') {
+      flashToast('Interactive doors on the official tower can be moved or re-skinned, but not removed.', 'info')
+      return
+    }
     if (typeof placementId === 'number') {
       editor.deleteArtifact.mutate(placementId, {
         onError: (error) => flashToast(apiErrorMessage(error) ?? 'Could not remove artifact.'),
@@ -1122,9 +1130,15 @@ function PropertiesPanel({
   onRemovePiece: (pieceId: number) => void
   onRemoveArtifact: (placementId: number | string) => void
 }) {
+  // On the official tower's private fork the interactive doors belong to the
+  // curriculum: you can reposition and re-skin them, but not author/rebind their
+  // content or delete them (that would hide a learning step).
+  const isFork = overview.design.origin === 'official_fork'
+
   if (selectedArtifact && selectedArtifactTransform) {
     const roleLabel =
       selectedArtifact.role === 'normal' ? 'Artifact' : ARTIFACT_ROLE_LABEL[selectedArtifact.role]
+    const lockedInteractive = isFork && selectedArtifact.role !== 'normal'
     return (
       <div className="ite-inspector" aria-label="Artifact properties">
         <div className="ite-section ite-section--head">
@@ -1132,14 +1146,16 @@ function PropertiesPanel({
             <p className="ite-eyebrow">Artifact</p>
             <h2 className="ite-section-heading">{roleLabel}</h2>
           </div>
-          <button
-            type="button"
-            className="editor-danger-icon"
-            aria-label="Remove artifact"
-            onClick={() => onRemoveArtifact(selectedArtifact.id)}
-          >
-            <Trash2 className="size-3.5" aria-hidden="true" />
-          </button>
+          {lockedInteractive ? null : (
+            <button
+              type="button"
+              className="editor-danger-icon"
+              aria-label="Remove artifact"
+              onClick={() => onRemoveArtifact(selectedArtifact.id)}
+            >
+              <Trash2 className="size-3.5" aria-hidden="true" />
+            </button>
+          )}
         </div>
         <ArtifactTransformPanel
           artifact={selectedArtifact}
@@ -1147,7 +1163,9 @@ function PropertiesPanel({
           onChange={(next) => onTransformArtifact(selectedArtifact, next)}
           onGestureEnd={onGestureEnd}
         />
-        <ArtifactInteractivePanel overview={overview} editor={editor} artifact={selectedArtifact} />
+        {isFork ? null : (
+          <ArtifactInteractivePanel overview={overview} editor={editor} artifact={selectedArtifact} />
+        )}
       </div>
     )
   }

@@ -65,7 +65,6 @@ const ARTIFACT_Z_BASE = 10
 // collapse a placement to nothing.
 const ARTIFACT_MIN_DISPLAY = 6
 const CENTER_SNAP_PX = 16
-const LANDING_TARGET_BAND_PX = 28
 const LANDING_TARGET_X_PAD_PX = 10
 
 const RESIZE_HANDLES: ResizeHandle[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w']
@@ -234,7 +233,7 @@ export function EditorStorey({
       .map(targetFromElement)
       .filter((target): target is PieceDropTarget => target?.piece.pieceType === 'landing')
       .map((target) => ({ target, distance: landingRailDistancePx(target, clientY, footprint) }))
-      .filter(({ target, distance }) => isLandingRailCandidate(target, clientX, clientY, distance, footprint))
+      .filter(({ target }) => isLandingRailCandidate(target, clientX, clientY, footprint))
       .sort((a, b) => a.distance - b.distance)[0]?.target ?? null
   }
 
@@ -247,7 +246,7 @@ export function EditorStorey({
     return targets
       .filter((target) => target.piece.pieceType === 'landing')
       .map((target) => ({ target, distance: landingRailDistancePx(target, clientY, footprint) }))
-      .filter(({ target, distance }) => isLandingRailCandidate(target, clientX, clientY, distance, footprint))
+      .filter(({ target }) => isLandingRailCandidate(target, clientX, clientY, footprint))
       .sort((a, b) => a.distance - b.distance)[0]?.target ?? null
   }
 
@@ -328,13 +327,15 @@ export function EditorStorey({
     target: PieceDropTarget,
     clientX: number,
     clientY: number,
-    distance: number,
     footprint?: ArtifactFootprint,
   ) {
+    // Landings are thin separators between tower sections. Treat the rail as a
+    // target only when the pointer's Y is actually inside the landing element;
+    // otherwise nearby sections can be stolen by the landing snap band.
+    if (!pointYInsideElement(target.element, clientY)) return false
     if (pointInsideElement(target.element, clientX, clientY)) return true
-    if (distance > LANDING_TARGET_BAND_PX) return false
     const rail = landingRailClientXRange(target)
-    if (!rail) return pointInsideElement(target.element, clientX, clientY)
+    if (!rail) return false
     const horizontalRadius = footprint ? artifactHorizontalRadiusPx(target, footprint) : 0
     return (
       clientX >= rail.min - LANDING_TARGET_X_PAD_PX - horizontalRadius &&
@@ -371,6 +372,11 @@ export function EditorStorey({
   function pointInsideElement(element: HTMLElement, clientX: number, clientY: number) {
     const rect = element.getBoundingClientRect()
     return clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom
+  }
+
+  function pointYInsideElement(element: HTMLElement, clientY: number) {
+    const rect = element.getBoundingClientRect()
+    return clientY >= rect.top && clientY <= rect.bottom
   }
 
   function shouldSnapAxis(

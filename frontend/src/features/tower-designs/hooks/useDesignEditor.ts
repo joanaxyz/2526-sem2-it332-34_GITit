@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { towerDesignsApi } from '@/features/tower-designs/api/towerDesignsApi'
 import { pieceIdFromInstance } from '@/features/tower-designs/editorUtils'
 import { assetsApi } from '@/shared/assets/assetsApi'
-import { queryKeys } from '@/shared/api/queryKeys'
+import { queryKeys, queryKeyRoots } from '@/shared/api/queryKeys'
 import type {
   TowerArtifactRole,
   TowerArtifactAssetDescriptor,
@@ -56,6 +56,13 @@ export function useDesignEditor(designId: number) {
   function invalidate() {
     queryClient.invalidateQueries({ queryKey: queryKeys.towerDesignLayout(designId) })
     queryClient.invalidateQueries({ queryKey: queryKeys.myTower })
+    // Edits to the private fork of the official tower surface on the official
+    // view, which is built from the curriculum storey overviews — refresh those
+    // so the tower page reflects what just changed in the editor.
+    if (layoutQuery.data?.design.origin === 'official_fork') {
+      queryClient.invalidateQueries({ queryKey: queryKeys.storeys })
+      queryClient.invalidateQueries({ queryKey: queryKeyRoots.storeyOverview })
+    }
   }
 
   const rename = useMutation({
