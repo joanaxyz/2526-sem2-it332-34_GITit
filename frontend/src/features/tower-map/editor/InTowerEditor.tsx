@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   AlertTriangle,
@@ -111,7 +111,7 @@ function TowerNameField({
 function apiErrorMessage(error: unknown): string | null {
   if (!(error instanceof ApiError)) return error ? 'Something went wrong.' : null
   const payload = error.payload as
-    | { detail?: string; validation_errors?: { message: string }[]; [key: string]: unknown }
+    | { detail?: string; validation_errors?: { message: string }[];[key: string]: unknown }
     | null
   if (payload?.validation_errors?.length) {
     return payload.validation_errors.map((row) => row.message).join(' ')
@@ -170,14 +170,89 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
     toastTimer.current = window.setTimeout(() => setToast(null), 3600)
   }
 
-  // Ctrl/Cmd+Z undo, Ctrl+Shift+Z / Ctrl+Y redo. Defer to native text undo while
-  // a form control is focused (renaming, scrubbing a number field).
+  const clearSelection = useCallback(() => {
+    setSelectedPieceId(null)
+    setSelectedArtifactId(null)
+    setPlacementDraft(null)
+  }, [])
+
+  const deleteSelection = useCallback(() => {
+    const currentOverview = editor.overview
+
+    if (selectedArtifactId !== null) {
+      removeArtifact(selectedArtifactId)
+      setSelectedPieceId(null)
+      setPlacementDraft(null)
+      return
+    }
+
+    if (selectedPieceId === null || !currentOverview) return
+
+    const deletedPiece = currentOverview.tower_layout.pieces.find(
+      (piece) => pieceIdFromInstance(piece.instanceId) === selectedPieceId,
+    )
+
+    editor.deletePiece.mutate(selectedPieceId, {
+      onError: (error) => flashToast(apiErrorMessage(error) ?? 'Could not delete piece.'),
+    })
+
+    staged.commit((state) => {
+      let changed = false
+      const pendingSwaps = new Map(state.pendingSwaps)
+      const pieceTransforms = new Map(state.pieceTransforms)
+      const artifactEdits = new Map(state.artifactEdits)
+
+      if (pendingSwaps.delete(selectedPieceId)) changed = true
+      if (pieceTransforms.delete(selectedPieceId)) changed = true
+
+      if (deletedPiece) {
+        for (const artifact of currentOverview.artifacts) {
+          if (artifact.targetInstanceId === deletedPiece.instanceId && artifactEdits.delete(artifact.id)) {
+            changed = true
+          }
+        }
+      }
+
+      if (!changed) return state
+      return { ...state, pendingSwaps, pieceTransforms, artifactEdits }
+    })
+
+    staged.endGesture()
+    clearSelection()
+  }, [clearSelection, editor.deletePiece, editor.overview, selectedArtifactId, selectedPieceId, staged])
+
+  // Editor hotkeys. Defer to native text editing while a form control is focused.
   const { undo: undoEdit, redo: redoEdit } = staged
   useEffect(() => {
+    function isTypingTarget(target: EventTarget | null) {
+      const element = target instanceof HTMLElement ? target : null
+      if (!element) return false
+      return Boolean(element.closest('input, textarea, select, [contenteditable="true"]'))
+    }
+
     function onKey(event: KeyboardEvent) {
+      if (uploadOpen || isTypingTarget(event.target)) return
+
+      if (event.key === 'Escape') {
+        if (selectedPieceId !== null || selectedArtifactId !== null || placementDraft) {
+          event.preventDefault()
+          clearSelection()
+        }
+        setShowIssues(false)
+        return
+      }
+
+      if ((event.key === 'Delete' || event.key === 'Backspace') && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        if (event.repeat) return
+        if (selectedPieceId !== null || selectedArtifactId !== null) {
+          event.preventDefault()
+          deleteSelection()
+        }
+        return
+      }
+
       if (!(event.ctrlKey || event.metaKey)) return
-      const tag = (event.target as HTMLElement | null)?.tagName
-      if (tag && /^(INPUT|TEXTAREA|SELECT)$/.test(tag)) return
+
       const key = event.key.toLowerCase()
       if (key === 'z') {
         event.preventDefault()
@@ -188,9 +263,19 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
         redoEdit()
       }
     }
+
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [undoEdit, redoEdit])
+  }, [
+    clearSelection,
+    deleteSelection,
+    placementDraft,
+    redoEdit,
+    selectedArtifactId,
+    selectedPieceId,
+    undoEdit,
+    uploadOpen,
+  ])
 
   useEffect(() => () => window.clearTimeout(toastTimer.current), [])
 
@@ -416,7 +501,19 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
         className="tower-stage-grid tower-stage-grid--editor"
         aria-label="Tower editor canvas"
         onWheel={zoom.onWheel}
-        onPointerDown={zoom.onPanStart}
+        onPointerDown={(event) => {
+          const target = event.target
+
+          const clickedSelectable =
+            target instanceof Element &&
+            target.closest('.editor-piece, .editor-artifact, .ed-tf, .tower-artifact')
+
+          if (!clickedSelectable) {
+            clearSelection()
+          }
+
+          zoom.onPanStart(event)
+        }}
         style={zoom.style}
       >
         <EditorStorey
