@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import copy
+import json
+from collections import Counter
 
 from django.db import models, transaction
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -87,7 +89,7 @@ class TowerDesignService:
             .first()
         )
         if existing:
-            self._refresh_legacy_official_fork_if_needed(design=existing)
+            self._resync_official_fork_if_unedited(design=existing)
             return existing
         with transaction.atomic():
             design = TowerDesign.objects.create(
@@ -128,20 +130,72 @@ class TowerDesignService:
             )
 
     def _refresh_legacy_official_fork_if_needed(self, *, design: TowerDesign) -> None:
-        """Replace only the untouched old five-piece official fork skeleton.
+        self._resync_official_fork_if_unedited(design=design)
 
-        Users may already have real edits in their fork. We only refresh when the
-        fork still has the exact legacy seed shape: no artifacts, at most five
-        official starter pieces, and no custom asset swaps.
+    def _resync_official_fork_if_unedited(self, *, design: TowerDesign) -> None:
+        """Rebuild generated official forks after curriculum layout drift.
+
+        Curriculum reseeds can delete/recreate Storey rows, changing their IDs.
+        Official forks store those IDs in ``storey_index`` so the /tower overlay
+        can join a user's private fork back to the live curriculum. If an
+        untouched fork still points at old storey IDs, the editor renders the old
+        snapshot while /tower falls back to the live layout. Re-seeding here keeps
+        the two surfaces in lockstep without touching forks that carry real edits.
         """
-        if not self._is_unedited_official_fork(design=design):
+        pieces = list(
+            design.pieces.select_related("piece_asset", "parent_instance").order_by(
+                "sort_order", "id"
+            )
+        )
+        placements = list(
+            design.artifact_placements.select_related(
+                "artifact_asset", "target_piece_instance"
+            ).order_by("z_index", "id")
+        )
+        if not self._is_unedited_official_fork(
+            design=design,
+            pieces=pieces,
+            placements=placements,
+        ):
             return
+
+        current_pieces, current_artifacts = self._current_official_layout_signatures()
+        if (
+            self._official_piece_signature(pieces=pieces) == current_pieces
+            and self._official_artifact_signature(pieces=pieces, placements=placements)
+            == current_artifacts
+        ):
+            return
+
         with transaction.atomic():
             design.pieces.all().delete()
             self._seed_official_fork_skeleton(design=design)
 
-    def _is_unedited_official_fork(self, *, design: TowerDesign) -> bool:
-        pieces = list(design.pieces.select_related("piece_asset").order_by("sort_order", "id"))
+    def _is_unedited_official_fork(
+        self,
+        *,
+        design: TowerDesign,
+        pieces: list[TowerPieceInstance] | None = None,
+        placements: list[ArtifactPlacement] | None = None,
+    ) -> bool:
+        pieces = (
+            pieces
+            if pieces is not None
+            else list(
+                design.pieces.select_related("piece_asset", "parent_instance").order_by(
+                    "sort_order", "id"
+                )
+            )
+        )
+        placements = (
+            placements
+            if placements is not None
+            else list(
+                design.artifact_placements.select_related(
+                    "artifact_asset", "target_piece_instance"
+                ).order_by("z_index", "id")
+            )
+        )
         if not pieces:
             return True
         if design.pieces.filter(piece_asset__owner__isnull=False).exists():
@@ -150,48 +204,122 @@ class TowerDesignService:
             return False
         if design.artifact_placements.filter(content_definition__isnull=False).exists():
             return False
-        if any(piece.transform for piece in pieces):
-            return False
         piece_signature = self._official_piece_signature(pieces=pieces)
-        if piece_signature == self._legacy_official_piece_signature():
+        artifact_signature = self._official_artifact_signature(
+            pieces=pieces,
+            placements=placements,
+        )
+        if piece_signature == self._legacy_official_piece_signature() and not placements:
             return True
 
         current_pieces, current_artifacts = self._current_official_layout_signatures()
-        return (
-            piece_signature == current_pieces
-            and bool(current_artifacts)
-            and not design.artifact_placements.exists()
+        if piece_signature == current_pieces and artifact_signature == current_artifacts:
+            return True
+        if piece_signature == current_pieces and bool(current_artifacts) and not placements:
+            return True
+        if self._same_signature_items_ignoring_storey(piece_signature, current_pieces):
+            return self._same_signature_items_ignoring_storey(
+                artifact_signature,
+                current_artifacts,
+            ) or (bool(current_artifacts) and not placements)
+
+        # Compatibility for old generated official snapshots from before the
+        # window/tome section layout. With no persisted seed-version bit, keep
+        # this fallback narrow: only official assets, no local config/transform,
+        # and every non-crown piece points at a now-dead storey id.
+        return self._looks_like_stale_generated_official_snapshot(
+            pieces=pieces,
+            placements=placements,
         )
 
-    def _official_piece_signature(self, *, pieces: list[TowerPieceInstance]) -> list[tuple[int | None, str, str]]:
+    def _official_piece_signature(self, *, pieces: list[TowerPieceInstance]) -> list[tuple]:
         return [
             (
                 None if piece.piece_type == "crown" else piece.storey_index,
                 piece.piece_type,
                 piece.piece_asset.slug,
+                _json_signature(piece.transform),
+                _json_signature(piece.config),
             )
             for piece in pieces
         ]
 
-    def _legacy_official_piece_signature(self) -> list[tuple[int | None, str, str]]:
+    def _official_artifact_signature(
+        self,
+        *,
+        pieces: list[TowerPieceInstance],
+        placements: list[ArtifactPlacement],
+    ) -> list[tuple]:
+        target_order = {piece.id: index for index, piece in enumerate(pieces)}
         return [
-            (None, "crown", "official-crown"),
-            (0, "section", "official-hall-section"),
-            (0, "landing", "official-landing"),
-            (0, "section", "official-trial-section"),
-            (0, "landing", "official-challenge-landing"),
+            (
+                placement.target_piece_instance.storey_index,
+                target_order.get(placement.target_piece_instance_id),
+                placement.role,
+                placement.artifact_asset.slug,
+                placement.x,
+                placement.y,
+                placement.scale,
+                placement.width,
+                placement.height,
+                placement.rotation,
+                placement.anchor,
+                placement.z_index,
+            )
+            for placement in placements
         ]
+
+    def _legacy_official_piece_signature(self) -> list[tuple]:
+        return [
+            (None, "crown", "official-crown", _json_signature({}), _json_signature({})),
+            (0, "section", "official-hall-section", _json_signature({}), _json_signature({})),
+            (0, "landing", "official-landing", _json_signature({}), _json_signature({})),
+            (0, "section", "official-trial-section", _json_signature({}), _json_signature({})),
+            (
+                0,
+                "landing",
+                "official-challenge-landing",
+                _json_signature({}),
+                _json_signature({}),
+            ),
+        ]
+
+    def _same_signature_items_ignoring_storey(self, left: list[tuple], right: list[tuple]) -> bool:
+        return Counter(row[1:] for row in left) == Counter(row[1:] for row in right)
+
+    def _looks_like_stale_generated_official_snapshot(
+        self,
+        *,
+        pieces: list[TowerPieceInstance],
+        placements: list[ArtifactPlacement],
+    ) -> bool:
+        if not pieces:
+            return True
+        if any(not piece.piece_asset.slug.startswith("official-") for piece in pieces):
+            return False
+        if any(
+            not placement.artifact_asset.slug.startswith("official-") for placement in placements
+        ):
+            return False
+        if any(piece.transform or piece.config for piece in pieces):
+            return False
+
+        from curriculum.selectors import published_storeys
+
+        live_storey_ids = set(published_storeys().values_list("id", flat=True))
+        fork_storey_ids = {piece.storey_index for piece in pieces if piece.piece_type != "crown"}
+        return bool(fork_storey_ids) and fork_storey_ids.isdisjoint(live_storey_ids)
 
     def _current_official_layout_signatures(
         self,
-    ) -> tuple[list[tuple[int | None, str, str]], list[tuple[int, str, str, str]]]:
+    ) -> tuple[list[tuple], list[tuple]]:
         from challenges.models import Challenge
         from command_adventures.models import CommandAdventure
         from curriculum.models import Tome
         from curriculum.selectors import published_storeys, tower_layout_payload
 
-        piece_signature: list[tuple[int | None, str, str]] = []
-        artifact_signature: list[tuple[int, str, str, str]] = []
+        piece_signature: list[tuple] = []
+        artifact_signature: list[tuple] = []
         crown_seen = False
         for storey in published_storeys():
             adventures = list(
@@ -199,8 +327,14 @@ class TowerDesignService:
                 .select_related("storey")
                 .order_by("sort_order", "id")
             )
-            tomes = list(Tome.objects.filter(storey=storey, is_published=True).order_by("sort_order", "id"))
-            challenges = list(Challenge.objects.filter(storey=storey, is_published=True).order_by("sort_order", "id"))
+            tomes = list(
+                Tome.objects.filter(storey=storey, is_published=True).order_by("sort_order", "id")
+            )
+            challenges = list(
+                Challenge.objects.filter(storey=storey, is_published=True).order_by(
+                    "sort_order", "id"
+                )
+            )
             layout = tower_layout_payload(
                 storey=storey,
                 storey_id=storey.id,
@@ -213,16 +347,43 @@ class TowerDesignService:
                     if crown_seen:
                         continue
                     crown_seen = True
-                    piece_signature.append((None, piece["pieceType"], piece["assetSlug"]))
+                    piece_signature.append(
+                        (
+                            None,
+                            piece["pieceType"],
+                            piece["assetSlug"],
+                            _json_signature(piece.get("transform")),
+                            _json_signature(piece.get("config")),
+                        )
+                    )
                 else:
-                    piece_signature.append((storey.id, piece["pieceType"], piece["assetSlug"]))
+                    piece_signature.append(
+                        (
+                            storey.id,
+                            piece["pieceType"],
+                            piece["assetSlug"],
+                            _json_signature(piece.get("transform")),
+                            _json_signature(piece.get("config")),
+                        )
+                    )
+            target_order = {
+                piece["instanceId"]: index for index, piece in enumerate(layout["pieces"])
+            }
             for artifact in layout["artifacts"]:
                 artifact_signature.append(
                     (
                         storey.id,
-                        artifact["targetInstanceId"],
+                        target_order.get(artifact["targetInstanceId"]),
                         artifact["role"],
                         artifact["assetSlug"],
+                        artifact.get("x", 0),
+                        artifact.get("y", 0),
+                        artifact.get("scale", 1),
+                        artifact.get("width", 0),
+                        artifact.get("height", 0),
+                        artifact.get("rotation", 0),
+                        artifact.get("anchor", ""),
+                        artifact.get("zIndex", 0),
                     )
                 )
         return piece_signature, artifact_signature
@@ -243,8 +404,14 @@ class TowerDesignService:
                 .select_related("storey")
                 .order_by("sort_order", "id")
             )
-            tomes = list(Tome.objects.filter(storey=storey, is_published=True).order_by("sort_order", "id"))
-            challenges = list(Challenge.objects.filter(storey=storey, is_published=True).order_by("sort_order", "id"))
+            tomes = list(
+                Tome.objects.filter(storey=storey, is_published=True).order_by("sort_order", "id")
+            )
+            challenges = list(
+                Challenge.objects.filter(storey=storey, is_published=True).order_by(
+                    "sort_order", "id"
+                )
+            )
             layout = tower_layout_payload(
                 storey=storey,
                 storey_id=storey.id,
@@ -347,7 +514,9 @@ class TowerDesignService:
     @transaction.atomic
     def set_active(self, *, user, design: TowerDesign) -> TowerDesign:
         self.assert_owner(user=user, design=design)
-        TowerDesign.objects.filter(owner=user, is_active=True).exclude(id=design.id).update(is_active=False)
+        TowerDesign.objects.filter(owner=user, is_active=True).exclude(id=design.id).update(
+            is_active=False
+        )
         design.is_active = True
         design.save(update_fields=["is_active", "updated_at"])
         return design
@@ -401,14 +570,17 @@ class TowerDesignService:
 
         slugs = self._referenced_monster_slugs(design=design)
         if slugs:
-            Asset.objects.filter(
-                kind=KIND_MONSTER, owner=design.owner, slug__in=slugs
-            ).update(is_published=True, visibility="public")
+            Asset.objects.filter(kind=KIND_MONSTER, owner=design.owner, slug__in=slugs).update(
+                is_published=True, visibility="public"
+            )
 
     def _referenced_monster_slugs(self, *, design: TowerDesign) -> set[str]:
         slugs: set[str] = set()
         for placement in design.artifact_placements.select_related("content_definition"):
-            if placement.role not in INTERACTABLE_ARTIFACT_ROLES or not placement.content_definition_id:
+            if (
+                placement.role not in INTERACTABLE_ARTIFACT_ROLES
+                or not placement.content_definition_id
+            ):
                 continue
             definition = placement.content_definition.definition or {}
             levels = definition.get("levels") or []
@@ -566,3 +738,7 @@ def _unique_slug(*, user, base: str) -> str:
         slug = f"{base}-{index}"
         index += 1
     return slug
+
+
+def _json_signature(value) -> str:
+    return json.dumps(value or {}, sort_keys=True, separators=(",", ":"))

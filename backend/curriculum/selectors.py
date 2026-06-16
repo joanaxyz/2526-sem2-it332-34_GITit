@@ -111,7 +111,9 @@ def storey_completion_count_map(*, user, storey_ids: list[int]) -> dict[int, int
         if not run_meets_progress_threshold(run=run):
             continue
         level_id = run.challenge_level_id
-        challenge_counts[(run.storey_id, level_id)] = challenge_counts.get((run.storey_id, level_id), 0) + 1
+        challenge_counts[(run.storey_id, level_id)] = (
+            challenge_counts.get((run.storey_id, level_id), 0) + 1
+        )
         required_by_level[level_id] = run.challenge_level.required_successful_attempts
         storey_by_level[level_id] = run.storey_id
 
@@ -129,14 +131,11 @@ def storey_completion_denominator_map(*, storey_ids: list[int]) -> dict[int, int
     for adventure in CommandAdventure.objects.filter(storey_id__in=storey_ids, is_published=True):
         denominator_by_storey[adventure.storey_id] += 1
 
-    for row in (
-        ChallengeLevel.objects.filter(
-            is_published=True,
-            challenge__is_published=True,
-            challenge__storey_id__in=storey_ids,
-        )
-        .values("challenge__storey_id", "required_successful_attempts")
-    ):
+    for row in ChallengeLevel.objects.filter(
+        is_published=True,
+        challenge__is_published=True,
+        challenge__storey_id__in=storey_ids,
+    ).values("challenge__storey_id", "required_successful_attempts"):
         storey_id = row["challenge__storey_id"]
         denominator_by_storey[storey_id] += int(row["required_successful_attempts"] or 0)
     return denominator_by_storey
@@ -167,7 +166,9 @@ def storey_content_page(
         }
 
     if section == "tomes":
-        tomes = Tome.objects.filter(storey_id=storey_id, is_published=True).order_by("sort_order", "id")
+        tomes = Tome.objects.filter(storey_id=storey_id, is_published=True).order_by(
+            "sort_order", "id"
+        )
         return {
             "section": section,
             "results": [tome_summary_payload(tome=tome) for tome in tomes],
@@ -183,7 +184,10 @@ def storey_content_page(
         access = _build_challenge_access(user=user, storey_id=storey_id, challenges=visible)
         return {
             "section": section,
-            "results": [challenge_summary_payload(challenge=challenge, access=access) for challenge in visible],
+            "results": [
+                challenge_summary_payload(challenge=challenge, access=access)
+                for challenge in visible
+            ],
             "next_cursor": visible[-1].id if len(items) > limit and visible else None,
         }
 
@@ -223,6 +227,16 @@ def storey_content_overview(*, user, storey_id: int) -> dict:
         tomes=list(tomes),
         challenges=challenges,
     )
+    # If the viewer has a private fork of the official tower, render the FORK as
+    # the single source of truth — the exact pieces/artifacts its editor shows,
+    # so scale/position/structure match by construction — and bind only the
+    # curriculum's content (what each door opens) onto its interactive doors.
+    # Falls back to the plain curriculum layout when the fork has no pieces here.
+    fork = _viewer_official_fork(user=user)
+    if fork is not None:
+        fork_layout = _fork_storey_layout(fork=fork, storey_id=storey_id, curriculum_layout=layout)
+        if fork_layout is not None:
+            layout = fork_layout
     adventure_payloads = [
         command_adventure_summary_payload(user=user, adventure=adventure)
         for adventure in adventures
@@ -233,11 +247,115 @@ def storey_content_overview(*, user, storey_id: int) -> dict:
         "command_adventures": adventure_payloads,
         "tomes": [tome_summary_payload(tome=tome) for tome in tomes],
         "challenges": [
-            challenge_summary_payload(challenge=challenge, access=access) for challenge in challenges
+            challenge_summary_payload(challenge=challenge, access=access)
+            for challenge in challenges
         ],
         "tower_layout": {"storeyId": storey_id, "pieces": layout["pieces"]},
         "artifacts": layout["artifacts"],
     }
+
+
+def _viewer_official_fork(*, user):
+    """The viewer's own private fork of the official tower, or None.
+
+    Imported lazily to avoid an import cycle (tower_designs.services already
+    imports this module for the fork seed)."""
+    if not getattr(user, "is_authenticated", False):
+        return None
+    from tower_designs.models import (
+        ORIGIN_OFFICIAL_FORK,
+        STATUS_ARCHIVED,
+        TowerDesign,
+    )
+
+    return (
+        TowerDesign.objects.filter(owner=user, origin=ORIGIN_OFFICIAL_FORK)
+        .exclude(status=STATUS_ARCHIVED)
+        .order_by("-updated_at", "-id")
+        .first()
+    )
+
+
+def _fork_storey_layout(*, fork, storey_id: int, curriculum_layout: dict) -> dict | None:
+    """Build one storey's layout from the viewer's fork — the SAME pieces and
+    artifacts its editor renders, so scale/position/structure match exactly —
+    and bind the curriculum's interactive content onto the fork's interactive
+    doors by ``(role, ordinal-within-storey)``.
+
+    The fork is the single source of truth for structure; the curriculum supplies
+    only *what* each door opens. The fork is seeded from the curriculum in the
+    same order, and interactive doors can't be deleted on the fork, so the
+    ordinals line up. Returns ``None`` when the fork has no pieces for this
+    storey, so the caller falls back to the plain curriculum layout.
+    """
+    from tower_designs.models import ARTIFACT_ROLE_NORMAL
+
+    fork_pieces = list(
+        fork.pieces.select_related("piece_asset", "parent_instance")
+        .filter(storey_index=storey_id)
+        .order_by("sort_order", "id")
+    )
+    if not fork_pieces:
+        return None
+
+    def instance_id(piece_pk) -> str | None:
+        return f"tower-{fork.id}-piece-{piece_pk}" if piece_pk else None
+
+    pieces = []
+    for piece in fork_pieces:
+        payload = {
+            "instanceId": instance_id(piece.id),
+            "assetSlug": piece.piece_asset.slug,
+            "pieceType": piece.piece_type,
+            "storeyIndex": piece.storey_index,
+            "parentInstanceId": instance_id(piece.parent_instance_id),
+        }
+        if piece.transform:
+            payload["transform"] = piece.transform
+        if piece.config:
+            payload["config"] = piece.config
+        pieces.append(payload)
+
+    # Curriculum content bindings in order, grouped by role (adventure/tome/
+    # challenge) — these carry the adventure/tome/challenge-level ids.
+    bindings_by_role: dict[str, list] = {}
+    for artifact in curriculum_layout["artifacts"]:
+        role = artifact["role"]
+        if role == ARTIFACT_ROLE_NORMAL:
+            continue
+        bindings_by_role.setdefault(role, []).append(artifact.get("contentBinding"))
+
+    artifacts = []
+    interactive_seen: dict[str, int] = {}
+    for placement in (
+        fork.artifact_placements.select_related("artifact_asset")
+        .filter(target_piece_instance__storey_index=storey_id)
+        .order_by("z_index", "id")
+    ):
+        payload = {
+            "id": placement.id,
+            "targetInstanceId": instance_id(placement.target_piece_instance_id),
+            "assetSlug": placement.artifact_asset.slug,
+            "role": placement.role,
+            "x": placement.x,
+            "y": placement.y,
+            "scale": placement.scale,
+            "width": placement.width,
+            "height": placement.height,
+            "rotation": placement.rotation,
+            "anchor": placement.anchor,
+            "zIndex": placement.z_index,
+        }
+        if placement.role != ARTIFACT_ROLE_NORMAL:
+            ordinal = interactive_seen.get(placement.role, 0)
+            interactive_seen[placement.role] = ordinal + 1
+            options = bindings_by_role.get(placement.role) or []
+            binding = options[ordinal] if ordinal < len(options) else None
+            if binding:
+                payload["contentBinding"] = binding
+        artifacts.append(payload)
+
+    return {"storeyId": storey_id, "pieces": pieces, "artifacts": artifacts}
 
 
 def tower_layout_payload(
@@ -248,13 +366,17 @@ def tower_layout_payload(
     tomes: list[Tome],
     challenges: list[Challenge],
 ) -> dict:
-    layout_config = storey.tower_layout if storey is not None and isinstance(storey.tower_layout, dict) else {}
+    layout_config = (
+        storey.tower_layout if storey is not None and isinstance(storey.tower_layout, dict) else {}
+    )
     pieces: list[dict] = [
         _tower_piece(
             storey_id=storey_id,
             name="crown",
             piece_type=TOWER_PIECE_CROWN,
-            asset_slug=_slot_asset(layout_config, "crown", "asset_slug", OFFICIAL_TOWER_ASSET_SLUGS[TOWER_PIECE_CROWN]),
+            asset_slug=_slot_asset(
+                layout_config, "crown", "asset_slug", OFFICIAL_TOWER_ASSET_SLUGS[TOWER_PIECE_CROWN]
+            ),
             config=_slot_config(layout_config, "crown"),
             transform=_slot_transform(layout_config, "crown"),
         )
@@ -286,7 +408,9 @@ def tower_layout_payload(
                 name=f"tome-{tome.id}",
                 target_name=window_section_name,
                 role="tome",
-                asset_slug=_slot_value(window_slot, "artifact_asset_slug", OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["tome"]),
+                asset_slug=_slot_value(
+                    window_slot, "artifact_asset_slug", OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["tome"]
+                ),
                 content_binding={"kind": "tome", "id": tome.id},
                 x=_slot_value(artifact_defaults, "x", 184),
                 y=_slot_value(artifact_defaults, "y", 112),
@@ -300,7 +424,9 @@ def tower_layout_payload(
             storey_id=storey_id,
             name="landing-after-window",
             piece_type=TOWER_PIECE_LANDING,
-            asset_slug=_slot_value(window_slot, "landing_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS[TOWER_PIECE_LANDING]),
+            asset_slug=_slot_value(
+                window_slot, "landing_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS[TOWER_PIECE_LANDING]
+            ),
             config=_slot_value(window_slot, "landing_config", {}),
             transform=_slot_value(window_slot, "landing_transform", {}),
         )
@@ -309,14 +435,22 @@ def tower_layout_payload(
     adventure_list = adventures or []
     for adventure in adventure_list:
         slot = _slot(layout_config, "adventure")
-        section_name = "section" if len(adventure_list) == 1 else f"adventure-section-{adventure.id}"
-        landing_name = "landing-after-adventure" if len(adventure_list) == 1 else f"landing-after-adventure-{adventure.id}"
+        section_name = (
+            "section" if len(adventure_list) == 1 else f"adventure-section-{adventure.id}"
+        )
+        landing_name = (
+            "landing-after-adventure"
+            if len(adventure_list) == 1
+            else f"landing-after-adventure-{adventure.id}"
+        )
         pieces.append(
             _tower_piece(
                 storey_id=storey_id,
                 name=section_name,
                 piece_type=TOWER_PIECE_SECTION,
-                asset_slug=_slot_value(slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["hall_section"]),
+                asset_slug=_slot_value(
+                    slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["hall_section"]
+                ),
                 config=_slot_value(slot, "section_config", {}),
                 transform=_slot_value(slot, "section_transform", {}),
             )
@@ -328,7 +462,9 @@ def tower_layout_payload(
                 name=f"adventure-{adventure.id}",
                 target_name=section_name,
                 role="adventure",
-                asset_slug=_slot_value(slot, "artifact_asset_slug", OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["adventure"]),
+                asset_slug=_slot_value(
+                    slot, "artifact_asset_slug", OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["adventure"]
+                ),
                 content_binding={"kind": "adventure", "id": adventure.id},
                 x=_slot_value(artifact_defaults, "x", 184),
                 y=_slot_value(artifact_defaults, "y", 122),
@@ -342,7 +478,9 @@ def tower_layout_payload(
                 storey_id=storey_id,
                 name=landing_name,
                 piece_type=TOWER_PIECE_LANDING,
-                asset_slug=_slot_value(slot, "landing_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS[TOWER_PIECE_LANDING]),
+                asset_slug=_slot_value(
+                    slot, "landing_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS[TOWER_PIECE_LANDING]
+                ),
                 config=_slot_value(slot, "landing_config", {}),
                 transform=_slot_value(slot, "landing_transform", {}),
             )
@@ -354,7 +492,9 @@ def tower_layout_payload(
                 storey_id=storey_id,
                 name="section",
                 piece_type=TOWER_PIECE_SECTION,
-                asset_slug=_slot_value(slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["hall_section"]),
+                asset_slug=_slot_value(
+                    slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["hall_section"]
+                ),
                 config=_slot_value(slot, "section_config", {}),
                 transform=_slot_value(slot, "section_transform", {}),
             )
@@ -369,7 +509,9 @@ def tower_layout_payload(
                     storey_id=storey_id,
                     name=section_name,
                     piece_type=TOWER_PIECE_SECTION,
-                    asset_slug=_slot_value(slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["trial_section"]),
+                    asset_slug=_slot_value(
+                        slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["trial_section"]
+                    ),
                     config=_slot_value(slot, "section_config", {}),
                     transform=_slot_value(slot, "section_transform", {}),
                 )
@@ -415,7 +557,9 @@ def tower_layout_payload(
                 storey_id=storey_id,
                 name="challenge-section-empty",
                 piece_type=TOWER_PIECE_SECTION,
-                asset_slug=_slot_value(slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["trial_section"]),
+                asset_slug=_slot_value(
+                    slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["trial_section"]
+                ),
                 config=_slot_value(slot, "section_config", {}),
                 transform=_slot_value(slot, "section_transform", {}),
             )
@@ -426,7 +570,11 @@ def tower_layout_payload(
             storey_id=storey_id,
             name="landing-after-challenges",
             piece_type=TOWER_PIECE_LANDING,
-            asset_slug=_slot_value(challenge_slot, "landing_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["challenge_landing"]),
+            asset_slug=_slot_value(
+                challenge_slot,
+                "landing_asset_slug",
+                OFFICIAL_TOWER_ASSET_SLUGS["challenge_landing"],
+            ),
             config=_slot_value(challenge_slot, "landing_config", {}),
             transform=_slot_value(challenge_slot, "landing_transform", {}),
         )
@@ -622,7 +770,9 @@ def storey_book(*, storey_id: int) -> dict | None:
         return None
 
     skills = list(
-        CommandSkill.objects.filter(storey_id=storey_id, is_published=True).order_by("sort_order", "id")
+        CommandSkill.objects.filter(storey_id=storey_id, is_published=True).order_by(
+            "sort_order", "id"
+        )
     )
     # One query for the whole book: resolve every skill's library entry in bulk
     # so a storey with N commands does not cost N round trips.
@@ -634,7 +784,9 @@ def storey_book(*, storey_id: int) -> dict | None:
     commands = [
         book_command_payload(
             skill=skill,
-            entry=entries.get(library_key_for_command(skill.base_command)) if skill.base_command else None,
+            entry=entries.get(library_key_for_command(skill.base_command))
+            if skill.base_command
+            else None,
         )
         for skill in skills
     ]
@@ -709,18 +861,24 @@ class ChallengeAccessContext:
     adventure_passed: bool = False
 
 
-def _build_challenge_access(*, user, storey_id: int, challenges: list[Challenge]) -> ChallengeAccessContext:
+def _build_challenge_access(
+    *, user, storey_id: int, challenges: list[Challenge]
+) -> ChallengeAccessContext:
     from progress.models import LevelCompletion
 
     if not getattr(user, "is_authenticated", False):
         return ChallengeAccessContext()
     level_ids = [level.id for challenge in challenges for level in challenge.challenge_levels.all()]
     if not level_ids:
-        return ChallengeAccessContext(adventure_passed=_adventure_passed(user=user, storey_id=storey_id))
+        return ChallengeAccessContext(
+            adventure_passed=_adventure_passed(user=user, storey_id=storey_id)
+        )
 
     completions = {
         completion.challenge_level_id: completion
-        for completion in LevelCompletion.objects.filter(user=user, challenge_level_id__in=level_ids)
+        for completion in LevelCompletion.objects.filter(
+            user=user, challenge_level_id__in=level_ids
+        )
     }
 
     active_runs: dict[int, ChallengeRun] = {}
@@ -746,8 +904,14 @@ def _build_challenge_access(*, user, storey_id: int, challenges: list[Challenge]
         latest_runs[run.challenge_level_id] = run
         if run.mode == "primary" and run.status == "started":
             active_runs[run.challenge_level_id] = run
-        if run.mode == "primary" and run.status == "completed" and run_meets_progress_threshold(run=run):
-            progress_counts[run.challenge_level_id] = progress_counts.get(run.challenge_level_id, 0) + 1
+        if (
+            run.mode == "primary"
+            and run.status == "completed"
+            and run_meets_progress_threshold(run=run)
+        ):
+            progress_counts[run.challenge_level_id] = (
+                progress_counts.get(run.challenge_level_id, 0) + 1
+            )
 
     return ChallengeAccessContext(
         completions=completions,
@@ -761,9 +925,7 @@ def _build_challenge_access(*, user, storey_id: int, challenges: list[Challenge]
 def command_adventure_summary_payload(*, user, adventure: CommandAdventure) -> dict:
     authenticated = getattr(user, "is_authenticated", False)
     latest = (
-        AdventureRun.objects.filter(user=user, command_adventure=adventure)
-        .order_by("-id")
-        .first()
+        AdventureRun.objects.filter(user=user, command_adventure=adventure).order_by("-id").first()
         if authenticated
         else None
     )
@@ -820,7 +982,9 @@ def command_skill_summary_payload(*, user, skill: CommandSkill) -> dict:
                 "usage_form": form.usage_form,
                 "label": form.label,
                 "summary": form.summary,
-                "level_count": len([level for level in form.adventure_levels.all() if level.is_published]),
+                "level_count": len(
+                    [level for level in form.adventure_levels.all() if level.is_published]
+                ),
             }
         )
     return {
@@ -857,7 +1021,9 @@ def challenge_levels_access_payload(*, user, challenge: Challenge) -> list[dict]
     easy-to-hard. Reuses the same access context the Tower uses so statuses
     (locked / in_progress / completed) match exactly between the Tower and the
     in-run level navigator."""
-    access = _build_challenge_access(user=user, storey_id=challenge.storey_id, challenges=[challenge])
+    access = _build_challenge_access(
+        user=user, storey_id=challenge.storey_id, challenges=[challenge]
+    )
     ordered = _ordered_levels(challenge.challenge_levels.all())
     return [
         challenge_level_access_payload(level=level, access=access, sibling_levels=ordered)
@@ -915,7 +1081,9 @@ def _challenge_status(
         return "in_progress"
     if _challenge_unlocked(level=level, access=access, sibling_levels=sibling_levels):
         latest = access.latest_runs.get(level.id)
-        return latest.status if latest and latest.status in {"failed", "abandoned"} else "not_started"
+        return (
+            latest.status if latest and latest.status in {"failed", "abandoned"} else "not_started"
+        )
     return "locked"
 
 
@@ -931,7 +1099,11 @@ def _challenge_unlocked(
         return access.adventure_passed
     previous = DIFFICULTY_EASY if level.difficulty == DIFFICULTY_MEDIUM else DIFFICULTY_MEDIUM
     previous_level = next(
-        (candidate for candidate in sibling_levels if candidate.difficulty == previous and candidate.is_published),
+        (
+            candidate
+            for candidate in sibling_levels
+            if candidate.difficulty == previous and candidate.is_published
+        ),
         None,
     )
     return bool(previous_level and previous_level.id in access.completions)
@@ -939,7 +1111,9 @@ def _challenge_unlocked(
 
 def _adventure_passed(*, user, storey_id: int) -> bool:
     adventure_ids = list(
-        CommandAdventure.objects.filter(storey_id=storey_id, is_published=True).values_list("id", flat=True)
+        CommandAdventure.objects.filter(storey_id=storey_id, is_published=True).values_list(
+            "id", flat=True
+        )
     )
     if not adventure_ids:
         return True  # storey has no Command Adventure to gate on
