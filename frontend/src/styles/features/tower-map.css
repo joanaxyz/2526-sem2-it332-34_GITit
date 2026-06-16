@@ -1,0 +1,2495 @@
+/* Tower page */
+.tower-page-shell {
+  --tower-cyan: 45, 245, 255;
+  --tower-blue: 53, 143, 255;
+  --tower-purple: 176, 74, 255;
+  position: relative;
+  min-height: calc(100vh - 7rem);
+  /* No overflow:hidden here — it would trap the sticky storey rail. Clouds are
+     clipped by .tower-cloudfield instead. */
+  isolation: isolate;
+  /* Top padding clears the floating nav blade (no header bar since 2026-06)
+     so the spire never tucks under it. */
+  padding: clamp(4.5rem, 9vh, 6rem) 0 2.5rem;
+  scroll-padding-top: clamp(9.5rem, 21vh, 14rem);
+}
+
+.tower-sky {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: -1;
+  /* Colours come from the living-sky engine (set on .tower-page-shell). The
+     hard-coded values are night-palette fallbacks for first paint. */
+  background:
+    radial-gradient(130% 80% at 50% 108%, rgba(var(--sky-glow, 70, 96, 168), 0.32), transparent 60%),
+    linear-gradient(
+      to bottom,
+      var(--sky-top, #05081d) 0%,
+      var(--sky-mid, #111a44) 52%,
+      var(--sky-bottom, #243066) 100%
+    );
+  transition: background 0.4s linear;
+}
+
+/* ── Sun: a warm disc that arcs across the sky by day (position + opacity from
+      the living-sky engine). ── */
+.tower-sun {
+  position: absolute;
+  left: var(--sun-x, 50%);
+  top: var(--sun-y, 80%);
+  width: 9rem;
+  height: 9rem;
+  margin: -4.5rem 0 0 -4.5rem;
+  opacity: var(--sun-opacity, 0);
+  will-change: transform, opacity;
+  transition: opacity 0.5s linear;
+}
+
+.tower-sun-core {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 46%, #fff7e6 0%, #ffe49a 42%, #ffb24d 74%, #ff8a3d 100%);
+  box-shadow:
+    0 0 70px rgba(255, 196, 120, 0.7),
+    0 0 160px rgba(255, 158, 86, 0.45);
+}
+
+.tower-sun-flare {
+  position: absolute;
+  inset: -45%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 214, 150, 0.34), transparent 62%);
+  filter: blur(6px);
+}
+
+/* ── Moon: larger, arcs across the sky by night. ── */
+.tower-moon {
+  position: absolute;
+  left: var(--moon-x, 16%);
+  top: var(--moon-y, 18%);
+  width: 16rem;
+  height: 16rem;
+  margin: -8rem 0 0 -8rem;
+  border-radius: 50%;
+  opacity: var(--moon-opacity, 1);
+  will-change: transform, opacity;
+  background: radial-gradient(circle at 36% 34%, #f9fbff, #dde6f8 50%, #b7c4e3 73%, #94a3c9);
+  box-shadow:
+    0 0 96px rgba(196, 218, 255, 0.58),
+    0 0 240px rgba(126, 166, 255, 0.36),
+    inset -24px -18px 50px rgba(60, 80, 132, 0.52);
+  transition: opacity 0.5s linear;
+}
+
+.tower-moon-crater {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(120, 134, 172, 0.45);
+  box-shadow: inset 1px 1px 2px rgba(60, 74, 112, 0.6);
+}
+
+.tower-moon-crater--a { width: 1.5rem; height: 1.5rem; top: 28%; left: 30%; }
+.tower-moon-crater--b { width: 1rem; height: 1rem; top: 55%; left: 58%; }
+.tower-moon-crater--c { width: 0.7rem; height: 0.7rem; top: 38%; left: 64%; }
+
+/* ── Stars: hand-scattered across the WHOLE sky (not just the top band) and
+      faded in/out by the living-sky engine via --star-opacity. ── */
+.tower-starfield {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  opacity: var(--star-opacity, 1);
+  will-change: transform, opacity;
+  transition: opacity 0.5s linear;
+}
+
+.tower-starfield--far {
+  background-image:
+    radial-gradient(1px 1px at 6% 12%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 17% 33%, rgba(198, 224, 255, 0.7), transparent),
+    radial-gradient(1.2px 1.2px at 23% 8%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1px 1px at 31% 22%, rgba(210, 230, 255, 0.65), transparent),
+    radial-gradient(1px 1px at 39% 47%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1.3px 1.3px at 47% 15%, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1px 1px at 53% 38%, rgba(190, 220, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 62% 27%, rgba(255, 255, 255, 0.78), transparent),
+    radial-gradient(1.2px 1.2px at 69% 9%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1px 1px at 74% 44%, rgba(205, 228, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 83% 19%, rgba(255, 255, 255, 0.72), transparent),
+    radial-gradient(1.2px 1.2px at 88% 36%, rgba(255, 255, 255, 0.82), transparent),
+    radial-gradient(1px 1px at 94% 24%, rgba(200, 224, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 12% 52%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1px 1px at 44% 58%, rgba(210, 230, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 8% 68%, rgba(255, 255, 255, 0.62), transparent),
+    radial-gradient(1.2px 1.2px at 27% 74%, rgba(220, 236, 255, 0.55), transparent),
+    radial-gradient(1px 1px at 49% 81%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 66% 71%, rgba(206, 228, 255, 0.55), transparent),
+    radial-gradient(1.2px 1.2px at 81% 78%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 93% 64%, rgba(214, 232, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 35% 92%, rgba(255, 255, 255, 0.45), transparent),
+    radial-gradient(1px 1px at 72% 90%, rgba(220, 236, 255, 0.42), transparent);
+  animation: tower-twinkle 5.5s ease-in-out infinite;
+}
+
+.tower-starfield--near {
+  background-image:
+    radial-gradient(1.6px 1.6px at 9% 18%, #ffffff, transparent),
+    radial-gradient(2px 2px at 28% 12%, #eaf3ff, transparent),
+    radial-gradient(1.6px 1.6px at 41% 30%, #ffffff, transparent),
+    radial-gradient(1.8px 1.8px at 57% 9%, #ffffff, transparent),
+    radial-gradient(2px 2px at 66% 34%, #dcebff, transparent),
+    radial-gradient(1.6px 1.6px at 79% 14%, #ffffff, transparent),
+    radial-gradient(1.8px 1.8px at 91% 28%, #ffffff, transparent),
+    radial-gradient(1.6px 1.6px at 20% 42%, #eaf3ff, transparent),
+    radial-gradient(1.8px 1.8px at 50% 48%, #ffffff, transparent),
+    radial-gradient(1.6px 1.6px at 85% 46%, #ffffff, transparent),
+    radial-gradient(1.7px 1.7px at 15% 64%, #ffffff, transparent),
+    radial-gradient(1.9px 1.9px at 38% 73%, #eaf3ff, transparent),
+    radial-gradient(1.6px 1.6px at 61% 67%, #ffffff, transparent),
+    radial-gradient(1.8px 1.8px at 76% 82%, #dcebff, transparent),
+    radial-gradient(1.6px 1.6px at 90% 72%, #ffffff, transparent),
+    radial-gradient(1.7px 1.7px at 30% 88%, #ffffff, transparent),
+    radial-gradient(1.6px 1.6px at 55% 94%, #eaf3ff, transparent);
+  animation: tower-twinkle 3.8s ease-in-out 0.9s infinite;
+}
+
+/* ── Clouds: puffy silhouettes spread down the WHOLE tower (count + positions are
+      generated in StoreyMapPage and scale with the storey count). The field is as
+      tall as the tower and scrolls with it; each depth layer adds a scroll-linked
+      parallax offset that reverses on scroll-up. Top & bottom are masked so edge
+      clouds dissolve instead of being sliced. ── */
+/* Clouds crossing the viewport edge fade out instead of cutting straight:
+   the vertical and horizontal gradients are intersected into one mask. */
+.tower-cloudfield {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent 0, #000 2.5%, #000 97.5%, transparent 100%),
+    linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent 0, #000 2.5%, #000 97.5%, transparent 100%),
+    linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%);
+  mask-composite: intersect;
+}
+
+/* Far/mid sit behind the tower (z 0); near drifts in front of it (z 2, grid is z 1). */
+.tower-cloudfield--back { z-index: 0; }
+.tower-cloudfield--front { z-index: 2; }
+
+.tower-cloud-layer {
+  position: absolute;
+  inset: 0;
+  opacity: var(--cloud-opacity, 0.6);
+  will-change: transform, opacity;
+  transition: opacity 0.5s linear;
+}
+
+.tower-cloud {
+  position: absolute;
+  height: auto;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 6px 14px rgba(4, 8, 26, 0.35));
+}
+
+.tower-cloud[data-layer='far'] {
+  filter: drop-shadow(0 4px 12px rgba(4, 8, 26, 0.28)) blur(1.4px);
+}
+
+.tower-cloud[data-layer='near'] {
+  filter: drop-shadow(0 9px 20px rgba(4, 8, 26, 0.42));
+}
+
+.tower-cloud path {
+  fill: var(--cloud-tint, #d2def5);
+  stroke: rgba(255, 255, 255, 0.32);
+  stroke-width: 0.6;
+  transition: fill 0.5s linear;
+}
+
+@keyframes tower-twinkle {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+.tower-stage-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  justify-content: center;
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
+.tower-overview-column {
+  display: grid;
+  gap: 1.15rem;
+  padding-top: 2rem;
+}
+
+.tower-heading-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tower-index-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 245, 212, 0.28);
+  background: rgba(0, 245, 212, 0.1);
+  color: hsl(var(--primary));
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.25rem 0.65rem;
+  box-shadow: 0 0 18px rgba(0, 245, 212, 0.12);
+}
+
+.tower-side-panel,
+.stage-reward-panel {
+  border-radius: 8px;
+  border: 1px solid rgba(45, 245, 255, 0.2);
+  background:
+    linear-gradient(180deg, rgba(5, 21, 43, 0.74), rgba(2, 9, 25, 0.68)),
+    rgba(3, 14, 31, 0.7);
+  box-shadow: inset 0 1px 0 rgba(126, 249, 255, 0.08), 0 18px 55px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(12px);
+}
+
+.tower-side-panel {
+  overflow: hidden;
+}
+
+.tower-side-panel > .grid {
+  padding: 1.25rem;
+}
+
+.tower-overview-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.tower-overview-stat-icon {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 245, 212, 0.32);
+  color: hsl(var(--primary));
+  box-shadow: 0 0 15px rgba(0, 245, 212, 0.16);
+}
+
+.tower-progress-block {
+  border-top: 1px solid rgba(45, 245, 255, 0.12);
+  background: rgba(0, 4, 14, 0.24);
+  padding: 1.15rem 1.25rem 1.65rem;
+}
+
+.tower-reward-rail {
+  position: relative;
+  margin-top: 1.1rem;
+  padding: 0 0.35rem 1.35rem;
+}
+
+.tower-reward-markers {
+  position: absolute;
+  inset-inline: 0.35rem;
+  top: 0.12rem;
+  height: 1.8rem;
+  pointer-events: none;
+}
+
+.tower-reward-markers span {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(45, 245, 255, 0.26);
+  background: rgba(2, 9, 25, 0.82);
+  opacity: 0.58;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 16px rgba(53, 143, 255, 0.14);
+}
+
+.tower-reward-markers span::before {
+  content: '';
+  position: absolute;
+  top: -0.46rem;
+  width: 1px;
+  height: 0.38rem;
+  background: rgba(45, 245, 255, 0.38);
+}
+
+.tower-reward-markers span.is-earned {
+  opacity: 1;
+  border-color: rgba(0, 245, 212, 0.72);
+  box-shadow: 0 0 18px rgba(0, 245, 212, 0.35), 0 0 28px rgba(53, 143, 255, 0.18);
+}
+
+.tower-reward-markers img {
+  width: 1.45rem;
+  height: 1.45rem;
+  object-fit: contain;
+}
+
+.stage-reward-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.stage-reward-icon {
+  display: grid;
+  width: 5rem;
+  height: 5rem;
+  place-items: center;
+  overflow: visible;
+}
+
+.stage-reward-chest {
+  width: 5.75rem;
+  height: 5.75rem;
+  object-fit: contain;
+  filter: drop-shadow(0 0 18px rgba(0, 245, 212, 0.5)) drop-shadow(0 0 32px rgba(53, 143, 255, 0.28));
+}
+
+.tower-stack-column {
+  display: grid;
+  justify-items: center;
+  min-width: 0;
+  width: 100%;
+}
+
+.storey-section {
+  display: grid;
+  grid-template-columns: minmax(24rem, 36rem);
+  align-items: start;
+  justify-content: center;
+  gap: clamp(1rem, 2.6vw, 2.2rem);
+  width: 100%;
+}
+
+.storey-section + .storey-section {
+  /* Keep only a tiny seam overlap. The old -4.55rem pulled the next
+     storey over the full connector, so the wall painted on top of it. */
+  margin-top: -0.15rem;
+}
+
+.tower-storey-dock,
+.tower-artifact-dock {
+  position: fixed;
+  z-index: 34;
+  display: grid;
+  width: min(19rem, calc((100vw - 42rem) / 2 - 2rem));
+  min-width: 15.5rem;
+  pointer-events: none;
+}
+
+.tower-storey-dock {
+  top: clamp(5.25rem, 8vh, 6rem);
+  left: clamp(1rem, 2.5vw, 2rem);
+}
+
+.tower-artifact-dock {
+  top: auto;
+  right: clamp(1rem, 2.5vw, 2rem);
+  bottom: clamp(2rem, 7vh, 4.5rem);
+  gap: 0.85rem;
+}
+
+.tower-storey-dock > *,
+.tower-artifact-dock > * {
+  pointer-events: auto;
+}
+
+.tower-zoom-control {
+  position: fixed;
+  z-index: 45;
+  left: 50%;
+  bottom: clamp(0.85rem, 2.5vh, 1.6rem);
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: min(18rem, calc(100vw - 2rem));
+  padding: 0.42rem 0.52rem 0.42rem 0.7rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.2);
+  border-radius: 999px;
+  background: rgba(6, 14, 26, 0.36);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px) saturate(1.15);
+  opacity: 0.46;
+  transform: translateX(-50%);
+  transition: opacity 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  pointer-events: auto;
+}
+
+.tower-zoom-control:hover,
+.tower-zoom-control:focus-within {
+  opacity: 0.94;
+  border-color: rgba(var(--tower-cyan), 0.42);
+  background: rgba(6, 14, 26, 0.68);
+}
+
+.tower-zoom-control input[type='range'] {
+  flex: 1;
+  min-width: 0;
+  accent-color: rgb(var(--tower-cyan));
+}
+
+.tower-zoom-control button {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.22);
+  border-radius: 999px;
+  background: rgba(10, 20, 34, 0.48);
+  color: hsl(var(--foreground));
+  cursor: pointer;
+}
+
+.tower-zoom-control--editor {
+  bottom: clamp(0.85rem, 2.5vh, 1.6rem);
+}
+
+/* -- In-tower control cluster: compact tower picker + Edit/Author icons, docked
+   just under the SkyClock, top-right. Reads as instrumentation, not a toolbar. -- */
+.tower-controls {
+  position: fixed;
+  z-index: 41;
+  top: clamp(18.25rem, calc(8vh + 12.5rem), 20rem);
+  right: clamp(1rem, 2.5vw, 2rem);
+  display: grid;
+  justify-items: end;
+  gap: 0.5rem;
+}
+
+.tower-controls-picker {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tower-control-error {
+  max-width: 14rem;
+  margin: 0;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, var(--color-danger, #e5484d) 18%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-danger, #e5484d) 45%, transparent);
+  color: var(--color-text, #f4f1ea);
+  font-size: 0.75rem;
+  line-height: 1.3;
+  text-align: right;
+}
+
+.tower-control-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2.25rem;
+  padding: 0 0.7rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.28);
+  background: linear-gradient(160deg, rgba(8, 18, 32, 0.86), rgba(6, 12, 22, 0.78));
+  color: hsl(var(--foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(var(--tower-cyan), 0.06);
+  cursor: pointer;
+  transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s, color 0.18s;
+}
+
+.tower-control-chip:hover:not(:disabled) {
+  border-color: rgba(var(--tower-cyan), 0.6);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.46), 0 0 16px rgba(var(--tower-cyan), 0.3);
+}
+
+.tower-control-chip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.tower-control-chip--icon {
+  width: 2.25rem;
+  padding: 0;
+  justify-content: center;
+  position: relative;
+}
+
+.tower-control-chip-label {
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Hover/focus label hint for the icon-only chips. */
+.tower-control-chip--icon::after {
+  content: attr(data-hint);
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 0.5rem);
+  transform: translateY(-50%) translateX(4px);
+  padding: 0.28rem 0.55rem;
+  border-radius: 0.45rem;
+  background: rgba(4, 10, 18, 0.95);
+  border: 1px solid rgba(var(--tower-cyan), 0.3);
+  color: hsl(var(--foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: none;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s, transform 0.16s;
+}
+
+.tower-control-chip--icon:hover::after,
+.tower-control-chip--icon:focus-visible::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+.tower-control-popover {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 5;
+  display: grid;
+  gap: 0.25rem;
+  min-width: 12rem;
+  padding: 0.4rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.3);
+  background: linear-gradient(165deg, rgba(8, 18, 32, 0.96), rgba(5, 11, 20, 0.94));
+  backdrop-filter: blur(16px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55), 0 0 22px rgba(var(--tower-cyan), 0.18);
+}
+
+.tower-control-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.5rem;
+  border: 0;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.14s, color 0.14s;
+}
+
+.tower-control-option:hover:not(:disabled) {
+  background: rgba(var(--tower-cyan), 0.1);
+  color: hsl(var(--foreground));
+}
+
+.tower-control-option.is-active {
+  color: hsl(var(--foreground));
+  background: rgba(var(--tower-cyan), 0.14);
+}
+
+.tower-control-option--create {
+  justify-content: flex-start;
+  color: hsl(var(--primary));
+}
+
+.tower-control-option:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.tower-private-empty {
+  display: grid;
+  gap: 0.5rem;
+  padding: clamp(3rem, 12vh, 6rem) 1.5rem;
+  justify-items: center;
+  text-align: center;
+}
+
+.tower-private-door {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .tower-controls {
+    top: clamp(16rem, 24vh, 18rem);
+  }
+
+  .tower-control-chip-label {
+    max-width: 6rem;
+  }
+}
+
+.storey-overview {
+  display: grid;
+  align-self: start;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: stretch;
+}
+
+.storey-overview-heading {
+  align-self: start;
+  padding: 0 0.05rem;
+}
+
+.storey-overview-card {
+  width: 100%;
+}
+
+.storey-overview-kicker {
+  color: hsl(var(--primary));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.storey-overview-title {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: clamp(1.55rem, 2.2vw, 2.05rem);
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.storey-overview-heading p {
+  max-width: 17rem;
+  margin-top: 0.65rem;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.storey-overview .stage-reward-panel {
+  min-width: 0;
+}
+
+.storey-overview-progress {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-top: 0.9rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.78rem;
+}
+
+.storey-overview-progress strong {
+  color: hsl(var(--primary));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-weight: 900;
+}
+
+.storey-overview-stats {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 0.85rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.76rem;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   STOREY BOOK: aurora charge first, then delayed opening
+   ════════════════════════════════════════════════════════════════════════ */
+.storey-book {
+  --book-blue: #2df5ff;
+  --book-purple: #b04aff;
+  --book-pink: #e58cff;
+  --book-cover-top: #0a4c55;
+  --book-cover-bottom: #031923;
+  --book-page: #fffdf7;
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem 0.5rem 1.55rem;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 220ms ease;
+}
+
+.storey-book:hover {
+  transform: translateY(-2px);
+}
+
+.storey-book:focus-visible {
+  outline: 2px solid var(--book-blue);
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+
+.storey-book-stage {
+  position: relative;
+  width: 5.75rem;
+  height: 6rem;
+  flex-shrink: 0;
+  perspective: 760px;
+}
+
+/* Keep old particle spans harmless if they still exist in TSX. */
+.storey-book-particles,
+.storey-book-diamond {
+  display: none;
+}
+
+/* A very soft hidden bloom that appears only during the opening moment. */
+.storey-book-stage::before {
+  content: '';
+  position: absolute;
+  left: 0.35rem;
+  top: 0.35rem;
+  width: 4.8rem;
+  height: 5.15rem;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(176, 74, 255, 0.34), transparent 52%),
+    radial-gradient(circle at 50% 52%, rgba(45, 245, 255, 0.18), transparent 68%);
+  opacity: 0;
+  transform: scale(0.68);
+  pointer-events: none;
+  filter: blur(7px);
+  z-index: 0;
+}
+
+.storey-book:hover .storey-book-stage::before,
+.storey-book:focus-visible .storey-book-stage::before {
+  animation: storey-book-opening-bloom 1350ms ease-out both;
+}
+
+@keyframes storey-book-opening-bloom {
+  0% {
+    opacity: 0;
+    transform: scale(0.62);
+  }
+
+  35% {
+    opacity: 0.65;
+    transform: scale(0.82);
+  }
+
+  72% {
+    opacity: 0.42;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+}
+
+.storey-book-3d {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transform-style: preserve-3d;
+  transform: rotateY(-32deg) rotateX(8deg);
+  transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.storey-book:hover .storey-book-3d,
+.storey-book:focus-visible .storey-book-3d {
+  transform: rotateY(-18deg) rotateX(6deg) translateZ(0.18rem);
+  transition-delay: 760ms;
+}
+
+.storey-book-back,
+.storey-book-cover,
+.storey-book-leaf {
+  position: absolute;
+  top: 0.18rem;
+  left: 0.95rem;
+  width: 3.1rem;
+  height: 5.3rem;
+  border-radius: 3px 7px 7px 3px;
+  transform-origin: left center;
+}
+
+/* Back cover */
+.storey-book-back {
+  background: linear-gradient(135deg, var(--book-cover-top), var(--book-cover-bottom));
+  border: 2px solid var(--book-blue);
+  transform: translateZ(-0.08rem);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.45);
+}
+
+.storey-book-leaves {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+/* Inner purple light appears only after the aurora charge, then fades. */
+.storey-book-leaves::after {
+  content: '';
+  position: absolute;
+  top: 0.62rem;
+  left: 1.1rem;
+  width: 2.65rem;
+  height: 4.35rem;
+  border-radius: 3px 6px 6px 3px;
+  background:
+    radial-gradient(circle at 15% 45%, rgba(229, 140, 255, 0.42), transparent 44%),
+    linear-gradient(
+      90deg,
+      rgba(176, 74, 255, 0.34),
+      rgba(176, 74, 255, 0.12) 48%,
+      transparent 78%
+    );
+  opacity: 0;
+  transform: translateZ(0.18rem) scaleX(0.5);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+.storey-book:hover .storey-book-leaves::after,
+.storey-book:focus-visible .storey-book-leaves::after {
+  animation: storey-book-inner-light 900ms ease-out 760ms both;
+}
+
+@keyframes storey-book-inner-light {
+  0% {
+    opacity: 0;
+    transform: translateZ(0.18rem) scaleX(0.45);
+  }
+
+  45% {
+    opacity: 0.9;
+    transform: translateZ(0.18rem) scaleX(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateZ(0.18rem) scaleX(1.08);
+  }
+}
+
+/* White pages. Kept behind the cover so they do not overlap the front. */
+.storey-book-leaf {
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, #ffffff 0%, var(--book-page) 72%, #eaffff 100%);
+  border: 1.5px solid var(--book-blue);
+  border-radius: 1px 6px 6px 1px;
+  box-shadow:
+    inset -4px 0 7px rgba(0, 120, 145, 0.13),
+    0 4px 8px rgba(0, 0, 0, 0.12);
+  transition:
+    transform 560ms cubic-bezier(0.3, 1.15, 0.4, 1),
+    border-color 260ms ease;
+}
+
+.storey-book-leaf::before {
+  content: '';
+  position: absolute;
+  inset: 0.45rem 0.42rem;
+  border-radius: inherit;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0,
+    transparent 0.42rem,
+    rgba(5, 50, 65, 0.14) 0.47rem,
+    transparent 0.52rem
+  );
+  opacity: 0.5;
+}
+
+.storey-book-leaf:nth-child(1) { transform: translateZ(0.16rem); }
+.storey-book-leaf:nth-child(2) { transform: translateZ(0.11rem); }
+.storey-book-leaf:nth-child(3) { transform: translateZ(0.06rem); }
+.storey-book-leaf:nth-child(4) { transform: translateZ(0.02rem); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .storey-book:hover .storey-book-leaf:nth-child(1),
+  .storey-book:focus-visible .storey-book-leaf:nth-child(1) {
+    transform: translateZ(0.16rem) rotateY(-38deg);
+    border-color: var(--book-purple);
+    transition-delay: 860ms;
+  }
+
+  .storey-book:hover .storey-book-leaf:nth-child(2),
+  .storey-book:focus-visible .storey-book-leaf:nth-child(2) {
+    transform: translateZ(0.11rem) rotateY(-27deg);
+    border-color: rgba(176, 74, 255, 0.82);
+    transition-delay: 930ms;
+  }
+
+  .storey-book:hover .storey-book-leaf:nth-child(3),
+  .storey-book:focus-visible .storey-book-leaf:nth-child(3) {
+    transform: translateZ(0.06rem) rotateY(-16deg);
+    border-color: rgba(176, 74, 255, 0.68);
+    transition-delay: 1000ms;
+  }
+
+  .storey-book:hover .storey-book-leaf:nth-child(4),
+  .storey-book:focus-visible .storey-book-leaf:nth-child(4) {
+    transform: translateZ(0.02rem) rotateY(-7deg);
+    border-color: rgba(176, 74, 255, 0.56);
+    transition-delay: 1070ms;
+  }
+}
+
+/* Thin white page edge. */
+.storey-book-fore {
+  position: absolute;
+  top: 0.34rem;
+  left: calc(0.95rem + 3.02rem);
+  width: 0.22rem;
+  height: 4.98rem;
+  transform: translateZ(0.12rem) rotateY(-90deg);
+  transform-origin: left center;
+  border-radius: 0 3px 3px 0;
+  border: 1.5px solid var(--book-blue);
+  background: repeating-linear-gradient(
+    180deg,
+    #ffffff 0,
+    #ffffff 2px,
+    #dffcff 2px,
+    #dffcff 4px
+  );
+  box-shadow: inset -2px 0 4px rgba(0, 120, 145, 0.14);
+}
+
+/* Front cover. Solid teal outline by default. */
+.storey-book-cover {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(45, 245, 255, 0.1), transparent 44%),
+    linear-gradient(135deg, var(--book-cover-top), var(--book-cover-bottom));
+  border: 2px solid var(--book-blue);
+  transform: translateZ(0.86rem);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 10px 18px rgba(0, 0, 0, 0.28);
+  transition:
+    transform 620ms cubic-bezier(0.34, 1.1, 0.4, 1),
+    border-color 300ms ease,
+    box-shadow 300ms ease;
+  backface-visibility: visible;
+}
+
+.storey-book-cover::before {
+  content: '';
+  position: absolute;
+  inset: 0.35rem;
+  border-radius: 2px 5px 5px 2px;
+  border: 1.5px solid var(--book-blue);
+  opacity: 0.6;
+}
+
+/* Aurora sweep across the cover before it opens. */
+.storey-book-cover::after {
+  content: '';
+  position: absolute;
+  inset: -45%;
+  background:
+    linear-gradient(
+      115deg,
+      transparent 26%,
+      rgba(45, 245, 255, 0.08) 36%,
+      rgba(176, 74, 255, 0.58) 45%,
+      rgba(229, 140, 255, 0.78) 50%,
+      rgba(45, 245, 255, 0.48) 56%,
+      transparent 70%
+    );
+  opacity: 0;
+  transform: translateX(-55%) rotate(10deg);
+  pointer-events: none;
+}
+
+.storey-book:hover .storey-book-cover,
+.storey-book:focus-visible .storey-book-cover {
+  transform: translateZ(0.86rem) rotateY(-118deg);
+  border-color: var(--book-purple);
+  transition-delay: 780ms;
+  animation: storey-book-edge-charge 1450ms ease-out both;
+}
+
+.storey-book:hover .storey-book-cover::after,
+.storey-book:focus-visible .storey-book-cover::after {
+  animation: storey-book-aurora-sweep 1450ms ease-out both;
+}
+
+@keyframes storey-book-edge-charge {
+  0% {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 10px 18px rgba(0, 0, 0, 0.28);
+  }
+
+  22% {
+    box-shadow:
+      0 0 7px rgba(45, 245, 255, 0.65),
+      0 0 16px rgba(176, 74, 255, 0.28),
+      inset 0 0 8px rgba(45, 245, 255, 0.16),
+      0 10px 18px rgba(0, 0, 0, 0.28);
+  }
+
+  54% {
+    box-shadow:
+      0 0 10px rgba(45, 245, 255, 0.78),
+      0 0 22px rgba(176, 74, 255, 0.45),
+      inset 0 0 12px rgba(229, 140, 255, 0.22),
+      0 10px 18px rgba(0, 0, 0, 0.28);
+  }
+
+  82% {
+    box-shadow:
+      0 0 8px rgba(176, 74, 255, 0.45),
+      inset 0 0 8px rgba(176, 74, 255, 0.14),
+      0 10px 18px rgba(0, 0, 0, 0.28);
+  }
+
+  100% {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+      0 10px 18px rgba(0, 0, 0, 0.28);
+  }
+}
+
+@keyframes storey-book-aurora-sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-55%) rotate(10deg);
+  }
+
+  20% {
+    opacity: 0.72;
+  }
+
+  58% {
+    opacity: 0.95;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(55%) rotate(10deg);
+  }
+}
+
+.storey-book-emblem {
+  position: relative;
+  z-index: 1;
+  width: 1.85rem;
+  height: 1.85rem;
+  color: #e8ffff;
+}
+
+.storey-book:hover .storey-book-emblem,
+.storey-book:focus-visible .storey-book-emblem {
+  animation: storey-book-icon-charge 1450ms ease-out both;
+}
+
+@keyframes storey-book-icon-charge {
+  0% {
+    color: #e8ffff;
+    filter: none;
+    transform: scale(1);
+  }
+
+  24% {
+    color: #ffffff;
+    filter:
+      drop-shadow(0 0 5px rgba(45, 245, 255, 0.85))
+      drop-shadow(0 0 12px rgba(176, 74, 255, 0.42));
+    transform: scale(1.04);
+  }
+
+  52% {
+    color: #f4e8ff;
+    filter:
+      drop-shadow(0 0 7px rgba(229, 140, 255, 0.95))
+      drop-shadow(0 0 16px rgba(45, 245, 255, 0.5));
+    transform: scale(1.09);
+  }
+
+  82% {
+    color: #f4e8ff;
+    filter:
+      drop-shadow(0 0 5px rgba(176, 74, 255, 0.62));
+    transform: scale(1.02);
+  }
+
+  100% {
+    color: #f4e8ff;
+    filter: none;
+    transform: scale(1);
+  }
+}
+
+/* Spine: solid teal outline, dark teal body. */
+.storey-book-spine {
+  position: absolute;
+  top: 0.18rem;
+  left: 0.92rem;
+  width: 0.68rem;
+  height: 5.3rem;
+  transform: rotateY(-90deg);
+  transform-origin: left center;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #0a4a55, #031822);
+  border: 2px solid var(--book-blue);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.22);
+}
+
+.storey-book:hover .storey-book-spine,
+.storey-book:focus-visible .storey-book-spine {
+  animation: storey-book-spine-charge 1450ms ease-out both;
+}
+
+@keyframes storey-book-spine-charge {
+  0% {
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.22);
+  }
+
+  45% {
+    box-shadow:
+      0 0 8px rgba(45, 245, 255, 0.72),
+      0 0 15px rgba(176, 74, 255, 0.34),
+      0 10px 18px rgba(0, 0, 0, 0.22);
+  }
+
+  100% {
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.22);
+  }
+}
+
+.storey-book-meta {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.storey-book-kicker {
+  color: rgba(196, 158, 255, 0.95);
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.storey-book-title {
+  color: hsl(var(--foreground));
+  font-size: 1.02rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.storey-book-sub {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.74rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .storey-book:hover .storey-book-3d,
+  .storey-book:focus-visible .storey-book-3d {
+    transition-delay: 0ms;
+  }
+
+  .storey-book:hover .storey-book-cover,
+  .storey-book:focus-visible .storey-book-cover {
+    transform: translateZ(0.86rem) rotateY(-42deg);
+    transition-delay: 0ms;
+  }
+
+  .storey-book-3d,
+  .storey-book-cover,
+  .storey-book-leaf {
+    transition: none;
+  }
+
+  .storey-book:hover .storey-book-stage::before,
+  .storey-book:focus-visible .storey-book-stage::before,
+  .storey-book:hover .storey-book-leaves::after,
+  .storey-book:focus-visible .storey-book-leaves::after,
+  .storey-book:hover .storey-book-cover,
+  .storey-book:focus-visible .storey-book-cover,
+  .storey-book:hover .storey-book-cover::after,
+  .storey-book:focus-visible .storey-book-cover::after,
+  .storey-book:hover .storey-book-emblem,
+  .storey-book:focus-visible .storey-book-emblem,
+  .storey-book:hover .storey-book-spine,
+  .storey-book:focus-visible .storey-book-spine {
+    animation: none;
+  }
+}
+
+/* ── Book modal ─────────────────────────────────────────────────────────── */
+.book-modal {
+  background:
+    linear-gradient(180deg, rgba(7, 12, 28, 0.6), rgba(4, 7, 20, 0.6));
+}
+
+.book-modal-rail {
+  padding: 1rem 0.85rem;
+  border-right: 1px solid rgba(45, 245, 255, 0.16);
+  background: rgba(4, 9, 22, 0.5);
+}
+
+.book-modal-rail-kicker {
+  margin: 0 0 0.65rem 0.35rem;
+  color: hsl(var(--muted-foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.book-modal-rail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.82rem;
+  text-align: left;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.book-modal-rail-item:hover {
+  background: rgba(45, 245, 255, 0.07);
+  color: hsl(var(--foreground));
+}
+
+.book-modal-rail-item.is-active {
+  color: hsl(var(--foreground));
+  background: linear-gradient(90deg, rgba(45, 245, 255, 0.14), rgba(176, 74, 255, 0.12));
+  border-color: rgba(126, 249, 255, 0.32);
+}
+
+/* Option/argument sub-nav under the active command. */
+.book-modal-rail-anchors {
+  display: grid;
+  gap: 0.1rem;
+  margin: 0.2rem 0 0.35rem;
+  padding: 0 0 0 0.85rem;
+  list-style: none;
+  border-left: 1px solid rgba(45, 245, 255, 0.18);
+  margin-left: 0.85rem;
+}
+
+.book-modal-rail-anchor {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  min-height: 1.9rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.76rem;
+  text-align: left;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.book-modal-rail-anchor::before {
+  content: '';
+  width: 0.32rem;
+  height: 0.32rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: rgba(45, 245, 255, 0.7);
+}
+
+.book-modal-rail-anchor.is-argument::before {
+  background: rgba(176, 74, 255, 0.75);
+}
+
+.book-modal-rail-anchor:hover {
+  background: rgba(45, 245, 255, 0.06);
+  color: hsl(var(--foreground));
+}
+
+.book-modal-head {
+  padding: 1.15rem 1.4rem;
+  border-bottom: 1px solid rgba(45, 245, 255, 0.16);
+  background: rgba(6, 12, 28, 0.55);
+}
+
+.book-modal-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 1.1rem;
+  border-top: 1px solid rgba(45, 245, 255, 0.16);
+  background: rgba(6, 12, 28, 0.6);
+}
+
+/* ── Authored diagrams ──────────────────────────────────────────────────── */
+.book-diagram {
+  margin: 0;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(176, 74, 255, 0.28);
+  background:
+    radial-gradient(120% 120% at 50% 0%, rgba(45, 245, 255, 0.07), transparent 60%),
+    linear-gradient(180deg, rgba(14, 16, 38, 0.7), rgba(7, 9, 26, 0.72));
+}
+
+.book-diagram-title {
+  margin-bottom: 0.75rem;
+  color: hsl(var(--foreground));
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.book-diagram-canvas {
+  display: grid;
+  place-items: center;
+  overflow-x: auto;
+  padding: 0.35rem 0;
+}
+
+.book-diagram-svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.book-diagram-node-label {
+  fill: hsl(var(--foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.book-diagram-edge-label {
+  fill: hsl(var(--muted-foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 10px;
+}
+
+.book-diagram-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.74rem;
+}
+
+.book-diagram-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.book-diagram-legend-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+}
+
+.book-diagram-caption {
+  margin: 0.75rem 0 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.book-diagram-empty {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8rem;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   TOWER: reference-locked neon keep: windows storey → adventure →
+   section separator → challenges → bannered base separator. Layout (page shell, docks, sky
+   clock, sun/moon) lives elsewhere.
+   ════════════════════════════════════════════════════════════════════════ */
+.learning-tower {
+  --tower-wall-solid: #081b2f;
+  --tower-wall-shadow: #03101f;
+  --tower-wall-highlight: #0a2d46;
+  --tower-cyan-glow: rgba(45, 245, 255, 0.28);
+  --tower-purple-glow: rgba(176, 74, 255, 0.24);
+  position: relative;
+  justify-self: center;
+  width: min(100%, 40rem);
+  padding-top: 3.25rem;
+}
+
+.learning-tower-continuation {
+  margin-top: -0.2rem;
+  padding-top: 0;
+}
+
+.tower-repeater {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  width: 100%;
+  overflow: visible;
+}
+
+.tower-roof-stage {
+  position: relative;
+  z-index: 5;
+  display: grid;
+  justify-items: center;
+  width: 100%;
+}
+
+/* The roof and lit-window band are separate backend SVG pieces. The roof is a
+   one-off cap; the window band repeats per storey without carrying the roof.
+   The roof is drawn deliberately wider than the band so its eaves overhang the
+   walls like a real hat — a same-width roof read as uncanny. */
+.tower-roof-stage {
+  z-index: 6;
+  margin-bottom: -1.35rem;
+}
+
+.tower-roof-art {
+  display: block;
+  width: min(116%, 38rem);
+  height: auto;
+  overflow: visible;
+}
+
+/* Dev-only marker shown when a piece descriptor has no SVG (unseeded / fresh
+   upload). Neutral on purpose — the frontend does not stand in art for a piece. */
+.piece-art-missing {
+  display: grid;
+  place-items: center;
+  min-height: 3rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+  border-radius: 0.35rem;
+  color: rgba(148, 163, 184, 0.85);
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.7rem;
+}
+
+/* Section walls are authored SVG assets. The wrapper handles layout;
+   the authored SVG paints the tower wall and the outer glow is uniform. */
+.tower-adventure-stage,
+.tower-challenges-stage,
+.tower-tome-stage {
+  position: relative;
+  box-sizing: border-box;
+  aspect-ratio: var(--tower-piece-aspect, 1.84);
+  overflow: visible;
+  text-align: center;
+}
+
+.tower-hall-art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 0 14px var(--tower-cyan-glow));
+}
+
+.tower-adventure-stage {
+  z-index: 3;
+  width: min(82%, 23rem);
+  margin-top: 0.05rem;
+  padding: 0;
+}
+
+
+.tower-stage-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  margin: 0;
+  opacity: 0.5;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.tower-stage-icon--cyan {
+  color: rgb(45, 245, 255);
+  filter: drop-shadow(0 0 12px rgba(45, 245, 255, 0.38));
+}
+
+.tower-stage-icon--purple {
+  color: rgb(217, 145, 255);
+  filter: drop-shadow(0 0 12px rgba(176, 74, 255, 0.38));
+}
+
+.tower-stage-title {
+  position: absolute;
+  top: 0.72rem;
+  left: 50%;
+  z-index: 5;
+  margin: 0;
+  padding: 0.22rem 0.55rem;
+  border: 1px solid rgba(45, 245, 255, 0.32);
+  border-radius: 0.2rem;
+  background: rgba(2, 11, 22, 0.86);
+  color: hsl(var(--foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, -0.22rem);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.tower-adventure-stage:hover .tower-stage-title,
+.tower-adventure-stage:focus-within .tower-stage-title,
+.tower-challenges-stage:hover .tower-stage-title,
+.tower-challenges-stage:focus-within .tower-stage-title,
+.tower-tome-stage:hover .tower-stage-title,
+.tower-tome-stage:focus-within .tower-stage-title {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* Tome stage: structural art comes from the section asset; the tome itself is a
+   placed artifact. */
+.tower-tome-stage {
+  z-index: 3;
+  width: min(78%, 21rem);
+  margin-top: 0.05rem;
+  padding: 0;
+}
+
+.tower-artifact {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  transform-origin: center;
+  pointer-events: auto;
+}
+
+.tower-artifact img,
+.tower-artifact .sprite-animator {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.tower-artifact--interactive {
+  cursor: pointer;
+}
+
+.tower-artifact--interactive:focus-visible {
+  outline: 2px solid rgba(var(--artifact-accent, 0, 245, 212), 0.9);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+.tower-artifact.is-selected::after {
+  content: '';
+  position: absolute;
+  inset: -0.4rem;
+  border: 1.5px solid rgba(var(--artifact-accent, 0, 245, 212), 0.9);
+  border-radius: 10px;
+  box-shadow:
+    0 0 18px rgba(var(--artifact-accent, 0, 245, 212), 0.45),
+    inset 0 0 12px rgba(var(--artifact-accent, 0, 245, 212), 0.18);
+  pointer-events: none;
+}
+
+.tower-artifact.is-locked {
+  filter: grayscale(0.38) saturate(0.72);
+  opacity: 0.82;
+}
+
+.editor-artifact {
+  cursor: grab;
+  touch-action: none;
+}
+
+.editor-artifact:active {
+  cursor: grabbing;
+}
+
+/* Landings/separators are authored SVG assets; the container only sizes,
+   positions, and tucks the belt into its neighbours. */
+.tower-section-separator {
+  position: relative;
+  z-index: 4;
+  width: min(100%, 34.5rem);
+  margin: -0.56rem auto -0.28rem;
+  isolation: isolate;
+}
+
+.tower-landing-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.tower-section-separator.is-continuation {
+  margin-bottom: -0.82rem;
+}
+
+.tower-section-separator.is-base {
+  width: min(100%, 37.5rem);
+  margin-bottom: 0;
+}
+
+/* ── Tower companion: the click-driven character sprite. The layer covers the
+   stage grid in document space (so a grounded character scrolls with its
+   separator for free) and never intercepts pointer events — the controller
+   listens on the stage grid (its parent) instead.
+
+   z-index sits INSIDE the stage grid's stacking context, deliberately between
+   the walkable ledges and the crenels: above the challenge/adventure stages
+   (1/3) and the thin walk-ledges (4) so he stands on top of them, but below the
+   crenel parapet + roof (6) so the battlements paint over his feet (he reads as
+   standing behind the parapet). Ties the window band (5) but paints after it in
+   source order, so he stays in front of the wall. ── */
+.tower-character-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.tower-character {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+  filter: drop-shadow(0 0 10px rgba(45, 245, 255, 0.22));
+  transition:
+    opacity 180ms ease,
+    scale 180ms ease;
+}
+
+.tower-character.is-unspawned {
+  visibility: hidden;
+}
+
+/* Teleport: fade-scale out, reposition, then the class removal fades back in. */
+.tower-character.is-teleporting {
+  opacity: 0;
+  scale: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tower-character {
+    transition: none;
+  }
+}
+
+.tower-challenges-stage {
+  z-index: 1;
+  width: min(88%, 25rem);
+  margin-top: -0.35rem;
+  padding: 0;
+}
+
+.tower-challenges-stage.is-locked {
+  opacity: 0.96;
+}
+
+@media (max-width: 860px) {
+  .tower-repeater {
+    width: min(100%, 30rem);
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .learning-tower {
+    width: min(100%, 30rem);
+  }
+
+  .tower-roof-art {
+    width: min(118%, 30rem);
+  }
+
+  .tower-adventure-stage {
+    width: min(86%, 18.5rem);
+  }
+
+  .tower-challenges-stage,
+  .tower-section-separator {
+    width: min(98%, 23rem);
+  }
+
+  .tower-tome-stage {
+    width: min(86%, 18.5rem);
+  }
+
+}
+
+/* Inline structural SVG art. Visual states come from uploaded asset data. */
+.piece-svg {
+  display: block;
+}
+
+.piece-svg > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.piece-svg.tower-hall-art > svg {
+  height: 100%;
+}
+
+/* ── Section states + loaders reused by the tower ── */
+.tower-empty-state {
+  margin: 1rem auto;
+  border: 1px dashed rgba(var(--tower-cyan), 0.25);
+  border-radius: 8px;
+  background: rgba(0, 10, 26, 0.42);
+  padding: 1rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.85rem;
+}
+
+/* ── Storey skeleton: an outline-only wireframe ("blueprint") of a storey shown
+   while its real art + content load, so the tower reads as under construction
+   instead of flashing the finished, painted pieces. The real pieces animate in
+   over it once they arrive. ── */
+.tower-skel {
+  display: contents;
+}
+
+.tower-skel-stage {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  width: min(100%, 34.5rem);
+  margin: 0.45rem auto 0;
+}
+
+.tower-skel-art {
+  display: block;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 0 9px rgba(var(--tower-cyan), 0.16));
+  animation: tower-skeleton-breathe 2s ease-in-out infinite;
+}
+
+.tower-skel-fill {
+  width: 100%;
+}
+
+.tower-skel-art path,
+.tower-skel-art rect,
+.tower-skel-art line,
+.tower-skel-art polygon,
+.tower-skel-art circle {
+  fill: none;
+  stroke: rgba(var(--tower-cyan), 0.5);
+  stroke-width: 2.5;
+  stroke-dasharray: 7 8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.tower-skel-art .skel-faint {
+  stroke: rgba(var(--tower-cyan), 0.22);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 7;
+}
+
+/* ── Build zone: the growth sentinel under the lowest mounted storey — a ghost
+   storey "under construction" that mounts the next one when scrolled to. ── */
+.tower-build-zone {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.7rem;
+  width: min(100%, 34.5rem);
+  margin: 0.5rem auto 3.5rem;
+}
+
+.tower-build-ghost {
+  display: flex;
+  justify-content: center;
+  gap: 1.3rem;
+  width: 100%;
+  padding: 1.1rem 0 1.25rem;
+  border: 2px dashed rgba(var(--tower-cyan), 0.3);
+  border-radius: 0.5rem;
+  background: linear-gradient(180deg, rgba(7, 31, 51, 0.42), rgba(3, 16, 28, 0.55));
+  animation: tower-skeleton-breathe 1.9s ease-in-out infinite;
+}
+
+.tower-build-ghost-window {
+  width: 1.15rem;
+  height: 2.2rem;
+  border: 1.5px dashed rgba(var(--tower-cyan), 0.42);
+  border-radius: 0.62rem 0.62rem 0.1rem 0.1rem;
+  background: rgba(var(--tower-cyan), 0.07);
+  animation: tower-skeleton-breathe 1.9s ease-in-out infinite;
+}
+
+.tower-build-ghost-window:nth-child(2) { animation-delay: 0.22s; }
+.tower-build-ghost-window:nth-child(3) { animation-delay: 0.44s; }
+
+.tower-build-beam {
+  width: 62%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(var(--tower-cyan), 0.5), transparent);
+  background-size: 220% 100%;
+  animation: tower-loading-sheen 1.6s ease-in-out infinite;
+}
+
+/* ── Artifact overview (in the sticky storey rail) ── */
+.artifact-overview {
+  --artifact-overview-accent: 0, 245, 212;
+  display: grid;
+  gap: 0.55rem;
+  align-self: start;
+  padding: 1rem 1.1rem 1.15rem;
+  border: 1px solid rgba(var(--artifact-overview-accent), 0.35);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(5, 18, 38, 0.82), rgba(2, 9, 24, 0.76));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 14px 40px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(10px);
+  pointer-events: auto;
+}
+
+.artifact-overview.is-empty {
+  border-style: dashed;
+  border-color: rgba(126, 200, 255, 0.2);
+  background: rgba(2, 9, 24, 0.4);
+}
+
+.artifact-overview-hint {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8rem;
+}
+
+.artifact-overview-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: hsl(var(--primary));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.artifact-overview-kind.is-challenge {
+  color: rgb(var(--artifact-overview-accent));
+}
+
+.artifact-overview-title {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: 1.02rem;
+  font-weight: 900;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.artifact-overview-summary {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.artifact-overview-difficulty {
+  justify-self: start;
+  padding: 0.12rem 0.45rem;
+  border: 1px solid rgba(var(--artifact-overview-accent), 0.42);
+  border-radius: 6px;
+  color: rgb(var(--artifact-overview-accent));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.artifact-overview-locked {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: rgba(214, 226, 245, 0.78);
+  font-size: 0.74rem;
+}
+
+.artifact-overview-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.artifact-overview-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.55rem;
+  border: 1px solid rgba(var(--artifact-overview-accent), 0.24);
+  border-radius: 9px;
+  background: rgba(0, 6, 18, 0.4);
+  color: rgba(206, 224, 248, 0.78);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.artifact-overview-stat svg {
+  color: rgb(var(--artifact-overview-accent));
+}
+
+.artifact-overview-stat strong {
+  margin-left: auto;
+  color: hsl(var(--foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.8rem;
+}
+
+.artifact-overview-progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-bottom: 0.35rem;
+  color: rgba(200, 220, 245, 0.78);
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.64rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.artifact-overview-progress-meta strong {
+  color: rgb(var(--artifact-overview-accent));
+  font-size: 0.78rem;
+}
+
+/* ── Medieval game action button with animated neon outline ── */
+.tower-action-dock {
+  --action-accent: 0, 245, 212;
+  --action-blue: 53, 143, 255;
+  --action-gold: 255, 196, 107;
+
+  position: relative;
+  width: 100%;
+  overflow: visible;
+  filter:
+    drop-shadow(0 0 12px rgba(var(--action-accent), 0.18))
+    drop-shadow(0 12px 22px rgba(0, 0, 0, 0.42));
+}
+
+.tower-action-button {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 3.55rem;
+  min-width: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+
+  clip-path: polygon(
+    0.95rem 0,
+    calc(100% - 0.95rem) 0,
+    100% 50%,
+    calc(100% - 0.95rem) 100%,
+    0.95rem 100%,
+    0 50%
+  );
+
+  color: rgb(244, 255, 255) !important;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 7px rgba(var(--action-accent), 0.58),
+    0 2px 0 rgba(0, 0, 0, 0.88);
+
+  box-shadow:
+    0 0 0 3px rgba(1, 7, 20, 0.92),
+    0 0 18px rgba(var(--action-accent), 0.18);
+
+  transform: translateY(0);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+}
+
+/* rotating neon border layer */
+.tower-action-button::before {
+  content: '';
+  position: absolute;
+  inset: -65%;
+  z-index: -2;
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(var(--action-accent), 0.08),
+      rgba(var(--action-accent), 0.95),
+      rgba(var(--action-blue), 0.85),
+      rgba(var(--action-accent), 0.12),
+      rgba(var(--action-accent), 0.08)
+    );
+  animation: tower-action-outline-spin 2.8s linear infinite;
+}
+
+/* dark inner button face */
+.tower-action-button::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  display: block;
+
+  clip-path: polygon(
+    0.82rem 0,
+    calc(100% - 0.82rem) 0,
+    100% 50%,
+    calc(100% - 0.82rem) 100%,
+    0.82rem 100%,
+    0 50%
+  );
+
+  background:
+    radial-gradient(90% 150% at 50% 120%, rgba(var(--action-gold), 0.09), transparent 58%),
+    linear-gradient(180deg, rgba(12, 38, 58, 0.99) 0%, rgba(5, 18, 36, 0.99) 52%, rgba(1, 7, 20, 0.99) 100%);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -0.72rem 1.4rem rgba(0, 0, 0, 0.42);
+}
+
+.tower-action-button:hover,
+.tower-action-button:focus-visible {
+  outline: none;
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow:
+    0 0 0 3px rgba(1, 7, 20, 0.92),
+    0 0 26px rgba(var(--action-accent), 0.32),
+    0 0 16px rgba(var(--action-blue), 0.2);
+}
+
+.tower-action-button:hover::before,
+.tower-action-button:focus-visible::before {
+  animation-duration: 1.45s;
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(var(--action-accent), 0.08),
+      rgba(var(--action-accent), 1),
+      rgba(var(--action-blue), 0.95),
+      rgba(190, 255, 255, 0.9),
+      rgba(var(--action-accent), 0.1)
+    );
+}
+
+.tower-action-button:active {
+  transform: translateY(1px) scale(0.985);
+  filter: brightness(0.94);
+  box-shadow:
+    0 0 0 3px rgba(1, 7, 20, 0.95),
+    0 0 14px rgba(var(--action-accent), 0.18),
+    inset 0 0.55rem 1rem rgba(0, 0, 0, 0.42);
+}
+
+.tower-action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+  filter: grayscale(0.28);
+  transform: none;
+}
+
+@keyframes tower-action-outline-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tower-action-button::before {
+    animation: none;
+  }
+}
+
+/* ── Sky clock (top-right) ── */
+.sky-clock {
+  position: fixed;
+  top: clamp(5rem, 8vh, 6.25rem);
+  right: clamp(1rem, 2.5vw, 2rem);
+  z-index: 40;
+  display: grid;
+  justify-items: center;
+  gap: 0.18rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  filter:
+    drop-shadow(0 16px 26px rgba(0, 0, 0, 0.62))
+    drop-shadow(0 0 20px rgba(var(--tower-cyan), 0.34));
+}
+
+.sky-clock-dial {
+  width: 11rem;
+  height: 11rem;
+  cursor: grab;
+  touch-action: none;
+  border-radius: 50%;
+  outline: none;
+}
+
+.sky-clock-dial:active {
+  cursor: grabbing;
+}
+
+.sky-clock-dial:focus-visible {
+  box-shadow: 0 0 0 2px rgba(var(--tower-cyan), 0.6);
+}
+
+.sky-clock-dial svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.sky-clock-silhouette {
+  fill: rgba(1, 7, 20, 0.96);
+  stroke: rgba(var(--tower-cyan), 0.86);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  filter:
+    drop-shadow(0 0 6px rgba(var(--tower-cyan), 0.9))
+    drop-shadow(0 0 18px rgba(176, 74, 255, 0.38));
+}
+
+.sky-clock-rim {
+  fill: none;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 5px rgba(var(--tower-cyan), 0.45));
+}
+
+.sky-clock-rim--outer {
+  stroke: rgba(var(--tower-cyan), 0.9);
+  stroke-width: 2.4;
+}
+
+.sky-clock-rim--face {
+  fill: url(#sky-clock-face);
+  stroke: rgba(176, 74, 255, 0.55);
+  stroke-width: 1.4;
+}
+
+.sky-clock-rim--inner {
+  stroke: rgba(238, 254, 255, 0.24);
+  stroke-width: 0.8;
+}
+
+.sky-clock-ornament {
+  fill: rgba(0, 245, 212, 0.1);
+  stroke: rgba(var(--tower-cyan), 0.5);
+  stroke-width: 0.8;
+  filter: drop-shadow(0 0 3px rgba(var(--tower-cyan), 0.35));
+}
+
+.sky-clock-ornament--lower {
+  fill: rgba(176, 74, 255, 0.1);
+  stroke: rgba(176, 74, 255, 0.46);
+}
+
+.sky-clock-cross {
+  stroke: rgba(238, 254, 255, 0.13);
+  stroke-width: 0.7;
+  stroke-linecap: round;
+}
+
+.sky-clock-tick {
+  stroke: rgba(238, 254, 255, 0.34);
+  stroke-width: 0.7;
+  stroke-linecap: round;
+}
+
+.sky-clock-tick--major {
+  stroke: rgba(var(--tower-cyan), 0.72);
+  stroke-width: 1.45;
+}
+
+.sky-clock-gem {
+  fill: rgb(176, 74, 255);
+  stroke: rgba(238, 254, 255, 0.68);
+  stroke-width: 0.45;
+  filter: drop-shadow(0 0 3px rgba(176, 74, 255, 0.75));
+}
+
+.sky-clock-roman {
+  fill: rgba(238, 254, 255, 0.78);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 5.2px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  paint-order: stroke;
+  stroke: rgba(2, 8, 22, 0.9);
+  stroke-width: 1px;
+}
+
+.sky-clock-hand {
+  stroke: rgb(238, 254, 255);
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 3px rgba(var(--tower-cyan), 0.7));
+}
+
+.sky-clock-hand--shadow {
+  stroke: rgba(var(--tower-cyan), 0.25);
+  stroke-width: 5.4;
+  filter: blur(0.8px);
+}
+
+.sky-clock-hand-tail {
+  stroke: rgba(176, 74, 255, 0.82);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 3px rgba(176, 74, 255, 0.58));
+}
+
+.sky-clock-hub {
+  fill: rgb(238, 254, 255);
+  stroke: rgba(var(--tower-cyan), 0.9);
+  stroke-width: 1.1;
+  filter: drop-shadow(0 0 4px rgba(var(--tower-cyan), 0.82));
+}
+
+.sky-clock-sun {
+  fill: #ffce6a;
+  filter: drop-shadow(0 0 5px rgba(255, 196, 110, 0.9));
+}
+
+.sky-clock-moon {
+  fill: #d7e2f7;
+  filter: drop-shadow(0 0 5px rgba(174, 200, 247, 0.9));
+}
+
+.sky-clock-readout {
+  display: grid;
+  justify-items: center;
+  gap: 0.05rem;
+}
+
+.sky-clock-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: hsl(var(--foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.sky-clock-time svg {
+  color: hsl(var(--primary));
+}
+
+.sky-clock-phase {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sky-clock-toggle {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.32);
+  border-radius: 999px;
+  background: rgba(2, 12, 28, 0.7);
+  color: hsl(var(--primary));
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sky-clock-toggle:hover,
+.sky-clock-toggle:focus-visible {
+  outline: none;
+  border-color: rgba(var(--tower-cyan), 0.7);
+  box-shadow: 0 0 12px rgba(var(--tower-cyan), 0.32);
+}
+
+@keyframes tower-loading-sheen {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes tower-skeleton-breathe {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+@keyframes tower-linear-flow {
+  from { background-position: 0 0; }
+  to { background-position: 0 220%; }
+}
+
+@media (max-width: 1180px) {
+  .tower-stage-grid {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 760px;
+  }
+
+  .tower-overview-column {
+    padding-top: 0;
+  }
+
+  .tower-storey-dock,
+  .tower-artifact-dock {
+    position: static;
+    width: min(100%, 38rem);
+    min-width: 0;
+    margin: 0 auto 1rem;
+    pointer-events: auto;
+  }
+
+  .tower-artifact-dock {
+    gap: 0.75rem;
+  }
+
+  .storey-section {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .storey-section + .storey-section {
+    margin-top: 0;
+  }
+
+  .storey-overview {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .tower-stage-grid {
+    gap: 1.25rem;
+  }
+
+  .learning-tower {
+    width: min(100%, 29rem);
+    padding-top: 0;
+  }
+
+  .learning-tower-continuation {
+    padding-top: 0;
+  }
+
+}
+
+/* Compact clock + full-width action button on small screens. */
+@media (max-width: 720px) {
+  .tower-page-shell {
+    padding-top: 6.2rem;
+  }
+
+  .tower-action-dock {
+    left: auto;
+    right: auto;
+    bottom: auto;
+  }
+
+  .tower-action-button {
+    width: 100%;
+  }
+
+  .sky-clock {
+    grid-auto-flow: column;
+    align-items: center;
+    top: 4.8rem;
+    padding: 0;
+    gap: 0.4rem;
+  }
+
+  .sky-clock-dial {
+    width: 5.8rem;
+    height: 5.8rem;
+  }
+
+  .artifact-overview {
+    padding: 0.85rem 0.95rem;
+  }
+}
+

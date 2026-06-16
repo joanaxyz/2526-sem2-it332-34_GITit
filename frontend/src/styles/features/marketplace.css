@@ -1,0 +1,280 @@
+/* ============================================================
+   MARKETPLACE — The Arcane Bazaar (gallery, not boxy grid)
+   ============================================================ */
+.marketplace {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.market-head {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.market-title {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 900;
+}
+
+.market-sub {
+  margin: 0;
+  max-width: 42rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.9rem;
+}
+
+.market-rail {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.market-rail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(var(--tower-cyan), 0.16);
+  padding-bottom: 0.6rem;
+}
+
+.market-cats {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.market-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0;
+  border: 0;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.market-cat:hover {
+  color: hsl(var(--foreground));
+}
+
+.market-cat.is-active {
+  color: hsl(var(--foreground));
+  border-bottom-color: hsl(var(--primary));
+}
+
+.market-owned-toggle {
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--tower-cyan), 0.3);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.market-owned-toggle.is-active {
+  border-color: rgba(0, 245, 212, 0.5);
+  background: rgba(0, 245, 212, 0.1);
+  color: hsl(var(--foreground));
+}
+
+.market-subkinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.market-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: rgba(10, 20, 34, 0.5);
+  color: hsl(var(--muted-foreground));
+  font-size: 0.74rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.market-chip:hover {
+  color: hsl(var(--foreground));
+}
+
+.market-chip.is-active {
+  border-color: rgba(var(--tower-cyan), 0.5);
+  background: rgba(var(--tower-cyan), 0.12);
+  color: hsl(var(--foreground));
+}
+
+.market-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.market-tags-label {
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  margin-right: 0.1rem;
+}
+
+/* Tag chips read as a distinct (purple) facet, separate from the cyan kind chips. */
+.market-chip--tag {
+  text-transform: lowercase;
+}
+
+.market-chip--tag.is-active {
+  border-color: rgba(var(--tower-purple), 0.55);
+  background: rgba(var(--tower-purple), 0.16);
+}
+
+.market-chip--clear {
+  color: hsl(var(--muted-foreground));
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.market-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1rem;
+}
+
+.market-plaque {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 0.7rem;
+  padding: 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.16);
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(24, 42, 70, 0.4), transparent 65%),
+    linear-gradient(180deg, rgba(8, 16, 28, 0.7), rgba(4, 9, 16, 0.7));
+  transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+}
+
+.market-plaque:hover {
+  border-color: rgba(var(--tower-cyan), 0.4);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.4), 0 0 18px rgba(var(--tower-cyan), 0.15);
+  transform: translateY(-2px);
+}
+
+.market-plaque.is-owned {
+  border-color: rgba(0, 245, 212, 0.4);
+  box-shadow: 0 0 22px rgba(0, 245, 212, 0.15);
+}
+
+.market-plaque-sigil {
+  display: grid;
+  place-items: center;
+  height: 5rem;
+  border-radius: 0.6rem;
+  background: rgba(2, 8, 16, 0.5);
+  color: hsl(var(--primary));
+}
+
+.market-plaque-title {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.market-plaque-kind {
+  color: hsl(var(--muted-foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.market-plaque-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.market-price {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: hsl(var(--foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-weight: 800;
+}
+
+.market-buy {
+  padding: 0.38rem 0.85rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.4);
+  background: rgba(var(--tower-cyan), 0.12);
+  color: hsl(var(--foreground));
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.market-buy:hover:not(:disabled) {
+  background: rgba(var(--tower-cyan), 0.22);
+}
+
+.market-buy:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.market-owned-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #8ff7e6;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.market-empty {
+  color: hsl(var(--muted-foreground));
+  padding: 2rem 0;
+}
+
+.purchase-confirm-item {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-weight: 700;
+}
+
+.purchase-confirm-cost {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.84rem;
+}
+
+.purchase-confirm-price {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: hsl(var(--foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-weight: 800;
+}
+

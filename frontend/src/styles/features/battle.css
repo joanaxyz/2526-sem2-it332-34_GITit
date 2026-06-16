@@ -1,0 +1,110 @@
+/* ── Battle stage ───────────────────────────────────────────────────────── */
+
+/* Ambient nebula drift on the battle stage cloud band. Background repeats
+   every 480px, so the loop is seamless. */
+.battle-clouds {
+  animation: battle-clouds-drift 60s linear infinite;
+}
+
+@keyframes battle-clouds-drift {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: -520px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-clouds {
+    animation: none;
+  }
+}
+
+/* The stone ledge each tower-defense floor stands on — a stone slab with a neon
+   cyan top edge and battlement crenels, echoing the /tower page separators. */
+.battle-ledge {
+  background-image:
+    linear-gradient(to bottom, rgba(0, 245, 212, 0.55) 0, rgba(0, 245, 212, 0.55) 2px, transparent 2px),
+    repeating-linear-gradient(90deg, rgba(0, 245, 212, 0.05) 0 2px, transparent 2px 60px),
+    linear-gradient(to bottom, #141b30 0%, #0b1020 60%, #070a16 100%);
+  box-shadow:
+    0 -8px 22px rgba(0, 245, 212, 0.12),
+    inset 0 2px 0 rgba(0, 245, 212, 0.25);
+}
+
+.battle-ledge-crenels {
+  position: absolute;
+  inset-inline: 0;
+  top: -6px;
+  height: 6px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    #141b30 0 18px,
+    transparent 18px 34px
+  );
+  filter: drop-shadow(0 -1px 0 rgba(0, 245, 212, 0.4));
+}
+
+/* The tower crystal Blue defends: a sprite (see TowerCrystal.tsx) with an
+   arcane glow. The float/pulse lives in the sheet, not CSS. */
+.tower-crystal-sprite {
+  filter: drop-shadow(0 0 10px rgba(0, 245, 212, 0.45));
+}
+
+/* Per-command DAG deltas (LiveDagPanel animateChanges). The pop-in runs on the
+   node's inner div — the ReactFlow node wrapper's transform is positioning. */
+.dag-node-enter {
+  animation: dag-node-enter 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes dag-node-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.dag-edge-enter .react-flow__edge-path {
+  stroke-dasharray: 140;
+  stroke-dashoffset: 140;
+  animation: dag-edge-draw 450ms ease-out 120ms forwards;
+}
+
+@keyframes dag-edge-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.dag-ref-enter {
+  animation: dag-ref-enter 300ms ease-out both;
+}
+
+@keyframes dag-ref-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dag-node-enter,
+  .dag-edge-enter .react-flow__edge-path,
+  .dag-ref-enter {
+    animation: none;
+  }
+}
+

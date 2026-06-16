@@ -1,0 +1,341 @@
+/* ─── Gamified panels & stat tiles (Dashboard + Stats) ──────────────────── */
+
+/* Glassy neon panel with a top light-bar and engraved corner brackets. */
+.game-panel {
+  position: relative;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 245, 212, 0.16);
+  background:
+    linear-gradient(180deg, rgba(8, 25, 45, 0.82), rgba(3, 12, 24, 0.94)),
+    rgba(2, 8, 18, 0.92);
+  box-shadow:
+    inset 0 1px 0 rgba(125, 211, 252, 0.08),
+    0 12px 32px rgba(0, 0, 0, 0.34);
+  -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
+  overflow: hidden;
+  transition: box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+/* Top neon light-bar */
+.game-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 245, 212, 0.62), rgba(0, 180, 216, 0.45), transparent);
+  opacity: 0.75;
+}
+
+/* Faint scanline texture for the gamified HUD feel */
+.game-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    180deg,
+    rgba(0, 245, 212, 0.025) 0,
+    rgba(0, 245, 212, 0.025) 1px,
+    transparent 1px,
+    transparent 5px
+  );
+  opacity: 0.32;
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent 70%);
+          mask-image: linear-gradient(180deg, #000, transparent 70%);
+}
+
+.game-panel:hover {
+  border-color: rgba(0, 245, 212, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(125, 211, 252, 0.12),
+    0 0 22px rgba(0, 245, 212, 0.08),
+    0 16px 42px rgba(0, 0, 0, 0.42);
+}
+
+/* Engraved corner brackets — sit above the scanline layer */
+.game-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: rgba(190, 235, 255, 0.72);
+  pointer-events: none;
+  z-index: 1;
+}
+.game-corner--tl { top: 8px; left: 8px; border-top: 1.5px solid; border-left: 1.5px solid; border-top-left-radius: 4px; }
+.game-corner--tr { top: 8px; right: 8px; border-top: 1.5px solid; border-right: 1.5px solid; border-top-right-radius: 4px; }
+.game-corner--bl { bottom: 8px; left: 8px; border-bottom: 1.5px solid; border-left: 1.5px solid; border-bottom-left-radius: 4px; }
+.game-corner--br { bottom: 8px; right: 8px; border-bottom: 1.5px solid; border-right: 1.5px solid; border-bottom-right-radius: 4px; }
+
+/* Glowing icon chip used inside panels / tiles */
+.game-chip {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 245, 212, 0.26);
+  background:
+    radial-gradient(circle at 32% 26%, rgba(0, 245, 212, 0.18), rgba(0, 180, 216, 0.05) 70%),
+    rgba(4, 16, 32, 0.7);
+  box-shadow: inset 0 0 10px rgba(0, 245, 212, 0.10), 0 0 14px rgba(0, 245, 212, 0.08);
+}
+
+/* Compact KPI tile — accent-tinted top edge, big neon stat */
+.stat-tile {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(160deg, rgba(10, 28, 50, 0.9), rgba(4, 13, 28, 0.92));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 8px 22px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.stat-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--tile-accent, rgba(0, 245, 212, 0.7));
+  box-shadow: 0 0 12px var(--tile-accent, rgba(0, 245, 212, 0.5));
+}
+.stat-tile::after {
+  content: '';
+  position: absolute;
+  right: -28px;
+  top: -28px;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--tile-accent, rgba(0, 245, 212, 0.5)), transparent 70%);
+  opacity: 0.14;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.stat-tile:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--tile-accent, #00F5D4) 45%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 14px 34px rgba(0, 0, 0, 0.45);
+}
+.stat-tile:hover::after {
+  opacity: 0.26;
+  transform: scale(1.15);
+}
+
+/* Stats tab readout rails and ledgers. These replace dense card grids. */
+.stats-deck {
+  color: hsl(var(--foreground));
+}
+
+/* The one deliberate glass element of the stats deck — a chamfered readout
+   slat in the hero plaques' vocabulary. Every other section sits open on
+   the night sky. */
+.stats-glass-band {
+  --cut: 0.9rem;
+  --chamfer-tint: rgba(125, 211, 252, 0.22);
+  --chamfer-tint-soft: rgba(0, 180, 216, 0.08);
+  filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.35));
+}
+
+.stats-glass-band .chamfer-body {
+  background:
+    radial-gradient(120% 150% at 10% -40%, rgba(0, 245, 212, 0.06), transparent 55%),
+    linear-gradient(180deg, rgba(8, 20, 38, 0.84), rgba(3, 10, 22, 0.88));
+  -webkit-backdrop-filter: blur(14px);
+          backdrop-filter: blur(14px);
+}
+
+.stats-readout-primary,
+.stats-readout-item,
+.stats-readout-wallet {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.stats-readout-primary {
+  padding-right: 1.25rem;
+}
+
+.stats-readout-item {
+  min-height: 4.3rem;
+  border-left: 1px solid rgba(0, 245, 212, 0.18);
+  padding-left: 1rem;
+}
+
+.stats-readout-wallet {
+  justify-self: end;
+  border-left: 1px solid rgba(0, 245, 212, 0.16);
+  padding: 0.55rem 0 0.55rem 1.15rem;
+}
+
+.stats-readout-footer {
+  margin-top: -0.4rem;
+  border-top: 1px solid rgba(125, 211, 252, 0.08);
+  padding-top: 0.85rem;
+  color: hsl(var(--muted-foreground) / 0.78);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stats-readout-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+/* Open ledger rows — no boxes; rhythm comes from hairline rules and light. */
+.metric-line,
+.kpi-line {
+  --line-accent: #00f5d4;
+  display: grid;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+  border-bottom: 1px solid rgba(125, 211, 252, 0.08);
+}
+
+.metric-line {
+  grid-template-columns: 1.7rem minmax(0, 1fr) minmax(3rem, auto) auto;
+  min-height: 3.7rem;
+  padding: 0.6rem 0.15rem;
+}
+
+.kpi-line {
+  grid-template-columns: 2.4rem minmax(0, 1fr) auto;
+  min-height: 3.7rem;
+  padding: 0.55rem 0.15rem;
+}
+
+.metric-line-icon,
+.kpi-line-icon {
+  display: grid;
+  place-items: center;
+  height: 2rem;
+  color: var(--line-accent);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--line-accent) 45%, transparent));
+}
+
+.metric-line-icon {
+  width: 1.7rem;
+}
+
+.kpi-line-icon {
+  width: 2.4rem;
+}
+
+.metric-line-micro {
+  justify-self: end;
+  min-width: 0;
+  color: var(--line-accent);
+}
+
+.metric-line-value,
+.kpi-line-value {
+  justify-self: end;
+  color: var(--line-accent);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 0 16px color-mix(in srgb, var(--line-accent) 34%, transparent);
+}
+
+.kpi-line-value span {
+  margin-left: 0.08rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.stats-radar-panel .recharts-wrapper {
+  filter: drop-shadow(0 0 16px rgba(0, 245, 212, 0.08));
+}
+
+@media (max-width: 640px) {
+  .stats-readout-item,
+  .stats-readout-wallet {
+    border-left: 0;
+    border-top: 1px solid rgba(0, 245, 212, 0.12);
+    padding-left: 0;
+    padding-top: 0.85rem;
+    justify-self: stretch;
+  }
+
+  .metric-line {
+    grid-template-columns: 2.1rem minmax(0, 1fr) auto;
+  }
+
+  .metric-line-micro {
+    grid-column: 2 / -1;
+    justify-self: start;
+  }
+}
+
+/* Recharts theming overrides to match the neon HUD */
+.recharts-cartesian-grid line,
+.recharts-polar-grid-concentric polygon,
+.recharts-polar-grid-angle line {
+  stroke: rgba(255, 255, 255, 0.07);
+}
+.recharts-surface:focus,
+.recharts-wrapper:focus {
+  outline: none;
+}
+
+/* Stat card hover — lift + inset top glow only, no bg or ring change */
+.stat-card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.stat-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: inset 0 1px 0 rgba(0, 245, 212, 0.5), 0 8px 28px rgba(0, 0, 0, 0.4);
+}
+
+/* Tower performance hover */
+.tower-performance-hover {
+  border-left: 3px solid var(--tower-border-rest, rgba(0, 212, 170, 0.35));
+  transition: border-left-color 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
+}
+.tower-performance-hover:hover {
+  border-left-color: var(--tower-border-hover, rgba(0, 212, 170, 0.7));
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 20px 4px var(--tower-glow, rgba(0, 212, 170, 0.3)),
+    0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+
+
+.progress-glow-tip {
+  background: linear-gradient(
+    to right,
+    hsl(var(--primary)) 0%,
+    hsl(var(--accent)) 55%,
+    rgba(180, 255, 248, 0.9) 100%
+  );
+  box-shadow: 0 0 10px rgba(0, 245, 212, 0.65), 0 0 20px rgba(0, 180, 216, 0.35);
+}
+
+/* Progress landmark checkpoints */
+.progress-landmark {
+  position: absolute;
+  top: 50%;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 1.5px;
+  border: 1px solid rgba(0, 245, 212, 0.35);
+  background: hsl(var(--background));
+  transform: translate(-50%, -50%) rotate(45deg);
+  box-shadow: 0 0 0 2px hsl(var(--background));
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.progress-landmark[data-reached='true'] {
+  border-color: rgba(0, 245, 212, 0.9);
+  background: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 10px rgba(0, 245, 212, 0.7);
+}
+

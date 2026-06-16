@@ -1,0 +1,1213 @@
+/* ─── Player hub & performance profile (Dashboard + Stats redesign) ─────── */
+
+/* Rank emblem — layered CSS-art hexagon crest with a glowing tower glyph.
+   Tier color arrives via --rank-color (hex) / --rank-color-rgb (r,g,b). */
+.rank-emblem {
+  position: relative;
+  width: 7.25rem;
+  height: 8.25rem;
+  display: grid;
+  place-items: center;
+  perspective: 540px;
+}
+
+.rank-emblem-halo {
+  position: absolute;
+  inset: -18%;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(var(--rank-color-rgb), 0.30), transparent 56%),
+    radial-gradient(circle at 50% 60%, rgba(0, 180, 216, 0.16), transparent 70%);
+  filter: blur(10px);
+  animation: rank-halo-pulse 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes rank-halo-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.94); }
+  50%      { opacity: 1; transform: scale(1.05); }
+}
+
+.rank-emblem-frame {
+  position: relative;
+  width: 6.5rem;
+  height: 7.5rem;
+  clip-path: polygon(50% 0, 96% 25%, 96% 75%, 50% 100%, 4% 75%, 4% 25%);
+  background: linear-gradient(160deg, rgba(var(--rank-color-rgb), 0.95), rgba(var(--rank-color-rgb), 0.45) 55%, rgba(0, 180, 216, 0.55));
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.5));
+}
+
+.rank-emblem:hover .rank-emblem-frame {
+  transform: rotateY(14deg) rotateX(8deg) translateZ(8px);
+}
+
+.rank-emblem-face {
+  position: absolute;
+  inset: 3px;
+  clip-path: polygon(50% 0, 96% 25%, 96% 75%, 50% 100%, 4% 75%, 4% 25%);
+  background:
+    radial-gradient(90% 60% at 50% 0%, rgba(var(--rank-color-rgb), 0.28), transparent 62%),
+    radial-gradient(120% 70% at 50% 110%, rgba(0, 119, 182, 0.30), transparent 64%),
+    linear-gradient(180deg, #0b1d36 0%, #050d1d 100%);
+  display: grid;
+  place-items: center;
+}
+
+/* Faceted shine sweeping across the crest face */
+.rank-emblem-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.10) 46%, rgba(255, 255, 255, 0.02) 54%, transparent 70%);
+  background-size: 250% 250%;
+  animation: aurora-shimmer 6s ease infinite;
+  pointer-events: none;
+}
+
+/* Mini tower glyph inside the crest — gradient masonry + lit door, same
+   technique as the tower build loader. */
+.rank-emblem-tower {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: end;
+  width: 3.2rem;
+  height: 4.1rem;
+  filter: drop-shadow(0 0 8px rgba(var(--rank-color-rgb), 0.45));
+}
+
+.rank-emblem-tower-roof {
+  width: 2.5rem;
+  height: 1.05rem;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  background: linear-gradient(180deg, rgba(var(--rank-color-rgb), 0.95), rgba(var(--rank-color-rgb), 0.5));
+}
+
+.rank-emblem-tower-spire {
+  position: absolute;
+  top: -0.5rem;
+  left: 50%;
+  width: 2px;
+  height: 0.65rem;
+  transform: translateX(-50%);
+  background: rgba(var(--rank-color-rgb), 0.95);
+  box-shadow: 0 0 6px rgba(var(--rank-color-rgb), 0.8);
+}
+
+.rank-emblem-tower-body {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 2.5rem;
+  border: 1.5px solid rgba(var(--rank-color-rgb), 0.85);
+  border-bottom: 0;
+  background: linear-gradient(180deg, rgba(10, 30, 56, 0.95), rgba(4, 13, 28, 0.98));
+  box-shadow: inset 0 0 8px rgba(var(--rank-color-rgb), 0.16);
+}
+
+.rank-emblem-tower-door {
+  width: 0.62rem;
+  height: 0.95rem;
+  margin-top: 0.85rem;
+  border-radius: 0.4rem 0.4rem 0 0;
+  background: radial-gradient(100% 78% at 50% 100%, rgba(255, 209, 130, 0.92), rgba(255, 176, 84, 0.34) 56%, rgba(2, 12, 24, 0.9) 92%);
+  box-shadow: 0 0 8px rgba(255, 196, 107, 0.5);
+  animation: git-it-build-window-flicker 2.4s ease-in-out infinite;
+}
+
+.rank-emblem-tower-base {
+  width: 2.5rem;
+  height: 0.5rem;
+  border: 1.5px solid rgba(var(--rank-color-rgb), 0.85);
+  background: rgba(4, 18, 34, 0.95);
+}
+
+/* Laurel dots flanking the tower */
+.rank-emblem-pip {
+  position: absolute;
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: 999px;
+  background: rgba(var(--rank-color-rgb), 0.9);
+  box-shadow: 0 0 6px rgba(var(--rank-color-rgb), 0.7);
+}
+
+.rank-emblem-pip--left  { left: 0.55rem; bottom: 1.4rem; }
+.rank-emblem-pip--right { right: 0.55rem; bottom: 1.4rem; }
+
+/* ── Character showcase: pedestal + floating sprite ── */
+
+.sprite-stage {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-items: end;
+}
+
+.sprite-stage-aura {
+  position: absolute;
+  inset: 6% 4% 10%;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 62%, rgba(0, 245, 212, 0.20), transparent 48%),
+    radial-gradient(circle at 44% 38%, rgba(0, 180, 216, 0.16), transparent 52%),
+    radial-gradient(circle at 58% 46%, rgba(167, 139, 250, 0.12), transparent 56%);
+  filter: blur(14px);
+  animation: rank-halo-pulse 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.sprite-stage-float {
+  position: relative;
+  z-index: 1;
+  animation: sprite-hover-float 3s ease-in-out infinite;
+}
+
+@keyframes sprite-hover-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-7px); }
+}
+
+.sprite-pedestal {
+  position: relative;
+  z-index: 0;
+  width: 72%;
+  height: 1.1rem;
+  margin-top: -0.9rem;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgba(0, 245, 212, 0.5), rgba(0, 180, 216, 0.18) 55%, transparent 75%);
+  filter: blur(4px);
+  animation: sprite-pedestal-pulse 3s ease-in-out infinite;
+}
+
+@keyframes sprite-pedestal-pulse {
+  0%, 100% { opacity: 0.55; transform: scaleX(0.92); }
+  50%      { opacity: 1; transform: scaleX(1.04); }
+}
+
+/* ── Match-history rows (recent runs) ── */
+
+.match-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.62rem 0.15rem;
+  border-bottom: 1px solid rgba(125, 211, 252, 0.07);
+}
+
+.match-dot {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--run-accent, #00f5d4);
+  box-shadow: 0 0 8px rgba(var(--run-accent-rgb, 0, 245, 212), 0.7);
+}
+
+/* ── Storey progress door motif ── */
+
+.storey-door-chip {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.8rem;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(0, 245, 212, 0.5);
+  border-radius: 1.1rem 1.1rem 3px 3px;
+  background:
+    radial-gradient(110% 75% at 50% 100%, rgba(255, 209, 130, 0.40), rgba(255, 176, 84, 0.12) 50%, rgba(2, 12, 24, 0.96) 86%);
+  box-shadow: inset 0 0 10px rgba(0, 245, 212, 0.14), 0 0 12px rgba(0, 245, 212, 0.12);
+  color: #aef9ee;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(0, 245, 212, 0.6);
+}
+
+/* ── Hero band identity backdrop ── */
+
+.hero-identity-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0, 245, 212, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 245, 212, 0.035) 1px, transparent 1px);
+  background-size: 34px 34px;
+  -webkit-mask-image: radial-gradient(85% 90% at 28% 30%, #000 10%, transparent 78%);
+          mask-image: radial-gradient(85% 90% at 28% 30%, #000 10%, transparent 78%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rank-emblem-halo,
+  .rank-emblem-face::after,
+  .rank-emblem-tower-door,
+  .sprite-stage-aura,
+  .sprite-stage-float,
+  .sprite-pedestal {
+    animation: none;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   HOME HUB — game-launcher home page (angled nav, env hero, sub-tab deck)
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Break a section out of the centered max-width container to span the viewport. */
+.full-bleed {
+  position: relative;
+  left: 50%;
+  right: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+/* ── Chamfer frame system: angular octagon panels with a 1px neon "border".
+      Outer .chamfer-frame paints the edge tint and clips; the inner
+      .chamfer-body re-clips 1px inside, leaving the frame visible. ── */
+.chamfer-frame {
+  --cut: 0.8rem;
+  --chamfer-tint: rgba(0, 245, 212, 0.34);
+  --chamfer-tint-soft: rgba(0, 180, 216, 0.14);
+  padding: 1px;
+  clip-path: polygon(
+    var(--cut) 0, calc(100% - var(--cut)) 0, 100% var(--cut),
+    100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%,
+    var(--cut) 100%, 0 calc(100% - var(--cut)), 0 var(--cut)
+  );
+  background: linear-gradient(180deg, var(--chamfer-tint), var(--chamfer-tint-soft));
+}
+
+.chamfer-body {
+  clip-path: inherit;
+  background: linear-gradient(180deg, rgba(8, 22, 42, 0.88), rgba(3, 10, 22, 0.92));
+  height: 100%;
+  width: 100%;
+}
+
+/* ── Angled top navbar — the launcher blade per the reference: a compact
+      dark trapezoid with a small index tab dipping from its bottom centre. ── */
+.hub-nav-frame {
+  --nav-cut: 1.5rem;
+  --nav-tab-w: 1.22rem;
+  --nav-tab-h: 0.38rem;
+  --nav-base: calc(100% - var(--nav-tab-h));
+  --nav-clip: polygon(
+    0 0, 100% 0,
+    calc(100% - var(--nav-cut)) var(--nav-base),
+    calc(50% + var(--nav-tab-w)) var(--nav-base),
+    50% 100%,
+    calc(50% - var(--nav-tab-w)) var(--nav-base),
+    var(--nav-cut) var(--nav-base)
+  );
+  position: relative;
+  padding: 0;
+  background: transparent;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.45));
+}
+
+/* The launcher blade \ Home | Tower / — the only top chrome. Glass:
+   the page (or hero art) reads through the blur. */
+.hub-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.08rem;
+  width: min(90vw, 31rem);
+  min-height: 3.1rem;
+  padding: 0.32rem 3.2rem calc(0.42rem + var(--nav-tab-h));
+  clip-path: var(--nav-clip);
+  background:
+    radial-gradient(120% 90% at 50% -30%, rgba(125, 211, 252, 0.12), transparent 58%),
+    linear-gradient(180deg, rgba(4, 12, 25, 0.92), rgba(1, 7, 16, 0.86));
+  box-shadow:
+    inset 0 0 0 1px rgba(174, 226, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 245, 212, 0.14);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+          backdrop-filter: blur(16px) saturate(1.2);
+}
+
+.hub-nav-link {
+  position: relative;
+  padding: 0.2rem 1.12rem 0.32rem;
+  color: hsl(var(--muted-foreground) / 0.85);
+  font-family: 'Chakra Petch', 'Inter', system-ui, sans-serif;
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.hub-nav-link:hover {
+  color: hsl(var(--foreground));
+}
+
+.hub-nav-link.is-active {
+  color: hsl(var(--foreground));
+  text-shadow: 0 0 14px rgba(0, 245, 212, 0.55);
+}
+
+/* Glowing underline blade beneath the active link */
+.hub-nav-link::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -0.38rem;
+  width: 2.1rem;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #00f5d4, #00b4d8, transparent);
+  box-shadow: 0 0 10px rgba(0, 245, 212, 0.72), 0 -4px 14px rgba(0, 245, 212, 0.28);
+  transform: translateX(-50%) scaleX(0);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hub-nav-link.is-active::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+.hub-nav-divider {
+  width: 1px;
+  height: 1.1rem;
+  background: linear-gradient(180deg, transparent, rgba(0, 245, 212, 0.35), transparent);
+}
+
+/* ── Environment hero banner ── */
+.hub-hero {
+  --hub-hero-window-width: min(92vw, 84rem);
+  --hub-hero-window-ratio: 1280 / 500;
+  position: relative;
+  /* Overflow stays visible so the wordmark plate can straddle the video shelf. */
+  display: grid;
+  justify-items: center;
+  isolation: isolate;
+  min-height: 0;
+  overflow: visible;
+  padding-top: 0.35rem;
+}
+
+.hub-hero-window {
+  position: relative;
+  width: var(--hub-hero-window-width);
+  aspect-ratio: var(--hub-hero-window-ratio);
+  overflow: hidden;
+  border: 1px solid rgba(174, 226, 255, 0.12);
+  border-radius: 4px;
+  background: rgba(6, 15, 28, 0.42);
+  box-shadow:
+    0 18px 60px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+  isolation: isolate;
+}
+
+/* Hatched glass band across the hero's bottom — the launcher's intel shelf.
+   The diagonal hatch is the reference's pattern; the plaques sit on it. */
+/* Bottom assembly: readout — wordmark plate — readout. The plate is taller
+   than the band, so anchoring the row to the hero's bottom edge makes it
+   rise out of the band exactly like the reference; the readouts centre
+   themselves in the band via their own margin. */
+.hub-hero-divider {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 0;
+  width: min(96vw, 84rem);
+  padding-inline: clamp(0.25rem, 1vw, 0.75rem);
+  isolation: isolate;
+  transform: translateX(-50%);
+}
+
+.hub-hero-divider::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  left: clamp(1.5rem, 5vw, 5rem);
+  right: clamp(1.5rem, 5vw, 5rem);
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(174, 226, 255, 0.22) 10%, rgba(0, 245, 212, 0.16) 34%, rgba(0, 245, 212, 0.16) 66%, rgba(174, 226, 255, 0.22) 90%, transparent);
+  box-shadow: 0 0 16px rgba(0, 245, 212, 0.18);
+  pointer-events: none;
+}
+
+/* The side banners nest under the hexagon's flares: they stretch to fill the
+   column and overlap the centre, where the higher-z plate draws over them. */
+.hub-hero-divider > :first-child {
+  justify-self: stretch;
+  margin-right: clamp(-2.6rem, -2.8vw, -1.8rem);
+}
+
+.hub-hero-divider > :last-child {
+  justify-self: stretch;
+  margin-left: clamp(-2.6rem, -2.8vw, -1.8rem);
+}
+
+/* CTA row sits below the hero on the page background, like the reference */
+.hub-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: clamp(6.4rem, 7.2vw, 7.6rem);
+}
+
+@media (max-width: 1024px) {
+  .hub-hero {
+    --hub-hero-window-width: min(96vw, 74rem);
+    --hub-hero-window-ratio: 1280 / 520;
+  }
+
+  .hub-hero-divider {
+    column-gap: clamp(0.6rem, 1.8vw, 1.1rem);
+    width: min(96vw, 70rem);
+  }
+
+  .hub-stat {
+    min-height: 4.05rem;
+    padding-block: 0.55rem;
+  }
+
+  .hub-stat-divider {
+    margin-inline: 0.38rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .hub-hero {
+    --hub-hero-window-width: min(calc(100vw - 0.75rem), 42rem);
+    --hub-hero-window-ratio: 16 / 9;
+  }
+
+  .hub-hero-divider {
+    top: calc(100% - 2.25rem);
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 0.75rem;
+    width: min(calc(100vw - 1rem), 25rem);
+    padding-inline: 0;
+    transform: translateX(-50%);
+  }
+
+  .hub-hero-divider > :first-child,
+  .hub-hero-divider > :last-child {
+    justify-self: center;
+  }
+
+  .hub-hero-divider > .hub-logo-frame {
+    order: -1;
+  }
+
+  .hub-stat,
+  .hub-stat--left,
+  .hub-stat--right {
+    width: min(100%, 20rem);
+    margin: 0;
+  }
+
+  .hub-cta-row {
+    gap: 0.8rem;
+    margin-top: 13.5rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .hub-hero {
+    --hub-hero-window-ratio: 1.9 / 1;
+  }
+
+  .hub-cta-row {
+    margin-top: 13rem;
+  }
+
+}
+
+.hub-hero-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 61% 43%;
+  filter: brightness(0.84) contrast(1.08) saturate(1.02);
+}
+
+/* Palette veil: tint + letterbox the env art and dissolve it into the page. */
+.hub-hero-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(2, 7, 17, 0.56) 0%, rgba(2, 7, 17, 0.08) 25%, rgba(2, 7, 17, 0.04) 50%, rgba(3, 10, 22, 0.42) 78%, rgba(3, 10, 22, 0.66) 100%),
+    radial-gradient(84% 68% at 50% 34%, transparent 34%, rgba(2, 7, 17, 0.5) 100%),
+    linear-gradient(180deg, rgba(0, 180, 216, 0.075), rgba(0, 245, 212, 0.035) 42%, rgba(8, 24, 44, 0.14));
+}
+
+/* Fine scanlines over the env art — ties the video frame into the HUD look. */
+.hub-hero-scan {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.16) 0, rgba(0, 0, 0, 0.16) 1px, transparent 1px, transparent 4px);
+  opacity: 0.35;
+}
+
+/* ── Game wordmark plate — the reference's glass hexagon: shallow top
+      chamfers flare to side points just below the middle, cut back in to a
+      wide base, and a small index tab dips from the bottom centre. ── */
+.hub-logo-frame {
+  --notch-top: clamp(3.45rem, 5vw, 5rem);
+  --notch-soft: 0.42rem;
+  --plate-clip: polygon(
+    calc(var(--notch-top) + var(--notch-soft)) 0,
+    calc(100% - var(--notch-top) - var(--notch-soft)) 0,
+    calc(100% - var(--notch-soft)) calc(50% - 0.42rem),
+    100% 50%,
+    calc(100% - var(--notch-soft)) calc(50% + 0.42rem),
+    calc(100% - var(--notch-top) - var(--notch-soft)) 100%,
+    calc(var(--notch-top) + var(--notch-soft)) 100%,
+    var(--notch-soft) calc(50% + 0.42rem),
+    0 50%,
+    var(--notch-soft) calc(50% - 0.42rem)
+  );
+  position: relative;
+  z-index: 6;
+  display: grid;
+  width: clamp(24.5rem, 37vw, 33rem);
+  min-height: clamp(5.25rem, 6vw, 6.25rem);
+  margin-top: clamp(-3.35rem, -3.8vw, -2.85rem);
+  padding: 1.5px;
+  clip-path: var(--plate-clip);
+  background:
+    linear-gradient(135deg, rgba(174, 226, 255, 0.46), rgba(0, 180, 216, 0.2) 48%, rgba(174, 226, 255, 0.34)),
+    linear-gradient(180deg, rgba(98, 169, 211, 0.24), rgba(15, 52, 82, 0.12));
+  filter:
+    drop-shadow(0 20px 38px rgba(0, 0, 0, 0.62))
+    drop-shadow(0 0 22px rgba(0, 245, 212, 0.18));
+}
+
+/* True glass: the environment art reads through the plate. */
+.hub-logo-frame-body {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  clip-path: inherit;
+  min-height: inherit;
+  padding: 0.82rem clamp(3rem, 5vw, 4.8rem) 0.9rem;
+  text-align: center;
+  /* Bright frosted glass: a white top sheen + cool light wash frost the art,
+     with only a soft basal darkening to seat the big word — the sky/tower
+     reads through, matching the reference plate. */
+  background:
+    linear-gradient(118deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.05) 32%, transparent 58%),
+    radial-gradient(122% 146% at 50% -24%, rgba(190, 234, 255, 0.34), transparent 60%),
+    linear-gradient(180deg, rgba(28, 62, 96, 0.20) 0%, rgba(12, 34, 60, 0.28) 52%, rgba(5, 16, 32, 0.46) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(210, 236, 249, 0.22),
+    inset 0 0 52px rgba(0, 245, 212, 0.10);
+  -webkit-backdrop-filter: blur(26px) saturate(1.35) brightness(1.06);
+          backdrop-filter: blur(26px) saturate(1.35) brightness(1.06);
+}
+
+.hub-logo-frame-body::before,
+.hub-logo-frame-body::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.hub-logo-frame-body::before {
+  inset: 1px;
+  clip-path: inherit;
+  background:
+    repeating-linear-gradient(-45deg, rgba(174, 226, 255, 0.04) 0 1px, transparent 1px 7px),
+    linear-gradient(90deg, rgba(0, 245, 212, 0.1), transparent 25%, transparent 75%, rgba(125, 211, 252, 0.09));
+  opacity: 0.72;
+}
+
+.hub-logo-frame-body::after {
+  left: 16%;
+  right: 16%;
+  top: 13%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.78), transparent);
+  box-shadow: 0 0 16px rgba(220, 246, 255, 0.42);
+  opacity: 0.62;
+}
+
+/* Emblem inside the plate, above the logotype — like the ring above HALO */
+/* Stacked logotype: small tracked word over the big one (HALO / INFINITE) */
+.hub-logo-stack {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.16rem;
+  margin: 0;
+  /* Chakra Petch — wide, squared, chamfered caps in the techno-military lineage
+     of the reference wordmark; it also rhymes with the chamfer-frame motif. */
+  font-family: 'Chakra Petch', 'Inter', system-ui, sans-serif;
+}
+
+.hub-logo-title {
+  font-size: clamp(0.8rem, 1.2vw, 0.98rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.62em;
+  text-indent: 0.62em; /* optically recenters tracked-out caps */
+  text-transform: uppercase;
+  color: rgba(245, 253, 255, 0.96);
+  /* dark drop lifts the small caps off the now-bright frosted glass */
+  text-shadow: 0 1px 4px rgba(2, 8, 20, 0.55), 0 0 14px rgba(0, 245, 212, 0.34), 0 0 30px rgba(255, 255, 255, 0.2);
+}
+
+.hub-logo-wordmark {
+  font-size: clamp(2.55rem, 4.6vw, 3.9rem);
+  font-weight: 600;
+  line-height: 0.92;
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
+  text-transform: uppercase;
+  color: rgba(245, 252, 255, 0.97);
+  text-shadow: 0 2px 12px rgba(2, 8, 20, 0.4), 0 0 24px rgba(0, 245, 212, 0.36), 0 0 72px rgba(0, 180, 216, 0.22);
+}
+
+/* ── Band-mounted readouts (streak / latest achievement) — content sits
+      directly on the hatched band, no card chrome, per the reference. ── */
+.hub-stat {
+  /* a deep cut so the banner's inner diagonal runs near-parallel to the
+     hexagon flare it nests against, closing the seam */
+  --stat-cut: clamp(4.2rem, 5.4vw, 6rem);
+  --stat-corner: 0.55rem;
+  --stat-clip: polygon(
+    var(--stat-corner) 0,
+    calc(100% - var(--stat-cut)) 0,
+    100% calc(100% - var(--stat-corner)),
+    calc(100% - var(--stat-corner)) 100%,
+    var(--stat-corner) 100%,
+    0 calc(100% - var(--stat-corner)),
+    0 var(--stat-corner)
+  );
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.85rem;
+  width: 100%;
+  min-height: 4.5rem;
+  min-width: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  /* extra inner padding clears the diagonal cut so text never rides the seam */
+  padding: 0.66rem clamp(2.7rem, 3.4vw, 3.9rem) 0.66rem 1.15rem;
+  clip-path: var(--stat-clip);
+  border-radius: 6px;
+  background:
+    linear-gradient(135deg, rgba(174, 226, 255, 0.38), rgba(0, 180, 216, 0.16) 48%, rgba(174, 226, 255, 0.28)),
+    linear-gradient(180deg, rgba(98, 169, 211, 0.22), rgba(15, 52, 82, 0.1));
+  filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.42));
+}
+
+.hub-stat::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  clip-path: inherit;
+  background:
+    linear-gradient(110deg, rgba(255, 255, 255, 0.09), transparent 30%, rgba(255, 255, 255, 0.035) 62%, transparent),
+    linear-gradient(180deg, rgba(8, 24, 43, 0.64), rgba(3, 11, 24, 0.76));
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+          backdrop-filter: blur(18px) saturate(1.2);
+}
+
+.hub-stat::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  clip-path: inherit;
+  background:
+    repeating-linear-gradient(-45deg, rgba(174, 226, 255, 0.045) 0 1px, transparent 1px 7px),
+    linear-gradient(90deg, rgba(0, 245, 212, 0.12), transparent 24%, transparent 76%, rgba(125, 211, 252, 0.1));
+  opacity: 0.7;
+}
+
+.hub-stat--left {
+  justify-content: flex-start;
+}
+
+.hub-stat--right {
+  --stat-clip: polygon(
+    var(--stat-cut) 0,
+    calc(100% - var(--stat-corner)) 0,
+    100% var(--stat-corner),
+    100% calc(100% - var(--stat-corner)),
+    calc(100% - var(--stat-corner)) 100%,
+    var(--stat-corner) 100%,
+    0 calc(100% - var(--stat-corner))
+  );
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+  padding-right: 1.15rem;
+  padding-left: clamp(2.7rem, 3.4vw, 3.9rem);
+}
+
+.hub-stat > .min-w-0 {
+  width: auto;
+  min-width: 0;
+}
+
+.hub-stat-label {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: clamp(0.48rem, 0.8vw, 0.58rem);
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(174, 226, 255, 0.85);
+}
+
+.hub-stat-value {
+  margin-top: 0.18rem;
+  font-size: clamp(0.68rem, 1vw, 0.88rem);
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+/* Thin vertical divider inside a readout value — the reference's “ | ” */
+.hub-stat-divider {
+  display: inline-block;
+  width: 1px;
+  height: 0.85rem;
+  margin-inline: 0.6rem;
+  vertical-align: -0.12em;
+  background: rgba(174, 226, 255, 0.35);
+}
+
+/* Emblem chip seated at each banner's outer end — the reference's portrait.
+   Cyan for the live streak, violet for the earned achievement. */
+.hub-stat-emblem {
+  --emblem-accent: 0, 245, 212;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.7rem;
+  height: 2.7rem;
+  clip-path: polygon(
+    0.4rem 0, calc(100% - 0.4rem) 0, 100% 0.4rem,
+    100% calc(100% - 0.4rem), calc(100% - 0.4rem) 100%,
+    0.4rem 100%, 0 calc(100% - 0.4rem), 0 0.4rem
+  );
+  color: rgba(var(--emblem-accent), 0.92);
+  background:
+    radial-gradient(120% 120% at 50% 0%, rgba(var(--emblem-accent), 0.22), transparent 62%),
+    linear-gradient(180deg, rgba(10, 28, 50, 0.78), rgba(4, 12, 26, 0.85));
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--emblem-accent), 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0 16px rgba(var(--emblem-accent), 0.22);
+}
+
+.hub-stat-emblem svg {
+  width: 1.32rem;
+  height: 1.32rem;
+  filter: drop-shadow(0 0 6px rgba(var(--emblem-accent), 0.55));
+}
+
+.hub-stat--right .hub-stat-emblem {
+  --emblem-accent: 167, 139, 250;
+}
+
+/* ── Hero CTAs: launcher buttons — two identical steel-edged slabs with a
+      small corner cut, dark glass fill, per the reference. ── */
+.hub-cta {
+  --cut: 0.45rem;
+  --chamfer-tint: rgba(174, 226, 255, 0.55);
+  --chamfer-tint-soft: rgba(140, 190, 226, 0.3);
+  display: inline-block;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.45));
+}
+
+.hub-cta:hover {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 14px rgba(125, 211, 252, 0.3));
+}
+
+.hub-cta:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 3px;
+}
+
+.hub-cta .chamfer-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 10.5rem;
+  padding: 0.78rem 1.5rem;
+  color: #d9ecfa;
+  font-family: 'Chakra Petch', 'Inter', system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background:
+    radial-gradient(130% 120% at 50% -30%, rgba(125, 211, 252, 0.1), transparent 60%),
+    linear-gradient(180deg, rgba(7, 17, 32, 0.62), rgba(3, 9, 20, 0.7));
+  -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
+}
+
+.hub-info-card .chamfer-body {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.72rem 1.2rem 0.72rem 0.85rem;
+  background:
+    radial-gradient(140% 150% at 0% -40%, rgba(0, 245, 212, 0.10), transparent 55%),
+    linear-gradient(180deg, rgba(6, 16, 31, 0.62), rgba(2, 8, 19, 0.72));
+  -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(12px);
+}
+
+.hub-info-card--end .chamfer-body {
+  flex-direction: row-reverse;
+  text-align: right;
+  padding: 0.72rem 0.85rem 0.72rem 1.2rem;
+  background:
+    radial-gradient(140% 150% at 100% -40%, rgba(167, 139, 250, 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(6, 16, 31, 0.62), rgba(2, 8, 19, 0.72));
+}
+
+.hub-info-card--end {
+  --chamfer-tint: rgba(167, 139, 250, 0.32);
+  --chamfer-tint-soft: rgba(167, 139, 250, 0.12);
+}
+
+/* ── Sub-tab deck: ‹ Stats · Achievements · Hero Showcase › ── */
+.hub-tab {
+  position: relative;
+  padding: 0.55rem 1.4rem 0.8rem;
+  color: hsl(var(--muted-foreground) / 0.38);
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color 0.22s ease, text-shadow 0.22s ease;
+}
+
+.hub-tab:hover {
+  color: hsl(var(--muted-foreground));
+}
+
+.hub-tab[aria-selected='true'] {
+  color: hsl(var(--foreground));
+  text-shadow: 0 0 18px rgba(0, 245, 212, 0.45);
+}
+
+/* Underline blade + upward glow bloom, like a lit console tab */
+.hub-tab::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 2.6rem;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #00f5d4, #00b4d8, transparent);
+  box-shadow: 0 0 14px rgba(0, 245, 212, 0.9), 0 -6px 22px rgba(0, 245, 212, 0.4);
+  transform: translateX(-50%) scaleX(0);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hub-tab[aria-selected='true']::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+.hub-tab-arrow {
+  --cut: 0.45rem;
+  --chamfer-tint: rgba(0, 245, 212, 0.22);
+  --chamfer-tint-soft: rgba(0, 180, 216, 0.08);
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.hub-tab-arrow .chamfer-body {
+  display: grid;
+  place-items: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.hub-tab-arrow:hover {
+  filter: drop-shadow(0 0 10px rgba(0, 245, 212, 0.25));
+}
+
+.hub-tab-arrow:hover .chamfer-body {
+  color: hsl(var(--primary));
+}
+
+.hub-tab-arrow:active {
+  transform: scale(0.94);
+}
+
+/* ── Time-range pills inside chart panels ── */
+.hub-pill {
+  border-radius: 6px;
+  background: rgba(125, 211, 252, 0.07);
+  padding: 0.32rem 0.7rem;
+  color: hsl(var(--muted-foreground) / 0.95);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.hub-pill:hover {
+  background: rgba(125, 211, 252, 0.13);
+  color: hsl(var(--foreground));
+}
+
+.hub-pill[aria-pressed='true'] {
+  background: rgba(0, 245, 212, 0.16);
+  color: #aef9ee;
+}
+
+/* ── "Your Activity" vertical thermometer bars ── */
+.activity-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-track {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 1.15rem;
+  height: 100%;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+  padding: 3px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.activity-col:hover .activity-track {
+  border-color: rgba(0, 245, 212, 0.35);
+  box-shadow: 0 0 12px rgba(0, 245, 212, 0.12);
+}
+
+.activity-col[data-today='true'] .activity-track {
+  border-color: rgba(0, 245, 212, 0.45);
+  background: linear-gradient(180deg, rgba(0, 245, 212, 0.07), rgba(0, 245, 212, 0.02));
+  box-shadow: 0 0 16px rgba(0, 245, 212, 0.18), inset 0 0 10px rgba(0, 245, 212, 0.05);
+}
+
+.activity-fill {
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #00f5d4, #00b4d8 80%);
+  box-shadow: 0 0 10px rgba(0, 245, 212, 0.55), 0 0 22px rgba(0, 180, 216, 0.25);
+  transition: height 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.activity-fill[data-zero='true'] {
+  background: rgba(255, 255, 255, 0.10);
+  box-shadow: none;
+}
+
+.activity-day {
+  color: hsl(var(--muted-foreground) / 0.78);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.activity-col[data-today='true'] .activity-day {
+  color: hsl(var(--primary));
+  text-shadow: 0 0 8px rgba(0, 245, 212, 0.5);
+}
+
+/* ── Achievement tiles ── */
+.achv-tile {
+  --achv-accent: #00f5d4;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(160deg, rgba(10, 28, 50, 0.9), rgba(4, 13, 28, 0.92));
+  /* Sliced top-right corner — the angular launcher motif */
+  clip-path: polygon(0 0, calc(100% - 1.1rem) 0, 100% 1.1rem, 100% 100%, 0 100%);
+  padding: 1rem;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.achv-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--achv-accent), transparent 70%);
+  opacity: 0.8;
+}
+
+.achv-tile:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--achv-accent) 40%, transparent);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45), 0 0 18px color-mix(in srgb, var(--achv-accent) 18%, transparent);
+}
+
+.achv-tile[data-locked='true'] {
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.achv-tile[data-locked='true']::before {
+  opacity: 0.18;
+}
+
+.achv-tile[data-locked='true'] .achv-icon {
+  filter: grayscale(0.9) brightness(0.7);
+}
+
+.achv-icon {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--achv-accent) 45%, transparent);
+  background: radial-gradient(circle at 32% 26%, color-mix(in srgb, var(--achv-accent) 26%, transparent), rgba(4, 16, 32, 0.7) 72%);
+  box-shadow: inset 0 0 10px color-mix(in srgb, var(--achv-accent) 14%, transparent), 0 0 14px color-mix(in srgb, var(--achv-accent) 14%, transparent);
+  color: var(--achv-accent);
+}
+
+.achv-points {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  background: rgba(251, 191, 36, 0.08);
+  padding: 0.18rem 0.55rem;
+  color: #fbbf24;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.achv-tile[data-locked='true'] .achv-points {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: hsl(var(--muted-foreground) / 0.6);
+}
+
+/* ── Showcase tier ladder ── */
+.tier-rung {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.55rem 0.8rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.tier-rung[data-state='current'] {
+  border-color: color-mix(in srgb, var(--tier-color, #00f5d4) 55%, transparent);
+  background: color-mix(in srgb, var(--tier-color, #00f5d4) 9%, transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--tier-color, #00f5d4) 18%, transparent);
+}
+
+.tier-rung[data-state='locked'] {
+  opacity: 0.45;
+}
+
+.tier-diamond {
+  width: 0.7rem;
+  height: 0.7rem;
+  flex-shrink: 0;
+  transform: rotate(45deg);
+  border-radius: 2px;
+  background: var(--tier-color, #00f5d4);
+  box-shadow: 0 0 8px var(--tier-color, #00f5d4);
+}
+
+.tier-rung[data-state='locked'] .tier-diamond {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: none;
+}
+
+@media (max-width: 860px) {
+  .hub-logo-frame {
+    --notch-top: clamp(2.55rem, 5vw, 3.45rem);
+    width: min(calc(100vw - 2rem), clamp(18rem, 42vw, 23rem));
+    min-height: clamp(4.85rem, 7vw, 5.75rem);
+  }
+
+  .hub-logo-frame-body {
+    padding: 0.74rem clamp(2rem, 4vw, 3rem) 0.82rem;
+  }
+
+  .hub-logo-title {
+    letter-spacing: 0.56em;
+    text-indent: 0.56em;
+  }
+
+  .hub-nav {
+    min-height: 2.75rem;
+    padding: 0.28rem 1.8rem calc(0.36rem + var(--nav-tab-h));
+  }
+
+  .hub-nav-link {
+    padding: 0.2rem 0.7rem 0.3rem;
+    font-size: 0.74rem;
+  }
+
+  .hub-tab {
+    padding: 0.5rem 0.8rem 0.75rem;
+    font-size: 0.74rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hub-nav-link::after,
+  .hub-tab::after,
+  .activity-fill,
+  .hub-cta,
+  .achv-tile {
+    transition: none;
+  }
+}
+

@@ -5,13 +5,10 @@ import { ProgressBar } from '@/shared/components/ProgressBar'
 import {
   accuracyLabel,
   challengeLevelAccent,
-  chestRewards,
   difficultyLabel,
   levelProgress,
-  nextReward,
 } from '@/features/tower-map/challengeUi'
 import { useTowerSelection } from '@/features/tower-map/hooks/useTowerSelection'
-import type { LearningStorey } from '@/features/tower-map/types'
 
 const ADVENTURE_ACCENT = '0, 245, 212'
 
@@ -25,32 +22,10 @@ function Stat({ icon: Icon, label, value }: { icon: typeof Target; label: string
   )
 }
 
-export function ArtifactOverview({ storeyId, storey }: { storeyId: number; storey?: LearningStorey | null }) {
+export function ArtifactOverview({ storeyId }: { storeyId: number }) {
   const selected = useTowerSelection((state) => state.selected)
 
   if (!selected || selected.storeyId !== storeyId) {
-    if (storey) {
-      const progress = storey.level_completion?.value ?? 0
-      const rewards = chestRewards(storey)
-      const reward = nextReward(rewards, progress)
-      return (
-        <section className="artifact-overview artifact-overview--storey" aria-label="Current storey">
-          <span className="artifact-overview-kind">Storey {storey.number}</span>
-          <h3 className="artifact-overview-title">{storey.title}</h3>
-          {storey.description ? <p className="artifact-overview-summary">{storey.description}</p> : null}
-          <div className="artifact-overview-progress-meta">
-            <span>Progress</span>
-            <strong>{Math.round(progress)}%</strong>
-          </div>
-          <ProgressBar value={progress} className="h-2.5 bg-secondary/60" glow fillAnimate />
-          <div className="artifact-overview-storey-meta">
-            <span>{storey.command_skill_count} commands</span>
-            <span>{storey.challenge_count} trials</span>
-            {reward ? <strong>{reward.coins} coins at {reward.threshold}%</strong> : null}
-          </div>
-        </section>
-      )
-    }
     return (
       <div className="artifact-overview is-empty" aria-hidden="true">
         <p className="artifact-overview-hint">Pick an artifact to preview this stage.</p>

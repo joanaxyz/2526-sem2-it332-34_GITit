@@ -16,6 +16,7 @@ import { useSearchParams } from 'react-router-dom'
 import { towerMapApi } from '@/features/tower-map/api/towerMapApi'
 import { TowerCharacter } from '@/features/tower-map/character/TowerCharacter'
 import { ArtifactOverview } from '@/features/tower-map/components/ArtifactOverview'
+import { StoreyOverview } from '@/features/tower-map/components/StoreyOverview'
 import { TowerStoreySection } from '@/features/tower-map/components/TowerStoreySection'
 import { SkyClock } from '@/features/tower-map/components/SkyClock'
 import { TowerActionButton } from '@/features/tower-map/components/TowerActionButton'
@@ -511,25 +512,33 @@ export function TowerMapPage() {
         <div className="tower-starfield tower-starfield--near" />
       </div>
 
-      <SkyClock
-        timeOfDay={timeOfDay}
-        onScrub={handleScrub}
-        running={running}
-        onToggleRunning={toggleRunning}
-        phaseLabel={phaseLabel}
-      />
+      {/* In edit mode the editor owns all the chrome (its command bar carries the
+          exit, zoom, and identity), so the view-mode clock dial and control
+          cluster are suppressed to keep the right side clear. The ambient sky
+          above still animates. */}
+      {!editMode ? (
+        <>
+          <SkyClock
+            timeOfDay={timeOfDay}
+            onScrub={handleScrub}
+            running={running}
+            onToggleRunning={toggleRunning}
+            phaseLabel={phaseLabel}
+          />
 
-      <TowerControls
-        view={view}
-        editMode={editMode}
-        onViewChange={setView}
-        onEditModeExit={exitEdit}
-      />
+          <TowerControls
+            view={view}
+            editMode={editMode}
+            onViewChange={setView}
+            onEditModeExit={exitEdit}
+          />
+        </>
+      ) : null}
 
       {editMode ? (
-        // Edit mode keeps only the living sky + clock; the editor takes the rest.
+        // Edit mode keeps only the living sky; the editor takes the rest.
         editDesignId !== null ? (
-          <InTowerEditor designId={editDesignId} />
+          <InTowerEditor designId={editDesignId} onExit={exitEdit} />
         ) : (
           <EmptyState
             title="No tower to edit"
@@ -539,8 +548,14 @@ export function TowerMapPage() {
       ) : (
         <>
           {view === 'official' && activeStorey ? (
+            <aside className="tower-storey-dock" aria-label="Current storey overview">
+              <StoreyOverview key={activeStorey.id} storey={activeStorey} />
+            </aside>
+          ) : null}
+
+          {view === 'official' && activeStorey ? (
             <aside className="tower-artifact-dock" aria-label="Selected artifact controls">
-              {artifactOverviewStoreyId ? <ArtifactOverview storeyId={artifactOverviewStoreyId} storey={activeStorey} /> : null}
+              {artifactOverviewStoreyId ? <ArtifactOverview storeyId={artifactOverviewStoreyId} /> : null}
               <TowerActionButton />
             </aside>
           ) : null}

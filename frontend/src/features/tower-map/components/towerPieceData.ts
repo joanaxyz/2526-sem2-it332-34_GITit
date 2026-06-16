@@ -36,11 +36,14 @@ export function pieceTransformStyle(piece: TowerLayoutPieceDescriptor | null | u
   if (!isRecord(transform)) return undefined
   const x = finiteNumber(transform.x) ?? 0
   const y = finiteNumber(transform.y) ?? 0
-  const scale = positiveNumber(transform.scale) ?? 1
+  // Per-axis scale; legacy slots only stored a single uniform `scale`.
+  const legacy = positiveNumber(transform.scale)
+  const scaleX = positiveNumber(transform.scaleX) ?? legacy ?? 1
+  const scaleY = positiveNumber(transform.scaleY) ?? legacy ?? 1
   const rotation = finiteNumber(transform.rotation) ?? finiteNumber(transform.rotate) ?? 0
-  if (x === 0 && y === 0 && scale === 1 && rotation === 0) return undefined
+  if (x === 0 && y === 0 && scaleX === 1 && scaleY === 1 && rotation === 0) return undefined
   return {
-    transform: `translate(${x}px, ${y}px) scale(${scale}) rotate(${rotation}deg)`,
+    transform: `translate(${x}px, ${y}px) scale(${scaleX}, ${scaleY}) rotate(${rotation}deg)`,
     transformOrigin: 'center center',
   }
 }

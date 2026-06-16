@@ -4,6 +4,7 @@ import { AuthLayout } from '@/app/layouts/AuthLayout'
 import { HomeLayout } from '@/app/layouts/HomeLayout'
 import { LevelLayout } from '@/app/layouts/LevelLayout'
 import { Protected } from '@/app/Protected'
+import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { HomePage } from '@/features/home/pages/HomePage'
@@ -41,6 +42,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },
+      { path: '/forgot-password', element: <ForgotPasswordPage /> },
     ],
   },
   // Public, no-auth view of a shared tower (copiable link target).

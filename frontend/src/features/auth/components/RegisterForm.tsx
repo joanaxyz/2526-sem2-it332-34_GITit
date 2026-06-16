@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { authApi } from '@/features/auth/api/authApi'
 import { presentAuthError } from '@/features/auth/api/authError'
 import { PasswordStrengthIndicator } from '@/features/auth/components/PasswordStrengthIndicator'
+import { inputClasses, inputErrorClasses, passwordToggleClasses } from '@/features/auth/components/fieldStyles'
 import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
 
@@ -36,9 +37,6 @@ const schema = z
   })
 
 type FormValues = z.infer<typeof schema>
-
-const inputClasses =
-  'h-10 rounded-md border border-input bg-secondary px-3 text-sm outline-none transition-all duration-200 focus:border-primary/40 focus:ring-2 focus:ring-ring/25'
 
 export function RegisterForm() {
   const navigate = useNavigate()
@@ -81,31 +79,38 @@ export function RegisterForm() {
     >
       <div>
         <h2 className="text-2xl font-extrabold tracking-tight">Create account</h2>
+        <p className="mt-1 text-sm leading-5 text-muted-foreground">Begin your Git level journey.</p>
       </div>
       <label className="flex flex-col gap-1.5 text-sm font-semibold">
         Username
-        <input className={cn(inputClasses, form.formState.errors.username && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30')} autoComplete="username" {...form.register('username')} />
+        <input
+          className={cn(inputClasses, form.formState.errors.username && inputErrorClasses)}
+          autoComplete="username"
+          {...form.register('username')}
+        />
         {form.formState.errors.username ? <span className="text-xs font-normal text-destructive">{form.formState.errors.username.message}</span> : null}
       </label>
       <label className="flex flex-col gap-1.5 text-sm font-semibold">
         Email
-        <input className={cn(inputClasses, form.formState.errors.email && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30')} autoComplete="email" {...form.register('email')} />
+        <input
+          className={cn(inputClasses, form.formState.errors.email && inputErrorClasses)}
+          autoComplete="email"
+          {...form.register('email')}
+        />
         {form.formState.errors.email ? <span className="text-xs font-normal text-destructive">{form.formState.errors.email.message}</span> : null}
       </label>
       <label className="flex flex-col gap-1.5 text-sm font-semibold">
         Password
         <div className="relative">
           <input
-            className={cn(
-              `${inputClasses} w-full pr-10`,
-              form.formState.errors.password && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30',
-            )}
+            className={cn(inputClasses, 'pr-10', form.formState.errors.password && inputErrorClasses)}
             type={showPassword ? 'text' : 'password'}
+            autoComplete="new-password"
             {...form.register('password')}
           />
           <button
             type="button"
-            className="absolute inset-y-0 right-0 grid w-10 place-items-center text-muted-foreground"
+            className={passwordToggleClasses}
             onClick={() => setShowPassword((value) => !value)}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
@@ -119,16 +124,14 @@ export function RegisterForm() {
         Confirm password
         <div className="relative">
           <input
-            className={cn(
-              `${inputClasses} w-full pr-10`,
-              form.formState.errors.password_confirm && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30',
-            )}
+            className={cn(inputClasses, 'pr-10', form.formState.errors.password_confirm && inputErrorClasses)}
             type={showPasswordConfirm ? 'text' : 'password'}
+            autoComplete="new-password"
             {...form.register('password_confirm')}
           />
           <button
             type="button"
-            className="absolute inset-y-0 right-0 grid w-10 place-items-center text-muted-foreground"
+            className={passwordToggleClasses}
             onClick={() => setShowPasswordConfirm((value) => !value)}
             aria-label={showPasswordConfirm ? 'Hide password confirmation' : 'Show password confirmation'}
           >

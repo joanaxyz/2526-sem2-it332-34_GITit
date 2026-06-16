@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Eye, EyeOff, GitMerge, Loader2, LogIn, ShieldCheck, Zap } from 'lucide-react'
+import { Eye, EyeOff, Loader2, LogIn } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
@@ -8,6 +8,7 @@ import { z } from 'zod'
 
 import { authApi } from '@/features/auth/api/authApi'
 import { presentAuthError } from '@/features/auth/api/authError'
+import { inputClasses, inputErrorClasses, passwordToggleClasses } from '@/features/auth/components/fieldStyles'
 import { useAuthStore } from '@/features/auth/hooks/useAuth'
 import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
@@ -27,15 +28,6 @@ const schema = z.object({
 })
 
 type FormValues = z.infer<typeof schema>
-
-const inputClasses =
-  'h-10 rounded-md border border-input bg-secondary px-3 text-sm outline-none transition-all duration-200 focus:border-primary/40 focus:ring-2 focus:ring-ring/25'
-
-const highlights = [
-  { Icon: ShieldCheck, text: 'Live DAG visualizations per command' },
-  { Icon: Zap, text: 'Consequence-safe runs' },
-  { Icon: GitMerge, text: 'Progress tracking across all towers' },
-]
 
 export function LoginForm() {
   const navigate = useNavigate()
@@ -81,7 +73,7 @@ export function LoginForm() {
 
   return (
     <form
-      className="flex h-full flex-col gap-3"
+      className="flex flex-col gap-3.5"
       onSubmit={form.handleSubmit((values) => {
         setLastSubmittedValues(values)
         mutation.mutate(values)
@@ -95,7 +87,7 @@ export function LoginForm() {
       <label className="flex flex-col gap-1.5 text-sm font-semibold">
         Username or email
         <input
-          className={cn(inputClasses, form.formState.errors.identifier && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30')}
+          className={cn(inputClasses, form.formState.errors.identifier && inputErrorClasses)}
           autoComplete="username"
           disabled={isLocked}
           {...form.register('identifier')}
@@ -106,17 +98,26 @@ export function LoginForm() {
       </label>
 
       <label className="flex flex-col gap-1.5 text-sm font-semibold">
-        Password
+        <span className="flex items-center justify-between gap-2">
+          Password
+          <Link
+            to="/forgot-password"
+            className="link-underline-anim text-xs font-medium text-muted-foreground hover:text-primary"
+          >
+            Forgot password?
+          </Link>
+        </span>
         <div className="relative">
           <input
-            className={cn(`${inputClasses} w-full pr-10`, form.formState.errors.password && 'border-destructive focus:border-destructive/80 focus:ring-destructive/30')}
+            className={cn(inputClasses, 'pr-10', form.formState.errors.password && inputErrorClasses)}
             type={showPassword ? 'text' : 'password'}
+            autoComplete="current-password"
             disabled={isLocked}
             {...form.register('password')}
           />
           <button
             type="button"
-            className="absolute inset-y-0 right-0 grid w-10 place-items-center text-muted-foreground transition-colors hover:text-foreground"
+            className={passwordToggleClasses}
             onClick={() => setShowPassword((value) => !value)}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
             disabled={isLocked}
@@ -131,7 +132,8 @@ export function LoginForm() {
 
       {isLocked ? (
         <p className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-          Too many failed attempts. Try again in {lockoutRemaining}s.
+          Too many failed attempts. Try again in{' '}
+          <span className="font-mono font-semibold tabular-nums">{lockoutRemaining}s</span>.
         </p>
       ) : null}
 
@@ -155,34 +157,12 @@ export function LoginForm() {
         {mutation.isPending ? 'Signing in' : 'Sign in'}
       </Button>
 
-      <div className="mt-auto flex flex-col gap-3">
-        <div
-          className="rounded-md p-3"
-          style={{
-            background: 'rgba(0,245,212,0.04)',
-            border: '1px solid rgba(0,245,212,0.12)',
-          }}
-        >
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-primary/50">
-            Platform features
-          </p>
-          <ul className="space-y-1.5">
-            {highlights.map(({ Icon, text }) => (
-              <li key={text} className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Icon className="size-3 shrink-0 text-primary/60" />
-                {text}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <p className="text-sm text-muted-foreground">
-          New to GIT it!?{' '}
-          <Link className="link-underline-anim font-semibold text-primary" to="/register">
-            Create an account
-          </Link>
-        </p>
-      </div>
+      <p className="text-sm text-muted-foreground">
+        New to GIT it!?{' '}
+        <Link className="link-underline-anim font-semibold text-primary" to="/register">
+          Create an account
+        </Link>
+      </p>
     </form>
   )
 }

@@ -5,15 +5,17 @@ import {
   type ArtifactEdit,
   type ArtifactTransform,
   ARTIFACT_ROTATION_RANGE,
-  ARTIFACT_SCALE_RANGE,
   type PieceTransform,
   PIECE_ROTATION_RANGE,
   PIECE_SCALE_RANGE,
+  type ResizeHandle,
   clampNumber,
   pieceIdFromInstance,
   pieceTransformToRecord,
   readArtifactTransform,
   readPieceTransform,
+  resizeBoxFromHandle,
+  rotateVec,
   roundTo,
 } from '@/features/tower-designs/editorUtils'
 import type { ArtifactPlacementDescriptor, TowerDesignOverview } from '@/features/tower-designs/types'
@@ -44,6 +46,15 @@ export type EditorDragPayload =
 
 export type PlacementDraft = Extract<EditorDragPayload, { source: 'asset-artifact' }> | null
 
+// Placed artifacts layer above a selected piece's transform frame (z-index 1)
+// so they keep receiving pointer events; see the gizmo z-index note in CSS.
+const ARTIFACT_Z_BASE = 10
+// Smallest on-screen artifact box, in piece viewBox units, so a resize can't
+// collapse a placement to nothing.
+const ARTIFACT_MIN_DISPLAY = 6
+
+const RESIZE_HANDLES: ResizeHandle[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w']
+
 export function EditorStorey({
   overview,
   pieceDescriptorBySlug,
@@ -51,6 +62,7 @@ export function EditorStorey({
   artifactDescriptorBySlug,
   selectedPieceId,
   selectedArtifactId,
+  activeStoreyIndex,
   pendingSwaps,
   pieceTransforms,
   artifactEdits,
@@ -63,6 +75,8 @@ export function EditorStorey({
   onMoveArtifact,
   onTransformArtifact,
   onTransformPiece,
+  onGestureEnd,
+  onRejectPlacement,
 }: {
   overview: TowerDesignOverview
   pieceDescriptorBySlug: Record<string, TowerPieceAssetDescriptor>
@@ -70,6 +84,7 @@ export function EditorStorey({
   artifactDescriptorBySlug: Record<string, TowerArtifactAssetDescriptor>
   selectedPieceId: number | null
   selectedArtifactId: number | string | null
+  activeStoreyIndex: number | null
   pendingSwaps: Map<number, number>
   pieceTransforms: Map<number, PieceTransform>
   artifactEdits: Map<number | string, ArtifactEdit>
@@ -89,6 +104,10 @@ export function EditorStorey({
   onMoveArtifact: (placementId: number | string, x: number, y: number) => void
   onTransformArtifact: (placementId: number | string, next: ArtifactTransform) => void
   onTransformPiece: (pieceId: number, next: PieceTransform) => void
+  /** Close the current undo-coalescing window when a drag gesture ends. */
+  onGestureEnd: () => void
+  /** Explain why a drop was refused, so the canvas isn't a silent red flash. */
+  onRejectPlacement?: (reason: string) => void
 }) {
   const layout = overview.tower_layout
   const artifactsByInstance = useMemo(() => groupArtifacts(overview.artifacts), [overview.artifacts])
@@ -119,16 +138,29 @@ export function EditorStorey({
     )
   }
 
-  function canPlaceArtifact(piece: TowerLayoutPieceDescriptor, payload: PlacementDraft) {
-    if (!payload) return false
-    if (payload.role === 'normal') return true
-    if (piece.pieceType !== 'section') return false
-    const artifacts = artifactsByInstance.get(piece.instanceId) ?? []
-    const interactables = artifacts.filter((artifact) => artifact.role !== 'normal')
+  // Returns null when the drop is allowed, or a human reason when it is not.
+  // Mirrors the server's ArtifactPlacement validation so the canvas refuses the
+  // same drops the API would, but with an explanation instead of a 400.
+  function placeRejectReason(piece: TowerLayoutPieceDescriptor, payload: PlacementDraft): string | null {
+    if (!payload) return 'Nothing to place.'
+    if (payload.role === 'normal') return null
+    if (piece.pieceType !== 'section') return 'Interactive artifacts can only sit on a tower section.'
+    const interactables = (artifactsByInstance.get(piece.instanceId) ?? []).filter(
+      (artifact) => artifact.role !== 'normal',
+    )
     if (payload.role === 'challenge') {
-      return interactables.every((artifact) => artifact.role === 'challenge') && interactables.length < 3
+      if (interactables.some((artifact) => artifact.role !== 'challenge')) {
+        return 'This section already holds a different content kind.'
+      }
+      if (interactables.length >= 3) return 'A section holds at most three challenges.'
+      return null
     }
-    return interactables.length === 0
+    if (interactables.length > 0) return 'This section already has an interactive artifact (only one is allowed).'
+    return null
+  }
+
+  function canPlaceArtifact(piece: TowerLayoutPieceDescriptor, payload: PlacementDraft) {
+    return placeRejectReason(piece, payload) === null
   }
 
   function placePayloadOnPiece(
@@ -140,8 +172,10 @@ export function EditorStorey({
   ) {
     const pieceId = pieceIdFromInstance(piece.instanceId)
     if (pieceId === null || !payload) return
-    if (!canPlaceArtifact(piece, payload)) {
+    const reason = placeRejectReason(piece, payload)
+    if (reason !== null) {
       flashReject(pieceId)
+      onRejectPlacement?.(reason)
       return
     }
     const point = clientPointToPiecePoint(clientX, clientY, target, descriptorFor(piece), variantForPiece(piece))
@@ -215,6 +249,10 @@ export function EditorStorey({
   ): ReactNode {
     const placements = artifactsByInstance.get(piece.instanceId)
     if (!placements?.length) return null
+    // Artifacts sit above the piece's transform frame (ARTIFACT_Z_BASE) so they
+    // stay clickable while the piece is selected. The selected artifact rides one
+    // step above its siblings rather than at an arbitrary 100000.
+    const topSiblingZ = Math.max(0, ...placements.map((artifact) => artifact.zIndex ?? 0))
     return placements.map((artifact) => {
       const edit = artifactEdits.get(artifact.id)
       const transformed = readArtifactTransform(artifact, edit)
@@ -225,7 +263,7 @@ export function EditorStorey({
           artifact={{
             ...artifact,
             ...transformed,
-            zIndex: selected ? 100000 : artifact.zIndex,
+            zIndex: ARTIFACT_Z_BASE + (selected ? topSiblingZ + 1 : artifact.zIndex ?? 0),
           }}
           artifactDescriptor={artifactDescriptorBySlug[artifact.assetSlug] ?? null}
           pieceDescriptor={pieceDescriptor}
@@ -235,6 +273,7 @@ export function EditorStorey({
           onSelectArtifact={() => onSelectArtifact(artifact.id, pieceId ?? null)}
           onMoveArtifact={onMoveArtifact}
           onTransformArtifact={(next) => onTransformArtifact(artifact.id, next)}
+          onGestureEnd={onGestureEnd}
         />
       )
     })
@@ -253,6 +292,12 @@ export function EditorStorey({
   }
 
   const { crown, storeys } = editorTowerPieces(layout.pieces)
+  // The editor edits one storey at a time (storeys are tabs in InTowerEditor);
+  // the canvas only mounts the active storey so authors aren't lost in a tall
+  // stack. The crown caps the topmost storey only.
+  const activeStorey = storeys.find((group) => group.storeyIndex === activeStoreyIndex) ?? storeys[0] ?? null
+  const showCrown =
+    crown !== null && (activeStorey === null || storeys[0]?.storeyIndex === activeStorey.storeyIndex)
   const renderPiece = (piece: TowerLayoutPieceDescriptor) => {
     const pieceId = pieceIdFromInstance(piece.instanceId)
     const descriptor = descriptorFor(piece)
@@ -270,6 +315,7 @@ export function EditorStorey({
         transform={effective}
         zoomScale={zoomScale}
         onChange={(next) => onTransformPiece(pieceId as number, next)}
+        onGestureEnd={onGestureEnd}
       />
     ) : null
 
@@ -323,12 +369,12 @@ export function EditorStorey({
       <section className="storey-section storey-section--editor">
         <div className="learning-tower">
           <div className="tower-repeater">
-            {crown ? renderPiece(crown) : null}
-            {storeys.map((group, order) => (
-              <div className="editor-storey-band" key={group.storeyIndex} aria-label={`Storey ${order + 1}`}>
-                {group.pieces.map(renderPiece)}
+            {showCrown && crown ? renderPiece(crown) : null}
+            {activeStorey ? (
+              <div className="editor-storey-band" key={activeStorey.storeyIndex} aria-label="Active storey">
+                {activeStorey.pieces.map(renderPiece)}
               </div>
-            ))}
+            ) : null}
           </div>
         </div>
       </section>
@@ -339,22 +385,28 @@ export function EditorStorey({
 /**
  * The on-canvas transform gizmo for the selected piece. It lives INSIDE the
  * piece element, so it inherits the piece's translate/scale/rotate and stays
- * glued to the art. Dragging the body moves; corner handles scale uniformly
- * around the centre; the top handle rotates. Edits are staged (no network) and
- * only committed when the user applies; see InTowerEditor.
+ * glued to the art. The body moves the piece; the eight handles resize it
+ * (corners free, edges per-axis, Shift constrains aspect) with the opposite
+ * handle pinned; the top grip rotates. Edits are staged (no network) and only
+ * committed when the user applies; see InTowerEditor.
  */
 function PieceTransformFrame({
   transform,
   zoomScale,
   onChange,
+  onGestureEnd,
 }: {
   transform: PieceTransform
   zoomScale: number
   onChange: (next: PieceTransform) => void
+  onGestureEnd: () => void
 }) {
+  function host(target: HTMLElement) {
+    return (target.closest('[data-piece-id]') as HTMLElement | null) ?? target
+  }
+
   function centreOf(target: HTMLElement) {
-    const host = (target.closest('[data-piece-id]') as HTMLElement | null) ?? target
-    const rect = host.getBoundingClientRect()
+    const rect = host(target).getBoundingClientRect()
     return { cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2 }
   }
 
@@ -371,24 +423,48 @@ function PieceTransformFrame({
       const dx = (moveEvent.clientX - startX) / z
       const dy = (moveEvent.clientY - startY) / z
       onChange({ ...start, x: Math.round(start.x + dx), y: Math.round(start.y + dy) })
-    })
+    }, onGestureEnd)
   }
 
-  function beginScale(event: React.PointerEvent<HTMLSpanElement>) {
-    event.stopPropagation()
-    event.preventDefault()
-    const start = transform
-    const { cx, cy } = centreOf(event.currentTarget)
-    const startDistance = Math.hypot(event.clientX - cx, event.clientY - cy) || 1
-    trackPointer((moveEvent) => {
-      const distance = Math.hypot(moveEvent.clientX - cx, moveEvent.clientY - cy)
-      const scale = clampNumber(
-        roundTo(start.scale * (distance / startDistance), 2),
-        PIECE_SCALE_RANGE.min,
-        PIECE_SCALE_RANGE.max,
-      )
-      onChange({ ...start, scale })
-    })
+  function beginResize(handle: ResizeHandle) {
+    return (event: React.PointerEvent<HTMLSpanElement>) => {
+      event.stopPropagation()
+      event.preventDefault()
+      const el = host(event.currentTarget)
+      // Layout size ignores the piece's own transform and the canvas zoom, so it
+      // is the un-scaled box we measure the new scale against.
+      const baseW = el.offsetWidth || 1
+      const baseH = el.offsetHeight || 1
+      const start = transform
+      const z = zoomScale || 1
+      const startX = event.clientX
+      const startY = event.clientY
+      const w0 = baseW * start.scaleX
+      const h0 = baseH * start.scaleY
+      trackPointer((moveEvent) => {
+        const dCanvas = { x: (moveEvent.clientX - startX) / z, y: (moveEvent.clientY - startY) / z }
+        const local = rotateVec(dCanvas, -start.rotation)
+        const box = resizeBoxFromHandle({
+          handle,
+          rotation: start.rotation,
+          local,
+          w0,
+          h0,
+          cx: start.x,
+          cy: start.y,
+          minW: baseW * PIECE_SCALE_RANGE.min,
+          minH: baseH * PIECE_SCALE_RANGE.min,
+          keepAspect: moveEvent.shiftKey,
+        })
+        onChange({
+          ...start,
+          x: Math.round(box.cx),
+          y: Math.round(box.cy),
+          scaleX: clampNumber(roundTo(box.w / baseW, 3), PIECE_SCALE_RANGE.min, PIECE_SCALE_RANGE.max),
+          scaleY: clampNumber(roundTo(box.h / baseH, 3), PIECE_SCALE_RANGE.min, PIECE_SCALE_RANGE.max),
+        })
+      }, onGestureEnd)
+    }
   }
 
   function beginRotate(event: React.PointerEvent<HTMLSpanElement>) {
@@ -405,19 +481,25 @@ function PieceTransformFrame({
         PIECE_ROTATION_RANGE.max,
       )
       onChange({ ...start, rotation })
-    })
+    }, onGestureEnd)
   }
 
-  // Handles counter-scale by the piece's own scale so the grips stay a usable
-  // size whether the piece is shrunk or blown up. (Canvas zoom still applies.)
-  const style = { '--ed-inv': 1 / Math.max(transform.scale, 0.001) } as CSSProperties
+  // Counter-scale the grips by each axis (and the canvas zoom) so they stay a
+  // constant on-screen size no matter how the piece is stretched.
+  const style = {
+    '--ed-inv-x': 1 / Math.max(transform.scaleX * (zoomScale || 1), 0.001),
+    '--ed-inv-y': 1 / Math.max(transform.scaleY * (zoomScale || 1), 0.001),
+  } as CSSProperties
 
   return (
     <div className="ed-tf" style={style} onPointerDown={beginMove} aria-hidden="true">
-      <span className="ed-tf-handle ed-tf-handle--nw" onPointerDown={beginScale} />
-      <span className="ed-tf-handle ed-tf-handle--ne" onPointerDown={beginScale} />
-      <span className="ed-tf-handle ed-tf-handle--se" onPointerDown={beginScale} />
-      <span className="ed-tf-handle ed-tf-handle--sw" onPointerDown={beginScale} />
+      {RESIZE_HANDLES.map((handle) => (
+        <span
+          key={handle}
+          className={`ed-tf-handle ed-tf-handle--${handle}`}
+          onPointerDown={beginResize(handle)}
+        />
+      ))}
       <span className="ed-tf-rotate" onPointerDown={beginRotate}>
         <RotateCw className="ed-tf-rotate-icon" aria-hidden="true" />
       </span>
@@ -425,10 +507,11 @@ function PieceTransformFrame({
   )
 }
 
-function trackPointer(move: (event: PointerEvent) => void) {
+function trackPointer(move: (event: PointerEvent) => void, onEnd?: () => void) {
   const up = () => {
     window.removeEventListener('pointermove', move)
     window.removeEventListener('pointerup', up)
+    onEnd?.()
   }
   window.addEventListener('pointermove', move)
   window.addEventListener('pointerup', up)
@@ -444,6 +527,7 @@ function EditableArtifact({
   onSelectArtifact,
   onMoveArtifact,
   onTransformArtifact,
+  onGestureEnd,
 }: {
   artifact: ArtifactPlacementDescriptor
   artifactDescriptor: TowerArtifactAssetDescriptor | null
@@ -454,6 +538,7 @@ function EditableArtifact({
   onSelectArtifact: () => void
   onMoveArtifact: (placementId: number | string, x: number, y: number) => void
   onTransformArtifact: (next: ArtifactTransform) => void
+  onGestureEnd: () => void
 }) {
   function onPointerDown(event: React.PointerEvent<HTMLElement>) {
     event.stopPropagation()
@@ -466,12 +551,7 @@ function EditableArtifact({
       const point = clientPointToPiecePoint(ev.clientX, ev.clientY, hostEl, pieceDescriptor, pieceVariant)
       onMoveArtifact(artifact.id, Math.round(point.x), Math.round(point.y))
     }
-    function up() {
-      window.removeEventListener('pointermove', move)
-      window.removeEventListener('pointerup', up)
-    }
-    window.addEventListener('pointermove', move)
-    window.addEventListener('pointerup', up)
+    trackPointer(move, onGestureEnd)
   }
 
   return (
@@ -490,6 +570,7 @@ function EditableArtifact({
           pieceVariant={pieceVariant}
           zoomScale={zoomScale}
           onChange={onTransformArtifact}
+          onGestureEnd={onGestureEnd}
         />
       ) : null}
     </TowerArtifact>
@@ -502,12 +583,14 @@ function ArtifactTransformFrame({
   pieceVariant,
   zoomScale,
   onChange,
+  onGestureEnd,
 }: {
   artifact: ArtifactPlacementDescriptor
   pieceDescriptor: TowerPieceAssetDescriptor | null
   pieceVariant?: string
   zoomScale: number
   onChange: (next: ArtifactTransform) => void
+  onGestureEnd: () => void
 }) {
   const transform = readArtifactTransform(artifact)
 
@@ -530,27 +613,46 @@ function ArtifactTransformFrame({
         x: Math.round(start.x + point.x - startPoint.x),
         y: Math.round(start.y + point.y - startPoint.y),
       })
-    })
+    }, onGestureEnd)
   }
 
-  function beginScale(event: React.PointerEvent<HTMLSpanElement>) {
-    event.stopPropagation()
-    event.preventDefault()
-    const rect = (event.currentTarget.closest('.tower-artifact') as HTMLElement | null)?.getBoundingClientRect()
-    if (!rect) return
-    const start = transform
-    const cx = rect.left + rect.width / 2
-    const cy = rect.top + rect.height / 2
-    const startDistance = Math.hypot(event.clientX - cx, event.clientY - cy) || 1
-    trackPointer((moveEvent) => {
-      const distance = Math.hypot(moveEvent.clientX - cx, moveEvent.clientY - cy)
-      const scale = clampNumber(
-        roundTo(start.scale * (distance / startDistance), 2),
-        ARTIFACT_SCALE_RANGE.min,
-        ARTIFACT_SCALE_RANGE.max,
-      )
-      onChange({ ...start, scale })
-    })
+  // Handles drive the artifact's box (width/height) non-uniformly while its
+  // uniform `scale` stays put, so dragging a corner stretches the placement.
+  function beginResize(handle: ResizeHandle) {
+    return (event: React.PointerEvent<HTMLSpanElement>) => {
+      event.stopPropagation()
+      event.preventDefault()
+      const host = hostPiece(event.currentTarget)
+      if (!host) return
+      const start = transform
+      const s = Math.max(start.scale, 0.001)
+      const startPoint = clientPointToPiecePoint(event.clientX, event.clientY, host, pieceDescriptor, pieceVariant)
+      const w0 = start.width * start.scale
+      const h0 = start.height * start.scale
+      trackPointer((moveEvent) => {
+        const point = clientPointToPiecePoint(moveEvent.clientX, moveEvent.clientY, host, pieceDescriptor, pieceVariant)
+        const local = rotateVec({ x: point.x - startPoint.x, y: point.y - startPoint.y }, -start.rotation)
+        const box = resizeBoxFromHandle({
+          handle,
+          rotation: start.rotation,
+          local,
+          w0,
+          h0,
+          cx: start.x,
+          cy: start.y,
+          minW: ARTIFACT_MIN_DISPLAY,
+          minH: ARTIFACT_MIN_DISPLAY,
+          keepAspect: moveEvent.shiftKey,
+        })
+        onChange({
+          ...start,
+          x: Math.round(box.cx),
+          y: Math.round(box.cy),
+          width: Math.max(1, Math.round(box.w / s)),
+          height: Math.max(1, Math.round(box.h / s)),
+        })
+      }, onGestureEnd)
+    }
   }
 
   function beginRotate(event: React.PointerEvent<HTMLSpanElement>) {
@@ -570,17 +672,20 @@ function ArtifactTransformFrame({
         ARTIFACT_ROTATION_RANGE.max,
       )
       onChange({ ...start, rotation })
-    })
+    }, onGestureEnd)
   }
 
-  const style = { '--ed-inv': 1 / Math.max(transform.scale * zoomScale, 0.001) } as CSSProperties
+  const style = { '--ed-inv': 1 / Math.max(transform.scale * (zoomScale || 1), 0.001) } as CSSProperties
 
   return (
     <div className="ed-tf ed-tf--artifact" style={style} onPointerDown={beginMove} aria-hidden="true">
-      <span className="ed-tf-handle ed-tf-handle--nw" onPointerDown={beginScale} />
-      <span className="ed-tf-handle ed-tf-handle--ne" onPointerDown={beginScale} />
-      <span className="ed-tf-handle ed-tf-handle--se" onPointerDown={beginScale} />
-      <span className="ed-tf-handle ed-tf-handle--sw" onPointerDown={beginScale} />
+      {RESIZE_HANDLES.map((handle) => (
+        <span
+          key={handle}
+          className={`ed-tf-handle ed-tf-handle--${handle}`}
+          onPointerDown={beginResize(handle)}
+        />
+      ))}
       <span className="ed-tf-rotate" onPointerDown={beginRotate}>
         <RotateCw className="ed-tf-rotate-icon" aria-hidden="true" />
       </span>

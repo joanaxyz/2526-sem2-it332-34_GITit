@@ -1,0 +1,1896 @@
+/* ============================================================
+   TOWER EDITOR — single-storey + roof canvas, palette, inspector
+   ============================================================ */
+.tower-editor {
+  display: grid;
+  gap: 1rem;
+  min-height: calc(100vh - 2rem);
+}
+
+.tower-editor-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tower-editor-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tower-editor-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.editor-eyebrow {
+  margin: 0;
+  color: hsl(var(--primary));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.editor-title {
+  margin: 0.1rem 0 0;
+  color: hsl(var(--foreground));
+  font-size: clamp(1.4rem, 2.2vw, 1.85rem);
+  font-weight: 900;
+}
+
+.editor-warning {
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(245, 200, 66, 0.35);
+  background: rgba(60, 48, 12, 0.4);
+  color: #f3d27a;
+  font-size: 0.82rem;
+}
+
+.editor-warning.is-error {
+  border-color: rgba(245, 90, 90, 0.4);
+  background: rgba(60, 16, 16, 0.4);
+  color: #f6a5a5;
+}
+
+.tower-editor-grid {
+  display: grid;
+  grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr) minmax(15rem, 19rem);
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 1080px) {
+  .tower-editor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* -- In-page editor: the editor rendered over the living tower sky -- */
+.in-tower-editor {
+  position: relative;
+  z-index: 6;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 0 6rem;
+  min-height: calc(100vh - 7rem);
+  /* One semantic z-index scale for all editor chrome, so nothing reaches for a
+     stray 9999/100000 again. The on-canvas gizmo deliberately sits BELOW the
+     placed artifacts (which layer at +10) and is handled inline, not here. */
+  --z-ed-canvas: 0;
+  --z-ed-rail: 30;
+  --z-ed-toolbar: 40;
+  --z-ed-floating: 45;
+  --z-ed-toast: 55;
+  /* Side-rail width; the canvas reserves a matching gutter so the tower never
+     hides behind a rail. */
+  --ite-rail-w: clamp(16rem, 21vw, 21rem);
+  --ite-cmdbar-h: 4.4rem;
+}
+
+.ite-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: stretch;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  width: 100%;
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.18);
+  background: linear-gradient(165deg, rgba(8, 16, 28, 0.82), rgba(5, 10, 18, 0.74));
+  backdrop-filter: blur(10px);
+}
+
+.ite-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.ite-title-block {
+  line-height: 1.05;
+}
+
+.ite-name-input {
+  margin: 0.1rem 0 0;
+  padding: 0.1rem 0.35rem;
+  width: min(100%, 18rem);
+  border: 1px solid transparent;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-size: clamp(1.3rem, 2.1vw, 1.7rem);
+  font-weight: 900;
+}
+
+.ite-name-input:hover {
+  border-color: rgba(var(--tower-cyan), 0.25);
+}
+
+.ite-name-input:focus-visible {
+  outline: none;
+  border-color: rgba(var(--tower-cyan), 0.6);
+  background: rgba(4, 9, 17, 0.45);
+}
+
+.ite-bar-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ite-zoom-readout {
+  min-width: 3rem;
+  text-align: center;
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.ite-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.tower-stage-grid--editor {
+  min-height: calc(100vh - 14rem);
+  /* Clear the fixed command bar at the top and the apply pill at the bottom, and
+     reserve a gutter on each side so the centred tower lands between the rails
+     instead of behind them. */
+  padding-top: calc(var(--ite-cmdbar-h) + 1.5rem);
+  padding-bottom: 5.5rem;
+  padding-inline: calc(var(--ite-rail-w) + 1.5rem);
+  touch-action: none;
+  cursor: grab;
+  will-change: transform;
+}
+
+@media (max-width: 1180px) {
+  .tower-stage-grid--editor {
+    padding-inline: 1rem;
+  }
+}
+
+.tower-stage-grid--editor:active {
+  cursor: grabbing;
+}
+
+/* -- Command bar: one glass blade across the top. Identity (left), storey
+   switcher (centre), history · zoom · validation · publish/share (right). -- */
+.ite-cmdbar {
+  position: fixed;
+  z-index: var(--z-ed-toolbar);
+  top: clamp(0.75rem, 2vh, 1.4rem);
+  left: clamp(1rem, 2.5vw, 2rem);
+  right: clamp(1rem, 2.5vw, 2rem);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: var(--ite-cmdbar-h);
+  padding: 0.5rem 0.7rem 0.5rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.2);
+  background: linear-gradient(168deg, rgba(8, 16, 28, 0.9), rgba(5, 10, 18, 0.82));
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(16px);
+  pointer-events: auto;
+}
+
+.ite-cmd-exit {
+  flex: 0 0 auto;
+  border-color: rgba(var(--tower-cyan), 0.18);
+}
+
+.ite-cmd-id {
+  min-width: 0;
+  flex: 0 1 auto;
+  line-height: 1.1;
+}
+
+.ite-cmd-id .ite-name {
+  font-size: clamp(1.02rem, 1.5vw, 1.28rem);
+}
+
+.ite-cmd-id .ite-substat {
+  margin-top: 0.2rem;
+}
+
+.ite-eyebrow {
+  margin: 0;
+  color: hsl(var(--primary));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.ite-name {
+  margin: 0.1rem 0 0;
+  color: hsl(var(--foreground));
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  font-weight: 900;
+}
+
+.ite-substat {
+  margin: 0.3rem 0 0;
+  color: hsl(var(--muted-foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ite-cmd-storeys {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1 1 auto;
+  justify-content: center;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 0.2rem;
+  scrollbar-width: thin;
+}
+
+.ite-cmd-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.ite-cmd-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.15rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.14);
+  background: rgba(4, 10, 18, 0.5);
+}
+
+.ite-zoom-value {
+  min-width: 2.7rem;
+  text-align: center;
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: hsl(var(--muted-foreground));
+}
+
+.ite-iconbtn {
+  display: inline-grid;
+  place-items: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 0.45rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.ite-iconbtn:hover:not(:disabled) {
+  color: hsl(var(--foreground));
+  background: rgba(var(--tower-cyan), 0.1);
+}
+
+.ite-iconbtn:focus-visible {
+  outline: none;
+  border-color: rgba(var(--tower-cyan), 0.6);
+}
+
+.ite-iconbtn:disabled {
+  opacity: 0.32;
+  cursor: default;
+}
+
+.ite-valchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.42rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ite-valchip.is-ok {
+  color: rgb(var(--tower-cyan));
+  border-color: rgba(var(--tower-cyan), 0.3);
+  background: rgba(0, 245, 212, 0.08);
+}
+
+.ite-valchip.is-warn {
+  color: #f3d27a;
+  border-color: rgba(245, 200, 66, 0.4);
+  background: rgba(60, 48, 12, 0.42);
+}
+
+.ite-valchip.is-open {
+  box-shadow: 0 0 0 2px rgba(var(--tower-cyan), 0.24);
+}
+
+/* -- Side rails: library (left) + inspector (right). Each is one glass plaque
+   with hairline-split sections, never nested boxes. -- */
+.ite-rail {
+  position: fixed;
+  z-index: var(--z-ed-rail);
+  top: calc(clamp(0.75rem, 2vh, 1.4rem) + var(--ite-cmdbar-h) + 0.8rem);
+  bottom: clamp(5rem, 10vh, 6.5rem);
+  display: flex;
+  flex-direction: column;
+  width: var(--ite-rail-w);
+  min-height: 0;
+  overflow: hidden auto;
+  border-radius: 0.95rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.18);
+  background: linear-gradient(168deg, rgba(8, 16, 28, 0.86), rgba(5, 10, 18, 0.78));
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(14px);
+  pointer-events: auto;
+}
+
+.ite-rail--library {
+  left: clamp(1rem, 2.5vw, 2rem);
+}
+
+.ite-rail--inspector {
+  right: clamp(1rem, 2.5vw, 2rem);
+}
+
+/* -- Status line: drops into the canvas column under the command bar only when
+   there's something to report (issues, warnings, the share link). -- */
+.ite-statusline {
+  position: fixed;
+  z-index: var(--z-ed-floating);
+  top: calc(clamp(0.75rem, 2vh, 1.4rem) + var(--ite-cmdbar-h) + 0.6rem);
+  left: calc(clamp(1rem, 2.5vw, 2rem) + var(--ite-rail-w) + 1rem);
+  right: calc(clamp(1rem, 2.5vw, 2rem) + var(--ite-rail-w) + 1rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 46vh;
+  overflow-y: auto;
+  pointer-events: none;
+}
+
+.ite-statusline > * {
+  pointer-events: auto;
+}
+
+.ite-status-msg {
+  margin: 0;
+  padding: 0.55rem 0.8rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.18);
+  background: rgba(8, 16, 28, 0.92);
+  color: hsl(var(--muted-foreground));
+  font-size: 0.78rem;
+  backdrop-filter: blur(12px);
+}
+
+.ite-status-msg.is-warn {
+  border-color: rgba(245, 200, 66, 0.4);
+  background: rgba(48, 40, 14, 0.92);
+  color: #f3d27a;
+}
+
+.ite-status-msg.is-error {
+  border-color: rgba(245, 90, 90, 0.45);
+  background: rgba(48, 14, 14, 0.92);
+  color: #f6a5a5;
+}
+
+.ite-issue-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.ite-issue {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.55rem;
+  border: 1px solid rgba(245, 200, 66, 0.35);
+  background: rgba(40, 32, 10, 0.92);
+  color: #f3d27a;
+  font-size: 0.78rem;
+  text-align: left;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.ite-issue:hover {
+  border-color: rgba(245, 200, 66, 0.6);
+  background: rgba(54, 42, 12, 0.96);
+}
+
+.ite-issue-storey {
+  flex: 0 0 auto;
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ffe6a8;
+}
+
+.ite-issue-msg {
+  flex: 1 1 auto;
+  color: #e9d49a;
+}
+
+/* Transient drop-rejected / action-failed message above the apply pill. */
+.ite-toast {
+  position: fixed;
+  z-index: var(--z-ed-toast);
+  left: 50%;
+  bottom: clamp(8.5rem, 16vh, 10rem);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: min(90vw, 30rem);
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.3);
+  background: rgba(8, 14, 26, 0.96);
+  color: hsl(var(--foreground));
+  font-size: 0.82rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(14px);
+  animation: ite-toast-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ite-toast.is-error {
+  border-color: rgba(245, 90, 90, 0.5);
+  color: #ffd4d4;
+}
+
+.ite-toast svg {
+  flex: 0 0 auto;
+  color: #f6a5a5;
+}
+
+@keyframes ite-toast-in {
+  from { opacity: 0; transform: translate(-50%, 0.5rem); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ite-toast { animation: none; }
+}
+
+/* Per-section content-rule readout in the inspector + library. */
+.ite-status-pill {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.18);
+  background: rgba(6, 12, 22, 0.6);
+}
+
+.ite-status-pill.is-empty {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.76rem;
+}
+
+.ite-status-pill.is-ok {
+  border-color: rgba(var(--tower-cyan), 0.32);
+  color: rgb(var(--tower-cyan));
+}
+
+.ite-status-pill.is-warn {
+  border-color: rgba(245, 200, 66, 0.42);
+  color: #f3d27a;
+}
+
+.ite-status-pill svg {
+  flex: 0 0 auto;
+  margin-top: 0.05rem;
+}
+
+.ite-status-pill-body {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.ite-status-pill-label {
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.ite-status-pill-detail {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+/* Inspector: a stack of hairline-split sections, no inner panels. */
+.ite-inspector {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.ite-inspector--empty {
+  gap: 0.7rem;
+  padding: 1rem 0.95rem 1.1rem;
+  border-top: 1px solid rgba(var(--tower-cyan), 0.1);
+}
+
+.ite-section {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.9rem 0.95rem;
+  border-top: 1px solid rgba(var(--tower-cyan), 0.1);
+}
+
+.ite-section--head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.ite-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.ite-section-title {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ite-section-heading {
+  margin: 0.12rem 0 0;
+  color: hsl(var(--foreground));
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.ite-hint {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.ite-empty {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.ite-empty--inline {
+  font-size: 0.74rem;
+}
+
+.ite-mini-btn {
+  padding: 0.2rem 0.55rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.22);
+  border-radius: 0.45rem;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.ite-mini-btn:hover:not(:disabled) {
+  color: hsl(var(--foreground));
+  border-color: rgba(var(--tower-cyan), 0.5);
+}
+
+.ite-mini-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ite-rule-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.35rem;
+  padding: 0 0.45rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.24);
+  border-radius: 999px;
+  background: rgba(0, 245, 212, 0.08);
+  color: hsl(var(--primary));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+/* Numeric property fields (the customizable mirror of the on-canvas gizmo). */
+.ite-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.ite-field {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.ite-field--wide {
+  grid-column: 1 / -1;
+}
+
+.ite-field-label {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ite-field-unit {
+  color: rgba(var(--tower-cyan), 0.7);
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.62rem;
+  text-transform: none;
+}
+
+.ite-field-input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.2);
+  border-radius: 0.5rem;
+  background: rgba(4, 9, 17, 0.6);
+  color: hsl(var(--foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.ite-field-input:focus-visible {
+  outline: none;
+  border-color: rgba(var(--tower-cyan), 0.65);
+  box-shadow: 0 0 0 2px rgba(var(--tower-cyan), 0.22);
+}
+
+/* On-canvas transform gizmo. The PIECE frame deliberately sits at z-index 1 —
+   below the placed artifacts (which layer at ARTIFACT_Z_BASE = 10) so artifacts
+   stay clickable while a piece is selected, and the body only catches
+   piece-move drags on the empty areas between them. The ARTIFACT frame rides
+   inside its own (lifted) artifact, so it sits above its sprite. */
+.ed-tf {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: 1.5px solid rgba(var(--tower-cyan), 0.9);
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px rgba(3, 12, 18, 0.55), 0 0 18px rgba(0, 245, 212, 0.22);
+  cursor: move;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.ed-tf--artifact {
+  inset: -2px;
+  z-index: 2;
+  border-color: rgba(var(--tower-purple), 0.95);
+  box-shadow: 0 0 0 1px rgba(3, 12, 18, 0.7), 0 0 20px rgba(var(--tower-purple), 0.32);
+}
+
+.ed-tf-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin: -6px;
+  border-radius: 3px;
+  border: 1.5px solid rgba(var(--tower-cyan), 0.95);
+  background: #061018;
+  box-shadow: 0 0 8px rgba(0, 245, 212, 0.5);
+  /* Counter the box's own scale (per-axis for pieces) and the canvas zoom so the
+     grips stay a constant on-screen size. */
+  transform: scale(var(--ed-inv-x, var(--ed-inv, 1)), var(--ed-inv-y, var(--ed-inv, 1)));
+  touch-action: none;
+}
+
+.ed-tf-handle:hover {
+  background: rgba(0, 245, 212, 0.25);
+}
+
+.ed-tf-handle--nw {
+  top: 0;
+  left: 0;
+  cursor: nwse-resize;
+}
+
+.ed-tf-handle--n {
+  top: 0;
+  left: 50%;
+  margin-left: -6px;
+  cursor: ns-resize;
+}
+
+.ed-tf-handle--ne {
+  top: 0;
+  right: 0;
+  cursor: nesw-resize;
+}
+
+.ed-tf-handle--e {
+  top: 50%;
+  right: 0;
+  margin-top: -6px;
+  cursor: ew-resize;
+}
+
+.ed-tf-handle--se {
+  bottom: 0;
+  right: 0;
+  cursor: nwse-resize;
+}
+
+.ed-tf-handle--s {
+  bottom: 0;
+  left: 50%;
+  margin-left: -6px;
+  cursor: ns-resize;
+}
+
+.ed-tf-handle--sw {
+  bottom: 0;
+  left: 0;
+  cursor: nesw-resize;
+}
+
+.ed-tf-handle--w {
+  top: 50%;
+  left: 0;
+  margin-top: -6px;
+  cursor: ew-resize;
+}
+
+.ed-tf-rotate {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(var(--tower-cyan), 0.95);
+  background: #061018;
+  box-shadow: 0 0 10px rgba(0, 245, 212, 0.5);
+  color: rgb(var(--tower-cyan));
+  cursor: grab;
+  transform: translate(-50%, calc(-100% - 16px))
+    scale(var(--ed-inv-x, var(--ed-inv, 1)), var(--ed-inv-y, var(--ed-inv, 1)));
+  touch-action: none;
+}
+
+.ed-tf-rotate::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 1.5px;
+  height: 16px;
+  background: rgba(var(--tower-cyan), 0.7);
+  transform: translateX(-50%);
+}
+
+.ed-tf-rotate:active {
+  cursor: grabbing;
+}
+
+.ed-tf-rotate-icon {
+  width: 12px;
+  height: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ed-tf-handle,
+  .ed-tf-rotate {
+    transition: none;
+  }
+}
+
+.editor-storey-count {
+  padding: 0.55rem 0.65rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.16);
+  border-radius: 0.65rem;
+  background: rgba(5, 12, 23, 0.58);
+  color: hsl(var(--muted-foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+}
+
+.ite-quest-dock {
+  position: fixed;
+  z-index: 44;
+  top: clamp(9rem, 18vh, 12rem);
+  right: clamp(1rem, 2.5vw, 2rem);
+  display: grid;
+  gap: 0.7rem;
+  width: min(19rem, calc((100vw - 42rem) / 2 - 2rem));
+  min-width: 15rem;
+  pointer-events: auto;
+}
+
+.ite-quest-row {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.18);
+  border-radius: 0.7rem;
+  background: linear-gradient(165deg, rgba(5, 12, 23, 0.72), rgba(3, 8, 16, 0.64));
+  backdrop-filter: blur(12px);
+}
+
+.ite-quest-main {
+  display: grid;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.ite-quest-main strong {
+  overflow: hidden;
+  color: hsl(var(--foreground));
+  font-size: 0.84rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ite-quest-role {
+  color: hsl(var(--primary));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ite-quest-role.is-challenge {
+  color: rgb(var(--tower-purple));
+}
+
+.ite-quest-role.is-tome {
+  color: #f3d27a;
+}
+
+.ite-quest-actions {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.ite-quest-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.22);
+  border-radius: 0.5rem;
+  background: rgba(4, 10, 18, 0.58);
+  color: hsl(var(--foreground));
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ite-quest-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1180px) {
+  /* Below tablet the rails can't float beside the canvas; stack everything in
+     normal flow under the command bar so nothing overlaps the tower. */
+  .ite-cmdbar {
+    position: sticky;
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+
+  .ite-cmd-storeys {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: flex-start;
+  }
+
+  .ite-statusline {
+    position: static;
+    max-height: none;
+    margin: 0.75rem auto 0;
+    width: min(42rem, calc(100vw - 2rem));
+  }
+
+  .ite-rail {
+    position: static;
+    width: min(42rem, calc(100vw - 2rem));
+    margin: 1rem auto 0;
+    max-height: none;
+  }
+
+  .ite-quest-dock {
+    position: static;
+    width: min(42rem, calc(100vw - 2rem));
+    margin: 0 auto;
+  }
+}
+
+/* Container-less: the tower floats directly on the living sky — no boxy frame
+   around the canvas (just the zoom/pan surface). */
+/* Floats over the canvas while edits are staged — commit or discard them. The
+   single source of "save"; nothing in the editor writes to the server until the
+   user applies from here. */
+.ite-apply-bar {
+  position: fixed;
+  z-index: var(--z-ed-floating);
+  bottom: clamp(4rem, 8vh, 5.2rem);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.4rem 0.45rem 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--tower-cyan), 0.4);
+  background: rgba(8, 12, 24, 0.95);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 26px rgba(0, 245, 212, 0.12);
+  backdrop-filter: blur(12px);
+  cursor: default;
+}
+
+.ite-apply-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: rgb(var(--tower-cyan));
+  box-shadow: 0 0 10px rgba(0, 245, 212, 0.7);
+  animation: ite-apply-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes ite-apply-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.ite-apply-bar-label {
+  margin-right: 0.15rem;
+  color: hsl(var(--foreground));
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ite-apply-dot {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+.editor-artifact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(3.2rem, 1fr));
+  gap: 0.5rem;
+}
+
+/* Transform controls for the selected artifact (size / rotation). */
+.editor-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.editor-control-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.editor-control-value {
+  color: hsl(var(--foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.72rem;
+  text-transform: none;
+}
+
+.editor-control input[type='range'] {
+  width: 100%;
+  accent-color: rgb(var(--tower-cyan));
+  cursor: pointer;
+}
+
+.editor-transform-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.editor-artifact.is-selected {
+  outline: 2px solid rgba(var(--tower-cyan), 0.8);
+  outline-offset: 2px;
+  border-radius: 0.3rem;
+}
+
+.editor-danger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 0.55rem;
+  border: 1px solid rgba(245, 90, 90, 0.4);
+  background: rgba(60, 16, 16, 0.4);
+  color: #f6a5a5;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.editor-danger-btn:hover {
+  background: rgba(80, 20, 20, 0.55);
+}
+
+/* -- Palette + inspector rails -- */
+.editor-palette,
+.editor-inspector {
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
+  padding: 0.9rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.18);
+  background: linear-gradient(165deg, rgba(8, 16, 28, 0.7), rgba(5, 10, 18, 0.6));
+  backdrop-filter: blur(10px);
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* The inspector fills its rail and scrolls within it. */
+.ite-rail .ite-inspector {
+  flex: 1 1 auto;
+}
+
+.editor-rail-title {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.editor-rail-hint {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.74rem;
+}
+
+.editor-context-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.editor-role-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.editor-palette-head {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.editor-palette-active {
+  margin: 0;
+  min-height: 1.6em;
+  color: hsl(var(--foreground));
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.editor-palette-filters {
+  display: grid;
+  gap: 0.4rem;
+}
+
+/* -- Scalable tag filter: a single popover trigger with an internal search and
+   a scrollable tag checklist (replaces the unbounded one-chip-per-tag row). -- */
+.editor-filter {
+  position: relative;
+  justify-self: start;
+}
+
+.editor-filter-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.6rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.24);
+  border-radius: 999px;
+  background: rgba(10, 20, 34, 0.5);
+  color: hsl(var(--muted-foreground));
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.editor-filter-trigger:hover {
+  color: hsl(var(--foreground));
+  border-color: rgba(var(--tower-cyan), 0.5);
+}
+
+.editor-filter-trigger.is-active {
+  color: hsl(var(--foreground));
+  background: rgba(var(--tower-purple), 0.16);
+  border-color: rgba(var(--tower-purple), 0.5);
+}
+
+.editor-filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.05rem;
+  height: 1.05rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: rgba(var(--tower-purple), 0.45);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+.editor-filter-pop {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  width: min(17rem, 80vw);
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.6rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.28);
+  background: linear-gradient(165deg, rgba(10, 18, 32, 0.98), rgba(6, 11, 20, 0.98));
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(14px);
+}
+
+.editor-filter-search {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.2);
+  background: rgba(4, 9, 17, 0.6);
+  color: hsl(var(--muted-foreground));
+}
+
+.editor-filter-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-size: 0.78rem;
+  outline: none;
+}
+
+.editor-filter-search-clear {
+  display: inline-flex;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+}
+
+.editor-filter-search-clear:hover {
+  color: hsl(var(--foreground));
+}
+
+.editor-filter-list {
+  display: grid;
+  gap: 0.15rem;
+  max-height: 13rem;
+  overflow-y: auto;
+}
+
+.editor-filter-option {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.74rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.editor-filter-option:hover {
+  background: rgba(var(--tower-cyan), 0.1);
+  color: hsl(var(--foreground));
+}
+
+.editor-filter-option.is-on {
+  color: hsl(var(--foreground));
+}
+
+.editor-filter-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 0.3rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.4);
+  color: hsl(var(--primary));
+}
+
+.editor-filter-option.is-on .editor-filter-check {
+  background: rgba(var(--tower-cyan), 0.2);
+  border-color: rgba(var(--tower-cyan), 0.7);
+}
+
+.editor-filter-tag {
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.7rem;
+}
+
+.editor-filter-none {
+  margin: 0;
+  padding: 0.4rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.72rem;
+}
+
+.editor-filter-clear {
+  justify-self: start;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.2);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.editor-filter-clear:hover {
+  color: hsl(var(--foreground));
+  border-color: rgba(var(--tower-cyan), 0.45);
+}
+
+.editor-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.editor-filter-chip {
+  padding: 0.2rem 0.55rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.22);
+  border-radius: 999px;
+  background: rgba(10, 20, 34, 0.45);
+  color: hsl(var(--muted-foreground));
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.editor-filter-chip.is-subtle {
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.62rem;
+  text-transform: lowercase;
+}
+
+.editor-filter-chip:hover {
+  color: hsl(var(--foreground));
+  border-color: rgba(var(--tower-cyan), 0.5);
+}
+
+.editor-filter-chip.is-active {
+  color: hsl(var(--background));
+  background: rgb(var(--tower-cyan));
+  border-color: rgb(var(--tower-cyan));
+}
+
+.editor-palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(3rem, 1fr));
+  gap: 0.45rem;
+}
+
+.editor-palette-cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: 0.3rem;
+  border: 1px solid transparent;
+  border-radius: 0.55rem;
+  background: rgba(10, 20, 34, 0.5);
+  cursor: grab;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.editor-palette-cell:hover,
+.editor-palette-cell:focus-visible {
+  border-color: rgba(var(--tower-cyan), 0.5);
+  background: rgba(12, 26, 42, 0.75);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.editor-palette-cell:active {
+  cursor: grabbing;
+}
+
+.editor-palette-cell:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.editor-palette-cell:disabled:hover,
+.editor-palette-cell:disabled:focus-visible {
+  border-color: transparent;
+  background: rgba(10, 20, 34, 0.5);
+  transform: none;
+}
+
+/* With a slot selected, same-type pieces light up as click-to-apply targets. */
+.editor-palette-cell.is-applicable {
+  cursor: pointer;
+  border-color: rgba(var(--tower-cyan), 0.55);
+  background: rgba(14, 32, 52, 0.85);
+  box-shadow: 0 0 0 1px rgba(var(--tower-cyan), 0.3), 0 0 14px rgba(var(--tower-cyan), 0.18);
+}
+
+.editor-palette-cell.is-applicable:hover,
+.editor-palette-cell.is-applicable:focus-visible {
+  border-color: rgba(var(--tower-cyan), 0.85);
+  transform: translateY(-2px);
+}
+
+/* A hairline accent marks where a piece came from. */
+.editor-palette-cell.is-owned {
+  border-color: rgba(var(--tower-cyan), 0.28);
+}
+
+.editor-palette-cell.is-purchased {
+  border-color: rgba(168, 130, 255, 0.4);
+}
+
+.editor-palette-thumb {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.4rem;
+  overflow: hidden;
+}
+
+.editor-palette-thumb img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.editor-walkable {
+  position: absolute;
+  right: 0.18rem;
+  bottom: 0.18rem;
+  display: grid;
+  place-items: center;
+  color: hsl(var(--primary));
+}
+
+.editor-palette-empty {
+  grid-column: 1 / -1;
+  margin: 0.3rem 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.74rem;
+}
+
+.editor-palette-foot {
+  margin-top: 0.4rem;
+  border-top: 1px solid rgba(var(--tower-cyan), 0.12);
+  padding-top: 0.7rem;
+}
+
+.editor-upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 0.55rem;
+  border: 1px dashed rgba(var(--tower-cyan), 0.35);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.76rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.editor-upload-btn:hover:not(:disabled) {
+  color: hsl(var(--foreground));
+  border-color: rgba(var(--tower-cyan), 0.6);
+}
+
+.editor-upload-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.editor-fork-note {
+  align-self: center;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.74rem;
+  font-style: italic;
+}
+
+.editor-share-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.4rem 0 0;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.3);
+  border-radius: 0.6rem;
+  background: rgba(8, 16, 28, 0.6);
+  color: hsl(var(--foreground));
+  font-size: 0.8rem;
+}
+
+.editor-share-input {
+  flex: 1;
+  min-width: 12rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.25);
+  border-radius: 0.4rem;
+  background: rgba(2, 8, 16, 0.6);
+  color: hsl(var(--foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.74rem;
+}
+
+.shared-tower-page {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+}
+
+.shared-tower-head {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.shared-tower-kicker {
+  margin: 0;
+  color: hsl(var(--primary));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.shared-tower-title {
+  margin: 0.3rem 0;
+  font-size: 2rem;
+  font-weight: 900;
+  color: hsl(var(--foreground));
+}
+
+.shared-tower-summary {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+}
+
+.editor-empty {
+  color: hsl(var(--muted-foreground));
+  padding: 2rem;
+}
+
+/* Real tower pieces (crown, sections, and landings) rendered as selectable
+   pieces in the editor canvas. Feedback uses outline + a layout-neutral
+   box-shadow so the piece geometry never shifts when selected. */
+.editor-piece {
+  cursor: pointer;
+  border-radius: 0.4rem;
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+  transition: outline-color 0.15s, box-shadow 0.15s;
+}
+
+.editor-piece:hover {
+  outline-color: rgba(var(--tower-cyan), 0.32);
+}
+
+.editor-piece:focus-visible {
+  outline-color: rgba(var(--tower-cyan), 0.6);
+}
+
+.editor-piece--selected,
+.editor-piece--selected:hover {
+  outline-color: rgba(var(--tower-cyan), 0.85);
+  box-shadow: 0 0 0 1px rgba(var(--tower-cyan), 0.4), 0 0 22px rgba(var(--tower-cyan), 0.28);
+}
+
+/* A staged (picked, not yet applied) skin: a purple ring via box-shadow so it
+   reads as "pending" on top of any selection outline without shifting layout. */
+.editor-piece--pending {
+  box-shadow: 0 0 0 2px rgba(var(--tower-purple), 0.75), 0 0 20px rgba(var(--tower-purple), 0.3);
+}
+
+.editor-piece--drop {
+  outline-color: rgba(var(--primary), 0.85);
+  box-shadow: 0 0 16px rgba(0, 245, 212, 0.3);
+}
+
+.editor-piece--reject {
+  outline-color: rgba(255, 99, 99, 0.85);
+  box-shadow: 0 0 16px rgba(255, 99, 99, 0.3);
+}
+
+.editor-slot {
+  position: relative;
+  display: block;
+  width: 100%;
+  border: 1px dashed transparent;
+  border-radius: 0.5rem;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.editor-slot:hover {
+  border-color: rgba(var(--tower-cyan), 0.3);
+}
+
+.editor-slot.is-selected {
+  border-color: rgba(var(--tower-cyan), 0.7);
+  box-shadow: 0 0 0 1px rgba(var(--tower-cyan), 0.4), 0 0 18px rgba(var(--tower-cyan), 0.25);
+}
+
+.editor-slot.is-drop-target {
+  border-color: rgba(var(--primary), 0.8);
+  border-style: solid;
+  box-shadow: 0 0 16px rgba(0, 245, 212, 0.3);
+}
+
+.editor-slot.is-drop-reject {
+  border-color: rgba(255, 99, 99, 0.8);
+  border-style: solid;
+  box-shadow: 0 0 16px rgba(255, 99, 99, 0.3);
+}
+
+.editor-slot-reject {
+  position: absolute;
+  top: 0.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.3rem;
+  background: rgba(40, 8, 8, 0.92);
+  border: 1px solid rgba(255, 99, 99, 0.5);
+  color: #ffb4b4;
+  font-size: 0.62rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.editor-slot-art {
+  position: relative;
+  display: block;
+}
+
+.editor-slot-badge {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  z-index: 4;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.3rem;
+  background: rgba(0, 245, 212, 0.16);
+  border: 1px solid rgba(0, 245, 212, 0.4);
+  color: #8ff7e6;
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* -- Inspector panels -- */
+.editor-inspector-empty {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.editor-panel {
+  display: grid;
+  gap: 0.5rem;
+}
+
+/* Click-to-apply piece skins (inspector). Mirrors the palette cell look. */
+.editor-skin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(3rem, 1fr));
+  gap: 0.45rem;
+}
+
+.editor-skin-cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: 0.3rem;
+  border: 1px solid transparent;
+  border-radius: 0.55rem;
+  background: rgba(10, 20, 34, 0.5);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.editor-skin-cell:hover,
+.editor-skin-cell:focus-visible {
+  border-color: rgba(var(--tower-cyan), 0.5);
+  background: rgba(12, 26, 42, 0.75);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.editor-skin-cell:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+.editor-skin-cell.is-owned {
+  border-color: rgba(var(--tower-cyan), 0.28);
+}
+
+.editor-skin-cell.is-purchased {
+  border-color: rgba(168, 130, 255, 0.4);
+}
+
+.editor-skin-cell.is-active {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 1px hsl(var(--primary));
+}
+
+.editor-skin-thumb {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.4rem;
+  overflow: hidden;
+}
+
+.editor-skin-thumb img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.editor-skin-check {
+  position: absolute;
+  right: 0.18rem;
+  top: 0.18rem;
+  display: grid;
+  place-items: center;
+  color: hsl(var(--primary));
+}
+
+.editor-panel-title {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.editor-bind-list,
+.editor-artifact-list {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.editor-bind-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.14);
+  background: rgba(10, 20, 34, 0.5);
+  color: hsl(var(--foreground));
+  font-size: 0.76rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.editor-bind-row:hover {
+  border-color: rgba(var(--tower-cyan), 0.45);
+}
+
+.editor-bind-row.is-bound {
+  border-color: rgba(0, 245, 212, 0.5);
+  background: rgba(0, 245, 212, 0.08);
+}
+
+.editor-bind-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editor-bind-status {
+  color: hsl(var(--muted-foreground));
+  font-family: JetBrains Mono, ui-monospace, monospace;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+}
+
+.editor-author-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: hsl(var(--primary));
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.editor-author-link:hover {
+  text-decoration: underline;
+}
+
+.editor-artifact-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.5rem;
+  background: rgba(10, 20, 34, 0.5);
+  font-size: 0.74rem;
+}
+
+.editor-artifact-slug {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: JetBrains Mono, ui-monospace, monospace;
+}
+
+.editor-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(var(--tower-cyan), 0.2);
+  background: rgba(10, 20, 34, 0.5);
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.editor-icon-btn:hover {
+  color: hsl(var(--foreground));
+  border-color: rgba(var(--tower-cyan), 0.5);
+}
+
+.editor-danger-icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(245, 90, 90, 0.36);
+  background: rgba(60, 16, 16, 0.36);
+  color: #f6a5a5;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.editor-danger-icon:hover {
+  color: #ffd1d1;
+  border-color: rgba(245, 90, 90, 0.62);
+  background: rgba(80, 20, 20, 0.52);
+}
+

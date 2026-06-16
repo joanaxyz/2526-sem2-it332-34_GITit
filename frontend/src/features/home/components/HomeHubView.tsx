@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useMemo, useRef } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import { deriveAchievements, latestAchievement } from '@/features/home/achievements'
@@ -41,20 +41,40 @@ export function HomeHubView({
   const tabParam = searchParams.get('tab')
   const active: HubTabId = isHubTabId(tabParam) ? tabParam : DEFAULT_HUB_TAB
   const deckRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const shouldScrollToContentRef = useRef(isHubTabId(tabParam))
 
   const achievements = useMemo(() => deriveAchievements(home, stats), [home, stats])
   const latest = useMemo(() => latestAchievement(achievements), [achievements])
 
+  const scrollToContent = useCallback(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    contentRef.current?.scrollIntoView({
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      block: 'start',
+    })
+  }, [])
+
   const selectTab = useCallback(
     (id: HubTabId) => {
+      shouldScrollToContentRef.current = true
       setSearchParams(id === DEFAULT_HUB_TAB ? {} : { tab: id }, { replace: true })
+      window.requestAnimationFrame(scrollToContent)
     },
-    [setSearchParams],
+    [scrollToContent, setSearchParams],
   )
+
+  useEffect(() => {
+    if (!shouldScrollToContentRef.current && !isHubTabId(tabParam)) return
+    const frame = window.requestAnimationFrame(() => {
+      scrollToContent()
+      shouldScrollToContentRef.current = false
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [active, scrollToContent, tabParam])
 
   const viewStats = useCallback(() => {
     selectTab('stats')
-    deckRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [selectTab])
 
   return (
@@ -65,7 +85,7 @@ export function HomeHubView({
         <HubTabs active={active} onSelect={selectTab} />
       </div>
 
-      <div className="mt-5">
+      <div ref={contentRef} className="hub-deck-content mt-5 scroll-mt-28">
         <div
           role="tabpanel"
           id="hub-panel-stats"

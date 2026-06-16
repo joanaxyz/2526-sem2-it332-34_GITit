@@ -215,6 +215,47 @@ def test_section_allows_up_to_three_challenge_interactables_only(django_user_mod
         )
 
 
+@pytest.mark.django_db
+def test_publish_requires_full_challenge_chain(django_user_model):
+    from tower_designs.services import TowerDesignService
+
+    user = make_user(django_user_model)
+    design, piece, artifact = _design_piece_and_artifact(user)
+    challenges = [
+        ContentDefinition.objects.create(
+            owner=user,
+            kind="challenge",
+            status="published",
+            slug=f"chain-{index}",
+            title=f"Chain {index}",
+        )
+        for index in range(3)
+    ]
+
+    # Two of three challenges placed — the Easy/Medium/Hard chain is incomplete.
+    for content in challenges[:2]:
+        ArtifactPlacement.objects.create(
+            tower_design=design,
+            target_piece_instance=piece,
+            artifact_asset=artifact,
+            role="challenge",
+            content_definition=content,
+        )
+    errors = TowerDesignService().publish_errors(design=design)
+    assert any("three challenges" in error["message"] for error in errors)
+
+    # Completing the chain clears the completeness error.
+    ArtifactPlacement.objects.create(
+        tower_design=design,
+        target_piece_instance=piece,
+        artifact_asset=artifact,
+        role="challenge",
+        content_definition=challenges[2],
+    )
+    errors = TowerDesignService().publish_errors(design=design)
+    assert not any("three challenges" in error["message"] for error in errors)
+
+
 def _design_piece_and_artifact(user):
     piece_asset = Asset.objects.create(
         kind=KIND_TOWER_PIECE,

@@ -1,3 +1,4 @@
+import { Award, Flame } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import heroLoop from '@/assets/video/hub-hero-loop.mp4'
@@ -43,6 +44,9 @@ export function HeroBanner({
         {/* Bottom assembly: readout - glass hexagon plate - readout */}
         <div className="hub-hero-divider">
           <div className="hub-stat hub-stat--left animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+            <span className="hub-stat-emblem" aria-hidden="true">
+              <Flame />
+            </span>
             <div className="min-w-0">
               <p className="hub-stat-label">Day Streak</p>
               <p className="hub-stat-value truncate">
@@ -65,6 +69,9 @@ export function HeroBanner({
           </div>
 
           <div className="hub-stat hub-stat--right animate-fade-in-up" style={{ animationDelay: '260ms' }}>
+            <span className="hub-stat-emblem" aria-hidden="true">
+              <Award />
+            </span>
             <div className="min-w-0 text-right">
               <p className="hub-stat-label">Latest Achievement</p>
               {latest ? (
