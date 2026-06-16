@@ -85,9 +85,9 @@ export function EditorStorey({
   selectedPieceId: number | null
   selectedArtifactId: number | string | null
   activeStoreyIndex: number | null
-  pendingSwaps: Map<number, number>
-  pieceTransforms: Map<number, PieceTransform>
-  artifactEdits: Map<number | string, ArtifactEdit>
+  pendingSwaps: ReadonlyMap<number, number>
+  pieceTransforms: ReadonlyMap<number, PieceTransform>
+  artifactEdits: ReadonlyMap<number | string, ArtifactEdit>
   zoomScale: number
   placementDraft: PlacementDraft
   onSelectPiece: (pieceId: number) => void
