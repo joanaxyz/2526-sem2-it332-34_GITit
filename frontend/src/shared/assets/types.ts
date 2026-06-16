@@ -13,6 +13,10 @@ export type AssetSpriteDescriptor = {
   rows: number
   frame_width: number
   frame_height: number
+  natural_width?: number
+  natural_height?: number
+  content_type?: string
+  is_raster?: boolean
   fps: number
   loops?: boolean
 }
@@ -73,7 +77,7 @@ export type CharacterAssetDescriptor = BaseAssetDescriptor<'character'> & {
   random_actions?: string[]
 }
 
-export type TowerPieceType = 'crown' | 'section' | 'landing'
+export type TowerPieceType = 'crown' | 'base' | 'section' | 'landing'
 
 export type TowerArtifactRole = 'normal' | 'adventure' | 'challenge' | 'tome'
 
@@ -85,6 +89,10 @@ export type TowerPieceAssetDetail = {
   interaction_zones: Record<string, unknown>
   state_variants: Record<string, unknown>
   svg_sanitized: boolean
+  natural_width?: number
+  natural_height?: number
+  content_type?: string
+  is_raster?: boolean
   /** Inline sanitized SVG markup for structural pieces. Asset states come from
    *  uploaded sprite actions or authored SVG data, not frontend presets. */
   svg?: string
@@ -122,6 +130,7 @@ export type TowerLayoutPieceDescriptor = {
   assetSlug: string
   pieceType: TowerPieceType
   storeyIndex?: number
+  sortOrder?: number
   parentInstanceId?: string | null
   transform?: Record<string, unknown>
   config?: Record<string, unknown>

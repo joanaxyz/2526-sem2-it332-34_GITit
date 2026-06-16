@@ -170,6 +170,11 @@ function canonicalTowerLayout(storeyId: number) {
         assetSlug: 'official-challenge-landing',
         pieceType: 'landing',
       },
+      {
+        instanceId: `storey-${storeyId}-base`,
+        assetSlug: 'official-base',
+        pieceType: 'base',
+      },
     ],
   } as const
 }
@@ -301,6 +306,9 @@ function mockTowerPieceDescriptors() {
             kind: 'tower_piece',
             results: {
               'official-crown': towerPieceDescriptor('official-crown', 'crown'),
+              'official-base': towerPieceDescriptor('official-base', 'base', {
+                walk_rail: { x1: 18, y1: 18, x2: 202, y2: 18 },
+              }),
               'official-hall-section': towerPieceDescriptor('official-hall-section', 'section'),
               'official-trial-section': towerPieceDescriptor('official-trial-section', 'section'),
               'official-window-section': towerPieceDescriptor('official-window-section', 'section'),

@@ -1,4 +1,4 @@
-import { type CSSProperties, type ReactNode, useMemo, useState } from 'react'
+import { Fragment, type CSSProperties, type ReactNode, useMemo, useState } from 'react'
 import { RotateCw } from 'lucide-react'
 
 import {
@@ -19,7 +19,7 @@ import {
   roundTo,
 } from '@/features/tower-designs/editorUtils'
 import type { ArtifactPlacementDescriptor, TowerDesignOverview } from '@/features/tower-designs/types'
-import { RoofSpire, TowerLanding, TowerSectionShell } from '@/features/tower-map/components/TowerStoreySection'
+import { RoofSpire, TowerBase, TowerLanding, TowerSectionShell } from '@/features/tower-map/components/TowerStoreySection'
 import { TowerArtifact } from '@/features/tower-map/components/TowerArtifact'
 import {
   artifactSafeBounds,
@@ -34,11 +34,29 @@ import type {
   TowerArtifactRole,
   TowerLayoutPieceDescriptor,
   TowerPieceAssetDescriptor,
+  TowerPieceType,
 } from '@/shared/assets/types'
 import { cn } from '@/shared/utils/cn'
 
+type StoragePieceDragPayload = {
+  source: 'asset-piece'
+  assetId: number
+  slug: string
+  pieceType: TowerPieceType
+  origin: 'storage'
+}
+
+type SkinPieceDragPayload = {
+  source: 'asset-piece'
+  assetId: number
+  slug: string
+  pieceType: TowerPieceType
+  origin?: 'skin'
+}
+
 export type EditorDragPayload =
-  | { source: 'asset-piece'; assetId: number; slug: string; pieceType: string }
+  | StoragePieceDragPayload
+  | SkinPieceDragPayload
   // Artifacts always place as `normal`; the author promotes one to interactive
   // (and binds content) from the inspector, so the payload carries no role.
   | { source: 'asset-artifact'; assetId: number; slug: string }
@@ -84,6 +102,7 @@ export function EditorStorey({
   onSelectPiece,
   onSelectArtifact,
   onSwapAsset,
+  onAddPiece,
   onPlaceArtifact,
   onMoveArtifact,
   onTransformArtifact,
@@ -104,6 +123,7 @@ export function EditorStorey({
   onSelectPiece: (pieceId: number) => void
   onSelectArtifact: (artifactId: number | string, pieceId: number | null) => void
   onSwapAsset: (pieceId: number, assetId: number) => void
+  onAddPiece: (assetId: number, pieceType: TowerPieceType, sortOrder?: number) => void
   onPlaceArtifact: (pieceId: number, assetId: number, x: number, y: number) => void
   onMoveArtifact: (placementId: number | string, targetInstanceId: string, x: number, y: number) => void
   onTransformArtifact: (placementId: number | string, next: ArtifactTransform) => void
@@ -115,7 +135,9 @@ export function EditorStorey({
   const artifactsByInstance = useMemo(() => groupArtifacts(overview.artifacts, artifactEdits), [overview.artifacts, artifactEdits])
   const [dropHoverId, setDropHoverId] = useState<number | null>(null)
   const [dropRejectHoverId, setDropRejectHoverId] = useState<number | null>(null)
+  const [insertHoverIndex, setInsertHoverIndex] = useState<number | null>(null)
   const [rejectedId, setRejectedId] = useState<number | null>(null)
+  const { crown, base, templatePieces } = editorTowerPieces(layout.pieces)
 
   function descriptorFor(piece: TowerLayoutPieceDescriptor): TowerPieceAssetDescriptor | null {
     const pieceId = pieceIdFromInstance(piece.instanceId)
@@ -435,6 +457,83 @@ export function EditorStorey({
     onGestureEnd()
   }
 
+  function sortOrderForInsert(index: number): number {
+    const after = templatePieces[index]
+    if (typeof after?.sortOrder === 'number') return after.sortOrder
+    const before = templatePieces[index - 1]
+    if (typeof before?.sortOrder === 'number') return before.sortOrder + 1
+    if (typeof base?.sortOrder === 'number') return base.sortOrder
+    if (typeof crown?.sortOrder === 'number') return crown.sortOrder + 1
+    return layout.pieces.length
+  }
+
+  function insertIndexForDrop(piece: TowerLayoutPieceDescriptor, element: HTMLElement, clientY: number): number {
+    if (piece.pieceType === 'crown') return 0
+    if (piece.pieceType === 'base') return templatePieces.length
+    const index = templatePieces.findIndex((candidate) => candidate.instanceId === piece.instanceId)
+    if (index < 0) return templatePieces.length
+    const rect = element.getBoundingClientRect()
+    return clientY < rect.top + rect.height / 2 ? index : index + 1
+  }
+
+  function isRepeatablePieceType(pieceType: TowerPieceType) {
+    return pieceType === 'section' || pieceType === 'landing'
+  }
+
+  function isStoragePiecePayload(payload: EditorDragPayload | null): payload is StoragePieceDragPayload {
+    return payload?.source === 'asset-piece' && payload.origin === 'storage'
+  }
+
+  function canInsertPiece(payload: EditorDragPayload | null): payload is StoragePieceDragPayload {
+    return isStoragePiecePayload(payload) && isRepeatablePieceType(payload.pieceType)
+  }
+
+  function insertPieceFromPayload(payload: EditorDragPayload | null, index: number) {
+    if (!canInsertPiece(payload)) return false
+    onAddPiece(payload.assetId, payload.pieceType, sortOrderForInsert(index))
+    setInsertHoverIndex(null)
+    return true
+  }
+
+  function insertionHandlers(index: number) {
+    return {
+      onDragOver: (event: React.DragEvent<HTMLDivElement>) => {
+        const meta = dragMetaFromTypes(event.dataTransfer)
+        if (meta?.kind !== 'piece' || meta.origin !== 'storage' || !isRepeatablePieceType(meta.pieceType)) return
+        event.preventDefault()
+        event.dataTransfer.dropEffect = 'copy'
+        setInsertHoverIndex(index)
+        setDropHoverId(null)
+        setDropRejectHoverId(null)
+      },
+      onDragLeave: () => {
+        setInsertHoverIndex((current) => (current === index ? null : current))
+      },
+      onDrop: (event: React.DragEvent<HTMLDivElement>) => {
+        const payload = readDrag(event)
+        if (!insertPieceFromPayload(payload, index)) return
+        event.preventDefault()
+      },
+    }
+  }
+
+  function addStoragePieceAtTarget(
+    payload: EditorDragPayload | null,
+    piece: TowerLayoutPieceDescriptor,
+    element: HTMLElement,
+    clientY: number,
+  ) {
+    if (!isStoragePiecePayload(payload)) return false
+    if (isRepeatablePieceType(payload.pieceType)) {
+      const index = insertIndexForDrop(piece, element, clientY)
+      onAddPiece(payload.assetId, payload.pieceType, sortOrderForInsert(index))
+    } else {
+      onAddPiece(payload.assetId, payload.pieceType)
+    }
+    setInsertHoverIndex(null)
+    return true
+  }
+
   function regionHandlers(piece: TowerLayoutPieceDescriptor, pieceId: number | null) {
     if (pieceId === null) return {}
     return {
@@ -469,22 +568,35 @@ export function EditorStorey({
         }
       },
       onDragOver: (event: React.DragEvent<HTMLElement>) => {
+        const meta = dragMetaFromTypes(event.dataTransfer)
+        if (!meta) return
         event.preventDefault()
-        const payload = readDrag(event)
+        setInsertHoverIndex(null)
         // Artifacts place as normal anywhere; pieces must match the slot type.
-        if (payload?.source === 'asset-artifact') {
-          const footprint = artifactFootprintForPayload(payload)
+        if (meta.kind === 'artifact') {
           const target = pieceDropTargetAtPoint(event.clientX, event.clientY, {
             piece,
             pieceId,
             element: event.currentTarget,
-          }, footprint)
+          })
           event.dataTransfer.dropEffect = target ? 'copy' : 'none'
           setDropHoverId(target?.pieceId ?? null)
           setDropRejectHoverId(null)
           return
         }
-        const canDrop = payload?.source === 'asset-piece' && payload.pieceType === piece.pieceType
+        if (meta.origin === 'storage') {
+          event.dataTransfer.dropEffect = 'copy'
+          setDropHoverId(pieceId)
+          setDropRejectHoverId(null)
+          setInsertHoverIndex(
+            isRepeatablePieceType(meta.pieceType)
+              ? insertIndexForDrop(piece, event.currentTarget, event.clientY)
+              : null,
+          )
+          return
+        }
+        // Skin swap: only lands on a piece of the same type.
+        const canDrop = meta.pieceType === piece.pieceType
         event.dataTransfer.dropEffect = canDrop ? 'copy' : 'none'
         setDropHoverId(pieceId)
         setDropRejectHoverId(canDrop ? null : pieceId)
@@ -495,11 +607,13 @@ export function EditorStorey({
       },
       onDrop: (event: React.DragEvent<HTMLElement>) => {
         event.preventDefault()
+        setInsertHoverIndex(null)
         setDropHoverId(null)
         setDropRejectHoverId(null)
         const payload = readDrag(event)
         if (!payload) return
         if (payload.source === 'asset-piece') {
+          if (addStoragePieceAtTarget(payload, piece, event.currentTarget, event.clientY)) return
           if (payload.pieceType === piece.pieceType) onSwapAsset(pieceId, payload.assetId)
           else flashReject(pieceId)
           return
@@ -511,6 +625,88 @@ export function EditorStorey({
         })
       },
     }
+  }
+
+  function pieceElementForInstance(instanceId: string): HTMLElement | null {
+    return (
+      Array.from(document.querySelectorAll<HTMLElement>('.editor-piece[data-piece-id]')).find(
+        (candidate) => candidate.dataset.pieceId === instanceId,
+      ) ?? null
+    )
+  }
+
+  // Where a repeatable piece dropped on open canvas (not over a piece or insert
+  // line) should slot in: by the pointer's Y against each template row's midpoint.
+  function templateInsertIndexAtY(clientY: number): number {
+    for (let index = 0; index < templatePieces.length; index += 1) {
+      const element = pieceElementForInstance(templatePieces[index].instanceId)
+      if (!element) continue
+      const rect = element.getBoundingClientRect()
+      if (clientY < rect.top + rect.height / 2) return index
+    }
+    return templatePieces.length
+  }
+
+  function addPieceFromCanvasDrop(payload: EditorDragPayload | null, clientY: number): boolean {
+    if (!isStoragePiecePayload(payload)) return false
+    if (isRepeatablePieceType(payload.pieceType)) {
+      onAddPiece(payload.assetId, payload.pieceType, sortOrderForInsert(templateInsertIndexAtY(clientY)))
+    } else {
+      onAddPiece(payload.assetId, payload.pieceType)
+    }
+    setInsertHoverIndex(null)
+    return true
+  }
+
+  // Open-canvas fallback. The gaps between pieces and the gutters beside the tower
+  // own no piece/insert handler, so without this a drag there reads as "no drop"
+  // (the stop-sign cursor) and you could only ever drop onto an existing piece.
+  // These run only when no inner handler already claimed the event
+  // (defaultPrevented), so a piece swap/insert is never double-handled.
+  function onCanvasDragOver(event: React.DragEvent<HTMLDivElement>) {
+    if (event.defaultPrevented) return
+    const meta = dragMetaFromTypes(event.dataTransfer)
+    if (!meta) return
+    if (meta.kind === 'artifact') {
+      const target = pieceDropTargetAtPoint(event.clientX, event.clientY)
+      if (!target) return
+      event.preventDefault()
+      event.dataTransfer.dropEffect = 'copy'
+      setDropHoverId(target.pieceId)
+      setDropRejectHoverId(null)
+      setInsertHoverIndex(null)
+      return
+    }
+    // Skin swaps need a piece under the pointer; on open canvas there's nothing to skin.
+    if (meta.origin !== 'storage') return
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'copy'
+    setDropHoverId(null)
+    setDropRejectHoverId(null)
+    setInsertHoverIndex(
+      isRepeatablePieceType(meta.pieceType) ? templateInsertIndexAtY(event.clientY) : null,
+    )
+  }
+
+  function onCanvasDrop(event: React.DragEvent<HTMLDivElement>) {
+    if (event.defaultPrevented) return
+    const payload = readDrag(event)
+    if (!payload) return
+    if (payload.source === 'asset-artifact') {
+      event.preventDefault()
+      setDropHoverId(null)
+      placePayloadAtPoint(payload, event.clientX, event.clientY)
+      return
+    }
+    if (addPieceFromCanvasDrop(payload, event.clientY)) event.preventDefault()
+  }
+
+  function onCanvasDragLeave(event: React.DragEvent<HTMLDivElement>) {
+    const next = event.relatedTarget
+    if (next instanceof Node && event.currentTarget.contains(next)) return
+    setInsertHoverIndex(null)
+    setDropHoverId(null)
+    setDropRejectHoverId(null)
   }
 
   function variantForPiece(piece: TowerLayoutPieceDescriptor) {
@@ -558,7 +754,13 @@ export function EditorStorey({
 
   if (layout.pieces.length === 0) {
     return (
-      <div className="tower-stack-column tower-stack-column--editor" aria-label="Tower editor canvas">
+      <div
+        className="tower-stack-column tower-stack-column--editor"
+        aria-label="Tower editor canvas"
+        onDragOver={onCanvasDragOver}
+        onDrop={onCanvasDrop}
+        onDragLeave={onCanvasDragLeave}
+      >
         <section className="storey-section storey-section--editor">
           <div className="learning-tower">
             <p className="editor-empty">This tower has no pieces yet.</p>
@@ -568,7 +770,6 @@ export function EditorStorey({
     )
   }
 
-  const { crown, templatePieces } = editorTowerPieces(layout.pieces)
   const renderPiece = (piece: TowerLayoutPieceDescriptor) => {
     const pieceId = pieceIdFromInstance(piece.instanceId)
     const descriptor = descriptorFor(piece)
@@ -608,6 +809,21 @@ export function EditorStorey({
         </RoofSpire>
       )
     }
+    if (piece.pieceType === 'base') {
+      const variant = variantForPiece(piece)
+      return (
+        <TowerBase
+          key={piece.instanceId}
+          piece={renderedPiece}
+          descriptor={descriptor}
+          className={regionClass(pieceId)}
+          {...handlers}
+        >
+          {frame}
+          {artifactsFor(piece, descriptor, variant, pieceId)}
+        </TowerBase>
+      )
+    }
     if (piece.pieceType === 'landing') {
       const variant = variantForPiece(piece)
       return (
@@ -640,13 +856,37 @@ export function EditorStorey({
     )
   }
 
+  const renderInsertMarker = (index: number) => (
+    <div
+      key={`insert-${index}`}
+      className={cn('editor-piece-insert', insertHoverIndex === index && 'is-active')}
+      aria-hidden="true"
+      {...insertionHandlers(index)}
+    >
+      <span />
+    </div>
+  )
+
   return (
-    <div className="tower-stack-column tower-stack-column--editor" aria-label="Tower editor canvas">
+    <div
+      className="tower-stack-column tower-stack-column--editor"
+      aria-label="Tower editor canvas"
+      onDragOver={onCanvasDragOver}
+      onDrop={onCanvasDrop}
+      onDragLeave={onCanvasDragLeave}
+    >
       <section className="storey-section storey-section--editor">
         <div className="learning-tower">
           <div className="tower-repeater">
             {crown ? renderPiece(crown) : null}
-            {templatePieces.map(renderPiece)}
+            {renderInsertMarker(0)}
+            {templatePieces.map((piece, index) => (
+              <Fragment key={piece.instanceId}>
+                {renderPiece(piece)}
+                {renderInsertMarker(index + 1)}
+              </Fragment>
+            ))}
+            {base ? renderPiece(base) : null}
           </div>
         </div>
       </section>
@@ -1002,6 +1242,37 @@ function readDrag(event: React.DragEvent): EditorDragPayload | null {
   }
 }
 
+// The browser locks `dataTransfer.getData()` during `dragover` (it only unlocks
+// on `drop`), so a dragover handler can't read the JSON payload to decide whether
+// to accept the drop. The *type names* stay readable throughout, though, so we
+// also stamp a marker type that encodes the drag's kind. dragover handlers read
+// that to allow/reject and to pick feedback; the real payload is still read from
+// JSON on drop. Without this, dropping only worked where a handler happened to
+// call preventDefault blindly (on top of a piece) — open canvas always rejected.
+const TOWER_ARTIFACT_DRAG_TYPE = 'application/x-tower-artifact'
+
+export type DragMeta =
+  | { kind: 'artifact' }
+  | { kind: 'piece'; origin: 'storage' | 'skin'; pieceType: TowerPieceType }
+
+export function dragMarkerType(payload: EditorDragPayload): string {
+  if (payload.source === 'asset-artifact') return TOWER_ARTIFACT_DRAG_TYPE
+  const origin = payload.origin === 'storage' ? 'storage' : 'skin'
+  return `application/x-tower-piece-${origin}-${payload.pieceType}`
+}
+
+function dragMetaFromTypes(dataTransfer: DataTransfer): DragMeta | null {
+  const types = Array.from(dataTransfer.types)
+  if (types.includes(TOWER_ARTIFACT_DRAG_TYPE)) return { kind: 'artifact' }
+  for (const type of types) {
+    const match = /^application\/x-tower-piece-(storage|skin)-([a-z]+)$/.exec(type)
+    if (match) {
+      return { kind: 'piece', origin: match[1] as 'storage' | 'skin', pieceType: match[2] as TowerPieceType }
+    }
+  }
+  return null
+}
+
 function numericWalkRail(
   descriptor: TowerPieceAssetDescriptor | null,
   variant?: string,
@@ -1054,9 +1325,11 @@ function groupArtifacts(
 
 function editorTowerPieces(pieces: TowerLayoutPieceDescriptor[]) {
   const crown = pieces.find((piece) => piece.pieceType === 'crown') ?? null
-  const templatePieces = pieces.filter((piece) => piece.pieceType !== 'crown')
+  const base = pieces.find((piece) => piece.pieceType === 'base') ?? null
+  const templatePieces = pieces.filter((piece) => piece.pieceType !== 'crown' && piece.pieceType !== 'base')
   return {
     crown,
+    base,
     templatePieces,
   }
 }

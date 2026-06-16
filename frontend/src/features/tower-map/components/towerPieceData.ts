@@ -22,6 +22,8 @@ export function pieceVariant(
   switch (piece.pieceType) {
     case 'crown':
       return 'roof'
+    case 'base':
+      return typeof piece.config?.variant === 'string' ? piece.config.variant : 'base'
     case 'section':
       return typeof piece.config?.variant === 'string' ? piece.config.variant : 'regular'
     case 'landing':

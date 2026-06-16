@@ -23,6 +23,7 @@ import {
   pieceAspectRatio,
   pieceVariant,
   pieceTransformStyle,
+  pieceViewBox,
   towerDescriptorFor,
   towerPieceAttrs,
 } from '@/features/tower-map/components/towerPieceData'
@@ -62,6 +63,7 @@ export function RoofSpire({
     >
       <PieceArt pieceType="crown" descriptor={descriptor} variant={variant} />
       {children}
+      <PieceForeground piece={piece} descriptor={descriptor} variant={variant} />
     </div>
   )
 }
@@ -100,8 +102,110 @@ export function TowerLanding({
     >
       <PieceArt pieceType="landing" descriptor={descriptor} variant={renderVariant} />
       {children}
+      <PieceForeground piece={piece} descriptor={descriptor} variant={renderVariant} />
     </div>
   )
+}
+
+export function TowerBase({
+  piece,
+  descriptor,
+  className,
+  children,
+  style,
+  ...rest
+}: {
+  piece?: TowerLayoutPieceDescriptor | null
+  descriptor?: TowerPieceAssetDescriptor | null
+  children?: ReactNode
+} & HTMLAttributes<HTMLDivElement>) {
+  const variant = piece ? pieceVariant(null, piece) : 'base'
+  return (
+    <div
+      className={cn('tower-base-stage', 'tower-section-separator', 'is-base', className)}
+      style={{ ...(style ?? {}), ...(pieceTransformStyle(piece) ?? {}) }}
+      {...towerPieceAttrs(piece, descriptor, { variant })}
+      {...rest}
+    >
+      <PieceArt pieceType="base" descriptor={descriptor} variant={variant} />
+      {children}
+      <PieceForeground piece={piece} descriptor={descriptor} variant={variant} />
+    </div>
+  )
+}
+
+type BlueOccluderRegion = {
+  id?: string
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+}
+
+function PieceForeground({
+  piece,
+  descriptor,
+  variant,
+}: {
+  piece?: TowerLayoutPieceDescriptor | null
+  descriptor?: TowerPieceAssetDescriptor | null
+  variant?: string
+}) {
+  const regions = blueOccluders(piece)
+  if (!regions.length) return null
+  return (
+    <>
+      {regions.map((region, index) => (
+        <span
+          className="tower-piece-foreground"
+          key={region.id ?? index}
+          style={occluderClipStyle(region, descriptor, variant)}
+          aria-hidden="true"
+        >
+          <PieceArt pieceType={piece?.pieceType ?? 'section'} descriptor={descriptor} variant={variant} />
+        </span>
+      ))}
+    </>
+  )
+}
+
+function blueOccluders(piece?: TowerLayoutPieceDescriptor | null): BlueOccluderRegion[] {
+  const value = piece?.config?.blue_occluders
+  if (!Array.isArray(value)) return []
+  return value.filter((item): item is BlueOccluderRegion => {
+    if (typeof item !== 'object' || item === null) return false
+    const region = item as BlueOccluderRegion
+    return positive(region.width) !== null && positive(region.height) !== null
+  })
+}
+
+function occluderClipStyle(
+  region: BlueOccluderRegion,
+  descriptor?: TowerPieceAssetDescriptor | null,
+  variant?: string,
+): CSSProperties {
+  const box = pieceViewBox(descriptor, variant)
+  const x = finite(region.x) ?? box.x
+  const y = finite(region.y) ?? box.y
+  const width = positive(region.width) ?? box.width
+  const height = positive(region.height) ?? box.height
+  const left = ((x - box.x) / Math.max(box.width, 1)) * 100
+  const top = ((y - box.y) / Math.max(box.height, 1)) * 100
+  const right = 100 - ((x + width - box.x) / Math.max(box.width, 1)) * 100
+  const bottom = 100 - ((y + height - box.y) / Math.max(box.height, 1)) * 100
+  return {
+    clipPath: `inset(${top}% ${right}% ${bottom}% ${left}%)`,
+  }
+}
+
+function finite(value: unknown) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function positive(value: unknown) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null
 }
 
 export function TowerSectionShell({
@@ -146,6 +250,7 @@ export function TowerSectionShell({
         </>
       ) : null}
       {children}
+      <PieceForeground piece={piece} descriptor={descriptor} variant={variant} />
     </section>
   )
 }
@@ -280,14 +385,41 @@ function RenderedPieces({
   isFirst: boolean
   isLast: boolean
 }) {
+  const hasBasePiece = layout.pieces.some((piece) => piece.pieceType === 'base')
   return (
     <>
       {layout.pieces.map((piece) => {
         const descriptor = towerDescriptorFor(piece, pieceDescriptors)
         const artifacts = artifactsByTarget.get(piece.instanceId) ?? []
         const sectionRole = firstInteractableRole(artifacts)
+        const children = artifacts.map((artifact) => (
+          <PlayableArtifact
+            key={artifact.id}
+            artifact={artifact}
+            descriptor={artifactDescriptors[artifact.assetSlug] ?? null}
+            piece={piece}
+            pieceDescriptor={descriptor}
+            role={artifact.role}
+            storeyId={storeyId}
+            adventures={adventures}
+            tomes={tomes}
+            challenges={challenges}
+            challengesLocked={challengesLocked}
+          />
+        ))
         if (piece.pieceType === 'crown') {
-          return isFirst ? <RoofSpire key={piece.instanceId} descriptor={descriptor} piece={piece} /> : null
+          return isFirst ? (
+            <RoofSpire key={piece.instanceId} descriptor={descriptor} piece={piece}>
+              {children}
+            </RoofSpire>
+          ) : null
+        }
+        if (piece.pieceType === 'base') {
+          return isLast ? (
+            <TowerBase key={piece.instanceId} descriptor={descriptor} piece={piece}>
+              {children}
+            </TowerBase>
+          ) : null
         }
         if (piece.pieceType === 'landing') {
           const landing = (
@@ -295,30 +427,18 @@ function RenderedPieces({
               key={piece.instanceId}
               variant={pieceVariant(layout, piece)}
               continuation={!isLast}
-              base={isLast}
+              base={isLast && !hasBasePiece}
               descriptor={descriptor}
               piece={piece}
-            />
+            >
+              {children}
+            </TowerLanding>
           )
           return landing
         }
         return (
           <TowerSectionShell key={piece.instanceId} artifactRole={sectionRole} descriptor={descriptor} piece={piece}>
-            {artifacts.map((artifact) => (
-              <PlayableArtifact
-                key={artifact.id}
-                artifact={artifact}
-                descriptor={artifactDescriptors[artifact.assetSlug] ?? null}
-                piece={piece}
-                pieceDescriptor={descriptor}
-                role={artifact.role}
-                storeyId={storeyId}
-                adventures={adventures}
-                tomes={tomes}
-                challenges={challenges}
-                challengesLocked={challengesLocked}
-              />
-            ))}
+            {children}
             {sectionRole !== 'normal' && artifacts.length === 0 ? <div className="tower-empty-state">No content yet.</div> : null}
           </TowerSectionShell>
         )
@@ -352,7 +472,7 @@ function PlayableArtifact({
 }) {
   const select = useTowerSelection((state) => state.select)
   const selected = useTowerSelection((state) => state.selected)
-  const variant = role === 'normal' ? pieceVariant(null, piece) : role
+  const variant = piece.pieceType === 'section' && role !== 'normal' ? role : pieceVariant(null, piece)
   const staticArtifact = (
     <TowerArtifact
       artifact={artifact}

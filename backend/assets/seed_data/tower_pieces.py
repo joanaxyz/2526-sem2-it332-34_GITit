@@ -1,8 +1,8 @@
 """Official Arcane Spire tower asset seed specs.
 
-Structural assets are intentionally generic: a tower is made from a crown,
-repeatable sections, and landings. Adventure/challenge/tome behavior is authored
-by placing interactable artifacts into sections.
+Structural assets are intentionally generic: a tower is made from one crown, one
+base, repeatable sections, and landings. Adventure/challenge/tome behavior is
+authored by placing interactable artifacts into sections.
 """
 
 ARCANE_SPIRE_TAG = "arcane-spire"
@@ -127,6 +127,42 @@ OFFICIAL_TOWER_PIECE_SPECS = [
             "width": 592,
             "height": 73.28,
             "artifact_safe_bounds": {"x": 64, "y": 0, "width": 408, "height": 28},
+        },
+    },
+    {
+        "slug": "official-empty-landing",
+        "label": "Empty Landing",
+        "piece_type": "landing",
+        "svg": "landings/empty.svg",
+        "tags": [ARCANE_SPIRE_TAG],
+        "view_box": "0 0 592 73.28",
+        "anchors": {
+            "walk_rail": {"x1": 12, "y1": 12.48, "x2": 580, "y2": 12.48},
+        },
+        "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 592,
+            "height": 73.28,
+            "artifact_safe_bounds": {"x": 44, "y": 6, "width": 504, "height": 28},
+        },
+    },
+    {
+        "slug": "official-base",
+        "label": "Arcane Base",
+        "piece_type": "base",
+        "svg": "landings/walkway.svg",
+        "tags": [ARCANE_SPIRE_TAG],
+        "view_box": "0 0 592 73.28",
+        "anchors": {
+            "walk_rail": {"x1": 12, "y1": 2.24, "x2": 540, "y2": 2.24},
+        },
+        "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 592,
+            "height": 73.28,
+            "artifact_safe_bounds": {"x": 44, "y": 0, "width": 504, "height": 24},
         },
     },
 ]

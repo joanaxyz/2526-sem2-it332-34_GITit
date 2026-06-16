@@ -7,6 +7,7 @@ export function pieceIdFromInstance(instanceId: string): number | null {
 
 export const PIECE_TYPE_LABEL: Record<TowerPieceType, string> = {
   crown: 'Crown',
+  base: 'Base',
   section: 'Section',
   landing: 'Landing',
 }

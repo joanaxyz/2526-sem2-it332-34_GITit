@@ -24,11 +24,12 @@ def tower_layout(
 
     These are authored data, not renderer assumptions: each storey can choose
     different structural art and artifact defaults while the frontend still
-    renders only crown/section/landing plus placed artifacts.
+    renders only crown/base/section/landing plus placed artifacts.
     """
 
     return {
         "crown": {"asset_slug": "official-crown"},
+        "base": {"asset_slug": "official-base"},
         "slots": {
             "window": {
                 "section_asset_slug": window_section,

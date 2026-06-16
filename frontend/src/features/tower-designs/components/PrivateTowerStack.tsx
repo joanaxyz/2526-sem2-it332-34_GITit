@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 
 import { towerDesignsApi } from '@/features/tower-designs/api/towerDesignsApi'
 import type { ArtifactPlacementDescriptor } from '@/features/tower-designs/types'
-import { RoofSpire, TowerLanding, TowerSectionShell } from '@/features/tower-map/components/TowerStoreySection'
+import { RoofSpire, TowerBase, TowerLanding, TowerSectionShell } from '@/features/tower-map/components/TowerStoreySection'
 import { TowerArtifact } from '@/features/tower-map/components/TowerArtifact'
 import { pieceVariant, towerDescriptorFor } from '@/features/tower-map/components/towerPieceData'
 import { assetsApi } from '@/shared/assets/assetsApi'
@@ -116,7 +116,7 @@ export function TowerStack({
                 artifact={artifact}
                 descriptor={artifactDescriptors[artifact.assetSlug] ?? null}
                 pieceDescriptor={descriptor}
-                pieceVariant={role === 'normal' ? pieceVariant(null, piece) : role}
+                pieceVariant={piece.pieceType === 'section' && role !== 'normal' ? role : pieceVariant(null, piece)}
               />
             ))
 
@@ -125,6 +125,14 @@ export function TowerStack({
                 <RoofSpire key={piece.instanceId} piece={piece} descriptor={descriptor}>
                   {children}
                 </RoofSpire>
+              )
+            }
+
+            if (piece.pieceType === 'base') {
+              return (
+                <TowerBase key={piece.instanceId} piece={piece} descriptor={descriptor}>
+                  {children}
+                </TowerBase>
               )
             }
 

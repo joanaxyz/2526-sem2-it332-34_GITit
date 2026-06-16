@@ -43,6 +43,7 @@ import {
 import { validateDesign, type DesignIssue } from '@/features/tower-designs/editorValidation'
 import {
   EditorStorey,
+  dragMarkerType,
   type EditorDragPayload,
   type PlacementDraft,
 } from '@/features/tower-designs/components/EditorStorey'
@@ -148,8 +149,15 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
       .filter((p) => p.pieceType === 'landing')
       .filter((p) => !pieceHasWalkRail(editor.pieceDescriptorBySlug[p.assetSlug]))
   }, [editor.overview, editor.pieceDescriptorBySlug])
+  // Publish-readiness checks only matter where the author binds content and can
+  // publish/share. The official fork does neither — its interactive doors borrow
+  // the curriculum's content at render time, and it can't be published — so
+  // flagging "needs content bound" there is noise. Skip it for forks.
   const issues = useMemo<DesignIssue[]>(
-    () => (editor.overview ? validateDesign(editor.overview) : []),
+    () =>
+      editor.overview && editor.overview.design.origin !== 'official_fork'
+        ? validateDesign(editor.overview)
+        : [],
     [editor.overview],
   )
 
@@ -194,9 +202,63 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
     [editor.deleteArtifact, editor.overview, flashToast, staged],
   )
 
-  const deleteSelection = useCallback(() => {
-    const currentOverview = editor.overview
+  const removePiece = useCallback(
+    (pieceId: number): boolean => {
+      const currentOverview = editor.overview
+      if (!currentOverview) return false
+      const piece =
+        currentOverview.tower_layout.pieces.find(
+          (item) => pieceIdFromInstance(item.instanceId) === pieceId,
+        ) ?? null
+      // On the official fork the interactive doors are the curriculum's. Deleting
+      // a door is already blocked; a section that still holds one can't be deleted
+      // either, since that would take the door (and its learning step) with it.
+      // Move or re-skin the section instead.
+      const holdsInteractive =
+        piece !== null &&
+        currentOverview.artifacts.some(
+          (artifact) => artifact.targetInstanceId === piece.instanceId && artifact.role !== 'normal',
+        )
+      if (currentOverview.design.origin === 'official_fork' && holdsInteractive) {
+        flashToast(
+          'This section holds an interactive door from the official tower — move or re-skin it, but it can’t be deleted.',
+          'info',
+        )
+        return false
+      }
 
+      editor.deletePiece.mutate(pieceId, {
+        onError: (error) => flashToast(apiErrorMessage(error) ?? 'Could not delete piece.'),
+      })
+
+      staged.commit((state) => {
+        let changed = false
+        const pendingSwaps = new Map(state.pendingSwaps)
+        const pieceTransforms = new Map(state.pieceTransforms)
+        const artifactEdits = new Map(state.artifactEdits)
+
+        if (pendingSwaps.delete(pieceId)) changed = true
+        if (pieceTransforms.delete(pieceId)) changed = true
+
+        if (piece) {
+          for (const artifact of currentOverview.artifacts) {
+            if (artifact.targetInstanceId === piece.instanceId && artifactEdits.delete(artifact.id)) {
+              changed = true
+            }
+          }
+        }
+
+        if (!changed) return state
+        return { ...state, pendingSwaps, pieceTransforms, artifactEdits }
+      })
+
+      staged.endGesture()
+      return true
+    },
+    [editor.deletePiece, editor.overview, flashToast, staged],
+  )
+
+  const deleteSelection = useCallback(() => {
     if (selectedArtifactId !== null) {
       removeArtifact(selectedArtifactId)
       setSelectedPieceId(null)
@@ -204,40 +266,9 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
       return
     }
 
-    if (selectedPieceId === null || !currentOverview) return
-
-    const deletedPiece = currentOverview.tower_layout.pieces.find(
-      (piece) => pieceIdFromInstance(piece.instanceId) === selectedPieceId,
-    )
-
-    editor.deletePiece.mutate(selectedPieceId, {
-      onError: (error) => flashToast(apiErrorMessage(error) ?? 'Could not delete piece.'),
-    })
-
-    staged.commit((state) => {
-      let changed = false
-      const pendingSwaps = new Map(state.pendingSwaps)
-      const pieceTransforms = new Map(state.pieceTransforms)
-      const artifactEdits = new Map(state.artifactEdits)
-
-      if (pendingSwaps.delete(selectedPieceId)) changed = true
-      if (pieceTransforms.delete(selectedPieceId)) changed = true
-
-      if (deletedPiece) {
-        for (const artifact of currentOverview.artifacts) {
-          if (artifact.targetInstanceId === deletedPiece.instanceId && artifactEdits.delete(artifact.id)) {
-            changed = true
-          }
-        }
-      }
-
-      if (!changed) return state
-      return { ...state, pendingSwaps, pieceTransforms, artifactEdits }
-    })
-
-    staged.endGesture()
-    clearSelection()
-  }, [clearSelection, editor.deletePiece, editor.overview, flashToast, removeArtifact, selectedArtifactId, selectedPieceId, staged])
+    if (selectedPieceId === null) return
+    if (removePiece(selectedPieceId)) clearSelection()
+  }, [clearSelection, removeArtifact, removePiece, selectedArtifactId, selectedPieceId])
 
   // Editor hotkeys. Defer to native text editing while a form control is focused.
   const { undo: undoEdit, redo: redoEdit } = staged
@@ -376,6 +407,24 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
     }, `artifact:${artifact.id}`)
   }
 
+  function addPiece(assetId: number, pieceType: TowerPieceType, sortOrder?: number) {
+    editor.addPiece.mutate(
+      {
+        piece_asset_id: assetId,
+        piece_type: pieceType,
+        ...(sortOrder !== undefined ? { sort_order: sortOrder } : {}),
+      },
+      {
+        onSuccess: (piece) => {
+          setSelectedPieceId(piece.id)
+          setSelectedArtifactId(null)
+          setPlacementDraft(null)
+        },
+        onError: (error) => flashToast(apiErrorMessage(error) ?? 'Could not add piece.'),
+      },
+    )
+  }
+
   async function applyChanges() {
     setApplying(true)
     try {
@@ -467,7 +516,7 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
       />
 
       <div className="ite-body">
-        <aside className="ite-rail ite-rail--library" aria-label="Asset library">
+        <aside className="ite-rail ite-rail--library" aria-label="Asset storage">
           <StoragePanel
             overview={overview}
             editor={editor}
@@ -536,6 +585,7 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
                 setPlacementDraft(null)
               }}
               onSwapAsset={pickSwap}
+              onAddPiece={addPiece}
               onPlaceArtifact={(pieceId, assetId, x, y) => {
                 const size = artifactSize(assetId)
                 editor.placeArtifact.mutate(
@@ -578,11 +628,10 @@ export function InTowerEditor({ designId, onExit }: { designId: number; onExit?:
             onTransformArtifact={(artifact, next) => transformArtifact(artifact, next)}
             onGestureEnd={staged.endGesture}
             onRemovePiece={(pieceId) => {
-              editor.deletePiece.mutate(pieceId, {
-                onError: (error) => flashToast(apiErrorMessage(error) ?? 'Could not delete piece.'),
-              })
-              setSelectedPieceId(null)
-              setSelectedArtifactId(null)
+              if (removePiece(pieceId)) {
+                setSelectedPieceId(null)
+                setSelectedArtifactId(null)
+              }
             }}
             onRemoveArtifact={removeArtifact}
           />
@@ -712,20 +761,25 @@ function EditorCommandBar({
           </button>
         </div>
 
-        <button
-          type="button"
-          className={cn('ite-valchip', issueCount === 0 ? 'is-ok' : 'is-warn', showIssues && 'is-open')}
-          aria-pressed={showIssues}
-          aria-label={issueCount === 0 ? 'No publish issues' : `${issueCount} publish issue${issueCount > 1 ? 's' : ''}`}
-          onClick={onToggleIssues}
-        >
-          {issueCount === 0 ? (
-            <CheckCircle2 className="size-4" aria-hidden="true" />
-          ) : (
-            <AlertTriangle className="size-4" aria-hidden="true" />
-          )}
-          <span>{issueCount === 0 ? 'Ready' : `${issueCount} issue${issueCount > 1 ? 's' : ''}`}</span>
-        </button>
+        {/* Publish readiness is a personal-tower concept; the fork can't publish
+            and binds no content, so the chip would only ever read a misleading
+            "Ready"/"needs content". Hide it there. */}
+        {isFork ? null : (
+          <button
+            type="button"
+            className={cn('ite-valchip', issueCount === 0 ? 'is-ok' : 'is-warn', showIssues && 'is-open')}
+            aria-pressed={showIssues}
+            aria-label={issueCount === 0 ? 'No publish issues' : `${issueCount} publish issue${issueCount > 1 ? 's' : ''}`}
+            onClick={onToggleIssues}
+          >
+            {issueCount === 0 ? (
+              <CheckCircle2 className="size-4" aria-hidden="true" />
+            ) : (
+              <AlertTriangle className="size-4" aria-hidden="true" />
+            )}
+            <span>{issueCount === 0 ? 'Ready' : `${issueCount} issue${issueCount > 1 ? 's' : ''}`}</span>
+          </button>
+        )}
 
         {isFork ? null : (
           <>
@@ -809,7 +863,7 @@ function EditorStatusLine({
   )
 }
 
-// --- Library (left rail) ----------------------------------------------------
+// --- Storage (left rail) ----------------------------------------------------
 function StoragePanel({
   overview,
   editor,
@@ -826,7 +880,7 @@ function StoragePanel({
   const [tag, setTag] = useState<string>('all')
 
   // Tags are a property of every asset, not just artifacts, so the filter spans
-  // the whole library (pieces and artifacts alike) rather than sitting under one
+  // the whole storage shelf (pieces and artifacts alike) rather than sitting under one
   // shelf as if it were an artifact-only field.
   const allTags = useMemo(() => {
     const set = new Set<string>()
@@ -847,16 +901,17 @@ function StoragePanel({
   const filtering = tag !== 'all'
 
   const spires = byTag(editor.pieceDescriptors.filter((d) => descriptorPieceType(d) === 'crown'))
+  const bases = byTag(editor.pieceDescriptors.filter((d) => descriptorPieceType(d) === 'base'))
   const sections = byTag(editor.pieceDescriptors.filter((d) => descriptorPieceType(d) === 'section'))
   const landings = byTag(editor.pieceDescriptors.filter((d) => descriptorPieceType(d) === 'landing'))
   const artifacts = byTag(editor.artifactDescriptors)
-  const noneMatch = filtering && !spires.length && !sections.length && !landings.length && !artifacts.length
+  const noneMatch = filtering && !spires.length && !bases.length && !sections.length && !landings.length && !artifacts.length
 
   return (
-    <div className="ite-inspector" aria-label="Asset library">
+    <div className="ite-inspector" aria-label="Asset storage">
       <div className="ite-section ite-section--head">
         <div>
-          <p className="ite-eyebrow">Library</p>
+          <p className="ite-eyebrow">Storage</p>
           <h2 className="ite-section-heading">{overview.tower_layout.pieces.length} assets placed</h2>
         </div>
         <Button size="sm" variant="outline" onClick={onUploadClick}>
@@ -872,7 +927,7 @@ function StoragePanel({
             className="ite-tag-filter"
             value={tag}
             onChange={(event) => setTag(event.target.value)}
-            aria-label="Filter library by tag"
+            aria-label="Filter storage by tag"
           >
             <option value="all">All tags</option>
             {allTags.map((value) => (
@@ -885,6 +940,7 @@ function StoragePanel({
       ) : null}
 
       <StoragePieceShelf title="Spire" descriptors={spires} hideWhenEmpty={filtering} />
+      <StoragePieceShelf title="Base" descriptors={bases} hideWhenEmpty={filtering} />
       <StoragePieceShelf title="Sections" descriptors={sections} hideWhenEmpty={filtering} />
       <StoragePieceShelf title="Landings" descriptors={landings} hideWhenEmpty={filtering} />
 
@@ -910,7 +966,7 @@ function StoragePanel({
 
       {noneMatch ? <p className="ite-empty ite-empty--inline">No assets match this tag.</p> : null}
 
-      {placementDraft ? <p className="editor-palette-active">Drag to a tower piece, or click the destination piece.</p> : null}
+      {placementDraft ? <p className="editor-palette-active">Drop it anywhere on the canvas, or click where you want it — it attaches to the nearest piece.</p> : null}
     </div>
   )
 }
@@ -938,6 +994,7 @@ function StoragePieceShelf({
             assetId: descriptor.id,
             slug: descriptor.slug,
             pieceType: descriptorPieceType(descriptor) ?? 'section',
+            origin: 'storage',
           }
           const thumb = thumbUrl(descriptor)
           return (
@@ -1271,6 +1328,7 @@ function SkinPanel({
             assetId: descriptor.id,
             slug: descriptor.slug,
             pieceType: descriptorPieceType(descriptor) ?? piece.pieceType,
+            origin: 'skin',
           }
           return (
             <button
@@ -1511,6 +1569,9 @@ function NumberField({
 
 function setDrag(event: React.DragEvent, payload: EditorDragPayload) {
   event.dataTransfer.setData('application/json', JSON.stringify(payload))
+  // Marker type encodes the kind so dragover handlers can read it (getData is
+  // locked until drop). See dragMarkerType in EditorStorey.
+  event.dataTransfer.setData(dragMarkerType(payload), '')
   event.dataTransfer.effectAllowed = 'copy'
 }
 

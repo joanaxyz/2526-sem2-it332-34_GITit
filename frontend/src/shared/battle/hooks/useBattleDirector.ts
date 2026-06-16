@@ -110,6 +110,35 @@ export function useBattleDirector(): BattleDirector {
     [setRoster],
   )
 
+  /**
+   * One monster besieges the crystal: attack/lunge strip, then (ranged) a
+   * projectile toward the crystal, then the crystal jolts. Shared by the miss
+   * event and the ambient siege loop. Purely cosmetic - never touches state.
+   */
+  const strikeCrystal = useCallback(
+    async (monsterId: number) => {
+      const handle = monsterHandles.current.get(monsterId)
+      const crystal = crystalRef.current
+      if (!handle || !crystal) return
+      await handle.attack()
+      const attacker = rosterRef.current.find((m) => m.id === monsterId)
+      const def = attacker ? definitionForMonster(attacker) : null
+      const layer = effectLayerRef.current
+      const crystalEl = crystal.element()
+      if (def?.attack.kind === 'projectile' && layer && crystalEl) {
+        // Monster (left of the crystal) looses rightward at it; the source sheet
+        // already faces right, so no flip.
+        await spriteProjectile(def.attack.sheet)({
+          layer,
+          from: anchor(handle.element(), 14, -6),
+          to: anchor(crystalEl, -6, 0),
+        })
+      }
+      await crystal.shake()
+    },
+    [anchor],
+  )
+
   const onCastStart = useCallback(() => {
     if (defeatedRef.current) return
     castPendingRef.current = true
@@ -199,24 +228,7 @@ export function useBattleDirector(): BattleDirector {
                   void crystalRef.current?.shake()
                   return
                 }
-                const handle = monsterHandles.current.get(event.monster)
-                const crystal = crystalRef.current
-                if (!handle || !crystal) return
-                await handle.attack()
-                const attacker = rosterRef.current.find((m) => m.id === event.monster)
-                const def = attacker ? definitionForMonster(attacker) : null
-                const layer = effectLayerRef.current
-                const crystalEl = crystal.element()
-                if (def?.attack.kind === 'projectile' && layer && crystalEl) {
-                  // Monster (left of the crystal) looses rightward at it; the
-                  // source sheet already faces right, so no flip.
-                  await spriteProjectile(def.attack.sheet)({
-                    layer,
-                    from: anchor(handle.element(), 14, -6),
-                    to: anchor(crystalEl, -6, 0),
-                  })
-                }
-                await crystal.shake()
+                await strikeCrystal(event.monster)
               },
             })
             break
@@ -241,8 +253,54 @@ export function useBattleDirector(): BattleDirector {
         }
       }
     },
-    [anchor, queue, setMonster],
+    [anchor, queue, setMonster, strikeCrystal],
   )
+
+  /**
+   * Ambient siege: between commands the living monsters keep harrying the
+   * crystal so the floor reads as actively under attack rather than frozen.
+   * Purely cosmetic - it never touches HP/roster/mana and fully yields to
+   * command choreography, firing only while the queue is idle and the run is
+   * live. Skipped under reduced motion and while the tab is hidden.
+   */
+  useEffect(() => {
+    if (prefersReducedMotion()) return
+    let timer = 0
+    let stopped = false
+    let inFlight = false
+
+    const schedule = (ms: number) => {
+      timer = window.setTimeout(tick, ms)
+    }
+    const tick = async () => {
+      if (stopped) return
+      const ready =
+        !inFlight &&
+        !queue.busy &&
+        !castPendingRef.current &&
+        !defeatedRef.current &&
+        !document.hidden &&
+        rosterRef.current.some((m) => m.alive)
+      if (ready) {
+        inFlight = true
+        try {
+          const alive = rosterRef.current.filter((m) => m.alive)
+          const attacker = alive[Math.floor(Math.random() * alive.length)]
+          await strikeCrystal(attacker.id)
+        } catch {
+          // A dropped flourish must never wedge the loop.
+        } finally {
+          inFlight = false
+        }
+      }
+      if (!stopped) schedule(700 + Math.random() * 900)
+    }
+    schedule(1200)
+    return () => {
+      stopped = true
+      window.clearTimeout(timer)
+    }
+  }, [queue, strikeCrystal])
 
   const setEncounter = useCallback(
     (next: BattleMonster[], opts?: EncounterOptions) => {

@@ -85,7 +85,10 @@ export function definitionForMonster(monster: BattleMonster): MonsterRuntimeDefi
           },
     metrics: {
       scale: positiveNumber(monster.scale ?? descriptor.scale, 1),
-      footOffset: positiveNumber(descriptor.metrics?.foot_offset, 16),
+      // Default = the transparent padding below the feet/shadow in the official
+      // 100px monster packs (content bottoms out at row 59 -> 40px clear below).
+      // Without it the actor is pulled down too little and floats off the ledge.
+      footOffset: positiveNumber(descriptor.metrics?.foot_offset, 40),
       hpBarFraction: positiveNumber(descriptor.metrics?.hp_bar_fraction, 0.74),
     },
   }

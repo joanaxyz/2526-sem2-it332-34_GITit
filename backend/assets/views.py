@@ -1,4 +1,7 @@
 import json
+from dataclasses import dataclass
+from io import BytesIO
+from pathlib import Path
 
 from django.core.files.base import ContentFile
 from django.utils.text import slugify
@@ -18,6 +21,8 @@ from assets.models import (
     AssetSprite,
     TowerPieceAsset,
     TowerPieceType,
+    TOWER_PIECE_BASE,
+    TOWER_PIECE_LANDING,
 )
 from assets.sanitize import sanitize_svg
 from assets.svg_crop import crop_svg_markup
@@ -32,6 +37,18 @@ from common.performance import timing
 # Default per-tier display scale for uploaded monsters (mirrors seed conventions).
 _MONSTER_TIER_SCALE = {"mob": 1.0, "elite": 1.1, "boss": 1.6}
 _MONSTER_RASTER_EXTENSIONS = (".png", ".webp", ".gif", ".jpg", ".jpeg")
+_TOWER_RASTER_EXTENSIONS = (".png", ".webp", ".gif", ".jpg", ".jpeg")
+
+
+@dataclass(frozen=True)
+class PreparedTowerUpload:
+    file: ContentFile | object
+    svg_sanitized: bool
+    view_box: str | None = None
+    bounds: dict | None = None
+    natural_width: int | None = None
+    natural_height: int | None = None
+    content_type: str | None = None
 
 
 class AssetDescriptorAPIView(APIView):
@@ -77,7 +94,7 @@ class AssetUploadAPIView(APIView):
         if upload is None:
             raise ValidationError({"file": "A file is required."})
 
-        upload, sanitized, cropped_view_box = _prepare_tower_upload(upload, field="file")
+        prepared_upload = _prepare_tower_upload(upload, field="file")
 
         piece_type = None
         if kind == KIND_TOWER_PIECE:
@@ -99,7 +116,9 @@ class AssetUploadAPIView(APIView):
         AssetSprite.objects.create(
             asset=asset,
             action="default",
-            image=upload,
+            image=prepared_upload.file,
+            frame_width=prepared_upload.natural_width or 0,
+            frame_height=prepared_upload.natural_height or 0,
             fps=_safe_int(request.data.get("fps_default"), default=12),
             loops=True,
         )
@@ -107,13 +126,13 @@ class AssetUploadAPIView(APIView):
             action_upload = request.FILES.get(f"file_{action}") or request.FILES.get(f"sprite_{action}")
             if action_upload is None:
                 continue
-            prepared, _, _ = _prepare_tower_upload(
-                action_upload, field=f"file_{action}"
-            )
+            prepared = _prepare_tower_upload(action_upload, field=f"file_{action}")
             AssetSprite.objects.create(
                 asset=asset,
                 action=action,
-                image=prepared,
+                image=prepared.file,
+                frame_width=prepared.natural_width or 0,
+                frame_height=prepared.natural_height or 0,
                 fps=_safe_int(request.data.get(f"fps_{action}"), default=12),
                 loops=action != "click",
             )
@@ -121,20 +140,36 @@ class AssetUploadAPIView(APIView):
         # `view_box` is kept as a legacy API fallback. SVG uploads now derive it
         # from the sanitized/cropped image instead of asking authors to scope it.
         manual_view_box = (request.data.get("view_box") or "").strip()
-        parsed_view_box = _parse_view_box(manual_view_box) if manual_view_box and not cropped_view_box else None
+        parsed_view_box = (
+            _parse_view_box(manual_view_box)
+            if manual_view_box and not prepared_upload.view_box
+            else None
+        )
 
         if kind == KIND_TOWER_PIECE:
-            normalized_view_box = cropped_view_box or (_format_view_box(parsed_view_box) if parsed_view_box else "")
+            normalized_view_box = prepared_upload.view_box or (
+                _format_view_box(parsed_view_box) if parsed_view_box else ""
+            )
             anchors = _parse_json(request.data.get("anchors")) or {}
+            bounds = prepared_upload.bounds or _bounds_from_view_box(normalized_view_box)
+            if bounds:
+                bounds = _with_artifact_safe_bounds(bounds)
+            if piece_type == TOWER_PIECE_LANDING and "walk_rail" not in anchors:
+                anchors["walk_rail"] = _default_walk_rail(bounds)
+            if piece_type == TOWER_PIECE_BASE and bounds and "walk_rail" not in anchors:
+                anchors["walk_rail"] = _default_walk_rail(bounds)
             TowerPieceAsset.objects.create(
                 asset=asset,
                 piece_type=piece_type,
                 view_box=normalized_view_box,
                 anchors=anchors,
-                svg_sanitized=sanitized,
+                bounds=bounds or {},
+                svg_sanitized=prepared_upload.svg_sanitized,
             )
         else:
-            asset_view_box = cropped_view_box or (_format_view_box(parsed_view_box) if parsed_view_box else "")
+            asset_view_box = prepared_upload.view_box or (
+                _format_view_box(parsed_view_box) if parsed_view_box else ""
+            )
             bounds = _parse_view_box(asset_view_box) if asset_view_box else None
             if not bounds:
                 return Response(asset_descriptor(asset), status=201)
@@ -143,6 +178,9 @@ class AssetUploadAPIView(APIView):
                 **asset.config,
                 "view_box": _format_view_box(bounds),
                 "bounds": {"x": x, "y": y, "width": width, "height": height},
+                "natural_width": prepared_upload.natural_width,
+                "natural_height": prepared_upload.natural_height,
+                "content_type": prepared_upload.content_type,
             }
             asset.save(update_fields=["config", "updated_at"])
 
@@ -257,10 +295,59 @@ def _prepare_tower_upload(upload, *, field: str):
     if name.endswith(".svg"):
         sanitized = sanitize_svg(upload.read())
         cropped, view_box = crop_svg_markup(sanitized)
-        return ContentFile(cropped, name=upload.name), True, view_box
-    if not name.endswith((".png", ".webp", ".gif", ".jpg", ".jpeg")):
+        parsed = _parse_view_box(view_box) if view_box else None
+        bounds = _bounds_dict(parsed) if parsed else None
+        return PreparedTowerUpload(
+            file=ContentFile(cropped, name=upload.name),
+            svg_sanitized=True,
+            view_box=view_box,
+            bounds=bounds,
+            natural_width=int(round(parsed[2])) if parsed else None,
+            natural_height=int(round(parsed[3])) if parsed else None,
+            content_type="image/svg+xml",
+        )
+    if not name.endswith(_TOWER_RASTER_EXTENSIONS):
         raise ValidationError({field: "Upload an SVG or raster sprite image."})
-    return upload, False, None
+    return _prepare_raster_tower_upload(upload, field=field)
+
+
+def _prepare_raster_tower_upload(upload, *, field: str) -> PreparedTowerUpload:
+    try:
+        from PIL import Image, UnidentifiedImageError
+    except ImportError as exc:  # pragma: no cover - deployment dependency issue.
+        raise ValidationError({field: "Pillow is required to upload raster images."}) from exc
+
+    try:
+        with Image.open(upload) as image:
+            image.verify()
+        upload.seek(0)
+        with Image.open(upload) as image:
+            rgba = image.convert("RGBA")
+    except (UnidentifiedImageError, OSError, ValueError) as exc:
+        raise ValidationError({field: "Upload a valid raster image."}) from exc
+    finally:
+        try:
+            upload.seek(0)
+        except (AttributeError, ValueError):
+            pass
+
+    alpha_bbox = rgba.getchannel("A").getbbox()
+    cropped = rgba.crop(alpha_bbox) if alpha_bbox else rgba
+    width, height = cropped.size
+    output = BytesIO()
+    cropped.save(output, format="PNG")
+    stem = Path(upload.name or "tower-piece").stem or "tower-piece"
+    filename = f"{stem}.png"
+    bounds = {"x": 0, "y": 0, "width": width, "height": height}
+    return PreparedTowerUpload(
+        file=ContentFile(output.getvalue(), name=filename),
+        svg_sanitized=False,
+        view_box=_format_view_box((0, 0, width, height)),
+        bounds=bounds,
+        natural_width=width,
+        natural_height=height,
+        content_type="image/png",
+    )
 
 
 def _unique_slug(*, user, label: str) -> str:
@@ -300,3 +387,33 @@ def _parse_view_box(value: str) -> tuple[float, float, float, float]:
 
 def _format_view_box(view_box: tuple[float, float, float, float]) -> str:
     return " ".join(f"{value:g}" for value in view_box)
+
+
+def _bounds_from_view_box(view_box: str) -> dict:
+    if not view_box:
+        return {}
+    try:
+        return _bounds_dict(_parse_view_box(view_box))
+    except ValidationError:
+        return {}
+
+
+def _bounds_dict(view_box: tuple[float, float, float, float]) -> dict:
+    x, y, width, height = view_box
+    return {"x": x, "y": y, "width": width, "height": height}
+
+
+def _with_artifact_safe_bounds(bounds: dict) -> dict:
+    if "artifact_safe_bounds" in bounds:
+        return bounds
+    return {**bounds, "artifact_safe_bounds": {key: bounds[key] for key in ("x", "y", "width", "height")}}
+
+
+def _default_walk_rail(bounds: dict | None) -> dict:
+    box = bounds or {"x": 0, "y": 0, "width": 100, "height": 24}
+    x = float(box.get("x", 0) or 0)
+    y = float(box.get("y", 0) or 0)
+    width = float(box.get("width", 100) or 100)
+    height = float(box.get("height", 24) or 24)
+    rail_y = y + min(max(height * 0.2, 0), height)
+    return {"x1": x, "y1": rail_y, "x2": x + width, "y2": rail_y}

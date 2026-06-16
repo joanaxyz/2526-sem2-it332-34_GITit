@@ -9,7 +9,7 @@ import { ApiError } from '@/shared/api/apiError'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { Button } from '@/shared/components/Button'
 
-const PIECE_TYPES: TowerPieceType[] = ['crown', 'section', 'landing']
+const PIECE_TYPES: TowerPieceType[] = ['crown', 'base', 'section', 'landing']
 const IMAGE_ACCEPT = '.svg,.png,.webp,.gif,.jpg,.jpeg'
 
 export function UploadAssetDialog({ onClose }: { onClose: () => void }) {

@@ -1,9 +1,10 @@
 from django.db.models import Q
 
-from assets.models import TOWER_PIECE_CROWN
+from assets.models import TOWER_PIECE_BASE, TOWER_PIECE_CROWN
 from authoring.selectors import content_payload
 from tower_designs.models import (
     ARTIFACT_ROLE_NORMAL,
+    BASE_STOREY_INDEX,
     SPIRE_STOREY_INDEX,
     STATUS_PUBLISHED,
     STOREY_TEMPLATE_INDEX,
@@ -56,6 +57,7 @@ def tower_design_overview(*, design: TowerDesign) -> dict:
                 "assetSlug": piece.piece_asset.slug,
                 "pieceType": piece.piece_type,
                 "storeyIndex": canonical_storey_index(piece),
+                "sortOrder": piece.sort_order,
                 "parentInstanceId": (
                     f"tower-{design.id}-piece-{piece.parent_instance_id}"
                     if piece.parent_instance_id in visible_piece_ids
@@ -107,24 +109,33 @@ def tower_design_overview(*, design: TowerDesign) -> dict:
 
 
 def canonical_design_pieces(pieces: list[TowerPieceInstance]) -> list[TowerPieceInstance]:
-    """Return the one editable spire plus the one repeatable storey template.
+    """Return one editable spire, one repeatable storey template, and one base.
 
     Old designs may still contain several storey_index groups. Reading chooses a
     canonical view without deleting the hidden historical rows: the first crown
-    by sort order and the explicit template group when present, otherwise the
-    first non-crown group by sort order.
+    and base by sort order and the explicit template group when present,
+    otherwise the first repeatable group by sort order.
     """
     ordered = sorted(pieces, key=lambda piece: (piece.sort_order, piece.id))
     crown = next((piece for piece in ordered if piece.piece_type == TOWER_PIECE_CROWN), None)
-    non_crown = [piece for piece in ordered if piece.piece_type != TOWER_PIECE_CROWN]
-    template = [
-        piece for piece in non_crown if piece.storey_index == STOREY_TEMPLATE_INDEX
+    base = next((piece for piece in ordered if piece.piece_type == TOWER_PIECE_BASE), None)
+    repeatable = [
+        piece
+        for piece in ordered
+        if piece.piece_type not in {TOWER_PIECE_CROWN, TOWER_PIECE_BASE}
     ]
-    if not template and non_crown:
-        first_template_index = non_crown[0].storey_index
-        template = [piece for piece in non_crown if piece.storey_index == first_template_index]
-    return ([crown] if crown else []) + template
+    template = [
+        piece for piece in repeatable if piece.storey_index == STOREY_TEMPLATE_INDEX
+    ]
+    if not template and repeatable:
+        first_template_index = repeatable[0].storey_index
+        template = [piece for piece in repeatable if piece.storey_index == first_template_index]
+    return ([crown] if crown else []) + template + ([base] if base else [])
 
 
 def canonical_storey_index(piece: TowerPieceInstance) -> int:
-    return SPIRE_STOREY_INDEX if piece.piece_type == TOWER_PIECE_CROWN else STOREY_TEMPLATE_INDEX
+    if piece.piece_type == TOWER_PIECE_CROWN:
+        return SPIRE_STOREY_INDEX
+    if piece.piece_type == TOWER_PIECE_BASE:
+        return BASE_STOREY_INDEX
+    return STOREY_TEMPLATE_INDEX

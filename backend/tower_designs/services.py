@@ -5,13 +5,15 @@ import json
 from collections import Counter
 
 from django.db import transaction
+from django.db.models import F
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from assets.models import Asset, TOWER_PIECE_CROWN
+from assets.models import Asset, TOWER_PIECE_BASE, TOWER_PIECE_CROWN
 from authoring.models import STATUS_PUBLISHED as CONTENT_STATUS_PUBLISHED
 from authoring.models import ContentDefinition
 from tower_designs.models import (
     ARTIFACT_ROLE_NORMAL,
+    BASE_STOREY_INDEX,
     INTERACTABLE_ARTIFACT_ROLES,
     ORIGIN_OFFICIAL_FORK,
     ORIGIN_PERSONAL,
@@ -24,6 +26,8 @@ from tower_designs.models import (
     TowerDesign,
     TowerPieceInstance,
 )
+
+NON_REPEATABLE_PIECE_TYPES = {TOWER_PIECE_CROWN, TOWER_PIECE_BASE}
 
 
 class TowerDesignService:
@@ -115,6 +119,7 @@ class TowerDesignService:
             ("official-landing", "landing", 1),
             ("official-trial-section", "section", None),
             ("official-challenge-landing", "landing", 3),
+            ("official-base", "base", None),
         ]
         created: dict[int, TowerPieceInstance] = {}
         for sort_order, (slug, piece_type, parent_position) in enumerate(skeleton):
@@ -130,6 +135,8 @@ class TowerDesignService:
                 storey_index=(
                     SPIRE_STOREY_INDEX
                     if piece_type == TOWER_PIECE_CROWN
+                    else BASE_STOREY_INDEX
+                    if piece_type == TOWER_PIECE_BASE
                     else STOREY_TEMPLATE_INDEX
                 ),
                 sort_order=sort_order,
@@ -234,11 +241,17 @@ class TowerDesignService:
                 artifact_signature,
                 current_artifacts,
             ) or (bool(current_artifacts) and not placements)
+        current_without_base = self._without_official_base_signature(current_pieces)
+        if self._same_signature_items_ignoring_storey(piece_signature, current_without_base):
+            return self._same_signature_items_ignoring_storey(
+                artifact_signature,
+                current_artifacts,
+            ) or (bool(current_artifacts) and not placements)
 
         # Compatibility for old generated official snapshots from before the
         # window/tome section layout. With no persisted seed-version bit, keep
         # this fallback narrow: only official assets, no local config/transform,
-        # and every non-crown piece points at a now-dead storey id.
+        # and every repeatable piece points at a now-dead storey id.
         return self._looks_like_stale_generated_official_snapshot(
             pieces=pieces,
             placements=placements,
@@ -247,7 +260,7 @@ class TowerDesignService:
     def _official_piece_signature(self, *, pieces: list[TowerPieceInstance]) -> list[tuple]:
         return [
             (
-                None if piece.piece_type == "crown" else piece.storey_index,
+                None if piece.piece_type in NON_REPEATABLE_PIECE_TYPES else piece.storey_index,
                 piece.piece_type,
                 piece.piece_asset.slug,
                 _json_signature(piece.transform),
@@ -299,6 +312,13 @@ class TowerDesignService:
     def _same_signature_items_ignoring_storey(self, left: list[tuple], right: list[tuple]) -> bool:
         return Counter(row[1:] for row in left) == Counter(row[1:] for row in right)
 
+    def _without_official_base_signature(self, signature: list[tuple]) -> list[tuple]:
+        return [
+            row
+            for row in signature
+            if not (row[1] == TOWER_PIECE_BASE and row[2] == "official-base")
+        ]
+
     def _looks_like_stale_generated_official_snapshot(
         self,
         *,
@@ -319,7 +339,11 @@ class TowerDesignService:
         from curriculum.selectors import published_storeys
 
         live_storey_ids = set(published_storeys().values_list("id", flat=True))
-        fork_storey_ids = {piece.storey_index for piece in pieces if piece.piece_type != "crown"}
+        fork_storey_ids = {
+            piece.storey_index
+            for piece in pieces
+            if piece.piece_type not in NON_REPEATABLE_PIECE_TYPES
+        }
         return bool(fork_storey_ids) and fork_storey_ids.isdisjoint(live_storey_ids)
 
     def _current_official_layout_signatures(
@@ -336,7 +360,7 @@ class TowerDesignService:
         for piece in layout["pieces"]:
             piece_signature.append(
                 (
-                    None if piece["pieceType"] == TOWER_PIECE_CROWN else STOREY_TEMPLATE_INDEX,
+                    None if piece["pieceType"] in NON_REPEATABLE_PIECE_TYPES else STOREY_TEMPLATE_INDEX,
                     piece["pieceType"],
                     piece["assetSlug"],
                     _json_signature(piece.get("transform")),
@@ -369,13 +393,13 @@ class TowerDesignService:
     ) -> tuple[list[tuple], list[tuple]]:
         piece_signature: list[tuple] = []
         artifact_signature: list[tuple] = []
-        crown_seen = False
+        non_repeatable_seen: set[str] = set()
         for storey, layout in self._official_layout_payloads():
             for piece in layout["pieces"]:
-                if piece["pieceType"] == TOWER_PIECE_CROWN:
-                    if crown_seen:
+                if piece["pieceType"] in NON_REPEATABLE_PIECE_TYPES:
+                    if piece["pieceType"] in non_repeatable_seen:
                         continue
-                    crown_seen = True
+                    non_repeatable_seen.add(piece["pieceType"])
                     piece_signature.append(
                         (
                             None,
@@ -487,10 +511,11 @@ class TowerDesignService:
                 _json_signature({}),
                 _json_signature({}),
             ),
+            (None, "base", "official-base", _json_signature({}), _json_signature({})),
         ], []
 
     def _seed_official_fork_skeleton(self, *, design: TowerDesign) -> None:
-        """Seed one editable Arcane Spire template: crown + repeatable storey."""
+        """Seed one editable Arcane Spire template: crown + storey + base."""
         layout = self._official_template_layout_payload()
         if layout is None:
             self._seed_default_skeleton(design=design)
@@ -510,6 +535,8 @@ class TowerDesignService:
                 storey_index=(
                     SPIRE_STOREY_INDEX
                     if piece_type == TOWER_PIECE_CROWN
+                    else BASE_STOREY_INDEX
+                    if piece_type == TOWER_PIECE_BASE
                     else STOREY_TEMPLATE_INDEX
                 ),
                 sort_order=sort_order,
@@ -683,14 +710,38 @@ class TowerDesignService:
         self.assert_owner(user=user, design=design)
         asset = Asset.objects.get(id=data["piece_asset_id"])
         piece_type = data.get("piece_type") or asset.tower_piece.piece_type
+        if piece_type in NON_REPEATABLE_PIECE_TYPES:
+            existing = (
+                design.pieces.filter(piece_type=piece_type)
+                .order_by("sort_order", "id")
+                .first()
+            )
+            if existing is not None:
+                existing.piece_asset = asset
+                if "sort_order" in data:
+                    existing.sort_order = data["sort_order"]
+                if "transform" in data:
+                    existing.transform = data.get("transform") or {}
+                if "config" in data:
+                    existing.config = data.get("config") or {}
+                existing.save()
+                return existing
+        sort_order = _optional_sort_order(data.get("sort_order"))
+        if sort_order is None:
+            sort_order = design.pieces.count()
+        else:
+            design.pieces.filter(sort_order__gte=sort_order).update(sort_order=F("sort_order") + 1)
+
         piece = TowerPieceInstance.objects.create(
             tower_design=design,
             piece_asset=asset,
             piece_type=piece_type,
-            sort_order=data.get("sort_order", design.pieces.count()),
+            sort_order=sort_order,
             storey_index=(
                 SPIRE_STOREY_INDEX
                 if piece_type == TOWER_PIECE_CROWN
+                else BASE_STOREY_INDEX
+                if piece_type == TOWER_PIECE_BASE
                 else STOREY_TEMPLATE_INDEX
             ),
             parent_instance_id=data.get("parent_instance_id"),
@@ -801,3 +852,13 @@ def _unique_slug(*, user, base: str) -> str:
 
 def _json_signature(value) -> str:
     return json.dumps(value or {}, sort_keys=True, separators=(",", ":"))
+
+
+def _optional_sort_order(value) -> int | None:
+    if value in (None, ""):
+        return None
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return None
+    return max(parsed, 0)

@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from django.db.models import Count, Q
 
 from assets.models import (
+    TOWER_PIECE_BASE,
     TOWER_PIECE_CROWN,
     TOWER_PIECE_LANDING,
     TOWER_PIECE_SECTION,
@@ -24,6 +25,7 @@ from curriculum.models import CommandForm, CommandSkill, LibraryEntry, Storey, T
 
 OFFICIAL_TOWER_ASSET_SLUGS = {
     TOWER_PIECE_CROWN: "official-crown",
+    TOWER_PIECE_BASE: "official-base",
     TOWER_PIECE_LANDING: "official-landing",
     "challenge_landing": "official-challenge-landing",
     "hall_section": "official-hall-section",
@@ -279,12 +281,12 @@ def _viewer_official_fork(*, user):
 def _fork_storey_layout(*, fork, storey_id: int, curriculum_layout: dict) -> dict | None:
     """Build one rendered storey from the viewer's fork template.
 
-    The fork stores one spire and one repeatable storey template. The visual
-    template repeats for every curriculum storey; the curriculum supplies only
-    what each interactive artifact opens.
+    The fork stores one spire, one base, and one repeatable storey template.
+    The visual template repeats for every curriculum storey; the renderer shows
+    the spire only on the first storey and the base only on the last.
     """
-    from tower_designs.models import ARTIFACT_ROLE_NORMAL, STOREY_TEMPLATE_INDEX
-    from tower_designs.selectors import canonical_design_pieces
+    from tower_designs.models import ARTIFACT_ROLE_NORMAL
+    from tower_designs.selectors import canonical_design_pieces, canonical_storey_index
 
     all_fork_pieces = list(
         fork.pieces.select_related("piece_asset", "parent_instance").order_by(
@@ -305,7 +307,8 @@ def _fork_storey_layout(*, fork, storey_id: int, curriculum_layout: dict) -> dic
             "instanceId": instance_id(piece.id),
             "assetSlug": piece.piece_asset.slug,
             "pieceType": piece.piece_type,
-            "storeyIndex": STOREY_TEMPLATE_INDEX,
+            "storeyIndex": canonical_storey_index(piece),
+            "sortOrder": piece.sort_order,
             "parentInstanceId": (
                 instance_id(piece.parent_instance_id)
                 if piece.parent_instance_id in visible_piece_ids
@@ -581,6 +584,20 @@ def tower_layout_payload(
             transform=_slot_value(challenge_slot, "landing_transform", {}),
         )
     )
+    pieces.append(
+        _tower_piece(
+            storey_id=storey_id,
+            name="base",
+            piece_type=TOWER_PIECE_BASE,
+            asset_slug=_slot_asset(
+                layout_config, "base", "asset_slug", OFFICIAL_TOWER_ASSET_SLUGS[TOWER_PIECE_BASE]
+            ),
+            config=_slot_config(layout_config, "base"),
+            transform=_slot_transform(layout_config, "base"),
+        )
+    )
+    for sort_order, piece in enumerate(pieces):
+        piece.setdefault("sortOrder", sort_order)
     return {"storeyId": storey_id, "pieces": pieces, "artifacts": artifacts}
 
 

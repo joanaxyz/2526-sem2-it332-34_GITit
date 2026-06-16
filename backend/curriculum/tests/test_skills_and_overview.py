@@ -68,6 +68,7 @@ def test_storey_overview_bundles_adventure_tomes_and_challenges(db, django_user_
         "landing",
         "section",
         "landing",
+        "base",
     ]
     assert [
         piece["assetSlug"]

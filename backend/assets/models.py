@@ -40,11 +40,13 @@ ASSET_KINDS = AssetKind.choices
 
 class TowerPieceType(models.TextChoices):
     CROWN = "crown", "Crown"
+    BASE = "base", "Base"
     SECTION = "section", "Section"
     LANDING = "landing", "Landing"
 
 
 TOWER_PIECE_CROWN = TowerPieceType.CROWN
+TOWER_PIECE_BASE = TowerPieceType.BASE
 TOWER_PIECE_SECTION = TowerPieceType.SECTION
 TOWER_PIECE_LANDING = TowerPieceType.LANDING
 

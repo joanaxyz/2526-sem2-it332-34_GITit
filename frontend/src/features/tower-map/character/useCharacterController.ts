@@ -41,7 +41,7 @@ const RANDOM_DELAY_MIN_MS = 6000
 const RANDOM_DELAY_MAX_MS = 14000
 
 const INTERACTIVE_SELECTOR =
-  'button, a, input, select, textarea, [role="button"], [role="slider"], .sky-clock, .tower-artifact-dock, .tower-zoom-control'
+  'button, a, input, select, textarea, [role="button"], [role="slider"], .sky-clock, .tower-storey-dock, .tower-artifact-dock, .tower-controls, .tower-zoom-control'
 
 type Ledge = { el: HTMLElement; left: number; right: number; y: number }
 type Target = { x: number; y: number; ledge: Ledge | null }
@@ -91,7 +91,25 @@ export function useCharacterController({
     if (!layer || !bodyEl || !shellEl) return
     // Non-null aliases: hoisted inner functions don't inherit the narrowing.
     const body: HTMLDivElement = bodyEl
+    // `shell` is the zoom/pan-transformed canvas: the coordinate frame the
+    // companion's `pos` is painted in and the root we scan ledges under. The
+    // wider page shell is the click surface, so he can be sent into the open sky
+    // beyond the tower canvas — not just onto it.
     const shell: HTMLElement = shellEl
+    const surface: HTMLElement = shell.closest<HTMLElement>('.tower-page-shell') ?? shell.parentElement ?? shell
+
+    // The canvas carries the live zoom transform, so client-space measurements
+    // must be divided by its scale to land in the un-transformed coordinate space
+    // the companion lives in — otherwise he overshoots the ledge once zoomed.
+    function canvasScale(): number {
+      const value = getComputedStyle(shell).transform
+      if (!value || value === 'none') return 1
+      try {
+        return new DOMMatrixReadOnly(value).a || 1
+      } catch {
+        return 1
+      }
+    }
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const metrics = character.metrics
@@ -151,7 +169,7 @@ export function useCharacterController({
       return Number.isFinite(parsed) ? parsed : null
     }
 
-    function measureAnchorLedge(el: HTMLElement, shellRect: DOMRect): Ledge | null {
+    function measureAnchorLedge(el: HTMLElement, shellRect: DOMRect, scale: number): Ledge | null {
       const rect = el.getBoundingClientRect()
       if (rect.width === 0) return null
 
@@ -167,42 +185,47 @@ export function useCharacterController({
         return null
       }
 
+      // Client deltas and `rect` dimensions are both scaled by the canvas zoom;
+      // dividing the whole expression by `scale` returns canvas-local units.
       return {
         el,
-        left: rect.left - shellRect.left + ((Math.min(x1, x2) - viewBoxX) / viewBoxWidth) * rect.width,
-        right: rect.left - shellRect.left + ((Math.max(x1, x2) - viewBoxX) / viewBoxWidth) * rect.width,
-        y: rect.top - shellRect.top + ((((y1 + y2) / 2) - viewBoxY) / viewBoxHeight) * rect.height,
+        left: (rect.left - shellRect.left + ((Math.min(x1, x2) - viewBoxX) / viewBoxWidth) * rect.width) / scale,
+        right: (rect.left - shellRect.left + ((Math.max(x1, x2) - viewBoxX) / viewBoxWidth) * rect.width) / scale,
+        y: (rect.top - shellRect.top + ((((y1 + y2) / 2) - viewBoxY) / viewBoxHeight) * rect.height) / scale,
       }
     }
 
     // Prefer authored landing anchors from tower-piece descriptors. The CSS
     // separator scan below is an explicit migration shim until every rendered
     // landing carries a walk_rail anchor.
-    function measureLedge(el: HTMLElement, shellRect: DOMRect): Ledge | null {
-      const anchored = measureAnchorLedge(el, shellRect)
+    function measureLedge(el: HTMLElement, shellRect: DOMRect, scale: number): Ledge | null {
+      const anchored = measureAnchorLedge(el, shellRect, scale)
       if (anchored) return anchored
 
-      // Fallback: use the CSS separator's top edge when authored anchor data is absent.
+      // Fallback: use the CSS separator's top edge when authored anchor data is
+      // absent. The ::before top is a CSS px (already canvas-local); only the
+      // client deltas need de-scaling.
       const rect = el.getBoundingClientRect()
       if (rect.width === 0) return null
       const railTop = Number.parseFloat(window.getComputedStyle(el, '::before').top)
       return {
         el,
-        left: rect.left - shellRect.left + LEDGE_INSET_PX,
-        right: rect.right - shellRect.left - LEDGE_INSET_PX,
-        y: rect.top - shellRect.top + (Number.isFinite(railTop) ? railTop : 0),
+        left: (rect.left - shellRect.left) / scale + LEDGE_INSET_PX,
+        right: (rect.right - shellRect.left) / scale - LEDGE_INSET_PX,
+        y: (rect.top - shellRect.top) / scale + (Number.isFinite(railTop) ? railTop : 0),
       }
     }
 
     function scanLedges(): Ledge[] {
       const shellRect = shell.getBoundingClientRect()
-      const anchoredNodes = shell.querySelectorAll<HTMLElement>('.tower-landing[data-walk-rail-x1]')
+      const scale = canvasScale()
+      const anchoredNodes = shell.querySelectorAll<HTMLElement>('.tower-section-separator[data-walk-rail-x1]')
       const nodes = anchoredNodes.length
         ? anchoredNodes
         : shell.querySelectorAll<HTMLElement>('.tower-section-separator')
       const ledges: Ledge[] = []
       for (const el of Array.from(nodes)) {
-        const ledge = measureLedge(el, shellRect)
+        const ledge = measureLedge(el, shellRect, scale)
         if (ledge) ledges.push(ledge)
       }
       return ledges
@@ -349,7 +372,7 @@ export function useCharacterController({
       // Mid-move states don't survive a re-init; settle to a resting pose.
       mode = grounded ? 'idle' : 'float'
       if (grounded) {
-        const ledge = measureLedge(grounded.el, shell.getBoundingClientRect())
+        const ledge = measureLedge(grounded.el, shell.getBoundingClientRect(), canvasScale())
         if (ledge) {
           pos = { x: ledge.left + grounded.xFraction * (ledge.right - ledge.left), y: ledge.y }
         }
@@ -380,7 +403,7 @@ export function useCharacterController({
         }
         anchor = { el: best.el, xFraction: 0.5 }
       }
-      const ledge = measureLedge(anchor.el, shell.getBoundingClientRect())
+      const ledge = measureLedge(anchor.el, shell.getBoundingClientRect(), canvasScale())
       if (!ledge) return
       pos = {
         x: ledge.left + anchor.xFraction * (ledge.right - ledge.left),
@@ -404,7 +427,10 @@ export function useCharacterController({
       }
 
       const shellRect = shell.getBoundingClientRect()
-      const point = { x: e.clientX - shellRect.left, y: e.clientY - shellRect.top }
+      const scale = canvasScale()
+      // Clicks can land outside the canvas (the open sky); de-scaling keeps the
+      // mapping linear so a far-sky target resolves to open-air flight.
+      const point = { x: (e.clientX - shellRect.left) / scale, y: (e.clientY - shellRect.top) / scale }
       const ledge = ledgeAt(point)
       const next: Target = ledge
         ? { x: clamp(point.x, ledge.left, ledge.right), y: ledge.y, ledge }
@@ -549,8 +575,8 @@ export function useCharacterController({
 
     const resizeObserver = new ResizeObserver(reanchor)
     resizeObserver.observe(shell)
-    shell.addEventListener('pointerdown', onPointerDown)
-    shell.addEventListener('click', onClick)
+    surface.addEventListener('pointerdown', onPointerDown)
+    surface.addEventListener('click', onClick)
     if (!restoreSpawn()) trySpawn()
     raf = requestAnimationFrame(tick)
 
@@ -558,8 +584,8 @@ export function useCharacterController({
       disposed = true
       cancelAnimationFrame(raf)
       resizeObserver.disconnect()
-      shell.removeEventListener('pointerdown', onPointerDown)
-      shell.removeEventListener('click', onClick)
+      surface.removeEventListener('pointerdown', onPointerDown)
+      surface.removeEventListener('click', onClick)
       cancelRandom()
       window.clearTimeout(teleportTimer)
     }

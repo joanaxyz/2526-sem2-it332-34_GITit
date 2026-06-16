@@ -60,6 +60,10 @@ def test_tower_piece_descriptor_includes_piece_metadata():
         "state_variants": {},
         "svg_sanitized": True,
         "svg": None,
+        "content_type": None,
+        "natural_width": None,
+        "natural_height": None,
+        "is_raster": False,
     }
 
 

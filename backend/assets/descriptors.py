@@ -16,7 +16,7 @@ from django.core.cache import cache
 
 from assets.models import KIND_CHARACTER, KIND_MONSTER, KIND_TOWER_PIECE, Asset, TowerPieceAsset
 
-_CACHE_VERSION = 6
+_CACHE_VERSION = 7
 logger = logging.getLogger(__name__)
 
 # Production caches descriptors indefinitely (busted by `assets.signals` on write)
@@ -51,6 +51,7 @@ def _cache_key(kind: str) -> str:
 
 
 def sprite_descriptor(sprite) -> dict:
+    content_type = _content_type_for(sprite.image.name if sprite.image else "")
     return {
         "url": sprite.image.url if sprite.image else "",
         "frame_count": sprite.frame_count,
@@ -58,6 +59,10 @@ def sprite_descriptor(sprite) -> dict:
         "rows": sprite.rows,
         "frame_width": sprite.frame_width,
         "frame_height": sprite.frame_height,
+        "natural_width": sprite.frame_width,
+        "natural_height": sprite.frame_height,
+        "content_type": content_type,
+        "is_raster": bool(content_type and not content_type.endswith("svg+xml")),
         "fps": sprite.fps,
         "loops": sprite.loops,
     }
@@ -95,6 +100,13 @@ def asset_descriptor(asset: Asset) -> dict:
         except TowerPieceAsset.DoesNotExist:
             tower_piece = None
         if tower_piece:
+            default_sprite = next(
+                (s for s in asset.sprites.all() if s.action == "default"),
+                None,
+            )
+            default_sprite_payload = (
+                sprite_descriptor(default_sprite) if default_sprite is not None else {}
+            )
             payload["piece_type"] = tower_piece.piece_type
             payload["tower_piece"] = {
                 "piece_type": tower_piece.piece_type,
@@ -105,6 +117,10 @@ def asset_descriptor(asset: Asset) -> dict:
                 "state_variants": tower_piece.state_variants or {},
                 "svg_sanitized": tower_piece.svg_sanitized,
                 "svg": _inline_svg(asset),
+                "content_type": default_sprite_payload.get("content_type"),
+                "natural_width": default_sprite_payload.get("natural_width"),
+                "natural_height": default_sprite_payload.get("natural_height"),
+                "is_raster": default_sprite_payload.get("is_raster", False),
             }
     return payload
 
@@ -191,3 +207,18 @@ def clear_descriptor_cache() -> None:
         cache.delete_many([_cache_key(kind) for kind, _label in ASSET_KINDS])
     except Exception as exc:  # pragma: no cover - depends on cache backend/network.
         logger.warning("Could not clear asset descriptor cache: %s", exc)
+
+
+def _content_type_for(name: str) -> str:
+    lowered = name.lower()
+    if lowered.endswith(".svg"):
+        return "image/svg+xml"
+    if lowered.endswith(".png"):
+        return "image/png"
+    if lowered.endswith(".webp"):
+        return "image/webp"
+    if lowered.endswith(".gif"):
+        return "image/gif"
+    if lowered.endswith(".jpg") or lowered.endswith(".jpeg"):
+        return "image/jpeg"
+    return ""

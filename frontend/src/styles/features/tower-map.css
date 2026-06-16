@@ -1695,6 +1695,21 @@
   overflow: visible;
 }
 
+.tower-base-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.piece-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+}
+
 .tower-section-separator.is-continuation {
   margin-bottom: -0.82rem;
 }
@@ -1702,6 +1717,28 @@
 .tower-section-separator.is-base {
   width: min(100%, 37.5rem);
   margin-bottom: 0;
+}
+
+.tower-piece-foreground {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.tower-piece-foreground .piece-svg,
+.tower-piece-foreground .piece-image {
+  width: 100%;
+  height: 100%;
+}
+
+.tower-piece-foreground .piece-svg > svg,
+.tower-piece-foreground .piece-image {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
 }
 
 /* ── Tower companion: the click-driven character sprite. The layer covers the
@@ -1720,7 +1757,9 @@
   inset: 0;
   z-index: 5;
   pointer-events: none;
-  overflow: hidden;
+  /* No clip: the companion can be sent into the open sky beyond the tower
+     canvas, so he must stay visible past the layer's edges. */
+  overflow: visible;
 }
 
 .tower-character {

@@ -161,7 +161,7 @@ def test_official_fork_resyncs_unedited_snapshot_after_storey_reseed(
     assert {
         piece.storey_index
         for piece in TowerPieceInstance.objects.filter(tower_design_id=fork_id)
-        if piece.piece_type != "crown"
+        if piece.piece_type not in {"crown", "base"}
     } == {STOREY_TEMPLATE_INDEX}
 
     Storey.objects.all().delete()
@@ -174,7 +174,7 @@ def test_official_fork_resyncs_unedited_snapshot_after_storey_reseed(
     assert {
         piece.storey_index
         for piece in TowerPieceInstance.objects.filter(tower_design_id=fork_id)
-        if piece.piece_type != "crown"
+        if piece.piece_type not in {"crown", "base"}
     } == {STOREY_TEMPLATE_INDEX}
     assert {artifact["role"] for artifact in refreshed.json()["artifacts"]} == {
         "adventure",
@@ -222,7 +222,7 @@ def test_official_fork_resync_preserves_edited_snapshot_after_storey_reseed(
     assert {
         piece.storey_index
         for piece in TowerPieceInstance.objects.filter(tower_design_id=fork_id)
-        if piece.piece_type != "crown"
+        if piece.piece_type not in {"crown", "base"}
     } == {STOREY_TEMPLATE_INDEX}
 
 
@@ -404,7 +404,7 @@ def test_official_view_uses_template_when_fork_storey_index_is_stale(
     )
     fork_section.transform = {"y": 44}
     fork_section.save(update_fields=["transform"])
-    TowerPieceInstance.objects.filter(tower_design_id=fork_id).exclude(piece_type="crown").update(
+    TowerPieceInstance.objects.filter(tower_design_id=fork_id).exclude(piece_type__in=["crown", "base"]).update(
         storey_index=999999
     )
 

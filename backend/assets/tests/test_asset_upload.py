@@ -1,3 +1,5 @@
+from io import BytesIO
+
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.exceptions import ValidationError
@@ -54,9 +56,62 @@ def test_upload_creates_owned_private_tower_piece(django_user_model):
     assert asset.is_published is False
     piece = TowerPieceAsset.objects.get(asset=asset)
     assert piece.view_box == "-2.5 -2.5 15 15"
-    assert piece.anchors == {}
+    assert piece.anchors == {"walk_rail": {"x1": -2.5, "y1": 0.5, "x2": 12.5, "y2": 0.5}}
+    assert piece.bounds == {
+        "x": -2.5,
+        "y": -2.5,
+        "width": 15.0,
+        "height": 15.0,
+        "artifact_safe_bounds": {"x": -2.5, "y": -2.5, "width": 15.0, "height": 15.0},
+    }
     sprite = AssetSprite.objects.get(asset=asset, action="default")
+    assert (sprite.frame_width, sprite.frame_height) == (15, 15)
     assert b'viewBox="-2.5 -2.5 15 15"' in sprite.image.read()
+
+
+@pytest.mark.django_db
+def test_upload_raster_tower_piece_crops_alpha_and_keeps_png_geometry(django_user_model, settings, tmp_path):
+    settings.MEDIA_ROOT = tmp_path
+    from PIL import Image
+
+    user = make_user(django_user_model)
+    client = APIClient()
+    client.force_authenticate(user=user)
+    source = Image.new("RGBA", (12, 10), (0, 0, 0, 0))
+    for x in range(3, 9):
+        for y in range(2, 7):
+            source.putpixel((x, y), (120, 220, 255, 255))
+    data = BytesIO()
+    source.save(data, format="PNG")
+
+    response = client.post(
+        "/api/assets/",
+        {
+            "kind": "tower_piece",
+            "label": "Raster Landing",
+            "piece_type": "landing",
+            "file": SimpleUploadedFile("landing.png", data.getvalue(), content_type="image/png"),
+        },
+        format="multipart",
+    )
+
+    assert response.status_code == 201, response.content
+    asset = Asset.objects.get(owner=user, label="Raster Landing")
+    piece = TowerPieceAsset.objects.get(asset=asset)
+    assert piece.view_box == "0 0 6 5"
+    assert piece.bounds == {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 5,
+        "artifact_safe_bounds": {"x": 0, "y": 0, "width": 6, "height": 5},
+    }
+    assert piece.anchors == {"walk_rail": {"x1": 0.0, "y1": 1.0, "x2": 6.0, "y2": 1.0}}
+    sprite = AssetSprite.objects.get(asset=asset, action="default")
+    assert sprite.image.name.endswith(".png")
+    assert (sprite.frame_width, sprite.frame_height, sprite.frame_count) == (6, 5, 1)
+    with Image.open(sprite.image) as cropped:
+        assert cropped.size == (6, 5)
 
 
 @pytest.mark.django_db
@@ -81,6 +136,9 @@ def test_upload_tower_artifact_stores_cropped_bounds_and_action_sprites(django_u
     asset = Asset.objects.get(owner=user, label="Quest Relic")
     assert asset.config["view_box"] == "-2.5 -2.5 15 15"
     assert asset.config["bounds"] == {"x": -2.5, "y": -2.5, "width": 15.0, "height": 15.0}
+    assert asset.config["natural_width"] == 15
+    assert asset.config["natural_height"] == 15
+    assert asset.config["content_type"] == "image/svg+xml"
     assert set(AssetSprite.objects.filter(asset=asset).values_list("action", flat=True)) == {
         "default",
         "hover",

@@ -5,13 +5,14 @@ from rest_framework.test import APIClient
 from assets.models import (
     KIND_TOWER_ARTIFACT,
     KIND_TOWER_PIECE,
+    TOWER_PIECE_BASE,
     TOWER_PIECE_LANDING,
     TOWER_PIECE_SECTION,
     Asset,
     TowerPieceAsset,
 )
 from authoring.models import ContentDefinition
-from tower_designs.models import ArtifactPlacement, TowerDesign, TowerPieceInstance
+from tower_designs.models import BASE_STOREY_INDEX, ArtifactPlacement, TowerDesign, TowerPieceInstance
 
 
 def make_user(django_user_model, username="student"):
@@ -113,6 +114,77 @@ def test_raise_tower_is_idempotent(django_user_model):
     # Same tower returned, not a second one.
     assert second.json()["id"] == first.json()["id"]
     assert TowerDesign.objects.filter(owner=user, origin="personal").count() == 1
+
+
+@pytest.mark.django_db
+def test_base_piece_is_non_repeatable_via_api(django_user_model):
+    user = make_user(django_user_model)
+    client = APIClient()
+    client.force_authenticate(user=user)
+    design_id = client.post("/api/tower-designs/", {"slug": "base-tower", "title": "Tower"}, format="json").json()["id"]
+    base_a = Asset.objects.create(kind=KIND_TOWER_PIECE, slug="base-a", label="Base A")
+    base_b = Asset.objects.create(kind=KIND_TOWER_PIECE, slug="base-b", label="Base B")
+    TowerPieceAsset.objects.create(asset=base_a, piece_type=TOWER_PIECE_BASE)
+    TowerPieceAsset.objects.create(asset=base_b, piece_type=TOWER_PIECE_BASE)
+
+    first = client.post(
+        f"/api/tower-designs/{design_id}/pieces/",
+        {"piece_asset_id": base_a.id, "piece_type": "base"},
+        format="json",
+    )
+    second = client.post(
+        f"/api/tower-designs/{design_id}/pieces/",
+        {"piece_asset_id": base_b.id, "piece_type": "base", "sort_order": 7},
+        format="json",
+    )
+
+    assert first.status_code == 201, first.content
+    assert second.status_code == 201, second.content
+    bases = TowerPieceInstance.objects.filter(tower_design_id=design_id, piece_type="base")
+    assert bases.count() == 1
+    base = bases.get()
+    assert base.id == first.json()["id"] == second.json()["id"]
+    assert base.piece_asset_id == base_b.id
+    assert base.storey_index == BASE_STOREY_INDEX
+    assert base.sort_order == 7
+
+
+@pytest.mark.django_db
+def test_add_piece_inserts_and_shifts_sort_order(django_user_model):
+    user = make_user(django_user_model)
+    client = APIClient()
+    client.force_authenticate(user=user)
+    design_id = client.post("/api/tower-designs/", {"slug": "ordered-tower", "title": "Tower"}, format="json").json()["id"]
+    section_a = Asset.objects.create(kind=KIND_TOWER_PIECE, slug="section-a", label="Section A")
+    section_b = Asset.objects.create(kind=KIND_TOWER_PIECE, slug="section-b", label="Section B")
+    landing = Asset.objects.create(kind=KIND_TOWER_PIECE, slug="landing-a", label="Landing")
+    TowerPieceAsset.objects.create(asset=section_a, piece_type=TOWER_PIECE_SECTION)
+    TowerPieceAsset.objects.create(asset=section_b, piece_type=TOWER_PIECE_SECTION)
+    TowerPieceAsset.objects.create(asset=landing, piece_type=TOWER_PIECE_LANDING)
+
+    client.post(
+        f"/api/tower-designs/{design_id}/pieces/",
+        {"piece_asset_id": section_a.id, "piece_type": "section", "sort_order": 0},
+        format="json",
+    )
+    client.post(
+        f"/api/tower-designs/{design_id}/pieces/",
+        {"piece_asset_id": section_b.id, "piece_type": "section", "sort_order": 1},
+        format="json",
+    )
+    inserted = client.post(
+        f"/api/tower-designs/{design_id}/pieces/",
+        {"piece_asset_id": landing.id, "piece_type": "landing", "sort_order": 1},
+        format="json",
+    )
+
+    assert inserted.status_code == 201, inserted.content
+    assert list(
+        TowerPieceInstance.objects.filter(tower_design_id=design_id).order_by("sort_order", "id").values_list(
+            "piece_asset__slug",
+            "sort_order",
+        )
+    ) == [("section-a", 0), ("landing-a", 1), ("section-b", 2)]
 
 
 @pytest.mark.django_db
