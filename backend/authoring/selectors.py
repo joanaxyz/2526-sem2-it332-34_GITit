@@ -4,26 +4,26 @@ from authoring.models import (
     STATUS_PUBLISHED,
     VISIBILITY_PUBLIC,
     VISIBILITY_STORE,
-    AuthoringStorey,
+    AuthoringChapter,
     ContentDefinition,
 )
 
 
-def storey_payload(storey: AuthoringStorey) -> dict:
+def chapter_payload(chapter: AuthoringChapter) -> dict:
     return {
-        "id": storey.id,
-        "owner_id": storey.owner_id,
-        "slug": storey.slug,
-        "title": storey.title,
-        "summary": storey.summary,
-        "sort_order": storey.sort_order,
-        "chest_rewards": storey.chest_rewards,
-        "mob_roster": storey.mob_roster,
-        "boss_roster": storey.boss_roster,
-        "pass_bar_fraction": storey.pass_bar_fraction,
-        "battle_stage": storey.battle_stage,
-        "created_at": storey.created_at,
-        "updated_at": storey.updated_at,
+        "id": chapter.id,
+        "owner_id": chapter.owner_id,
+        "slug": chapter.slug,
+        "title": chapter.title,
+        "summary": chapter.summary,
+        "sort_order": chapter.sort_order,
+        "chest_rewards": chapter.chest_rewards,
+        "mob_roster": chapter.mob_roster,
+        "boss_roster": chapter.boss_roster,
+        "pass_bar_fraction": chapter.pass_bar_fraction,
+        "battle_stage": chapter.battle_stage,
+        "created_at": chapter.created_at,
+        "updated_at": chapter.updated_at,
     }
 
 
@@ -41,7 +41,7 @@ def content_payload(content: ContentDefinition, *, include_definition: bool = Tr
         "id": content.id,
         "kind": content.kind,
         "owner_id": content.owner_id,
-        "storey_id": content.storey_id,
+        "chapter_id": content.chapter_id,
         "source_definition_id": content.source_definition_id,
         "visibility": content.visibility,
         "status": content.status,

@@ -1,10 +1,10 @@
 """Seed the Git command library.
 
-The Storey Book renders authored command reference content (overview, syntax,
+The Chapter Book renders authored command reference content (overview, syntax,
 options, arguments, effects, diagrams). Entries are authored in
 ``curriculum/library.py`` (``LIBRARY_ENTRIES``) using the same builder helpers
 the book uses, built through ``_content`` here, and persisted to the
-``LibraryEntry`` model. ``storey_book`` resolves each registered command to its
+``LibraryEntry`` model. ``chapter_book`` resolves each registered command to its
 seeded entry; commands without one fall back to a synthesized summary page.
 
 Run with:  python manage.py seed_command_library
@@ -22,7 +22,7 @@ from curriculum.models import LibraryEntry
 
 
 class Command(BaseCommand):
-    help = "Seed the Git command library (LibraryEntry rows for the Storey Book)."
+    help = "Seed the Git command library (LibraryEntry rows for the Chapter Book)."
 
     @transaction.atomic
     def handle(self, *args: Any, **options: Any) -> None:

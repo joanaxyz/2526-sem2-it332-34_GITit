@@ -51,10 +51,10 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
         if supports["expected_state"] and expected_target
         else None
     )
-    storey_payload = {
-        "id": run.storey_id,
-        "number": run.storey.number,
-        "title": run.storey.title,
+    chapter_payload = {
+        "id": run.chapter_id,
+        "number": run.chapter.number,
+        "title": run.chapter.title,
     }
 
     steps = list(run.steps.order_by("id")) if include_steps else []
@@ -67,10 +67,10 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
         "first_attempt_star_eligible": run.first_attempt_star_eligible,
         "challenge": _challenge_payload(run),
         "scenario_context": context,
-        "storey": storey_payload,
+        "chapter": chapter_payload,
         # Authored battle-stage dressing (background + artifacts); constant per
-        # storey so it rides the run payload, not the per-command patch.
-        "battle_stage": stage_payload(run.storey, user=run.user),
+        # chapter so it rides the run payload, not the per-command patch.
+        "battle_stage": stage_payload(run.chapter, user=run.user),
         "difficulty": run.difficulty or None,
         "variant": {
             "id": run.variant_id,

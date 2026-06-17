@@ -6,8 +6,8 @@ from challenges.models import Challenge, ChallengeLevel, ChallengeRun
 from challenges.payloads import challenge_run_payload
 from challenges.services import ChallengeRunService
 from command_adventures.models import AdventureLevel, AdventureRun, CommandAdventure
-from curriculum.models import CommandSkill, Storey, Tome
-from curriculum.selectors import storey_content_page
+from curriculum.models import CommandSkill, Chapter, Tome
+from curriculum.selectors import chapter_content_page
 from practice.context import ScenarioContextNormalizer
 from practice.services import CommandProcessingService
 from practice.visualization import RepositoryVisualizationService
@@ -24,10 +24,10 @@ def make_user(django_user_model, username: str = "student"):
     )
 
 
-def pass_adventure_for(user, storey):
-    """Mark the storey's Command Adventure as passed so its EASY challenge unlocks.
-    Challenge entry is now gated on passing the storey's adventure first."""
-    adventure = CommandAdventure.objects.filter(storey=storey, is_published=True).first()
+def pass_adventure_for(user, chapter):
+    """Mark the chapter's Command Adventure as passed so its EASY challenge unlocks.
+    Challenge entry is now gated on passing the chapter's adventure first."""
+    adventure = CommandAdventure.objects.filter(chapter=chapter, is_published=True).first()
     if adventure is not None:
         AdventureRun.objects.create(
             user=user, command_adventure=adventure, passed_at=timezone.now()
@@ -38,7 +38,7 @@ def test_seed_curriculum_v2_creates_feature_owned_content(db):
     call_command("seed_curriculum_v2")
 
     assert Tome.objects.filter(is_published=True).exists()
-    assert not Storey.objects.filter(number=0).exists()
+    assert not Chapter.objects.filter(number=0).exists()
     assert CommandSkill.objects.filter(base_command="git add").exists()
     assert CommandAdventure.objects.filter(slug="tracking-changes-snapshots-command-adventure").exists()
     assert AdventureLevel.objects.filter(command_form__usage_form="git add <file>").exists()
@@ -46,26 +46,26 @@ def test_seed_curriculum_v2_creates_feature_owned_content(db):
     assert set(challenge.challenge_levels.values_list("difficulty", flat=True)) == {"easy", "medium", "hard"}
 
 
-def test_storey_content_page_returns_canonical_sections(db, django_user_model):
+def test_chapter_content_page_returns_canonical_sections(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
-    storey = Storey.objects.get(slug="tracking-changes-snapshots")
-    challenge_storey = Challenge.objects.filter(is_published=True).order_by("id").first().storey
+    chapter = Chapter.objects.get(slug="tracking-changes-snapshots")
+    challenge_chapter = Challenge.objects.filter(is_published=True).order_by("id").first().chapter
 
-    adventure_page = storey_content_page(
+    adventure_page = chapter_content_page(
         user=user,
-        storey_id=storey.id,
+        chapter_id=chapter.id,
         section="command_adventures",
     )
-    skill_page = storey_content_page(
+    skill_page = chapter_content_page(
         user=user,
-        storey_id=storey.id,
+        chapter_id=chapter.id,
         section="command_skills",
         limit=1,
     )
-    challenge_page = storey_content_page(
+    challenge_page = chapter_content_page(
         user=user,
-        storey_id=challenge_storey.id,
+        chapter_id=challenge_chapter.id,
         section="challenges",
     )
 
@@ -80,11 +80,11 @@ def test_storey_content_page_returns_canonical_sections(db, django_user_model):
     assert "active_session_id" not in challenge_page["results"][0]["levels"][0]
 
 
-def test_challenge_run_payload_uses_challenge_and_storey_terms(db, django_user_model):
+def test_challenge_run_payload_uses_challenge_and_chapter_terms(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
     level = ChallengeLevel.objects.get(challenge__slug=CANONICAL_CHALLENGE_SLUG, difficulty="easy")
-    pass_adventure_for(user, level.storey)
+    pass_adventure_for(user, level.chapter)
 
     run = ChallengeRunService().start_run(
         user=user,
@@ -94,7 +94,7 @@ def test_challenge_run_payload_uses_challenge_and_storey_terms(db, django_user_m
     payload = challenge_run_payload(run)
 
     assert payload["challenge"]["level_id"] == level.id
-    assert payload["storey"]["id"] == level.storey.id
+    assert payload["chapter"]["id"] == level.chapter.id
     assert payload["difficulty"] == "easy"
     assert payload["review_mode"] is False
     assert "practice_kind" not in payload
@@ -110,7 +110,7 @@ def test_challenge_run_http_lifecycle_retry_and_review(db, django_user_model):
     level = ChallengeLevel.objects.get(challenge__slug=CANONICAL_CHALLENGE_SLUG, difficulty="easy")
     level.required_successful_attempts = 1
     level.save(update_fields=["required_successful_attempts"])
-    pass_adventure_for(user, level.storey)
+    pass_adventure_for(user, level.chapter)
     client = APIClient()
     client.force_authenticate(user=user)
 
@@ -232,7 +232,7 @@ def test_hard_challenge_payload_hides_expected_state(db, django_user_model):
     variant = level.challenge_variants.get(is_published=True)
     run = ChallengeRun.objects.create(
         user=user,
-        storey=level.storey,
+        chapter=level.chapter,
         challenge=level.challenge,
         challenge_level=level,
         challenge_variant=variant,
@@ -260,7 +260,7 @@ def test_expanded_command_catalog_is_published(db):
 
     assert {"git init", "git status", "git add", "git commit", "git switch"} <= published_commands
     assert {"git clone", "git fetch", "git pull", "git push"} <= published_commands
-    assert Storey.objects.filter(is_published=True).count() == 7
+    assert Chapter.objects.filter(is_published=True).count() == 7
 
 
 def test_seed_curriculum_v2_validate_passes_for_published_content(db):
@@ -271,7 +271,7 @@ def test_status_challenge_completes_with_explicit_process_requirement(db, django
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
     level = ChallengeLevel.objects.get(challenge__slug=CANONICAL_CHALLENGE_SLUG, difficulty="easy")
-    pass_adventure_for(user, level.storey)
+    pass_adventure_for(user, level.chapter)
     run = ChallengeRunService().start_run(
         user=user,
         level=level,

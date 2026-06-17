@@ -21,17 +21,16 @@ from assets.models import (
     KIND_BATTLE_ARTIFACT,
     KIND_CHARACTER,
     KIND_MONSTER,
-    KIND_TOWER_ARTIFACT,
-    KIND_TOWER_PIECE,
+    KIND_RELIC,
     Asset,
     AssetSprite,
-    TowerPieceAsset,
+    RelicAsset,
 )
 from assets.svg_crop import crop_svg_markup
 from assets.seed_data.battle_artifacts import BATTLE_ARTIFACT_SPECS
 from assets.seed_data.characters import CHARACTER_SPECS
 from assets.seed_data.monsters import LOOPING_ACTIONS, MONSTER_SPECS
-from assets.seed_data.tower_pieces import OFFICIAL_TOWER_ARTIFACT_SPECS, OFFICIAL_TOWER_PIECE_SPECS
+from assets.seed_data.relics import OFFICIAL_RELIC_SPECS
 
 # All official sprite source files live under backend/assets/seed_assets/ and are
 # the single committed source of truth (the frontend renders them from media via
@@ -105,8 +104,7 @@ class Command(BaseCommand):
             monster_count, monster_stale = self._seed_monsters()
             character_count, character_stale = self._seed_characters()
             artifact_count, artifact_stale = self._seed_battle_artifacts()
-            tower_artifact_count, tower_artifact_stale = self._seed_tower_artifacts()
-            tower_piece_count, tower_piece_stale = self._seed_tower_pieces()
+            relic_count, relic_stale = self._seed_relics()
         self._cleanup_uncompressed_seed_sources()
         self.stdout.write(
             self.style.SUCCESS(
@@ -114,8 +112,7 @@ class Command(BaseCommand):
                 f"{monster_count} monsters ({monster_stale} retired), "
                 f"{character_count} characters ({character_stale} retired), "
                 f"{artifact_count} battle artifacts ({artifact_stale} retired), "
-                f"{tower_artifact_count} tower artifacts ({tower_artifact_stale} retired), "
-                f"{tower_piece_count} tower pieces ({tower_piece_stale} retired)."
+                f"{relic_count} relics ({relic_stale} retired)."
             )
         )
         if not options.get("skip_grant"):
@@ -192,27 +189,14 @@ class Command(BaseCommand):
         )
         return len(seeded_slugs), stale
 
-    def _seed_tower_artifacts(self) -> tuple[int, int]:
+    def _seed_relics(self) -> tuple[int, int]:
         seeded_slugs: list[str] = []
-        for spec in OFFICIAL_TOWER_ARTIFACT_SPECS:
-            self._seed_tower_artifact(spec)
+        for spec in OFFICIAL_RELIC_SPECS:
+            self._seed_relic(spec)
             seeded_slugs.append(spec["slug"])
 
         stale = (
-            Asset.objects.filter(kind=KIND_TOWER_ARTIFACT, owner__isnull=True)
-            .exclude(slug__in=seeded_slugs)
-            .update(is_published=False)
-        )
-        return len(seeded_slugs), stale
-
-    def _seed_tower_pieces(self) -> tuple[int, int]:
-        seeded_slugs: list[str] = []
-        for spec in OFFICIAL_TOWER_PIECE_SPECS:
-            self._seed_tower_piece(spec)
-            seeded_slugs.append(spec["slug"])
-
-        stale = (
-            Asset.objects.filter(kind=KIND_TOWER_PIECE, owner__isnull=True)
+            Asset.objects.filter(kind=KIND_RELIC, owner__isnull=True)
             .exclude(slug__in=seeded_slugs)
             .update(is_published=False)
         )
@@ -325,10 +309,10 @@ class Command(BaseCommand):
                 _replace_sprite_file(sprite, f"{slug}__{action}.png", handle)
                 sprite.save()
 
-    def _seed_tower_piece(self, spec: dict) -> None:
+    def _seed_relic(self, spec: dict) -> None:
         path = self._tower_assets_root / spec["svg"]
         if not path.exists():
-            raise CommandError(f"{spec['slug']}: missing tower piece SVG {path}")
+            raise CommandError(f"{spec['slug']}: missing relic SVG {path}")
         raw_svg = path.read_bytes()
         seeded_svg, cropped_view_box = crop_svg_markup(raw_svg)
         view_box = cropped_view_box or spec.get("view_box", "")
@@ -336,7 +320,7 @@ class Command(BaseCommand):
         asset, _ = Asset.objects.update_or_create(
             slug=spec["slug"],
             defaults={
-                "kind": KIND_TOWER_PIECE,
+                "kind": KIND_RELIC,
                 "owner": None,
                 "label": spec["label"],
                 "default_scale": 1.0,
@@ -345,15 +329,12 @@ class Command(BaseCommand):
                 "is_published": True,
             },
         )
-        TowerPieceAsset.objects.update_or_create(
+        RelicAsset.objects.update_or_create(
             asset=asset,
             defaults={
-                "piece_type": spec["piece_type"],
                 "view_box": view_box,
-                "anchors": spec.get("anchors", {}),
-                "bounds": spec.get("bounds", {}),
-                "interaction_zones": spec.get("interaction_zones", {}),
-                "state_variants": spec.get("state_variants", {}),
+                "interactive_viewbox": spec.get("interactive_viewbox", {}),
+                "landing_viewbox": spec.get("landing_viewbox", {}),
                 "svg_sanitized": True,
             },
         )
@@ -379,48 +360,6 @@ class Command(BaseCommand):
             old.delete()
 
         with BytesIO(seeded_svg) as handle:
-            _replace_sprite_file(sprite, f"{spec['slug']}__default.svg", handle)
-            sprite.save()
-
-    def _seed_tower_artifact(self, spec: dict) -> None:
-        asset, _ = Asset.objects.update_or_create(
-            slug=spec["slug"],
-            defaults={
-                "kind": KIND_TOWER_ARTIFACT,
-                "owner": None,
-                "label": spec["label"],
-                "default_scale": spec.get("scale", 1.0),
-                "tags": spec.get("tags", []),
-                "config": spec.get("config", {}),
-                "is_published": True,
-            },
-        )
-        TowerPieceAsset.objects.filter(asset=asset).delete()
-
-        path = self._tower_assets_root / spec["svg"]
-        if not path.exists():
-            raise CommandError(f"{spec['slug']}: missing tower artifact SVG {path}")
-        frame_width, frame_height = _view_box_size(spec.get("view_box", ""))
-        sprite, _ = AssetSprite.objects.get_or_create(
-            asset=asset,
-            action="default",
-            defaults={
-                "frame_width": frame_width,
-                "frame_height": frame_height,
-                "fps": 1,
-                "loops": True,
-            },
-        )
-        sprite.frame_width = frame_width
-        sprite.frame_height = frame_height
-        sprite.fps = 1
-        sprite.loops = True
-
-        for old in asset.sprites.exclude(pk=sprite.pk):
-            old.image.delete(save=False)
-            old.delete()
-
-        with path.open("rb") as handle:
             _replace_sprite_file(sprite, f"{spec['slug']}__default.svg", handle)
             sprite.save()
 

@@ -39,20 +39,20 @@ def _default_chest_rewards() -> list[dict]:
     ]
 
 
-class AuthoringStorey(models.Model):
-    """A user-authored storey: a floor of their tower that GROUPS content.
+class AuthoringChapter(models.Model):
+    """A user-authored chapter: a floor of their tower that GROUPS content.
 
-    One storey can hold multiple adventures plus 1+ challenges and 1+ tomes, and
+    One chapter can hold multiple adventures plus 1+ challenges and 1+ tomes, and
     carries the floor-level settings shared by all of them: reward checkpoints
-    (GitCoin chests dropped along the storey's combined progress), the monster
+    (GitCoin chests dropped along the chapter's combined progress), the monster
     rosters its battles draw from, and the mastery pass-bar that unlocks the
-    storey's Challenge. Content authored "into" a storey compiles to one shared
-    runtime curriculum.Storey.
+    chapter's Challenge. Content authored "into" a chapter compiles to one shared
+    runtime curriculum.Chapter.
     """
 
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        related_name="authoring_storeys",
+        related_name="authoring_chapters",
         on_delete=models.CASCADE,
     )
     slug = models.SlugField()
@@ -64,8 +64,8 @@ class AuthoringStorey(models.Model):
     boss_roster = models.JSONField(default=list, blank=True)
     pass_bar_fraction = models.FloatField(default=0.6)
     # Authored battle-stage dressing (background + draggable artifacts) rendered
-    # behind the actors during this storey's battles. Compiled onto the runtime
-    # curriculum.Storey. See Storey.battle_stage for the shape.
+    # behind the actors during this chapter's battles. Compiled onto the runtime
+    # curriculum.Chapter. See Chapter.battle_stage for the shape.
     battle_stage = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -73,17 +73,17 @@ class AuthoringStorey(models.Model):
     class Meta:
         ordering = ["sort_order", "id"]
         constraints = [
-            models.UniqueConstraint(fields=["owner", "slug"], name="unique_authoring_storey_slug_per_owner"),
+            models.UniqueConstraint(fields=["owner", "slug"], name="unique_authoring_chapter_slug_per_owner"),
         ]
 
     def __str__(self) -> str:
-        return f"AuthoringStorey({self.slug})"
+        return f"AuthoringChapter({self.slug})"
 
 
 class ContentDefinition(models.Model):
     kind = models.CharField(max_length=20, choices=ContentKind.choices)
-    storey = models.ForeignKey(
-        AuthoringStorey,
+    chapter = models.ForeignKey(
+        AuthoringChapter,
         null=True,
         blank=True,
         related_name="contents",
@@ -155,8 +155,8 @@ class PublishedContentRuntime(models.Model):
         related_name="runtime",
         on_delete=models.CASCADE,
     )
-    storey = models.ForeignKey(
-        "curriculum.Storey", null=True, blank=True, on_delete=models.SET_NULL
+    chapter = models.ForeignKey(
+        "curriculum.Chapter", null=True, blank=True, on_delete=models.SET_NULL
     )
     command_adventure = models.ForeignKey(
         "adventures.CommandAdventure", null=True, blank=True, on_delete=models.SET_NULL

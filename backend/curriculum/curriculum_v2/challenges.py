@@ -1271,7 +1271,7 @@ CHALLENGES = [
         "coordinate-with-remote-history",
         "Coordinate with Remote History",
         "Use remote-tracking refs to decide whether to fetch, pull, merge, or publish.",
-        "The final storey combines collaboration with the earlier graph skills. The target is not 'use push'; it is 'make local and remote refs tell the right story.'",
+        "The final chapter combines collaboration with the earlier graph skills. The target is not 'use push'; it is 'make local and remote refs tell the right story.'",
         [
             level(
                 "easy",

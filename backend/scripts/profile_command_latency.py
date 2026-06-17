@@ -66,7 +66,7 @@ def test_profile_challenge_submit(db, django_user_model):
 
     level = ChallengeLevel.objects.get(challenge__slug="compose-clean-history", difficulty="easy")
     adventure = CommandAdventure.objects.filter(
-        storey=level.challenge.storey, is_published=True
+        chapter=level.challenge.chapter, is_published=True
     ).first()
     if adventure is not None:
         from django.utils import timezone

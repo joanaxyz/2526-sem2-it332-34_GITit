@@ -22,33 +22,25 @@ class AssetKind(models.TextChoices):
     MONSTER = "monster", "Monster"
     CHARACTER = "character", "Character"
     PROJECTILE = "projectile", "Projectile"
-    TOWER_PIECE = "tower_piece", "Tower piece"
-    TOWER_ARTIFACT = "tower_artifact", "Tower artifact"
-    # Set-pieces that live on the battle stage rather than in the tower
-    # structure - currently the crystal Blue defends.
+    # A floating Archive relic - the single structural asset that replaced the
+    # old tower pieces/artifacts. Its art carries an interactive viewbox
+    # (hover/click hotspot) and a landing viewbox (the companion's walk rail).
+    RELIC = "relic", "Relic"
+    # Set-pieces that live on the battle stage rather than in the Archive - the
+    # crystal Blue defends.
     BATTLE_ARTIFACT = "battle_artifact", "Battle artifact"
 
 
 KIND_MONSTER = AssetKind.MONSTER
 KIND_CHARACTER = AssetKind.CHARACTER
 KIND_PROJECTILE = AssetKind.PROJECTILE
-KIND_TOWER_PIECE = AssetKind.TOWER_PIECE
-KIND_TOWER_ARTIFACT = AssetKind.TOWER_ARTIFACT
+KIND_RELIC = AssetKind.RELIC
 KIND_BATTLE_ARTIFACT = AssetKind.BATTLE_ARTIFACT
 ASSET_KINDS = AssetKind.choices
 
-
-class TowerPieceType(models.TextChoices):
-    CROWN = "crown", "Crown"
-    BASE = "base", "Base"
-    SECTION = "section", "Section"
-    LANDING = "landing", "Landing"
-
-
-TOWER_PIECE_CROWN = TowerPieceType.CROWN
-TOWER_PIECE_BASE = TowerPieceType.BASE
-TOWER_PIECE_SECTION = TowerPieceType.SECTION
-TOWER_PIECE_LANDING = TowerPieceType.LANDING
+# Relic kinds: every Archive relic is a tome, adventure, or challenge (or plain
+# decor). Mirrors the old artifact roles; the kind lives on the placement, not
+# the asset, since one relic art can serve any kind.
 
 # Sharing model: official content has no owner; user content is private until
 # published public/to the store (the gallery + store land in later phases).
@@ -113,32 +105,35 @@ class Asset(models.Model):
         return f"Asset({self.kind}:{self.slug})"
 
 
-class TowerPieceAsset(models.Model):
-    """Tower-specific detail for assets that define structural tower geometry."""
+class RelicAsset(models.Model):
+    """Geometry detail for a ``relic`` asset.
 
-    asset = models.OneToOneField(
-        Asset, related_name="tower_piece", on_delete=models.CASCADE
-    )
-    piece_type = models.CharField(max_length=32, choices=TowerPieceType.choices)
+    A relic's SVG carries two transparent regions, stored here as defaults that a
+    placement may override:
+      - ``interactive_viewbox`` ``{x, y, width, height}`` - the hover/click
+        hotspot that opens the relic overview.
+      - ``landing_viewbox`` ``{x1, y1, x2, y2}`` - the rail the companion (Blue)
+        walks along.
+    Coordinates are in the relic's ``view_box`` space.
+    """
+
+    asset = models.OneToOneField(Asset, related_name="relic", on_delete=models.CASCADE)
     view_box = models.CharField(max_length=80, blank=True)
-    anchors = models.JSONField(default=dict, blank=True)
-    bounds = models.JSONField(default=dict, blank=True)
-    interaction_zones = models.JSONField(default=dict, blank=True)
-    state_variants = models.JSONField(default=dict, blank=True)
+    interactive_viewbox = models.JSONField(default=dict, blank=True)
+    landing_viewbox = models.JSONField(default=dict, blank=True)
     svg_sanitized = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ["piece_type", "asset__slug"]
-        indexes = [models.Index(fields=["piece_type"])]
+        ordering = ["asset__slug"]
 
     def __str__(self) -> str:
-        return f"TowerPieceAsset({self.piece_type}:{self.asset.slug})"
+        return f"RelicAsset({self.asset.slug})"
 
     def clean(self) -> None:
         super().clean()
-        if self.asset_id and self.asset.kind != KIND_TOWER_PIECE:
+        if self.asset_id and self.asset.kind != KIND_RELIC:
             raise ValidationError(
-                {"asset": "Tower piece metadata can only be attached to tower_piece assets."}
+                {"asset": "Relic metadata can only be attached to relic assets."}
             )
 
     def save(self, *args, **kwargs):

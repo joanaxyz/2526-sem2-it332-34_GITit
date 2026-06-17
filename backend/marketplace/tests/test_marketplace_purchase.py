@@ -1,7 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 
-from assets.models import KIND_TOWER_ARTIFACT, Asset
+from assets.models import KIND_RELIC, Asset
 from marketplace.models import Entitlement, StoreListing
 from progress.models import CoinTransaction, Wallet
 from progress.wallet import WalletService
@@ -21,7 +21,7 @@ def test_purchase_debits_wallet_and_grants_entitlement_once(django_user_model):
     buyer = make_user(django_user_model, "buyer")
     asset = Asset.objects.create(
         owner=seller,
-        kind=KIND_TOWER_ARTIFACT,
+        kind=KIND_RELIC,
         visibility="store",
         slug="banner",
         label="Banner",
@@ -54,7 +54,7 @@ def test_store_purchase_rejects_insufficient_balance(django_user_model):
     buyer = make_user(django_user_model, "buyer")
     asset = Asset.objects.create(
         owner=seller,
-        kind=KIND_TOWER_ARTIFACT,
+        kind=KIND_RELIC,
         visibility="store",
         slug="expensive-banner",
         label="Expensive Banner",

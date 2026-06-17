@@ -41,7 +41,7 @@ from evaluation.compiler import CompiledEvaluationSpecCache
 from evaluation.engine import EvaluationEngine
 from practice.models import CommandLog, CommandStep
 from practice.services import CommandExecutor, VariantTargetStateHashCache, log_command_step
-from progress.chests import StoreyChestService
+from progress.chests import ChapterChestService
 from simulator.services import RepositoryStateSimulator
 from simulator.workspace_files import WorkspaceFileError, WorkspaceFileStateService
 
@@ -50,14 +50,14 @@ def ordered_levels_for(
     adventure: CommandAdventure, *, with_prerequisites: bool = False
 ) -> list[AdventureLevel]:
     base_queryset = AdventureLevel.objects.filter(
-        command_form__command_skill__storey_id=adventure.storey_id,
+        command_form__command_skill__chapter_id=adventure.chapter_id,
         is_published=True,
         command_form__is_published=True,
         command_form__command_skill__is_published=True,
     ).select_related(
-        # `level.storey` (for the battle-state mob roster) walks this chain;
+        # `level.chapter` (for the battle-state mob roster) walks this chain;
         # selecting it here keeps attempt creation from issuing extra queries.
-        "command_form__command_skill__storey",
+        "command_form__command_skill__chapter",
     ).order_by("command_form__command_skill__sort_order", "command_form__sort_order", "sort_order", "id")
     queryset = base_queryset.filter(command_adventure=adventure)
     if not queryset.exists():
@@ -212,11 +212,11 @@ class AdventureRunService:
                 run.passed_at = timezone.now()
             run.save(update_fields=["session_score", "passed_at"])
             if newly_passed:
-                # Passing the adventure moves the storey progress bar; GitCoins
+                # Passing the adventure moves the chapter progress bar; GitCoins
                 # come from the progress chests, so check them now that
                 # passed_at is persisted.
-                StoreyChestService().award_chests(
-                    user=run.user, storey=run.command_adventure.storey
+                ChapterChestService().award_chests(
+                    user=run.user, chapter=run.command_adventure.chapter
                 )
 
         self._open_next(run=run, levels=levels)
@@ -322,7 +322,7 @@ class AdventureRunService:
                     Q(adventure_level__command_adventure=run.command_adventure)
                     | Q(
                         adventure_level__command_adventure__isnull=True,
-                        adventure_level__command_form__command_skill__storey=run.command_adventure.storey,
+                        adventure_level__command_form__command_skill__chapter=run.command_adventure.chapter,
                     ),
                     user=run.user,
                     introduced=True,

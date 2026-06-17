@@ -183,13 +183,13 @@ def adventure_run_payload(run: AdventureRun) -> dict:
             "title": run.command_adventure.title,
             "description": run.command_adventure.description,
         },
-        # The adventure's storey is its OneToOne owner; surfaced so the
-        # completion modal's "Back to Tower" lands on the right storey.
-        "storey_id": run.command_adventure.storey_id,
+        # The adventure's chapter is its OneToOne owner; surfaced so the
+        # completion modal's "Back to Tower" lands on the right chapter.
+        "chapter_id": run.command_adventure.chapter_id,
         # Authored battle-stage dressing (background + artifacts). Constant per
-        # storey, so it rides the run payload once; the per-command patch omits
+        # chapter, so it rides the run payload once; the per-command patch omits
         # it (the stage never changes mid-run). Null -> default sky + ledge.
-        "battle_stage": stage_payload(run.command_adventure.storey, user=run.user),
+        "battle_stage": stage_payload(run.command_adventure.chapter, user=run.user),
         "current_level_index": run.current_level_index,
         "total_levels": total_levels,
         "session_score": run.session_score,

@@ -70,7 +70,7 @@ def test_stats_adventure_only_user_gets_full_radar(db, django_user_model):
     adventure = CommandAdventure.objects.filter(is_published=True).first()
     level = (
         AdventureLevel.objects.filter(
-            command_form__command_skill__storey=adventure.storey, adventure_variants__isnull=False
+            command_form__command_skill__chapter=adventure.chapter, adventure_variants__isnull=False
         )
         .distinct()
         .first()

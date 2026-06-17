@@ -13,58 +13,58 @@ from assets.models import KIND_TOWER_PIECE, Asset, TowerPieceAsset
 from challenges.models import Challenge
 from command_adventures.models import CommandAdventure
 from curriculum.models import Tome
-from curriculum.selectors import published_storeys, tower_layout_payload
-from tower_designs.models import ORIGIN_OFFICIAL_FORK, TowerDesign
+from curriculum.selectors import published_chapters, relic_layout_payload
+from archive.models import ORIGIN_OFFICIAL_FORK, ArchiveDesign
 
 
 def live_layout():
     pieces, arts = [], []
     crown_seen = False
-    for storey in published_storeys():
-        adventures = list(CommandAdventure.objects.filter(storey=storey, is_published=True).order_by("sort_order", "id"))
-        tomes = list(Tome.objects.filter(storey=storey, is_published=True).order_by("sort_order", "id"))
-        challenges = list(Challenge.objects.filter(storey=storey, is_published=True).order_by("sort_order", "id"))
-        layout = tower_layout_payload(storey=storey, storey_id=storey.id,
+    for chapter in published_chapters():
+        adventures = list(CommandAdventure.objects.filter(chapter=chapter, is_published=True).order_by("sort_order", "id"))
+        tomes = list(Tome.objects.filter(chapter=chapter, is_published=True).order_by("sort_order", "id"))
+        challenges = list(Challenge.objects.filter(chapter=chapter, is_published=True).order_by("sort_order", "id"))
+        layout = relic_layout_payload(chapter=chapter, chapter_id=chapter.id,
                                       adventures=adventures, tomes=tomes, challenges=challenges)
         for p in layout["pieces"]:
             if p["pieceType"] == "crown":
                 if crown_seen:
                     continue
                 crown_seen = True
-            pieces.append((storey.id, p["pieceType"], p["assetSlug"]))
+            pieces.append((chapter.id, p["pieceType"], p["assetSlug"]))
         for a in layout["artifacts"]:
-            arts.append((storey.id, a["role"], a["assetSlug"]))
+            arts.append((chapter.id, a["role"], a["assetSlug"]))
     return pieces, arts
 
 
 print("=" * 72)
-print("DB engine:", TowerDesign.objects.db, "| using settings DATABASES['default']")
+print("DB engine:", ArchiveDesign.objects.db, "| using settings DATABASES['default']")
 from django.db import connection
 print("DB name:", connection.settings_dict.get("NAME"))
 
 print("\n" + "=" * 72)
-print("PUBLISHED STOREYS (live curriculum)")
+print("PUBLISHED CHAPTERS (live curriculum)")
 print("=" * 72)
-storeys = list(published_storeys())
-for s in storeys:
-    print(f"  storey id={s.id:<5} slug={s.slug!r} title={s.title!r}")
+chapters = list(published_chapters())
+for s in chapters:
+    print(f"  chapter id={s.id:<5} slug={s.slug!r} title={s.title!r}")
 
 live_pieces, live_arts = live_layout()
 print(f"\nLIVE official layout (what /tower draws): {len(live_pieces)} pieces, {len(live_arts)} artifacts")
 for row in live_pieces:
-    print(f"    PIECE storey={row[0]:<5} {row[1]:<8} {row[2]}")
+    print(f"    PIECE chapter={row[0]:<5} {row[1]:<8} {row[2]}")
 for row in live_arts:
-    print(f"    ART   storey={row[0]:<5} {row[1]:<10} {row[2]}")
+    print(f"    ART   chapter={row[0]:<5} {row[1]:<10} {row[2]}")
 
 print("\n" + "=" * 72)
 print("STORED OFFICIAL FORKS (what the editor draws)")
 print("=" * 72)
-forks = TowerDesign.objects.filter(origin=ORIGIN_OFFICIAL_FORK).select_related("owner").order_by("id")
+forks = ArchiveDesign.objects.filter(origin=ORIGIN_OFFICIAL_FORK).select_related("owner").order_by("id")
 if not forks:
     print("  (no official_fork designs exist yet)")
 live_pc = Counter((t, slug) for _sid, t, slug in live_pieces)
 live_ac = Counter((role, slug) for _sid, role, slug in live_arts)
-live_storeys = sorted(s.id for s in storeys)
+live_chapters = sorted(s.id for s in chapters)
 for design in forks:
     print("-" * 72)
     owner = getattr(design.owner, "username", design.owner_id)
@@ -74,20 +74,20 @@ for design in forks:
     fparts = list(design.artifact_placements.select_related("artifact_asset").order_by("z_index", "id"))
     print(f"  {len(fpieces)} pieces, {len(fparts)} artifacts")
     for p in fpieces:
-        print(f"    PIECE storey_index={p.storey_index:<5} {p.piece_type:<8} {p.piece_asset.slug}")
+        print(f"    PIECE chapter_index={p.chapter_index:<5} {p.piece_type:<8} {p.piece_asset.slug}")
     for a in fparts:
         print(f"    ART   target_piece={a.target_piece_instance_id:<6} {a.role:<10} {a.artifact_asset.slug}")
     fork_pc = Counter((p.piece_type, p.piece_asset.slug) for p in fpieces)
     fork_ac = Counter((a.role, a.artifact_asset.slug) for a in fparts)
-    print("  DIFF vs live (multiset, storey id ignored):")
+    print("  DIFF vs live (multiset, chapter id ignored):")
     print(f"    pieces  live-not-fork: {dict(live_pc - fork_pc) or 'NONE'}")
     print(f"    pieces  fork-not-live: {dict(fork_pc - live_pc) or 'NONE'}")
     print(f"    arts    live-not-fork: {dict(live_ac - fork_ac) or 'NONE'}")
     print(f"    arts    fork-not-live: {dict(fork_ac - live_ac) or 'NONE'}")
-    fork_storeys = sorted({p.storey_index for p in fpieces})
-    dead = [sx for sx in fork_storeys if sx not in live_storeys]
-    print(f"    fork storey_index: {fork_storeys} | live storey ids: {live_storeys}")
-    print(f"    STALE storey_index (no matching live storey): {dead or 'NONE'}")
+    fork_chapters = sorted({p.chapter_index for p in fpieces})
+    dead = [sx for sx in fork_chapters if sx not in live_chapters]
+    print(f"    fork chapter_index: {fork_chapters} | live chapter ids: {live_chapters}")
+    print(f"    STALE chapter_index (no matching live chapter): {dead or 'NONE'}")
 
 print("\n" + "=" * 72)
 print("PIECE-ART DATA (from TowerPieceAsset rows - drives windows + Blue's footing)")

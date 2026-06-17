@@ -5,7 +5,7 @@ from challenges.models import Challenge, ChallengeLevel, ChallengeRun, Challenge
 
 @admin.register(Challenge)
 class ChallengeAdmin(admin.ModelAdmin):
-    list_display = ("slug", "title", "storey", "is_published", "sort_order")
+    list_display = ("slug", "title", "chapter", "is_published", "sort_order")
     list_filter = ("is_published",)
     search_fields = ("title", "slug")
 

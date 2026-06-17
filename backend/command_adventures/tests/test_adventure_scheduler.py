@@ -159,7 +159,7 @@ def test_easy_challenge_locked_until_adventure_passed(db, django_user_model):
             user=user, level=level, source_entry_point="tower_page"
         )
 
-    adventure = CommandAdventure.objects.get(storey=level.storey)
+    adventure = CommandAdventure.objects.get(chapter=level.chapter)
     AdventureRun.objects.create(
         user=user, command_adventure=adventure, passed_at=timezone.now()
     )

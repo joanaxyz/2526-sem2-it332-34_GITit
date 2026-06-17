@@ -38,7 +38,7 @@ class ContentDefinitionValidator:
 
     def _validate_chest_rewards(self, definition: dict[str, Any], errors: list[dict[str, str]]) -> None:
         """Reward checkpoints are optional; when present each row must be a
-        {threshold (0-100), coins} object so the storey can drop chests."""
+        {threshold (0-100), coins} object so the chapter can drop chests."""
         rewards = (definition or {}).get("chest_rewards")
         if rewards is None:
             return

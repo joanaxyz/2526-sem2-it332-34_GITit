@@ -4,11 +4,11 @@ from django.db import models
 
 ITEM_ASSET = "asset"
 ITEM_CONTENT = "content_definition"
-ITEM_TOWER_DESIGN = "tower_design"
+ITEM_ARCHIVE_DESIGN = "archive_design"
 ITEM_KINDS = [
     (ITEM_ASSET, "Asset"),
     (ITEM_CONTENT, "Content definition"),
-    (ITEM_TOWER_DESIGN, "Tower design"),
+    (ITEM_ARCHIVE_DESIGN, "Archive design"),
 ]
 
 LISTING_DRAFT = "draft"
@@ -36,7 +36,7 @@ class StoreListing(models.Model):
     content_definition = models.ForeignKey(
         "authoring.ContentDefinition", null=True, blank=True, on_delete=models.CASCADE
     )
-    tower_design = models.ForeignKey("towers.TowerDesign", null=True, blank=True, on_delete=models.CASCADE)
+    archive_design = models.ForeignKey("archive.ArchiveDesign", null=True, blank=True, on_delete=models.CASCADE)
     price = models.PositiveIntegerField(default=0)
     status = models.CharField(max_length=16, choices=LISTING_STATUSES, default=LISTING_DRAFT)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -54,7 +54,7 @@ class StoreListing(models.Model):
 
     @property
     def item(self):
-        return self.asset or self.content_definition or self.tower_design
+        return self.asset or self.content_definition or self.archive_design
 
     @property
     def item_id(self) -> int | None:
@@ -67,7 +67,7 @@ class StoreListing(models.Model):
         expected = {
             ITEM_ASSET: self.asset_id,
             ITEM_CONTENT: self.content_definition_id,
-            ITEM_TOWER_DESIGN: self.tower_design_id,
+            ITEM_ARCHIVE_DESIGN: self.archive_design_id,
         }.get(self.item_kind)
         if not expected:
             raise ValidationError({"item_kind": "Listing item kind must match the referenced item."})
@@ -88,7 +88,7 @@ class Entitlement(models.Model):
     content_definition = models.ForeignKey(
         "authoring.ContentDefinition", null=True, blank=True, on_delete=models.CASCADE
     )
-    tower_design = models.ForeignKey("towers.TowerDesign", null=True, blank=True, on_delete=models.CASCADE)
+    archive_design = models.ForeignKey("archive.ArchiveDesign", null=True, blank=True, on_delete=models.CASCADE)
     source_listing = models.ForeignKey(StoreListing, null=True, blank=True, on_delete=models.SET_NULL)
     granted_at = models.DateTimeField(auto_now_add=True)
 
@@ -106,8 +106,8 @@ class Entitlement(models.Model):
                 name="unique_content_entitlement_per_user",
             ),
             models.UniqueConstraint(
-                fields=["user", "tower_design"],
-                condition=models.Q(tower_design__isnull=False),
+                fields=["user", "archive_design"],
+                condition=models.Q(archive_design__isnull=False),
                 name="unique_tower_entitlement_per_user",
             ),
         ]
@@ -117,7 +117,7 @@ class Entitlement(models.Model):
 
     @property
     def item(self):
-        return self.asset or self.content_definition or self.tower_design
+        return self.asset or self.content_definition or self.archive_design
 
     def clean(self) -> None:
         super().clean()
@@ -125,7 +125,7 @@ class Entitlement(models.Model):
         expected = {
             ITEM_ASSET: self.asset_id,
             ITEM_CONTENT: self.content_definition_id,
-            ITEM_TOWER_DESIGN: self.tower_design_id,
+            ITEM_ARCHIVE_DESIGN: self.archive_design_id,
         }.get(self.item_kind)
         if not expected:
             raise ValidationError({"item_kind": "Entitlement item kind must match the referenced item."})
@@ -141,7 +141,7 @@ def _validate_exactly_one_item(instance) -> None:
         for value in [
             instance.asset_id,
             instance.content_definition_id,
-            instance.tower_design_id,
+            instance.archive_design_id,
         ]
     )
     if count != 1:

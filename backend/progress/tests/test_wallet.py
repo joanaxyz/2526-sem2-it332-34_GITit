@@ -61,26 +61,26 @@ def test_wallet_endpoint_returns_balance_and_recent(db, django_user_model):
     assert body["recent"][0]["amount"] == 30
 
 
-def test_storey_chest_awards_gitcoins_when_progress_crosses_threshold(db, django_user_model):
+def test_chapter_chest_awards_gitcoins_when_progress_crosses_threshold(db, django_user_model):
     call_command("seed_curriculum_v2")
     user = make_user(django_user_model)
     level = ChallengeLevel.objects.filter(difficulty="easy", is_published=True).select_related("challenge").first()
     assert level is not None
     level.required_successful_attempts = 1
     level.save(update_fields=["required_successful_attempts"])
-    storey = level.storey
+    chapter = level.chapter
     # A tiny threshold guarantees the first progress tick crosses it.
-    storey.chest_rewards = [{"threshold": 1, "coins": 60}]
-    storey.save(update_fields=["chest_rewards"])
+    chapter.chest_rewards = [{"threshold": 1, "coins": 60}]
+    chapter.save(update_fields=["chest_rewards"])
     client = APIClient()
     client.force_authenticate(user=user)
 
-    # Challenge entry is gated on passing the storey's adventure first.
+    # Challenge entry is gated on passing the chapter's adventure first.
     from django.utils import timezone
 
     from command_adventures.models import AdventureRun, CommandAdventure
 
-    adventure = CommandAdventure.objects.filter(storey=storey, is_published=True).first()
+    adventure = CommandAdventure.objects.filter(chapter=chapter, is_published=True).first()
     if adventure is not None:
         AdventureRun.objects.create(
             user=user, command_adventure=adventure, mode="primary", passed_at=timezone.now()
@@ -103,16 +103,16 @@ def test_storey_chest_awards_gitcoins_when_progress_crosses_threshold(db, django
     run.refresh_from_db()
     assert run.status == "completed"
 
-    transactions = CoinTransaction.objects.filter(user=user, award_key=f"storey-chest:{storey.id}:1")
+    transactions = CoinTransaction.objects.filter(user=user, award_key=f"chapter-chest:{chapter.id}:1")
     assert transactions.count() == 1
     assert transactions.first().amount == 60
-    assert transactions.first().reason == "storey_chest"
+    assert transactions.first().reason == "chapter_chest"
     assert Wallet.objects.get(user=user).balance == 60
 
 
 def test_chest_thresholds_are_seed_customizable(db):
     call_command("seed_curriculum_v2")
-    from curriculum.models import DEFAULT_CHEST_REWARDS, Storey
+    from curriculum.models import DEFAULT_CHEST_REWARDS, Chapter
 
-    storey = Storey.objects.filter(is_published=True).first()
-    assert storey.chest_rewards == DEFAULT_CHEST_REWARDS
+    chapter = Chapter.objects.filter(is_published=True).first()
+    assert chapter.chest_rewards == DEFAULT_CHEST_REWARDS

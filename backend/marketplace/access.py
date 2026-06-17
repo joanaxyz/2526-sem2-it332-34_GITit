@@ -3,12 +3,12 @@ from authoring.models import VISIBILITY_PUBLIC, VISIBILITY_STORE
 from marketplace.models import (
     ITEM_ASSET,
     ITEM_CONTENT,
-    ITEM_TOWER_DESIGN,
+    ITEM_ARCHIVE_DESIGN,
     LISTING_ACTIVE,
     Entitlement,
     StoreListing,
 )
-from tower_designs.models import STATUS_PUBLISHED as TOWER_PUBLISHED
+from archive.models import STATUS_PUBLISHED as TOWER_PUBLISHED
 
 
 def can_edit(user, item) -> bool:
@@ -46,12 +46,12 @@ def can_use_asset(user, asset) -> bool:
     return has_entitlement(user=user, item=asset) or has_free_listing(item=asset)
 
 
-def can_use_tower_design(user, tower_design) -> bool:
-    if can_edit(user, tower_design):
+def can_use_archive_design(user, archive_design) -> bool:
+    if can_edit(user, archive_design):
         return True
-    if tower_design.status == TOWER_PUBLISHED and tower_design.visibility == VISIBILITY_PUBLIC:
+    if archive_design.status == TOWER_PUBLISHED and archive_design.visibility == VISIBILITY_PUBLIC:
         return True
-    return has_entitlement(user=user, item=tower_design) or has_free_listing(item=tower_design)
+    return has_entitlement(user=user, item=archive_design) or has_free_listing(item=archive_design)
 
 
 def can_remix(user, item) -> bool:
@@ -97,6 +97,6 @@ def _item_kind_and_field(item) -> tuple[str, str]:
         return ITEM_ASSET, "asset"
     if app_label == "authoring" and model_name == "contentdefinition":
         return ITEM_CONTENT, "content_definition"
-    if app_label == "towers" and model_name == "towerdesign":
-        return ITEM_TOWER_DESIGN, "tower_design"
+    if app_label == "archive" and model_name == "towerdesign":
+        return ITEM_ARCHIVE_DESIGN, "archive_design"
     raise TypeError(f"Unsupported marketplace item: {item!r}")

@@ -17,8 +17,8 @@ from common.constants import (
 
 
 class Challenge(models.Model):
-    storey = models.ForeignKey(
-        "curriculum.Storey",
+    chapter = models.ForeignKey(
+        "curriculum.Chapter",
         related_name="challenges",
         on_delete=models.CASCADE,
     )
@@ -37,8 +37,8 @@ class Challenge(models.Model):
     )
 
     class Meta:
-        ordering = ["storey__sort_order", "sort_order", "title"]
-        unique_together = [("storey", "slug")]
+        ordering = ["chapter__sort_order", "sort_order", "title"]
+        unique_together = [("chapter", "slug")]
 
     def __str__(self) -> str:
         return self.title
@@ -70,8 +70,8 @@ class ChallengeLevel(models.Model):
         return f"{self.challenge} / {self.difficulty}"
 
     @property
-    def storey(self):
-        return self.challenge.storey
+    def chapter(self):
+        return self.challenge.chapter
 
 
 class ChallengeVariant(VariantBase):
@@ -106,7 +106,7 @@ class ChallengeRun(models.Model):
         REVIEW = SESSION_MODE_REVIEW, "Review"
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    storey = models.ForeignKey("curriculum.Storey", on_delete=models.PROTECT)
+    chapter = models.ForeignKey("curriculum.Chapter", on_delete=models.PROTECT)
     challenge = models.ForeignKey(Challenge, on_delete=models.PROTECT)
     challenge_level = models.ForeignKey(ChallengeLevel, on_delete=models.PROTECT)
     challenge_variant = models.ForeignKey(ChallengeVariant, on_delete=models.PROTECT)

@@ -14,7 +14,7 @@ import logging
 from django.conf import settings
 from django.core.cache import cache
 
-from assets.models import KIND_CHARACTER, KIND_MONSTER, KIND_TOWER_PIECE, Asset, TowerPieceAsset
+from assets.models import KIND_CHARACTER, KIND_MONSTER, KIND_RELIC, Asset, RelicAsset
 
 _CACHE_VERSION = 7
 logger = logging.getLogger(__name__)
@@ -94,12 +94,12 @@ def asset_descriptor(asset: Asset) -> dict:
     elif asset.kind == KIND_CHARACTER:
         payload["metrics"] = config.get("metrics", {})
         payload["random_actions"] = config.get("random_actions", [])
-    elif asset.kind == KIND_TOWER_PIECE:
+    elif asset.kind == KIND_RELIC:
         try:
-            tower_piece = asset.tower_piece
-        except TowerPieceAsset.DoesNotExist:
-            tower_piece = None
-        if tower_piece:
+            relic = asset.relic
+        except RelicAsset.DoesNotExist:
+            relic = None
+        if relic:
             default_sprite = next(
                 (s for s in asset.sprites.all() if s.action == "default"),
                 None,
@@ -107,15 +107,11 @@ def asset_descriptor(asset: Asset) -> dict:
             default_sprite_payload = (
                 sprite_descriptor(default_sprite) if default_sprite is not None else {}
             )
-            payload["piece_type"] = tower_piece.piece_type
-            payload["tower_piece"] = {
-                "piece_type": tower_piece.piece_type,
-                "view_box": tower_piece.view_box,
-                "anchors": tower_piece.anchors or {},
-                "bounds": tower_piece.bounds or {},
-                "interaction_zones": tower_piece.interaction_zones or {},
-                "state_variants": tower_piece.state_variants or {},
-                "svg_sanitized": tower_piece.svg_sanitized,
+            payload["relic"] = {
+                "view_box": relic.view_box,
+                "interactive_viewbox": relic.interactive_viewbox or {},
+                "landing_viewbox": relic.landing_viewbox or {},
+                "svg_sanitized": relic.svg_sanitized,
                 "svg": _inline_svg(asset),
                 "content_type": default_sprite_payload.get("content_type"),
                 "natural_width": default_sprite_payload.get("natural_width"),
@@ -132,7 +128,7 @@ def descriptor_map(kind: str = KIND_MONSTER) -> dict[str, dict]:
     if cached is not None:
         return cached
     assets = Asset.objects.filter(kind=kind, is_published=True).select_related(
-        "tower_piece"
+        "relic"
     ).prefetch_related("sprites")
     built = {asset.slug: asset_descriptor(asset) for asset in assets}
     cache.set(key, built, timeout=_DESCRIPTOR_CACHE_TTL)
@@ -157,7 +153,7 @@ def owned_descriptor_map(user, kind: str) -> dict[str, dict]:
 
     owned = (
         Asset.objects.filter(owner=user, kind=kind)
-        .select_related("tower_piece")
+        .select_related("relic")
         .prefetch_related("sprites")
     )
     for asset in owned:
@@ -193,7 +189,7 @@ def _entitled_assets(user, kind: str):
             kind=kind,
             entitlement__user=user,
         )
-        .select_related("tower_piece")
+        .select_related("relic")
         .prefetch_related("sprites")
         .distinct()
     )

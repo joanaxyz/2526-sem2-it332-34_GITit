@@ -2,12 +2,6 @@ from dataclasses import dataclass, field
 
 from django.db.models import Count, Q
 
-from assets.models import (
-    TOWER_PIECE_BASE,
-    TOWER_PIECE_CROWN,
-    TOWER_PIECE_LANDING,
-    TOWER_PIECE_SECTION,
-)
 from challenges.models import Challenge, ChallengeLevel, ChallengeRun
 from challenges.selectors import (
     command_accuracy_rate,
@@ -21,38 +15,29 @@ from common.constants import (
     SESSION_MODE_PRIMARY,
 )
 from curriculum.library import library_key_for_command
-from curriculum.models import CommandForm, CommandSkill, LibraryEntry, Storey, Tome
+from curriculum.models import CommandForm, CommandSkill, LibraryEntry, Chapter, Tome
 
-OFFICIAL_TOWER_ASSET_SLUGS = {
-    TOWER_PIECE_CROWN: "official-crown",
-    TOWER_PIECE_BASE: "official-base",
-    TOWER_PIECE_LANDING: "official-landing",
-    "challenge_landing": "official-challenge-landing",
-    "hall_section": "official-hall-section",
-    "tome_landing": "official-tome-landing",
-    "trial_section": "official-trial-section",
-    "window_section": "official-window-section",
-}
-OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS = {
-    "adventure": "official-gate-artifact",
-    "challenge": "official-portcullis-artifact",
-    "tome": "official-tome-artifact",
-}
-OFFICIAL_CHALLENGE_ARTIFACT_SLUGS = {
-    DIFFICULTY_EASY: "official-trial-gate-easy-artifact",
-    DIFFICULTY_MEDIUM: "official-portcullis-artifact",
-    DIFFICULTY_HARD: "official-trial-gate-hard-artifact",
-}
-OFFICIAL_CHALLENGE_ARTIFACT_X = {
-    DIFFICULTY_EASY: 112,
-    DIFFICULTY_MEDIUM: 184,
-    DIFFICULTY_HARD: 256,
-}
+# The single official relic art every interactable uses for now (skinned later).
+OFFICIAL_RELIC_SLUG = "official-relic"
+
+# Free-canvas default geometry for one chapter's relics. The public Archive
+# scrolls vertically through chapters, so relics scatter down a tall band; the
+# kind is what drives the relic overview, not the position.
+RELIC_DEFAULT_WIDTH = 200
+RELIC_DEFAULT_HEIGHT = 120
+# A relic's default interactive/landing regions, relative to its own box.
+_DEFAULT_INTERACTIVE_VIEWBOX = {"x": 30, "y": 24, "width": 140, "height": 72}
+_DEFAULT_LANDING_VIEWBOX = {"x1": 12, "y1": 112, "x2": 188, "y2": 112}
+# Where each kind lands on the chapter canvas (x, y in canvas px).
+_RELIC_TOME_POS = {"x": 40, "y": 0}
+_RELIC_ADVENTURE_POS = {"x": 260, "y": 200}
+_RELIC_CHALLENGE_ROW_Y = 440
+_RELIC_CHALLENGE_X = {DIFFICULTY_EASY: 80, DIFFICULTY_MEDIUM: 300, DIFFICULTY_HARD: 520}
 
 
-def published_storeys():
+def published_chapters():
     return (
-        Storey.objects.filter(is_published=True)
+        Chapter.objects.filter(is_published=True)
         .annotate(
             command_skill_count=Count(
                 "command_skills",
@@ -69,41 +54,41 @@ def published_storeys():
     )
 
 
-def storey_completion_count_map(*, user, storey_ids: list[int]) -> dict[int, int]:
-    if not getattr(user, "is_authenticated", False) or not storey_ids:
+def chapter_completion_count_map(*, user, chapter_ids: list[int]) -> dict[int, int]:
+    if not getattr(user, "is_authenticated", False) or not chapter_ids:
         return {}
 
-    completion_by_storey = {storey_id: 0 for storey_id in storey_ids}
-    # Count each Command Adventure at most once per storey: the milestone is
+    completion_by_chapter = {chapter_id: 0 for chapter_id in chapter_ids}
+    # Count each Command Adventure at most once per chapter: the milestone is
     # *passing* the adventure (passed_at), not how many times it was run. Replays
-    # never set passed_at, so they cannot inflate progress past the 1-per-storey
+    # never set passed_at, so they cannot inflate progress past the 1-per-chapter
     # denominator. Distinct on the adventure id keeps this idempotent across runs.
-    for storey_id, _adventure_id in (
+    for chapter_id, _adventure_id in (
         AdventureRun.objects.filter(
             user=user,
             mode=SESSION_MODE_PRIMARY,
             passed_at__isnull=False,
-            command_adventure__storey_id__in=storey_ids,
+            command_adventure__chapter_id__in=chapter_ids,
         )
-        .values_list("command_adventure__storey_id", "command_adventure_id")
+        .values_list("command_adventure__chapter_id", "command_adventure_id")
         .distinct()
     ):
-        completion_by_storey[storey_id] += 1
+        completion_by_chapter[chapter_id] += 1
 
     challenge_counts: dict[tuple[int, int], int] = {}
     required_by_level: dict[int, int] = {}
-    storey_by_level: dict[int, int] = {}
+    chapter_by_level: dict[int, int] = {}
     for run in (
         ChallengeRun.objects.filter(
             user=user,
             mode="primary",
             status="completed",
-            storey_id__in=storey_ids,
+            chapter_id__in=chapter_ids,
         )
         .select_related("challenge_level")
         .only(
             "id",
-            "storey_id",
+            "chapter_id",
             "challenge_level_id",
             "counted_action_total",
             "command_budget_snapshot",
@@ -113,40 +98,40 @@ def storey_completion_count_map(*, user, storey_ids: list[int]) -> dict[int, int
         if not run_meets_progress_threshold(run=run):
             continue
         level_id = run.challenge_level_id
-        challenge_counts[(run.storey_id, level_id)] = (
-            challenge_counts.get((run.storey_id, level_id), 0) + 1
+        challenge_counts[(run.chapter_id, level_id)] = (
+            challenge_counts.get((run.chapter_id, level_id), 0) + 1
         )
         required_by_level[level_id] = run.challenge_level.required_successful_attempts
-        storey_by_level[level_id] = run.storey_id
+        chapter_by_level[level_id] = run.chapter_id
 
     for (_, level_id), count in challenge_counts.items():
-        storey_id = storey_by_level[level_id]
-        completion_by_storey[storey_id] += min(count, required_by_level.get(level_id, 1))
-    return completion_by_storey
+        chapter_id = chapter_by_level[level_id]
+        completion_by_chapter[chapter_id] += min(count, required_by_level.get(level_id, 1))
+    return completion_by_chapter
 
 
-def storey_completion_denominator_map(*, storey_ids: list[int]) -> dict[int, int]:
-    if not storey_ids:
+def chapter_completion_denominator_map(*, chapter_ids: list[int]) -> dict[int, int]:
+    if not chapter_ids:
         return {}
 
-    denominator_by_storey = {storey_id: 0 for storey_id in storey_ids}
-    for adventure in CommandAdventure.objects.filter(storey_id__in=storey_ids, is_published=True):
-        denominator_by_storey[adventure.storey_id] += 1
+    denominator_by_chapter = {chapter_id: 0 for chapter_id in chapter_ids}
+    for adventure in CommandAdventure.objects.filter(chapter_id__in=chapter_ids, is_published=True):
+        denominator_by_chapter[adventure.chapter_id] += 1
 
     for row in ChallengeLevel.objects.filter(
         is_published=True,
         challenge__is_published=True,
-        challenge__storey_id__in=storey_ids,
-    ).values("challenge__storey_id", "required_successful_attempts"):
-        storey_id = row["challenge__storey_id"]
-        denominator_by_storey[storey_id] += int(row["required_successful_attempts"] or 0)
-    return denominator_by_storey
+        challenge__chapter_id__in=chapter_ids,
+    ).values("challenge__chapter_id", "required_successful_attempts"):
+        chapter_id = row["challenge__chapter_id"]
+        denominator_by_chapter[chapter_id] += int(row["required_successful_attempts"] or 0)
+    return denominator_by_chapter
 
 
-def storey_content_page(
+def chapter_content_page(
     *,
     user,
-    storey_id: int,
+    chapter_id: int,
     section: str,
     cursor: int | None = None,
     limit: int = 8,
@@ -154,8 +139,8 @@ def storey_content_page(
     limit = max(1, min(limit, 24))
     if section == "command_adventures":
         adventures = list(
-            CommandAdventure.objects.filter(storey_id=storey_id, is_published=True)
-            .select_related("storey")
+            CommandAdventure.objects.filter(chapter_id=chapter_id, is_published=True)
+            .select_related("chapter")
             .order_by("sort_order", "id")
         )
         return {
@@ -168,7 +153,7 @@ def storey_content_page(
         }
 
     if section == "tomes":
-        tomes = Tome.objects.filter(storey_id=storey_id, is_published=True).order_by(
+        tomes = Tome.objects.filter(chapter_id=chapter_id, is_published=True).order_by(
             "sort_order", "id"
         )
         return {
@@ -178,12 +163,12 @@ def storey_content_page(
         }
 
     if section == "challenges":
-        queryset = challenge_queryset(storey_id=storey_id)
+        queryset = challenge_queryset(chapter_id=chapter_id)
         if cursor:
             queryset = queryset.filter(id__gt=cursor)
         items = list(queryset[: limit + 1])
         visible = items[:limit]
-        access = _build_challenge_access(user=user, storey_id=storey_id, challenges=visible)
+        access = _build_challenge_access(user=user, chapter_id=chapter_id, challenges=visible)
         return {
             "section": section,
             "results": [
@@ -193,7 +178,7 @@ def storey_content_page(
             "next_cursor": visible[-1].id if len(items) > limit and visible else None,
         }
 
-    queryset = command_skill_queryset(storey_id=storey_id)
+    queryset = command_skill_queryset(chapter_id=chapter_id)
     if cursor:
         queryset = queryset.filter(id__gt=cursor)
     items = list(queryset[: limit + 1])
@@ -205,38 +190,37 @@ def storey_content_page(
     }
 
 
-def storey_content_overview(*, user, storey_id: int) -> dict:
-    """Every tower section for one storey in a single payload.
+def chapter_content_overview(*, user, chapter_id: int) -> dict:
+    """Every relic for one chapter in a single payload.
 
-    The Tower renders three sections per storey - its Command Adventure (always
-    one), its tomes, and its challenges - each of which was previously a separate
-    request. Storeys hold only a handful of challenges/tomes, so this returns them
-    all (no cursor): collapsing 2-3 round trips per storey into one is the win.
+    The Archive renders a chapter's Command Adventure (always one), its tomes,
+    and its challenges as floating relics - each of which was previously a
+    separate request. Chapters hold only a handful, so this returns them all (no
+    cursor): collapsing 2-3 round trips per chapter into one is the win.
     """
     adventures = list(
-        CommandAdventure.objects.filter(storey_id=storey_id, is_published=True)
-        .select_related("storey")
+        CommandAdventure.objects.filter(chapter_id=chapter_id, is_published=True)
+        .select_related("chapter")
         .order_by("sort_order", "id")
     )
-    tomes = Tome.objects.filter(storey_id=storey_id, is_published=True).order_by("sort_order", "id")
-    challenges = list(challenge_queryset(storey_id=storey_id))
-    access = _build_challenge_access(user=user, storey_id=storey_id, challenges=challenges)
-    storey = Storey.objects.get(id=storey_id)
-    layout = tower_layout_payload(
-        storey=storey,
-        storey_id=storey_id,
+    tomes = Tome.objects.filter(chapter_id=chapter_id, is_published=True).order_by("sort_order", "id")
+    challenges = list(challenge_queryset(chapter_id=chapter_id))
+    access = _build_challenge_access(user=user, chapter_id=chapter_id, challenges=challenges)
+    chapter = Chapter.objects.get(id=chapter_id)
+    layout = relic_layout_payload(
+        chapter=chapter,
+        chapter_id=chapter_id,
         adventures=adventures,
         tomes=list(tomes),
         challenges=challenges,
     )
-    # If the viewer has a private fork of the official tower, render the FORK as
-    # the single source of truth — the exact pieces/artifacts its editor shows,
-    # so scale/position/structure match by construction — and bind only the
-    # curriculum's content (what each door opens) onto its interactive doors.
-    # Falls back to the plain curriculum layout when the fork has no pieces here.
+    # If the viewer has a private fork of the official Archive, render the FORK's
+    # relics — the exact positions/regions its editor shows — and bind only the
+    # curriculum's content (what each relic opens) onto its interactable relics.
+    # Falls back to the plain curriculum layout when the fork has no relics here.
     fork = _viewer_official_fork(user=user)
     if fork is not None:
-        fork_layout = _fork_storey_layout(fork=fork, storey_id=storey_id, curriculum_layout=layout)
+        fork_layout = _fork_chapter_layout(fork=fork, chapter_id=chapter_id, curriculum_layout=layout)
         if fork_layout is not None:
             layout = fork_layout
     adventure_payloads = [
@@ -244,7 +228,7 @@ def storey_content_overview(*, user, storey_id: int) -> dict:
         for adventure in adventures
     ]
     return {
-        "storey_id": storey_id,
+        "chapter_id": chapter_id,
         "command_adventure": adventure_payloads[0] if adventure_payloads else None,
         "command_adventures": adventure_payloads,
         "tomes": [tome_summary_payload(tome=tome) for tome in tomes],
@@ -252,478 +236,187 @@ def storey_content_overview(*, user, storey_id: int) -> dict:
             challenge_summary_payload(challenge=challenge, access=access)
             for challenge in challenges
         ],
-        "tower_layout": {"storeyId": storey_id, "pieces": layout["pieces"]},
-        "artifacts": layout["artifacts"],
+        "relic_layout": {"chapterId": chapter_id, "relics": layout["relics"]},
     }
 
 
 def _viewer_official_fork(*, user):
-    """The viewer's own private fork of the official tower, or None.
+    """The viewer's own private fork of the official Archive, or None.
 
-    Imported lazily to avoid an import cycle (tower_designs.services already
+    Imported lazily to avoid an import cycle (archive.services already
     imports this module for the fork seed)."""
     if not getattr(user, "is_authenticated", False):
         return None
-    from tower_designs.models import (
+    from archive.models import (
         ORIGIN_OFFICIAL_FORK,
         STATUS_ARCHIVED,
-        TowerDesign,
+        ArchiveDesign,
     )
 
     return (
-        TowerDesign.objects.filter(owner=user, origin=ORIGIN_OFFICIAL_FORK)
+        ArchiveDesign.objects.filter(owner=user, origin=ORIGIN_OFFICIAL_FORK)
         .exclude(status=STATUS_ARCHIVED)
         .order_by("-updated_at", "-id")
         .first()
     )
 
 
-def _fork_storey_layout(*, fork, storey_id: int, curriculum_layout: dict) -> dict | None:
-    """Build one rendered storey from the viewer's fork template.
+def _fork_chapter_layout(*, fork, chapter_id: int, curriculum_layout: dict) -> dict | None:
+    """Build one rendered chapter from the viewer's fork relics.
 
-    The fork stores one spire, one base, and one repeatable storey template.
-    The visual template repeats for every curriculum storey; the renderer shows
-    the spire only on the first storey and the base only on the last.
+    The fork stores its relics grouped by ``chapter_index`` (the curriculum
+    Chapter id). Interactable fork relics carry no content of their own; the
+    curriculum's content is rebound to them by (kind, ordinal) so positions are
+    the author's but the content is always live.
     """
-    from tower_designs.models import ARTIFACT_ROLE_NORMAL
-    from tower_designs.selectors import canonical_design_pieces, canonical_storey_index
+    from archive.models import RELIC_KIND_NORMAL, RelicPlacement
 
-    all_fork_pieces = list(
-        fork.pieces.select_related("piece_asset", "parent_instance").order_by(
-            "sort_order", "id"
-        )
+    placements = list(
+        RelicPlacement.objects.filter(archive_design=fork, chapter_index=chapter_id)
+        .select_related("relic_asset", "relic_asset__relic")
+        .order_by("z_index", "id")
     )
-    fork_pieces = canonical_design_pieces(all_fork_pieces)
-    if not fork_pieces:
+    if not placements:
         return None
 
-    def instance_id(piece_pk) -> str | None:
-        return f"tower-{fork.id}-storey-{storey_id}-piece-{piece_pk}" if piece_pk else None
+    from archive.selectors import relic_placement_payload
 
-    visible_piece_ids = {piece.id for piece in fork_pieces}
-    pieces = []
-    for piece in fork_pieces:
-        payload = {
-            "instanceId": instance_id(piece.id),
-            "assetSlug": piece.piece_asset.slug,
-            "pieceType": piece.piece_type,
-            "storeyIndex": canonical_storey_index(piece),
-            "sortOrder": piece.sort_order,
-            "parentInstanceId": (
-                instance_id(piece.parent_instance_id)
-                if piece.parent_instance_id in visible_piece_ids
-                else None
-            ),
-        }
-        if piece.transform:
-            payload["transform"] = piece.transform
-        if piece.config:
-            payload["config"] = piece.config
-        pieces.append(payload)
-
-    # Curriculum content bindings in order, grouped by role (adventure/tome/
-    # challenge) — these carry the adventure/tome/challenge-level ids.
-    bindings_by_role: dict[str, list] = {}
-    for artifact in curriculum_layout["artifacts"]:
-        role = artifact["role"]
-        if role == ARTIFACT_ROLE_NORMAL:
+    # Curriculum content bindings in order, grouped by kind.
+    bindings_by_kind: dict[str, list] = {}
+    for relic in curriculum_layout["relics"]:
+        kind = relic["kind"]
+        if kind == RELIC_KIND_NORMAL:
             continue
-        bindings_by_role.setdefault(role, []).append(artifact.get("contentBinding"))
+        bindings_by_kind.setdefault(kind, []).append(relic.get("contentBinding"))
 
-    artifacts = []
-    interactive_seen: dict[str, int] = {}
-    for placement in (
-        fork.artifact_placements.select_related("artifact_asset")
-        .filter(target_piece_instance_id__in=visible_piece_ids)
-        .order_by("z_index", "id")
-    ):
-        payload = {
-            "id": f"{placement.id}:storey:{storey_id}",
-            "targetInstanceId": instance_id(placement.target_piece_instance_id),
-            "assetSlug": placement.artifact_asset.slug,
-            "role": placement.role,
-            "x": placement.x,
-            "y": placement.y,
-            "scale": placement.scale,
-            "width": placement.width,
-            "height": placement.height,
-            "rotation": placement.rotation,
-            "anchor": placement.anchor,
-            "zIndex": placement.z_index,
-        }
-        if placement.role != ARTIFACT_ROLE_NORMAL:
-            ordinal = interactive_seen.get(placement.role, 0)
-            interactive_seen[placement.role] = ordinal + 1
-            options = bindings_by_role.get(placement.role) or []
+    relics = []
+    seen: dict[str, int] = {}
+    for placement in placements:
+        payload = relic_placement_payload(placement)
+        payload["id"] = f"{placement.id}:chapter:{chapter_id}"
+        payload["contentBinding"] = None
+        if placement.kind != RELIC_KIND_NORMAL:
+            ordinal = seen.get(placement.kind, 0)
+            seen[placement.kind] = ordinal + 1
+            options = bindings_by_kind.get(placement.kind) or []
             binding = options[ordinal] if ordinal < len(options) else None
             if binding:
                 payload["contentBinding"] = binding
-        artifacts.append(payload)
+        relics.append(payload)
 
-    return {"storeyId": storey_id, "pieces": pieces, "artifacts": artifacts}
+    return {"chapterId": chapter_id, "relics": relics}
 
 
-def tower_layout_payload(
+def relic_layout_payload(
     *,
-    storey: Storey | None = None,
-    storey_id: int,
+    chapter: Chapter | None = None,
+    chapter_id: int,
     adventures: list[CommandAdventure] | None = None,
     tomes: list[Tome],
     challenges: list[Challenge],
 ) -> dict:
-    layout_config = (
-        storey.tower_layout if storey is not None and isinstance(storey.tower_layout, dict) else {}
-    )
-    pieces: list[dict] = [
-        _tower_piece(
-            storey_id=storey_id,
-            name="crown",
-            piece_type=TOWER_PIECE_CROWN,
-            asset_slug=_slot_asset(
-                layout_config, "crown", "asset_slug", OFFICIAL_TOWER_ASSET_SLUGS[TOWER_PIECE_CROWN]
-            ),
-            config=_slot_config(layout_config, "crown"),
-            transform=_slot_transform(layout_config, "crown"),
-        )
-    ]
-    artifacts: list[dict] = []
+    """Flat list of floating relics for one chapter.
 
-    above_adventure_tomes = [tome for tome in tomes if tome.placement == "above_adventure"]
-    window_slot = _slot(layout_config, "window") or _slot(layout_config, "tome")
-    window_section_name = "window-section"
-    pieces.append(
-        _tower_piece(
-            storey_id=storey_id,
-            name=window_section_name,
-            piece_type=TOWER_PIECE_SECTION,
-            asset_slug=_slot_value(
-                window_slot,
-                "section_asset_slug",
-                OFFICIAL_TOWER_ASSET_SLUGS["window_section"],
-            ),
-            config=_slot_value(window_slot, "section_config", {}),
-            transform=_slot_value(window_slot, "section_transform", {}),
-        )
-    )
-    for tome in above_adventure_tomes:
-        artifact_defaults = _slot_value(window_slot, "artifact", {})
-        artifacts.append(
-            _tower_artifact(
-                storey_id=storey_id,
+    Every interactable (each adventure, each tome, each challenge level) becomes
+    one relic with a free canvas position, its ``kind``, and a content binding.
+    Positions are sensible defaults; the official fork (and later per-chapter
+    overrides) can move them.
+    """
+    relics: list[dict] = []
+    z = 10
+
+    for index, tome in enumerate(tomes or []):
+        relics.append(
+            _relic(
+                chapter_id=chapter_id,
                 name=f"tome-{tome.id}",
-                target_name=window_section_name,
-                role="tome",
-                asset_slug=_slot_value(
-                    window_slot, "artifact_asset_slug", OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["tome"]
-                ),
+                kind="tome",
                 content_binding={"kind": "tome", "id": tome.id},
-                x=_slot_value(artifact_defaults, "x", 184),
-                y=_slot_value(artifact_defaults, "y", 112),
-                width=_slot_value(artifact_defaults, "width", 96),
-                height=_slot_value(artifact_defaults, "height", 88),
-                z_index=_slot_value(artifact_defaults, "z_index", 12),
+                x=_RELIC_TOME_POS["x"] + index * 60,
+                y=_RELIC_TOME_POS["y"] + index * 40,
+                z_index=z,
             )
         )
-    pieces.append(
-        _tower_piece(
-            storey_id=storey_id,
-            name="landing-after-window",
-            piece_type=TOWER_PIECE_LANDING,
-            asset_slug=_slot_value(
-                window_slot, "landing_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS[TOWER_PIECE_LANDING]
-            ),
-            config=_slot_value(window_slot, "landing_config", {}),
-            transform=_slot_value(window_slot, "landing_transform", {}),
-        )
-    )
+        z += 1
 
-    adventure_list = adventures or []
-    for adventure in adventure_list:
-        slot = _slot(layout_config, "adventure")
-        section_name = (
-            "section" if len(adventure_list) == 1 else f"adventure-section-{adventure.id}"
-        )
-        landing_name = (
-            "landing-after-adventure"
-            if len(adventure_list) == 1
-            else f"landing-after-adventure-{adventure.id}"
-        )
-        pieces.append(
-            _tower_piece(
-                storey_id=storey_id,
-                name=section_name,
-                piece_type=TOWER_PIECE_SECTION,
-                asset_slug=_slot_value(
-                    slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["hall_section"]
-                ),
-                config=_slot_value(slot, "section_config", {}),
-                transform=_slot_value(slot, "section_transform", {}),
-            )
-        )
-        artifact_defaults = _slot_value(slot, "artifact", {})
-        artifacts.append(
-            _tower_artifact(
-                storey_id=storey_id,
+    for index, adventure in enumerate(adventures or []):
+        relics.append(
+            _relic(
+                chapter_id=chapter_id,
                 name=f"adventure-{adventure.id}",
-                target_name=section_name,
-                role="adventure",
-                asset_slug=_slot_value(
-                    slot, "artifact_asset_slug", OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["adventure"]
-                ),
+                kind="adventure",
                 content_binding={"kind": "adventure", "id": adventure.id},
-                x=_slot_value(artifact_defaults, "x", 184),
-                y=_slot_value(artifact_defaults, "y", 122),
-                width=_slot_value(artifact_defaults, "width", 116),
-                height=_slot_value(artifact_defaults, "height", 134),
-                z_index=_slot_value(artifact_defaults, "z_index", 12),
+                x=_RELIC_ADVENTURE_POS["x"] + index * 60,
+                y=_RELIC_ADVENTURE_POS["y"] + index * 40,
+                z_index=z,
             )
         )
-        pieces.append(
-            _tower_piece(
-                storey_id=storey_id,
-                name=landing_name,
-                piece_type=TOWER_PIECE_LANDING,
-                asset_slug=_slot_value(
-                    slot, "landing_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS[TOWER_PIECE_LANDING]
-                ),
-                config=_slot_value(slot, "landing_config", {}),
-                transform=_slot_value(slot, "landing_transform", {}),
-            )
-        )
-    if not adventure_list:
-        slot = _slot(layout_config, "adventure")
-        pieces.append(
-            _tower_piece(
-                storey_id=storey_id,
-                name="section",
-                piece_type=TOWER_PIECE_SECTION,
-                asset_slug=_slot_value(
-                    slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["hall_section"]
-                ),
-                config=_slot_value(slot, "section_config", {}),
-                transform=_slot_value(slot, "section_transform", {}),
-            )
-        )
+        z += 1
 
-    if challenges:
-        for challenge in challenges:
-            section_name = f"challenge-section-{challenge.id}"
-            slot = _slot(layout_config, "challenge")
-            pieces.append(
-                _tower_piece(
-                    storey_id=storey_id,
-                    name=section_name,
-                    piece_type=TOWER_PIECE_SECTION,
-                    asset_slug=_slot_value(
-                        slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["trial_section"]
-                    ),
-                    config=_slot_value(slot, "section_config", {}),
-                    transform=_slot_value(slot, "section_transform", {}),
+    for challenge_index, challenge in enumerate(challenges or []):
+        levels = [
+            level
+            for level in _ordered_levels(challenge.challenge_levels.all())
+            if getattr(level, "is_published", True)
+        ]
+        row_y = _RELIC_CHALLENGE_ROW_Y + challenge_index * 200
+        for level in levels:
+            difficulty = str(level.difficulty)
+            relics.append(
+                _relic(
+                    chapter_id=chapter_id,
+                    name=f"challenge-{challenge.id}-{difficulty}",
+                    kind="challenge",
+                    content_binding={
+                        "kind": "challenge",
+                        "id": challenge.id,
+                        "levelId": level.id,
+                        "difficulty": difficulty,
+                    },
+                    x=_RELIC_CHALLENGE_X.get(difficulty, 300),
+                    y=row_y,
+                    z_index=z,
                 )
             )
-            artifact_defaults = _slot_value(slot, "artifact", {})
-            levels = [
-                level
-                for level in _ordered_levels(challenge.challenge_levels.all())
-                if getattr(level, "is_published", True)
-            ]
-            for level in levels:
-                difficulty = str(level.difficulty)
-                artifacts.append(
-                    _tower_artifact(
-                        storey_id=storey_id,
-                        name=f"challenge-{challenge.id}-{difficulty}",
-                        target_name=section_name,
-                        role="challenge",
-                        asset_slug=_challenge_artifact_slug(slot=slot, difficulty=difficulty),
-                        content_binding={
-                            "kind": "challenge",
-                            "id": challenge.id,
-                            "levelId": level.id,
-                            "difficulty": difficulty,
-                        },
-                        x=_challenge_artifact_x(slot=slot, difficulty=difficulty),
-                        y=_slot_value(artifact_defaults, "y", 124),
-                        width=_slot_value(artifact_defaults, "width", 62),
-                        height=_slot_value(artifact_defaults, "height", 94),
-                        z_index=_slot_value(
-                            artifact_defaults,
-                            "z_index",
-                            12 + list(OFFICIAL_CHALLENGE_ARTIFACT_X).index(difficulty)
-                            if difficulty in OFFICIAL_CHALLENGE_ARTIFACT_X
-                            else 12,
-                        ),
-                    )
-                )
-    else:
-        slot = _slot(layout_config, "empty_challenge")
-        pieces.append(
-            _tower_piece(
-                storey_id=storey_id,
-                name="challenge-section-empty",
-                piece_type=TOWER_PIECE_SECTION,
-                asset_slug=_slot_value(
-                    slot, "section_asset_slug", OFFICIAL_TOWER_ASSET_SLUGS["trial_section"]
-                ),
-                config=_slot_value(slot, "section_config", {}),
-                transform=_slot_value(slot, "section_transform", {}),
-            )
-        )
-    challenge_slot = _slot(layout_config, "challenge")
-    pieces.append(
-        _tower_piece(
-            storey_id=storey_id,
-            name="landing-after-challenges",
-            piece_type=TOWER_PIECE_LANDING,
-            asset_slug=_slot_value(
-                challenge_slot,
-                "landing_asset_slug",
-                OFFICIAL_TOWER_ASSET_SLUGS["challenge_landing"],
-            ),
-            config=_slot_value(challenge_slot, "landing_config", {}),
-            transform=_slot_value(challenge_slot, "landing_transform", {}),
-        )
-    )
-    pieces.append(
-        _tower_piece(
-            storey_id=storey_id,
-            name="base",
-            piece_type=TOWER_PIECE_BASE,
-            asset_slug=_slot_asset(
-                layout_config, "base", "asset_slug", OFFICIAL_TOWER_ASSET_SLUGS[TOWER_PIECE_BASE]
-            ),
-            config=_slot_config(layout_config, "base"),
-            transform=_slot_transform(layout_config, "base"),
-        )
-    )
-    for sort_order, piece in enumerate(pieces):
-        piece.setdefault("sortOrder", sort_order)
-    return {"storeyId": storey_id, "pieces": pieces, "artifacts": artifacts}
+            z += 1
+
+    return {"chapterId": chapter_id, "relics": relics}
 
 
-def _tower_piece(
+def _relic(
     *,
-    storey_id: int,
+    chapter_id: int,
     name: str,
-    piece_type: str,
-    asset_slug: str | None = None,
-    config: dict | None = None,
-    transform: dict | None = None,
-) -> dict:
-    payload = {
-        "instanceId": f"storey-{storey_id}-{name}",
-        "assetSlug": asset_slug or OFFICIAL_TOWER_ASSET_SLUGS[piece_type],
-        "pieceType": piece_type,
-    }
-    if config:
-        payload["config"] = config
-    if transform:
-        payload["transform"] = transform
-    return payload
-
-
-def _tower_artifact(
-    *,
-    storey_id: int,
-    name: str,
-    target_name: str,
-    role: str,
-    asset_slug: str,
+    kind: str,
     content_binding: dict | None,
     x: float,
     y: float,
-    width: float,
-    height: float,
     z_index: int,
+    width: float = RELIC_DEFAULT_WIDTH,
+    height: float = RELIC_DEFAULT_HEIGHT,
 ) -> dict:
     payload = {
-        "id": f"storey-{storey_id}-artifact-{name}",
-        "targetInstanceId": f"storey-{storey_id}-{target_name}",
-        "assetSlug": asset_slug,
-        "role": role,
+        "id": f"chapter-{chapter_id}-relic-{name}",
+        "assetSlug": OFFICIAL_RELIC_SLUG,
+        "kind": kind,
         "x": x,
         "y": y,
         "scale": 1,
         "width": width,
         "height": height,
         "rotation": 0,
-        "anchor": "",
         "zIndex": z_index,
+        "interactiveViewbox": dict(_DEFAULT_INTERACTIVE_VIEWBOX),
+        "landingViewbox": dict(_DEFAULT_LANDING_VIEWBOX),
     }
     if content_binding:
         payload["contentBinding"] = content_binding
     return payload
 
 
-def _slot(layout_config: dict, name: str) -> dict:
-    slots = layout_config.get("slots")
-    if not isinstance(slots, dict):
-        return {}
-    value = slots.get(name)
-    return value if isinstance(value, dict) else {}
-
-
-def _slot_config(layout_config: dict, name: str) -> dict:
-    value = layout_config.get(name)
-    if not isinstance(value, dict):
-        return {}
-    config = value.get("config")
-    return config if isinstance(config, dict) else {}
-
-
-def _slot_transform(layout_config: dict, name: str) -> dict:
-    value = layout_config.get(name)
-    if not isinstance(value, dict):
-        return {}
-    transform = value.get("transform")
-    return transform if isinstance(transform, dict) else {}
-
-
-def _slot_asset(layout_config: dict, name: str, key: str, fallback: str) -> str:
-    value = layout_config.get(name)
-    if not isinstance(value, dict):
-        return fallback
-    asset_slug = value.get(key)
-    return str(asset_slug) if asset_slug else fallback
-
-
-def _slot_value(slot: dict, key: str, fallback):
-    value = slot.get(key)
-    if isinstance(fallback, dict):
-        return value if isinstance(value, dict) else fallback
-    return value if value not in (None, "") else fallback
-
-
-def _challenge_artifact_slug(*, slot: dict, difficulty: str) -> str:
-    asset_slugs = slot.get("artifact_asset_slugs")
-    if isinstance(asset_slugs, dict):
-        value = asset_slugs.get(difficulty)
-        if value:
-            return str(value)
-    return OFFICIAL_CHALLENGE_ARTIFACT_SLUGS.get(
-        difficulty,
-        _slot_value(slot, "artifact_asset_slug", OFFICIAL_INTERACTABLE_ARTIFACT_SLUGS["challenge"]),
-    )
-
-
-def _challenge_artifact_x(*, slot: dict, difficulty: str) -> int:
-    """Keep the three trial doors aligned horizontally.
-
-    Older seeded rows contain one shared ``artifact.x`` value for the old
-    single-door layout. Ignore that scalar for challenge doors so a stale DB
-    still renders easy / medium / hard as a row.
-    """
-    positions = slot.get("artifact_x")
-    if isinstance(positions, dict):
-        value = positions.get(difficulty)
-        if isinstance(value, (int, float)):
-            return int(value)
-    return OFFICIAL_CHALLENGE_ARTIFACT_X.get(difficulty, 184)
-
-
-def command_skill_queryset(*, storey_id: int):
+def command_skill_queryset(*, chapter_id: int):
     return (
-        CommandSkill.objects.filter(storey_id=storey_id, is_published=True)
+        CommandSkill.objects.filter(chapter_id=chapter_id, is_published=True)
         .prefetch_related(
             "command_forms",
             "command_forms__adventure_levels",
@@ -738,23 +431,23 @@ def learned_command_skills(*, user) -> list[dict]:
 
     A CommandSkill is "learned" once the player has passed the Command Adventure
     that teaches it - the same pass milestone (`passed_at`) that unlocks the
-    storey's challenges. Passing a storey's adventure therefore grants every
-    published command-skill in that storey. Derived (not stored) so it can never
+    chapter's challenges. Passing a chapter's adventure therefore grants every
+    published command-skill in that chapter. Derived (not stored) so it can never
     drift from the progression that produced it.
     """
     if not getattr(user, "is_authenticated", False):
         return []
-    passed_storey_ids = set(
+    passed_chapter_ids = set(
         AdventureRun.objects.filter(user=user, passed_at__isnull=False)
-        .values_list("command_adventure__storey_id", flat=True)
+        .values_list("command_adventure__chapter_id", flat=True)
         .distinct()
     )
-    if not passed_storey_ids:
+    if not passed_chapter_ids:
         return []
     skills = (
-        CommandSkill.objects.filter(storey_id__in=passed_storey_ids, is_published=True)
-        .select_related("storey")
-        .order_by("storey__sort_order", "sort_order", "id")
+        CommandSkill.objects.filter(chapter_id__in=passed_chapter_ids, is_published=True)
+        .select_related("chapter")
+        .order_by("chapter__sort_order", "sort_order", "id")
     )
     return [
         {
@@ -763,16 +456,16 @@ def learned_command_skills(*, user) -> list[dict]:
             "base_command": skill.base_command,
             "title": skill.title,
             "summary": skill.summary,
-            "storey_id": skill.storey_id,
-            "storey_number": skill.storey.number,
-            "storey_title": skill.storey.title,
+            "chapter_id": skill.chapter_id,
+            "chapter_number": skill.chapter.number,
+            "chapter_title": skill.chapter.title,
         }
         for skill in skills
     ]
 
 
-def storey_book(*, storey_id: int) -> dict | None:
-    """The Storey Book: every command registered for the storey, each resolved to
+def chapter_book(*, chapter_id: int) -> dict | None:
+    """The Chapter Book: every command registered for the chapter, each resolved to
     its rich authored content from the library.
 
     There is no terminal demo here - the book is reference material. Pages come
@@ -780,21 +473,21 @@ def storey_book(*, storey_id: int) -> dict | None:
     ``library.py``, persisted by ``seed_command_library``); a minimal summary
     page is synthesized as a fallback so a registered command never renders
     empty."""
-    storey = (
-        Storey.objects.filter(id=storey_id, is_published=True)
+    chapter = (
+        Chapter.objects.filter(id=chapter_id, is_published=True)
         .only("id", "slug", "number", "title", "description")
         .first()
     )
-    if storey is None:
+    if chapter is None:
         return None
 
     skills = list(
-        CommandSkill.objects.filter(storey_id=storey_id, is_published=True).order_by(
+        CommandSkill.objects.filter(chapter_id=chapter_id, is_published=True).order_by(
             "sort_order", "id"
         )
     )
     # One query for the whole book: resolve every skill's library entry in bulk
-    # so a storey with N commands does not cost N round trips.
+    # so a chapter with N commands does not cost N round trips.
     keys = {library_key_for_command(skill.base_command) for skill in skills if skill.base_command}
     entries = {
         entry.command_key: entry
@@ -810,11 +503,11 @@ def storey_book(*, storey_id: int) -> dict | None:
         for skill in skills
     ]
     return {
-        "storey_id": storey.id,
-        "slug": storey.slug,
-        "number": storey.number,
-        "title": storey.title,
-        "description": storey.description,
+        "chapter_id": chapter.id,
+        "slug": chapter.slug,
+        "number": chapter.number,
+        "title": chapter.title,
+        "description": chapter.description,
         "command_count": len(commands),
         "commands": commands,
     }
@@ -859,9 +552,9 @@ def tome_summary_payload(*, tome: Tome) -> dict:
     }
 
 
-def challenge_queryset(*, storey_id: int):
+def challenge_queryset(*, chapter_id: int):
     return (
-        Challenge.objects.filter(storey_id=storey_id, is_published=True)
+        Challenge.objects.filter(chapter_id=chapter_id, is_published=True)
         .prefetch_related("challenge_levels")
         .order_by("sort_order", "id")
     )
@@ -881,7 +574,7 @@ class ChallengeAccessContext:
 
 
 def _build_challenge_access(
-    *, user, storey_id: int, challenges: list[Challenge]
+    *, user, chapter_id: int, challenges: list[Challenge]
 ) -> ChallengeAccessContext:
     from progress.models import LevelCompletion
 
@@ -890,7 +583,7 @@ def _build_challenge_access(
     level_ids = [level.id for challenge in challenges for level in challenge.challenge_levels.all()]
     if not level_ids:
         return ChallengeAccessContext(
-            adventure_passed=_adventure_passed(user=user, storey_id=storey_id)
+            adventure_passed=_adventure_passed(user=user, chapter_id=chapter_id)
         )
 
     completions = {
@@ -937,7 +630,7 @@ def _build_challenge_access(
         active_runs=active_runs,
         latest_runs=latest_runs,
         progress_counts=progress_counts,
-        adventure_passed=_adventure_passed(user=user, storey_id=storey_id),
+        adventure_passed=_adventure_passed(user=user, chapter_id=chapter_id),
     )
 
 
@@ -957,7 +650,7 @@ def command_adventure_summary_payload(*, user, adventure: CommandAdventure) -> d
     if level_count == 0:
         level_count = AdventureLevel.objects.filter(
             command_adventure__isnull=True,
-            command_form__command_skill__storey=adventure.storey,
+            command_form__command_skill__chapter=adventure.chapter,
             is_published=True,
             command_form__is_published=True,
             command_form__command_skill__is_published=True,
@@ -1041,7 +734,7 @@ def challenge_levels_access_payload(*, user, challenge: Challenge) -> list[dict]
     (locked / in_progress / completed) match exactly between the Tower and the
     in-run level navigator."""
     access = _build_challenge_access(
-        user=user, storey_id=challenge.storey_id, challenges=[challenge]
+        user=user, chapter_id=challenge.chapter_id, challenges=[challenge]
     )
     ordered = _ordered_levels(challenge.challenge_levels.all())
     return [
@@ -1080,11 +773,11 @@ def challenge_level_access_payload(
 
 
 def get_command_form(form_id: int) -> CommandForm:
-    return CommandForm.objects.select_related("command_skill", "command_skill__storey").get(
+    return CommandForm.objects.select_related("command_skill", "command_skill__chapter").get(
         id=form_id,
         is_published=True,
         command_skill__is_published=True,
-        command_skill__storey__is_published=True,
+        command_skill__chapter__is_published=True,
     )
 
 
@@ -1113,7 +806,7 @@ def _challenge_unlocked(
     sibling_levels: list[ChallengeLevel],
 ) -> bool:
     if level.difficulty == DIFFICULTY_EASY:
-        # Mirrors ChallengeRunService._ensure_adventure_passed: a storey's
+        # Mirrors ChallengeRunService._ensure_adventure_passed: a chapter's
         # challenges open once its Command Adventure has been passed.
         return access.adventure_passed
     previous = DIFFICULTY_EASY if level.difficulty == DIFFICULTY_MEDIUM else DIFFICULTY_MEDIUM
@@ -1128,14 +821,14 @@ def _challenge_unlocked(
     return bool(previous_level and previous_level.id in access.completions)
 
 
-def _adventure_passed(*, user, storey_id: int) -> bool:
+def _adventure_passed(*, user, chapter_id: int) -> bool:
     adventure_ids = list(
-        CommandAdventure.objects.filter(storey_id=storey_id, is_published=True).values_list(
+        CommandAdventure.objects.filter(chapter_id=chapter_id, is_published=True).values_list(
             "id", flat=True
         )
     )
     if not adventure_ids:
-        return True  # storey has no Command Adventure to gate on
+        return True  # chapter has no Command Adventure to gate on
     passed_ids = set(
         AdventureRun.objects.filter(
             user=user, command_adventure_id__in=adventure_ids, passed_at__isnull=False

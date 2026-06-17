@@ -11,7 +11,7 @@ from command_adventures.models import (
 
 @admin.register(CommandAdventure)
 class CommandAdventureAdmin(admin.ModelAdmin):
-    list_display = ("slug", "title", "storey", "is_published", "sort_order")
+    list_display = ("slug", "title", "chapter", "is_published", "sort_order")
     list_filter = ("is_published",)
     search_fields = ("title", "slug")
 

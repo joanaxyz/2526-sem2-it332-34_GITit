@@ -9,11 +9,11 @@ appears here.
 from __future__ import annotations
 
 from assets.descriptors import descriptor_map, owned_descriptor_map
-from assets.models import KIND_BATTLE_ARTIFACT, KIND_MONSTER, KIND_TOWER_ARTIFACT
+from assets.models import KIND_BATTLE_ARTIFACT, KIND_MONSTER, KIND_RELIC
 from battle.constants import BATTLE_SCHEMA_VERSION
 
 # Artifact assets that can dress a battle stage (backdrop + scattered props).
-_STAGE_ARTIFACT_KINDS = (KIND_TOWER_ARTIFACT, KIND_BATTLE_ARTIFACT)
+_STAGE_ARTIFACT_KINDS = (KIND_RELIC, KIND_BATTLE_ARTIFACT)
 
 
 def _effective_descriptor(monster: dict, descriptors: dict[str, dict]) -> dict | None:
@@ -86,12 +86,12 @@ def _resolve_stage_artifact(slug: str, user, caches: dict) -> str | None:
     return None
 
 
-def stage_payload(storey, *, user=None) -> dict | None:
-    """Resolve a storey's authored battle-stage dressing into render-ready data
+def stage_payload(chapter, *, user=None) -> dict | None:
+    """Resolve a chapter's authored battle-stage dressing into render-ready data
     (sprite URLs + normalized positions). Returns None when nothing is authored
     so the client falls back to the default sky + ledge. Built off the run-detail
     payload only (never the per-command hot path)."""
-    config = getattr(storey, "battle_stage", None) or {}
+    config = getattr(chapter, "battle_stage", None) or {}
     if not isinstance(config, dict) or not config:
         return None
     caches: dict = {}

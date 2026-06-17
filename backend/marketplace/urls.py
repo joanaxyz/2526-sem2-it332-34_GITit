@@ -3,7 +3,7 @@ from django.urls import path
 from marketplace.views import (
     GalleryAssetListAPIView,
     GalleryContentListAPIView,
-    GalleryTowerDesignListAPIView,
+    GalleryArchiveDesignListAPIView,
     MarketplaceListingDetailAPIView,
     MarketplaceListingListCreateAPIView,
     MarketplaceListingPurchaseAPIView,
@@ -23,5 +23,5 @@ urlpatterns = [
     ),
     path("gallery/assets/", GalleryAssetListAPIView.as_view(), name="gallery-assets"),
     path("gallery/content/", GalleryContentListAPIView.as_view(), name="gallery-content"),
-    path("gallery/tower-designs/", GalleryTowerDesignListAPIView.as_view(), name="gallery-tower-designs"),
+    path("gallery/tower-designs/", GalleryArchiveDesignListAPIView.as_view(), name="gallery-tower-designs"),
 ]

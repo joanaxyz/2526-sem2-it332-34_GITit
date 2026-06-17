@@ -29,10 +29,10 @@ from common.views import HealthAPIView
 from curriculum.views import (
     CommandFormPreviewAPIView,
     LearnedSkillsAPIView,
-    StoreyBookAPIView,
-    StoreyContentAPIView,
-    StoreyContentOverviewAPIView,
-    StoreyListAPIView,
+    ChapterBookAPIView,
+    ChapterContentAPIView,
+    ChapterContentOverviewAPIView,
+    ChapterListAPIView,
 )
 
 urlpatterns = [
@@ -45,13 +45,13 @@ urlpatterns = [
     path("api/assets/monsters/", MonsterUploadAPIView.as_view(), name="asset-monster-upload"),
     path("api/assets/", AssetUploadAPIView.as_view(), name="asset-upload"),
     path("api/authoring/", include("authoring.urls")),
-    path("api/", include("tower_designs.urls")),
+    path("api/", include("archive.urls")),
     path("api/", include("marketplace.urls")),
     path("api/progress/", include("progress.urls")),
-    path("api/storeys/", StoreyListAPIView.as_view(), name="storeys"),
-    path("api/storeys/<int:storey_id>/content/", StoreyContentAPIView.as_view(), name="storey-content"),
-    path("api/storeys/<int:storey_id>/overview/", StoreyContentOverviewAPIView.as_view(), name="storey-overview"),
-    path("api/storeys/<int:storey_id>/book/", StoreyBookAPIView.as_view(), name="storey-book"),
+    path("api/chapters/", ChapterListAPIView.as_view(), name="chapters"),
+    path("api/chapters/<int:chapter_id>/content/", ChapterContentAPIView.as_view(), name="chapter-content"),
+    path("api/chapters/<int:chapter_id>/overview/", ChapterContentOverviewAPIView.as_view(), name="chapter-overview"),
+    path("api/chapters/<int:chapter_id>/book/", ChapterBookAPIView.as_view(), name="chapter-book"),
     path("api/skills/learned/", LearnedSkillsAPIView.as_view(), name="skills-learned"),
     path("api/command-forms/<int:form_id>/preview/", CommandFormPreviewAPIView.as_view(), name="command-form-preview"),
     path("api/command-adventures/<slug:adventure_slug>/runs/", CommandAdventureRunStartAPIView.as_view(), name="adventure-run-start"),

@@ -62,7 +62,7 @@ class ChallengeCommandSubmitAPIView(APIView):
         serializer = CommandSubmitSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         run = ChallengeRun.objects.select_related(
-            "storey",
+            "chapter",
             "challenge",
             "challenge_level__challenge",
             "challenge_variant",
@@ -170,7 +170,7 @@ class ChallengeRetryAPIView(APIView):
 
 def _get_workspace_run(run_id: int, user):
     return ChallengeRun.objects.select_related(
-        "storey",
+        "chapter",
         "challenge",
         "challenge_level__challenge",
         "challenge_variant",

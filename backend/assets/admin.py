@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from assets.models import Asset, AssetSprite, TowerPieceAsset
+from assets.models import Asset, AssetSprite, RelicAsset
 
 
 class AssetSpriteInline(admin.TabularInline):
@@ -12,16 +12,13 @@ class AssetSpriteInline(admin.TabularInline):
     fields = ("action", "image", "frame_width", "frame_height", "columns", "rows", "frame_count", "fps", "loops")
 
 
-class TowerPieceAssetInline(admin.StackedInline):
-    model = TowerPieceAsset
+class RelicAssetInline(admin.StackedInline):
+    model = RelicAsset
     extra = 0
     fields = (
-        "piece_type",
         "view_box",
-        "anchors",
-        "bounds",
-        "interaction_zones",
-        "state_variants",
+        "interactive_viewbox",
+        "landing_viewbox",
         "svg_sanitized",
     )
 
@@ -32,4 +29,4 @@ class AssetAdmin(admin.ModelAdmin):
     list_filter = ("kind", "visibility", "is_published")
     search_fields = ("slug", "label", "tags")
     prepopulated_fields = {"slug": ("label",)}
-    inlines = [TowerPieceAssetInline, AssetSpriteInline]
+    inlines = [RelicAssetInline, AssetSpriteInline]

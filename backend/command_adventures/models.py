@@ -12,8 +12,8 @@ from common.constants import (
 
 
 class CommandAdventure(models.Model):
-    storey = models.ForeignKey(
-        "curriculum.Storey",
+    chapter = models.ForeignKey(
+        "curriculum.Chapter",
         related_name="command_adventures",
         on_delete=models.CASCADE,
     )
@@ -68,7 +68,7 @@ class AdventureLevel(models.Model):
     # start (battle.state), so unauthored levels need no seed changes.
     encounter_spec = models.JSONField(default=list, blank=True)
     # The runtime adventure this level belongs to. Legacy seeded rows may be
-    # null until reseeded; services fall back to the storey's first adventure.
+    # null until reseeded; services fall back to the chapter's first adventure.
     command_adventure = models.ForeignKey(
         CommandAdventure,
         null=True,
@@ -94,8 +94,8 @@ class AdventureLevel(models.Model):
         return self.title
 
     @property
-    def storey(self):
-        return self.command_form.command_skill.storey
+    def chapter(self):
+        return self.command_form.command_skill.chapter
 
 
 class VariantBase(models.Model):

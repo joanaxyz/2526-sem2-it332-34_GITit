@@ -7,12 +7,12 @@ from marketplace.selectors import (
     active_listings,
     gallery_assets,
     gallery_content,
-    gallery_tower_designs,
+    gallery_archive,
     listing_payload,
     listing_payloads,
 )
 from marketplace.services import MarketplaceService
-from tower_designs.selectors import tower_design_payload
+from archive.selectors import archive_design_payload
 
 
 class MarketplaceListingListCreateAPIView(APIView):
@@ -41,7 +41,7 @@ class MarketplaceListingDetailAPIView(APIView):
 
 class MarketplaceListingPurchaseAPIView(APIView):
     def post(self, request, listing_id: int):
-        listing = StoreListing.objects.select_related("asset", "content_definition", "tower_design").get(id=listing_id)
+        listing = StoreListing.objects.select_related("asset", "content_definition", "archive_design").get(id=listing_id)
         result = MarketplaceService().purchase(user=request.user, listing=listing)
         entitlement = result["entitlement"]
         return Response(
@@ -51,7 +51,7 @@ class MarketplaceListingPurchaseAPIView(APIView):
                     "item_kind": entitlement.item_kind,
                     "asset_id": entitlement.asset_id,
                     "content_definition_id": entitlement.content_definition_id,
-                    "tower_design_id": entitlement.tower_design_id,
+                    "archive_design_id": entitlement.archive_design_id,
                     "source_listing_id": entitlement.source_listing_id,
                     "granted_at": entitlement.granted_at,
                 },
@@ -93,7 +93,7 @@ class GalleryContentListAPIView(APIView):
         return Response({"results": [content_payload(content, include_definition=False) for content in queryset]})
 
 
-class GalleryTowerDesignListAPIView(APIView):
+class GalleryArchiveDesignListAPIView(APIView):
     def get(self, request):
-        queryset = gallery_tower_designs(user=request.user)
-        return Response({"results": [tower_design_payload(design) for design in queryset]})
+        queryset = gallery_archive(user=request.user)
+        return Response({"results": [archive_design_payload(design) for design in queryset]})

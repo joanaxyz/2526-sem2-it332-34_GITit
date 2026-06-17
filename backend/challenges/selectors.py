@@ -46,9 +46,9 @@ def run_meets_progress_threshold(*, run: ChallengeRun) -> bool:
 
 def get_challenge_level(level_id: int) -> ChallengeLevel:
     return (
-        ChallengeLevel.objects.select_related("challenge", "challenge__storey")
+        ChallengeLevel.objects.select_related("challenge", "challenge__chapter")
         .prefetch_related("challenge_variants")
-        .filter(Q(challenge__storey__is_published=True) | Q(challenge__source_content_definition__isnull=False))
+        .filter(Q(challenge__chapter__is_published=True) | Q(challenge__source_content_definition__isnull=False))
         .get(
             id=level_id,
             is_published=True,

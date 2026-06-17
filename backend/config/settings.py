@@ -94,7 +94,7 @@ INSTALLED_APPS = [
     "accounts",
     "assets",
     "authoring",
-    "tower_designs.apps.TowerDesignsConfig",
+    "archive.apps.ArchiveConfig",
     "marketplace",
     "curriculum",
     "command_adventures.apps.CommandAdventuresConfig",

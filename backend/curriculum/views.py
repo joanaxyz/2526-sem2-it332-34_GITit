@@ -5,47 +5,47 @@ from common.performance import timing
 from curriculum.selectors import (
     get_command_form,
     learned_command_skills,
-    published_storeys,
-    storey_book,
-    storey_completion_count_map,
-    storey_completion_denominator_map,
-    storey_content_overview,
-    storey_content_page,
+    published_chapters,
+    chapter_book,
+    chapter_completion_count_map,
+    chapter_completion_denominator_map,
+    chapter_content_overview,
+    chapter_content_page,
 )
-from curriculum.serializers import StoreyListSerializer
+from curriculum.serializers import ChapterListSerializer
 
 
-class StoreyListAPIView(APIView):
+class ChapterListAPIView(APIView):
     def get(self, request):
-        storeys = list(published_storeys())
-        storey_ids = [storey.id for storey in storeys]
-        serializer = StoreyListSerializer(
-            storeys,
+        chapters = list(published_chapters())
+        chapter_ids = [chapter.id for chapter in chapters]
+        serializer = ChapterListSerializer(
+            chapters,
             many=True,
             context={
-                "storey_completion_count_map": storey_completion_count_map(
+                "chapter_completion_count_map": chapter_completion_count_map(
                     user=request.user,
-                    storey_ids=storey_ids,
+                    chapter_ids=chapter_ids,
                 ),
-                "storey_completion_denominator_map": storey_completion_denominator_map(
-                    storey_ids=storey_ids,
+                "chapter_completion_denominator_map": chapter_completion_denominator_map(
+                    chapter_ids=chapter_ids,
                 ),
             },
         )
         return Response(serializer.data)
 
 
-class StoreyContentAPIView(APIView):
-    def get(self, request, storey_id: int):
+class ChapterContentAPIView(APIView):
+    def get(self, request, chapter_id: int):
         section = request.query_params.get("section") or "command_skills"
         cursor = _int_param(request.query_params.get("cursor"))
         # Clamp so a client can't request an unbounded page (?limit=999999).
         limit = min(max(_int_param(request.query_params.get("limit")) or 8, 1), 50)
-        with timing("curriculum.storey_content", storey_id=storey_id, section=section):
+        with timing("curriculum.chapter_content", chapter_id=chapter_id, section=section):
             return Response(
-                storey_content_page(
+                chapter_content_page(
                     user=request.user,
-                    storey_id=storey_id,
+                    chapter_id=chapter_id,
                     section=section,
                     cursor=cursor,
                     limit=limit,
@@ -53,20 +53,20 @@ class StoreyContentAPIView(APIView):
             )
 
 
-class StoreyContentOverviewAPIView(APIView):
-    def get(self, request, storey_id: int):
-        with timing("curriculum.storey_overview", storey_id=storey_id):
+class ChapterContentOverviewAPIView(APIView):
+    def get(self, request, chapter_id: int):
+        with timing("curriculum.chapter_overview", chapter_id=chapter_id):
             return Response(
-                storey_content_overview(user=request.user, storey_id=storey_id)
+                chapter_content_overview(user=request.user, chapter_id=chapter_id)
             )
 
 
-class StoreyBookAPIView(APIView):
-    def get(self, request, storey_id: int):
-        with timing("curriculum.storey_book", storey_id=storey_id):
-            book = storey_book(storey_id=storey_id)
+class ChapterBookAPIView(APIView):
+    def get(self, request, chapter_id: int):
+        with timing("curriculum.chapter_book", chapter_id=chapter_id):
+            book = chapter_book(chapter_id=chapter_id)
         if book is None:
-            return Response({"detail": "Storey not found."}, status=404)
+            return Response({"detail": "Chapter not found."}, status=404)
         return Response(book)
 
 

@@ -36,7 +36,7 @@ from evaluation.completion import CompletionEvaluationContext, PracticeCompletio
 from practice.models import CommandLog, CommandStep
 from practice.scaffolding import FeedbackGenerationService
 from practice.visualization import RepositoryVisualizationService
-from progress.chests import StoreyChestService
+from progress.chests import ChapterChestService
 from progress.models import LevelCompletion
 from progress.services import StreakService
 from simulator.command_engine import SimulatedGitCommandEngine
@@ -339,7 +339,7 @@ class CommandProcessingService:
         with span("run_save"):
             run.save(update_fields=sorted(update_fields))
         if chest_pending:
-            StoreyChestService().award_chests(user=run.user, storey=run.storey)
+            ChapterChestService().award_chests(user=run.user, chapter=run.chapter)
         with span("response_snapshot"):
             if _command_response_includes_project_tree(
                 command_result=command_result,
@@ -368,7 +368,7 @@ class CommandProcessingService:
 
     def _complete_run(self, run: ChallengeRun) -> tuple[set[str], bool]:
         """Mark the run completed and record level progress. Returns the saved
-        field names plus whether a storey-chest check should run after the
+        field names plus whether a chapter-chest check should run after the
         caller persists this run (the check reads completed runs from the DB)."""
         run.status = SESSION_STATUS_COMPLETED
         run.completed_at = timezone.now()
@@ -406,7 +406,7 @@ class CommandProcessingService:
                     completion.completed_at = run.completed_at
                     completion.save(update_fields=["challenge_run", "first_attempt_star", "counted_action_total", "completed_at"])
                 StreakService().record_completion(user=run.user, completed_at=run.completed_at)
-            # GitCoins come from the storey progress chests. The chest check
+            # GitCoins come from the chapter progress chests. The chest check
             # reads completed runs from the DB, so it must wait until the
             # caller persists this run - report it back for after run.save().
             chest_pending = current_meets_progress

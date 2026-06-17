@@ -22,7 +22,7 @@ def _level(slug="stage-files", encounter_spec=None, mob_roster=None):
     return SimpleNamespace(
         slug=slug,
         encounter_spec=encounter_spec or [],
-        storey=SimpleNamespace(mob_roster=mob_roster or []) if mob_roster is not None else None,
+        chapter=SimpleNamespace(mob_roster=mob_roster or []) if mob_roster is not None else None,
     )
 
 
@@ -31,7 +31,7 @@ def _challenge_level(challenge_slug="onboard", boss_spec=None, pk=1, boss_roster
         challenge=SimpleNamespace(slug=challenge_slug),
         boss_spec=boss_spec or {},
         pk=pk,
-        storey=SimpleNamespace(boss_roster=boss_roster or []) if boss_roster is not None else None,
+        chapter=SimpleNamespace(boss_roster=boss_roster or []) if boss_roster is not None else None,
     )
 
 
@@ -78,13 +78,13 @@ def test_adventure_authored_encounter_wins():
     ]
 
 
-def test_adventure_default_roster_uses_storey_mob_roster():
-    roster = ["wizard", "priest"]  # arbitrary species, only the storey list matters
+def test_adventure_default_roster_uses_chapter_mob_roster():
+    roster = ["wizard", "priest"]  # arbitrary species, only the chapter list matters
     monsters = initial_adventure_battle_state(_level(mob_roster=roster), _variant(rule_count=4))[
         "monsters"
     ]
     assert {m["species"] for m in monsters} <= set(roster)
-    # Authored encounters still win over the storey roster.
+    # Authored encounters still win over the chapter roster.
     authored = initial_adventure_battle_state(
         _level(mob_roster=roster, encounter_spec=[{"species": "slime", "hp": 1}]),
         _variant(),
@@ -92,7 +92,7 @@ def test_adventure_default_roster_uses_storey_mob_roster():
     assert authored[0]["species"] == "slime"
 
 
-def test_challenge_boss_uses_storey_boss_roster():
+def test_challenge_boss_uses_chapter_boss_roster():
     (boss,) = initial_challenge_battle_state(_challenge_level(boss_roster=["wizard"]), _variant())[
         "monsters"
     ]

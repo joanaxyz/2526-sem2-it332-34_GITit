@@ -1,15 +1,15 @@
 from rest_framework import serializers
 
-from curriculum.models import Storey
+from curriculum.models import Chapter
 
 
-class StoreyListSerializer(serializers.ModelSerializer):
+class ChapterListSerializer(serializers.ModelSerializer):
     command_skill_count = serializers.IntegerField(read_only=True)
     challenge_count = serializers.IntegerField(read_only=True)
     level_completion = serializers.SerializerMethodField()
 
     class Meta:
-        model = Storey
+        model = Chapter
         fields = [
             "id",
             "slug",
@@ -24,8 +24,8 @@ class StoreyListSerializer(serializers.ModelSerializer):
         ]
 
     def get_level_completion(self, obj) -> dict:
-        denominator_map = self.context.get("storey_completion_denominator_map", {})
-        count_map = self.context.get("storey_completion_count_map", {})
+        denominator_map = self.context.get("chapter_completion_denominator_map", {})
+        count_map = self.context.get("chapter_completion_count_map", {})
         denominator = int(
             denominator_map.get(obj.id, 0) or 0
         )

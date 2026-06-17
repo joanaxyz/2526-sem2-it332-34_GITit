@@ -1,7 +1,7 @@
 from django.db import models
 
-# Default GitCoin chests along the storey progress bar. Seeds may override
-# per storey via the module spec's "chest_rewards".
+# Default GitCoin chests along the chapter progress bar. Seeds may override
+# per chapter via the module spec's "chest_rewards".
 DEFAULT_CHEST_REWARDS = [
     {"threshold": 25, "coins": 25},
     {"threshold": 50, "coins": 60},
@@ -14,7 +14,7 @@ def default_chest_rewards() -> list[dict]:
     return [dict(chest) for chest in DEFAULT_CHEST_REWARDS]
 
 
-class Storey(models.Model):
+class Chapter(models.Model):
     slug = models.SlugField(unique=True)
     number = models.PositiveIntegerField(unique=True)
     title = models.CharField(max_length=160)
@@ -23,29 +23,29 @@ class Storey(models.Model):
     sort_order = models.PositiveIntegerField(default=0)
     # [{"threshold": <progress percent>, "coins": <GitCoins>}, ...]
     chest_rewards = models.JSONField(default=default_chest_rewards, blank=True)
-    # Monster palette for this storey's battles: adventure encounters cycle
+    # Monster palette for this chapter's battles: adventure encounters cycle
     # `mob_roster`, challenge bosses cycle `boss_roster`. Each level still picks
     # its species deterministically (stable hash of the level slug) from the
     # list. Empty falls back to the global cycles in battle/constants.py.
     mob_roster = models.JSONField(default=list, blank=True)
     boss_roster = models.JSONField(default=list, blank=True)
     # Authored battle-stage dressing rendered behind the actors during this
-    # storey's battles. Stamped from the AuthoringStorey at compile time.
+    # chapter's battles. Stamped from the AuthoringChapter at compile time.
     # Shape: {"background": "<asset-slug>"|null,
     #         "artifacts": [{"slug", "x", "y", "scale", "rotation", "z"}]}
     # Coordinates are normalized (0..1) so they render at any stage size.
     battle_stage = models.JSONField(default=dict, blank=True)
-    # Per-storey visual authoring for the official/runtime tower. Structure is
-    # intentionally asset-slug based so a storey can choose different sections,
+    # Per-chapter visual authoring for the official/runtime tower. Structure is
+    # intentionally asset-slug based so a chapter can choose different sections,
     # landings, transforms, and artifact placement defaults without frontend
     # role-specific rendering logic.
-    tower_layout = models.JSONField(default=dict, blank=True)
+    relic_layout = models.JSONField(default=dict, blank=True)
 
     class Meta:
         ordering = ["sort_order", "number"]
 
     def __str__(self) -> str:
-        return f"Storey {self.number}: {self.title}"
+        return f"Chapter {self.number}: {self.title}"
 
 
 # Tower slots a tome can be authored into. The tower renders sections in a
@@ -64,14 +64,14 @@ TOME_PLACEMENTS = [
 class Tome(models.Model):
     """A general lesson (not a command) that opens as a book in the tower.
 
-    Tomes appear only on storeys where they are authored, at the authored
+    Tomes appear only on chapters where they are authored, at the authored
     placement slot. They are pure reading - no runs, attempts, or locking."""
 
-    storey = models.ForeignKey(Storey, related_name="tomes", on_delete=models.CASCADE)
+    chapter = models.ForeignKey(Chapter, related_name="tomes", on_delete=models.CASCADE)
     slug = models.SlugField()
     title = models.CharField(max_length=160)
     summary = models.TextField(blank=True)
-    # list[BookPage] - the same page/block schema the Storey Book renders.
+    # list[BookPage] - the same page/block schema the Chapter Book renders.
     pages = models.JSONField(default=list, blank=True)
     placement = models.CharField(
         max_length=32, choices=TOME_PLACEMENTS, default=TOME_PLACEMENT_ABOVE_ADVENTURE
@@ -87,8 +87,8 @@ class Tome(models.Model):
     )
 
     class Meta:
-        ordering = ["storey__sort_order", "sort_order", "id"]
-        unique_together = [("storey", "slug")]
+        ordering = ["chapter__sort_order", "sort_order", "id"]
+        unique_together = [("chapter", "slug")]
 
     def __str__(self) -> str:
         return self.title
@@ -96,7 +96,7 @@ class Tome(models.Model):
 
 class LibraryEntry(models.Model):
     """Authored reference content for one command, keyed by its canonical
-    library key (``library_key_for_command``). The Storey Book resolves each
+    library key (``library_key_for_command``). The Chapter Book resolves each
     registered CommandSkill to its entry here; commands without an entry fall
     back to a synthesized summary page."""
 
@@ -104,7 +104,7 @@ class LibraryEntry(models.Model):
     title = models.CharField(max_length=160, blank=True)
     summary = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
-    # list[BookPage] - the same page/block schema the Storey Book renders.
+    # list[BookPage] - the same page/block schema the Chapter Book renders.
     pages = models.JSONField(default=list, blank=True)
     is_published = models.BooleanField(default=True)
 
@@ -117,8 +117,8 @@ class LibraryEntry(models.Model):
 
 
 class CommandSkill(models.Model):
-    storey = models.ForeignKey(
-        Storey,
+    chapter = models.ForeignKey(
+        Chapter,
         related_name="command_skills",
         on_delete=models.CASCADE,
     )
@@ -132,8 +132,8 @@ class CommandSkill(models.Model):
     sort_order = models.PositiveIntegerField(default=0)
 
     class Meta:
-        ordering = ["storey__sort_order", "sort_order", "base_command"]
-        unique_together = [("storey", "slug")]
+        ordering = ["chapter__sort_order", "sort_order", "base_command"]
+        unique_together = [("chapter", "slug")]
 
     def __str__(self) -> str:
         return self.title

@@ -14,15 +14,11 @@ from assets.descriptors import asset_descriptor, descriptor_map, owned_descripto
 from assets.models import (
     ASSET_KINDS,
     KIND_MONSTER,
-    KIND_TOWER_ARTIFACT,
-    KIND_TOWER_PIECE,
+    KIND_RELIC,
     MONSTER_TIERS,
     Asset,
     AssetSprite,
-    TowerPieceAsset,
-    TowerPieceType,
-    TOWER_PIECE_BASE,
-    TOWER_PIECE_LANDING,
+    RelicAsset,
 )
 from assets.sanitize import sanitize_svg
 from assets.svg_crop import crop_svg_markup
@@ -41,7 +37,7 @@ _TOWER_RASTER_EXTENSIONS = (".png", ".webp", ".gif", ".jpg", ".jpeg")
 
 
 @dataclass(frozen=True)
-class PreparedTowerUpload:
+class PreparedRelicUpload:
     file: ContentFile | object
     svg_sanitized: bool
     view_box: str | None = None
@@ -71,7 +67,12 @@ class AssetDescriptorAPIView(APIView):
 
 
 class AssetUploadAPIView(APIView):
-    """Upload an owned tower piece or artifact (SVG sanitized, raster validated)."""
+    """Upload an owned Archive relic (SVG sanitized, raster validated).
+
+    A relic carries an interactive viewbox (hover/click hotspot) and a landing
+    viewbox (Blue's walk rail); both default from the cropped art and the author
+    can fine-tune them later in the editor.
+    """
 
     parser_classes = [MultiPartParser, FormParser]
 
@@ -81,8 +82,8 @@ class AssetUploadAPIView(APIView):
             raise PermissionDenied("Sign in to upload assets.")
 
         kind = request.data.get("kind")
-        if kind not in {KIND_TOWER_PIECE, KIND_TOWER_ARTIFACT}:
-            raise ValidationError({"kind": "Only tower_piece and tower_artifact uploads are supported."})
+        if kind != KIND_RELIC:
+            raise ValidationError({"kind": "Only relic uploads are supported."})
 
         label = (request.data.get("label") or "").strip()
         if not label:
@@ -94,14 +95,7 @@ class AssetUploadAPIView(APIView):
         if upload is None:
             raise ValidationError({"file": "A file is required."})
 
-        prepared_upload = _prepare_tower_upload(upload, field="file")
-
-        piece_type = None
-        if kind == KIND_TOWER_PIECE:
-            piece_type = request.data.get("piece_type")
-            valid_types = {value for value, _label in TowerPieceType.choices}
-            if piece_type not in valid_types:
-                raise ValidationError({"piece_type": "A valid tower piece type is required."})
+        prepared_upload = _prepare_relic_upload(upload, field="file")
 
         asset = Asset.objects.create(
             kind=kind,
@@ -126,7 +120,7 @@ class AssetUploadAPIView(APIView):
             action_upload = request.FILES.get(f"file_{action}") or request.FILES.get(f"sprite_{action}")
             if action_upload is None:
                 continue
-            prepared = _prepare_tower_upload(action_upload, field=f"file_{action}")
+            prepared = _prepare_relic_upload(action_upload, field=f"file_{action}")
             AssetSprite.objects.create(
                 asset=asset,
                 action=action,
@@ -145,44 +139,23 @@ class AssetUploadAPIView(APIView):
             if manual_view_box and not prepared_upload.view_box
             else None
         )
-
-        if kind == KIND_TOWER_PIECE:
-            normalized_view_box = prepared_upload.view_box or (
-                _format_view_box(parsed_view_box) if parsed_view_box else ""
-            )
-            anchors = _parse_json(request.data.get("anchors")) or {}
-            bounds = prepared_upload.bounds or _bounds_from_view_box(normalized_view_box)
-            if bounds:
-                bounds = _with_artifact_safe_bounds(bounds)
-            if piece_type == TOWER_PIECE_LANDING and "walk_rail" not in anchors:
-                anchors["walk_rail"] = _default_walk_rail(bounds)
-            if piece_type == TOWER_PIECE_BASE and bounds and "walk_rail" not in anchors:
-                anchors["walk_rail"] = _default_walk_rail(bounds)
-            TowerPieceAsset.objects.create(
-                asset=asset,
-                piece_type=piece_type,
-                view_box=normalized_view_box,
-                anchors=anchors,
-                bounds=bounds or {},
-                svg_sanitized=prepared_upload.svg_sanitized,
-            )
-        else:
-            asset_view_box = prepared_upload.view_box or (
-                _format_view_box(parsed_view_box) if parsed_view_box else ""
-            )
-            bounds = _parse_view_box(asset_view_box) if asset_view_box else None
-            if not bounds:
-                return Response(asset_descriptor(asset), status=201)
-            x, y, width, height = bounds
-            asset.config = {
-                **asset.config,
-                "view_box": _format_view_box(bounds),
-                "bounds": {"x": x, "y": y, "width": width, "height": height},
-                "natural_width": prepared_upload.natural_width,
-                "natural_height": prepared_upload.natural_height,
-                "content_type": prepared_upload.content_type,
-            }
-            asset.save(update_fields=["config", "updated_at"])
+        normalized_view_box = prepared_upload.view_box or (
+            _format_view_box(parsed_view_box) if parsed_view_box else ""
+        )
+        bounds = prepared_upload.bounds or _bounds_from_view_box(normalized_view_box)
+        interactive_viewbox = _parse_json(request.data.get("interactive_viewbox")) or (
+            _default_interactive_viewbox(bounds) if bounds else {}
+        )
+        landing_viewbox = _parse_json(request.data.get("landing_viewbox")) or (
+            _default_landing_viewbox(bounds) if bounds else {}
+        )
+        RelicAsset.objects.create(
+            asset=asset,
+            view_box=normalized_view_box,
+            interactive_viewbox=interactive_viewbox,
+            landing_viewbox=landing_viewbox,
+            svg_sanitized=prepared_upload.svg_sanitized,
+        )
 
         return Response(asset_descriptor(asset), status=201)
 
@@ -290,14 +263,14 @@ def _safe_int(value, *, default: int) -> int:
         return default
 
 
-def _prepare_tower_upload(upload, *, field: str):
+def _prepare_relic_upload(upload, *, field: str):
     name = (upload.name or "").lower()
     if name.endswith(".svg"):
         sanitized = sanitize_svg(upload.read())
         cropped, view_box = crop_svg_markup(sanitized)
         parsed = _parse_view_box(view_box) if view_box else None
         bounds = _bounds_dict(parsed) if parsed else None
-        return PreparedTowerUpload(
+        return PreparedRelicUpload(
             file=ContentFile(cropped, name=upload.name),
             svg_sanitized=True,
             view_box=view_box,
@@ -308,10 +281,10 @@ def _prepare_tower_upload(upload, *, field: str):
         )
     if not name.endswith(_TOWER_RASTER_EXTENSIONS):
         raise ValidationError({field: "Upload an SVG or raster sprite image."})
-    return _prepare_raster_tower_upload(upload, field=field)
+    return _prepare_raster_relic_upload(upload, field=field)
 
 
-def _prepare_raster_tower_upload(upload, *, field: str) -> PreparedTowerUpload:
+def _prepare_raster_relic_upload(upload, *, field: str) -> PreparedRelicUpload:
     try:
         from PIL import Image, UnidentifiedImageError
     except ImportError as exc:  # pragma: no cover - deployment dependency issue.
@@ -336,10 +309,10 @@ def _prepare_raster_tower_upload(upload, *, field: str) -> PreparedTowerUpload:
     width, height = cropped.size
     output = BytesIO()
     cropped.save(output, format="PNG")
-    stem = Path(upload.name or "tower-piece").stem or "tower-piece"
+    stem = Path(upload.name or "relic").stem or "relic"
     filename = f"{stem}.png"
     bounds = {"x": 0, "y": 0, "width": width, "height": height}
-    return PreparedTowerUpload(
+    return PreparedRelicUpload(
         file=ContentFile(output.getvalue(), name=filename),
         svg_sanitized=False,
         view_box=_format_view_box((0, 0, width, height)),
@@ -403,17 +376,29 @@ def _bounds_dict(view_box: tuple[float, float, float, float]) -> dict:
     return {"x": x, "y": y, "width": width, "height": height}
 
 
-def _with_artifact_safe_bounds(bounds: dict) -> dict:
-    if "artifact_safe_bounds" in bounds:
-        return bounds
-    return {**bounds, "artifact_safe_bounds": {key: bounds[key] for key in ("x", "y", "width", "height")}}
+def _default_interactive_viewbox(bounds: dict | None) -> dict:
+    """A centred hotspot covering the middle ~70% of the relic art."""
+    box = bounds or {"x": 0, "y": 0, "width": 100, "height": 100}
+    x = float(box.get("x", 0) or 0)
+    y = float(box.get("y", 0) or 0)
+    width = float(box.get("width", 100) or 100)
+    height = float(box.get("height", 100) or 100)
+    inset_x = width * 0.15
+    inset_y = height * 0.15
+    return {
+        "x": x + inset_x,
+        "y": y + inset_y,
+        "width": width - inset_x * 2,
+        "height": height - inset_y * 2,
+    }
 
 
-def _default_walk_rail(bounds: dict | None) -> dict:
+def _default_landing_viewbox(bounds: dict | None) -> dict:
+    """A rail near the base of the relic for the companion to stand on."""
     box = bounds or {"x": 0, "y": 0, "width": 100, "height": 24}
     x = float(box.get("x", 0) or 0)
     y = float(box.get("y", 0) or 0)
     width = float(box.get("width", 100) or 100)
     height = float(box.get("height", 24) or 24)
-    rail_y = y + min(max(height * 0.2, 0), height)
+    rail_y = y + height * 0.94
     return {"x1": x, "y1": rail_y, "x2": x + width, "y2": rail_y}

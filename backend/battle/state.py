@@ -57,15 +57,15 @@ def _stable_offset(slug: str) -> int:
 
 
 def _roster_for(level, attr: str, fallback: tuple[str, ...]) -> tuple[str, ...]:
-    """Species cycle for this level's storey, or the global fallback.
+    """Species cycle for this level's chapter, or the global fallback.
 
-    Reads `level.storey.<attr>` (mob_roster / boss_roster); a missing storey or
-    an empty roster falls back to the shared default cycle. Storey access is
+    Reads `level.chapter.<attr>` (mob_roster / boss_roster); a missing chapter or
+    an empty roster falls back to the shared default cycle. Chapter access is
     resolved once at run/attempt creation - callers select_related the chain -
     so this never adds a per-command round trip.
     """
-    storey = getattr(level, "storey", None)
-    roster = list(getattr(storey, attr, None) or []) if storey is not None else []
+    chapter = getattr(level, "chapter", None)
+    roster = list(getattr(chapter, attr, None) or []) if chapter is not None else []
     return tuple(roster) if roster else fallback
 
 

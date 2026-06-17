@@ -2,12 +2,12 @@
 
 Runs the whole seed pipeline in dependency order:
 
-1. ``seed_curriculum_v2`` — storeys, command catalog, adventures, challenges,
+1. ``seed_curriculum_v2`` — chapters, command catalog, adventures, challenges,
    tomes. It calls ``seed_assets`` itself (monsters, characters, battle
    artifacts, tower pieces), so assets are always refreshed first. With
    ``--reset`` (the default here) it first clears the seeded curriculum and the
    dependent practice/progress rows (runs, attempts, completions, mastery).
-2. ``seed_command_library`` — the Storey Book ``LibraryEntry`` rows.
+2. ``seed_command_library`` — the Chapter Book ``LibraryEntry`` rows.
 3. ``grant_default_assets`` — registers the default Arcane Spire kit (Blue, the
    tower pieces, the crystal) into every player's asset registry.
 

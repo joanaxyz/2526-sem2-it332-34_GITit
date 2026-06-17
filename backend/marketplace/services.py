@@ -57,7 +57,7 @@ def _listing_fields(data: dict, *, partial: bool = False) -> dict:
         "item_kind",
         "asset_id",
         "content_definition_id",
-        "tower_design_id",
+        "archive_design_id",
         "price",
         "status",
     }

@@ -104,9 +104,9 @@ class MetricsService:
             for record in completion_records
             if record.challenge_run_id
         ]
-        storey_rows = (
+        chapter_rows = (
             ChallengeRun.objects.filter(user=user, mode=SESSION_MODE_PRIMARY)
-            .values("storey__number")
+            .values("chapter__number")
             .annotate(
                 hard_started=Count("id", filter=Q(challenge_level__difficulty=DIFFICULTY_HARD)),
                 hard_completed=Count(
@@ -120,31 +120,31 @@ class MetricsService:
                 completed_retry_total=Sum("retry_index", filter=Q(status=SESSION_STATUS_COMPLETED)),
             )
         )
-        storey_metrics_map = {
-            int(row["storey__number"]): row
-            for row in storey_rows
-            if row["storey__number"] is not None
+        chapter_metrics_map = {
+            int(row["chapter__number"]): row
+            for row in chapter_rows
+            if row["chapter__number"] is not None
         }
-        storey_kpis = {
-            str(storey_number): {
+        chapter_kpis = {
+            str(chapter_number): {
                 "scr": self._rate(
-                    storey_metrics_map.get(storey_number, {}).get("completed_count") or 0,
-                    storey_metrics_map.get(storey_number, {}).get("started_count") or 0,
+                    chapter_metrics_map.get(chapter_number, {}).get("completed_count") or 0,
+                    chapter_metrics_map.get(chapter_number, {}).get("started_count") or 0,
                 ),
                 "hlcr": self._rate(
-                    storey_metrics_map.get(storey_number, {}).get("hard_completed") or 0,
-                    storey_metrics_map.get(storey_number, {}).get("hard_started") or 0,
+                    chapter_metrics_map.get(chapter_number, {}).get("hard_completed") or 0,
+                    chapter_metrics_map.get(chapter_number, {}).get("hard_started") or 0,
                 ),
                 "rta": self._rate(
-                    storey_metrics_map.get(storey_number, {}).get("rta_success") or 0,
-                    storey_metrics_map.get(storey_number, {}).get("rta_total") or 0,
+                    chapter_metrics_map.get(chapter_number, {}).get("rta_success") or 0,
+                    chapter_metrics_map.get(chapter_number, {}).get("rta_total") or 0,
                 ),
                 "arc": self._average_retry_count_from_counts(
-                    storey_metrics_map.get(storey_number, {}).get("completed_retry_total") or 0,
-                    storey_metrics_map.get(storey_number, {}).get("completed_count") or 0,
+                    chapter_metrics_map.get(chapter_number, {}).get("completed_retry_total") or 0,
+                    chapter_metrics_map.get(chapter_number, {}).get("completed_count") or 0,
                 ),
             }
-            for storey_number in sorted(storey_metrics_map)
+            for chapter_number in sorted(chapter_metrics_map)
         }
         streak = StreakRecord.objects.filter(user=user).only(
             "current_streak",
@@ -159,7 +159,7 @@ class MetricsService:
                 "hlcr": self._rate(challenge_counts["hard_completed"] or 0, challenge_counts["hard_started"] or 0),
                 "rta": self._rate(challenge_counts["rta_success"] or 0, challenge_counts["rta_total"] or 0),
             },
-            "storey_kpis": storey_kpis,
+            "chapter_kpis": chapter_kpis,
             "counts": {
                 "started": started,
                 "completed": completed,

@@ -17,7 +17,7 @@ from common.lru import LRUCommandHistoryCache
 from progress.models import LevelCompletion
 
 RUN_HYDRATE_SELECT_RELATED = (
-    "storey",
+    "chapter",
     "challenge",
     "challenge_level__challenge",
     "challenge_variant",
@@ -173,7 +173,7 @@ class ChallengeRunService:
         )
         run = ChallengeRun.objects.create(
             user=user,
-            storey=level.storey,
+            chapter=level.chapter,
             challenge=level.challenge,
             challenge_level=level,
             challenge_variant=variant,
@@ -204,9 +204,9 @@ class ChallengeRunService:
 
     def _ensure_unlocked(self, *, user, level: ChallengeLevel) -> None:
         if level.difficulty == DIFFICULTY_EASY:
-            # Entry into a storey's challenges is gated on passing its Command
+            # Entry into a chapter's challenges is gated on passing its Command
             # Adventure (the learn-by-doing mode that teaches the commands first).
-            self._ensure_adventure_passed(user=user, storey=level.storey)
+            self._ensure_adventure_passed(user=user, chapter=level.chapter)
             return
         previous = DIFFICULTY_EASY if level.difficulty == DIFFICULTY_MEDIUM else DIFFICULTY_MEDIUM
         previous_level = ChallengeLevel.objects.filter(
@@ -217,23 +217,23 @@ class ChallengeRunService:
         if not previous_level or not LevelCompletion.objects.filter(user=user, challenge_level=previous_level).exists():
             raise Locked("This challenge level is locked until the previous level is completed.")
 
-    def _ensure_adventure_passed(self, *, user, storey) -> None:
+    def _ensure_adventure_passed(self, *, user, chapter) -> None:
         # Lazy import: adventures.models is a leaf w.r.t. challenges, but keep the
         # dependency local to this gate.
         from command_adventures.models import AdventureRun, CommandAdventure
 
         adventure_ids = list(
-            CommandAdventure.objects.filter(storey=storey, is_published=True).values_list("id", flat=True)
+            CommandAdventure.objects.filter(chapter=chapter, is_published=True).values_list("id", flat=True)
         )
         if not adventure_ids:
-            return  # storey has no Command Adventure to gate on
+            return  # chapter has no Command Adventure to gate on
         passed_ids = set(
             AdventureRun.objects.filter(
                 user=user, command_adventure_id__in=adventure_ids, passed_at__isnull=False
             ).values_list("command_adventure_id", flat=True)
         )
         if not set(adventure_ids).issubset(passed_ids):
-            raise Locked("Complete this storey's Command Adventures to unlock its challenges.")
+            raise Locked("Complete this chapter's Command Adventures to unlock its challenges.")
 
     def _review_variant(self, *, user, level: ChallengeLevel):
         completion = LevelCompletion.objects.select_related("challenge_run__challenge_variant").filter(

@@ -3,13 +3,13 @@
 A tome is not a command. It teaches an idea (mental models, platform rules,
 workflow philosophy) with the same section/block vocabulary the command
 library uses, so the book reader renders both. Unlike adventures and
-challenges, tomes are not a repeating per-storey pattern - each one is
-authored onto a specific storey (the frozen ``"module"`` key = storey slug)
+challenges, tomes are not a repeating per-chapter pattern - each one is
+authored onto a specific chapter (the frozen ``"module"`` key = chapter slug)
 at an explicit ``placement`` slot:
 
-  * ``above_adventure``  - before the storey's Command Adventure gate
+  * ``above_adventure``  - before the chapter's Command Adventure gate
   * ``below_adventure``  - between the adventure and the challenges
-  * ``below_challenges`` - after the storey's challenges
+  * ``below_challenges`` - after the chapter's challenges
 
 Pages are built at import time through ``tome_pages`` so the seed persists
 ready-to-render pages, exactly like seeded command library entries.

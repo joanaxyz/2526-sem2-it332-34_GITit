@@ -3,31 +3,31 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from authoring.models import AuthoringStorey, ContentDefinition
-from authoring.selectors import content_payload, storey_payload, visible_content_definitions
-from authoring.services import AuthoringStoreyService, ContentDefinitionService
+from authoring.models import AuthoringChapter, ContentDefinition
+from authoring.selectors import content_payload, chapter_payload, visible_content_definitions
+from authoring.services import AuthoringChapterService, ContentDefinitionService
 from marketplace.access import can_remix
 
 
-class AuthoringStoreyListCreateAPIView(APIView):
+class AuthoringChapterListCreateAPIView(APIView):
     def get(self, request):
-        storeys = AuthoringStorey.objects.filter(owner=request.user)
-        return Response({"results": [storey_payload(row) for row in storeys]})
+        chapters = AuthoringChapter.objects.filter(owner=request.user)
+        return Response({"results": [chapter_payload(row) for row in chapters]})
 
     def post(self, request):
-        storey = AuthoringStoreyService().create(user=request.user, data=request.data)
-        return Response(storey_payload(storey), status=201)
+        chapter = AuthoringChapterService().create(user=request.user, data=request.data)
+        return Response(chapter_payload(chapter), status=201)
 
 
-class AuthoringStoreyDetailAPIView(APIView):
-    def patch(self, request, storey_id: int):
-        storey = get_object_or_404(AuthoringStorey, id=storey_id)
-        storey = AuthoringStoreyService().update(user=request.user, storey=storey, data=request.data)
-        return Response(storey_payload(storey))
+class AuthoringChapterDetailAPIView(APIView):
+    def patch(self, request, chapter_id: int):
+        chapter = get_object_or_404(AuthoringChapter, id=chapter_id)
+        chapter = AuthoringChapterService().update(user=request.user, chapter=chapter, data=request.data)
+        return Response(chapter_payload(chapter))
 
-    def delete(self, request, storey_id: int):
-        storey = get_object_or_404(AuthoringStorey, id=storey_id)
-        AuthoringStoreyService().delete(user=request.user, storey=storey)
+    def delete(self, request, chapter_id: int):
+        chapter = get_object_or_404(AuthoringChapter, id=chapter_id)
+        AuthoringChapterService().delete(user=request.user, chapter=chapter)
         return Response(status=204)
 
 

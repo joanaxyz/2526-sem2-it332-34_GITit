@@ -152,7 +152,7 @@ def _diagram(
 ) -> dict[str, Any]:
     """Authorable diagram block.
 
-    ``kind`` selects how the Storey Book renders it:
+    ``kind`` selects how the Chapter Book renders it:
       - ``"dag"`` - a commit graph. ``nodes`` are ``{id, label, lane, type}``
         (type one of commit/head/branch/merge); ``edges`` are ``{from, to}``.
       - ``"flow"`` - left-to-right stages (e.g. working tree -> staging -> repo).
@@ -1063,7 +1063,7 @@ def tome_pages(sections: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Build a tome's renderable pages from authored sections.
 
     Tomes (general lessons) are authored with the same section/block vocabulary
-    as command library entries, so the Storey Book reader renders both."""
+    as command library entries, so the Chapter Book reader renders both."""
     return pages_from_command_sections(sections)
 
 
@@ -1102,7 +1102,7 @@ LIBRARY_ENTRIES: list[dict[str, Any]] = [
         "terminal_output": "Initialized empty Git repository in /path/.git/",
         # -- Sub-navigation: options & arguments ------------------------------
         # Each option/argument becomes its own page AND a sub-nav item in the
-        # Storey Book (e.g. git init -> -q / --quiet, -b / --initial-branch).
+        # Chapter Book (e.g. git init -> -q / --quiet, -b / --initial-branch).
         "options": [
             {
                 "token": "-b / --initial-branch",
@@ -1135,6 +1135,6 @@ LIBRARY_ENTRIES: list[dict[str, Any]] = [
             edges=[{"from": "folder", "to": "repo", "label": "git init"}],
         ),
     },
-    # TODO(authoring): add the remaining commands registered across the storeys
+    # TODO(authoring): add the remaining commands registered across the chapters
     # here, one dict per command, following the template above.
 ]
