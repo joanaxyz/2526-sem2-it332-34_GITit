@@ -1,0 +1,29 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "index.html",
+    "src/main.tsx",
+    "src/test/setup.ts",
+    "src/test/assetStub.ts",
+    "eslint.config.js",
+    "vite.config.ts"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "*.{js,ts}", "scripts/**/*.{js,ts}"],
+  "ignore": [
+    // UI utilities intentionally kept as design-system building blocks even
+    // when a specific page does not import them yet.
+    "src/shared/components/ExpandToggleButton.tsx",
+    "src/shared/components/GamePanel.tsx",
+
+    // Challenge selection widgets are kept for the upcoming difficulty-picker
+    // polish pass; remove these ignores if that flow is simplified further.
+    "src/features/challenges/components/DifficultyActionButton.tsx",
+    "src/features/challenges/components/DifficultySelector.tsx",
+    "src/features/challenges/utils/difficulty.ts",
+
+    // Home stats widgets are preview/iteration components retained for the
+    // stats tab cleanup pass.
+    "src/features/home/components/ChapterProgress.tsx",
+    "src/features/home/components/StreakPanel.tsx"
+  ]
+}

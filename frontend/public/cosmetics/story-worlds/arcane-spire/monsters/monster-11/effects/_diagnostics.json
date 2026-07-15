@@ -1,0 +1,92 @@
+{
+  "front": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      35,
+      65,
+      1236,
+      1257
+    ],
+    "frameBBoxCenterRange": [
+      125.5,
+      147.0,
+      126.5,
+      180.5
+    ],
+    "frameEnergyAnchorRange": [
+      125.76,
+      136.78,
+      163.47,
+      195.07
+    ],
+    "frameRegistrationAnchorRange": [
+      125.76,
+      136.78,
+      163.47,
+      195.07
+    ],
+    "registration": {
+      "targetAnchor": [
+        126,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        91,
+        134,
+        191,
+        222
+      ],
+      "appliedShiftRange": [
+        -8,
+        35,
+        -2,
+        29
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 14,
+      "lowConfidenceFrames": 11,
+      "method": "feet-planted base on ground line (fit scale 0.823), core-x centred"
+    }
+  },
+  "back": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      191
+    ],
+    "bbox": [
+      30,
+      60,
+      1243,
+      1261
+    ],
+    "frameBBoxCenterRange": [
+      122.5,
+      129.0,
+      128.0,
+      193.5
+    ],
+    "frameEnergyAnchorRange": [
+      125.83,
+      127.54,
+      161.75,
+      195.64
+    ],
+    "frameRegistrationAnchorRange": [
+      125.83,
+      127.54,
+      161.75,
+      195.64
+    ]
+  }
+}

@@ -1,0 +1,156 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # Fast, infrastructure-free guards: linting plus the architecture/documentation
+  # /API-contract checks. Runs on every push and PR.
+  quality-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      # Run the artifact guard on the pristine checkout, before any install step
+      # can create __pycache__/.ruff_cache and trip it.
+      - name: Repository artifact guard
+        run: python scripts/check_repository_artifacts.py
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements-dev.txt
+      - name: Backend lint (ruff)
+        working-directory: backend
+        run: ruff check .
+      - name: Repository script lint (ruff)
+        run: ruff check scripts
+      - name: Architecture and contract guards
+        working-directory: frontend
+        env:
+          DJANGO_SETTINGS_MODULE: config.test_settings
+          DJANGO_DEBUG: "True"
+          DJANGO_SECRET_KEY: ci-quality-gates-secret
+        run: |
+          python ../scripts/check_legacy_terms.py
+          python ../scripts/check_architecture_boundaries.py
+          python ../scripts/check_css_architecture.py
+          python ../scripts/check_ui_typography.py
+          python ../scripts/check_seed_targets.py
+          python ../scripts/check_api_contract.py
+          python ../scripts/check_frontend_api_usage.py
+          python ../scripts/check_api_type_adoption.py
+          python ../scripts/check_documentation_current.py
+          python ../scripts/check_ci_quality_gates.py
+          python ../scripts/check_django_deploy.py
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint (eslint)
+        run: npm run lint
+      - name: Dead-code scan (knip)
+        run: npm run lint:dead
+      - name: Tests (vitest)
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Dependency audit
+        run: npm audit --audit-level=high
+
+  # Replays every authored solution through the real browser engine and proves
+  # the committed generated targets are current. Needs both Python and Node.
+  generated-targets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements-dev.txt
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Generated target replay guard
+        run: python scripts/check_generated_targets_current.py
+
+  # Proves a clean PostgreSQL database migrates from zero, audits Python
+  # dependencies, and runs the backend test suite with coverage. Migrations are
+  # intentionally uncommitted (see ARCHITECTURE.md "Current Migration Policy"),
+  # so CI regenerates them before applying.
+  production-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DJANGO_SETTINGS_MODULE: config.integration_test_settings
+      DJANGO_DEBUG: "True"
+      DJANGO_SECRET_KEY: ci-integration-secret
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      REDIS_URL: redis://localhost:6379/1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements-dev.txt
+      - name: Python dependency audit
+        run: pip-audit -r backend/requirements.txt
+      - name: Regenerate migrations from current models
+        working-directory: backend
+        run: python manage.py makemigrations
+      - name: Migration drift check
+        working-directory: backend
+        run: python manage.py makemigrations --check --dry-run
+      - name: Apply migrations on a clean database
+        working-directory: backend
+        run: python manage.py migrate --noinput
+      - name: Tests with coverage (pytest)
+        working-directory: backend
+        run: pytest -q --cov=. --cov-report=term-missing --cov-report=xml

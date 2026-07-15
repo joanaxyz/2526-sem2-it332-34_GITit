@@ -9,12 +9,12 @@ export function CursorGlow() {
     if (!window.matchMedia('(pointer: fine)').matches) return
 
     function handleMouseMove(e: MouseEvent) {
-      // Skip if an RAF is already queued — at most one update per frame
+      // Skip if an RAF is already queued - at most one update per frame
       if (rafRef.current !== null) return
       rafRef.current = requestAnimationFrame(() => {
         if (glowRef.current) {
           glowRef.current.style.background =
-            `radial-gradient(600px circle at ${e.clientX}px ${e.clientY}px, rgba(0, 212, 170, 0.07), transparent 70%)`
+            `radial-gradient(600px circle at ${e.clientX}px ${e.clientY}px, rgba(var(--theme-primary-rgb), 0.07), transparent 70%)`
         }
         rafRef.current = null
       })
@@ -29,7 +29,7 @@ export function CursorGlow() {
         width: 0;
         height: 0;
         border-radius: 50%;
-        border: 2px solid rgba(0, 212, 170, 0.4);
+        border: 2px solid rgba(var(--theme-primary-rgb), 0.4);
         transform: translate(-50%, -50%);
         pointer-events: none;
         z-index: 9999;

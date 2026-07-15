@@ -1,0 +1,4 @@
+@import './auth/layout.css';
+@import './auth/form.css';
+@import './auth/strength.css';
+@import './auth/responsive.css';

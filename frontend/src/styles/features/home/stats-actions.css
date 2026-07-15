@@ -1,0 +1,200 @@
+.home-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.95rem;
+  width: min(100%, 104rem);
+  margin: 0 auto;
+}
+
+.home-stats-panel,
+.home-activity-panel {
+  padding: 1rem 1.15rem;
+}
+
+.home-stat-rows div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.6rem;
+  min-height: 2.9rem;
+  border-bottom: 1px solid rgba(125, 211, 252, 0.09);
+  padding: 0.5rem 0.1rem;
+}
+
+.home-stat-rows div:last-child {
+  border-bottom: 0;
+}
+
+.home-stat-rows span {
+  color: rgba(218, 229, 247, 0.62);
+  font-size: 0.82rem;
+}
+
+.home-stat-rows strong {
+  color: #f6fbff;
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+}
+
+.home-stat-rows small {
+  grid-column: 1 / -1;
+  margin-top: -0.35rem;
+  color: rgba(218, 229, 247, 0.4);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home-streak-hero {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.15);
+  padding: 1rem 0.75rem 0.85rem;
+  text-align: center;
+}
+
+.home-streak-hero svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  color: hsl(var(--warning));
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.4));
+}
+
+.home-streak-hero strong {
+  color: #f6fbff;
+  font-family: var(--font-mono);
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.home-streak-hero span {
+  color: rgba(218, 229, 247, 0.62);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home-streak-hero small {
+  color: rgba(218, 229, 247, 0.42);
+  font-size: var(--text-2xs);
+}
+
+.home-meter-stack {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 0.85rem;
+}
+
+.home-meter-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.home-meter-row .ref-meter {
+  grid-column: 1 / -1;
+}
+
+.home-meter-row span {
+  color: rgba(218, 229, 247, 0.72);
+  font-size: 0.8rem;
+}
+
+.home-meter-row strong {
+  color: #f6fbff;
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+}
+
+.home-meter-row small {
+  grid-column: 1 / -1;
+  color: rgba(218, 229, 247, 0.42);
+  font-size: var(--text-2xs);
+}
+
+.home-activity-panel {
+  grid-column: 1 / -1;
+}
+
+.home-activity-charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.4rem;
+}
+
+.home-activity-chart {
+  margin: 0;
+}
+
+.home-activity-chart figcaption {
+  margin-bottom: 0.55rem;
+  color: rgba(218, 229, 247, 0.72);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.home-activity-cols {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  align-items: end;
+  gap: 3px;
+  height: 7.5rem;
+  border-bottom: 1px solid rgba(125, 211, 252, 0.14);
+  padding: 0.9rem 0 0;
+}
+
+.home-activity-slot {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100%;
+}
+
+.home-activity-fill {
+  display: block;
+  width: min(100%, 24px);
+  border-radius: 4px 4px 0 0;
+  background: rgba(var(--theme-primary-rgb), 0.85);
+}
+
+.home-activity-chart.is-violet .home-activity-fill {
+  background: rgba(var(--theme-challenge-rgb), 0.85);
+}
+
+.home-activity-slot:hover .home-activity-fill {
+  background: rgb(var(--theme-spark-rgb));
+}
+
+.home-activity-chart.is-violet .home-activity-slot:hover .home-activity-fill {
+  background: rgba(var(--theme-challenge-rgb), 1);
+}
+
+.home-activity-peak {
+  position: absolute;
+  top: -0.85rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(218, 229, 247, 0.85);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+}
+
+.home-activity-ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.3rem;
+  color: rgba(218, 229, 247, 0.42);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+}
+

@@ -1,9 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
+import { Toaster } from 'sonner'
 
-import { subscribeToScenarioSessionSync } from '@/features/scenarios/utils/scenarioCache'
+import { subscribeToChallengeRunSync } from '@/features/challenges/utils/challengeRunCache'
 import { ApiError } from '@/shared/api/apiError'
+import { bindButtonSoundEffects } from '@/shared/audio/battleAudio'
+import { PreferencesSync } from '@/shared/preferences/PreferencesSync'
 
 export function AppProviders({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -22,7 +25,14 @@ export function AppProviders({ children }: { children: ReactNode }) {
       }),
   )
 
-  useEffect(() => subscribeToScenarioSessionSync(queryClient), [queryClient])
+  useEffect(() => subscribeToChallengeRunSync(queryClient), [queryClient])
+  useEffect(() => bindButtonSoundEffects(), [])
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  return (
+    <QueryClientProvider client={queryClient}>
+      <PreferencesSync />
+      {children}
+      <Toaster position="bottom-right" expand={false} />
+    </QueryClientProvider>
+  )
 }

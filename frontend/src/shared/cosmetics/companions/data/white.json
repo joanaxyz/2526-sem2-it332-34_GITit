@@ -1,0 +1,107 @@
+{
+  "id": "white",
+  "label": "White",
+  "scale": 1.0,
+  "metrics": {
+    "walk_speed": 140,
+    "run_speed": 280,
+    "foot_offset": 0
+  },
+  "randomActions": [],
+  "kit": [
+    {
+      "name": "Frostbound Ward",
+      "description": "Draws on cold, patient discipline under pressure."
+    },
+    {
+      "name": "Clear Sight",
+      "description": "Sees through illusions and misdirection in the field."
+    },
+    {
+      "name": "Winter's Calm",
+      "description": "Never rattled - composure sharpens every attack."
+    }
+  ],
+  "sprites": {
+    "idle": {
+      "src": "/cosmetics/companion/white/idle.png",
+      "fps": 10,
+      "loops": true,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "run": {
+      "src": "/cosmetics/companion/white/run.png",
+      "fps": 16,
+      "loops": true,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "hurt": {
+      "src": "/cosmetics/companion/white/hurt.png",
+      "fps": 26,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "death": {
+      "src": "/cosmetics/companion/white/death.png",
+      "fps": 12,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "portrait": {
+      "src": "/cosmetics/companion/white/white.png",
+      "fps": 1,
+      "loops": false,
+      "frameWidth": 1024,
+      "frameHeight": 1536,
+      "columns": 1,
+      "rows": 1,
+      "frameCount": 1
+    },
+    "attack": {
+      "src": "/cosmetics/companion/white/attack.png",
+      "fps": 24,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "attack-end": {
+      "src": "/cosmetics/companion/white/attack-end.png",
+      "fps": 24,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "miss": {
+      "src": "/cosmetics/companion/white/miss.png",
+      "fps": 24,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    }
+  }
+}

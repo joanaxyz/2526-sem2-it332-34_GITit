@@ -1,0 +1,167 @@
+from drf_spectacular.utils import OpenApiTypes, extend_schema
+from rest_framework.exceptions import NotFound
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from common.exceptions import Locked
+from common.openapi import (
+    CommandFormPreviewResponseSerializer,
+    LearnedSkillsResponseSerializer,
+)
+from common.services.performance import timing
+from curriculum.models import Chapter
+from curriculum.selectors import (
+    chapter_book,
+    chapter_completion_count_map,
+    chapter_completion_denominator_map,
+    chapter_content_overview,
+    chapter_content_page,
+    chapter_locked,
+    get_command_form,
+    learned_command_skills,
+    published_chapters,
+    published_stories,
+    stories_completed_map,
+)
+from curriculum.serializers import ChapterListSerializer, StorySerializer
+from players.services import get_or_create_player
+
+
+def _player_for(request):
+    if not request.user.is_authenticated:
+        return None
+    return get_or_create_player(request.user)
+
+
+def _require_unlocked_chapter(request, chapter_id: int) -> tuple[object, Chapter]:
+    chapter = (
+        Chapter.objects.select_related("story")
+        .filter(id=chapter_id, is_published=True, story__is_published=True)
+        .first()
+    )
+    if chapter is None:
+        raise NotFound("Chapter not found.")
+    player = _player_for(request)
+    locked, reason = chapter_locked(player=player, chapter=chapter)
+    if locked:
+        raise Locked(reason or "This chapter is locked.")
+    return player, chapter
+
+
+class StoryListAPIView(APIView):
+    @extend_schema(responses={200: StorySerializer(many=True)})
+    def get(self, request):
+        stories = list(published_stories())
+        player = _player_for(request)
+        # One batched mastery computation covers every story and prerequisite
+        # (prerequisites are select_related members of the same published set).
+        completed_map = stories_completed_map(player=player, stories=stories)
+        serializer = StorySerializer(
+            stories,
+            many=True,
+            context={"player": player, "story_completed_map": completed_map},
+        )
+        return Response(serializer.data)
+
+
+class ChapterListAPIView(APIView):
+    @extend_schema(responses={200: ChapterListSerializer(many=True)})
+    def get(self, request):
+        chapters = list(published_chapters(story_slug=request.query_params.get("story")))
+        chapter_ids = [chapter.id for chapter in chapters]
+        player = _player_for(request)
+        serializer = ChapterListSerializer(
+            chapters,
+            many=True,
+            context={
+                "player": player,
+                "chapter_completion_count_map": chapter_completion_count_map(
+                    player=player,
+                    chapter_ids=chapter_ids,
+                ),
+                "chapter_completion_denominator_map": chapter_completion_denominator_map(
+                    chapter_ids=chapter_ids,
+                ),
+            },
+        )
+        return Response(serializer.data)
+
+
+class ChapterContentAPIView(APIView):
+    @extend_schema(responses={200: OpenApiTypes.OBJECT})
+    def get(self, request, chapter_id: int):
+        player, chapter = _require_unlocked_chapter(request, chapter_id)
+        section = request.query_params.get("section") or "command_skills"
+        cursor = _int_param(request.query_params.get("cursor"))
+        # Clamp so a client can't request an unbounded page (?limit=999999).
+        limit = min(max(_int_param(request.query_params.get("limit")) or 8, 1), 50)
+        with timing("curriculum.chapter_content", chapter_id=chapter.id, section=section):
+            return Response(
+                chapter_content_page(
+                    player=player,
+                    chapter_id=chapter.id,
+                    section=section,
+                    cursor=cursor,
+                    limit=limit,
+                )
+            )
+
+
+class ChapterContentOverviewAPIView(APIView):
+    @extend_schema(responses={200: OpenApiTypes.OBJECT})
+    def get(self, request, chapter_id: int):
+        player, chapter = _require_unlocked_chapter(request, chapter_id)
+        with timing("curriculum.chapter_overview", chapter_id=chapter.id):
+            return Response(
+                chapter_content_overview(player=player, chapter_id=chapter.id)
+            )
+
+
+class ChapterBookAPIView(APIView):
+    @extend_schema(responses={200: OpenApiTypes.OBJECT})
+    def get(self, request, chapter_id: int):
+        _, chapter = _require_unlocked_chapter(request, chapter_id)
+        with timing("curriculum.chapter_book", chapter_id=chapter.id):
+            book = chapter_book(chapter_id=chapter.id)
+        if book is None:
+            raise NotFound("Chapter not found.")
+        return Response(book)
+
+
+class LearnedSkillsAPIView(APIView):
+    """The player's registry of learned commands (their spellbook)."""
+
+    @extend_schema(responses={200: LearnedSkillsResponseSerializer})
+    def get(self, request):
+        with timing("curriculum.learned_skills"):
+            return Response({"results": learned_command_skills(player=_player_for(request))})
+
+
+class CommandFormPreviewAPIView(APIView):
+    @extend_schema(responses={200: CommandFormPreviewResponseSerializer})
+    def get(self, request, form_id: int):
+        form = get_command_form(form_id)
+        return Response(
+            {
+                "id": form.id,
+                "slug": form.slug,
+                "usage_form": form.usage_form,
+                "label": form.label,
+                "summary": form.summary,
+                "is_playable": form.is_playable,
+                "skill": {
+                    "id": form.command_skill_id,
+                    "slug": form.command_skill.slug,
+                    "base_command": form.command_skill.base_command,
+                    "title": form.command_skill.title,
+                },
+                "command_preview": form.command_preview or form.command_skill.command_preview or {},
+            }
+        )
+
+
+def _int_param(value: str | None) -> int | None:
+    try:
+        return int(value) if value is not None else None
+    except (TypeError, ValueError):
+        return None

@@ -1,54 +1,50 @@
 from dataclasses import dataclass, field
 from typing import Any
 
-from common.constants import RESULT_TARGET_MATCHED
-from evaluation.services import EvaluationOutcome, StateBasedEvaluator
+from evaluation.compiler import CompiledEvaluationSpecCache, compile_evaluation_spec
+from evaluation.engine import EvaluationEngine
+from evaluation.services import EvaluationOutcome
 
 
 @dataclass
 class CompletionEvaluationContext:
-    session: Any
+    run: Any
     previous_state: dict
     next_state: dict
     executed_commands: list[str] = field(default_factory=list)
     next_state_hash: str | None = None
     expected_state_hash: str | None = None
+    next_state_already_normalized: bool = False
+    initial_state_already_normalized: bool = False
 
 
-class StateRuleCompletionEvaluator:
+class PracticeCompletionEvaluator:
     def evaluate(self, context: CompletionEvaluationContext) -> EvaluationOutcome:
-        target_rule = context.session.variant.target_rule
-        if not target_rule:
-            raise ValueError("missing target_rule")
-
-        module_number = getattr(
-            getattr(context.session, "learning_unit", None), "number", None
-        )
-
-        if module_number == 4:
-            # Fast path: precomputed hash comparison skips full evaluation
-            if (
-                context.next_state_hash is not None
-                and context.expected_state_hash is not None
-                and context.next_state_hash == context.expected_state_hash
-            ):
-                return EvaluationOutcome(
-                    result_category=RESULT_TARGET_MATCHED,
-                    target_matched=True,
-                    summary="State hash matched target state.",
-                )
-            # Module 4 checks state shape only — required_commands are not enforced
-            effective_rule = {k: v for k, v in target_rule.items() if k != "required_commands"}
+        variant = context.run.variant
+        raw_spec = getattr(variant, "evaluation_spec", None)
+        variant_id = getattr(variant, "id", None)
+        if raw_spec and variant_id is not None:
+            # Cached compile keyed on the variant; the spec is recompiled only if
+            # the variant is re-authored (new semantic_key).
+            spec = CompiledEvaluationSpecCache().spec_for(
+                key=("variant", variant_id, getattr(variant, "semantic_key", "") or ""),
+                raw_spec=raw_spec,
+            )
+        elif raw_spec:
+            spec = compile_evaluation_spec(raw_spec)
         else:
-            effective_rule = target_rule
-
-        return StateBasedEvaluator().evaluate(
-            context.next_state,
-            effective_rule,
-            initial_state=getattr(context.session.variant, "initial_state", None),
+            # Level fallback is rare and not keyed by a stable cache id, so
+            # compile it directly.
+            spec = compile_evaluation_spec(
+                getattr(context.run.level, "evaluation_spec", None)
+            )
+        return EvaluationEngine().evaluate(
+            spec=spec,
+            next_state=context.next_state,
+            initial_state=getattr(context.run.variant, "initial_state", None),
             executed_commands=context.executed_commands,
+            next_state_hash=context.next_state_hash,
+            expected_state_hash=context.expected_state_hash,
+            next_state_already_normalized=context.next_state_already_normalized,
+            initial_state_already_normalized=context.initial_state_already_normalized,
         )
-
-
-# Production alias used by the scenario session service
-ScenarioCompletionEvaluator = StateRuleCompletionEvaluator

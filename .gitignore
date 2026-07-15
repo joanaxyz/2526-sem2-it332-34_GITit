@@ -16,6 +16,9 @@ backend/**/__pycache__/
 *.pyd
 .pytest_cache/
 backend/.pytest_cache/
+backend/.pytest-cache-local/
+backend/.pytest-tmp/
+backend/.pytest-temp-assets/
 .mypy_cache/
 .ruff_cache/
 .coverage
@@ -25,14 +28,19 @@ htmlcov/
 
 # Django/local backend artifacts
 backend/db.sqlite3
+backend/media/
 *.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
 *.log
 
 # Frontend dependencies and build artifacts
+node_modules/
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
 frontend/coverage/
+frontend/--full-page
 
 # Logs and debug outputs
 debug-*.log
@@ -40,6 +48,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+backend/.codex-runserver.err.log
+backend/.codex-runserver.out.log
+frontend/.codex-vite.err.log
+frontend/.codex-vite.out.log
+frontend/vite-*.log
+frontend/vite-*.err.log
 
 # OS/editor cruft
 .DS_Store
@@ -48,10 +62,29 @@ Thumbs.db
 .vscode/
 
 # Project-specific generated folders
-scripts/
 md_files/
+.tmp/
+tmp/
 
+# Local sprite source/pose exports; runtime sheets stay tracked at the asset root.
+frontend/public/cosmetics/story-worlds/*/monsters/*/pose/
+frontend/public/cosmetics/story-worlds/*/monsters/*/raw/
+frontend/public/cosmetics/story-worlds/*/monsters/*/effects/raw/
+frontend/public/cosmetics/story-worlds/*/monsters/*/effects/_raw/
+frontend/public/cosmetics/companion/*/pose/
+frontend/public/cosmetics/companion/*/raw/
+frontend/public/cosmetics/companion/*/effects/*/_raw/
 
-frontend/src/features/auth/components/LoginForm.test.tsx
-frontend/src/features/auth/components/RegisterForm.test.tsx
-frontend/src/features/auth/utils/passwordStrength.test.ts
+# Local agent/workbench state
+.agents/
+.claude/
+.codex/
+.impeccable/
+krypton/
+
+# Large local archives/backups
+git-it.zip
+git.zip
+# Local reference/docs dumps should not ship with source packages
+REFERENCE/
+GIT_PEDAGOGY_BLUEPRINT_PACK/

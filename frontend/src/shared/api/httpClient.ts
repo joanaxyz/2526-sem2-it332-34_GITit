@@ -1,22 +1,72 @@
 import { ApiError } from './apiError'
-import { getStoredAccessToken, useAuthStore } from '@/features/auth/hooks/useAuth'
+import { apiOperations } from './generated/apiTypes'
+import type { ApiOperationId, ApiRequestBody, ApiResponseBody } from './generated/apiTypes'
+import { useAuthStore } from '@/shared/auth/useAuth'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? defaultApiBaseUrl()
+export const API_BASE_URL = resolveApiBaseUrl()
 
 type RequestOptions = RequestInit & { skipAuthRefresh?: boolean }
 
 let refreshPromise: Promise<boolean> | null = null
 const REFRESH_RETRY_DELAY_MS = 250
 
+function resolveApiBaseUrl() {
+  const configured = import.meta.env.VITE_API_BASE_URL?.trim()
+
+  if (!configured) {
+    if (import.meta.env.PROD) {
+      throw new Error('VITE_API_BASE_URL must be set for production builds.')
+    }
+
+    return defaultApiBaseUrl()
+  }
+
+  // Allows same-domain deployments later, for example:
+  // VITE_API_BASE_URL=/api
+  if (configured.startsWith('/')) {
+    return removeTrailingSlash(configured)
+  }
+
+  const apiUrl = new URL(configured)
+
+  // Local dev safety: prevents localhost vs 127.0.0.1 cookie mismatch.
+  if (!import.meta.env.PROD && typeof window !== 'undefined') {
+    const appHost = window.location.hostname
+    const localHosts = new Set(['localhost', '127.0.0.1', '::1'])
+
+    if (
+      localHosts.has(appHost) &&
+      localHosts.has(apiUrl.hostname) &&
+      appHost !== apiUrl.hostname
+    ) {
+      return defaultApiBaseUrl()
+    }
+  }
+
+  return removeTrailingSlash(apiUrl.toString())
+}
+
+function removeTrailingSlash(value: string) {
+  return value.endsWith('/') ? value.slice(0, -1) : value
+}
+
+export function backendUrl(path: string): string {
+  if (!path.startsWith('/')) return path
+  if (API_BASE_URL.startsWith('/')) return path
+  return new URL(path, new URL(API_BASE_URL).origin).toString()
+}
+
 function defaultApiBaseUrl() {
-  if (typeof window === 'undefined') return 'http://127.0.0.1:8000/api'
+  if (typeof window === 'undefined') {
+    return 'http://localhost:8000/api'
+  }
 
   const host = window.location.hostname.includes(':')
     ? `[${window.location.hostname}]`
     : window.location.hostname
+
   return `${window.location.protocol}//${host}:8000/api`
 }
-
 async function parseResponse(response: Response) {
   if (response.status === 204) return null
   const contentType = response.headers.get('content-type')
@@ -31,6 +81,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      'X-Git-It-Client': 'web',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
@@ -90,14 +141,7 @@ async function requestAccessTokenRefresh(attempt = 0, tokenAtStart: string | nul
       return requestAccessTokenRefresh(attempt + 1, tokenAtStart)
     }
     const latestToken = useAuthStore.getState().accessToken
-    const storedToken = getStoredAccessToken()
-    if (
-      (latestToken && latestToken !== tokenAtStart) ||
-      (storedToken && storedToken !== tokenAtStart)
-    ) {
-      if (storedToken && storedToken !== latestToken) {
-        useAuthStore.getState().setAccessToken(storedToken)
-      }
+    if (latestToken && latestToken !== tokenAtStart) {
       return true
     }
     if (error instanceof ApiError && error.status === 401) {
@@ -105,4 +149,28 @@ async function requestAccessTokenRefresh(attempt = 0, tokenAtStart: string | nul
     }
     return false
   }
+}
+
+
+type OperationRequestOptions<TOperation extends ApiOperationId> = Omit<RequestOptions, 'body' | 'method'> & {
+  body?: ApiRequestBody<TOperation>
+  method?: never
+}
+
+/**
+ * Contract-aware request helper. Runtime URLs can still contain concrete IDs,
+ * but request/response types and HTTP method are anchored to the generated
+ * OpenAPI operation id so API drift is caught by TypeScript instead of memory.
+ */
+export async function apiOperationRequest<
+  TOperation extends ApiOperationId,
+  TResponse = ApiResponseBody<TOperation>,
+>(operationId: TOperation, path: string, options: OperationRequestOptions<TOperation> = {}): Promise<TResponse> {
+  const operation = apiOperations[operationId]
+  const { body, ...rest } = options
+  return apiRequest<TResponse>(path, {
+    ...rest,
+    method: operation.method,
+    body: body == null ? undefined : JSON.stringify(body),
+  })
 }

@@ -33,20 +33,20 @@ const STRENGTH_META: Record<
   'so-so': {
     label: 'So-so',
     filledSegments: 2,
-    labelClass: 'text-orange-500',
-    segmentClass: 'bg-orange-500',
+    labelClass: 'text-warning',
+    segmentClass: 'bg-warning',
   },
   good: {
     label: 'Good',
     filledSegments: 3,
-    labelClass: 'text-emerald-400',
-    segmentClass: 'bg-emerald-400',
+    labelClass: 'text-success',
+    segmentClass: 'bg-success',
   },
   strong: {
     label: 'Strong',
     filledSegments: 4,
-    labelClass: 'text-emerald-600',
-    segmentClass: 'bg-emerald-600',
+    labelClass: 'text-primary',
+    segmentClass: 'bg-primary',
   },
 }
 

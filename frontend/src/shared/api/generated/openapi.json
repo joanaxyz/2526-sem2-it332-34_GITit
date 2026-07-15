@@ -1,0 +1,4194 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "GIT it! API",
+        "version": "0.1.0",
+        "description": "Student-facing Git scenario level API."
+    },
+    "paths": {
+        "/api/admin/analytics/": {
+            "get": {
+                "operationId": "admin_analytics_retrieve",
+                "tags": [
+                    "admin"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/admin/chapters/": {
+            "get": {
+                "operationId": "admin_chapters_retrieve",
+                "tags": [
+                    "admin"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/admin/chapters/{chapter_id}/": {
+            "patch": {
+                "operationId": "admin_chapters_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/admin/content/": {
+            "get": {
+                "operationId": "admin_content_retrieve",
+                "description": "Official content definitions: staff-authored (or owner-less) adventures,\nchallenges, and lessons. Create/edit happens in the existing level editor.",
+                "tags": [
+                    "admin"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/admin/economy/adjust/": {
+            "post": {
+                "operationId": "admin_economy_adjust_create",
+                "tags": [
+                    "admin"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/admin/economy/transactions/": {
+            "get": {
+                "operationId": "admin_economy_transactions_retrieve",
+                "tags": [
+                    "admin"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/admin/moderation/": {
+            "get": {
+                "operationId": "admin_moderation_retrieve",
+                "description": "Shared player-generated content: public published content definitions.",
+                "tags": [
+                    "admin"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/admin/moderation/unpublish/": {
+            "post": {
+                "operationId": "admin_moderation_unpublish_create",
+                "tags": [
+                    "admin"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/admin/overview/": {
+            "get": {
+                "operationId": "admin_overview_retrieve",
+                "tags": [
+                    "admin"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/admin/settings/": {
+            "get": {
+                "operationId": "admin_settings_retrieve",
+                "tags": [
+                    "admin"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "admin_settings_create",
+                "description": "Upsert + toggle a feature flag by key.",
+                "tags": [
+                    "admin"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/admin/stories/": {
+            "get": {
+                "operationId": "admin_stories_retrieve",
+                "tags": [
+                    "admin"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "admin_stories_create",
+                "tags": [
+                    "admin"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/admin/stories/{story_id}/": {
+            "patch": {
+                "operationId": "admin_stories_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "story_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/admin/users/": {
+            "get": {
+                "operationId": "admin_users_retrieve",
+                "tags": [
+                    "admin"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/admin/users/{user_id}/": {
+            "get": {
+                "operationId": "admin_users_retrieve_2",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "user_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/admin/users/{user_id}/actions/": {
+            "post": {
+                "operationId": "admin_users_actions_create",
+                "description": "Run a staff action on a user: grant/deduct coins, toggle staff or\nactive. One action per call via the ``action`` field.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "user_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/adventure-levels/{level_id}/runs/": {
+            "post": {
+                "operationId": "adventure_levels_runs_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "level_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "adventure-levels"
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdventureRunResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/adventure-runs/{run_id}/": {
+            "get": {
+                "operationId": "adventure_runs_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "adventure-runs"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdventureRunResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "adventure_runs_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "adventure-runs"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/adventure-runs/{run_id}/files/": {
+            "post": {
+                "operationId": "adventure_runs_files_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "adventure-runs"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkspaceFile"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkspaceFile"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkspaceFile"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdventureRunResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "adventure_runs_files_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "adventure-runs"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkspaceFileRename"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkspaceFileRename"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkspaceFileRename"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdventureRunResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "adventure_runs_files_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "adventure-runs"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedWorkspaceFile"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedWorkspaceFile"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedWorkspaceFile"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdventureRunResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "adventure_runs_files_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "adventure-runs"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdventureRunResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/adventure-runs/{run_id}/level-library/": {
+            "post": {
+                "operationId": "adventure_runs_level_library_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "adventure-runs"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdventureLevelLibraryResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/adventure-runs/{run_id}/submit-command/": {
+            "post": {
+                "operationId": "adventure_runs_submit_command_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "adventure-runs"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommandSubmit"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommandSubmit"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommandSubmit"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdventureCommandResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/adventures/{adventure_slug}/runs/": {
+            "post": {
+                "operationId": "adventures_runs_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "adventure_slug",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "adventures"
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdventureRunResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/auth/login/": {
+            "post": {
+                "operationId": "auth_login_create",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LoginResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/auth/logout/": {
+            "post": {
+                "operationId": "auth_logout_create",
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/auth/me/": {
+            "get": {
+                "operationId": "auth_me_retrieve",
+                "tags": [
+                    "auth"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/auth/password-change/": {
+            "post": {
+                "operationId": "auth_password_change_create",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordChange"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordChange"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordChange"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LoginResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/auth/password-reset/confirm/": {
+            "post": {
+                "operationId": "auth_password_reset_confirm_create",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetConfirm"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetConfirm"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetConfirm"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DetailResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Invalid or expired reset link"
+                    }
+                }
+            }
+        },
+        "/api/auth/password-reset/request/": {
+            "post": {
+                "operationId": "auth_password_reset_request_create",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DetailResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/auth/refresh/": {
+            "post": {
+                "operationId": "auth_refresh_create",
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccessTokenResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/auth/register/": {
+            "post": {
+                "operationId": "auth_register_create",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Register"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Register"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Register"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthUserResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/auth/sessions/revoke-all/": {
+            "post": {
+                "operationId": "auth_sessions_revoke_all_create",
+                "tags": [
+                    "auth"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/auth/sessions/revoke-others/": {
+            "post": {
+                "operationId": "auth_sessions_revoke_others_create",
+                "tags": [
+                    "auth"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DetailResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/authoring/chapters/": {
+            "get": {
+                "operationId": "authoring_chapters_retrieve",
+                "tags": [
+                    "authoring"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "authoring_chapters_create",
+                "tags": [
+                    "authoring"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/authoring/chapters/{chapter_id}/": {
+            "patch": {
+                "operationId": "authoring_chapters_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "authoring"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "authoring_chapters_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "authoring"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/authoring/command-forms/": {
+            "get": {
+                "operationId": "authoring_command_forms_retrieve",
+                "description": "Published command forms an author can attach to a level (introduce/reuse).",
+                "tags": [
+                    "authoring"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/authoring/content-definitions/": {
+            "get": {
+                "operationId": "authoring_content_definitions_retrieve",
+                "tags": [
+                    "authoring"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "authoring_content_definitions_create",
+                "tags": [
+                    "authoring"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/authoring/content-definitions/{definition_id}/": {
+            "get": {
+                "operationId": "authoring_content_definitions_retrieve_2",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "definition_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "authoring"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "authoring_content_definitions_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "definition_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "authoring"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/authoring/content-definitions/{definition_id}/publish/": {
+            "post": {
+                "operationId": "authoring_content_definitions_publish_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "definition_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "authoring"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/authoring/content-definitions/{definition_id}/remix/": {
+            "post": {
+                "operationId": "authoring_content_definitions_remix_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "definition_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "authoring"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/authoring/content-definitions/{definition_id}/test-run/": {
+            "post": {
+                "operationId": "authoring_content_definitions_test_run_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "definition_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "authoring"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/authoring/content-definitions/{definition_id}/validate/": {
+            "post": {
+                "operationId": "authoring_content_definitions_validate_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "definition_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "authoring"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/challenge-runs/{run_id}/": {
+            "get": {
+                "operationId": "challenge_runs_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "challenge-runs"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChallengeRunResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "challenge_runs_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "challenge-runs"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/challenge-runs/{run_id}/files/": {
+            "post": {
+                "operationId": "challenge_runs_files_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "challenge-runs"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkspaceFileCreate"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkspaceFileCreate"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkspaceFileCreate"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChallengeRunResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "challenge_runs_files_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "challenge-runs"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkspaceFileRename"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkspaceFileRename"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkspaceFileRename"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChallengeRunResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "challenge_runs_files_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "challenge-runs"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedWorkspaceFileCreate"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedWorkspaceFileCreate"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedWorkspaceFileCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChallengeRunResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "challenge_runs_files_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "challenge-runs"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChallengeRunResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/challenge-runs/{run_id}/retry/": {
+            "post": {
+                "operationId": "challenge_runs_retry_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "challenge-runs"
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChallengeRunResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/challenge-runs/{run_id}/submit-command/": {
+            "post": {
+                "operationId": "challenge_runs_submit_command_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "challenge-runs"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommandSubmit"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommandSubmit"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommandSubmit"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChallengeCommandResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/challenge-trials/{trial_id}/runs/": {
+            "post": {
+                "operationId": "challenge_trials_runs_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "trial_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "challenge-trials"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChallengeRunStart"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChallengeRunStart"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChallengeRunStart"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChallengeRunResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/chapters/": {
+            "get": {
+                "operationId": "chapters_list",
+                "tags": [
+                    "chapters"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ChapterList"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/chapters/{chapter_id}/book/": {
+            "get": {
+                "operationId": "chapters_book_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "chapters"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/chapters/{chapter_id}/content/": {
+            "get": {
+                "operationId": "chapters_content_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "chapters"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/chapters/{chapter_id}/overview/": {
+            "get": {
+                "operationId": "chapters_overview_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "chapters"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/command-forms/{form_id}/preview/": {
+            "get": {
+                "operationId": "command_forms_preview_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "form_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "command-forms"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CommandFormPreviewResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/health/": {
+            "get": {
+                "operationId": "health_retrieve",
+                "description": "Traffic-readiness probe for database and shared-cache reachability.",
+                "tags": [
+                    "health"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/health/live/": {
+            "get": {
+                "operationId": "health_live_retrieve",
+                "description": "Process-only probe. Dependency outages must not restart healthy workers.",
+                "tags": [
+                    "health"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/health/ready/": {
+            "get": {
+                "operationId": "health_ready_retrieve",
+                "description": "Traffic-readiness probe for database and shared-cache reachability.",
+                "tags": [
+                    "health"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/payments/checkout/": {
+            "post": {
+                "operationId": "payments_checkout_create",
+                "tags": [
+                    "payments"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CheckoutSessionRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CheckoutSessionRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CheckoutSessionRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CheckoutSessionResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/payments/packs/": {
+            "get": {
+                "operationId": "payments_packs_retrieve",
+                "tags": [
+                    "payments"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GitCoinPacksResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/payments/webhook/": {
+            "post": {
+                "operationId": "payments_webhook_create",
+                "description": "Unauthenticated by design - Stripe calls this directly. Authenticity\ncomes from the signed payload, not a session/JWT.",
+                "tags": [
+                    "payments"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/player/loadout/companion/": {
+            "post": {
+                "operationId": "player_loadout_companion_create",
+                "tags": [
+                    "player"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShopMutationRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShopMutationRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShopMutationRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShopEquipResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/player/preferences/": {
+            "get": {
+                "operationId": "player_preferences_retrieve",
+                "tags": [
+                    "player"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlayerPreferences"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "player_preferences_partial_update",
+                "tags": [
+                    "player"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPlayerPreferences"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPlayerPreferences"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPlayerPreferences"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlayerPreferences"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/progress/dashboard/": {
+            "get": {
+                "operationId": "progress_dashboard_retrieve",
+                "tags": [
+                    "progress"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DashboardSummaryResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/progress/stats/": {
+            "get": {
+                "operationId": "progress_stats_retrieve",
+                "tags": [
+                    "progress"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StatsSummaryResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/progress/wallet/": {
+            "get": {
+                "operationId": "progress_wallet_retrieve",
+                "tags": [
+                    "progress"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WalletSummaryResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/schema/": {
+            "get": {
+                "operationId": "schema_retrieve",
+                "description": "OpenApi3 schema for this API. Format can be selected via content negotiation.\n\n- YAML: application/vnd.oai.openapi\n- JSON: application/vnd.oai.openapi+json",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "format",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "json",
+                                "yaml"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lang",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "af",
+                                "ar",
+                                "ar-dz",
+                                "ast",
+                                "az",
+                                "be",
+                                "bg",
+                                "bn",
+                                "br",
+                                "bs",
+                                "ca",
+                                "ckb",
+                                "cs",
+                                "cy",
+                                "da",
+                                "de",
+                                "dsb",
+                                "el",
+                                "en",
+                                "en-au",
+                                "en-gb",
+                                "eo",
+                                "es",
+                                "es-ar",
+                                "es-co",
+                                "es-mx",
+                                "es-ni",
+                                "es-ve",
+                                "et",
+                                "eu",
+                                "fa",
+                                "fi",
+                                "fr",
+                                "fy",
+                                "ga",
+                                "gd",
+                                "gl",
+                                "he",
+                                "hi",
+                                "hr",
+                                "hsb",
+                                "ht",
+                                "hu",
+                                "hy",
+                                "ia",
+                                "id",
+                                "ig",
+                                "io",
+                                "is",
+                                "it",
+                                "ja",
+                                "ka",
+                                "kab",
+                                "kk",
+                                "km",
+                                "kn",
+                                "ko",
+                                "ky",
+                                "lb",
+                                "lt",
+                                "lv",
+                                "mk",
+                                "ml",
+                                "mn",
+                                "mr",
+                                "ms",
+                                "my",
+                                "nb",
+                                "ne",
+                                "nl",
+                                "nn",
+                                "os",
+                                "pa",
+                                "pl",
+                                "pt",
+                                "pt-br",
+                                "ro",
+                                "ru",
+                                "sk",
+                                "sl",
+                                "sq",
+                                "sr",
+                                "sr-latn",
+                                "sv",
+                                "sw",
+                                "ta",
+                                "te",
+                                "tg",
+                                "th",
+                                "tk",
+                                "tr",
+                                "tt",
+                                "udm",
+                                "ug",
+                                "uk",
+                                "ur",
+                                "uz",
+                                "vi",
+                                "zh-hans",
+                                "zh-hant"
+                            ]
+                        }
+                    }
+                ],
+                "tags": [
+                    "schema"
+                ],
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/vnd.oai.openapi": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            },
+                            "application/yaml": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            },
+                            "application/vnd.oai.openapi+json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/shop/catalog/": {
+            "get": {
+                "operationId": "shop_catalog_retrieve",
+                "description": "The shop catalog: stories and companions with ownership flags.",
+                "tags": [
+                    "shop"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShopResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/shop/catalog/purchase/": {
+            "post": {
+                "operationId": "shop_catalog_purchase_create",
+                "tags": [
+                    "shop"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShopMutationRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShopMutationRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShopMutationRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShopPurchaseResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/skills/learned/": {
+            "get": {
+                "operationId": "skills_learned_retrieve",
+                "description": "The player's registry of learned commands (their spellbook).",
+                "tags": [
+                    "skills"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LearnedSkillsResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/stories/": {
+            "get": {
+                "operationId": "stories_list",
+                "tags": [
+                    "stories"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Story"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AccessTokenResponse": {
+                "type": "object",
+                "properties": {
+                    "access": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "access"
+                ]
+            },
+            "AdventureCommandResponse": {
+                "type": "object",
+                "properties": {
+                    "run": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "solved": {
+                        "type": "boolean"
+                    },
+                    "stdout": {
+                        "type": "string"
+                    },
+                    "stderr": {
+                        "type": "string"
+                    },
+                    "exit_code": {
+                        "type": "integer"
+                    },
+                    "terminal_output": {
+                        "type": "string"
+                    },
+                    "command_classification": {
+                        "type": "string"
+                    },
+                    "step": {
+                        "$ref": "#/components/schemas/RuntimeStepResponse"
+                    },
+                    "command_outcome": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "command_classification",
+                    "command_outcome",
+                    "exit_code",
+                    "run",
+                    "solved",
+                    "stderr",
+                    "stdout",
+                    "step",
+                    "terminal_output"
+                ]
+            },
+            "AdventureLevelLibraryResponse": {
+                "type": "object",
+                "properties": {
+                    "book": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "run": {
+                        "$ref": "#/components/schemas/AdventureRunResponse"
+                    }
+                },
+                "required": [
+                    "book",
+                    "run"
+                ]
+            },
+            "AdventureRunResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "replay": {
+                        "type": "boolean"
+                    },
+                    "stars": {
+                        "type": "integer"
+                    },
+                    "library_opened": {
+                        "type": "boolean"
+                    },
+                    "is_passed": {
+                        "type": "boolean"
+                    },
+                    "selected_level": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "nullable": true
+                    },
+                    "next_level": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "nullable": true
+                    },
+                    "story": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "nullable": true
+                    },
+                    "chapter_id": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "battle_stage": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "nullable": true
+                    },
+                    "current_level_index": {
+                        "type": "integer"
+                    },
+                    "total_levels": {
+                        "type": "integer"
+                    },
+                    "current_wave": {
+                        "type": "integer"
+                    },
+                    "total_waves": {
+                        "type": "integer"
+                    },
+                    "mastery": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "current_attempt": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "nullable": true
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "progress": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "current_level_index",
+                    "current_wave",
+                    "id",
+                    "is_passed",
+                    "library_opened",
+                    "mastery",
+                    "progress",
+                    "replay",
+                    "results",
+                    "stars",
+                    "status",
+                    "total_levels",
+                    "total_waves"
+                ]
+            },
+            "AuthUserResponse": {
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "user"
+                ]
+            },
+            "ChallengeCommandResponse": {
+                "type": "object",
+                "properties": {
+                    "run": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "command_outcome": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "stdout": {
+                        "type": "string"
+                    },
+                    "stderr": {
+                        "type": "string"
+                    },
+                    "exit_code": {
+                        "type": "integer"
+                    },
+                    "command_family": {
+                        "type": "string"
+                    },
+                    "diagnostic_metadata": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "step": {
+                        "$ref": "#/components/schemas/RuntimeStepResponse"
+                    }
+                },
+                "required": [
+                    "command_outcome",
+                    "run",
+                    "step"
+                ]
+            },
+            "ChallengeRunResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "replay": {
+                        "type": "boolean"
+                    },
+                    "stars": {
+                        "type": "integer"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "failure_reason": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "challenge": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "scenario_context": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "chapter": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "battle_stage": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "nullable": true
+                    },
+                    "difficulty": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "reward_coins": {
+                        "type": "integer"
+                    },
+                    "variant": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "mastery_progress": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "policy": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "counts": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "scaffolding": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "repository_state": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "visualization": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "expected_state": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "nullable": true
+                    },
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RuntimeStepResponse"
+                        }
+                    },
+                    "next_difficulty": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "nullable": true
+                    },
+                    "sibling_levels": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "completion": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "challenge",
+                    "chapter",
+                    "counts",
+                    "id",
+                    "mastery_progress",
+                    "policy",
+                    "replay",
+                    "repository_state",
+                    "scaffolding",
+                    "stars",
+                    "status",
+                    "steps",
+                    "variant",
+                    "visualization"
+                ]
+            },
+            "ChallengeRunStart": {
+                "type": "object",
+                "properties": {
+                    "source_entry_point": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SourceEntryPointEnum"
+                            }
+                        ],
+                        "default": "level_page"
+                    },
+                    "prior_run_id": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "replay": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                }
+            },
+            "ChapterList": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "slug": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "number": {
+                        "type": "integer",
+                        "maximum": 9223372036854775807,
+                        "minimum": 0,
+                        "format": "int64"
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 160
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "narrative_brief": {},
+                    "sort_order": {
+                        "type": "integer",
+                        "maximum": 9223372036854775807,
+                        "minimum": 0,
+                        "format": "int64"
+                    },
+                    "is_playable": {
+                        "type": "boolean"
+                    },
+                    "story": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "locked": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "lock_reason": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "command_skill_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "challenge_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "adventure_level_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "level_completion": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "readOnly": true
+                    },
+                    "chest_schedule": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        },
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "adventure_level_count",
+                    "challenge_count",
+                    "chest_schedule",
+                    "command_skill_count",
+                    "description",
+                    "id",
+                    "level_completion",
+                    "lock_reason",
+                    "locked",
+                    "number",
+                    "slug",
+                    "story",
+                    "title"
+                ]
+            },
+            "CheckoutSessionRequest": {
+                "type": "object",
+                "properties": {
+                    "pack_slug": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "pack_slug"
+                ]
+            },
+            "CheckoutSessionResponse": {
+                "type": "object",
+                "properties": {
+                    "checkout_url": {
+                        "type": "string",
+                        "format": "uri"
+                    }
+                },
+                "required": [
+                    "checkout_url"
+                ]
+            },
+            "ClientCommandExecution": {
+                "type": "object",
+                "description": "Strict validation for the browser-owned simulator result.",
+                "properties": {
+                    "processed": {
+                        "type": "boolean"
+                    },
+                    "next_state": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "output": {
+                        "type": "string",
+                        "maxLength": 100000
+                    },
+                    "normalized_command": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "exit_code": {
+                        "type": "integer",
+                        "maximum": 255,
+                        "minimum": -255
+                    },
+                    "diagnostic": {
+                        "type": "boolean"
+                    },
+                    "stdout": {
+                        "type": "string",
+                        "maxLength": 100000
+                    },
+                    "stderr": {
+                        "type": "string",
+                        "maxLength": 100000
+                    },
+                    "command_family": {
+                        "type": "string",
+                        "maxLength": 80
+                    },
+                    "diagnostic_metadata": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 200
+                        },
+                        "maxItems": 100
+                    },
+                    "client_run_revision": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "command_family",
+                    "diagnostic",
+                    "diagnostic_metadata",
+                    "exit_code",
+                    "next_state",
+                    "normalized_command",
+                    "output",
+                    "processed",
+                    "stderr",
+                    "stdout"
+                ]
+            },
+            "CommandFormPreviewResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "usage_form": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "summary": {
+                        "type": "string"
+                    },
+                    "is_playable": {
+                        "type": "boolean"
+                    },
+                    "skill": {
+                        "$ref": "#/components/schemas/CommandFormPreviewSkillResponse"
+                    },
+                    "command_preview": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "command_preview",
+                    "id",
+                    "is_playable",
+                    "label",
+                    "skill",
+                    "slug",
+                    "summary",
+                    "usage_form"
+                ]
+            },
+            "CommandFormPreviewSkillResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "base_command": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "base_command",
+                    "id",
+                    "slug",
+                    "title"
+                ]
+            },
+            "CommandSubmit": {
+                "type": "object",
+                "properties": {
+                    "command": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "execution": {
+                        "$ref": "#/components/schemas/ClientCommandExecution"
+                    }
+                },
+                "required": [
+                    "command",
+                    "execution"
+                ]
+            },
+            "DashboardSummaryResponse": {
+                "type": "object",
+                "properties": {
+                    "kpis": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "chapter_kpis": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "counts": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "completed_story_slug": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "completed_stories": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "streak": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "perfect_clears": {
+                        "type": "integer"
+                    },
+                    "mastery": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "retry_trends": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "chapter_kpis",
+                    "completed_stories",
+                    "counts",
+                    "kpis",
+                    "mastery",
+                    "perfect_clears",
+                    "retry_trends",
+                    "streak"
+                ]
+            },
+            "DetailResponse": {
+                "type": "object",
+                "properties": {
+                    "detail": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "detail"
+                ]
+            },
+            "DifficultyEnum": {
+                "enum": [
+                    "beginner",
+                    "intermediate",
+                    "advanced"
+                ],
+                "type": "string",
+                "description": "* `beginner` - Beginner\n* `intermediate` - Intermediate\n* `advanced` - Advanced"
+            },
+            "GitCoinPackResponse": {
+                "type": "object",
+                "properties": {
+                    "slug": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "coins": {
+                        "type": "integer"
+                    },
+                    "price_cents": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "coins",
+                    "label",
+                    "price_cents",
+                    "slug"
+                ]
+            },
+            "GitCoinPacksResponse": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GitCoinPackResponse"
+                        }
+                    }
+                },
+                "required": [
+                    "items"
+                ]
+            },
+            "KindEnum": {
+                "enum": [
+                    "story",
+                    "companion"
+                ],
+                "type": "string",
+                "description": "* `story` - story\n* `companion` - companion"
+            },
+            "LearnedSkillResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "base_command": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "summary": {
+                        "type": "string"
+                    },
+                    "chapter_id": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "chapter_number": {
+                        "type": "integer"
+                    },
+                    "chapter_title": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "base_command",
+                    "chapter_number",
+                    "chapter_title",
+                    "id",
+                    "slug",
+                    "summary",
+                    "title"
+                ]
+            },
+            "LearnedSkillsResponse": {
+                "type": "object",
+                "properties": {
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LearnedSkillResponse"
+                        }
+                    }
+                },
+                "required": [
+                    "results"
+                ]
+            },
+            "Login": {
+                "type": "object",
+                "properties": {
+                    "identifier": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "identifier",
+                    "password"
+                ]
+            },
+            "LoginResponse": {
+                "type": "object",
+                "properties": {
+                    "access": {
+                        "type": "string"
+                    },
+                    "user": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "access",
+                    "user"
+                ]
+            },
+            "MotionModeEnum": {
+                "enum": [
+                    "system",
+                    "reduced",
+                    "full"
+                ],
+                "type": "string",
+                "description": "* `system` - Follow system\n* `reduced` - Reduced\n* `full` - Full"
+            },
+            "PasswordChange": {
+                "type": "object",
+                "properties": {
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 8
+                    },
+                    "password_confirm": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 8
+                    },
+                    "current_password": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "current_password",
+                    "password",
+                    "password_confirm"
+                ]
+            },
+            "PasswordResetConfirm": {
+                "type": "object",
+                "properties": {
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 8
+                    },
+                    "password_confirm": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 8
+                    },
+                    "uid": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "token": {
+                        "type": "string",
+                        "maxLength": 255
+                    }
+                },
+                "required": [
+                    "password",
+                    "password_confirm",
+                    "token",
+                    "uid"
+                ]
+            },
+            "PasswordResetRequest": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    }
+                },
+                "required": [
+                    "email"
+                ]
+            },
+            "PatchedPlayerPreferences": {
+                "type": "object",
+                "properties": {
+                    "motion_mode": {
+                        "$ref": "#/components/schemas/MotionModeEnum"
+                    }
+                }
+            },
+            "PatchedWorkspaceFile": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "maxLength": 240
+                    },
+                    "content": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 20000
+                    }
+                }
+            },
+            "PatchedWorkspaceFileCreate": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "maxLength": 240
+                    },
+                    "content": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 20000
+                    }
+                }
+            },
+            "PlayerPreferences": {
+                "type": "object",
+                "properties": {
+                    "motion_mode": {
+                        "$ref": "#/components/schemas/MotionModeEnum"
+                    }
+                }
+            },
+            "Register": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "maxLength": 30
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 8
+                    },
+                    "password_confirm": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 8
+                    }
+                },
+                "required": [
+                    "email",
+                    "password",
+                    "password_confirm",
+                    "username"
+                ]
+            },
+            "RuntimeStepResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "command_text": {
+                        "type": "string"
+                    },
+                    "terminal_output": {
+                        "type": "string"
+                    },
+                    "result_category": {
+                        "type": "string"
+                    },
+                    "command_classification": {
+                        "type": "string"
+                    },
+                    "contextual_feedback": {
+                        "type": "string"
+                    },
+                    "visualization_snapshot": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "command_text",
+                    "id"
+                ]
+            },
+            "ShopEquipResponse": {
+                "type": "object",
+                "properties": {
+                    "active_companion": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "shop": {
+                        "$ref": "#/components/schemas/ShopResponse"
+                    }
+                },
+                "required": [
+                    "shop"
+                ]
+            },
+            "ShopItemResponse": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "$ref": "#/components/schemas/KindEnum"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "integer"
+                    },
+                    "owned": {
+                        "type": "boolean"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "unlocks_story": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "active",
+                    "kind",
+                    "label",
+                    "owned",
+                    "price",
+                    "slug"
+                ]
+            },
+            "ShopMutationRequest": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "slug": {
+                        "type": "string",
+                        "maxLength": 120
+                    }
+                },
+                "required": [
+                    "kind",
+                    "slug"
+                ]
+            },
+            "ShopPurchaseResponse": {
+                "type": "object",
+                "properties": {
+                    "owned": {
+                        "type": "boolean"
+                    },
+                    "wallet": {
+                        "$ref": "#/components/schemas/WalletSummaryResponse"
+                    },
+                    "shop": {
+                        "$ref": "#/components/schemas/ShopResponse"
+                    }
+                },
+                "required": [
+                    "owned",
+                    "shop",
+                    "wallet"
+                ]
+            },
+            "ShopResponse": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ShopItemResponse"
+                        }
+                    },
+                    "active_companion": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "items"
+                ]
+            },
+            "SourceEntryPointEnum": {
+                "enum": [
+                    "level_page",
+                    "retry"
+                ],
+                "type": "string",
+                "description": "* `level_page` - level_page\n* `retry` - retry"
+            },
+            "StatsSummaryResponse": {
+                "type": "object",
+                "properties": {
+                    "skill_profile": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "activity": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "headlines": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "totals": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "activity",
+                    "headlines",
+                    "skill_profile"
+                ]
+            },
+            "Story": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "slug": {
+                        "type": "string",
+                        "maxLength": 50,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 160
+                    },
+                    "summary": {
+                        "type": "string"
+                    },
+                    "narrative_brief": {},
+                    "price": {
+                        "type": "integer",
+                        "maximum": 9223372036854775807,
+                        "minimum": 0,
+                        "format": "int64"
+                    },
+                    "sort_order": {
+                        "type": "integer",
+                        "maximum": 9223372036854775807,
+                        "minimum": 0,
+                        "format": "int64"
+                    },
+                    "is_published": {
+                        "type": "boolean"
+                    },
+                    "completed": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "owned": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "world_slug": {
+                        "type": "string",
+                        "maxLength": 64,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "difficulty": {
+                        "$ref": "#/components/schemas/DifficultyEnum"
+                    },
+                    "prerequisite_story": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "locked": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "lock_reason": {
+                        "type": "string",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "completed",
+                    "id",
+                    "lock_reason",
+                    "locked",
+                    "owned",
+                    "prerequisite_story",
+                    "slug",
+                    "title"
+                ]
+            },
+            "User": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "is_staff": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "email",
+                    "id",
+                    "is_staff",
+                    "username"
+                ]
+            },
+            "WalletSummaryResponse": {
+                "type": "object",
+                "properties": {
+                    "balance": {
+                        "type": "integer"
+                    },
+                    "recent": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WalletTransaction"
+                        }
+                    }
+                },
+                "required": [
+                    "balance",
+                    "recent"
+                ]
+            },
+            "WalletTransaction": {
+                "type": "object",
+                "properties": {
+                    "amount": {
+                        "type": "integer"
+                    },
+                    "reason": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "amount",
+                    "created_at",
+                    "reason"
+                ]
+            },
+            "WorkspaceFile": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "maxLength": 240
+                    },
+                    "content": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 20000
+                    }
+                },
+                "required": [
+                    "path"
+                ]
+            },
+            "WorkspaceFileCreate": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "maxLength": 240
+                    },
+                    "content": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 20000
+                    }
+                },
+                "required": [
+                    "path"
+                ]
+            },
+            "WorkspaceFileRename": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "maxLength": 240
+                    },
+                    "new_path": {
+                        "type": "string",
+                        "maxLength": 240
+                    }
+                },
+                "required": [
+                    "new_path",
+                    "path"
+                ]
+            }
+        }
+    }
+}

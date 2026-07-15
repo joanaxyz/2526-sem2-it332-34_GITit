@@ -10,6 +10,7 @@ export function ProgressBar({
   fillAnimate,
   fillFrom,
   fillTo,
+  segments,
 }: {
   value: number
   className?: string
@@ -19,6 +20,8 @@ export function ProgressBar({
   fillFrom?: string
   /** Override gradient end color (hex). Requires fillFrom. */
   fillTo?: string
+  /** Number of checkpoints along the story. Renders landmark marks at each boundary. */
+  segments?: number
 }) {
   const normalized = Math.max(0, Math.min(100, value))
   const [mounted, setMounted] = useState(false)
@@ -41,7 +44,12 @@ export function ProgressBar({
       }
     : undefined
 
-  return (
+  const landmarks =
+    segments && segments > 1
+      ? Array.from({ length: segments - 1 }, (_, index) => ((index + 1) / segments) * 100)
+      : []
+
+  const root = (
     <ProgressPrimitive.Root
       className={cn('h-2 overflow-hidden rounded-full bg-secondary', className)}
       value={normalized}
@@ -60,5 +68,23 @@ export function ProgressBar({
         }}
       />
     </ProgressPrimitive.Root>
+  )
+
+  if (!landmarks.length) return root
+
+  return (
+    <div className="relative">
+      {root}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        {landmarks.map((position) => (
+          <span
+            key={position}
+            className="progress-landmark"
+            data-reached={displayed >= position - 0.5}
+            style={{ left: `${position}%` }}
+          />
+        ))}
+      </div>
+    </div>
   )
 }

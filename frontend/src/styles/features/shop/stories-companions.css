@@ -1,0 +1,198 @@
+/* Stories tab ------------------------------------------------------------- */
+.shop-view--stories {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(17.5rem, 18vw, 19.5rem);
+  grid-template-rows: minmax(0, 1fr) 23rem;
+  gap: 1rem 1.2rem;
+  height: var(--app-content-height);
+  padding: 1rem 0 0 1.4rem;
+}
+
+/* Companions tab: portrait carousel | separated pose/skill previews | detail rail. */
+.shop-view--companions {
+  display: grid;
+  grid-template-columns: clamp(20rem, 27vw, 30rem) minmax(28rem, 1fr) clamp(15rem, 17vw, 18rem);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 1.15rem;
+  height: var(--app-content-height);
+  padding: 1rem 1.4rem 1.2rem;
+}
+
+.shop-view--companions .shop-detail-panel {
+  grid-column: 3;
+}
+
+.shop-stage {
+  grid-column: 1;
+  grid-row: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+.shop-world-slide,
+.shop-portrait-slide {
+  position: relative;
+  display: block;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 1.1rem;
+  border: 1px solid rgba(var(--tone, var(--theme-primary-rgb)), 0.32);
+  background: #04091a;
+}
+
+.shop-world-slide[data-tone='shadow'],
+.shop-portrait-slide[data-tone='shadow'] {
+  --tone: 150, 170, 196;
+}
+
+.shop-world-slide[data-tone='ice'],
+.shop-portrait-slide[data-tone='ice'] {
+  --tone: var(--theme-rail-rgb);
+}
+
+.shop-world-slide[data-tone='neon'],
+.shop-portrait-slide[data-tone='neon'] {
+  --tone: 0, 223, 255;
+}
+
+.shop-world-art,
+.shop-world-art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.shop-world-art img {
+  object-fit: cover;
+  object-position: center;
+}
+
+.shop-world-slide::after,
+.shop-portrait-slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(2, 6, 15, 0.12) 0%, transparent 32%, rgba(2, 6, 15, 0.5) 74%, rgba(1, 4, 10, 0.92) 100%);
+  pointer-events: none;
+}
+
+.shop-world-caption,
+.shop-portrait-caption {
+  position: absolute;
+  left: 1.5rem;
+  right: 1.5rem;
+  bottom: 1.35rem;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.shop-world-title,
+.shop-portrait-title {
+  margin: 0;
+  color: #f4faff;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1;
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.7);
+}
+
+.shop-world-sub {
+  margin: 0;
+  color: rgba(212, 230, 240, 0.82);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Cinematic portrait selector: fill the wider tall card, framed on the face. */
+.shop-stage--portrait .shop-portrait-art {
+  position: absolute;
+  inset: 0;
+}
+
+.shop-portrait-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 12%;
+  filter: drop-shadow(0 14px 32px rgba(0, 0, 0, 0.5));
+}
+
+.shop-portrait-slide {
+  background:
+    radial-gradient(120% 80% at 50% 8%, rgba(var(--tone, var(--theme-primary-rgb)), 0.14), transparent 60%),
+    linear-gradient(180deg, #060d20, #03060f);
+}
+
+.shop-portrait-caption {
+  left: 1.1rem;
+  right: 1.1rem;
+  bottom: 5.65rem;
+  gap: 0.4rem;
+}
+
+.shop-stage--portrait {
+  position: relative;
+}
+
+.shop-stage--portrait .shop-carousel-dots {
+  bottom: 1.15rem;
+}
+
+.shop-portrait-thumbs {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 2.35rem;
+  z-index: 4;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(2.7rem, 3.35rem);
+  justify-content: center;
+  gap: 0.45rem;
+  pointer-events: auto;
+}
+
+.shop-portrait-thumb {
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid rgba(126, 183, 217, 0.28);
+  border-radius: 0.5rem;
+  background: rgba(2, 9, 20, 0.76);
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.68;
+  transition: border-color 150ms ease, box-shadow 150ms ease, opacity 150ms ease, transform 150ms ease;
+}
+
+.shop-portrait-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 18%;
+}
+
+.shop-portrait-thumb:hover,
+.shop-portrait-thumb:focus-visible {
+  outline: none;
+  border-color: rgba(var(--theme-primary-rgb), 0.64);
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.shop-portrait-thumb[data-active='true'] {
+  border-color: rgba(var(--theme-primary-rgb), 0.94);
+  box-shadow: 0 0 0 1px rgba(var(--theme-primary-rgb), 0.36), 0 0 14px rgba(var(--theme-primary-rgb), 0.34);
+  opacity: 1;
+}
+
+.shop-portrait-title {
+  font-size: 1.5rem;
+}

@@ -1,123 +1,107 @@
 # GIT it!
 
-GIT it! is a web-based, scenario-driven Git learning platform. It trains practical Git problem-solving through a simulated terminal, live repository visualization, and state-based evaluation inside a consequence-safe environment.
+GIT it! is a scenario-driven Git learning platform. It teaches practical Git problem-solving through a simulated terminal, a live repository-state visualization, and backend-verified completion checks inside a consequence-safe practice environment.
 
-This repository contains the current implementation split into:
-- `frontend/` - React + Vite single-page application
-- `backend/` - Django + Django REST Framework API, simulator, evaluator, and persistence
+The repository is split into two primary applications:
 
-## Why This System Exists
+- `frontend/` — React + Vite single-page application.
+- `backend/` — Django + Django REST Framework API, simulator/verification boundary, evaluator, curriculum seeding, rewards, and persistence.
 
-Based on project documents and local study context, the platform addresses recurring beginner failure patterns in Git learning (command memorization, destructive conflict handling, and low repository-state reasoning). The core design focus is:
-- scenario practice over command memorization
-- repository-state outcomes over exact command-string matching
-- fading scaffolding from guided to independent execution
-- transfer-oriented retries through structurally changed variants
+## Current Product Vocabulary
 
-## Core Learning Model
+Use these terms consistently:
 
-The student flow is:
-1. Access orientation lessons (Unit 1) for foundational concepts and platform walkthrough.
-2. Expand a learning unit and open a `Scenario Skill Focus`.
-3. Choose a difficulty action (`Start`, `Continue`, `Retry`, or `Review`) and pass through `Skill Focus Preview`.
-4. Enter the practice workspace with:
-   - terminal-style command input
-   - live animated DAG
-   - difficulty-specific supports
-5. Submit Git commands to the backend simulator.
-6. Have the evaluator check whether resulting repository state matches target state.
-7. Complete, retry, or review based on outcomes.
+- `Story` — a learning path.
+- `Chapter` — a section within a story.
+- `Lesson` — short conceptual reading.
+- `Adventure` / `Wave` — guided battle-style practice.
+- `Challenge` / `Trial` — independent state-based practice.
+- `Level map` — the visual chapter navigation surface.
+- `Story world` — site/map visual bundle.
+- `Companion` — player-side battle/avatar cosmetic.
 
-### Difficulty and Scaffolding
+Compatibility for old bookmarks is isolated in `frontend/src/shared/navigation/legacyRoutes.ts`. New code should not introduce deprecated product vocabulary.
 
-- `Easy` - Live DAG + expected-state diagram + contextual feedback panel
-- `Medium` - Live DAG + expected-state diagram
-- `Hard` - Live DAG + narrative only
+## Architecture Rules
 
-Difficulty progression is per scenario skill focus: Easy -> Medium -> Hard unlock chain.
+The current source of truth is [ARCHITECTURE.md](ARCHITECTURE.md). The most important rules are:
 
-## Architecture Overview
+- Backend owns persisted state, reward decisions, command integrity, schema validation, semantic slugs, and API contracts.
+- Frontend owns presentation, animation, optimistic command feedback, and visual asset resolution.
+- Shared frontend modules must not import feature modules.
+- Feature modules may import `shared`, but non-page modules must not import feature `pages`.
+- Backend runtime code must not inspect frontend source or visual assets.
+- Generated data must say how it is regenerated.
+- Runtime API wrappers must use the generated API contract helper.
 
-### Frontend (`frontend/`)
+## Frontend Structure
 
-- React + Vite SPA
-- Terminal interaction, scenario workspace, dashboard, unit/skill focus cards
-- Live DAG visualization using graph tooling (`reactflow`, `dagre`)
-- State and data fetching via modern React tooling (`@tanstack/react-query`, form and schema validation libs)
+```txt
+frontend/src/
+  app/                  router, layouts, providers
+  features/             product features: adventures, challenges, shop, story-map, etc.
+  shared/               cross-feature API, auth, battle, cosmetics, simulator, UI utilities
+  styles/               base tokens and feature CSS
+```
 
-### Backend (`backend/`)
+Feature folders follow this pattern:
 
-- Django + DRF API
-- Auth/session endpoints and protected learning endpoints
-- Repository state simulator and command adapter
-- State-based evaluator for completion logic
-- Session and step logging for KPI computation
+```txt
+feature-name/
+  api/
+  components/
+  hooks/
+  pages/
+  types.ts
+  utils/
+```
 
-### Data and Supporting Services
+## Backend Structure
 
-- Persistent store: PostgreSQL-compatible backend (Supabase-compatible deployment model in docs)
-- Cache/session acceleration: Redis-compatible cache
-- JWT-based auth with refresh flow
+```txt
+backend/
+  common/               shared backend schemas, command boundary, utilities
+  simulator/            simplified Git state normalization/parity helpers
+  evaluation/           state-based objective evaluation
+  adventures/           adventure runtime API/services/tests
+  challenges/           challenge runtime API/services/tests
+  practice/             practice command execution services/tests
+  curriculum/           authored and generated learning content
+  shop/                 cosmetics catalog, ownership, and equipment
+```
 
-## Simulator and Evaluator Design (Critical System Behavior)
+Django views stay thin: parse the request, call a service, return a response. Business logic belongs in services/helpers with focused tests.
 
-Per ADR 0001 and requirements:
-- production command execution is fully simulated (not shelling out to Git binaries)
-- student input is parsed, normalized, mapped to safe intents, then applied to simulated repository state
-- unsupported or unsafe patterns are rejected with neutral terminal-style responses
-- evaluator checks state equivalence to authored targets instead of fixed command text
-- diagnostic/read-only commands are tracked separately from counted action commands
+## Command Execution Boundary
 
-This keeps behavior deterministic, safe, and curriculum-aligned while still supporting multiple valid solution paths.
+Frontend command simulation remains instant for user experience. Backend verification is authoritative for persisted progress, rewards, and completion state.
 
-## No-Answer Policy
+```txt
+user command
+↓
+frontend simulator gives immediate UI feedback
+↓
+frontend submits command + proposed next_state
+↓
+backend validates JSON shape and verifies the state transition
+↓
+backend awards or rejects persisted progress
+```
 
-The system is designed to never reveal exact solution commands or command sequences in student-facing surfaces. Supports (DAG, expected-state view, easy feedback text) are educational scaffolds, not answer reveal mechanisms.
+## Local Development
 
-## Functional Scope by Module
-
-Current release centers on student-facing modules:
-- Module 0 - system access prerequisites (registration/login/session)
-- Module 1 - orientation and conceptual readiness
-- Module 2 - scenario practice and state-based evaluation
-- Module 3 - repository visualization and fading scaffolding
-- Module 4 - adaptive retry and transfer practice
-- Module 5 - progress tracking and self-monitoring
-
-Planned Phase 2 modules:
-- Module 6 - administrative management
-- Module 7 - AI-assisted learning support
-
-## Metrics and Evaluation Model
-
-The system computes progress from logs (not command quizzes), including:
-- `SCR` - Scenario Completion Rate
-- `ARC` - Average Retry Count
-- `CAR` - Command Accuracy Rate (counted commands vs authored threshold)
-- `HLCR` - Hard-Level Completion Rate
-- `RTA` - Retry Transfer Accuracy (changed-variant retries)
-
-## Local Development Setup
-
-## Prerequisites
-
-- Python 3.10+ (recommended)
-- Node.js 20+ and npm
-- PostgreSQL (or compatible DSN)
-- Redis (or compatible cache endpoint)
-
-## Backend
+### Backend
 
 ```bash
 cd backend
 python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
+.venv\Scripts\activate  # Windows PowerShell/CMD
+pip install -r requirements-dev.txt
 python manage.py migrate
 python manage.py runserver
 ```
 
-## Frontend
+### Frontend
 
 ```bash
 cd frontend
@@ -125,18 +109,64 @@ npm install
 npm run dev
 ```
 
-## Test Commands
+## Validation Commands
 
-Frontend:
-```bash
-cd frontend
-npm run test
-```
+Backend:
 
-Backend (example):
 ```bash
 cd backend
-python manage.py test
+ruff check .
+python -m pytest -q
 ```
 
-These documents are the authoritative source for detailed requirements, research framing, and module-level behavior.
+Frontend:
+
+```bash
+cd frontend
+npm run api:check
+npm run api:usage-check
+npm run api:type-adoption-check
+npm run lint
+npm run lint:dead
+npm test
+npm run build
+```
+
+Repository-level fast guard suite:
+
+```bash
+python scripts/check_quality_gates.py
+python scripts/check_repository_artifacts.py
+```
+
+Individual repository-level guards:
+
+```bash
+python scripts/check_legacy_terms.py
+python scripts/check_architecture_boundaries.py
+python scripts/check_css_architecture.py
+python scripts/check_seed_targets.py
+python scripts/check_api_contract.py
+python scripts/check_frontend_api_usage.py
+python scripts/check_api_type_adoption.py
+python scripts/check_documentation_current.py
+python scripts/check_ci_quality_gates.py
+python scripts/check_django_deploy.py
+```
+
+Generated target replay check, after frontend dependencies are installed:
+
+```bash
+python scripts/check_generated_targets_current.py
+```
+
+
+## Packaging
+
+Create a clean review zip without runtime/build artifacts:
+
+```powershell
+python scripts/clean_repository_artifacts.py
+python scripts/check_repository_artifacts.py
+python scripts/package_source_zip.py git-it-clean.zip
+```

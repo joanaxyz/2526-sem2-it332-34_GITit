@@ -1,0 +1,114 @@
+/* File-tree hierarchy guides, per the mock. */
+.tree-children {
+  margin-left: 0.6rem;
+  padding-left: 0.35rem;
+  border-left: 1px solid hsl(var(--border) / 0.55);
+}
+
+/* Node legend pinned at the foot of the DAG band, per the mock. */
+.dag-legend {
+  pointer-events: none;
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  z-index: var(--z-raised);
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: 999px;
+  padding: 0.28rem 0.85rem;
+  background: rgba(2, 9, 22, 0.82);
+  color: hsl(var(--muted-foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.dag-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.dag-legend svg {
+  width: 0.8rem;
+  height: 0.8rem;
+  color: rgb(var(--theme-primary-rgb));
+}
+
+/* DAG header tags: live pulse on the working graph, amber chip on the target. */
+.dag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 999px;
+  padding: 0.14rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.dag-badge--live {
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.4);
+  background: rgba(var(--theme-primary-rgb), 0.08);
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.dag-badge-dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: rgb(var(--theme-primary-rgb));
+  box-shadow: 0 0 6px rgba(var(--theme-primary-rgb), 0.8);
+  animation: dag-live-pulse 2.2s ease-in-out infinite;
+}
+
+.dag-badge--target {
+  border: 1px solid hsl(var(--warning) / 0.55);
+  background: hsl(var(--warning) / 0.08);
+  color: hsl(var(--warning));
+}
+
+@keyframes dag-live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dag-badge-dot {
+    animation: none;
+  }
+}
+
+
+.dag-controls.react-flow__controls {
+  overflow: hidden;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.28);
+  border-radius: var(--radius-sm);
+  background: var(--surface-overlay);
+  box-shadow: var(--glow-interactive);
+}
+
+.dag-controls .react-flow__controls-button {
+  width: 2rem;
+  height: 2rem;
+  border-bottom-color: rgba(var(--theme-primary-rgb), 0.16);
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.dag-controls .react-flow__controls-button:hover {
+  background: rgba(var(--theme-primary-rgb), 0.1);
+  color: rgb(var(--theme-primary-rgb));
+}

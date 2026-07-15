@@ -1,0 +1,97 @@
+.auth-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow: auto;
+  color: var(--text-primary);
+  background: hsl(var(--background));
+}
+
+.auth-reference-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(50% 45% at 50% 34%, rgba(var(--theme-primary-rgb), 0.14), transparent 70%),
+    linear-gradient(180deg, rgba(1, 8, 22, 0.34), rgba(1, 7, 18, 0.86)),
+    url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png') center / cover no-repeat;
+}
+
+.auth-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(100%, 31rem);
+  min-height: 100vh;
+  align-content: center;
+  gap: 1.25rem;
+  margin: 0 auto;
+  padding: clamp(1rem, 4vw, 2rem);
+}
+
+.auth-page-brand {
+  display: grid;
+  justify-items: center;
+  gap: 0.65rem;
+  text-align: center;
+}
+
+.auth-page-brand p {
+  max-width: 30rem;
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.auth-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  background: var(--panel-bg-raised);
+  box-shadow: var(--panel-inset), var(--shadow-overlay);
+  -webkit-backdrop-filter: var(--panel-backdrop);
+          backdrop-filter: var(--panel-backdrop);
+}
+
+.auth-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  pointer-events: none;
+  background: var(--panel-lightbar);
+  opacity: 0.72;
+}
+
+.auth-card--primary {
+  display: grid;
+  gap: 1.25rem;
+  padding: clamp(1.35rem, 5vw, 2.35rem);
+}
+
+.auth-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.auth-brand img {
+  width: 4rem;
+  height: 4rem;
+  object-fit: contain;
+  filter: drop-shadow(0 0 18px rgba(var(--theme-primary-rgb), 0.52));
+}
+
+.auth-brand span {
+  font-family: var(--font-display);
+  font-size: 2.35rem;
+  font-style: italic;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.auth-brand--sm img { width: 2.5rem; height: 2.5rem; }
+.auth-brand--sm span { font-size: 1.55rem; }

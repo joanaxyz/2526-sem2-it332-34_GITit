@@ -1,0 +1,49 @@
+{
+  "id": "undead-siren-skill-effect",
+  "label": "Undead Siren Skill Effect",
+  "motif": "blue flame water orb",
+  "playback": "target",
+  "durationMs": 900,
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "columns": 5,
+  "rows": 5,
+  "frameCount": 25,
+  "fps": 18,
+  "layers": [
+    {
+      "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-14/effects/skill-back.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "layer": "back",
+      "scale": 0.929,
+      "opacity": 0.82,
+      "offset_x": 0,
+      "offset_y": 14,
+      "orient_to": "target-facing"
+    },
+    {
+      "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-14/effects/skill.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "layer": "front",
+      "scale": 0.86,
+      "opacity": 1,
+      "offset_x": 0,
+      "offset_y": 0,
+      "orient_to": "target-facing"
+    }
+  ],
+  "anchor": "center",
+  "placement": "target"
+}

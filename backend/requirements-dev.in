@@ -1,0 +1,7 @@
+-r requirements.in
+
+pytest==9.1.1
+pytest-django==4.12.0
+pytest-cov==7.0.0
+ruff==0.14.10
+pip-audit==2.9.0

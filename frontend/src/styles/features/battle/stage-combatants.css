@@ -1,0 +1,173 @@
+/* Combatant HUD: unframed portrait art sits above a compact resource meter.
+   Player meter is cyan, enemy meter is ember red. */
+.battle-combatants-hud {
+  position: absolute;
+  right: 0.8rem;
+  bottom: 0.75rem;
+  left: 0.8rem;
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+.battle-combatants-hud.has-ground-footer {
+  bottom: 2.75rem;
+}
+
+.battle-combatants-hud__enemies {
+  display: flex;
+  min-width: 0;
+  align-items: end;
+  justify-content: end;
+  gap: 0.55rem;
+}
+
+.battle-unit-hud {
+  display: grid;
+  min-width: 0;
+  width: 8.2rem;
+  justify-items: start;
+  gap: 0.08rem;
+  transition: opacity 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.battle-unit-hud--enemy {
+  justify-items: end;
+}
+
+.battle-unit-hud__portrait {
+  display: inline-block;
+  width: 4.15rem;
+  height: 4.45rem;
+  flex: 0 0 auto;
+  overflow: visible;
+  margin-bottom: -0.2rem;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  box-shadow: none;
+  filter:
+    drop-shadow(0 5px 8px rgba(0, 0, 0, 0.74))
+    drop-shadow(0 0 7px rgba(var(--theme-primary-rgb), 0.22));
+  image-rendering: auto;
+}
+
+.battle-unit-hud__portrait--fallback {
+  display: grid;
+  place-items: center;
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+}
+
+.battle-unit-hud__vitals {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.16rem 0.45rem;
+}
+
+.battle-unit-hud--enemy .battle-unit-hud__vitals {
+  justify-items: end;
+}
+
+.battle-unit-hud__name {
+  overflow: hidden;
+  max-width: 4.9rem;
+  color: hsl(var(--foreground));
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  opacity: 0.82;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.battle-unit-hud__value {
+  color: hsl(var(--foreground) / 0.95);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+}
+
+.battle-unit-hud__meter {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 0.5rem;
+  border-color: rgba(0, 0, 0, 0.55);
+  border-radius: 0.2rem;
+  background: rgba(2, 10, 24, 0.72);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+}
+
+.battle-unit-hud.is-active .battle-unit-hud__portrait {
+  filter:
+    drop-shadow(0 5px 8px rgba(0, 0, 0, 0.74))
+    drop-shadow(0 0 12px rgba(var(--theme-rail-rgb), 0.46));
+}
+
+.battle-unit-hud.is-defeated {
+  opacity: 0.35;
+}
+
+@keyframes battle-monster-roam {
+  0% {
+    transform: translateX(0);
+  }
+  45% {
+    transform: translateX(-12px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes battle-player-attack-glow {
+  0% {
+    filter: drop-shadow(0 0 7px rgba(var(--theme-primary-rgb), 0.36)) brightness(1);
+  }
+  45% {
+    filter:
+      drop-shadow(0 0 16px rgba(var(--theme-primary-rgb), 0.78))
+      drop-shadow(0 0 30px rgba(var(--theme-challenge-rgb), 0.34))
+      brightness(1.18);
+  }
+  100% {
+    filter: drop-shadow(0 0 7px rgba(var(--theme-primary-rgb), 0.36)) brightness(1);
+  }
+}
+
+@keyframes battle-wave-cue {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+
+  16% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  72% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+}

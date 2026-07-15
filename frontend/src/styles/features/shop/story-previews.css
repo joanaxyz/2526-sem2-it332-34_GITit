@@ -1,0 +1,416 @@
+/* Contents / showcase shelf ---------------------------------------------- */
+.shop-contents-shelf {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: minmax(21rem, 0.95fr) minmax(25rem, 1.05fr);
+  gap: 1rem;
+  height: 23rem;
+  padding: 0.9rem 1.05rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.2);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, rgba(4, 14, 30, 0.6), rgba(1, 7, 16, 0.72));
+}
+
+.shop-contents-shelf--empty {
+  display: grid;
+  place-items: center;
+}
+
+.shop-contents-block {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.shop-block-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.55rem;
+  color: rgb(var(--theme-primary-rgb));
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.shop-block-head small {
+  color: rgba(178, 200, 214, 0.66);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* Environment carousel ---------------------------------------------------- */
+.shop-env-carousel {
+  flex: 1 1 auto;
+  min-height: 0;
+  border-radius: 0.8rem;
+  background: rgba(3, 8, 19, 0.66);
+}
+
+.shop-env-carousel .shop-carousel-viewport {
+  border: 1px solid rgba(126, 183, 217, 0.22);
+  border-radius: 0.8rem;
+}
+
+.shop-env-carousel .shop-carousel-arrow {
+  width: 2.2rem;
+  height: 2.2rem;
+}
+
+.shop-env-carousel .shop-carousel-dots {
+  bottom: 0.62rem;
+}
+
+.shop-env-slide {
+  position: relative;
+  display: block;
+  height: 100%;
+  overflow: hidden;
+  background: #030813;
+}
+
+.shop-env-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.shop-env-slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 58%, rgba(1, 5, 12, 0.76));
+  pointer-events: none;
+}
+
+.shop-env-slide span {
+  position: absolute;
+  left: 0.9rem;
+  bottom: 0.8rem;
+  z-index: 1;
+  color: rgba(234, 246, 255, 0.88);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Story monster showcase -------------------------------------------------- */
+.shop-monster-showcase {
+  gap: 0.55rem;
+}
+
+.shop-monster-showcase--empty {
+  display: grid;
+  place-items: center;
+}
+
+.shop-monster-stage {
+  --monster-stage-bg: none;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 13.1rem;
+  border: 1px solid rgba(126, 183, 217, 0.22);
+  border-radius: 0.75rem;
+  background:
+    linear-gradient(180deg, rgba(1, 6, 14, 0.1), rgba(1, 6, 14, 0.28)),
+    var(--monster-stage-bg) center / cover no-repeat,
+    radial-gradient(70% 85% at 50% 32%, rgba(var(--theme-primary-rgb), 0.13), transparent 64%),
+    linear-gradient(180deg, rgba(5, 15, 32, 0.86), rgba(1, 6, 14, 0.92));
+}
+
+.shop-monster-stage::after {
+  content: '';
+  position: absolute;
+  left: 13%;
+  right: 13%;
+  bottom: 18%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(var(--theme-primary-rgb), 0.42), transparent);
+  box-shadow: 0 0 22px rgba(var(--theme-primary-rgb), 0.26);
+  opacity: 0.88;
+  z-index: 1;
+}
+
+.shop-monster-stage[data-mode='skill-fx']::after {
+  opacity: 0.32;
+}
+
+.shop-monster-stage-glow {
+  position: absolute;
+  left: 50%;
+  bottom: 11%;
+  width: 40%;
+  height: 3rem;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(var(--theme-primary-rgb), 0.18), transparent 70%);
+  z-index: 0;
+}
+
+.shop-monster-stage > [role='img'] {
+  position: relative;
+  z-index: 2;
+}
+
+.shop-monster-effect-layer {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.shop-monster-toolbar {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.shop-monster-toolbar-id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.03rem;
+  min-width: 0;
+  max-width: 7rem;
+  padding: 0 0.1rem;
+  text-align: right;
+}
+
+.shop-monster-toolbar-id strong {
+  overflow: hidden;
+  color: #f2f8ff;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 0 12px rgba(0, 0, 0, 0.6);
+}
+
+.shop-monster-toolbar-id small {
+  display: block;
+  color: rgba(210, 226, 236, 0.72);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 0 12px rgba(0, 0, 0, 0.6);
+}
+
+.shop-monster-toolbar-moves {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 0.18rem;
+}
+
+.shop-monster-move {
+  display: grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  border: 1px solid rgba(126, 183, 217, 0.22);
+  border-radius: var(--control-radius);
+  background: rgba(3, 11, 25, 0.4);
+  backdrop-filter: blur(6px);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out), opacity var(--motion-normal) var(--ease-out);
+}
+
+.shop-monster-move svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.shop-monster-move:hover,
+.shop-monster-move:focus-visible {
+  outline: none;
+  border-color: var(--control-border-hover);
+  background: var(--control-bg-hover);
+  color: var(--text-primary);
+}
+
+.shop-monster-move:focus-visible {
+  box-shadow: var(--control-focus-ring);
+}
+
+.shop-monster-move[data-active='true'] {
+  border-color: var(--control-primary-border);
+  background: rgba(var(--theme-primary-rgb), 0.13);
+  color: var(--text-primary);
+  box-shadow: var(--control-primary-shadow);
+}
+
+.shop-monster-move[data-active='true']:focus-visible {
+  box-shadow: var(--control-focus-ring), 0 0 18px rgba(var(--theme-primary-rgb), 0.24);
+}
+
+.shop-monster-move:disabled {
+  cursor: not-allowed;
+  opacity: 0.34;
+}
+
+/* Compact monster carousel ------------------------------------------------ */
+.shop-monster-carousel {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 0;
+}
+
+.shop-monster-carousel-track {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(4.5rem, 1fr));
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.shop-preview-pager {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid var(--control-border);
+  border-radius: 999px;
+  background: var(--control-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out), opacity var(--motion-normal) var(--ease-out);
+}
+
+.shop-preview-pager:hover:not(:disabled),
+.shop-preview-pager:focus-visible {
+  outline: none;
+  border-color: var(--control-border-hover);
+  background: var(--control-bg-hover);
+  color: var(--text-primary);
+}
+
+.shop-preview-pager:focus-visible {
+  box-shadow: var(--control-focus-ring);
+}
+
+.shop-preview-pager:disabled {
+  cursor: default;
+  opacity: 0.28;
+}
+
+.shop-preview-pager svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.shop-preview-pager-dots {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  gap: 0.42rem;
+  padding-top: 0.1rem;
+}
+
+.shop-preview-pager-dots button {
+  width: 0.42rem;
+  height: 0.42rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(150, 178, 200, 0.42);
+  cursor: pointer;
+  padding: 0;
+  transition: background 150ms ease, width 150ms ease;
+}
+
+.shop-preview-pager-dots button[data-active='true'] {
+  width: 1.15rem;
+  background: rgb(var(--theme-primary-rgb));
+  box-shadow: 0 0 8px rgba(var(--theme-primary-rgb), 0.7);
+}
+
+.shop-monster-pick {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0.15rem 0.1rem;
+  transition: transform var(--motion-normal) var(--ease-out);
+}
+
+.shop-monster-pick:hover,
+.shop-monster-pick[data-active='true'] {
+  transform: translateY(-2px);
+}
+
+.shop-monster-pick:focus-visible {
+  outline: none;
+}
+
+.shop-monster-pick-stage {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: 3.5rem;
+}
+
+.shop-monster-pick-ground {
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  bottom: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(var(--theme-primary-rgb), 0.34), transparent);
+  opacity: 0.6;
+  transition: opacity var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out);
+}
+
+.shop-monster-pick:hover .shop-monster-pick-ground,
+.shop-monster-pick[data-active='true'] .shop-monster-pick-ground,
+.shop-monster-pick:focus-visible .shop-monster-pick-ground {
+  opacity: 1;
+  background: linear-gradient(90deg, transparent, rgb(var(--theme-primary-rgb)), transparent);
+  box-shadow: 0 0 10px rgba(var(--theme-primary-rgb), 0.6);
+}
+
+.shop-monster-pick-sprite {
+  position: relative;
+  z-index: 1;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+  filter: drop-shadow(0 0.2rem 0.3rem rgba(0, 0, 0, 0.44));
+  transition: filter var(--motion-normal) var(--ease-out);
+}
+
+.shop-monster-pick:hover .shop-monster-pick-sprite,
+.shop-monster-pick[data-active='true'] .shop-monster-pick-sprite,
+.shop-monster-pick:focus-visible .shop-monster-pick-sprite {
+  filter: drop-shadow(0 0.2rem 0.3rem rgba(0, 0, 0, 0.44)) drop-shadow(0 0 8px rgba(var(--theme-primary-rgb), 0.55));
+}
