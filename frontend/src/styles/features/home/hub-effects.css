@@ -1,0 +1,287 @@
+/* Effect overlay for spellbook skills: the same registry effects battle uses. */
+.home-sprite-fx {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+/* Invisible impact point the skill flames fly toward. */
+.home-attack-anchor {
+  position: absolute;
+  top: 40%;
+  right: 15%;
+  width: 1px;
+  height: 1px;
+}
+
+.home-rank-body {
+  display: grid;
+  grid-template-columns: 45% minmax(0, 1fr);
+  gap: 1rem;
+  min-height: 0;
+}
+
+.home-rank-list {
+  display: grid;
+  align-content: start;
+  gap: 0.32rem;
+}
+
+.home-rank-list div {
+  display: grid;
+  grid-template-columns: 2.1rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.4rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.12);
+  padding: 0.2rem 0.6rem;
+  background: rgba(2, 11, 27, 0.56);
+}
+
+.home-rank-list div.is-active {
+  border-color: rgba(var(--theme-primary-rgb), 0.88);
+  background: rgba(var(--theme-primary-rgb), 0.11);
+  box-shadow: 0 0 16px rgba(var(--theme-primary-rgb), 0.18);
+}
+
+.home-rank-list span {
+  overflow: hidden;
+  color: rgba(218, 229, 247, 0.72);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-rank-list svg {
+  width: 1rem;
+  height: 1rem;
+  color: rgba(218, 229, 247, 0.56);
+}
+
+.home-spellbook-grid button {
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.home-current-rank {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 0.3rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.18);
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+}
+
+.home-current-rank-crest {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.home-current-rank > span {
+  color: #f6fbff;
+  font-size: 0.9rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.home-current-rank small {
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.home-current-rank strong {
+  color: #f6fbff;
+  font-family: var(--font-mono);
+  font-size: 1.45rem;
+}
+
+.home-current-rank strong em {
+  color: rgba(218, 229, 247, 0.64);
+  font-size: 0.78rem;
+  font-style: normal;
+}
+
+.home-current-rank .ref-meter {
+  width: 100%;
+}
+
+.home-profile-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-top: 0.6rem;
+}
+
+.home-profile-stats header {
+  grid-column: 1 / -1;
+  color: rgb(var(--theme-primary-rgb));
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home-profile-stats div {
+  display: grid;
+  gap: 0.18rem;
+  min-height: 2.6rem;
+  place-items: center;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.15);
+  padding: 0.32rem;
+  text-align: center;
+}
+
+.home-profile-stats span {
+  color: rgba(218, 229, 247, 0.62);
+  font-size: var(--text-2xs);
+}
+
+.home-profile-stats strong {
+  color: #f6fbff;
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+}
+
+.home-spellbook-panel {
+  display: grid;
+  grid-column: 2 / 4;
+  grid-row: 2;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.home-spellbook-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.75rem, 1fr));
+  grid-auto-rows: min-content;
+  gap: 0.5rem;
+  min-height: 0;
+  overflow: auto;
+}
+
+.home-spellbook-grid button {
+  position: relative;
+  display: grid;
+  min-height: 5.6rem;
+  justify-items: center;
+  gap: 0.18rem;
+  border-color: var(--control-border);
+  border-radius: var(--control-radius);
+  padding: 0.45rem 0.35rem;
+  background: var(--control-bg);
+  color: var(--text-secondary);
+  transition: border-color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out), opacity var(--motion-normal) var(--ease-out);
+}
+
+.home-spellbook-grid button:hover:not(:disabled),
+.home-spellbook-grid button:focus-visible {
+  border-color: var(--control-border-hover);
+  background: var(--control-bg-hover);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.home-spellbook-grid button:focus-visible {
+  box-shadow: var(--control-focus-ring);
+}
+
+.home-spellbook-grid button.is-selected {
+  border-color: var(--control-primary-border);
+  background: rgba(var(--theme-primary-rgb), 0.12);
+  box-shadow: var(--control-primary-shadow);
+}
+
+.home-spellbook-grid button.is-selected:focus-visible {
+  box-shadow: var(--control-focus-ring), 0 0 18px rgba(var(--theme-primary-rgb), 0.24);
+}
+
+.home-spellbook-grid button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+  opacity: 0.55;
+}
+
+.home-command-icon {
+  display: grid;
+  width: 2.7rem;
+  height: 2.4rem;
+  place-items: center;
+}
+
+.home-command-icon .git-command-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  filter: drop-shadow(0 0 8px rgba(var(--theme-primary-rgb), 0.35));
+}
+
+.home-spellbook-grid strong {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.home-spellbook-grid small {
+  color: rgba(218, 229, 247, 0.55);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.home-spellbook-skeleton {
+  display: block;
+  min-height: 5.6rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.12);
+  border-radius: 8px;
+  background: rgba(2, 11, 28, 0.45);
+  animation: home-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+.home-spellbook-empty {
+  margin: 0;
+  align-self: center;
+  color: rgba(218, 229, 247, 0.62);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.home-ref-grid .ref-panel-head em {
+  margin-left: 0.35rem;
+  color: rgba(218, 229, 247, 0.5);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: none;
+}
+
+@keyframes home-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.home-ref-arrows {
+  position: fixed;
+  left: 50%;
+  bottom: 1.2rem;
+  z-index: 2;
+  display: none;
+  gap: 32rem;
+  color: rgb(var(--theme-primary-rgb));
+  opacity: 0.5;
+  transform: translateX(-50%);
+}
+
+.home-ref-arrows svg {
+  width: 1.3rem;
+  height: 1.3rem;
+}

@@ -1,0 +1,107 @@
+{
+  "id": "black",
+  "label": "Black",
+  "scale": 1.0,
+  "metrics": {
+    "walk_speed": 140,
+    "run_speed": 280,
+    "foot_offset": 0
+  },
+  "randomActions": [],
+  "kit": [
+    {
+      "name": "Shadow Step",
+      "description": "Moves through danger with an unnerving, silent confidence."
+    },
+    {
+      "name": "Umbral Grip",
+      "description": "Strikes hit harder when the odds favor the enemy."
+    },
+    {
+      "name": "Night's Patience",
+      "description": "Waits out a fight rather than rushing it."
+    }
+  ],
+  "sprites": {
+    "idle": {
+      "src": "/cosmetics/companion/black/idle.png",
+      "fps": 10,
+      "loops": true,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "run": {
+      "src": "/cosmetics/companion/black/run.png",
+      "fps": 16,
+      "loops": true,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "hurt": {
+      "src": "/cosmetics/companion/black/hurt.png",
+      "fps": 26,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "death": {
+      "src": "/cosmetics/companion/black/death.png",
+      "fps": 12,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "portrait": {
+      "src": "/cosmetics/companion/black/portrait.png",
+      "fps": 1,
+      "loops": false,
+      "frameWidth": 1086,
+      "frameHeight": 1448,
+      "columns": 1,
+      "rows": 1,
+      "frameCount": 1
+    },
+    "attack": {
+      "src": "/cosmetics/companion/black/attack.png",
+      "fps": 24,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "attack-end": {
+      "src": "/cosmetics/companion/black/attack-end.png",
+      "fps": 24,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "miss": {
+      "src": "/cosmetics/companion/black/miss.png",
+      "fps": 24,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    }
+  }
+}

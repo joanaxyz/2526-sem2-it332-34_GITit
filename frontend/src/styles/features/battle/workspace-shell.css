@@ -1,0 +1,266 @@
+/* Shared gameplay workspace shell for adventures and challenges. */
+.gameplay-workspace-screen {
+  position: relative;
+  display: grid;
+  grid-template-rows: 4.45rem minmax(0, 1fr);
+  width: 100%;
+  height: 100vh;
+  min-height: 40rem;
+  overflow: hidden;
+  background: #020711;
+}
+
+.gameplay-workspace-screen::before {
+  display: none;
+}
+
+.gameplay-workspace-screen > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Flex, not a fixed-story grid: the control set varies per run state (retry /
+   start-over / replay), and a grid with fewer stories than children wraps into
+   an implicit row that paints over the workspace. */
+.gameplay-workspace-header {
+  display: flex;
+  align-items: stretch;
+  gap: 0.55rem;
+  min-width: 0;
+  border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.24);
+  padding: 0.52rem 0.88rem;
+  background:
+    linear-gradient(90deg, rgba(1, 7, 18, 0.98), rgba(4, 13, 31, 0.94) 50%, rgba(1, 7, 18, 0.98)),
+    rgba(0, 5, 16, 0.96);
+  box-shadow: 0 1px 0 rgba(var(--theme-primary-rgb), 0.12);
+}
+
+.gameplay-header-brand,
+.gameplay-header-button,
+.gameplay-header-wallet,
+.gameplay-header-profile {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.gameplay-header-brand {
+  gap: 0.52rem;
+  min-width: 10.4rem;
+  color: hsl(var(--foreground));
+  font-family: var(--font-display);
+  font-size: 1.72rem;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.gameplay-header-brand img {
+  width: 2.62rem;
+  height: 2.62rem;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(var(--theme-primary-rgb), 0.52));
+}
+
+.gameplay-header-button {
+  justify-content: center;
+  gap: 0.46rem;
+  min-height: var(--control-height-md);
+  min-width: 5.8rem;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  padding-inline: 0.8rem;
+  background: var(--control-bg);
+  color: var(--text-secondary);
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out), opacity var(--motion-normal) var(--ease-out);
+}
+
+.gameplay-header-button:hover,
+.gameplay-header-button:focus-visible {
+  border-color: var(--control-border-hover);
+  background: var(--control-bg-hover);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.gameplay-header-button:focus-visible {
+  box-shadow: var(--control-focus-ring);
+}
+
+.gameplay-header-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.gameplay-header-button svg {
+  width: 1.08rem;
+  height: 1.08rem;
+  color: currentColor;
+}
+
+.gameplay-header-icon-button {
+  width: var(--control-height-md);
+  min-width: var(--control-height-md);
+  padding-inline: 0;
+}
+
+.gameplay-header-audio-controls {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0.35rem;
+}
+
+.gameplay-header-audio.is-muted {
+  border-color: hsl(var(--muted-foreground) / 0.28);
+  background: rgba(3, 11, 25, 0.48);
+  color: hsl(var(--muted-foreground));
+}
+
+/* The level name lives in the Level Context panel, not the command bar; the
+   spacer keeps the run controls docked right, like the mock. */
+.gameplay-header-spacer {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Exit is a plain × docked left of the brand. */
+.gameplay-header-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 0;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.gameplay-header-close svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.gameplay-header-close:hover,
+.gameplay-header-close:focus-visible {
+  background: rgba(var(--theme-primary-rgb), 0.1);
+  color: hsl(var(--foreground));
+  outline: none;
+}
+
+.gameplay-header-close:focus-visible {
+  box-shadow: var(--control-focus-ring);
+}
+
+.gameplay-header-close:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Star triplet (now rendered in the Level Context panel's detail rows). */
+.gameplay-header-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.08rem;
+}
+
+.gameplay-header-stars svg {
+  width: 1rem;
+  height: 1rem;
+  color: rgba(126, 153, 190, 0.56);
+  fill: transparent;
+}
+
+.gameplay-header-stars svg.is-lit {
+  color: rgb(var(--theme-primary-rgb));
+  fill: currentColor;
+  filter: drop-shadow(0 0 7px rgba(var(--theme-primary-rgb), 0.78));
+}
+
+.gameplay-header-account {
+  display: flex;
+  align-items: stretch;
+  justify-content: end;
+  gap: 0.55rem;
+}
+
+/* Wallet rides in a bordered pill like the mock; the profile stays open. */
+.gameplay-header-wallet {
+  gap: 0.52rem;
+  min-width: 8.7rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.4);
+  border-radius: 9px;
+  padding-inline: 0.72rem;
+  background: rgba(2, 10, 24, 0.6);
+  color: hsl(var(--foreground));
+}
+
+.gameplay-header-profile {
+  gap: 0.52rem;
+  min-width: 8.7rem;
+  padding-left: 0.4rem;
+  color: hsl(var(--foreground));
+}
+
+.gameplay-header-wallet img {
+  width: 2.08rem;
+  height: 2.08rem;
+  filter: drop-shadow(0 0 8px rgba(243, 210, 122, 0.56));
+}
+
+.gameplay-header-wallet strong,
+.gameplay-header-profile strong {
+  display: block;
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 600; /* JetBrains Mono loads 400-600 */
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.gameplay-header-wallet small,
+.gameplay-header-profile small {
+  display: block;
+  margin-top: 0.16rem;
+  color: rgb(var(--theme-primary-rgb));
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.gameplay-header-profile img {
+  width: 2.55rem;
+  height: 2.55rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.66);
+  border-radius: 999px;
+  background: #06152e;
+  object-fit: cover;
+  box-shadow: 0 0 14px rgba(var(--theme-primary-rgb), 0.24);
+}
+
+.gameplay-workspace {
+  display: grid;
+  grid-template-columns: minmax(17.5rem, 18.75rem) minmax(0, 1fr);
+  /* Explicit 1fr row: an implicit row is content-sized and leaves a dead band
+     of raw background under the terminal. */
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0.42rem;
+  min-height: 0;
+  padding: 0.58rem 0.56rem 0.7rem 0.7rem;
+}
+
+.gameplay-workspace__sidebar {
+  display: grid;
+  gap: 0.58rem;
+  min-height: 0;
+}
+
+.gameplay-project-region {
+  min-height: 0;
+  overflow: hidden;
+}

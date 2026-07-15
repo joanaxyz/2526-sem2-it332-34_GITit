@@ -1,0 +1,117 @@
+{
+  "id": "blue",
+  "label": "Blue",
+  "scale": 1.0,
+  "metrics": {
+    "walk_speed": 140,
+    "run_speed": 280,
+    "foot_offset": 14
+  },
+  "randomActions": [],
+  "kit": [
+    {
+      "name": "Steady Hand",
+      "description": "A balanced adventurer, quick to recover between attacks."
+    },
+    {
+      "name": "Arcane Focus",
+      "description": "Channels spells with even, reliable timing."
+    },
+    {
+      "name": "Traveler's Instinct",
+      "description": "Reads unfamiliar terrain without hesitation."
+    }
+  ],
+  "sprites": {
+    "idle": {
+      "src": "/cosmetics/companion/blue/idle.png",
+      "fps": 10,
+      "loops": true,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "run": {
+      "src": "/cosmetics/companion/blue/run.png",
+      "fps": 16,
+      "loops": true,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "hurt": {
+      "src": "/cosmetics/companion/blue/hurt.png",
+      "fps": 26,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "death": {
+      "src": "/cosmetics/companion/blue/death.png",
+      "fps": 12,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "portrait": {
+      "src": "/cosmetics/companion/blue/portrait.png",
+      "fps": 1,
+      "loops": false,
+      "frameWidth": 1028,
+      "frameHeight": 1530,
+      "columns": 1,
+      "rows": 1,
+      "frameCount": 1
+    },
+    "avatar": {
+      "src": "/cosmetics/companion/blue/avatar.png",
+      "fps": 1,
+      "loops": false,
+      "frameWidth": 1254,
+      "frameHeight": 1254,
+      "columns": 1,
+      "rows": 1,
+      "frameCount": 1
+    },
+    "attack": {
+      "src": "/cosmetics/companion/blue/attack.png",
+      "fps": 24,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "attack-end": {
+      "src": "/cosmetics/companion/blue/attack-end.png",
+      "fps": 24,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    },
+    "miss": {
+      "src": "/cosmetics/companion/blue/miss.png",
+      "fps": 24,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25
+    }
+  }
+}

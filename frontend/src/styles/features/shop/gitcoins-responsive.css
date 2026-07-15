@@ -1,0 +1,114 @@
+/* Responsive -------------------------------------------------------------- */
+@media (max-width: 1180px) {
+  .shop-view--stories,
+  .shop-view--coins {
+    grid-template-columns: minmax(0, 1fr) 18rem;
+  }
+
+  .shop-view--companions {
+    grid-template-columns: 12.5rem minmax(0, 1fr) 17rem;
+  }
+}
+
+@media (max-width: 980px) {
+  .shop-ref-page {
+    height: auto;
+    min-height: var(--app-content-height);
+    overflow: auto;
+  }
+
+  .shop-ref-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .shop-categories {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    min-height: auto;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    border-right: 0;
+    border-bottom: 1px solid rgba(116, 173, 210, 0.18);
+  }
+
+  .shop-rail-balance {
+    grid-row: 1;
+    flex-direction: row;
+    border-bottom: 0;
+    border-right: 1px solid rgba(116, 173, 210, 0.14);
+  }
+
+  .shop-tab-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .shop-tab-list button {
+    min-height: 4.4rem;
+  }
+
+  .shop-tab-list button.is-active::before {
+    left: 50%;
+    top: auto;
+    bottom: 0;
+    width: 2.4rem;
+    height: 2px;
+    transform: translateX(-50%);
+  }
+
+  .shop-view {
+    grid-column: 1;
+  }
+
+  .shop-view--stories,
+  .shop-view--companions,
+  .shop-view--coins {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    height: auto;
+    padding: 1rem;
+  }
+
+  .shop-stage {
+    height: 24rem;
+  }
+
+  .shop-detail-panel,
+  .shop-store,
+  .shop-earn-panel,
+  .shop-ledger-panel,
+  .shop-coin-hero,
+  .shop-companion-preview-suite,
+  .shop-contents-shelf {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .shop-view--companions .shop-detail-panel {
+    grid-column: 1;
+  }
+
+  .shop-contents-shelf {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .shop-onboarding-banner,
+  .shop-checkout-banner {
+    position: static;
+    margin: 0.75rem 1rem 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .shop-store-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shop-coin-balance-card {
+    width: 100%;
+  }
+}

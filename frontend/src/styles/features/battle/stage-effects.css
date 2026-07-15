@@ -1,0 +1,97 @@
+/* Per-command DAG deltas (LiveDagPanel animateChanges). The pop-in runs on the
+   node's inner div — the ReactFlow node wrapper's transform is positioning. */
+.dag-node-enter {
+  animation: dag-node-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes dag-node-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.dag-edge-enter .react-flow__edge-path {
+  stroke-dasharray: 140;
+  stroke-dashoffset: 140;
+  animation: dag-edge-draw 450ms ease-out 120ms forwards;
+}
+
+@keyframes dag-edge-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.dag-ref-enter {
+  animation: dag-ref-enter 300ms ease-out both;
+}
+
+@keyframes dag-ref-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dag-node-enter,
+  .dag-edge-enter .react-flow__edge-path,
+  .dag-ref-enter,
+  .battle-wave-cue,
+  .battle-monster-roam.is-roaming,
+  .battle-player-actor.is-attacking {
+    animation: none;
+  }
+
+  .battle-parallax-layer {
+    will-change: auto;
+    background-position: 50% 100% !important;
+  }
+}
+
+@media (max-width: 35rem) {
+  .battle-combatants-hud {
+    top: 0.45rem;
+    right: 0.45rem;
+    bottom: auto;
+    left: 0.45rem;
+    align-items: start;
+    gap: 0.45rem;
+  }
+
+  .battle-combatants-hud__enemies {
+    gap: 0.25rem;
+  }
+
+  .battle-unit-hud__portrait {
+    width: 2.75rem;
+    height: 2.95rem;
+  }
+
+  .battle-unit-hud__name {
+    max-width: 3.2rem;
+  }
+
+  .battle-unit-hud {
+    width: 5.4rem;
+  }
+
+  .battle-unit-hud__meter,
+  .battle-unit-hud--player .battle-unit-hud__meter {
+    width: 100%;
+    height: 0.38rem;
+  }
+}

@@ -1,0 +1,87 @@
+.home-overview-continue {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  padding: 0.9rem 1.1rem;
+  background:
+    linear-gradient(90deg, rgba(var(--theme-primary-rgb), 0.13), transparent 56%),
+    var(--panel-bg);
+  box-shadow: var(--panel-inset);
+}
+
+.home-overview-continue span {
+  color: rgb(var(--theme-primary-rgb));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home-overview-continue > div {
+  min-width: 0;
+}
+
+.home-overview-continue h2,
+.home-overview-continue p {
+  margin: 0;
+}
+
+.home-overview-continue h2 {
+  margin-top: 0.18rem;
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  font-weight: 800;
+}
+
+.home-overview-continue p {
+  margin-top: 0.2rem;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+.home-overview-continue-action {
+  display: inline-flex;
+  min-height: var(--control-height-md);
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 1px solid var(--control-primary-border);
+  border-radius: var(--control-radius);
+  padding-inline: 1rem;
+  background: var(--control-primary-bg);
+  color: var(--control-primary-text);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: var(--control-primary-shadow);
+  transition: background var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out);
+}
+
+.home-overview-continue-action:hover,
+.home-overview-continue-action:focus-visible {
+  background: var(--control-primary-bg-hover);
+  outline: none;
+}
+
+.home-overview-continue-action:focus-visible {
+  box-shadow: var(--control-focus-ring), 0 0 18px rgba(var(--theme-primary-rgb), 0.28);
+}
+
+.home-overview-continue-action svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+@media (max-width: 760px) {
+  .home-overview-continue {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

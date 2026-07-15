@@ -3,7 +3,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 BACKEND_DIR = Path(__file__).resolve().parents[2]
 
 
@@ -43,26 +42,16 @@ def test_development_settings_allow_locmem_without_redis():
 
 
 def test_jdbc_database_url_is_normalized_to_postgresql():
-    env = {
-        "DATABASE_URL": "jdbc:postgresql://localhost:5432/git_it",
-        "DJANGO_ALLOWED_HOSTS": "localhost,127.0.0.1",
-        "DJANGO_CORS_ALLOWED_ORIGINS": "http://localhost:5173",
-        "DJANGO_DEBUG": "True",
-        "DJANGO_SECRET_KEY": "test-secret",
-        "REDIS_URL": "",
-    }
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-c",
-            "import config.settings as s; print(s.DATABASES['default']['ENGINE'])",
-        ],
-        cwd=BACKEND_DIR,
-        env={**os.environ, **env},
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    # Tested directly rather than via a settings subprocess: settings intentionally
+    # prefer whatever DATABASE_URL `backend/.env` defines over a `jdbc:` URL (see
+    # the "Prefer project .env" guard in config.settings), so a subprocess import is
+    # hostage to the developer's local .env (e.g. a sqlite one). The custom logic
+    # under test is the prefix strip itself.
+    from config.settings import _normalize_database_url
 
-    assert result.returncode == 0
-    assert "postgresql" in result.stdout
+    assert (
+        _normalize_database_url("jdbc:postgresql://localhost:5432/git_it")
+        == "postgresql://localhost:5432/git_it"
+    )
+    # Non-jdbc URLs pass through unchanged.
+    assert _normalize_database_url("postgresql://host/db") == "postgresql://host/db"

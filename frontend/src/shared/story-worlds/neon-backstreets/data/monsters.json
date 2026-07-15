@@ -1,0 +1,937 @@
+{
+  "bone-archer": {
+    "label": "Rooftop Marksman",
+    "tier": "mob",
+    "scale": 0.73,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 28,
+      "range_px": 305
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-01/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-01/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-01/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-01/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-01/idle.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 1
+      }
+    }
+  },
+  "bone-blacksmith": {
+    "label": "Industrial Enforcer",
+    "tier": "elite",
+    "scale": 0.86,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 56
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 40,
+      "range_px": 165
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-02/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-02/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-02/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-02/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-02/idle.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 1
+      }
+    }
+  },
+  "bone-demon": {
+    "label": "Aerial Breaker",
+    "tier": "elite",
+    "scale": 0.88,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 28,
+      "range_px": 290
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-03/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-03/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-03/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-03/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-03/idle.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 1
+      }
+    }
+  },
+  "bone-ghost": {
+    "label": "Signal Phantom",
+    "tier": "mob",
+    "scale": 0.82,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.65,
+      "foot_offset": 28,
+      "range_px": 260
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-04/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-04/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-04/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-04/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-04/idle.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 1
+      }
+    }
+  },
+  "bone-lancer": {
+    "label": "Transit Sentinel",
+    "tier": "elite",
+    "scale": 0.58,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 64
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 38,
+      "range_px": 165
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-05/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-05/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-05/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-05/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-05/idle.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 1
+      }
+    }
+  },
+  "bone-necromancer": {
+    "label": "Systems Architect",
+    "tier": "elite",
+    "scale": 0.78,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.53,
+      "foot_offset": 17,
+      "range_px": 285
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-06/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-06/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-06/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-06/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-06/idle.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 1
+      }
+    }
+  },
+  "bone-soldier": {
+    "label": "Security Unit",
+    "tier": "mob",
+    "scale": 0.86,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 56
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.48,
+      "foot_offset": 60,
+      "range_px": 128
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-07/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-07/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-07/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-07/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-07/idle.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 1
+      }
+    }
+  },
+  "cursed-lantern": {
+    "label": "Patrol Beacon",
+    "tier": "mob",
+    "scale": 0.88,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 56
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 81,
+      "range_px": 128
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-08/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-08/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-08/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-08/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-08/idle.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 1
+      }
+    }
+  },
+  "ghost-lady": {
+    "label": "Executive Specter",
+    "tier": "elite",
+    "scale": 0.82,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 36,
+      "range_px": 275
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-10/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-10/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-10/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-10/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-10/idle.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 1
+      }
+    }
+  },
+  "lich-king": {
+    "label": "Street Sovereign",
+    "tier": "boss",
+    "scale": 1.16,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 72
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.53,
+      "foot_offset": 53,
+      "range_px": 210
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-11/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-11/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-11/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-11/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-11/idle.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 1
+      }
+    }
+  },
+  "two-headed-hound": {
+    "label": "Dual-Core Pursuer",
+    "tier": "elite",
+    "scale": 0.95,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 57,
+      "range_px": 165
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-12/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-12/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-12/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-12/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-12/idle.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 1
+      }
+    }
+  },
+  "undead-clown": {
+    "label": "Glitch Performer",
+    "tier": "mob",
+    "scale": 0.86,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 25,
+      "range_px": 255
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-13/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-13/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-13/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-13/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-13/idle.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 1
+      }
+    }
+  },
+  "undead-siren": {
+    "label": "Broadcast Siren",
+    "tier": "elite",
+    "scale": 0.8,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 8,
+      "range_px": 285
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-14/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-14/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-14/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-14/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-14/idle.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 1
+      }
+    }
+  },
+  "zombe-boy": {
+    "label": "Street Runner",
+    "tier": "mob",
+    "scale": 0.78,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 56
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 27,
+      "range_px": 128
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-15/idle.png",
+        "fps": 1,
+        "loops": true,
+        "frameWidth": 836,
+        "frameHeight": 836,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1,
+        "displayScale": 0.30622
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-15/attack.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 836,
+        "frameHeight": 836,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1,
+        "displayScale": 0.30622
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-15/hurt.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 836,
+        "frameHeight": 836,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1,
+        "displayScale": 0.30622
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-15/death.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 836,
+        "frameHeight": 836,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1,
+        "displayScale": 0.30622
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-15/idle.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 836,
+        "frameHeight": 836,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1,
+        "displayScale": 0.30622
+      }
+    }
+  }
+}

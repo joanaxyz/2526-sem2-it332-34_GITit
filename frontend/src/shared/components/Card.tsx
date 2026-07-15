@@ -2,31 +2,28 @@ import * as React from 'react'
 
 import { cn } from '@/shared/utils/cn'
 
+// The ui-* classes are the single source of truth for card chrome.
+
 export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn('rounded-lg border border-border bg-card text-card-foreground shadow-panel', className)}
-      {...props}
-    />
-  )
+  return <div className={cn('ui-card', className)} {...props} />
 }
 
 export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('flex flex-col gap-1.5 p-5', className)} {...props} />
+  return <div className={cn('ui-card-header', className)} {...props} />
 }
 
 export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className={cn('text-lg font-bold leading-none', className)} {...props} />
+  return <h3 className={cn('ui-card-title', className)} {...props} />
 }
 
 export function CardDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn('text-sm leading-6 text-muted-foreground', className)} {...props} />
+  return <p className={cn('ui-card-description', className)} {...props} />
 }
 
 export function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('p-5 pt-0', className)} {...props} />
+  return <div className={cn('ui-card-content', className)} {...props} />
 }
 
 export function CardFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('flex items-center p-5 pt-0', className)} {...props} />
+  return <div className={cn('ui-card-footer', className)} {...props} />
 }

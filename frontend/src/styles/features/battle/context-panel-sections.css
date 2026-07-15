@@ -1,0 +1,274 @@
+/* ── Level context panel: hairline-split sections inside one slab ─────────── */
+
+/* Shared panel voice from the reference mock: every workspace panel opens with
+   a tracked-uppercase eyebrow over a hairline. */
+.panel-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(218, 233, 248, 0.88);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.panel-eyebrow svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.lvlctx-header {
+  gap: 0;
+  padding: 0;
+}
+
+.lvlctx-header .panel-eyebrow {
+  padding: 0.72rem 0.95rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.55);
+}
+
+.lvlctx-titlerow {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.72rem 0.95rem 0.15rem;
+}
+
+.lvlctx-titlerow svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: 0 0 auto;
+  color: rgb(var(--theme-primary-rgb));
+  filter: drop-shadow(0 0 6px rgba(var(--theme-primary-rgb), 0.45));
+}
+
+.lvlctx-title {
+  font-size: 1rem;
+}
+
+.lvlctx-body {
+  padding: 0;
+}
+
+.lvlctx-section {
+  padding: 0.7rem 0.95rem 0.85rem;
+}
+
+.lvlctx-section + .lvlctx-section {
+  border-top: 1px solid hsl(var(--border) / 0.55);
+}
+
+.lvlctx-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+  color: hsl(var(--muted-foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.lvlctx-eyebrow svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.lvlctx-story {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+.lvlctx-task {
+  margin: 0.55rem 0 0;
+  color: hsl(var(--foreground));
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.lvlctx-checks {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lvlctx-check {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: start;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+
+.lvlctx-check-dot {
+  display: grid;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.12rem;
+  place-items: center;
+  border: 1px solid hsl(var(--muted-foreground) / 0.45);
+  border-radius: 999px;
+}
+
+.lvlctx-check-dot svg {
+  width: 0.65rem;
+  height: 0.65rem;
+}
+
+.lvlctx-check.is-done .lvlctx-check-dot {
+  border-color: transparent;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.lvlctx-check.is-done .lvlctx-check-label {
+  color: hsl(var(--foreground));
+  text-decoration: line-through;
+  text-decoration-color: hsl(var(--muted-foreground) / 0.4);
+}
+
+.lvlctx-facts {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+}
+
+.lvlctx-fact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 1.25rem;
+}
+
+.lvlctx-fact dt {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.lvlctx-fact dt svg {
+  width: 1rem;
+  height: 1rem;
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.lvlctx-fact dt svg.lvlctx-icon--amber {
+  color: hsl(var(--warning));
+}
+
+.lvlctx-fact dd {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: var(--text-xs);
+}
+
+.lvlctx-num {
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.lvlctx-chip {
+  border: 1px solid;
+  border-radius: 999px;
+  padding: 0.16rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.lvlctx-chip--easy {
+  border-color: hsl(var(--success) / 0.5);
+  color: hsl(var(--success));
+  background: hsl(var(--success) / 0.08);
+}
+
+.lvlctx-chip--medium {
+  border-color: hsl(var(--warning) / 0.55);
+  color: hsl(var(--warning));
+  background: hsl(var(--warning) / 0.08);
+}
+
+.lvlctx-chip--hard {
+  border-color: hsl(var(--destructive) / 0.5);
+  color: hsl(var(--destructive));
+  background: hsl(var(--destructive) / 0.08);
+}
+
+.lvlctx-chip--optional {
+  border-color: hsl(var(--muted-foreground) / 0.4);
+  color: hsl(var(--muted-foreground));
+  background: transparent;
+}
+
+.lvlctx-reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  color: hsl(var(--warning));
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.lvlctx-reward svg,
+.lvlctx-reward img {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.lvlctx-copies {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lvlctx-copy {
+  position: relative;
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.5rem 2.3rem 0.5rem 0;
+}
+
+.lvlctx-copy + .lvlctx-copy {
+  border-top: 1px solid hsl(var(--border) / 0.4);
+}
+
+.lvlctx-copy code {
+  overflow-wrap: anywhere;
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.lvlctx-copy-btn {
+  position: absolute;
+  top: 0.42rem;
+  right: 0;
+}
+

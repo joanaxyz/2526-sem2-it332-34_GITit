@@ -4,3 +4,9 @@ target-version = "py313"
 [lint]
 select = ["E", "F", "I", "B", "UP"]
 ignore = ["B904", "E501"]
+
+[lint.per-file-ignores]
+"curriculum/seed_data/source/adventure_level_specs/*.py" = ["F403", "F405"]
+"curriculum/seed_data/source/adventure_level_specs/common.py" = ["F401", "F403", "F405"]
+"curriculum/seed_data/source/challenge_specs/*.py" = ["F403", "F405"]
+"curriculum/seed_data/source/challenge_specs/helpers.py" = ["F401", "F403", "F405"]

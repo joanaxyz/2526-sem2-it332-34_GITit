@@ -1,20 +1,147 @@
 :root {
+  color-scheme: dark;
+
   --background: 205 34% 6%;          /* original near-black */
   --foreground: 195 60% 95%;         /* cool white */
   --card: 215 40% 10%;               /* dark navy card */
   --card-foreground: 195 60% 95%;
-  --primary: 172 100% 48%;           /* #00F5D4 aurora cyan */
-  --primary-foreground: 172 80% 6%;
+  --primary: 202 100% 50%;           /* neon blue */
+  --primary-foreground: 214 100% 7%;
   --secondary: 215 36% 16%;
   --secondary-foreground: 195 60% 95%;
   --muted: 215 28% 13%;
   --muted-foreground: 200 20% 55%;
-  --accent: 190 100% 42%;            /* #00B4D8 ocean blue */
+  --accent: 190 100% 42%;            /* ocean blue */
   --accent-foreground: 190 80% 95%;
   --destructive: 0 100% 68%;
   --destructive-foreground: 0 0% 100%;
   --border: 215 28% 20%;
   --input: 215 28% 20%;
-  --ring: 172 100% 48%;
+  --ring: 202 100% 50%;
+
+  /* Semantic state colours. */
+  --success: 194 100% 64%;           /* neon blue - published / ok */
+  --success-foreground: 214 100% 7%;
+  --warning: 43 82% 72%;             /* amber - needs attention (#f3d27a family) */
+  --warning-foreground: 30 55% 9%;
+  /* --destructive (above) is the error colour. */
+
+  /* Theme token contract. These names are semantic and must not mention a specific theme.
+     Real render-ready story worlds provide the same fields in StoryWorldDef.tokens. */
+  --theme-primary-rgb: 0, 163, 255;
+  --theme-secondary-rgb: 176, 74, 255;
+  --theme-accent-rgb: 0, 180, 216;
+  --theme-surface-rgb: 5, 8, 29;
+  --theme-glow-rgb: 53, 143, 255;
+  --theme-spark-rgb: 98, 230, 255;
+
+  /* Backwards-compatible semantic aliases used by existing feature CSS. */
+  --theme-rail-rgb: var(--theme-glow-rgb);
+  --theme-challenge-rgb: var(--theme-secondary-rgb);
+  --theme-primary-soft-rgb: 90, 174, 255;
+  --theme-deep-rgb: 0, 119, 182;
+
+
+  /* Semantic surface and layout contract. */
+  --surface-canvas: hsl(var(--background));
+  --surface-panel: hsl(var(--card) / 0.88);
+  --surface-raised: hsl(var(--secondary) / 0.94);
+  --surface-overlay: hsl(214 46% 7% / 0.96);
+  --border-subtle: hsl(var(--border) / 0.72);
+  --border-active: hsl(var(--primary) / 0.72);
+  --text-primary: hsl(var(--foreground));
+  --text-secondary: hsl(var(--foreground) / 0.76);
+  --text-tertiary: hsl(var(--muted-foreground));
+
+  --control-height-sm: 2.25rem;
+  --control-height-md: 2.65rem;
+  --control-height-lg: 3rem;
+  --content-max: 104rem;
+  --reading-max: 72ch;
+  --workspace-gap: 0.58rem;
+  --panel-padding-sm: 0.75rem;
+  --panel-padding-md: 1rem;
+  --panel-padding-lg: 1.35rem;
+
+  /* Shared component chrome: quiet neon HUD, minimal product controls. */
+  --panel-radius: var(--radius-lg);
+  --panel-border: rgba(var(--theme-primary-rgb), 0.24);
+  --panel-border-strong: rgba(var(--theme-primary-rgb), 0.38);
+  --panel-bg:
+    linear-gradient(180deg, rgba(5, 18, 40, 0.62), rgba(2, 8, 22, 0.74)),
+    rgba(2, 8, 18, 0.7);
+  --panel-bg-raised:
+    linear-gradient(180deg, rgba(9, 25, 50, 0.72), rgba(4, 12, 28, 0.82)),
+    rgba(4, 12, 28, 0.78);
+  --panel-inset: inset 0 1px 0 rgba(232, 246, 250, 0.06);
+  --panel-glow: 0 0 16px rgba(var(--theme-primary-rgb), 0.07);
+  --panel-glow-hover: 0 0 20px rgba(var(--theme-primary-rgb), 0.12);
+  --panel-backdrop: blur(6px) saturate(1.03);
+  --panel-lightbar: linear-gradient(90deg, transparent, rgba(var(--theme-primary-rgb), 0.5), transparent);
+
+  --control-radius: var(--radius-md);
+  --control-border: rgba(var(--theme-primary-rgb), 0.34);
+  --control-border-hover: rgba(var(--theme-primary-rgb), 0.62);
+  --control-bg: rgba(3, 11, 25, 0.72);
+  --control-bg-hover: rgba(var(--theme-primary-rgb), 0.1);
+  --control-bg-active: rgba(var(--theme-primary-rgb), 0.16);
+  --control-primary-bg: linear-gradient(180deg, rgba(0, 180, 216, 0.96), rgba(0, 119, 182, 0.96));
+  --control-primary-bg-hover: linear-gradient(180deg, rgba(24, 203, 238, 0.98), rgba(0, 133, 202, 0.98));
+  --control-primary-border: rgba(0, 180, 216, 0.72);
+  --control-primary-text: #f6fdff;
+  --control-danger-bg: hsl(var(--destructive) / 0.1);
+  --control-danger-border: hsl(var(--destructive) / 0.45);
+  --control-focus-ring: 0 0 0 2px hsl(var(--background)), 0 0 0 4px rgba(var(--theme-primary-rgb), 0.48);
+  --control-primary-shadow: 0 0 14px rgba(var(--theme-primary-rgb), 0.2);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.48);
+  --glow-interactive: 0 0 14px rgba(var(--theme-primary-rgb), 0.16);
+  --glow-active: 0 0 22px rgba(var(--theme-primary-rgb), 0.3);
+  --motion-fast: 120ms;
+  --motion-normal: 180ms;
+  --motion-slow: 320ms;
+
+  /* Type families - three voices, no fourth. */
+  --font-display: 'Chakra Petch', 'Inter', system-ui, sans-serif; /* page titles, brand */
+  --font-sans: Inter, system-ui, sans-serif;                       /* the interface */
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace; /* data, code, eyebrows */
+
+  /* Fixed type scale. Never below 2xs. */
+  --text-2xs: 0.6875rem;   /* 11px - dense mono labels, badges */
+  --text-xs: 0.75rem;      /* 12px - hints, eyebrows, captions */
+  --text-sm: 0.8125rem;    /* 13px - controls, secondary body */
+  --text-base: 0.9375rem;  /* 15px - body, inputs */
+  --text-md: 1.0625rem;    /* 17px - section headings */
+  --text-lg: 1.25rem;      /* 20px - sub-titles */
+  --text-xl: 1.5rem;       /* 24px - minor page titles */
+  --text-2xl: 1.875rem;    /* 30px - page titles */
+  --text-3xl: 2.25rem;     /* 36px - hero / display ceiling */
+
+  /* Spacing scale (4px base). */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+
+  /* Radius scale (--radius is the shadcn base). */
   --radius: 0.75rem;
+  --radius-sm: 0.45rem;
+  --radius-md: 0.6rem;
+  --radius-lg: 0.9rem;
+  --radius-pill: 999px;
+
+  /* Semantic z-index scale. */
+  --z-base: 1;
+  --z-raised: 5;
+  --z-sticky: 20;
+  --z-dropdown: 30;
+  --z-overlay: 40;
+  --z-modal-backdrop: 50;
+  --z-modal: 60;
+  --z-toast: 70;
+  --z-tooltip: 80;
 }

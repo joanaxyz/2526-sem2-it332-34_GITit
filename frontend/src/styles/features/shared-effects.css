@@ -1,0 +1,95 @@
+/* Click ripple spawned by CursorGlow */
+@keyframes cursor-ripple {
+  from {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  to {
+    width: 200px;
+    height: 200px;
+    opacity: 0;
+  }
+}
+
+/* Terminal blinking cursor */
+@keyframes cursor-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* Profile dropdown open animation */
+@keyframes dropdown-in {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+.dropdown-menu {
+  animation: dropdown-in 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: top right;
+}
+
+/* Inline tooltip */
+@keyframes tooltip-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* DAG panel — HEAD node breathing glow */
+@keyframes dag-head-pulse {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 8px rgba(var(--theme-primary-rgb), 0.12),
+      0 0 0 3px rgba(var(--theme-primary-rgb), 0.18),
+      0 0 16px rgba(var(--theme-primary-rgb), 0.3);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 12px rgba(var(--theme-primary-rgb), 0.22),
+      0 0 0 5px rgba(var(--theme-primary-rgb), 0.28),
+      0 0 28px rgba(var(--theme-primary-rgb), 0.52);
+  }
+}
+
+.dag-head-glow {
+  animation: dag-head-pulse 2.8s ease-in-out infinite;
+}
+
+/* Dashboard animated background orbs */
+@keyframes bg-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(30px, -20px) scale(1.06); }
+  66%  { transform: translate(-15px, 25px) scale(0.94); }
+  100% { transform: translate(20px, -10px) scale(1.03); }
+}
+
+/* ============================================================
+   ASSET PORTRAIT — a still first-frame thumbnail of a sprite
+   sheet (see shared/assets/AssetPortrait.tsx). The inline style
+   pins the sheet to frame 0; this only owns the box + shape.
+   ============================================================ */
+.asset-portrait {
+  display: inline-block;
+  flex: none;
+  aspect-ratio: 1 / 1;
+  background-color: rgba(2, 8, 16, 0.4);
+}
+
+/* ============================================================
+   EFFECT PORTRAIT — one representative frame of a skill's
+   battle-effect sheet (see shared/battle/components/
+   EffectPortrait.tsx). The inline style pins the frame; this
+   only owns the box.
+   ============================================================ */
+.effect-portrait {
+  display: inline-block;
+  flex: none;
+  aspect-ratio: 1 / 1;
+}
+
+/* Shared resource meters drain from the leading edge, never from center. */
+.health-bar__fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: left center;
+}

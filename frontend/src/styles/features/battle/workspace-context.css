@@ -1,0 +1,132 @@
+/* The story/context card owns its own internal scroll. If the wrapper scrolls,
+   Chromium reserves scrollbar width outside the card and the context slab stops
+   short of the Project Files panel. */
+.gameplay-panel-scroll {
+  display: grid;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.gameplay-project-region {
+  display: grid;
+}
+
+.gameplay-workspace__main {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  min-height: 0;
+}
+
+.gameplay-pane {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.gameplay-pane > .ui-card,
+.gameplay-panel-scroll > .ui-card,
+.gameplay-project-region > .ui-card {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.gameplay-pane .ui-card-header,
+.gameplay-panel-scroll .ui-card-header,
+.gameplay-project-region .ui-card-header {
+  flex: 0 0 auto;
+  border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.14);
+  padding: 0.74rem 0.88rem;
+  background: rgba(var(--theme-primary-rgb), 0.03);
+}
+
+/* The context body scrolls, but the default thumb is invisible against the
+   dark slab - the story would look hard-clipped mid-line with no cue that the
+   objective and copy details continue below. */
+.gameplay-panel-scroll .ui-card-content {
+  scrollbar-gutter: stable;
+}
+
+
+.gameplay-pane .ui-card-content,
+.gameplay-panel-scroll .ui-card-content,
+.gameplay-project-region .ui-card-content {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 0.75rem;
+}
+
+.gameplay-pane .react-flow {
+  width: 100%;
+  height: 100%;
+}
+
+/* The DAG owns its own pan/zoom - an outer scrollbar is never meaningful. */
+.gameplay-pane .ui-card-content:has(.react-flow) {
+  overflow: hidden;
+  padding: 0;
+}
+
+.challenge-diagram-grid {
+  position: relative; /* anchors the node legend */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  min-height: 11rem;
+}
+
+.challenge-diagram-grid.has-target {
+  grid-template-columns: minmax(0, var(--live-dag-size, 1fr)) 0.375rem minmax(0, var(--expected-dag-size, 1fr));
+}
+
+.gameplay-terminal-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 9rem;
+}
+
+.gameplay-terminal-grid.has-feedback {
+  grid-template-columns: minmax(0, var(--terminal-pane-size, 0.6fr)) 0.375rem minmax(17rem, var(--feedback-pane-size, 0.4fr));
+}
+
+.gameplay-resize {
+  position: relative;
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.gameplay-resize::before {
+  content: '';
+  position: absolute;
+  background: rgba(var(--theme-primary-rgb), 0.24);
+  box-shadow: 0 0 10px rgba(var(--theme-primary-rgb), 0.18);
+}
+
+.gameplay-resize--vertical {
+  cursor: col-resize;
+}
+
+.gameplay-resize--vertical::before {
+  top: 0.4rem;
+  bottom: 0.4rem;
+  left: 50%;
+  width: 1px;
+}
+
+.gameplay-resize--horizontal {
+  cursor: row-resize;
+}
+
+.gameplay-resize--horizontal::before {
+  right: 0.4rem;
+  left: 0.4rem;
+  top: 50%;
+  height: 1px;
+}

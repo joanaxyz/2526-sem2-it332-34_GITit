@@ -1,0 +1,58 @@
+{
+  "front": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      11,
+      87,
+      1269,
+      1263
+    ],
+    "frameBBoxCenterRange": [
+      99.5,
+      157.5,
+      146.5,
+      165.0
+    ],
+    "frameEnergyAnchorRange": [
+      94.99,
+      149.47,
+      152.85,
+      174.11
+    ],
+    "frameRegistrationAnchorRange": [
+      94.99,
+      149.47,
+      152.85,
+      174.11
+    ],
+    "registration": {
+      "targetAnchor": [
+        116,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        76,
+        142,
+        149,
+        207
+      ],
+      "appliedShiftRange": [
+        -26,
+        40,
+        13,
+        71
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 17,
+      "lowConfidenceFrames": 8,
+      "method": "feet-planted base on ground line (fit scale 1.000), core-x centred"
+    }
+  }
+}

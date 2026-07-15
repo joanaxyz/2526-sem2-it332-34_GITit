@@ -1,0 +1,451 @@
+/* GIT-IT map build loader */
+.git-it-build-loader {
+  --build-cyan: 45, 245, 255;
+  --build-blue: var(--theme-rail-rgb);
+  --build-purple: var(--theme-challenge-rgb);
+
+  position: relative;
+  display: grid;
+  width: min(22rem, 82vw);
+  height: 20rem;
+  place-items: center;
+  filter:
+    drop-shadow(0 0 24px rgba(var(--build-cyan), 0.24))
+    drop-shadow(0 18px 42px rgba(0, 0, 0, 0.42));
+}
+
+.git-it-build-loader--small {
+  width: 15rem;
+  height: 14rem;
+}
+
+.git-it-build-loader--compact {
+  width: 10rem;
+  height: 9rem;
+}
+
+.git-it-build-loader::before {
+  content: '';
+  position: absolute;
+  inset: 18% 10% 8%;
+  z-index: -1;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 68%, rgba(var(--build-cyan), 0.22), transparent 34%),
+    radial-gradient(circle at 38% 42%, rgba(var(--build-blue), 0.16), transparent 34%),
+    radial-gradient(circle at 62% 34%, rgba(var(--build-purple), 0.12), transparent 38%);
+  filter: blur(18px);
+  animation: git-it-build-aura 2.8s ease-in-out infinite;
+}
+
+.git-it-build-map {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: end;
+  width: 13.5rem;
+  height: 18rem;
+}
+
+.git-it-build-roof,
+.git-it-build-chapter,
+.git-it-build-roof-spire,
+.git-it-build-window,
+.git-it-build-door,
+.git-it-build-brick,
+.git-it-build-block {
+  position: relative;
+  display: block;
+}
+
+.git-it-build-roof {
+  z-index: 5;
+  width: 11.2rem;
+  height: 4.2rem;
+  margin-bottom: -0.08rem;
+  border: 2px solid rgba(var(--build-cyan), 0.92);
+  background:
+    radial-gradient(80% 80% at 50% 8%, rgba(var(--build-purple), 0.22), transparent 62%),
+    linear-gradient(180deg, rgba(16, 38, 72, 0.98), rgba(5, 16, 34, 0.98));
+  clip-path: polygon(50% 0, 91% 68%, 100% 68%, 94% 100%, 6% 100%, 0 68%, 9% 68%);
+  box-shadow:
+    0 0 18px rgba(var(--build-cyan), 0.28),
+    inset 0 -1rem 1.4rem rgba(0, 0, 0, 0.28);
+  animation: git-it-build-drop 1.8s cubic-bezier(0.2, 1.38, 0.32, 1) infinite;
+  animation-delay: 0.72s;
+}
+
+.git-it-build-roof-spire {
+  position: absolute;
+  left: 50%;
+  bottom: 16.3rem;
+  z-index: 6;
+  width: 2px;
+  height: 2.6rem;
+  transform: translateX(-50%);
+  background: rgba(var(--build-cyan), 0.94);
+  box-shadow: 0 0 12px rgba(var(--build-cyan), 0.44);
+  opacity: 0;
+  /* Crowns the structure last — drops in after the roof lands. */
+  animation: git-it-build-spire-fall 3.4s cubic-bezier(0.2, 1.38, 0.32, 1) infinite both;
+  animation-delay: 1.3s;
+}
+
+.git-it-build-roof-spire::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -0.74rem;
+  width: 0.9rem;
+  height: 0.9rem;
+  transform: translateX(-50%) rotate(45deg);
+  border: 2px solid rgba(var(--build-cyan), 0.9);
+  background: rgba(8, 27, 47, 0.96);
+}
+
+.git-it-build-chapter {
+  border: 2px solid rgba(var(--build-cyan), 0.9);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04), transparent 12% 88%, rgba(255, 255, 255, 0.035)),
+    linear-gradient(180deg, rgba(9, 31, 52, 0.98), rgba(4, 16, 31, 0.99));
+  box-shadow:
+    0 0 18px rgba(var(--build-cyan), 0.2),
+    inset 0 -1rem 1.6rem rgba(0, 0, 0, 0.2);
+}
+
+.git-it-build-chapter--top {
+  z-index: 4;
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  width: 10.2rem;
+  height: 4.1rem;
+  padding-top: 0.72rem;
+  animation: git-it-build-drop 1.8s cubic-bezier(0.2, 1.38, 0.32, 1) infinite;
+  animation-delay: 0.48s;
+}
+
+.git-it-build-chapter--mid {
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 1fr 1fr 2.2rem 1fr;
+  align-items: end;
+  gap: 0.42rem;
+  width: 11.4rem;
+  height: 5.1rem;
+  padding: 0.72rem 0.8rem 0;
+  animation: git-it-build-drop 1.8s cubic-bezier(0.2, 1.38, 0.32, 1) infinite;
+  animation-delay: 0.24s;
+}
+
+.git-it-build-chapter--base {
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.42rem;
+  width: 12.6rem;
+  height: 3.6rem;
+  padding: 0.72rem;
+  animation: git-it-build-drop 1.8s cubic-bezier(0.2, 1.38, 0.32, 1) infinite;
+}
+
+.git-it-build-window {
+  width: 1.45rem;
+  height: 2.35rem;
+  border: 2px solid rgba(var(--build-cyan), 0.88);
+  border-radius: 1rem 1rem 0.1rem 0.1rem;
+  background:
+    radial-gradient(90% 80% at 50% 100%, rgba(255, 209, 130, 0.68), rgba(255, 176, 84, 0.2) 48%, rgba(2, 12, 24, 0.96) 84%);
+  box-shadow:
+    0 0 12px rgba(255, 196, 107, 0.24),
+    inset 0 0 10px rgba(var(--build-cyan), 0.12);
+  animation: git-it-build-window-flicker 1.8s ease-in-out infinite;
+}
+
+.git-it-build-door {
+  height: 3.6rem;
+  border: 2px solid rgba(var(--build-cyan), 0.9);
+  border-radius: 1.1rem 1.1rem 0.08rem 0.08rem;
+  background:
+    radial-gradient(110% 72% at 50% 100%, rgba(255, 209, 130, 0.52), rgba(255, 176, 84, 0.14) 48%, rgba(2, 12, 24, 0.96) 84%);
+  box-shadow: inset 0 0 12px rgba(var(--build-cyan), 0.14);
+}
+
+.git-it-build-brick,
+.git-it-build-block {
+  height: 1rem;
+  border: 1.5px solid rgba(var(--build-cyan), 0.64);
+  background: rgba(4, 18, 34, 0.92);
+  box-shadow: inset 0 0 8px rgba(var(--build-blue), 0.12);
+  animation: git-it-build-brick-pop 1.8s cubic-bezier(0.2, 1.6, 0.32, 1) infinite;
+}
+
+.git-it-build-brick--a { animation-delay: 0.28s; }
+.git-it-build-brick--b { animation-delay: 0.36s; }
+.git-it-build-brick--c { animation-delay: 0.44s; }
+
+.git-it-build-block--1 { animation-delay: 0s; }
+.git-it-build-block--2 { animation-delay: 0.08s; }
+.git-it-build-block--3 { animation-delay: 0.16s; }
+.git-it-build-block--4 { animation-delay: 0.24s; }
+
+.git-it-build-spark {
+  position: absolute;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: rgba(var(--build-cyan), 0.92);
+  box-shadow:
+    0 0 10px rgba(var(--build-cyan), 0.8),
+    0 0 20px rgba(var(--build-blue), 0.42);
+  opacity: 0;
+  animation: git-it-build-spark-rise 1.8s ease-out infinite;
+}
+
+.git-it-build-spark--a {
+  left: 1.7rem;
+  bottom: 4.5rem;
+  animation-delay: 0.12s;
+}
+
+.git-it-build-spark--b {
+  right: 1.3rem;
+  bottom: 7.6rem;
+  animation-delay: 0.42s;
+}
+
+.git-it-build-spark--c {
+  left: 50%;
+  bottom: 12rem;
+  animation-delay: 0.76s;
+}
+
+/* Start every map piece invisible. No pre-built map flash. */
+.git-it-build-roof,
+.git-it-build-chapter,
+.git-it-build-window,
+.git-it-build-door,
+.git-it-build-brick,
+.git-it-build-block {
+  opacity: 0;
+  transform: translateY(-6rem) scale(0.92);
+}
+
+/* Main chunks fall in from bottom to top */
+.git-it-build-chapter--base {
+  animation: git-it-build-piece-fall 3.4s cubic-bezier(0.18, 0.92, 0.24, 1.18) infinite both;
+  animation-delay: 0s;
+}
+
+.git-it-build-chapter--mid {
+  animation: git-it-build-piece-fall 3.4s cubic-bezier(0.18, 0.92, 0.24, 1.18) infinite both;
+  animation-delay: 0.34s;
+}
+
+.git-it-build-chapter--top {
+  animation: git-it-build-piece-fall 3.4s cubic-bezier(0.18, 0.92, 0.24, 1.18) infinite both;
+  animation-delay: 0.68s;
+}
+
+.git-it-build-roof {
+  animation: git-it-build-piece-fall 3.4s cubic-bezier(0.18, 0.92, 0.24, 1.18) infinite both;
+  animation-delay: 1.02s;
+}
+
+/* Small blocks fall/pop after their parent chunk appears */
+.git-it-build-block,
+.git-it-build-brick {
+  animation: git-it-build-small-piece-fall 3.4s cubic-bezier(0.16, 1.35, 0.28, 1.08) infinite both;
+}
+
+.git-it-build-block--1 { animation-delay: 0.08s; }
+.git-it-build-block--2 { animation-delay: 0.16s; }
+.git-it-build-block--3 { animation-delay: 0.24s; }
+.git-it-build-block--4 { animation-delay: 0.32s; }
+
+.git-it-build-brick--a { animation-delay: 0.48s; }
+.git-it-build-brick--b { animation-delay: 0.58s; }
+.git-it-build-brick--c { animation-delay: 0.68s; }
+
+.git-it-build-door {
+  animation: git-it-build-door-drop 3.4s cubic-bezier(0.18, 0.92, 0.24, 1.18) infinite both;
+  animation-delay: 0.72s;
+}
+
+.git-it-build-window {
+  animation:
+    git-it-build-small-piece-fall 3.4s cubic-bezier(0.16, 1.35, 0.28, 1.08) infinite both,
+    git-it-build-window-flicker 1.6s ease-in-out infinite;
+}
+
+.git-it-build-window:nth-child(1) { animation-delay: 0.86s, 1.22s; }
+.git-it-build-window:nth-child(2) { animation-delay: 0.96s, 1.32s; }
+.git-it-build-window:nth-child(3) { animation-delay: 1.06s, 1.42s; }
+
+.git-it-build-spark {
+  animation: git-it-build-spark-rise 3.4s ease-out infinite both;
+}
+
+.git-it-build-spark--a { animation-delay: 0.34s; }
+.git-it-build-spark--b { animation-delay: 0.72s; }
+.git-it-build-spark--c { animation-delay: 1.08s; }
+
+@keyframes git-it-build-piece-fall {
+  0%, 8% {
+    opacity: 0;
+    transform: translateY(-7.5rem) scale(0.9);
+  }
+
+  18% {
+    opacity: 1;
+    transform: translateY(0.52rem) scale(1.045);
+  }
+
+  24% {
+    opacity: 1;
+    transform: translateY(-0.24rem) scale(0.985);
+  }
+
+  31% {
+    opacity: 1;
+    transform: translateY(0.08rem) scale(1.01);
+  }
+
+  38%, 76% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  86% {
+    opacity: 1;
+    transform: translateY(0.18rem) scale(0.995);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(1.6rem) scale(0.94);
+  }
+}
+
+@keyframes git-it-build-spire-fall {
+  0%, 10% {
+    opacity: 0;
+    transform: translate(-50%, -5rem) scale(0.6);
+  }
+
+  22% {
+    opacity: 1;
+    transform: translate(-50%, 0.34rem) scale(1.06);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translate(-50%, -0.16rem) scale(0.98);
+  }
+
+  38%, 80% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 0.9rem) scale(0.9);
+  }
+}
+
+@keyframes git-it-build-small-piece-fall {
+  0%, 10% {
+    opacity: 0;
+    transform: translateY(-4.5rem) rotate(-6deg) scale(0.72);
+  }
+
+  20% {
+    opacity: 1;
+    transform: translateY(0.36rem) rotate(3deg) scale(1.16);
+  }
+
+  27% {
+    opacity: 1;
+    transform: translateY(-0.16rem) rotate(-1deg) scale(0.96);
+  }
+
+  35%, 76% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(1.2rem) rotate(4deg) scale(0.78);
+  }
+}
+
+@keyframes git-it-build-door-drop {
+  0%, 16% {
+    opacity: 0;
+    transform: translateY(-4rem) scale(0.78);
+  }
+
+  26% {
+    opacity: 1;
+    transform: translateY(0.28rem) scale(1.08);
+  }
+
+  34%, 76% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(1.1rem) scale(0.82);
+  }
+}
+
+@keyframes git-it-build-window-flicker {
+  0%, 100% {
+    filter: brightness(0.92);
+  }
+
+  50% {
+    filter: brightness(1.22);
+  }
+}
+
+@keyframes git-it-build-spark-rise {
+  0%, 18% {
+    opacity: 0;
+    transform: translateY(0) scale(0.5);
+  }
+
+  32% {
+    opacity: 1;
+    transform: translateY(-0.45rem) scale(1);
+  }
+
+  64% {
+    opacity: 0.6;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-3rem) scale(0.12);
+  }
+}
+@keyframes git-it-build-aura {
+  0%, 100% {
+    opacity: 0.48;
+    transform: scale(0.96);
+  }
+
+  50% {
+    opacity: 0.95;
+    transform: scale(1.08);
+  }
+}
+/* Aurora utility classes */
+.animate-fade-in-up {
+  animation: fade-in-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+

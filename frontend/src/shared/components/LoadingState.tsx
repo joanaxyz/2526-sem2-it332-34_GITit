@@ -1,7 +1,5 @@
 import { cn } from '@/shared/utils/cn'
 
-const LOADING_MARK = Array.from('GIT IT..')
-
 const containerClass = {
   screen: 'min-h-screen bg-background p-4',
   page: 'min-h-[calc(100vh-8rem)] p-4',
@@ -11,22 +9,59 @@ const containerClass = {
 } as const
 
 const frameClass = {
-  screen: 'gap-4 rounded-md border border-primary/20 bg-card/85 p-7 shadow-[0_22px_80px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(0,245,212,0.16)]',
-  page: 'gap-4 rounded-md border border-primary/20 bg-card/85 p-7 shadow-[0_18px_70px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(0,245,212,0.16)]',
-  panel: 'gap-4 rounded-md border border-primary/20 bg-card/75 p-6 shadow-[inset_0_1px_0_rgba(0,245,212,0.14)]',
-  inline: 'gap-3',
-  compact: 'gap-2',
-} as const
-
-const markSizeClass = {
-  screen: 'text-4xl',
-  page: 'text-4xl',
-  panel: 'text-3xl',
-  inline: 'text-2xl',
-  compact: 'text-lg',
+  screen: 'gap-5 p-0',
+  page: 'gap-5 p-0',
+  panel: 'gap-4 p-0',
+  inline: 'gap-3 p-0',
+  compact: 'gap-2 p-0',
 } as const
 
 type LoadingStateVariant = keyof typeof containerClass
+
+function MapBuildLoader({ variant }: { variant: LoadingStateVariant }) {
+  const isSmall = variant === 'inline' || variant === 'compact'
+
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        'git-it-build-loader',
+        isSmall && 'git-it-build-loader--small',
+        variant === 'compact' && 'git-it-build-loader--compact',
+      )}
+    >
+      <div className="git-it-build-map">
+        <span className="git-it-build-roof-spire" />
+
+        <div className="git-it-build-roof" />
+
+        <div className="git-it-build-chapter git-it-build-chapter--top">
+          <span className="git-it-build-window" />
+          <span className="git-it-build-window" />
+          <span className="git-it-build-window" />
+        </div>
+
+        <div className="git-it-build-chapter git-it-build-chapter--mid">
+          <span className="git-it-build-brick git-it-build-brick--a" />
+          <span className="git-it-build-brick git-it-build-brick--b" />
+          <span className="git-it-build-door" />
+          <span className="git-it-build-brick git-it-build-brick--c" />
+        </div>
+
+        <div className="git-it-build-chapter git-it-build-chapter--base">
+          <span className="git-it-build-block git-it-build-block--1" />
+          <span className="git-it-build-block git-it-build-block--2" />
+          <span className="git-it-build-block git-it-build-block--3" />
+          <span className="git-it-build-block git-it-build-block--4" />
+        </div>
+
+        <span className="git-it-build-spark git-it-build-spark--a" />
+        <span className="git-it-build-spark git-it-build-spark--b" />
+        <span className="git-it-build-spark git-it-build-spark--c" />
+      </div>
+    </div>
+  )
+}
 
 export function LoadingState({
   label = 'Loading',
@@ -52,40 +87,9 @@ export function LoadingState({
       )}
       role="status"
     >
-      {variant !== 'inline' && variant !== 'compact' ? (
-        <div aria-hidden="true" className="git-it-loading-grid absolute inset-0 opacity-55" />
-      ) : null}
       <div className={cn('relative flex w-full max-w-md flex-col items-center', frameClass[variant])}>
-        <div
-          aria-hidden="true"
-          className={cn(
-            'flex items-end justify-center gap-1 font-mono font-extrabold leading-none text-primary',
-            markSizeClass[variant],
-          )}
-        >
-          {LOADING_MARK.map((letter, index) =>
-            letter === ' ' ? (
-              <span className="w-2" key={`space-${index}`} />
-            ) : (
-              <span
-                className="git-it-loading-letter"
-                key={`${letter}-${index}`}
-                style={{ animationDelay: `${index * 80}ms` }}
-              >
-                {letter}
-              </span>
-            ),
-          )}
-        </div>
-        <div
-          aria-hidden="true"
-          className={cn(
-            'overflow-hidden rounded-full border border-primary/20 bg-secondary/70',
-            isCompact ? 'h-1 w-28' : 'h-1.5 w-48',
-          )}
-        >
-          <span className="git-it-loading-meter block h-full rounded-full bg-gradient-to-r from-primary via-accent to-foreground" />
-        </div>
+        <MapBuildLoader variant={variant} />
+
         <div className={cn('grid gap-1', isCompact ? 'text-xs' : 'text-sm')}>
           <p className="font-semibold text-foreground">{label}</p>
           {description ? (

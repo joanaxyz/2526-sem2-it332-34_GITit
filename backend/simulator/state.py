@@ -40,6 +40,12 @@ class RepositoryStateNormalizer:
     ``changes`` when they are present or can be inferred.
     """
 
+    # Must cover every key RepositorySnapshotService.snapshot_for_command emits.
+    # API responses fill these defaults into the client's copy of the state, so
+    # normalization has to fill the same set: otherwise a stored initial_state
+    # that omits a key (e.g. config) and a client next_state that round-tripped
+    # through a snapshot (config: {}) normalize to different shapes, and the
+    # transition verifier falsely rejects the first mutating command of a run.
     TOP_LEVEL_DEFAULTS = {
         "repository_initialized": True,
         "commits": list,
@@ -52,15 +58,32 @@ class RepositoryStateNormalizer:
         "remotes": dict,
         "remote_branches": dict,
         "upstream_tracking": dict,
+        "tags": dict,
+        "remote_tags": dict,
         "stash_stack": list,
         "reflog": list,
         "partial_hunks": dict,
         "replaced_commits": dict,
         "operation_metadata": dict,
+        "config": dict,
+        "remote_fixtures": dict,
+        "remote_updates": dict,
+        "merge_abort_state": dict,
+        "merge_parent": None,
+        "merge_conflicts": dict,
+        "merge_resolutions": dict,
+        "conflict_on_merge": False,
+        "conflict_files": list,
+        "merge_conflict_files": list,
+        "cherry_pick_in_progress": False,
+        "cherry_pick_original_head": None,
+        "rebase_state": dict,
     }
 
     def normalize(self, state: dict | None) -> dict:
         normalized = copy.deepcopy(state or {})
+        normalized.pop("project_tree", None)
+        normalized.pop("visible_tree", None)
         self.ensure_shape(normalized)
         self.normalize_commits(normalized)
         self.normalize_head(normalized)
@@ -88,6 +111,10 @@ class RepositoryStateNormalizer:
             commit.setdefault("id", f"c{index}")
             commit.setdefault("message", commit["id"])
             commit.setdefault("parents", [])
+            # The browser engine stamps `order` on every commit; mirror it so an
+            # authored initial state and a replayed target state stay byte-equal
+            # (read-only scenarios assert `repository_state_unchanged`).
+            commit.setdefault("order", index)
 
             parent_tree = self.parent_tree(commit, commits_by_id)
             tree_was_authored = isinstance(commit.get("tree"), dict)

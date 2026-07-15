@@ -1,0 +1,142 @@
+/* IDE-like project tree controls inside the practice workspace. */
+.project-tree-node {
+  min-height: 1.55rem;
+}
+
+.project-tree-node-label {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.project-tree-node-label:focus-visible,
+.project-tree-action:focus-visible,
+.project-tree-menu__item:focus-visible {
+  outline: none;
+  box-shadow: var(--control-focus-ring);
+}
+
+.project-tree-action {
+  opacity: 0.62;
+  transition:
+    background-color var(--motion-fast) var(--ease-out),
+    color var(--motion-fast) var(--ease-out),
+    opacity var(--motion-fast) var(--ease-out);
+}
+
+.project-tree-node:not(:hover, :focus-within) .project-tree-action {
+  opacity: 0;
+}
+
+.project-tree-inline {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: 0.18rem;
+}
+
+.project-tree-inline__input {
+  width: 100%;
+  min-width: 0;
+  height: 1.35rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.48);
+  border-radius: var(--radius-sm);
+  padding: 0 0.35rem;
+  background: rgba(2, 8, 18, 0.88);
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1;
+  outline: none;
+}
+
+.project-tree-inline__input:focus {
+  border-color: rgba(var(--theme-primary-rgb), 0.78);
+  box-shadow: 0 0 0 2px rgba(var(--theme-primary-rgb), 0.18);
+}
+
+.project-tree-inline__error,
+.project-tree-panel-error {
+  color: hsl(var(--destructive));
+  font-size: var(--text-2xs);
+  line-height: 1.25;
+}
+
+.project-tree-draft-row {
+  display: flex;
+  align-items: start;
+  gap: 0.38rem;
+  min-height: 1.7rem;
+  padding: 0.12rem 0.25rem;
+  color: hsl(var(--foreground));
+}
+
+.project-tree-panel-error {
+  margin: 0.4rem 0.25rem 0;
+  border: 1px solid hsl(var(--destructive) / 0.28);
+  border-radius: var(--radius-sm);
+  padding: 0.38rem 0.5rem;
+  background: hsl(var(--destructive) / 0.1);
+}
+
+.project-tree-menu {
+  position: fixed;
+  z-index: var(--z-dropdown);
+  min-width: 10rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.28);
+  border-radius: var(--radius-md);
+  padding: 0.24rem;
+  background:
+    linear-gradient(180deg, rgba(9, 25, 50, 0.98), rgba(3, 10, 24, 0.98)),
+    hsl(var(--background));
+  box-shadow: var(--shadow-overlay);
+}
+
+.project-tree-menu__item {
+  display: flex;
+  width: 100%;
+  min-height: 1.9rem;
+  align-items: center;
+  gap: 0.46rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: 0.34rem 0.5rem;
+  background: transparent;
+  color: hsl(var(--foreground) / 0.86);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: 1.2;
+  text-align: left;
+}
+
+.project-tree-menu__item:hover:not(:disabled) {
+  background: rgba(var(--theme-primary-rgb), 0.1);
+  color: hsl(var(--foreground));
+}
+
+.project-tree-menu__item:disabled {
+  cursor: not-allowed;
+  opacity: 0.46;
+}
+
+.project-tree-menu__item.is-danger {
+  color: hsl(var(--destructive));
+}
+
+.project-tree-menu__item.is-danger:hover:not(:disabled) {
+  background: hsl(var(--destructive) / 0.1);
+}
+
+.project-tree-menu__item svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex: 0 0 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-tree-action {
+    transition: none;
+  }
+}

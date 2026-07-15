@@ -1,0 +1,117 @@
+/* ── Battle stage frame & lanes (bespoke; no arbitrary-value utilities) ───── */
+
+.battle-stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid hsl(var(--primary) / 0.2);
+  border-radius: 8px;
+}
+
+.battle-arena {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100%;
+  transform: translateX(-50%);
+}
+
+.battle-arena--boss {
+  max-width: none;
+}
+
+.battle-arena--pack {
+  max-width: none;
+}
+
+.battle-effect-layer,
+.battle-camera {
+  position: absolute;
+  inset: 0;
+}
+
+.battle-effect-layer {
+  pointer-events: none;
+}
+
+.battle-effect-layer--back {
+  z-index: var(--z-raised);
+}
+
+.battle-camera {
+  z-index: calc(var(--z-raised) + 5);
+  will-change: transform;
+}
+
+.battle-effect-layer--front {
+  z-index: calc(var(--z-sticky) + 2);
+}
+
+.battle-landing-rail {
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  z-index: var(--z-raised);
+  transform: translateX(-50%);
+}
+
+.battle-player-slot {
+  position: absolute;
+  bottom: 0;
+  left: 15%;
+  transform: translateX(-50%);
+}
+
+.battle-landing-rail--boss {
+  width: 100%;
+  max-width: none;
+}
+
+.battle-landing-rail--pack {
+  width: 100%;
+  max-width: none;
+}
+
+.battle-center-overlay {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 28;
+  display: grid;
+  place-items: center;
+  padding-inline: 1rem;
+}
+
+/* The stage's own eyebrow, pinned inside the arena's top-left. */
+.battle-stage-label {
+  position: absolute;
+  top: 0.65rem;
+  left: 0.8rem;
+  z-index: var(--z-sticky);
+  pointer-events: none;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.battle-corner-overlay {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: var(--z-sticky);
+}
+
+.battle-ground-footer {
+  position: absolute;
+  inset-inline: 1rem;
+  bottom: 0.75rem;
+  z-index: calc(var(--z-sticky) + 5);
+}
+
+.battle-defeated-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(1px);
+  transition: opacity 160ms ease;
+}

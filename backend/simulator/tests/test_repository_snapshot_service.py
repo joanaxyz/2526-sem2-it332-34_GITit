@@ -103,3 +103,30 @@ def test_repository_snapshot_includes_conflict_details():
         "merged": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n",
         "merge_branch": "feature/auth-timeout",
     }
+
+
+def test_snapshot_round_trip_normalizes_identical_to_raw_state():
+    # API responses carry snapshot_for_command output, and the browser submits
+    # its mutation of THAT copy back as execution.next_state. If snapshotting
+    # fills default-empty keys (config, merge_*, rebase_state, ...) that a
+    # stored initial_state omits, normalization must erase the difference -
+    # otherwise the transition verifier falsely rejects the first mutating
+    # command of every fresh run ("cannot change config for this command").
+    from simulator.services import RepositoryStateSimulator
+
+    tools = RepositoryStateSimulator()
+    snapshotter = RepositorySnapshotService()
+    # Same minimal shape spec_helpers.repo() persists for seeded variants.
+    raw = {
+        "repository_initialized": True,
+        "commits": [{"id": "c0", "message": "Initial", "parents": [], "tree": {"README.md": "notes"}}],
+        "branches": {"main": "c0"},
+        "head": {"type": "branch", "name": "main"},
+        "working_tree": {"README.md": {"status": "modified", "content": "notes v2"}},
+        "staging": {},
+        "conflicts": [],
+    }
+
+    raw_hash = tools.state_hash(raw)
+    assert tools.state_hash(snapshotter.snapshot(raw)) == raw_hash
+    assert tools.state_hash(snapshotter.snapshot_for_command(raw)) == raw_hash

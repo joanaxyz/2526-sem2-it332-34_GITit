@@ -1,0 +1,1568 @@
+{
+  "blue": [
+    {
+      "family": "init",
+      "command": "git init",
+      "tint": "cyan",
+      "playback": "projectile",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/init.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "motion": "gather-orb-projectile-impact-dissipate",
+      "launchStartFrame": 10,
+      "impactStartFrame": 15
+    },
+    {
+      "family": "clone",
+      "command": "git clone",
+      "tint": "azure",
+      "playback": "projectile",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/clone.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 15
+    },
+    {
+      "family": "config",
+      "command": "git config",
+      "tint": "indigo",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/config.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "status",
+      "command": "git status",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/status.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "log",
+      "command": "git log",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/log.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "show",
+      "command": "git show",
+      "tint": "azure",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/show.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "diff",
+      "command": "git diff",
+      "tint": "cyan",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/diff.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 15
+    },
+    {
+      "family": "add",
+      "command": "git add",
+      "tint": "cyan",
+      "playback": "projectile",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/add.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "motion": "gather-orb-projectile-impact-dissipate",
+      "launchStartFrame": 3,
+      "impactStartFrame": 16
+    },
+    {
+      "family": "commit",
+      "command": "git commit",
+      "tint": "azure",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/commit.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "rm",
+      "command": "git rm",
+      "tint": "steel",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/rm.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 16
+    },
+    {
+      "family": "restore",
+      "command": "git restore",
+      "tint": "cyan",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/restore.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "reset",
+      "command": "git reset",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/reset.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "revert",
+      "command": "git revert",
+      "tint": "indigo",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/revert.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "stash",
+      "command": "git stash",
+      "tint": "violet",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/stash.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 15
+    },
+    {
+      "family": "branch",
+      "command": "git branch",
+      "tint": "cyan",
+      "playback": "projectile",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/branch.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 19
+    },
+    {
+      "family": "switch",
+      "command": "git switch",
+      "tint": "cyan",
+      "playback": "ground",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/switch.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "checkout",
+      "command": "git checkout",
+      "tint": "steel",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/checkout.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 16
+    },
+    {
+      "family": "merge",
+      "command": "git merge",
+      "tint": "cyan",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/merge.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 20
+    },
+    {
+      "family": "merge-base",
+      "command": "git merge-base",
+      "tint": "indigo",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/merge-base.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "rebase",
+      "command": "git rebase",
+      "tint": "indigo",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/rebase.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "cherry-pick",
+      "command": "git cherry-pick",
+      "tint": "azure",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/cherry-pick.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "reflog",
+      "command": "git reflog",
+      "tint": "violet",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/reflog.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 16
+    },
+    {
+      "family": "check-ignore",
+      "command": "git check-ignore",
+      "tint": "ash",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/check-ignore.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "ls-files",
+      "command": "git ls-files",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/ls-files.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "checkout-conflict",
+      "command": "git checkout",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/checkout-conflict.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "diff-conflict",
+      "command": "git diff",
+      "tint": "cyan",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/diff-conflict.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "mergetool",
+      "command": "git mergetool",
+      "tint": "azure",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/mergetool.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "remote",
+      "command": "git remote",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/remote.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "fetch",
+      "command": "git fetch",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/fetch.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "pull",
+      "command": "git pull",
+      "tint": "azure",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/pull.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "push",
+      "command": "git push",
+      "tint": "steel",
+      "playback": "ground",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/push.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    }
+  ],
+  "white": [
+    {
+      "family": "init",
+      "command": "git init",
+      "tint": "azure",
+      "playback": "projectile",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/init.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "motion": "gather-orb-projectile-impact-dissipate",
+      "launchStartFrame": 10,
+      "impactStartFrame": 15
+    },
+    {
+      "family": "clone",
+      "command": "git clone",
+      "tint": "azure",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/clone.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 15
+    },
+    {
+      "family": "config",
+      "command": "git config",
+      "tint": "indigo",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/config.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "status",
+      "command": "git status",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/status.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "log",
+      "command": "git log",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/log.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "show",
+      "command": "git show",
+      "tint": "azure",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/show.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "diff",
+      "command": "git diff",
+      "tint": "cyan",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/diff.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 20
+    },
+    {
+      "family": "add",
+      "command": "git add",
+      "tint": "cyan",
+      "playback": "projectile",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/add.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "motion": "gather-orb-projectile-impact-dissipate",
+      "launchStartFrame": 10,
+      "impactStartFrame": 15
+    },
+    {
+      "family": "commit",
+      "command": "git commit",
+      "tint": "azure",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/commit.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "rm",
+      "command": "git rm",
+      "tint": "steel",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/rm.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 16
+    },
+    {
+      "family": "restore",
+      "command": "git restore",
+      "tint": "cyan",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/restore.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "reset",
+      "command": "git reset",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/reset.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "revert",
+      "command": "git revert",
+      "tint": "indigo",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/revert.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "stash",
+      "command": "git stash",
+      "tint": "violet",
+      "playback": "projectile",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/stash.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 13
+    },
+    {
+      "family": "branch",
+      "command": "git branch",
+      "tint": "cyan",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/branch.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 17
+    },
+    {
+      "family": "switch",
+      "command": "git switch",
+      "tint": "cyan",
+      "playback": "ground",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/switch.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "checkout",
+      "command": "git checkout",
+      "tint": "steel",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/checkout.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 20
+    },
+    {
+      "family": "merge",
+      "command": "git merge",
+      "tint": "cyan",
+      "playback": "projectile",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/merge.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 18
+    },
+    {
+      "family": "merge-base",
+      "command": "git merge-base",
+      "tint": "indigo",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/merge-base.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "rebase",
+      "command": "git rebase",
+      "tint": "indigo",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/rebase.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "cherry-pick",
+      "command": "git cherry-pick",
+      "tint": "azure",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/cherry-pick.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "reflog",
+      "command": "git reflog",
+      "tint": "violet",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/reflog.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 16
+    },
+    {
+      "family": "check-ignore",
+      "command": "git check-ignore",
+      "tint": "ash",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/check-ignore.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "ls-files",
+      "command": "git ls-files",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/ls-files.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "checkout-conflict",
+      "command": "git checkout",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/checkout-conflict.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "diff-conflict",
+      "command": "git diff",
+      "tint": "cyan",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/diff-conflict.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "mergetool",
+      "command": "git mergetool",
+      "tint": "azure",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/mergetool.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "remote",
+      "command": "git remote",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/remote.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "fetch",
+      "command": "git fetch",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/fetch.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "pull",
+      "command": "git pull",
+      "tint": "azure",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/pull.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "push",
+      "command": "git push",
+      "tint": "steel",
+      "playback": "ground",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/push.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    }
+  ],
+  "black": [
+    {
+      "family": "init",
+      "command": "git init",
+      "tint": "violet",
+      "playback": "projectile",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/init.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "motion": "gather-orb-projectile-impact-dissipate",
+      "launchStartFrame": 8,
+      "impactStartFrame": 14
+    },
+    {
+      "family": "clone",
+      "command": "git clone",
+      "tint": "azure",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/clone.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 15
+    },
+    {
+      "family": "config",
+      "command": "git config",
+      "tint": "indigo",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/config.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "status",
+      "command": "git status",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/status.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "log",
+      "command": "git log",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/log.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "show",
+      "command": "git show",
+      "tint": "azure",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/show.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "diff",
+      "command": "git diff",
+      "tint": "cyan",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/diff.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 14
+    },
+    {
+      "family": "add",
+      "command": "git add",
+      "tint": "cyan",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/add.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "motion": "gather-orb-projectile-impact-dissipate",
+      "launchStartFrame": 3,
+      "impactStartFrame": 18
+    },
+    {
+      "family": "commit",
+      "command": "git commit",
+      "tint": "azure",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/commit.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "rm",
+      "command": "git rm",
+      "tint": "steel",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/rm.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 17
+    },
+    {
+      "family": "restore",
+      "command": "git restore",
+      "tint": "cyan",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/restore.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "reset",
+      "command": "git reset",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/reset.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "revert",
+      "command": "git revert",
+      "tint": "indigo",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/revert.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "stash",
+      "command": "git stash",
+      "tint": "violet",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/stash.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 15
+    },
+    {
+      "family": "branch",
+      "command": "git branch",
+      "tint": "cyan",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/branch.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 19
+    },
+    {
+      "family": "switch",
+      "command": "git switch",
+      "tint": "cyan",
+      "playback": "ground",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/switch.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "checkout",
+      "command": "git checkout",
+      "tint": "steel",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/checkout.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 17
+    },
+    {
+      "family": "merge",
+      "command": "git merge",
+      "tint": "cyan",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 20
+    },
+    {
+      "family": "merge-base",
+      "command": "git merge-base",
+      "tint": "indigo",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge-base_front.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "layers": [
+        {
+          "layer": "back",
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge-base_back.png"
+        },
+        {
+          "layer": "front",
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge-base_front.png"
+        }
+      ]
+    },
+    {
+      "family": "rebase",
+      "command": "git rebase",
+      "tint": "indigo",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/rebase.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "cherry-pick",
+      "command": "git cherry-pick",
+      "tint": "azure",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_front.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "layers": [
+        {
+          "layer": "back",
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_back.png"
+        },
+        {
+          "layer": "front",
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_front.png"
+        }
+      ]
+    },
+    {
+      "family": "reflog",
+      "command": "git reflog",
+      "tint": "violet",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/reflog.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 16
+    },
+    {
+      "family": "check-ignore",
+      "command": "git check-ignore",
+      "tint": "ash",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/check-ignore.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "ls-files",
+      "command": "git ls-files",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/ls-files.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "checkout-conflict",
+      "command": "git checkout",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/checkout-conflict.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "diff-conflict",
+      "command": "git diff",
+      "tint": "cyan",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/diff-conflict.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "mergetool",
+      "command": "git mergetool",
+      "tint": "azure",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/mergetool.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "remote",
+      "command": "git remote",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/remote_front.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "layers": [
+        {
+          "layer": "back",
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/remote_back.png"
+        },
+        {
+          "layer": "front",
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/remote_front.png"
+        }
+      ]
+    },
+    {
+      "family": "fetch",
+      "command": "git fetch",
+      "tint": "steel",
+      "playback": "target",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/fetch.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "pull",
+      "command": "git pull",
+      "tint": "azure",
+      "playback": "target",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/pull.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    },
+    {
+      "family": "push",
+      "command": "git push",
+      "tint": "steel",
+      "playback": "ground",
+      "anchor": "feet",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/push.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      }
+    }
+  ]
+}

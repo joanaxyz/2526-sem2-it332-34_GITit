@@ -6,13 +6,10 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
 USERNAME_PATTERN = re.compile(r"^[A-Za-z0-9._-]{3,30}$")
-CIT_EMAIL_DOMAIN = "@cit.edu"
 
 
 class RegisterSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=30)
-    first_name = serializers.CharField(max_length=150)
-    last_name = serializers.CharField(max_length=150)
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True, min_length=8)
@@ -25,17 +22,8 @@ class RegisterSerializer(serializers.Serializer):
             )
         return username
 
-    def validate_first_name(self, value: str) -> str:
-        return value.strip()
-
-    def validate_last_name(self, value: str) -> str:
-        return value.strip()
-
     def validate_email(self, value: str) -> str:
-        email = get_user_model().objects.normalize_email(value).lower()
-        if not email.endswith(CIT_EMAIL_DOMAIN):
-            raise serializers.ValidationError("Use your CIT email address.")
-        return email
+        return get_user_model().objects.normalize_email(value).lower()
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password_confirm"]:
@@ -66,9 +54,34 @@ class LoginSerializer(serializers.Serializer):
         return identifier
 
 
+class PasswordPairSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True, min_length=8)
+    password_confirm = serializers.CharField(write_only=True, min_length=8)
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs["password_confirm"]:
+            raise serializers.ValidationError({"password_confirm": "Passwords do not match."})
+        return attrs
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value: str) -> str:
+        return get_user_model().objects.normalize_email(value).lower()
+
+
+class PasswordResetConfirmSerializer(PasswordPairSerializer):
+    uid = serializers.CharField(max_length=255)
+    token = serializers.CharField(max_length=255)
+
+
+class PasswordChangeSerializer(PasswordPairSerializer):
+    current_password = serializers.CharField(write_only=True)
+
+
 class UserSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     username = serializers.CharField()
     email = serializers.EmailField()
-    first_name = serializers.CharField()
-    last_name = serializers.CharField()
+    is_staff = serializers.BooleanField()

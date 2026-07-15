@@ -1,0 +1,470 @@
+.story-switcher--map {
+  display: none;
+}
+
+.story-map-title {
+  display: none;
+}
+
+.story-adventure-path {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  padding: 2.4rem 0 1.2rem;
+}
+
+/* Fixed pixel coordinate space shared by the SVG route and the nodes, so
+   the dashed line passes exactly through every ring at any level count. */
+.story-path-canvas {
+  position: relative;
+  margin: 0 auto;
+}
+
+.story-route-line {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  filter: drop-shadow(0 0 8px rgba(var(--theme-primary-rgb), 0.38));
+  pointer-events: none;
+}
+
+.story-route-line path {
+  fill: none;
+  stroke: rgb(var(--theme-primary-rgb));
+  stroke-width: 2.4;
+  stroke-dasharray: 7 6;
+  stroke-linecap: round;
+  opacity: 0.82;
+}
+
+.story-route-line .story-route-branch {
+  stroke-width: 1.8;
+  stroke-dasharray: 5 6;
+  opacity: 0.62;
+}
+
+.story-path-node {
+  position: absolute;
+  left: var(--node-x);
+  top: var(--node-y);
+  display: grid;
+  width: 4.6rem;
+  place-items: center;
+  color: hsl(var(--foreground));
+  transform: translate(-50%, -50%);
+}
+
+.story-path-node,
+.story-path-node-button {
+  border: 0;
+  background: transparent;
+}
+
+.story-path-node-button {
+  position: relative;
+  display: grid;
+  width: 4.6rem;
+  height: 4.6rem;
+  place-items: center;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+.story-path-node:disabled,
+.story-path-node-button:disabled {
+  cursor: not-allowed;
+}
+
+/* The 9rem invisible button box overlaps neighbouring nodes, so a later
+   sibling swallows clicks aimed at the node underneath. Only the visible
+   ring accepts the pointer; keyboard focus on the button is unaffected. */
+.story-path-node {
+  pointer-events: none;
+}
+
+.story-path-node .story-path-node-ring,
+.story-path-node-button {
+  pointer-events: auto;
+}
+
+.story-path-node:not(:disabled) .story-path-node-badge,
+.story-path-node:not(:disabled) .story-path-node-play,
+.story-path-node-button:not(:disabled) .story-path-node-badge {
+  pointer-events: auto;
+}
+
+.story-path-node:disabled .story-path-node-ring,
+.story-path-node-button:disabled .story-path-node-ring {
+  pointer-events: none;
+}
+
+.story-path-node:not(:disabled) {
+  z-index: 1;
+}
+
+.story-path-node[data-state='current'] {
+  z-index: 2;
+}
+
+.story-path-node-ring {
+  position: relative;
+  display: grid;
+  width: 4.6rem;
+  height: 4.6rem;
+  place-items: center;
+  border: 2px solid rgba(var(--theme-primary-rgb), 0.92);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(var(--theme-primary-rgb), 0.14), transparent 62%),
+    linear-gradient(180deg, rgba(8, 22, 46, 0.96), rgba(2, 7, 18, 0.97));
+  box-shadow:
+    0 0 0 4px rgba(var(--theme-primary-rgb), 0.1),
+    0 0 20px rgba(var(--theme-primary-rgb), 0.55);
+  color: #f4fbff;
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 0 12px rgba(var(--theme-primary-rgb), 0.4);
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 180ms ease;
+}
+
+.story-path-node-button:not(:disabled):hover .story-path-node-ring,
+.story-path-node-button:focus-visible .story-path-node-ring {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow:
+    0 0 0 6px rgba(var(--theme-primary-rgb), 0.12),
+    0 0 32px rgba(var(--theme-primary-rgb), 0.72);
+}
+
+.story-path-node:focus-visible,
+.story-path-node-button:focus-visible,
+.story-path-node-play:focus-visible {
+  outline: none;
+}
+
+.story-path-node[data-state='current'] .story-path-node-ring {
+  border-color: rgb(243, 210, 122);
+  box-shadow:
+    0 0 0 7px rgba(243, 210, 122, 0.12),
+    0 0 26px rgba(243, 210, 122, 0.68),
+    0 0 52px rgba(243, 210, 122, 0.18);
+  transform: scale(1.12);
+}
+
+.story-path-node[data-state='current'] .story-path-node-button:not(:disabled):hover .story-path-node-ring,
+.story-path-node[data-state='current'] .story-path-node-button:focus-visible .story-path-node-ring {
+  transform: translateY(-2px) scale(1.16);
+}
+
+.story-path-node[data-state='locked'] .story-path-node-ring,
+.story-path-node[data-state='loading'] .story-path-node-ring {
+  border-color: rgba(148, 163, 184, 0.3);
+  color: rgba(219, 234, 254, 0.52);
+  box-shadow: none;
+  filter: grayscale(0.5);
+}
+
+.story-path-node[data-state='cleared'] .story-path-node-ring,
+.story-path-node[data-state='ready'] .story-path-node-ring {
+  border-color: rgba(var(--theme-primary-rgb), 0.9);
+  box-shadow:
+    0 0 0 6px rgba(var(--theme-primary-rgb), 0.1),
+    0 0 25px rgba(var(--theme-primary-rgb), 0.54);
+}
+
+.story-path-node-badge,
+.story-path-node-play {
+  position: absolute;
+  top: -0.45rem;
+  right: 0.15rem;
+  display: grid;
+  width: 1.45rem;
+  height: 1.45rem;
+  place-items: center;
+  border-radius: 999px;
+  background: rgb(var(--theme-primary-rgb));
+  color: #041018;
+  box-shadow: 0 0 14px rgba(var(--theme-primary-rgb), 0.6);
+}
+
+/* Above the ring (z-index 1) so the check glyph is not clipped behind it. */
+.story-path-node-badge {
+  z-index: 2;
+}
+
+/* The play pill materializes from behind the active ring, extending right -
+   which is also why that node's stars move below (the pill takes their spot). */
+.story-path-node-play {
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  left: 1.9rem;
+  z-index: 0;
+  justify-content: end;
+  width: 6.7rem;
+  height: 2.85rem;
+  padding: 0 0.72rem 0 0;
+  border: 1px solid rgba(243, 210, 122, 0.88);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at calc(100% - 1.2rem) 50%, rgba(243, 210, 122, 0.98) 0 0.82rem, transparent 0.84rem),
+    linear-gradient(90deg, rgba(22, 16, 8, 0.42), rgba(67, 44, 12, 0.86));
+  color: #06111d;
+  cursor: pointer;
+  box-shadow: 0 0 14px rgba(243, 210, 122, 0.52);
+  transform: translateY(-50%);
+}
+
+.story-path-node[data-selected] .story-path-node-ring {
+  border-color: rgb(243, 210, 122);
+  box-shadow:
+    0 0 0 8px rgba(243, 210, 122, 0.13),
+    0 0 32px rgba(243, 210, 122, 0.74),
+    0 0 58px rgba(243, 210, 122, 0.2);
+}
+
+.story-path-node-play[data-pill-state='open'] {
+  animation: story-node-pill-open 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.story-path-node-play[data-pill-state='closing'] {
+  animation: story-node-pill-close 180ms ease both;
+}
+
+@keyframes story-node-pill-open {
+  from {
+    opacity: 0;
+    clip-path: inset(0 82% 0 0 round 999px);
+    transform: translate(-0.45rem, -50%) scaleX(0.84);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0 round 999px);
+    transform: translate(0, -50%) scaleX(1);
+  }
+}
+
+@keyframes story-node-pill-close {
+  from {
+    opacity: 1;
+    clip-path: inset(0 0 0 0 round 999px);
+    transform: translate(0, -50%) scaleX(1);
+  }
+  to {
+    opacity: 0;
+    clip-path: inset(0 82% 0 0 round 999px);
+    transform: translate(-0.35rem, -50%) scaleX(0.88);
+  }
+}
+
+.story-path-node-ring {
+  z-index: 1;
+}
+
+.story-path-node-play svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+/* Stars sit centered directly beneath every node, so the row reads as part of
+   the ring instead of floating loose across the dashed route line. */
+.story-path-stars {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  justify-content: center;
+  white-space: nowrap;
+  filter: drop-shadow(0 0 6px rgba(var(--theme-primary-rgb), 0.5));
+  transform: translateX(-50%);
+}
+
+.story-path-node[data-state='current'] .story-path-stars {
+  top: calc(100% + 0.7rem);
+}
+
+.story-path-node[data-state='current'] .story-path-stars .fill-primary {
+  color: rgb(243, 210, 122);
+  fill: rgb(243, 210, 122);
+  filter: drop-shadow(0 0 6px rgba(243, 210, 122, 0.55));
+}
+
+/* The chapter's challenge trials node: same path, Challenge accent. */
+.story-path-node--trial .story-path-node-ring {
+  border-color: rgba(176, 74, 255, 0.85);
+  background:
+    radial-gradient(circle at 50% 30%, rgba(176, 74, 255, 0.16), transparent 62%),
+    linear-gradient(180deg, rgba(18, 8, 40, 0.96), rgba(6, 2, 16, 0.97));
+  box-shadow:
+    0 0 0 4px rgba(176, 74, 255, 0.1),
+    0 0 20px rgba(176, 74, 255, 0.5);
+  color: #f3e8ff;
+}
+
+.story-path-node--trial:not(:disabled):hover .story-path-node-ring,
+.story-path-node--trial:focus-visible .story-path-node-ring,
+.story-path-node--trial[data-open] .story-path-node-ring {
+  box-shadow:
+    0 0 0 6px rgba(176, 74, 255, 0.14),
+    0 0 32px rgba(176, 74, 255, 0.66);
+}
+
+.story-path-node--trial[data-state='locked'] .story-path-node-ring,
+.story-path-node--trial[data-state='loading'] .story-path-node-ring {
+  border-color: rgba(148, 163, 184, 0.3);
+  background:
+    radial-gradient(circle at 50% 30%, rgba(var(--theme-primary-rgb), 0.14), transparent 62%),
+    linear-gradient(180deg, rgba(8, 22, 46, 0.96), rgba(2, 7, 18, 0.97));
+  box-shadow: none;
+}
+
+/* Trial cards appear beside the challenge node only once it is clicked. */
+.story-trials-flyout {
+  position: absolute;
+  z-index: 6;
+  display: grid;
+  gap: 1.05rem;
+  width: 16.4rem;
+  animation: story-trials-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes story-trials-in {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+}
+
+/* A chapter can carry several challenge scenarios; each renders as its own
+   titled group of difficulty cards inside the same flyout. */
+.story-trials-flyout {
+  max-height: min(72vh, 34rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.story-trials-flyout-group {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.story-trials-flyout-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  padding-left: 0.15rem;
+}
+
+.story-path-stars svg,
+.story-trial-copy [role='img'] svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.story-trial-copy [role='img'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.12rem;
+}
+
+.story-trial-card {
+  --trial-rgb: var(--theme-primary-rgb);
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.85rem;
+  min-height: 5.35rem;
+  padding: 0.75rem 1rem 0.75rem 0.75rem;
+  border: 1px solid rgba(var(--trial-rgb), 0.3);
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, rgba(var(--trial-rgb), 0.08), transparent 58%),
+    linear-gradient(180deg, rgba(7, 21, 48, 0.54), rgba(3, 10, 25, 0.68));
+  color: hsl(var(--foreground));
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.story-trial-card:not(:disabled):hover,
+.story-trial-card:focus-visible {
+  border-color: rgba(var(--trial-rgb), 0.72);
+  box-shadow: 0 0 22px rgba(var(--trial-rgb), 0.22);
+  transform: translateX(-3px);
+  outline: none;
+}
+
+.story-trial-card:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+  filter: grayscale(0.35);
+}
+
+.story-trial-medallion {
+  position: relative;
+  display: grid;
+  width: 4.15rem;
+  height: 4.15rem;
+  place-items: center;
+  border: 2px solid rgba(var(--trial-rgb), 0.72);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(var(--trial-rgb), 0.22), rgba(4, 14, 31, 0.95) 68%);
+  color: rgb(var(--trial-rgb));
+  box-shadow:
+    0 0 0 5px rgba(var(--trial-rgb), 0.08),
+    0 0 18px rgba(var(--trial-rgb), 0.32);
+}
+
+.story-trial-medallion img {
+  display: block;
+  width: 2.55rem;
+  height: 2.55rem;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(var(--trial-rgb), 0.45));
+}
+
+.story-trial-lock {
+  position: absolute;
+  right: -0.15rem;
+  top: -0.15rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0.22rem;
+  border-radius: 999px;
+  background: rgba(4, 10, 22, 0.92);
+  color: rgba(219, 234, 254, 0.74);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.45);
+}
+
+.story-trial-copy {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.story-trial-copy strong {
+  overflow: hidden;
+  color: hsl(var(--foreground));
+  font-size: 1rem;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.story-trial-copy > span:last-child {
+  width: fit-content;
+  border: 1px solid rgba(var(--trial-rgb), 0.38);
+  border-radius: 999px;
+  background: rgba(var(--trial-rgb), 0.1);
+  color: rgba(219, 234, 254, 0.74);
+  font-size: 0.72rem;
+  font-weight: 760;
+  padding: 0.16rem 0.52rem;
+}

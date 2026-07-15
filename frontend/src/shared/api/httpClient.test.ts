@@ -1,15 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useAuthStore } from '@/features/auth/hooks/useAuth'
+import { useAuthStore } from '@/shared/auth/useAuth'
 
-import { apiRequest } from './httpClient'
+import { apiOperationRequest, apiRequest } from './httpClient'
 
 const user = {
   id: 1,
   email: 'student@example.com',
   username: 'studentuser',
-  first_name: 'Student',
-  last_name: 'User',
+  tier: 'free' as const,
+  is_staff: false,
 }
 
 function jsonResponse(status: number, payload: unknown) {
@@ -125,7 +125,54 @@ describe('apiRequest auth refresh', () => {
     expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/auth/refresh/'))).toHaveLength(2)
   })
 
-  it('does not clear auth when another tab already stored a newer token', async () => {
+
+
+  it('uses the generated operation method and serializes typed bodies', async () => {
+    const fetchMock = vi.fn((_input: RequestInfo | URL, init?: RequestInit) => {
+      expect(init?.method).toBe('POST')
+      expect(init?.body).toBe(JSON.stringify({ kind: 'companion', slug: 'blue' }))
+      expect((init?.headers as Record<string, string>)['X-Git-It-Client']).toBe('web')
+      return Promise.resolve(jsonResponse(201, { ok: true }))
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(
+      apiOperationRequest<'shop_catalog_purchase_create', { ok: boolean }>(
+        'shop_catalog_purchase_create',
+        '/shop/catalog/purchase/',
+        { body: { kind: 'companion', slug: 'blue' } },
+      ),
+    ).resolves.toEqual({ ok: true })
+  })
+
+  it('does not persist access tokens in localStorage', () => {
+    useAuthStore.getState().setSession('fresh-token', user)
+
+    expect(useAuthStore.getState().accessToken).toBe('fresh-token')
+    expect(localStorage.getItem('git-it-access-token')).toBeNull()
+    expect(JSON.parse(localStorage.getItem('git-it-user') ?? 'null')).toMatchObject(user)
+  })
+
+  it('removes a legacy localStorage access token during auth changes', () => {
+    localStorage.setItem('git-it-access-token', 'legacy-token')
+
+    useAuthStore.getState().setAccessToken('fresh-token')
+
+    expect(useAuthStore.getState().accessToken).toBe('fresh-token')
+    expect(localStorage.getItem('git-it-access-token')).toBeNull()
+  })
+
+  it('clears the in-memory token when another tab removes the stored user', () => {
+    useAuthStore.getState().setSession('active-token', user)
+    localStorage.removeItem('git-it-user')
+
+    window.dispatchEvent(new StorageEvent('storage', { key: 'git-it-user' }))
+
+    expect(useAuthStore.getState().accessToken).toBeNull()
+    expect(useAuthStore.getState().user).toBeNull()
+  })
+
+  it('does not clear auth when another in-memory refresh already installed a newer token', async () => {
     vi.useFakeTimers()
 
     const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
@@ -133,7 +180,7 @@ describe('apiRequest auth refresh', () => {
       const headers = init?.headers as Record<string, string> | undefined
 
       if (url.endsWith('/auth/refresh/')) {
-        localStorage.setItem('git-it-access-token', 'other-tab-token')
+        useAuthStore.getState().setAccessToken('other-tab-token')
         return Promise.resolve(jsonResponse(401, { detail: 'Session expired.' }))
       }
 

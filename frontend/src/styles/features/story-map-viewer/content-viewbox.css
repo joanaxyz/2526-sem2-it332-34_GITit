@@ -1,0 +1,399 @@
+/* -- Content viewbox modals: challenge trials + adventure levels -- */
+.content-viewbox-modal {
+  width: min(96vw, 72rem);
+  max-height: 92vh;
+  overflow: hidden;
+  border-color: rgba(45, 245, 255, 0.28);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(var(--theme-primary-rgb), 0.13), transparent 32rem),
+    linear-gradient(180deg, rgba(9, 24, 51, 0.98), rgba(4, 9, 22, 0.99)),
+    hsl(var(--card));
+}
+
+.content-viewbox-modal-body {
+  max-height: calc(92vh - 4.75rem);
+  overflow: auto;
+  padding: 1.35rem;
+}
+
+/* Level-select shell � a game-style level map, not a list. No aggregate
+   progress bar; each node carries its own state + per-level progress. */
+.ls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.ls-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(45, 245, 255, 0.16);
+}
+
+.ls-eyebrow {
+  margin: 0;
+  color: rgba(var(--theme-primary-rgb), 0.95);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ls-head-count {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.ls-head-count strong {
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.ls-head-count span {
+  color: rgba(219, 234, 254, 0.7);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.ls-worlds {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.ls-world {
+  display: grid;
+  gap: 0.95rem;
+}
+
+.ls-world-title {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: 0.95rem;
+  font-weight: 850;
+}
+
+/* Node grids (rendered as <ol>: strip the default decimal markers so only the
+   in-ring level number shows, not a leaked "1. 2. 3." list marker). */
+.ls-grid {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ls-grid--levels {
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+}
+
+.ls-grid--trio {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+/* The level node � a tappable medallion tile */
+.ls-node {
+  --node-rgb: var(--theme-primary-rgb);
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0.5rem;
+  padding: 0.95rem 0.7rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  color: hsl(var(--foreground));
+  text-align: center;
+  background:
+    radial-gradient(125% 95% at 50% -12%, rgba(var(--node-rgb), 0.13), transparent 70%),
+    linear-gradient(180deg, rgba(14, 27, 49, 0.92), rgba(5, 10, 24, 0.94));
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.ls-node--trial {
+  --node-rgb: var(--ring-rgb);
+}
+
+.ls-node:not(:disabled):hover,
+.ls-node:not(:disabled):focus-visible {
+  transform: translateY(-3px);
+  border-color: rgba(var(--node-rgb), 0.62);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.45), 0 0 18px rgba(var(--node-rgb), 0.28);
+}
+
+.ls-node:focus-visible {
+  outline: 2px solid rgba(var(--node-rgb), 0.9);
+  outline-offset: 2px;
+}
+
+.ls-node[data-state='cleared'],
+.ls-node--trial[data-status='completed'] {
+  border-color: rgba(var(--theme-primary-rgb), 0.42);
+}
+
+.ls-node[data-state='current'],
+.ls-node[data-state='active'] {
+  border-color: rgba(var(--theme-primary-rgb), 0.6);
+  animation: ls-pulse 2.6s ease-in-out infinite;
+}
+
+.ls-node[data-state='locked'],
+.ls-node[data-status='locked'] {
+  cursor: not-allowed;
+  opacity: 0.5;
+  filter: saturate(0.45);
+}
+
+.ls-node:disabled {
+  cursor: not-allowed;
+}
+
+@keyframes ls-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px rgba(var(--theme-primary-rgb), 0.2), 0 0 14px rgba(var(--theme-primary-rgb), 0.16);
+  }
+  50% {
+    box-shadow: 0 0 0 1px rgba(var(--theme-primary-rgb), 0.4), 0 0 28px rgba(var(--theme-primary-rgb), 0.34);
+  }
+}
+
+/* Progress ring (conic) � full at 100%, thin story below */
+.ls-ring {
+  --pct: 0;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 50%;
+  background: conic-gradient(
+    rgba(var(--ring-rgb, var(--theme-primary-rgb)), 0.95) calc(var(--pct) * 1%),
+    rgba(255, 255, 255, 0.09) 0
+  );
+}
+
+.ls-ring-core {
+  display: grid;
+  place-items: center;
+  width: calc(100% - 7px);
+  height: calc(100% - 7px);
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgb(13, 25, 45), rgb(6, 11, 24));
+}
+
+/* Trial nodes lead with difficulty and earned stars, so their ring carries more weight */
+.ls-node--trial {
+  gap: 0.65rem;
+  padding: 1.15rem 0.7rem 1rem;
+}
+
+.ls-node--trial .ls-ring {
+  width: 4.35rem;
+  height: 4.35rem;
+}
+
+.ls-num {
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.ls-num {
+  font-size: 1.25rem;
+}
+
+.ls-ring-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  color: rgba(219, 234, 254, 0.72);
+}
+
+.ls-node-title {
+  display: -webkit-box;
+  max-width: 100%;
+  overflow: hidden;
+  color: hsl(var(--foreground));
+  font-size: 0.82rem;
+  font-weight: 750;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.ls-node-foot {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(219, 234, 254, 0.6);
+}
+
+.ls-node-foot[data-state='cleared'],
+.ls-node-foot[data-done='true'] {
+  color: rgba(var(--theme-primary-rgb), 0.92);
+}
+
+.ls-node-foot[data-state='current'],
+.ls-node-foot[data-state='active'] {
+  color: rgb(243, 210, 122);
+}
+
+.ls-node-foot[data-status='failed'],
+.ls-node-foot[data-status='abandoned'] {
+  color: rgb(255, 150, 120);
+}
+
+/* Per-level progress strip � the per-node "progress bar" */
+.ls-strip {
+  width: 100%;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ls-strip[data-filled='true'] {
+  background: linear-gradient(90deg, rgba(var(--theme-primary-rgb), 0.95), rgba(var(--theme-accent-rgb), 0.95));
+  box-shadow: 0 0 8px rgba(var(--theme-primary-rgb), 0.5);
+}
+
+/* Corner badges */
+.ls-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  display: grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border: 2px solid rgb(6, 11, 24);
+  border-radius: 999px;
+  color: #041018;
+}
+
+.ls-badge--done {
+  background: rgb(var(--theme-primary-rgb));
+}
+
+.ls-badge--go {
+  background: rgb(243, 210, 122);
+}
+
+/* Trial section head (replaces the per-challenge progress bar with a count) */
+.ls-trial-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 1rem;
+}
+
+.ls-trial-copy {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.ls-trial-copy h3 {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: 1rem;
+  font-weight: 850;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.ls-trial-copy p {
+  max-width: 68ch;
+  margin: 0;
+  color: rgba(219, 234, 254, 0.78);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+.ls-trial-count {
+  flex-shrink: 0;
+  color: rgba(219, 234, 254, 0.68);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.ls-trial-count strong {
+  color: hsl(var(--foreground));
+  font-size: 1.05rem;
+}
+
+.ls-lock {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  color: rgba(219, 234, 254, 0.8);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-node {
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .ls-node:not(:disabled):hover,
+  .ls-node:not(:disabled):focus-visible {
+    transform: none;
+  }
+
+  .ls-node[data-state='current'],
+  .ls-node[data-state='active'] {
+    animation: none;
+    box-shadow: 0 0 0 1px rgba(var(--theme-primary-rgb), 0.32), 0 0 18px rgba(var(--theme-primary-rgb), 0.22);
+  }
+}
+
+@media (max-width: 760px) {
+  .content-viewbox-modal-body {
+    padding: 1rem;
+  }
+
+  .ls-head {
+    gap: 0.3rem;
+  }
+
+  .ls-grid--levels {
+    grid-template-columns: repeat(auto-fill, minmax(6.25rem, 1fr));
+  }
+
+  .ls-ring,
+  .ls-node--trial .ls-ring {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .ls-node--trial {
+    padding: 0.95rem 0.55rem 0.8rem;
+  }
+
+  .ls-trial-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+

@@ -1,0 +1,125 @@
+/* Mock chrome: a plain eyebrow header, no faux window dressing. */
+.terminal-titlebar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.16);
+  padding: 0.62rem 0.85rem;
+  background: rgba(var(--theme-primary-rgb), 0.035);
+}
+
+.terminal-output {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 0.85rem 0.95rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.terminal-line {
+  color: rgba(232, 246, 250, 0.82);
+  white-space: pre-wrap;
+}
+
+.terminal-line--output {
+  color: hsl(var(--foreground) / 0.72);
+}
+
+.terminal-line--hint {
+  color: hsl(var(--muted-foreground));
+  font-style: italic;
+}
+
+.terminal-line--system,
+.terminal-line--warning {
+  color: rgb(243, 210, 122);
+}
+
+.terminal-line--success {
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.terminal-prompt span,
+.command-input-prompt span {
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.terminal-prompt small,
+.command-input-prompt small {
+  color: rgba(218, 229, 247, 0.5);
+  font-size: inherit;
+}
+
+.terminal-prompt b,
+.command-input-prompt b {
+  color: hsl(var(--primary));
+  font-weight: 800;
+}
+
+/* The live prompt is just the next line of the scrollback stream. */
+.command-input {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5ch;
+  padding: 0;
+  background: transparent;
+}
+
+.command-input-prompt {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+
+.command-input-field {
+  min-width: 0;
+  flex: 1 1 auto;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  outline: none;
+  caret-color: hsl(var(--primary));
+}
+
+.command-input-field::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+
+.terminal-line + .terminal-line {
+  margin-top: 0.16rem;
+}
+
+.terminal-line--input {
+  margin-block: 0.35rem 0.15rem;
+  border-left: 2px solid rgba(var(--theme-primary-rgb), 0.54);
+  padding-left: 0.55rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.terminal-line--warning,
+.terminal-line--system {
+  border-left: 2px solid hsl(var(--warning) / 0.58);
+  padding-left: 0.55rem;
+}
+
+.terminal-line--success {
+  border-left: 2px solid hsl(var(--success) / 0.62);
+  padding-left: 0.55rem;
+}
+
+.command-input {
+  position: sticky;
+  bottom: -0.85rem;
+  margin: 0.55rem -0.35rem -0.85rem;
+  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.14);
+  padding: 0.72rem 0.35rem 0.85rem;
+  background: linear-gradient(180deg, rgba(1, 8, 19, 0.88), rgba(1, 8, 19, 0.98));
+}

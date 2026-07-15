@@ -1,0 +1,173 @@
+/* Shop page ===============================================================
+   Two intensities of the Arcane Observatory: the storefront stages (story
+   environments, companion portraits, coin store) carry the world; the detail
+   rails and ledgers stay legible. One cyan accent, display face for titles,
+   mono for every numeral and eyebrow. */
+
+.shop-ref-page {
+  position: relative;
+  height: var(--app-content-height);
+  min-height: var(--app-content-height);
+  overflow: hidden;
+  isolation: isolate;
+  background: #010610;
+  color: #e7f3fb;
+}
+
+.shop-ref-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  background:
+    radial-gradient(circle at 42% 12%, rgba(var(--theme-primary-rgb), 0.16), transparent 24rem),
+    radial-gradient(circle at 74% 46%, rgba(var(--theme-challenge-rgb), 0.14), transparent 26rem),
+    linear-gradient(180deg, #050b18 0%, #03070f 52%, #01040a 100%);
+}
+
+.shop-ref-backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(1, 7, 18, 0.55), transparent 14%, transparent 74%, rgba(1, 7, 18, 0.6));
+  pointer-events: none;
+}
+
+.shop-ref-layout {
+  display: grid;
+  grid-template-columns: 7.6rem minmax(0, 1fr);
+  height: var(--app-content-height);
+  min-height: var(--app-content-height);
+  padding: 0 1.6rem 1.35rem 0;
+}
+
+/* Section rail ------------------------------------------------------------ */
+.shop-categories {
+  display: grid;
+  align-content: start;
+  min-height: var(--app-content-height);
+  border-right: 1px solid rgba(116, 173, 210, 0.18);
+  background: linear-gradient(180deg, rgba(5, 13, 26, 0.82), rgba(2, 7, 16, 0.88));
+}
+
+.shop-rail-balance {
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  padding: 1rem 0.4rem 0.85rem;
+  border-bottom: 1px solid rgba(116, 173, 210, 0.14);
+}
+
+.shop-rail-balance img {
+  width: 2.1rem;
+  height: 2.1rem;
+  filter: drop-shadow(0 0 8px rgba(243, 210, 122, 0.6));
+}
+
+.shop-rail-balance strong {
+  color: #f4fbff;
+  font-family: var(--font-mono);
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.shop-tab-list {
+  display: grid;
+}
+
+.shop-tab-list button {
+  display: grid;
+  min-height: 6.6rem;
+  place-items: center;
+  align-content: center;
+  gap: 0.5rem;
+  border: 0;
+  border-bottom: 1px solid rgba(116, 173, 210, 0.1);
+  background: transparent;
+  color: rgba(216, 232, 240, 0.6);
+  cursor: pointer;
+  padding: 0.7rem 0.4rem;
+  text-align: center;
+  transition: color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out);
+}
+
+.shop-tab-list button:hover,
+.shop-tab-list button:focus-visible {
+  color: #f4fbff;
+  outline: none;
+  background: rgba(var(--theme-primary-rgb), 0.04);
+}
+
+.shop-tab-list button:focus-visible {
+  box-shadow: inset 0 0 0 2px rgba(var(--theme-primary-rgb), 0.38);
+}
+
+.shop-tab-list button.is-active {
+  color: rgb(var(--theme-primary-rgb));
+  background:
+    radial-gradient(circle at 50% 40%, rgba(var(--theme-primary-rgb), 0.14), transparent 62%),
+    linear-gradient(90deg, rgba(var(--theme-primary-rgb), 0.04), rgba(var(--theme-primary-rgb), 0.11));
+}
+
+.shop-tab-list button.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 2px;
+  height: 2.4rem;
+  border-radius: 999px;
+  background: rgb(var(--theme-primary-rgb));
+  box-shadow: 0 0 10px rgba(var(--theme-primary-rgb), 0.8);
+}
+
+.shop-tab-list button {
+  position: relative;
+}
+
+.shop-tab-list svg,
+.shop-tab-list img {
+  width: 2.05rem;
+  height: 2.05rem;
+  object-fit: contain;
+}
+
+.shop-tab-list img {
+  width: 2.5rem;
+  height: 2.5rem;
+  filter: drop-shadow(0 0 7px rgba(243, 210, 122, 0.55));
+}
+
+.shop-tab-list strong {
+  display: block;
+  color: currentColor;
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.15;
+}
+
+.shop-tab-list small {
+  display: block;
+  margin-top: 0.15rem;
+  color: rgba(155, 182, 200, 0.62);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.02em;
+}
+
+.shop-view {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.shop-error-panel,
+.shop-empty-panel {
+  padding: 1.25rem 0 0 1.45rem;
+}
+
+.shop-action-error {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: var(--z-toast);
+  width: min(28rem, calc(100% - 2rem));
+}

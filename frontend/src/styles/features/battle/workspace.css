@@ -1,0 +1,5 @@
+@import './workspace-shell.css';
+@import './workspace-context.css';
+@import './workspace-resize.css';
+@import './workspace-terminal.css';
+@import './workspace-editor.css';
