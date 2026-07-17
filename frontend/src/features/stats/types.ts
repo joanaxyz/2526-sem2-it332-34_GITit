@@ -1,11 +1,12 @@
-export type RateMetric = {
+type RateMetric = {
   value: number | null
   numerator: number
   denominator: number
 }
 
-export type SkillAxis = {
+export type GitSkillMastery = {
   key: string
+  command: string
   label: string
   hint: string
   value: number | null
@@ -17,13 +18,13 @@ export type TrendPoint = {
   commands_run: number
 }
 
-export type ScopedCount = {
+type ScopedCount = {
   value: number
   scope: string
 }
 
 export type StatsSummary = {
-  skill_profile: SkillAxis[]
+  skill_profile: GitSkillMastery[]
   activity_trend: TrendPoint[]
   headline: {
     levels_completed: number
