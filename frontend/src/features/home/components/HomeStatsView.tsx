@@ -4,7 +4,7 @@ import { ArrowRight, Lock, Star } from 'lucide-react'
 
 import { deriveAchievements } from '@/features/home/utils/achievements'
 import type { HomeSummary } from '@/features/home/types'
-import type { SkillAxis, StatsSummary, TrendPoint } from '@/features/stats/types'
+import type { SkillMasteryRow, StatsSummary, TrendPoint } from '@/features/stats/types'
 import { GitCommandIcon } from '@/shared/git/commandCatalog/commandIcons'
 import { storyPath } from '@/shared/navigation/routes'
 
@@ -16,20 +16,6 @@ type ActivityCell = {
   value: number
 }
 
-type SkillProfileRow = SkillAxis & {
-  command: string
-}
-
-/* Picks a themed glyph per axis; purely decorative - the axes are behavioral
-   metrics, not per-command scores, so never render these as text. */
-const SKILL_AXIS_COMMANDS: Record<string, string> = {
-  accuracy: 'git status',
-  efficiency: 'git add',
-  independence: 'git commit',
-  consistency: 'git branch',
-  mastery: 'git diff',
-  coverage: 'git push',
-}
 const ACHIEVEMENT_FILTERS: Array<{ value: AchievementFilter; label: string }> = [
   { value: 'all', label: 'All' },
   { value: 'unlocked', label: 'Unlocked' },
@@ -81,16 +67,12 @@ function buildActivityCells(points: TrendPoint[]): ActivityCell[] {
   ]
 }
 
-function buildSkillProfileRows(axes: SkillAxis[]): SkillProfileRow[] {
-  return axes.map((axis) => ({
-    ...axis,
-    command: SKILL_AXIS_COMMANDS[axis.key] ?? 'git status',
-  }))
-}
-
-function SkillProfileBars({ rows }: { rows: SkillProfileRow[] }) {
+function SkillProfileBars({ rows }: { rows: SkillMasteryRow[] }) {
   return (
-    <div className="home-overview-command-list">
+    <div
+      className="home-overview-command-list app-scrollbar"
+      style={{ maxHeight: '14.5rem', overflowY: 'auto', paddingRight: '0.35rem' }}
+    >
       {rows.map((row) => (
         <div className="home-overview-command-row" key={row.key} title={row.hint}>
           <GitCommandIcon command={row.command} className="home-overview-command-glyph" />
@@ -151,7 +133,7 @@ export function HomeStatsView({
 }) {
   const [achievementFilter, setAchievementFilter] = useState<AchievementFilter>('all')
   const achievements = useMemo(() => deriveAchievements(home, stats), [home, stats])
-  const skillRows = useMemo(() => buildSkillProfileRows(stats.skill_profile), [stats.skill_profile])
+  const skillRows = stats.skill_profile
   const activityCells = useMemo(() => buildActivityCells(stats.activity_trend), [stats.activity_trend])
 
   const unlocked = achievements.filter((achievement) => achievement.unlocked)
@@ -166,7 +148,7 @@ export function HomeStatsView({
     .slice(0, 8)
 
   const skillValues = stats.skill_profile
-    .map((axis) => axis.value)
+    .map((skill) => skill.value)
     .filter((value): value is number => typeof value === 'number')
   const overallMastery = clampPercent(average(skillValues))
   const masteryStars = Math.max(1, Math.min(3, Math.ceil(overallMastery / 34)))
@@ -192,7 +174,7 @@ export function HomeStatsView({
       <section className="ref-panel home-overview-stats-panel" aria-label="Stats overview">
         <div className="home-overview-master-row">
           <div>
-            <header className="ref-panel-head">Skill Profile</header>
+            <header className="ref-panel-head">Git Skill Mastery</header>
             <SkillProfileBars rows={skillRows} />
           </div>
 
@@ -202,7 +184,7 @@ export function HomeStatsView({
             </div>
             <span>Overall Mastery</span>
             <strong>{overallMastery}%</strong>
-            <small>Proficiency</small>
+            <small>Across Git skills</small>
             <div className="home-overview-rating-stars" aria-label={`${masteryStars} of 3 proficiency stars`}>
               {Array.from({ length: 3 }, (_, index) => (
                 <i className={index < masteryStars ? 'is-lit' : ''} key={index} />
