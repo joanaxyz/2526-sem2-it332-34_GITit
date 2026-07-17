@@ -4,10 +4,7 @@ import {
   ChevronRight,
   Compass,
   Map as MapIcon,
-  ShieldCheck,
   ShoppingBag,
-  Sparkles,
-  Swords,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -31,12 +28,6 @@ function companionAvatar(slug: string, fallback?: string) {
 function companionStageArt(slug: string, fallback?: string) {
   const sprites = COMPANIONS[slug]?.sprites
   return sprites?.portrait?.src ?? sprites?.avatar?.src ?? sprites?.idle?.src ?? fallback
-}
-
-const companionIdentity: Record<string, string> = {
-  blue: 'Arcane flame',
-  white: 'Frost ward',
-  black: 'Storm veil',
 }
 
 export function HomeLoadoutView() {
@@ -107,20 +98,6 @@ export function HomeLoadoutView() {
                   <h2 id="home-loadout-companion-title">{selectedCompanion.label}</h2>
                   <p>{COMPANIONS[selectedCompanion.slug]?.kit?.[0]?.description ?? 'A battle-ready companion for your next Git quest.'}</p>
                 </header>
-                <dl className="home-loadout-facts">
-                  <div>
-                    <dt><Sparkles aria-hidden="true" />Affinity</dt>
-                    <dd>{companionIdentity[selectedCompanion.slug] ?? 'Arcane'}</dd>
-                  </div>
-                  <div>
-                    <dt><Swords aria-hidden="true" />Assignment</dt>
-                    <dd>All missions</dd>
-                  </div>
-                  <div>
-                    <dt><ShieldCheck aria-hidden="true" />Account status</dt>
-                    <dd>Permanent unlock</dd>
-                  </div>
-                </dl>
                 <div className="home-loadout-action">
                   <div>
                     <span>{selectedCompanion.active ? 'Current slot' : 'Selected slot'}</span>
@@ -163,7 +140,7 @@ export function HomeLoadoutView() {
                   >
                     <span>{avatar ? <img src={avatar} alt="" loading="lazy" /> : null}</span>
                     <strong>{companion.label}</strong>
-                    <small>{companion.active ? 'Equipped' : companionIdentity[companion.slug] ?? 'Owned'}</small>
+                    <small>{companion.active ? 'Equipped' : 'Owned'}</small>
                   </button>
                 )
               })}
