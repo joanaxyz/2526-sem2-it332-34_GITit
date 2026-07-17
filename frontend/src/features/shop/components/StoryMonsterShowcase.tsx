@@ -10,6 +10,9 @@ import type { SpriteAnimation } from '@/shared/sprites/types'
 import { useSpritePixelAnchor } from '@/shared/sprites/usePixelBounds'
 
 const MONSTER_STAGE_HEIGHT = 260
+const MONSTER_GROUND_BOTTOM = 0.18
+const MONSTER_TOP_CLEARANCE = 16
+const MONSTER_VISIBLE_STAGE_HEIGHT = MONSTER_STAGE_HEIGHT * (1 - MONSTER_GROUND_BOTTOM) - MONSTER_TOP_CLEARANCE
 const MONSTER_MOVE_LABELS: Record<MonsterPreviewMove, string> = {
   idle: 'Idle',
   attack: 'Attack',
@@ -59,9 +62,6 @@ export function StoryMonsterShowcase({
   const [move, setMove] = useState<MonsterPreviewMove>('idle')
   const [playKey, setPlayKey] = useState(0)
   const selected = monsters.find((monster) => monster.slug === selectedSlug) ?? monsters[0]
-  // Measured visible pixels of the idle sheet (async, cached per sheet). Stage fitting
-  // must not use the raw frame box: frame padding varies per sheet (512px lancer frames
-  // vs 256px peers) and would shrink exactly the monsters with roomy frames.
   const idleSprite = selected?.skin.sprites.idle
   const idleAnimation = selected && idleSprite ? spriteAnimation(idleSprite, `${selected.slug}.idle`, true) : null
   const idleAnchor = useSpritePixelAnchor(idleAnimation)
@@ -77,10 +77,8 @@ export function StoryMonsterShowcase({
   const activeMove = canPreviewMove(selected, move) ? move : 'idle'
   const sprite = selected.skin.sprites[activeMove === 'skill' ? 'idle' : activeMove] ?? selected.skin.sprites.idle
   const animation = spriteAnimation(sprite, `${selected.slug}.${activeMove}`, activeMove === 'idle')
-  // Battle-native size (visible px × displayScale × species scale), shrunk only if the
-  // monster itself would overflow the stage — keeps roster sizes relatively honest.
   const visibleHeight = (idleAnchor?.bounds.height ?? animation.frameHeight) * (idleAnimation?.displayScale ?? 1)
-  const scale = Math.min(1.35, MONSTER_STAGE_HEIGHT / (visibleHeight * selected.skin.scale)) * selected.skin.scale
+  const scale = Math.min(1.35, MONSTER_VISIBLE_STAGE_HEIGHT / (visibleHeight * selected.skin.scale)) * selected.skin.scale
   const effectLayers = activeMove === 'skill' ? selected.skin.attack.effect?.layers ?? [] : []
   const isSkillFx = activeMove === 'skill'
 
@@ -105,26 +103,27 @@ export function StoryMonsterShowcase({
 
       <div
         className="shop-monster-stage"
-        aria-label={
-          isSkillFx
-            ? `${selected.label} skill effect preview`
-            : `${selected.label} ${MONSTER_MOVE_LABELS[activeMove]} preview`
-        }
+        aria-label={isSkillFx ? `${selected.label} skill effect preview` : `${selected.label} ${MONSTER_MOVE_LABELS[activeMove]} preview`}
         data-mode={isSkillFx ? 'skill-fx' : 'monster'}
       >
         <div className="shop-monster-stage-glow" aria-hidden="true" />
         {!isSkillFx ? (
-          <SpriteAnimator
-            key={`${selected.slug}-${activeMove}-${playKey}`}
-            animation={animation}
-            scale={scale}
-            anchorToPixelBounds
-            layoutAnimation={idleAnimation ?? undefined}
-            pixelAnchorAnimation={idleAnimation ?? undefined}
-            pixelAnchorFallback={{ bottomOffset: selected.skin.metrics.foot_offset ?? 0 }}
-            pixelated
-            aria-label={`${selected.label} ${MONSTER_MOVE_LABELS[activeMove]}`}
-          />
+          <div
+            className="shop-monster-actor"
+            style={{ position: 'absolute', left: '50%', bottom: `${MONSTER_GROUND_BOTTOM * 100}%`, zIndex: 2, transform: 'translateX(-50%)' }}
+          >
+            <SpriteAnimator
+              key={`${selected.slug}-${activeMove}-${playKey}`}
+              animation={animation}
+              scale={scale}
+              anchorToPixelBounds
+              layoutAnimation={idleAnimation ?? undefined}
+              pixelAnchorAnimation={idleAnimation ?? undefined}
+              pixelAnchorFallback={{ bottomOffset: selected.skin.metrics.foot_offset ?? 0 }}
+              pixelated
+              aria-label={`${selected.label} ${MONSTER_MOVE_LABELS[activeMove]}`}
+            />
+          </div>
         ) : null}
         {effectLayers.map((layer, index) => (
           <div
@@ -146,9 +145,7 @@ export function StoryMonsterShowcase({
         ))}
 
         <div className="shop-monster-toolbar" aria-label="Monster animation controls">
-          <div className="shop-monster-toolbar-id">
-            <strong>{selected.label}</strong>
-          </div>
+          <div className="shop-monster-toolbar-id"><strong>{selected.label}</strong></div>
           <div className="shop-monster-toolbar-moves" role="tablist" aria-label="Preview pose">
             {MONSTER_MOVE_ORDER.map((option) => {
               const disabled = !canPreviewMove(selected, option)
@@ -179,8 +176,6 @@ export function StoryMonsterShowcase({
   )
 }
 
-// Roster picker as a compact themed dropdown. The sprite-rail geometry fought the
-// wildly different frame paddings per sheet; a name list is legible and honest.
 function MonsterSelect({
   monsters,
   selected,
@@ -218,9 +213,7 @@ function MonsterSelect({
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >
-        <span className="shop-monster-select-value">
-          <strong>{selected.label}</strong>
-        </span>
+        <span className="shop-monster-select-value"><strong>{selected.label}</strong></span>
         <ChevronDown aria-hidden="true" data-open={open} />
       </button>
       {open ? (
