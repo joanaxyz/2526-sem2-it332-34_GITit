@@ -4,12 +4,9 @@ from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 
-from adventures.models import (
-    AdventureLevel,
-    AdventureRun,
-    SkillMastery,
-)
-from challenges.models import ChallengeRun, ChallengeTrial
+from adventures.models import AdventureRun, SkillMastery
+from adventures.services import form_solve_targets
+from challenges.models import ChallengeRun
 from common.constants import (
     DIFFICULTY_HARD,
     RESULT_INVALID,
@@ -18,6 +15,7 @@ from common.constants import (
     SESSION_STATUS_COMPLETED,
     SESSION_STATUS_FAILED,
 )
+from curriculum.models import CommandSkill
 from curriculum.selectors import published_stories, stories_completed_map
 from practice.models import CommandStep
 from progress.models import (
@@ -27,18 +25,10 @@ from progress.models import (
     Wallet,
 )
 
-# Trailing window (days) for the activity trend and the consistency axis.
+# Trailing window (days) for the activity trend.
 
 TREND_DAYS = 14
 
-SKILL_AXES = [
-    ("accuracy", "Accuracy", "How many of your commands run cleanly, with no typos or invalid git."),
-    ("efficiency", "Efficiency", "How close to the ideal number of commands you solve in."),
-    ("independence", "Independence", "First-try clears that stay within the command budget."),
-    ("consistency", "Consistency", f"How many of the last {TREND_DAYS} days you showed up to train."),
-    ("mastery", "Mastery", "How deeply you've drilled the commands you've met."),
-    ("coverage", "Coverage", "The share of all levels you've completed at least once."),
-]
 
 class MetricsService:
     def dashboard_summary(self, *, player) -> dict:
@@ -145,18 +135,12 @@ class MetricsService:
                 "last_completed_on": streak.last_completed_on if streak else None,
             },
             "perfect_clears": perfect_stars,
-            # Rank is expressed directly in terms of this (0-100): the same
-            # "how deeply have you drilled what you've met" score as the Stats
-            # page's Mastery radar axis.
             "mastery": self._mastery_score(player=player) or 0,
             "retry_trends": self._retry_trends(player=player, started=started),
         }
 
     def stats_summary(self, *, player) -> dict:
-        """Learner-facing Stats page: a 6-axis Skill Profile radar, a daily
-        activity trend, and friendly headline numbers. Unlike dashboard_summary
-        (challenge-weighted), every axis blends adventures and challenges where
-        both produce data, so adventure-only learners still get a full profile."""
+        """Learner-facing stats with per-command mastery, activity, and headline KPIs."""
         now = timezone.now()
         since = now - timedelta(days=TREND_DAYS - 1)
         today = timezone.localdate()
@@ -174,57 +158,12 @@ class MetricsService:
             else None
         )
 
-        # Efficiency: share of completions that earned ≥2 stars (within budget).
         adv_completions = AdventureLevelCompletion.objects.filter(player=player)
-        adv_eff_n = adv_completions.count()
-        adv_eff_hits = adv_completions.filter(stars__gte=2).count()
         chal_completions = ChallengeTrialCompletion.objects.filter(player=player)
-        chal_eff_n = chal_completions.count()
-        chal_eff_hits = chal_completions.filter(stars__gte=2).count()
-        efficiency = self._blend(
-            [
-                (self._rate(adv_eff_hits, adv_eff_n)["value"], adv_eff_n),
-                (self._rate(chal_eff_hits, chal_eff_n)["value"], chal_eff_n),
-            ]
-        )
-
-        # Independence: share of 3-star clears (first-try within budget).
+        adv_done = adv_completions.count()
+        chal_done = chal_completions.count()
         adv_perf_hits = adv_completions.filter(stars=3).count()
         chal_perf_hits = chal_completions.filter(stars=3).count()
-        independence = self._blend(
-            [
-                (self._rate(adv_perf_hits, adv_eff_n)["value"], adv_eff_n),
-                (self._rate(chal_perf_hits, chal_eff_n)["value"], chal_eff_n),
-            ]
-        )
-
-        # Consistency: how many of the last TREND_DAYS days had any activity.
-        active_days = self._active_days(player=player, since=since)
-        consistency = round(min(1.0, len(active_days) / TREND_DAYS) * 100, 1) if total_steps else None
-
-        mastery = self._mastery_score(player=player)
-
-        # Coverage: distinct levels completed over all published levels (both ladders).
-        adv_done = AdventureLevelCompletion.objects.filter(player=player).count()
-        chal_done = ChallengeTrialCompletion.objects.filter(player=player).count()
-        total_levels = (
-            AdventureLevel.objects.filter(is_published=True).count()
-            + ChallengeTrial.objects.filter(is_published=True).count()
-        )
-        coverage = round((adv_done + chal_done) / total_levels * 100, 1) if total_levels else None
-
-        axis_values = {
-            "accuracy": accuracy,
-            "efficiency": efficiency,
-            "independence": independence,
-            "consistency": consistency,
-            "mastery": mastery,
-            "coverage": coverage,
-        }
-        skill_profile = [
-            {"key": key, "label": label, "hint": hint, "value": axis_values[key]}
-            for key, label, hint in SKILL_AXES
-        ]
 
         # Headline numbers.
         chal_counts = ChallengeRun.objects.filter(player=player, is_replay=False).aggregate(
@@ -261,17 +200,61 @@ class MetricsService:
         }
 
         return {
-            "skill_profile": skill_profile,
+            "skill_profile": self._skill_mastery_profile(player=player),
             "activity_trend": self._activity_trend(player=player, since=since, today=today),
             "headline": headline,
         }
 
-    def _mastery_score(self, *, player) -> float | None:
-        """Blend of adventure solve depth (solves / authored repetition) and
-        challenge clear ratio. Shared by dashboard_summary (rank is expressed
-        directly in terms of this) and stats_summary's Mastery radar axis."""
-        from adventures.services import form_solve_targets
+    def _skill_mastery_profile(self, *, player) -> list[dict]:
+        """Return every published Git skill with mastery aggregated across its forms."""
+        skills = list(
+            CommandSkill.objects.filter(
+                is_published=True,
+                command_forms__is_published=True,
+            )
+            .prefetch_related("command_forms")
+            .distinct()
+            .order_by("sort_order", "base_command", "id")
+        )
+        forms_by_skill = {
+            skill.id: [form for form in skill.command_forms.all() if form.is_published]
+            for skill in skills
+        }
+        form_ids = {
+            form.id
+            for forms in forms_by_skill.values()
+            for form in forms
+        }
+        targets = form_solve_targets(form_ids)
+        solves_by_form = dict(
+            SkillMastery.objects.filter(
+                player=player,
+                command_form_id__in=form_ids,
+            ).values_list("command_form_id", "solves")
+        )
 
+        rows = []
+        for skill in skills:
+            forms = forms_by_skill[skill.id]
+            target = sum(targets.get(form.id, 1) for form in forms)
+            solves = sum(
+                min(solves_by_form.get(form.id, 0), targets.get(form.id, 1))
+                for form in forms
+            )
+            value = round((solves / target) * 100, 1) if target else 0.0
+            rows.append(
+                {
+                    "key": skill.slug,
+                    "command": skill.base_command,
+                    "label": skill.base_command,
+                    "hint": f"{skill.title} · {solves} / {target} mastery solves",
+                    "value": value,
+                }
+            )
+        return rows
+
+    def _mastery_score(self, *, player) -> float | None:
+        """Blend adventure solve depth and challenge clear ratio for rank progress."""
         masteries = list(
             SkillMastery.objects.filter(player=player, solves__gte=1).select_related("command_form")
         )
@@ -298,9 +281,7 @@ class MetricsService:
         return round(sum(values) / len(values), 1) if values else None
 
     def _blend(self, parts: list[tuple]) -> float | None:
-        """Volume-weighted average of (value, weight) pairs, skipping empty parts.
-        Returns None only when no part has data, so a learner with just one mode
-        still gets a real axis value."""
+        """Volume-weighted average of (value, weight) pairs, skipping empty parts."""
         numerator = 0.0
         denominator = 0.0
         for value, weight in parts:
@@ -309,29 +290,6 @@ class MetricsService:
             numerator += value * weight
             denominator += weight
         return round(numerator / denominator, 1) if denominator else None
-
-    def _active_days(self, *, player, since) -> set:
-        adventure_completion_days = (
-            AdventureLevelCompletion.objects.filter(player=player, completed_at__gte=since)
-            .annotate(day=TruncDate("completed_at"))
-            .values_list("day", flat=True)
-            .distinct()
-        )
-        challenge_completion_days = (
-            ChallengeTrialCompletion.objects.filter(player=player, completed_at__gte=since)
-            .annotate(day=TruncDate("completed_at"))
-            .values_list("day", flat=True)
-            .distinct()
-        )
-        step_days = (
-            CommandStep.objects.filter(
-                Q(challenge_run__player=player) | Q(attempt__player=player), created_at__gte=since
-            )
-            .annotate(day=TruncDate("created_at"))
-            .values_list("day", flat=True)
-            .distinct()
-        )
-        return set(adventure_completion_days) | set(challenge_completion_days) | set(step_days)
 
     def _activity_trend(self, *, player, since, today) -> list[dict]:
         completed_by_day = dict(
@@ -375,13 +333,6 @@ class MetricsService:
             "value": round((numerator / denominator) * 100, 1) if denominator else None,
             "numerator": numerator,
             "denominator": denominator,
-        }
-
-    def _average_percent(self, values: list[int]) -> dict:
-        return {
-            "value": round(sum(values) / len(values), 1) if values else None,
-            "numerator": round(sum(values), 1),
-            "denominator": len(values),
         }
 
     def _average_retry_count_from_counts(self, numerator: int, denominator: int) -> dict:
