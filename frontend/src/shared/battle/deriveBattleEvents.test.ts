@@ -9,8 +9,8 @@ import {
 } from '@/shared/battle/deriveBattleEvents'
 import type { BattleMonster, CommandSubmissionOutcome } from '@/shared/battle/types'
 
-function mob(id = 0, hp = 3): BattleMonster {
-  return { id, species: 'bone-soldier', tier: 'mob', hp, max_hp: hp, alive: hp > 0 }
+function monster(id = 0, hp = 3): BattleMonster {
+  return { id, species: 'bone-soldier', hp, max_hp: hp, alive: hp > 0 }
 }
 
 function outcome(overrides: Partial<CommandSubmissionOutcome> = {}): CommandSubmissionOutcome {
@@ -58,7 +58,7 @@ describe('deriveBattleEventsFromCommandOutcome', () => {
     const block = deriveBattleEventsFromCommandOutcome({
       outcome: outcome({ solved: true, rules_passing: 3, rules_delta: 1, remaining_counted_commands: 3 }),
       skill: 'commit',
-      monsters: [mob(0, 3)],
+      monsters: [monster(0, 3)],
     })
 
     expect(block.events.map((event) => event.type)).toEqual([
@@ -73,7 +73,7 @@ describe('deriveBattleEventsFromCommandOutcome', () => {
     const block = deriveBattleEventsFromCommandOutcome({
       outcome: outcome({ rules_passing: 1, rules_delta: 1 }),
       skill: 'add',
-      monsters: [mob(0, 3)],
+      monsters: [monster(0, 3)],
     })
 
     expect(block.events.map((event) => event.type)).toEqual(['player_attack', 'monster_attack'])
@@ -81,11 +81,23 @@ describe('deriveBattleEventsFromCommandOutcome', () => {
     expect(block.player_hp).toBe(4)
   })
 
+  it('reserves the final monster HP until the stage is actually solved', () => {
+    const block = deriveBattleEventsFromCommandOutcome({
+      outcome: outcome({ solved: false, rules_passing: 3, rules_delta: 1 }),
+      skill: 'commit',
+      monsters: [monster(0, 1)],
+    })
+
+    expect(block.events.map((event) => event.type)).toEqual(['player_attack', 'monster_attack'])
+    expect(block.events).not.toContainEqual({ type: 'monster_death', monster: 0 })
+    expect(block.waves[0].monsters[0]).toMatchObject({ hp: 1, alive: true })
+  })
+
   it('casts a damage-less missed attack then a miss counter on counted no-progress', () => {
     const block = deriveBattleEventsFromCommandOutcome({
       outcome: outcome({ rules_passing: 0, rules_delta: 0 }),
       skill: 'status',
-      monsters: [mob(0, 3)],
+      monsters: [monster(0, 3)],
     })
 
     expect(block.events).toMatchObject([
@@ -96,21 +108,25 @@ describe('deriveBattleEventsFromCommandOutcome', () => {
     expect(block.waves[0].monsters[0].alive).toBe(true)
   })
 
-  it('does nothing for non-counted commands', () => {
+  it('casts free inspection commands without damage or counterattack', () => {
     const block = deriveBattleEventsFromCommandOutcome({
       outcome: outcome({ counted: false, remaining_counted_commands: 5 }),
       skill: 'status',
-      monsters: [mob(0, 3)],
+      monsters: [monster(0, 3)],
     })
 
-    expect(block.events).toEqual([])
+    expect(block.events).toEqual([
+      { type: 'player_attack', skill: 'status', target: 0, damage: 0, target_hp_after: 3 },
+    ])
+    expect(block.waves[0].monsters[0].hp).toBe(3)
+    expect(block.player_hp).toBe(5)
   })
 
   it('appends defeat when command outcome failed', () => {
     const block = deriveBattleEventsFromCommandOutcome({
       outcome: outcome({ failed: true, remaining_counted_commands: 0 }),
       skill: 'add',
-      monsters: [mob(0, 3)],
+      monsters: [monster(0, 3)],
     })
 
     expect(block.events.at(-1)).toEqual({ type: 'player_defeat' })
@@ -135,7 +151,7 @@ describe('client roster stability', () => {
     const block = deriveBattleEventsFromCommandOutcome({
       outcome: outcome({ total_rules: 9, rules_passing: 1, rules_delta: 1 }),
       skill: 'add',
-      monsters: [mob(0, 4)],
+      monsters: [monster(0, 4)],
     })
 
     expect(block.waves[0].monsters[0].max_hp).toBe(4)

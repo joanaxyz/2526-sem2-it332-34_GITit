@@ -82,7 +82,10 @@ ADVENTURE_LEVELS = [
                         "A cherry-pick was started onto the wrong target and is now stuck mid-way. Back "
                         "all the way out to the state before it began."
                     ),
-                    evaluation={"staging_empty": True, "working_tree_clean": True},
+                    evaluation={
+                        "staging_empty": True,
+                        "working_tree_clean": True,
+                    },
                     checks=[
                         {
                             "label": "The cherry-pick is fully backed out; the repository is clean again.",
@@ -132,6 +135,13 @@ ADVENTURE_LEVELS = [
                                 }
                             },
                         },
+                    ],
+                    workspace_files=[
+                        {
+                            "after_command_index": 1,
+                            "path": "src/auth.py",
+                            "content": "guard\nadapted=True\n",
+                        }
                     ],
                 ),
                 _wave(
@@ -387,7 +397,10 @@ ADVENTURE_LEVELS = [
                         "A transplant stalled halfway and the deadline will not wait. Read the "
                         "state to see what is stuck, then back the whole attempt out cleanly."
                     ),
-                    evaluation={"staging_empty": True, "working_tree_clean": True},
+                    evaluation={
+                        "staging_empty": True,
+                        "working_tree_clean": True,
+                    },
                     checks=[
                         {
                             "label": "The stuck state was read before retreating.",
@@ -478,6 +491,13 @@ ADVENTURE_LEVELS = [
                             },
                         },
                     ],
+                    workspace_files=[
+                        {
+                            "after_command_index": 2,
+                            "path": "src/auth.py",
+                            "content": "guard\nadapted_after_abort=True\n",
+                        }
+                    ],
                 ),
                 _wave(
                     "ch6-adv-abort-final-drill",
@@ -492,7 +512,20 @@ ADVENTURE_LEVELS = [
                         "incident note, back the attempt out completely, and confirm the "
                         "workspace reads clean again."
                     ),
-                    evaluation={"staging_empty": True, "working_tree_clean": True},
+                    evaluation={
+                        "staging_empty": True,
+                        "working_tree_clean": True,
+                        "rules": [
+                            {
+                                "type": "required_command_sequence",
+                                "commands": [
+                                    "git status --porcelain",
+                                    "git cherry-pick --abort",
+                                    "git status",
+                                ],
+                            }
+                        ],
+                    },
                     checks=[
                         {
                             "label": "The stuck state was captured before retreating.",
@@ -501,6 +534,21 @@ ADVENTURE_LEVELS = [
                         {
                             "label": "The workspace reads clean after the retreat.",
                             "requirement": {"staging_empty": True, "working_tree_clean": True},
+                        },
+                        {
+                            "label": "The clean workspace was confirmed after the cherry-pick was aborted.",
+                            "requirement": {
+                                "rules": [
+                                    {
+                                        "type": "required_command_sequence",
+                                        "commands": [
+                                            "git status --porcelain",
+                                            "git cherry-pick --abort",
+                                            "git status",
+                                        ],
+                                    }
+                                ]
+                            },
                         },
                     ],
                 ),

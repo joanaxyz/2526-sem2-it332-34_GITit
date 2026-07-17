@@ -2,7 +2,7 @@ import type { WalletSummary } from '@/shared/wallet/api/walletApi'
 
 export type ShopKind = 'story' | 'companion'
 
-export type UnlocksStory = {
+type UnlocksStory = {
   slug: string
   title: string
   chapter_count: number
@@ -33,9 +33,3 @@ export type ShopPurchaseResult = {
   wallet: WalletSummary
   shop: ShopCatalogResponse
 }
-
-export type ShopEquipResult = {
-  active_companion: string | null
-  shop: ShopCatalogResponse
-}
-

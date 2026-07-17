@@ -1,8 +1,7 @@
 {
   "bone-archer": {
     "label": "Bone Archer",
-    "tier": "mob",
-    "scale": 0.73,
+    "scale": 0.75,
     "attack": {
       "kind": "projectile",
       "hit_frame": 15,
@@ -12,7 +11,7 @@
         "orient_to": "travel",
         "layers": [
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/default.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/effects/skill.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -27,7 +26,21 @@
             "offset_y": 0,
             "orient_to": "travel"
           }
-        ]
+        ],
+        "anchor": "feet",
+        "motion": "charge",
+        "launch_start_frame": 5,
+        "impact_start_frame": 20,
+        "place_anchor": {
+          "x": 0.4883,
+          "y": 0.9258
+        },
+        "place_bounds": {
+          "left": 0.1562,
+          "top": 0.3867,
+          "right": 0.7852,
+          "bottom": 0.9531
+        }
       }
     },
     "metrics": {
@@ -90,8 +103,7 @@
   },
   "bone-blacksmith": {
     "label": "Bone Blacksmith",
-    "tier": "elite",
-    "scale": 0.86,
+    "scale": 0.81,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
@@ -102,7 +114,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/status.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/effects/skill.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -118,8 +130,12 @@
             "orient_to": "target-facing"
           }
         ],
-        "anchor": "center",
-        "placement": "target"
+        "anchor": "feet",
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.4844,
+          "y": 0.8594
+        }
       }
     },
     "metrics": {
@@ -182,8 +198,7 @@
   },
   "bone-demon": {
     "label": "Bone Demon",
-    "tier": "elite",
-    "scale": 1,
+    "scale": 0.54,
     "attack": {
       "kind": "projectile",
       "hit_frame": 15,
@@ -193,7 +208,7 @@
         "orient_to": "travel",
         "layers": [
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/diff.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-03/effects/skill.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -208,7 +223,21 @@
             "offset_y": 0,
             "orient_to": "travel"
           }
-        ]
+        ],
+        "anchor": "feet",
+        "motion": "charge",
+        "launch_start_frame": 5,
+        "impact_start_frame": 20,
+        "place_anchor": {
+          "x": 0.5,
+          "y": 0.9062
+        },
+        "place_bounds": {
+          "left": 0.1758,
+          "top": 0.3164,
+          "right": 0.8242,
+          "bottom": 0.9219
+        }
       }
     },
     "metrics": {
@@ -271,8 +300,7 @@
   },
   "bone-ghost": {
     "label": "Bone Ghost",
-    "tier": "mob",
-    "scale": 0.82,
+    "scale": 0.71,
     "attack": {
       "kind": "projectile",
       "hit_frame": 15,
@@ -282,7 +310,7 @@
         "orient_to": "travel",
         "layers": [
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/checkout.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/effects/skill.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -297,7 +325,21 @@
             "offset_y": 0,
             "orient_to": "travel"
           }
-        ]
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 5,
+        "impact_start_frame": 20,
+        "place_anchor": {
+          "x": 0.5059,
+          "y": 0.4648
+        },
+        "place_bounds": {
+          "left": 0.1602,
+          "top": 0.1445,
+          "right": 0.8477,
+          "bottom": 0.7812
+        }
       }
     },
     "metrics": {
@@ -360,8 +402,7 @@
   },
   "bone-lancer": {
     "label": "Bone Lancer",
-    "tier": "elite",
-    "scale": 0.52,
+    "scale": 0.54,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
@@ -372,7 +413,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/config.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/effects/skill.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -388,8 +429,12 @@
             "orient_to": "target-facing"
           }
         ],
-        "anchor": "center",
-        "placement": "target"
+        "anchor": "feet",
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.4922,
+          "y": 0.9023
+        }
       }
     },
     "metrics": {
@@ -452,8 +497,7 @@
   },
   "bone-necromancer": {
     "label": "Bone Necromancer",
-    "tier": "elite",
-    "scale": 0.78,
+    "scale": 0.67,
     "attack": {
       "kind": "projectile",
       "hit_frame": 15,
@@ -463,7 +507,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/log.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/effects/skill.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -479,8 +523,12 @@
             "orient_to": "target-facing"
           }
         ],
-        "anchor": "center",
-        "placement": "target"
+        "anchor": "feet",
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.4766,
+          "y": 0.8438
+        }
       }
     },
     "metrics": {
@@ -543,8 +591,7 @@
   },
   "bone-soldier": {
     "label": "Bone Soldier",
-    "tier": "mob",
-    "scale": 0.86,
+    "scale": 0.87,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
@@ -555,7 +602,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/revert.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/effects/skill.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -572,7 +619,11 @@
           }
         ],
         "anchor": "center",
-        "placement": "target"
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.5176,
+          "y": 0.4473
+        }
       }
     },
     "metrics": {
@@ -635,8 +686,7 @@
   },
   "cursed-lantern": {
     "label": "Cursed Lantern",
-    "tier": "mob",
-    "scale": 0.88,
+    "scale": 1.34,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
@@ -647,7 +697,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/fetch.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/effects/skill.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -664,7 +714,11 @@
           }
         ],
         "anchor": "center",
-        "placement": "caster"
+        "placement": "caster",
+        "place_anchor": {
+          "x": 0.5078,
+          "y": 0.4824
+        }
       }
     },
     "metrics": {
@@ -727,8 +781,7 @@
   },
   "floating-skull": {
     "label": "Floating Skull",
-    "tier": "mob",
-    "scale": 0.52,
+    "scale": 0.73,
     "attack": {
       "kind": "projectile",
       "hit_frame": 15,
@@ -738,7 +791,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/mergetool.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/effects/skill.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -754,8 +807,12 @@
             "orient_to": "target-facing"
           }
         ],
-        "anchor": "center",
-        "placement": "target"
+        "anchor": "feet",
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.4648,
+          "y": 0.8984
+        }
       }
     },
     "metrics": {
@@ -818,7 +875,6 @@
   },
   "ghost-lady": {
     "label": "Ghost Lady",
-    "tier": "elite",
     "scale": 0.82,
     "attack": {
       "kind": "projectile",
@@ -829,7 +885,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/log.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/effects/skill-back.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -845,7 +901,7 @@
             "orient_to": "target-facing"
           },
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/status.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/effects/skill.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -861,8 +917,12 @@
             "orient_to": "target-facing"
           }
         ],
-        "anchor": "center",
-        "placement": "target"
+        "anchor": "feet",
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.4355,
+          "y": 0.9297
+        }
       }
     },
     "metrics": {
@@ -925,8 +985,7 @@
   },
   "lich-king": {
     "label": "Lich King",
-    "tier": "boss",
-    "scale": 1.16,
+    "scale": 0.83,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
@@ -937,7 +996,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/config.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/effects/skill-back.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -953,7 +1012,7 @@
             "orient_to": "target-facing"
           },
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/revert.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/effects/skill.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -969,8 +1028,12 @@
             "orient_to": "target-facing"
           }
         ],
-        "anchor": "center",
-        "placement": "target"
+        "anchor": "feet",
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.498,
+          "y": 0.9141
+        }
       }
     },
     "metrics": {
@@ -1033,8 +1096,7 @@
   },
   "two-headed-hound": {
     "label": "Two Headed Hound",
-    "tier": "elite",
-    "scale": 0.95,
+    "scale": 0.99,
     "attack": {
       "kind": "projectile",
       "hit_frame": 15,
@@ -1044,7 +1106,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/checkout-conflict.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/effects/skill.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -1061,7 +1123,11 @@
           }
         ],
         "anchor": "center",
-        "placement": "target"
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.5312,
+          "y": 0.4922
+        }
       }
     },
     "metrics": {
@@ -1124,8 +1190,7 @@
   },
   "undead-clown": {
     "label": "Undead Clown",
-    "tier": "mob",
-    "scale": 0.86,
+    "scale": 0.77,
     "attack": {
       "kind": "projectile",
       "hit_frame": 15,
@@ -1135,7 +1200,7 @@
         "orient_to": "travel",
         "layers": [
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/reflog.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-13/effects/skill.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -1150,7 +1215,21 @@
             "offset_y": 0,
             "orient_to": "travel"
           }
-        ]
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 5,
+        "impact_start_frame": 20,
+        "place_anchor": {
+          "x": 0.5176,
+          "y": 0.4785
+        },
+        "place_bounds": {
+          "left": 0.2227,
+          "top": 0.1875,
+          "right": 0.9883,
+          "bottom": 0.7188
+        }
       }
     },
     "metrics": {
@@ -1213,8 +1292,7 @@
   },
   "undead-siren": {
     "label": "Undead Siren",
-    "tier": "elite",
-    "scale": 0.8,
+    "scale": 0.64,
     "attack": {
       "kind": "projectile",
       "hit_frame": 15,
@@ -1224,7 +1302,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/mergetool.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-14/effects/skill-back.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -1240,7 +1318,7 @@
             "orient_to": "target-facing"
           },
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/fetch.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-14/effects/skill.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -1257,7 +1335,11 @@
           }
         ],
         "anchor": "center",
-        "placement": "target"
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.5215,
+          "y": 0.4844
+        }
       }
     },
     "metrics": {
@@ -1320,8 +1402,7 @@
   },
   "zombe-boy": {
     "label": "Zombie Boy",
-    "tier": "mob",
-    "scale": 0.78,
+    "scale": 0.77,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
@@ -1332,7 +1413,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/companion/blue/effects/skill-flames-25/status.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/effects/skill.png",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -1349,7 +1430,11 @@
           }
         ],
         "anchor": "center",
-        "placement": "target"
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.5742,
+          "y": 0.4941
+        }
       }
     },
     "metrics": {

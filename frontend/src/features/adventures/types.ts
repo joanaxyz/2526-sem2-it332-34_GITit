@@ -3,26 +3,26 @@ import type { ChapterBook } from '@/features/story-map/components/book/bookTypes
 import type { LevelScenarioContext, RepositorySnapshot, TerminalStep } from '@/shared/level/types'
 import type { ObjectiveCheck } from '@/shared/level/utils/levelContext'
 
-export type AdventureRunStatus = 'started' | 'completed' | 'failed' | 'abandoned'
-export type AttemptStatus = 'started' | 'completed' | 'failed'
+type AdventureRunStatus = 'started' | 'completed' | 'failed' | 'abandoned'
+type AttemptStatus = 'started' | 'completed' | 'failed'
 
-export type AdventureScaffolding = {
+type AdventureScaffolding = {
   live_dag: boolean
   expected_state: boolean
   contextual_feedback: boolean
 }
 
-export type AdventureCommandBudget = {
+type AdventureCommandBudget = {
   min_counted_commands: number
   max_counted_commands: number
 }
 
-export type AdventureAttemptCounts = {
+type AdventureAttemptCounts = {
   command_count: number
   counted_command_count: number
 }
 
-export type AdventureLevelRef = {
+type AdventureLevelRef = {
   id: number
   slug: string
   title: string
@@ -37,7 +37,7 @@ export type AdventureLevelRef = {
  * `ScenarioContextNormalizer`. The live objective checklist arrives separately
  * as the attempt's `objective_checks` field.
  */
-export type AdventureScenarioContext = LevelScenarioContext
+type AdventureScenarioContext = LevelScenarioContext
 
 /** One persisted command in an attempt's terminal history. */
 export type AdventureStepLog = TerminalStep
@@ -66,7 +66,7 @@ export type AdventureAttempt = {
   steps: AdventureStepLog[]
 }
 
-export type AdventureAttemptResult = {
+type AdventureAttemptResult = {
   id: number
   order: number
   status: AttemptStatus
@@ -86,7 +86,7 @@ export type AdventureMasteryCommand = {
   mastered: boolean
 }
 
-export type AdventureMastery = {
+type AdventureMastery = {
   commands: AdventureMasteryCommand[]
   commands_mastered: number
   total_commands: number

@@ -1898,7 +1898,13 @@ REFORGE_WORKFLOWS = [
             _req(
                 {},
                 ["git log", "git rebase", "git status"],
-                rules=[_meta("last_rebase_target", "main")],
+                rules=[
+                    _meta("last_rebase_target", "main"),
+                    {
+                        "type": "required_command_sequence",
+                        "commands": ["git status", "git log"],
+                    },
+                ],
             ),
         ),
         checks=[
@@ -1906,7 +1912,18 @@ REFORGE_WORKFLOWS = [
                 "label": "The branch was replayed onto today's main.",
                 "requirement": {"rules": [_meta("last_rebase_target", "main")]},
             },
-            _required_check("The new shape was verified.", ["git status", "git log"]),
+            {
+                "label": "The new shape was verified after the rebase.",
+                "requirement": {
+                    "required_commands": ["git status", "git log"],
+                    "rules": [
+                        {
+                            "type": "required_command_sequence",
+                            "commands": ["git status", "git log"],
+                        }
+                    ],
+                },
+            },
         ],
         details=["main"],
         command_forms=CORE_TAGS,

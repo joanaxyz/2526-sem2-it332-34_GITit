@@ -117,7 +117,6 @@ def test_adventure_level_compiles_ordered_waves(db, django_user_model):
                 {
                     "slug": "level-1",
                     "title": "Level 1",
-                    "brief": "Make a save.",
                     "waves": [_wave("wave-a"), _wave("wave-b"), _wave("wave-c")],
                 }
             ]

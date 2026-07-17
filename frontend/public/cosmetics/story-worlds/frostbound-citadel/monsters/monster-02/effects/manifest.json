@@ -1,0 +1,33 @@
+{
+  "id": "glacier-smith-skill-effect",
+  "label": "Glacier Smith Skill Effect",
+  "motif": "glacier hammer impact",
+  "playback": "target",
+  "durationMs": 780,
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "columns": 5,
+  "rows": 5,
+  "frameCount": 25,
+  "fps": 18,
+  "layers": [
+    {
+      "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-02/effects/skill.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "layer": "front",
+      "scale": 0.82,
+      "opacity": 1,
+      "offset_x": 0,
+      "offset_y": 0,
+      "orient_to": "target-facing"
+    }
+  ],
+  "anchor": "feet",
+  "placement": "target"
+}

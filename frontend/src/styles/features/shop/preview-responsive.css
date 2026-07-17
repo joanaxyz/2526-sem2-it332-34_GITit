@@ -1,37 +1,5 @@
-@media (max-width: 940px) {
-  .shop-companion-preview-suite {
-    grid-template-rows: auto;
-  }
-
-  .shop-companion-pose-stage,
-  .shop-skill-stage {
-    min-height: 20rem;
-  }
-
-  .shop-skill-preview-body {
-    grid-template-columns: 1fr;
-  }
-
-  .shop-monster-carousel {
-    grid-template-columns: 1fr;
-  }
-
-  .shop-monster-carousel-track {
-    grid-template-columns: repeat(auto-fit, minmax(4.8rem, 1fr));
-  }
-
-  .shop-preview-pager,
-  .shop-preview-pager-dots {
-    display: none;
-  }
-}
-
-/* The page owns vertical scrolling. Preview panels may page horizontally, but
-   should never create nested vertical scroll containers. */
-.shop-shell,
 .shop-view,
 .shop-preview-panel,
-.shop-monster-showcase,
 .shop-companion-preview-suite {
   min-height: 0;
 }
@@ -42,14 +10,20 @@
   overflow-y: visible;
 }
 
-@media (max-width: 1024px) {
-  .shop-view--stories,
-  .shop-view--companions {
+@media (max-width: 760px) {
+  .shop-companion-preview-suite {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(2, minmax(26rem, auto));
   }
 
-  .shop-detail-rail {
-    position: static;
-    width: 100%;
+  .shop-companion-preview,
+  .shop-skill-preview { min-height: 26rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-carousel-story,
+  .shop-preview-chip,
+  .shop-monster-pick {
+    transition: none;
   }
 }

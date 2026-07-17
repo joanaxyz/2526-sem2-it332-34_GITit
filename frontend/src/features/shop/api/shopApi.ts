@@ -4,7 +4,6 @@ import type {
   ShopItem,
   ShopKind,
   ShopPurchaseResult,
-  UnlocksStory,
 } from '@/features/shop/types'
 
 export type {
@@ -12,7 +11,6 @@ export type {
   ShopItem,
   ShopKind,
   ShopPurchaseResult,
-  UnlocksStory,
 }
 
 export const shopApi = {

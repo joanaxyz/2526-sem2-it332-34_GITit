@@ -70,7 +70,7 @@ def test_snapshot_for_command_omits_project_tree():
     assert "visible_tree" not in snapshot
 
 
-def test_repository_snapshot_includes_conflict_details():
+def test_repository_snapshot_preserves_authored_conflict_details_without_enrichment():
     state = {
         "commits": [
             {"id": "c0", "message": "Base", "parents": [], "tree": {"src/auth.js": "timeout=3000"}},
@@ -90,6 +90,13 @@ def test_repository_snapshot_includes_conflict_details():
         },
         "staging": {},
         "conflicts": ["src/auth.js"],
+        "conflict_details": {
+            "src/auth.js": {
+                "base": "timeout=3000",
+                "ours": "timeout=5000",
+                "theirs": "timeout=2500",
+            }
+        },
         "operation_metadata": {"last_merge_branch": "feature/auth-timeout"},
     }
 
@@ -99,9 +106,6 @@ def test_repository_snapshot_includes_conflict_details():
         "base": "timeout=3000",
         "ours": "timeout=5000",
         "theirs": "timeout=2500",
-        "resolution": "timeout=5000\nretry=enabled",
-        "merged": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n",
-        "merge_branch": "feature/auth-timeout",
     }
 
 
@@ -130,3 +134,69 @@ def test_snapshot_round_trip_normalizes_identical_to_raw_state():
     raw_hash = tools.state_hash(raw)
     assert tools.state_hash(snapshotter.snapshot(raw)) == raw_hash
     assert tools.state_hash(snapshotter.snapshot_for_command(raw)) == raw_hash
+
+
+def test_snapshot_round_trip_preserves_conflict_and_legacy_metadata_exactly():
+    from simulator.services import RepositoryStateSimulator
+
+    tools = RepositoryStateSimulator()
+    snapshotter = RepositorySnapshotService()
+    raw = {
+        "repository_initialized": True,
+        "commits": [
+            {
+                "id": "c0",
+                "message": "Base",
+                "parents": [],
+                "tree": {"src/relay.conf": "load=low"},
+            }
+        ],
+        "branches": {"main": "c0"},
+        "head": {"type": "branch", "name": "main"},
+        "working_tree": {
+            "src/relay.conf": {
+                "status": "conflicted",
+                "content": "<<<<<<< HEAD\nload=high\n=======\nload=low\n>>>>>>> team/strict",
+            }
+        },
+        "staging": {},
+        "conflicts": ["src/relay.conf"],
+        "conflict_details": {
+            "src/relay.conf": {
+                "base": "load=medium",
+                "ours": "load=high",
+                "theirs": "load=low",
+            }
+        },
+        "operation_metadata": {"last_merge_branch": "team/strict"},
+        "last_merge_branch": "team/strict",
+        "squash_merge_staged": True,
+        "scenario_marker": {"preserve": ["arbitrary", "metadata"]},
+        "project_tree": {"stale": "derived"},
+        "visible_tree": {"stale": "derived"},
+    }
+
+    normalized = tools.normalize_state(raw)
+    command_snapshot = snapshotter.snapshot_for_command(raw)
+    display_snapshot = snapshotter.snapshot(raw)
+
+    assert tools.state_hash(command_snapshot) == tools.state_hash_for_normalized(normalized)
+    assert tools.state_hash(display_snapshot) == tools.state_hash_for_normalized(normalized)
+    assert command_snapshot["conflict_details"] == normalized["conflict_details"]
+    assert command_snapshot["last_merge_branch"] == "team/strict"
+    assert command_snapshot["squash_merge_staged"] is True
+    assert command_snapshot["scenario_marker"] == {"preserve": ["arbitrary", "metadata"]}
+    assert "project_tree" not in command_snapshot
+    assert "visible_tree" not in command_snapshot
+
+    normalized_snapshot = snapshotter.snapshot_for_command(normalized, already_normalized=True)
+    normalized_snapshot["scenario_marker"]["preserve"].append("isolated")
+    assert normalized["scenario_marker"] == {"preserve": ["arbitrary", "metadata"]}
+
+    command_snapshot["operation_metadata"]["last_merge_branch"] = "mutated"
+    command_snapshot["scenario_marker"]["preserve"].append("mutated")
+    assert raw["operation_metadata"]["last_merge_branch"] == "team/strict"
+    assert raw["scenario_marker"] == {"preserve": ["arbitrary", "metadata"]}
+
+    display_snapshot["visible_tree"]["src/relay.conf"]["content"] = "mutated"
+    assert display_snapshot["project_tree"]["src/relay.conf"]["content"] != "mutated"

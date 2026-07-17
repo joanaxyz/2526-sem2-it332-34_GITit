@@ -2,11 +2,6 @@ import type { RepositoryCommit } from '@/shared/level/types'
 import type { MutableRepositoryState } from '@/shared/git/simulator/types'
 import { clone, commitById, isRecord, normalizeCommits } from '@/shared/git/simulator/state/core'
 
-export function firstRemoteTarget(remoteBranches: Record<string, string | null>) {
-  const targets = Object.values(remoteBranches).filter((target): target is string => Boolean(target))
-  return targets.sort()[0] ?? 'r0'
-}
-
 export function applyRemoteFixtureBranches(state: MutableRepositoryState) {
   const fixture = isRecord(state.remote_fixtures) ? state.remote_fixtures : {}
   state.remote_branches ??= {}

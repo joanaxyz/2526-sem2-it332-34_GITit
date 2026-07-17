@@ -1,12 +1,15 @@
-import { BookOpen, CheckCircle2, Ghost, Map as MapIcon, Swords } from 'lucide-react'
+import { CheckCircle2 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { ShopCarousel } from '@/features/shop/components/ShopCarousel'
 import { StoryMonsterShowcase } from '@/features/shop/components/StoryMonsterShowcase'
-import { actionDisabled, actionLabel, formatCoins, statusLabel, unlocksLabel, type ShopDisplayItem } from '@/features/shop/utils/shopDisplay'
+import { actionDisabled, compactActionLabel, statusLabel, type ShopDisplayItem } from '@/features/shop/utils/shopDisplay'
+import { storyMapApi } from '@/features/story-map/api/storyMapApi'
+import type { LearningChapter } from '@/features/story-map/types'
+import { queryKeys } from '@/shared/api/queryKeys'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { environmentSlides, storyPreview, type EnvSlide, type StoryPreview } from '@/shared/story-worlds/storyPreviews'
-import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 
 /* Stories ----------------------------------------------------------------- */
 
@@ -36,6 +39,13 @@ export function StoryShop({
   const [index, setIndex] = useState(0)
   const selectedStory = stories[Math.min(index, stories.length - 1)]
   const bundle = previewForStory(selectedStory)
+  const selectedStorySlug = selectedStory ? worldSlugForStory(selectedStory) : null
+  const chapters = useQuery({
+    queryKey: queryKeys.storyChapters(selectedStorySlug),
+    queryFn: () => storyMapApi.listChapters(selectedStorySlug),
+    enabled: Boolean(selectedStorySlug),
+    staleTime: 60 * 1000,
+  })
 
   if (!selectedStory) {
     return (
@@ -47,6 +57,7 @@ export function StoryShop({
 
   const slides = bundle ? environmentSlides(bundle) : []
   const selectedWorldSlug = worldSlugForStory(selectedStory)
+  const scope = chapters.data ? chapterScope(chapters.data) : null
 
   return (
     <section className="shop-view shop-view--stories" aria-labelledby="story-shop-title">
@@ -69,29 +80,36 @@ export function StoryShop({
                   <span className="shop-status-chip" data-state={story.owned ? 'owned' : 'locked'}>
                     {statusLabel(story)}
                   </span>
-                  <h2 className="shop-world-title">{story.label}</h2>
+                  <h2 id={active ? 'story-shop-title' : undefined} className="shop-world-title">{story.label}</h2>
                   <p className="shop-world-sub">Story Map &amp; Battle World</p>
                 </div>
               </article>
             )
           }}
         />
+        <StoryActionDock
+          balance={balance}
+          onAction={onAction}
+          pending={pending}
+          story={selectedStory}
+          walletPending={walletPending}
+        />
       </div>
 
-      <StoryDetailPanel
-        balance={balance}
-        onAction={onAction}
-        pending={pending}
-        story={selectedStory}
-        walletPending={walletPending}
-      />
+      <StoryMonsterShowcase storyLabel={selectedStory.label} worldSlug={selectedWorldSlug} key={`monsters-${selectedStory.slug}`} />
 
-      <StoryContents bundle={bundle} slides={slides} story={selectedStory} worldSlug={selectedWorldSlug} key={selectedStory.slug} />
+      <StoryContents
+        bundle={bundle}
+        scope={scope}
+        slides={slides}
+        story={selectedStory}
+        key={`environments-${selectedStory.slug}`}
+      />
     </section>
   )
 }
 
-function StoryDetailPanel({
+function StoryActionDock({
   balance,
   onAction,
   pending,
@@ -105,67 +123,30 @@ function StoryDetailPanel({
   walletPending: boolean
 }) {
   return (
-    <aside className="ref-panel shop-detail-panel">
-      <p className="shop-detail-eyebrow">Story Bundle</p>
-      <h1 id="story-shop-title">{story.label}</h1>
-      <span className="shop-panel-rule" aria-hidden="true" />
-      <div className="shop-includes-list">
-        <span><BookOpen aria-hidden="true" /> Story chapters</span>
-        <span><MapIcon aria-hidden="true" /> Map environment &amp; sky</span>
-        <span><Swords aria-hidden="true" /> Battle parallax backdrops</span>
-        <span><Ghost aria-hidden="true" /> Story monster roster</span>
-      </div>
-      {unlocksLabel(story.unlocks_story) ? (
-        <p className="shop-unlocks-note">
-          <MapIcon aria-hidden="true" />
-          {unlocksLabel(story.unlocks_story)}
-        </p>
-      ) : null}
-      <div className="shop-buy-block">
-        <div className="shop-price-block">
-          {story.price > 0 ? (
-            <>
-              <GitCoinIcon />
-              <span>
-                <strong>{formatCoins(story.price)}</strong>
-                <small>GitCoins</small>
-              </span>
-            </>
-          ) : (
-            <span>
-              <strong>Free</strong>
-              <small>Included with your account</small>
-            </span>
-          )}
-        </div>
-        <button
-          type="button"
-          className="shop-primary-action"
-          disabled={actionDisabled(story, pending, balance, walletPending)}
-          onClick={() => onAction(story)}
-        >
-          {story.owned ? <CheckCircle2 aria-hidden="true" /> : null}
-          {actionLabel(story, balance, walletPending)}
-        </button>
-      </div>
-      <p className="shop-purchase-note">
-        <span aria-hidden="true">i</span>
-        Owned stories are permanent account unlocks. Entering a story controls its map, battle world, and monsters.
-      </p>
-    </aside>
+    <div className="shop-stage-action-dock" aria-label={`${story.label} purchase status`}>
+      <button
+        type="button"
+        className="shop-stage-action-button"
+        disabled={actionDisabled(story, pending, balance, walletPending)}
+        onClick={() => onAction(story)}
+      >
+        {story.owned ? <CheckCircle2 aria-hidden="true" /> : null}
+        {compactActionLabel(story, balance, walletPending)}
+      </button>
+    </div>
   )
 }
 
 function StoryContents({
   bundle,
+  scope,
   slides,
   story,
-  worldSlug,
 }: {
   bundle: StoryPreview | undefined
+  scope: StoryScope | null
   slides: EnvSlide[]
   story: ShopDisplayItem
-  worldSlug: string
 }) {
   // Start the gallery on the first battle backdrop so it doesn't just echo the
   // story map already shown in the hero carousel above.
@@ -178,14 +159,24 @@ function StoryContents({
     )
   }
 
-  const active = slides[Math.min(envIndex, slides.length - 1)]
+  const battleEnvironmentCount = slides.filter((slide) => slide.kind === 'battle').length
 
   return (
     <section className="shop-contents-shelf" aria-label={`${story.label} contents`}>
       <div className="shop-contents-block shop-contents-block--env">
         <header className="shop-block-head">
           <span>Environments</span>
-          <small>{active ? active.label : ''}</small>
+          <small className="shop-story-scope">
+            {scope ? (
+              <>
+                <span>{scope.chapters} chapters</span>
+                <span>{scope.adventures} adventure levels</span>
+                <span>{scope.challenges} challenges</span>
+              </>
+            ) : (
+              <span>{battleEnvironmentCount} battle {battleEnvironmentCount === 1 ? 'scene' : 'scenes'}</span>
+            )}
+          </small>
         </header>
         <ShopCarousel
           className="shop-env-carousel"
@@ -202,8 +193,19 @@ function StoryContents({
           )}
         />
       </div>
-
-      <StoryMonsterShowcase battleStageSrc={active?.src} storyLabel={story.label} worldSlug={worldSlug} />
     </section>
+  )
+}
+
+type StoryScope = { chapters: number; adventures: number; challenges: number }
+
+function chapterScope(chapters: LearningChapter[]): StoryScope {
+  return chapters.reduce<StoryScope>(
+    (scope, chapter) => ({
+      chapters: scope.chapters + 1,
+      adventures: scope.adventures + chapter.adventure_level_count,
+      challenges: scope.challenges + chapter.challenge_count,
+    }),
+    { chapters: 0, adventures: 0, challenges: 0 },
   )
 }

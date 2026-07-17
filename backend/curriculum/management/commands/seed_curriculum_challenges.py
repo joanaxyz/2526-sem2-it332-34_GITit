@@ -31,7 +31,6 @@ class SeedCurriculumChallengeLessonMixin:
                         "title": spec["title"],
                         "summary": chapter.description or spec["summary"],
                         "narrative": spec["narrative"],
-                        "brief": spec["summary"],
                         "sort_order": sort_order_by_chapter[chapter.id],
                         "is_published": chapter.is_published,
                     },
@@ -42,7 +41,7 @@ class SeedCurriculumChallengeLessonMixin:
             ChallengeLevel.objects.filter(chapter__in=list(chapters.values())),
             level_rows,
             key=lambda obj: (obj.chapter_id, obj.slug),
-            update_fields=["title", "summary", "narrative", "brief", "sort_order", "is_published"],
+            update_fields=["title", "summary", "narrative", "sort_order", "is_published"],
         )
         live_challenge_level_ids = [challenge_levels_by_key[key].id for key, _ in level_rows]
         ChallengeLevel.objects.filter(chapter__in=list(chapters.values())).exclude(

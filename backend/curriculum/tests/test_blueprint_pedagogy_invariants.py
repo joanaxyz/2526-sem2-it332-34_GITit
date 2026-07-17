@@ -38,6 +38,37 @@ CORE_FORMS = {
     "git-pull/default",
 }
 
+PROJECT_FILE_ACTIONS = {
+    "ch6-adv-stash-restore-commit": [
+        {
+            "after_command_index": 2,
+            "path": "README.md",
+            "content": "base\nUrgent navbar fix\n",
+        }
+    ],
+    "ch6-adv-shelve-fix-return": [
+        {
+            "after_command_index": 2,
+            "path": "README.md",
+            "content": "base\nQuick navbar patch\n",
+        }
+    ],
+    "ch6-adv-pick-then-adjust": [
+        {
+            "after_command_index": 1,
+            "path": "src/auth.py",
+            "content": "guard\nadapted=True\n",
+        }
+    ],
+    "ch6-adv-abort-and-adjust": [
+        {
+            "after_command_index": 2,
+            "path": "src/auth.py",
+            "content": "guard\nadapted_after_abort=True\n",
+        }
+    ],
+}
+
 CATALOG_SKILL_TRACKING = {
     skill["slug"]: skill.get("mastery_trackable", True)
     for skill in COMMAND_CATALOG
@@ -166,3 +197,26 @@ def test_authored_stories_do_not_spoil_solution_commands():
             if command.lower() in story:
                 leaks.append(f"{wave['slug']}: story contains {command!r}")
     assert not leaks, "Stories must not spell out solution commands:\n" + "\n".join(leaks)
+
+
+def test_branch_from_release_does_not_precreate_the_branch_it_teaches():
+    variants = [
+        variant
+        for level in ADVENTURE_LEVELS
+        for variant in level.get("variants") or []
+        if str(variant.get("case_id", "")).startswith("ch3-adv-branch-from-release")
+    ]
+
+    assert variants
+    for variant in variants:
+        initial_branches = (variant.get("initial_state_template") or {}).get("branches") or {}
+        assert "hotfix" not in initial_branches
+
+
+def test_edit_dependent_workflows_publish_the_exact_project_file_actions():
+    waves = {wave["slug"]: wave for wave in _ordered_waves()}
+
+    assert {
+        slug: waves[slug].get("workspace_files")
+        for slug in PROJECT_FILE_ACTIONS
+    } == PROJECT_FILE_ACTIONS

@@ -1,12 +1,8 @@
 from __future__ import annotations
 
-from adventures.models import AdventureLevel, SkillMastery
+from adventures.models import AdventureLevel
 from challenges.models import ChallengeTrial
 from common.constants import DIFFICULTY_EASY, DIFFICULTY_HARD, DIFFICULTY_MEDIUM
-
-
-def _level_command_form_ids(level: AdventureLevel) -> set[int]:
-    return {form.id for form in level.command_forms.all()}
 
 
 def _level_commands(level: AdventureLevel) -> list[str]:
@@ -17,18 +13,6 @@ def _level_commands(level: AdventureLevel) -> list[str]:
         if command not in commands:
             commands.append(command)
     return commands
-
-
-def _learned_form_ids_for(*, player, form_ids: set[int]) -> set[int]:
-    if player is None or not form_ids:
-        return set()
-    return set(
-        SkillMastery.objects.filter(
-            player=player,
-            learned_at__isnull=False,
-            command_form_id__in=form_ids,
-        ).values_list("command_form_id", flat=True)
-    )
 
 
 def _latest_attempt_payload(run) -> dict | None:

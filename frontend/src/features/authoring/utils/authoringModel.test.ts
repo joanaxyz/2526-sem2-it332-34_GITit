@@ -10,12 +10,11 @@ import {
 } from './authoringModel'
 
 describe('authoring serde round-trip', () => {
-  it('preserves brief, waves and variants through the definition', () => {
+  it('preserves waves and variants through the definition', () => {
     const form = initialForm('adventure')
     form.levels = [
       {
         ...emptyLevel('adventure', 0),
-        brief: 'Make your first save.',
         problems: [
           {
             ...emptyProblem('adventure', 0),
@@ -49,7 +48,6 @@ describe('authoring serde round-trip', () => {
     })
 
     const level = restored.levels[0]
-    expect(level.brief).toBe('Make your first save.')
     expect(level.problems).toHaveLength(2)
     const wave = level.problems[0]
     expect(wave.story).toBe('The history got tangled.')
@@ -98,7 +96,7 @@ describe('authoring serde round-trip', () => {
     expect(Array.isArray(chalDef.levels[0].trials)).toBe(true)
   })
 
-  it('omits brief from the definition when the author leaves it empty', () => {
+  it('omits scenario context when the author leaves story and task empty', () => {
     const form = initialForm('adventure')
     const definition = formToDefinition(form) as { levels: { waves: Record<string, unknown>[] }[] }
     const wave = definition.levels[0].waves[0]

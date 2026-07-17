@@ -2,14 +2,13 @@
 .shop-contents-shelf {
   grid-column: 1 / -1;
   grid-row: 2;
-  display: grid;
-  grid-template-columns: minmax(21rem, 0.95fr) minmax(25rem, 1.05fr);
-  gap: 1rem;
-  height: 23rem;
-  padding: 0.9rem 1.05rem;
+  display: block;
+  height: auto;
+  min-height: 0;
+  padding: 0.65rem;
   border: 1px solid rgba(var(--theme-primary-rgb), 0.2);
-  border-radius: 1rem;
-  background: linear-gradient(180deg, rgba(4, 14, 30, 0.6), rgba(1, 7, 16, 0.72));
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(6, 17, 34, 0.88), rgba(1, 7, 16, 0.94));
 }
 
 .shop-contents-shelf--empty {
@@ -23,6 +22,8 @@
   min-width: 0;
   min-height: 0;
 }
+
+.shop-contents-shelf .shop-contents-block--env { height: 100%; }
 
 .shop-block-head {
   display: flex;
@@ -43,6 +44,17 @@
   font-size: var(--text-2xs);
   font-weight: 700;
   letter-spacing: 0.06em;
+}
+
+.shop-story-scope {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.shop-story-scope span + span {
+  border-left: 1px solid rgba(126, 183, 217, 0.25);
+  padding-left: 0.45rem;
 }
 
 /* Environment carousel ---------------------------------------------------- */
@@ -104,7 +116,18 @@
 
 /* Story monster showcase -------------------------------------------------- */
 .shop-monster-showcase {
+  position: relative;
   gap: 0.55rem;
+  overflow: hidden;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.2);
+  border-radius: var(--radius);
+  padding: 0.62rem;
+  background: linear-gradient(180deg, rgba(6, 17, 34, 0.92), rgba(1, 7, 16, 0.97));
+}
+
+.shop-monster-showcase > .shop-block-head {
+  font-size: 0.6875rem;
+  letter-spacing: 0.09em;
 }
 
 .shop-monster-showcase--empty {
@@ -113,21 +136,18 @@
 }
 
 .shop-monster-stage {
-  --monster-stage-bg: none;
   position: relative;
   display: grid;
   place-items: center;
   overflow: hidden;
   flex: 1 1 auto;
   min-width: 0;
-  min-height: 13.1rem;
+  min-height: 13rem;
   border: 1px solid rgba(126, 183, 217, 0.22);
   border-radius: 0.75rem;
   background:
-    linear-gradient(180deg, rgba(1, 6, 14, 0.1), rgba(1, 6, 14, 0.28)),
-    var(--monster-stage-bg) center / cover no-repeat,
-    radial-gradient(70% 85% at 50% 32%, rgba(var(--theme-primary-rgb), 0.13), transparent 64%),
-    linear-gradient(180deg, rgba(5, 15, 32, 0.86), rgba(1, 6, 14, 0.92));
+    radial-gradient(78% 72% at 50% 42%, rgba(var(--theme-primary-rgb), 0.12), transparent 66%),
+    linear-gradient(180deg, rgba(5, 15, 32, 0.88), rgba(1, 6, 14, 0.96));
 }
 
 .shop-monster-stage::after {
@@ -175,23 +195,27 @@
 
 .shop-monster-toolbar {
   position: absolute;
-  top: 0.4rem;
-  right: 0.4rem;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  left: 0.5rem;
   z-index: 4;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 0.25rem;
+  width: 2.45rem;
+  border: 1px solid rgba(126, 183, 217, 0.13);
+  border-radius: var(--radius-md);
+  padding: 0.28rem;
+  background: rgba(1, 7, 17, 0.38);
 }
 
 .shop-monster-toolbar-id {
-  display: flex;
-  flex-direction: column;
-  gap: 0.03rem;
-  min-width: 0;
-  max-width: 7rem;
-  padding: 0 0.1rem;
-  text-align: right;
+  position: absolute;
+  top: 0.1rem;
+  left: 2.8rem;
+  width: 8rem;
+  text-align: left;
 }
 
 .shop-monster-toolbar-id strong {
@@ -222,7 +246,9 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  gap: 0.18rem;
+  justify-content: center;
+  flex: 1 1 auto;
+  gap: 0.28rem;
 }
 
 .shop-monster-move {
@@ -272,27 +298,191 @@
   opacity: 0.34;
 }
 
+/* Monster selector -------------------------------------------------------- */
+.shop-monster-select {
+  position: relative;
+  z-index: var(--z-dropdown);
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.shop-monster-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 2.75rem;
+  gap: 0.75rem;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  padding: 0.55rem 0.7rem;
+  background: var(--control-bg);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out);
+}
+
+.shop-monster-select-trigger:hover {
+  border-color: var(--control-border-hover);
+  background: var(--control-bg-hover);
+}
+
+.shop-monster-select-trigger:focus-visible {
+  outline: none;
+  border-color: var(--control-border-hover);
+  box-shadow: var(--control-focus-ring);
+}
+
+.shop-monster-select-value {
+  display: block;
+  min-width: 0;
+}
+
+.shop-monster-select-value strong {
+  display: block;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shop-monster-select-trigger > svg {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  color: var(--text-secondary);
+  transition: transform var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out);
+}
+
+.shop-monster-select-trigger:hover > svg,
+.shop-monster-select-trigger:focus-visible > svg {
+  color: var(--text-primary);
+}
+
+.shop-monster-select-trigger > svg[data-open='true'] {
+  transform: rotate(180deg);
+}
+
+.shop-monster-select-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.4rem);
+  left: 0;
+  z-index: var(--z-dropdown);
+  display: grid;
+  max-height: min(16rem, calc(100vh - 5rem));
+  gap: 0.2rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.36);
+  border-radius: var(--control-radius);
+  padding: 0.35rem;
+  background: #030b18;
+  box-shadow: 0 0.45rem 0.5rem rgba(0, 0, 0, 0.48);
+  list-style: none;
+  scrollbar-gutter: stable;
+  animation: shop-monster-select-in var(--motion-fast) var(--ease-out);
+}
+
+.shop-monster-select-menu li {
+  min-width: 0;
+}
+
+.shop-monster-select-option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 2.5rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.65rem;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: left;
+  transition: background var(--motion-fast) var(--ease-out), color var(--motion-fast) var(--ease-out);
+}
+
+.shop-monster-select-option:hover,
+.shop-monster-select-option:focus-visible {
+  outline: none;
+  background: var(--control-bg-hover);
+  color: var(--text-primary);
+}
+
+.shop-monster-select-option:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--control-border-hover);
+}
+
+.shop-monster-select-option[data-active='true'] {
+  background: var(--control-bg-active);
+  color: rgb(var(--theme-primary-rgb));
+}
+
+@keyframes shop-monster-select-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.25rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-monster-select-trigger,
+  .shop-monster-select-trigger > svg,
+  .shop-monster-select-option {
+    transition: none;
+  }
+
+  .shop-monster-select-menu {
+    animation: none;
+  }
+}
+
 /* Compact monster carousel ------------------------------------------------ */
 .shop-monster-carousel {
-  position: relative;
+  position: absolute;
+  top: 2.6rem;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 4;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.55rem;
-  min-height: 0;
+  width: 4.65rem;
+  gap: 0.25rem;
+  overflow: hidden;
+  border: 1px solid rgba(126, 183, 217, 0.13);
+  border-radius: var(--radius-md);
+  padding: 0.35rem;
+  background: rgba(1, 7, 17, 0.38);
 }
 
 .shop-monster-carousel-track {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(4.5rem, 1fr));
-  gap: 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
   min-width: 0;
+  min-height: 0;
+  overflow-x: clip;
+  overflow-y: auto;
+  padding-inline: 0.15rem;
+  scrollbar-width: thin;
 }
 
 .shop-preview-pager {
   display: grid;
-  width: 2rem;
-  height: 2rem;
+  width: 1.9rem;
+  height: 1.9rem;
   place-items: center;
   border: 1px solid var(--control-border);
   border-radius: 999px;
@@ -301,6 +491,9 @@
   cursor: pointer;
   transition: border-color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out), opacity var(--motion-normal) var(--ease-out);
 }
+
+.shop-monster-carousel .shop-preview-pager { justify-self: center; }
+.shop-monster-carousel .shop-preview-pager svg { transform: rotate(90deg); }
 
 .shop-preview-pager:hover:not(:disabled),
 .shop-preview-pager:focus-visible {
@@ -326,7 +519,7 @@
 
 .shop-preview-pager-dots {
   grid-column: 1 / -1;
-  display: flex;
+  display: none;
   justify-content: center;
   gap: 0.42rem;
   padding-top: 0.1rem;
@@ -340,13 +533,13 @@
   background: rgba(150, 178, 200, 0.42);
   cursor: pointer;
   padding: 0;
-  transition: background 150ms ease, width 150ms ease;
+  transition: background var(--motion-normal) var(--ease-out), transform var(--motion-normal) var(--ease-out);
 }
 
 .shop-preview-pager-dots button[data-active='true'] {
-  width: 1.15rem;
   background: rgb(var(--theme-primary-rgb));
   box-shadow: 0 0 8px rgba(var(--theme-primary-rgb), 0.7);
+  transform: scaleX(2.6);
 }
 
 .shop-monster-pick {
@@ -357,7 +550,7 @@
   background: none;
   color: inherit;
   cursor: pointer;
-  padding: 0.15rem 0.1rem;
+  padding: 0.18rem 0.25rem;
   transition: transform var(--motion-normal) var(--ease-out);
 }
 
@@ -376,7 +569,8 @@
   align-items: flex-end;
   justify-content: center;
   width: 100%;
-  height: 3.5rem;
+  height: 3.75rem;
+  overflow: visible;
 }
 
 .shop-monster-pick-ground {

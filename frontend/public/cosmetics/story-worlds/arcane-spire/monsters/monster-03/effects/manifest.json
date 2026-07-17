@@ -1,5 +1,5 @@
 {
-  "id": "bone-demon-skill-effect",
+  "id": "monster-03-skill-effect",
   "label": "Bone Demon Skill Effect",
   "motif": "blue flaming meteor",
   "playback": "projectile",
@@ -21,11 +21,25 @@
       "rows": 5,
       "frameCount": 25,
       "layer": "front",
-      "scale": 0.62,
+      "scale": 0.6,
       "opacity": 1,
       "offset_x": 0,
       "offset_y": 0,
       "orient_to": "travel"
     }
-  ]
+  ],
+  "anchor": "feet",
+  "motion": "charge",
+  "launchStartFrame": 5,
+  "impactStartFrame": 20,
+  "placeAnchor": {
+    "x": 0.5,
+    "y": 0.9062
+  },
+  "placeBounds": {
+    "left": 0.1758,
+    "top": 0.3164,
+    "right": 0.8242,
+    "bottom": 0.9219
+  }
 }

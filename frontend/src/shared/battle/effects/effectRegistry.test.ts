@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
@@ -13,11 +15,17 @@ import {
   tintForSkill,
 } from '@/shared/battle/effects/effectRegistry'
 import { effectSpecForSkill } from '@/shared/battle/effects/skill-effects/catalog'
+import skillIndex from '@/shared/cosmetics/companions/data/companion-skills.json'
 import type { SpriteAnimation } from '@/shared/sprites/types'
 
 const ROOT = '/cosmetics/companion/blue/effects/skill-flames-25'
 const BLACK_ROOT = '/cosmetics/companion/black/effects/skill-lightning-25'
 const WHITE_ROOT = '/cosmetics/companion/white/effects/skill-ice-25'
+const README_ROOTS = {
+  blue: 'blue/effects/skill-flames-25',
+  white: 'white/effects/skill-ice-25',
+  black: 'black/effects/skill-lightning-25',
+} as const
 const GIT_SKILLS = [
   'init',
   'clone',
@@ -50,6 +58,8 @@ const GIT_SKILLS = [
   'pull',
   'push',
   'rebase',
+  'tag',
+  'rev-list',
   'default',
 ] as const
 
@@ -122,6 +132,41 @@ function expectSpriteInsideHost(node: HTMLElement, frame: Keyframe, width: numbe
   expect(placed.y + spriteHeight).toBeLessThanOrEqual(height)
 }
 
+function expectVisibleSpriteInsideHost(
+  node: HTMLElement,
+  frame: Keyframe,
+  bounds: { left: number; top: number; right: number; bottom: number },
+  width: number,
+  height: number,
+) {
+  const placed = translateOf(frame)
+  const spriteWidth = Number.parseFloat(node.style.width)
+  const spriteHeight = Number.parseFloat(node.style.height)
+  expect(placed.x + spriteWidth * bounds.left).toBeGreaterThanOrEqual(0)
+  expect(placed.y + spriteHeight * bounds.top).toBeGreaterThanOrEqual(0)
+  expect(placed.x + spriteWidth * bounds.right).toBeLessThanOrEqual(width)
+  expect(placed.y + spriteHeight * bounds.bottom).toBeLessThanOrEqual(height)
+}
+
+function scaleOf(frame: Keyframe): number {
+  const match = /scale\(([-\d.]+)\)/.exec(String(frame.transform))
+  expect(match).not.toBeNull()
+  return Number(match![1])
+}
+
+function readmePlacement(desc: string): { playback: 'projectile' | 'target' | 'ground'; anchor: 'center' | 'feet' } | null {
+  if (desc.includes('impact(ground)')) return { playback: 'projectile', anchor: 'feet' }
+  if (desc.includes('impact(center)')) return { playback: 'projectile', anchor: 'center' }
+  if (desc === 'target-ground') return { playback: 'target', anchor: 'feet' }
+  if (desc === 'target-center') return { playback: 'target', anchor: 'center' }
+  if (desc === 'ground-run') return { playback: 'ground', anchor: 'feet' }
+  return null
+}
+
+function readmeSkillKey(skill: string): string {
+  return skill.replace(/_(front|back)$/, '')
+}
+
 describe('effectRegistry', () => {
   afterEach(() => {
     vi.restoreAllMocks()
@@ -132,6 +177,8 @@ describe('effectRegistry', () => {
     expect(spriteSourceForSkill('diff-conflict')).toBe(`${ROOT}/diff-conflict.png`)
     expect(spriteSourceForSkill('merge-base')).toBe(`${ROOT}/merge-base.png`)
     expect(spriteSourceForSkill('ls-files')).toBe(`${ROOT}/ls-files.png`)
+    expect(spriteSourceForSkill('tag')).toBe(`${ROOT}/tag.png`)
+    expect(spriteSourceForSkill('rev-list')).toBe(`${ROOT}/rev-list.png`)
   })
 
   it('exposes a dedicated miss effect instead of the default projectile', () => {
@@ -197,11 +244,13 @@ describe('effectRegistry', () => {
   })
 
   it('anchors audited grounded projectile impacts on the ground line', () => {
-    for (const slug of ['blue', 'white']) {
+    for (const slug of ['blue', 'white', 'black']) {
       expect(effectPlacementForSkill('init', slug)).toEqual({ playback: 'projectile', anchor: 'feet' })
-      expect(effectPlacementForSkill('add', slug)).toEqual({ playback: 'projectile', anchor: 'feet' })
     }
-    expect(effectPlacementForSkill('init', 'black')).toEqual({ playback: 'projectile', anchor: 'feet' })
+    // Blue's `add` impact is ground-baked, so it plants on the ground line; White
+    // and Black baked theirs as a body-centred burst.
+    expect(effectPlacementForSkill('add', 'blue')).toEqual({ playback: 'projectile', anchor: 'feet' })
+    expect(effectPlacementForSkill('add', 'white')).toEqual({ playback: 'projectile', anchor: 'center' })
     expect(effectPlacementForSkill('add', 'black')).toEqual({ playback: 'projectile', anchor: 'center' })
     expect(effectPlacementForSkill('branch', 'blue')).toEqual({ playback: 'projectile', anchor: 'feet' })
     expect(effectPlacementForSkill('branch', 'white')).toEqual({ playback: 'projectile', anchor: 'center' })
@@ -212,6 +261,48 @@ describe('effectRegistry', () => {
       launchStartFrame: 3,
       impactStartFrame: 16,
     })
+  })
+
+  it('keeps runtime placement in sync with generated companion manifests', () => {
+    for (const [companionSlug, skills] of Object.entries(skillIndex)) {
+      for (const skill of skills) {
+        expect(effectPlacementForSkill(skill.family, companionSlug)).toEqual({
+          playback: skill.playback,
+          anchor: skill.playback === 'ground' ? 'feet' : skill.anchor,
+        })
+      }
+    }
+  })
+
+  it('carries the pixel-measured placeAnchor from the companion index onto the runtime spec', () => {
+    let checked = 0
+    for (const [companionSlug, skills] of Object.entries(skillIndex)) {
+      for (const skill of skills) {
+        const measured = (skill as { placeAnchor?: { x: number; y: number } }).placeAnchor
+        if (!measured) continue
+        // The runtime pins the measured pixel anchor, so it must reach the spec
+        // verbatim (the fixed FEET/CENTER fraction is only a fallback).
+        expect(effectSpecForSkill(skill.family, companionSlug).placeAnchor).toEqual(measured)
+        checked += 1
+      }
+    }
+    expect(checked).toBeGreaterThan(0)
+  })
+
+  it('keeps runtime placement in sync with companion README choreography notes', () => {
+    for (const [companionSlug, root] of Object.entries(README_ROOTS)) {
+      const text = readFileSync(
+        `public/cosmetics/companion/${root}/README.md`,
+        'utf8',
+      )
+      for (const line of text.split(/\r?\n/)) {
+        const [rawSkill, desc] = line.split(' - ')
+        if (!rawSkill || !desc) continue
+        const expected = readmePlacement(desc.trim())
+        if (!expected) continue
+        expect(effectPlacementForSkill(readmeSkillKey(rawSkill.trim()), companionSlug), line).toEqual(expected)
+      }
+    }
   })
 
   it('plants ground-rooted risers on the ground line and body auras on the body', () => {
@@ -229,13 +320,14 @@ describe('effectRegistry', () => {
       'diff-conflict',
       'check-ignore',
       'ls-files',
+      'tag',
     ]) {
       expect(effectPlacementForSkill(skill)).toEqual({ playback: 'target', anchor: 'feet' })
     }
     expect(effectPlacementForSkill('ls-files', 'white')).toEqual({ playback: 'target', anchor: 'center' })
     expect(effectPlacementForSkill('ls-files', 'black')).toEqual({ playback: 'target', anchor: 'feet' })
     // Auras/bursts that play on the monster body are centered on it, not the floor.
-    for (const skill of ['status', 'config', 'log', 'revert', 'mergetool', 'fetch']) {
+    for (const skill of ['status', 'config', 'log', 'revert', 'mergetool', 'fetch', 'rev-list']) {
       expect(effectPlacementForSkill(skill)).toEqual({ playback: 'target', anchor: 'center' })
     }
     // Body-impact projectiles keep the centered impact anchor.
@@ -253,12 +345,10 @@ describe('effectRegistry', () => {
     try {
       const layer = document.createElement('div')
       await effectForSkill('status')({ layer, from: { x: 80, y: 90 }, to: { x: 300, y: 200 }, sizeScale: 2 })
-      // The sprite node is sized frameWidth * scale * sizeScale.
-      const node = layer.querySelector('[data-effect-sprite]') as HTMLElement | null
-      // Node is removed after the animation resolves; assert via metrics instead.
       const base = spriteDisplayMetricsForSkill('status')
-      expect(base.width).toBeGreaterThan(0)
-      expect(node).toBeNull()
+      const node = runtime.animationElements[0]
+      expect(Number.parseFloat(node.style.width)).toBeCloseTo(base.width * 2, 4)
+      expect(Number.parseFloat(node.style.height)).toBeCloseTo(base.height * 2, 4)
     } finally {
       runtime.restore()
     }
@@ -343,15 +433,18 @@ describe('effectRegistry', () => {
       expect(fade).toBeDefined()
       const impact = translateOf(fade![1])
       const metrics = spriteDisplayMetricsForSkill('reset', 'blue')
-      // Centered horizontally on the target, base planted on its ground line (0.86).
-      expect(impact.x + metrics.width * 0.5).toBeCloseTo(300, 4)
-      expect(impact.y + metrics.height * 0.86).toBeCloseTo(200, 4)
+      // Planted on the target via the pixel-measured placeAnchor (a ground-rooted
+      // riser, so its measured base sits low in the cell).
+      const pa = effectSpecForSkill('reset', 'blue').placeAnchor!
+      expect(pa.y).toBeGreaterThan(0.6)
+      expect(impact.x + metrics.width * pa.x).toBeCloseTo(300, 4)
+      expect(impact.y + metrics.height * pa.y).toBeCloseTo(200, 4)
     } finally {
       runtime.restore()
     }
   })
 
-  it('keeps an edge-pinned Blue rebase effect inside the stage', async () => {
+  it('keeps the visible pixels of an edge-pinned Blue rebase effect inside the stage', async () => {
     const runtime = installAnimationMocks()
     try {
       const layer = document.createElement('div')
@@ -367,7 +460,9 @@ describe('effectRegistry', () => {
       const fade = runtime.animations.find((frames) => frames.length === 4 && frames[1].offset === 0.18)
       expect(fade).toBeDefined()
       const index = runtime.animations.indexOf(fade!)
-      expectSpriteInsideHost(runtime.animationElements[index], fade![1], 360, 220)
+      const bounds = effectSpecForSkill('rebase', 'blue').placeBounds!
+      expect(bounds).toBeDefined()
+      expectVisibleSpriteInsideHost(runtime.animationElements[index], fade![1], bounds, 360, 220)
     } finally {
       runtime.restore()
     }
@@ -406,9 +501,12 @@ describe('effectRegistry', () => {
       expect(impact.x + metrics.width * 0.78).toBeCloseTo(bodyPoint.x, 4)
       expect(impact.y + metrics.height * 0.52).toBeCloseTo(bodyPoint.y, 4)
 
+      // The impact/dissipate frames pin the pixel-measured placeAnchor onto the
+      // ground point, not a fixed 0.86 fraction.
+      const pa = effectSpecForSkill('init', 'white').placeAnchor!
       const settle = translateOf(dissipate![0])
-      expect(settle.x + metrics.width * 0.5).toBeCloseTo(feetPoint.x, 4)
-      expect(settle.y + metrics.height * 0.86).toBeCloseTo(feetPoint.y, 4)
+      expect(settle.x + metrics.width * pa.x).toBeCloseTo(feetPoint.x, 4)
+      expect(settle.y + metrics.height * pa.y).toBeCloseTo(feetPoint.y, 4)
     } finally {
       runtime.restore()
     }
@@ -433,15 +531,16 @@ describe('effectRegistry', () => {
       expect(nose.x + metrics.width * 0.78).toBeCloseTo(300, 4)
       expect(nose.y + metrics.height * 0.52).toBeCloseTo(144, 4)
 
+      const pa = effectSpecForSkill('clone', 'black').placeAnchor!
       const settle = translateOf(impact![0])
-      expect(settle.x + metrics.width * 0.5).toBeCloseTo(300, 4)
-      expect(settle.y + metrics.height * 0.5).toBeCloseTo(144, 4)
+      expect(settle.x + metrics.width * pa.x).toBeCloseTo(300, 4)
+      expect(settle.y + metrics.height * pa.y).toBeCloseTo(144, 4)
     } finally {
       runtime.restore()
     }
   })
 
-  it('plants Blue clone impact frames on the ground line and scales them to the monster', async () => {
+  it('keeps Blue clone travel scale constant, then enlarges only its feet-planted impact', async () => {
     const runtime = installAnimationMocks()
     try {
       const layer = document.createElement('div')
@@ -461,15 +560,19 @@ describe('effectRegistry', () => {
       expect(flight).toBeDefined()
       expect(impact).toBeDefined()
 
-      const baseMetrics = spriteDisplayMetricsForSkill('clone', 'blue')
-      const metrics = { width: baseMetrics.width * 1.5, height: baseMetrics.height * 1.5 }
+      const metrics = spriteDisplayMetricsForSkill('clone', 'blue')
+      const node = runtime.animationElements[runtime.animations.indexOf(flight!)]
+      expect(Number.parseFloat(node.style.width)).toBeCloseTo(metrics.width, 4)
+      expect(Number.parseFloat(node.style.height)).toBeCloseTo(metrics.height, 4)
       const nose = translateOf(flight![1])
       expect(nose.x + metrics.width * 0.78).toBeCloseTo(bodyPoint.x, 4)
       expect(nose.y + metrics.height * 0.52).toBeCloseTo(bodyPoint.y, 4)
 
+      const pa = effectSpecForSkill('clone', 'blue').placeAnchor!
       const settle = translateOf(impact![0])
-      expect(settle.x + metrics.width * 0.5).toBeCloseTo(feetPoint.x, 4)
-      expect(settle.y + metrics.height * 0.86).toBeCloseTo(feetPoint.y, 4)
+      expect(settle.x + metrics.width * pa.x).toBeCloseTo(feetPoint.x, 4)
+      expect(settle.y + metrics.height * pa.y).toBeCloseTo(feetPoint.y, 4)
+      expect(scaleOf(impact![0])).toBeCloseTo(1.5, 4)
     } finally {
       runtime.restore()
     }
@@ -479,7 +582,9 @@ describe('effectRegistry', () => {
     const runtime = installAnimationMocks()
     try {
       const layer = document.createElement('div')
-      await effectForSkill('add', 'black')({ layer, from: { x: 90, y: 100 }, to: { x: 320, y: 150 } })
+      const bodyPoint = { x: 320, y: 150 }
+      const impactPoint = { x: 320, y: 210 }
+      await effectForSkill('add', 'black')({ layer, from: { x: 90, y: 100 }, to: bodyPoint, impactTo: impactPoint })
 
       expect(effectPlaybackForSkill('add', 'black')).toBe('projectile')
 
@@ -498,26 +603,28 @@ describe('effectRegistry', () => {
       expect(gatherStart.y + metrics.height * 0.5).toBeCloseTo(100, 4)
 
       const impact = translateOf(travel![1])
-      expect(impact.x + metrics.width * 0.78).toBeCloseTo(320, 4)
-      expect(impact.y + metrics.height * 0.52).toBeCloseTo(150, 4)
+      expect(impact.x + metrics.width * 0.78).toBeCloseTo(bodyPoint.x, 4)
+      expect(impact.y + metrics.height * 0.52).toBeCloseTo(bodyPoint.y, 4)
 
+      // The dissipate frames pin the pixel-measured placeAnchor onto the impact
+      // point (Black baked add as a body-centred burst).
+      const pa = effectSpecForSkill('add', 'black').placeAnchor!
       const settle = translateOf(dissipate![0])
-      expect(settle.x + metrics.width * 0.5).toBeCloseTo(320, 4)
-      expect(settle.y + metrics.height * 0.5).toBeCloseTo(150, 4)
+      expect(settle.x + metrics.width * pa.x).toBeCloseTo(impactPoint.x, 4)
+      expect(settle.y + metrics.height * pa.y).toBeCloseTo(impactPoint.y, 4)
     } finally {
       runtime.restore()
     }
   })
 
-  it('keeps Blue add impact planted at the feet point in a constrained stage', async () => {
+  it('settles Blue add on its pixel-measured placeAnchor at the impact point', async () => {
     const runtime = installAnimationMocks()
     try {
       const layer = document.createElement('div')
-      setHostRect(layer, 896, 276)
       const bodyPoint = { x: 760, y: 168 }
-      const feetPoint = { x: 760, y: 230 }
+      const impactPoint = { x: 760, y: 230 }
 
-      await effectForSkill('add', 'blue')({ layer, from: { x: 90, y: 100 }, to: bodyPoint, impactTo: feetPoint })
+      await effectForSkill('add', 'blue')({ layer, from: { x: 90, y: 100 }, to: bodyPoint, impactTo: impactPoint })
 
       const travel = runtime.animations.find((frames) => frames.length === 3 && frames[1].offset === 0.82)
       const dissipate = runtime.animations.find((frames) => frames.length === 3 && frames[1].offset === 0.46)
@@ -526,10 +633,13 @@ describe('effectRegistry', () => {
       const travelNose = translateOf(travel![1])
       const settle = translateOf(dissipate![0])
       const metrics = spriteDisplayMetricsForSkill('add', 'blue')
+      // Blue's add IS ground-baked, so its measured anchor sits low in the cell.
+      const pa = effectSpecForSkill('add', 'blue').placeAnchor!
+      expect(pa.y).toBeGreaterThan(0.5)
       expect(travelNose.x + metrics.width * 0.78).toBeCloseTo(bodyPoint.x, 4)
       expect(travelNose.y + metrics.height * 0.52).toBeCloseTo(bodyPoint.y, 4)
-      expect(settle.x + metrics.width * 0.5).toBeCloseTo(feetPoint.x, 4)
-      expect(settle.y + metrics.height * 0.86).toBeCloseTo(feetPoint.y, 4)
+      expect(settle.x + metrics.width * pa.x).toBeCloseTo(impactPoint.x, 4)
+      expect(settle.y + metrics.height * pa.y).toBeCloseTo(impactPoint.y, 4)
     } finally {
       runtime.restore()
     }
@@ -593,12 +703,12 @@ describe('effectRegistry', () => {
     }
   })
 
-  it('mirrors a monster charge onto its left/front hand (opposite the companion)', async () => {
+  it('charges rightward monster projectiles toward Blue without mirroring', async () => {
     const runtime = installAnimationMocks()
     try {
       const layer = document.createElement('div')
       const sheet = monsterSheet('projectile')
-      const from = { x: 300, y: 120 }
+      const from = { x: 120, y: 120 }
 
       await monsterAttackEffect({
         playback: 'projectile',
@@ -609,17 +719,17 @@ describe('effectRegistry', () => {
         anchor: 'center',
         motion: 'charge',
         layers: [{ sheet, layer: 'front', scale: 0.6, opacity: 1, offsetX: 0, offsetY: 0, orientTo: 'travel' }],
-      })({ layer, from, to: { x: 120, y: 120 }, targetFacing: 'right' })
+      })({ layer, from, to: { x: 300, y: 120 }, targetFacing: 'right' })
 
       const gather = runtime.animations.find((frames) => frames.length === 3 && frames[1].offset === 0.56)
       expect(gather).toBeDefined()
       const width = sheet.frameWidth * 0.6
-      // Charge gathers one clearance to the LEFT of the hand (a monster faces left)
-      // — the mirror of the companion's right-hand charge — and flips its art.
+      // Battle monsters stand on the left and shoot toward Blue on the right, so
+      // their charge gathers in the travel direction and keeps the right-facing art.
       const gatherCenterX = translateOf(gather![0]).x + width * 0.5
-      expect(gatherCenterX).toBeCloseTo(from.x - width * 0.56, 4)
-      expect(gatherCenterX).toBeLessThan(from.x)
-      expect(String(gather![0].transform)).toContain('scaleX(-1)')
+      expect(gatherCenterX).toBeCloseTo(from.x + width * 0.56, 4)
+      expect(gatherCenterX).toBeGreaterThan(from.x)
+      expect(String(gather![0].transform)).not.toContain('scaleX(-1)')
     } finally {
       runtime.restore()
     }
@@ -671,6 +781,50 @@ describe('effectRegistry', () => {
       expect(runtime.parents).toContain('front-layer')
       expect(runtime.parents).toContain('back-layer')
       expect(runtime.animations.some((frames) => String(frames[0]?.transform).includes('scaleX(-1)'))).toBe(true)
+    } finally {
+      runtime.restore()
+    }
+  })
+
+  it('pins monster target effects with measured placeAnchor when available', async () => {
+    const runtime = installAnimationMocks()
+    try {
+      const layer = document.createElement('div')
+      const to = { x: 180, y: 150 }
+
+      await monsterAttackEffect({
+        playback: 'target',
+        durationMs: 300,
+        scale: 0.82,
+        orientTo: 'target-facing',
+        placement: 'target',
+        anchor: 'feet',
+        placeAnchor: { x: 0.46, y: 0.78 },
+        layers: [
+          {
+            sheet: monsterSheet('measured.target'),
+            layer: 'front',
+            scale: 0.82,
+            opacity: 1,
+            offsetX: 0,
+            offsetY: 0,
+            orientTo: 'target-facing',
+          },
+        ],
+      })({
+        layer,
+        from: { x: 260, y: 120 },
+        to,
+        targetFacing: 'right',
+      })
+
+      const fade = runtime.animations.find((frames) => frames.length === 4 && frames[1].offset === 0.18)
+      expect(fade).toBeDefined()
+      const impact = translateOf(fade![1])
+      const width = 256 * 0.82
+      const height = 256 * 0.82
+      expect(impact.x + width * 0.46).toBeCloseTo(to.x, 4)
+      expect(impact.y + height * 0.78).toBeCloseTo(to.y, 4)
     } finally {
       runtime.restore()
     }

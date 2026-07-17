@@ -1,10 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CheckCircle2, Compass, Map as MapIcon, ShoppingBag, Sparkles } from 'lucide-react'
+import {
+  CheckCircle2,
+  ChevronRight,
+  Compass,
+  Map as MapIcon,
+  ShieldCheck,
+  ShoppingBag,
+  Sparkles,
+  Swords,
+} from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { shopApi } from '@/features/shop/api/shopApi'
-import { ShopCarousel } from '@/features/shop/components/ShopCarousel'
 import { hasLocalDefinition, statusLabel, toDisplayItem } from '@/features/shop/utils/shopDisplay'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { COMPANIONS } from '@/shared/cosmetics/companions/registry'
@@ -18,6 +26,17 @@ import { playerLoadoutApi } from '@/shared/player-loadout/playerLoadoutApi'
 function companionAvatar(slug: string, fallback?: string) {
   const sprites = COMPANIONS[slug]?.sprites
   return sprites?.avatar?.src ?? sprites?.portrait?.src ?? fallback
+}
+
+function companionStageArt(slug: string, fallback?: string) {
+  const sprites = COMPANIONS[slug]?.sprites
+  return sprites?.portrait?.src ?? sprites?.avatar?.src ?? sprites?.idle?.src ?? fallback
+}
+
+const companionIdentity: Record<string, string> = {
+  blue: 'Arcane flame',
+  white: 'Frost ward',
+  black: 'Storm veil',
 }
 
 export function HomeLoadoutView() {
@@ -54,86 +73,101 @@ export function HomeLoadoutView() {
     <section className="home-loadout" aria-label="Player loadout and stories">
       <header className="home-loadout-intro">
         <div>
-          <span>Owned collection</span>
-          <h2>Choose your companion</h2>
-          <p>Your equipped companion appears in Home, Adventures, Challenges, and the top navigation.</p>
+          <span>Field inventory</span>
+          <h2>Build your active loadout</h2>
+          <p>Choose the companion who enters every Adventure and Challenge at your side.</p>
         </div>
         <Link to={`${SHOP_ROUTE}?tab=companions`}><ShoppingBag aria-hidden="true" />Find companions</Link>
       </header>
 
-      <section className="ref-panel home-loadout-panel">
-        <header className="ref-panel-head"><Sparkles aria-hidden="true" />Companion loadout</header>
+      <section className="home-loadout-command" aria-labelledby="home-loadout-companion-title">
         {companions.length ? (
           <>
-            <div className="shop-stage shop-stage--portrait home-loadout-stage" data-tone={selectedCompanion?.tone}>
-              <ShopCarousel
-                className="shop-portrait-carousel"
-                ariaLabel="Owned companions"
-                items={companions}
-                index={companionIndex}
-                onIndexChange={setCompanionIndex}
-                getKey={(companion) => companion.slug}
-                renderSlide={(companion, _i, active) => {
-                  const avatar = companionAvatar(companion.slug, companion.art)
-                  return (
-                  <article className="shop-portrait-slide" data-tone={companion.tone} data-active={active}>
-                    <div className="shop-portrait-art">
-                      {avatar ? <img src={avatar} alt={companion.label} loading="lazy" /> : null}
-                    </div>
-                    <div className="shop-portrait-caption">
-                      <span className="shop-status-chip" data-state={companion.active ? 'equipped' : 'owned'}>
-                        {statusLabel(companion)}
-                      </span>
-                      <h2 className="shop-portrait-title">{companion.label}</h2>
-                    </div>
-                  </article>
-                  )
-                }}
-              />
-              {companions.length > 1 ? (
-              <div className="shop-portrait-thumbs" role="tablist" aria-label="Companion quick select">
-                {companions.map((companion, thumbIndex) => {
-                  const avatar = companionAvatar(companion.slug, companion.art)
-                  return (
+            <div className="home-loadout-stage" data-tone={selectedCompanion?.tone}>
+              <div className="home-loadout-stage-grid" aria-hidden="true" />
+              {selectedCompanion ? (
+                <img
+                  className="home-loadout-stage-art"
+                  src={companionStageArt(selectedCompanion.slug, selectedCompanion.art)}
+                  alt={selectedCompanion.label}
+                />
+              ) : null}
+              <div className="home-loadout-stage-status">
+                <span className="shop-status-chip" data-state={selectedCompanion?.active ? 'equipped' : 'owned'}>
+                  {selectedCompanion ? statusLabel(selectedCompanion) : 'Owned'}
+                </span>
+                <small>Active companion stage</small>
+              </div>
+            </div>
+
+            {selectedCompanion ? (
+              <div className="home-loadout-inspector">
+                <header>
+                  <span>{selectedCompanion.active ? 'Deployed companion' : 'Ready to deploy'}</span>
+                  <h2 id="home-loadout-companion-title">{selectedCompanion.label}</h2>
+                  <p>{COMPANIONS[selectedCompanion.slug]?.kit?.[0]?.description ?? 'A battle-ready companion for your next Git quest.'}</p>
+                </header>
+                <dl className="home-loadout-facts">
+                  <div>
+                    <dt><Sparkles aria-hidden="true" />Affinity</dt>
+                    <dd>{companionIdentity[selectedCompanion.slug] ?? 'Arcane'}</dd>
+                  </div>
+                  <div>
+                    <dt><Swords aria-hidden="true" />Assignment</dt>
+                    <dd>All missions</dd>
+                  </div>
+                  <div>
+                    <dt><ShieldCheck aria-hidden="true" />Account status</dt>
+                    <dd>Permanent unlock</dd>
+                  </div>
+                </dl>
+                <div className="home-loadout-action">
+                  <div>
+                    <span>{selectedCompanion.active ? 'Current slot' : 'Selected slot'}</span>
+                    <strong>{selectedCompanion.active ? 'Companion equipped' : 'Swap active companion'}</strong>
+                  </div>
+                  <button
+                    type="button"
+                    className="shop-primary-action"
+                    disabled={selectedCompanion.active || equip.isPending}
+                    aria-busy={equip.isPending && equip.variables === selectedCompanion.slug}
+                    onClick={() => equip.mutate(selectedCompanion.slug)}
+                  >
+                    {selectedCompanion.active ? <CheckCircle2 aria-hidden="true" /> : <ChevronRight aria-hidden="true" />}
+                    {selectedCompanion.active
+                      ? 'Equipped'
+                      : equip.isPending && equip.variables === selectedCompanion.slug
+                        ? 'Equipping'
+                        : 'Equip companion'}
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
+            <div className="home-loadout-roster" role="tablist" aria-label="Owned companions">
+              <div className="home-loadout-roster-heading">
+                <span>Owned roster</span>
+                <strong>{companions.length.toLocaleString()} available</strong>
+              </div>
+              {companions.map((companion, rosterIndex) => {
+                const avatar = companionAvatar(companion.slug, companion.art)
+                return (
                   <button
                     key={companion.slug}
                     type="button"
                     role="tab"
-                    aria-selected={thumbIndex === companionIndex}
-                    aria-label={`Select ${companion.label}`}
-                    className="shop-portrait-thumb"
-                    data-active={thumbIndex === companionIndex}
-                    onClick={() => setCompanionIndex(thumbIndex)}
+                    aria-selected={rosterIndex === companionIndex}
+                    className="home-loadout-roster-item"
+                    data-active={rosterIndex === companionIndex}
+                    onClick={() => setCompanionIndex(rosterIndex)}
                   >
-                    {avatar ? <img src={avatar} alt="" loading="lazy" /> : null}
+                    <span>{avatar ? <img src={avatar} alt="" loading="lazy" /> : null}</span>
+                    <strong>{companion.label}</strong>
+                    <small>{companion.active ? 'Equipped' : companionIdentity[companion.slug] ?? 'Owned'}</small>
                   </button>
-                  )
-                })}
-              </div>
-              ) : null}
+                )
+              })}
             </div>
-
-            {selectedCompanion ? (
-              <div className="home-loadout-action">
-                <div>
-                  <span>{selectedCompanion.active ? 'Currently equipped' : 'Selected'}</span>
-                  <strong>{selectedCompanion.label}</strong>
-                </div>
-                <button
-                  type="button"
-                  className="shop-primary-action"
-                  disabled={selectedCompanion.active || equip.isPending}
-                  onClick={() => equip.mutate(selectedCompanion.slug)}
-                >
-                  {selectedCompanion.active ? <CheckCircle2 aria-hidden="true" /> : null}
-                  {selectedCompanion.active
-                    ? 'Equipped'
-                    : equip.isPending && equip.variables === selectedCompanion.slug
-                      ? 'Equipping'
-                      : 'Equip companion'}
-                </button>
-              </div>
-            ) : null}
           </>
         ) : (
           <div className="home-loadout-empty">
@@ -141,42 +175,27 @@ export function HomeLoadoutView() {
             <Link to={`${SHOP_ROUTE}?tab=companions&required=1`}>Choose a companion</Link>
           </div>
         )}
-        {equip.isError ? <p className="home-loadout-error">{equip.error.message}</p> : null}
+        {equip.isError ? <p className="home-loadout-error" role="alert">{equip.error.message}</p> : null}
       </section>
 
-      <section className="ref-panel home-loadout-panel">
-        <header className="ref-panel-head"><Compass aria-hidden="true" />Your stories</header>
-        <p className="home-loadout-copy">Stories are entered from the Stories screen; they are not equipped like companions.</p>
+      <section className="home-loadout-worlds" aria-labelledby="home-loadout-worlds-title">
+        <div className="home-loadout-worlds-copy">
+          <Compass aria-hidden="true" />
+          <div>
+            <span>World atlas</span>
+            <h2 id="home-loadout-worlds-title">Stories are entered, not equipped</h2>
+            <p>Choose a destination, then open its map to continue your quest.</p>
+          </div>
+        </div>
         {stories.length ? (
           <>
-            <div className="shop-stage home-loadout-stage" data-tone={selectedStory?.tone}>
-              <ShopCarousel
-                className="shop-story-carousel"
-                ariaLabel="Owned stories"
-                items={stories}
-                index={storyIndex}
-                onIndexChange={setStoryIndex}
-                getKey={(story) => story.slug}
-                renderSlide={(story, _i, active) => (
-                  <article className="shop-world-slide" data-tone={story.tone} data-active={active}>
-                    <div className="shop-world-art">
-                      {story.art ? <img src={story.art} alt={`${story.label} map`} loading="lazy" /> : null}
-                    </div>
-                    <div className="shop-world-caption">
-                      <span className="shop-status-chip" data-state="owned">Owned</span>
-                      <h2 className="shop-world-title">{story.label}</h2>
-                      <p className="shop-world-sub">Story Map &amp; Battle World</p>
-                    </div>
-                  </article>
-                )}
-              />
-            </div>
-
             {selectedStory ? (
-              <div className="home-loadout-action">
+              <div className="home-loadout-world-stage" data-tone={selectedStory.tone}>
+                {selectedStory.art ? <img src={selectedStory.art} alt={`${selectedStory.label} map`} loading="lazy" /> : null}
                 <div>
-                  <span>Selected story</span>
-                  <strong>{selectedStory.label}</strong>
+                  <span className="shop-status-chip" data-state="owned">Owned world</span>
+                  <h3>{selectedStory.label}</h3>
+                  <p>Story map and battle world</p>
                 </div>
                 <Link className="shop-primary-action" to={storyPath(selectedStory.slug)}>
                   <MapIcon aria-hidden="true" />
@@ -184,6 +203,24 @@ export function HomeLoadoutView() {
                 </Link>
               </div>
             ) : null}
+            <div className="home-loadout-world-rail" role="tablist" aria-label="Owned story worlds">
+              {stories.map((story, worldIndex) => (
+                <button
+                  key={story.slug}
+                  type="button"
+                  role="tab"
+                  aria-selected={worldIndex === storyIndex}
+                  data-active={worldIndex === storyIndex}
+                  onClick={() => setStoryIndex(worldIndex)}
+                >
+                  {story.art ? <img src={story.art} alt="" loading="lazy" /> : null}
+                  <span>
+                    <strong>{story.label}</strong>
+                    <small>Owned world</small>
+                  </span>
+                </button>
+              ))}
+            </div>
           </>
         ) : (
           <div className="home-loadout-empty">
@@ -192,7 +229,7 @@ export function HomeLoadoutView() {
           </div>
         )}
         <div className="home-loadout-links">
-          <Link to={STORIES_ROUTE}>Choose another story</Link>
+          <Link to={STORIES_ROUTE}>Browse story maps</Link>
           <Link to={`${SHOP_ROUTE}?tab=stories`}>Find more stories</Link>
           <Link to={HOME_ROUTE}>Back to overview</Link>
         </div>

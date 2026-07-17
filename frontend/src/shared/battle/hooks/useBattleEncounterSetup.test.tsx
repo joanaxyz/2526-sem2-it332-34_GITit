@@ -9,7 +9,6 @@ function monster(id: number): BattleMonster {
   return {
     id,
     species: 'bone-soldier',
-    tier: 'mob',
     hp: 3,
     max_hp: 3,
     alive: true,
@@ -59,4 +58,3 @@ describe('useBattleEncounterSetup', () => {
     )
   })
 })
-

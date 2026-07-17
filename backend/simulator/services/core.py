@@ -82,7 +82,7 @@ def is_diagnostic_command(command: str) -> bool:
     if subcommand == "submodule":
         return args == ["status"]
     if subcommand == "config":
-        return "--get" in args
+        return any(option in args for option in {"--get", "--list", "-l"})
     if subcommand == "branch":
         return len([part for part in args if not part.startswith("-")]) == 0
     if subcommand == "remote":
@@ -310,89 +310,21 @@ class RepositoryStateSimulator:
 
 
 class RepositorySnapshotService:
-    def _head_target(self, state: dict) -> dict:
-        branches = state.get("branches", {})
-        head = state.get("head", {})
-        head_target = (
-            branches.get(head.get("name")) if head.get("type") == "branch" else head.get("target")
-        )
-        return {**head, "target": head_target}
+    def _canonical_copy(self, state: dict, *, already_normalized: bool) -> dict:
+        normalizer = RepositoryStateNormalizer()
+        payload = copy.deepcopy(state) if already_normalized else normalizer.normalize(state)
+        payload.pop("project_tree", None)
+        payload.pop("visible_tree", None)
+        return payload
 
     def snapshot_for_command(self, state: dict, *, already_normalized: bool = False) -> dict:
-        """Lightweight snapshot for command responses (DAG + index/worktree, no project tree)."""
-        normalizer = RepositoryStateNormalizer()
-        if not already_normalized:
-            state = normalizer.normalize(state)
-        conflicts = state.get("conflicts", [])
-        return {
-            "repository_initialized": state.get("repository_initialized", True),
-            "commits": state.get("commits", []),
-            "branches": state.get("branches", {}),
-            "head": self._head_target(state),
-            "staging": state.get("staging", {}),
-            "working_tree": state.get("working_tree", {}),
-            "conflicts": conflicts,
-            "conflict_details": self._conflict_details(normalizer, state) if conflicts else {},
-            "remotes": state.get("remotes", {}),
-            "remote_branches": state.get("remote_branches", {}),
-            "upstream_tracking": state.get("upstream_tracking", {}),
-            "tags": state.get("tags", {}),
-            "remote_tags": state.get("remote_tags", {}),
-            "stash_stack": state.get("stash_stack", []),
-            "partial_hunks": state.get("partial_hunks", {}),
-            "replaced_commits": state.get("replaced_commits", {}),
-            "reflog": state.get("reflog", []),
-            "operation_metadata": state.get("operation_metadata", {}),
-            # Browser command execution now owns the teaching-state mutation
-            # path, so execution-only state must survive refreshes too.
-            "config": state.get("config", {}),
-            "remote_fixtures": state.get("remote_fixtures", {}),
-            "remote_updates": state.get("remote_updates", {}),
-            "merge_abort_state": state.get("merge_abort_state", {}),
-            "merge_parent": state.get("merge_parent"),
-            "merge_conflicts": state.get("merge_conflicts", {}),
-            "merge_resolutions": state.get("merge_resolutions", {}),
-            "conflict_on_merge": state.get("conflict_on_merge", False),
-            "conflict_files": state.get("conflict_files", []),
-            "merge_conflict_files": state.get("merge_conflict_files", []),
-            "cherry_pick_in_progress": state.get("cherry_pick_in_progress", False),
-            "cherry_pick_original_head": state.get("cherry_pick_original_head"),
-            "rebase_state": state.get("rebase_state", {}),
-        }
+        """Return the canonical command state without derived display trees."""
+        return self._canonical_copy(state, already_normalized=already_normalized)
 
     def snapshot(self, state: dict, *, already_normalized: bool = False) -> dict:
         normalizer = RepositoryStateNormalizer()
-        if not already_normalized:
-            state = normalizer.normalize(state)
+        state = self._canonical_copy(state, already_normalized=already_normalized)
         visible_tree = normalizer.visible_project_tree(state, assume_normalized=True)
-        payload = self.snapshot_for_command(state, already_normalized=True)
-        payload["project_tree"] = visible_tree
-        payload["visible_tree"] = visible_tree
-        return payload
-
-    def _conflict_details(self, normalizer: RepositoryStateNormalizer, state: dict) -> dict:
-        details: dict[str, dict] = {}
-        authored_details = state.get("conflict_details") or {}
-        working_tree = state.get("working_tree") or {}
-        merge_branch = state.get("operation_metadata", {}).get("last_merge_branch")
-
-        for path in state.get("conflicts", []):
-            detail: dict = {}
-            authored = authored_details.get(path)
-            if isinstance(authored, dict):
-                detail.update(copy.deepcopy(authored))
-
-            entry = working_tree.get(path)
-            if isinstance(entry, dict):
-                for key in ("base", "ours", "theirs", "resolution"):
-                    if key in entry and key not in detail:
-                        detail[key] = copy.deepcopy(entry.get(key))
-                if "content" in entry:
-                    detail.setdefault("merged", copy.deepcopy(entry.get("content")))
-
-            if merge_branch and "merge_branch" not in detail:
-                detail["merge_branch"] = merge_branch
-            if detail:
-                details[path] = detail
-
-        return details
+        state["project_tree"] = visible_tree
+        state["visible_tree"] = copy.deepcopy(visible_tree)
+        return state

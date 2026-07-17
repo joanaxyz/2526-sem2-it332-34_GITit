@@ -55,7 +55,6 @@ export function AdventureBattlePanel({
       attempt.id,
       attempt.wave,
       maxHp,
-      run.current_wave,
       run.id,
       run.total_waves,
       storyWorld,

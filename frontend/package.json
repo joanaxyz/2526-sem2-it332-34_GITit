@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "lint:dead": "knip --include files,dependencies --reporter compact --no-progress",
+    "lint:dead": "knip --reporter compact --no-progress",
     "preview": "vite preview",
     "test": "vitest run",
     "api:generate": "python ../scripts/generate_api_contract.py",

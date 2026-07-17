@@ -15,7 +15,6 @@ from curriculum.selectors import (
     chapter_completion_count_map,
     chapter_completion_denominator_map,
     chapter_content_overview,
-    chapter_content_page,
     chapter_locked,
     get_command_form,
     learned_command_skills,
@@ -87,26 +86,6 @@ class ChapterListAPIView(APIView):
         return Response(serializer.data)
 
 
-class ChapterContentAPIView(APIView):
-    @extend_schema(responses={200: OpenApiTypes.OBJECT})
-    def get(self, request, chapter_id: int):
-        player, chapter = _require_unlocked_chapter(request, chapter_id)
-        section = request.query_params.get("section") or "command_skills"
-        cursor = _int_param(request.query_params.get("cursor"))
-        # Clamp so a client can't request an unbounded page (?limit=999999).
-        limit = min(max(_int_param(request.query_params.get("limit")) or 8, 1), 50)
-        with timing("curriculum.chapter_content", chapter_id=chapter.id, section=section):
-            return Response(
-                chapter_content_page(
-                    player=player,
-                    chapter_id=chapter.id,
-                    section=section,
-                    cursor=cursor,
-                    limit=limit,
-                )
-            )
-
-
 class ChapterContentOverviewAPIView(APIView):
     @extend_schema(responses={200: OpenApiTypes.OBJECT})
     def get(self, request, chapter_id: int):
@@ -158,10 +137,3 @@ class CommandFormPreviewAPIView(APIView):
                 "command_preview": form.command_preview or form.command_skill.command_preview or {},
             }
         )
-
-
-def _int_param(value: str | None) -> int | None:
-    try:
-        return int(value) if value is not None else None
-    except (TypeError, ValueError):
-        return None

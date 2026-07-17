@@ -11,15 +11,7 @@ const COMMAND_ALIASES: Record<string, string> = {
   br: 'branch',
 }
 
-export function normalizeCommand(command: string) {
-  try {
-    return new GitCommandParser().parse(command).normalizedText
-  } catch {
-    return normalizedFallback(command)
-  }
-}
-
-export function shellJoin(parts: string[]) {
+function shellJoin(parts: string[]) {
   return parts.map((part) => (needsQuote(part) ? quote(part) : part)).join(' ')
 }
 
@@ -29,10 +21,6 @@ function quote(value: string) {
 
 function needsQuote(value: string) {
   return /\s/.test(value) || /["';&|<>`$]/.test(value)
-}
-
-function normalizedFallback(command: string) {
-  return command.trim().split(/\s+/).filter(Boolean).join(' ')
 }
 
 export class GitCommandParser {

@@ -63,25 +63,17 @@ referencing==0.37.0
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.34.2
-    # via stripe
 rpds-py==2026.6.3
     # via
     #   jsonschema
     #   referencing
 sqlparse==0.5.5
     # via django
-stripe==13.0.1
-    # via -r requirements.in
-typing-extensions==4.16.0
-    # via stripe
 tzdata==2026.2 ; sys_platform == 'win32'
     # via
     #   django
     #   psycopg
 uritemplate==4.2.0
     # via drf-spectacular
-urllib3==2.7.0
-    # via requests
 whitenoise==6.11.0
     # via -r requirements.in

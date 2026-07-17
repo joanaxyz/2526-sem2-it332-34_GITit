@@ -285,13 +285,12 @@ function ProfileDropdown({
 
 function AppWalletLink({ balance, isPending }: { balance: number; isPending?: boolean }) {
   return (
-    <NavLink to="/shop?tab=gitcoins" className="app-wallet" aria-label="Open GitCoin shop">
+    <NavLink to="/shop?tab=gitcoins" className="app-wallet" aria-label="View GitCoin wallet">
       <GitCoinIcon />
       <span>
         <strong>{formatBalance(balance, isPending)}</strong>
         <small>GitCoins</small>
       </span>
-      <b aria-hidden="true">+</b>
     </NavLink>
   )
 }

@@ -43,6 +43,7 @@ import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { usePersistentState } from '@/shared/utils/persistentState'
+import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 
 export function ChallengeWorkspace() {
   const params = useParams()
@@ -50,6 +51,7 @@ export function ChallengeWorkspace() {
   const queryClient = useQueryClient()
   const runId = Number(params.runId)
   const { query, run, lines } = useChallengeRun(runId)
+  const { companionSlug } = usePlayerLoadout()
   const observedRunId = run?.id ?? null
   const observedRunStatus = run?.status ?? null
   const mutation = useChallengeCommandSubmission(runId)
@@ -160,6 +162,7 @@ export function ChallengeWorkspace() {
   if (query.isLoading) {
     return (
       <LoadingState
+        companionSlug={companionSlug}
         description="Preparing the repository, terminal, and challenge workspace."
         label="Loading challenge"
         variant="screen"
@@ -196,7 +199,7 @@ export function ChallengeWorkspace() {
     completionAnimationReady(run.id)
 
   const workspaceGridStyle = {
-    // Leading row = the battle strip (boss arena), uppermost in this column;
+    // Leading row = the challenge battle strip, uppermost in this column;
     // collapses to a slim HP bar. The DAG/terminal rows keep their resize.
     // Plain fr stories (min-heights live on the pane classes): minmax(len, fr)
     // stops distributing free space once a min binds and leaves a dead band.

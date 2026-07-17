@@ -113,18 +113,6 @@ export function LevelsEditor({
                 </label>
               </div>
 
-              <label className="author-field">
-                <span className="author-label">Lesson brief (optional)</span>
-                <span className="author-hint">A short intro shown above this level's problems.</span>
-                <textarea
-                  className="author-input"
-                  rows={2}
-                  value={level.brief}
-                  onChange={(e) => patch(index, { brief: e.target.value })}
-                  placeholder="In this level you'll make your first save…"
-                />
-              </label>
-
               <CommandFormPicker
                 options={commandFormOptions}
                 selected={level.commandForms}
@@ -147,4 +135,3 @@ export function LevelsEditor({
     </section>
   )
 }
-

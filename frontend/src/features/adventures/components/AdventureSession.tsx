@@ -24,6 +24,7 @@ import { LoadingState } from '@/shared/components/LoadingState'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { usePersistentState } from '@/shared/utils/persistentState'
 import { WORKSPACE_BATTLE_STAGE_ROW } from '@/shared/level/workspaceLayout'
+import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 
 type AdventureWorkspaceSnapshot = {
   run: AdventureRun
@@ -43,6 +44,7 @@ export function AdventureSession({
   const director = useBattleDirector()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { companionSlug } = usePlayerLoadout()
   const retryRun = useStartAdventureRun()
   const startNextLevel = useStartAdventureRun()
   const [projectFilesOpen, setProjectFilesOpen] = usePersistentState(PROJECT_FILES_OPEN_KEY, true)
@@ -122,6 +124,7 @@ export function AdventureSession({
   if (query.isLoading) {
     return (
       <LoadingState
+        companionSlug={companionSlug}
         description="Preparing the repository, terminal, and command challenge."
         label="Loading adventure"
         variant="screen"
@@ -146,7 +149,14 @@ export function AdventureSession({
   } as CSSProperties
 
   if (!attempt && run.status === 'started') {
-    return <LoadingState description="Setting up the next repository." label="Preparing next level" variant="screen" />
+    return (
+      <LoadingState
+        companionSlug={companionSlug}
+        description="Setting up the next repository."
+        label="Preparing next level"
+        variant="screen"
+      />
+    )
   }
 
   if (!attempt) {

@@ -17,18 +17,15 @@ describe('syncAdventureRunInCache', () => {
     const run = adventureRun(42)
     const chaptersKey = queryKeys.storyChapters('arcane-spire')
     const overviewKey = queryKeys.chapterOverview(7)
-    const contentKey = queryKeys.chapterContent(7, 'adventures')
 
     queryClient.setQueryData(chaptersKey, [])
     queryClient.setQueryData(overviewKey, { adventures: [{ latest_run_id: 42 }] })
-    queryClient.setQueryData(contentKey, { results: [] })
 
     syncAdventureRunInCache(queryClient, run)
 
     expect(queryClient.getQueryData(queryKeys.adventureRun(42))).toBe(run)
     expect(queryClient.getQueryState(chaptersKey)?.isInvalidated).toBe(true)
     expect(queryClient.getQueryState(overviewKey)?.isInvalidated).toBe(true)
-    expect(queryClient.getQueryState(contentKey)?.isInvalidated).toBe(true)
   })
 })
 

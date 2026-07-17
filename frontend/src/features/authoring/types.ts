@@ -4,7 +4,7 @@ export type ContentKind = 'adventure' | 'challenge' | 'lesson'
 export type ContentStatus = 'draft' | 'testable' | 'published' | 'archived'
 export type Visibility = 'private' | 'public' | 'store'
 
-export type ValidationErrorRow = {
+type ValidationErrorRow = {
   field: string
   message: string
 }

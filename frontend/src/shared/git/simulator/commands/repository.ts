@@ -103,7 +103,7 @@ function defaultCloneDirectory(url: string) {
   return tail.replace(/\.git$/, '') || 'repository'
 }
 
-export function defaultRemoteBranchFor(state: MutableRepositoryState, remote: string) {
+function defaultRemoteBranchFor(state: MutableRepositoryState, remote: string) {
   const fixture = isRecord(state.remote_fixtures) ? state.remote_fixtures : {}
   const defaultName = String(fixture.default_branch ?? `${remote}/main`)
   if (defaultName in (state.remote_branches ?? {})) return defaultName

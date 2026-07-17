@@ -202,25 +202,6 @@ class AdventureCommandResponseSerializer(serializers.Serializer):
     command_outcome = serializers.DictField()
 
 
-class GitCoinPackResponseSerializer(serializers.Serializer):
-    slug = serializers.CharField()
-    label = serializers.CharField()
-    coins = serializers.IntegerField()
-    price_cents = serializers.IntegerField()
-
-
-class GitCoinPacksResponseSerializer(serializers.Serializer):
-    items = GitCoinPackResponseSerializer(many=True)
-
-
-class CheckoutSessionRequestSerializer(serializers.Serializer):
-    pack_slug = serializers.CharField()
-
-
-class CheckoutSessionResponseSerializer(serializers.Serializer):
-    checkout_url = serializers.URLField()
-
-
 class LearnedSkillResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     slug = serializers.CharField()

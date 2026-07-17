@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import type {
   ChallengeActionIntent,
   ChallengeTrialAccess,
-  AdventureLevelSummary,
 } from '@/features/challenges/types'
+import type { AdventureLevelSummary } from '@/features/story-map/types'
 
 /**
  * The story map routes from the selected interactable artifact into the owning

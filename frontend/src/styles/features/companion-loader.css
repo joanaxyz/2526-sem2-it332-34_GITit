@@ -1,0 +1,113 @@
+/* Companion run loader: shared loading state, centered and sprite-driven. */
+.git-it-loading-state--screen {
+  min-height: 100dvh;
+}
+
+.git-it-companion-loader {
+  --loader-size: 18rem;
+  --loader-ground-width: 18rem;
+
+  position: relative;
+  display: grid;
+  width: min(24rem, 90vw);
+  min-height: var(--loader-size);
+  place-items: center;
+  overflow: visible;
+}
+
+.git-it-companion-loader--screen {
+  --loader-size: 26rem;
+  --loader-ground-width: 24rem;
+
+  width: min(30rem, 92vw);
+}
+
+.git-it-companion-loader--page {
+  --loader-size: 22rem;
+  --loader-ground-width: 20rem;
+
+  width: min(28rem, 90vw);
+}
+
+.git-it-companion-loader--small {
+  --loader-size: 9rem;
+  --loader-ground-width: 12rem;
+
+  width: min(16rem, 82vw);
+}
+
+.git-it-companion-loader--compact {
+  --loader-size: 6.25rem;
+  --loader-ground-width: 8rem;
+
+  width: min(11rem, 76vw);
+}
+
+.git-it-companion-loader::before {
+  content: '';
+  position: absolute;
+  inset: 18% 18% 8%;
+  z-index: -1;
+  border-radius: var(--radius-pill);
+  background:
+    radial-gradient(circle at 50% 62%, rgba(var(--theme-primary-rgb), 0.2), transparent 56%),
+    radial-gradient(circle at 42% 38%, rgba(var(--theme-glow-rgb), 0.12), transparent 50%);
+  filter: blur(18px);
+  opacity: 0.72;
+  animation: git-it-companion-loader-aura 1.8s var(--ease-out) infinite;
+}
+
+.git-it-companion-loader__stage {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-height: var(--loader-size);
+  place-items: center;
+  overflow: visible;
+}
+
+.git-it-companion-loader__stage::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 8%;
+  width: var(--loader-ground-width);
+  max-width: 82%;
+  height: 2px;
+  transform: translateX(-50%);
+  border-radius: var(--radius-pill);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(var(--theme-primary-rgb), 0.24),
+    rgba(var(--theme-primary-rgb), 0.56),
+    rgba(var(--theme-glow-rgb), 0.22),
+    transparent
+  );
+  box-shadow: 0 0 16px rgba(var(--theme-primary-rgb), 0.22);
+}
+
+.git-it-companion-loader__sprite {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 0 14px rgba(var(--theme-primary-rgb), 0.2));
+}
+
+@keyframes git-it-companion-loader-aura {
+  0%,
+  100% {
+    opacity: 0.42;
+    transform: scale(0.92);
+  }
+
+  50% {
+    opacity: 0.78;
+    transform: scale(1.02);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .git-it-companion-loader::before {
+    animation: none;
+  }
+}

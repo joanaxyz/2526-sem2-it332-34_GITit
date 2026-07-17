@@ -21,3 +21,15 @@ def test_scenario_context_normalizer_keeps_only_story_schema_keys():
         "task": "Inspect the branch before changing it.",
         "details": [{"label": "Branch", "value": "feature/auth"}],
     }
+
+
+def test_scenario_context_normalizer_keeps_value_only_copy_details():
+    context = ScenarioContextNormalizer().normalize(
+        {
+            "schema_version": 3,
+            "story": "Use the required commit message shown below.",
+            "details": [{"label": "", "value": "Save staged work"}],
+        }
+    )
+
+    assert context["details"] == [{"value": "Save staged work"}]

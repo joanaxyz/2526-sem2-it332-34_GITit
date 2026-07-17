@@ -15,9 +15,7 @@ export type ApiSchemas = {
   "ChallengeCommandResponse": { "command_family"?: string; "command_outcome": { [key: string]: JsonValue }; "diagnostic_metadata"?: Array<string>; "exit_code"?: number; "run": { [key: string]: JsonValue }; "stderr"?: string; "stdout"?: string; "step": ApiSchemas["RuntimeStepResponse"] }
   "ChallengeRunResponse": { "battle_stage"?: { [key: string]: JsonValue }; "challenge": { [key: string]: JsonValue }; "chapter": { [key: string]: JsonValue }; "completed_at"?: string; "completion"?: { [key: string]: JsonValue }; "counts": { [key: string]: JsonValue }; "difficulty"?: string; "expected_state"?: { [key: string]: JsonValue }; "failure_reason"?: string; "id": number; "mastery_progress": { [key: string]: JsonValue }; "next_difficulty"?: { [key: string]: JsonValue }; "policy": { [key: string]: JsonValue }; "replay": boolean; "repository_state": { [key: string]: JsonValue }; "reward_coins"?: number; "scaffolding": { [key: string]: JsonValue }; "scenario_context"?: { [key: string]: JsonValue }; "sibling_levels"?: Array<{ [key: string]: JsonValue }>; "stars": number; "status": string; "steps": Array<ApiSchemas["RuntimeStepResponse"]>; "variant": { [key: string]: JsonValue }; "visualization": { [key: string]: JsonValue } }
   "ChallengeRunStart": { "prior_run_id"?: number; "replay"?: boolean; "source_entry_point"?: ApiSchemas["SourceEntryPointEnum"] }
-  "ChapterList": { "adventure_level_count": number; "challenge_count": number; "chest_schedule": Array<{ [key: string]: JsonValue }>; "command_skill_count": number; "description": string; "id": number; "is_playable"?: boolean; "level_completion": { [key: string]: JsonValue }; "lock_reason": string; "locked": boolean; "narrative_brief"?: JsonValue; "number": number; "slug": string; "sort_order"?: number; "story": { [key: string]: JsonValue }; "title": string }
-  "CheckoutSessionRequest": { "pack_slug": string }
-  "CheckoutSessionResponse": { "checkout_url": string }
+  "ChapterList": { "adventure_level_count": number; "challenge_count": number; "chest_schedule": Array<{ [key: string]: JsonValue }>; "command_skill_count": number; "description": string; "id": number; "is_playable"?: boolean; "level_completion": { [key: string]: JsonValue }; "lock_reason": string; "locked": boolean; "number": number; "slug": string; "sort_order"?: number; "story": { [key: string]: JsonValue }; "title": string }
   "ClientCommandExecution": { "client_run_revision"?: number; "command_family": string; "diagnostic": boolean; "diagnostic_metadata": Array<string>; "exit_code": number; "next_state": { [key: string]: JsonValue }; "normalized_command": string; "output": string; "processed": boolean; "stderr": string; "stdout": string }
   "CommandFormPreviewResponse": { "command_preview": { [key: string]: JsonValue }; "id": number; "is_playable": boolean; "label": string; "skill": ApiSchemas["CommandFormPreviewSkillResponse"]; "slug": string; "summary": string; "usage_form": string }
   "CommandFormPreviewSkillResponse": { "base_command": string; "id": number; "slug": string; "title": string }
@@ -25,8 +23,6 @@ export type ApiSchemas = {
   "DashboardSummaryResponse": { "chapter_kpis": { [key: string]: JsonValue }; "completed_stories": Array<string>; "completed_story_slug"?: string; "counts": { [key: string]: JsonValue }; "kpis": { [key: string]: JsonValue }; "mastery": number; "perfect_clears": number; "retry_trends": { [key: string]: JsonValue }; "streak": { [key: string]: JsonValue } }
   "DetailResponse": { "detail": string }
   "DifficultyEnum": "beginner" | "intermediate" | "advanced"
-  "GitCoinPackResponse": { "coins": number; "label": string; "price_cents": number; "slug": string }
-  "GitCoinPacksResponse": { "items": Array<ApiSchemas["GitCoinPackResponse"]> }
   "KindEnum": "story" | "companion"
   "LearnedSkillResponse": { "base_command": string; "chapter_id"?: number; "chapter_number": number; "chapter_title": string; "id": number; "slug": string; "summary": string; "title": string }
   "LearnedSkillsResponse": { "results": Array<ApiSchemas["LearnedSkillResponse"]> }
@@ -49,7 +45,7 @@ export type ApiSchemas = {
   "ShopResponse": { "active_companion"?: string; "items": Array<ApiSchemas["ShopItemResponse"]> }
   "SourceEntryPointEnum": "level_page" | "retry"
   "StatsSummaryResponse": { "activity": Array<{ [key: string]: JsonValue }>; "headlines": { [key: string]: JsonValue }; "skill_profile": Array<{ [key: string]: JsonValue }>; "totals"?: { [key: string]: JsonValue } }
-  "Story": { "completed": boolean; "difficulty"?: ApiSchemas["DifficultyEnum"]; "id": number; "is_published"?: boolean; "lock_reason": string; "locked": boolean; "narrative_brief"?: JsonValue; "owned": boolean; "prerequisite_story": { [key: string]: JsonValue }; "price"?: number; "slug": string; "sort_order"?: number; "summary"?: string; "title": string; "world_slug"?: string }
+  "Story": { "completed": boolean; "difficulty"?: ApiSchemas["DifficultyEnum"]; "id": number; "is_published"?: boolean; "lock_reason": string; "locked": boolean; "owned": boolean; "prerequisite_story": { [key: string]: JsonValue }; "price"?: number; "slug": string; "sort_order"?: number; "summary"?: string; "title": string; "world_slug"?: string }
   "User": { "email": string; "id": number; "is_staff": boolean; "username": string }
   "WalletSummaryResponse": { "balance": number; "recent": Array<ApiSchemas["WalletTransaction"]> }
   "WalletTransaction": { "amount": number; "created_at": string; "reason": string }
@@ -106,15 +102,11 @@ export type ApiPath =
   | "/api/challenge-trials/{trial_id}/runs/"
   | "/api/chapters/"
   | "/api/chapters/{chapter_id}/book/"
-  | "/api/chapters/{chapter_id}/content/"
   | "/api/chapters/{chapter_id}/overview/"
   | "/api/command-forms/{form_id}/preview/"
   | "/api/health/"
   | "/api/health/live/"
   | "/api/health/ready/"
-  | "/api/payments/checkout/"
-  | "/api/payments/packs/"
-  | "/api/payments/webhook/"
   | "/api/player/loadout/companion/"
   | "/api/player/preferences/"
   | "/api/progress/dashboard/"
@@ -176,15 +168,11 @@ export type ApiMethodByPath = {
   "/api/challenge-trials/{trial_id}/runs/": "POST"
   "/api/chapters/": "GET"
   "/api/chapters/{chapter_id}/book/": "GET"
-  "/api/chapters/{chapter_id}/content/": "GET"
   "/api/chapters/{chapter_id}/overview/": "GET"
   "/api/command-forms/{form_id}/preview/": "GET"
   "/api/health/": "GET"
   "/api/health/live/": "GET"
   "/api/health/ready/": "GET"
-  "/api/payments/checkout/": "POST"
-  "/api/payments/packs/": "GET"
-  "/api/payments/webhook/": "POST"
   "/api/player/loadout/companion/": "POST"
   "/api/player/preferences/": "GET" | "PATCH"
   "/api/progress/dashboard/": "GET"
@@ -259,15 +247,11 @@ export const apiOperations = {
   challenge_trials_runs_create: { method: "POST", path: "/api/challenge-trials/{trial_id}/runs/", operationId: "challenge_trials_runs_create", tags: ["challenge-trials"] },
   chapters_list: { method: "GET", path: "/api/chapters/", operationId: "chapters_list", tags: ["chapters"] },
   chapters_book_retrieve: { method: "GET", path: "/api/chapters/{chapter_id}/book/", operationId: "chapters_book_retrieve", tags: ["chapters"] },
-  chapters_content_retrieve: { method: "GET", path: "/api/chapters/{chapter_id}/content/", operationId: "chapters_content_retrieve", tags: ["chapters"] },
   chapters_overview_retrieve: { method: "GET", path: "/api/chapters/{chapter_id}/overview/", operationId: "chapters_overview_retrieve", tags: ["chapters"] },
   command_forms_preview_retrieve: { method: "GET", path: "/api/command-forms/{form_id}/preview/", operationId: "command_forms_preview_retrieve", tags: ["command-forms"] },
   health_retrieve: { method: "GET", path: "/api/health/", operationId: "health_retrieve", tags: ["health"] },
   health_live_retrieve: { method: "GET", path: "/api/health/live/", operationId: "health_live_retrieve", tags: ["health"] },
   health_ready_retrieve: { method: "GET", path: "/api/health/ready/", operationId: "health_ready_retrieve", tags: ["health"] },
-  payments_checkout_create: { method: "POST", path: "/api/payments/checkout/", operationId: "payments_checkout_create", tags: ["payments"] },
-  payments_packs_retrieve: { method: "GET", path: "/api/payments/packs/", operationId: "payments_packs_retrieve", tags: ["payments"] },
-  payments_webhook_create: { method: "POST", path: "/api/payments/webhook/", operationId: "payments_webhook_create", tags: ["payments"] },
   player_loadout_companion_create: { method: "POST", path: "/api/player/loadout/companion/", operationId: "player_loadout_companion_create", tags: ["player"] },
   player_preferences_retrieve: { method: "GET", path: "/api/player/preferences/", operationId: "player_preferences_retrieve", tags: ["player"] },
   player_preferences_partial_update: { method: "PATCH", path: "/api/player/preferences/", operationId: "player_preferences_partial_update", tags: ["player"] },
@@ -346,15 +330,11 @@ export type ApiRequestBodyByOperation = {
   challenge_trials_runs_create: ApiSchemas["ChallengeRunStart"]
   chapters_list: null
   chapters_book_retrieve: null
-  chapters_content_retrieve: null
   chapters_overview_retrieve: null
   command_forms_preview_retrieve: null
   health_retrieve: null
   health_live_retrieve: null
   health_ready_retrieve: null
-  payments_checkout_create: ApiSchemas["CheckoutSessionRequest"]
-  payments_packs_retrieve: null
-  payments_webhook_create: null
   player_loadout_companion_create: ApiSchemas["ShopMutationRequest"]
   player_preferences_retrieve: null
   player_preferences_partial_update: ApiSchemas["PatchedPlayerPreferences"]
@@ -430,15 +410,11 @@ export type ApiResponseBodyByOperation = {
   challenge_trials_runs_create: ApiSchemas["ChallengeRunResponse"]
   chapters_list: Array<ApiSchemas["ChapterList"]>
   chapters_book_retrieve: { [key: string]: JsonValue }
-  chapters_content_retrieve: { [key: string]: JsonValue }
   chapters_overview_retrieve: { [key: string]: JsonValue }
   command_forms_preview_retrieve: ApiSchemas["CommandFormPreviewResponse"]
   health_retrieve: { [key: string]: JsonValue }
   health_live_retrieve: { [key: string]: JsonValue }
   health_ready_retrieve: { [key: string]: JsonValue }
-  payments_checkout_create: ApiSchemas["CheckoutSessionResponse"]
-  payments_packs_retrieve: ApiSchemas["GitCoinPacksResponse"]
-  payments_webhook_create: JsonValue
   player_loadout_companion_create: ApiSchemas["ShopEquipResponse"]
   player_preferences_retrieve: ApiSchemas["PlayerPreferences"]
   player_preferences_partial_update: ApiSchemas["PlayerPreferences"]

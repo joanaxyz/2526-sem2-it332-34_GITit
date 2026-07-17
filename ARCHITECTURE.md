@@ -153,7 +153,7 @@ CI rejects stale contract files with:
 python scripts/check_api_contract.py
 ```
 
-Critical runtime operations must use named response components, not anonymous `object` schemas. The contract guard currently enforces this for challenge runs, adventure runs, shop cosmetics, wallet, dashboard, stats, skills, payments, and command-form preview endpoints.
+Critical runtime operations must use named response components, not anonymous `object` schemas. The contract guard currently enforces this for challenge runs, adventure runs, shop cosmetics, wallet, dashboard, stats, skills, and command-form preview endpoints.
 
 Frontend runtime wrappers are guarded by:
 

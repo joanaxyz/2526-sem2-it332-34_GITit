@@ -4,12 +4,12 @@ export type PathPoint = { x: number; y: number }
    keeps nodes readable at ANY level count (the stage grows and the page
    scrolls), and the SVG shares the same pixel space so the dashed route
    passes exactly through every node with an undistorted stroke. */
-export const PATH_STEP = 118
-export const PATH_TOP = 78
-export const PATH_BOTTOM = 96
-export const TRIAL_CARD_H = 86
-export const TRIAL_CARD_GAP = 17
-export const TRIAL_FLYOUT_W = 262
+const PATH_STEP = 118
+const PATH_TOP = 78
+const PATH_BOTTOM = 96
+const TRIAL_CARD_H = 86
+const TRIAL_CARD_GAP = 17
+const TRIAL_FLYOUT_W = 262
 
 export function pathGeometry(count: number, width: number) {
   const amp = Math.max(56, Math.min(112, width * 0.5 - 176))

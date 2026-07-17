@@ -90,7 +90,7 @@ export function AdventureMasteryOverlay({ run }: { run: AdventureRun }) {
         </div>
         <ul className="flex flex-col gap-1.5">
           {commands.map((command) => (
-            <li key={command.slug} className="flex items-center justify-between gap-2">
+            <li key={command.form_id} className="flex items-center justify-between gap-2">
               <span
                 className={cn(
                   'flex min-w-0 items-center gap-1.5 text-xs',

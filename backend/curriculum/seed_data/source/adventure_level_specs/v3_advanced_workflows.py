@@ -160,6 +160,12 @@ def _requirements(branch: str, message: str, path: str | None = None) -> dict:
         "working_tree_clean": True,
         "staging_empty": True,
         "min_commits_on_branch": {branch: 3},
+        "rules": [
+            {
+                "type": "required_command_sequence",
+                "commands": ["git tag", "git log"],
+            }
+        ],
     }
 
 
@@ -357,8 +363,16 @@ def _level(incident: ChapterIncident, *, index: int, diagnostic: str) -> dict:
                 "requirement": {"required_commands": ["git switch -c"]},
             },
             {
-                "label": "Verify the resulting repository graph before handoff.",
-                "requirement": {"required_commands": ["git log"]},
+                "label": "Tag the repair, then verify the resulting repository graph before handoff.",
+                "requirement": {
+                    "required_commands": ["git tag", "git log"],
+                    "rules": [
+                        {
+                            "type": "required_command_sequence",
+                            "commands": ["git tag", "git log"],
+                        }
+                    ],
+                },
             },
         ],
         min_counted_commands=4,
@@ -366,7 +380,6 @@ def _level(incident: ChapterIncident, *, index: int, diagnostic: str) -> dict:
         adventure=f"{incident.chapter}-incidents",
         workflow=True,
         level_type=incident.level_type,
-        narrative_brief=narrative,
         # Forms genuinely exercised by EVERY variant of this wave (the four
         # strategies additionally diverge on cherry-pick/squash/revert, which
         # therefore must not be tagged wave-wide).

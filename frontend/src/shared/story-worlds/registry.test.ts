@@ -165,5 +165,6 @@ describe('story world and companion registries', () => {
     expect(monsters.map((monster) => monster.slug)).toContain('lich-king')
     expect(monsters.map((monster) => monster.slug)).toContain('two-headed-hound')
     expect(monsters.every((monster) => monster.skin === STORY_WORLDS['arcane-spire'].battle.monsters[monster.slug])).toBe(true)
+    expect(monsters.every((monster) => !('tier' in monster) && !('tier' in monster.skin))).toBe(true)
   })
 })

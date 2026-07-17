@@ -7,37 +7,7 @@ from common.constants import (
     SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
-
-try:
-    from common.models import VariantBase
-except ModuleNotFoundError as exc:
-    if exc.name != "common.models":
-        raise
-
-    class VariantBase(models.Model):
-        """Local fallback for authored problem variant fields.
-
-        Some zip-overlay updates can leave an older checkout without
-        backend/common/models.py. This abstract fallback keeps Django startup
-        alive and matches the shared field shape exactly, without creating its
-        own database table.
-        """
-
-        slug = models.SlugField()
-        label = models.CharField(max_length=80)
-        initial_state = models.JSONField(default=dict)
-        evaluation_spec = models.JSONField(default=dict, blank=True)
-        target_state = models.JSONField(default=dict, blank=True)
-        solution_commands = models.JSONField(default=list, blank=True)
-        case_id = models.CharField(max_length=160, blank=True)
-        semantic_key = models.CharField(max_length=240, blank=True)
-        parameter_context = models.JSONField(default=dict, blank=True)
-        scenario_context = models.JSONField(default=dict, blank=True)
-        scaffold_policy = models.JSONField(default=dict, blank=True)
-        is_published = models.BooleanField(default=True)
-
-        class Meta:
-            abstract = True
+from common.models import VariantBase
 
 
 class AdventureLevel(models.Model):
@@ -48,12 +18,6 @@ class AdventureLevel(models.Model):
         Chapter -> AdventureLevel -> AdventureWave -> AdventureWaveVariant
     """
 
-    class LevelType(models.TextChoices):
-        COMMAND_INTRODUCTION = "command_introduction", "Command introduction"
-        GUIDED_WORKFLOW = "guided_workflow", "Guided workflow"
-        APPLIED_SCENARIO = "applied_scenario", "Applied scenario"
-        MASTERY_INCIDENT = "mastery_incident", "Mastery incident"
-
     chapter = models.ForeignKey(
         "curriculum.Chapter",
         related_name="adventure_levels",
@@ -61,15 +25,6 @@ class AdventureLevel(models.Model):
     )
     slug = models.SlugField()
     title = models.CharField(max_length=180)
-    description = models.TextField(blank=True)
-    # Short level intro shown above the level's waves (optional).
-    brief = models.TextField(blank=True)
-    narrative_brief = models.JSONField(default=dict, blank=True)
-    level_type = models.CharField(
-        max_length=32,
-        choices=LevelType.choices,
-        default=LevelType.GUIDED_WORKFLOW,
-    )
     command_forms = models.ManyToManyField(
         "curriculum.CommandForm",
         related_name="adventure_levels",

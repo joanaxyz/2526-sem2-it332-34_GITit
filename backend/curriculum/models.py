@@ -16,7 +16,6 @@ class Story(models.Model):
     slug = models.SlugField(unique=True)
     title = models.CharField(max_length=160)
     summary = models.TextField(blank=True)
-    narrative_brief = models.JSONField(default=dict, blank=True)
     price = models.PositiveIntegerField(default=0)
     sort_order = models.PositiveIntegerField(default=0)
     is_published = models.BooleanField(default=True)
@@ -53,7 +52,6 @@ class Chapter(models.Model):
     number = models.PositiveIntegerField()
     title = models.CharField(max_length=160)
     description = models.TextField()
-    narrative_brief = models.JSONField(default=dict, blank=True)
     is_published = models.BooleanField(default=True)
     # A reference chapter has the same detailed book content as a playable
     # chapter but does not claim to have simulator levels before its command

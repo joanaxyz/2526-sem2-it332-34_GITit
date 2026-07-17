@@ -1,0 +1,35 @@
+{
+  "id": "bone-necromancer-skill-effect",
+  "label": "Systems Architect Skill Effect",
+  "motif": "magenta code dart",
+  "playback": "projectile",
+  "durationMs": 640,
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "columns": 5,
+  "rows": 5,
+  "frameCount": 25,
+  "fps": 18,
+  "layers": [
+    {
+      "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-06/effects/skill.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "layer": "front",
+      "scale": 0.58,
+      "opacity": 1,
+      "offset_x": 0,
+      "offset_y": 0,
+      "orient_to": "travel"
+    }
+  ],
+  "anchor": "center",
+  "motion": "charge",
+  "launchStartFrame": 2,
+  "impactStartFrame": 16
+}

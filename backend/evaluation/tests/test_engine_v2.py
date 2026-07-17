@@ -39,6 +39,55 @@ def test_process_requirements_are_enforced_when_explicit():
     assert outcome.result_category == RESULT_TARGET_NOT_YET_MATCHED
 
 
+def test_required_command_sequence_preserves_order_and_multiplicity():
+    spec = compile_evaluation_spec(
+        {
+            "state_requirements": {
+                "rules": [
+                    {
+                        "type": "required_command_sequence",
+                        "commands": [
+                            "git status --porcelain",
+                            "git cherry-pick --abort",
+                            "git status",
+                        ],
+                    }
+                ]
+            },
+            "completion_policy": {"mode": "rules"},
+        }
+    )
+
+    incomplete = EvaluationEngine().evaluate(
+        spec=spec,
+        next_state={},
+        executed_commands=["git status --porcelain", "git cherry-pick --abort"],
+    )
+    wrong_order = EvaluationEngine().evaluate(
+        spec=spec,
+        next_state={},
+        executed_commands=[
+            "git status",
+            "git cherry-pick --abort",
+            "git status --porcelain",
+        ],
+    )
+    complete_with_extra = EvaluationEngine().evaluate(
+        spec=spec,
+        next_state={},
+        executed_commands=[
+            "git status --porcelain",
+            "git log --oneline",
+            "git cherry-pick --abort",
+            "git status",
+        ],
+    )
+
+    assert incomplete.result_category == RESULT_TARGET_NOT_YET_MATCHED
+    assert wrong_order.result_category == RESULT_TARGET_NOT_YET_MATCHED
+    assert complete_with_extra.result_category == RESULT_TARGET_MATCHED
+
+
 def test_state_hash_completion_policy_uses_hashes():
     spec = compile_evaluation_spec({"completion_policy": {"mode": "state_hash"}})
     outcome = EvaluationEngine().evaluate(

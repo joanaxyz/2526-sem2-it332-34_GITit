@@ -1,13 +1,11 @@
 import type { SpriteDef } from '@/shared/cosmetics/types'
 
 /** Pure-CSS sky: a base color plus a layered gradient stack. */
-export type SkyDef = {
+type SkyDef = {
   base: string
   background: string
   starfield?: boolean
 }
-
-export type MonsterTier = 'mob' | 'elite' | 'boss'
 
 export type MonsterEffectPlayback = 'projectile' | 'target'
 export type MonsterEffectLayerDepth = 'front' | 'back'
@@ -15,7 +13,7 @@ export type MonsterEffectOrientation = 'none' | 'travel' | 'target-facing'
 export type MonsterEffectAnchor = 'center' | 'feet'
 export type MonsterEffectPlacement = 'target' | 'caster'
 /** Projectile windup style: 'charge' gathers the bolt at the monster's front
- *  (left) hand before firing, mirroring the companion's right-hand charge. */
+ *  hand before firing. The runtime mirrors from the actual travel direction. */
 export type MonsterEffectMotion = 'charge'
 
 export type MonsterEffectLayer = SpriteDef & {
@@ -34,14 +32,27 @@ export type MonsterAttackEffect = {
   orient_to?: MonsterEffectOrientation
   /** Target effects can either hit Blue or wrap the attacking monster. */
   placement?: MonsterEffectPlacement
-  /** Target effects default to body-center; feet remains for ground-planted art. */
+  /** Target effects default to body-center; feet remains for ground-planted art.
+   *  Projectile effects may also set feet when their impact frames are ground-baked. */
   anchor?: MonsterEffectAnchor
   /** Projectile-only: 'charge' plays the gather-orb windup on the front hand. */
   motion?: MonsterEffectMotion
+  /** Projectile-only, zero-based first frame that leaves the caster. */
+  launch_start_frame?: number
+  /** Projectile-only, zero-based first frame that should hold on the impact point. */
+  impact_start_frame?: number
+  /** Pixel-measured placement anchor emitted by the effect processor. When
+   *  present, runtime pins this actual baked point instead of a fixed center/feet
+   *  fraction, so regenerated sheets do not drift. */
+  place_anchor?: { x: number; y: number }
+  placeAnchor?: { x: number; y: number }
+  /** Visible bounds of planted/impact frames, normalized to the sprite cell. */
+  place_bounds?: { left: number; top: number; right: number; bottom: number }
+  placeBounds?: { left: number; top: number; right: number; bottom: number }
   layers: MonsterEffectLayer[]
 }
 
-export type MonsterAttack = {
+type MonsterAttack = {
   kind: 'melee' | 'projectile'
   hit_frame?: number
   lunge_px?: number
@@ -51,16 +62,15 @@ export type MonsterAttack = {
   effect?: MonsterAttackEffect
 }
 
-export type MonsterMetrics = {
+type MonsterMetrics = {
   foot_offset?: number
   hp_bar_fraction?: number
   range_px?: number
 }
 
-/** The visual skin for one catalog monster id. Gameplay HP/tier live backend-side. */
+/** The visual skin for one catalog monster id. */
 export type MonsterSkin = {
   label: string
-  tier: MonsterTier
   scale: number
   attack: MonsterAttack
   metrics: MonsterMetrics
@@ -76,14 +86,14 @@ export type StoryBattleDef = {
   monsters: Record<string, MonsterSkin>
 }
 
-export type StoryMapDef = {
+type StoryMapDef = {
   background: SpriteDef
 }
 
-export type StoryWorldTone = 'blue' | 'ice' | 'shadow' | 'neon'
+type StoryWorldTone = 'blue' | 'ice' | 'shadow' | 'neon'
 
 /** Semantic CSS tokens a render-ready story world owns. Values are RGB triplets without rgb(). */
-export type StoryWorldTokens = {
+type StoryWorldTokens = {
   primaryRgb: string
   secondaryRgb: string
   accentRgb: string
@@ -92,7 +102,7 @@ export type StoryWorldTokens = {
   sparkRgb: string
 }
 
-export type StoryWorldPreviewDef = {
+type StoryWorldPreviewDef = {
   battleBackgrounds?: string[]
   monsterPoses?: string[]
 }

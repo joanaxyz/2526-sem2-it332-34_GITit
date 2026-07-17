@@ -27,8 +27,6 @@ export type AuthoredProblem = {
 export type AuthoredLevel = {
   slug: string
   title: string
-  /** Short lesson intro shown above the level's problems. */
-  brief: string
   /** CommandForm ids this level introduces AND reuses. Listing a form on several
    *  levels is the spiral: its mastery target counts the levels that exercise it. */
   commandForms: number[]

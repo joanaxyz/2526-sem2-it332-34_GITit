@@ -194,7 +194,7 @@
   border-radius: 999px;
 }
 
-/* Larger portrait beside an encounter/boss monster picker. */
+/* Larger portrait beside an encounter monster picker. */
 .author-row-portrait {
   width: 2.1rem;
   border-radius: 0.45rem;
@@ -223,8 +223,7 @@
 
 .author-level,
 .author-block,
-.author-variant,
-.author-boss {
+.author-variant {
   display: grid;
   gap: 0.6rem;
   padding: 0.75rem;

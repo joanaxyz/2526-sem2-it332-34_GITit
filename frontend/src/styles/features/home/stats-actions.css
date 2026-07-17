@@ -46,42 +46,6 @@
   text-transform: uppercase;
 }
 
-.home-streak-hero {
-  display: grid;
-  justify-items: center;
-  gap: 0.15rem;
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.15);
-  padding: 1rem 0.75rem 0.85rem;
-  text-align: center;
-}
-
-.home-streak-hero svg {
-  width: 1.4rem;
-  height: 1.4rem;
-  color: hsl(var(--warning));
-  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.4));
-}
-
-.home-streak-hero strong {
-  color: #f6fbff;
-  font-family: var(--font-mono);
-  font-size: 3rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.home-streak-hero span {
-  color: rgba(218, 229, 247, 0.62);
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.home-streak-hero small {
-  color: rgba(218, 229, 247, 0.42);
-  font-size: var(--text-2xs);
-}
-
 .home-meter-stack {
   display: grid;
   gap: 0.7rem;
@@ -197,4 +161,3 @@
   font-family: var(--font-mono);
   font-size: var(--text-2xs);
 }
-

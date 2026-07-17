@@ -1,9 +1,8 @@
 import type { SpriteAnimation } from '@/shared/sprites/types'
 
-import type { SpriteAnchor } from './types'
+import type { SpriteAnchor, SpriteBounds } from './types'
 import {
   CENTER_ANCHOR,
-  FEET_ANCHOR,
   PROJECTILE_NOSE_ANCHOR,
   PROJECTILE_ORIGIN_ANCHOR,
   animateFrameRange,
@@ -12,6 +11,7 @@ import {
   containSpriteInHostForAnchors,
   finishAnimation,
   flipAnchor,
+  flipBounds,
   placeAt,
   spriteNode,
 } from './spriteDom'
@@ -29,6 +29,9 @@ export type ProjectileLayerSpec = {
   impactTo?: { x: number; y: number }
   durationMs: number
   impactAnchor?: SpriteAnchor
+  /** Target-size multiplier for impact frames only. Travel remains `scale`. */
+  impactScale?: number
+  impactBounds?: SpriteBounds
   impactStartFrame?: number
   opacity?: number
   filter?: string
@@ -45,10 +48,6 @@ const DEFAULT_PROJECTILE_IMPACT_START_FRAME = 20
 const PROJECTILE_FLIGHT_MS_FRAC = 0.72
 const PROJECTILE_MIN_IMPACT_MS = 200
 
-function isGroundImpactAnchor(anchor: SpriteAnchor): boolean {
-  return anchor.y >= FEET_ANCHOR.y - 0.01
-}
-
 /** Launch from the caster's hand with the body extending forward, fly the nose
  *  onto the body target, then play the impact/dissipate frames on the authored
  *  anchor. Ground impacts can pin separately without bending the flight path. */
@@ -58,28 +57,31 @@ export async function playProjectileLayer(spec: ProjectileLayerSpec): Promise<vo
   const flipped = orientation.includes('scaleX(-1)')
   const noseAnchor = flipped ? flipAnchor(PROJECTILE_NOSE_ANCHOR) : PROJECTILE_NOSE_ANCHOR
   const launchAnchor = flipped ? flipAnchor(PROJECTILE_ORIGIN_ANCHOR) : PROJECTILE_ORIGIN_ANCHOR
-  const finalAnchor = spec.pixelated ? noseAnchor : spec.impactAnchor ?? CENTER_ANCHOR
+  const authoredImpactAnchor = spec.impactAnchor ?? CENTER_ANCHOR
+  const impactAnchor = flipped ? flipAnchor(authoredImpactAnchor) : authoredImpactAnchor
+  const impactBounds = flipped && spec.impactBounds ? flipBounds(spec.impactBounds) : spec.impactBounds
+  const finalAnchor = spec.pixelated ? noseAnchor : impactAnchor
   const baseSize = { w: sheetDef.frameWidth * scale, h: sheetDef.frameHeight * scale }
-  const containAnchors = isGroundImpactAnchor(finalAnchor) ? [finalAnchor] : [finalAnchor, noseAnchor]
   const requestedImpactTo = spec.impactTo ?? spec.to
+  const requestedImpactScale = spec.pixelated ? 1 : Math.max(0.1, spec.impactScale ?? 1)
+  // Keep projectile travel at one authored size across every monster. Only the
+  // planted impact inherits target size, fitted against its visible pixels
+  // instead of the mostly-transparent sprite cell.
   const contained = containSpriteInHostForAnchors(
     host,
     spec.pixelated ? spec.to : requestedImpactTo,
-    containAnchors,
-    baseSize.w,
-    baseSize.h,
+    [finalAnchor],
+    baseSize.w * requestedImpactScale,
+    baseSize.h * requestedImpactScale,
     {
       grow: spec.pixelated ? 1 : 1.14,
-      minScaleBeforeShift: 0.58,
+      minScaleBeforeShift: spec.pixelated ? 0.58 : 0,
+      bounds: spec.pixelated ? undefined : impactBounds,
     },
   )
-  const fittedScale = scale * contained.scale
-  const to = spec.pixelated
-    ? contained.point
-    : {
-        x: spec.to.x + (contained.point.x - requestedImpactTo.x),
-        y: spec.to.y + (contained.point.y - requestedImpactTo.y),
-      }
+  const fittedScale = spec.pixelated ? scale * contained.scale : scale
+  const fittedImpactScale = spec.pixelated ? 1 : requestedImpactScale * contained.scale
+  const to = spec.pixelated ? contained.point : spec.to
   const impactTo = contained.point
   const node = spriteNode(host, sheetDef, {
     scale: fittedScale,
@@ -117,7 +119,6 @@ export async function playProjectileLayer(spec: ProjectileLayerSpec): Promise<vo
 
   const launchTransform = placeAt(from, size, launchAnchor, orientation)
   const noseTransform = placeAt(to, size, noseAnchor, orientation)
-  const impactAnchor = spec.impactAnchor ?? CENTER_ANCHOR
   const settleTransform = placeAt(impactTo, size, impactAnchor, orientation)
 
   // Flight: fly frames 0..impactStart-1 from the hand onto the body target,
@@ -145,9 +146,9 @@ export async function playProjectileLayer(spec: ProjectileLayerSpec): Promise<vo
   node.style.transform = settleTransform
   const impact = node.animate(
     [
-      { transform: `${settleTransform} scale(1)`, opacity },
-      { transform: `${settleTransform} scale(1.06)`, opacity, offset: 0.42 },
-      { transform: `${settleTransform} scale(1.12)`, opacity: 0 },
+      { transform: `${settleTransform} scale(${fittedImpactScale})`, opacity },
+      { transform: `${settleTransform} scale(${fittedImpactScale * 1.06})`, opacity, offset: 0.42 },
+      { transform: `${settleTransform} scale(${fittedImpactScale * 1.12})`, opacity: 0 },
     ],
     { duration: impactMs, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' },
   )
@@ -169,6 +170,9 @@ export type ChargeProjectileLayerSpec = {
   launchStartFrame?: number
   impactStartFrame?: number
   impactAnchor?: SpriteAnchor
+  /** Target-size multiplier for impact frames only. Gather/travel remain fixed. */
+  impactScale?: number
+  impactBounds?: SpriteBounds
   /** Caster faces left (monster) — mirror the charge onto its left/front hand. */
   flip?: boolean
   opacity?: number
@@ -206,18 +210,19 @@ export async function playChargeProjectileLayer(spec: ChargeProjectileLayerSpec)
   const flip = spec.flip ?? false
   const orientation = flip ? ' scaleX(-1)' : ''
   const noseAnchor = flip ? flipAnchor(PROJECTILE_NOSE_ANCHOR) : PROJECTILE_NOSE_ANCHOR
-  const impactAnchor = spec.impactAnchor ?? CENTER_ANCHOR
-  const containAnchors = isGroundImpactAnchor(impactAnchor) ? [impactAnchor] : [noseAnchor, impactAnchor]
+  const authoredImpactAnchor = spec.impactAnchor ?? CENTER_ANCHOR
+  const impactAnchor = flip ? flipAnchor(authoredImpactAnchor) : authoredImpactAnchor
+  const impactBounds = flip && spec.impactBounds ? flipBounds(spec.impactBounds) : spec.impactBounds
   const requestedImpactTo = spec.impactTo ?? spec.to
-  const contained = containSpriteInHostForAnchors(host, requestedImpactTo, containAnchors, baseSize.w, baseSize.h, {
+  const requestedImpactScale = Math.max(0.1, spec.impactScale ?? 1)
+  const contained = containSpriteInHostForAnchors(host, requestedImpactTo, [impactAnchor], baseSize.w * requestedImpactScale, baseSize.h * requestedImpactScale, {
     grow: 1.14,
-    minScaleBeforeShift: 0.58,
+    minScaleBeforeShift: 0,
+    bounds: impactBounds,
   })
-  const fittedScale = scale * contained.scale
-  const to = {
-    x: spec.to.x + (contained.point.x - requestedImpactTo.x),
-    y: spec.to.y + (contained.point.y - requestedImpactTo.y),
-  }
+  const fittedScale = scale
+  const fittedImpactScale = requestedImpactScale * contained.scale
+  const to = spec.to
   const impactTo = contained.point
   const node = spriteNode(host, sheetDef, {
     scale: fittedScale,
@@ -283,9 +288,9 @@ export async function playChargeProjectileLayer(spec: ChargeProjectileLayerSpec)
   node.style.transform = impactTransform
   const dissipate = node.animate(
     [
-      { transform: `${impactTransform} scale(0.98)`, opacity: 1 },
-      { transform: `${impactTransform} scale(1.04)`, opacity: 0.82, offset: 0.46 },
-      { transform: `${impactTransform} scale(1.12)`, opacity: 0 },
+      { transform: `${impactTransform} scale(${fittedImpactScale * 0.98})`, opacity: 1 },
+      { transform: `${impactTransform} scale(${fittedImpactScale * 1.04})`, opacity: 0.82, offset: 0.46 },
+      { transform: `${impactTransform} scale(${fittedImpactScale * 1.12})`, opacity: 0 },
     ],
     { duration: dissipateMs, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' },
   )
@@ -305,30 +310,41 @@ export type TargetLayerSpec = {
   offsetX?: number
   offsetY?: number
   orientation?: string
+  frameRange?: { from: number; to: number }
+  visualBounds?: SpriteBounds
 }
 
 /** Plant the sheet at `anchor` on the target and play a grow-hold-fade. */
 export async function playTargetLayer(spec: TargetLayerSpec): Promise<void> {
-  const { host, sheet: sheetDef, scale, to, anchor, durationMs } = spec
+  const { host, sheet: sheetDef, scale, to, durationMs } = spec
+  const orientation = spec.orientation ?? ''
+  const flipped = orientation.includes('scaleX(-1)')
+  const anchor = flipped ? flipAnchor(spec.anchor) : spec.anchor
+  const visualBounds = flipped && spec.visualBounds ? flipBounds(spec.visualBounds) : spec.visualBounds
   const desiredTarget = { x: to.x + (spec.offsetX ?? 0), y: to.y + (spec.offsetY ?? 0) }
-  // Fit-to-stage: a boss-sized effect planted at the edge would be cropped by the
+  // Fit-to-stage: a large effect planted at the edge would be cropped by the
   // stage's overflow:hidden. Prefer shrinking at the target point; when the point
   // itself is off-screen, nudge it into the frame so the full silhouette remains visible.
   const baseW = sheetDef.frameWidth * scale
   const baseH = sheetDef.frameHeight * scale
   const contained = containSpriteInHost(host, desiredTarget, anchor, baseW, baseH, {
     grow: 1.04,
-    minScaleBeforeShift: 0.6,
+    // Preserve the semantic body/feet destination. Fit only the visible art;
+    // never move a valid target just to save transparent cell padding.
+    minScaleBeforeShift: 0,
+    bounds: visualBounds,
   })
   const target = contained.point
   const fittedScale = scale * contained.scale
   const node = spriteNode(host, sheetDef, { scale: fittedScale, opacity: spec.opacity })
   const size = { w: sheetDef.frameWidth * fittedScale, h: sheetDef.frameHeight * fittedScale }
-  const transform = placeAt(target, size, anchor, spec.orientation ?? '')
+  const transform = placeAt(target, size, anchor, orientation)
   const opacity = spec.opacity ?? 1
   node.style.transformOrigin = `${anchor.x * 100}% ${anchor.y * 100}%`
   node.style.transform = transform
-  const sheetRun = animateSheet(node, sheetDef, durationMs)
+  const sheetRun = spec.frameRange
+    ? animateFrameRange(node, sheetDef, spec.frameRange.from, spec.frameRange.to, durationMs)
+    : animateSheet(node, sheetDef, durationMs)
   const fade = node.animate(
     [
       { transform: `${transform} scale(0.98)`, opacity: opacity * 0.9 },

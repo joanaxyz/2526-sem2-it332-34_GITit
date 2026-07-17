@@ -60,6 +60,7 @@ class StaticLevelVariantBuilder:
         solution_workspace_files = list(
             self.materializer.render(template.get("solution_workspace_files_template", []), context)
         )
+        variant_model, parent_field = self._variant_model_for(level)
         if solution_workspace_files:
             context["solution_workspace_files"] = solution_workspace_files
         target_state_template = self.materializer.render(
@@ -82,7 +83,6 @@ class StaticLevelVariantBuilder:
             rendered_context,
             fallback_story="Reach the requested repository outcome cleanly.",
         )
-        variant_model, parent_field = self._variant_model_for(level)
         variant = variant_model(
             **{parent_field: level},
             slug=self.materializer.render(template.get("slug_template", "{{case_id}}"), context),

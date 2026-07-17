@@ -7,6 +7,7 @@ import { monsterSkin } from '@/shared/story-worlds/registry'
 import type { StoryWorldDef } from '@/shared/story-worlds/types'
 import { SpriteAnimator } from '@/shared/sprites/SpriteAnimator'
 import type { SpriteAnimatorHandle } from '@/shared/sprites/types'
+import { useSpritePixelAnchor } from '@/shared/sprites/usePixelBounds'
 import {
   finishElementAnimation,
   playOneShotAndHold,
@@ -14,6 +15,8 @@ import {
   playOneShotSprite,
   readElementTranslateX,
 } from './actorPlayback'
+import { projectMonsterBodyBounds } from './monsterBodyBounds'
+import type { MonsterBodyBounds } from './monsterBodyBounds'
 import { cn } from '@/shared/utils/cn'
 
 export type MonsterAttackOptions = {
@@ -52,6 +55,8 @@ export type MonsterActorHandle = {
   walkIn: (fromPx?: number, ms?: number, toPx?: number) => Promise<void>
   /** Ease from the wide-frame hold into the centered duel slot. */
   slideTo: (toPx: number, ms?: number) => Promise<void>
+  /** Viewport bounds of the visible idle pixels, excluding transparent sheet padding. */
+  bodyBounds: () => MonsterBodyBounds | null
   element: () => HTMLDivElement | null
 }
 
@@ -64,7 +69,7 @@ export const MonsterActor = forwardRef<
   MonsterActorHandle,
   {
     monster: BattleMonster
-    /** Extra multiplier on the species' own scale (bosses pass >1). */
+    /** Optional extra multiplier on the species' authored display scale. */
     scale?: number
     facing?: 'left' | 'right'
     /** Hide the actor until the director's entrance choreography reveals it. */
@@ -79,6 +84,7 @@ export const MonsterActor = forwardRef<
   )
   const spriteRef = useRef<SpriteAnimatorHandle | null>(null)
   const wrapRef = useRef<HTMLDivElement | null>(null)
+  const idlePixelAnchor = useSpritePixelAnchor(def.sprites.idle)
   const idleSpriteRef = useRef(def.sprites.idle)
   const deadRef = useRef(!monster.alive)
   const busyRef = useRef(false)
@@ -104,6 +110,17 @@ export const MonsterActor = forwardRef<
     sprite.pause()
     sprite.goToFrame(def.sprites.death.frameCount - 1)
   }, [def.sprites.death])
+
+  const measureBodyBounds = useCallback(() => {
+    const sprite = wrapRef.current?.querySelector<HTMLElement>('.battle-monster-sprite')
+    if (!sprite || !idlePixelAnchor) return null
+    return projectMonsterBodyBounds(
+      sprite.getBoundingClientRect(),
+      { width: def.sprites.idle.frameWidth, height: def.sprites.idle.frameHeight },
+      idlePixelAnchor.bounds,
+      facing === 'left',
+    )
+  }, [def.sprites.idle.frameHeight, def.sprites.idle.frameWidth, facing, idlePixelAnchor])
 
   useEffect(() => {
     const wasDead = deadRef.current
@@ -365,6 +382,7 @@ export const MonsterActor = forwardRef<
           })
       }),
 
+    bodyBounds: measureBodyBounds,
     element: () => wrapRef.current,
   }))
 
@@ -385,6 +403,7 @@ export const MonsterActor = forwardRef<
           pixelAnchorAnimation={def.sprites.idle}
           pixelAnchorFallback={{ bottomOffset: def.metrics.footOffset }}
           flipX={facing === 'left'}
+          className="battle-monster-sprite"
           aria-label={def.label}
         />
       </div>

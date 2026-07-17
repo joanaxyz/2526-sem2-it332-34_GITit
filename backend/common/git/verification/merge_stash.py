@@ -162,6 +162,14 @@ class MergeStashVerificationMixin:
                 if path not in target_tree:
                     expected_staging[path] = "deleted"
             expected["staging"] = expected_staging
+            self._set_operation_metadata(
+                expected,
+                {
+                    "last_merge_branch": branch,
+                    "last_merge_target": target_id,
+                    "squash_merge_staged": True,
+                },
+            )
             return expected
 
         conflict_paths = set(self._authored_conflict_paths(previous_state))

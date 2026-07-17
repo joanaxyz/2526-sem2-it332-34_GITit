@@ -11,7 +11,7 @@ export const richStatsFixture: StatsSummary = {
     { key: 'efficiency', label: 'Efficiency', hint: 'Solving levels without wasted commands', value: 74 },
     { key: 'independence', label: 'Independence', hint: 'Clearing levels without hints or retries', value: 62 },
     { key: 'consistency', label: 'Consistency', hint: 'Showing up and finishing what you start', value: 84 },
-    { key: 'mastery', label: 'Mastery', hint: 'Success on hard, boss-level challenges', value: 58 },
+    { key: 'mastery', label: 'Mastery', hint: 'Success on hard challenges', value: 58 },
     { key: 'coverage', label: 'Coverage', hint: 'Breadth of git commands you have used', value: 69 },
   ],
   activity_trend: [
@@ -51,7 +51,7 @@ export const emptyStatsFixture: StatsSummary = {
     { key: 'efficiency', label: 'Efficiency', hint: 'Solving levels without wasted commands', value: null },
     { key: 'independence', label: 'Independence', hint: 'Clearing levels without hints or retries', value: null },
     { key: 'consistency', label: 'Consistency', hint: 'Showing up and finishing what you start', value: null },
-    { key: 'mastery', label: 'Mastery', hint: 'Success on hard, boss-level challenges', value: null },
+    { key: 'mastery', label: 'Mastery', hint: 'Success on hard challenges', value: null },
     { key: 'coverage', label: 'Coverage', hint: 'Breadth of git commands you have used', value: null },
   ],
   activity_trend: [],

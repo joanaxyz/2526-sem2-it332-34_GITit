@@ -1,5 +1,5 @@
-import { ChevronLeft, ChevronRight, HeartCrack, PersonStanding, Skull, Sparkles, Swords } from 'lucide-react'
-import { type CSSProperties, type ComponentType, useMemo, useState } from 'react'
+import { ChevronDown, HeartCrack, PersonStanding, Skull, Sparkles, Swords } from 'lucide-react'
+import { type ComponentType, useEffect, useMemo, useRef, useState } from 'react'
 
 import { EmptyState } from '@/shared/components/EmptyState'
 import type { SpriteDef } from '@/shared/cosmetics/types'
@@ -9,7 +9,7 @@ import { SpriteAnimator } from '@/shared/sprites/SpriteAnimator'
 import type { SpriteAnimation } from '@/shared/sprites/types'
 import { useSpritePixelAnchor } from '@/shared/sprites/usePixelBounds'
 
-const MONSTER_STAGE_HEIGHT = 210
+const MONSTER_STAGE_HEIGHT = 260
 const MONSTER_MOVE_LABELS: Record<MonsterPreviewMove, string> = {
   idle: 'Idle',
   attack: 'Attack',
@@ -48,11 +48,9 @@ function effectAnimation(layer: MonsterEffectLayer, name: string): SpriteAnimati
 }
 
 export function StoryMonsterShowcase({
-  battleStageSrc,
   storyLabel,
   worldSlug,
 }: {
-  battleStageSrc?: string
   storyLabel: string
   worldSlug: string
 }) {
@@ -60,7 +58,6 @@ export function StoryMonsterShowcase({
   const [selectedSlug, setSelectedSlug] = useState(() => monsters[0]?.slug ?? '')
   const [move, setMove] = useState<MonsterPreviewMove>('idle')
   const [playKey, setPlayKey] = useState(0)
-  const [monsterPage, setMonsterPage] = useState(0)
   const selected = monsters.find((monster) => monster.slug === selectedSlug) ?? monsters[0]
   // Measured visible pixels of the idle sheet (async, cached per sheet). Stage fitting
   // must not use the raw frame box: frame padding varies per sheet (512px lancer frames
@@ -83,21 +80,11 @@ export function StoryMonsterShowcase({
   // Battle-native size (visible px × displayScale × species scale), shrunk only if the
   // monster itself would overflow the stage — keeps roster sizes relatively honest.
   const visibleHeight = (idleAnchor?.bounds.height ?? animation.frameHeight) * (idleAnimation?.displayScale ?? 1)
-  const scale = Math.min(1, MONSTER_STAGE_HEIGHT / (visibleHeight * selected.skin.scale)) * selected.skin.scale
+  const scale = Math.min(1.35, MONSTER_STAGE_HEIGHT / (visibleHeight * selected.skin.scale)) * selected.skin.scale
   const effectLayers = activeMove === 'skill' ? selected.skin.attack.effect?.layers ?? [] : []
   const isSkillFx = activeMove === 'skill'
-  const monstersPerPage = 7
-  const monsterPageCount = Math.max(1, Math.ceil(monsters.length / monstersPerPage))
-  const clampedMonsterPage = Math.min(monsterPage, monsterPageCount - 1)
-  const visibleMonsters = monsters.slice(clampedMonsterPage * monstersPerPage, (clampedMonsterPage + 1) * monstersPerPage)
-
-  function goMonsterPage(nextPage: number) {
-    setMonsterPage(Math.max(0, Math.min(monsterPageCount - 1, nextPage)))
-  }
 
   function selectMonster(monster: StoryWorldMonsterEntry) {
-    const nextIndex = monsters.findIndex((entry) => entry.slug === monster.slug)
-    if (nextIndex >= 0) setMonsterPage(Math.floor(nextIndex / monstersPerPage))
     setSelectedSlug(monster.slug)
     setMove('idle')
     setPlayKey((key) => key + 1)
@@ -110,10 +97,10 @@ export function StoryMonsterShowcase({
   }
 
   return (
-    <div className="shop-contents-block shop-monster-showcase">
+    <div className="shop-contents-block shop-monster-showcase" aria-label={`${storyLabel} monster registry`}>
       <header className="shop-block-head">
         <span>Monster Registry</span>
-        <small>{monsters.length} foes from {storyLabel}</small>
+        <small>{monsters.length} foes</small>
       </header>
 
       <div
@@ -123,7 +110,6 @@ export function StoryMonsterShowcase({
             ? `${selected.label} skill effect preview`
             : `${selected.label} ${MONSTER_MOVE_LABELS[activeMove]} preview`
         }
-        style={battleStageSrc ? { '--monster-stage-bg': `url(${battleStageSrc})` } as CSSProperties : undefined}
         data-mode={isSkillFx ? 'skill-fx' : 'monster'}
       >
         <div className="shop-monster-stage-glow" aria-hidden="true" />
@@ -162,7 +148,6 @@ export function StoryMonsterShowcase({
         <div className="shop-monster-toolbar" aria-label="Monster animation controls">
           <div className="shop-monster-toolbar-id">
             <strong>{selected.label}</strong>
-            <small>{selected.tier}</small>
           </div>
           <div className="shop-monster-toolbar-moves" role="tablist" aria-label="Preview pose">
             {MONSTER_MOVE_ORDER.map((option) => {
@@ -189,55 +174,74 @@ export function StoryMonsterShowcase({
         </div>
       </div>
 
-      <div className="shop-monster-carousel" aria-label="All story monsters">
-        {monsterPageCount > 1 ? (
-          <button
-            type="button"
-            className="shop-preview-pager shop-preview-pager--left"
-            aria-label="Previous monsters"
-            disabled={clampedMonsterPage === 0}
-            onClick={() => goMonsterPage(clampedMonsterPage - 1)}
-          >
-            <ChevronLeft aria-hidden="true" />
-          </button>
-        ) : null}
-        <div className="shop-monster-carousel-track" role="list">
-          {visibleMonsters.map((monster) => (
-            <MonsterPickerButton
-              key={monster.slug}
-              monster={monster}
-              active={monster.slug === selected.slug}
-              onSelect={() => selectMonster(monster)}
-            />
-          ))}
-        </div>
-        {monsterPageCount > 1 ? (
-          <button
-            type="button"
-            className="shop-preview-pager shop-preview-pager--right"
-            aria-label="Next monsters"
-            disabled={clampedMonsterPage === monsterPageCount - 1}
-            onClick={() => goMonsterPage(clampedMonsterPage + 1)}
-          >
-            <ChevronRight aria-hidden="true" />
-          </button>
-        ) : null}
-        {monsterPageCount > 1 ? (
-          <div className="shop-preview-pager-dots" role="tablist" aria-label="Monster pages">
-            {Array.from({ length: monsterPageCount }, (_, i) => (
+      <MonsterSelect monsters={monsters} selected={selected} onSelect={selectMonster} />
+    </div>
+  )
+}
+
+// Roster picker as a compact themed dropdown. The sprite-rail geometry fought the
+// wildly different frame paddings per sheet; a name list is legible and honest.
+function MonsterSelect({
+  monsters,
+  selected,
+  onSelect,
+}: {
+  monsters: StoryWorldMonsterEntry[]
+  selected: StoryWorldMonsterEntry
+  onSelect: (monster: StoryWorldMonsterEntry) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return undefined
+    function onPointerDown(event: PointerEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [open])
+
+  return (
+    <div className="shop-monster-select" ref={rootRef}>
+      <button
+        type="button"
+        className="shop-monster-select-trigger"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span className="shop-monster-select-value">
+          <strong>{selected.label}</strong>
+        </span>
+        <ChevronDown aria-hidden="true" data-open={open} />
+      </button>
+      {open ? (
+        <ul className="shop-monster-select-menu" role="listbox" aria-label="Story monsters">
+          {monsters.map((monster) => (
+            <li key={monster.slug} role="option" aria-selected={monster.slug === selected.slug}>
               <button
-                key={i}
                 type="button"
-                role="tab"
-                aria-selected={i === clampedMonsterPage}
-                aria-label={`Monster page ${i + 1} of ${monsterPageCount}`}
-                data-active={i === clampedMonsterPage}
-                onClick={() => goMonsterPage(i)}
-              />
-            ))}
-          </div>
-        ) : null}
-      </div>
+                className="shop-monster-select-option"
+                data-active={monster.slug === selected.slug}
+                onClick={() => {
+                  onSelect(monster)
+                  setOpen(false)
+                }}
+              >
+                <span>{monster.label}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </div>
   )
 }
@@ -245,57 +249,4 @@ export function StoryMonsterShowcase({
 function canPreviewMove(monster: StoryWorldMonsterEntry, move: MonsterPreviewMove): boolean {
   if (move === 'skill') return Boolean(monster.skin.attack.effect?.layers?.length)
   return Boolean(monster.skin.sprites[move])
-}
-
-const MONSTER_PICK_STAGE_HEIGHT = 56
-
-// Foot-accurate roster picker: no card chrome, just the sprite standing on a
-// ground line. Scale + vertical anchor both derive from measured alpha pixels
-// (frame padding differs per sheet) so every monster's feet land on the same
-// line regardless of how much transparent margin its sheet carries.
-function MonsterPickerButton({
-  monster,
-  active,
-  onSelect,
-}: {
-  monster: StoryWorldMonsterEntry
-  active: boolean
-  onSelect: () => void
-}) {
-  const portrait = monster.portrait ?? monster.skin.sprites.idle
-  const animation = spriteAnimation(portrait, `${monster.slug}.pick`, false)
-  const anchor = useSpritePixelAnchor(animation)
-  const displayScale = animation.displayScale ?? 1
-  const visibleHeight = (anchor?.bounds.height ?? animation.frameHeight) * displayScale
-  const scale = Math.min(1, MONSTER_PICK_STAGE_HEIGHT / (visibleHeight * monster.skin.scale)) * monster.skin.scale
-  const anchorScale = displayScale * scale
-  const bottomOffset = (anchor?.bottomOffset ?? monster.skin.metrics.foot_offset ?? 0) * anchorScale
-  const centerOffsetX = (anchor?.centerOffsetX ?? 0) * anchorScale
-
-  return (
-    <button
-      type="button"
-      role="listitem"
-      className="shop-monster-pick"
-      data-active={active}
-      onClick={onSelect}
-      aria-label={monster.label}
-      title={monster.label}
-    >
-      <span className="shop-monster-pick-stage">
-        <span className="shop-monster-pick-ground" aria-hidden="true" />
-        <span
-          className="shop-monster-pick-sprite"
-          style={{
-            width: animation.frameWidth * scale,
-            height: animation.frameHeight * scale,
-            backgroundImage: `url(${animation.src})`,
-            backgroundSize: `${animation.columns * 100}% ${animation.rows * 100}%`,
-            backgroundPosition: '0% 0%',
-            transform: `translate(${centerOffsetX}px, ${bottomOffset}px)`,
-          }}
-        />
-      </span>
-    </button>
-  )
 }

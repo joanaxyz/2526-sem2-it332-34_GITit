@@ -21,7 +21,7 @@ GENERATED = ROOT / "frontend" / "src" / "shared" / "api" / "generated"
 OPENAPI_JSON = GENERATED / "openapi.json"
 API_TYPES_TS = GENERATED / "apiTypes.ts"
 HTTP_METHODS = {"get", "post", "put", "patch", "delete", "head", "options"}
-NO_BODY_SUCCESS_ALLOWLIST = {"POST /api/payments/webhook/ 200"}
+NO_BODY_SUCCESS_ALLOWLIST: set[str] = set()
 
 REQUIRED_OPERATION_RESPONSES = {
     "adventure_levels_runs_create": "AdventureRunResponse",
@@ -42,8 +42,6 @@ REQUIRED_OPERATION_RESPONSES = {
     "shop_catalog_retrieve": "ShopResponse",
     "shop_catalog_purchase_create": "ShopPurchaseResponse",
     "player_loadout_companion_create": "ShopEquipResponse",
-    "payments_packs_retrieve": "GitCoinPacksResponse",
-    "payments_checkout_create": "CheckoutSessionResponse",
     "skills_learned_retrieve": "LearnedSkillsResponse",
     "command_forms_preview_retrieve": "CommandFormPreviewResponse",
 }

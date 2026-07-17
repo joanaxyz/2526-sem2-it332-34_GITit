@@ -2149,37 +2149,6 @@
                 }
             }
         },
-        "/api/chapters/{chapter_id}/content/": {
-            "get": {
-                "operationId": "chapters_content_retrieve",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "chapter_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "chapters"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {}
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
         "/api/chapters/{chapter_id}/overview/": {
             "get": {
                 "operationId": "chapters_overview_retrieve",
@@ -2334,83 +2303,6 @@
                             }
                         },
                         "description": ""
-                    }
-                }
-            }
-        },
-        "/api/payments/checkout/": {
-            "post": {
-                "operationId": "payments_checkout_create",
-                "tags": [
-                    "payments"
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CheckoutSessionRequest"
-                            }
-                        },
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CheckoutSessionRequest"
-                            }
-                        },
-                        "multipart/form-data": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CheckoutSessionRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "201": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/CheckoutSessionResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/payments/packs/": {
-            "get": {
-                "operationId": "payments_packs_retrieve",
-                "tags": [
-                    "payments"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/GitCoinPacksResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/payments/webhook/": {
-            "post": {
-                "operationId": "payments_webhook_create",
-                "description": "Unauthenticated by design - Stripe calls this directly. Authenticity\ncomes from the signed payload, not a session/JWT.",
-                "tags": [
-                    "payments"
-                ],
-                "security": [
-                    {}
-                ],
-                "responses": {
-                    "200": {
-                        "description": "No response body"
                     }
                 }
             }
@@ -3235,7 +3127,6 @@
                     "description": {
                         "type": "string"
                     },
-                    "narrative_brief": {},
                     "sort_order": {
                         "type": "integer",
                         "maximum": 9223372036854775807,
@@ -3299,29 +3190,6 @@
                     "slug",
                     "story",
                     "title"
-                ]
-            },
-            "CheckoutSessionRequest": {
-                "type": "object",
-                "properties": {
-                    "pack_slug": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "pack_slug"
-                ]
-            },
-            "CheckoutSessionResponse": {
-                "type": "object",
-                "properties": {
-                    "checkout_url": {
-                        "type": "string",
-                        "format": "uri"
-                    }
-                },
-                "required": [
-                    "checkout_url"
                 ]
             },
             "ClientCommandExecution": {
@@ -3540,43 +3408,6 @@
                 ],
                 "type": "string",
                 "description": "* `beginner` - Beginner\n* `intermediate` - Intermediate\n* `advanced` - Advanced"
-            },
-            "GitCoinPackResponse": {
-                "type": "object",
-                "properties": {
-                    "slug": {
-                        "type": "string"
-                    },
-                    "label": {
-                        "type": "string"
-                    },
-                    "coins": {
-                        "type": "integer"
-                    },
-                    "price_cents": {
-                        "type": "integer"
-                    }
-                },
-                "required": [
-                    "coins",
-                    "label",
-                    "price_cents",
-                    "slug"
-                ]
-            },
-            "GitCoinPacksResponse": {
-                "type": "object",
-                "properties": {
-                    "items": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/GitCoinPackResponse"
-                        }
-                    }
-                },
-                "required": [
-                    "items"
-                ]
             },
             "KindEnum": {
                 "enum": [
@@ -4018,7 +3849,6 @@
                     "summary": {
                         "type": "string"
                     },
-                    "narrative_brief": {},
                     "price": {
                         "type": "integer",
                         "maximum": 9223372036854775807,

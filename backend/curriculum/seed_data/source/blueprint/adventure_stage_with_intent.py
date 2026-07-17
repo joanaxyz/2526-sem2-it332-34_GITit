@@ -82,7 +82,17 @@ ADVENTURE_LEVELS = [
                     evaluation={
                         "working_tree_dirty": True,
                         "staging_empty": True,
-                        "rules": [{"type": "commit_count_equals", "count": 1}],
+                        "rules": [
+                            {"type": "commit_count_equals", "count": 1},
+                            {
+                                "type": "required_command_sequence",
+                                "commands": [
+                                    "git status -s",
+                                    "git diff --name-only",
+                                    "git diff",
+                                ],
+                            },
+                        ],
                     },
                     checks=[
                         {
@@ -92,7 +102,17 @@ ADVENTURE_LEVELS = [
                                     "git status -s",
                                     "git diff --name-only",
                                     "git diff",
-                                ]
+                                ],
+                                "rules": [
+                                    {
+                                        "type": "required_command_sequence",
+                                        "commands": [
+                                            "git status -s",
+                                            "git diff --name-only",
+                                            "git diff",
+                                        ],
+                                    }
+                                ],
                             },
                         },
                     ],

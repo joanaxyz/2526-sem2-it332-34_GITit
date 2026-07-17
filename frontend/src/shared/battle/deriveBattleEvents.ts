@@ -10,7 +10,7 @@ export type DeriveFromCommandOutcomeInput = {
   skill: string
   /** Roster before this command (the director's local visual copy). */
   monsters: BattleMonster[]
-  /** StoryWorld used for fallback monsters/tier lookup. */
+  /** StoryWorld used for fallback monster selection. */
   storyWorldSlug?: string | null
 }
 
@@ -78,7 +78,6 @@ export function clientAdventureRoster(
     {
       id: 0,
       species,
-      tier: tierForSpecies(species, storyWorldSlug),
       hp: maxHp,
       max_hp: maxHp,
       alive: true,
@@ -100,7 +99,6 @@ export function clientChallengeRoster(
     {
       id: 0,
       species,
-      tier: tierForSpecies(species, storyWorldSlug),
       hp,
       max_hp: hp,
       alive: true,
@@ -124,10 +122,6 @@ function stableHash(value: string): number {
   return hash | 0
 }
 
-function tierForSpecies(species: string, storyWorldSlug: string | null | undefined = DEFAULT_STORY_WORLD_SLUG): BattleMonster['tier'] {
-  return getStoryWorld(storyWorldSlug).battle.monsters[species]?.tier ?? 'mob'
-}
-
 export function activeBattleMonsters(block: BattleBlock | null | undefined): BattleMonster[] {
   if (!block) return []
   const wave = block.waves?.[Math.max(0, block.current_wave ?? 0)]
@@ -147,8 +141,12 @@ export function deriveBattleEventsFromCommandOutcome(input: DeriveFromCommandOut
   const rulesPassing = Math.max(0, Math.min(monsterMaxHp, outcome.rules_passing || 0))
   const monsters = baseMonsters.map((m, index) => {
     if (index !== 0) return { ...m }
-    const hp = outcome.solved ? 0 : Math.max(0, monsterMaxHp - rulesPassing)
-    return { ...m, hp, max_hp: monsterMaxHp, alive: hp > 0 }
+    // Rule progress can reach its visual cap before the objective's full success
+    // contract does (for example, a final history/ordering check). Reserve the
+    // last HP for the actual solved outcome so the monster cannot die while the
+    // stage is still incomplete.
+    const hp = Math.max(1, monsterMaxHp - rulesPassing)
+    return { ...m, hp, max_hp: monsterMaxHp, alive: true }
   })
   const events: BattleEvent[] = []
   const alive = () => monsters.filter((m) => m.alive)
@@ -156,9 +154,8 @@ export function deriveBattleEventsFromCommandOutcome(input: DeriveFromCommandOut
   const playerHp = outcome.remaining_counted_commands
 
   function monsterCounter(progressed: boolean) {
-    // Only a living monster strikes back. A hit that just dropped the target to 0
-    // HP (rules capped the bar before the objective was solved) must not also play
-    // a counterattack from the corpse, nor should later turns against a dead foe.
+    // Only a living monster strikes back. The final HP is reserved until the
+    // objective is solved, so an incomplete stage always retains its opponent.
     const attacker = alive()[0]
     if (!attacker) return
     events.push({
@@ -173,8 +170,6 @@ export function deriveBattleEventsFromCommandOutcome(input: DeriveFromCommandOut
 
   if (outcome.solved) {
     // A solved objective clears the encounter: every still-living monster dies.
-    // (The index-0 target is already zeroed above; the fallback below covers the
-    // single-monster case where no living foe remains to iterate.)
     for (const monster of monsters.filter((m) => m.alive)) {
       const damage = Math.max(1, monster.hp)
       monster.hp = 0
@@ -188,16 +183,6 @@ export function deriveBattleEventsFromCommandOutcome(input: DeriveFromCommandOut
       })
       events.push({ type: 'monster_death', monster: monster.id })
     }
-    if (events.length === 0 && monsters[0]) {
-      events.push({
-        type: 'player_attack',
-        skill: input.skill,
-        target: monsters[0].id,
-        damage: Math.max(1, outcome.rules_delta || 1),
-        target_hp_after: 0,
-      })
-      events.push({ type: 'monster_death', monster: monsters[0].id })
-    }
     events.push({ type: 'encounter_cleared' })
   } else if (outcome.counted && outcome.rules_delta > 0) {
     const target = monsters[0]
@@ -209,10 +194,6 @@ export function deriveBattleEventsFromCommandOutcome(input: DeriveFromCommandOut
         damage: Math.max(1, outcome.rules_delta),
         target_hp_after: target.hp,
       })
-      if (target.hp <= 0) {
-        target.alive = false
-        events.push({ type: 'monster_death', monster: target.id })
-      }
     }
     monsterCounter(true)
   } else if (outcome.counted) {
@@ -230,6 +211,19 @@ export function deriveBattleEventsFromCommandOutcome(input: DeriveFromCommandOut
       })
     }
     monsterCounter(false)
+  } else {
+    // Diagnostics are free inspections, but they should still feel responsive:
+    // cast the command's spell without changing HP or inviting a counterattack.
+    const target = alive()[0]
+    if (target) {
+      events.push({
+        type: 'player_attack',
+        skill: input.skill,
+        target: target.id,
+        damage: 0,
+        target_hp_after: target.hp,
+      })
+    }
   }
 
   if (outcome.failed && !events.some((event) => event.type === 'player_defeat')) {

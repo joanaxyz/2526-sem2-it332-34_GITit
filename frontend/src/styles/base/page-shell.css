@@ -9,7 +9,7 @@ body {
 }
 
 :root {
-  --app-topbar-height: 4.25rem;
+  --app-topbar-height: 3.65rem;
   --app-content-height: calc(100vh - var(--app-topbar-height));
 }
 
@@ -36,7 +36,9 @@ textarea {
   display: grid;
   grid-template-rows: var(--app-topbar-height) minmax(0, 1fr);
   overflow-x: clip;
-  background: #020711;
+  background:
+    radial-gradient(circle at 50% -12rem, rgba(var(--theme-primary-rgb), 0.12), transparent 34rem),
+    linear-gradient(180deg, #040b18, #020711 42%, #01040b);
 }
 
 .app-main {
@@ -55,16 +57,14 @@ textarea {
   left: 0;
   z-index: 45;
   display: grid;
-  grid-template-columns: minmax(16rem, 1fr) auto minmax(18rem, 1fr);
-  align-items: stretch;
+  grid-template-columns: minmax(12rem, 1fr) auto minmax(19rem, 1fr);
+  align-items: center;
   min-height: var(--app-topbar-height);
-  border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.25);
+  border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.2);
   background:
-    linear-gradient(90deg, rgba(1, 7, 18, 0.98), rgba(5, 12, 28, 0.94) 48%, rgba(1, 7, 18, 0.98)),
-    rgba(0, 5, 16, 0.96);
-  box-shadow: 0 1px 0 rgba(var(--theme-primary-rgb), 0.12), 0 18px 42px rgba(0, 0, 0, 0.4);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
-          backdrop-filter: blur(14px) saturate(1.1);
+    linear-gradient(90deg, rgba(2, 8, 20, 0.99), rgba(7, 17, 35, 0.98) 50%, rgba(2, 8, 20, 0.99)),
+    #020814;
+  box-shadow: 0 1px 0 rgba(var(--theme-primary-rgb), 0.08), 0 10px 28px rgba(0, 0, 0, 0.3);
 }
 
 .app-brand,
@@ -78,16 +78,16 @@ textarea {
 .app-brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.58rem;
   width: fit-content;
-  min-width: 17rem;
-  padding: 0 1.35rem;
+  min-width: 12rem;
+  padding: 0 1rem;
   color: #f4fbff;
 }
 
 .app-brand img {
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.35rem;
+  height: 2.35rem;
   object-fit: contain;
   filter: drop-shadow(0 0 14px rgba(var(--theme-primary-rgb), 0.54));
 }
@@ -95,7 +95,7 @@ textarea {
 .app-brand strong {
   display: block;
   font-family: var(--font-display);
-  font-size: 1.82rem;
+  font-size: 1.48rem;
   font-style: italic;
   font-weight: 800;
   line-height: 0.95;
@@ -104,7 +104,7 @@ textarea {
 
 .app-brand small {
   display: block;
-  margin-top: 0.15rem;
+  margin-top: 0.12rem;
   color: rgb(var(--theme-primary-rgb));
   font-family: var(--font-mono);
   font-size: var(--text-2xs);
@@ -116,72 +116,91 @@ textarea {
 
 .app-nav {
   display: flex;
-  align-self: stretch;
+  align-self: center;
   justify-self: center;
+  height: 2.55rem;
+  gap: 0.2rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.16);
+  border-radius: var(--radius-md);
+  padding: 0.2rem;
+  background: rgba(1, 7, 18, 0.68);
 }
 
 .app-nav-link {
   position: relative;
   display: inline-flex;
-  min-width: 8.45rem;
+  min-width: 6.9rem;
   align-items: center;
   justify-content: center;
   gap: 0.52rem;
-  border-inline: 1px solid rgba(var(--theme-primary-rgb), 0.08);
+  border-radius: var(--radius-sm);
   color: rgba(218, 229, 247, 0.7);
-  font-size: 1.05rem;
-  font-weight: 760;
+  font-size: var(--text-sm);
+  font-weight: 700;
   transition: color var(--motion-normal) ease, background var(--motion-normal) ease, text-shadow var(--motion-normal) ease;
 }
 
 .app-nav-link svg {
-  width: 1.22rem;
-  height: 1.22rem;
+  width: 1rem;
+  height: 1rem;
 }
 
 .app-nav-link:hover,
 .app-nav-link:focus-visible {
   color: #f4fbff;
+  background: rgba(var(--theme-primary-rgb), 0.06);
   outline: none;
 }
 
 .app-nav-link.is-active {
   color: rgb(var(--theme-primary-rgb));
-  background:
-    linear-gradient(180deg, rgba(var(--theme-primary-rgb), 0.2), rgba(var(--theme-primary-rgb), 0.07) 58%, rgba(var(--theme-primary-rgb), 0.18)),
-    rgba(5, 20, 45, 0.92);
-  text-shadow: 0 0 16px rgba(var(--theme-primary-rgb), 0.62);
+  background: rgba(var(--theme-primary-rgb), 0.12);
+  text-shadow: 0 0 12px rgba(var(--theme-primary-rgb), 0.4);
 }
 
 .app-nav-link.is-active::after {
   content: '';
   position: absolute;
   right: 0;
-  bottom: -0.42rem;
-  left: 0;
-  height: 0.42rem;
-  background:
-    linear-gradient(90deg, transparent, rgb(var(--theme-primary-rgb)), transparent) top / 100% 2px no-repeat,
-    radial-gradient(circle, rgb(var(--theme-primary-rgb)) 0 34%, transparent 36%) center bottom / 0.9rem 0.9rem no-repeat;
-  filter: drop-shadow(0 0 9px rgba(var(--theme-primary-rgb), 0.86));
+  bottom: -0.22rem;
+  left: 18%;
+  height: 1px;
+  background: rgb(var(--theme-primary-rgb));
+  box-shadow: 0 0 8px rgba(var(--theme-primary-rgb), 0.8);
 }
 
 .app-account {
   display: flex;
   align-items: stretch;
+  align-self: center;
   justify-content: end;
+  justify-self: end;
+  height: 2.55rem;
+  margin-right: 0.75rem;
+  /* No overflow:hidden here — it would clip the profile dropdown that drops
+     below the pill. End segments round their own outer corners instead. */
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.16);
+  border-radius: var(--radius-md);
+  background: rgba(1, 7, 18, 0.68);
+}
+
+/* Keep the pill's rounded ends now that the cluster no longer clips overflow:
+   the leftmost audio control is the only end segment with a hover fill. */
+.app-account > .app-audio-controls > .app-audio-control:first-child {
+  border-top-left-radius: var(--radius-md);
+  border-bottom-left-radius: var(--radius-md);
 }
 
 .app-audio-controls {
   display: inline-flex;
   align-items: stretch;
-  border-left: 1px solid rgba(var(--theme-primary-rgb), 0.13);
+  border-left: 0;
 }
 
 .app-audio-control {
   display: grid;
-  width: 3.15rem;
-  min-width: 3.15rem;
+  width: 2.45rem;
+  min-width: 2.45rem;
   place-items: center;
   border: 0;
   border-right: 1px solid rgba(var(--theme-primary-rgb), 0.1);
@@ -192,8 +211,8 @@ textarea {
 }
 
 .app-audio-control svg {
-  width: 1.18rem;
-  height: 1.18rem;
+  width: 1rem;
+  height: 1rem;
 }
 
 .app-audio-control:hover,
@@ -218,16 +237,16 @@ textarea {
 .app-wallet {
   display: inline-flex;
   align-items: center;
-  gap: 0.62rem;
-  min-width: 12rem;
-  padding: 0 0.95rem;
+  gap: 0.48rem;
+  min-width: 7.6rem;
+  padding: 0 0.62rem;
   border-left: 1px solid rgba(var(--theme-primary-rgb), 0.13);
   color: #f4fbff;
 }
 
 .app-wallet img {
-  width: 2.15rem;
-  height: 2.15rem;
+  width: 1.72rem;
+  height: 1.72rem;
   filter: drop-shadow(0 0 8px rgba(243, 210, 122, 0.56));
 }
 
@@ -235,8 +254,8 @@ textarea {
 .app-profile-copy strong {
   display: block;
   color: #f4fbff;
-  font-size: 1rem;
-  font-weight: 850;
+  font-size: var(--text-sm);
+  font-weight: 800;
   line-height: 1;
 }
 
@@ -248,25 +267,9 @@ textarea {
 .app-wallet small,
 .app-profile-copy span {
   display: block;
-  margin-top: 0.18rem;
+  margin-top: 0.12rem;
   color: rgb(var(--theme-primary-rgb));
-  font-size: 0.75rem;
-  line-height: 1;
-}
-
-.app-wallet b {
-  display: grid;
-  width: 1.8rem;
-  height: 1.8rem;
-  place-items: center;
-  margin-left: 0.18rem;
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.55);
-  border-radius: 5px;
-  color: rgb(var(--theme-primary-rgb));
-  background: rgba(var(--theme-primary-rgb), 0.07);
-  font-family: var(--font-mono);
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: var(--text-2xs);
   line-height: 1;
 }
 
@@ -278,9 +281,9 @@ textarea {
   display: inline-flex;
   height: 100%;
   align-items: center;
-  gap: 0.72rem;
-  min-width: 13.1rem;
-  padding: 0 1rem;
+  gap: 0.52rem;
+  min-width: 9.5rem;
+  padding: 0 0.62rem;
   border: 0;
   border-left: 1px solid rgba(var(--theme-primary-rgb), 0.13);
   background: transparent;
@@ -289,8 +292,8 @@ textarea {
 }
 
 .app-profile-trigger svg {
-  width: 1rem;
-  height: 1rem;
+  width: 0.85rem;
+  height: 0.85rem;
   color: rgba(218, 229, 247, 0.7);
   transition: transform 160ms ease;
 }
@@ -301,8 +304,8 @@ textarea {
 
 .app-profile-avatar {
   display: grid;
-  width: 2.8rem;
-  height: 2.8rem;
+  width: 2.05rem;
+  height: 2.05rem;
   place-items: center;
   overflow: hidden;
   border: 1px solid rgba(var(--theme-primary-rgb), 0.68);

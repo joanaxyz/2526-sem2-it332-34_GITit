@@ -2,6 +2,7 @@
   "blue": [
     {
       "family": "init",
+      "showcase": true,
       "command": "git init",
       "tint": "cyan",
       "playback": "projectile",
@@ -17,10 +18,21 @@
       },
       "motion": "gather-orb-projectile-impact-dissipate",
       "launchStartFrame": 10,
-      "impactStartFrame": 15
+      "impactStartFrame": 15,
+      "placeAnchor": {
+        "x": 0.5225,
+        "y": 0.918
+      },
+      "placeBounds": {
+        "left": 0.0938,
+        "top": 0.1953,
+        "right": 0.8984,
+        "bottom": 1
+      }
     },
     {
       "family": "clone",
+      "showcase": true,
       "command": "git clone",
       "tint": "azure",
       "playback": "projectile",
@@ -34,10 +46,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 15
+      "impactStartFrame": 15,
+      "placeAnchor": {
+        "x": 0.4922,
+        "y": 0.9219
+      },
+      "placeBounds": {
+        "left": 0.0508,
+        "top": 0.1484,
+        "right": 0.8633,
+        "bottom": 1
+      }
     },
     {
       "family": "config",
+      "showcase": true,
       "command": "git config",
       "tint": "indigo",
       "playback": "target",
@@ -50,10 +73,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5059,
+        "y": 0.4883
+      },
+      "placeBounds": {
+        "left": 0.0977,
+        "top": 0.0977,
+        "right": 0.9102,
+        "bottom": 0.9766
       }
     },
     {
       "family": "status",
+      "showcase": true,
       "command": "git status",
       "tint": "steel",
       "playback": "target",
@@ -66,10 +100,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5039,
+        "y": 0.4648
+      },
+      "placeBounds": {
+        "left": 0,
+        "top": 0.1016,
+        "right": 0.8867,
+        "bottom": 1
       }
     },
     {
       "family": "log",
+      "showcase": true,
       "command": "git log",
       "tint": "steel",
       "playback": "target",
@@ -82,10 +127,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5059,
+        "y": 0.4922
+      },
+      "placeBounds": {
+        "left": 0.0195,
+        "top": 0.082,
+        "right": 0.9062,
+        "bottom": 1
       }
     },
     {
       "family": "show",
+      "showcase": true,
       "command": "git show",
       "tint": "azure",
       "playback": "target",
@@ -98,10 +154,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4824,
+        "y": 0.8984
+      },
+      "placeBounds": {
+        "left": 0.2148,
+        "top": 0.2188,
+        "right": 0.7578,
+        "bottom": 1
       }
     },
     {
       "family": "diff",
+      "showcase": true,
       "command": "git diff",
       "tint": "cyan",
       "playback": "projectile",
@@ -115,10 +182,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 15
+      "impactStartFrame": 15,
+      "placeAnchor": {
+        "x": 0.4951,
+        "y": 0.4756
+      },
+      "placeBounds": {
+        "left": 0.1133,
+        "top": 0.1172,
+        "right": 0.8359,
+        "bottom": 0.9844
+      }
     },
     {
       "family": "add",
+      "showcase": true,
       "command": "git add",
       "tint": "cyan",
       "playback": "projectile",
@@ -134,10 +212,21 @@
       },
       "motion": "gather-orb-projectile-impact-dissipate",
       "launchStartFrame": 3,
-      "impactStartFrame": 16
+      "impactStartFrame": 16,
+      "placeAnchor": {
+        "x": 0.5234,
+        "y": 0.9141
+      },
+      "placeBounds": {
+        "left": 0.0859,
+        "top": 0.168,
+        "right": 0.957,
+        "bottom": 1
+      }
     },
     {
       "family": "commit",
+      "showcase": true,
       "command": "git commit",
       "tint": "azure",
       "playback": "target",
@@ -150,10 +239,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.498,
+        "y": 0.918
+      },
+      "placeBounds": {
+        "left": 0.0508,
+        "top": 0.082,
+        "right": 0.9414,
+        "bottom": 1
       }
     },
     {
       "family": "rm",
+      "showcase": true,
       "command": "git rm",
       "tint": "steel",
       "playback": "projectile",
@@ -167,10 +267,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 16
+      "impactStartFrame": 16,
+      "placeAnchor": {
+        "x": 0.5273,
+        "y": 0.4922
+      },
+      "placeBounds": {
+        "left": 0.0195,
+        "top": 0.1836,
+        "right": 0.9492,
+        "bottom": 0.7812
+      }
     },
     {
       "family": "restore",
+      "showcase": true,
       "command": "git restore",
       "tint": "cyan",
       "playback": "target",
@@ -183,10 +294,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4863,
+        "y": 0.8867
+      },
+      "placeBounds": {
+        "left": 0.1289,
+        "top": 0.2852,
+        "right": 0.8906,
+        "bottom": 1
       }
     },
     {
       "family": "reset",
+      "showcase": true,
       "command": "git reset",
       "tint": "steel",
       "playback": "target",
@@ -199,10 +321,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4805,
+        "y": 0.9336
+      },
+      "placeBounds": {
+        "left": 0,
+        "top": 0.0938,
+        "right": 0.8828,
+        "bottom": 1
       }
     },
     {
       "family": "revert",
+      "showcase": true,
       "command": "git revert",
       "tint": "indigo",
       "playback": "target",
@@ -215,10 +348,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5156,
+        "y": 0.4863
+      },
+      "placeBounds": {
+        "left": 0.1562,
+        "top": 0.1602,
+        "right": 0.9453,
+        "bottom": 0.8906
       }
     },
     {
       "family": "stash",
+      "showcase": true,
       "command": "git stash",
       "tint": "violet",
       "playback": "projectile",
@@ -232,10 +376,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 15
+      "impactStartFrame": 15,
+      "placeAnchor": {
+        "x": 0.5098,
+        "y": 0.5166
+      },
+      "placeBounds": {
+        "left": 0.1133,
+        "top": 0.1602,
+        "right": 0.8359,
+        "bottom": 1
+      }
     },
     {
       "family": "branch",
+      "showcase": true,
       "command": "git branch",
       "tint": "cyan",
       "playback": "projectile",
@@ -249,10 +404,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 19
+      "impactStartFrame": 19,
+      "placeAnchor": {
+        "x": 0.4824,
+        "y": 0.9062
+      },
+      "placeBounds": {
+        "left": 0.1094,
+        "top": 0.1953,
+        "right": 0.8125,
+        "bottom": 1
+      }
     },
     {
       "family": "switch",
+      "showcase": true,
       "command": "git switch",
       "tint": "cyan",
       "playback": "ground",
@@ -265,10 +431,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4609,
+        "y": 0.8906
+      },
+      "placeBounds": {
+        "left": 0.0352,
+        "top": 0.2188,
+        "right": 0.9219,
+        "bottom": 1
       }
     },
     {
       "family": "checkout",
+      "showcase": true,
       "command": "git checkout",
       "tint": "steel",
       "playback": "projectile",
@@ -282,10 +459,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 16
+      "impactStartFrame": 16,
+      "placeAnchor": {
+        "x": 0.5234,
+        "y": 0.4902
+      },
+      "placeBounds": {
+        "left": 0.1367,
+        "top": 0.1211,
+        "right": 0.8867,
+        "bottom": 0.8984
+      }
     },
     {
       "family": "merge",
+      "showcase": true,
       "command": "git merge",
       "tint": "cyan",
       "playback": "projectile",
@@ -299,10 +487,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 20
+      "impactStartFrame": 20,
+      "placeAnchor": {
+        "x": 0.4902,
+        "y": 0.498
+      },
+      "placeBounds": {
+        "left": 0.0039,
+        "top": 0.1602,
+        "right": 0.8789,
+        "bottom": 1
+      }
     },
     {
       "family": "merge-base",
+      "showcase": true,
       "command": "git merge-base",
       "tint": "indigo",
       "playback": "target",
@@ -315,10 +514,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4668,
+        "y": 0.918
+      },
+      "placeBounds": {
+        "left": 0.0156,
+        "top": 0.1328,
+        "right": 0.8633,
+        "bottom": 1
       }
     },
     {
       "family": "rebase",
+      "showcase": true,
       "command": "git rebase",
       "tint": "indigo",
       "playback": "target",
@@ -331,10 +541,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4277,
+        "y": 0.9062
+      },
+      "placeBounds": {
+        "left": 0.0391,
+        "top": 0.2578,
+        "right": 0.918,
+        "bottom": 1
       }
     },
     {
       "family": "cherry-pick",
+      "showcase": true,
       "command": "git cherry-pick",
       "tint": "azure",
       "playback": "target",
@@ -347,10 +568,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4844,
+        "y": 0.9141
+      },
+      "placeBounds": {
+        "left": 0,
+        "top": 0,
+        "right": 1,
+        "bottom": 1
       }
     },
     {
       "family": "reflog",
+      "showcase": true,
       "command": "git reflog",
       "tint": "violet",
       "playback": "projectile",
@@ -364,10 +596,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 16
+      "impactStartFrame": 16,
+      "placeAnchor": {
+        "x": 0.5586,
+        "y": 0.5176
+      },
+      "placeBounds": {
+        "left": 0.1133,
+        "top": 0.1289,
+        "right": 0.9492,
+        "bottom": 1
+      }
     },
     {
       "family": "check-ignore",
+      "showcase": true,
       "command": "git check-ignore",
       "tint": "ash",
       "playback": "target",
@@ -380,10 +623,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4883,
+        "y": 0.9102
+      },
+      "placeBounds": {
+        "left": 0.125,
+        "top": 0.2656,
+        "right": 0.8945,
+        "bottom": 1
       }
     },
     {
       "family": "ls-files",
+      "showcase": true,
       "command": "git ls-files",
       "tint": "steel",
       "playback": "target",
@@ -396,10 +650,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4727,
+        "y": 0.9141
+      },
+      "placeBounds": {
+        "left": 0.0508,
+        "top": 0.25,
+        "right": 0.9062,
+        "bottom": 1
       }
     },
     {
       "family": "checkout-conflict",
+      "showcase": true,
       "command": "git checkout",
       "tint": "steel",
       "playback": "target",
@@ -412,10 +677,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5098,
+        "y": 0.4707
+      },
+      "placeBounds": {
+        "left": 0.1055,
+        "top": 0.0781,
+        "right": 0.9102,
+        "bottom": 0.9297
       }
     },
     {
       "family": "diff-conflict",
+      "showcase": true,
       "command": "git diff",
       "tint": "cyan",
       "playback": "target",
@@ -428,10 +704,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5059,
+        "y": 0.9219
+      },
+      "placeBounds": {
+        "left": 0,
+        "top": 0.1133,
+        "right": 0.8945,
+        "bottom": 1
       }
     },
     {
       "family": "mergetool",
+      "showcase": true,
       "command": "git mergetool",
       "tint": "azure",
       "playback": "target",
@@ -444,10 +731,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5039,
+        "y": 0.4688
+      },
+      "placeBounds": {
+        "left": 0.0469,
+        "top": 0,
+        "right": 0.8945,
+        "bottom": 0.9219
       }
     },
     {
       "family": "remote",
+      "showcase": true,
       "command": "git remote",
       "tint": "steel",
       "playback": "target",
@@ -460,10 +758,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.459,
+        "y": 0.8984
+      },
+      "placeBounds": {
+        "left": 0.0508,
+        "top": 0.1406,
+        "right": 0.8398,
+        "bottom": 1
       }
     },
     {
       "family": "fetch",
+      "showcase": true,
       "command": "git fetch",
       "tint": "steel",
       "playback": "target",
@@ -476,10 +785,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.502,
+        "y": 0.4902
+      },
+      "placeBounds": {
+        "left": 0.0273,
+        "top": 0.0977,
+        "right": 0.8867,
+        "bottom": 1
       }
     },
     {
       "family": "pull",
+      "showcase": true,
       "command": "git pull",
       "tint": "azure",
       "playback": "target",
@@ -492,10 +812,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4746,
+        "y": 0.918
+      },
+      "placeBounds": {
+        "left": 0.0117,
+        "top": 0.168,
+        "right": 0.8398,
+        "bottom": 1
       }
     },
     {
       "family": "push",
+      "showcase": true,
       "command": "git push",
       "tint": "steel",
       "playback": "ground",
@@ -508,12 +839,51 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4902,
+        "y": 0.8828
+      },
+      "placeBounds": {
+        "left": 0.0664,
+        "top": 0.1406,
+        "right": 0.9844,
+        "bottom": 1
+      }
+    },
+    {
+      "family": "default",
+      "showcase": false,
+      "command": "default",
+      "tint": "cyan",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/default.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 15,
+      "placeAnchor": {
+        "x": 0.4756,
+        "y": 0.4746
+      },
+      "placeBounds": {
+        "left": 0.1484,
+        "top": 0.2148,
+        "right": 0.8203,
+        "bottom": 0.75
       }
     }
   ],
   "white": [
     {
       "family": "init",
+      "showcase": true,
       "command": "git init",
       "tint": "azure",
       "playback": "projectile",
@@ -529,10 +899,21 @@
       },
       "motion": "gather-orb-projectile-impact-dissipate",
       "launchStartFrame": 10,
-      "impactStartFrame": 15
+      "impactStartFrame": 15,
+      "placeAnchor": {
+        "x": 0.5098,
+        "y": 0.9395
+      },
+      "placeBounds": {
+        "left": 0.0586,
+        "top": 0.1992,
+        "right": 0.8906,
+        "bottom": 1
+      }
     },
     {
       "family": "clone",
+      "showcase": true,
       "command": "git clone",
       "tint": "azure",
       "playback": "projectile",
@@ -546,10 +927,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 15
+      "impactStartFrame": 15,
+      "placeAnchor": {
+        "x": 0.4893,
+        "y": 0.4883
+      },
+      "placeBounds": {
+        "left": 0.1797,
+        "top": 0.1875,
+        "right": 0.9922,
+        "bottom": 1
+      }
     },
     {
       "family": "config",
+      "showcase": true,
       "command": "git config",
       "tint": "indigo",
       "playback": "target",
@@ -562,10 +954,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5039,
+        "y": 0.502
+      },
+      "placeBounds": {
+        "left": 0.1445,
+        "top": 0.1523,
+        "right": 0.8594,
+        "bottom": 1
       }
     },
     {
       "family": "status",
+      "showcase": true,
       "command": "git status",
       "tint": "steel",
       "playback": "target",
@@ -578,10 +981,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5039,
+        "y": 0.4961
+      },
+      "placeBounds": {
+        "left": 0.0781,
+        "top": 0.082,
+        "right": 0.918,
+        "bottom": 1
       }
     },
     {
       "family": "log",
+      "showcase": true,
       "command": "git log",
       "tint": "steel",
       "playback": "target",
@@ -594,10 +1008,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5039,
+        "y": 0.502
+      },
+      "placeBounds": {
+        "left": 0.1445,
+        "top": 0.1523,
+        "right": 0.8594,
+        "bottom": 1
       }
     },
     {
       "family": "show",
+      "showcase": true,
       "command": "git show",
       "tint": "azure",
       "playback": "target",
@@ -610,10 +1035,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4961,
+        "y": 0.8906
+      },
+      "placeBounds": {
+        "left": 0.2188,
+        "top": 0.3242,
+        "right": 0.793,
+        "bottom": 1
       }
     },
     {
       "family": "diff",
+      "showcase": true,
       "command": "git diff",
       "tint": "cyan",
       "playback": "projectile",
@@ -627,14 +1063,25 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 20
+      "impactStartFrame": 20,
+      "placeAnchor": {
+        "x": 0.5391,
+        "y": 0.4844
+      },
+      "placeBounds": {
+        "left": 0.1641,
+        "top": 0.1953,
+        "right": 1,
+        "bottom": 0.7383
+      }
     },
     {
       "family": "add",
+      "showcase": true,
       "command": "git add",
       "tint": "cyan",
       "playback": "projectile",
-      "anchor": "feet",
+      "anchor": "center",
       "sheet": {
         "src": "/cosmetics/companion/white/effects/skill-ice-25/add.png",
         "frameWidth": 256,
@@ -646,10 +1093,21 @@
       },
       "motion": "gather-orb-projectile-impact-dissipate",
       "launchStartFrame": 10,
-      "impactStartFrame": 15
+      "impactStartFrame": 15,
+      "placeAnchor": {
+        "x": 0.501,
+        "y": 0.4531
+      },
+      "placeBounds": {
+        "left": 0.2344,
+        "top": 0.1406,
+        "right": 0.7734,
+        "bottom": 0.9258
+      }
     },
     {
       "family": "commit",
+      "showcase": true,
       "command": "git commit",
       "tint": "azure",
       "playback": "target",
@@ -662,10 +1120,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5117,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.0508,
+        "top": 0.1719,
+        "right": 0.9688,
+        "bottom": 1
       }
     },
     {
       "family": "rm",
+      "showcase": true,
       "command": "git rm",
       "tint": "steel",
       "playback": "projectile",
@@ -679,10 +1148,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 16
+      "impactStartFrame": 16,
+      "placeAnchor": {
+        "x": 0.5234,
+        "y": 0.4941
+      },
+      "placeBounds": {
+        "left": 0.1836,
+        "top": 0.1875,
+        "right": 0.9414,
+        "bottom": 0.8203
+      }
     },
     {
       "family": "restore",
+      "showcase": true,
       "command": "git restore",
       "tint": "cyan",
       "playback": "target",
@@ -695,10 +1175,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4746,
+        "y": 0.918
+      },
+      "placeBounds": {
+        "left": 0.0469,
+        "top": 0.2266,
+        "right": 0.9453,
+        "bottom": 0.9375
       }
     },
     {
       "family": "reset",
+      "showcase": true,
       "command": "git reset",
       "tint": "steel",
       "playback": "target",
@@ -711,10 +1202,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5137,
+        "y": 0.9102
+      },
+      "placeBounds": {
+        "left": 0.082,
+        "top": 0.1328,
+        "right": 0.875,
+        "bottom": 1
       }
     },
     {
       "family": "revert",
+      "showcase": true,
       "command": "git revert",
       "tint": "indigo",
       "playback": "target",
@@ -727,10 +1229,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.502,
+        "y": 0.4648
+      },
+      "placeBounds": {
+        "left": 0.0703,
+        "top": 0.0547,
+        "right": 0.9688,
+        "bottom": 0.8945
       }
     },
     {
       "family": "stash",
+      "showcase": true,
       "command": "git stash",
       "tint": "violet",
       "playback": "projectile",
@@ -744,10 +1257,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 13
+      "impactStartFrame": 13,
+      "placeAnchor": {
+        "x": 0.5039,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.1914,
+        "top": 0.1953,
+        "right": 0.7891,
+        "bottom": 1
+      }
     },
     {
       "family": "branch",
+      "showcase": true,
       "command": "git branch",
       "tint": "cyan",
       "playback": "projectile",
@@ -761,10 +1285,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 17
+      "impactStartFrame": 17,
+      "placeAnchor": {
+        "x": 0.4854,
+        "y": 0.5312
+      },
+      "placeBounds": {
+        "left": 0.043,
+        "top": 0.1289,
+        "right": 0.8594,
+        "bottom": 1
+      }
     },
     {
       "family": "switch",
+      "showcase": true,
       "command": "git switch",
       "tint": "cyan",
       "playback": "ground",
@@ -777,10 +1312,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4746,
+        "y": 0.8945
+      },
+      "placeBounds": {
+        "left": 0.0391,
+        "top": 0.1484,
+        "right": 0.9258,
+        "bottom": 1
       }
     },
     {
       "family": "checkout",
+      "showcase": true,
       "command": "git checkout",
       "tint": "steel",
       "playback": "projectile",
@@ -794,10 +1340,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 20
+      "impactStartFrame": 20,
+      "placeAnchor": {
+        "x": 0.5254,
+        "y": 0.4805
+      },
+      "placeBounds": {
+        "left": 0.2188,
+        "top": 0.1758,
+        "right": 0.8398,
+        "bottom": 0.7617
+      }
     },
     {
       "family": "merge",
+      "showcase": true,
       "command": "git merge",
       "tint": "cyan",
       "playback": "projectile",
@@ -811,10 +1368,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 18
+      "impactStartFrame": 18,
+      "placeAnchor": {
+        "x": 0.5078,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.1172,
+        "top": 0.1445,
+        "right": 0.8242,
+        "bottom": 1
+      }
     },
     {
       "family": "merge-base",
+      "showcase": true,
       "command": "git merge-base",
       "tint": "indigo",
       "playback": "target",
@@ -827,10 +1395,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4902,
+        "y": 0.9297
+      },
+      "placeBounds": {
+        "left": 0.0234,
+        "top": 0.1406,
+        "right": 0.8945,
+        "bottom": 1
       }
     },
     {
       "family": "rebase",
+      "showcase": true,
       "command": "git rebase",
       "tint": "indigo",
       "playback": "target",
@@ -843,10 +1422,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4453,
+        "y": 0.9141
+      },
+      "placeBounds": {
+        "left": 0,
+        "top": 0.2188,
+        "right": 0.9258,
+        "bottom": 1
       }
     },
     {
       "family": "cherry-pick",
+      "showcase": true,
       "command": "git cherry-pick",
       "tint": "azure",
       "playback": "target",
@@ -859,10 +1449,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.502,
+        "y": 0.9922
+      },
+      "placeBounds": {
+        "left": 0,
+        "top": 0,
+        "right": 1,
+        "bottom": 1
       }
     },
     {
       "family": "reflog",
+      "showcase": true,
       "command": "git reflog",
       "tint": "violet",
       "playback": "projectile",
@@ -876,10 +1477,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 16
+      "impactStartFrame": 16,
+      "placeAnchor": {
+        "x": 0.5566,
+        "y": 0.5254
+      },
+      "placeBounds": {
+        "left": 0.0898,
+        "top": 0.1367,
+        "right": 0.9375,
+        "bottom": 1
+      }
     },
     {
       "family": "check-ignore",
+      "showcase": true,
       "command": "git check-ignore",
       "tint": "ash",
       "playback": "target",
@@ -892,10 +1504,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4941,
+        "y": 0.9531
+      },
+      "placeBounds": {
+        "left": 0.082,
+        "top": 0.2227,
+        "right": 0.9336,
+        "bottom": 1
       }
     },
     {
       "family": "ls-files",
+      "showcase": true,
       "command": "git ls-files",
       "tint": "steel",
       "playback": "target",
@@ -908,10 +1531,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5098,
+        "y": 0.4922
+      },
+      "placeBounds": {
+        "left": 0.0156,
+        "top": 0.0977,
+        "right": 0.9531,
+        "bottom": 1
       }
     },
     {
       "family": "checkout-conflict",
+      "showcase": true,
       "command": "git checkout",
       "tint": "steel",
       "playback": "target",
@@ -924,10 +1558,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5039,
+        "y": 0.4961
+      },
+      "placeBounds": {
+        "left": 0.1523,
+        "top": 0.1406,
+        "right": 0.9141,
+        "bottom": 0.9805
       }
     },
     {
       "family": "diff-conflict",
+      "showcase": true,
       "command": "git diff",
       "tint": "cyan",
       "playback": "target",
@@ -940,10 +1585,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5039,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.0352,
+        "top": 0.1367,
+        "right": 0.9531,
+        "bottom": 1
       }
     },
     {
       "family": "mergetool",
+      "showcase": true,
       "command": "git mergetool",
       "tint": "azure",
       "playback": "target",
@@ -956,10 +1612,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.502,
+        "y": 0.5117
+      },
+      "placeBounds": {
+        "left": 0.1797,
+        "top": 0.1289,
+        "right": 0.8906,
+        "bottom": 0.9727
       }
     },
     {
       "family": "remote",
+      "showcase": true,
       "command": "git remote",
       "tint": "steel",
       "playback": "target",
@@ -972,10 +1639,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.502,
+        "y": 0.9062
+      },
+      "placeBounds": {
+        "left": 0.1641,
+        "top": 0.1836,
+        "right": 0.8555,
+        "bottom": 1
       }
     },
     {
       "family": "fetch",
+      "showcase": true,
       "command": "git fetch",
       "tint": "steel",
       "playback": "target",
@@ -988,10 +1666,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4961,
+        "y": 0.4922
+      },
+      "placeBounds": {
+        "left": 0.0312,
+        "top": 0.1133,
+        "right": 0.8906,
+        "bottom": 1
       }
     },
     {
       "family": "pull",
+      "showcase": true,
       "command": "git pull",
       "tint": "azure",
       "playback": "target",
@@ -1004,10 +1693,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4805,
+        "y": 0.9336
+      },
+      "placeBounds": {
+        "left": 0,
+        "top": 0.0977,
+        "right": 0.9922,
+        "bottom": 1
       }
     },
     {
       "family": "push",
+      "showcase": true,
       "command": "git push",
       "tint": "steel",
       "playback": "ground",
@@ -1020,12 +1720,51 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5312,
+        "y": 0.8867
+      },
+      "placeBounds": {
+        "left": 0.125,
+        "top": 0.1484,
+        "right": 0.9961,
+        "bottom": 0.9219
+      }
+    },
+    {
+      "family": "default",
+      "showcase": false,
+      "command": "default",
+      "tint": "cyan",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/default.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 15,
+      "placeAnchor": {
+        "x": 0.5029,
+        "y": 0.5098
+      },
+      "placeBounds": {
+        "left": 0.0703,
+        "top": 0.1133,
+        "right": 0.9805,
+        "bottom": 1
       }
     }
   ],
   "black": [
     {
       "family": "init",
+      "showcase": true,
       "command": "git init",
       "tint": "violet",
       "playback": "projectile",
@@ -1041,10 +1780,21 @@
       },
       "motion": "gather-orb-projectile-impact-dissipate",
       "launchStartFrame": 8,
-      "impactStartFrame": 14
+      "impactStartFrame": 14,
+      "placeAnchor": {
+        "x": 0.5117,
+        "y": 0.9062
+      },
+      "placeBounds": {
+        "left": 0.0039,
+        "top": 0.1953,
+        "right": 0.9453,
+        "bottom": 0.9961
+      }
     },
     {
       "family": "clone",
+      "showcase": true,
       "command": "git clone",
       "tint": "azure",
       "playback": "projectile",
@@ -1058,10 +1808,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 15
+      "impactStartFrame": 15,
+      "placeAnchor": {
+        "x": 0.498,
+        "y": 0.5625
+      },
+      "placeBounds": {
+        "left": 0.1836,
+        "top": 0.1562,
+        "right": 0.8203,
+        "bottom": 1
+      }
     },
     {
       "family": "config",
+      "showcase": true,
       "command": "git config",
       "tint": "indigo",
       "playback": "target",
@@ -1074,10 +1835,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5078,
+        "y": 0.4902
+      },
+      "placeBounds": {
+        "left": 0.1172,
+        "top": 0.082,
+        "right": 0.9844,
+        "bottom": 0.9023
       }
     },
     {
       "family": "status",
+      "showcase": true,
       "command": "git status",
       "tint": "steel",
       "playback": "target",
@@ -1090,10 +1862,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5098,
+        "y": 0.4863
+      },
+      "placeBounds": {
+        "left": 0.0781,
+        "top": 0.0742,
+        "right": 0.9453,
+        "bottom": 0.9141
       }
     },
     {
       "family": "log",
+      "showcase": true,
       "command": "git log",
       "tint": "steel",
       "playback": "target",
@@ -1106,10 +1889,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5059,
+        "y": 0.498
+      },
+      "placeBounds": {
+        "left": 0.1133,
+        "top": 0.1094,
+        "right": 0.9062,
+        "bottom": 0.8945
       }
     },
     {
       "family": "show",
+      "showcase": true,
       "command": "git show",
       "tint": "azure",
       "playback": "target",
@@ -1122,10 +1916,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4863,
+        "y": 0.9102
+      },
+      "placeBounds": {
+        "left": 0.1797,
+        "top": 0.1133,
+        "right": 0.9297,
+        "bottom": 0.9453
       }
     },
     {
       "family": "diff",
+      "showcase": true,
       "command": "git diff",
       "tint": "cyan",
       "playback": "projectile",
@@ -1139,10 +1944,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 14
+      "impactStartFrame": 14,
+      "placeAnchor": {
+        "x": 0.4629,
+        "y": 0.4863
+      },
+      "placeBounds": {
+        "left": 0.082,
+        "top": 0.1445,
+        "right": 0.793,
+        "bottom": 0.7969
+      }
     },
     {
       "family": "add",
+      "showcase": true,
       "command": "git add",
       "tint": "cyan",
       "playback": "projectile",
@@ -1158,10 +1974,21 @@
       },
       "motion": "gather-orb-projectile-impact-dissipate",
       "launchStartFrame": 3,
-      "impactStartFrame": 18
+      "impactStartFrame": 18,
+      "placeAnchor": {
+        "x": 0.5137,
+        "y": 0.4434
+      },
+      "placeBounds": {
+        "left": 0.1445,
+        "top": 0.1367,
+        "right": 0.9297,
+        "bottom": 0.7617
+      }
     },
     {
       "family": "commit",
+      "showcase": true,
       "command": "git commit",
       "tint": "azure",
       "playback": "target",
@@ -1174,10 +2001,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4609,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.1133,
+        "top": 0.1406,
+        "right": 0.8398,
+        "bottom": 1
       }
     },
     {
       "family": "rm",
+      "showcase": true,
       "command": "git rm",
       "tint": "steel",
       "playback": "projectile",
@@ -1191,10 +2029,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 17
+      "impactStartFrame": 17,
+      "placeAnchor": {
+        "x": 0.5371,
+        "y": 0.4756
+      },
+      "placeBounds": {
+        "left": 0.1914,
+        "top": 0.1758,
+        "right": 0.957,
+        "bottom": 0.7891
+      }
     },
     {
       "family": "restore",
+      "showcase": true,
       "command": "git restore",
       "tint": "cyan",
       "playback": "target",
@@ -1207,10 +2056,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4629,
+        "y": 0.9141
+      },
+      "placeBounds": {
+        "left": 0.0352,
+        "top": 0.2266,
+        "right": 0.9297,
+        "bottom": 0.9414
       }
     },
     {
       "family": "reset",
+      "showcase": true,
       "command": "git reset",
       "tint": "steel",
       "playback": "target",
@@ -1223,10 +2083,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4961,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.0898,
+        "top": 0.1641,
+        "right": 0.9258,
+        "bottom": 0.9531
       }
     },
     {
       "family": "revert",
+      "showcase": true,
       "command": "git revert",
       "tint": "indigo",
       "playback": "target",
@@ -1239,10 +2110,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4961,
+        "y": 0.4746
+      },
+      "placeBounds": {
+        "left": 0.1055,
+        "top": 0.1016,
+        "right": 1,
+        "bottom": 0.8359
       }
     },
     {
       "family": "stash",
+      "showcase": true,
       "command": "git stash",
       "tint": "violet",
       "playback": "projectile",
@@ -1256,10 +2138,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 15
+      "impactStartFrame": 15,
+      "placeAnchor": {
+        "x": 0.4922,
+        "y": 0.498
+      },
+      "placeBounds": {
+        "left": 0.0391,
+        "top": 0.168,
+        "right": 0.8789,
+        "bottom": 1
+      }
     },
     {
       "family": "branch",
+      "showcase": true,
       "command": "git branch",
       "tint": "cyan",
       "playback": "projectile",
@@ -1273,10 +2166,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 19
+      "impactStartFrame": 19,
+      "placeAnchor": {
+        "x": 0.4844,
+        "y": 0.4648
+      },
+      "placeBounds": {
+        "left": 0.1836,
+        "top": 0.1602,
+        "right": 0.7539,
+        "bottom": 0.7812
+      }
     },
     {
       "family": "switch",
+      "showcase": true,
       "command": "git switch",
       "tint": "cyan",
       "playback": "ground",
@@ -1289,10 +2193,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4727,
+        "y": 0.8945
+      },
+      "placeBounds": {
+        "left": 0.0625,
+        "top": 0.2344,
+        "right": 0.9141,
+        "bottom": 0.9492
       }
     },
     {
       "family": "checkout",
+      "showcase": true,
       "command": "git checkout",
       "tint": "steel",
       "playback": "projectile",
@@ -1306,10 +2221,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 17
+      "impactStartFrame": 17,
+      "placeAnchor": {
+        "x": 0.498,
+        "y": 0.4375
+      },
+      "placeBounds": {
+        "left": 0.1875,
+        "top": 0.0664,
+        "right": 0.8203,
+        "bottom": 0.7578
+      }
     },
     {
       "family": "merge",
+      "showcase": true,
       "command": "git merge",
       "tint": "cyan",
       "playback": "projectile",
@@ -1323,10 +2249,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 20
+      "impactStartFrame": 20,
+      "placeAnchor": {
+        "x": 0.5215,
+        "y": 0.4844
+      },
+      "placeBounds": {
+        "left": 0.2305,
+        "top": 0.2422,
+        "right": 0.8672,
+        "bottom": 0.7148
+      }
     },
     {
       "family": "merge-base",
+      "showcase": true,
       "command": "git merge-base",
       "tint": "indigo",
       "playback": "target",
@@ -1339,6 +2276,16 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4941,
+        "y": 0.8789
+      },
+      "placeBounds": {
+        "left": 0.1406,
+        "top": 0.1172,
+        "right": 0.8555,
+        "bottom": 0.9297
       },
       "layers": [
         {
@@ -1353,6 +2300,7 @@
     },
     {
       "family": "rebase",
+      "showcase": true,
       "command": "git rebase",
       "tint": "indigo",
       "playback": "target",
@@ -1365,10 +2313,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4492,
+        "y": 0.918
+      },
+      "placeBounds": {
+        "left": 0.0664,
+        "top": 0.1562,
+        "right": 0.9492,
+        "bottom": 1
       }
     },
     {
       "family": "cherry-pick",
+      "showcase": true,
       "command": "git cherry-pick",
       "tint": "azure",
       "playback": "target",
@@ -1381,6 +2340,16 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4844,
+        "y": 0.9023
+      },
+      "placeBounds": {
+        "left": 0.0742,
+        "top": 0.1445,
+        "right": 0.8906,
+        "bottom": 0.9414
       },
       "layers": [
         {
@@ -1395,6 +2364,7 @@
     },
     {
       "family": "reflog",
+      "showcase": true,
       "command": "git reflog",
       "tint": "violet",
       "playback": "projectile",
@@ -1408,10 +2378,21 @@
         "frameCount": 25,
         "fps": 18
       },
-      "impactStartFrame": 16
+      "impactStartFrame": 16,
+      "placeAnchor": {
+        "x": 0.5059,
+        "y": 0.5
+      },
+      "placeBounds": {
+        "left": 0.0625,
+        "top": 0.1289,
+        "right": 0.9492,
+        "bottom": 0.8633
+      }
     },
     {
       "family": "check-ignore",
+      "showcase": true,
       "command": "git check-ignore",
       "tint": "ash",
       "playback": "target",
@@ -1424,10 +2405,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.498,
+        "y": 0.9844
+      },
+      "placeBounds": {
+        "left": 0.0898,
+        "top": 0.1797,
+        "right": 0.9102,
+        "bottom": 1
       }
     },
     {
       "family": "ls-files",
+      "showcase": true,
       "command": "git ls-files",
       "tint": "steel",
       "playback": "target",
@@ -1440,10 +2432,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4277,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.043,
+        "top": 0.1094,
+        "right": 0.9453,
+        "bottom": 0.9609
       }
     },
     {
       "family": "checkout-conflict",
+      "showcase": true,
       "command": "git checkout",
       "tint": "steel",
       "playback": "target",
@@ -1456,10 +2459,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5645,
+        "y": 0.502
+      },
+      "placeBounds": {
+        "left": 0.0664,
+        "top": 0.125,
+        "right": 0.9453,
+        "bottom": 0.8672
       }
     },
     {
       "family": "diff-conflict",
+      "showcase": true,
       "command": "git diff",
       "tint": "cyan",
       "playback": "target",
@@ -1472,10 +2486,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4785,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.0273,
+        "top": 0.0781,
+        "right": 0.9375,
+        "bottom": 0.9492
       }
     },
     {
       "family": "mergetool",
+      "showcase": true,
       "command": "git mergetool",
       "tint": "azure",
       "playback": "target",
@@ -1488,10 +2513,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.5039,
+        "y": 0.502
+      },
+      "placeBounds": {
+        "left": 0.1953,
+        "top": 0.1367,
+        "right": 0.8203,
+        "bottom": 1
       }
     },
     {
       "family": "remote",
+      "showcase": true,
       "command": "git remote",
       "tint": "steel",
       "playback": "target",
@@ -1504,6 +2540,16 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4883,
+        "y": 0.8867
+      },
+      "placeBounds": {
+        "left": 0.1094,
+        "top": 0.125,
+        "right": 0.8594,
+        "bottom": 1
       },
       "layers": [
         {
@@ -1518,6 +2564,7 @@
     },
     {
       "family": "fetch",
+      "showcase": true,
       "command": "git fetch",
       "tint": "steel",
       "playback": "target",
@@ -1530,10 +2577,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4941,
+        "y": 0.4922
+      },
+      "placeBounds": {
+        "left": 0.0234,
+        "top": 0.0703,
+        "right": 0.8867,
+        "bottom": 0.9805
       }
     },
     {
       "family": "pull",
+      "showcase": true,
       "command": "git pull",
       "tint": "azure",
       "playback": "target",
@@ -1546,10 +2604,21 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4707,
+        "y": 0.9375
+      },
+      "placeBounds": {
+        "left": 0.0391,
+        "top": 0.2461,
+        "right": 0.8672,
+        "bottom": 0.9766
       }
     },
     {
       "family": "push",
+      "showcase": true,
       "command": "git push",
       "tint": "steel",
       "playback": "ground",
@@ -1562,6 +2631,44 @@
         "rows": 5,
         "frameCount": 25,
         "fps": 18
+      },
+      "placeAnchor": {
+        "x": 0.4141,
+        "y": 0.8984
+      },
+      "placeBounds": {
+        "left": 0.0352,
+        "top": 0.2305,
+        "right": 0.832,
+        "bottom": 1
+      }
+    },
+    {
+      "family": "default",
+      "showcase": false,
+      "command": "default",
+      "tint": "cyan",
+      "playback": "projectile",
+      "anchor": "center",
+      "sheet": {
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/default.png",
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25,
+        "fps": 18
+      },
+      "impactStartFrame": 15,
+      "placeAnchor": {
+        "x": 0.4941,
+        "y": 0.4805
+      },
+      "placeBounds": {
+        "left": 0.1953,
+        "top": 0.1328,
+        "right": 0.8438,
+        "bottom": 0.9141
       }
     }
   ]

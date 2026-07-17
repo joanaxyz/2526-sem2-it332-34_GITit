@@ -3,22 +3,16 @@ import { useSearchParams } from 'react-router-dom'
 import { Backpack, BarChart3, BookOpen, Check, ChevronLeft, ChevronRight, Lock, Star, Trophy, User } from 'lucide-react'
 
 import heroShowcasePedestalImage from '@/assets/images/hero_showcase_pedestal.png'
-import rank1BadgeImage from '@/assets/images/rank1.png'
-import rank2BadgeImage from '@/assets/images/rank2.png'
-import rank3BadgeImage from '@/assets/images/rank3.png'
-import rank4BadgeImage from '@/assets/images/rank4.png'
-import rank5BadgeImage from '@/assets/images/rank5.png'
-import rank6BadgeImage from '@/assets/images/rank6.png'
 import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 import { HomeStatsView } from '@/features/home/components/HomeStatsView'
 import { HomeLoadoutView } from '@/features/home/components/HomeLoadoutView'
+import { RankBadge } from '@/features/home/components/HomeRankBadge'
 import { RANK_TIERS, deriveRank } from '@/shared/progress/rank'
-import type { RankTier } from '@/shared/progress/rank'
 import type { HomeSummary } from '@/features/home/types'
 import type { StatsSummary } from '@/features/stats/types'
 import { useLearnedSkills } from '@/features/skills/hooks/useLearnedSkills'
 import type { LearnedSkill } from '@/features/skills/types'
-import { effectForSkill } from '@/shared/battle/effects/effectRegistry'
+import { effectForSkill, effectPlacementForSkill } from '@/shared/battle/effects/effectRegistry'
 import { companionBattleFromDef, companionFromDef } from '@/shared/cosmetics/companionRuntime'
 import type { SpriteDef } from '@/shared/cosmetics/types'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
@@ -29,15 +23,6 @@ import type { SpriteAnimation, SpriteAnimatorHandle } from '@/shared/sprites/typ
 import { useImagePixelBounds } from '@/shared/sprites/usePixelBounds'
 import { GitCommandIcon, gitCommandFamily } from '@/shared/git/commandCatalog/commandIcons'
 
-const RANK_BADGE_IMAGES = [
-  rank1BadgeImage,
-  rank2BadgeImage,
-  rank3BadgeImage,
-  rank4BadgeImage,
-  rank5BadgeImage,
-  rank6BadgeImage,
-] as const
-
 type ShowcaseMove = {
   label: string
   sheet: SpriteAnimation
@@ -47,20 +32,30 @@ type ShowcaseMove = {
   oneShot: boolean
 }
 
-function formatNumber(value: number | null | undefined, fallback = 0) {
-  return (typeof value === 'number' ? value : fallback).toLocaleString()
+function cssLengthToPx(value: string, context: Element): number | null {
+  const trimmed = value.trim()
+  const amount = Number.parseFloat(trimmed)
+  if (!Number.isFinite(amount)) return null
+  if (trimmed.endsWith('rem')) {
+    const rootFontSize = Number.parseFloat(window.getComputedStyle(document.documentElement).fontSize)
+    return amount * rootFontSize
+  }
+  if (trimmed.endsWith('em')) {
+    const fontSize = Number.parseFloat(window.getComputedStyle(context).fontSize)
+    return amount * fontSize
+  }
+  return amount
 }
 
-function RankBadge({ tier, className }: { tier: RankTier; className?: string }) {
-  const badge = RANK_BADGE_IMAGES[Math.max(0, Math.min(tier.rank - 1, RANK_BADGE_IMAGES.length - 1))]
-  return (
-    <img
-      className={['home-rank-badge', className].filter(Boolean).join(' ')}
-      src={badge}
-      alt=""
-      aria-hidden="true"
-    />
-  )
+function homeGroundPoint(layer: HTMLElement, bodyImpact: { x: number; y: number }): { x: number; y: number } {
+  const layerBox = layer.getBoundingClientRect()
+  const groundBottom = cssLengthToPx(window.getComputedStyle(layer).getPropertyValue('--home-sprite-ground-bottom'), layer)
+  const groundY = groundBottom == null ? layerBox.height * 0.82 : layerBox.height - groundBottom
+  return { x: bodyImpact.x, y: Math.max(bodyImpact.y, groundY) }
+}
+
+function formatNumber(value: number | null | undefined, fallback = 0) {
+  return (typeof value === 'number' ? value : fallback).toLocaleString()
 }
 
 export function HomeHubView({
@@ -174,9 +169,15 @@ export function HomeHubView({
 
     const attackerBox = attackerRef.current?.getBoundingClientRect()
     const from = anchor(attackerRef.current, attackerBox ? attackerBox.width * 0.2 : 30, attackerBox ? -attackerBox.height * 0.08 : -16)
-    const to = anchor(attackTargetRef.current)
+    const skillFamily = gitCommandFamily(skill.base_command)
+    const { playback, anchor: impactAnchor } = effectPlacementForSkill(skillFamily, companionSlug)
+    const bodyImpact = anchor(attackTargetRef.current)
+    const groundImpact = homeGroundPoint(layer, bodyImpact)
+    const feetPlanted = playback === 'ground' || impactAnchor === 'feet'
+    const to = playback === 'projectile' ? bodyImpact : feetPlanted ? groundImpact : bodyImpact
+    const impactTo = playback === 'projectile' && impactAnchor === 'feet' ? groundImpact : undefined
     window.setTimeout(() => {
-      void effectForSkill(gitCommandFamily(skill.base_command), companionSlug)({ layer, from, to })
+      void effectForSkill(skillFamily, companionSlug)({ layer, from, to, impactTo })
     }, 120)
   }
 

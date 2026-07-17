@@ -1,4 +1,3 @@
-import type { ChapterContentSection } from '@/shared/level/chapterContent'
 import type {
   LevelScenarioContext,
   RepositorySnapshot,
@@ -6,20 +5,19 @@ import type {
   TerminalStep,
 } from '@/shared/level/types'
 import type { KnownDifficulty } from '@/features/challenges/utils/constants'
-import type { BookPage } from '@/features/story-map/components/book/bookTypes'
 import type { CommandSubmissionOutcome } from '@/shared/battle/types'
 
 export type Difficulty = KnownDifficulty | (string & {})
 export type ChallengeStatus = 'not_started' | 'locked' | 'in_progress' | 'completed' | 'failed' | 'abandoned'
-export type AttemptStatus = 'started' | 'completed' | 'failed' | 'abandoned'
+type AttemptStatus = 'started' | 'completed' | 'failed' | 'abandoned'
 export type ChallengeActionIntent = 'start' | 'replay' | 'retry' | 'continue'
 
-export type CommandBudget = {
+type CommandBudget = {
   min_counted_commands: number
   max_counted_commands: number
 }
 
-export type LatestAttemptStats = {
+type LatestAttemptStats = {
   id: number
   status: AttemptStatus
   stars: number
@@ -29,7 +27,7 @@ export type LatestAttemptStats = {
   ended_at: string | null
 }
 
-export type LevelRunCompletion = {
+type LevelRunCompletion = {
   stars: number
   counted_action_total: number
   completed_at: string
@@ -46,111 +44,7 @@ export type ChallengeTrialAccess = {
   command_budget: CommandBudget
 }
 
-export type ChallengeLevelAccess = {
-  id: number
-  slug: string
-  title: string
-  brief: string
-  status: ChallengeStatus
-  completed: boolean
-  locked: boolean
-  trials: ChallengeTrialAccess[]
-}
-
-/** One independently launchable adventure level. Its waves are played inside
- *  its own run; levels belong directly to a chapter, not to an adventure wrapper. */
-export type AdventureSummary = {
-  item_type: 'adventure'
-  id: number
-  slug: string
-  title: string
-  description: string
-  command: string
-  learned: boolean
-  completed: boolean
-  locked: boolean
-  lock_reason: string
-  wave_count: number
-  completion: LevelRunCompletion | null
-  latest_run_id: number | null
-  status: 'not_started' | 'started' | 'completed' | 'failed' | 'abandoned'
-  // Stable across re-runs: true once the level has ever been passed. Drives
-  // the challenge gate and progress so a post-pass replay can't relock anything.
-  is_passed: boolean
-  progress: {
-    value: number
-    numerator: number
-    denominator: number
-  }
-}
-
-export type AdventureLevelSummary = AdventureSummary
-
-
-export type CommandFormSummary = {
-  id: number
-  slug: string
-  usage_form: string
-  label: string
-  summary: string
-  level_count: number
-}
-
-export type CommandSkillSummary = {
-  item_type: 'command_skill'
-  id: number
-  slug: string
-  base_command: string
-  title: string
-  summary: string
-  mental_model: Record<string, unknown>
-  forms: CommandFormSummary[]
-}
-
-export type ChallengeSummary = {
-  item_type: 'challenge'
-  id: number
-  slug: string
-  title: string
-  summary: string
-  narrative: string
-  status: ChallengeStatus
-  completed: boolean
-  locked: boolean
-  trials: ChallengeTrialAccess[]
-}
-
-
-export type ChapterLessonSummary = {
-  item_type: 'lesson'
-  id: number
-  slug: string
-  title: string
-  summary: string
-  // Pages ship inline (lessons are small), so opening the reader needs no fetch.
-  pages: BookPage[]
-}
-
-export type { ChapterContentSection }
-
-export type ChapterContentPage<
-  T extends AdventureSummary | CommandSkillSummary | ChallengeSummary | ChapterLessonSummary,
-> = {
-  section: ChapterContentSection
-  results: T[]
-  next_cursor: number | null
-}
-
-// Every relic for one chapter, fetched in a single request. Chapters hold only
-// a handful of challenges/lessons, so the lists are returned whole.
-export type ChapterContentOverview = {
-  chapter_id: number
-  adventures: AdventureSummary[]
-  lessons: ChapterLessonSummary[]
-  challenges: ChallengeSummary[]
-}
-
-export type CommandPreviewBlock = {
+type CommandPreviewBlock = {
   type?: 'paragraph' | 'bullet_list' | 'list' | 'command' | 'code' | 'callout' | 'warning' | 'terminal_output'
   title?: string
   body?: string
@@ -160,7 +54,7 @@ export type CommandPreviewBlock = {
   language?: string
 }
 
-export type CommandPreviewPage = {
+type CommandPreviewPage = {
   id?: string
   title: string
   subtitle?: string
@@ -168,7 +62,7 @@ export type CommandPreviewPage = {
   blocks?: CommandPreviewBlock[]
 }
 
-export type CommandPreviewMetadata = {
+type CommandPreviewMetadata = {
   schema_version?: number
   title?: string
   intro?: string
@@ -197,7 +91,7 @@ export type CommandFormPreview = {
   command_preview: CommandPreviewMetadata
 }
 
-export type ChallengeRef = {
+type ChallengeRef = {
   id: number
   slug: string
   title: string
@@ -307,7 +201,7 @@ export type ChallengeCommandResponse = {
   }
 }
 
-export type ChallengeRunUpdate = Pick<
+type ChallengeRunUpdate = Pick<
   ChallengeRun,
   | 'id'
   | 'replay'

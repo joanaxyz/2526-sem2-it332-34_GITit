@@ -12,7 +12,7 @@ import type { BattleDirector, BattleTransitionCue, BattleTransitionCueConfig } f
 import type { BattleMonster } from '@/shared/battle/types'
 
 export { missedSpellFloorTarget } from './battleMotion'
-export type { BattleDirector, BattleTransitionCue, BattleTransitionCueConfig, EncounterOptions } from './battleDirectorTypes'
+export type { BattleDirector,  BattleTransitionCueConfig, EncounterOptions } from './battleDirectorTypes'
 
 /**
  * Translates command-lifecycle calls into sequential stage choreography. In the

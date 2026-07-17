@@ -11,12 +11,13 @@ import { ErrorState } from '@/shared/components/ErrorState'
  * only used around playable Adventure/Challenge routes, never Home or Stories.
  */
 export function RequireCompanion({ children }: { children: ReactElement }) {
-  const { hasCompanion, isLoading, isError, error } = usePlayerLoadout()
+  const { companionSlug, hasCompanion, isLoading, isError, error } = usePlayerLoadout()
   const [searchParams] = useSearchParams()
 
   if (isLoading) {
     return (
       <LoadingState
+        companionSlug={companionSlug}
         description="Checking your adventuring party."
         label="Loading"
         variant="screen"

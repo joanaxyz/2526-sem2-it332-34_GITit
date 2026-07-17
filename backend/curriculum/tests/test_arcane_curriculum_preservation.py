@@ -24,10 +24,9 @@ EXPECTED_HASHES = {
     "chapters": "b3588181c71c0f83a053bc4c69666129d9923ca7736100c43a79156a3ca75b57",
     "commands": "5e4af04c91823d35b9d813f2715bc9fe3b83f5b36e2fa4dccd628c6beec2f0cc",
     "lessons": "f9f4b58f337841475c56bf31e12b2cd21ebb354a4f81fcd59b4e63a811b59c25",
-    # 2026-07-15: repinned after fixing unquoted multi-word config values in the
-    # arcane blueprint solutions (git config --global user.name 'Learner X') —
-    # the previous spelling silently no-opped in the engine.
-    "adventures": "033832b870a3c0153ea2c9516d5c1bf8547eb5e3d4d607c5c061032078edd034",
+    # 2026-07-17: repinned after restoring the authored Project Files edits that
+    # make the stash and cherry-pick workflows produce real work before staging.
+    "adventures": "79d581d205718afaa4360093612539083ddd211867fcb9330f29f7c1f4636e85",
     "challenges": "ce07591ddba92da84cf3de90e46c19ba5545bbdf53caf837e87e3180bab1d3d5",
 }
 

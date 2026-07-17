@@ -128,7 +128,6 @@ requests==2.34.2
     # via
     #   cachecontrol
     #   pip-audit
-    #   stripe
 rich==15.0.0
     # via pip-audit
 rpds-py==2026.6.3
@@ -141,12 +140,8 @@ sortedcontainers==2.4.0
     # via cyclonedx-python-lib
 sqlparse==0.5.5
     # via django
-stripe==13.0.1
-    # via -r requirements.in
 toml==0.10.2
     # via pip-audit
-typing-extensions==4.16.0
-    # via stripe
 tzdata==2026.2 ; sys_platform == 'win32'
     # via
     #   django

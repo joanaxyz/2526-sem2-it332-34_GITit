@@ -58,7 +58,7 @@ class ScenarioContextNormalizer:
                 continue
             label = self._text(item.get("label"))
             detail_value = self._text(item.get("value"))
-            if label and detail_value:
+            if detail_value:
                 details.append({"label": label, "value": detail_value})
         return details
 

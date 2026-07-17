@@ -117,9 +117,11 @@ def test_active_adventure_run_is_not_exposed_as_resumable_session(db, django_use
 
     payload = adventure_summary_payload(player=get_or_create_player(user), adventure=level)
 
-    assert payload["status"] == "not_started"
+    assert payload["is_passed"] is False
+    assert payload["completion"] is None
+    assert "status" not in payload
     assert "active_run_id" not in payload
-    assert payload["latest_run_id"] is None
+    assert "latest_run_id" not in payload
 
 
 def test_passed_run_unlocks_next_level_even_without_completion_row(db, django_user_model):

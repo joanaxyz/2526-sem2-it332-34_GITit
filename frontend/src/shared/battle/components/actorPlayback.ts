@@ -30,7 +30,7 @@ export function playOneShotSprite(
   })
 }
 
-export function holdLastFrame(sprite: SpriteAnimatorHandle | null, animation: SpriteAnimation) {
+function holdLastFrame(sprite: SpriteAnimatorHandle | null, animation: SpriteAnimation) {
   if (!sprite) return
   sprite.pause()
   sprite.goToFrame(animation.frameCount - 1)

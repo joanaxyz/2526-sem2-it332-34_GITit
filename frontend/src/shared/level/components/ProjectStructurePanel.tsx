@@ -1,16 +1,12 @@
 import {
   AlertTriangle,
   ChevronDown,
-  ExternalLink,
   FilePlus,
   FolderOpen,
   FolderPlus,
-  Pencil,
-  Trash2,
 } from 'lucide-react'
-import type { MouseEvent, ReactNode } from 'react'
+import type { MouseEvent } from 'react'
 import { useEffect, useMemo, useState } from 'react'
-import { createPortal } from 'react-dom'
 
 import type { RepositorySnapshot } from '@/shared/level/types'
 import {
@@ -21,6 +17,14 @@ import {
 import type { ProjectTreeNode } from '@/shared/level/utils/projectFiles'
 import { Button } from '@/shared/components/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Card'
+import {
+  CONTEXT_MENU_HEIGHT,
+  CONTEXT_MENU_WIDTH,
+  ProjectTreeContextMenu,
+} from '@/shared/level/components/project-structure/ProjectTreeContextMenu'
+import type {
+  ProjectTreeContextMenuState,
+} from '@/shared/level/components/project-structure/ProjectTreeContextMenu'
 import {
   ProjectTreeCreateDraftRow,
   ProjectTreeItem,
@@ -53,12 +57,6 @@ type ProjectStructurePanelProps = {
   onOpenFile?: (path: string) => void
 }
 
-type ContextMenuState = {
-  x: number
-  y: number
-  node: ProjectTreeNode | null
-}
-
 function parentPathFor(path: string) {
   return path.split('/').slice(0, -1).join('/')
 }
@@ -80,33 +78,6 @@ function draftError(error: unknown, fallback: string) {
   return workspaceFileErrorMessage(error, fallback)
 }
 
-function MenuItem({
-  children,
-  tone = 'default',
-  disabled,
-  onClick,
-}: {
-  children: ReactNode
-  tone?: 'default' | 'danger'
-  disabled?: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      role="menuitem"
-      disabled={disabled}
-      className={cn('project-tree-menu__item', tone === 'danger' && 'is-danger')}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  )
-}
-
-const CONTEXT_MENU_WIDTH = 176
-const CONTEXT_MENU_HEIGHT = 176
-
 export function ProjectStructurePanel({
   snapshot,
   rootName,
@@ -125,7 +96,7 @@ export function ProjectStructurePanel({
   const filePaths = useMemo(() => new Set(files.map((file) => file.path)), [files])
   const hasFiles = tree.length > 0
   const [draft, setDraft] = useState<ProjectTreeDraft | null>(null)
-  const [menu, setMenu] = useState<ContextMenuState | null>(null)
+  const [menu, setMenu] = useState<ProjectTreeContextMenuState | null>(null)
   const [panelError, setPanelError] = useState('')
   const actionDisabled = createDisabled || Boolean(draft?.submitting)
   const canCreate = Boolean(onCreateFile) && !actionDisabled
@@ -249,9 +220,6 @@ export function ProjectStructurePanel({
   }
 
   const rootCreateDraft = draft?.mode === 'create' && draft.parentPath === '' ? draft : null
-  const contextNode = menu?.node ?? null
-  const contextIsDirectory = !contextNode || contextNode.type === 'directory'
-
   return (
     <Card
       className={cn('flex flex-col overflow-hidden shadow-none', isOpen && 'min-h-[18rem]', className)}
@@ -377,51 +345,17 @@ export function ProjectStructurePanel({
           </div>
         </CardContent>
       ) : null}
-      {menu ? createPortal(
-        <div
-          role="menu"
-          className="project-tree-menu"
-          style={{ left: menu.x, top: menu.y }}
-          onMouseDown={(event) => event.stopPropagation()}
-        >
-          {contextIsDirectory ? (
-            <>
-              <MenuItem disabled={!canCreate} onClick={() => startCreate(contextNode?.path ?? '', 'file')}>
-                <FilePlus aria-hidden="true" />
-                New File
-              </MenuItem>
-              <MenuItem disabled={!canCreate} onClick={() => startCreate(contextNode?.path ?? '', 'folder')}>
-                <FolderPlus aria-hidden="true" />
-                New Folder
-              </MenuItem>
-            </>
-          ) : (
-            <MenuItem
-              disabled={!onOpenFile}
-              onClick={() => {
-                if (contextNode) onOpenFile?.(contextNode.path)
-                setMenu(null)
-              }}
-            >
-              <ExternalLink aria-hidden="true" />
-              Open
-            </MenuItem>
-          )}
-          {contextNode ? (
-            <>
-              <MenuItem disabled={!canRename} onClick={() => startRename(contextNode)}>
-                <Pencil aria-hidden="true" />
-                Rename
-              </MenuItem>
-              <MenuItem disabled={!canDelete} tone="danger" onClick={() => void deleteNode(contextNode)}>
-                <Trash2 aria-hidden="true" />
-                Delete
-              </MenuItem>
-            </>
-          ) : null}
-        </div>,
-        document.body,
-      ) : null}
+      <ProjectTreeContextMenu
+        menu={menu}
+        canCreate={canCreate}
+        canRename={canRename}
+        canDelete={canDelete}
+        onOpenFile={onOpenFile}
+        onStartCreate={startCreate}
+        onStartRename={startRename}
+        onDeleteNode={(node) => void deleteNode(node)}
+        onClose={() => setMenu(null)}
+      />
     </Card>
   )
 }

@@ -23,6 +23,7 @@ export type CompanionSkill = {
 
 type RawSkill = {
   family: string
+  showcase?: boolean
   command: string
   tint: string
   playback: string
@@ -30,6 +31,8 @@ type RawSkill = {
   motion?: string
   launchStartFrame?: number
   impactStartFrame?: number
+  placeAnchor?: { x: number; y: number }
+  placeBounds?: { left: number; top: number; right: number; bottom: number }
   layers?: { layer: string; src: string }[]
   sheet: {
     src: string
@@ -70,9 +73,28 @@ function toSkill(raw: RawSkill): CompanionSkill {
 /** Every spell a companion can showcase, in git-workflow order. */
 export function companionSkills(slug: string | null | undefined): CompanionSkill[] {
   const list = (slug && INDEX[slug]) || []
-  return list.map(toSkill)
+  return list.filter((raw) => raw.showcase !== false).map(toSkill)
 }
 
-export function hasCompanionSkills(slug: string | null | undefined): boolean {
-  return companionSkills(slug).length > 0
+/** Pixel placement geometry keyed by command family. This includes hidden
+ *  fallback effects (such as `default`) that are not shown in the Shop. */
+export function companionPlacementGeometry(
+  slug: string | null | undefined,
+): Record<
+  string,
+  {
+    anchor?: { x: number; y: number }
+    bounds?: { left: number; top: number; right: number; bottom: number }
+  }
+> {
+  const list = (slug && INDEX[slug]) || []
+  const out: Record<string, { anchor?: { x: number; y: number }; bounds?: { left: number; top: number; right: number; bottom: number } }> = {}
+  for (const raw of list) {
+    if (!raw.placeAnchor && !raw.placeBounds) continue
+    out[raw.family] = {
+      ...(raw.placeAnchor ? { anchor: { ...raw.placeAnchor } } : {}),
+      ...(raw.placeBounds ? { bounds: { ...raw.placeBounds } } : {}),
+    }
+  }
+  return out
 }

@@ -79,8 +79,8 @@ export type RepositorySnapshot = {
   visible_tree?: Record<string, RepositoryValue>
 }
 
-export type CopyDetail = {
-  label: string
+type CopyDetail = {
+  label?: string
   value: string
 }
 

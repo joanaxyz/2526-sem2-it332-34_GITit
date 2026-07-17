@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Sparkles } from 'lucide-react'
 
-import type { AdventureLevelSummary } from '@/features/challenges/types'
+import type { AdventureLevelSummary } from '@/features/story-map/types'
 import { GamePanel } from '@/shared/components/GamePanel'
 import { companionSkillPortrait, primarySkillCommand } from '@/shared/cosmetics/skillPortrait'
 import type { CompanionDef } from '@/shared/cosmetics/types'
@@ -18,7 +18,7 @@ type NextSkill = {
    they have not cleared - the honest answer to "which skill, at what level?".
    Null once every level in the chapter is done. */
 function nextSkillReward(levels: AdventureLevelSummary[]): NextSkill | null {
-  const index = levels.findIndex((level) => !level.completed)
+  const index = levels.findIndex((level) => !level.is_passed)
   if (index === -1) return null
   const level = levels[index]
   return { level, levelNumber: index + 1, command: primarySkillCommand(level.command) }

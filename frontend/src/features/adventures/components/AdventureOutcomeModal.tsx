@@ -187,7 +187,7 @@ export function AdventureOutcomeModal({
           {commands.map((command) => {
             const state = command.mastered ? 'mastered' : command.introduced ? 'progress' : 'untried'
             return (
-              <li key={command.slug} className="flex items-center justify-between gap-3 px-3 py-1.5 text-sm">
+              <li key={command.form_id} className="flex items-center justify-between gap-3 px-3 py-1.5 text-sm">
                 <CheckCircle2
                   aria-hidden="true"
                   className={cn(

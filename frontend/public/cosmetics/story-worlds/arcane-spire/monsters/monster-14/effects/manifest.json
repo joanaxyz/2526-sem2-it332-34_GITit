@@ -1,5 +1,5 @@
 {
-  "id": "undead-siren-skill-effect",
+  "id": "monster-14-skill-effect",
   "label": "Undead Siren Skill Effect",
   "motif": "blue flame water orb",
   "playback": "target",
@@ -45,5 +45,15 @@
     }
   ],
   "anchor": "center",
+  "placeAnchor": {
+    "x": 0.5078,
+    "y": 0.4668
+  },
+  "placeBounds": {
+    "left": 0.0898,
+    "top": 0.0898,
+    "right": 0.9961,
+    "bottom": 0.8398
+  },
   "placement": "target"
 }

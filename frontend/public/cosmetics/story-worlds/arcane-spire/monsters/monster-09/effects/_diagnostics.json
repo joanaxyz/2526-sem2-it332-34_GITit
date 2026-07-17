@@ -9,28 +9,28 @@
       255
     ],
     "bbox": [
-      26,
       24,
-      1243,
-      1255
+      17,
+      1246,
+      1254
     ],
     "frameBBoxCenterRange": [
-      110.5,
-      128.0,
-      127.0,
-      154.0
+      109.5,
+      122.5,
+      124.0,
+      160.5
     ],
     "frameEnergyAnchorRange": [
-      108.13,
-      124.27,
-      152.11,
-      201.81
+      110.0,
+      120.7,
+      149.64,
+      201.57
     ],
     "frameRegistrationAnchorRange": [
-      108.13,
-      124.27,
-      152.11,
-      201.81
+      110.0,
+      120.7,
+      149.64,
+      201.57
     ],
     "registration": {
       "targetAnchor": [
@@ -39,20 +39,20 @@
       ],
       "detectedAnchorRangeBeforeRegistration": [
         106,
-        128,
-        189,
-        225
+        129,
+        191,
+        229
       ],
       "appliedShiftRange": [
-        -10,
-        12,
-        -5,
-        31
+        -9,
+        8,
+        -9,
+        28
       ],
       "emptyFrames": 0,
       "reliableFrames": 16,
       "lowConfidenceFrames": 9,
-      "method": "feet-planted base on ground line (fit scale 0.956), core-x centred"
+      "method": "feet-planted base on ground line when bounds allow, core-x centred (bounds-clamped; authored scale preserved)"
     }
   }
 }

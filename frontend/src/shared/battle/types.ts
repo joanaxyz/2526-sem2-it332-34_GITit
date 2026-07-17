@@ -11,7 +11,6 @@ export type BattleMonster = {
   id: number
   /** Catalog monster id (a.k.a. `species`). The selected StoryWorld supplies its skin. */
   species: string
-  tier: 'mob' | 'elite' | 'boss'
   hp: number
   max_hp: number
   alive: boolean
@@ -20,7 +19,7 @@ export type BattleMonster = {
 }
 
 /** Why a monster struck Blue this turn. `timeout` is reserved for a future turn timer. */
-export type MonsterAttackCause = 'counter' | 'miss' | 'timeout'
+type MonsterAttackCause = 'counter' | 'miss' | 'timeout'
 
 export type BattleEvent =
   | {
@@ -50,7 +49,7 @@ export type BattleEvent =
   | { type: 'encounter_cleared' }
   | { type: 'player_defeat' }
 
-export type BattleWave = {
+type BattleWave = {
   monsters: BattleMonster[]
 }
 

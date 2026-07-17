@@ -204,5 +204,3 @@ function ContentRow({ content }: { content: ContentDefinition }) {
     </li>
   )
 }
-
-export default AuthoringLibraryPage

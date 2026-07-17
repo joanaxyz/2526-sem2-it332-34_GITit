@@ -17,7 +17,7 @@ export function normalizeLevelContext(
     task: cleanText(context?.task),
     details: (context?.details ?? [])
       .map((item) => ({ label: cleanText(item.label), value: cleanText(item.value) }))
-      .filter((item) => item.label && item.value),
+      .filter((item) => item.value),
   }
 }
 

@@ -8,7 +8,7 @@ from common.constants import (
     DIFFICULTY_MEDIUM,
     SESSION_STATUS_STARTED,
 )
-from curriculum.models import CommandForm, CommandSkill
+from curriculum.models import CommandForm
 
 from .access_helpers import _completion_payload, _latest_attempt_payload, _ordered_trials
 from .adventure_access import _adventure_passed
@@ -27,19 +27,23 @@ class ChallengeAccessContext:
 
 
 def _build_challenge_access(
-    *, player, chapter_id: int, challenges: list[ChallengeLevel]
+    *,
+    player,
+    chapter_id: int,
+    challenges: list[ChallengeLevel],
+    adventure_passed: bool | None = None,
 ) -> ChallengeAccessContext:
     from progress.models import ChallengeLevelCompletion, ChallengeTrialCompletion
 
     if player is None:
         return ChallengeAccessContext()
+    if adventure_passed is None:
+        adventure_passed = _adventure_passed(player=player, chapter_id=chapter_id)
     challenge_levels = list(challenges)
     challenge_level_ids = [level.id for level in challenge_levels]
     trial_ids = [trial.id for level in challenge_levels for trial in level.trials.all()]
     if not trial_ids:
-        return ChallengeAccessContext(
-            adventure_passed=_adventure_passed(player=player, chapter_id=chapter_id)
-        )
+        return ChallengeAccessContext(adventure_passed=adventure_passed)
 
     completions = {
         completion.challenge_trial_id: completion
@@ -83,45 +87,24 @@ def _build_challenge_access(
         completions=completions,
         level_completions=level_completions,
         latest_runs=latest_runs,
-        adventure_passed=_adventure_passed(player=player, chapter_id=chapter_id),
+        adventure_passed=adventure_passed,
     )
 
 
-def command_skill_summary_payload(*, skill: CommandSkill) -> dict:
-    forms = []
-    for form in skill.command_forms.all():
-        forms.append(
-            {
-                "id": form.id,
-                "slug": form.slug,
-                "usage_form": form.usage_form,
-                "label": form.label,
-                "summary": form.summary,
-                "level_count": len(
-                    [level for level in form.adventure_levels.all() if level.is_published]
-                ),
-            }
+def challenge_summary_payload(
+    *,
+    challenge: ChallengeLevel,
+    access: ChallengeAccessContext,
+    sibling_levels: list[ChallengeLevel] | None = None,
+) -> dict:
+    if sibling_levels is None:
+        sibling_levels = list(
+            ChallengeLevel.objects.filter(
+                chapter_id=challenge.chapter_id,
+                is_published=True,
+            ).prefetch_related("trials")
         )
-    return {
-        "item_type": "command_skill",
-        "id": skill.id,
-        "slug": skill.slug,
-        "base_command": skill.base_command,
-        "title": skill.title,
-        "summary": skill.summary,
-        "mental_model": skill.mental_model,
-        "forms": forms,
-    }
-
-
-def challenge_summary_payload(*, challenge: ChallengeLevel, access: ChallengeAccessContext) -> dict:
-    sibling_levels = list(
-        ChallengeLevel.objects.filter(
-            chapter_id=challenge.chapter_id,
-            is_published=True,
-        ).prefetch_related("trials")
-    )
-    sibling_levels.sort(key=lambda level: (level.sort_order, level.id))
+        sibling_levels.sort(key=lambda level: (level.sort_order, level.id))
     level_payload = challenge_level_access_payload(
         level=challenge,
         access=access,
@@ -171,7 +154,6 @@ def challenge_level_access_payload(
         "id": level.id,
         "slug": level.slug,
         "title": level.title,
-        "brief": level.brief,
         "status": _challenge_level_status(
             level=level,
             access=access,
@@ -310,4 +292,3 @@ def _challenge_level_unlocked(
         return True
     previous_level = sorted(previous, key=lambda item: (item.sort_order, item.id))[-1]
     return previous_level.id in access.level_completions
-

@@ -7,8 +7,8 @@
   "frameCount": 25,
   "fps": 18,
   "monsters": {
-    "bone-archer": {
-      "id": "bone-archer-skill-effect",
+    "monster-01": {
+      "id": "monster-01-skill-effect",
       "label": "Bone Archer Skill Effect",
       "motif": "blue flaming arrow",
       "playback": "projectile",
@@ -30,16 +30,30 @@
           "rows": 5,
           "frameCount": 25,
           "layer": "front",
-          "scale": 0.56,
+          "scale": 0.6,
           "opacity": 1,
           "offset_x": 0,
           "offset_y": 0,
           "orient_to": "travel"
         }
-      ]
+      ],
+      "anchor": "feet",
+      "motion": "charge",
+      "launchStartFrame": 5,
+      "impactStartFrame": 20,
+      "placeAnchor": {
+        "x": 0.4883,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.1562,
+        "top": 0.3867,
+        "right": 0.7852,
+        "bottom": 0.9531
+      }
     },
-    "bone-blacksmith": {
-      "id": "bone-blacksmith-skill-effect",
+    "monster-02": {
+      "id": "monster-02-skill-effect",
       "label": "Bone Blacksmith Skill Effect",
       "motif": "blue flame ground crack",
       "playback": "target",
@@ -68,11 +82,21 @@
           "orient_to": "target-facing"
         }
       ],
-      "anchor": "center",
+      "anchor": "feet",
+      "placeAnchor": {
+        "x": 0.4707,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.1836,
+        "top": 0.1797,
+        "right": 0.75,
+        "bottom": 1.0
+      },
       "placement": "target"
     },
-    "bone-demon": {
-      "id": "bone-demon-skill-effect",
+    "monster-03": {
+      "id": "monster-03-skill-effect",
       "label": "Bone Demon Skill Effect",
       "motif": "blue flaming meteor",
       "playback": "projectile",
@@ -94,16 +118,30 @@
           "rows": 5,
           "frameCount": 25,
           "layer": "front",
-          "scale": 0.62,
+          "scale": 0.6,
           "opacity": 1,
           "offset_x": 0,
           "offset_y": 0,
           "orient_to": "travel"
         }
-      ]
+      ],
+      "anchor": "feet",
+      "motion": "charge",
+      "launchStartFrame": 5,
+      "impactStartFrame": 20,
+      "placeAnchor": {
+        "x": 0.5,
+        "y": 0.9062
+      },
+      "placeBounds": {
+        "left": 0.1758,
+        "top": 0.3164,
+        "right": 0.8242,
+        "bottom": 0.9219
+      }
     },
-    "bone-ghost": {
-      "id": "bone-ghost-skill-effect",
+    "monster-04": {
+      "id": "monster-04-skill-effect",
       "label": "Bone Ghost Skill Effect",
       "motif": "blue flame ghost skull",
       "playback": "projectile",
@@ -125,16 +163,30 @@
           "rows": 5,
           "frameCount": 25,
           "layer": "front",
-          "scale": 0.58,
+          "scale": 0.6,
           "opacity": 1,
           "offset_x": 0,
           "offset_y": 0,
           "orient_to": "travel"
         }
-      ]
+      ],
+      "anchor": "center",
+      "motion": "charge",
+      "launchStartFrame": 5,
+      "impactStartFrame": 20,
+      "placeAnchor": {
+        "x": 0.5059,
+        "y": 0.4648
+      },
+      "placeBounds": {
+        "left": 0.1602,
+        "top": 0.1445,
+        "right": 0.8477,
+        "bottom": 0.7812
+      }
     },
-    "bone-lancer": {
-      "id": "bone-lancer-skill-effect",
+    "monster-05": {
+      "id": "monster-05-skill-effect",
       "label": "Bone Lancer Skill Effect",
       "motif": "blue flame pierce",
       "playback": "target",
@@ -163,11 +215,21 @@
           "orient_to": "target-facing"
         }
       ],
-      "anchor": "center",
+      "anchor": "feet",
+      "placeAnchor": {
+        "x": 0.4922,
+        "y": 0.918
+      },
+      "placeBounds": {
+        "left": 0.043,
+        "top": 0.0859,
+        "right": 0.9297,
+        "bottom": 0.9727
+      },
       "placement": "target"
     },
-    "bone-necromancer": {
-      "id": "bone-necromancer-skill-effect",
+    "monster-06": {
+      "id": "monster-06-skill-effect",
       "label": "Bone Necromancer Skill Effect",
       "motif": "skeleton hands",
       "playback": "target",
@@ -196,11 +258,21 @@
           "orient_to": "target-facing"
         }
       ],
-      "anchor": "center",
+      "anchor": "feet",
+      "placeAnchor": {
+        "x": 0.4629,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.043,
+        "top": 0.1367,
+        "right": 0.8828,
+        "bottom": 1.0
+      },
       "placement": "target"
     },
-    "bone-soldier": {
-      "id": "bone-soldier-skill-effect",
+    "monster-07": {
+      "id": "monster-07-skill-effect",
       "label": "Bone Soldier Skill Effect",
       "motif": "blue flame slash",
       "playback": "target",
@@ -230,10 +302,20 @@
         }
       ],
       "anchor": "center",
+      "placeAnchor": {
+        "x": 0.5312,
+        "y": 0.4492
+      },
+      "placeBounds": {
+        "left": 0.1016,
+        "top": 0.1641,
+        "right": 0.9336,
+        "bottom": 0.8828
+      },
       "placement": "target"
     },
-    "cursed-lantern": {
-      "id": "cursed-lantern-skill-effect",
+    "monster-08": {
+      "id": "monster-08-skill-effect",
       "label": "Cursed Lantern Skill Effect",
       "motif": "blue flame spin",
       "playback": "target",
@@ -263,10 +345,20 @@
         }
       ],
       "anchor": "center",
+      "placeAnchor": {
+        "x": 0.5117,
+        "y": 0.4785
+      },
+      "placeBounds": {
+        "left": 0.0938,
+        "top": 0.1484,
+        "right": 0.9141,
+        "bottom": 0.832
+      },
       "placement": "caster"
     },
-    "floating-skull": {
-      "id": "floating-skull-skill-effect",
+    "monster-09": {
+      "id": "monster-09-skill-effect",
       "label": "Floating Skull Skill Effect",
       "motif": "blue flame rain",
       "playback": "target",
@@ -295,11 +387,21 @@
           "orient_to": "target-facing"
         }
       ],
-      "anchor": "center",
+      "anchor": "feet",
+      "placeAnchor": {
+        "x": 0.4629,
+        "y": 0.9023
+      },
+      "placeBounds": {
+        "left": 0.0391,
+        "top": 0.0586,
+        "right": 0.8906,
+        "bottom": 0.9336
+      },
       "placement": "target"
     },
-    "ghost-lady": {
-      "id": "ghost-lady-skill-effect",
+    "monster-10": {
+      "id": "monster-10-skill-effect",
       "label": "Ghost Lady Skill Effect",
       "motif": "blue flame chains",
       "playback": "target",
@@ -344,11 +446,21 @@
           "orient_to": "target-facing"
         }
       ],
-      "anchor": "center",
+      "anchor": "feet",
+      "placeAnchor": {
+        "x": 0.4316,
+        "y": 0.9297
+      },
+      "placeBounds": {
+        "left": 0.0664,
+        "top": 0.1484,
+        "right": 0.9609,
+        "bottom": 0.9531
+      },
       "placement": "target"
     },
-    "lich-king": {
-      "id": "lich-king-skill-effect",
+    "monster-11": {
+      "id": "monster-11-skill-effect",
       "label": "Lich King Skill Effect",
       "motif": "blue flame stab",
       "playback": "target",
@@ -393,11 +505,21 @@
           "orient_to": "target-facing"
         }
       ],
-      "anchor": "center",
+      "anchor": "feet",
+      "placeAnchor": {
+        "x": 0.502,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.0938,
+        "top": 0.043,
+        "right": 0.918,
+        "bottom": 1.0
+      },
       "placement": "target"
     },
-    "two-headed-hound": {
-      "id": "two-headed-hound-skill-effect",
+    "monster-12": {
+      "id": "monster-12-skill-effect",
       "label": "Two Headed Hound Skill Effect",
       "motif": "blue wolf fang bite",
       "playback": "target",
@@ -427,12 +549,22 @@
         }
       ],
       "anchor": "center",
+      "placeAnchor": {
+        "x": 0.5273,
+        "y": 0.4922
+      },
+      "placeBounds": {
+        "left": 0.1758,
+        "top": 0.0547,
+        "right": 1.0,
+        "bottom": 0.8789
+      },
       "placement": "target"
     },
-    "undead-clown": {
-      "id": "undead-clown-skill-effect",
+    "monster-13": {
+      "id": "monster-13-skill-effect",
       "label": "Undead Clown Skill Effect",
-      "motif": "blue clown fire projectile",
+      "motif": "carnival curse bomb",
       "playback": "projectile",
       "durationMs": 620,
       "frameWidth": 256,
@@ -458,10 +590,24 @@
           "offset_y": 0,
           "orient_to": "travel"
         }
-      ]
+      ],
+      "anchor": "center",
+      "motion": "charge",
+      "launchStartFrame": 5,
+      "impactStartFrame": 20,
+      "placeAnchor": {
+        "x": 0.5176,
+        "y": 0.4785
+      },
+      "placeBounds": {
+        "left": 0.2227,
+        "top": 0.1875,
+        "right": 0.9883,
+        "bottom": 0.7188
+      }
     },
-    "undead-siren": {
-      "id": "undead-siren-skill-effect",
+    "monster-14": {
+      "id": "monster-14-skill-effect",
       "label": "Undead Siren Skill Effect",
       "motif": "blue flame water orb",
       "playback": "target",
@@ -507,10 +653,20 @@
         }
       ],
       "anchor": "center",
+      "placeAnchor": {
+        "x": 0.5078,
+        "y": 0.4668
+      },
+      "placeBounds": {
+        "left": 0.0898,
+        "top": 0.0898,
+        "right": 0.9961,
+        "bottom": 0.8398
+      },
       "placement": "target"
     },
-    "zombe-boy": {
-      "id": "zombe-boy-skill-effect",
+    "monster-15": {
+      "id": "monster-15-skill-effect",
       "label": "Zombe Boy Skill Effect",
       "motif": "blue zombie bite",
       "playback": "target",
@@ -540,6 +696,16 @@
         }
       ],
       "anchor": "center",
+      "placeAnchor": {
+        "x": 0.5723,
+        "y": 0.4961
+      },
+      "placeBounds": {
+        "left": 0.1133,
+        "top": 0.1328,
+        "right": 1.0,
+        "bottom": 0.8164
+      },
       "placement": "target"
     }
   }

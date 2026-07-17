@@ -14,8 +14,8 @@ import type { AuthoredLevel, AuthoredProblem, AuthoringForm, BookBlock } from '@
 import { computeTargetState } from '@/shared/git/simulator/engine'
 import type { MutableRepositoryState } from '@/shared/git/simulator/types'
 
-export type { AuthoredLevel, AuthoredProblem, AuthoredVariant, AuthoringForm, BookBlock, BookPage } from '@/features/authoring/utils/authoring-model/types'
-export { BLOCK_TYPES, DEFAULT_BATTLE_STAGE, DIFFICULTIES, EVALUATION_MODES, VISIBILITIES } from '@/features/authoring/utils/authoring-model/options'
+export type { AuthoredLevel, AuthoredProblem,  AuthoringForm, BookBlock, BookPage } from '@/features/authoring/utils/authoring-model/types'
+export { BLOCK_TYPES,  DIFFICULTIES, EVALUATION_MODES, VISIBILITIES } from '@/features/authoring/utils/authoring-model/options'
 export { emptyLevel, emptyPage, emptyProblem, emptyVariant, initialForm } from '@/features/authoring/utils/authoring-model/factories'
 
 /** A plain-language summary of what this form will compile into, so the author
@@ -81,8 +81,8 @@ function problemToDefinition(problem: AuthoredProblem, kind: ContentKind): Recor
     },
   }
   if (kind === 'challenge' && problem.difficulty) out.difficulty = problem.difficulty
-  // Brief: only emit when authored, so an empty brief behaves exactly as before
-  // (the runtime falls back to a generic story/task).
+  // Scenario copy is optional; the runtime supplies a generic fallback when
+  // neither field is authored.
   const story = problem.story.trim()
   const task = problem.task.trim()
   if (story || task) {
@@ -109,7 +109,6 @@ function levelToDefinition(level: AuthoredLevel, kind: ContentKind): Record<stri
     slug: level.slug,
     title: level.title,
   }
-  if (level.brief.trim()) out.brief = level.brief.trim()
   if (level.commandForms.length) out.command_forms = [...level.commandForms]
   const problems = level.problems.map((problem) => problemToDefinition(problem, kind))
   if (kind === 'challenge') {
@@ -148,10 +147,6 @@ function blockToDefinition(block: BookBlock): Record<string, unknown> {
 
 export function definitionErrorMessage(error: unknown): string | null {
   return error instanceof DefinitionError ? error.message : null
-}
-
-export function isDefinitionError(error: unknown): boolean {
-  return error instanceof DefinitionError
 }
 
 // --- deserialization (existing content -> form) -------------------------------
@@ -225,7 +220,6 @@ function levelFromDefinition(raw: Record<string, unknown>, kind: ContentKind, in
   return {
     slug: String(raw.slug ?? `level-${index + 1}`),
     title: String(raw.title ?? `Level ${index + 1}`),
-    brief: String(raw.brief ?? ''),
     commandForms: asArray(raw.command_forms)
       .map((v) => Number(v))
       .filter((n) => Number.isInteger(n)),

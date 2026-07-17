@@ -1,11 +1,37 @@
 {
   "frost-ranger": {
     "label": "Frost Ranger",
-    "tier": "mob",
-    "scale": 0.73,
+    "scale": 1.2,
     "attack": {
       "kind": "projectile",
-      "hit_frame": 15
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 560,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-01/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.58,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 2,
+        "impact_start_frame": 16
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -67,12 +93,36 @@
   },
   "glacier-smith": {
     "label": "Glacier Smith",
-    "tier": "elite",
-    "scale": 0.86,
+    "scale": 1.13,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
-      "lunge_px": 56
+      "lunge_px": 56,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 780,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "feet",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-02/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.82,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -134,11 +184,37 @@
   },
   "whiteout-wyrm": {
     "label": "Whiteout Wyrm",
-    "tier": "elite",
-    "scale": 0.88,
+    "scale": 1.38,
     "attack": {
       "kind": "projectile",
-      "hit_frame": 15
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 660,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-03/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.62,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 2,
+        "impact_start_frame": 16
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -200,11 +276,37 @@
   },
   "snow-wraith": {
     "label": "Snow Wraith",
-    "tier": "mob",
-    "scale": 0.82,
+    "scale": 1.45,
     "attack": {
       "kind": "projectile",
-      "hit_frame": 15
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 600,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-04/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.58,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 5,
+        "impact_start_frame": 16
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.65,
@@ -266,12 +368,36 @@
   },
   "iceguard-lancer": {
     "label": "Iceguard Lancer",
-    "tier": "elite",
-    "scale": 0.52,
+    "scale": 1.36,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
-      "lunge_px": 64
+      "lunge_px": 64,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 660,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "center",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-05/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.74,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -333,11 +459,37 @@
   },
   "rimecaller": {
     "label": "Rimecaller",
-    "tier": "elite",
-    "scale": 0.78,
+    "scale": 1.23,
     "attack": {
       "kind": "projectile",
-      "hit_frame": 15
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 680,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-06/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.62,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 5,
+        "impact_start_frame": 16
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.53,
@@ -399,12 +551,36 @@
   },
   "citadel-guard": {
     "label": "Citadel Guard",
-    "tier": "mob",
-    "scale": 0.86,
+    "scale": 1.1,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
-      "lunge_px": 56
+      "lunge_px": 56,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 680,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "center",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-07/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.74,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.48,
@@ -466,12 +642,36 @@
   },
   "hoarfrost-geode-mimic": {
     "label": "Hoarfrost Geode Mimic",
-    "tier": "mob",
-    "scale": 0.88,
+    "scale": 1.03,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
-      "lunge_px": 56
+      "lunge_px": 56,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 760,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "center",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-08/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.8,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -533,11 +733,37 @@
   },
   "frostveil-duchess": {
     "label": "Frostveil Duchess",
-    "tier": "elite",
-    "scale": 0.82,
+    "scale": 1.04,
     "attack": {
       "kind": "projectile",
-      "hit_frame": 15
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 700,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-10/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.64,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 5,
+        "impact_start_frame": 16
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -599,8 +825,7 @@
   },
   "winter-regent": {
     "label": "Winter Regent",
-    "tier": "boss",
-    "scale": 1.16,
+    "scale": 1.25,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
@@ -666,12 +891,36 @@
   },
   "twinmaw-direwolf": {
     "label": "White Tiger",
-    "tier": "elite",
-    "scale": 0.95,
+    "scale": 1.12,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
-      "lunge_px": 64
+      "lunge_px": 64,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 700,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "center",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-12/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.78,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -733,11 +982,37 @@
   },
   "jester-of-hail": {
     "label": "Jester of Hail",
-    "tier": "mob",
-    "scale": 0.86,
+    "scale": 0.95,
     "attack": {
       "kind": "projectile",
-      "hit_frame": 15
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 620,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-13/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.56,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 3,
+        "impact_start_frame": 16
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -799,11 +1074,37 @@
   },
   "aurora-siren": {
     "label": "Aurora Siren",
-    "tier": "elite",
-    "scale": 0.8,
+    "scale": 0.81,
     "attack": {
       "kind": "projectile",
-      "hit_frame": 15
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 760,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-14/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.64,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 3,
+        "impact_start_frame": 16
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -865,12 +1166,36 @@
   },
   "driftbound-scout": {
     "label": "Driftbound Scout",
-    "tier": "mob",
-    "scale": 0.78,
+    "scale": 1.39,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
-      "lunge_px": 56
+      "lunge_px": 56,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 620,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "center",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-15/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.62,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,

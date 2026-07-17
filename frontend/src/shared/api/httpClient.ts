@@ -3,7 +3,7 @@ import { apiOperations } from './generated/apiTypes'
 import type { ApiOperationId, ApiRequestBody, ApiResponseBody } from './generated/apiTypes'
 import { useAuthStore } from '@/shared/auth/useAuth'
 
-export const API_BASE_URL = resolveApiBaseUrl()
+const API_BASE_URL = resolveApiBaseUrl()
 
 type RequestOptions = RequestInit & { skipAuthRefresh?: boolean }
 
@@ -48,12 +48,6 @@ function resolveApiBaseUrl() {
 
 function removeTrailingSlash(value: string) {
   return value.endsWith('/') ? value.slice(0, -1) : value
-}
-
-export function backendUrl(path: string): string {
-  if (!path.startsWith('/')) return path
-  if (API_BASE_URL.startsWith('/')) return path
-  return new URL(path, new URL(API_BASE_URL).origin).toString()
 }
 
 function defaultApiBaseUrl() {

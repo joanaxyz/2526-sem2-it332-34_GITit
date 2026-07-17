@@ -11,8 +11,7 @@ per-variant values are surfaced as bare Copy details the brief points at.
 
 from __future__ import annotations
 
-from .common import ev, q, v
-from .v3_advanced_workflows import _state
+from .common import q
 from .v3_frost_form_drills import (
     CORE_TAGS,
     GRAPH,
@@ -24,7 +23,6 @@ from .v3_frost_form_drills import (
     _req,
     _required_check,
 )
-
 
 # ---------------------------------------------------------------------------
 # Chapter 1 - skyline-revision-language
@@ -430,7 +428,40 @@ ENCHANT_DRILLS = [
     ),
 ]
 
-ENCHANT_WORKFLOWS: list = []
+ENCHANT_WORKFLOWS = [
+    q(
+        "git-config/get",
+        "se-apply-config-audit",
+        "Audit the effective configuration",
+        "The automation mismatch cannot be diagnosed from one value alone. Read user.name, compare it with the complete effective configuration, then confirm that the repository itself stayed untouched.",
+        "Read user.name, list the effective configuration, and verify the repository state.",
+        _dv(
+            "se-apply-config-audit",
+            _clean,
+            ["git config --get user.name", "git config --list", STATUS, GRAPH],
+            _read_eval(
+                [
+                    "git config --get user.name",
+                    "git config --list",
+                    "git status",
+                    "git log",
+                ]
+            ),
+        ),
+        checks=[
+            _required_check(
+                "The exact value and the complete effective configuration were compared.",
+                ["git config --get", "git config --list"],
+            ),
+            _required_check("The repository state and graph were verified.", ["git status", "git log"]),
+        ],
+        details=["user.name"],
+        command_forms=["git-config/list", *CORE_TAGS],
+        adventure="skyline-enchant-behavior-drills",
+        workflow=True,
+        max_counted_commands=8,
+    ),
+]
 
 
 # ---------------------------------------------------------------------------
@@ -456,7 +487,31 @@ GUARD_DRILLS = [
     ),
 ]
 
-GUARD_WORKFLOWS: list = []
+GUARD_WORKFLOWS = [
+    q(
+        "git-verify-commit/commit",
+        "sg-apply-inspect-and-verify",
+        "Inspect and verify the release commit",
+        "A release-critical commit claims to be signed by the release bot. Open the commit first, verify its signature, then place it in the repository graph before deployment trusts it.",
+        "Inspect the commit in Copy details, verify its signature, and confirm its place in history.",
+        _dv(
+            "sg-apply-inspect-and-verify",
+            _clean,
+            ["git show {p}1", "git verify-commit {p}1", STATUS, GRAPH],
+            _read_eval(["git show {p}1", "git verify-commit {p}1", "git status", "git log"]),
+            details=["{p}1"],
+        ),
+        checks=[
+            _required_check("The exact commit was opened before trust was assigned.", ["git show"]),
+            _required_check("The commit signature was verified.", ["git verify-commit"]),
+            _required_check("The repository state and graph were verified.", ["git status", "git log"]),
+        ],
+        command_forms=["git-show/head", *CORE_TAGS],
+        adventure="skyline-guard-the-archive-drills",
+        workflow=True,
+        max_counted_commands=8,
+    ),
+]
 
 
 # ---------------------------------------------------------------------------
@@ -628,7 +683,32 @@ SERVE_DRILLS = [
     ),
 ]
 
-SERVE_WORKFLOWS: list = []
+SERVE_WORKFLOWS = [
+    q(
+        "git-for-each-ref/all",
+        "ss-apply-audit-served-refs",
+        "Audit the served reference set",
+        "Before the sync service advertises anything, compare the raw ref table with the formatted inventory, then place the advertised tips in the repository graph.",
+        "List the raw refs, enumerate the formatted ref set, and verify the graph.",
+        _dv(
+            "ss-apply-audit-served-refs",
+            _clean,
+            ["git show-ref", "git for-each-ref", STATUS, GRAPH],
+            _read_eval(["git show-ref", "git for-each-ref", "git status", "git log"]),
+        ),
+        checks=[
+            _required_check(
+                "The raw and formatted reference inventories were compared.",
+                ["git show-ref", "git for-each-ref"],
+            ),
+            _required_check("The repository state and graph were verified.", ["git status", "git log"]),
+        ],
+        command_forms=["git-show-ref/all", *CORE_TAGS],
+        adventure="skyline-serve-the-city-drills",
+        workflow=True,
+        max_counted_commands=8,
+    ),
+]
 
 
 # ---------------------------------------------------------------------------

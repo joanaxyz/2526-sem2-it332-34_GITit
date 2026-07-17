@@ -22,7 +22,6 @@ export function emptyLevel(kind: ContentKind, index = 0): AuthoredLevel {
   return {
     slug: index === 0 ? 'level-one' : `level-${index + 1}`,
     title: index === 0 ? 'First level' : `Level ${index + 1}`,
-    brief: '',
     commandForms: [],
     problems: [emptyProblem(kind, 0)],
   }

@@ -98,8 +98,6 @@ class ContentRuntimeCompiler:
                 chapter=chapter,
                 slug=authored["slug"],
                 title=authored["title"],
-                description=content.summary,
-                brief=authored.get("brief", "") or "",
                 is_published=True,
                 sort_order=index,
                 source_content_definition=content,
@@ -149,8 +147,6 @@ class ContentRuntimeCompiler:
                 chapter=chapter,
                 slug=f"ugc-adventure-{content.id}",
                 title=content.title,
-                description=content.summary,
-                brief=content.summary,
                 is_published=True,
                 source_content_definition=content,
             )
@@ -181,7 +177,6 @@ class ContentRuntimeCompiler:
                         else authored.get("slug") or f"{slug_base}-level-{index + 1}"
                     ),
                     authored.get("title") or content.title,
-                    authored.get("brief", "") or content.summary,
                     authored,
                     level_trials(authored),
                 )
@@ -192,20 +187,18 @@ class ContentRuntimeCompiler:
                 (
                     f"{slug_base}-level-1",
                     content.title,
-                    content.summary,
                     None,
                     authored_levels,
                 )
             ]
         first_level = None
-        for level_index, (slug, title, brief, authored_level, trials) in enumerate(level_groups):
+        for level_index, (slug, title, authored_level, trials) in enumerate(level_groups):
             challenge_level = ChallengeLevel.objects.create(
                 chapter=chapter,
                 slug=slug,
                 title=title,
                 summary=content.summary,
                 narrative=content.definition.get("narrative", content.summary),
-                brief=brief,
                 is_published=True,
                 sort_order=level_index,
                 source_content_definition=content,
@@ -252,7 +245,6 @@ class ContentRuntimeCompiler:
                 title=content.title,
                 summary=content.summary,
                 narrative=content.definition.get("narrative", content.summary),
-                brief=content.summary,
                 is_published=True,
                 source_content_definition=content,
             )

@@ -18,7 +18,7 @@ class AdventureWaveInline(admin.TabularInline):
 class AdventureLevelAdmin(admin.ModelAdmin):
     list_display = ("slug", "title", "chapter", "is_required", "is_published", "sort_order")
     list_filter = ("is_required", "is_published", "chapter")
-    search_fields = ("title", "slug", "description", "brief")
+    search_fields = ("title", "slug")
     inlines = [AdventureWaveInline]
 
 

@@ -44,7 +44,7 @@ export const arcaneSpireWorld: StoryWorldDef = {
     sparkRgb: '98, 230, 255',
   },
   // Battle visuals (backdrop + crystal + monster roster) are generated from
-  // source PNGs; gameplay HP/tier stay backend-side.
+  // source PNGs; gameplay HP stays in the encounter state.
   battle: {
     backdrop: battleData.backdrop,
     parallax: {

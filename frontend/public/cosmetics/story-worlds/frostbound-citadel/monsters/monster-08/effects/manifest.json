@@ -1,0 +1,33 @@
+{
+  "id": "hoarfrost-geode-mimic-skill-effect",
+  "label": "Hoarfrost Geode Mimic Skill Effect",
+  "motif": "geode crystal bite burst",
+  "playback": "target",
+  "durationMs": 760,
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "columns": 5,
+  "rows": 5,
+  "frameCount": 25,
+  "fps": 18,
+  "layers": [
+    {
+      "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-08/effects/skill.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "layer": "front",
+      "scale": 0.8,
+      "opacity": 1,
+      "offset_x": 0,
+      "offset_y": 0,
+      "orient_to": "target-facing"
+    }
+  ],
+  "anchor": "center",
+  "placement": "target"
+}

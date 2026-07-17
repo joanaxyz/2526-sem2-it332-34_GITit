@@ -131,5 +131,3 @@ export function ChapterEditorPage() {
     </div>
   )
 }
-
-export default ChapterEditorPage

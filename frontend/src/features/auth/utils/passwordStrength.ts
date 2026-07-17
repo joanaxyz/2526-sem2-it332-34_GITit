@@ -1,12 +1,12 @@
-export type PasswordStrengthLevel = 'very-weak' | 'weak' | 'so-so' | 'good' | 'strong'
+type PasswordStrengthLevel = 'very-weak' | 'weak' | 'so-so' | 'good' | 'strong'
 
-export type PasswordRequirement = {
+type PasswordRequirement = {
   id: string
   label: string
   test: (password: string) => boolean
 }
 
-export const PASSWORD_REQUIREMENTS: PasswordRequirement[] = [
+const PASSWORD_REQUIREMENTS: PasswordRequirement[] = [
   { id: 'length', label: 'At least 8 characters', test: (password) => password.length >= 8 },
   { id: 'uppercase', label: 'An uppercase letter', test: (password) => /[A-Z]/.test(password) },
   { id: 'lowercase', label: 'A lowercase letter', test: (password) => /[a-z]/.test(password) },

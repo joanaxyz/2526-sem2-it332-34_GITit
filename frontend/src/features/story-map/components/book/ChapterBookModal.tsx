@@ -9,7 +9,7 @@ import type { BookCommand, BookLesson, ChapterBook } from '@/features/story-map/
 import { queryKeys } from '@/shared/api/queryKeys'
 import { Button } from '@/shared/components/Button'
 import { EmptyState } from '@/shared/components/EmptyState'
-import { GlyphLoadingState } from '@/shared/components/GlyphLoadingState'
+import { LoadingState } from '@/shared/components/LoadingState'
 import { Modal } from '@/shared/components/Modal'
 import { cn } from '@/shared/utils/cn'
 
@@ -33,7 +33,7 @@ export function ChapterBookModal({
   if (bookQuery.isLoading && !bookQuery.data) {
     return (
       <Modal open title={title} onClose={onClose} contentClassName="p-5">
-        <GlyphLoadingState description="Opening the field guide." label="Loading field guide" variant="inline" />
+        <LoadingState description="Opening the field guide." label="Loading field guide" variant="inline" />
       </Modal>
     )
   }

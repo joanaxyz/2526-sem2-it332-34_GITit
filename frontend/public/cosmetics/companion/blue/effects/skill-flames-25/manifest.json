@@ -28,10 +28,20 @@
       "baseCommand": "git init",
       "skillSlug": "git-init",
       "generationSource": "imagegen-raw",
+      "launchStartFrame": 10,
+      "impactStartFrame": 15,
       "motion": "gather-orb-projectile-impact-dissipate",
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/init.png",
-      "launchStartFrame": 10,
-      "impactStartFrame": 15
+      "placeAnchor": {
+        "x": 0.5205,
+        "y": 0.916
+      },
+      "placeBounds": {
+        "left": 0.1328,
+        "top": 0.1953,
+        "right": 0.8828,
+        "bottom": 1.0
+      }
     },
     "clone": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/clone.png",
@@ -50,8 +60,18 @@
       "baseCommand": "git clone",
       "skillSlug": "git-clone",
       "generationSource": "imagegen-raw",
+      "impactStartFrame": 15,
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/clone.png",
-      "impactStartFrame": 15
+      "placeAnchor": {
+        "x": 0.4863,
+        "y": 0.9062
+      },
+      "placeBounds": {
+        "left": 0.0703,
+        "top": 0.1484,
+        "right": 0.8828,
+        "bottom": 1.0
+      }
     },
     "status": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/status.png",
@@ -70,7 +90,17 @@
       "baseCommand": "git status",
       "skillSlug": "git-status",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/status.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/status.png",
+      "placeAnchor": {
+        "x": 0.5059,
+        "y": 0.4648
+      },
+      "placeBounds": {
+        "left": 0.0352,
+        "top": 0.1016,
+        "right": 0.8789,
+        "bottom": 1.0
+      }
     },
     "config": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/config.png",
@@ -89,7 +119,17 @@
       "baseCommand": "git config",
       "skillSlug": "git-config",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/config.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/config.png",
+      "placeAnchor": {
+        "x": 0.5078,
+        "y": 0.4922
+      },
+      "placeBounds": {
+        "left": 0.0898,
+        "top": 0.0977,
+        "right": 0.9141,
+        "bottom": 0.9531
+      }
     },
     "log": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/log.png",
@@ -108,7 +148,17 @@
       "baseCommand": "git log",
       "skillSlug": "git-log",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/log.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/log.png",
+      "placeAnchor": {
+        "x": 0.502,
+        "y": 0.4883
+      },
+      "placeBounds": {
+        "left": 0.0391,
+        "top": 0.0977,
+        "right": 0.9062,
+        "bottom": 1.0
+      }
     },
     "show": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/show.png",
@@ -127,7 +177,17 @@
       "baseCommand": "git show",
       "skillSlug": "git-show",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/show.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/show.png",
+      "placeAnchor": {
+        "x": 0.4863,
+        "y": 0.8984
+      },
+      "placeBounds": {
+        "left": 0.207,
+        "top": 0.2188,
+        "right": 0.7617,
+        "bottom": 1.0
+      }
     },
     "diff": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/diff.png",
@@ -146,8 +206,18 @@
       "baseCommand": "git diff",
       "skillSlug": "git-diff",
       "generationSource": "imagegen-raw",
+      "impactStartFrame": 15,
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/diff.png",
-      "impactStartFrame": 15
+      "placeAnchor": {
+        "x": 0.4932,
+        "y": 0.4844
+      },
+      "placeBounds": {
+        "left": 0.125,
+        "top": 0.1133,
+        "right": 0.832,
+        "bottom": 0.9766
+      }
     },
     "add": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/add.png",
@@ -169,7 +239,17 @@
       "launchStartFrame": 3,
       "impactStartFrame": 16,
       "motion": "gather-orb-projectile-impact-dissipate",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/add.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/add.png",
+      "placeAnchor": {
+        "x": 0.5273,
+        "y": 0.9102
+      },
+      "placeBounds": {
+        "left": 0.0977,
+        "top": 0.168,
+        "right": 0.9375,
+        "bottom": 1.0
+      }
     },
     "commit": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/commit.png",
@@ -181,14 +261,24 @@
       "rows": 5,
       "frameCount": 25,
       "tint": "azure",
-      "motif": "seal",
+      "motif": "commit",
       "playback": "target",
       "anchor": "feet",
       "commandFamily": "commit",
       "baseCommand": "git commit",
       "skillSlug": "git-commit",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/commit.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/commit.png",
+      "placeAnchor": {
+        "x": 0.4902,
+        "y": 0.9219
+      },
+      "placeBounds": {
+        "left": 0.0547,
+        "top": 0.0781,
+        "right": 0.9336,
+        "bottom": 1.0
+      }
     },
     "rm": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/rm.png",
@@ -207,8 +297,18 @@
       "baseCommand": "git rm",
       "skillSlug": "git-rm",
       "generationSource": "imagegen-raw",
+      "impactStartFrame": 16,
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/rm.png",
-      "impactStartFrame": 16
+      "placeAnchor": {
+        "x": 0.541,
+        "y": 0.4902
+      },
+      "placeBounds": {
+        "left": 0.0547,
+        "top": 0.1836,
+        "right": 0.9414,
+        "bottom": 0.7852
+      }
     },
     "check-ignore": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/check-ignore.png",
@@ -227,7 +327,17 @@
       "baseCommand": "git check-ignore",
       "skillSlug": "git-check-ignore",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/check-ignore.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/check-ignore.png",
+      "placeAnchor": {
+        "x": 0.4922,
+        "y": 0.9062
+      },
+      "placeBounds": {
+        "left": 0.1328,
+        "top": 0.2656,
+        "right": 0.8633,
+        "bottom": 1.0
+      }
     },
     "restore": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/restore.png",
@@ -246,7 +356,17 @@
       "baseCommand": "git restore",
       "skillSlug": "git-restore",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/restore.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/restore.png",
+      "placeAnchor": {
+        "x": 0.4883,
+        "y": 0.8906
+      },
+      "placeBounds": {
+        "left": 0.1211,
+        "top": 0.2852,
+        "right": 0.8867,
+        "bottom": 0.9766
+      }
     },
     "branch": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/branch.png",
@@ -266,7 +386,17 @@
       "skillSlug": "git-branch",
       "generationSource": "imagegen-raw",
       "impactStartFrame": 19,
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/branch.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/branch.png",
+      "placeAnchor": {
+        "x": 0.4844,
+        "y": 0.873
+      },
+      "placeBounds": {
+        "left": 0.125,
+        "top": 0.1953,
+        "right": 0.8203,
+        "bottom": 1.0
+      }
     },
     "switch": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/switch.png",
@@ -285,7 +415,17 @@
       "baseCommand": "git switch",
       "skillSlug": "git-switch",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/switch.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/switch.png",
+      "placeAnchor": {
+        "x": 0.4609,
+        "y": 0.8906
+      },
+      "placeBounds": {
+        "left": 0.0352,
+        "top": 0.2188,
+        "right": 0.9219,
+        "bottom": 1.0
+      }
     },
     "checkout": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/checkout.png",
@@ -304,8 +444,18 @@
       "baseCommand": "git checkout",
       "skillSlug": "git-checkout",
       "generationSource": "imagegen-raw",
+      "impactStartFrame": 16,
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/checkout.png",
-      "impactStartFrame": 16
+      "placeAnchor": {
+        "x": 0.5195,
+        "y": 0.4902
+      },
+      "placeBounds": {
+        "left": 0.1484,
+        "top": 0.125,
+        "right": 0.8867,
+        "bottom": 0.8867
+      }
     },
     "merge": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/merge.png",
@@ -324,8 +474,18 @@
       "baseCommand": "git merge",
       "skillSlug": "git-merge",
       "generationSource": "imagegen-raw",
+      "impactStartFrame": 20,
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/merge.png",
-      "impactStartFrame": 20
+      "placeAnchor": {
+        "x": 0.5,
+        "y": 0.4863
+      },
+      "placeBounds": {
+        "left": 0.0078,
+        "top": 0.1562,
+        "right": 0.8789,
+        "bottom": 1.0
+      }
     },
     "merge-base": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/merge-base.png",
@@ -344,7 +504,17 @@
       "baseCommand": "git merge-base",
       "skillSlug": "git-merge-base",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/merge-base.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/merge-base.png",
+      "placeAnchor": {
+        "x": 0.4629,
+        "y": 0.918
+      },
+      "placeBounds": {
+        "left": 0.0273,
+        "top": 0.125,
+        "right": 0.8594,
+        "bottom": 1.0
+      }
     },
     "checkout-conflict": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/checkout-conflict.png",
@@ -363,7 +533,17 @@
       "baseCommand": "git checkout",
       "skillSlug": "git-checkout-conflict",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/checkout-conflict.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/checkout-conflict.png",
+      "placeAnchor": {
+        "x": 0.5215,
+        "y": 0.4727
+      },
+      "placeBounds": {
+        "left": 0.0938,
+        "top": 0.0703,
+        "right": 0.8984,
+        "bottom": 0.9219
+      }
     },
     "diff-conflict": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/diff-conflict.png",
@@ -382,7 +562,17 @@
       "baseCommand": "git diff",
       "skillSlug": "git-diff-conflict",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/diff-conflict.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/diff-conflict.png",
+      "placeAnchor": {
+        "x": 0.4961,
+        "y": 0.9219
+      },
+      "placeBounds": {
+        "left": 0.0391,
+        "top": 0.1133,
+        "right": 0.918,
+        "bottom": 1.0
+      }
     },
     "ls-files": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/ls-files.png",
@@ -401,7 +591,17 @@
       "baseCommand": "git ls-files",
       "skillSlug": "git-ls-files",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/ls-files.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/ls-files.png",
+      "placeAnchor": {
+        "x": 0.4707,
+        "y": 0.9141
+      },
+      "placeBounds": {
+        "left": 0.043,
+        "top": 0.25,
+        "right": 0.9102,
+        "bottom": 1.0
+      }
     },
     "mergetool": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/mergetool.png",
@@ -420,7 +620,17 @@
       "baseCommand": "git mergetool",
       "skillSlug": "git-mergetool",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/mergetool.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/mergetool.png",
+      "placeAnchor": {
+        "x": 0.5039,
+        "y": 0.4746
+      },
+      "placeBounds": {
+        "left": 0.0703,
+        "top": 0.0,
+        "right": 0.9102,
+        "bottom": 0.9062
+      }
     },
     "reset": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/reset.png",
@@ -439,7 +649,17 @@
       "baseCommand": "git reset",
       "skillSlug": "git-reset",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/reset.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/reset.png",
+      "placeAnchor": {
+        "x": 0.4785,
+        "y": 0.9219
+      },
+      "placeBounds": {
+        "left": 0.0352,
+        "top": 0.0938,
+        "right": 0.8711,
+        "bottom": 1.0
+      }
     },
     "revert": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/revert.png",
@@ -458,7 +678,17 @@
       "baseCommand": "git revert",
       "skillSlug": "git-revert",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/revert.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/revert.png",
+      "placeAnchor": {
+        "x": 0.5215,
+        "y": 0.4863
+      },
+      "placeBounds": {
+        "left": 0.125,
+        "top": 0.1562,
+        "right": 0.9219,
+        "bottom": 0.8828
+      }
     },
     "reflog": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/reflog.png",
@@ -477,8 +707,18 @@
       "baseCommand": "git reflog",
       "skillSlug": "git-reflog",
       "generationSource": "imagegen-raw",
+      "impactStartFrame": 16,
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/reflog.png",
-      "impactStartFrame": 16
+      "placeAnchor": {
+        "x": 0.5547,
+        "y": 0.5254
+      },
+      "placeBounds": {
+        "left": 0.1289,
+        "top": 0.1367,
+        "right": 0.9492,
+        "bottom": 1.0
+      }
     },
     "stash": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/stash.png",
@@ -497,8 +737,18 @@
       "baseCommand": "git stash",
       "skillSlug": "git-stash",
       "generationSource": "imagegen-raw",
+      "impactStartFrame": 15,
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/stash.png",
-      "impactStartFrame": 15
+      "placeAnchor": {
+        "x": 0.498,
+        "y": 0.501
+      },
+      "placeBounds": {
+        "left": 0.1289,
+        "top": 0.1562,
+        "right": 0.8555,
+        "bottom": 1.0
+      }
     },
     "cherry-pick": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/cherry-pick.png",
@@ -517,7 +767,17 @@
       "baseCommand": "git cherry-pick",
       "skillSlug": "git-cherry-pick",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/cherry-pick.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/cherry-pick.png",
+      "placeAnchor": {
+        "x": 0.4844,
+        "y": 0.9297
+      },
+      "placeBounds": {
+        "left": 0.0,
+        "top": 0.0,
+        "right": 0.9844,
+        "bottom": 1.0
+      }
     },
     "remote": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/remote.png",
@@ -536,7 +796,17 @@
       "baseCommand": "git remote",
       "skillSlug": "git-remote",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/remote.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/remote.png",
+      "placeAnchor": {
+        "x": 0.457,
+        "y": 0.8945
+      },
+      "placeBounds": {
+        "left": 0.0547,
+        "top": 0.1406,
+        "right": 0.8438,
+        "bottom": 1.0
+      }
     },
     "fetch": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/fetch.png",
@@ -555,7 +825,17 @@
       "baseCommand": "git fetch",
       "skillSlug": "git-fetch",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/fetch.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/fetch.png",
+      "placeAnchor": {
+        "x": 0.4902,
+        "y": 0.4844
+      },
+      "placeBounds": {
+        "left": 0.043,
+        "top": 0.0977,
+        "right": 0.875,
+        "bottom": 1.0
+      }
     },
     "pull": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/pull.png",
@@ -574,7 +854,17 @@
       "baseCommand": "git pull",
       "skillSlug": "git-pull",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/pull.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/pull.png",
+      "placeAnchor": {
+        "x": 0.4688,
+        "y": 0.918
+      },
+      "placeBounds": {
+        "left": 0.0547,
+        "top": 0.168,
+        "right": 0.8516,
+        "bottom": 1.0
+      }
     },
     "push": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/push.png",
@@ -593,7 +883,17 @@
       "baseCommand": "git push",
       "skillSlug": "git-push",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/push.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/push.png",
+      "placeAnchor": {
+        "x": 0.4902,
+        "y": 0.8828
+      },
+      "placeBounds": {
+        "left": 0.0664,
+        "top": 0.1406,
+        "right": 0.9844,
+        "bottom": 1.0
+      }
     },
     "rebase": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/rebase.png",
@@ -612,7 +912,17 @@
       "baseCommand": "git rebase",
       "skillSlug": "git-rebase",
       "generationSource": "imagegen-raw",
-      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/rebase.png"
+      "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/rebase.png",
+      "placeAnchor": {
+        "x": 0.4473,
+        "y": 0.9102
+      },
+      "placeBounds": {
+        "left": 0.043,
+        "top": 0.2344,
+        "right": 0.8984,
+        "bottom": 0.9727
+      }
     },
     "default": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/default.png",
@@ -631,8 +941,18 @@
       "baseCommand": "default",
       "skillSlug": "default",
       "generationSource": "imagegen-raw",
+      "impactStartFrame": 15,
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/default.png",
-      "impactStartFrame": 15
+      "placeAnchor": {
+        "x": 0.4746,
+        "y": 0.4697
+      },
+      "placeBounds": {
+        "left": 0.1289,
+        "top": 0.1992,
+        "right": 0.8047,
+        "bottom": 0.75
+      }
     },
     "miss": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/miss.png",

@@ -63,6 +63,10 @@ const designPreviewRoutes: RouteObject[] = import.meta.env.DEV
         lazy: () => import('@/features/dev/pages/BattlePlayground'),
       },
       {
+        path: '/dev/monster-scales',
+        lazy: () => import('@/features/dev/pages/MonsterScalePlayground'),
+      },
+      {
         path: '/dev/outcomes',
         lazy: () => import('@/features/dev/pages/OutcomePreviewPage'),
       },
@@ -71,10 +75,6 @@ const designPreviewRoutes: RouteObject[] = import.meta.env.DEV
         lazy: () => import('@/features/story-map/pages/StoryMapPreviewPage'),
       },
       { path: LEGACY_DESIGN_PREVIEW_STORY_ROUTE, element: <Navigate replace to={DESIGN_PREVIEW_STORY_MAP_ROUTE} /> },
-      {
-        path: '/design-preview/levels',
-        lazy: () => import('@/features/story-map/pages/LevelSelectPreviewPage'),
-      },
     ]
   : []
 

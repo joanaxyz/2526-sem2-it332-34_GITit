@@ -1,1 +1,1 @@
-export type { ChapterKpis, HomeSummary, RateMetric } from '@/shared/progress/types'
+export type {  HomeSummary,  } from '@/shared/progress/types'

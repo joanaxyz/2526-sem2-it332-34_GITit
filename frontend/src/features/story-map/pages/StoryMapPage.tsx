@@ -6,10 +6,8 @@ import { PanelLeftOpen, PanelRightOpen, X } from 'lucide-react'
 import { StoryAdventurePath } from '@/features/story-map/components/path/StoryAdventurePath'
 import { ChapterOverview } from '@/features/story-map/components/ChapterOverview'
 import { StoryChapterList } from '@/features/story-map/components/StoryChapterList'
-import { StoryContentModals } from '@/features/story-map/components/StoryContentModals'
 import { StoryCompanionPanel, StorySkillFocusPanel } from '@/features/story-map/components/StorySidePanels'
 import { storyMapApi } from '@/features/story-map/api/storyMapApi'
-import { useStoryContentModal } from '@/features/story-map/hooks/useStoryContentModal'
 import { useStories } from '@/features/story-map/hooks/useStories'
 import { chapterTitle, firstOpenChapter } from '@/features/story-map/utils/storyMapChapter'
 import { queryKeys } from '@/shared/api/queryKeys'
@@ -49,7 +47,6 @@ export function StoryMapPage() {
   const [activeChapterId, setActiveChapterId] = useState<number | null>(null)
   const [leftRailOpen, setLeftRailOpen] = useState(false)
   const [rightRailOpen, setRightRailOpen] = useState(false)
-  const resetContentModal = useStoryContentModal((state) => state.reset)
 
   useEffect(() => {
     if (!chapters.length) return
@@ -64,10 +61,9 @@ export function StoryMapPage() {
   }, [chapters, focusedChapterId])
 
   useEffect(() => {
-    resetContentModal()
     setLeftRailOpen(false)
     setRightRailOpen(false)
-  }, [activeChapterId, resetContentModal, storySlug])
+  }, [activeChapterId, storySlug])
 
   const activeChapter = useMemo(
     () => chapters.find((chapter) => chapter.id === activeChapterId) ?? firstOpenChapter(chapters),
@@ -82,7 +78,7 @@ export function StoryMapPage() {
   })
 
   if (chaptersQuery.isLoading) {
-    return <LoadingState description="Preparing the story map." label="Loading map" variant="page" />
+    return <LoadingState companionSlug={companionSlug} description="Preparing the story map." label="Loading map" variant="page" />
   }
   if (chaptersQuery.isError) {
     return <ErrorState title="Could not load map" description={chaptersQuery.error.message} />
@@ -100,7 +96,6 @@ export function StoryMapPage() {
   return (
     <div className="story-page-shell" style={storyWorldStyle(storyWorld)}>
       <div className="story-map-backdrop" style={storyMapStyle} aria-hidden="true" />
-      <StoryContentModals />
 
       <div className="story-map-rail-controls" aria-label="Map panels">
         <button

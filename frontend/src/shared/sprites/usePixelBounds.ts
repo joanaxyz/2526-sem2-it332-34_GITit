@@ -79,10 +79,7 @@ export function loadSpritePixelAnchor(
       spriteAnchorCache.set(key, anchor)
       return anchor
     })
-    .catch(() => {
-      spriteAnchorCache.set(key, null)
-      return null
-    })
+    .catch(() => null)
     .finally(() => {
       spriteAnchorPromises.delete(key)
     })
@@ -91,7 +88,7 @@ export function loadSpritePixelAnchor(
   return promise
 }
 
-export function loadImagePixelBounds(src: string, alphaThreshold = DEFAULT_ALPHA_THRESHOLD): Promise<ImagePixelBounds | null> {
+function loadImagePixelBounds(src: string, alphaThreshold = DEFAULT_ALPHA_THRESHOLD): Promise<ImagePixelBounds | null> {
   const key = `${src}|${alphaThreshold}`
   if (imageBoundsCache.has(key)) return Promise.resolve(imageBoundsCache.get(key) ?? null)
 

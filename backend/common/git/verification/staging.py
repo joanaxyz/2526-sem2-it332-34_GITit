@@ -165,6 +165,7 @@ class StagingVerificationMixin:
             raise BadRequest("execution.next_state does not match the submitted git reset command.")
         mode = "soft" if "--soft" in parts else "mixed" if "--mixed" in parts else "hard"
         expected = copy.deepcopy(previous_state)
+        expected["merge_abort_state"] = copy.deepcopy(previous_state)
         old_head = self.normalizer.head_commit_id(previous_state)
         old_tree = self.normalizer.head_tree(previous_state)
         target_tree = self._tree_for_commit(previous_state, target)
@@ -182,16 +183,15 @@ class StagingVerificationMixin:
             expected.pop("merge_parent", None)
             expected.pop("cherry_pick_in_progress", None)
             expected.pop("cherry_pick_original_head", None)
-        expected.setdefault("operation_metadata", {}).update(
+        self._set_operation_metadata(
+            expected,
             {
                 "last_reset_mode": mode,
                 "last_reset_target": target,
                 "last_reset_target_expr": target_expr,
                 "last_reset_previous_head": old_head,
-            }
+            },
         )
-        # The frontend stores a legacy top-level mirror for operation metadata.
-        expected.update(expected["operation_metadata"])
         if target:
             expected.setdefault("reflog", []).append(
                 {
@@ -256,10 +256,8 @@ class StagingVerificationMixin:
             for key in ("hunks", "tokens", "target_hunks", "leftover_hunks"):
                 if key in value:
                     return [str(item) for item in self._as_list(value.get(key))]
-            return [str(item) for item in value.values()]
-        if isinstance(value, list):
-            return [str(item) for item in value]
-        return [str(value)] if str(value) else []
+        haystack = self.normalizer.token_haystack(value)
+        return [haystack] if haystack else []
     def _selected_add_paths(self, state: dict, args: list[str], *, include_tracked: bool = True, include_untracked: bool = True) -> list[str]:
         working_tree = state.get("working_tree") or {}
         base_tree = self.normalizer.head_tree(state)

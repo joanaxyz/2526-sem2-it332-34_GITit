@@ -10,37 +10,7 @@ from common.constants import (
     SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
-
-try:
-    from common.models import VariantBase
-except ModuleNotFoundError as exc:
-    if exc.name != "common.models":
-        raise
-
-    class VariantBase(models.Model):
-        """Local fallback for authored problem variant fields.
-
-        Some zip-overlay updates can leave an older checkout without
-        backend/common/models.py. This abstract fallback keeps Django startup
-        alive and matches the shared field shape exactly, without creating its
-        own database table.
-        """
-
-        slug = models.SlugField()
-        label = models.CharField(max_length=80)
-        initial_state = models.JSONField(default=dict)
-        evaluation_spec = models.JSONField(default=dict, blank=True)
-        target_state = models.JSONField(default=dict, blank=True)
-        solution_commands = models.JSONField(default=list, blank=True)
-        case_id = models.CharField(max_length=160, blank=True)
-        semantic_key = models.CharField(max_length=240, blank=True)
-        parameter_context = models.JSONField(default=dict, blank=True)
-        scenario_context = models.JSONField(default=dict, blank=True)
-        scaffold_policy = models.JSONField(default=dict, blank=True)
-        is_published = models.BooleanField(default=True)
-
-        class Meta:
-            abstract = True
+from common.models import VariantBase
 
 
 class ChallengeLevel(models.Model):
@@ -60,7 +30,6 @@ class ChallengeLevel(models.Model):
     title = models.CharField(max_length=180)
     summary = models.TextField(blank=True)
     narrative = models.TextField(blank=True)
-    brief = models.TextField(blank=True)
     command_forms = models.ManyToManyField(
         "curriculum.CommandForm",
         related_name="challenge_levels",

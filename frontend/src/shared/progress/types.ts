@@ -1,10 +1,10 @@
-export type RateMetric = {
+type RateMetric = {
   value: number | null
   numerator: number
   denominator: number
 }
 
-export type ChapterKpis = Record<string, {
+type ChapterKpis = Record<string, {
   scr: RateMetric
   hlcr: RateMetric
   arc: RateMetric

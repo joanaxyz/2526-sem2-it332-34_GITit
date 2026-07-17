@@ -345,5 +345,3 @@ function TagsField({ value, onChange }: { value: string[]; onChange: (tags: stri
     </label>
   )
 }
-
-export default ContentEditorPage

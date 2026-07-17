@@ -1,5 +1,5 @@
 import type { RepositorySnapshot } from '@/shared/level/types'
-import { GitCommandParser, normalizeCommand } from '@/shared/git/simulator/parser'
+import { GitCommandParser } from '@/shared/git/simulator/parser'
 import {
   GIT_COMMAND_NAMES,
   SUPPORTED_OPTIONS,
@@ -274,5 +274,3 @@ export function computeTargetState(
   }
   return snapshotForCommand(state, true)
 }
-
-export { normalizeCommand }

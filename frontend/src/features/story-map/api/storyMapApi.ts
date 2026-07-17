@@ -1,12 +1,12 @@
-import { apiOperationRequest, apiRequest } from '@/shared/api/httpClient'
-import type { ChapterContentOverview } from '@/features/challenges/types'
+import { apiOperationRequest } from '@/shared/api/httpClient'
+import type { ChapterContentOverview } from '@/features/story-map/types'
 import type { ChapterBook } from '@/features/story-map/components/book/bookTypes'
 import type { Story } from '@/features/story-map/types'
 import type { LearningChapter } from '@/features/story-map/types'
 
 export const storyMapApi = {
   listStories() {
-    return apiRequest<Story[]>('/stories/')
+    return apiOperationRequest<'stories_list', Story[]>('stories_list', '/stories/')
   },
   listChapters(storySlug?: string | null) {
     const query = storySlug ? `?story=${encodeURIComponent(storySlug)}` : ''

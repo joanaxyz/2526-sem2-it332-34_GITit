@@ -30,10 +30,6 @@ export function isRecord(value: unknown): value is Record<string, RepositoryValu
   return Boolean(value && typeof value === 'object' && !Array.isArray(value))
 }
 
-export function asRecord(value: unknown): Record<string, RepositoryValue> {
-  return isRecord(value) ? value : {}
-}
-
 export function normalizeState(input?: Partial<MutableRepositoryState> | null): MutableRepositoryState {
   const state = clone((input ?? {}) as MutableRepositoryState)
   delete state.project_tree
@@ -44,7 +40,7 @@ export function normalizeState(input?: Partial<MutableRepositoryState> | null): 
   return state
 }
 
-export function ensureShape(state: MutableRepositoryState) {
+function ensureShape(state: MutableRepositoryState) {
   state.repository_initialized ??= true
   state.commits ??= []
   state.branches ??= {}
@@ -65,7 +61,7 @@ export function ensureShape(state: MutableRepositoryState) {
   state.operation_metadata ??= {}
 }
 
-export function normalizeHead(state: MutableRepositoryState) {
+function normalizeHead(state: MutableRepositoryState) {
   const head = state.head
   if (head?.type === 'branch') {
     head.target = state.branches?.[head.name ?? ''] ?? null
@@ -113,7 +109,7 @@ function parentTreeFor(commit: RepositoryCommit, commitsById: Map<string, Reposi
   return clone(parent?.tree ?? {})
 }
 
-export function normalizeChanges(changes?: Record<string, RepositoryValue>): Record<string, { change_type: string; before: RepositoryValue; after: RepositoryValue }> {
+function normalizeChanges(changes?: Record<string, RepositoryValue>): Record<string, { change_type: string; before: RepositoryValue; after: RepositoryValue }> {
   const normalized: Record<string, { change_type: string; before: RepositoryValue; after: RepositoryValue }> = {}
   for (const [path, payload] of Object.entries(changes ?? {})) {
     if (isRecord(payload)) {
@@ -178,7 +174,7 @@ export function applyChanges(baseTree: Record<string, RepositoryValue>, changes?
   return tree
 }
 
-export function filesFromChanges(changes?: Record<string, { change_type?: string }>) {
+function filesFromChanges(changes?: Record<string, { change_type?: string }>) {
   const files: Record<string, RepositoryValue> = {}
   for (const [path, payload] of Object.entries(changes ?? {})) {
     files[path] = payload.change_type ?? 'modified'
@@ -215,7 +211,7 @@ export function entryContent(value: unknown): RepositoryValue {
   return clone(value as RepositoryValue)
 }
 
-export function tokenHaystack(value: unknown): string {
+function tokenHaystack(value: unknown): string {
   if (value === null || value === undefined) return ''
   if (Array.isArray(value)) return value.map(tokenHaystack).join(' ')
   if (isRecord(value)) return Object.values(value).map(tokenHaystack).join(' ')
@@ -343,4 +339,3 @@ export function displayStatus(value: unknown, fallback = 'changed') {
   if (!status || status === 'none') return fallback
   return DISPLAY_STATUS_ALIASES[status] ?? fallback
 }
-

@@ -15,6 +15,14 @@
   text-transform: uppercase;
 }
 
+.lvlctx {
+  border-color: rgba(var(--theme-primary-rgb), 0.22);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, rgba(6, 18, 36, 0.96), rgba(2, 8, 19, 0.98)),
+    #020814;
+}
+
 .panel-eyebrow svg {
   width: 0.95rem;
   height: 0.95rem;
@@ -27,7 +35,7 @@
 }
 
 .lvlctx-header .panel-eyebrow {
-  padding: 0.72rem 0.95rem;
+  padding: 0.58rem 0.75rem;
   border-bottom: 1px solid hsl(var(--border) / 0.55);
 }
 
@@ -35,7 +43,7 @@
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  padding: 0.72rem 0.95rem 0.15rem;
+  padding: 0.62rem 0.75rem 0.15rem;
 }
 
 .lvlctx-titlerow svg {
@@ -47,15 +55,18 @@
 }
 
 .lvlctx-title {
-  font-size: 1rem;
+  font-size: var(--text-base);
 }
 
 .lvlctx-body {
   padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: auto;
 }
 
 .lvlctx-section {
-  padding: 0.7rem 0.95rem 0.85rem;
+  padding: 0.62rem 0.75rem 0.72rem;
 }
 
 .lvlctx-section + .lvlctx-section {
@@ -84,14 +95,14 @@
 .lvlctx-story {
   margin: 0;
   color: hsl(var(--muted-foreground));
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   line-height: 1.55;
 }
 
 .lvlctx-task {
   margin: 0.55rem 0 0;
   color: hsl(var(--foreground));
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   font-weight: 500;
   line-height: 1.55;
 }
@@ -110,7 +121,7 @@
   gap: 0.5rem;
   align-items: start;
   color: hsl(var(--muted-foreground));
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   line-height: 1.45;
 }
 
@@ -271,4 +282,3 @@
   top: 0.42rem;
   right: 0;
 }
-

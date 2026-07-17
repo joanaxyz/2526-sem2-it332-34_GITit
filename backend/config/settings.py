@@ -118,7 +118,6 @@ INSTALLED_APPS = [
     "simulator",
     "evaluation",
     "progress",
-    "payments",
     "common",
     "adminconsole",
 ]
@@ -395,11 +394,8 @@ EMAIL_USE_TLS = env("EMAIL_USE_TLS")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 PASSWORD_RESET_TIMEOUT = env("PASSWORD_RESET_TIMEOUT")
 
-# --- Stripe (GitCoin top-up packs) ------------------------------------------
-# Test-mode keys are enough for a capstone demo: hosted Checkout redirect, no
-# card handling in this codebase at all. Get them from the Stripe dashboard's
-# "Developers -> API keys" (test mode) and "Developers -> Webhooks" pages.
-STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="").strip()
-STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET", default="").strip()
-# Where Stripe Checkout redirects back to after payment.
 FRONTEND_BASE_URL = env("FRONTEND_BASE_URL", default="http://localhost:5173").rstrip("/")
+
+if not DEBUG:
+    if not FRONTEND_BASE_URL.startswith("https://"):
+        raise RuntimeError("FRONTEND_BASE_URL must be an HTTPS origin when DJANGO_DEBUG=False.")

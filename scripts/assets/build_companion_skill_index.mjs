@@ -35,7 +35,7 @@ const EFFECT_ROOTS = {
 }
 
 // Not player-facing skills: keep them out of the showcase.
-const EXCLUDE = new Set(['default', 'miss'])
+const EXCLUDE = new Set(['miss'])
 
 // Rough git-workflow order so the showcase reads as a progression rather than
 // manifest insertion order. Unknown families sort after these, alphabetically.
@@ -44,7 +44,7 @@ const ORDER = [
   'rm', 'restore', 'reset', 'revert', 'stash', 'branch', 'switch', 'checkout',
   'merge', 'merge-base', 'rebase', 'cherry-pick', 'reflog', 'check-ignore',
   'ls-files', 'checkout-conflict', 'diff-conflict', 'mergetool',
-  'remote', 'fetch', 'pull', 'push',
+  'remote', 'fetch', 'pull', 'push', 'tag', 'rev-list',
 ]
 
 function orderIndex(name) {
@@ -67,6 +67,7 @@ for (const [slug, effectRoot] of Object.entries(EFFECT_ROOTS)) {
     if (!existsSync(sheetPath)) continue
     const record = {
       family: name,
+      showcase: name !== 'default',
       command: String(entry.baseCommand ?? `git ${name}`),
       tint: String(entry.tint ?? 'cyan'),
       playback: String(entry.playback ?? 'target'),
@@ -84,6 +85,20 @@ for (const [slug, effectRoot] of Object.entries(EFFECT_ROOTS)) {
     if (entry.motion) record.motion = String(entry.motion)
     if (entry.launchStartFrame != null) record.launchStartFrame = Number(entry.launchStartFrame)
     if (entry.impactStartFrame != null) record.impactStartFrame = Number(entry.impactStartFrame)
+    // Pixel-measured placement anchor (normalized 0..1 of the frame). The runtime
+    // pins this point on the target instead of assuming the fixed feet/center
+    // fraction, so a reprocess that shifts the art within its cell can't float it.
+    if (entry.placeAnchor && typeof entry.placeAnchor === 'object') {
+      record.placeAnchor = { x: Number(entry.placeAnchor.x), y: Number(entry.placeAnchor.y) }
+    }
+    if (entry.placeBounds && typeof entry.placeBounds === 'object') {
+      record.placeBounds = {
+        left: Number(entry.placeBounds.left),
+        top: Number(entry.placeBounds.top),
+        right: Number(entry.placeBounds.right),
+        bottom: Number(entry.placeBounds.bottom),
+      }
+    }
     if (Array.isArray(entry.layers)) {
       record.layers = entry.layers.map((l) => ({ layer: String(l.layer), src: String(l.src) }))
     }

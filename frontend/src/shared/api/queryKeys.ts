@@ -1,5 +1,3 @@
-import type { ChapterContentSection } from '@/shared/level/chapterContent'
-
 export const queryKeys = {
   authBootstrap: ['auth-bootstrap'] as const,
   homeSummary: ['home-summary'] as const,
@@ -13,9 +11,6 @@ export const queryKeys = {
   authoringChapters: ['authoring-chapters'] as const,
   shopCatalog: ['shop-catalog'] as const,
   preferences: ['player-preferences'] as const,
-  gitcoinPacks: ['gitcoin-packs'] as const,
-  chapterContent: (chapterId: number | null | undefined, section: ChapterContentSection) =>
-    ['chapter-content', chapterId, section] as const,
   chapterOverview: (chapterId: number | null | undefined) => ['chapter-overview', chapterId] as const,
   learnedSkills: ['learned-skills'] as const,
   chapterBook: (chapterId: number | null | undefined) => ['chapter-book', chapterId] as const,
@@ -36,6 +31,5 @@ export const queryKeys = {
 }
 
 export const queryKeyRoots = {
-  chapterContent: ['chapter-content'] as const,
   chapterOverview: ['chapter-overview'] as const,
 }

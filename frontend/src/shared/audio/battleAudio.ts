@@ -1,75 +1,38 @@
-export type BattleSkillElement = 'flame' | 'ice' | 'lightning'
-export type BattleSkillSoundPhase =
-  | 'charge'
-  | 'projectile'
-  | 'target-center'
-  | 'target-ground'
-  | 'ground-run'
-  | 'impact'
-export type ButtonSound =
-  | 'button-click'
-  | 'button-click-soft'
-  | 'button-click-bright'
-  | 'button-toggle'
-  | 'button-confirm'
-  | 'button-dismiss'
-  | 'button-danger'
-export type BattleBackgroundKind = 'outside' | 'inside'
-export type CompanionSound = 'hurt' | 'death'
-export type SystemSound = 'victory' | 'game-over' | 'wave-transition' | 'run'
+import { buttonSoundForEventTarget } from '@/shared/audio/battleButtonSounds'
+import { audioClockNow, canUseAudio, fadeOut, loadAudio, tryPlay } from '@/shared/audio/battleAudioDom'
+import {
+  BACKGROUND_VOLUMES,
+  BUTTON_CLICK_VARIANTS,
+  BUTTON_SOUND_VOLUMES,
+  BUTTON_SOUNDS,
+  COMPANION_ELEMENTS,
+  COMPANION_SOUND_SLUGS,
+  COMPANION_SOUNDS,
+  SKILL_ELEMENTS,
+  SKILL_PHASES,
+  SKILL_VOLUMES,
+  SYSTEM_SOUNDS,
+  backgroundSrc,
+  buttonSrc,
+  companionSoundSlug,
+  companionSrc,
+  monsterHurtSrc,
+  skillSrc,
+  systemSrc,
+} from '@/shared/audio/battleAudioCatalog'
+import type {
+  BattleBackgroundKind,
+  BattleSkillElement,
+  BattleSkillSoundPhase,
+  ButtonSound,
+} from '@/shared/audio/battleAudioCatalog'
 
-const AUDIO_ROOT = '/audio/battle'
-const SKILL_ELEMENTS: BattleSkillElement[] = ['flame', 'ice', 'lightning']
-const SKILL_PHASES: BattleSkillSoundPhase[] = [
-  'charge',
-  'projectile',
-  'target-center',
-  'target-ground',
-  'ground-run',
-  'impact',
-]
-const BUTTON_SOUNDS: ButtonSound[] = [
-  'button-click',
-  'button-click-soft',
-  'button-click-bright',
-  'button-toggle',
-  'button-confirm',
-  'button-dismiss',
-  'button-danger',
-]
-const BUTTON_SOUND_SET = new Set<string>(BUTTON_SOUNDS)
-const BUTTON_CLICK_VARIANTS: ButtonSound[] = ['button-click', 'button-click-soft', 'button-click-bright']
-const BUTTON_SOUND_VOLUMES: Record<ButtonSound, number> = {
-  'button-click': 0.2,
-  'button-click-soft': 0.18,
-  'button-click-bright': 0.18,
-  'button-toggle': 0.2,
-  'button-confirm': 0.24,
-  'button-dismiss': 0.18,
-  'button-danger': 0.2,
-}
-const COMPANION_SOUND_SLUGS = ['blue', 'white', 'black'] as const
-const COMPANION_SOUNDS: CompanionSound[] = ['hurt', 'death']
-const SYSTEM_SOUNDS: SystemSound[] = ['victory', 'game-over', 'wave-transition', 'run']
-const COMPANION_ELEMENTS: Record<string, BattleSkillElement> = {
-  blue: 'flame',
-  white: 'ice',
-  black: 'lightning',
-}
-
-const SKILL_VOLUMES: Record<BattleSkillSoundPhase, number> = {
-  charge: 0.34,
-  projectile: 0.32,
-  'target-center': 0.38,
-  'target-ground': 0.48,
-  'ground-run': 0.36,
-  impact: 0.46,
-}
-
-const BACKGROUND_VOLUMES: Record<BattleBackgroundKind, number> = {
-  outside: 0.32,
-  inside: 0.68,
-}
+export { buttonSoundForElement } from '@/shared/audio/battleButtonSounds'
+export type {
+  BattleBackgroundKind,
+  BattleSkillElement,
+  BattleSkillSoundPhase,
+} from '@/shared/audio/battleAudioCatalog'
 
 const LEGACY_AUDIO_ENABLED_STORAGE_KEY = 'gitit:battle-audio-enabled'
 const SOUND_EFFECTS_ENABLED_STORAGE_KEY = 'gitit:battle-sound-effects-enabled'
@@ -77,7 +40,6 @@ const MUSIC_ENABLED_STORAGE_KEY = 'gitit:battle-music-enabled'
 
 type AudioPreferenceListener = (enabled: boolean) => void
 
-const audioCache = new Map<string, HTMLAudioElement>()
 const activeOneShots = new Set<HTMLAudioElement>()
 const soundEffectsEnabledListeners = new Set<AudioPreferenceListener>()
 const musicEnabledListeners = new Set<AudioPreferenceListener>()
@@ -95,7 +57,7 @@ export function skillElementForCompanion(companionSlug?: string | null): BattleS
   return COMPANION_ELEMENTS[slug] ?? 'flame'
 }
 
-export function preloadBattleAudio(): void {
+function preloadBattleAudio(): void {
   if (!canUseAudio()) return
   for (const element of SKILL_ELEMENTS) {
     for (const phase of SKILL_PHASES) {
@@ -183,53 +145,7 @@ export function bindButtonSoundEffects(target: Document | HTMLElement = document
   return () => target.removeEventListener('click', handleClick)
 }
 
-export function buttonSoundForElement(element: Element): ButtonSound | null {
-  if (isDisabledButtonLike(element)) return null
-
-  const explicit = element.getAttribute('data-button-sound')?.trim()
-  if (explicit === 'none') return null
-  if (explicit && BUTTON_SOUND_SET.has(explicit)) return explicit as ButtonSound
-
-  const classText = element.getAttribute('class')?.toLowerCase() ?? ''
-  const labelText = [
-    element.getAttribute('aria-label'),
-    element.getAttribute('title'),
-    element.textContent,
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase()
-
-  if (/\b(danger|destructive|is-danger)\b/.test(classText)) return 'button-danger'
-  if (/\b(delete|remove|revoke|sign out|unpublish|destroy|discard|reset|deduct)\b/.test(labelText)) {
-    return 'button-danger'
-  }
-  if (/\b(close|cancel|back|exit|dismiss|previous)\b/.test(labelText) || /\b(close|dismiss)\b/.test(classText)) {
-    return 'button-dismiss'
-  }
-  if (
-    element.getAttribute('aria-pressed') !== null ||
-    element.getAttribute('aria-selected') !== null ||
-    element.getAttribute('role') === 'tab' ||
-    element.getAttribute('role') === 'switch' ||
-    /\b(tab|toggle|filter|selector|carousel|pager|switch)\b/.test(classText)
-  ) {
-    return 'button-toggle'
-  }
-  if (
-    element.getAttribute('type') === 'submit' ||
-    /\b(primary|submit|action|cta)\b/.test(classText) ||
-    /\b(start|play|try again|retry|continue|next|buy|purchase|unlock|save|update|apply|create|publish|add|copy|submit|confirm|open|search)\b/.test(
-      labelText,
-    )
-  ) {
-    return 'button-confirm'
-  }
-
-  return 'button-click'
-}
-
-export function playButtonSound(sound: ButtonSound = 'button-click'): void {
+function playButtonSound(sound: ButtonSound = 'button-click'): void {
   const now = audioClockNow()
   if (now - lastButtonSoundAt < 36) return
   lastButtonSoundAt = now
@@ -312,66 +228,14 @@ export function stopBackgroundMusic(kind?: BattleBackgroundKind, options: { fade
   fadeOut(audio, fadeMs)
 }
 
-export function startBattleBackground(): void {
-  startBackgroundMusic('inside')
-}
-
-export function stopBattleBackground(options: { fadeMs?: number } = {}): void {
+function stopBattleBackground(options: { fadeMs?: number } = {}): void {
   stopBackgroundMusic('inside', options)
-}
-
-function skillSrc(element: BattleSkillElement, phase: BattleSkillSoundPhase): string {
-  return `${AUDIO_ROOT}/skills/${element}/${phase}.wav`
-}
-
-function buttonSrc(sound: ButtonSound): string {
-  return `${AUDIO_ROOT}/ui/${sound}.wav`
-}
-
-function buttonSoundForEventTarget(target: EventTarget | null): ButtonSound | null {
-  if (!(target instanceof Element)) return null
-  const element = target.closest('button, [role="button"], [role="tab"], [role="switch"], .ui-button')
-  if (!element) return null
-  return buttonSoundForElement(element)
-}
-
-function isDisabledButtonLike(element: Element): boolean {
-  if (element.closest('[aria-disabled="true"]')) return true
-  if (element.closest('[disabled]')) return true
-  if (element instanceof HTMLButtonElement || element instanceof HTMLInputElement) return element.disabled
-  return false
 }
 
 function nextButtonClickVariant(): ButtonSound {
   const sound = BUTTON_CLICK_VARIANTS[buttonClickVariantIndex % BUTTON_CLICK_VARIANTS.length]
   buttonClickVariantIndex += 1
   return sound
-}
-
-function audioClockNow(): number {
-  if (typeof window !== 'undefined' && window.performance) return window.performance.now()
-  return Date.now()
-}
-
-function backgroundSrc(kind: BattleBackgroundKind): string {
-  const fileName = kind === 'outside' ? 'outside-battle-loop' : 'inside-battle-loop'
-  return `${AUDIO_ROOT}/background/${fileName}.wav`
-}
-
-function companionSrc(companionSlug: (typeof COMPANION_SOUND_SLUGS)[number], sound: CompanionSound): string {
-  return `${AUDIO_ROOT}/companions/${companionSlug}/${sound}.wav`
-}
-
-function monsterHurtSrc(): string {
-  return `${AUDIO_ROOT}/monsters/hurt.wav`
-}
-
-function systemSrc(sound: SystemSound): string {
-  return `${AUDIO_ROOT}/system/${sound}.wav`
-}
-
-function canUseAudio(): boolean {
-  return import.meta.env.MODE !== 'test' && typeof window !== 'undefined' && typeof Audio !== 'undefined'
 }
 
 function readAudioChannelPreference(storageKey: string): boolean {
@@ -392,15 +256,6 @@ function persistAudioChannelPreference(storageKey: string, enabled: boolean): vo
   } catch {
     // Storage can be unavailable in private or embedded contexts; audio still works.
   }
-}
-
-function loadAudio(src: string): HTMLAudioElement {
-  const cached = audioCache.get(src)
-  if (cached) return cached
-  const audio = new Audio(src)
-  audio.preload = 'auto'
-  audioCache.set(src, audio)
-  return audio
 }
 
 function playOneShot(src: string, volume: number): void {
@@ -460,17 +315,6 @@ function resumeActiveBackground(): void {
   playBackground(audio)
 }
 
-function tryPlay(audio: HTMLAudioElement, onReject?: () => void): void {
-  try {
-    const result = audio.play()
-    void result.catch(() => {
-      onReject?.()
-    })
-  } catch {
-    onReject?.()
-  }
-}
-
 function scheduleBackgroundUnlock(audio: HTMLAudioElement): void {
   if (!canUseAudio() || !battleMusicEnabled || activeBackground?.audio !== audio) return
   clearBackgroundUnlock()
@@ -519,33 +363,4 @@ function suspendBackgroundMusic(): void {
   if (activeBackground?.audio) {
     activeBackground.audio.pause()
   }
-}
-
-function companionSoundSlug(companionSlug?: string | null): (typeof COMPANION_SOUND_SLUGS)[number] {
-  const slug = companionSlug?.trim().toLowerCase()
-  if (slug === 'white' || slug === 'black') return slug
-  return 'blue'
-}
-
-function fadeOut(audio: HTMLAudioElement, durationMs: number): void {
-  if (durationMs <= 0 || typeof window.requestAnimationFrame !== 'function') {
-    audio.pause()
-    audio.currentTime = 0
-    return
-  }
-
-  const started = window.performance.now()
-  const startVolume = audio.volume
-  const step = (now: number) => {
-    const progress = Math.min(1, (now - started) / durationMs)
-    audio.volume = startVolume * (1 - progress)
-    if (progress < 1) {
-      window.requestAnimationFrame(step)
-      return
-    }
-    audio.pause()
-    audio.currentTime = 0
-    audio.volume = startVolume
-  }
-  window.requestAnimationFrame(step)
 }

@@ -1,30 +1,7 @@
 from __future__ import annotations
 
-from django.db.models import Prefetch
-
 from adventures.models import AdventureLevel, SkillMastery
 from curriculum.models import Chapter, CommandForm, CommandSkill
-
-
-def command_skill_queryset(*, chapter_id: int):
-    # Global skills scoped to a chapter through their forms; prefetch only the
-    # forms taught in this chapter so a split command shows its chapter-local moves.
-    return (
-        CommandSkill.objects.filter(
-            command_forms__chapter_id=chapter_id,
-            command_forms__is_published=True,
-            is_published=True,
-        )
-        .distinct()
-        .prefetch_related(
-            Prefetch(
-                "command_forms",
-                queryset=CommandForm.objects.filter(chapter_id=chapter_id, is_published=True),
-            ),
-            "command_forms__adventure_levels",
-        )
-        .order_by("sort_order", "id")
-    )
 
 
 def learned_command_skills(*, player) -> list[dict]:

@@ -16,6 +16,50 @@ from simulator.services import parse_git_command
 
 
 class CommitHistoryVerificationMixin:
+    def verified_diagnostic_state(
+        self,
+        *,
+        command: str,
+        previous_state: dict,
+        command_family: str,
+        exit_code: int,
+    ) -> dict:
+        """Return authoritative evidence metadata for supported diagnostics.
+
+        The browser's submitted diagnostic state is never trusted. Evidence is
+        derived from the normalized command and the backend-owned previous
+        repository state, then limited to the same operation metadata keys the
+        frontend simulator records.
+        """
+
+        expected = copy.deepcopy(previous_state)
+        if exit_code != 0:
+            return expected
+
+        parts = parse_git_command(command) or []
+        raw_args = parts[2:]
+        if (
+            command_family == "merge-base"
+            and len(raw_args) == 2
+            and all(not value.startswith("-") for value in raw_args)
+        ):
+            left = self._resolve_ref(expected, raw_args[0])
+            right = self._resolve_ref(expected, raw_args[1])
+            base = self._common_ancestor(expected, left, right)
+            if base:
+                self._set_operation_metadata(expected, {"last_merge_base": base})
+        elif command_family == "rev-list" and len(raw_args) == 2 and raw_args.count("--count") == 1:
+            range_arg = next(value for value in raw_args if value != "--count")
+            range_parts = range_arg.split("..", 1)
+            if len(range_parts) == 2 and all(range_parts):
+                left = self._resolve_ref(expected, range_parts[0])
+                right = self._resolve_ref(expected, range_parts[1])
+                if left and right:
+                    count = len(self._commits_since(expected, right, left))
+                    self._set_operation_metadata(expected, {"last_rev_list_count": count})
+
+        return self.tools.normalize_state(expected)
+
     def _verify_commit(self, *, command: str, previous_state: dict, next_state: dict) -> None:
         parts = parse_git_command(command) or []
         expected = copy.deepcopy(previous_state)

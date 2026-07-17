@@ -13,7 +13,7 @@ import { getStoryWorld } from '@/shared/story-worlds/registry'
 import { cn } from '@/shared/utils/cn'
 
 /**
- * Challenge adapter for the shared battle stage. Challenges own boss roster
+ * Challenge adapter for the shared battle stage. Challenges own opponent roster
  * selection and collapse behavior; rendering, choreography, and sizing stay in
  * the shared battle system.
  */
@@ -111,8 +111,8 @@ function ChallengeBattleSummary({
         current: director.playerHp ?? run.counts.remaining_counted_commands,
         max: director.playerMaxHp ?? run.counts.maximum_counted_commands,
       }
-  const boss = director.roster[0]
-  const bossLabel = labelForMonster(boss)
+  const opponent = director.roster[0]
+  const opponentLabel = labelForMonster(opponent)
 
   return (
     <button
@@ -134,13 +134,13 @@ function ChallengeBattleSummary({
           />
         </span>
       ) : null}
-      {boss ? (
+      {opponent ? (
         <span className="challenge-mini-health">
-          <span>{bossLabel}</span>
+          <span>{opponentLabel}</span>
           <HealthBar
-            value={boss.hp}
-            max={boss.max_hp}
-            variant="boss"
+            value={opponent.hp}
+            max={opponent.max_hp}
+            variant="enemy"
             className="challenge-mini-meter"
           />
         </span>

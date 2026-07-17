@@ -1,3 +1,8 @@
+import { useMemo } from 'react'
+
+import { DEFAULT_COMPANION_SLUG, getCompanion } from '@/shared/cosmetics/companions/registry'
+import { companionFromDef } from '@/shared/cosmetics/companionRuntime'
+import { SpriteAnimator } from '@/shared/sprites/SpriteAnimator'
 import { cn } from '@/shared/utils/cn'
 
 const containerClass = {
@@ -18,46 +23,49 @@ const frameClass = {
 
 type LoadingStateVariant = keyof typeof containerClass
 
-function MapBuildLoader({ variant }: { variant: LoadingStateVariant }) {
+const loaderScale = {
+  screen: 1.4,
+  page: 1.12,
+  panel: 0.7,
+  inline: 0.5,
+  compact: 0.38,
+} satisfies Record<LoadingStateVariant, number>
+
+function CompanionRunLoader({
+  companionSlug,
+  variant,
+}: {
+  companionSlug?: string | null
+  variant: LoadingStateVariant
+}) {
   const isSmall = variant === 'inline' || variant === 'compact'
+  const companionDef = getCompanion(companionSlug ?? DEFAULT_COMPANION_SLUG)
+  const companion = useMemo(() => companionFromDef(companionDef), [companionDef])
+
+  if (!companion) return null
 
   return (
     <div
       aria-hidden="true"
       className={cn(
-        'git-it-build-loader',
-        isSmall && 'git-it-build-loader--small',
-        variant === 'compact' && 'git-it-build-loader--compact',
+        'git-it-companion-loader',
+        `git-it-companion-loader--${variant}`,
+        isSmall && 'git-it-companion-loader--small',
+        variant === 'compact' && 'git-it-companion-loader--compact',
       )}
     >
-      <div className="git-it-build-map">
-        <span className="git-it-build-roof-spire" />
-
-        <div className="git-it-build-roof" />
-
-        <div className="git-it-build-chapter git-it-build-chapter--top">
-          <span className="git-it-build-window" />
-          <span className="git-it-build-window" />
-          <span className="git-it-build-window" />
-        </div>
-
-        <div className="git-it-build-chapter git-it-build-chapter--mid">
-          <span className="git-it-build-brick git-it-build-brick--a" />
-          <span className="git-it-build-brick git-it-build-brick--b" />
-          <span className="git-it-build-door" />
-          <span className="git-it-build-brick git-it-build-brick--c" />
-        </div>
-
-        <div className="git-it-build-chapter git-it-build-chapter--base">
-          <span className="git-it-build-block git-it-build-block--1" />
-          <span className="git-it-build-block git-it-build-block--2" />
-          <span className="git-it-build-block git-it-build-block--3" />
-          <span className="git-it-build-block git-it-build-block--4" />
-        </div>
-
-        <span className="git-it-build-spark git-it-build-spark--a" />
-        <span className="git-it-build-spark git-it-build-spark--b" />
-        <span className="git-it-build-spark git-it-build-spark--c" />
+      <div className="git-it-companion-loader__stage">
+        <SpriteAnimator
+          animation={companion.sprites.run}
+          anchorToPixelBounds
+          aria-label={`${companionDef.label} running`}
+          className="git-it-companion-loader__sprite"
+          layoutAnimation={companion.sprites.idle}
+          pixelAnchorAnimation={companion.sprites.run}
+          pixelAnchorFallback={{ bottomOffset: companion.metrics.footOffset }}
+          pixelated
+          scale={loaderScale[variant]}
+        />
       </div>
     </div>
   )
@@ -68,11 +76,13 @@ export function LoadingState({
   description,
   variant = 'panel',
   className,
+  companionSlug,
 }: {
   label?: string
   description?: string
   variant?: LoadingStateVariant
   className?: string
+  companionSlug?: string | null
 }) {
   const isCompact = variant === 'compact'
 
@@ -81,6 +91,8 @@ export function LoadingState({
       aria-label={label}
       aria-live="polite"
       className={cn(
+        'git-it-loading-state',
+        `git-it-loading-state--${variant}`,
         'relative isolate flex items-center justify-center overflow-hidden text-center',
         containerClass[variant],
         className,
@@ -88,9 +100,9 @@ export function LoadingState({
       role="status"
     >
       <div className={cn('relative flex w-full max-w-md flex-col items-center', frameClass[variant])}>
-        <MapBuildLoader variant={variant} />
+        <CompanionRunLoader companionSlug={companionSlug} variant={variant} />
 
-        <div className={cn('grid gap-1', isCompact ? 'text-xs' : 'text-sm')}>
+        <div className={cn('git-it-loading-state__copy grid gap-1', isCompact ? 'text-xs' : 'text-sm')}>
           <p className="font-semibold text-foreground">{label}</p>
           {description ? (
             <p className={cn('mx-auto max-w-xs leading-5 text-muted-foreground', isCompact && 'hidden')}>

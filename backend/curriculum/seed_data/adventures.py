@@ -304,6 +304,247 @@ ADVENTURE_WAVE_PLANS = {
             "waves": _waves("force-with-lease-after-rewrite", "delete-remote-branch"),
         },
     ],
+    # --- Advanced stories: command onboarding is a wave, not a payout ---------
+    #
+    # Frostbound and Neon still introduce each advanced form in one focused
+    # command (the intro-first mastery law depends on that), but those micro
+    # encounters are grouped into 2-4 wave field operations. A single syntax
+    # check must never masquerade as a complete adventure level.
+    "frost-temper-the-commit-drills": [
+        {
+            "slug": "audit-and-stage-the-patch",
+            "title": "Audit and Stage the Patch",
+            "waves": _waves(
+                "ft-intro-diff-stat",
+                "ft-intro-diff-check",
+                "ft-intro-add-patch",
+                "ft-intro-add-update",
+            ),
+        },
+        {
+            "slug": "rewrite-the-tip",
+            "title": "Rewrite the Tip",
+            "waves": _waves("ft-intro-amend", "ft-intro-amend-no-edit"),
+        },
+        {
+            "slug": "step-back-with-intent",
+            "title": "Step Back with Intent",
+            "waves": _waves(
+                "ft-intro-reset-soft",
+                "ft-intro-reset-mixed",
+                "ft-intro-reset-hard",
+            ),
+        },
+        {
+            "slug": "restore-and-mark-known-good",
+            "title": "Restore and Mark Known-Good",
+            "waves": _waves("ft-intro-restore-source", "ft-intro-tag-checkpoint"),
+        },
+    ],
+    "frost-choose-the-integration-drills": [
+        {
+            "slug": "compare-and-choose-the-integration",
+            "title": "Compare and Choose the Integration",
+            "waves": _waves(
+                "fc-intro-rev-list-count",
+                "fc-intro-three-dot",
+                "fc-intro-merge-no-ff",
+                "fc-intro-merge-squash",
+            ),
+        },
+    ],
+    "frost-survive-the-conflict-drills": [
+        {
+            "slug": "map-the-conflict",
+            "title": "Map the Conflict",
+            "waves": _waves(
+                "fs-intro-merge-tree",
+                "fs-intro-ls-files-u",
+                "fs-intro-diff-base",
+            ),
+        },
+        {
+            "slug": "compare-both-sides",
+            "title": "Compare Both Sides",
+            "waves": _waves("fs-intro-diff-ours", "fs-intro-diff-theirs"),
+        },
+        {
+            "slug": "resolve-or-retreat",
+            "title": "Resolve or Retreat",
+            "waves": _waves(
+                "fs-intro-checkout-ours",
+                "fs-intro-checkout-theirs",
+                "fs-intro-merge-abort",
+                "fs-intro-merge-continue",
+            ),
+        },
+    ],
+    "frost-move-the-patch-drills": [
+        {
+            "slug": "inspect-and-shelve-the-patch",
+            "title": "Inspect and Shelve the Patch",
+            "waves": _waves(
+                "fm-intro-range-diff",
+                "fm-intro-stash-push",
+                "fm-intro-stash-show",
+            ),
+        },
+        {
+            "slug": "recover-or-retreat",
+            "title": "Recover or Retreat",
+            "waves": _waves(
+                "fm-intro-stash-apply",
+                "fm-intro-stash-pop",
+                "fm-intro-stash-drop",
+                "fm-intro-cherry-abort",
+            ),
+        },
+    ],
+    "frost-reforge-the-branch-drills": [
+        {
+            "slug": "rebase-or-stand-down",
+            "title": "Rebase or Stand Down",
+            "waves": _waves("fr-intro-rebase", "fr-intro-rebase-abort"),
+        },
+    ],
+    "frost-govern-the-remote-drills": [
+        {
+            "slug": "inspect-and-refresh-remotes",
+            "title": "Inspect and Refresh Remotes",
+            "waves": _waves(
+                "fg-intro-branch-vv",
+                "fg-intro-fetch-all",
+                "fg-intro-fetch-prune",
+            ),
+        },
+        {
+            "slug": "integrate-under-guard",
+            "title": "Integrate Under Guard",
+            "waves": _waves("fg-intro-pull-ff-only", "fg-intro-pull-rebase"),
+        },
+        {
+            "slug": "publish-with-guardrails",
+            "title": "Publish with Guardrails",
+            "waves": _waves(
+                "fg-intro-push-lease",
+                "fg-intro-push-delete",
+                "fg-intro-set-url",
+            ),
+        },
+    ],
+    "frost-deliver-the-release-drills": [
+        {
+            "slug": "read-the-release-history",
+            "title": "Read the Release History",
+            "waves": _waves(
+                "fd-intro-shortlog",
+                "fd-intro-shortlog-numbered",
+                "fd-intro-describe",
+            ),
+        },
+        {
+            "slug": "mark-and-publish-the-release",
+            "title": "Mark and Publish the Release",
+            "waves": _waves(
+                "fd-intro-tag-annotated",
+                "fd-intro-tag-delete",
+                "fd-intro-push-tags",
+            ),
+        },
+    ],
+    "frost-hunt-the-regression-drills": [
+        {
+            "slug": "run-and-preserve-the-search",
+            "title": "Run and Preserve the Search",
+            "waves": _waves("fh-intro-bisect-run", "fh-intro-bisect-log"),
+        },
+    ],
+    "frost-publish-the-core-drills": [
+        {
+            "slug": "verify-the-release-record",
+            "title": "Verify the Release Record",
+            "waves": _waves("fp-intro-verify-tag", "fp-intro-show-ref"),
+        },
+    ],
+    "skyline-revision-language-drills": [
+        {
+            "slug": "locate-and-resolve",
+            "title": "Locate and Resolve",
+            "waves": _waves("sr-intro-rev-parse", "sr-intro-rev-parse-toplevel"),
+        },
+    ],
+    "skyline-hidden-history-drills": [
+        {
+            "slug": "search-the-hidden-history",
+            "title": "Search the Hidden History",
+            "waves": _waves("sh-intro-blame", "sh-intro-grep", "sh-intro-show-path"),
+        },
+    ],
+    "skyline-repeated-conflict-drills": [
+        {
+            "slug": "read-the-resolution-memory",
+            "title": "Read the Resolution Memory",
+            "waves": _waves("sc-intro-rerere-status", "sc-intro-rerere-diff"),
+        },
+    ],
+    "skyline-many-realities-drills": [
+        {
+            "slug": "map-the-parallel-workspaces",
+            "title": "Map the Parallel Workspaces",
+            "waves": _waves(
+                "sm-intro-worktree-list",
+                "sm-intro-sparse-list",
+                "sm-intro-submodule-status",
+            ),
+        },
+    ],
+    "skyline-enchant-behavior-drills": [
+        {
+            "slug": "audit-the-effective-behavior",
+            "title": "Audit the Effective Behavior",
+            "waves": _waves("se-intro-config-get", "se-apply-config-audit"),
+        },
+    ],
+    "skyline-guard-the-archive-drills": [
+        {
+            "slug": "inspect-and-verify-the-commit",
+            "title": "Inspect and Verify the Commit",
+            "waves": _waves("sg-intro-verify-commit", "sg-apply-inspect-and-verify"),
+        },
+    ],
+    "skyline-restore-maintain-drills": [
+        {
+            "slug": "measure-and-recover-the-store",
+            "title": "Measure and Recover the Store",
+            "waves": _waves(
+                "sx-intro-fsck",
+                "sx-intro-count-objects",
+                "sx-intro-reflog-show",
+                "sx-intro-reflog-recovery",
+            ),
+        },
+    ],
+    "skyline-serve-the-city-drills": [
+        {
+            "slug": "audit-the-served-ref-set",
+            "title": "Audit the Served Ref Set",
+            "waves": _waves("ss-intro-for-each-ref", "ss-apply-audit-served-refs"),
+        },
+    ],
+    "skyline-migrate-the-grid-drills": [
+        {
+            "slug": "inspect-the-migrated-objects",
+            "title": "Inspect the Migrated Objects",
+            "waves": _waves("sq-intro-cat-file-type", "sq-intro-ls-tree"),
+        },
+    ],
+    "skyline-git-machinery-drills": [
+        {
+            "slug": "trace-head-to-the-object",
+            "title": "Trace HEAD to the Object",
+            "waves": _waves("sy-intro-symbolic-ref", "sy-intro-cat-file-pretty"),
+        },
+    ],
 }
 
 ADVENTURE_WAVE_PLANS.update(BLUEPRINT_ADVENTURE_LEVELS)
@@ -314,97 +555,78 @@ ADVENTURE_SOURCES = {
         {
             "slug": "repository-foundations",
             "title": "Repository Foundations",
-            "description": (
-                "Start a repo, save snapshots through the working tree to staging to commit loop, "
-                "read history and changes, and set up identity and ignores."
-            ),
         },
     ],
     "tracking-changes-snapshots": [
         {
             "slug": "stage-with-intent",
             "title": "Stage with Intent",
-            "description": "Compare work and move exactly the right changes into the staging area.",
         },
         {
             "slug": "seal-the-snapshot",
             "title": "Seal the Snapshot",
-            "description": "Create and amend focused commits from staged work.",
         },
         {
             "slug": "untrack-and-undo-edits",
             "title": "Untrack and Undo Edits",
-            "description": "Remove tracked files, unstage mistakes, discard edits, and inspect ignore rules.",
         },
     ],
     "branching-switching": [
         {
             "slug": "create-and-move",
             "title": "Create and Move",
-            "description": "Create branch pointers and move HEAD safely between branches.",
         },
         {
             "slug": "detach-and-clean",
             "title": "Detach and Clean",
-            "description": "Inspect old commits detached and clean up branch pointers deliberately.",
         },
     ],
     "merging-conflicts": [
         {
             "slug": "integrate-branches",
             "title": "Integrate Branches",
-            "description": "Merge branch histories and inspect their common base.",
         },
         {
             "slug": "resolve-conflicts",
             "title": "Resolve Conflicts",
-            "description": "Read conflict state, choose sides, inspect conflict diffs, and stage resolutions.",
         },
         {
             "slug": "manage-the-merge",
             "title": "Manage the Merge",
-            "description": "Use merge tools, abort safely, or continue after a resolved merge.",
         },
     ],
     "undoing-recovery": [
         {
             "slug": "step-back-safely",
             "title": "Step Back Safely",
-            "description": "Discard local edits, amend commits, and reset local history when appropriate.",
         },
         {
             "slug": "reverse-and-recover",
             "title": "Reverse and Recover",
-            "description": "Reverse shared changes safely and use reflog as the recovery map.",
         },
     ],
     "temporary-work-patches": [
         {
             "slug": "shelve-work",
             "title": "Shelve Work",
-            "description": "Save, inspect, restore, and remove temporary work with stash.",
         },
         {
             "slug": "transplant-commits",
             "title": "Transplant Commits",
-            "description": "Copy selected commits without merging an entire branch.",
         },
     ],
     "remotes-collaboration": [
         {
             "slug": "connect-and-inspect",
             "title": "Connect and Inspect",
-            "description": "Read remote configuration and update remote-tracking refs safely.",
         },
         {
             "slug": "integrate-upstream",
             "title": "Integrate Upstream",
-            "description": "Bring upstream work into the current branch with pull and rebase-aware flows.",
         },
         {
             "slug": "publish-work",
             "title": "Publish Work",
-            "description": "Publish branches, set upstreams, force with lease, and delete remote branches.",
         },
     ],
 }
@@ -440,10 +662,6 @@ ADVENTURE_SOURCES["guild-archive-handoff"] = [
     {
         "slug": "guild-archive-handoff-workflows",
         "title": "Guild Handoff Workflows",
-        "description": (
-            "Complete connected beginner workflows that isolate, record, integrate, verify, and publish "
-            "the final Chronicle repairs."
-        ),
     }
 ]
 
@@ -452,30 +670,17 @@ ADVENTURE_SOURCES.update(
         chapter_slug: [
             {
                 "slug": f"{chapter_slug}-drills",
-                "title": "Command Drills",
-                "description": (
-                    "Meet each of this chapter's commands on its own: one focused scenario per command, "
-                    "with the exact names and values spelled out."
-                ),
+                "title": "Field Training",
             },
             {
                 "slug": f"{chapter_slug}-workflows",
                 "title": "Applied Workflows",
-                "description": (
-                    "Recombine the chapter's commands into short real workflows that inspect first, "
-                    "act deliberately, and verify the result."
-                ),
             },
             {
                 "slug": f"{chapter_slug}-incidents",
                 "title": "Repository Incidents",
-                "description": (
-                    "Diagnose a complete repository situation, choose a safe strategy, create a visible "
-                    "corrective history change, and verify the graph before handoff."
-                ),
             },
         ]
         for chapter_slug in _V3_INCIDENT_CHAPTERS
     }
 )
-

@@ -10,7 +10,7 @@ import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
  * backend. Monster + backdrop visuals come from the selected StoryWorld, while
  * player visuals come from the companion registry. Compiled away in production builds (DEV-gated route).
  */
-export function BattlePlayground() {
+function BattlePlayground() {
   const director = useBattleDirector()
   const [variant, setVariant] = useState<'adventure' | 'challenge'>('adventure')
   const [latency, setLatency] = useState(450)
@@ -140,7 +140,7 @@ export function BattlePlayground() {
           onChange={(e) => setVariant(e.target.value as 'adventure' | 'challenge')}
         >
           <option value="adventure">adventure</option>
-          <option value="challenge">challenge (boss)</option>
+          <option value="challenge">challenge</option>
         </select>
 
         <span className="rounded border border-border/70 px-3 py-1 text-muted-foreground">

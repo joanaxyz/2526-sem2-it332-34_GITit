@@ -27,10 +27,20 @@
       "baseCommand": "git init",
       "skillSlug": "git-init",
       "generationSource": "black-imagegen-raw",
+      "launchStartFrame": 8,
+      "impactStartFrame": 14,
       "motion": "gather-orb-projectile-impact-dissipate",
       "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/init.png",
-      "launchStartFrame": 8,
-      "impactStartFrame": 14
+      "placeAnchor": {
+        "x": 0.5117,
+        "y": 0.9023
+      },
+      "placeBounds": {
+        "left": 0.0312,
+        "top": 0.1875,
+        "right": 0.9492,
+        "bottom": 0.9961
+      }
     },
     "clone": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/clone.png",
@@ -49,8 +59,18 @@
       "baseCommand": "git clone",
       "skillSlug": "git-clone",
       "generationSource": "black-imagegen-raw",
+      "impactStartFrame": 15,
       "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/clone.png",
-      "impactStartFrame": 15
+      "placeAnchor": {
+        "x": 0.4971,
+        "y": 0.5527
+      },
+      "placeBounds": {
+        "left": 0.1836,
+        "top": 0.1523,
+        "right": 0.8359,
+        "bottom": 1.0
+      }
     },
     "status": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/status.png",
@@ -69,7 +89,17 @@
       "baseCommand": "git status",
       "skillSlug": "git-status",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/status.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/status.png",
+      "placeAnchor": {
+        "x": 0.5117,
+        "y": 0.4902
+      },
+      "placeBounds": {
+        "left": 0.0781,
+        "top": 0.082,
+        "right": 0.9414,
+        "bottom": 0.9102
+      }
     },
     "config": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/config.png",
@@ -88,7 +118,17 @@
       "baseCommand": "git config",
       "skillSlug": "git-config",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/config.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/config.png",
+      "placeAnchor": {
+        "x": 0.5117,
+        "y": 0.4883
+      },
+      "placeBounds": {
+        "left": 0.0859,
+        "top": 0.082,
+        "right": 0.9688,
+        "bottom": 0.9062
+      }
     },
     "log": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/log.png",
@@ -107,7 +147,17 @@
       "baseCommand": "git log",
       "skillSlug": "git-log",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/log.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/log.png",
+      "placeAnchor": {
+        "x": 0.5117,
+        "y": 0.502
+      },
+      "placeBounds": {
+        "left": 0.1016,
+        "top": 0.1094,
+        "right": 0.8984,
+        "bottom": 0.8828
+      }
     },
     "show": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/show.png",
@@ -126,7 +176,17 @@
       "baseCommand": "git show",
       "skillSlug": "git-show",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/show.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/show.png",
+      "placeAnchor": {
+        "x": 0.4863,
+        "y": 0.9102
+      },
+      "placeBounds": {
+        "left": 0.1797,
+        "top": 0.1133,
+        "right": 0.8594,
+        "bottom": 0.9805
+      }
     },
     "diff": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/diff.png",
@@ -146,7 +206,17 @@
       "skillSlug": "git-diff",
       "generationSource": "black-imagegen-raw",
       "impactStartFrame": 14,
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/diff.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/diff.png",
+      "placeAnchor": {
+        "x": 0.4609,
+        "y": 0.4863
+      },
+      "placeBounds": {
+        "left": 0.0859,
+        "top": 0.1367,
+        "right": 0.7969,
+        "bottom": 0.7891
+      }
     },
     "add": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/add.png",
@@ -168,7 +238,17 @@
       "launchStartFrame": 3,
       "impactStartFrame": 18,
       "motion": "gather-orb-projectile-impact-dissipate",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/add.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/add.png",
+      "placeAnchor": {
+        "x": 0.5137,
+        "y": 0.4453
+      },
+      "placeBounds": {
+        "left": 0.1289,
+        "top": 0.1406,
+        "right": 0.918,
+        "bottom": 0.75
+      }
     },
     "commit": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/commit.png",
@@ -180,14 +260,24 @@
       "rows": 5,
       "frameCount": 25,
       "tint": "azure",
-      "motif": "black-lightning-seal",
+      "motif": "black-lightning-commit",
       "playback": "target",
       "anchor": "feet",
       "commandFamily": "commit",
       "baseCommand": "git commit",
       "skillSlug": "git-commit",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/commit.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/commit.png",
+      "placeAnchor": {
+        "x": 0.4609,
+        "y": 0.918
+      },
+      "placeBounds": {
+        "left": 0.1094,
+        "top": 0.1406,
+        "right": 0.832,
+        "bottom": 1.0
+      }
     },
     "rm": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/rm.png",
@@ -207,7 +297,17 @@
       "skillSlug": "git-rm",
       "generationSource": "black-imagegen-raw",
       "impactStartFrame": 17,
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/rm.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/rm.png",
+      "placeAnchor": {
+        "x": 0.5469,
+        "y": 0.4707
+      },
+      "placeBounds": {
+        "left": 0.2109,
+        "top": 0.1758,
+        "right": 0.9492,
+        "bottom": 0.793
+      }
     },
     "check-ignore": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/check-ignore.png",
@@ -226,7 +326,17 @@
       "baseCommand": "git check-ignore",
       "skillSlug": "git-check-ignore",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/check-ignore.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/check-ignore.png",
+      "placeAnchor": {
+        "x": 0.498,
+        "y": 0.9688
+      },
+      "placeBounds": {
+        "left": 0.1211,
+        "top": 0.1797,
+        "right": 0.9102,
+        "bottom": 1.0
+      }
     },
     "restore": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/restore.png",
@@ -245,7 +355,17 @@
       "baseCommand": "git restore",
       "skillSlug": "git-restore",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/restore.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/restore.png",
+      "placeAnchor": {
+        "x": 0.4609,
+        "y": 0.9141
+      },
+      "placeBounds": {
+        "left": 0.0312,
+        "top": 0.2266,
+        "right": 0.9219,
+        "bottom": 0.9531
+      }
     },
     "branch": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/branch.png",
@@ -265,7 +385,17 @@
       "skillSlug": "git-branch",
       "generationSource": "black-imagegen-raw",
       "impactStartFrame": 19,
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/branch.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/branch.png",
+      "placeAnchor": {
+        "x": 0.4795,
+        "y": 0.4668
+      },
+      "placeBounds": {
+        "left": 0.1836,
+        "top": 0.1562,
+        "right": 0.7578,
+        "bottom": 0.7734
+      }
     },
     "switch": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/switch.png",
@@ -284,7 +414,17 @@
       "baseCommand": "git switch",
       "skillSlug": "git-switch",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/switch.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/switch.png",
+      "placeAnchor": {
+        "x": 0.4727,
+        "y": 0.8945
+      },
+      "placeBounds": {
+        "left": 0.0625,
+        "top": 0.2461,
+        "right": 0.9141,
+        "bottom": 0.9492
+      }
     },
     "checkout": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/checkout.png",
@@ -304,7 +444,17 @@
       "skillSlug": "git-checkout",
       "generationSource": "black-imagegen-raw",
       "impactStartFrame": 17,
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/checkout.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/checkout.png",
+      "placeAnchor": {
+        "x": 0.498,
+        "y": 0.4512
+      },
+      "placeBounds": {
+        "left": 0.1523,
+        "top": 0.0625,
+        "right": 0.8359,
+        "bottom": 0.7539
+      }
     },
     "merge": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge.png",
@@ -323,8 +473,18 @@
       "baseCommand": "git merge",
       "skillSlug": "git-merge",
       "generationSource": "black-imagegen-raw",
+      "impactStartFrame": 20,
       "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/merge.png",
-      "impactStartFrame": 20
+      "placeAnchor": {
+        "x": 0.5176,
+        "y": 0.4805
+      },
+      "placeBounds": {
+        "left": 0.2227,
+        "top": 0.2422,
+        "right": 0.8594,
+        "bottom": 0.7148
+      }
     },
     "merge-base": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge-base_front.png",
@@ -353,7 +513,17 @@
           "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge-base_front.png"
         }
       ],
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/merge-base_front.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/merge-base_front.png",
+      "placeAnchor": {
+        "x": 0.4961,
+        "y": 0.8906
+      },
+      "placeBounds": {
+        "left": 0.125,
+        "top": 0.1094,
+        "right": 0.8633,
+        "bottom": 0.9336
+      }
     },
     "checkout-conflict": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/checkout-conflict.png",
@@ -372,7 +542,17 @@
       "baseCommand": "git checkout",
       "skillSlug": "git-checkout-conflict",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/checkout-conflict.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/checkout-conflict.png",
+      "placeAnchor": {
+        "x": 0.5645,
+        "y": 0.502
+      },
+      "placeBounds": {
+        "left": 0.0664,
+        "top": 0.125,
+        "right": 0.957,
+        "bottom": 0.8672
+      }
     },
     "diff-conflict": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/diff-conflict.png",
@@ -391,7 +571,17 @@
       "baseCommand": "git diff",
       "skillSlug": "git-diff-conflict",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/diff-conflict.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/diff-conflict.png",
+      "placeAnchor": {
+        "x": 0.4844,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.0586,
+        "top": 0.0898,
+        "right": 0.918,
+        "bottom": 0.9688
+      }
     },
     "ls-files": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/ls-files.png",
@@ -410,7 +600,17 @@
       "baseCommand": "git ls-files",
       "skillSlug": "git-ls-files",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/ls-files.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/ls-files.png",
+      "placeAnchor": {
+        "x": 0.416,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.0352,
+        "top": 0.1172,
+        "right": 0.9414,
+        "bottom": 0.9492
+      }
     },
     "mergetool": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/mergetool.png",
@@ -429,7 +629,17 @@
       "baseCommand": "git mergetool",
       "skillSlug": "git-mergetool",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/mergetool.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/mergetool.png",
+      "placeAnchor": {
+        "x": 0.5078,
+        "y": 0.5039
+      },
+      "placeBounds": {
+        "left": 0.1797,
+        "top": 0.1367,
+        "right": 0.832,
+        "bottom": 1.0
+      }
     },
     "reset": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/reset.png",
@@ -448,7 +658,17 @@
       "baseCommand": "git reset",
       "skillSlug": "git-reset",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/reset.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/reset.png",
+      "placeAnchor": {
+        "x": 0.4922,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.0781,
+        "top": 0.1641,
+        "right": 0.9258,
+        "bottom": 0.9648
+      }
     },
     "revert": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/revert.png",
@@ -467,7 +687,17 @@
       "baseCommand": "git revert",
       "skillSlug": "git-revert",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/revert.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/revert.png",
+      "placeAnchor": {
+        "x": 0.4922,
+        "y": 0.4707
+      },
+      "placeBounds": {
+        "left": 0.1055,
+        "top": 0.1016,
+        "right": 1.0,
+        "bottom": 0.8359
+      }
     },
     "reflog": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/reflog.png",
@@ -486,8 +716,18 @@
       "baseCommand": "git reflog",
       "skillSlug": "git-reflog",
       "generationSource": "black-imagegen-raw",
+      "impactStartFrame": 16,
       "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/reflog.png",
-      "impactStartFrame": 16
+      "placeAnchor": {
+        "x": 0.5352,
+        "y": 0.5
+      },
+      "placeBounds": {
+        "left": 0.082,
+        "top": 0.1289,
+        "right": 0.9219,
+        "bottom": 0.875
+      }
     },
     "stash": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/stash.png",
@@ -506,8 +746,18 @@
       "baseCommand": "git stash",
       "skillSlug": "git-stash",
       "generationSource": "black-imagegen-raw",
+      "impactStartFrame": 15,
       "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/stash.png",
-      "impactStartFrame": 15
+      "placeAnchor": {
+        "x": 0.4756,
+        "y": 0.502
+      },
+      "placeBounds": {
+        "left": 0.0312,
+        "top": 0.168,
+        "right": 0.8828,
+        "bottom": 1.0
+      }
     },
     "cherry-pick": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_front.png",
@@ -536,7 +786,17 @@
           "src": "/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_front.png"
         }
       ],
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/cherry-pick_front.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/cherry-pick_front.png",
+      "placeAnchor": {
+        "x": 0.4883,
+        "y": 0.9023
+      },
+      "placeBounds": {
+        "left": 0.082,
+        "top": 0.1445,
+        "right": 0.9023,
+        "bottom": 0.9375
+      }
     },
     "remote": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/remote_front.png",
@@ -565,7 +825,17 @@
           "src": "/cosmetics/companion/black/effects/skill-lightning-25/remote_front.png"
         }
       ],
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/remote_front.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/remote_front.png",
+      "placeAnchor": {
+        "x": 0.4922,
+        "y": 0.8789
+      },
+      "placeBounds": {
+        "left": 0.1016,
+        "top": 0.125,
+        "right": 0.8633,
+        "bottom": 1.0
+      }
     },
     "fetch": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/fetch.png",
@@ -584,7 +854,17 @@
       "baseCommand": "git fetch",
       "skillSlug": "git-fetch",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/fetch.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/fetch.png",
+      "placeAnchor": {
+        "x": 0.4902,
+        "y": 0.4883
+      },
+      "placeBounds": {
+        "left": 0.0508,
+        "top": 0.0898,
+        "right": 0.8789,
+        "bottom": 0.9727
+      }
     },
     "pull": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/pull.png",
@@ -603,7 +883,17 @@
       "baseCommand": "git pull",
       "skillSlug": "git-pull",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/pull.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/pull.png",
+      "placeAnchor": {
+        "x": 0.4727,
+        "y": 0.9414
+      },
+      "placeBounds": {
+        "left": 0.0391,
+        "top": 0.2461,
+        "right": 0.8672,
+        "bottom": 0.9766
+      }
     },
     "push": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/push.png",
@@ -622,7 +912,17 @@
       "baseCommand": "git push",
       "skillSlug": "git-push",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/push.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/push.png",
+      "placeAnchor": {
+        "x": 0.4141,
+        "y": 0.8984
+      },
+      "placeBounds": {
+        "left": 0.0352,
+        "top": 0.2305,
+        "right": 0.832,
+        "bottom": 1.0
+      }
     },
     "rebase": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/rebase.png",
@@ -641,7 +941,17 @@
       "baseCommand": "git rebase",
       "skillSlug": "git-rebase",
       "generationSource": "black-imagegen-raw",
-      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/rebase.png"
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/rebase.png",
+      "placeAnchor": {
+        "x": 0.4453,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.0508,
+        "top": 0.1406,
+        "right": 0.9336,
+        "bottom": 0.9883
+      }
     },
     "default": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/default.png",
@@ -660,8 +970,18 @@
       "baseCommand": "default",
       "skillSlug": "default",
       "generationSource": "black-imagegen-raw",
+      "impactStartFrame": 15,
       "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/default.png",
-      "impactStartFrame": 15
+      "placeAnchor": {
+        "x": 0.4951,
+        "y": 0.4824
+      },
+      "placeBounds": {
+        "left": 0.1719,
+        "top": 0.1367,
+        "right": 0.8242,
+        "bottom": 0.9141
+      }
     },
     "miss": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/miss.png",

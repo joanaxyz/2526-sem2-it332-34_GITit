@@ -1,4 +1,4 @@
-export type RateMetric = {
+type RateMetric = {
   value: number | null
   numerator: number
   denominator: number
@@ -17,7 +17,7 @@ export type TrendPoint = {
   commands_run: number
 }
 
-export type ScopedCount = {
+type ScopedCount = {
   value: number
   scope: string
 }

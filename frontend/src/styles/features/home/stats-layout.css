@@ -5,42 +5,42 @@
 
 .home-overview-grid {
   display: grid;
-  grid-template-columns: minmax(34rem, 1.08fr) minmax(28rem, 0.92fr);
-  gap: 0.95rem;
-  width: min(100%, 104rem);
+  grid-template-columns: minmax(38rem, 1.42fr) minmax(22rem, 0.58fr);
+  gap: 0.78rem;
+  width: min(100%, 96rem);
   min-height: 0;
   margin: 0 auto;
 }
 
 .home-overview-stats-panel,
 .home-overview-achievements-panel {
-  padding: 1rem 1.15rem;
+  padding: 0.9rem 1rem;
 }
 
 .home-overview-stats-panel {
   display: grid;
-  grid-template-rows: minmax(18.5rem, 1.08fr) minmax(12.5rem, 0.74fr) auto;
-  gap: 0.72rem;
+  grid-template-rows: minmax(16.5rem, 1fr) minmax(10.5rem, 0.68fr) auto;
+  gap: 0.65rem;
 }
 
 .home-overview-master-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(12.2rem, 14.5rem);
-  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(11rem, 13rem);
+  gap: 0.85rem;
   min-height: 0;
 }
 
 .home-overview-command-list {
   display: grid;
-  gap: 0.62rem;
+  gap: 0.48rem;
 }
 
 .home-overview-command-row {
   display: grid;
-  grid-template-columns: 2rem minmax(9rem, 15rem) minmax(9rem, 1fr) 3.2rem;
+  grid-template-columns: 1.8rem minmax(8rem, 13rem) minmax(7rem, 1fr) 3.2rem;
   align-items: center;
   gap: 0.72rem;
-  min-height: 2.25rem;
+  min-height: 2.05rem;
 }
 
 .home-overview-command-glyph {
@@ -113,8 +113,8 @@
 .home-overview-compass {
   position: relative;
   display: grid;
-  width: 7.4rem;
-  height: 7.4rem;
+  width: 6.6rem;
+  height: 6.6rem;
   place-items: center;
   margin-bottom: 0.25rem;
   border: 1px solid rgba(var(--theme-primary-rgb), 0.46);
@@ -131,7 +131,7 @@
 .home-overview-compass span {
   content: '';
   position: absolute;
-  inset: 1.6rem;
+  inset: 1.4rem;
   border: 1px solid rgba(var(--theme-primary-rgb), 0.5);
 }
 
@@ -140,12 +140,12 @@
 }
 
 .home-overview-compass::after {
-  inset: 2.15rem;
+  inset: 1.95rem;
   border-radius: 50%;
 }
 
 .home-overview-compass span {
-  inset: 2.55rem;
+  inset: 2.35rem;
   border: 0;
   background: rgb(var(--theme-primary-rgb));
   clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
@@ -420,7 +420,7 @@
 .home-overview-achievements-panel {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
-  gap: 0.82rem;
+  gap: 0.7rem;
 }
 
 .home-overview-achievements-head {
@@ -492,8 +492,8 @@
 
 .home-overview-achievement-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-  gap: 0.72rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
   min-height: 0;
   overflow: auto;
 }

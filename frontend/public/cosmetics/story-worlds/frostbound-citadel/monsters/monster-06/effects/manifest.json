@@ -1,0 +1,35 @@
+{
+  "id": "rimecaller-skill-effect",
+  "label": "Rimecaller Skill Effect",
+  "motif": "rime glyph projectile",
+  "playback": "projectile",
+  "durationMs": 680,
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "columns": 5,
+  "rows": 5,
+  "frameCount": 25,
+  "fps": 18,
+  "layers": [
+    {
+      "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-06/effects/skill.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "layer": "front",
+      "scale": 0.62,
+      "opacity": 1,
+      "offset_x": 0,
+      "offset_y": 0,
+      "orient_to": "travel"
+    }
+  ],
+  "anchor": "center",
+  "motion": "charge",
+  "launchStartFrame": 5,
+  "impactStartFrame": 16
+}

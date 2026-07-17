@@ -1,8 +1,10 @@
 from django.core.management import call_command
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from rest_framework.test import APIClient
 
 from curriculum.models import Chapter
-from curriculum.selectors import chapter_content_overview, chapter_content_page
+from curriculum.selectors import chapter_content_overview
 from players.services import get_or_create_player
 
 
@@ -35,21 +37,24 @@ def test_chapter_overview_marks_first_adventure_level_unlocked(db, django_user_m
     first_level = payload["adventures"][0]
     assert first_level["locked"] is False
     assert first_level["lock_reason"] == ""
-    assert first_level["status"] == "not_started"
+    assert first_level["is_passed"] is False
 
 
-def test_chapter_adventure_page_marks_first_adventure_level_unlocked(db, django_user_model):
+def test_chapter_overview_batch_loads_adventure_completions(db, django_user_model):
     call_command("seed_curriculum")
-    user = _make_user(django_user_model, "track-page-student")
+    user = _make_user(django_user_model, "track-query-student")
     player = get_or_create_player(user)
     chapter = _first_seeded_chapter()
 
-    payload = chapter_content_page(player=player, chapter_id=chapter.id, section="adventures")
+    with CaptureQueriesContext(connection) as queries:
+        chapter_content_overview(player=player, chapter_id=chapter.id)
 
-    assert payload["results"], "seeded chapter should expose adventure levels"
-    first_level = payload["results"][0]
-    assert first_level["locked"] is False
-    assert first_level["lock_reason"] == ""
+    completion_queries = [
+        query
+        for query in queries.captured_queries
+        if "progress_adventurelevelcompletion" in query["sql"].lower()
+    ]
+    assert len(completion_queries) == 1
 
 
 def test_chapter_overview_api_does_not_fall_back_to_locked_placeholders(db, django_user_model):
@@ -64,4 +69,4 @@ def test_chapter_overview_api_does_not_fall_back_to_locked_placeholders(db, djan
     assert response.status_code == 200
     first_level = response.json()["adventures"][0]
     assert first_level["locked"] is False
-    assert first_level["status"] == "not_started"
+    assert first_level["is_passed"] is False

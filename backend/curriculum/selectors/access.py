@@ -15,7 +15,6 @@ from .challenge_access import (
     challenge_levels_access_payload,
     challenge_summary_payload,
     challenge_trial_access_payload,
-    command_skill_summary_payload,
     get_command_form,
 )
 
@@ -31,7 +30,6 @@ __all__ = [
     "challenge_levels_access_payload",
     "challenge_summary_payload",
     "challenge_trial_access_payload",
-    "command_skill_summary_payload",
     "get_command_form",
     "level_locked",
 ]

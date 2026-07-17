@@ -1,6 +1,6 @@
 import { BookOpen, User, type LucideIcon } from 'lucide-react'
 
-import type { ShopItem, UnlocksStory } from '@/features/shop/api/shopApi'
+import type { ShopItem } from '@/features/shop/api/shopApi'
 import { COMPANIONS } from '@/shared/cosmetics/companions/registry'
 import { STORY_WORLDS } from '@/shared/story-worlds/registry'
 import { storyPreview } from '@/shared/story-worlds/storyPreviews'
@@ -22,7 +22,7 @@ export type ShopTabConfig = {
 export const shopTabs: ShopTabConfig[] = [
   { id: 'stories', label: 'Stories', description: 'World bundles', Icon: BookOpen },
   { id: 'companions', label: 'Companions', description: 'Adventurers', Icon: User },
-  { id: 'gitcoins', label: 'GitCoin', description: 'Wallet' },
+  { id: 'gitcoins', label: 'Wallet', description: 'Earned GitCoins' },
 ]
 
 const transactionLabels: Record<string, string> = {
@@ -32,14 +32,6 @@ const transactionLabels: Record<string, string> = {
   shop_purchase: 'Shop purchase',
   cosmetic_purchase: 'Shop purchase',
   signup_grant: 'Signup grant',
-}
-
-export function unlocksLabel(unlocksStory: UnlocksStory | null | undefined): string | null {
-  if (!unlocksStory) return null
-  const chapters = unlocksStory.chapter_count
-  const chapterText =
-    chapters > 0 ? `${chapters} chapter${chapters === 1 ? '' : 's'}` : 'chapters coming soon'
-  return `Unlocks ${unlocksStory.title} — ${chapterText}`
 }
 
 export function formatCoins(value: number) {
@@ -110,6 +102,13 @@ export function actionLabel(item: ShopDisplayItem, balance: number, walletPendin
   if (item.price === 0) return 'Claim'
   if (!walletPending && item.price > balance) return `Need ${formatCoins(item.price - balance)} more`
   return 'Purchase'
+}
+
+export function compactActionLabel(item: ShopDisplayItem, balance: number, walletPending: boolean) {
+  const action = actionLabel(item, balance, walletPending)
+  if (item.owned) return action
+  const price = item.price > 0 ? `${formatCoins(item.price)} GitCoins` : 'Free'
+  return `${price} | ${action}`
 }
 
 export function actionDisabled(item: ShopDisplayItem, pending: boolean, balance: number, walletPending: boolean) {

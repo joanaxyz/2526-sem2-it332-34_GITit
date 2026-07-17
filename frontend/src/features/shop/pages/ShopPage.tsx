@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { shopApi, type ShopKind } from '@/features/shop/api/shopApi'
 import { CompanionShop } from '@/features/shop/components/CompanionShop'
-import { GitCoinShop } from '@/features/shop/components/GitCoinShop'
+import { GitCoinWallet } from '@/features/shop/components/GitCoinWallet'
 import { ShopTabs } from '@/features/shop/components/ShopTabs'
 import { StoryShop } from '@/features/shop/components/StoryShop'
 import {
@@ -75,7 +75,16 @@ export function ShopPage() {
     <div className="shop-ref-page" data-shop-tab={activeTab}>
       <div className="shop-ref-backdrop" aria-hidden="true" />
 
-      <main className="shop-ref-layout">
+      <div className="shop-ref-layout">
+        <header className="shop-page-header">
+          <div className="shop-page-title">
+            <span>Citadel quartermaster</span>
+            <h1>Armory &amp; Archives</h1>
+            <p>Unlock worlds, choose your adventurer, and track the GitCoins you earn in play.</p>
+          </div>
+          <ShopTabs activeTab={activeTab} balance={balance} walletPending={wallet.isPending} onTabChange={setActiveTab} />
+        </header>
+
         {onboardingRequired ? (
           <div className="shop-onboarding-banner" role="status">
             {hasCompanion ? (
@@ -94,8 +103,6 @@ export function ShopPage() {
             )}
           </div>
         ) : null}
-
-        <ShopTabs activeTab={activeTab} balance={balance} walletPending={wallet.isPending} onTabChange={setActiveTab} />
 
         {shop.isPending && activeTab !== 'gitcoins' ? (
           <section className="shop-view">
@@ -116,7 +123,7 @@ export function ShopPage() {
         ) : null}
 
         {activeTab === 'gitcoins' ? (
-          <GitCoinShop
+          <GitCoinWallet
             balance={balance}
             recent={wallet.data?.recent ?? []}
             walletError={wallet.error}
@@ -143,7 +150,7 @@ export function ShopPage() {
             walletPending={wallet.isPending}
           />
         ) : null}
-      </main>
+      </div>
     </div>
   )
 }

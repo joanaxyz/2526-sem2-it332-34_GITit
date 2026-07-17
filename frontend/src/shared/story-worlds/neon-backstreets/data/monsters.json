@@ -1,11 +1,37 @@
 {
   "bone-archer": {
     "label": "Rooftop Marksman",
-    "tier": "mob",
-    "scale": 0.73,
+    "scale": 1.17,
     "attack": {
       "kind": "projectile",
-      "hit_frame": 15
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 520,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-01/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.56,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 2,
+        "impact_start_frame": 16
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -67,12 +93,36 @@
   },
   "bone-blacksmith": {
     "label": "Industrial Enforcer",
-    "tier": "elite",
-    "scale": 0.86,
+    "scale": 1.18,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
-      "lunge_px": 56
+      "lunge_px": 56,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 720,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "center",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-02/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.78,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -134,11 +184,37 @@
   },
   "bone-demon": {
     "label": "Aerial Breaker",
-    "tier": "elite",
-    "scale": 0.88,
+    "scale": 1.7,
     "attack": {
       "kind": "projectile",
-      "hit_frame": 15
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 600,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-03/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.58,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 1,
+        "impact_start_frame": 15
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -200,11 +276,37 @@
   },
   "bone-ghost": {
     "label": "Signal Phantom",
-    "tier": "mob",
-    "scale": 0.82,
+    "scale": 1.01,
     "attack": {
       "kind": "projectile",
-      "hit_frame": 15
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 620,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-04/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.58,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 5,
+        "impact_start_frame": 16
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.65,
@@ -266,12 +368,36 @@
   },
   "bone-lancer": {
     "label": "Transit Sentinel",
-    "tier": "elite",
-    "scale": 0.58,
+    "scale": 1.37,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
-      "lunge_px": 64
+      "lunge_px": 64,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 660,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "center",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-05/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.74,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -333,11 +459,37 @@
   },
   "bone-necromancer": {
     "label": "Systems Architect",
-    "tier": "elite",
-    "scale": 0.78,
+    "scale": 1.13,
     "attack": {
       "kind": "projectile",
-      "hit_frame": 15
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 640,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-06/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.58,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 2,
+        "impact_start_frame": 16
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.53,
@@ -399,12 +551,36 @@
   },
   "bone-soldier": {
     "label": "Security Unit",
-    "tier": "mob",
-    "scale": 0.86,
+    "scale": 1.04,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
-      "lunge_px": 56
+      "lunge_px": 56,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 680,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "center",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-07/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.76,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.48,
@@ -466,12 +642,36 @@
   },
   "cursed-lantern": {
     "label": "Patrol Beacon",
-    "tier": "mob",
-    "scale": 0.88,
+    "scale": 0.91,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
-      "lunge_px": 56
+      "lunge_px": 56,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 760,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "center",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-08/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.78,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -533,8 +733,7 @@
   },
   "ghost-lady": {
     "label": "Executive Specter",
-    "tier": "elite",
-    "scale": 0.82,
+    "scale": 1.29,
     "attack": {
       "kind": "projectile",
       "hit_frame": 15
@@ -599,12 +798,36 @@
   },
   "lich-king": {
     "label": "Street Sovereign",
-    "tier": "boss",
-    "scale": 1.16,
+    "scale": 1.13,
     "attack": {
       "kind": "melee",
       "hit_frame": 15,
-      "lunge_px": 72
+      "lunge_px": 72,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 820,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "center",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-11/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.9,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.53,
@@ -666,11 +889,37 @@
   },
   "two-headed-hound": {
     "label": "Dual-Core Pursuer",
-    "tier": "elite",
-    "scale": 0.95,
+    "scale": 1.09,
     "attack": {
       "kind": "projectile",
-      "hit_frame": 15
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 660,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-12/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.62,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 2,
+        "impact_start_frame": 15
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -732,11 +981,37 @@
   },
   "undead-clown": {
     "label": "Glitch Performer",
-    "tier": "mob",
-    "scale": 0.86,
+    "scale": 0.96,
     "attack": {
       "kind": "projectile",
-      "hit_frame": 15
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 620,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-13/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.58,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 5,
+        "impact_start_frame": 16
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -798,11 +1073,37 @@
   },
   "undead-siren": {
     "label": "Broadcast Siren",
-    "tier": "elite",
-    "scale": 0.8,
+    "scale": 1.2,
     "attack": {
       "kind": "projectile",
-      "hit_frame": 15
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 700,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-14/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.64,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 5,
+        "impact_start_frame": 16
+      }
     },
     "metrics": {
       "hp_bar_fraction": 0.55,
@@ -859,78 +1160,6 @@
         "columns": 5,
         "rows": 5,
         "frameCount": 1
-      }
-    }
-  },
-  "zombe-boy": {
-    "label": "Street Runner",
-    "tier": "mob",
-    "scale": 0.78,
-    "attack": {
-      "kind": "melee",
-      "hit_frame": 15,
-      "lunge_px": 56
-    },
-    "metrics": {
-      "hp_bar_fraction": 0.55,
-      "foot_offset": 27,
-      "range_px": 128
-    },
-    "sprites": {
-      "idle": {
-        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-15/idle.png",
-        "fps": 1,
-        "loops": true,
-        "frameWidth": 836,
-        "frameHeight": 836,
-        "columns": 1,
-        "rows": 1,
-        "frameCount": 1,
-        "displayScale": 0.30622
-      },
-      "attack": {
-        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-15/attack.png",
-        "fps": 1,
-        "loops": false,
-        "frameWidth": 836,
-        "frameHeight": 836,
-        "columns": 1,
-        "rows": 1,
-        "frameCount": 1,
-        "displayScale": 0.30622
-      },
-      "hurt": {
-        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-15/hurt.png",
-        "fps": 1,
-        "loops": false,
-        "frameWidth": 836,
-        "frameHeight": 836,
-        "columns": 1,
-        "rows": 1,
-        "frameCount": 1,
-        "displayScale": 0.30622
-      },
-      "death": {
-        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-15/death.png",
-        "fps": 1,
-        "loops": false,
-        "frameWidth": 836,
-        "frameHeight": 836,
-        "columns": 1,
-        "rows": 1,
-        "frameCount": 1,
-        "displayScale": 0.30622
-      },
-      "portrait": {
-        "src": "/cosmetics/story-worlds/neon-backstreets/monsters/monster-15/idle.png",
-        "fps": 1,
-        "loops": false,
-        "frameWidth": 836,
-        "frameHeight": 836,
-        "columns": 1,
-        "rows": 1,
-        "frameCount": 1,
-        "displayScale": 0.30622
       }
     }
   }

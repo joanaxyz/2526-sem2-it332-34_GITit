@@ -10,5 +10,3 @@ drf-spectacular==0.29.0
 psycopg[binary]==3.3.4
 # Production WSGI server (POSIX-only; Windows dev uses manage.py runserver)
 gunicorn==23.0.0; sys_platform != "win32"
-# GitCoin top-up packs: hosted Stripe Checkout + webhook (test mode).
-stripe==13.0.1

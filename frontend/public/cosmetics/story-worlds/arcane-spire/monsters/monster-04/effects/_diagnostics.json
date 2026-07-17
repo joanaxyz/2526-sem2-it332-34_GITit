@@ -9,40 +9,40 @@
       255
     ],
     "bbox": [
-      26,
-      46,
-      1235,
-      1244
+      44,
+      62,
+      1244,
+      1223
     ],
     "frameBBoxCenterRange": [
-      97.5,
-      133.0,
-      113.5,
-      149.5
+      112.5,
+      135.5,
+      115.0,
+      126.5
     ],
     "frameEnergyAnchorRange": [
-      127.87,
-      159.47,
-      120.17,
-      128.47
+      124.67,
+      161.31,
+      124.24,
+      129.9
     ],
     "projectileHandEnergyAnchorRange": [
-      127.5,
-      155.61,
-      124.96,
-      128.35
+      124.63,
+      133.43,
+      126.8,
+      129.85
     ],
     "projectileFlightNoseAnchorRange": [
-      194,
-      197,
-      132,
-      135
+      199,
+      201,
+      133,
+      133
     ],
     "projectileSettleEnergyAnchorRange": [
-      127.65,
-      145.89,
-      127.27,
-      128.29
+      126.4,
+      129.57,
+      126.96,
+      128.49
     ],
     "registration": {
       "targetAnchor": [
@@ -50,22 +50,22 @@
         133.12
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        145.464,
-        242,
-        98.834,
-        150.216
+        130.403,
+        196,
+        103.963,
+        150
       ],
       "appliedShiftRange": [
-        -75,
-        -6,
         -22,
-        29
+        8,
+        -19,
+        23
       ],
       "emptyFrames": 0,
-      "reliableFrames": 22,
-      "lowConfidenceFrames": 3,
-      "method": "hand-center anchor until frame 9, projectile nose anchor through frame 19, center anchor for impact/dissipate frames",
-      "projectileLaunchStartFrame": 10,
+      "reliableFrames": 23,
+      "lowConfidenceFrames": 2,
+      "method": "hand-center anchor until frame 4, projectile nose anchor through frame 19, center anchor for impact/dissipate frames (bounds-clamped; authored scale preserved)",
+      "projectileLaunchStartFrame": 5,
       "projectileSettleStartFrame": 20,
       "projectileHandAnchor": [
         128.0,

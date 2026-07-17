@@ -2,38 +2,10 @@ import type { ApiRequestBody } from '@/shared/api/generated/apiTypes'
 import { apiOperationRequest } from '@/shared/api/httpClient'
 import type {
   ChallengeRun,
-  AdventureSummary,
   CommandFormPreview,
-  CommandSkillSummary,
-  ChapterContentPage,
-  ChapterContentSection,
-  ChallengeSummary,
-  ChapterLessonSummary,
 } from '@/features/challenges/types'
 
-type ChapterContentResult<TSection extends ChapterContentSection> =
-  TSection extends 'adventures'
-    ? ChapterContentPage<AdventureSummary>
-    : TSection extends 'command_skills'
-    ? ChapterContentPage<CommandSkillSummary>
-    : TSection extends 'lessons'
-    ? ChapterContentPage<ChapterLessonSummary>
-    : ChapterContentPage<ChallengeSummary>
-
 export const challengesApi = {
-  chapterContent<TSection extends ChapterContentSection>(
-    chapterId: number,
-    section: TSection,
-    options?: { cursor?: number | null; limit?: number },
-  ) {
-    const params = new URLSearchParams({ section })
-    if (options?.cursor) params.set('cursor', String(options.cursor))
-    if (options?.limit) params.set('limit', String(options.limit))
-    return apiOperationRequest<'chapters_content_retrieve', ChapterContentResult<TSection>>(
-      'chapters_content_retrieve',
-      `/chapters/${chapterId}/content/?${params.toString()}`,
-    )
-  },
   commandFormPreview(formId: number) {
     return apiOperationRequest<'command_forms_preview_retrieve', CommandFormPreview>(
       'command_forms_preview_retrieve',

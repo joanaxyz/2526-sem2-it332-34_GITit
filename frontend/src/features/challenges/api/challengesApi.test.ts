@@ -12,15 +12,6 @@ const mockedApiOperationRequest = vi.mocked(apiOperationRequest)
 describe('challengesApi', () => {
   afterEach(() => vi.clearAllMocks())
 
-  it('loads chapter content with explicit section query params', () => {
-    challengesApi.chapterContent(4, 'challenges', { cursor: 12, limit: 6 })
-
-    expect(mockedApiOperationRequest).toHaveBeenCalledWith(
-      'chapters_content_retrieve',
-      '/chapters/4/content/?section=challenges&cursor=12&limit=6',
-    )
-  })
-
   it('starts challenge runs through the generated contract helper', () => {
     challengesApi.startChallengeRun(99, { prior_run_id: 7, replay: true })
 
