@@ -172,42 +172,6 @@
   line-height: 0.98;
 }
 
-.home-loadout-facts {
-  display: grid;
-  margin: 1.1rem 0 0;
-}
-
-.home-loadout-facts > div {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.75rem;
-  align-items: center;
-  min-height: 3rem;
-  border-top: 1px solid hsl(var(--border) / 0.55);
-}
-
-.home-loadout-facts dt {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-}
-
-.home-loadout-facts dt svg {
-  width: 1rem;
-  height: 1rem;
-  color: rgb(var(--theme-primary-rgb));
-}
-
-.home-loadout-facts dd {
-  margin: 0;
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  text-align: right;
-}
-
 .home-loadout-action {
   display: grid;
   gap: 0.75rem;
