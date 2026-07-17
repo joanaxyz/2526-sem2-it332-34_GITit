@@ -5,7 +5,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { shopApi, type ShopKind } from '@/features/shop/api/shopApi'
 import { CompanionShop } from '@/features/shop/components/CompanionShop'
-import { GitCoinWallet } from '@/features/shop/components/GitCoinWallet'
 import { ShopTabs } from '@/features/shop/components/ShopTabs'
 import { StoryShop } from '@/features/shop/components/StoryShop'
 import {
@@ -80,7 +79,7 @@ export function ShopPage() {
           <div className="shop-page-title">
             <span>Citadel quartermaster</span>
             <h1>Armory &amp; Archives</h1>
-            <p>Unlock worlds, choose your adventurer, and track the GitCoins you earn in play.</p>
+            <p>Unlock worlds and choose your adventurer for the journey ahead.</p>
           </div>
           <ShopTabs activeTab={activeTab} balance={balance} walletPending={wallet.isPending} onTabChange={setActiveTab} />
         </header>
@@ -104,13 +103,13 @@ export function ShopPage() {
           </div>
         ) : null}
 
-        {shop.isPending && activeTab !== 'gitcoins' ? (
+        {shop.isPending ? (
           <section className="shop-view">
             <LoadingState label="Loading shop" description="Fetching your story and companion unlocks." />
           </section>
         ) : null}
 
-        {shop.isError && activeTab !== 'gitcoins' ? (
+        {shop.isError ? (
           <section className="shop-view shop-error-panel">
             <ErrorState title="Could not load shop" description={errorMessage(shop.error)} />
           </section>
@@ -120,15 +119,6 @@ export function ShopPage() {
           <section className="shop-action-error" aria-live="assertive">
             <ErrorState title="Shop action failed" description={errorMessage(actionError)} />
           </section>
-        ) : null}
-
-        {activeTab === 'gitcoins' ? (
-          <GitCoinWallet
-            balance={balance}
-            recent={wallet.data?.recent ?? []}
-            walletError={wallet.error}
-            walletPending={wallet.isPending}
-          />
         ) : null}
 
         {activeTab === 'stories' && shop.isSuccess ? (

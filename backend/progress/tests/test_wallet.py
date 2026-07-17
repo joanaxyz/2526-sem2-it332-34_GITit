@@ -57,7 +57,7 @@ def test_spend_debits_balance_once_per_key(db, django_user_model):
     assert CoinTransaction.objects.filter(player=player, amount=-25, reason="store_purchase").count() == 1
 
 
-def test_wallet_endpoint_returns_balance_and_recent(db, django_user_model):
+def test_wallet_endpoint_returns_balance_without_transaction_history(db, django_user_model):
     user = make_user(django_user_model)
     player = get_or_create_player(user)
     WalletService().award(player=player, amount=30, reason="adventure_pass", award_key="adventure-pass:1")
@@ -67,10 +67,7 @@ def test_wallet_endpoint_returns_balance_and_recent(db, django_user_model):
     response = client.get("/api/progress/wallet/")
 
     assert response.status_code == 200
-    body = response.json()
-    assert body["balance"] == 30
-    assert body["recent"][0]["reason"] == "adventure_pass"
-    assert body["recent"][0]["amount"] == 30
+    assert response.json() == {"balance": 30}
 
 
 def test_chapter_chest_awards_gitcoins_when_progress_crosses_threshold(db, django_user_model, monkeypatch):

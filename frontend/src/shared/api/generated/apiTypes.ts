@@ -47,8 +47,7 @@ export type ApiSchemas = {
   "StatsSummaryResponse": { "activity": Array<{ [key: string]: JsonValue }>; "headlines": { [key: string]: JsonValue }; "skill_profile": Array<{ [key: string]: JsonValue }>; "totals"?: { [key: string]: JsonValue } }
   "Story": { "completed": boolean; "difficulty"?: ApiSchemas["DifficultyEnum"]; "id": number; "is_published"?: boolean; "lock_reason": string; "locked": boolean; "owned": boolean; "prerequisite_story": { [key: string]: JsonValue }; "price"?: number; "slug": string; "sort_order"?: number; "summary"?: string; "title": string; "world_slug"?: string }
   "User": { "email": string; "id": number; "is_staff": boolean; "username": string }
-  "WalletSummaryResponse": { "balance": number; "recent": Array<ApiSchemas["WalletTransaction"]> }
-  "WalletTransaction": { "amount": number; "created_at": string; "reason": string }
+  "WalletSummaryResponse": { "balance": number }
   "WorkspaceFile": { "content"?: string; "path": string }
   "WorkspaceFileCreate": { "content"?: string; "path": string }
   "WorkspaceFileRename": { "new_path": string; "path": string }

@@ -32,15 +32,7 @@ class WalletService:
 
     def summary(self, *, player) -> dict:
         wallet = Wallet.objects.filter(player=player).only("balance").first()
-        recent = [
-            {
-                "amount": entry.amount,
-                "reason": entry.reason,
-                "created_at": entry.created_at,
-            }
-            for entry in CoinTransaction.objects.filter(player=player)[:10]
-        ]
-        return {"balance": wallet.balance if wallet else 0, "recent": recent}
+        return {"balance": wallet.balance if wallet else 0}
 
     def spend(self, *, player, amount: int, reason: str, award_key: str) -> bool:
         """Debit GitCoins once per (player, award_key).

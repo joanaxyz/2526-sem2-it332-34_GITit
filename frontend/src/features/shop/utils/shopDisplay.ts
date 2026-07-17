@@ -5,7 +5,7 @@ import { COMPANIONS } from '@/shared/cosmetics/companions/registry'
 import { STORY_WORLDS } from '@/shared/story-worlds/registry'
 import { storyPreview } from '@/shared/story-worlds/storyPreviews'
 
-export type ShopTab = 'stories' | 'companions' | 'gitcoins'
+export type ShopTab = 'stories' | 'companions'
 
 export type ShopDisplayItem = ShopItem & {
   art?: string
@@ -16,36 +16,16 @@ export type ShopTabConfig = {
   id: ShopTab
   label: string
   description: string
-  Icon?: LucideIcon
+  Icon: LucideIcon
 }
 
 export const shopTabs: ShopTabConfig[] = [
   { id: 'stories', label: 'Stories', description: 'World bundles', Icon: BookOpen },
   { id: 'companions', label: 'Companions', description: 'Adventurers', Icon: User },
-  { id: 'gitcoins', label: 'Wallet', description: 'Earned GitCoins' },
 ]
-
-const transactionLabels: Record<string, string> = {
-  adventure_level_reward: 'Adventure reward',
-  challenge_trial_reward: 'Challenge reward',
-  chapter_chest: 'Chapter chest',
-  shop_purchase: 'Shop purchase',
-  cosmetic_purchase: 'Shop purchase',
-  signup_grant: 'Signup grant',
-}
 
 export function formatCoins(value: number) {
   return value.toLocaleString()
-}
-
-export function formatTransactionReason(reason: string) {
-  return transactionLabels[reason] ?? reason.replaceAll('_', ' ')
-}
-
-export function formatTransactionDate(value: string) {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 }
 
 export function errorMessage(error: unknown) {
@@ -53,7 +33,7 @@ export function errorMessage(error: unknown) {
 }
 
 export function isShopTab(value: string | null): value is ShopTab {
-  return value === 'gitcoins' || value === 'stories' || value === 'companions'
+  return value === 'stories' || value === 'companions'
 }
 
 function companionTone(slug: string): ShopDisplayItem['tone'] {

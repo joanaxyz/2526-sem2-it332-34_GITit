@@ -27,7 +27,7 @@ export function ShopTabs({
               className={active ? 'is-active' : undefined}
               onClick={() => onTabChange(id)}
             >
-              {Icon ? <Icon aria-hidden="true" /> : <GitCoinIcon />}
+              <Icon aria-hidden="true" />
               <span>
                 <strong>{label}</strong>
                 <small>{description}</small>

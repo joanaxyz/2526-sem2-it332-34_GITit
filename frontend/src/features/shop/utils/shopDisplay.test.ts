@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { actionDisabled, actionLabel, hasLocalDefinition, toDisplayItem } from './shopDisplay'
+import {
+  actionDisabled,
+  actionLabel,
+  hasLocalDefinition,
+  isShopTab,
+  shopTabs,
+  toDisplayItem,
+} from './shopDisplay'
 import type { ShopItem } from '@/features/shop/types'
 
 const baseItem = {
@@ -12,6 +19,11 @@ const baseItem = {
 } satisfies Omit<ShopItem, 'kind' | 'slug'>
 
 describe('shopDisplay', () => {
+  it('offers only the stories and companions shop tabs', () => {
+    expect(shopTabs.map((tab) => tab.id)).toEqual(['stories', 'companions'])
+    expect(isShopTab('gitcoins')).toBe(false)
+  })
+
   it('keeps story catalog entries limited to render-ready story worlds', () => {
     const realStory: ShopItem = { ...baseItem, kind: 'story', slug: 'arcane-spire' }
     const fakeStory: ShopItem = { ...baseItem, kind: 'story', slug: 'not-render-ready' }

@@ -3935,37 +3935,10 @@
                 "properties": {
                     "balance": {
                         "type": "integer"
-                    },
-                    "recent": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/WalletTransaction"
-                        }
                     }
                 },
                 "required": [
-                    "balance",
-                    "recent"
-                ]
-            },
-            "WalletTransaction": {
-                "type": "object",
-                "properties": {
-                    "amount": {
-                        "type": "integer"
-                    },
-                    "reason": {
-                        "type": "string"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                },
-                "required": [
-                    "amount",
-                    "created_at",
-                    "reason"
+                    "balance"
                 ]
             },
             "WorkspaceFile": {

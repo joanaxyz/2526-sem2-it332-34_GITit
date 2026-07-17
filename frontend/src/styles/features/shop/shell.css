@@ -85,7 +85,7 @@
 
 .shop-tab-list {
   display: grid;
-  grid-template-columns: repeat(3, minmax(8rem, 1fr));
+  grid-template-columns: repeat(2, minmax(8rem, 1fr));
   min-width: 0;
   overflow: hidden;
   border: 1px solid rgba(var(--theme-primary-rgb), 0.18);
@@ -137,15 +137,9 @@
   box-shadow: 0 0 8px rgba(var(--theme-primary-rgb), 0.7);
 }
 
-.shop-tab-list svg,
-.shop-tab-list img {
+.shop-tab-list svg {
   width: 1.15rem;
   height: 1.15rem;
-  object-fit: contain;
-}
-
-.shop-tab-list img {
-  filter: drop-shadow(0 0 6px rgba(243, 210, 122, 0.44));
 }
 
 .shop-tab-list span { min-width: 0; }
@@ -253,7 +247,7 @@
     overflow: visible;
   }
   .shop-tab-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     min-width: 0;
   }
   .shop-tab-list button { padding-inline: 0.45rem; }
@@ -270,8 +264,7 @@
   .shop-categories { padding-bottom: 0.15rem; }
   .shop-tab-list small { display: none; }
   .shop-tab-list button { min-height: 2.55rem; }
-  .shop-tab-list svg,
-  .shop-tab-list img { width: 1rem; height: 1rem; }
+  .shop-tab-list svg { width: 1rem; height: 1rem; }
   .shop-rail-balance img { width: 1.35rem; height: 1.35rem; }
   .shop-onboarding-banner { align-items: flex-start; flex-wrap: wrap; }
   .shop-onboarding-cta { width: 100%; text-align: center; }

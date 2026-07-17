@@ -57,15 +57,8 @@ class RateMetricSerializer(serializers.Serializer):
     denominator = serializers.IntegerField(required=False)
 
 
-class WalletTransactionSerializer(serializers.Serializer):
-    amount = serializers.IntegerField()
-    reason = serializers.CharField()
-    created_at = serializers.DateTimeField()
-
-
 class WalletSummaryResponseSerializer(serializers.Serializer):
     balance = serializers.IntegerField()
-    recent = WalletTransactionSerializer(many=True)
 
 
 class DashboardSummaryResponseSerializer(serializers.Serializer):

@@ -8,7 +8,7 @@ type LevelCompletionSummary = {
   completed_at: string
 }
 
-export type AdventureSummary = {
+type AdventureSummary = {
   item_type: 'adventure'
   id: number
   slug: string
