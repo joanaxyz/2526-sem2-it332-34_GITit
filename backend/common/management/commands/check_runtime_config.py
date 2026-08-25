@@ -32,8 +32,12 @@ class Command(BaseCommand):
             if settings.EMAIL_BACKEND == MAILGUN_BACKEND:
                 for key in ("MAILGUN_API_KEY", "MAILGUN_DOMAIN"):
                     if not os.environ.get(key, "").strip():
-                        errors.append(f"{key} is required when the Mailgun email backend is enabled.")
-                api_base_url = os.environ.get("MAILGUN_API_BASE_URL", "https://api.mailgun.net").strip()
+                        errors.append(
+                            f"{key} is required when the Mailgun email backend is enabled."
+                        )
+                api_base_url = os.environ.get(
+                    "MAILGUN_API_BASE_URL", "https://api.mailgun.net"
+                ).strip()
                 if not api_base_url.startswith("https://"):
                     errors.append("MAILGUN_API_BASE_URL must use HTTPS.")
                 if "@" not in settings.DEFAULT_FROM_EMAIL:
