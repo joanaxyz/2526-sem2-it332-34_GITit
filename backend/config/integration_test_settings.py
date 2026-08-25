@@ -7,6 +7,9 @@ os.environ.setdefault("DJANGO_DEBUG", "True")
 from .settings import *  # noqa: F403
 
 DEBUG = True
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 REST_FRAMEWORK = {
     **REST_FRAMEWORK,

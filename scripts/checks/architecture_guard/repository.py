@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[3]
 
 
@@ -32,8 +31,7 @@ def iter_files(root: Path, suffixes: set[str]) -> list[Path]:
         if not path.is_file() or path.suffix not in suffixes:
             continue
         if any(
-            part in {"node_modules", "dist", "build", "__pycache__", ".venv"}
-            for part in path.parts
+            part in {"node_modules", "dist", "build", "__pycache__", ".venv"} for part in path.parts
         ):
             continue
         out.append(path)

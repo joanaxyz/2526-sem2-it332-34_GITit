@@ -43,7 +43,6 @@ from scripts.checks.architecture_guard.typescript_analysis import (
     ts_type_aliases,
 )
 
-
 AUTH_BACKEND_SERIALIZERS = "backend/accounts/serializers.py"
 AUTH_BACKEND_VIEWS = "backend/accounts/views.py"
 AUTH_COMMON_OPENAPI = "backend/common/openapi.py"
@@ -109,9 +108,7 @@ def auth_contract_source_violations(
     for node in views_tree.body:
         if isinstance(node, ast.ImportFrom) and node.level == 0:
             if node.module == "accounts.serializers":
-                imported_from_owner.update(
-                    item.name for item in node.names if item.asname is None
-                )
+                imported_from_owner.update(item.name for item in node.names if item.asname is None)
             if node.module == "common.openapi" and any(
                 item.name in response_serializer_names for item in node.names
             ):
@@ -150,9 +147,7 @@ def auth_contract_source_violations(
         "AuthUserResponseSerializer",
         "LoginResponseSerializer",
     }
-    remaining = sorted(
-        displaced & set(python_top_level_class_names(common_openapi_source))
-    )
+    remaining = sorted(displaced & set(python_top_level_class_names(common_openapi_source)))
     if remaining:
         violations.append(
             f"{AUTH_COMMON_OPENAPI}: displaced Auth response contracts must stay deleted; "
@@ -170,22 +165,16 @@ def auth_contract_source_violations(
     if ts_interface_declarations(types_without_comments) or ts_object_type_alias_bodies(
         types_without_comments
     ):
-        violations.append(
-            f"{AUTH_FRONTEND_TYPES}: handwritten Auth response DTOs are not allowed"
-        )
+        violations.append(f"{AUTH_FRONTEND_TYPES}: handwritten Auth response DTOs are not allowed")
 
     api_without_comments = strip_ts_comments(auth_api_source)
     expected_method_bodies = {
         "register": (
-            "returnapiOperationRequest('auth_register_create','/auth/register/',"
-            "{body:payload})"
+            "returnapiOperationRequest('auth_register_create','/auth/register/',{body:payload})"
         ),
-        "login": (
-            "returnapiOperationRequest('auth_login_create','/auth/login/',{body:payload})"
-        ),
+        "login": ("returnapiOperationRequest('auth_login_create','/auth/login/',{body:payload})"),
         "logout": (
-            "returnapiOperationRequest('auth_logout_create','/auth/logout/',"
-            "{skipAuthRefresh:true})"
+            "returnapiOperationRequest('auth_logout_create','/auth/logout/',{skipAuthRefresh:true})"
         ),
         "refresh": (
             "returnapiOperationRequest('auth_refresh_create','/auth/refresh/',"
@@ -232,9 +221,7 @@ def auth_contract_source_violations(
             re.S,
         )
         if call is None:
-            violations.append(
-                f"{AUTH_FRONTEND_API}: missing generated {operation_id} request"
-            )
+            violations.append(f"{AUTH_FRONTEND_API}: missing generated {operation_id} request")
         elif call.group("generics"):
             violations.append(
                 f"{AUTH_FRONTEND_API}: {operation_id} must not pass a custom response generic"
@@ -246,12 +233,8 @@ def auth_contract_source_violations(
         r"\s*>\s*>\s*\(\s*['\"]/auth/refresh/['\"]",
         re.S,
     )
-    auth_paths = re.findall(
-        r"['\"]((?:/api)?/auth/[^'\"]*)['\"]", client_without_comments
-    )
-    if len(refresh_call.findall(client_without_comments)) != 1 or auth_paths != [
-        "/auth/refresh/"
-    ]:
+    auth_paths = re.findall(r"['\"]((?:/api)?/auth/[^'\"]*)['\"]", client_without_comments)
+    if len(refresh_call.findall(client_without_comments)) != 1 or auth_paths != ["/auth/refresh/"]:
         violations.append(
             f"{AUTH_HTTP_CLIENT}: only refresh may use a raw Auth path and it must derive ApiResponseBody"
         )
@@ -272,9 +255,7 @@ def is_auth_response_contract_symbol(name: str) -> bool:
     if name.endswith(("State", "Message", "Props")):
         return False
     normalized = name.lower()
-    return any(
-        marker in normalized for marker in ("auth", "login", "session", "refresh")
-    ) and any(
+    return any(marker in normalized for marker in ("auth", "login", "session", "refresh")) and any(
         marker in normalized for marker in ("response", "result", "dto", "contract")
     )
 
@@ -312,16 +293,12 @@ def python_auth_response_contract_symbols(
         )
         if absolute_owner or relative_owner:
             local_contracts = {
-                item.asname or item.name
-                for item in node.names
-                if item.name in canonical
+                item.asname or item.name for item in node.names if item.name in canonical
             }
             imported_contracts.update(local_contracts)
             known_contracts.update(local_contracts)
             known_user_serializers.update(
-                item.asname or item.name
-                for item in node.names
-                if item.name == "UserSerializer"
+                item.asname or item.name for item in node.names if item.name == "UserSerializer"
             )
 
     def references_contract(value: ast.expr | None) -> bool:
@@ -357,8 +334,7 @@ def python_auth_response_contract_symbols(
                     ):
                         field_values[statement.target.id] = statement.value
                 field_calls = {
-                    name: canonical_python_call(value)
-                    for name, value in field_values.items()
+                    name: canonical_python_call(value) for name, value in field_values.items()
                 }
                 serializer_based = any(
                     "serializer" in ast.unparse(base).lower() for base in node.bases
@@ -385,9 +361,7 @@ def python_auth_response_contract_symbols(
 
                 has_canonical_user = is_canonical_user_field(field_values.get("user"))
                 exact_register_shape = (
-                    serializer_based
-                    and set(field_values) == {"user"}
-                    and has_canonical_user
+                    serializer_based and set(field_values) == {"user"} and has_canonical_user
                 )
                 exact_session_shape = (
                     serializer_based
@@ -398,12 +372,10 @@ def python_auth_response_contract_symbols(
                 auth_named = node.name in canonical or (
                     node.name.endswith("Serializer")
                     and any(
-                        marker in normalized
-                        for marker in ("auth", "login", "session", "refresh")
+                        marker in normalized for marker in ("auth", "login", "session", "refresh")
                     )
                     and any(
-                        marker in normalized
-                        for marker in ("response", "result", "dto", "contract")
+                        marker in normalized for marker in ("response", "result", "dto", "contract")
                     )
                 )
                 owns_contract = (
@@ -425,9 +397,7 @@ def python_auth_response_contract_symbols(
             names: list[str] = []
             value: ast.expr | None = None
             if isinstance(node, ast.Assign):
-                names = [
-                    target.id for target in node.targets if isinstance(target, ast.Name)
-                ]
+                names = [target.id for target in node.targets if isinstance(target, ast.Name)]
                 value = node.value
             elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
                 names = [node.target.id]
@@ -442,8 +412,7 @@ def python_auth_response_contract_symbols(
     exported_names: set[str] = set()
     for node in tree.body:
         if not isinstance(node, ast.Assign) or not any(
-            isinstance(target, ast.Name) and target.id == "__all__"
-            for target in node.targets
+            isinstance(target, ast.Name) and target.id == "__all__" for target in node.targets
         ):
             continue
         if isinstance(node.value, (ast.List, ast.Tuple, ast.Set)):
@@ -547,8 +516,7 @@ def auth_secondary_frontend_contract_violations(
                     for binding in schema_bindings
                 )
                 derived_root = any(
-                    re.search(rf"\b{re.escape(alias)}\b", normalized)
-                    for alias in tainted_aliases
+                    re.search(rf"\b{re.escape(alias)}\b", normalized) for alias in tainted_aliases
                 )
                 return_type_root = any(
                     re.search(
@@ -588,9 +556,7 @@ def auth_secondary_frontend_contract_violations(
         named_contracts = {
             name for name in declared_names if is_auth_response_contract_symbol(name)
         }
-        secondary_contracts = sorted(
-            tainted_aliases | structural_contracts | named_contracts
-        )
+        secondary_contracts = sorted(tainted_aliases | structural_contracts | named_contracts)
         if secondary_contracts:
             violations.append(
                 f"{path_label}: secondary frontend Auth response contracts are not allowed; "
@@ -622,9 +588,7 @@ def auth_secondary_frontend_contract_violations(
             path.startswith(("/auth/", "/api/auth/")) for path in resolved_request_paths
         )
         if raw_literal or static_request:
-            violations.append(
-                f"{path_label}: raw Auth endpoint request path is not allowed"
-            )
+            violations.append(f"{path_label}: raw Auth endpoint request path is not allowed")
 
         arrow_bindings = set(
             re.findall(
@@ -768,9 +732,7 @@ def check_auth_contract_ownership() -> list[str]:
         return [f"{path}: required Auth contract owner is missing" for path in missing]
 
     violations = auth_contract_source_violations(
-        serializers_source=(ROOT / AUTH_BACKEND_SERIALIZERS).read_text(
-            encoding="utf-8"
-        ),
+        serializers_source=(ROOT / AUTH_BACKEND_SERIALIZERS).read_text(encoding="utf-8"),
         views_source=(ROOT / AUTH_BACKEND_VIEWS).read_text(encoding="utf-8"),
         common_openapi_source=(ROOT / AUTH_COMMON_OPENAPI).read_text(encoding="utf-8"),
         auth_types_source=(ROOT / AUTH_FRONTEND_TYPES).read_text(encoding="utf-8"),
@@ -784,9 +746,7 @@ def check_auth_contract_ownership() -> list[str]:
         and not any(part in {"migrations", "tests"} for part in path.parts)
         and not path.name.startswith("test_")
     }
-    violations.extend(
-        auth_secondary_backend_contract_violations(secondary_backend_sources)
-    )
+    violations.extend(auth_secondary_backend_contract_violations(secondary_backend_sources))
     secondary_frontend_sources = {
         rel(path): path.read_text(encoding="utf-8", errors="ignore")
         for path in iter_files(FRONTEND_SRC, TS_SUFFIXES)
@@ -796,15 +756,11 @@ def check_auth_contract_ownership() -> list[str]:
         and ".test." not in path.name
         and ".spec." not in path.name
     }
-    violations.extend(
-        auth_secondary_frontend_contract_violations(secondary_frontend_sources)
-    )
+    violations.extend(auth_secondary_frontend_contract_violations(secondary_frontend_sources))
     try:
         schema = json.loads((ROOT / AUTH_GENERATED_OPENAPI).read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as error:
-        violations.append(
-            f"{AUTH_GENERATED_OPENAPI}: invalid generated schema: {error}"
-        )
+        violations.append(f"{AUTH_GENERATED_OPENAPI}: invalid generated schema: {error}")
     else:
         violations.extend(auth_openapi_contract_violations(schema))
     return violations

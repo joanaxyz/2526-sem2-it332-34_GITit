@@ -46,7 +46,5 @@ def user_detail(user) -> dict:
         **user_brief(user),
         "last_login": user.last_login,
         "wallet": wallet,
-        "entitlement_count": (
-            Entitlement.objects.filter(player=player).count() if player else 0
-        ),
+        "entitlement_count": (Entitlement.objects.filter(player=player).count() if player else 0),
     }

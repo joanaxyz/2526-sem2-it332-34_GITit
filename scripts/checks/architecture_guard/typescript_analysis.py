@@ -6,7 +6,6 @@ import ast
 import posixpath
 import re
 
-
 TS_TRIVIA = r"(?:\s|/\*(?:(?!\*/)[\s\S])*\*/|//[^\r\n]*(?:\r?\n|$))*"
 TS_MODULE_SPECIFIER = re.compile(
     r"(?:\bfrom\b|\bimport\s*\(|\bimport\b|\brequire\s*\()"
@@ -45,9 +44,7 @@ def canonical_ts_module_reference(*, module: str, path_label: str) -> str:
     if normalized_module.startswith("@/"):
         reference = f"frontend/src/{normalized_module[2:]}"
     elif normalized_module.startswith("."):
-        reference = posixpath.join(
-            posixpath.dirname(normalized_path), normalized_module
-        )
+        reference = posixpath.join(posixpath.dirname(normalized_path), normalized_module)
     else:
         return normalized_module
     reference = posixpath.normpath(reference)
@@ -69,9 +66,7 @@ def ts_clause_is_type_only(clause: str) -> bool:
         return True
     if not (normalized.startswith("{") and normalized.endswith("}")):
         return False
-    bindings = [
-        binding.strip() for binding in normalized[1:-1].split(",") if binding.strip()
-    ]
+    bindings = [binding.strip() for binding in normalized[1:-1].split(",") if binding.strip()]
     return bool(bindings) and all(binding.startswith("type ") for binding in bindings)
 
 
@@ -317,9 +312,7 @@ def normalized_ts_module_reference(path_label: str, module: str) -> str:
     if module.startswith("@/"):
         resolved = posixpath.join("frontend/src", module[2:])
     elif module.startswith("."):
-        resolved = posixpath.normpath(
-            posixpath.join(posixpath.dirname(path_label), module)
-        )
+        resolved = posixpath.normpath(posixpath.join(posixpath.dirname(path_label), module))
     else:
         resolved = module
     return re.sub(r"\.(?:tsx?|jsx?)$", "", resolved)
@@ -332,9 +325,9 @@ def ts_module_matches(
     canonical_module: str,
 ) -> bool:
     """Match canonical TS imports across aliases and relative specifiers."""
-    return normalized_ts_module_reference(
-        path_label, module
-    ) == normalized_ts_module_reference(path_label, canonical_module)
+    return normalized_ts_module_reference(path_label, module) == normalized_ts_module_reference(
+        path_label, canonical_module
+    )
 
 
 def ts_named_import_bindings(
@@ -486,17 +479,11 @@ def ts_member_access_aliases(
                     rf"\[\s*['\"](?:{member})['\"]\s*\])"
                     for binding in objects
                 ]
-                access_patterns.extend(
-                    rf"\b{re.escape(binding)}\b" for binding in callables
-                )
+                access_patterns.extend(rf"\b{re.escape(binding)}\b" for binding in callables)
                 access_call = (
-                    "(?:" + "|".join(access_patterns) + r")\s*\("
-                    if access_patterns
-                    else r"(?!)"
+                    "(?:" + "|".join(access_patterns) + r")\s*\(" if access_patterns else r"(?!)"
                 )
-                if re.search(access_call, body) and not re.match(
-                    TS_QUERY_CONSUMER_CALL, body
-                ):
+                if re.search(access_call, body) and not re.match(TS_QUERY_CONSUMER_CALL, body):
                     callables.add(name)
                     changed = True
         for binding in tuple(objects):
@@ -517,9 +504,7 @@ def ts_member_access_aliases(
         rf"\[\s*['\"](?:{member})['\"]\s*\])"
         for binding in sorted(objects)
     ]
-    access_patterns.extend(
-        rf"\b{re.escape(binding)}\b" for binding in sorted(callables)
-    )
+    access_patterns.extend(rf"\b{re.escape(binding)}\b" for binding in sorted(callables))
     return access_patterns, objects | callables
 
 
@@ -564,9 +549,7 @@ def ts_exported_adapter_uses_access(source: str, access_patterns: list[str]) -> 
         source,
     ):
         expression = match.group("expression")
-        if re.search(access_call, expression) and not re.match(
-            TS_QUERY_CONSUMER_CALL, expression
-        ):
+        if re.search(access_call, expression) and not re.match(TS_QUERY_CONSUMER_CALL, expression):
             return True
     if re.search(
         rf"\bexport\s+const\s+\w+\s*=\s*(?:(?:async\s*)?"
@@ -615,12 +598,10 @@ def ts_exported_adapter_uses_access(source: str, access_patterns: list[str]) -> 
             for name, expression in assignments:
                 query_consumer = re.match(TS_QUERY_CONSUMER_CALL, expression)
                 uses_tainted_name = any(
-                    re.search(rf"\b{re.escape(tainted)}\b", expression)
-                    for tainted in tainted_names
+                    re.search(rf"\b{re.escape(tainted)}\b", expression) for tainted in tainted_names
                 )
                 if name not in tainted_names and (
-                    (re.search(access_call, expression) and not query_consumer)
-                    or uses_tainted_name
+                    (re.search(access_call, expression) and not query_consumer) or uses_tainted_name
                 ):
                     tainted_names.add(name)
                     changed = True
@@ -629,10 +610,7 @@ def ts_exported_adapter_uses_access(source: str, access_patterns: list[str]) -> 
                 re.search(access_call, expression)
                 and not re.match(TS_QUERY_CONSUMER_CALL, expression)
             )
-            or any(
-                re.search(rf"\b{re.escape(tainted)}\b", expression)
-                for tainted in tainted_names
-            )
+            or any(re.search(rf"\b{re.escape(tainted)}\b", expression) for tainted in tainted_names)
             for expression in returns
         ):
             return True
@@ -643,9 +621,7 @@ def ts_exported_adapter_uses_access(source: str, access_patterns: list[str]) -> 
         source,
     ):
         expression = match.group("expression")
-        if re.search(access_call, expression) and not re.match(
-            TS_QUERY_CONSUMER_CALL, expression
-        ):
+        if re.search(access_call, expression) and not re.match(TS_QUERY_CONSUMER_CALL, expression):
             return True
     for match in re.finditer(r"\bexport\s+const\s+\w+\s*=\s*\{", source):
         body = ts_balanced_brace_body(source, match.end() - 1)

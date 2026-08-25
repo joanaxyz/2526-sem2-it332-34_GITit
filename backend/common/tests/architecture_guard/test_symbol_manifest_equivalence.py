@@ -152,8 +152,7 @@ def _stable_value(value: object) -> object:
 
 def test_canonical_owners_match_complete_pre_cutover_symbol_manifest() -> None:
     manifest_path = (
-        ROOT
-        / "docs/goals/architecture-guard-policy-modularization/"
+        ROOT / "docs/goals/architecture-guard-policy-modularization/"
         "PRE_CUTOVER_SYMBOL_MANIFEST.json"
     )
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))["symbols"]

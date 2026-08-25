@@ -22,7 +22,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from PIL import Image
-
 from process_companion_spell_sheets import (
     ALPHA_THRESHOLD,
     GRID_COLUMNS,
@@ -58,11 +57,7 @@ def runtime_png_paths() -> list[Path]:
     story_worlds = COSMETICS_ROOT / "story-worlds"
     paths = [
         *companion.glob("*/*.png"),
-        *(
-            path
-            for path in companion.glob("*/effects/*/*.png")
-            if not path.name.startswith("_")
-        ),
+        *(path for path in companion.glob("*/effects/*/*.png") if not path.name.startswith("_")),
         *story_worlds.glob("*/monsters/monster-*/*.png"),
         *(
             path
@@ -94,9 +89,7 @@ def frame_boxes(size: tuple[int, int]) -> list[tuple[int, int, int, int]]:
 
 
 def threshold_bbox(frame: Image.Image) -> tuple[int, int, int, int] | None:
-    alpha = frame.getchannel("A").point(
-        lambda value: 255 if value > ALPHA_THRESHOLD else 0
-    )
+    alpha = frame.getchannel("A").point(lambda value: 255 if value > ALPHA_THRESHOLD else 0)
     return alpha.getbbox()
 
 
@@ -109,9 +102,7 @@ def edge_pixel_counts(
     edge = max(1, min(edge_width, width, height))
     return {
         "top": sum(
-            1
-            for value in alpha.crop((0, 0, width, edge)).getdata()
-            if value > ALPHA_THRESHOLD
+            1 for value in alpha.crop((0, 0, width, edge)).getdata() if value > ALPHA_THRESHOLD
         ),
         "bottom": sum(
             1
@@ -136,23 +127,14 @@ def soften_clipped_effect_edges(frame: Image.Image) -> tuple[Image.Image, int]:
     import numpy as np
 
     counts = edge_pixel_counts(frame)
-    clipped_edges = {
-        edge
-        for edge, count in counts.items()
-        if count >= EFFECT_FEATHER_MIN_PIXELS
-    }
+    clipped_edges = {edge for edge, count in counts.items() if count >= EFFECT_FEATHER_MIN_PIXELS}
     if not clipped_edges:
         return frame, 0
 
     arr = np.asarray(frame.convert("RGBA")).copy()
     alpha = arr[..., 3].astype(np.float32)
     height, width = alpha.shape
-    ramp = (
-        np.linspace(0.0, 1.0, EFFECT_FEATHER_PX + 1, dtype=np.float32)[
-            :EFFECT_FEATHER_PX
-        ]
-        ** 1.6
-    )
+    ramp = np.linspace(0.0, 1.0, EFFECT_FEATHER_PX + 1, dtype=np.float32)[:EFFECT_FEATHER_PX] ** 1.6
     if "top" in clipped_edges:
         alpha[:EFFECT_FEATHER_PX, :] *= ramp[:, None]
     if "bottom" in clipped_edges:
@@ -222,21 +204,11 @@ def transform_intervals(
 ) -> tuple[float, float, float, float]:
     width, height = frame_size
     pivot_x, pivot_y = pivot
-    left = max(
-        margin - (pivot_x + (x0 - pivot_x) * scale)
-        for x0, _y0, _x1, _y1 in bboxes
-    )
-    right = min(
-        width - margin - (pivot_x + (x1 - pivot_x) * scale)
-        for _x0, _y0, x1, _y1 in bboxes
-    )
-    top = max(
-        margin - (pivot_y + (y0 - pivot_y) * scale)
-        for _x0, y0, _x1, _y1 in bboxes
-    )
+    left = max(margin - (pivot_x + (x0 - pivot_x) * scale) for x0, _y0, _x1, _y1 in bboxes)
+    right = min(width - margin - (pivot_x + (x1 - pivot_x) * scale) for _x0, _y0, x1, _y1 in bboxes)
+    top = max(margin - (pivot_y + (y0 - pivot_y) * scale) for _x0, y0, _x1, _y1 in bboxes)
     bottom = min(
-        height - margin - (pivot_y + (y1 - pivot_y) * scale)
-        for _x0, _y0, _x1, y1 in bboxes
+        height - margin - (pivot_y + (y1 - pivot_y) * scale) for _x0, _y0, _x1, y1 in bboxes
     )
     return left, right, top, bottom
 
@@ -356,15 +328,10 @@ def harden_sheet(
     frame_size = prepared[0].size
     pivot = stable_pivot(bboxes, placement_mode(path), frame_size)
     scale, offset = choose_transform(bboxes, pivot, frame_size, margin)
-    transformed = [
-        transform_frame(frame, pivot, scale, offset)
-        for frame in prepared
-    ]
+    transformed = [transform_frame(frame, pivot, scale, offset) for frame in prepared]
 
     unsafe = [
-        index
-        for index, frame in enumerate(transformed)
-        if visible_margin_count(frame, margin)
+        index for index, frame in enumerate(transformed) if visible_margin_count(frame, margin)
     ]
     if unsafe:
         raise ValueError(
@@ -486,7 +453,9 @@ def main() -> None:
         )
 
     action = "Repaired" if args.write else "Would repair"
-    print(f"{action} {len(reports)} sheet(s); {len(selected) - len(reports)} already safe/unsupported.")
+    print(
+        f"{action} {len(reports)} sheet(s); {len(selected) - len(reports)} already safe/unsupported."
+    )
 
 
 if __name__ == "__main__":

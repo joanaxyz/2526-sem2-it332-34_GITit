@@ -34,9 +34,7 @@ def admin_analytics_payload(*, now=None) -> dict:
     adventure_total = sum(adventure_by_status.values())
     challenge_total = sum(challenge_by_status.values())
     adventure_passed = AdventureRun.objects.filter(passed_at__isnull=False).count()
-    challenge_passed = ChallengeRun.objects.filter(
-        status=ChallengeRun.Status.COMPLETED
-    ).count()
+    challenge_passed = ChallengeRun.objects.filter(status=ChallengeRun.Status.COMPLETED).count()
     active_learners = (
         AdventureRun.objects.filter(started_at__gte=month_ago)
         .values_list("player_id", flat=True)
@@ -51,9 +49,7 @@ def admin_analytics_payload(*, now=None) -> dict:
 
     story_runs = {
         row["level__chapter__story_id"]: row["n"]
-        for row in AdventureRun.objects.values("level__chapter__story_id").annotate(
-            n=Count("id")
-        )
+        for row in AdventureRun.objects.values("level__chapter__story_id").annotate(n=Count("id"))
     }
     story_passed = {
         row["level__chapter__story_id"]: row["n"]
@@ -82,10 +78,7 @@ def admin_analytics_payload(*, now=None) -> dict:
                 "slug": story.slug,
                 "title": story.title,
                 "runs": adventure_story_total + challenge_story_total,
-                "passed": (
-                    story_passed.get(story.id, 0)
-                    + challenge_story_passed.get(story.id, 0)
-                ),
+                "passed": (story_passed.get(story.id, 0) + challenge_story_passed.get(story.id, 0)),
                 "adventure_runs": adventure_story_total,
                 "challenge_runs": challenge_story_total,
             }

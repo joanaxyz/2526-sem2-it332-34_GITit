@@ -78,9 +78,7 @@ def _validate_world_slug(value: str) -> None:
 
 def _validate_chapter_state(*, is_published: bool, is_playable: bool) -> None:
     if is_playable and not is_published:
-        raise ValidationError(
-            {"is_playable": "A playable chapter must also be published."}
-        )
+        raise ValidationError({"is_playable": "A playable chapter must also be published."})
 
 
 class AdminCurriculumService:
@@ -93,7 +91,9 @@ class AdminCurriculumService:
         _validate_world_slug(data["world_slug"])
         if data["is_published"]:
             raise ValidationError(
-                {"is_published": "Create the story as a draft, add a published chapter, then publish it."}
+                {
+                    "is_published": "Create the story as a draft, add a published chapter, then publish it."
+                }
             )
         story = Story.objects.create(
             slug=data["slug"],
@@ -161,9 +161,7 @@ class AdminCurriculumService:
         if Chapter.objects.filter(slug=data["slug"]).exists():
             raise ValidationError({"slug": "A chapter with this slug already exists."})
         if Chapter.objects.filter(story=story, number=data["number"]).exists():
-            raise ValidationError(
-                {"number": "This story already has a chapter with that number."}
-            )
+            raise ValidationError({"number": "This story already has a chapter with that number."})
         _validate_chapter_state(
             is_published=data["is_published"],
             is_playable=data["is_playable"],
@@ -210,11 +208,7 @@ class AdminCurriculumService:
             .exists()
         ):
             raise ValidationError(
-                {
-                    "is_published": (
-                        "A published story must retain at least one published chapter."
-                    )
-                }
+                {"is_published": ("A published story must retain at least one published chapter.")}
             )
         next_number = data.get("number", chapter.number)
         if (
@@ -222,9 +216,7 @@ class AdminCurriculumService:
             .exclude(pk=chapter.pk)
             .exists()
         ):
-            raise ValidationError(
-                {"number": "This story already has a chapter with that number."}
-            )
+            raise ValidationError({"number": "This story already has a chapter with that number."})
         for field in (
             "number",
             "title",

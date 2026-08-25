@@ -97,7 +97,7 @@ const api = {
     )
     method_body = ts_object_method_body(source, "load")
     assert method_body is not None
-    assert 'return { value: marker }' in method_body
+    assert "return { value: marker }" in method_body
     opening = source.index("{", source.index("load()"))
     assert ts_balanced_brace_body(source, opening) == method_body
     assert ts_balanced_brace_body(source, source.index("load")) is None
@@ -171,12 +171,14 @@ export * from "@/shared/account/contracts";
 export { Account as PublicAccount, Other } from "../../../shared/account/contracts";
 """
 
-    assert canonical_ts_module_reference(
-        module="@/shared/account/contracts.ts", path_label=path_label
-    ) == canonical
-    assert normalized_ts_module_reference(
-        path_label, "../../../shared/account/contracts.ts"
-    ) == canonical
+    assert (
+        canonical_ts_module_reference(module="@/shared/account/contracts.ts", path_label=path_label)
+        == canonical
+    )
+    assert (
+        normalized_ts_module_reference(path_label, "../../../shared/account/contracts.ts")
+        == canonical
+    )
     assert ts_module_matches(
         path_label=path_label,
         module="@/shared/account/contracts",
@@ -188,12 +190,10 @@ export { Account as PublicAccount, Other } from "../../../shared/account/contrac
         module=canonical,
         exported_names={"Account", "AccountMeta"},
     ) == {"AccountContract", "AccountMeta"}
-    assert ts_namespace_import_bindings(
-        source, path_label=path_label, module=canonical
-    ) == {"Contracts"}
-    assert ts_reexports_all_from_module(
-        source, path_label=path_label, module=canonical
-    )
+    assert ts_namespace_import_bindings(source, path_label=path_label, module=canonical) == {
+        "Contracts"
+    }
+    assert ts_reexports_all_from_module(source, path_label=path_label, module=canonical)
     assert ts_reexports_named_binding(
         source,
         path_label=path_label,

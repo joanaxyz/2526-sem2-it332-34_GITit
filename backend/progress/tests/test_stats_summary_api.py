@@ -1,8 +1,8 @@
 from datetime import date
 
-from curriculum.models import CommandSkill
 from rest_framework.test import APIClient
 
+from curriculum.models import CommandSkill
 from progress.serializers import StatsSummaryResponseSerializer
 
 SUMMARY_KEYS = {"skill_profile", "activity_trend", "headline"}

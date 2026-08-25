@@ -21,7 +21,6 @@ from scripts.checks.architecture_guard.typescript_analysis import (
     ts_type_aliases,
 )
 
-
 GAMEPLAY_ADVENTURE_TYPES = "frontend/src/features/adventures/types.ts"
 
 
@@ -44,16 +43,12 @@ def _typescript_alias_source(source: str, alias_name: str) -> str:
     start = re.search(rf"(?m)^(?:export\s+)?type\s+{re.escape(alias_name)}\s*=", source)
     if start is None:
         return ""
-    following = re.search(
-        r"(?m)^(?:export\s+)?(?:type|interface|const)\s+", source[start.end() :]
-    )
+    following = re.search(r"(?m)^(?:export\s+)?(?:type|interface|const)\s+", source[start.end() :])
     end = start.end() + following.start() if following else len(source)
     return source[start.start() : end]
 
 
-def _typescript_omit_signature(
-    source: str, alias_name: str
-) -> tuple[str, set[str]] | None:
+def _typescript_omit_signature(source: str, alias_name: str) -> tuple[str, set[str]] | None:
     declaration = _typescript_alias_source(source, alias_name)
     opening = declaration.find("Omit<")
     if opening < 0:
@@ -270,10 +265,7 @@ def _typescript_local_api_bindings(source: str, seeds: set[str]) -> set[str]:
     while changed:
         changed = False
         for match in assignments:
-            if (
-                match.group("value") in bindings
-                and match.group("alias") not in bindings
-            ):
+            if match.group("value") in bindings and match.group("alias") not in bindings:
                 bindings.add(match.group("alias"))
                 changed = True
     return bindings
@@ -291,15 +283,12 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
         GAMEPLAY_CHALLENGE_ENTRY_API,
     }
     for missing_path in sorted(required_paths - sources.keys()):
-        violations.append(
-            f"{missing_path}: required gameplay response boundary is missing"
-        )
+        violations.append(f"{missing_path}: required gameplay response boundary is missing")
 
     terminal_source = strip_ts_comments(sources.get(GAMEPLAY_RESPONSE_SHARED_COMMAND_TYPES, ""))
     terminal_alias = _typescript_alias_source(terminal_source, "TerminalStep")
-    if (
-        "exporttypeTerminalStep=ApiSchemas['RuntimeStepResponse']"
-        not in normalized_ts_type(terminal_alias)
+    if "exporttypeTerminalStep=ApiSchemas['RuntimeStepResponse']" not in normalized_ts_type(
+        terminal_alias
     ):
         violations.append(
             f"{GAMEPLAY_RESPONSE_SHARED_COMMAND_TYPES}: TerminalStep must derive exactly from RuntimeStepResponse"
@@ -403,9 +392,7 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
     }
     for path_label, raw_source in sources.items():
         source = strip_ts_comments(raw_source)
-        declarations = set(ts_type_aliases(source)) | set(
-            ts_interface_declarations(source)
-        )
+        declarations = set(ts_type_aliases(source)) | set(ts_interface_declarations(source))
         for type_name in sorted(declarations & response_type_owners.keys()):
             if path_label != response_type_owners[type_name]:
                 violations.append(
@@ -464,10 +451,7 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
     adventure_wire = normalized_ts_type(
         _typescript_alias_source(adventure_source, "AdventureRunWire")
     )
-    if (
-        "RequireAdventureRunStatus<ApiSchemas['AdventureRunResponse']>"
-        not in adventure_wire
-    ):
+    if "RequireAdventureRunStatus<ApiSchemas['AdventureRunResponse']>" not in adventure_wire:
         violations.append(
             f"{GAMEPLAY_ADVENTURE_TYPES}: AdventureRunWire must derive from AdventureRunResponse"
         )
@@ -485,9 +469,7 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
         violations.append(
             f"{GAMEPLAY_CHALLENGE_TYPES}: optimistic steps may omit only visualization_snapshot"
         )
-    step_log = normalized_ts_type(
-        _typescript_alias_source(challenge_source, "ChallengeStepLog")
-    )
+    step_log = normalized_ts_type(_typescript_alias_source(challenge_source, "ChallengeStepLog"))
     if "ChallengeRunStepResponse|ChallengeOptimisticStep" not in step_log:
         violations.append(
             f"{GAMEPLAY_CHALLENGE_TYPES}: ChallengeStepLog must be the exact wire/local union"
@@ -503,9 +485,7 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
             "ChallengeRunUpdate",
         ):
             declaration = _typescript_alias_source(source, alias_name)
-            if declaration and re.search(
-                r"\b(?:Partial|Record)\s*<|\bkeyof\b", declaration
-            ):
+            if declaration and re.search(r"\b(?:Partial|Record)\s*<|\bkeyof\b", declaration):
                 violations.append(
                     f"{path_label}: {alias_name} must not widen the generated wire contract"
                 )
@@ -580,9 +560,7 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
     for path_label, operation in expected_generated_destroy_calls.items():
         normalized = normalized_ts_type(strip_ts_comments(sources.get(path_label, "")))
         if f"apiOperationRequest('{operation}'" not in normalized:
-            violations.append(
-                f"{path_label}: {operation} must use the generated response directly"
-            )
+            violations.append(f"{path_label}: {operation} must use the generated response directly")
     expected_direct_methods = {
         GAMEPLAY_RESPONSE_FRONTEND_APIS[0]: {
             "startRun": ("adventure_levels_runs_create", "AdventureRun"),
@@ -636,9 +614,7 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
         source = strip_ts_comments(sources.get(path_label, ""))
         object_name = expected_api_objects[path_label]
         object_body = _typescript_exported_object_body(source, object_name)
-        if object_body is None or _typescript_unsafe_api_object_members(
-            object_body, set(methods)
-        ):
+        if object_body is None or _typescript_unsafe_api_object_members(object_body, set(methods)):
             violations.append(
                 f"{path_label}: {object_name} must not override owned methods through "
                 "spread, computed, or property members"
@@ -658,9 +634,7 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
             if (
                 len(method_bodies) != 1
                 or len(returns) != 1
-                or not _typescript_is_exact_operation_return(
-                    returns[0], operation, response_type
-                )
+                or not _typescript_is_exact_operation_return(returns[0], operation, response_type)
             ):
                 violations.append(
                     f"{path_label}: {method_name} must directly return the exact {operation} response"
@@ -671,15 +645,11 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
                 source,
             )
             if len(operation_calls) != 1:
-                violations.append(
-                    f"{path_label}: {operation} must have exactly one owned API call"
-                )
+                violations.append(f"{path_label}: {operation} must have exactly one owned API call")
     for path_label, raw_source in sources.items():
         source = strip_ts_comments(raw_source)
         for owner_path, object_name in expected_api_objects.items():
-            owner_module_stem = owner_path.rsplit("/", maxsplit=1)[-1].removesuffix(
-                ".ts"
-            )
+            owner_module_stem = owner_path.rsplit("/", maxsplit=1)[-1].removesuffix(".ts")
             if (
                 path_label != owner_path
                 and object_name not in source
@@ -701,17 +671,12 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
                 module=owner_path,
             )
             if path_label != owner_path and namespace_bindings:
-                violations.append(
-                    f"{path_label}: gameplay API namespace imports are forbidden"
-                )
-            seeds.update(
-                f"{namespace}.{object_name}" for namespace in namespace_bindings
-            )
+                violations.append(f"{path_label}: gameplay API namespace imports are forbidden")
+            seeds.update(f"{namespace}.{object_name}" for namespace in namespace_bindings)
             bindings = _typescript_local_api_bindings(source, seeds)
             export_bindings = _typescript_local_api_bindings(
                 source,
-                {binding for binding in bindings if "." not in binding}
-                | namespace_bindings,
+                {binding for binding in bindings if "." not in binding} | namespace_bindings,
             )
             reexports_canonical_object = path_label != owner_path and (
                 ts_reexports_named_binding(
@@ -761,7 +726,5 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
                 _typescript_api_binding_mutation_pattern(binding).search(source)
                 for binding in bindings
             ):
-                violations.append(
-                    f"{path_label}: {object_name} must not be reassigned or mutated"
-                )
+                violations.append(f"{path_label}: {object_name} must not be reassigned or mutated")
     return violations

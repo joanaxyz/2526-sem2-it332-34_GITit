@@ -149,8 +149,7 @@ def test_layout_rejects_package_reexports(tmp_path: Path):
     composer, package = _copy_layout(tmp_path)
     initializer = package / "__init__.py"
     initializer.write_text(
-        initializer.read_text(encoding="utf-8")
-        + "from .cloning import LEVELS as CLONING_LEVELS\n",
+        initializer.read_text(encoding="utf-8") + "from .cloning import LEVELS as CLONING_LEVELS\n",
         encoding="utf-8",
     )
 

@@ -53,6 +53,7 @@ jobs:
           python ../scripts/check_documentation_current.py
           python ../scripts/check_ci_quality_gates.py
           python ../scripts/check_django_deploy.py
+          python ../scripts/check_render_blueprint.py
 
   frontend:
     runs-on: ubuntu-latest
@@ -92,12 +93,23 @@ jobs:
         run: docker build --tag git-it-backend-ci:${{ github.sha }} backend
       - name: Build frontend image
         run: docker build --tag git-it-frontend-ci:${{ github.sha }} frontend
+      - name: Build all-Free Render image
+        run: >-
+          docker build
+          --tag git-it-render-free-ci:${{ github.sha }}
+          --file deploy/render-free/Dockerfile
+          .
       - name: Validate rendered Nginx configuration
         run: >-
           docker run --rm
           --env BACKEND_HOST=127.0.0.1
           --env BACKEND_PORT=8000
           git-it-frontend-ci:${{ github.sha }}
+          nginx -t
+      - name: Validate all-Free Render Nginx configuration
+        run: >-
+          docker run --rm
+          git-it-render-free-ci:${{ github.sha }}
           nginx -t
 
   # Replays every authored solution through the real browser engine and proves
@@ -158,6 +170,7 @@ jobs:
       DJANGO_SECRET_KEY: ci-integration-secret-key-at-least-32-bytes
       DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
       REDIS_URL: redis://localhost:6379/1
+      PYTHONPATH: ${{ github.workspace }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6

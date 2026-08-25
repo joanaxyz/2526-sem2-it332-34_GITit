@@ -9,7 +9,7 @@ import {
   challengeLevelAccent,
   difficultyLabel,
 } from '@/features/story-map/utils/challengeUi'
-import { pathDataFor, pathGeometry, trialFlyoutPlacement } from '@/features/story-map/utils/pathGeometry'
+import { pathDataFor, pathGeometry } from '@/features/story-map/utils/pathGeometry'
 import { useStoryArtifactNavigation } from '@/features/story-map/hooks/useStoryArtifactNavigation'
 import type { LearningChapter } from '@/features/story-map/types'
 import { StarRating } from '@/shared/level/components/StarRating'
@@ -34,12 +34,14 @@ export function StoryAdventurePath({
   challenges,
   challengesLocked,
   loading,
+  defaultTrialsOpen = false,
 }: {
   chapter: LearningChapter
   levels: AdventureLevelSummary[]
   challenges: ChallengeSummary[]
   challengesLocked: boolean
   loading: boolean
+  defaultTrialsOpen?: boolean
 }) {
   const { openAdventureLevel, openChallengeArtifact } = useStoryArtifactNavigation()
   const currentLevelId = nextPlayableLevelId(levels, chapter.locked)
@@ -48,7 +50,8 @@ export function StoryAdventurePath({
     ? levels
     : Array.from({ length: placeholderCount })
   const trials = allChallengeTrials(challenges)
-  const [trialsOpen, setTrialsOpen] = useState(false)
+  const [trialsOpen, setTrialsOpen] = useState(defaultTrialsOpen)
+  const trialsPanelRef = useRef<HTMLElement | null>(null)
   const [selectedLevelId, setSelectedLevelId] = useState<number | null>(null)
   const [closingLevelId, setClosingLevelId] = useState<number | null>(null)
   const closeTimerRef = useRef<number | null>(null)
@@ -87,10 +90,10 @@ export function StoryAdventurePath({
   }
 
   useEffect(() => {
-    setTrialsOpen(false)
+    setTrialsOpen(defaultTrialsOpen)
     setSelectedLevelId(null)
     setClosingLevelId(null)
-  }, [chapter.id])
+  }, [chapter.id, defaultTrialsOpen])
 
   useEffect(() => {
     if (selectedLevelId && !levels.some((level) => level.id === selectedLevelId && !level.locked)) {
@@ -113,6 +116,14 @@ export function StoryAdventurePath({
     return () => window.removeEventListener('keydown', onKey)
   }, [trialsOpen])
 
+  useEffect(() => {
+    if (!trialsOpen) return
+    const frame = window.requestAnimationFrame(() => {
+      trialsPanelRef.current?.scrollIntoView?.({ block: 'nearest' })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [trialsOpen])
+
   // One extra point: the chapter's challenge trials live on the same path,
   // as its final node.
   const { points, height } = useMemo(
@@ -123,6 +134,7 @@ export function StoryAdventurePath({
   const trialPoint = points[points.length - 1]
 
   const trialsCleared = trials.length > 0 && trials.every((trial) => trial.completion)
+  const clearedTrialCount = trials.filter((trial) => trial.completion).length
   const trialState = loading
     ? 'loading'
     : challengesLocked || !trials.length
@@ -131,12 +143,6 @@ export function StoryAdventurePath({
     ? 'cleared'
     : 'ready'
   const trialDisabled = trialState === 'locked' || trialState === 'loading'
-
-  const {
-    left: flyoutLeft,
-    top: flyoutTop,
-    connectors: trialConnectors,
-  } = trialFlyoutPlacement(trialPoint, pathWidth, height)
 
   return (
     <div className="story-adventure-path" ref={pathRef}>
@@ -150,9 +156,6 @@ export function StoryAdventurePath({
           focusable="false"
         >
           <path d={routePathData} />
-          {trialsOpen
-            ? trialConnectors.map((d) => <path className="story-route-branch" d={d} key={d} />)
-            : null}
         </svg>
 
         {nodes.map((node, index) => {
@@ -244,7 +247,7 @@ export function StoryAdventurePath({
           }
           aria-label={trialState === 'locked' ? 'Challenge trials (locked)' : 'Challenge trials'}
           aria-expanded={trialsOpen}
-          aria-controls="story-trials-flyout"
+          aria-controls="story-challenge-panel"
           onClick={() => setTrialsOpen((open) => !open)}
         >
           <span className="story-path-node-ring">
@@ -254,70 +257,87 @@ export function StoryAdventurePath({
               <Swords className="size-6" aria-hidden="true" />
             )}
           </span>
+          <span className="story-challenge-node-label">Challenge Gate</span>
           {trialState === 'cleared' ? (
             <span className="story-path-node-badge" aria-hidden="true">
               <Check className="size-3.5" strokeWidth={3} />
             </span>
           ) : null}
         </button>
+      </div>
 
-        {trialsOpen ? (
-          <div
-            id="story-trials-flyout"
-            className="story-trials-flyout"
-            style={{ left: flyoutLeft, top: flyoutTop }}
-            role="group"
-            aria-label="Challenge trials"
-          >
+      {trialsOpen ? (
+        <section
+          id="story-challenge-panel"
+          ref={trialsPanelRef}
+          className="story-trials-panel"
+          aria-labelledby="story-challenge-panel-title"
+        >
+          <header className="story-trials-panel-header">
+            <span className="story-trials-panel-mark" aria-hidden="true">
+              <Swords />
+            </span>
+            <div>
+              <h2 id="story-challenge-panel-title">Challenge Gate</h2>
+              <p>Clear each trial to master the chapter.</p>
+            </div>
+            <span className="story-trials-panel-progress">
+              {clearedTrialCount} / {trials.length} cleared
+            </span>
+          </header>
+
+          <div className="story-trials-panel-content">
             {/* One section per challenge level: a chapter can carry several
                 challenge scenarios, and every trial of each must stay reachable. */}
             {challenges.map((challenge) => (
-              <div className="story-trials-flyout-group" key={challenge.id} role="group" aria-label={challenge.title}>
-                {challenges.length > 1 ? (
-                  <span className="story-trials-flyout-title">{challenge.title}</span>
-                ) : null}
-                {DIFFICULTY_ORDER.map((difficulty) => {
-                  const trial =
-                    challenge.trials.find((item) => String(item.difficulty) === difficulty) ?? null
-                  const action = trial ? actionForChallengeLevel(trial) : null
-                  const isLocked = challengesLocked || !trial || !action || trial.status === 'locked'
-                  const status = loading ? 'loading' : isLocked ? 'locked' : trial.status
-                  const stars = trial?.completion?.stars ?? 0
-                  const accent = challengeLevelAccent(trial)
+              <section className="story-trials-group" key={challenge.id} aria-labelledby={`challenge-${challenge.id}-title`}>
+                <h3 id={`challenge-${challenge.id}-title`} className="story-trials-group-title">
+                  {challenge.title}
+                </h3>
+                <div className="story-trials-grid">
+                  {DIFFICULTY_ORDER.map((difficulty) => {
+                    const trial =
+                      challenge.trials.find((item) => String(item.difficulty) === difficulty) ?? null
+                    const action = trial ? actionForChallengeLevel(trial) : null
+                    const isLocked = challengesLocked || !trial || !action || trial.status === 'locked'
+                    const status = loading ? 'loading' : isLocked ? 'locked' : trial.status
+                    const stars = trial?.completion?.stars ?? 0
+                    const accent = challengeLevelAccent(trial)
 
-                  return (
-                    <button
-                      type="button"
-                      className="story-trial-card"
-                      data-status={status}
-                      key={`${challenge.id}-${difficulty}`}
-                      disabled={isLocked || loading}
-                      style={{ '--trial-rgb': accent } as React.CSSProperties}
-                      aria-label={`${challenge.title}: ${difficulty} challenge trial`}
-                      onClick={() => {
-                        if (!trial || !action) return
-                        openChallengeArtifact(trial, action)
-                      }}
-                    >
-                      <span className="story-trial-medallion">
-                        <img src={DIFFICULTY_ICONS[difficulty]} alt="" />
-                        {status === 'locked' || status === 'loading' ? (
-                          <Lock className="story-trial-lock" aria-hidden="true" />
-                        ) : null}
-                      </span>
-                      <span className="story-trial-copy">
-                        <strong>{trial ? difficultyLabel(trial) : difficulty}</strong>
-                        <StarRating stars={stars} size="sm" label={`${difficulty} stars`} />
-                        <span>{trial ? actionLabel(action, trial.status) : 'Locked'}</span>
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
+                    return (
+                      <button
+                        type="button"
+                        className="story-trial-card"
+                        data-status={status}
+                        key={`${challenge.id}-${difficulty}`}
+                        disabled={isLocked || loading}
+                        style={{ '--trial-rgb': accent } as React.CSSProperties}
+                        aria-label={`${challenge.title}: ${difficulty} challenge trial`}
+                        onClick={() => {
+                          if (!trial || !action) return
+                          openChallengeArtifact(trial, action)
+                        }}
+                      >
+                        <span className="story-trial-medallion">
+                          <img src={DIFFICULTY_ICONS[difficulty]} alt="" />
+                          {status === 'locked' || status === 'loading' ? (
+                            <Lock className="story-trial-lock" aria-hidden="true" />
+                          ) : null}
+                        </span>
+                        <span className="story-trial-copy">
+                          <strong>{trial ? difficultyLabel(trial) : difficulty}</strong>
+                          <StarRating stars={stars} size="sm" label={`${difficulty} stars`} />
+                          <span>{trial ? actionLabel(action, trial.status) : 'Locked'}</span>
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </section>
             ))}
           </div>
-        ) : null}
-      </div>
+        </section>
+      ) : null}
     </div>
   )
 }

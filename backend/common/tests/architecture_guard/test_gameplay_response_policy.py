@@ -115,7 +115,9 @@ def test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift()
         field_violations = gameplay_response_openapi_violations(nullable_schema)
         assert any("ChallengeCommandRunResponse nullable fields" in row for row in field_violations)
 
-    status_schema = json.loads((ROOT / GAMEPLAY_RESPONSE_GENERATED_OPENAPI).read_text(encoding="utf-8"))
+    status_schema = json.loads(
+        (ROOT / GAMEPLAY_RESPONSE_GENERATED_OPENAPI).read_text(encoding="utf-8")
+    )
     status_schema["components"]["schemas"]["AdventureRunResponse"]["properties"]["status"] = {
         "type": "string"
     }
@@ -276,7 +278,9 @@ def test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass
     )
 
     cast_sources = dict(original)
-    cast_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]] = cast_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]].replace(
+    cast_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]] = cast_sources[
+        GAMEPLAY_RESPONSE_FRONTEND_APIS[1]
+    ].replace(
         "return apiOperationRequest<'challenge_runs_retrieve', ChallengeRunResponse>("
         "'challenge_runs_retrieve', `/challenge-runs/${runId}/`)",
         "return apiOperationRequest<'challenge_runs_retrieve', ChallengeRunResponse>("
@@ -289,7 +293,9 @@ def test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass
     )
 
     adapter_sources = dict(original)
-    adapter_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]] = adapter_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]].replace(
+    adapter_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]] = adapter_sources[
+        GAMEPLAY_RESPONSE_FRONTEND_APIS[1]
+    ].replace(
         "getRun(runId: number) {\n"
         "    return apiOperationRequest<'challenge_runs_retrieve', ChallengeRunResponse>("
         "'challenge_runs_retrieve', `/challenge-runs/${runId}/`)\n"
@@ -308,7 +314,9 @@ def test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass
     )
 
     then_sources = dict(original)
-    then_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]] = then_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]].replace(
+    then_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]] = then_sources[
+        GAMEPLAY_RESPONSE_FRONTEND_APIS[1]
+    ].replace(
         "return apiOperationRequest<'challenge_runs_retrieve', ChallengeRunResponse>("
         "'challenge_runs_retrieve', `/challenge-runs/${runId}/`)",
         "return apiOperationRequest<'challenge_runs_retrieve', ChallengeRunResponse>("

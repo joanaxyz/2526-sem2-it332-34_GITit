@@ -5,6 +5,9 @@ This guide provides two supported deployment paths:
 1. A reference Linux host using Docker Compose and a TLS reverse proxy.
 2. A container platform using the same backend and frontend Dockerfiles.
 
+For Render, use the checked-in `render.yaml` Blueprint and follow the
+platform-specific [Render deployment guide](deploy/RENDER.md).
+
 The application topology is:
 
 ```text

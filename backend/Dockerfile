@@ -25,6 +25,6 @@ USER app
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD python -c "import os, urllib.request; port = os.environ.get('PORT', '8000'); urllib.request.urlopen(f'http://127.0.0.1:{port}/api/health/live/', timeout=3)" || exit 1
+  CMD python -c "import os, urllib.request; port = os.environ.get('PORT', '8000'); host = (os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')[0].strip() or 'localhost'); request = urllib.request.Request(f'http://127.0.0.1:{port}/api/health/live/', headers={'Host': host}); urllib.request.urlopen(request, timeout=3)" || exit 1
 
 ENTRYPOINT ["./docker-entrypoint.sh"]

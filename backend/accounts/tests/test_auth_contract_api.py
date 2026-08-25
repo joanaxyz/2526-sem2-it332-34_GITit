@@ -168,9 +168,7 @@ def test_detail_and_empty_auth_successes_keep_exact_contracts(api_client):
         format="json",
     )
     assert confirm.status_code == status.HTTP_200_OK
-    assert confirm.data == {
-        "detail": "Password reset successfully. You can now sign in."
-    }
+    assert confirm.data == {"detail": "Password reset successfully. You can now sign in."}
     assert confirm.data == DetailResponseSerializer(confirm.data).data
     user.refresh_from_db()
 

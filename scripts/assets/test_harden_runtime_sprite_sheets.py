@@ -26,7 +26,7 @@ def build_sheet(path: Path, *, touch_both_sides: bool) -> None:
         (frame * GRID_COLUMNS, frame * GRID_ROWS),
         (0, 0, 0, 0),
     )
-    for index, box in enumerate(frame_boxes(sheet.size)):
+    for _index, box in enumerate(frame_boxes(sheet.size)):
         cell = Image.new("RGBA", (frame, frame), (0, 0, 0, 0))
         draw = ImageDraw.Draw(cell)
         if touch_both_sides:

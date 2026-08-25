@@ -114,10 +114,13 @@ def test_story_catalog_response_has_exact_nested_contract(authenticated_client):
     assert rows[sequel.slug]["difficulty"] == Story.DIFFICULTY_ADVANCED
     assert rows[sequel.slug]["summary"] == "Climb higher."
     assert rows[sequel.slug]["price"] == 250
-    assert rows[sequel.slug] == StorySerializer(
-        sequel,
-        context={"player": None, "story_completed_map": {prerequisite.id: False}},
-    ).data
+    assert (
+        rows[sequel.slug]
+        == StorySerializer(
+            sequel,
+            context={"player": None, "story_completed_map": {prerequisite.id: False}},
+        ).data
+    )
 
 
 @pytest.mark.django_db

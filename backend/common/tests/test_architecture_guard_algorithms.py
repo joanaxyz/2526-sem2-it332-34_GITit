@@ -222,12 +222,12 @@ def test_home_hub_guard_rejects_role_bypasses_and_integration_forwarding():
         source="\n".join(["// line"] * 141), path_label=hub_path, role="hub"
     )
     link_only_profile = home_hub_source_violations(
-        source="import { Link } from 'react-router-dom'\nexport const View = () => <aside className=\"home-profile-panel\"><div className=\"home-profile-view\" /><div className=\"home-rank-view\"><Link to=\"/shop\">Shop</Link></div></aside>\n",
+        source='import { Link } from \'react-router-dom\'\nexport const View = () => <aside className="home-profile-panel"><div className="home-profile-view" /><div className="home-rank-view"><Link to="/shop">Shop</Link></div></aside>\n',
         path_label=profile_path,
         role="profile",
     )
     router_hook_profile = home_hub_source_violations(
-        source="import { Link, useNavigate } from 'react-router-dom'\nexport const View = () => <aside className=\"home-profile-panel\"><div className=\"home-profile-view\" /><div className=\"home-rank-view\"><Link to=\"/shop\">Shop</Link></div></aside>\n",
+        source='import { Link, useNavigate } from \'react-router-dom\'\nexport const View = () => <aside className="home-profile-panel"><div className="home-profile-view" /><div className="home-rank-view"><Link to="/shop">Shop</Link></div></aside>\n',
         path_label=profile_path,
         role="profile",
     )
@@ -235,7 +235,7 @@ def test_home_hub_guard_rejects_role_bypasses_and_integration_forwarding():
         source="\n".join(["// line"] * 251), path_label=combat_path, role="combat"
     )
     link_only_status = home_hub_source_violations(
-        source="import { Link } from 'react-router-dom'\nexport function HomeProfileCompanionStatus() { return <div className=\"home-profile-companion-empty\"><Link to=\"/shop\">Shop</Link></div> }\nexport function HomeCombatCompanionStatus() { return <div className=\"home-sprite-stage--empty\" /> }\n",
+        source='import { Link } from \'react-router-dom\'\nexport function HomeProfileCompanionStatus() { return <div className="home-profile-companion-empty"><Link to="/shop">Shop</Link></div> }\nexport function HomeCombatCompanionStatus() { return <div className="home-sprite-stage--empty" /> }\n',
         path_label=status_path,
         role="status",
     )
@@ -306,10 +306,7 @@ def test_home_hub_guard_rejects_role_bypasses_and_integration_forwarding():
     assert any("must remain type-only" in row for row in runtime_contract)
     assert any("canonical type-only union" in row for row in default_export_contract)
     assert any("canonical type-only union" in row for row in executable_contract)
-    assert any(
-        "usePlayerLoadout" in row and "ownership" in row
-        for row in hook_owner_violations
-    )
+    assert any("usePlayerLoadout" in row and "ownership" in row for row in hook_owner_violations)
 
 
 def test_home_hub_hook_owner_guard_rejects_aliased_direct_module_bypasses():
@@ -321,12 +318,15 @@ def test_home_hub_hook_owner_guard_rejects_aliased_direct_module_bypasses():
         workspace_path: "import { useLearnedSkills } from '@/features/skills/hooks/useLearnedSkills'\nconst { data } = useLearnedSkills()\n",
     }
     assert home_hub_hook_owner_violations(valid_sources) == []
-    assert home_hub_hook_owner_violations(
-        {
-            **valid_sources,
-            rogue_path: "// import { usePlayerLoadout as useLoadout } from '@/shared/player-loadout/usePlayerLoadout'\n// const loadout = useLoadout()\n",
-        }
-    ) == []
+    assert (
+        home_hub_hook_owner_violations(
+            {
+                **valid_sources,
+                rogue_path: "// import { usePlayerLoadout as useLoadout } from '@/shared/player-loadout/usePlayerLoadout'\n// const loadout = useLoadout()\n",
+            }
+        )
+        == []
+    )
 
     bypasses = (
         (
@@ -366,12 +366,8 @@ def test_home_hub_hook_owner_guard_rejects_aliased_direct_module_bypasses():
         ),
     )
     for label, rogue_source, expected in bypasses:
-        violations = home_hub_hook_owner_violations(
-            {**valid_sources, rogue_path: rogue_source}
-        )
-        assert any(
-            expected in row and rogue_path in row for row in violations
-        ), label
+        violations = home_hub_hook_owner_violations({**valid_sources, rogue_path: rogue_source})
+        assert any(expected in row and rogue_path in row for row in violations), label
         if label == "namespace alias":
             call_row = next(row for row in violations if expected in row)
             assert f"('{rogue_path}', 1)" in call_row

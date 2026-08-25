@@ -92,11 +92,14 @@ def _errors(
 
 
 def test_live_frost_form_drill_layout_is_valid():
-    assert frost_form_drill_layout_errors(
-        monolith_path=FROST_MONOLITH,
-        package_path=FROST_PACKAGE,
-        import_roots=FROST_IMPORT_SCAN_ROOTS,
-    ) == []
+    assert (
+        frost_form_drill_layout_errors(
+            monolith_path=FROST_MONOLITH,
+            package_path=FROST_PACKAGE,
+            import_roots=FROST_IMPORT_SCAN_ROOTS,
+        )
+        == []
+    )
 
 
 def test_canonical_frost_form_drill_layout_is_valid(tmp_path: Path):
@@ -114,9 +117,7 @@ def test_layout_rejects_restored_monolith(tmp_path: Path):
     assert any("monolith must be absent" in error for error in errors)
 
 
-@pytest.mark.parametrize(
-    "mutation", ["missing", "unexpected", "nested", "non_python"]
-)
+@pytest.mark.parametrize("mutation", ["missing", "unexpected", "nested", "non_python"])
 def test_layout_rejects_wrong_module_manifest(tmp_path: Path, mutation: str):
     monolith, package, source_root = _create_layout(tmp_path)
     if mutation == "missing":

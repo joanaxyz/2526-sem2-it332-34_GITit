@@ -28,9 +28,7 @@ PUBLIC_LEDGER_EXPORTS = {
     "V3_FORM_CHALLENGES",
 }
 DISPLACED_SUPPORT_PATH = SOURCE / "adventure_level_specs" / "advanced_story_support.py"
-FROST_FORM_DRILL_PACKAGE = (
-    SOURCE / "adventure_level_specs" / "v3_frost_form_drills"
-)
+FROST_FORM_DRILL_PACKAGE = SOURCE / "adventure_level_specs" / "v3_frost_form_drills"
 DISPLACED_OWNER_BINDINGS = {
     SOURCE / "adventure_level_specs" / "v3_advanced_workflows.py": {
         "_base_commits",

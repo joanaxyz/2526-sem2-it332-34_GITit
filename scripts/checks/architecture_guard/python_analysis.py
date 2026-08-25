@@ -19,13 +19,9 @@ def python_class_fields(source: str, class_name: str) -> set[str] | None:
         for statement in node.body:
             if isinstance(statement, ast.Assign):
                 fields.update(
-                    target.id
-                    for target in statement.targets
-                    if isinstance(target, ast.Name)
+                    target.id for target in statement.targets if isinstance(target, ast.Name)
                 )
-            elif isinstance(statement, ast.AnnAssign) and isinstance(
-                statement.target, ast.Name
-            ):
+            elif isinstance(statement, ast.AnnAssign) and isinstance(statement.target, ast.Name):
                 fields.add(statement.target.id)
         return fields
     return None
@@ -51,9 +47,7 @@ def python_top_level_assignment_names(source: str) -> list[str]:
     names: list[str] = []
     for node in tree.body:
         if isinstance(node, ast.Assign):
-            names.extend(
-                target.id for target in node.targets if isinstance(target, ast.Name)
-            )
+            names.extend(target.id for target in node.targets if isinstance(target, ast.Name))
         elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
             names.append(node.target.id)
     return names
@@ -94,9 +88,7 @@ def python_class_field_calls(source: str, class_name: str) -> dict[str, str] | N
                 for target in statement.targets:
                     if isinstance(target, ast.Name):
                         calls[target.id] = canonical_python_call(statement.value)
-            elif isinstance(statement, ast.AnnAssign) and isinstance(
-                statement.target, ast.Name
-            ):
+            elif isinstance(statement, ast.AnnAssign) and isinstance(statement.target, ast.Name):
                 calls[statement.target.id] = canonical_python_call(statement.value)
         return calls
     return None
@@ -120,9 +112,7 @@ def python_class_method_decorator_calls(
             if isinstance(statement, (ast.FunctionDef, ast.AsyncFunctionDef)) and (
                 statement.name == method_name
             ):
-                return [
-                    canonical_python_call(item) for item in statement.decorator_list
-                ]
+                return [canonical_python_call(item) for item in statement.decorator_list]
         return None
     return None
 
@@ -172,17 +162,14 @@ def python_extend_schema_success_responses(
                 continue
             for decorator in method.decorator_list:
                 if not isinstance(decorator, ast.Call) or not (
-                    isinstance(decorator.func, ast.Name)
-                    and decorator.func.id == "extend_schema"
+                    isinstance(decorator.func, ast.Name) and decorator.func.id == "extend_schema"
                 ):
                     continue
                 response_keyword = next(
                     (item for item in decorator.keywords if item.arg == "responses"),
                     None,
                 )
-                if response_keyword is None or not isinstance(
-                    response_keyword.value, ast.Dict
-                ):
+                if response_keyword is None or not isinstance(response_keyword.value, ast.Dict):
                     continue
                 for key, value in zip(
                     response_keyword.value.keys,
@@ -194,7 +181,5 @@ def python_extend_schema_success_responses(
                         and isinstance(key.value, int)
                         and 200 <= key.value < 300
                     ):
-                        responses[(class_node.name, method.name, key.value)] = (
-                            ast.unparse(value)
-                        )
+                        responses[(class_node.name, method.name, key.value)] = ast.unparse(value)
     return responses

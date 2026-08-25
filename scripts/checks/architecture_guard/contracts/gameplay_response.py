@@ -22,7 +22,6 @@ from scripts.checks.architecture_guard.repository import (
     rel,
 )
 
-
 GAMEPLAY_RESPONSE_GENERATED_OPENAPI = "frontend/src/shared/api/generated/openapi.json"
 
 
@@ -69,9 +68,7 @@ def gameplay_response_backend_violations(sources: dict[str, str]) -> list[str]:
     for owner_path, expected_names in expected_owner_classes.items():
         source = sources.get(owner_path, "")
         if not source:
-            violations.append(
-                f"{owner_path}: required gameplay response owner is missing"
-            )
+            violations.append(f"{owner_path}: required gameplay response owner is missing")
             continue
         actual_names = set(python_top_level_class_names(source))
         missing_names = sorted(expected_names - actual_names)
@@ -170,9 +167,7 @@ def gameplay_response_backend_violations(sources: dict[str, str]) -> list[str]:
     return violations
 
 
-def _response_schema_fields(
-    schemas: dict, schema_name: str
-) -> tuple[set[str], set[str], dict]:
+def _response_schema_fields(schemas: dict, schema_name: str) -> tuple[set[str], set[str], dict]:
     component = schemas.get(schema_name, {})
     properties = component.get("properties", {}) if isinstance(component, dict) else {}
     required = component.get("required", []) if isinstance(component, dict) else []
@@ -310,9 +305,7 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
         }
     }
     for schema_name, expected_fields in exact_fields.items():
-        actual_fields, required_fields, _ = _response_schema_fields(
-            schemas, schema_name
-        )
+        actual_fields, required_fields, _ = _response_schema_fields(schemas, schema_name)
         expected_required = expected_fields - optional_fields.get(schema_name, set())
         component = schemas.get(schema_name, {})
         if (
@@ -396,9 +389,7 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
         ("ChallengeCommandResponse", "step"): "ChallengeCommandStepResponse",
     }
     for (schema_name, field_name), expected_ref in expected_component_refs.items():
-        field_schema = (
-            schemas.get(schema_name, {}).get("properties", {}).get(field_name, {})
-        )
+        field_schema = schemas.get(schema_name, {}).get("properties", {}).get(field_name, {})
         if field_name == "steps":
             field_schema = field_schema.get("items", {})
         if field_schema != {"$ref": f"#/components/schemas/{expected_ref}"}:
@@ -457,9 +448,7 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
         ("challenge-runs", "ChallengeRunResponse"),
     ):
         for method in ("post", "patch", "put", "delete"):
-            response_refs[(f"/api/{prefix}/{{run_id}}/files/", method, "200")] = (
-                component
-            )
+            response_refs[(f"/api/{prefix}/{{run_id}}/files/", method, "200")] = component
     for (path, method, status), component in response_refs.items():
         actual = (
             schema.get("paths", {})

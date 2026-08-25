@@ -62,15 +62,9 @@ PAGE_IMPORT = re.compile(r"@/features/[^'\"]+/pages/")
 FRONTEND_PATH_REFERENCE = re.compile(r"frontend/(?:src|public|scripts)")
 
 CONTENT_EDITOR_PAGE = "frontend/src/features/authoring/pages/ContentEditorPage.tsx"
-CONTENT_EDITOR_HOOK = (
-    "frontend/src/features/authoring/hooks/useContentEditorController.ts"
-)
-CONTENT_EDITOR_DRAFT_SUPPORT = (
-    "frontend/src/features/authoring/hooks/contentEditorDraftState.ts"
-)
-CONTENT_EDITOR_COMPONENT_DIR = (
-    "frontend/src/features/authoring/components/content-editor"
-)
+CONTENT_EDITOR_HOOK = "frontend/src/features/authoring/hooks/useContentEditorController.ts"
+CONTENT_EDITOR_DRAFT_SUPPORT = "frontend/src/features/authoring/hooks/contentEditorDraftState.ts"
+CONTENT_EDITOR_COMPONENT_DIR = "frontend/src/features/authoring/components/content-editor"
 CONTENT_EDITOR_LINE_LIMITS = {
     "page": 150,
     "hook": 300,
@@ -79,18 +73,10 @@ CONTENT_EDITOR_LINE_LIMITS = {
 }
 
 HOME_HUB_VIEW = "frontend/src/features/home/components/HomeHubView.tsx"
-HOME_PROFILE_WORKSPACE = (
-    "frontend/src/features/home/components/home-hub/HomeProfileWorkspace.tsx"
-)
-HOME_PROFILE_PANEL = (
-    "frontend/src/features/home/components/home-hub/HomeProfilePanel.tsx"
-)
-HOME_COMBAT_SHOWCASE = (
-    "frontend/src/features/home/components/home-hub/HomeCombatShowcase.tsx"
-)
-HOME_COMPANION_STATUS = (
-    "frontend/src/features/home/components/home-hub/HomeCompanionStatus.tsx"
-)
+HOME_PROFILE_WORKSPACE = "frontend/src/features/home/components/home-hub/HomeProfileWorkspace.tsx"
+HOME_PROFILE_PANEL = "frontend/src/features/home/components/home-hub/HomeProfilePanel.tsx"
+HOME_COMBAT_SHOWCASE = "frontend/src/features/home/components/home-hub/HomeCombatShowcase.tsx"
+HOME_COMPANION_STATUS = "frontend/src/features/home/components/home-hub/HomeCompanionStatus.tsx"
 HOME_COMPANION_PRESENTATION = (
     "frontend/src/features/home/components/home-hub/companionPresentation.ts"
 )
@@ -105,9 +91,7 @@ HOME_HUB_LINE_LIMITS = {
 
 HOME_STATS_VIEW = "frontend/src/features/home/components/HomeStatsView.tsx"
 HOME_STATS_MODEL = "frontend/src/features/home/components/home-stats/homeStatsModel.ts"
-HOME_STATS_DASHBOARD = (
-    "frontend/src/features/home/components/home-stats/HomeStatsDashboard.tsx"
-)
+HOME_STATS_DASHBOARD = "frontend/src/features/home/components/home-stats/HomeStatsDashboard.tsx"
 HOME_ACHIEVEMENT_GALLERY = (
     "frontend/src/features/home/components/home-stats/HomeAchievementGallery.tsx"
 )
@@ -147,9 +131,7 @@ COMMON_ROOT_FORBIDDEN_MODULES = {
     "schema_validation.py",
 }
 SERVICE_PACKAGE_APPS = {
-    path.name
-    for path in BACKEND.iterdir()
-    if path.is_dir() and (path / "apps.py").exists()
+    path.name for path in BACKEND.iterdir() if path.is_dir() and (path / "apps.py").exists()
 }
 ROOT_FEATURE_ALLOWED_FILES = {"types.ts", "index.ts"}
 THIN_BACKEND_PACKAGE_INIT_MAX_LINES = 100
@@ -197,9 +179,7 @@ def imported_runtime_modules(
 
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     is_package = path.name == "__init__.py"
-    package_parts = (
-        module_name.split(".") if is_package else module_name.split(".")[:-1]
-    )
+    package_parts = module_name.split(".") if is_package else module_name.split(".")[:-1]
     imported: set[str] = set()
 
     for node in ast.walk(tree):
@@ -323,9 +303,7 @@ def imported_module_references(node: ast.AST) -> set[str]:
     modules = {node.module}
     boundary_aliases = {"auth", "db", "flags", "models", "selectors", "views", "wallet"}
     modules.update(
-        f"{node.module}.{alias.name}"
-        for alias in node.names
-        if alias.name in boundary_aliases
+        f"{node.module}.{alias.name}" for alias in node.names if alias.name in boundary_aliases
     )
     return modules
 
@@ -367,9 +345,7 @@ def adminconsole_view_source_violations(*, source: str, path_label: str) -> list
     return violations
 
 
-def adminconsole_selector_source_violations(
-    *, source: str, path_label: str
-) -> list[str]:
+def adminconsole_selector_source_violations(*, source: str, path_label: str) -> list[str]:
     """Reject HTTP-layer dependencies inside admin selector modules."""
 
     tree = ast.parse(source, filename=path_label)
@@ -384,11 +360,7 @@ def adminconsole_selector_source_violations(
                 or module.endswith(".views")
                 or ".views." in module
             )
-            if (
-                module == "rest_framework"
-                or module.startswith("rest_framework.")
-                or is_view_module
-            ):
+            if module == "rest_framework" or module.startswith("rest_framework.") or is_view_module:
                 violations.append(
                     f"{path_label}:{node.lineno}: admin selectors must not import HTTP layer "
                     f"module {module}"
@@ -396,9 +368,7 @@ def adminconsole_selector_source_violations(
     return violations
 
 
-def adminconsole_view_init_source_violations(
-    *, source: str, path_label: str
-) -> list[str]:
+def adminconsole_view_init_source_violations(*, source: str, path_label: str) -> list[str]:
     """Keep the public admin view initializer limited to exports."""
 
     tree = ast.parse(source, filename=path_label)
@@ -530,12 +500,9 @@ def content_editor_source_violations(
             path_label=path_label,
         )
         if any(
-            ts_module_matches_boundary(canonical_module, boundary)
-            for boundary in forbidden_modules
+            ts_module_matches_boundary(canonical_module, boundary) for boundary in forbidden_modules
         ):
-            violations.append(
-                f"{path_label}: content editor {role} must not import {module}"
-            )
+            violations.append(f"{path_label}: content editor {role} must not import {module}")
 
     if role == "page":
         displaced_markers = (
@@ -566,9 +533,7 @@ def content_editor_source_violations(
             violations.append(
                 f"{path_label}: destructure useContentEditorController at the call site"
             )
-        if re.search(
-            r"\bcontroller\s*=|\{\s*\.\.\.\s*[\w$]*controller\b", source, re.I
-        ):
+        if re.search(r"\bcontroller\s*=|\{\s*\.\.\.\s*[\w$]*controller\b", source, re.I):
             violations.append(
                 f"{path_label}: controller objects must not be forwarded to rendering components"
             )
@@ -602,9 +567,7 @@ def content_editor_css_violations(*, source: str, path_label: str) -> list[str]:
     )
     for property_name in ("display", "align-items", "gap", "flex-wrap"):
         if not row or not re.search(rf"\b{property_name}\s*:", row.group("body")):
-            violations.append(
-                f"{path_label}: .author-destination-row must own {property_name}"
-            )
+            violations.append(f"{path_label}: .author-destination-row must own {property_name}")
     if not input_rule or not re.search(r"\bflex\s*:", input_rule.group("body")):
         violations.append(f"{path_label}: destination input must own flexible sizing")
     return violations
@@ -631,9 +594,7 @@ def check_content_editor_workflow_ownership() -> list[str]:
         (ROOT / CONTENT_EDITOR_DRAFT_SUPPORT, "support"),
     ]
     component_dir = ROOT / CONTENT_EDITOR_COMPONENT_DIR
-    targets.extend(
-        (path, "component") for path in iter_files(component_dir, TS_SUFFIXES)
-    )
+    targets.extend((path, "component") for path in iter_files(component_dir, TS_SUFFIXES))
     for path, role in targets:
         if not path.exists():
             violations.append(f"{rel(path)}: required content editor {role} is missing")
@@ -682,9 +643,7 @@ def home_hub_source_violations(
     line_count = len(source.splitlines())
     limit = HOME_HUB_LINE_LIMITS[role]
     if line_count > limit:
-        violations.append(
-            f"{path_label}: Home Hub {role} has {line_count} lines; limit is {limit}"
-        )
+        violations.append(f"{path_label}: Home Hub {role} has {line_count} lines; limit is {limit}")
 
     direct_data_modules = (
         "@tanstack/react-query",
@@ -771,13 +730,11 @@ def home_hub_source_violations(
 
     modules = ts_module_specifiers(source)
     canonical_modules = [
-        canonical_ts_module_reference(module=module, path_label=path_label)
-        for module in modules
+        canonical_ts_module_reference(module=module, path_label=path_label) for module in modules
     ]
     for module, canonical_module in zip(modules, canonical_modules, strict=True):
         if any(
-            ts_module_matches_boundary(canonical_module, boundary)
-            for boundary in forbidden_modules
+            ts_module_matches_boundary(canonical_module, boundary) for boundary in forbidden_modules
         ):
             violations.append(f"{path_label}: Home Hub {role} must not import {module}")
 
@@ -885,9 +842,7 @@ def home_hub_source_violations(
     if role == "hub":
         loadout_calls = len(re.findall(r"\busePlayerLoadout\s*\(", source))
         if loadout_calls != 1:
-            violations.append(
-                f"{path_label}: Hub must invoke usePlayerLoadout exactly once"
-            )
+            violations.append(f"{path_label}: Hub must invoke usePlayerLoadout exactly once")
         loadout_binding = re.search(
             r"\bconst\s*\{(?P<body>[^}]*)\}\s*=\s*usePlayerLoadout\s*\(",
             source,
@@ -901,9 +856,7 @@ def home_hub_source_violations(
             "isLoading",
         }
         if loadout_binding is None:
-            violations.append(
-                f"{path_label}: Hub must destructure usePlayerLoadout immediately"
-            )
+            violations.append(f"{path_label}: Hub must destructure usePlayerLoadout immediately")
         else:
             loadout_names = {
                 binding.split(":", 1)[0].split("=", 1)[0].strip()
@@ -916,13 +869,9 @@ def home_hub_source_violations(
                 )
         workspace_module = HOME_PROFILE_WORKSPACE.removesuffix(".tsx")
         if canonical_modules.count(workspace_module) != 1:
-            violations.append(
-                f"{path_label}: Hub must import HomeProfileWorkspace exactly once"
-            )
+            violations.append(f"{path_label}: Hub must import HomeProfileWorkspace exactly once")
         if len(re.findall(r"<HomeProfileWorkspace\b", source)) != 1:
-            violations.append(
-                f"{path_label}: Hub must render HomeProfileWorkspace exactly once"
-            )
+            violations.append(f"{path_label}: Hub must render HomeProfileWorkspace exactly once")
         workspace_props, _ = jsx_component_props(source, "HomeProfileWorkspace")
         expected_workspace_props = [
             "home",
@@ -933,38 +882,26 @@ def home_hub_source_violations(
             "companion",
         ]
         if workspace_props != expected_workspace_props:
-            violations.append(
-                f"{path_label}: Hub must pass only narrow Profile workspace props"
-            )
+            violations.append(f"{path_label}: Hub must pass only narrow Profile workspace props")
         if destructured_function_props(source, "HomeHubView") != [
             "home",
             "stats",
             "playerName",
             "gitcoins",
         ]:
-            violations.append(
-                f"{path_label}: Hub must keep the production four-prop contract"
-            )
+            violations.append(f"{path_label}: Hub must keep the production four-prop contract")
 
     if role == "workspace":
         for hook in ("useLearnedSkills",):
             if len(re.findall(rf"\b{hook}\s*\(", source)) != 1:
-                violations.append(
-                    f"{path_label}: workspace must invoke {hook} exactly once"
-                )
+                violations.append(f"{path_label}: workspace must invoke {hook} exactly once")
             if re.search(rf"\bconst\s+[A-Za-z_$][\w$]*\s*=\s*{hook}\s*\(", source):
-                violations.append(
-                    f"{path_label}: workspace must destructure {hook} immediately"
-                )
+                violations.append(f"{path_label}: workspace must destructure {hook} immediately")
         if "home-ref-grid" not in source:
-            violations.append(
-                f"{path_label}: workspace must own the home-ref-grid root"
-            )
+            violations.append(f"{path_label}: workspace must own the home-ref-grid root")
         for child in ("HomeProfilePanel", "HomeCombatShowcase"):
             if len(re.findall(rf"<{child}\b", source)) != 1:
-                violations.append(
-                    f"{path_label}: workspace must render {child} exactly once"
-                )
+                violations.append(f"{path_label}: workspace must render {child} exactly once")
         if re.search(
             r"\{\s*\.\.\.|\b(?:query|loadout|controller|integration|render[A-Z]\w*)\s*=",
             source,
@@ -974,20 +911,14 @@ def home_hub_source_violations(
             )
 
     if role == "status":
-        router_modules = [
-            module
-            for module in modules
-            if module == "react-router-dom"
-        ]
+        router_modules = [module for module in modules if module == "react-router-dom"]
         exact_link_imports = len(
             re.findall(
                 r"\bimport\s*\{\s*Link\s*\}\s*from\s*['\"]react-router-dom['\"]",
                 source,
             )
         )
-        if router_modules and not (
-            len(router_modules) == 1 and exact_link_imports == 1
-        ):
+        if router_modules and not (len(router_modules) == 1 and exact_link_imports == 1):
             violations.append(
                 f"{path_label}: Home Hub {role} may import only static Link from react-router-dom"
             )
@@ -999,9 +930,7 @@ def home_hub_source_violations(
             "home-rank-view",
         ):
             if required_marker not in source:
-                violations.append(
-                    f"{path_label}: Profile panel must own {required_marker}"
-                )
+                violations.append(f"{path_label}: Profile panel must own {required_marker}")
 
     if role == "combat":
         for required_marker in (
@@ -1015,9 +944,7 @@ def home_hub_source_violations(
             "SpriteAnimator",
         ):
             if not re.search(rf"\b{re.escape(required_marker)}\b", source):
-                violations.append(
-                    f"{path_label}: Combat showcase must own {required_marker}"
-                )
+                violations.append(f"{path_label}: Combat showcase must own {required_marker}")
 
     if role == "status":
         for required_marker in (
@@ -1027,9 +954,7 @@ def home_hub_source_violations(
             "home-sprite-stage--empty",
         ):
             if required_marker not in source:
-                violations.append(
-                    f"{path_label}: Companion status must own {required_marker}"
-                )
+                violations.append(f"{path_label}: Companion status must own {required_marker}")
 
     if role == "contract":
         without_comments = strip_ts_comments(source)
@@ -1055,9 +980,10 @@ export type UnresolvedCompanionPresentation = Exclude<
             violations.append(
                 f"{path_label}: companion presentation contract must remain type-only"
             )
-        if re.sub(r"\s+", " ", without_comments).strip() != re.sub(
-            r"\s+", " ", expected_contract
-        ).strip():
+        if (
+            re.sub(r"\s+", " ", without_comments).strip()
+            != re.sub(r"\s+", " ", expected_contract).strip()
+        ):
             violations.append(
                 f"{path_label}: companion presentation contract must contain only the canonical type-only union"
             )
@@ -1109,9 +1035,7 @@ def home_hub_hook_owner_violations(sources: dict[str, str]) -> list[str]:
             call_sites = {
                 match.start()
                 for binding in local_bindings
-                for match in re.finditer(
-                    rf"\b{re.escape(binding)}\s*\(", analyzed_source
-                )
+                for match in re.finditer(rf"\b{re.escape(binding)}\s*\(", analyzed_source)
             }
             namespace_bindings = ts_namespace_import_bindings(
                 analyzed_source,
@@ -1240,17 +1164,13 @@ def home_overview_source_violations(
 
     modules = ts_module_specifiers(source)
     canonical_modules = [
-        canonical_ts_module_reference(module=module, path_label=path_label)
-        for module in modules
+        canonical_ts_module_reference(module=module, path_label=path_label) for module in modules
     ]
     for module, canonical_module in zip(modules, canonical_modules, strict=True):
         if any(
-            ts_module_matches_boundary(canonical_module, boundary)
-            for boundary in forbidden_modules
+            ts_module_matches_boundary(canonical_module, boundary) for boundary in forbidden_modules
         ):
-            violations.append(
-                f"{path_label}: Home Overview {role} must not import {module}"
-            )
+            violations.append(f"{path_label}: Home Overview {role} must not import {module}")
 
     required_imports = {
         "composition": (
@@ -1325,31 +1245,21 @@ def home_overview_source_violations(
             else marker in source
         )
         if owns_marker:
-            violations.append(
-                f"{path_label}: Home Overview {role} must not own {marker}"
-            )
+            violations.append(f"{path_label}: Home Overview {role} must not own {marker}")
 
     if re.search(r"<[A-Z][A-Za-z0-9]*\b[^>]*\{\s*\.\.\.", source, re.S):
         violations.append(
             f"{path_label}: Home Overview owners must not spread objects across component boundaries"
         )
     if re.search(r"\brender[A-Z][A-Za-z0-9]*\s*=", source):
-        violations.append(
-            f"{path_label}: Home Overview owners must not accept render props"
-        )
+        violations.append(f"{path_label}: Home Overview owners must not accept render props")
 
     if role == "composition":
         required_calls = {
             "useMemo": len(re.findall(r"\buseMemo\s*\(", source)),
-            "buildHomeStatsModel": len(
-                re.findall(r"\bbuildHomeStatsModel\s*\(", source)
-            ),
-            "HomeStatsDashboard render": len(
-                re.findall(r"<HomeStatsDashboard\b", source)
-            ),
-            "HomeAchievementGallery render": len(
-                re.findall(r"<HomeAchievementGallery\b", source)
-            ),
+            "buildHomeStatsModel": len(re.findall(r"\bbuildHomeStatsModel\s*\(", source)),
+            "HomeStatsDashboard render": len(re.findall(r"<HomeStatsDashboard\b", source)),
+            "HomeAchievementGallery render": len(re.findall(r"<HomeAchievementGallery\b", source)),
         }
         for marker, count in required_calls.items():
             if count != 1:
@@ -1430,9 +1340,7 @@ def home_overview_source_violations(
             r"\(\s*\{[^}]*\b(?:home|stats)\b[^}]*\}\s*(?::|,|\))",
             source,
         ):
-            violations.append(
-                f"{path_label}: gallery must not receive raw home or stats summaries"
-            )
+            violations.append(f"{path_label}: gallery must not receive raw home or stats summaries")
     return violations
 
 
@@ -1486,9 +1394,7 @@ def css_has_top_level_selector(source: str, selector: str, *, exact: bool) -> bo
         if header.startswith("@"):
             continue
         for branch in css_selector_list(header):
-            matches = (
-                branch == selector if exact else bool(selector_token.search(branch))
-            )
+            matches = branch == selector if exact else bool(selector_token.search(branch))
             if matches:
                 return True
     return False
@@ -1519,9 +1425,7 @@ def home_overview_css_source_violations(
     imports = css_import_specifiers(source)
     if role == "home-entry":
         if imports.count("./home/stats.css") != 1:
-            violations.append(
-                f"{path_label}: home entry must import ./home/stats.css exactly once"
-            )
+            violations.append(f"{path_label}: home entry must import ./home/stats.css exactly once")
         for displaced in ("./home/achievements.css", "./home/stats-actions.css"):
             if displaced in imports:
                 violations.append(f"{path_label}: must not import deleted {displaced}")
@@ -1548,9 +1452,7 @@ def home_overview_css_source_violations(
     elif role == "responsive":
         headers = css_top_level_rule_headers(source)
         if not headers or any(not header.startswith("@media") for header in headers):
-            violations.append(
-                f"{path_label}: stats-responsive may contain breakpoint rules only"
-            )
+            violations.append(f"{path_label}: stats-responsive may contain breakpoint rules only")
     elif role == "scan":
         owner = "frontend/src/styles/features/home/stats-achievements.css"
         if path_label != owner and css_has_top_level_selector(
@@ -1595,9 +1497,7 @@ def check_home_overview_ownership() -> list[str]:
     expected_production_paths = {rel(path) for path, _ in targets}
     for path, role in targets:
         if not path.exists():
-            violations.append(
-                f"{rel(path)}: required Home Overview {role} owner is missing"
-            )
+            violations.append(f"{rel(path)}: required Home Overview {role} owner is missing")
             continue
         violations.extend(
             home_overview_source_violations(
@@ -1638,13 +1538,9 @@ def check_home_overview_ownership() -> list[str]:
         )
         allowed = allowed_child_edges.get(path_rel, set())
         for module in ts_module_specifiers(source):
-            canonical = canonical_ts_module_reference(
-                module=module, path_label=path_rel
-            )
+            canonical = canonical_ts_module_reference(module=module, path_label=path_rel)
             if canonical in child_modules and canonical not in allowed:
-                violations.append(
-                    f"{path_rel}: must not import Home Overview child owner {module}"
-                )
+                violations.append(f"{path_rel}: must not import Home Overview child owner {module}")
 
     css_targets = (
         (ROOT / "frontend/src/styles/features/home.css", "home-entry"),
@@ -1657,9 +1553,7 @@ def check_home_overview_ownership() -> list[str]:
     )
     for path, role in css_targets:
         if not path.exists():
-            violations.append(
-                f"{rel(path)}: required Home Overview CSS {role} owner is missing"
-            )
+            violations.append(f"{rel(path)}: required Home Overview CSS {role} owner is missing")
             continue
         violations.extend(
             home_overview_css_source_violations(
@@ -1671,9 +1565,7 @@ def check_home_overview_ownership() -> list[str]:
 
     for displaced in sorted(HOME_STATS_DISPLACED_CSS):
         if (ROOT / displaced).exists():
-            violations.append(
-                f"{displaced}: displaced Home Overview CSS must stay deleted"
-            )
+            violations.append(f"{displaced}: displaced Home Overview CSS must stay deleted")
 
     for path in iter_files(FRONTEND_SRC / "styles", {".css"}):
         source = path.read_text(encoding="utf-8", errors="ignore")
@@ -1686,9 +1578,8 @@ def check_home_overview_ownership() -> list[str]:
         )
 
     achievements_path = ROOT / achievement_utility
-    if (
-        achievements_path.exists()
-        and "latestAchievement" in achievements_path.read_text(encoding="utf-8")
+    if achievements_path.exists() and "latestAchievement" in achievements_path.read_text(
+        encoding="utf-8"
     ):
         violations.append(
             f"{achievement_utility}: displaced latestAchievement helper must stay deleted"
@@ -1729,10 +1620,7 @@ def check_backend_frontend_references_are_allowlisted() -> list[str]:
         path_rel = rel(path)
         text = path.read_text(encoding="utf-8", errors="ignore")
         for lineno, line in enumerate(text.splitlines(), start=1):
-            if (
-                FRONTEND_PATH_REFERENCE.search(line)
-                and path_rel not in BACKEND_FRONTEND_ALLOWLIST
-            ):
+            if FRONTEND_PATH_REFERENCE.search(line) and path_rel not in BACKEND_FRONTEND_ALLOWLIST:
                 violations.append(
                     f"{path_rel}:{lineno}: backend code must not depend on frontend files: {line.strip()}"
                 )
@@ -1760,9 +1648,7 @@ def check_frontend_feature_roots_are_thin() -> list[str]:
         return violations
     for feature in sorted(path for path in features.iterdir() if path.is_dir()):
         for child in sorted(
-            path
-            for path in feature.iterdir()
-            if path.is_file() and path.suffix in TS_SUFFIXES
+            path for path in feature.iterdir() if path.is_file() and path.suffix in TS_SUFFIXES
         ):
             if child.name not in ROOT_FEATURE_ALLOWED_FILES:
                 violations.append(
@@ -1810,9 +1696,7 @@ def check_backend_layer_package_inits_are_thin() -> list[str]:
             init_path = app_dir / module_name / "__init__.py"
             if not init_path.exists():
                 continue
-            line_count = len(
-                init_path.read_text(encoding="utf-8", errors="ignore").splitlines()
-            )
+            line_count = len(init_path.read_text(encoding="utf-8", errors="ignore").splitlines())
             if line_count > THIN_BACKEND_PACKAGE_INIT_MAX_LINES:
                 violations.append(
                     f"{rel(init_path)}: package initializer has {line_count} lines; move implementation into named modules and keep __init__.py as exports only"
@@ -1831,9 +1715,7 @@ def check_backend_common_shape() -> list[str]:
             )
     for directory in [common / "git", common / "schemas", common / "services"]:
         if not directory.exists() or not (directory / "__init__.py").exists():
-            violations.append(
-                f"{rel(directory)}: required common subpackage is missing"
-            )
+            violations.append(f"{rel(directory)}: required common subpackage is missing")
     return violations
 
 
@@ -1847,9 +1729,7 @@ def check_backend_service_packages() -> list[str]:
                 f"{rel(file_path)}: service layer must be a package, not a flat services.py file"
             )
         if not package_path.exists():
-            violations.append(
-                f"{rel(package_path)}: expected service package entrypoint"
-            )
+            violations.append(f"{rel(package_path)}: expected service package entrypoint")
     return violations
 
 
@@ -1873,9 +1753,7 @@ def check_curriculum_seed_public_modules_are_thin() -> list[str]:
             (public_module, "public"),
             (source_module, "source compatibility"),
         ):
-            line_count = len(
-                module_path.read_text(encoding="utf-8", errors="ignore").splitlines()
-            )
+            line_count = len(module_path.read_text(encoding="utf-8", errors="ignore").splitlines())
             if line_count > 50:
                 violations.append(
                     f"{rel(module_path)}: {label} seed-data module has {line_count} lines; keep authored data in partitioned source packages"

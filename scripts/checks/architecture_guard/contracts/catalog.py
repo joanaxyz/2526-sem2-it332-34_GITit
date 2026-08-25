@@ -38,7 +38,6 @@ from scripts.checks.architecture_guard.typescript_analysis import (
     ts_type_aliases,
 )
 
-
 CATALOG_BACKEND_SERIALIZERS = "backend/curriculum/serializers.py"
 CATALOG_FRONTEND_TYPES = "frontend/src/features/story-map/types.ts"
 CATALOG_FRONTEND_API = "frontend/src/features/story-map/api/storyMapApi.ts"
@@ -132,8 +131,7 @@ def is_catalog_root_type_expression(
     schema_root = "|".join(re.escape(name) for name in sorted(schemas))
     root = rf"(?:(?:{schema_root})\['(?:Story|ChapterList)'\]|(?:{named_root}))"
     return bool(
-        re.fullmatch(root, normalized)
-        or re.search(rf"(?:^|[&|]){root}(?:$|[&|])", normalized)
+        re.fullmatch(root, normalized) or re.search(rf"(?:^|[&|]){root}(?:$|[&|])", normalized)
     )
 
 
@@ -203,9 +201,7 @@ def python_catalog_contract_symbols(
                         statement.target, ast.Name
                     ):
                         fields.add(statement.target.id)
-                catalog_base = any(
-                    expression_references_contract(base) for base in node.bases
-                )
+                catalog_base = any(expression_references_contract(base) for base in node.bases)
                 serializer_based = catalog_base or any(
                     "serializer" in ast.unparse(base).lower() for base in node.bases
                 )
@@ -213,9 +209,7 @@ def python_catalog_contract_symbols(
                     fields >= expected for expected in CATALOG_RESPONSE_FIELD_SETS
                 )
                 owns_contract = serializer_based and (
-                    catalog_base
-                    or is_catalog_contract_symbol(node.name)
-                    or structural_copy
+                    catalog_base or is_catalog_contract_symbol(node.name) or structural_copy
                 )
                 if owns_contract and node.name not in symbol_set:
                     symbols.append(node.name)
@@ -227,9 +221,7 @@ def python_catalog_contract_symbols(
             names: list[str] = []
             value: ast.expr | None = None
             if isinstance(node, ast.Assign):
-                names = [
-                    target.id for target in node.targets if isinstance(target, ast.Name)
-                ]
+                names = [target.id for target in node.targets if isinstance(target, ast.Name)]
                 value = node.value
             elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
                 names = [node.target.id]
@@ -300,8 +292,7 @@ def catalog_secondary_frontend_contract_violations(
             for name, (extends, body) in interfaces.items()
             if is_catalog_frontend_contract_symbol(name)
             or any(
-                re.search(rf"\b{re.escape(canonical)}\b", extends)
-                for canonical in canonical_names
+                re.search(rf"\b{re.escape(canonical)}\b", extends) for canonical in canonical_names
             )
             or any(
                 ts_object_type_field_names(body) >= expected
@@ -545,8 +536,7 @@ def catalog_contract_source_violations(
         if is_catalog_frontend_contract_symbol(name)
         or bool(re.search(r"\b(?:Story|LearningChapter)\b", extends))
         or any(
-            ts_object_type_field_names(body) >= expected
-            for expected in CATALOG_RESPONSE_FIELD_SETS
+            ts_object_type_field_names(body) >= expected for expected in CATALOG_RESPONSE_FIELD_SETS
         )
     )
     if extra_catalog_aliases or extra_catalog_interfaces:
@@ -565,9 +555,7 @@ def catalog_contract_source_violations(
     }
     for method_name, expected_body in expected_method_bodies.items():
         body = ts_object_method_body(api_without_comments, method_name)
-        actual_body = (
-            normalized_ts_type(body).replace(";", "") if body is not None else ""
-        )
+        actual_body = normalized_ts_type(body).replace(";", "") if body is not None else ""
         if actual_body != expected_body:
             violations.append(
                 f"{CATALOG_FRONTEND_API}: {method_name} must return the generated operation "
@@ -581,9 +569,7 @@ def catalog_contract_source_violations(
             re.S,
         )
         if call is None:
-            violations.append(
-                f"{CATALOG_FRONTEND_API}: missing generated {operation_id} request"
-            )
+            violations.append(f"{CATALOG_FRONTEND_API}: missing generated {operation_id} request")
         elif call.group("generics") and "," in call.group("generics"):
             violations.append(
                 f"{CATALOG_FRONTEND_API}: {operation_id} must not pass a custom response generic"
@@ -672,9 +658,7 @@ def catalog_openapi_contract_violations(schema: dict) -> list[str]:
     for schema_name, expected in expected_properties.items():
         component = schemas.get(schema_name)
         actual = component.get("properties", {}) if isinstance(component, dict) else {}
-        required = (
-            set(component.get("required", [])) if isinstance(component, dict) else set()
-        )
+        required = set(component.get("required", [])) if isinstance(component, dict) else set()
         if (
             not isinstance(component, dict)
             or component.get("type") != "object"
@@ -726,13 +710,9 @@ def check_catalog_contract_ownership() -> list[str]:
     )
     missing = [path for path in path_labels if not (ROOT / path).is_file()]
     if missing:
-        return [
-            f"{path}: required catalog contract owner is missing" for path in missing
-        ]
+        return [f"{path}: required catalog contract owner is missing" for path in missing]
 
-    serializers_source = (ROOT / CATALOG_BACKEND_SERIALIZERS).read_text(
-        encoding="utf-8"
-    )
+    serializers_source = (ROOT / CATALOG_BACKEND_SERIALIZERS).read_text(encoding="utf-8")
     violations = catalog_contract_source_violations(
         serializers_source=serializers_source,
         story_types_source=(ROOT / CATALOG_FRONTEND_TYPES).read_text(encoding="utf-8"),
@@ -745,9 +725,7 @@ def check_catalog_contract_ownership() -> list[str]:
         and not any(part in {"migrations", "tests"} for part in path.parts)
         and not path.name.startswith("test_")
     }
-    violations.extend(
-        catalog_secondary_backend_contract_violations(secondary_backend_sources)
-    )
+    violations.extend(catalog_secondary_backend_contract_violations(secondary_backend_sources))
     secondary_frontend_sources = {
         rel(path): path.read_text(encoding="utf-8", errors="ignore")
         for path in iter_files(FRONTEND_SRC, TS_SUFFIXES)
@@ -757,17 +735,11 @@ def check_catalog_contract_ownership() -> list[str]:
         and ".test." not in path.name
         and ".spec." not in path.name
     }
-    violations.extend(
-        catalog_secondary_frontend_contract_violations(secondary_frontend_sources)
-    )
+    violations.extend(catalog_secondary_frontend_contract_violations(secondary_frontend_sources))
     try:
-        schema = json.loads(
-            (ROOT / CATALOG_GENERATED_OPENAPI).read_text(encoding="utf-8")
-        )
+        schema = json.loads((ROOT / CATALOG_GENERATED_OPENAPI).read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as error:
-        violations.append(
-            f"{CATALOG_GENERATED_OPENAPI}: invalid generated schema: {error}"
-        )
+        violations.append(f"{CATALOG_GENERATED_OPENAPI}: invalid generated schema: {error}")
     else:
         violations.extend(catalog_openapi_contract_violations(schema))
     return violations

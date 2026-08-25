@@ -33,9 +33,7 @@ MUTATING_METHODS = frozenset(
     }
 )
 
-MUTATING_OPERATOR_FUNCTIONS = frozenset(
-    {"delitem", "iadd", "iconcat", "imul", "ior", "setitem"}
-)
+MUTATING_OPERATOR_FUNCTIONS = frozenset({"delitem", "iadd", "iconcat", "imul", "ior", "setitem"})
 
 READ_ONLY_PARAMETER_METHODS = frozenset(
     {
@@ -63,9 +61,7 @@ def _literal_immutable_value(node: ast.AST | None) -> bool:
     if isinstance(node, ast.Tuple):
         return all(_literal_immutable_value(element) for element in node.elts)
     if isinstance(node, ast.Dict):
-        return all(
-            _literal_immutable_value(item) for item in [*node.keys, *node.values]
-        )
+        return all(_literal_immutable_value(item) for item in [*node.keys, *node.values])
     return False
 
 
@@ -199,8 +195,7 @@ def _derived_from_owner(
         return False
     if isinstance(node, (ast.List, ast.Set, ast.Tuple)):
         return any(
-            _derived_from_owner(element, symbol=symbol, aliases=aliases)
-            for element in node.elts
+            _derived_from_owner(element, symbol=symbol, aliases=aliases) for element in node.elts
         )
     if isinstance(node, ast.Dict):
         return any(
@@ -421,9 +416,7 @@ def _local_binding_names(tree: ast.AST, store_counts: dict[str, int]) -> set[str
         if isinstance(node, (ast.Import, ast.ImportFrom))
         for item in node.names
     )
-    names.update(
-        name for node in ast.walk(tree) for name in _statement_bound_names(node)
-    )
+    names.update(name for node in ast.walk(tree) for name in _statement_bound_names(node))
     return names
 
 
@@ -441,9 +434,7 @@ class _LexicalBindings:
     def __init__(self, tree: ast.AST) -> None:
         self.tree = tree
         self.parents = {
-            child: parent
-            for parent in ast.walk(tree)
-            for child in ast.iter_child_nodes(parent)
+            child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)
         }
         self._binding_cache: dict[ast.AST, set[str]] = {}
         self._namespace_capabilities: dict[tuple[ast.AST, str], set[int]] = {}
@@ -537,9 +528,7 @@ class _LexicalBindings:
         name: str,
     ) -> bool:
         return any(
-            isinstance(node, declaration)
-            and name in node.names
-            and self.scope(node) is scope
+            isinstance(node, declaration) and name in node.names and self.scope(node) is scope
             for node in ast.walk(scope)
         )
 
@@ -600,13 +589,11 @@ class _LexicalBindings:
         if isinstance(node, (ast.Await, ast.NamedExpr, ast.Starred)):
             return self.namespace_container_depths(node.value)
         if isinstance(node, ast.IfExp):
-            return self.namespace_container_depths(
-                node.body
-            ) | self.namespace_container_depths(node.orelse)
-        if isinstance(node, ast.BoolOp):
-            return set().union(
-                *(self.namespace_container_depths(value) for value in node.values)
+            return self.namespace_container_depths(node.body) | self.namespace_container_depths(
+                node.orelse
             )
+        if isinstance(node, ast.BoolOp):
+            return set().union(*(self.namespace_container_depths(value) for value in node.values))
         return set()
 
     def _resolved_local_function(
@@ -664,9 +651,7 @@ class _LexicalBindings:
         if self.current_module_object(node):
             return {0}
         if isinstance(node, ast.Await):
-            return {
-                depth - 1 for depth in self.namespace_depths(node.value) if depth > 0
-            }
+            return {depth - 1 for depth in self.namespace_depths(node.value) if depth > 0}
         if isinstance(node, (ast.NamedExpr, ast.Starred)):
             return self.namespace_depths(node.value)
         if isinstance(node, ast.Lambda):
@@ -726,9 +711,7 @@ class _LexicalBindings:
             or node.keywords
         ):
             if isinstance(node, ast.Call):
-                return {
-                    depth - 1 for depth in self.namespace_depths(node.func) if depth > 0
-                }
+                return {depth - 1 for depth in self.namespace_depths(node.func) if depth > 0}
             return set()
         name = node.func.id
         if name == "globals" and self.builtin_is_unshadowed(node, name):
@@ -781,9 +764,7 @@ class _LexicalBindings:
                     *node.args.args,
                 ]
                 default_parameters = (
-                    positional_parameters[-len(node.args.defaults) :]
-                    if node.args.defaults
-                    else []
+                    positional_parameters[-len(node.args.defaults) :] if node.args.defaults else []
                 )
                 for parameter, default in zip(
                     default_parameters,
@@ -1048,10 +1029,7 @@ def _owner_import_context(
             for item in node.names:
                 if item.name == symbol:
                     aliases.add(item.asname or item.name)
-                if (
-                    node.module == "operator"
-                    and item.name in MUTATING_OPERATOR_FUNCTIONS
-                ):
+                if node.module == "operator" and item.name in MUTATING_OPERATOR_FUNCTIONS:
                     imported_operator_mutators.add(item.asname or item.name)
                 if node.module == "operator" and item.name == "methodcaller":
                     imported_methodcallers.add(item.asname or item.name)
@@ -1140,9 +1118,7 @@ def _safe_sink_identity_names(
             _safe_sink_identity_names(node.orelse, safe_sink_names),
         ]
     elif isinstance(node, ast.BoolOp):
-        branches = [
-            _safe_sink_identity_names(value, safe_sink_names) for value in node.values
-        ]
+        branches = [_safe_sink_identity_names(value, safe_sink_names) for value in node.values]
     else:
         return set()
     if any(not branch for branch in branches):
@@ -1208,11 +1184,7 @@ def _fresh_container_names(
                     node.value,
                     names,
                 ):
-                    if (
-                        identities
-                        and name not in names
-                        and definition_store_counts.get(name) == 1
-                    ):
+                    if identities and name not in names and definition_store_counts.get(name) == 1:
                         names.add(name)
                         changed = True
     return names
@@ -1286,9 +1258,7 @@ class _OwnerProvenance:
         if isinstance(node, ast.NamedExpr):
             return self.contains_owner(node.value)
         if isinstance(node, (ast.List, ast.Set, ast.Tuple)):
-            return any(
-                self.derived(item) or self.contains_owner(item) for item in node.elts
-            )
+            return any(self.derived(item) or self.contains_owner(item) for item in node.elts)
         if isinstance(node, ast.Dict):
             return any(
                 self.derived(item) or self.contains_owner(item)
@@ -1306,8 +1276,7 @@ class _OwnerProvenance:
             )
         if isinstance(node, ast.DictComp):
             return any(
-                self.derived(item) or self.contains_owner(item)
-                for item in (node.key, node.value)
+                self.derived(item) or self.contains_owner(item) for item in (node.key, node.value)
             ) or any(
                 self.derived(generator.iter) or self.contains_owner(generator.iter)
                 for generator in node.generators
@@ -1318,8 +1287,7 @@ class _OwnerProvenance:
             return any(self.contains_owner(item) for item in node.values)
         if isinstance(node, ast.BinOp):
             return any(
-                self.derived(item) or self.contains_owner(item)
-                for item in (node.left, node.right)
+                self.derived(item) or self.contains_owner(item) for item in (node.left, node.right)
             )
         if isinstance(node, ast.Call):
             if isinstance(node.func, ast.Name) and node.func.id in {
@@ -1334,9 +1302,7 @@ class _OwnerProvenance:
                     self.derived(item) or self.contains_owner(item)
                     for item in [*node.args, *[kw.value for kw in node.keywords]]
                 )
-            if isinstance(node.func, ast.Attribute) and self.contains_owner(
-                node.func.value
-            ):
+            if isinstance(node.func, ast.Attribute) and self.contains_owner(node.func.value):
                 return node.func.attr in {"copy", "items", "values"}
         return False
 
@@ -1374,8 +1340,7 @@ class _OwnerProvenance:
             isinstance(node, ast.Call)
             and isinstance(node.func, ast.Attribute)
             and (self.derived(node.func.value) or self.contains_owner(node.func.value))
-            and node.func.attr
-            in {"get", "items", "pop", "popitem", "values", "__getitem__"}
+            and node.func.attr in {"get", "items", "pop", "popitem", "values", "__getitem__"}
         ):
             return True
         if (
@@ -1395,11 +1360,7 @@ class _OwnerProvenance:
             )
         ):
             return True
-        analyzer = (
-            _richly_derived_from_owner
-            if self._rich_expressions
-            else _derived_from_owner
-        )
+        analyzer = _richly_derived_from_owner if self._rich_expressions else _derived_from_owner
         return analyzer(node, symbol=self.symbol, aliases=self.aliases)
 
     def owner_returning_callable(self, node: ast.AST | None) -> bool:
@@ -1410,13 +1371,13 @@ class _OwnerProvenance:
         if isinstance(node, (ast.Await, ast.NamedExpr, ast.Starred)):
             return self.owner_returning_callable(node.value)
         if isinstance(node, ast.IfExp):
-            return self.owner_returning_callable(
-                node.body
-            ) or self.owner_returning_callable(node.orelse)
+            return self.owner_returning_callable(node.body) or self.owner_returning_callable(
+                node.orelse
+            )
         if isinstance(node, ast.BinOp):
-            return self.owner_returning_callable(
-                node.left
-            ) or self.owner_returning_callable(node.right)
+            return self.owner_returning_callable(node.left) or self.owner_returning_callable(
+                node.right
+            )
         if isinstance(node, (ast.BoolOp, ast.List, ast.Set, ast.Tuple)):
             candidates = node.values if isinstance(node, ast.BoolOp) else node.elts
             return any(self.owner_returning_callable(item) for item in candidates)
@@ -1429,9 +1390,9 @@ class _OwnerProvenance:
         if isinstance(node, (ast.GeneratorExp, ast.ListComp, ast.SetComp)):
             return self.owner_returning_callable(node.elt)
         if isinstance(node, ast.DictComp):
-            return self.owner_returning_callable(
-                node.key
-            ) or self.owner_returning_callable(node.value)
+            return self.owner_returning_callable(node.key) or self.owner_returning_callable(
+                node.value
+            )
         if isinstance(node, ast.Subscript):
             return self.owner_returning_callable(node.value)
         if isinstance(node, ast.Call):
@@ -1481,13 +1442,13 @@ class _OwnerProvenance:
         if isinstance(node, (ast.Await, ast.NamedExpr, ast.Starred)):
             return self.escapable_owner_callable(node.value)
         if isinstance(node, ast.IfExp):
-            return self.escapable_owner_callable(
-                node.body
-            ) or self.escapable_owner_callable(node.orelse)
+            return self.escapable_owner_callable(node.body) or self.escapable_owner_callable(
+                node.orelse
+            )
         if isinstance(node, ast.BinOp):
-            return self.escapable_owner_callable(
-                node.left
-            ) or self.escapable_owner_callable(node.right)
+            return self.escapable_owner_callable(node.left) or self.escapable_owner_callable(
+                node.right
+            )
         if isinstance(node, (ast.BoolOp, ast.List, ast.Set, ast.Tuple)):
             candidates = node.values if isinstance(node, ast.BoolOp) else node.elts
             return any(self.escapable_owner_callable(item) for item in candidates)
@@ -1500,15 +1461,13 @@ class _OwnerProvenance:
         if isinstance(node, (ast.GeneratorExp, ast.ListComp, ast.SetComp)):
             return self.escapable_owner_callable(node.elt)
         if isinstance(node, ast.DictComp):
-            return self.escapable_owner_callable(
-                node.key
-            ) or self.escapable_owner_callable(node.value)
+            return self.escapable_owner_callable(node.key) or self.escapable_owner_callable(
+                node.value
+            )
         if isinstance(node, ast.Subscript):
             return self.escapable_owner_callable(node.value)
         if isinstance(node, ast.Call):
-            if isinstance(node.func, ast.Name) and self.escapable_owner_callable(
-                node.func
-            ):
+            if isinstance(node.func, ast.Name) and self.escapable_owner_callable(node.func):
                 return True
             if isinstance(node.func, ast.Name) and node.func.id in {
                 "dict",
@@ -1584,9 +1543,7 @@ class _OwnerProvenance:
                     if value_is_derived and name not in self.aliases:
                         self.aliases.add(name)
                         changed = True
-                    elif (
-                        value_contains_owner and name not in self.contained_owner_names
-                    ):
+                    elif value_contains_owner and name not in self.contained_owner_names:
                         self.contained_owner_names.add(name)
                         changed = True
         return changed
@@ -1601,9 +1558,7 @@ class _OwnerProvenance:
                 continue
             positional_parameters = [*node.args.posonlyargs, *node.args.args]
             default_parameters = (
-                positional_parameters[-len(node.args.defaults) :]
-                if node.args.defaults
-                else []
+                positional_parameters[-len(node.args.defaults) :] if node.args.defaults else []
             )
             bindings = [
                 *zip(default_parameters, node.args.defaults, strict=True),
@@ -1621,10 +1576,7 @@ class _OwnerProvenance:
                 if self.derived(default) and parameter.arg not in self.aliases:
                     self.aliases.add(parameter.arg)
                     changed = True
-                if (
-                    self.contains_owner(default)
-                    and parameter.arg not in self.contained_owner_names
-                ):
+                if self.contains_owner(default) and parameter.arg not in self.contained_owner_names:
                     self.contained_owner_names.add(parameter.arg)
                     changed = True
                 if (
@@ -1741,10 +1693,7 @@ class _OwnerProvenance:
                 and (self.derived(node.value) or self.contains_owner(node.value))
             ):
                 sink_name = _root_name(node.target)
-                if (
-                    sink_name is not None
-                    and sink_name not in self.contained_owner_names
-                ):
+                if sink_name is not None and sink_name not in self.contained_owner_names:
                     self.contained_owner_names.add(sink_name)
                     changed = True
         return changed
@@ -1859,9 +1808,7 @@ class _MutatorClassifier:
             return self.kind(node.value)
         if isinstance(node, (ast.Subscript, ast.IfExp)):
             candidates = (
-                [node.value]
-                if isinstance(node, ast.Subscript)
-                else [node.body, node.orelse]
+                [node.value] if isinstance(node, ast.Subscript) else [node.body, node.orelse]
             )
         elif isinstance(node, (ast.BoolOp, ast.List, ast.Set, ast.Tuple)):
             candidates = node.values if isinstance(node, ast.BoolOp) else node.elts
@@ -1884,9 +1831,7 @@ class _MutatorClassifier:
                 kind = self.kind(node.value)
                 if kind is None:
                     continue
-                destination = (
-                    self._bound_aliases if kind == "bound" else self._unbound_aliases
-                )
+                destination = self._bound_aliases if kind == "bound" else self._unbound_aliases
                 for target in _assignment_targets(node):
                     for name in _bound_target_names(target):
                         if name not in destination:
@@ -2005,9 +1950,7 @@ def _mutable_owner_mutations(
 
     analyzer = _analyzer or MutableOwnerAnalyzer(tree)
     if analyzer.tree is not tree:
-        raise ValueError(
-            "mutable-owner analyzer tree does not match the requested tree"
-        )
+        raise ValueError("mutable-owner analyzer tree does not match the requested tree")
     (
         aliases,
         operator_module_aliases,
@@ -2156,9 +2099,7 @@ def _mutable_owner_mutations(
         node
         for node in analyzer.nodes
         if mutators.kind(node) == "bound"
-        and not (
-            isinstance((parent := parents.get(node)), ast.Call) and parent.func is node
-        )
+        and not (isinstance((parent := parents.get(node)), ast.Call) and parent.func is node)
     )
     definition_seen = False
     for node in analyzer.nodes:
@@ -2189,8 +2130,7 @@ def _mutable_owner_mutations(
                 ):
                     mutations.append(node)
                 elif any(
-                    lexical.protected_namespace_slot(sink, symbol)
-                    or derived(sink.value)
+                    lexical.protected_namespace_slot(sink, symbol) or derived(sink.value)
                     for sink in sink_targets
                 ):
                     mutations.append(node)
@@ -2217,11 +2157,7 @@ def _mutable_owner_mutations(
             _import_bound_names(node)
         ):
             scope = lexical.scope(node)
-            if (
-                isinstance(scope, ast.Module)
-                and node in scope.body
-                and not definition_seen
-            ):
+            if isinstance(scope, ast.Module) and node in scope.body and not definition_seen:
                 definition_seen = True
             elif isinstance(scope, ast.Module) or lexical.scope_rebinds_outer_name(
                 scope,
@@ -2230,9 +2166,7 @@ def _mutable_owner_mutations(
                 mutations.append(node)
         elif isinstance(node, (ast.With, ast.AsyncWith)):
             optional_targets = [
-                item.optional_vars
-                for item in node.items
-                if item.optional_vars is not None
+                item.optional_vars for item in node.items if item.optional_vars is not None
             ]
             if any(
                 symbol in _bound_target_names(target)

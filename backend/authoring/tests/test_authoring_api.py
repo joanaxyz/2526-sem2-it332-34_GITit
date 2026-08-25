@@ -174,9 +174,7 @@ def test_staff_content_compiles_into_selected_official_chapter(django_user_model
     test_run = client.post(f"/api/authoring/content-definitions/{definition_id}/test-run/")
     assert test_run.status_code == 400
     assert "official_chapter" in test_run.json()
-    assert not PublishedContentRuntime.objects.filter(
-        content_definition_id=definition_id
-    ).exists()
+    assert not PublishedContentRuntime.objects.filter(content_definition_id=definition_id).exists()
     updated = client.patch(
         f"/api/authoring/content-definitions/{definition_id}/",
         {"summary": "Audited official update."},
@@ -196,9 +194,7 @@ def test_staff_content_compiles_into_selected_official_chapter(django_user_model
         is_published=True,
     ).exists()
     assert content.visibility == "public"
-    assert set(
-        AdminActionLog.objects.filter(actor=staff).values_list("action", flat=True)
-    ) == {
+    assert set(AdminActionLog.objects.filter(actor=staff).values_list("action", flat=True)) == {
         "official_content.create",
         "official_content.update",
         "official_content.publish",
@@ -298,9 +294,7 @@ def test_official_publish_rejects_runtime_slug_collision(django_user_model):
     )
     assert created.status_code == 201
 
-    published = client.post(
-        f"/api/authoring/content-definitions/{created.json()['id']}/publish/"
-    )
+    published = client.post(f"/api/authoring/content-definitions/{created.json()['id']}/publish/")
 
     assert published.status_code == 400
     assert "definition" in published.json()
