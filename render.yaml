@@ -31,11 +31,12 @@ services:
         value: "False"
 
       # Free web services cannot use pre-deploy commands or one-off jobs.
-      # The single-instance startup path safely migrates and idempotently seeds.
+      # Keep migrations on startup, but seed curriculum separately so a long
+      # seed cannot prevent Gunicorn/Nginx from binding the public port.
       - key: DJANGO_MIGRATE_ON_STARTUP
         value: "True"
       - key: DJANGO_SEED_ON_STARTUP
-        value: "True"
+        value: "False"
       - key: GUNICORN_WORKERS
         value: "1"
       - key: GUNICORN_THREADS
