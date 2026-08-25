@@ -85,8 +85,12 @@ deployments use `autoDeployTrigger: checksPass`.
    - `DJANGO_SUPERUSER_USERNAME`: your first admin username
    - `DJANGO_SUPERUSER_EMAIL`: your admin email
    - `DJANGO_SUPERUSER_PASSWORD`: a unique strong password
+   - `MAILGUN_API_KEY`: your Mailgun private API key
+   - `MAILGUN_DOMAIN`: the exact sending domain shown in Mailgun
+   - `DEFAULT_FROM_EMAIL`: a sender on that domain, for example `GIT it! <no-reply@mg.example.com>`
 6. Apply the Blueprint and watch the `git-it-app` Events logs.
 
+Never commit the real database URL, Mailgun API key, or administrator password.
 If the resource review shows Starter, Basic, Standard, a Render database, or
 another paid resource, stop. If Render displays **Payment Information
 Required** because of a paid Blueprint resource, cancel and confirm it is
@@ -98,7 +102,7 @@ Free web services do not support pre-deploy commands, one-off jobs, Dashboard
 shell access, or SSH. The combined container therefore performs these safe
 steps before accepting traffic:
 
-1. Validate Django's production environment.
+1. Validate Django's production environment, including required Mailgun values.
 2. Apply pending migrations to Supabase.
 3. Idempotently upsert official curriculum and command-library data.
 4. Create or update the bootstrap administrator from the prompted secrets.
@@ -133,18 +137,45 @@ request after an idle period can take about a minute while the Free service
 wakes.
 
 In a browser, verify registration, sign-in, authenticated refresh, profile
-avatar, story map, one adventure, one challenge, shop, sign-out, sign-in, and
-administrator access. Check the Network panel for `/api`, `/cosmetics`,
-`/audio`, or `/assets` 404/5xx responses.
+avatar, story map, one adventure, one challenge, shop, sign-out, sign-in,
+administrator access, and password reset. Check the Network panel for `/api`,
+`/cosmetics`, `/audio`, or `/assets` 404/5xx responses.
 
 All current runtime media is committed and copied into the combined frontend
 build. User-uploaded files would still require external object storage.
 
 ## 7. Email behavior
 
-The Blueprint uses Django's dummy email backend. Registration and gameplay
-work, but password-reset emails are discarded. No SMTP or email-provider
-account is needed for this preview.
+Production email uses `common.email_backends.MailgunEmailBackend`. It submits
+the complete Django MIME message to Mailgun's HTTPS API, so it works on Render
+Free without outbound SMTP. Existing password-reset and password-changed
+notifications continue to use Django's normal `EmailMultiAlternatives` API.
+
+The Blueprint sets:
+
+```text
+EMAIL_BACKEND=common.email_backends.MailgunEmailBackend
+MAILGUN_API_BASE_URL=https://api.mailgun.net
+MAILGUN_TIMEOUT_SECONDS=10
+```
+
+Supply these secrets in Render:
+
+```text
+MAILGUN_API_KEY=key-your-private-api-key
+MAILGUN_DOMAIN=mg.example.com
+DEFAULT_FROM_EMAIL=GIT it! <no-reply@mg.example.com>
+```
+
+`MAILGUN_DOMAIN` must exactly match the Mailgun sending domain. For production
+sending to arbitrary users, use a verified custom domain with the DNS records
+Mailgun provides. A Mailgun sandbox domain is suitable only for its authorized
+test recipients. If the Mailgun domain is hosted in Mailgun's EU region, set
+`MAILGUN_API_BASE_URL=https://api.eu.mailgun.net` instead.
+
+For an existing Blueprint instance, newly added `sync: false` variables might
+not be populated automatically during a Blueprint sync. Add the three secret
+values directly under **git-it-app → Environment** before redeploying.
 
 ## Free-tier limitations
 
@@ -155,8 +186,8 @@ account is needed for this preview.
   session revocation still has a Supabase database source of truth.
 - Free usage is subject to Render's monthly instance-hour, build-minute, and
   bandwidth allowances.
-- Supabase availability, storage, and limits are governed separately by the
-  existing Supabase project's plan.
+- Supabase and Mailgun availability, quotas, and limits are governed separately
+  by those providers' plans.
 - This topology is for a disposable preview, not a reliable 100-concurrent-user
   event.
 
@@ -170,6 +201,11 @@ Billing page before adding a card.
   commit and lists only `git-it-app` Free plus `git-it-cache` Free.
 - **Database connection fails**: use the Supabase Session pooler URL on port
   `5432`, verify its password, and keep `DATABASE_SSLMODE=require`.
+- **Mailgun configuration fails at startup**: confirm `MAILGUN_API_KEY`,
+  `MAILGUN_DOMAIN`, and `DEFAULT_FROM_EMAIL` are present in the app Environment.
+- **Mailgun accepts the request but recipients receive nothing**: verify the
+  Mailgun domain/DNS status, sender domain, recipient restrictions, and Mailgun
+  logs before changing Django code.
 - **Invalid HTTP Host or redirect loop**: confirm the app's self-referenced
   `RENDER_EXTERNAL_HOSTNAME` and proxy settings were created by the Blueprint.
 - **Readiness returns 503**: inspect the app logs for Supabase or Key Value
