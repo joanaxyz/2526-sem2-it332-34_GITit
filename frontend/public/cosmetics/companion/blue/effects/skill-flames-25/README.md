@@ -62,10 +62,8 @@ push - ground-run
 
 rebase - target-ground
 
+tag - target-ground
+
+rev-list - target-center
+
 default - charge (f: 1 - 7) -> fly (f: 8 - 15) -> impact(center) (f: 16 - 25)
-
-crop-repairs:
-
-restore - removed raw cross-cell top slice (f: 6 - 25)
-
-rebase - removed raw cross-cell top slice (f: 11 - 25)

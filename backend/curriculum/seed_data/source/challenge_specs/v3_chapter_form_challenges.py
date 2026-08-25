@@ -27,12 +27,12 @@ from curriculum.seed_data.source.adventure_level_specs.v3_frost_form_drills impo
 from curriculum.seed_data.source.adventure_level_specs.v3_skyline_form_drills import (
     LEVELS as _SKYLINE_DRILL_LEVELS,
 )
-from curriculum.seed_data.source.challenge_specs.helpers import challenge, level
-from curriculum.seed_data.source.challenge_specs.v3_story_challenges import (
-    _DIFFICULTY,
-    _advanced_variant,
-    _scenario_copy,
+from curriculum.seed_data.source.challenge_specs.advanced_challenge_support import (
+    ADVANCED_CHALLENGE_DIFFICULTY,
+    advanced_challenge_scenario_copy,
+    build_advanced_challenge_variant,
 )
+from curriculum.seed_data.source.challenge_specs.helpers import challenge, level
 
 # Diagnostics for the "-forms" challenges: reads drawn from each chapter's
 # drilled forms (never the same pairing the incident challenge leads with).
@@ -100,7 +100,7 @@ def _series_challenge(incident, *, series: str, title: str, summary: str, narrat
             else diagnostics
         )
         variants = [
-            _advanced_variant(
+            build_advanced_challenge_variant(
                 chapter_slug=chapter_slug,
                 story_title=incident.story_title,
                 chapter_title=chapter_title,
@@ -116,20 +116,24 @@ def _series_challenge(incident, *, series: str, title: str, summary: str, narrat
                 start=1,
             )
         ]
-        story, task, after = _scenario_copy(incident.story_title, chapter_title, difficulty)
+        story, task, after = advanced_challenge_scenario_copy(
+            incident.story_title,
+            chapter_title,
+            difficulty,
+        )
         trials.append(
             level(
                 difficulty,
                 story=story,
                 task=task,
-                before=_DIFFICULTY[difficulty]["before"],
+                before=ADVANCED_CHALLENGE_DIFFICULTY[difficulty]["before"],
                 after=after,
                 current=(
                     "The repository provides graph, workspace, ref, and chapter-specific diagnostic evidence."
                 ),
-                risk=_DIFFICULTY[difficulty]["risk"],
-                min_counted_commands=_DIFFICULTY[difficulty]["min"],
-                max_counted_commands=_DIFFICULTY[difficulty]["max"],
+                risk=ADVANCED_CHALLENGE_DIFFICULTY[difficulty]["risk"],
+                min_counted_commands=ADVANCED_CHALLENGE_DIFFICULTY[difficulty]["min"],
+                max_counted_commands=ADVANCED_CHALLENGE_DIFFICULTY[difficulty]["max"],
                 uses_adventure_levels=uses,
                 variants=variants,
             )

@@ -85,3 +85,20 @@ class UserSerializer(serializers.Serializer):
     username = serializers.CharField()
     email = serializers.EmailField()
     is_staff = serializers.BooleanField()
+
+
+class RegisterResponseSerializer(serializers.Serializer):
+    user = UserSerializer()
+
+
+class SessionResponseSerializer(serializers.Serializer):
+    access = serializers.CharField()
+    user = UserSerializer()
+
+
+class AccessTokenResponseSerializer(serializers.Serializer):
+    access = serializers.CharField()
+
+
+class DetailResponseSerializer(serializers.Serializer):
+    detail = serializers.CharField()

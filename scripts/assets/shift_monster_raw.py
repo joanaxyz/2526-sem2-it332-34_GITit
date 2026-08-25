@@ -29,9 +29,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from PIL import Image
-from PIL import ImageChops
-
+from PIL import Image, ImageChops
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 STORY_WORLDS_ROOT = REPO_ROOT / "frontend" / "public" / "story-worlds"
@@ -218,27 +216,74 @@ def shift_png(
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("monster", help="monster folder/species name, e.g. bone-lancer")
-    parser.add_argument("--story-world", "--theme", dest="story_world", default="arcane-spire", help="story world slug (default: arcane-spire)")
+    parser.add_argument(
+        "--story-world",
+        "--theme",
+        dest="story_world",
+        default="arcane-spire",
+        help="story world slug (default: arcane-spire)",
+    )
     target_group = parser.add_mutually_exclusive_group()
-    target_group.add_argument("--root", dest="target", action="store_const", const="root", help="shift pose/*.png")
-    target_group.add_argument("--raw", dest="target", action="store_const", const="raw", help="shift pose/raw/*.png (default)")
-    target_group.add_argument("--_raw", dest="target", action="store_const", const="_raw", help="shift pose/raw/_raw/*.png")
+    target_group.add_argument(
+        "--root", dest="target", action="store_const", const="root", help="shift pose/*.png"
+    )
+    target_group.add_argument(
+        "--raw",
+        dest="target",
+        action="store_const",
+        const="raw",
+        help="shift pose/raw/*.png (default)",
+    )
+    target_group.add_argument(
+        "--_raw",
+        dest="target",
+        action="store_const",
+        const="_raw",
+        help="shift pose/raw/_raw/*.png",
+    )
     parser.set_defaults(target="raw")
-    parser.add_argument("--raw-dir", type=Path, help="override the resolved target directory (legacy name)")
-    parser.add_argument("--poses", nargs="+", help="pose names to shift (default: idle); use 'all' for every root PNG")
+    parser.add_argument(
+        "--raw-dir", type=Path, help="override the resolved target directory (legacy name)"
+    )
+    parser.add_argument(
+        "--poses",
+        nargs="+",
+        help="pose names to shift (default: idle); use 'all' for every root PNG",
+    )
     parser.add_argument("--left", type=int, default=0, help="pixels to shift left (default: 0)")
     parser.add_argument("--right", type=int, default=0, help="pixels to shift right (default: 0)")
     parser.add_argument("--up", type=int, default=0, help="pixels to shift up (default: 0)")
     parser.add_argument("--down", type=int, default=0, help="pixels to shift down (default: 0)")
-    parser.add_argument("--align-left", action="store_true", help="shift visible pixels flush to the left edge")
-    parser.add_argument("--align-right", action="store_true", help="shift visible pixels flush to the right edge")
-    parser.add_argument("--align-top", action="store_true", help="shift visible pixels flush to the top edge")
-    parser.add_argument("--align-bottom", action="store_true", help="shift visible pixels flush to the bottom edge")
-    parser.add_argument("--threshold", type=int, default=24, help="channel drop below white that counts as visible (default: 24)")
-    parser.add_argument("--refresh-source", action="store_true", help="refresh _shift_raw from the current target file")
-    parser.add_argument("--dry-run", action="store_true", help="report shifted files without writing")
+    parser.add_argument(
+        "--align-left", action="store_true", help="shift visible pixels flush to the left edge"
+    )
+    parser.add_argument(
+        "--align-right", action="store_true", help="shift visible pixels flush to the right edge"
+    )
+    parser.add_argument(
+        "--align-top", action="store_true", help="shift visible pixels flush to the top edge"
+    )
+    parser.add_argument(
+        "--align-bottom", action="store_true", help="shift visible pixels flush to the bottom edge"
+    )
+    parser.add_argument(
+        "--threshold",
+        type=int,
+        default=24,
+        help="channel drop below white that counts as visible (default: 24)",
+    )
+    parser.add_argument(
+        "--refresh-source",
+        action="store_true",
+        help="refresh _shift_raw from the current target file",
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="report shifted files without writing"
+    )
     args = parser.parse_args(argv)
 
     if min(args.left, args.right, args.up, args.down) < 0:
@@ -251,7 +296,9 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("--threshold must be between 0 and 254")
 
     offset = (args.right - args.left, args.down - args.up)
-    target_dir = (args.raw_dir or monster_target_dir(args.story_world, args.monster, args.target)).resolve()
+    target_dir = (
+        args.raw_dir or monster_target_dir(args.story_world, args.monster, args.target)
+    ).resolve()
     shift_source_dir = target_dir / SHIFT_SOURCE_DIR_NAME
 
     if not target_dir.exists():
@@ -267,7 +314,9 @@ def main(argv: list[str] | None = None) -> int:
 
     for pose in poses:
         filename = pose_filename(pose)
-        source = stage_shift_source(target_dir, shift_source_dir, pose, args.refresh_source, args.dry_run)
+        source = stage_shift_source(
+            target_dir, shift_source_dir, pose, args.refresh_source, args.dry_run
+        )
         destination = target_dir / filename
         size, resolved = shift_png(
             source,
@@ -281,7 +330,9 @@ def main(argv: list[str] | None = None) -> int:
             args.dry_run,
         )
         action = "would write" if args.dry_run else "wrote"
-        print(f"{action:11} {repo_relative(destination)} {size[0]}x{size[1]} offset=({resolved[0]},{resolved[1]})")
+        print(
+            f"{action:11} {repo_relative(destination)} {size[0]}x{size[1]} offset=({resolved[0]},{resolved[1]})"
+        )
 
     return 0
 

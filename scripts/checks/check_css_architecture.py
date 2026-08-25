@@ -4,6 +4,7 @@
 Feature CSS should be split into understandable files. Semantic theme tokens must
 not regress to product-specific legacy names.
 """
+
 from __future__ import annotations
 
 import re
@@ -35,7 +36,9 @@ def main() -> int:
         for lineno, line in enumerate(text.splitlines(), start=1):
             for pattern in FORBIDDEN_PATTERNS:
                 if pattern.search(line):
-                    violations.append(f"{rel(path)}:{lineno}: forbidden legacy CSS token/reference: {line.strip()}")
+                    violations.append(
+                        f"{rel(path)}:{lineno}: forbidden legacy CSS token/reference: {line.strip()}"
+                    )
     if violations:
         print("CSS architecture violations found:", file=sys.stderr)
         for violation in violations:

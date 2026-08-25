@@ -14,7 +14,7 @@ from accounts.models import AccountIdentity, AccountSecurity, SessionRecord
 from common.exceptions import Conflict
 from common.http import get_client_ip
 from players.services import get_or_create_player
-from progress.models import StreakRecord, StudentProgress
+from progress.models import StreakRecord
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +61,6 @@ class UserService:
             # workers while preserving the same public conflict response.
             raise Conflict("An account already exists for this username or email.") from exc
         player = get_or_create_player(user)
-        StudentProgress.objects.create(player=player)
         StreakRecord.objects.create(player=player)
         # The default Arcane Spire story is owned implicitly by
         # everyone — nothing to grant at signup. Companions are NOT free: the

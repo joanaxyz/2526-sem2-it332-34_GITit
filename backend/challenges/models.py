@@ -10,37 +10,7 @@ from common.constants import (
     SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
-
-try:
-    from common.models import VariantBase
-except ModuleNotFoundError as exc:
-    if exc.name != "common.models":
-        raise
-
-    class VariantBase(models.Model):
-        """Local fallback for authored problem variant fields.
-
-        Some zip-overlay updates can leave an older checkout without
-        backend/common/models.py. This abstract fallback keeps Django startup
-        alive and matches the shared field shape exactly, without creating its
-        own database table.
-        """
-
-        slug = models.SlugField()
-        label = models.CharField(max_length=80)
-        initial_state = models.JSONField(default=dict)
-        evaluation_spec = models.JSONField(default=dict, blank=True)
-        target_state = models.JSONField(default=dict, blank=True)
-        solution_commands = models.JSONField(default=list, blank=True)
-        case_id = models.CharField(max_length=160, blank=True)
-        semantic_key = models.CharField(max_length=240, blank=True)
-        parameter_context = models.JSONField(default=dict, blank=True)
-        scenario_context = models.JSONField(default=dict, blank=True)
-        scaffold_policy = models.JSONField(default=dict, blank=True)
-        is_published = models.BooleanField(default=True)
-
-        class Meta:
-            abstract = True
+from common.models import VariantBase
 
 
 class ChallengeLevel(models.Model):
@@ -60,7 +30,6 @@ class ChallengeLevel(models.Model):
     title = models.CharField(max_length=180)
     summary = models.TextField(blank=True)
     narrative = models.TextField(blank=True)
-    brief = models.TextField(blank=True)
     command_forms = models.ManyToManyField(
         "curriculum.CommandForm",
         related_name="challenge_levels",
@@ -79,7 +48,9 @@ class ChallengeLevel(models.Model):
     class Meta:
         ordering = ["chapter__sort_order", "sort_order", "id"]
         constraints = [
-            models.UniqueConstraint(fields=["chapter", "slug"], name="unique_challenge_level_chapter_slug"),
+            models.UniqueConstraint(
+                fields=["chapter", "slug"], name="unique_challenge_level_chapter_slug"
+            ),
         ]
         indexes = [
             models.Index(fields=["chapter", "sort_order"], name="chal_level_chapter_sort_idx"),
@@ -118,7 +89,16 @@ class ChallengeTrial(models.Model):
             "difficulty",
         ]
         constraints = [
-            models.UniqueConstraint(fields=["challenge_level", "difficulty"], name="unique_challenge_trial_difficulty"),
+            models.UniqueConstraint(
+                fields=["challenge_level", "difficulty"], name="unique_challenge_trial_difficulty"
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(min_counted_commands__gte=1)
+                    & Q(max_counted_commands__gte=models.F("min_counted_commands"))
+                ),
+                name="challenge_trial_valid_command_budget",
+            ),
         ]
 
     def __str__(self) -> str:
@@ -139,7 +119,9 @@ class ChallengeTrialVariant(VariantBase):
     class Meta:
         ordering = ["trial_id", "semantic_key", "id"]
         constraints = [
-            models.UniqueConstraint(fields=["trial", "slug"], name="unique_challenge_trial_variant_slug"),
+            models.UniqueConstraint(
+                fields=["trial", "slug"], name="unique_challenge_trial_variant_slug"
+            ),
         ]
 
     def __str__(self) -> str:
@@ -153,7 +135,9 @@ class ChallengeRun(models.Model):
         FAILED = SESSION_STATUS_FAILED, "Failed"
         ABANDONED = SESSION_STATUS_ABANDONED, "Abandoned"
 
-    player = models.ForeignKey("players.Player", on_delete=models.CASCADE, related_name="challenge_runs")
+    player = models.ForeignKey(
+        "players.Player", on_delete=models.CASCADE, related_name="challenge_runs"
+    )
     challenge_trial = models.ForeignKey(
         ChallengeTrial,
         on_delete=models.PROTECT,
@@ -188,14 +172,29 @@ class ChallengeRun(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=["player", "is_replay", "status"], name="chal_plyr_replay_status_idx"),
-            models.Index(fields=["player", "challenge_trial", "-id"], name="chal_plyr_trial_latest_idx"),
+            models.Index(
+                fields=["player", "is_replay", "status"], name="chal_plyr_replay_status_idx"
+            ),
+            models.Index(
+                fields=["player", "challenge_trial", "-id"], name="chal_plyr_trial_latest_idx"
+            ),
         ]
         constraints = [
             models.UniqueConstraint(
                 fields=["player", "challenge_trial"],
                 condition=Q(status=SESSION_STATUS_STARTED),
                 name="unique_active_challenge_run",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(min_counted_commands__gte=1)
+                    & Q(max_counted_commands__gte=models.F("min_counted_commands"))
+                ),
+                name="challenge_run_valid_command_budget",
+            ),
+            models.CheckConstraint(
+                condition=Q(stars__lte=3),
+                name="challenge_run_stars_lte_3",
             ),
         ]
 
@@ -204,24 +203,8 @@ class ChallengeRun(models.Model):
         return self.challenge_trial.chapter
 
     @property
-    def challenge(self):
-        return self.challenge_trial.challenge_level
-
-    @property
     def difficulty(self) -> str:
         return self.challenge_trial.difficulty
-
-    @property
-    def trial(self):
-        return self.challenge_trial
-
-    @property
-    def variant(self):
-        return self.selected_variant
-
-    @property
-    def variant_id(self):
-        return self.selected_variant_id
 
     def __str__(self) -> str:
         return f"ChallengeRun({self.id}, {self.status})"

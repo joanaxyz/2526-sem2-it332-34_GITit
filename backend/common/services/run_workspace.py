@@ -1,12 +1,14 @@
 """Shared transactional mutations for playable run workspaces.
 
 Adventure and challenge runs persist the same normalized repository-state shape.
-This module owns the common lock/status/mutate/save sequence while each domain
-keeps a small service that supplies its own terminology and model instance.
+This module owns both the public mutation API and the common
+lock/status/mutate/save sequence. Callers supply only their domain-specific
+ended-session message.
 """
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Literal, cast
 
 from django.db import transaction
@@ -22,6 +24,67 @@ from common.git.workspace_files import (
 )
 
 WorkspaceOperation = Literal["create", "write", "delete", "rename"]
+
+
+@dataclass(frozen=True)
+class RunWorkspaceFileService:
+    """Public workspace mutation API for any persisted playable run."""
+
+    ended_message: str
+
+    def create_file[RunModel: Model](
+        self,
+        *,
+        run: RunModel,
+        path: str,
+        content: str = "",
+    ) -> RunModel:
+        return mutate_run_workspace_file(
+            run=run,
+            operation="create",
+            path=path,
+            content=content,
+            ended_message=self.ended_message,
+        )
+
+    def write_file[RunModel: Model](
+        self,
+        *,
+        run: RunModel,
+        path: str,
+        content: str = "",
+    ) -> RunModel:
+        return mutate_run_workspace_file(
+            run=run,
+            operation="write",
+            path=path,
+            content=content,
+            ended_message=self.ended_message,
+        )
+
+    def delete_file[RunModel: Model](self, *, run: RunModel, path: str) -> RunModel:
+        return mutate_run_workspace_file(
+            run=run,
+            operation="delete",
+            path=path,
+            ended_message=self.ended_message,
+        )
+
+    def rename_file[RunModel: Model](
+        self,
+        *,
+        run: RunModel,
+        path: str,
+        new_path: str,
+    ) -> RunModel:
+        return mutate_run_workspace_file(
+            run=run,
+            operation="rename",
+            path=path,
+            new_path=new_path,
+            ended_message=self.ended_message,
+        )
+
 
 @transaction.atomic
 def mutate_run_workspace_file[RunModel: Model](

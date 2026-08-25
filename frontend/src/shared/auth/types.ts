@@ -1,11 +1,3 @@
-export type User = {
-  id: number
-  username: string
-  email: string
-  is_staff: boolean
-}
+import type { ApiSchemas } from '@/shared/api/generated/apiTypes'
 
-export type AuthResponse = {
-  access: string
-  user: User
-}
+export type User = ApiSchemas['User']

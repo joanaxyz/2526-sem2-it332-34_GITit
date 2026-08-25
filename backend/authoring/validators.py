@@ -55,7 +55,9 @@ class ContentDefinitionValidator:
                 continue
             for block_index, block in enumerate(blocks):
                 if not isinstance(block, dict):
-                    errors.append(_error(f"{path}.blocks[{block_index}]", "Block must be an object."))
+                    errors.append(
+                        _error(f"{path}.blocks[{block_index}]", "Block must be an object.")
+                    )
                     continue
                 block_type = block.get("type")
                 if block_type not in BOOK_BLOCK_TYPES:
@@ -66,7 +68,9 @@ class ContentDefinitionValidator:
                         )
                     )
 
-    def _validate_playable(self, content: ContentDefinition, errors: list[dict[str, str]], *, owner=None) -> None:
+    def _validate_playable(
+        self, content: ContentDefinition, errors: list[dict[str, str]], *, owner=None
+    ) -> None:
         self._validate_battle_stage(content.definition, errors, owner=owner)
         levels = content_levels(content.definition)
         if not levels:
@@ -85,23 +89,35 @@ class ContentDefinitionValidator:
                 p_path = f"{path}.{nested_key}[{p_index}]" if has_nested else path
                 self._validate_problem(problem, p_path, errors, owner=owner)
 
-    def _validate_level_meta(self, level: dict[str, Any], path: str, errors: list[dict[str, str]]) -> None:
+    def _validate_level_meta(
+        self, level: dict[str, Any], path: str, errors: list[dict[str, str]]
+    ) -> None:
         if not str(level.get("slug") or "").strip():
             errors.append(_error(f"{path}.slug", "Level slug is required."))
         if not str(level.get("title") or "").strip():
             errors.append(_error(f"{path}.title", "Level title is required."))
 
-    def _validate_problem(self, level: dict[str, Any], path: str, errors: list[dict[str, str]], *, owner=None) -> None:
+    def _validate_problem(
+        self, level: dict[str, Any], path: str, errors: list[dict[str, str]], *, owner=None
+    ) -> None:
         solution_commands = level.get("solution_commands")
-        if not isinstance(solution_commands, list) or not all(isinstance(command, str) for command in solution_commands):
-            errors.append(_error(f"{path}.solution_commands", "Solution commands must be a list of strings."))
+        if not isinstance(solution_commands, list) or not all(
+            isinstance(command, str) for command in solution_commands
+        ):
+            errors.append(
+                _error(f"{path}.solution_commands", "Solution commands must be a list of strings.")
+            )
             return
         if not solution_commands:
-            errors.append(_error(f"{path}.solution_commands", "At least one solution command is required."))
+            errors.append(
+                _error(f"{path}.solution_commands", "At least one solution command is required.")
+            )
             return
         initial_state = level.get("initial_state", {})
         if not isinstance(initial_state, dict):
-            errors.append(_error(f"{path}.initial_state", "Initial repository state must be an object."))
+            errors.append(
+                _error(f"{path}.initial_state", "Initial repository state must be an object.")
+            )
             return
         try:
             self.simulator.normalize_state(initial_state)
@@ -122,7 +138,9 @@ class ContentDefinitionValidator:
         except Exception as exc:
             errors.append(_error(f"{path}.target_state", f"Invalid target repository state: {exc}"))
             return
-        evaluation_spec = level.get("evaluation_spec") or {"completion_policy": {"mode": "state_hash"}}
+        evaluation_spec = level.get("evaluation_spec") or {
+            "completion_policy": {"mode": "state_hash"}
+        }
         if not isinstance(evaluation_spec, dict):
             errors.append(_error(f"{path}.evaluation_spec", "Evaluation spec must be an object."))
             return
@@ -137,13 +155,22 @@ class ContentDefinitionValidator:
                 expected_state_hash=self.simulator.state_hash(state),
             )
         except Exception as exc:
-            errors.append(_error(f"{path}.evaluation_spec", f"Evaluation spec did not compile: {exc}"))
+            errors.append(
+                _error(f"{path}.evaluation_spec", f"Evaluation spec did not compile: {exc}")
+            )
             return
         if not outcome.target_matched:
-            errors.append(_error(f"{path}.evaluation_spec", f"Solution does not satisfy evaluator: {outcome.summary}"))
+            errors.append(
+                _error(
+                    f"{path}.evaluation_spec",
+                    f"Solution does not satisfy evaluator: {outcome.summary}",
+                )
+            )
         self._validate_variants(level, path, errors)
 
-    def _validate_variants(self, level: dict[str, Any], path: str, errors: list[dict[str, str]]) -> None:
+    def _validate_variants(
+        self, level: dict[str, Any], path: str, errors: list[dict[str, str]]
+    ) -> None:
         """Extra test cases (compiled into rotating curriculum.Variant rows) are
         optional, but each must be a solvable problem in its own right so a retry
         never serves a broken case."""
@@ -168,14 +195,25 @@ class ContentDefinitionValidator:
             if not isinstance(solution_commands, list) or not all(
                 isinstance(command, str) for command in solution_commands
             ):
-                errors.append(_error(f"{v_path}.solution_commands", "Solution commands must be a list of strings."))
+                errors.append(
+                    _error(
+                        f"{v_path}.solution_commands",
+                        "Solution commands must be a list of strings.",
+                    )
+                )
                 continue
             if not solution_commands:
-                errors.append(_error(f"{v_path}.solution_commands", "At least one solution command is required."))
+                errors.append(
+                    _error(
+                        f"{v_path}.solution_commands", "At least one solution command is required."
+                    )
+                )
                 continue
             initial_state = variant.get("initial_state", {})
             if not isinstance(initial_state, dict):
-                errors.append(_error(f"{v_path}.initial_state", "Initial repository state must be an object."))
+                errors.append(
+                    _error(f"{v_path}.initial_state", "Initial repository state must be an object.")
+                )
                 continue
             try:
                 normalized_initial = self.simulator.normalize_state(initial_state)
@@ -189,7 +227,9 @@ class ContentDefinitionValidator:
                 else:
                     state = normalized_initial
             except Exception as exc:
-                errors.append(_error(f"{v_path}.target_state", f"Invalid target repository state: {exc}"))
+                errors.append(
+                    _error(f"{v_path}.target_state", f"Invalid target repository state: {exc}")
+                )
                 continue
             evaluation_spec = (
                 variant.get("evaluation_spec")
@@ -208,14 +248,21 @@ class ContentDefinitionValidator:
                     expected_state_hash=self.simulator.state_hash(state),
                 )
             except Exception as exc:
-                errors.append(_error(f"{v_path}.evaluation_spec", f"Evaluation spec did not compile: {exc}"))
+                errors.append(
+                    _error(f"{v_path}.evaluation_spec", f"Evaluation spec did not compile: {exc}")
+                )
                 continue
             if not outcome.target_matched:
                 errors.append(
-                    _error(f"{v_path}.evaluation_spec", f"Test case does not satisfy evaluator: {outcome.summary}")
+                    _error(
+                        f"{v_path}.evaluation_spec",
+                        f"Test case does not satisfy evaluator: {outcome.summary}",
+                    )
                 )
 
-    def _validate_battle_stage(self, definition: dict[str, Any], errors: list[dict[str, str]], *, owner=None) -> None:
+    def _validate_battle_stage(
+        self, definition: dict[str, Any], errors: list[dict[str, str]], *, owner=None
+    ) -> None:
         stage = (definition or {}).get("battle_stage")
         if stage is None:
             return
@@ -224,7 +271,12 @@ class ContentDefinitionValidator:
             return
         landing = stage.get("landing")
         if landing not in (None, {}) and not _is_normalized_rect(landing):
-            errors.append(_error("definition.battle_stage.landing", "Land must be a normalized rectangle (x, y, width, height in 0..1)."))
+            errors.append(
+                _error(
+                    "definition.battle_stage.landing",
+                    "Land must be a normalized rectangle (x, y, width, height in 0..1).",
+                )
+            )
         # The backdrop is story-world supplied client-side; no background slug to validate.
 
 

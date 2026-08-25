@@ -30,7 +30,9 @@ def _story_access(story_slug: str) -> dict | None:
 
     story = (
         Story.objects.filter(slug=story_slug, is_published=True)
-        .annotate(chapter_count=models.Count("chapters", filter=models.Q(chapters__is_published=True)))
+        .annotate(
+            chapter_count=models.Count("chapters", filter=models.Q(chapters__is_published=True))
+        )
         .order_by("sort_order", "id")
         .first()
     )
@@ -42,24 +44,32 @@ def _story_access(story_slug: str) -> dict | None:
         "chapter_count": story.chapter_count,
         "world_slug": story.world_slug,
         "difficulty": story.difficulty,
-        "prerequisite_story": story.prerequisite_story.slug if story.prerequisite_story_id else None,
+        "prerequisite_story": story.prerequisite_story.slug
+        if story.prerequisite_story_id
+        else None,
     }
 
 
 def shop_payload(*, player) -> dict:
     """The shop catalog: stories + companions, flagged owned for this player."""
+    from adminconsole.flags import feature_enabled
+
     owned = _owned_set(player)
     loadout = player_loadout(player)
     items = [
         {
             **item,
-            "owned": is_default(item["kind"], item["slug"]) or (item["kind"], item["slug"]) in owned,
+            "owned": is_default(item["kind"], item["slug"])
+            or (item["kind"], item["slug"]) in owned,
             "active": item["kind"] == KIND_COMPANION and loadout["companion"] == item["slug"],
-            **({"unlocks_story": _story_access(item["slug"])} if item["kind"] == KIND_STORY else {}),
+            **(
+                {"unlocks_story": _story_access(item["slug"])} if item["kind"] == KIND_STORY else {}
+            ),
         }
         for item in listings()
     ]
     return {
         "items": items,
         "active_companion": loadout["companion"],
+        "purchases_enabled": feature_enabled("shop-purchases"),
     }

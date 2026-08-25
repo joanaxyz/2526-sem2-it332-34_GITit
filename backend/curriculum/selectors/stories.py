@@ -13,9 +13,12 @@ from .access import _adventure_passed
 DEFAULT_CHAPTER_HEIGHT = 560
 
 
-
 def published_stories():
-    return Story.objects.filter(is_published=True).select_related("prerequisite_story").order_by("sort_order", "id")
+    return (
+        Story.objects.filter(is_published=True)
+        .select_related("prerequisite_story")
+        .order_by("sort_order", "id")
+    )
 
 
 def published_chapters(*, story_slug: str | None = None):
@@ -51,7 +54,9 @@ def chapter_completed(*, player, chapter: Chapter) -> bool:
     if player is None or not chapter.is_playable:
         return False
     required_level_ids = list(
-        ChallengeLevel.objects.filter(chapter=chapter, is_published=True).values_list("id", flat=True)
+        ChallengeLevel.objects.filter(chapter=chapter, is_published=True).values_list(
+            "id", flat=True
+        )
     )
     if required_level_ids:
         from progress.models import ChallengeLevelCompletion
@@ -167,9 +172,7 @@ def chapter_band_offset(*, chapter_heights: dict | None, chapter_number: int) ->
     """Y of a chapter band's top: the sum of prior chapters' heights (each
     defaulting to DEFAULT_CHAPTER_HEIGHT unless explicitly resized)."""
     heights = chapter_heights or {}
-    return sum(
-        int(heights.get(str(n), DEFAULT_CHAPTER_HEIGHT)) for n in range(1, chapter_number)
-    )
+    return sum(int(heights.get(str(n), DEFAULT_CHAPTER_HEIGHT)) for n in range(1, chapter_number))
 
 
 def _published_adventure_levels_queryset():

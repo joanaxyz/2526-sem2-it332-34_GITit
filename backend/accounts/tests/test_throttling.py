@@ -28,13 +28,9 @@ def test_register_throttled_after_limit(db, api_client, monkeypatch):
     # class attribute rather than override_settings (which it never re-reads).
     monkeypatch.setitem(ScopedRateThrottle.THROTTLE_RATES, "auth_register", "2/hour")
     for n in range(2):
-        response = api_client.post(
-            "/api/auth/register/", registration_payload(n), format="json"
-        )
+        response = api_client.post("/api/auth/register/", registration_payload(n), format="json")
         assert response.status_code == status.HTTP_201_CREATED
-    response = api_client.post(
-        "/api/auth/register/", registration_payload(2), format="json"
-    )
+    response = api_client.post("/api/auth/register/", registration_payload(2), format="json")
     assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
 
 

@@ -10,30 +10,39 @@ When a sprite directory does not have a raw copy yet, the current root PNG is
 copied into a new raw/ folder before the cleaned PNG is written back to the
 root. This keeps the uncleaned original available for later reprocessing.
 
-By default, near-white pixels connected to the outside transparent/white
-background are removed, plus any enclosed near-white "holes" fully walled off
-by opaque artwork (e.g. the gap inside a bow, a chain loop, or a cloak fold) --
-those are background bleed-through too, they just never reach the image
-border. A second conservative pass removes pale, low-saturation fringe pixels
-touching already-transparent enclosed holes (e.g. antialiased white residue in
-wing perforations). Only small enclosed blobs below --min-hole-size are left
-alone, on the assumption they are pinpoint highlights (eye glints, metal shine)
-rather than background.
+Static companion portraits are intentionally skipped. Pass --include-portraits
+to opt them into an explicit cleanup run.
 
-A final white-matte edge pass then decontaminates the antialiased silhouette
-ring: sprites generated on a white background keep a faint white-tinted halo on
-the partly-transparent edge pixels where the artwork met the background. Rather
-than deleting that ring (which would leave a hard, aliased edge), the white
-contribution is un-premultiplied back out so the true edge colour composites
-cleanly over any background. Fully opaque, hard-keyed sprites are untouched.
-Disable with --no-edge-defringe.
+By default, only near-white pixels connected to the outside transparent/white
+background are removed. Enclosed-white removal, enclosed-hole fringe cleanup,
+and white-matte edge decontamination are intentionally opt-in: pale character
+details can be indistinguishable from a white matte without per-sprite visual
+review. Use --min-hole-size, --hole-fringe-radius, or --edge-defringe only for a
+reviewed asset set.
+
+When a cleaned root sprite has accidentally filled holes that are already
+transparent in its raw source, use --restore-alpha-holes. This copies only
+enclosed transparent regions from raw to root and preserves every current
+destination pixel outside those holes.
+
+When the current root sprite itself still contains enclosed near-white islands,
+use --clean-current-white-holes with --min-hole-size. This removes only those
+islands from the current destination instead of rebuilding it from raw.
+
+When raw sources are older than their already-cleaned runtime sprites, use
+--clean-current-connected-white. This runs the conservative background-connected
+cleanup against the current destination and never replaces it with raw artwork.
 
 Usage:
     python scripts/remove_sprite_white_background.py --dry-run
     python scripts/remove_sprite_white_background.py
     python scripts/remove_sprite_white_background.py --scope companion
+    python scripts/remove_sprite_white_background.py --scope companion --include-portraits
     python scripts/remove_sprite_white_background.py frontend/public/cosmetics/companion/blue
     python scripts/remove_sprite_white_background.py path/to/sprite/raw/idle.png
+    python scripts/remove_sprite_white_background.py path/to/sprite --restore-alpha-holes
+    python scripts/remove_sprite_white_background.py path/to/sprite --clean-current-white-holes --min-hole-size 4
+    python scripts/remove_sprite_white_background.py path/to/sprite --clean-current-connected-white
 
 Requires: Pillow.
 """
@@ -50,13 +59,13 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 COSMETICS_ROOT = REPO_ROOT / "frontend" / "public" / "cosmetics"
 COMPANION_ROOT = COSMETICS_ROOT / "companion"
 STORY_WORLDS_ROOT = COSMETICS_ROOT / "story-worlds"
 RAW_DIR_NAME = "raw"
 POSE_DIR_NAME = "pose"
+PORTRAIT_FILE_NAMES = frozenset({"avatar.png", "battle_portrait.png", "portrait.png"})
 
 
 @dataclass(frozen=True)
@@ -77,6 +86,9 @@ class CleanResult:
     stage_action: str | None
     raw_path: Path | None
     wrote: bool
+    restored_alpha_holes: bool
+    cleaned_current_white_holes: bool
+    cleaned_current_connected_white: bool
 
 
 def image_data(image: Image.Image):
@@ -182,6 +194,256 @@ def connected_white_mask(
     return mask
 
 
+def enclosed_white_mask(
+    rgba: Image.Image,
+    tolerance: int,
+    alpha_threshold: int,
+    min_hole_size: int,
+    grid_columns: int,
+    grid_rows: int,
+) -> bytearray:
+    """Return enclosed near-white islands without touching exterior whites.
+
+    The current-root cleanup mode must preserve every already-cleaned exterior
+    edge. Run the connected-white detector frame by frame and subtract its
+    exterior-only result, leaving only enclosed components at or above
+    ``min_hole_size``.
+    """
+    width, height = rgba.size
+    if (
+        (grid_columns > 1 or grid_rows > 1)
+        and width % grid_columns == 0
+        and height % grid_rows == 0
+    ):
+        frame_width = width // grid_columns
+        frame_height = height // grid_rows
+        full_mask = bytearray(width * height)
+        for row in range(grid_rows):
+            for column in range(grid_columns):
+                left = column * frame_width
+                top = row * frame_height
+                frame_mask = _enclosed_white_mask_for_image(
+                    rgba.crop((left, top, left + frame_width, top + frame_height)),
+                    tolerance=tolerance,
+                    alpha_threshold=alpha_threshold,
+                    min_hole_size=min_hole_size,
+                )
+                for y in range(frame_height):
+                    source_row = y * frame_width
+                    target_row = (top + y) * width + left
+                    full_mask[target_row : target_row + frame_width] = frame_mask[
+                        source_row : source_row + frame_width
+                    ]
+        return full_mask
+
+    return _enclosed_white_mask_for_image(
+        rgba,
+        tolerance=tolerance,
+        alpha_threshold=alpha_threshold,
+        min_hole_size=min_hole_size,
+    )
+
+
+def _enclosed_white_mask_for_image(
+    rgba: Image.Image,
+    tolerance: int,
+    alpha_threshold: int,
+    min_hole_size: int,
+) -> bytearray:
+    width, height = rgba.size
+    total = width * height
+    traversable = bytearray(total)
+    removable = bytearray(total)
+
+    for index, (r, g, b, a) in enumerate(image_data(rgba)):
+        if a <= alpha_threshold:
+            traversable[index] = 1
+        elif is_near_white(r, g, b, tolerance):
+            traversable[index] = 1
+            removable[index] = 1
+
+    queue: deque[int] = deque()
+    exterior = bytearray(total)
+
+    def seed(index: int) -> None:
+        if traversable[index] and not exterior[index]:
+            exterior[index] = 1
+            queue.append(index)
+
+    last_row = (height - 1) * width
+    for x in range(width):
+        seed(x)
+        seed(last_row + x)
+    for y in range(height):
+        row = y * width
+        seed(row)
+        seed(row + width - 1)
+
+    while queue:
+        index = queue.popleft()
+        x = index % width
+
+        if x > 0:
+            neighbor = index - 1
+            if traversable[neighbor] and not exterior[neighbor]:
+                exterior[neighbor] = 1
+                queue.append(neighbor)
+        if x < width - 1:
+            neighbor = index + 1
+            if traversable[neighbor] and not exterior[neighbor]:
+                exterior[neighbor] = 1
+                queue.append(neighbor)
+        if index >= width:
+            neighbor = index - width
+            if traversable[neighbor] and not exterior[neighbor]:
+                exterior[neighbor] = 1
+                queue.append(neighbor)
+        if index < total - width:
+            neighbor = index + width
+            if traversable[neighbor] and not exterior[neighbor]:
+                exterior[neighbor] = 1
+                queue.append(neighbor)
+
+    mask = bytearray(total)
+    _remove_enclosed_holes(
+        mask,
+        removable,
+        exterior,
+        width,
+        height,
+        min_hole_size,
+    )
+    return mask
+
+
+def enclosed_transparent_mask(
+    rgba: Image.Image,
+    alpha_threshold: int,
+    min_hole_size: int,
+    grid_columns: int,
+    grid_rows: int,
+) -> bytearray:
+    """Return transparent source regions enclosed within each sprite frame."""
+    width, height = rgba.size
+    if (
+        (grid_columns > 1 or grid_rows > 1)
+        and width % grid_columns == 0
+        and height % grid_rows == 0
+    ):
+        frame_width = width // grid_columns
+        frame_height = height // grid_rows
+        full_mask = bytearray(width * height)
+        for row in range(grid_rows):
+            for column in range(grid_columns):
+                left = column * frame_width
+                top = row * frame_height
+                frame_mask = _enclosed_transparent_mask_for_image(
+                    rgba.crop((left, top, left + frame_width, top + frame_height)),
+                    alpha_threshold=alpha_threshold,
+                    min_hole_size=min_hole_size,
+                )
+                for y in range(frame_height):
+                    source_row = y * frame_width
+                    target_row = (top + y) * width + left
+                    full_mask[target_row : target_row + frame_width] = frame_mask[
+                        source_row : source_row + frame_width
+                    ]
+        return full_mask
+
+    return _enclosed_transparent_mask_for_image(
+        rgba,
+        alpha_threshold=alpha_threshold,
+        min_hole_size=min_hole_size,
+    )
+
+
+def _enclosed_transparent_mask_for_image(
+    rgba: Image.Image,
+    alpha_threshold: int,
+    min_hole_size: int,
+) -> bytearray:
+    width, height = rgba.size
+    total = width * height
+    transparent = bytearray(
+        1 if a <= alpha_threshold else 0 for _, _, _, a in image_data(rgba)
+    )
+    exterior = bytearray(total)
+    queue: deque[int] = deque()
+
+    def seed(index: int) -> None:
+        if transparent[index] and not exterior[index]:
+            exterior[index] = 1
+            queue.append(index)
+
+    last_row = (height - 1) * width
+    for x in range(width):
+        seed(x)
+        seed(last_row + x)
+    for y in range(height):
+        row = y * width
+        seed(row)
+        seed(row + width - 1)
+
+    while queue:
+        index = queue.popleft()
+        x = index % width
+
+        if x > 0:
+            neighbor = index - 1
+            if transparent[neighbor] and not exterior[neighbor]:
+                exterior[neighbor] = 1
+                queue.append(neighbor)
+        if x < width - 1:
+            neighbor = index + 1
+            if transparent[neighbor] and not exterior[neighbor]:
+                exterior[neighbor] = 1
+                queue.append(neighbor)
+        if index >= width:
+            neighbor = index - width
+            if transparent[neighbor] and not exterior[neighbor]:
+                exterior[neighbor] = 1
+                queue.append(neighbor)
+        if index < total - width:
+            neighbor = index + width
+            if transparent[neighbor] and not exterior[neighbor]:
+                exterior[neighbor] = 1
+                queue.append(neighbor)
+
+    labeled = bytearray(total)
+    mask = bytearray(total)
+    for start in range(total):
+        if not transparent[start] or exterior[start] or labeled[start]:
+            continue
+
+        component = [start]
+        labeled[start] = 1
+        queue = deque([start])
+        while queue:
+            index = queue.popleft()
+            x = index % width
+            neighbors = []
+            if x > 0:
+                neighbors.append(index - 1)
+            if x < width - 1:
+                neighbors.append(index + 1)
+            if index >= width:
+                neighbors.append(index - width)
+            if index < total - width:
+                neighbors.append(index + width)
+
+            for neighbor in neighbors:
+                if transparent[neighbor] and not exterior[neighbor] and not labeled[neighbor]:
+                    labeled[neighbor] = 1
+                    component.append(neighbor)
+                    queue.append(neighbor)
+
+        if len(component) >= min_hole_size:
+            for index in component:
+                mask[index] = 1
+
+    return mask
+
+
 def transparent_hole_fringe_mask(
     rgba: Image.Image,
     alpha_threshold: int,
@@ -206,12 +468,7 @@ def transparent_hole_fringe_mask(
         return bytearray(rgba.width * rgba.height)
 
     width, height = rgba.size
-    if (
-        grid_columns > 1
-        and grid_rows > 1
-        and width % grid_columns == 0
-        and height % grid_rows == 0
-    ):
+    if grid_columns > 1 and grid_rows > 1 and width % grid_columns == 0 and height % grid_rows == 0:
         frame_width = width // grid_columns
         frame_height = height // grid_rows
         full_mask = bytearray(width * height)
@@ -422,7 +679,7 @@ def all_white_mask(rgba: Image.Image, tolerance: int, alpha_threshold: int) -> b
     )
 
 
-def _dilate_mask(mask: "np.ndarray", radius: int) -> "np.ndarray":
+def _dilate_mask(mask: np.ndarray, radius: int) -> np.ndarray:
     """Grow a boolean mask outward by ``radius`` 4-connected steps."""
     grown = mask
     for _ in range(radius):
@@ -518,37 +775,106 @@ def clean_png(
     hole_fringe_max_chroma: int,
     grid_columns: int,
     grid_rows: int,
+    restore_alpha_holes: bool,
+    clean_current_white_holes: bool,
     edge_defringe: bool,
     edge_defringe_radius: int,
     dry_run: bool,
+    clean_current_connected_white: bool = False,
 ) -> CleanResult:
     with Image.open(task.source) as image:
-        rgba = image.convert("RGBA")
-        if mode == "all":
-            remove_mask = all_white_mask(rgba, tolerance, alpha_threshold)
-        else:
-            remove_mask = connected_white_mask(rgba, tolerance, alpha_threshold, min_hole_size)
-            fringe_mask = transparent_hole_fringe_mask(
-                rgba,
-                alpha_threshold=alpha_threshold,
-                radius=hole_fringe_radius,
-                min_hole_size=min_transparent_hole_size,
-                min_rgb=hole_fringe_min_rgb,
-                min_luma=hole_fringe_min_luma,
-                max_chroma=hole_fringe_max_chroma,
-                grid_columns=grid_columns,
-                grid_rows=grid_rows,
-            )
-            if any(fringe_mask):
-                remove_mask = bytearray(
-                    1 if remove_mask[index] or fringe_mask[index] else 0
-                    for index in range(len(remove_mask))
+        source_rgba = image.convert("RGBA")
+
+        preserve_destination = (
+            restore_alpha_holes
+            or clean_current_white_holes
+            or clean_current_connected_white
+        )
+        if preserve_destination:
+            if not task.destination.exists():
+                raise SystemExit(
+                    "current-destination cleanup requires an existing destination: "
+                    f"{task.destination}"
                 )
+            with Image.open(task.destination) as destination_image:
+                rgba = destination_image.convert("RGBA")
+            if rgba.size != source_rgba.size:
+                raise SystemExit(
+                    "current-destination cleanup requires matching source and destination sizes: "
+                    f"{task.source} is {source_rgba.size}, {task.destination} is {rgba.size}"
+                )
+            if restore_alpha_holes:
+                remove_mask = enclosed_transparent_mask(
+                    source_rgba,
+                    alpha_threshold=alpha_threshold,
+                    min_hole_size=min_transparent_hole_size,
+                    grid_columns=grid_columns,
+                    grid_rows=grid_rows,
+                )
+                remove_mask = bytearray(
+                    1 if remove_mask[index] and a > alpha_threshold else 0
+                    for index, (_, _, _, a) in enumerate(image_data(rgba))
+                )
+            elif clean_current_white_holes:
+                remove_mask = enclosed_white_mask(
+                    rgba,
+                    tolerance=tolerance,
+                    alpha_threshold=alpha_threshold,
+                    min_hole_size=min_hole_size,
+                    grid_columns=grid_columns,
+                    grid_rows=grid_rows,
+                )
+            elif mode == "all":
+                remove_mask = all_white_mask(rgba, tolerance, alpha_threshold)
+            else:
+                remove_mask = connected_white_mask(
+                    rgba, tolerance, alpha_threshold, min_hole_size
+                )
+                fringe_mask = transparent_hole_fringe_mask(
+                    rgba,
+                    alpha_threshold=alpha_threshold,
+                    radius=hole_fringe_radius,
+                    min_hole_size=min_transparent_hole_size,
+                    min_rgb=hole_fringe_min_rgb,
+                    min_luma=hole_fringe_min_luma,
+                    max_chroma=hole_fringe_max_chroma,
+                    grid_columns=grid_columns,
+                    grid_rows=grid_rows,
+                )
+                if any(fringe_mask):
+                    remove_mask = bytearray(
+                        1 if remove_mask[index] or fringe_mask[index] else 0
+                        for index in range(len(remove_mask))
+                    )
+        else:
+            rgba = source_rgba
+            if mode == "all":
+                remove_mask = all_white_mask(rgba, tolerance, alpha_threshold)
+            else:
+                remove_mask = connected_white_mask(
+                    rgba, tolerance, alpha_threshold, min_hole_size
+                )
+                fringe_mask = transparent_hole_fringe_mask(
+                    rgba,
+                    alpha_threshold=alpha_threshold,
+                    radius=hole_fringe_radius,
+                    min_hole_size=min_transparent_hole_size,
+                    min_rgb=hole_fringe_min_rgb,
+                    min_luma=hole_fringe_min_luma,
+                    max_chroma=hole_fringe_max_chroma,
+                    grid_columns=grid_columns,
+                    grid_rows=grid_rows,
+                )
+                if any(fringe_mask):
+                    remove_mask = bytearray(
+                        1 if remove_mask[index] or fringe_mask[index] else 0
+                        for index in range(len(remove_mask))
+                    )
 
         output, removed = apply_transparency(rgba, remove_mask)
 
         recolored = 0
-        if edge_defringe:
+        if edge_defringe and not preserve_destination:
             output, recolored = decontaminate_white_edges(
                 output, alpha_threshold, edge_defringe_radius
             )
@@ -559,7 +885,7 @@ def clean_png(
         if removed or recolored:
             output.save(task.destination, optimize=True)
             wrote = True
-        elif task.source.resolve() != task.destination.resolve():
+        elif not preserve_destination and task.source.resolve() != task.destination.resolve():
             shutil.copy2(task.source, task.destination)
             wrote = True
 
@@ -572,11 +898,33 @@ def clean_png(
         stage_action=task.stage_action,
         raw_path=task.raw_path,
         wrote=wrote,
+        restored_alpha_holes=restore_alpha_holes,
+        cleaned_current_white_holes=clean_current_white_holes,
+        cleaned_current_connected_white=clean_current_connected_white,
     )
 
 
-def direct_pngs(directory: Path) -> list[Path]:
-    return sorted(path for path in directory.glob("*.png") if path.is_file())
+def is_companion_portrait(path: Path) -> bool:
+    """Return whether path is one of the companion's static portrait assets."""
+    try:
+        relative_path = path.resolve().relative_to(COMPANION_ROOT.resolve())
+    except ValueError:
+        return False
+
+    if len(relative_path.parts) < 2:
+        return False
+
+    companion_slug = relative_path.parts[0].lower()
+    file_name = path.name.lower()
+    return file_name in PORTRAIT_FILE_NAMES or file_name == f"{companion_slug}.png"
+
+
+def direct_pngs(directory: Path, include_portraits: bool = False) -> list[Path]:
+    return sorted(
+        path
+        for path in directory.glob("*.png")
+        if path.is_file() and (include_portraits or not is_companion_portrait(path))
+    )
 
 
 def task_for_root_png(path: Path, raw_action: str, dry_run: bool) -> SpriteTask:
@@ -600,9 +948,14 @@ def task_for_root_png(path: Path, raw_action: str, dry_run: bool) -> SpriteTask:
     return SpriteTask(source=source, destination=path, raw_path=raw_path, stage_action=raw_action)
 
 
-def tasks_for_directory(directory: Path, raw_action: str, dry_run: bool) -> list[SpriteTask]:
+def tasks_for_directory(
+    directory: Path,
+    raw_action: str,
+    dry_run: bool,
+    include_portraits: bool = False,
+) -> list[SpriteTask]:
     raw_dir = directory / RAW_DIR_NAME
-    raw_pngs = direct_pngs(raw_dir) if raw_dir.exists() else []
+    raw_pngs = direct_pngs(raw_dir, include_portraits) if raw_dir.exists() else []
     tasks = [
         SpriteTask(source=path, destination=directory / path.name, raw_path=path, stage_action=None)
         for path in raw_pngs
@@ -611,7 +964,7 @@ def tasks_for_directory(directory: Path, raw_action: str, dry_run: bool) -> list
 
     tasks.extend(
         task_for_root_png(path, raw_action, dry_run)
-        for path in direct_pngs(directory)
+        for path in direct_pngs(directory, include_portraits)
         if path.name not in raw_names
     )
     if tasks:
@@ -619,29 +972,38 @@ def tasks_for_directory(directory: Path, raw_action: str, dry_run: bool) -> list
 
     return [
         task_for_root_png(path, raw_action, dry_run)
-        for path in direct_pngs(directory)
+        for path in direct_pngs(directory, include_portraits)
     ]
 
 
-def tasks_for_raw_directory(directory: Path) -> list[SpriteTask]:
+def tasks_for_raw_directory(directory: Path, include_portraits: bool = False) -> list[SpriteTask]:
     if directory.name != RAW_DIR_NAME:
         return []
     destination_dir = directory.parent
     return [
-        SpriteTask(source=path, destination=destination_dir / path.name, raw_path=path, stage_action=None)
-        for path in direct_pngs(directory)
+        SpriteTask(
+            source=path, destination=destination_dir / path.name, raw_path=path, stage_action=None
+        )
+        for path in direct_pngs(directory, include_portraits)
     ]
 
 
-def tasks_for_path(path: Path, raw_action: str, dry_run: bool) -> list[SpriteTask]:
+def tasks_for_path(
+    path: Path,
+    raw_action: str,
+    dry_run: bool,
+    include_portraits: bool = False,
+) -> list[SpriteTask]:
     resolved = path.resolve()
     if not resolved.exists():
         raise SystemExit(f"Path does not exist: {path}")
     if resolved.is_dir():
         if resolved.name == RAW_DIR_NAME:
-            return tasks_for_raw_directory(resolved)
-        return tasks_for_directory(resolved, raw_action, dry_run)
+            return tasks_for_raw_directory(resolved, include_portraits)
+        return tasks_for_directory(resolved, raw_action, dry_run, include_portraits)
     if resolved.suffix.lower() != ".png":
+        return []
+    if is_companion_portrait(resolved) and not include_portraits:
         return []
     if resolved.parent.name == RAW_DIR_NAME:
         return [
@@ -655,23 +1017,35 @@ def tasks_for_path(path: Path, raw_action: str, dry_run: bool) -> list[SpriteTas
     return [task_for_root_png(resolved, raw_action, dry_run)]
 
 
-def has_png_work(directory: Path) -> bool:
-    return bool(direct_pngs(directory) or direct_pngs(directory / RAW_DIR_NAME))
+def has_png_work(directory: Path, include_portraits: bool = False) -> bool:
+    return bool(
+        direct_pngs(directory, include_portraits)
+        or direct_pngs(directory / RAW_DIR_NAME, include_portraits)
+    )
 
 
-def default_sprite_dirs(scope: str, include_nested: bool, include_pose: bool) -> list[Path]:
+def default_sprite_dirs(
+    scope: str,
+    include_nested: bool,
+    include_pose: bool,
+    include_portraits: bool = False,
+) -> list[Path]:
     directories: list[Path] = []
 
     if scope in {"all", "companion"} and COMPANION_ROOT.exists():
-        directories.extend(path for path in sorted(COMPANION_ROOT.iterdir()) if path.is_dir() and has_png_work(path))
+        directories.extend(
+            path
+            for path in sorted(COMPANION_ROOT.iterdir())
+            if path.is_dir() and has_png_work(path, include_portraits)
+        )
 
     if scope in {"all", "monsters"} and STORY_WORLDS_ROOT.exists():
         for monsters_root in sorted(STORY_WORLDS_ROOT.glob("*/monsters")):
             for monster_dir in sorted(path for path in monsters_root.iterdir() if path.is_dir()):
-                if has_png_work(monster_dir):
+                if has_png_work(monster_dir, include_portraits):
                     directories.append(monster_dir)
                 pose_dir = monster_dir / POSE_DIR_NAME
-                if include_pose and pose_dir.is_dir() and has_png_work(pose_dir):
+                if include_pose and pose_dir.is_dir() and has_png_work(pose_dir, include_portraits):
                     directories.append(pose_dir)
 
     if include_nested:
@@ -692,7 +1066,7 @@ def default_sprite_dirs(scope: str, include_nested: bool, include_pose: bool) ->
                     continue
                 if any(part in skip_names for part in directory.parts):
                     continue
-                if has_png_work(directory) and directory.resolve() not in seen:
+                if has_png_work(directory, include_portraits) and directory.resolve() not in seen:
                     directories.append(directory)
                     seen.add(directory.resolve())
 
@@ -709,7 +1083,15 @@ def relative(path: Path) -> str:
 def print_result(result: CleanResult, dry_run: bool) -> None:
     action = "would clean" if dry_run else "cleaned"
     if result.removed_pixels == 0 and result.recolored_pixels == 0:
-        action = "would copy " if dry_run and result.source != result.destination else "unchanged"
+        action = (
+            "would copy "
+            if dry_run
+            and not result.restored_alpha_holes
+            and not result.cleaned_current_white_holes
+            and not result.cleaned_current_connected_white
+            and result.source != result.destination
+            else "unchanged"
+        )
     if result.stage_action:
         raw = relative(result.raw_path) if result.raw_path else "raw"
         stage = f" stage={result.stage_action}:{raw}"
@@ -736,7 +1118,9 @@ def dedupe_tasks(tasks: list[SpriteTask]) -> list[SpriteTask]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument(
         "paths",
         nargs="*",
@@ -758,6 +1142,11 @@ def main(argv: list[str] | None = None) -> int:
         "--include-pose",
         action="store_true",
         help="include monster pose stills during default discovery (default: skipped)",
+    )
+    parser.add_argument(
+        "--include-portraits",
+        action="store_true",
+        help="include static companion portraits (default: skipped)",
     )
     parser.add_argument(
         "--raw-action",
@@ -786,32 +1175,34 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--min-hole-size",
         type=int,
-        default=1,
+        default=0,
         help=(
             "enclosed near-white blobs (not touching the image border, e.g. inside a "
             "bow, chain loop, cloak fold, or a punched-out gap in wing membrane) at or "
             "above this pixel count are treated as leftover background and removed too; "
             "smaller blobs are kept as likely pinpoint highlights. Raise this if a future "
             "asset pack has genuine tiny white highlights worth preserving. Only applies "
-            "in --mode connected. Use 0 to disable entirely (default: 1, i.e. every "
-            "enclosed hole is removed)"
+            "in --mode connected. Use 0 to disable entirely (default: 0)"
         ),
     )
     parser.add_argument(
         "--hole-fringe-radius",
         type=int,
-        default=2,
+        default=0,
         help=(
             "remove pale low-saturation pixels within this many pixels of enclosed "
             "transparent holes, useful for antialiased white residue in wing "
-            "perforations; use 0 to disable (default: 2)"
+            "perforations; use 0 to disable (default: 0)"
         ),
     )
     parser.add_argument(
         "--min-transparent-hole-size",
         type=int,
         default=4,
-        help="minimum enclosed transparent component size before fringe cleanup applies (default: 4)",
+        help=(
+            "minimum enclosed transparent component size before fringe cleanup or "
+            "alpha-hole restoration applies (default: 4)"
+        ),
     )
     parser.add_argument(
         "--hole-fringe-min-rgb",
@@ -843,15 +1234,48 @@ def main(argv: list[str] | None = None) -> int:
         default=5,
         help="sprite grid rows for frame-local hole detection; whole image fallback when not divisible (default: 5)",
     )
-    parser.add_argument(
+    current_cleanup_group = parser.add_mutually_exclusive_group()
+    current_cleanup_group.add_argument(
+        "--restore-alpha-holes",
+        action="store_true",
+        help=(
+            "preserve the current destination artwork and restore only enclosed "
+            "transparent regions from its raw source"
+        ),
+    )
+    current_cleanup_group.add_argument(
+        "--clean-current-white-holes",
+        action="store_true",
+        help=(
+            "preserve the current destination artwork and remove only enclosed "
+            "near-white islands at or above --min-hole-size"
+        ),
+    )
+    current_cleanup_group.add_argument(
+        "--clean-current-connected-white",
+        action="store_true",
+        help=(
+            "preserve the current destination artwork and remove only near-white "
+            "pixels connected to its transparent background"
+        ),
+    )
+    edge_defringe_group = parser.add_mutually_exclusive_group()
+    edge_defringe_group.add_argument(
+        "--edge-defringe",
+        dest="edge_defringe",
+        action="store_true",
+        help=(
+            "enable the white-matte edge decontamination pass that removes the "
+            "antialiased white halo ringing each silhouette (default: disabled)"
+        ),
+    )
+    edge_defringe_group.add_argument(
         "--no-edge-defringe",
         dest="edge_defringe",
         action="store_false",
-        help=(
-            "disable the white-matte edge decontamination pass that removes the "
-            "antialiased white halo ringing each silhouette (enabled by default)"
-        ),
+        help="explicitly keep white-matte edge decontamination disabled",
     )
+    parser.set_defaults(edge_defringe=False)
     parser.add_argument(
         "--edge-defringe-radius",
         type=int,
@@ -870,6 +1294,8 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("--alpha-threshold must be between 0 and 254")
     if args.min_hole_size < 0:
         raise SystemExit("--min-hole-size must be >= 0")
+    if args.clean_current_white_holes and args.min_hole_size == 0:
+        raise SystemExit("--clean-current-white-holes requires --min-hole-size >= 1")
     if args.hole_fringe_radius < 0:
         raise SystemExit("--hole-fringe-radius must be >= 0")
     if args.min_transparent_hole_size < 0:
@@ -883,11 +1309,30 @@ def main(argv: list[str] | None = None) -> int:
     if args.edge_defringe_radius < 0:
         raise SystemExit("--edge-defringe-radius must be >= 0")
 
-    task_paths = args.paths or default_sprite_dirs(args.scope, args.include_nested, args.include_pose)
+    task_paths = args.paths or default_sprite_dirs(
+        args.scope,
+        args.include_nested,
+        args.include_pose,
+        args.include_portraits,
+    )
     tasks: list[SpriteTask] = []
     for path in task_paths:
-        tasks.extend(tasks_for_path(path, args.raw_action, args.dry_run))
+        tasks.extend(
+            tasks_for_path(
+                path,
+                args.raw_action,
+                args.dry_run,
+                args.include_portraits,
+            )
+        )
     tasks = dedupe_tasks(tasks)
+
+    if (
+        args.restore_alpha_holes
+        or args.clean_current_white_holes
+        or args.clean_current_connected_white
+    ):
+        tasks = [task for task in tasks if task.destination.exists()]
 
     if not tasks:
         print("No PNG sprites found to process.", file=sys.stderr)
@@ -908,9 +1353,12 @@ def main(argv: list[str] | None = None) -> int:
             hole_fringe_max_chroma=args.hole_fringe_max_chroma,
             grid_columns=args.grid_columns,
             grid_rows=args.grid_rows,
+            restore_alpha_holes=args.restore_alpha_holes,
+            clean_current_white_holes=args.clean_current_white_holes,
             edge_defringe=args.edge_defringe,
             edge_defringe_radius=args.edge_defringe_radius,
             dry_run=args.dry_run,
+            clean_current_connected_white=args.clean_current_connected_white,
         )
         total_removed += result.removed_pixels
         print_result(result, args.dry_run)

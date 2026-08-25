@@ -6,9 +6,10 @@ from rest_framework.test import APIClient
 
 @override_settings(DEPLOYMENT_VERSION="test-sha")
 def test_liveness_does_not_touch_dependencies():
-    with mock.patch("common.views.connection.cursor") as cursor, mock.patch(
-        "common.views.cache.set"
-    ) as cache_set:
+    with (
+        mock.patch("common.views.connection.cursor") as cursor,
+        mock.patch("common.views.cache.set") as cache_set,
+    ):
         response = APIClient().get("/api/health/live/")
 
     assert response.status_code == 200

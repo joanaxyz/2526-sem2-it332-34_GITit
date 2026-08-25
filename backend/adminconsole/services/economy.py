@@ -1,24 +1,39 @@
-import uuid
+from django.db import transaction
 
-from rest_framework.exceptions import ValidationError
-
+from adminconsole.services.actions import record_admin_action
 from progress.wallet import WalletService
 
 
 class AdminEconomyService:
-    """Staff-initiated GitCoin grants/deductions, with a fresh idempotency key
-    per call (each admin action is its own, once-only ledger entry)."""
+    """Staff-initiated GitCoin changes keyed by the caller's stable request id."""
 
-    def adjust(self, *, player, amount, reason) -> None:
-        try:
-            amount = int(amount)
-        except (TypeError, ValueError) as exc:
-            raise ValidationError({"amount": "A whole-number amount is required."}) from exc
-        if amount == 0:
-            raise ValidationError({"amount": "Amount must be non-zero."})
-        reason = (reason or "admin_adjust").strip()[:64]
-        key = f"admin_adjust:{player.id}:{uuid.uuid4()}"
+    @transaction.atomic
+    def adjust(self, *, actor, player, amount: int, reason: str, request_id) -> bool:
+        wallet_service = WalletService()
+        before = wallet_service.summary(player=player)
+        key = f"admin_adjust:{player.id}:{request_id}"
         if amount > 0:
-            WalletService().award(player=player, amount=amount, reason=reason, award_key=key)
+            applied = wallet_service.award(
+                player=player,
+                amount=amount,
+                reason=reason,
+                award_key=key,
+            )
         else:
-            WalletService().spend(player=player, amount=-amount, reason=reason, award_key=key)
+            applied = wallet_service.spend(
+                player=player,
+                amount=-amount,
+                reason=reason,
+                award_key=key,
+            )
+        if applied:
+            record_admin_action(
+                actor=actor,
+                action="economy.adjust",
+                target=player,
+                before={"wallet": before},
+                after={"wallet": wallet_service.summary(player=player)},
+                metadata={"amount": amount, "reason": reason},
+                request_id=str(request_id),
+            )
+        return applied

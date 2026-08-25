@@ -1,11 +1,14 @@
 import type { RepositoryValue } from '@/shared/level/types'
+import type {
+  WorkspaceFileInput,
+  WorkspaceFileRenameInput,
+} from '@/shared/level/workspaceFileTypes'
 import {
   clone,
   changeType,
   entryContent,
   entryStatus,
   headTree,
-  isDeleteMarker,
   normalizeState,
   setOperationMetadata,
   visibleProjectTree,
@@ -13,16 +16,6 @@ import {
 import type { MutableRepositoryState } from '@/shared/git/simulator/types'
 
 export class WorkspaceFileError extends Error {}
-
-export type WorkspaceFileInput = {
-  path: string
-  content: string
-}
-
-export type WorkspaceFileRenameInput = {
-  path: string
-  newPath: string
-}
 
 type VisibleProjectEntry = {
   status?: string
@@ -142,7 +135,7 @@ export function renameWorkspaceFile(
   return normalizeState(nextState)
 }
 
-export function normalizePath(path: string) {
+function normalizePath(path: string) {
   const normalized = String(path || '').replaceAll('\\', '/').trim()
   if (!normalized) throw new WorkspaceFileError('File path is required.')
   if (normalized.endsWith('/')) throw new WorkspaceFileError('File path must include a file name.')
@@ -266,9 +259,4 @@ function pathMatchesRule(path: string, rule: string) {
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-}
-
-export function visibleFileContent(value: RepositoryValue | undefined) {
-  if (value === undefined || isDeleteMarker(value)) return ''
-  return String(entryContent(value) ?? '')
 }

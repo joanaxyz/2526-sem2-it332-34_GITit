@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 import { Sparkles } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
-import type { AdventureLevelSummary } from '@/features/challenges/types'
+import type { AdventureLevelSummary } from '@/features/story-map/types'
 import { GamePanel } from '@/shared/components/GamePanel'
 import { companionSkillPortrait, primarySkillCommand } from '@/shared/cosmetics/skillPortrait'
 import type { CompanionDef } from '@/shared/cosmetics/types'
 import { GitCommandIcon } from '@/shared/git/commandCatalog/commandIcons'
+import { SHOP_ROUTE } from '@/shared/navigation/routes'
 import { useRank } from '@/shared/progress/rank'
 
 type NextSkill = {
@@ -18,7 +20,7 @@ type NextSkill = {
    they have not cleared - the honest answer to "which skill, at what level?".
    Null once every level in the chapter is done. */
 function nextSkillReward(levels: AdventureLevelSummary[]): NextSkill | null {
-  const index = levels.findIndex((level) => !level.completed)
+  const index = levels.findIndex((level) => !level.is_passed)
   if (index === -1) return null
   const level = levels[index]
   return { level, levelNumber: index + 1, command: primarySkillCommand(level.command) }
@@ -26,11 +28,11 @@ function nextSkillReward(levels: AdventureLevelSummary[]): NextSkill | null {
 
 /* The companion's spell portrait for a command. The `portrait/<command>.png`
    art is populated per companion; fall back to the command glyph until it is. */
-function SkillPortrait({ src, command }: { src: string; command: string }) {
+function SkillPortrait({ src, command }: { src: string | null; command: string }) {
   const [failed, setFailed] = useState(false)
   return (
     <span className="story-skill-portrait" aria-hidden="true">
-      {failed ? (
+      {!src || failed ? (
         <GitCommandIcon command={command} className="story-skill-portrait-glyph" />
       ) : (
         <img src={src} alt="" onError={() => setFailed(true)} />
@@ -46,8 +48,8 @@ export function StorySkillFocusPanel({
   loading,
 }: {
   levels: AdventureLevelSummary[]
-  companionSlug: string
-  companionLabel: string
+  companionSlug: string | null
+  companionLabel: string | null
   loading: boolean
 }) {
   const next = useMemo(() => nextSkillReward(levels), [levels])
@@ -65,19 +67,33 @@ export function StorySkillFocusPanel({
             <strong className="story-skill-reward-name">Every spell inscribed</strong>
             <span className="story-skill-reward-level">Chapter mastered</span>
             <p className="story-skill-reward-desc">
-              You have inscribed every command in this chapter into {companionLabel}'s Spellbook.
+              {companionLabel
+                ? `You have inscribed every command in this chapter into ${companionLabel}'s Spellbook.`
+                : 'Every command in this chapter has been mastered.'}
             </p>
           </div>
         </div>
       ) : (
         <div className="story-skill-reward">
-          <SkillPortrait src={companionSkillPortrait(companionSlug, next.command)} command={next.command} />
+          <SkillPortrait
+            src={companionSlug ? companionSkillPortrait(companionSlug, next.command) : null}
+            command={next.command}
+          />
           <div className="story-skill-reward-copy">
             <code className="story-skill-reward-name">{next.command}</code>
             <span className="story-skill-reward-level">Level {next.levelNumber} Skill Reward</span>
             <p className="story-skill-reward-desc">
-              Clear <strong>{next.level.title}</strong> to inscribe {companionLabel}'s{' '}
-              <code>{next.command}</code> spell.
+              {companionLabel ? (
+                <>
+                  Clear <strong>{next.level.title}</strong> to inscribe {companionLabel}'s{' '}
+                  <code>{next.command}</code> spell.
+                </>
+              ) : (
+                <>
+                  <Link to={`${SHOP_ROUTE}?tab=companions&required=1`}>Choose a companion</Link> before
+                  clearing <strong>{next.level.title}</strong> to bind this spell.
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -86,8 +102,23 @@ export function StorySkillFocusPanel({
   )
 }
 
-export function StoryCompanionPanel({ companion }: { companion: CompanionDef }) {
+export function StoryCompanionPanel({ companion }: { companion: CompanionDef | null }) {
   const rank = useRank()
+  if (!companion) {
+    return (
+      <GamePanel
+        as="section"
+        eyebrow="Unassigned"
+        title="No Companion Selected"
+        className="story-companion-panel story-companion-panel--empty"
+      >
+        <div className="story-companion-empty">
+          <p>Choose a companion before entering an Adventure or Challenge.</p>
+          <Link to={`${SHOP_ROUTE}?tab=companions&required=1`}>Choose companion</Link>
+        </div>
+      </GamePanel>
+    )
+  }
   const portrait = companion.sprites.portrait?.src ?? companion.sprites.idle?.src ?? ''
   return (
     <GamePanel as="section" eyebrow={companion.label} title="Your Companion" className="story-companion-panel">

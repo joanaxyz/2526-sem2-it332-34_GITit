@@ -261,7 +261,9 @@ def body_focus(mask: Image.Image, bbox: tuple[int, int, int, int]) -> tuple[floa
             count += 1
 
     focus_x = sum_x / count if count else center_x_for_bbox(bbox)
-    focus_width = (focus_bbox[2] - focus_bbox[0]) if focus_bbox is not None else (max_x_excl - min_x)
+    focus_width = (
+        (focus_bbox[2] - focus_bbox[0]) if focus_bbox is not None else (max_x_excl - min_x)
+    )
     return focus_x, focus_width
 
 
@@ -290,7 +292,9 @@ def lowest_support(
     fallback: tuple[int, list[tuple[int, int, int]]] | None = None
 
     for y in range(max_y_excl - 1, min_y - 1, -1):
-        support_segments = [segment for segment in row_segments(mask, y) if segment[2] >= required_width]
+        support_segments = [
+            segment for segment in row_segments(mask, y) if segment[2] >= required_width
+        ]
         if not support_segments:
             continue
 
@@ -298,7 +302,9 @@ def lowest_support(
             fallback = (y, support_segments)
 
         centered_segments = [
-            segment for segment in support_segments if abs(segment_center(segment) - focus_x) <= center_tolerance
+            segment
+            for segment in support_segments
+            if abs(segment_center(segment) - focus_x) <= center_tolerance
         ]
         if centered_segments:
             return y, centered_segments
@@ -344,7 +350,9 @@ def feet_anchor(
     if support_segments:
         column_margin = max(1, round((max_x_excl - min_x) * SUPPORT_COLUMN_MARGIN_RATIO))
         column_left = max(0, min(left for left, _, _ in support_segments) - column_margin)
-        column_right = min(mask.width - 1, max(right for _, right, _ in support_segments) + column_margin)
+        column_right = min(
+            mask.width - 1, max(right for _, right, _ in support_segments) + column_margin
+        )
 
     sum_x = 0
     count = 0
@@ -383,12 +391,16 @@ def side_foot_anchor(
     for y in range(max_y_excl - 1, lower_top - 1, -1):
         segments = [segment for segment in row_segments(mask, y) if segment[2] >= required_width]
         if side == "right":
-            candidates = [segment for segment in segments if segment_center(segment) >= side_threshold]
+            candidates = [
+                segment for segment in segments if segment_center(segment) >= side_threshold
+            ]
             if candidates:
                 segment = max(candidates, key=segment_center)
                 return segment_center(segment), y, bbox
         else:
-            candidates = [segment for segment in segments if segment_center(segment) <= side_threshold]
+            candidates = [
+                segment for segment in segments if segment_center(segment) <= side_threshold
+            ]
             if candidates:
                 segment = min(candidates, key=segment_center)
                 return segment_center(segment), y, bbox
@@ -442,16 +454,16 @@ def background_color(im: Image.Image, mask: Image.Image, margin: int = 6):
     rgb = im.convert("RGB")
     w, h = rgb.size
     strips = [
-        (0, 0, w, margin),          # top
-        (0, h - margin, w, h),      # bottom
-        (0, 0, margin, h),          # left
-        (w - margin, 0, w, h),      # right
+        (0, 0, w, margin),  # top
+        (0, h - margin, w, h),  # bottom
+        (0, 0, margin, h),  # left
+        (w - margin, 0, w, h),  # right
     ]
     samples: list[tuple[int, int, int]] = []
     for box in strips:
         pixels = image_data(rgb.crop(box))
         mask_pixels = image_data(mask.crop(box))
-        samples.extend(px for px, m in zip(pixels, mask_pixels) if not m)
+        samples.extend(px for px, m in zip(pixels, mask_pixels, strict=True) if not m)
     if not samples:
         return (255, 255, 255)
     return (
@@ -469,7 +481,9 @@ def parse_fill(bg_mode: str):
         return (255, 255, 255)
     hex_str = bg_mode.lstrip("#")
     if len(hex_str) != 6:
-        raise argparse.ArgumentTypeError(f"--bg must be 'sample', 'white', or #rrggbb (got {bg_mode!r})")
+        raise argparse.ArgumentTypeError(
+            f"--bg must be 'sample', 'white', or #rrggbb (got {bg_mode!r})"
+        )
     return tuple(int(hex_str[i : i + 2], 16) for i in (0, 2, 4))
 
 
@@ -504,10 +518,14 @@ def is_alignable_pose_png(path: Path) -> bool:
 
 
 def pose_png_paths(source_dir: Path) -> list[Path]:
-    return sorted(path for path in source_dir.glob("*.png") if path.is_file() and is_alignable_pose_png(path))
+    return sorted(
+        path for path in source_dir.glob("*.png") if path.is_file() and is_alignable_pose_png(path)
+    )
 
 
-def shifted_content_bbox(plan: PosePlan, preserve_background: bool) -> tuple[int, int, int, int] | None:
+def shifted_content_bbox(
+    plan: PosePlan, preserve_background: bool
+) -> tuple[int, int, int, int] | None:
     if preserve_background:
         bbox = (0, 0, plan.image.width, plan.image.height)
     else:
@@ -524,7 +542,9 @@ def shifted_content_bbox(plan: PosePlan, preserve_background: bool) -> tuple[int
     )
 
 
-def natural_canvas(plans: list[PosePlan], crop_padding: int, preserve_background: bool) -> CanvasPlan:
+def natural_canvas(
+    plans: list[PosePlan], crop_padding: int, preserve_background: bool
+) -> CanvasPlan:
     """Return a per-folder natural square canvas around shifted visible content.
 
     The output does not inherit the largest source image. Each monster/companion
@@ -534,7 +554,9 @@ def natural_canvas(plans: list[PosePlan], crop_padding: int, preserve_background
     room is centered; extra vertical room is biased above the art so the
     character sits lower in the frame.
     """
-    shifted_bboxes = [bbox for plan in plans if (bbox := shifted_content_bbox(plan, preserve_background))]
+    shifted_bboxes = [
+        bbox for plan in plans if (bbox := shifted_content_bbox(plan, preserve_background))
+    ]
     if not shifted_bboxes:
         return CanvasPlan(1, 1, crop_padding, crop_padding, (0, 0, 0, 0))
 
@@ -577,7 +599,9 @@ def align_dir(
     dry_run: bool,
 ) -> None:
     ref_path = source_dir / f"{reference}.png"
-    rel_source = source_dir.relative_to(REPO_ROOT) if source_dir.is_relative_to(REPO_ROOT) else source_dir
+    rel_source = (
+        source_dir.relative_to(REPO_ROOT) if source_dir.is_relative_to(REPO_ROOT) else source_dir
+    )
     rel_out = out_dir.relative_to(REPO_ROOT) if out_dir.is_relative_to(REPO_ROOT) else out_dir
     print(f"\n{rel_source} -> {rel_out}")
 
@@ -626,7 +650,9 @@ def align_dir(
         im = Image.open(path)
         mask = silhouette_mask(im, threshold)
         anchor_mode = pose_x_anchor(path.stem, x_anchor, death_x_anchor)
-        anchor = alignment_anchor(mask, foot_band, support_segment_ratio, min_support_width, anchor_mode)
+        anchor = alignment_anchor(
+            mask, foot_band, support_segment_ratio, min_support_width, anchor_mode
+        )
         if path.stem == reference:
             dx = dy = 0
             note = "reference pose -> shift=(+0, +0)"
@@ -686,7 +712,10 @@ def align_dir(
                 min_x, min_y, _, _ = bbox
                 canvas.paste(
                     plan.image.convert("RGB").crop(bbox),
-                    (canvas_plan.origin_x + plan.dx + min_x, canvas_plan.origin_y + plan.dy + min_y),
+                    (
+                        canvas_plan.origin_x + plan.dx + min_x,
+                        canvas_plan.origin_y + plan.dy + min_y,
+                    ),
                     plan.mask.crop(bbox),
                 )
         canvas.save(out_dir / plan.path.name)
@@ -755,7 +784,9 @@ def asset_folder_candidates(asset: str) -> list[str]:
     return unique
 
 
-def resolve_monster_source_and_output(monster: str, story_world: str, target: str) -> tuple[Path, Path] | None:
+def resolve_monster_source_and_output(
+    monster: str, story_world: str, target: str
+) -> tuple[Path, Path] | None:
     for folder in asset_folder_candidates(monster):
         for story_world_root in existing_story_world_roots():
             pose_dir = story_world_root / story_world / "monsters" / folder / POSE_DIR_NAME
@@ -780,7 +811,9 @@ def named_scope_order(scope: str) -> tuple[str, ...]:
     return (scope,)
 
 
-def resolve_named_source_and_output(name: str, story_world: str, target: str, scope: str) -> tuple[Path, Path] | None:
+def resolve_named_source_and_output(
+    name: str, story_world: str, target: str, scope: str
+) -> tuple[Path, Path] | None:
     for asset_scope in named_scope_order(scope):
         if asset_scope == "monsters":
             monster_paths = resolve_monster_source_and_output(name, story_world, target)
@@ -798,7 +831,9 @@ def looks_like_path(path: Path) -> bool:
     return path.is_absolute() or "/" in raw or "\\" in raw
 
 
-def resolve_source_and_output(path: Path, story_world: str, target: str, scope: str) -> tuple[Path, Path]:
+def resolve_source_and_output(
+    path: Path, story_world: str, target: str, scope: str
+) -> tuple[Path, Path]:
     resolved = path.resolve()
     if resolved.name == RAW_DIR_NAME:
         return resolved, resolved.parent
@@ -821,7 +856,9 @@ def resolve_source_and_output(path: Path, story_world: str, target: str, scope: 
     return resolved, resolved
 
 
-def resolve_jobs(pose_dirs: list[Path], story_world: str, target: str, scope: str) -> list[tuple[Path, Path]]:
+def resolve_jobs(
+    pose_dirs: list[Path], story_world: str, target: str, scope: str
+) -> list[tuple[Path, Path]]:
     if not pose_dirs:
         return discover_source_dirs(target, scope)
 
@@ -866,14 +903,22 @@ def resolve_x_anchor(source_dir: Path, x_anchor: str) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument(
         "pose_dirs",
         nargs="*",
         type=Path,
         help="monster/companion names or source directories (default: every matching monster directory)",
     )
-    parser.add_argument("--story-world", "--theme", dest="story_world", default="arcane-spire", help="story world slug for monster-name arguments (default: arcane-spire)")
+    parser.add_argument(
+        "--story-world",
+        "--theme",
+        dest="story_world",
+        default="arcane-spire",
+        help="story world slug for monster-name arguments (default: arcane-spire)",
+    )
     parser.add_argument(
         "--scope",
         choices=SCOPES,
@@ -884,13 +929,43 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
     target_group = parser.add_mutually_exclusive_group()
-    target_group.add_argument("--root", dest="target", action="store_const", const="root", help="read and write pose/*.png")
-    target_group.add_argument("--raw", dest="target", action="store_const", const=RAW_DIR_NAME, help="read pose/raw/*.png and write pose/*.png (default)")
-    target_group.add_argument("--_raw", dest="target", action="store_const", const=ORIGINAL_RAW_DIR_NAME, help="read pose/raw/_raw/*.png and write pose/raw/*.png")
+    target_group.add_argument(
+        "--root",
+        dest="target",
+        action="store_const",
+        const="root",
+        help="read and write pose/*.png",
+    )
+    target_group.add_argument(
+        "--raw",
+        dest="target",
+        action="store_const",
+        const=RAW_DIR_NAME,
+        help="read pose/raw/*.png and write pose/*.png (default)",
+    )
+    target_group.add_argument(
+        "--_raw",
+        dest="target",
+        action="store_const",
+        const=ORIGINAL_RAW_DIR_NAME,
+        help="read pose/raw/_raw/*.png and write pose/raw/*.png",
+    )
     parser.set_defaults(target=RAW_DIR_NAME)
-    parser.add_argument("--reference", default="idle", help="pose used as the feet anchor (default: idle)")
-    parser.add_argument("--threshold", type=int, default=24, help="channel drop below white that counts as character (default: 24)")
-    parser.add_argument("--foot-band", type=float, default=0.12, help="bottom fraction of the silhouette used as feet (default: 0.12)")
+    parser.add_argument(
+        "--reference", default="idle", help="pose used as the feet anchor (default: idle)"
+    )
+    parser.add_argument(
+        "--threshold",
+        type=int,
+        default=24,
+        help="channel drop below white that counts as character (default: 24)",
+    )
+    parser.add_argument(
+        "--foot-band",
+        type=float,
+        default=0.12,
+        help="bottom fraction of the silhouette used as feet (default: 0.12)",
+    )
     parser.add_argument(
         "--support-segment-ratio",
         type=float,
@@ -944,13 +1019,19 @@ def main(argv: list[str] | None = None) -> int:
         metavar="POSE=PX",
         help="extra vertical shift for one named pose after alignment; may be repeated (example: run=-200)",
     )
-    parser.add_argument("--bg", default="white", help="fill for revealed strips: 'white' (default), 'sample' (per-image), or #rrggbb")
+    parser.add_argument(
+        "--bg",
+        default="white",
+        help="fill for revealed strips: 'white' (default), 'sample' (per-image), or #rrggbb",
+    )
     parser.add_argument(
         "--preserve-background",
         action="store_true",
         help="paste the whole source image instead of masking the character onto a clean canvas",
     )
-    parser.add_argument("--dry-run", action="store_true", help="report shifts without writing files")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="report shifts without writing files"
+    )
     args = parser.parse_args(argv)
 
     fill_color = parse_fill(args.bg)
@@ -964,7 +1045,10 @@ def main(argv: list[str] | None = None) -> int:
     jobs = resolve_jobs(args.pose_dirs, args.story_world, args.target, args.scope)
     if not jobs:
         story_roots = " / ".join(str(root) for root in STORY_WORLDS_ROOTS)
-        print(f"No pose/raw directories found for scope {args.scope!r} under {story_roots} / {COMPANION_ROOT}", file=sys.stderr)
+        print(
+            f"No pose/raw directories found for scope {args.scope!r} under {story_roots} / {COMPANION_ROOT}",
+            file=sys.stderr,
+        )
         return 1
 
     for source_dir, out_dir in jobs:

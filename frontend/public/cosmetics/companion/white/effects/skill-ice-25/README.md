@@ -14,7 +14,7 @@ show - target-ground
 
 diff - charge (f: 1 - 10) -> fly (f: 11 - 20) -> impact(center) (f: 21 - 25)
 
-add - charge (f: 1 - 10) -> fly (f: 11 - 15) -> impact(ground) (f: 16 - 25)
+add - charge (f: 1 - 10) -> fly (f: 11 - 15) -> impact(center) (f: 16 - 25)
 
 commit - target-ground
 
@@ -62,12 +62,8 @@ push - ground-run
 
 rebase - target-ground
 
+tag - target-ground
+
+rev-list - target-center
+
 default - charge (f: 1 - 10) -> fly (f: 11 - 15) -> impact(center) (f: 16 - 25)
-
-crop-repairs:
-
-add - removed raw cross-cell bottom slice (f: 15 - 20)
-
-reflog - removed raw cross-cell top slice (f: 11 - 15)
-
-rebase - removed raw cross-cell top slice (f: 19 - 20)

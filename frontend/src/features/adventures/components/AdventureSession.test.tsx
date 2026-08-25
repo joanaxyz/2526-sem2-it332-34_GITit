@@ -223,6 +223,8 @@ describe('AdventureSession', () => {
       discardRun: { isPending: false, mutate: vi.fn() },
       createFile: { isPending: false, mutateAsync: vi.fn() },
       writeFile: { isPending: false, mutateAsync: vi.fn() },
+      renameFile: { isPending: false, mutateAsync: vi.fn() },
+      deleteFile: { isPending: false, mutateAsync: vi.fn() },
     })
     mocks.useStartAdventureRun.mockImplementation(() => {
       startHookCall += 1
@@ -261,6 +263,8 @@ describe('AdventureSession', () => {
       discardRun: { isPending: false, mutate: vi.fn() },
       createFile: { isPending: false, mutateAsync: vi.fn() },
       writeFile: { isPending: false, mutateAsync: vi.fn() },
+      renameFile: { isPending: false, mutateAsync: vi.fn() },
+      deleteFile: { isPending: false, mutateAsync: vi.fn() },
     })
     mocks.useStartAdventureRun.mockReturnValue({ isPending: false, mutate: vi.fn() })
 
@@ -288,6 +292,8 @@ describe('AdventureSession', () => {
       lines: [],
       createFile: { isPending: false, mutateAsync: vi.fn() },
       writeFile: { isPending: false, mutateAsync: vi.fn() },
+      renameFile: { isPending: false, mutateAsync: vi.fn() },
+      deleteFile: { isPending: false, mutateAsync: vi.fn() },
     })
     mocks.useStartAdventureRun.mockReturnValue({ isPending: false, mutate: vi.fn() })
 
@@ -322,6 +328,8 @@ describe('AdventureSession', () => {
       lines: [],
       createFile: { isPending: false, mutateAsync: vi.fn() },
       writeFile: { isPending: false, mutateAsync: vi.fn() },
+      renameFile: { isPending: false, mutateAsync: vi.fn() },
+      deleteFile: { isPending: false, mutateAsync: vi.fn() },
     })
     mocks.useStartAdventureRun.mockReturnValue(restartMutation)
 
@@ -353,6 +361,8 @@ describe('AdventureSession', () => {
       lines: [],
       createFile: { isPending: false, mutateAsync: vi.fn() },
       writeFile: { isPending: false, mutateAsync: vi.fn() },
+      renameFile: { isPending: false, mutateAsync: vi.fn() },
+      deleteFile: { isPending: false, mutateAsync: vi.fn() },
     }))
     mocks.useStartAdventureRun.mockReturnValue({ isPending: false, mutate: vi.fn() })
 
@@ -385,6 +395,8 @@ describe('AdventureSession', () => {
       lines: [],
       createFile: { isPending: false, mutateAsync: vi.fn() },
       writeFile: { isPending: false, mutateAsync: vi.fn() },
+      renameFile: { isPending: false, mutateAsync: vi.fn() },
+      deleteFile: { isPending: false, mutateAsync: vi.fn() },
     })
     mocks.useStartAdventureRun.mockReturnValue({ isPending: false, mutate: vi.fn() })
 

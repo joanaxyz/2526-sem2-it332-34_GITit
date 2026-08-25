@@ -9,7 +9,7 @@ import { withClientRunRevision } from '@/shared/level/commandExecution'
 import { nextEphemeralStepId, stripEphemeralSteps } from '@/shared/level/terminalSteps'
 import type { CommandExecutionPayload, RepositorySnapshot, TerminalStep } from '@/shared/level/types'
 
-export type OptimisticCommandSession<TStep extends TerminalStep> = {
+type OptimisticCommandSession<TStep extends TerminalStep> = {
   repositoryState: MutableRepositoryState
   revision: number
   steps: TStep[]

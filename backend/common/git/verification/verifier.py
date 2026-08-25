@@ -138,9 +138,13 @@ class ClientTransitionVerifier(
             if command_family in {"merge", "pull"}:
                 try:
                     if command_family == "merge":
-                        self._verify_merge(command=command, previous_state=previous_state, next_state=next_state)
+                        self._verify_merge(
+                            command=command, previous_state=previous_state, next_state=next_state
+                        )
                     else:
-                        self._verify_pull(command=command, previous_state=previous_state, next_state=next_state)
+                        self._verify_pull(
+                            command=command, previous_state=previous_state, next_state=next_state
+                        )
                     return
                 except BadRequest:
                     # A merge/pull can stop with conflicts and mutate state, or
@@ -164,5 +168,9 @@ class ClientTransitionVerifier(
 
         handler_name = self.VERIFY_HANDLERS.get(command_family)
         if handler_name is None:
-            raise BadRequest(f"Unsupported mutating command family cannot persist state: {command_family}.")
-        getattr(self, handler_name)(command=command, previous_state=previous_state, next_state=next_state)
+            raise BadRequest(
+                f"Unsupported mutating command family cannot persist state: {command_family}."
+            )
+        getattr(self, handler_name)(
+            command=command, previous_state=previous_state, next_state=next_state
+        )

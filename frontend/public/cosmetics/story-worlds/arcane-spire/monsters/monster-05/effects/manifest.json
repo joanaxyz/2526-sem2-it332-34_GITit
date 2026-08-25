@@ -1,5 +1,5 @@
 {
-  "id": "bone-lancer-skill-effect",
+  "id": "monster-05-skill-effect",
   "label": "Bone Lancer Skill Effect",
   "motif": "blue flame pierce",
   "playback": "target",
@@ -28,6 +28,16 @@
       "orient_to": "target-facing"
     }
   ],
-  "anchor": "center",
+  "anchor": "feet",
+  "placeAnchor": {
+    "x": 0.4922,
+    "y": 0.918
+  },
+  "placeBounds": {
+    "left": 0.043,
+    "top": 0.0859,
+    "right": 0.9297,
+    "bottom": 0.9727
+  },
   "placement": "target"
 }

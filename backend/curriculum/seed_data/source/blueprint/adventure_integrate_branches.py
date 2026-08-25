@@ -460,6 +460,16 @@ ADVENTURE_LEVELS = [
                         "conflict_free": True,
                         "working_tree_clean": True,
                         "staging_empty": True,
+                        "rules": [
+                            {
+                                "type": "required_command_sequence",
+                                "commands": [
+                                    "git status --porcelain",
+                                    "git merge --abort",
+                                    "git status",
+                                ],
+                            }
+                        ],
                     },
                     checks=[
                         {
@@ -472,6 +482,21 @@ ADVENTURE_LEVELS = [
                                 "conflict_free": True,
                                 "working_tree_clean": True,
                                 "staging_empty": True,
+                            },
+                        },
+                        {
+                            "label": "The clean workspace was confirmed after the merge was aborted.",
+                            "requirement": {
+                                "rules": [
+                                    {
+                                        "type": "required_command_sequence",
+                                        "commands": [
+                                            "git status --porcelain",
+                                            "git merge --abort",
+                                            "git status",
+                                        ],
+                                    }
+                                ]
                             },
                         },
                     ],

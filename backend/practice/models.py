@@ -74,4 +74,12 @@ class CommandStep(models.Model):
                 ),
                 name="command_step_exactly_one_parent",
             ),
+            models.CheckConstraint(
+                condition=(
+                    Q(attempt_number__gte=1)
+                    & Q(counted_increment__lte=1)
+                    & Q(counted_total_after__gte=models.F("counted_increment"))
+                ),
+                name="command_step_valid_counts",
+            ),
         ]

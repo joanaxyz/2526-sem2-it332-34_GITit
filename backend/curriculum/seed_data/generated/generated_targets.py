@@ -27891,9 +27891,11 @@ TARGET_STATES = json.loads(r"""
       "target": "c3",
       "type": "branch"
     },
+    "last_branch_created": "hotfix",
     "last_switch_branch": "hotfix",
     "last_switched_to": "hotfix",
     "operation_metadata": {
+      "last_branch_created": "hotfix",
       "last_switch_branch": "hotfix",
       "last_switched_to": "hotfix"
     },
@@ -28025,10 +28027,12 @@ TARGET_STATES = json.loads(r"""
       "target": "c3",
       "type": "branch"
     },
+    "last_branch_created": "hotfix",
     "last_switch_branch": "hotfix",
     "last_switched_to": "hotfix",
     "operation_metadata": {
       "blueprint_variant": "alternate",
+      "last_branch_created": "hotfix",
       "last_switch_branch": "hotfix",
       "last_switched_to": "hotfix"
     },
@@ -29989,7 +29993,6 @@ TARGET_STATES = json.loads(r"""
   "ch3-adv-detach-inspect-note": {
     "branches": {
       "feature/ui": "c1",
-      "hotfix": "c0",
       "main": "c3"
     },
     "commits": [
@@ -30125,7 +30128,6 @@ TARGET_STATES = json.loads(r"""
   "ch3-adv-detach-inspect-note-alt": {
     "branches": {
       "feature/ui": "c1",
-      "hotfix": "c0",
       "main": "c3",
       "review/context": "c2"
     },
@@ -30267,7 +30269,6 @@ TARGET_STATES = json.loads(r"""
     "branches": {
       "feature/notes": "c3",
       "feature/ui": "c1",
-      "hotfix": "c0",
       "main": "c2"
     },
     "commits": [
@@ -30402,7 +30403,6 @@ TARGET_STATES = json.loads(r"""
     "branches": {
       "feature/notes": "c3",
       "feature/ui": "c1",
-      "hotfix": "c0",
       "main": "c2",
       "review/context": "c2"
     },
@@ -32458,7 +32458,6 @@ TARGET_STATES = json.loads(r"""
   "ch3-adv-legacy-hotfix": {
     "branches": {
       "feature/ui": "c1",
-      "hotfix": "c0",
       "hotfix/legacy": "c3",
       "main": "c2"
     },
@@ -32593,7 +32592,6 @@ TARGET_STATES = json.loads(r"""
   "ch3-adv-legacy-hotfix-alt": {
     "branches": {
       "feature/ui": "c1",
-      "hotfix": "c0",
       "hotfix/legacy": "c3",
       "main": "c2",
       "review/context": "c2"
@@ -34448,7 +34446,6 @@ TARGET_STATES = json.loads(r"""
   "ch3-adv-switch-existing": {
     "branches": {
       "feature/ui": "c3",
-      "hotfix": "c0",
       "main": "c2"
     },
     "commits": [
@@ -34579,7 +34576,6 @@ TARGET_STATES = json.loads(r"""
   "ch3-adv-switch-existing-alt": {
     "branches": {
       "feature/ui": "c3",
-      "hotfix": "c0",
       "main": "c2",
       "review/context": "c2"
     },
@@ -64191,7 +64187,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "src/auth.py": {
-            "after": "guard",
+            "after": "guard\nadapted_after_abort=True\n",
             "before": null,
             "change_type": "added"
           }
@@ -64210,7 +64206,7 @@ TARGET_STATES = json.loads(r"""
           "README.md": "base",
           "docs/guide.md": "guide",
           "src/app.py": "v1",
-          "src/auth.py": "guard"
+          "src/auth.py": "guard\nadapted_after_abort=True\n"
         }
       }
     ],
@@ -64224,12 +64220,14 @@ TARGET_STATES = json.loads(r"""
     "last_cherry_pick_aborted": true,
     "last_cherry_pick_no_commit": true,
     "last_cherry_pick_source": "c2",
+    "last_workspace_file_written": "src/auth.py",
     "operation_metadata": {
       "cherry_pick_in_progress": true,
       "cherry_pick_original_head": "c1",
       "last_cherry_pick_aborted": true,
       "last_cherry_pick_no_commit": true,
-      "last_cherry_pick_source": "c2"
+      "last_cherry_pick_source": "c2",
+      "last_workspace_file_written": "src/auth.py"
     },
     "partial_hunks": {},
     "reflog": [
@@ -64343,7 +64341,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "src/auth.py": {
-            "after": "guard",
+            "after": "guard\nadapted_after_abort=True\n",
             "before": null,
             "change_type": "added"
           }
@@ -64362,7 +64360,7 @@ TARGET_STATES = json.loads(r"""
           "README.md": "base",
           "docs/guide.md": "guide",
           "src/app.py": "v1",
-          "src/auth.py": "guard"
+          "src/auth.py": "guard\nadapted_after_abort=True\n"
         }
       }
     ],
@@ -64379,13 +64377,15 @@ TARGET_STATES = json.loads(r"""
     "last_cherry_pick_aborted": true,
     "last_cherry_pick_no_commit": true,
     "last_cherry_pick_source": "c2",
+    "last_workspace_file_written": "src/auth.py",
     "operation_metadata": {
       "blueprint_variant": "alternate",
       "cherry_pick_in_progress": true,
       "cherry_pick_original_head": "c1",
       "last_cherry_pick_aborted": true,
       "last_cherry_pick_no_commit": true,
-      "last_cherry_pick_source": "c2"
+      "last_cherry_pick_source": "c2",
+      "last_workspace_file_written": "src/auth.py"
     },
     "partial_hunks": {},
     "reflog": [
@@ -70393,7 +70393,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "src/auth.py": {
-            "after": "guard",
+            "after": "guard\nadapted=True\n",
             "before": null,
             "change_type": "added"
           }
@@ -70412,7 +70412,7 @@ TARGET_STATES = json.loads(r"""
           "README.md": "base",
           "docs/guide.md": "guide",
           "src/app.py": "v1",
-          "src/auth.py": "guard"
+          "src/auth.py": "guard\nadapted=True\n"
         }
       }
     ],
@@ -70425,11 +70425,13 @@ TARGET_STATES = json.loads(r"""
     },
     "last_cherry_pick_no_commit": true,
     "last_cherry_pick_source": "c2",
+    "last_workspace_file_written": "src/auth.py",
     "operation_metadata": {
       "cherry_pick_in_progress": true,
       "cherry_pick_original_head": "c1",
       "last_cherry_pick_no_commit": true,
-      "last_cherry_pick_source": "c2"
+      "last_cherry_pick_source": "c2",
+      "last_workspace_file_written": "src/auth.py"
     },
     "partial_hunks": {},
     "reflog": [
@@ -70538,7 +70540,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "src/auth.py": {
-            "after": "guard",
+            "after": "guard\nadapted=True\n",
             "before": null,
             "change_type": "added"
           }
@@ -70557,7 +70559,7 @@ TARGET_STATES = json.loads(r"""
           "README.md": "base",
           "docs/guide.md": "guide",
           "src/app.py": "v1",
-          "src/auth.py": "guard"
+          "src/auth.py": "guard\nadapted=True\n"
         }
       }
     ],
@@ -70573,12 +70575,14 @@ TARGET_STATES = json.loads(r"""
     },
     "last_cherry_pick_no_commit": true,
     "last_cherry_pick_source": "c2",
+    "last_workspace_file_written": "src/auth.py",
     "operation_metadata": {
       "blueprint_variant": "alternate",
       "cherry_pick_in_progress": true,
       "cherry_pick_original_head": "c1",
       "last_cherry_pick_no_commit": true,
-      "last_cherry_pick_source": "c2"
+      "last_cherry_pick_source": "c2",
+      "last_workspace_file_written": "src/auth.py"
     },
     "partial_hunks": {},
     "reflog": [
@@ -71101,7 +71105,7 @@ TARGET_STATES = json.loads(r"""
   },
   "ch6-adv-shelve-fix-return": {
     "branches": {
-      "hotfix/navbar": "c1",
+      "hotfix/navbar": "c3",
       "main": "c2"
     },
     "commits": [
@@ -71171,6 +71175,30 @@ TARGET_STATES = json.loads(r"""
           "src/app.py": "v1",
           "src/dashboard.py": "v1"
         }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "README.md": {
+            "after": "base\nQuick navbar patch\n",
+            "before": "base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Quick navbar patch",
+        "order": 3,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "base\nQuick navbar patch\n",
+          "src/app.py": "v1"
+        }
       }
     ],
     "conflict_details": {},
@@ -71184,15 +71212,23 @@ TARGET_STATES = json.loads(r"""
     "last_stash_operation": "drop",
     "last_switch_branch": "main",
     "last_switched_to": "main",
+    "last_workspace_file_written": "README.md",
     "operation_metadata": {
       "last_stash_action": "drop",
       "last_stash_operation": "drop",
       "last_switch_branch": "main",
       "last_switched_to": "main",
+      "last_workspace_file_written": "README.md",
       "stash_count": 0
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -71210,7 +71246,7 @@ TARGET_STATES = json.loads(r"""
   },
   "ch6-adv-shelve-fix-return-alt": {
     "branches": {
-      "hotfix/navbar": "c1",
+      "hotfix/navbar": "c3",
       "main": "c2",
       "review/context": "c2"
     },
@@ -71281,6 +71317,30 @@ TARGET_STATES = json.loads(r"""
           "src/app.py": "v1",
           "src/dashboard.py": "v1"
         }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "README.md": {
+            "after": "base\nQuick navbar patch\n",
+            "before": "base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Quick navbar patch",
+        "order": 3,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "base\nQuick navbar patch\n",
+          "src/app.py": "v1"
+        }
       }
     ],
     "config": {
@@ -71297,16 +71357,24 @@ TARGET_STATES = json.loads(r"""
     "last_stash_operation": "drop",
     "last_switch_branch": "main",
     "last_switched_to": "main",
+    "last_workspace_file_written": "README.md",
     "operation_metadata": {
       "blueprint_variant": "alternate",
       "last_stash_action": "drop",
       "last_stash_operation": "drop",
       "last_switch_branch": "main",
       "last_switched_to": "main",
+      "last_workspace_file_written": "README.md",
       "stash_count": 0
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -72368,8 +72436,8 @@ TARGET_STATES = json.loads(r"""
   },
   "ch6-adv-stash-restore-commit": {
     "branches": {
-      "hotfix/navbar": "c1",
-      "main": "c3"
+      "hotfix/navbar": "c3",
+      "main": "c4"
     },
     "commits": [
       {
@@ -72442,6 +72510,30 @@ TARGET_STATES = json.loads(r"""
       {
         "author": "GIT it",
         "changes": {
+          "README.md": {
+            "after": "base\nUrgent navbar fix\n",
+            "before": "base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Commit urgent fix",
+        "order": 3,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "base\nUrgent navbar fix\n",
+          "src/app.py": "v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
           "src/app.py": {
             "after": "work in progress",
             "before": "v1",
@@ -72451,10 +72543,10 @@ TARGET_STATES = json.loads(r"""
         "files": {
           "src/app.py": "modified"
         },
-        "id": "c3",
+        "id": "c4",
         "is_merge": false,
         "message": "Save restored WIP",
-        "order": 3,
+        "order": 4,
         "parents": [
           "c2"
         ],
@@ -72469,18 +72561,20 @@ TARGET_STATES = json.loads(r"""
     "conflicts": [],
     "head": {
       "name": "main",
-      "target": "c3",
+      "target": "c4",
       "type": "branch"
     },
     "last_stash_action": "pop",
     "last_stash_operation": "pop",
     "last_switch_branch": "main",
     "last_switched_to": "main",
+    "last_workspace_file_written": "README.md",
     "operation_metadata": {
       "last_stash_action": "pop",
       "last_stash_operation": "pop",
       "last_switch_branch": "main",
       "last_switched_to": "main",
+      "last_workspace_file_written": "README.md",
       "stash_count": 0
     },
     "partial_hunks": {},
@@ -72489,6 +72583,11 @@ TARGET_STATES = json.loads(r"""
         "message": "move HEAD",
         "ref": "HEAD@{0}",
         "target": "c3"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
+        "target": "c4"
       }
     ],
     "remote_branches": {},
@@ -72507,8 +72606,8 @@ TARGET_STATES = json.loads(r"""
   },
   "ch6-adv-stash-restore-commit-alt": {
     "branches": {
-      "hotfix/navbar": "c1",
-      "main": "c3",
+      "hotfix/navbar": "c3",
+      "main": "c4",
       "review/context": "c2"
     },
     "commits": [
@@ -72582,6 +72681,30 @@ TARGET_STATES = json.loads(r"""
       {
         "author": "GIT it",
         "changes": {
+          "README.md": {
+            "after": "base\nUrgent navbar fix\n",
+            "before": "base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Commit urgent fix",
+        "order": 3,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "base\nUrgent navbar fix\n",
+          "src/app.py": "v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
           "src/app.py": {
             "after": "work in progress",
             "before": "v1",
@@ -72591,10 +72714,10 @@ TARGET_STATES = json.loads(r"""
         "files": {
           "src/app.py": "modified"
         },
-        "id": "c3",
+        "id": "c4",
         "is_merge": false,
         "message": "Save restored WIP",
-        "order": 3,
+        "order": 4,
         "parents": [
           "c2"
         ],
@@ -72612,19 +72735,21 @@ TARGET_STATES = json.loads(r"""
     "conflicts": [],
     "head": {
       "name": "main",
-      "target": "c3",
+      "target": "c4",
       "type": "branch"
     },
     "last_stash_action": "pop",
     "last_stash_operation": "pop",
     "last_switch_branch": "main",
     "last_switched_to": "main",
+    "last_workspace_file_written": "README.md",
     "operation_metadata": {
       "blueprint_variant": "alternate",
       "last_stash_action": "pop",
       "last_stash_operation": "pop",
       "last_switch_branch": "main",
       "last_switched_to": "main",
+      "last_workspace_file_written": "README.md",
       "stash_count": 0
     },
     "partial_hunks": {},
@@ -72633,6 +72758,11 @@ TARGET_STATES = json.loads(r"""
         "message": "move HEAD",
         "ref": "HEAD@{0}",
         "target": "c3"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
+        "target": "c4"
       }
     ],
     "remote_branches": {},
@@ -72928,7 +73058,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "src/patch.py": {
-            "after": "fix()\n",
+            "after": "fix()\n# adapted for release\n",
             "before": null,
             "change_type": "added"
           }
@@ -72945,7 +73075,7 @@ TARGET_STATES = json.loads(r"""
         ],
         "tree": {
           "README.md": "release\n",
-          "src/patch.py": "fix()\n"
+          "src/patch.py": "fix()\n# adapted for release\n"
         }
       }
     ],
@@ -72959,12 +73089,14 @@ TARGET_STATES = json.loads(r"""
     "last_cherry_pick_aborted": true,
     "last_cherry_pick_no_commit": true,
     "last_cherry_pick_source": "c3",
+    "last_workspace_file_written": "src/patch.py",
     "operation_metadata": {
       "cherry_pick_in_progress": true,
       "cherry_pick_original_head": "c1",
       "last_cherry_pick_aborted": true,
       "last_cherry_pick_no_commit": true,
-      "last_cherry_pick_source": "c3"
+      "last_cherry_pick_source": "c3",
+      "last_workspace_file_written": "src/patch.py"
     },
     "partial_hunks": {},
     "reflog": [
@@ -73089,7 +73221,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "docs/backport.md": {
-            "after": "notes\n",
+            "after": "notes\nAdapted for release\n",
             "before": null,
             "change_type": "added"
           }
@@ -73106,7 +73238,7 @@ TARGET_STATES = json.loads(r"""
         ],
         "tree": {
           "README.md": "release\n",
-          "docs/backport.md": "notes\n"
+          "docs/backport.md": "notes\nAdapted for release\n"
         }
       }
     ],
@@ -73120,12 +73252,14 @@ TARGET_STATES = json.loads(r"""
     "last_cherry_pick_aborted": true,
     "last_cherry_pick_no_commit": true,
     "last_cherry_pick_source": "c3",
+    "last_workspace_file_written": "docs/backport.md",
     "operation_metadata": {
       "cherry_pick_in_progress": true,
       "cherry_pick_original_head": "c1",
       "last_cherry_pick_aborted": true,
       "last_cherry_pick_no_commit": true,
-      "last_cherry_pick_source": "c3"
+      "last_cherry_pick_source": "c3",
+      "last_workspace_file_written": "docs/backport.md"
     },
     "partial_hunks": {},
     "reflog": [
@@ -90013,6 +90147,7 @@ TARGET_STATES = json.loads(r"""
     "last_fetch_remote": "origin",
     "last_push_branch": "main",
     "last_push_commit": "c3",
+    "last_push_deleted_branch": "origin/old-feature",
     "last_push_remote": "origin",
     "last_push_remote_branch": "origin/main",
     "last_rebase_replayed_commits": [
@@ -90028,6 +90163,7 @@ TARGET_STATES = json.loads(r"""
       "last_fetch_remote": "origin",
       "last_push_branch": "main",
       "last_push_commit": "c3",
+      "last_push_deleted_branch": "origin/old-feature",
       "last_push_remote": "origin",
       "last_push_remote_branch": "origin/main",
       "last_rebase_replayed_commits": [
@@ -90035,6 +90171,7 @@ TARGET_STATES = json.loads(r"""
       ],
       "pull_rebased_onto": "r2",
       "pull_strategy": "rebase",
+      "remote_branch_deleted": "old-feature",
       "remote_tracking_updated": true
     },
     "partial_hunks": {},
@@ -90057,12 +90194,10 @@ TARGET_STATES = json.loads(r"""
         "target": "c3"
       }
     ],
+    "remote_branch_deleted": "old-feature",
     "remote_branches": {
       "origin/main": "c3"
     },
-    "remote_stale_branches": [
-      "old-feature"
-    ],
     "remote_tags": {},
     "remote_tracking_updated": true,
     "remote_updates": {
@@ -90221,6 +90356,7 @@ TARGET_STATES = json.loads(r"""
     "last_fetch_remote": "origin",
     "last_push_branch": "main",
     "last_push_commit": "c3",
+    "last_push_deleted_branch": "origin/old-draft",
     "last_push_remote": "origin",
     "last_push_remote_branch": "origin/main",
     "last_rebase_replayed_commits": [
@@ -90236,6 +90372,7 @@ TARGET_STATES = json.loads(r"""
       "last_fetch_remote": "origin",
       "last_push_branch": "main",
       "last_push_commit": "c3",
+      "last_push_deleted_branch": "origin/old-draft",
       "last_push_remote": "origin",
       "last_push_remote_branch": "origin/main",
       "last_rebase_replayed_commits": [
@@ -90243,6 +90380,7 @@ TARGET_STATES = json.loads(r"""
       ],
       "pull_rebased_onto": "r2",
       "pull_strategy": "rebase",
+      "remote_branch_deleted": "old-draft",
       "remote_tracking_updated": true
     },
     "partial_hunks": {},
@@ -90265,12 +90403,10 @@ TARGET_STATES = json.loads(r"""
         "target": "c3"
       }
     ],
+    "remote_branch_deleted": "old-draft",
     "remote_branches": {
       "origin/main": "c3"
     },
-    "remote_stale_branches": [
-      "old-draft"
-    ],
     "remote_tags": {},
     "remote_tracking_updated": true,
     "remote_updates": {
@@ -263189,6 +263325,448 @@ TARGET_STATES = json.loads(r"""
     },
     "working_tree": {}
   },
+  "se-apply-config-audit-a": {
+    "branches": {
+      "donor/patch": "m3",
+      "feature/work": "m3",
+      "main": "m1",
+      "old/series": "m4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "Operations repository\n",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.ts": {
+            "after": "export const mode = 'base'\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.ts": "added"
+        },
+        "id": "m0",
+        "is_merge": false,
+        "message": "Establish shared foundation",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'base'\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'stable'\n",
+            "before": "export const mode = 'base'\n",
+            "change_type": "modified"
+          },
+          "src/health.ts": {
+            "after": "export const healthy = true\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified",
+          "src/health.ts": "added"
+        },
+        "id": "m1",
+        "is_merge": false,
+        "message": "Harden the main service",
+        "order": 1,
+        "parents": [
+          "m0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'stable'\n",
+          "src/health.ts": "export const healthy = true\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'unsafe'\n",
+            "before": "export const mode = 'stable'\n",
+            "change_type": "modified"
+          },
+          "src/health.ts": {
+            "after": "export const healthy = false\n",
+            "before": "export const healthy = true\n",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified",
+          "src/health.ts": "modified"
+        },
+        "id": "m2",
+        "is_merge": false,
+        "message": "Introduce the failing deployment",
+        "order": 2,
+        "parents": [
+          "m1"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'unsafe'\n",
+          "src/health.ts": "export const healthy = false\n"
+        }
+      },
+      {
+        "changes": {
+          "src/relay.ts": {
+            "after": "export const relay = 'repaired'\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/relay.ts": "added"
+        },
+        "id": "m3",
+        "is_merge": false,
+        "message": "Prepare isolated relay repair",
+        "order": 3,
+        "parents": [
+          "m0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'base'\n",
+          "src/relay.ts": "export const relay = 'repaired'\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'candidate-v1'\n",
+            "before": "export const mode = 'base'\n",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified"
+        },
+        "id": "m4",
+        "is_merge": false,
+        "message": "Draft earlier patch series",
+        "order": 4,
+        "parents": [
+          "m0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'candidate-v1'\n"
+        }
+      }
+    ],
+    "config": {
+      "user.email": "marshal@example.test",
+      "user.name": "Repository Marshal"
+    },
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "m1",
+      "type": "branch"
+    },
+    "operation_metadata": {
+      "bisect_bad": "m2",
+      "bisect_good": "m0",
+      "first_bad_commit": "m2",
+      "rerere_after": "mode = stable",
+      "rerere_before": "mode = unsafe",
+      "rerere_paths": [
+        "src/app.ts"
+      ],
+      "signatures": {
+        "m1": {
+          "signer": "Release Bot"
+        },
+        "v1.0": {
+          "signer": "Release Bot"
+        }
+      },
+      "sparse_paths": [
+        "src",
+        "docs/runbooks"
+      ],
+      "submodules": [
+        {
+          "commit": "a11ce00",
+          "describe": "heads/main",
+          "initialized": true,
+          "path": "vendor/telemetry"
+        }
+      ],
+      "worktrees": [
+        {
+          "branch": "main",
+          "commit": "m2",
+          "path": "/workspace/repository"
+        },
+        {
+          "branch": "donor/relay",
+          "commit": "m3",
+          "path": "/workspace/hotfix"
+        }
+      ]
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/main": "m1"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/nexus/operations.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {
+      "v1.0": {
+        "annotated": true,
+        "message": "stable base",
+        "target": "m0"
+      }
+    },
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "se-apply-config-audit-b": {
+    "branches": {
+      "donor/patch": "n3",
+      "feature/work": "n3",
+      "main": "n1",
+      "old/series": "n4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "Operations repository\n",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.ts": {
+            "after": "export const mode = 'base'\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.ts": "added"
+        },
+        "id": "n0",
+        "is_merge": false,
+        "message": "Establish shared foundation",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'base'\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'stable'\n",
+            "before": "export const mode = 'base'\n",
+            "change_type": "modified"
+          },
+          "src/health.ts": {
+            "after": "export const healthy = true\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified",
+          "src/health.ts": "added"
+        },
+        "id": "n1",
+        "is_merge": false,
+        "message": "Harden the main service",
+        "order": 1,
+        "parents": [
+          "n0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'stable'\n",
+          "src/health.ts": "export const healthy = true\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'unsafe'\n",
+            "before": "export const mode = 'stable'\n",
+            "change_type": "modified"
+          },
+          "src/health.ts": {
+            "after": "export const healthy = false\n",
+            "before": "export const healthy = true\n",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified",
+          "src/health.ts": "modified"
+        },
+        "id": "n2",
+        "is_merge": false,
+        "message": "Introduce the failing deployment",
+        "order": 2,
+        "parents": [
+          "n1"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'unsafe'\n",
+          "src/health.ts": "export const healthy = false\n"
+        }
+      },
+      {
+        "changes": {
+          "src/relay.ts": {
+            "after": "export const relay = 'repaired'\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/relay.ts": "added"
+        },
+        "id": "n3",
+        "is_merge": false,
+        "message": "Prepare isolated relay repair",
+        "order": 3,
+        "parents": [
+          "n0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'base'\n",
+          "src/relay.ts": "export const relay = 'repaired'\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'candidate-v1'\n",
+            "before": "export const mode = 'base'\n",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified"
+        },
+        "id": "n4",
+        "is_merge": false,
+        "message": "Draft earlier patch series",
+        "order": 4,
+        "parents": [
+          "n0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'candidate-v1'\n"
+        }
+      }
+    ],
+    "config": {
+      "user.email": "marshal@example.test",
+      "user.name": "Repository Marshal"
+    },
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "n1",
+      "type": "branch"
+    },
+    "operation_metadata": {
+      "bisect_bad": "n2",
+      "bisect_good": "n0",
+      "first_bad_commit": "n2",
+      "rerere_after": "mode = stable",
+      "rerere_before": "mode = unsafe",
+      "rerere_paths": [
+        "src/app.ts"
+      ],
+      "signatures": {
+        "n1": {
+          "signer": "Release Bot"
+        },
+        "v1.0": {
+          "signer": "Release Bot"
+        }
+      },
+      "sparse_paths": [
+        "src",
+        "docs/runbooks"
+      ],
+      "submodules": [
+        {
+          "commit": "a11ce00",
+          "describe": "heads/main",
+          "initialized": true,
+          "path": "vendor/telemetry"
+        }
+      ],
+      "worktrees": [
+        {
+          "branch": "main",
+          "commit": "n2",
+          "path": "/workspace/repository"
+        },
+        {
+          "branch": "donor/relay",
+          "commit": "n3",
+          "path": "/workspace/hotfix"
+        }
+      ]
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/main": "n1"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/nexus/operations.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {
+      "v1.0": {
+        "annotated": true,
+        "message": "stable base",
+        "target": "n0"
+      }
+    },
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
   "se-intro-config-get-a": {
     "branches": {
       "donor/patch": "m3",
@@ -263411,6 +263989,448 @@ TARGET_STATES = json.loads(r"""
     "working_tree": {}
   },
   "se-intro-config-get-b": {
+    "branches": {
+      "donor/patch": "n3",
+      "feature/work": "n3",
+      "main": "n1",
+      "old/series": "n4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "Operations repository\n",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.ts": {
+            "after": "export const mode = 'base'\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.ts": "added"
+        },
+        "id": "n0",
+        "is_merge": false,
+        "message": "Establish shared foundation",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'base'\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'stable'\n",
+            "before": "export const mode = 'base'\n",
+            "change_type": "modified"
+          },
+          "src/health.ts": {
+            "after": "export const healthy = true\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified",
+          "src/health.ts": "added"
+        },
+        "id": "n1",
+        "is_merge": false,
+        "message": "Harden the main service",
+        "order": 1,
+        "parents": [
+          "n0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'stable'\n",
+          "src/health.ts": "export const healthy = true\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'unsafe'\n",
+            "before": "export const mode = 'stable'\n",
+            "change_type": "modified"
+          },
+          "src/health.ts": {
+            "after": "export const healthy = false\n",
+            "before": "export const healthy = true\n",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified",
+          "src/health.ts": "modified"
+        },
+        "id": "n2",
+        "is_merge": false,
+        "message": "Introduce the failing deployment",
+        "order": 2,
+        "parents": [
+          "n1"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'unsafe'\n",
+          "src/health.ts": "export const healthy = false\n"
+        }
+      },
+      {
+        "changes": {
+          "src/relay.ts": {
+            "after": "export const relay = 'repaired'\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/relay.ts": "added"
+        },
+        "id": "n3",
+        "is_merge": false,
+        "message": "Prepare isolated relay repair",
+        "order": 3,
+        "parents": [
+          "n0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'base'\n",
+          "src/relay.ts": "export const relay = 'repaired'\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'candidate-v1'\n",
+            "before": "export const mode = 'base'\n",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified"
+        },
+        "id": "n4",
+        "is_merge": false,
+        "message": "Draft earlier patch series",
+        "order": 4,
+        "parents": [
+          "n0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'candidate-v1'\n"
+        }
+      }
+    ],
+    "config": {
+      "user.email": "marshal@example.test",
+      "user.name": "Repository Marshal"
+    },
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "n1",
+      "type": "branch"
+    },
+    "operation_metadata": {
+      "bisect_bad": "n2",
+      "bisect_good": "n0",
+      "first_bad_commit": "n2",
+      "rerere_after": "mode = stable",
+      "rerere_before": "mode = unsafe",
+      "rerere_paths": [
+        "src/app.ts"
+      ],
+      "signatures": {
+        "n1": {
+          "signer": "Release Bot"
+        },
+        "v1.0": {
+          "signer": "Release Bot"
+        }
+      },
+      "sparse_paths": [
+        "src",
+        "docs/runbooks"
+      ],
+      "submodules": [
+        {
+          "commit": "a11ce00",
+          "describe": "heads/main",
+          "initialized": true,
+          "path": "vendor/telemetry"
+        }
+      ],
+      "worktrees": [
+        {
+          "branch": "main",
+          "commit": "n2",
+          "path": "/workspace/repository"
+        },
+        {
+          "branch": "donor/relay",
+          "commit": "n3",
+          "path": "/workspace/hotfix"
+        }
+      ]
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/main": "n1"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/nexus/operations.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {
+      "v1.0": {
+        "annotated": true,
+        "message": "stable base",
+        "target": "n0"
+      }
+    },
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "sg-apply-inspect-and-verify-a": {
+    "branches": {
+      "donor/patch": "m3",
+      "feature/work": "m3",
+      "main": "m1",
+      "old/series": "m4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "Operations repository\n",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.ts": {
+            "after": "export const mode = 'base'\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.ts": "added"
+        },
+        "id": "m0",
+        "is_merge": false,
+        "message": "Establish shared foundation",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'base'\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'stable'\n",
+            "before": "export const mode = 'base'\n",
+            "change_type": "modified"
+          },
+          "src/health.ts": {
+            "after": "export const healthy = true\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified",
+          "src/health.ts": "added"
+        },
+        "id": "m1",
+        "is_merge": false,
+        "message": "Harden the main service",
+        "order": 1,
+        "parents": [
+          "m0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'stable'\n",
+          "src/health.ts": "export const healthy = true\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'unsafe'\n",
+            "before": "export const mode = 'stable'\n",
+            "change_type": "modified"
+          },
+          "src/health.ts": {
+            "after": "export const healthy = false\n",
+            "before": "export const healthy = true\n",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified",
+          "src/health.ts": "modified"
+        },
+        "id": "m2",
+        "is_merge": false,
+        "message": "Introduce the failing deployment",
+        "order": 2,
+        "parents": [
+          "m1"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'unsafe'\n",
+          "src/health.ts": "export const healthy = false\n"
+        }
+      },
+      {
+        "changes": {
+          "src/relay.ts": {
+            "after": "export const relay = 'repaired'\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/relay.ts": "added"
+        },
+        "id": "m3",
+        "is_merge": false,
+        "message": "Prepare isolated relay repair",
+        "order": 3,
+        "parents": [
+          "m0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'base'\n",
+          "src/relay.ts": "export const relay = 'repaired'\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'candidate-v1'\n",
+            "before": "export const mode = 'base'\n",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified"
+        },
+        "id": "m4",
+        "is_merge": false,
+        "message": "Draft earlier patch series",
+        "order": 4,
+        "parents": [
+          "m0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'candidate-v1'\n"
+        }
+      }
+    ],
+    "config": {
+      "user.email": "marshal@example.test",
+      "user.name": "Repository Marshal"
+    },
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "m1",
+      "type": "branch"
+    },
+    "operation_metadata": {
+      "bisect_bad": "m2",
+      "bisect_good": "m0",
+      "first_bad_commit": "m2",
+      "rerere_after": "mode = stable",
+      "rerere_before": "mode = unsafe",
+      "rerere_paths": [
+        "src/app.ts"
+      ],
+      "signatures": {
+        "m1": {
+          "signer": "Release Bot"
+        },
+        "v1.0": {
+          "signer": "Release Bot"
+        }
+      },
+      "sparse_paths": [
+        "src",
+        "docs/runbooks"
+      ],
+      "submodules": [
+        {
+          "commit": "a11ce00",
+          "describe": "heads/main",
+          "initialized": true,
+          "path": "vendor/telemetry"
+        }
+      ],
+      "worktrees": [
+        {
+          "branch": "main",
+          "commit": "m2",
+          "path": "/workspace/repository"
+        },
+        {
+          "branch": "donor/relay",
+          "commit": "m3",
+          "path": "/workspace/hotfix"
+        }
+      ]
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/main": "m1"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/nexus/operations.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {
+      "v1.0": {
+        "annotated": true,
+        "message": "stable base",
+        "target": "m0"
+      }
+    },
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "sg-apply-inspect-and-verify-b": {
     "branches": {
       "donor/patch": "n3",
       "feature/work": "n3",
@@ -397368,6 +398388,448 @@ TARGET_STATES = json.loads(r"""
     "working_tree": {}
   },
   "sr-intro-rev-parse-toplevel-b": {
+    "branches": {
+      "donor/patch": "n3",
+      "feature/work": "n3",
+      "main": "n1",
+      "old/series": "n4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "Operations repository\n",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.ts": {
+            "after": "export const mode = 'base'\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.ts": "added"
+        },
+        "id": "n0",
+        "is_merge": false,
+        "message": "Establish shared foundation",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'base'\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'stable'\n",
+            "before": "export const mode = 'base'\n",
+            "change_type": "modified"
+          },
+          "src/health.ts": {
+            "after": "export const healthy = true\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified",
+          "src/health.ts": "added"
+        },
+        "id": "n1",
+        "is_merge": false,
+        "message": "Harden the main service",
+        "order": 1,
+        "parents": [
+          "n0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'stable'\n",
+          "src/health.ts": "export const healthy = true\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'unsafe'\n",
+            "before": "export const mode = 'stable'\n",
+            "change_type": "modified"
+          },
+          "src/health.ts": {
+            "after": "export const healthy = false\n",
+            "before": "export const healthy = true\n",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified",
+          "src/health.ts": "modified"
+        },
+        "id": "n2",
+        "is_merge": false,
+        "message": "Introduce the failing deployment",
+        "order": 2,
+        "parents": [
+          "n1"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'unsafe'\n",
+          "src/health.ts": "export const healthy = false\n"
+        }
+      },
+      {
+        "changes": {
+          "src/relay.ts": {
+            "after": "export const relay = 'repaired'\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/relay.ts": "added"
+        },
+        "id": "n3",
+        "is_merge": false,
+        "message": "Prepare isolated relay repair",
+        "order": 3,
+        "parents": [
+          "n0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'base'\n",
+          "src/relay.ts": "export const relay = 'repaired'\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'candidate-v1'\n",
+            "before": "export const mode = 'base'\n",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified"
+        },
+        "id": "n4",
+        "is_merge": false,
+        "message": "Draft earlier patch series",
+        "order": 4,
+        "parents": [
+          "n0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'candidate-v1'\n"
+        }
+      }
+    ],
+    "config": {
+      "user.email": "marshal@example.test",
+      "user.name": "Repository Marshal"
+    },
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "n1",
+      "type": "branch"
+    },
+    "operation_metadata": {
+      "bisect_bad": "n2",
+      "bisect_good": "n0",
+      "first_bad_commit": "n2",
+      "rerere_after": "mode = stable",
+      "rerere_before": "mode = unsafe",
+      "rerere_paths": [
+        "src/app.ts"
+      ],
+      "signatures": {
+        "n1": {
+          "signer": "Release Bot"
+        },
+        "v1.0": {
+          "signer": "Release Bot"
+        }
+      },
+      "sparse_paths": [
+        "src",
+        "docs/runbooks"
+      ],
+      "submodules": [
+        {
+          "commit": "a11ce00",
+          "describe": "heads/main",
+          "initialized": true,
+          "path": "vendor/telemetry"
+        }
+      ],
+      "worktrees": [
+        {
+          "branch": "main",
+          "commit": "n2",
+          "path": "/workspace/repository"
+        },
+        {
+          "branch": "donor/relay",
+          "commit": "n3",
+          "path": "/workspace/hotfix"
+        }
+      ]
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/main": "n1"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/nexus/operations.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {
+      "v1.0": {
+        "annotated": true,
+        "message": "stable base",
+        "target": "n0"
+      }
+    },
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "ss-apply-audit-served-refs-a": {
+    "branches": {
+      "donor/patch": "m3",
+      "feature/work": "m3",
+      "main": "m1",
+      "old/series": "m4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "Operations repository\n",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.ts": {
+            "after": "export const mode = 'base'\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.ts": "added"
+        },
+        "id": "m0",
+        "is_merge": false,
+        "message": "Establish shared foundation",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'base'\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'stable'\n",
+            "before": "export const mode = 'base'\n",
+            "change_type": "modified"
+          },
+          "src/health.ts": {
+            "after": "export const healthy = true\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified",
+          "src/health.ts": "added"
+        },
+        "id": "m1",
+        "is_merge": false,
+        "message": "Harden the main service",
+        "order": 1,
+        "parents": [
+          "m0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'stable'\n",
+          "src/health.ts": "export const healthy = true\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'unsafe'\n",
+            "before": "export const mode = 'stable'\n",
+            "change_type": "modified"
+          },
+          "src/health.ts": {
+            "after": "export const healthy = false\n",
+            "before": "export const healthy = true\n",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified",
+          "src/health.ts": "modified"
+        },
+        "id": "m2",
+        "is_merge": false,
+        "message": "Introduce the failing deployment",
+        "order": 2,
+        "parents": [
+          "m1"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'unsafe'\n",
+          "src/health.ts": "export const healthy = false\n"
+        }
+      },
+      {
+        "changes": {
+          "src/relay.ts": {
+            "after": "export const relay = 'repaired'\n",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/relay.ts": "added"
+        },
+        "id": "m3",
+        "is_merge": false,
+        "message": "Prepare isolated relay repair",
+        "order": 3,
+        "parents": [
+          "m0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'base'\n",
+          "src/relay.ts": "export const relay = 'repaired'\n"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "export const mode = 'candidate-v1'\n",
+            "before": "export const mode = 'base'\n",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified"
+        },
+        "id": "m4",
+        "is_merge": false,
+        "message": "Draft earlier patch series",
+        "order": 4,
+        "parents": [
+          "m0"
+        ],
+        "tree": {
+          "README.md": "Operations repository\n",
+          "src/app.ts": "export const mode = 'candidate-v1'\n"
+        }
+      }
+    ],
+    "config": {
+      "user.email": "marshal@example.test",
+      "user.name": "Repository Marshal"
+    },
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "m1",
+      "type": "branch"
+    },
+    "operation_metadata": {
+      "bisect_bad": "m2",
+      "bisect_good": "m0",
+      "first_bad_commit": "m2",
+      "rerere_after": "mode = stable",
+      "rerere_before": "mode = unsafe",
+      "rerere_paths": [
+        "src/app.ts"
+      ],
+      "signatures": {
+        "m1": {
+          "signer": "Release Bot"
+        },
+        "v1.0": {
+          "signer": "Release Bot"
+        }
+      },
+      "sparse_paths": [
+        "src",
+        "docs/runbooks"
+      ],
+      "submodules": [
+        {
+          "commit": "a11ce00",
+          "describe": "heads/main",
+          "initialized": true,
+          "path": "vendor/telemetry"
+        }
+      ],
+      "worktrees": [
+        {
+          "branch": "main",
+          "commit": "m2",
+          "path": "/workspace/repository"
+        },
+        {
+          "branch": "donor/relay",
+          "commit": "m3",
+          "path": "/workspace/hotfix"
+        }
+      ]
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/main": "m1"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/nexus/operations.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {
+      "v1.0": {
+        "annotated": true,
+        "message": "stable base",
+        "target": "m0"
+      }
+    },
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "ss-apply-audit-served-refs-b": {
     "branches": {
       "donor/patch": "n3",
       "feature/work": "n3",

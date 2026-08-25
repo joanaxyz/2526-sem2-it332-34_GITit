@@ -5,6 +5,7 @@ This intentionally excludes the full generated-target replay check, backend test
 suite, and frontend build because those require installed project dependencies
 and can be slower. CI still runs those separately.
 """
+
 from __future__ import annotations
 
 import os
@@ -17,6 +18,7 @@ FAST_GATES = [
     "check_legacy_terms.py",
     "check_architecture_boundaries.py",
     "check_css_architecture.py",
+    "checks/check_curriculum_source_layout.py",
     "check_seed_targets.py",
     "check_api_contract.py",
     "check_frontend_api_usage.py",

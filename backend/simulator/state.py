@@ -269,6 +269,10 @@ class RepositoryStateNormalizer:
             return state.get("branches", {}).get(head.get("name"))
         return head.get("target")
 
+    def head_branch(self, state: dict) -> str | None:
+        head = state.get("head", {})
+        return head.get("name") if head.get("type") == "branch" else None
+
     def commit_by_id(self, state: dict, commit_id: str | None) -> dict | None:
         if not commit_id:
             return None
@@ -280,7 +284,9 @@ class RepositoryStateNormalizer:
         commit = self.commit_by_id(state, self.head_commit_id(state))
         return copy.deepcopy((commit or {}).get("tree") or {})
 
-    def visible_project_tree(self, state: dict, *, assume_normalized: bool = False) -> dict[str, dict]:
+    def visible_project_tree(
+        self, state: dict, *, assume_normalized: bool = False
+    ) -> dict[str, dict]:
         """Derive the user-visible file set from HEAD, index, and worktree.
 
         ``working_tree`` in authored scenarios intentionally stores local file
@@ -326,7 +332,6 @@ class RepositoryStateNormalizer:
             }
 
         return dict(sorted(visible.items()))
-
 
     def display_status(self, value: object | None, *, fallback: str = "changed") -> str:
         status = self.entry_status(value)

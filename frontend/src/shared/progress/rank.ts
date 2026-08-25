@@ -50,7 +50,7 @@ const CHAPTER_ORDINALS = [
   'Sixth', 'Seventh', 'Eighth', 'Ninth', 'Tenth',
 ]
 
-export function rankScore(summary: HomeSummary): number {
+function rankScore(summary: HomeSummary): number {
   return summary.mastery
 }
 

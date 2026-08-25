@@ -12,11 +12,11 @@ const battleBackgrounds = Array.from(
 )
 
 const monsterPoses = [
-  '/cosmetics/story-worlds/arcane-spire/monsters/monster-11/pose/idle.png',
-  '/cosmetics/story-worlds/arcane-spire/monsters/monster-05/pose/idle.png',
-  '/cosmetics/story-worlds/arcane-spire/monsters/monster-06/pose/idle.png',
-  '/cosmetics/story-worlds/arcane-spire/monsters/monster-10/pose/idle.png',
-  '/cosmetics/story-worlds/arcane-spire/monsters/monster-08/pose/idle.png',
+  '/cosmetics/story-worlds/arcane-spire/monsters/monster-11/idle.png',
+  '/cosmetics/story-worlds/arcane-spire/monsters/monster-05/idle.png',
+  '/cosmetics/story-worlds/arcane-spire/monsters/monster-06/idle.png',
+  '/cosmetics/story-worlds/arcane-spire/monsters/monster-10/idle.png',
+  '/cosmetics/story-worlds/arcane-spire/monsters/monster-08/idle.png',
 ]
 
 /** Arcane Spire: the default story world and fallback renderer. */
@@ -44,7 +44,7 @@ export const arcaneSpireWorld: StoryWorldDef = {
     sparkRgb: '98, 230, 255',
   },
   // Battle visuals (backdrop + crystal + monster roster) are generated from
-  // source PNGs; gameplay HP/tier stay backend-side.
+  // source PNGs; gameplay HP stays in the encounter state.
   battle: {
     backdrop: battleData.backdrop,
     parallax: {

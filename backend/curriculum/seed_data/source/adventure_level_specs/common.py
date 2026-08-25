@@ -16,7 +16,14 @@ from curriculum.seed_data.source.adventure_fixtures import (
     TWO_COMMITS,
 )
 from curriculum.seed_data.source.command_routing import adventure_for_usage
-from curriculum.seed_data.spec_helpers import commit, ev, meta_equals, repo, uninitialized
+from curriculum.seed_data.spec_helpers import (
+    commit,
+    enrich_context_with_required_details,
+    ev,
+    meta_equals,
+    repo,
+    uninitialized,
+)
 
 
 def _adventure_for_usage(usage: str) -> str:
@@ -141,11 +148,10 @@ def _variant_with_context(
     task_notes: list[str] | None,
 ) -> dict:
     enriched = copy.deepcopy(variant)
-    # Details are an *authored* slot only - a short list of hard-to-retype literals
-    # the learner genuinely needs (remote URLs, exact branch/commit refs). We no
-    # longer auto-derive details from the solution commands or the repo state:
-    # that leaked the answer (it printed the exact tokens to type) and read like a
-    # spec sheet. Everything narrative belongs in `story`/`task` instead.
+    # Details are a short list of hard-to-retype or otherwise-uninferable literals
+    # the learner genuinely needs (remote URLs, exact branch/commit refs, and any
+    # commit message enforced by evaluation). We never expose command syntax or
+    # derive general solution tokens; only strict outcome literals belong here.
     #
     # `story`/`task`/level-`details` are shared by every variant; per-variant
     # literals (the URL/branch/commit THIS variant uses, which differ for the
@@ -155,19 +161,25 @@ def _variant_with_context(
     seen: set[str] = set()
     for detail in list(details or []) + list(variant_details):
         _add_detail(merged_details, seen, detail)
+    context = enrich_context_with_required_details(
+        {
+            "schema_version": 3,
+            "story": story,
+            "task": _task_with_notes(task, task_notes),
+            "details": merged_details,
+        },
+        solution_commands=enriched.get("solution_commands_template") or [],
+        evaluation_spec=enriched.get("evaluation_spec_template") or {},
+    )
+
     # Hard guard against the old bloat: copy details are only a few literals.
-    if len(merged_details) > 4:
+    if len(context.get("details") or []) > 4:
         raise ValueError(
-            f"Level copy details list {len(merged_details)} values; keep it to <=4 hard-to-retype "
+            f"Level copy details list {len(context['details'])} values; keep it to <=4 hard-to-retype "
             "literals (URLs/refs) and move the rest into the story/task."
         )
 
-    enriched["scenario_context_template"] = {
-        "schema_version": 3,
-        "story": story,
-        "task": _task_with_notes(task, task_notes),
-        "details": merged_details,
-    }
+    enriched["scenario_context_template"] = context
     return enriched
 
 def v(
@@ -218,7 +230,6 @@ def q(
     adventure: str | None = None,
     workflow: bool = False,
     level_type: str = "guided_workflow",
-    narrative_brief: dict | None = None,
 ) -> dict:
     # `workflow=True` opts a level into the modular objective checklist: the
     # authored `checks` are used verbatim, so each step of the scenario is its own
@@ -247,7 +258,6 @@ def q(
         "command_forms": command_forms or [],
         "prerequisites": prerequisites or [],
         "level_type": level_type,
-        "narrative_brief": narrative_brief or {},
         "variants": [
             _variant_with_context(
                 variant,

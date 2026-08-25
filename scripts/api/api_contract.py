@@ -4,6 +4,7 @@
 This intentionally uses only the Python standard library so CI does not need a
 Node code generator before the app can verify backend/frontend contract drift.
 """
+
 from __future__ import annotations
 
 import json
@@ -21,9 +22,35 @@ GENERATED = ROOT / "frontend" / "src" / "shared" / "api" / "generated"
 OPENAPI_JSON = GENERATED / "openapi.json"
 API_TYPES_TS = GENERATED / "apiTypes.ts"
 HTTP_METHODS = {"get", "post", "put", "patch", "delete", "head", "options"}
-NO_BODY_SUCCESS_ALLOWLIST = {"POST /api/payments/webhook/ 200"}
+NO_BODY_SUCCESS_ALLOWLIST: set[str] = set()
 
 REQUIRED_OPERATION_RESPONSES = {
+    "admin_analytics_retrieve": "AdminAnalyticsResponse",
+    "admin_chapters_retrieve": "AdminChapterListResponse",
+    "admin_chapters_create": "AdminChapter",
+    "admin_chapters_partial_update": "AdminChapter",
+    "admin_content_retrieve": "AdminContentListResponse",
+    "admin_economy_adjust_create": "AdminEconomyAdjustResponse",
+    "admin_economy_transactions_retrieve": "AdminTransactionListResponse",
+    "admin_moderation_retrieve": "AdminModerationListResponse",
+    "admin_moderation_unpublish_create": "AdminOkayResponse",
+    "admin_overview_retrieve": "AdminOverviewResponse",
+    "admin_settings_retrieve": "AdminSettingsResponse",
+    "admin_settings_create": "AdminFeatureFlag",
+    "admin_stories_retrieve": "AdminStoryListResponse",
+    "admin_stories_create": "AdminStory",
+    "admin_stories_partial_update": "AdminStory",
+    "admin_users_retrieve": "AdminUserListResponse",
+    "admin_users_retrieve_2": "AdminUserDetail",
+    "admin_users_actions_create": "AdminUserDetail",
+    "authoring_content_definitions_retrieve": "ContentDefinitionListResponse",
+    "authoring_content_definitions_create": "ContentDefinition",
+    "authoring_content_definitions_retrieve_2": "ContentDefinition",
+    "authoring_content_definitions_partial_update": "ContentDefinition",
+    "authoring_content_definitions_publish_create": "ContentDefinition",
+    "authoring_content_definitions_remix_create": "ContentDefinition",
+    "authoring_content_definitions_test_run_create": "ContentTestRunResult",
+    "authoring_content_definitions_validate_create": "ContentValidationResult",
     "adventure_levels_runs_create": "AdventureRunResponse",
     "adventure_runs_retrieve": "AdventureRunResponse",
     "adventure_runs_files_create": "AdventureRunResponse",
@@ -42,13 +69,24 @@ REQUIRED_OPERATION_RESPONSES = {
     "shop_catalog_retrieve": "ShopResponse",
     "shop_catalog_purchase_create": "ShopPurchaseResponse",
     "player_loadout_companion_create": "ShopEquipResponse",
-    "payments_packs_retrieve": "GitCoinPacksResponse",
-    "payments_checkout_create": "CheckoutSessionResponse",
     "skills_learned_retrieve": "LearnedSkillsResponse",
     "command_forms_preview_retrieve": "CommandFormPreviewResponse",
 }
 
 HEADER = """// GENERATED FILE. DO NOT EDIT.\n// Source: backend DRF/drf-spectacular OpenAPI schema.\n// Regenerate with: python scripts/generate_api_contract.py\n\n"""
+
+
+def backend_python() -> Path:
+    """Use the repository virtualenv when the caller is outside it."""
+    candidates = (
+        BACKEND / ".venv" / "Scripts" / "python.exe",
+        BACKEND / ".venv" / "bin" / "python",
+    )
+    current = Path(sys.executable).resolve()
+    for candidate in candidates:
+        if candidate.is_file() and candidate.resolve() != current:
+            return candidate
+    return current
 
 
 def contract_env() -> dict[str, str]:
@@ -65,7 +103,7 @@ def generate_openapi_json(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     result = subprocess.run(
         [
-            sys.executable,
+            str(backend_python()),
             "manage.py",
             "spectacular",
             "--file",
@@ -140,6 +178,10 @@ def ts_identifier(name: str) -> str:
 def schema_to_ts(schema: Any, *, seen: set[int] | None = None) -> str:
     if not isinstance(schema, dict):
         return "JsonValue"
+    if schema.get("nullable") is True:
+        return f"{schema_to_ts({key: value for key, value in schema.items() if key != 'nullable'}, seen=seen)} | null"
+    if schema.get("nullable") is True:
+        return f"{schema_to_ts({key: value for key, value in schema.items() if key != 'nullable'}, seen=seen)} | null"
     if "$ref" in schema:
         return f"ApiSchemas[{ts_string(schema_ref_name(str(schema['$ref'])))}]"
     if seen is None:
@@ -160,7 +202,9 @@ def schema_to_ts(schema: Any, *, seen: set[int] | None = None) -> str:
         return " | ".join(json.dumps(item) for item in enum)
     schema_type = schema.get("type")
     if isinstance(schema_type, list):
-        return " | ".join(schema_to_ts({**schema, "type": item}, seen=seen.copy()) for item in schema_type)
+        return " | ".join(
+            schema_to_ts({**schema, "type": item}, seen=seen.copy()) for item in schema_type
+        )
     if schema_type in {"integer", "number"}:
         return "number"
     if schema_type == "string":
@@ -178,7 +222,9 @@ def schema_to_ts(schema: Any, *, seen: set[int] | None = None) -> str:
         if isinstance(properties, dict):
             for name, subschema in sorted(properties.items()):
                 optional = "" if name in required else "?"
-                parts.append(f"{ts_string(name)}{optional}: {schema_to_ts(subschema, seen=seen.copy())}")
+                parts.append(
+                    f"{ts_string(name)}{optional}: {schema_to_ts(subschema, seen=seen.copy())}"
+                )
         additional = schema.get("additionalProperties")
         if additional is True:
             parts.append("[key: string]: JsonValue")
@@ -243,7 +289,6 @@ def undocumented_success_responses(schema: dict[str, Any]) -> list[str]:
     return missing
 
 
-
 def schema_component_name(schema: dict[str, Any] | None) -> str | None:
     if not isinstance(schema, dict):
         return None
@@ -266,7 +311,9 @@ def required_operation_response_mismatches(schema: dict[str, Any]) -> list[str]:
         for status_code in sorted(responses):
             if not str(status_code).startswith("2"):
                 continue
-            actual_component = schema_component_name(first_json_schema((responses[status_code] or {}).get("content")))
+            actual_component = schema_component_name(
+                first_json_schema((responses[status_code] or {}).get("content"))
+            )
             if actual_component:
                 break
         if actual_component != expected_component:
@@ -274,6 +321,7 @@ def required_operation_response_mismatches(schema: dict[str, Any]) -> list[str]:
                 f"{operation_id}: expected {expected_component}, got {actual_component or 'no component response'}"
             )
     return mismatches
+
 
 def write_api_types(schema_path: Path, out_path: Path) -> None:
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
@@ -308,7 +356,9 @@ def write_api_types(schema_path: Path, out_path: Path) -> None:
     else:
         lines.append("  | never\n")
     lines.append("\n")
-    lines.append("export type ApiMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'\n\n")
+    lines.append(
+        "export type ApiMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'\n\n"
+    )
     lines.append("export type ApiMethodByPath = {\n")
     for path in path_literals:
         methods = " | ".join(ts_string(method) for method in sorted(set(methods_by_path[path])))
@@ -342,10 +392,15 @@ def write_api_types(schema_path: Path, out_path: Path) -> None:
     for op in unique_ops:
         lines.append(f"  {op['key']}: {response_by_operation.get(op['key'], 'JsonValue')}\n")
     lines.append("}\n\n")
-    lines.append("export type ApiRequestBody<TOperation extends ApiOperationId> = ApiRequestBodyByOperation[TOperation]\n")
-    lines.append("export type ApiResponseBody<TOperation extends ApiOperationId> = ApiResponseBodyByOperation[TOperation]\n")
+    lines.append(
+        "export type ApiRequestBody<TOperation extends ApiOperationId> = ApiRequestBodyByOperation[TOperation]\n"
+    )
+    lines.append(
+        "export type ApiResponseBody<TOperation extends ApiOperationId> = ApiResponseBodyByOperation[TOperation]\n"
+    )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text("".join(lines), encoding="utf-8")
+
 
 def generate_contract(openapi_path: Path = OPENAPI_JSON, types_path: Path = API_TYPES_TS) -> None:
     generate_openapi_json(openapi_path)
@@ -364,14 +419,23 @@ def check_contract() -> int:
             print("OpenAPI success responses without a JSON schema:", file=sys.stderr)
             for item in undocumented:
                 print(f"  {item}", file=sys.stderr)
-            print("Add extend_schema(... responses=...) annotations before regenerating.", file=sys.stderr)
+            print(
+                "Add extend_schema(... responses=...) annotations before regenerating.",
+                file=sys.stderr,
+            )
             return 1
         contract_mismatches = required_operation_response_mismatches(generated_schema)
         if contract_mismatches:
-            print("Critical API operations are missing their named response components:", file=sys.stderr)
+            print(
+                "Critical API operations are missing their named response components:",
+                file=sys.stderr,
+            )
             for item in contract_mismatches:
                 print(f"  {item}", file=sys.stderr)
-            print("Add or fix extend_schema(... responses=...) annotations before regenerating.", file=sys.stderr)
+            print(
+                "Add or fix extend_schema(... responses=...) annotations before regenerating.",
+                file=sys.stderr,
+            )
             return 1
         expected = {
             OPENAPI_JSON: expected_schema.read_text(encoding="utf-8"),
@@ -380,13 +444,20 @@ def check_contract() -> int:
         missing = [path for path in expected if not path.exists()]
         if missing:
             for path in missing:
-                print(f"Missing generated API contract file: {path.relative_to(ROOT)}", file=sys.stderr)
+                print(
+                    f"Missing generated API contract file: {path.relative_to(ROOT)}",
+                    file=sys.stderr,
+                )
             print("Run: python scripts/generate_api_contract.py", file=sys.stderr)
             return 1
-        stale = [path for path, text in expected.items() if path.read_text(encoding="utf-8") != text]
+        stale = [
+            path for path, text in expected.items() if path.read_text(encoding="utf-8") != text
+        ]
         if stale:
             for path in stale:
-                print(f"Stale generated API contract file: {path.relative_to(ROOT)}", file=sys.stderr)
+                print(
+                    f"Stale generated API contract file: {path.relative_to(ROOT)}", file=sys.stderr
+                )
             print("Run: python scripts/generate_api_contract.py", file=sys.stderr)
             return 1
     print("Generated API contract is current.")

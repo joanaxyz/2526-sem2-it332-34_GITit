@@ -41,13 +41,10 @@ def chapter_completion_denominator_map(*, chapter_ids: list[int]) -> dict[int, i
         return {}
 
     denominator_by_chapter = {chapter_id: 0 for chapter_id in chapter_ids}
-    for chapter_id in (
-        AdventureLevel.objects.filter(
-            is_published=True,
-            chapter_id__in=chapter_ids,
-        )
-        .values_list("chapter_id", flat=True)
-    ):
+    for chapter_id in AdventureLevel.objects.filter(
+        is_published=True,
+        chapter_id__in=chapter_ids,
+    ).values_list("chapter_id", flat=True):
         denominator_by_chapter[chapter_id] += 1
 
     for chapter_id in ChallengeTrial.objects.filter(

@@ -60,7 +60,5 @@ def command_budget_exhausted(
     max_counted_commands: int,
 ) -> bool:
     return (
-        not solved
-        and classification == COMMAND_COUNTED
-        and counted_total >= max_counted_commands
+        not solved and classification == COMMAND_COUNTED and counted_total >= max_counted_commands
     )

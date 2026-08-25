@@ -1,36 +1,43 @@
 from django.db import OperationalError, transaction
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from challenges.models import ChallengeRun
+from challenges.openapi import ChallengeCommandResponseSerializer, ChallengeRunResponseSerializer
 from challenges.payloads import (
     challenge_run_payload,
     command_run_payload,
     prefetch_run_payload_context,
 )
 from challenges.selectors import get_challenge_trial
-from challenges.serializers import (
-    ChallengeRunStartSerializer,
-    CommandSubmitSerializer,
-    WorkspaceFileCreateSerializer,
-    WorkspaceFilePathSerializer,
-    WorkspaceFileRenameSerializer,
-)
+from challenges.serializers import ChallengeRunStartSerializer
 from challenges.services import (
     ChallengeCommandProcessingService,
     ChallengeRunService,
-    ChallengeWorkspaceFileService,
 )
 from common.constants import SESSION_STATUS_STARTED
 from common.exceptions import Conflict, Locked
-from common.openapi import ChallengeCommandResponseSerializer, ChallengeRunResponseSerializer
+from common.schemas.openapi import RequiredPatchBodyAutoSchema
+from common.serializers import (
+    CommandSubmitSerializer,
+    WorkspaceFilePathSerializer,
+    WorkspaceFileRenameSerializer,
+    WorkspaceFileSerializer,
+)
+from common.services.run_workspace import RunWorkspaceFileService
 from players.services import get_or_create_player
+
+CHALLENGE_WORKSPACE_FILES = RunWorkspaceFileService(
+    ended_message="This challenge run has already ended."
+)
 
 
 class ChallengeRunStartAPIView(APIView):
-    @extend_schema(request=ChallengeRunStartSerializer, responses={201: ChallengeRunResponseSerializer})
+    @extend_schema(
+        request=ChallengeRunStartSerializer, responses={201: ChallengeRunResponseSerializer}
+    )
     def post(self, request, trial_id: int):
         serializer = ChallengeRunStartSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -91,7 +98,9 @@ class ChallengeCommandSubmitAPIView(APIView):
 
     # Atomic so the run-row lock taken below is held across the whole submit,
     # serializing concurrent commands for the same run.
-    @extend_schema(request=CommandSubmitSerializer, responses={200: ChallengeCommandResponseSerializer})
+    @extend_schema(
+        request=CommandSubmitSerializer, responses={200: ChallengeCommandResponseSerializer}
+    )
     @transaction.atomic
     def post(self, request, run_id: int):
         serializer = CommandSubmitSerializer(data=request.data)
@@ -153,13 +162,16 @@ class ChallengeCommandSubmitAPIView(APIView):
 
 class ChallengeWorkspaceFileAPIView(APIView):
     throttle_scope = "command_submit"
+    schema = RequiredPatchBodyAutoSchema()
 
-    @extend_schema(request=WorkspaceFileCreateSerializer, responses={200: ChallengeRunResponseSerializer})
+    @extend_schema(
+        request=WorkspaceFileSerializer, responses={200: ChallengeRunResponseSerializer}
+    )
     def post(self, request, run_id: int):
-        serializer = WorkspaceFileCreateSerializer(data=request.data)
+        serializer = WorkspaceFileSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         run = _get_workspace_run(run_id, get_or_create_player(request.user))
-        run = ChallengeWorkspaceFileService().create_file(
+        run = CHALLENGE_WORKSPACE_FILES.create_file(
             run=run,
             path=serializer.validated_data["path"],
             content=serializer.validated_data.get("content", ""),
@@ -168,12 +180,15 @@ class ChallengeWorkspaceFileAPIView(APIView):
         prefetch_run_payload_context(run)
         return Response(challenge_run_payload(run))
 
-    @extend_schema(request=WorkspaceFileCreateSerializer, responses={200: ChallengeRunResponseSerializer})
+    @extend_schema(
+        request={"application/json": {"$ref": "#/components/schemas/WorkspaceFile"}},
+        responses={200: ChallengeRunResponseSerializer},
+    )
     def patch(self, request, run_id: int):
-        serializer = WorkspaceFileCreateSerializer(data=request.data)
+        serializer = WorkspaceFileSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         run = _get_workspace_run(run_id, get_or_create_player(request.user))
-        run = ChallengeWorkspaceFileService().write_file(
+        run = CHALLENGE_WORKSPACE_FILES.write_file(
             run=run,
             path=serializer.validated_data["path"],
             content=serializer.validated_data.get("content", ""),
@@ -182,12 +197,14 @@ class ChallengeWorkspaceFileAPIView(APIView):
         prefetch_run_payload_context(run)
         return Response(challenge_run_payload(run))
 
-    @extend_schema(request=WorkspaceFileRenameSerializer, responses={200: ChallengeRunResponseSerializer})
+    @extend_schema(
+        request=WorkspaceFileRenameSerializer, responses={200: ChallengeRunResponseSerializer}
+    )
     def put(self, request, run_id: int):
         serializer = WorkspaceFileRenameSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         run = _get_workspace_run(run_id, get_or_create_player(request.user))
-        run = ChallengeWorkspaceFileService().rename_file(
+        run = CHALLENGE_WORKSPACE_FILES.rename_file(
             run=run,
             path=serializer.validated_data["path"],
             new_path=serializer.validated_data["new_path"],
@@ -196,12 +213,22 @@ class ChallengeWorkspaceFileAPIView(APIView):
         prefetch_run_payload_context(run)
         return Response(challenge_run_payload(run))
 
-    @extend_schema(request=WorkspaceFilePathSerializer, responses={200: ChallengeRunResponseSerializer})
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="path",
+                type={"type": "string", "maxLength": 240},
+                location=OpenApiParameter.QUERY,
+                required=True,
+            )
+        ],
+        responses={200: ChallengeRunResponseSerializer},
+    )
     def delete(self, request, run_id: int):
         serializer = WorkspaceFilePathSerializer(data=request.data or request.query_params)
         serializer.is_valid(raise_exception=True)
         run = _get_workspace_run(run_id, get_or_create_player(request.user))
-        run = ChallengeWorkspaceFileService().delete_file(
+        run = CHALLENGE_WORKSPACE_FILES.delete_file(
             run=run,
             path=serializer.validated_data["path"],
         )
@@ -214,15 +241,12 @@ class ChallengeRetryAPIView(APIView):
     @extend_schema(request=None, responses={201: ChallengeRunResponseSerializer})
     def post(self, request, run_id: int):
         player = get_or_create_player(request.user)
-        prior = (
-            ChallengeRun.objects.select_related(
-                "challenge_trial__challenge_level",
-                "challenge_trial__challenge_level__chapter",
-                "challenge_trial__challenge_level__chapter__story",
-                "selected_variant",
-            )
-            .get(id=run_id, player=player)
-        )
+        prior = ChallengeRun.objects.select_related(
+            "challenge_trial__challenge_level",
+            "challenge_trial__challenge_level__chapter",
+            "challenge_trial__challenge_level__chapter__story",
+            "selected_variant",
+        ).get(id=run_id, player=player)
         if prior.is_replay:
             raise Locked("Replay runs cannot be retried.")
         run = ChallengeRunService().start_run(

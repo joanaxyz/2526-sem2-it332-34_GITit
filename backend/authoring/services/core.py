@@ -32,7 +32,9 @@ class AuthoringChapterService:
     def create(self, *, user, data: dict) -> AuthoringChapter:
         fields = {key: data[key] for key in self._FIELDS if key in data}
         fields.setdefault("title", "New chapter")
-        fields.setdefault("slug", _unique_chapter_slug(user=user, base=fields.get("slug") or fields["title"]))
+        fields.setdefault(
+            "slug", _unique_chapter_slug(user=user, base=fields.get("slug") or fields["title"])
+        )
         if "sort_order" not in fields:
             fields["sort_order"] = AuthoringChapter.objects.filter(owner=user).count()
         chapter = AuthoringChapter(owner=user, **fields)
@@ -64,27 +66,50 @@ class ContentDefinitionService:
     @transaction.atomic
     def create(self, *, user, data: dict) -> ContentDefinition:
         content = ContentDefinition(owner=user, **_content_fields(data))
-        if "chapter" in data:
-            content.chapter = _resolve_chapter(user=user, chapter_id=data.get("chapter"))
+        _validate_chapter_choice(data)
+        _apply_chapter_choice(user=user, content=content, data=data)
+        if content.official_chapter_id:
+            _assert_official_content_owner(content)
         content.full_clean()
         content.save()
+        if content.official_chapter_id:
+            _record_official_action(
+                actor=user,
+                action="official_content.create",
+                content=content,
+                after=_official_content_snapshot(content),
+            )
         return content
 
     @transaction.atomic
     def update(self, *, user, content: ContentDefinition, data: dict) -> ContentDefinition:
         self.assert_owner(user=user, content=content)
+        before = _official_content_snapshot(content)
+        was_official = content.official_chapter_id is not None
         if content.status == STATUS_PUBLISHED:
             forbidden = set(data) - {"visibility"}
             if forbidden:
                 raise ValidationError(
-                    {"status": "Published content can only change visibility or be remixed; its definition is immutable."}
+                    {
+                        "status": "Published content can only change visibility or be remixed; its definition is immutable."
+                    }
                 )
         for field, value in _content_fields(data, partial=True).items():
             setattr(content, field, value)
-        if "chapter" in data:
-            content.chapter = _resolve_chapter(user=user, chapter_id=data.get("chapter"))
+        _validate_chapter_choice(data)
+        _apply_chapter_choice(user=user, content=content, data=data)
+        if content.official_chapter_id:
+            _assert_official_content_owner(content)
         content.full_clean()
         content.save()
+        if was_official or content.official_chapter_id:
+            _record_official_action(
+                actor=user,
+                action="official_content.update",
+                content=content,
+                before=before,
+                after=_official_content_snapshot(content),
+            )
         return content
 
     @transaction.atomic
@@ -102,21 +127,55 @@ class ContentDefinitionService:
     @transaction.atomic
     def publish(self, *, user, content: ContentDefinition) -> ContentDefinition:
         self.assert_owner(user=user, content=content)
+        before = _official_content_snapshot(content)
+        if content.official_chapter_id:
+            _assert_official_content_owner(content)
+            _assert_publishable_official_chapter(content.official_chapter)
         result = ContentDefinitionValidator().validate(content)
         if not result.valid:
             content.validation_errors = result.errors
             content.save(update_fields=["validation_errors", "updated_at"])
             raise ValidationError({"validation_errors": result.errors})
         content.status = STATUS_PUBLISHED
+        if content.official_chapter_id:
+            content.visibility = "public"
         content.validation_errors = []
         content.published_at = timezone.now()
-        content.save(update_fields=["status", "validation_errors", "published_at", "updated_at"])
-        ContentRuntimeCompiler().compile(content=content)
+        content.save(
+            update_fields=[
+                "status",
+                "visibility",
+                "validation_errors",
+                "published_at",
+                "updated_at",
+            ]
+        )
+        runtime = ContentRuntimeCompiler().compile(content=content)
+        if content.official_chapter_id:
+            _record_official_action(
+                actor=user,
+                action="official_content.publish",
+                content=content,
+                before=before,
+                after=_official_content_snapshot(content),
+                metadata={
+                    "runtime_id": runtime.id,
+                    "chapter_id": runtime.chapter_id,
+                },
+            )
         return content
 
     @transaction.atomic
     def test_run(self, *, user, content: ContentDefinition) -> dict:
         self.assert_owner(user=user, content=content)
+        if content.official_chapter_id:
+            raise ValidationError(
+                {
+                    "official_chapter": (
+                        "Official content must be published before it enters the live curriculum."
+                    )
+                }
+            )
         result = ContentDefinitionValidator().validate(content)
         if not result.valid:
             content.validation_errors = result.errors
@@ -135,7 +194,9 @@ class ContentDefinitionService:
             kind=content.kind,
             owner=user,
             source_definition=content,
-            chapter=content.chapter if content.chapter_id and content.chapter.owner_id == user.id else None,
+            chapter=content.chapter
+            if content.chapter_id and content.chapter.owner_id == user.id
+            else None,
             visibility="private",
             status="draft",
             slug=_next_remix_slug(user=user, source=content),
@@ -156,6 +217,102 @@ def _resolve_chapter(*, user, chapter_id) -> AuthoringChapter | None:
         return AuthoringChapter.objects.get(id=chapter_id, owner=user)
     except AuthoringChapter.DoesNotExist as exc:
         raise ValidationError({"chapter": "Unknown chapter."}) from exc
+
+
+def _apply_chapter_choice(*, user, content: ContentDefinition, data: dict) -> None:
+    authored_chapter_id = data.get("chapter")
+    if authored_chapter_id is not None:
+        content.chapter = _resolve_chapter(user=user, chapter_id=authored_chapter_id)
+        content.official_chapter = None
+    elif "official_chapter" in data:
+        content.official_chapter = _resolve_official_chapter(
+            user=user,
+            chapter_id=data.get("official_chapter"),
+        )
+        content.chapter = None
+    elif "chapter" in data:
+        content.chapter = None
+        content.official_chapter = None
+
+
+def _resolve_official_chapter(*, user, chapter_id):
+    if chapter_id is None:
+        return None
+    if not getattr(user, "is_staff", False):
+        raise PermissionDenied("Only staff can place content in the official curriculum.")
+    from curriculum.models import MANAGEMENT_SOURCE_RUNTIME, Chapter
+
+    try:
+        chapter = (
+            Chapter.objects.exclude(management_source=MANAGEMENT_SOURCE_RUNTIME)
+            .select_related("story")
+            .get(id=chapter_id)
+        )
+    except Chapter.DoesNotExist as exc:
+        raise ValidationError({"official_chapter": "Unknown official chapter."}) from exc
+    _assert_publishable_official_chapter(chapter)
+    return chapter
+
+
+def _assert_publishable_official_chapter(chapter) -> None:
+    if not chapter.is_published or chapter.story_id is None or not chapter.story.is_published:
+        raise ValidationError(
+            {
+                "official_chapter": (
+                    "Official content requires a published chapter in a published story."
+                )
+            }
+        )
+
+
+def _assert_official_content_owner(content: ContentDefinition) -> None:
+    if content.owner_id is not None and not content.owner.is_staff:
+        raise ValidationError(
+            {
+                "official_chapter": (
+                    "Player-authored content cannot be moved into the official curriculum."
+                )
+            }
+        )
+
+
+def _official_content_snapshot(content: ContentDefinition) -> dict:
+    return {
+        "kind": content.kind,
+        "slug": content.slug,
+        "title": content.title,
+        "visibility": content.visibility,
+        "status": content.status,
+        "official_chapter_id": content.official_chapter_id,
+    }
+
+
+def _record_official_action(
+    *,
+    actor,
+    action: str,
+    content: ContentDefinition,
+    before: dict | None = None,
+    after: dict | None = None,
+    metadata: dict | None = None,
+) -> None:
+    from adminconsole.services.actions import record_admin_action
+
+    record_admin_action(
+        actor=actor,
+        action=action,
+        target=content,
+        before=before,
+        after=after,
+        metadata=metadata,
+    )
+
+
+def _validate_chapter_choice(data: dict) -> None:
+    if data.get("chapter") and data.get("official_chapter"):
+        raise ValidationError(
+            {"official_chapter": "Choose an authored chapter or an official chapter, not both."}
+        )
 
 
 def _unique_chapter_slug(*, user, base: str) -> str:

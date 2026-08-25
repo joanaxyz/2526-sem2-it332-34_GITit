@@ -25,12 +25,6 @@ class Command(BaseCommand):
                     "This is correct only when Django terminates TLS directly."
                 )
 
-        stripe_values = [settings.STRIPE_SECRET_KEY, settings.STRIPE_WEBHOOK_SECRET]
-        if any(stripe_values) and not all(stripe_values):
-            errors.append("STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET must be set together.")
-        if not any(stripe_values):
-            warnings.append("Stripe is disabled; GitCoin checkout endpoints will not be usable.")
-
         for warning in warnings:
             self.stdout.write(self.style.WARNING(f"WARNING: {warning}"))
         if errors:

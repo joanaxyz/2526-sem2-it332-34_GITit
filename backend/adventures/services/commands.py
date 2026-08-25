@@ -7,7 +7,6 @@ unlocks and mastery targets, but the runtime never walks a whole chapter as
 one continuous session.
 """
 
-
 from django.db import transaction
 
 from adventures.models import (
@@ -24,6 +23,7 @@ from common.git.command_outcomes import command_outcome_payload
 from common.git.repository_state import VariantTargetStateHashCache
 from common.runtime import (
     apply_command_accounting,
+    battle_rule_counts,
     command_budget_exhausted,
     repository_response_snapshot,
     update_fields_for_execution,
@@ -82,48 +82,60 @@ class AdventureCommandService:
         rules_passing = 0
         total_rules = max(1, wave.max_counted_commands if wave is not None else 1)
         executed: list[str] = []
+
+        evaluation_spec = CompiledEvaluationSpecCache().spec_for(
+            key=("adventure-wave-variant", variant.id, variant.semantic_key or ""),
+            raw_spec=variant.evaluation_spec,
+        )
+        evaluator = EvaluationEngine()
+        expected_state_hash = VariantTargetStateHashCache().hash_for(
+            variant=variant,
+            state_tools=self.sim,
+        )
+        history = AdventureCommandHistoryCache().history_for(
+            attempt=attempt,
+            log_count=attempt.command_count - 1,
+        )
+        initial_outcome = evaluator.evaluate(
+            spec=evaluation_spec,
+            next_state=variant.initial_state,
+            initial_state=variant.initial_state,
+            executed_commands=[],
+            next_state_hash=self.sim.state_hash(variant.initial_state),
+            expected_state_hash=expected_state_hash,
+        )
+        previous_outcome = evaluator.evaluate(
+            spec=evaluation_spec,
+            next_state=previous_state,
+            initial_state=variant.initial_state,
+            executed_commands=history,
+            next_state_hash=self.sim.state_hash_for_normalized(previous_state),
+            expected_state_hash=expected_state_hash,
+            next_state_already_normalized=True,
+        )
+        previous_rules_passing, total_rules = battle_rule_counts(
+            previous_outcome,
+            initial_outcome,
+        )
+        rules_passing = previous_rules_passing
+
         if result.processed:
             with span("evaluate"):
-                history = AdventureCommandHistoryCache().history_for(
-                    attempt=attempt,
-                    log_count=attempt.command_count - 1,
-                )
-                previous_outcome = EvaluationEngine().evaluate(
-                    spec=CompiledEvaluationSpecCache().spec_for(
-                        key=("adventure-wave-variant", variant.id, variant.semantic_key or ""),
-                        raw_spec=variant.evaluation_spec,
-                    ),
-                    next_state=previous_state,
-                    initial_state=variant.initial_state,
-                    executed_commands=history,
-                    next_state_hash=self.sim.state_hash_for_normalized(previous_state),
-                    expected_state_hash=VariantTargetStateHashCache().hash_for(
-                        variant=variant,
-                        state_tools=self.sim,
-                    ),
-                    next_state_already_normalized=True,
-                )
-                previous_rules_passing = len(previous_outcome.passed_rules)
-                total_rules = max(1, previous_rules_passing + len(previous_outcome.failed_rules))
                 executed = [*history, result.normalized_command]
-                outcome = EvaluationEngine().evaluate(
-                    spec=CompiledEvaluationSpecCache().spec_for(
-                        key=("adventure-wave-variant", variant.id, variant.semantic_key or ""),
-                        raw_spec=variant.evaluation_spec,
-                    ),
+                outcome = evaluator.evaluate(
+                    spec=evaluation_spec,
                     next_state=next_state,
                     initial_state=variant.initial_state,
                     executed_commands=executed,
                     next_state_hash=self.sim.state_hash_for_normalized(next_state),
-                    expected_state_hash=VariantTargetStateHashCache().hash_for(
-                        variant=variant,
-                        state_tools=self.sim,
-                    ),
+                    expected_state_hash=expected_state_hash,
                     next_state_already_normalized=True,
                 )
                 solved = outcome.target_matched
-                rules_passing = len(outcome.passed_rules)
-                total_rules = max(1, rules_passing + len(outcome.failed_rules))
+                rules_passing, total_rules = battle_rule_counts(
+                    outcome,
+                    initial_outcome,
+                )
 
         failed = command_budget_exhausted(
             solved=solved,

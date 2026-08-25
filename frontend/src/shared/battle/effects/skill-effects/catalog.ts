@@ -1,15 +1,16 @@
 import type { SpriteAnimation } from '@/shared/sprites/types'
 import { DEFAULT_SKILL_COMPANION, SKILL_EFFECT_ROOTS } from '@/shared/cosmetics/skillPortrait'
+import { companionPlacementGeometry } from '@/shared/cosmetics/companions/companionSkills'
 import { skillElementForCompanion } from '@/shared/audio/battleAudio'
 
 import type { SkillSpriteSpec } from './types'
 
-export const FRAME = 256
-export const COLUMNS = 5
-export const ROWS = 5
-export const FRAME_COUNT = 25
-export const FPS = 18
-export const DEFAULT_EFFECT_COMPANION = DEFAULT_SKILL_COMPANION
+const FRAME = 256
+const COLUMNS = 5
+const ROWS = 5
+const FRAME_COUNT = 25
+const FPS = 18
+const DEFAULT_EFFECT_COMPANION = DEFAULT_SKILL_COMPANION
 const EFFECT_ROOTS = SKILL_EFFECT_ROOTS
 /** Families the processor split into back/front depth sheets, per companion. */
 const LAYERED_FAMILIES: Record<string, ReadonlySet<string>> = {
@@ -22,7 +23,7 @@ function layeredSheets(name: string, companionSlug: string): { back: SpriteAnima
   return { back: sheet(`${name}_back`, companionSlug), front: sheet(`${name}_front`, companionSlug) }
 }
 
-export function companionEffectSlug(companionSlug?: string | null): string {
+function companionEffectSlug(companionSlug?: string | null): string {
   return companionSlug?.trim().toLowerCase() || DEFAULT_EFFECT_COMPANION
 }
 
@@ -129,6 +130,8 @@ function buildEffects(companionSlug = DEFAULT_EFFECT_COMPANION): Record<string, 
     pull: { sheet: sheet('pull', companionSlug), playback: 'target', anchor: 'feet', tint: 'azure', scale: TARGET_SCALE, durationMs: 900 },
     push: { sheet: sheet('push', companionSlug), playback: 'ground', tint: 'steel', scale: 0.54, durationMs: 840 },
     rebase: { sheet: sheet('rebase', companionSlug), playback: 'target', anchor: 'feet', tint: 'indigo', scale: 0.64, durationMs: 940 },
+    tag: { sheet: sheet('tag', companionSlug), playback: 'target', anchor: 'feet', tint: 'indigo', scale: TARGET_SCALE, durationMs: 900 },
+    'rev-list': { sheet: sheet('rev-list', companionSlug), playback: 'target', anchor: 'center', tint: 'violet', scale: 0.62, durationMs: 900 },
     default: { sheet: sheet('default', companionSlug), playback: 'projectile', tint: 'cyan', scale: PROJECTILE_SCALE, durationMs: 740, impactStartFrame: 15 },
     miss: { sheet: sheet('miss', companionSlug), playback: 'miss', tint: 'ash', scale: 0.56, durationMs: 760 },
   }
@@ -146,7 +149,7 @@ function buildEffects(companionSlug = DEFAULT_EFFECT_COMPANION): Record<string, 
     effects.init = { ...effects.init, tint: 'azure', durationMs: 820 }
     effects.clone = { ...effects.clone, anchor: 'center' }
     effects.diff = { ...effects.diff, impactStartFrame: 20 }
-    effects.add = { ...effects.add, launchStartFrame: 10, impactStartFrame: 15 }
+    effects.add = { ...effects.add, anchor: 'center', launchStartFrame: 10, impactStartFrame: 15 }
     effects.branch = { ...effects.branch, anchor: 'center', impactStartFrame: 17 }
     effects.checkout = { ...effects.checkout, impactStartFrame: 20 }
     effects.merge = { ...effects.merge, anchor: 'feet', impactStartFrame: 18 }
@@ -165,8 +168,20 @@ function buildEffects(companionSlug = DEFAULT_EFFECT_COMPANION): Record<string, 
     effects[family] = { ...spec, layers, sheet: layers.front }
   }
 
+  // Attach the pixel-measured placement anchors emitted by the spell processor.
+  // The runtime pins these on the target instead of the fixed FEET/CENTER
+  // fraction, so placement follows the actual baked pixels and survives a
+  // reprocess that shifts art within its transparent cell. Families the index
+  // omits (default/miss) keep the constant-anchor fallback.
+  const placementGeometry = companionPlacementGeometry(slug)
   for (const key of Object.keys(effects)) {
-    effects[key] = { ...effects[key], element }
+    const measured = placementGeometry[key]
+    effects[key] = {
+      ...effects[key],
+      element,
+      ...(measured?.anchor ? { placeAnchor: measured.anchor } : {}),
+      ...(measured?.bounds ? { placeBounds: measured.bounds } : {}),
+    }
   }
 
   return effects

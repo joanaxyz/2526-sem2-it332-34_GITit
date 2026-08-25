@@ -133,15 +133,20 @@ def test_beginner_command_library_entries_are_educationally_rich():
     assert not missing, f"beginner command library entries are missing: {sorted(missing)}"
 
     required_section_types = {"overview", "checklist", "comparison", "scenario", "quiz", "mistake"}
-    required_block_types = {"state_flow", "before_after", "comparison_table", "scenario", "quiz", "do_dont"}
+    required_block_types = {
+        "state_flow",
+        "before_after",
+        "comparison_table",
+        "scenario",
+        "quiz",
+        "do_dont",
+    }
 
     for key in sorted(BEGINNER_COMMAND_KEYS):
         content = _content(**specs_by_key[key])
         section_types = {page.get("section_type") for page in content["pages"]}
         block_types = {
-            block.get("type")
-            for page in content["pages"]
-            for block in page.get("blocks", [])
+            block.get("type") for page in content["pages"] for block in page.get("blocks", [])
         }
 
         assert required_section_types <= section_types, key
@@ -152,7 +157,16 @@ def test_command_library_terminal_outputs_use_realistic_transcripts():
     from curriculum.library_preview_outputs import _sample_output_for_syntax
     from curriculum.seed_data.command_catalog import COMMAND_CATALOG
 
-    placeholder_tokens = ("<file>", "<path>", "<branch>", "<url>", "<commit>", "<name>", "<directory>", "<folder>")
+    placeholder_tokens = (
+        "<file>",
+        "<path>",
+        "<branch>",
+        "<url>",
+        "<commit>",
+        "<name>",
+        "<directory>",
+        "<folder>",
+    )
     comment_tokens = ("# output depends", "# no output")
     for spec in COMMAND_CATALOG:
         for usage in spec["usages"]:

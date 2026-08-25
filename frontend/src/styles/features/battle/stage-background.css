@@ -70,11 +70,6 @@
   filter: blur(2px);
 }
 
-.battle-monster-slot[data-range='far'] .battle-range-shadow {
-  opacity: 0.38;
-  background: radial-gradient(ellipse at center, rgba(var(--theme-primary-soft-rgb), var(--battle-range-alpha, 0.2)), transparent 72%);
-}
-
 .battle-monster-roam {
   position: relative;
   transform: translateX(0);

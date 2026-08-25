@@ -1,0 +1,723 @@
+{
+  "assertion_count": 58,
+  "ordered_call_trace": [
+    {
+      "call_index": 0,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: required gameplay contract owner is missing",
+        "frontend/src/shared/level-runtime/runMutationInputs.ts: required gameplay contract owner is missing",
+        "frontend/src/shared/level/types.ts: required gameplay contract owner is missing",
+        "frontend/src/shared/level/workspaceFileTypes.ts: required gameplay contract owner is missing",
+        "frontend/src/features/example/shadows.ts: CreateFileInput duplicates or facades the shared workspace input",
+        "frontend/src/features/example/shadows.ts: RenameFileInput duplicates or facades the shared workspace input",
+        "frontend/src/features/example/shadows.ts: WorkspaceFileRequest duplicates or facades the shared workspace input",
+        "frontend/src/features/example/shadows.ts: CommandExecutionPayload belongs in frontend/src/shared/level/types.ts",
+        "frontend/src/features/example/shadows.ts: gameplay contract type re-export facades are forbidden",
+        "frontend/src/features/adventures/api/adventuresApi.ts: gameplay API bodies must use the shared generated adapter",
+        "frontend/src/features/adventures/api/adventuresApi.ts: gameplay API must import the exact shared body adapters",
+        "frontend/src/features/adventures/api/adventuresApi.ts: submitCommand body must delegate to commandSubmitBody",
+        "frontend/src/features/adventures/api/adventuresApi.ts: createFile body must delegate to workspaceFileBody",
+        "frontend/src/features/adventures/api/adventuresApi.ts: writeFile body must delegate to workspaceFileBody",
+        "frontend/src/features/adventures/api/adventuresApi.ts: renameFile body must delegate to workspaceFileRenameBody"
+      ],
+      "symbol": "gameplay_mutation_frontend_violations",
+      "test": "test_gameplay_mutation_guard_rejects_frontend_contract_shadows_and_casts"
+    },
+    {
+      "call_index": 0,
+      "ordered_result": [],
+      "symbol": "gameplay_mutation_frontend_violations",
+      "test": "test_gameplay_mutation_frontend_guard_allows_unrelated_structural_types"
+    },
+    {
+      "call_index": 0,
+      "ordered_result": [
+        "frontend/src/features/adventures/api/adventuresApi.ts: createFile body must delegate to workspaceFileBody"
+      ],
+      "symbol": "gameplay_mutation_frontend_violations",
+      "test": "test_gameplay_mutation_frontend_guard_rejects_partial_adapter_delegation"
+    },
+    {
+      "call_index": 0,
+      "ordered_result": [
+        "backend/example/facade.py: gameplay serializer import/re-export facade is forbidden: CommandSubmitSerializer",
+        "backend/example/serializers.py: secondary gameplay serializer owner is forbidden: WorkspaceFileSerializer"
+      ],
+      "symbol": "gameplay_mutation_backend_violations",
+      "test": "test_gameplay_mutation_backend_guard_rejects_alternate_owners_and_runtime_use"
+    },
+    {
+      "call_index": 1,
+      "ordered_result": [
+        "backend/challenges/views.py: ChallengeWorkspaceFileAPIView.post must validate with WorkspaceFileSerializer"
+      ],
+      "symbol": "gameplay_mutation_backend_violations",
+      "test": "test_gameplay_mutation_backend_guard_rejects_alternate_owners_and_runtime_use"
+    },
+    {
+      "call_index": 0,
+      "ordered_result": [
+        "frontend/src/shared/api/generated/openapi.json: WorkspaceFile properties must be exact",
+        "frontend/src/shared/api/generated/openapi.json: displaced PatchedWorkspaceFile must stay absent",
+        "frontend/src/shared/api/generated/openapi.json: PATCH /api/adventure-runs/{run_id}/files/ must use WorkspaceFile",
+        "frontend/src/shared/api/generated/openapi.json: PATCH /api/adventure-runs/{run_id}/files/ request body must be required",
+        "frontend/src/shared/api/generated/openapi.json: DELETE /api/adventure-runs/{run_id}/files/ must require string query path"
+      ],
+      "symbol": "gameplay_mutation_openapi_violations",
+      "test": "test_gameplay_mutation_openapi_guard_rejects_schema_forks_and_http_drift"
+    },
+    {
+      "call_index": 0,
+      "ordered_result": [
+        "backend/common/openapi.py: domain response re-export facades are forbidden",
+        "backend/common/openapi.py: gameplay response import/re-export facade is forbidden",
+        "backend/example/assignment_facade.py: displaced gameplay response owner is forbidden: ChallengeRunResponseSerializer",
+        "backend/example/facade.py: gameplay response import/re-export facade is forbidden",
+        "backend/example/openapi.py: displaced gameplay response owner is forbidden: ChallengeRunResponseSerializer",
+        "backend/adventures/views.py: response schemas must import directly from adventures.openapi; expected=['AdventureCommandResponseSerializer', 'AdventureLevelLibraryResponseSerializer', 'AdventureRunResponseSerializer']",
+        "backend/adventures/views.py: gameplay response schemas must not come from common.openapi"
+      ],
+      "symbol": "gameplay_response_backend_violations",
+      "test": "test_gameplay_response_backend_guard_rejects_displaced_owners_and_common_facades"
+    },
+    {
+      "call_index": 0,
+      "ordered_result": [
+        "frontend/src/shared/api/generated/openapi.json: AdventureRunResponse properties/required must be exact",
+        "frontend/src/shared/api/generated/openapi.json: ChallengeCommandStepResponse properties/required must be exact",
+        "frontend/src/shared/api/generated/openapi.json: ChallengeCommandRunResponse properties/required must be exact",
+        "frontend/src/shared/api/generated/openapi.json: ChallengeRunResponse properties/required must be exact",
+        "frontend/src/shared/api/generated/openapi.json: AdventureCommandRunResponse must be the exact full/patch union",
+        "frontend/src/shared/api/generated/openapi.json: GET /api/challenge-runs/{run_id}/ 200 must return ChallengeRunResponse"
+      ],
+      "symbol": "gameplay_response_openapi_violations",
+      "test": "test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift"
+    },
+    {
+      "call_index": 1,
+      "ordered_result": [
+        "frontend/src/shared/api/generated/openapi.json: ChallengeCommandRunResponse properties/required must be exact"
+      ],
+      "symbol": "gameplay_response_openapi_violations",
+      "test": "test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift"
+    },
+    {
+      "call_index": 2,
+      "ordered_result": [
+        "frontend/src/shared/api/generated/openapi.json: ChallengeCommandRunResponse properties/required must be exact"
+      ],
+      "symbol": "gameplay_response_openapi_violations",
+      "test": "test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift"
+    },
+    {
+      "call_index": 3,
+      "ordered_result": [
+        "frontend/src/shared/api/generated/openapi.json: ChallengeCommandRunResponse properties/required must be exact"
+      ],
+      "symbol": "gameplay_response_openapi_violations",
+      "test": "test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift"
+    },
+    {
+      "call_index": 4,
+      "ordered_result": [
+        "frontend/src/shared/api/generated/openapi.json: ChallengeCommandRunResponse properties/required must be exact"
+      ],
+      "symbol": "gameplay_response_openapi_violations",
+      "test": "test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift"
+    },
+    {
+      "call_index": 5,
+      "ordered_result": [
+        "frontend/src/shared/api/generated/openapi.json: ChallengeCommandRunResponse nullable fields must be exact"
+      ],
+      "symbol": "gameplay_response_openapi_violations",
+      "test": "test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift"
+    },
+    {
+      "call_index": 6,
+      "ordered_result": [
+        "frontend/src/shared/api/generated/openapi.json: ChallengeCommandRunResponse nullable fields must be exact"
+      ],
+      "symbol": "gameplay_response_openapi_violations",
+      "test": "test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift"
+    },
+    {
+      "call_index": 7,
+      "ordered_result": [
+        "frontend/src/shared/api/generated/openapi.json: ChallengeCommandRunResponse nullable fields must be exact"
+      ],
+      "symbol": "gameplay_response_openapi_violations",
+      "test": "test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift"
+    },
+    {
+      "call_index": 8,
+      "ordered_result": [
+        "frontend/src/shared/api/generated/openapi.json: ChallengeCommandRunResponse nullable fields must be exact"
+      ],
+      "symbol": "gameplay_response_openapi_violations",
+      "test": "test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift"
+    },
+    {
+      "call_index": 9,
+      "ordered_result": [
+        "frontend/src/shared/api/generated/openapi.json: AdventureRunResponse.status must reference GameplayRunStatus"
+      ],
+      "symbol": "gameplay_response_openapi_violations",
+      "test": "test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift"
+    },
+    {
+      "call_index": 10,
+      "ordered_result": [
+        "frontend/src/shared/api/generated/openapi.json: RuntimeStepResponse nullable fields must be exact"
+      ],
+      "symbol": "gameplay_response_openapi_violations",
+      "test": "test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift"
+    },
+    {
+      "call_index": 0,
+      "ordered_result": [
+        "frontend/src/features/example/responseFacade.ts: secondary gameplay response type ChallengeRunResponse is forbidden",
+        "frontend/src/features/example/responseFacade.ts: gameplay response type re-export facades are forbidden",
+        "frontend/src/features/challenges/types.ts: ChallengeOptimisticStep must use its exact generated-derived Omit allowlist",
+        "frontend/src/features/challenges/types.ts: ChallengeRunResponse must use its exact generated-derived Omit allowlist",
+        "frontend/src/features/challenges/types.ts: ChallengeRunResponse must not widen the generated wire contract",
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: challenge_runs_retrieve must use exact response type ChallengeRunResponse",
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: challenge_runs_files_create must use exact response type ChallengeRunResponse",
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: challenge_runs_files_partial_update must use exact response type ChallengeRunResponse",
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: challenge_runs_files_update must use exact response type ChallengeRunResponse",
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: challenge_runs_files_destroy must use exact response type ChallengeRunResponse",
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: client ChallengeRun must never be an HTTP response override",
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: gameplay response return casts/intersections are forbidden",
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: getRun must directly return the exact challenge_runs_retrieve response",
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: createFile must directly return the exact challenge_runs_files_create response",
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: writeFile must directly return the exact challenge_runs_files_partial_update response",
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: renameFile must directly return the exact challenge_runs_files_update response",
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: deleteFile must directly return the exact challenge_runs_files_destroy response"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_wire_widening_and_client_http_types"
+    },
+    {
+      "call_index": 0,
+      "ordered_result": [
+        "frontend/src/features/challenges/types.ts: ChallengeRunResponse must use its exact generated-derived Omit allowlist",
+        "frontend/src/features/challenges/types.ts: ChallengeRunRefinementKeys must remain an explicit finite key allowlist"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 1,
+      "ordered_result": [
+        "frontend/src/features/challenges/types.ts: ChallengeRunResponse must use its exact generated-derived Omit allowlist"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 2,
+      "ordered_result": [
+        "frontend/src/features/challenges/types.ts: ChallengeRunResponse must use its exact generated-derived Omit allowlist",
+        "frontend/src/features/challenges/types.ts: ChallengeRunResponse must not widen the generated wire contract"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 3,
+      "ordered_result": [
+        "frontend/src/features/challenges/types.ts: ChallengeRunResponse must not widen the generated wire contract"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 4,
+      "ordered_result": [
+        "frontend/src/features/challenges/types.ts: ChallengeRunResponse must use its exact generated-derived Omit allowlist"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 5,
+      "ordered_result": [
+        "frontend/src/features/challenges/types.ts: ChallengeRunResponse must use its exact generated-derived Omit allowlist"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 6,
+      "ordered_result": [
+        "frontend/src/features/challenges/types.ts: ChallengeOptimisticStep must use its exact generated-derived Omit allowlist"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 7,
+      "ordered_result": [
+        "frontend/src/features/challenges/types.ts: ChallengeRunResponse overlay fields must equal its exact refinement allowlist"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 8,
+      "ordered_result": [
+        "frontend/src/features/challenges/types.ts: ChallengeRunResponse overlay fields must equal its exact refinement allowlist"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 9,
+      "ordered_result": [
+        "frontend/src/features/challenges/types.ts: ChallengeRunResponse overlay fields must equal its exact refinement allowlist"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 10,
+      "ordered_result": [
+        "frontend/src/features/challenges/types.ts: ChallengeOptimisticStep overlay fields must equal its exact refinement allowlist",
+        "frontend/src/features/challenges/types.ts: optimistic steps may omit only visualization_snapshot"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 11,
+      "ordered_result": [
+        "frontend/src/shared/level/types.ts: TerminalStep must derive exactly from RuntimeStepResponse"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 12,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengesApi.ts: challenge_runs_destroy must use the generated response directly",
+        "frontend/src/features/challenges/api/challengesApi.ts: discardChallengeRun must directly return the exact challenge_runs_destroy response"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 13,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: gameplay response return casts/intersections are forbidden",
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: getRun must directly return the exact challenge_runs_retrieve response"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 14,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: getRun must directly return the exact challenge_runs_retrieve response"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 15,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: gameplay response adapters are forbidden",
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: getRun must directly return the exact challenge_runs_retrieve response"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 16,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: getRun must directly return the exact challenge_runs_retrieve response"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 17,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: getRun must directly return the exact challenge_runs_retrieve response"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 18,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: getRun must directly return the exact challenge_runs_retrieve response"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 19,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: getRun must directly return the exact challenge_runs_retrieve response"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 20,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: getRun must directly return the exact challenge_runs_retrieve response"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 21,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: getRun must directly return the exact challenge_runs_retrieve response"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 22,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: challengeRunsApi must not override owned methods through spread, computed, or property members"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 23,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: challengeRunsApi must not override owned methods through spread, computed, or property members"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 24,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: challengeRunsApi must not override owned methods through spread, computed, or property members"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 25,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: challengeRunsApi must not be reassigned or mutated"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 26,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: challengeRunsApi must not be reassigned or mutated"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 27,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: challengeRunsApi must not be reassigned or mutated"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 28,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: challengeRunsApi must not be reassigned or mutated"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 29,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: challengeRunsApi must not be reassigned or mutated"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 30,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: challengeRunsApi must not be reassigned or mutated"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 31,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: challengeRunsApi must not be reassigned or mutated"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 32,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengeRunsApi.ts: challengeRunsApi must not be reassigned or mutated"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 33,
+      "ordered_result": [],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 34,
+      "ordered_result": [],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 35,
+      "ordered_result": [
+        "frontend/src/features/example/apiMutation.ts: challengeRunsApi must not be reassigned or mutated"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 36,
+      "ordered_result": [
+        "frontend/src/features/example/apiMutation.ts: challengeRunsApi must not be reassigned or mutated"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 37,
+      "ordered_result": [
+        "frontend/src/features/example/apiMutation.ts: gameplay API namespace imports are forbidden",
+        "frontend/src/features/example/apiMutation.ts: challengeRunsApi must not be reassigned or mutated"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 38,
+      "ordered_result": [
+        "frontend/src/features/example/apiFacade.ts: gameplay API object re-export facades are forbidden"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 39,
+      "ordered_result": [
+        "frontend/src/features/example/apiFacade.ts: gameplay API object re-export facades are forbidden"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 40,
+      "ordered_result": [
+        "frontend/src/features/example/apiFacade.ts: gameplay API object re-export facades are forbidden"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 41,
+      "ordered_result": [
+        "frontend/src/features/example/apiFacade.ts: gameplay API object re-export facades are forbidden"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 42,
+      "ordered_result": [
+        "frontend/src/features/example/apiFacade.ts: gameplay API object re-export facades are forbidden"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 43,
+      "ordered_result": [
+        "frontend/src/features/example/apiFacade.ts: gameplay API namespace imports are forbidden",
+        "frontend/src/features/example/apiFacade.ts: gameplay API object re-export facades are forbidden"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 44,
+      "ordered_result": [
+        "frontend/src/features/example/apiFacade.ts: gameplay API namespace imports are forbidden",
+        "frontend/src/features/example/apiFacade.ts: gameplay API object re-export facades are forbidden"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 45,
+      "ordered_result": [
+        "frontend/src/features/example/apiFacade.ts: gameplay API namespace imports are forbidden",
+        "frontend/src/features/example/apiFacade.ts: gameplay API object re-export facades are forbidden"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 46,
+      "ordered_result": [
+        "frontend/src/features/example/apiFacade.ts: gameplay API object re-export facades are forbidden"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 47,
+      "ordered_result": [
+        "frontend/src/features/example/apiFacade.ts: gameplay API object re-export facades are forbidden"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 48,
+      "ordered_result": [
+        "frontend/src/features/example/apiFacade.ts: gameplay API object re-export facades are forbidden"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 49,
+      "ordered_result": [
+        "frontend/src/features/example/apiProjection.ts: gameplay API namespace imports are forbidden"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 50,
+      "ordered_result": [
+        "frontend/src/features/example/apiProjection.ts: gameplay API namespace imports are forbidden"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 51,
+      "ordered_result": [
+        "frontend/src/features/example/apiProjection.ts: gameplay API namespace imports are forbidden"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 52,
+      "ordered_result": [
+        "frontend/src/features/example/apiProjection.ts: gameplay API namespace imports are forbidden"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 53,
+      "ordered_result": [
+        "frontend/src/features/challenges/api/challengesApi.ts: challenge_runs_destroy must have exactly one owned API call"
+      ],
+      "symbol": "gameplay_response_frontend_violations",
+      "test": "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass"
+    },
+    {
+      "call_index": 0,
+      "ordered_result": [],
+      "symbol": "check_gameplay_mutation_contract_ownership",
+      "test": "test_gameplay_mutation_contract_runtime_obeys_shared_generated_owners"
+    },
+    {
+      "call_index": 0,
+      "ordered_result": [],
+      "symbol": "check_gameplay_response_contract_ownership",
+      "test": "test_gameplay_response_contract_runtime_obeys_domain_generated_owners"
+    }
+  ],
+  "schema_version": 1,
+  "source_path": "backend/common/tests/architecture_guard/test_gameplay_policy.py",
+  "source_sha256": "99495D43C5692991FAF0B298D1AECD23C13404F049FF63D6E0B072E28B480DCC",
+  "test_count": 11,
+  "tests": {
+    "test_gameplay_mutation_backend_guard_rejects_alternate_owners_and_runtime_use": {
+      "assertion_count": 3,
+      "lineno": 99,
+      "normalized_ast_sha256": "864ECE060DF1318B2A80E1CC4D9B2BAC01704E2D536D82A848DAF9C6F5281FDD",
+      "owner": "backend.common.tests.architecture_guard.test_gameplay_policy"
+    },
+    "test_gameplay_mutation_contract_runtime_obeys_shared_generated_owners": {
+      "assertion_count": 1,
+      "lineno": 692,
+      "normalized_ast_sha256": "D8B1DB68097300D7E8DE1BE2311705E92470E214C7CC8DC15EDA140FC5C0D708",
+      "owner": "backend.common.tests.architecture_guard.test_gameplay_policy"
+    },
+    "test_gameplay_mutation_frontend_guard_allows_unrelated_structural_types": {
+      "assertion_count": 1,
+      "lineno": 63,
+      "normalized_ast_sha256": "B03A4F126FC5860CEB31FE18BC3E928D4E6E09214E455622126694928A2F55E0",
+      "owner": "backend.common.tests.architecture_guard.test_gameplay_policy"
+    },
+    "test_gameplay_mutation_frontend_guard_rejects_partial_adapter_delegation": {
+      "assertion_count": 1,
+      "lineno": 79,
+      "normalized_ast_sha256": "EE4041FCD4EF908A24EA5904E7356DA2986027EF500992D252B9649E4A7A4DC0",
+      "owner": "backend.common.tests.architecture_guard.test_gameplay_policy"
+    },
+    "test_gameplay_mutation_guard_rejects_frontend_contract_shadows_and_casts": {
+      "assertion_count": 8,
+      "lineno": 44,
+      "normalized_ast_sha256": "876A2AAE49D208ECA3C77D72BBCDAD79F71AFCC647DE2454B8092E83BFE8A0E1",
+      "owner": "backend.common.tests.architecture_guard.test_gameplay_policy"
+    },
+    "test_gameplay_mutation_openapi_guard_rejects_schema_forks_and_http_drift": {
+      "assertion_count": 5,
+      "lineno": 130,
+      "normalized_ast_sha256": "1E617B08622B6F1551E2E22B8619B4B73A67648B0FCE21FFFB144C61A376F69C",
+      "owner": "backend.common.tests.architecture_guard.test_gameplay_policy"
+    },
+    "test_gameplay_response_backend_guard_rejects_displaced_owners_and_common_facades": {
+      "assertion_count": 5,
+      "lineno": 156,
+      "normalized_ast_sha256": "BB4461BB101A5E0049C6E13A8E1CBF2394E2CCDC7D9C11B9FBAC96D52AE1FE5C",
+      "owner": "backend.common.tests.architecture_guard.test_gameplay_policy"
+    },
+    "test_gameplay_response_contract_runtime_obeys_domain_generated_owners": {
+      "assertion_count": 1,
+      "lineno": 696,
+      "normalized_ast_sha256": "AB7D6AC2ACEE808A0D9335F47629A9E38BE2BDABC71D62770BD804235989F182",
+      "owner": "backend.common.tests.architecture_guard.test_gameplay_policy"
+    },
+    "test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass": {
+      "assertion_count": 16,
+      "lineno": 300,
+      "normalized_ast_sha256": "0B0CBF51A3D583410A750DFB24164D0DDC88C5AA656BD073F5BDB2A43EB3B794",
+      "owner": "backend.common.tests.architecture_guard.test_gameplay_policy"
+    },
+    "test_gameplay_response_frontend_guard_rejects_wire_widening_and_client_http_types": {
+      "assertion_count": 7,
+      "lineno": 259,
+      "normalized_ast_sha256": "512343DD1A414A47C938F4E9D4247D232C2D3BFCF9E263211BE7887416486693",
+      "owner": "backend.common.tests.architecture_guard.test_gameplay_policy"
+    },
+    "test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift": {
+      "assertion_count": 10,
+      "lineno": 187,
+      "normalized_ast_sha256": "B1B9ADA316E301F423239D9CAA5925C154B464712659A7850388CB644B388941",
+      "owner": "backend.common.tests.architecture_guard.test_gameplay_policy"
+    }
+  }
+}

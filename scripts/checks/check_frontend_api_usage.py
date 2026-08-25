@@ -6,6 +6,7 @@ inside the HTTP client itself. User-facing runtime modules must call
 apiOperationRequest so methods and payload/response shapes stay tied to the
 committed OpenAPI contract.
 """
+
 from __future__ import annotations
 
 import sys
@@ -18,7 +19,7 @@ ENFORCED_API_DIRS = [
     FRONTEND_SRC / "features" / "adventures" / "api",
     FRONTEND_SRC / "features" / "challenges" / "api",
     FRONTEND_SRC / "features" / "home" / "api",
-    FRONTEND_SRC / "features" / "shop" / "api",
+    FRONTEND_SRC / "shared" / "shop" / "api",
     FRONTEND_SRC / "features" / "skills" / "api",
     FRONTEND_SRC / "features" / "stats" / "api",
     FRONTEND_SRC / "features" / "track-map" / "api",
@@ -54,7 +55,11 @@ def main() -> int:
     for api_dir in ENFORCED_API_DIRS:
         for path in iter_ts_files(api_dir) or []:
             path_rel = rel(path)
-            if path_rel in ALLOWLIST or path.name.endswith(".test.ts") or path.name.endswith(".test.tsx"):
+            if (
+                path_rel in ALLOWLIST
+                or path.name.endswith(".test.ts")
+                or path.name.endswith(".test.tsx")
+            ):
                 continue
             text = path.read_text(encoding="utf-8", errors="ignore")
             for lineno, line in enumerate(text.splitlines(), start=1):

@@ -18,9 +18,7 @@ class EvaluationEngine:
     ) -> EvaluationOutcome:
         mode = spec.completion_policy.mode
         hashes_match = bool(
-            next_state_hash
-            and expected_state_hash
-            and next_state_hash == expected_state_hash
+            next_state_hash and expected_state_hash and next_state_hash == expected_state_hash
         )
 
         if mode == "state_hash":

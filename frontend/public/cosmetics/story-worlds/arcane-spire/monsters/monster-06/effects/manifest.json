@@ -1,5 +1,5 @@
 {
-  "id": "bone-necromancer-skill-effect",
+  "id": "monster-06-skill-effect",
   "label": "Bone Necromancer Skill Effect",
   "motif": "skeleton hands",
   "playback": "target",
@@ -28,6 +28,16 @@
       "orient_to": "target-facing"
     }
   ],
-  "anchor": "center",
+  "anchor": "feet",
+  "placeAnchor": {
+    "x": 0.4629,
+    "y": 0.9258
+  },
+  "placeBounds": {
+    "left": 0.043,
+    "top": 0.1367,
+    "right": 0.8828,
+    "bottom": 1.0
+  },
   "placement": "target"
 }

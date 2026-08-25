@@ -1,48 +1,58 @@
 import { CheckCircle2, Sparkles } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { notifyManager, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { shopApi, type ShopKind } from '@/features/shop/api/shopApi'
 import { CompanionShop } from '@/features/shop/components/CompanionShop'
-import { GitCoinShop } from '@/features/shop/components/GitCoinShop'
 import { ShopTabs } from '@/features/shop/components/ShopTabs'
 import { StoryShop } from '@/features/shop/components/StoryShop'
 import {
   actionDisabled,
   errorMessage,
-  hasLocalDefinition,
   isShopTab,
-  toDisplayItem,
-  type ShopDisplayItem,
   type ShopTab,
 } from '@/features/shop/utils/shopDisplay'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
-import { HOME_ROUTE, STORIES_ROUTE, storyPath } from '@/shared/navigation/routes'
-import { walletApi } from '@/shared/wallet/api/walletApi'
+import { HOME_ROUTE, storyPath } from '@/shared/navigation/routes'
+import {
+  shopApi,
+  shopCatalogQueryOptions,
+  type ShopKind,
+} from '@/shared/shop/api/shopApi'
+import {
+  hasLocalDefinition,
+  toDisplayItem,
+  type ShopDisplayItem,
+} from '@/shared/shop/model/shopPresentation'
+import { useWalletSummary } from '@/shared/wallet/hooks/useWallet'
 
 export function ShopPage() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const shop = useQuery({ queryKey: queryKeys.shopCatalog, queryFn: shopApi.catalog, staleTime: 60 * 1000 })
-  const wallet = useQuery({ queryKey: queryKeys.wallet, queryFn: walletApi.summary, staleTime: 60 * 1000 })
+  const shop = useQuery(shopCatalogQueryOptions())
+  const wallet = useWalletSummary()
   const balance = wallet.data?.balance ?? 0
   const tabParam = searchParams.get('tab')
   const activeTab: ShopTab = isShopTab(tabParam) ? tabParam : 'stories'
   const onboardingRequired = searchParams.get('required') === '1'
   const hasCompanion = Boolean(shop.data?.active_companion)
-
-  const refresh = () => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.shopCatalog })
-    queryClient.invalidateQueries({ queryKey: queryKeys.wallet })
-  }
+  const purchasesEnabled = shop.data?.purchases_enabled ?? true
 
   const purchase = useMutation({
     mutationFn: ({ kind, slug }: { kind: ShopKind; slug: string }) => shopApi.purchase(kind, slug),
-    onSuccess: refresh,
+    onSuccess: async (result) => {
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: queryKeys.shopCatalog }),
+        queryClient.cancelQueries({ queryKey: queryKeys.wallet }),
+      ])
+      notifyManager.batch(() => {
+        queryClient.setQueryData(queryKeys.shopCatalog, result.shop)
+        queryClient.setQueryData(queryKeys.wallet, result.wallet)
+      })
+    },
   })
   const catalog = useMemo(() => {
     const items = (shop.data?.items ?? []).filter(hasLocalDefinition).map(toDisplayItem)
@@ -64,10 +74,10 @@ export function ShopPage() {
 
   function act(item: ShopDisplayItem) {
     if (item.owned) {
-      navigate(item.kind === 'story' ? STORIES_ROUTE : `${HOME_ROUTE}?tab=loadout`)
+      navigate(item.kind === 'story' ? storyPath(item.slug) : `${HOME_ROUTE}?tab=loadout`)
       return
     }
-    if (actionDisabled(item, pending, balance, wallet.isPending)) return
+    if (actionDisabled(item, pending, balance, wallet.isPending, purchasesEnabled)) return
     purchase.mutate({ kind: item.kind, slug: item.slug })
   }
 
@@ -75,7 +85,16 @@ export function ShopPage() {
     <div className="shop-ref-page" data-shop-tab={activeTab}>
       <div className="shop-ref-backdrop" aria-hidden="true" />
 
-      <main className="shop-ref-layout">
+      <div className="shop-ref-layout">
+        <header className="shop-page-header">
+          <div className="shop-page-title">
+            <span>Citadel quartermaster</span>
+            <h1>Armory &amp; Archives</h1>
+            <p>Unlock worlds and choose your adventurer for the journey ahead.</p>
+          </div>
+          <ShopTabs activeTab={activeTab} balance={balance} walletPending={wallet.isPending} onTabChange={setActiveTab} />
+        </header>
+
         {onboardingRequired ? (
           <div className="shop-onboarding-banner" role="status">
             {hasCompanion ? (
@@ -95,15 +114,19 @@ export function ShopPage() {
           </div>
         ) : null}
 
-        <ShopTabs activeTab={activeTab} balance={balance} walletPending={wallet.isPending} onTabChange={setActiveTab} />
+        {!purchasesEnabled ? (
+          <div className="shop-onboarding-banner" role="status">
+            <span>Purchases are temporarily paused. You can still browse owned stories and companions.</span>
+          </div>
+        ) : null}
 
-        {shop.isPending && activeTab !== 'gitcoins' ? (
+        {shop.isPending ? (
           <section className="shop-view">
             <LoadingState label="Loading shop" description="Fetching your story and companion unlocks." />
           </section>
         ) : null}
 
-        {shop.isError && activeTab !== 'gitcoins' ? (
+        {shop.isError ? (
           <section className="shop-view shop-error-panel">
             <ErrorState title="Could not load shop" description={errorMessage(shop.error)} />
           </section>
@@ -115,20 +138,12 @@ export function ShopPage() {
           </section>
         ) : null}
 
-        {activeTab === 'gitcoins' ? (
-          <GitCoinShop
-            balance={balance}
-            recent={wallet.data?.recent ?? []}
-            walletError={wallet.error}
-            walletPending={wallet.isPending}
-          />
-        ) : null}
-
         {activeTab === 'stories' && shop.isSuccess ? (
           <StoryShop
             balance={balance}
             onAction={act}
             pending={pending}
+            purchasesEnabled={purchasesEnabled}
             stories={catalog.stories}
             walletPending={wallet.isPending}
           />
@@ -140,10 +155,11 @@ export function ShopPage() {
             companions={catalog.companions}
             onAction={act}
             pending={pending}
+            purchasesEnabled={purchasesEnabled}
             walletPending={wallet.isPending}
           />
         ) : null}
-      </main>
+      </div>
     </div>
   )
 }

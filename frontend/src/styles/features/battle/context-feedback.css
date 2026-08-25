@@ -105,30 +105,31 @@
   line-height: 1.5;
 }
 
-@media (max-width: 1180px) {
-  .gameplay-header-account {
-    display: none;
-  }
-
-  .gameplay-workspace {
-    grid-template-columns: minmax(15rem, 17rem) minmax(0, 1fr);
-  }
+@media (max-width: 1280px) {
+  .gameplay-header-profile { display: none; }
+  .gameplay-workspace { grid-template-columns: 17.5rem minmax(0, 1fr); }
 }
 
-@media (max-width: 840px) {
+@media (max-width: 1080px) {
+  .gameplay-header-account { display: none; }
+  .gameplay-header-mission { max-width: 28vw; }
+}
+
+@media (max-width: 900px) {
   .gameplay-workspace-screen {
     height: auto;
-    min-height: 100vh;
+    min-height: 100svh;
     overflow: visible;
+  }
+
+  .gameplay-workspace-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
   }
 
   .gameplay-header-brand {
     min-width: 0;
-  }
-
-  .gameplay-header-brand span,
-  .gameplay-header-button:not(:first-of-type) {
-    display: none;
   }
 
   .gameplay-workspace {
@@ -147,6 +148,15 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .gameplay-workspace__sidebar {
+    grid-template-rows: minmax(15rem, 46vh) auto !important;
+  }
+
+  .gameplay-project-region.is-open {
+    min-height: 15rem;
+    max-height: 20rem;
+  }
+
   .gameplay-workspace__main {
     grid-template-rows: auto auto auto auto !important;
   }
@@ -161,10 +171,29 @@
   }
 
   .gameplay-pane {
-    min-height: 18rem;
+    min-height: 17rem;
   }
 
   .command-input-prompt {
     display: none;
   }
+}
+
+@media (max-width: 600px) {
+  .gameplay-workspace-screen { grid-template-rows: 3.35rem minmax(0, 1fr); }
+  .gameplay-workspace-header { gap: 0.25rem; padding: 0.3rem 0.38rem; }
+  .gameplay-header-brand { display: none; }
+  .gameplay-header-mission { max-width: none; flex: 1 1 auto; border-left: 0; padding-left: 0.25rem; }
+  .gameplay-header-mission span { display: none; }
+  .gameplay-header-mission strong { font-size: var(--text-xs); }
+  .gameplay-header-spacer { display: none; }
+  .gameplay-header-button,
+  .gameplay-header-icon-button { width: 2rem; min-width: 2rem; min-height: 2rem; padding: 0; font-size: 0; }
+  .gameplay-header-button svg { width: 0.95rem; height: 0.95rem; }
+  .gameplay-header-close { width: 2rem; height: 2rem; }
+  .gameplay-workspace { padding: 0.32rem; }
+  .gameplay-workspace__sidebar { grid-template-rows: minmax(16rem, 52vh) auto !important; }
+  .gameplay-battle-slot,
+  .gameplay-battle-panel,
+  .gameplay-pane { min-height: 15rem; }
 }

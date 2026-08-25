@@ -42,9 +42,9 @@ const BATTLE_MODE_CONFIG: Record<
   },
   challenge: {
     stageClass: 'battle-stage--challenge',
-    arenaClass: 'battle-arena--boss',
-    railClass: 'battle-landing-rail--boss',
-    // Pan the backdrop too: the boss entrance runs Blue in while the camera
+    arenaClass: 'battle-arena--challenge',
+    railClass: 'battle-landing-rail--challenge',
+    // Pan the backdrop too: the challenge entrance runs Blue in while the camera
     // follows, so a frozen background made him look like he was running on a
     // treadmill. Scroll only fires on the explicit run-in/center beats.
     scrollBackdrop: true,
@@ -201,20 +201,15 @@ function MonsterSlot({
 }) {
   const spread = total <= 1 ? 0 : index - (total - 1) / 2
   const left = baseLeft + spread * spreadStep
-  // Read tougher foes as physically bigger. Mobs stay at the tuned baseline (1);
-  // elites and bosses get a size bump on top of their authored sprite scale.
-  const scale = monster.tier === 'boss' ? 1.18 : monster.tier === 'elite' ? 1.06 : 1
   return (
     <div
       className="battle-monster-slot"
-      data-range={monster.tier === 'boss' ? 'far' : 'near'}
       style={{ left: `${left}%` }}
     >
       <span className="battle-range-shadow" aria-hidden />
       <MonsterActor
         ref={(handle) => bindMonster(monster.id, handle)}
         monster={monster}
-        scale={scale}
         stagedHidden={stagedHidden}
         className={active ? 'is-active' : undefined}
         storyWorld={storyWorld}
@@ -262,7 +257,7 @@ function UnitHud({
         <HealthBar
           value={Math.max(0, current)}
           max={max}
-          variant={kind === 'enemy' ? 'boss' : 'hp'}
+          variant={kind === 'enemy' ? 'enemy' : 'hp'}
           className="battle-unit-hud__meter"
           aria-label={`${name} health`}
         />

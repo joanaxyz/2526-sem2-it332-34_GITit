@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "lint:dead": "knip --include files,dependencies --reporter compact --no-progress",
+    "lint:dead": "knip --reporter compact --no-progress",
     "preview": "vite preview",
     "test": "vitest run",
     "api:generate": "python ../scripts/generate_api_contract.py",
@@ -20,6 +20,7 @@
     "ci:manifest-check": "python ../scripts/check_ci_quality_gates.py",
     "quality:fast": "python ../scripts/check_quality_gates.py",
     "deploy:check": "python ../scripts/check_django_deploy.py",
+    "assets:check": "python ../scripts/check_runtime_assets.py --require-tracked",
     "artifacts:check": "python ../scripts/check_repository_artifacts.py",
     "artifacts:clean": "python ../scripts/clean_repository_artifacts.py",
     "ui:typography-check": "python ../scripts/check_ui_typography.py"

@@ -101,6 +101,26 @@ export function useBattleActorRefs(
     }
   }, [])
 
+  /** Layer-local point inside already-measured viewport bounds. */
+  const boundsAnchor = useCallback(
+    (
+      box: { left: number; top: number; width: number; height: number } | null,
+      dx = 0,
+      dy = 0,
+      xFrac = 0.5,
+      yFrac = 0.5,
+    ) => {
+      const layer = effectLayerRef.current
+      if (!layer || !box) return { x: 0, y: 0 }
+      const layerBox = layer.getBoundingClientRect()
+      return {
+        x: box.left + box.width * clamp01(xFrac) - layerBox.left + dx,
+        y: box.top + box.height * clamp01(yFrac) - layerBox.top + dy,
+      }
+    },
+    [],
+  )
+
   const monsterBodyFraction = useCallback((monster: BattleMonster | undefined) => {
     if (!monster) return 0.62
     const def = definitionForMonster(monster, monsterSkin(storyWorldRef.current, monster.species))
@@ -108,31 +128,41 @@ export function useBattleActorRefs(
   }, [storyWorldRef])
 
   const monsterImpactAnchor = useCallback(
-    (monsterId: number, side: 'left' | 'right' = 'left') => {
+    (monsterId: number, side: 'left' | 'center' | 'right' = 'center') => {
       const monster = rosterRef.current.find((m) => m.id === monsterId)
-      const targetEl = monsterHandles.current.get(monsterId)?.element() ?? null
+      const handle = monsterHandles.current.get(monsterId)
+      const bodyBounds = handle?.bodyBounds() ?? null
+      const bodyX = side === 'left' ? 0.12 : side === 'right' ? 0.88 : 0.5
+      if (bodyBounds) return boundsAnchor(bodyBounds, 0, 0, bodyX, 0.5)
+
+      const targetEl = handle?.element() ?? null
       const body = monsterBodyFraction(monster)
-      const xFrac = side === 'left' ? 0.5 - body / 2 : 0.5 + body / 2
-      return anchor(targetEl, side === 'left' ? 4 : -4, -6, xFrac, 0.52)
+      const xFrac = side === 'left' ? 0.5 - body / 2 : side === 'right' ? 0.5 + body / 2 : 0.5
+      return anchor(targetEl, 0, 0, xFrac, 0.62)
     },
-    [anchor, monsterBodyFraction, rosterRef],
+    [anchor, boundsAnchor, monsterBodyFraction, rosterRef],
   )
 
   // Ground line under a monster - where feet-anchored and ground-travel spells
   // plant their base so they sit on the floor rather than the monster's body.
   const monsterFeetAnchor = useCallback(
     (monsterId: number) => {
-      const targetEl = monsterHandles.current.get(monsterId)?.element() ?? null
+      const handle = monsterHandles.current.get(monsterId)
+      const bodyBounds = handle?.bodyBounds() ?? null
+      if (bodyBounds) return boundsAnchor(bodyBounds, 0, -2, 0.5, 1)
+      const targetEl = handle?.element() ?? null
       return anchor(targetEl, 0, -2, 0.5, 0.95)
     },
-    [anchor],
+    [anchor, boundsAnchor],
   )
 
-  // Scale spell effects to the monster's rendered size: a big boss gets a
-  // proportionally larger impact/target effect than a small mob. Baseline is a
-  // typical mob's on-screen height; clamped so effects stay readable.
+  // Scale spell effects to the monster's rendered size, with a neutral baseline
+  // and clamps that keep effects readable across differently padded artwork.
   const monsterSizeScale = useCallback((monsterId: number) => {
-    const el = monsterHandles.current.get(monsterId)?.element() ?? null
+    const handle = monsterHandles.current.get(monsterId)
+    const visibleHeight = handle?.bodyBounds()?.height
+    if (visibleHeight) return Math.min(2.2, Math.max(0.7, visibleHeight / 160))
+    const el = handle?.element() ?? null
     if (!el) return 1
     const height = el.getBoundingClientRect().height
     if (!height) return 1

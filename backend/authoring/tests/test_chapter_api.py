@@ -24,7 +24,13 @@ def test_create_chapter_and_assign_content(django_user_model):
 
     content = client.post(
         "/api/authoring/content-definitions/",
-        {"kind": "challenge", "slug": "c1", "title": "C1", "chapter": chapter_id, "definition": {"levels": []}},
+        {
+            "kind": "challenge",
+            "slug": "c1",
+            "title": "C1",
+            "chapter": chapter_id,
+            "definition": {"levels": []},
+        },
         format="json",
     )
     assert content.status_code == 201
@@ -58,7 +64,13 @@ def test_cannot_assign_another_users_chapter(django_user_model):
     client.force_authenticate(user=other)
     response = client.post(
         "/api/authoring/content-definitions/",
-        {"kind": "lesson", "slug": "t1", "title": "T1", "chapter": chapter.id, "definition": {"pages": []}},
+        {
+            "kind": "lesson",
+            "slug": "t1",
+            "title": "T1",
+            "chapter": chapter.id,
+            "definition": {"pages": []},
+        },
         format="json",
     )
     assert response.status_code == 400

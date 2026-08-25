@@ -28,8 +28,9 @@ from common.constants import (
     SESSION_STATUS_STARTED,
 )
 from common.exceptions import Conflict, Locked
+from common.runtime import discard_started_run
 from curriculum.models import CommandForm
-from progress.chests import ChapterChestService
+from curriculum.services import ChapterChestService
 from progress.models import AdventureLevelCompletion
 from progress.wallet import WalletService
 
@@ -45,8 +46,11 @@ class AdventureRunService:
         # Serialize starts per player. The partial unique constraint on the run
         # table is the final safety net for databases where row locking is weak.
         player.__class__.objects.select_for_update().get(pk=player.pk)
+        # Hydration includes nullable current-wave and selected-variant joins.
+        # PostgreSQL cannot lock the nullable side of those outer joins, and
+        # only the AdventureRun row owns the state transition.
         active = (
-            AdventureRun.objects.select_for_update()
+            AdventureRun.objects.select_for_update(of=("self",))
             .filter(player=player, level=level, status=SESSION_STATUS_STARTED)
             .select_related("level", "level__chapter", "current_wave", "selected_variant")
             .order_by("-id")
@@ -80,7 +84,6 @@ class AdventureRunService:
         AdventureRunWave.objects.create(run=run, wave=first_wave, selected_variant=variant)
         return run
 
-
     def current_attempt(self, *, run: AdventureRun) -> AdventureRun | None:
         return run if run.status == SESSION_STATUS_STARTED else None
 
@@ -91,12 +94,16 @@ class AdventureRunService:
                 adventure_level=attempt.level,
                 stars__gte=3,
             ).exists()
-        return not AdventureRun.objects.filter(
-            player=attempt.player,
-            level=attempt.level,
-            is_replay=False,
-            status__in=(SESSION_STATUS_FAILED, SESSION_STATUS_COMPLETED),
-        ).exclude(pk=attempt.pk).exists()
+        return (
+            not AdventureRun.objects.filter(
+                player=attempt.player,
+                level=attempt.level,
+                is_replay=False,
+                status__in=(SESSION_STATUS_FAILED, SESSION_STATUS_COMPLETED),
+            )
+            .exclude(pk=attempt.pk)
+            .exists()
+        )
 
     @transaction.atomic(savepoint=False)
     def record_wave_outcome(
@@ -288,9 +295,9 @@ class AdventureRunService:
         # form it exercises, mirroring the per-wave mastery targets.
         wave_counts = Counter(
             form_id
-            for form_id in AdventureWave.objects.filter(
-                level=level, is_published=True
-            ).values_list("command_forms", flat=True)
+            for form_id in AdventureWave.objects.filter(level=level, is_published=True).values_list(
+                "command_forms", flat=True
+            )
             if form_id is not None
         )
         if not wave_counts:
@@ -325,11 +332,5 @@ class AdventureRunService:
         )
         return required_ids <= completed_ids
 
-
-    @transaction.atomic
     def discard(self, *, run: AdventureRun) -> bool:
-        locked = AdventureRun.objects.select_for_update().filter(pk=run.pk).first()
-        if locked is None or locked.status != SESSION_STATUS_STARTED:
-            return False
-        locked.delete()
-        return True
+        return discard_started_run(run)

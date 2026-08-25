@@ -1,3 +1,6 @@
+from common.collections import as_list
+
+
 class StateCommitRuleMixin:
     def _check_commit_conditions(
         self,
@@ -53,7 +56,7 @@ class StateCommitRuleMixin:
         initial_state: dict | None,
     ) -> tuple[bool, str]:
         if rule_type == "commit_message_contains":
-            texts = self._as_list(rule.get("text") or rule.get("message_contains"))
+            texts = as_list(rule.get("text") or rule.get("message_contains"))
             message = commit.get("message", "")
             missing = [text for text in texts if str(text).lower() not in message.lower()]
             return (
@@ -271,8 +274,8 @@ class StateCommitRuleMixin:
             initial_state,
         )
         tip_id = self._ref_target(state, branch)
-        old_commit = self._commit_by_id(state, old_id)
-        tip_commit = self._commit_by_id(state, tip_id)
+        old_commit = self.normalizer.commit_by_id(state, old_id)
+        tip_commit = self.normalizer.commit_by_id(state, tip_id)
         passed = bool(
             old_commit
             and tip_commit

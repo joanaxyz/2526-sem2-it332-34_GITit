@@ -25,15 +25,18 @@ class SeedCurriculumValidationMixin:
         # every published skill must be well-formed.
         for chapter in chapters:
             owns_form = CommandForm.objects.filter(chapter=chapter, is_published=True).exists()
-            reuses_form = AdventureLevel.objects.filter(
-                chapter=chapter,
-                is_published=True,
-                command_forms__is_published=True,
-            ).exists() or ChallengeLevel.objects.filter(
-                chapter=chapter,
-                is_published=True,
-                command_forms__is_published=True,
-            ).exists()
+            reuses_form = (
+                AdventureLevel.objects.filter(
+                    chapter=chapter,
+                    is_published=True,
+                    command_forms__is_published=True,
+                ).exists()
+                or ChallengeLevel.objects.filter(
+                    chapter=chapter,
+                    is_published=True,
+                    command_forms__is_published=True,
+                ).exists()
+            )
             if not owns_form and not reuses_form:
                 errors.append(f"{chapter.slug}: missing command forms")
         for skill in CommandSkill.objects.filter(is_published=True).order_by("sort_order", "id"):
@@ -51,16 +54,15 @@ class SeedCurriculumValidationMixin:
         ):
             self._validate_level_variants(level=wave, errors=errors)
 
-        for level in ChallengeLevel.objects.filter(is_published=True).prefetch_related("trials__variants"):
+        for level in ChallengeLevel.objects.filter(is_published=True).prefetch_related(
+            "trials__variants"
+        ):
             trials = list(level.trials.filter(is_published=True))
             difficulties = {trial.difficulty for trial in trials}
             if difficulties != {"easy", "medium", "hard"}:
-                errors.append(
-                    f"{level.slug}: challenge levels must publish Easy, Medium, and Hard"
-                )
+                errors.append(f"{level.slug}: challenge levels must publish Easy, Medium, and Hard")
             for trial in trials:
                 self._validate_level_variants(level=trial, errors=errors)
-
 
         self._validate_challenge_intro_contract(errors=errors)
         self._validate_seed_adventure_references(errors=errors)
@@ -84,9 +86,7 @@ class SeedCurriculumValidationMixin:
         for spec in ADVENTURE_LEVELS:
             adventure_slug = spec.get("adventure")
             if adventure_slug and adventure_slug not in configured:
-                errors.append(
-                    f"{spec['slug']}: references unknown Adventure {adventure_slug!r}"
-                )
+                errors.append(f"{spec['slug']}: references unknown Adventure {adventure_slug!r}")
 
     def _validate_command_skill(self, *, skill: CommandSkill, errors: list[str]) -> None:
         if not skill.base_command:
@@ -125,7 +125,9 @@ class SeedCurriculumValidationMixin:
                 configured_specs = [configured_specs]
             for index, configured_spec in enumerate(configured_specs or [{}], start=1):
                 suffix = "" if index == 1 else f"-{index}"
-                source_slug = configured_spec.get("slug") or f"{module_slug}-command-adventure{suffix}"
+                source_slug = (
+                    configured_spec.get("slug") or f"{module_slug}-command-adventure{suffix}"
+                )
                 source_to_module[source_slug] = module_slug
 
         level_to_module = {

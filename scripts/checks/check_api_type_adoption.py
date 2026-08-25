@@ -6,6 +6,7 @@ Feature-level domain types can still refine generated schemas, but API wrapper
 files should alias or compose ApiSchemas/ApiRequestBody instead of declaring new
 object literal response/request contracts by memory.
 """
+
 from __future__ import annotations
 
 import re
@@ -16,10 +17,12 @@ ROOT = Path(__file__).resolve().parents[2]
 FRONTEND_SRC = ROOT / "frontend" / "src"
 
 ENFORCED_API_DIRS = [
+    FRONTEND_SRC / "features" / "admin" / "api",
     FRONTEND_SRC / "features" / "adventures" / "api",
+    FRONTEND_SRC / "features" / "authoring" / "api",
     FRONTEND_SRC / "features" / "challenges" / "api",
     FRONTEND_SRC / "features" / "home" / "api",
-    FRONTEND_SRC / "features" / "shop" / "api",
+    FRONTEND_SRC / "shared" / "shop" / "api",
     FRONTEND_SRC / "features" / "skills" / "api",
     FRONTEND_SRC / "features" / "stats" / "api",
     FRONTEND_SRC / "features" / "track-map" / "api",
@@ -71,9 +74,13 @@ def main() -> int:
         path_rel = rel(path)
         if path_rel in ALLOWLIST:
             continue
-        for lineno, line in enumerate(path.read_text(encoding="utf-8", errors="ignore").splitlines(), start=1):
+        for lineno, line in enumerate(
+            path.read_text(encoding="utf-8", errors="ignore").splitlines(), start=1
+        ):
             if EXPORTED_OBJECT_TYPE_RE.search(line.strip()):
-                violations.append(f"{path_rel}:{lineno}: exported API object type should compose generated ApiSchemas/ApiRequestBody: {line.strip()}")
+                violations.append(
+                    f"{path_rel}:{lineno}: exported API object type should compose generated ApiSchemas/ApiRequestBody: {line.strip()}"
+                )
     if violations:
         print("Manual API type declarations found:", file=sys.stderr)
         for violation in violations:

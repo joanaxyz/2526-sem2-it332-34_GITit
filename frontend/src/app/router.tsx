@@ -1,6 +1,7 @@
 import { Navigate, Outlet, createBrowserRouter, type RouteObject } from 'react-router-dom'
 
 import { AdminLayout } from '@/features/admin/components/AdminLayout'
+import { ADMIN_SECTIONS } from '@/features/admin/utils/adminSections'
 import { AuthLayout } from '@/app/layouts/AuthLayout'
 import { HomeLayout } from '@/app/layouts/HomeLayout'
 import { LevelLayout } from '@/app/layouts/LevelLayout'
@@ -20,6 +21,7 @@ import { AdventureStartPage } from '@/features/adventures/pages/AdventureStartPa
 import { ChallengeStartPage } from '@/features/challenges/pages/ChallengeStartPage'
 import {
   DESIGN_PREVIEW_STORY_MAP_ROUTE,
+  ADMIN_ROUTES,
   HOME_ROUTE,
   SHOP_ROUTE,
   STORIES_ROUTE,
@@ -34,6 +36,7 @@ import {
   LEGACY_STORY_ROUTE,
   LEGACY_STORIES_ROUTE,
 } from '@/shared/navigation/legacyRoutes'
+import { LoadingState } from '@/shared/components/LoadingState'
 
 /**
  * Dev-only design preview: the real Home hub view inside the real layout
@@ -63,6 +66,10 @@ const designPreviewRoutes: RouteObject[] = import.meta.env.DEV
         lazy: () => import('@/features/dev/pages/BattlePlayground'),
       },
       {
+        path: '/dev/monster-scales',
+        lazy: () => import('@/features/dev/pages/MonsterScalePlayground'),
+      },
+      {
         path: '/dev/outcomes',
         lazy: () => import('@/features/dev/pages/OutcomePreviewPage'),
       },
@@ -71,14 +78,10 @@ const designPreviewRoutes: RouteObject[] = import.meta.env.DEV
         lazy: () => import('@/features/story-map/pages/StoryMapPreviewPage'),
       },
       { path: LEGACY_DESIGN_PREVIEW_STORY_ROUTE, element: <Navigate replace to={DESIGN_PREVIEW_STORY_MAP_ROUTE} /> },
-      {
-        path: '/design-preview/levels',
-        lazy: () => import('@/features/story-map/pages/LevelSelectPreviewPage'),
-      },
     ]
   : []
 
-export const router = createBrowserRouter([
+const appRoutes: RouteObject[] = [
   ...designPreviewRoutes,
   {
     element: <AuthLayout />,
@@ -195,54 +198,11 @@ export const router = createBrowserRouter([
       </Protected>
     ),
     children: [
-      {
-        path: '/admin',
-        lazy: async () => ({
-          Component: (await import('@/features/admin/pages/AdminDashboardPage')).AdminDashboardPage,
-        }),
-      },
-      {
-        path: '/admin/users',
-        lazy: async () => ({
-          Component: (await import('@/features/admin/pages/AdminUsersPage')).AdminUsersPage,
-        }),
-      },
-      {
-        path: '/admin/economy',
-        lazy: async () => ({
-          Component: (await import('@/features/admin/pages/AdminEconomyPage')).AdminEconomyPage,
-        }),
-      },
-      {
-        path: '/admin/curriculum',
-        lazy: async () => ({
-          Component: (await import('@/features/admin/pages/AdminCurriculumPage')).AdminCurriculumPage,
-        }),
-      },
-      {
-        path: '/admin/content',
-        lazy: async () => ({
-          Component: (await import('@/features/admin/pages/AdminContentPage')).AdminContentPage,
-        }),
-      },
-      {
-        path: '/admin/analytics',
-        lazy: async () => ({
-          Component: (await import('@/features/admin/pages/AdminAnalyticsPage')).AdminAnalyticsPage,
-        }),
-      },
-      {
-        path: '/admin/moderation',
-        lazy: async () => ({
-          Component: (await import('@/features/admin/pages/AdminModerationPage')).AdminModerationPage,
-        }),
-      },
-      {
-        path: '/admin/settings',
-        lazy: async () => ({
-          Component: (await import('@/features/admin/pages/AdminSettingsPage')).AdminSettingsPage,
-        }),
-      },
+      ...ADMIN_SECTIONS.map((section) => ({
+        path: section.path,
+        lazy: async () => ({ Component: await section.load() }),
+      })),
+      { path: '/admin/*', element: <Navigate replace to={ADMIN_ROUTES.dashboard} /> },
     ],
   },
   {
@@ -272,5 +232,13 @@ export const router = createBrowserRouter([
         }),
       },
     ],
+  },
+]
+
+export const router = createBrowserRouter([
+  {
+    element: <Outlet />,
+    hydrateFallbackElement: <LoadingState label="Loading application" variant="page" />,
+    children: appRoutes,
   },
 ])

@@ -1,7 +1,5 @@
-export { reduceMotion } from './spriteDom'
+
 export {
-  lockedEffectIsGrounded,
-  playLockedSkillEffect,
   playMissEffect,
   playResolvedSkillEffect,
   playSpriteProjectileEffect,

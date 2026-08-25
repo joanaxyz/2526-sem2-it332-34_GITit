@@ -12,13 +12,11 @@ from .selectors import (
     ordered_waves_for,
     story_command_form_ids,
 )
-from .workspace_files import AdventureWorkspaceFileService
 
 __all__ = [
     "AdventureCommandHistoryCache",
     "AdventureCommandService",
     "AdventureRunService",
-    "AdventureWorkspaceFileService",
     "MASTERY_TARGET_CAP",
     "adventure_command_form_ids",
     "form_solve_targets",

@@ -3,6 +3,7 @@
 The assembly helpers stay in :mod:`curriculum.library`; this module contains the
 large hand-authored dictionaries so the runtime library module remains readable.
 """
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -18,69 +19,69 @@ def authored_library_entries(diagram_factory: DiagramFactory) -> list[dict[str, 
     block-construction logic while preserving the exact existing payload shape.
     """
     return [
-    {
-        # Stable identifier for the entry (kebab-case). Also the seed lookup key.
-        "key": "git-init",
-        # Human label shown in the book's command rail.
-        "display_name": "git init",
-        # The canonical, fully-written form the content is authored against.
-        "canonical_command": "git init",
-        # Base command used for grouping (defaults from canonical when omitted).
-        "base_command": "git init",
-        # Other accepted spellings/forms for this command.
-        "aliases": ["git init <directory>", "git init -b <branch>", "git init -q"],
-        # One-paragraph summary shown at the top of the command.
-        "summary": "git init creates Git metadata for a folder so future snapshots can be tracked there.",
-        # Free-form tags (diagnostic/action/); surfaced to the book payload.
-        "tags": ["action", "setup"],
-        # Authored syntax examples; each becomes a syntax page.
-        "syntax": [
-            "git init",
-            "git init <directory>",
-            "git init -b <branch>",
-            "git init --quiet",
-        ],
-        "effects": ["Creates the repository metadata directory for the folder."],
-        "boundaries": ["It does not stage or commit any existing project files."],
-        "watch_for": "Running it inside a folder that is already a repository.",
-        "readiness": ["Confirm you are in the intended folder before initializing."],
-        "terminal_output": "Initialized empty Git repository in /path/.git/",
-        # -- Sub-navigation: options & arguments ------------------------------
-        # Each option/argument becomes its own page AND a sub-nav item in the
-        # Chapter Book (e.g. git init -> -q / --quiet, -b / --initial-branch).
-        "options": [
-            {
-                "token": "-b / --initial-branch",
-                "title": "Initial branch name",
-                "body": "Names the first branch instead of accepting the default branch name.",
-            },
-            {
-                "token": "-q / --quiet",
-                "title": "Quiet init",
-                "body": "Suppresses the confirmation message while still creating the repository.",
-            },
-        ],
-        "arguments": [
-            {
-                "token": "<directory>",
-                "title": "Destination directory",
-                "body": "Initializes the named folder instead of the current working directory.",
-            },
-        ],
-        # -- Authored diagram (optional) --------------------------------------
-        # Rendered as neon SVG in the book. kind="flow" | "dag".
-        "diagram": diagram_factory(
-            kind="flow",
-            title="What init sets up",
-            caption="git init creates the .git metadata folder; your files stay untracked until you stage and commit them.",
-            nodes=[
-                {"id": "folder", "label": "Project folder", "accent": "muted"},
-                {"id": "repo", "label": ".git metadata", "accent": "cyan"},
+        {
+            # Stable identifier for the entry (kebab-case). Also the seed lookup key.
+            "key": "git-init",
+            # Human label shown in the book's command rail.
+            "display_name": "git init",
+            # The canonical, fully-written form the content is authored against.
+            "canonical_command": "git init",
+            # Base command used for grouping (defaults from canonical when omitted).
+            "base_command": "git init",
+            # Other accepted spellings/forms for this command.
+            "aliases": ["git init <directory>", "git init -b <branch>", "git init -q"],
+            # One-paragraph summary shown at the top of the command.
+            "summary": "git init creates Git metadata for a folder so future snapshots can be tracked there.",
+            # Free-form tags (diagnostic/action/); surfaced to the book payload.
+            "tags": ["action", "setup"],
+            # Authored syntax examples; each becomes a syntax page.
+            "syntax": [
+                "git init",
+                "git init <directory>",
+                "git init -b <branch>",
+                "git init --quiet",
             ],
-            edges=[{"from": "folder", "to": "repo", "label": "git init"}],
-        ),
-    },
-]
+            "effects": ["Creates the repository metadata directory for the folder."],
+            "boundaries": ["It does not stage or commit any existing project files."],
+            "watch_for": "Running it inside a folder that is already a repository.",
+            "readiness": ["Confirm you are in the intended folder before initializing."],
+            "terminal_output": "Initialized empty Git repository in /path/.git/",
+            # -- Sub-navigation: options & arguments ------------------------------
+            # Each option/argument becomes its own page AND a sub-nav item in the
+            # Chapter Book (e.g. git init -> -q / --quiet, -b / --initial-branch).
+            "options": [
+                {
+                    "token": "-b / --initial-branch",
+                    "title": "Initial branch name",
+                    "body": "Names the first branch instead of accepting the default branch name.",
+                },
+                {
+                    "token": "-q / --quiet",
+                    "title": "Quiet init",
+                    "body": "Suppresses the confirmation message while still creating the repository.",
+                },
+            ],
+            "arguments": [
+                {
+                    "token": "<directory>",
+                    "title": "Destination directory",
+                    "body": "Initializes the named folder instead of the current working directory.",
+                },
+            ],
+            # -- Authored diagram (optional) --------------------------------------
+            # Rendered as neon SVG in the book. kind="flow" | "dag".
+            "diagram": diagram_factory(
+                kind="flow",
+                title="What init sets up",
+                caption="git init creates the .git metadata folder; your files stay untracked until you stage and commit them.",
+                nodes=[
+                    {"id": "folder", "label": "Project folder", "accent": "muted"},
+                    {"id": "repo", "label": ".git metadata", "accent": "cyan"},
+                ],
+                edges=[{"from": "folder", "to": "repo", "label": "git init"}],
+            ),
+        },
+    ]
 
 
 SEMANTIC_SECTION_COPY: dict[str, dict[str, str]] = {
@@ -394,7 +395,9 @@ COMMAND_EFFECTS: dict[str, tuple[list[str], list[str], str, list[str]]] = {
         ["Reads or writes Git configuration such as user identity or merge-tool preferences."],
         ["It does not stage files, create commits, or repair repository history."],
         "Setting a global value when the scenario only asked you to inspect configuration.",
-        ["Check whether the scenario asks for global configuration, local configuration, or inspection only."],
+        [
+            "Check whether the scenario asks for global configuration, local configuration, or inspection only."
+        ],
     ),
     "git log": (
         ["Shows commit history and graph shape for the selected refs."],
@@ -412,7 +415,9 @@ COMMAND_EFFECTS: dict[str, tuple[list[str], list[str], str, list[str]]] = {
         ["Compares working, staged, committed, or conflict-stage content."],
         ["It does not stage, discard, or resolve the compared changes."],
         "Comparing the wrong side of the index or conflict.",
-        ["Decide whether you need working, staged, HEAD, ours, theirs, or base before running the diff."],
+        [
+            "Decide whether you need working, staged, HEAD, ours, theirs, or base before running the diff."
+        ],
     ),
     "git add": (
         ["Copies selected working-tree content into the index for the next commit."],
@@ -422,7 +427,9 @@ COMMAND_EFFECTS: dict[str, tuple[list[str], list[str], str, list[str]]] = {
     ),
     "git commit": (
         ["Creates or replaces a local commit from the staged snapshot."],
-        ["It does not automatically include unstaged or untracked files unless the chosen syntax says so."],
+        [
+            "It does not automatically include unstaged or untracked files unless the chosen syntax says so."
+        ],
         "Committing before checking what is staged.",
         ["Inspect the staged diff and choose a message that matches the scenario."],
     ),
@@ -442,7 +449,9 @@ COMMAND_EFFECTS: dict[str, tuple[list[str], list[str], str, list[str]]] = {
         ["Defines ignore patterns for untracked generated, local, or secret files."],
         ["It does not automatically untrack files that are already committed."],
         "Writing a broad ignore rule or expecting it to remove already tracked files.",
-        ["Check whether the path is untracked, and verify the rule with status or git check-ignore."],
+        [
+            "Check whether the path is untracked, and verify the rule with status or git check-ignore."
+        ],
     ),
     "git restore": (
         ["Restores working-tree files or unstages content depending on flags."],
@@ -463,10 +472,16 @@ COMMAND_EFFECTS: dict[str, tuple[list[str], list[str], str, list[str]]] = {
         ["Inspect status before moving to another branch."],
     ),
     "git checkout": (
-        ["Creates and switches branches in legacy form, or selects a conflict side during resolution."],
-        ["It does not replace modern switch/restore for everyday branch and file work in this track."],
+        [
+            "Creates and switches branches in legacy form, or selects a conflict side during resolution."
+        ],
+        [
+            "It does not replace modern switch/restore for everyday branch and file work in this track."
+        ],
         "Using checkout's broad behavior when the focused modern command would be clearer.",
-        ["Use checkout only when the scenario specifically asks for its branch-creation or conflict-side form."],
+        [
+            "Use checkout only when the scenario specifically asks for its branch-creation or conflict-side form."
+        ],
     ),
     "git merge": (
         ["Integrates another branch, manages a conflicted merge, or stages a squash merge."],
@@ -541,7 +556,9 @@ COMMAND_EFFECTS: dict[str, tuple[list[str], list[str], str, list[str]]] = {
         ["Inspect branch and upstream state before pulling."],
     ),
     "git push": (
-        ["Publishes local commits, sets upstreams, force-updates with lease, or deletes remote branches."],
+        [
+            "Publishes local commits, sets upstreams, force-updates with lease, or deletes remote branches."
+        ],
         ["It does not pull missing remote work first."],
         "Pushing or force-pushing without checking the remote branch state.",
         ["Confirm remote, branch, upstream, and whether lease protection is required."],

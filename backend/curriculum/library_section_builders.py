@@ -334,7 +334,9 @@ def _sections(
             )
         )
     sections.extend(_semantic_item_sections(section_type="option", prefix="option", items=options))
-    sections.extend(_semantic_item_sections(section_type="argument", prefix="argument", items=arguments))
+    sections.extend(
+        _semantic_item_sections(section_type="argument", prefix="argument", items=arguments)
+    )
 
     comparison = _comparison_block(wrong_command_comparisons)
     if comparison:

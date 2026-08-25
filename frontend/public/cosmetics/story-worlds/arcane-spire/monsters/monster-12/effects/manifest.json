@@ -1,5 +1,5 @@
 {
-  "id": "two-headed-hound-skill-effect",
+  "id": "monster-12-skill-effect",
   "label": "Two Headed Hound Skill Effect",
   "motif": "blue wolf fang bite",
   "playback": "target",
@@ -29,5 +29,15 @@
     }
   ],
   "anchor": "center",
+  "placeAnchor": {
+    "x": 0.5273,
+    "y": 0.4922
+  },
+  "placeBounds": {
+    "left": 0.1758,
+    "top": 0.0547,
+    "right": 1.0,
+    "bottom": 0.8789
+  },
   "placement": "target"
 }

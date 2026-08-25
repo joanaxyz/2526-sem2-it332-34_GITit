@@ -26,7 +26,7 @@ class StateHelperMixin:
     def _latest_commit_for_rule(self, state: dict, rule: dict) -> dict | None:
         ref = rule.get("branch") or rule.get("ref")
         commit_id = self._ref_target(state, ref) if ref else self._head_commit(state)
-        return self._commit_by_id(state, commit_id)
+        return self.normalizer.commit_by_id(state, commit_id)
 
     def _commit_for_rule(
         self,
@@ -42,7 +42,7 @@ class StateHelperMixin:
         )
         if commit_id is None and rule.get("branch"):
             commit_id = self._ref_target(state, rule.get("branch"))
-        return self._commit_by_id(state, commit_id)
+        return self.normalizer.commit_by_id(state, commit_id)
 
     def _expected_commits(
         self,
@@ -62,21 +62,10 @@ class StateHelperMixin:
         ]
 
     def _head_branch(self, state: dict) -> str | None:
-        head = state.get("head", {})
-        return head.get("name") if head.get("type") == "branch" else None
+        return self.normalizer.head_branch(state)
 
     def _head_commit(self, state: dict) -> str | None:
-        head = state.get("head", {})
-        if head.get("type") == "branch":
-            return state.get("branches", {}).get(head.get("name"))
-        return head.get("target")
-
-    def _commit_by_id(self, state: dict, commit_id: str | None) -> dict | None:
-        if not commit_id:
-            return None
-        return next(
-            (commit for commit in state.get("commits", []) if commit["id"] == commit_id), None
-        )
+        return self.normalizer.head_commit_id(state)
 
     def _ref_target(self, state: dict, ref: str | None) -> str | None:
         if not ref:
@@ -152,8 +141,3 @@ class StateHelperMixin:
         if value == "$head_commit":
             return self._head_commit(state)
         return value
-
-    def _as_list(self, value: Any) -> list:
-        if value in (None, ""):
-            return []
-        return value if isinstance(value, list) else [value]

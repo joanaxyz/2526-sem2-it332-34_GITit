@@ -2,12 +2,6 @@ import type { ComponentProps } from 'react'
 
 import { cn } from '@/shared/utils/cn'
 
-export type GitCommandDefinition = {
-  slug: GitCommandSlug
-  command: string
-  title: string
-}
-
 const COMMAND_ICON_URLS = {
   'git-init': new URL('../../../assets/images/git-commands/git-init.svg', import.meta.url).href,
   'git-clone': new URL('../../../assets/images/git-commands/git-clone.svg', import.meta.url).href,
@@ -47,43 +41,6 @@ const COMMAND_ICON_URLS = {
 
 export type GitCommandSlug = keyof typeof COMMAND_ICON_URLS
 
-
-export const GIT_COMMAND_CATALOG: GitCommandDefinition[] = [
-  { slug: 'git-init', command: 'git init', title: 'Initialize repository' },
-  { slug: 'git-clone', command: 'git clone', title: 'Clone repository' },
-  { slug: 'git-status', command: 'git status', title: 'Read repository state' },
-  { slug: 'git-config', command: 'git config', title: 'Configure identity' },
-  { slug: 'git-log', command: 'git log', title: 'Inspect history' },
-  { slug: 'git-show', command: 'git show', title: 'Inspect object' },
-  { slug: 'git-diff', command: 'git diff', title: 'Compare changes' },
-  { slug: 'git-add', command: 'git add', title: 'Stage changes' },
-  { slug: 'git-commit', command: 'git commit', title: 'Create snapshot' },
-  { slug: 'git-rm', command: 'git rm', title: 'Remove tracked paths' },
-  { slug: 'git-check-ignore', command: 'git check-ignore', title: 'Explain ignores' },
-  { slug: 'git-restore', command: 'git restore', title: 'Restore files' },
-  { slug: 'git-branch', command: 'git branch', title: 'Manage branches' },
-  { slug: 'git-switch', command: 'git switch', title: 'Switch branches' },
-  { slug: 'git-checkout', command: 'git checkout', title: 'Checkout legacy paths' },
-  { slug: 'git-merge', command: 'git merge', title: 'Merge histories' },
-  { slug: 'git-merge-base', command: 'git merge-base', title: 'Find common base' },
-  { slug: 'git-checkout-conflict', command: 'git checkout --ours', title: 'Choose conflict side' },
-  { slug: 'git-diff-conflict', command: 'git diff --ours', title: 'Compare conflict side' },
-  { slug: 'git-ls-files', command: 'git ls-files', title: 'Inspect index files' },
-  { slug: 'git-mergetool', command: 'git mergetool', title: 'Open merge tool' },
-  { slug: 'git-reset', command: 'git reset', title: 'Reset history' },
-  { slug: 'git-revert', command: 'git revert', title: 'Revert safely' },
-  { slug: 'git-reflog', command: 'git reflog', title: 'Recover history' },
-  { slug: 'git-stash', command: 'git stash', title: 'Shelve work' },
-  { slug: 'git-cherry-pick', command: 'git cherry-pick', title: 'Pick a commit' },
-  { slug: 'git-remote', command: 'git remote', title: 'Inspect remotes' },
-  { slug: 'git-fetch', command: 'git fetch', title: 'Fetch remote refs' },
-  { slug: 'git-pull', command: 'git pull', title: 'Pull upstream work' },
-  { slug: 'git-push', command: 'git push', title: 'Publish work' },
-  { slug: 'git-rebase', command: 'git rebase', title: 'Replay commits' },
-  { slug: 'git-tag', command: 'git tag', title: 'Mark releases' },
-  { slug: 'git-rev-list', command: 'git rev-list', title: 'List revisions' },
-]
-
 const KNOWN_COMMAND_SLUGS = new Set<GitCommandSlug>(Object.keys(COMMAND_ICON_URLS) as GitCommandSlug[])
 
 function slugFromVerb(verb: string): GitCommandSlug {
@@ -91,7 +48,7 @@ function slugFromVerb(verb: string): GitCommandSlug {
   return KNOWN_COMMAND_SLUGS.has(candidate) ? candidate : 'default'
 }
 
-export function gitCommandSlug(command: string | null | undefined): GitCommandSlug {
+function gitCommandSlug(command: string | null | undefined): GitCommandSlug {
   const normalized = command?.trim().toLowerCase().replace(/\s+/g, ' ') ?? ''
   if (!normalized) return 'default'
   if (normalized.startsWith('git checkout --ours') || normalized.startsWith('git checkout --theirs')) {
@@ -113,10 +70,6 @@ export function gitCommandSlug(command: string | null | undefined): GitCommandSl
 export function gitCommandFamily(command: string | null | undefined): string {
   const slug = gitCommandSlug(command)
   return slug === 'default' ? 'default' : slug.replace(/^git-/, '')
-}
-
-export function gitCommandIconUrl(command: string | null | undefined): string {
-  return COMMAND_ICON_URLS[gitCommandSlug(command)]
 }
 
 export function GitCommandIcon({

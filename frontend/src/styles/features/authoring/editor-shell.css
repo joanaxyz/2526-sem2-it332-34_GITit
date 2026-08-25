@@ -88,6 +88,18 @@
   color: hsl(var(--muted-foreground));
 }
 
+.author-destination-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.author-destination-row > .author-input {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
 .author-page-lead {
   display: flex;
   align-items: center;
@@ -157,5 +169,14 @@
   .author-save-status {
     grid-column: 1 / -1;
     justify-content: center;
+  }
+
+  .author-destination-row {
+    align-items: stretch;
+  }
+
+  .author-destination-row > .author-input {
+    flex-basis: 100%;
+    width: 100%;
   }
 }

@@ -1,5 +1,5 @@
 {
-  "id": "floating-skull-skill-effect",
+  "id": "monster-09-skill-effect",
   "label": "Floating Skull Skill Effect",
   "motif": "blue flame rain",
   "playback": "target",
@@ -28,6 +28,16 @@
       "orient_to": "target-facing"
     }
   ],
-  "anchor": "center",
+  "anchor": "feet",
+  "placeAnchor": {
+    "x": 0.4629,
+    "y": 0.9023
+  },
+  "placeBounds": {
+    "left": 0.0391,
+    "top": 0.0586,
+    "right": 0.8906,
+    "bottom": 0.9336
+  },
   "placement": "target"
 }

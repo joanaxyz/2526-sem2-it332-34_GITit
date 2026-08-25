@@ -10,10 +10,34 @@ from adventures.views import (
 )
 
 urlpatterns = [
-    path("adventure-levels/<int:level_id>/runs/", AdventureLevelRunStartAPIView.as_view(), name="adventure-level-run-start"),
-    path("adventures/<slug:adventure_slug>/runs/", AdventureRunStartAPIView.as_view(), name="adventure-run-start"),
-    path("adventure-runs/<int:run_id>/", AdventureRunDetailAPIView.as_view(), name="adventure-run-detail"),
-    path("adventure-runs/<int:run_id>/level-library/", AdventureRunLevelLibraryAPIView.as_view(), name="adventure-run-level-library"),
-    path("adventure-runs/<int:run_id>/submit-command/", AdventureRunSubmitCommandAPIView.as_view(), name="adventure-run-submit-command"),
-    path("adventure-runs/<int:run_id>/files/", AdventureWorkspaceFileAPIView.as_view(), name="adventure-run-files"),
+    path(
+        "adventure-levels/<int:level_id>/runs/",
+        AdventureLevelRunStartAPIView.as_view(),
+        name="adventure-level-run-start",
+    ),
+    path(
+        "adventures/<slug:adventure_slug>/runs/",
+        AdventureRunStartAPIView.as_view(),
+        name="adventure-run-start",
+    ),
+    path(
+        "adventure-runs/<int:run_id>/",
+        AdventureRunDetailAPIView.as_view(),
+        name="adventure-run-detail",
+    ),
+    path(
+        "adventure-runs/<int:run_id>/level-library/",
+        AdventureRunLevelLibraryAPIView.as_view(),
+        name="adventure-run-level-library",
+    ),
+    path(
+        "adventure-runs/<int:run_id>/submit-command/",
+        AdventureRunSubmitCommandAPIView.as_view(),
+        name="adventure-run-submit-command",
+    ),
+    path(
+        "adventure-runs/<int:run_id>/files/",
+        AdventureWorkspaceFileAPIView.as_view(),
+        name="adventure-run-files",
+    ),
 ]

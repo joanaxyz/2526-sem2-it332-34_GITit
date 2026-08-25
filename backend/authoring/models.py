@@ -4,11 +4,9 @@ from django.db import models
 
 VISIBILITY_PRIVATE = "private"
 VISIBILITY_PUBLIC = "public"
-VISIBILITY_STORE = "store"
 VISIBILITY_CHOICES = [
     (VISIBILITY_PRIVATE, "Private"),
     (VISIBILITY_PUBLIC, "Public"),
-    (VISIBILITY_STORE, "Store"),
 ]
 
 STATUS_DRAFT = "draft"
@@ -52,7 +50,9 @@ class AuthoringChapter(models.Model):
     class Meta:
         ordering = ["sort_order", "id"]
         constraints = [
-            models.UniqueConstraint(fields=["owner", "slug"], name="unique_authoring_chapter_slug_per_owner"),
+            models.UniqueConstraint(
+                fields=["owner", "slug"], name="unique_authoring_chapter_slug_per_owner"
+            ),
         ]
 
     def __str__(self) -> str:
@@ -66,6 +66,13 @@ class ContentDefinition(models.Model):
         null=True,
         blank=True,
         related_name="contents",
+        on_delete=models.SET_NULL,
+    )
+    official_chapter = models.ForeignKey(
+        "curriculum.Chapter",
+        null=True,
+        blank=True,
+        related_name="official_content_definitions",
         on_delete=models.SET_NULL,
     )
     owner = models.ForeignKey(
@@ -104,7 +111,23 @@ class ContentDefinition(models.Model):
             models.UniqueConstraint(
                 fields=["owner", "kind", "slug"],
                 name="unique_content_slug_per_owner_kind",
-            )
+            ),
+            models.UniqueConstraint(
+                fields=["kind", "slug"],
+                condition=models.Q(owner__isnull=True),
+                name="unique_system_content_slug_per_kind",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(visibility__in=[VISIBILITY_PRIVATE, VISIBILITY_PUBLIC]),
+                name="authoring_content_valid_visibility",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(chapter__isnull=True)
+                    | models.Q(official_chapter__isnull=True)
+                ),
+                name="authoring_content_one_chapter_type",
+            ),
         ]
         indexes = [
             models.Index(fields=["owner", "kind", "status"], name="auth_content_owner_idx"),
@@ -120,12 +143,14 @@ class ContentDefinition(models.Model):
 
     def clean(self) -> None:
         super().clean()
-        if self.visibility == VISIBILITY_STORE and self.status != STATUS_PUBLISHED:
-            raise ValidationError({"visibility": "Store content must be published first."})
         if not isinstance(self.definition, dict):
             raise ValidationError({"definition": "Content definition must be an object."})
         if not isinstance(self.tags, list):
             raise ValidationError({"tags": "Tags must be a list."})
+        if self.chapter_id and self.official_chapter_id:
+            raise ValidationError(
+                {"official_chapter": "Choose an authored chapter or an official chapter, not both."}
+            )
 
 
 class PublishedContentRuntime(models.Model):
@@ -151,6 +176,28 @@ class PublishedContentRuntime(models.Model):
 
     class Meta:
         ordering = ["content_definition_id"]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    (
+                        models.Q(adventure__isnull=False)
+                        & models.Q(challenge__isnull=True)
+                        & models.Q(lesson__isnull=True)
+                    )
+                    | (
+                        models.Q(adventure__isnull=True)
+                        & models.Q(challenge__isnull=False)
+                        & models.Q(lesson__isnull=True)
+                    )
+                    | (
+                        models.Q(adventure__isnull=True)
+                        & models.Q(challenge__isnull=True)
+                        & models.Q(lesson__isnull=False)
+                    )
+                ),
+                name="published_runtime_exactly_one_target",
+            ),
+        ]
 
     def __str__(self) -> str:
         return f"PublishedContentRuntime({self.content_definition_id})"

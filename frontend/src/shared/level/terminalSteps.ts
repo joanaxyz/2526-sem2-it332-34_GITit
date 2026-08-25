@@ -2,8 +2,8 @@ import type { TerminalLine, TerminalStep } from './types'
 
 // Sentinel result categories used only for client-side optimistic placeholders.
 // Real server steps use the backend's RESULT_* values (TargetMatched, etc.).
-export const PENDING_RESULT = 'Pending'
-export const ERROR_RESULT = 'Error'
+const PENDING_RESULT = 'Pending'
+const ERROR_RESULT = 'Error'
 
 const TARGET_MATCHED_RESULT = 'TargetMatched'
 

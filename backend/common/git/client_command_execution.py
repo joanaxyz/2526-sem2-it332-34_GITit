@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import json
 from contextlib import nullcontext
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 
 from common.constants import COMMAND_COUNTED, COMMAND_DIAGNOSTIC, COMMAND_UNPROCESSABLE
@@ -37,7 +37,9 @@ MAX_REPOSITORY_STATE_BYTES = 256 * 1024
 
 
 class CommandCountClassifier:
-    def classify(self, *, command: str, processed: bool, diagnostic: bool | None = None) -> tuple[str, int]:
+    def classify(
+        self, *, command: str, processed: bool, diagnostic: bool | None = None
+    ) -> tuple[str, int]:
         if not processed:
             # Any command the engine can't process is a wasted turn - a miss that
             # burns budget. Git subcommand typos (`git comit`), misspellings of
@@ -93,7 +95,9 @@ class ClientCommandExecutionService:
     - normalized command must match the submitted raw command
     - processed/non-processed state must match whether the command is Git-shaped
     - diagnostic flag must match backend-known read-only command families
-    - diagnostic and unprocessed commands may not mutate repository state
+    - unprocessed commands may not mutate repository state
+    - diagnostics cannot mutate Git state; supported evidence metadata is
+      recomputed by the backend instead of trusted from the browser
     - command_family must match the normalized git subcommand
     """
 
@@ -114,7 +118,9 @@ class ClientCommandExecutionService:
         tools = self.state_tools
 
         def span(stage: str):
-            return timing(f"{timing_label}.{stage}", run_id=run_id) if timing_label else nullcontext()
+            return (
+                timing(f"{timing_label}.{stage}", run_id=run_id) if timing_label else nullcontext()
+            )
 
         with span("repository_state_clone"):
             validate_repository_state_payload(repository_state, field_name="repository_state")
@@ -160,7 +166,9 @@ class ClientCommandExecutionService:
             stdout=str(execution.get("stdout") or ""),
             stderr=str(execution.get("stderr") or ""),
             command_family=str(execution.get("command_family") or ""),
-            diagnostic_metadata=tuple(str(item) for item in (execution.get("diagnostic_metadata") or ())),
+            diagnostic_metadata=tuple(
+                str(item) for item in (execution.get("diagnostic_metadata") or ())
+            ),
             client_run_revision=client_run_revision,
         )
 
@@ -172,6 +180,19 @@ class ClientCommandExecutionService:
             result=result,
             expected_client_revision=expected_client_revision,
         )
+
+        if result.processed and result.diagnostic:
+            next_state = self.transition_verifier.verified_diagnostic_state(
+                command=expected_normalized,
+                previous_state=previous_state,
+                command_family=result.command_family,
+                exit_code=result.exit_code,
+            )
+            result = replace(result, state=next_state)
+
+        state_changed = result.processed and tools.state_hash_for_normalized(
+            previous_state
+        ) != tools.state_hash_for_normalized(next_state)
 
         # Repository state is stored as an unbounded JSON column and shipped in
         # every payload; a pathological command sequence (mass file/commit
@@ -202,8 +223,9 @@ class ClientCommandExecutionService:
             result=result,
             classification=classification,
             increment=increment,
-            # Only processed, non-diagnostic commands write to the repository.
-            state_mutated=result.processed and not result.diagnostic,
+            # Mutating commands and backend-derived diagnostic evidence write
+            # state. Ordinary read-only diagnostics remain persistence-free.
+            state_mutated=state_changed,
         )
 
     @staticmethod
@@ -245,17 +267,24 @@ class ClientCommandExecutionService:
         if result.normalized_command != expected_normalized:
             raise BadRequest("execution.normalized_command does not match the submitted command.")
 
-        if expected_client_revision is not None and result.client_run_revision != expected_client_revision:
+        if (
+            expected_client_revision is not None
+            and result.client_run_revision != expected_client_revision
+        ):
             raise BadRequest("execution.client_run_revision is stale for this run.")
 
         parsed = parse_git_command(expected_normalized)
         is_git_command = parsed is not None
         is_cd_command = expected_normalized == "cd" or expected_normalized.startswith("cd ")
-        expected_family = "cd" if is_cd_command else (parsed[1] if parsed and len(parsed) > 1 else "")
+        expected_family = (
+            "cd" if is_cd_command else (parsed[1] if parsed and len(parsed) > 1 else "")
+        )
         expected_diagnostic = is_cd_command or is_diagnostic_command(expected_normalized)
 
         if result.processed and not (is_git_command or is_cd_command):
-            raise BadRequest("Only Git commands and supported shell no-ops may be submitted as processed executions.")
+            raise BadRequest(
+                "Only Git commands and supported shell no-ops may be submitted as processed executions."
+            )
 
         if result.diagnostic and not expected_diagnostic:
             raise BadRequest("execution.diagnostic does not match the submitted command.")
@@ -267,14 +296,15 @@ class ClientCommandExecutionService:
         if not result.processed:
             if not (is_git_command or is_cd_command) and result.command_family:
                 raise BadRequest("Non-Git executions must not include a command family.")
-            if (is_git_command or is_cd_command) and result.command_family not in {"", expected_family}:
+            if (is_git_command or is_cd_command) and result.command_family not in {
+                "",
+                expected_family,
+            }:
                 raise BadRequest("execution.command_family does not match the submitted command.")
 
-        # Unprocessed and diagnostic commands can never mutate the repository:
-        # `from_payload` pins their next_state to the previous state and ignores
-        # the browser's submitted next_state entirely, so no hash comparison is
-        # needed (and comparing the client's drift-prone snapshot here would only
-        # produce false rejections). Only processed, non-diagnostic commands carry
-        # a real transition, verified against previous_state by the transition
-        # verifier in `from_payload`.
-
+        # The browser's next_state is ignored for unprocessed and diagnostic
+        # commands, so no client-state hash comparison is needed here. A narrow
+        # set of processed diagnostics may still persist evidence metadata, but
+        # `from_payload` derives that transition from the backend-owned previous
+        # state and exact supported command shape. Non-diagnostic transitions are
+        # verified against previous_state by the transition verifier.

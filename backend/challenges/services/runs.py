@@ -7,6 +7,7 @@ from common.constants import (
     SESSION_STATUS_STARTED,
 )
 from common.exceptions import Conflict, Locked
+from common.runtime import discard_started_run
 from progress.models import (
     AdventureLevelCompletion,
     ChallengeLevelCompletion,
@@ -35,7 +36,9 @@ class ChallengeRunService:
 
         from practice.models import CommandStep
 
-        queryset = ChallengeRun.objects.select_related(*RUN_HYDRATE_SELECT_RELATED).prefetch_related(
+        queryset = ChallengeRun.objects.select_related(
+            *RUN_HYDRATE_SELECT_RELATED
+        ).prefetch_related(
             Prefetch("steps", queryset=CommandStep.objects.order_by("id")),
         )
         queryset = queryset.filter(pk=run if isinstance(run, int) else run.pk)
@@ -83,7 +86,9 @@ class ChallengeRunService:
         published_variants = list(
             trial.variants.filter(is_published=True).order_by("semantic_key", "id")
         )
-        tried_keys = selector._tried_variant_keys(player=player, trial=trial) if prior_run else set()
+        tried_keys = (
+            selector._tried_variant_keys(player=player, trial=trial) if prior_run else set()
+        )
         variant = (
             self._replay_variant(player=player, trial=trial)
             if is_replay
@@ -142,10 +147,13 @@ class ChallengeRunService:
             difficulty=previous,
             is_published=True,
         ).first()
-        if not previous_trial or not ChallengeTrialCompletion.objects.filter(
-            player=player,
-            challenge_trial=previous_trial,
-        ).exists():
+        if (
+            not previous_trial
+            or not ChallengeTrialCompletion.objects.filter(
+                player=player,
+                challenge_trial=previous_trial,
+            ).exists()
+        ):
             raise Locked("This challenge trial is locked until the previous trial is completed.")
 
     def _ensure_previous_challenge_level_complete(self, *, player, trial: ChallengeTrial) -> None:
@@ -157,10 +165,13 @@ class ChallengeRunService:
             .order_by("-sort_order", "-id")
             .first()
         )
-        if previous_level and not ChallengeLevelCompletion.objects.filter(
-            player=player,
-            challenge_level=previous_level,
-        ).exists():
+        if (
+            previous_level
+            and not ChallengeLevelCompletion.objects.filter(
+                player=player,
+                challenge_level=previous_level,
+            ).exists()
+        ):
             raise Locked("Complete the previous challenge level first.")
 
     def _ensure_adventure_complete(self, *, player, chapter) -> None:
@@ -185,7 +196,6 @@ class ChallengeRunService:
             return
         raise Locked("Complete this chapter's required Adventure levels to unlock its challenges.")
 
-
     def _replay_variant(self, *, player, trial: ChallengeTrial):
         completion = (
             ChallengeTrialCompletion.objects.select_related("challenge_run__selected_variant")
@@ -194,12 +204,7 @@ class ChallengeRunService:
         )
         if not completion or not completion.challenge_run:
             raise Locked("Free play is available only after completing this challenge trial.")
-        return completion.challenge_run.variant
+        return completion.challenge_run.selected_variant
 
-    @transaction.atomic
     def discard(self, *, run: ChallengeRun) -> bool:
-        locked = ChallengeRun.objects.select_for_update().filter(pk=run.pk).first()
-        if locked is None or locked.status != SESSION_STATUS_STARTED:
-            return False
-        locked.delete()
-        return True
+        return discard_started_run(run)

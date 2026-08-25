@@ -11,10 +11,11 @@ import type {
 } from '@/shared/story-worlds/types'
 import type { BattleMonster } from '@/shared/battle/types'
 import type { SpriteAnimation } from '@/shared/sprites/types'
+import type { SpriteAnchor, SpriteBounds } from '@/shared/battle/effects/skill-effects/types'
 
-export type MonsterAnimName = 'idle' | 'walk' | 'attack' | 'hurt' | 'death'
+type MonsterAnimName = 'idle' | 'walk' | 'attack' | 'hurt' | 'death'
 
-export type MonsterRuntimeAttackFlight = {
+type MonsterRuntimeAttackFlight = {
   distancePx: number
   liftPx: number
 }
@@ -27,7 +28,6 @@ type MonsterRuntimeAttackShared = {
 export type MonsterRuntimeDefinition = {
   id: string
   label: string
-  tier: 'mob' | 'elite' | 'boss'
   sprites: Record<MonsterAnimName, SpriteAnimation>
   portrait?: string
   attack:
@@ -66,11 +66,17 @@ export type MonsterRuntimeAttackEffect = {
   orientTo: MonsterEffectOrientation
   placement: MonsterEffectPlacement
   anchor: MonsterEffectAnchor
+  placeAnchor?: SpriteAnchor
+  placeBounds?: SpriteBounds
   motion?: MonsterEffectMotion
+  launchStartFrame?: number
+  impactStartFrame?: number
   layers: MonsterRuntimeEffectLayer[]
 }
 
 const FALLBACK_FRAME_SIZE = 100
+const MONSTER_PROJECTILE_EFFECT_SCALE = 0.6
+const MONSTER_TARGET_EFFECT_SCALE = 0.82
 const DEFAULT_LOOP: Record<MonsterAnimName, boolean> = {
   idle: true,
   walk: true,
@@ -81,9 +87,8 @@ const DEFAULT_LOOP: Record<MonsterAnimName, boolean> = {
 
 /**
  * Build a monster's runtime visuals from its story-world skin (resolved by the caller
- * via `monsterSkin(storyWorld, species)`, with default-world fallback). Gameplay HP/
- * tier come from the battle payload (`monster`); the skin only supplies art +
- * presentation metrics. No DB, no descriptors.
+ * via `monsterSkin(storyWorld, species)`, with default-world fallback). The skin
+ * supplies art and presentation metrics. No DB, no descriptors.
  */
 export function definitionForMonster(
   monster: BattleMonster,
@@ -102,12 +107,10 @@ export function definitionForMonster(
   const attack = skin.attack ?? { kind: 'melee' as const }
   const effect = effectFromSkin(attack.effect, monster.species)
   const flight = flightFromAttack(attack)
-  const tier = normalizeTier(skin.tier ?? monster.tier)
 
   return {
     id: monster.species,
     label: skin.label || labelFromSlug(monster.species),
-    tier,
     sprites: {
       idle: sprite('idle'),
       walk: sprite('walk'),
@@ -138,7 +141,7 @@ export function definitionForMonster(
       hpBarFraction: positiveNumber(skin.metrics?.hp_bar_fraction, 0.74),
       combatRangePx: positiveNumber(
         skin.metrics?.range_px,
-        inferredCombatRange(monster.species, tier, attack.kind),
+        inferredCombatRange(monster.species, attack.kind),
       ),
     },
   }
@@ -159,13 +162,20 @@ function effectFromSkin(
 ): MonsterRuntimeAttackEffect | undefined {
   if (!effect || !Array.isArray(effect.layers) || effect.layers.length === 0) return undefined
   const playback = effect.playback === 'target' ? 'target' : 'projectile'
-  const defaultScale = positiveNumber(effect.scale, playback === 'target' ? 0.74 : 0.62)
+  const defaultScale = positiveNumber(
+    effect.scale,
+    playback === 'target' ? MONSTER_TARGET_EFFECT_SCALE : MONSTER_PROJECTILE_EFFECT_SCALE,
+  )
   const defaultOrientation = normalizeEffectOrientation(effect.orient_to, playback === 'projectile' ? 'travel' : 'target-facing')
   const placement = playback === 'target' ? normalizeEffectPlacement(effect.placement, 'target') : 'target'
-  const anchor = playback === 'target' ? normalizeEffectAnchor(effect.anchor, 'center') : 'center'
+  const anchor = normalizeEffectAnchor(effect.anchor, 'center')
+  const placeAnchor = normalizeSpriteAnchor(effect.place_anchor ?? effect.placeAnchor)
+  const placeBounds = normalizeSpriteBounds(effect.place_bounds ?? effect.placeBounds)
 
   // 'charge' is only meaningful for projectiles (the gather-orb windup).
   const motion = playback === 'projectile' && effect.motion === 'charge' ? 'charge' : undefined
+  const launchStartFrame = playback === 'projectile' ? nonNegativeInt(effect.launch_start_frame) : undefined
+  const impactStartFrame = playback === 'projectile' ? nonNegativeInt(effect.impact_start_frame) : undefined
 
   return {
     playback,
@@ -174,11 +184,15 @@ function effectFromSkin(
     orientTo: defaultOrientation,
     placement,
     anchor,
+    ...(placeAnchor ? { placeAnchor } : {}),
+    ...(placeBounds ? { placeBounds } : {}),
     motion,
+    launchStartFrame,
+    impactStartFrame,
     layers: effect.layers.map((layer, index) => ({
       sheet: animationFromSkin(layer, `${species}.effect.${index}`, false),
       layer: layer.layer === 'back' ? 'back' : 'front',
-      scale: positiveNumber(layer.scale, defaultScale),
+      scale: playback === 'projectile' ? defaultScale : positiveNumber(layer.scale, defaultScale),
       opacity: positiveNumber(layer.opacity, 1),
       offsetX: finiteNumber(layer.offset_x, 0),
       offsetY: finiteNumber(layer.offset_y, 0),
@@ -200,6 +214,35 @@ function normalizeEffectAnchor(value: unknown, fallback: MonsterEffectAnchor): M
 
 function normalizeEffectPlacement(value: unknown, fallback: MonsterEffectPlacement): MonsterEffectPlacement {
   return value === 'caster' || value === 'target' ? value : fallback
+}
+
+function normalizeSpriteAnchor(value: unknown): SpriteAnchor | undefined {
+  if (!value || typeof value !== 'object') return undefined
+  const candidate = value as { x?: unknown; y?: unknown }
+  const x = Number(candidate.x)
+  const y = Number(candidate.y)
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return undefined
+  return {
+    x: Math.min(1, Math.max(0, x)),
+    y: Math.min(1, Math.max(0, y)),
+  }
+}
+
+function normalizeSpriteBounds(value: unknown): SpriteBounds | undefined {
+  if (!value || typeof value !== 'object') return undefined
+  const candidate = value as Partial<Record<keyof SpriteBounds, unknown>>
+  const left = Number(candidate.left)
+  const top = Number(candidate.top)
+  const right = Number(candidate.right)
+  const bottom = Number(candidate.bottom)
+  if (![left, top, right, bottom].every(Number.isFinite)) return undefined
+  const normalized = {
+    left: Math.min(1, Math.max(0, left)),
+    top: Math.min(1, Math.max(0, top)),
+    right: Math.min(1, Math.max(0, right)),
+    bottom: Math.min(1, Math.max(0, bottom)),
+  }
+  return normalized.left < normalized.right && normalized.top < normalized.bottom ? normalized : undefined
 }
 
 export function labelForMonster(monster: BattleMonster | null | undefined): string | null {
@@ -228,7 +271,6 @@ function placeholderDefinition(monster: BattleMonster): MonsterRuntimeDefinition
   return {
     id: monster.species,
     label: labelFromSlug(monster.species),
-    tier: monster.tier,
     sprites: {
       idle: animation('idle'),
       walk: animation('walk'),
@@ -239,21 +281,18 @@ function placeholderDefinition(monster: BattleMonster): MonsterRuntimeDefinition
     portrait: placeholderAnimation(`${monster.species}.portrait`, true).src,
     attack: { kind: 'melee', lungePx: 48, hitFrame: 1 },
     metrics: {
-      scale: positiveNumber(monster.scale, monster.tier === 'boss' ? 1.4 : 1),
+      scale: positiveNumber(monster.scale, 1),
       footOffset: 12,
       hpBarFraction: 0.68,
-      combatRangePx: inferredCombatRange(monster.species, monster.tier, 'melee'),
+      combatRangePx: inferredCombatRange(monster.species, 'melee'),
     },
   }
 }
 
-function inferredCombatRange(slug: string, tier: 'mob' | 'elite' | 'boss', attackKind: unknown): number {
+function inferredCombatRange(slug: string, attackKind: unknown): number {
   if (attackKind === 'projectile') {
-    if (tier === 'boss') return 330
     return slug.includes('archer') ? 305 : 285
   }
-  if (tier === 'boss') return 210
-  if (tier === 'elite') return 165
   return 128
 }
 
@@ -283,13 +322,14 @@ function placeholderSvg(species: string): string {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`
 }
 
-function normalizeTier(value: unknown): 'mob' | 'elite' | 'boss' {
-  return value === 'elite' || value === 'boss' ? value : 'mob'
-}
-
 function positiveInt(value: unknown, fallback: number): number {
   const parsed = Number(value)
   return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback
+}
+
+function nonNegativeInt(value: unknown): number | undefined {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : undefined
 }
 
 function positiveNumber(value: unknown, fallback: number): number {

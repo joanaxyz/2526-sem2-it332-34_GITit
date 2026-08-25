@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import type { AdventureLevelSummary } from '@/features/challenges/types'
-import { adventureLevelCleared, nextPlayableLevelId } from '@/features/story-map/utils/storyMapChapter'
+import type { AdventureLevelSummary } from '@/features/story-map/types'
+import {
+  adventureLevelCleared,
+  chapterTitle,
+  nextPlayableLevelId,
+} from '@/features/story-map/utils/storyMapChapter'
+import type { LearningChapter } from '@/features/story-map/types'
 
 function level(overrides: Partial<AdventureLevelSummary>): AdventureLevelSummary {
   return {
@@ -9,32 +14,45 @@ function level(overrides: Partial<AdventureLevelSummary>): AdventureLevelSummary
     id: 1,
     slug: 'level-1',
     title: 'Level 1',
-    description: '',
     command: 'git status',
-    learned: false,
-    completed: false,
     locked: false,
     lock_reason: '',
-    wave_count: 1,
     completion: null,
-    latest_run_id: null,
-    status: 'not_started',
     is_passed: false,
-    progress: { value: 0, numerator: 0, denominator: 1 },
     ...overrides,
   }
 }
 
 describe('story map chapter utilities', () => {
+  it('preserves an admin-created first chapter title', () => {
+    const chapter = {
+      number: 1,
+      slug: 'browser-acceptance-chapter',
+      title: 'Browser Acceptance Chapter',
+    } as LearningChapter
+
+    expect(chapterTitle(chapter)).toBe('Browser Acceptance Chapter')
+  })
+
+  it('keeps the seeded foundations display alias scoped to its canonical slug', () => {
+    const chapter = {
+      number: 1,
+      slug: 'creating-inspecting-repositories',
+      title: 'Repository Basics',
+    } as LearningChapter
+
+    expect(chapterTitle(chapter)).toBe('Foundations')
+  })
+
   it('treats passed adventure levels as cleared even without a completion payload', () => {
-    expect(adventureLevelCleared(level({ is_passed: true, completed: false }))).toBe(true)
+    expect(adventureLevelCleared(level({ is_passed: true }))).toBe(true)
   })
 
   it('selects the first unpassed unlocked level as the next playable node', () => {
     const levels = [
-      level({ id: 1, is_passed: true, completed: false }),
-      level({ id: 2, is_passed: false, completed: false }),
-      level({ id: 3, is_passed: false, completed: false }),
+      level({ id: 1, is_passed: true }),
+      level({ id: 2, is_passed: false }),
+      level({ id: 3, is_passed: false }),
     ]
 
     expect(nextPlayableLevelId(levels, false)).toBe(2)

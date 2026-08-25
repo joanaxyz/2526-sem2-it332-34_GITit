@@ -13,6 +13,12 @@ class ContentDefinitionAdmin(admin.ModelAdmin):
 
 @admin.register(PublishedContentRuntime)
 class PublishedContentRuntimeAdmin(admin.ModelAdmin):
-    list_display = ("content_definition", "chapter", "adventure", "challenge", "lesson", "compiled_at")
+    list_display = (
+        "content_definition",
+        "chapter",
+        "adventure",
+        "challenge",
+        "lesson",
+        "compiled_at",
+    )
     search_fields = ("content_definition__title", "content_definition__slug")
-

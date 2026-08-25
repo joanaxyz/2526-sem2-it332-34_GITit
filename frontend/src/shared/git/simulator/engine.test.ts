@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { executeGitCommand } from '@/shared/git/simulator/engine'
+import { normalizeState } from '@/shared/git/simulator/state'
 import type { MutableRepositoryState } from '@/shared/git/simulator/types'
 
 function baseState(overrides: Partial<MutableRepositoryState> = {}): MutableRepositoryState {
@@ -211,5 +212,87 @@ describe('fast-forward merge workspace state', () => {
     expect(result.next_state.branches.main).toBe('c1')
     expect(result.next_state.staging).toEqual({})
     expect(result.next_state.working_tree).toEqual({})
+  })
+})
+
+describe('merge abort restoration', () => {
+  it('falls back to conflict cleanup when the normalized abort snapshot is empty', () => {
+    const state = baseState({
+      commits: [
+        { id: 'c0', message: 'base', parents: [], tree: { 'app.js': 'base' } },
+        { id: 'c1', message: 'feature', parents: ['c0'], tree: { 'app.js': 'feature' } },
+      ],
+      branches: { main: 'c0', feature: 'c1' },
+      head: { type: 'branch', name: 'main', target: 'c0' },
+      remotes: { origin: 'https://example.test/team/app.git' },
+      conflicts: ['app.js'],
+      conflict_details: {
+        'app.js': { base: 'base', ours: 'main', theirs: 'feature' },
+      },
+      staging: { 'other.txt': { status: 'modified', content: 'staged' } },
+      working_tree: {
+        'app.js': { status: 'conflicted', content: '<<<<<<< HEAD\nmain\n=======\nfeature\n' },
+      },
+      merge_parent: 'c1',
+      merge_abort_state: {} as MutableRepositoryState,
+      operation_metadata: { preserved_marker: 'keep-me' },
+      session_note: 'keep-this-too',
+    })
+    const normalizedBefore = normalizeState(state)
+
+    const result = executeGitCommand(state, 'git merge --abort')
+
+    expect(result.processed).toBe(true)
+    expect(result.next_state.commits).toEqual(normalizedBefore.commits)
+    expect(result.next_state.branches).toEqual(normalizedBefore.branches)
+    expect(result.next_state.head).toEqual(normalizedBefore.head)
+    expect(result.next_state.remotes).toEqual(normalizedBefore.remotes)
+    expect(result.next_state.session_note).toBe('keep-this-too')
+    expect(result.next_state.conflicts).toEqual([])
+    expect(result.next_state.staging).toEqual({})
+    expect(result.next_state.working_tree).toEqual({})
+    expect(result.next_state.conflict_details).toEqual({})
+    expect(result.next_state.merge_parent).toBeUndefined()
+    expect(result.next_state.operation_metadata).toMatchObject({
+      preserved_marker: 'keep-me',
+      last_merge_aborted: true,
+    })
+    expect(result.next_state.last_merge_aborted).toBe(true)
+  })
+
+  it('restores a non-empty pre-merge snapshot before recording the abort', () => {
+    const beforeMerge = baseState({
+      commits: [
+        { id: 'c0', message: 'base', parents: [], tree: { 'app.js': 'base' } },
+        { id: 'c1', message: 'feature', parents: ['c0'], tree: { 'app.js': 'feature' } },
+      ],
+      branches: { main: 'c0', feature: 'c1' },
+      head: { type: 'branch', name: 'main', target: 'c0' },
+      remotes: { origin: 'https://example.test/team/app.git' },
+      operation_metadata: { preserved_marker: 'restore-me' },
+      session_note: 'from-before-merge',
+    })
+    const conflicted = baseState({
+      ...beforeMerge,
+      conflicts: ['app.js'],
+      merge_parent: 'c1',
+      merge_abort_state: beforeMerge,
+      working_tree: {
+        'app.js': { status: 'conflicted', content: '<<<<<<< HEAD\nmain\n=======\nfeature\n' },
+      },
+    })
+    const normalizedBeforeMerge = normalizeState(beforeMerge)
+
+    const result = executeGitCommand(conflicted, 'git merge --abort')
+
+    expect(result.processed).toBe(true)
+    expect(result.next_state).toEqual({
+      ...normalizedBeforeMerge,
+      operation_metadata: {
+        preserved_marker: 'restore-me',
+        last_merge_aborted: true,
+      },
+      last_merge_aborted: true,
+    })
   })
 })

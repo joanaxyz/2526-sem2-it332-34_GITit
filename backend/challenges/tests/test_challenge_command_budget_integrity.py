@@ -4,7 +4,9 @@ from testing.frontend_execution import frontend_execution_payload
 from testing.runtime_factories import api_client_for, create_stage_readme_challenge_run
 
 
-def _submit(*, fixture, command: str, next_state: dict, processed: bool = True, output: str | None = None):
+def _submit(
+    *, fixture, command: str, next_state: dict, processed: bool = True, output: str | None = None
+):
     return api_client_for(fixture.user).post(
         f"/api/challenge-runs/{fixture.run.id}/submit-command/",
         {
@@ -43,9 +45,14 @@ def test_challenge_budget_exhaustion_fails_without_completion_or_reward(db, djan
     assert response.status_code == 200
     fixture.run.refresh_from_db()
     assert fixture.run.status == SESSION_STATUS_FAILED
-    assert fixture.run.failure_reason == "You ran out of counted commands before reaching the target repository state."
+    assert (
+        fixture.run.failure_reason
+        == "You ran out of counted commands before reaching the target repository state."
+    )
     assert not ChallengeTrialCompletion.objects.filter(challenge_run=fixture.run).exists()
-    assert not CoinTransaction.objects.filter(player=fixture.player, award_key=f"trial-reward:{fixture.trial.id}").exists()
+    assert not CoinTransaction.objects.filter(
+        player=fixture.player, award_key=f"trial-reward:{fixture.trial.id}"
+    ).exists()
 
 
 def test_challenge_can_complete_on_last_allowed_counted_command(db, django_user_model):
@@ -68,4 +75,9 @@ def test_challenge_can_complete_on_last_allowed_counted_command(db, django_user_
     fixture.run.refresh_from_db()
     assert fixture.run.status == SESSION_STATUS_COMPLETED
     assert ChallengeTrialCompletion.objects.filter(challenge_run=fixture.run).exists()
-    assert CoinTransaction.objects.filter(player=fixture.player, award_key=f"trial-reward:{fixture.trial.id}").count() == 1
+    assert (
+        CoinTransaction.objects.filter(
+            player=fixture.player, award_key=f"trial-reward:{fixture.trial.id}"
+        ).count()
+        == 1
+    )

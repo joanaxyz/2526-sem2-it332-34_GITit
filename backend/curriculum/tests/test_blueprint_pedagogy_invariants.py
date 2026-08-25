@@ -38,9 +38,39 @@ CORE_FORMS = {
     "git-pull/default",
 }
 
+PROJECT_FILE_ACTIONS = {
+    "ch6-adv-stash-restore-commit": [
+        {
+            "after_command_index": 2,
+            "path": "README.md",
+            "content": "base\nUrgent navbar fix\n",
+        }
+    ],
+    "ch6-adv-shelve-fix-return": [
+        {
+            "after_command_index": 2,
+            "path": "README.md",
+            "content": "base\nQuick navbar patch\n",
+        }
+    ],
+    "ch6-adv-pick-then-adjust": [
+        {
+            "after_command_index": 1,
+            "path": "src/auth.py",
+            "content": "guard\nadapted=True\n",
+        }
+    ],
+    "ch6-adv-abort-and-adjust": [
+        {
+            "after_command_index": 2,
+            "path": "src/auth.py",
+            "content": "guard\nadapted_after_abort=True\n",
+        }
+    ],
+}
+
 CATALOG_SKILL_TRACKING = {
-    skill["slug"]: skill.get("mastery_trackable", True)
-    for skill in COMMAND_CATALOG
+    skill["slug"]: skill.get("mastery_trackable", True) for skill in COMMAND_CATALOG
 }
 CATALOG_FORMS = {
     form
@@ -87,12 +117,7 @@ def test_wave_slugs_are_globally_unique():
 
 def test_every_usage_and_form_reference_exists_in_catalog():
     unknown = sorted(
-        {
-            form
-            for wave in ORDERED_WAVES
-            for form in _forms_used(wave)
-            if form not in CATALOG_FORMS
-        }
+        {form for wave in ORDERED_WAVES for form in _forms_used(wave) if form not in CATALOG_FORMS}
     )
     assert not unknown, f"Waves reference forms missing from COMMAND_CATALOG: {unknown}"
 
@@ -101,8 +126,7 @@ def test_every_catalog_form_has_a_solo_intro_wave():
     introduced = {wave["usage"] for wave in ORDERED_WAVES if _is_intro(wave)}
     missing = sorted(CATALOG_FORMS - introduced)
     assert not missing, (
-        "Every command form needs a dedicated single-command intro wave. "
-        f"Missing intros: {missing}"
+        f"Every command form needs a dedicated single-command intro wave. Missing intros: {missing}"
     )
 
 
@@ -125,9 +149,7 @@ def test_no_form_is_used_before_its_intro():
 
 
 def test_repetition_law():
-    appearances = Counter(
-        form for wave in ORDERED_WAVES for form in set(_forms_used(wave))
-    )
+    appearances = Counter(form for wave in ORDERED_WAVES for form in set(_forms_used(wave)))
     shortfalls = []
     for form in sorted(CATALOG_FORMS):
         need = CORE_MIN_APPEARANCES if form in CORE_FORMS else MIN_APPEARANCES
@@ -150,9 +172,7 @@ def test_challenge_uses_reference_live_blueprint_waves():
         for trial in challenge.get("levels", []):
             for used in trial.get("uses_adventure_levels", []) or []:
                 if used not in known_slugs:
-                    broken.append(
-                        f"{challenge['slug']}/{trial.get('difficulty', '?')} -> {used}"
-                    )
+                    broken.append(f"{challenge['slug']}/{trial.get('difficulty', '?')} -> {used}")
     assert not broken, "Challenge trials reference unknown wave slugs:\n" + "\n".join(broken)
 
 
@@ -166,3 +186,25 @@ def test_authored_stories_do_not_spoil_solution_commands():
             if command.lower() in story:
                 leaks.append(f"{wave['slug']}: story contains {command!r}")
     assert not leaks, "Stories must not spell out solution commands:\n" + "\n".join(leaks)
+
+
+def test_branch_from_release_does_not_precreate_the_branch_it_teaches():
+    variants = [
+        variant
+        for level in ADVENTURE_LEVELS
+        for variant in level.get("variants") or []
+        if str(variant.get("case_id", "")).startswith("ch3-adv-branch-from-release")
+    ]
+
+    assert variants
+    for variant in variants:
+        initial_branches = (variant.get("initial_state_template") or {}).get("branches") or {}
+        assert "hotfix" not in initial_branches
+
+
+def test_edit_dependent_workflows_publish_the_exact_project_file_actions():
+    waves = {wave["slug"]: wave for wave in _ordered_waves()}
+
+    assert {
+        slug: waves[slug].get("workspace_files") for slug in PROJECT_FILE_ACTIONS
+    } == PROJECT_FILE_ACTIONS

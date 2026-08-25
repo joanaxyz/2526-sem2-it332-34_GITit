@@ -12,7 +12,7 @@ export type SpriteDef = {
 }
 
 /** Flavor-only kit entry shown in the shop preview - not a gameplay system. */
-export type CompanionKitEntry = {
+type CompanionKitEntry = {
   name: string
   description: string
 }

@@ -134,6 +134,30 @@ describe('story world and companion registries', () => {
     }
   })
 
+  it('uses dedicated static close-up portraits for every monster', () => {
+    for (const world of listStoryWorlds()) {
+      for (const [slug, skin] of Object.entries(world.battle.monsters)) {
+        const portrait = skin.sprites.portrait
+
+        expect(portrait, `${world.slug}/${slug}`).toBeDefined()
+        expect(portrait?.src, `${world.slug}/${slug}`).toMatch(
+          new RegExp(`^/cosmetics/story-worlds/${world.slug}/monsters/monster-\\d+/portrait\\.png$`),
+        )
+        expect(portrait?.src, `${world.slug}/${slug} does not reuse idle art`).not.toBe(
+          skin.sprites.idle?.src,
+        )
+        expect(portrait, `${world.slug}/${slug}`).toMatchObject({
+          frameWidth: 256,
+          frameHeight: 256,
+          columns: 1,
+          rows: 1,
+          frameCount: 1,
+          loops: false,
+        })
+      }
+    }
+  })
+
   it('exposes complete previews for every store-ready story world', () => {
     for (const world of listStoryWorlds()) {
       const preview = storyPreview(world.slug)
@@ -165,5 +189,6 @@ describe('story world and companion registries', () => {
     expect(monsters.map((monster) => monster.slug)).toContain('lich-king')
     expect(monsters.map((monster) => monster.slug)).toContain('two-headed-hound')
     expect(monsters.every((monster) => monster.skin === STORY_WORLDS['arcane-spire'].battle.monsters[monster.slug])).toBe(true)
+    expect(monsters.every((monster) => !('tier' in monster) && !('tier' in monster.skin))).toBe(true)
   })
 })

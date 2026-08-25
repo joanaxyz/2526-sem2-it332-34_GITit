@@ -8,11 +8,15 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.serializers import (
+    AccessTokenResponseSerializer,
+    DetailResponseSerializer,
     LoginSerializer,
     PasswordChangeSerializer,
     PasswordResetConfirmSerializer,
     PasswordResetRequestSerializer,
+    RegisterResponseSerializer,
     RegisterSerializer,
+    SessionResponseSerializer,
     UserSerializer,
 )
 from accounts.services import (
@@ -24,12 +28,6 @@ from accounts.services import (
     set_refresh_cookie,
 )
 from common.http import get_client_ip
-from common.openapi import (
-    AccessTokenResponseSerializer,
-    AuthUserResponseSerializer,
-    DetailResponseSerializer,
-    LoginResponseSerializer,
-)
 from common.permissions import HasTrustedWebClientHeader
 
 
@@ -37,7 +35,7 @@ class RegisterAPIView(APIView):
     permission_classes = [AllowAny]
     throttle_scope = "auth_register"
 
-    @extend_schema(request=RegisterSerializer, responses={201: AuthUserResponseSerializer})
+    @extend_schema(request=RegisterSerializer, responses={201: RegisterResponseSerializer})
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -52,7 +50,7 @@ class RegisterAPIView(APIView):
 class LoginAPIView(APIView):
     permission_classes = [AllowAny, HasTrustedWebClientHeader]
 
-    @extend_schema(request=LoginSerializer, responses={200: LoginResponseSerializer})
+    @extend_schema(request=LoginSerializer, responses={200: SessionResponseSerializer})
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -65,7 +63,10 @@ class LoginAPIView(APIView):
         )
         if lockout_remaining > 0:
             return Response(
-                {"detail": "Too many failed attempts. Try again later.", "retry_after": lockout_remaining},
+                {
+                    "detail": "Too many failed attempts. Try again later.",
+                    "retry_after": lockout_remaining,
+                },
                 status=status.HTTP_429_TOO_MANY_REQUESTS,
             )
 
@@ -81,7 +82,10 @@ class LoginAPIView(APIView):
             )
             if lockout_remaining > 0:
                 return Response(
-                    {"detail": "Too many failed attempts. Try again later.", "retry_after": lockout_remaining},
+                    {
+                        "detail": "Too many failed attempts. Try again later.",
+                        "retry_after": lockout_remaining,
+                    },
                     status=status.HTTP_429_TOO_MANY_REQUESTS,
                 )
             return Response(
@@ -148,7 +152,10 @@ class PasswordResetConfirmAPIView(APIView):
 
     @extend_schema(
         request=PasswordResetConfirmSerializer,
-        responses={200: DetailResponseSerializer, 400: OpenApiResponse(description="Invalid or expired reset link")},
+        responses={
+            200: DetailResponseSerializer,
+            400: OpenApiResponse(description="Invalid or expired reset link"),
+        },
     )
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)
@@ -170,7 +177,7 @@ class PasswordResetConfirmAPIView(APIView):
 class PasswordChangeAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=PasswordChangeSerializer, responses={200: LoginResponseSerializer})
+    @extend_schema(request=PasswordChangeSerializer, responses={200: SessionResponseSerializer})
     def post(self, request):
         serializer = PasswordChangeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

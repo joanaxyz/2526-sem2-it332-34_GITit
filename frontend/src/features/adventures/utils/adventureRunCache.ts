@@ -12,7 +12,6 @@ export function invalidateAdventureProgressQueries(queryClient: QueryClient) {
   void queryClient.invalidateQueries({ queryKey: queryKeys.chapters })
   void queryClient.invalidateQueries({ queryKey: queryKeys.homeSummary })
   void queryClient.invalidateQueries({ queryKey: queryKeys.statsSummary })
-  void queryClient.invalidateQueries({ queryKey: queryKeyRoots.chapterContent })
   void queryClient.invalidateQueries({ queryKey: queryKeyRoots.chapterOverview })
   void queryClient.invalidateQueries({ queryKey: queryKeys.learnedSkills })
   void queryClient.invalidateQueries({ queryKey: queryKeys.wallet })

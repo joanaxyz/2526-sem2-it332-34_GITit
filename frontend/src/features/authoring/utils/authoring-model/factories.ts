@@ -22,7 +22,6 @@ export function emptyLevel(kind: ContentKind, index = 0): AuthoredLevel {
   return {
     slug: index === 0 ? 'level-one' : `level-${index + 1}`,
     title: index === 0 ? 'First level' : `Level ${index + 1}`,
-    brief: '',
     commandForms: [],
     problems: [emptyProblem(kind, 0)],
   }
@@ -47,6 +46,7 @@ export function initialForm(kind: ContentKind): AuthoringForm {
     tags: [],
     visibility: 'private',
     chapterId: null,
+    officialChapterId: null,
     pages: kind === 'lesson' ? [emptyPage(0)] : [],
     levels: kind === 'lesson' ? [] : [emptyLevel(kind, 0)],
     battleStage: { ...DEFAULT_BATTLE_STAGE },

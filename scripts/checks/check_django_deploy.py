@@ -4,6 +4,7 @@
 No external connection is opened here. The PostgreSQL/Redis integration job is
 responsible for proving real dependency connectivity and migrations.
 """
+
 from __future__ import annotations
 
 import os

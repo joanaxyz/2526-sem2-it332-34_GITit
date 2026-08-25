@@ -1,100 +1,17 @@
-"""Adventure level grouping plan."""
+"""Resolve and normalize the canonical adventure wave-plan owners."""
 
 from __future__ import annotations
 
 from curriculum.seed_data.blueprint_overlay import BLUEPRINT_ADVENTURE_LEVELS
 
 
-def _level(slug: str, title: str, *, waves: list[str], reuse: list[str] | None = None,
-           brief: str = "") -> dict:
+def _level(slug: str, title: str, *, waves: list[str], reuse: list[str] | None = None) -> dict:
     return {
         "slug": slug,
         "title": title,
-        "brief": brief,
         "wave_slugs": list(waves),
         "reuse_usages": list(reuse or []),
     }
-
-ADVENTURE_LEVEL_PLAN = {
-    "repository-foundations": [
-        _level(
-            "initialize-a-repository",
-            "Initialize a repository",
-            brief="Turn a plain folder into a Git repository and save the first commit.",
-            waves=["init-current-folder", "init-named-folder", "init-with-initial-branch"],
-            reuse=["git-add/dot", "git-commit/message"],
-        ),
-        _level(
-            "clone-existing-repositories",
-            "Clone existing repositories",
-            brief="Copy a remote project down to your machine.",
-            waves=[
-                "clone-default-folder",
-                "clone-into-named-folder",
-                "clone-specific-branch",
-                "clone-shallow-history",
-            ],
-            reuse=["git-status/plain"],
-        ),
-        _level(
-            "read-repository-status",
-            "Read repository status",
-            brief="See what Git thinks changed before you act.",
-            waves=[
-                "inspect-status",
-                "inspect-short-status",
-                "inspect-porcelain-status",
-                "inspect-ignored-status",
-            ],
-            reuse=["git-init/current-directory"],
-        ),
-        _level(
-            "stage-and-commit",
-            "Stage and commit your first save",
-            brief="Stage exactly what you mean, then seal the snapshot.",
-            waves=["stage-one-file", "stage-visible-folder-work", "commit-staged-snapshot"],
-            reuse=["git-status/plain"],
-        ),
-        _level(
-            "inspect-changes-with-diff",
-            "Inspect changes with diff",
-            brief="Review working and staged content, then save what you confirmed.",
-            waves=["inspect-working-diff", "inspect-staged-diff"],
-            reuse=["git-add/file", "git-commit/message", "git-status/plain"],
-        ),
-        _level(
-            "read-your-history",
-            "Read your history",
-            brief="Investigate the commit history at every level of detail, then record what you found.",
-            waves=[
-                "inspect-compact-history",
-                "inspect-graph-history",
-                "inspect-named-commit",
-            ],
-            reuse=[
-                "git-log/limit",
-                "git-log/stat",
-                "git-log/patch",
-                "git-show/head",
-                "git-show/name-only",
-                "git-add/file",
-                "git-commit/message",
-            ],
-        ),
-        _level(
-            "configure-and-ignore",
-            "Configure and ignore",
-            brief="Set up your identity, add a shortcut, and keep noise out of your commits.",
-            waves=[
-                "set-global-user-name",
-                "set-global-user-email",
-                "set-global-alias",
-                "explain-ignore-rule",
-            ],
-            reuse=["git-config/list", "git-add/file", "git-commit/message"],
-        ),
-    ],
-}
 
 def adventure_levels_for(adventure_slug: str, problems: list[dict]) -> list[dict]:
     """Ordered level groups for one adventure.
@@ -107,15 +24,10 @@ def adventure_levels_for(adventure_slug: str, problems: list[dict]) -> list[dict
 
     plan = _wave_plan_levels(ADVENTURE_WAVE_PLANS.get(adventure_slug, []))
     if not plan:
-        plan = ADVENTURE_LEVEL_PLAN.get(adventure_slug)
-    if not plan:
         return [
             {
                 "slug": spec["slug"],
                 "title": spec["title"],
-                "brief": spec.get("scenario_context", {}).get("story", ""),
-                "narrative_brief": spec.get("narrative_brief", {}),
-                "level_type": spec.get("level_type", "guided_workflow"),
                 "waves": [spec],
                 "reuse_usages": [],
             }
@@ -132,9 +44,6 @@ def adventure_levels_for(adventure_slug: str, problems: list[dict]) -> list[dict
             {
                 "slug": level["slug"],
                 "title": level["title"],
-                "brief": level["brief"],
-                "narrative_brief": level.get("narrative_brief", waves[0].get("narrative_brief", {})),
-                "level_type": level.get("level_type", waves[0].get("level_type", "guided_workflow")),
                 "waves": waves,
                 "reuse_usages": level["reuse_usages"],
             }
@@ -150,7 +59,6 @@ def adventure_levels_for(adventure_slug: str, problems: list[dict]) -> list[dict
                     {
                         "slug": spec["slug"],
                         "title": spec["title"],
-                        "brief": "",
                         "waves": [spec],
                         "reuse_usages": [],
                     }
@@ -175,10 +83,9 @@ def _wave_plan_levels(plan: list[dict]) -> list[dict]:
                 str(level["slug"]),
                 str(level["title"]),
                 waves=wave_slugs,
-                brief=str(level.get("brief", "")),
                 reuse=list(level.get("reuse_usages", [])),
             )
         )
     return levels
 
-__all__ = ["ADVENTURE_LEVEL_PLAN", "adventure_levels_for"]
+__all__ = ["adventure_levels_for"]

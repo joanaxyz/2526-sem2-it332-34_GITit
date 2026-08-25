@@ -7,6 +7,7 @@ import { syncAdventureRunInCache } from '@/features/adventures/utils/adventureRu
 import { ApiError } from '@/shared/api/apiError'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
+import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 
 /**
  * Entry page for chapter adventure-level runs.
@@ -20,6 +21,7 @@ export function AdventureStartPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const start = useStartAdventureRun()
+  const { companionSlug } = usePlayerLoadout()
   const rawLevelId = Number(levelIdParam)
   const levelId = Number.isInteger(rawLevelId) && rawLevelId > 0 ? rawLevelId : null
 
@@ -65,6 +67,7 @@ export function AdventureStartPage() {
 
   return (
     <LoadingState
+      companionSlug={companionSlug}
       description="Preparing the repository, terminal, and command challenge."
       label="Starting adventure"
       variant="screen"

@@ -380,6 +380,15 @@ ADVENTURE_LEVELS = [
                         "rules": [
                             {"type": "branch_exists", "branch": "staging"},
                             {"type": "branch_exists", "branch": "qa"},
+                            {
+                                "type": "required_command_sequence",
+                                "commands": [
+                                    "git branch staging",
+                                    "git branch qa",
+                                    "git branch",
+                                    "git branch -v",
+                                ],
+                            },
                         ],
                     },
                     checks=[
@@ -390,6 +399,22 @@ ADVENTURE_LEVELS = [
                                 "rules": [
                                     {"type": "branch_exists", "branch": "staging"},
                                     {"type": "branch_exists", "branch": "qa"},
+                                ]
+                            },
+                        },
+                        {
+                            "label": "The plain and verbose branch lists were read after creating the pair.",
+                            "requirement": {
+                                "rules": [
+                                    {
+                                        "type": "required_command_sequence",
+                                        "commands": [
+                                            "git branch staging",
+                                            "git branch qa",
+                                            "git branch",
+                                            "git branch -v",
+                                        ],
+                                    }
                                 ]
                             },
                         },
@@ -419,6 +444,15 @@ ADVENTURE_LEVELS = [
                             {"type": "branch_exists", "branch": "task/login"},
                             {"type": "branch_exists", "branch": "task/search"},
                             {"type": "branch_exists", "branch": "task/profile"},
+                            {
+                                "type": "required_command_sequence",
+                                "commands": [
+                                    "git branch task/login",
+                                    "git branch task/search",
+                                    "git branch task/profile",
+                                    "git branch",
+                                ],
+                            },
                         ],
                     },
                     checks=[
@@ -430,6 +464,22 @@ ADVENTURE_LEVELS = [
                                     {"type": "branch_exists", "branch": "task/login"},
                                     {"type": "branch_exists", "branch": "task/search"},
                                     {"type": "branch_exists", "branch": "task/profile"},
+                                ]
+                            },
+                        },
+                        {
+                            "label": "The final branch list was read after all three task pointers were created.",
+                            "requirement": {
+                                "rules": [
+                                    {
+                                        "type": "required_command_sequence",
+                                        "commands": [
+                                            "git branch task/login",
+                                            "git branch task/search",
+                                            "git branch task/profile",
+                                            "git branch",
+                                        ],
+                                    }
                                 ]
                             },
                         },
@@ -544,6 +594,15 @@ ADVENTURE_LEVELS = [
                             {"type": "branch_points_to", "branch": "release/v1", "commit": "c0"},
                             {"type": "branch_points_to", "branch": "release/v2", "commit": "c1"},
                             {"type": "branch_exists", "branch": "integration"},
+                            {
+                                "type": "required_command_sequence",
+                                "commands": [
+                                    "git branch release/v1 c0",
+                                    "git branch release/v2 c1",
+                                    "git branch integration",
+                                    "git branch",
+                                ],
+                            },
                         ],
                     },
                     checks=[
@@ -559,6 +618,22 @@ ADVENTURE_LEVELS = [
                         {
                             "label": "The integration pointer exists at the current tip.",
                             "requirement": {"rules": [{"type": "branch_exists", "branch": "integration"}]},
+                        },
+                        {
+                            "label": "The final branch list was read after all release pointers were pinned.",
+                            "requirement": {
+                                "rules": [
+                                    {
+                                        "type": "required_command_sequence",
+                                        "commands": [
+                                            "git branch release/v1 c0",
+                                            "git branch release/v2 c1",
+                                            "git branch integration",
+                                            "git branch",
+                                        ],
+                                    }
+                                ]
+                            },
                         },
                     ],
                 ),
@@ -669,6 +744,14 @@ ADVENTURE_LEVELS = [
                         "rules": [
                             {"type": "branch_absent", "branch": "old"},
                             {"type": "branch_points_to", "branch": "keep", "commit": "c1"},
+                            {
+                                "type": "required_command_sequence",
+                                "commands": [
+                                    "git branch -d old",
+                                    "git branch keep c1",
+                                    "git branch",
+                                ],
+                            },
                         ]
                     },
                     checks=[
@@ -680,6 +763,21 @@ ADVENTURE_LEVELS = [
                             "label": "The keep pointer pins the surviving commit.",
                             "requirement": {
                                 "rules": [{"type": "branch_points_to", "branch": "keep", "commit": "c1"}]
+                            },
+                        },
+                        {
+                            "label": "The surviving branch list was read after pruning and pinning.",
+                            "requirement": {
+                                "rules": [
+                                    {
+                                        "type": "required_command_sequence",
+                                        "commands": [
+                                            "git branch -d old",
+                                            "git branch keep c1",
+                                            "git branch",
+                                        ],
+                                    }
+                                ]
                             },
                         },
                     ],

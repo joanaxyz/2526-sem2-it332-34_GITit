@@ -71,7 +71,9 @@ class PasswordResetService:
     @transaction.atomic
     def change(self, *, user, current_password: str, password: str) -> None:
         if not user.check_password(current_password):
-            raise serializers.ValidationError({"current_password": "Current password is incorrect."})
+            raise serializers.ValidationError(
+                {"current_password": "Current password is incorrect."}
+            )
         try:
             validate_password(password, user=user)
         except DjangoValidationError as exc:

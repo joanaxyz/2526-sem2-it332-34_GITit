@@ -18,7 +18,7 @@ export type BookDiagramEdge = {
   label?: string
 }
 
-export type BookDiagramLegendItem = {
+type BookDiagramLegendItem = {
   label: string
   accent?: 'cyan' | 'purple' | 'muted'
 }
@@ -74,7 +74,7 @@ export type BookPage = {
   blocks?: BookBlock[]
 }
 
-export type BookCommandForm = {
+type BookCommandForm = {
   id: number
   slug: string
   usage_form: string

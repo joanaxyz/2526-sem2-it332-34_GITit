@@ -161,5 +161,3 @@ export function ShopCarousel<T>({
     </div>
   )
 }
-
-export type { ReactNode }

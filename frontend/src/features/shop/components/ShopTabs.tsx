@@ -14,12 +14,8 @@ export function ShopTabs({
   onTabChange: (tab: ShopTab) => void
 }) {
   return (
-    <aside className="shop-categories" aria-label="Shop sections">
-      <div className="shop-rail-balance" aria-label="GitCoin balance">
-        <GitCoinIcon />
-        <strong>{walletPending ? '—' : formatCoins(balance)}</strong>
-      </div>
-      <div className="shop-tab-list" role="tablist" aria-orientation="vertical">
+    <nav className="shop-categories" aria-label="Shop sections">
+      <div className="shop-tab-list" role="tablist" aria-orientation="horizontal">
         {shopTabs.map(({ id, label, description, Icon }) => {
           const active = activeTab === id
           return (
@@ -31,7 +27,7 @@ export function ShopTabs({
               className={active ? 'is-active' : undefined}
               onClick={() => onTabChange(id)}
             >
-              {Icon ? <Icon aria-hidden="true" /> : <GitCoinIcon />}
+              <Icon aria-hidden="true" />
               <span>
                 <strong>{label}</strong>
                 <small>{description}</small>
@@ -40,7 +36,13 @@ export function ShopTabs({
           )
         })}
       </div>
-    </aside>
+      <div className="shop-rail-balance" aria-label="GitCoin balance">
+        <GitCoinIcon />
+        <span>
+          <small>Balance</small>
+          <strong>{walletPending ? '---' : formatCoins(balance)}</strong>
+        </span>
+      </div>
+    </nav>
   )
 }
-

@@ -8,9 +8,8 @@ import struct
 import wave
 from pathlib import Path
 
-from elevenlabs.core.api_error import ApiError
 from elevenlabs.client import ElevenLabs
-
+from elevenlabs.core.api_error import ApiError
 
 ROOT = Path(__file__).resolve().parents[2]
 ENV_PATH = ROOT / "frontend" / ".env"
@@ -209,8 +208,7 @@ def write_wav(path: Path, samples: list[float]) -> int:
     peak = max((abs(sample) for sample in samples), default=1)
     gain = min(1, 0.96 / peak) if peak > 0 else 1
     frames = b"".join(
-        struct.pack("<h", int(max(-1, min(1, sample * gain)) * 32767))
-        for sample in samples
+        struct.pack("<h", int(max(-1, min(1, sample * gain)) * 32767)) for sample in samples
     )
     with wave.open(str(path), "wb") as handle:
         handle.setnchannels(1)
@@ -261,7 +259,9 @@ def write_pcm_stream(path: Path, chunks) -> int:
     return path.stat().st_size
 
 
-def sound_effect(client: ElevenLabs, path: Path, prompt: str, duration: float, *, loop: bool, force: bool) -> None:
+def sound_effect(
+    client: ElevenLabs, path: Path, prompt: str, duration: float, *, loop: bool, force: bool
+) -> None:
     if path.exists() and path.stat().st_size > 0 and not force:
         print(f"skip {path.relative_to(ROOT)}")
         return
@@ -277,7 +277,9 @@ def sound_effect(client: ElevenLabs, path: Path, prompt: str, duration: float, *
     print(f"wrote {path.relative_to(ROOT)} ({size} bytes)")
 
 
-def music_track(client: ElevenLabs, path: Path, prompt: str, duration: float, *, force: bool) -> None:
+def music_track(
+    client: ElevenLabs, path: Path, prompt: str, duration: float, *, force: bool
+) -> None:
     if path.exists() and path.stat().st_size > 0 and not force:
         print(f"skip {path.relative_to(ROOT)}")
         return
@@ -342,7 +344,9 @@ def synth_skill(element: str, phase: str, duration: float) -> list[float]:
             body = tone(sweep, t) * 0.48 + tone(sweep * 1.5, t) * 0.22
             if element == "lightning":
                 body += tone(sweep * 2.02, t, "square") * 0.14
-            sample = body * amp + noise * amp * (0.14 if element == "flame" else 0.07) + crackle * 0.12
+            sample = (
+                body * amp + noise * amp * (0.14 if element == "flame" else 0.07) + crackle * 0.12
+            )
         elif phase == "projectile":
             amp = envelope(p, 0.02, 0.12) * (1 - p * 0.25)
             sweep = element_base * (2.7 - p * 1.45)
@@ -366,13 +370,22 @@ def synth_skill(element: str, phase: str, duration: float) -> list[float]:
         elif phase == "ground-run":
             amp = envelope(p, 0.02, 0.16)
             pulse = 0.48 + 0.52 * math.sin(math.tau * (7 + p * 4) * t) ** 2
-            crawl = tone(element_base * (0.65 + p * 0.85), t, "saw" if element == "lightning" else "sine") * 0.2
+            crawl = (
+                tone(
+                    element_base * (0.65 + p * 0.85), t, "saw" if element == "lightning" else "sine"
+                )
+                * 0.2
+            )
             floor = tone(58, t) * 0.18 + tone(96, t) * 0.08
             sample = (floor + crawl + noise * 0.24 + crackle * 0.11) * amp * pulse
         else:
             decay = math.exp(-p * 7.5)
             hit = tone(72, t) * 0.55 * decay
-            burst = tone(element_base * (2.1 - p), t, "square" if element == "lightning" else "sine") * 0.28 * decay
+            burst = (
+                tone(element_base * (2.1 - p), t, "square" if element == "lightning" else "sine")
+                * 0.28
+                * decay
+            )
             sparkle = tone(element_base * 4.2, t) * 0.18 * math.exp(-p * 4.0)
             sample = hit + burst + sparkle + noise * decay * 0.32 + crackle * 0.16
 
@@ -434,11 +447,23 @@ def add_note(
             env *= 0.78 + 0.22 * math.sin(math.pi * p)
         else:
             env *= math.exp(-p * 3.2)
-        body = tone(freq, t, shape) + tone(freq * 2.01, t) * harmonic + tone(freq * 3.0, t) * harmonic * 0.18
+        body = (
+            tone(freq, t, shape)
+            + tone(freq * 2.01, t) * harmonic
+            + tone(freq * 3.0, t) * harmonic * 0.18
+        )
         samples[i] += body * amp * env
 
 
-def add_drum(samples: list[float], start: float, duration: float, freq: float, amp: float, *, noise: bool = False) -> None:
+def add_drum(
+    samples: list[float],
+    start: float,
+    duration: float,
+    freq: float,
+    amp: float,
+    *,
+    noise: bool = False,
+) -> None:
     rng = random.Random(f"drum:{start}:{freq}:{amp}")
     start_i = max(0, int(start * SAMPLE_RATE))
     end_i = min(len(samples), int((start + duration) * SAMPLE_RATE))
@@ -469,14 +494,43 @@ def synth_background(name: str, duration: float) -> list[float]:
             base_t = bar * 4 * beat
             degree = chord_roots[bar % len(chord_roots)]
             for chord_note in (degree, degree + 2, degree + 4):
-                add_note(samples, base_t, 3.9 * beat, midi_freq(root + 12 + scale[chord_note % len(scale)]), 0.035, release=0.42)
-                add_note(samples, base_t, 3.9 * beat, midi_freq(root + 24 + scale[chord_note % len(scale)]), 0.015, release=0.42)
+                add_note(
+                    samples,
+                    base_t,
+                    3.9 * beat,
+                    midi_freq(root + 12 + scale[chord_note % len(scale)]),
+                    0.035,
+                    release=0.42,
+                )
+                add_note(
+                    samples,
+                    base_t,
+                    3.9 * beat,
+                    midi_freq(root + 24 + scale[chord_note % len(scale)]),
+                    0.015,
+                    release=0.42,
+                )
             for step in range(8):
                 degree = [0, 2, 4, 5, 4, 2, 0, 5][step]
-                add_note(samples, base_t + step * 0.5 * beat, 0.42 * beat, midi_freq(root + 12 + scale[degree]), 0.04, shape="saw", harmonic=0.18)
+                add_note(
+                    samples,
+                    base_t + step * 0.5 * beat,
+                    0.42 * beat,
+                    midi_freq(root + 12 + scale[degree]),
+                    0.04,
+                    shape="saw",
+                    harmonic=0.18,
+                )
             for step in range(4):
                 degree = melody[(bar * 4 + step) % len(melody)]
-                add_note(samples, base_t + step * beat, 0.86 * beat, midi_freq(root + 24 + scale[degree % len(scale)]), 0.032, release=0.22)
+                add_note(
+                    samples,
+                    base_t + step * beat,
+                    0.86 * beat,
+                    midi_freq(root + 24 + scale[degree % len(scale)]),
+                    0.032,
+                    release=0.22,
+                )
             for drum_beat in (0, 2):
                 add_drum(samples, base_t + drum_beat * beat, 0.34, 62, 0.14)
             for drum_beat in (1, 3):
@@ -493,14 +547,35 @@ def synth_background(name: str, duration: float) -> list[float]:
             base_t = bar * 4 * beat
             degree = chord_roots[bar % len(chord_roots)]
             for chord_note in (degree, degree + 2, degree + 4):
-                add_note(samples, base_t, 3.8 * beat, midi_freq(root + scale[chord_note % len(scale)]), 0.032, release=0.5)
+                add_note(
+                    samples,
+                    base_t,
+                    3.8 * beat,
+                    midi_freq(root + scale[chord_note % len(scale)]),
+                    0.032,
+                    release=0.5,
+                )
             for step in range(8):
                 degree = [0, 2, 4, 2, 5, 4, 2, 4][step]
-                add_note(samples, base_t + step * 0.5 * beat, 0.45 * beat, midi_freq(root + 12 + scale[degree]), 0.045, harmonic=0.2)
+                add_note(
+                    samples,
+                    base_t + step * 0.5 * beat,
+                    0.45 * beat,
+                    midi_freq(root + 12 + scale[degree]),
+                    0.045,
+                    harmonic=0.2,
+                )
             if bar % 2 == 0:
                 for step in range(4):
                     degree = melody[((bar // 2) * 4 + step) % len(melody)]
-                    add_note(samples, base_t + step * beat, 0.9 * beat, midi_freq(root + 24 + scale[degree % len(scale)]), 0.032, release=0.26)
+                    add_note(
+                        samples,
+                        base_t + step * beat,
+                        0.9 * beat,
+                        midi_freq(root + 24 + scale[degree % len(scale)]),
+                        0.032,
+                        release=0.26,
+                    )
             add_drum(samples, base_t, 0.26, 74, 0.075)
             add_drum(samples, base_t + 2 * beat, 0.26, 74, 0.055)
 
@@ -529,9 +604,33 @@ def synth_outcome_music(name: str, duration: float) -> list[float]:
             for chord_degree in (degree, degree + 2, degree + 4):
                 octave = 12 * (chord_degree // len(scale))
                 note = root + 12 + scale[chord_degree % len(scale)] + octave
-                add_note(samples, base_t, 1.9 * beat, midi_freq(note), 0.052, shape="saw", release=0.48, harmonic=0.16)
-                add_note(samples, base_t, 1.9 * beat, midi_freq(note + 12), 0.016, release=0.5, harmonic=0.1)
-            add_note(samples, base_t, 1.8 * beat, midi_freq(root - 12 + scale[degree % len(scale)]), 0.055, release=0.46)
+                add_note(
+                    samples,
+                    base_t,
+                    1.9 * beat,
+                    midi_freq(note),
+                    0.052,
+                    shape="saw",
+                    release=0.48,
+                    harmonic=0.16,
+                )
+                add_note(
+                    samples,
+                    base_t,
+                    1.9 * beat,
+                    midi_freq(note + 12),
+                    0.016,
+                    release=0.5,
+                    harmonic=0.1,
+                )
+            add_note(
+                samples,
+                base_t,
+                1.8 * beat,
+                midi_freq(root - 12 + scale[degree % len(scale)]),
+                0.055,
+                release=0.46,
+            )
             add_drum(samples, base_t, 0.22, 72, 0.09)
             add_drum(samples, base_t + beat, 0.16, 190, 0.04, noise=True)
 
@@ -560,9 +659,32 @@ def synth_outcome_music(name: str, duration: float) -> list[float]:
             for chord_degree in (degree, degree + 2, degree + 4):
                 octave = 12 * (chord_degree // len(minor_scale))
                 note = root + minor_scale[chord_degree % len(minor_scale)] + octave
-                add_note(samples, base_t, 1.28 * beat, midi_freq(note), 0.045, release=0.62, harmonic=0.12)
-                add_note(samples, base_t, 1.28 * beat, midi_freq(note + 12), 0.018, release=0.6, harmonic=0.1)
-            add_note(samples, base_t, 1.25 * beat, midi_freq(root - 12 + minor_scale[degree % len(minor_scale)]), 0.05, release=0.7)
+                add_note(
+                    samples,
+                    base_t,
+                    1.28 * beat,
+                    midi_freq(note),
+                    0.045,
+                    release=0.62,
+                    harmonic=0.12,
+                )
+                add_note(
+                    samples,
+                    base_t,
+                    1.28 * beat,
+                    midi_freq(note + 12),
+                    0.018,
+                    release=0.6,
+                    harmonic=0.1,
+                )
+            add_note(
+                samples,
+                base_t,
+                1.25 * beat,
+                midi_freq(root - 12 + minor_scale[degree % len(minor_scale)]),
+                0.05,
+                release=0.7,
+            )
             add_drum(samples, base_t, 0.34, 52, 0.055)
 
         for index, degree in enumerate(melody):
@@ -690,11 +812,15 @@ def describe_api_error(exc: ApiError) -> str:
     return str(exc)
 
 
-def generate_elevenlabs(client: ElevenLabs, force: bool, only: str, element_filter: str | None) -> None:
+def generate_elevenlabs(
+    client: ElevenLabs, force: bool, only: str, element_filter: str | None
+) -> None:
     if only in {"all", "sfx", "skills"}:
         for element, element_prompt in selected_elements(element_filter).items():
             for phase, (duration, phase_prompt) in SKILL_PHASES.items():
-                prompt = f"{element_prompt}; {phase_prompt}; dry game sound effect, no music, no speech"
+                prompt = (
+                    f"{element_prompt}; {phase_prompt}; dry game sound effect, no music, no speech"
+                )
                 path = OUTPUT_ROOT / "skills" / element / f"{phase}{OUTPUT_EXT}"
                 sound_effect(client, path, prompt, duration, loop=False, force=force)
 
@@ -703,7 +829,14 @@ def generate_elevenlabs(client: ElevenLabs, force: bool, only: str, element_filt
 
     if only in {"all", "sfx", "ui"}:
         for name, (duration, prompt) in UI_PROMPTS.items():
-            sound_effect(client, OUTPUT_ROOT / "ui" / f"{name}{OUTPUT_EXT}", prompt, duration, loop=False, force=force)
+            sound_effect(
+                client,
+                OUTPUT_ROOT / "ui" / f"{name}{OUTPUT_EXT}",
+                prompt,
+                duration,
+                loop=False,
+                force=force,
+            )
 
     if only == "ui":
         return
@@ -767,8 +900,12 @@ def generate_elevenlabs(client: ElevenLabs, force: bool, only: str, element_filt
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate battle SFX with ElevenLabs.")
-    parser.add_argument("--force", action="store_true", help="Regenerate files even when they already exist.")
-    parser.add_argument("--procedural", action="store_true", help="Use the local procedural generator.")
+    parser.add_argument(
+        "--force", action="store_true", help="Regenerate files even when they already exist."
+    )
+    parser.add_argument(
+        "--procedural", action="store_true", help="Use the local procedural generator."
+    )
     parser.add_argument(
         "--only",
         choices=["all", "sfx", "ui", "skills", "system-cues", "backgrounds", "outcomes"],

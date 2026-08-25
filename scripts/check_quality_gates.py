@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Compatibility wrapper for scripts/checks/check_quality_gates.py."""
+
 from __future__ import annotations
 
 import runpy

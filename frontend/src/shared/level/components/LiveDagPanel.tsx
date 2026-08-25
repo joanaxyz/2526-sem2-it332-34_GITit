@@ -234,7 +234,7 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   )
 })
 
-export function RepositoryStateDiagram({
+function RepositoryStateDiagram({
   title,
   snapshot,
   className,

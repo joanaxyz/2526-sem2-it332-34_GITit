@@ -55,9 +55,7 @@ def test_buying_a_companion_unlocks_challenge_start(db, django_user_model, monke
     client = APIClient()
     client.force_authenticate(user=user)
 
-    client.post(
-        "/api/shop/catalog/purchase/", {"kind": "companion", "slug": "blue"}, format="json"
-    )
+    client.post("/api/shop/catalog/purchase/", {"kind": "companion", "slug": "blue"}, format="json")
     response = client.post(f"/api/challenge-trials/{trial.id}/runs/")
 
     assert response.status_code == 201

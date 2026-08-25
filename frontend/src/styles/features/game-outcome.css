@@ -18,7 +18,7 @@
   z-index: 1;
   filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.35));
   opacity: 0;
-  animation: game-outcome-popper-bounce 920ms cubic-bezier(0.2, 0.92, 0.25, 1.1) both;
+  animation: game-outcome-popper-enter 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .game-outcome-party-popper-left {
@@ -53,15 +53,15 @@
   }
 }
 
-@keyframes game-outcome-popper-bounce {
+@keyframes game-outcome-popper-enter {
   0% {
     opacity: 0;
     transform: translateY(1rem) scale(0.68) rotate(-10deg);
   }
 
-  62% {
+  70% {
     opacity: 1;
-    transform: translateY(-0.3rem) scale(1.08) rotate(5deg);
+    transform: translateY(0) scale(1) rotate(2deg);
   }
 
   100% {

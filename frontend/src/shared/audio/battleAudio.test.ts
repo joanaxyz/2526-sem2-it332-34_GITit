@@ -72,3 +72,70 @@ describe('battle audio preferences', () => {
     expect(audio.isBattleMusicEnabled()).toBe(false)
   })
 })
+
+describe('battle movement audio visibility', () => {
+  it('stops an active run loop and refuses to restart it while the page is hidden', async () => {
+    window.localStorage.clear()
+    const originalHidden = Object.getOwnPropertyDescriptor(document, 'hidden')
+    const runAudio = {
+      currentTime: 0,
+      loop: false,
+      paused: true,
+      play: vi.fn().mockImplementation(function (this: { paused: boolean }) {
+        this.paused = false
+        return Promise.resolve()
+      }),
+      pause: vi.fn().mockImplementation(function (this: { paused: boolean }) {
+        this.paused = true
+      }),
+      remove: vi.fn(),
+      volume: 1,
+    }
+    const baseAudio = {
+      cloneNode: vi.fn(() => runAudio),
+    }
+    const fadeOut = vi.fn((audio: typeof runAudio) => {
+      audio.pause()
+      audio.currentTime = 0
+    })
+
+    vi.resetModules()
+    vi.doMock('@/shared/audio/battleAudioDom', () => ({
+      audioClockNow: () => 0,
+      canUseAudio: () => true,
+      fadeOut,
+      loadAudio: () => baseAudio,
+      tryPlay: (audio: typeof runAudio) => {
+        void audio.play()
+      },
+    }))
+
+    try {
+      Object.defineProperty(document, 'hidden', { configurable: true, value: false })
+      const audio = await import('./battleAudio')
+      const unbind = audio.bindBattleAudioVisibility()
+
+      audio.playRunSound(10_000)
+      expect(runAudio.play).toHaveBeenCalledTimes(1)
+
+      Object.defineProperty(document, 'hidden', { configurable: true, value: true })
+      document.dispatchEvent(new Event('visibilitychange'))
+
+      expect(fadeOut).toHaveBeenCalledWith(runAudio, 0)
+      expect(runAudio.pause).toHaveBeenCalledTimes(1)
+
+      audio.playRunSound(10_000)
+      expect(runAudio.play).toHaveBeenCalledTimes(1)
+
+      unbind()
+    } finally {
+      vi.doUnmock('@/shared/audio/battleAudioDom')
+      vi.resetModules()
+      if (originalHidden) {
+        Object.defineProperty(document, 'hidden', originalHidden)
+      } else {
+        Reflect.deleteProperty(document, 'hidden')
+      }
+    }
+  })
+})

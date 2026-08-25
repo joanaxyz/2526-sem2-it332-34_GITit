@@ -8,7 +8,6 @@
 .leading-tight { line-height: 1.15; }
 .leading-5 { line-height: 1.25rem; }
 .leading-6 { line-height: 1.5rem; }
-.text-\[10px\] { font-size: var(--text-2xs); }
 .text-\[11px\] { font-size: 11px; }
 .text-xs { font-size: var(--text-xs); }
 .text-sm { font-size: var(--text-sm); }

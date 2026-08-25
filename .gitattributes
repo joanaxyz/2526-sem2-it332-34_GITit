@@ -13,6 +13,7 @@
 *.txt text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+*.sh text eol=lf
 
 *.bat text eol=crlf
 *.cmd text eol=crlf
@@ -27,8 +28,6 @@
 *.webp binary
 *.zip binary
 
-frontend/public/** export-ignore
-frontend/src/assets/** export-ignore
 node_modules/** export-ignore
 backend/.venv/** export-ignore
 backend/media/** export-ignore

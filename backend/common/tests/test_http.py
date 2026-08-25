@@ -4,9 +4,7 @@ from common.http import get_client_ip
 
 
 def test_client_ip_ignores_forwarded_header_by_default():
-    request = RequestFactory().get(
-        "/", REMOTE_ADDR="10.0.0.10", HTTP_X_FORWARDED_FOR="203.0.113.8"
-    )
+    request = RequestFactory().get("/", REMOTE_ADDR="10.0.0.10", HTTP_X_FORWARDED_FOR="203.0.113.8")
     assert get_client_ip(request) == "10.0.0.10"
 
 

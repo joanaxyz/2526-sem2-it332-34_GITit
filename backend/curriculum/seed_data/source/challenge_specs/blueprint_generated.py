@@ -1055,7 +1055,7 @@ def _blueprint_challenges() -> list[dict[str, Any]]:
                     ["ch6-adv-abort-then-pick-right-commit", "ch6-adv-stash-and-pick"],
                     {
                         "story": "A cherry-pick of the wrong release candidate is stuck mid-way, and the real fix is still waiting on develop.",
-                        "task": "Abort the wrong pick, bring in the correct fix unstaged so you can adapt it, then commit the adapted result.",
+                        "task": "Abort the wrong pick, bring in the correct fix without committing it so you can adapt it, then stage and commit the adapted result.",
                         "before": "main mid-cherry-pick of the wrong candidate c2; correct fix c3 available on develop",
                         "after": "wrong pick aborted; correct fix adapted and committed on main",
                         "initial": repo(
@@ -1070,6 +1070,13 @@ def _blueprint_challenges() -> list[dict[str, Any]]:
                             cherry_pick_original_head="c1",
                         ),
                         "solution": ["git cherry-pick --abort", "git cherry-pick --no-commit c3", "git add src/patch.py", "git commit -m 'Adapt release fix'"],
+                        "workspace_files": [
+                            {
+                                "after_command_index": 2,
+                                "path": "src/patch.py",
+                                "content": "fix()\n# adapted for release\n",
+                            }
+                        ],
                         "required": ["git cherry-pick --abort", "git cherry-pick --no-commit", "git add", "git commit"],
                         "state_requirements": {
                             "latest_commit": {"branch": "main", "contains_paths": ["src/patch.py"], "message_contains": ["Adapt release fix"]},
@@ -1080,7 +1087,7 @@ def _blueprint_challenges() -> list[dict[str, Any]]:
                     },
                     {
                         "story": "A cherry-pick of the wrong doc candidate is stuck mid-way, and the real backport is still waiting on develop.",
-                        "task": "Abort the wrong pick, bring in the correct backport unstaged so you can adapt it, then commit the adapted result.",
+                        "task": "Abort the wrong pick, bring in the correct backport without committing it so you can adapt it, then stage and commit the adapted result.",
                         "before": "main mid-cherry-pick of the wrong candidate c2; correct backport c3 available on develop",
                         "after": "wrong pick aborted; correct backport adapted and committed on main",
                         "initial": repo(
@@ -1095,6 +1102,13 @@ def _blueprint_challenges() -> list[dict[str, Any]]:
                             cherry_pick_original_head="c1",
                         ),
                         "solution": ["git cherry-pick --abort", "git cherry-pick --no-commit c3", "git add docs/backport.md", "git commit -m 'Adapt doc backport'"],
+                        "workspace_files": [
+                            {
+                                "after_command_index": 2,
+                                "path": "docs/backport.md",
+                                "content": "notes\nAdapted for release\n",
+                            }
+                        ],
                         "required": ["git cherry-pick --abort", "git cherry-pick --no-commit", "git add", "git commit"],
                         "state_requirements": {
                             "latest_commit": {"branch": "main", "contains_paths": ["docs/backport.md"], "message_contains": ["Adapt doc backport"]},
@@ -1233,7 +1247,6 @@ def _blueprint_challenges() -> list[dict[str, Any]]:
                             remote_branches={"origin/main": "c0", "origin/old-feature": "c0"},
                             upstream_tracking={"main": "origin/main"},
                             remote_updates={"origin/main": "r2"},
-                            remote_stale_branches=["old-feature"],
                         ),
                         "solution": ["git fetch --prune", "git log --oneline --graph --all", "git pull --rebase", "git commit --amend -m 'Correct release note'", "git push --force-with-lease", "git push origin --delete old-feature"],
                         "required": ["git fetch --prune", "git pull --rebase", "git commit --amend", "git push --force-with-lease", "git push"],
@@ -1265,7 +1278,6 @@ def _blueprint_challenges() -> list[dict[str, Any]]:
                             remote_branches={"origin/main": "c0", "origin/old-draft": "c0"},
                             upstream_tracking={"main": "origin/main"},
                             remote_updates={"origin/main": "r2"},
-                            remote_stale_branches=["old-draft"],
                         ),
                         "solution": ["git fetch --prune", "git log --oneline --graph --all", "git pull --rebase", "git commit --amend -m 'Correct summary note'", "git push --force-with-lease", "git push origin --delete old-draft"],
                         "required": ["git fetch --prune", "git pull --rebase", "git commit --amend", "git push --force-with-lease", "git push"],

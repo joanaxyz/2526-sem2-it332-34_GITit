@@ -24,7 +24,7 @@ export function AdminContentPage() {
       <div className="mb-4 flex flex-wrap gap-2">
         {KINDS.map((kind) => (
           <Button key={kind} asChild size="sm">
-            <Link to={`/level-editor/new/${kind}`}>New {kind}</Link>
+            <Link to={`/level-editor/new/${kind}?official=1`}>New {kind}</Link>
           </Button>
         ))}
       </div>
@@ -45,6 +45,7 @@ export function AdminContentPage() {
                 <th className="px-5 py-2 font-semibold">Title</th>
                 <th className="px-5 py-2 font-semibold">Kind</th>
                 <th className="px-5 py-2 font-semibold">Status</th>
+                <th className="px-5 py-2 font-semibold">Official chapter</th>
                 <th className="px-5 py-2 font-semibold">Updated</th>
                 <th className="px-5 py-2" />
               </tr>
@@ -55,10 +56,13 @@ export function AdminContentPage() {
                   <td className="px-5 py-2.5 font-medium text-foreground">{content.title}</td>
                   <td className="px-5 py-2.5 capitalize text-muted-foreground">{content.kind}</td>
                   <td className="px-5 py-2.5 capitalize text-muted-foreground">{content.status}</td>
+                  <td className="px-5 py-2.5 text-muted-foreground">
+                    {content.official_chapter?.title}
+                  </td>
                   <td className="px-5 py-2.5 text-muted-foreground">{formatDate(content.updated_at)}</td>
                   <td className="px-5 py-2.5 text-right">
                     <Button asChild size="sm" variant="outline">
-                      <Link to={`/level-editor/${content.id}`}>Edit</Link>
+                      <Link to={`/level-editor/${content.id}?official=1`}>Edit</Link>
                     </Button>
                   </td>
                 </tr>

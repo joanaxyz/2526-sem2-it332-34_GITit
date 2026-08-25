@@ -2,7 +2,7 @@
    Every scrollable game surface should inherit this treatment. Feature files
    own only layout/overflow; color, width, and thumb treatment live here. */
 :root {
-  --scrollbar-size: 0.55rem;
+  --scrollbar-size: 0.42rem;
   --scrollbar-track: rgba(2, 10, 24, 0.48);
   --scrollbar-thumb: rgba(var(--theme-primary-rgb), 0.42);
   --scrollbar-thumb-hover: rgba(var(--theme-primary-rgb), 0.68);
@@ -25,7 +25,7 @@
 
 :where(html, body, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *)::-webkit-scrollbar-thumb {
   min-height: 2.5rem;
-  border: 0.16rem solid transparent;
+  border: 0.1rem solid transparent;
   border-radius: 999px;
   background: var(--scrollbar-thumb);
   background-clip: padding-box;
@@ -36,7 +36,6 @@
   background-clip: padding-box;
 }
 
-.app-scrollbar,
 .ui-scroll-y,
 .ui-scroll-x,
 .ui-scroll-both {

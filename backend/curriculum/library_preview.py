@@ -88,7 +88,11 @@ def command_preview_syntax_for_command(command: str) -> str:
     if normalized.startswith("git diff"):
         for option in ("--ours", "--theirs", "--base"):
             if option in normalized:
-                return f"git diff {option} <path>" if len(_command_words(raw)) > 3 else f"git diff {option}"
+                return (
+                    f"git diff {option} <path>"
+                    if len(_command_words(raw)) > 3
+                    else f"git diff {option}"
+                )
         if "--check" in normalized:
             return "git diff --check <path>" if len(_command_words(raw)) > 3 else "git diff --check"
         if "--name-only" in normalized:
@@ -119,7 +123,11 @@ def command_preview_syntax_for_command(command: str) -> str:
     if normalized.startswith("git checkout -b"):
         words = _command_words(raw)
         positional = [w for w in words[2:] if not w.startswith("-")]
-        return "git checkout -b <branch> <start-point>" if len(positional) >= 2 else "git checkout -b <branch>"
+        return (
+            "git checkout -b <branch> <start-point>"
+            if len(positional) >= 2
+            else "git checkout -b <branch>"
+        )
     if normalized.startswith("git stash list"):
         return "git stash list"
     if normalized.startswith("git stash pop"):
@@ -130,7 +138,11 @@ def command_preview_syntax_for_command(command: str) -> str:
         return "git stash drop"
     if normalized.startswith("git stash"):
         return "git stash"
-    if normalized.startswith("git push --force-with-lease") or normalized.startswith("git push -f") or normalized.startswith("git push --force"):
+    if (
+        normalized.startswith("git push --force-with-lease")
+        or normalized.startswith("git push -f")
+        or normalized.startswith("git push --force")
+    ):
         return "git push --force-with-lease <remote> <branch>"
     if normalized.startswith("git push") and " --delete " in f" {normalized} ":
         return "git push <remote> --delete <branch>"
@@ -163,7 +175,13 @@ def command_preview_syntax_for_command(command: str) -> str:
     if normalized.startswith("git remote"):
         return "git remote"
     if normalized.startswith("git status"):
-        for syntax in ("git status --ignored", "git status --porcelain", "git status -sb", "git status --short", "git status -s"):
+        for syntax in (
+            "git status --ignored",
+            "git status --porcelain",
+            "git status -sb",
+            "git status --short",
+            "git status -s",
+        ):
             if normalized == syntax:
                 return syntax
         return "git status"
@@ -201,7 +219,9 @@ def _git_init_preview_syntax(command: str) -> str:
     opts = [word.lower() for word in words[2:] if word.startswith("-")]
     has_quiet = any(word in {"-q", "--quiet"} for word in opts)
     has_short_branch = "-b" in opts
-    has_long_branch = any(word == "--initial-branch" or word.startswith("--initial-branch=") for word in opts)
+    has_long_branch = any(
+        word == "--initial-branch" or word.startswith("--initial-branch=") for word in opts
+    )
     # Any non-option token after `git init` that is not the branch value is treated as a directory.
     args = words[2:]
     directory = False
@@ -311,9 +331,3 @@ def _restore_preview_syntax(command: str, *, staged: bool) -> str:
     if len(args) >= 2:
         return f"{base} <path> <path>"
     return f"{base} <path>"
-
-
-
-
-
-

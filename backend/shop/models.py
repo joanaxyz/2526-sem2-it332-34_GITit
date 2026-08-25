@@ -15,6 +15,7 @@ class Entitlement(models.Model):
         "players.Player",
         related_name="entitlements",
         on_delete=models.CASCADE,
+        db_index=False,
     )
     kind = models.CharField(max_length=16, choices=SHOP_KIND_CHOICES)
     slug = models.SlugField(max_length=64)
@@ -23,10 +24,9 @@ class Entitlement(models.Model):
     class Meta:
         ordering = ["-granted_at", "-id"]
         constraints = [
-            models.UniqueConstraint(fields=["player", "kind", "slug"], name="unique_shop_entitlement"),
-        ]
-        indexes = [
-            models.Index(fields=["player", "kind"], name="entitlement_player_kind_idx"),
+            models.UniqueConstraint(
+                fields=["player", "kind", "slug"], name="unique_shop_entitlement"
+            ),
         ]
 
     def __str__(self) -> str:

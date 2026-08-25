@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 
 import { adminApi } from '@/features/admin/api/adminApi'
 import { PageHeading } from '@/features/admin/components/adminUi'
+import { adminErrorMessage } from '@/features/admin/utils/errors'
 import { formatDate } from '@/features/admin/utils/format'
 import { Button } from '@/shared/components/Button'
 import { ErrorState } from '@/shared/components/ErrorState'
@@ -10,11 +12,15 @@ import { queryKeys } from '@/shared/api/queryKeys'
 
 export function AdminModerationPage() {
   const queryClient = useQueryClient()
+  const [confirmingId, setConfirmingId] = useState<number | null>(null)
   const { data, isPending, isError } = useQuery({ queryKey: queryKeys.adminModeration, queryFn: adminApi.moderation })
 
   const unpublish = useMutation({
     mutationFn: adminApi.unpublish,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.adminModeration }),
+    onSuccess: () => {
+      setConfirmingId(null)
+      queryClient.invalidateQueries({ queryKey: queryKeys.adminModeration })
+    },
   })
 
   if (isPending) return <LoadingState label="Loading shared content" variant="page" />
@@ -36,13 +42,48 @@ export function AdminModerationPage() {
                   <span className="font-medium text-foreground">{content.title}</span>
                   <span className="ml-2 text-xs capitalize text-muted-foreground">{content.kind} · by {content.owner ?? 'unknown'} · {formatDate(content.updated_at)}</span>
                 </span>
-                <Button size="sm" variant="destructive" disabled={unpublish.isPending} onClick={() => unpublish.mutate({ kind: 'content', id: content.id })}>
-                  Unpublish
-                </Button>
+                {confirmingId === content.id ? (
+                  <div
+                    className="flex items-center gap-2"
+                    role="group"
+                    aria-label={`Confirm unpublish ${content.title}`}
+                  >
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      disabled={unpublish.isPending}
+                      onClick={() => unpublish.mutate({ kind: 'content', id: content.id })}
+                    >
+                      Confirm unpublish
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={unpublish.isPending}
+                      onClick={() => setConfirmingId(null)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    disabled={unpublish.isPending || confirmingId !== null}
+                    onClick={() => setConfirmingId(content.id)}
+                  >
+                    Unpublish
+                  </Button>
+                )}
               </li>
             ))}
           </ul>
         )}
+        {unpublish.isError ? (
+          <p role="alert" className="border-t border-border px-5 py-3 text-xs text-destructive">
+            {adminErrorMessage(unpublish.error, 'The content could not be unpublished.')}
+          </p>
+        ) : null}
       </section>
     </div>
   )

@@ -1,6 +1,6 @@
 import type { AuthoringChapter } from '@/features/authoring/types'
 
-export function chapterIndexToSortOrder(chapterIndex: number): number | null {
+function chapterIndexToSortOrder(chapterIndex: number): number | null {
   const normalized = Math.round(Number(chapterIndex))
   if (!Number.isFinite(normalized) || normalized < 1) return null
   return normalized - 1

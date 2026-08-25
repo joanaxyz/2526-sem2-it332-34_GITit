@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""Replay authored curriculum solutions and fail if generated targets are stale.
+"""Validate authored solutions and fail if generated targets are stale.
 
 This is the expensive Phase 6 guard. It requires both backend Python
 requirements and frontend Node dependencies because the target generator replays
-solutions through the real TypeScript git simulator.
+solutions through the real TypeScript git simulator. The replay also rejects
+unprocessable commands, invalid file-edit timing, and routes that exceed their
+counted-command budget.
 """
+
 from __future__ import annotations
 
 import os

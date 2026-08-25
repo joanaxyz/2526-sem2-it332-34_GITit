@@ -92,6 +92,45 @@
   padding-bottom: 0.75rem;
 }
 
+.story-companion-panel--empty {
+  min-height: 10.5rem;
+}
+
+.story-companion-empty {
+  display: grid;
+  min-height: 6.5rem;
+  align-content: center;
+  justify-items: start;
+  gap: 0.7rem;
+}
+
+.story-companion-empty p {
+  max-width: 30ch;
+  margin: 0;
+  color: rgba(219, 234, 254, 0.72);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.story-companion-empty a {
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  padding: 0.45rem 0.7rem;
+  background: var(--control-bg);
+  color: hsl(var(--foreground));
+  font-size: var(--text-xs);
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.story-companion-empty a:hover,
+.story-companion-empty a:focus-visible {
+  border-color: var(--control-border-hover);
+  background: var(--control-bg-hover);
+  outline: none;
+  box-shadow: var(--control-focus-ring);
+}
+
 .story-companion-panel .game-panel-head {
   margin-bottom: 0.15rem;
 }

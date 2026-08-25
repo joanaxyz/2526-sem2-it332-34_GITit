@@ -3,7 +3,6 @@ import type { BattleStageConfig, Visibility } from '@/features/authoring/types'
 export const VISIBILITIES: { id: Visibility; label: string }[] = [
   { id: 'private', label: 'Private (only you)' },
   { id: 'public', label: 'Public (shareable)' },
-  { id: 'store', label: 'Store (listed)' },
 ]
 
 export const DIFFICULTIES: { id: string; label: string }[] = [

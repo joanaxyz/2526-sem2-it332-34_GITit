@@ -27,7 +27,6 @@ from pathlib import Path
 
 from PIL import Image
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ASSETS_ROOT = REPO_ROOT / "frontend" / "src" / "assets"
 DEFAULT_SOURCE_DIR = ASSETS_ROOT / "raw" / "images"
@@ -100,7 +99,12 @@ def crop_png(
         crop_box = padded_bbox(bbox, image.size, padding)
         cropped = image.convert("RGBA").crop(crop_box)
         output_size = cropped.size
-        copied = output_size == original_size and crop_box == (0, 0, original_size[0], original_size[1])
+        copied = output_size == original_size and crop_box == (
+            0,
+            0,
+            original_size[0],
+            original_size[1],
+        )
 
         if not dry_run:
             destination.parent.mkdir(parents=True, exist_ok=True)
@@ -128,16 +132,22 @@ def print_result(result: CropResult, source_root: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE_DIR, help="raw PNG directory")
-    parser.add_argument("--out", type=Path, default=DEFAULT_OUTPUT_DIR, help="cropped PNG output directory")
+    parser.add_argument(
+        "--out", type=Path, default=DEFAULT_OUTPUT_DIR, help="cropped PNG output directory"
+    )
     parser.add_argument(
         "--alpha-threshold",
         type=int,
         default=0,
         help="alpha values at or below this are treated as transparent (default: 0)",
     )
-    parser.add_argument("--padding", type=int, default=0, help="transparent pixels to keep around the crop")
+    parser.add_argument(
+        "--padding", type=int, default=0, help="transparent pixels to keep around the crop"
+    )
     parser.add_argument("--dry-run", action="store_true", help="report crops without writing files")
     args = parser.parse_args(argv)
 

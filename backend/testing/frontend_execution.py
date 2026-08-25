@@ -20,7 +20,9 @@ def frontend_execution_payload(
 
     normalized = normalize_command(command)
     parsed = parse_git_command(normalized) or []
-    family = command_family if command_family is not None else (parsed[1] if len(parsed) > 1 else "")
+    family = (
+        command_family if command_family is not None else (parsed[1] if len(parsed) > 1 else "")
+    )
     normalized_state = RepositoryStateNormalizer().normalize(deepcopy(next_state))
     payload = {
         "processed": processed,

@@ -21,7 +21,7 @@ import { useAuthStore } from '@/shared/auth/useAuth'
 import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 import { useWalletSummary } from '@/shared/wallet/hooks/useWallet'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
-import { HOME_ROUTE, SHOP_ROUTE, isStoryMapRoute, storyPath } from '@/shared/navigation/routes'
+import { ADMIN_ROUTES, HOME_ROUTE, SHOP_ROUTE, isStoryMapRoute, storyPath } from '@/shared/navigation/routes'
 import { cn } from '@/shared/utils/cn'
 
 type PrimaryNavItem = {
@@ -55,10 +55,10 @@ const primaryNavItems: PrimaryNavItem[] = [
 ]
 
 const adminNavItem: PrimaryNavItem = {
-  to: '/admin',
+  to: ADMIN_ROUTES.dashboard,
   label: 'Admin',
   Icon: ShieldCheck,
-  match: (pathname) => pathname.startsWith('/admin'),
+  match: (pathname) => pathname.startsWith(ADMIN_ROUTES.dashboard),
 }
 
 function formatBalance(balance: number, isPending?: boolean) {
@@ -139,11 +139,11 @@ function ProfileAvatar({
   initials: string
   className: string
   open: boolean
-  src: string
+  src?: string
 }) {
   return (
     <span className={cn(className, open && 'is-open')} title={initials}>
-      <img src={src} alt="" />
+      {src ? <img src={src} alt="" /> : <span className="app-profile-avatar-initials">{initials}</span>}
     </span>
   )
 }
@@ -191,10 +191,11 @@ function ProfileDropdown({
   const initials = getInitials(user.username)
   const displayName = user.username || 'Adventurer'
   const rankLabel = rank ? `Rank ${rank.tier.numeral}` : 'Rank --'
-  const avatarSrc =
-    playerLoadout.companion.sprites.avatar?.src ??
-    playerLoadout.companion.sprites.portrait?.src ??
-    playerLoadout.companion.sprites.idle.src
+  const avatarSrc = playerLoadout.hasCompanion
+    ? playerLoadout.companion.sprites.avatar?.src ??
+      playerLoadout.companion.sprites.portrait?.src ??
+      playerLoadout.companion.sprites.idle.src
+    : undefined
 
   useEffect(() => {
     if (!open) return
@@ -218,6 +219,7 @@ function ProfileDropdown({
     <div ref={ref} className="app-profile">
       <button
         type="button"
+        aria-label={`${open ? 'Close' : 'Open'} account menu for ${displayName}`}
         aria-expanded={open}
         aria-haspopup="menu"
         className="app-profile-trigger"
@@ -260,7 +262,7 @@ function ProfileDropdown({
                 label="Admin console"
                 onClick={() => {
                   setOpen(false)
-                  onNavigate('/admin')
+                  onNavigate(ADMIN_ROUTES.dashboard)
                 }}
               />
             ) : null}
@@ -285,13 +287,12 @@ function ProfileDropdown({
 
 function AppWalletLink({ balance, isPending }: { balance: number; isPending?: boolean }) {
   return (
-    <NavLink to="/shop?tab=gitcoins" className="app-wallet" aria-label="Open GitCoin shop">
+    <NavLink to={SHOP_ROUTE} className="app-wallet" aria-label="Open shop">
       <GitCoinIcon />
       <span>
         <strong>{formatBalance(balance, isPending)}</strong>
         <small>GitCoins</small>
       </span>
-      <b aria-hidden="true">+</b>
     </NavLink>
   )
 }

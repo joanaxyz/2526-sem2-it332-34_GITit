@@ -3,7 +3,7 @@
 Root-level script files are compatibility wrappers for CI/package scripts. New
 implementation code should live in grouped folders:
 
-- `checks/` — repository, architecture, docs, API, and deploy guards.
+- `checks/` — repository, architecture, docs, API, and deploy guards. The architecture-boundary executable is a stable orchestrator; reusable analysis and domain contract policies live in `checks/architecture_guard/`.
 - `api/` — OpenAPI/schema generation helpers.
 - `assets/` — sprite and image processing helpers.
 - `packaging/` — source-zip and artifact cleanup helpers.

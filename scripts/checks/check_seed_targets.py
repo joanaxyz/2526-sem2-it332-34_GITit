@@ -15,6 +15,7 @@ When a variant solution changes, run:
 
     cd backend && python manage.py generate_targets
 """
+
 from __future__ import annotations
 
 import sys
@@ -58,7 +59,9 @@ def _load_seed_modules() -> tuple[list[dict[str, Any]], list[dict[str, Any]], di
     return ADVENTURE_LEVELS, CHALLENGES, TARGET_STATES
 
 
-def _collect_case_ids(adventure_levels: list[dict[str, Any]], challenges: list[dict[str, Any]]) -> set[str]:
+def _collect_case_ids(
+    adventure_levels: list[dict[str, Any]], challenges: list[dict[str, Any]]
+) -> set[str]:
     case_ids: set[str] = set()
     duplicates: set[str] = set()
 
@@ -174,7 +177,10 @@ def main() -> int:
             print(f"  {error}", file=sys.stderr)
         if len(errors) > 80:
             print(f"  ... {len(errors) - 80} more", file=sys.stderr)
-        print("\nRun `cd backend && python manage.py generate_targets` after changing solutions.", file=sys.stderr)
+        print(
+            "\nRun `cd backend && python manage.py generate_targets` after changing solutions.",
+            file=sys.stderr,
+        )
         return 1
 
     print(f"Generated curriculum targets are consistent ({len(authored_case_ids)} cases).")

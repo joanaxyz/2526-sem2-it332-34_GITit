@@ -23,8 +23,7 @@ class SeedCurriculumCommandSkillsMixin:
             # capability is tracked separately on each form, so a command is not
             # hidden merely because its simulator implementation lands later.
             skill_is_published = any(
-                form_chapter(spec, form_spec).is_published
-                for form_spec in spec.get("usages", [])
+                form_chapter(spec, form_spec).is_published for form_spec in spec.get("usages", [])
             )
             skill_rows.append(
                 (
@@ -43,7 +42,7 @@ class SeedCurriculumCommandSkillsMixin:
             )
         skills_by_slug = self._bulk_upsert(
             CommandSkill,
-            CommandSkill.objects.all(),
+            CommandSkill.objects.filter(source_content_definition__isnull=True),
             skill_rows,
             key=lambda obj: obj.slug,
             update_fields=[
@@ -110,10 +109,11 @@ class SeedCurriculumCommandSkillsMixin:
         CommandForm.objects.filter(command_skill__in=skill_objs).exclude(
             id__in=live_form_ids
         ).update(is_published=False)
-        CommandSkill.objects.exclude(id__in=live_skill_ids).update(is_published=False)
+        CommandSkill.objects.filter(source_content_definition__isnull=True).exclude(
+            id__in=live_skill_ids
+        ).update(is_published=False)
         return {
-            form_key: forms_by_key[identity]
-            for form_key, identity in form_key_to_identity.items()
+            form_key: forms_by_key[identity] for form_key, identity in form_key_to_identity.items()
         }
 
     def _usage_to_chapter_slug(self) -> dict[str, str]:

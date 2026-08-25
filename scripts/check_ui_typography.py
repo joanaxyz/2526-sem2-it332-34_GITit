@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Reject UI font sizes below the documented 11px minimum."""
+
 from __future__ import annotations
 
 import re
@@ -20,7 +21,9 @@ def main() -> int:
     for path in FRONTEND.rglob("*"):
         if path.suffix not in {".css", ".tsx", ".ts"}:
             continue
-        for lineno, line in enumerate(path.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
+        for lineno, line in enumerate(
+            path.read_text(encoding="utf-8", errors="ignore").splitlines(), 1
+        ):
             if path.suffix == ".css":
                 for match in CSS_REM.finditer(line):
                     value = float(match.group(1)) * ROOT_PX

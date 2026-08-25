@@ -12,6 +12,10 @@ import {
 } from '@/features/challenges/utils/challengeRunCache'
 import { mapUrlForRun } from '@/features/challenges/components/challengeWorkspaceLayout'
 import { queryKeys } from '@/shared/api/queryKeys'
+import type {
+  WorkspaceFileInput,
+  WorkspaceFileRenameInput,
+} from '@/shared/level/workspaceFileTypes'
 
 export function useChallengeWorkspaceMutations({
   run,
@@ -119,7 +123,7 @@ export function useChallengeWorkspaceMutations({
   })
 
   const createFileMutation = useMutation({
-    mutationFn: (input: { path: string; content: string }) => {
+    mutationFn: (input: WorkspaceFileInput) => {
       if (!run) throw new Error('No challenge run is available to update.')
       return challengeRunsApi.createFile(run.id, input)
     },
@@ -129,7 +133,7 @@ export function useChallengeWorkspaceMutations({
   })
 
   const writeFileMutation = useMutation({
-    mutationFn: (input: { path: string; content: string }) => {
+    mutationFn: (input: WorkspaceFileInput) => {
       if (!run) throw new Error('No challenge run is available to update.')
       return challengeRunsApi.writeFile(run.id, input)
     },
@@ -139,7 +143,7 @@ export function useChallengeWorkspaceMutations({
   })
 
   const renameFileMutation = useMutation({
-    mutationFn: (input: { path: string; newPath: string }) => {
+    mutationFn: (input: WorkspaceFileRenameInput) => {
       if (!run) throw new Error('No challenge run is available to update.')
       return challengeRunsApi.renameFile(run.id, input)
     },

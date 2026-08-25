@@ -11,10 +11,11 @@ import { ResizeHandle } from '@/shared/level/components/ResizeHandle'
 import { TerminalPanel } from '@/shared/level/components/TerminalPanel'
 import type { TerminalPrompt } from '@/shared/level/terminalPrompt'
 import type { TerminalLine } from '@/shared/level/types'
+import type {
+  WorkspaceFileInput,
+  WorkspaceFileRenameInput,
+} from '@/shared/level/workspaceFileTypes'
 import { cn } from '@/shared/utils/cn'
-
-export type WorkspaceFileInput = { path: string; content: string }
-type WorkspaceFileRenameInput = { path: string; newPath: string }
 
 export type ResizeStart = (event: PointerEvent<HTMLElement>) => void
 

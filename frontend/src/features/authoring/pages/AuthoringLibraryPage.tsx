@@ -183,16 +183,18 @@ function ContentRow({ content }: { content: ContentDefinition }) {
           <CheckCircle2 className="size-3.5" aria-hidden="true" />
           Validate
         </button>
-        <button
-          type="button"
-          className="scriptorium-action"
-          disabled={busy || content.status === 'draft'}
-          onClick={() => testRun.mutate()}
-          title={content.status === 'draft' ? 'Validate first to test-play' : undefined}
-        >
-          <Play className="size-3.5" aria-hidden="true" />
-          Test-play
-        </button>
+        {content.official_chapter_id == null ? (
+          <button
+            type="button"
+            className="scriptorium-action"
+            disabled={busy || content.status === 'draft'}
+            onClick={() => testRun.mutate()}
+            title={content.status === 'draft' ? 'Validate first to test-play' : undefined}
+          >
+            <Play className="size-3.5" aria-hidden="true" />
+            Test-play
+          </button>
+        ) : null}
         <button type="button" className="scriptorium-action" disabled={busy} onClick={() => publish.mutate()}>
           <Rocket className="size-3.5" aria-hidden="true" />
           Publish
@@ -204,5 +206,3 @@ function ContentRow({ content }: { content: ContentDefinition }) {
     </li>
   )
 }
-
-export default AuthoringLibraryPage

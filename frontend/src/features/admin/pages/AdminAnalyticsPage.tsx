@@ -18,7 +18,7 @@ export function AdminAnalyticsPage() {
       <PageHeading title="Progress & Analytics" description="How learners are moving through the curriculum." />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile label="Adventure runs" value={data.runs.total} />
+        <StatTile label="All runs" value={data.runs.total} hint={`${data.runs.adventure.total} adventure · ${data.runs.challenge.total} challenge`} />
         <StatTile label="Pass rate" value={`${passRate}%`} hint={`${data.runs.passed} passed`} />
         <StatTile label="Active learners" value={data.active_learners_30d} hint="last 30 days" />
         <StatTile label="Level completions" value={data.completions.total} />
@@ -62,6 +62,8 @@ export function AdminAnalyticsPage() {
             <tr>
               <th className="px-5 py-2 font-semibold">Story</th>
               <th className="px-5 py-2 font-semibold">Runs</th>
+              <th className="px-5 py-2 font-semibold">Adventure</th>
+              <th className="px-5 py-2 font-semibold">Challenge</th>
               <th className="px-5 py-2 font-semibold">Passed</th>
             </tr>
           </thead>
@@ -70,6 +72,8 @@ export function AdminAnalyticsPage() {
               <tr key={story.slug} className="border-b border-border/40">
                 <td className="px-5 py-2.5 font-medium text-foreground">{story.title}</td>
                 <td className="px-5 py-2.5 text-muted-foreground">{story.runs}</td>
+                <td className="px-5 py-2.5 text-muted-foreground">{story.adventure_runs}</td>
+                <td className="px-5 py-2.5 text-muted-foreground">{story.challenge_runs}</td>
                 <td className="px-5 py-2.5 text-muted-foreground">{story.passed}</td>
               </tr>
             ))}

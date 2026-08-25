@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Remove generated cache/build artifacts from the repository tree."""
+
 from __future__ import annotations
 
 import os

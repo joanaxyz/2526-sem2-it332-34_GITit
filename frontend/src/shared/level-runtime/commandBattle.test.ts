@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { battleEventsForSubmittedCommand } from '@/shared/level-runtime/commandBattle'
 import type { BattleMonster, CommandSubmissionOutcome } from '@/shared/battle/types'
 
-function mob(id = 1, hp = 2): BattleMonster {
-  return { id, species: 'bone-soldier', tier: 'mob', hp, max_hp: hp, alive: hp > 0 }
+function monster(id = 1, hp = 2): BattleMonster {
+  return { id, species: 'bone-soldier', hp, max_hp: hp, alive: hp > 0 }
 }
 
 function outcome(overrides: Partial<CommandSubmissionOutcome> = {}): CommandSubmissionOutcome {
@@ -30,7 +30,7 @@ describe('battleEventsForSubmittedCommand', () => {
     const block = battleEventsForSubmittedCommand({
       command: 'git add README.md',
       outcome: outcome({ command_family: 'add' }),
-      monsters: [mob()],
+      monsters: [monster()],
     })
 
     expect(block.events[0]).toMatchObject({ type: 'player_attack', skill: 'add', damage: 1 })
@@ -42,7 +42,7 @@ describe('battleEventsForSubmittedCommand', () => {
       command: 'git checkout --ours app.py',
       outcome: outcome({ command_family: null as unknown as string }),
       fallbackCommandFamily: 'checkout',
-      monsters: [mob()],
+      monsters: [monster()],
     })
 
     expect(block.events[0]).toMatchObject({ type: 'player_attack', skill: 'checkout-conflict' })

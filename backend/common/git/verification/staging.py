@@ -26,18 +26,32 @@ class StagingVerificationMixin:
             expected = copy.deepcopy(previous_state)
             selected = self._selected_patch_paths(expected, args)
             if not selected:
-                raise BadRequest("execution.next_state does not match the submitted git add --patch command.")
+                raise BadRequest(
+                    "execution.next_state does not match the submitted git add --patch command."
+                )
             for path in selected:
-                if path not in (expected.get("working_tree") or {}) and path not in (expected.get("partial_hunks") or {}):
+                if path not in (expected.get("working_tree") or {}) and path not in (
+                    expected.get("partial_hunks") or {}
+                ):
                     continue
-                if self.normalizer.entry_status((expected.get("working_tree") or {}).get(path)) == "ignored":
+                if (
+                    self.normalizer.entry_status((expected.get("working_tree") or {}).get(path))
+                    == "ignored"
+                ):
                     continue
                 authored = (expected.get("partial_hunks") or {}).get(path)
                 target_hunks, leftover_hunks = self._partial_hunk_lists(authored)
-                expected.setdefault("staging", {})[path] = {"status": "partial", "hunks": target_hunks or self._entry_tokens((expected.get("working_tree") or {}).get(path))}
+                expected.setdefault("staging", {})[path] = {
+                    "status": "partial",
+                    "hunks": target_hunks
+                    or self._entry_tokens((expected.get("working_tree") or {}).get(path)),
+                }
                 if target_hunks or leftover_hunks:
                     if leftover_hunks:
-                        expected.setdefault("working_tree", {})[path] = {"status": "modified", "hunks": leftover_hunks}
+                        expected.setdefault("working_tree", {})[path] = {
+                            "status": "modified",
+                            "hunks": leftover_hunks,
+                        }
                     else:
                         expected.setdefault("working_tree", {}).pop(path, None)
                 else:
@@ -47,7 +61,9 @@ class StagingVerificationMixin:
             return
 
         include_untracked = "-u" not in parts and "--update" not in parts
-        selected = self._selected_add_paths(previous_state, args, include_untracked=include_untracked)
+        selected = self._selected_add_paths(
+            previous_state, args, include_untracked=include_untracked
+        )
         if not selected:
             # Empty add is a no-op in authored scenarios. It cannot rewrite index
             # or worktree wholesale.
@@ -75,12 +91,15 @@ class StagingVerificationMixin:
             raise BadRequest("execution.next_state does not match the submitted git add command.")
         if next_state.get("conflict_details") != expected_details:
             raise BadRequest("execution.next_state does not match the submitted git add command.")
+
     def _verify_rm(self, *, command: str, previous_state: dict, next_state: dict) -> None:
         for key in self.INDEX_WORKTREE_IMMUTABLE_KEYS:
             self._require_same_key(key, previous_state, next_state)
         parts = parse_git_command(command) or []
         cached = "--cached" in parts
-        paths = self._expand_pathspecs(self.normalizer.head_tree(previous_state), self._pathspecs(parts))
+        paths = self._expand_pathspecs(
+            self.normalizer.head_tree(previous_state), self._pathspecs(parts)
+        )
         if not paths:
             self._require_same_key("staging", previous_state, next_state)
             self._require_same_key("working_tree", previous_state, next_state)
@@ -90,14 +109,20 @@ class StagingVerificationMixin:
         expected_working = copy.deepcopy(previous_state.get("working_tree") or {})
         for path in paths:
             if path not in base_tree and path not in expected_staging:
-                raise BadRequest("execution.next_state does not match the submitted git rm command.")
+                raise BadRequest(
+                    "execution.next_state does not match the submitted git rm command."
+                )
             expected_staging[path] = "deleted"
             if cached:
                 expected_working[path] = {"status": "untracked", "content": base_tree.get(path, "")}
             else:
                 expected_working.pop(path, None)
-        if next_state.get("staging") != expected_staging or next_state.get("working_tree") != expected_working:
+        if (
+            next_state.get("staging") != expected_staging
+            or next_state.get("working_tree") != expected_working
+        ):
             raise BadRequest("execution.next_state does not match the submitted git rm command.")
+
     def _verify_restore(self, *, command: str, previous_state: dict, next_state: dict) -> None:
         for key in self.INDEX_WORKTREE_IMMUTABLE_KEYS:
             self._require_same_key(key, previous_state, next_state)
@@ -115,8 +140,13 @@ class StagingVerificationMixin:
                 if path in expected_staging:
                     expected_working[path] = copy.deepcopy(expected_staging.get(path, "modified"))
                     expected_staging.pop(path, None)
-            if next_state.get("staging") != expected_staging or next_state.get("working_tree") != expected_working:
-                raise BadRequest("execution.next_state does not match the submitted git restore command.")
+            if (
+                next_state.get("staging") != expected_staging
+                or next_state.get("working_tree") != expected_working
+            ):
+                raise BadRequest(
+                    "execution.next_state does not match the submitted git restore command."
+                )
             return
 
         expected_working = copy.deepcopy(previous_state.get("working_tree") or {})
@@ -125,7 +155,9 @@ class StagingVerificationMixin:
         if source:
             source_commit = self._resolve_revision(previous_state, source)
             if not source_commit:
-                raise BadRequest("execution.next_state does not match the submitted git restore command.")
+                raise BadRequest(
+                    "execution.next_state does not match the submitted git restore command."
+                )
             source_tree = self._tree_for_commit(previous_state, source_commit)
             head_tree = self.normalizer.head_tree(previous_state)
             for path in paths:
@@ -133,7 +165,9 @@ class StagingVerificationMixin:
                     expected_working[path] = "deleted"
                 else:
                     expected_working[path] = {
-                        "status": self.normalizer.change_type(head_tree.get(path), source_tree[path]),
+                        "status": self.normalizer.change_type(
+                            head_tree.get(path), source_tree[path]
+                        ),
                         "content": copy.deepcopy(source_tree[path]),
                     }
         else:
@@ -146,16 +180,25 @@ class StagingVerificationMixin:
             head_tree = self.normalizer.head_tree(previous_state)
             for path in paths:
                 if path not in expected_working and path not in head_tree:
-                    raise BadRequest("execution.next_state does not match the submitted git restore command.")
+                    raise BadRequest(
+                        "execution.next_state does not match the submitted git restore command."
+                    )
                 expected_working.pop(path, None)
                 expected_conflicts.discard(path)
                 expected_details.pop(path, None)
         if next_state.get("working_tree") != expected_working:
-            raise BadRequest("execution.next_state does not match the submitted git restore command.")
+            raise BadRequest(
+                "execution.next_state does not match the submitted git restore command."
+            )
         if sorted(next_state.get("conflicts") or []) != sorted(expected_conflicts):
-            raise BadRequest("execution.next_state does not match the submitted git restore command.")
+            raise BadRequest(
+                "execution.next_state does not match the submitted git restore command."
+            )
         if next_state.get("conflict_details") != expected_details:
-            raise BadRequest("execution.next_state does not match the submitted git restore command.")
+            raise BadRequest(
+                "execution.next_state does not match the submitted git restore command."
+            )
+
     def _verify_reset(self, *, command: str, previous_state: dict, next_state: dict) -> None:
         parts = parse_git_command(command) or []
         args = self._pathspecs(parts)
@@ -165,6 +208,7 @@ class StagingVerificationMixin:
             raise BadRequest("execution.next_state does not match the submitted git reset command.")
         mode = "soft" if "--soft" in parts else "mixed" if "--mixed" in parts else "hard"
         expected = copy.deepcopy(previous_state)
+        expected["merge_abort_state"] = copy.deepcopy(previous_state)
         old_head = self.normalizer.head_commit_id(previous_state)
         old_tree = self.normalizer.head_tree(previous_state)
         target_tree = self._tree_for_commit(previous_state, target)
@@ -182,16 +226,15 @@ class StagingVerificationMixin:
             expected.pop("merge_parent", None)
             expected.pop("cherry_pick_in_progress", None)
             expected.pop("cherry_pick_original_head", None)
-        expected.setdefault("operation_metadata", {}).update(
+        self._set_operation_metadata(
+            expected,
             {
                 "last_reset_mode": mode,
                 "last_reset_target": target,
                 "last_reset_target_expr": target_expr,
                 "last_reset_previous_head": old_head,
-            }
+            },
         )
-        # The frontend stores a legacy top-level mirror for operation metadata.
-        expected.update(expected["operation_metadata"])
         if target:
             expected.setdefault("reflog", []).append(
                 {
@@ -202,19 +245,26 @@ class StagingVerificationMixin:
             )
         expected = self.tools.normalize_state(expected)
         self._require_equivalent_expected(expected, next_state, "git reset")
+
     def _stage_selected(self, state: dict, paths: list[str]) -> None:
         state.setdefault("working_tree", {})
         state.setdefault("staging", {})
         conflicts = set(state.get("conflicts") or [])
         details = state.setdefault("conflict_details", {})
         for path in paths:
-            if self.normalizer.entry_status((state.get("working_tree") or {}).get(path)) == "ignored":
+            if (
+                self.normalizer.entry_status((state.get("working_tree") or {}).get(path))
+                == "ignored"
+            ):
                 continue
-            state["staging"][path] = copy.deepcopy((state.get("working_tree") or {}).get(path, "updated"))
+            state["staging"][path] = copy.deepcopy(
+                (state.get("working_tree") or {}).get(path, "updated")
+            )
             state["working_tree"].pop(path, None)
             conflicts.discard(path)
             details.pop(path, None)
         state["conflicts"] = sorted(conflicts)
+
     def _cleanup_partial_hunks_after_commit(self, state: dict, staged_entries: dict) -> None:
         state.setdefault("partial_hunks", {})
         for path, staged_value in (staged_entries or {}).items():
@@ -223,11 +273,16 @@ class StagingVerificationMixin:
             authored = (state.get("partial_hunks") or {}).get(path)
             if not isinstance(authored, dict):
                 continue
-            leftover = self._as_list(authored.get("leftover_hunks") or authored.get("remaining_hunks") or authored.get("leftover"))
+            leftover = self._as_list(
+                authored.get("leftover_hunks")
+                or authored.get("remaining_hunks")
+                or authored.get("leftover")
+            )
             if leftover:
                 state["partial_hunks"][path] = {"target_hunks": [], "leftover_hunks": leftover}
             else:
                 state["partial_hunks"].pop(path, None)
+
     def _selected_patch_paths(self, state: dict, args: list[str]) -> list[str]:
         if args:
             return args
@@ -238,17 +293,28 @@ class StagingVerificationMixin:
             for path, value in (state.get("working_tree") or {}).items()
             if self.normalizer.entry_status(value) not in {"ignored", "untracked"}
         ]
+
     def _partial_hunk_lists(self, authored: Any) -> tuple[list[Any], list[Any]]:
         if isinstance(authored, dict):
-            target = self._as_list(authored.get("target_hunks") or authored.get("staged_hunks") or authored.get("stage"))
-            leftover = self._as_list(authored.get("leftover_hunks") or authored.get("remaining_hunks") or authored.get("leftover"))
+            target = self._as_list(
+                authored.get("target_hunks")
+                or authored.get("staged_hunks")
+                or authored.get("stage")
+            )
+            leftover = self._as_list(
+                authored.get("leftover_hunks")
+                or authored.get("remaining_hunks")
+                or authored.get("leftover")
+            )
             return target, leftover
         hunks = self._as_list(authored)
         return hunks[:1], hunks[1:]
+
     def _as_list(self, value: Any) -> list[Any]:
         if value is None or value == "":
             return []
         return list(value) if isinstance(value, list) else [value]
+
     def _entry_tokens(self, value: Any) -> list[str]:
         if value is None:
             return []
@@ -256,11 +322,17 @@ class StagingVerificationMixin:
             for key in ("hunks", "tokens", "target_hunks", "leftover_hunks"):
                 if key in value:
                     return [str(item) for item in self._as_list(value.get(key))]
-            return [str(item) for item in value.values()]
-        if isinstance(value, list):
-            return [str(item) for item in value]
-        return [str(value)] if str(value) else []
-    def _selected_add_paths(self, state: dict, args: list[str], *, include_tracked: bool = True, include_untracked: bool = True) -> list[str]:
+        haystack = self.normalizer.token_haystack(value)
+        return [haystack] if haystack else []
+
+    def _selected_add_paths(
+        self,
+        state: dict,
+        args: list[str],
+        *,
+        include_tracked: bool = True,
+        include_untracked: bool = True,
+    ) -> list[str]:
         working_tree = state.get("working_tree") or {}
         base_tree = self.normalizer.head_tree(state)
         requested = [arg for arg in args if arg != "--"] or sorted(working_tree)
@@ -279,6 +351,7 @@ class StagingVerificationMixin:
                 if (tracked and include_tracked) or (untracked and include_untracked):
                     selected.append(path)
         return sorted(set(selected))
+
     def _matching_paths(self, working_tree: dict, requested_path: str) -> list[str]:
         if requested_path.endswith("/"):
             return sorted(path for path in working_tree if path.startswith(requested_path))
@@ -286,6 +359,7 @@ class StagingVerificationMixin:
             return [requested_path]
         prefix = f"{requested_path.rstrip('/')}/"
         return sorted(path for path in working_tree if path.startswith(prefix))
+
     def _expand_pathspecs(self, base_tree: dict, paths: list[str]) -> list[str]:
         expanded: list[str] = []
         for spec in paths:
@@ -296,6 +370,7 @@ class StagingVerificationMixin:
             matches = [path for path in base_tree if path.startswith(prefix)]
             expanded.extend(matches or [spec])
         return sorted(set(expanded))
+
     def _pathspecs(self, parts: list[str], *, value_options: set[str] | None = None) -> list[str]:
         value_options = value_options or set()
         paths: list[str] = []
@@ -308,7 +383,9 @@ class StagingVerificationMixin:
                 index += 1
                 continue
             if not positional_only:
-                option_name = part.split("=", 1)[0] if part.startswith("--") and "=" in part else part
+                option_name = (
+                    part.split("=", 1)[0] if part.startswith("--") and "=" in part else part
+                )
                 if option_name in value_options:
                     index += 1 if "=" in part else 2
                     continue

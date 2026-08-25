@@ -70,7 +70,9 @@ def validate_repository_state_payload(value: Any, *, field_name: str = "reposito
 
     _require_json_value(value, field_name)
 
-    if "repository_initialized" in value and not isinstance(value.get("repository_initialized"), bool):
+    if "repository_initialized" in value and not isinstance(
+        value.get("repository_initialized"), bool
+    ):
         raise BadRequest(f"{field_name}.repository_initialized must be a boolean.")
 
     for key in REPOSITORY_DICT_KEYS:
@@ -92,7 +94,9 @@ def validate_repository_state_payload(value: Any, *, field_name: str = "reposito
     if "remote_tags" in value:
         _validate_tag_map(value.get("remote_tags"), field_name=f"{field_name}.remote_tags")
     if "upstream_tracking" in value:
-        _validate_string_map(value.get("upstream_tracking"), field_name=f"{field_name}.upstream_tracking")
+        _validate_string_map(
+            value.get("upstream_tracking"), field_name=f"{field_name}.upstream_tracking"
+        )
     if "remotes" in value:
         _validate_string_map(value.get("remotes"), field_name=f"{field_name}.remotes")
     if "commits" in value:
@@ -126,7 +130,9 @@ def validate_command_outcome_payload(value: Any, *, field_name: str = "command_o
     required = bool_fields | int_fields | {"command_family"}
     missing = sorted(required - set(value))
     if missing:
-        raise SchemaValidationError(f"{field_name} missing required field(s): {', '.join(missing)}.")
+        raise SchemaValidationError(
+            f"{field_name} missing required field(s): {', '.join(missing)}."
+        )
 
     for key in bool_fields:
         if not isinstance(value.get(key), bool):
@@ -138,7 +144,13 @@ def validate_command_outcome_payload(value: Any, *, field_name: str = "command_o
         raise SchemaValidationError(f"{field_name}.command_family must be a non-empty string.")
     if value["total_rules"] < 1:
         raise SchemaValidationError(f"{field_name}.total_rules must be at least 1.")
-    for key in ("previous_rules_passing", "rules_passing", "max_counted_commands", "counted_command_count", "remaining_counted_commands"):
+    for key in (
+        "previous_rules_passing",
+        "rules_passing",
+        "max_counted_commands",
+        "counted_command_count",
+        "remaining_counted_commands",
+    ):
         if value[key] < 0:
             raise SchemaValidationError(f"{field_name}.{key} must be non-negative.")
     if value["rules_delta"] != value["rules_passing"] - value["previous_rules_passing"]:
@@ -149,7 +161,9 @@ def validate_command_outcome_payload(value: Any, *, field_name: str = "command_o
     if value["rules_passing"] > value["total_rules"]:
         raise SchemaValidationError(f"{field_name}.rules_passing cannot exceed total_rules.")
     if value["previous_rules_passing"] > value["total_rules"]:
-        raise SchemaValidationError(f"{field_name}.previous_rules_passing cannot exceed total_rules.")
+        raise SchemaValidationError(
+            f"{field_name}.previous_rules_passing cannot exceed total_rules."
+        )
 
     return value
 
@@ -206,7 +220,11 @@ def _validate_head(value: Any, *, field_name: str) -> None:
     head_type = value.get("type", "branch")
     if head_type not in {"branch", "detached", "none"}:
         raise BadRequest(f"{field_name}.type must be 'branch', 'detached', or 'none'.")
-    if head_type == "branch" and value.get("name") is not None and not isinstance(value.get("name"), str):
+    if (
+        head_type == "branch"
+        and value.get("name") is not None
+        and not isinstance(value.get("name"), str)
+    ):
         raise BadRequest(f"{field_name}.name must be a string.")
     if value.get("target") is not None and not isinstance(value.get("target"), str):
         raise BadRequest(f"{field_name}.target must be a string or null.")
@@ -233,7 +251,11 @@ def _validate_tag_map(value: Any, *, field_name: str) -> None:
         if isinstance(target, dict):
             if target.get("target") is not None and not isinstance(target.get("target"), str):
                 raise BadRequest(f"{field_name}.{key}.target must be a string or null.")
-            if "message" in target and target.get("message") is not None and not isinstance(target.get("message"), str):
+            if (
+                "message" in target
+                and target.get("message") is not None
+                and not isinstance(target.get("message"), str)
+            ):
                 raise BadRequest(f"{field_name}.{key}.message must be a string or null.")
             if "annotated" in target and not isinstance(target.get("annotated"), bool):
                 raise BadRequest(f"{field_name}.{key}.annotated must be a boolean.")
@@ -273,7 +295,9 @@ def _validate_commits(value: Any, *, field_name: str) -> None:
         for key in ("tree", "changes", "files"):
             if key in commit and not isinstance(commit.get(key), dict):
                 raise BadRequest(f"{item_name}.{key} must be an object.")
-        if "order" in commit and (not isinstance(commit.get("order"), int) or isinstance(commit.get("order"), bool)):
+        if "order" in commit and (
+            not isinstance(commit.get("order"), int) or isinstance(commit.get("order"), bool)
+        ):
             raise BadRequest(f"{item_name}.order must be an integer.")
         if "is_merge" in commit and not isinstance(commit.get("is_merge"), bool):
             raise BadRequest(f"{item_name}.is_merge must be a boolean.")
@@ -300,7 +324,9 @@ def _validate_stash_stack(value: Any, *, field_name: str) -> None:
             if key in entry and not isinstance(entry.get(key), dict):
                 raise BadRequest(f"{field_name}[{index}].{key} must be an object.")
         if "conflicts" in entry:
-            _validate_string_list(entry.get("conflicts"), field_name=f"{field_name}[{index}].conflicts")
+            _validate_string_list(
+                entry.get("conflicts"), field_name=f"{field_name}[{index}].conflicts"
+            )
         if "message" in entry and not isinstance(entry.get("message"), str):
             raise BadRequest(f"{field_name}[{index}].message must be a string.")
 
@@ -329,7 +355,9 @@ def _validate_string_or_string_list(
             raise error_cls(f"{field_name}{suffix} must be a string.")
 
 
-def _require_json_value(value: Any, field_name: str, *, error_cls: type[Exception] = BadRequest) -> None:
+def _require_json_value(
+    value: Any, field_name: str, *, error_cls: type[Exception] = BadRequest
+) -> None:
     if isinstance(value, JSON_SCALAR_TYPES):
         return
     if isinstance(value, dict):

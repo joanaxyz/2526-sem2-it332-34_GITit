@@ -1,45 +1,50 @@
-import type { ApiRequestBody } from '@/shared/api/generated/apiTypes'
 import { apiOperationRequest } from '@/shared/api/httpClient'
-import type { ChallengeCommandResponse, ChallengeRun } from '@/features/challenges/types'
+import type { ChallengeCommandResponse, ChallengeRunResponse } from '@/features/challenges/types'
 import type { CommandExecutionPayload } from '@/shared/level/types'
-
-type WorkspaceFileRequest = { path: string; content: string }
-type WorkspaceFileRenameRequest = { path: string; newPath: string }
+import {
+  commandSubmitBody,
+  workspaceFileBody,
+  workspaceFileRenameBody,
+} from '@/shared/level-runtime/runMutationInputs'
+import type {
+  WorkspaceFileInput,
+  WorkspaceFileRenameInput,
+} from '@/shared/level/workspaceFileTypes'
 
 export const challengeRunsApi = {
   getRun(runId: number) {
-    return apiOperationRequest<'challenge_runs_retrieve', ChallengeRun>('challenge_runs_retrieve', `/challenge-runs/${runId}/`)
+    return apiOperationRequest<'challenge_runs_retrieve', ChallengeRunResponse>('challenge_runs_retrieve', `/challenge-runs/${runId}/`)
   },
   submitCommand(runId: number, command: string, execution: CommandExecutionPayload) {
     return apiOperationRequest<'challenge_runs_submit_command_create', ChallengeCommandResponse>(
       'challenge_runs_submit_command_create',
       `/challenge-runs/${runId}/submit-command/`,
-      { body: { command, execution } as ApiRequestBody<'challenge_runs_submit_command_create'> },
+      { body: commandSubmitBody(command, execution) },
     )
   },
-  createFile(runId: number, input: WorkspaceFileRequest) {
-    return apiOperationRequest<'challenge_runs_files_create', ChallengeRun>(
+  createFile(runId: number, input: WorkspaceFileInput) {
+    return apiOperationRequest<'challenge_runs_files_create', ChallengeRunResponse>(
       'challenge_runs_files_create',
       `/challenge-runs/${runId}/files/`,
-      { body: input as ApiRequestBody<'challenge_runs_files_create'> },
+      { body: workspaceFileBody(input) },
     )
   },
-  writeFile(runId: number, input: WorkspaceFileRequest) {
-    return apiOperationRequest<'challenge_runs_files_partial_update', ChallengeRun>(
+  writeFile(runId: number, input: WorkspaceFileInput) {
+    return apiOperationRequest<'challenge_runs_files_partial_update', ChallengeRunResponse>(
       'challenge_runs_files_partial_update',
       `/challenge-runs/${runId}/files/`,
-      { body: input as ApiRequestBody<'challenge_runs_files_partial_update'> },
+      { body: workspaceFileBody(input) },
     )
   },
-  renameFile(runId: number, input: WorkspaceFileRenameRequest) {
-    return apiOperationRequest<'challenge_runs_files_update', ChallengeRun>(
+  renameFile(runId: number, input: WorkspaceFileRenameInput) {
+    return apiOperationRequest<'challenge_runs_files_update', ChallengeRunResponse>(
       'challenge_runs_files_update',
       `/challenge-runs/${runId}/files/`,
-      { body: { path: input.path, new_path: input.newPath } },
+      { body: workspaceFileRenameBody(input) },
     )
   },
   deleteFile(runId: number, path: string) {
-    return apiOperationRequest<'challenge_runs_files_destroy', ChallengeRun>(
+    return apiOperationRequest<'challenge_runs_files_destroy', ChallengeRunResponse>(
       'challenge_runs_files_destroy',
       `/challenge-runs/${runId}/files/?path=${encodeURIComponent(path)}`,
     )

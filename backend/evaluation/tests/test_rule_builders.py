@@ -122,6 +122,6 @@ def test_falsy_flags_emit_nothing():
 def test_stash_rule_emitted_once_for_either_or_both_keys():
     assert rules_for({"stash_stack_empty": True}) == [{"type": "stash_stack_empty"}]
     assert rules_for({"stash_stack_empty_after_pop": True}) == [{"type": "stash_stack_empty"}]
-    assert rules_for(
-        {"stash_stack_empty": True, "stash_stack_empty_after_pop": True}
-    ) == [{"type": "stash_stack_empty"}]
+    assert rules_for({"stash_stack_empty": True, "stash_stack_empty_after_pop": True}) == [
+        {"type": "stash_stack_empty"}
+    ]

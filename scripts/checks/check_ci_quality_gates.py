@@ -5,6 +5,7 @@ This is a meta-guard: it does not replace the individual checks. It prevents a
 future cleanup from accidentally removing a guard from CI/package scripts while
 leaving the guard file in the repository.
 """
+
 from __future__ import annotations
 
 import json
@@ -29,7 +30,9 @@ REQUIRED_CI_SNIPPETS = {
     "repository artifact guard": "python scripts/check_repository_artifacts.py",
     "django deploy check": "python ../scripts/check_django_deploy.py",
     "backend ruff": "ruff check .",
-    "repository script ruff": "ruff check scripts",
+    "backend ruff format": "ruff format --check .",
+    "repository script ruff": "ruff check --config backend/ruff.toml scripts",
+    "repository script ruff format": "ruff format --check --config backend/ruff.toml scripts",
     "migration drift check": "python manage.py makemigrations --check --dry-run",
     "clean migration apply": "python manage.py migrate --noinput",
     "postgres and redis integration job": "production-integration:",

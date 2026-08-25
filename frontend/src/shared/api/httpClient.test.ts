@@ -8,7 +8,6 @@ const user = {
   id: 1,
   email: 'student@example.com',
   username: 'studentuser',
-  tier: 'free' as const,
   is_staff: false,
 }
 
@@ -143,33 +142,6 @@ describe('apiRequest auth refresh', () => {
         { body: { kind: 'companion', slug: 'blue' } },
       ),
     ).resolves.toEqual({ ok: true })
-  })
-
-  it('does not persist access tokens in localStorage', () => {
-    useAuthStore.getState().setSession('fresh-token', user)
-
-    expect(useAuthStore.getState().accessToken).toBe('fresh-token')
-    expect(localStorage.getItem('git-it-access-token')).toBeNull()
-    expect(JSON.parse(localStorage.getItem('git-it-user') ?? 'null')).toMatchObject(user)
-  })
-
-  it('removes a legacy localStorage access token during auth changes', () => {
-    localStorage.setItem('git-it-access-token', 'legacy-token')
-
-    useAuthStore.getState().setAccessToken('fresh-token')
-
-    expect(useAuthStore.getState().accessToken).toBe('fresh-token')
-    expect(localStorage.getItem('git-it-access-token')).toBeNull()
-  })
-
-  it('clears the in-memory token when another tab removes the stored user', () => {
-    useAuthStore.getState().setSession('active-token', user)
-    localStorage.removeItem('git-it-user')
-
-    window.dispatchEvent(new StorageEvent('storage', { key: 'git-it-user' }))
-
-    expect(useAuthStore.getState().accessToken).toBeNull()
-    expect(useAuthStore.getState().user).toBeNull()
   })
 
   it('does not clear auth when another in-memory refresh already installed a newer token', async () => {

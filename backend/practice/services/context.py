@@ -1,5 +1,7 @@
 from typing import Any
 
+from common.collections import as_list
+
 LEAKY_KEYS = {
     "solution_commands",
     "solution_command",
@@ -53,19 +55,14 @@ class ScenarioContextNormalizer:
 
     def _details(self, value: Any) -> list[dict[str, str]]:
         details = []
-        for item in self._as_list(value):
+        for item in as_list(value):
             if not isinstance(item, dict):
                 continue
             label = self._text(item.get("label"))
             detail_value = self._text(item.get("value"))
-            if label and detail_value:
+            if detail_value:
                 details.append({"label": label, "value": detail_value})
         return details
-
-    def _as_list(self, value: Any) -> list:
-        if value in (None, ""):
-            return []
-        return value if isinstance(value, list) else [value]
 
     def _text(self, value: Any) -> str:
         if value in (None, ""):

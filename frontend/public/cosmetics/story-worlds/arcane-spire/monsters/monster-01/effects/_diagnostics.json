@@ -9,40 +9,40 @@
       255
     ],
     "bbox": [
-      25,
-      65,
-      1235,
-      1253
+      59,
+      77,
+      1251,
+      1266
     ],
     "frameBBoxCenterRange": [
-      106.0,
-      140.0,
-      115.5,
-      163.0
+      115.0,
+      152.0,
+      119.0,
+      184.5
     ],
     "frameEnergyAnchorRange": [
-      127.94,
-      158.21,
-      123.01,
-      130.07
+      122.9,
+      167.11,
+      126.3,
+      190.87
     ],
     "projectileHandEnergyAnchorRange": [
-      127.58,
-      144.09,
-      124.49,
-      128.36
+      122.72,
+      132.03,
+      126.15,
+      130.03
     ],
     "projectileFlightNoseAnchorRange": [
-      192,
-      196,
-      129,
+      197,
+      202,
+      133,
       133
     ],
     "projectileSettleEnergyAnchorRange": [
-      128.9,
-      143.86,
-      122.94,
-      128.1
+      126,
+      131,
+      208,
+      223
     ],
     "registration": {
       "targetAnchor": [
@@ -50,22 +50,22 @@
         133.12
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        137.451,
-        241,
-        85.378,
-        137.224
+        127,
+        193,
+        113,
+        143
       ],
       "appliedShiftRange": [
-        -77,
-        5,
-        -9,
-        43
+        -20,
+        23,
+        -8,
+        95
       ],
       "emptyFrames": 0,
-      "reliableFrames": 11,
-      "lowConfidenceFrames": 14,
-      "method": "hand-center anchor until frame 9, projectile nose anchor through frame 19, center anchor for impact/dissipate frames",
-      "projectileLaunchStartFrame": 10,
+      "reliableFrames": 22,
+      "lowConfidenceFrames": 3,
+      "method": "hand-center anchor until frame 4, projectile nose anchor through frame 19, feet anchor for impact/dissipate frames (bounds-clamped; authored scale preserved)",
+      "projectileLaunchStartFrame": 5,
       "projectileSettleStartFrame": 20,
       "projectileHandAnchor": [
         128.0,
@@ -77,7 +77,7 @@
       ],
       "projectileSettleAnchor": [
         128.0,
-        128.0
+        220.16
       ]
     }
   }

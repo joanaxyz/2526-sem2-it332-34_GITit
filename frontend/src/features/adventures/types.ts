@@ -1,28 +1,29 @@
 import type { BattleStage, CommandSubmissionOutcome } from '@/shared/battle/types'
 import type { ChapterBook } from '@/features/story-map/components/book/bookTypes'
+import type { ApiSchemas } from '@/shared/api/generated/apiTypes'
 import type { LevelScenarioContext, RepositorySnapshot, TerminalStep } from '@/shared/level/types'
 import type { ObjectiveCheck } from '@/shared/level/utils/levelContext'
 
-export type AdventureRunStatus = 'started' | 'completed' | 'failed' | 'abandoned'
-export type AttemptStatus = 'started' | 'completed' | 'failed'
+type AdventureRunStatus = 'started' | 'completed' | 'failed' | 'abandoned'
+type AttemptStatus = 'started' | 'completed' | 'failed'
 
-export type AdventureScaffolding = {
+type AdventureScaffolding = {
   live_dag: boolean
   expected_state: boolean
   contextual_feedback: boolean
 }
 
-export type AdventureCommandBudget = {
+type AdventureCommandBudget = {
   min_counted_commands: number
   max_counted_commands: number
 }
 
-export type AdventureAttemptCounts = {
+type AdventureAttemptCounts = {
   command_count: number
   counted_command_count: number
 }
 
-export type AdventureLevelRef = {
+type AdventureLevelRef = {
   id: number
   slug: string
   title: string
@@ -37,7 +38,7 @@ export type AdventureLevelRef = {
  * `ScenarioContextNormalizer`. The live objective checklist arrives separately
  * as the attempt's `objective_checks` field.
  */
-export type AdventureScenarioContext = LevelScenarioContext
+type AdventureScenarioContext = LevelScenarioContext
 
 /** One persisted command in an attempt's terminal history. */
 export type AdventureStepLog = TerminalStep
@@ -66,7 +67,7 @@ export type AdventureAttempt = {
   steps: AdventureStepLog[]
 }
 
-export type AdventureAttemptResult = {
+type AdventureAttemptResult = {
   id: number
   order: number
   status: AttemptStatus
@@ -86,7 +87,7 @@ export type AdventureMasteryCommand = {
   mastered: boolean
 }
 
-export type AdventureMastery = {
+type AdventureMastery = {
   commands: AdventureMasteryCommand[]
   commands_mastered: number
   total_commands: number
@@ -94,36 +95,36 @@ export type AdventureMastery = {
   passed: boolean
 }
 
-export type AdventureRun = {
-  id: number
-  status: AdventureRunStatus
-  /** True for uncounted free-play replays; false for the counted first playthrough. */
-  replay: boolean
-  stars: number
-  library_opened: boolean
-  /** Stable across re-runs: true once this adventure has ever been passed. */
-  is_passed: boolean
+type AdventureRunRefinementKeys =
+  | 'selected_level'
+  | 'next_level'
+  | 'story'
+  | 'battle_stage'
+  | 'mastery'
+  | 'current_attempt'
+  | 'results'
+  | 'progress'
+
+type RequireAdventureRunStatus<T extends { status: AdventureRunStatus }> = T
+type AdventureRunWire = RequireAdventureRunStatus<ApiSchemas['AdventureRunResponse']>
+
+export type AdventureRun = Omit<AdventureRunWire, AdventureRunRefinementKeys> & {
   selected_level: AdventureLevelRef | null
   /** Next published level in this chapter, or null when this is the final level. */
   next_level: AdventureLevelRef | null
   story: { id: number; slug: string; title: string; world_slug: string } | null
-  /** The adventure's chapter id, used to navigate back to the story map. */
-  chapter_id: number | null
   /** Authored battle-stage dressing for this chapter (null -> default sky). */
-  battle_stage?: BattleStage | null
-  current_level_index: number
-  total_levels: number
-  /** One-based wave cursor and total waves in the selected level. */
-  current_wave: number
-  total_waves: number
+  battle_stage: BattleStage | null
   mastery: AdventureMastery
-  completed_at: string | null
   current_attempt: AdventureAttempt | null
   results: AdventureAttemptResult[]
   progress: { completed: number; total: number }
 }
 
-export type AdventureLevelLibraryResponse = {
+export type AdventureLevelLibraryResponse = Omit<
+  ApiSchemas['AdventureLevelLibraryResponse'],
+  'book' | 'run'
+> & {
   book: ChapterBook
   run: AdventureRun
 }
@@ -136,26 +137,23 @@ export type AdventureLevelLibraryResponse = {
  * spent) returns a full `AdventureRun` instead, flagged by the absence of
  * `partial`.
  */
-export type AdventureRunPatch = {
-  partial: true
-  id: number
-  status: AdventureRunStatus
+export type AdventureRunPatch = Omit<
+  RequireAdventureRunStatus<ApiSchemas['AdventureRunPatchResponse']>,
+  'current_attempt'
+> & {
   current_attempt: {
     id: number
     counts: AdventureAttemptCounts
     repository_state: RepositorySnapshot
-    objective_checks: ObjectiveCheck[] | null
-  } | null
+    objective_checks: ObjectiveCheck[]
+  }
 }
 
-export type AdventureCommandResponse = {
+export type AdventureCommandResponse = Omit<
+  ApiSchemas['AdventureCommandResponse'],
+  'run' | 'step' | 'command_outcome'
+> & {
   run: AdventureRun | AdventureRunPatch
-  solved: boolean
-  stdout: string
-  stderr: string
-  exit_code: number
-  terminal_output: string
-  command_classification: string
   /** The persisted step; replaces the client's optimistic pending placeholder. */
   step: AdventureStepLog
   command_outcome: CommandSubmissionOutcome

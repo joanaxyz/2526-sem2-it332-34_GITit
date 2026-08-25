@@ -20,7 +20,7 @@ class VariantSelectionService:
             return None
         if prior_run is None:
             return variants[0]
-        prior_key = self.variant_identity(prior_run.variant)
+        prior_key = self.variant_identity(prior_run.selected_variant)
         tried_keys = tried_variant_keys if tried_variant_keys is not None else set()
         for variant in variants:
             identity = self.variant_identity(variant)

@@ -37,6 +37,37 @@ OLD_COPY_PHRASES = [
     "Target:",
 ]
 
+PROJECT_FILE_ACTIONS = {
+    "ch6-adv-stash-restore-commit": [
+        {
+            "after_command_index": 2,
+            "path": "README.md",
+            "content": "base\nUrgent navbar fix\n",
+        }
+    ],
+    "ch6-adv-shelve-fix-return": [
+        {
+            "after_command_index": 2,
+            "path": "README.md",
+            "content": "base\nQuick navbar patch\n",
+        }
+    ],
+    "ch6-adv-pick-then-adjust": [
+        {
+            "after_command_index": 1,
+            "path": "src/auth.py",
+            "content": "guard\nadapted=True\n",
+        }
+    ],
+    "ch6-adv-abort-and-adjust": [
+        {
+            "after_command_index": 2,
+            "path": "src/auth.py",
+            "content": "guard\nadapted_after_abort=True\n",
+        }
+    ],
+}
+
 
 def test_seed_creates_chapter_owned_adventure_and_challenge_levels(db):
     call_command("seed_curriculum")
@@ -66,7 +97,6 @@ def test_seed_creates_chapter_owned_adventure_and_challenge_levels(db):
             trials = challenge.trials.filter(is_published=True)
             assert set(trials.values_list("difficulty", flat=True)) == {"easy", "medium", "hard"}
             assert all(trial.variants.filter(is_published=True).count() >= 4 for trial in trials)
-
 
 
 def test_seed_uses_authored_wave_plans_beyond_chapter_one(db):
@@ -120,15 +150,21 @@ def test_seed_publishes_every_blueprint_ledger_entry(db):
         for wave in level["waves"]
     }
     assert expected_waves
-    assert set(
-        AdventureWave.objects.filter(slug__in=expected_waves, is_published=True).values_list(
-            "slug", flat=True
+    assert (
+        set(
+            AdventureWave.objects.filter(slug__in=expected_waves, is_published=True).values_list(
+                "slug", flat=True
+            )
         )
-    ) == expected_waves
-    assert AdventureWaveVariant.objects.filter(
-        wave__slug__in=expected_waves,
-        is_published=True,
-    ).count() == len(expected_waves) * 2
+        == expected_waves
+    )
+    assert (
+        AdventureWaveVariant.objects.filter(
+            wave__slug__in=expected_waves,
+            is_published=True,
+        ).count()
+        == len(expected_waves) * 2
+    )
     for context in AdventureWaveVariant.objects.filter(
         wave__slug__in=expected_waves,
         is_published=True,
@@ -136,8 +172,17 @@ def test_seed_publishes_every_blueprint_ledger_entry(db):
         assert set(context) <= {"schema_version", "story", "task", "details"}
         assert "constraints" not in context
         assert not any(
-            detail.get("label") in OLD_COPY_DETAIL_LABELS
-            for detail in context.get("details", [])
+            detail.get("label") in OLD_COPY_DETAIL_LABELS for detail in context.get("details", [])
+        )
+    for wave_slug, expected_actions in PROJECT_FILE_ACTIONS.items():
+        variants = AdventureWaveVariant.objects.filter(
+            wave__slug=wave_slug,
+            is_published=True,
+        )
+        assert variants.count() == 2
+        assert all(
+            context.get("solution_workspace_files") == expected_actions
+            for context in variants.values_list("parameter_context", flat=True)
         )
     for phrase in OLD_COPY_PHRASES:
         assert not AdventureWave.objects.filter(
@@ -165,21 +210,23 @@ def test_seed_publishes_every_blueprint_ledger_entry(db):
         for difficulty in ["easy", "medium", "hard"]
         for suffix in ["", "-alt"]
     }
-    assert set(
-        ChallengeTrialVariant.objects.filter(
-            case_id__in=expected_cases, is_published=True
-        ).values_list("case_id", flat=True)
-    ) == expected_cases
+    assert (
+        set(
+            ChallengeTrialVariant.objects.filter(
+                case_id__in=expected_cases, is_published=True
+            ).values_list("case_id", flat=True)
+        )
+        == expected_cases
+    )
     for context in ChallengeTrialVariant.objects.filter(
         case_id__in=expected_cases,
         is_published=True,
     ).values_list("scenario_context", flat=True):
         assert set(context) <= {"schema_version", "story", "task", "details"}
         assert "constraints" not in context
-        assert context.get("details", []) == []
+        assert all(detail.get("value", "").strip() for detail in context.get("details", []))
         assert not any(
-            detail.get("label") in OLD_COPY_DETAIL_LABELS
-            for detail in context.get("details", [])
+            detail.get("label") in OLD_COPY_DETAIL_LABELS for detail in context.get("details", [])
         )
 
 
@@ -234,3 +281,47 @@ def test_init_current_folder_wave_has_stateful_story_and_objectives(db):
     }
     assert variant.evaluation_spec["state_requirements"]["working_tree_clean"] is True
     assert variant.evaluation_spec["state_requirements"]["staging_empty"] is True
+
+
+def test_advanced_stories_do_not_publish_one_command_level_nodes(db):
+    """A solo syntax intro may be one wave, but not a whole paid-out level.
+
+    Frostbound and Neon group focused intros into short field operations; the
+    deeper applied workflows and incidents remain single-wave, multi-command
+    levels. This prevents the advanced maps from degrading into flashcards.
+    """
+
+    call_command("seed_curriculum")
+
+    levels = (
+        AdventureLevel.objects.filter(
+            chapter__story__slug__in={"frostbound-citadel", "neon-backstreets"},
+            is_published=True,
+        )
+        .prefetch_related("waves__variants")
+        .order_by("chapter__story__sort_order", "chapter__sort_order", "sort_order", "id")
+    )
+    violations = []
+    oversized_field_operations = []
+    for level in levels:
+        waves = list(level.waves.filter(is_published=True).order_by("sort_order", "id"))
+        shortest_solution = sum(
+            min(
+                len(variant.solution_commands or [])
+                for variant in wave.variants.filter(is_published=True)
+            )
+            for wave in waves
+        )
+        if shortest_solution < 2:
+            violations.append(f"{level.chapter.story.slug}/{level.slug}: {shortest_solution}")
+        if len(waves) > 4:
+            oversized_field_operations.append(f"{level.slug}: {len(waves)} waves")
+
+    assert not violations, (
+        "Advanced levels must require more than one command across their full run:\n"
+        + "\n".join(violations)
+    )
+    assert not oversized_field_operations, (
+        "Advanced field operations should stay within four waves:\n"
+        + "\n".join(oversized_field_operations)
+    )

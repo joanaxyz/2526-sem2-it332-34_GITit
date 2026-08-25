@@ -55,6 +55,8 @@ export type BattleDirector = {
   onAttackStart: () => void
   onResolve: (block: BattleBlock) => void
   onError: () => void
+  /** Immediately align the HUD with authoritative encounter HP. */
+  syncPlayerVitals: (playerHp: number | null, playerMaxHp: number | null) => void
   /** Select which story world supplies monster skins/effects for this run. */
   setStoryWorldSlug: (slug: string | null | undefined) => void
   /** Swap to a new encounter (level advance / initial mount / retry). */

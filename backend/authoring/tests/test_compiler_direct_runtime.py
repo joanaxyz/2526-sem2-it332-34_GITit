@@ -117,7 +117,6 @@ def test_adventure_level_compiles_ordered_waves(db, django_user_model):
                 {
                     "slug": "level-1",
                     "title": "Level 1",
-                    "brief": "Make a save.",
                     "waves": [_wave("wave-a"), _wave("wave-b"), _wave("wave-c")],
                 }
             ]
@@ -149,14 +148,24 @@ def test_nested_challenge_un_collapses_to_multiple_levels(db, django_user_model)
         definition={
             "narrative": "Two stages.",
             "levels": [
-                {"slug": "stage-one", "title": "Stage one", "trials": [trial("easy"), trial("medium"), trial("hard")]},
-                {"slug": "stage-two", "title": "Stage two", "trials": [trial("easy"), trial("hard")]},
+                {
+                    "slug": "stage-one",
+                    "title": "Stage one",
+                    "trials": [trial("easy"), trial("medium"), trial("hard")],
+                },
+                {
+                    "slug": "stage-two",
+                    "title": "Stage two",
+                    "trials": [trial("easy"), trial("hard")],
+                },
             ],
         },
     )
 
     runtime = ContentRuntimeCompiler().compile(content=content)
-    levels = list(ChallengeLevel.objects.filter(chapter=runtime.challenge.chapter).order_by("sort_order"))
+    levels = list(
+        ChallengeLevel.objects.filter(chapter=runtime.challenge.chapter).order_by("sort_order")
+    )
 
     assert [level.slug for level in levels] == ["stage-one", "stage-two"]
     assert {t.difficulty for t in levels[0].trials.all()} == {"easy", "medium", "hard"}

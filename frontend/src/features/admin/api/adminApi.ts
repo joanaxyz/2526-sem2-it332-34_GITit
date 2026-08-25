@@ -1,145 +1,94 @@
-import type { WalletSummary } from '@/shared/wallet/api/walletApi'
-import { apiRequest } from '@/shared/api/httpClient'
+import { apiOperationRequest } from '@/shared/api/httpClient'
+import type {
+  ApiRequestBody,
+  ApiSchemas,
+} from '@/shared/api/generated/apiTypes'
 
-export type AdminOverview = {
-  users: { total: number; new_7d: number; new_30d: number }
-  economy: { coins_in_circulation: number; coins_spent: number; signup_grant: number }
-  recent_signups: AdminUserBrief[]
-  recent_purchases: { user_id: number; amount: number; reason: string; created_at: string }[]
-}
+export type AdminStory = ApiSchemas['AdminStory']
+export type AdminChapter = ApiSchemas['AdminChapter']
 
-export type AdminUserBrief = {
-  id: number
-  username: string
-  email: string
-  is_staff: boolean
-  is_active: boolean
-  date_joined: string
-}
+export type AdminStoryCreatePayload = ApiRequestBody<'admin_stories_create'>
+export type AdminChapterCreatePayload = ApiRequestBody<'admin_chapters_create'>
 
-export type AdminUserDetail = AdminUserBrief & {
-  last_login: string | null
-  wallet: WalletSummary
-  entitlement_count: number
-}
-
-export type AdminTransaction = {
-  id: number
-  user_id: number
-  username: string
-  amount: number
-  reason: string
-  created_at: string
-}
-
-export type AdminStory = {
-  id: number
-  slug: string
-  title: string
-  summary: string
-  sort_order: number
-  is_published: boolean
-  chapter_count: number
-}
-
-export type AdminChapter = {
-  id: number
-  story_id: number | null
-  slug: string
-  number: number
-  title: string
-  description: string
-  is_published: boolean
-  sort_order: number
-}
-
-export type AdminContent = {
-  id: number
-  kind: string
-  slug: string
-  title: string
-  status: string
-  visibility: string
-  updated_at: string
-}
-
-export type AdminAnalytics = {
-  runs: { by_status: Record<string, number>; total: number; passed: number }
-  completions: { adventure: number; challenge: number; total: number }
-  active_learners_30d: number
-  per_story: { slug: string; title: string; runs: number; passed: number }[]
-}
-
-export type AdminModeration = {
-  content: { id: number; kind: string; title: string; owner: string | null; updated_at: string }[]
-}
-
-export type AdminFeatureFlag = { key: string; label: string; description: string; enabled: boolean }
-export type AdminSettings = { feature_flags: AdminFeatureFlag[] }
-
-type UserActionPayload =
-  | { action: 'grant_coins'; amount: number; reason?: string }
-  | { action: 'set_staff'; value: boolean }
-  | { action: 'set_active'; value: boolean }
-
-function body(payload: unknown) {
-  return { body: JSON.stringify(payload) }
-}
+type UserActionPayload = ApiRequestBody<'admin_users_actions_create'>
+type EconomyAdjustPayload = ApiRequestBody<'admin_economy_adjust_create'>
+type StoryUpdatePayload = ApiRequestBody<'admin_stories_partial_update'>
+type ChapterUpdatePayload = ApiRequestBody<'admin_chapters_partial_update'>
+type ModerationUnpublishPayload = ApiRequestBody<'admin_moderation_unpublish_create'>
+type FeatureFlagUpdatePayload = ApiRequestBody<'admin_settings_create'>
 
 export const adminApi = {
   overview() {
-    return apiRequest<AdminOverview>('/admin/overview/')
+    return apiOperationRequest('admin_overview_retrieve', '/admin/overview/')
   },
   users(query?: string) {
-    const q = query ? `?q=${encodeURIComponent(query)}` : ''
-    return apiRequest<{ results: AdminUserBrief[] }>(`/admin/users/${q}`)
+    const suffix = query ? `?q=${encodeURIComponent(query)}` : ''
+    return apiOperationRequest('admin_users_retrieve', `/admin/users/${suffix}`)
   },
   user(id: number) {
-    return apiRequest<AdminUserDetail>(`/admin/users/${id}/`)
+    return apiOperationRequest('admin_users_retrieve_2', `/admin/users/${id}/`)
   },
   userAction(id: number, payload: UserActionPayload) {
-    return apiRequest<AdminUserDetail>(`/admin/users/${id}/actions/`, { method: 'POST', ...body(payload) })
+    return apiOperationRequest('admin_users_actions_create', `/admin/users/${id}/actions/`, {
+      body: payload,
+    })
   },
   transactions(userId?: number) {
-    const q = userId ? `?user_id=${userId}` : ''
-    return apiRequest<{ results: AdminTransaction[] }>(`/admin/economy/transactions/${q}`)
+    const suffix = userId ? `?user_id=${userId}` : ''
+    return apiOperationRequest(
+      'admin_economy_transactions_retrieve',
+      `/admin/economy/transactions/${suffix}`,
+    )
   },
-  adjustCoins(payload: { user_id: number; amount: number; reason?: string }) {
-    return apiRequest<{ wallet: WalletSummary }>('/admin/economy/adjust/', { method: 'POST', ...body(payload) })
+  adjustCoins(payload: EconomyAdjustPayload) {
+    return apiOperationRequest('admin_economy_adjust_create', '/admin/economy/adjust/', {
+      body: payload,
+    })
   },
   stories() {
-    return apiRequest<{ results: AdminStory[] }>('/admin/stories/')
+    return apiOperationRequest('admin_stories_retrieve', '/admin/stories/')
   },
-  createStory(payload: { slug: string; title: string; summary?: string }) {
-    return apiRequest<AdminStory>('/admin/stories/', { method: 'POST', ...body(payload) })
+  createStory(payload: AdminStoryCreatePayload) {
+    return apiOperationRequest('admin_stories_create', '/admin/stories/', { body: payload })
   },
-  updateStory(id: number, patch: Partial<Pick<AdminStory, 'title' | 'summary' | 'sort_order' | 'is_published'>>) {
-    return apiRequest<AdminStory>(`/admin/stories/${id}/`, { method: 'PATCH', ...body(patch) })
+  updateStory(id: number, patch: StoryUpdatePayload) {
+    return apiOperationRequest('admin_stories_partial_update', `/admin/stories/${id}/`, {
+      body: patch,
+    })
   },
   chapters(storyId?: number) {
-    const q = storyId ? `?story=${storyId}` : ''
-    return apiRequest<{ results: AdminChapter[] }>(`/admin/chapters/${q}`)
+    const suffix = storyId ? `?story=${storyId}` : ''
+    return apiOperationRequest('admin_chapters_retrieve', `/admin/chapters/${suffix}`)
   },
-  updateChapter(id: number, patch: Partial<Pick<AdminChapter, 'title' | 'description' | 'is_published' | 'sort_order'>>) {
-    return apiRequest<AdminChapter>(`/admin/chapters/${id}/`, { method: 'PATCH', ...body(patch) })
+  createChapter(payload: AdminChapterCreatePayload) {
+    return apiOperationRequest('admin_chapters_create', '/admin/chapters/', { body: payload })
   },
-  content(kind?: string) {
-    const q = kind ? `?kind=${kind}` : ''
-    return apiRequest<{ results: AdminContent[] }>(`/admin/content/${q}`)
+  updateChapter(id: number, patch: ChapterUpdatePayload) {
+    return apiOperationRequest('admin_chapters_partial_update', `/admin/chapters/${id}/`, {
+      body: patch,
+    })
+  },
+  content(kind?: ApiSchemas['AdminContentKindEnum']) {
+    const suffix = kind ? `?kind=${kind}` : ''
+    return apiOperationRequest('admin_content_retrieve', `/admin/content/${suffix}`)
   },
   analytics() {
-    return apiRequest<AdminAnalytics>('/admin/analytics/')
+    return apiOperationRequest('admin_analytics_retrieve', '/admin/analytics/')
   },
   moderation() {
-    return apiRequest<AdminModeration>('/admin/moderation/')
+    return apiOperationRequest('admin_moderation_retrieve', '/admin/moderation/')
   },
-  unpublish(payload: { kind: 'content'; id: number }) {
-    return apiRequest<{ ok: boolean }>('/admin/moderation/unpublish/', { method: 'POST', ...body(payload) })
+  unpublish(payload: ModerationUnpublishPayload) {
+    return apiOperationRequest(
+      'admin_moderation_unpublish_create',
+      '/admin/moderation/unpublish/',
+      { body: payload },
+    )
   },
   settings() {
-    return apiRequest<AdminSettings>('/admin/settings/')
+    return apiOperationRequest('admin_settings_retrieve', '/admin/settings/')
   },
-  saveFlag(payload: { key: string; label?: string; description?: string; enabled?: boolean }) {
-    return apiRequest<AdminFeatureFlag>('/admin/settings/', { method: 'POST', ...body(payload) })
+  saveFlag(payload: FeatureFlagUpdatePayload) {
+    return apiOperationRequest('admin_settings_create', '/admin/settings/', { body: payload })
   },
 }

@@ -1,10 +1,9 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
-import { apiRequest } from '@/shared/api/httpClient'
-import { queryKeys } from '@/shared/api/queryKeys'
 import { DEFAULT_COMPANION_SLUG, getCompanion } from '@/shared/cosmetics/companions/registry'
 import type { CompanionDef } from '@/shared/cosmetics/types'
+import { shopCatalogQueryOptions } from '@/shared/shop/api/shopApi'
 
 /**
  * The player's equipped companion.
@@ -23,14 +22,9 @@ export type PlayerLoadout = {
   error: Error | null
 }
 
-type ShopCatalogResponse = {
-  active_companion: string | null
-}
-
 export function usePlayerLoadout(): PlayerLoadout {
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: queryKeys.shopCatalog,
-    queryFn: () => apiRequest<ShopCatalogResponse>('/shop/catalog/'),
+    ...shopCatalogQueryOptions(),
     staleTime: 5 * 60 * 1000,
     retry: false,
   })

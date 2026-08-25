@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from common.exceptions import Locked
-from common.services.run_workspace import mutate_run_workspace_file
+from common.services.run_workspace import RunWorkspaceFileService, mutate_run_workspace_file
 
 
 class _Manager:
@@ -20,18 +20,20 @@ class _Manager:
 
 @pytest.mark.django_db(transaction=True)
 def test_mutate_run_workspace_file_uses_persisted_locked_state():
-    locked = SimpleNamespace(pk=1, status="started", repository_state={"working_tree": {}}, save=Mock())
+    locked = SimpleNamespace(
+        pk=1, status="started", repository_state={"working_tree": {}}, save=Mock()
+    )
     model = type("Run", (), {"objects": _Manager(locked)})
     incoming = model()
     incoming.pk = 1
 
-    with patch("common.services.run_workspace.create_workspace_file", return_value={"changed": True}) as mutate:
-        result = mutate_run_workspace_file(
+    with patch(
+        "common.services.run_workspace.create_workspace_file", return_value={"changed": True}
+    ) as mutate:
+        result = RunWorkspaceFileService(ended_message="ended").create_file(
             run=incoming,
-            operation="create",
             path="README.md",
             content="hello",
-            ended_message="ended",
         )
 
     mutate.assert_called_once_with({"working_tree": {}}, path="README.md", content="hello")
@@ -41,12 +43,16 @@ def test_mutate_run_workspace_file_uses_persisted_locked_state():
 
 @pytest.mark.django_db(transaction=True)
 def test_mutate_run_workspace_file_routes_rename_operation():
-    locked = SimpleNamespace(pk=1, status="started", repository_state={"working_tree": {}}, save=Mock())
+    locked = SimpleNamespace(
+        pk=1, status="started", repository_state={"working_tree": {}}, save=Mock()
+    )
     model = type("Run", (), {"objects": _Manager(locked)})
     incoming = model()
     incoming.pk = 1
 
-    with patch("common.services.run_workspace.rename_workspace_file", return_value={"renamed": True}) as mutate:
+    with patch(
+        "common.services.run_workspace.rename_workspace_file", return_value={"renamed": True}
+    ) as mutate:
         result = mutate_run_workspace_file(
             run=incoming,
             operation="rename",
