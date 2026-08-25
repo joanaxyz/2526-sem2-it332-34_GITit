@@ -67,7 +67,7 @@ class MailgunEmailBackend(BaseEmailBackend):
         self._validate_configuration()
         mime_bytes = email_message.message().as_bytes()
         body, boundary = _multipart_mime_payload(recipients, mime_bytes)
-        credentials = base64.b64encode(f"api:{self.api_key}".encode("utf-8")).decode("ascii")
+        credentials = base64.b64encode(f"api:{self.api_key}".encode()).decode("ascii")
         domain = quote(self.domain, safe="")
         request = Request(
             f"{self.api_base_url}/v3/{domain}/messages.mime",
@@ -116,7 +116,7 @@ def _multipart_mime_payload(recipients: list[str], mime_bytes: bytes) -> tuple[b
             [
                 b"--" + boundary_bytes + b"\r\n",
                 b'Content-Disposition: form-data; name="to"\r\n\r\n',
-                str(recipient).encode("utf-8"),
+                str(recipient).encode(),
                 b"\r\n",
             ]
         )
