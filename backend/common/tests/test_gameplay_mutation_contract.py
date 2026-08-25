@@ -24,9 +24,7 @@ from testing.runtime_factories import (
         (WorkspaceFileRenameSerializer, {"path", "new_path"}),
     ],
 )
-def test_gameplay_mutation_serializers_have_one_common_owner(
-    serializer_class, expected_fields
-):
+def test_gameplay_mutation_serializers_have_one_common_owner(serializer_class, expected_fields):
     assert serializer_class.__module__ == "common.serializers"
     assert set(serializer_class().fields) == expected_fields
 
@@ -40,9 +38,7 @@ def test_workspace_file_contract_preserves_limits_defaults_and_whitespace():
     assert serializer.fields["content"].max_length == 20_000
     assert serializer.fields["content"].trim_whitespace is False
 
-    with_whitespace = WorkspaceFileSerializer(
-        data={"path": "notes.txt", "content": "  keep me  "}
-    )
+    with_whitespace = WorkspaceFileSerializer(data={"path": "notes.txt", "content": "  keep me  "})
     assert with_whitespace.is_valid(), with_whitespace.errors
     assert with_whitespace.validated_data["content"] == "  keep me  "
 

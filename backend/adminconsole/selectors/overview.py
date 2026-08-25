@@ -40,9 +40,7 @@ def admin_overview_payload(*, now=None) -> dict:
             "coins_spent": abs(spent),
             "signup_grant": PLAN_SIGNUP_GRANT,
         },
-        "recent_signups": [
-            user_brief(user) for user in User.objects.order_by("-date_joined")[:5]
-        ],
+        "recent_signups": [user_brief(user) for user in User.objects.order_by("-date_joined")[:5]],
         "recent_purchases": [
             {
                 "user_id": transaction.player.user_id,

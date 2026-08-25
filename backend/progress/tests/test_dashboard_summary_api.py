@@ -49,9 +49,7 @@ def assert_dashboard_wire_shape(payload):
 
     assert set(payload["counts"]) == COUNT_KEYS
     assert all(type(value) is int for value in payload["counts"].values())
-    assert payload["completed_story_slug"] is None or type(
-        payload["completed_story_slug"]
-    ) is str
+    assert payload["completed_story_slug"] is None or type(payload["completed_story_slug"]) is str
     assert type(payload["completed_stories"]) is list
     assert all(type(slug) is str for slug in payload["completed_stories"])
 
@@ -73,9 +71,7 @@ def assert_dashboard_wire_shape(payload):
         assert type(row["label"]) is str
 
 
-def test_authenticated_empty_dashboard_matches_exact_documented_contract(
-    db, django_user_model
-):
+def test_authenticated_empty_dashboard_matches_exact_documented_contract(db, django_user_model):
     user = django_user_model.objects.create_user(
         username="dashboard-contract-empty",
         email="dashboard-contract-empty@example.com",

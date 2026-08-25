@@ -165,6 +165,16 @@ DATABASES["default"]["CONN_MAX_AGE"] = env.int(
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = env.bool(
     "DATABASE_CONN_HEALTH_CHECKS", default=not _IS_SQLITE
 )
+_DATABASE_SSLMODE = env("DATABASE_SSLMODE", default="").strip().lower()
+if _DATABASE_SSLMODE:
+    valid_sslmodes = {"disable", "allow", "prefer", "require", "verify-ca", "verify-full"}
+    if _DATABASE_SSLMODE not in valid_sslmodes:
+        raise RuntimeError(
+            "DATABASE_SSLMODE must be disable, allow, prefer, require, verify-ca, or verify-full."
+        )
+    if _IS_SQLITE:
+        raise RuntimeError("DATABASE_SSLMODE cannot be used with SQLite.")
+    DATABASES["default"].setdefault("OPTIONS", {})["sslmode"] = _DATABASE_SSLMODE
 if _IS_SQLITE:
     from django.db.backends.signals import connection_created
 

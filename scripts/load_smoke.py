@@ -24,9 +24,7 @@ class Results:
     errors: Counter[str] = field(default_factory=Counter)
     lock: threading.Lock = field(default_factory=threading.Lock)
 
-    def record_response(
-        self, status: int, latency_ms: float, expected_status: int
-    ) -> None:
+    def record_response(self, status: int, latency_ms: float, expected_status: int) -> None:
         with self.lock:
             self.latencies_ms.append(latency_ms)
             self.status_counts[status] += 1
@@ -44,9 +42,7 @@ def parse_target(value: str) -> SplitResult:
     if target.scheme not in {"http", "https"} or not target.hostname:
         raise argparse.ArgumentTypeError("target must be an http:// or https:// URL")
     if target.query or target.fragment:
-        raise argparse.ArgumentTypeError(
-            "put query strings in --path, not in the target URL"
-        )
+        raise argparse.ArgumentTypeError("put query strings in --path, not in the target URL")
     return target
 
 
@@ -161,9 +157,7 @@ def main() -> int:
     if args.users < 1 or args.duration <= 0 or args.timeout <= 0:
         parser().error("--users, --duration, and --timeout must be positive")
     if not 0 <= args.max_error_rate <= 1 or args.max_p95_ms <= 0:
-        parser().error(
-            "--max-error-rate must be 0..1 and --max-p95-ms must be positive"
-        )
+        parser().error("--max-error-rate must be 0..1 and --max-p95-ms must be positive")
 
     paths = tuple(args.paths or ["/api/health/ready/"])
     try:
@@ -181,9 +175,7 @@ def main() -> int:
     started = time.monotonic()
     deadline = started + args.duration
     start = threading.Barrier(args.users)
-    with ThreadPoolExecutor(
-        max_workers=args.users, thread_name_prefix="load-user"
-    ) as executor:
+    with ThreadPoolExecutor(max_workers=args.users, thread_name_prefix="load-user") as executor:
         futures = [
             executor.submit(
                 run_user,
@@ -216,9 +208,7 @@ def main() -> int:
         f"latency_ms p50={statistics.median(results.latencies_ms) if total else 0:.1f} "
         f"p95={p95_ms:.1f} p99={percentile(results.latencies_ms, 0.99):.1f}"
     )
-    print(
-        f"statuses={dict(sorted(results.status_counts.items()))} errors={dict(results.errors)}"
-    )
+    print(f"statuses={dict(sorted(results.status_counts.items()))} errors={dict(results.errors)}")
 
     failed = total == 0 or error_rate > args.max_error_rate or p95_ms > args.max_p95_ms
     if failed:

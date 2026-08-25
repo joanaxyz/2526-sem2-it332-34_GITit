@@ -25,8 +25,7 @@ def find_admin_chapter(chapter_id):
 def admin_story_list_payload() -> dict:
     stories = Story.objects.select_related("prerequisite_story").order_by("sort_order", "id")
     counts = {
-        row["story"]: row["n"]
-        for row in Chapter.objects.values("story").annotate(n=Count("id"))
+        row["story"]: row["n"] for row in Chapter.objects.values("story").annotate(n=Count("id"))
     }
     return {
         "results": [story_payload(story, counts.get(story.id, 0)) for story in stories],

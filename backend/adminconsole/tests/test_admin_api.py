@@ -186,12 +186,10 @@ def test_staff_can_change_another_users_admin_and_active_state_with_audit(
     logs = list(AdminActionLog.objects.filter(actor=staff, target_id=str(target.id)))
     assert {log.action for log in logs} == {"user.set_staff", "user.set_active"}
     assert any(
-        log.before == {"is_staff": False} and log.after == {"is_staff": True}
-        for log in logs
+        log.before == {"is_staff": False} and log.after == {"is_staff": True} for log in logs
     )
     assert any(
-        log.before == {"is_active": True} and log.after == {"is_active": False}
-        for log in logs
+        log.before == {"is_active": True} and log.after == {"is_active": False} for log in logs
     )
 
 
@@ -348,9 +346,12 @@ def test_staff_can_create_and_edit_story(django_user_model):
     assert chapter.battle_stage["landing"]["width"] == 0.6
     assert chapter_patched.json()["battle_stage"] == chapter.battle_stage
     assert chapter.management_source == MANAGEMENT_SOURCE_ADMIN
-    assert set(
-        AdminActionLog.objects.filter(actor=staff).values_list("action", flat=True)
-    ) == {"story.create", "story.update", "chapter.create", "chapter.update"}
+    assert set(AdminActionLog.objects.filter(actor=staff).values_list("action", flat=True)) == {
+        "story.create",
+        "story.update",
+        "chapter.create",
+        "chapter.update",
+    }
 
 
 @pytest.mark.django_db

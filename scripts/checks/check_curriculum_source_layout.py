@@ -5,8 +5,8 @@ from __future__ import annotations
 
 import ast
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 
 try:
     from scripts.checks.adventure_plan_ownership import (
@@ -20,13 +20,10 @@ sys.dont_write_bytecode = True
 
 ROOT = Path(__file__).resolve().parents[2]
 BLUEPRINT_SOURCE = ROOT / "backend/curriculum/seed_data/source/blueprint"
-REPOSITORY_FOUNDATIONS_COMPOSER = (
-    BLUEPRINT_SOURCE / "adventure_repository_foundations.py"
-)
+REPOSITORY_FOUNDATIONS_COMPOSER = BLUEPRINT_SOURCE / "adventure_repository_foundations.py"
 REPOSITORY_FOUNDATIONS_PACKAGE = BLUEPRINT_SOURCE / "repository_foundations"
 FROST_MONOLITH = (
-    ROOT
-    / "backend/curriculum/seed_data/source/adventure_level_specs/v3_frost_form_drills.py"
+    ROOT / "backend/curriculum/seed_data/source/adventure_level_specs/v3_frost_form_drills.py"
 )
 FROST_PACKAGE = FROST_MONOLITH.with_suffix("")
 FROST_IMPORT_SCAN_ROOTS = (ROOT / "backend", ROOT / "scripts")
@@ -143,9 +140,7 @@ def _assignment_values(tree: ast.Module, name: str) -> list[ast.AST]:
         if not isinstance(node, (ast.Assign, ast.AnnAssign)):
             continue
         targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-        if any(
-            isinstance(target, ast.Name) and target.id == name for target in targets
-        ):
+        if any(isinstance(target, ast.Name) and target.id == name for target in targets):
             values.append(node.value)
     return values
 
@@ -177,7 +172,7 @@ def _assigned_names(node: ast.AST) -> set[str]:
 def _literal_slug(node: ast.AST) -> str | None:
     if not isinstance(node, ast.Dict):
         return None
-    for key, value in zip(node.keys, node.values):
+    for key, value in zip(node.keys, node.values, strict=True):
         if (
             isinstance(key, ast.Constant)
             and key.value == "slug"
@@ -199,9 +194,7 @@ def _verify_package_initializer(package_path: Path, errors: list[str]) -> None:
         and isinstance(tree.body[0].value, ast.Constant)
         and isinstance(tree.body[0].value.value, str)
     ):
-        errors.append(
-            "repository_foundations/__init__.py must contain only a package docstring"
-        )
+        errors.append("repository_foundations/__init__.py must contain only a package docstring")
 
 
 def _verify_composer(path: Path, errors: list[str]) -> None:
@@ -216,13 +209,9 @@ def _verify_composer(path: Path, errors: list[str]) -> None:
             f"maximum is {COMPOSER_MAX_LINES}"
         )
     if any(isinstance(node, ast.Dict) for node in ast.walk(tree)):
-        errors.append(
-            "Repository Foundations composer must not contain level dictionaries"
-        )
+        errors.append("Repository Foundations composer must not contain level dictionaries")
     if any(
-        isinstance(node, ast.Call)
-        and isinstance(node.func, ast.Name)
-        and node.func.id == "_wave"
+        isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "_wave"
         for node in ast.walk(tree)
     ):
         errors.append("Repository Foundations composer must not call _wave")
@@ -254,8 +243,7 @@ def _verify_composer(path: Path, errors: list[str]) -> None:
             unexpected_imports.append(ast.unparse(node))
     if actual_imports != expected_imports:
         errors.append(
-            "Repository Foundations composer imports must match the canonical "
-            "concept order exactly"
+            "Repository Foundations composer imports must match the canonical concept order exactly"
         )
     if unexpected_imports:
         errors.append(
@@ -284,9 +272,7 @@ def _verify_composer(path: Path, errors: list[str]) -> None:
 
     assignments = _assignment_values(tree, "ADVENTURE_LEVELS")
     if len(assignments) != 1 or not isinstance(assignments[0], ast.List):
-        errors.append(
-            "Repository Foundations composer must define one ADVENTURE_LEVELS list"
-        )
+        errors.append("Repository Foundations composer must define one ADVENTURE_LEVELS list")
         return
     actual_aliases = [
         element.value.id
@@ -294,32 +280,22 @@ def _verify_composer(path: Path, errors: list[str]) -> None:
         if isinstance(element, ast.Starred) and isinstance(element.value, ast.Name)
     ]
     expected_aliases = [alias for _, _, alias in expected_imports]
-    if (
-        len(actual_aliases) != len(assignments[0].elts)
-        or actual_aliases != expected_aliases
-    ):
+    if len(actual_aliases) != len(assignments[0].elts) or actual_aliases != expected_aliases:
         errors.append(
-            "Repository Foundations composer must flatten each concept list once "
-            "in canonical order"
+            "Repository Foundations composer must flatten each concept list once in canonical order"
         )
 
 
-def _verify_leaf(
-    path: Path, expected_slugs: tuple[str, ...], errors: list[str]
-) -> list[str]:
+def _verify_leaf(path: Path, expected_slugs: tuple[str, ...], errors: list[str]) -> list[str]:
     parsed = _parse(path, errors)
     if parsed is None:
         return []
     source, tree = parsed
     line_count = _line_count(source)
     if line_count > LEAF_MAX_LINES:
-        errors.append(
-            f"{path.name} has {line_count} lines; maximum is {LEAF_MAX_LINES}"
-        )
+        errors.append(f"{path.name} has {line_count} lines; maximum is {LEAF_MAX_LINES}")
 
-    imports = [
-        node for node in tree.body if isinstance(node, (ast.Import, ast.ImportFrom))
-    ]
+    imports = [node for node in tree.body if isinstance(node, (ast.Import, ast.ImportFrom))]
     non_future_imports = [
         node
         for node in imports
@@ -352,9 +328,7 @@ def _verify_leaf(
         )
     ]
     if unexpected_statements:
-        errors.append(
-            f"{path.name} has unexpected top-level ownership: {unexpected_statements}"
-        )
+        errors.append(f"{path.name} has unexpected top-level ownership: {unexpected_statements}")
 
     if _assignment_values(tree, "ADVENTURE_LEVELS"):
         errors.append(f"{path.name} must not define the public ADVENTURE_LEVELS export")
@@ -364,13 +338,9 @@ def _verify_leaf(
         return []
     actual_slugs = [_literal_slug(element) for element in assignments[0].elts]
     if any(slug is None for slug in actual_slugs):
-        errors.append(
-            f"{path.name} LEVELS entries must be literal dictionaries with slugs"
-        )
+        errors.append(f"{path.name} LEVELS entries must be literal dictionaries with slugs")
     if actual_slugs != list(expected_slugs):
-        errors.append(
-            f"{path.name} owns {actual_slugs}; expected {list(expected_slugs)}"
-        )
+        errors.append(f"{path.name} owns {actual_slugs}; expected {list(expected_slugs)}")
     return [slug for slug in actual_slugs if slug is not None]
 
 
@@ -386,10 +356,7 @@ def repository_foundations_layout_errors(
         f"{module}.py" for module, _ in REPOSITORY_FOUNDATIONS_GROUPS
     }
     actual_files = (
-        {
-            path.relative_to(package_path).as_posix()
-            for path in package_path.rglob("*.py")
-        }
+        {path.relative_to(package_path).as_posix() for path in package_path.rglob("*.py")}
         if package_path.is_dir()
         else set()
     )
@@ -404,16 +371,10 @@ def repository_foundations_layout_errors(
     _verify_composer(composer_path, errors)
     all_slugs: list[str] = []
     for module, expected_slugs in REPOSITORY_FOUNDATIONS_GROUPS:
-        all_slugs.extend(
-            _verify_leaf(package_path / f"{module}.py", expected_slugs, errors)
-        )
-    expected_all = [
-        slug for _, slugs in REPOSITORY_FOUNDATIONS_GROUPS for slug in slugs
-    ]
+        all_slugs.extend(_verify_leaf(package_path / f"{module}.py", expected_slugs, errors))
+    expected_all = [slug for _, slugs in REPOSITORY_FOUNDATIONS_GROUPS for slug in slugs]
     if all_slugs != expected_all:
-        errors.append(
-            "Repository Foundations leaf slug sequence is incomplete or duplicated"
-        )
+        errors.append("Repository Foundations leaf slug sequence is incomplete or duplicated")
     return errors
 
 
@@ -473,8 +434,7 @@ def _verify_frost_initializer(path: Path, errors: list[str]) -> None:
         and imports[0].module == "__future__"
         and imports[1].level == 1
         and imports[1].module == "_catalog"
-        and [(alias.name, alias.asname) for alias in imports[1].names]
-        == [("LEVELS", None)]
+        and [(alias.name, alias.asname) for alias in imports[1].names] == [("LEVELS", None)]
     )
     if not expected_import:
         errors.append("Frost package initializer must import only public LEVELS")
@@ -483,11 +443,7 @@ def _verify_frost_initializer(path: Path, errors: list[str]) -> None:
     valid_all = (
         len(all_values) == 1
         and isinstance(all_values[0], ast.List)
-        and [
-            element.value
-            for element in all_values[0].elts
-            if isinstance(element, ast.Constant)
-        ]
+        and [element.value for element in all_values[0].elts if isinstance(element, ast.Constant)]
         == ["LEVELS"]
         and len(all_values[0].elts) == 1
     )
@@ -503,9 +459,7 @@ def _verify_frost_initializer(path: Path, errors: list[str]) -> None:
             and isinstance(node.value.value, str)
         )
         if not (
-            is_docstring
-            or isinstance(node, ast.ImportFrom)
-            or _assigned_names(node) == {"__all__"}
+            is_docstring or isinstance(node, ast.ImportFrom) or _assigned_names(node) == {"__all__"}
         ):
             allowed_statements.append(ast.unparse(node))
     if allowed_statements or _top_level_owned_names(tree) != {"__all__"}:
@@ -563,10 +517,7 @@ def _verify_frost_catalog(path: Path, errors: list[str]) -> None:
             if isinstance(element, ast.Starred) and isinstance(element.value, ast.Name)
         ]
         expected_aliases = [alias for _, _, alias in expected_imports]
-        if (
-            len(actual_aliases) != len(assignments[0].elts)
-            or actual_aliases != expected_aliases
-        ):
+        if len(actual_aliases) != len(assignments[0].elts) or actual_aliases != expected_aliases:
             errors.append(
                 "Frost _catalog.py must flatten every chapter list once in canonical order"
             )
@@ -610,14 +561,10 @@ def _verify_frost_fixtures(path: Path, errors: list[str]) -> None:
         errors.append("Frost _fixtures.py must not define content catalogs")
 
     duplicate_owners = {
-        name: count
-        for name, count in _top_level_owner_counts(tree).items()
-        if count > 1
+        name: count for name, count in _top_level_owner_counts(tree).items() if count > 1
     }
     if duplicate_owners:
-        errors.append(
-            f"Frost _fixtures.py has duplicate top-level owners {duplicate_owners}"
-        )
+        errors.append(f"Frost _fixtures.py has duplicate top-level owners {duplicate_owners}")
 
     unexpected_statements: list[str] = []
     for index, node in enumerate(tree.body):
@@ -636,8 +583,7 @@ def _verify_frost_fixtures(path: Path, errors: list[str]) -> None:
             }
             if not allowed:
                 errors.append(
-                    "Frost _fixtures.py imports an unauthorized owner: "
-                    f"{ast.unparse(node)}"
+                    f"Frost _fixtures.py imports an unauthorized owner: {ast.unparse(node)}"
                 )
             if any(alias.name == "*" for alias in node.names):
                 errors.append("Frost _fixtures.py must not use wildcard imports")
@@ -652,8 +598,7 @@ def _verify_frost_fixtures(path: Path, errors: list[str]) -> None:
             unexpected_statements.append(ast.unparse(node))
     if unexpected_statements:
         errors.append(
-            "Frost _fixtures.py has unexpected top-level statements: "
-            f"{unexpected_statements}"
+            f"Frost _fixtures.py has unexpected top-level statements: {unexpected_statements}"
         )
 
 
@@ -668,9 +613,7 @@ def _verify_frost_chapter(
         return
     source, tree = parsed
     if _line_count(source) > max_lines:
-        errors.append(
-            f"Frost {path.name} exceeds its {max_lines}-line maximum"
-        )
+        errors.append(f"Frost {path.name} exceeds its {max_lines}-line maximum")
 
     expected_owned = {"DRILLS", "WORKFLOWS"}
     if module_name == "survive_the_conflict":
@@ -686,14 +629,10 @@ def _verify_frost_chapter(
         errors.append(f"Frost {path.name} must not define LEVELS")
 
     duplicate_owners = {
-        name: count
-        for name, count in _top_level_owner_counts(tree).items()
-        if count > 1
+        name: count for name, count in _top_level_owner_counts(tree).items() if count > 1
     }
     if duplicate_owners:
-        errors.append(
-            f"Frost {path.name} has duplicate top-level owners {duplicate_owners}"
-        )
+        errors.append(f"Frost {path.name} has duplicate top-level owners {duplicate_owners}")
 
     chapter_names = {name for name, _ in FROST_CHAPTERS}
     unexpected_statements: list[str] = []
@@ -709,17 +648,21 @@ def _verify_frost_chapter(
             continue
         if not isinstance(node, ast.ImportFrom):
             allowed_definition = (
-                isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-                and node.name in expected_owned
-            ) or (
-                isinstance(node, ast.Assign)
-                and len(node.targets) == 1
-                and isinstance(node.targets[0], ast.Name)
-                and node.targets[0].id in expected_owned
-            ) or (
-                isinstance(node, ast.AnnAssign)
-                and isinstance(node.target, ast.Name)
-                and node.target.id in expected_owned
+                (
+                    isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                    and node.name in expected_owned
+                )
+                or (
+                    isinstance(node, ast.Assign)
+                    and len(node.targets) == 1
+                    and isinstance(node.targets[0], ast.Name)
+                    and node.targets[0].id in expected_owned
+                )
+                or (
+                    isinstance(node, ast.AnnAssign)
+                    and isinstance(node.target, ast.Name)
+                    and node.target.id in expected_owned
+                )
             )
             if not (is_docstring or allowed_definition):
                 unexpected_statements.append(ast.unparse(node))
@@ -732,9 +675,7 @@ def _verify_frost_chapter(
             (2, "form_drill_support"),
         }
         if not allowed:
-            errors.append(
-                f"Frost {path.name} imports an unauthorized owner: {ast.unparse(node)}"
-            )
+            errors.append(f"Frost {path.name} imports an unauthorized owner: {ast.unparse(node)}")
         if any(alias.name == "*" for alias in node.names):
             errors.append(f"Frost {path.name} must not use wildcard imports")
         if (
@@ -742,23 +683,18 @@ def _verify_frost_chapter(
             or node.module == "_catalog"
             or (node.module is None and any(alias.name in chapter_names for alias in node.names))
             or any(
-                (node.module or "").endswith(
-                    f"v3_frost_form_drills.{chapter_name}"
-                )
+                (node.module or "").endswith(f"v3_frost_form_drills.{chapter_name}")
                 for chapter_name in chapter_names
             )
         ):
             errors.append(f"Frost {path.name} imports a sibling chapter")
     if unexpected_statements:
         errors.append(
-            f"Frost {path.name} has unexpected top-level statements: "
-            f"{unexpected_statements}"
+            f"Frost {path.name} has unexpected top-level statements: {unexpected_statements}"
         )
 
 
-def _frost_external_import_errors(
-    import_roots: tuple[Path, ...], package_path: Path
-) -> list[str]:
+def _frost_external_import_errors(import_roots: tuple[Path, ...], package_path: Path) -> list[str]:
     errors: list[str] = []
     package_name = "v3_frost_form_drills"
     package_marker = package_name.encode()
@@ -788,9 +724,7 @@ def _frost_external_import_errors(
             try:
                 tree = ast.parse(source, filename=str(path))
             except SyntaxError as exc:
-                errors.append(
-                    f"{path.name}: invalid Python: {exc.msg} (line {exc.lineno})"
-                )
+                errors.append(f"{path.name}: invalid Python: {exc.msg} (line {exc.lineno})")
                 continue
             try:
                 path_label = path.relative_to(ROOT)
@@ -801,23 +735,18 @@ def _frost_external_import_errors(
                     for alias in node.names:
                         marker = f"{package_name}."
                         if marker in alias.name:
-                            errors.append(
-                                f"{path_label} imports Frost package internals"
-                            )
+                            errors.append(f"{path_label} imports Frost package internals")
                 elif isinstance(node, ast.ImportFrom):
                     module = node.module or ""
                     if f"{package_name}." in module:
-                        errors.append(
-                            f"{path_label} imports Frost package internals"
-                        )
+                        errors.append(f"{path_label} imports Frost package internals")
                     elif module.endswith(package_name):
                         private_names = sorted(
                             alias.name for alias in node.names if alias.name != "LEVELS"
                         )
                         if private_names:
                             errors.append(
-                                f"{path_label} imports non-public Frost bindings "
-                                f"{private_names}"
+                                f"{path_label} imports non-public Frost bindings {private_names}"
                             )
     return errors
 
@@ -876,8 +805,7 @@ def frost_form_drill_layout_errors(
             displaced = _top_level_bound_names(tree) & FROST_DISPLACED_SUPPORT_BINDINGS
             if displaced:
                 errors.append(
-                    f"Frost {path.name} restores displaced support bindings "
-                    f"{sorted(displaced)}"
+                    f"Frost {path.name} restores displaced support bindings {sorted(displaced)}"
                 )
 
     unique_helper_names = FROST_FIXTURE_BINDINGS | FROST_SURVIVE_LOCAL_BINDINGS

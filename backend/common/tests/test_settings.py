@@ -6,11 +6,18 @@ from pathlib import Path
 BACKEND_DIR = Path(__file__).resolve().parents[2]
 
 
-def run_settings_import(*, debug: str, redis_url: str):
+def run_settings_import(
+    *,
+    debug: str,
+    redis_url: str,
+    database_url: str = "sqlite:///:memory:",
+    database_sslmode: str = "",
+):
     env = os.environ.copy()
     env.update(
         {
-            "DATABASE_URL": "sqlite:///:memory:",
+            "DATABASE_URL": database_url,
+            "DATABASE_SSLMODE": database_sslmode,
             "DJANGO_ALLOWED_HOSTS": "localhost,127.0.0.1",
             "DJANGO_CORS_ALLOWED_ORIGINS": "http://localhost:5173",
             "DJANGO_DEBUG": debug,
@@ -55,3 +62,26 @@ def test_jdbc_database_url_is_normalized_to_postgresql():
     )
     # Non-jdbc URLs pass through unchanged.
     assert _normalize_database_url("postgresql://host/db") == "postgresql://host/db"
+
+
+def test_production_database_can_require_tls():
+    result = run_settings_import(
+        debug="False",
+        redis_url="redis://localhost:6379/0",
+        database_url="postgresql://user:password@pooler.supabase.com:5432/postgres",
+        database_sslmode="require",
+    )
+
+    assert result.returncode == 0
+
+
+def test_invalid_database_sslmode_is_rejected():
+    result = run_settings_import(
+        debug="False",
+        redis_url="redis://localhost:6379/0",
+        database_url="postgresql://user:password@pooler.supabase.com:5432/postgres",
+        database_sslmode="sometimes",
+    )
+
+    assert result.returncode != 0
+    assert "DATABASE_SSLMODE must be" in result.stderr

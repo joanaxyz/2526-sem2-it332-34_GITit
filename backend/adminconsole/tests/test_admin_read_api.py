@@ -329,13 +329,9 @@ def test_admin_official_content_preserves_eligibility_kind_order_and_cap(django_
     direct_moderation_over_limit = admin_moderation_list_payload(limit=10_000)["content"]
 
     assert len(adventures) == 200
-    assert [row["id"] for row in adventures] == [
-        content.id for content in reversed(eligible[1:])
-    ]
+    assert [row["id"] for row in adventures] == [content.id for content in reversed(eligible[1:])]
     assert excluded_nonstaff.id not in {row["id"] for row in adventures}
     assert excluded_without_chapter.id not in {row["id"] for row in adventures}
     assert [row["id"] for row in challenges] == [ownerless_challenge.id]
-    assert [row["id"] for row in direct_official_over_limit] == [
-        row["id"] for row in adventures
-    ]
+    assert [row["id"] for row in direct_official_over_limit] == [row["id"] for row in adventures]
     assert len(direct_moderation_over_limit) == 200

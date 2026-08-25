@@ -37,12 +37,6 @@
   opacity: 0.82;
 }
 
-.story-route-line .story-route-branch {
-  stroke-width: 1.8;
-  stroke-dasharray: 5 6;
-  opacity: 0.62;
-}
-
 .story-path-node {
   position: absolute;
   left: var(--node-x);
@@ -295,14 +289,41 @@
 
 /* The chapter's challenge trials node: same path, Challenge accent. */
 .story-path-node--trial .story-path-node-ring {
+  width: 5rem;
+  height: 5rem;
   border-color: rgba(176, 74, 255, 0.85);
+  border-radius: 15px;
   background:
-    radial-gradient(circle at 50% 30%, rgba(176, 74, 255, 0.16), transparent 62%),
+    radial-gradient(circle at 50% 30%, rgba(176, 74, 255, 0.22), transparent 62%),
     linear-gradient(180deg, rgba(18, 8, 40, 0.96), rgba(6, 2, 16, 0.97));
   box-shadow:
     0 0 0 4px rgba(176, 74, 255, 0.1),
     0 0 20px rgba(176, 74, 255, 0.5);
   color: #f3e8ff;
+}
+
+.story-challenge-node-label {
+  position: absolute;
+  top: calc(100% + 0.65rem);
+  left: 50%;
+  width: max-content;
+  padding: 0.18rem 0.55rem;
+  border: 1px solid rgba(176, 74, 255, 0.38);
+  border-radius: var(--radius-pill);
+  background: rgba(12, 4, 28, 0.88);
+  color: #ead7ff;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  line-height: 1.3;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.story-path-node--trial[data-state='locked'] .story-challenge-node-label,
+.story-path-node--trial[data-state='loading'] .story-challenge-node-label {
+  border-color: rgba(148, 163, 184, 0.26);
+  color: rgba(219, 234, 254, 0.54);
 }
 
 .story-path-node--trial:not(:disabled):hover .story-path-node-ring,
@@ -322,43 +343,106 @@
   box-shadow: none;
 }
 
-/* Trial cards appear beside the challenge node only once it is clicked. */
-.story-trials-flyout {
-  position: absolute;
-  z-index: 6;
+/* Challenge choices live in document flow below the path. This gives every
+   trial a stable home without covering adventure nodes or their play actions. */
+.story-trials-panel {
+  position: relative;
+  z-index: 4;
   display: grid;
-  gap: 1.05rem;
-  width: 16.4rem;
+  gap: 1rem;
+  width: min(100%, 46rem);
+  margin: 0 auto 1.5rem;
+  padding: 1rem 1.1rem 1.15rem;
+  border-block: 1px solid rgba(176, 74, 255, 0.36);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(176, 74, 255, 0.14), transparent 18rem),
+    linear-gradient(90deg, rgba(9, 4, 22, 0.38), rgba(9, 4, 22, 0.72) 18%, rgba(9, 4, 22, 0.72) 82%, rgba(9, 4, 22, 0.38));
   animation: story-trials-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes story-trials-in {
   from {
     opacity: 0;
-    transform: translateX(-10px);
+    transform: translateY(-8px);
   }
 }
 
-/* A chapter can carry several challenge scenarios; each renders as its own
-   titled group of difficulty cards inside the same flyout. */
-.story-trials-flyout {
-  max-height: min(72vh, 34rem);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-.story-trials-flyout-group {
+.story-trials-panel-header {
   display: grid;
-  gap: 0.65rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
 }
 
-.story-trials-flyout-title {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: hsl(var(--muted-foreground));
-  padding-left: 0.15rem;
+.story-trials-panel-mark {
+  display: grid;
+  width: 2.65rem;
+  height: 2.65rem;
+  place-items: center;
+  border: 1px solid rgba(176, 74, 255, 0.55);
+  border-radius: var(--radius-md);
+  background: rgba(176, 74, 255, 0.12);
+  color: #d9b3ff;
+}
+
+.story-trials-panel-mark svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.story-trials-panel-header h2,
+.story-trials-panel-header p,
+.story-trials-group-title {
+  margin: 0;
+}
+
+.story-trials-panel-header h2 {
+  color: hsl(var(--foreground));
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.story-trials-panel-header p {
+  margin-top: 0.2rem;
+  color: rgba(219, 234, 254, 0.68);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.story-trials-panel-progress {
+  padding: 0.28rem 0.6rem;
+  border: 1px solid rgba(176, 74, 255, 0.32);
+  border-radius: var(--radius-pill);
+  color: #d9b3ff;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.story-trials-panel-content,
+.story-trials-group {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.story-trials-group + .story-trials-group {
+  padding-top: 1rem;
+  border-top: 1px solid rgba(176, 74, 255, 0.2);
+}
+
+.story-trials-group-title {
+  color: rgba(232, 246, 250, 0.84);
+  font-size: 0.86rem;
+  font-weight: 750;
+}
+
+.story-trials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
 }
 
 .story-path-stars svg,

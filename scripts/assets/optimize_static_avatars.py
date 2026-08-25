@@ -42,9 +42,7 @@ def targets() -> list[Target]:
             destination=portrait,
             maximum_size=(256, 256),
         )
-        for portrait in sorted(
-            (PUBLIC / "story-worlds").glob("*/monsters/*/portrait.png")
-        )
+        for portrait in sorted((PUBLIC / "story-worlds").glob("*/monsters/*/portrait.png"))
     ]
     items.extend(
         [
@@ -78,9 +76,7 @@ def targets() -> list[Target]:
     return items
 
 
-def optimized_png(
-    source: Path, maximum_size: tuple[int, int]
-) -> tuple[bytes, tuple[int, int]]:
+def optimized_png(source: Path, maximum_size: tuple[int, int]) -> tuple[bytes, tuple[int, int]]:
     with Image.open(source) as opened:
         image = opened.convert("RGBA")
         image.thumbnail(maximum_size, Image.Resampling.LANCZOS)

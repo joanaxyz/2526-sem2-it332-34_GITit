@@ -364,9 +364,7 @@ def _enclosed_transparent_mask_for_image(
 ) -> bytearray:
     width, height = rgba.size
     total = width * height
-    transparent = bytearray(
-        1 if a <= alpha_threshold else 0 for _, _, _, a in image_data(rgba)
-    )
+    transparent = bytearray(1 if a <= alpha_threshold else 0 for _, _, _, a in image_data(rgba))
     exterior = bytearray(total)
     queue: deque[int] = deque()
 
@@ -786,9 +784,7 @@ def clean_png(
         source_rgba = image.convert("RGBA")
 
         preserve_destination = (
-            restore_alpha_holes
-            or clean_current_white_holes
-            or clean_current_connected_white
+            restore_alpha_holes or clean_current_white_holes or clean_current_connected_white
         )
         if preserve_destination:
             if not task.destination.exists():
@@ -827,9 +823,7 @@ def clean_png(
             elif mode == "all":
                 remove_mask = all_white_mask(rgba, tolerance, alpha_threshold)
             else:
-                remove_mask = connected_white_mask(
-                    rgba, tolerance, alpha_threshold, min_hole_size
-                )
+                remove_mask = connected_white_mask(rgba, tolerance, alpha_threshold, min_hole_size)
                 fringe_mask = transparent_hole_fringe_mask(
                     rgba,
                     alpha_threshold=alpha_threshold,
@@ -851,9 +845,7 @@ def clean_png(
             if mode == "all":
                 remove_mask = all_white_mask(rgba, tolerance, alpha_threshold)
             else:
-                remove_mask = connected_white_mask(
-                    rgba, tolerance, alpha_threshold, min_hole_size
-                )
+                remove_mask = connected_white_mask(rgba, tolerance, alpha_threshold, min_hole_size)
                 fringe_mask = transparent_hole_fringe_mask(
                     rgba,
                     alpha_threshold=alpha_threshold,

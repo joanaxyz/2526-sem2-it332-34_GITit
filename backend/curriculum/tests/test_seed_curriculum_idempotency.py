@@ -122,18 +122,14 @@ def test_seed_curriculum_preserves_complete_admin_owned_rows(db, django_user_mod
                     },
                     "initial_state": repository_state,
                     "target_state": repository_state,
-                    "evaluation_spec": {
-                        "completion_policy": {"mode": "state_hash"}
-                    },
+                    "evaluation_spec": {"completion_policy": {"mode": "state_hash"}},
                     "solution_commands": ["git status"],
                 }
             ]
         },
     )
     official_runtime = ContentRuntimeCompiler().compile(content=official_content)
-    authored_skill = CommandSkill.objects.get(
-        source_content_definition=official_content
-    )
+    authored_skill = CommandSkill.objects.get(source_content_definition=official_content)
 
     admin_only_story = Story.objects.create(
         slug="operator-story",

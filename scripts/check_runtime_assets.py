@@ -52,18 +52,14 @@ def _asset_references() -> set[str]:
             # comments and whole-line comments before collecting literals.
             searchable = re.sub(r"/\*.*?\*/", "", searchable, flags=re.DOTALL)
             searchable = "\n".join(
-                line
-                for line in searchable.splitlines()
-                if not line.lstrip().startswith("//")
+                line for line in searchable.splitlines() if not line.lstrip().startswith("//")
             )
         references.update(match.group(0) for match in MEDIA_PATH.finditer(searchable))
         if path.suffix == ".json":
             try:
                 payload = json.loads(source)
             except json.JSONDecodeError as exc:
-                raise RuntimeError(
-                    f"Cannot parse {path.relative_to(ROOT)}: {exc}"
-                ) from exc
+                raise RuntimeError(f"Cannot parse {path.relative_to(ROOT)}: {exc}") from exc
             for value in _json_strings(payload):
                 if MEDIA_PATH.fullmatch(value):
                     references.add(value)
@@ -76,8 +72,7 @@ def _git_lines(*args: str, input_text: str | None = None) -> list[str]:
         cwd=ROOT,
         input=input_text,
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         check=False,
     )
     if completed.returncode:
@@ -95,9 +90,7 @@ def _tracked_public_files() -> set[str]:
 def _export_ignored(paths: list[str]) -> list[str]:
     if not paths:
         return []
-    output = _git_lines(
-        "check-attr", "--stdin", "export-ignore", input_text="\n".join(paths)
-    )
+    output = _git_lines("check-attr", "--stdin", "export-ignore", input_text="\n".join(paths))
     ignored: list[str] = []
     for line in output:
         path, _attribute, value = line.rsplit(": ", 2)
@@ -127,17 +120,14 @@ def main() -> int:
         elif relative not in tracked:
             untracked.append(reference)
 
-    archive_excluded = _export_ignored(
-        [f"frontend/public{reference}" for reference in references]
-    )
+    archive_excluded = _export_ignored([f"frontend/public{reference}" for reference in references])
 
     errors: list[str] = []
     if missing:
         errors.append("Missing runtime media:\n  " + "\n  ".join(missing))
     if archive_excluded:
         errors.append(
-            "Runtime media excluded from git archive:\n  "
-            + "\n  ".join(archive_excluded)
+            "Runtime media excluded from git archive:\n  " + "\n  ".join(archive_excluded)
         )
     if untracked and args.require_tracked:
         errors.append("Untracked runtime media:\n  " + "\n  ".join(untracked))
@@ -148,9 +138,7 @@ def main() -> int:
         return 1
 
     detail = f", {len(untracked)} present but untracked" if untracked else ""
-    print(
-        f"Runtime asset deployment check passed ({len(references)} references{detail})."
-    )
+    print(f"Runtime asset deployment check passed ({len(references)} references{detail}).")
     return 0
 
 

@@ -32,7 +32,6 @@ from scripts.checks.architecture_guard.typescript_analysis import (
     ts_type_aliases,
 )
 
-
 STATS_PROGRESS_SERIALIZERS = "backend/progress/serializers.py"
 STATS_COMMON_OPENAPI = "backend/common/openapi.py"
 STATS_FRONTEND_TYPES = "frontend/src/features/stats/types.ts"
@@ -150,9 +149,7 @@ def progress_summary_backend_contract_violations(
         },
         "DashboardSummaryResponseSerializer": {
             "kpis": "DashboardKpiSetSerializer()",
-            "chapter_kpis": (
-                "serializers.DictField(child=DashboardKpiSetSerializer())"
-            ),
+            "chapter_kpis": ("serializers.DictField(child=DashboardKpiSetSerializer())"),
             "counts": "DashboardCountsSerializer()",
             "completed_story_slug": "serializers.CharField(allow_null=True)",
             "completed_stories": "serializers.ListField(child=serializers.CharField())",
@@ -176,9 +173,7 @@ def progress_summary_backend_contract_violations(
                 f"{sorted(expected_fields)}; found {sorted(fields)}"
             )
         else:
-            actual_calls = python_class_field_calls(
-                progress_serializers_source, class_name
-            )
+            actual_calls = python_class_field_calls(progress_serializers_source, class_name)
             if actual_calls != expected_calls:
                 violations.append(
                     f"{STATS_PROGRESS_SERIALIZERS}: {class_name} field signatures must be exact"
@@ -190,10 +185,7 @@ def progress_summary_backend_contract_violations(
             violations.append(
                 f"{STATS_PROGRESS_SERIALIZERS}: displaced DashboardSummarySerializer must stay deleted"
             )
-        elif (
-            is_stats_contract_symbol(class_name)
-            and class_name not in allowed_progress_contracts
-        ):
+        elif is_stats_contract_symbol(class_name) and class_name not in allowed_progress_contracts:
             violations.append(
                 f"{STATS_PROGRESS_SERIALIZERS}: secondary contract {class_name} is not allowed"
             )
@@ -217,17 +209,12 @@ def progress_summary_backend_contract_violations(
             violations.append(
                 f"{STATS_COMMON_OPENAPI}: secondary contract alias {alias_name} is not allowed"
             )
-    if (
-        python_class_fields(common_openapi_source, "WalletSummaryResponseSerializer")
-        is None
-    ):
+    if python_class_fields(common_openapi_source, "WalletSummaryResponseSerializer") is None:
         violations.append(
             f"{STATS_COMMON_OPENAPI}: shared WalletSummaryResponseSerializer must remain canonical"
         )
     if (
-        python_class_fields(
-            progress_serializers_source, "WalletSummaryResponseSerializer"
-        )
+        python_class_fields(progress_serializers_source, "WalletSummaryResponseSerializer")
         is not None
     ):
         violations.append(
@@ -266,9 +253,7 @@ def stats_contract_source_violations(
             )
     all_aliases = ts_type_aliases(stats_types_without_comments)
     extra_aliases = sorted(set(all_aliases) - set(expected_aliases))
-    if extra_aliases or re.search(
-        r"\b(?:export\s+)?interface\b", stats_types_without_comments
-    ):
+    if extra_aliases or re.search(r"\b(?:export\s+)?interface\b", stats_types_without_comments):
         violations.append(
             f"{STATS_FRONTEND_TYPES}: may declare only the three generated Stats aliases; "
             f"extra aliases found: {extra_aliases}"
@@ -293,9 +278,7 @@ def stats_contract_source_violations(
             f"{STATS_FRONTEND_API}: summary must use progress_stats_retrieve at /progress/stats/"
         )
     elif operation_call.group("generics") and "," in operation_call.group("generics"):
-        violations.append(
-            f"{STATS_FRONTEND_API}: must not pass a custom Stats response generic"
-        )
+        violations.append(f"{STATS_FRONTEND_API}: must not pass a custom Stats response generic")
     summary_method = re.search(
         r"\bsummary\s*\(\s*\)\s*\{(?P<body>[^{}]*)\}",
         stats_api_without_comments,
@@ -313,9 +296,7 @@ def stats_contract_source_violations(
         violations.append(
             f"{STATS_FRONTEND_API}: summary must return the generated operation response directly"
         )
-    if re.search(
-        r"\.then\s*\(|\b(?:activity|headlines|totals)\s*:", stats_api_without_comments
-    ):
+    if re.search(r"\.then\s*\(|\b(?:activity|headlines|totals)\s*:", stats_api_without_comments):
         violations.append(
             f"{STATS_FRONTEND_API}: must not adapt or alias the generated Stats response"
         )
@@ -377,9 +358,7 @@ def stats_openapi_contract_violations(schema: dict) -> list[str]:
     for schema_name, expected_properties in expected_schema_properties.items():
         expected_fields = set(expected_properties)
         component = schemas.get(schema_name)
-        actual_properties = (
-            component.get("properties", {}) if isinstance(component, dict) else {}
-        )
+        actual_properties = component.get("properties", {}) if isinstance(component, dict) else {}
         actual_fields = set(actual_properties)
         required_fields = (
             set(component.get("required", [])) if isinstance(component, dict) else set()
@@ -438,9 +417,9 @@ def dashboard_contract_source_violations(
         )
     exported_aliases = ts_exported_type_aliases(dashboard_types)
     expected_alias = "ApiSchemas['DashboardSummaryResponse']"
-    if normalized_ts_type(
-        exported_aliases.get("HomeSummary", "")
-    ) != normalized_ts_type(expected_alias):
+    if normalized_ts_type(exported_aliases.get("HomeSummary", "")) != normalized_ts_type(
+        expected_alias
+    ):
         violations.append(
             f"{DASHBOARD_FRONTEND_TYPES}: HomeSummary must derive exactly from {expected_alias}"
         )
@@ -483,10 +462,10 @@ def dashboard_contract_source_violations(
         violations.append(
             f"{DASHBOARD_FRONTEND_API}: must not pass a custom Dashboard response generic"
         )
-    summary_method = re.search(
-        r"\bsummary\s*\(\s*\)\s*\{(?P<body>[^{}]*)\}", dashboard_api, re.S
+    summary_method = re.search(r"\bsummary\s*\(\s*\)\s*\{(?P<body>[^{}]*)\}", dashboard_api, re.S)
+    expected_summary_body = (
+        "returnapiOperationRequest('progress_dashboard_retrieve','/progress/dashboard/')"
     )
-    expected_summary_body = "returnapiOperationRequest('progress_dashboard_retrieve','/progress/dashboard/')"
     actual_summary_body = (
         normalized_ts_type(summary_method.group("body")).replace(";", "")
         if summary_method is not None
@@ -532,9 +511,7 @@ def dashboard_secondary_frontend_contract_violations(
             r"(?:Summary|Response|Contract|Dto)\w*)\b",
             source,
         ) or ("DashboardSummaryResponse" in source and "ApiSchemas" in source):
-            violations.append(
-                f"{path_label}: secondary Dashboard response DTO is not allowed"
-            )
+            violations.append(f"{path_label}: secondary Dashboard response DTO is not allowed")
         if re.search(r"\bprogress_dashboard_retrieve\b|/progress/dashboard/", source):
             violations.append(
                 f"{path_label}: secondary Dashboard endpoint request path is not allowed"
@@ -574,9 +551,7 @@ def dashboard_secondary_frontend_contract_violations(
             for module, exported_name in canonical_modules.items()
         )
         if derived_export or exported_alias or reexported_api:
-            violations.append(
-                f"{path_label}: secondary Dashboard summary adapter is not allowed"
-            )
+            violations.append(f"{path_label}: secondary Dashboard summary adapter is not allowed")
     return violations
 
 
@@ -616,9 +591,7 @@ def dashboard_openapi_contract_violations(schema: dict) -> list[str]:
             "kpis": {"$ref": "#/components/schemas/DashboardKpiSet"},
             "chapter_kpis": {
                 "type": "object",
-                "additionalProperties": {
-                    "$ref": "#/components/schemas/DashboardKpiSet"
-                },
+                "additionalProperties": {"$ref": "#/components/schemas/DashboardKpiSet"},
             },
             "counts": {"$ref": "#/components/schemas/DashboardCounts"},
             "completed_story_slug": {"type": "string", "nullable": True},
@@ -638,9 +611,7 @@ def dashboard_openapi_contract_violations(schema: dict) -> list[str]:
     for schema_name, expected_properties in expected_schema_properties.items():
         expected_fields = set(expected_properties)
         component = schemas.get(schema_name)
-        actual_properties = (
-            component.get("properties", {}) if isinstance(component, dict) else {}
-        )
+        actual_properties = component.get("properties", {}) if isinstance(component, dict) else {}
         required_fields = (
             set(component.get("required", [])) if isinstance(component, dict) else set()
         )
@@ -689,32 +660,19 @@ def check_dashboard_summary_contract_ownership() -> list[str]:
         DASHBOARD_HOME_API_SHIM,
         DASHBOARD_GENERATED_OPENAPI,
     )
-    missing = [
-        path_label for path_label in path_labels if not (ROOT / path_label).is_file()
-    ]
+    missing = [path_label for path_label in path_labels if not (ROOT / path_label).is_file()]
     if missing:
         return [
-            f"{path_label}: required Dashboard contract path is missing"
-            for path_label in missing
+            f"{path_label}: required Dashboard contract path is missing" for path_label in missing
         ]
 
     violations = dashboard_contract_source_violations(
-        dashboard_types_source=(ROOT / DASHBOARD_FRONTEND_TYPES).read_text(
-            encoding="utf-8"
-        ),
-        dashboard_api_source=(ROOT / DASHBOARD_FRONTEND_API).read_text(
-            encoding="utf-8"
-        ),
-        home_types_shim_source=(ROOT / DASHBOARD_HOME_TYPES_SHIM).read_text(
-            encoding="utf-8"
-        ),
-        home_api_shim_source=(ROOT / DASHBOARD_HOME_API_SHIM).read_text(
-            encoding="utf-8"
-        ),
+        dashboard_types_source=(ROOT / DASHBOARD_FRONTEND_TYPES).read_text(encoding="utf-8"),
+        dashboard_api_source=(ROOT / DASHBOARD_FRONTEND_API).read_text(encoding="utf-8"),
+        home_types_shim_source=(ROOT / DASHBOARD_HOME_TYPES_SHIM).read_text(encoding="utf-8"),
+        home_api_shim_source=(ROOT / DASHBOARD_HOME_API_SHIM).read_text(encoding="utf-8"),
     )
-    progress_serializers_source = (ROOT / STATS_PROGRESS_SERIALIZERS).read_text(
-        encoding="utf-8"
-    )
+    progress_serializers_source = (ROOT / STATS_PROGRESS_SERIALIZERS).read_text(encoding="utf-8")
     common_openapi_source = (ROOT / STATS_COMMON_OPENAPI).read_text(encoding="utf-8")
     violations.extend(
         progress_summary_backend_contract_violations(
@@ -734,9 +692,7 @@ def check_dashboard_summary_contract_ownership() -> list[str]:
         and not path.name.startswith("test_")
     }
     violations.extend(
-        progress_summary_secondary_backend_contract_violations(
-            secondary_backend_sources
-        )
+        progress_summary_secondary_backend_contract_violations(secondary_backend_sources)
     )
     canonical_frontend_contract_paths = {
         DASHBOARD_FRONTEND_TYPES,
@@ -754,17 +710,11 @@ def check_dashboard_summary_contract_ownership() -> list[str]:
         and ".test." not in path.name
         and ".spec." not in path.name
     }
-    violations.extend(
-        dashboard_secondary_frontend_contract_violations(secondary_frontend_sources)
-    )
+    violations.extend(dashboard_secondary_frontend_contract_violations(secondary_frontend_sources))
     try:
-        schema = json.loads(
-            (ROOT / DASHBOARD_GENERATED_OPENAPI).read_text(encoding="utf-8")
-        )
+        schema = json.loads((ROOT / DASHBOARD_GENERATED_OPENAPI).read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as error:
-        violations.append(
-            f"{DASHBOARD_GENERATED_OPENAPI}: invalid generated schema: {error}"
-        )
+        violations.append(f"{DASHBOARD_GENERATED_OPENAPI}: invalid generated schema: {error}")
     else:
         violations.extend(dashboard_openapi_contract_violations(schema))
     return violations
@@ -780,19 +730,12 @@ def check_stats_summary_contract_ownership() -> list[str]:
         STATS_FRONTEND_API,
         STATS_GENERATED_OPENAPI,
     )
-    missing = [
-        path_label for path_label in path_labels if not (ROOT / path_label).is_file()
-    ]
+    missing = [path_label for path_label in path_labels if not (ROOT / path_label).is_file()]
     if missing:
-        return [
-            f"{path_label}: required Stats contract owner is missing"
-            for path_label in missing
-        ]
+        return [f"{path_label}: required Stats contract owner is missing" for path_label in missing]
 
     violations = stats_contract_source_violations(
-        progress_serializers_source=(ROOT / STATS_PROGRESS_SERIALIZERS).read_text(
-            encoding="utf-8"
-        ),
+        progress_serializers_source=(ROOT / STATS_PROGRESS_SERIALIZERS).read_text(encoding="utf-8"),
         common_openapi_source=(ROOT / STATS_COMMON_OPENAPI).read_text(encoding="utf-8"),
         stats_types_source=(ROOT / STATS_FRONTEND_TYPES).read_text(encoding="utf-8"),
         stats_api_source=(ROOT / STATS_FRONTEND_API).read_text(encoding="utf-8"),
@@ -809,18 +752,12 @@ def check_stats_summary_contract_ownership() -> list[str]:
         and not path.name.startswith("test_")
     }
     violations.extend(
-        progress_summary_secondary_backend_contract_violations(
-            secondary_backend_sources
-        )
+        progress_summary_secondary_backend_contract_violations(secondary_backend_sources)
     )
     try:
-        schema = json.loads(
-            (ROOT / STATS_GENERATED_OPENAPI).read_text(encoding="utf-8")
-        )
+        schema = json.loads((ROOT / STATS_GENERATED_OPENAPI).read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as error:
-        violations.append(
-            f"{STATS_GENERATED_OPENAPI}: invalid generated schema: {error}"
-        )
+        violations.append(f"{STATS_GENERATED_OPENAPI}: invalid generated schema: {error}")
     else:
         violations.extend(stats_openapi_contract_violations(schema))
     return violations

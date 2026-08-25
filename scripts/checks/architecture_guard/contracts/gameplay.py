@@ -31,7 +31,6 @@ from scripts.checks.architecture_guard.typescript_analysis import (
     ts_type_aliases,
 )
 
-
 GAMEPLAY_COMMON_SERIALIZERS = "backend/common/serializers.py"
 
 
@@ -102,9 +101,7 @@ def gameplay_mutation_frontend_violations(
         *GAMEPLAY_FRONTEND_APIS,
     }
     for missing_path in sorted(required_paths - sources.keys()):
-        violations.append(
-            f"{missing_path}: required gameplay contract owner is missing"
-        )
+        violations.append(f"{missing_path}: required gameplay contract owner is missing")
 
     for path_label, source in sources.items():
         without_comments = strip_ts_comments(source)
@@ -124,8 +121,7 @@ def gameplay_mutation_frontend_violations(
             and "CommandExecutionPayload" in declared_names
         ):
             violations.append(
-                f"{path_label}: CommandExecutionPayload belongs in "
-                f"{GAMEPLAY_SHARED_COMMAND_TYPES}"
+                f"{path_label}: CommandExecutionPayload belongs in {GAMEPLAY_SHARED_COMMAND_TYPES}"
             )
 
         for match in TS_IMPORT_EXPORT_FROM.finditer(without_comments):
@@ -186,9 +182,7 @@ def gameplay_mutation_frontend_violations(
                 if method_body is None or not re.search(
                     rf"\bbody\s*:\s*{re.escape(helper)}\s*\(", method_body
                 ):
-                    violations.append(
-                        f"{path_label}: {method_name} body must delegate to {helper}"
-                    )
+                    violations.append(f"{path_label}: {method_name} body must delegate to {helper}")
         elif path_label == GAMEPLAY_SHARED_BODY_ADAPTER:
             for schema_name in (
                 "CommandSubmit",
@@ -252,13 +246,9 @@ def gameplay_mutation_openapi_violations(schema: dict) -> list[str]:
     for name, expected in expected_components.items():
         component = schemas.get(name, {})
         if component.get("required") != expected["required"]:
-            violations.append(
-                f"{GAMEPLAY_GENERATED_OPENAPI}: {name} required fields must be exact"
-            )
+            violations.append(f"{GAMEPLAY_GENERATED_OPENAPI}: {name} required fields must be exact")
         if component.get("properties") != expected["properties"]:
-            violations.append(
-                f"{GAMEPLAY_GENERATED_OPENAPI}: {name} properties must be exact"
-            )
+            violations.append(f"{GAMEPLAY_GENERATED_OPENAPI}: {name} properties must be exact")
     for displaced in (
         "WorkspaceFileCreate",
         "PatchedWorkspaceFile",
@@ -289,18 +279,13 @@ def gameplay_mutation_openapi_violations(schema: dict) -> list[str]:
                 violations.append(
                     f"{GAMEPLAY_GENERATED_OPENAPI}: {method.upper()} {path} must use {component}"
                 )
-            if (
-                method == "patch"
-                and operation.get("requestBody", {}).get("required") is not True
-            ):
+            if method == "patch" and operation.get("requestBody", {}).get("required") is not True:
                 violations.append(
                     f"{GAMEPLAY_GENERATED_OPENAPI}: PATCH {path} request body must be required"
                 )
         delete_parameters = operations.get("delete", {}).get("parameters", [])
         query_parameters = [
-            parameter
-            for parameter in delete_parameters
-            if parameter.get("in") == "query"
+            parameter for parameter in delete_parameters if parameter.get("in") == "query"
         ]
         if query_parameters != [
             {
@@ -342,9 +327,7 @@ def gameplay_mutation_backend_violations(sources: dict[str, str]) -> list[str]:
                 "required=False,trim_whitespace=False)"
             ),
         },
-        "WorkspaceFilePathSerializer": {
-            "path": "serializers.CharField(max_length=240)"
-        },
+        "WorkspaceFilePathSerializer": {"path": "serializers.CharField(max_length=240)"},
         "WorkspaceFileRenameSerializer": {
             "path": "serializers.CharField(max_length=240)",
             "new_path": "serializers.CharField(max_length=240)",
@@ -353,9 +336,7 @@ def gameplay_mutation_backend_violations(sources: dict[str, str]) -> list[str]:
     for class_name, expected_fields in expected_serializer_fields.items():
         actual_fields = python_class_field_calls(common_source, class_name)
         if actual_fields != expected_fields:
-            violations.append(
-                f"{GAMEPLAY_COMMON_SERIALIZERS}: {class_name} fields must be exact"
-            )
+            violations.append(f"{GAMEPLAY_COMMON_SERIALIZERS}: {class_name} fields must be exact")
 
     if GAMEPLAY_ADVENTURE_SERIALIZERS in sources:
         violations.append(
@@ -434,16 +415,11 @@ def gameplay_mutation_backend_violations(sources: dict[str, str]) -> list[str]:
                 f"{view_path}: gameplay request serializers must come from common.serializers; "
                 f"missing={missing_imports}"
             )
-        for (class_name, method_name), serializer_name in expected_runtime_calls[
-            view_path
-        ].items():
-            called_names = python_class_method_called_names(
-                source, class_name, method_name
-            )
+        for (class_name, method_name), serializer_name in expected_runtime_calls[view_path].items():
+            called_names = python_class_method_called_names(source, class_name, method_name)
             if called_names is None or serializer_name not in called_names:
                 violations.append(
-                    f"{view_path}: {class_name}.{method_name} must validate with "
-                    f"{serializer_name}"
+                    f"{view_path}: {class_name}.{method_name} must validate with {serializer_name}"
                 )
     return violations
 
@@ -465,13 +441,9 @@ def check_gameplay_mutation_contract_ownership() -> list[str]:
     }
     violations.extend(gameplay_mutation_frontend_violations(frontend_sources))
     try:
-        schema = json.loads(
-            (ROOT / GAMEPLAY_GENERATED_OPENAPI).read_text(encoding="utf-8")
-        )
+        schema = json.loads((ROOT / GAMEPLAY_GENERATED_OPENAPI).read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as error:
-        violations.append(
-            f"{GAMEPLAY_GENERATED_OPENAPI}: invalid generated schema: {error}"
-        )
+        violations.append(f"{GAMEPLAY_GENERATED_OPENAPI}: invalid generated schema: {error}")
     else:
         violations.extend(gameplay_mutation_openapi_violations(schema))
     return violations

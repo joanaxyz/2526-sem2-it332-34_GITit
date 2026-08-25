@@ -123,8 +123,7 @@ class ContentDefinition(models.Model):
             ),
             models.CheckConstraint(
                 condition=(
-                    models.Q(chapter__isnull=True)
-                    | models.Q(official_chapter__isnull=True)
+                    models.Q(chapter__isnull=True) | models.Q(official_chapter__isnull=True)
                 ),
                 name="authoring_content_one_chapter_type",
             ),

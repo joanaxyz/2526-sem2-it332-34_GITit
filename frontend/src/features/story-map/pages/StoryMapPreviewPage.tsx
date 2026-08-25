@@ -1,21 +1,18 @@
 import {
   BookOpen,
-  Check,
   Lock,
-  Play,
-  Swords,
 } from 'lucide-react'
 
-import easyIconImage from '@/assets/images/easy_icon.png'
-import hardIconImage from '@/assets/images/hard_icon.png'
-import mediumIconImage from '@/assets/images/medium_icon.png'
 import { ChapterOverview } from '@/features/story-map/components/ChapterOverview'
-import { pathDataFor, pathGeometry, trialFlyoutPlacement } from '@/features/story-map/utils/pathGeometry'
+import { StoryAdventurePath } from '@/features/story-map/components/path/StoryAdventurePath'
 import { GamePanel } from '@/shared/components/GamePanel'
-import type { LearningChapter } from '@/features/story-map/types'
+import type {
+  AdventureLevelSummary,
+  ChallengeSummary,
+  LearningChapter,
+} from '@/features/story-map/types'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 import { AppTopbar } from '@/shared/navigation/AppNavigation'
-import { StarRating } from '@/shared/level/components/StarRating'
 import { GitCommandIcon } from '@/shared/git/commandCatalog/commandIcons'
 import { DEFAULT_STORY_WORLD_SLUG, getStoryWorld } from '@/shared/story-worlds/registry'
 
@@ -80,16 +77,81 @@ const PREVIEW_CHAPTERS: LearningChapter[] = [
     chest_schedule: PREVIEW_CHEST_SCHEDULE,
   },
 ]
-const trialIcons = [easyIconImage, mediumIconImage, hardIconImage]
-
 const PREVIEW_NEXT_SKILL = { command: 'git add', level: 3, title: 'Stage and Commit' }
 
-// Static pose of the live map: 6 levels + the trials node, flyout open.
-const PREVIEW_PATH_WIDTH = 640
-const previewPath = pathGeometry(7, PREVIEW_PATH_WIDTH)
-const previewRouteData = pathDataFor(previewPath.points)
-const previewTrialPoint = previewPath.points[previewPath.points.length - 1]
-const previewFlyout = trialFlyoutPlacement(previewTrialPoint, PREVIEW_PATH_WIDTH, previewPath.height)
+const PREVIEW_LEVELS: AdventureLevelSummary[] = Array.from({ length: 6 }, (_, index) => ({
+  item_type: 'adventure',
+  id: index + 1,
+  slug: `preview-level-${index + 1}`,
+  title: `Preview Level ${index + 1}`,
+  command: index < 2 ? 'git init' : 'git add',
+  locked: false,
+  lock_reason: '',
+  completion: index < 4
+    ? {
+        stars: 3,
+        counted_action_total: 1,
+        completed_at: '2026-08-25T00:00:00Z',
+      }
+    : null,
+  // Keep the preview focused on the unlocked Challenge Gate while preserving
+  // the mixed star state used to assess the map's visual hierarchy.
+  is_passed: true,
+}))
+
+const PREVIEW_CHALLENGES: ChallengeSummary[] = [
+  {
+    item_type: 'challenge',
+    id: 100,
+    slug: 'repository-foundations-trial',
+    title: 'Repository Foundations Trial',
+    summary: 'Prove the chapter skills.',
+    narrative: 'The gate awaits.',
+    status: 'not_started',
+    completed: false,
+    locked: false,
+    trials: [
+      {
+        id: 101,
+        difficulty: 'easy',
+        status: 'completed',
+        cleared: true,
+        replay_available: true,
+        latest_attempt: null,
+        completion: {
+          stars: 2,
+          counted_action_total: 2,
+          completed_at: '2026-08-25T00:00:00Z',
+        },
+        command_budget: { min_counted_commands: 1, max_counted_commands: 4 },
+      },
+      {
+        id: 102,
+        difficulty: 'medium',
+        status: 'completed',
+        cleared: true,
+        replay_available: true,
+        latest_attempt: null,
+        completion: {
+          stars: 2,
+          counted_action_total: 3,
+          completed_at: '2026-08-25T00:00:00Z',
+        },
+        command_budget: { min_counted_commands: 2, max_counted_commands: 6 },
+      },
+      {
+        id: 103,
+        difficulty: 'hard',
+        status: 'locked',
+        cleared: false,
+        replay_available: false,
+        latest_attempt: null,
+        completion: null,
+        command_budget: { min_counted_commands: 3, max_counted_commands: 8 },
+      },
+    ],
+  },
+]
 
 export function Component() {
   const activeChapter = PREVIEW_CHAPTERS[0]
@@ -112,96 +174,14 @@ export function Component() {
             </aside>
 
             <section className="story-map-stage" aria-label="Preview story map">
-              <div className="story-adventure-path">
-                <div className="story-path-canvas" style={{ width: PREVIEW_PATH_WIDTH, height: previewPath.height }}>
-                  <svg
-                    className="story-route-line"
-                    viewBox={`0 0 ${PREVIEW_PATH_WIDTH} ${previewPath.height}`}
-                    width={PREVIEW_PATH_WIDTH}
-                    height={previewPath.height}
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path d={previewRouteData} />
-                    {previewFlyout.connectors.map((d) => (
-                      <path className="story-route-branch" d={d} key={d} />
-                    ))}
-                  </svg>
-                  {[1, 2, 3, 4, 5, 6].map((level, index) => (
-                    <button
-                      type="button"
-                      className="story-path-node"
-                      data-state={level < 5 ? 'cleared' : level === 6 ? 'current' : 'ready'}
-                      key={level}
-                      style={
-                        {
-                          '--node-x': `${previewPath.points[index].x}px`,
-                          '--node-y': `${previewPath.points[index].y}px`,
-                        } as React.CSSProperties
-                      }
-                    >
-                      <span className="story-path-node-ring">
-                        <span>{level}</span>
-                      </span>
-                      {level < 5 ? (
-                        <span className="story-path-node-badge" aria-hidden="true">
-                          <Check className="size-3.5" strokeWidth={3} />
-                        </span>
-                      ) : null}
-                      {level === 6 ? (
-                        <span className="story-path-node-play" aria-hidden="true">
-                          <Play className="size-4" fill="currentColor" />
-                        </span>
-                      ) : null}
-                      <StarRating stars={level < 5 ? 3 : 0} size="sm" className="story-path-stars" label={`Level ${level}`} />
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    className="story-path-node story-path-node--trial"
-                    data-state="ready"
-                    data-open="true"
-                    style={
-                      {
-                        '--node-x': `${previewTrialPoint.x}px`,
-                        '--node-y': `${previewTrialPoint.y}px`,
-                      } as React.CSSProperties
-                    }
-                    aria-expanded="true"
-                    aria-label="Challenge trials"
-                  >
-                    <span className="story-path-node-ring">
-                      <Swords className="size-6" aria-hidden="true" />
-                    </span>
-                  </button>
-                  <div
-                    className="story-trials-flyout"
-                    style={{ left: previewFlyout.left, top: previewFlyout.top }}
-                    role="group"
-                    aria-label="Challenge trials"
-                  >
-                    {['Easy', 'Medium', 'Hard'].map((difficulty, index) => (
-                      <button
-                        type="button"
-                        className="story-trial-card"
-                        data-status={index < 2 ? 'completed' : 'locked'}
-                        key={difficulty}
-                        style={{ '--trial-rgb': index === 0 ? 'var(--theme-primary-rgb)' : index === 1 ? 'var(--theme-rail-rgb)' : 'var(--theme-challenge-rgb)' } as React.CSSProperties}
-                      >
-                        <span className="story-trial-medallion">
-                          <img src={trialIcons[index]} alt="" />
-                          {index < 2 ? null : <Lock className="story-trial-lock" aria-hidden="true" />}
-                        </span>
-                        <span className="story-trial-copy">
-                          <strong>{difficulty}</strong>
-                          <StarRating stars={index < 2 ? 2 : 0} size="sm" label={`${difficulty} stars`} />
-                          <span>{index < 2 ? 'Cleared' : 'Locked'}</span>
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              <StoryAdventurePath
+                chapter={activeChapter}
+                levels={PREVIEW_LEVELS}
+                challenges={PREVIEW_CHALLENGES}
+                challengesLocked={false}
+                loading={false}
+                defaultTrialsOpen
+              />
             </section>
 
         <aside className="story-map-right" aria-label="Story chapters and companion">

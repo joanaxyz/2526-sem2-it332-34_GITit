@@ -167,6 +167,9 @@ including Docker Compose, PostgreSQL and Redis configuration, migrations,
 curriculum seeding, TLS, media verification, 100-user load smoke testing,
 updates, and rollback.
 
+For the supported Render Blueprint and dashboard walkthrough, see
+[deploy/RENDER.md](deploy/RENDER.md).
+
 
 ## Packaging
 

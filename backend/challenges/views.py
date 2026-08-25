@@ -164,9 +164,7 @@ class ChallengeWorkspaceFileAPIView(APIView):
     throttle_scope = "command_submit"
     schema = RequiredPatchBodyAutoSchema()
 
-    @extend_schema(
-        request=WorkspaceFileSerializer, responses={200: ChallengeRunResponseSerializer}
-    )
+    @extend_schema(request=WorkspaceFileSerializer, responses={200: ChallengeRunResponseSerializer})
     def post(self, request, run_id: int):
         serializer = WorkspaceFileSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

@@ -60,6 +60,36 @@
     font-size: 1.3rem;
   }
 
+  .story-path-node--trial .story-path-node-ring {
+    width: 3.7rem;
+    height: 3.7rem;
+    border-radius: 12px;
+  }
+
+  .story-challenge-node-label {
+    top: calc(100% + 0.42rem);
+    font-size: 0.64rem;
+  }
+
+  .story-trials-panel {
+    width: 100%;
+    margin-top: 0;
+    padding-inline: 0.65rem;
+  }
+
+  .story-trials-panel-header {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .story-trials-panel-progress {
+    grid-column: 2;
+    width: fit-content;
+  }
+
+  .story-trials-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .story-path-node-play {
     left: 1.4rem;
     width: 5rem;
@@ -84,7 +114,7 @@
     transform: none;
   }
 
-  .story-trials-flyout,
+  .story-trials-panel,
   .story-path-node-play {
     animation: none;
   }

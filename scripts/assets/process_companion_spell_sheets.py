@@ -1184,9 +1184,9 @@ def owned_frame_sources(raw_path: Path) -> list[OwnedFrameSource]:
     import numpy as np
     from scipy import ndimage
 
-    keyed = clear_detected_bright_grid_lines(
-        remove_keyed_background(Image.open(raw_path))
-    ).convert("RGBA")
+    keyed = clear_detected_bright_grid_lines(remove_keyed_background(Image.open(raw_path))).convert(
+        "RGBA"
+    )
     arr = np.asarray(keyed)
     alpha = arr[..., 3]
     component_mask = alpha > max(1, ALPHA_THRESHOLD // 3)

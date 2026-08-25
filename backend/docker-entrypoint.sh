@@ -1,6 +1,12 @@
 #!/bin/sh
 set -eu
 
+# Render pre-deploy commands and initial deploy hooks are supplied as container
+# arguments. Honor them without running the long-lived web startup path.
+if [ "$#" -gt 0 ]; then
+  exec "$@"
+fi
+
 python manage.py check_runtime_config
 
 case "${DJANGO_MIGRATE_ON_STARTUP:-true}" in

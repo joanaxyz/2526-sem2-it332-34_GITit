@@ -7,9 +7,6 @@ export type PathPoint = { x: number; y: number }
 const PATH_STEP = 118
 const PATH_TOP = 78
 const PATH_BOTTOM = 96
-const TRIAL_CARD_H = 86
-const TRIAL_CARD_GAP = 17
-const TRIAL_FLYOUT_W = 262
 
 export function pathGeometry(count: number, width: number) {
   const amp = Math.max(56, Math.min(112, width * 0.5 - 176))
@@ -40,18 +37,4 @@ export function pathDataFor(points: PathPoint[]): string {
     d += ` C${c1x} ${c1y} ${c2x} ${c2y} ${p2.x} ${p2.y}`
   }
   return d
-}
-
-/** Anchor for the trials flyout beside the challenge node, clamped inside
- *  the canvas. */
-export function trialFlyoutPlacement(trialPoint: PathPoint, width: number, height: number) {
-  const flyoutHeight = TRIAL_CARD_H * 3 + TRIAL_CARD_GAP * 2
-  const left = Math.min(trialPoint.x + 92, width - TRIAL_FLYOUT_W - 8)
-  const top = Math.max(8, Math.min(trialPoint.y - flyoutHeight / 2, height - flyoutHeight - 8))
-  const connectors = [0, 1, 2].map((index) => {
-    const endY = top + TRIAL_CARD_H / 2 + index * (TRIAL_CARD_H + TRIAL_CARD_GAP)
-    const startX = trialPoint.x + 38
-    return `M${startX} ${trialPoint.y} C${startX + 48} ${trialPoint.y}, ${left - 46} ${endY}, ${left + 4} ${endY}`
-  })
-  return { left, top, connectors }
 }

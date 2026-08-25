@@ -48,7 +48,4 @@ def test_legacy_progress_rows_are_normalized_and_dead_progress_table_is_removed(
     assert NewStreakRecord.objects.get(pk=streak.pk).longest_streak == 3
     assert not NewCoinTransaction.objects.filter(pk=transaction.pk).exists()
     with connection.cursor() as cursor:
-        assert (
-            "progress_studentprogress"
-            not in connection.introspection.table_names(cursor)
-        )
+        assert "progress_studentprogress" not in connection.introspection.table_names(cursor)

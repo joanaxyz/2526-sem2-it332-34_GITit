@@ -5,9 +5,9 @@ from __future__ import annotations
 
 import ast
 import hashlib
-from pathlib import Path
 import sys
 import unicodedata
+from pathlib import Path
 
 if __package__:
     from . import mutable_owner_analysis as _owner_analysis
@@ -30,21 +30,15 @@ ROOT = Path(__file__).resolve().parents[2]
 ADVENTURES_SOURCE = ROOT / "backend/curriculum/seed_data/adventures.py"
 AUTHORING_GUIDE = ROOT / "CONTENT_AUTHORING_GUIDE.md"
 PUBLIC_ADVENTURE_LEVELS = ROOT / "backend/curriculum/seed_data/adventure_levels.py"
-SOURCE_ADVENTURE_LEVELS = (
-    ROOT / "backend/curriculum/seed_data/source/adventure_levels.py"
-)
+SOURCE_ADVENTURE_LEVELS = ROOT / "backend/curriculum/seed_data/source/adventure_levels.py"
 ADVENTURE_LEVEL_SPECS = (
     ROOT / "backend/curriculum/seed_data/source/adventure_level_specs/__init__.py"
 )
-LEVEL_PLAN = (
-    ROOT / "backend/curriculum/seed_data/source/adventure_level_specs/level_plan.py"
-)
+LEVEL_PLAN = ROOT / "backend/curriculum/seed_data/source/adventure_level_specs/level_plan.py"
 SEED_WRITER = ROOT / "backend/curriculum/management/commands/seed_curriculum_writer.py"
 SOURCE_PACKAGE = ROOT / "backend/curriculum/seed_data/source/__init__.py"
 LEGACY_CHAPTER_PACKAGE = ROOT / "backend/curriculum/seed_data/source/ch1"
-ADVENTURE_POLICY_TEST = (
-    ROOT / "backend/curriculum/tests/test_adventure_plan_ownership.py"
-)
+ADVENTURE_POLICY_TEST = ROOT / "backend/curriculum/tests/test_adventure_plan_ownership.py"
 
 FOUNDATIONAL_ADVENTURE_ORDER = (
     "repository-foundations",
@@ -249,9 +243,7 @@ def _assignment_values(tree: ast.Module, name: str) -> list[ast.AST]:
         if not isinstance(node, (ast.Assign, ast.AnnAssign)):
             continue
         targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-        if any(
-            isinstance(target, ast.Name) and target.id == name for target in targets
-        ):
+        if any(isinstance(target, ast.Name) and target.id == name for target in targets):
             values.append(node.value)
     return values
 
@@ -344,8 +336,7 @@ def _valid_advanced_owner(node: ast.AST) -> bool:
                 and _is_name(waves.func, "_waves")
                 and not waves.keywords
                 and all(
-                    isinstance(argument, ast.Constant)
-                    and isinstance(argument.value, str)
+                    isinstance(argument, ast.Constant) and isinstance(argument.value, str)
                     for argument in waves.args
                 )
             ):
@@ -355,9 +346,7 @@ def _valid_advanced_owner(node: ast.AST) -> bool:
 
 def _named_function(tree: ast.Module, name: str) -> ast.FunctionDef | None:
     matches = [
-        node
-        for node in tree.body
-        if isinstance(node, ast.FunctionDef) and node.name == name
+        node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == name
     ]
     return matches[0] if len(matches) == 1 else None
 
@@ -431,15 +420,11 @@ def _verify_critical_name_census(tree: ast.Module, errors: list[str]) -> None:
             if isinstance(node, ast.Name) and node.id == name
         )
         if actual_contexts != expected_contexts:
-            errors.append(
-                f"critical adventure composition symbol usage drifted: {name}"
-            )
+            errors.append(f"critical adventure composition symbol usage drifted: {name}")
     bindings = _scope_bindings(tree.body)
     for name, expected_bindings in EXPECTED_CRITICAL_BINDINGS.items():
         if bindings.get(name, []) != expected_bindings:
-            errors.append(
-                f"critical adventure composition symbol binding drifted: {name}"
-            )
+            errors.append(f"critical adventure composition symbol binding drifted: {name}")
 
 
 def _verify_adventure_composition(path: Path, errors: list[str]) -> None:
@@ -478,9 +463,7 @@ def _verify_adventure_composition(path: Path, errors: list[str]) -> None:
         and blueprint_imports[0].names[0].name == "BLUEPRINT_ADVENTURE_LEVELS"
         and blueprint_imports[0].names[0].asname is None
     ):
-        errors.append(
-            "adventure owner must use the canonical one-name blueprint import"
-        )
+        errors.append("adventure owner must use the canonical one-name blueprint import")
 
     waves_helper = _named_function(tree, "_waves")
     if waves_helper is None or not _same_function_shape(
@@ -495,8 +478,7 @@ def _verify_adventure_composition(path: Path, errors: list[str]) -> None:
     )
     actual_order = (
         _literal_string_sequence(order_assignment.value)
-        if order_assignment is not None
-        and isinstance(order_assignment.value, ast.Tuple)
+        if order_assignment is not None and isinstance(order_assignment.value, ast.Tuple)
         else None
     )
     if actual_order != list(FOUNDATIONAL_ADVENTURE_ORDER):
@@ -511,30 +493,18 @@ def _verify_adventure_composition(path: Path, errors: list[str]) -> None:
         "_ADVANCED_DRILL_WAVE_PLANS",
     )
     advanced_keys = (
-        _literal_dict_keys(advanced_assignment.value)
-        if advanced_assignment is not None
-        else None
+        _literal_dict_keys(advanced_assignment.value) if advanced_assignment is not None else None
     )
     if advanced_keys != list(ADVANCED_DRILL_ADVENTURES):
-        errors.append(
-            "advanced drill owner keys must match the canonical sequence exactly"
-        )
-    if advanced_assignment is None or not _valid_advanced_owner(
-        advanced_assignment.value
-    ):
+        errors.append("advanced drill owner keys must match the canonical sequence exactly")
+    if advanced_assignment is None or not _valid_advanced_owner(advanced_assignment.value):
         errors.append("advanced drill plans must use the canonical literal schema")
-    if advanced_keys is not None and set(advanced_keys) & set(
-        FOUNDATIONAL_ADVENTURE_ORDER
-    ):
+    if advanced_keys is not None and set(advanced_keys) & set(FOUNDATIONAL_ADVENTURE_ORDER):
         errors.append("advanced drill owner must not contain foundational keys")
 
     public_assignment = _single_direct_assignment(tree, "ADVENTURE_WAVE_PLANS")
-    if public_assignment is None or not _valid_public_plan_composition(
-        public_assignment.value
-    ):
-        errors.append(
-            "ADVENTURE_WAVE_PLANS must use the canonical ordered disjoint composition"
-        )
+    if public_assignment is None or not _valid_public_plan_composition(public_assignment.value):
+        errors.append("ADVENTURE_WAVE_PLANS must use the canonical ordered disjoint composition")
 
     silent_mutations = _public_plan_mutations(tree)
     if silent_mutations:
@@ -556,9 +526,7 @@ def _verify_adventure_composition(path: Path, errors: list[str]) -> None:
     if merger is None:
         errors.append("missing disjoint adventure plan merge helper")
     elif not _same_function_shape(merger, EXPECTED_DISJOINT_MERGER):
-        errors.append(
-            "disjoint merge helper must implement the exact guard-before-merge contract"
-        )
+        errors.append("disjoint merge helper must implement the exact guard-before-merge contract")
 
 
 def _all_exports(tree: ast.Module) -> list[str] | None:
@@ -603,9 +571,7 @@ def _legacy_symbol_references(path: Path, tree: ast.Module) -> list[str]:
             kind = "argument binding"
         elif isinstance(node, ast.ExceptHandler) and node.name == LEGACY_PLAN_SYMBOL:
             kind = "exception binding"
-        elif isinstance(node, (ast.MatchAs, ast.MatchStar)) and (
-            node.name == LEGACY_PLAN_SYMBOL
-        ):
+        elif isinstance(node, (ast.MatchAs, ast.MatchStar)) and (node.name == LEGACY_PLAN_SYMBOL):
             kind = "match binding"
         elif isinstance(node, ast.MatchMapping) and node.rest == LEGACY_PLAN_SYMBOL:
             kind = "match binding"
@@ -685,9 +651,7 @@ def _owner_usage_hashes(tree: ast.Module, symbol: str) -> tuple[str, ...]:
     """Fingerprint each executable/import/export statement that names an owner."""
 
     parents = {
-        id(child): parent
-        for parent in ast.walk(tree)
-        for child in ast.iter_child_nodes(parent)
+        id(child): parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)
     }
     statements: dict[int, ast.stmt] = {}
     for node in ast.walk(tree):
@@ -727,10 +691,7 @@ def _verify_approved_blueprint_reader_bindings(
     tree: ast.Module,
     errors: list[str],
 ) -> None:
-    if (
-        relative_path
-        != "backend/curriculum/management/commands/seed_curriculum_structure.py"
-    ):
+    if relative_path != "backend/curriculum/management/commands/seed_curriculum_structure.py":
         return
     calls = [
         node
@@ -739,15 +700,12 @@ def _verify_approved_blueprint_reader_bindings(
         and isinstance(node.func, ast.Name)
         and node.func.id == "set"
         and any(
-            isinstance(argument, ast.Name)
-            and argument.id == "BLUEPRINT_ADVENTURE_LEVELS"
+            isinstance(argument, ast.Name) and argument.id == "BLUEPRINT_ADVENTURE_LEVELS"
             for argument in node.args
         )
     ]
     parents = {
-        id(child): parent
-        for parent in ast.walk(tree)
-        for child in ast.iter_child_nodes(parent)
+        id(child): parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)
     }
     scope: ast.AST | None = calls[0] if len(calls) == 1 else None
     while scope is not None and not isinstance(
@@ -823,17 +781,11 @@ def _module_attribute_calls_are_canonical(
     module: str,
     attribute: str,
 ) -> bool:
-    parents = {
-        child: parent
-        for parent in ast.walk(tree)
-        for child in ast.iter_child_nodes(parent)
-    }
+    parents = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
     uses = [
         node
         for node in ast.walk(tree)
-        if isinstance(node, ast.Name)
-        and isinstance(node.ctx, ast.Load)
-        and node.id == module
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load) and node.id == module
     ]
     return bool(uses) and all(
         isinstance((member := parents.get(node)), ast.Attribute)
@@ -846,17 +798,11 @@ def _module_attribute_calls_are_canonical(
 
 
 def _callable_names_are_only_called(tree: ast.Module, names: set[str]) -> bool:
-    parents = {
-        child: parent
-        for parent in ast.walk(tree)
-        for child in ast.iter_child_nodes(parent)
-    }
+    parents = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
     return all(
         isinstance((call := parents.get(node)), ast.Call) and call.func is node
         for node in ast.walk(tree)
-        if isinstance(node, ast.Name)
-        and isinstance(node.ctx, ast.Load)
-        and node.id in names
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load) and node.id in names
     )
 
 
@@ -869,9 +815,7 @@ def _attribute_is_assigned(tree: ast.Module, root: str, attribute: str) -> bool:
         for node in ast.walk(tree)
         if isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign, ast.Delete))
         for target in (
-            node.targets
-            if isinstance(node, (ast.Assign, ast.Delete))
-            else [node.target]
+            node.targets if isinstance(node, (ast.Assign, ast.Delete)) else [node.target]
         )
     )
 
@@ -996,9 +940,7 @@ def _selected_helper_parameters_are_read_only(
         assert function is not None
         actual_parameters = {item.arg for item in _function_parameters(function)}
         declared_sinks = safe_sink_parameters.get(function_name, frozenset())
-        if not declared_sinks <= actual_parameters or declared_sinks & set(
-            parameter_names
-        ):
+        if not declared_sinks <= actual_parameters or declared_sinks & set(parameter_names):
             return False
         analyzer = _MutableOwnerAnalyzer(function)
         if any(
@@ -1048,9 +990,7 @@ def _add_detail_uses_fresh_sinks(tree: ast.Module) -> bool:
             if isinstance(node, (ast.Assign, ast.AnnAssign))
             and any(
                 isinstance(target, ast.Name) and target.id == name
-                for target in (
-                    node.targets if isinstance(node, ast.Assign) else [node.target]
-                )
+                for target in (node.targets if isinstance(node, ast.Assign) else [node.target])
             )
         ]
         for name in ("merged_details", "seen")
@@ -1077,15 +1017,13 @@ def _trusted_blueprint_generator_callables(
     wildcard_imports = [
         node
         for node in tree.body
-        if isinstance(node, ast.ImportFrom)
-        and any(item.name == "*" for item in node.names)
+        if isinstance(node, ast.ImportFrom) and any(item.name == "*" for item in node.names)
     ]
     if not (
         len(wildcard_imports) == 1
         and wildcard_imports[0].level == 1
         and wildcard_imports[0].module == "common"
-        and [(item.name, item.asname) for item in wildcard_imports[0].names]
-        == [("*", None)]
+        and [(item.name, item.asname) for item in wildcard_imports[0].names] == [("*", None)]
     ):
         return frozenset()
 
@@ -1101,11 +1039,7 @@ def _trusted_blueprint_generator_callables(
         root / "backend/curriculum/seed_data/spec_helpers.py",
         errors,
     )
-    if (
-        common_parsed is None
-        or command_routing_parsed is None
-        or spec_helpers_parsed is None
-    ):
+    if common_parsed is None or command_routing_parsed is None or spec_helpers_parsed is None:
         return frozenset()
     _, common_tree = common_parsed
     _, command_routing_tree = command_routing_parsed
@@ -1196,8 +1130,7 @@ def _trusted_blueprint_generator_callables(
         name
         for name in {"ADVENTURE_BY_COMMAND", "ADVENTURE_BY_USAGE"}
         if _all_scope_binding_kinds(command_routing_tree).get(name) == ["store"]
-        and (assignment := _single_direct_assignment(command_routing_tree, name))
-        is not None
+        and (assignment := _single_direct_assignment(command_routing_tree, name)) is not None
         and _literal_immutable_value(assignment.value)
         and _mapping_owner_is_read_only(
             command_routing_tree,
@@ -1207,8 +1140,7 @@ def _trusted_blueprint_generator_callables(
     )
     command_routing_is_read_only = (
         command_routing_callables is not None
-        and command_mapping_receivers
-        == frozenset({"ADVENTURE_BY_COMMAND", "ADVENTURE_BY_USAGE"})
+        and command_mapping_receivers == frozenset({"ADVENTURE_BY_COMMAND", "ADVENTURE_BY_USAGE"})
         and _selected_helper_parameters_are_read_only(
             command_routing_tree,
             command_routing_contract,
@@ -1319,9 +1251,7 @@ def _verify_blueprint_generator_parameters_are_read_only(
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda))
     ]
     function_definitions = [
-        node
-        for node in function_nodes
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        node for node in function_nodes if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
     ]
     function_names = [node.name for node in function_definitions]
     binding_kinds = _all_scope_binding_kinds(tree)
@@ -1340,9 +1270,7 @@ def _verify_blueprint_generator_parameters_are_read_only(
         for node in ast.walk(tree)
         if isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign, ast.Delete))
         for target in (
-            node.targets
-            if isinstance(node, (ast.Assign, ast.Delete))
-            else [node.target]
+            node.targets if isinstance(node, (ast.Assign, ast.Delete)) else [node.target]
         )
     )
     copy_imported_anywhere = any(
@@ -1390,9 +1318,7 @@ def _verify_blueprint_generator_parameters_are_read_only(
                 rich_expressions=True,
                 reject_unknown_owner_calls=True,
                 safe_callables=safe_callables,
-                provenance_callables=frozenset(
-                    local_function_names | trusted_external_callables
-                ),
+                provenance_callables=frozenset(local_function_names | trusted_external_callables),
                 safe_deepcopy=deepcopy_is_safe,
                 safe_method_receivers=safe_method_receivers,
             )
@@ -1429,13 +1355,9 @@ def _verify_mutable_plan_owner_census(root: Path, errors: list[str]) -> None:
         if (path := root / relative_path).is_file()
     }
     if blueprint_paths != expected_blueprint_paths:
-        errors.append(
-            "blueprint adventure plan consumers must match the approved module set"
-        )
+        errors.append("blueprint adventure plan consumers must match the approved module set")
 
-    blueprint_owner = (
-        root / "backend/curriculum/seed_data/source/blueprint/__init__.py"
-    ).resolve()
+    blueprint_owner = (root / "backend/curriculum/seed_data/source/blueprint/__init__.py").resolve()
     for path in sorted(blueprint_paths):
         source = path.read_text(encoding="utf-8")
         try:
@@ -1448,9 +1370,7 @@ def _verify_mutable_plan_owner_census(root: Path, errors: list[str]) -> None:
         if expected_hashes is None:
             continue
         if _owner_usage_hashes(tree, "BLUEPRINT_ADVENTURE_LEVELS") != expected_hashes:
-            errors.append(
-                "BLUEPRINT_ADVENTURE_LEVELS approved use-site structure drifted"
-            )
+            errors.append("BLUEPRINT_ADVENTURE_LEVELS approved use-site structure drifted")
         _verify_approved_blueprint_reader_bindings(relative_path, tree, errors)
         _verify_blueprint_generator_parameters_are_read_only(
             root,
@@ -1501,9 +1421,7 @@ def _verify_blueprint_owner_graph(root: Path, errors: list[str]) -> None:
                 for module in BLUEPRINT_REPOSITORY_FOUNDATION_MODULES
             ),
         }
-        actual_files = {
-            path.relative_to(owner_dir).as_posix() for path in owner_dir.rglob("*.py")
-        }
+        actual_files = {path.relative_to(owner_dir).as_posix() for path in owner_dir.rglob("*.py")}
         if actual_files != expected_files:
             errors.append(
                 "blueprint owner module set drifted: "
@@ -1512,9 +1430,7 @@ def _verify_blueprint_owner_graph(root: Path, errors: list[str]) -> None:
             )
 
     implementation_package = "curriculum.seed_data.source.blueprint"
-    approved_overlay = (
-        root / "backend/curriculum/seed_data/source/blueprint_overlay.py"
-    ).resolve()
+    approved_overlay = (root / "backend/curriculum/seed_data/source/blueprint_overlay.py").resolve()
     excluded = {
         (root / "scripts/checks/adventure_plan_ownership.py").resolve(),
         (root / "scripts/checks/check_curriculum_source_layout.py").resolve(),
@@ -1565,17 +1481,12 @@ def _verify_blueprint_owner_graph(root: Path, errors: list[str]) -> None:
                     or module == "curriculum.seed_data.source"
                     and any(item.name == "blueprint" for item in node.names)
                 )
-                illegal = (
-                    absolute_implementation_import and not exact_public_overlay_import
-                )
+                illegal = absolute_implementation_import and not exact_public_overlay_import
             if illegal:
-                illegal_imports.append(
-                    f"{path.relative_to(root).as_posix()}:{node.lineno}"
-                )
+                illegal_imports.append(f"{path.relative_to(root).as_posix()}:{node.lineno}")
     if illegal_imports:
         errors.append(
-            "blueprint mutable implementation modules are owner-private: "
-            f"{sorted(illegal_imports)}"
+            f"blueprint mutable implementation modules are owner-private: {sorted(illegal_imports)}"
         )
 
 
@@ -1601,9 +1512,7 @@ def _verify_public_plan_consumer_census(root: Path, errors: list[str]) -> None:
         adventures_path.resolve(),
         level_plan_path.resolve(),
     }:
-        errors.append(
-            "ADVENTURE_WAVE_PLANS may appear only in its owner and canonical reader"
-        )
+        errors.append("ADVENTURE_WAVE_PLANS may appear only in its owner and canonical reader")
         return
 
     parsed = _parse(level_plan_path, errors)
@@ -1634,9 +1543,7 @@ def _verify_public_plan_consumer_census(root: Path, errors: list[str]) -> None:
         if not isinstance(node, (ast.Assign, ast.AnnAssign)):
             continue
         targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-        if any(
-            isinstance(target, ast.Name) and target.id == "plan" for target in targets
-        ):
+        if any(isinstance(target, ast.Name) and target.id == "plan" for target in targets):
             plan_values.append(node.value)
     public_loads = [
         node
@@ -1669,9 +1576,7 @@ def _verify_public_plan_consumer_census(root: Path, errors: list[str]) -> None:
     )
     reader_binding_kinds = _all_scope_binding_kinds(tree)
     reader_safe_callables = frozenset(
-        item
-        for item in READ_ONLY_PARAMETER_CALLABLES
-        if item not in reader_binding_kinds
+        item for item in READ_ONLY_PARAMETER_CALLABLES if item not in reader_binding_kinds
     )
     blueprint_contexts = sorted(
         type(node.ctx).__name__
@@ -1707,10 +1612,7 @@ def _verify_public_plan_consumer_census(root: Path, errors: list[str]) -> None:
         name
         for name in ("isinstance", "list", "str")
         if module_bindings.get(name)
-        or (
-            wave_plan_reader is not None
-            and _scope_bindings(wave_plan_reader.body).get(name)
-        )
+        or (wave_plan_reader is not None and _scope_bindings(wave_plan_reader.body).get(name))
     }
     if not (
         len(blueprint_imports) == 1
@@ -1746,9 +1648,7 @@ def adventure_plan_ownership_errors(*, root: Path = ROOT) -> list[str]:
         "SPEC_BY_SLUG",
         "adventure_levels_for",
     )
-    _verify_wrapper_exports(
-        seed_data / "adventure_levels.py", supported_exports, errors
-    )
+    _verify_wrapper_exports(seed_data / "adventure_levels.py", supported_exports, errors)
     _verify_wrapper_exports(source / "adventure_levels.py", supported_exports, errors)
     _verify_wrapper_exports(
         source / "adventure_level_specs/__init__.py",
@@ -1787,9 +1687,7 @@ def adventure_plan_ownership_errors(*, root: Path = ROOT) -> list[str]:
             "ADVENTURE_WAVE_PLANS",
         )
         if any(text not in guide for text in required_guide_text):
-            errors.append(
-                "content authoring guide does not identify every current owner"
-            )
+            errors.append("content authoring guide does not identify every current owner")
 
     legacy_package = source / "ch1"
     if legacy_package.exists():

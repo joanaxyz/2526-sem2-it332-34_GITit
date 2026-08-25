@@ -26,9 +26,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[2]
 PUBLIC = ROOT / "frontend" / "public"
-COMPANION_DATA = (
-    ROOT / "frontend" / "src" / "shared" / "cosmetics" / "companions" / "data"
-)
+COMPANION_DATA = ROOT / "frontend" / "src" / "shared" / "cosmetics" / "companions" / "data"
 STORY_DATA = ROOT / "frontend" / "src" / "shared" / "story-worlds"
 DEFAULT_ALPHA_THRESHOLD = 8
 DEFAULT_PADDING = 2
@@ -89,9 +87,7 @@ def load_actors() -> tuple[list[Actor], dict[Path, dict[str, Any]]]:
 
     for path in sorted(COMPANION_DATA.glob("*.json")):
         payload = json.loads(path.read_text(encoding="utf-8"))
-        if not isinstance(payload, dict) or not isinstance(
-            payload.get("sprites"), dict
-        ):
+        if not isinstance(payload, dict) or not isinstance(payload.get("sprites"), dict):
             continue
         documents[path] = payload
         entries = animated_entries(payload["sprites"])
@@ -112,9 +108,7 @@ def load_actors() -> tuple[list[Actor], dict[Path, dict[str, Any]]]:
         documents[path] = payload
         world = path.parents[1].name
         for slug, monster in payload.items():
-            if not isinstance(monster, dict) or not isinstance(
-                monster.get("sprites"), dict
-            ):
+            if not isinstance(monster, dict) or not isinstance(monster.get("sprites"), dict):
                 continue
             entries = animated_entries(monster["sprites"])
             if entries:
@@ -146,12 +140,8 @@ def combine_bbox(
     )
 
 
-def visible_bbox(
-    frame: Image.Image, alpha_threshold: int
-) -> tuple[int, int, int, int] | None:
-    alpha = frame.getchannel("A").point(
-        lambda value: 255 if value > alpha_threshold else 0
-    )
+def visible_bbox(frame: Image.Image, alpha_threshold: int) -> tuple[int, int, int, int] | None:
+    alpha = frame.getchannel("A").point(lambda value: 255 if value > alpha_threshold else 0)
     return alpha.getbbox()
 
 
@@ -166,9 +156,7 @@ def plan_actor(actor: Actor, alpha_threshold: int, padding: int) -> ActorPlan:
         for sprite in actor.sprites
     }
     if len(shapes) != 1:
-        raise ValueError(
-            f"{actor.name} uses inconsistent actor-sheet grids: {sorted(shapes)}"
-        )
+        raise ValueError(f"{actor.name} uses inconsistent actor-sheet grids: {sorted(shapes)}")
     frame_width, frame_height, columns, rows = shapes.pop()
 
     union: tuple[int, int, int, int] | None = None
@@ -232,9 +220,7 @@ def compact_sheet(
         # Palette quantization can otherwise promote a barely visible alpha
         # value into the visible range. Normalize the same values that the crop
         # planner deliberately treats as transparent.
-        alpha = source.getchannel("A").point(
-            lambda value: 0 if value <= alpha_threshold else value
-        )
+        alpha = source.getchannel("A").point(lambda value: 0 if value <= alpha_threshold else value)
         source.putalpha(alpha)
         output = Image.new(
             "RGBA",
@@ -251,9 +237,7 @@ def compact_sheet(
                         (row + 1) * frame_height,
                     )
                 ).crop(plan.crop)
-                output.alpha_composite(
-                    frame, (column * compact_width, row * compact_height)
-                )
+                output.alpha_composite(frame, (column * compact_width, row * compact_height))
 
     encoded: Image.Image = output
     if colors:
@@ -288,9 +272,7 @@ def update_actor_metadata(plan: ActorPlan) -> None:
 def write_documents(documents: dict[Path, dict[str, Any]]) -> None:
     for path, payload in documents.items():
         temporary = path.with_suffix(".compacted.tmp.json")
-        temporary.write_text(
-            json.dumps(payload, indent=2) + "\n", encoding="utf-8", newline="\n"
-        )
+        temporary.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8", newline="\n")
         os.replace(temporary, path)
 
 
