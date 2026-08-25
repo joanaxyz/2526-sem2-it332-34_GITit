@@ -33,8 +33,20 @@ RUN sed -i 's/\r$//' /app/start-render-free.sh \
     && sh -n /app/start-render-free.sh \
     && addgroup --system app \
     && adduser --system --ingroup app app \
-    && mkdir -p /app/backend/staticfiles /tmp/nginx-client /tmp/nginx-proxy \
-    && chown -R app:app /app /tmp/nginx-client /tmp/nginx-proxy
+    && mkdir -p \
+        /app/backend/staticfiles \
+        /tmp/nginx-client \
+        /tmp/nginx-proxy \
+        /tmp/nginx-fastcgi \
+        /tmp/nginx-uwsgi \
+        /tmp/nginx-scgi \
+    && chown -R app:app \
+        /app \
+        /tmp/nginx-client \
+        /tmp/nginx-proxy \
+        /tmp/nginx-fastcgi \
+        /tmp/nginx-uwsgi \
+        /tmp/nginx-scgi
 
 USER app
 EXPOSE 10000

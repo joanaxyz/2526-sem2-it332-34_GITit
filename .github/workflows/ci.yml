@@ -106,11 +106,14 @@ jobs:
           --env BACKEND_PORT=8000
           git-it-frontend-ci:${{ github.sha }}
           nginx -t
-      - name: Validate all-Free Render Nginx configuration
+      - name: Smoke-test all-Free Render Nginx as non-root
         run: >-
           docker run --rm
           git-it-render-free-ci:${{ github.sha }}
-          nginx -t
+          sh -ec
+          "nginx;
+          python -c 'import urllib.request; assert urllib.request.urlopen(\"http://127.0.0.1:10000/nginx-health\", timeout=3).read() == b\"ok\"';
+          nginx -s quit"
 
   # Replays every authored solution through the real browser engine and proves
   # the committed generated targets are current. Needs both Python and Node.
