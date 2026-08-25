@@ -19,6 +19,11 @@ def _clean_env_list(values: list[str]) -> list[str]:
     return [value.strip() for value in values if value.strip()]
 
 
+def _deployment_version(explicit_version: str, render_commit: str) -> str:
+    """Prefer an explicit release ID, then Render's runtime commit SHA."""
+    return explicit_version.strip() or render_commit.strip() or "development"
+
+
 env = environ.Env(
     # Safer default. Your local .env should explicitly set DJANGO_DEBUG=True.
     DJANGO_DEBUG=(bool, False),
@@ -317,7 +322,10 @@ if DJANGO_TRUST_PROXY_HEADERS:
     USE_X_FORWARDED_HOST = True
 
 ALLOW_DESTRUCTIVE_SEED_RESET = env("ALLOW_DESTRUCTIVE_SEED_RESET")
-DEPLOYMENT_VERSION = env("DEPLOYMENT_VERSION", default="development").strip() or "development"
+DEPLOYMENT_VERSION = _deployment_version(
+    env("DEPLOYMENT_VERSION", default=""),
+    env("RENDER_GIT_COMMIT", default=""),
+)
 
 if not DEBUG and SECURE_HSTS_SECONDS <= 0:
     raise RuntimeError("SECURE_HSTS_SECONDS must be set when DJANGO_DEBUG=False.")
