@@ -30,8 +30,12 @@ class MailgunEmailBackend(BaseEmailBackend):
         **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
-        self.api_key = (api_key if api_key is not None else os.getenv("MAILGUN_API_KEY", "")).strip()
-        self.domain = (domain if domain is not None else os.getenv("MAILGUN_DOMAIN", "")).strip()
+        self.api_key = (
+            api_key if api_key is not None else os.getenv("MAILGUN_API_KEY", "")
+        ).strip()
+        self.domain = (
+            domain if domain is not None else os.getenv("MAILGUN_DOMAIN", "")
+        ).strip()
         self.api_base_url = (
             api_base_url
             if api_base_url is not None
