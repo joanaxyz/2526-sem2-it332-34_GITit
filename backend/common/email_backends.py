@@ -108,7 +108,9 @@ class MailgunEmailBackend(BaseEmailBackend):
             raise ImproperlyConfigured("MAILGUN_TIMEOUT_SECONDS must be greater than 0.")
 
 
-def _multipart_mime_payload(recipients: list[str], mime_bytes: bytes) -> tuple[bytes, str]:
+def _multipart_mime_payload(
+    recipients: list[str], mime_bytes: bytes
+) -> tuple[bytes, str]:
     """Build Mailgun's multipart/form-data payload without an HTTP dependency."""
 
     boundary = f"git-it-mailgun-{uuid.uuid4().hex}"
