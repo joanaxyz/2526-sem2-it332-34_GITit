@@ -105,8 +105,9 @@ def main() -> int:
     app_env = env_by_key(app)
     require_secret_prompt(app_env, "DATABASE_URL")
     require_reference(app_env["REDIS_URL"], "fromService", "git-it-cache", "connectionString")
+    if "DEPLOYMENT_VERSION" in app_env:
+        fail("DEPLOYMENT_VERSION must use Render's runtime RENDER_GIT_COMMIT fallback")
     for key, render_key in (
-        ("DEPLOYMENT_VERSION", "RENDER_GIT_COMMIT"),
         ("DJANGO_ALLOWED_HOSTS", "RENDER_EXTERNAL_HOSTNAME"),
         ("DJANGO_CORS_ALLOWED_ORIGINS", "RENDER_EXTERNAL_URL"),
         ("DJANGO_CSRF_TRUSTED_ORIGINS", "RENDER_EXTERNAL_URL"),

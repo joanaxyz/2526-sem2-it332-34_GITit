@@ -64,6 +64,14 @@ def test_jdbc_database_url_is_normalized_to_postgresql():
     assert _normalize_database_url("postgresql://host/db") == "postgresql://host/db"
 
 
+def test_deployment_version_falls_back_to_render_commit():
+    from config.settings import _deployment_version
+
+    assert _deployment_version("", "render-sha") == "render-sha"
+    assert _deployment_version("release-42", "render-sha") == "release-42"
+    assert _deployment_version("", "") == "development"
+
+
 def test_production_database_can_require_tls():
     result = run_settings_import(
         debug="False",

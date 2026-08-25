@@ -25,11 +25,6 @@ services:
         value: "False"
       - key: DJANGO_SECRET_KEY
         generateValue: true
-      - key: DEPLOYMENT_VERSION
-        fromService:
-          type: web
-          name: git-it-app
-          envVarKey: RENDER_GIT_COMMIT
       - key: DJANGO_LOG_LEVEL
         value: INFO
       - key: PERFORMANCE_TIMING_ENABLED
