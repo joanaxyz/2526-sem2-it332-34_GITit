@@ -25,9 +25,7 @@ _ADVANCED_PLAYABLE_FORMS = {
 }
 
 _ADVANCED_CHAPTERS = [
-    chapter["slug"]
-    for chapter in CHAPTERS
-    if chapter["slug"].startswith(("frost-", "skyline-"))
+    chapter["slug"] for chapter in CHAPTERS if chapter["slug"].startswith(("frost-", "skyline-"))
 ]
 
 _SPEC_BY_SLUG = {spec["slug"]: spec for spec in ADVENTURE_LEVELS}

@@ -4,7 +4,9 @@ from testing.frontend_execution import frontend_execution_payload
 from testing.runtime_factories import api_client_for, create_stage_readme_adventure_run
 
 
-def _submit(*, fixture, command: str, next_state: dict, processed: bool = True, output: str | None = None):
+def _submit(
+    *, fixture, command: str, next_state: dict, processed: bool = True, output: str | None = None
+):
     return api_client_for(fixture.user).post(
         f"/api/adventure-runs/{fixture.run.id}/submit-command/",
         {
@@ -44,7 +46,9 @@ def test_adventure_budget_exhaustion_fails_without_completion_or_reward(db, djan
     fixture.run.refresh_from_db()
     assert fixture.run.status == SESSION_STATUS_FAILED
     assert not AdventureLevelCompletion.objects.filter(adventure_run=fixture.run).exists()
-    assert not CoinTransaction.objects.filter(player=fixture.player, award_key=f"adventure-level-reward:{fixture.level.id}").exists()
+    assert not CoinTransaction.objects.filter(
+        player=fixture.player, award_key=f"adventure-level-reward:{fixture.level.id}"
+    ).exists()
 
 
 def test_adventure_can_complete_on_last_allowed_counted_command(db, django_user_model):
@@ -67,4 +71,9 @@ def test_adventure_can_complete_on_last_allowed_counted_command(db, django_user_
     fixture.run.refresh_from_db()
     assert fixture.run.status == SESSION_STATUS_COMPLETED
     assert AdventureLevelCompletion.objects.filter(adventure_run=fixture.run).exists()
-    assert CoinTransaction.objects.filter(player=fixture.player, award_key=f"adventure-level-reward:{fixture.level.id}").count() == 1
+    assert (
+        CoinTransaction.objects.filter(
+            player=fixture.player, award_key=f"adventure-level-reward:{fixture.level.id}"
+        ).count()
+        == 1
+    )

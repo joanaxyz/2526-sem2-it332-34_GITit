@@ -1,1 +1,1 @@
-"""Human-authored curriculum source packages, split by chapter as they migrate."""
+"""Canonical human-authored curriculum source packages."""

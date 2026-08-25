@@ -1,4 +1,5 @@
 from copy import deepcopy
+from types import SimpleNamespace
 
 from django.core.management import call_command
 from django.utils import timezone
@@ -10,6 +11,7 @@ from adventures.services import (
     AdventureRunService,
     form_solve_targets,
 )
+from adventures.services.history import AdventureCommandHistoryCache
 from common.constants import RESULT_TARGET_MATCHED
 from curriculum.library import library_key_for_command
 from curriculum.selectors import adventure_summary_payload
@@ -30,8 +32,36 @@ def make_user(django_user_model, username="adventurer"):
     # these runtime tests don't have to go through the shop purchase flow.
     from shop.models import Entitlement
 
-    Entitlement.objects.get_or_create(player=get_or_create_player(user), kind="companion", slug="blue")
+    Entitlement.objects.get_or_create(
+        player=get_or_create_player(user), kind="companion", slug="blue"
+    )
     return user
+
+
+def test_adventure_history_cache_key_changes_for_reused_ids_and_new_waves():
+    first_wave = SimpleNamespace(
+        id=7,
+        started_at="run-a",
+        current_wave_id=11,
+        selected_variant_id=101,
+    )
+    next_wave = SimpleNamespace(
+        id=7,
+        started_at="run-a",
+        current_wave_id=12,
+        selected_variant_id=102,
+    )
+    reused_id = SimpleNamespace(
+        id=7,
+        started_at="run-b",
+        current_wave_id=11,
+        selected_variant_id=101,
+    )
+
+    first_key = AdventureCommandHistoryCache.key_for(attempt=first_wave, log_count=2)
+
+    assert first_key != AdventureCommandHistoryCache.key_for(attempt=next_wave, log_count=2)
+    assert first_key != AdventureCommandHistoryCache.key_for(attempt=reused_id, log_count=2)
 
 
 def first_level():
@@ -117,9 +147,11 @@ def test_active_adventure_run_is_not_exposed_as_resumable_session(db, django_use
 
     payload = adventure_summary_payload(player=get_or_create_player(user), adventure=level)
 
-    assert payload["status"] == "not_started"
+    assert payload["is_passed"] is False
+    assert payload["completion"] is None
+    assert "status" not in payload
     assert "active_run_id" not in payload
-    assert payload["latest_run_id"] is None
+    assert "latest_run_id" not in payload
 
 
 def test_passed_run_unlocks_next_level_even_without_completion_row(db, django_user_model):
@@ -216,7 +248,9 @@ def test_first_repository_workflow_wave_does_not_complete_after_only_init(db, dj
     result = AdventureCommandService().submit(
         attempt=run,
         command="git init",
-        execution=frontend_execution_payload("git init", init_only_state, client_run_revision=run.command_count),
+        execution=frontend_execution_payload(
+            "git init", init_only_state, client_run_revision=run.command_count
+        ),
     )
 
     assert result["step"].result_category != RESULT_TARGET_MATCHED
@@ -226,6 +260,95 @@ def test_first_repository_workflow_wave_does_not_complete_after_only_init(db, dj
     assert run.counted_command_count == 1
 
 
+def test_first_snapshot_battle_progress_survives_invalid_commit_and_rewards_add(
+    db,
+    django_user_model,
+):
+    from adventures.models import AdventureWave
+
+    call_command("seed_curriculum")
+    user = make_user(django_user_model, username="first-snapshot-progress")
+    wave = AdventureWave.objects.get(slug="ch1-adv-init-current-folder", is_published=True)
+    run = AdventureRunService().start_run(
+        player=get_or_create_player(user),
+        level=wave.level,
+    )
+    service = AdventureCommandService()
+
+    initialized = deepcopy(run.repository_state)
+    initialized.update(
+        {
+            "repository_initialized": True,
+            "branches": {"main": None},
+            "head": {"type": "branch", "name": "main", "target": None},
+            "commits": [],
+            "staging": {},
+            "operation_metadata": {
+                "last_init_branch": "main",
+                "last_init_directory": "",
+                "last_init_initial_branch": "main",
+                "repository_reinitialized": False,
+            },
+        }
+    )
+    init_result = service.submit(
+        attempt=run,
+        command="git init",
+        execution=frontend_execution_payload(
+            "git init",
+            initialized,
+            client_run_revision=run.command_count,
+        ),
+    )
+    init_progress = init_result["command_outcome"]["rules_passing"]
+    assert init_result["command_outcome"]["rules_delta"] > 0
+
+    invalid_result = service.submit(
+        attempt=run,
+        command="git commit",
+        execution=frontend_execution_payload(
+            "git commit",
+            initialized,
+            processed=False,
+            output="nothing to commit",
+            exit_code=1,
+            client_run_revision=run.command_count,
+        ),
+    )
+    assert invalid_result["command_outcome"]["previous_rules_passing"] == init_progress
+    assert invalid_result["command_outcome"]["rules_passing"] == init_progress
+    assert invalid_result["command_outcome"]["rules_delta"] == 0
+
+    repeated_init_result = service.submit(
+        attempt=run,
+        command="git init",
+        execution=frontend_execution_payload(
+            "git init",
+            initialized,
+            client_run_revision=run.command_count,
+        ),
+    )
+    assert repeated_init_result["command_outcome"]["previous_rules_passing"] == init_progress
+    assert repeated_init_result["command_outcome"]["rules_passing"] == init_progress
+    assert repeated_init_result["command_outcome"]["rules_delta"] == 0
+
+    staged = deepcopy(initialized)
+    staged["staging"] = deepcopy(staged["working_tree"])
+    staged["working_tree"] = {}
+    add_result = service.submit(
+        attempt=run,
+        command="git add .",
+        execution=frontend_execution_payload(
+            "git add .",
+            staged,
+            client_run_revision=run.command_count,
+        ),
+    )
+    assert add_result["command_outcome"]["previous_rules_passing"] == init_progress
+    assert add_result["command_outcome"]["rules_passing"] > init_progress
+    assert add_result["command_outcome"]["rules_delta"] > 0
+
+
 def _multi_wave_level():
     from django.db.models import Count, Q
 
@@ -233,9 +356,7 @@ def _multi_wave_level():
 
     return (
         AdventureLevel.objects.filter(is_published=True, waves__variants__is_published=True)
-        .annotate(
-            wave_count=Count("waves", filter=Q(waves__is_published=True), distinct=True)
-        )
+        .annotate(wave_count=Count("waves", filter=Q(waves__is_published=True), distinct=True))
         .filter(wave_count__gte=2)
         .select_related("chapter")
         .order_by("chapter__sort_order", "sort_order", "id")
@@ -251,9 +372,7 @@ def test_wave_advance_response_returns_neutral_command_outcome(db, django_user_m
     user = make_user(django_user_model)
     level = _multi_wave_level()
     assert level is not None, "seed data should include a multi-wave level"
-    run = AdventureRunService().start_run(
-        player=get_or_create_player(user), level=level
-    )
+    run = AdventureRunService().start_run(player=get_or_create_player(user), level=level)
     first_wave_id = run.current_wave_id
     variant = run.selected_variant
     solution = variant.solution_commands or ["git status"]
@@ -279,7 +398,9 @@ def test_wave_advance_response_returns_neutral_command_outcome(db, django_user_m
     result = AdventureCommandService().submit(
         attempt=run,
         command=solution[-1],
-        execution=frontend_execution_payload(solution[-1], variant.target_state, client_run_revision=run.command_count),
+        execution=frontend_execution_payload(
+            solution[-1], variant.target_state, client_run_revision=run.command_count
+        ),
     )
 
     assert result["step"].result_category == RESULT_TARGET_MATCHED
@@ -305,7 +426,9 @@ def test_adventure_level_run_is_scoped_to_one_level(db, django_user_model):
     payload = response.json()
     run = AdventureRun.objects.get(id=payload["id"])
     levels = list(
-        AdventureLevel.objects.filter(chapter_id=level.chapter_id, is_published=True).order_by("sort_order", "id")
+        AdventureLevel.objects.filter(chapter_id=level.chapter_id, is_published=True).order_by(
+            "sort_order", "id"
+        )
     )
     level_ids = [item.id for item in levels]
     current_index = level_ids.index(level.id)
@@ -336,7 +459,9 @@ def test_completing_level_records_level_and_adventure_completion(db, django_user
     adventure = first_level()
     service = AdventureRunService()
 
-    required_levels = AdventureLevel.objects.filter(chapter_id=adventure.chapter_id, is_published=True, is_required=True).order_by(
+    required_levels = AdventureLevel.objects.filter(
+        chapter_id=adventure.chapter_id, is_published=True, is_required=True
+    ).order_by(
         "sort_order",
         "id",
     )
@@ -351,7 +476,9 @@ def test_completing_level_records_level_and_adventure_completion(db, django_user
         ).count()
         == required_levels.count()
     )
-    assert AdventureLevelCompletion.objects.filter(player=player, adventure_level_id__in=[level.id for level in required_levels]).exists()
+    assert AdventureLevelCompletion.objects.filter(
+        player=player, adventure_level_id__in=[level.id for level in required_levels]
+    ).exists()
 
 
 def test_opening_level_library_filters_commands_and_penalizes_score(db, django_user_model):
@@ -373,9 +500,7 @@ def test_opening_level_library_filters_commands_and_penalizes_score(db, django_u
     assert response.status_code == 200
     payload = response.json()
     commands = payload["book"]["commands"]
-    wave_skill_ids = set(
-        run.current_wave.command_forms.values_list("command_skill_id", flat=True)
-    )
+    wave_skill_ids = set(run.current_wave.command_forms.values_list("command_skill_id", flat=True))
     assert payload["run"]["library_opened"] is True
     assert payload["book"]["lessons"] == []
     assert commands
@@ -387,7 +512,9 @@ def test_opening_level_library_filters_commands_and_penalizes_score(db, django_u
     run.refresh_from_db()
     complete_level(service, run)
     run.refresh_from_db()
-    completion = AdventureLevelCompletion.objects.get(player=get_or_create_player(user), adventure_level=level)
+    completion = AdventureLevelCompletion.objects.get(
+        player=get_or_create_player(user), adventure_level=level
+    )
     assert run.stars == 2
     assert completion.stars == 2
 
@@ -403,7 +530,9 @@ def test_replay_can_restore_perfect_score_after_library_penalty(db, django_user_
 
     complete_level(service, run)
     run.refresh_from_db()
-    completion = AdventureLevelCompletion.objects.get(player=get_or_create_player(user), adventure_level=level)
+    completion = AdventureLevelCompletion.objects.get(
+        player=get_or_create_player(user), adventure_level=level
+    )
     assert run.stars == 2
     assert completion.stars == 2
 

@@ -52,6 +52,11 @@ export function AdventureStatusHeader({
         <span>GIT it!</span>
       </a>
 
+      <div className="gameplay-header-mission" aria-label="Current adventure">
+        <span>Adventure · Wave {Math.max(1, run.current_wave)} / {Math.max(1, run.total_waves)}</span>
+        <strong>{run.selected_level?.title ?? run.current_attempt?.level.title ?? 'Adventure run'}</strong>
+      </div>
+
       <span className="gameplay-header-spacer" aria-hidden="true" />
 
       <AudioControls

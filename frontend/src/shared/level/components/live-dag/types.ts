@@ -3,7 +3,7 @@ import type { RepositoryCommit } from '@/shared/level/types'
 export type DagVariant = 'cyan'
 export type DagLayoutDirection = 'vertical' | 'horizontal'
 
-export type RefKind = 'local' | 'remote'
+type RefKind = 'local' | 'remote'
 
 export type RefLabel = {
   name: string

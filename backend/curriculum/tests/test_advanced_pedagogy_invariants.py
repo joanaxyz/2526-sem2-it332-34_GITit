@@ -55,7 +55,11 @@ def _ordered_advanced_waves() -> list[dict]:
 
     ordered: list[dict] = []
     chapters = sorted(
-        (slug for slug in ADVENTURE_SOURCES if _CHAPTER_STORY.get(slug, "").startswith(("frostbound", "skyline"))),
+        (
+            slug
+            for slug in ADVENTURE_SOURCES
+            if _CHAPTER_STORY.get(slug, "").startswith(("frostbound", "skyline"))
+        ),
         key=lambda slug: (_STORY_ORDER[_CHAPTER_STORY[slug]], _CHAPTER_NUMBER[slug]),
     )
     for chapter_slug in chapters:
@@ -108,9 +112,7 @@ def test_every_used_form_has_a_solo_intro_before_first_use():
 
 
 def test_every_used_form_recurs_across_enough_waves():
-    appearances = Counter(
-        form for spec in ORDERED_WAVES for form in set(_forms_used(spec))
-    )
+    appearances = Counter(form for spec in ORDERED_WAVES for form in set(_forms_used(spec)))
     shortfalls = [
         f"{form}: {count}/{MIN_APPEARANCES}"
         for form, count in sorted(appearances.items())

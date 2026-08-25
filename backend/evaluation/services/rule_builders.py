@@ -1,4 +1,3 @@
-
 from simulator.services import normalize_command
 
 
@@ -18,32 +17,39 @@ def _canonical_form(command: str) -> str:
         return " ".join(parts)
     return normalized
 
+
 def command_matches(executed: str, required: str) -> bool:
     executed = _canonical_form(executed)
     required = _canonical_form(required)
     return executed == required or executed.startswith(f"{required} ")
 
+
 def _each(spec: dict, key: str, rule_type: str, field: str) -> list[dict]:
     """One rule per item of a list-valued spec key."""
     return [{"type": rule_type, field: item} for item in spec.get(key, [])]
+
 
 def _pairs(spec: dict, key: str, rule_type: str, left: str, right: str) -> list[dict]:
     """One rule per entry of a mapping-valued spec key."""
     return [{"type": rule_type, left: k, right: v} for k, v in spec.get(key, {}).items()]
 
+
 def _flag(spec: dict, key: str, rule_type: str) -> list[dict]:
     """A bare rule when a boolean spec key is truthy."""
     return [{"type": rule_type}] if spec.get(key) else []
 
+
 def _presence_bool(spec: dict, key: str, rule_type: str) -> list[dict]:
     """A valued rule whenever the key is present - False is a real requirement."""
     return [{"type": rule_type, "value": bool(spec[key])}] if key in spec else []
+
 
 def _command_rules(spec: dict) -> list[dict]:
     return [
         *_each(spec, "required_commands", "required_command", "command"),
         *_each(spec, "forbidden_commands", "forbidden_command", "command"),
     ]
+
 
 def _branch_rules(spec: dict) -> list[dict]:
     return [
@@ -77,6 +83,7 @@ def _branch_rules(spec: dict) -> list[dict]:
         ),
     ]
 
+
 def _remote_rules(spec: dict) -> list[dict]:
     return [
         *_each(spec, "remote_exists", "remote_exists", "remote"),
@@ -95,6 +102,7 @@ def _remote_rules(spec: dict) -> list[dict]:
         ),
     ]
 
+
 def _cleanliness_rules(spec: dict) -> list[dict]:
     stash_required = spec.get("stash_stack_empty") or spec.get("stash_stack_empty_after_pop")
     return [
@@ -110,6 +118,7 @@ def _cleanliness_rules(spec: dict) -> list[dict]:
         *([{"type": "stash_stack_empty"}] if stash_required else []),
     ]
 
+
 def _commit_graph_rules(spec: dict) -> list[dict]:
     return [
         *_pairs(spec, "min_commits_on_branch", "min_commits_on_branch", "branch", "minimum"),
@@ -119,12 +128,14 @@ def _commit_graph_rules(spec: dict) -> list[dict]:
         ),
     ]
 
+
 def _path_rules(spec: dict) -> list[dict]:
     return [
         *_each(spec, "working_tree_contains", "working_tree_contains", "path"),
         *_each(spec, "working_tree_absent", "working_tree_absent", "path"),
         *_each(spec, "staging_contains", "staging_contains", "path"),
     ]
+
 
 def _history_rules(spec: dict) -> list[dict]:
     latest_commit = spec.get("latest_commit", {})
@@ -145,6 +156,7 @@ def _history_rules(spec: dict) -> list[dict]:
         *_each(spec, "reflog_contains", "reflog_contains", "expected"),
     ]
 
+
 def _invariance_rules(spec: dict) -> list[dict]:
     return [
         *_flag(spec, "repository_state_unchanged", "repository_state_unchanged"),
@@ -159,6 +171,7 @@ def _invariance_rules(spec: dict) -> list[dict]:
             else []
         ),
     ]
+
 
 def rules_from_state_requirements(state_requirements: dict | None) -> list[dict]:
     """Expand a seed-authored state_requirements spec into flat rule dicts.

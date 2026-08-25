@@ -7,7 +7,10 @@ class VariantBase(models.Model):
     evaluation spec, and scaffold policy. Concrete subclasses add only their
     parent FK."""
 
-    slug = models.SlugField()
+    # Variant slugs are rendered from authored case identifiers. Keep both
+    # fields on the same explicit bound so bulk seeding cannot succeed on
+    # SQLite and then fail against PostgreSQL's enforced varchar length.
+    slug = models.SlugField(max_length=160)
     label = models.CharField(max_length=80)
     initial_state = models.JSONField(default=dict)
     evaluation_spec = models.JSONField(default=dict, blank=True)

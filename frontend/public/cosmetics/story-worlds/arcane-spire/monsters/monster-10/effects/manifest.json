@@ -1,5 +1,5 @@
 {
-  "id": "ghost-lady-skill-effect",
+  "id": "monster-10-skill-effect",
   "label": "Ghost Lady Skill Effect",
   "motif": "blue flame chains",
   "playback": "target",
@@ -44,6 +44,16 @@
       "orient_to": "target-facing"
     }
   ],
-  "anchor": "center",
+  "anchor": "feet",
+  "placeAnchor": {
+    "x": 0.4316,
+    "y": 0.9297
+  },
+  "placeBounds": {
+    "left": 0.0664,
+    "top": 0.1484,
+    "right": 0.9609,
+    "bottom": 0.9531
+  },
   "placement": "target"
 }

@@ -89,19 +89,24 @@ export function useMonsterCounterattack({
         if (def?.attack.effect && layer && playerEl) {
           const effect = def.attack.effect
           const playback = effect.playback
+          const bodyImpact = anchor(playerEl, 6, -4, 0.72, 0.52)
+          const groundImpact = anchor(playerEl, 0, -2, 0.5, 0.95)
           const targetPoint =
             playback === 'projectile'
-              ? anchor(playerEl, 6, -4, 0.72, 0.52)
+              ? bodyImpact
               : effect.placement === 'caster'
                 ? anchor(handle.element(), 0, -2, 0.5, 0.5)
                 : effect.anchor === 'feet'
-                  ? anchor(playerEl, 0, -2, 0.5, 0.95)
+                  ? groundImpact
                   : anchor(playerEl, 6, -4, 0.58, 0.52)
+          const impactTo = playback === 'projectile' && effect.anchor === 'feet' ? groundImpact : undefined
           await monsterAttackEffect(effect)({
             layer,
             backLayer,
             from: anchor(handle.element(), -14, -6),
             to: targetPoint,
+            impactTo,
+            sizeScale: effect.placement === 'caster' ? def.metrics.scale : 1,
             targetFacing: effect.placement === 'caster' ? 'left' : 'right',
           })
         } else if (def?.attack.kind === 'projectile' && def.attack.sheet && layer && playerEl) {

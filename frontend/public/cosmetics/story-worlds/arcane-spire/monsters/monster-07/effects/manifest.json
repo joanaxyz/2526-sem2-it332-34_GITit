@@ -1,5 +1,5 @@
 {
-  "id": "bone-soldier-skill-effect",
+  "id": "monster-07-skill-effect",
   "label": "Bone Soldier Skill Effect",
   "motif": "blue flame slash",
   "playback": "target",
@@ -29,5 +29,15 @@
     }
   ],
   "anchor": "center",
+  "placeAnchor": {
+    "x": 0.5312,
+    "y": 0.4492
+  },
+  "placeBounds": {
+    "left": 0.1016,
+    "top": 0.1641,
+    "right": 0.9336,
+    "bottom": 0.8828
+  },
   "placement": "target"
 }

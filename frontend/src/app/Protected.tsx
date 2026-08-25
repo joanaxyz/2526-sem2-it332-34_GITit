@@ -3,7 +3,11 @@ import type { ReactElement } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
 import { authApi } from '@/shared/auth/authApi'
-import { useAuthStore } from '@/shared/auth/useAuth'
+import {
+  beginAuthConfirmation,
+  confirmAuthSession,
+  useAuthStore,
+} from '@/shared/auth/useAuth'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { LoadingState } from '@/shared/components/LoadingState'
 
@@ -15,13 +19,13 @@ export function Protected({ children }: { children: ReactElement }) {
     queryFn: async () => {
       if (token) {
         const user = await authApi.me()
-        useAuthStore.getState().setSession(token, user)
+        confirmAuthSession(token, user)
         return user
       }
       const refreshed = await authApi.refresh()
-      useAuthStore.getState().setAccessToken(refreshed.access)
+      beginAuthConfirmation(refreshed.access)
       const user = await authApi.me()
-      useAuthStore.getState().setSession(refreshed.access, user)
+      confirmAuthSession(refreshed.access, user)
       return user
     },
     enabled: !token || !user,

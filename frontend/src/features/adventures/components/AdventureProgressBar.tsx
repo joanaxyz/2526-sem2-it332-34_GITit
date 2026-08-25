@@ -29,7 +29,7 @@ export function AdventureProgressBar({
   const waveTotal = Math.max(waveCurrent, totalWaves ?? run.total_waves ?? waveCurrent)
   const clearedWaves =
     run.status === 'completed' ? waveTotal : Math.max(0, Math.min(waveTotal, waveCurrent - 1))
-  const wavePct = Math.min(100, Math.round((clearedWaves / waveTotal) * 100))
+  const wavePct = Math.min(100, (clearedWaves / waveTotal) * 100)
 
   if (variant === 'battle') {
     return (
@@ -48,14 +48,14 @@ export function AdventureProgressBar({
         <span className="text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">Wave</span>
         <div className="relative h-2 min-w-0 flex-1 overflow-hidden rounded-[2px] bg-secondary/80">
           <span
-            className="absolute inset-y-0 left-0 rounded-[2px] bg-gradient-to-r from-primary to-accent transition-all"
+            className="adventure-wave-progress__fill absolute inset-y-0 left-0 rounded-[2px] bg-gradient-to-r from-primary to-accent transition-all"
             style={{ width: `${wavePct}%` }}
           />
           {Array.from({ length: waveTotal - 1 }, (_, i) => (
             <span
               key={i}
               aria-hidden
-              className="absolute inset-y-0 w-px bg-foreground/30"
+              className="adventure-wave-progress__divider absolute inset-y-0 w-px bg-foreground/30"
               style={{ left: `${((i + 1) / waveTotal) * 100}%` }}
             />
           ))}

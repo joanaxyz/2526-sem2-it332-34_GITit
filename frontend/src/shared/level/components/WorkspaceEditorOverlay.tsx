@@ -10,7 +10,8 @@ import {
   lineNumbersFor,
   workspaceFileErrorMessage,
 } from '@/shared/level/utils/projectFiles'
-import type { ProjectTreeNode, WorkspaceFileInput } from '@/shared/level/utils/projectFiles'
+import type { ProjectTreeNode } from '@/shared/level/utils/projectFiles'
+import type { WorkspaceFileInput } from '@/shared/level/workspaceFileTypes'
 import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
 

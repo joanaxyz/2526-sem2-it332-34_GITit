@@ -17,6 +17,9 @@
 .inline-flex { display: inline-flex; }
 .grid { display: grid; }
 .hidden { display: none; }
+.animate-fade-in-up {
+  animation: fade-in-up 0.55s var(--ease-out) both;
+}
 .min-h-0 { min-height: 0; }
 .min-w-0 { min-width: 0; }
 .h-full { height: 100%; }

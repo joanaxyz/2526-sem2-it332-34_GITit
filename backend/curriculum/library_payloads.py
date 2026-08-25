@@ -26,6 +26,7 @@ def pages_from_command_sections(sections: list[dict[str, Any]]) -> list[dict[str
         pages.append(page)
     return pages
 
+
 def _content(
     *,
     key: str,
@@ -76,7 +77,8 @@ def _content(
         before_you_run=before_you_run or education.get("before_you_run"),
         after_you_run=after_you_run or education.get("after_you_run"),
         beginner_traps=beginner_traps or education.get("beginner_traps"),
-        wrong_command_comparisons=wrong_command_comparisons or education.get("wrong_command_comparisons"),
+        wrong_command_comparisons=wrong_command_comparisons
+        or education.get("wrong_command_comparisons"),
         scenario_examples=scenario_examples or education.get("scenario_examples"),
         mini_quiz=mini_quiz or education.get("mini_quiz"),
         state_flow=state_flow or education.get("state_flow"),
@@ -93,10 +95,10 @@ def _content(
         "pages": pages_from_command_sections(sections),
     }
 
+
 def lesson_pages(sections: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Build a lesson's renderable pages from authored sections.
 
     Lessons (general lessons) are authored with the same section/block vocabulary
     as command library entries, so the Chapter Book reader renders both."""
     return pages_from_command_sections(sections)
-

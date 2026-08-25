@@ -267,7 +267,6 @@ export function useBattleResolveQueue({
       })
     },
     [
-      anchor,
       backdropRef,
       bumpRosterEpoch,
       attackPendingRef,

@@ -23,6 +23,7 @@ _READING_COMMANDS = {
     "git ls-files",
 }
 
+
 def _tags_for_module(module: str, base_command: str) -> list[str]:
     tags = ["diagnostic" if base_command in _READING_COMMANDS else "action"]
     tags_by_module = {
@@ -39,6 +40,7 @@ def _tags_for_module(module: str, base_command: str) -> list[str]:
         tags.append(module_tag)
     return tags
 
+
 def _semantic_items_for_key(key: str, prefix: str) -> list[dict[str, str]]:
     section_ids = COMMAND_KEY_ALWAYS_INCLUDED_SECTION_IDS.get(key, [])
     items = []
@@ -50,7 +52,10 @@ def _semantic_items_for_key(key: str, prefix: str) -> list[dict[str, str]]:
             items.append({"id": section_id, **copy})
     return items
 
-def _catalog_library_entries(existing_entries: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
+
+def _catalog_library_entries(
+    existing_entries: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     from curriculum.seed_data.command_catalog import COMMAND_CATALOG
 
     grouped: dict[str, dict[str, Any]] = {}
@@ -104,4 +109,3 @@ def _catalog_library_entries(existing_entries: list[dict[str, Any]] | None = Non
         entry["arguments"] = _semantic_items_for_key(key, "argument")
         entries.append(entry)
     return entries
-

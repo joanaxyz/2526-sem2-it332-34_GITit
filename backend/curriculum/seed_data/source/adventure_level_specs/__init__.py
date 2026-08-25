@@ -11,7 +11,7 @@ from .chapter_4_merging import LEVELS as _CHAPTER_4_MERGING
 from .chapter_5_recovery import LEVELS as _CHAPTER_5_RECOVERY
 from .chapter_6_patches import LEVELS as _CHAPTER_6_PATCHES
 from .chapter_7_remotes import LEVELS as _CHAPTER_7_REMOTES
-from .level_plan import ADVENTURE_LEVEL_PLAN, adventure_levels_for
+from .level_plan import adventure_levels_for
 from .v3_advanced_workflows import LEVELS as _ADVANCED_STORY_LEVELS
 from .v3_arcane_handoff import LEVELS as _V3_ARCANE_HANDOFF
 from .v3_frost_form_drills import LEVELS as _V3_FROST_FORM_DRILLS
@@ -35,4 +35,4 @@ ADVENTURE_LEVELS = [
 
 SPEC_BY_SLUG = {spec["slug"]: spec for spec in ADVENTURE_LEVELS}
 
-__all__ = ["ADVENTURE_LEVELS", "ADVENTURE_LEVEL_PLAN", "SPEC_BY_SLUG", "adventure_levels_for"]
+__all__ = ["ADVENTURE_LEVELS", "SPEC_BY_SLUG", "adventure_levels_for"]

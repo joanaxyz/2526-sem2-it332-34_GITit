@@ -5,7 +5,7 @@ import type { ChallengeRun } from '@/features/challenges/types'
 export const DEFAULT_TERMINAL_RATIO = 0.28
 export const DEFAULT_TARGET_DIAGRAM_RATIO = 0.5
 export const DEFAULT_TERMINAL_PANE_RATIO = 0.60
-export const RESIZE_HANDLE_WIDTH = 6
+const RESIZE_HANDLE_WIDTH = 6
 export const BATTLE_STAGE_OPEN_ROW = WORKSPACE_BATTLE_STAGE_ROW
 export const BATTLE_STAGE_COLLAPSED_ROW = WORKSPACE_BATTLE_COLLAPSED_ROW
 export const TERMINAL_RATIO_KEY = 'workspace:terminal-ratio'

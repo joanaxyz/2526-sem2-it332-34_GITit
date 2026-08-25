@@ -14,8 +14,9 @@ export type EffectContext = {
   /** Optional impact pin for projectile dissipate frames. Ground-impact sheets
    *  fly to `to`, then plant their burst here without bending the flight path. */
   impactTo?: { x: number; y: number }
-  /** Multiplier on the effect's base scale, from the target monster's size, so
-   *  the spell grows with a big boss and shrinks for a small mob. Defaults to 1. */
+  /** Multiplier on target/impact art from the target monster's rendered size.
+   *  Projectile travel stays at its authored scale; only its landing burst uses
+   *  this value. Defaults to 1. */
   sizeScale?: number
 }
 
@@ -29,7 +30,7 @@ export type SkillEffectPlayback = 'projectile' | 'target' | 'ground' | 'miss'
 /** Where a target/ground effect plants: on the enemy body, or on its ground line. */
 export type SkillEffectAnchor = 'center' | 'feet'
 export type FlameTint = 'cyan' | 'azure' | 'indigo' | 'steel' | 'violet' | 'ash'
-export type SkillEffectMotion = 'gather-orb-projectile-impact-dissipate'
+type SkillEffectMotion = 'gather-orb-projectile-impact-dissipate'
 
 export type SkillSpriteSpec = {
   sheet: SpriteAnimation
@@ -49,6 +50,15 @@ export type SkillSpriteSpec = {
   launchStartFrame?: number
   /** Zero-based first frame that should hold on the impact point. */
   impactStartFrame?: number
+  /** Pixel-measured placement anchor (normalized 0..1 of the frame), emitted by
+   *  process_companion_spell_sheets.py from the baked art. When present, the
+   *  runtime pins THIS point on the target instead of the fixed FEET/CENTER
+   *  fraction — so a reprocess that shifts the art inside its transparent cell
+   *  can't float the effect. Falls back to the `anchor` constant when absent. */
+  placeAnchor?: SpriteAnchor
+  /** Pixel-measured visible bounds for planted/impact frames, normalized to the
+   *  frame. Stage fitting uses this instead of the transparent sprite cell. */
+  placeBounds?: SpriteBounds
   offsetX?: number
   offsetY?: number
   /** Two depth passes (back drawn behind the actors, front in front). The
@@ -57,3 +67,4 @@ export type SkillSpriteSpec = {
 }
 
 export type SpriteAnchor = { x: number; y: number }
+export type SpriteBounds = { left: number; top: number; right: number; bottom: number }

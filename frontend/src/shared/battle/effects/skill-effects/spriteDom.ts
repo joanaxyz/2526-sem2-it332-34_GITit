@@ -1,6 +1,6 @@
 import type { SpriteAnimation } from '@/shared/sprites/types'
 
-import type { SpriteAnchor } from './types'
+import type { SpriteAnchor, SpriteBounds } from './types'
 
 export const CENTER_ANCHOR: SpriteAnchor = { x: 0.5, y: 0.5 }
 export const PROJECTILE_NOSE_ANCHOR: SpriteAnchor = { x: 0.78, y: 0.52 }
@@ -15,10 +15,32 @@ export const MISS_LANDING_ANCHOR: SpriteAnchor = { x: 0.47, y: 0.7 }
 // shockwave and the switch wave on the floor instead of the enemy's head.
 export const FEET_ANCHOR: SpriteAnchor = { x: 0.5, y: 0.86 }
 
+const spriteSheetLoads = new Map<string, Promise<void>>()
+
 export function reduceMotion(): boolean {
   return (
     typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
   )
+}
+
+export function preloadSpriteSheet(sheet: SpriteAnimation): Promise<void> {
+  if (typeof Image === 'undefined' || !sheet.src) return Promise.resolve()
+  const cached = spriteSheetLoads.get(sheet.src)
+  if (cached) return cached
+
+  const image = new Image()
+  image.decoding = 'async'
+  image.src = sheet.src
+  const loaded =
+    typeof image.decode === 'function'
+      ? image.decode()
+      : new Promise<void>((resolve, reject) => {
+          image.onload = () => resolve()
+          image.onerror = () => reject(new Error(`Could not preload sprite sheet ${sheet.src}`))
+        })
+  const safeLoad = loaded.catch(() => undefined)
+  spriteSheetLoads.set(sheet.src, safeLoad)
+  return safeLoad
 }
 
 export function finishAnimation(animation: Animation, ms: number): Promise<void> {
@@ -122,36 +144,13 @@ export function flipAnchor(anchor: SpriteAnchor): SpriteAnchor {
   return { x: 1 - anchor.x, y: anchor.y }
 }
 
-/**
- * Largest scale factor <= 1 that keeps a sprite of size (w, h), placed so its
- * `anchor` point lands at layer-local `to`, fully inside `host` with `margin`
- * breathing room. The battle stage is `overflow: hidden`, so a target/ground
- * effect scaled up to a big boss near the stage edge would otherwise be cropped
- * at the top/right rather than shrunk to fit. Returns 1 when it already fits.
- */
-export function fitScaleToHost(
-  host: HTMLElement,
-  to: { x: number; y: number },
-  anchor: SpriteAnchor,
-  w: number,
-  h: number,
-  margin = 8,
-): number {
-  const box = host.getBoundingClientRect()
-  const W = box.width
-  const H = box.height
-  if (!W || !H || !w || !h) return 1
-  // A short scale-up (fade keyframes reach 1.02) plus the margin keep the top
-  // fringe of tall pillars from just kissing the edge.
-  const ew = w * 1.03
-  const eh = h * 1.03
-  const caps: number[] = [1]
-  if (anchor.x > 0) caps.push((to.x - margin) / (ew * anchor.x))
-  if (anchor.x < 1) caps.push((W - margin - to.x) / (ew * (1 - anchor.x)))
-  if (anchor.y > 0) caps.push((to.y - margin) / (eh * anchor.y))
-  if (anchor.y < 1) caps.push((H - margin - to.y) / (eh * (1 - anchor.y)))
-  const s = Math.min(...caps)
-  return s > 0 && s < 1 ? s : 1
+export function flipBounds(bounds: SpriteBounds): SpriteBounds {
+  return {
+    left: 1 - bounds.right,
+    top: bounds.top,
+    right: 1 - bounds.left,
+    bottom: bounds.bottom,
+  }
 }
 
 export function containSpriteInHost(
@@ -160,7 +159,7 @@ export function containSpriteInHost(
   anchor: SpriteAnchor,
   w: number,
   h: number,
-  opts: { margin?: number; grow?: number; minScaleBeforeShift?: number } = {},
+  opts: { margin?: number; grow?: number; minScaleBeforeShift?: number; bounds?: SpriteBounds } = {},
 ): { point: { x: number; y: number }; scale: number } {
   return containSpriteInHostForAnchors(host, point, [anchor], w, h, opts)
 }
@@ -171,7 +170,7 @@ export function containSpriteInHostForAnchors(
   anchors: SpriteAnchor[],
   w: number,
   h: number,
-  opts: { margin?: number; grow?: number; minScaleBeforeShift?: number } = {},
+  opts: { margin?: number; grow?: number; minScaleBeforeShift?: number; bounds?: SpriteBounds } = {},
 ): { point: { x: number; y: number }; scale: number } {
   const box = host.getBoundingClientRect()
   const W = box.width
@@ -183,7 +182,7 @@ export function containSpriteInHostForAnchors(
   const minScaleBeforeShift = opts.minScaleBeforeShift ?? 0.55
   const ew = w * grow
   const eh = h * grow
-  const extents = anchorExtents(anchors)
+  const extents = anchorExtents(anchors, opts.bounds)
   const caps: number[] = [1]
 
   if (extents.left > 0) caps.push((point.x - margin) / (ew * extents.left))
@@ -209,14 +208,17 @@ export function containSpriteInHostForAnchors(
   }
 }
 
-function anchorExtents(anchors: SpriteAnchor[]): { left: number; right: number; top: number; bottom: number } {
+function anchorExtents(
+  anchors: SpriteAnchor[],
+  bounds: SpriteBounds = { left: 0, top: 0, right: 1, bottom: 1 },
+): { left: number; right: number; top: number; bottom: number } {
   const list = anchors.length ? anchors : [CENTER_ANCHOR]
   return list.reduce(
     (max, anchor) => ({
-      left: Math.max(max.left, anchor.x),
-      right: Math.max(max.right, 1 - anchor.x),
-      top: Math.max(max.top, anchor.y),
-      bottom: Math.max(max.bottom, 1 - anchor.y),
+      left: Math.max(max.left, anchor.x - bounds.left),
+      right: Math.max(max.right, bounds.right - anchor.x),
+      top: Math.max(max.top, anchor.y - bounds.top),
+      bottom: Math.max(max.bottom, bounds.bottom - anchor.y),
     }),
     { left: 0, right: 0, top: 0, bottom: 0 },
   )
@@ -234,8 +236,4 @@ export function placeAt(
   extra = '',
 ): string {
   return `translate(${point.x - size.w * anchor.x}px, ${point.y - size.h * anchor.y}px)${extra}`
-}
-
-export function travelRotation(from: { x: number; y: number }, to: { x: number; y: number }): number {
-  return Math.atan2(to.y - from.y, to.x - from.x)
 }

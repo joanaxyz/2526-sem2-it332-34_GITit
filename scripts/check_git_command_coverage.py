@@ -21,12 +21,26 @@ invalid = [
     if row["coverage_level"] not in {"mastery", "practice", "demonstration", "reference"}
 ]
 required_fields = {
-    "command", "category", "coverage_level", "introduced_story", "introduced_chapter",
-    "adventure_level_slugs", "challenge_slugs", "later_retrieval_slugs", "engine_support",
-    "backend_verification", "visual_effect", "platform_constraints", "deprecation_status",
-    "replacement_guidance", "official_version", "notes",
+    "command",
+    "category",
+    "coverage_level",
+    "introduced_story",
+    "introduced_chapter",
+    "adventure_level_slugs",
+    "challenge_slugs",
+    "later_retrieval_slugs",
+    "engine_support",
+    "backend_verification",
+    "visual_effect",
+    "platform_constraints",
+    "deprecation_status",
+    "replacement_guidance",
+    "official_version",
+    "notes",
 }
-incomplete = [row.get("command", "<unknown>") for row in COMMAND_COVERAGE if required_fields - row.keys()]
+incomplete = [
+    row.get("command", "<unknown>") for row in COMMAND_COVERAGE if required_fields - row.keys()
+]
 if missing or extra or invalid or incomplete:
     print("Git command coverage check failed.")
     if missing:
@@ -38,4 +52,6 @@ if missing or extra or invalid or incomplete:
     if incomplete:
         print("Incomplete records:", ", ".join(incomplete))
     raise SystemExit(1)
-print(f"Git command coverage is complete for {len(COMMAND_COVERAGE)} commands (Git {inventory['git_version']}).")
+print(
+    f"Git command coverage is complete for {len(COMMAND_COVERAGE)} commands (Git {inventory['git_version']})."
+)

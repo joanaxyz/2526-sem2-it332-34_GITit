@@ -2,7 +2,19 @@
 set -eu
 
 python manage.py check_runtime_config
-python manage.py migrate --noinput
+
+case "${DJANGO_MIGRATE_ON_STARTUP:-true}" in
+  true|True|TRUE|1|yes|Yes|YES|on|On|ON)
+    python manage.py migrate --noinput
+    ;;
+  false|False|FALSE|0|no|No|NO|off|Off|OFF)
+    ;;
+  *)
+    echo "DJANGO_MIGRATE_ON_STARTUP must be a boolean value." >&2
+    exit 1
+    ;;
+esac
+
 python manage.py collectstatic --noinput
 
 exec gunicorn config.wsgi:application \

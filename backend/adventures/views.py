@@ -1,35 +1,38 @@
 from django.db import OperationalError, transaction
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from adventures.models import AdventureLevel, AdventureRun
+from adventures.openapi import (
+    AdventureCommandResponseSerializer,
+    AdventureLevelLibraryResponseSerializer,
+    AdventureRunResponseSerializer,
+)
 from adventures.payloads import (
     adventure_command_payload,
     adventure_level_library_payload,
     adventure_run_payload,
 )
-from adventures.serializers import (
+from adventures.services import (
+    AdventureCommandService,
+    AdventureRunService,
+)
+from common.constants import SESSION_STATUS_STARTED
+from common.exceptions import Conflict, Locked
+from common.schemas.openapi import RequiredPatchBodyAutoSchema
+from common.serializers import (
     CommandSubmitSerializer,
     WorkspaceFilePathSerializer,
     WorkspaceFileRenameSerializer,
     WorkspaceFileSerializer,
 )
-from adventures.services import (
-    AdventureCommandService,
-    AdventureRunService,
-    AdventureWorkspaceFileService,
-)
-from common.constants import SESSION_STATUS_STARTED
-from common.exceptions import Conflict, Locked
-from common.openapi import (
-    AdventureCommandResponseSerializer,
-    AdventureLevelLibraryResponseSerializer,
-    AdventureRunResponseSerializer,
-)
+from common.services.run_workspace import RunWorkspaceFileService
 from curriculum.selectors import adventure_locked, chapter_locked, level_locked
 from players.services import get_or_create_player
+
+ADVENTURE_WORKSPACE_FILES = RunWorkspaceFileService(ended_message="This attempt has already ended.")
 
 
 def _get_run(run_id: int, player) -> AdventureRun:
@@ -135,7 +138,6 @@ class AdventureRunStartAPIView(APIView):
         )
 
 
-
 class AdventureRunDetailAPIView(APIView):
     @extend_schema(responses={200: AdventureRunResponseSerializer})
     def get(self, request, run_id: int):
@@ -154,7 +156,9 @@ class AdventureRunDetailAPIView(APIView):
 class AdventureRunSubmitCommandAPIView(APIView):
     throttle_scope = "command_submit"
 
-    @extend_schema(request=CommandSubmitSerializer, responses={200: AdventureCommandResponseSerializer})
+    @extend_schema(
+        request=CommandSubmitSerializer, responses={200: AdventureCommandResponseSerializer}
+    )
     @transaction.atomic
     def post(self, request, run_id: int):
         serializer = CommandSubmitSerializer(data=request.data)
@@ -215,7 +219,9 @@ class AdventureRunLevelLibraryAPIView(APIView):
     @transaction.atomic
     def post(self, request, run_id: int):
         try:
-            run, _attempt = _run_with_active_attempt(run_id, get_or_create_player(request.user), lock=True)
+            run, _attempt = _run_with_active_attempt(
+                run_id, get_or_create_player(request.user), lock=True
+            )
         except OperationalError as exc:
             raise Conflict(
                 "This command is still being processed - try again in a moment."
@@ -227,48 +233,66 @@ class AdventureRunLevelLibraryAPIView(APIView):
         return Response({"book": book, "run": adventure_run_payload(run)})
 
 
-
 class AdventureWorkspaceFileAPIView(APIView):
     throttle_scope = "command_submit"
+    schema = RequiredPatchBodyAutoSchema()
 
     @extend_schema(request=WorkspaceFileSerializer, responses={200: AdventureRunResponseSerializer})
     def post(self, request, run_id: int):
-        return self._mutate_file(request, run_id, AdventureWorkspaceFileService().create_file)
+        return self._mutate_file(request, run_id, ADVENTURE_WORKSPACE_FILES.create_file)
 
-    @extend_schema(request=WorkspaceFileSerializer, responses={200: AdventureRunResponseSerializer})
+    @extend_schema(
+        request={"application/json": {"$ref": "#/components/schemas/WorkspaceFile"}},
+        responses={200: AdventureRunResponseSerializer},
+    )
     def patch(self, request, run_id: int):
-        return self._mutate_file(request, run_id, AdventureWorkspaceFileService().write_file)
+        return self._mutate_file(request, run_id, ADVENTURE_WORKSPACE_FILES.write_file)
 
-    @extend_schema(request=WorkspaceFileRenameSerializer, responses={200: AdventureRunResponseSerializer})
+    @extend_schema(
+        request=WorkspaceFileRenameSerializer, responses={200: AdventureRunResponseSerializer}
+    )
     def put(self, request, run_id: int):
         serializer = WorkspaceFileRenameSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         run, attempt = _run_with_active_attempt(run_id, get_or_create_player(request.user))
-        AdventureWorkspaceFileService().rename_file(
-            attempt=attempt,
+        updated = ADVENTURE_WORKSPACE_FILES.rename_file(
+            run=attempt,
             path=serializer.validated_data["path"],
             new_path=serializer.validated_data["new_path"],
         )
+        run.repository_state = updated.repository_state
         return Response(adventure_run_payload(run))
 
-    @extend_schema(request=WorkspaceFilePathSerializer, responses={200: AdventureRunResponseSerializer})
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="path",
+                type={"type": "string", "maxLength": 240},
+                location=OpenApiParameter.QUERY,
+                required=True,
+            )
+        ],
+        responses={200: AdventureRunResponseSerializer},
+    )
     def delete(self, request, run_id: int):
         serializer = WorkspaceFilePathSerializer(data=request.data or request.query_params)
         serializer.is_valid(raise_exception=True)
         run, attempt = _run_with_active_attempt(run_id, get_or_create_player(request.user))
-        AdventureWorkspaceFileService().delete_file(
-            attempt=attempt,
+        updated = ADVENTURE_WORKSPACE_FILES.delete_file(
+            run=attempt,
             path=serializer.validated_data["path"],
         )
+        run.repository_state = updated.repository_state
         return Response(adventure_run_payload(run))
 
     def _mutate_file(self, request, run_id: int, mutate):
         serializer = WorkspaceFileSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         run, attempt = _run_with_active_attempt(run_id, get_or_create_player(request.user))
-        mutate(
-            attempt=attempt,
+        updated = mutate(
+            run=attempt,
             path=serializer.validated_data["path"],
             content=serializer.validated_data.get("content", ""),
         )
+        run.repository_state = updated.repository_state
         return Response(adventure_run_payload(run))

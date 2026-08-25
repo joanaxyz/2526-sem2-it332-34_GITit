@@ -36,8 +36,8 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
     context = _scenario_context(run)
     repository_state = snapshotter.snapshot(run.repository_state, already_normalized=True)
     supports = ScaffoldingService().supports_for(run.difficulty)
-    expected_target = run.variant.target_state
-    target_state = run.variant.target_state if supports["expected_state"] else None
+    expected_target = run.selected_variant.target_state
+    target_state = run.selected_variant.target_state if supports["expected_state"] else None
     # Stored repository_state is already normalized (the snapshotter calls beside
     # this rely on the same invariant), so the DAG snapshot can skip a redundant pass.
     visualization = visualizer.snapshot(
@@ -55,12 +55,16 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
         "title": chapter.title,
     }
     story = chapter.story if chapter.story_id else None
-    story_payload = {
-        "id": story.id,
-        "slug": story.slug,
-        "title": story.title,
-        "world_slug": story.world_slug,
-    } if story else None
+    story_payload = (
+        {
+            "id": story.id,
+            "slug": story.slug,
+            "title": story.title,
+            "world_slug": story.world_slug,
+        }
+        if story
+        else None
+    )
 
     steps = list(run.steps.order_by("id")) if include_steps else []
     return {
@@ -83,8 +87,8 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
         # GitCoins paid on first completion of this trial (0 = no reward).
         "reward_coins": run.challenge_trial.reward_coins if run.challenge_trial_id else 0,
         "variant": {
-            "id": run.variant_id,
-            "label": run.variant.label,
+            "id": run.selected_variant_id,
+            "label": run.selected_variant.label,
         },
         "mastery_progress": mastery_progress_payload(run),
         "policy": {
@@ -141,12 +145,15 @@ def command_run_payload(run: ChallengeRun, *, repository_state: dict, visualizat
 
 def mastery_progress_payload(run: ChallengeRun) -> dict:
     completion = getattr(run, "_prefetched_completion", None)
-    cleared = completion is not None or ChallengeRun.objects.filter(
-        player_id=run.player_id,
-        is_replay=False,
-        status=SESSION_STATUS_COMPLETED,
-        challenge_trial_id=run.challenge_trial_id,
-    ).exists()
+    cleared = (
+        completion is not None
+        or ChallengeRun.objects.filter(
+            player_id=run.player_id,
+            is_replay=False,
+            status=SESSION_STATUS_COMPLETED,
+            challenge_trial_id=run.challenge_trial_id,
+        ).exists()
+    )
     return {"cleared": cleared, "stars": run.stars}
 
 
@@ -181,11 +188,7 @@ def run_counts_payload(run: ChallengeRun) -> dict:
 
 
 def next_difficulty_payload(run: ChallengeRun) -> dict | None:
-    if (
-        run.is_replay
-        or run.status != SESSION_STATUS_COMPLETED
-        or not run.challenge_trial_id
-    ):
+    if run.is_replay or run.status != SESSION_STATUS_COMPLETED or not run.challenge_trial_id:
         return None
     if not mastery_progress_payload(run)["cleared"]:
         return None
@@ -210,18 +213,22 @@ def sibling_levels_payload(run: ChallengeRun) -> list[dict]:
         return []
     from curriculum.selectors import challenge_levels_access_payload
 
-    levels = challenge_levels_access_payload(player=run.player, challenge=run.challenge_trial.challenge_level)
+    levels = challenge_levels_access_payload(
+        player=run.player, challenge=run.challenge_trial.challenge_level
+    )
     return [trial for level in levels for trial in level.get("trials", [])]
 
 
 def _scenario_context(run: ChallengeRun) -> dict:
-    variant = run.variant
+    variant = run.selected_variant
     raw = (variant.scenario_context if variant else None) or {
         "schema_version": 3,
         "story": run.challenge_trial.story,
         "task": run.challenge_trial.task,
     }
-    return ScenarioContextNormalizer().normalize(raw, fallback_story=run.challenge_trial.challenge_level.narrative)
+    return ScenarioContextNormalizer().normalize(
+        raw, fallback_story=run.challenge_trial.challenge_level.narrative
+    )
 
 
 def _challenge_payload(run: ChallengeRun) -> dict:

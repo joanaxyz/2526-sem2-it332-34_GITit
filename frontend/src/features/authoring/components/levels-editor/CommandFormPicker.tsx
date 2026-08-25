@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 
-import type { CommandFormOption } from '@/features/authoring/api/authoringApi'
+import type { CommandFormOption } from '@/features/authoring/types'
 
 
 /** Pick the command forms a level introduces and reuses. Listing a form on

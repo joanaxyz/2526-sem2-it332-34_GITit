@@ -1,0 +1,50 @@
+{
+  "captured_from": "dirty working tree immediately before the Frost chapter-ownership slice",
+  "catalogs": {
+    "adventure_levels": {
+      "bytes": 7676379,
+      "items": 663,
+      "sha256": "5C4F2AE3E4894D280BF4849385D3E173773B7B4C4F0984D0692576ACB4C7FFCB"
+    },
+    "frost_levels": {
+      "bytes": 1578356,
+      "items": 112,
+      "sha256": "9088754962466A989181BA17685C462F834335CF3D3820F3B4E24A138093FBD2"
+    },
+    "v3_form_challenges": {
+      "bytes": 3383597,
+      "items": 26,
+      "sha256": "DEFB819D154466460D9D651F8122417EAB6C6EFD051F995AE309FE3C4C9E4E97"
+    }
+  },
+  "source_lists": {
+    "choose_drills": {"bytes": 57093, "items": 4, "sha256": "F11E2D87618E020427D45EFDC56F98F05B01525631FC5E9E84F03E3090548453"},
+    "choose_workflows": {"bytes": 61925, "items": 4, "sha256": "ED514C5D0E4AA8576FEFFE28656FAB721DE2B1D8071CB8BCEB590EFA62FA2AD1"},
+    "deliver_drills": {"bytes": 79893, "items": 6, "sha256": "CFE720EC6986CA2DF2D780A96F2072BDBE9A2A6687EDD8E81D42451AE548BC83"},
+    "deliver_workflows": {"bytes": 84000, "items": 6, "sha256": "6BBAD96C1268C24F753D3B8CE96141D330BAF8E0CC13BCDCD9069E7D5CE43E3F"},
+    "govern_drills": {"bytes": 111430, "items": 8, "sha256": "732A00D29FDC4F1A286C1BB064FC02AC7E6F9567A9ACE5476155E602AEEE2B89"},
+    "govern_workflows": {"bytes": 174106, "items": 12, "sha256": "825523F7795E9DB570AFE48465FD10914202D27194B7E6AB28AE02E3AA0609EC"},
+    "hunt_drills": {"bytes": 26452, "items": 2, "sha256": "3309F9C532BB6BFEB174DDCBC82DA32A590253480132E008BAE955AC71D5B8AF"},
+    "hunt_workflows": {"bytes": 54528, "items": 4, "sha256": "06B6E4C8D66A2415D80599AE4359F2D479103E17E5DE49EFE54276DE5F6F2832"},
+    "move_drills": {"bytes": 98558, "items": 7, "sha256": "45B89DD97F9CF0A83C0CD4E41A8D3A1DBC5CCD47D90ABE6170C55AA94347C6D4"},
+    "move_workflows": {"bytes": 116862, "items": 8, "sha256": "5715AE6739189A90A3089FA4D020A268A9A94799D74F1E78D242785B7140BD48"},
+    "publish_drills": {"bytes": 26162, "items": 2, "sha256": "DBB978C2645C8DF8BEE7332C8DDE3BBB5D06D28E27DFDDC77675525C1C2C45DF"},
+    "publish_workflows": {"bytes": 27069, "items": 2, "sha256": "FB0ED8F266750E71C9A7C723B9326513DAA5194CA274097FD3BD1AAE47D2805B"},
+    "reforge_drills": {"bytes": 32807, "items": 2, "sha256": "113C2C30A629350417F2E61CCD147752E7B5FB97DC9A45A6B99636EAB7B0338B"},
+    "reforge_workflows": {"bytes": 67855, "items": 4, "sha256": "734178C40C782C499BA01175AF8CFAE62F97E53722656791ED7FE1CF9E07510C"},
+    "survive_drills": {"bytes": 75867, "items": 9, "sha256": "BF94B84FEFFEA8150F0A264464AA3CC971C4C0919129FD297313ABA97E65C637"},
+    "survive_workflows": {"bytes": 67498, "items": 8, "sha256": "CAC256D767A1A1C536C203C4D64C5BD3A587FE3DBAD45700A2242BDAB41373AD"},
+    "temper_drills": {"bytes": 177368, "items": 11, "sha256": "84BA9A3AA269FD9E8ECA1ACA69F3736503FEF88BF01A4D79395D7364694E3508"},
+    "temper_workflows": {"bytes": 238900, "items": 13, "sha256": "6DEF1F45CC877F0CB4367C01608F95555674E555C4F653F274E8125263672554"}
+  },
+  "files": {
+    "backend/curriculum/seed_data/generated/generated_targets.py": {
+      "sha256": "6EE61275D1571FABD983C5602FA2D323A5DAF4B6F637FA71D3B617B0F916DF54"
+    },
+    "backend/curriculum/seed_data/source/adventure_level_specs/v3_frost_form_drills.py": {
+      "lines": 2948,
+      "sha256": "C4F7F8D31A4D3CD0F6ABA50BB1D2E3847BB8AA927D04499F6A4658181BA14C7F"
+    }
+  },
+  "serialization": "json.dumps(value, sort_keys=True, separators=(',', ':'), default=dataclass-to-dict-or-sorted-set), UTF-8, SHA-256"
+}

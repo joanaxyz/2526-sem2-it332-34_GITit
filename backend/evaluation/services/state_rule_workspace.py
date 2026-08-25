@@ -1,28 +1,33 @@
 from __future__ import annotations
 
-SUPPORTED_RULE_TYPES = frozenset({
-    'conflict_free',
-    'conflict_resolution_contains',
-    'conflicts_contain_paths',
-    'conflicts_empty',
-    'conflicts_resolved',
-    'index_empty',
-    'staging_contains',
-    'staging_contains_tokens',
-    'staging_empty',
-    'staging_excludes',
-    'staging_excludes_tokens',
-    'staging_matches_exact_paths',
-    'staging_not_empty',
-    'working_tree_absent',
-    'working_tree_clean',
-    'working_tree_clean_except',
-    'working_tree_contains',
-    'working_tree_contains_tokens',
-    'working_tree_dirty',
-    'working_tree_excludes_tokens',
-    'working_tree_matches_exact_paths',
-})
+from common.collections import as_list
+
+SUPPORTED_RULE_TYPES = frozenset(
+    {
+        "conflict_free",
+        "conflict_resolution_contains",
+        "conflicts_contain_paths",
+        "conflicts_empty",
+        "conflicts_resolved",
+        "index_empty",
+        "staging_contains",
+        "staging_contains_tokens",
+        "staging_empty",
+        "staging_excludes",
+        "staging_excludes_tokens",
+        "staging_matches_exact_paths",
+        "staging_not_empty",
+        "working_tree_absent",
+        "working_tree_clean",
+        "working_tree_clean_except",
+        "working_tree_contains",
+        "working_tree_contains_tokens",
+        "working_tree_dirty",
+        "working_tree_excludes_tokens",
+        "working_tree_matches_exact_paths",
+    }
+)
+
 
 def check_workspace_state_rule(
     self,
@@ -37,24 +42,20 @@ def check_workspace_state_rule(
         passed = not state.get("staging")
         return (
             passed,
-            "Index is empty."
-            if passed
-            else f"Index still has {sorted(state.get('staging', {}))}.",
+            "Index is empty." if passed else f"Index still has {sorted(state.get('staging', {}))}.",
         )
     if rule_type == "staging_not_empty":
         passed = bool(state.get("staging"))
         return passed, "Something is staged." if passed else "Nothing is staged."
     if rule_type == "staging_contains":
-        paths = set(self._as_list(rule.get("path") or rule.get("paths")))
+        paths = set(as_list(rule.get("path") or rule.get("paths")))
         missing = sorted(paths - set(state.get("staging", {})))
         return (
             not missing,
-            "Staging contains expected paths."
-            if not missing
-            else f"Staging is missing {missing}.",
+            "Staging contains expected paths." if not missing else f"Staging is missing {missing}.",
         )
     if rule_type == "staging_excludes":
-        paths = set(self._as_list(rule.get("path") or rule.get("paths")))
+        paths = set(as_list(rule.get("path") or rule.get("paths")))
         present = sorted(paths & set(state.get("staging", {})))
         return (
             not present,
@@ -84,9 +85,7 @@ def check_workspace_state_rule(
         passed = not visible_working and not state.get("conflicts")
         return (
             passed,
-            "Working tree is clean."
-            if passed
-            else "Working tree still has changes or conflicts.",
+            "Working tree is clean." if passed else "Working tree still has changes or conflicts.",
         )
     if rule_type == "working_tree_dirty":
         visible_working = {
@@ -97,12 +96,10 @@ def check_workspace_state_rule(
         passed = bool(visible_working) or bool(state.get("conflicts"))
         return (
             passed,
-            "Working tree has uncommitted changes."
-            if passed
-            else "Working tree has no changes.",
+            "Working tree has uncommitted changes." if passed else "Working tree has no changes.",
         )
     if rule_type == "working_tree_contains":
-        paths = set(self._as_list(rule.get("path") or rule.get("paths")))
+        paths = set(as_list(rule.get("path") or rule.get("paths")))
         missing = sorted(paths - set(state.get("working_tree", {})))
         return (
             not missing,
@@ -111,7 +108,7 @@ def check_workspace_state_rule(
             else f"Working tree is missing {missing}.",
         )
     if rule_type == "working_tree_absent":
-        paths = set(self._as_list(rule.get("path") or rule.get("paths")))
+        paths = set(as_list(rule.get("path") or rule.get("paths")))
         present = sorted(paths & set(state.get("working_tree", {})))
         return (
             not present,
@@ -150,9 +147,7 @@ def check_workspace_state_rule(
         passed = not state.get("conflicts")
         return (
             passed,
-            "No conflicts remain."
-            if passed
-            else f"Conflicts remain: {state.get('conflicts')}.",
+            "No conflicts remain." if passed else f"Conflicts remain: {state.get('conflicts')}.",
         )
     if rule_type == "conflicts_contain_paths":
         paths = set(rule.get("paths", []))

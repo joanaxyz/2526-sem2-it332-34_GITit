@@ -1,8 +1,8 @@
 // Target-state generator for the curriculum seed.
 //
-// Reads {case_id: {initial_state, solution_commands, workspace_files}} from
-// `inputPath`, replays each solution through the SAME browser git engine the
-// learner runs, and writes {case_id: target_state} to `outputPath`. Driven by
+// Replays each authored solution through the SAME browser git engine the learner
+// runs, rejects unprocessable or over-budget routes, and writes
+// {case_id: target_state} to `outputPath`. Driven by
 // `python manage.py generate_targets` — do not run by hand.
 //
 // The engine is TypeScript with a `@` path alias, so we load it through a Vite
@@ -56,20 +56,48 @@ try {
   for (const [caseId, spec] of Object.entries(cases)) {
     let state = normalizeState(spec.initial_state ?? {})
     const commands = spec.solution_commands ?? []
+    const maxCountedCommands = Number(spec.max_counted_commands)
+    if (!Number.isInteger(maxCountedCommands) || maxCountedCommands < 1) {
+      console.error(`Invalid command budget for case '${caseId}': ${spec.max_counted_commands}`)
+      process.exitCode = 1
+      continue
+    }
 
     // Group file edits by the command index they apply *before* (after N commands
     // have run). `after_command_index: 1` => applied just before command index 1.
     const filesByIndex = new Map()
     for (const file of spec.workspace_files ?? []) {
       const index = Number(file.after_command_index ?? 0)
+      if (!Number.isInteger(index) || index < 0 || index > commands.length) {
+        console.error(
+          `Invalid workspace edit index for case '${caseId}': ${file.after_command_index}`,
+        )
+        process.exitCode = 1
+        continue
+      }
       if (!filesByIndex.has(index)) filesByIndex.set(index, [])
       filesByIndex.get(index).push(file)
     }
 
     try {
+      let countedCommands = 0
       for (let i = 0; i < commands.length; i += 1) {
         for (const file of filesByIndex.get(i) ?? []) state = applyFile(state, file)
-        state = executeGitCommand(state, commands[i]).next_state
+        const execution = executeGitCommand(state, commands[i])
+        if (!execution.processed) {
+          throw new Error(
+            `solution command ${i + 1}/${commands.length} was rejected: ${JSON.stringify(commands[i])}` +
+              ` (${execution.output || `exit ${execution.exit_code}`})`,
+          )
+        }
+        if (!execution.diagnostic) countedCommands += 1
+        if (countedCommands > maxCountedCommands) {
+          throw new Error(
+            `solution exceeds its ${maxCountedCommands}-command budget at command ` +
+              `${i + 1}/${commands.length}: ${JSON.stringify(commands[i])}`,
+          )
+        }
+        state = execution.next_state
       }
       for (const file of filesByIndex.get(commands.length) ?? []) state = applyFile(state, file)
     } catch (error) {

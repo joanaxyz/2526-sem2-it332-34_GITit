@@ -52,4 +52,13 @@ describe('AdventureProgressBar', () => {
     expect(progress).toHaveAttribute('aria-valuenow', '4')
     expect(progress.querySelector('[style*="100%"]')).not.toBeNull()
   })
+
+  it('aligns the fill exactly with dividers for three-wave adventures', () => {
+    render(<AdventureProgressBar run={run} variant="battle" currentWave={2} totalWaves={3} />)
+
+    const progress = screen.getByRole('progressbar', { name: 'Wave 2 of 3' })
+    const fill = progress.querySelector<HTMLElement>('.adventure-wave-progress__fill')
+    const firstDivider = progress.querySelector<HTMLElement>('.adventure-wave-progress__divider')
+    expect(fill?.style.width).toBe(firstDivider?.style.left)
+  })
 })

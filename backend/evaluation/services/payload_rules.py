@@ -1,3 +1,6 @@
+from common.collections import as_list
+
+
 class StatePayloadRuleMixin:
     def _token_rule_for_entries(
         self,
@@ -10,11 +13,11 @@ class StatePayloadRuleMixin:
         path_map = rule.get("paths")
         if isinstance(path_map, dict):
             for path, tokens in path_map.items():
-                missing = self._missing_tokens(entries.get(path), self._as_list(tokens))
+                missing = self._missing_tokens(entries.get(path), as_list(tokens))
                 if should_contain and missing:
                     return False, f"{label} entry {path!r} is missing tokens {missing}."
-                if not should_contain and len(missing) != len(self._as_list(tokens)):
-                    present = sorted(set(map(str, self._as_list(tokens))) - set(missing))
+                if not should_contain and len(missing) != len(as_list(tokens)):
+                    present = sorted(set(map(str, as_list(tokens))) - set(missing))
                     return False, f"{label} entry {path!r} still contains tokens {present}."
             return True, f"{label} token rule matched."
         return self._token_rule_for_payload(
@@ -32,7 +35,7 @@ class StatePayloadRuleMixin:
         should_contain: bool,
         label: str,
     ) -> tuple[bool, str]:
-        token_list = self._as_list(tokens)
+        token_list = as_list(tokens)
         missing = self._missing_tokens(payload, token_list)
         if should_contain:
             return (
@@ -53,7 +56,7 @@ class StatePayloadRuleMixin:
         self, entries: dict, path_map: dict, *, label: str
     ) -> tuple[bool, str]:
         for path, tokens in (path_map or {}).items():
-            missing = self._missing_tokens(entries.get(path), self._as_list(tokens))
+            missing = self._missing_tokens(entries.get(path), as_list(tokens))
             if missing:
                 return False, f"{label} for {path!r} is missing tokens {missing}."
         return True, f"{label} matched expected tokens."

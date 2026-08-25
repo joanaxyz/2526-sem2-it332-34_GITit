@@ -1,28 +1,31 @@
 from __future__ import annotations
 
-SUPPORTED_RULE_TYPES = frozenset({
-    'branch_moved_back_from_initial',
-    'branch_moved_to',
-    'cherry_pick_copied_changes_from',
-    'cherry_pick_created_new_commit',
-    'fetch_updated_remote_tracking_without_moving_local',
-    'new_revert_commit_exists',
-    'operation_metadata_absent',
-    'operation_metadata_contains',
-    'operation_metadata_equals',
-    'operation_metadata_not_equals',
-    'pull_moved_local_to_upstream',
-    'push_moved_remote_to_local_tip',
-    'reflog_contains',
-    'remote_exists',
-    'remote_tracking_updated',
-    'remote_url_matches',
-    'revert_preserves_history',
-    'stash_pop_restored_paths',
-    'stash_stack_contains_paths',
-    'stash_stack_empty',
-    'stash_top_contains',
-})
+SUPPORTED_RULE_TYPES = frozenset(
+    {
+        "branch_moved_back_from_initial",
+        "branch_moved_to",
+        "cherry_pick_copied_changes_from",
+        "cherry_pick_created_new_commit",
+        "fetch_updated_remote_tracking_without_moving_local",
+        "new_revert_commit_exists",
+        "operation_metadata_absent",
+        "operation_metadata_contains",
+        "operation_metadata_equals",
+        "operation_metadata_not_equals",
+        "pull_moved_local_to_upstream",
+        "push_moved_remote_to_local_tip",
+        "reflog_contains",
+        "remote_exists",
+        "remote_tracking_updated",
+        "remote_url_matches",
+        "revert_preserves_history",
+        "stash_pop_restored_paths",
+        "stash_stack_contains_paths",
+        "stash_stack_empty",
+        "stash_top_contains",
+    }
+)
+
 
 def check_remote_history_state_rule(
     self,
@@ -66,9 +69,7 @@ def check_remote_history_state_rule(
             local_unchanged = state.get("branches", {}).get(branch) == initial_state.get(
                 "branches", {}
             ).get(branch)
-        passed = (
-            bool(self._operation_value(state, "remote_tracking_updated")) and local_unchanged
-        )
+        passed = bool(self._operation_value(state, "remote_tracking_updated")) and local_unchanged
         return (
             passed,
             "Fetch updated remote tracking without moving the local branch."
@@ -92,9 +93,7 @@ def check_remote_history_state_rule(
         )
     if rule_type == "push_moved_remote_to_local_tip":
         branch = rule.get("branch") or self._head_branch(state)
-        remote_branch = rule.get("remote_branch") or state.get("upstream_tracking", {}).get(
-            branch
-        )
+        remote_branch = rule.get("remote_branch") or state.get("upstream_tracking", {}).get(branch)
         passed = bool(
             remote_branch
             and state.get("remote_branches", {}).get(remote_branch)
@@ -185,7 +184,7 @@ def check_remote_history_state_rule(
             else f"{target!r} is missing from history.",
         )
     if rule_type == "cherry_pick_created_new_commit":
-        source = self._commit_by_id(
+        source = self.normalizer.commit_by_id(
             state, self._resolve_expected(rule.get("source"), state, initial_state)
         )
         tip = self._latest_commit_for_rule(state, rule)
@@ -197,12 +196,10 @@ def check_remote_history_state_rule(
         )
         return (
             passed,
-            "Cherry-pick created a new commit."
-            if passed
-            else "Cherry-pick commit was not found.",
+            "Cherry-pick created a new commit." if passed else "Cherry-pick commit was not found.",
         )
     if rule_type == "cherry_pick_copied_changes_from":
-        source = self._commit_by_id(
+        source = self.normalizer.commit_by_id(
             state, self._resolve_expected(rule.get("source"), state, initial_state)
         )
         tip = self._latest_commit_for_rule(state, rule)

@@ -54,6 +54,12 @@ def _variant(
                 "staging_empty": True,
                 "branch_exists": [branch],
                 "min_commits_on_branch": {"main": 3},
+                "rules": [
+                    {
+                        "type": "required_command_sequence",
+                        "commands": ["git merge", "git log"],
+                    }
+                ],
             },
             required=["git status", "git switch -c", "git add", "git commit", "git merge", "git log"],
         ),
@@ -218,7 +224,15 @@ def _level(index: int, title: str, story: str, task: str) -> dict:
             },
             {
                 "label": "Integrate the branch into main and verify the DAG.",
-                "requirement": {"required_commands": ["git merge", "git log"]},
+                "requirement": {
+                    "required_commands": ["git merge", "git log"],
+                    "rules": [
+                        {
+                            "type": "required_command_sequence",
+                            "commands": ["git merge", "git log"],
+                        }
+                    ],
+                },
             },
         ],
         min_counted_commands=4,
@@ -226,14 +240,6 @@ def _level(index: int, title: str, story: str, task: str) -> dict:
         adventure="guild-archive-handoff-workflows",
         workflow=True,
         level_type="guided_workflow",
-        narrative_brief={
-            "arrival": "The Guild review team enters the signal chamber while late repairs are still arriving.",
-            "problem_discovery": "The correct change exists, but it is mixed with branch, base, and publication decisions.",
-            "repository_evidence": "The DAG shows a stable mainline, available start points, and a working repair not yet in history.",
-            "operational_goal": "Isolate, record, integrate, and verify the requested repair.",
-            "consequence_of_failure": "The Guild could receive an incomplete graph or an unrelated local draft.",
-            "successful_handoff": "Main contains the intended repair and the diagram explains how it arrived.",
-        },
     )
 
 

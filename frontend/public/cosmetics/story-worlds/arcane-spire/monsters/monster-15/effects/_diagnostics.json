@@ -9,50 +9,50 @@
       255
     ],
     "bbox": [
-      18,
-      74,
-      1235,
-      1264
+      48,
+      52,
+      1250,
+      1196
     ],
     "frameBBoxCenterRange": [
-      109.5,
-      140.0,
-      147.5,
-      185.0
+      128.5,
+      158.0,
+      112.5,
+      136.0
     ],
     "frameEnergyAnchorRange": [
-      104.64,
-      115.81,
-      145.58,
-      196.31
+      116.45,
+      135.08,
+      120.69,
+      133.57
     ],
     "frameRegistrationAnchorRange": [
-      104.64,
-      115.81,
-      145.58,
-      196.31
+      116.45,
+      135.08,
+      120.69,
+      133.57
     ],
     "registration": {
       "targetAnchor": [
-        103,
-        220.16
+        128.0,
+        128.0
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        52,
-        117,
-        138,
-        224
+        63.592,
+        118.508,
+        113.69,
+        158.939
       ],
       "appliedShiftRange": [
-        -14,
-        51,
-        -4,
-        82
+        10,
+        59,
+        -30,
+        11
       ],
       "emptyFrames": 0,
       "reliableFrames": 13,
       "lowConfidenceFrames": 12,
-      "method": "feet-planted base on ground line (fit scale 1.000), core-x centred"
+      "method": "body-centered: energy core registered to cell centre (bounds-clamped; authored scale preserved)"
     }
   }
 }

@@ -22,7 +22,6 @@ const adventureRun = {
   stars: 3,
   library_opened: false,
   is_passed: true,
-  adventure: { id: 1, slug: 'repo-basecamp', title: 'Repository Basecamp', description: '' },
   selected_level: { id: 1, slug: 'create-repository', title: 'Create a repository', is_required: true },
   next_level: { id: 2, slug: 'first-commit', title: 'First commit', is_required: true },
   chapter_id: 1,
@@ -130,7 +129,7 @@ const challengeRun = {
  * Dev-only outcome preview (/dev/outcomes). The router only imports this route
  * in DEV, so production builds do not expose it.
  */
-export function OutcomePreviewPage() {
+function OutcomePreviewPage() {
   const [searchParams] = useSearchParams()
   const [mode, setMode] = useState<PreviewMode>(() => previewMode(searchParams.get('mode')))
   const isAdventure = mode.startsWith('adventure')

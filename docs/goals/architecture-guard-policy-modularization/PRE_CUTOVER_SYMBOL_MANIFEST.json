@@ -1,0 +1,1095 @@
+{
+  "schema_version": 1,
+  "source_path": "scripts/checks/check_architecture_boundaries.py",
+  "source_sha256": "a603466344e4425dc36ce807262f088eefecaa46b2a7845a2e90d1317aca31af",
+  "symbol_count": 118,
+  "symbols": {
+    "AUTH_BACKEND_SERIALIZERS": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.auth",
+      "resolved_value": "backend/accounts/serializers.py",
+      "resolved_value_sha256": "dbacd089f8db66f8ff10b5eda94ec1b3e2879cfc192b6dbef8afdd1fbaf27641"
+    },
+    "AUTH_BACKEND_VIEWS": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.auth",
+      "resolved_value": "backend/accounts/views.py",
+      "resolved_value_sha256": "fe3bf36026909baeaa26e6549c472b6830276fec41934b1d037111ede0d5e0b8"
+    },
+    "AUTH_COMMON_OPENAPI": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.auth",
+      "resolved_value": "backend/common/openapi.py",
+      "resolved_value_sha256": "b39cefa7b213a5c36c56d988c653f916a36b13971419ff243f4a804be7460b1f"
+    },
+    "AUTH_FRONTEND_API": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.auth",
+      "resolved_value": "frontend/src/shared/auth/authApi.ts",
+      "resolved_value_sha256": "7b6e8b4d66283ae51672e5f9fd22dbd37a86acb2d353c6de26c9fe60c2b9976e"
+    },
+    "AUTH_FRONTEND_TYPES": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.auth",
+      "resolved_value": "frontend/src/shared/auth/types.ts",
+      "resolved_value_sha256": "4b20e53ddda5ba50924ddddedb8a2511cc64b3ab7d652b21d16fc61d552101f0"
+    },
+    "AUTH_GENERATED_OPENAPI": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.auth",
+      "resolved_value": "frontend/src/shared/api/generated/openapi.json",
+      "resolved_value_sha256": "850f65e148abbf10f24bcb4a65e93e1621389c32c8f261833db19bac9b871e83"
+    },
+    "AUTH_HTTP_CLIENT": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.auth",
+      "resolved_value": "frontend/src/shared/api/httpClient.ts",
+      "resolved_value_sha256": "b5f510a576105c490bf14432fd32a13d5ba3258589e40d2ae13edb4eac51d0f4"
+    },
+    "AUTH_OPERATION_IDS": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.auth",
+      "resolved_value": {
+        "items": [
+          "auth_register_create",
+          "auth_login_create",
+          "auth_logout_create",
+          "auth_refresh_create",
+          "auth_me_retrieve",
+          "auth_password_reset_request_create",
+          "auth_password_reset_confirm_create",
+          "auth_password_change_create",
+          "auth_sessions_revoke_others_create",
+          "auth_sessions_revoke_all_create"
+        ],
+        "type": "tuple"
+      },
+      "resolved_value_sha256": "d4b6c3d5d204aeb90f67014706cf039ea8b98d17dadbfe38ed064a8dc2d934f9"
+    },
+    "BACKEND": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.repository",
+      "resolved_value": {
+        "type": "Path",
+        "value": "backend"
+      },
+      "resolved_value_sha256": "f4d2666e9a568e3bf4e5e776eba913c96ff96e15bc53f834b6b96ea9f08448b4"
+    },
+    "CATALOG_BACKEND_SERIALIZERS": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.catalog",
+      "resolved_value": "backend/curriculum/serializers.py",
+      "resolved_value_sha256": "1c1bbc7f01d8cea8eb65c41825d456619840b2dae21aa9d455bb48e692cffefc"
+    },
+    "CATALOG_CHAPTER_FIELDS": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.catalog",
+      "resolved_value": {
+        "items": [
+          "adventure_level_count",
+          "challenge_count",
+          "chest_schedule",
+          "command_skill_count",
+          "description",
+          "id",
+          "is_playable",
+          "level_completion",
+          "lock_reason",
+          "locked",
+          "number",
+          "slug",
+          "sort_order",
+          "story",
+          "title"
+        ],
+        "type": "frozenset"
+      },
+      "resolved_value_sha256": "ee3c47d196f8149d804f4c7ea6cf4c5b94673198b6735ebe0cf70aa45d0c871f"
+    },
+    "CATALOG_FRONTEND_API": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.catalog",
+      "resolved_value": "frontend/src/features/story-map/api/storyMapApi.ts",
+      "resolved_value_sha256": "394c39b1c2124f1bfe1fd98603c17a5880ac4b4b47121f1713a3b2f2ea18ca51"
+    },
+    "CATALOG_FRONTEND_TYPES": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.catalog",
+      "resolved_value": "frontend/src/features/story-map/types.ts",
+      "resolved_value_sha256": "4b27512741a3e26e3c636b19e8384199358e2842793306b72cd254335c845810"
+    },
+    "CATALOG_GENERATED_OPENAPI": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.catalog",
+      "resolved_value": "frontend/src/shared/api/generated/openapi.json",
+      "resolved_value_sha256": "850f65e148abbf10f24bcb4a65e93e1621389c32c8f261833db19bac9b871e83"
+    },
+    "CATALOG_RESPONSE_FIELD_SETS": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.catalog",
+      "resolved_value": {
+        "items": [
+          {
+            "items": [
+              "adventure_level_count",
+              "challenge_count",
+              "chest_schedule",
+              "command_skill_count",
+              "description",
+              "id",
+              "is_playable",
+              "level_completion",
+              "lock_reason",
+              "locked",
+              "number",
+              "slug",
+              "sort_order",
+              "story",
+              "title"
+            ],
+            "type": "frozenset"
+          },
+          {
+            "items": [
+              "completed",
+              "difficulty",
+              "id",
+              "is_published",
+              "lock_reason",
+              "locked",
+              "owned",
+              "prerequisite_story",
+              "price",
+              "slug",
+              "sort_order",
+              "summary",
+              "title",
+              "world_slug"
+            ],
+            "type": "frozenset"
+          }
+        ],
+        "type": "set"
+      },
+      "resolved_value_sha256": "b950458942e8adf8b184cd440511f8ad92c36d4ec60417815b33f0a1a1b36495"
+    },
+    "CATALOG_STORY_FIELDS": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.catalog",
+      "resolved_value": {
+        "items": [
+          "completed",
+          "difficulty",
+          "id",
+          "is_published",
+          "lock_reason",
+          "locked",
+          "owned",
+          "prerequisite_story",
+          "price",
+          "slug",
+          "sort_order",
+          "summary",
+          "title",
+          "world_slug"
+        ],
+        "type": "frozenset"
+      },
+      "resolved_value_sha256": "fc583c3e106ec86d0af4fdcd8615ca364dfbded66937cce4ac55f126a53e2d6c"
+    },
+    "DASHBOARD_FRONTEND_API": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "resolved_value": "frontend/src/shared/progress/homeSummaryApi.ts",
+      "resolved_value_sha256": "f5bd4472879a47fd6b968e9a223a0eae17c44e7de87cb5fa59b234df8fe4a09d"
+    },
+    "DASHBOARD_FRONTEND_TYPES": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "resolved_value": "frontend/src/shared/progress/types.ts",
+      "resolved_value_sha256": "6f1e495a8397697b6c1cb5c2517a7c899e2fb872929b691eceaea53c90c0c1c8"
+    },
+    "DASHBOARD_GENERATED_OPENAPI": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "resolved_value": "frontend/src/shared/api/generated/openapi.json",
+      "resolved_value_sha256": "850f65e148abbf10f24bcb4a65e93e1621389c32c8f261833db19bac9b871e83"
+    },
+    "DASHBOARD_HOME_API_SHIM": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "resolved_value": "frontend/src/features/home/api/homeApi.ts",
+      "resolved_value_sha256": "bae4e08c2c49ceaf0d090a467962a1f588210732b897e199a5a68fb627d1a057"
+    },
+    "DASHBOARD_HOME_TYPES_SHIM": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "resolved_value": "frontend/src/features/home/types.ts",
+      "resolved_value_sha256": "2f3bf5201fb3121ff2461599aba1142c5b2bdeac2236ae35219b464f5eac061c"
+    },
+    "FRONTEND_SRC": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.repository",
+      "resolved_value": {
+        "type": "Path",
+        "value": "frontend/src"
+      },
+      "resolved_value_sha256": "970ff9b05c37d19ad950803ac84ca424940a2c25d57b8db161f6c8c3b909aa1a"
+    },
+    "GAMEPLAY_ADVENTURE_SERIALIZERS": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "backend/adventures/serializers.py",
+      "resolved_value_sha256": "cf27f10f575385d9dee25db49639a3740c8b29eb0553d97763a2aacc4518a13e"
+    },
+    "GAMEPLAY_BACKEND_VIEWS": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": {
+        "items": [
+          "backend/adventures/views.py",
+          "backend/challenges/views.py"
+        ],
+        "type": "tuple"
+      },
+      "resolved_value_sha256": "69b22317b3dd030473c3090b6b9d725e8ef1674eb3993bdd77a618909c48ef12"
+    },
+    "GAMEPLAY_CHALLENGE_SERIALIZERS": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "backend/challenges/serializers.py",
+      "resolved_value_sha256": "d9d0c414cee549e02d63dc6b95cd4c360cf81914043b8469c9626ffdeba54468"
+    },
+    "GAMEPLAY_COMMON_SERIALIZERS": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "backend/common/serializers.py",
+      "resolved_value_sha256": "32390e710c831afb349d68dd358d590899bb634380f0b482f9d8ca9c2b2cd2ae"
+    },
+    "GAMEPLAY_FRONTEND_APIS": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": {
+        "items": [
+          "frontend/src/features/adventures/api/adventuresApi.ts",
+          "frontend/src/features/challenges/api/challengeRunsApi.ts"
+        ],
+        "type": "tuple"
+      },
+      "resolved_value_sha256": "594289047fd77255c6f4c9217f7a55963b1938924a92b02ad6e342c151f87dde"
+    },
+    "GAMEPLAY_FRONTEND_CONTRACT_NAMES": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": {
+        "items": [
+          "CommandExecutionPayload",
+          "CreateFileInput",
+          "RenameFileInput",
+          "WorkspaceFileInput",
+          "WorkspaceFileRenameInput",
+          "WorkspaceFileRenameRequest",
+          "WorkspaceFileRequest"
+        ],
+        "type": "set"
+      },
+      "resolved_value_sha256": "092fce042595768d692a182178e856c7a2e5200fcef0d6e7022d042ed9188021"
+    },
+    "GAMEPLAY_GENERATED_OPENAPI": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "frontend/src/shared/api/generated/openapi.json",
+      "resolved_value_sha256": "850f65e148abbf10f24bcb4a65e93e1621389c32c8f261833db19bac9b871e83"
+    },
+    "GAMEPLAY_SHARED_BODY_ADAPTER": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "frontend/src/shared/level-runtime/runMutationInputs.ts",
+      "resolved_value_sha256": "40309f620c2439ff9316fcdf5fb8ed8be6e4a7f20cc07e6611fa8420d1ec9c32"
+    },
+    "GAMEPLAY_SHARED_COMMAND_TYPES": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "frontend/src/shared/level/types.ts",
+      "resolved_value_sha256": "10999c4e4a4f1100a565051322cf8fc7d840c72c56f309eb127fa09630e0a2e7"
+    },
+    "GAMEPLAY_SHARED_SERIALIZERS": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": {
+        "items": [
+          "CommandSubmitSerializer",
+          "WorkspaceFilePathSerializer",
+          "WorkspaceFileRenameSerializer",
+          "WorkspaceFileSerializer"
+        ],
+        "type": "set"
+      },
+      "resolved_value_sha256": "a0373243777149575a18011fbd17b7963d27d52718a4e54da6adea0b45f39eca"
+    },
+    "GAMEPLAY_SHARED_WORKSPACE_TYPES": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "frontend/src/shared/level/workspaceFileTypes.ts",
+      "resolved_value_sha256": "478f75e2e43ffb261a35fb247d51786dc71aa381dd44021776127c17b45175e7"
+    },
+    "GAMEPLAY_WORKSPACE_TYPE_NAMES": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": {
+        "items": [
+          "CreateFileInput",
+          "RenameFileInput",
+          "WorkspaceFileInput",
+          "WorkspaceFileRenameInput",
+          "WorkspaceFileRenameRequest",
+          "WorkspaceFileRequest"
+        ],
+        "type": "set"
+      },
+      "resolved_value_sha256": "64afecd34d0dd61f3e698c08f7982583322754ec6c1d9d62edf51dd2fd11924b"
+    },
+    "PY_SUFFIXES": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.repository",
+      "resolved_value": {
+        "items": [
+          ".py"
+        ],
+        "type": "set"
+      },
+      "resolved_value_sha256": "57b8f0865abb7b8066d332e5dd9ad0e59649f4012fdecc1be61c2f76f5df4d69"
+    },
+    "ROOT": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.repository",
+      "resolved_value": {
+        "type": "Path",
+        "value": "."
+      },
+      "resolved_value_sha256": "f868ee5263d6b2619267272b3dbc41207d4709ec6db76325935cfd0757d9b40e"
+    },
+    "STATS_COMMON_OPENAPI": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "resolved_value": "backend/common/openapi.py",
+      "resolved_value_sha256": "b39cefa7b213a5c36c56d988c653f916a36b13971419ff243f4a804be7460b1f"
+    },
+    "STATS_FRONTEND_API": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "resolved_value": "frontend/src/features/stats/api/statsApi.ts",
+      "resolved_value_sha256": "720ad6ae6213999636cd86ae7d90cd20e2156acada5eb266142eb17ad5b2bffa"
+    },
+    "STATS_FRONTEND_TYPES": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "resolved_value": "frontend/src/features/stats/types.ts",
+      "resolved_value_sha256": "df78cd7e23bd5e754ef29eb7d8aac1b694cc6fe1c8655e159bcc0d27a4599785"
+    },
+    "STATS_GENERATED_OPENAPI": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "resolved_value": "frontend/src/shared/api/generated/openapi.json",
+      "resolved_value_sha256": "850f65e148abbf10f24bcb4a65e93e1621389c32c8f261833db19bac9b871e83"
+    },
+    "STATS_PROGRESS_SERIALIZERS": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "resolved_value": "backend/progress/serializers.py",
+      "resolved_value_sha256": "3880ba39dab46e0d9a92bb91ceb2112296e0785dd1ef08bf2504623a87e04850"
+    },
+    "TS_IMPORT_EXPORT_FROM": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "resolved_value": {
+        "flags": 48,
+        "pattern": "\\b(?:import|export)\\b(?:\\s|/\\*(?:(?!\\*/)[\\s\\S])*\\*/|//[^\\r\\n]*(?:\\r?\\n|$))*(?P<clause>[^'\\\"`;]*?)(?:\\s|/\\*(?:(?!\\*/)[\\s\\S])*\\*/|//[^\\r\\n]*(?:\\r?\\n|$))*from\\b(?:\\s|/\\*(?:(?!\\*/)[\\s\\S])*\\*/|//[^\\r\\n]*(?:\\r?\\n|$))*(?P<quote>['\\\"])(?P<module>[^'\\\"]+)(?P=quote)",
+        "type": "Pattern"
+      },
+      "resolved_value_sha256": "4fb7b6cbbe30e451e624f20cd6292777968049fdf0d5378bff4eac0838310eed"
+    },
+    "TS_MODULE_SPECIFIER": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "resolved_value": {
+        "flags": 32,
+        "pattern": "(?:\\bfrom\\b|\\bimport\\s*\\(|\\bimport\\b|\\brequire\\s*\\()(?:\\s|/\\*(?:(?!\\*/)[\\s\\S])*\\*/|//[^\\r\\n]*(?:\\r?\\n|$))*(?:(?P<quote>['\\\"])(?P<quoted>[^'\\\"]+)(?P=quote)|`(?P<template>[^`$]+)`)",
+        "type": "Pattern"
+      },
+      "resolved_value_sha256": "f0df2d1dace2766b7c9aec70d7851416378d53384749d69dc464ba4c5208b76d"
+    },
+    "TS_QUERY_CONSUMER_CALL": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "resolved_value": "\\s*(?:[A-Za-z_$][\\w$]*\\s*\\.\\s*)?(?:useQuery|useInfiniteQuery|useSuspenseQuery|useSuspenseInfiniteQuery|queryOptions|infiniteQueryOptions)\\s*\\(",
+      "resolved_value_sha256": "73e83ecf08b5ffc72f0e9cd0bc76b8d121a93076b90455fbf80da2885198105e"
+    },
+    "TS_SUFFIXES": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.repository",
+      "resolved_value": {
+        "items": [
+          ".ts",
+          ".tsx"
+        ],
+        "type": "set"
+      },
+      "resolved_value_sha256": "1777883859fb525b61b0f664988ad054e10ba298fcb078d83f89f1171b3b0e83"
+    },
+    "TS_TRIVIA": {
+      "kind": "constant",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "resolved_value": "(?:\\s|/\\*(?:(?!\\*/)[\\s\\S])*\\*/|//[^\\r\\n]*(?:\\r?\\n|$))*",
+      "resolved_value_sha256": "a4686c7e89d6449792446fde2c37fd92fcd0b94ab30418bdda080c1d63313208"
+    },
+    "auth_contract_source_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "d273de9cc3a1d5786c562225d3b2d7c4c9edf4824bcc136df49e1ef01437098f",
+      "owner": "scripts.checks.architecture_guard.contracts.auth",
+      "pre_cutover_lines": [
+        3223,
+        3409
+      ]
+    },
+    "auth_openapi_contract_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "3f83b67fb5fac1d007dac5421344db909d5549b4541692e0551aa6824ede6fbf",
+      "owner": "scripts.checks.architecture_guard.contracts.auth",
+      "pre_cutover_lines": [
+        3867,
+        3959
+      ]
+    },
+    "auth_secondary_backend_contract_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "d0ce429686c4bddbd89d758c079f62fc3aa4532354d1a6fa66863d5c508d55f6",
+      "owner": "scripts.checks.architecture_guard.contracts.auth",
+      "pre_cutover_lines": [
+        3598,
+        3612
+      ]
+    },
+    "auth_secondary_frontend_contract_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "1287df92fc3f72b7c6cbfd9c9a8c0910bef39a7fd128790e6f6e78d9037a21d8",
+      "owner": "scripts.checks.architecture_guard.contracts.auth",
+      "pre_cutover_lines": [
+        3683,
+        3864
+      ]
+    },
+    "canonical_python_call": {
+      "kind": "function",
+      "normalized_ast_sha256": "241341fc45f3564c502b888be3d74cd14185607a9471f65eb82ef2cff9ed73fd",
+      "owner": "scripts.checks.architecture_guard.python_analysis",
+      "pre_cutover_lines": [
+        1661,
+        1677
+      ]
+    },
+    "canonical_ts_module_reference": {
+      "kind": "function",
+      "normalized_ast_sha256": "527c0dcc63e9af5305d159b4913a125fc59843503f82fd7205d4bc682b6f16aa",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        570,
+        586
+      ]
+    },
+    "catalog_contract_source_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "8a8a456f907542f050e2fc030d5289facfb66da68701c185fdbcc82b1ab3caea",
+      "owner": "scripts.checks.architecture_guard.contracts.catalog",
+      "pre_cutover_lines": [
+        2801,
+        3000
+      ]
+    },
+    "catalog_openapi_contract_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "a96b0657884f8da5cf337647d7dc42a09f02d23d1d23e9a3b58f26378d4bc2a6",
+      "owner": "scripts.checks.architecture_guard.contracts.catalog",
+      "pre_cutover_lines": [
+        3003,
+        3122
+      ]
+    },
+    "catalog_secondary_backend_contract_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "44c0dea37a8d8c297a748576bf997ba373e3c87aa8baff6c74a146e9d7767fd7",
+      "owner": "scripts.checks.architecture_guard.contracts.catalog",
+      "pre_cutover_lines": [
+        2126,
+        2137
+      ]
+    },
+    "catalog_secondary_frontend_contract_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "2c5b15f28a9ef49ec3791956943e8c962eba022eae53e25ea713b6388b6738c5",
+      "owner": "scripts.checks.architecture_guard.contracts.catalog",
+      "pre_cutover_lines": [
+        2668,
+        2798
+      ]
+    },
+    "check_auth_contract_ownership": {
+      "kind": "function",
+      "normalized_ast_sha256": "8395edd25feec3dff7be5f082a51ffd7aac80448a3deda2b7bb669e251740a0d",
+      "owner": "scripts.checks.architecture_guard.contracts.auth",
+      "pre_cutover_lines": [
+        3962,
+        4016
+      ]
+    },
+    "check_catalog_contract_ownership": {
+      "kind": "function",
+      "normalized_ast_sha256": "0a6a35ac6df60835da59e8a330d0f0dcb74a07487979d11550b7070f46c79523",
+      "owner": "scripts.checks.architecture_guard.contracts.catalog",
+      "pre_cutover_lines": [
+        3125,
+        3176
+      ]
+    },
+    "check_dashboard_summary_contract_ownership": {
+      "kind": "function",
+      "normalized_ast_sha256": "5aa75217db1acf4c45748c978e5a5756e6620715a6ecdfbb3c82f615b8ef5a2a",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "pre_cutover_lines": [
+        4620,
+        4708
+      ]
+    },
+    "check_gameplay_mutation_contract_ownership": {
+      "kind": "function",
+      "normalized_ast_sha256": "c7c126f627f627927c4d2371b0858aa0e38c1e518d271012a8a042e62fb40ded",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "pre_cutover_lines": [
+        5111,
+        5137
+      ]
+    },
+    "check_stats_summary_contract_ownership": {
+      "kind": "function",
+      "normalized_ast_sha256": "8911cb1e77257d83330b96c9967683ec6884e69b5a3af28d003e9dc387978489",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "pre_cutover_lines": [
+        4711,
+        4755
+      ]
+    },
+    "dashboard_contract_source_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "8eca78d852d00f3fcd6b824cf5e0aaf0d5f382509c15bfc55c1e3426af701d73",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "pre_cutover_lines": [
+        4358,
+        4465
+      ]
+    },
+    "dashboard_openapi_contract_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "fb5266357d0dfc98d9c4f0429323cebfcd02f365f987b81c01542c785dec618a",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "pre_cutover_lines": [
+        4527,
+        4617
+      ]
+    },
+    "dashboard_secondary_frontend_contract_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "8a013ddeb0dc4b79d735997c10880654af3e5f76f406d5550a479ab332d71372",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "pre_cutover_lines": [
+        4468,
+        4524
+      ]
+    },
+    "destructured_function_props": {
+      "kind": "function",
+      "normalized_ast_sha256": "83fa7b9fc0525f6b8c4543ad667a1d074049d62006f6ce245711a19dfbbe5636",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        626,
+        640
+      ]
+    },
+    "gameplay_mutation_backend_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "fdfdfa132185a9f67ead14e653cad9cc4858a84c7509a9bbbba95f36ae27a77d",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "pre_cutover_lines": [
+        4982,
+        5108
+      ]
+    },
+    "gameplay_mutation_frontend_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "4fef2eae5246a3b6f4f149b6aabb29e1db04606171ee73f1dd564205f02f8cb1",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "pre_cutover_lines": [
+        4758,
+        4886
+      ]
+    },
+    "gameplay_mutation_openapi_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "a1e3dd26cad20bea15174d5e7119e0d08b9d1d9dba9c63ec7517b2f377b1d819",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "pre_cutover_lines": [
+        4889,
+        4979
+      ]
+    },
+    "is_auth_response_contract_symbol": {
+      "kind": "function",
+      "normalized_ast_sha256": "261b3fb6295b8b463aef4d9e1fe0efb08b4bc8dcd171bd7d428925e10e2fa288",
+      "owner": "scripts.checks.architecture_guard.contracts.auth",
+      "pre_cutover_lines": [
+        3412,
+        3422
+      ]
+    },
+    "is_catalog_contract_symbol": {
+      "kind": "function",
+      "normalized_ast_sha256": "4e177479dfa04c8ad7644b98d219716afe581f73fe7b7113c354a2cbdf237702",
+      "owner": "scripts.checks.architecture_guard.contracts.catalog",
+      "pre_cutover_lines": [
+        1897,
+        1922
+      ]
+    },
+    "is_catalog_frontend_contract_symbol": {
+      "kind": "function",
+      "normalized_ast_sha256": "25606c46a03ae6b33e0002d190910d4d46eba74cd91971c3afef41b21d570098",
+      "owner": "scripts.checks.architecture_guard.contracts.catalog",
+      "pre_cutover_lines": [
+        1925,
+        1928
+      ]
+    },
+    "is_catalog_root_type_expression": {
+      "kind": "function",
+      "normalized_ast_sha256": "28941f623a1599bf88b0abd2bc56b55dea9db92ab88f7fe321a722bad5768d1a",
+      "owner": "scripts.checks.architecture_guard.contracts.catalog",
+      "pre_cutover_lines": [
+        1999,
+        2016
+      ]
+    },
+    "is_stats_contract_symbol": {
+      "kind": "function",
+      "normalized_ast_sha256": "2303847df0dd070846243157859e7979c0b6c9677bfffc05584a78aeeb33de38",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "pre_cutover_lines": [
+        1649,
+        1658
+      ]
+    },
+    "iter_files": {
+      "kind": "function",
+      "normalized_ast_sha256": "63a1ac0bd82de4a957a19d4490c9d6128e4be942a53e8f87ceb5bc1a5999096b",
+      "owner": "scripts.checks.architecture_guard.repository",
+      "pre_cutover_lines": [
+        263,
+        275
+      ]
+    },
+    "jsx_component_props": {
+      "kind": "function",
+      "normalized_ast_sha256": "3fdf5e0a2687f9b0898ce6ab1bd21571c68686f1610b9d713dda5646ae44687d",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        643,
+        651
+      ]
+    },
+    "normalized_ts_module_reference": {
+      "kind": "function",
+      "normalized_ast_sha256": "71631985f9ae2265ee3cdeacc704b6110c07e73cd963671e96e91457f13773a3",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        2140,
+        2149
+      ]
+    },
+    "normalized_ts_type": {
+      "kind": "function",
+      "normalized_ast_sha256": "7b8bf79fc3e6d8f2feb9296e2d48b65f05cbd7dd54578f1348fe4bd196df2fb4",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        1891,
+        1894
+      ]
+    },
+    "progress_summary_backend_contract_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "fb0b040532b3e291b63e7d27e389fb02382f4d93598c024df8d62b3115875341",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "pre_cutover_lines": [
+        4041,
+        4182
+      ]
+    },
+    "progress_summary_secondary_backend_contract_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "39d630b9bba3ce4700c2d9a7256cf5fe6fcbca0edc87e79af5e6caa36f42f5d8",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "pre_cutover_lines": [
+        4019,
+        4038
+      ]
+    },
+    "python_auth_response_contract_symbols": {
+      "kind": "function",
+      "normalized_ast_sha256": "38f0c7d005639ad6d5a17952a12ee861341bc347c8bd84c2c3071454f26afdf8",
+      "owner": "scripts.checks.architecture_guard.contracts.auth",
+      "pre_cutover_lines": [
+        3425,
+        3595
+      ]
+    },
+    "python_catalog_contract_symbols": {
+      "kind": "function",
+      "normalized_ast_sha256": "0644d09fb6cd5143aa46c3566fe4726189a884cb9897f91ecf8f547e1a190e19",
+      "owner": "scripts.checks.architecture_guard.contracts.catalog",
+      "pre_cutover_lines": [
+        2019,
+        2123
+      ]
+    },
+    "python_class_field_calls": {
+      "kind": "function",
+      "normalized_ast_sha256": "a2b6110042cdc9dc185ebf9e07c8f482159b2fe60e4fe899dae83d6056e92424",
+      "owner": "scripts.checks.architecture_guard.python_analysis",
+      "pre_cutover_lines": [
+        1680,
+        1701
+      ]
+    },
+    "python_class_fields": {
+      "kind": "function",
+      "normalized_ast_sha256": "fcc53bd8d252c4b16516abc0054fd014c366b8b37993d879687ab75e8c1cd28e",
+      "owner": "scripts.checks.architecture_guard.python_analysis",
+      "pre_cutover_lines": [
+        1601,
+        1620
+      ]
+    },
+    "python_class_method_called_names": {
+      "kind": "function",
+      "normalized_ast_sha256": "b407c0f70f3bb822af61be9b0dafa65c84ee05abc1397fba14a07eef18c9e48c",
+      "owner": "scripts.checks.architecture_guard.python_analysis",
+      "pre_cutover_lines": [
+        1727,
+        1751
+      ]
+    },
+    "python_class_method_decorator_calls": {
+      "kind": "function",
+      "normalized_ast_sha256": "4c6353a4cdf9728bdc8ca0bf63aed3c59c5984a2939213c497dbb6a46fe6e417",
+      "owner": "scripts.checks.architecture_guard.python_analysis",
+      "pre_cutover_lines": [
+        1704,
+        1724
+      ]
+    },
+    "python_extend_schema_success_responses": {
+      "kind": "function",
+      "normalized_ast_sha256": "8a1904368ae0217089c914e9a59f8ac3a26c5050a879150f4fff5018bd3c759e",
+      "owner": "scripts.checks.architecture_guard.python_analysis",
+      "pre_cutover_lines": [
+        3179,
+        3220
+      ]
+    },
+    "python_top_level_assignment_names": {
+      "kind": "function",
+      "normalized_ast_sha256": "2545f7bd0164168d514c842b48bee0a6886d0dc239521baa147bb5e49e337504",
+      "owner": "scripts.checks.architecture_guard.python_analysis",
+      "pre_cutover_lines": [
+        1633,
+        1646
+      ]
+    },
+    "python_top_level_class_names": {
+      "kind": "function",
+      "normalized_ast_sha256": "e26810ef47c9f4b0fdc3424afe775afda6c645a365ebf0c9bdeed6a43a90cb48",
+      "owner": "scripts.checks.architecture_guard.python_analysis",
+      "pre_cutover_lines": [
+        1623,
+        1630
+      ]
+    },
+    "rel": {
+      "kind": "function",
+      "normalized_ast_sha256": "5da0c345ce5de6b187b945c592e947bc17427decc4ab77d0e85ad5c0a951e5dc",
+      "owner": "scripts.checks.architecture_guard.repository",
+      "pre_cutover_lines": [
+        259,
+        260
+      ]
+    },
+    "resolve_ts_static_string_expression": {
+      "kind": "function",
+      "normalized_ast_sha256": "c6c012652cabf5f917c5b46b24d77e17e212c5f03239d0678fbd22bb265d7e99",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        3615,
+        3657
+      ]
+    },
+    "stats_contract_source_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "3fdd0ce099440706ba2443073029fa2324b307caea8a5a880964380bd4451967",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "pre_cutover_lines": [
+        4185,
+        4265
+      ]
+    },
+    "stats_openapi_contract_violations": {
+      "kind": "function",
+      "normalized_ast_sha256": "d70f6eb625fbf89ca935aa717a7d1fd34c9faa3ada008777ecb7b44f9bfdcb3b",
+      "owner": "scripts.checks.architecture_guard.contracts.progress",
+      "pre_cutover_lines": [
+        4268,
+        4355
+      ]
+    },
+    "strip_outer_ts_parentheses": {
+      "kind": "function",
+      "normalized_ast_sha256": "2c5446e6abf985fa879cba2cbffbb20aaea0537d890a401e46fb8848b86b6d63",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        1978,
+        1996
+      ]
+    },
+    "strip_ts_comments": {
+      "kind": "function",
+      "normalized_ast_sha256": "d8d166ca7502f9811f210faf345ad293f1699850171f16faf3da067ea5d99ccc",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        1754,
+        1757
+      ]
+    },
+    "ts_balanced_brace_body": {
+      "kind": "function",
+      "normalized_ast_sha256": "8414f27ee45dca5c85f01eee070b2500822c2dfba211fed31bcc32576882a308",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        1760,
+        1786
+      ]
+    },
+    "ts_clause_is_type_only": {
+      "kind": "function",
+      "normalized_ast_sha256": "12dd182eac72a666a37b2ba7c8f34718273651a46e1e90f6b26273aafb9ffc4f",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        595,
+        608
+      ]
+    },
+    "ts_exported_adapter_uses_access": {
+      "kind": "function",
+      "normalized_ast_sha256": "d8ff9c3baa2967f8bc71384b26ba4fa614ce192febfb59cfd0a960003060f3a2",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        2380,
+        2490
+      ]
+    },
+    "ts_exported_top_level_adapter_uses_access": {
+      "kind": "function",
+      "normalized_ast_sha256": "25ed0d105fe34aa78e9b8dee790dbacca57fa4d4ae7c545c312294e20c597132",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        2556,
+        2665
+      ]
+    },
+    "ts_exported_type_aliases": {
+      "kind": "function",
+      "normalized_ast_sha256": "d4a06d308b7ffe5b13fc56e45779bd34fa469cb30e36f87f81d6b188cc801aa2",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        1866,
+        1875
+      ]
+    },
+    "ts_exports_tainted_binding": {
+      "kind": "function",
+      "normalized_ast_sha256": "c38edbdcb1c3ace9a3e1167fa34b462071fee1aa3bf8f38eae784834fd04a3b4",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        2353,
+        2377
+      ]
+    },
+    "ts_interface_declarations": {
+      "kind": "function",
+      "normalized_ast_sha256": "4d5ca2329e4b88e8b5013922f4abc4e713f89cb6ceeac80f7eceb0f35a206158",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        1931,
+        1946
+      ]
+    },
+    "ts_member_access_aliases": {
+      "kind": "function",
+      "normalized_ast_sha256": "b4752f2cf92590064ff282e1f21d458d8f99b1eb38b8dcebde9d9c600648eed7",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        2263,
+        2350
+      ]
+    },
+    "ts_module_matches": {
+      "kind": "function",
+      "normalized_ast_sha256": "aadf987dd1fe7e99ac7193814632729e1167b1b961215d2050688339a7bc5d9e",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        2152,
+        2162
+      ]
+    },
+    "ts_module_matches_boundary": {
+      "kind": "function",
+      "normalized_ast_sha256": "f2ed6c0dc8aaaf95d2bc311fb445e2ce8750e313f2dc0dcc3be1a461c8e345ef",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        589,
+        592
+      ]
+    },
+    "ts_module_specifiers": {
+      "kind": "function",
+      "normalized_ast_sha256": "af51ef19aff457ed3c27d86d84828916537e074109faf049011589466fae0dcd",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        561,
+        567
+      ]
+    },
+    "ts_named_import_bindings": {
+      "kind": "function",
+      "normalized_ast_sha256": "1ea0a8d008ea5560c5f8d421bfffff0453e679ae405835a8ae1fc39b4f5acdc1",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        2165,
+        2189
+      ]
+    },
+    "ts_namespace_import_bindings": {
+      "kind": "function",
+      "normalized_ast_sha256": "9c5d8ec6d87878d58533c8b97237b6a9d9f36c1cf559578e25a79488c5894f3d",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        2192,
+        2214
+      ]
+    },
+    "ts_object_method_body": {
+      "kind": "function",
+      "normalized_ast_sha256": "498e78835c13c7fc41e486fbec4bdc05f212565ce3269a9c3b1c5112c986cd9b",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        1789,
+        1798
+      ]
+    },
+    "ts_object_type_alias_bodies": {
+      "kind": "function",
+      "normalized_ast_sha256": "3c307ad8b566ae0baa811da208d11677cf65c28a145d62cf798e544d599abe64",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        1949,
+        1960
+      ]
+    },
+    "ts_object_type_field_names": {
+      "kind": "function",
+      "normalized_ast_sha256": "8f3f6a5b77b5b9710cb63944ba974427c268cfe4dbb285caa40acbe0e40ee5d3",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        1963,
+        1975
+      ]
+    },
+    "ts_recursive_statements": {
+      "kind": "function",
+      "normalized_ast_sha256": "85318ac307fe94e87f2d3a88ff3677f20b5bed76d0582c6a4c432ae0b9656b5b",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        1850,
+        1863
+      ]
+    },
+    "ts_reexports_all_from_module": {
+      "kind": "function",
+      "normalized_ast_sha256": "0713563f42cc23530e495699d28f99634184fccd8c7818244fc2d884ec7c1ef6",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        2217,
+        2234
+      ]
+    },
+    "ts_reexports_named_binding": {
+      "kind": "function",
+      "normalized_ast_sha256": "1b5a8c46e694fe898542ba57ba382de02a1d3d690130cd5d5d01cd4520c6b1c1",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        2237,
+        2260
+      ]
+    },
+    "ts_response_forwarding_bindings": {
+      "kind": "function",
+      "normalized_ast_sha256": "3528581a6a5f72b9627949a4fc4ffd53fffc4e61bd2ccbbef8256fb669f48669",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        2493,
+        2553
+      ]
+    },
+    "ts_static_string_bindings": {
+      "kind": "function",
+      "normalized_ast_sha256": "fa8456a7a70708efa93e041ff112a71f25b2e108288f5c2a8187a75992fcf704",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        3660,
+        3680
+      ]
+    },
+    "ts_top_level_statements": {
+      "kind": "function",
+      "normalized_ast_sha256": "ce560093be90a18c2c5bd133165dca6ad20427967f1cf8c6a48c54d55bcd1aee",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        1801,
+        1847
+      ]
+    },
+    "ts_type_aliases": {
+      "kind": "function",
+      "normalized_ast_sha256": "46a9c01321832b78f7e961836b5689690b26c6185528c542a15dec3c66ce452c",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        1878,
+        1888
+      ]
+    },
+    "ts_value_module_references": {
+      "kind": "function",
+      "normalized_ast_sha256": "3699f528ac95177068b5fae45e75ab13fc8412ce8efe911158f5da554e3dcf29",
+      "owner": "scripts.checks.architecture_guard.typescript_analysis",
+      "pre_cutover_lines": [
+        611,
+        623
+      ]
+    }
+  }
+}

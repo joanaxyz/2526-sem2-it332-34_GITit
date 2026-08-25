@@ -7,10 +7,9 @@ away from thin compatibility modules.
 from __future__ import annotations
 
 from curriculum.seed_data.source.adventure_levels import (
-    ADVENTURE_LEVEL_PLAN,
     ADVENTURE_LEVELS,
     SPEC_BY_SLUG,
     adventure_levels_for,
 )
 
-__all__ = ["ADVENTURE_LEVELS", "ADVENTURE_LEVEL_PLAN", "SPEC_BY_SLUG", "adventure_levels_for"]
+__all__ = ["ADVENTURE_LEVELS", "SPEC_BY_SLUG", "adventure_levels_for"]

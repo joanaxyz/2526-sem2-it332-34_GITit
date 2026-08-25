@@ -11,6 +11,14 @@ from authoring.selectors import (
     content_payload,
     visible_content_definitions,
 )
+from authoring.serializers import (
+    ContentDefinitionCreateRequestSerializer,
+    ContentDefinitionListResponseSerializer,
+    ContentDefinitionSerializer,
+    ContentDefinitionUpdateRequestSerializer,
+    ContentTestRunResultSerializer,
+    ContentValidationResultSerializer,
+)
 from authoring.services import AuthoringChapterService, ContentDefinitionService
 from shop.access import can_remix
 
@@ -39,7 +47,9 @@ class AuthoringChapterDetailAPIView(APIView):
     @extend_schema(request=OpenApiTypes.OBJECT, responses={200: OpenApiTypes.OBJECT})
     def patch(self, request, chapter_id: int):
         chapter = get_object_or_404(AuthoringChapter, id=chapter_id)
-        chapter = AuthoringChapterService().update(user=request.user, chapter=chapter, data=request.data)
+        chapter = AuthoringChapterService().update(
+            user=request.user, chapter=chapter, data=request.data
+        )
         return Response(chapter_payload(chapter))
 
     @extend_schema(request=None, responses={204: None})
@@ -50,42 +60,66 @@ class AuthoringChapterDetailAPIView(APIView):
 
 
 class ContentDefinitionListCreateAPIView(APIView):
-    @extend_schema(responses={200: OpenApiTypes.OBJECT})
+    @extend_schema(responses={200: ContentDefinitionListResponseSerializer})
     def get(self, request):
         kind = request.query_params.get("kind")
         queryset = visible_content_definitions(user=request.user).order_by("-updated_at", "-id")
         if kind:
             queryset = queryset.filter(kind=kind)
-        return Response({"results": [content_payload(row, include_definition=False) for row in queryset]})
+        return Response(
+            {"results": [content_payload(row, include_definition=False) for row in queryset]}
+        )
 
-    @extend_schema(request=OpenApiTypes.OBJECT, responses={200: OpenApiTypes.OBJECT})
+    @extend_schema(
+        request=ContentDefinitionCreateRequestSerializer,
+        responses={201: ContentDefinitionSerializer},
+    )
     def post(self, request):
-        content = ContentDefinitionService().create(user=request.user, data=request.data)
+        serializer = ContentDefinitionCreateRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        content = ContentDefinitionService().create(
+            user=request.user,
+            data=serializer.validated_data,
+        )
         return Response(content_payload(content), status=201)
 
 
 class ContentDefinitionDetailAPIView(APIView):
-    @extend_schema(responses={200: OpenApiTypes.OBJECT})
+    @extend_schema(responses={200: ContentDefinitionSerializer})
     def get(self, request, definition_id: int):
-        content = get_object_or_404(visible_content_definitions(user=request.user), id=definition_id)
+        content = get_object_or_404(
+            visible_content_definitions(user=request.user), id=definition_id
+        )
         return Response(content_payload(content))
 
-    @extend_schema(request=OpenApiTypes.OBJECT, responses={200: OpenApiTypes.OBJECT})
+    @extend_schema(
+        request=ContentDefinitionUpdateRequestSerializer,
+        responses={200: ContentDefinitionSerializer},
+    )
     def patch(self, request, definition_id: int):
         content = ContentDefinition.objects.get(id=definition_id)
-        content = ContentDefinitionService().update(user=request.user, content=content, data=request.data)
+        serializer = ContentDefinitionUpdateRequestSerializer(
+            data=request.data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        content = ContentDefinitionService().update(
+            user=request.user,
+            content=content,
+            data=serializer.validated_data,
+        )
         return Response(content_payload(content))
 
 
 class ContentDefinitionValidateAPIView(APIView):
-    @extend_schema(request=OpenApiTypes.OBJECT, responses={200: OpenApiTypes.OBJECT})
+    @extend_schema(request=None, responses={200: ContentValidationResultSerializer})
     def post(self, request, definition_id: int):
         content = ContentDefinition.objects.get(id=definition_id)
         return Response(ContentDefinitionService().validate(user=request.user, content=content))
 
 
 class ContentDefinitionPublishAPIView(APIView):
-    @extend_schema(request=OpenApiTypes.OBJECT, responses={200: OpenApiTypes.OBJECT})
+    @extend_schema(request=None, responses={200: ContentDefinitionSerializer})
     def post(self, request, definition_id: int):
         content = ContentDefinition.objects.get(id=definition_id)
         content = ContentDefinitionService().publish(user=request.user, content=content)
@@ -93,14 +127,14 @@ class ContentDefinitionPublishAPIView(APIView):
 
 
 class ContentDefinitionTestRunAPIView(APIView):
-    @extend_schema(request=OpenApiTypes.OBJECT, responses={200: OpenApiTypes.OBJECT})
+    @extend_schema(request=None, responses={200: ContentTestRunResultSerializer})
     def post(self, request, definition_id: int):
         content = ContentDefinition.objects.get(id=definition_id)
         return Response(ContentDefinitionService().test_run(user=request.user, content=content))
 
 
 class ContentDefinitionRemixAPIView(APIView):
-    @extend_schema(request=OpenApiTypes.OBJECT, responses={200: OpenApiTypes.OBJECT})
+    @extend_schema(request=None, responses={201: ContentDefinitionSerializer})
     def post(self, request, definition_id: int):
         content = visible_content_definitions(user=request.user).get(id=definition_id)
         if not can_remix(request.user, content):

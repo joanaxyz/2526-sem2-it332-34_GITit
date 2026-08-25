@@ -1,39 +1,16 @@
-import {
-  BarChart3,
-  BookText,
-  Boxes,
-  Coins,
-  LayoutDashboard,
-  Layers,
-  Settings,
-  ShieldAlert,
-  Store,
-  Users,
-  ArrowLeft,
-} from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { NavLink, Navigate, Outlet } from 'react-router-dom'
 
+import { ADMIN_SECTIONS } from '@/features/admin/utils/adminSections'
 import { useAuthStore } from '@/shared/auth/useAuth'
+import { HOME_ROUTE } from '@/shared/navigation/routes'
 import { cn } from '@/shared/utils/cn'
-
-const sections = [
-  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/admin/users', label: 'Users', icon: Users },
-  { to: '/admin/economy', label: 'Economy', icon: Coins },
-  { to: '/admin/assets', label: 'Assets', icon: Boxes },
-  { to: '/admin/shop', label: 'Shop', icon: Store },
-  { to: '/admin/curriculum', label: 'Curriculum', icon: Layers },
-  { to: '/admin/content', label: 'Content', icon: BookText },
-  { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
-  { to: '/admin/moderation', label: 'Moderation', icon: ShieldAlert },
-  { to: '/admin/settings', label: 'Settings', icon: Settings },
-]
 
 /** Staff-only console shell. Non-staff are redirected back to the app. */
 export function AdminLayout() {
   const user = useAuthStore((state) => state.user)
   if (!user) return <Navigate replace to="/login" />
-  if (!user.is_staff) return <Navigate replace to="/home" />
+  if (!user.is_staff) return <Navigate replace to={HOME_ROUTE} />
 
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ overflowX: 'clip' }}>
@@ -43,17 +20,17 @@ export function AdminLayout() {
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Admin</p>
             <p className="text-lg font-black text-primary">Observatory Console</p>
           </div>
-          {sections.map(({ to, label, icon: Icon, end }) => (
+          {ADMIN_SECTIONS.map(({ path, label, icon: Icon, end }) => (
             <NavLink
-              key={to}
-              to={to}
+              key={path}
+              to={path}
               end={end}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 rounded-md border-l-2 border-l-transparent px-3 py-2 text-sm font-medium transition',
+                  'flex items-center gap-3 rounded-md border border-transparent px-3 py-2 text-sm font-medium transition',
                   isActive
-                    ? 'border-l-primary bg-secondary/70 text-primary'
-                    : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground',
+                    ? 'border-primary/40 bg-secondary/70 text-primary'
+                    : 'text-muted-foreground hover:border-border hover:bg-secondary/50 hover:text-foreground',
                 )
               }
             >
@@ -62,7 +39,7 @@ export function AdminLayout() {
             </NavLink>
           ))}
           <NavLink
-            to="/home"
+            to={HOME_ROUTE}
             className="mt-4 flex items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground transition hover:text-foreground"
           >
             <ArrowLeft className="size-4" />
@@ -73,10 +50,10 @@ export function AdminLayout() {
         {/* Mobile section tabs */}
         <div className="flex w-full flex-col gap-4">
           <nav className="app-scrollbar flex gap-2 overflow-x-auto md:hidden" aria-label="Admin sections">
-            {sections.map(({ to, label, end }) => (
+            {ADMIN_SECTIONS.map(({ path, label, end }) => (
               <NavLink
-                key={to}
-                to={to}
+                key={path}
+                to={path}
                 end={end}
                 className={({ isActive }) =>
                   cn(

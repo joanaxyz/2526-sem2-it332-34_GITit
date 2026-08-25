@@ -8,10 +8,11 @@ import { TerminalPanel } from '@/shared/level/components/TerminalPanel'
 import { WorkspaceEditorOverlay } from '@/shared/level/components/WorkspaceEditorOverlay'
 import { terminalPrompt } from '@/shared/level/terminalPrompt'
 import type { TerminalLine } from '@/shared/level/types'
+import type {
+  WorkspaceFileInput,
+  WorkspaceFileRenameInput,
+} from '@/shared/level/workspaceFileTypes'
 import type { BattleDirector } from '@/shared/battle/hooks/useBattleDirector'
-
-type WorkspaceFileInput = { path: string; content: string }
-type WorkspaceFileRenameInput = { path: string; newPath: string }
 
 export function AdventureWorkspaceMain({
   run,

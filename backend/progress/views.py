@@ -1,13 +1,13 @@
+from common.openapi import WalletSummaryResponseSerializer
 from drf_spectacular.utils import extend_schema
+from players.services import get_or_create_player
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from common.openapi import (
+from progress.serializers import (
     DashboardSummaryResponseSerializer,
     StatsSummaryResponseSerializer,
-    WalletSummaryResponseSerializer,
 )
-from players.services import get_or_create_player
 from progress.services import MetricsService
 from progress.wallet import WalletService
 

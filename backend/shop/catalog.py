@@ -61,15 +61,6 @@ def listings() -> list[dict]:
                     "slug": slug,
                     "label": meta["label"],
                     "price": meta["price"],
-                    **(
-                        {
-                            "world_slug": meta.get("world_slug"),
-                            "difficulty": meta.get("difficulty"),
-                            "prerequisite_story": meta.get("prerequisite_story"),
-                        }
-                        if kind == KIND_STORY
-                        else {}
-                    ),
                 }
             )
     return out

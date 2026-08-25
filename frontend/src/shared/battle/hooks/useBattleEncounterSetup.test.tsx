@@ -9,7 +9,6 @@ function monster(id: number): BattleMonster {
   return {
     id,
     species: 'bone-soldier',
-    tier: 'mob',
     hp: 3,
     max_hp: 3,
     alive: true,
@@ -20,6 +19,7 @@ function directorMock() {
   return {
     setStoryWorldSlug: vi.fn(),
     setEncounter: vi.fn(),
+    syncPlayerVitals: vi.fn(),
   } as unknown as BattleDirector
 }
 
@@ -43,6 +43,7 @@ describe('useBattleEncounterSetup', () => {
     )
 
     expect(director.setEncounter).toHaveBeenCalledTimes(1)
+    expect(director.syncPlayerVitals).toHaveBeenLastCalledWith(5, 5)
     expect(director.setEncounter).toHaveBeenLastCalledWith(
       roster,
       expect.objectContaining({ travel: false, playerHp: 5, playerMaxHp: 5 }),
@@ -50,13 +51,14 @@ describe('useBattleEncounterSetup', () => {
 
     rerender({ encounterKey: 'wave-1', playerHp: 4 })
     expect(director.setEncounter).toHaveBeenCalledTimes(1)
+    expect(director.syncPlayerVitals).toHaveBeenCalledTimes(1)
 
     rerender({ encounterKey: 'wave-2', playerHp: 4 })
     expect(director.setEncounter).toHaveBeenCalledTimes(2)
+    expect(director.syncPlayerVitals).toHaveBeenLastCalledWith(4, 5)
     expect(director.setEncounter).toHaveBeenLastCalledWith(
       roster,
       expect.objectContaining({ travel: true, playerHp: 4, playerMaxHp: 5 }),
     )
   })
 })
-

@@ -1,6 +1,6 @@
 import type { SpriteAnimation } from '@/shared/sprites/types'
 
-export type PixelBounds = {
+type PixelBounds = {
   left: number
   top: number
   right: number
@@ -28,7 +28,7 @@ export type ImagePixelBounds = PixelBounds & {
 
 const DEFAULT_ALPHA_THRESHOLD = 8
 
-export function scanAlphaRegion({
+function scanAlphaRegion({
   data,
   sheetWidth,
   sourceX = 0,

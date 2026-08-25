@@ -3,6 +3,7 @@ import { useState } from 'react'
 
 import { adminApi } from '@/features/admin/api/adminApi'
 import { PageHeading } from '@/features/admin/components/adminUi'
+import { adminErrorMessage } from '@/features/admin/utils/errors'
 import { Button } from '@/shared/components/Button'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
@@ -13,6 +14,7 @@ export function AdminEconomyPage() {
   const [userId, setUserId] = useState('')
   const [amount, setAmount] = useState('')
   const [reason, setReason] = useState('')
+  const [requestId, setRequestId] = useState<string | null>(null)
 
   const txQuery = useQuery({
     queryKey: queryKeys.adminTransactions(),
@@ -24,6 +26,7 @@ export function AdminEconomyPage() {
     onSuccess: () => {
       setAmount('')
       setReason('')
+      setRequestId(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.adminTransactions() })
       queryClient.invalidateQueries({ queryKey: queryKeys.adminOverview })
     },
@@ -42,34 +45,52 @@ export function AdminEconomyPage() {
             e.preventDefault()
             const uid = Number(userId)
             const amt = Number(amount)
-            if (!Number.isFinite(uid) || !Number.isFinite(amt) || amt === 0) return
-            adjust.mutate({ user_id: uid, amount: amt, reason: reason.trim() || 'admin_adjust' })
+            if (!Number.isFinite(uid) || !Number.isFinite(amt) || amt === 0 || !reason.trim()) return
+            const stableRequestId = requestId ?? crypto.randomUUID()
+            setRequestId(stableRequestId)
+            adjust.mutate({
+              user_id: uid,
+              amount: amt,
+              reason: reason.trim(),
+              request_id: stableRequestId,
+            })
           }}
         >
           <input
             value={userId}
-            onChange={(e) => setUserId(e.target.value)}
+            onChange={(e) => {
+              setUserId(e.target.value)
+              setRequestId(null)
+            }}
             placeholder="User ID"
             inputMode="numeric"
             className="h-9 w-28 rounded-md border border-border bg-background/40 px-3 text-sm outline-none focus:border-primary/50"
           />
           <input
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => {
+              setAmount(e.target.value)
+              setRequestId(null)
+            }}
             placeholder="Amount (±)"
             inputMode="numeric"
             className="h-9 w-32 rounded-md border border-border bg-background/40 px-3 text-sm outline-none focus:border-primary/50"
           />
           <input
             value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            placeholder="Reason (optional)"
+            onChange={(e) => {
+              setReason(e.target.value)
+              setRequestId(null)
+            }}
+            placeholder="Reason (required)"
             className="h-9 flex-1 rounded-md border border-border bg-background/40 px-3 text-sm outline-none focus:border-primary/50"
           />
-          <Button type="submit" size="sm" disabled={adjust.isPending}>Apply</Button>
+          <Button type="submit" size="sm" disabled={adjust.isPending || !reason.trim()}>Apply</Button>
         </form>
         {adjust.isError ? (
-          <p className="mt-2 text-xs text-destructive">Adjustment failed (insufficient balance or invalid input).</p>
+          <p role="alert" className="mt-2 text-xs text-destructive">
+            {adminErrorMessage(adjust.error, 'Adjustment failed. Check the input and try again.')}
+          </p>
         ) : null}
       </section>
 

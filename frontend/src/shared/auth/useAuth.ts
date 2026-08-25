@@ -1,5 +1,10 @@
 import { create } from 'zustand'
 
+import {
+  canonicalizeAuthUser,
+  createAuthSessionBoundary,
+  type AuthSessionMessage,
+} from '@/shared/auth/authSessionBoundary'
 import type { User } from '@/shared/auth/types'
 
 type AuthState = {
@@ -10,118 +15,74 @@ type AuthState = {
   clearSession: () => void
 }
 
-type AuthChannelMessage =
-  | { type: 'session'; accessToken: string; user: User }
-  | { type: 'access-token'; accessToken: string }
-  | { type: 'clear-session' }
+const browserSession = createAuthSessionBoundary()
+const storedUser = browserSession.readUser()
 
-const userStorageKey = 'git-it-user'
-const legacyAccessTokenStorageKey = 'git-it-access-token'
-const authChannelName = 'git-it-auth-session'
+function installSession(accessToken: string, user: User, publish: boolean) {
+  const canonicalUser = canonicalizeAuthUser(user)
+  if (!canonicalUser) {
+    useAuthStore.setState({ accessToken: null, user: null })
+    browserSession.clearPersistedSession()
+    browserSession.publish({ type: 'clear-session' })
+    return
+  }
 
-function browserStorage() {
-  if (typeof window === 'undefined') return null
-  try {
-    const storage = window.localStorage
-    return storage && typeof storage.getItem === 'function' ? storage : null
-  } catch {
-    return null
+  useAuthStore.setState({ accessToken, user: canonicalUser })
+  browserSession.persistUser(canonicalUser)
+  if (publish) {
+    browserSession.publish({ type: 'session', accessToken, user: canonicalUser })
   }
 }
 
-function getStoredUser() {
-  const storage = browserStorage()
-  const storedUser = storage?.getItem(userStorageKey)
-  if (!storedUser) return null
-  try {
-    const parsed = JSON.parse(storedUser) as User
-    return { ...parsed, is_staff: parsed.is_staff ?? false }
-  } catch {
-    storage?.removeItem(userStorageKey)
-    return null
+function applyChannelMessage(
+  set: (state: Partial<Pick<AuthState, 'accessToken' | 'user'>>) => void,
+  message: AuthSessionMessage,
+) {
+  if (message.type === 'session') {
+    set({ accessToken: message.accessToken, user: null })
+    return
   }
-}
 
-function removeLegacyAccessToken() {
-  browserStorage()?.removeItem(legacyAccessTokenStorageKey)
-}
-
-function authChannel() {
-  if (typeof BroadcastChannel === 'undefined') return null
-  try {
-    return new BroadcastChannel(authChannelName)
-  } catch {
-    return null
+  if (message.type === 'access-token') {
+    set({ accessToken: message.accessToken, user: null })
+    browserSession.removeLegacyAccessToken()
+    return
   }
-}
 
-const storedUser = getStoredUser()
-const channel = authChannel()
-
-function publishAuthMessage(message: AuthChannelMessage) {
-  channel?.postMessage(message)
+  set({ accessToken: null, user: null })
+  browserSession.clearPersistedSession()
 }
 
 export const useAuthStore = create<AuthState>((set) => {
-  removeLegacyAccessToken()
-
-  if (typeof window !== 'undefined') {
-    window.addEventListener('storage', (event) => {
-      if (event.key && event.key !== userStorageKey && event.key !== legacyAccessTokenStorageKey) return
-      removeLegacyAccessToken()
-      set({ accessToken: null, user: getStoredUser() })
-    })
-  }
-
-  if (channel) {
-    channel.addEventListener('message', (event: MessageEvent<AuthChannelMessage>) => {
-      const message = event.data
-      if (!message || typeof message !== 'object' || !('type' in message)) return
-
-      if (message.type === 'session') {
-        browserStorage()?.setItem(userStorageKey, JSON.stringify(message.user))
-        set({ accessToken: message.accessToken, user: message.user })
-        return
-      }
-
-      if (message.type === 'access-token') {
-        set({ accessToken: message.accessToken })
-        return
-      }
-
-      if (message.type === 'clear-session') {
-        browserStorage()?.removeItem(userStorageKey)
-        removeLegacyAccessToken()
-        set({ accessToken: null, user: null })
-      }
-    })
-  }
+  browserSession.removeLegacyAccessToken()
+  browserSession.subscribe({
+    onStoredUserChange: (user) => set({ accessToken: null, user }),
+    onMessage: (message) => applyChannelMessage(set, message),
+  })
 
   return {
     accessToken: null,
     user: storedUser,
-    setSession: (accessToken, user) => {
-      const storage = browserStorage()
-      storage?.removeItem(legacyAccessTokenStorageKey)
-      storage?.setItem(userStorageKey, JSON.stringify(user))
-      set({ accessToken, user })
-      publishAuthMessage({ type: 'session', accessToken, user })
-    },
+    setSession: (accessToken, user) => installSession(accessToken, user, true),
     setAccessToken: (accessToken) => {
-      removeLegacyAccessToken()
       set({ accessToken })
-      publishAuthMessage({ type: 'access-token', accessToken })
+      browserSession.removeLegacyAccessToken()
+      browserSession.publish({ type: 'access-token', accessToken })
     },
     clearSession: () => {
-      const storage = browserStorage()
-      storage?.removeItem(legacyAccessTokenStorageKey)
-      storage?.removeItem(userStorageKey)
       set({ accessToken: null, user: null })
-      publishAuthMessage({ type: 'clear-session' })
+      browserSession.clearPersistedSession()
+      browserSession.publish({ type: 'clear-session' })
     },
   }
 })
 
-export function useAuth() {
-  return useAuthStore()
+export function beginAuthConfirmation(accessToken: string) {
+  useAuthStore.setState({ accessToken, user: null })
+  browserSession.removeLegacyAccessToken()
+  browserSession.publish({ type: 'access-token', accessToken })
+}
+
+export function confirmAuthSession(accessToken: string, user: User) {
+  installSession(accessToken, user, false)
 }

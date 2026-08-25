@@ -3,7 +3,6 @@ from django.db.models import Q
 from authoring.models import (
     STATUS_PUBLISHED,
     VISIBILITY_PUBLIC,
-    VISIBILITY_STORE,
     AuthoringChapter,
     ContentDefinition,
 )
@@ -25,7 +24,7 @@ def chapter_payload(chapter: AuthoringChapter) -> dict:
 def visible_content_definitions(*, user):
     if getattr(user, "is_staff", False):
         return ContentDefinition.objects.all()
-    public_filter = Q(status=STATUS_PUBLISHED, visibility__in=[VISIBILITY_PUBLIC, VISIBILITY_STORE])
+    public_filter = Q(status=STATUS_PUBLISHED, visibility=VISIBILITY_PUBLIC)
     if getattr(user, "is_authenticated", False):
         return ContentDefinition.objects.filter(public_filter | Q(owner=user))
     return ContentDefinition.objects.filter(public_filter)
@@ -37,6 +36,7 @@ def content_payload(content: ContentDefinition, *, include_definition: bool = Tr
         "kind": content.kind,
         "owner_id": content.owner_id,
         "chapter_id": content.chapter_id,
+        "official_chapter_id": content.official_chapter_id,
         "source_definition_id": content.source_definition_id,
         "visibility": content.visibility,
         "status": content.status,

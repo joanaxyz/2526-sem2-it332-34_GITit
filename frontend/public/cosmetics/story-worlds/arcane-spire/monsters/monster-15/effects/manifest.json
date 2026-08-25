@@ -1,5 +1,5 @@
 {
-  "id": "zombe-boy-skill-effect",
+  "id": "monster-15-skill-effect",
   "label": "Zombe Boy Skill Effect",
   "motif": "blue zombie bite",
   "playback": "target",
@@ -29,5 +29,15 @@
     }
   ],
   "anchor": "center",
+  "placeAnchor": {
+    "x": 0.5723,
+    "y": 0.4961
+  },
+  "placeBounds": {
+    "left": 0.1133,
+    "top": 0.1328,
+    "right": 1.0,
+    "bottom": 0.8164
+  },
   "placement": "target"
 }

@@ -5,7 +5,7 @@
   "metrics": {
     "walk_speed": 140,
     "run_speed": 280,
-    "foot_offset": 14
+    "foot_offset": 19
   },
   "randomActions": [],
   "kit": [
@@ -27,8 +27,8 @@
       "src": "/cosmetics/companion/blue/idle.png",
       "fps": 10,
       "loops": true,
-      "frameWidth": 256,
-      "frameHeight": 256,
+      "frameWidth": 253,
+      "frameHeight": 244,
       "columns": 5,
       "rows": 5,
       "frameCount": 25
@@ -37,8 +37,8 @@
       "src": "/cosmetics/companion/blue/run.png",
       "fps": 16,
       "loops": true,
-      "frameWidth": 256,
-      "frameHeight": 256,
+      "frameWidth": 253,
+      "frameHeight": 244,
       "columns": 5,
       "rows": 5,
       "frameCount": 25
@@ -47,8 +47,8 @@
       "src": "/cosmetics/companion/blue/hurt.png",
       "fps": 26,
       "loops": false,
-      "frameWidth": 256,
-      "frameHeight": 256,
+      "frameWidth": 253,
+      "frameHeight": 244,
       "columns": 5,
       "rows": 5,
       "frameCount": 25
@@ -57,8 +57,8 @@
       "src": "/cosmetics/companion/blue/death.png",
       "fps": 12,
       "loops": false,
-      "frameWidth": 256,
-      "frameHeight": 256,
+      "frameWidth": 253,
+      "frameHeight": 244,
       "columns": 5,
       "rows": 5,
       "frameCount": 25
@@ -67,8 +67,8 @@
       "src": "/cosmetics/companion/blue/portrait.png",
       "fps": 1,
       "loops": false,
-      "frameWidth": 1028,
-      "frameHeight": 1530,
+      "frameWidth": 516,
+      "frameHeight": 768,
       "columns": 1,
       "rows": 1,
       "frameCount": 1
@@ -77,8 +77,8 @@
       "src": "/cosmetics/companion/blue/avatar.png",
       "fps": 1,
       "loops": false,
-      "frameWidth": 1254,
-      "frameHeight": 1254,
+      "frameWidth": 256,
+      "frameHeight": 256,
       "columns": 1,
       "rows": 1,
       "frameCount": 1
@@ -87,8 +87,8 @@
       "src": "/cosmetics/companion/blue/attack.png",
       "fps": 24,
       "loops": false,
-      "frameWidth": 256,
-      "frameHeight": 256,
+      "frameWidth": 253,
+      "frameHeight": 244,
       "columns": 5,
       "rows": 5,
       "frameCount": 25
@@ -97,8 +97,8 @@
       "src": "/cosmetics/companion/blue/attack-end.png",
       "fps": 24,
       "loops": false,
-      "frameWidth": 256,
-      "frameHeight": 256,
+      "frameWidth": 253,
+      "frameHeight": 244,
       "columns": 5,
       "rows": 5,
       "frameCount": 25
@@ -107,8 +107,8 @@
       "src": "/cosmetics/companion/blue/miss.png",
       "fps": 24,
       "loops": false,
-      "frameWidth": 256,
-      "frameHeight": 256,
+      "frameWidth": 253,
+      "frameHeight": 244,
       "columns": 5,
       "rows": 5,
       "frameCount": 25

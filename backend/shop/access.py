@@ -1,22 +1,15 @@
 from authoring.models import STATUS_PUBLISHED as CONTENT_PUBLISHED
-from authoring.models import VISIBILITY_PUBLIC, VISIBILITY_STORE
+from authoring.models import VISIBILITY_PUBLIC
 from common.exceptions import Locked
 from shop.catalog import KIND_COMPANION, is_default
 from shop.models import Entitlement
 
 
 def can_edit(user, item) -> bool:
-    return bool(getattr(user, "is_staff", False) or getattr(item, "owner_id", None) == getattr(user, "id", None))
-
-
-def can_view(user, item) -> bool:
-    if can_edit(user, item):
-        return True
-    status = getattr(item, "status", None)
-    visibility = getattr(item, "visibility", None)
-    if status == CONTENT_PUBLISHED and visibility in {VISIBILITY_PUBLIC, VISIBILITY_STORE}:
-        return True
-    return bool(getattr(item, "is_published", False) and visibility in {VISIBILITY_PUBLIC, VISIBILITY_STORE, None})
+    return bool(
+        getattr(user, "is_staff", False)
+        or getattr(item, "owner_id", None) == getattr(user, "id", None)
+    )
 
 
 def can_launch(user, content_definition) -> bool:

@@ -37,11 +37,31 @@ describe('advanced story diagnostic tranche', () => {
     ['git sparse-checkout list', 'docs'],
     ['git submodule status', 'vendor/ui'],
     ['git config --get user.name', 'Contributor A'],
+    ['git config --list', 'user.name=Contributor A'],
+    ['git config -l', 'core.autocrlf=input'],
   ])('executes %s without mutating repository state', (command, expected) => {
     const result = executeGitCommand(state, command)
     expect(result.processed).toBe(true)
     expect(result.diagnostic).toBe(true)
     expect(result.output).toContain(expected)
+    expect(result.next_state).toEqual(expect.objectContaining({ branches: { main: 'c1' } }))
+  })
+
+  it('reads a file from a historical revision with git show revision:path', () => {
+    const result = executeGitCommand(state, 'git show c0:src/app.ts')
+
+    expect(result.processed).toBe(true)
+    expect(result.diagnostic).toBe(true)
+    expect(result.output).toBe('stable')
+  })
+
+  it('reports a missing historical path without mutating repository state', () => {
+    const result = executeGitCommand(state, 'git show c0:src/missing.ts')
+
+    expect(result.processed).toBe(false)
+    expect(result.diagnostic).toBe(true)
+    expect(result.exit_code).toBe(128)
+    expect(result.output).toBe("fatal: path 'src/missing.ts' does not exist in 'c0'")
     expect(result.next_state).toEqual(expect.objectContaining({ branches: { main: 'c1' } }))
   })
 })

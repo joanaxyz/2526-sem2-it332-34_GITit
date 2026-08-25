@@ -22,11 +22,11 @@ const chapterBackgrounds = chapterKeys.map(
 )
 
 const monsterPoses = [
-  '/cosmetics/story-worlds/frostbound-citadel/monsters/monster-11/pose/idle.png',
-  '/cosmetics/story-worlds/frostbound-citadel/monsters/monster-05/pose/idle.png',
-  '/cosmetics/story-worlds/frostbound-citadel/monsters/monster-06/pose/idle.png',
-  '/cosmetics/story-worlds/frostbound-citadel/monsters/monster-10/pose/idle.png',
-  '/cosmetics/story-worlds/frostbound-citadel/monsters/monster-08/pose/idle.png',
+  '/cosmetics/story-worlds/frostbound-citadel/monsters/monster-11/idle.png',
+  '/cosmetics/story-worlds/frostbound-citadel/monsters/monster-05/idle.png',
+  '/cosmetics/story-worlds/frostbound-citadel/monsters/monster-06/idle.png',
+  '/cosmetics/story-worlds/frostbound-citadel/monsters/monster-10/idle.png',
+  '/cosmetics/story-worlds/frostbound-citadel/monsters/monster-08/idle.png',
 ]
 
 export const frostboundCitadelWorld: StoryWorldDef = {

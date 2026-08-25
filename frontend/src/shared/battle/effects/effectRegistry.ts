@@ -2,9 +2,7 @@ import type { SpriteAnimation } from '@/shared/sprites/types'
 
 import { effectSpecForSkill, effectsForCompanion } from './skill-effects/catalog'
 import {
-  lockedEffectIsGrounded,
   monsterAttackEffect,
-  playLockedSkillEffect,
   playMissEffect,
   playResolvedSkillEffect,
   playSpriteProjectileEffect,
@@ -20,8 +18,6 @@ export type {
   BattleEffect,
   EffectContext,
   FlameTint,
-  MonsterBattleEffect,
-  MonsterEffectContext,
   SkillEffectAnchor,
   SkillEffectPlayback,
 } from './skill-effects/types'
@@ -31,19 +27,6 @@ export { monsterAttackEffect }
 export function effectForSkill(skill: string, companionSlug?: string | null): BattleEffect {
   const spec = effectSpecForSkill(skill, companionSlug)
   return (ctx) => playResolvedSkillEffect(ctx, spec)
-}
-
-/** Same effect, LOCKED in place (no projectile flight). Projectile impacts and
- *  risers plant on the ground line; body-centered auras sit on the body. */
-export function lockedEffectForSkill(skill: string, companionSlug?: string | null): BattleEffect {
-  const spec = effectSpecForSkill(skill, companionSlug)
-  return (ctx) => playLockedSkillEffect(ctx, spec)
-}
-
-/** Whether a skill's locked preview plants on the ground line (true) or sits
- *  centered on the body (false), so the stage can pick the matching `ctx.to`. */
-export function lockedGroundedForSkill(skill: string, companionSlug?: string | null): boolean {
-  return lockedEffectIsGrounded(effectSpecForSkill(skill, companionSlug))
 }
 
 /** Whether a skill sheet flies from the companion or plays centered on the target. */

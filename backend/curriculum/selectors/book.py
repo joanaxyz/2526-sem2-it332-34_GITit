@@ -128,4 +128,3 @@ def lesson_summary_payload(*, lesson: ChapterLesson) -> dict:
         "summary": lesson.summary,
         "pages": lesson.pages,
     }
-

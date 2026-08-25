@@ -60,3 +60,32 @@ class ClientCommandExecutionSerializer(serializers.Serializer):
         if len(encoded) > MAX_EXECUTION_STATE_BYTES:
             raise serializers.ValidationError("Repository state is too large.")
         return value
+
+
+class CommandSubmitSerializer(serializers.Serializer):
+    """Shared command request contract for every browser-simulated run."""
+
+    command = serializers.CharField(max_length=500)
+    execution = ClientCommandExecutionSerializer()
+
+
+class WorkspaceFileSerializer(serializers.Serializer):
+    """Shared create/write contract for a run workspace file."""
+
+    path = serializers.CharField(max_length=240)
+    content = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=20000,
+        default="",
+        trim_whitespace=False,
+    )
+
+
+class WorkspaceFilePathSerializer(serializers.Serializer):
+    path = serializers.CharField(max_length=240)
+
+
+class WorkspaceFileRenameSerializer(serializers.Serializer):
+    path = serializers.CharField(max_length=240)
+    new_path = serializers.CharField(max_length=240)

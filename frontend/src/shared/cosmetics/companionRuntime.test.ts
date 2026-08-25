@@ -10,8 +10,8 @@ describe('companionBattleFromDef', () => {
     expect(battle?.attackEnd.src).toBe('/cosmetics/companion/blue/attack-end.png')
     expect(battle?.miss.src).toBe('/cosmetics/companion/blue/miss.png')
     expect(battle?.death).toMatchObject({
-      frameWidth: 256,
-      frameHeight: 256,
+      frameWidth: 253,
+      frameHeight: 244,
       columns: 5,
       rows: 5,
       frameCount: 25,
@@ -28,8 +28,8 @@ describe('companionBattleFromDef', () => {
     expect(world?.sprites.idle).toMatchObject({
       name: 'white.idle',
       src: '/cosmetics/companion/white/idle.png',
-      frameWidth: 256,
-      frameHeight: 256,
+      frameWidth: 250,
+      frameHeight: 239,
       columns: 5,
       rows: 5,
       frameCount: 25,
@@ -66,8 +66,8 @@ describe('companionBattleFromDef', () => {
     expect(world?.sprites.idle).toMatchObject({
       name: 'black.idle',
       src: '/cosmetics/companion/black/idle.png',
-      frameWidth: 256,
-      frameHeight: 256,
+      frameWidth: 251,
+      frameHeight: 251,
       columns: 5,
       rows: 5,
       frameCount: 25,

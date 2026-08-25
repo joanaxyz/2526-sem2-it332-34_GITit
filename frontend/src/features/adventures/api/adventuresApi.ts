@@ -1,4 +1,3 @@
-import type { ApiRequestBody } from '@/shared/api/generated/apiTypes'
 import { apiOperationRequest } from '@/shared/api/httpClient'
 import type {
   AdventureLevelLibraryResponse,
@@ -6,8 +5,15 @@ import type {
   AdventureRun,
 } from '@/features/adventures/types'
 import type { CommandExecutionPayload } from '@/shared/level/types'
-type WorkspaceFileRequest = { path: string; content: string }
-type WorkspaceFileRenameRequest = { path: string; newPath: string }
+import {
+  commandSubmitBody,
+  workspaceFileBody,
+  workspaceFileRenameBody,
+} from '@/shared/level-runtime/runMutationInputs'
+import type {
+  WorkspaceFileInput,
+  WorkspaceFileRenameInput,
+} from '@/shared/level/workspaceFileTypes'
 
 export const adventuresApi = {
   startRun(levelId: number) {
@@ -29,28 +35,28 @@ export const adventuresApi = {
     return apiOperationRequest<'adventure_runs_submit_command_create', AdventureCommandResponse>(
       'adventure_runs_submit_command_create',
       `/adventure-runs/${runId}/submit-command/`,
-      { body: { command, execution } as ApiRequestBody<'adventure_runs_submit_command_create'> },
+      { body: commandSubmitBody(command, execution) },
     )
   },
-  createFile(runId: number, input: WorkspaceFileRequest) {
+  createFile(runId: number, input: WorkspaceFileInput) {
     return apiOperationRequest<'adventure_runs_files_create', AdventureRun>(
       'adventure_runs_files_create',
       `/adventure-runs/${runId}/files/`,
-      { body: input as ApiRequestBody<'adventure_runs_files_create'> },
+      { body: workspaceFileBody(input) },
     )
   },
-  writeFile(runId: number, input: WorkspaceFileRequest) {
+  writeFile(runId: number, input: WorkspaceFileInput) {
     return apiOperationRequest<'adventure_runs_files_partial_update', AdventureRun>(
       'adventure_runs_files_partial_update',
       `/adventure-runs/${runId}/files/`,
-      { body: input as ApiRequestBody<'adventure_runs_files_partial_update'> },
+      { body: workspaceFileBody(input) },
     )
   },
-  renameFile(runId: number, input: WorkspaceFileRenameRequest) {
+  renameFile(runId: number, input: WorkspaceFileRenameInput) {
     return apiOperationRequest<'adventure_runs_files_update', AdventureRun>(
       'adventure_runs_files_update',
       `/adventure-runs/${runId}/files/`,
-      { body: { path: input.path, new_path: input.newPath } },
+      { body: workspaceFileRenameBody(input) },
     )
   },
   deleteFile(runId: number, path: string) {
@@ -60,7 +66,7 @@ export const adventuresApi = {
     )
   },
   discardRun(runId: number, options?: Omit<RequestInit, 'method' | 'body'>) {
-    return apiOperationRequest<'adventure_runs_destroy', null>(
+    return apiOperationRequest(
       'adventure_runs_destroy',
       `/adventure-runs/${runId}/`,
       options,

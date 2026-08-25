@@ -10,14 +10,12 @@ from adventures.models import AdventureLevel, AdventureRun
 from authoring.models import STATUS_PUBLISHED, ContentDefinition
 from authoring.services import ContentDefinitionService
 from challenges.models import ChallengeLevel, ChallengeRun
-from challenges.serializers import CommandSubmitSerializer
 from challenges.services import ChallengeCommandProcessingService, ChallengeRunService
 from common.api import api_exception_handler
 from common.constants import SESSION_STATUS_COMPLETED
-from payments.models import GitCoinPurchase
-from payments.services import PaymentService
+from common.serializers import CommandSubmitSerializer
 from players.services import get_or_create_player
-from progress.models import AdventureLevelCompletion, ChallengeTrialCompletion, Wallet
+from progress.models import AdventureLevelCompletion, ChallengeTrialCompletion
 
 
 def _user(username: str):
@@ -142,10 +140,14 @@ def test_active_run_constraints_and_completion_history_survive_deletion():
 def test_completed_challenge_launch_is_server_derived_replay_and_cannot_lower_best_score():
     call_command("seed_curriculum")
     player = get_or_create_player(_user("replay-safety"))
-    level = ChallengeLevel.objects.filter(
-        is_published=True,
-        trials__variants__is_published=True,
-    ).order_by("id").first()
+    level = (
+        ChallengeLevel.objects.filter(
+            is_published=True,
+            trials__variants__is_published=True,
+        )
+        .order_by("id")
+        .first()
+    )
     assert level is not None
     trial = level.trials.filter(is_published=True).order_by("id").first()
     assert trial is not None
@@ -197,28 +199,6 @@ def test_completed_challenge_launch_is_server_derived_replay_and_cannot_lower_be
     assert completion.challenge_run_id == best_run.id
     assert completion.stars == 3
     assert completion.counted_action_total == 1
-
-
-@pytest.mark.django_db
-def test_payment_webhook_can_recover_missing_local_session_link():
-    player = get_or_create_player(_user("payment-recovery"))
-
-    PaymentService().handle_checkout_completed(
-        session={
-            "id": "cs_recovered_123",
-            "metadata": {
-                "player_id": str(player.id),
-                "pack_slug": "starter",
-            },
-            "amount_total": 99,
-            "currency": "usd",
-        }
-    )
-
-    purchase = GitCoinPurchase.objects.get(stripe_session_id="cs_recovered_123")
-    assert purchase.status == "paid"
-    assert purchase.checkout_key == "recovered:cs_recovered_123"
-    assert Wallet.objects.get(player=player).balance == 150
 
 
 @pytest.mark.django_db

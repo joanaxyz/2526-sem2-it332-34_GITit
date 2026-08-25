@@ -3,3 +3,12 @@ node_modules
 dist
 coverage
 .vite
+public/**/raw
+public/**/_raw
+public/**/pose
+public/**/references
+public/**/samples
+public/**/_diagnostics.json
+public/**/_preview-contact-sheet.*
+public/**/_raw.zip
+public/**/*.md

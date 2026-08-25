@@ -248,7 +248,7 @@ export function isDiagnosticCommand(parsed: ParsedGitCommand) {
     case 'version':
       return true
     case 'config':
-      return hasOption(parsed, '--get')
+      return hasOption(parsed, '--get') || hasOption(parsed, '--list') || hasOption(parsed, '-l')
     case 'branch':
       return !parsed.args.length && !hasOption(parsed, '-d') && !hasOption(parsed, '-D') && !hasOption(parsed, '--delete') && !hasOption(parsed, '-m') && !hasOption(parsed, '--move')
     case 'remote':

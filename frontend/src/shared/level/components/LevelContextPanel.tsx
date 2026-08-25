@@ -110,7 +110,7 @@ export function LevelStoryCard({
                 <code>{item.value}</code>
                 <CopyButton
                   value={item.value}
-                  label={`Copy ${item.label || item.value}`}
+                  label={item.label || item.value}
                   className="lvlctx-copy-btn"
                 />
               </li>

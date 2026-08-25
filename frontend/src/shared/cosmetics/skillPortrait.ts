@@ -22,7 +22,7 @@ function rootForCompanion(companionSlug: string | null | undefined): string {
  * `commit`, ...). A level's `command` can be a comma-separated workflow
  * ("git status, git diff"); the reward is keyed off the primary command.
  */
-export function skillCommandFamily(command: string): string {
+function skillCommandFamily(command: string): string {
   const primary = command.split(',')[0]?.trim().toLowerCase() ?? ''
   return primary.replace(/^git\s+/, '').trim()
 }
@@ -42,9 +42,4 @@ export function companionSkillPortrait(
 ): string {
   const family = skillCommandFamily(command) || 'default'
   return `${rootForCompanion(companionSlug)}/portrait/${family}.png`
-}
-
-/** Neutral fallback portrait when a specific command's art is missing. */
-export function companionSkillPortraitFallback(companionSlug: string | null | undefined): string {
-  return `${rootForCompanion(companionSlug)}/portrait/default.png`
 }

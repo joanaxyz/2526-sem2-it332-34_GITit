@@ -6,13 +6,16 @@ import {
   ChallengeSidebar,
   ChallengeTerminalStage,
   type ResizeStart,
-  type WorkspaceFileInput,
 } from '@/features/challenges/components/ChallengeWorkspacePanels'
 import type { ChallengeRun } from '@/features/challenges/types'
 import { ResizeHandle } from '@/shared/level/components/ResizeHandle'
 import { WorkspaceEditorOverlay } from '@/shared/level/components/WorkspaceEditorOverlay'
 import type { TerminalPrompt } from '@/shared/level/terminalPrompt'
 import type { TerminalLine } from '@/shared/level/types'
+import type {
+  WorkspaceFileInput,
+  WorkspaceFileRenameInput,
+} from '@/shared/level/workspaceFileTypes'
 import type { BattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 
 export function ChallengeWorkspaceMain({
@@ -71,7 +74,7 @@ export function ChallengeWorkspaceMain({
   mutationPending: boolean
   onToggleProjectFiles: () => void
   onCreateFile: (input: WorkspaceFileInput) => Promise<ChallengeRun>
-  onRenameFile: (input: { path: string; newPath: string }) => Promise<ChallengeRun>
+  onRenameFile: (input: WorkspaceFileRenameInput) => Promise<ChallengeRun>
   onDeleteFile: (path: string) => Promise<ChallengeRun>
   onOpenFile: (path: string | null) => void
   onToggleBattle: () => void

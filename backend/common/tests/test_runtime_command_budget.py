@@ -78,6 +78,10 @@ def test_budget_exhaustion_requires_unsolved_counted_command():
         max_counted_commands=4,
     )
 
+
 def test_update_fields_for_execution_only_adds_repository_state_when_mutated():
     assert update_fields_for_execution({"command_count"}, state_mutated=False) == ["command_count"]
-    assert update_fields_for_execution({"command_count"}, state_mutated=True) == ["command_count", "repository_state"]
+    assert update_fields_for_execution({"command_count"}, state_mutated=True) == [
+        "command_count",
+        "repository_state",
+    ]

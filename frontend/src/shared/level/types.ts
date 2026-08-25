@@ -1,3 +1,5 @@
+import type { ApiSchemas } from '@/shared/api/generated/apiTypes'
+
 export type RepositoryValue =
   | string
   | number
@@ -79,8 +81,8 @@ export type RepositorySnapshot = {
   visible_tree?: Record<string, RepositoryValue>
 }
 
-export type CopyDetail = {
-  label: string
+type CopyDetail = {
+  label?: string
   value: string
 }
 
@@ -103,26 +105,16 @@ export type RepositoryVisualization = {
 // The minimal shape the shared terminal needs to render a command + its output.
 // Both ChallengeStepLog and the adventure step payload satisfy this, so terminal
 // line derivation (and the optimistic pending/error placeholders) are shared.
-export type TerminalStep = {
-  id: number
-  command_text: string
-  terminal_output: string
-  result_category: string
-}
+export type TerminalStep = ApiSchemas['RuntimeStepResponse']
 
-export type CommandExecutionPayload = {
-  processed: boolean
-  next_state: RepositorySnapshot
-  output: string
-  normalized_command: string
-  exit_code: number
-  diagnostic: boolean
-  stdout: string
-  stderr: string
-  command_family: string
-  diagnostic_metadata: string[]
-  /** Client-side run revision used to reject stale optimistic submissions. */
+export type RepositoryCommandState = RepositorySnapshot & Record<string, RepositoryValue>
+
+export type CommandExecutionPayload = Omit<
+  ApiSchemas['ClientCommandExecution'],
+  'client_run_revision' | 'next_state'
+> & {
   client_run_revision?: number
+  next_state: RepositoryCommandState
 }
 
 export type TerminalLine = {

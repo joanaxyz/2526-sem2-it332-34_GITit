@@ -9,7 +9,7 @@ from curriculum.management.commands.seed_curriculum_challenges import (
 from curriculum.management.commands.seed_curriculum_commands import SeedCurriculumCommandSkillsMixin
 from curriculum.management.commands.seed_curriculum_helpers import SeedCurriculumHelperMixin
 from curriculum.management.commands.seed_curriculum_structure import SeedCurriculumStructureMixin
-from curriculum.seed_data.adventure_levels import ADVENTURE_LEVEL_PLAN, ADVENTURE_LEVELS
+from curriculum.seed_data.adventure_levels import ADVENTURE_LEVELS
 
 
 class SeedCurriculumWriterMixin(
@@ -30,12 +30,6 @@ class SeedCurriculumWriterMixin(
             spec["usage"] for spec in ADVENTURE_LEVELS if not spec.get("engine_blocked")
         }
         self.supported_form_keys.update(ENGINE_SUPPORTED_REFERENCE_FORMS)
-        # Forms a level only *reuses* (the spiral - e.g. the log/show variants
-        # practised inside a workflow that has no standalone level of its own) are
-        # still taught, so they must stay published.
-        for plan_levels in ADVENTURE_LEVEL_PLAN.values():
-            for plan_level in plan_levels:
-                self.supported_form_keys.update(plan_level.get("reuse_usages", []))
         self.published_chapter_slugs = self._published_chapter_slugs()
         stories = self._seed_stories()
         chapters = self._seed_chapters(stories)

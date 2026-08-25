@@ -15,7 +15,7 @@ export function gitMerge(state: MutableRepositoryState, parsed: ParsedGitCommand
 function abortMerge(state: MutableRepositoryState): CommandOutcome {
   if (!state.merge_parent && !state.conflicts?.length) throw new SimulatorCommandError('fatal: There is no merge to abort (MERGE_HEAD missing).')
   const restored = state.merge_abort_state
-  if (restored && isRecord(restored)) {
+  if (restored && isRecord(restored) && Object.keys(restored).length > 0) {
     for (const key of Object.keys(state)) delete state[key]
     Object.assign(state, clone(restored))
     setOperationMetadata(state, { last_merge_aborted: true })

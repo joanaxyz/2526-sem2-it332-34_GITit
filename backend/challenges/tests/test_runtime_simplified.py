@@ -1,8 +1,11 @@
+from types import SimpleNamespace
+
 from django.core.management import call_command
 from django.utils import timezone
 from rest_framework.test import APIClient
 
 from challenges.models import ChallengeLevel, ChallengeRun
+from challenges.services.history import CommandHistoryCache
 from curriculum.selectors import challenge_levels_access_payload
 from players.services import get_or_create_player
 from progress.models import AdventureLevelCompletion, ChallengeTrialCompletion
@@ -18,28 +21,41 @@ def make_user(django_user_model, username="challenger"):
     # these runtime tests don't have to go through the shop purchase flow.
     from shop.models import Entitlement
 
-    Entitlement.objects.get_or_create(player=get_or_create_player(user), kind="companion", slug="blue")
+    Entitlement.objects.get_or_create(
+        player=get_or_create_player(user), kind="companion", slug="blue"
+    )
     return user
+
+
+def test_challenge_history_cache_key_changes_when_database_id_is_reused():
+    first_run = SimpleNamespace(id=9, started_at="run-a", selected_variant_id=201)
+    reused_id = SimpleNamespace(id=9, started_at="run-b", selected_variant_id=201)
+
+    first_key = CommandHistoryCache.key_for(run=first_run, attempt_count=3)
+
+    assert first_key != CommandHistoryCache.key_for(run=reused_id, attempt_count=3)
 
 
 def unlock_chapter_for(user, chapter):
     from adventures.models import AdventureLevel, AdventureRun
 
     player = get_or_create_player(user)
-    for level in AdventureLevel.objects.filter(chapter=chapter, is_published=True, is_required=True):
-            wave = level.waves.filter(is_published=True).order_by("sort_order", "id").first()
-            run = AdventureRun.objects.create(
-                player=player,
-                level=level,
-                current_wave=wave,
-                selected_variant=wave.variants.filter(is_published=True).first(),
-                passed_at=timezone.now(),
-            )
-            AdventureLevelCompletion.objects.get_or_create(
-                player=player,
-                adventure_level=level,
-                defaults={"adventure_run": run},
-            )
+    for level in AdventureLevel.objects.filter(
+        chapter=chapter, is_published=True, is_required=True
+    ):
+        wave = level.waves.filter(is_published=True).order_by("sort_order", "id").first()
+        run = AdventureRun.objects.create(
+            player=player,
+            level=level,
+            current_wave=wave,
+            selected_variant=wave.variants.filter(is_published=True).first(),
+            passed_at=timezone.now(),
+        )
+        AdventureLevelCompletion.objects.get_or_create(
+            player=player,
+            adventure_level=level,
+            defaults={"adventure_run": run},
+        )
 
 
 def first_challenge_level():
@@ -71,7 +87,11 @@ def test_challenge_trial_launch_uses_trial_owned_variant(db, django_user_model):
     client = APIClient()
     client.force_authenticate(user=user)
 
-    response = client.post(f"/api/challenge-trials/{trial.id}/runs/", {"source_entry_point": "level_page"}, format="json")
+    response = client.post(
+        f"/api/challenge-trials/{trial.id}/runs/",
+        {"source_entry_point": "level_page"},
+        format="json",
+    )
 
     assert response.status_code == 201
     run = ChallengeRun.objects.get(id=response.json()["id"])
@@ -89,7 +109,11 @@ def test_challenge_retry_rotates_within_same_trial(db, django_user_model):
     client = APIClient()
     client.force_authenticate(user=user)
 
-    first = client.post(f"/api/challenge-trials/{trial.id}/runs/", {"source_entry_point": "level_page"}, format="json")
+    first = client.post(
+        f"/api/challenge-trials/{trial.id}/runs/",
+        {"source_entry_point": "level_page"},
+        format="json",
+    )
     run = ChallengeRun.objects.get(id=first.json()["id"])
     run.status = "failed"
     run.ended_at = run.started_at
@@ -112,7 +136,11 @@ def test_discarding_active_challenge_deletes_run(db, django_user_model):
     unlock_chapter_for(user, trial.chapter)
     client = APIClient()
     client.force_authenticate(user=user)
-    first = client.post(f"/api/challenge-trials/{trial.id}/runs/", {"source_entry_point": "level_page"}, format="json")
+    first = client.post(
+        f"/api/challenge-trials/{trial.id}/runs/",
+        {"source_entry_point": "level_page"},
+        format="json",
+    )
     run_id = first.json()["id"]
 
     response = client.delete(f"/api/challenge-runs/{run_id}/")
@@ -129,10 +157,18 @@ def test_starting_challenge_discards_stale_active_run(db, django_user_model):
     unlock_chapter_for(user, trial.chapter)
     client = APIClient()
     client.force_authenticate(user=user)
-    first = client.post(f"/api/challenge-trials/{trial.id}/runs/", {"source_entry_point": "level_page"}, format="json")
+    first = client.post(
+        f"/api/challenge-trials/{trial.id}/runs/",
+        {"source_entry_point": "level_page"},
+        format="json",
+    )
     stale_id = first.json()["id"]
 
-    second = client.post(f"/api/challenge-trials/{trial.id}/runs/", {"source_entry_point": "level_page"}, format="json")
+    second = client.post(
+        f"/api/challenge-trials/{trial.id}/runs/",
+        {"source_entry_point": "level_page"},
+        format="json",
+    )
 
     assert second.status_code == 201
     assert second.json()["id"] != stale_id
@@ -148,7 +184,11 @@ def test_retrying_active_challenge_discards_prior_run(db, django_user_model):
     unlock_chapter_for(user, trial.chapter)
     client = APIClient()
     client.force_authenticate(user=user)
-    first = client.post(f"/api/challenge-trials/{trial.id}/runs/", {"source_entry_point": "level_page"}, format="json")
+    first = client.post(
+        f"/api/challenge-trials/{trial.id}/runs/",
+        {"source_entry_point": "level_page"},
+        format="json",
+    )
     prior_id = first.json()["id"]
 
     retry = client.post(f"/api/challenge-runs/{prior_id}/retry/")
@@ -168,7 +208,11 @@ def test_active_challenge_run_is_not_exposed_as_resumable_session(db, django_use
     client = APIClient()
     client.force_authenticate(user=user)
 
-    response = client.post(f"/api/challenge-trials/{trial.id}/runs/", {"source_entry_point": "level_page"}, format="json")
+    response = client.post(
+        f"/api/challenge-trials/{trial.id}/runs/",
+        {"source_entry_point": "level_page"},
+        format="json",
+    )
     assert response.status_code == 201
 
     levels = challenge_levels_access_payload(player=get_or_create_player(user), challenge=level)
@@ -192,9 +236,17 @@ def test_medium_unlocks_after_easy_trial_completion(db, django_user_model):
     client = APIClient()
     client.force_authenticate(user=user)
 
-    locked = client.post(f"/api/challenge-trials/{medium.id}/runs/", {"source_entry_point": "level_page"}, format="json")
+    locked = client.post(
+        f"/api/challenge-trials/{medium.id}/runs/",
+        {"source_entry_point": "level_page"},
+        format="json",
+    )
     assert locked.status_code == 423
 
     ChallengeTrialCompletion.objects.create(player=get_or_create_player(user), challenge_trial=easy)
-    unlocked = client.post(f"/api/challenge-trials/{medium.id}/runs/", {"source_entry_point": "level_page"}, format="json")
+    unlocked = client.post(
+        f"/api/challenge-trials/{medium.id}/runs/",
+        {"source_entry_point": "level_page"},
+        format="json",
+    )
     assert unlocked.status_code == 201

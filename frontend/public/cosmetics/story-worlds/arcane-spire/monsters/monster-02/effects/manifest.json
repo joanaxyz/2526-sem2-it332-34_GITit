@@ -1,5 +1,5 @@
 {
-  "id": "bone-blacksmith-skill-effect",
+  "id": "monster-02-skill-effect",
   "label": "Bone Blacksmith Skill Effect",
   "motif": "blue flame ground crack",
   "playback": "target",
@@ -28,6 +28,16 @@
       "orient_to": "target-facing"
     }
   ],
-  "anchor": "center",
+  "anchor": "feet",
+  "placeAnchor": {
+    "x": 0.4707,
+    "y": 0.9258
+  },
+  "placeBounds": {
+    "left": 0.1836,
+    "top": 0.1797,
+    "right": 0.75,
+    "bottom": 1.0
+  },
   "placement": "target"
 }

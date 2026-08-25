@@ -1,5 +1,5 @@
 {
-  "id": "bone-archer-skill-effect",
+  "id": "monster-01-skill-effect",
   "label": "Bone Archer Skill Effect",
   "motif": "blue flaming arrow",
   "playback": "projectile",
@@ -21,11 +21,25 @@
       "rows": 5,
       "frameCount": 25,
       "layer": "front",
-      "scale": 0.56,
+      "scale": 0.6,
       "opacity": 1,
       "offset_x": 0,
       "offset_y": 0,
       "orient_to": "travel"
     }
-  ]
+  ],
+  "anchor": "feet",
+  "motion": "charge",
+  "launchStartFrame": 5,
+  "impactStartFrame": 20,
+  "placeAnchor": {
+    "x": 0.4883,
+    "y": 0.9258
+  },
+  "placeBounds": {
+    "left": 0.1562,
+    "top": 0.3867,
+    "right": 0.7852,
+    "bottom": 0.9531
+  }
 }

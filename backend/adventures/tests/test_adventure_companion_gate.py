@@ -49,7 +49,9 @@ def two_levels_in_one_adventure():
 def _authenticated_client_with_companion(django_user_model, username: str = "adventurer"):
     user = make_user(django_user_model, username)
     player = get_or_create_player(user)
-    WalletService().award(player=player, amount=150, reason="test_seed", award_key=f"test-seed:{username}")
+    WalletService().award(
+        player=player, amount=150, reason="test_seed", award_key=f"test-seed:{username}"
+    )
     client = APIClient()
     client.force_authenticate(user=user)
     client.post("/api/shop/catalog/purchase/", {"kind": "companion", "slug": "blue"}, format="json")
@@ -77,9 +79,7 @@ def test_buying_a_companion_unlocks_adventure_start(db, django_user_model):
     client = APIClient()
     client.force_authenticate(user=user)
 
-    client.post(
-        "/api/shop/catalog/purchase/", {"kind": "companion", "slug": "blue"}, format="json"
-    )
+    client.post("/api/shop/catalog/purchase/", {"kind": "companion", "slug": "blue"}, format="json")
     response = client.post(f"/api/adventure-levels/{level.id}/runs/")
 
     assert response.status_code == 201

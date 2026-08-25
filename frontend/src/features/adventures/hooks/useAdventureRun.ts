@@ -5,6 +5,10 @@ import { adventuresApi } from '@/features/adventures/api/adventuresApi'
 import type { AdventureRun } from '@/features/adventures/types'
 import { terminalLinesFromSteps } from '@/shared/level/terminalSteps'
 import { queryKeys } from '@/shared/api/queryKeys'
+import type {
+  WorkspaceFileInput,
+  WorkspaceFileRenameInput,
+} from '@/shared/level/workspaceFileTypes'
 import {
   invalidateAdventureProgressQueries,
   syncAdventureRunInCache,
@@ -59,7 +63,7 @@ export function useAdventureRun(runId: number | null) {
   })
 
   const createFile = useMutation({
-    mutationFn: (input: { path: string; content: string }) => {
+    mutationFn: (input: WorkspaceFileInput) => {
       const attempt = queryClient.getQueryData<AdventureRun>(key)?.current_attempt
       if (!attempt) throw new Error('No adventure attempt is available to update.')
       return adventuresApi.createFile(runId as number, input)
@@ -68,7 +72,7 @@ export function useAdventureRun(runId: number | null) {
   })
 
   const writeFile = useMutation({
-    mutationFn: (input: { path: string; content: string }) => {
+    mutationFn: (input: WorkspaceFileInput) => {
       const attempt = queryClient.getQueryData<AdventureRun>(key)?.current_attempt
       if (!attempt) throw new Error('No adventure attempt is available to update.')
       return adventuresApi.writeFile(runId as number, input)
@@ -77,7 +81,7 @@ export function useAdventureRun(runId: number | null) {
   })
 
   const renameFile = useMutation({
-    mutationFn: (input: { path: string; newPath: string }) => {
+    mutationFn: (input: WorkspaceFileRenameInput) => {
       const attempt = queryClient.getQueryData<AdventureRun>(key)?.current_attempt
       if (!attempt) throw new Error('No adventure attempt is available to update.')
       return adventuresApi.renameFile(runId as number, input)

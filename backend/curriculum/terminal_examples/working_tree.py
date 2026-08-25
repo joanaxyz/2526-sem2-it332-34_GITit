@@ -7,15 +7,17 @@ def render(raw: str, normalized: str, display_command: str, prompt_text: str) ->
     if normalized.startswith("git add -p") or normalized.startswith("git add --patch"):
         return transcript(
             display_command,
-            "\n".join([
-                "diff --git a/README.md b/README.md",
-                "index e69de29..b6fc4c6 100644",
-                "--- a/README.md",
-                "+++ b/README.md",
-                "@@ -0,0 +1 @@",
-                "+Arcane Spire unlocks the first story world.",
-                "(1/1) Stage this hunk [y,n,q,a,d,e,?]? y",
-            ]),
+            "\n".join(
+                [
+                    "diff --git a/README.md b/README.md",
+                    "index e69de29..b6fc4c6 100644",
+                    "--- a/README.md",
+                    "+++ b/README.md",
+                    "@@ -0,0 +1 @@",
+                    "+Arcane Spire unlocks the first story world.",
+                    "(1/1) Stage this hunk [y,n,q,a,d,e,?]? y",
+                ]
+            ),
         )
 
     if normalized.startswith("git add"):
@@ -25,7 +27,9 @@ def render(raw: str, normalized: str, display_command: str, prompt_text: str) ->
         return commit_output(display_command, "9c2e6b1", "Add map encounter preview", amended=True)
 
     if normalized.startswith("git commit --amend"):
-        return commit_output(display_command, "9c2e6b1", "Refine map encounter preview", amended=True)
+        return commit_output(
+            display_command, "9c2e6b1", "Refine map encounter preview", amended=True
+        )
 
     if normalized.startswith("git commit -a") or normalized.startswith("git commit"):
         return commit_output(display_command, "9c2e6b1", "document init")

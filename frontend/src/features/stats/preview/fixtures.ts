@@ -7,12 +7,18 @@ import type { StatsSummary } from '@/features/stats/types'
 /** Mirrors the home preview player: 43 levels, 12-day streak, 1240 coins. */
 export const richStatsFixture: StatsSummary = {
   skill_profile: [
-    { key: 'accuracy', label: 'Accuracy', hint: 'How often your commands are accepted first time', value: 91 },
-    { key: 'efficiency', label: 'Efficiency', hint: 'Solving levels without wasted commands', value: 74 },
-    { key: 'independence', label: 'Independence', hint: 'Clearing levels without hints or retries', value: 62 },
-    { key: 'consistency', label: 'Consistency', hint: 'Showing up and finishing what you start', value: 84 },
-    { key: 'mastery', label: 'Mastery', hint: 'Success on hard, boss-level challenges', value: 58 },
-    { key: 'coverage', label: 'Coverage', hint: 'Breadth of git commands you have used', value: 69 },
+    { key: 'git-init', label: 'Initialize', hint: 'Mastery of git init', value: 100, command: 'git init' },
+    { key: 'git-status', label: 'Status', hint: 'Mastery of git status', value: 95, command: 'git status' },
+    { key: 'git-add', label: 'Stage Changes', hint: 'Mastery of git add', value: 88, command: 'git add' },
+    { key: 'git-commit', label: 'Commit', hint: 'Mastery of git commit', value: 82, command: 'git commit' },
+    { key: 'git-log', label: 'History', hint: 'Mastery of git log', value: 74, command: 'git log' },
+    { key: 'git-diff', label: 'Diff', hint: 'Mastery of git diff', value: 68, command: 'git diff' },
+    { key: 'git-branch', label: 'Branching', hint: 'Mastery of git branch', value: 62, command: 'git branch' },
+    { key: 'git-checkout', label: 'Checkout', hint: 'Mastery of git checkout', value: 55, command: 'git checkout' },
+    { key: 'git-merge', label: 'Merge', hint: 'Mastery of git merge', value: 40, command: 'git merge' },
+    { key: 'git-push', label: 'Push', hint: 'Mastery of git push', value: 30, command: 'git push' },
+    { key: 'git-pull', label: 'Pull', hint: 'Mastery of git pull', value: 20, command: 'git pull' },
+    { key: 'git-rebase', label: 'Rebase', hint: 'Mastery of git rebase', value: 0, command: 'git rebase' },
   ],
   activity_trend: [
     { date: '2026-05-29', levels_completed: 2, commands_run: 38 },
@@ -47,12 +53,18 @@ export const richStatsFixture: StatsSummary = {
 /** Brand-new account: everything null/zero - exercises the empty states. */
 export const emptyStatsFixture: StatsSummary = {
   skill_profile: [
-    { key: 'accuracy', label: 'Accuracy', hint: 'How often your commands are accepted first time', value: null },
-    { key: 'efficiency', label: 'Efficiency', hint: 'Solving levels without wasted commands', value: null },
-    { key: 'independence', label: 'Independence', hint: 'Clearing levels without hints or retries', value: null },
-    { key: 'consistency', label: 'Consistency', hint: 'Showing up and finishing what you start', value: null },
-    { key: 'mastery', label: 'Mastery', hint: 'Success on hard, boss-level challenges', value: null },
-    { key: 'coverage', label: 'Coverage', hint: 'Breadth of git commands you have used', value: null },
+    { key: 'git-init', label: 'Initialize', hint: 'Mastery of git init', value: null, command: 'git init' },
+    { key: 'git-status', label: 'Status', hint: 'Mastery of git status', value: null, command: 'git status' },
+    { key: 'git-add', label: 'Stage Changes', hint: 'Mastery of git add', value: null, command: 'git add' },
+    { key: 'git-commit', label: 'Commit', hint: 'Mastery of git commit', value: null, command: 'git commit' },
+    { key: 'git-log', label: 'History', hint: 'Mastery of git log', value: null, command: 'git log' },
+    { key: 'git-diff', label: 'Diff', hint: 'Mastery of git diff', value: null, command: 'git diff' },
+    { key: 'git-branch', label: 'Branching', hint: 'Mastery of git branch', value: null, command: 'git branch' },
+    { key: 'git-checkout', label: 'Checkout', hint: 'Mastery of git checkout', value: null, command: 'git checkout' },
+    { key: 'git-merge', label: 'Merge', hint: 'Mastery of git merge', value: null, command: 'git merge' },
+    { key: 'git-push', label: 'Push', hint: 'Mastery of git push', value: null, command: 'git push' },
+    { key: 'git-pull', label: 'Pull', hint: 'Mastery of git pull', value: null, command: 'git pull' },
+    { key: 'git-rebase', label: 'Rebase', hint: 'Mastery of git rebase', value: null, command: 'git rebase' },
   ],
   activity_trend: [],
   headline: {

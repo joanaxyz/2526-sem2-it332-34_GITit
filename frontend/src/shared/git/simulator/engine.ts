@@ -1,5 +1,9 @@
-import type { RepositorySnapshot } from '@/shared/level/types'
-import { GitCommandParser, normalizeCommand } from '@/shared/git/simulator/parser'
+import type {
+  CommandExecutionPayload,
+  RepositoryCommandState,
+  RepositorySnapshot,
+} from '@/shared/level/types'
+import { GitCommandParser } from '@/shared/git/simulator/parser'
 import {
   GIT_COMMAND_NAMES,
   SUPPORTED_OPTIONS,
@@ -13,7 +17,6 @@ import {
   GitCommandParseError,
   NonGitCommandError,
   SimulatorCommandError,
-  type CommandExecutionPayload,
   type MutableRepositoryState,
   type ParsedGitCommand,
 } from '@/shared/git/simulator/types'
@@ -209,7 +212,9 @@ function result({
 }): CommandExecutionPayload {
   return {
     processed,
-    next_state: state,
+    // Mutable simulator state is normalized to the JSON-safe repository shape
+    // accepted by the generated command contract at this single owner boundary.
+    next_state: state as RepositoryCommandState,
     output,
     normalized_command: normalizedCommand,
     exit_code: exitCode,
@@ -274,5 +279,3 @@ export function computeTargetState(
   }
   return snapshotForCommand(state, true)
 }
-
-export { normalizeCommand }

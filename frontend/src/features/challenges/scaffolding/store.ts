@@ -35,12 +35,3 @@ export function writeScaffoldTriggers(sessionId: number, flags: ScaffoldTriggerF
     // sessionStorage may be unavailable; degrade gracefully
   }
 }
-
-export function clearScaffoldTriggers(sessionId: number): void {
-  if (typeof window === 'undefined') return
-  try {
-    window.sessionStorage.removeItem(storageKey(sessionId))
-  } catch {
-    // ignore
-  }
-}

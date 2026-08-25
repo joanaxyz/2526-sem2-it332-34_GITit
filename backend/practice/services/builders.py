@@ -4,6 +4,8 @@ import json
 import re
 from typing import Any
 
+from django.core.exceptions import FieldDoesNotExist, ValidationError
+
 from evaluation.compiler import compile_evaluation_spec
 from evaluation.engine import EvaluationEngine
 from evaluation.services import StateBasedEvaluator
@@ -60,6 +62,7 @@ class StaticLevelVariantBuilder:
         solution_workspace_files = list(
             self.materializer.render(template.get("solution_workspace_files_template", []), context)
         )
+        variant_model, parent_field = self._variant_model_for(level)
         if solution_workspace_files:
             context["solution_workspace_files"] = solution_workspace_files
         target_state_template = self.materializer.render(
@@ -82,7 +85,6 @@ class StaticLevelVariantBuilder:
             rendered_context,
             fallback_story="Reach the requested repository outcome cleanly.",
         )
-        variant_model, parent_field = self._variant_model_for(level)
         variant = variant_model(
             **{parent_field: level},
             slug=self.materializer.render(template.get("slug_template", "{{case_id}}"), context),
@@ -102,24 +104,34 @@ class StaticLevelVariantBuilder:
             ),
             is_published=True,
         )
+        level_slug = getattr(level, "slug", "<unknown-level>")
         try:
+            # The seed writer uses bulk_create/bulk_update, which intentionally
+            # bypass model validation. Validate the persisted field contract
+            # here so every database backend rejects the same authored input.
+            variant.full_clean(validate_unique=False, validate_constraints=False)
             self.validate(variant, objective_checks=getattr(level, "objective_checks", None) or [])
-        except LevelVariantBuildError as exc:
-            level_slug = getattr(level, "slug", "<unknown-level>")
+        except ValidationError as exc:
             raise LevelVariantBuildError(
-                f"{level_slug}/{case_id}: {exc}"
+                f"{level_slug}/{case_id}: Variant fields violate the persisted model contract: "
+                f"{exc.message_dict}"
             ) from exc
+        except LevelVariantBuildError as exc:
+            raise LevelVariantBuildError(f"{level_slug}/{case_id}: {exc}") from exc
         return variant
 
     def _variant_model_for(self, level):
-        from adventures.models import AdventureWave, AdventureWaveVariant
-        from challenges.models import ChallengeTrial, ChallengeTrialVariant
-
-        if isinstance(level, AdventureWave):
-            return AdventureWaveVariant, "wave"
-        if isinstance(level, ChallengeTrial):
-            return ChallengeTrialVariant, "trial"
-        raise LevelVariantBuildError("Variant build expects an AdventureWave or ChallengeTrial.")
+        try:
+            relation = level._meta.get_field("variants")
+        except (AttributeError, FieldDoesNotExist) as exc:
+            raise LevelVariantBuildError(
+                "Variant build expects a model with a 'variants' reverse relation."
+            ) from exc
+        if not relation.one_to_many or relation.related_model is None:
+            raise LevelVariantBuildError(
+                "Variant build expects 'variants' to be a reverse foreign-key relation."
+            )
+        return relation.related_model, relation.field.name
 
     def _assert_v3_context(self, rendered: Any) -> None:
         """Seed-time strictness: an authored scenario_context_template must be a

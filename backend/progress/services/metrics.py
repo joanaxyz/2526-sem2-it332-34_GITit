@@ -4,12 +4,8 @@ from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 
-from adventures.models import (
-    AdventureLevel,
-    AdventureRun,
-    SkillMastery,
-)
-from challenges.models import ChallengeRun, ChallengeTrial
+from adventures.models import AdventureRun, SkillMastery
+from challenges.models import ChallengeRun
 from common.constants import (
     DIFFICULTY_HARD,
     RESULT_INVALID,
@@ -18,6 +14,7 @@ from common.constants import (
     SESSION_STATUS_COMPLETED,
     SESSION_STATUS_FAILED,
 )
+from curriculum.models import CommandForm, CommandSkill
 from curriculum.selectors import published_stories, stories_completed_map
 from practice.models import CommandStep
 from progress.models import (
@@ -31,14 +28,6 @@ from progress.models import (
 
 TREND_DAYS = 14
 
-SKILL_AXES = [
-    ("accuracy", "Accuracy", "How many of your commands run cleanly, with no typos or invalid git."),
-    ("efficiency", "Efficiency", "How close to the ideal number of commands you solve in."),
-    ("independence", "Independence", "First-try clears that stay within the command budget."),
-    ("consistency", "Consistency", f"How many of the last {TREND_DAYS} days you showed up to train."),
-    ("mastery", "Mastery", "How deeply you've drilled the commands you've met."),
-    ("coverage", "Coverage", "The share of all levels you've completed at least once."),
-]
 
 class MetricsService:
     def dashboard_summary(self, *, player) -> dict:
@@ -59,11 +48,11 @@ class MetricsService:
                     status=SESSION_STATUS_COMPLETED,
                 ),
             ),
-            completed_retry_total=Sum("retry_index", filter=Q(is_replay=False, status=SESSION_STATUS_COMPLETED)),
+            completed_retry_total=Sum(
+                "retry_index", filter=Q(is_replay=False, status=SESSION_STATUS_COMPLETED)
+            ),
         )
-        adventure_counts = AdventureRun.objects.filter(
-            player=player, is_replay=False
-        ).aggregate(
+        adventure_counts = AdventureRun.objects.filter(player=player, is_replay=False).aggregate(
             started=Count("id"),
             completed=Count("id", filter=Q(status=SESSION_STATUS_COMPLETED)),
             failed=Count("id", filter=Q(status=SESSION_STATUS_FAILED)),
@@ -81,7 +70,9 @@ class MetricsService:
                 hard_started=Count("id", filter=Q(challenge_trial__difficulty=DIFFICULTY_HARD)),
                 hard_completed=Count(
                     "id",
-                    filter=Q(challenge_trial__difficulty=DIFFICULTY_HARD, status=SESSION_STATUS_COMPLETED),
+                    filter=Q(
+                        challenge_trial__difficulty=DIFFICULTY_HARD, status=SESSION_STATUS_COMPLETED
+                    ),
                 ),
                 started_count=Count("id"),
                 completed_count=Count("id", filter=Q(status=SESSION_STATUS_COMPLETED)),
@@ -110,16 +101,18 @@ class MetricsService:
             }
             for chapter_number in sorted(chapter_metrics_map)
         }
-        streak = StreakRecord.objects.filter(player=player).only(
-            "current_streak",
-            "longest_streak",
-            "last_completed_on",
-        ).first()
+        streak = (
+            StreakRecord.objects.filter(player=player)
+            .only(
+                "current_streak",
+                "longest_streak",
+                "last_completed_on",
+            )
+            .first()
+        )
         stories = list(published_stories())
         completed_map = stories_completed_map(player=player, stories=stories)
-        completed_stories = [
-            story.slug for story in stories if completed_map.get(story.id, False)
-        ]
+        completed_stories = [story.slug for story in stories if completed_map.get(story.id, False)]
         perfect_stars = (
             AdventureLevelCompletion.objects.filter(player=player, stars=3).count()
             + ChallengeTrialCompletion.objects.filter(player=player, stars=3).count()
@@ -127,8 +120,12 @@ class MetricsService:
         return {
             "kpis": {
                 "scr": self._rate(completed, started),
-                "arc": self._average_retry_count_from_counts(challenge_counts["completed_retry_total"] or 0, completed),
-                "hlcr": self._rate(challenge_counts["hard_completed"] or 0, challenge_counts["hard_started"] or 0),
+                "arc": self._average_retry_count_from_counts(
+                    challenge_counts["completed_retry_total"] or 0, completed
+                ),
+                "hlcr": self._rate(
+                    challenge_counts["hard_completed"] or 0, challenge_counts["hard_started"] or 0
+                ),
             },
             "chapter_kpis": chapter_kpis,
             "counts": {
@@ -162,10 +159,14 @@ class MetricsService:
         today = timezone.localdate()
 
         # Accuracy + total volume from the unified command log (spans both modes).
-        steps = CommandStep.objects.filter(Q(challenge_run__player=player) | Q(attempt__player=player))
+        steps = CommandStep.objects.filter(
+            Q(challenge_run__player=player) | Q(attempt__player=player)
+        )
         step_totals = steps.aggregate(
             total=Count("id"),
-            unclean=Count("id", filter=Q(result_category__in=[RESULT_INVALID, RESULT_UNPROCESSABLE])),
+            unclean=Count(
+                "id", filter=Q(result_category__in=[RESULT_INVALID, RESULT_UNPROCESSABLE])
+            ),
         )
         total_steps = step_totals["total"] or 0
         accuracy = (
@@ -174,57 +175,16 @@ class MetricsService:
             else None
         )
 
-        # Efficiency: share of completions that earned ≥2 stars (within budget).
-        adv_completions = AdventureLevelCompletion.objects.filter(player=player)
-        adv_eff_n = adv_completions.count()
-        adv_eff_hits = adv_completions.filter(stars__gte=2).count()
-        chal_completions = ChallengeTrialCompletion.objects.filter(player=player)
-        chal_eff_n = chal_completions.count()
-        chal_eff_hits = chal_completions.filter(stars__gte=2).count()
-        efficiency = self._blend(
-            [
-                (self._rate(adv_eff_hits, adv_eff_n)["value"], adv_eff_n),
-                (self._rate(chal_eff_hits, chal_eff_n)["value"], chal_eff_n),
-            ]
-        )
+        # Per-command skill mastery: one row per published git command.
+        skill_profile = self._command_skill_profile(player=player)
 
-        # Independence: share of 3-star clears (first-try within budget).
+        # Perfect-clear counts needed for headline.
+        adv_completions = AdventureLevelCompletion.objects.filter(player=player)
+        chal_completions = ChallengeTrialCompletion.objects.filter(player=player)
         adv_perf_hits = adv_completions.filter(stars=3).count()
         chal_perf_hits = chal_completions.filter(stars=3).count()
-        independence = self._blend(
-            [
-                (self._rate(adv_perf_hits, adv_eff_n)["value"], adv_eff_n),
-                (self._rate(chal_perf_hits, chal_eff_n)["value"], chal_eff_n),
-            ]
-        )
-
-        # Consistency: how many of the last TREND_DAYS days had any activity.
-        active_days = self._active_days(player=player, since=since)
-        consistency = round(min(1.0, len(active_days) / TREND_DAYS) * 100, 1) if total_steps else None
-
-        mastery = self._mastery_score(player=player)
-
-        # Coverage: distinct levels completed over all published levels (both ladders).
         adv_done = AdventureLevelCompletion.objects.filter(player=player).count()
         chal_done = ChallengeTrialCompletion.objects.filter(player=player).count()
-        total_levels = (
-            AdventureLevel.objects.filter(is_published=True).count()
-            + ChallengeTrial.objects.filter(is_published=True).count()
-        )
-        coverage = round((adv_done + chal_done) / total_levels * 100, 1) if total_levels else None
-
-        axis_values = {
-            "accuracy": accuracy,
-            "efficiency": efficiency,
-            "independence": independence,
-            "consistency": consistency,
-            "mastery": mastery,
-            "coverage": coverage,
-        }
-        skill_profile = [
-            {"key": key, "label": label, "hint": hint, "value": axis_values[key]}
-            for key, label, hint in SKILL_AXES
-        ]
 
         # Headline numbers.
         chal_counts = ChallengeRun.objects.filter(player=player, is_replay=False).aggregate(
@@ -232,7 +192,10 @@ class MetricsService:
             completed=Count("id", filter=Q(status=SESSION_STATUS_COMPLETED)),
             comebacks=Count("id", filter=Q(status=SESSION_STATUS_COMPLETED, retry_index__gt=0)),
             hard_completed=Count(
-                "id", filter=Q(status=SESSION_STATUS_COMPLETED, challenge_trial__difficulty=DIFFICULTY_HARD)
+                "id",
+                filter=Q(
+                    status=SESSION_STATUS_COMPLETED, challenge_trial__difficulty=DIFFICULTY_HARD
+                ),
             ),
         )
         adv_counts = AdventureRun.objects.filter(player=player, is_replay=False).aggregate(
@@ -241,7 +204,11 @@ class MetricsService:
         )
         started = (chal_counts["started"] or 0) + (adv_counts["started"] or 0)
         completed = (chal_counts["completed"] or 0) + (adv_counts["completed"] or 0)
-        streak = StreakRecord.objects.filter(player=player).only("current_streak", "longest_streak").first()
+        streak = (
+            StreakRecord.objects.filter(player=player)
+            .only("current_streak", "longest_streak")
+            .first()
+        )
         wallet = Wallet.objects.filter(player=player).only("balance").first()
 
         headline = {
@@ -265,6 +232,65 @@ class MetricsService:
             "activity_trend": self._activity_trend(player=player, since=since, today=today),
             "headline": headline,
         }
+
+    def _command_skill_profile(self, *, player) -> list[dict]:
+        """One row per published CommandSkill showing per-command mastery %.
+
+        Mastery for each skill = average of (solves / target) across its playable
+        forms, capped at 100%. Skills with no playable forms are shown at 0%.
+        """
+        from adventures.services import form_solve_targets
+
+        skills = list(
+            CommandSkill.objects.filter(is_published=True).order_by("sort_order", "base_command")
+        )
+        if not skills:
+            return []
+
+        # Collect all playable form IDs grouped by skill.
+        skill_ids = [s.id for s in skills]
+        forms = list(
+            CommandForm.objects.filter(
+                command_skill_id__in=skill_ids,
+                is_published=True,
+                is_playable=True,
+            ).only("id", "command_skill_id")
+        )
+        forms_by_skill: dict[int, list[int]] = {}
+        all_form_ids: set[int] = set()
+        for f in forms:
+            forms_by_skill.setdefault(f.command_skill_id, []).append(f.id)
+            all_form_ids.add(f.id)
+
+        targets = form_solve_targets(all_form_ids) if all_form_ids else {}
+        solves_map: dict[int, int] = {}
+        if all_form_ids:
+            for row in SkillMastery.objects.filter(
+                player=player, command_form_id__in=all_form_ids
+            ).values_list("command_form_id", "solves"):
+                solves_map[row[0]] = row[1]
+
+        rows = []
+        for skill in skills:
+            form_ids = forms_by_skill.get(skill.id, [])
+            if not form_ids:
+                value = None
+            else:
+                ratios = [
+                    min(1.0, (solves_map.get(fid, 0) / max(1, targets.get(fid, 1))))
+                    for fid in form_ids
+                ]
+                value = round(sum(ratios) / len(ratios) * 100, 1)
+            rows.append(
+                {
+                    "key": skill.slug,
+                    "label": skill.title,
+                    "hint": skill.summary or f"Mastery of {skill.base_command}",
+                    "value": value,
+                    "command": skill.base_command,
+                }
+            )
+        return rows
 
     def _mastery_score(self, *, player) -> float | None:
         """Blend of adventure solve depth (solves / authored repetition) and
@@ -408,7 +434,9 @@ class MetricsService:
                 "level_title": row["challenge_trial__challenge_level__title"],
                 "attempts": row["attempts"],
                 "retries": row["retries"],
-                "label": "No trend available" if row["attempts"] < 2 else f"{row['retries']} retry runs",
+                "label": "No trend available"
+                if row["attempts"] < 2
+                else f"{row['retries']} retry runs",
             }
             for row in rows
         ]

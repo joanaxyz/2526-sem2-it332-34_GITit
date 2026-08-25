@@ -6,6 +6,7 @@ from typing import Any
 
 from django.db import transaction
 from django.utils.text import slugify
+from rest_framework.exceptions import ValidationError
 
 from adventures.models import (
     AdventureLevel,
@@ -21,6 +22,7 @@ from authoring.schemas import (
 )
 from challenges.models import ChallengeLevel, ChallengeTrial, ChallengeTrialVariant
 from curriculum.models import (
+    MANAGEMENT_SOURCE_RUNTIME,
     Chapter,
     ChapterLesson,
     CommandForm,
@@ -38,11 +40,22 @@ class ContentRuntimeCompiler:
 
     @transaction.atomic
     def compile(self, *, content: ContentDefinition) -> PublishedContentRuntime:
-        signature = self._signature(content.definition)
+        signature = self._signature(content)
         runtime = getattr(content, "runtime", None)
         if runtime and runtime.definition_signature == signature:
             return runtime
         chapter = self._runtime_chapter(content)
+        if content.official_chapter_id:
+            self._assert_official_runtime_slugs_available(
+                content=content,
+                chapter=chapter,
+            )
+        # Drop the pointer row before replacing compiled targets. The database
+        # enforces that a runtime always references exactly one target, so an
+        # adventure/challenge target cannot pass through an all-null state while
+        # its source levels are being rebuilt.
+        if runtime:
+            runtime.delete()
         adventure = challenge = lesson = None
         if content.kind == ContentKind.ADVENTURE:
             adventure = self._compile_adventure(content, chapter)
@@ -62,7 +75,55 @@ class ContentRuntimeCompiler:
         )
         return runtime
 
+    def _assert_official_runtime_slugs_available(
+        self,
+        *,
+        content: ContentDefinition,
+        chapter: Chapter,
+    ) -> None:
+        if content.kind == ContentKind.ADVENTURE:
+            slugs = [
+                authored.get("slug") or f"ugc-adventure-{content.id}"
+                for authored in content_levels(content.definition)
+            ] or [f"ugc-adventure-{content.id}"]
+            conflicts = AdventureLevel.objects.filter(
+                chapter=chapter,
+                slug__in=slugs,
+            ).exclude(source_content_definition=content)
+        elif content.kind == ContentKind.CHALLENGE:
+            authored_levels = content_levels(content.definition)
+            if challenge_is_nested(content.definition):
+                slugs = [
+                    authored.get("slug") or f"ugc-challenge-{content.id}-level-{index + 1}"
+                    for index, authored in enumerate(authored_levels)
+                ]
+            else:
+                slugs = [f"ugc-challenge-{content.id}-level-1"]
+            conflicts = ChallengeLevel.objects.filter(
+                chapter=chapter,
+                slug__in=slugs,
+            ).exclude(source_content_definition=content)
+        else:
+            slugs = [f"ugc-lesson-{content.id}"]
+            conflicts = ChapterLesson.objects.filter(
+                chapter=chapter,
+                slug__in=slugs,
+            ).exclude(source_content_definition=content)
+
+        duplicate_slugs = len(slugs) != len(set(slugs))
+        if duplicate_slugs or conflicts.exists():
+            raise ValidationError(
+                {
+                    "definition": (
+                        "A runtime slug already exists in the selected official chapter. "
+                        "Use unique level slugs."
+                    )
+                }
+            )
+
     def _runtime_chapter(self, content: ContentDefinition) -> Chapter:
+        if content.official_chapter_id is not None:
+            return content.official_chapter
         if content.chapter_id is not None:
             chapter = content.chapter
             number = GROUPED_CHAPTER_NUMBER_BASE + chapter.id
@@ -86,6 +147,7 @@ class ContentRuntimeCompiler:
                 "is_published": False,
                 "sort_order": number,
                 "battle_stage": {},
+                "management_source": MANAGEMENT_SOURCE_RUNTIME,
             },
         )[0]
 
@@ -98,8 +160,6 @@ class ContentRuntimeCompiler:
                 chapter=chapter,
                 slug=authored["slug"],
                 title=authored["title"],
-                description=content.summary,
-                brief=authored.get("brief", "") or "",
                 is_published=True,
                 sort_order=index,
                 source_content_definition=content,
@@ -149,13 +209,10 @@ class ContentRuntimeCompiler:
                 chapter=chapter,
                 slug=f"ugc-adventure-{content.id}",
                 title=content.title,
-                description=content.summary,
-                brief=content.summary,
                 is_published=True,
                 source_content_definition=content,
             )
         return first_level
-
 
     def _compile_challenge(self, content: ContentDefinition, chapter: Chapter) -> ChallengeLevel:
         # Grouped authored chapters share one runtime Chapter, so challenge
@@ -181,7 +238,6 @@ class ContentRuntimeCompiler:
                         else authored.get("slug") or f"{slug_base}-level-{index + 1}"
                     ),
                     authored.get("title") or content.title,
-                    authored.get("brief", "") or content.summary,
                     authored,
                     level_trials(authored),
                 )
@@ -192,20 +248,18 @@ class ContentRuntimeCompiler:
                 (
                     f"{slug_base}-level-1",
                     content.title,
-                    content.summary,
                     None,
                     authored_levels,
                 )
             ]
         first_level = None
-        for level_index, (slug, title, brief, authored_level, trials) in enumerate(level_groups):
+        for level_index, (slug, title, authored_level, trials) in enumerate(level_groups):
             challenge_level = ChallengeLevel.objects.create(
                 chapter=chapter,
                 slug=slug,
                 title=title,
                 summary=content.summary,
                 narrative=content.definition.get("narrative", content.summary),
-                brief=brief,
                 is_published=True,
                 sort_order=level_index,
                 source_content_definition=content,
@@ -252,12 +306,10 @@ class ContentRuntimeCompiler:
                 title=content.title,
                 summary=content.summary,
                 narrative=content.definition.get("narrative", content.summary),
-                brief=content.summary,
                 is_published=True,
                 source_content_definition=content,
             )
         return first_level
-
 
     def _compile_lesson(self, content: ContentDefinition, chapter: Chapter) -> ChapterLesson:
         definition = content.definition or {}
@@ -274,7 +326,6 @@ class ContentRuntimeCompiler:
             },
         )[0]
 
-
     def _command_form_for_content(
         self,
         *,
@@ -282,9 +333,10 @@ class ContentRuntimeCompiler:
         chapter: Chapter,
         required: bool = True,
     ) -> CommandForm | None:
-        base_command = content.command_family or str(
-            (content.definition or {}).get("base_command") or ""
-        ).strip()
+        base_command = (
+            content.command_family
+            or str((content.definition or {}).get("base_command") or "").strip()
+        )
         if not base_command:
             if required:
                 base_command = "git"
@@ -298,6 +350,7 @@ class ContentRuntimeCompiler:
                 "summary": content.summary,
                 "is_published": True,
                 "sort_order": 0,
+                "source_content_definition": content,
             },
         )[0]
         return CommandForm.objects.update_or_create(
@@ -327,11 +380,7 @@ class ContentRuntimeCompiler:
         content so legacy definitions keep their one-form mastery behaviour."""
         ids = authored.get("command_forms")
         if isinstance(ids, list) and ids:
-            forms = list(
-                CommandForm.objects.filter(
-                    id__in=[i for i in ids if isinstance(i, int)]
-                )
-            )
+            forms = list(CommandForm.objects.filter(id__in=[i for i in ids if isinstance(i, int)]))
             if forms:
                 return forms
         if fallback is not None:
@@ -462,10 +511,18 @@ class ContentRuntimeCompiler:
             return self.simulator.normalize_state(authored_target)
         return self.simulator.normalize_state(initial_state)
 
-    def _signature(self, definition: dict) -> str:
+    def _signature(self, content: ContentDefinition) -> str:
         return hashlib.sha256(
             json.dumps(
-                definition,
+                {
+                    "kind": content.kind,
+                    "title": content.title,
+                    "summary": content.summary,
+                    "command_family": content.command_family,
+                    "chapter_id": content.chapter_id,
+                    "official_chapter_id": content.official_chapter_id,
+                    "definition": content.definition,
+                },
                 sort_keys=True,
                 separators=(",", ":"),
                 default=str,

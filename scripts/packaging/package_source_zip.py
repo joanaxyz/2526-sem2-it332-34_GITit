@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Create a clean source zip without runtime/build artifacts."""
+
 from __future__ import annotations
 
 import argparse

@@ -387,6 +387,19 @@
   color: rgba(219, 234, 254, 0.9);
 }
 
+.story-skill-reward-desc a {
+  color: rgb(var(--theme-primary-rgb));
+  font-weight: 750;
+  text-underline-offset: 0.18em;
+}
+
+.story-skill-reward-desc a:hover,
+.story-skill-reward-desc a:focus-visible {
+  color: hsl(var(--foreground));
+  outline: none;
+  text-decoration-thickness: 2px;
+}
+
 
 .story-map-rail-controls,
 .story-map-rail-close,

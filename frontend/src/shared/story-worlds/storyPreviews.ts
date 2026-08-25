@@ -31,16 +31,11 @@ const BACKGROUND_LABEL_OVERRIDES: Record<string, string> = {
   'skyline-12-command-research-roof': 'Street-Shop Plaza',
 }
 
-export function backgroundLabel(src: string): string {
+function backgroundLabel(src: string): string {
   const base = src.split('/').pop()?.replace(/\.png$/, '') ?? ''
   if (BACKGROUND_LABEL_OVERRIDES[base]) return BACKGROUND_LABEL_OVERRIDES[base]
 
   return titleCase(base.replace(/^chapter-\d+-/, '')) || 'Battle Ground'
-}
-
-export function monsterLabel(src: string): string {
-  const base = src.split('/').pop()?.replace(/\.png$/, '') ?? ''
-  return titleCase(base)
 }
 
 export function storyPreview(slug: string): StoryPreview | undefined {

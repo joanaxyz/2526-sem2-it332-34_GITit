@@ -12,7 +12,9 @@ from evaluation.compiler import compile_evaluation_spec
 
 
 def test_repository_state_validator_accepts_minimal_state():
-    assert validate_repository_state_payload({"working_tree": {"README.md": "draft"}})["working_tree"]
+    assert validate_repository_state_payload({"working_tree": {"README.md": "draft"}})[
+        "working_tree"
+    ]
 
 
 def test_repository_state_validator_accepts_uninitialized_head():
@@ -116,7 +118,10 @@ def test_evaluation_spec_validator_accepts_current_contract():
         ([], "evaluation_spec must be an object"),
         ({"state_requirements": []}, "state_requirements must be an object"),
         ({"process_requirements": []}, "process_requirements must be an object"),
-        ({"process_requirements": {"required_commands": ["git init", 3]}}, r"required_commands\[1\]"),
+        (
+            {"process_requirements": {"required_commands": ["git init", 3]}},
+            r"required_commands\[1\]",
+        ),
         ({"completion_policy": {"mode": "magic"}}, "unsupported completion policy mode"),
     ],
 )

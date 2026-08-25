@@ -1,4 +1,4 @@
-export function levelTourStorageKey(userId?: number | null) {
+function levelTourStorageKey(userId?: number | null) {
   return `git-it-practice-workspace-tour:${userId ?? 'guest'}`
 }
 

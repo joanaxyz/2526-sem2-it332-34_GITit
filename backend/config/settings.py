@@ -22,21 +22,16 @@ def _clean_env_list(values: list[str]) -> list[str]:
 env = environ.Env(
     # Safer default. Your local .env should explicitly set DJANGO_DEBUG=True.
     DJANGO_DEBUG=(bool, False),
-
     DJANGO_ALLOWED_HOSTS=(list, []),
     DJANGO_CORS_ALLOWED_ORIGINS=(list, []),
     DJANGO_CSRF_TRUSTED_ORIGINS=(list, []),
     CORS_ALLOW_CREDENTIALS=(bool, True),
-
     PERFORMANCE_TIMING_ENABLED=(bool, False),
     ALLOW_DESTRUCTIVE_SEED_RESET=(bool, False),
-
     DJANGO_TRUST_PROXY_HEADERS=(bool, False),
     DJANGO_TRUSTED_PROXY_IPS=(list, []),
-
     AUTH_LOGIN_MAX_ATTEMPTS=(int, 5),
     AUTH_LOGIN_LOCKOUT_SECONDS=(int, 300),
-
     EMAIL_BACKEND=(str, "django.core.mail.backends.console.EmailBackend"),
     EMAIL_HOST=(str, ""),
     EMAIL_PORT=(int, 587),
@@ -45,7 +40,6 @@ env = environ.Env(
     EMAIL_USE_TLS=(bool, True),
     DEFAULT_FROM_EMAIL=(str, "GIT it! <no-reply@example.com>"),
     PASSWORD_RESET_TIMEOUT=(int, 3600),
-
     JWT_ACCESS_TOKEN_LIFETIME_MINUTES=(int, 15),
     JWT_REFRESH_TOKEN_LIFETIME_DAYS=(int, 7),
     JWT_COOKIE_NAME=(str, "git_it_refresh"),
@@ -53,7 +47,6 @@ env = environ.Env(
     JWT_COOKIE_DOMAIN=(str, ""),
     JWT_COOKIE_SAMESITE=(str, "Strict"),
     JWT_COOKIE_SECURE=(bool, False),
-
     SECURE_SSL_REDIRECT=(bool, False),
     SESSION_COOKIE_SECURE=(bool, False),
     CSRF_COOKIE_SECURE=(bool, False),
@@ -62,7 +55,6 @@ env = environ.Env(
     SECURE_HSTS_PRELOAD=(bool, False),
     SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
     SECURE_REFERRER_POLICY=(str, "same-origin"),
-
     API_VERSION=(str, "0.1.0"),
 )
 
@@ -86,7 +78,7 @@ else:
         raise RuntimeError(
             "DJANGO_SECRET_KEY must be set to a unique secret when DJANGO_DEBUG=False."
         )
-    
+
 PERFORMANCE_TIMING_ENABLED = env("PERFORMANCE_TIMING_ENABLED", default=DEBUG)
 
 ALLOWED_HOSTS = _clean_env_list(env("DJANGO_ALLOWED_HOSTS"))
@@ -118,7 +110,6 @@ INSTALLED_APPS = [
     "simulator",
     "evaluation",
     "progress",
-    "payments",
     "common",
     "adminconsole",
 ]
@@ -219,9 +210,7 @@ if REDIS_URL:
             "LOCATION": REDIS_URL,
             "OPTIONS": {
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
-                "SOCKET_CONNECT_TIMEOUT": env.float(
-                    "REDIS_SOCKET_CONNECT_TIMEOUT", default=0.5
-                ),
+                "SOCKET_CONNECT_TIMEOUT": env.float("REDIS_SOCKET_CONNECT_TIMEOUT", default=0.5),
                 "SOCKET_TIMEOUT": env.float("REDIS_SOCKET_TIMEOUT", default=0.5),
             },
         }
@@ -280,9 +269,7 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
-    },
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -298,10 +285,7 @@ if DEBUG and not CORS_ALLOWED_ORIGINS:
 CORS_ALLOW_CREDENTIALS = env("CORS_ALLOW_CREDENTIALS")
 CORS_ALLOW_HEADERS = (*default_headers, "x-git-it-client")
 
-CSRF_TRUSTED_ORIGINS = (
-    _clean_env_list(env("DJANGO_CSRF_TRUSTED_ORIGINS"))
-    or CORS_ALLOWED_ORIGINS
-)
+CSRF_TRUSTED_ORIGINS = _clean_env_list(env("DJANGO_CSRF_TRUSTED_ORIGINS")) or CORS_ALLOWED_ORIGINS
 
 SECURE_SSL_REDIRECT = env("SECURE_SSL_REDIRECT")
 SESSION_COOKIE_SECURE = env("SESSION_COOKIE_SECURE", default=env("JWT_COOKIE_SECURE"))
@@ -329,9 +313,7 @@ if not DEBUG and SECURE_HSTS_SECONDS <= 0:
     raise RuntimeError("SECURE_HSTS_SECONDS must be set when DJANGO_DEBUG=False.")
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "accounts.authentication.VersionedJWTAuthentication",
-    ),
+    "DEFAULT_AUTHENTICATION_CLASSES": ("accounts.authentication.VersionedJWTAuthentication",),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
@@ -344,7 +326,9 @@ REST_FRAMEWORK = {
         "auth_register": env("THROTTLE_AUTH_REGISTER", default="60/hour"),
         "auth_refresh": env("THROTTLE_AUTH_REFRESH", default="600/hour"),
         "auth_password_reset": env("THROTTLE_AUTH_PASSWORD_RESET", default="20/hour"),
-        "auth_password_reset_confirm": env("THROTTLE_AUTH_PASSWORD_RESET_CONFIRM", default="60/hour"),
+        "auth_password_reset_confirm": env(
+            "THROTTLE_AUTH_PASSWORD_RESET_CONFIRM", default="60/hour"
+        ),
         "command_submit": env("THROTTLE_COMMAND_SUBMIT", default="120/min"),
     },
 }
@@ -395,11 +379,8 @@ EMAIL_USE_TLS = env("EMAIL_USE_TLS")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 PASSWORD_RESET_TIMEOUT = env("PASSWORD_RESET_TIMEOUT")
 
-# --- Stripe (GitCoin top-up packs) ------------------------------------------
-# Test-mode keys are enough for a capstone demo: hosted Checkout redirect, no
-# card handling in this codebase at all. Get them from the Stripe dashboard's
-# "Developers -> API keys" (test mode) and "Developers -> Webhooks" pages.
-STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="").strip()
-STRIPE_WEBHOOK_SECRET = env("STRIPE_WEBHOOK_SECRET", default="").strip()
-# Where Stripe Checkout redirects back to after payment.
 FRONTEND_BASE_URL = env("FRONTEND_BASE_URL", default="http://localhost:5173").rstrip("/")
+
+if not DEBUG:
+    if not FRONTEND_BASE_URL.startswith("https://"):
+        raise RuntimeError("FRONTEND_BASE_URL must be an HTTPS origin when DJANGO_DEBUG=False.")

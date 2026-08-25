@@ -96,7 +96,9 @@ def test_default_story_purchase_is_free_and_idempotent(db, django_user_model):
     create_story()
     user = make_user(django_user_model, "default-story-free")
     player = get_or_create_player(user)
-    WalletService().award(player=player, amount=75, reason="test_seed", award_key="test-seed:default-story")
+    WalletService().award(
+        player=player, amount=75, reason="test_seed", award_key="test-seed:default-story"
+    )
     client = authenticated_client(user)
 
     first = client.post(
@@ -113,7 +115,9 @@ def test_default_story_purchase_is_free_and_idempotent(db, django_user_model):
     assert first.status_code == 201
     assert second.status_code == 201
     assert Wallet.objects.get(player=player).balance == 75
-    assert not Entitlement.objects.filter(player=player, kind=KIND_STORY, slug="arcane-spire").exists()
+    assert not Entitlement.objects.filter(
+        player=player, kind=KIND_STORY, slug="arcane-spire"
+    ).exists()
     assert not CoinTransaction.objects.filter(player=player, reason="shop_purchase").exists()
 
 

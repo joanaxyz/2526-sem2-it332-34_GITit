@@ -17,7 +17,7 @@ class ChallengeTrialInline(admin.TabularInline):
 class ChallengeLevelAdmin(admin.ModelAdmin):
     list_display = ("slug", "title", "chapter", "is_published", "sort_order")
     list_filter = ("is_published", "chapter")
-    search_fields = ("title", "slug", "summary", "narrative", "brief")
+    search_fields = ("title", "slug", "summary", "narrative")
     inlines = [ChallengeTrialInline]
 
 

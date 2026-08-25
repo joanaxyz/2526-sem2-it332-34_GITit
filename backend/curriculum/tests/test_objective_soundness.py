@@ -39,7 +39,9 @@ def test_objective_checks_are_false_on_initial_and_true_on_target(level, variant
     assert target, f"{level['slug']}::{variant['case_id']} has no target state."
 
     evaluator = ObjectiveChecklistEvaluator()
-    on_initial = evaluator.evaluate(checks, state=initial, initial_state=initial, executed_commands=[])
+    on_initial = evaluator.evaluate(
+        checks, state=initial, initial_state=initial, executed_commands=[]
+    )
     on_target = evaluator.evaluate(
         checks, state=target, initial_state=initial, executed_commands=solution
     )

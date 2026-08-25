@@ -1,5 +1,5 @@
 {
-  "id": "cursed-lantern-skill-effect",
+  "id": "monster-08-skill-effect",
   "label": "Cursed Lantern Skill Effect",
   "motif": "blue flame spin",
   "playback": "target",
@@ -29,5 +29,15 @@
     }
   ],
   "anchor": "center",
+  "placeAnchor": {
+    "x": 0.5117,
+    "y": 0.4785
+  },
+  "placeBounds": {
+    "left": 0.0938,
+    "top": 0.1484,
+    "right": 0.9141,
+    "bottom": 0.832
+  },
   "placement": "caster"
 }

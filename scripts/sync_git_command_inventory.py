@@ -15,7 +15,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "backend" / "curriculum" / "git_inventory"
-CATEGORY_RE = re.compile(r"^[A-Za-z].*Commands|^Interacting with Others$|^User-facing |^Developer-facing |^External commands$")
+CATEGORY_RE = re.compile(
+    r"^[A-Za-z].*Commands|^Interacting with Others$|^User-facing |^Developer-facing |^External commands$"
+)
 COMMAND_RE = re.compile(r"^\s{3}([a-z0-9][a-z0-9-]*)\s{2,}(.+)$")
 
 

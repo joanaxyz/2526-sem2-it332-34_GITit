@@ -89,7 +89,9 @@ def test_buying_a_story_unlocks_its_chapters(db, django_user_model):
     )
     user = make_user(django_user_model)
     player = get_or_create_player(user)
-    WalletService().award(player=player, amount=200, reason="test_seed", award_key="test-seed:story")
+    WalletService().award(
+        player=player, amount=200, reason="test_seed", award_key="test-seed:story"
+    )
     client = APIClient()
     client.force_authenticate(user=user)
 

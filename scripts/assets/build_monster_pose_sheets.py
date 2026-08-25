@@ -349,7 +349,9 @@ def death_left_foot_anchor(mask: Image.Image) -> tuple[float, float]:
         min_x = min(x for x, _, _ in candidates)
         x_slack = max(4, round(width * 0.04))
         near_left = [candidate for candidate in candidates if candidate[0] <= min_x + x_slack]
-        _, y, segment = max(near_left, key=lambda candidate: (candidate[1], -segment_center(candidate[2])))
+        _, y, segment = max(
+            near_left, key=lambda candidate: (candidate[1], -segment_center(candidate[2]))
+        )
         return (segment[0], y)
 
     return left_foot_anchor(mask)
@@ -461,7 +463,9 @@ def plan_monster(world: str, slug: str, monster: dict, padding_ratio: float) -> 
     if "idle" not in poses:
         return None
     displayed_frame_size = displayed_frame_size_for(monster)
-    effective_padding_ratio = max(padding_ratio, PADDING_RATIO_OVERRIDES.get((world, slug), padding_ratio))
+    effective_padding_ratio = max(
+        padding_ratio, PADDING_RATIO_OVERRIDES.get((world, slug), padding_ratio)
+    )
     padding = max(24, round(displayed_frame_size * effective_padding_ratio))
 
     min_rel_x = math.inf
@@ -512,10 +516,14 @@ def render_pose_frame(plan: MonsterPlan, source: PoseSource) -> Image.Image:
         return apply_rendered_pose_offset(plan, source, frame)
     if source.name == "death":
         return apply_rendered_pose_offset(plan, source, frame)
-    return apply_rendered_pose_offset(plan, source, align_rendered_frame_to_anchor(frame, plan.anchor))
+    return apply_rendered_pose_offset(
+        plan, source, align_rendered_frame_to_anchor(frame, plan.anchor)
+    )
 
 
-def apply_rendered_pose_offset(plan: MonsterPlan, source: PoseSource, frame: Image.Image) -> Image.Image:
+def apply_rendered_pose_offset(
+    plan: MonsterPlan, source: PoseSource, frame: Image.Image
+) -> Image.Image:
     dx, dy = RENDERED_POSE_OFFSETS.get((plan.world, plan.slug, source.name), (0, 0))
     return shift_frame(frame, dx, dy)
 
@@ -567,7 +575,9 @@ def draw_review_cell(frame: Image.Image, plan: MonsterPlan, pose: str) -> Image.
     cell_w = 220
     label_h = 36
     scale = min((cell_w - 12) / frame.width, (cell_w - label_h - 12) / frame.height)
-    shown = frame.resize((round(frame.width * scale), round(frame.height * scale)), Image.Resampling.NEAREST)
+    shown = frame.resize(
+        (round(frame.width * scale), round(frame.height * scale)), Image.Resampling.NEAREST
+    )
     cell = Image.new("RGB", (cell_w, cell_w), (248, 250, 252))
     draw = ImageDraw.Draw(cell)
     draw.text((6, 5), f"{pose} {frame.width}x{frame.height}", fill=(17, 24, 39))
@@ -579,7 +589,9 @@ def draw_review_cell(frame: Image.Image, plan: MonsterPlan, pose: str) -> Image.
     anchor_y = y0 + plan.anchor[1] * scale
     draw.line((anchor_x, y0, anchor_x, y0 + shown.height), fill=(239, 68, 68), width=1)
     draw.line((x0, anchor_y, x0 + shown.width, anchor_y), fill=(239, 68, 68), width=1)
-    draw.ellipse((anchor_x - 3, anchor_y - 3, anchor_x + 3, anchor_y + 3), outline=(185, 28, 28), width=2)
+    draw.ellipse(
+        (anchor_x - 3, anchor_y - 3, anchor_x + 3, anchor_y + 3), outline=(185, 28, 28), width=2
+    )
 
     bbox = visible_bbox(frame)
     if bbox is not None:
@@ -597,7 +609,9 @@ def draw_review_cell(frame: Image.Image, plan: MonsterPlan, pose: str) -> Image.
     return cell
 
 
-def build_review(plans: list[MonsterPlan], rendered: dict[tuple[str, str, str], Image.Image], path: Path) -> None:
+def build_review(
+    plans: list[MonsterPlan], rendered: dict[tuple[str, str, str], Image.Image], path: Path
+) -> None:
     row_h = 242
     label_w = 180
     cell_w = 220
@@ -677,10 +691,18 @@ def update_manifest(world: str, plans: list[MonsterPlan], dry_run: bool) -> None
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build monster pose sheets from raw stills.")
-    parser.add_argument("--world", action="append", choices=DEFAULT_WORLDS, help="World to process. Repeatable.")
-    parser.add_argument("--monster", action="append", help="Only process the named monster slug. Repeatable.")
-    parser.add_argument("--dry-run", action="store_true", help="Create the review only; do not write PNG outputs.")
-    parser.add_argument("--padding-ratio", type=float, default=0.08, help="Frame padding as a ratio of frame size.")
+    parser.add_argument(
+        "--world", action="append", choices=DEFAULT_WORLDS, help="World to process. Repeatable."
+    )
+    parser.add_argument(
+        "--monster", action="append", help="Only process the named monster slug. Repeatable."
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Create the review only; do not write PNG outputs."
+    )
+    parser.add_argument(
+        "--padding-ratio", type=float, default=0.08, help="Frame padding as a ratio of frame size."
+    )
     parser.add_argument(
         "--review-out",
         type=Path,

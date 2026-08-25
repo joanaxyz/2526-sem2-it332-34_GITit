@@ -1,0 +1,660 @@
+{
+  "assertion_count": 216,
+  "normalization": [
+    "remove namespace = _guard_namespace() assignments",
+    "remove symbol = _guard_namespace()[symbol] assignments",
+    "rewrite namespace[symbol] and _guard_namespace()[symbol] to direct symbol names"
+  ],
+  "schema_version": 1,
+  "source_path": "backend/common/tests/test_architecture_guard_algorithms.py",
+  "source_sha256": "95aa671dd3e69d8ace066f7db89ef73692b222902dcd98023df810689ad84824",
+  "test_count": 43,
+  "tests": {
+    "test_adminconsole_layer_guard_rejects_wrong_owner_dependencies": {
+      "assertion_ast_sha256": [
+        "815dba602b9896bdf12df75f81b3e413cbdc4abe49a1e4bfc91773134dd5444b",
+        "fa154a846c11599889dba5fe972f18075f3926b43055fb498590c4dcbda759d0",
+        "8c6ea0f6e1f1c6a2b2f2e6463324ec37c07556e57409ef1a35aa7312fbb09af7",
+        "791aec2bf11c792d27dc38afa66b2c9db1427c4e38a2dfe9b10324bb2144e9f6",
+        "05c383f55106be37cbb7d192501f6244e88c0281b92648948c6671205b73ee63",
+        "ed43a433306ccd2138820e2095b42c62dd7b6517895de40af31020d78f0eefa4",
+        "3ce874126efde7b451bca0076cf1becfcbd4b0f21306d0b3a7370e9543bd70e7",
+        "e0bab74e94f3ad56733fa01163bc6a7ae31a15afd20db733ba4db712c3260b3e",
+        "b893f5dffe0c0acc5e353c0b7315404de07f0f534e726ddfdff73bbaae71a607",
+        "088d0bcc46dedeb2dde7327878c5cc9ffec0c627b28ec5fba472da687e4fdfbc",
+        "c10a4db5427b36034e5d3c04bc9ed336ae1e89a301d0aafd9538901ae2881b6e",
+        "e4ea80476054d099faf49a152888a7eae22b70edc6e53c748aa4a96ed1921884"
+      ],
+      "assertion_count": 12,
+      "normalized_ast_sha256": "9acc039607598bcfb8d0e84a27f750159dfce49e390292b151ee8df039cbd523",
+      "pre_cutover_lines": [
+        25,
+        84
+      ]
+    },
+    "test_adminconsole_runtime_layers_obey_http_read_ownership": {
+      "assertion_ast_sha256": [
+        "2fb4fe4fc3301f702f34e59e81feee5ba56cf121b0a9bf821c3be07d287bc91d",
+        "cc0023c9846c4e5f30b0323171cce68de1aa6b896ee01fed7e19cc70c182f8c6"
+      ],
+      "assertion_count": 2,
+      "normalized_ast_sha256": "f8e8d17b3ef6883624aa00068442e408e289694ace28ccfc32a690dedb890d48",
+      "pre_cutover_lines": [
+        87,
+        91
+      ]
+    },
+    "test_architecture_guard_detects_runtime_cycles_deterministically": {
+      "assertion_ast_sha256": [
+        "15ea124717d5389b91252a811e8dbb6d1b9aece464da456f66891f178a842bdf"
+      ],
+      "assertion_count": 1,
+      "normalized_ast_sha256": "11eaa1d0de9d0f49baadd3e26e89ee54e73b4a4042031a5b86b206e97165e35b",
+      "pre_cutover_lines": [
+        12,
+        22
+      ]
+    },
+    "test_auth_contract_guard_allows_state_messages_and_error_props": {
+      "assertion_ast_sha256": [
+        "bd5da71fcef61b3952d4f63968409cbbbe6b46f7f7031f2206cf9e714371e46e"
+      ],
+      "assertion_count": 1,
+      "normalized_ast_sha256": "2c70f37b6801c970e795818c9687a22dd432bd0539064c7a6297a2368050b282",
+      "pre_cutover_lines": [
+        1652,
+        1680
+      ]
+    },
+    "test_auth_contract_guard_rejects_aliases_wrappers_and_raw_paths": {
+      "assertion_ast_sha256": [
+        "e0ad23ef0d498f15ce3a00d3a3764bd52c4bdfb501a421aedafa27097a3d6b9b",
+        "d8fd181098b2af9766ea0fa9a9bf52899e6659d8ce2b23b2a4e79502f517a401",
+        "64170748219f2d5ff9c74b35146f52120c7de2c731420fecf21f5c8ee56c9573",
+        "c83d656da955ee08fa0f3d5f6424e973bdc205266ac3c13d921b6797b7139fc4",
+        "1dec43e3baa87080982fd52b8163d016e0184e1581033f50f25f8167b730fa0d",
+        "08c7d21a0597eff47f50120ba991e63ab1c3c2c13356edf8a47e226bbcda08bb",
+        "ef8e77bdd18dade339a9462e5fc33f1932c5ab78d6cc419df8902e68620651bd",
+        "64ea18e68c3b55319f7d4b0d9c9ab616652d5c045128090130b572875c24135d"
+      ],
+      "assertion_count": 8,
+      "normalized_ast_sha256": "19f6edeb27d22d334f890aa47552949fb9b3871e602a7f894f1da82ae5ffb111",
+      "pre_cutover_lines": [
+        1523,
+        1649
+      ]
+    },
+    "test_auth_contract_guard_rejects_secondary_backend_shadows": {
+      "assertion_ast_sha256": [
+        "2ec4a8fb3f9b0e2bac921a8881fadfb08ca32a5956ec13eb3ae90d0c98309a16",
+        "85364edd13f9c1bb8013e277358f4cf462dd6d3a574da4dd2de3df23d9c13935",
+        "99176ea9b23ef722264a98ef7f1ed055dc4b5149121bd7f24329b9f98c0658c9",
+        "e0507c68da6ef6f72643fc9970650b6a814e3dd7bd0ee85e7f8ddad23ae36f6d",
+        "6fefea20fcbf744a9a1632cf176ceb09b141be03893c4345ec0439b738b695d5",
+        "5ee72667d36b95f0180906b8f3da0fa0f4244d6059dc79ce8d4066136d0cfa83"
+      ],
+      "assertion_count": 6,
+      "normalized_ast_sha256": "5153f6a4dbbe86f97bee39350ff5b051ec44f64b8a8040f64f4ec4e30a83c88c",
+      "pre_cutover_lines": [
+        1490,
+        1520
+      ]
+    },
+    "test_auth_contract_guard_rejects_wrong_owners_and_manual_overrides": {
+      "assertion_ast_sha256": [
+        "a4bb579ea1f68478647df3380e54648b51c04f6be4cb8260c8d35f39f9eed901",
+        "8315d2a86911d2803a4aca360597f78922e8e64210f3bf4c95eada360a38349b",
+        "e4001c4967b7a732a6e7e31892fc8fa3ff9d373c02acadc32f155583d9fb43e8",
+        "bddfc0c595c931cb583a129f17a73b24b6fbb32c22417a2a3369de4656465a1f",
+        "07895b46c50d169bc385bc36bd4d9f2d82040f2195efa2da63b0ab2aa610ab9d",
+        "2b1ee44e30146169a895ee77b27a263b3028afe7a472ecc860ca940321cf779b",
+        "e3b3f7bb5a56913658c6e5adba969863764f2cfe13b2214fb5cf84c28ff29dcb"
+      ],
+      "assertion_count": 7,
+      "normalized_ast_sha256": "0b998768d2e5415afb392389e184fcfef0a8938028a05b0f05c158134d04e5fa",
+      "pre_cutover_lines": [
+        1447,
+        1487
+      ]
+    },
+    "test_auth_contract_runtime_obeys_account_owned_generated_contracts": {
+      "assertion_ast_sha256": [
+        "9df312256b93d6ae098687f95cae1511111865f6479bbb0579623354881344b5"
+      ],
+      "assertion_count": 1,
+      "normalized_ast_sha256": "ee9e7de20a91e699dd2da7140e7340d8494f7e9ef7e8489ddb9f12ecc3df1711",
+      "pre_cutover_lines": [
+        1711,
+        1714
+      ]
+    },
+    "test_auth_openapi_guard_rejects_open_nested_and_body_drift": {
+      "assertion_ast_sha256": [
+        "880ffefbf335b5c82d8d841906360ad5c568e2ea220e917242befdc3aee8be69",
+        "2a146f8b92a0e947161f5288c11623d9ca6fa5d99dfee15d43f06d39f9162446",
+        "e0054676e4d7e213dce15023d4ecbec927f7ccfb8d272d935ae56bf254c80630",
+        "1a578bf8cfcd61b44ba840d8b0057dd7b8ead8f582287d852eb8d5d57347000a"
+      ],
+      "assertion_count": 4,
+      "normalized_ast_sha256": "a3ecb68ef34d7e97c5ab8d567207085177eb2bf340b94bdd623c0d6e128937a0",
+      "pre_cutover_lines": [
+        1683,
+        1708
+      ]
+    },
+    "test_catalog_contract_guard_allows_ordinary_generated_catalog_consumers": {
+      "assertion_ast_sha256": [
+        "477af3cab1588c8303cfb5910086bd52b1e50104ea06c2cfaf8506c487994cf9",
+        "d1aabf1e05a7568e0777f59209a7d0eac1de6247b791405bb1031159c4a6d014"
+      ],
+      "assertion_count": 2,
+      "normalized_ast_sha256": "388609c170876ae67a7d9400f22e4fbfdd398bb6a1910d4a790264f9a4e4e8a8",
+      "pre_cutover_lines": [
+        1363,
+        1406
+      ]
+    },
+    "test_catalog_contract_guard_rejects_loose_backend_and_frontend_overrides": {
+      "assertion_ast_sha256": [
+        "8b34f5d28d4ea7346f5c550896665e030ea7fcd45362a03f26dce85449db5975",
+        "12e5f80fc73056adeaf749e96697ff32d9db9fef1b11c31fa793f25354e4d827",
+        "22a9fcd032257274d8167615200bc1140b96d8893d54e579e26975a4388ea142",
+        "4b8226fd85d7b6797605e5f58080bd9b5b4c31cdd333d3941f37f37385127401",
+        "fb7f706dff9880f01acc6176c68e88304582c04c5a7d082c01b0c5724461f6a9",
+        "7e7021ec3ac419e2c000c913f86fe7d99578023115921584c3ac495501a0ee94",
+        "4c81817c8ac72ec50bdae2b9786286b7473ba8ff0c8ff07eab16967213a6aa08"
+      ],
+      "assertion_count": 7,
+      "normalized_ast_sha256": "9d5509e87aedfb7a06dc65449df5b589595f52cde21ea04400b701678dc0a3f4",
+      "pre_cutover_lines": [
+        1143,
+        1188
+      ]
+    },
+    "test_catalog_contract_guard_rejects_secondary_contract_owners": {
+      "assertion_ast_sha256": [
+        "485696f20dee5feb3faf5b38bfa97d0d686be9c27804874f32f24348c3addb34",
+        "f600dcfb559bb8389501080feae9283359023efaadb3e322df8ea108ad337b7c",
+        "3a4f4699fe70b3525c2eb245fbb0d5a01d7f8373927de18724079947d73bdc5f",
+        "6236245fa908b9fd6bbb22311d034af8a4b55edcae24b07ff5989dff7883b440",
+        "3eb4d9bf3f373b096e12d2667e632108974c23b3c189dbb9cc4c04ab9dedd69b",
+        "807830b10f37849e309a17191c7a1fb1f8c1b80329c5451b953e20f9c230b0bc",
+        "0720721e33a32c1b6d384d26c86b0eb8127bfb0e9decc6303a95ff8850718917",
+        "e303f16b66bb5e06b7bd51100fdfeb000ed13ac9f859d98ad798780408762c51",
+        "9dbe45a4b7cdf5e9e1035b6bb9c18c31fa44b1e309240299780cbb4377ff28a2",
+        "0a8c409362f8fcee4832af65e1291205037bf647e2b66cfa824f681e1cbf5951",
+        "612621de8ad50c2f38a13d3e7b93c756211c10226060160bafac94202da06162",
+        "b31eaf17f36d625878f37da90f888f1b0056b61fba0cbe2b7712f94d77127880",
+        "5defeb4b956efdd6a36387be3311c2b6c448045bb6998ac278f697d3600f6909",
+        "a63c10591a9e4678f4f427be1482e51646abb6ab5fb0c60aac5036bae8be93ce",
+        "6719c3d6dfae719e17fb52cceb92030e95ce0806c986c8a3fadd841a29c61aaf",
+        "cf9cb527caac92c6763d20b56b377899028107a6da4dd31f500f66f173a58894",
+        "c6f8e2e26a9fdeec233ca8829ec5900b96825b01b98afd44d376e05784074556",
+        "4808462cbf8051c6be9e18c45f3e05d94e4ce668caf5792fb66c35e9500fedb1",
+        "65ae71e290507e4e37e346bcccf45b0dfcf7c781f5cee73c629a8e5fa5c07e0a",
+        "43b970e5135d0954948877c82e2c894f39e940b37bea453eee421f4edee6eb12",
+        "46cd4c28d9311c907a592c5c8c71e845af79049ae6429e0c432d61bd87f5899e",
+        "a7ee287630cb2b660641a1aa8ef9b54c539479259b0f83ef14723f220f32fcf3",
+        "31c34aa9c41a8fed1118d802853b0feb8fa7c21c583c396f17bea68e91cc32e3",
+        "fe139f101065d3124745e3a1ab9770a2cf479829c0e5427425d2ce1e93a354c8",
+        "b3158932587339b2858bd220661645ebe7253feb275c63f97c016340844369b3",
+        "d62564f886753ced15c2409413aef9b0bd9528b1d6941c6e908a632d26864037",
+        "c758755904ae3bcc83965a577a44ec2656ca9c47f484652f90b2d5f27f62fad0",
+        "22b29ab785fab9493a50cdbc0b44296bbfdd6aced972246855896b6fdc61a6de"
+      ],
+      "assertion_count": 28,
+      "normalized_ast_sha256": "bb2d23afd469404fae599e6f8ec8c3e93f22cdaa19f3a558dcb0aa711119ef35",
+      "pre_cutover_lines": [
+        1191,
+        1360
+      ]
+    },
+    "test_catalog_contract_runtime_obeys_one_way_generated_ownership": {
+      "assertion_ast_sha256": [
+        "9c99944f3a70dfec646777307ec5b307e9b4e16cea87de590b35c64bd6c0bd17"
+      ],
+      "assertion_count": 1,
+      "normalized_ast_sha256": "8cc6082fc3b14b3dd29ea74f34ef3cf4d39e078e5a70304f137260a607a9530b",
+      "pre_cutover_lines": [
+        1441,
+        1444
+      ]
+    },
+    "test_catalog_openapi_guard_rejects_optional_open_and_wrong_operation_shapes": {
+      "assertion_ast_sha256": [
+        "e402d56dc1add712b446a533c5c49cfaa22278391fbbd20287e518a0629567e4",
+        "9a4630479626cab4a0db927ae51c0b45578e9b9d9c2e7d4dc4402c5078f0cc42",
+        "7e391c63be1a7f3f30e65be87812850a8905afdc6fefb8fab26231e710fb373a",
+        "7c1a31fe4cda2595d31bd43123f5c6903e86062d5dce461b179a8a3cb1f79bc8",
+        "b691961ed6edb9eca476ae9c76fd21e67248f6b6404f18e5b8a88c917758b5bc"
+      ],
+      "assertion_count": 5,
+      "normalized_ast_sha256": "1b047a4d3e542bccd07fcd180de749d7c6271d7150ae176ea9f993d68d7d611a",
+      "pre_cutover_lines": [
+        1409,
+        1438
+      ]
+    },
+    "test_content_editor_guard_detects_import_forms_and_controller_forwarding": {
+      "assertion_ast_sha256": [
+        "dd85e9b559505d344615886a186483b8afd762310335f3f9d6ea172e430182bb",
+        "27f2e9522c41256ee5307010a4097b32a1e3ba79242f2d0fe5dc3a718c780c88",
+        "77d0639ca18b6418ed2a8782fc23562f33cbd87e74426c652b409bfbd36aeadd",
+        "8c4cb5c909755e5c977e13cd276c50991e23343b61aebb1ef0ff215c2f30ca02",
+        "2ae6491ffcb58a73bd1bbb39c6220665cfcf64a70bf41901115244dadd5d0970",
+        "3620c87fe9141fc50f0763d897651305b9dbda36c2f8c050f4be3c6504c68660"
+      ],
+      "assertion_count": 6,
+      "normalized_ast_sha256": "d1e525102918da4851274e44b2334e1ce1eeda4886af3c2ff708bf75158b4a64",
+      "pre_cutover_lines": [
+        94,
+        121
+      ]
+    },
+    "test_content_editor_guard_rejects_component_and_reverse_feature_edges": {
+      "assertion_ast_sha256": [
+        "0477e92f0d3a3f67d50c107f26d5a85def20d7f76413728cfc85a116911c6f78",
+        "b704c1a099a1bc80f353515b35977a9ded0d6cb68f15c10d246d6645d80e62a9",
+        "6c5974d30d284aea659031e175b2d32e55af135d664c99f4430b5df0827c3965",
+        "f31f99177bb936c514b63afd20b955d388fd53779333ae3c58815ebf1fb6981e"
+      ],
+      "assertion_count": 4,
+      "normalized_ast_sha256": "08d0d38031b8a06b910a2e3d2474006facc3111b698dacfb878e26a1a2a2e7da",
+      "pre_cutover_lines": [
+        124,
+        151
+      ]
+    },
+    "test_content_editor_guard_rejects_relative_and_barrel_import_bypasses": {
+      "assertion_ast_sha256": [
+        "89dcad9b40ba8a9391f5a215dfb917279decddfeeb3b08404ccc0c76c052f0f7",
+        "a28094500e21ac8615e9ee7224d3e25ba5399353fb92c686a260b392c6fcf7b7",
+        "1b52ac113ca2a59972a0aa9a382d521a6905491f188cfc139282a69d372dcb34",
+        "0477e92f0d3a3f67d50c107f26d5a85def20d7f76413728cfc85a116911c6f78",
+        "5ff5924ec8013f7402ebfee74fa7d6ad3e763c2b8e661e5ab8cebc37270d8f1f",
+        "e576965ee69d1d07c67959151bc170f4a50800afe823656fc8a4feb72fbb0b45",
+        "f31f99177bb936c514b63afd20b955d388fd53779333ae3c58815ebf1fb6981e"
+      ],
+      "assertion_count": 7,
+      "normalized_ast_sha256": "c6c98cee23d15319b96a2edb79c0bb24a382c3ce5d35b6c6a076895eaceab2cb",
+      "pre_cutover_lines": [
+        154,
+        221
+      ]
+    },
+    "test_content_editor_runtime_obeys_workflow_ownership_and_css_boundary": {
+      "assertion_ast_sha256": [
+        "e65d8ef29b262d2509895d8981b1af77089dbba350bba9eddb8391f652413a63",
+        "3e2a6b3a9fcf6fd23dd32125b9f5aa75742ede4ce11fbab61787a0a0dc9cb906",
+        "a97d152428bdf2726248b7e7882df404e999a327c46386923788e2d7eb48e9c4",
+        "95ba94145201e783626e286be100aaf279c13a7436c3f68936d99c09af6ec9ad"
+      ],
+      "assertion_count": 4,
+      "normalized_ast_sha256": "6ae44075b7aaccac2f8899f71ff871bc693518baae01d1707d3453f8eaa6ba77",
+      "pre_cutover_lines": [
+        224,
+        234
+      ]
+    },
+    "test_dashboard_contract_guard_rejects_loose_serializer_and_frontend_shadows": {
+      "assertion_ast_sha256": [
+        "2cf67d8988dfd5a2675fc4ce2bc9cbbcce558f2da046ae882d72f66462701843",
+        "66cef22bc72dbe1c60e74d8815ae60196bc0d244be5fe7d10b0e17522ee9779d",
+        "1d08fe8ab75cd9ae0751f8c7559610217f80666c986bdb1eb5ebdbf73c6e2ab4",
+        "a363cd00c1901a9ddb15a2fb72a7c0cf3d376ae73336f6546b0f2ca082cd0f25",
+        "3ffd3a62821184f312eb030d8738a2956e93271ef686ab4694d367d2509518e1",
+        "8d046cbe3ddce884f10718379fb3ec79ced86d77750f2e35448dea97e043f823",
+        "ac478e3e3e9f9162e768bb6e85976e02cdae63d030a6a9bf35946e6dacf2f875"
+      ],
+      "assertion_count": 7,
+      "normalized_ast_sha256": "d335a417c9eac75c7909ecd91826c4ceec6ab6c85d251a6af08fce1fc540a6c9",
+      "pre_cutover_lines": [
+        801,
+        851
+      ]
+    },
+    "test_dashboard_contract_runtime_obeys_generated_home_shim_ownership": {
+      "assertion_ast_sha256": [
+        "76f6446f29acdd722a5dfc146431b5945afc31b6d348eefed97145fec486f927"
+      ],
+      "assertion_count": 1,
+      "normalized_ast_sha256": "26fc62899ab3fae0d20955a93ebf7369b551f417cad76661fd09b4418b9d6fd4",
+      "pre_cutover_lines": [
+        1137,
+        1140
+      ]
+    },
+    "test_dashboard_guard_rejects_alternate_imports_and_parallel_api_exports": {
+      "assertion_ast_sha256": [
+        "5a269125bc580d6c3df93222e468b7f40a8a94e6d25a532a0d1a0d6140317e4a",
+        "509084f54fdb014856b2104d997e853c54b2d5d3c3732d5e87fdce24192c3853",
+        "190e4cdf0b5f3393b5754d3ecddc76ad65ef65049e96484627be6d2008662c97"
+      ],
+      "assertion_count": 3,
+      "normalized_ast_sha256": "ada0c7cf28d7381b1b258bfcaee6a2fb41a70cc0fcba5955e8ba2858a06ba77d",
+      "pre_cutover_lines": [
+        882,
+        929
+      ]
+    },
+    "test_dashboard_guard_rejects_secondary_frontend_and_backend_owners": {
+      "assertion_ast_sha256": [
+        "dd431160d79dd3c2ea39d5b29d6a026e35841a42d757fc74338c260244da24e6",
+        "d57a066a838ccf10ed2d28ddc08cb8d6709156933e1c6082dd7986db4952e2b3",
+        "80999105f669b8b602000b7d85eccd7f20275a93fa7e18313d3dd7c328dc8734",
+        "86db168738e294576558fd06506d252d6aaec0d6c8707cef807a2f108915a481",
+        "5c0bfa11feaa0a1d0a8031b43efe40598011bb3ebd71c1200487b985cb84e1d8",
+        "a9636dc9d6fef9b91719b9db4628cd2b8914bfee103b239cd28486c6bb3fbf31",
+        "2496c8778c2ed322760f46541df63d2e245385bf32527d3fe0a23d24de558723",
+        "aeb0012a77d1cb2fd852f14a99d7d12200e6d2bc74d339f736a5b208ef3f5fa1",
+        "881ec6c562f12242143367f9d10b842d316f20b8ae6a74c91fe9c4db68de423b",
+        "461070700f119ba7af8d5cfc90757a2d41498508ad5571de23009837706466bf"
+      ],
+      "assertion_count": 10,
+      "normalized_ast_sha256": "c210f89702cae3f946f497371ca8e941fefef1d9e30bead6b1bd161e4f45006d",
+      "pre_cutover_lines": [
+        932,
+        1134
+      ]
+    },
+    "test_dashboard_openapi_guard_rejects_loose_dynamic_and_array_shapes": {
+      "assertion_ast_sha256": [
+        "6129e5d3b0c6fd12880ed89cf549f44031495119a93f0dae740b1445c3d633a0",
+        "d06ef030984924dc5089c3203cc393e4fa81d053faf4c1c7430b160e2acf43c7",
+        "37625f94bb2705673d8c4afc2a2efcf1069594dafbde1c0e8f6cb36a8a9ca4ce",
+        "1615b27b54d7caac7e13d14bf526f20a966e88f8d52746374dc9347061d282d9"
+      ],
+      "assertion_count": 4,
+      "normalized_ast_sha256": "65f8b2df4d6aa0012c737d29116cc74b0d63f1d5b37b57ea15a91f538f7a8773",
+      "pre_cutover_lines": [
+        854,
+        879
+      ]
+    },
+    "test_gameplay_mutation_backend_guard_rejects_alternate_owners_and_runtime_use": {
+      "assertion_ast_sha256": [
+        "2174aec7d3db510fe22ddfb6b6fbdc73cc7f548d61b43f6187c6b55bf1202a3d",
+        "9dd2d0c769c8ab1c1ff3436e9644834c3b49197817067620763f3292b955d69c",
+        "b88a63b3266f9e0ae9eed300d2b62973cf458258e2f39abb01fee892aa3d1038"
+      ],
+      "assertion_count": 3,
+      "normalized_ast_sha256": "864ece060df1318b2a80e1cc4d9b2bac01704e2d536d82a848daf9c6f5281fdd",
+      "pre_cutover_lines": [
+        1796,
+        1836
+      ]
+    },
+    "test_gameplay_mutation_contract_runtime_obeys_shared_generated_owners": {
+      "assertion_ast_sha256": [
+        "c79ae7e1e391d005b01291be4b9d157f005343f2ca37d7db5aa504af6d6b804d"
+      ],
+      "assertion_count": 1,
+      "normalized_ast_sha256": "d8b1db68097300d7e8de1be2311705e92470e214c7cc8dc15eda140fc5c0d708",
+      "pre_cutover_lines": [
+        1874,
+        1877
+      ]
+    },
+    "test_gameplay_mutation_frontend_guard_allows_unrelated_structural_types": {
+      "assertion_ast_sha256": [
+        "9423c4f91d6dd0369a107c56bc350bdf2caeb174e98b0cc065e7dadae1a61f40"
+      ],
+      "assertion_count": 1,
+      "normalized_ast_sha256": "b03a4f126fc5860ceb31fe18bc3e928d4e6e09214e455622126694928a2f55e0",
+      "pre_cutover_lines": [
+        1746,
+        1765
+      ]
+    },
+    "test_gameplay_mutation_frontend_guard_rejects_partial_adapter_delegation": {
+      "assertion_ast_sha256": [
+        "25026933ba06f0e4532c1533aaf420a084974319240ac18a393d2ee4ffbacdb5"
+      ],
+      "assertion_count": 1,
+      "normalized_ast_sha256": "ee4041fcd4ef908a24ea5904e7356da2986027ef500992d252b9649e4a7a4dc0",
+      "pre_cutover_lines": [
+        1768,
+        1793
+      ]
+    },
+    "test_gameplay_mutation_guard_rejects_frontend_contract_shadows_and_casts": {
+      "assertion_ast_sha256": [
+        "ce274f2560c01ba72cae7da524c35ddebd4a9309cf5fc2756ab689110441173a",
+        "e99e10f167b53db229b665972dbb45898810f8a305c44826c7ef930e7d30b5e6",
+        "0a8b8e6daa6231b51223ed2ee67164ba51cf669327d133a5c378460713af6c81",
+        "fb0a363362c2ee270598d89f7235db57fcb888d52749eb53ccf6d5ce6337eb1a",
+        "756640a52cce3903d541ea0f14fce5ac46eb9e73fcf8132e6709c7fda81f3609",
+        "5d17c2e0161eb6aeabdc494bb553de69be2315a0e33b59c4c61d0d28cc3bf0e9",
+        "7931ed1f9b22bd9d62472986739f127a83b3c304fd4d8c5ec1aca38486292447",
+        "9c2f604c1e1dc46a54895057163d9c120424a37444eff180e1b260b23b62eff3"
+      ],
+      "assertion_count": 8,
+      "normalized_ast_sha256": "876a2aae49d208eca3c77d72bbcdad79f71afcc647de2454b8092e83bfe8a0e1",
+      "pre_cutover_lines": [
+        1717,
+        1743
+      ]
+    },
+    "test_gameplay_mutation_openapi_guard_rejects_schema_forks_and_http_drift": {
+      "assertion_ast_sha256": [
+        "264143ac6e37a072903679663ee6a6988ad09d641d8835531f74b5a437716ff5",
+        "4848a7f4882603ca73ad13de02f3b6773a0c869ad36a36716db2d5e3a59c89e5",
+        "cf3ebc16dd33c37b9cd152a701aa8edd09790f07694921175c41a70da04066fb",
+        "8b9c76587824ac533a737fb75aebc9905aad63651b8a960714bf8987f72fbd80",
+        "fdbea744a1f25a51fd5b96bb6b30778cf73d1619927b9c102d5972dae12c1d81"
+      ],
+      "assertion_count": 5,
+      "normalized_ast_sha256": "1e617b08622b6f1551e2e22b8619b4b73a67648b0fce21fffb144c61a376f69c",
+      "pre_cutover_lines": [
+        1839,
+        1871
+      ]
+    },
+    "test_home_hub_guard_rejects_role_bypasses_and_integration_forwarding": {
+      "assertion_ast_sha256": [
+        "3e2c7fa4a7ec1d770144aa8ecbf13017f39a4ff3408e15e06aaacad05b75fde1",
+        "7312f707cd59d7226959368fe4f0407cdfbd20083677ae0b4bc493350f0119f4",
+        "cb2baec5c7a736a239145afa87e334c85cd37949b01740a59e3b8328db2c88cb",
+        "f4076655ae26ac0851db0136f1ee21888f6ac83b17aa22657c289183546002ab",
+        "0179eed983bfbe657e3b2209e862783da9ce040c9c4f26ea9cd388a390abe3da",
+        "55491a897deda417866c3f4df0d42aa1e659a825b7fb7046fc7d9d86cc3ed945",
+        "1c32afd8fb5908db94c9ab9d2244bc6dd6b0658d3e22d6611936d06fa34b40a0",
+        "f505382a5c3d4d734cc3a8235c2c1e7380110481ccb2e277998c3c1cc2c616ad",
+        "1378faa43003c45517cd497ba7c73473db5545b8047e63e132319f8573105736",
+        "59f7e2e41be167db5e4846c74fe25483ac095db10efa0f9d304e2516aac56c91",
+        "fde9a23763003c11642c23cfbdc75dbc4ab4be158780166b58c44dbdd663e13e",
+        "3dcd8d4dac981e3bd4330df023207e54e652fd75edba56e4aa84056d5c92d6f0"
+      ],
+      "assertion_count": 12,
+      "normalized_ast_sha256": "4c678bc651cdede9db65e9017ad167e5dc3786c04725c5e77191536db3ef7bfd",
+      "pre_cutover_lines": [
+        237,
+        333
+      ]
+    },
+    "test_home_hub_runtime_obeys_profile_workspace_ownership": {
+      "assertion_ast_sha256": [
+        "0ba15d7f4f6a2dc720daaee6f406a9445352a27216576f67ef4f7644f1a2876f"
+      ],
+      "assertion_count": 1,
+      "normalized_ast_sha256": "a995a5f1ee428a52388578e7833858043869d2be33ca47393162c470042751d1",
+      "pre_cutover_lines": [
+        336,
+        339
+      ]
+    },
+    "test_home_overview_css_guard_rejects_legacy_and_misowned_rules": {
+      "assertion_ast_sha256": [
+        "4861215fa458b10d8bd7b9c77737139b7930de6a3954372aa1bc7639fe2ec1cd",
+        "4f1640b4b316d8b90acac4071b7e24a24e1699122ec5ce46cd24aba1da60e9b8",
+        "fa1bb2ce55f78015a9656cb670ae79d5adfe960f2742dbd8866988ba1ce93be2",
+        "8aebc363f9662dd6ee91b23edf75c0eb13ec2340d788bc10b107f900a1904a78",
+        "203bc50cb0a4d38120e12427ccf534d2825dc5b64e390ed3f2e914f72354dbcd",
+        "c566078aeb3973c82f216e1db44619efa3f90fabcfe22e6f2fed39e75b6fbed1",
+        "ff67880bf0d23f6f226b038b780d722f1970816f867f3116484016f7622e86a5"
+      ],
+      "assertion_count": 7,
+      "normalized_ast_sha256": "038d4c699f7aaf84030cddaa9d32b7573e456d0a470d4ae4c5d1eb71abe0d20b",
+      "pre_cutover_lines": [
+        531,
+        575
+      ]
+    },
+    "test_home_overview_guard_allows_equivalent_model_syntax_and_blocks_value_aliases": {
+      "assertion_ast_sha256": [
+        "6b8244e74d3eb558cfd17ae68c1ed7a6507c9c77143043738a857c2aada1d40e",
+        "8afe8a268593524c30dc5675418410aad2def8c4affd393c73f8d4856c16938b",
+        "6e9b3fb66124176bb91cb5d881d6343f3f36fd7abc6058f0fd8bd37c76df5b8d",
+        "9fbb0bcdf9f7201fc38c00f62346a6c013bad45c71b180e7dd30c3a18ca0374d",
+        "e7702b710169898813dd1e8ba34755dc640d85bb359e1dd0da34fc76d230a1a3",
+        "980d4e6e1506b9635b76e6b747c453453420d4405f48ef78f10de9c92214308c"
+      ],
+      "assertion_count": 6,
+      "normalized_ast_sha256": "97b6036993ef0cb069a66a10c8cb14ef0f734fe365bd5c87899450702648efe0",
+      "pre_cutover_lines": [
+        426,
+        482
+      ]
+    },
+    "test_home_overview_guard_rejects_role_bypasses_and_wide_boundaries": {
+      "assertion_ast_sha256": [
+        "29bef4981f3f8bfd276e0aaddf86801df6fe9111e856302a68ef128a285b94ae",
+        "a89bc86213ed3e045acb1a8212b26ba3f0b81f07a7db1015f660bf0e001ca414",
+        "52fcd5c1790b9e1e04fffe2aec90fb293b516e38261bd55d1ac54a4495f56036",
+        "a6e0aeda733fd5c5a1e973b4823bab661eb6b365fb46612916c60d49aeff331c",
+        "5bdfa26fa77781b8fc71add698a28874372fda8d61088541e61e72a6e48178da",
+        "aeab86c892ab0ca065cf1c12e30c82a1a8cb2c69e7618dbaa86221cfcbd1de86",
+        "aac10ea3dd878875e8941c85e1c7c7521d50ef965339e76736c9e38b64e2ec57",
+        "f4897ad14758a4ffd68cb9023d26886286f7d5d67228333b38e96edc4643a132",
+        "a4d303a06bee83153557e1f8c186502f24f62573a48f5c7fbc9a246eed79b7de",
+        "6b6745f93308d80128387d4feb9e256d26456258313e80e519e3899d1e5091c3",
+        "4ea6024ab5c56f44ad66d794a686fbdca263dde284b4037137a349cf5cde0e57",
+        "b6602dd8c70ad282319208134dab1408bfb28deda1dc03c79fb02f7f7f4465ab",
+        "a59c84836be1e8a05ad97452dd5f9cdcfad7b93586ff2e1fd0f514af068fa8f9",
+        "eb99f3fb874b358c1e2d3bb78a7703c531c406be1a269d728f7b358a79ee7306"
+      ],
+      "assertion_count": 14,
+      "normalized_ast_sha256": "3739060cbe0ec654e6c47c8de2e320abeff6dac31553dd2332ff573e192b34a5",
+      "pre_cutover_lines": [
+        342,
+        423
+      ]
+    },
+    "test_home_overview_import_guard_handles_trivia_and_statement_boundaries": {
+      "assertion_ast_sha256": [
+        "47392d5bbda54d4ec6a4696a25984e7d9808b1c87d610d81096d3dfd7e76fc46",
+        "a74695fedcbdec121bea549181c5d2b85228975c8031aeb2832101e2ce53f6fd",
+        "ce6dd22f9b915cda1ac732db9077391d0bf7eec79cde8fc2333508b3601d8ee0",
+        "63d979f4d1c4f66a014126035122a14aeabd7cc6242372549805dc499fa825c9"
+      ],
+      "assertion_count": 4,
+      "normalized_ast_sha256": "3553778a1cce8ed82ed9b7d10eb424824dc628e99a59d920d429c61440cbeef6",
+      "pre_cutover_lines": [
+        485,
+        528
+      ]
+    },
+    "test_home_overview_runtime_obeys_component_and_css_ownership": {
+      "assertion_ast_sha256": [
+        "8f2110ebbc4cd86f8cb99e85e389173b888d9c9c1225fc16917bd97f68dfc51b"
+      ],
+      "assertion_count": 1,
+      "normalized_ast_sha256": "62008c9b63135beba929998dd388371b28992abff5b6bdeba06a391168577ef3",
+      "pre_cutover_lines": [
+        578,
+        581
+      ]
+    },
+    "test_stats_contract_guard_rejects_async_adapters_but_ignores_comments": {
+      "assertion_ast_sha256": [
+        "d82294cb2a2c6dae92dd3bb1b2a82ffe6f81b4b7e2a07b3044bd71736ea27888",
+        "9433865144a76764dcc182bdfb48e111b1f6f69f6bc1faf237557dea9f9568fe"
+      ],
+      "assertion_count": 2,
+      "normalized_ast_sha256": "c00fcec09a0ae5b65caafdb51514f8db19390c0282a9f62dfe88559d7367317b",
+      "pre_cutover_lines": [
+        720,
+        760
+      ]
+    },
+    "test_stats_contract_guard_rejects_duplicate_and_manual_contract_paths": {
+      "assertion_ast_sha256": [
+        "8d63e12d361c30cf85d54dd3dc955e62131017a10886d37d87248b7d55449068",
+        "36f264a970cd2b8cdae0783217b0c1150523305c3621da37c6fa54a418d64f5d",
+        "b301a4c9133f077b0b0f9c6272c1be3d83565eb07f441fe794ee50faf2a7bf51",
+        "8a933d00b3a8e725679b5e99a11f8f6b50cb811b63ce378b2b885d99cec2d83e",
+        "2b6e37493dc850ddf78aebb2eede215dcd4898d393a20098154ed035905487a3",
+        "ba6d6194c20c75d6b1a58471999149a308ba9cee09e843172ecd834595b51fd5",
+        "6ebe92bde0ab08324442ab146dbfbe6ed8fc64981839405884ce2f4f54685156"
+      ],
+      "assertion_count": 7,
+      "normalized_ast_sha256": "53c7313356e28dfca779b36b49e8541efb167700fc31b17b88259d84fbe25dab",
+      "pre_cutover_lines": [
+        584,
+        627
+      ]
+    },
+    "test_stats_contract_guard_rejects_secondary_backend_modules": {
+      "assertion_ast_sha256": [
+        "bcf73ff123d038cc0938e80f9a1f5296c9680e0378d78c5dbfde8ebd5849a689",
+        "1f3dead45b0e3583ecd518dad33e29fe75d5c0a7b22f61564477ac089863f5f5",
+        "b7d56c7750aa63771bc5a07209b6a3f2358444dd6bdd8464f79e42b4367bcae5"
+      ],
+      "assertion_count": 3,
+      "normalized_ast_sha256": "d44290609de522335d1ca49134abf446cd0eecf1186ba3fd989211b76d6fd2ec",
+      "pre_cutover_lines": [
+        702,
+        717
+      ]
+    },
+    "test_stats_contract_guard_rejects_wrong_field_signatures_and_shadow_contracts": {
+      "assertion_ast_sha256": [
+        "f255a909cf399860f18cd9578b5178dba3b786a2638c2d2f40c2f600736c7706",
+        "2a5e0437b2345ac8ca0b4184eda1f0fb24799df1ba5a8171157ca7af2c522b65",
+        "3e11b56315d3e1566c3331655fe9d3f28ccb8ee7170893b17710d635919174f8",
+        "4962c64dbd94ba117859e3ef74a7b4fd62e181d145315859d468918f9b42eab5"
+      ],
+      "assertion_count": 4,
+      "normalized_ast_sha256": "91502c44ebedbf25ed20dd3189e2160a92076fe357aab2f4768aa2fa5d65a614",
+      "pre_cutover_lines": [
+        668,
+        699
+      ]
+    },
+    "test_stats_contract_runtime_obeys_one_way_generated_ownership": {
+      "assertion_ast_sha256": [
+        "9c7d83d05d0b13e0c26fbd2cc02897d5bcb8f9893e3e24303c2bd96e4ce7ed45"
+      ],
+      "assertion_count": 1,
+      "normalized_ast_sha256": "c1b47358cd87ddec460cc55cb30e5d4cb8414a619eaf19c3ea7c6d7a84b3896f",
+      "pre_cutover_lines": [
+        795,
+        798
+      ]
+    },
+    "test_stats_openapi_guard_rejects_displaced_and_loose_schema_shapes": {
+      "assertion_ast_sha256": [
+        "8b7cd933503f98ea148f8a7f23278289ae5f313f568647a5e43335bf5c13ef5a",
+        "00e526ba5d57af5eca9375bd6dc3d12b0ac85bd281bb7ed49d2760c5c439da81",
+        "3419c72cfca99c549091d58c1a6db6837a3f59ae5844145b780b56bd54a01af6"
+      ],
+      "assertion_count": 3,
+      "normalized_ast_sha256": "8ce72084ee4e79f4811624ceff76de70fe48eac12ce9cfd1a0ded82cec6f8db3",
+      "pre_cutover_lines": [
+        630,
+        665
+      ]
+    },
+    "test_stats_openapi_guard_rejects_wrong_nested_schema_signatures": {
+      "assertion_ast_sha256": [
+        "ad43ec1f7d20789e506ca175093256357ab83247b15f7b857b88b6acfad54730"
+      ],
+      "assertion_count": 1,
+      "normalized_ast_sha256": "9e278759ea05980f7655af8c2939ee64c5c6432f8f0f12df6a0786ad2aab9b62",
+      "pre_cutover_lines": [
+        763,
+        792
+      ]
+    }
+  }
+}

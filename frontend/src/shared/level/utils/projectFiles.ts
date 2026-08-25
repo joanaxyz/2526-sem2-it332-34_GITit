@@ -12,11 +12,6 @@ export type ProjectTreeNode = {
   children: ProjectTreeNode[]
 }
 
-export type WorkspaceFileInput = {
-  path: string
-  content: string
-}
-
 export function buildProjectTree(snapshot: RepositorySnapshot): ProjectTreeNode[] {
   const root: ProjectTreeNode = { name: '', path: '', type: 'directory', children: [] }
   const conflictPaths = new Set(snapshot.conflicts ?? [])
@@ -82,7 +77,7 @@ export function flattenProjectFiles(nodes: ProjectTreeNode[]) {
   return files
 }
 
-export function statusLabel(value: RepositoryValue) {
+function statusLabel(value: RepositoryValue) {
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     const status = value.status
     if (typeof status === 'string') return status
@@ -90,7 +85,7 @@ export function statusLabel(value: RepositoryValue) {
   return String(value ?? 'changed')
 }
 
-export function sourceLabel(value: RepositoryValue): 'head' | 'staging' | 'working_tree' {
+function sourceLabel(value: RepositoryValue): 'head' | 'staging' | 'working_tree' {
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     const source = value.source
     if (source === 'staging' || source === 'working_tree' || source === 'head') return source
@@ -98,7 +93,7 @@ export function sourceLabel(value: RepositoryValue): 'head' | 'staging' | 'worki
   return 'head'
 }
 
-export function contentValue(value: RepositoryValue): RepositoryValue {
+function contentValue(value: RepositoryValue): RepositoryValue {
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     if ('content' in value) return value.content
     if ('after' in value) return value.after

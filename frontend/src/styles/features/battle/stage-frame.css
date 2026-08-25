@@ -17,7 +17,7 @@
   transform: translateX(-50%);
 }
 
-.battle-arena--boss {
+.battle-arena--challenge {
   max-width: none;
 }
 
@@ -63,7 +63,7 @@
   transform: translateX(-50%);
 }
 
-.battle-landing-rail--boss {
+.battle-landing-rail--challenge {
   width: 100%;
   max-width: none;
 }

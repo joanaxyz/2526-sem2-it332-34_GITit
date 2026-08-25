@@ -1,6 +1,6 @@
 # Architecture Notes
 
-This file is the root-level architecture guide for GIT it!. `/docs` is intentionally absent; the current rules live in the root markdown files so contributors do not have to choose between duplicate documentation sources.
+This file is the root-level architecture guide for GIT it!. Current architecture and contributor rules live in the root markdown files. `docs/goals/` is reserved for scoped implementation goals and their supporting artifacts; it is not a second architecture source of truth.
 
 ## Domain Glossary
 
@@ -101,6 +101,11 @@ backend/common/schemas/   runtime JSON payload validation
 backend/common/services/  shared infrastructure helpers
 ```
 
+Shared run workspace mutations and active-run deletion live in common helpers so
+Adventure and Challenge do not maintain parallel locking/status implementations.
+Domain services keep orchestration and public terminology; shared helpers own the
+transactional primitive.
+
 Apps with business logic use a service package entrypoint, not a flat service module. Service and selector package `__init__.py` files are public export surfaces only; implementation belongs in named modules such as `runs.py`, `commands.py`, `history.py`, `state_requirements.py`, or `core.py`. The architecture guard fails oversized service/selector package initializers so implementation cannot drift back into `__init__.py`.
 
 Large visual/runtime surfaces must decompose by role before they become feature god files:
@@ -153,7 +158,7 @@ CI rejects stale contract files with:
 python scripts/check_api_contract.py
 ```
 
-Critical runtime operations must use named response components, not anonymous `object` schemas. The contract guard currently enforces this for challenge runs, adventure runs, shop cosmetics, wallet, dashboard, stats, skills, payments, and command-form preview endpoints.
+Critical runtime operations must use named response components, not anonymous `object` schemas. The contract guard currently enforces this for challenge runs, adventure runs, shop cosmetics, wallet, dashboard, stats, skills, and command-form preview endpoints.
 
 Frontend runtime wrappers are guarded by:
 
@@ -220,17 +225,24 @@ Compatibility exists only for old bookmarks and must stay isolated to the route 
 ## CI Guards
 
 - `scripts/check_legacy_terms.py` blocks removed vocabulary from active code and root markdown.
-- `scripts/check_architecture_boundaries.py` blocks forbidden imports, runtime cross-app coupling, oversized service/selector package initializers, oversized production frontend modules, stale migration files, and oversized public seed-data modules.
+- `scripts/check_architecture_boundaries.py` preserves the public architecture-check command while `scripts/checks/check_architecture_boundaries.py` owns orchestration, ordering, rendering, and the remaining workflow/general rules. Reusable source analysis and focused Catalog, Auth, Progress, Gameplay request, and Gameplay response policies live under `scripts/checks/architecture_guard/`; policy modules may depend on repository/source-analysis helpers but never on the executable or another domain policy, and the Gameplay response backend/OpenAPI owner depends one-way on its focused frontend analyzer.
+- The architecture guard blocks forbidden imports, maintained backend runtime import cycles, restored displaced backend paths, contract-owner drift, oversized service/selector package initializers, oversized production frontend modules, and oversized public seed-data modules.
 - `scripts/check_css_architecture.py` keeps CSS split into reviewable files and blocks legacy product references.
 - `scripts/check_api_contract.py` proves committed OpenAPI JSON and generated TypeScript endpoint/request/response types are current.
 - `scripts/check_frontend_api_usage.py` keeps runtime API wrappers on the generated contract helper.
 - `scripts/check_api_type_adoption.py` keeps runtime API wrapper types composed from generated schemas.
 - `scripts/check_seed_targets.py` keeps committed target keys and repository-state shapes consistent with authored variants.
 - `scripts/check_generated_targets_current.py` replays authored solutions through the real simulator and verifies generated targets are current.
-- `scripts/check_documentation_current.py` keeps root documentation current and prevents a second `/docs` source from reappearing.
+- `scripts/check_documentation_current.py` keeps root documentation current and limits `/docs` to scoped goal artifacts.
 - `scripts/check_ci_quality_gates.py` proves the CI workflow and package scripts still run the required guards.
 - `scripts/check_quality_gates.py` runs the fast repository guards from one local command.
 - `scripts/check_django_deploy.py` runs Django deployment checks with production-like required settings.
+
+Ruff lint and format checks are both blocking in CI. Formatting covers maintained
+backend runtime/tests and repository scripts. Historical Django migrations and
+curriculum data ledgers are excluded from formatting to preserve immutable schema
+history and reviewable authored content; they remain covered by lint and their
+dedicated migration, structural, seed, and replay guards.
 
 
 Repository artifact guard: `python scripts/check_repository_artifacts.py`.
@@ -240,23 +252,30 @@ Repository artifact guard: `python scripts/check_repository_artifacts.py`.
 
 Use `python scripts/clean_repository_artifacts.py` before packaging and `python scripts/package_source_zip.py <output.zip>` when sharing the project. The packager excludes cache/build artifacts such as `__pycache__`, `.pytest_cache`, `node_modules`, and `dist`.
 
-## Current Migration Policy
+## Committed Migration Policy
 
-This handoff intentionally clears committed Django migration files while keeping every app's `migrations/__init__.py`. Recreate migrations from the current models with `python manage.py makemigrations` in the target environment before applying them.
+Django migrations are versioned schema history. Every model change must include its generated migration so a clean checkout can reproduce the schema without inventing environment-specific history.
 
 Rules:
 
 - Keep `migrations/__init__.py` so Django still recognizes each migration package.
-- Do not preserve stale migration history while the schema is still being actively reshaped.
-- Regenerate migrations after pulling this package and before running `migrate`.
+- Generate migrations during development and commit them with the model change.
+- Run `python manage.py makemigrations --check --dry-run` in CI to detect drift.
+- Apply the committed migrations with `python manage.py migrate --noinput`; deployments must never generate new migrations.
 
 ## Curriculum Selector Decomposition
 
-`backend/curriculum/selectors/core.py` is now a compatibility export surface. Implementation is split by read-model responsibility:
+`backend/curriculum/selectors/__init__.py` is the compatibility export surface.
+It imports implementation directly from named read-model modules, without a
+second `core.py` export layer:
 
-- `tracks.py` for track/chapter locks and completion checks.
+- `stories.py` for story/chapter locks and completion checks.
 - `progress_counts.py` for chapter completion numerator/denominator maps.
 - `content.py` for chapter content page/overview payload assembly.
+
+Chapter completion reward policy and orchestration live in
+`backend/curriculum/services/chests.py`; the progress wallet remains the durable
+currency-ledger owner.
 - `command_skills.py` for command-skill query and learned-spellbook rows.
 - `book.py` for Chapter Book payloads.
 - `challenge_queries.py` for challenge query shape.

@@ -8,9 +8,10 @@
 # Records authored repetition for Git command practice - a command is mastered only after every slot that
 # exercises it is solved.
 #
-# `waves` is a list of waves; each wave is a list of scenario slugs (the q()
-# slugs authored in adventure_levels.py). Adventures without a plan keep the 1:1
-# layout. Chapter 1's "found-a-repository" is the reference.
+# `waves` is a list of waves; each wave is a list of scenario slugs from the
+# canonical specs under source/adventure_level_specs/. Foundational grouping is
+# blueprint-owned; this module owns advanced grouping and validated composition.
+# Adventures without a plan keep the 1:1 layout.
 from curriculum.seed_data.blueprint_overlay import BLUEPRINT_ADVENTURE_LEVELS
 
 
@@ -19,294 +20,312 @@ def _waves(*scenario_slugs: str) -> list[list[str]]:
     return [[slug] for slug in scenario_slugs]
 
 
-ADVENTURE_WAVE_PLANS = {
-    # --- Chapter 1: creating-inspecting-repositories ---------------------------
-    # One adventure per chapter (1:1): all Chapter 1 levels flat under a single
-    # adventure, in concept order (found -> save -> read -> identity). The learner
-    # sees a flat list of ~11 levels; the adventure is just the run/mastery carrier.
-    "repository-foundations": [
+_FOUNDATIONAL_ADVENTURE_ORDER = (
+    "repository-foundations",
+    "stage-with-intent",
+    "seal-the-snapshot",
+    "untrack-and-undo-edits",
+    "create-and-move",
+    "detach-and-clean",
+    "integrate-branches",
+    "resolve-conflicts",
+    "manage-the-merge",
+    "step-back-safely",
+    "reverse-and-recover",
+    "shelve-work",
+    "transplant-commits",
+    "connect-and-inspect",
+    "integrate-upstream",
+    "publish-work",
+)
+
+
+def _ordered_foundational_adventure_wave_plans(
+    blueprint_plans: dict[str, list[dict]],
+    order: tuple[str, ...],
+) -> dict[str, list[dict]]:
+    """Project blueprint-owned plans into the stable public adventure order."""
+
+    order_keys = set(order)
+    blueprint_keys = set(blueprint_plans)
+    missing = sorted(blueprint_keys - order_keys)
+    extra = sorted(order_keys - blueprint_keys)
+    duplicates = sorted({slug for slug in order if order.count(slug) > 1})
+    if missing or extra or duplicates:
+        raise ValueError(
+            "Foundational adventure order mismatch: "
+            f"missing={missing}, extra={extra}, duplicates={duplicates}"
+        )
+    return {slug: blueprint_plans[slug] for slug in order}
+
+
+def _merge_disjoint_adventure_wave_plans(
+    *owners: dict[str, list[dict]],
+) -> dict[str, list[dict]]:
+    """Compose plan owners while rejecting every duplicate key."""
+
+    merged: dict[str, list[dict]] = {}
+    for owner in owners:
+        duplicates = sorted(merged.keys() & owner.keys())
+        if duplicates:
+            raise ValueError(
+                "Duplicate adventure wave plan owner(s): " + ", ".join(duplicates)
+            )
+        merged.update(owner)
+    return merged
+
+
+_ADVANCED_DRILL_WAVE_PLANS = {
+    # --- Advanced stories: command onboarding is a wave, not a payout ---------
+    #
+    # Frostbound and Neon still introduce each advanced form in one focused
+    # command (the intro-first mastery law depends on that), but those micro
+    # encounters are grouped into 2-4 wave field operations. A single syntax
+    # check must never masquerade as a complete adventure level.
+    "frost-temper-the-commit-drills": [
         {
-            "slug": "start-a-repository",
-            "title": "Start a Repository",
+            "slug": "audit-and-stage-the-patch",
+            "title": "Audit and Stage the Patch",
             "waves": _waves(
-                "init-current-folder",
-                "init-named-folder",
-                "init-with-initial-branch",
+                "ft-intro-diff-stat",
+                "ft-intro-diff-check",
+                "ft-intro-add-patch",
+                "ft-intro-add-update",
             ),
         },
         {
-            "slug": "copy-a-project",
-            "title": "Copy a Project",
+            "slug": "rewrite-the-tip",
+            "title": "Rewrite the Tip",
+            "waves": _waves("ft-intro-amend", "ft-intro-amend-no-edit"),
+        },
+        {
+            "slug": "step-back-with-intent",
+            "title": "Step Back with Intent",
             "waves": _waves(
-                "clone-default-folder",
-                "clone-into-named-folder",
-                "clone-specific-branch",
-                "clone-shallow-history",
+                "ft-intro-reset-soft",
+                "ft-intro-reset-mixed",
+                "ft-intro-reset-hard",
             ),
         },
         {
-            "slug": "see-what-changed",
-            "title": "See What Changed",
-            "waves": _waves(
-                "inspect-status",
-                "inspect-short-status",
-                "inspect-porcelain-status",
-                "inspect-ignored-status",
-            ),
-        },
-        {
-            "slug": "stage-and-commit",
-            "title": "Stage and Commit",
-            "waves": _waves("stage-one-file", "commit-staged-snapshot"),
-        },
-        {
-            "slug": "a-second-snapshot",
-            "title": "A Second Snapshot",
-            "waves": [
-                ["stage-visible-folder-work"],
-                # Spiral re-entry: commit again as a fresh situation, so the commit
-                # move must be solved twice to master (served as a new variant).
-                ["commit-staged-snapshot"],
-            ],
-        },
-        {
-            "slug": "walk-the-log",
-            "title": "Walk the Log",
-            "waves": _waves(
-                "inspect-compact-history",
-                "inspect-graph-history",
-                "inspect-limited-history",
-            ),
-        },
-        {
-            "slug": "look-closer",
-            "title": "Look Closer",
-            "waves": _waves("inspect-log-patch", "inspect-log-stat"),
-        },
-        {
-            "slug": "inspect-a-commit",
-            "title": "Inspect a Commit",
-            "waves": _waves(
-                "inspect-named-commit",
-                "inspect-head-commit",
-                "inspect-commit-paths",
-            ),
-        },
-        {
-            "slug": "compare-work",
-            "title": "Compare Work",
-            "waves": _waves("inspect-working-diff", "inspect-staged-diff"),
-        },
-        {
-            "slug": "set-your-identity",
-            "title": "Set Your Identity",
-            "waves": _waves(
-                "set-global-user-name",
-                "set-global-user-email",
-                "list-effective-config",
-            ),
-        },
-        {
-            "slug": "aliases-and-ignores",
-            "title": "Aliases and Ignores",
-            "waves": _waves("set-global-alias", "explain-ignore-rule"),
+            "slug": "restore-and-mark-known-good",
+            "title": "Restore and Mark Known-Good",
+            "waves": _waves("ft-intro-restore-source", "ft-intro-tag-checkpoint"),
         },
     ],
-    # --- Chapter 2: tracking-changes-snapshots ---------------------------------
-    # Ch1 reauthor moved the basic diff/stage-one/commit-message/check-ignore
-    # scenarios into Chapter 1; Chapter 2 keeps the precision + undo + amend work.
-    "stage-with-intent": [
+    "frost-choose-the-integration-drills": [
         {
-            "slug": "stage-with-precision",
-            "title": "Stage with Precision",
+            "slug": "compare-and-choose-the-integration",
+            "title": "Compare and Choose the Integration",
             "waves": _waves(
-                "inspect-changed-paths",
-                "stage-selected-hunks",
-                "stage-tracked-updates",
-                "stage-all-changes",
+                "fc-intro-rev-list-count",
+                "fc-intro-three-dot",
+                "fc-intro-merge-no-ff",
+                "fc-intro-merge-squash",
             ),
         },
     ],
-    "seal-the-snapshot": [
+    "frost-survive-the-conflict-drills": [
         {
-            "slug": "commit-your-work",
-            "title": "Commit Your Work",
-            "waves": _waves("commit-tracked-changes-directly"),
-        },
-        {
-            "slug": "amend-the-last-commit",
-            "title": "Amend the Last Commit",
-            "waves": _waves("amend-latest-commit-message", "amend-without-editing-message"),
-        },
-    ],
-    "untrack-and-undo-edits": [
-        {
-            "slug": "undo-staged-and-working",
-            "title": "Undo Staged and Working Edits",
-            "waves": _waves("unstage-one-file", "discard-working-file-change"),
-        },
-        {
-            "slug": "stop-tracking-files",
-            "title": "Stop Tracking Files",
+            "slug": "map-the-conflict",
+            "title": "Map the Conflict",
             "waves": _waves(
-                "remove-tracked-file",
-                "stop-tracking-local-file",
-                "stop-tracking-directory",
-            ),
-        },
-    ],
-    # --- Chapter 3: branching-switching ----------------------------------------
-    "create-and-move": [
-        {
-            "slug": "see-and-make-branches",
-            "title": "See and Make Branches",
-            "waves": _waves(
-                "list-local-branches",
-                "create-branch-pointer",
-                "create-branch-at-start-point",
+                "fs-intro-merge-tree",
+                "fs-intro-ls-files-u",
+                "fs-intro-diff-base",
             ),
         },
         {
-            "slug": "move-between-branches",
-            "title": "Move Between Branches",
+            "slug": "compare-both-sides",
+            "title": "Compare Both Sides",
+            "waves": _waves("fs-intro-diff-ours", "fs-intro-diff-theirs"),
+        },
+        {
+            "slug": "resolve-or-retreat",
+            "title": "Resolve or Retreat",
             "waves": _waves(
-                "switch-existing-branch",
-                "create-and-switch-branch",
-                "legacy-create-and-switch",
+                "fs-intro-checkout-ours",
+                "fs-intro-checkout-theirs",
+                "fs-intro-merge-abort",
+                "fs-intro-merge-continue",
             ),
         },
     ],
-    "detach-and-clean": [
+    "frost-move-the-patch-drills": [
         {
-            "slug": "inspect-branches",
-            "title": "Inspect Branches",
-            "waves": _waves("inspect-branch-tips", "inspect-detached-commit"),
-        },
-        {
-            "slug": "clean-up-branches",
-            "title": "Clean Up Branches",
-            "waves": _waves("delete-merged-branch", "force-delete-branch-pointer"),
-        },
-    ],
-    # --- Chapter 4: merging-conflicts ------------------------------------------
-    "integrate-branches": [
-        {
-            "slug": "merge-branches",
-            "title": "Merge Branches",
+            "slug": "inspect-and-shelve-the-patch",
+            "title": "Inspect and Shelve the Patch",
             "waves": _waves(
-                "find-merge-base",
-                "merge-fast-forward-branch",
-                "merge-with-merge-commit",
-                "squash-merge-branch",
-            ),
-        },
-    ],
-    "resolve-conflicts": [
-        {
-            "slug": "inspect-the-conflict",
-            "title": "Inspect the Conflict",
-            "waves": _waves(
-                "inspect-our-conflict-side",
-                "inspect-their-conflict-side",
-                "inspect-base-conflict-side",
-                "list-unmerged-index-entries",
+                "fm-intro-range-diff",
+                "fm-intro-stash-push",
+                "fm-intro-stash-show",
             ),
         },
         {
-            "slug": "choose-a-side",
-            "title": "Choose a Side",
-            "waves": _waves("choose-our-conflict-side", "choose-their-conflict-side"),
-        },
-    ],
-    "manage-the-merge": [
-        {
-            "slug": "drive-the-merge",
-            "title": "Drive the Merge",
+            "slug": "recover-or-retreat",
+            "title": "Recover or Retreat",
             "waves": _waves(
-                "launch-merge-tool",
-                "continue-resolved-merge",
-                "abort-conflicted-merge",
+                "fm-intro-stash-apply",
+                "fm-intro-stash-pop",
+                "fm-intro-stash-drop",
+                "fm-intro-cherry-abort",
             ),
         },
     ],
-    # --- Chapter 5: undoing-recovery -------------------------------------------
-    "step-back-safely": [
+    "frost-reforge-the-branch-drills": [
         {
-            "slug": "reset-hard",
-            "title": "Reset Hard",
-            "waves": _waves("reset-hard-one-parent", "reset-hard-specific-commit"),
+            "slug": "rebase-or-stand-down",
+            "title": "Rebase or Stand Down",
+            "waves": _waves("fr-intro-rebase", "fr-intro-rebase-abort"),
         },
     ],
-    "reverse-and-recover": [
+    "frost-govern-the-remote-drills": [
         {
-            "slug": "reverse-shared-work",
-            "title": "Reverse and Recover",
+            "slug": "inspect-and-refresh-remotes",
+            "title": "Inspect and Refresh Remotes",
             "waves": _waves(
-                "revert-shared-commit",
-                "revert-with-generated-message",
-                "inspect-reflog-for-recovery",
+                "fg-intro-branch-vv",
+                "fg-intro-fetch-all",
+                "fg-intro-fetch-prune",
+            ),
+        },
+        {
+            "slug": "integrate-under-guard",
+            "title": "Integrate Under Guard",
+            "waves": _waves("fg-intro-pull-ff-only", "fg-intro-pull-rebase"),
+        },
+        {
+            "slug": "publish-with-guardrails",
+            "title": "Publish with Guardrails",
+            "waves": _waves(
+                "fg-intro-push-lease",
+                "fg-intro-push-delete",
+                "fg-intro-set-url",
             ),
         },
     ],
-    # --- Chapter 6: temporary-work-patches -------------------------------------
-    "shelve-work": [
+    "frost-deliver-the-release-drills": [
         {
-            "slug": "stash-and-restore",
-            "title": "Stash and Restore",
-            "waves": _waves("stash-local-work", "list-stashed-work", "pop-top-stash"),
-        },
-        {
-            "slug": "manage-the-stash",
-            "title": "Manage the Stash",
-            "waves": _waves("apply-top-stash", "drop-top-stash"),
-        },
-    ],
-    "transplant-commits": [
-        {
-            "slug": "cherry-pick-commits",
-            "title": "Cherry-pick Commits",
+            "slug": "read-the-release-history",
+            "title": "Read the Release History",
             "waves": _waves(
-                "cherry-pick-one-commit",
-                "cherry-pick-without-commit",
-                "abort-cherry-pick",
+                "fd-intro-shortlog",
+                "fd-intro-shortlog-numbered",
+                "fd-intro-describe",
+            ),
+        },
+        {
+            "slug": "mark-and-publish-the-release",
+            "title": "Mark and Publish the Release",
+            "waves": _waves(
+                "fd-intro-tag-annotated",
+                "fd-intro-tag-delete",
+                "fd-intro-push-tags",
             ),
         },
     ],
-    # --- Chapter 7: remotes-collaboration --------------------------------------
-    "connect-and-inspect": [
+    "frost-hunt-the-regression-drills": [
         {
-            "slug": "inspect-remotes",
-            "title": "Inspect Remotes",
-            "waves": _waves("list-remote-names", "inspect-remote-urls"),
-        },
-        {
-            "slug": "fetch-updates",
-            "title": "Fetch Updates",
-            "waves": _waves("fetch-origin-updates", "fetch-and-prune-stale-refs"),
+            "slug": "run-and-preserve-the-search",
+            "title": "Run and Preserve the Search",
+            "waves": _waves("fh-intro-bisect-run", "fh-intro-bisect-log"),
         },
     ],
-    "integrate-upstream": [
+    "frost-publish-the-core-drills": [
         {
-            "slug": "pull-upstream",
-            "title": "Pull Upstream Work",
-            "waves": _waves("pull-fast-forward-update", "pull-with-rebase"),
+            "slug": "verify-the-release-record",
+            "title": "Verify the Release Record",
+            "waves": _waves("fp-intro-verify-tag", "fp-intro-show-ref"),
         },
     ],
-    "publish-work": [
+    "skyline-revision-language-drills": [
         {
-            "slug": "publish-branches",
-            "title": "Publish Branches",
-            "waves": _waves("push-and-set-upstream", "push-current-branch"),
+            "slug": "locate-and-resolve",
+            "title": "Locate and Resolve",
+            "waves": _waves("sr-intro-rev-parse", "sr-intro-rev-parse-toplevel"),
         },
+    ],
+    "skyline-hidden-history-drills": [
         {
-            "slug": "rewrite-and-remove",
-            "title": "Rewrite and Remove",
-            "waves": _waves("force-with-lease-after-rewrite", "delete-remote-branch"),
+            "slug": "search-the-hidden-history",
+            "title": "Search the Hidden History",
+            "waves": _waves("sh-intro-blame", "sh-intro-grep", "sh-intro-show-path"),
+        },
+    ],
+    "skyline-repeated-conflict-drills": [
+        {
+            "slug": "read-the-resolution-memory",
+            "title": "Read the Resolution Memory",
+            "waves": _waves("sc-intro-rerere-status", "sc-intro-rerere-diff"),
+        },
+    ],
+    "skyline-many-realities-drills": [
+        {
+            "slug": "map-the-parallel-workspaces",
+            "title": "Map the Parallel Workspaces",
+            "waves": _waves(
+                "sm-intro-worktree-list",
+                "sm-intro-sparse-list",
+                "sm-intro-submodule-status",
+            ),
+        },
+    ],
+    "skyline-enchant-behavior-drills": [
+        {
+            "slug": "audit-the-effective-behavior",
+            "title": "Audit the Effective Behavior",
+            "waves": _waves("se-intro-config-get", "se-apply-config-audit"),
+        },
+    ],
+    "skyline-guard-the-archive-drills": [
+        {
+            "slug": "inspect-and-verify-the-commit",
+            "title": "Inspect and Verify the Commit",
+            "waves": _waves("sg-intro-verify-commit", "sg-apply-inspect-and-verify"),
+        },
+    ],
+    "skyline-restore-maintain-drills": [
+        {
+            "slug": "measure-and-recover-the-store",
+            "title": "Measure and Recover the Store",
+            "waves": _waves(
+                "sx-intro-fsck",
+                "sx-intro-count-objects",
+                "sx-intro-reflog-show",
+                "sx-intro-reflog-recovery",
+            ),
+        },
+    ],
+    "skyline-serve-the-city-drills": [
+        {
+            "slug": "audit-the-served-ref-set",
+            "title": "Audit the Served Ref Set",
+            "waves": _waves("ss-intro-for-each-ref", "ss-apply-audit-served-refs"),
+        },
+    ],
+    "skyline-migrate-the-grid-drills": [
+        {
+            "slug": "inspect-the-migrated-objects",
+            "title": "Inspect the Migrated Objects",
+            "waves": _waves("sq-intro-cat-file-type", "sq-intro-ls-tree"),
+        },
+    ],
+    "skyline-git-machinery-drills": [
+        {
+            "slug": "trace-head-to-the-object",
+            "title": "Trace HEAD to the Object",
+            "waves": _waves("sy-intro-symbolic-ref", "sy-intro-cat-file-pretty"),
         },
     ],
 }
 
-ADVENTURE_WAVE_PLANS.update(BLUEPRINT_ADVENTURE_LEVELS)
+ADVENTURE_WAVE_PLANS = _merge_disjoint_adventure_wave_plans(
+    _ordered_foundational_adventure_wave_plans(
+        BLUEPRINT_ADVENTURE_LEVELS,
+        _FOUNDATIONAL_ADVENTURE_ORDER,
+    ),
+    _ADVANCED_DRILL_WAVE_PLANS,
+)
 
 
 ADVENTURE_SOURCES = {
@@ -314,97 +333,78 @@ ADVENTURE_SOURCES = {
         {
             "slug": "repository-foundations",
             "title": "Repository Foundations",
-            "description": (
-                "Start a repo, save snapshots through the working tree to staging to commit loop, "
-                "read history and changes, and set up identity and ignores."
-            ),
         },
     ],
     "tracking-changes-snapshots": [
         {
             "slug": "stage-with-intent",
             "title": "Stage with Intent",
-            "description": "Compare work and move exactly the right changes into the staging area.",
         },
         {
             "slug": "seal-the-snapshot",
             "title": "Seal the Snapshot",
-            "description": "Create and amend focused commits from staged work.",
         },
         {
             "slug": "untrack-and-undo-edits",
             "title": "Untrack and Undo Edits",
-            "description": "Remove tracked files, unstage mistakes, discard edits, and inspect ignore rules.",
         },
     ],
     "branching-switching": [
         {
             "slug": "create-and-move",
             "title": "Create and Move",
-            "description": "Create branch pointers and move HEAD safely between branches.",
         },
         {
             "slug": "detach-and-clean",
             "title": "Detach and Clean",
-            "description": "Inspect old commits detached and clean up branch pointers deliberately.",
         },
     ],
     "merging-conflicts": [
         {
             "slug": "integrate-branches",
             "title": "Integrate Branches",
-            "description": "Merge branch histories and inspect their common base.",
         },
         {
             "slug": "resolve-conflicts",
             "title": "Resolve Conflicts",
-            "description": "Read conflict state, choose sides, inspect conflict diffs, and stage resolutions.",
         },
         {
             "slug": "manage-the-merge",
             "title": "Manage the Merge",
-            "description": "Use merge tools, abort safely, or continue after a resolved merge.",
         },
     ],
     "undoing-recovery": [
         {
             "slug": "step-back-safely",
             "title": "Step Back Safely",
-            "description": "Discard local edits, amend commits, and reset local history when appropriate.",
         },
         {
             "slug": "reverse-and-recover",
             "title": "Reverse and Recover",
-            "description": "Reverse shared changes safely and use reflog as the recovery map.",
         },
     ],
     "temporary-work-patches": [
         {
             "slug": "shelve-work",
             "title": "Shelve Work",
-            "description": "Save, inspect, restore, and remove temporary work with stash.",
         },
         {
             "slug": "transplant-commits",
             "title": "Transplant Commits",
-            "description": "Copy selected commits without merging an entire branch.",
         },
     ],
     "remotes-collaboration": [
         {
             "slug": "connect-and-inspect",
             "title": "Connect and Inspect",
-            "description": "Read remote configuration and update remote-tracking refs safely.",
         },
         {
             "slug": "integrate-upstream",
             "title": "Integrate Upstream",
-            "description": "Bring upstream work into the current branch with pull and rebase-aware flows.",
         },
         {
             "slug": "publish-work",
             "title": "Publish Work",
-            "description": "Publish branches, set upstreams, force with lease, and delete remote branches.",
         },
     ],
 }
@@ -440,10 +440,6 @@ ADVENTURE_SOURCES["guild-archive-handoff"] = [
     {
         "slug": "guild-archive-handoff-workflows",
         "title": "Guild Handoff Workflows",
-        "description": (
-            "Complete connected beginner workflows that isolate, record, integrate, verify, and publish "
-            "the final Chronicle repairs."
-        ),
     }
 ]
 
@@ -452,30 +448,17 @@ ADVENTURE_SOURCES.update(
         chapter_slug: [
             {
                 "slug": f"{chapter_slug}-drills",
-                "title": "Command Drills",
-                "description": (
-                    "Meet each of this chapter's commands on its own: one focused scenario per command, "
-                    "with the exact names and values spelled out."
-                ),
+                "title": "Field Training",
             },
             {
                 "slug": f"{chapter_slug}-workflows",
                 "title": "Applied Workflows",
-                "description": (
-                    "Recombine the chapter's commands into short real workflows that inspect first, "
-                    "act deliberately, and verify the result."
-                ),
             },
             {
                 "slug": f"{chapter_slug}-incidents",
                 "title": "Repository Incidents",
-                "description": (
-                    "Diagnose a complete repository situation, choose a safe strategy, create a visible "
-                    "corrective history change, and verify the graph before handoff."
-                ),
             },
         ]
         for chapter_slug in _V3_INCIDENT_CHAPTERS
     }
 )
-

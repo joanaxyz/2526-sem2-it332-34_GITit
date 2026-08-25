@@ -38,7 +38,9 @@ class ShopService:
     def equip(self, *, player, kind: str, slug: str) -> dict:
         self._require(kind, slug)
         if kind == KIND_STORY:
-            raise ValidationError({"kind": "Stories are selected by entering the story, not equipped."})
+            raise ValidationError(
+                {"kind": "Stories are selected by entering the story, not equipped."}
+            )
         if not owns_item(player=player, kind=kind, slug=slug):
             raise PermissionDenied("You do not own this shop item.")
         record, _ = PlayerLoadout.objects.get_or_create(player=player)

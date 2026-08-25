@@ -5,7 +5,7 @@ import { syncAdventureRunInCache } from '@/features/adventures/utils/adventureRu
 import type { AdventureRun } from '@/features/adventures/types'
 import { ChapterBookReader } from '@/features/story-map/components/book/ChapterBookModal'
 import { queryKeys } from '@/shared/api/queryKeys'
-import { GlyphLoadingState } from '@/shared/components/GlyphLoadingState'
+import { LoadingState } from '@/shared/components/LoadingState'
 import { Modal } from '@/shared/components/Modal'
 
 export function AdventureLevelLibraryModal({
@@ -31,7 +31,7 @@ export function AdventureLevelLibraryModal({
   if (libraryQuery.isLoading && !libraryQuery.data) {
     return (
       <Modal open title={title} onClose={onClose} className="w-full max-w-xl" contentClassName="p-5">
-        <GlyphLoadingState description="Opening the command library." label="Loading library" variant="inline" />
+        <LoadingState description="Opening the command library." label="Loading library" variant="inline" />
       </Modal>
     )
   }

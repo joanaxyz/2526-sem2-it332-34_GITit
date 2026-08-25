@@ -4,6 +4,7 @@ from curriculum.library_commands import normalize_command_text
 
 _PROMPT = "student@git-it:~/quest$"
 
+
 def example_command(command: str) -> str:
     raw = " ".join(str(command).strip().split())
     normalized = normalize_command_text(raw)
@@ -30,9 +31,9 @@ def example_command(command: str) -> str:
     }
 
     if normalized.startswith("git config --global user.name"):
-        return "git config --global user.name \"Learner\""
+        return 'git config --global user.name "Learner"'
     if normalized.startswith("git config --global alias"):
-        return "git config --global alias.st \"status --short\""
+        return 'git config --global alias.st "status --short"'
     if normalized.startswith("git config") and "<key>" in raw:
         return "git config --global init.defaultBranch main"
     if normalized.startswith("git init -b"):
@@ -43,9 +44,15 @@ def example_command(command: str) -> str:
         return "git branch -D feature/spike"
     if normalized.startswith("git branch -d") or normalized.startswith("git branch --delete"):
         return "git branch -d feature/map"
-    if normalized.startswith("git checkout --ours") or normalized.startswith("git checkout --theirs"):
+    if normalized.startswith("git checkout --ours") or normalized.startswith(
+        "git checkout --theirs"
+    ):
         return raw.replace("<file>", "src/title.js").replace("<path>", "src/title.js")
-    if normalized.startswith("git diff --ours") or normalized.startswith("git diff --theirs") or normalized.startswith("git diff --base"):
+    if (
+        normalized.startswith("git diff --ours")
+        or normalized.startswith("git diff --theirs")
+        or normalized.startswith("git diff --base")
+    ):
         return raw.replace("<file>", "src/title.js").replace("<path>", "src/title.js")
     if normalized.startswith("git rm -r --cached"):
         return "git rm -r --cached dist"
@@ -55,7 +62,11 @@ def example_command(command: str) -> str:
         return "git stash drop stash@{0}"
     if normalized.startswith("git push") and "--delete" in normalized:
         return "git push origin --delete feature/old-map"
-    if normalized.startswith("git push --force-with-lease") or normalized.startswith("git push -f") or normalized.startswith("git push --force"):
+    if (
+        normalized.startswith("git push --force-with-lease")
+        or normalized.startswith("git push -f")
+        or normalized.startswith("git push --force")
+    ):
         return "git push --force-with-lease origin feature/map"
     if normalized.startswith("git push -u") or normalized.startswith("git push --set-upstream"):
         return "git push -u origin feature/map"
@@ -104,14 +115,16 @@ def commit_output(command: str, commit_id: str, message: str, *, amended: bool =
 def conflict_diff(command: str, label: str, line: str) -> str:
     return transcript(
         command,
-        "\n".join([
-            "diff --git a/src/title.js b/src/title.js",
-            "index e69de29..b6fc4c6 100644",
-            f"--- a/src/title.js ({label})",
-            "+++ b/src/title.js",
-            "@@ -1 +1 @@",
-            f"+{line}",
-        ]),
+        "\n".join(
+            [
+                "diff --git a/src/title.js b/src/title.js",
+                "index e69de29..b6fc4c6 100644",
+                f"--- a/src/title.js ({label})",
+                "+++ b/src/title.js",
+                "@@ -1 +1 @@",
+                f"+{line}",
+            ]
+        ),
     )
 
 
@@ -119,11 +132,11 @@ def stash_apply_output(*, dropped: bool) -> str:
     lines = [
         "On branch feature/map",
         "Changes not staged for commit:",
-        "  (use \"git add <file>...\" to update what will be committed)",
-        "  (use \"git restore <file>...\" to discard changes in working directory)",
+        '  (use "git add <file>..." to update what will be committed)',
+        '  (use "git restore <file>..." to discard changes in working directory)',
         "\tmodified:   src/app.js",
         "",
-        "no changes added to commit (use \"git add\" and/or \"git commit -a\")",
+        'no changes added to commit (use "git add" and/or "git commit -a")',
     ]
     if dropped:
         lines.append("Dropped refs/stash@{0} (8f3c2d1a4b5c6d7e8f90123456789abcdef0123)")
@@ -139,6 +152,9 @@ def sample_directory_for(command: str) -> str:
 
 
 def syntax_title(command: str) -> str:
-    if any(token in command for token in ("<path>", "<directory>", "<url>", "<branch>", "<number>", '"message"')):
+    if any(
+        token in command
+        for token in ("<path>", "<directory>", "<url>", "<branch>", "<number>", '"message"')
+    ):
         return f"Syntax: {command}"
     return command

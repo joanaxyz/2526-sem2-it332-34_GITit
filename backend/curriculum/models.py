@@ -1,5 +1,17 @@
 from django.db import models
 
+MANAGEMENT_SOURCE_SEED = "seed"
+MANAGEMENT_SOURCE_ADMIN = "admin"
+MANAGEMENT_SOURCE_RUNTIME = "runtime"
+STORY_MANAGEMENT_SOURCE_CHOICES = (
+    (MANAGEMENT_SOURCE_SEED, "Seed"),
+    (MANAGEMENT_SOURCE_ADMIN, "Admin"),
+)
+CHAPTER_MANAGEMENT_SOURCE_CHOICES = (
+    *STORY_MANAGEMENT_SOURCE_CHOICES,
+    (MANAGEMENT_SOURCE_RUNTIME, "Runtime"),
+)
+
 
 class Story(models.Model):
     """A purchasable curriculum world containing an ordered chapter sequence."""
@@ -16,7 +28,6 @@ class Story(models.Model):
     slug = models.SlugField(unique=True)
     title = models.CharField(max_length=160)
     summary = models.TextField(blank=True)
-    narrative_brief = models.JSONField(default=dict, blank=True)
     price = models.PositiveIntegerField(default=0)
     sort_order = models.PositiveIntegerField(default=0)
     is_published = models.BooleanField(default=True)
@@ -32,6 +43,11 @@ class Story(models.Model):
         blank=True,
         related_name="unlocks_stories",
         on_delete=models.PROTECT,
+    )
+    management_source = models.CharField(
+        max_length=8,
+        choices=STORY_MANAGEMENT_SOURCE_CHOICES,
+        default=MANAGEMENT_SOURCE_SEED,
     )
 
     class Meta:
@@ -53,7 +69,6 @@ class Chapter(models.Model):
     number = models.PositiveIntegerField()
     title = models.CharField(max_length=160)
     description = models.TextField()
-    narrative_brief = models.JSONField(default=dict, blank=True)
     is_published = models.BooleanField(default=True)
     # A reference chapter has the same detailed book content as a playable
     # chapter but does not claim to have simulator levels before its command
@@ -65,6 +80,12 @@ class Chapter(models.Model):
     # "landing": {"x", "y", "width", "height"}|null}. Coordinates are
     # normalized (0..1) so they render at any stage size.
     battle_stage = models.JSONField(default=dict, blank=True)
+    management_source = models.CharField(
+        max_length=8,
+        choices=CHAPTER_MANAGEMENT_SOURCE_CHOICES,
+        default=MANAGEMENT_SOURCE_SEED,
+    )
+
     class Meta:
         ordering = ["sort_order", "number"]
         indexes = [
@@ -151,6 +172,13 @@ class CommandSkill(models.Model):
     command_preview = models.JSONField(default=dict, blank=True)
     is_published = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
+    source_content_definition = models.ForeignKey(
+        "authoring.ContentDefinition",
+        null=True,
+        blank=True,
+        related_name="runtime_command_skills",
+        on_delete=models.SET_NULL,
+    )
 
     class Meta:
         ordering = ["sort_order", "base_command"]
@@ -160,7 +188,9 @@ class CommandSkill(models.Model):
 
 
 class CommandForm(models.Model):
-    command_skill = models.ForeignKey(CommandSkill, related_name="command_forms", on_delete=models.CASCADE)
+    command_skill = models.ForeignKey(
+        CommandSkill, related_name="command_forms", on_delete=models.CASCADE
+    )
     # The chapter where this specific move is taught. The skill spans whatever
     # chapters its forms live in (derived), so the library entry is never duplicated.
     chapter = models.ForeignKey(
@@ -182,7 +212,9 @@ class CommandForm(models.Model):
     class Meta:
         ordering = ["command_skill__sort_order", "sort_order", "usage_form"]
         constraints = [
-            models.UniqueConstraint(fields=["command_skill", "slug"], name="unique_command_form_skill_slug"),
+            models.UniqueConstraint(
+                fields=["command_skill", "slug"], name="unique_command_form_skill_slug"
+            ),
         ]
 
     def __str__(self) -> str:

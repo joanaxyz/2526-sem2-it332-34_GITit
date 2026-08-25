@@ -7,6 +7,7 @@ import { monsterSkin } from '@/shared/story-worlds/registry'
 import type { StoryWorldDef } from '@/shared/story-worlds/types'
 import { SpriteAnimator } from '@/shared/sprites/SpriteAnimator'
 import type { SpriteAnimatorHandle } from '@/shared/sprites/types'
+import { useSpritePixelAnchor } from '@/shared/sprites/usePixelBounds'
 import {
   finishElementAnimation,
   playOneShotAndHold,
@@ -14,46 +15,15 @@ import {
   playOneShotSprite,
   readElementTranslateX,
 } from './actorPlayback'
+import { projectMonsterBodyBounds } from './monsterBodyBounds'
+import type {
+  MonsterActorHandle,
+  MonsterAttackOptions,
+  NormalizedMonsterAttackOptions,
+} from './monsterActorTypes'
 import { cn } from '@/shared/utils/cn'
 
-export type MonsterAttackOptions = {
-  approachPx?: number
-  /** `complete` is the gameplay default: effects fire only after the attack strip. */
-  resolveAt?: 'impact' | 'complete'
-  /** Pass false when the director wants to fire an effect before the monster retreats. */
-  recover?: boolean
-}
-
-type NormalizedMonsterAttackOptions = {
-  approachPx?: number
-  resolveAt: 'impact' | 'complete'
-  recover: boolean
-}
-
-export type MonsterActorHandle = {
-  /**
-   * Play the monster attack. Melee species blink to striking range first, and authored
-   * flyers arc through their attack strip. By default the promise resolves only
-   * after the full attack strip completes, so monster effects/projectiles start
-   * after the monster animation rather than at the old hit/launch frame.
-   */
-  attack: (options?: number | MonsterAttackOptions) => Promise<void>
-  /** Return from the post-attack position back to the duel lane. */
-  recover: () => Promise<void>
-  hurt: () => Promise<void>
-  /** Death strip, then hold the final frame. */
-  die: () => Promise<void>
-  /**
-   * Park off-screen to the right (duel slot stays centred; only translateX moves
-   * the sprite). Called before the travel pan so nothing flashes in the middle.
-   */
-  prepOffscreen: (offsetPx: number) => void
-  /** Entrance: slide in from offstage; `toPx` is the wide-frame hold (right edge). */
-  walkIn: (fromPx?: number, ms?: number, toPx?: number) => Promise<void>
-  /** Ease from the wide-frame hold into the centered duel slot. */
-  slideTo: (toPx: number, ms?: number) => Promise<void>
-  element: () => HTMLDivElement | null
-}
+export type { MonsterActorHandle, MonsterAttackOptions } from './monsterActorTypes'
 
 /**
  * One monster on the stage: sprite only, all verbs imperative.
@@ -64,7 +34,7 @@ export const MonsterActor = forwardRef<
   MonsterActorHandle,
   {
     monster: BattleMonster
-    /** Extra multiplier on the species' own scale (bosses pass >1). */
+    /** Optional extra multiplier on the species' authored display scale. */
     scale?: number
     facing?: 'left' | 'right'
     /** Hide the actor until the director's entrance choreography reveals it. */
@@ -79,6 +49,7 @@ export const MonsterActor = forwardRef<
   )
   const spriteRef = useRef<SpriteAnimatorHandle | null>(null)
   const wrapRef = useRef<HTMLDivElement | null>(null)
+  const idlePixelAnchor = useSpritePixelAnchor(def.sprites.idle)
   const idleSpriteRef = useRef(def.sprites.idle)
   const deadRef = useRef(!monster.alive)
   const busyRef = useRef(false)
@@ -104,6 +75,17 @@ export const MonsterActor = forwardRef<
     sprite.pause()
     sprite.goToFrame(def.sprites.death.frameCount - 1)
   }, [def.sprites.death])
+
+  const measureBodyBounds = useCallback(() => {
+    const sprite = wrapRef.current?.querySelector<HTMLElement>('.battle-monster-sprite')
+    if (!sprite || !idlePixelAnchor) return null
+    return projectMonsterBodyBounds(
+      sprite.getBoundingClientRect(),
+      { width: def.sprites.idle.frameWidth, height: def.sprites.idle.frameHeight },
+      idlePixelAnchor.bounds,
+      facing === 'left',
+    )
+  }, [def.sprites.idle.frameHeight, def.sprites.idle.frameWidth, facing, idlePixelAnchor])
 
   useEffect(() => {
     const wasDead = deadRef.current
@@ -365,6 +347,7 @@ export const MonsterActor = forwardRef<
           })
       }),
 
+    bodyBounds: measureBodyBounds,
     element: () => wrapRef.current,
   }))
 
@@ -385,6 +368,7 @@ export const MonsterActor = forwardRef<
           pixelAnchorAnimation={def.sprites.idle}
           pixelAnchorFallback={{ bottomOffset: def.metrics.footOffset }}
           flipX={facing === 'left'}
+          className="battle-monster-sprite"
           aria-label={def.label}
         />
       </div>

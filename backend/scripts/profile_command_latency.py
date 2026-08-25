@@ -54,7 +54,9 @@ def test_profile_adventure_submit(db, django_user_model):
     run = AdventureRun.objects.get(id=run_id)
     solution = run.selected_variant.solution_commands
     for idx, command in enumerate(solution):
-        _timed_post(client, url, {"command": command}, f"adventure: solution {idx + 1}/{len(solution)}")
+        _timed_post(
+            client, url, {"command": command}, f"adventure: solution {idx + 1}/{len(solution)}"
+        )
 
 
 def test_profile_challenge_submit(db, django_user_model):
@@ -95,6 +97,8 @@ def test_profile_challenge_submit(db, django_user_model):
 
     url = f"/api/challenge-runs/{run.id}/submit-command/"
     _timed_post(client, url, {"command": "git status"}, "challenge: diagnostic cmd")
-    solution = run.variant.solution_commands
+    solution = run.selected_variant.solution_commands
     for idx, command in enumerate(solution):
-        _timed_post(client, url, {"command": command}, f"challenge: solution {idx + 1}/{len(solution)}")
+        _timed_post(
+            client, url, {"command": command}, f"challenge: solution {idx + 1}/{len(solution)}"
+        )

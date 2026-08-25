@@ -65,6 +65,8 @@ Thumbs.db
 md_files/
 .tmp/
 tmp/
+sheets/
+dogfood-output/
 
 # Local sprite source/pose exports; runtime sheets stay tracked at the asset root.
 frontend/public/cosmetics/story-worlds/*/monsters/*/pose/
@@ -74,6 +76,7 @@ frontend/public/cosmetics/story-worlds/*/monsters/*/effects/_raw/
 frontend/public/cosmetics/companion/*/pose/
 frontend/public/cosmetics/companion/*/raw/
 frontend/public/cosmetics/companion/*/effects/*/_raw/
+frontend/public/**/_raw.zip
 
 # Local agent/workbench state
 .agents/
@@ -85,6 +88,8 @@ krypton/
 # Large local archives/backups
 git-it.zip
 git.zip
+--full-page
+home-loadout-1920*.png
 # Local reference/docs dumps should not ship with source packages
 REFERENCE/
 GIT_PEDAGOGY_BLUEPRINT_PACK/

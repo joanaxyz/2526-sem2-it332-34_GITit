@@ -17,21 +17,6 @@ export type MutableRepositoryState = RepositorySnapshot & {
   [key: string]: unknown
 }
 
-export type CommandExecutionPayload = {
-  processed: boolean
-  next_state: MutableRepositoryState
-  output: string
-  normalized_command: string
-  exit_code: number
-  diagnostic: boolean
-  stdout: string
-  stderr: string
-  command_family: string
-  diagnostic_metadata: string[]
-  /** Client-side run revision used to reject stale optimistic submissions. */
-  client_run_revision?: number
-}
-
 export type ParsedGitCommand = {
   rawText: string
   normalizedText: string

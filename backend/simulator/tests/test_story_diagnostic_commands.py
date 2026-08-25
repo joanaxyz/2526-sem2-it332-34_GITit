@@ -11,6 +11,8 @@ def test_new_story_read_only_commands_are_backend_diagnostics():
         "git sparse-checkout list",
         "git submodule status",
         "git config --get user.name",
+        "git config --list",
+        "git config -l",
     ]
     assert all(is_diagnostic_command(command) for command in commands)
 

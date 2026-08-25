@@ -1,13 +1,14 @@
-# Curriculum source data migration
+# Authored curriculum source
 
-This folder is the landing zone for human-authored curriculum definitions split by
-chapter/module. The existing monolithic seed files remain the runtime source of
-truth until each chapter is migrated and checked against deterministic seed
-output.
+This directory is the canonical home for human-authored curriculum definitions.
+Content is grouped by chapter, adventure, or cohesive concept module; stable
+composer modules preserve the public seed-data imports used by the runtime.
 
-Migration rule:
+Ownership rules:
 
-1. Move only hand-authored definitions here.
-2. Keep generated artifacts under `seed_data/generated/`.
-3. Do not edit generated output by hand.
-4. Each migrated chapter must keep seed idempotency tests passing.
+1. Edit hand-authored curriculum only under `seed_data/source/`.
+2. Keep deterministic generated artifacts under `seed_data/generated/`.
+3. Regenerate generated output through the canonical management command; never
+   edit generated files by hand.
+4. Preserve stable composer exports when splitting a large authored ledger, and
+   keep source-layout and seed-idempotency checks passing.

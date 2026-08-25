@@ -102,7 +102,11 @@ def _blueprint_state(kind: str) -> dict:
     if kind == "branch":
         return repo(commits=BRANCH_BASE, branches={"main": "c2", "feature/ui": "c1", "old": "c1", "scratch": "c0"})
     if kind == "branch-dirty":
-        return repo(commits=BRANCH_BASE, branches={"main": "c2", "feature/ui": "c1", "hotfix": "c0"}, working_tree=dirty_readme)
+        return repo(
+            commits=BRANCH_BASE,
+            branches={"main": "c2", "feature/ui": "c1"},
+            working_tree=dirty_readme,
+        )
     if kind == "branch-delete":
         commits = [*BRANCH_BASE, commit("c3", "Scratch", ["c0"], {"README.md": "scratch\n"})]
         return repo(commits=commits, branches={"main": "c2", "old": "c1", "scratch": "c3"})
@@ -420,7 +424,7 @@ def _blueprint_variant_state(initial: dict, *, alternate: bool) -> dict:
 
 def _blueprint_variants(wave: dict, solution: list[str], required: list[str]) -> list[dict]:
     initial = _blueprint_state(wave.get("state", "worktree"))
-    state_requirements = dict(wave.get("evaluation") or {})
+    state_requirements = copy.deepcopy(wave.get("evaluation") or {})
     return [
         v(
             wave["id"],

@@ -105,7 +105,9 @@ def rename_workspace_file(repository_state: dict, *, path: str, new_path: str) -
         visible_entry = visible_tree.get(source_path)
         if not visible_entry or visible_entry.get("status") == "deleted":
             raise BadRequest(f"{source_path} cannot be renamed because it is deleted.")
-        moved_entries.append((source_path, destination, copy.deepcopy(visible_entry.get("content"))))
+        moved_entries.append(
+            (source_path, destination, copy.deepcopy(visible_entry.get("content")))
+        )
 
     for source_path, destination, content in moved_entries:
         staging.pop(source_path, None)

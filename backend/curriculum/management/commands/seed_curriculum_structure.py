@@ -8,6 +8,8 @@ from adventures.models import (
     AdventureWaveVariant,
 )
 from curriculum.models import (
+    MANAGEMENT_SOURCE_ADMIN,
+    MANAGEMENT_SOURCE_SEED,
     Chapter,
     CommandForm,
     Story,
@@ -23,6 +25,11 @@ class SeedCurriculumStructureMixin:
     def _seed_stories(self) -> dict[str, Story]:
         live_slugs = [spec["slug"] for spec in STORIES]
         existing = {story.slug: story for story in Story.objects.all()}
+        admin_by_slug = {
+            slug: story
+            for slug, story in existing.items()
+            if story.management_source == MANAGEMENT_SOURCE_ADMIN
+        }
 
         # First pass creates/updates every story without prerequisites so forward
         # references never depend on authoring order.
@@ -35,25 +42,25 @@ class SeedCurriculumStructureMixin:
                         "slug": spec["slug"],
                         "title": spec["title"],
                         "summary": spec.get("summary", ""),
-                        "narrative_brief": spec.get("narrative_brief", {}),
                         "price": spec.get("price", 0),
                         "sort_order": spec.get("sort_order", index),
                         "is_published": spec.get("is_published", True),
                         "world_slug": spec.get("world_slug", spec["slug"]),
                         "difficulty": spec.get("difficulty", Story.DIFFICULTY_BEGINNER),
                         "prerequisite_story": existing.get(spec.get("prerequisite_story")),
+                        "management_source": MANAGEMENT_SOURCE_SEED,
                     },
                 )
             )
+        rows = [row for row in rows if row[0] not in admin_by_slug]
         by_slug = self._bulk_upsert(
             Story,
-            Story.objects.all(),
+            Story.objects.filter(management_source=MANAGEMENT_SOURCE_SEED),
             rows,
             key=lambda obj: obj.slug,
             update_fields=[
                 "title",
                 "summary",
-                "narrative_brief",
                 "price",
                 "sort_order",
                 "is_published",
@@ -62,11 +69,14 @@ class SeedCurriculumStructureMixin:
                 "prerequisite_story",
             ],
         )
+        by_slug.update(admin_by_slug)
 
         # Second pass resolves prerequisites against the complete story set.
         changed = []
         for spec in STORIES:
             story = by_slug[spec["slug"]]
+            if story.management_source != MANAGEMENT_SOURCE_SEED:
+                continue
             prerequisite_slug = spec.get("prerequisite_story")
             prerequisite = by_slug.get(prerequisite_slug) if prerequisite_slug else None
             if story.prerequisite_story_id != (prerequisite.id if prerequisite else None):
@@ -75,12 +85,18 @@ class SeedCurriculumStructureMixin:
         if changed:
             Story.objects.bulk_update(changed, ["prerequisite_story"])
 
-        Story.objects.exclude(slug__in=live_slugs).update(is_published=False)
+        Story.objects.filter(management_source=MANAGEMENT_SOURCE_SEED).exclude(
+            slug__in=live_slugs
+        ).update(is_published=False)
         return {slug: by_slug[slug] for slug in live_slugs}
 
     def _seed_chapters(self, stories: dict[str, Story]) -> dict[str, Chapter]:
         live_slugs = []
         rows = []
+        admin_by_slug = {
+            chapter.slug: chapter
+            for chapter in Chapter.objects.filter(management_source=MANAGEMENT_SOURCE_ADMIN)
+        }
         story_positions: dict[str, int] = {}
         for spec in CHAPTERS:
             live_slugs.append(spec["slug"])
@@ -99,17 +115,18 @@ class SeedCurriculumStructureMixin:
                         "number": spec["number"],
                         "title": spec["title"],
                         "description": spec["description"],
-                        "narrative_brief": spec.get("narrative_brief", {}),
                         "sort_order": spec.get("sort_order", story_positions[story_slug]),
                         "is_published": spec["slug"] in self.published_chapter_slugs,
                         "is_playable": spec.get("is_playable", story_slug == "arcane-spire"),
                         "battle_stage": spec.get("battle_stage", {}),
+                        "management_source": MANAGEMENT_SOURCE_SEED,
                     },
                 )
             )
+        rows = [row for row in rows if row[0] not in admin_by_slug]
         by_slug = self._bulk_upsert(
             Chapter,
-            Chapter.objects.all(),
+            Chapter.objects.filter(management_source=MANAGEMENT_SOURCE_SEED),
             rows,
             key=lambda obj: obj.slug,
             update_fields=[
@@ -117,16 +134,16 @@ class SeedCurriculumStructureMixin:
                 "number",
                 "title",
                 "description",
-                "narrative_brief",
                 "sort_order",
                 "is_published",
                 "is_playable",
                 "battle_stage",
             ],
         )
-        Chapter.objects.exclude(slug__in=live_slugs).exclude(slug__startswith="ugc-").update(
-            is_published=False
-        )
+        by_slug.update(admin_by_slug)
+        Chapter.objects.filter(management_source=MANAGEMENT_SOURCE_SEED).exclude(
+            slug__in=live_slugs
+        ).update(is_published=False)
         # Preserve CHAPTERS authoring order; downstream seeding enumerates this map.
         return {slug: by_slug[slug] for slug in live_slugs}
 
@@ -238,10 +255,6 @@ class SeedCurriculumStructureMixin:
                             "chapter": chapter,
                             "slug": level_slug,
                             "title": group["title"],
-                            "description": chapter.description or f"Practice the Git moves for {chapter.title}.",
-                            "brief": group.get("brief", "") or "",
-                            "narrative_brief": group.get("narrative_brief", {}),
-                            "level_type": group.get("level_type", "guided_workflow"),
                             "is_required": True,
                             "sort_order": sort_order_by_chapter[chapter_id],
                             "is_published": chapter.is_published,
@@ -252,15 +265,14 @@ class SeedCurriculumStructureMixin:
         canonical_chapters = list(chapter_by_id.values())
         levels_by_key = self._bulk_upsert(
             AdventureLevel,
-            AdventureLevel.objects.filter(chapter__in=canonical_chapters),
+            AdventureLevel.objects.filter(
+                chapter__in=canonical_chapters,
+                source_content_definition__isnull=True,
+            ),
             level_rows,
             key=lambda obj: (obj.chapter_id, obj.slug),
             update_fields=[
                 "title",
-                "description",
-                "brief",
-                "narrative_brief",
-                "level_type",
                 "is_required",
                 "sort_order",
                 "is_published",
@@ -315,7 +327,10 @@ class SeedCurriculumStructureMixin:
                 )
         waves_by_key = self._bulk_upsert(
             AdventureWave,
-            AdventureWave.objects.filter(level__chapter__in=canonical_chapters),
+            AdventureWave.objects.filter(
+                level__chapter__in=canonical_chapters,
+                level__source_content_definition__isnull=True,
+            ),
             wave_rows,
             key=lambda obj: (obj.level_id, obj.slug),
             update_fields=[
@@ -353,8 +368,10 @@ class SeedCurriculumStructureMixin:
 
         official_chapter_slugs = [spec["slug"] for spec in CHAPTERS]
         AdventureWave.objects.filter(
-            level__chapter__slug__in=official_chapter_slugs
+            level__chapter__slug__in=official_chapter_slugs,
+            level__source_content_definition__isnull=True,
         ).exclude(id__in=live_wave_ids).update(is_published=False)
         AdventureLevel.objects.filter(
-            chapter__slug__in=official_chapter_slugs
+            chapter__slug__in=official_chapter_slugs,
+            source_content_definition__isnull=True,
         ).exclude(id__in=live_level_ids).update(is_published=False)

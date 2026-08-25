@@ -12,7 +12,7 @@ Scenario-driven Git learning platform. `frontend/` is a React + Vite SPA; `backe
 ## Non-Negotiable Rules
 
 - Do not add deprecated product vocabulary to active code.
-- Keep `/docs` absent; root markdown files are the documentation source.
+- Keep current architecture in the root markdown files; reserve `docs/goals/` for scoped implementation artifacts.
 - Do not make backend runtime code depend on frontend source files or assets.
 - Do not hand-write user-facing runtime API response shapes in API wrappers; use generated contract types.
 - Do not edit generated target states by hand; regenerate them.

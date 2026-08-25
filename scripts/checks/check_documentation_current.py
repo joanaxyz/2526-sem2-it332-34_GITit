@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Validate that root documentation describes the current architecture.
 
-The project intentionally does not use a /docs tree. This guard keeps the root
-markdown files useful and prevents stale refactor-era labels from becoming a
-second source of truth.
+The root markdown files are the architectural source of truth. ``docs/goals``
+may contain scoped implementation artifacts, but no other documentation tree is
+allowed to become a competing source of current guidance.
 """
+
 from __future__ import annotations
 
 import sys
@@ -69,7 +70,11 @@ def main() -> int:
 
     docs_dir = ROOT / "docs"
     if docs_dir.exists():
-        violations.append("/docs must remain absent; root markdown files are the documentation source.")
+        unexpected_docs = [
+            path.relative_to(ROOT).as_posix() for path in docs_dir.iterdir() if path.name != "goals"
+        ]
+        for path in unexpected_docs:
+            violations.append(f"Unexpected documentation path outside docs/goals: {path}")
 
     for rel in REQUIRED_FILES:
         path = ROOT / rel
@@ -89,7 +94,13 @@ def main() -> int:
         if snippet not in readme:
             violations.append(f"README.md missing current setup/check snippet: {snippet}")
 
-    for rel in ["README.md", "ARCHITECTURE.md", "CLAUDE.md", "CONTENT_AUTHORING_GUIDE.md", "CURRICULUM_AUTHORING_PLAN.md"]:
+    for rel in [
+        "README.md",
+        "ARCHITECTURE.md",
+        "CLAUDE.md",
+        "CONTENT_AUTHORING_GUIDE.md",
+        "CURRICULUM_AUTHORING_PLAN.md",
+    ]:
         path = ROOT / rel
         if not path.exists():
             continue
@@ -104,7 +115,7 @@ def main() -> int:
             print(f"  {violation}", file=sys.stderr)
         return 1
 
-    print("Root documentation is current and /docs is absent.")
+    print("Root documentation is current and /docs is limited to scoped goals.")
     return 0
 
 

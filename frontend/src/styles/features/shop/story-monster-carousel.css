@@ -1,0 +1,161 @@
+/* Compact monster carousel ------------------------------------------------ */
+.shop-monster-carousel {
+  position: absolute;
+  top: 2.6rem;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  align-items: center;
+  width: 4.65rem;
+  gap: 0.25rem;
+  overflow: hidden;
+  border: 1px solid rgba(126, 183, 217, 0.13);
+  border-radius: var(--radius-md);
+  padding: 0.35rem;
+  background: rgba(1, 7, 17, 0.38);
+}
+
+.shop-monster-carousel-track {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: clip;
+  overflow-y: auto;
+  padding-inline: 0.15rem;
+  scrollbar-width: thin;
+}
+
+.shop-preview-pager {
+  display: grid;
+  width: 1.9rem;
+  height: 1.9rem;
+  place-items: center;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: var(--control-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out), opacity var(--motion-normal) var(--ease-out);
+}
+
+.shop-monster-carousel .shop-preview-pager { justify-self: center; }
+.shop-monster-carousel .shop-preview-pager svg { transform: rotate(90deg); }
+
+.shop-preview-pager:hover:not(:disabled),
+.shop-preview-pager:focus-visible {
+  outline: none;
+  border-color: var(--control-border-hover);
+  background: var(--control-bg-hover);
+  color: var(--text-primary);
+}
+
+.shop-preview-pager:focus-visible {
+  box-shadow: var(--control-focus-ring);
+}
+
+.shop-preview-pager:disabled {
+  cursor: default;
+  opacity: 0.28;
+}
+
+.shop-preview-pager svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.shop-preview-pager-dots {
+  grid-column: 1 / -1;
+  display: none;
+  justify-content: center;
+  gap: 0.42rem;
+  padding-top: 0.1rem;
+}
+
+.shop-preview-pager-dots button {
+  width: 0.42rem;
+  height: 0.42rem;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: rgba(150, 178, 200, 0.42);
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--motion-normal) var(--ease-out), transform var(--motion-normal) var(--ease-out);
+}
+
+.shop-preview-pager-dots button[data-active='true'] {
+  background: rgb(var(--theme-primary-rgb));
+  box-shadow: 0 0 8px rgba(var(--theme-primary-rgb), 0.7);
+  transform: scaleX(2.6);
+}
+
+.shop-monster-pick {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0.18rem 0.25rem;
+  transition: transform var(--motion-normal) var(--ease-out);
+}
+
+.shop-monster-pick:hover,
+.shop-monster-pick[data-active='true'] {
+  transform: translateY(-2px);
+}
+
+.shop-monster-pick:focus-visible {
+  outline: none;
+}
+
+.shop-monster-pick-stage {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: 3.75rem;
+  overflow: visible;
+}
+
+.shop-monster-pick-ground {
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  bottom: 0;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, transparent, rgba(var(--theme-primary-rgb), 0.34), transparent);
+  opacity: 0.6;
+  transition: opacity var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out);
+}
+
+.shop-monster-pick:hover .shop-monster-pick-ground,
+.shop-monster-pick[data-active='true'] .shop-monster-pick-ground,
+.shop-monster-pick:focus-visible .shop-monster-pick-ground {
+  opacity: 1;
+  background: linear-gradient(90deg, transparent, rgb(var(--theme-primary-rgb)), transparent);
+  box-shadow: 0 0 10px rgba(var(--theme-primary-rgb), 0.6);
+}
+
+.shop-monster-pick-sprite {
+  position: relative;
+  z-index: 1;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+  filter: drop-shadow(0 0.2rem 0.3rem rgba(0, 0, 0, 0.44));
+  transition: filter var(--motion-normal) var(--ease-out);
+}
+
+.shop-monster-pick:hover .shop-monster-pick-sprite,
+.shop-monster-pick[data-active='true'] .shop-monster-pick-sprite,
+.shop-monster-pick:focus-visible .shop-monster-pick-sprite {
+  filter: drop-shadow(0 0.2rem 0.3rem rgba(0, 0, 0, 0.44)) drop-shadow(0 0 8px rgba(var(--theme-primary-rgb), 0.55));
+}

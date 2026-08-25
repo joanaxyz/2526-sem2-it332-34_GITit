@@ -14,7 +14,7 @@
 
 .gameplay-workspace__main {
   display: grid;
-  gap: 0.5rem;
+  gap: var(--workspace-gap);
   min-width: 0;
   min-height: 0;
 }
@@ -45,21 +45,25 @@
   background: rgba(var(--theme-primary-rgb), 0.03);
 }
 
-/* The context body scrolls, but the default thumb is invisible against the
-   dark slab - the story would look hard-clipped mid-line with no cue that the
-   objective and copy details continue below. */
 .gameplay-panel-scroll .ui-card-content {
-  scrollbar-gutter: stable;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: auto;
 }
 
 
 .gameplay-pane .ui-card-content,
-.gameplay-panel-scroll .ui-card-content,
 .gameplay-project-region .ui-card-content {
   min-height: 0;
   flex: 1 1 auto;
   overflow: auto;
   padding: 0.75rem;
+}
+
+.gameplay-panel-scroll .ui-card-content {
+  min-height: 0;
+  flex: 1 1 auto;
+  padding: 0;
 }
 
 .gameplay-pane .react-flow {

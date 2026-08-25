@@ -48,6 +48,8 @@ export const richHomeFixture: HomeSummary = {
     failed: 9,
     abandoned: 5,
   },
+  completed_story_slug: null,
+  completed_stories: [],
   streak: {
     current: 12,
     longest: 19,
@@ -76,6 +78,8 @@ export const emptyHomeFixture: HomeSummary = {
   },
   chapter_kpis: {},
   counts: { started: 0, completed: 0, failed: 0, abandoned: 0 },
+  completed_story_slug: null,
+  completed_stories: [],
   streak: { current: 0, longest: 0, last_completed_on: null },
   perfect_clears: 0,
   mastery: 0,

@@ -21,7 +21,14 @@ from curriculum.seed_data.source.challenge_fixtures import (
     SNAPSHOT_BASE,
     SNAPSHOT_WITH_SECRET,
 )
-from curriculum.seed_data.spec_helpers import commit, ev, meta_equals, repo, uninitialized
+from curriculum.seed_data.spec_helpers import (
+    commit,
+    enrich_context_with_required_details,
+    ev,
+    meta_equals,
+    repo,
+    uninitialized,
+)
 
 DIFFICULTY_ORDER = {"easy": 1, "medium": 2, "hard": 3}
 
@@ -122,14 +129,18 @@ def variant(
         "solution_commands_template": solution,
         "solution_workspace_files_template": workspace_files or [],
         "evaluation_spec_template": evaluation,
-        "scenario_context_template": _scenario(
-            story,
-            task,
-            before=before,
-            after=after,
-            current=current,
-            risk=risk,
-            details=details,
+        "scenario_context_template": enrich_context_with_required_details(
+            _scenario(
+                story,
+                task,
+                before=before,
+                after=after,
+                current=current,
+                risk=risk,
+                details=details,
+            ),
+            solution_commands=solution,
+            evaluation_spec=evaluation,
         ),
         "scaffold_policy_template": {
             "diagram": "primary",

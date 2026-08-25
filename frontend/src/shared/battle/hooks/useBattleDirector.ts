@@ -12,7 +12,7 @@ import type { BattleDirector, BattleTransitionCue, BattleTransitionCueConfig } f
 import type { BattleMonster } from '@/shared/battle/types'
 
 export { missedSpellFloorTarget } from './battleMotion'
-export type { BattleDirector, BattleTransitionCue, BattleTransitionCueConfig, EncounterOptions } from './battleDirectorTypes'
+export type { BattleDirector,  BattleTransitionCueConfig, EncounterOptions } from './battleDirectorTypes'
 
 /**
  * Translates command-lifecycle calls into sequential stage choreography. In the
@@ -183,6 +183,14 @@ export function useBattleDirector(): BattleDirector {
     playerRef.current?.cancelAttack()
   }, [playerRef])
 
+  const syncPlayerVitals = useCallback(
+    (nextPlayerHp: number | null, nextPlayerMaxHp: number | null) => {
+      setPlayerHp(nextPlayerHp)
+      setPlayerMaxHp(nextPlayerMaxHp)
+    },
+    [setPlayerHp, setPlayerMaxHp],
+  )
+
   const setStoryWorldSlug = useCallback((slug: string | null | undefined) => {
     setStoryWorldSlugState(slug || DEFAULT_STORY_WORLD_SLUG)
   }, [])
@@ -207,6 +215,7 @@ export function useBattleDirector(): BattleDirector {
     onAttackStart,
     onResolve,
     onError,
+    syncPlayerVitals,
     setStoryWorldSlug,
     setEncounter,
   }

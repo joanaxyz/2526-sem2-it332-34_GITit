@@ -31,7 +31,6 @@ class SeedCurriculumChallengeLessonMixin:
                         "title": spec["title"],
                         "summary": chapter.description or spec["summary"],
                         "narrative": spec["narrative"],
-                        "brief": spec["summary"],
                         "sort_order": sort_order_by_chapter[chapter.id],
                         "is_published": chapter.is_published,
                     },
@@ -39,15 +38,19 @@ class SeedCurriculumChallengeLessonMixin:
             )
         challenge_levels_by_key = self._bulk_upsert(
             ChallengeLevel,
-            ChallengeLevel.objects.filter(chapter__in=list(chapters.values())),
+            ChallengeLevel.objects.filter(
+                chapter__in=list(chapters.values()),
+                source_content_definition__isnull=True,
+            ),
             level_rows,
             key=lambda obj: (obj.chapter_id, obj.slug),
-            update_fields=["title", "summary", "narrative", "brief", "sort_order", "is_published"],
+            update_fields=["title", "summary", "narrative", "sort_order", "is_published"],
         )
         live_challenge_level_ids = [challenge_levels_by_key[key].id for key, _ in level_rows]
-        ChallengeLevel.objects.filter(chapter__in=list(chapters.values())).exclude(
-            id__in=live_challenge_level_ids
-        ).update(is_published=False)
+        ChallengeLevel.objects.filter(
+            chapter__in=list(chapters.values()),
+            source_content_definition__isnull=True,
+        ).exclude(id__in=live_challenge_level_ids).update(is_published=False)
 
         levels_by_spec_slug = {
             spec["slug"]: challenge_levels_by_key[(chapters[spec["module"]].id, spec["slug"])]
@@ -99,7 +102,10 @@ class SeedCurriculumChallengeLessonMixin:
                 )
         trials_by_key = self._bulk_upsert(
             ChallengeTrial,
-            ChallengeTrial.objects.filter(challenge_level__in=list(levels_by_spec_slug.values())),
+            ChallengeTrial.objects.filter(
+                challenge_level__in=list(levels_by_spec_slug.values()),
+                challenge_level__source_content_definition__isnull=True,
+            ),
             trial_rows,
             key=lambda obj: (obj.challenge_level_id, obj.difficulty),
             update_fields=[
@@ -113,9 +119,10 @@ class SeedCurriculumChallengeLessonMixin:
             ],
         )
         live_trial_ids = [trials_by_key[key].id for key, _ in trial_rows]
-        ChallengeTrial.objects.filter(challenge_level__in=list(levels_by_spec_slug.values())).exclude(
-            id__in=live_trial_ids
-        ).update(is_published=False)
+        ChallengeTrial.objects.filter(
+            challenge_level__in=list(levels_by_spec_slug.values()),
+            challenge_level__source_content_definition__isnull=True,
+        ).exclude(id__in=live_trial_ids).update(is_published=False)
 
         levels_and_specs = []
         for spec in CHALLENGES:
@@ -152,12 +159,15 @@ class SeedCurriculumChallengeLessonMixin:
             )
         by_key = self._bulk_upsert(
             ChapterLesson,
-            ChapterLesson.objects.filter(chapter__in=list(chapters.values())),
+            ChapterLesson.objects.filter(
+                chapter__in=list(chapters.values()),
+                source_content_definition__isnull=True,
+            ),
             rows,
             key=lambda obj: (obj.chapter_id, obj.slug),
             update_fields=["title", "summary", "pages", "sort_order", "is_published"],
         )
         live_ids = [by_key[key].id for key, _ in rows]
-        ChapterLesson.objects.filter(source_content_definition__isnull=True).exclude(id__in=live_ids).update(
-            is_published=False
-        )
+        ChapterLesson.objects.filter(source_content_definition__isnull=True).exclude(
+            id__in=live_ids
+        ).update(is_published=False)

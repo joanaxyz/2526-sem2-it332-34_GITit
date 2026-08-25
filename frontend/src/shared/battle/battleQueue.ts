@@ -19,7 +19,7 @@
  * animator onComplete callbacks or WAAPI `animation.finished`.
  */
 
-export type StepContext = {
+type StepContext = {
   /** True when the queue is being fast-forwarded: apply outcomes instantly. */
   fast: boolean
 }

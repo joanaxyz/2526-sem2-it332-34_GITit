@@ -16,10 +16,24 @@ import {
   spriteNode,
 } from './spriteDom'
 
+/** The point on the sprite to pin at the target while it rests/impacts. The
+ *  pixel-measured `placeAnchor` (emitted from the baked art) wins; otherwise we
+ *  fall back to the fixed feet/center frame fraction. */
+function impactAnchorFor(spec: SkillSpriteSpec): SpriteAnchor {
+  return spec.placeAnchor ?? (spec.anchor === 'feet' ? FEET_ANCHOR : CENTER_ANCHOR)
+}
+
 async function playProjectile(
   ctx: EffectContext,
   spec: SkillSpriteSpec,
-  options?: { opacity?: number; filter?: string; flip?: boolean; pixelated?: boolean; to?: { x: number; y: number } },
+  options?: {
+    opacity?: number
+    filter?: string
+    flip?: boolean
+    pixelated?: boolean
+    to?: { x: number; y: number }
+    impactScale?: number
+  },
 ): Promise<void> {
   await playProjectileLayer({
     host: ctx.layer,
@@ -29,7 +43,9 @@ async function playProjectile(
     to: options?.to ?? ctx.to,
     impactTo: ctx.impactTo ?? options?.to ?? ctx.to,
     durationMs: spec.durationMs,
-    impactAnchor: spec.anchor === 'feet' ? FEET_ANCHOR : CENTER_ANCHOR,
+    impactAnchor: impactAnchorFor(spec),
+    impactScale: options?.impactScale,
+    impactBounds: spec.placeBounds,
     impactStartFrame: spec.impactStartFrame,
     opacity: options?.opacity,
     filter: options?.filter,
@@ -40,7 +56,11 @@ async function playProjectile(
   })
 }
 
-async function playGatherOrbProjectileImpact(ctx: EffectContext, spec: SkillSpriteSpec): Promise<void> {
+async function playGatherOrbProjectileImpact(
+  ctx: EffectContext,
+  spec: SkillSpriteSpec,
+  impactScale = 1,
+): Promise<void> {
   // The companion faces right, so its charge gathers to the right of the hand.
   // Monsters share this same core with `flip` to mirror it onto their left hand.
   await playChargeProjectileLayer({
@@ -53,7 +73,9 @@ async function playGatherOrbProjectileImpact(ctx: EffectContext, spec: SkillSpri
     durationMs: spec.durationMs,
     launchStartFrame: spec.launchStartFrame,
     impactStartFrame: spec.impactStartFrame,
-    impactAnchor: spec.anchor === 'feet' ? FEET_ANCHOR : CENTER_ANCHOR,
+    impactAnchor: impactAnchorFor(spec),
+    impactScale,
+    impactBounds: spec.placeBounds,
     onCharge: spec.element ? () => playSkillSound(spec.element, 'charge') : undefined,
     onLaunch: spec.element ? () => playSkillSound(spec.element, 'projectile') : undefined,
     onImpact: spec.element ? () => playSkillSound(spec.element, 'impact') : undefined,
@@ -141,12 +163,19 @@ async function playMissProjectile(ctx: EffectContext, spec: SkillSpriteSpec): Pr
  *  Ground effects and feet-anchored risers plant on the ground line; body-centered
  *  target auras were baked to the cell centre and plant on the monster's body. */
 function anchorForSpec(spec: SkillSpriteSpec): SpriteAnchor {
+  // Pixel-measured anchor wins over the baked-classification fallback.
+  if (spec.placeAnchor) return spec.placeAnchor
   if (spec.playback === 'ground') return FEET_ANCHOR
   if (spec.playback === 'target') return spec.anchor === 'center' ? CENTER_ANCHOR : FEET_ANCHOR
   return CENTER_ANCHOR
 }
 
-async function playTarget(ctx: EffectContext, spec: SkillSpriteSpec, anchorOverride?: SpriteAnchor): Promise<void> {
+async function playTarget(
+  ctx: EffectContext,
+  spec: SkillSpriteSpec,
+  anchorOverride?: SpriteAnchor,
+  frameRange?: { from: number; to: number },
+): Promise<void> {
   const anchor = anchorOverride ?? anchorForSpec(spec)
   const layers = spec.layers
   if (layers) {
@@ -161,6 +190,8 @@ async function playTarget(ctx: EffectContext, spec: SkillSpriteSpec, anchorOverr
         durationMs: spec.durationMs,
         offsetX: spec.offsetX,
         offsetY: spec.offsetY,
+        frameRange,
+        visualBounds: spec.placeBounds,
       }),
       playTargetLayer({
         host: ctx.layer,
@@ -171,6 +202,8 @@ async function playTarget(ctx: EffectContext, spec: SkillSpriteSpec, anchorOverr
         durationMs: spec.durationMs,
         offsetX: spec.offsetX,
         offsetY: spec.offsetY,
+        frameRange,
+        visualBounds: spec.placeBounds,
       }),
     ])
     return
@@ -184,13 +217,15 @@ async function playTarget(ctx: EffectContext, spec: SkillSpriteSpec, anchorOverr
     durationMs: spec.durationMs,
     offsetX: spec.offsetX,
     offsetY: spec.offsetY,
+    frameRange,
+    visualBounds: spec.placeBounds,
   })
 }
 
 /** Ground shockwave / cresting wave: base planted on the floor, travelling along
  *  it from the caster's ground point to the enemy's. */
 async function playGround(ctx: EffectContext, spec: SkillSpriteSpec): Promise<void> {
-  const anchor = FEET_ANCHOR
+  const anchor = spec.placeAnchor ?? FEET_ANCHOR
   // Fit-to-stage against the enemy-side impact point so the shockwave never
   // spills past the clipped stage edge as it comes to rest.
   const baseW = spec.sheet.frameWidth * spec.scale
@@ -227,18 +262,17 @@ async function playGround(ctx: EffectContext, spec: SkillSpriteSpec): Promise<vo
 
 export async function playResolvedSkillEffect(ctx: EffectContext, spec: SkillSpriteSpec): Promise<void> {
   if (reduceMotion()) return
-  // Impacts and target effects scale with the monster: a big boss gets a
-  // proportionally larger spell than a small mob.
+  // Impacts and target effects follow the rendered monster size.
   const sizeScale = ctx.sizeScale && ctx.sizeScale > 0 ? ctx.sizeScale : 1
+  if (spec.motion === 'gather-orb-projectile-impact-dissipate') {
+    await playGatherOrbProjectileImpact(ctx, spec, sizeScale)
+    return
+  }
+  if (spec.playback === 'projectile') {
+    await playProjectile(ctx, spec, { impactScale: sizeScale })
+    return
+  }
   const sized = sizeScale === 1 ? spec : { ...spec, scale: spec.scale * sizeScale }
-  if (sized.motion === 'gather-orb-projectile-impact-dissipate') {
-    await playGatherOrbProjectileImpact(ctx, sized)
-    return
-  }
-  if (sized.playback === 'projectile') {
-    await playProjectile(ctx, sized)
-    return
-  }
   if (sized.playback === 'ground') {
     await playGround(ctx, sized)
     return
@@ -249,26 +283,6 @@ export async function playResolvedSkillEffect(ctx: EffectContext, spec: SkillSpr
   }
   playSkillSound(sized.element, sized.anchor === 'center' ? 'target-center' : 'target-ground')
   await playTarget(ctx, sized)
-}
-
-/** In a monster-less preview, an effect plants on the ground line unless it is a
- *  body-centered target aura: projectile impacts are ground eruptions (they burst
- *  on the floor, not in mid-air), and ground/feet risers already root on the
- *  floor. Only the target auras (scan orb, attune reticle, ...) float on the body. */
-export function lockedEffectIsGrounded(spec: SkillSpriteSpec): boolean {
-  return !(spec.playback === 'target' && spec.anchor === 'center')
-}
-
-/** Play a skill LOCKED in place: route every kind (even projectiles) through the
- *  stationary target playback, so a preview shows the effect without it flying
- *  across. Grounded effects plant their base on `ctx.to` (the drawn ground line);
- *  body auras sit centered on `ctx.to`. Used by the shop skill preview. */
-export async function playLockedSkillEffect(ctx: EffectContext, spec: SkillSpriteSpec): Promise<void> {
-  if (reduceMotion()) return
-  const sizeScale = ctx.sizeScale && ctx.sizeScale > 0 ? ctx.sizeScale : 1
-  const sized = sizeScale === 1 ? spec : { ...spec, scale: spec.scale * sizeScale }
-  const anchor = lockedEffectIsGrounded(spec) ? FEET_ANCHOR : CENTER_ANCHOR
-  await playTarget(ctx, sized, anchor)
 }
 
 export async function playMissEffect(ctx: EffectContext, spec: SkillSpriteSpec): Promise<void> {

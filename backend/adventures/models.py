@@ -7,37 +7,7 @@ from common.constants import (
     SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
-
-try:
-    from common.models import VariantBase
-except ModuleNotFoundError as exc:
-    if exc.name != "common.models":
-        raise
-
-    class VariantBase(models.Model):
-        """Local fallback for authored problem variant fields.
-
-        Some zip-overlay updates can leave an older checkout without
-        backend/common/models.py. This abstract fallback keeps Django startup
-        alive and matches the shared field shape exactly, without creating its
-        own database table.
-        """
-
-        slug = models.SlugField()
-        label = models.CharField(max_length=80)
-        initial_state = models.JSONField(default=dict)
-        evaluation_spec = models.JSONField(default=dict, blank=True)
-        target_state = models.JSONField(default=dict, blank=True)
-        solution_commands = models.JSONField(default=list, blank=True)
-        case_id = models.CharField(max_length=160, blank=True)
-        semantic_key = models.CharField(max_length=240, blank=True)
-        parameter_context = models.JSONField(default=dict, blank=True)
-        scenario_context = models.JSONField(default=dict, blank=True)
-        scaffold_policy = models.JSONField(default=dict, blank=True)
-        is_published = models.BooleanField(default=True)
-
-        class Meta:
-            abstract = True
+from common.models import VariantBase
 
 
 class AdventureLevel(models.Model):
@@ -48,12 +18,6 @@ class AdventureLevel(models.Model):
         Chapter -> AdventureLevel -> AdventureWave -> AdventureWaveVariant
     """
 
-    class LevelType(models.TextChoices):
-        COMMAND_INTRODUCTION = "command_introduction", "Command introduction"
-        GUIDED_WORKFLOW = "guided_workflow", "Guided workflow"
-        APPLIED_SCENARIO = "applied_scenario", "Applied scenario"
-        MASTERY_INCIDENT = "mastery_incident", "Mastery incident"
-
     chapter = models.ForeignKey(
         "curriculum.Chapter",
         related_name="adventure_levels",
@@ -61,15 +25,6 @@ class AdventureLevel(models.Model):
     )
     slug = models.SlugField()
     title = models.CharField(max_length=180)
-    description = models.TextField(blank=True)
-    # Short level intro shown above the level's waves (optional).
-    brief = models.TextField(blank=True)
-    narrative_brief = models.JSONField(default=dict, blank=True)
-    level_type = models.CharField(
-        max_length=32,
-        choices=LevelType.choices,
-        default=LevelType.GUIDED_WORKFLOW,
-    )
     command_forms = models.ManyToManyField(
         "curriculum.CommandForm",
         related_name="adventure_levels",
@@ -91,7 +46,9 @@ class AdventureLevel(models.Model):
     class Meta:
         ordering = ["chapter__sort_order", "sort_order", "id"]
         constraints = [
-            models.UniqueConstraint(fields=["chapter", "slug"], name="unique_adventure_level_chapter_slug"),
+            models.UniqueConstraint(
+                fields=["chapter", "slug"], name="unique_adventure_level_chapter_slug"
+            ),
         ]
         indexes = [
             models.Index(fields=["chapter", "sort_order"], name="adv_level_chapter_sort_idx"),
@@ -104,9 +61,7 @@ class AdventureLevel(models.Model):
 class AdventureWave(models.Model):
     """The playable Git problem inside an adventure level."""
 
-    level = models.ForeignKey(
-        AdventureLevel, related_name="waves", on_delete=models.CASCADE
-    )
+    level = models.ForeignKey(AdventureLevel, related_name="waves", on_delete=models.CASCADE)
     slug = models.SlugField()
     title = models.CharField(max_length=180, blank=True)
     sort_order = models.PositiveIntegerField(default=0)
@@ -126,6 +81,13 @@ class AdventureWave(models.Model):
         ordering = ["level_id", "sort_order", "id"]
         constraints = [
             models.UniqueConstraint(fields=["level", "slug"], name="unique_adventure_wave_slug"),
+            models.CheckConstraint(
+                condition=(
+                    Q(min_counted_commands__gte=0)
+                    & Q(max_counted_commands__gte=models.F("min_counted_commands"))
+                ),
+                name="adventure_wave_valid_command_budget",
+            ),
         ]
         indexes = [
             models.Index(fields=["level", "sort_order"], name="adv_wave_slot_idx"),
@@ -145,7 +107,9 @@ class AdventureWaveVariant(VariantBase):
     class Meta:
         ordering = ["wave_id", "semantic_key", "id"]
         constraints = [
-            models.UniqueConstraint(fields=["wave", "slug"], name="unique_adventure_wave_variant_slug"),
+            models.UniqueConstraint(
+                fields=["wave", "slug"], name="unique_adventure_wave_variant_slug"
+            ),
         ]
 
     def __str__(self) -> str:
@@ -165,7 +129,9 @@ class AdventureRun(models.Model):
         FAILED = SESSION_STATUS_FAILED, "Failed"
         ABANDONED = SESSION_STATUS_ABANDONED, "Abandoned"
 
-    player = models.ForeignKey("players.Player", on_delete=models.CASCADE, related_name="adventure_runs")
+    player = models.ForeignKey(
+        "players.Player", on_delete=models.CASCADE, related_name="adventure_runs"
+    )
     level = models.ForeignKey(
         AdventureLevel,
         related_name="runs",
@@ -205,6 +171,10 @@ class AdventureRun(models.Model):
                 condition=Q(status=SESSION_STATUS_STARTED),
                 name="unique_active_adventure_run",
             ),
+            models.CheckConstraint(
+                condition=Q(stars__lte=3),
+                name="adventure_run_stars_lte_3",
+            ),
         ]
 
     @property
@@ -243,6 +213,10 @@ class AdventureRunWave(models.Model):
         ordering = ["run_id", "wave__sort_order", "id"]
         constraints = [
             models.UniqueConstraint(fields=["run", "wave"], name="unique_adventure_run_wave"),
+            models.CheckConstraint(
+                condition=Q(stars__lte=3),
+                name="adventure_run_wave_stars_lte_3",
+            ),
         ]
 
     def __str__(self) -> str:
@@ -252,7 +226,9 @@ class AdventureRunWave(models.Model):
 class SkillMastery(models.Model):
     """Per-user mastery for one command form."""
 
-    player = models.ForeignKey("players.Player", on_delete=models.CASCADE, related_name="skill_mastery_states")
+    player = models.ForeignKey(
+        "players.Player", on_delete=models.CASCADE, related_name="skill_mastery_states"
+    )
     command_form = models.ForeignKey(
         "curriculum.CommandForm",
         related_name="skill_mastery_states",
@@ -265,10 +241,9 @@ class SkillMastery(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["player", "command_form"], name="unique_skill_mastery_player_form"),
-        ]
-        indexes = [
-            models.Index(fields=["player", "command_form"], name="skillmastery_plyr_form_idx"),
+            models.UniqueConstraint(
+                fields=["player", "command_form"], name="unique_skill_mastery_player_form"
+            ),
         ]
 
     def __str__(self) -> str:

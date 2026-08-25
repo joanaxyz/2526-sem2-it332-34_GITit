@@ -68,13 +68,26 @@ COMMAND_KEY_ALWAYS_INCLUDED_SECTION_IDS: dict[str, list[str]] = {
     "git-switch": ["option-c-create", "option-detach", "argument-branch"],
     "git-checkout-b": ["option-b-create", "argument-branch", "argument-start-point"],
     "git-stash": ["option-pop", "option-apply", "option-drop", "option-list"],
-    "git-push": ["option-u-upstream", "option-force-with-lease", "option-delete", "argument-remote", "argument-branch"],
+    "git-push": [
+        "option-u-upstream",
+        "option-force-with-lease",
+        "option-delete",
+        "argument-remote",
+        "argument-branch",
+    ],
     "git-pull": ["option-rebase", "argument-remote", "argument-branch"],
     "git-merge-squash": ["option-squash", "argument-branch"],
     "git-remote-v": ["option-v-verbose"],
     "git-check-ignore": ["option-v", "argument-path"],
     "git-init": ["option-b-initial-branch", "option-q-quiet", "argument-directory"],
-    "git-clone": ["option-b-branch", "option-depth", "argument-url", "argument-directory", "argument-branch", "argument-number"],
+    "git-clone": [
+        "option-b-branch",
+        "option-depth",
+        "argument-url",
+        "argument-directory",
+        "argument-branch",
+        "argument-number",
+    ],
     "git-add": ["option-a-all", "option-u-update", "option-p-patch", "argument-path"],
     "git-add-p": ["option-p-patch", "argument-path"],
     "git-rm-cached": ["option-cached", "argument-path"],
@@ -173,6 +186,7 @@ def _diagram(
     if legend:
         block["legend"] = legend
     return block
+
 
 def command_syntax_section_id(command: str) -> str:
     value = str(command).replace("=", " equals ").replace('"', " quote ")

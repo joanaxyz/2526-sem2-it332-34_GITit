@@ -1,10 +1,6 @@
 from django.db.models import Q
 
-from challenges.models import ChallengeRun, ChallengeTrial
-
-
-def minimum_counted_for_run(*, run: ChallengeRun) -> int:
-    return run.min_counted_commands
+from challenges.models import ChallengeTrial
 
 
 def get_challenge_trial(trial_id: int) -> ChallengeTrial:

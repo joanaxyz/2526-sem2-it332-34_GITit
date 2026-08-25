@@ -6,6 +6,7 @@ Removed tower-map/tome/fake-theme product concepts are allowed only in explicit
 legacy route redirects. Natural narrative uses of words such as "tower" remain
 valid inside story content and must not be confused with the deprecated UI model.
 """
+
 from __future__ import annotations
 
 import re
@@ -110,7 +111,10 @@ def main() -> int:
         print("Legacy product vocabulary found in active code:", file=sys.stderr)
         for violation in violations:
             print(f"  {violation}", file=sys.stderr)
-        print("\nUse current terms: story, story world, level map, lesson, adventure, challenge, companion.", file=sys.stderr)
+        print(
+            "\nUse current terms: story, story world, level map, lesson, adventure, challenge, companion.",
+            file=sys.stderr,
+        )
         return 1
 
     print("No forbidden legacy product vocabulary found in active code.")

@@ -1,5 +1,7 @@
 """Unit tests for the shared client-execution submit boundary."""
 
+import copy
+
 import pytest
 
 from common.constants import COMMAND_COUNTED, COMMAND_DIAGNOSTIC, COMMAND_UNPROCESSABLE
@@ -53,8 +55,15 @@ class TestClientCommandExecutionService:
         next_state = {
             **previous,
             "repository_initialized": True,
-            "branches": {**previous.get("branches", {}), "main": previous.get("branches", {}).get("main")},
-            "head": {"type": "branch", "name": "main", "target": previous.get("branches", {}).get("main")},
+            "branches": {
+                **previous.get("branches", {}),
+                "main": previous.get("branches", {}).get("main"),
+            },
+            "head": {
+                "type": "branch",
+                "name": "main",
+                "target": previous.get("branches", {}).get("main"),
+            },
             "operation_metadata": {
                 **previous.get("operation_metadata", {}),
                 "last_init_branch": "main",
@@ -100,6 +109,125 @@ class TestClientCommandExecutionService:
         assert execution.state_mutated is False
         assert execution.classification == COMMAND_DIAGNOSTIC
 
+    def test_merge_base_persists_backend_verified_evidence_and_ignores_forged_value(self):
+        state = ClientCommandExecutionService().state_tools.normalize_state(
+            {
+                "commits": [
+                    {"id": "c0", "message": "base", "parents": [], "tree": {}},
+                    {
+                        "id": "c1",
+                        "message": "main",
+                        "parents": ["c0"],
+                        "tree": {"main.txt": "main"},
+                    },
+                    {
+                        "id": "c2",
+                        "message": "feature",
+                        "parents": ["c0"],
+                        "tree": {"feature.txt": "feature"},
+                    },
+                ],
+                "branches": {"main": "c1", "feature": "c2"},
+                "head": {"type": "branch", "name": "main", "target": "c1"},
+                "operation_metadata": {"preserved_marker": "keep-me"},
+            }
+        )
+        forged = copy.deepcopy(state)
+        forged["operation_metadata"]["last_merge_base"] = "forged"
+        forged["last_merge_base"] = "forged"
+
+        execution = self.execute(
+            state,
+            "git merge-base main feature",
+            diagnostic_payload("git merge-base main feature", forged, output="c0"),
+        )
+
+        assert execution.classification == COMMAND_DIAGNOSTIC
+        assert execution.state_mutated is True
+        assert execution.next_state["operation_metadata"] == {
+            "preserved_marker": "keep-me",
+            "last_merge_base": "c0",
+        }
+        assert execution.next_state["last_merge_base"] == "c0"
+        assert execution.next_state["commits"] == state["commits"]
+        assert execution.next_state["branches"] == state["branches"]
+        assert execution.next_state["head"] == state["head"]
+
+    def test_rev_list_persists_backend_verified_count_evidence(self):
+        state = ClientCommandExecutionService().state_tools.normalize_state(
+            {
+                "commits": [
+                    {"id": "c0", "message": "base", "parents": [], "tree": {}},
+                    {"id": "c1", "message": "one", "parents": ["c0"], "tree": {"one.txt": "one"}},
+                    {
+                        "id": "c2",
+                        "message": "two",
+                        "parents": ["c1"],
+                        "tree": {"one.txt": "one", "two.txt": "two"},
+                    },
+                ],
+                "branches": {"main": "c2"},
+                "head": {"type": "branch", "name": "main", "target": "c2"},
+            }
+        )
+
+        execution = self.execute(
+            state,
+            "git rev-list --count c0..main",
+            diagnostic_payload("git rev-list --count c0..main", state, output="2"),
+        )
+
+        assert execution.classification == COMMAND_DIAGNOSTIC
+        assert execution.state_mutated is True
+        assert execution.next_state["operation_metadata"]["last_rev_list_count"] == 2
+        assert execution.next_state["last_rev_list_count"] == 2
+
+    @pytest.mark.parametrize(
+        ("command", "forged_key"),
+        [
+            ("git merge-base --is-ancestor main feature", "last_merge_base"),
+            ("git rev-list c0..main", "last_rev_list_count"),
+            ("git rev-list --count c0..main extra", "last_rev_list_count"),
+        ],
+    )
+    def test_unsupported_diagnostic_shapes_cannot_persist_evidence(self, command, forged_key):
+        state = ClientCommandExecutionService().state_tools.normalize_state(
+            {
+                "commits": [
+                    {"id": "c0", "message": "base", "parents": [], "tree": {}},
+                    {
+                        "id": "c1",
+                        "message": "main",
+                        "parents": ["c0"],
+                        "tree": {"main.txt": "main"},
+                    },
+                    {
+                        "id": "c2",
+                        "message": "feature",
+                        "parents": ["c0"],
+                        "tree": {"feature.txt": "feature"},
+                    },
+                ],
+                "branches": {"main": "c1", "feature": "c2"},
+                "head": {"type": "branch", "name": "main", "target": "c1"},
+            }
+        )
+        forged = copy.deepcopy(state)
+        forged["operation_metadata"][forged_key] = "forged"
+        forged[forged_key] = "forged"
+
+        execution = self.execute(
+            state,
+            command,
+            diagnostic_payload(command, forged, output="forged"),
+        )
+
+        assert execution.classification == COMMAND_DIAGNOSTIC
+        assert execution.state_mutated is False
+        assert execution.next_state == state
+        assert forged_key not in execution.next_state["operation_metadata"]
+        assert forged_key not in execution.next_state
+
     @pytest.mark.parametrize(
         ("command", "family"),
         [
@@ -131,7 +259,6 @@ class TestClientCommandExecutionService:
             frontend_execution_payload("git switch -c feature", target),
         )
         assert repr(state) == before
-
 
     def test_cd_noop_is_allowed_as_diagnostic(self):
         payload = frontend_execution_payload(
@@ -170,7 +297,6 @@ class TestClientCommandExecutionService:
         )  # must not raise
         assert execution.result.processed
 
-
     def test_rejects_malformed_repository_state_before_normalization(self):
         payload = frontend_execution_payload("git status", {})
         with pytest.raises(BadRequest, match="repository_state must be an object"):
@@ -179,7 +305,6 @@ class TestClientCommandExecutionService:
                 command="git status",
                 execution=payload,
             )
-
 
     def test_rejects_empty_list_next_state_instead_of_treating_it_as_missing(self):
         payload = frontend_execution_payload("git init", {}, processed=True, command_family="init")
@@ -221,7 +346,9 @@ class TestClientCommandExecutionService:
     def test_unprocessed_payload_ignores_client_state_mutation(self):
         initialized = self.execute({}, "git init").next_state
         mutated = {**initialized, "working_tree": {"x.txt": "changed"}}
-        payload = frontend_execution_payload("git frobnicate", mutated, processed=False, exit_code=129)
+        payload = frontend_execution_payload(
+            "git frobnicate", mutated, processed=False, exit_code=129
+        )
         execution = self.execute(initialized, "git frobnicate", payload)
         assert execution.state_mutated is False
         assert execution.next_state == execution.previous_state
@@ -234,7 +361,9 @@ class TestClientCommandExecutionService:
             self.execute({}, "git status", payload)
 
     def test_accepts_matching_client_run_revision(self):
-        payload = frontend_execution_payload("git init", self.init_next_state(), client_run_revision=3)
+        payload = frontend_execution_payload(
+            "git init", self.init_next_state(), client_run_revision=3
+        )
         execution = ClientCommandExecutionService().from_payload(
             repository_state={},
             command="git init",
@@ -244,7 +373,9 @@ class TestClientCommandExecutionService:
         assert execution.result.client_run_revision == 3
 
     def test_rejects_stale_client_run_revision(self):
-        payload = frontend_execution_payload("git init", self.init_next_state(), client_run_revision=2)
+        payload = frontend_execution_payload(
+            "git init", self.init_next_state(), client_run_revision=2
+        )
         with pytest.raises(BadRequest):
             ClientCommandExecutionService().from_payload(
                 repository_state={},
@@ -279,7 +410,9 @@ class TestClientCommandExecutionService:
                     "message": "forged",
                     "parents": [],
                     "tree": {"README.md": "hello"},
-                    "changes": {"README.md": {"change_type": "added", "before": None, "after": "hello"}},
+                    "changes": {
+                        "README.md": {"change_type": "added", "before": None, "after": "hello"}
+                    },
                     "files": {"README.md": "added"},
                 }
             ],
@@ -288,7 +421,9 @@ class TestClientCommandExecutionService:
             "working_tree": {},
         }
         with pytest.raises(BadRequest):
-            self.execute(state, "git add README.md", frontend_execution_payload("git add README.md", forged))
+            self.execute(
+                state, "git add README.md", frontend_execution_payload("git add README.md", forged)
+            )
 
     def test_accepts_verified_git_add_transition(self):
         state = ClientCommandExecutionService().state_tools.normalize_state(
@@ -298,9 +433,129 @@ class TestClientCommandExecutionService:
                 "working_tree": {"README.md": {"status": "untracked", "content": "hello"}},
             }
         )
-        next_state = {**state, "staging": {"README.md": {"status": "untracked", "content": "hello"}}, "working_tree": {}}
-        execution = self.execute(state, "git add README.md", frontend_execution_payload("git add README.md", next_state))
+        next_state = {
+            **state,
+            "staging": {"README.md": {"status": "untracked", "content": "hello"}},
+            "working_tree": {},
+        }
+        execution = self.execute(
+            state, "git add README.md", frontend_execution_payload("git add README.md", next_state)
+        )
         assert execution.next_state["staging"]["README.md"]["content"] == "hello"
+
+    def test_accepts_verified_patch_add_with_structured_worktree_entry(self):
+        state = ClientCommandExecutionService().state_tools.normalize_state(
+            {
+                "branches": {"main": "c0"},
+                "head": {"type": "branch", "name": "main", "target": "c0"},
+                "commits": [
+                    {
+                        "id": "c0",
+                        "message": "base",
+                        "parents": [],
+                        "tree": {"src/app.ts": "export const mode = 'base'\n"},
+                    }
+                ],
+                "working_tree": {
+                    "src/app.ts": {
+                        "status": "modified",
+                        "content": "export const mode = 'patched'\n",
+                    }
+                },
+            }
+        )
+        next_state = {
+            **state,
+            "staging": {
+                "src/app.ts": {
+                    "status": "partial",
+                    "hunks": ["modified export const mode = 'patched'\n"],
+                }
+            },
+            "working_tree": {"src/app.ts": "modified"},
+        }
+
+        execution = self.execute(
+            state,
+            "git add -p src/app.ts",
+            frontend_execution_payload("git add -p src/app.ts", next_state),
+        )
+
+        assert execution.next_state["staging"]["src/app.ts"]["hunks"] == [
+            "modified export const mode = 'patched'\n"
+        ]
+
+    @pytest.mark.parametrize(
+        ("mode", "expected_staging", "expected_working"),
+        [
+            (
+                "soft",
+                {"README.md": {"status": "modified", "content": "changed"}},
+                {},
+            ),
+            (
+                "mixed",
+                {},
+                {"README.md": {"status": "modified", "content": "changed"}},
+            ),
+            ("hard", {}, {}),
+        ],
+    )
+    def test_accepts_verified_reset_with_pre_reset_snapshot_and_scoped_metadata_mirrors(
+        self,
+        mode,
+        expected_staging,
+        expected_working,
+    ):
+        state = ClientCommandExecutionService().state_tools.normalize_state(
+            {
+                "branches": {"main": "c1"},
+                "head": {"type": "branch", "name": "main", "target": "c1"},
+                "commits": [
+                    {
+                        "id": "c0",
+                        "message": "base",
+                        "parents": [],
+                        "tree": {"README.md": "base"},
+                    },
+                    {
+                        "id": "c1",
+                        "message": "changed",
+                        "parents": ["c0"],
+                        "tree": {"README.md": "changed"},
+                    },
+                ],
+                "operation_metadata": {"bisect_good": "c0"},
+            }
+        )
+        reset_metadata = {
+            "last_reset_mode": mode,
+            "last_reset_target": "c0",
+            "last_reset_target_expr": "c0",
+            "last_reset_previous_head": "c1",
+        }
+        next_state = copy.deepcopy(state)
+        next_state["merge_abort_state"] = copy.deepcopy(state)
+        next_state["branches"]["main"] = "c0"
+        next_state["head"]["target"] = "c0"
+        next_state["staging"] = expected_staging
+        next_state["working_tree"] = expected_working
+        next_state["operation_metadata"].update(reset_metadata)
+        next_state.update(reset_metadata)
+        next_state["reflog"] = [
+            {"ref": "HEAD@{0}", "target": "c0", "message": "move HEAD"},
+            {"ref": "HEAD@{1}", "target": "c0", "message": "reset: moving to c0"},
+        ]
+
+        execution = self.execute(
+            state,
+            f"git reset --{mode} c0",
+            frontend_execution_payload(f"git reset --{mode} c0", next_state),
+        )
+
+        assert execution.next_state["merge_abort_state"] == state
+        assert execution.next_state["operation_metadata"]["bisect_good"] == "c0"
+        assert "bisect_good" not in execution.next_state
 
     def test_accepts_verified_simple_commit_transition(self):
         state = ClientCommandExecutionService().state_tools.normalize_state(
@@ -318,7 +573,9 @@ class TestClientCommandExecutionService:
                     "message": "first",
                     "parents": [],
                     "tree": {"README.md": "hello"},
-                    "changes": {"README.md": {"change_type": "added", "before": None, "after": "hello"}},
+                    "changes": {
+                        "README.md": {"change_type": "added", "before": None, "after": "hello"}
+                    },
                     "files": {"README.md": "added"},
                     "author": "GIT it",
                     "order": 0,
@@ -330,7 +587,11 @@ class TestClientCommandExecutionService:
             "staging": {},
             "reflog": [{"ref": "HEAD@{0}", "target": "c0", "message": "move HEAD"}],
         }
-        execution = self.execute(state, "git commit -m first", frontend_execution_payload("git commit -m first", next_state))
+        execution = self.execute(
+            state,
+            "git commit -m first",
+            frontend_execution_payload("git commit -m first", next_state),
+        )
         assert execution.next_state["commits"][0]["id"] == "c0"
 
     def test_rejects_forged_simple_commit_tree(self):
@@ -349,7 +610,9 @@ class TestClientCommandExecutionService:
                     "message": "first",
                     "parents": [],
                     "tree": {"README.md": "forged"},
-                    "changes": {"README.md": {"change_type": "added", "before": None, "after": "forged"}},
+                    "changes": {
+                        "README.md": {"change_type": "added", "before": None, "after": "forged"}
+                    },
                     "files": {"README.md": "added"},
                 }
             ],
@@ -358,12 +621,20 @@ class TestClientCommandExecutionService:
             "staging": {},
         }
         with pytest.raises(BadRequest):
-            self.execute(state, "git commit -m first", frontend_execution_payload("git commit -m first", forged))
+            self.execute(
+                state,
+                "git commit -m first",
+                frontend_execution_payload("git commit -m first", forged),
+            )
 
     def test_rejects_failed_command_that_mutates_state(self):
-        state = ClientCommandExecutionService().state_tools.normalize_state({"working_tree": {"README.md": "hello"}})
+        state = ClientCommandExecutionService().state_tools.normalize_state(
+            {"working_tree": {"README.md": "hello"}}
+        )
         mutated = {**state, "staging": {"README.md": "hello"}, "working_tree": {}}
-        payload = frontend_execution_payload("git commit -m nope", mutated, exit_code=1, output="nothing to commit")
+        payload = frontend_execution_payload(
+            "git commit -m nope", mutated, exit_code=1, output="nothing to commit"
+        )
         with pytest.raises(BadRequest):
             self.execute(state, "git commit -m nope", payload)
 
@@ -372,9 +643,13 @@ class TestClientCommandExecutionService:
             {
                 "branches": {"main": "c0"},
                 "head": {"type": "branch", "name": "main", "target": "c0"},
-                "commits": [{"id": "c0", "message": "base", "parents": [], "tree": {"app.txt": "base"}}],
+                "commits": [
+                    {"id": "c0", "message": "base", "parents": [], "tree": {"app.txt": "base"}}
+                ],
                 "conflicts": ["app.txt"],
-                "conflict_details": {"app.txt": {"ours": "ours", "theirs": "theirs", "base": "base"}},
+                "conflict_details": {
+                    "app.txt": {"ours": "ours", "theirs": "theirs", "base": "base"}
+                },
                 "working_tree": {"app.txt": {"status": "conflicted", "content": "<<<<<<<"}},
             }
         )
@@ -396,7 +671,9 @@ class TestClientCommandExecutionService:
             {
                 "branches": {"main": "c0"},
                 "head": {"type": "branch", "name": "main", "target": "c0"},
-                "commits": [{"id": "c0", "message": "base", "parents": [], "tree": {"README.md": "hello"}}],
+                "commits": [
+                    {"id": "c0", "message": "base", "parents": [], "tree": {"README.md": "hello"}}
+                ],
             }
         )
         next_state = {
@@ -415,7 +692,9 @@ class TestClientCommandExecutionService:
             {
                 "branches": {"main": "c0"},
                 "head": {"type": "branch", "name": "main", "target": "c0"},
-                "commits": [{"id": "c0", "message": "base", "parents": [], "tree": {"README.md": "hello"}}],
+                "commits": [
+                    {"id": "c0", "message": "base", "parents": [], "tree": {"README.md": "hello"}}
+                ],
             }
         )
         forged = {
@@ -438,7 +717,9 @@ class TestClientCommandExecutionService:
         execution = self.execute(
             state,
             "git remote add origin https://example.test/repo.git",
-            frontend_execution_payload("git remote add origin https://example.test/repo.git", next_state),
+            frontend_execution_payload(
+                "git remote add origin https://example.test/repo.git", next_state
+            ),
         )
         assert execution.next_state["remotes"]["origin"] == "https://example.test/repo.git"
 
@@ -468,7 +749,9 @@ class TestClientCommandExecutionService:
             {
                 "branches": {"main": "c0"},
                 "head": {"type": "branch", "name": "main", "target": "c0"},
-                "commits": [{"id": "c0", "message": "base", "parents": [], "tree": {"README.md": "base"}}],
+                "commits": [
+                    {"id": "c0", "message": "base", "parents": [], "tree": {"README.md": "base"}}
+                ],
                 "staging": {"README.md": {"status": "modified", "content": "staged"}},
                 "working_tree": {
                     "README.md": {"status": "modified", "content": "work"},
@@ -544,12 +827,58 @@ class TestClientCommandExecutionService:
         )
         assert execution.next_state["branches"]["main"] == "c1"
 
+    def test_accepts_verified_squash_merge_with_scoped_metadata_mirrors(self):
+        state = ClientCommandExecutionService().state_tools.normalize_state(
+            {
+                "branches": {"main": "c0", "feature": "c1"},
+                "head": {"type": "branch", "name": "main", "target": "c0"},
+                "commits": [
+                    {
+                        "id": "c0",
+                        "message": "base",
+                        "parents": [],
+                        "tree": {"README.md": "base"},
+                    },
+                    {
+                        "id": "c1",
+                        "message": "feature",
+                        "parents": ["c0"],
+                        "tree": {"README.md": "feature"},
+                    },
+                ],
+                "operation_metadata": {"bisect_good": "c0"},
+            }
+        )
+        next_state = copy.deepcopy(state)
+        next_state["staging"] = {"README.md": {"status": "modified", "content": "feature"}}
+        squash_metadata = {
+            "last_merge_branch": "feature",
+            "last_merge_target": "c1",
+            "squash_merge_staged": True,
+        }
+        next_state["operation_metadata"].update(squash_metadata)
+        next_state.update(squash_metadata)
+
+        execution = self.execute(
+            state,
+            "git merge --squash feature",
+            frontend_execution_payload("git merge --squash feature", next_state),
+        )
+
+        assert execution.next_state["head"] == state["head"]
+        assert execution.next_state["branches"] == state["branches"]
+        assert execution.next_state["commits"] == state["commits"]
+        assert execution.next_state["operation_metadata"]["bisect_good"] == "c0"
+        assert "bisect_good" not in execution.next_state
+
     def test_accepts_verified_commit_all_transition(self):
         state = ClientCommandExecutionService().state_tools.normalize_state(
             {
                 "branches": {"main": "c0"},
                 "head": {"type": "branch", "name": "main", "target": "c0"},
-                "commits": [{"id": "c0", "message": "base", "parents": [], "tree": {"README.md": "base"}}],
+                "commits": [
+                    {"id": "c0", "message": "base", "parents": [], "tree": {"README.md": "base"}}
+                ],
                 "working_tree": {"README.md": {"status": "modified", "content": "changed"}},
             }
         )
@@ -562,7 +891,13 @@ class TestClientCommandExecutionService:
                     "message": "update",
                     "parents": ["c0"],
                     "tree": {"README.md": "changed"},
-                    "changes": {"README.md": {"change_type": "modified", "before": "base", "after": "changed"}},
+                    "changes": {
+                        "README.md": {
+                            "change_type": "modified",
+                            "before": "base",
+                            "after": "changed",
+                        }
+                    },
                     "files": {"README.md": "modified"},
                     "author": "GIT it",
                     "order": 1,
@@ -587,7 +922,9 @@ class TestClientCommandExecutionService:
             {
                 "branches": {"main": "c0"},
                 "head": {"type": "branch", "name": "main", "target": "c0"},
-                "commits": [{"id": "c0", "message": "base", "parents": [], "tree": {"README.md": "base"}}],
+                "commits": [
+                    {"id": "c0", "message": "base", "parents": [], "tree": {"README.md": "base"}}
+                ],
                 "staging": {"README.md": {"status": "modified", "content": "amended"}},
             }
         )
@@ -600,7 +937,9 @@ class TestClientCommandExecutionService:
                     "message": "better",
                     "parents": [],
                     "tree": {"README.md": "amended"},
-                    "changes": {"README.md": {"change_type": "added", "before": None, "after": "amended"}},
+                    "changes": {
+                        "README.md": {"change_type": "added", "before": None, "after": "amended"}
+                    },
                     "files": {"README.md": "added"},
                     "author": "GIT it",
                     "order": 1,
@@ -635,12 +974,19 @@ class TestClientCommandExecutionService:
             {
                 "branches": {"main": "c0"},
                 "head": {"type": "branch", "name": "main", "target": "c0"},
-                "commits": [{"id": "c0", "message": "base", "parents": [], "tree": {"README.md": "base"}}],
+                "commits": [
+                    {"id": "c0", "message": "base", "parents": [], "tree": {"README.md": "base"}}
+                ],
                 "remotes": {"origin": "https://example.test/repo.git"},
                 "remote_fixtures": {
                     "branches": {"origin/main": "c1"},
                     "commits": [
-                        {"id": "c1", "message": "remote", "parents": ["c0"], "tree": {"README.md": "remote"}}
+                        {
+                            "id": "c1",
+                            "message": "remote",
+                            "parents": ["c0"],
+                            "tree": {"README.md": "remote"},
+                        }
                     ],
                 },
             }
@@ -668,7 +1014,9 @@ class TestClientCommandExecutionService:
         )
         forged = {**state, "branches": {"main": None}, "remote_branches": {"origin/main": "c0"}}
         with pytest.raises(BadRequest):
-            self.execute(state, "git fetch origin", frontend_execution_payload("git fetch origin", forged))
+            self.execute(
+                state, "git fetch origin", frontend_execution_payload("git fetch origin", forged)
+            )
 
     def test_accepts_verified_clone_transition(self):
         state = ClientCommandExecutionService().state_tools.normalize_state(
@@ -676,7 +1024,14 @@ class TestClientCommandExecutionService:
                 "repository_initialized": False,
                 "remote_fixtures": {
                     "branches": {"origin/main": "r1"},
-                    "commits": [{"id": "r1", "message": "remote", "parents": [], "tree": {"README.md": "remote"}}],
+                    "commits": [
+                        {
+                            "id": "r1",
+                            "message": "remote",
+                            "parents": [],
+                            "tree": {"README.md": "remote"},
+                        }
+                    ],
                 },
             }
         )
@@ -685,7 +1040,9 @@ class TestClientCommandExecutionService:
         next_state["repository_initialized"] = True
         next_state["remotes"] = {"origin": "https://example.test/repo.git"}
         next_state["remote_branches"] = {"origin/main": "r1"}
-        next_state["commits"] = [{"id": "r1", "message": "remote", "parents": [], "tree": {"README.md": "remote"}}]
+        next_state["commits"] = [
+            {"id": "r1", "message": "remote", "parents": [], "tree": {"README.md": "remote"}}
+        ]
         next_state["branches"] = {"main": "r1"}
         next_state["head"] = {"type": "branch", "name": "main", "target": "r1"}
         next_state["upstream_tracking"] = {"main": "origin/main"}
@@ -722,14 +1079,26 @@ class TestClientCommandExecutionService:
                         "message": "local",
                         "parents": ["c0"],
                         "tree": {"app.txt": "local"},
-                        "changes": {"app.txt": {"change_type": "modified", "before": "base", "after": "local"}},
+                        "changes": {
+                            "app.txt": {
+                                "change_type": "modified",
+                                "before": "base",
+                                "after": "local",
+                            }
+                        },
                     },
                     {
                         "id": "c2",
                         "message": "upstream",
                         "parents": ["c0"],
                         "tree": {"app.txt": "upstream"},
-                        "changes": {"app.txt": {"change_type": "modified", "before": "base", "after": "upstream"}},
+                        "changes": {
+                            "app.txt": {
+                                "change_type": "modified",
+                                "before": "base",
+                                "after": "upstream",
+                            }
+                        },
                     },
                 ],
             }
@@ -767,7 +1136,9 @@ class TestClientCommandExecutionService:
 
         stored = {
             "repository_initialized": True,
-            "commits": [{"id": "c0", "message": "Initial", "parents": [], "tree": {"README.md": "notes"}}],
+            "commits": [
+                {"id": "c0", "message": "Initial", "parents": [], "tree": {"README.md": "notes"}}
+            ],
             "branches": {"main": "c0"},
             "head": {"type": "branch", "name": "main"},
             "working_tree": {"README.md": {"status": "modified", "content": "notes v2"}},
@@ -789,7 +1160,11 @@ class TestClientCommandExecutionService:
         assert execution.next_state["staging"]["README.md"]["content"] == "notes v2"
 
     def test_rejects_unknown_mutating_family_even_if_git_shaped(self):
-        state = ClientCommandExecutionService().state_tools.normalize_state({"working_tree": {"x.txt": "x"}})
-        payload = frontend_execution_payload("git frobnicate", state, processed=True, command_family="frobnicate")
+        state = ClientCommandExecutionService().state_tools.normalize_state(
+            {"working_tree": {"x.txt": "x"}}
+        )
+        payload = frontend_execution_payload(
+            "git frobnicate", state, processed=True, command_family="frobnicate"
+        )
         with pytest.raises(BadRequest):
             self.execute(state, "git frobnicate", payload)

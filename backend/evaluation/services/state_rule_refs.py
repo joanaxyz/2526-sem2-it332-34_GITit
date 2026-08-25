@@ -1,25 +1,28 @@
 from __future__ import annotations
 
-SUPPORTED_RULE_TYPES = frozenset({
-    'branch_absent',
-    'branch_exists',
-    'branch_points_to',
-    'branch_tip_commit',
-    'branches_equal',
-    'head_branch_changed',
-    'head_branch_equals',
-    'head_detached',
-    'head_detached_at',
-    'head_points_to',
-    'local_branches_at_most',
-    'local_branches_min',
-    'remote_branch_absent',
-    'remote_branch_exists',
-    'remote_branch_matches_local',
-    'remote_branch_points_to',
-    'upstream_tracking_equals',
-    'upstream_tracking_set',
-})
+SUPPORTED_RULE_TYPES = frozenset(
+    {
+        "branch_absent",
+        "branch_exists",
+        "branch_points_to",
+        "branch_tip_commit",
+        "branches_equal",
+        "head_branch_changed",
+        "head_branch_equals",
+        "head_detached",
+        "head_detached_at",
+        "head_points_to",
+        "local_branches_at_most",
+        "local_branches_min",
+        "remote_branch_absent",
+        "remote_branch_exists",
+        "remote_branch_matches_local",
+        "remote_branch_points_to",
+        "upstream_tracking_equals",
+        "upstream_tracking_set",
+    }
+)
+
 
 def check_ref_state_rule(
     self,
@@ -38,9 +41,7 @@ def check_ref_state_rule(
         )
         return (
             passed,
-            "HEAD is on the expected branch."
-            if passed
-            else f"HEAD is not on branch {branch!r}.",
+            "HEAD is on the expected branch." if passed else f"HEAD is not on branch {branch!r}.",
         )
     if rule_type == "head_detached":
         passed = state.get("head", {}).get("type") == "detached"
@@ -50,9 +51,9 @@ def check_ref_state_rule(
             return False, "Initial state is required."
         current = state.get("head", {})
         start = initial_state.get("head", {})
-        passed = current.get("type") != start.get("type") or current.get(
+        passed = current.get("type") != start.get("type") or current.get("name") != start.get(
             "name"
-        ) != start.get("name")
+        )
         return (
             passed,
             "HEAD moved off its starting branch."
@@ -118,12 +119,10 @@ def check_ref_state_rule(
         return passed, f"Refs compare as {left!r} and {right!r}."
     if rule_type == "branch_tip_commit":
         branch = rule.get("branch") or self._head_branch(state)
-        commit = self._commit_by_id(state, self._ref_target(state, branch))
+        commit = self.normalizer.commit_by_id(state, self._ref_target(state, branch))
         if not commit:
             return False, f"Branch {branch!r} does not point to a known commit."
-        return self._check_commit_conditions(
-            commit, rule, state=state, initial_state=initial_state
-        )
+        return self._check_commit_conditions(commit, rule, state=state, initial_state=initial_state)
     if rule_type == "remote_branch_exists":
         name = rule.get("remote_branch")
         passed = name in state.get("remote_branches", {})

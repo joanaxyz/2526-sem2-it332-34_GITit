@@ -1,5 +1,5 @@
 import type { SpriteDef } from '@/shared/cosmetics/types'
-import type { MonsterSkin, MonsterTier, StoryWorldDef } from '@/shared/story-worlds/types'
+import type { MonsterSkin, StoryWorldDef } from '@/shared/story-worlds/types'
 
 import { arcaneSpireWorld } from './arcane-spire'
 import { frostboundCitadelWorld } from './frostbound-citadel'
@@ -38,40 +38,21 @@ export function monsterSkin(storyWorld: StoryWorldDef, species: string): Monster
   )
 }
 
-export type MonsterCatalogEntry = { slug: string; label: string; tier: string; portrait?: SpriteDef }
-
 export type StoryWorldMonsterEntry = {
   slug: string
   label: string
-  tier: MonsterTier
   skin: MonsterSkin
   portrait?: SpriteDef
 }
 
-const MONSTER_TIER_ORDER: Record<MonsterTier, number> = { mob: 0, elite: 1, boss: 2 }
-
-/** Every monster skin owned by the selected story world, sorted for shop grids. */
+/** Every monster skin owned by the selected story world, sorted by name. */
 export function listStoryWorldMonsters(slug: string | null | undefined): StoryWorldMonsterEntry[] {
   const world = getStoryWorld(slug)
   return Object.entries(world.battle.monsters)
     .map(([monsterSlug, skin]) => ({
       slug: monsterSlug,
       label: skin.label,
-      tier: skin.tier,
       skin,
-      portrait: skin.sprites.portrait ?? skin.sprites.idle,
-    }))
-    .sort((a, b) => MONSTER_TIER_ORDER[a.tier] - MONSTER_TIER_ORDER[b.tier] || a.label.localeCompare(b.label))
-}
-
-/** The canonical monster catalog (default story world roster) for authoring pickers. */
-export function monsterCatalog(): MonsterCatalogEntry[] {
-  const monsters = STORY_WORLDS[DEFAULT_STORY_WORLD_SLUG].battle.monsters
-  return Object.entries(monsters)
-    .map(([slug, skin]) => ({
-      slug,
-      label: skin.label,
-      tier: skin.tier,
       portrait: skin.sprites.portrait ?? skin.sprites.idle,
     }))
     .sort((a, b) => a.label.localeCompare(b.label))

@@ -33,7 +33,6 @@ from pathlib import Path
 
 from PIL import Image
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 STORY_WORLDS_ROOT = REPO_ROOT / "frontend" / "public" / "story-worlds"
 BACKUP_DIR_NAME = "_raw"
@@ -67,7 +66,9 @@ def monster_folder_candidates(monster: str) -> list[str]:
 
 def monster_raw_dir(story_world: str, monster: str) -> Path:
     monsters_dir = STORY_WORLDS_ROOT / story_world / "monsters"
-    candidates = [monsters_dir / folder / "pose" / "raw" for folder in monster_folder_candidates(monster)]
+    candidates = [
+        monsters_dir / folder / "pose" / "raw" for folder in monster_folder_candidates(monster)
+    ]
     for candidate in candidates:
         if candidate.exists():
             return candidate
@@ -159,10 +160,16 @@ def write_padded_images(
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("monster", help="monster folder/species name, e.g. bone-lancer")
-    parser.add_argument("--story-world", default="arcane-spire", help="story-world slug (default: arcane-spire)")
-    parser.add_argument("--raw-dir", type=Path, help="override the resolved monster pose/raw directory")
+    parser.add_argument(
+        "--story-world", default="arcane-spire", help="story-world slug (default: arcane-spire)"
+    )
+    parser.add_argument(
+        "--raw-dir", type=Path, help="override the resolved monster pose/raw directory"
+    )
     parser.add_argument(
         "--padding-size",
         type=int,
@@ -174,7 +181,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--top", type=int, help="pixels to add on the top")
     parser.add_argument("--right", type=int, help="pixels to add on the right")
     parser.add_argument("--bottom", type=int, help="pixels to add on the bottom")
-    parser.add_argument("--dry-run", action="store_true", help="report staging and output sizes without writing")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="report staging and output sizes without writing"
+    )
     args = parser.parse_args(argv)
 
     raw_dir = (args.raw_dir or monster_raw_dir(args.story_world, args.monster)).resolve()
@@ -182,7 +191,9 @@ def main(argv: list[str] | None = None) -> int:
     base = args.all_sides
     left = args.left if args.left is not None else (base if base is not None else 0)
     top = args.top if args.top is not None else (base if base is not None else 0)
-    right = args.right if args.right is not None else (base if base is not None else args.padding_size)
+    right = (
+        args.right if args.right is not None else (base if base is not None else args.padding_size)
+    )
     bottom = args.bottom if args.bottom is not None else (base if base is not None else 0)
     pad = Pad(left, top, right, bottom)
     require_non_negative(pad)

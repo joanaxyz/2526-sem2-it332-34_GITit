@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Fail when generated cache/build artifacts are present in the repository tree.
+"""Fail when generated cache/build artifacts are tracked by Git.
 
-This project ships source zips for review. Runtime/build cache directories make diffs
-noisy and can hide stale generated state, so they must never be committed or packaged.
-The walk prunes ignored directories so the guard stays fast even when artifacts exist.
+Developer environments legitimately contain ignored caches and dependencies. Source
+packages are built from tracked files, so this guard checks that authoritative set and
+does not fail merely because a local install has created ``node_modules`` or ``.venv``.
 """
+
 from __future__ import annotations
 
-import os
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -35,9 +36,6 @@ FORBIDDEN_SUFFIXES = {
     ".sqlite3-shm",
     ".sqlite3-wal",
 }
-ALLOWLISTED_DIRS = {
-    ".git",
-}
 FORBIDDEN_TOP_LEVEL_DIRS = {
     "REFERENCE",
     "GIT_PEDAGOGY_BLUEPRINT_PACK",
@@ -45,50 +43,38 @@ FORBIDDEN_TOP_LEVEL_DIRS = {
 MAX_VIOLATIONS = 50
 
 
-def relative(path: Path) -> str:
-    return path.relative_to(ROOT).as_posix()
-
-
 def main() -> int:
     violations: list[str] = []
+    result = subprocess.run(
+        ["git", "-C", str(ROOT), "ls-files", "-z"],
+        check=True,
+        capture_output=True,
+    )
+    tracked_files = result.stdout.decode("utf-8", errors="surrogateescape").split("\0")
 
-    for current_root, dir_names, file_names in os.walk(ROOT):
-        current = Path(current_root)
-        rel_parts = current.relative_to(ROOT).parts
-
-        if any(part in ALLOWLISTED_DIRS for part in rel_parts):
-            dir_names[:] = []
+    for tracked_file in filter(None, tracked_files):
+        path = Path(tracked_file)
+        if not (ROOT / path).exists():
+            # A tracked file deleted by the current change is no longer part of
+            # the source tree that will be committed or packaged.
             continue
-
-        for dir_name in list(dir_names):
-            path = current / dir_name
-            top_level_forbidden = not rel_parts and dir_name in FORBIDDEN_TOP_LEVEL_DIRS
-            forbidden_cache_dir = dir_name in FORBIDDEN_DIR_NAMES
-            if top_level_forbidden or forbidden_cache_dir:
-                violations.append(relative(path))
-                dir_names.remove(dir_name)
-                if len(violations) >= MAX_VIOLATIONS:
-                    break
-        if len(violations) >= MAX_VIOLATIONS:
-            break
-
-        for file_name in file_names:
-            path = current / file_name
-            if path.suffix in FORBIDDEN_SUFFIXES:
-                violations.append(relative(path))
-                if len(violations) >= MAX_VIOLATIONS:
-                    break
+        parts = path.parts
+        top_level_forbidden = bool(parts) and parts[0] in FORBIDDEN_TOP_LEVEL_DIRS
+        forbidden_cache_dir = any(part in FORBIDDEN_DIR_NAMES for part in parts[:-1])
+        forbidden_suffix = path.suffix in FORBIDDEN_SUFFIXES
+        if top_level_forbidden or forbidden_cache_dir or forbidden_suffix:
+            violations.append(path.as_posix())
         if len(violations) >= MAX_VIOLATIONS:
             break
 
     if violations:
-        print("Generated/cache artifacts are present in the source tree:")
+        print("Generated/cache artifacts are tracked by Git:")
         for item in violations:
             print(f"- {item}")
         print("\nRemove them before committing or packaging the project.")
         return 1
 
-    print("No generated/cache artifacts found in the source tree.")
+    print("No generated/cache artifacts are tracked by Git.")
     return 0
 
 

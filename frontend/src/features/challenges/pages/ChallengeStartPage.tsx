@@ -8,6 +8,7 @@ import type { ChallengeRun } from '@/features/challenges/types'
 import { ApiError } from '@/shared/api/apiError'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
+import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 
 type ChallengeStartMode = 'start' | 'replay' | 'retry'
 
@@ -30,6 +31,7 @@ export function ChallengeStartPage({ mode = 'start' }: { mode?: ChallengeStartMo
   const { trialId, runId } = useParams<{ trialId?: string; runId?: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { companionSlug } = usePlayerLoadout()
   const targetId = Number(mode === 'retry' ? runId : trialId)
 
   const start = useMutation({
@@ -72,5 +74,5 @@ export function ChallengeStartPage({ mode = 'start' }: { mode?: ChallengeStartMo
   }
 
   const copy = loadingCopy[mode]
-  return <LoadingState description={copy.description} label={copy.label} variant="screen" />
+  return <LoadingState companionSlug={companionSlug} description={copy.description} label={copy.label} variant="screen" />
 }

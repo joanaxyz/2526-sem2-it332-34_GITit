@@ -37,11 +37,7 @@ def _live_objective_checks(
 
 
 def _mastery_payload(run: AdventureRun) -> dict:
-    form_ids = (
-        set(run.level.command_forms.values_list("id", flat=True))
-        if run.level_id
-        else set()
-    )
+    form_ids = set(run.level.command_forms.values_list("id", flat=True)) if run.level_id else set()
     rows = {
         mastery.command_form_id: mastery
         for mastery in SkillMastery.objects.filter(
@@ -101,11 +97,15 @@ def _wave_index_for(attempt: AdventureRun) -> int:
     wave = attempt.current_wave
     if wave is None:
         return 0
-    return list(
-        attempt.level.waves.filter(is_published=True)
-        .order_by("sort_order", "id")
-        .values_list("id", flat=True)
-    ).index(wave.id) if attempt.level_id else 0
+    return (
+        list(
+            attempt.level.waves.filter(is_published=True)
+            .order_by("sort_order", "id")
+            .values_list("id", flat=True)
+        ).index(wave.id)
+        if attempt.level_id
+        else 0
+    )
 
 
 def attempt_payload(
@@ -286,14 +286,12 @@ def adventure_run_payload(run: AdventureRun, *, include_current_steps: bool = Tr
     current = run if run.status == SESSION_STATUS_STARTED else None
     stage_chapter = run.level.chapter if run.level_id else None
     stage_config = (
-        merged_battle_stage(chapter=stage_chapter, content_owner=run.level)
-        if run.level_id
-        else {}
+        merged_battle_stage(chapter=stage_chapter, content_owner=run.level) if run.level_id else {}
     )
-    total_waves = max(
-        1, run.level.waves.filter(is_published=True).count() if run.level_id else 1
+    total_waves = max(1, run.level.waves.filter(is_published=True).count() if run.level_id else 1)
+    current_wave_number = (
+        (_wave_index_for(run) + 1) if run.status == SESSION_STATUS_STARTED else total_waves
     )
-    current_wave_number = (_wave_index_for(run) + 1) if run.status == SESSION_STATUS_STARTED else total_waves
     level_progress = _level_progress_payload(run)
     return {
         "id": run.id,
@@ -348,11 +346,15 @@ def adventure_level_library_payload(run: AdventureRun) -> dict | None:
         return None
 
     commands = []
-    skill_ids = {
-        form.command_skill_id
-        for form in run.current_wave.command_forms.all()
-        if form.command_skill_id is not None
-    } if run.current_wave_id else set()
+    skill_ids = (
+        {
+            form.command_skill_id
+            for form in run.current_wave.command_forms.all()
+            if form.command_skill_id is not None
+        }
+        if run.current_wave_id
+        else set()
+    )
     if skill_ids:
         commands = [command for command in book["commands"] if command["id"] in skill_ids]
 

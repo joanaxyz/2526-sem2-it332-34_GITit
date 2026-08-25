@@ -109,14 +109,3 @@ export function deriveAchievements(home: HomeSummary, stats: StatsSummary): Achi
     ),
   ]
 }
-
-/**
- * The badge surfaced in the hero banner's "Latest Achievement" card: the
- * highest-value badge currently unlocked (no unlock timestamps exist, so
- * "rarest earned" stands in for recency).
- */
-export function latestAchievement(achievements: Achievement[]): Achievement | null {
-  const unlocked = achievements.filter((a) => a.unlocked)
-  if (unlocked.length === 0) return null
-  return unlocked.reduce((best, a) => (a.points >= best.points ? a : best))
-}

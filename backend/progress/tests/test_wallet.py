@@ -18,7 +18,9 @@ def make_user(django_user_model, username: str = "student"):
     # these wallet tests don't have to go through the shop purchase flow.
     from shop.models import Entitlement
 
-    Entitlement.objects.get_or_create(player=get_or_create_player(user), kind="companion", slug="blue")
+    Entitlement.objects.get_or_create(
+        player=get_or_create_player(user), kind="companion", slug="blue"
+    )
     return user
 
 
@@ -27,9 +29,24 @@ def test_award_credits_balance_once_per_key(db, django_user_model):
     player = get_or_create_player(user)
     service = WalletService()
 
-    assert service.award(player=player, amount=25, reason="challenge_clear", award_key="challenge-clear:1") is True
-    assert service.award(player=player, amount=25, reason="challenge_clear", award_key="challenge-clear:1") is False
-    assert service.award(player=player, amount=10, reason="perfect_clear", award_key="challenge-star:1") is True
+    assert (
+        service.award(
+            player=player, amount=25, reason="challenge_clear", award_key="challenge-clear:1"
+        )
+        is True
+    )
+    assert (
+        service.award(
+            player=player, amount=25, reason="challenge_clear", award_key="challenge-clear:1"
+        )
+        is False
+    )
+    assert (
+        service.award(
+            player=player, amount=10, reason="perfect_clear", award_key="challenge-star:1"
+        )
+        is True
+    )
 
     wallet = Wallet.objects.get(player=player)
     assert wallet.balance == 35
@@ -40,7 +57,9 @@ def test_award_rejects_non_positive_amounts(db, django_user_model):
     user = make_user(django_user_model)
     player = get_or_create_player(user)
 
-    assert WalletService().award(player=player, amount=0, reason="noop", award_key="noop:0") is False
+    assert (
+        WalletService().award(player=player, amount=0, reason="noop", award_key="noop:0") is False
+    )
     assert not Wallet.objects.filter(player=player).exists()
 
 
@@ -50,30 +69,40 @@ def test_spend_debits_balance_once_per_key(db, django_user_model):
     service = WalletService()
     service.award(player=player, amount=75, reason="seed", award_key="seed:spend")
 
-    assert service.spend(player=player, amount=25, reason="store_purchase", award_key="purchase:1") is True
-    assert service.spend(player=player, amount=25, reason="store_purchase", award_key="purchase:1") is False
+    assert (
+        service.spend(player=player, amount=25, reason="store_purchase", award_key="purchase:1")
+        is True
+    )
+    assert (
+        service.spend(player=player, amount=25, reason="store_purchase", award_key="purchase:1")
+        is False
+    )
 
     assert Wallet.objects.get(player=player).balance == 50
-    assert CoinTransaction.objects.filter(player=player, amount=-25, reason="store_purchase").count() == 1
+    assert (
+        CoinTransaction.objects.filter(player=player, amount=-25, reason="store_purchase").count()
+        == 1
+    )
 
 
-def test_wallet_endpoint_returns_balance_and_recent(db, django_user_model):
+def test_wallet_endpoint_returns_balance_without_transaction_history(db, django_user_model):
     user = make_user(django_user_model)
     player = get_or_create_player(user)
-    WalletService().award(player=player, amount=30, reason="adventure_pass", award_key="adventure-pass:1")
+    WalletService().award(
+        player=player, amount=30, reason="adventure_pass", award_key="adventure-pass:1"
+    )
     client = APIClient()
     client.force_authenticate(user=user)
 
     response = client.get("/api/progress/wallet/")
 
     assert response.status_code == 200
-    body = response.json()
-    assert body["balance"] == 30
-    assert body["recent"][0]["reason"] == "adventure_pass"
-    assert body["recent"][0]["amount"] == 30
+    assert response.json() == {"balance": 30}
 
 
-def test_chapter_chest_awards_gitcoins_when_progress_crosses_threshold(db, django_user_model, monkeypatch):
+def test_chapter_chest_awards_gitcoins_when_progress_crosses_threshold(
+    db, django_user_model, monkeypatch
+):
     fixture = create_stage_readme_challenge_run(
         django_user_model,
         username="chapter-chest",
@@ -84,7 +113,7 @@ def test_chapter_chest_awards_gitcoins_when_progress_crosses_threshold(db, djang
     # A tiny threshold guarantees this trial completion crosses it. The reward
     # schedule is a fixed runtime constant, so the test patches that constant
     # directly instead of authoring per-chapter reward data.
-    import progress.chests as chests_module
+    import curriculum.services.chests as chests_module
 
     monkeypatch.setattr(chests_module, "CHEST_SCHEDULE", [{"threshold": 1, "coins": 60}])
 
@@ -117,7 +146,7 @@ def test_chapter_chest_awards_gitcoins_when_progress_crosses_threshold(db, djang
 
 def test_chest_schedule_is_the_same_fixed_runtime_constant_for_every_chapter(db, django_user_model):
     call_command("seed_curriculum")
-    from progress.chests import CHEST_SCHEDULE
+    from curriculum.services import CHEST_SCHEDULE
 
     user = make_user(django_user_model, "chest-schedule-reader")
     client = APIClient()

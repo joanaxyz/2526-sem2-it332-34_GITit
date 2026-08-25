@@ -186,7 +186,5 @@ def test_prerequisite_gate_uses_mastery_and_truthful_copy(player):
     assert reason == ""
 
     # A prebuilt map short-circuits the per-story query.
-    locked, _ = story_locked(
-        player=player, story=second, completed_map={first.id: False}
-    )
+    locked, _ = story_locked(player=player, story=second, completed_map={first.id: False})
     assert locked is True

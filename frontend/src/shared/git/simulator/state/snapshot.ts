@@ -50,43 +50,10 @@ export function visibleProjectTree(input: MutableRepositoryState | RepositorySna
 }
 
 export function snapshotForCommand(input: MutableRepositoryState, alreadyNormalized = false): RepositorySnapshot {
-  const state = alreadyNormalized ? input : normalizeState(input)
-  const head = state.head?.type === 'branch'
-    ? { ...state.head, target: state.branches?.[state.head.name ?? ''] ?? null }
-    : { ...state.head }
-  return {
-    repository_initialized: state.repository_initialized,
-    commits: clone(state.commits ?? []),
-    branches: clone(state.branches ?? {}),
-    head,
-    staging: clone(state.staging ?? {}),
-    working_tree: clone(state.working_tree ?? {}),
-    conflicts: clone(state.conflicts ?? []),
-    conflict_details: clone(state.conflict_details ?? {}),
-    remotes: clone(state.remotes ?? {}),
-    remote_branches: clone(state.remote_branches ?? {}),
-    upstream_tracking: clone(state.upstream_tracking ?? {}),
-    tags: clone(state.tags ?? {}),
-    remote_tags: clone(state.remote_tags ?? {}),
-    stash_stack: clone(state.stash_stack ?? []),
-    partial_hunks: clone(state.partial_hunks ?? {}),
-    replaced_commits: clone(state.replaced_commits ?? {}),
-    reflog: clone(state.reflog ?? []),
-    operation_metadata: clone(state.operation_metadata ?? {}),
-    config: clone(state.config ?? {}),
-    remote_fixtures: clone(state.remote_fixtures),
-    remote_updates: clone(state.remote_updates ?? {}),
-    merge_abort_state: clone(state.merge_abort_state),
-    merge_parent: state.merge_parent ?? null,
-    merge_conflicts: clone(state.merge_conflicts),
-    merge_resolutions: clone(state.merge_resolutions ?? {}),
-    conflict_on_merge: state.conflict_on_merge,
-    conflict_files: clone(state.conflict_files ?? []),
-    merge_conflict_files: clone(state.merge_conflict_files ?? []),
-    cherry_pick_in_progress: state.cherry_pick_in_progress,
-    cherry_pick_original_head: state.cherry_pick_original_head ?? null,
-    rebase_state: clone(state.rebase_state),
-  } as RepositorySnapshot
+  const state = alreadyNormalized ? clone(input) : normalizeState(input)
+  delete state.project_tree
+  delete state.visible_tree
+  return state
 }
 
 export function snapshot(input: MutableRepositoryState, alreadyNormalized = false): RepositorySnapshot {
@@ -95,13 +62,6 @@ export function snapshot(input: MutableRepositoryState, alreadyNormalized = fals
   return {
     ...snapshotForCommand(state, true),
     project_tree: projectTree,
-    visible_tree: projectTree,
+    visible_tree: clone(projectTree),
   }
-}
-
-export function stateAffectsVisibleTree(previous: MutableRepositoryState, next: MutableRepositoryState) {
-  for (const key of ['commits', 'staging', 'working_tree', 'conflicts', 'branches', 'head'] as const) {
-    if (JSON.stringify(previous[key]) !== JSON.stringify(next[key])) return true
-  }
-  return false
 }

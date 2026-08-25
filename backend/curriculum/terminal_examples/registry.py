@@ -1,11 +1,15 @@
 """Ordered terminal-example renderer registry."""
 
-from . import branching, history, recovery_remote, setup, working_tree
+from .branching import render as render_branching
+from .history import render as render_history
+from .recovery_remote import render as render_recovery_remote
+from .setup import render as render_setup
+from .working_tree import render as render_working_tree
 
 TERMINAL_EXAMPLE_RENDERERS = (
-    setup.render,
-    history.render,
-    working_tree.render,
-    branching.render,
-    recovery_remote.render,
+    render_setup,
+    render_history,
+    render_working_tree,
+    render_branching,
+    render_recovery_remote,
 )

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { deriveAchievements, latestAchievement } from '@/features/home/utils/achievements'
+import { deriveAchievements } from '@/features/home/utils/achievements'
 import type { HomeSummary } from '@/features/home/types'
 import type { StatsSummary } from '@/features/stats/types'
 
@@ -83,11 +83,5 @@ describe('deriveAchievements', () => {
       target: 90,
       unlocked: false,
     })
-  })
-
-  it('uses the highest-value unlocked badge as the latest achievement stand-in', () => {
-    const achievements = deriveAchievements(home, stats)
-
-    expect(latestAchievement(achievements)?.id).toBe('boss-slayer')
   })
 })

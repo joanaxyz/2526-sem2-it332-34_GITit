@@ -6,10 +6,8 @@ import { PanelLeftOpen, PanelRightOpen, X } from 'lucide-react'
 import { StoryAdventurePath } from '@/features/story-map/components/path/StoryAdventurePath'
 import { ChapterOverview } from '@/features/story-map/components/ChapterOverview'
 import { StoryChapterList } from '@/features/story-map/components/StoryChapterList'
-import { StoryContentModals } from '@/features/story-map/components/StoryContentModals'
 import { StoryCompanionPanel, StorySkillFocusPanel } from '@/features/story-map/components/StorySidePanels'
 import { storyMapApi } from '@/features/story-map/api/storyMapApi'
-import { useStoryContentModal } from '@/features/story-map/hooks/useStoryContentModal'
 import { useStories } from '@/features/story-map/hooks/useStories'
 import { chapterTitle, firstOpenChapter } from '@/features/story-map/utils/storyMapChapter'
 import { queryKeys } from '@/shared/api/queryKeys'
@@ -20,6 +18,27 @@ import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 import { STORIES_ROUTE } from '@/shared/navigation/routes'
 import { getStoryWorld } from '@/shared/story-worlds/registry'
 import { storyWorldStyle } from '@/shared/story-worlds/theme'
+
+const COMPACT_STORY_MAP_QUERY = '(max-width: 1120px)'
+
+function useCompactStoryMap() {
+  const [compact, setCompact] = useState(
+    () => typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+      ? window.matchMedia(COMPACT_STORY_MAP_QUERY).matches
+      : false,
+  )
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return
+    const media = window.matchMedia(COMPACT_STORY_MAP_QUERY)
+    const update = () => setCompact(media.matches)
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
+
+  return compact
+}
 
 export function StoryMapPage() {
   const { storySlug: routeStorySlug } = useParams<{ storySlug: string }>()
@@ -40,7 +59,7 @@ export function StoryMapPage() {
     () => storiesQuery.data?.find((story) => story.slug === storySlug) ?? null,
     [storySlug, storiesQuery.data],
   )
-  const { companion, companionSlug } = usePlayerLoadout()
+  const { companion, companionSlug, hasCompanion } = usePlayerLoadout()
   const storyWorld = useMemo(() => getStoryWorld(activeStory?.world_slug ?? storySlug), [activeStory?.world_slug, storySlug])
   const storyMapStyle = {
     ...storyWorldStyle(storyWorld),
@@ -49,7 +68,7 @@ export function StoryMapPage() {
   const [activeChapterId, setActiveChapterId] = useState<number | null>(null)
   const [leftRailOpen, setLeftRailOpen] = useState(false)
   const [rightRailOpen, setRightRailOpen] = useState(false)
-  const resetContentModal = useStoryContentModal((state) => state.reset)
+  const compactStoryMap = useCompactStoryMap()
 
   useEffect(() => {
     if (!chapters.length) return
@@ -64,10 +83,9 @@ export function StoryMapPage() {
   }, [chapters, focusedChapterId])
 
   useEffect(() => {
-    resetContentModal()
     setLeftRailOpen(false)
     setRightRailOpen(false)
-  }, [activeChapterId, resetContentModal, storySlug])
+  }, [activeChapterId, storySlug])
 
   const activeChapter = useMemo(
     () => chapters.find((chapter) => chapter.id === activeChapterId) ?? firstOpenChapter(chapters),
@@ -82,7 +100,7 @@ export function StoryMapPage() {
   })
 
   if (chaptersQuery.isLoading) {
-    return <LoadingState description="Preparing the story map." label="Loading map" variant="page" />
+    return <LoadingState companionSlug={companionSlug} description="Preparing the story map." label="Loading map" variant="page" />
   }
   if (chaptersQuery.isError) {
     return <ErrorState title="Could not load map" description={chaptersQuery.error.message} />
@@ -96,11 +114,12 @@ export function StoryMapPage() {
   const challenges = overview?.challenges ?? []
   const levels = adventures
   const challengesLocked = activeChapter.locked || (adventures.length > 0 && adventures.some((adventure) => !adventure.is_passed))
+  const leftRailHidden = compactStoryMap && !leftRailOpen
+  const rightRailHidden = compactStoryMap && !rightRailOpen
 
   return (
     <div className="story-page-shell" style={storyWorldStyle(storyWorld)}>
       <div className="story-map-backdrop" style={storyMapStyle} aria-hidden="true" />
-      <StoryContentModals />
 
       <div className="story-map-rail-controls" aria-label="Map panels">
         <button
@@ -133,7 +152,13 @@ export function StoryMapPage() {
       ) : null}
 
       <div className="story-map-layout">
-        <aside id="story-map-tools" className={`story-map-left ${leftRailOpen ? 'is-open' : ''}`} aria-label="Chapter tools">
+        <aside
+          id="story-map-tools"
+          className={`story-map-left ${leftRailOpen ? 'is-open' : ''}`}
+          aria-label="Chapter tools"
+          aria-hidden={leftRailHidden || undefined}
+          inert={leftRailHidden || undefined}
+        >
           <button type="button" className="story-map-rail-close" aria-label="Close chapter tools" onClick={() => setLeftRailOpen(false)}>
             <X aria-hidden="true" />
           </button>
@@ -163,7 +188,13 @@ export function StoryMapPage() {
           )}
         </section>
 
-        <aside id="story-map-utilities" className={`story-map-right ${rightRailOpen ? 'is-open' : ''}`} aria-label="Story chapters and companion">
+        <aside
+          id="story-map-utilities"
+          className={`story-map-right ${rightRailOpen ? 'is-open' : ''}`}
+          aria-label="Story chapters and companion"
+          aria-hidden={rightRailHidden || undefined}
+          inert={rightRailHidden || undefined}
+        >
           <button type="button" className="story-map-rail-close" aria-label="Close story utilities" onClick={() => setRightRailOpen(false)}>
             <X aria-hidden="true" />
           </button>
@@ -174,11 +205,11 @@ export function StoryMapPage() {
           />
           <StorySkillFocusPanel
             levels={levels}
-            companionSlug={companionSlug}
-            companionLabel={companion.label}
+            companionSlug={hasCompanion ? companionSlug : null}
+            companionLabel={hasCompanion ? companion.label : null}
             loading={overviewQuery.isLoading}
           />
-          <StoryCompanionPanel companion={companion} />
+          <StoryCompanionPanel companion={hasCompanion ? companion : null} />
         </aside>
       </div>
     </div>

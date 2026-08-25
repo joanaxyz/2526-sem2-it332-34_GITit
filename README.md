@@ -160,6 +160,13 @@ Generated target replay check, after frontend dependencies are installed:
 python scripts/check_generated_targets_current.py
 ```
 
+## Deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the complete production procedure,
+including Docker Compose, PostgreSQL and Redis configuration, migrations,
+curriculum seeding, TLS, media verification, 100-user load smoke testing,
+updates, and rollback.
+
 
 ## Packaging
 

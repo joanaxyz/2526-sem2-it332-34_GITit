@@ -11,9 +11,7 @@ class VersionedJWTAuthentication(JWTAuthentication):
         user = super().get_user(validated_token)
         token_version = int(validated_token.get("auth_version", 1))
         current_version = (
-            AccountSecurity.objects.filter(user=user)
-            .values_list("auth_version", flat=True)
-            .first()
+            AccountSecurity.objects.filter(user=user).values_list("auth_version", flat=True).first()
             or 1
         )
         if token_version != int(current_version):

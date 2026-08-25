@@ -1,38 +1,55 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from curriculum.models import Chapter, Story
+from curriculum.models import Story
 from curriculum.selectors import chapter_locked, story_completed, story_locked
-from progress.chests import CHEST_SCHEDULE
+from curriculum.services import CHEST_SCHEDULE
 from shop.access import owns_item
 from shop.catalog import KIND_STORY
 
 
-class StorySerializer(serializers.ModelSerializer):
+class StoryPrerequisiteSerializer(serializers.Serializer):
+    slug = serializers.CharField()
+    title = serializers.CharField()
+    completed = serializers.BooleanField()
+
+
+class ChapterStorySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    slug = serializers.CharField()
+    title = serializers.CharField()
+    world_slug = serializers.CharField()
+
+
+class ChapterLevelCompletionSerializer(serializers.Serializer):
+    value = serializers.FloatField()
+    numerator = serializers.IntegerField()
+    denominator = serializers.IntegerField()
+
+
+class ChapterChestRewardSerializer(serializers.Serializer):
+    threshold = serializers.IntegerField()
+    coins = serializers.IntegerField()
+
+
+class StorySerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    slug = serializers.CharField(read_only=True)
+    title = serializers.CharField(read_only=True)
+    summary = serializers.CharField(read_only=True)
+    price = serializers.IntegerField(read_only=True)
+    sort_order = serializers.IntegerField(read_only=True)
+    is_published = serializers.BooleanField(read_only=True)
     completed = serializers.SerializerMethodField()
     owned = serializers.SerializerMethodField()
+    world_slug = serializers.CharField(read_only=True)
+    difficulty = serializers.ChoiceField(
+        choices=Story.DIFFICULTY_CHOICES,
+        read_only=True,
+    )
     prerequisite_story = serializers.SerializerMethodField()
     locked = serializers.SerializerMethodField()
     lock_reason = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Story
-        fields = [
-            "id",
-            "slug",
-            "title",
-            "summary",
-            "narrative_brief",
-            "price",
-            "sort_order",
-            "is_published",
-            "completed",
-            "owned",
-            "world_slug",
-            "difficulty",
-            "prerequisite_story",
-            "locked",
-            "lock_reason",
-        ]
 
     def _completed(self, story) -> bool:
         completed_map = self.context.get("story_completed_map")
@@ -50,6 +67,7 @@ class StorySerializer(serializers.ModelSerializer):
             slug=obj.slug,
         )
 
+    @extend_schema_field(StoryPrerequisiteSerializer(allow_null=True))
     def get_prerequisite_story(self, obj) -> dict | None:
         prerequisite = obj.prerequisite_story
         if prerequisite is None:
@@ -77,7 +95,14 @@ class StorySerializer(serializers.ModelSerializer):
         return reason
 
 
-class ChapterListSerializer(serializers.ModelSerializer):
+class ChapterListSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    slug = serializers.CharField(read_only=True)
+    number = serializers.IntegerField(read_only=True)
+    title = serializers.CharField(read_only=True)
+    description = serializers.CharField(read_only=True)
+    sort_order = serializers.IntegerField(read_only=True)
+    is_playable = serializers.BooleanField(read_only=True)
     command_skill_count = serializers.IntegerField(read_only=True)
     challenge_count = serializers.IntegerField(read_only=True)
     adventure_level_count = serializers.IntegerField(read_only=True)
@@ -87,36 +112,12 @@ class ChapterListSerializer(serializers.ModelSerializer):
     lock_reason = serializers.SerializerMethodField()
     chest_schedule = serializers.SerializerMethodField()
 
-    class Meta:
-        model = Chapter
-        fields = [
-            "id",
-            "slug",
-            "number",
-            "title",
-            "description",
-            "narrative_brief",
-            "sort_order",
-            "is_playable",
-            "story",
-            "locked",
-            "lock_reason",
-            "command_skill_count",
-            "challenge_count",
-            "adventure_level_count",
-            "level_completion",
-            "chest_schedule",
-        ]
-
+    @extend_schema_field(ChapterLevelCompletionSerializer())
     def get_level_completion(self, obj) -> dict:
         denominator_map = self.context.get("chapter_completion_denominator_map", {})
         count_map = self.context.get("chapter_completion_count_map", {})
-        denominator = int(
-            denominator_map.get(obj.id, 0) or 0
-        )
-        numerator = int(
-            count_map.get(obj.id, 0) or 0
-        )
+        denominator = int(denominator_map.get(obj.id, 0) or 0)
+        numerator = int(count_map.get(obj.id, 0) or 0)
         value = round((numerator / denominator) * 100, 1) if denominator else 0.0
         return {
             "value": value,
@@ -124,6 +125,7 @@ class ChapterListSerializer(serializers.ModelSerializer):
             "denominator": denominator,
         }
 
+    @extend_schema_field(ChapterStorySerializer(allow_null=True))
     def get_story(self, obj) -> dict | None:
         if not obj.story_id:
             return None
@@ -142,6 +144,7 @@ class ChapterListSerializer(serializers.ModelSerializer):
         _, reason = chapter_locked(player=self.context.get("player"), chapter=obj)
         return reason
 
+    @extend_schema_field(ChapterChestRewardSerializer(many=True))
     def get_chest_schedule(self, obj) -> list[dict]:
         # Fixed, universal schedule computed at runtime - every chapter shows
         # the same reward-per-threshold preview; nothing is authored per chapter.

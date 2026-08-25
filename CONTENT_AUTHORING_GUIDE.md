@@ -21,7 +21,11 @@ This guide explains how to author curriculum content that teaches Git through sc
 
 ## Adventure Authoring
 
-Adventure data lives in `backend/curriculum/seed_data/adventure_levels.py`.
+Adventure scenario specs live under
+`backend/curriculum/seed_data/source/adventure_level_specs/`. Foundational
+level and wave groupings live in the blueprint ledgers under
+`backend/curriculum/seed_data/source/blueprint/`; advanced drill groupings live
+in the private owner map in `backend/curriculum/seed_data/adventures.py`.
 
 A wave should define:
 
@@ -33,7 +37,9 @@ A wave should define:
 - objective checks, when the wave is guided
 - prerequisites, when order matters
 
-A level groups waves through `ADVENTURE_LEVEL_PLAN`. Keep the plan in sync whenever adding, renaming, or removing waves.
+A level groups waves through exactly one of those owners. The public
+`ADVENTURE_WAVE_PLANS` mapping is their validated composition output, not a
+second authoring surface.
 
 ## Challenge Authoring
 
@@ -57,6 +63,17 @@ Guided adventure objectives should be:
 - **End-state based** — false at the start, true only after the learner completes the step.
 
 Avoid premature-pass checks such as `staging_empty: true` unless the initial state makes that meaningful.
+
+## Story Briefs and Exact Values
+
+The learner must never have to guess an arbitrary literal that evaluation requires.
+
+- Name each value's purpose in the story or task prose (for example, "Use the required commit message shown below").
+- Put the exact copyable value in `scenario_context.details`. The workspace displays the value only; the label remains available to assistive technology and the copy button.
+- Do not expose whole solution commands. Command choice remains part of the exercise; only otherwise-uninferable values such as required commit messages, URLs, branch names, and refs belong in copy details.
+- Evaluated messages supplied through `git commit -m` are synchronized into copy details by the seed helpers. The authored prose must still make their role understandable.
+
+The curriculum invariant suite audits this contract across every adventure and challenge variant.
 
 ## Generated Targets
 

@@ -111,9 +111,20 @@ export function formatLog(state: MutableRepositoryState, parsed: ParsedGitComman
 
 export function formatShow(state: MutableRepositoryState, parsed: ParsedGitCommand) {
   const nameOnly = hasOption(parsed, '--name-only')
-  const ref = parsed.args.find((arg) => !arg.startsWith('-')) ?? 'HEAD'
+  const expression = parsed.args.find((arg) => !arg.startsWith('-')) ?? 'HEAD'
+  const separator = expression.indexOf(':')
+  const ref = separator >= 0 ? expression.slice(0, separator) || 'HEAD' : expression
+  const path = separator >= 0 ? expression.slice(separator + 1) : null
   const commit = commitById(state, resolveRevision(state, ref))
   if (!commit) throw new SimulatorCommandError(`fatal: ambiguous argument '${ref}'`)
+  if (path !== null) {
+    const tree = commit.tree ?? {}
+    if (!path || !(path in tree)) {
+      throw new SimulatorCommandError(`fatal: path '${path}' does not exist in '${ref}'`)
+    }
+    const content = tree[path]
+    return typeof content === 'string' ? content : JSON.stringify(content, null, 2)
+  }
   const header = `commit ${commit.id}\nAuthor: ${commit.author ?? 'GIT it'}\n\n    ${commit.message}`
   if (nameOnly) return [header, ...Object.keys(commit.changes ?? {})].join('\n')
   const body = Object.entries(commit.changes ?? {}).map(([path, change]) => `${path}\n${change.before ?? ''}\n${change.after ?? ''}`).join('\n')

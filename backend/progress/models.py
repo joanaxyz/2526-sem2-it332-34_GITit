@@ -1,30 +1,26 @@
 from django.db import models
 
 
-class StudentProgress(models.Model):
-    player = models.OneToOneField("players.Player", on_delete=models.CASCADE)
-    first_practice_started_at = models.DateTimeField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self) -> str:
-        return f"Progress({self.player_id})"
-
-
 class StreakRecord(models.Model):
     player = models.OneToOneField("players.Player", on_delete=models.CASCADE)
     current_streak = models.PositiveIntegerField(default=0)
     longest_streak = models.PositiveIntegerField(default=0)
     last_completed_on = models.DateField(null=True, blank=True)
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(longest_streak__gte=models.F("current_streak")),
+                name="streak_longest_gte_current",
+            ),
+        ]
+
     def __str__(self) -> str:
         return f"Streak({self.player_id}: {self.current_streak})"
 
 
 class Wallet(models.Model):
-    player = models.OneToOneField(
-        "players.Player", on_delete=models.CASCADE, related_name="wallet"
-    )
+    player = models.OneToOneField("players.Player", on_delete=models.CASCADE, related_name="wallet")
     balance = models.PositiveIntegerField(default=0)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -49,6 +45,10 @@ class CoinTransaction(models.Model):
         ordering = ["-created_at", "-id"]
         constraints = [
             models.UniqueConstraint(fields=["player", "award_key"], name="unique_award_per_player"),
+            models.CheckConstraint(
+                condition=~models.Q(amount=0),
+                name="coin_transaction_amount_nonzero",
+            ),
         ]
 
     def __str__(self) -> str:
@@ -94,7 +94,11 @@ class AdventureLevelCompletion(ScoredPlayerCompletion):
             models.UniqueConstraint(
                 fields=["player", "adventure_level"],
                 name="unique_adventure_level_completion",
-            )
+            ),
+            models.CheckConstraint(
+                condition=models.Q(stars__lte=3),
+                name="adventure_completion_stars_lte_3",
+            ),
         ]
 
     @property
@@ -121,7 +125,11 @@ class ChallengeTrialCompletion(ScoredPlayerCompletion):
             models.UniqueConstraint(
                 fields=["player", "challenge_trial"],
                 name="unique_challenge_trial_completion",
-            )
+            ),
+            models.CheckConstraint(
+                condition=models.Q(stars__lte=3),
+                name="challenge_completion_stars_lte_3",
+            ),
         ]
 
     @property

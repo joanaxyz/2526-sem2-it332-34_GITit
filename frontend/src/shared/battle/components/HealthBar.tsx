@@ -17,7 +17,7 @@ export function HealthBar({
 }: {
   value: number
   max: number
-  variant?: 'hp' | 'mana' | 'boss' | 'battle' | 'battle-active'
+  variant?: 'hp' | 'mana' | 'enemy' | 'battle' | 'battle-active'
   className?: string
   style?: CSSProperties
   'aria-label'?: string
@@ -30,7 +30,7 @@ export function HealthBar({
         ? 'bg-success'
       : variant === 'mana'
       ? 'bg-accent'
-      : variant === 'boss'
+      : variant === 'enemy'
         ? 'bg-destructive'
         : 'bg-primary'
 
@@ -53,7 +53,6 @@ export function HealthBar({
         style={{
           transformOrigin: 'left center',
           transform: `scaleX(${fraction})`,
-          transition: 'transform 350ms cubic-bezier(0.22, 1, 0.36, 1)',
         }}
       />
       {/* Hairline gloss so the bar reads on both bright and dark stage areas. */}

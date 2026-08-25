@@ -35,7 +35,7 @@ export function useBattleEncounterSetup({
   playerMaxHp = null,
 }: BattleEncounterSetup) {
   const lastEncounterKeyRef = useRef<string | null>(null)
-  const { setEncounter, setStoryWorldSlug } = director
+  const { setEncounter, setStoryWorldSlug, syncPlayerVitals } = director
   const lastStageSignatureRef = useRef<string | null>(null)
 
   const rosterIdentity = roster.map((monster) => monster.id).join(',')
@@ -54,6 +54,10 @@ export function useBattleEncounterSetup({
     lastStageSignatureRef.current = stageSignature
     lastEncounterKeyRef.current = encounterKey
 
+    // The run payload already points at the next wave. Keep the visible HP
+    // meter authoritative immediately instead of leaving the depleted previous
+    // value queued behind the travel/death choreography.
+    syncPlayerVitals(playerHp, playerMaxHp)
     setEncounter(roster, {
       entry,
       travel: travelOnEncounterChange && encounterChanged,
@@ -74,9 +78,9 @@ export function useBattleEncounterSetup({
     setEncounter,
     setStoryWorldSlug,
     storyWorldSlug,
+    syncPlayerVitals,
     transitionTotal,
     transitionWave,
     travelOnEncounterChange,
   ])
 }
-

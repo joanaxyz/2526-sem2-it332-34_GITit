@@ -1,4 +1,5 @@
-import { apiRequest } from '@/shared/api/httpClient'
+import { apiOperationRequest, apiRequest } from '@/shared/api/httpClient'
+import type { ApiRequestBody } from '@/shared/api/generated/apiTypes'
 import type {
   AuthoringChapter,
   AuthoringChapterInput,
@@ -6,34 +7,13 @@ import type {
   ContentDefinition,
   ContentDefinitionList,
   ContentKind,
+  CommandFormOption,
   TestRunResult,
   ValidationResult,
-  Visibility,
 } from '@/features/authoring/types'
 
-export type ContentDefinitionInput = {
-  kind: ContentKind
-  visibility?: Visibility
-  slug: string
-  title: string
-  summary?: string
-  tags?: string[]
-  command_family?: string
-  difficulty?: string
-  chapter?: number | null
-  definition?: Record<string, unknown>
-}
-
-export type CommandFormOption = {
-  id: number
-  slug: string
-  usage_form: string
-  label: string
-  skill_slug: string
-  skill_title: string
-  base_command: string
-  chapter_number: number | null
-}
+export type ContentDefinitionInput =
+  ApiRequestBody<'authoring_content_definitions_create'>
 
 export const authoringApi = {
   chapters() {
@@ -56,31 +36,39 @@ export const authoringApi = {
     return apiRequest<ContentDefinition>(`/authoring/content-definitions/${id}/`)
   },
   create(input: ContentDefinitionInput) {
-    return apiRequest<ContentDefinition>('/authoring/content-definitions/', {
-      method: 'POST',
-      body: JSON.stringify(input),
-    })
+    return apiOperationRequest(
+      'authoring_content_definitions_create',
+      '/authoring/content-definitions/',
+      { body: input },
+    ) as Promise<ContentDefinition>
   },
-  update(id: number, input: Partial<ContentDefinitionInput>) {
-    return apiRequest<ContentDefinition>(`/authoring/content-definitions/${id}/`, {
-      method: 'PATCH',
-      body: JSON.stringify(input),
-    })
+  update(
+    id: number,
+    input: ApiRequestBody<'authoring_content_definitions_partial_update'>,
+  ) {
+    return apiOperationRequest(
+      'authoring_content_definitions_partial_update',
+      `/authoring/content-definitions/${id}/`,
+      { body: input },
+    ) as Promise<ContentDefinition>
   },
   validate(id: number) {
-    return apiRequest<ValidationResult>(`/authoring/content-definitions/${id}/validate/`, {
-      method: 'POST',
-    })
+    return apiOperationRequest(
+      'authoring_content_definitions_validate_create',
+      `/authoring/content-definitions/${id}/validate/`,
+    ) as Promise<ValidationResult>
   },
   publish(id: number) {
-    return apiRequest<ContentDefinition>(`/authoring/content-definitions/${id}/publish/`, {
-      method: 'POST',
-    })
+    return apiOperationRequest(
+      'authoring_content_definitions_publish_create',
+      `/authoring/content-definitions/${id}/publish/`,
+    ) as Promise<ContentDefinition>
   },
   testRun(id: number) {
-    return apiRequest<TestRunResult>(`/authoring/content-definitions/${id}/test-run/`, {
-      method: 'POST',
-    })
+    return apiOperationRequest(
+      'authoring_content_definitions_test_run_create',
+      `/authoring/content-definitions/${id}/test-run/`,
+    ) as Promise<TestRunResult>
   },
   commandForms() {
     return apiRequest<{ results: CommandFormOption[] }>('/authoring/command-forms/')

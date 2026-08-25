@@ -2,9 +2,9 @@ import type { StageLanding } from '@/shared/battle/types'
 
 export type ContentKind = 'adventure' | 'challenge' | 'lesson'
 export type ContentStatus = 'draft' | 'testable' | 'published' | 'archived'
-export type Visibility = 'private' | 'public' | 'store'
+export type Visibility = 'private' | 'public'
 
-export type ValidationErrorRow = {
+type ValidationErrorRow = {
   field: string
   message: string
 }
@@ -46,6 +46,7 @@ export type ContentDefinition = {
   kind: ContentKind
   owner_id: number | null
   chapter_id: number | null
+  official_chapter_id: number | null
   source_definition_id: number | null
   visibility: Visibility
   status: ContentStatus
@@ -76,4 +77,15 @@ export type TestRunResult = {
   runtime_id: number | null
   start_path?: string | null
   pages?: unknown[]
+}
+
+export type CommandFormOption = {
+  id: number
+  slug: string
+  usage_form: string
+  label: string
+  skill_slug: string
+  skill_title: string
+  base_command: string
+  chapter_number: number | null
 }

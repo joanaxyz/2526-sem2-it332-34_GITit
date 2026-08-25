@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Check, Lock, Play, Swords } from 'lucide-react'
 
-import type { AdventureLevelSummary, ChallengeSummary } from '@/features/challenges/types'
+import type { AdventureLevelSummary, ChallengeSummary } from '@/features/story-map/types'
 import {
   actionForChallengeLevel,
   actionLabel,

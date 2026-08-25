@@ -218,6 +218,13 @@ ADVENTURE_LEVELS = [
                             },
                         },
                     ],
+                    workspace_files=[
+                        {
+                            "after_command_index": 2,
+                            "path": "README.md",
+                            "content": "base\nUrgent navbar fix\n",
+                        }
+                    ],
                 ),
             ],
         },
@@ -486,6 +493,13 @@ ADVENTURE_LEVELS = [
                                 ]
                             },
                         },
+                    ],
+                    workspace_files=[
+                        {
+                            "after_command_index": 2,
+                            "path": "README.md",
+                            "content": "base\nQuick navbar patch\n",
+                        }
                     ],
                 ),
                 _wave(

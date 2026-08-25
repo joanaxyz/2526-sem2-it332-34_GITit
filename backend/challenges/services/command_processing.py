@@ -19,17 +19,17 @@ from common.git.command_outcomes import command_outcome_payload
 from common.git.repository_state import VariantTargetStateHashCache
 from common.runtime import (
     apply_command_accounting,
+    battle_rule_counts,
     command_budget_exhausted,
     repository_response_snapshot,
-    rule_counts,
     update_fields_for_execution,
 )
 from common.services.performance import timing
+from curriculum.services import ChapterChestService
 from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
 from practice.models import CommandStep
 from practice.services.scaffolding import FeedbackGenerationService
 from practice.services.visualization import RepositoryVisualizationService
-from progress.chests import ChapterChestService
 from progress.models import ChallengeLevelCompletion, ChallengeTrialCompletion
 from progress.services import StreakService
 from progress.wallet import WalletService
@@ -81,31 +81,45 @@ class ChallengeCommandProcessingService:
         previous_rules_passing = 0
         rules_passing = 0
         total_rules = max(1, run.max_counted_commands)
+        evaluator = PracticeCompletionEvaluator()
+        expected_state_hash = VariantTargetStateHashCache().hash_for(
+            variant=run.selected_variant,
+            state_tools=state_tools,
+        )
+        previous_history = CommandHistoryCache().history_for(run=run)
+        initial_state = run.selected_variant.initial_state
+        initial_evaluation = evaluator.evaluate(
+            CompletionEvaluationContext(
+                variant=run.selected_variant,
+                next_state=initial_state,
+                executed_commands=[],
+                next_state_hash=state_tools.state_hash(initial_state),
+                expected_state_hash=expected_state_hash,
+            )
+        )
+        previous_evaluation = evaluator.evaluate(
+            CompletionEvaluationContext(
+                variant=run.selected_variant,
+                next_state=previous_state,
+                executed_commands=previous_history,
+                next_state_hash=state_tools.state_hash_for_normalized(previous_state),
+                expected_state_hash=expected_state_hash,
+                next_state_already_normalized=True,
+            )
+        )
+        previous_rules_passing, total_rules = battle_rule_counts(
+            previous_evaluation,
+            initial_evaluation,
+        )
+        rules_passing = previous_rules_passing
+
         if command_result.processed:
             with span("evaluate"):
                 state_hash = state_tools.state_hash_for_normalized(next_state)
-                expected_state_hash = VariantTargetStateHashCache().hash_for(
-                    variant=run.variant,
-                    state_tools=state_tools,
-                )
-                previous_history = CommandHistoryCache().history_for(run=run)
-                previous_evaluation = PracticeCompletionEvaluator().evaluate(
-                    CompletionEvaluationContext(
-                        run=run,
-                        previous_state=previous_state,
-                        next_state=previous_state,
-                        executed_commands=previous_history,
-                        next_state_hash=state_tools.state_hash_for_normalized(previous_state),
-                        expected_state_hash=expected_state_hash,
-                        next_state_already_normalized=True,
-                    )
-                )
-                previous_rules_passing, total_rules = rule_counts(previous_evaluation)
                 executed_commands = [*previous_history, command_result.normalized_command]
-                evaluation = PracticeCompletionEvaluator().evaluate(
+                evaluation = evaluator.evaluate(
                     CompletionEvaluationContext(
-                        run=run,
-                        previous_state=previous_state,
+                        variant=run.selected_variant,
                         next_state=next_state,
                         executed_commands=executed_commands,
                         next_state_hash=state_hash,
@@ -114,16 +128,19 @@ class ChallengeCommandProcessingService:
                     )
                 )
                 result_category = evaluation.result_category
-                rules_passing, total_rules = rule_counts(evaluation)
+                rules_passing, total_rules = battle_rule_counts(
+                    evaluation,
+                    initial_evaluation,
+                )
                 if _uses_contextual_feedback(run) and classification == COMMAND_COUNTED:
                     feedback = FeedbackGenerationService().describe(previous_state, next_state)
         else:
-            result_category = RESULT_INVALID if command.strip().lower().startswith("git") else RESULT_UNPROCESSABLE
-            state_hash = state_tools.state_hash_for_normalized(next_state)
-            expected_state_hash = VariantTargetStateHashCache().hash_for(
-                variant=run.variant,
-                state_tools=state_tools,
+            result_category = (
+                RESULT_INVALID
+                if command.strip().lower().startswith("git")
+                else RESULT_UNPROCESSABLE
             )
+            state_hash = state_tools.state_hash_for_normalized(next_state)
 
         accounting = apply_command_accounting(
             run,
@@ -181,10 +198,12 @@ class ChallengeCommandProcessingService:
         # the blob is wasted I/O on the hot path.
         if execution.state_mutated:
             run.repository_state = next_state
-        update_fields = set(update_fields_for_execution(
-            accounting.changed_fields,
-            state_mutated=execution.state_mutated,
-        ))
+        update_fields = set(
+            update_fields_for_execution(
+                accounting.changed_fields,
+                state_mutated=execution.state_mutated,
+            )
+        )
         chest_pending = False
         if solved:
             completion_fields, chest_pending = self._complete_run(run)
@@ -192,7 +211,9 @@ class ChallengeCommandProcessingService:
         elif failed:
             run.status = SESSION_STATUS_FAILED
             run.ended_at = timezone.now()
-            run.failure_reason = "You ran out of counted commands before reaching the target repository state."
+            run.failure_reason = (
+                "You ran out of counted commands before reaching the target repository state."
+            )
             update_fields.update({"status", "ended_at", "failure_reason"})
 
         with span("run_save"):
@@ -314,10 +335,12 @@ class ChallengeCommandProcessingService:
                 challenge_level=run.challenge_trial.challenge_level,
             )
 
+
 def _uses_contextual_feedback(run: ChallengeRun) -> bool:
     return run.difficulty == DIFFICULTY_EASY
 
+
 def _visible_target_state(run: ChallengeRun) -> dict | None:
     if run.difficulty in (DIFFICULTY_EASY, DIFFICULTY_MEDIUM):
-        return run.variant.target_state
+        return run.selected_variant.target_state
     return None

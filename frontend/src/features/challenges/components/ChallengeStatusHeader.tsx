@@ -52,6 +52,11 @@ export function ChallengeStatusHeader({
         <span>GIT it!</span>
       </a>
 
+      <div className="gameplay-header-mission" aria-label="Current challenge">
+        <span>Challenge · {run.difficulty ?? 'Trial'}</span>
+        <strong>{run.challenge.title}</strong>
+      </div>
+
       <span className="gameplay-header-spacer" aria-hidden="true" />
 
       <AudioControls
