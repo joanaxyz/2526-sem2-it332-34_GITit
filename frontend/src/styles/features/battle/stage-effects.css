@@ -1,28 +1,33 @@
 /* Per-command DAG deltas (LiveDagPanel animateChanges). The pop-in runs on the
    node's inner div — the ReactFlow node wrapper's transform is positioning. */
 .dag-node-enter {
-  animation: dag-node-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --dag-node-enter-x: -12px;
+  --dag-node-enter-y: 0;
+  animation: dag-node-enter 280ms cubic-bezier(0.16, 1, 0.3, 1) 110ms both;
+}
+
+.dag-node-enter--vertical {
+  --dag-node-enter-x: 0;
+  --dag-node-enter-y: -12px;
 }
 
 @keyframes dag-node-enter {
   from {
     opacity: 0;
-    transform: scale(0.55);
-  }
-  60% {
-    opacity: 1;
-    transform: scale(1.02);
+    filter: brightness(1.35) drop-shadow(0 0 12px rgba(var(--theme-primary-rgb), 0.6));
+    transform: translate(var(--dag-node-enter-x), var(--dag-node-enter-y)) scale(0.82);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    filter: brightness(1) drop-shadow(0 0 0 rgba(var(--theme-primary-rgb), 0));
+    transform: translate(0, 0) scale(1);
   }
 }
 
 .dag-edge-enter .react-flow__edge-path {
   stroke-dasharray: 140;
   stroke-dashoffset: 140;
-  animation: dag-edge-draw 450ms ease-out 120ms forwards;
+  animation: dag-edge-draw 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes dag-edge-draw {
@@ -32,18 +37,26 @@
 }
 
 .dag-ref-enter {
-  animation: dag-ref-enter 300ms ease-out both;
+  animation: dag-ref-enter 200ms cubic-bezier(0.16, 1, 0.3, 1) 260ms both;
 }
 
 @keyframes dag-ref-enter {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    filter: brightness(1.35);
+    transform: translateX(-7px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    filter: brightness(1);
+    transform: translateX(0);
   }
+}
+
+.live-dag-panel.is-change-paused .dag-node-enter,
+.live-dag-panel.is-change-paused .dag-edge-enter .react-flow__edge-path,
+.live-dag-panel.is-change-paused .dag-ref-enter {
+  animation-play-state: paused;
 }
 
 @media (prefers-reduced-motion: reduce) {

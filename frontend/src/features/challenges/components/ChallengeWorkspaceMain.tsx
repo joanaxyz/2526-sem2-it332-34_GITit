@@ -1,6 +1,5 @@
 import type { CSSProperties, RefObject } from 'react'
 
-import { ChallengeBattlePanel } from '@/features/challenges/components/ChallengeBattlePanel'
 import {
   ChallengeDiagramStage,
   ChallengeSidebar,
@@ -16,7 +15,7 @@ import type {
   WorkspaceFileInput,
   WorkspaceFileRenameInput,
 } from '@/shared/level/workspaceFileTypes'
-import type { BattleDirector } from '@/shared/battle/hooks/useBattleDirector'
+import type { ChallengeDagAnimationController } from '@/features/challenges/hooks/useChallengeDagAnimation'
 
 export function ChallengeWorkspaceMain({
   run,
@@ -28,8 +27,7 @@ export function ChallengeWorkspaceMain({
   writeDisabled,
   workspaceGridRef,
   workspaceGridStyle,
-  director,
-  battleOpen,
+  dagAnimation,
   hasTargetDiagram,
   diagramGridRef,
   diagramGridStyle,
@@ -41,7 +39,6 @@ export function ChallengeWorkspaceMain({
   onRenameFile,
   onDeleteFile,
   onOpenFile,
-  onToggleBattle,
   onBeginDiagramResize,
   onBeginTerminalResize,
   onBeginTerminalPaneResize,
@@ -64,8 +61,7 @@ export function ChallengeWorkspaceMain({
   writeDisabled: boolean
   workspaceGridRef: RefObject<HTMLElement | null>
   workspaceGridStyle: CSSProperties
-  director: BattleDirector
-  battleOpen: boolean
+  dagAnimation: ChallengeDagAnimationController
   hasTargetDiagram: boolean
   diagramGridRef: RefObject<HTMLDivElement | null>
   diagramGridStyle: CSSProperties
@@ -77,7 +73,6 @@ export function ChallengeWorkspaceMain({
   onRenameFile: (input: WorkspaceFileRenameInput) => Promise<ChallengeRun>
   onDeleteFile: (path: string) => Promise<ChallengeRun>
   onOpenFile: (path: string | null) => void
-  onToggleBattle: () => void
   onBeginDiagramResize: ResizeStart
   onBeginTerminalResize: ResizeStart
   onBeginTerminalPaneResize: ResizeStart
@@ -106,18 +101,12 @@ export function ChallengeWorkspaceMain({
       />
       <section
         ref={workspaceGridRef}
-        className="gameplay-workspace__main"
+        className="gameplay-workspace__main challenge-workspace__main"
         style={workspaceGridStyle}
       >
-        <ChallengeBattlePanel
-          run={run}
-          director={director}
-          open={battleOpen}
-          onToggle={onToggleBattle}
-          className="gameplay-battle-slot"
-        />
         <ChallengeDiagramStage
           run={run}
+          animation={dagAnimation}
           hasTargetDiagram={hasTargetDiagram}
           diagramGridRef={diagramGridRef}
           diagramGridStyle={diagramGridStyle}
@@ -140,6 +129,7 @@ export function ChallengeWorkspaceMain({
           terminalGridRef={terminalGridRef}
           terminalGridStyle={terminalGridStyle}
           mutationPending={mutationPending}
+          dagAnimating={dagAnimation.animating}
           onBeginTerminalPaneResize={onBeginTerminalPaneResize}
           onKeyboardTerminalPaneResize={onKeyboardTerminalPaneResize}
           onResetTerminalPaneResize={onResetTerminalPaneResize}

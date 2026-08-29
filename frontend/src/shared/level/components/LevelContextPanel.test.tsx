@@ -1,10 +1,12 @@
-import { render, screen } from '@testing-library/react'
+import { cleanup, render, screen } from '@testing-library/react'
 import { GitBranch } from 'lucide-react'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 
 import { LevelStoryCard } from '@/shared/level/components/LevelContextPanel'
 
-describe('LevelStoryCard copy details', () => {
+describe('LevelStoryCard', () => {
+  afterEach(() => cleanup())
+
   it('shows only the copy value while keeping the field name accessible', () => {
     render(
       <LevelStoryCard
@@ -21,5 +23,20 @@ describe('LevelStoryCard copy details', () => {
     expect(screen.getByText('Save staged work')).toBeVisible()
     expect(screen.getByText('Commit message:')).toHaveClass('sr-only')
     expect(screen.getByRole('button', { name: 'Copy Commit message' })).toBeVisible()
+  })
+
+  it('can omit the repeated workspace header while retaining an accessible name', () => {
+    render(
+      <LevelStoryCard
+        title="Clean Snapshots"
+        context={{ story: 'Inspect the repository.', task: 'Repair the commit.', details: [] }}
+        showHeader={false}
+      />,
+    )
+
+    expect(screen.getByLabelText('Clean Snapshots')).toBeVisible()
+    expect(screen.queryByText('Level Context')).not.toBeInTheDocument()
+    expect(screen.queryByText('Clean Snapshots')).not.toBeInTheDocument()
+    expect(screen.getByText('Inspect the repository.')).toBeVisible()
   })
 })

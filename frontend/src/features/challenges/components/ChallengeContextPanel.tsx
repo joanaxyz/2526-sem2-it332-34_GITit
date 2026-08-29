@@ -1,4 +1,4 @@
-import { Clock, Smile, Swords } from 'lucide-react'
+import { Clock, Smile } from 'lucide-react'
 
 import type { ChallengeRun } from '@/features/challenges/types'
 import {
@@ -15,9 +15,9 @@ export function ChallengeContextPanel({ run }: { run: ChallengeRun }) {
   const context = contextForRun(run)
   const facts: LevelFact[] = [
     {
-      label: 'Level Type',
+      label: 'Mode',
       icon: RookIcon,
-      value: `Challenge Trial${run.replay ? ' · Replay' : ''}`,
+      value: `Challenge${run.replay ? ' · Replay' : ''}`,
     },
     ...(run.difficulty
       ? [{ label: 'Difficulty', icon: Smile, value: <DifficultyChip difficulty={run.difficulty} /> }]
@@ -40,10 +40,18 @@ export function ChallengeContextPanel({ run }: { run: ChallengeRun }) {
 
   return (
     <LevelStoryCard
-      title={`Challenge: ${run.challenge.title}`}
-      titleIcon={Swords}
+      title={run.challenge.title}
       context={context}
       facts={facts}
+      labels={{
+        story: 'Scenario',
+        task: 'Objective',
+        details: 'Required values',
+        detailsAriaLabel: 'Values required by the challenge scenario and objective',
+      }}
+      showHeader={false}
+      showDetailLabels
+      tourTarget="challenge-brief"
     />
   )
 }

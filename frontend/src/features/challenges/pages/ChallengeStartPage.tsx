@@ -1,14 +1,12 @@
 import { useEffect } from 'react'
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { challengesApi } from '@/features/challenges/api/challengesApi'
 import { syncChallengeRunInCache } from '@/features/challenges/utils/challengeRunCache'
 import type { ChallengeRun } from '@/features/challenges/types'
-import { ApiError } from '@/shared/api/apiError'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
-import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 
 type ChallengeStartMode = 'start' | 'replay' | 'retry'
 
@@ -31,7 +29,6 @@ export function ChallengeStartPage({ mode = 'start' }: { mode?: ChallengeStartMo
   const { trialId, runId } = useParams<{ trialId?: string; runId?: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { companionSlug } = usePlayerLoadout()
   const targetId = Number(mode === 'retry' ? runId : trialId)
 
   const start = useMutation({
@@ -56,16 +53,6 @@ export function ChallengeStartPage({ mode = 'start' }: { mode?: ChallengeStartMo
   }, [])
 
   if (start.isError) {
-    // See AdventureStartPage: the RequireCompanion route guard should already
-    // have caught this, but a stale shop cache can let one request
-    // through. Only redirect for that specific lock reason.
-    if (
-      start.error instanceof ApiError &&
-      start.error.status === 423 &&
-      start.error.message.toLowerCase().includes('companion')
-    ) {
-      return <Navigate replace to="/shop?tab=companions&required=1" />
-    }
     return (
       <div className="grid min-h-screen place-items-center bg-background p-6">
         <ErrorState title="Could not prepare challenge" description={start.error.message} />
@@ -74,5 +61,5 @@ export function ChallengeStartPage({ mode = 'start' }: { mode?: ChallengeStartMo
   }
 
   const copy = loadingCopy[mode]
-  return <LoadingState companionSlug={companionSlug} description={copy.description} label={copy.label} variant="screen" />
+  return <LoadingState description={copy.description} label={copy.label} showCompanion={false} variant="screen" />
 }

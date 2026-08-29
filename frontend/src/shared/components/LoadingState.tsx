@@ -77,12 +77,14 @@ export function LoadingState({
   variant = 'panel',
   className,
   companionSlug,
+  showCompanion = true,
 }: {
   label?: string
   description?: string
   variant?: LoadingStateVariant
   className?: string
   companionSlug?: string | null
+  showCompanion?: boolean
 }) {
   const isCompact = variant === 'compact'
 
@@ -100,7 +102,7 @@ export function LoadingState({
       role="status"
     >
       <div className={cn('relative flex w-full max-w-md flex-col items-center', frameClass[variant])}>
-        <CompanionRunLoader companionSlug={companionSlug} variant={variant} />
+        {showCompanion ? <CompanionRunLoader companionSlug={companionSlug} variant={variant} /> : null}
 
         <div className={cn('git-it-loading-state__copy grid gap-1', isCompact ? 'text-xs' : 'text-sm')}>
           <p className="font-semibold text-foreground">{label}</p>

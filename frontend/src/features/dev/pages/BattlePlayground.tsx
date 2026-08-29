@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { BattleStage } from '@/shared/battle/components/BattleStage'
-import { clientAdventureRoster, clientChallengeRoster, deriveBattleEventsFromCommandOutcome } from '@/shared/battle/deriveBattleEvents'
+import { clientAdventureRoster, deriveBattleEventsFromCommandOutcome } from '@/shared/battle/deriveBattleEvents'
 import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 
 /**
@@ -12,24 +12,23 @@ import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
  */
 function BattlePlayground() {
   const director = useBattleDirector()
-  const [variant, setVariant] = useState<'adventure' | 'challenge'>('adventure')
   const [latency, setLatency] = useState(450)
   const [skill, setSkill] = useState('commit')
   const [playerHp, setPlayerHp] = useState(8)
   const [levelIndex, setLevelIndex] = useState(0)
-  const encounterRef = useRef(0)
 
   const maxHp = 8
 
   useEffect(() => {
-    director.setEncounter(
-      variant === 'adventure' ? clientAdventureRoster(0, 6) : clientChallengeRoster(0, 8),
-      { entry: 'run', playerHp, playerMaxHp: maxHp },
-    )
-    // Restage on variant flip. The director object is intentionally excluded
-    // because it is an imperative facade.
+    director.setEncounter(clientAdventureRoster(0, 6), {
+      entry: 'run',
+      playerHp,
+      playerMaxHp: maxHp,
+    })
+    // The director object is intentionally excluded because it is an
+    // imperative facade.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [variant])
+  }, [])
 
   function submit(kind: 'hit' | 'miss' | 'solve' | 'diagnostic') {
     director.onAttackStart()
@@ -58,12 +57,13 @@ function BattlePlayground() {
       if (kind === 'solve') {
         const nextIndex = levelIndex + 1
         setLevelIndex(nextIndex)
-        encounterRef.current = nextIndex
         setPlayerHp(maxHp)
-        director.setEncounter(
-          variant === 'adventure' ? clientAdventureRoster(nextIndex, 6) : clientChallengeRoster(nextIndex, 8),
-          { travel: variant === 'adventure', entry: variant === 'adventure' ? 'run' : 'none', playerHp: maxHp, playerMaxHp: maxHp },
-        )
+        director.setEncounter(clientAdventureRoster(nextIndex, 6), {
+          travel: true,
+          entry: 'run',
+          playerHp: maxHp,
+          playerMaxHp: maxHp,
+        })
       }
     }, latency)
   }
@@ -73,15 +73,12 @@ function BattlePlayground() {
       <h1 className="mb-3 text-lg font-semibold">Battle playground</h1>
       <BattleStage
         director={director}
-        variant={variant}
         className="battle-playground-stage"
         stage={null}
         groundFooter={
-          variant === 'adventure' ? (
-            <div className="h-1.5 rounded-full bg-primary/20">
-              <div className="h-full w-1/3 rounded-full bg-primary/70" />
-            </div>
-          ) : undefined
+          <div className="h-1.5 rounded-full bg-primary/20">
+            <div className="h-full w-1/3 rounded-full bg-primary/70" />
+          </div>
         }
       />
 
@@ -103,10 +100,11 @@ function BattlePlayground() {
           onClick={() => {
             setPlayerHp(maxHp)
             setLevelIndex(0)
-            director.setEncounter(
-              variant === 'adventure' ? clientAdventureRoster(0, 6) : clientChallengeRoster(0, 8),
-              { entry: 'run', playerHp: maxHp, playerMaxHp: maxHp },
-            )
+            director.setEncounter(clientAdventureRoster(0, 6), {
+              entry: 'run',
+              playerHp: maxHp,
+              playerMaxHp: maxHp,
+            })
           }}
         >
           Reset
@@ -145,15 +143,6 @@ function BattlePlayground() {
           ].map((s) => (
             <option key={s}>{s}</option>
           ))}
-        </select>
-
-        <select
-          className="rounded border border-border bg-background px-2 py-1"
-          value={variant}
-          onChange={(e) => setVariant(e.target.value as 'adventure' | 'challenge')}
-        >
-          <option value="adventure">adventure</option>
-          <option value="challenge">challenge</option>
         </select>
 
         <span className="rounded border border-border/70 px-3 py-1 text-muted-foreground">

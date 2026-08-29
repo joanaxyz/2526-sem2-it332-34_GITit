@@ -12,19 +12,11 @@ from progress.models import AdventureLevelCompletion, ChallengeTrialCompletion
 
 
 def make_user(django_user_model, username="challenger"):
-    user = django_user_model.objects.create_user(
+    return django_user_model.objects.create_user(
         username=username,
         email=f"{username}@example.com",
         password="pass12345",
     )
-    # Starting a challenge requires an owned companion; grant one directly so
-    # these runtime tests don't have to go through the shop purchase flow.
-    from shop.models import Entitlement
-
-    Entitlement.objects.get_or_create(
-        player=get_or_create_player(user), kind="companion", slug="blue"
-    )
-    return user
 
 
 def test_challenge_history_cache_key_changes_when_database_id_is_reused():

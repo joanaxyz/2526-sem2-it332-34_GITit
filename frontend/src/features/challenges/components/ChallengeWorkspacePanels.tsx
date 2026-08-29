@@ -1,10 +1,12 @@
 import type { CSSProperties, PointerEvent, RefObject } from 'react'
 
 import { ChallengeContextPanel } from '@/features/challenges/components/ChallengeContextPanel'
+import { ChallengeDagStage } from '@/features/challenges/components/ChallengeDagStage'
 import { ChallengeDagLegend } from '@/features/challenges/components/ChallengeDagLegend'
 import { ContextualFeedbackPanel } from '@/features/challenges/components/ContextualFeedbackPanel'
 import { DAG_ZOOM_KEY } from '@/features/challenges/components/challengeWorkspaceLayout'
 import type { ChallengeRun } from '@/features/challenges/types'
+import type { ChallengeDagAnimationController } from '@/features/challenges/hooks/useChallengeDagAnimation'
 import { LiveDagPanel } from '@/shared/level/components/LiveDagPanel'
 import { ProjectStructurePanel } from '@/shared/level/components/ProjectStructurePanel'
 import { ResizeHandle } from '@/shared/level/components/ResizeHandle'
@@ -76,6 +78,7 @@ export function ChallengeSidebar({
 
 export function ChallengeDiagramStage({
   run,
+  animation,
   hasTargetDiagram,
   diagramGridRef,
   diagramGridStyle,
@@ -84,6 +87,7 @@ export function ChallengeDiagramStage({
   onResetDiagramResize,
 }: {
   run: ChallengeRun
+  animation: ChallengeDagAnimationController
   hasTargetDiagram: boolean
   diagramGridRef: RefObject<HTMLDivElement | null>
   diagramGridStyle: CSSProperties
@@ -101,15 +105,11 @@ export function ChallengeDiagramStage({
       style={diagramGridStyle}
     >
       <div className="gameplay-pane" data-tour-target="live-dag">
-        <LiveDagPanel
-          title="Live DAG"
-          badge="live"
+        <ChallengeDagStage
           snapshot={run.repository_state}
-          className="flex h-full min-h-0 flex-col"
-          contentClassName="h-full min-h-0 flex-1"
+          animation={animation}
           zoomStorageKey={DAG_ZOOM_KEY}
-          animateChanges
-          layoutDirection="horizontal"
+          className="h-full min-h-0"
         />
       </div>
       {hasTargetDiagram ? (
@@ -125,12 +125,12 @@ export function ChallengeDiagramStage({
           <div className="gameplay-pane" data-tour-target="expected-state">
             <LiveDagPanel
               title="Expected State"
-              badge="target"
               snapshot={run.expected_state!}
               className="flex h-full min-h-0 flex-col"
               contentClassName="h-full min-h-0 flex-1"
               zoomStorageKey={DAG_ZOOM_KEY}
-              layoutDirection="horizontal"
+              fitViewPadding={0.16}
+              layoutDirection="vertical"
             />
           </div>
         </>
@@ -147,6 +147,7 @@ export function ChallengeTerminalStage({
   terminalGridRef,
   terminalGridStyle,
   mutationPending,
+  dagAnimating,
   onBeginTerminalPaneResize,
   onKeyboardTerminalPaneResize,
   onResetTerminalPaneResize,
@@ -158,6 +159,7 @@ export function ChallengeTerminalStage({
   terminalGridRef: RefObject<HTMLDivElement | null>
   terminalGridStyle: CSSProperties
   mutationPending: boolean
+  dagAnimating: boolean
   onBeginTerminalPaneResize: ResizeStart
   onKeyboardTerminalPaneResize: (delta: number) => void
   onResetTerminalPaneResize: () => void
@@ -178,7 +180,7 @@ export function ChallengeTerminalStage({
           lines={lines}
           prompt={prompt}
           disabled={run.status !== 'started'}
-          runDisabled={mutationPending}
+          runDisabled={mutationPending || dagAnimating}
           processing={mutationPending}
           className="h-full"
           onCommand={onCommand}

@@ -18,10 +18,10 @@ export type BattleEncounterSetup = {
 /**
  * Stages one visual encounter per encounter/roster identity.
  *
- * Adventure and challenge adapters still own their distinct roster rules and
- * feature UI. This hook owns the shared director lifecycle: synchronizing the
- * StoryWorld, guarding against StrictMode duplicate staging, and replacing the
- * encounter only when its stable identity changes.
+ * Adventure adapters own their roster rules and feature UI. This hook owns the
+ * director lifecycle: synchronizing the StoryWorld, guarding against StrictMode
+ * duplicate staging, and replacing the encounter only when its stable identity
+ * changes.
  */
 export function useBattleEncounterSetup({
   director,

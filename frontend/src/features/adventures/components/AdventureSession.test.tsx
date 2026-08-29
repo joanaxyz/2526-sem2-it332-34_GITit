@@ -65,6 +65,14 @@ vi.mock('@/features/adventures/components/AdventureLevelLibraryModal', () => ({
   ),
 }))
 
+vi.mock('@/features/adventures/components/AdventureWorkspaceTour', () => ({
+  AdventureWorkspaceTour: ({ onClose }: { onClose: () => void }) => (
+    <div aria-label="Adventure field guide" role="dialog">
+      <button type="button" onClick={onClose}>Finish Adventure tour</button>
+    </div>
+  ),
+}))
+
 vi.mock('@/features/adventures/components/AdventureOutcomeModal', () => ({
   AdventureOutcomeModal: ({
     open,
@@ -191,7 +199,39 @@ function renderSession(queryClient: QueryClient) {
 describe('AdventureSession', () => {
   afterEach(() => {
     cleanup()
+    window.localStorage.clear()
     vi.clearAllMocks()
+  })
+
+  it('opens once for a first Adventure without suppressing the Challenge tour', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+    mocks.useAdventureRun.mockReturnValue({
+      query: { isLoading: false, isError: false, data: retryRun },
+      lines: [],
+      createFile: { isPending: false, mutateAsync: vi.fn() },
+      writeFile: { isPending: false, mutateAsync: vi.fn() },
+      renameFile: { isPending: false, mutateAsync: vi.fn() },
+      deleteFile: { isPending: false, mutateAsync: vi.fn() },
+    })
+    mocks.useStartAdventureRun.mockReturnValue({ isPending: false, mutate: vi.fn() })
+
+    renderSession(queryClient)
+
+    const guide = await screen.findByRole('dialog', { name: 'Adventure field guide' })
+    fireEvent.click(screen.getByRole('button', { name: /finish adventure tour/i }))
+
+    expect(guide).not.toBeInTheDocument()
+    expect(
+      window.localStorage.getItem('git-it-practice-workspace-tour:v2:guest:adventure'),
+    ).toBe('seen')
+    expect(
+      window.localStorage.getItem('git-it-practice-workspace-tour:v2:guest:challenge'),
+    ).toBeNull()
   })
 
   it('starts retry runs in place so the battle transition can stay mounted', async () => {
