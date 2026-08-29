@@ -1,0 +1,13 @@
+{
+  "captured_at": "2026-08-28T18:49:23Z",
+  "implementation": "planned summary-only selector and prefetched published-wave reuse",
+  "command": "$env:COMMAND_LATENCY_SAMPLES='20'; $env:COMMAND_LATENCY_REVERSE_LANES='true'; python -m pytest scripts/profile_command_latency.py::test_profile_steady_state -q -s",
+  "pytest_result": "1 passed in 14.23s",
+  "results": [
+    {"cold": false, "lane": "challenge_completion", "precondition_fingerprint": "e7c94051191fe206b1fce66dd646ed2e1acb9c07b08e7af0bba92d84b2034196", "queries": {"max": 38, "p50": 38.0, "p95": 38.0}, "request_ms": {"max": 46.83, "p50": 32.79, "p95": 41.68}, "response_bytes": {"max": 2896, "p50": 2896.0, "p95": 2896.0}, "samples": 20},
+    {"cold": false, "lane": "challenge_diagnostic", "precondition_fingerprint": "aa4c3c9ef3eb8ab1a704d09649bcf5434163a3d1a77ac5a8ed6110873cb08e0c", "queries": {"max": 5, "p50": 5.0, "p95": 5.0}, "request_ms": {"max": 16.98, "p50": 11.66, "p95": 16.58}, "response_bytes": {"max": 2083, "p50": 2083.0, "p95": 2083.0}, "samples": 20},
+    {"cold": false, "lane": "adventure_completion", "precondition_fingerprint": "95aad9725997ed669cec136eccb38f9b6f48ff90acbacd37146cbec005e24d95", "queries": {"max": 29, "p50": 29.0, "p95": 29.0}, "request_ms": {"max": 67.25, "p50": 41.29, "p95": 59.96}, "response_bytes": {"max": 1350, "p50": 1350.0, "p95": 1350.0}, "samples": 20},
+    {"cold": false, "lane": "adventure_wave_advance", "precondition_fingerprint": "d2ec89182f164903aae533597016c213cc9ac76f2abde5783661b3464ec6a64d", "queries": {"max": 23, "p50": 23.0, "p95": 23.0}, "request_ms": {"max": 48.89, "p50": 24.81, "p95": 38.73}, "response_bytes": {"max": 2816, "p50": 2816.0, "p95": 2816.0}, "samples": 20},
+    {"cold": false, "lane": "adventure_diagnostic", "precondition_fingerprint": "d3d5c574643bb7abba7cf84d5586b03d6472043705572f3901d7107e4385d8a8", "queries": {"max": 8, "p50": 8.0, "p95": 8.0}, "request_ms": {"max": 20.37, "p50": 13.93, "p95": 19.32}, "response_bytes": {"max": 1432, "p50": 1431.0, "p95": 1432.0}, "samples": 20}
+  ]
+}

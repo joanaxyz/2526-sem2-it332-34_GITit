@@ -119,6 +119,20 @@ ruff check .
 python -m pytest -q
 ```
 
+Command-submit latency profiling is opt-in and uses disposable pytest data. Run
+the two cold probes in separate processes, then the warmed multi-sample lanes:
+
+```powershell
+cd backend
+$env:COMMAND_LATENCY_SAMPLES='15'
+python -m pytest scripts/profile_command_latency.py::test_profile_adventure_cold -q -s
+python -m pytest scripts/profile_command_latency.py::test_profile_challenge_cold -q -s
+python -m pytest scripts/profile_command_latency.py::test_profile_steady_state -q -s
+```
+
+Set `COMMAND_LATENCY_REVERSE_LANES=true` for the order-control run. Wall-time
+results are machine-local evidence and are not CI pass/fail thresholds.
+
 Frontend:
 
 ```bash
