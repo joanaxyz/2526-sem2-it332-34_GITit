@@ -55,6 +55,10 @@
   image-rendering: auto;
 }
 
+.battle-unit-hud--enemy .battle-unit-hud__portrait {
+  transform: scaleX(-1);
+}
+
 .battle-unit-hud__portrait--fallback {
   display: grid;
   place-items: center;
