@@ -1,0 +1,1004 @@
+{
+  "command_count": 166,
+  "commands": [
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git add",
+      "name": "add",
+      "summary": "Add file contents to the index"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git am",
+      "name": "am",
+      "summary": "Apply a series of patches from a mailbox"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git archive",
+      "name": "archive",
+      "summary": "Create an archive of files from a named tree"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git bisect",
+      "name": "bisect",
+      "summary": "Use binary search to find the commit that introduced a bug"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git branch",
+      "name": "branch",
+      "summary": "List, create, or delete branches"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git bundle",
+      "name": "bundle",
+      "summary": "Move objects and refs by archive"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git checkout",
+      "name": "checkout",
+      "summary": "Switch branches or restore working tree files"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git cherry-pick",
+      "name": "cherry-pick",
+      "summary": "Apply the changes introduced by some existing commits"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git citool",
+      "name": "citool",
+      "summary": "Graphical alternative to git-commit"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git clean",
+      "name": "clean",
+      "summary": "Remove untracked files from the working tree"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git clone",
+      "name": "clone",
+      "summary": "Clone a repository into a new directory"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git commit",
+      "name": "commit",
+      "summary": "Record changes to the repository"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git describe",
+      "name": "describe",
+      "summary": "Give an object a human readable name based on an available ref"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git diff",
+      "name": "diff",
+      "summary": "Show changes between commits, commit and working tree, etc"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git fetch",
+      "name": "fetch",
+      "summary": "Download objects and refs from another repository"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git format-patch",
+      "name": "format-patch",
+      "summary": "Prepare patches for e-mail submission"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git gc",
+      "name": "gc",
+      "summary": "Cleanup unnecessary files and optimize the local repository"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git gitk",
+      "name": "gitk",
+      "summary": "The Git repository browser"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git grep",
+      "name": "grep",
+      "summary": "Print lines matching a pattern"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git gui",
+      "name": "gui",
+      "summary": "A portable graphical interface to Git"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git init",
+      "name": "init",
+      "summary": "Create an empty Git repository or reinitialize an existing one"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git log",
+      "name": "log",
+      "summary": "Show commit logs"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git maintenance",
+      "name": "maintenance",
+      "summary": "Run tasks to optimize Git repository data"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git merge",
+      "name": "merge",
+      "summary": "Join two or more development histories together"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git mv",
+      "name": "mv",
+      "summary": "Move or rename a file, a directory, or a symlink"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git notes",
+      "name": "notes",
+      "summary": "Add or inspect object notes"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git pull",
+      "name": "pull",
+      "summary": "Fetch from and integrate with another repository or a local branch"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git push",
+      "name": "push",
+      "summary": "Update remote refs along with associated objects"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git range-diff",
+      "name": "range-diff",
+      "summary": "Compare two commit ranges (e.g. two versions of a branch)"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git rebase",
+      "name": "rebase",
+      "summary": "Reapply commits on top of another base tip"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git reset",
+      "name": "reset",
+      "summary": "Reset current HEAD to the specified state"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git restore",
+      "name": "restore",
+      "summary": "Restore working tree files"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git revert",
+      "name": "revert",
+      "summary": "Revert some existing commits"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git rm",
+      "name": "rm",
+      "summary": "Remove files from the working tree and from the index"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git scalar",
+      "name": "scalar",
+      "summary": "A tool for managing large Git repositories"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git shortlog",
+      "name": "shortlog",
+      "summary": "Summarize 'git log' output"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git show",
+      "name": "show",
+      "summary": "Show various types of objects"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git sparse-checkout",
+      "name": "sparse-checkout",
+      "summary": "Reduce your working tree to a subset of tracked files"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git stash",
+      "name": "stash",
+      "summary": "Stash the changes in a dirty working directory away"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git status",
+      "name": "status",
+      "summary": "Show the working tree status"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git submodule",
+      "name": "submodule",
+      "summary": "Initialize, update or inspect submodules"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git switch",
+      "name": "switch",
+      "summary": "Switch branches"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git tag",
+      "name": "tag",
+      "summary": "Create, list, delete or verify a tag object signed with GPG"
+    },
+    {
+      "category": "Main Porcelain Commands",
+      "command": "git worktree",
+      "name": "worktree",
+      "summary": "Manage multiple working trees"
+    },
+    {
+      "category": "Ancillary Commands / Manipulators",
+      "command": "git config",
+      "name": "config",
+      "summary": "Get and set repository or global options"
+    },
+    {
+      "category": "Ancillary Commands / Manipulators",
+      "command": "git fast-export",
+      "name": "fast-export",
+      "summary": "Git data exporter"
+    },
+    {
+      "category": "Ancillary Commands / Manipulators",
+      "command": "git fast-import",
+      "name": "fast-import",
+      "summary": "Backend for fast Git data importers"
+    },
+    {
+      "category": "Ancillary Commands / Manipulators",
+      "command": "git filter-branch",
+      "name": "filter-branch",
+      "summary": "Rewrite branches"
+    },
+    {
+      "category": "Ancillary Commands / Manipulators",
+      "command": "git mergetool",
+      "name": "mergetool",
+      "summary": "Run merge conflict resolution tools to resolve merge conflicts"
+    },
+    {
+      "category": "Ancillary Commands / Manipulators",
+      "command": "git pack-refs",
+      "name": "pack-refs",
+      "summary": "Pack heads and tags for efficient repository access"
+    },
+    {
+      "category": "Ancillary Commands / Manipulators",
+      "command": "git prune",
+      "name": "prune",
+      "summary": "Prune all unreachable objects from the object database"
+    },
+    {
+      "category": "Ancillary Commands / Manipulators",
+      "command": "git reflog",
+      "name": "reflog",
+      "summary": "Manage reflog information"
+    },
+    {
+      "category": "Ancillary Commands / Manipulators",
+      "command": "git refs",
+      "name": "refs",
+      "summary": "Low-level access to refs"
+    },
+    {
+      "category": "Ancillary Commands / Manipulators",
+      "command": "git remote",
+      "name": "remote",
+      "summary": "Manage set of tracked repositories"
+    },
+    {
+      "category": "Ancillary Commands / Manipulators",
+      "command": "git repack",
+      "name": "repack",
+      "summary": "Pack unpacked objects in a repository"
+    },
+    {
+      "category": "Ancillary Commands / Manipulators",
+      "command": "git replace",
+      "name": "replace",
+      "summary": "Create, list, delete refs to replace objects"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git annotate",
+      "name": "annotate",
+      "summary": "Annotate file lines with commit information"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git blame",
+      "name": "blame",
+      "summary": "Show what revision and author last modified each line of a file"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git bugreport",
+      "name": "bugreport",
+      "summary": "Collect information for user to file a bug report"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git count-objects",
+      "name": "count-objects",
+      "summary": "Count unpacked number of objects and their disk consumption"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git diagnose",
+      "name": "diagnose",
+      "summary": "Generate a zip archive of diagnostic information"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git difftool",
+      "name": "difftool",
+      "summary": "Show changes using common diff tools"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git fsck",
+      "name": "fsck",
+      "summary": "Verifies the connectivity and validity of the objects in the database"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git gitweb",
+      "name": "gitweb",
+      "summary": "Git web interface (web frontend to Git repositories)"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git help",
+      "name": "help",
+      "summary": "Display help information about Git"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git instaweb",
+      "name": "instaweb",
+      "summary": "Instantly browse your working repository in gitweb"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git merge-tree",
+      "name": "merge-tree",
+      "summary": "Perform merge without touching index or working tree"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git rerere",
+      "name": "rerere",
+      "summary": "Reuse recorded resolution of conflicted merges"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git show-branch",
+      "name": "show-branch",
+      "summary": "Show branches and their commits"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git verify-commit",
+      "name": "verify-commit",
+      "summary": "Check the GPG signature of commits"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git verify-tag",
+      "name": "verify-tag",
+      "summary": "Check the GPG signature of tags"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git version",
+      "name": "version",
+      "summary": "Display version information about Git"
+    },
+    {
+      "category": "Ancillary Commands / Interrogators",
+      "command": "git whatchanged",
+      "name": "whatchanged",
+      "summary": "Show logs with differences each commit introduces"
+    },
+    {
+      "category": "Interacting with Others",
+      "command": "git archimport",
+      "name": "archimport",
+      "summary": "Import a GNU Arch repository into Git"
+    },
+    {
+      "category": "Interacting with Others",
+      "command": "git cvsexportcommit",
+      "name": "cvsexportcommit",
+      "summary": "Export a single commit to a CVS checkout"
+    },
+    {
+      "category": "Interacting with Others",
+      "command": "git cvsimport",
+      "name": "cvsimport",
+      "summary": "Salvage your data out of another SCM people love to hate"
+    },
+    {
+      "category": "Interacting with Others",
+      "command": "git cvsserver",
+      "name": "cvsserver",
+      "summary": "A CVS server emulator for Git"
+    },
+    {
+      "category": "Interacting with Others",
+      "command": "git imap-send",
+      "name": "imap-send",
+      "summary": "Send a collection of patches from stdin to an IMAP folder"
+    },
+    {
+      "category": "Interacting with Others",
+      "command": "git p4",
+      "name": "p4",
+      "summary": "Import from and submit to Perforce repositories"
+    },
+    {
+      "category": "Interacting with Others",
+      "command": "git quiltimport",
+      "name": "quiltimport",
+      "summary": "Applies a quilt patchset onto the current branch"
+    },
+    {
+      "category": "Interacting with Others",
+      "command": "git request-pull",
+      "name": "request-pull",
+      "summary": "Generates a summary of pending changes"
+    },
+    {
+      "category": "Interacting with Others",
+      "command": "git send-email",
+      "name": "send-email",
+      "summary": "Send a collection of patches as emails"
+    },
+    {
+      "category": "Interacting with Others",
+      "command": "git svn",
+      "name": "svn",
+      "summary": "Bidirectional operation between a Subversion repository and Git"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git apply",
+      "name": "apply",
+      "summary": "Apply a patch to files and/or to the index"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git checkout-index",
+      "name": "checkout-index",
+      "summary": "Copy files from the index to the working tree"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git commit-graph",
+      "name": "commit-graph",
+      "summary": "Write and verify Git commit-graph files"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git commit-tree",
+      "name": "commit-tree",
+      "summary": "Create a new commit object"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git hash-object",
+      "name": "hash-object",
+      "summary": "Compute object ID and optionally create an object from a file"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git index-pack",
+      "name": "index-pack",
+      "summary": "Build pack index file for an existing packed archive"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git merge-file",
+      "name": "merge-file",
+      "summary": "Run a three-way file merge"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git merge-index",
+      "name": "merge-index",
+      "summary": "Run a merge for files needing merging"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git mktag",
+      "name": "mktag",
+      "summary": "Creates a tag object with extra validation"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git mktree",
+      "name": "mktree",
+      "summary": "Build a tree-object from ls-tree formatted text"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git multi-pack-index",
+      "name": "multi-pack-index",
+      "summary": "Write and verify multi-pack-indexes"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git pack-objects",
+      "name": "pack-objects",
+      "summary": "Create a packed archive of objects"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git prune-packed",
+      "name": "prune-packed",
+      "summary": "Remove extra objects that are already in pack files"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git read-tree",
+      "name": "read-tree",
+      "summary": "Reads tree information into the index"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git replay",
+      "name": "replay",
+      "summary": "EXPERIMENTAL: Replay commits on a new base, works with bare repos too"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git symbolic-ref",
+      "name": "symbolic-ref",
+      "summary": "Read, modify and delete symbolic refs"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git unpack-objects",
+      "name": "unpack-objects",
+      "summary": "Unpack objects from a packed archive"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git update-index",
+      "name": "update-index",
+      "summary": "Register file contents in the working tree to the index"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git update-ref",
+      "name": "update-ref",
+      "summary": "Update the object name stored in a ref safely"
+    },
+    {
+      "category": "Low-level Commands / Manipulators",
+      "command": "git write-tree",
+      "name": "write-tree",
+      "summary": "Create a tree object from the current index"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git cat-file",
+      "name": "cat-file",
+      "summary": "Provide contents or details of repository objects"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git cherry",
+      "name": "cherry",
+      "summary": "Find commits yet to be applied to upstream"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git diff-files",
+      "name": "diff-files",
+      "summary": "Compares files in the working tree and the index"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git diff-index",
+      "name": "diff-index",
+      "summary": "Compare a tree to the working tree or index"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git diff-tree",
+      "name": "diff-tree",
+      "summary": "Compares the content and mode of blobs found via two tree objects"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git for-each-ref",
+      "name": "for-each-ref",
+      "summary": "Output information on each ref"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git for-each-repo",
+      "name": "for-each-repo",
+      "summary": "Run a Git command on a list of repositories"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git get-tar-commit-id",
+      "name": "get-tar-commit-id",
+      "summary": "Extract commit ID from an archive created using git-archive"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git ls-files",
+      "name": "ls-files",
+      "summary": "Show information about files in the index and the working tree"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git ls-remote",
+      "name": "ls-remote",
+      "summary": "List references in a remote repository"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git ls-tree",
+      "name": "ls-tree",
+      "summary": "List the contents of a tree object"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git merge-base",
+      "name": "merge-base",
+      "summary": "Find as good common ancestors as possible for a merge"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git name-rev",
+      "name": "name-rev",
+      "summary": "Find symbolic names for given revs"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git pack-redundant",
+      "name": "pack-redundant",
+      "summary": "Find redundant pack files"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git rev-list",
+      "name": "rev-list",
+      "summary": "Lists commit objects in reverse chronological order"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git rev-parse",
+      "name": "rev-parse",
+      "summary": "Pick out and massage parameters"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git show-index",
+      "name": "show-index",
+      "summary": "Show packed archive index"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git show-ref",
+      "name": "show-ref",
+      "summary": "List references in a local repository"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git unpack-file",
+      "name": "unpack-file",
+      "summary": "Creates a temporary file with a blob's contents"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git var",
+      "name": "var",
+      "summary": "Show a Git logical variable"
+    },
+    {
+      "category": "Low-level Commands / Interrogators",
+      "command": "git verify-pack",
+      "name": "verify-pack",
+      "summary": "Validate packed Git archive files"
+    },
+    {
+      "category": "Low-level Commands / Syncing Repositories",
+      "command": "git daemon",
+      "name": "daemon",
+      "summary": "A really simple server for Git repositories"
+    },
+    {
+      "category": "Low-level Commands / Syncing Repositories",
+      "command": "git fetch-pack",
+      "name": "fetch-pack",
+      "summary": "Receive missing objects from another repository"
+    },
+    {
+      "category": "Low-level Commands / Syncing Repositories",
+      "command": "git http-backend",
+      "name": "http-backend",
+      "summary": "Server side implementation of Git over HTTP"
+    },
+    {
+      "category": "Low-level Commands / Syncing Repositories",
+      "command": "git send-pack",
+      "name": "send-pack",
+      "summary": "Push objects over Git protocol to another repository"
+    },
+    {
+      "category": "Low-level Commands / Syncing Repositories",
+      "command": "git update-server-info",
+      "name": "update-server-info",
+      "summary": "Update auxiliary info file to help dumb servers"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git check-attr",
+      "name": "check-attr",
+      "summary": "Display gitattributes information"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git check-ignore",
+      "name": "check-ignore",
+      "summary": "Debug gitignore / exclude files"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git check-mailmap",
+      "name": "check-mailmap",
+      "summary": "Show canonical names and email addresses of contacts"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git check-ref-format",
+      "name": "check-ref-format",
+      "summary": "Ensures that a reference name is well formed"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git column",
+      "name": "column",
+      "summary": "Display data in columns"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git credential",
+      "name": "credential",
+      "summary": "Retrieve and store user credentials"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git credential-cache",
+      "name": "credential-cache",
+      "summary": "Helper to temporarily store passwords in memory"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git credential-store",
+      "name": "credential-store",
+      "summary": "Helper to store credentials on disk"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git fmt-merge-msg",
+      "name": "fmt-merge-msg",
+      "summary": "Produce a merge commit message"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git hook",
+      "name": "hook",
+      "summary": "Run git hooks"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git interpret-trailers",
+      "name": "interpret-trailers",
+      "summary": "Add or parse structured information in commit messages"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git mailinfo",
+      "name": "mailinfo",
+      "summary": "Extracts patch and authorship from a single e-mail message"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git mailsplit",
+      "name": "mailsplit",
+      "summary": "Simple UNIX mbox splitter program"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git merge-one-file",
+      "name": "merge-one-file",
+      "summary": "The standard helper program to use with git-merge-index"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git patch-id",
+      "name": "patch-id",
+      "summary": "Compute unique ID for a patch"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git sh-i18n",
+      "name": "sh-i18n",
+      "summary": "Git's i18n setup code for shell scripts"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git sh-setup",
+      "name": "sh-setup",
+      "summary": "Common Git shell script setup code"
+    },
+    {
+      "category": "Low-level Commands / Internal Helpers",
+      "command": "git stripspace",
+      "name": "stripspace",
+      "summary": "Remove unnecessary whitespace"
+    },
+    {
+      "category": "User-facing repository, command and file interfaces",
+      "command": "git attributes",
+      "name": "attributes",
+      "summary": "Defining attributes per path"
+    },
+    {
+      "category": "User-facing repository, command and file interfaces",
+      "command": "git cli",
+      "name": "cli",
+      "summary": "Git command-line interface and conventions"
+    },
+    {
+      "category": "User-facing repository, command and file interfaces",
+      "command": "git hooks",
+      "name": "hooks",
+      "summary": "Hooks used by Git"
+    },
+    {
+      "category": "User-facing repository, command and file interfaces",
+      "command": "git ignore",
+      "name": "ignore",
+      "summary": "Specifies intentionally untracked files to ignore"
+    },
+    {
+      "category": "User-facing repository, command and file interfaces",
+      "command": "git mailmap",
+      "name": "mailmap",
+      "summary": "Map author/committer names and/or E-Mail addresses"
+    },
+    {
+      "category": "User-facing repository, command and file interfaces",
+      "command": "git modules",
+      "name": "modules",
+      "summary": "Defining submodule properties"
+    },
+    {
+      "category": "User-facing repository, command and file interfaces",
+      "command": "git repository-layout",
+      "name": "repository-layout",
+      "summary": "Git Repository Layout"
+    },
+    {
+      "category": "User-facing repository, command and file interfaces",
+      "command": "git revisions",
+      "name": "revisions",
+      "summary": "Specifying revisions and ranges for Git"
+    },
+    {
+      "category": "Developer-facing file formats, protocols and other interfaces",
+      "command": "git format-bundle",
+      "name": "format-bundle",
+      "summary": "The bundle file format"
+    },
+    {
+      "category": "Developer-facing file formats, protocols and other interfaces",
+      "command": "git format-chunk",
+      "name": "format-chunk",
+      "summary": "Chunk-based file formats"
+    },
+    {
+      "category": "Developer-facing file formats, protocols and other interfaces",
+      "command": "git format-commit-graph",
+      "name": "format-commit-graph",
+      "summary": "Git commit-graph format"
+    },
+    {
+      "category": "Developer-facing file formats, protocols and other interfaces",
+      "command": "git format-index",
+      "name": "format-index",
+      "summary": "Git index format"
+    },
+    {
+      "category": "Developer-facing file formats, protocols and other interfaces",
+      "command": "git format-pack",
+      "name": "format-pack",
+      "summary": "Git pack format"
+    },
+    {
+      "category": "Developer-facing file formats, protocols and other interfaces",
+      "command": "git format-signature",
+      "name": "format-signature",
+      "summary": "Git cryptographic signature formats"
+    },
+    {
+      "category": "Developer-facing file formats, protocols and other interfaces",
+      "command": "git protocol-capabilities",
+      "name": "protocol-capabilities",
+      "summary": "Protocol v0 and v1 capabilities"
+    },
+    {
+      "category": "Developer-facing file formats, protocols and other interfaces",
+      "command": "git protocol-common",
+      "name": "protocol-common",
+      "summary": "Things common to various protocols"
+    },
+    {
+      "category": "Developer-facing file formats, protocols and other interfaces",
+      "command": "git protocol-http",
+      "name": "protocol-http",
+      "summary": "Git HTTP-based protocols"
+    },
+    {
+      "category": "Developer-facing file formats, protocols and other interfaces",
+      "command": "git protocol-pack",
+      "name": "protocol-pack",
+      "summary": "How packs are transferred over-the-wire"
+    },
+    {
+      "category": "Developer-facing file formats, protocols and other interfaces",
+      "command": "git protocol-v2",
+      "name": "protocol-v2",
+      "summary": "Git Wire Protocol, Version 2"
+    }
+  ],
+  "git_version": "2.47.3",
+  "schema_version": 1,
+  "source": "git help -a"
+}

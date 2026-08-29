@@ -1,0 +1,563 @@
+{
+  "id": "arcane-spire-monster-skill-effects",
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "columns": 5,
+  "rows": 5,
+  "frameCount": 25,
+  "fps": 18,
+  "monsters": {
+    "monster-01": {
+      "id": "monster-01-skill-effect",
+      "label": "Bone Archer Skill Effect",
+      "motif": "blue flaming arrow",
+      "playback": "projectile",
+      "durationMs": 520,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "fps": 18,
+      "layers": [
+        {
+          "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/effects/skill.png",
+          "fps": 18,
+          "loops": false,
+          "frameWidth": 256,
+          "frameHeight": 256,
+          "columns": 5,
+          "rows": 5,
+          "frameCount": 25,
+          "layer": "front",
+          "scale": 0.6,
+          "opacity": 1,
+          "offset_x": 0,
+          "offset_y": 0,
+          "orient_to": "travel"
+        }
+      ],
+      "anchor": "feet",
+      "motion": "charge",
+      "launchStartFrame": 5,
+      "impactStartFrame": 20,
+      "placeAnchor": {
+        "x": 0.4883,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.1562,
+        "top": 0.3867,
+        "right": 0.7852,
+        "bottom": 0.9531
+      }
+    },
+    "monster-02": {
+      "id": "monster-02-skill-effect",
+      "label": "Bone Blacksmith Skill Effect",
+      "motif": "blue flame ground crack",
+      "playback": "target",
+      "durationMs": 780,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "fps": 18,
+      "layers": [
+        {
+          "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/effects/skill.png",
+          "fps": 18,
+          "loops": false,
+          "frameWidth": 256,
+          "frameHeight": 256,
+          "columns": 5,
+          "rows": 5,
+          "frameCount": 25,
+          "layer": "front",
+          "scale": 0.82,
+          "opacity": 1,
+          "offset_x": 0,
+          "offset_y": 0,
+          "orient_to": "target-facing"
+        }
+      ],
+      "anchor": "feet",
+      "placeAnchor": {
+        "x": 0.4707,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.1836,
+        "top": 0.1797,
+        "right": 0.75,
+        "bottom": 1.0
+      },
+      "placement": "target"
+    },
+    "monster-04": {
+      "id": "monster-04-skill-effect",
+      "label": "Bone Ghost Skill Effect",
+      "motif": "blue flame ghost skull",
+      "playback": "projectile",
+      "durationMs": 600,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "fps": 18,
+      "layers": [
+        {
+          "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/effects/skill.png",
+          "fps": 18,
+          "loops": false,
+          "frameWidth": 256,
+          "frameHeight": 256,
+          "columns": 5,
+          "rows": 5,
+          "frameCount": 25,
+          "layer": "front",
+          "scale": 0.6,
+          "opacity": 1,
+          "offset_x": 0,
+          "offset_y": 0,
+          "orient_to": "travel"
+        }
+      ],
+      "anchor": "center",
+      "motion": "charge",
+      "launchStartFrame": 5,
+      "impactStartFrame": 20,
+      "placeAnchor": {
+        "x": 0.5059,
+        "y": 0.4648
+      },
+      "placeBounds": {
+        "left": 0.1602,
+        "top": 0.1445,
+        "right": 0.8477,
+        "bottom": 0.7812
+      }
+    },
+    "monster-05": {
+      "id": "monster-05-skill-effect",
+      "label": "Bone Lancer Skill Effect",
+      "motif": "blue flame pierce",
+      "playback": "target",
+      "durationMs": 720,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "fps": 18,
+      "layers": [
+        {
+          "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/effects/skill.png",
+          "fps": 18,
+          "loops": false,
+          "frameWidth": 256,
+          "frameHeight": 256,
+          "columns": 5,
+          "rows": 5,
+          "frameCount": 25,
+          "layer": "front",
+          "scale": 0.78,
+          "opacity": 1,
+          "offset_x": 0,
+          "offset_y": 0,
+          "orient_to": "target-facing"
+        }
+      ],
+      "anchor": "feet",
+      "placeAnchor": {
+        "x": 0.4922,
+        "y": 0.918
+      },
+      "placeBounds": {
+        "left": 0.043,
+        "top": 0.0859,
+        "right": 0.9297,
+        "bottom": 0.9727
+      },
+      "placement": "target"
+    },
+    "monster-06": {
+      "id": "monster-06-skill-effect",
+      "label": "Bone Necromancer Skill Effect",
+      "motif": "skeleton hands",
+      "playback": "target",
+      "durationMs": 860,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "fps": 18,
+      "layers": [
+        {
+          "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/effects/skill.png",
+          "fps": 18,
+          "loops": false,
+          "frameWidth": 256,
+          "frameHeight": 256,
+          "columns": 5,
+          "rows": 5,
+          "frameCount": 25,
+          "layer": "front",
+          "scale": 0.84,
+          "opacity": 1,
+          "offset_x": 0,
+          "offset_y": 0,
+          "orient_to": "target-facing"
+        }
+      ],
+      "anchor": "feet",
+      "placeAnchor": {
+        "x": 0.4629,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.043,
+        "top": 0.1367,
+        "right": 0.8828,
+        "bottom": 1.0
+      },
+      "placement": "target"
+    },
+    "monster-07": {
+      "id": "monster-07-skill-effect",
+      "label": "Bone Soldier Skill Effect",
+      "motif": "blue flame slash",
+      "playback": "target",
+      "durationMs": 680,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "fps": 18,
+      "layers": [
+        {
+          "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/effects/skill.png",
+          "fps": 18,
+          "loops": false,
+          "frameWidth": 256,
+          "frameHeight": 256,
+          "columns": 5,
+          "rows": 5,
+          "frameCount": 25,
+          "layer": "front",
+          "scale": 0.72,
+          "opacity": 1,
+          "offset_x": 0,
+          "offset_y": 0,
+          "orient_to": "target-facing"
+        }
+      ],
+      "anchor": "center",
+      "placeAnchor": {
+        "x": 0.5312,
+        "y": 0.4492
+      },
+      "placeBounds": {
+        "left": 0.1016,
+        "top": 0.1641,
+        "right": 0.9336,
+        "bottom": 0.8828
+      },
+      "placement": "target"
+    },
+    "monster-08": {
+      "id": "monster-08-skill-effect",
+      "label": "Cursed Lantern Skill Effect",
+      "motif": "blue flame spin",
+      "playback": "target",
+      "durationMs": 760,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "fps": 18,
+      "layers": [
+        {
+          "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/effects/skill.png",
+          "fps": 18,
+          "loops": false,
+          "frameWidth": 256,
+          "frameHeight": 256,
+          "columns": 5,
+          "rows": 5,
+          "frameCount": 25,
+          "layer": "front",
+          "scale": 0.78,
+          "opacity": 1,
+          "offset_x": 0,
+          "offset_y": 0,
+          "orient_to": "target-facing"
+        }
+      ],
+      "anchor": "center",
+      "placeAnchor": {
+        "x": 0.5117,
+        "y": 0.4785
+      },
+      "placeBounds": {
+        "left": 0.0938,
+        "top": 0.1484,
+        "right": 0.9141,
+        "bottom": 0.832
+      },
+      "placement": "caster"
+    },
+    "monster-09": {
+      "id": "monster-09-skill-effect",
+      "label": "Floating Skull Skill Effect",
+      "motif": "blue flame rain",
+      "playback": "target",
+      "durationMs": 880,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "fps": 18,
+      "layers": [
+        {
+          "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/effects/skill.png",
+          "fps": 18,
+          "loops": false,
+          "frameWidth": 256,
+          "frameHeight": 256,
+          "columns": 5,
+          "rows": 5,
+          "frameCount": 25,
+          "layer": "front",
+          "scale": 0.86,
+          "opacity": 1,
+          "offset_x": 0,
+          "offset_y": 0,
+          "orient_to": "target-facing"
+        }
+      ],
+      "anchor": "feet",
+      "placeAnchor": {
+        "x": 0.4629,
+        "y": 0.9023
+      },
+      "placeBounds": {
+        "left": 0.0391,
+        "top": 0.0586,
+        "right": 0.8906,
+        "bottom": 0.9336
+      },
+      "placement": "target"
+    },
+    "monster-10": {
+      "id": "monster-10-skill-effect",
+      "label": "Ghost Lady Skill Effect",
+      "motif": "blue flame chains",
+      "playback": "target",
+      "durationMs": 900,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "fps": 18,
+      "layers": [
+        {
+          "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/effects/skill-back.png",
+          "fps": 18,
+          "loops": false,
+          "frameWidth": 256,
+          "frameHeight": 256,
+          "columns": 5,
+          "rows": 5,
+          "frameCount": 25,
+          "layer": "back",
+          "scale": 0.907,
+          "opacity": 0.82,
+          "offset_x": 0,
+          "offset_y": 14,
+          "orient_to": "target-facing"
+        },
+        {
+          "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/effects/skill.png",
+          "fps": 18,
+          "loops": false,
+          "frameWidth": 256,
+          "frameHeight": 256,
+          "columns": 5,
+          "rows": 5,
+          "frameCount": 25,
+          "layer": "front",
+          "scale": 0.84,
+          "opacity": 1,
+          "offset_x": 0,
+          "offset_y": 0,
+          "orient_to": "target-facing"
+        }
+      ],
+      "anchor": "feet",
+      "placeAnchor": {
+        "x": 0.4316,
+        "y": 0.9297
+      },
+      "placeBounds": {
+        "left": 0.0664,
+        "top": 0.1484,
+        "right": 0.9609,
+        "bottom": 0.9531
+      },
+      "placement": "target"
+    },
+    "monster-11": {
+      "id": "monster-11-skill-effect",
+      "label": "Lich King Skill Effect",
+      "motif": "blue flame stab",
+      "playback": "target",
+      "durationMs": 920,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "fps": 18,
+      "layers": [
+        {
+          "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/effects/skill-back.png",
+          "fps": 18,
+          "loops": false,
+          "frameWidth": 256,
+          "frameHeight": 256,
+          "columns": 5,
+          "rows": 5,
+          "frameCount": 25,
+          "layer": "back",
+          "scale": 0.972,
+          "opacity": 0.82,
+          "offset_x": 0,
+          "offset_y": 14,
+          "orient_to": "target-facing"
+        },
+        {
+          "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/effects/skill.png",
+          "fps": 18,
+          "loops": false,
+          "frameWidth": 256,
+          "frameHeight": 256,
+          "columns": 5,
+          "rows": 5,
+          "frameCount": 25,
+          "layer": "front",
+          "scale": 0.9,
+          "opacity": 1,
+          "offset_x": 0,
+          "offset_y": 0,
+          "orient_to": "target-facing"
+        }
+      ],
+      "anchor": "feet",
+      "placeAnchor": {
+        "x": 0.502,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.0938,
+        "top": 0.043,
+        "right": 0.918,
+        "bottom": 1.0
+      },
+      "placement": "target"
+    },
+    "monster-12": {
+      "id": "monster-12-skill-effect",
+      "label": "Two Headed Hound Skill Effect",
+      "motif": "blue wolf fang bite",
+      "playback": "target",
+      "durationMs": 700,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "fps": 18,
+      "layers": [
+        {
+          "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/effects/skill.png",
+          "fps": 18,
+          "loops": false,
+          "frameWidth": 256,
+          "frameHeight": 256,
+          "columns": 5,
+          "rows": 5,
+          "frameCount": 25,
+          "layer": "front",
+          "scale": 0.74,
+          "opacity": 1,
+          "offset_x": 0,
+          "offset_y": 0,
+          "orient_to": "target-facing"
+        }
+      ],
+      "anchor": "center",
+      "placeAnchor": {
+        "x": 0.5273,
+        "y": 0.4922
+      },
+      "placeBounds": {
+        "left": 0.1758,
+        "top": 0.0547,
+        "right": 1.0,
+        "bottom": 0.8789
+      },
+      "placement": "target"
+    },
+    "monster-15": {
+      "id": "monster-15-skill-effect",
+      "label": "Zombe Boy Skill Effect",
+      "motif": "blue zombie bite",
+      "playback": "target",
+      "durationMs": 660,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "fps": 18,
+      "layers": [
+        {
+          "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/effects/skill.png",
+          "fps": 18,
+          "loops": false,
+          "frameWidth": 256,
+          "frameHeight": 256,
+          "columns": 5,
+          "rows": 5,
+          "frameCount": 25,
+          "layer": "front",
+          "scale": 0.62,
+          "opacity": 1,
+          "offset_x": 0,
+          "offset_y": 0,
+          "orient_to": "target-facing"
+        }
+      ],
+      "anchor": "center",
+      "placeAnchor": {
+        "x": 0.5723,
+        "y": 0.4961
+      },
+      "placeBounds": {
+        "left": 0.1133,
+        "top": 0.1328,
+        "right": 1.0,
+        "bottom": 0.8164
+      },
+      "placement": "target"
+    }
+  }
+}

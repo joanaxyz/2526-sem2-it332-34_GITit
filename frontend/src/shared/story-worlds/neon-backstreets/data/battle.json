@@ -1,0 +1,12 @@
+{
+  "backdrop": {
+    "src": "/cosmetics/story-worlds/neon-backstreets/backgrounds/battle/chapter-01.png",
+    "fps": 1,
+    "loops": false,
+    "frameWidth": 2000,
+    "frameHeight": 512,
+    "columns": 1,
+    "rows": 1,
+    "frameCount": 1
+  }
+}

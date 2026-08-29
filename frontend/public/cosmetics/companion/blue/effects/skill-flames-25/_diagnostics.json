@@ -1,0 +1,2226 @@
+{
+  "init": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      36,
+      49,
+      1278,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      120.5,
+      169.0,
+      114.0,
+      170.5
+    ],
+    "frameEnergyAnchorRange": [
+      119.97,
+      157.14,
+      125.17,
+      184.18
+    ],
+    "projectileHandEnergyAnchorRange": [
+      125.07,
+      132.23,
+      125.02,
+      129.9
+    ],
+    "projectileFlightNoseAnchorRange": [
+      186,
+      206,
+      131,
+      134
+    ],
+    "projectileSettleEnergyAnchorRange": [
+      118,
+      138,
+      176,
+      220
+    ],
+    "registration": {
+      "targetAnchor": [
+        199.68,
+        133.12
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        76,
+        177,
+        134,
+        176
+      ],
+      "appliedShiftRange": [
+        -6,
+        42,
+        -30,
+        57
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 23,
+      "lowConfidenceFrames": 2,
+      "method": "hand-center anchor until frame 9, projectile nose anchor through frame 14, feet anchor for impact/dissipate frames (bounds-clamped; authored scale preserved)",
+      "projectileLaunchStartFrame": 10,
+      "projectileSettleStartFrame": 15,
+      "projectileHandAnchor": [
+        128.0,
+        128.0
+      ],
+      "projectileFlightAnchor": [
+        199.68,
+        133.12
+      ],
+      "projectileSettleAnchor": [
+        128.0,
+        220.16
+      ]
+    }
+  },
+  "clone": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      13,
+      76,
+      1248,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      93.0,
+      145.0,
+      121.5,
+      187.0
+    ],
+    "frameEnergyAnchorRange": [
+      119.69,
+      167.72,
+      119.8,
+      204.04
+    ],
+    "projectileHandEnergyAnchorRange": [
+      117.87,
+      133.15,
+      119.9,
+      135.43
+    ],
+    "projectileFlightNoseAnchorRange": [
+      198,
+      202,
+      132,
+      134
+    ],
+    "projectileSettleEnergyAnchorRange": [
+      120,
+      133,
+      184,
+      221
+    ],
+    "registration": {
+      "targetAnchor": [
+        199.68,
+        133.12
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        109.874,
+        194,
+        111,
+        169
+      ],
+      "appliedShiftRange": [
+        -30,
+        23,
+        -13,
+        58
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 19,
+      "lowConfidenceFrames": 6,
+      "method": "hand-center anchor until frame 9, projectile nose anchor through frame 14, feet anchor for impact/dissipate frames (bounds-clamped; authored scale preserved)",
+      "projectileLaunchStartFrame": 10,
+      "projectileSettleStartFrame": 15,
+      "projectileHandAnchor": [
+        128.0,
+        128.0
+      ],
+      "projectileFlightAnchor": [
+        199.68,
+        133.12
+      ],
+      "projectileSettleAnchor": [
+        128.0,
+        220.16
+      ]
+    }
+  },
+  "status": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      11,
+      69,
+      1238,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      113.5,
+      136.5,
+      102.5,
+      141.0
+    ],
+    "frameEnergyAnchorRange": [
+      119.78,
+      139.36,
+      112.47,
+      133.35
+    ],
+    "frameRegistrationAnchorRange": [
+      119.78,
+      139.36,
+      112.47,
+      133.35
+    ],
+    "registration": {
+      "targetAnchor": [
+        128.0,
+        128.0
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        106.781,
+        140.356,
+        102.469,
+        161.676
+      ],
+      "appliedShiftRange": [
+        -3,
+        13,
+        -31,
+        18
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 14,
+      "lowConfidenceFrames": 11,
+      "method": "body-centered: energy core registered to cell centre (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "config": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      35,
+      34,
+      1253,
+      1266
+    ],
+    "frameBBoxCenterRange": [
+      123.5,
+      148.0,
+      119.0,
+      151.5
+    ],
+    "frameEnergyAnchorRange": [
+      123.67,
+      133.69,
+      119.46,
+      135.4
+    ],
+    "frameRegistrationAnchorRange": [
+      123.67,
+      133.69,
+      119.46,
+      135.4
+    ],
+    "registration": {
+      "targetAnchor": [
+        128.0,
+        128.0
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        88.862,
+        130.937,
+        73.456,
+        151.298
+      ],
+      "appliedShiftRange": [
+        2,
+        35,
+        -22,
+        49
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 18,
+      "lowConfidenceFrames": 7,
+      "method": "body-centered: energy core registered to cell centre (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "log": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      12,
+      43,
+      1247,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      112.5,
+      144.0,
+      118.5,
+      147.5
+    ],
+    "frameEnergyAnchorRange": [
+      120.12,
+      134.17,
+      109.04,
+      132.37
+    ],
+    "frameRegistrationAnchorRange": [
+      120.12,
+      134.17,
+      109.04,
+      132.37
+    ],
+    "registration": {
+      "targetAnchor": [
+        128.0,
+        128.0
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        97.983,
+        143.174,
+        96.484,
+        157.757
+      ],
+      "appliedShiftRange": [
+        -11,
+        23,
+        -28,
+        29
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 15,
+      "lowConfidenceFrames": 10,
+      "method": "body-centered: energy core registered to cell centre (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "show": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      45,
+      116,
+      1242,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      119.0,
+      130.5,
+      145.5,
+      204.5
+    ],
+    "frameEnergyAnchorRange": [
+      120.3,
+      127.62,
+      158.54,
+      210.52
+    ],
+    "frameRegistrationAnchorRange": [
+      120.3,
+      127.62,
+      158.54,
+      210.52
+    ],
+    "registration": {
+      "targetAnchor": [
+        123,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        112,
+        132,
+        151,
+        175
+      ],
+      "appliedShiftRange": [
+        -7,
+        9,
+        41,
+        51
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 18,
+      "lowConfidenceFrames": 7,
+      "method": "feet-planted base on ground line when bounds allow, core-x centred (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "diff": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      34,
+      46,
+      1244,
+      1272
+    ],
+    "frameBBoxCenterRange": [
+      107.5,
+      151.5,
+      108.0,
+      147.0
+    ],
+    "frameEnergyAnchorRange": [
+      121.32,
+      174.05,
+      124.73,
+      133.55
+    ],
+    "projectileHandEnergyAnchorRange": [
+      120.93,
+      133.36,
+      124.96,
+      131.38
+    ],
+    "projectileFlightNoseAnchorRange": [
+      198,
+      202,
+      133,
+      133
+    ],
+    "projectileSettleEnergyAnchorRange": [
+      123.8,
+      132.15,
+      124.84,
+      130.55
+    ],
+    "registration": {
+      "targetAnchor": [
+        199.68,
+        133.12
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        103.871,
+        180,
+        96.837,
+        155.381
+      ],
+      "appliedShiftRange": [
+        -11,
+        31,
+        -24,
+        28
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 18,
+      "lowConfidenceFrames": 7,
+      "method": "hand-center anchor until frame 9, projectile nose anchor through frame 14, center anchor for impact/dissipate frames (bounds-clamped; authored scale preserved)",
+      "projectileLaunchStartFrame": 10,
+      "projectileSettleStartFrame": 15,
+      "projectileHandAnchor": [
+        128.0,
+        128.0
+      ],
+      "projectileFlightAnchor": [
+        199.68,
+        133.12
+      ],
+      "projectileSettleAnchor": [
+        128.0,
+        128.0
+      ]
+    }
+  },
+  "add": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      27,
+      40,
+      1271,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      124.5,
+      153.0,
+      99.0,
+      167.5
+    ],
+    "frameEnergyAnchorRange": [
+      125.2,
+      161.39,
+      119.83,
+      194.47
+    ],
+    "projectileHandEnergyAnchorRange": [
+      126.54,
+      129.77,
+      126.79,
+      129.37
+    ],
+    "projectileFlightNoseAnchorRange": [
+      186,
+      204,
+      128,
+      158
+    ],
+    "projectileSettleEnergyAnchorRange": [
+      119,
+      131,
+      188,
+      221
+    ],
+    "registration": {
+      "targetAnchor": [
+        199.68,
+        133.12
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        76,
+        199,
+        150,
+        197
+      ],
+      "appliedShiftRange": [
+        1,
+        43,
+        -39,
+        36
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 22,
+      "lowConfidenceFrames": 3,
+      "method": "hand-center anchor until frame 2, projectile nose anchor through frame 15, feet anchor for impact/dissipate frames (bounds-clamped; authored scale preserved)",
+      "projectileLaunchStartFrame": 3,
+      "projectileSettleStartFrame": 16,
+      "projectileHandAnchor": [
+        128.0,
+        128.0
+      ],
+      "projectileFlightAnchor": [
+        199.68,
+        133.12
+      ],
+      "projectileSettleAnchor": [
+        128.0,
+        220.16
+      ]
+    }
+  },
+  "commit": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      16,
+      35,
+      1261,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      105.0,
+      141.0,
+      129.5,
+      187.5
+    ],
+    "frameEnergyAnchorRange": [
+      109.6,
+      130.36,
+      145.88,
+      213.74
+    ],
+    "frameRegistrationAnchorRange": [
+      109.6,
+      130.36,
+      145.88,
+      213.74
+    ],
+    "registration": {
+      "targetAnchor": [
+        118,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        92,
+        143,
+        191,
+        217
+      ],
+      "appliedShiftRange": [
+        -22,
+        25,
+        6,
+        23
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 18,
+      "lowConfidenceFrames": 7,
+      "method": "feet-planted base on ground line when bounds allow, core-x centred (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "rm": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      48,
+      79,
+      1278,
+      1249
+    ],
+    "frameBBoxCenterRange": [
+      109.5,
+      156.5,
+      119.0,
+      146.5
+    ],
+    "frameEnergyAnchorRange": [
+      112.35,
+      166.24,
+      125.6,
+      146.07
+    ],
+    "projectileHandEnergyAnchorRange": [
+      117.59,
+      139.7,
+      125.52,
+      130.71
+    ],
+    "projectileFlightNoseAnchorRange": [
+      194,
+      205,
+      130,
+      135
+    ],
+    "projectileSettleEnergyAnchorRange": [
+      113.69,
+      139.56,
+      126.18,
+      130.45
+    ],
+    "registration": {
+      "targetAnchor": [
+        199.68,
+        133.12
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        73.686,
+        187,
+        97,
+        147.422
+      ],
+      "appliedShiftRange": [
+        -4,
+        40,
+        -17,
+        33
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 21,
+      "lowConfidenceFrames": 4,
+      "method": "hand-center anchor until frame 9, projectile nose anchor through frame 15, center anchor for impact/dissipate frames (bounds-clamped; authored scale preserved)",
+      "projectileLaunchStartFrame": 10,
+      "projectileSettleStartFrame": 16,
+      "projectileHandAnchor": [
+        128.0,
+        128.0
+      ],
+      "projectileFlightAnchor": [
+        199.68,
+        133.12
+      ],
+      "projectileSettleAnchor": [
+        128.0,
+        128.0
+      ]
+    }
+  },
+  "check-ignore": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      36,
+      110,
+      1244,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      112.5,
+      132.5,
+      152.5,
+      187.5
+    ],
+    "frameEnergyAnchorRange": [
+      116.0,
+      134.67,
+      142.45,
+      205.24
+    ],
+    "frameRegistrationAnchorRange": [
+      116.0,
+      134.67,
+      142.45,
+      205.24
+    ],
+    "registration": {
+      "targetAnchor": [
+        124,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        103,
+        140,
+        141,
+        206
+      ],
+      "appliedShiftRange": [
+        -14,
+        15,
+        14,
+        75
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 20,
+      "lowConfidenceFrames": 5,
+      "method": "feet-planted base on ground line when bounds allow, core-x centred (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "restore": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      44,
+      74,
+      1235,
+      1272
+    ],
+    "frameBBoxCenterRange": [
+      118.5,
+      147.0,
+      150.0,
+      202.0
+    ],
+    "frameEnergyAnchorRange": [
+      116.03,
+      136.62,
+      172.99,
+      211.63
+    ],
+    "frameRegistrationAnchorRange": [
+      116.03,
+      136.62,
+      172.99,
+      211.63
+    ],
+    "registration": {
+      "targetAnchor": [
+        121,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        90,
+        133,
+        183,
+        237
+      ],
+      "appliedShiftRange": [
+        -9,
+        29,
+        -16,
+        36
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 17,
+      "lowConfidenceFrames": 8,
+      "method": "feet-planted base on ground line when bounds allow, core-x centred (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "branch": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      34,
+      82,
+      1257,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      105.0,
+      165.5,
+      113.5,
+      164.0
+    ],
+    "frameEnergyAnchorRange": [
+      120.73,
+      177.11,
+      111.79,
+      175.08
+    ],
+    "projectileHandEnergyAnchorRange": [
+      121.81,
+      136.12,
+      125.8,
+      132.07
+    ],
+    "projectileFlightNoseAnchorRange": [
+      188,
+      209,
+      122,
+      141
+    ],
+    "projectileSettleEnergyAnchorRange": [
+      125,
+      132,
+      160,
+      213
+    ],
+    "registration": {
+      "targetAnchor": [
+        199.68,
+        133.12
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        111,
+        182,
+        80,
+        154.598
+      ],
+      "appliedShiftRange": [
+        -9,
+        42,
+        -24,
+        81
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 22,
+      "lowConfidenceFrames": 3,
+      "method": "hand-center anchor until frame 9, projectile nose anchor through frame 18, feet anchor for impact/dissipate frames (bounds-clamped; authored scale preserved)",
+      "projectileLaunchStartFrame": 10,
+      "projectileSettleStartFrame": 19,
+      "projectileHandAnchor": [
+        128.0,
+        128.0
+      ],
+      "projectileFlightAnchor": [
+        199.68,
+        133.12
+      ],
+      "projectileSettleAnchor": [
+        128.0,
+        220.16
+      ]
+    }
+  },
+  "switch": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      23,
+      66,
+      1253,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      94.5,
+      142.5,
+      125.0,
+      204.5
+    ],
+    "frameEnergyAnchorRange": [
+      88.41,
+      145.12,
+      135.91,
+      211.1
+    ],
+    "frameRegistrationAnchorRange": [
+      88.41,
+      145.12,
+      135.91,
+      211.1
+    ],
+    "registration": {
+      "targetAnchor": [
+        130,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        93,
+        154,
+        157,
+        215
+      ],
+      "appliedShiftRange": [
+        -2,
+        -2,
+        5,
+        55
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 22,
+      "lowConfidenceFrames": 3,
+      "method": "ground-travel: base planted on ground line, forward motion preserved for runtime travel (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "checkout": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      45,
+      56,
+      1262,
+      1249
+    ],
+    "frameBBoxCenterRange": [
+      127.5,
+      157.0,
+      103.0,
+      149.0
+    ],
+    "frameEnergyAnchorRange": [
+      121.93,
+      162.84,
+      123.13,
+      155.72
+    ],
+    "projectileHandEnergyAnchorRange": [
+      123.54,
+      131.99,
+      123.1,
+      156.0
+    ],
+    "projectileFlightNoseAnchorRange": [
+      195,
+      206,
+      129,
+      135
+    ],
+    "projectileSettleEnergyAnchorRange": [
+      121.54,
+      131.87,
+      124.9,
+      132.5
+    ],
+    "registration": {
+      "targetAnchor": [
+        199.68,
+        133.12
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        76.34,
+        184,
+        119.214,
+        196.297
+      ],
+      "appliedShiftRange": [
+        2,
+        46,
+        -63,
+        7
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 21,
+      "lowConfidenceFrames": 4,
+      "method": "hand-center anchor until frame 9, projectile nose anchor through frame 15, center anchor for impact/dissipate frames (bounds-clamped; authored scale preserved)",
+      "projectileLaunchStartFrame": 10,
+      "projectileSettleStartFrame": 16,
+      "projectileHandAnchor": [
+        128.0,
+        128.0
+      ],
+      "projectileFlightAnchor": [
+        199.68,
+        133.12
+      ],
+      "projectileSettleAnchor": [
+        128.0,
+        128.0
+      ]
+    }
+  },
+  "merge": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      4,
+      80,
+      1255,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      90.5,
+      156.0,
+      118.0,
+      169.0
+    ],
+    "frameEnergyAnchorRange": [
+      113.22,
+      171.56,
+      123.79,
+      137.04
+    ],
+    "projectileHandEnergyAnchorRange": [
+      117.15,
+      134.29,
+      123.75,
+      131.24
+    ],
+    "projectileFlightNoseAnchorRange": [
+      184,
+      206,
+      128,
+      136
+    ],
+    "projectileSettleEnergyAnchorRange": [
+      114.03,
+      133.76,
+      125.11,
+      130.83
+    ],
+    "registration": {
+      "targetAnchor": [
+        199.68,
+        133.12
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        98.032,
+        200,
+        102.495,
+        147.495
+      ],
+      "appliedShiftRange": [
+        -26,
+        32,
+        -18,
+        23
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 17,
+      "lowConfidenceFrames": 8,
+      "method": "hand-center anchor until frame 9, projectile nose anchor through frame 19, center anchor for impact/dissipate frames (bounds-clamped; authored scale preserved)",
+      "projectileLaunchStartFrame": 10,
+      "projectileSettleStartFrame": 20,
+      "projectileHandAnchor": [
+        128.0,
+        128.0
+      ],
+      "projectileFlightAnchor": [
+        199.68,
+        133.12
+      ],
+      "projectileSettleAnchor": [
+        128.0,
+        128.0
+      ]
+    }
+  },
+  "merge-base": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      9,
+      47,
+      1268,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      107.0,
+      127.0,
+      136.0,
+      201.0
+    ],
+    "frameEnergyAnchorRange": [
+      114.68,
+      122.34,
+      155.72,
+      203.24
+    ],
+    "frameRegistrationAnchorRange": [
+      114.68,
+      122.34,
+      155.72,
+      203.24
+    ],
+    "registration": {
+      "targetAnchor": [
+        118,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        111,
+        132,
+        185,
+        226
+      ],
+      "appliedShiftRange": [
+        -10,
+        4,
+        -6,
+        29
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 17,
+      "lowConfidenceFrames": 8,
+      "method": "feet-planted base on ground line when bounds allow, core-x centred (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "checkout-conflict": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      42,
+      52,
+      1252,
+      1266
+    ],
+    "frameBBoxCenterRange": [
+      125.5,
+      150.0,
+      114.5,
+      146.5
+    ],
+    "frameEnergyAnchorRange": [
+      119.95,
+      132.34,
+      124.86,
+      132.49
+    ],
+    "frameRegistrationAnchorRange": [
+      119.95,
+      132.34,
+      124.86,
+      132.49
+    ],
+    "registration": {
+      "targetAnchor": [
+        128.0,
+        128.0
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        84.952,
+        129.304,
+        92.997,
+        155.073
+      ],
+      "appliedShiftRange": [
+        2,
+        35,
+        -23,
+        32
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 16,
+      "lowConfidenceFrames": 9,
+      "method": "body-centered: energy core registered to cell centre (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "diff-conflict": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      12,
+      71,
+      1241,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      118.5,
+      136.5,
+      139.0,
+      187.5
+    ],
+    "frameEnergyAnchorRange": [
+      116.79,
+      140.68,
+      130.0,
+      204.16
+    ],
+    "frameRegistrationAnchorRange": [
+      116.79,
+      140.68,
+      130.0,
+      204.16
+    ],
+    "registration": {
+      "targetAnchor": [
+        127,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        100,
+        156,
+        161,
+        223
+      ],
+      "appliedShiftRange": [
+        -9,
+        21,
+        -2,
+        56
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 19,
+      "lowConfidenceFrames": 6,
+      "method": "feet-planted base on ground line when bounds allow, core-x centred (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "ls-files": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      23,
+      101,
+      1248,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      103.5,
+      130.0,
+      154.0,
+      192.0
+    ],
+    "frameEnergyAnchorRange": [
+      105.6,
+      116.57,
+      139.87,
+      205.59
+    ],
+    "frameRegistrationAnchorRange": [
+      105.6,
+      116.57,
+      139.87,
+      205.59
+    ],
+    "registration": {
+      "targetAnchor": [
+        110,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        85,
+        130,
+        158,
+        188
+      ],
+      "appliedShiftRange": [
+        -19,
+        17,
+        17,
+        62
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 16,
+      "lowConfidenceFrames": 9,
+      "method": "feet-planted base on ground line when bounds allow, core-x centred (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "mergetool": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      20,
+      35,
+      1245,
+      1254
+    ],
+    "frameBBoxCenterRange": [
+      115.0,
+      145.5,
+      105.0,
+      144.5
+    ],
+    "frameEnergyAnchorRange": [
+      118.96,
+      134.29,
+      124.38,
+      138.83
+    ],
+    "frameRegistrationAnchorRange": [
+      118.96,
+      134.29,
+      124.38,
+      138.83
+    ],
+    "registration": {
+      "targetAnchor": [
+        128.0,
+        128.0
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        84.957,
+        139.195,
+        116.9,
+        165.562
+      ],
+      "appliedShiftRange": [
+        -10,
+        34,
+        -37,
+        8
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 19,
+      "lowConfidenceFrames": 6,
+      "method": "body-centered: energy core registered to cell centre (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "reset": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      11,
+      124,
+      1236,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      110.0,
+      134.0,
+      140.0,
+      211.0
+    ],
+    "frameEnergyAnchorRange": [
+      112.36,
+      136.22,
+      114.17,
+      212.38
+    ],
+    "frameRegistrationAnchorRange": [
+      112.36,
+      136.22,
+      114.17,
+      212.38
+    ],
+    "registration": {
+      "targetAnchor": [
+        122,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        92,
+        143,
+        161,
+        213
+      ],
+      "appliedShiftRange": [
+        -12,
+        17,
+        10,
+        50
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 18,
+      "lowConfidenceFrames": 7,
+      "method": "feet-planted base on ground line when bounds allow, core-x centred (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "revert": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      44,
+      57,
+      1243,
+      1261
+    ],
+    "frameBBoxCenterRange": [
+      125.0,
+      147.5,
+      119.5,
+      140.0
+    ],
+    "frameEnergyAnchorRange": [
+      120.47,
+      138.46,
+      122.66,
+      131.16
+    ],
+    "frameRegistrationAnchorRange": [
+      120.47,
+      138.46,
+      122.66,
+      131.16
+    ],
+    "registration": {
+      "targetAnchor": [
+        128.0,
+        128.0
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        99.104,
+        134.85,
+        102.656,
+        154.313
+      ],
+      "appliedShiftRange": [
+        -2,
+        25,
+        -25,
+        20
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 19,
+      "lowConfidenceFrames": 6,
+      "method": "body-centered: energy core registered to cell centre (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "reflog": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      46,
+      59,
+      1255,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      124.0,
+      158.5,
+      121.0,
+      156.0
+    ],
+    "frameEnergyAnchorRange": [
+      121.68,
+      152.15,
+      114.84,
+      153.97
+    ],
+    "projectileHandEnergyAnchorRange": [
+      121.94,
+      136.24,
+      126.5,
+      130.38
+    ],
+    "projectileFlightNoseAnchorRange": [
+      196,
+      203,
+      132,
+      135
+    ],
+    "projectileSettleEnergyAnchorRange": [
+      125.32,
+      135.04,
+      113.58,
+      133.05
+    ],
+    "registration": {
+      "targetAnchor": [
+        199.68,
+        133.12
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        98.35,
+        198,
+        91.791,
+        179.38
+      ],
+      "appliedShiftRange": [
+        -6,
+        29,
+        -49,
+        30
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 20,
+      "lowConfidenceFrames": 5,
+      "method": "hand-center anchor until frame 9, projectile nose anchor through frame 15, center anchor for impact/dissipate frames (bounds-clamped; authored scale preserved)",
+      "projectileLaunchStartFrame": 10,
+      "projectileSettleStartFrame": 16,
+      "projectileHandAnchor": [
+        128.0,
+        128.0
+      ],
+      "projectileFlightAnchor": [
+        199.68,
+        133.12
+      ],
+      "projectileSettleAnchor": [
+        128.0,
+        128.0
+      ]
+    }
+  },
+  "stash": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      36,
+      83,
+      1265,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      115.5,
+      147.0,
+      117.5,
+      164.0
+    ],
+    "frameEnergyAnchorRange": [
+      120.49,
+      156.39,
+      118.79,
+      132.29
+    ],
+    "projectileHandEnergyAnchorRange": [
+      120.5,
+      136.38,
+      124.12,
+      131.96
+    ],
+    "projectileFlightNoseAnchorRange": [
+      196,
+      203,
+      133,
+      133
+    ],
+    "projectileSettleEnergyAnchorRange": [
+      120.41,
+      133.5,
+      118.34,
+      130.96
+    ],
+    "registration": {
+      "targetAnchor": [
+        199.68,
+        133.12
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        106.409,
+        197,
+        78.853,
+        167.75
+      ],
+      "appliedShiftRange": [
+        -16,
+        27,
+        -39,
+        45
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 20,
+      "lowConfidenceFrames": 5,
+      "method": "hand-center anchor until frame 9, projectile nose anchor through frame 14, center anchor for impact/dissipate frames (bounds-clamped; authored scale preserved)",
+      "projectileLaunchStartFrame": 10,
+      "projectileSettleStartFrame": 15,
+      "projectileHandAnchor": [
+        128.0,
+        128.0
+      ],
+      "projectileFlightAnchor": [
+        199.68,
+        133.12
+      ],
+      "projectileSettleAnchor": [
+        128.0,
+        128.0
+      ]
+    }
+  },
+  "cherry-pick": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      5,
+      86,
+      1256,
+      1262
+    ],
+    "frameBBoxCenterRange": [
+      107.5,
+      135.5,
+      139.0,
+      196.0
+    ],
+    "frameEnergyAnchorRange": [
+      111.48,
+      133.9,
+      152.53,
+      198.6
+    ],
+    "frameRegistrationAnchorRange": [
+      111.48,
+      133.9,
+      152.53,
+      198.6
+    ],
+    "registration": {
+      "targetAnchor": [
+        126,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        97,
+        165,
+        191,
+        214
+      ],
+      "appliedShiftRange": [
+        -18,
+        11,
+        9,
+        24
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 15,
+      "lowConfidenceFrames": 10,
+      "method": "feet-planted base on ground line when bounds allow, core-x centred (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "remote": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      20,
+      43,
+      1234,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      112.0,
+      133.0,
+      134.0,
+      172.5
+    ],
+    "frameEnergyAnchorRange": [
+      110.39,
+      127.7,
+      150.37,
+      207.75
+    ],
+    "frameRegistrationAnchorRange": [
+      110.39,
+      127.7,
+      150.37,
+      207.75
+    ],
+    "registration": {
+      "targetAnchor": [
+        115,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        108,
+        130,
+        194,
+        212
+      ],
+      "appliedShiftRange": [
+        -9,
+        6,
+        9,
+        24
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 17,
+      "lowConfidenceFrames": 8,
+      "method": "feet-planted base on ground line when bounds allow, core-x centred (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "fetch": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      13,
+      52,
+      1269,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      104.5,
+      134.0,
+      114.0,
+      159.0
+    ],
+    "frameEnergyAnchorRange": [
+      122.89,
+      132.81,
+      106.29,
+      134.62
+    ],
+    "frameRegistrationAnchorRange": [
+      122.89,
+      132.81,
+      106.29,
+      134.62
+    ],
+    "registration": {
+      "targetAnchor": [
+        128.0,
+        128.0
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        118.082,
+        152.922,
+        92.293,
+        171.162
+      ],
+      "appliedShiftRange": [
+        -22,
+        7,
+        -41,
+        29
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 22,
+      "lowConfidenceFrames": 3,
+      "method": "body-centered: energy core registered to cell centre (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "pull": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      16,
+      91,
+      1221,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      106.0,
+      136.5,
+      147.5,
+      193.5
+    ],
+    "frameEnergyAnchorRange": [
+      108.5,
+      128.16,
+      134.85,
+      210.87
+    ],
+    "frameRegistrationAnchorRange": [
+      108.5,
+      128.16,
+      134.85,
+      210.87
+    ],
+    "registration": {
+      "targetAnchor": [
+        119,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        96,
+        144,
+        163,
+        211
+      ],
+      "appliedShiftRange": [
+        -20,
+        17,
+        11,
+        57
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 17,
+      "lowConfidenceFrames": 8,
+      "method": "feet-planted base on ground line when bounds allow, core-x centred (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "push": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      28,
+      60,
+      1257,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      103.0,
+      150.5,
+      143.5,
+      191.5
+    ],
+    "frameEnergyAnchorRange": [
+      90.95,
+      157.78,
+      140.29,
+      207.4
+    ],
+    "frameRegistrationAnchorRange": [
+      90.95,
+      157.78,
+      140.29,
+      207.4
+    ],
+    "registration": {
+      "targetAnchor": [
+        121,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        83,
+        156,
+        156,
+        229
+      ],
+      "appliedShiftRange": [
+        7,
+        7,
+        -8,
+        64
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 25,
+      "lowConfidenceFrames": 0,
+      "method": "ground-travel: base planted on ground line, forward motion preserved for runtime travel (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "rebase": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      25,
+      78,
+      1249,
+      1278
+    ],
+    "frameBBoxCenterRange": [
+      101.0,
+      136.5,
+      146.5,
+      200.0
+    ],
+    "frameEnergyAnchorRange": [
+      103.53,
+      119.17,
+      161.34,
+      214.02
+    ],
+    "frameRegistrationAnchorRange": [
+      103.53,
+      119.17,
+      161.34,
+      214.02
+    ],
+    "registration": {
+      "targetAnchor": [
+        108,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        89,
+        132,
+        182,
+        232
+      ],
+      "appliedShiftRange": [
+        -17,
+        14,
+        -10,
+        37
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 16,
+      "lowConfidenceFrames": 9,
+      "method": "feet-planted base on ground line when bounds allow, core-x centred (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "default": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      34,
+      73,
+      1257,
+      1257
+    ],
+    "frameBBoxCenterRange": [
+      114.0,
+      149.5,
+      112.0,
+      129.5
+    ],
+    "frameEnergyAnchorRange": [
+      122.01,
+      160.77,
+      123.43,
+      131.13
+    ],
+    "projectileHandEnergyAnchorRange": [
+      121.75,
+      135.73,
+      125.56,
+      129.4
+    ],
+    "projectileFlightNoseAnchorRange": [
+      195,
+      204,
+      133,
+      133
+    ],
+    "projectileSettleEnergyAnchorRange": [
+      123.14,
+      131.4,
+      123.81,
+      130.18
+    ],
+    "registration": {
+      "targetAnchor": [
+        199.68,
+        133.12
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        117.627,
+        193,
+        108.811,
+        149.686
+      ],
+      "appliedShiftRange": [
+        -20,
+        27,
+        -21,
+        15
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 20,
+      "lowConfidenceFrames": 5,
+      "method": "hand-center anchor until frame 9, projectile nose anchor through frame 14, center anchor for impact/dissipate frames (bounds-clamped; authored scale preserved)",
+      "projectileLaunchStartFrame": 10,
+      "projectileSettleStartFrame": 15,
+      "projectileHandAnchor": [
+        128.0,
+        128.0
+      ],
+      "projectileFlightAnchor": [
+        199.68,
+        133.12
+      ],
+      "projectileSettleAnchor": [
+        128.0,
+        128.0
+      ]
+    }
+  },
+  "miss": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      38,
+      136,
+      1217,
+      1203
+    ],
+    "frameBBoxCenterRange": [
+      88.5,
+      147.5,
+      102.5,
+      170.0
+    ],
+    "frameEnergyAnchorRange": [
+      109.38,
+      164.21,
+      123.75,
+      169.95
+    ],
+    "frameRegistrationAnchorRange": [
+      109.38,
+      164.21,
+      123.75,
+      169.95
+    ]
+  },
+  "tag": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      38,
+      101,
+      1231,
+      1255
+    ],
+    "frameBBoxCenterRange": [
+      114.0,
+      132.5,
+      149.5,
+      202.0
+    ],
+    "frameEnergyAnchorRange": [
+      115.29,
+      123.12,
+      154.65,
+      210.78
+    ],
+    "frameRegistrationAnchorRange": [
+      115.29,
+      123.12,
+      154.65,
+      210.78
+    ],
+    "registration": {
+      "targetAnchor": [
+        118,
+        220.16
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        96,
+        126,
+        146,
+        176
+      ],
+      "appliedShiftRange": [
+        -7,
+        16,
+        34,
+        73
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 17,
+      "lowConfidenceFrames": 8,
+      "method": "feet-planted base on ground line when bounds allow, core-x centred (bounds-clamped; authored scale preserved)"
+    }
+  },
+  "rev-list": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      34,
+      50,
+      1252,
+      1236
+    ],
+    "frameBBoxCenterRange": [
+      125.0,
+      158.0,
+      119.5,
+      137.5
+    ],
+    "frameEnergyAnchorRange": [
+      124.27,
+      131.84,
+      119.06,
+      130.67
+    ],
+    "frameRegistrationAnchorRange": [
+      124.27,
+      131.84,
+      119.06,
+      130.67
+    ],
+    "registration": {
+      "targetAnchor": [
+        128.0,
+        128.0
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        81.052,
+        131.188,
+        97.057,
+        140.537
+      ],
+      "appliedShiftRange": [
+        -2,
+        44,
+        -11,
+        22
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 14,
+      "lowConfidenceFrames": 11,
+      "method": "body-centered: energy core registered to cell centre (bounds-clamped; authored scale preserved)"
+    }
+  }
+}

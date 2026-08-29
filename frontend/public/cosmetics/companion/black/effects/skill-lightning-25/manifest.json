@@ -1,0 +1,1062 @@
+{
+  "id": "black-skill-lightning-25",
+  "label": "Black Git Skill Lightning Sprites 25",
+  "generationMode": "black-imagegen-and-smooth-derived-sheets",
+  "styleReference": "/cosmetics/companion/black/cast.png",
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "columns": 5,
+  "rows": 5,
+  "frameCount": 25,
+  "fps": 18,
+  "sprites": {
+    "init": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/init.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "violet",
+      "motif": "black-lightning-ignite",
+      "playback": "projectile",
+      "anchor": "feet",
+      "commandFamily": "init",
+      "baseCommand": "git init",
+      "skillSlug": "git-init",
+      "generationSource": "black-imagegen-raw",
+      "launchStartFrame": 8,
+      "impactStartFrame": 14,
+      "motion": "gather-orb-projectile-impact-dissipate",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/init.png",
+      "placeAnchor": {
+        "x": 0.5117,
+        "y": 0.9023
+      },
+      "placeBounds": {
+        "left": 0.0312,
+        "top": 0.1875,
+        "right": 0.9492,
+        "bottom": 0.9961
+      }
+    },
+    "clone": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/clone.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "azure",
+      "motif": "black-lightning-mirror",
+      "playback": "projectile",
+      "anchor": "center",
+      "commandFamily": "clone",
+      "baseCommand": "git clone",
+      "skillSlug": "git-clone",
+      "generationSource": "black-imagegen-raw",
+      "impactStartFrame": 15,
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/clone.png",
+      "placeAnchor": {
+        "x": 0.4971,
+        "y": 0.5527
+      },
+      "placeBounds": {
+        "left": 0.1836,
+        "top": 0.1523,
+        "right": 0.8359,
+        "bottom": 1.0
+      }
+    },
+    "status": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/status.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "steel",
+      "motif": "black-lightning-scan",
+      "playback": "target",
+      "anchor": "center",
+      "commandFamily": "status",
+      "baseCommand": "git status",
+      "skillSlug": "git-status",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/status.png",
+      "placeAnchor": {
+        "x": 0.5117,
+        "y": 0.4902
+      },
+      "placeBounds": {
+        "left": 0.0781,
+        "top": 0.082,
+        "right": 0.9414,
+        "bottom": 0.9102
+      }
+    },
+    "config": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/config.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "indigo",
+      "motif": "black-lightning-attune",
+      "playback": "target",
+      "anchor": "center",
+      "commandFamily": "config",
+      "baseCommand": "git config",
+      "skillSlug": "git-config",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/config.png",
+      "placeAnchor": {
+        "x": 0.5117,
+        "y": 0.4883
+      },
+      "placeBounds": {
+        "left": 0.0859,
+        "top": 0.082,
+        "right": 0.9688,
+        "bottom": 0.9062
+      }
+    },
+    "log": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/log.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "steel",
+      "motif": "black-lightning-chronicle",
+      "playback": "target",
+      "anchor": "center",
+      "commandFamily": "log",
+      "baseCommand": "git log",
+      "skillSlug": "git-log",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/log.png",
+      "placeAnchor": {
+        "x": 0.5117,
+        "y": 0.502
+      },
+      "placeBounds": {
+        "left": 0.1016,
+        "top": 0.1094,
+        "right": 0.8984,
+        "bottom": 0.8828
+      }
+    },
+    "show": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/show.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "azure",
+      "motif": "black-lightning-reveal",
+      "playback": "target",
+      "anchor": "feet",
+      "commandFamily": "show",
+      "baseCommand": "git show",
+      "skillSlug": "git-show",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/show.png",
+      "placeAnchor": {
+        "x": 0.4863,
+        "y": 0.9102
+      },
+      "placeBounds": {
+        "left": 0.1797,
+        "top": 0.1133,
+        "right": 0.8594,
+        "bottom": 0.9805
+      }
+    },
+    "diff": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/diff.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "cyan",
+      "motif": "black-lightning-compare",
+      "playback": "projectile",
+      "anchor": "center",
+      "commandFamily": "diff",
+      "baseCommand": "git diff",
+      "skillSlug": "git-diff",
+      "generationSource": "black-imagegen-raw",
+      "impactStartFrame": 14,
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/diff.png",
+      "placeAnchor": {
+        "x": 0.4609,
+        "y": 0.4863
+      },
+      "placeBounds": {
+        "left": 0.0859,
+        "top": 0.1367,
+        "right": 0.7969,
+        "bottom": 0.7891
+      }
+    },
+    "add": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/add.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "cyan",
+      "motif": "black-lightning-gather",
+      "playback": "projectile",
+      "anchor": "center",
+      "commandFamily": "add",
+      "baseCommand": "git add",
+      "skillSlug": "git-add",
+      "generationSource": "black-imagegen-raw",
+      "launchStartFrame": 3,
+      "impactStartFrame": 18,
+      "motion": "gather-orb-projectile-impact-dissipate",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/add.png",
+      "placeAnchor": {
+        "x": 0.5137,
+        "y": 0.4453
+      },
+      "placeBounds": {
+        "left": 0.1289,
+        "top": 0.1406,
+        "right": 0.918,
+        "bottom": 0.75
+      }
+    },
+    "commit": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/commit.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "azure",
+      "motif": "black-lightning-commit",
+      "playback": "target",
+      "anchor": "feet",
+      "commandFamily": "commit",
+      "baseCommand": "git commit",
+      "skillSlug": "git-commit",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/commit.png",
+      "placeAnchor": {
+        "x": 0.4609,
+        "y": 0.918
+      },
+      "placeBounds": {
+        "left": 0.1094,
+        "top": 0.1406,
+        "right": 0.832,
+        "bottom": 1.0
+      }
+    },
+    "rm": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/rm.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "steel",
+      "motif": "black-lightning-excise",
+      "playback": "projectile",
+      "anchor": "center",
+      "commandFamily": "rm",
+      "baseCommand": "git rm",
+      "skillSlug": "git-rm",
+      "generationSource": "black-imagegen-raw",
+      "impactStartFrame": 17,
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/rm.png",
+      "placeAnchor": {
+        "x": 0.5469,
+        "y": 0.4707
+      },
+      "placeBounds": {
+        "left": 0.2109,
+        "top": 0.1758,
+        "right": 0.9492,
+        "bottom": 0.793
+      }
+    },
+    "check-ignore": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/check-ignore.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "ash",
+      "motif": "black-lightning-ward",
+      "playback": "target",
+      "anchor": "feet",
+      "commandFamily": "check-ignore",
+      "baseCommand": "git check-ignore",
+      "skillSlug": "git-check-ignore",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/check-ignore.png",
+      "placeAnchor": {
+        "x": 0.498,
+        "y": 0.9688
+      },
+      "placeBounds": {
+        "left": 0.1211,
+        "top": 0.1797,
+        "right": 0.9102,
+        "bottom": 1.0
+      }
+    },
+    "restore": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/restore.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "cyan",
+      "motif": "black-lightning-mend",
+      "playback": "target",
+      "anchor": "feet",
+      "commandFamily": "restore",
+      "baseCommand": "git restore",
+      "skillSlug": "git-restore",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/restore.png",
+      "placeAnchor": {
+        "x": 0.4609,
+        "y": 0.9141
+      },
+      "placeBounds": {
+        "left": 0.0312,
+        "top": 0.2266,
+        "right": 0.9219,
+        "bottom": 0.9531
+      }
+    },
+    "branch": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/branch.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "cyan",
+      "motif": "black-lightning-fork",
+      "playback": "projectile",
+      "anchor": "center",
+      "commandFamily": "branch",
+      "baseCommand": "git branch",
+      "skillSlug": "git-branch",
+      "generationSource": "black-imagegen-raw",
+      "impactStartFrame": 19,
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/branch.png",
+      "placeAnchor": {
+        "x": 0.4795,
+        "y": 0.4668
+      },
+      "placeBounds": {
+        "left": 0.1836,
+        "top": 0.1562,
+        "right": 0.7578,
+        "bottom": 0.7734
+      }
+    },
+    "switch": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/switch.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "cyan",
+      "motif": "black-lightning-switch",
+      "playback": "ground",
+      "anchor": "feet",
+      "commandFamily": "switch",
+      "baseCommand": "git switch",
+      "skillSlug": "git-switch",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/switch.png",
+      "placeAnchor": {
+        "x": 0.4727,
+        "y": 0.8945
+      },
+      "placeBounds": {
+        "left": 0.0625,
+        "top": 0.2461,
+        "right": 0.9141,
+        "bottom": 0.9492
+      }
+    },
+    "checkout": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/checkout.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "steel",
+      "motif": "black-lightning-step",
+      "playback": "projectile",
+      "anchor": "center",
+      "commandFamily": "checkout",
+      "baseCommand": "git checkout",
+      "skillSlug": "git-checkout",
+      "generationSource": "black-imagegen-raw",
+      "impactStartFrame": 17,
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/checkout.png",
+      "placeAnchor": {
+        "x": 0.498,
+        "y": 0.4512
+      },
+      "placeBounds": {
+        "left": 0.1523,
+        "top": 0.0625,
+        "right": 0.8359,
+        "bottom": 0.7539
+      }
+    },
+    "merge": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "cyan",
+      "motif": "black-lightning-merge",
+      "playback": "projectile",
+      "anchor": "center",
+      "commandFamily": "merge",
+      "baseCommand": "git merge",
+      "skillSlug": "git-merge",
+      "generationSource": "black-imagegen-raw",
+      "impactStartFrame": 20,
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/merge.png",
+      "placeAnchor": {
+        "x": 0.5176,
+        "y": 0.4805
+      },
+      "placeBounds": {
+        "left": 0.2227,
+        "top": 0.2422,
+        "right": 0.8594,
+        "bottom": 0.7148
+      }
+    },
+    "merge-base": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge-base_front.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "indigo",
+      "motif": "black-lightning-root",
+      "playback": "target",
+      "anchor": "feet",
+      "commandFamily": "merge-base",
+      "baseCommand": "git merge-base",
+      "skillSlug": "git-merge-base",
+      "generationSource": "black-imagegen-raw",
+      "layers": [
+        {
+          "layer": "back",
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge-base_back.png"
+        },
+        {
+          "layer": "front",
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge-base_front.png"
+        }
+      ],
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/merge-base_front.png",
+      "placeAnchor": {
+        "x": 0.4961,
+        "y": 0.8906
+      },
+      "placeBounds": {
+        "left": 0.125,
+        "top": 0.1094,
+        "right": 0.8633,
+        "bottom": 0.9336
+      }
+    },
+    "checkout-conflict": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/checkout-conflict.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "steel",
+      "motif": "black-lightning-choose-side",
+      "playback": "target",
+      "anchor": "center",
+      "commandFamily": "checkout",
+      "baseCommand": "git checkout",
+      "skillSlug": "git-checkout-conflict",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/checkout-conflict.png",
+      "placeAnchor": {
+        "x": 0.5645,
+        "y": 0.502
+      },
+      "placeBounds": {
+        "left": 0.0664,
+        "top": 0.125,
+        "right": 0.957,
+        "bottom": 0.8672
+      }
+    },
+    "diff-conflict": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/diff-conflict.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "cyan",
+      "motif": "black-lightning-conflict-compare",
+      "playback": "target",
+      "anchor": "feet",
+      "commandFamily": "diff",
+      "baseCommand": "git diff",
+      "skillSlug": "git-diff-conflict",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/diff-conflict.png",
+      "placeAnchor": {
+        "x": 0.4844,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.0586,
+        "top": 0.0898,
+        "right": 0.918,
+        "bottom": 0.9688
+      }
+    },
+    "ls-files": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/ls-files.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "steel",
+      "motif": "black-lightning-ledger",
+      "playback": "target",
+      "anchor": "feet",
+      "commandFamily": "ls-files",
+      "baseCommand": "git ls-files",
+      "skillSlug": "git-ls-files",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/ls-files.png",
+      "placeAnchor": {
+        "x": 0.416,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.0352,
+        "top": 0.1172,
+        "right": 0.9414,
+        "bottom": 0.9492
+      }
+    },
+    "mergetool": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/mergetool.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "azure",
+      "motif": "black-lightning-weld",
+      "playback": "target",
+      "anchor": "center",
+      "commandFamily": "mergetool",
+      "baseCommand": "git mergetool",
+      "skillSlug": "git-mergetool",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/mergetool.png",
+      "placeAnchor": {
+        "x": 0.5078,
+        "y": 0.5039
+      },
+      "placeBounds": {
+        "left": 0.1797,
+        "top": 0.1367,
+        "right": 0.832,
+        "bottom": 1.0
+      }
+    },
+    "reset": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/reset.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "steel",
+      "motif": "black-lightning-rewind",
+      "playback": "target",
+      "anchor": "feet",
+      "commandFamily": "reset",
+      "baseCommand": "git reset",
+      "skillSlug": "git-reset",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/reset.png",
+      "placeAnchor": {
+        "x": 0.4922,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.0781,
+        "top": 0.1641,
+        "right": 0.9258,
+        "bottom": 0.9648
+      }
+    },
+    "revert": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/revert.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "indigo",
+      "motif": "black-lightning-counter",
+      "playback": "target",
+      "anchor": "center",
+      "commandFamily": "revert",
+      "baseCommand": "git revert",
+      "skillSlug": "git-revert",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/revert.png",
+      "placeAnchor": {
+        "x": 0.4922,
+        "y": 0.4707
+      },
+      "placeBounds": {
+        "left": 0.1055,
+        "top": 0.1016,
+        "right": 1.0,
+        "bottom": 0.8359
+      }
+    },
+    "reflog": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/reflog.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "violet",
+      "motif": "black-lightning-echo",
+      "playback": "projectile",
+      "anchor": "center",
+      "commandFamily": "reflog",
+      "baseCommand": "git reflog",
+      "skillSlug": "git-reflog",
+      "generationSource": "black-imagegen-raw",
+      "impactStartFrame": 16,
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/reflog.png",
+      "placeAnchor": {
+        "x": 0.5352,
+        "y": 0.5
+      },
+      "placeBounds": {
+        "left": 0.082,
+        "top": 0.1289,
+        "right": 0.9219,
+        "bottom": 0.875
+      }
+    },
+    "stash": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/stash.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "violet",
+      "motif": "black-lightning-fold",
+      "playback": "projectile",
+      "anchor": "center",
+      "commandFamily": "stash",
+      "baseCommand": "git stash",
+      "skillSlug": "git-stash",
+      "generationSource": "black-imagegen-raw",
+      "impactStartFrame": 15,
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/stash.png",
+      "placeAnchor": {
+        "x": 0.4756,
+        "y": 0.502
+      },
+      "placeBounds": {
+        "left": 0.0312,
+        "top": 0.168,
+        "right": 0.8828,
+        "bottom": 1.0
+      }
+    },
+    "cherry-pick": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_front.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "azure",
+      "motif": "black-lightning-claws",
+      "playback": "target",
+      "anchor": "feet",
+      "commandFamily": "cherry-pick",
+      "baseCommand": "git cherry-pick",
+      "skillSlug": "git-cherry-pick",
+      "generationSource": "black-imagegen-raw",
+      "layers": [
+        {
+          "layer": "back",
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_back.png"
+        },
+        {
+          "layer": "front",
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_front.png"
+        }
+      ],
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/cherry-pick_front.png",
+      "placeAnchor": {
+        "x": 0.4883,
+        "y": 0.9023
+      },
+      "placeBounds": {
+        "left": 0.082,
+        "top": 0.1445,
+        "right": 0.9023,
+        "bottom": 0.9375
+      }
+    },
+    "remote": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/remote_front.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "steel",
+      "motif": "black-lightning-beacon",
+      "playback": "target",
+      "anchor": "feet",
+      "commandFamily": "remote",
+      "baseCommand": "git remote",
+      "skillSlug": "git-remote",
+      "generationSource": "black-imagegen-raw",
+      "layers": [
+        {
+          "layer": "back",
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/remote_back.png"
+        },
+        {
+          "layer": "front",
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/remote_front.png"
+        }
+      ],
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/remote_front.png",
+      "placeAnchor": {
+        "x": 0.4922,
+        "y": 0.8789
+      },
+      "placeBounds": {
+        "left": 0.1016,
+        "top": 0.125,
+        "right": 0.8633,
+        "bottom": 1.0
+      }
+    },
+    "fetch": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/fetch.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "steel",
+      "motif": "black-lightning-inbound",
+      "playback": "target",
+      "anchor": "center",
+      "commandFamily": "fetch",
+      "baseCommand": "git fetch",
+      "skillSlug": "git-fetch",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/fetch.png",
+      "placeAnchor": {
+        "x": 0.4902,
+        "y": 0.4883
+      },
+      "placeBounds": {
+        "left": 0.0508,
+        "top": 0.0898,
+        "right": 0.8789,
+        "bottom": 0.9727
+      }
+    },
+    "pull": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/pull.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "azure",
+      "motif": "black-lightning-pull",
+      "playback": "target",
+      "anchor": "feet",
+      "commandFamily": "pull",
+      "baseCommand": "git pull",
+      "skillSlug": "git-pull",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/pull.png",
+      "placeAnchor": {
+        "x": 0.4727,
+        "y": 0.9414
+      },
+      "placeBounds": {
+        "left": 0.0391,
+        "top": 0.2461,
+        "right": 0.8672,
+        "bottom": 0.9766
+      }
+    },
+    "push": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/push.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "steel",
+      "motif": "black-lightning-push",
+      "playback": "ground",
+      "anchor": "feet",
+      "commandFamily": "push",
+      "baseCommand": "git push",
+      "skillSlug": "git-push",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/push.png",
+      "placeAnchor": {
+        "x": 0.4141,
+        "y": 0.8984
+      },
+      "placeBounds": {
+        "left": 0.0352,
+        "top": 0.2305,
+        "right": 0.832,
+        "bottom": 1.0
+      }
+    },
+    "rebase": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/rebase.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "indigo",
+      "motif": "black-lightning-ladder",
+      "playback": "target",
+      "anchor": "feet",
+      "commandFamily": "rebase",
+      "baseCommand": "git rebase",
+      "skillSlug": "git-rebase",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/rebase.png",
+      "placeAnchor": {
+        "x": 0.4453,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.0508,
+        "top": 0.1406,
+        "right": 0.9336,
+        "bottom": 0.9883
+      }
+    },
+    "default": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/default.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "cyan",
+      "motif": "black-lightning-bolt",
+      "playback": "projectile",
+      "anchor": "center",
+      "commandFamily": "default",
+      "baseCommand": "default",
+      "skillSlug": "default",
+      "generationSource": "black-imagegen-raw",
+      "impactStartFrame": 15,
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/default.png",
+      "placeAnchor": {
+        "x": 0.4951,
+        "y": 0.4824
+      },
+      "placeBounds": {
+        "left": 0.1719,
+        "top": 0.1367,
+        "right": 0.8242,
+        "bottom": 0.9141
+      }
+    },
+    "miss": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/miss.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "ash",
+      "motif": "black-lightning-misfire",
+      "playback": "miss",
+      "commandFamily": "miss",
+      "baseCommand": "missed attack",
+      "skillSlug": "missed-attack",
+      "generationSource": "black-imagegen-raw"
+    },
+    "tag": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/tag.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "indigo",
+      "motif": "black-lightning-seal",
+      "playback": "target",
+      "anchor": "feet",
+      "commandFamily": "tag",
+      "baseCommand": "git tag",
+      "skillSlug": "git-tag",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/tag.png",
+      "placeAnchor": {
+        "x": 0.502,
+        "y": 0.9258
+      },
+      "placeBounds": {
+        "left": 0.1133,
+        "top": 0.1602,
+        "right": 0.875,
+        "bottom": 1.0
+      }
+    },
+    "rev-list": {
+      "src": "/cosmetics/companion/black/effects/skill-lightning-25/rev-list.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "tint": "violet",
+      "motif": "black-lightning-ancestry",
+      "playback": "target",
+      "anchor": "center",
+      "commandFamily": "rev-list",
+      "baseCommand": "git rev-list",
+      "skillSlug": "git-rev-list",
+      "generationSource": "black-imagegen-raw",
+      "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/rev-list.png",
+      "placeAnchor": {
+        "x": 0.5078,
+        "y": 0.4941
+      },
+      "placeBounds": {
+        "left": 0.0859,
+        "top": 0.0742,
+        "right": 0.9883,
+        "bottom": 0.8984
+      }
+    }
+  }
+}

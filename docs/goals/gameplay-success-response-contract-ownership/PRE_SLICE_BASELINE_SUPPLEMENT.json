@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "purpose": "Authorize the two frontend integration targets discovered after the initial Slice 14 baseline and the captured canonical-orchestrator amendment.",
+  "revised_plan": {
+    "path": "docs/goals/gameplay-success-response-contract-ownership/PLAN.md",
+    "bytes": 34078,
+    "sha256": "8AF7D0B19420B46F66BFF0C88FCFF8106D6FFAE0568176562FF1BC584E6EE855"
+  },
+  "targets": [
+    {
+      "path": "frontend/src/features/challenges/api/challengesApi.ts",
+      "pre_slice_git_status": "clean",
+      "bytes": 1409,
+      "sha256": "31442D568E70F2530B814ECF5A2784F967D7E8656AD6D4FBA3F57647E1B6DF5D",
+      "normalization": "Replace every ChallengeRunResponse token with ChallengeRun and restore only the generated-inferred challenge destroy call to its captured explicit null response generic.",
+      "normalized_bytes": 1409,
+      "normalized_sha256": "31442D568E70F2530B814ECF5A2784F967D7E8656AD6D4FBA3F57647E1B6DF5D",
+      "approved_replacement": "Import ChallengeRunResponse instead of ChallengeRun and use it only as the response override for startChallengeRun and retryChallengeRun; remove the redundant explicit null response generic from discardChallengeRun."
+    },
+    {
+      "path": "frontend/src/features/adventures/components/AdventureOutcomeModal.test.tsx",
+      "pre_slice_git_status": "clean",
+      "bytes": 4867,
+      "sha256": "8EF546EA1D014C1664B75BE26C8E43928E64FF850A729409AF7F7951DDB25040",
+      "normalization": "Remove only exactly two-space-indented top-level passed boolean and battle_stage: null fixture lines.",
+      "normalized_bytes": 4867,
+      "normalized_sha256": "8EF546EA1D014C1664B75BE26C8E43928E64FF850A729409AF7F7951DDB25040",
+      "approved_replacement": "Add passed: true and battle_stage: null to the top-level AdventureRun fixture."
+    },
+    {
+      "path": "scripts/checks/check_architecture_boundaries.py",
+      "pre_slice_git_status": " M",
+      "bytes": 60632,
+      "sha256": "5D2A378D53CEB8FDE4BBE2CCEE96FD685CD36D6D7F919243A9AE9506D0DD769F",
+      "normalization": "Remove only the check_gameplay_response_contract_ownership import line, invocation line, and gameplay success-response rules-text line.",
+      "normalized_bytes": 60632,
+      "normalized_sha256": "5D2A378D53CEB8FDE4BBE2CCEE96FD685CD36D6D7F919243A9AE9506D0DD769F",
+      "approved_replacement": "Import and invoke the additive gameplay response checker in the canonical architecture command and add one matching rules-text clause."
+    }
+  ]
+}

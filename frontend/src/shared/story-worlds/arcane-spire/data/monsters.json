@@ -1,0 +1,1184 @@
+{
+  "bone-archer": {
+    "label": "Bone Archer",
+    "scale": 0.75,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 520,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.56,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "feet",
+        "motion": "charge",
+        "launch_start_frame": 5,
+        "impact_start_frame": 20,
+        "place_anchor": {
+          "x": 0.4883,
+          "y": 0.9258
+        },
+        "place_bounds": {
+          "left": 0.1562,
+          "top": 0.3867,
+          "right": 0.7852,
+          "bottom": 0.9531
+        }
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 4,
+      "range_px": 305
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 245,
+        "frameHeight": 221,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 245,
+        "frameHeight": 221,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 245,
+        "frameHeight": 221,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 245,
+        "frameHeight": 221,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "bone-blacksmith": {
+    "label": "Bone Blacksmith",
+    "scale": 0.81,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 56,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 780,
+        "orient_to": "target-facing",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.82,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ],
+        "anchor": "feet",
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.4844,
+          "y": 0.8594
+        }
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 16,
+      "range_px": 165
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 247,
+        "frameHeight": 227,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 247,
+        "frameHeight": 227,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 247,
+        "frameHeight": 227,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 247,
+        "frameHeight": 227,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "bone-ghost": {
+    "label": "Bone Ghost",
+    "scale": 0.71,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 600,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.58,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 5,
+        "impact_start_frame": 20,
+        "place_anchor": {
+          "x": 0.5059,
+          "y": 0.4648
+        },
+        "place_bounds": {
+          "left": 0.1602,
+          "top": 0.1445,
+          "right": 0.8477,
+          "bottom": 0.7812
+        }
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.65,
+      "foot_offset": 5,
+      "range_px": 260
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 228,
+        "frameHeight": 233,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 228,
+        "frameHeight": 233,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 228,
+        "frameHeight": 233,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 228,
+        "frameHeight": 233,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "bone-lancer": {
+    "label": "Bone Lancer",
+    "scale": 0.54,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 64,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 720,
+        "orient_to": "target-facing",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.78,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ],
+        "anchor": "feet",
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.4922,
+          "y": 0.9023
+        }
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 4,
+      "range_px": 165
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 500,
+        "frameHeight": 307,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 500,
+        "frameHeight": 307,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 500,
+        "frameHeight": 307,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 500,
+        "frameHeight": 307,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "bone-necromancer": {
+    "label": "Bone Necromancer",
+    "scale": 0.67,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 860,
+        "orient_to": "target-facing",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.84,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ],
+        "anchor": "feet",
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.4766,
+          "y": 0.8438
+        }
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.53,
+      "foot_offset": 3,
+      "range_px": 285
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 219,
+        "frameHeight": 246,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 219,
+        "frameHeight": 246,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 219,
+        "frameHeight": 246,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 219,
+        "frameHeight": 246,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "bone-soldier": {
+    "label": "Bone Soldier",
+    "scale": 0.87,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 56,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 680,
+        "orient_to": "target-facing",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.72,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ],
+        "anchor": "center",
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.5176,
+          "y": 0.4473
+        }
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.48,
+      "foot_offset": 13,
+      "range_px": 128
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 243,
+        "frameHeight": 194,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 243,
+        "frameHeight": 194,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 243,
+        "frameHeight": 194,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 243,
+        "frameHeight": 194,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "cursed-lantern": {
+    "label": "Cursed Lantern",
+    "scale": 1.34,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 56,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 760,
+        "orient_to": "target-facing",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.78,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ],
+        "anchor": "center",
+        "placement": "caster",
+        "place_anchor": {
+          "x": 0.5078,
+          "y": 0.4824
+        }
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 3,
+      "range_px": 128
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 247,
+        "frameHeight": 139,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 247,
+        "frameHeight": 139,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 247,
+        "frameHeight": 139,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 247,
+        "frameHeight": 139,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "floating-skull": {
+    "label": "Floating Skull",
+    "scale": 0.73,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 880,
+        "orient_to": "target-facing",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.86,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ],
+        "anchor": "feet",
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.4648,
+          "y": 0.8984
+        }
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 26,
+      "range_px": 260
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 217,
+        "frameHeight": 246,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 217,
+        "frameHeight": 246,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 217,
+        "frameHeight": 246,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 217,
+        "frameHeight": 246,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "ghost-lady": {
+    "label": "Ghost Lady",
+    "scale": 0.82,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 900,
+        "orient_to": "target-facing",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/effects/skill-back.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "back",
+            "scale": 0.907,
+            "opacity": 0.82,
+            "offset_x": 0,
+            "offset_y": 14,
+            "orient_to": "target-facing"
+          },
+          {
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.84,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ],
+        "anchor": "feet",
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.4355,
+          "y": 0.9297
+        }
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 3,
+      "range_px": 275
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 200,
+        "frameHeight": 209,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 200,
+        "frameHeight": 209,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 200,
+        "frameHeight": 209,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 200,
+        "frameHeight": 209,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "lich-king": {
+    "label": "Lich King",
+    "scale": 0.83,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 72,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 920,
+        "orient_to": "target-facing",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/effects/skill-back.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "back",
+            "scale": 0.972,
+            "opacity": 0.82,
+            "offset_x": 0,
+            "offset_y": 14,
+            "orient_to": "target-facing"
+          },
+          {
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.9,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ],
+        "anchor": "feet",
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.498,
+          "y": 0.9141
+        }
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.53,
+      "foot_offset": 10,
+      "range_px": 210
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 248,
+        "frameHeight": 206,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 248,
+        "frameHeight": 206,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 248,
+        "frameHeight": 206,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 248,
+        "frameHeight": 206,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "two-headed-hound": {
+    "label": "Two Headed Hound",
+    "scale": 0.99,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 700,
+        "orient_to": "target-facing",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.74,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ],
+        "anchor": "center",
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.5312,
+          "y": 0.4922
+        }
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 3,
+      "range_px": 165
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 244,
+        "frameHeight": 193,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 244,
+        "frameHeight": 193,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 244,
+        "frameHeight": 193,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 244,
+        "frameHeight": 193,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "zombe-boy": {
+    "label": "Zombie Boy",
+    "scale": 0.77,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 56,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 660,
+        "orient_to": "target-facing",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.62,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ],
+        "anchor": "center",
+        "placement": "target",
+        "place_anchor": {
+          "x": 0.5742,
+          "y": 0.4941
+        }
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 20,
+      "range_px": 128
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 231,
+        "frameHeight": 232,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 231,
+        "frameHeight": 232,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 231,
+        "frameHeight": 232,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 231,
+        "frameHeight": 232,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  }
+}

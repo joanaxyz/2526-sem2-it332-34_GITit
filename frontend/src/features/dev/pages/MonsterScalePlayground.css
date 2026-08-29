@@ -1,0 +1,110 @@
+.monster-scale-gallery {
+  min-height: 100vh;
+  padding: 24px;
+  color: hsl(var(--foreground));
+}
+
+.monster-scale-gallery__header {
+  margin-bottom: 32px;
+}
+
+.monster-scale-gallery__header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.monster-scale-gallery__header p {
+  margin: 4px 0 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+}
+
+.monster-scale-gallery__worlds {
+  display: grid;
+  gap: 40px;
+}
+
+.monster-scale-gallery__section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.monster-scale-gallery__section-header h2 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.monster-scale-gallery__section-header span,
+.monster-scale-card__meta span {
+  color: hsl(var(--muted-foreground));
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.monster-scale-gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.monster-scale-card {
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  background: hsl(var(--card));
+}
+
+.monster-scale-card__stage {
+  position: relative;
+  height: 224px;
+  overflow: hidden;
+  background: hsl(var(--background));
+}
+
+.monster-scale-card__baseline {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  left: 20px;
+  height: 1px;
+  background: hsl(var(--primary) / 0.3);
+  box-shadow: 0 0 10px rgb(var(--theme-primary-rgb) / 0.35);
+}
+
+.monster-scale-card__actor {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.monster-scale-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-top: 1px solid hsl(var(--border));
+  font-size: 0.875rem;
+}
+
+.monster-scale-card__meta strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .monster-scale-gallery {
+    padding: 16px;
+  }
+
+  .monster-scale-gallery__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

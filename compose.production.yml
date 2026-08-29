@@ -1,0 +1,32 @@
+name: git-it
+
+services:
+  backend:
+    build:
+      context: ./backend
+    env_file:
+      - ./backend/.env.production
+    environment:
+      PORT: "8000"
+    expose:
+      - "8000"
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: /api
+    environment:
+      BACKEND_HOST: backend
+      BACKEND_PORT: "8000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-8080}:80"
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 15s

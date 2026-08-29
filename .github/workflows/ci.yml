@@ -1,0 +1,196 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # Fast, infrastructure-free guards: linting plus the architecture/documentation
+  # /API-contract checks. Runs on every push and PR.
+  quality-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      # Run the artifact guard on the pristine checkout, before any install step
+      # can create __pycache__/.ruff_cache and trip it.
+      - name: Repository artifact guard
+        run: python scripts/check_repository_artifacts.py
+      - name: Runtime asset deployment guard
+        run: python scripts/check_runtime_assets.py --require-tracked
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements-dev.txt
+      - name: Backend lint (ruff)
+        working-directory: backend
+        run: ruff check .
+      - name: Backend format (ruff)
+        working-directory: backend
+        run: ruff format --check .
+      - name: Repository script lint (ruff)
+        run: ruff check --config backend/ruff.toml scripts
+      - name: Repository script format (ruff)
+        run: ruff format --check --config backend/ruff.toml scripts
+      - name: Architecture and contract guards
+        working-directory: frontend
+        env:
+          DJANGO_SETTINGS_MODULE: config.test_settings
+          DJANGO_DEBUG: "True"
+          DJANGO_SECRET_KEY: ci-quality-gates-secret-key-at-least-32-bytes
+        run: |
+          python ../scripts/check_legacy_terms.py
+          python ../scripts/check_architecture_boundaries.py
+          python ../scripts/check_css_architecture.py
+          python ../scripts/check_ui_typography.py
+          python ../scripts/check_seed_targets.py
+          python ../scripts/check_api_contract.py
+          python ../scripts/check_frontend_api_usage.py
+          python ../scripts/check_api_type_adoption.py
+          python ../scripts/check_documentation_current.py
+          python ../scripts/check_ci_quality_gates.py
+          python ../scripts/check_django_deploy.py
+          python ../scripts/check_render_blueprint.py
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint (eslint)
+        run: npm run lint
+      - name: Dead-code scan (knip)
+        run: npm run lint:dead
+      - name: Tests (vitest)
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Dependency audit
+        run: npm audit --audit-level=high
+
+  # A main-branch deployment must prove the checked-in Dockerfiles assemble.
+  # The frontend smoke command runs the official image entrypoint so its
+  # envsubst template is rendered before Nginx validates the final config.
+  container-images:
+    if: github.event_name == 'push'
+    needs: [quality-gates, frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build backend image
+        run: docker build --tag git-it-backend-ci:${{ github.sha }} backend
+      - name: Build frontend image
+        run: docker build --tag git-it-frontend-ci:${{ github.sha }} frontend
+      - name: Build all-Free Render image
+        run: >-
+          docker build
+          --tag git-it-render-free-ci:${{ github.sha }}
+          --file deploy/render-free/Dockerfile
+          .
+      - name: Validate rendered Nginx configuration
+        run: >-
+          docker run --rm
+          --env BACKEND_HOST=127.0.0.1
+          --env BACKEND_PORT=8000
+          git-it-frontend-ci:${{ github.sha }}
+          nginx -t
+      - name: Smoke-test all-Free Render Nginx as non-root
+        run: >-
+          docker run --rm
+          git-it-render-free-ci:${{ github.sha }}
+          sh -ec
+          "nginx;
+          python -c 'import urllib.request; assert urllib.request.urlopen(\"http://127.0.0.1:10000/nginx-health\", timeout=3).read() == b\"ok\"';
+          nginx -s quit"
+
+  # Replays every authored solution through the real browser engine and proves
+  # the committed generated targets are current. Needs both Python and Node.
+  generated-targets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements-dev.txt
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Generated target replay guard
+        run: python scripts/check_generated_targets_current.py
+
+  # Proves a clean PostgreSQL database migrates from zero, audits Python
+  # dependencies, verifies committed migration history, and runs the backend
+  # test suite with coverage.
+  production-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DJANGO_SETTINGS_MODULE: config.integration_test_settings
+      DJANGO_DEBUG: "True"
+      DJANGO_SECRET_KEY: ci-integration-secret-key-at-least-32-bytes
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      REDIS_URL: redis://localhost:6379/1
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements-dev.txt
+      - name: Python dependency audit
+        run: pip-audit -r backend/requirements.txt
+      - name: Migration drift check
+        working-directory: backend
+        run: python manage.py makemigrations --check --dry-run
+      - name: Apply migrations on a clean database
+        working-directory: backend
+        run: python manage.py migrate --noinput
+      - name: Tests with coverage (pytest)
+        working-directory: backend
+        run: pytest -q --cov=. --cov-report=term-missing --cov-report=xml

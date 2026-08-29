@@ -3,15 +3,21 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 BACKEND_DIR = Path(__file__).resolve().parents[2]
 
 
-def run_settings_import(*, debug: str, redis_url: str):
+def run_settings_import(
+    *,
+    debug: str,
+    redis_url: str,
+    database_url: str = "sqlite:///:memory:",
+    database_sslmode: str = "",
+):
     env = os.environ.copy()
     env.update(
         {
-            "DATABASE_URL": "sqlite:///:memory:",
+            "DATABASE_URL": database_url,
+            "DATABASE_SSLMODE": database_sslmode,
             "DJANGO_ALLOWED_HOSTS": "localhost,127.0.0.1",
             "DJANGO_CORS_ALLOWED_ORIGINS": "http://localhost:5173",
             "DJANGO_DEBUG": debug,
@@ -43,26 +49,47 @@ def test_development_settings_allow_locmem_without_redis():
 
 
 def test_jdbc_database_url_is_normalized_to_postgresql():
-    env = {
-        "DATABASE_URL": "jdbc:postgresql://localhost:5432/git_it",
-        "DJANGO_ALLOWED_HOSTS": "localhost,127.0.0.1",
-        "DJANGO_CORS_ALLOWED_ORIGINS": "http://localhost:5173",
-        "DJANGO_DEBUG": "True",
-        "DJANGO_SECRET_KEY": "test-secret",
-        "REDIS_URL": "",
-    }
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-c",
-            "import config.settings as s; print(s.DATABASES['default']['ENGINE'])",
-        ],
-        cwd=BACKEND_DIR,
-        env={**os.environ, **env},
-        capture_output=True,
-        text=True,
-        check=False,
+    # Tested directly rather than via a settings subprocess: settings intentionally
+    # prefer whatever DATABASE_URL `backend/.env` defines over a `jdbc:` URL (see
+    # the "Prefer project .env" guard in config.settings), so a subprocess import is
+    # hostage to the developer's local .env (e.g. a sqlite one). The custom logic
+    # under test is the prefix strip itself.
+    from config.settings import _normalize_database_url
+
+    assert (
+        _normalize_database_url("jdbc:postgresql://localhost:5432/git_it")
+        == "postgresql://localhost:5432/git_it"
+    )
+    # Non-jdbc URLs pass through unchanged.
+    assert _normalize_database_url("postgresql://host/db") == "postgresql://host/db"
+
+
+def test_deployment_version_falls_back_to_render_commit():
+    from config.settings import _deployment_version
+
+    assert _deployment_version("", "render-sha") == "render-sha"
+    assert _deployment_version("release-42", "render-sha") == "release-42"
+    assert _deployment_version("", "") == "development"
+
+
+def test_production_database_can_require_tls():
+    result = run_settings_import(
+        debug="False",
+        redis_url="redis://localhost:6379/0",
+        database_url="postgresql://user:password@pooler.supabase.com:5432/postgres",
+        database_sslmode="require",
     )
 
     assert result.returncode == 0
-    assert "postgresql" in result.stdout
+
+
+def test_invalid_database_sslmode_is_rejected():
+    result = run_settings_import(
+        debug="False",
+        redis_url="redis://localhost:6379/0",
+        database_url="postgresql://user:password@pooler.supabase.com:5432/postgres",
+        database_sslmode="sometimes",
+    )
+
+    assert result.returncode != 0
+    assert "DATABASE_SSLMODE must be" in result.stderr

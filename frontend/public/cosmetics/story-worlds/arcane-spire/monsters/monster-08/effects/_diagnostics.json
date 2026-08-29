@@ -1,0 +1,58 @@
+{
+  "front": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      34,
+      54,
+      1257,
+      1228
+    ],
+    "frameBBoxCenterRange": [
+      126.5,
+      143.0,
+      117.5,
+      128.5
+    ],
+    "frameEnergyAnchorRange": [
+      122.9,
+      133.27,
+      121.11,
+      133.01
+    ],
+    "frameRegistrationAnchorRange": [
+      122.9,
+      133.27,
+      121.11,
+      133.01
+    ],
+    "registration": {
+      "targetAnchor": [
+        128.0,
+        128.0
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        104.648,
+        126.408,
+        91.215,
+        156.23
+      ],
+      "appliedShiftRange": [
+        5,
+        20,
+        -24,
+        34
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 17,
+      "lowConfidenceFrames": 8,
+      "method": "body-centered: energy core registered to cell centre (bounds-clamped; authored scale preserved)"
+    }
+  }
+}

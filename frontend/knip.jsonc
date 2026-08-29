@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "index.html",
+    "src/main.tsx",
+    "src/test/setup.ts",
+    "src/test/assetStub.ts",
+    "eslint.config.js",
+    "vite.config.ts"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "*.{js,ts}", "scripts/**/*.{js,ts}"],
+  "ignoreBinaries": [
+    // The API scripts intentionally use the repository's Python environment,
+    // not an npm-distributed Python shim.
+    "python"
+  ],
+  "ignore": [
+    // Generated from the backend contract; its public surface is owned by the
+    // generator rather than hand-authored frontend usage.
+    "src/shared/api/generated/**"
+  ]
+}
