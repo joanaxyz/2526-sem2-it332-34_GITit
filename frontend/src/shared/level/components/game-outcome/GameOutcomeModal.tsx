@@ -1,20 +1,25 @@
 import type { ComponentType, ReactNode } from 'react'
 import { X } from 'lucide-react'
 
-import loseStarsImage from '@/assets/images/battle-outcome/lose-0.png'
-import titlesImage from '@/assets/images/battle-outcome/titles.png'
-import winStars1Image from '@/assets/images/battle-outcome/win-1.png'
-import winStars2Image from '@/assets/images/battle-outcome/win-2.png'
-import winStars3Image from '@/assets/images/battle-outcome/win-3.png'
+import titlesImage from '@/assets/images/battle-outcome/titles.webp'
 import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
 import { cn } from '@/shared/utils/cn'
+import { useLazyImage } from '@/shared/utils/useLazyImage'
 
 import { GameOutcomeConfetti } from './GameOutcomeConfetti'
 import { GameOutcomeStatTile } from './GameOutcomeStatTile'
 
-/** Star-arc hero art, indexed by earned stars (1-3). */
-const WIN_STAR_ART = [winStars1Image, winStars2Image, winStars3Image] as const
+// A single outcome shows exactly one star-arc image (the loss art, or one of
+// three win tiers), so each is imported lazily instead of bundling all four
+// upfront. `titlesImage` above is shown on every outcome, so it stays a
+// normal static import.
+const STAR_ART_LOADERS: Record<string, () => Promise<{ default: string }>> = {
+  lose: () => import('@/assets/images/battle-outcome/lose-0.webp'),
+  'win-1': () => import('@/assets/images/battle-outcome/win-1.webp'),
+  'win-2': () => import('@/assets/images/battle-outcome/win-2.webp'),
+  'win-3': () => import('@/assets/images/battle-outcome/win-3.webp'),
+}
 
 export type GameOutcomeStat = {
   label: string
@@ -73,11 +78,8 @@ export function GameOutcomeModal({
   const displayLabel = resultLabel ?? (isFailed ? 'Game Over' : 'You Won')
   // Failure always shows the shattered arc; wins need at least one earned star
   // (the arc art has no zero-star variant, so starless wins keep the icon crest).
-  const starArt = isFailed
-    ? loseStarsImage
-    : earnedStars && earnedStars > 0
-      ? WIN_STAR_ART[earnedStars - 1]
-      : null
+  const starArtKey = isFailed ? 'lose' : earnedStars && earnedStars > 0 ? `win-${earnedStars}` : null
+  const starArt = useLazyImage(starArtKey, STAR_ART_LOADERS)
   const statAccent = isFailed ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'
 
   return (
