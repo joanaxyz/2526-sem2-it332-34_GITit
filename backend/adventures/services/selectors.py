@@ -19,8 +19,15 @@ def ordered_levels_for(adventure: AdventureLevel) -> list[AdventureLevel]:
     """Return published adventure levels in the same chapter as ``adventure``."""
     return list(
         AdventureLevel.objects.filter(chapter_id=adventure.chapter_id, is_published=True)
-        .select_related("chapter", "chapter__story", "source_content_definition")
-        .prefetch_related("command_forms", "waves", "waves__variants")
+        .only(
+            "id",
+            "chapter_id",
+            "slug",
+            "title",
+            "is_required",
+            "reward_coins",
+            "sort_order",
+        )
         .order_by("sort_order", "id")
     )
 

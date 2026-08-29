@@ -92,20 +92,31 @@ def _wave_context(wave) -> dict:
     }
 
 
-def _wave_index_for(attempt: AdventureRun) -> int:
+def _published_waves_for(level) -> list:
+    if level is None:
+        return []
+    prefetched = getattr(level, "_prefetched_objects_cache", {}).get("waves")
+    if prefetched is not None:
+        return sorted(
+            (wave for wave in prefetched if wave.is_published),
+            key=lambda wave: (wave.sort_order, wave.id),
+        )
+    return list(
+        level.waves.filter(is_published=True)
+        .only("id", "level_id", "sort_order", "is_published")
+        .order_by("sort_order", "id")
+    )
+
+
+def _wave_index_for(attempt: AdventureRun, *, published_waves: list | None = None) -> int:
     """0-based index of the active wave within its level."""
     wave = attempt.current_wave
     if wave is None:
         return 0
-    return (
-        list(
-            attempt.level.waves.filter(is_published=True)
-            .order_by("sort_order", "id")
-            .values_list("id", flat=True)
-        ).index(wave.id)
-        if attempt.level_id
-        else 0
-    )
+    if not attempt.level_id:
+        return 0
+    waves = published_waves if published_waves is not None else _published_waves_for(attempt.level)
+    return [candidate.id for candidate in waves].index(wave.id)
 
 
 def attempt_payload(
@@ -113,6 +124,7 @@ def attempt_payload(
     *,
     executed_commands: list[str] | None = None,
     include_steps: bool = True,
+    published_waves: list | None = None,
 ) -> dict:
     level = attempt.level
     wave = attempt.current_wave
@@ -126,7 +138,7 @@ def attempt_payload(
     return {
         "id": attempt.id,
         "order": 0,
-        "wave": _wave_index_for(attempt),
+        "wave": _wave_index_for(attempt, published_waves=published_waves),
         "position": 0,
         "status": attempt.status,
         "level": {
@@ -288,9 +300,12 @@ def adventure_run_payload(run: AdventureRun, *, include_current_steps: bool = Tr
     stage_config = (
         merged_battle_stage(chapter=stage_chapter, content_owner=run.level) if run.level_id else {}
     )
-    total_waves = max(1, run.level.waves.filter(is_published=True).count() if run.level_id else 1)
+    published_waves = _published_waves_for(run.level) if run.level_id else []
+    total_waves = max(1, len(published_waves))
     current_wave_number = (
-        (_wave_index_for(run) + 1) if run.status == SESSION_STATUS_STARTED else total_waves
+        (_wave_index_for(run, published_waves=published_waves) + 1)
+        if run.status == SESSION_STATUS_STARTED
+        else total_waves
     )
     level_progress = _level_progress_payload(run)
     return {
@@ -327,7 +342,11 @@ def adventure_run_payload(run: AdventureRun, *, include_current_steps: bool = Tr
         "passed": run.passed_at is not None,
         "mastery": _mastery_payload(run),
         "completed_at": run.completed_at,
-        "current_attempt": attempt_payload(run, include_steps=include_current_steps)
+        "current_attempt": attempt_payload(
+            run,
+            include_steps=include_current_steps,
+            published_waves=published_waves,
+        )
         if current
         else None,
         "results": [] if current else [attempt_result_payload(run)],
