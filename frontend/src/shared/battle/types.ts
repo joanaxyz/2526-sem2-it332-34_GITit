@@ -1,10 +1,4 @@
-/**
- * Battle contract shared by adventures and challenges.
- *
- * Backend command submission returns neutral command_outcome data. Runtime HP,
- * monster HP, and animation events are frontend visual state derived from that
- * outcome; the backend no longer persists or returns battle_state.
- */
+/** Adventure battle state derived entirely on the frontend. */
 
 export type BattleMonster = {
   /** Stable within the encounter; event `monster`/`target` fields point here. */
@@ -61,21 +55,6 @@ export type BattleBlock = {
   /** Blue's frontend-derived HP. Null on replay/free-play payloads, so the bar hides. */
   player_hp?: number | null
   player_max_hp?: number | null
-}
-
-export type CommandSubmissionOutcome = {
-  processed: boolean
-  counted: boolean
-  solved: boolean
-  failed: boolean
-  command_family: string
-  previous_rules_passing: number
-  rules_passing: number
-  rules_delta: number
-  total_rules: number
-  max_counted_commands: number
-  counted_command_count: number
-  remaining_counted_commands: number
 }
 
 /** Normalized (0..1) rectangle for the authored land the fighters stand on. */

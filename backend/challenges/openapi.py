@@ -47,7 +47,6 @@ class ChallengeRunResponseSerializer(serializers.Serializer):
     scenario_context = serializers.DictField()
     chapter = serializers.DictField()
     story = serializers.DictField(allow_null=True)
-    battle_stage = serializers.DictField(allow_null=True)
     difficulty = serializers.CharField(allow_null=True)
     reward_coins = serializers.IntegerField()
     variant = serializers.DictField()

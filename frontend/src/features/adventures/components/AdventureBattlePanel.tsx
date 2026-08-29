@@ -90,10 +90,9 @@ export function AdventureBattlePanel({
     director.transitionCue && director.transitionCue.id !== expiredCueId ? director.transitionCue : null
 
   return (
-    <GameplayBattlePanel variant="adventure" className={className}>
+    <GameplayBattlePanel className={className}>
       <BattleStage
         director={director}
-        variant="adventure"
         groundFooter={
           <AdventureProgressBar
             run={run}

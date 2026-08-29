@@ -1,18 +1,16 @@
 import type { QueryClient } from '@tanstack/react-query'
 
 import { useChallengeCommandSubmission } from '@/features/challenges/hooks/useChallengeCommandSubmission'
+import type { ChallengeDagAnimationController } from '@/features/challenges/hooks/useChallengeDagAnimation'
 import type { ChallengeRun } from '@/features/challenges/types'
 import { stringList } from '@/features/challenges/components/challengeWorkspaceLayout'
 import { queryKeys } from '@/shared/api/queryKeys'
-import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
-import { battleEventsForSubmittedCommand } from '@/shared/level-runtime/commandBattle'
 import { isExitCommand } from '@/shared/level-runtime/commands'
 
 export function createChallengeWorkspaceCommandHandler({
-  run,
   runId,
   mutation,
-  director,
+  dagAnimation,
   queryClient,
   clearToast,
   evaluateAndNotify,
@@ -20,10 +18,9 @@ export function createChallengeWorkspaceCommandHandler({
   setWorkspaceEditorPath,
   queueOutcomeAnimation,
 }: {
-  run: ChallengeRun
   runId: number
   mutation: ReturnType<typeof useChallengeCommandSubmission>
-  director: ReturnType<typeof useBattleDirector>
+  dagAnimation: ChallengeDagAnimationController
   queryClient: QueryClient
   clearToast: () => void
   evaluateAndNotify: (
@@ -46,17 +43,11 @@ export function createChallengeWorkspaceCommandHandler({
     }
 
     clearToast()
-    director.onAttackStart()
+    dagAnimation.onCommandStart()
 
     mutation.mutate(command, {
       onSuccess: (response) => {
-        director.onResolve(battleEventsForSubmittedCommand({
-          command,
-          outcome: response.command_outcome,
-          fallbackCommandFamily: response.command_family,
-          monsters: director.currentMonsters(),
-          storyWorldSlug: run.story?.world_slug ?? run.story?.slug,
-        }))
+        dagAnimation.onCommandResolved(response.command_outcome)
         if (response.run.status === 'completed' || response.run.status === 'failed') {
           queueOutcomeAnimation(response.run.id)
         }
@@ -82,7 +73,7 @@ export function createChallengeWorkspaceCommandHandler({
           }
         }
       },
-      onError: () => director.onError(),
+      onError: () => dagAnimation.onCommandError(),
     })
   }
 }

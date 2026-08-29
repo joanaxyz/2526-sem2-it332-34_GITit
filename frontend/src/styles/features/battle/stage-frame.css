@@ -14,15 +14,8 @@
   bottom: 0;
   left: 50%;
   width: 100%;
+  max-width: none;
   transform: translateX(-50%);
-}
-
-.battle-arena--challenge {
-  max-width: none;
-}
-
-.battle-arena--pack {
-  max-width: none;
 }
 
 .battle-effect-layer,
@@ -53,6 +46,8 @@
   position: absolute;
   left: 50%;
   z-index: var(--z-raised);
+  width: 100%;
+  max-width: none;
   transform: translateX(-50%);
 }
 
@@ -63,16 +58,6 @@
   transform: translateX(-50%);
 }
 
-.battle-landing-rail--challenge {
-  width: 100%;
-  max-width: none;
-}
-
-.battle-landing-rail--pack {
-  width: 100%;
-  max-width: none;
-}
-
 .battle-center-overlay {
   pointer-events: none;
   position: absolute;
@@ -81,16 +66,6 @@
   display: grid;
   place-items: center;
   padding-inline: 1rem;
-}
-
-/* The stage's own eyebrow, pinned inside the arena's top-left. */
-.battle-stage-label {
-  position: absolute;
-  top: 0.65rem;
-  left: 0.8rem;
-  z-index: var(--z-sticky);
-  pointer-events: none;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
 }
 
 .battle-corner-overlay {

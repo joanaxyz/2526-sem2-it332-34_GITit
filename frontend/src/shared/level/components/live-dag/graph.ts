@@ -32,8 +32,22 @@ export function snapshotDelta(prev: RepositorySnapshot, next: RepositorySnapshot
   }
   collect(next.branches ?? {}, prev.branches ?? {})
   collect(next.remote_branches ?? {}, prev.remote_branches ?? {})
-  if (!commits.size && !refsByCommit.size) return NO_DELTA
-  return { commits, refsByCommit }
+  const previousHeadTarget = resolvedHeadTarget(prev)
+  const nextHeadTarget = resolvedHeadTarget(next)
+  const headChanged =
+    prev.head.type !== next.head.type ||
+    prev.head.name !== next.head.name ||
+    previousHeadTarget !== nextHeadTarget
+  const headTarget = headChanged ? nextHeadTarget : null
+  if (!commits.size && !refsByCommit.size && !headTarget) return NO_DELTA
+  return { commits, refsByCommit, headTarget }
+}
+
+function resolvedHeadTarget(snapshot: RepositorySnapshot) {
+  if (snapshot.head.type === 'branch') {
+    return snapshot.head.target ?? snapshot.branches?.[snapshot.head.name ?? ''] ?? null
+  }
+  return snapshot.head.target ?? null
 }
 
 export function rememberLayoutPositions(

@@ -1,4 +1,5 @@
-import type { BattleBlock, BattleEvent, BattleMonster, CommandSubmissionOutcome } from '@/shared/battle/types'
+import type { BattleBlock, BattleEvent, BattleMonster } from '@/shared/battle/types'
+import type { CommandSubmissionOutcome } from '@/shared/level-runtime/commandOutcome'
 import { DEFAULT_STORY_WORLD_SLUG, getStoryWorld } from '@/shared/story-worlds/registry'
 
 const FALLBACK_MONSTER_POOL = Object.keys(getStoryWorld(DEFAULT_STORY_WORLD_SLUG).battle.monsters)
@@ -20,42 +21,6 @@ type RosterOptions = {
   storyWorldSlug?: string | null
   /** Initial visual HP; should match the level's rule/command budget. */
   maxHp?: number | null
-}
-
-function gitTokens(command: string): string[] {
-  return command.trim().toLowerCase().split(/\s+/).filter(Boolean)
-}
-
-/** Command family for the effect registry: "git commit -m x" -> "commit". */
-export function commandSkill(command: string): string {
-  const tokens = gitTokens(command)
-  if (tokens[0] !== 'git' || !tokens[1]) return 'default'
-  return tokens[1]
-}
-
-function normalizeSkillName(skill: string | null | undefined): string | null {
-  const value = skill?.trim().toLowerCase()
-  if (!value) return null
-  return value.startsWith('git ') ? commandSkill(value) : value
-}
-
-/** Exact skill-sheet key for a concrete command form. */
-export function skillForCommand(command: string, fallbackSkill?: string | null): string {
-  const tokens = gitTokens(command)
-  if (tokens[0] === 'git') {
-    if (tokens[1] === 'checkout' && (tokens.includes('--ours') || tokens.includes('--theirs'))) {
-      return 'checkout-conflict'
-    }
-    if (tokens[1] === 'diff' && (tokens.includes('--ours') || tokens.includes('--theirs') || tokens.includes('--base'))) {
-      return 'diff-conflict'
-    }
-  }
-  return normalizeSkillName(fallbackSkill) ?? commandSkill(command)
-}
-
-/** How many checklist rows are ticked (objective progress signal). */
-export function countSatisfied(checks: Array<{ satisfied: boolean }> | null | undefined): number {
-  return (checks ?? []).reduce((n, check) => n + (check.satisfied ? 1 : 0), 0)
 }
 
 /** Deterministic adventure roster for the frontend-only visual encounter. */
@@ -80,27 +45,6 @@ export function clientAdventureRoster(
       species,
       hp: maxHp,
       max_hp: maxHp,
-      alive: true,
-    },
-  ]
-}
-
-/** Deterministic challenge opponent for the frontend-only visual encounter. */
-export function clientChallengeRoster(
-  _levelId: number,
-  maxCounted: number,
-  speciesPool: string[] = FALLBACK_MONSTER_POOL,
-  options: RosterOptions = {},
-): BattleMonster[] {
-  const storyWorldSlug = options.storyWorldSlug ?? DEFAULT_STORY_WORLD_SLUG
-  const hp = Math.max(3, Math.min(8, options.maxHp ?? maxCounted))
-  const species = selectSpecies(speciesPool, options.seed ?? `${storyWorldSlug}:challenge:${_levelId}:${maxCounted}`)
-  return [
-    {
-      id: 0,
-      species,
-      hp,
-      max_hp: hp,
       alive: true,
     },
   ]
@@ -132,7 +76,7 @@ export function deriveBattleEventsFromCommandOutcome(input: DeriveFromCommandOut
   const outcome = input.outcome
   const baseMonsters = input.monsters.length
     ? input.monsters
-    : clientChallengeRoster(0, Math.max(1, outcome.max_counted_commands || outcome.total_rules || 1), undefined, {
+    : clientAdventureRoster(0, 1, undefined, {
         storyWorldSlug: input.storyWorldSlug,
         maxHp: Math.max(1, outcome.total_rules || outcome.max_counted_commands || 1),
         seed: `${input.storyWorldSlug ?? DEFAULT_STORY_WORLD_SLUG}:fallback:${outcome.command_family}:${outcome.max_counted_commands}`,
