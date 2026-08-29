@@ -277,6 +277,15 @@
   font-size: var(--text-xs);
 }
 
+.lvlctx-copy-label:not(.sr-only) {
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
 .lvlctx-copy-btn {
   position: absolute;
   top: 0.42rem;

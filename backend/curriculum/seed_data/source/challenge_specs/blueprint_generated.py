@@ -511,7 +511,7 @@ def _blueprint_challenges() -> list[dict[str, Any]]:
                         "before": "main -> c0; src/ui.py untracked",
                         "after": "main -> c0 unchanged; feature/ui -> c1",
                         "initial": repo(commits=[commit("c0", "Initial", [], {"README.md": "base\n"})], branches={"main": "c0"}, working_tree={"src/ui.py": {"status": "untracked", "content": "class UI:\n    pass\n"}}),
-                        "solution": ["git switch -c feature/ui", "git add src/ui.py", "git commit -m 'Add UI feature'", "git log --oneline --graph"],
+                        "solution": ["git switch -c feature/ui", "git add src/ui.py", "git commit -m 'Add UI feature'", "git log --oneline --graph --all"],
                         "required": ["git switch -c", "git add", "git commit", "git log"],
                         "state_requirements": {
                             "head_branch": "feature/ui",
@@ -528,7 +528,7 @@ def _blueprint_challenges() -> list[dict[str, Any]]:
                         "before": "main -> c0; docs/index.md untracked",
                         "after": "main -> c0 unchanged; feature/docs -> c1",
                         "initial": repo(commits=[commit("c0", "Initial", [], {"README.md": "base\n"})], branches={"main": "c0"}, working_tree={"docs/index.md": {"status": "untracked", "content": "# Docs\n"}}),
-                        "solution": ["git switch -c feature/docs", "git add docs/index.md", "git commit -m 'Add docs feature'", "git log --oneline --graph"],
+                        "solution": ["git switch -c feature/docs", "git add docs/index.md", "git commit -m 'Add docs feature'", "git log --oneline --graph --all"],
                         "required": ["git switch -c", "git add", "git commit", "git log"],
                         "state_requirements": {
                             "head_branch": "feature/docs",

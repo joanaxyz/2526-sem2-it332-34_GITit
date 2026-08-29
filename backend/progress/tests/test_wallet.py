@@ -9,19 +9,11 @@ from testing.runtime_factories import api_client_for, create_stage_readme_challe
 
 
 def make_user(django_user_model, username: str = "student"):
-    user = django_user_model.objects.create_user(
+    return django_user_model.objects.create_user(
         username=username,
         email=f"{username}@example.com",
         password="pass12345",
     )
-    # Starting a challenge requires an owned companion; grant one directly so
-    # these wallet tests don't have to go through the shop purchase flow.
-    from shop.models import Entitlement
-
-    Entitlement.objects.get_or_create(
-        player=get_or_create_player(user), kind="companion", slug="blue"
-    )
-    return user
 
 
 def test_award_credits_balance_once_per_key(db, django_user_model):

@@ -23,7 +23,11 @@ export function CommitNode({ data }: NodeProps<CommitNodeData>) {
 
   return (
     <div
-      className={cn('relative z-10 flex w-36 flex-col items-center gap-2', data.isEntering && 'dag-node-enter')}
+      className={cn(
+        'relative z-10 flex w-36 flex-col items-center gap-2',
+        data.isEntering && 'dag-node-enter',
+        data.isEntering && `dag-node-enter--${data.layoutDirection}`,
+      )}
       onMouseEnter={data.onActivate}
       onMouseLeave={data.onDismiss}
       onFocus={data.onActivate}
@@ -53,7 +57,10 @@ export function CommitNode({ data }: NodeProps<CommitNodeData>) {
       {(visibleRefs.length > 0 || data.isDetachedHead) && (
         <div className="flex max-w-36 flex-wrap justify-center gap-1">
           {data.isDetachedHead && (
-            <span className="rounded-full border border-accent/40 bg-accent/15 px-2 py-0.5 text-[11px] font-semibold leading-none text-accent">
+            <span className={cn(
+              'rounded-full border border-accent/40 bg-accent/15 px-2 py-0.5 text-[11px] font-semibold leading-none text-accent',
+              data.enteringHead && 'dag-ref-enter',
+            )}>
               HEAD
             </span>
           )}
@@ -68,7 +75,7 @@ export function CommitNode({ data }: NodeProps<CommitNodeData>) {
                     : ref.kind === 'remote'
                       ? 'border-accent/35 bg-accent/10 text-accent'
                       : 'border-border bg-secondary text-muted-foreground',
-                  data.enteringRefs?.includes(ref.name) && 'dag-ref-enter',
+                  (data.enteringRefs?.includes(ref.name) || (isActive && data.enteringHead)) && 'dag-ref-enter',
                 )}
                 key={`${ref.kind}:${ref.name}`}
                 title={ref.name}

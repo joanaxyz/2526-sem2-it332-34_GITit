@@ -113,7 +113,7 @@ export function StoryCompanionPanel({ companion }: { companion: CompanionDef | n
         className="story-companion-panel story-companion-panel--empty"
       >
         <div className="story-companion-empty">
-          <p>Choose a companion before entering an Adventure or Challenge.</p>
+          <p>Choose a companion before entering an Adventure.</p>
           <Link to={`${SHOP_ROUTE}?tab=companions&required=1`}>Choose companion</Link>
         </div>
       </GamePanel>

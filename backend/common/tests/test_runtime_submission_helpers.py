@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import common.runtime.command_submission as command_submission
 from common.runtime import (
-    battle_rule_counts,
+    progress_rule_counts,
     repository_response_snapshot,
     update_fields_for_execution,
 )
@@ -54,7 +54,7 @@ def test_update_fields_for_execution_keeps_save_fields_stable_and_sorted():
     ]
 
 
-def test_battle_rule_counts_ignores_initial_invariants_that_temporarily_flip_off():
+def test_progress_rule_counts_ignores_initial_invariants_that_temporarily_flip_off():
     initially_passing = {
         "type": "index_empty",
         "rule": {"type": "index_empty"},
@@ -88,5 +88,5 @@ def test_battle_rule_counts_ignores_initial_invariants_that_temporarily_flip_off
         failed_rules=(initially_passing,),
     )
 
-    assert battle_rule_counts(after_init, baseline) == (2, 3)
-    assert battle_rule_counts(after_add, baseline) == (3, 3)
+    assert progress_rule_counts(after_init, baseline) == (2, 3)
+    assert progress_rule_counts(after_add, baseline) == (3, 3)
