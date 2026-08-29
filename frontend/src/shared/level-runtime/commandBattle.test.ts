@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
 import { battleEventsForSubmittedCommand } from '@/shared/level-runtime/commandBattle'
-import type { BattleMonster, CommandSubmissionOutcome } from '@/shared/battle/types'
+import type { BattleMonster } from '@/shared/battle/types'
+import type { CommandSubmissionOutcome } from '@/shared/level-runtime/commandOutcome'
 
 function monster(id = 1, hp = 2): BattleMonster {
   return { id, species: 'bone-soldier', hp, max_hp: hp, alive: hp > 0 }
@@ -26,7 +27,7 @@ function outcome(overrides: Partial<CommandSubmissionOutcome> = {}): CommandSubm
 }
 
 describe('battleEventsForSubmittedCommand', () => {
-  it('derives the same battle event contract for shared challenge/adventure command submissions', () => {
+  it('derives the battle event contract for adventure command submissions', () => {
     const block = battleEventsForSubmittedCommand({
       command: 'git add README.md',
       outcome: outcome({ command_family: 'add' }),

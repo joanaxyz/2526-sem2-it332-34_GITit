@@ -1,8 +1,9 @@
 import {
   deriveBattleEventsFromCommandOutcome,
-  skillForCommand,
 } from '@/shared/battle/deriveBattleEvents'
-import type { BattleMonster, CommandSubmissionOutcome } from '@/shared/battle/types'
+import type { BattleMonster } from '@/shared/battle/types'
+import type { CommandSubmissionOutcome } from '@/shared/level-runtime/commandOutcome'
+import { skillForCommand } from '@/shared/level-runtime/commandSkill'
 
 export function battleEventsForSubmittedCommand({
   command,

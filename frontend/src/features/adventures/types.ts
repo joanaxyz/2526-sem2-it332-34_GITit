@@ -1,4 +1,5 @@
-import type { BattleStage, CommandSubmissionOutcome } from '@/shared/battle/types'
+import type { BattleStage } from '@/shared/battle/types'
+import type { CommandSubmissionOutcome } from '@/shared/level-runtime/commandOutcome'
 import type { ChapterBook } from '@/features/story-map/components/book/bookTypes'
 import type { ApiSchemas } from '@/shared/api/generated/apiTypes'
 import type { LevelScenarioContext, RepositorySnapshot, TerminalStep } from '@/shared/level/types'

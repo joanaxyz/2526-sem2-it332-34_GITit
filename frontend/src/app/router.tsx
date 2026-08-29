@@ -104,8 +104,8 @@ const appRoutes: RouteObject[] = [
     children: [
       { path: '/', element: <Navigate replace to={HOME_ROUTE} /> },
       { path: HOME_ROUTE, element: <HomePage /> },
-      // Browsing Home and Stories does not require a companion. The play routes
-      // remain protected by RequireCompanion around LevelLayout below.
+      // Browsing Home, Stories, and repository-only challenges does not require
+      // a companion. Adventure play remains protected below.
       { path: LEGACY_STORY_ROUTE, element: <Navigate replace to={storyPath()} /> },
       { path: LEGACY_STORIES_ROUTE, element: <Navigate replace to={STORIES_ROUTE} /> },
       { path: `${LEGACY_STORIES_ROUTE}/:storySlug`, element: <LegacyStoryRouteRedirect /> },
@@ -208,9 +208,7 @@ const appRoutes: RouteObject[] = [
   {
     element: (
       <Protected>
-        <RequireCompanion>
-          <LevelLayout />
-        </RequireCompanion>
+        <LevelLayout />
       </Protected>
     ),
     children: [
@@ -223,6 +221,17 @@ const appRoutes: RouteObject[] = [
           Component: (await import('@/features/challenges/pages/ChallengeRunPage')).ChallengeRunPage,
         }),
       },
+    ],
+  },
+  {
+    element: (
+      <Protected>
+        <RequireCompanion>
+          <LevelLayout />
+        </RequireCompanion>
+      </Protected>
+    ),
+    children: [
       { path: '/adventure-levels/:levelId', element: <AdventureStartPage /> },
       {
         path: '/adventure-runs/:runId',

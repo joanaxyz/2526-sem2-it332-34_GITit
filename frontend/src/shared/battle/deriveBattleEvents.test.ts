@@ -1,13 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  clientChallengeRoster,
-  commandSkill,
-  countSatisfied,
+  clientAdventureRoster,
   deriveBattleEventsFromCommandOutcome,
-  skillForCommand,
 } from '@/shared/battle/deriveBattleEvents'
-import type { BattleMonster, CommandSubmissionOutcome } from '@/shared/battle/types'
+import type { BattleMonster } from '@/shared/battle/types'
+import type { CommandSubmissionOutcome } from '@/shared/level-runtime/commandOutcome'
+import { skillForCommand } from '@/shared/level-runtime/commandSkill'
 
 function monster(id = 0, hp = 3): BattleMonster {
   return { id, species: 'bone-soldier', hp, max_hp: hp, alive: hp > 0 }
@@ -31,25 +30,12 @@ function outcome(overrides: Partial<CommandSubmissionOutcome> = {}): CommandSubm
   }
 }
 
-describe('commandSkill', () => {
-  it('extracts the git subcommand', () => {
-    expect(commandSkill('git commit -m test')).toBe('commit')
-    expect(commandSkill('notgit')).toBe('default')
-  })
-})
-
 describe('skillForCommand', () => {
-  it('specializes conflict checkout/diff commands', () => {
+  it('extracts command families and specializes conflict commands', () => {
+    expect(skillForCommand('git commit -m test')).toBe('commit')
+    expect(skillForCommand('notgit')).toBe('default')
     expect(skillForCommand('git checkout --ours file.txt', 'checkout')).toBe('checkout-conflict')
     expect(skillForCommand('git diff --base file.txt', 'diff')).toBe('diff-conflict')
-  })
-})
-
-describe('countSatisfied', () => {
-  it('counts satisfied rows', () => {
-    expect(countSatisfied([{ satisfied: true }, { satisfied: false }, { satisfied: true }])).toBe(2)
-    expect(countSatisfied(null)).toBe(0)
-    expect(countSatisfied(undefined)).toBe(0)
   })
 })
 
@@ -151,11 +137,11 @@ describe('deriveBattleEventsFromCommandOutcome', () => {
 
 describe('client roster stability', () => {
   it('selects the same monster for the same seed', () => {
-    const a = clientChallengeRoster(7, 5, ['bone-archer', 'bone-ghost'], {
+    const a = clientAdventureRoster(7, 5, ['bone-archer', 'bone-ghost'], {
       seed: 'story:run:7',
       storyWorldSlug: 'arcane-spire',
     })
-    const b = clientChallengeRoster(7, 5, ['bone-archer', 'bone-ghost'], {
+    const b = clientAdventureRoster(7, 5, ['bone-archer', 'bone-ghost'], {
       seed: 'story:run:7',
       storyWorldSlug: 'arcane-spire',
     })
