@@ -14,6 +14,7 @@ import type { ProjectTreeNode } from '@/shared/level/utils/projectFiles'
 import type { WorkspaceFileInput } from '@/shared/level/workspaceFileTypes'
 import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
+import { useFocusTrap } from '@/shared/utils/useFocusTrap'
 
 type WorkspaceEditorOverlayProps = {
   snapshot: RepositorySnapshot
@@ -94,14 +95,18 @@ function WorkspaceEditorSurface({
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const gutterRef = useRef<HTMLDivElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
   const dirty = draftContent !== baselineContent
   const canWriteFile = Boolean(onWriteFile) && !writeDisabled && !submitting && Boolean(filePath)
   const lineNumbers = lineNumbersFor(draftContent, 18)
   const lineCount = Math.max(1, draftContent.split('\n').length)
   const byteCount = new Blob([draftContent]).size
   const isReadOnly = !onWriteFile || writeDisabled
+  const isOpen = open && Boolean(filePath)
 
-  if (!open || !filePath) return null
+  useFocusTrap(dialogRef, isOpen)
+
+  if (!isOpen) return null
 
   function closeOverlay() {
     if (dirty && !confirmDiscard()) return
@@ -153,6 +158,7 @@ function WorkspaceEditorSurface({
 
   return (
     <div
+      ref={dialogRef}
       aria-label={isConflicted ? 'Conflict resolver' : 'Workspace file editor'}
       aria-modal="true"
       className="workspace-editor-backdrop"

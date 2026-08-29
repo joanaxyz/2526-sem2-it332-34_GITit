@@ -23,6 +23,7 @@ import { useWalletSummary } from '@/shared/wallet/hooks/useWallet'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 import { ADMIN_ROUTES, HOME_ROUTE, SHOP_ROUTE, isStoryMapRoute, storyPath } from '@/shared/navigation/routes'
 import { cn } from '@/shared/utils/cn'
+import { useFocusTrap } from '@/shared/utils/useFocusTrap'
 
 type PrimaryNavItem = {
   to: string
@@ -162,7 +163,6 @@ function DropdownItem({
   return (
     <button
       type="button"
-      role="menuitem"
       className={cn(
         'app-profile-menu-item',
         danger ? 'app-profile-menu-item--danger' : 'app-profile-menu-item--normal',
@@ -186,6 +186,7 @@ function ProfileDropdown({
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const rank = useRank()
   const playerLoadout = usePlayerLoadout()
   const initials = getInitials(user.username)
@@ -215,13 +216,15 @@ function ProfileDropdown({
     }
   }, [open])
 
+  useFocusTrap(panelRef, open)
+
   return (
     <div ref={ref} className="app-profile">
       <button
         type="button"
         aria-label={`${open ? 'Close' : 'Open'} account menu for ${displayName}`}
         aria-expanded={open}
-        aria-haspopup="menu"
+        aria-controls="app-profile-menu"
         className="app-profile-trigger"
         onClick={() => setOpen((value) => !value)}
       >
@@ -239,7 +242,7 @@ function ProfileDropdown({
       </button>
 
       {open ? (
-        <div className="dropdown-menu app-profile-menu" role="menu">
+        <div ref={panelRef} id="app-profile-menu" className="dropdown-menu app-profile-menu">
           <div className="app-profile-menu-head">
             <div>
               <p>{displayName}</p>
