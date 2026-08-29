@@ -65,7 +65,10 @@ function toSkill(raw: RawSkill): CompanionSkill {
       rows: raw.sheet.rows,
       frameCount: raw.sheet.frameCount,
       fps: raw.sheet.fps,
-      loop: false,
+      // Shop's Skill FX preview is the only reader of this flag (see
+      // CompanionSkillPreview) - it showcases the cast on loop rather than
+      // freezing on the dissipated last frame.
+      loop: true,
     },
   }
 }
