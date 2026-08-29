@@ -116,6 +116,24 @@
   box-shadow: 0 0 14px rgba(var(--theme-primary-rgb), 0.6);
 }
 
+/* Mastered/in-progress skills (value > 0) read in the muted teal accent instead of
+   the navigation blue, so earned skill progress reads distinctly from chrome. */
+.home-overview-command-row.is-progressed .home-overview-command-meter span {
+  background: linear-gradient(90deg, rgba(var(--theme-teal-rgb), 0.85), rgba(var(--theme-teal-rgb), 0.98));
+  box-shadow: 0 0 14px rgba(var(--theme-teal-rgb), 0.55);
+}
+
+.home-overview-command-row.is-progressed > span strong {
+  font-weight: 800;
+}
+
+/* Untouched skills (0%) stay muted gray - no accent colour, matching the locked
+   achievement treatment rather than the navigation blue used elsewhere. */
+.home-overview-command-row:not(.is-progressed) .home-overview-command-meter span {
+  background: rgba(117, 143, 159, 0.42);
+  box-shadow: none;
+}
+
 .home-overview-mastery-orb {
   display: grid;
   align-content: center;

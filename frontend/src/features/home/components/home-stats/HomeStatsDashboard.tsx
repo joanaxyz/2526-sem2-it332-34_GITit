@@ -22,19 +22,26 @@ function dayLabel(iso: string) {
 function SkillProfileBars({ rows }: { rows: HomeSkillProfileRow[] }) {
   return (
     <div className="home-overview-command-list">
-      {rows.map((row) => (
-        <div className="home-overview-command-row" key={row.key} title={row.hint}>
-          <GitCommandIcon command={row.command} className="home-overview-command-glyph" />
-          <span>
-            <strong>{row.label}</strong>
-            <small>{row.hint}</small>
-          </span>
-          <div className="home-overview-command-meter" aria-label={`${row.label}: ${formatPercent(row.value)}`}>
-            <span style={{ width: `${Math.max(0, Math.min(100, row.value ?? 0))}%` }} />
+      {rows.map((row) => {
+        const hasProgress = (row.value ?? 0) > 0
+        return (
+          <div
+            className={`home-overview-command-row${hasProgress ? ' is-progressed' : ''}`}
+            key={row.key}
+            title={row.hint}
+          >
+            <GitCommandIcon command={row.command} className="home-overview-command-glyph" />
+            <span>
+              <strong>{row.label}</strong>
+              <small>{row.hint}</small>
+            </span>
+            <div className="home-overview-command-meter" aria-label={`${row.label}: ${formatPercent(row.value)}`}>
+              <span style={{ width: `${Math.max(0, Math.min(100, row.value ?? 0))}%` }} />
+            </div>
+            <strong>{formatPercent(row.value)}</strong>
           </div>
-          <strong>{formatPercent(row.value)}</strong>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
