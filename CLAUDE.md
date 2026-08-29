@@ -10,7 +10,7 @@ Scenario-driven Git learning platform. `frontend/` is a React + Vite SPA; `backe
 - [CONTENT_AUTHORING_GUIDE.md](CONTENT_AUTHORING_GUIDE.md) — how to author adventures, challenges, variants, objectives, and generated targets.
 
 ## Non-Negotiable Rules
-
+- Do not add a "Co-Authored-By: Claude" (or similar) trailer to commit messages — commits should list only the human author.
 - Do not add deprecated product vocabulary to active code.
 - Keep current architecture in the root markdown files; reserve `docs/goals/` for scoped implementation artifacts.
 - Do not make backend runtime code depend on frontend source files or assets.
