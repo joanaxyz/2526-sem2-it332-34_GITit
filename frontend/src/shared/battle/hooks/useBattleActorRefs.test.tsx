@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { MonsterActorHandle } from '@/shared/battle/components/MonsterActor'
 import type { BattleMonster } from '@/shared/battle/types'
@@ -56,5 +56,50 @@ describe('useBattleActorRefs monster effect anchors', () => {
     expect(result.current.monsterImpactAnchor(7)).toEqual({ x: 250, y: 200 })
     expect(result.current.monsterFeetAnchor(7)).toEqual({ x: 250, y: 298 })
     expect(result.current.monsterSizeScale(7)).toBe(1.25)
+  })
+})
+
+describe('useBattleActorRefs camera motion honors the app motion setting', () => {
+  afterEach(() => {
+    delete document.documentElement.dataset.motion
+    vi.restoreAllMocks()
+  })
+
+  it('skips the camera animation when data-motion is reduced, even without a matching OS preference', async () => {
+    // No OS-level `prefers-reduced-motion` is mocked here at all — only the
+    // in-app setting (`document.documentElement.dataset.motion`, as set by
+    // `applyPreferences`) should be consulted.
+    document.documentElement.dataset.motion = 'reduced'
+
+    const rosterRef = { current: [] as BattleMonster[] }
+    const storyWorldRef = { current: getStoryWorld(DEFAULT_STORY_WORLD_SLUG) }
+    const { result } = renderHook(() => useBattleActorRefs(rosterRef, storyWorldRef))
+
+    const node = document.createElement('div')
+    const animate = vi.fn()
+    Object.defineProperty(node, 'animate', { configurable: true, value: animate })
+    result.current.bindCamera(node)
+
+    await result.current.panCamera(120, 400)
+
+    expect(animate).not.toHaveBeenCalled()
+    expect(node.style.transform).toBe('')
+  })
+
+  it('animates the camera when data-motion is full', async () => {
+    document.documentElement.dataset.motion = 'full'
+
+    const rosterRef = { current: [] as BattleMonster[] }
+    const storyWorldRef = { current: getStoryWorld(DEFAULT_STORY_WORLD_SLUG) }
+    const { result } = renderHook(() => useBattleActorRefs(rosterRef, storyWorldRef))
+
+    const node = document.createElement('div')
+    const animate = vi.fn().mockReturnValue({ finished: Promise.resolve(), cancel: vi.fn() })
+    Object.defineProperty(node, 'animate', { configurable: true, value: animate })
+    result.current.bindCamera(node)
+
+    await result.current.panCamera(120, 400)
+
+    expect(animate).toHaveBeenCalledTimes(1)
   })
 })

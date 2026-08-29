@@ -11,7 +11,7 @@ import type { BattleBlock, BattleMonster } from '@/shared/battle/types'
 import { playWaveTransitionSound } from '@/shared/audio/battleAudio'
 import type { StoryWorldDef } from '@/shared/story-worlds/types'
 
-import { prefersReducedMotion, TRAVEL_SCROLL_MS, TRAVEL_SCROLL_PX, wait } from './battleMotion'
+import { isMotionReduced, TRAVEL_SCROLL_MS, TRAVEL_SCROLL_PX, wait } from './battleMotion'
 import { battleResolveFlags, visibleRosterForResolve, visibleWaveRoster } from './battleResolveSnapshots'
 import { useMonsterCounterattack } from './useMonsterCounterattack'
 import { usePlayerAttackChoreography } from './usePlayerAttackChoreography'
@@ -111,7 +111,7 @@ export function useBattleResolveQueue({
 
   const onResolve = useCallback(
     (block: BattleBlock) => {
-      const reduced = prefersReducedMotion()
+      const reduced = isMotionReduced()
       const hadAttack = attackPendingRef.current
       attackPendingRef.current = false
       const events = block.events

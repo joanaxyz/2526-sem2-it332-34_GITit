@@ -13,6 +13,7 @@ import { pathDataFor, pathGeometry } from '@/features/story-map/utils/pathGeomet
 import { useStoryArtifactNavigation } from '@/features/story-map/hooks/useStoryArtifactNavigation'
 import type { LearningChapter } from '@/features/story-map/types'
 import { StarRating } from '@/shared/level/components/StarRating'
+import { useFocusTrap } from '@/shared/utils/useFocusTrap'
 
 import easyIconImage from '@/assets/images/easy_icon.png'
 import hardIconImage from '@/assets/images/hard_icon.png'
@@ -123,6 +124,12 @@ export function StoryAdventurePath({
     })
     return () => window.cancelAnimationFrame(frame)
   }, [trialsOpen])
+
+  // Traps focus inside the trials panel while open and restores it to
+  // whatever opened it (the Challenge Gate node button) when it closes —
+  // otherwise closing via Escape drops focus into the void, since the
+  // focused trial card unmounts along with the rest of the panel.
+  useFocusTrap(trialsPanelRef, trialsOpen)
 
   // One extra point: the chapter's challenge trials live on the same path,
   // as its final node.
