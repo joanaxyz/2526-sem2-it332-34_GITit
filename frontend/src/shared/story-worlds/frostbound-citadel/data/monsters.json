@@ -1,0 +1,1258 @@
+{
+  "frost-ranger": {
+    "label": "Frost Ranger",
+    "scale": 1.2,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 560,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-01/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.58,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 2,
+        "impact_start_frame": 16
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 24,
+      "range_px": 305
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-01/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 245,
+        "frameHeight": 180,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-01/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 245,
+        "frameHeight": 180,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-01/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 245,
+        "frameHeight": 180,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-01/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 245,
+        "frameHeight": 180,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-01/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "glacier-smith": {
+    "label": "Glacier Smith",
+    "scale": 1.13,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 56,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 780,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "feet",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-02/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.82,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 10,
+      "range_px": 165
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-02/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 247,
+        "frameHeight": 228,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-02/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 247,
+        "frameHeight": 228,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-02/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 247,
+        "frameHeight": 228,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-02/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 247,
+        "frameHeight": 228,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-02/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "whiteout-wyrm": {
+    "label": "Whiteout Wyrm",
+    "scale": 1.38,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 660,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-03/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.62,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 2,
+        "impact_start_frame": 16
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 5,
+      "range_px": 290
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-03/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 250,
+        "frameHeight": 162,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-03/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 250,
+        "frameHeight": 162,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-03/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 250,
+        "frameHeight": 162,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-03/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 250,
+        "frameHeight": 162,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-03/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "snow-wraith": {
+    "label": "Snow Wraith",
+    "scale": 1.45,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 600,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-04/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.58,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 5,
+        "impact_start_frame": 16
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.65,
+      "foot_offset": 9,
+      "range_px": 260
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-04/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 217,
+        "frameHeight": 176,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-04/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 217,
+        "frameHeight": 176,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-04/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 217,
+        "frameHeight": 176,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-04/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 217,
+        "frameHeight": 176,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-04/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "iceguard-lancer": {
+    "label": "Iceguard Lancer",
+    "scale": 1.36,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 64,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 660,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "center",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-05/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.74,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 10,
+      "range_px": 165
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-05/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 242,
+        "frameHeight": 149,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-05/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 242,
+        "frameHeight": 149,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-05/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 242,
+        "frameHeight": 149,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-05/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 242,
+        "frameHeight": 149,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-05/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "rimecaller": {
+    "label": "Rimecaller",
+    "scale": 1.23,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 680,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-06/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.62,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 5,
+        "impact_start_frame": 16
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.53,
+      "foot_offset": 4,
+      "range_px": 285
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-06/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 247,
+        "frameHeight": 177,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-06/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 247,
+        "frameHeight": 177,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-06/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 247,
+        "frameHeight": 177,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-06/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 247,
+        "frameHeight": 177,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-06/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "citadel-guard": {
+    "label": "Citadel Guard",
+    "scale": 1.1,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 56,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 680,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "center",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-07/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.74,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.48,
+      "foot_offset": 22,
+      "range_px": 128
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-07/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 246,
+        "frameHeight": 202,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-07/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 246,
+        "frameHeight": 202,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-07/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 246,
+        "frameHeight": 202,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-07/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 246,
+        "frameHeight": 202,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-07/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "hoarfrost-geode-mimic": {
+    "label": "Hoarfrost Geode Mimic",
+    "scale": 1.03,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 56,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 760,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "center",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-08/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.8,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 4,
+      "range_px": 128
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-08/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 235,
+        "frameHeight": 194,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-08/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 235,
+        "frameHeight": 194,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-08/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 235,
+        "frameHeight": 194,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-08/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 235,
+        "frameHeight": 194,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-08/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "frostveil-duchess": {
+    "label": "Frostveil Duchess",
+    "scale": 1.04,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 700,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-10/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.64,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 5,
+        "impact_start_frame": 16
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 7,
+      "range_px": 275
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-10/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 215,
+        "frameHeight": 213,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-10/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 215,
+        "frameHeight": 213,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-10/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 215,
+        "frameHeight": 213,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-10/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 215,
+        "frameHeight": 213,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-10/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "winter-regent": {
+    "label": "Winter Regent",
+    "scale": 1.25,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 72
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.53,
+      "foot_offset": 15,
+      "range_px": 210
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-11/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 243,
+        "frameHeight": 208,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-11/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 243,
+        "frameHeight": 208,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-11/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 243,
+        "frameHeight": 208,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-11/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 243,
+        "frameHeight": 208,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-11/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "twinmaw-direwolf": {
+    "label": "White Tiger",
+    "scale": 1.12,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 64,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 700,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "center",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-12/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.78,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 4,
+      "range_px": 165
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-12/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 244,
+        "frameHeight": 204,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-12/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 244,
+        "frameHeight": 204,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-12/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 244,
+        "frameHeight": 204,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-12/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 244,
+        "frameHeight": 204,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-12/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "jester-of-hail": {
+    "label": "Jester of Hail",
+    "scale": 0.95,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 620,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-13/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.56,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 3,
+        "impact_start_frame": 16
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 8,
+      "range_px": 255
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-13/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 244,
+        "frameHeight": 223,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-13/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 244,
+        "frameHeight": 223,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-13/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 244,
+        "frameHeight": 223,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-13/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 244,
+        "frameHeight": 223,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-13/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "aurora-siren": {
+    "label": "Aurora Siren",
+    "scale": 0.81,
+    "attack": {
+      "kind": "projectile",
+      "hit_frame": 15,
+      "effect": {
+        "playback": "projectile",
+        "duration_ms": 760,
+        "orient_to": "travel",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-14/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.64,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "travel"
+          }
+        ],
+        "anchor": "center",
+        "motion": "charge",
+        "launch_start_frame": 3,
+        "impact_start_frame": 16
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 4,
+      "range_px": 285
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-14/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 248,
+        "frameHeight": 227,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-14/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 248,
+        "frameHeight": 227,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-14/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 248,
+        "frameHeight": 227,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-14/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 248,
+        "frameHeight": 227,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-14/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  },
+  "driftbound-scout": {
+    "label": "Driftbound Scout",
+    "scale": 1.39,
+    "attack": {
+      "kind": "melee",
+      "hit_frame": 15,
+      "lunge_px": 56,
+      "effect": {
+        "playback": "target",
+        "duration_ms": 620,
+        "orient_to": "target-facing",
+        "placement": "target",
+        "anchor": "center",
+        "layers": [
+          {
+            "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-15/effects/skill.png",
+            "fps": 18,
+            "loops": false,
+            "frameWidth": 256,
+            "frameHeight": 256,
+            "columns": 5,
+            "rows": 5,
+            "frameCount": 25,
+            "layer": "front",
+            "scale": 0.62,
+            "opacity": 1,
+            "offset_x": 0,
+            "offset_y": 0,
+            "orient_to": "target-facing"
+          }
+        ]
+      }
+    },
+    "metrics": {
+      "hp_bar_fraction": 0.55,
+      "foot_offset": 15,
+      "range_px": 128
+    },
+    "sprites": {
+      "idle": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-15/idle.png",
+        "fps": 10,
+        "loops": true,
+        "frameWidth": 254,
+        "frameHeight": 146,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "attack": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-15/attack.png",
+        "fps": 24,
+        "loops": false,
+        "frameWidth": 254,
+        "frameHeight": 146,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "hurt": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-15/hurt.png",
+        "fps": 26,
+        "loops": false,
+        "frameWidth": 254,
+        "frameHeight": 146,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "death": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-15/death.png",
+        "fps": 20,
+        "loops": false,
+        "frameWidth": 254,
+        "frameHeight": 146,
+        "columns": 5,
+        "rows": 5,
+        "frameCount": 25
+      },
+      "portrait": {
+        "src": "/cosmetics/story-worlds/frostbound-citadel/monsters/monster-15/portrait.png",
+        "fps": 1,
+        "loops": false,
+        "frameWidth": 256,
+        "frameHeight": 256,
+        "columns": 1,
+        "rows": 1,
+        "frameCount": 1
+      }
+    }
+  }
+}

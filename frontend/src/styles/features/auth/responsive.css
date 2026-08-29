@@ -1,0 +1,14 @@
+@media (max-width: 520px) {
+  .auth-content { padding: 0.85rem; }
+  .auth-card--primary { padding: 1.25rem; }
+  .auth-page-brand p { font-size: var(--text-sm); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-submit,
+  .auth-input,
+  .auth-submit .animate-spin {
+    animation: none;
+    transition: none;
+  }
+}

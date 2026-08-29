@@ -1,0 +1,181 @@
+services:
+  # Disposable $0 preview: Nginx serves the Vite build and proxies /api to
+  # Gunicorn inside this single Free web-service container. Keeping one public
+  # origin preserves secure SameSite=Strict refresh cookies.
+  - type: web
+    name: git-it-app
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./deploy/render-free/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health/live/
+    autoDeployTrigger: checksPass
+    buildFilter:
+      paths:
+        - backend/**
+        - frontend/**
+        - deploy/render-free/**
+        - .dockerignore
+        - render.yaml
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_LOG_LEVEL
+        value: INFO
+      - key: PERFORMANCE_TIMING_ENABLED
+        value: "False"
+
+      # Free web services cannot use pre-deploy commands or one-off jobs.
+      # Keep migrations on startup, but seed curriculum separately so a long
+      # seed cannot prevent Gunicorn/Nginx from binding the public port.
+      - key: DJANGO_MIGRATE_ON_STARTUP
+        value: "True"
+      - key: DJANGO_SEED_ON_STARTUP
+        value: "False"
+      - key: GUNICORN_WORKERS
+        value: "1"
+      - key: GUNICORN_THREADS
+        value: "2"
+      - key: GUNICORN_TIMEOUT
+        value: "60"
+
+      - key: DJANGO_ALLOWED_HOSTS
+        fromService:
+          type: web
+          name: git-it-app
+          envVarKey: RENDER_EXTERNAL_HOSTNAME
+      - key: DJANGO_CORS_ALLOWED_ORIGINS
+        fromService:
+          type: web
+          name: git-it-app
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: DJANGO_CSRF_TRUSTED_ORIGINS
+        fromService:
+          type: web
+          name: git-it-app
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: CORS_ALLOW_CREDENTIALS
+        value: "True"
+      - key: FRONTEND_BASE_URL
+        fromService:
+          type: web
+          name: git-it-app
+          envVarKey: RENDER_EXTERNAL_URL
+
+      # Paste the existing Supabase pooler URI when Render prompts. Never
+      # commit the database password to this file.
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_SSLMODE
+        value: require
+      - key: DATABASE_CONN_MAX_AGE
+        value: "60"
+      - key: DATABASE_CONN_HEALTH_CHECKS
+        value: "True"
+      - key: DATABASE_DISABLE_SERVER_SIDE_CURSORS
+        value: "True"
+      - key: DATABASE_DISABLE_PREPARED_STATEMENTS
+        value: "True"
+      - key: DATABASE_LOCK_TIMEOUT_MS
+        value: "10000"
+      - key: DATABASE_STATEMENT_TIMEOUT_MS
+        value: "30000"
+
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: git-it-cache
+          property: connectionString
+      - key: REDIS_SOCKET_CONNECT_TIMEOUT
+        value: "0.5"
+      - key: REDIS_SOCKET_TIMEOUT
+        value: "0.5"
+
+      # Render terminates TLS before forwarding to this public container. Trust
+      # only loopback/private proxy ranges, never arbitrary public peers.
+      - key: DJANGO_TRUST_PROXY_HEADERS
+        value: "True"
+      - key: DJANGO_TRUSTED_PROXY_IPS
+        value: 127.0.0.0/8,10.0.0.0/8,100.64.0.0/10,172.16.0.0/12,192.168.0.0/16,::1/128,fc00::/7
+
+      - key: AUTH_LOGIN_MAX_ATTEMPTS
+        value: "5"
+      - key: AUTH_LOGIN_LOCKOUT_SECONDS
+        value: "300"
+      - key: THROTTLE_AUTH_REGISTER
+        value: 60/hour
+      - key: THROTTLE_AUTH_REFRESH
+        value: 600/hour
+      - key: THROTTLE_AUTH_PASSWORD_RESET
+        value: 20/hour
+      - key: THROTTLE_AUTH_PASSWORD_RESET_CONFIRM
+        value: 60/hour
+      - key: THROTTLE_COMMAND_SUBMIT
+        value: 120/min
+
+      - key: JWT_ACCESS_TOKEN_LIFETIME_MINUTES
+        value: "15"
+      - key: JWT_REFRESH_TOKEN_LIFETIME_DAYS
+        value: "7"
+      - key: JWT_COOKIE_NAME
+        value: git_it_refresh
+      - key: JWT_COOKIE_PATH
+        value: /api/auth/
+      - key: JWT_COOKIE_DOMAIN
+        value: ""
+      - key: JWT_COOKIE_SAMESITE
+        value: Strict
+      - key: JWT_COOKIE_SECURE
+        value: "True"
+
+      - key: SESSION_COOKIE_SECURE
+        value: "True"
+      - key: CSRF_COOKIE_SECURE
+        value: "True"
+      - key: SECURE_SSL_REDIRECT
+        value: "True"
+      - key: SECURE_HSTS_SECONDS
+        value: "31536000"
+      - key: SECURE_HSTS_INCLUDE_SUBDOMAINS
+        value: "False"
+      - key: SECURE_HSTS_PRELOAD
+        value: "False"
+      - key: SECURE_CONTENT_TYPE_NOSNIFF
+        value: "True"
+      - key: SECURE_REFERRER_POLICY
+        value: same-origin
+
+      # Optional first-admin bootstrap. Render prompts for these secret values
+      # during initial Blueprint creation; remove all three after first login.
+      - key: DJANGO_SUPERUSER_USERNAME
+        sync: false
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
+
+      # Email is deliberately disabled for this disposable preview.
+      - key: EMAIL_BACKEND
+        value: django.core.mail.backends.dummy.EmailBackend
+      - key: DEFAULT_FROM_EMAIL
+        value: GIT it! <no-reply@example.com>
+      - key: PASSWORD_RESET_TIMEOUT
+        value: "3600"
+      - key: API_VERSION
+        value: 0.1.0
+      - key: ALLOW_DESTRUCTIVE_SEED_RESET
+        value: "False"
+
+  # Free Key Value is non-persistent. Database-backed refresh-session records
+  # remain the security source of truth, but throttle counters can reset.
+  - type: keyvalue
+    name: git-it-cache
+    plan: free
+    region: singapore
+    ipAllowList: []
+    maxmemoryPolicy: noeviction

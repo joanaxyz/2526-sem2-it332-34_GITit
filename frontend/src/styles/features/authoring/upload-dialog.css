@@ -1,0 +1,258 @@
+/* -- Upload asset dialog -- */
+.upload-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(2, 6, 12, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.upload-dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(36rem, 100%);
+  max-height: min(90vh, 52rem);
+  border-radius: var(--panel-radius);
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg-raised);
+  box-shadow: var(--panel-inset), var(--shadow-overlay);
+  overflow: hidden;
+}
+
+.upload-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.16);
+}
+.upload-dialog-title {
+  margin-top: 0.1rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: hsl(var(--foreground));
+}
+.upload-dialog-body {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1.1rem 1.25rem;
+  overflow-y: auto;
+}
+
+.upload-file-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Transparency preview backing for sprite art. */
+.checkerboard {
+  background-color: rgba(8, 14, 24, 0.9);
+  background-image:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.05) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.05) 75%);
+  background-size: 18px 18px;
+  background-position: 0 0, 0 9px, 9px -9px, -9px 0;
+}
+.upload-change {
+  border: 0;
+  background: transparent;
+  color: rgba(var(--theme-primary-rgb), 0.85);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.upload-field {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.upload-label {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.upload-input {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border-radius: var(--control-radius);
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+  color: hsl(var(--foreground));
+  font-size: 0.84rem;
+}
+
+.upload-input:focus {
+  border-color: var(--control-border-hover);
+  outline: none;
+  box-shadow: var(--control-focus-ring);
+}
+
+.upload-segment {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.upload-segment button {
+  flex: 1;
+  min-height: var(--control-height-md);
+  padding: 0 0.75rem;
+  border-radius: var(--control-radius);
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out);
+}
+
+.upload-segment button:hover,
+.upload-segment button:focus-visible {
+  border-color: var(--control-border-hover);
+  background: var(--control-bg-hover);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.upload-segment button:focus-visible {
+  box-shadow: var(--control-focus-ring);
+}
+
+.upload-segment button.is-active {
+  border-color: var(--control-primary-border);
+  background: rgba(var(--theme-primary-rgb), 0.12);
+  color: var(--text-primary);
+}
+
+.upload-segment button.is-active:focus-visible {
+  box-shadow: var(--control-focus-ring), 0 0 18px rgba(var(--theme-primary-rgb), 0.24);
+}
+
+.upload-dialog-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.9rem 1.25rem;
+  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.16);
+}
+
+.upload-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.6rem;
+}
+
+.upload-sprite-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: 0.5rem;
+}
+
+.upload-sprite-slot {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.4rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.18);
+  border-radius: 0.5rem;
+  font-size: 0.7rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.upload-sprite-slot input[type='file'] {
+  font-size: var(--text-2xs);
+}
+
+/* Shared sprite upload area (map item + battle background modals).
+   Static/Animated toggle; when Animated, a columns × rows grid is overlaid on
+   the sheet preview so the author can confirm the grid lines up. */
+.sprite-area {
+  gap: 0.45rem;
+}
+.sprite-area-stage {
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+}
+.sprite-area-frame {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  max-width: 100%;
+  border-radius: 0.6rem;
+  overflow: hidden;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.2);
+}
+.sprite-area-img {
+  display: block;
+  max-width: 100%;
+  max-height: 14rem;
+  object-fit: contain;
+}
+.sprite-grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(var(--theme-primary-rgb), 0.6) 0 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(var(--theme-primary-rgb), 0.6) 0 1px, transparent 1px);
+  background-position: 0 0;
+  box-shadow: inset 0 0 0 1px rgba(var(--theme-primary-rgb), 0.55);
+}
+.sprite-area-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.sprite-area-frames {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: rgba(var(--theme-primary-rgb), 0.9);
+}
+.sprite-area-clear {
+  display: grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(8, 14, 24, 0.9);
+  color: rgba(255, 140, 140, 0.95);
+  cursor: pointer;
+}
+.sprite-area-drop {
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  padding: 1.4rem 1rem;
+  border-radius: 0.7rem;
+  border: 1.5px dashed rgba(var(--theme-primary-rgb), 0.35);
+  background: rgba(4, 10, 18, 0.5);
+  color: hsl(var(--muted-foreground));
+  font-size: 0.76rem;
+  cursor: pointer;
+  text-align: center;
+}
+.sprite-area-drop:hover {
+  border-color: rgba(var(--theme-primary-rgb), 0.6);
+  background: rgba(var(--theme-primary-rgb), 0.06);
+}
+.sprite-area-loops {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: end;
+  font-size: 0.74rem;
+  color: hsl(var(--muted-foreground));
+}
+.sprite-area-loops input {
+  accent-color: rgb(var(--theme-primary-rgb));
+}

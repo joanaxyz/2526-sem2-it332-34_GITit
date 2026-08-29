@@ -1,65 +1,48 @@
-from __future__ import annotations
+from dataclasses import dataclass, field
+from typing import Any
 
-from dataclasses import dataclass
-
-from common.constants import RESULT_TARGET_MATCHED, RESULT_TARGET_NOT_YET_MATCHED
-from evaluation.services import EvaluationOutcome, StateBasedEvaluator
-from scenarios.models import ScenarioSession
-from simulator.services import RepositoryStateSimulator
+from evaluation.compiler import CompiledEvaluationSpecCache, compile_evaluation_spec
+from evaluation.engine import EvaluationEngine
+from evaluation.services import EvaluationOutcome
 
 
-@dataclass(frozen=True)
+@dataclass
 class CompletionEvaluationContext:
-    session: ScenarioSession
-    previous_state: dict
+    variant: Any
     next_state: dict
-    executed_commands: list[str]
+    level_evaluation_spec: dict | None = None
+    executed_commands: list[str] = field(default_factory=list)
     next_state_hash: str | None = None
     expected_state_hash: str | None = None
+    next_state_already_normalized: bool = False
+    initial_state_already_normalized: bool = False
 
 
-class ScenarioCompletionEvaluator:
-    """Evaluate scenario completion from repository state.
-
-    Command execution and terminal output happen before this boundary. This class
-    only decides whether the resulting structured state satisfies the learning
-    target. ``expanded_state_based`` uses the same evaluator with more detailed
-    target rules.
-    """
-
+class PracticeCompletionEvaluator:
     def evaluate(self, context: CompletionEvaluationContext) -> EvaluationOutcome:
-        return StateRuleCompletionEvaluator().evaluate(context)
-
-
-class StateRuleCompletionEvaluator:
-    def evaluate(self, context: CompletionEvaluationContext) -> EvaluationOutcome:
-        rule = context.session.variant.target_rule
-        if not rule:
-            raise ValueError("Scenario variant is missing target_rule.")
-        learning_unit = getattr(context.session, "learning_unit", None)
-        if getattr(learning_unit, "number", None) == 4:
-            if context.next_state_hash is not None and context.expected_state_hash is not None:
-                matched = context.next_state_hash == context.expected_state_hash
-            else:
-                simulator = RepositoryStateSimulator()
-                next_hash = simulator.state_hash(context.next_state)
-                target_hash = simulator.state_hash(context.session.variant.target_state)
-                matched = next_hash == target_hash
-            return EvaluationOutcome(
-                result_category=(
-                    RESULT_TARGET_MATCHED if matched else RESULT_TARGET_NOT_YET_MATCHED
-                ),
-                target_matched=matched,
-                summary=(
-                    "Repository state matches expected Module 4 target state."
-                    if matched
-                    else "Repository state does not yet match expected Module 4 target state."
-                ),
+        variant = context.variant
+        raw_spec = getattr(variant, "evaluation_spec", None)
+        variant_id = getattr(variant, "id", None)
+        if raw_spec and variant_id is not None:
+            # Cached compile keyed on the variant; the spec is recompiled only if
+            # the variant is re-authored (new semantic_key).
+            spec = CompiledEvaluationSpecCache().spec_for(
+                key=("variant", variant_id, getattr(variant, "semantic_key", "") or ""),
+                raw_spec=raw_spec,
             )
-        return StateBasedEvaluator().evaluate(
-            context.next_state,
-            rule,
-            initial_state=context.session.variant.initial_state,
+        elif raw_spec:
+            spec = compile_evaluation_spec(raw_spec)
+        else:
+            # Level fallback is rare and not keyed by a stable cache id, so
+            # compile it directly.
+            spec = compile_evaluation_spec(context.level_evaluation_spec)
+        return EvaluationEngine().evaluate(
+            spec=spec,
+            next_state=context.next_state,
+            initial_state=getattr(variant, "initial_state", None),
             executed_commands=context.executed_commands,
+            next_state_hash=context.next_state_hash,
+            expected_state_hash=context.expected_state_hash,
+            next_state_already_normalized=context.next_state_already_normalized,
+            initial_state_already_normalized=context.initial_state_already_normalized,
         )
-

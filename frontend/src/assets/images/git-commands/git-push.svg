@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="git push">
+  <defs>
+    <linearGradient id="commandStroke" x1="13" y1="12" x2="51" y2="52" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8ff2ff"/>
+      <stop offset="0.48" stop-color="#18b9ff"/>
+      <stop offset="1" stop-color="#006eff"/>
+    </linearGradient>
+    <filter id="softGlow" x="-45%" y="-45%" width="190%" height="190%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="1.15" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.00 0 0 0 0 0.65 0 0 0 0 1.00 0 0 0 0.85 0" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <g stroke="url(#commandStroke)" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round" filter="url(#softGlow)">
+    <path opacity="0.52" d="M32 5.5V12.5M32 51.5V58.5M5.5 32H12.5M51.5 32H58.5"/>
+    <circle opacity="0.22" cx="32" cy="32" r="22"/>
+    <path opacity="0.42" d="M32 10.5L36.5 24L50 32L36.5 40L32 53.5L27.5 40L14 32L27.5 24Z"/>
+    <circle opacity="0.2" cx="32" cy="32" r="13.5"/>
+    <g><path d="M32 49V25"/><path d="M23 34L32 25L41 34"/><path d="M20 45H44"/><path d="M24 19H40"/></g>
+  </g>
+</svg>

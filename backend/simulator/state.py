@@ -2,6 +2,22 @@ import copy
 
 DELETE_MARKERS = {"deleted", "removed", "delete", "remove"}
 
+DISPLAY_STATUS_ALIASES = {
+    "added": "added",
+    "add": "added",
+    "new": "added",
+    "untracked": "untracked",
+    "modified": "modified",
+    "changed": "modified",
+    "updated": "modified",
+    "staged": "staged",
+    "ignored": "ignored",
+    "conflict": "conflicted",
+    "conflicted": "conflicted",
+    "clean": "clean",
+    **{marker: "deleted" for marker in DELETE_MARKERS},
+}
+
 
 class RepositoryStateNormalizer:
     """Normalize authored repository JSON into the canonical teaching shape.
@@ -24,6 +40,12 @@ class RepositoryStateNormalizer:
     ``changes`` when they are present or can be inferred.
     """
 
+    # Must cover every key RepositorySnapshotService.snapshot_for_command emits.
+    # API responses fill these defaults into the client's copy of the state, so
+    # normalization has to fill the same set: otherwise a stored initial_state
+    # that omits a key (e.g. config) and a client next_state that round-tripped
+    # through a snapshot (config: {}) normalize to different shapes, and the
+    # transition verifier falsely rejects the first mutating command of a run.
     TOP_LEVEL_DEFAULTS = {
         "repository_initialized": True,
         "commits": list,
@@ -36,15 +58,32 @@ class RepositoryStateNormalizer:
         "remotes": dict,
         "remote_branches": dict,
         "upstream_tracking": dict,
+        "tags": dict,
+        "remote_tags": dict,
         "stash_stack": list,
         "reflog": list,
         "partial_hunks": dict,
         "replaced_commits": dict,
         "operation_metadata": dict,
+        "config": dict,
+        "remote_fixtures": dict,
+        "remote_updates": dict,
+        "merge_abort_state": dict,
+        "merge_parent": None,
+        "merge_conflicts": dict,
+        "merge_resolutions": dict,
+        "conflict_on_merge": False,
+        "conflict_files": list,
+        "merge_conflict_files": list,
+        "cherry_pick_in_progress": False,
+        "cherry_pick_original_head": None,
+        "rebase_state": dict,
     }
 
     def normalize(self, state: dict | None) -> dict:
         normalized = copy.deepcopy(state or {})
+        normalized.pop("project_tree", None)
+        normalized.pop("visible_tree", None)
         self.ensure_shape(normalized)
         self.normalize_commits(normalized)
         self.normalize_head(normalized)
@@ -72,6 +111,10 @@ class RepositoryStateNormalizer:
             commit.setdefault("id", f"c{index}")
             commit.setdefault("message", commit["id"])
             commit.setdefault("parents", [])
+            # The browser engine stamps `order` on every commit; mirror it so an
+            # authored initial state and a replayed target state stay byte-equal
+            # (read-only scenarios assert `repository_state_unchanged`).
+            commit.setdefault("order", index)
 
             parent_tree = self.parent_tree(commit, commits_by_id)
             tree_was_authored = isinstance(commit.get("tree"), dict)
@@ -226,6 +269,10 @@ class RepositoryStateNormalizer:
             return state.get("branches", {}).get(head.get("name"))
         return head.get("target")
 
+    def head_branch(self, state: dict) -> str | None:
+        head = state.get("head", {})
+        return head.get("name") if head.get("type") == "branch" else None
+
     def commit_by_id(self, state: dict, commit_id: str | None) -> dict | None:
         if not commit_id:
             return None
@@ -237,39 +284,49 @@ class RepositoryStateNormalizer:
         commit = self.commit_by_id(state, self.head_commit_id(state))
         return copy.deepcopy((commit or {}).get("tree") or {})
 
-    def visible_project_tree(self, state: dict, *, assume_normalized: bool = False) -> dict[str, dict]:
+    def visible_project_tree(
+        self, state: dict, *, assume_normalized: bool = False
+    ) -> dict[str, dict]:
         """Derive the user-visible file set from HEAD, index, and worktree.
 
-        ``working_tree`` in authored scenarios intentionally stores only local
-        changes, not every committed file. The Project Structure panel needs the
-        merged view students would see in a checkout, so this helper starts with
-        the HEAD tree and overlays staged and working-tree entries.
+        ``working_tree`` in authored scenarios intentionally stores local file
+        contents, not status labels. Infer the display status from where the path
+        already exists instead of showing raw content such as ``readme-v2`` as a
+        badge in the Project Files panel.
         """
 
         normalized = state if assume_normalized else self.normalize(state)
+        head_tree = self.head_tree(normalized)
+
         visible: dict[str, dict] = {
             path: {"status": "clean", "source": "head", "content": copy.deepcopy(content)}
-            for path, content in self.head_tree(normalized).items()
+            for path, content in head_tree.items()
         }
 
         for path, value in (normalized.get("staging") or {}).items():
-            status = self.entry_status(value) or "modified"
+            status = self.entry_status(value)
             if self.is_delete_marker(status) or self.is_delete_marker(value):
                 visible[path] = {"status": "deleted", "source": "staging", "content": None}
                 continue
+
+            fallback = "modified" if path in head_tree else "added"
             visible[path] = {
-                "status": self.display_status(value, fallback="modified"),
+                "status": self.display_status(value, fallback=fallback),
                 "source": "staging",
                 "content": self.entry_content(value),
             }
 
+        staged_paths = set((normalized.get("staging") or {}).keys())
+
         for path, value in (normalized.get("working_tree") or {}).items():
-            status = self.entry_status(value) or "modified"
+            status = self.entry_status(value)
             if self.is_delete_marker(status) or self.is_delete_marker(value):
                 visible[path] = {"status": "deleted", "source": "working_tree", "content": None}
                 continue
+
+            fallback = "modified" if path in head_tree or path in staged_paths else "untracked"
             visible[path] = {
-                "status": self.display_status(value, fallback="modified"),
+                "status": self.display_status(value, fallback=fallback),
                 "source": "working_tree",
                 "content": self.entry_content(value),
             }
@@ -280,8 +337,4 @@ class RepositoryStateNormalizer:
         status = self.entry_status(value)
         if status in {"", "none"}:
             return fallback
-        if status in {"new", "added"}:
-            return "added"
-        if status in {"remove", "removed"}:
-            return "deleted"
-        return status
+        return DISPLAY_STATUS_ALIASES.get(status, fallback)

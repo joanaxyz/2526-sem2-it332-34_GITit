@@ -1,0 +1,1 @@
+"""Readable curriculum seed data."""

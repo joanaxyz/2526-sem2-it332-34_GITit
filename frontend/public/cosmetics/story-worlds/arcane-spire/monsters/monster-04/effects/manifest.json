@@ -1,0 +1,45 @@
+{
+  "id": "monster-04-skill-effect",
+  "label": "Bone Ghost Skill Effect",
+  "motif": "blue flame ghost skull",
+  "playback": "projectile",
+  "durationMs": 600,
+  "frameWidth": 256,
+  "frameHeight": 256,
+  "columns": 5,
+  "rows": 5,
+  "frameCount": 25,
+  "fps": 18,
+  "layers": [
+    {
+      "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/effects/skill.png",
+      "fps": 18,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 5,
+      "rows": 5,
+      "frameCount": 25,
+      "layer": "front",
+      "scale": 0.6,
+      "opacity": 1,
+      "offset_x": 0,
+      "offset_y": 0,
+      "orient_to": "travel"
+    }
+  ],
+  "anchor": "center",
+  "motion": "charge",
+  "launchStartFrame": 5,
+  "impactStartFrame": 20,
+  "placeAnchor": {
+    "x": 0.5059,
+    "y": 0.4648
+  },
+  "placeBounds": {
+    "left": 0.1602,
+    "top": 0.1445,
+    "right": 0.8477,
+    "bottom": 0.7812
+  }
+}

@@ -1,0 +1,298 @@
+
+
+@keyframes story-twinkle {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+/* -- Book modal ----------------------------------------------------------- */
+/* Layout is real CSS here: the reader was originally laid out with Tailwind
+   arbitrary-value classes, which died in the Tailwind removal and left the
+   rail and content stacked in one unbounded column. */
+.book-modal-card {
+  width: min(100%, 64rem);
+  height: calc(100vh - 3rem);
+}
+
+.book-modal-content {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.book-modal {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(7, 12, 28, 0.6), rgba(4, 7, 20, 0.6));
+}
+
+.book-modal-main {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.book-modal-body {
+  min-height: 0;
+  padding: 1.25rem;
+  overflow: auto;
+}
+
+.book-modal-title {
+  font-size: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .book-modal {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .book-modal-rail {
+    display: none;
+  }
+}
+
+.book-modal-rail {
+  min-height: 0;
+  padding: 1rem 0.85rem;
+  border-right: 1px solid rgba(45, 245, 255, 0.16);
+  background: rgba(4, 9, 22, 0.5);
+  overflow-y: auto;
+}
+
+.book-modal-rail-item svg {
+  opacity: 0.7;
+}
+
+.book-modal-rail-kicker {
+  margin: 0 0 0.65rem 0.35rem;
+  color: hsl(var(--muted-foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.book-modal-rail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.82rem;
+  text-align: left;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.book-modal-rail-item:hover {
+  background: rgba(45, 245, 255, 0.07);
+  color: hsl(var(--foreground));
+}
+
+.book-modal-rail-item.is-active {
+  color: hsl(var(--foreground));
+  background: linear-gradient(90deg, rgba(45, 245, 255, 0.14), rgba(var(--theme-challenge-rgb), 0.12));
+  border-color: rgba(126, 249, 255, 0.32);
+}
+
+/* Option/argument sub-nav under the active command. */
+.book-modal-rail-anchors {
+  display: grid;
+  gap: 0.1rem;
+  margin: 0.2rem 0 0.35rem;
+  padding: 0 0 0 0.85rem;
+  list-style: none;
+  border-left: 1px solid rgba(45, 245, 255, 0.18);
+  margin-left: 0.85rem;
+}
+
+.book-modal-rail-anchor {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  min-height: 1.9rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.76rem;
+  text-align: left;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.book-modal-rail-anchor::before {
+  content: '';
+  width: 0.32rem;
+  height: 0.32rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: rgba(45, 245, 255, 0.7);
+}
+
+.book-modal-rail-anchor.is-argument::before {
+  background: rgba(var(--theme-challenge-rgb), 0.75);
+}
+
+.book-modal-rail-anchor:hover {
+  background: rgba(45, 245, 255, 0.06);
+  color: hsl(var(--foreground));
+}
+
+.book-modal-head {
+  padding: 1.15rem 1.4rem;
+  border-bottom: 1px solid rgba(45, 245, 255, 0.16);
+  background: rgba(6, 12, 28, 0.55);
+}
+
+.book-modal-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 1.1rem;
+  border-top: 1px solid rgba(45, 245, 255, 0.16);
+  background: rgba(6, 12, 28, 0.6);
+}
+
+/* -- Authored diagrams ---------------------------------------------------- */
+.book-diagram {
+  margin: 0;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(var(--theme-challenge-rgb), 0.28);
+  background:
+    radial-gradient(120% 120% at 50% 0%, rgba(45, 245, 255, 0.07), transparent 60%),
+    linear-gradient(180deg, rgba(14, 16, 38, 0.7), rgba(7, 9, 26, 0.72));
+}
+
+.book-diagram-title {
+  margin-bottom: 0.75rem;
+  color: hsl(var(--foreground));
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.book-diagram-canvas {
+  display: grid;
+  place-items: center;
+  overflow-x: auto;
+  padding: 0.35rem 0;
+}
+
+.book-diagram-svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.book-diagram-node-label {
+  fill: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.book-diagram-edge-label {
+  fill: hsl(var(--muted-foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+}
+
+.book-diagram-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.74rem;
+}
+
+.book-diagram-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.book-diagram-legend-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+}
+
+.book-diagram-caption {
+  margin: 0.75rem 0 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.book-diagram-empty {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8rem;
+}
+
+
+.book-modal-body > * {
+  width: min(100%, var(--reading-max));
+  margin-inline: auto;
+}
+
+.book-modal-mobile-select {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .book-modal-card {
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+  }
+
+  .book-modal-head {
+    padding: 0.9rem 1rem;
+  }
+
+  .book-modal-body {
+    padding: 1rem;
+  }
+
+  .book-modal-mobile-select {
+    display: grid;
+    gap: 0.3rem;
+    margin-top: 0.75rem;
+  }
+
+  .book-modal-mobile-select span {
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .book-modal-mobile-select select {
+    min-height: var(--control-height-md);
+    border: 1px solid rgba(var(--theme-primary-rgb), 0.34);
+    border-radius: var(--radius-sm);
+    padding-inline: 0.75rem;
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+  }
+}

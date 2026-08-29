@@ -25,5 +25,6 @@ const badgeVariants = cva(
 export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {}
 
 export function Badge({ className, variant, ...props }: BadgeProps) {
-  return <div className={cn(badgeVariants({ variant, className }))} {...props} />
+  const resolvedVariant = variant ?? 'secondary'
+  return <div className={cn('ui-badge', `ui-badge--${resolvedVariant}`, badgeVariants({ variant, className }))} {...props} />
 }

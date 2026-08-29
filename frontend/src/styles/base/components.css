@@ -1,0 +1,198 @@
+.ui-card {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  background: var(--panel-bg);
+  color: hsl(var(--foreground));
+  box-shadow: var(--panel-inset);
+  -webkit-backdrop-filter: var(--panel-backdrop);
+          backdrop-filter: var(--panel-backdrop);
+}
+
+.ui-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+  padding: 0.9rem 1rem;
+}
+
+.ui-card-title {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.ui-card-description {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.ui-card-content {
+  min-width: 0;
+  padding: 0 1rem 1rem;
+}
+
+.ui-card-footer {
+  display: flex;
+  align-items: center;
+  padding: 0 1rem 1rem;
+}
+
+.ui-button {
+  display: inline-flex;
+  min-height: var(--control-height-md);
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  padding: 0 0.95rem;
+  background: var(--control-bg);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: none;
+  transition:
+    border-color var(--motion-normal) var(--ease-out),
+    background var(--motion-normal) var(--ease-out),
+    color var(--motion-normal) var(--ease-out),
+    box-shadow var(--motion-normal) var(--ease-out),
+    opacity var(--motion-normal) var(--ease-out);
+}
+
+.ui-button:hover,
+.ui-button:focus-visible {
+  border-color: var(--control-border-hover);
+  background: var(--control-bg-hover);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.ui-button:active:not(:disabled) {
+  background: var(--control-bg-active);
+}
+
+.ui-button:focus-visible {
+  box-shadow: var(--control-focus-ring);
+}
+
+.ui-button:disabled,
+.ui-button[aria-busy='true'] {
+  cursor: not-allowed;
+  opacity: 0.54;
+}
+
+.ui-button[aria-busy='true'] {
+  cursor: progress;
+}
+
+.ui-button--default {
+  border-color: var(--control-primary-border);
+  background: var(--control-primary-bg);
+  color: var(--control-primary-text);
+  box-shadow: var(--control-primary-shadow);
+}
+
+.ui-button--default:hover {
+  background: var(--control-primary-bg-hover);
+  color: var(--control-primary-text);
+  box-shadow: 0 0 18px rgba(var(--theme-primary-rgb), 0.28);
+}
+
+.ui-button--default:focus-visible {
+  background: var(--control-primary-bg-hover);
+  color: var(--control-primary-text);
+  box-shadow: var(--control-focus-ring), 0 0 18px rgba(var(--theme-primary-rgb), 0.28);
+}
+
+.ui-button--secondary {
+  border-color: var(--panel-border);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+}
+
+.ui-button--outline {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.ui-button--ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.ui-button--ghost:hover,
+.ui-button--ghost:focus-visible {
+  border-color: var(--control-border);
+}
+
+.ui-button--destructive {
+  border-color: var(--control-danger-border);
+  background: var(--control-danger-bg);
+  color: hsl(var(--destructive));
+}
+
+.ui-button--destructive:hover,
+.ui-button--destructive:focus-visible {
+  border-color: hsl(var(--destructive) / 0.75);
+  background: hsl(var(--destructive) / 0.14);
+  color: hsl(var(--destructive));
+}
+
+.ui-button svg,
+.ui-button img {
+  width: 1rem;
+  height: 1rem;
+}
+
+.ui-button--sm {
+  min-height: var(--control-height-sm);
+  padding-inline: 0.72rem;
+  font-size: var(--text-xs);
+}
+
+.ui-button--lg {
+  min-height: var(--control-height-lg);
+  padding-inline: 1.25rem;
+}
+
+.ui-button--icon {
+  width: 2.15rem;
+  min-width: 2.15rem;
+  height: 2.15rem;
+  min-height: 2.15rem;
+  padding: 0;
+}
+
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: fit-content;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-pill);
+  padding: 0.25rem 0.55rem;
+  background: rgba(var(--theme-primary-rgb), 0.08);
+  color: rgb(var(--theme-primary-rgb));
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ui-badge svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}

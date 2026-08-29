@@ -1,0 +1,84 @@
+{
+  "front": {
+    "size": [
+      1280,
+      1280
+    ],
+    "alphaExtrema": [
+      0,
+      255
+    ],
+    "bbox": [
+      59,
+      77,
+      1251,
+      1266
+    ],
+    "frameBBoxCenterRange": [
+      115.0,
+      152.0,
+      119.0,
+      184.5
+    ],
+    "frameEnergyAnchorRange": [
+      122.9,
+      167.11,
+      126.3,
+      190.87
+    ],
+    "projectileHandEnergyAnchorRange": [
+      122.72,
+      132.03,
+      126.15,
+      130.03
+    ],
+    "projectileFlightNoseAnchorRange": [
+      197,
+      202,
+      133,
+      133
+    ],
+    "projectileSettleEnergyAnchorRange": [
+      126,
+      131,
+      208,
+      223
+    ],
+    "registration": {
+      "targetAnchor": [
+        199.68,
+        133.12
+      ],
+      "detectedAnchorRangeBeforeRegistration": [
+        127,
+        193,
+        113,
+        143
+      ],
+      "appliedShiftRange": [
+        -20,
+        23,
+        -8,
+        95
+      ],
+      "emptyFrames": 0,
+      "reliableFrames": 22,
+      "lowConfidenceFrames": 3,
+      "method": "hand-center anchor until frame 4, projectile nose anchor through frame 19, feet anchor for impact/dissipate frames (bounds-clamped; authored scale preserved)",
+      "projectileLaunchStartFrame": 5,
+      "projectileSettleStartFrame": 20,
+      "projectileHandAnchor": [
+        128.0,
+        128.0
+      ],
+      "projectileFlightAnchor": [
+        199.68,
+        133.12
+      ],
+      "projectileSettleAnchor": [
+        128.0,
+        220.16
+      ]
+    }
+  }
+}

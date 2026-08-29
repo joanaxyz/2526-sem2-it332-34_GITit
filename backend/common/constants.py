@@ -9,8 +9,11 @@ DIFFICULTY_MAX_COUNTED_COMMANDS = {
     DIFFICULTY_HARD: 8,
 }
 
-SESSION_MODE_PRIMARY = "primary"
-SESSION_MODE_REVIEW = "review"
+# GitCoins granted once when an account is created - exactly the price of one
+# starter companion (150), so a new player's first purchase is a real, single
+# choice rather than a shopping spree. Awarded idempotently via WalletService
+# (key ``signup:<player_id>``).
+PLAN_SIGNUP_GRANT = 150
 
 SESSION_STATUS_STARTED = "started"
 SESSION_STATUS_COMPLETED = "completed"
@@ -26,18 +29,4 @@ COMMAND_COUNTED = "counted_action"
 COMMAND_DIAGNOSTIC = "non_counted_diagnostic"
 COMMAND_UNPROCESSABLE = "unprocessable"
 
-COMPLETION_STATE_BASED = "state_based"
-# State-based scenarios may use detailed target rules, but they still evaluate
-# through the normal state-based evaluator.
-COMPLETION_EXPANDED_STATE_BASED = "expanded_state_based"
-COMPLETION_TYPES = (
-    COMPLETION_STATE_BASED,
-    COMPLETION_EXPANDED_STATE_BASED,
-)
-
-SOURCE_LESSON = "lesson"
 SOURCE_RETRY = "retry"
-SOURCE_REVIEW = "review"
-
-COMMAND_ACCURACY_PROGRESS_THRESHOLD = 70
-COMMAND_ACCURACY_MASTERY_THRESHOLD = 100
