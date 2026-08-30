@@ -1,4 +1,3 @@
-import { WORKSPACE_BATTLE_COLLAPSED_ROW, WORKSPACE_BATTLE_STAGE_ROW } from '@/shared/level/workspaceLayout'
 import { storyPathWithQuery } from '@/shared/navigation/routes'
 import type { ChallengeRun } from '@/features/challenges/types'
 
@@ -6,13 +5,10 @@ export const DEFAULT_TERMINAL_RATIO = 0.28
 export const DEFAULT_TARGET_DIAGRAM_RATIO = 0.5
 export const DEFAULT_TERMINAL_PANE_RATIO = 0.60
 const RESIZE_HANDLE_WIDTH = 6
-export const BATTLE_STAGE_OPEN_ROW = WORKSPACE_BATTLE_STAGE_ROW
-export const BATTLE_STAGE_COLLAPSED_ROW = WORKSPACE_BATTLE_COLLAPSED_ROW
 export const TERMINAL_RATIO_KEY = 'workspace:terminal-ratio'
 export const TARGET_DIAGRAM_RATIO_KEY = 'workspace:target-diagram-ratio'
 export const TERMINAL_PANE_RATIO_KEY = 'workspace:terminal-pane-ratio'
-export const DAG_ZOOM_KEY = 'workspace:challenge-dag-zoom-horizontal'
-export const BATTLE_OPEN_KEY = 'workspace:battle-open'
+export const DAG_ZOOM_KEY = 'workspace:challenge-dag-zoom-vertical'
 
 const MIN_TERMINAL_PANE_WIDTH = 544
 const MIN_FEEDBACK_PANE_WIDTH = 288

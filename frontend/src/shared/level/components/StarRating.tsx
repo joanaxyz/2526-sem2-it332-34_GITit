@@ -36,7 +36,7 @@ export function StarRating({
           aria-hidden="true"
           className={cn(
             SIZE_CLASS[size],
-            value <= earned ? 'fill-primary text-primary' : 'text-border',
+            value <= earned ? 'fill-primary text-primary' : 'star-empty',
             size === 'lg' && value <= earned && 'drop-shadow-[0_0_6px_rgba(var(--theme-primary-rgb),0.6)]',
           )}
         />

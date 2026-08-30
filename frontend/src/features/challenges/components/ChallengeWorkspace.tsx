@@ -16,9 +16,6 @@ import { useChallengeRun } from '@/features/challenges/hooks/useChallengeRun'
 import { invalidateLevelProgressQueries } from '@/features/challenges/utils/challengeRunCache'
 import { ChallengeWorkspaceTour } from '@/features/challenges/components/ChallengeWorkspaceTour'
 import {
-  BATTLE_OPEN_KEY,
-  BATTLE_STAGE_COLLAPSED_ROW,
-  BATTLE_STAGE_OPEN_ROW,
   DEFAULT_TARGET_DIAGRAM_RATIO,
   DEFAULT_TERMINAL_PANE_RATIO,
   DEFAULT_TERMINAL_RATIO,
@@ -36,14 +33,13 @@ import { terminalPrompt } from '@/shared/level/terminalPrompt'
 import { PROJECT_FILES_OPEN_KEY } from '@/shared/level/workspaceKeys'
 import { hasSeenLevelTour, markLevelTourSeen } from '@/shared/level/utils/levelTour'
 import { useOutcomeAnimationGate } from '@/shared/level-runtime/outcomeAnimation'
-import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
+import { useChallengeDagAnimation } from '@/features/challenges/hooks/useChallengeDagAnimation'
 import type { ChallengeRun } from '@/features/challenges/types'
 import { useAuthStore } from '@/shared/auth/useAuth'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { usePersistentState } from '@/shared/utils/persistentState'
-import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 
 export function ChallengeWorkspace() {
   const params = useParams()
@@ -51,7 +47,6 @@ export function ChallengeWorkspace() {
   const queryClient = useQueryClient()
   const runId = Number(params.runId)
   const { query, run, lines } = useChallengeRun(runId)
-  const { companionSlug } = usePlayerLoadout()
   const observedRunId = run?.id ?? null
   const observedRunStatus = run?.status ?? null
   const mutation = useChallengeCommandSubmission(runId)
@@ -73,12 +68,11 @@ export function ChallengeWorkspace() {
     ratioSanitizer(0.4, 0.92, DEFAULT_TERMINAL_PANE_RATIO),
   )
   const [projectFilesOpen, setProjectFilesOpen] = usePersistentState(PROJECT_FILES_OPEN_KEY, true)
-  const [battleOpen, setBattleOpen] = usePersistentState(BATTLE_OPEN_KEY, true)
-  const director = useBattleDirector()
+  const dagAnimation = useChallengeDagAnimation()
   const { completionAnimationReady, queueOutcomeAnimation } = useOutcomeAnimationGate({
     runId: observedRunId,
     status: observedRunStatus,
-    animating: director.animating,
+    animating: dagAnimation.animating,
   })
   const [tourOpen, setTourOpen] = useState(false)
   const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
@@ -162,9 +156,9 @@ export function ChallengeWorkspace() {
   if (query.isLoading) {
     return (
       <LoadingState
-        companionSlug={companionSlug}
         description="Preparing the repository, terminal, and challenge workspace."
         label="Loading challenge"
+        showCompanion={false}
         variant="screen"
       />
     )
@@ -178,10 +172,9 @@ export function ChallengeWorkspace() {
   const isTourOpen = tourOpen || shouldAutoOpenTour
 
   const submit = createChallengeWorkspaceCommandHandler({
-    run,
     runId,
     mutation,
-    director,
+    dagAnimation,
     queryClient,
     clearToast,
     evaluateAndNotify,
@@ -199,11 +192,9 @@ export function ChallengeWorkspace() {
     completionAnimationReady(run.id)
 
   const workspaceGridStyle = {
-    // Leading row = the challenge battle strip, uppermost in this column;
-    // collapses to a slim HP bar. The DAG/terminal rows keep their resize.
-    // Plain fr stories (min-heights live on the pane classes): minmax(len, fr)
-    // stops distributing free space once a min binds and leaves a dead band.
-    gridTemplateRows: `${battleOpen ? BATTLE_STAGE_OPEN_ROW : BATTLE_STAGE_COLLAPSED_ROW} minmax(0, ${1 - terminalRatio}fr) 0.375rem minmax(0, ${terminalRatio}fr)`,
+    // The repository puzzle is the primary stage. Challenge no longer reserves
+    // space for battle actors; command feedback happens directly in the DAG.
+    gridTemplateRows: `minmax(0, ${1 - terminalRatio}fr) 0.375rem minmax(0, ${terminalRatio}fr)`,
   }
   const hasTargetDiagram = Boolean(run.scaffolding.expected_state && run.expected_state)
   const diagramGridStyle = {
@@ -241,8 +232,7 @@ export function ChallengeWorkspace() {
         writeDisabled={run.status !== 'started' || writeFileMutation.isPending}
         workspaceGridRef={workspaceGridRef}
         workspaceGridStyle={workspaceGridStyle}
-        director={director}
-        battleOpen={battleOpen}
+        dagAnimation={dagAnimation}
         hasTargetDiagram={hasTargetDiagram}
         diagramGridRef={diagramGridRef}
         diagramGridStyle={diagramGridStyle}
@@ -267,7 +257,6 @@ export function ChallengeWorkspace() {
           return updatedRun
         }}
         onOpenFile={setWorkspaceEditorPath}
-        onToggleBattle={() => setBattleOpen((value) => !value)}
         onBeginDiagramResize={beginDiagramResize}
         onBeginTerminalResize={beginTerminalResize}
         onBeginTerminalPaneResize={beginTerminalPaneResize}

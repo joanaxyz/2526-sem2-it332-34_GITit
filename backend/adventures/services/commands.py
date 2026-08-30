@@ -23,7 +23,7 @@ from common.git.command_outcomes import command_outcome_payload
 from common.git.repository_state import VariantTargetStateHashCache
 from common.runtime import (
     apply_command_accounting,
-    battle_rule_counts,
+    progress_rule_counts,
     command_budget_exhausted,
     repository_response_snapshot,
     update_fields_for_execution,
@@ -113,7 +113,7 @@ class AdventureCommandService:
             expected_state_hash=expected_state_hash,
             next_state_already_normalized=True,
         )
-        previous_rules_passing, total_rules = battle_rule_counts(
+        previous_rules_passing, total_rules = progress_rule_counts(
             previous_outcome,
             initial_outcome,
         )
@@ -132,7 +132,7 @@ class AdventureCommandService:
                     next_state_already_normalized=True,
                 )
                 solved = outcome.target_matched
-                rules_passing, total_rules = battle_rule_counts(
+                rules_passing, total_rules = progress_rule_counts(
                     outcome,
                     initial_outcome,
                 )

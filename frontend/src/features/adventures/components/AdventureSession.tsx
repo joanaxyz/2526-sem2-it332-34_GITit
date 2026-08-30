@@ -8,6 +8,7 @@ import { AdventureOutcomeModal } from '@/features/adventures/components/Adventur
 import { AdventureStartOverConfirmModal } from '@/features/adventures/components/AdventureStartOverConfirmModal'
 import { AdventureStatusHeader } from '@/features/adventures/components/AdventureStatusHeader'
 import { AdventureWorkspaceMain } from '@/features/adventures/components/AdventureWorkspaceMain'
+import { AdventureWorkspaceTour } from '@/features/adventures/components/AdventureWorkspaceTour'
 import { adventuresApi } from '@/features/adventures/api/adventuresApi'
 import { useAdventureCommandSubmission } from '@/features/adventures/hooks/useAdventureCommandSubmission'
 import { createAdventureWorkspaceCommandHandler } from '@/features/adventures/utils/adventureWorkspaceCommand'
@@ -20,6 +21,7 @@ import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import { useAuthStore } from '@/shared/auth/useAuth'
 import type { TerminalLine } from '@/shared/level/types'
 import { PROJECT_FILES_OPEN_KEY } from '@/shared/level/workspaceKeys'
+import { hasSeenLevelTour, markLevelTourSeen } from '@/shared/level/utils/levelTour'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { usePersistentState } from '@/shared/utils/persistentState'
@@ -50,6 +52,7 @@ export function AdventureSession({
   const [projectFilesOpen, setProjectFilesOpen] = usePersistentState(PROJECT_FILES_OPEN_KEY, true)
   const [workspaceEditorPath, setWorkspaceEditorPath] = useState<string | null>(null)
   const [levelLibraryOpen, setLevelLibraryOpen] = useState(false)
+  const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
   const [startOverConfirmOpen, setStartOverConfirmOpen] = useState(false)
   const [exitConfirmOpen, setExitConfirmOpen] = useState(false)
   const [exitNavigationRunId, setExitNavigationRunId] = useState<number | null>(null)
@@ -144,6 +147,8 @@ export function AdventureSession({
     (!attempt || completionAnimationReady(run.id))
   const workspaceLines = run.status === 'started' ? lines : lastWorkspace?.lines ?? lines
   const repoSlug = workspaceRun.selected_level?.slug ?? run.selected_level?.slug
+  const tourKey = `${user?.id ?? 'guest'}:adventure`
+  const tourOpen = dismissedTourKey !== tourKey && !hasSeenLevelTour(user?.id, 'adventure')
   const workspaceGridStyle = {
     gridTemplateRows: `${WORKSPACE_BATTLE_STAGE_ROW} minmax(13rem, 1fr)`,
   } as CSSProperties
@@ -240,6 +245,16 @@ export function AdventureSession({
         onCloseEditor={() => setWorkspaceEditorPath(null)}
         onWriteFile={(input) => writeFile.mutateAsync(input)}
       />
+      {tourOpen ? (
+        <AdventureWorkspaceTour
+          key={`${tourKey}:${run.id}`}
+          runId={run.id}
+          onClose={() => {
+            markLevelTourSeen(user?.id, 'adventure')
+            setDismissedTourKey(tourKey)
+          }}
+        />
+      ) : null}
       {levelLibraryOpen ? (
         <AdventureLevelLibraryModal run={run} onClose={() => setLevelLibraryOpen(false)} />
       ) : null}

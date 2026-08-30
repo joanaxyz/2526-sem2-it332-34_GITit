@@ -150,8 +150,8 @@
   color: hsl(var(--muted-foreground));
 }
 
-/* The level name lives in the Level Context panel, not the command bar; the
-   spacer keeps the run controls docked right, like the mock. */
+/* The command bar owns the level name; the spacer keeps the run controls
+   docked right without adding another workspace label. */
 .gameplay-header-spacer {
   flex: 1 1 0;
   min-width: 0;

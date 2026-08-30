@@ -17,6 +17,20 @@ export type LevelFact = {
   value: ReactNode
 }
 
+export type LevelStoryCardLabels = {
+  story: string
+  task: string
+  details: string
+  detailsAriaLabel: string
+}
+
+const defaultLabels: LevelStoryCardLabels = {
+  story: 'Story',
+  task: 'Task',
+  details: 'Copy details',
+  detailsAriaLabel: 'Values referenced by the story and task',
+}
+
 export function StarTriplet({ count, className }: { count: number; className?: string }) {
   return (
     <span className={cn('gameplay-header-stars', className)} aria-label={`${count} of 3 stars`}>
@@ -60,29 +74,48 @@ export function LevelStoryCard({
   facts,
   className,
   checks,
+  labels,
+  showHeader = true,
+  showDetailLabels = false,
+  tourTarget,
 }: {
   title: string
-  titleIcon: ComponentType<{ className?: string }>
+  titleIcon?: ComponentType<{ className?: string }>
   context: NormalizedLevelContext
   facts?: LevelFact[]
   className?: string
   checks?: ObjectiveCheck[]
+  labels?: Partial<LevelStoryCardLabels>
+  /** The workspace command bar can own the level title on denser layouts. */
+  showHeader?: boolean
+  /** Challenge tasks benefit from naming each literal beside its copy action. */
+  showDetailLabels?: boolean
+  /** Optional stable anchor for contextual onboarding without coupling to layout wrappers. */
+  tourTarget?: string
 }) {
+  const sectionLabels = { ...defaultLabels, ...labels }
+
   return (
-    <Card className={cn('lvlctx shadow-none', className)}>
-      <CardHeader className="lvlctx-header">
-        <span className="panel-eyebrow">Level Context</span>
-        <div className="lvlctx-titlerow">
-          <TitleIcon aria-hidden="true" />
-          <CardTitle className="lvlctx-title">{title}</CardTitle>
-        </div>
-      </CardHeader>
+    <Card
+      aria-label={showHeader ? undefined : title}
+      className={cn('lvlctx shadow-none', className)}
+      data-tour-target={tourTarget}
+    >
+      {showHeader ? (
+        <CardHeader className="lvlctx-header">
+          <span className="panel-eyebrow">Level Context</span>
+          <div className="lvlctx-titlerow">
+            {TitleIcon ? <TitleIcon aria-hidden="true" /> : null}
+            <CardTitle className="lvlctx-title">{title}</CardTitle>
+          </div>
+        </CardHeader>
+      ) : null}
       <CardContent className="lvlctx-body app-scrollbar">
-        <Section icon={BookOpenText} title="Story" hidden={!context.story}>
+        <Section icon={BookOpenText} title={sectionLabels.story} hidden={!context.story}>
           <p className="lvlctx-story">{context.story}</p>
         </Section>
 
-        <Section icon={TaskSealIcon} title="Task" hidden={!context.task}>
+        <Section icon={TaskSealIcon} title={sectionLabels.task} hidden={!context.task}>
           <p className="lvlctx-task">{context.task}</p>
         </Section>
 
@@ -102,11 +135,19 @@ export function LevelStoryCard({
         {/* Required names (folder, branch, ...) sit right under the objective:
             the story references them and the panel bottom is the first thing
             to scroll out of view on short viewports. */}
-        <Section icon={ClipboardList} title="Copy details" hidden={!context.details.length}>
-          <ul className="lvlctx-copies" aria-label="Values referenced by the story and task">
+        <Section
+          icon={ClipboardList}
+          title={sectionLabels.details}
+          hidden={!context.details.length}
+        >
+          <ul className="lvlctx-copies" aria-label={sectionLabels.detailsAriaLabel}>
             {context.details.map((item) => (
               <li className="lvlctx-copy" key={`${item.label}:${item.value}`}>
-                {item.label ? <span className="sr-only">{item.label}: </span> : null}
+                {item.label ? (
+                  <span className={cn('lvlctx-copy-label', !showDetailLabels && 'sr-only')}>
+                    {item.label}
+                  </span>
+                ) : null}
                 <code>{item.value}</code>
                 <CopyButton
                   value={item.value}

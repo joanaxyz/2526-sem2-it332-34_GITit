@@ -4097,11 +4097,6 @@
                         "additionalProperties": {},
                         "nullable": true
                     },
-                    "battle_stage": {
-                        "type": "object",
-                        "additionalProperties": {},
-                        "nullable": true
-                    },
                     "difficulty": {
                         "type": "string",
                         "nullable": true
@@ -4167,7 +4162,6 @@
                     }
                 },
                 "required": [
-                    "battle_stage",
                     "challenge",
                     "chapter",
                     "completed_at",
