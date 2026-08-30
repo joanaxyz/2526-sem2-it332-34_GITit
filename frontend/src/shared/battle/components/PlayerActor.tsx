@@ -80,8 +80,9 @@ export const PlayerActor = forwardRef<
     companionSlug?: string | null
     scale?: number
     className?: string
+    ariaLabel?: string
   }
->(function PlayerActor({ companion, battle, label, companionSlug, scale = 0.78, className }, ref) {
+>(function PlayerActor({ companion, battle, label, companionSlug, scale = 0.78, className, ariaLabel }, ref) {
   const spriteRef = useRef<SpriteAnimatorHandle | null>(null)
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const effectiveScale = companion.metrics.scale * scale
@@ -327,7 +328,7 @@ export const PlayerActor = forwardRef<
         layoutAnimation={companion.sprites.idle}
         pixelAnchorAnimation={companion.sprites.idle}
         pixelAnchorFallback={{ bottomOffset: companion.metrics.footOffset }}
-        aria-label={`${label}, your combat companion`}
+        aria-label={ariaLabel ?? `${label}, your combat companion`}
       />
     </div>
   )

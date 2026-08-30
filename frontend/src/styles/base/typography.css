@@ -20,6 +20,18 @@
 .text-primary { color: hsl(var(--primary)); }
 .text-border { color: hsl(var(--border)); }
 .fill-primary { fill: hsl(var(--primary)); }
+/* Unearned StarRating icons: a plain low-contrast stroke (like .text-border)
+   disappears against busy illustrated backgrounds (e.g. the story map's
+   tower art), unlike on a flat panel. A bright stroke over a dark backing
+   fill plus a hard drop-shadow keeps the outline legible against any
+   artwork, mirroring how .story-path-node-ring backs the map's lock icon
+   with a solid dark fill. Earned stars (.fill-primary/.text-primary) are
+   untouched. */
+.star-empty {
+  color: hsl(var(--foreground) / 0.82);
+  fill: hsl(var(--background) / 0.65);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.85));
+}
 .text-primary-foreground { color: hsl(var(--primary-foreground)); }
 .text-accent { color: hsl(var(--accent)); }
 .text-destructive { color: hsl(var(--destructive)); }

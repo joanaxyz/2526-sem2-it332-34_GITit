@@ -20,7 +20,6 @@ const run = {
     level_id: 101,
   },
   chapter: { id: 1, number: 1, title: 'Foundations' },
-  battle_stage: null,
   difficulty: 'easy',
   variant: { id: 1, label: 'Variant A' },
   mastery_progress: { cleared: true, stars: 3 },

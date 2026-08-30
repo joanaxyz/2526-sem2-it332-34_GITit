@@ -18,44 +18,11 @@ import { storyWorldStyle } from '@/shared/story-worlds/theme'
 import { cn } from '@/shared/utils/cn'
 
 const DEFAULT_RAIL_Y = 88
-
-type BattleStageVariant = 'adventure' | 'challenge'
-
-const BATTLE_MODE_CONFIG: Record<
-  BattleStageVariant,
-  {
-    stageClass: string
-    arenaClass: string
-    railClass: string
-    scrollBackdrop: boolean
-    monsterBaseLeft: number
-    monsterSpread: number
-  }
-> = {
-  adventure: {
-    stageClass: 'battle-stage--adventure',
-    arenaClass: 'battle-arena--pack',
-    railClass: 'battle-landing-rail--pack',
-    scrollBackdrop: true,
-    monsterBaseLeft: 85,
-    monsterSpread: 8,
-  },
-  challenge: {
-    stageClass: 'battle-stage--challenge',
-    arenaClass: 'battle-arena--challenge',
-    railClass: 'battle-landing-rail--challenge',
-    // Pan the backdrop too: the challenge entrance runs Blue in while the camera
-    // follows, so a frozen background made him look like he was running on a
-    // treadmill. Scroll only fires on the explicit run-in/center beats.
-    scrollBackdrop: true,
-    monsterBaseLeft: 85,
-    monsterSpread: 0,
-  },
-}
+const MONSTER_BASE_LEFT = 85
+const MONSTER_SPREAD = 8
 
 export function BattleStage({
   director,
-  variant,
   stage,
   groundFooter,
   centerOverlay,
@@ -64,7 +31,6 @@ export function BattleStage({
   storyWorldSlug,
 }: {
   director: BattleDirector
-  variant: BattleStageVariant
   stage?: BattleStageConfig | null
   groundFooter?: ReactNode
   centerOverlay?: ReactNode
@@ -73,7 +39,6 @@ export function BattleStage({
   storyWorldSlug?: string | null
 }) {
   const { companion, companionSlug } = usePlayerLoadout()
-  const mode = BATTLE_MODE_CONFIG[variant]
   const storyWorld = getStoryWorld(storyWorldSlug)
   // Memoize on the (stable) companion so the sprite objects keep a stable
   // identity across resolve-driven re-renders. Rebuilding them every render
@@ -91,21 +56,21 @@ export function BattleStage({
   return (
     <section
       data-testid="battle-stage"
-      className={cn('battle-stage bg-background', mode.stageClass, className)}
+      className={cn('battle-stage bg-background', className)}
       style={{ ...storyWorldStyle(storyWorld), '--battle-rail-y': `${railY}%` } as CSSProperties}
       aria-label="Battle stage"
     >
       <BattleBackdrop
         ref={director.bindBackdrop}
         parallaxUrl={parallaxUrl}
-        scrollEnabled={mode.scrollBackdrop}
+        scrollEnabled
       />
       <BattleLand landing={stage?.landing ?? null} />
 
-      <div className={cn('battle-arena', mode.arenaClass)}>
+      <div className="battle-arena">
         <div ref={director.bindBackEffectLayer} className="battle-effect-layer battle-effect-layer--back" aria-hidden />
         <div ref={director.bindCamera} className="battle-camera">
-          <div className={cn('battle-landing-rail', mode.railClass)} style={{ top: `${railY}%` }}>
+          <div className="battle-landing-rail" style={{ top: `${railY}%` }}>
             {player && playerBattle ? (
               <div className="battle-player-slot">
                 <PlayerActor
@@ -124,8 +89,8 @@ export function BattleStage({
                 monster={monster}
                 index={index}
                 total={director.roster.length}
-                baseLeft={mode.monsterBaseLeft}
-                spreadStep={mode.monsterSpread}
+                baseLeft={MONSTER_BASE_LEFT}
+                spreadStep={MONSTER_SPREAD}
                 stagedHidden={director.stagedMonsterIds.has(monster.id)}
                 active={director.activeMonsterId === monster.id}
                 bindMonster={director.bindMonster}

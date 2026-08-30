@@ -11,7 +11,6 @@ from common.constants import (
     SESSION_STATUS_COMPLETED,
     SESSION_STATUS_STARTED,
 )
-from curriculum.stage_config import merged_battle_stage, stage_payload
 from practice.services.context import ScenarioContextNormalizer
 from practice.services.scaffolding import ScaffoldingService
 from practice.services.visualization import RepositoryVisualizationService
@@ -78,11 +77,6 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
         "scenario_context": context,
         "chapter": chapter_payload,
         "story": story_payload,
-        # Authored battle-stage backdrop; constant per chapter so it rides the
-        # run payload, not the per-command patch.
-        "battle_stage": stage_payload(
-            merged_battle_stage(chapter=chapter, content_owner=run.challenge_trial.challenge_level)
-        ),
         "difficulty": run.difficulty or None,
         # GitCoins paid on first completion of this trial (0 = no reward).
         "reward_coins": run.challenge_trial.reward_coins if run.challenge_trial_id else 0,

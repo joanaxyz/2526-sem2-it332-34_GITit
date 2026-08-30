@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import ReactFlow, { Background, Controls, ReactFlowProvider } from 'reactflow'
 
 import type { RepositorySnapshot } from '@/shared/level/types'
@@ -11,7 +11,7 @@ import { MAX_DAG_ZOOM, MIN_DAG_ZOOM, NO_DELTA, VARIANT_COLORS } from './live-dag
 import { FitViewOnTopologyChange } from './live-dag/FitViewOnTopologyChange'
 import { buildGraph, layoutPositionsCache, normalizeSnapshot, rememberLayoutPositions, snapshotDelta } from './live-dag/graph'
 import { CommitDetailsPanel, CommitNode, EmptyRepositoryNode, RepositoryDetails } from './live-dag/nodes'
-import type { CommitNodeData, DagLayoutDirection, DagVariant, EnteringDelta } from './live-dag/types'
+import type { CommitNodeData, DagActivity, DagLayoutDirection, DagVariant, EnteringDelta } from './live-dag/types'
 
 const commitNodeTypes = {
   commit: memo(CommitNode),
@@ -23,8 +23,6 @@ function handleReactFlowError(code: string, message: string) {
   console.warn(message)
 }
 
-export type DagBadge = 'live' | 'target'
-
 export function LiveDagPanel({
   title = 'Live DAG',
   snapshot,
@@ -34,8 +32,9 @@ export function LiveDagPanel({
   fitViewPadding = 0.08,
   zoomStorageKey,
   animateChanges = false,
+  pauseChangeAnimations = false,
+  activity = 'idle',
   layoutDirection = 'vertical',
-  badge,
 }: {
   title?: string
   snapshot: RepositorySnapshot
@@ -51,10 +50,12 @@ export function LiveDagPanel({
   /** Animate per-command deltas: new commits pop in, new edges draw in, moved
    *  ref pills slide up. Off for static diagrams (Target DAG). */
   animateChanges?: boolean
+  /** Keep newly rendered graph deltas at their first frame until a command resolves. */
+  pauseChangeAnimations?: boolean
+  /** Concise state signal used by puzzle-style DAG consumers. */
+  activity?: DagActivity
   /** Controls whether commits flow top-to-bottom or left-to-right. */
   layoutDirection?: DagLayoutDirection
-  /** Header tag: `live` = pulsing live dot, `target` = amber expected-state chip. */
-  badge?: DagBadge
 }) {
   return (
     <RepositoryStateDiagram
@@ -66,8 +67,9 @@ export function LiveDagPanel({
       fitViewPadding={fitViewPadding}
       zoomStorageKey={zoomStorageKey}
       animateChanges={animateChanges}
+      pauseChangeAnimations={pauseChangeAnimations}
+      activity={activity}
       layoutDirection={layoutDirection}
-      badge={badge}
     />
   )
 }
@@ -82,8 +84,9 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   variant = 'cyan',
   zoomStorageKey,
   animateChanges = false,
+  pauseChangeAnimations = false,
+  activity = 'idle',
   layoutDirection = 'vertical',
-  badge,
 }: {
   title: string
   snapshot: RepositorySnapshot
@@ -94,8 +97,9 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   variant?: DagVariant
   zoomStorageKey?: string
   animateChanges?: boolean
+  pauseChangeAnimations?: boolean
+  activity?: DagActivity
   layoutDirection?: DagLayoutDirection
-  badge?: DagBadge
 }) {
   const colors = VARIANT_COLORS[variant]
   const normalizedSnapshot = useMemo(() => normalizeSnapshot(snapshot), [snapshot])
@@ -107,16 +111,24 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   // for the CSS animations to finish, then clear.
   const [entering, setEntering] = useState<EnteringDelta>(NO_DELTA)
   const previousSnapshotRef = useRef<RepositorySnapshot | null>(null)
-  useEffect(() => {
+  useLayoutEffect(() => {
     const previous = previousSnapshotRef.current
     previousSnapshotRef.current = normalizedSnapshot
     if (!animateChanges || !previous || previous === normalizedSnapshot) return
     const delta = snapshotDelta(previous, normalizedSnapshot)
-    if (delta === NO_DELTA) return
+    if (delta === NO_DELTA) {
+      setEntering(NO_DELTA)
+      return
+    }
     setEntering(delta)
-    const timer = window.setTimeout(() => setEntering(NO_DELTA), 700)
-    return () => window.clearTimeout(timer)
   }, [animateChanges, normalizedSnapshot])
+
+  useEffect(() => {
+    const hasDelta = entering.commits.size > 0 || entering.refsByCommit.size > 0 || Boolean(entering.headTarget)
+    if (!hasDelta || pauseChangeAnimations) return
+    const timer = window.setTimeout(() => setEntering(NO_DELTA), 760)
+    return () => window.clearTimeout(timer)
+  }, [entering, pauseChangeAnimations])
 
   const { nodes, edges } = useMemo(() => {
     const cached = layoutPositionsCache.get(layoutCacheKey)
@@ -146,6 +158,7 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
             isActive: activeCommitId === commitId,
             isEntering: entering.commits.has(commitId),
             enteringRefs: entering.refsByCommit.get(commitId),
+            enteringHead: entering.headTarget === commitId,
             onActivate: () => setActiveCommitId(commitId),
             onDismiss: () => dismissCommit(commitId),
           },
@@ -169,20 +182,21 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
 
   return (
     <Card
-      className={cn('min-h-0 overflow-hidden shadow-none', className)}
+      className={cn(
+        'live-dag-panel min-h-0 overflow-hidden shadow-none',
+        pauseChangeAnimations && 'is-change-paused',
+        activity === 'processing' && 'is-processing',
+        className,
+      )}
       style={{ borderTop: `1.5px solid ${colors.border}` }}
     >
       <CardHeader className="p-3" style={{ background: colors.headerBg }}>
-        <div className="flex items-center gap-2">
-          <span className={cn('panel-eyebrow', colors.titleClass)}>{title}</span>
-          {badge === 'live' ? (
-            <span className="dag-badge dag-badge--live ml-auto">
-              <span className="dag-badge-dot" aria-hidden="true" />
-              Live
-            </span>
-          ) : null}
-          {badge === 'target' ? <span className="dag-badge dag-badge--target ml-auto">Expected State</span> : null}
-        </div>
+        <span className={cn('panel-eyebrow', colors.titleClass)}>{title}</span>
+        {activity !== 'idle' ? (
+          <span className="sr-only" role="status" aria-live="polite">
+            {activityLabel(activity)}
+          </span>
+        ) : null}
       </CardHeader>
       <CardContent className={cn('p-0', contentClassName)}>
         <div className="relative h-full min-h-0">
@@ -190,7 +204,6 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
             className="pointer-events-none absolute inset-0 z-0"
             style={{
               background: colors.gradientBg,
-              animation: 'bg-drift 20s ease-in-out infinite alternate',
             }}
           />
           <ReactFlow
@@ -202,14 +215,18 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
             nodesConnectable={false}
             nodeTypes={nodeTypes}
             panOnScroll
-            onlyRenderVisibleElements
             minZoom={MIN_DAG_ZOOM}
             maxZoom={MAX_DAG_ZOOM}
             proOptions={{ hideAttribution: true }}
             onError={handleReactFlowError}
             onMoveEnd={
               zoomStorageKey
-                ? (_event, viewport) => writePreference(zoomStorageKey, viewport.zoom)
+                ? (event, viewport) => {
+                    // Responsive/topology fitView calls have no source event;
+                    // persisting them would make a phone-sized zoom leak into
+                    // the next desktop session. Store only learner gestures.
+                    if (event) writePreference(zoomStorageKey, viewport.zoom)
+                  }
                 : undefined
             }
           >
@@ -221,7 +238,8 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
               aria-label={`${title} view controls`}
             />
             <FitViewOnTopologyChange
-              layoutSignature={layoutCacheKey}
+              fitSignature={layoutCacheKey}
+              topologySignature={layoutSignature}
               fitViewPadding={fitViewPadding}
               zoomStorageKey={zoomStorageKey}
             />
@@ -244,8 +262,9 @@ function RepositoryStateDiagram({
   variant = 'cyan',
   zoomStorageKey,
   animateChanges = false,
+  pauseChangeAnimations = false,
+  activity = 'idle',
   layoutDirection = 'vertical',
-  badge,
 }: {
   title: string
   snapshot: RepositorySnapshot
@@ -256,8 +275,9 @@ function RepositoryStateDiagram({
   variant?: DagVariant
   zoomStorageKey?: string
   animateChanges?: boolean
+  pauseChangeAnimations?: boolean
+  activity?: DagActivity
   layoutDirection?: DagLayoutDirection
-  badge?: DagBadge
 }) {
   return (
     <ReactFlowProvider>
@@ -271,9 +291,21 @@ function RepositoryStateDiagram({
         variant={variant}
         zoomStorageKey={zoomStorageKey}
         animateChanges={animateChanges}
+        pauseChangeAnimations={pauseChangeAnimations}
+        activity={activity}
         layoutDirection={layoutDirection}
-        badge={badge}
       />
     </ReactFlowProvider>
   )
+}
+
+function activityLabel(activity: DagActivity) {
+  switch (activity) {
+    case 'processing': return 'Repository command running'
+    case 'updated': return 'Repository updated'
+    case 'unchanged': return 'Repository unchanged'
+    case 'solved': return 'Repository puzzle solved'
+    case 'error': return 'Repository command failed'
+    default: return 'Repository ready'
+  }
 }

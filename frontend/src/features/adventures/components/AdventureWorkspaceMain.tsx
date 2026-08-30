@@ -69,10 +69,13 @@ export function AdventureWorkspaceMain({
             : 'minmax(13rem, 1fr) auto',
         }}
       >
-        <div className="gameplay-panel-scroll app-scrollbar">
+        <div
+          className="gameplay-panel-scroll app-scrollbar"
+          data-tour-target="adventure-story"
+        >
           <AdventureContextPanel run={workspaceRun} attempt={attempt} />
         </div>
-        <div className="gameplay-project-region">
+        <div className="gameplay-project-region" data-tour-target="project-files">
           <ProjectStructurePanel
             snapshot={attempt.repository_state}
             rootName={repoSlug}

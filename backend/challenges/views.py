@@ -43,9 +43,6 @@ class ChallengeRunStartAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         trial = get_challenge_trial(trial_id)
         player = get_or_create_player(request.user)
-        from shop.access import require_companion
-
-        require_companion(player)
         chapter = trial.chapter
         if chapter.story_id:
             from curriculum.selectors import chapter_locked, story_locked

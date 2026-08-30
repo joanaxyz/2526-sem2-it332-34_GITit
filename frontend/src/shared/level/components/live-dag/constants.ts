@@ -18,4 +18,4 @@ export const VARIANT_COLORS = {
   },
 } as const
 
-export const NO_DELTA: EnteringDelta = { commits: new Set(), refsByCommit: new Map() }
+export const NO_DELTA: EnteringDelta = { commits: new Set(), refsByCommit: new Map(), headTarget: null }

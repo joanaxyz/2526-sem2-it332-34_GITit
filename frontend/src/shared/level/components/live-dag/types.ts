@@ -24,6 +24,8 @@ export type CommitNodeData = {
   isEntering?: boolean
   /** Ref pills that just moved onto this commit: slide-up + fade. */
   enteringRefs?: string[]
+  /** HEAD moved to this commit during the current command. */
+  enteringHead?: boolean
   onActivate?: () => void
   onDismiss?: () => void
 }
@@ -36,4 +38,8 @@ export type EmptyRepositoryNodeData = {
 export type EnteringDelta = {
   commits: ReadonlySet<string>
   refsByCommit: ReadonlyMap<string, string[]>
+  /** Commit that HEAD newly points to, including checkout at unchanged topology. */
+  headTarget: string | null
 }
+
+export type DagActivity = 'idle' | 'processing' | 'updated' | 'unchanged' | 'solved' | 'error'
