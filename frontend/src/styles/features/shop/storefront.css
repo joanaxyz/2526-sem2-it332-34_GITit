@@ -70,9 +70,9 @@
 .shop-stage-action-button:disabled { cursor: not-allowed; opacity: 0.58; }
 .shop-stage-action-button svg { width: 1rem; height: 1rem; }
 
-/* Companion purchase dock: a coin-price chip beside a primary purchase CTA,
-   distinct from the plain status button the story dock still uses above. */
-.shop-companion-purchase-dock {
+/* Shop purchase dock: a coin-price chip beside a primary purchase CTA, shared
+   by the companion and story stages so their purchase UX stays in sync. */
+.shop-purchase-dock {
   position: absolute;
   top: 0.85rem;
   right: 0.85rem;
@@ -82,7 +82,7 @@
   gap: 0.5rem;
 }
 
-.shop-companion-price-chip {
+.shop-price-chip {
   display: inline-flex;
   min-height: 2.4rem;
   align-items: center;
@@ -98,7 +98,7 @@
   font-weight: 800;
 }
 
-.shop-companion-price-chip .git-coin-icon {
+.shop-price-chip .git-coin-icon {
   width: 1.3rem;
   height: 1.3rem;
   filter: drop-shadow(0 0 6px rgba(243, 210, 122, 0.54));
@@ -106,28 +106,28 @@
 
 /* Unaffordable state: the price chip is the trigger for a "Need X more" hint,
    not a competing button beside a disabled one. */
-.shop-companion-price-chip-wrap {
+.shop-price-chip-wrap {
   position: relative;
   display: inline-flex;
 }
 
-button.shop-companion-price-chip {
+button.shop-price-chip {
   cursor: pointer;
   transition: border-color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out);
 }
 
-button.shop-companion-price-chip:hover,
-button.shop-companion-price-chip[aria-expanded='true'] {
+button.shop-price-chip:hover,
+button.shop-price-chip[aria-expanded='true'] {
   border-color: rgba(243, 210, 122, 0.6);
   background: rgba(22, 18, 8, 0.88);
 }
 
-button.shop-companion-price-chip:focus-visible {
+button.shop-price-chip:focus-visible {
   outline: none;
   box-shadow: var(--control-focus-ring);
 }
 
-.shop-companion-price-tooltip {
+.shop-price-tooltip {
   position: absolute;
   top: calc(100% + 0.5rem);
   right: 0;
@@ -145,7 +145,7 @@ button.shop-companion-price-chip:focus-visible {
   pointer-events: none;
 }
 
-.shop-companion-purchase-button {
+.shop-purchase-button {
   display: inline-flex;
   min-height: 2.4rem;
   align-items: center;
@@ -163,23 +163,23 @@ button.shop-companion-price-chip:focus-visible {
   transition: background var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out), filter var(--motion-normal) var(--ease-out);
 }
 
-.shop-companion-purchase-button:hover:not(:disabled) {
+.shop-purchase-button:hover:not(:disabled) {
   background: var(--control-primary-bg-hover);
   box-shadow: 0 0 18px rgba(var(--theme-primary-rgb), 0.28);
 }
 
-.shop-companion-purchase-button:focus-visible {
+.shop-purchase-button:focus-visible {
   outline: none;
   box-shadow: var(--control-focus-ring), 0 0 18px rgba(var(--theme-primary-rgb), 0.28);
 }
 
-.shop-companion-purchase-button:disabled {
+.shop-purchase-button:disabled {
   cursor: not-allowed;
   filter: saturate(0.4) brightness(0.7);
   box-shadow: none;
 }
 
-.shop-companion-purchase-button svg { width: 1rem; height: 1rem; }
+.shop-purchase-button svg { width: 1rem; height: 1rem; }
 
 .shop-primary-action {
   display: inline-flex;
