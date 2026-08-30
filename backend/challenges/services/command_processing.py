@@ -19,8 +19,8 @@ from common.git.command_outcomes import command_outcome_payload
 from common.git.repository_state import VariantTargetStateHashCache
 from common.runtime import (
     apply_command_accounting,
-    progress_rule_counts,
     command_budget_exhausted,
+    progress_rule_counts,
     repository_response_snapshot,
     update_fields_for_execution,
 )
