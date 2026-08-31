@@ -1,5 +1,25 @@
 .story-switcher--map {
-  display: none;
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 0.85rem;
+  max-width: none;
+  margin-bottom: 0;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-lg);
+  background: var(--panel-bg);
+}
+
+.story-switcher--map > span {
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+}
+
+.story-switcher--map .ui-button {
+  flex-shrink: 0;
 }
 
 .story-map-title {

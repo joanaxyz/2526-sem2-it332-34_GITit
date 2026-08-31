@@ -388,6 +388,9 @@ export function GameplayWorkspaceTour({
   const spotlight = spotlightRect(layout.target, viewportWidth, viewportHeight)
   const Icon = activeStep.icon
   const finalStep = activeIndex === availableSteps.length - 1
+  // A long final CTA has priority over the optional keyboard hint. Keeping all
+  // three footer items in this fixed-width card can push the action offscreen.
+  const compactActions = finalStep && finishLabel.length > 16
   const titleId = `${markerId}-title`
   const bodyId = `${markerId}-body`
   const cardStyle = {
@@ -505,7 +508,7 @@ export function GameplayWorkspaceTour({
           ))}
         </nav>
 
-        <footer className="workspace-tour__actions">
+        <footer className={`workspace-tour__actions${compactActions ? ' is-compact' : ''}`}>
           <Button
             type="button"
             variant="ghost"

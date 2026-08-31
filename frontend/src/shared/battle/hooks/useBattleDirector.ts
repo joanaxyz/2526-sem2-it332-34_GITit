@@ -35,6 +35,7 @@ export function useBattleDirector(): BattleDirector {
     setMonster,
     setPlayerHp,
     setPlayerMaxHp,
+    resetPlayerVitals,
     setRoster,
   } = useBattleRosterState()
   const [defeated, setDefeated] = useState(false)
@@ -133,8 +134,7 @@ export function useBattleDirector(): BattleDirector {
     emitTransitionCue,
     setDefeated,
     setActiveMonsterId,
-    setPlayerHp,
-    setPlayerMaxHp,
+    resetPlayerVitals,
     setEntranceHidden,
     bumpRosterEpoch,
     setRoster,
@@ -185,8 +185,13 @@ export function useBattleDirector(): BattleDirector {
 
   const syncPlayerVitals = useCallback(
     (nextPlayerHp: number | null, nextPlayerMaxHp: number | null) => {
-      setPlayerHp(nextPlayerHp)
+      // Adopt the next wave's ceiling right away, but route HP through the
+      // damage-only writer: the run payload points at the next wave the instant
+      // its first command resolves, and healing Blue here would land while the
+      // wave he just cleared is still dying. `setEncounter` refills once the
+      // new wave has actually arrived on stage.
       setPlayerMaxHp(nextPlayerMaxHp)
+      setPlayerHp(nextPlayerHp)
     },
     [setPlayerHp, setPlayerMaxHp],
   )
