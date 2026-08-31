@@ -1,4 +1,4 @@
-import { GitBranch, MessageSquareText, ScrollText, Target, TerminalSquare } from 'lucide-react'
+import { GitBranch, MessageSquareText, ScrollText, Star, Target, TerminalSquare } from 'lucide-react'
 
 import type { ChallengeRun } from '@/features/challenges/types'
 import {
@@ -12,7 +12,15 @@ const challengeWorkspaceTourSteps = [
     selector: '[data-tour-target="challenge-brief"]',
     icon: ScrollText,
     title: 'Review the challenge',
-    body: 'Scenario explains the setup. Objective states the required result, and Required values are ready to copy.',
+    body: 'Scenario explains the setup. Objective states the required result, and Required values are ready to copy. It finishes on its own once the repository matches.',
+    placement: 'right',
+  },
+  {
+    id: 'challenge-scoring',
+    selector: '[data-tour-target="challenge-brief"]',
+    icon: Star,
+    title: 'Earn up to 3 stars',
+    body: 'Solving earns 1 star, staying within the command budget earns 2, and a first-try clear earns all 3 — tracked live in the Stars row.',
     placement: 'right',
   },
   {

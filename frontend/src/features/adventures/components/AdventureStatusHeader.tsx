@@ -69,6 +69,7 @@ export function AdventureStatusHeader({
         className="gameplay-header-button gameplay-header-icon-button"
         title={guideLabel}
         aria-label={guideLabel}
+        data-tour-target="level-guide"
         onClick={onOpenLibrary}
       >
         <BookOpen aria-hidden="true" />

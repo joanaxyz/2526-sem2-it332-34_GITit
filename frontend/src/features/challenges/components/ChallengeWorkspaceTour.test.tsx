@@ -58,11 +58,14 @@ describe('ChallengeWorkspaceTour', () => {
     expect(screen.getByText('Challenge quick tour')).toBeVisible()
 
     fireEvent.click(screen.getByRole('button', { name: /next/i }))
+    expect(await screen.findByRole('heading', { name: 'Earn up to 3 stars' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /next/i }))
     expect(await screen.findByRole('heading', { name: 'Track repository state' })).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /next/i }))
     expect(await screen.findByRole('heading', { name: 'Run a Git command' })).toBeInTheDocument()
-    expect(screen.getByText('3 / 3')).toBeInTheDocument()
+    expect(screen.getByText('4 / 4')).toBeInTheDocument()
     expect(screen.queryByText('Compare the target')).not.toBeInTheDocument()
     expect(screen.queryByText('Use the feedback')).not.toBeInTheDocument()
 
