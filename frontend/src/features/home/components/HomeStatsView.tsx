@@ -23,7 +23,7 @@ export function HomeStatsView({
 
   return (
     <section className="home-overview-grid" aria-label="Player overview">
-      <header className="home-overview-continue">
+      <header className="home-overview-continue" data-onboarding="overview-next">
         <div>
           <span>{companionRequired ? 'First step' : 'Recommended next step'}</span>
           <h2>{companionRequired ? 'Choose your first companion' : 'Continue your Git journey'}</h2>

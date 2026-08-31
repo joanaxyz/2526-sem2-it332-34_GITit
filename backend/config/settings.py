@@ -88,8 +88,9 @@ PERFORMANCE_TIMING_ENABLED = env("PERFORMANCE_TIMING_ENABLED", default=DEBUG)
 
 ALLOWED_HOSTS = _clean_env_list(env("DJANGO_ALLOWED_HOSTS"))
 
-if DEBUG and not ALLOWED_HOSTS:
-    ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
+if DEBUG:
+    # Allow development access through LAN addresses and custom hostnames.
+    ALLOWED_HOSTS = ["*"]
 
 if not DEBUG and (not ALLOWED_HOSTS or "*" in ALLOWED_HOSTS):
     raise RuntimeError("DJANGO_ALLOWED_HOSTS must be explicit when DJANGO_DEBUG=False.")

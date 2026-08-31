@@ -31,12 +31,26 @@ export function useBattleRosterState() {
     [setRoster],
   )
 
+  /**
+   * Damage-only writer: HP never climbs while an encounter is on screen.
+   * Command outcomes report the *absolute* remaining budget, and the payload for
+   * a wave-clearing command already carries the next wave's untouched budget -
+   * applying it verbatim refilled Blue's bar mid-fight, while the wave he just
+   * cleared was still playing its death beat. Refills belong to encounter
+   * staging, which owns the moment the next wave actually arrives.
+   */
   const setPlayerHp = useCallback((next: number | null) => {
-    setPlayerHpState(next)
+    setPlayerHpState((prev) => (prev === null || next === null ? next : Math.min(prev, next)))
   }, [])
 
   const setPlayerMaxHp = useCallback((next: number | null) => {
     setPlayerMaxHpState(next)
+  }, [])
+
+  /** Authoritative vitals for a newly staged encounter - the only refill path. */
+  const resetPlayerVitals = useCallback((hp: number | null, maxHp: number | null) => {
+    setPlayerHpState(hp)
+    setPlayerMaxHpState(maxHp)
   }, [])
 
   const currentMonsters = useCallback(() => rosterRef.current, [])
@@ -52,6 +66,7 @@ export function useBattleRosterState() {
     setMonster,
     setPlayerHp,
     setPlayerMaxHp,
+    resetPlayerVitals,
     setRoster,
   }
 }

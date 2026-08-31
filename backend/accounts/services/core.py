@@ -13,6 +13,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from accounts.models import AccountIdentity, AccountSecurity, SessionRecord
 from common.exceptions import Conflict
 from common.http import get_client_ip
+from players.models import PlayerPreferences
 from players.services import get_or_create_player
 from progress.models import StreakRecord
 
@@ -61,6 +62,11 @@ class UserService:
             # workers while preserving the same public conflict response.
             raise Conflict("An account already exists for this username or email.") from exc
         player = get_or_create_player(user)
+        # Registration is the only opt-in to the getting-started journey, so a
+        # brand-new account always starts it and existing accounts never do.
+        PlayerPreferences.objects.create(
+            player=player, onboarding_phase=PlayerPreferences.ONBOARDING_START
+        )
         StreakRecord.objects.create(player=player)
         # The default Arcane Spire story is owned implicitly by
         # everyone — nothing to grant at signup. Companions are NOT free: the

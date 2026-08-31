@@ -59,7 +59,7 @@ export function CompanionShop({
             </article>
           )}
         />
-        <div className="shop-portrait-thumbs" role="tablist" aria-label="Companion quick select">
+        <div className="shop-portrait-thumbs" role="tablist" aria-label="Companion quick select" data-onboarding="shop-characters">
           {companions.map((companion, thumbIndex) => (
             <button
               key={companion.slug}
@@ -106,7 +106,7 @@ function CompanionActionDock({
   walletPending: boolean
 }) {
   return (
-    <div className="shop-stage-action-dock" aria-label={`${companion.label} purchase status`}>
+    <div className="shop-stage-action-dock" aria-label={`${companion.label} purchase status`} data-onboarding="shop-purchase">
       <button
         type="button"
         className="shop-stage-action-button"

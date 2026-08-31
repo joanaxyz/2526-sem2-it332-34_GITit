@@ -109,6 +109,24 @@ describe('deriveBattleEventsFromCommandOutcome', () => {
     expect(block.waves[0].monsters[0]).toMatchObject({ hp: 2, max_hp: 2, alive: true })
   })
 
+  it('never heals the enemy when a command undoes earlier objective progress', () => {
+    // `git reset` on a wave whose earlier step already passed: rule progress is
+    // absolute, so the payload reports fewer passing rules than the turn before.
+    const block = deriveBattleEventsFromCommandOutcome({
+      outcome: outcome({
+        total_rules: 4,
+        previous_rules_passing: 2,
+        rules_passing: 1,
+        rules_delta: -1,
+      }),
+      skill: 'reset',
+      monsters: [{ id: 0, species: 'bone-soldier', hp: 2, max_hp: 4, alive: true }],
+    })
+
+    expect(block.waves[0].monsters[0]).toMatchObject({ hp: 2, max_hp: 4, alive: true })
+    expect(block.events[0]).toMatchObject({ type: 'player_attack', damage: 0, target_hp_after: 2, missed: true })
+  })
+
   it('casts free inspection commands without damage or counterattack', () => {
     const block = deriveBattleEventsFromCommandOutcome({
       outcome: outcome({ counted: false, remaining_counted_commands: 5 }),

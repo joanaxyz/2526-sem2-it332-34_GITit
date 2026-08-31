@@ -19,6 +19,7 @@ import '@/styles/features/authoring.css'
 import '@/styles/features/shop.css'
 import '@/styles/features/auth.css'
 import '@/styles/features/settings.css'
+import '@/styles/features/onboarding.css'
 
 initializePreferences()
 

@@ -137,7 +137,8 @@
 
   .story-map-rail-controls {
     position: sticky;
-    top: calc(var(--app-topbar-height) + 0.55rem);
+    /* This scroll container already begins below the app topbar. */
+    top: 0.55rem;
     z-index: var(--z-sticky);
     display: flex;
     justify-content: center;

@@ -1,7 +1,16 @@
 export type MotionMode = 'system' | 'reduced' | 'full'
+export type OnboardingPhase = 'stories' | 'shop' | 'purchase' | 'home' | 'equip' | 'done'
 
+export const onboardingPhases: readonly OnboardingPhase[] = ['stories', 'shop', 'purchase', 'home', 'equip', 'done']
+
+/** What this browser stores and applies to the document. */
 export type PlayerPreferences = {
   motion_mode: MotionMode
+}
+
+/** What the API reports for the signed-in account. */
+export type PlayerAccountPreferences = PlayerPreferences & {
+  onboarding_phase: OnboardingPhase
 }
 
 const storageKey = 'git-it-preferences'
@@ -23,7 +32,9 @@ export function readStoredPreferences(): PlayerPreferences {
 
 export function persistPreferences(preferences: PlayerPreferences) {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(storageKey, JSON.stringify(preferences))
+  // Only browser-wide settings go here: the onboarding phase is account-scoped
+  // and stays on the server (mirrored per user by the onboarding feature).
+  window.localStorage.setItem(storageKey, JSON.stringify({ motion_mode: preferences.motion_mode }))
 }
 
 export function applyPreferences(preferences: PlayerPreferences) {

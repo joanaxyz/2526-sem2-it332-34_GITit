@@ -10,6 +10,7 @@ import { authApi, type RegisterPayload } from '@/shared/auth/authApi'
 import { presentAuthError } from '@/features/auth/api/authError'
 import { PasswordStrengthIndicator } from '@/features/auth/components/PasswordStrengthIndicator'
 import { useAuthStore } from '@/shared/auth/useAuth'
+import { storyPath } from '@/shared/navigation/routes'
 import { cn } from '@/shared/utils/cn'
 
 const usernamePattern = /^[A-Za-z0-9._-]{3,30}$/
@@ -70,7 +71,7 @@ export function RegisterForm() {
       }
       queryClient.clear()
       setSession(session.access, session.user)
-      navigate('/home')
+      navigate(storyPath(), { replace: true })
     },
   })
   const errorPresentation = useMemo(
