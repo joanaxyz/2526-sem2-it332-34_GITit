@@ -1,4 +1,4 @@
-import { FolderTree, ScrollText, Swords, TerminalSquare } from 'lucide-react'
+import { BookOpen, FolderTree, ScrollText, Star, Swords, TerminalSquare } from 'lucide-react'
 
 import {
   GameplayWorkspaceTour,
@@ -11,8 +11,24 @@ const adventureWorkspaceTourSteps = [
     selector: '[data-tour-target="adventure-story"]',
     icon: ScrollText,
     title: 'Review the objective',
-    body: 'Read the task and live checks first. They describe the repository state this level expects.',
+    body: 'Read the task and live checks first. The level finishes on its own once every check is satisfied.',
     placement: 'right',
+  },
+  {
+    id: 'adventure-scoring',
+    selector: '[data-tour-target="adventure-story"]',
+    icon: Star,
+    title: 'Earn up to 3 stars',
+    body: 'Finishing earns 1 star, staying within the command budget earns 2, and a first-try clear earns all 3 — tracked live in the Stars row.',
+    placement: 'right',
+  },
+  {
+    id: 'adventure-guide',
+    selector: '[data-tour-target="level-guide"]',
+    icon: BookOpen,
+    title: 'The guide costs a star',
+    body: 'Stuck? Open the command guide for reference — it costs this run one star, never dropping below 1.',
+    placement: 'bottom',
   },
   {
     id: 'adventure-battle',
