@@ -1,4 +1,4 @@
-import { Clock, GitBranch, Layers } from 'lucide-react'
+import { Clock, GitBranch, Layers, Target, TerminalSquare } from 'lucide-react'
 
 import {
   LevelStoryCard,
@@ -44,6 +44,24 @@ export function AdventureContextPanel({
       icon: StarSolidIcon,
       iconClass: 'lvlctx-icon--amber',
       value: <StarTriplet count={run.stars || 0} />,
+    },
+    {
+      label: 'Commands',
+      icon: TerminalSquare,
+      value: (
+        <span className="lvlctx-num" data-tour-target="command-budget">
+          {attempt.counts.counted_command_count} / {attempt.command_budget.max_counted_commands}
+        </span>
+      ),
+    },
+    {
+      label: 'Star target',
+      icon: Target,
+      value: (
+        <span className="lvlctx-num" data-tour-target="star-budget">
+          ≤ {attempt.command_budget.min_counted_commands} {attempt.command_budget.min_counted_commands === 1 ? 'command' : 'commands'}
+        </span>
+      ),
     },
     ...(rewardCoins ? [{ label: 'Reward', icon: Clock, value: <RewardValue coins={rewardCoins} /> }] : []),
   ]

@@ -21,7 +21,7 @@ describe('LevelStoryCard', () => {
     )
 
     expect(screen.getByText('Save staged work')).toBeVisible()
-    expect(screen.getByText('Commit message:')).toHaveClass('sr-only')
+    expect(screen.getByText('Commit message')).toHaveClass('sr-only')
     expect(screen.getByRole('button', { name: 'Copy Commit message' })).toBeVisible()
   })
 

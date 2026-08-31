@@ -1,4 +1,4 @@
-import { Clock, Smile } from 'lucide-react'
+import { Clock, Smile, Target, TerminalSquare } from 'lucide-react'
 
 import type { ChallengeRun } from '@/features/challenges/types'
 import {
@@ -8,7 +8,7 @@ import {
   RewardValue,
   StarTriplet,
 } from '@/shared/level/components/LevelContextPanel'
-import { BustIcon, RookIcon, StarSolidIcon } from '@/shared/level/components/workspaceIcons'
+import { RookIcon, StarSolidIcon } from '@/shared/level/components/workspaceIcons'
 import { hasLevelContext, normalizeLevelContext } from '@/shared/level/utils/levelContext'
 
 export function ChallengeContextPanel({ run }: { run: ChallengeRun }) {
@@ -28,14 +28,27 @@ export function ChallengeContextPanel({ run }: { run: ChallengeRun }) {
       iconClass: 'lvlctx-icon--amber',
       value: <StarTriplet count={run.stars || run.mastery_progress.stars || 0} />,
     },
+    {
+      label: 'Commands',
+      icon: TerminalSquare,
+      value: (
+        <span className="lvlctx-num" data-tour-target="command-budget">
+          {run.counts.counted_action_total} / {run.policy.max_counted_commands}
+        </span>
+      ),
+    },
+    {
+      label: 'Star target',
+      icon: Target,
+      value: (
+        <span className="lvlctx-num" data-tour-target="star-budget">
+          ≤ {run.policy.min_counted_commands} {run.policy.min_counted_commands === 1 ? 'command' : 'commands'}
+        </span>
+      ),
+    },
     ...(run.reward_coins
       ? [{ label: 'Reward', icon: Clock, value: <RewardValue coins={run.reward_coins} /> }]
       : []),
-    {
-      label: 'Attempts',
-      icon: BustIcon,
-      value: <span className="lvlctx-num">{Math.max(1, run.counts.total_attempts)}</span>,
-    },
   ]
 
   return (
