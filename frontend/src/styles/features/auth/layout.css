@@ -86,9 +86,11 @@
 }
 
 .auth-brand span {
-  font-family: var(--font-display);
+  /* Cinzel is scoped to the "GIT it!" wordmark only - --font-display stays
+     Chakra Petch for every other heading. See .app-brand strong in
+     base/page-shell.css for the nav-bar instance of this same treatment. */
+  font-family: 'Cinzel', serif;
   font-size: 2.35rem;
-  font-style: italic;
   font-weight: 800;
   letter-spacing: -0.02em;
 }

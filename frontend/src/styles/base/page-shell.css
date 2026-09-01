@@ -94,9 +94,10 @@ textarea {
 
 .app-brand strong {
   display: block;
-  font-family: var(--font-display);
+  /* Cinzel is scoped to this wordmark only - --font-display stays Chakra
+     Petch for every other heading (settings, shop, story-map, etc.). */
+  font-family: 'Cinzel', serif;
   font-size: 1.48rem;
-  font-style: italic;
   font-weight: 800;
   line-height: 0.95;
   letter-spacing: -0.02em;
@@ -106,9 +107,10 @@ textarea {
   display: block;
   margin-top: 0.12rem;
   color: rgb(var(--theme-primary-rgb));
-  font-family: var(--font-mono);
+  /* Cinzel is scoped to this tagline only - see .app-brand strong above. */
+  font-family: 'Cinzel', serif;
   font-size: var(--text-2xs);
-  font-weight: 850;
+  font-weight: 600;
   letter-spacing: 0.08em;
   line-height: 1;
   text-transform: uppercase;
