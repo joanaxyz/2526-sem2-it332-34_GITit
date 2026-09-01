@@ -78,6 +78,7 @@ export function CompanionShop({
           balance={balance}
           item={selected}
           onAction={onAction}
+          onboardingTarget="shop-purchase"
           pending={pending}
           purchasesEnabled={purchasesEnabled}
           walletPending={walletPending}
