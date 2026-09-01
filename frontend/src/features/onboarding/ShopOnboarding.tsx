@@ -22,7 +22,7 @@ const shopSteps = [
   {
     id: 'purchase', selector: '[data-onboarding="shop-purchase"]', icon: ShoppingBag,
     title: 'Buy the selected companion',
-    body: 'When you are ready, use the purchase button with the GitCoin price. Your first companion equips automatically. After the purchase succeeds, choose Visit Home above to see your loadout.',
+    body: 'When you are ready, check the GitCoin price next to it and press Purchase. Your first companion equips automatically. After the purchase succeeds, choose Visit Home above to see your loadout.',
     optional: true,
   },
 ] satisfies WorkspaceTourStep[]

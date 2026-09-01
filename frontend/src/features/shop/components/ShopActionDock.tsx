@@ -15,6 +15,7 @@ export function ShopActionDock({
   balance,
   item,
   onAction,
+  onboardingTarget,
   pending,
   purchasesEnabled,
   walletPending,
@@ -22,6 +23,7 @@ export function ShopActionDock({
   balance: number
   item: ShopDisplayItem
   onAction: (item: ShopDisplayItem) => void
+  onboardingTarget?: string
   pending: boolean
   purchasesEnabled: boolean
   walletPending: boolean
@@ -48,6 +50,7 @@ export function ShopActionDock({
           className={owned ? 'shop-stage-action-button' : 'shop-purchase-button'}
           disabled={actionDisabled(item, pending, balance, walletPending, purchasesEnabled)}
           onClick={() => onAction(item)}
+          data-onboarding={!owned ? onboardingTarget : undefined}
         >
           {owned ? <CheckCircle2 aria-hidden="true" /> : null}
           {label}
