@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { ChallengeTrialAccess } from '@/features/challenges/types'
@@ -148,5 +148,32 @@ describe('StoryAdventurePath challenge gate', () => {
 
     fireEvent.keyDown(window, { key: 'Escape' })
     expect(screen.queryByRole('region', { name: 'Challenge Gate' })).not.toBeInTheDocument()
+  })
+
+  it('moves focus into the panel on open and restores it to the Challenge Gate button on close', async () => {
+    render(
+      <StoryAdventurePath
+        chapter={chapter}
+        levels={[adventure]}
+        challenges={[challenge]}
+        challengesLocked={false}
+        loading={false}
+      />,
+    )
+
+    const gate = screen.getByRole('button', { name: 'Challenge trials' })
+    gate.focus()
+    fireEvent.click(gate)
+
+    const panel = await screen.findByRole('region', { name: 'Challenge Gate' })
+    const easyTrialCard = within(panel).getByRole('button', {
+      name: 'Repository Foundations Trial: easy challenge trial',
+    })
+    await waitFor(() => expect(easyTrialCard).toHaveFocus())
+
+    fireEvent.keyDown(window, { key: 'Escape' })
+
+    expect(screen.queryByRole('region', { name: 'Challenge Gate' })).not.toBeInTheDocument()
+    await waitFor(() => expect(gate).toHaveFocus())
   })
 })

@@ -6,6 +6,7 @@ import type { ReactNode } from 'react'
 import { Button } from './Button'
 import { Card } from './Card'
 import { cn } from '@/shared/utils/cn'
+import { useFocusTrap } from '@/shared/utils/useFocusTrap'
 
 export function Modal({
   open,
@@ -37,46 +38,22 @@ export function Modal({
   useEffect(() => {
     if (!open) return
     const original = document.body.style.overflow
-    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
     document.body.style.overflow = 'hidden'
 
-    const dialog = dialogRef.current
-    const focusableSelector =
-      'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-    const focusable = () => Array.from(dialog?.querySelectorAll<HTMLElement>(focusableSelector) ?? [])
-    window.requestAnimationFrame(() => (focusable()[0] ?? dialog)?.focus())
-
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        onCloseRef.current()
-        return
-      }
-      if (event.key !== 'Tab') return
-      const items = focusable()
-      if (!items.length) {
-        event.preventDefault()
-        dialog?.focus()
-        return
-      }
-      const first = items[0]
-      const last = items[items.length - 1]
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault()
-        first.focus()
-      }
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      onCloseRef.current()
     }
 
     document.addEventListener('keydown', handleKeyDown)
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = original
-      previousFocus?.focus()
     }
   }, [open])
+
+  useFocusTrap(dialogRef, open)
 
   if (!open) return null
 

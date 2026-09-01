@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { useState } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { RepositorySnapshot } from '@/shared/level/types'
@@ -161,5 +162,52 @@ describe('WorkspaceEditorOverlay', () => {
     expect(confirm).toHaveBeenCalledTimes(2)
     expect(onClose).not.toHaveBeenCalled()
     expect(screen.getByLabelText('File content')).toHaveValue('changed')
+  })
+
+  it('traps focus inside the dialog, moves focus in on open, and restores it to the trigger on close', async () => {
+    function Harness() {
+      const [open, setOpen] = useState(false)
+      return (
+        <>
+          <button type="button" onClick={() => setOpen(true)}>
+            Open editor
+          </button>
+          <WorkspaceEditorOverlay
+            open={open}
+            filePath="src/app.py"
+            snapshot={{
+              ...baseSnapshot,
+              project_tree: {
+                'src/app.py': { status: 'modified', source: 'working_tree', content: 'print("v2")' },
+              },
+            }}
+            onClose={() => setOpen(false)}
+            onWriteFile={vi.fn()}
+          />
+        </>
+      )
+    }
+
+    render(<Harness />)
+
+    const trigger = screen.getByRole('button', { name: 'Open editor' })
+    trigger.focus()
+    fireEvent.click(trigger)
+
+    const closeButton = await screen.findByRole('button', { name: 'Close editor' })
+    await waitFor(() => expect(closeButton).toHaveFocus())
+
+    const editor = screen.getByLabelText('File content')
+    editor.focus()
+    fireEvent.keyDown(editor, { key: 'Tab' })
+    expect(closeButton).toHaveFocus()
+
+    fireEvent.keyDown(closeButton, { key: 'Tab', shiftKey: true })
+    expect(editor).toHaveFocus()
+
+    fireEvent.click(closeButton)
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    await waitFor(() => expect(trigger).toHaveFocus())
   })
 })

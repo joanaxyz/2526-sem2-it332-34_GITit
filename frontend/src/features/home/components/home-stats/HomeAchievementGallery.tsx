@@ -57,7 +57,7 @@ export function HomeAchievementGallery({ achievements }: { achievements: Achieve
         {visibleAchievements.map((achievement) => {
           const pct = Math.round((achievement.current / Math.max(achievement.target, 1)) * 100)
           const style = {
-            '--achievement-accent': achievement.unlocked ? achievement.color : 'rgba(117, 143, 159, 0.74)',
+            '--achievement-accent': achievement.unlocked ? achievement.color : 'hsl(var(--warning) / 0.55)',
           } as CSSProperties
 
           return (
