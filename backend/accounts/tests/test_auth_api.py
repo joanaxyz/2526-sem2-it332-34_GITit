@@ -11,6 +11,8 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from accounts.models import SessionRecord
 from accounts.services import TokenBlacklistService, TokenService
+from players.models import PlayerPreferences
+from players.services import get_or_create_player
 
 
 @pytest.fixture()
@@ -48,6 +50,23 @@ def test_register_creates_user_with_username_and_email(db, api_client):
     assert response.data["user"]["username"] == "jcgako"
     assert response.data["user"]["email"] == "student@example.com"
     assert get_user_model().objects.get().username == "jcgako"
+
+
+def test_register_starts_the_getting_started_journey(db, api_client):
+    api_client.post("/api/auth/register/", registration_payload(), format="json")
+
+    user = get_user_model().objects.get(username="jcgako")
+    preferences = PlayerPreferences.objects.get(player=user.player)
+    assert preferences.onboarding_phase == PlayerPreferences.ONBOARDING_START
+
+
+def test_existing_accounts_are_not_onboarded(db):
+    # Accounts that predate the journey have no preferences row; the one created
+    # for them on first read must leave the tutorial switched off.
+    user = create_student_user(username="veteran", email="veteran@example.com")
+    record, _created = PlayerPreferences.objects.get_or_create(player=get_or_create_player(user))
+
+    assert record.onboarding_phase == PlayerPreferences.ONBOARDING_DONE
 
 
 def test_register_rejects_duplicate_username_case_insensitive(db, api_client):

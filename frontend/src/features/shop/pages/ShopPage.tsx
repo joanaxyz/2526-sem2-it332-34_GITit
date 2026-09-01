@@ -27,8 +27,12 @@ import {
   type ShopDisplayItem,
 } from '@/shared/shop/model/shopPresentation'
 import { useWalletSummary } from '@/shared/wallet/hooks/useWallet'
+import { ShopOnboarding } from '@/features/onboarding/ShopOnboarding'
+import { useAppOnboarding } from '@/features/onboarding/onboardingContext'
 
 export function ShopPage() {
+  const onboarding = useAppOnboarding()
+  const guidedSetup = onboarding && ['shop', 'purchase'].includes(onboarding.phase)
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -95,7 +99,14 @@ export function ShopPage() {
           <ShopTabs activeTab={activeTab} balance={balance} walletPending={wallet.isPending} onTabChange={setActiveTab} />
         </header>
 
-        {onboardingRequired ? (
+        <ShopOnboarding
+          ready={shop.isSuccess && wallet.isSuccess}
+          companionsTab={activeTab === 'companions'}
+          ownsCompanion={catalog.companions.some((item) => item.owned)}
+          canBuy={purchasesEnabled && catalog.companions.some((item) => !item.owned && item.price <= balance)}
+        />
+
+        {onboardingRequired && !guidedSetup ? (
           <div className="shop-onboarding-banner" role="status">
             {hasCompanion ? (
               <>

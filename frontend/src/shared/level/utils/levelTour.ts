@@ -1,6 +1,6 @@
 export type LevelTourMode = 'adventure' | 'challenge'
 
-const LEVEL_TOUR_VERSION = 'v2'
+const LEVEL_TOUR_VERSION = 'v3'
 
 export function levelTourStorageKey(
   userId?: number | null,

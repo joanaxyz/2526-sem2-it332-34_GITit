@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { authApi } from '@/shared/auth/authApi'
 import { presentAuthError } from '@/features/auth/api/authError'
 import { useAuthStore } from '@/shared/auth/useAuth'
+import { storyPath } from '@/shared/navigation/routes'
 import { cn } from '@/shared/utils/cn'
 
 const usernamePattern = /^[A-Za-z0-9._-]{3,30}$/
@@ -44,7 +45,7 @@ export function LoginForm() {
     onSuccess: (data) => {
       queryClient.clear()
       setSession(data.access, data.user)
-      navigate('/home')
+      navigate(storyPath(), { replace: true })
     },
   })
   const errorPresentation = useMemo(

@@ -1,8 +1,9 @@
-import { type CSSProperties } from 'react'
+import { useCallback, type CSSProperties } from 'react'
 import { Backpack, BarChart3, ChevronLeft, ChevronRight, User } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 
 import { HomeLoadoutView } from '@/features/home/components/HomeLoadoutView'
+import { HomeOnboarding } from '@/features/onboarding/HomeOnboarding'
 import { HomeStatsView } from '@/features/home/components/HomeStatsView'
 import type { CompanionPresentation } from '@/features/home/components/home-hub/companionPresentation'
 import { HomeProfileWorkspace } from '@/features/home/components/home-hub/HomeProfileWorkspace'
@@ -50,17 +51,20 @@ export function HomeHubView({
     '--home-theme-map': `url("${storyWorld.map?.background.src ?? '/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png'}")`,
   } as CSSProperties
 
-  function selectTab(next: HomeTab) {
-    setSearchParams(
-      (current) => {
-        const nextParams = new URLSearchParams(current)
-        if (next === 'overview') nextParams.delete('tab')
-        else nextParams.set('tab', next)
-        return nextParams
-      },
-      { replace: true },
-    )
-  }
+  const selectTab = useCallback(
+    (next: HomeTab) => {
+      setSearchParams(
+        (current) => {
+          const nextParams = new URLSearchParams(current)
+          if (next === 'overview') nextParams.delete('tab')
+          else nextParams.set('tab', next)
+          return nextParams
+        },
+        { replace: true },
+      )
+    },
+    [setSearchParams],
+  )
 
   return (
     <div className="home-ref-screen">
@@ -71,6 +75,7 @@ export function HomeHubView({
           type="button"
           className={tab === 'overview' ? 'is-active' : ''}
           aria-pressed={tab === 'overview'}
+          data-onboarding="home-overview"
           onClick={() => selectTab('overview')}
         >
           <BarChart3 aria-hidden="true" />
@@ -80,6 +85,7 @@ export function HomeHubView({
           type="button"
           className={tab === 'loadout' ? 'is-active' : ''}
           aria-pressed={tab === 'loadout'}
+          data-onboarding="home-loadout"
           onClick={() => selectTab('loadout')}
         >
           <Backpack aria-hidden="true" />
@@ -89,12 +95,20 @@ export function HomeHubView({
           type="button"
           className={tab === 'profile' ? 'is-active' : ''}
           aria-pressed={tab === 'profile'}
+          data-onboarding="home-profile"
           onClick={() => selectTab('profile')}
         >
           <User aria-hidden="true" />
           Profile
         </button>
       </nav>
+
+      <HomeOnboarding
+        ready={!loadoutLoading && !loadoutError}
+        hasCompanion={hasCompanion}
+        tab={tab}
+        onSelectTab={selectTab}
+      />
 
       {tab === 'overview' ? (
         <HomeStatsView

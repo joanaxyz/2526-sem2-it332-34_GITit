@@ -169,7 +169,7 @@ export function ChallengeWorkspace() {
   const shellPrompt = terminalPrompt({ username: user?.username, repo: run.challenge.slug })
   const tourKey = `${user?.id ?? 'guest'}:challenge:${run.challenge.level_id}`
   const shouldAutoOpenTour = dismissedTourKey !== tourKey && !hasSeenLevelTour(user?.id)
-  const isTourOpen = tourOpen || shouldAutoOpenTour
+  const isTourOpen = run.status === 'started' && (tourOpen || shouldAutoOpenTour)
 
   const submit = createChallengeWorkspaceCommandHandler({
     runId,

@@ -5114,6 +5114,18 @@
                 "type": "string",
                 "description": "* `system` - Follow system\n* `reduced` - Reduced\n* `full` - Full"
             },
+            "OnboardingPhaseEnum": {
+                "enum": [
+                    "stories",
+                    "shop",
+                    "purchase",
+                    "home",
+                    "equip",
+                    "done"
+                ],
+                "type": "string",
+                "description": "* `stories` - Stories\n* `shop` - Shop\n* `purchase` - Purchase\n* `home` - Home\n* `equip` - Equip\n* `done` - Done"
+            },
             "PartialEnum": {
                 "enum": [
                     true
@@ -5309,6 +5321,9 @@
                 "properties": {
                     "motion_mode": {
                         "$ref": "#/components/schemas/MotionModeEnum"
+                    },
+                    "onboarding_phase": {
+                        "$ref": "#/components/schemas/OnboardingPhaseEnum"
                     }
                 }
             },
@@ -5317,6 +5332,9 @@
                 "properties": {
                     "motion_mode": {
                         "$ref": "#/components/schemas/MotionModeEnum"
+                    },
+                    "onboarding_phase": {
+                        "$ref": "#/components/schemas/OnboardingPhaseEnum"
                     }
                 }
             },

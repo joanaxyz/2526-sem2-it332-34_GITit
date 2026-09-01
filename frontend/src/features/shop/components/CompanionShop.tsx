@@ -58,7 +58,7 @@ export function CompanionShop({
             </article>
           )}
         />
-        <div className="shop-portrait-thumbs" role="tablist" aria-label="Companion quick select">
+        <div className="shop-portrait-thumbs" role="tablist" aria-label="Companion quick select" data-onboarding="shop-characters">
           {companions.map((companion, thumbIndex) => (
             <button
               key={companion.slug}

@@ -1,0 +1,53 @@
+.app-onboarding-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-block: 0.75rem 1.25rem;
+  padding: 1rem;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  background: var(--panel-bg-raised);
+  color: var(--text-primary);
+}
+
+.app-onboarding-banner > svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.app-onboarding-banner__copy { flex: 1; }
+.app-onboarding-banner__copy strong { font-size: var(--text-sm); }
+.app-onboarding-banner__copy p {
+  margin: 0.3rem 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.app-onboarding-banner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app-onboarding-skip {
+  min-height: 2.75rem;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.app-onboarding-skip:focus-visible {
+  outline: 2px solid rgb(var(--theme-primary-rgb));
+  outline-offset: 4px;
+}
+
+@media (max-width: 700px) {
+  .app-onboarding-banner { flex-wrap: wrap; align-items: flex-start; }
+  .app-onboarding-banner__actions { width: 100%; }
+}
