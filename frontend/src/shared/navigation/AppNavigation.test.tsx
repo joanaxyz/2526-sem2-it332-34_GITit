@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 
@@ -68,7 +68,36 @@ describe('AppTopbar account state', () => {
       'aria-expanded',
       'true',
     )
-    expect(screen.getByRole('menuitem', { name: 'Settings' })).toBeInTheDocument()
+    // A plain labelled button group, not a role="menu"/role="menuitem" widget —
+    // this app doesn't implement APG menu keyboarding (arrow keys), so it
+    // shouldn't claim menu semantics that promise it.
+    expect(screen.getByRole('button', { name: 'Settings' })).toBeInTheDocument()
+    queryClient.clear()
+  })
+
+  it('moves focus into the panel on open and restores it to the trigger on close', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <AppTopbar />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    const trigger = screen.getByRole('button', { name: 'Open account menu for new-user' })
+    trigger.focus()
+    fireEvent.click(trigger)
+
+    const settingsItem = await screen.findByRole('button', { name: 'Settings' })
+    await waitFor(() => expect(settingsItem).toHaveFocus())
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+
+    expect(screen.queryByRole('button', { name: 'Settings' })).not.toBeInTheDocument()
+    await waitFor(() => expect(trigger).toHaveFocus())
     queryClient.clear()
   })
 })

@@ -16,7 +16,7 @@ import {
   missedSpellFloorTarget,
   MONSTER_PEEK_VISIBLE,
   parseBattleRailY,
-  prefersReducedMotion,
+  isMotionReduced,
   readTranslateX,
 } from './battleMotion'
 
@@ -57,7 +57,7 @@ export function useBattleActorRefs(
   // Cumulative offset; resetCamera eases it back to the centred duel framing.
   const panCamera = useCallback((px: number, ms: number): Promise<void> => {
     const node = cameraRef.current
-    if (!node || prefersReducedMotion()) return Promise.resolve()
+    if (!node || isMotionReduced()) return Promise.resolve()
     const from = cameraOffsetRef.current
     const to = from + px
     cameraOffsetRef.current = to
@@ -75,7 +75,7 @@ export function useBattleActorRefs(
     const node = cameraRef.current
     const from = cameraOffsetRef.current
     cameraOffsetRef.current = 0
-    if (!node || from === 0 || prefersReducedMotion()) {
+    if (!node || from === 0 || isMotionReduced()) {
       if (node) node.style.transform = 'translateX(0px)'
       return Promise.resolve()
     }

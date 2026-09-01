@@ -14,7 +14,7 @@ import {
   MONSTER_PEEK_MS,
   nextPaint,
   PEEK_START_FRAC,
-  prefersReducedMotion,
+  isMotionReduced,
   RUN_IN_SCROLL_MIN_PX,
   RUN_IN_SCROLL_SCALE,
   SIGHTED_IDLE_PAUSE_MS,
@@ -73,7 +73,7 @@ export function useBattleEncounterChoreography({
    */
   const playApproach = useCallback(
     async (next: BattleMonster[], fromEdge = false, fast = false) => {
-      if (fast || prefersReducedMotion()) {
+      if (fast || isMotionReduced()) {
         await Promise.all(next.map((m) => monsterHandles.current.get(m.id)?.walkIn(0, 0, 0) ?? Promise.resolve()))
         playerRef.current?.reset(true)
         return
@@ -141,7 +141,7 @@ export function useBattleEncounterChoreography({
   const playCenterBeat = useCallback(
     async (fast = false) => {
       const living = rosterRef.current
-      if (fast || prefersReducedMotion()) {
+      if (fast || isMotionReduced()) {
         await Promise.all([
           ...living.map((m) => monsterHandles.current.get(m.id)?.slideTo(0, 0) ?? Promise.resolve()),
           playerRef.current?.slideTo(0, 0) ?? Promise.resolve(),
@@ -163,7 +163,7 @@ export function useBattleEncounterChoreography({
 
   const setEncounter = useCallback(
     (next: BattleMonster[], opts?: EncounterOptions) => {
-      const reduced = prefersReducedMotion()
+      const reduced = isMotionReduced()
       const entry = opts?.entry ?? 'run'
       const travelsBackToEdge = Boolean(opts?.travel && entry === 'run' && !reduced)
       const cue = opts?.transitionCue ?? null

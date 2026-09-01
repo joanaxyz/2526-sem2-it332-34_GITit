@@ -8,9 +8,9 @@ actually render.
 
 from __future__ import annotations
 
-from collections import defaultdict
 import re
 import shlex
+from collections import defaultdict
 
 from curriculum.seed_data.adventure_levels import ADVENTURE_LEVELS
 from curriculum.seed_data.adventures import ADVENTURE_SOURCES
@@ -18,7 +18,6 @@ from curriculum.seed_data.challenges import CHALLENGES
 from curriculum.seed_data.chapters import CHAPTERS
 from curriculum.seed_data.command_catalog import COMMAND_CATALOG
 from curriculum.seed_data.stories import STORIES
-
 
 _STORY_ORDER = {story["slug"]: story["sort_order"] for story in STORIES}
 _CHAPTER_ORDER = {

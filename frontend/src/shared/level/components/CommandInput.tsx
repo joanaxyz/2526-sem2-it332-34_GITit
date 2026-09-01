@@ -26,7 +26,16 @@ export function CommandInput({
   const pasteResetTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
-    if (!disabled) inputRef.current?.focus()
+    // Re-focus the prompt once processing clears, but only if the learner
+    // hasn't deliberately moved focus elsewhere (e.g. to inspect the DAG
+    // panel or terminal output) while the input was disabled. A disabled
+    // input can't hold focus, so it falls back to `document.body`; anything
+    // else there means focus was intentionally claimed and must not be
+    // yanked back.
+    if (disabled) return
+    if (document.activeElement === document.body || document.activeElement === null) {
+      inputRef.current?.focus()
+    }
   }, [disabled])
 
   useEffect(

@@ -36,8 +36,17 @@ export function readTranslateX(node: HTMLElement): number {
   return 0
 }
 
-export function prefersReducedMotion(): boolean {
-  return typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+/**
+ * Source of truth for "should battle choreography skip its animated steps."
+ * Reads the app's own resolved motion preference (`data-motion`, set by
+ * `applyPreferences` in `shared/preferences/preferences.ts`) rather than
+ * querying the OS media query directly — that resolved value already folds
+ * in the OS `prefers-reduced-motion` setting as the fallback for "system",
+ * so checking it here keeps this in sync with the in-app Motion setting
+ * (Settings page) that CSS already respects via `:root[data-motion='reduced']`.
+ */
+export function isMotionReduced(): boolean {
+  return document.documentElement.dataset.motion === 'reduced'
 }
 
 export function boundedAnimation(promise: Promise<void>, ms: number): Promise<void> {
