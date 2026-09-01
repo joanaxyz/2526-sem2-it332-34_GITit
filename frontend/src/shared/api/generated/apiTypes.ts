@@ -85,6 +85,7 @@ export type ApiSchemas = {
   "LearnedSkillsResponse": { "results": Array<ApiSchemas["LearnedSkillResponse"]> }
   "Login": { "identifier": string; "password": string }
   "MotionModeEnum": "system" | "reduced" | "full"
+  "OnboardingPhaseEnum": "stories" | "shop" | "purchase" | "home" | "equip" | "done"
   "PartialEnum": true
   "PasswordChange": { "current_password": string; "password": string; "password_confirm": string }
   "PasswordResetConfirm": { "password": string; "password_confirm": string; "token": string; "uid": string }
@@ -92,8 +93,8 @@ export type ApiSchemas = {
   "PatchedAdminChapterUpdateRequest": { "battle_stage"?: { [key: string]: JsonValue }; "description"?: string; "is_playable"?: boolean; "is_published"?: boolean; "number"?: number; "sort_order"?: number; "title"?: string }
   "PatchedAdminStoryUpdateRequest": { "difficulty"?: ApiSchemas["DifficultyEnum"]; "is_published"?: boolean; "prerequisite_story"?: number | null; "price"?: number; "sort_order"?: number; "summary"?: string; "title"?: string; "world_slug"?: string }
   "PatchedContentDefinitionUpdateRequest": { "chapter"?: number | null; "command_family"?: string; "definition"?: { [key: string]: JsonValue }; "difficulty"?: string; "kind"?: ApiSchemas["KindA5eEnum"]; "official_chapter"?: number | null; "slug"?: string; "summary"?: string; "tags"?: Array<string>; "title"?: string; "visibility"?: ApiSchemas["VisibilityEnum"] }
-  "PatchedPlayerPreferences": { "motion_mode"?: ApiSchemas["MotionModeEnum"] }
-  "PlayerPreferences": { "motion_mode"?: ApiSchemas["MotionModeEnum"] }
+  "PatchedPlayerPreferences": { "motion_mode"?: ApiSchemas["MotionModeEnum"]; "onboarding_phase"?: ApiSchemas["OnboardingPhaseEnum"] }
+  "PlayerPreferences": { "motion_mode"?: ApiSchemas["MotionModeEnum"]; "onboarding_phase"?: ApiSchemas["OnboardingPhaseEnum"] }
   "RateMetric": { "denominator": number; "numerator": number; "value": number | null }
   "Register": { "email": string; "password": string; "password_confirm": string; "username": string }
   "RegisterResponse": { "user": ApiSchemas["User"] }

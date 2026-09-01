@@ -36,7 +36,7 @@ export function ShopTabs({
           )
         })}
       </div>
-      <div className="shop-rail-balance" aria-label="GitCoin balance">
+      <div className="shop-rail-balance" aria-label="GitCoin balance" data-onboarding="shop-balance">
         <GitCoinIcon />
         <span>
           <small>Balance</small>

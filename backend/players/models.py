@@ -27,12 +27,31 @@ class PlayerPreferences(models.Model):
         (MOTION_FULL, "Full"),
     ]
 
+    # The getting-started journey walks Stories -> Shop -> Home. It is stored
+    # per account (not in browser storage) so a returning player is never
+    # re-onboarded on a new device, and so a half-finished journey resumes.
+    ONBOARDING_DONE = "done"
+    ONBOARDING_START = "stories"
+    ONBOARDING_CHOICES = [
+        (ONBOARDING_START, "Stories"),
+        ("shop", "Shop"),
+        ("purchase", "Purchase"),
+        ("home", "Home"),
+        ("equip", "Equip"),
+        (ONBOARDING_DONE, "Done"),
+    ]
+
     player = models.OneToOneField(
         Player,
         related_name="preferences",
         on_delete=models.CASCADE,
     )
     motion_mode = models.CharField(max_length=16, choices=MOTION_CHOICES, default=MOTION_SYSTEM)
+    # Defaults to "done": only registration opts an account in, so accounts that
+    # predate the journey (and lazily created preference rows) stay untouched.
+    onboarding_phase = models.CharField(
+        max_length=16, choices=ONBOARDING_CHOICES, default=ONBOARDING_DONE
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:

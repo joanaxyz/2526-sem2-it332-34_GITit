@@ -102,7 +102,7 @@ const appRoutes: RouteObject[] = [
       </Protected>
     ),
     children: [
-      { path: '/', element: <Navigate replace to={HOME_ROUTE} /> },
+      { path: '/', element: <Navigate replace to={storyPath()} /> },
       { path: HOME_ROUTE, element: <HomePage /> },
       // Browsing Home, Stories, and repository-only challenges does not require
       // a companion. Adventure play remains protected below.

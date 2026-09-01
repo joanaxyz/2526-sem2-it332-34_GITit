@@ -25,7 +25,7 @@ export function HomeAchievementGallery({ achievements }: { achievements: Achieve
     .slice(0, 8)
 
   return (
-    <section className="ref-panel home-overview-achievements-panel" aria-label="Achievement gallery">
+    <section className="ref-panel home-overview-achievements-panel" aria-label="Achievement gallery" data-onboarding="overview-achievements">
       <div className="home-overview-achievements-head">
         <div>
           <header className="ref-panel-head">Achievement Gallery</header>

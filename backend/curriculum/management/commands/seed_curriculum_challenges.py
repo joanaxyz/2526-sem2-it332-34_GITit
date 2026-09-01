@@ -4,6 +4,7 @@ from adventures.models import (
     AdventureWave,
 )
 from challenges.models import ChallengeLevel, ChallengeTrial, ChallengeTrialVariant
+from common.runtime import command_budget_for_spec
 from curriculum.models import (
     Chapter,
     ChapterLesson,
@@ -92,8 +93,9 @@ class SeedCurriculumChallengeLessonMixin:
                             "difficulty": level_spec["difficulty"],
                             "story": ctx.get("story", "") or "",
                             "task": ctx.get("task", "") or "",
-                            "min_counted_commands": level_spec["min_counted_commands"],
-                            "max_counted_commands": level_spec["max_counted_commands"],
+                            # Derived, not copied - see the adventure seeder: a
+                            # trial's star target must cover its solution's cost.
+                            **command_budget_for_spec(level_spec),
                             "reward_coins": level_spec.get("reward_coins", 0),
                             "objective_checks": level_spec.get("objective_checks", []),
                             "is_published": challenge_level.is_published,

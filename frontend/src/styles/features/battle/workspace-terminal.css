@@ -68,9 +68,14 @@
 }
 
 .command-input-prompt {
-  flex: 0 0 auto;
+  min-width: 0;
+  max-width: 50%;
+  flex: 0 1 auto;
+  overflow: hidden;
   font-family: var(--font-mono);
   font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .command-input-field {

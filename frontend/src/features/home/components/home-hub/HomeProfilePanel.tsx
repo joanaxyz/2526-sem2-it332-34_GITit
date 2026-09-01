@@ -39,7 +39,7 @@ export function HomeProfilePanel({
 
   return (
     <aside className={`ref-panel home-profile-panel home-profile-panel--${profileView}`}>
-      <div className="home-panel-switch" role="tablist" aria-label="Profile or rank ladder">
+      <div className="home-panel-switch" role="tablist" aria-label="Profile or rank ladder" data-onboarding="profile-switch">
         <button
           type="button"
           role="tab"
@@ -71,7 +71,7 @@ export function HomeProfilePanel({
               <HomeProfileCompanionStatus companion={companion} />
             )}
           </div>
-          <div className="home-profile-rank">
+          <div className="home-profile-rank" data-onboarding="profile-rank">
             <RankBadge tier={rank.tier} className="home-rank-badge--profile" />
             <div>
               <span>Rank {rank.tier.numeral}</span>
@@ -92,7 +92,7 @@ export function HomeProfilePanel({
             </strong>
             <span>{rank.tier.name}</span>
           </div>
-          <div className="home-profile-currencies">
+          <div className="home-profile-currencies" data-onboarding="profile-currencies">
             <div>
               <GitCoinIcon />
               <strong>{formatNumber(balance)}</strong>

@@ -92,7 +92,13 @@ export function deriveBattleEventsFromCommandOutcome(input: DeriveFromCommandOut
     // contract does (for example, a final history/ordering check). Reserve the
     // last HP for the actual solved outcome so the monster cannot die while the
     // stage is still incomplete.
-    const hp = Math.max(1, monsterMaxHp - rulesPassing)
+    const derived = Math.max(1, monsterMaxHp - rulesPassing)
+    // Rule progress is absolute, so a command that undoes earlier work (a reset,
+    // a deleted branch, a popped stash) reports fewer passing rules than the turn
+    // before. Recomputing from that healed the monster mid-wave; damage already
+    // dealt stays dealt, and the next wave arrives as a fresh roster anyway.
+    const previousHp = Number.isFinite(m.hp) ? m.hp : derived
+    const hp = Math.max(1, Math.min(previousHp, derived))
     return { ...m, hp, max_hp: monsterMaxHp, alive: true }
   })
   const events: BattleEvent[] = []
