@@ -48,10 +48,13 @@
   gap: 0.45rem;
   min-width: 8.2rem;
   color: hsl(var(--foreground));
-  font-family: var(--font-display);
+  /* Cinzel is scoped to the "GIT it!" wordmark only - --font-display stays
+     Chakra Petch for every other heading. Weight bumped from the old 700 to
+     800 to match the only two Cinzel weights loaded (600/800) and the same
+     "GIT it!" treatment used in the nav bar and auth screens. */
+  font-family: 'Cinzel', serif;
   font-size: 1.32rem;
-  font-style: italic;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1;
 }
 
