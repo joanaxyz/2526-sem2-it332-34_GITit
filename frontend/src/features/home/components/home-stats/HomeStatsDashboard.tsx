@@ -85,7 +85,7 @@ export function HomeStatsDashboard({ dashboard }: { dashboard: HomeStatsDashboar
 
   return (
     <section className="ref-panel home-overview-stats-panel" aria-label="Stats overview">
-      <div className="home-overview-master-row">
+      <div className="home-overview-master-row" data-onboarding="overview-mastery">
         <div>
           <header className="ref-panel-head">Git Skill Mastery</header>
           <SkillProfileBars rows={dashboard.skillRows} />
@@ -106,7 +106,7 @@ export function HomeStatsDashboard({ dashboard }: { dashboard: HomeStatsDashboar
         </aside>
       </div>
 
-      <div className="home-overview-stat-subgrid">
+      <div className="home-overview-stat-subgrid" data-onboarding="overview-progress">
         <section className="home-overview-stat-block">
           <header className="ref-panel-head">14-Day Activity</header>
           <ActivityHeatmap cells={dashboard.activityCells} />
@@ -139,7 +139,7 @@ export function HomeStatsDashboard({ dashboard }: { dashboard: HomeStatsDashboar
         </section>
       </div>
 
-      <div className="home-overview-kpi-row">
+      <div className="home-overview-kpi-row" data-onboarding="overview-kpis">
         <div>
           <span className="home-overview-mini-sigil is-accuracy" aria-hidden="true" />
           <strong>{formatPercent(kpis.clearRate.value)}</strong>

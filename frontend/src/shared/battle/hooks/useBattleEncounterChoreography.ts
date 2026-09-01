@@ -38,8 +38,7 @@ type EncounterChoreographyDeps = {
   emitTransitionCue: (cue: BattleTransitionCueConfig) => void
   setDefeated: (next: boolean) => void
   setActiveMonsterId: (next: number | null) => void
-  setPlayerHp: (next: number | null) => void
-  setPlayerMaxHp: (next: number | null) => void
+  resetPlayerVitals: (hp: number | null, maxHp: number | null) => void
   setEntranceHidden: (monsters: BattleMonster[], hidden: boolean) => void
   bumpRosterEpoch: () => void
   setRoster: (updater: (prev: BattleMonster[]) => BattleMonster[]) => void
@@ -60,8 +59,7 @@ export function useBattleEncounterChoreography({
   emitTransitionCue,
   setDefeated,
   setActiveMonsterId,
-  setPlayerHp,
-  setPlayerMaxHp,
+  resetPlayerVitals,
   setEntranceHidden,
   bumpRosterEpoch,
   setRoster,
@@ -195,8 +193,12 @@ export function useBattleEncounterChoreography({
           if (!travelsBackToEdge || ctx.fast) playerRef.current?.reset(true)
           setDefeated(false)
           setActiveMonsterId(null)
-          setPlayerHp(typeof opts?.playerHp === 'number' ? opts.playerHp : null)
-          setPlayerMaxHp(typeof opts?.playerMaxHp === 'number' ? opts.playerMaxHp : null)
+          // The wave has now visibly arrived, so this is the one moment a
+          // refill is honest - the damage-only writer refuses it everywhere else.
+          resetPlayerVitals(
+            typeof opts?.playerHp === 'number' ? opts.playerHp : null,
+            typeof opts?.playerMaxHp === 'number' ? opts.playerMaxHp : null,
+          )
           setEntranceHidden(next, entry !== 'none' && !ctx.fast && !reduced)
           bumpRosterEpoch()
           setRoster(() => next.map((m) => ({ ...m })))
@@ -236,8 +238,7 @@ export function useBattleEncounterChoreography({
       setActiveMonsterId,
       setDefeated,
       setEntranceHidden,
-      setPlayerHp,
-      setPlayerMaxHp,
+      resetPlayerVitals,
       setRoster,
     ],
   )

@@ -4,6 +4,7 @@ import { RouterProvider, createMemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { queryKeys } from '@/shared/api/queryKeys'
+import { levelTourStorageKey } from '@/shared/level/utils/levelTour'
 import type { AdventureRun } from '@/features/adventures/types'
 import { AdventureSession } from './AdventureSession'
 
@@ -227,10 +228,10 @@ describe('AdventureSession', () => {
 
     expect(guide).not.toBeInTheDocument()
     expect(
-      window.localStorage.getItem('git-it-practice-workspace-tour:v2:guest:adventure'),
+      window.localStorage.getItem(levelTourStorageKey(null, 'adventure')),
     ).toBe('seen')
     expect(
-      window.localStorage.getItem('git-it-practice-workspace-tour:v2:guest:challenge'),
+      window.localStorage.getItem(levelTourStorageKey(null, 'challenge')),
     ).toBeNull()
   })
 

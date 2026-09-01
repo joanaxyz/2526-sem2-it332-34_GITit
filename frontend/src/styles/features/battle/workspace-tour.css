@@ -296,6 +296,16 @@
   box-shadow: 0 0 12px rgba(var(--theme-primary-rgb), 0.26);
 }
 
+/* Let a descriptive final CTA use the space normally occupied by the optional
+   keyboard reminder. This card stays a comfortable fixed reading width. */
+.workspace-tour__actions.is-compact .workspace-tour__shortcut {
+  display: none;
+}
+
+.workspace-tour__actions.is-compact .workspace-tour__next {
+  margin-left: auto;
+}
+
 @keyframes workspace-tour-card-enter {
   from {
     opacity: 0;

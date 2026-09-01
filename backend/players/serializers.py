@@ -6,4 +6,4 @@ from players.models import PlayerPreferences
 class PlayerPreferencesSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlayerPreferences
-        fields = ("motion_mode",)
+        fields = ("motion_mode", "onboarding_phase")

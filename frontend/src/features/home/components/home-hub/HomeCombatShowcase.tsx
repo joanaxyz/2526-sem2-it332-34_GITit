@@ -180,7 +180,7 @@ export function HomeCombatShowcase({
         </div>
       </section>
 
-      <section className="ref-panel home-spellbook-panel">
+      <section className="ref-panel home-spellbook-panel" data-onboarding="profile-spellbook">
         <header className="ref-panel-head">
           <BookOpen aria-hidden="true" />
           Spellbook

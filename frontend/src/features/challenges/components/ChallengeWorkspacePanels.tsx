@@ -57,7 +57,11 @@ export function ChallengeSidebar({
         <ChallengeContextPanel run={run} />
       </div>
 
-      <div className={cn('gameplay-project-region', projectFilesOpen && 'is-open')} data-testid="project-structure-region">
+      <div
+        className={cn('gameplay-project-region', projectFilesOpen && 'is-open')}
+        data-testid="project-structure-region"
+        data-tour-target="project-files"
+      >
         <ProjectStructurePanel
           snapshot={run.repository_state}
           rootName={run.challenge.slug}
