@@ -1,9 +1,9 @@
 /* Shop command deck: compact navigation over a focused storefront stage. */
 .shop-ref-page {
   position: relative;
-  height: var(--app-content-height);
   min-height: var(--app-content-height);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   isolation: isolate;
   background: #010610;
   color: var(--text-primary);
@@ -34,8 +34,7 @@
 .shop-ref-layout {
   display: flex;
   width: min(100%, 110rem);
-  height: var(--app-content-height);
-  min-height: 0;
+  min-height: var(--app-content-height);
   margin: 0 auto;
   flex-direction: column;
   gap: 0.68rem;
@@ -238,8 +237,7 @@
 }
 
 @media (max-width: 760px) {
-  .shop-ref-page { height: auto; min-height: var(--app-content-height); overflow: visible; }
-  .shop-ref-layout { height: auto; min-height: var(--app-content-height); }
+  .shop-ref-page { overflow: visible; }
   .shop-page-title p { display: none; }
   .shop-categories {
     display: grid;

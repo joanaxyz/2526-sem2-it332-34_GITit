@@ -136,7 +136,7 @@ describe('first-visit onboarding journey', () => {
     expect(shopApi.purchase).not.toHaveBeenCalled()
     expect(screen.queryByRole('button', { name: 'Visit Home' })).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: '150 GitCoins | Purchase' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Purchase' }))
     fireEvent.click(await screen.findByRole('button', { name: 'Visit Home' }))
     expect(shopApi.purchase).toHaveBeenCalledExactlyOnceWith('companion', 'blue')
     await screen.findByRole('heading', { name: 'Home is your character hub' })
@@ -166,7 +166,7 @@ describe('first-visit onboarding journey', () => {
     writeOnboardingPhase(302, 'purchase')
     vi.mocked(shopApi.purchase).mockRejectedValue(new Error('Purchase failed. Try again.'))
     renderJourney(302, '/shop?tab=companions')
-    fireEvent.click(await screen.findByRole('button', { name: '150 GitCoins | Purchase' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Purchase' }))
     expect(await screen.findByText('Purchase failed. Try again.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Visit Home' })).not.toBeInTheDocument()
     expect(localStorage.getItem(onboardingStorageKey(302))).toBe('purchase')
