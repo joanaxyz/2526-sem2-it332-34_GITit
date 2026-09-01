@@ -1,6 +1,6 @@
 import { BookOpen, RefreshCcw, X } from 'lucide-react'
 
-import gitLogoImage from '@/assets/images/GIT_logo.png'
+import gitLogoImage from '@/assets/images/GIT_logo.webp'
 import type { AdventureRun } from '@/features/adventures/types'
 import { AudioControls } from '@/shared/audio/AudioControls'
 import { WorkspaceHeaderAccount } from '@/shared/level/components/WorkspaceHeaderAccount'
