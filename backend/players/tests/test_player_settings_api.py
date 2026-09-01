@@ -27,7 +27,9 @@ def test_preferences_are_created_with_defaults_and_can_be_updated(db, django_use
     response = client.get("/api/player/preferences/")
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {"motion_mode": "system"}
+    # A lazily created record must never opt an existing account into the
+    # getting-started journey; only registration does that.
+    assert response.json() == {"motion_mode": "system", "onboarding_phase": "done"}
     player = get_or_create_player(user)
     assert PlayerPreferences.objects.filter(player=player).exists()
 
@@ -38,9 +40,34 @@ def test_preferences_are_created_with_defaults_and_can_be_updated(db, django_use
     )
 
     assert updated.status_code == status.HTTP_200_OK
-    assert updated.json() == {"motion_mode": "reduced"}
+    assert updated.json() == {"motion_mode": "reduced", "onboarding_phase": "done"}
     record = PlayerPreferences.objects.get(player=player)
     assert record.motion_mode == "reduced"
+
+
+def test_onboarding_phase_advances_and_rejects_unknown_phases(db, django_user_model):
+    user = make_user(django_user_model, username="onboardinguser")
+    client = authenticated_client(user)
+
+    updated = client.patch(
+        "/api/player/preferences/",
+        {"onboarding_phase": "shop"},
+        format="json",
+    )
+
+    assert updated.status_code == status.HTTP_200_OK
+    assert updated.json()["onboarding_phase"] == "shop"
+    record = PlayerPreferences.objects.get(player=get_or_create_player(user))
+    assert record.onboarding_phase == "shop"
+    assert record.motion_mode == "system"
+
+    rejected = client.patch(
+        "/api/player/preferences/",
+        {"onboarding_phase": "tower"},
+        format="json",
+    )
+
+    assert rejected.status_code == status.HTTP_400_BAD_REQUEST
 
 
 def test_preferences_reject_unknown_choice(db, django_user_model):

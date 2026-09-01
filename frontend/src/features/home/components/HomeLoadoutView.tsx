@@ -100,7 +100,7 @@ export function HomeLoadoutView() {
                   <p>{COMPANIONS[selectedCompanion.slug]?.kit?.[0]?.description ?? 'A battle-ready companion for your next Git quest.'}</p>
                 </header>
 
-                <div className="home-loadout-action">
+                <div className="home-loadout-action" data-onboarding="home-equip">
                   <div>
                     <span>{selectedCompanion.active ? 'Current slot' : 'Selected slot'}</span>
                     <strong>{selectedCompanion.active ? 'Companion equipped' : 'Swap active companion'}</strong>
@@ -123,7 +123,7 @@ export function HomeLoadoutView() {
               </div>
             ) : null}
 
-            <div className="home-loadout-roster" role="tablist" aria-label="Owned companions">
+            <div className="home-loadout-roster" role="tablist" aria-label="Owned companions" data-onboarding="loadout-roster">
               <div className="home-loadout-roster-heading">
                 <span>Owned roster</span>
                 <strong>{companions.length.toLocaleString()} available</strong>
@@ -157,7 +157,7 @@ export function HomeLoadoutView() {
         {equip.isError ? <p className="home-loadout-error" role="alert">{equip.error.message}</p> : null}
       </section>
 
-      <section className="home-loadout-worlds" aria-labelledby="home-loadout-worlds-title">
+      <section className="home-loadout-worlds" aria-labelledby="home-loadout-worlds-title" data-onboarding="loadout-worlds">
         <div className="home-loadout-worlds-copy">
           <Compass aria-hidden="true" />
           <div>

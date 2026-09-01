@@ -36,19 +36,6 @@ export function actionLabel(item: ShopDisplayItem, balance: number, walletPendin
   return 'Purchase'
 }
 
-export function compactActionLabel(
-  item: ShopDisplayItem,
-  balance: number,
-  walletPending: boolean,
-  purchasesEnabled = true,
-) {
-  if (!item.owned && !purchasesEnabled) return 'Purchases paused'
-  const action = actionLabel(item, balance, walletPending)
-  if (item.owned) return action
-  const price = item.price > 0 ? `${formatCoins(item.price)} GitCoins` : 'Free'
-  return `${price} | ${action}`
-}
-
 export function actionDisabled(
   item: ShopDisplayItem,
   pending: boolean,

@@ -1,10 +1,9 @@
-import { CheckCircle2 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
+import { ShopActionDock } from '@/features/shop/components/ShopActionDock'
 import { ShopCarousel } from '@/features/shop/components/ShopCarousel'
 import { StoryMonsterShowcase } from '@/features/shop/components/StoryMonsterShowcase'
-import { actionDisabled, compactActionLabel } from '@/features/shop/utils/shopDisplay'
 import { storyMapApi } from '@/features/story-map/api/storyMapApi'
 import type { LearningChapter } from '@/features/story-map/types'
 import { queryKeys } from '@/shared/api/queryKeys'
@@ -90,12 +89,12 @@ export function StoryShop({
             )
           }}
         />
-        <StoryActionDock
+        <ShopActionDock
           balance={balance}
+          item={selectedStory}
           onAction={onAction}
           pending={pending}
           purchasesEnabled={purchasesEnabled}
-          story={selectedStory}
           walletPending={walletPending}
         />
       </div>
@@ -110,36 +109,6 @@ export function StoryShop({
         key={`environments-${selectedStory.slug}`}
       />
     </section>
-  )
-}
-
-function StoryActionDock({
-  balance,
-  onAction,
-  pending,
-  purchasesEnabled,
-  story,
-  walletPending,
-}: {
-  balance: number
-  onAction: (item: ShopDisplayItem) => void
-  pending: boolean
-  purchasesEnabled: boolean
-  story: ShopDisplayItem
-  walletPending: boolean
-}) {
-  return (
-    <div className="shop-stage-action-dock" aria-label={`${story.label} purchase status`}>
-      <button
-        type="button"
-        className="shop-stage-action-button"
-        disabled={actionDisabled(story, pending, balance, walletPending, purchasesEnabled)}
-        onClick={() => onAction(story)}
-      >
-        {story.owned ? <CheckCircle2 aria-hidden="true" /> : null}
-        {compactActionLabel(story, balance, walletPending, purchasesEnabled)}
-      </button>
-    </div>
   )
 }
 

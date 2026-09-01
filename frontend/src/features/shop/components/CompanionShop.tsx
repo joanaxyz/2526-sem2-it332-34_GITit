@@ -1,9 +1,8 @@
-import { CheckCircle2 } from 'lucide-react'
 import { useState } from 'react'
 
 import { CompanionPosePreview, CompanionSkillPreview } from '@/features/shop/components/CompanionCombatPreview'
+import { ShopActionDock } from '@/features/shop/components/ShopActionDock'
 import { ShopCarousel } from '@/features/shop/components/ShopCarousel'
-import { actionDisabled, compactActionLabel } from '@/features/shop/utils/shopDisplay'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { statusLabel, type ShopDisplayItem } from '@/shared/shop/model/shopPresentation'
 
@@ -59,7 +58,7 @@ export function CompanionShop({
             </article>
           )}
         />
-        <div className="shop-portrait-thumbs" role="tablist" aria-label="Companion quick select">
+        <div className="shop-portrait-thumbs" role="tablist" aria-label="Companion quick select" data-onboarding="shop-characters">
           {companions.map((companion, thumbIndex) => (
             <button
               key={companion.slug}
@@ -75,10 +74,11 @@ export function CompanionShop({
             </button>
           ))}
         </div>
-        <CompanionActionDock
+        <ShopActionDock
           balance={balance}
-          companion={selected}
+          item={selected}
           onAction={onAction}
+          onboardingTarget="shop-purchase"
           pending={pending}
           purchasesEnabled={purchasesEnabled}
           walletPending={walletPending}
@@ -87,36 +87,6 @@ export function CompanionShop({
 
       <CompanionPreviewSuite companionSlug={selected.slug} key={selected.slug} />
     </section>
-  )
-}
-
-function CompanionActionDock({
-  balance,
-  companion,
-  onAction,
-  pending,
-  purchasesEnabled,
-  walletPending,
-}: {
-  balance: number
-  companion: ShopDisplayItem
-  onAction: (item: ShopDisplayItem) => void
-  pending: boolean
-  purchasesEnabled: boolean
-  walletPending: boolean
-}) {
-  return (
-    <div className="shop-stage-action-dock" aria-label={`${companion.label} purchase status`}>
-      <button
-        type="button"
-        className="shop-stage-action-button"
-        disabled={actionDisabled(companion, pending, balance, walletPending, purchasesEnabled)}
-        onClick={() => onAction(companion)}
-      >
-        {companion.owned ? <CheckCircle2 aria-hidden="true" /> : null}
-        {compactActionLabel(companion, balance, walletPending, purchasesEnabled)}
-      </button>
-    </div>
   )
 }
 

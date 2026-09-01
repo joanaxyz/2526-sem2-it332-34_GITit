@@ -7,6 +7,7 @@ from adventures.models import (
     AdventureWave,
     AdventureWaveVariant,
 )
+from common.runtime import command_budget_for_spec
 from curriculum.models import (
     MANAGEMENT_SOURCE_ADMIN,
     MANAGEMENT_SOURCE_SEED,
@@ -318,8 +319,10 @@ class SeedCurriculumStructureMixin:
                             "sort_order": sort_index,
                             "story": ctx.get("story", "") or "",
                             "task": ctx.get("task", "") or "",
-                            "min_counted_commands": wave_spec["min_counted_commands"],
-                            "max_counted_commands": wave_spec["max_counted_commands"],
+                            # Derived, not copied: the star target must cover what
+                            # the authored solution actually costs in counted
+                            # commands, or two and three stars are unreachable.
+                            **command_budget_for_spec(wave_spec),
                             "objective_checks": wave_spec.get("objective_checks", []),
                             "is_published": True,
                         },

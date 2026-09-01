@@ -321,6 +321,22 @@ describe('GameplayWorkspaceTour', () => {
     expect(screen.getByTestId('workspace-tour-spotlight')).toHaveStyle({ top: '83px' })
   })
 
+  it('prioritizes a long final action over the optional keyboard hint', async () => {
+    addTarget('first')
+
+    render(
+      <GameplayWorkspaceTour
+        label="Gameplay guide"
+        finishLabel="Choose my character"
+        steps={[step('first')]}
+        onClose={vi.fn()}
+      />,
+    )
+
+    const finish = await screen.findByRole('button', { name: 'Choose my character' })
+    expect(finish.parentElement).toHaveClass('is-compact')
+  })
+
   it('treats Skip as dismissal and restores focus to the launch control', async () => {
     addTarget('first')
     const onClose = vi.fn()

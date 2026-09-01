@@ -6,6 +6,7 @@ import { PanelLeftOpen, PanelRightOpen, X } from 'lucide-react'
 import { StoryAdventurePath } from '@/features/story-map/components/path/StoryAdventurePath'
 import { ChapterOverview } from '@/features/story-map/components/ChapterOverview'
 import { StoryChapterList } from '@/features/story-map/components/StoryChapterList'
+import { StoryOnboarding } from '@/features/story-map/components/StoryOnboarding'
 import { StoryCompanionPanel, StorySkillFocusPanel } from '@/features/story-map/components/StorySidePanels'
 import { storyMapApi } from '@/features/story-map/api/storyMapApi'
 import { useStories } from '@/features/story-map/hooks/useStories'
@@ -15,6 +16,7 @@ import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
+import { useAuthStore } from '@/shared/auth/useAuth'
 import { STORIES_ROUTE } from '@/shared/navigation/routes'
 import { getStoryWorld } from '@/shared/story-worlds/registry'
 import { storyWorldStyle } from '@/shared/story-worlds/theme'
@@ -41,6 +43,7 @@ function useCompactStoryMap() {
 }
 
 export function StoryMapPage() {
+  const userId = useAuthStore((state) => state.user?.id)
   const { storySlug: routeStorySlug } = useParams<{ storySlug: string }>()
   const storySlug = routeStorySlug ?? 'arcane-spire'
   const [searchParams] = useSearchParams()
@@ -59,7 +62,7 @@ export function StoryMapPage() {
     () => storiesQuery.data?.find((story) => story.slug === storySlug) ?? null,
     [storySlug, storiesQuery.data],
   )
-  const { companion, companionSlug, hasCompanion } = usePlayerLoadout()
+  const { companion, companionSlug, hasCompanion, isLoading: loadoutLoading, isError: loadoutError } = usePlayerLoadout()
   const storyWorld = useMemo(() => getStoryWorld(activeStory?.world_slug ?? storySlug), [activeStory?.world_slug, storySlug])
   const storyMapStyle = {
     ...storyWorldStyle(storyWorld),
@@ -166,11 +169,19 @@ export function StoryMapPage() {
         </aside>
 
         <section className="story-map-stage" aria-label={`${activeStory?.title ?? 'Story'} chapter map`}>
-          <div className="story-switcher story-switcher--map">
+          <div className="story-switcher story-switcher--map" data-onboarding="stories">
             <Link to={STORIES_ROUTE} className="story-link">
-              Stories
+              All stories
             </Link>
             {activeStory ? <span>{activeStory.title}</span> : null}
+            {userId != null ? (
+              <StoryOnboarding
+                key={userId}
+                ready={Boolean(overview) && !overviewQuery.isError && !loadoutLoading && !loadoutError}
+                compact={compactStoryMap}
+                hasCompanion={hasCompanion}
+              />
+            ) : null}
           </div>
 
           <h1 className="story-map-title">{activeStory?.title ?? 'Story'}</h1>

@@ -196,6 +196,7 @@ export function StoryAdventurePath({
               <button
                 type="button"
                 className="story-path-node-button"
+                data-onboarding={level?.id === currentLevelId && !disabled ? 'next-level' : undefined}
                 disabled={disabled}
                 aria-label={
                   level
@@ -241,6 +242,7 @@ export function StoryAdventurePath({
         <button
           type="button"
           className="story-path-node story-path-node--trial"
+          data-onboarding={trials.length > 0 ? 'challenges' : undefined}
           data-state={trialState}
           data-open={trialsOpen || undefined}
           style={{ '--node-x': `${trialPoint.x}px`, '--node-y': `${trialPoint.y}px` } as React.CSSProperties}

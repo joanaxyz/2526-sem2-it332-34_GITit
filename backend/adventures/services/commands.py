@@ -175,6 +175,12 @@ class AdventureCommandService:
         with span("attempt_save"):
             attempt.save(update_fields=update_fields)
 
+        # Snapshot the turn's own accounting: clearing a non-final wave resets the
+        # attempt counters to the fresh wave below, and reporting those as this
+        # command's outcome told the client it had spent nothing - refilling the
+        # battle HP meter while the cleared wave was still playing its death beat.
+        counted_after_command = attempt.counted_command_count
+
         run_transitioned = False
         if solved or failed:
             outcome = self.runs.record_wave_outcome(
@@ -222,6 +228,6 @@ class AdventureCommandService:
                 rules_passing=rules_passing,
                 total_rules=total_rules,
                 max_counted_commands=wave.max_counted_commands if wave is not None else 0,
-                counted_command_count=attempt.counted_command_count,
+                counted_command_count=counted_after_command,
             ),
         }
