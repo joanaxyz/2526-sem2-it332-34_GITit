@@ -54,20 +54,9 @@ def _build_adventure_access(*, player, adventures: list[AdventureLevel]) -> Adve
         }
         passed_adventure_ids |= completion_by_adventure_id.keys()
 
-    locked_adventure_ids: set[int] = set()
-    lock_reasons: dict[int, str] = {}
-    previous: AdventureLevel | None = None
-    for adventure in adventures:
-        if previous is not None and previous.id not in passed_adventure_ids:
-            locked_adventure_ids.add(adventure.id)
-            lock_reasons[adventure.id] = f"Complete {previous.title} to unlock this adventure."
-        previous = adventure
-
     return AdventureAccessContext(
         completion_by_adventure_id=completion_by_adventure_id,
         passed_adventure_ids=passed_adventure_ids,
-        locked_adventure_ids=locked_adventure_ids,
-        lock_reasons=lock_reasons,
     )
 
 

@@ -116,7 +116,7 @@ export function StoryMapPage() {
   const adventures = overview?.adventures ?? []
   const challenges = overview?.challenges ?? []
   const levels = adventures
-  const challengesLocked = activeChapter.locked || (adventures.length > 0 && adventures.some((adventure) => !adventure.is_passed))
+  const challengesLocked = activeChapter.locked
   const leftRailHidden = compactStoryMap && !leftRailOpen
   const rightRailHidden = compactStoryMap && !rightRailOpen
 
