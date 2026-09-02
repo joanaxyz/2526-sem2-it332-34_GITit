@@ -287,13 +287,4 @@ def _challenge_level_unlocked(
     access: ChallengeAccessContext,
     sibling_levels: list[ChallengeLevel],
 ) -> bool:
-    previous = [
-        candidate
-        for candidate in sibling_levels
-        if candidate.is_published
-        and (candidate.sort_order, candidate.id) < (level.sort_order, level.id)
-    ]
-    if not previous:
-        return True
-    previous_level = sorted(previous, key=lambda item: (item.sort_order, item.id))[-1]
-    return previous_level.id in access.level_completions
+    return True
