@@ -252,7 +252,7 @@ def _challenge_unlocked(
     ):
         return False
     if trial.difficulty == DIFFICULTY_EASY:
-        return access.adventure_passed
+        return True
     previous = DIFFICULTY_EASY if trial.difficulty == DIFFICULTY_MEDIUM else DIFFICULTY_MEDIUM
     previous_trial = next(
         (
