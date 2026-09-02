@@ -77,25 +77,7 @@ def chapter_locked(*, player, chapter: Chapter) -> tuple[bool, str]:
     story_is_locked, story_reason = story_locked(player=player, story=chapter.story)
     if story_is_locked:
         return True, story_reason
-    # A future book-only chapter remains browseable once its story is accessible.
-    # Published playable chapters continue through the normal progression gate.
-    if not chapter.is_playable:
-        return False, ""
-    previous = (
-        Chapter.objects.filter(
-            story=chapter.story,
-            is_published=True,
-            is_playable=True,
-            sort_order__lt=chapter.sort_order,
-        )
-        .order_by("-sort_order", "-number")
-        .first()
-    )
-    if previous is None:
-        return False, ""
-    if chapter_completed(player=player, chapter=previous):
-        return False, ""
-    return True, f"Clear Chapter {previous.number}'s first challenge to unlock this chapter."
+    return False, ""
 
 
 def story_locked(
