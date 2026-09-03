@@ -251,6 +251,144 @@
   filter: drop-shadow(0 0 13px rgba(var(--theme-primary-rgb), 0.58));
 }
 
+.story-skill-reward[data-just-earned='true'] .story-reward-chest {
+  animation:
+    story-chest-claim-pop 640ms cubic-bezier(0.34, 1.56, 0.64, 1) both,
+    story-chest-claim-glow 900ms ease-out both;
+}
+
+@keyframes story-chest-claim-pop {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+
+  35% {
+    transform: scale(1.26) rotate(-4deg);
+  }
+
+  58% {
+    transform: scale(0.94) rotate(3deg);
+  }
+
+  78% {
+    transform: scale(1.07) rotate(-1deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes story-chest-claim-glow {
+  0% {
+    filter: drop-shadow(0 0 13px rgba(var(--theme-primary-rgb), 0.58));
+  }
+
+  40% {
+    filter: drop-shadow(0 0 28px rgba(var(--theme-primary-rgb), 0.95)) drop-shadow(0 0 48px rgba(var(--theme-spark-rgb), 0.55));
+  }
+
+  100% {
+    filter: drop-shadow(0 0 13px rgba(var(--theme-primary-rgb), 0.58));
+  }
+}
+
+.story-reward-chest-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.story-reward-chest-sparkle-layer {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  overflow: visible;
+}
+
+.story-reward-chest-sparkle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--spark-size);
+  height: var(--spark-size);
+  border-radius: 999px;
+  background: var(--spark-color);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--spark-color) 60%, transparent);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.4);
+  animation: story-chest-sparkle-burst 720ms cubic-bezier(0.16, 1, 0.3, 1) var(--spark-delay) both;
+}
+
+@keyframes story-chest-sparkle-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+
+  18% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--spark-x)), calc(-50% + var(--spark-y))) scale(0.2);
+  }
+}
+
+.story-reward-claim-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  white-space: nowrap;
+  color: rgb(var(--theme-primary-rgb));
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(var(--theme-primary-rgb), 0.6), 0 2px 6px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translate(-50%, 0) scale(0.85);
+  animation: story-chest-claim-toast 1300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.story-reward-claim-coin-icon {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+@keyframes story-chest-claim-toast {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.85);
+  }
+
+  15% {
+    opacity: 1;
+    transform: translate(-50%, -0.35rem) scale(1);
+  }
+
+  75% {
+    opacity: 1;
+    transform: translate(-50%, -1.1rem) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -1.6rem) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-skill-reward[data-just-earned='true'] .story-reward-chest,
+  .story-reward-chest-sparkle,
+  .story-reward-claim-toast {
+    animation: none;
+  }
+}
+
 .story-skill-name,
 .story-skill-threshold {
   max-width: 100%;

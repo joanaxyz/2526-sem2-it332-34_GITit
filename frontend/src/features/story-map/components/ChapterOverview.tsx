@@ -4,6 +4,8 @@ import chapterBadgeImage from '@/assets/images/chapter_badge.png'
 import rewardChestActiveImage from '@/assets/images/chest_active.png'
 import rewardChestNormalImage from '@/assets/images/chest_normal.png'
 import { ChapterBookCard } from '@/features/story-map/components/book/ChapterBookCard'
+import { ChestRewardBurst } from '@/features/story-map/components/ChestRewardBurst'
+import { useNewlyEarnedChestThresholds } from '@/features/story-map/hooks/useNewlyEarnedChestThresholds'
 import type { LearningChapter } from '@/features/story-map/types'
 import { GamePanel } from '@/shared/components/GamePanel'
 import { ProgressBar } from '@/shared/components/ProgressBar'
@@ -14,6 +16,8 @@ export function ChapterOverview({ chapter }: { chapter: LearningChapter }) {
   const levels = chapter.level_completion?.denominator ?? chapter.adventure_level_count + chapter.challenge_count * 3
   const cleared = chapter.level_completion?.numerator ?? 0
   const chests = [...chapter.chest_schedule].sort((a, b) => a.threshold - b.threshold)
+  const earnedThresholds = chests.filter((chest) => progress >= chest.threshold).map((chest) => chest.threshold)
+  const justEarnedThresholds = useNewlyEarnedChestThresholds(chapter.id, earnedThresholds)
 
   return (
     <aside className="chapter-overview">
@@ -70,10 +74,17 @@ export function ChapterOverview({ chapter }: { chapter: LearningChapter }) {
         <div className="story-skill-reward-grid" aria-label={`${title} progress rewards`}>
           {chests.map((chest) => {
             const earned = progress >= chest.threshold
+            const justEarned = justEarnedThresholds.has(chest.threshold)
             return (
-              <div className="story-skill-reward" data-earned={earned} key={chest.threshold}>
+              <div
+                className="story-skill-reward"
+                data-earned={earned}
+                data-just-earned={justEarned || undefined}
+                key={chest.threshold}
+              >
                 <span className="story-reward-chest" aria-hidden="true">
                   <img src={earned ? rewardChestActiveImage : rewardChestNormalImage} alt="" />
+                  {justEarned ? <ChestRewardBurst coins={chest.coins} /> : null}
                 </span>
                 <span className="story-skill-threshold">
                   {earned ? <Check aria-hidden="true" /> : null}
