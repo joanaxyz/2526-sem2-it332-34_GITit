@@ -34,7 +34,7 @@
   --theme-surface-rgb: 5, 8, 29;
   --theme-glow-rgb: 53, 143, 255;
   --theme-spark-rgb: 98, 230, 255;
-  --theme-teal-rgb: 143, 247, 230;   /* muted teal - Home Overview skill-mastery progress only */
+  --theme-teal-rgb: 143, 247, 230;   /* muted teal - Home Overview progress signals only (skill mastery, activity heatmap, story tower) */
 
   /* Backwards-compatible semantic aliases used by existing feature CSS. */
   --theme-rail-rgb: var(--theme-glow-rgb);

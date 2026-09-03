@@ -19,6 +19,23 @@ function dayLabel(iso: string) {
   return new Date(`${iso}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
+type KpiTier = 'gold' | 'neutral' | 'empty'
+
+function rateTier(metric: { value: number | null; denominator: number }): KpiTier {
+  if (!metric.denominator || metric.value === null) return 'empty'
+  return metric.value >= 100 ? 'gold' : 'neutral'
+}
+
+function retriesTier(metric: { value: number | null; denominator: number }): KpiTier {
+  if (!metric.denominator || metric.value === null) return 'empty'
+  return 'neutral'
+}
+
+function accuracyTier(ready: boolean, value: number | null): KpiTier {
+  if (!ready || value === null) return 'empty'
+  return value >= 100 ? 'gold' : 'neutral'
+}
+
 function SkillProfileBars({ rows }: { rows: HomeSkillProfileRow[] }) {
   return (
     <div className="home-overview-command-list">
@@ -112,24 +129,42 @@ export function HomeStatsDashboard({ dashboard }: { dashboard: HomeStatsDashboar
           <ActivityHeatmap cells={dashboard.activityCells} />
         </section>
 
-        <section className="home-overview-stat-block home-overview-story-block">
+        <section
+          className={`home-overview-stat-block home-overview-story-block${story.trackProgress >= 100 ? ' is-complete' : ''}`}
+        >
           <header className="ref-panel-head">Story Progress</header>
           <div className="home-overview-story-body">
-            <div className="home-overview-story-sigil" aria-hidden="true">
-              <span />
+            <div
+              className="home-overview-story-sigil"
+              aria-hidden="true"
+              title={`Citadel progress: ${story.trackProgress}%`}
+            >
+              <div className="home-overview-story-frame">
+                <div className="home-overview-story-shell" />
+                <div className="home-overview-story-fill" style={{ height: `${story.trackProgress}%` }}>
+                  <div className="home-overview-story-fill-inner" />
+                </div>
+              </div>
+              <span className="home-overview-story-ground" />
             </div>
             <dl>
               <div>
                 <dt>Levels Cleared</dt>
-                <dd>{formatNumber(story.levelsCompleted)}</dd>
+                <dd className={story.levelsCompleted === 0 ? 'is-zero' : undefined}>
+                  {formatNumber(story.levelsCompleted)}
+                </dd>
               </div>
               <div>
                 <dt>Perfect Clears</dt>
-                <dd>{formatNumber(story.perfectClears)}</dd>
+                <dd className={story.perfectClears === 0 ? 'is-zero' : undefined}>
+                  {formatNumber(story.perfectClears)}
+                </dd>
               </div>
               <div>
                 <dt>Hard Trials Won</dt>
-                <dd>{formatNumber(story.hardTrialsWon)}</dd>
+                <dd className={story.hardTrialsWon === 0 ? 'is-zero' : undefined}>
+                  {formatNumber(story.hardTrialsWon)}
+                </dd>
               </div>
             </dl>
           </div>
@@ -140,25 +175,25 @@ export function HomeStatsDashboard({ dashboard }: { dashboard: HomeStatsDashboar
       </div>
 
       <div className="home-overview-kpi-row" data-onboarding="overview-kpis">
-        <div>
+        <div data-tier={rateTier(kpis.clearRate)}>
           <span className="home-overview-mini-sigil is-accuracy" aria-hidden="true" />
           <strong>{formatPercent(kpis.clearRate.value)}</strong>
           <span>Clear rate</span>
           <small>{formatNumber(kpis.clearRate.numerator)} / {formatNumber(kpis.clearRate.denominator)} runs</small>
         </div>
-        <div>
+        <div data-tier={rateTier(kpis.hardClearRate)}>
           <span className="home-overview-mini-sigil is-finish" aria-hidden="true" />
           <strong>{formatPercent(kpis.hardClearRate.value)}</strong>
           <span>Hard clear rate</span>
           <small>{formatNumber(kpis.hardClearRate.numerator)} / {formatNumber(kpis.hardClearRate.denominator)} hard runs</small>
         </div>
-        <div>
+        <div data-tier={retriesTier(kpis.averageRetries)}>
           <span className="home-overview-mini-sigil is-streak" aria-hidden="true" />
           <strong>{formatDecimal(kpis.averageRetries.value)}</strong>
           <span>Avg retries</span>
           <small>per cleared run</small>
         </div>
-        <div>
+        <div data-tier={accuracyTier(kpis.accuracyReady, kpis.accuracy)}>
           <span className="home-overview-mini-sigil is-commands" aria-hidden="true" />
           <strong>{kpis.accuracyReady ? formatPercent(kpis.accuracy) : '--'}</strong>
           <span>Accuracy</span>
