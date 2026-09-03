@@ -223,15 +223,18 @@
 .home-overview-stat-subgrid {
   display: grid;
   grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr);
-  gap: 0.72rem;
+  gap: 0.85rem;
   min-height: 0;
 }
 
 .home-overview-stat-block {
   min-width: 0;
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.16);
-  padding: 0.82rem 0.95rem;
-  background: rgba(1, 9, 23, 0.42);
+  padding: 0.1rem 0;
+}
+
+.home-overview-story-block {
+  border-left: 1px solid rgba(var(--theme-primary-rgb), 0.14);
+  padding-left: 1.05rem;
 }
 
 .home-overview-weekdays {
@@ -252,33 +255,41 @@
   margin-top: 0.42rem;
 }
 
+/* Activity intensity reuses the same muted-teal progress language as skill mastery
+   (.home-overview-command-row.is-progressed) so engagement reads as one "growth" signal
+   across the panel, instead of a separate blue scale. Empty cells keep a visible teal-tinted
+   hairline + fill so they read as intentional empty slots, not missing data. */
 .home-overview-heatmap span,
 .home-overview-heatmap-scale i {
   display: block;
   aspect-ratio: 1;
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.07);
-  background: rgba(7, 28, 58, 0.44);
+  border: 1px solid rgba(var(--theme-teal-rgb), 0.16);
+  background: rgba(var(--theme-teal-rgb), 0.06);
 }
 
 .home-overview-heatmap [data-level='1'],
 .home-overview-heatmap-scale [data-level='1'] {
-  background: rgba(12, 61, 112, 0.88);
+  border-color: rgba(var(--theme-teal-rgb), 0.32);
+  background: rgba(var(--theme-teal-rgb), 0.24);
 }
 
 .home-overview-heatmap [data-level='2'],
 .home-overview-heatmap-scale [data-level='2'] {
-  background: rgba(16, 93, 165, 0.9);
+  border-color: rgba(var(--theme-teal-rgb), 0.5);
+  background: rgba(var(--theme-teal-rgb), 0.48);
 }
 
 .home-overview-heatmap [data-level='3'],
 .home-overview-heatmap-scale [data-level='3'] {
-  background: rgba(20, 134, 218, 0.95);
+  border-color: rgba(var(--theme-teal-rgb), 0.72);
+  background: rgba(var(--theme-teal-rgb), 0.74);
 }
 
 .home-overview-heatmap [data-level='4'],
 .home-overview-heatmap-scale [data-level='4'] {
-  background: rgba(var(--theme-primary-rgb), 0.98);
-  box-shadow: 0 0 10px rgba(var(--theme-primary-rgb), 0.42);
+  border-color: rgba(var(--theme-teal-rgb), 0.92);
+  background: rgb(var(--theme-teal-rgb));
+  box-shadow: 0 0 10px rgba(var(--theme-teal-rgb), 0.5);
 }
 
 .home-overview-heatmap-scale {
@@ -304,33 +315,134 @@
   align-items: center;
 }
 
+/* Citadel tower: a stone shell always visible, and a teal "construction" fill that
+   rises with actual track-progress (bottom-anchored, so the wide foundation fills
+   first). At 100% the fill flips to the gold earned-achievement accent, matching the
+   achievement medallions above. */
 .home-overview-story-sigil {
   position: relative;
   display: grid;
   height: 7.1rem;
   place-items: end center;
+  --story-tower-shape: polygon(50% 0, 68% 18%, 76% 100%, 24% 100%, 32% 18%);
 }
 
-.home-overview-story-sigil::before {
-  content: '';
+/* Fixed-size positioning context so the fill's percentage height resolves
+   against the tower's own 6.3rem box, not the taller sigil wrapper. */
+.home-overview-story-frame {
+  position: relative;
   width: 5.2rem;
   height: 6.3rem;
-  background:
-    linear-gradient(90deg, transparent 17%, rgba(var(--theme-primary-rgb), 0.85) 18% 21%, transparent 22% 78%, rgba(var(--theme-primary-rgb), 0.85) 79% 82%, transparent 83%),
-    linear-gradient(180deg, transparent 0 16%, rgba(var(--theme-primary-rgb), 0.9) 17% 20%, transparent 21%),
-    radial-gradient(circle at 50% 40%, rgba(var(--theme-primary-rgb), 0.8), transparent 11%),
-    linear-gradient(180deg, rgba(7, 44, 88, 0.95), rgba(2, 13, 31, 0.9));
-  clip-path: polygon(50% 0, 68% 18%, 76% 100%, 24% 100%, 32% 18%);
-  filter: drop-shadow(0 0 14px rgba(var(--theme-primary-rgb), 0.36));
+  margin-bottom: 0.1rem;
 }
 
-.home-overview-story-sigil span {
+.home-overview-story-shell {
+  position: absolute;
+  inset: 0;
+  clip-path: var(--story-tower-shape);
+  background:
+    linear-gradient(180deg, rgba(var(--theme-teal-rgb), 0.05) 0 2px, transparent 2px),
+    repeating-linear-gradient(180deg, rgba(var(--theme-teal-rgb), 0.14) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, rgba(var(--theme-teal-rgb), 0.2), rgba(var(--theme-teal-rgb), 0.06));
+}
+
+.home-overview-story-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  clip-path: var(--story-tower-shape);
+  transition: height 0.6s var(--ease-out);
+}
+
+/* Bright seam at the fill boundary - the shell and fill are both teal-toned, so
+   without this the exact "progress made" vs "progress remaining" line is hard to
+   read at partial percentages. Rides the mask's top edge, so it tracks the height
+   transition and is naturally clipped to the tower's silhouette by the shared
+   clip-path. Painted via ::after (not ::before) so it draws above .home-overview-
+   story-fill-inner rather than being covered by it. */
+.home-overview-story-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 0 8px rgba(var(--theme-teal-rgb), 0.85), 0 0 3px rgba(255, 255, 255, 0.7);
+}
+
+.home-overview-story-block.is-complete .home-overview-story-fill::after {
+  box-shadow: 0 0 8px hsl(var(--warning) / 0.85), 0 0 3px rgba(255, 255, 255, 0.7);
+}
+
+.home-overview-story-fill-inner {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 6.3rem;
+  background:
+    /* corner buttresses */
+    linear-gradient(90deg, transparent 17%, rgba(4, 16, 32, 0.55) 18% 21%, transparent 22% 78%, rgba(4, 16, 32, 0.55) 79% 82%, transparent 83%),
+    /* parapet band */
+    linear-gradient(180deg, transparent 0 16%, rgba(4, 16, 32, 0.55) 17% 20%, transparent 21%),
+    /* apex beacon */
+    radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.7), transparent 12%),
+    /* stone coursing texture */
+    repeating-linear-gradient(180deg, rgba(4, 16, 32, 0.28) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, rgba(var(--theme-teal-rgb), 0.98), rgba(var(--theme-teal-rgb), 0.62));
+  filter: drop-shadow(0 0 14px rgba(var(--theme-teal-rgb), 0.5));
+  animation: home-overview-story-pulse 3.4s var(--ease-out) infinite;
+}
+
+.home-overview-story-block.is-complete .home-overview-story-fill-inner {
+  background:
+    linear-gradient(90deg, transparent 17%, rgba(45, 30, 4, 0.5) 18% 21%, transparent 22% 78%, rgba(45, 30, 4, 0.5) 79% 82%, transparent 83%),
+    linear-gradient(180deg, transparent 0 16%, rgba(45, 30, 4, 0.5) 17% 20%, transparent 21%),
+    radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.85), transparent 14%),
+    repeating-linear-gradient(180deg, rgba(45, 30, 4, 0.24) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, hsl(var(--warning)), hsl(var(--warning) / 0.68));
+  filter: drop-shadow(0 0 18px hsl(var(--warning) / 0.62));
+  animation-name: home-overview-story-pulse-gold;
+}
+
+.home-overview-story-ground {
   position: absolute;
   bottom: 0.1rem;
   width: 6.5rem;
   height: 0.55rem;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(var(--theme-primary-rgb), 0.44), transparent 72%);
+  background: radial-gradient(ellipse, rgba(var(--theme-teal-rgb), 0.4), transparent 72%);
+}
+
+.home-overview-story-block.is-complete .home-overview-story-ground {
+  background: radial-gradient(ellipse, hsl(var(--warning) / 0.48), transparent 72%);
+}
+
+@keyframes home-overview-story-pulse {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(var(--theme-teal-rgb), 0.4)); }
+  50% { filter: drop-shadow(0 0 18px rgba(var(--theme-teal-rgb), 0.7)); }
+}
+
+@keyframes home-overview-story-pulse-gold {
+  0%, 100% { filter: drop-shadow(0 0 12px hsl(var(--warning) / 0.5)); }
+  50% { filter: drop-shadow(0 0 22px hsl(var(--warning) / 0.85)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-overview-story-fill-inner {
+    animation: none;
+    filter: drop-shadow(0 0 14px rgba(var(--theme-teal-rgb), 0.5));
+  }
+
+  .home-overview-story-block.is-complete .home-overview-story-fill-inner {
+    filter: drop-shadow(0 0 16px hsl(var(--warning) / 0.6));
+  }
+
+  .home-overview-story-fill {
+    transition: none;
+  }
 }
 
 .home-overview-story-body dl {
@@ -358,8 +470,19 @@
   font-size: 0.86rem;
 }
 
+/* A literal 0 reads as "not started yet" rather than a broken/missing stat. */
+.home-overview-story-body dd.is-zero {
+  color: rgba(218, 229, 247, 0.42);
+  font-weight: 500;
+}
+
 .home-overview-story-block .ref-meter {
   margin-top: 0.78rem;
+}
+
+.home-overview-story-block.is-complete .ref-meter span {
+  background: linear-gradient(90deg, hsl(var(--warning) / 0.85), hsl(var(--warning)));
+  box-shadow: 0 0 12px hsl(var(--warning) / 0.55);
 }
 
 .home-overview-kpi-row {
@@ -371,16 +494,33 @@
 }
 
 .home-overview-kpi-row > div {
+  --kpi-accent-rgb: var(--theme-primary-rgb);
+  --kpi-accent: rgb(var(--kpi-accent-rgb));
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   grid-template-rows: auto auto auto;
   gap: 0.1rem 0.7rem;
   min-width: 0;
   padding: 0.2rem 0.78rem;
+  transition: opacity var(--motion-normal) var(--ease-out);
 }
 
 .home-overview-kpi-row > div + div {
   border-left: 1px solid rgba(var(--theme-primary-rgb), 0.12);
+}
+
+/* Tiers differentiate what a stat means, not just its number: gold reads as an earned
+   feat (mirrors the achievement medallion accent), neutral is an ordinary in-progress
+   metric, empty is a clearly muted "not enough data yet" placeholder. */
+.home-overview-kpi-row > div[data-tier='gold'] {
+  --kpi-accent-rgb: 243, 210, 122;
+  --kpi-accent: hsl(var(--warning));
+}
+
+.home-overview-kpi-row > div[data-tier='empty'] {
+  --kpi-accent-rgb: 117, 143, 159;
+  --kpi-accent: rgba(117, 143, 159, 0.85);
+  opacity: 0.72;
 }
 
 .home-overview-mini-sigil {
@@ -389,11 +529,17 @@
   width: 2.55rem;
   height: 2.55rem;
   place-items: center;
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.42);
+  border: 1px solid rgba(var(--kpi-accent-rgb), 0.42);
   border-radius: 50%;
+  color: var(--kpi-accent);
   background:
-    radial-gradient(circle, rgba(var(--theme-primary-rgb), 0.18), transparent 58%),
+    radial-gradient(circle, rgba(var(--kpi-accent-rgb), 0.18), transparent 58%),
     rgba(2, 12, 29, 0.76);
+  transition: border-color var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out);
+}
+
+.home-overview-kpi-row > div[data-tier='gold'] .home-overview-mini-sigil {
+  box-shadow: 0 0 14px rgba(var(--kpi-accent-rgb), 0.4);
 }
 
 .home-overview-mini-sigil::before,
@@ -405,30 +551,30 @@
 .home-overview-mini-sigil.is-accuracy::before {
   width: 1.2rem;
   height: 1.2rem;
-  border: 1px solid rgb(var(--theme-primary-rgb));
+  border: 1px solid currentColor;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 0.32rem rgba(var(--theme-primary-rgb), 0.12);
+  box-shadow: inset 0 0 0 0.32rem rgba(var(--kpi-accent-rgb), 0.12);
 }
 
 .home-overview-mini-sigil.is-finish::before {
   width: 1.25rem;
   height: 1.25rem;
-  border: 1px solid rgb(var(--theme-primary-rgb));
+  border: 1px solid currentColor;
   transform: rotate(45deg);
 }
 
 .home-overview-mini-sigil.is-streak::before {
   width: 0.95rem;
   height: 1.45rem;
-  background: rgb(var(--theme-primary-rgb));
+  background: currentColor;
   clip-path: polygon(58% 0, 100% 42%, 72% 42%, 85% 100%, 0 48%, 33% 48%);
-  filter: drop-shadow(0 0 7px rgba(var(--theme-primary-rgb), 0.76));
+  filter: drop-shadow(0 0 7px rgba(var(--kpi-accent-rgb), 0.76));
 }
 
 .home-overview-mini-sigil.is-commands::before {
   width: 1.34rem;
   height: 0.9rem;
-  border-block: 1px solid rgb(var(--theme-primary-rgb));
+  border-block: 1px solid currentColor;
 }
 
 .home-overview-kpi-row strong {
@@ -436,10 +582,20 @@
   font-family: var(--font-mono);
   font-size: 1.35rem;
   line-height: 1;
+  transition: color var(--motion-normal) var(--ease-out);
+}
+
+.home-overview-kpi-row > div[data-tier='gold'] strong {
+  color: var(--kpi-accent);
+  text-shadow: 0 0 12px rgba(var(--kpi-accent-rgb), 0.5);
+}
+
+.home-overview-kpi-row > div[data-tier='empty'] strong {
+  color: rgba(232, 246, 250, 0.4);
 }
 
 .home-overview-kpi-row span:not(.home-overview-mini-sigil) {
-  color: rgb(var(--theme-primary-rgb));
+  color: var(--kpi-accent);
   font-size: 0.72rem;
   font-weight: 850;
 }
@@ -450,4 +606,8 @@
   font-size: var(--text-2xs);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.home-overview-kpi-row > div[data-tier='empty'] small {
+  color: rgba(218, 229, 247, 0.4);
 }
