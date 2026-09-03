@@ -159,11 +159,19 @@ services:
       - key: DJANGO_SUPERUSER_PASSWORD
         sync: false
 
-      # Email is deliberately disabled for this disposable preview.
+      # Mailgun is called over HTTPS, which works on Render Free (SMTP is blocked).
       - key: EMAIL_BACKEND
-        value: django.core.mail.backends.dummy.EmailBackend
+        value: common.email_backends.MailgunEmailBackend
+      - key: MAILGUN_API_KEY
+        sync: false
+      - key: MAILGUN_DOMAIN
+        sync: false
+      - key: MAILGUN_API_BASE_URL
+        value: https://api.mailgun.net
+      - key: MAILGUN_TIMEOUT_SECONDS
+        value: "10"
       - key: DEFAULT_FROM_EMAIL
-        value: GIT it! <no-reply@example.com>
+        sync: false
       - key: PASSWORD_RESET_TIMEOUT
         value: "3600"
       - key: API_VERSION

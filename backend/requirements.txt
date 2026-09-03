@@ -8,7 +8,7 @@ attrs==26.1.0
     # via
     #   jsonschema
     #   referencing
-django==6.0.7
+django==6.0.8
     # via
     #   -r requirements.in
     #   django-cors-headers
@@ -61,7 +61,7 @@ rpds-py==2026.6.3
     # via
     #   jsonschema
     #   referencing
-sqlparse==0.5.5
+sqlparse==0.6.0
     # via django
 tzdata==2026.2 ; sys_platform == 'win32'
     # via
