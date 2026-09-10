@@ -106,9 +106,13 @@ class SeedCurriculumCommandSkillsMixin:
             ],
         )
         live_form_ids = [forms_by_key[key].id for key, _ in form_rows]
-        CommandForm.objects.filter(command_skill__in=skill_objs).exclude(
-            id__in=live_form_ids
-        ).update(is_published=False)
+        # Only retire forms owned by this canonical curriculum seed. Other
+        # official importers (notably Runebound Turret) reuse these global
+        # skills with forms attached to their own chapters.
+        CommandForm.objects.filter(
+            command_skill__in=skill_objs,
+            chapter__in=chapters.values(),
+        ).exclude(id__in=live_form_ids).update(is_published=False)
         CommandSkill.objects.filter(source_content_definition__isnull=True).exclude(
             id__in=live_skill_ids
         ).update(is_published=False)
