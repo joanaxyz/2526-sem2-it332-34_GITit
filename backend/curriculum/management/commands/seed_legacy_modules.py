@@ -54,8 +54,11 @@ from adventures.models import (
 from curriculum.models import (
     Chapter,
     ChapterOrientationLesson,
+    CommandForm,
+    CommandSkill,
     Story,
 )
+from curriculum.seed_data.command_catalog import COMMAND_CATALOG
 
 LEGACY_STORY_SLUG = "git-it-legacy"
 
@@ -145,6 +148,134 @@ CHAPTER_SPECS: list[dict[str, Any]] = [
         "is_orientation": False,
     },
 ]
+
+
+# The legacy scenarios predate the Chapter Book and therefore did not register
+# CommandForms. These are the playable command shapes learners actually enter
+# in Modules 1-4. Forms use legacy-prefixed slugs because a global CommandSkill
+# can teach the same syntax in more than one chapter.
+LEGACY_MODULE_COMMAND_FORMS: dict[int, dict[str, list[tuple[str, str, str]]]] = {
+    1: {
+        "git-init": [
+            ("current", "git init", "Initialize the current folder"),
+            ("named", "git init <directory>", "Initialize a named folder"),
+            ("initial-branch", "git init -b <branch> [<directory>]", "Choose the initial branch"),
+            ("quiet", "git init --quiet [<directory>]", "Initialize without progress output"),
+        ],
+        "git-clone": [
+            ("default", "git clone <url>", "Clone into the default folder"),
+            ("named", "git clone <url> <folder>", "Clone into a named folder"),
+            ("branch", "git clone -b <branch> <url> [<folder>]", "Clone a specific branch"),
+            ("depth", "git clone --depth <n> <url> [<folder>]", "Clone shallow history"),
+            (
+                "branch-depth",
+                "git clone --depth <n> -b <branch> <url> [<folder>]",
+                "Clone one branch shallowly",
+            ),
+        ],
+        "git-add": [
+            ("paths", "git add <path>...", "Stage selected paths"),
+            ("dot", "git add .", "Stage changes below the current folder"),
+            ("all", "git add -A", "Stage all changes"),
+            ("patch", "git add -p <path>", "Stage selected hunks"),
+        ],
+        "git-commit": [
+            ("message", "git commit -m <message>", "Commit with a message"),
+            (
+                "amend-message",
+                "git commit --amend -m <message>",
+                "Amend the latest commit and message",
+            ),
+        ],
+        "git-restore": [
+            ("working", "git restore <path>...", "Discard working-tree changes"),
+            ("staged", "git restore --staged <path>...", "Unstage selected paths"),
+        ],
+    },
+    2: {
+        "git-branch": [
+            ("delete", "git branch -d <branch>", "Delete a merged local branch"),
+            ("force-delete", "git branch -D <branch>", "Force-delete a local branch"),
+        ],
+        "git-commit": [
+            ("message", "git commit -m <message>", "Commit with a message"),
+        ],
+        "git-fetch": [
+            ("origin", "git fetch origin", "Fetch from origin"),
+            (
+                "prune-origin",
+                "git fetch --prune origin",
+                "Fetch and prune stale remote-tracking refs",
+            ),
+        ],
+        "git-merge": [
+            ("branch", "git merge <branch>", "Merge a branch"),
+            ("no-ff", "git merge --no-ff <branch>", "Create an explicit merge commit"),
+            ("squash", "git merge --squash <branch>", "Stage a branch as one snapshot"),
+        ],
+        "git-pull": [
+            ("remote-branch", "git pull <remote> <branch>", "Fetch and integrate a remote branch"),
+        ],
+        "git-push": [
+            ("branch", "git push <remote> <branch>", "Push a branch"),
+            ("upstream", "git push -u <remote> <branch>", "Push and set upstream"),
+            (
+                "force-with-lease",
+                "git push --force-with-lease <remote> <branch>",
+                "Safely replace remote history",
+            ),
+            ("delete", "git push <remote> --delete <branch>", "Delete a remote branch"),
+        ],
+        "git-stash": [
+            ("push", "git stash", "Stash tracked changes"),
+            ("pop", "git stash pop", "Restore and drop the latest stash"),
+            ("drop", "git stash drop [stash@{n}]", "Delete a stash entry"),
+        ],
+        "git-switch": [
+            ("existing", "git switch <branch>", "Switch to an existing branch"),
+            ("create", "git switch -c <branch> [<start-point>]", "Create and switch branches"),
+        ],
+    },
+    3: {
+        "git-add": [
+            ("resolved", "git add <path>...", "Mark conflicts resolved by staging paths"),
+        ],
+        "git-cherry-pick": [
+            ("commit", "git cherry-pick <commit>", "Apply one commit"),
+            ("no-commit", "git cherry-pick --no-commit <commit>", "Apply without committing"),
+            ("abort", "git cherry-pick --abort", "Abort a cherry-pick"),
+        ],
+        "git-commit": [
+            ("complete-merge", "git commit [-m <message>]", "Complete the resolved merge"),
+        ],
+        "git-merge": [
+            ("branch", "git merge <branch>", "Merge a branch and expose conflicts"),
+        ],
+    },
+    4: {
+        "git-log": [
+            ("graph-all", "git log --oneline --graph --all", "Inspect the complete branch graph"),
+        ],
+        "git-push": [
+            ("current", "git push", "Push the current branch"),
+        ],
+        "git-rebase": [
+            ("upstream", "git rebase <upstream>", "Replay work onto an upstream branch"),
+        ],
+        "git-reflog": [
+            ("head", "git reflog", "Find recent HEAD positions"),
+        ],
+        "git-revert": [
+            ("commit", "git revert <commit>", "Reverse a commit additively"),
+        ],
+        "git-show": [
+            ("commit", "git show <commit>", "Inspect a recovery candidate"),
+        ],
+        "git-switch": [
+            ("recover", "git switch -c <branch> <commit>", "Create a recovery branch at a commit"),
+        ],
+    },
+}
 
 
 # ---------------------------------------------------------------------------
@@ -11808,6 +11939,7 @@ class Command(BaseCommand):
         story = self._seed_story()
         chapters = self._seed_chapters(story)
         self._seed_orientation_lessons(chapters[0])
+        self._seed_field_guide_commands(story=story, chapters=chapters)
         self._seed_adventure_levels(chapters[1], MODULE_1_LEVELS, MODULE_1_SESSION_COUNTS_DEFAULT)
         self._seed_adventure_levels(chapters[2], MODULE_2_LEVELS, MODULE_2_SESSION_COUNTS_DEFAULT)
         # Module 3 has no SESSION_COUNTS constant in the source - every tier
@@ -11878,6 +12010,81 @@ class Command(BaseCommand):
                     "sort_order": spec["sort_order"],
                 },
             )
+
+    def _seed_field_guide_commands(self, *, story: Story, chapters: list[Chapter]) -> None:
+        """Register the playable Module 1-4 commands with the Chapter Book.
+
+        The command library is global, so the importer reuses the canonical
+        skills while creating chapter-owned forms with deterministic slugs.
+        Creating a missing skill keeps this legacy command useful on a blank
+        database; seed_curriculum can later update that same canonical row.
+        """
+        catalog_by_slug = {
+            spec["slug"]: (index, spec)
+            for index, spec in enumerate(COMMAND_CATALOG, 1)
+        }
+        live_form_ids: list[int] = []
+
+        for module_number, commands in LEGACY_MODULE_COMMAND_FORMS.items():
+            chapter = chapters[module_number]
+            form_order = 0
+            for skill_slug, form_specs in commands.items():
+                catalog_entry = catalog_by_slug[skill_slug]
+                skill_index, skill_spec = catalog_entry
+                skill, _ = CommandSkill.objects.get_or_create(
+                    slug=skill_slug,
+                    defaults={
+                        "base_command": skill_spec["base_command"],
+                        "title": skill_spec["title"],
+                        "summary": skill_spec["summary"],
+                        "mental_model": skill_spec.get("mental_model", {}),
+                        "command_preview": self._command_preview(
+                            title=skill_spec["title"],
+                            summary=skill_spec["summary"],
+                        ),
+                        "sort_order": skill_index,
+                        "is_published": True,
+                    },
+                )
+                if not skill.is_published:
+                    skill.is_published = True
+                    skill.save(update_fields=["is_published"])
+
+                for form_slug, usage_form, label in form_specs:
+                    form_order += 1
+                    form, _ = CommandForm.objects.update_or_create(
+                        command_skill=skill,
+                        slug=f"legacy-m{module_number}-{form_slug}",
+                        defaults={
+                            "chapter": chapter,
+                            "usage_form": usage_form,
+                            "label": label,
+                            "summary": label,
+                            "command_preview": self._command_preview(
+                                title=label,
+                                summary=label,
+                                syntax=usage_form,
+                            ),
+                            "sort_order": form_order,
+                            "is_published": True,
+                            "is_playable": True,
+                        },
+                    )
+                    live_form_ids.append(form.id)
+
+        CommandForm.objects.filter(
+            chapter__story=story,
+            slug__startswith="legacy-m",
+        ).exclude(id__in=live_form_ids).update(is_published=False)
+
+    @staticmethod
+    def _command_preview(*, title: str, summary: str, syntax: str | None = None) -> dict:
+        return {
+            "schema_version": 2,
+            "title": title,
+            "summary": summary,
+            "syntax_examples": [syntax] if syntax else [],
+        }
 
     def _seed_adventure_levels(
         self,
