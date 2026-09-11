@@ -116,6 +116,8 @@ export function PerformancePage() {
   const data = summary.data!
   const { kpis } = data
   return (
+    <div className="performance-shell">
+      <div className="performance-bg" aria-hidden="true" />
     <main className="performance-page">
       <header className="performance-heading">
         <span>Runebound analytics</span>
@@ -150,5 +152,6 @@ export function PerformancePage() {
         </div>
       </section>
     </main>
+    </div>
   )
 }
