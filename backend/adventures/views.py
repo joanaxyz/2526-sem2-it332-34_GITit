@@ -418,6 +418,7 @@ class AdventureLevelTierCommandSubmitAPIView(APIView):
             result["run"],
             repository_state=result["repository_state"],
             visualization=result["visualization"],
+            rewards=result["rewards"],
         )
         return Response(
             {

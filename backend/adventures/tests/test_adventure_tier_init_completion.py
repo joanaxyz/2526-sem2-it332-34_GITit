@@ -10,9 +10,9 @@ from adventures.models import (
     AdventureLevelTierWaveVariant,
 )
 from adventures.services import AdventureLevelTierRunService
-from curriculum.models import Chapter, Story
+from curriculum.models import Chapter, CommandForm, CommandSkill, Story
 from players.services import get_or_create_player
-from progress.models import AdventureLevelTierCompletion
+from progress.models import AdventureLevelTierCompletion, Wallet
 from testing.frontend_execution import frontend_execution_payload
 
 
@@ -31,6 +31,7 @@ def test_git_init_completes_tier_persists_progress_and_unlocks_medium(db, django
         chapter=chapter,
         slug="initializing-a-local-repository",
         title="Initializing Repositories",
+        reward_coins=25,
     )
     easy = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
     medium = AdventureLevelTier.objects.create(adventure_level=level, difficulty="medium")
@@ -48,6 +49,21 @@ def test_git_init_completes_tier_persists_progress_and_unlocks_medium(db, django
         max_counted_commands=10,
         required_successful_attempts=1,
     )
+    skill = CommandSkill.objects.create(
+        slug="git-init",
+        base_command="git init",
+        title="Initialize repositories",
+    )
+    command_form = CommandForm.objects.create(
+        command_skill=skill,
+        chapter=chapter,
+        slug="current",
+        usage_form="git init",
+        label="Initialize the current folder",
+    )
+    level.command_forms.add(command_form)
+    easy_wave.command_forms.add(command_form)
+    medium_wave.command_forms.add(command_form)
     initial_state = {
         "repository_initialized": False,
         "commits": [],
@@ -161,11 +177,31 @@ def test_git_init_completes_tier_persists_progress_and_unlocks_medium(db, django
     assert payload["run"]["progress"] == {"completed": 1, "total": 1, "cleared": True}
     assert payload["run"]["completion"] is not None
     assert payload["run"]["next_difficulty"] == {"id": medium.id, "difficulty": "medium"}
+    assert payload["run"]["rewards"] == {
+        "first_level_clear": True,
+        "coins_awarded": 25,
+        "chapter_chests_awarded": [
+            {"threshold": 25, "coins": 25},
+            {"threshold": 50, "coins": 60},
+            {"threshold": 75, "coins": 100},
+            {"threshold": 100, "coins": 150},
+        ],
+        "mastery_advanced": [
+            {
+                "skill_slug": "git-init",
+                "form_slug": "current",
+                "solves": 1,
+                "target": 2,
+                "mastered": False,
+            }
+        ],
+    }
 
     run.refresh_from_db()
     assert run.status == "completed"
     assert AdventureLevelTierProgress.objects.get(player=player, tier=easy).successful_clears == 1
     assert AdventureLevelTierCompletion.objects.filter(player=player, tier=easy).exists()
+    assert Wallet.objects.get(player=player).balance == 360
 
     unlocked_run = AdventureLevelTierRunService().start_run(
         player=player,

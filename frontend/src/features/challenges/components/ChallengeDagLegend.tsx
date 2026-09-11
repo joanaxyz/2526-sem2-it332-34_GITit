@@ -1,19 +1,17 @@
-import { Circle, CircleDot, Diamond } from 'lucide-react'
-
 /** Node legend at the foot of the DAG band, mirroring the reference mock. */
 export function ChallengeDagLegend() {
   return (
     <div className="dag-legend" aria-hidden="true">
       <span>
-        <CircleDot />
+        <i className="dag-legend-symbol is-head" />
         HEAD
       </span>
       <span>
-        <Circle />
+        <i className="dag-legend-symbol is-branch" />
         Branch
       </span>
       <span>
-        <Diamond />
+        <i className="dag-legend-symbol is-commit" />
         Commit
       </span>
     </div>

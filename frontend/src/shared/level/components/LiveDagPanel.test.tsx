@@ -76,6 +76,16 @@ describe('LiveDagPanel', () => {
     expect(within(overlay).getByText('main')).toBeInTheDocument()
   })
 
+  it('renders HEAD as a fixed seal and branch refs as banners', () => {
+    render(<LiveDagPanel snapshot={snapshot} />)
+
+    const head = screen.getByTitle(/commit c2/i)
+    expect(head).toHaveClass('dag-commit-seal', 'is-head')
+    expect(head.querySelector('.dag-commit-seal__ornament')).toBeInTheDocument()
+    expect(head.querySelector('.dag-head-marker')).toHaveTextContent('HEAD')
+    expect(screen.getByText('main')).toHaveClass('dag-ref-banner', 'is-active')
+  })
+
   it('keeps repository metadata inside the diagram panel', () => {
     render(<LiveDagPanel title="Target DAG" snapshot={snapshot} showRepositoryDetails />)
 

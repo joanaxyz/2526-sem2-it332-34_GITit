@@ -233,8 +233,8 @@ export function Component() {
                     <dd>IV</dd>
                   </div>
                   <div>
-                    <dt>Next Rank</dt>
-                    <dd>320 / 500 XP</dd>
+                    <dt>Rank Progress</dt>
+                    <dd>320 / 500 mastery</dd>
                   </div>
                 </dl>
               </div>

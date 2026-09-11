@@ -11,6 +11,7 @@ from django.db.models import Count
 
 from adventures.models import (
     AdventureLevel,
+    AdventureLevelTierWave,
     AdventureWave,
 )
 
@@ -92,6 +93,21 @@ def form_solve_targets(form_ids) -> dict[int, int]:
         form_id = row["command_forms"]
         if form_id in targets:
             targets[form_id] = row["n"]
+    tier_rows = (
+        AdventureLevelTierWave.objects.filter(
+            is_published=True,
+            tier__is_published=True,
+            tier__adventure_level__is_published=True,
+            tier__adventure_level__is_required=True,
+            command_forms__in=form_ids,
+        )
+        .values("command_forms")
+        .annotate(n=Count("id", distinct=True))
+    )
+    for row in tier_rows:
+        form_id = row["command_forms"]
+        if form_id in targets:
+            targets[form_id] += row["n"]
     return {form_id: max(1, min(MASTERY_TARGET_CAP, n)) for form_id, n in targets.items()}
 
 

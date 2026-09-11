@@ -15,12 +15,8 @@ import { createTierWorkspaceCommandHandler } from '@/features/story-map/utils/ti
 import { useTierRun } from '@/features/story-map/hooks/useTierRun'
 import { invalidateTierProgressQueries } from '@/features/story-map/utils/tierRunCache'
 import {
-  DEFAULT_TARGET_DIAGRAM_RATIO,
   DEFAULT_TERMINAL_PANE_RATIO,
-  DEFAULT_TERMINAL_RATIO,
-  TARGET_DIAGRAM_RATIO_KEY,
   TERMINAL_PANE_RATIO_KEY,
-  TERMINAL_RATIO_KEY,
   clamp,
   constrainedTerminalPaneRatio,
   mapUrlForRun,
@@ -32,6 +28,7 @@ import { terminalPrompt } from '@/shared/level/terminalPrompt'
 import { PROJECT_FILES_OPEN_KEY } from '@/shared/level/workspaceKeys'
 import { useOutcomeAnimationGate } from '@/shared/level-runtime/outcomeAnimation'
 import { useTierDagAnimation } from '@/features/story-map/hooks/useTierDagAnimation'
+import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
@@ -53,16 +50,6 @@ export function TierWorkspace() {
   const mutation = useTierCommandSubmission(runId)
   const { clearToast, evaluateAndNotify } = useTierScaffolding(runId)
   const [dismissedCompletionRunId, setDismissedCompletionRunId] = useState<number | null>(null)
-  const [terminalRatio, setTerminalRatio] = usePersistentState(
-    TERMINAL_RATIO_KEY,
-    DEFAULT_TERMINAL_RATIO,
-    ratioSanitizer(0.22, 0.58, DEFAULT_TERMINAL_RATIO),
-  )
-  const [targetDiagramRatio, setTargetDiagramRatio] = usePersistentState(
-    TARGET_DIAGRAM_RATIO_KEY,
-    DEFAULT_TARGET_DIAGRAM_RATIO,
-    ratioSanitizer(0.34, 0.66, DEFAULT_TARGET_DIAGRAM_RATIO),
-  )
   const [terminalPaneRatio, setTerminalPaneRatio] = usePersistentState(
     TERMINAL_PANE_RATIO_KEY,
     DEFAULT_TERMINAL_PANE_RATIO,
@@ -70,10 +57,11 @@ export function TierWorkspace() {
   )
   const [projectFilesOpen, setProjectFilesOpen] = usePersistentState(PROJECT_FILES_OPEN_KEY, true)
   const dagAnimation = useTierDagAnimation()
+  const battleDirector = useBattleDirector()
   const { completionAnimationReady, queueOutcomeAnimation } = useOutcomeAnimationGate({
     runId: observedRunId,
     status: observedRunStatus,
-    animating: dagAnimation.animating,
+    animating: dagAnimation.animating || battleDirector.animating,
   })
   const [startOverConfirmOpen, setStartOverConfirmOpen] = useState(false)
   const [exitConfirmOpen, setExitConfirmOpen] = useState(false)
@@ -87,26 +75,12 @@ export function TierWorkspace() {
     if (!activeRunId || bypassNavigationRunId.current === activeRunId) return false
     return currentLocation.pathname !== nextLocation.pathname || currentLocation.search !== nextLocation.search
   })
-  const workspaceGridRef = useRef<HTMLElement>(null)
-  const diagramGridRef = useRef<HTMLDivElement>(null)
   const terminalGridRef = useRef<HTMLDivElement>(null)
-  const beginTerminalResize = useDragResize(workspaceGridRef, 'row-resize', (event, bounds) => {
-    setTerminalRatio(clamp((bounds.bottom - event.clientY) / bounds.height, 0.22, 0.58))
-  })
-  const beginDiagramResize = useDragResize(diagramGridRef, 'col-resize', (event, bounds) => {
-    setTargetDiagramRatio(clamp((event.clientX - bounds.left) / bounds.width, 0.34, 0.66))
-  })
   const beginTerminalPaneResize = useDragResize(terminalGridRef, 'col-resize', (event, bounds) => {
     setTerminalPaneRatio(constrainedTerminalPaneRatio(event.clientX, bounds))
   })
 
   const resizeStep = 0.03
-  const keyboardResizeDiagram = (delta: number) => {
-    setTargetDiagramRatio((value) => clamp(value + delta * resizeStep, 0.34, 0.66))
-  }
-  const keyboardResizeTerminal = (delta: number) => {
-    setTerminalRatio((value) => clamp(value + delta * resizeStep, 0.22, 0.58))
-  }
   const keyboardResizeTerminalPane = (delta: number) => {
     setTerminalPaneRatio((value) => clamp(value + delta * resizeStep, 0.4, 0.92))
   }
@@ -171,6 +145,7 @@ export function TierWorkspace() {
     runId,
     mutation,
     dagAnimation,
+    battleDirector,
     queryClient,
     clearToast,
     evaluateAndNotify,
@@ -187,14 +162,6 @@ export function TierWorkspace() {
     dismissedCompletionRunId !== run.id &&
     completionAnimationReady(run.id)
 
-  const workspaceGridStyle = {
-    gridTemplateRows: `minmax(0, ${1 - terminalRatio}fr) 0.375rem minmax(0, ${terminalRatio}fr)`,
-  }
-  const hasTargetDiagram = Boolean(run.scaffolding.expected_state && run.expected_state)
-  const diagramGridStyle = {
-    '--live-dag-size': `${targetDiagramRatio}fr`,
-    '--expected-dag-size': `${1 - targetDiagramRatio}fr`,
-  } as CSSProperties
   const terminalGridStyle = {
     '--terminal-pane-size': `${terminalPaneRatio}fr`,
     '--feedback-pane-size': `${1 - terminalPaneRatio}fr`,
@@ -224,12 +191,8 @@ export function TierWorkspace() {
           deleteFileMutation.isPending
         }
         writeDisabled={run.status !== 'started' || writeFileMutation.isPending}
-        workspaceGridRef={workspaceGridRef}
-        workspaceGridStyle={workspaceGridStyle}
         dagAnimation={dagAnimation}
-        hasTargetDiagram={hasTargetDiagram}
-        diagramGridRef={diagramGridRef}
-        diagramGridStyle={diagramGridStyle}
+        battleDirector={battleDirector}
         terminalGridRef={terminalGridRef}
         terminalGridStyle={terminalGridStyle}
         mutationPending={mutation.isPending}
@@ -251,14 +214,8 @@ export function TierWorkspace() {
           return updatedRun
         }}
         onOpenFile={setWorkspaceEditorPath}
-        onBeginDiagramResize={beginDiagramResize}
-        onBeginTerminalResize={beginTerminalResize}
         onBeginTerminalPaneResize={beginTerminalPaneResize}
-        onKeyboardDiagramResize={keyboardResizeDiagram}
-        onKeyboardTerminalResize={keyboardResizeTerminal}
         onKeyboardTerminalPaneResize={keyboardResizeTerminalPane}
-        onResetDiagramResize={() => setTargetDiagramRatio(DEFAULT_TARGET_DIAGRAM_RATIO)}
-        onResetTerminalResize={() => setTerminalRatio(DEFAULT_TERMINAL_RATIO)}
         onResetTerminalPaneResize={() => setTerminalPaneRatio(DEFAULT_TERMINAL_PANE_RATIO)}
         onCommand={submit}
         onCloseEditor={() => setWorkspaceEditorPath(null)}

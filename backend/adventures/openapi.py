@@ -115,6 +115,7 @@ class AdventureLevelTierCommandRunResponseSerializer(serializers.Serializer):
     progress = serializers.DictField(required=False)
     completion = serializers.DictField(required=False, allow_null=True)
     next_difficulty = serializers.DictField(required=False, allow_null=True)
+    rewards = serializers.DictField(required=False, allow_null=True)
 
 
 class AdventureLevelTierRunResponseSerializer(serializers.Serializer):

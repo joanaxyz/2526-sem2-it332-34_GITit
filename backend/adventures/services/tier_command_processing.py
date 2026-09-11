@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.utils import timezone
 
-from adventures.models import AdventureLevelTierProgress, AdventureLevelTierRun
+from adventures.models import AdventureLevelTierProgress, AdventureLevelTierRun, SkillMastery
 from common.constants import (
     COMMAND_COUNTED,
     DIFFICULTY_EASY,
@@ -24,16 +24,20 @@ from common.runtime import (
     update_fields_for_execution,
 )
 from common.services.performance import timing
+from curriculum.models import CommandForm
+from curriculum.services import ChapterChestService
 from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
 from practice.models import CommandStep
 from practice.services.scaffolding import FeedbackGenerationService
 from practice.services.visualization import RepositoryVisualizationService
 from progress.models import AdventureLevelTierCompletion
+from progress.wallet import WalletService
 from simulator.services import (
     RepositorySnapshotService,
     RepositoryStateSimulator,
 )
 
+from .selectors import form_solve_targets
 from .tier_history import TierCommandHistoryCache
 
 
@@ -204,8 +208,10 @@ class AdventureLevelTierCommandProcessingService:
                 state_mutated=execution.state_mutated,
             )
         )
+        rewards = None
         if solved:
-            update_fields.update(self._complete_run(run))
+            completed_fields, rewards = self._complete_run(run)
+            update_fields.update(completed_fields)
         elif failed:
             run.status = SESSION_STATUS_FAILED
             run.ended_at = timezone.now()
@@ -249,9 +255,10 @@ class AdventureLevelTierCommandProcessingService:
                 max_counted_commands=run.max_counted_commands,
                 counted_command_count=run.counted_action_total,
             ),
+            "rewards": rewards,
         }
 
-    def _complete_run(self, run: AdventureLevelTierRun) -> set[str]:
+    def _complete_run(self, run: AdventureLevelTierRun) -> tuple[set[str], dict | None]:
         """Mark the run completed and, if solving it pushed the tier's
         successful-clears count to its required threshold, write
         AdventureLevelTierCompletion. Returns the saved field names.
@@ -275,6 +282,7 @@ class AdventureLevelTierCommandProcessingService:
             budget=run.min_counted_commands,
             first_try=first_try,
         )
+        rewards = None
         if not run.is_replay:
             progress, _ = AdventureLevelTierProgress.objects.get_or_create(
                 player=run.player, tier=run.tier
@@ -312,7 +320,59 @@ class AdventureLevelTierCommandProcessingService:
                             "completed_at",
                         ]
                     )
-        return {"status", "completed_at", "ended_at", "stars"}
+                if created:
+                    mastery_advanced = self._credit_mastery(run)
+                    level = run.tier.adventure_level
+                    first_level_clear = run.tier.difficulty == DIFFICULTY_EASY
+                    coins_awarded = 0
+                    chapter_chests_awarded: list[dict] = []
+                    if first_level_clear:
+                        if level.reward_coins and WalletService().award(
+                            player=run.player,
+                            amount=level.reward_coins,
+                            reason="adventure_level_reward",
+                            award_key=f"adventure-level-reward:{level.id}",
+                        ):
+                            coins_awarded = level.reward_coins
+                        chapter_chests_awarded = ChapterChestService().award_chests(
+                            player=run.player,
+                            chapter=level.chapter,
+                        )
+                    rewards = {
+                        "first_level_clear": first_level_clear,
+                        "coins_awarded": coins_awarded,
+                        "chapter_chests_awarded": chapter_chests_awarded,
+                        "mastery_advanced": mastery_advanced,
+                    }
+        return {"status", "completed_at", "ended_at", "stars"}, rewards
+
+    def _credit_mastery(self, run: AdventureLevelTierRun) -> list[dict]:
+        form_ids = set(
+            run.current_wave.command_forms.filter(is_published=True).values_list(
+                "id", flat=True
+            )
+        )
+        if not form_ids:
+            return []
+        targets = form_solve_targets(form_ids)
+        advanced = []
+        for form in CommandForm.objects.filter(id__in=form_ids).select_related("command_skill"):
+            row, _ = SkillMastery.objects.get_or_create(player=run.player, command_form=form)
+            if row.learned_at is None:
+                row.learned_at = timezone.now()
+            row.solves += 1
+            row.mastered = row.solves >= targets.get(form.id, 1)
+            row.save(update_fields=["solves", "mastered", "learned_at", "updated_at"])
+            advanced.append(
+                {
+                    "skill_slug": form.command_skill.slug,
+                    "form_slug": form.slug,
+                    "solves": row.solves,
+                    "target": targets.get(form.id, 1),
+                    "mastered": row.mastered,
+                }
+            )
+        return advanced
 
 
 def _uses_contextual_feedback(run: AdventureLevelTierRun) -> bool:
