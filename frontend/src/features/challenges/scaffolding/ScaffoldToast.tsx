@@ -1,3 +1,6 @@
+import { BookOpen } from 'lucide-react'
+import { useState } from 'react'
+
 import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
 
@@ -5,8 +8,9 @@ export type ScaffoldToastProps = {
   message: string
   trigger: 'T1' | 'T2' | 'T3'
   difficulty: 'easy' | 'medium' | 'hard'
-  onReviewMap: () => void
-  onContinue: () => void
+  onDismiss: () => void
+  chapter?: { id: number; title: string } | null
+  FieldGuideModal?: React.ComponentType<{ chapterId: number; chapterTitle: string; onClose: () => void }>
 }
 
 const BORDER_COLOR: Record<'T1' | 'T2' | 'T3', string> = {
@@ -23,42 +27,59 @@ const BORDER_COLOR: Record<'T1' | 'T2' | 'T3', string> = {
 export function ScaffoldToast({
   message,
   trigger,
-  onReviewMap,
-  onContinue,
+  onDismiss,
+  chapter,
+  FieldGuideModal,
 }: ScaffoldToastProps) {
-  return (
-    <div
-      role="status"
-      aria-live="polite"
-      data-testid="scaffold-toast"
-      className={cn(
-        'w-[26rem] max-w-[90vw] rounded-lg border bg-background/95 p-4 shadow-xl backdrop-blur-sm',
-        BORDER_COLOR[trigger],
-      )}
-    >
-      {/* Message is plain text; no markdown or anchor rendering. */}
-      <p className="whitespace-pre-line text-sm leading-6 text-foreground">{message}</p>
+  const [fieldGuideOpen, setFieldGuideOpen] = useState(false)
+  const canOpenFieldGuide = Boolean(chapter && FieldGuideModal)
 
-      <div className="mt-4 flex justify-end gap-2">
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          onClick={onContinue}
-          data-testid="scaffold-continue"
-        >
-          Continue
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={onReviewMap}
-          data-testid="scaffold-proceed"
-        >
-          Review map
-        </Button>
+  return (
+    <>
+      <div
+        role="status"
+        aria-live="polite"
+        data-testid="scaffold-toast"
+        className={cn(
+          'w-[26rem] max-w-[90vw] rounded-lg border bg-background/95 p-4 shadow-xl backdrop-blur-sm',
+          BORDER_COLOR[trigger],
+        )}
+      >
+        {/* Message is plain text; no markdown or anchor rendering. */}
+        <p className="whitespace-pre-line text-sm leading-6 text-foreground">{message}</p>
+
+        <div className="mt-4 flex justify-end gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={onDismiss}
+            data-testid="scaffold-dismiss"
+          >
+            Dismiss
+          </Button>
+          {canOpenFieldGuide ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => setFieldGuideOpen(true)}
+              data-testid="scaffold-field-guide"
+            >
+              <BookOpen className="size-3.5" aria-hidden="true" />
+              Open Field Guide
+            </Button>
+          ) : null}
+        </div>
       </div>
-    </div>
+
+      {fieldGuideOpen && chapter && FieldGuideModal ? (
+        <FieldGuideModal
+          chapterId={chapter.id}
+          chapterTitle={chapter.title}
+          onClose={() => setFieldGuideOpen(false)}
+        />
+      ) : null}
+    </>
   )
 }

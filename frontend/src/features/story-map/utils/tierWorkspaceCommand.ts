@@ -27,11 +27,7 @@ export function createTierWorkspaceCommandHandler({
   battleDirector: BattleDirector
   queryClient: QueryClient
   clearToast: () => void
-  evaluateAndNotify: (
-    run: TierRun,
-    commandClassification: string,
-    onExitSuggested: () => void,
-  ) => void
+  evaluateAndNotify: (run: TierRun, commandClassification: string) => void
   setExitConfirmOpen: (open: boolean) => void
   setWorkspaceEditorPath: (path: string | null) => void
   queueOutcomeAnimation: (runId: number) => void
@@ -71,13 +67,7 @@ export function createTierWorkspaceCommandHandler({
         if (!response.run.replay) {
           const updatedRun = queryClient.getQueryData<TierRun>(queryKeys.adventureTierRun(runId))
           if (updatedRun) {
-            evaluateAndNotify(
-              updatedRun,
-              response.step.command_classification,
-              () => {
-                setExitConfirmOpen(true)
-              },
-            )
+            evaluateAndNotify(updatedRun, response.step.command_classification)
           }
         }
       },
