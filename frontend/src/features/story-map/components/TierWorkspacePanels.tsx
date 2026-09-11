@@ -83,64 +83,42 @@ export function TierSidebar({
 export function TierDiagramStage({
   run,
   animation,
-  hasTargetDiagram,
-  diagramGridRef,
-  diagramGridStyle,
-  onBeginDiagramResize,
-  onKeyboardDiagramResize,
-  onResetDiagramResize,
 }: {
   run: TierRun
   animation: TierDagAnimationController
-  hasTargetDiagram: boolean
-  diagramGridRef: RefObject<HTMLDivElement | null>
-  diagramGridStyle: CSSProperties
-  onBeginDiagramResize: ResizeStart
-  onKeyboardDiagramResize: (delta: number) => void
-  onResetDiagramResize: () => void
 }) {
+  const hasTargetDiagram = Boolean(run.scaffolding.expected_state && run.expected_state)
+
   return (
-    <div
-      ref={diagramGridRef}
-      className={cn(
-        'challenge-diagram-grid',
-        hasTargetDiagram && 'has-target',
-      )}
-      style={diagramGridStyle}
-    >
-      <div className="gameplay-pane" data-tour-target="live-dag">
-        <TierDagStage
-          snapshot={run.repository_state}
-          animation={animation}
-          zoomStorageKey={DAG_ZOOM_KEY}
-          className="h-full min-h-0"
-        />
-      </div>
-      {hasTargetDiagram ? (
-        <>
-          <ResizeHandle
-            label="Resize diagrams"
-            orientation="vertical"
-            className="gameplay-resize gameplay-resize--vertical"
-            onPointerDown={onBeginDiagramResize}
-            onKeyboardResize={onKeyboardDiagramResize}
-            onReset={onResetDiagramResize}
+    <aside className="tier-dag-rail">
+      <div
+        id="tier-live-dag-panel"
+        className={cn('tier-repository-view', hasTargetDiagram && 'has-target')}
+      >
+        <div className="gameplay-pane" data-tour-target="live-dag">
+          <TierDagStage
+            snapshot={run.repository_state}
+            animation={animation}
+            zoomStorageKey={DAG_ZOOM_KEY}
+            className="h-full min-h-0"
           />
+        </div>
+        {hasTargetDiagram ? (
           <div className="gameplay-pane" data-tour-target="expected-state">
             <LiveDagPanel
-              title="Expected State"
+              title="Expected State · Target"
               snapshot={run.expected_state!}
               className="flex h-full min-h-0 flex-col"
               contentClassName="h-full min-h-0 flex-1"
-              zoomStorageKey={DAG_ZOOM_KEY}
+              zoomStorageKey={`${DAG_ZOOM_KEY}:expected`}
               fitViewPadding={0.16}
               layoutDirection="vertical"
             />
           </div>
-        </>
-      ) : null}
-      <TierDagLegend />
-    </div>
+        ) : null}
+        <TierDagLegend />
+      </div>
+    </aside>
   )
 }
 
@@ -152,6 +130,7 @@ export function TierTerminalStage({
   terminalGridStyle,
   mutationPending,
   dagAnimating,
+  battleAnimating,
   onBeginTerminalPaneResize,
   onKeyboardTerminalPaneResize,
   onResetTerminalPaneResize,
@@ -164,6 +143,7 @@ export function TierTerminalStage({
   terminalGridStyle: CSSProperties
   mutationPending: boolean
   dagAnimating: boolean
+  battleAnimating: boolean
   onBeginTerminalPaneResize: ResizeStart
   onKeyboardTerminalPaneResize: (delta: number) => void
   onResetTerminalPaneResize: () => void
@@ -184,7 +164,7 @@ export function TierTerminalStage({
           lines={lines}
           prompt={prompt}
           disabled={run.status !== 'started'}
-          runDisabled={mutationPending || dagAnimating}
+          runDisabled={mutationPending || dagAnimating || battleAnimating}
           processing={mutationPending}
           className="h-full"
           onCommand={onCommand}

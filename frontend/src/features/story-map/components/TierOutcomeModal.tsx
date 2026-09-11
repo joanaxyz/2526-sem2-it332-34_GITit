@@ -1,4 +1,4 @@
-import { ArrowRight, Castle, RefreshCcw, Sparkles, XCircle } from 'lucide-react'
+import { ArrowRight, Castle, Gem, RefreshCcw, Sparkles, WandSparkles, XCircle } from 'lucide-react'
 import { useEffect } from 'react'
 import type { CSSProperties } from 'react'
 
@@ -11,6 +11,7 @@ import { GameOutcomeModal } from '@/shared/level/components/game-outcome/GameOut
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { playGameOverSound, playVictorySound } from '@/shared/audio/battleAudio'
+import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 
 function difficultyLabel(run: TierRun) {
   if (!run.difficulty) return 'Adventure'
@@ -131,6 +132,24 @@ export function TierOutcomeModal({
         >
           <RefreshCcw className="size-3.5" />
           Replay
+        </Badge>
+      ) : null}
+      {!isFailed && !isReplay && run.rewards?.coins_awarded ? (
+        <Badge variant="secondary" className="game-outcome-badge">
+          <GitCoinIcon className="size-3.5" />
+          +{run.rewards.coins_awarded} GitCoins
+        </Badge>
+      ) : null}
+      {!isFailed && !isReplay && run.rewards?.mastery_advanced.length ? (
+        <Badge variant="secondary" className="game-outcome-badge">
+          <WandSparkles className="size-3.5" />
+          {run.rewards.mastery_advanced.length} skill {run.rewards.mastery_advanced.length === 1 ? 'advanced' : 'advances'}
+        </Badge>
+      ) : null}
+      {!isFailed && !isReplay && run.rewards?.chapter_chests_awarded.length ? (
+        <Badge variant="secondary" className="game-outcome-badge">
+          <Gem className="size-3.5" />
+          {run.rewards.chapter_chests_awarded.length} progress {run.rewards.chapter_chests_awarded.length === 1 ? 'chest' : 'chests'}
         </Badge>
       ) : null}
     </>

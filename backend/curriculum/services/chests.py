@@ -17,16 +17,17 @@ CHEST_SCHEDULE = [
 class ChapterChestService:
     """Award fixed chapter milestones once through the wallet ledger."""
 
-    def award_chests(self, *, player, chapter) -> None:
+    def award_chests(self, *, player, chapter) -> list[dict]:
+        awarded: list[dict] = []
         if not getattr(chapter, "is_published", False):
-            return
+            return awarded
 
         denominator = chapter_completion_denominator_map(chapter_ids=[chapter.id]).get(
             chapter.id,
             0,
         )
         if not denominator:
-            return
+            return awarded
         numerator = chapter_completion_count_map(
             player=player,
             chapter_ids=[chapter.id],
@@ -37,9 +38,11 @@ class ChapterChestService:
             threshold = chest["threshold"]
             if progress < threshold:
                 continue
-            wallet.award(
+            if wallet.award(
                 player=player,
                 amount=chest["coins"],
                 reason="chapter_chest",
                 award_key=f"chapter-chest:{chapter.id}:{threshold}",
-            )
+            ):
+                awarded.append(dict(chest))
+        return awarded

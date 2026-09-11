@@ -8,8 +8,12 @@ def chapter_completion_count_map(*, player, chapter_ids: list[int]) -> dict[int,
     if player is None or not chapter_ids:
         return {}
 
-    completion_by_chapter = {chapter_id: 0 for chapter_id in chapter_ids}
-    from progress.models import AdventureLevelCompletion, ChallengeTrialCompletion
+    completed_levels_by_chapter = {chapter_id: set() for chapter_id in chapter_ids}
+    from progress.models import (
+        AdventureLevelCompletion,
+        AdventureLevelTierCompletion,
+        ChallengeTrialCompletion,
+    )
 
     for chapter_id, _level_id in (
         AdventureLevelCompletion.objects.filter(
@@ -20,7 +24,25 @@ def chapter_completion_count_map(*, player, chapter_ids: list[int]) -> dict[int,
         .values_list("adventure_level__chapter_id", "adventure_level_id")
         .distinct()
     ):
-        completion_by_chapter[chapter_id] += 1
+        completed_levels_by_chapter[chapter_id].add(_level_id)
+
+    for chapter_id, level_id in (
+        AdventureLevelTierCompletion.objects.filter(
+            player=player,
+            tier__difficulty="easy",
+            tier__is_published=True,
+            tier__adventure_level__is_published=True,
+            tier__adventure_level__chapter_id__in=chapter_ids,
+        )
+        .values_list("tier__adventure_level__chapter_id", "tier__adventure_level_id")
+        .distinct()
+    ):
+        completed_levels_by_chapter[chapter_id].add(level_id)
+
+    completion_by_chapter = {
+        chapter_id: len(level_ids)
+        for chapter_id, level_ids in completed_levels_by_chapter.items()
+    }
 
     for chapter_id, _trial_id in (
         ChallengeTrialCompletion.objects.filter(

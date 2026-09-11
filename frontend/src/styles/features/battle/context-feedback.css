@@ -108,6 +108,7 @@
 @media (max-width: 1280px) {
   .gameplay-header-profile { display: none; }
   .gameplay-workspace { grid-template-columns: 17.5rem minmax(0, 1fr); }
+  .tier-gameplay-workspace { grid-template-columns: 17.5rem minmax(0, 1fr) minmax(18rem, 28vw); }
 }
 
 @media (max-width: 1080px) {
@@ -136,6 +137,20 @@
     grid-template-columns: minmax(0, 1fr);
     min-height: auto;
     overflow: visible;
+  }
+
+  .tier-gameplay-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tier-dag-rail {
+    grid-column: auto;
+    grid-row: auto;
+    min-height: 20rem;
+  }
+
+  .tier-repository-view.has-target {
+    min-height: calc(40rem + var(--workspace-gap));
   }
 
   .gameplay-workspace__sidebar,

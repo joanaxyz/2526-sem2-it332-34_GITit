@@ -36,7 +36,7 @@ def _build_adventure_access(*, player, adventures: list[AdventureLevel]) -> Adve
     completion_by_adventure_id: dict[int, AdventureLevelCompletion] = {}
     passed_adventure_ids: set[int] = set()
     if player is not None:
-        from progress.models import AdventureLevelCompletion
+        from progress.models import AdventureLevelCompletion, AdventureLevelTierCompletion
 
         adventure_ids = [adventure.id for adventure in adventures]
         passed_adventure_ids = set(
@@ -53,6 +53,16 @@ def _build_adventure_access(*, player, adventures: list[AdventureLevel]) -> Adve
                 adventure_level_id__in=adventure_ids,
             ).only("adventure_level_id", "stars", "counted_action_total", "completed_at")
         }
+        tier_level_completions = {
+            completion.tier.adventure_level_id: completion
+            for completion in AdventureLevelTierCompletion.objects.filter(
+                player=player,
+                tier__difficulty=DIFFICULTY_EASY,
+                tier__adventure_level_id__in=adventure_ids,
+            ).select_related("tier")
+        }
+        for level_id, completion in tier_level_completions.items():
+            completion_by_adventure_id.setdefault(level_id, completion)
         passed_adventure_ids |= completion_by_adventure_id.keys()
 
     return AdventureAccessContext(

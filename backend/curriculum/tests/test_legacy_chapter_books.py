@@ -1,8 +1,8 @@
 from django.core.management import call_command
 
+from adventures.models import AdventureLevel
 from curriculum.models import Chapter, CommandForm
 from curriculum.selectors import chapter_book, published_chapters
-
 
 EXPECTED_COMMANDS = {
     1: {"git init", "git clone", "git add", "git commit", "git restore"},
@@ -80,6 +80,26 @@ def test_legacy_field_guide_seed_is_idempotent(db):
     )
 
     assert second == first
+
+
+def test_legacy_levels_seed_gamification_rewards_and_skill_forms(db):
+    call_command("seed_legacy_modules", verbosity=0)
+
+    levels = list(
+        AdventureLevel.objects.filter(chapter__story__slug="git-it-legacy")
+        .exclude(chapter__number=0)
+        .prefetch_related("command_forms", "tiers__waves__command_forms")
+    )
+
+    assert levels
+    assert all(level.reward_coins == 25 for level in levels)
+    assert all(level.command_forms.exists() for level in levels)
+    assert all(
+        wave.command_forms.exists()
+        for level in levels
+        for tier in level.tiers.all()
+        for wave in tier.waves.all()
+    )
 
 
 def test_canonical_reseed_preserves_legacy_field_guides(db):

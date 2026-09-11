@@ -146,7 +146,7 @@ describe('first-visit onboarding journey', () => {
       'Git Skill Mastery', 'Activity and story progress', 'Where your runs stand', 'Achievements to chase',
     ])
     await screen.findByRole('heading', { name: 'Profile and Rank Ladder' })
-    for (const heading of ['Your rank and XP', 'GitCoins and perfect clears', 'Spells you have learned']) {
+    for (const heading of ['Your rank progress', 'GitCoins and perfect clears', 'Spells you have learned']) {
       fireEvent.click(screen.getByRole('button', { name: 'Next' }))
       await screen.findByRole('heading', { name: heading })
     }
@@ -184,7 +184,7 @@ describe('first-visit onboarding journey', () => {
       'Git Skill Mastery', 'Activity and story progress', 'Where your runs stand', 'Achievements to chase',
     ])
     await screen.findByRole('heading', { name: 'Profile and Rank Ladder' })
-    await completeTour('Check my loadout', ['Your rank and XP', 'GitCoins and perfect clears', 'Spells you have learned'])
+    await completeTour('Check my loadout', ['Your rank progress', 'GitCoins and perfect clears', 'Spells you have learned'])
     expect(screen.queryByRole('button', { name: 'Return to Stories' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Equip companion' }))
     expect(await screen.findByRole('button', { name: 'Return to Stories' })).toBeEnabled()
