@@ -80,8 +80,8 @@ const profileSteps = [
   },
   {
     id: 'rank', selector: '[data-onboarding="profile-rank"]', icon: Trophy,
-    title: 'Your rank and XP',
-    body: 'The badge is your current rank, and the meter under it tracks XP toward the next tier. Clearing Adventure levels and Challenge trials is what moves it.',
+    title: 'Your rank progress',
+    body: 'The badge is your current rank, and the meter under it tracks mastery toward the next tier. Clearing Adventure levels and Challenge trials is what moves it.',
     optional: true,
   },
   {

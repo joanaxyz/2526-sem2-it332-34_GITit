@@ -45,20 +45,22 @@ export function CommitNode({ data }: NodeProps<CommitNodeData>) {
         title={label}
         onClick={data.onActivate}
         className={cn(
-          'grid size-16 place-items-center rounded-full font-mono text-sm font-semibold outline-none transition-all focus-visible:ring-2 focus-visible:ring-ring',
+          'dag-commit-seal font-mono text-sm font-semibold outline-none transition-all focus-visible:ring-2 focus-visible:ring-ring',
           data.isHead
-            ? colors.headNode
-            : 'border border-border bg-card text-foreground shadow-sm',
+            ? cn('is-head', colors.headNode)
+            : 'text-foreground',
           data.isActive && 'ring-2 ring-primary/70 ring-offset-2 ring-offset-background',
         )}
       >
-        {shortenHash(data.commit.id)}
+        <DagSealOrnament head={data.isHead} />
+        {data.isHead ? <span className="dag-head-marker">HEAD</span> : null}
+        <span className="dag-commit-seal__label">{shortenHash(data.commit.id)}</span>
       </button>
       {(visibleRefs.length > 0 || data.isDetachedHead) && (
         <div className="flex max-w-36 flex-wrap justify-center gap-1">
           {data.isDetachedHead && (
             <span className={cn(
-              'rounded-full border border-accent/40 bg-accent/15 px-2 py-0.5 text-[11px] font-semibold leading-none text-accent',
+              'dag-ref-banner is-head border-accent/40 bg-accent/15 text-[11px] font-semibold leading-none text-accent',
               data.enteringHead && 'dag-ref-enter',
             )}>
               HEAD
@@ -69,12 +71,12 @@ export function CommitNode({ data }: NodeProps<CommitNodeData>) {
             return (
               <span
                 className={cn(
-                  'max-w-32 truncate rounded-full border px-2 py-0.5 text-[11px] font-semibold leading-none',
+                  'dag-ref-banner max-w-32 truncate text-[11px] font-semibold leading-none',
                   isActive
-                    ? colors.activePill
+                    ? cn('is-active', colors.activePill)
                     : ref.kind === 'remote'
-                      ? 'border-accent/35 bg-accent/10 text-accent'
-                      : 'border-border bg-secondary text-muted-foreground',
+                      ? 'is-remote text-accent'
+                      : 'text-muted-foreground',
                   (data.enteringRefs?.includes(ref.name) || (isActive && data.enteringHead)) && 'dag-ref-enter',
                 )}
                 key={`${ref.kind}:${ref.name}`}
@@ -85,7 +87,7 @@ export function CommitNode({ data }: NodeProps<CommitNodeData>) {
             )
           })}
           {hiddenRefCount > 0 && (
-            <span className="rounded-full border border-border bg-secondary px-2 py-0.5 text-[11px] font-medium leading-none text-muted-foreground">
+            <span className="dag-ref-banner text-[11px] font-medium leading-none text-muted-foreground">
               +{hiddenRefCount}
             </span>
           )}
@@ -144,16 +146,33 @@ export function EmptyRepositoryNode({ data }: NodeProps<EmptyRepositoryNodeData>
   const colors = VARIANT_COLORS[data.variant]
   return (
     <div className="flex w-32 flex-col items-center gap-2">
-      <div className={cn('grid size-16 place-items-center rounded-full font-mono text-xs font-semibold', colors.emptyHead)}>
-        HEAD
+      <div className={cn('dag-commit-seal is-head font-mono text-xs font-semibold', colors.emptyHead)}>
+        <DagSealOrnament head />
+        <span className="dag-commit-seal__label">HEAD</span>
       </div>
-      <span className={cn('max-w-28 truncate rounded-full border px-2 py-0.5 text-[11px] font-semibold leading-none', colors.emptyPill)}>
+      <span className={cn('dag-ref-banner is-active max-w-28 truncate text-[11px] font-semibold leading-none', colors.emptyPill)}>
         {data.branchName}
       </span>
       <div className="mt-0.5 rounded border border-dashed border-muted-foreground/20 px-2.5 py-1.5 text-center">
         <span className="text-[11px] font-medium leading-none text-muted-foreground/55">No commits yet</span>
       </div>
     </div>
+  )
+}
+
+function DagSealOrnament({ head = false }: { head?: boolean }) {
+  return (
+    <svg className="dag-commit-seal__ornament" viewBox="0 0 64 64" aria-hidden="true">
+      <polygon className="dag-commit-seal__facet" points="22,3 42,3 58,17 61,32 58,47 42,61 22,61 6,47 3,32 6,17" />
+      <circle className="dag-commit-seal__ring" cx="32" cy="32" r="24" />
+      {head ? (
+        <g className="dag-commit-seal__runes">
+          <path d="M32 5v8M32 51v8M5 32h8M51 32h8" />
+          <path d="m13 13 5 5m28 28 5 5m0-38-5 5M18 46l-5 5" />
+          <path d="m32 15 3 6-3-2-3 2 3-6Zm17 17-6 3 2-3-2-3 6 3ZM32 49l-3-6 3 2 3-2-3 6ZM15 32l6-3-2 3 2 3-6-3Z" />
+        </g>
+      ) : null}
+    </svg>
   )
 }
 

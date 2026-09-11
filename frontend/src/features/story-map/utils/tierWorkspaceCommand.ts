@@ -6,11 +6,14 @@ import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes
 import { stringList } from '@/features/story-map/components/tierWorkspaceLayout'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { isExitCommand } from '@/shared/level-runtime/commands'
+import type { BattleDirector } from '@/shared/battle/hooks/useBattleDirector'
+import { battleEventsForSubmittedCommand } from '@/shared/level-runtime/commandBattle'
 
 export function createTierWorkspaceCommandHandler({
   runId,
   mutation,
   dagAnimation,
+  battleDirector,
   queryClient,
   clearToast,
   evaluateAndNotify,
@@ -21,6 +24,7 @@ export function createTierWorkspaceCommandHandler({
   runId: number
   mutation: ReturnType<typeof useTierCommandSubmission>
   dagAnimation: TierDagAnimationController
+  battleDirector: BattleDirector
   queryClient: QueryClient
   clearToast: () => void
   evaluateAndNotify: (
@@ -41,10 +45,17 @@ export function createTierWorkspaceCommandHandler({
 
     clearToast()
     dagAnimation.onCommandStart()
+    battleDirector.onAttackStart()
 
     mutation.mutate(command, {
       onSuccess: (response) => {
         dagAnimation.onCommandResolved(response.command_outcome)
+        battleDirector.onResolve(battleEventsForSubmittedCommand({
+          command,
+          outcome: response.command_outcome,
+          monsters: battleDirector.currentMonsters(),
+          storyWorldSlug: runStorySlug(queryClient, runId),
+        }))
         if (response.run.status === 'completed' || response.run.status === 'failed') {
           queueOutcomeAnimation(response.run.id)
         }
@@ -70,7 +81,15 @@ export function createTierWorkspaceCommandHandler({
           }
         }
       },
-      onError: () => dagAnimation.onCommandError(),
+      onError: () => {
+        dagAnimation.onCommandError()
+        battleDirector.onError()
+      },
     })
   }
+}
+
+function runStorySlug(queryClient: QueryClient, runId: number) {
+  const run = queryClient.getQueryData<TierRun>(queryKeys.adventureTierRun(runId))
+  return run?.story?.world_slug ?? run?.story?.slug
 }

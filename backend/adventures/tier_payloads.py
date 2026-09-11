@@ -110,7 +110,11 @@ def tier_run_payload(run: AdventureLevelTierRun, *, include_steps: bool = True) 
 
 
 def command_run_payload(
-    run: AdventureLevelTierRun, *, repository_state: dict, visualization: dict
+    run: AdventureLevelTierRun,
+    *,
+    repository_state: dict,
+    visualization: dict,
+    rewards: dict | None = None,
 ) -> dict:
     payload = {
         "id": run.id,
@@ -129,6 +133,7 @@ def command_run_payload(
                 "progress": progress_payload(run),
                 "completion": completion_payload(run),
                 "next_difficulty": next_difficulty_payload(run),
+                "rewards": rewards,
             }
         )
     return payload

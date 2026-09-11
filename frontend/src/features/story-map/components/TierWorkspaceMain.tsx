@@ -7,7 +7,6 @@ import {
   type ResizeStart,
 } from '@/features/story-map/components/TierWorkspacePanels'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
-import { ResizeHandle } from '@/shared/level/components/ResizeHandle'
 import { WorkspaceEditorOverlay } from '@/shared/level/components/WorkspaceEditorOverlay'
 import type { TerminalPrompt } from '@/shared/level/terminalPrompt'
 import type { TerminalLine } from '@/shared/level/types'
@@ -16,6 +15,9 @@ import type {
   WorkspaceFileRenameInput,
 } from '@/shared/level/workspaceFileTypes'
 import type { TierDagAnimationController } from '@/features/story-map/hooks/useTierDagAnimation'
+import { TierBattlePanel } from '@/features/story-map/components/TierBattlePanel'
+import type { BattleDirector } from '@/shared/battle/hooks/useBattleDirector'
+import { WORKSPACE_BATTLE_STAGE_ROW } from '@/shared/level/workspaceLayout'
 
 export function TierWorkspaceMain({
   run,
@@ -25,12 +27,8 @@ export function TierWorkspaceMain({
   workspaceEditorPath,
   createDisabled,
   writeDisabled,
-  workspaceGridRef,
-  workspaceGridStyle,
   dagAnimation,
-  hasTargetDiagram,
-  diagramGridRef,
-  diagramGridStyle,
+  battleDirector,
   terminalGridRef,
   terminalGridStyle,
   mutationPending,
@@ -39,14 +37,8 @@ export function TierWorkspaceMain({
   onRenameFile,
   onDeleteFile,
   onOpenFile,
-  onBeginDiagramResize,
-  onBeginTerminalResize,
   onBeginTerminalPaneResize,
-  onKeyboardDiagramResize,
-  onKeyboardTerminalResize,
   onKeyboardTerminalPaneResize,
-  onResetDiagramResize,
-  onResetTerminalResize,
   onResetTerminalPaneResize,
   onCommand,
   onCloseEditor,
@@ -59,12 +51,8 @@ export function TierWorkspaceMain({
   workspaceEditorPath: string | null
   createDisabled: boolean
   writeDisabled: boolean
-  workspaceGridRef: RefObject<HTMLElement | null>
-  workspaceGridStyle: CSSProperties
   dagAnimation: TierDagAnimationController
-  hasTargetDiagram: boolean
-  diagramGridRef: RefObject<HTMLDivElement | null>
-  diagramGridStyle: CSSProperties
+  battleDirector: BattleDirector
   terminalGridRef: RefObject<HTMLDivElement | null>
   terminalGridStyle: CSSProperties
   mutationPending: boolean
@@ -73,21 +61,15 @@ export function TierWorkspaceMain({
   onRenameFile: (input: WorkspaceFileRenameInput) => Promise<TierRun>
   onDeleteFile: (path: string) => Promise<TierRun>
   onOpenFile: (path: string | null) => void
-  onBeginDiagramResize: ResizeStart
-  onBeginTerminalResize: ResizeStart
   onBeginTerminalPaneResize: ResizeStart
-  onKeyboardDiagramResize: (delta: number) => void
-  onKeyboardTerminalResize: (delta: number) => void
   onKeyboardTerminalPaneResize: (delta: number) => void
-  onResetDiagramResize: () => void
-  onResetTerminalResize: () => void
   onResetTerminalPaneResize: () => void
   onCommand: (command: string) => void
   onCloseEditor: () => void
   onWriteFile: (input: WorkspaceFileInput) => Promise<TierRun>
 }) {
   return (
-    <main className="gameplay-workspace">
+    <main className="gameplay-workspace tier-gameplay-workspace">
       <TierSidebar
         run={run}
         projectFilesOpen={projectFilesOpen}
@@ -100,28 +82,10 @@ export function TierWorkspaceMain({
         onOpenFile={onOpenFile}
       />
       <section
-        ref={workspaceGridRef}
-        className="gameplay-workspace__main challenge-workspace__main"
-        style={workspaceGridStyle}
+        className="gameplay-workspace__main challenge-workspace__main tier-workspace__main"
+        style={{ gridTemplateRows: `${WORKSPACE_BATTLE_STAGE_ROW} minmax(13rem, 1fr)` }}
       >
-        <TierDiagramStage
-          run={run}
-          animation={dagAnimation}
-          hasTargetDiagram={hasTargetDiagram}
-          diagramGridRef={diagramGridRef}
-          diagramGridStyle={diagramGridStyle}
-          onBeginDiagramResize={onBeginDiagramResize}
-          onKeyboardDiagramResize={onKeyboardDiagramResize}
-          onResetDiagramResize={onResetDiagramResize}
-        />
-        <ResizeHandle
-          label="Resize terminal height"
-          orientation="horizontal"
-          className="gameplay-resize gameplay-resize--horizontal"
-          onPointerDown={onBeginTerminalResize}
-          onKeyboardResize={onKeyboardTerminalResize}
-          onReset={onResetTerminalResize}
-        />
+        <TierBattlePanel run={run} director={battleDirector} />
         <TierTerminalStage
           run={run}
           lines={lines}
@@ -130,12 +94,17 @@ export function TierWorkspaceMain({
           terminalGridStyle={terminalGridStyle}
           mutationPending={mutationPending}
           dagAnimating={dagAnimation.animating}
+          battleAnimating={battleDirector.animating}
           onBeginTerminalPaneResize={onBeginTerminalPaneResize}
           onKeyboardTerminalPaneResize={onKeyboardTerminalPaneResize}
           onResetTerminalPaneResize={onResetTerminalPaneResize}
           onCommand={onCommand}
         />
       </section>
+      <TierDiagramStage
+        run={run}
+        animation={dagAnimation}
+      />
       <WorkspaceEditorOverlay
         snapshot={run.repository_state}
         filePath={workspaceEditorPath}

@@ -130,8 +130,8 @@ export function StoryCompanionPanel({ companion }: { companion: CompanionDef | n
               <dd>{rank ? `${rank.tier.numeral} · ${rank.tier.name}` : '—'}</dd>
             </div>
             <div>
-              <dt>Next Rank</dt>
-              <dd>{rank ? (rank.nextTier ? `${Math.round(rank.ratingInTier)} / ${Math.round(rank.ratingForNext)} XP` : 'Max rank') : '—'}</dd>
+              <dt>Rank Progress</dt>
+              <dd>{rank ? (rank.nextTier ? `${Math.round(rank.ratingInTier)} / ${Math.round(rank.ratingForNext)} mastery` : 'Max rank') : '—'}</dd>
             </div>
           </dl>
         </div>
