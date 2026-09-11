@@ -35,10 +35,50 @@
   gap: 0.35rem;
 }
 
-.dag-legend svg {
+.dag-legend svg,
+.dag-legend-symbol {
   width: 0.8rem;
   height: 0.8rem;
   color: rgb(var(--theme-primary-rgb));
+}
+
+.dag-legend-symbol {
+  position: relative;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
+.dag-legend-symbol.is-head,
+.dag-legend-symbol.is-commit {
+  border: 1px solid currentColor;
+  background: rgba(var(--theme-primary-rgb), 0.12);
+  box-shadow: 0 0 5px rgba(var(--theme-primary-rgb), 0.34);
+}
+
+.dag-legend-symbol.is-head {
+  border-radius: 50%;
+}
+
+.dag-legend-symbol.is-head::after {
+  position: absolute;
+  inset: 0.19rem;
+  border: 1px solid currentColor;
+  border-radius: inherit;
+  content: '';
+}
+
+.dag-legend-symbol.is-branch {
+  width: 1rem;
+  height: 0.58rem;
+  background: currentColor;
+  clip-path: polygon(0 50%, 0.2rem 0, calc(100% - 0.2rem) 0, 100% 50%, calc(100% - 0.2rem) 100%, 0.2rem 100%);
+  opacity: 0.82;
+}
+
+.dag-legend-symbol.is-commit {
+  width: 0.66rem;
+  height: 0.66rem;
+  transform: rotate(45deg);
 }
 
 .dag-controls.react-flow__controls {
@@ -47,6 +87,151 @@
   border-radius: var(--radius-sm);
   background: var(--surface-overlay);
   box-shadow: var(--glow-interactive);
+}
+
+/* Lightweight SVG/CSS graph chrome. Dimensions are explicit because this app
+   uses a curated utility sheet rather than Tailwind; content must never size a
+   HEAD or commit seal into an oval. ReactFlow applies a uniform viewport scale. */
+.dag-commit-seal {
+  position: relative;
+  display: grid;
+  width: 4rem;
+  min-width: 4rem;
+  height: 4rem;
+  min-height: 4rem;
+  aspect-ratio: 1 / 1;
+  place-items: center;
+  isolation: isolate;
+  color: hsl(var(--foreground));
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+}
+
+.dag-commit-seal__ornament {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: rgba(var(--theme-surface-rgb), 0.94);
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.52));
+}
+
+.dag-commit-seal__facet {
+  stroke: rgba(var(--theme-accent-rgb), 0.66);
+  stroke-width: 1.25;
+}
+
+.dag-commit-seal__ring {
+  fill: rgba(var(--theme-primary-rgb), 0.08);
+  stroke: rgba(var(--theme-primary-rgb), 0.44);
+  stroke-width: 1;
+}
+
+.dag-commit-seal.is-head .dag-commit-seal__ornament {
+  fill: rgba(var(--theme-surface-rgb), 0.98);
+  filter:
+    drop-shadow(0 0 5px rgba(var(--theme-primary-rgb), 0.56))
+    drop-shadow(0 3px 5px rgba(0, 0, 0, 0.55));
+}
+
+.dag-commit-seal.is-head .dag-commit-seal__facet {
+  stroke: rgba(var(--theme-primary-rgb), 0.96);
+  stroke-width: 1.8;
+}
+
+.dag-commit-seal.is-head .dag-commit-seal__ring {
+  stroke: rgba(var(--theme-spark-rgb), 0.82);
+  stroke-width: 1.4;
+}
+
+.dag-commit-seal__runes {
+  fill: rgba(var(--theme-secondary-rgb), 0.72);
+  stroke: rgba(var(--theme-spark-rgb), 0.78);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.15;
+}
+
+.dag-commit-seal__label {
+  display: block;
+  max-width: 2.75rem;
+  overflow: hidden;
+  color: inherit;
+  line-height: 1;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-shadow: 0 0 8px rgba(var(--theme-primary-rgb), 0.38);
+  white-space: nowrap;
+}
+
+.dag-head-marker {
+  position: absolute;
+  top: -0.42rem;
+  left: 50%;
+  padding: 0.12rem 0.35rem;
+  transform: translateX(-50%);
+  border: 1px solid hsl(var(--warning) / 0.72);
+  border-radius: 999px;
+  background: rgba(var(--theme-surface-rgb), 0.96);
+  color: hsl(var(--warning));
+  font-size: 0.55rem;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  box-shadow: 0 0 7px hsl(var(--warning) / 0.22);
+}
+
+.dag-ref-banner {
+  position: relative;
+  display: inline-block;
+  min-height: 1.25rem;
+  padding: 0.28rem 0.72rem;
+  border: 1px solid rgba(var(--theme-accent-rgb), 0.3);
+  background: rgba(var(--theme-surface-rgb), 0.92);
+  clip-path: polygon(0 50%, 0.38rem 0, calc(100% - 0.38rem) 0, 100% 50%, calc(100% - 0.38rem) 100%, 0.38rem 100%);
+}
+
+.dag-ref-banner.is-active {
+  border-color: rgba(var(--theme-primary-rgb), 0.7);
+  background: linear-gradient(90deg, rgba(var(--theme-primary-rgb), 0.08), rgba(var(--theme-secondary-rgb), 0.15), rgba(var(--theme-primary-rgb), 0.08));
+  color: rgb(var(--theme-spark-rgb));
+  box-shadow: 0 0 8px rgba(var(--theme-primary-rgb), 0.2);
+}
+
+.dag-ref-banner.is-remote {
+  border-color: rgba(var(--theme-secondary-rgb), 0.55);
+  background: rgba(var(--theme-secondary-rgb), 0.1);
+}
+
+.dag-ley-edge .react-flow__edge-path {
+  stroke-dasharray: 5 5;
+  stroke-linecap: round;
+}
+
+.tier-repository-view {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  gap: var(--workspace-gap);
+  height: 100%;
+  min-height: 0;
+}
+
+.tier-repository-view.has-target {
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.tier-gameplay-workspace {
+  grid-template-columns: clamp(17.5rem, 19vw, 20rem) minmax(0, 1fr) clamp(20rem, 27vw, 32rem);
+}
+
+.tier-dag-rail {
+  grid-column: 3;
+  grid-row: 1;
+  min-width: 0;
+  min-height: 0;
 }
 
 .dag-controls .react-flow__controls-button {

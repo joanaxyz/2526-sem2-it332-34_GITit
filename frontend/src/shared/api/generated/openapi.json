@@ -4343,6 +4343,11 @@
                         "type": "object",
                         "additionalProperties": {},
                         "nullable": true
+                    },
+                    "rewards": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "nullable": true
                     }
                 },
                 "required": [

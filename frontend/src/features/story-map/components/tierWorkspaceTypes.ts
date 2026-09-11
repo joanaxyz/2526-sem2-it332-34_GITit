@@ -8,6 +8,19 @@ import type { CommandSubmissionOutcome } from '@/shared/level-runtime/commandOut
 
 export type TierDifficulty = 'easy' | 'medium' | 'hard'
 
+export type TierCompletionRewards = {
+  first_level_clear: boolean
+  coins_awarded: number
+  chapter_chests_awarded: Array<{ threshold: number; coins: number }>
+  mastery_advanced: Array<{
+    skill_slug: string
+    form_slug: string
+    solves: number
+    target: number
+    mastered: boolean
+  }>
+}
+
 type TierRef = {
   id: number
   difficulty: TierDifficulty
@@ -93,6 +106,7 @@ export type TierRunResponse = Omit<
     difficulty: TierDifficulty
   } | null
   completion: { stars: number; counted_action_total: number; completed_at: string } | null
+  rewards?: TierCompletionRewards | null
 }
 
 export type TierRun = Omit<TierRunResponse, 'steps'> & {
@@ -120,7 +134,7 @@ export type TierCommandResponse = Omit<
 
 type TierRunUpdate = Omit<
   ApiSchemas['AdventureLevelTierCommandRunResponse'],
-  'counts' | 'repository_state' | 'visualization' | 'progress' | 'completion' | 'next_difficulty'
+  'counts' | 'repository_state' | 'visualization' | 'progress' | 'completion' | 'next_difficulty' | 'rewards'
 > & {
   counts: TierRun['counts']
   repository_state: RepositorySnapshot
@@ -128,4 +142,5 @@ type TierRunUpdate = Omit<
   progress?: TierRun['progress']
   completion?: TierRun['completion']
   next_difficulty?: TierRun['next_difficulty']
+  rewards?: TierCompletionRewards | null
 }

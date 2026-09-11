@@ -79,21 +79,19 @@ export function TierContextPanel({ run }: { run: TierRun }) {
   )
 }
 
-// Legacy tier content puts the case-specific narrative in scenario_context's
-// details (a single unlabeled entry - see seed_legacy_modules.py), while
-// `story` only ever holds the generic wave-level brief. The scenario brief a
-// player actually needs is that per-case narrative, so it takes over the
-// Scenario section instead of rendering as a separate "Required Values"
-// copy-chip section (there are no literal copyable values for tiers, unlike
-// Challenges).
+// Legacy tier content puts the case-specific narrative in the first unlabeled
+// detail. Labeled details after it are exact, copyable values the learner must
+// be given (for example a clone URL or evaluated commit message).
 function contextForRun(run: TierRun) {
   const context = normalizeLevelContext(run.scenario_context)
-  const narrative = context.details[0]?.value
+  const narrativeIndex = context.details.findIndex((detail) => !detail.label)
+  const narrative = narrativeIndex >= 0 ? context.details[narrativeIndex].value : ''
+  const details = context.details.filter((_, index) => index !== narrativeIndex)
   const fallback = normalizeLevelContext({
     story: '',
     task: '',
   })
   const resolved = hasLevelContext(context) ? context : fallback
 
-  return { ...resolved, story: narrative || resolved.story, details: [] }
+  return { ...resolved, story: narrative || resolved.story, details }
 }

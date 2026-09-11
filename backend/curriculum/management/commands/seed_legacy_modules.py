@@ -59,6 +59,7 @@ from curriculum.models import (
     Story,
 )
 from curriculum.seed_data.command_catalog import COMMAND_CATALOG
+from curriculum.seed_data.spec_helpers import required_commit_message_details
 
 LEGACY_STORY_SLUG = "git-it-legacy"
 
@@ -73,6 +74,27 @@ def ev(state_requirements: dict | None = None, *, required: list[str] | None = N
         "process_requirements": {"required_commands": required or [], "forbidden_commands": []},
         "completion_policy": {"mode": "rules"},
     }
+
+
+def required_case_details(case: dict[str, Any]) -> list[dict[str, str]]:
+    """Expose exact literals a legacy exercise cannot reasonably make learners guess."""
+    details: list[dict[str, str]] = []
+    solutions = case.get("solution_commands", [])
+    initial_state = case.get("initial_state", {})
+    remote_fixture = initial_state.get("remote_fixtures", {})
+
+    if any(str(command).strip().startswith("git clone") for command in solutions):
+        remote_url = str(remote_fixture.get("url", "")).strip()
+        if remote_url:
+            details.append({"label": "Repository URL", "value": remote_url})
+
+    details.extend(
+        required_commit_message_details(
+            solutions,
+            {"state_requirements": case.get("state_requirements", {})},
+        )
+    )
+    return details
 
 
 # ---------------------------------------------------------------------------
@@ -12102,10 +12124,32 @@ class Command(BaseCommand):
                     "is_required": True,
                     "is_published": True,
                     "sort_order": level_spec["sort_order"],
+                    "reward_coins": 25,
                 },
             )
+            skill_slugs = self._level_skill_slugs(level_spec)
+            forms = list(
+                CommandForm.objects.filter(
+                    chapter=chapter,
+                    command_skill__slug__in=skill_slugs,
+                    is_published=True,
+                )
+            )
+            level.command_forms.set(forms)
             for difficulty, tier_spec in level_spec["tiers"].items():
-                self._seed_tier(level, difficulty, tier_spec, session_counts_default)
+                self._seed_tier(level, difficulty, tier_spec, session_counts_default, forms)
+
+    @staticmethod
+    def _level_skill_slugs(level_spec: dict[str, Any]) -> set[str]:
+        """Derive the explicitly taught command families from authored solutions."""
+        slugs: set[str] = set()
+        for tier_spec in level_spec.get("tiers", {}).values():
+            for case in tier_spec.get("cases", []):
+                for command in case.get("solution_commands", []):
+                    parts = str(command).strip().lower().split()
+                    if len(parts) >= 2 and parts[0] == "git":
+                        slugs.add(f"git-{parts[1]}")
+        return slugs
 
     def _seed_tier(
         self,
@@ -12113,6 +12157,7 @@ class Command(BaseCommand):
         difficulty: str,
         tier_spec: dict[str, Any],
         session_counts_default: dict[str, int],
+        forms: list[CommandForm],
     ) -> None:
         tier, _ = AdventureLevelTier.objects.update_or_create(
             adventure_level=level,
@@ -12140,6 +12185,7 @@ class Command(BaseCommand):
                 "is_published": True,
             },
         )
+        wave.command_forms.set(forms)
         for case in tier_spec["cases"]:
             AdventureLevelTierWaveVariant.objects.update_or_create(
                 wave=wave,
@@ -12161,7 +12207,10 @@ class Command(BaseCommand):
                         "schema_version": 3,
                         "story": tier_spec["story"],
                         "task": tier_spec["task"],
-                        "details": [{"label": "", "value": case["context"]}],
+                        "details": [
+                            {"label": "", "value": case["context"]},
+                            *required_case_details(case),
+                        ],
                     },
                     "scaffold_policy": {},
                     "is_published": True,

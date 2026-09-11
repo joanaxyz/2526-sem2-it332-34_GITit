@@ -81,7 +81,7 @@ export function HomeProfilePanel({
               </div>
               <em>
                 {rank.nextTier
-                  ? `${formatNumber(rank.ratingInTier)} / ${formatNumber(rank.ratingForNext)} XP`
+                  ? `${formatNumber(rank.ratingInTier)} / ${formatNumber(rank.ratingForNext)} mastery`
                   : 'Max rank'}
               </em>
             </div>

@@ -138,7 +138,8 @@ export function buildGraph(
         source: parent,
         target: commit.id,
         type: 'smoothstep',
-        style: { stroke: 'hsl(var(--muted-foreground))', strokeWidth: 1.4 },
+        className: 'dag-ley-edge',
+        style: { stroke: 'rgba(var(--theme-primary-rgb), 0.72)', strokeWidth: 1.5 },
       })
       graph.setEdge(parent, commit.id)
     }

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { RepositorySnapshot } from '@/shared/level/types'
 import { NO_DELTA } from './constants'
-import { snapshotDelta } from './graph'
+import { buildGraph, snapshotDelta } from './graph'
 
 const baseSnapshot: RepositorySnapshot = {
   repository_initialized: true,
@@ -55,5 +55,22 @@ describe('snapshotDelta', () => {
 
   it('returns the stable empty delta when the repository state is unchanged', () => {
     expect(snapshotDelta(baseSnapshot, { ...baseSnapshot })).toBe(NO_DELTA)
+  })
+
+  it('marks connectors as lightweight arcane ley lines', () => {
+    const snapshot: RepositorySnapshot = {
+      ...baseSnapshot,
+      commits: [
+        ...baseSnapshot.commits,
+        { id: 'c2', message: 'Next', parents: ['c1'], tree: {}, changes: {} },
+      ],
+      branches: { main: 'c2' },
+      head: { type: 'branch', name: 'main', target: 'c2' },
+    }
+
+    const { edges } = buildGraph(snapshot, 'cyan', 'vertical')
+
+    expect(edges[0]?.className).toBe('dag-ley-edge')
+    expect(edges[0]?.style).toMatchObject({ strokeWidth: 1.5 })
   })
 })
