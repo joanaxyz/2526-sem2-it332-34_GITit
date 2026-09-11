@@ -19,6 +19,7 @@ from curriculum.selectors import published_stories, stories_completed_map
 from practice.models import CommandStep
 from progress.models import (
     AdventureLevelCompletion,
+    AdventureLevelTierCompletion,
     ChallengeTrialCompletion,
     StreakRecord,
     Wallet,
@@ -483,6 +484,14 @@ class MetricsService:
         )
         for day, count in (
             ChallengeTrialCompletion.objects.filter(player=player, completed_at__gte=since)
+            .annotate(day=TruncDate("completed_at"))
+            .values("day")
+            .annotate(count=Count("id"))
+            .values_list("day", "count")
+        ):
+            completed_by_day[day] = completed_by_day.get(day, 0) + count
+        for day, count in (
+            AdventureLevelTierCompletion.objects.filter(player=player, completed_at__gte=since)
             .annotate(day=TruncDate("completed_at"))
             .values("day")
             .annotate(count=Count("id"))

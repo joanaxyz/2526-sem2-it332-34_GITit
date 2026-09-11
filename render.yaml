@@ -33,6 +33,8 @@ services:
       # Free web services cannot use pre-deploy commands or one-off jobs.
       # Keep migrations on startup, but seed curriculum separately so a long
       # seed cannot prevent Gunicorn/Nginx from binding the public port.
+      # To seed on first deploy, temporarily set DJANGO_SEED_ON_STARTUP=True
+      # via the Render dashboard, then revert after the deploy completes.
       - key: DJANGO_MIGRATE_ON_STARTUP
         value: "True"
       - key: DJANGO_SEED_ON_STARTUP
