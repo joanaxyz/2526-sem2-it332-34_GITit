@@ -76,7 +76,7 @@ function StoryMap({ ready = true, compact = false }) {
       onStartOrientation={() => undefined}
       onSkipOrientation={() => undefined}
     />
-    <Link to="/shop?tab=companions">Shop tab</Link>
+    <Link to="/shop">Shop tab</Link>
     <Link to="/home?tab=loadout">Home tab</Link>
   </>
 }
@@ -176,7 +176,7 @@ describe('first-visit onboarding journey', () => {
   it('resumes the purchase step after reload and does not advance when buying fails', async () => {
     writeOnboardingPhase(302, 'purchase')
     vi.mocked(shopApi.purchase).mockRejectedValue(new Error('Purchase failed. Try again.'))
-    renderJourney(302, '/shop?tab=companions')
+    renderJourney(302, '/shop')
     fireEvent.click(await screen.findByRole('button', { name: 'Purchase' }))
     expect(await screen.findByText('Purchase failed. Try again.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Visit Home' })).not.toBeInTheDocument()
@@ -186,7 +186,7 @@ describe('first-visit onboarding journey', () => {
   it('lets existing owners visit Home without buying again and waits for manual equipment when needed', async () => {
     writeOnboardingPhase(303, 'shop')
     vi.mocked(shopApi.catalog).mockResolvedValue(catalog(true))
-    renderJourney(303, '/shop?tab=companions')
+    renderJourney(303, '/shop')
     fireEvent.click(await screen.findByRole('button', { name: 'Visit Home' }))
     await screen.findByRole('heading', { name: 'Home is your character hub' })
     await completeTour('Show Overview', ['Your owned roster', 'Equip who joins you', 'Worlds you can enter'])
@@ -210,7 +210,7 @@ describe('first-visit onboarding journey', () => {
     writeOnboardingPhase(userId, 'purchase')
     vi.mocked(walletApi.summary).mockResolvedValue({ balance })
     vi.mocked(shopApi.catalog).mockResolvedValue({ ...catalog(), purchases_enabled: purchasesEnabled })
-    renderJourney(userId, '/shop?tab=companions')
+    renderJourney(userId, '/shop')
     expect(await screen.findByRole('button', { name: 'Continue without buying' })).toBeEnabled()
     fireEvent.click(screen.getByRole('button', { name: 'Skip setup' }))
     expect(localStorage.getItem(onboardingStorageKey(userId))).toBe('done')

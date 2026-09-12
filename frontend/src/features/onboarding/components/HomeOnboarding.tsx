@@ -35,7 +35,7 @@ const loadoutSteps = [
   {
     id: 'worlds', selector: '[data-onboarding="loadout-worlds"]', icon: Compass,
     title: 'Worlds you can enter',
-    body: 'The story worlds you own are listed below. Open story map takes you straight to that world and its chapters.',
+    body: 'Every story world open to you is listed below. Open story map takes you straight to that world and its chapters.',
     optional: true,
   },
 ] satisfies WorkspaceTourStep[]

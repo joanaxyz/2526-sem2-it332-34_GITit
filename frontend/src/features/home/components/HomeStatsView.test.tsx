@@ -82,7 +82,7 @@ describe('HomeStatsView contract', () => {
     expect(screen.getByRole('heading', { name: 'Choose your first companion' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /choose companion/i })).toHaveAttribute(
       'href',
-      '/shop?tab=companions&required=1',
+      '/shop?required=1',
     )
     expect(screen.queryByText(/return to the story map/i)).not.toBeInTheDocument()
   })

@@ -19,7 +19,13 @@ import { GamePanel } from '@/shared/components/GamePanel'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { cn } from '@/shared/utils/cn'
 
-export function OrientationLessonWorkspace({ chapter }: { chapter: LearningChapter }) {
+export function OrientationLessonWorkspace({ chapter, onLeaveModule }: {
+  chapter: LearningChapter
+  /** Ends orientation and returns the player to the story chapters. Reaching
+   * the end of Module 0 has to hand the journey back; topics a player skipped
+   * must not strand them here. */
+  onLeaveModule: () => void
+}) {
   const queryClient = useQueryClient()
 
   const lessonsQuery = useQuery({
@@ -76,6 +82,7 @@ export function OrientationLessonWorkspace({ chapter }: { chapter: LearningChapt
   const activeLessonIndex = lessons.findIndex((item) => item.id === activeLessonId)
   const completedLessonCount = lessons.filter((item) => item.is_complete).length
   const courseProgress = lessons.length ? Math.round((completedLessonCount / lessons.length) * 100) : 0
+  const moduleComplete = lessons.length > 0 && completedLessonCount === lessons.length
   const previousLessonId = activeLessonIndex > 0 ? lessons[activeLessonIndex - 1]?.id ?? null : null
   const nextLessonId = activeLessonIndex >= 0 && activeLessonIndex < lessons.length - 1
     ? lessons[activeLessonIndex + 1]?.id ?? null
@@ -247,7 +254,14 @@ export function OrientationLessonWorkspace({ chapter }: { chapter: LearningChapt
                     Next topic <ChevronRight aria-hidden="true" />
                   </Button>
                 ) : (
-                  <span className="orientation-module-complete"><Check aria-hidden="true" /> Module complete</span>
+                  <>
+                    {moduleComplete ? (
+                      <span className="orientation-module-complete"><Check aria-hidden="true" /> Module complete</span>
+                    ) : null}
+                    <Button type="button" onClick={onLeaveModule}>
+                      Continue to Module 1 <ChevronRight aria-hidden="true" />
+                    </Button>
+                  </>
                 )}
               </div>
               {completeMutation.isError ? (

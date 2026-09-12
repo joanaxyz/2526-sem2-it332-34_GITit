@@ -35,7 +35,7 @@ export function HomeStatsView({
         </div>
         <Link
           className="home-overview-continue-action"
-          to={companionRequired ? `${SHOP_ROUTE}?tab=companions&required=1` : storyPath()}
+          to={companionRequired ? `${SHOP_ROUTE}?required=1` : storyPath()}
         >
           {companionRequired ? 'Choose companion' : 'Continue story'}
           <ArrowRight aria-hidden="true" />

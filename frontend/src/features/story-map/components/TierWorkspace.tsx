@@ -9,6 +9,7 @@ import { TierStatusHeader } from '@/features/story-map/components/TierStatusHead
 import { TierOutcomeModal } from '@/features/story-map/components/TierOutcomeModal'
 import { TierStartOverConfirmModal } from '@/features/story-map/components/TierStartOverConfirmModal'
 import { TierWorkspaceMain } from '@/features/story-map/components/TierWorkspaceMain'
+import { TierWorkspaceTour } from '@/features/story-map/components/TierWorkspaceTour'
 import { useTierCommandSubmission } from '@/features/story-map/hooks/useTierCommandSubmission'
 import { useTierWorkspaceMutations } from '@/features/story-map/hooks/useTierWorkspaceMutations'
 import { createTierWorkspaceCommandHandler } from '@/features/story-map/utils/tierWorkspaceCommand'
@@ -23,7 +24,9 @@ import {
   ratioSanitizer,
 } from '@/features/story-map/components/tierWorkspaceLayout'
 import { useTierScaffolding } from '@/features/story-map/scaffolding/useTierScaffolding'
+import { useAuthStore } from '@/shared/auth/useAuth'
 import { useDragResize } from '@/shared/level/hooks/useDragResize'
+import { hasSeenLevelTour, markLevelTourSeen } from '@/shared/level/utils/levelTour'
 import { terminalPrompt } from '@/shared/level/terminalPrompt'
 import { PROJECT_FILES_OPEN_KEY } from '@/shared/level/workspaceKeys'
 import { useOutcomeAnimationGate } from '@/shared/level-runtime/outcomeAnimation'
@@ -36,9 +39,10 @@ import { queryKeys } from '@/shared/api/queryKeys'
 import { usePersistentState } from '@/shared/utils/persistentState'
 
 /** Mirrors ChallengeWorkspace.tsx for the adventure-tier run lifecycle - new
- * and parallel, ChallengeWorkspace itself is untouched. The first-run tour
- * (ChallengeWorkspaceTour) is intentionally not mirrored here; it is
- * onboarding copy specific to the Challenge Gate, not core mechanic. */
+ * and parallel, ChallengeWorkspace itself is untouched. Its first-run tour is
+ * TierWorkspaceTour, not ChallengeWorkspaceTour: this screen is where every
+ * difficulty-tiered adventure level is played, and the Challenge Gate copy
+ * does not describe it. */
 export function TierWorkspace() {
   const params = useParams()
   const navigate = useNavigate()
@@ -65,6 +69,8 @@ export function TierWorkspace() {
   })
   const [startOverConfirmOpen, setStartOverConfirmOpen] = useState(false)
   const [exitConfirmOpen, setExitConfirmOpen] = useState(false)
+  const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
+  const user = useAuthStore((state) => state.user)
   const [exitNavigationRunId, setExitNavigationRunId] = useState<number | null>(null)
   const [workspaceEditorPath, setWorkspaceEditorPath] = useState<string | null>(null)
   const latestRunRef = useRef<TierRun | null>(null)
@@ -140,6 +146,9 @@ export function TierWorkspace() {
   if (!run) return <ErrorState title="Could not load adventure workspace" description="The API returned no run data." />
 
   const shellPrompt = terminalPrompt({ username: undefined, repo: run.tier.adventure_level_slug })
+  const tourKey = `${user?.id ?? 'guest'}:tier`
+  const tourOpen =
+    run.status === 'started' && dismissedTourKey !== tourKey && !hasSeenLevelTour(user?.id, 'tier')
 
   const submit = createTierWorkspaceCommandHandler({
     runId,
@@ -242,6 +251,16 @@ export function TierWorkspace() {
             : null
         }
       />
+      {tourOpen ? (
+        <TierWorkspaceTour
+          key={`${tourKey}:${run.id}`}
+          runId={run.id}
+          onClose={() => {
+            markLevelTourSeen(user?.id, 'tier')
+            setDismissedTourKey(tourKey)
+          }}
+        />
+      ) : null}
       <TierExitConfirmModal
         open={exitConfirmOpen}
         isExiting={exitMutation.isPending || exitNavigationPending}
