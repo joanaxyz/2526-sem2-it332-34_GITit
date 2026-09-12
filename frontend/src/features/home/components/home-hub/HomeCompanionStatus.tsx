@@ -57,7 +57,7 @@ export function HomeProfileCompanionStatus({ companion }: HomeCompanionStatusPro
       <CompanionStatusIcon status={companion.status} />
       <span>{copy.title}</span>
       {companion.status === 'empty' ? (
-        <Link to={`${SHOP_ROUTE}?tab=companions&required=1`}>Choose companion</Link>
+        <Link to={`${SHOP_ROUTE}?required=1`}>Choose companion</Link>
       ) : (
         <small>{copy.detail}</small>
       )}
@@ -79,7 +79,7 @@ export function HomeCombatCompanionStatus({ companion }: HomeCompanionStatusProp
           <strong>{copy.title}</strong>
           <span>{copy.detail}</span>
           {companion.status === 'empty' ? (
-            <Link to={`${SHOP_ROUTE}?tab=companions&required=1`}>Choose companion</Link>
+            <Link to={`${SHOP_ROUTE}?required=1`}>Choose companion</Link>
           ) : null}
         </div>
       </section>

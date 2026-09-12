@@ -42,6 +42,7 @@ def test_staff_can_read_every_admin_get_contract(django_user_model):
             "completions",
             "active_learners_30d",
             "per_story",
+            "runebound_performance",
         },
         "/api/admin/moderation/": {"content"},
         "/api/admin/settings/": {"feature_flags"},

@@ -9,7 +9,7 @@ const API_BASE_URL = resolveApiBaseUrl()
 
 type RequestOptions = RequestInit & { skipAuthRefresh?: boolean }
 
-let refreshPromise: Promise<boolean> | null = null
+let refreshPromise: Promise<string> | null = null
 const REFRESH_RETRY_DELAY_MS = 250
 
 function resolveApiBaseUrl() {
@@ -103,39 +103,40 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   return payload as T
 }
 
-async function refreshAccessToken(tokenAtStart: string | null) {
-  if (refreshPromise) return refreshPromise
-
-  refreshPromise = requestAccessTokenRefresh(0, tokenAtStart)
-  refreshPromise.finally(() => {
-    refreshPromise = null
-  })
+/**
+ * Single-flight refresh shared by every caller in the tab.
+ *
+ * The backend rotates refresh tokens single-use (an atomic row-locked claim on
+ * the session record), so a second concurrent POST /auth/refresh/ always loses
+ * and comes back 401. Route session bootstrap through this gate as well, or a
+ * page load that bootstraps and 401s a request at the same time will kill its
+ * own perfectly valid session.
+ *
+ * Rejects with the underlying ApiError so callers can tell "no session" (401)
+ * apart from "refresh could not be reached" (network, 429, 5xx).
+ */
+export function refreshSharedAccessToken(): Promise<string> {
+  if (!refreshPromise) {
+    const pending = requestAccessTokenRefresh(0)
+    refreshPromise = pending
+    // The catch keeps this bookkeeping chain from surfacing as an unhandled
+    // rejection; real callers still await `pending` and see the error.
+    pending
+      .catch(() => undefined)
+      .finally(() => {
+        if (refreshPromise === pending) refreshPromise = null
+      })
+  }
 
   return refreshPromise
 }
 
-function sleep(ms: number) {
-  return new Promise<void>((resolve) => {
-    setTimeout(resolve, ms)
-  })
-}
-
-async function requestAccessTokenRefresh(attempt = 0, tokenAtStart: string | null): Promise<boolean> {
+async function refreshAccessToken(tokenAtStart: string | null): Promise<boolean> {
   try {
-    const payload = await apiRequest<ApiResponseBody<'auth_refresh_create'>>('/auth/refresh/', {
-      method: 'POST',
-      skipAuthRefresh: true,
-    })
-    useAuthStore.getState().setAccessToken(payload.access)
+    await refreshSharedAccessToken()
     return true
   } catch (error) {
-    // Refresh token rotation can cause a 401 if another tab refreshed at the same
-    // time. Give the browser a moment to apply the rotated refresh cookie, then
-    // retry once before forcing a logout.
-    if (error instanceof ApiError && error.status === 401 && attempt < 1) {
-      await sleep(REFRESH_RETRY_DELAY_MS)
-      return requestAccessTokenRefresh(attempt + 1, tokenAtStart)
-    }
+    // Another tab may have broadcast a working token while ours was failing.
     const latestToken = useAuthStore.getState().accessToken
     if (latestToken && latestToken !== tokenAtStart) {
       return true
@@ -145,6 +146,32 @@ async function requestAccessTokenRefresh(attempt = 0, tokenAtStart: string | nul
       toast.error('Your session has expired. Please log in again.')
     }
     return false
+  }
+}
+
+function sleep(ms: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
+async function requestAccessTokenRefresh(attempt: number): Promise<string> {
+  try {
+    const payload = await apiRequest<ApiResponseBody<'auth_refresh_create'>>('/auth/refresh/', {
+      method: 'POST',
+      skipAuthRefresh: true,
+    })
+    useAuthStore.getState().setAccessToken(payload.access)
+    return payload.access
+  } catch (error) {
+    // Refresh token rotation can cause a 401 if another tab refreshed at the same
+    // time. Give the browser a moment to apply the rotated refresh cookie, then
+    // retry once before giving up.
+    if (error instanceof ApiError && error.status === 401 && attempt < 1) {
+      await sleep(REFRESH_RETRY_DELAY_MS)
+      return requestAccessTokenRefresh(attempt + 1)
+    }
+    throw error
   }
 }
 

@@ -4,7 +4,6 @@ import pytest
 from rest_framework.test import APIClient
 
 from adminconsole.models import FeatureFlag
-from curriculum.models import Story
 from players.models import Player
 from players.services import get_or_create_player
 from progress.models import CoinTransaction, Wallet
@@ -27,28 +26,13 @@ def authenticated_client(user):
     return client
 
 
-def create_story(slug: str = "arcane-spire", *, price: int = 0):
-    return Story.objects.create(
-        slug=slug,
-        title="Arcane Spire" if slug == "arcane-spire" else slug.replace("-", " ").title(),
-        price=price,
-        world_slug=slug,
-        is_published=True,
-    )
-
-
 def companion_by_slug(payload: dict, slug: str) -> dict:
     return next(
         item for item in payload["items"] if item["kind"] == "companion" and item["slug"] == slug
     )
 
 
-def story_slugs(payload: dict) -> list[str]:
-    return [item["slug"] for item in payload["items"] if item["kind"] == "story"]
-
-
-def test_shop_catalog_lists_stories_and_companions_none_equipped_by_default(db, django_user_model):
-    create_story()
+def test_shop_catalog_lists_companions_none_equipped_by_default(db, django_user_model):
     user = make_user(django_user_model)
     client = authenticated_client(user)
 
@@ -57,32 +41,15 @@ def test_shop_catalog_lists_stories_and_companions_none_equipped_by_default(db, 
     assert response.status_code == 200
     body = response.json()
     assert body["active_companion"] is None
-    assert story_slugs(body) == ["arcane-spire"]
-    assert [item["slug"] for item in body["items"] if item["kind"] == "companion"] == [
-        "blue",
-        "white",
-        "black",
-    ]
-    assert companion_by_slug(body, "blue")["owned"] is False
-    assert companion_by_slug(body, "blue")["active"] is False
-    assert companion_by_slug(body, "white")["owned"] is False
-    assert companion_by_slug(body, "black")["owned"] is False
-    assert companion_by_slug(body, "blue")["price"] > 0
-    assert companion_by_slug(body, "white")["price"] > 0
-    assert companion_by_slug(body, "black")["price"] > 0
+    assert [item["slug"] for item in body["items"]] == ["blue", "white", "black"]
+    assert {item["kind"] for item in body["items"]} == {"companion"}
+    for slug in ("blue", "white", "black"):
+        assert companion_by_slug(body, slug)["owned"] is False
+        assert companion_by_slug(body, slug)["active"] is False
+        assert companion_by_slug(body, slug)["price"] > 0
 
 
-def test_shop_catalog_projects_exact_story_and_companion_contracts(db, django_user_model):
-    prerequisite = create_story()
-    Story.objects.create(
-        slug="frostbound-citadel",
-        title="Frostbound Citadel",
-        price=250,
-        world_slug="frostbound-citadel",
-        difficulty=Story.DIFFICULTY_INTERMEDIATE,
-        prerequisite_story=prerequisite,
-        is_published=True,
-    )
+def test_shop_catalog_projects_the_exact_companion_contract(db, django_user_model):
     client = authenticated_client(make_user(django_user_model, "exact-shop-contract"))
 
     response = client.get("/api/shop/catalog/")
@@ -90,40 +57,14 @@ def test_shop_catalog_projects_exact_story_and_companion_contracts(db, django_us
     assert response.status_code == 200
     body = response.json()
     assert set(body) == {"items", "active_companion", "purchases_enabled"}
-    story = next(item for item in body["items"] if item["slug"] == "frostbound-citadel")
-    companion = companion_by_slug(body, "blue")
-    assert set(story) == {
+    assert set(companion_by_slug(body, "blue")) == {
         "kind",
         "slug",
         "label",
         "price",
         "owned",
         "active",
-        "unlocks_story",
     }
-    assert story["unlocks_story"] == {
-        "slug": "frostbound-citadel",
-        "title": "Frostbound Citadel",
-        "chapter_count": 0,
-        "world_slug": "frostbound-citadel",
-        "difficulty": "intermediate",
-        "prerequisite_story": "arcane-spire",
-    }
-    assert set(companion) == {"kind", "slug", "label", "price", "owned", "active"}
-
-
-def test_shop_catalog_omits_story_unlock_when_story_changes_during_projection(
-    db, django_user_model, monkeypatch
-):
-    create_story()
-    monkeypatch.setattr("shop.selectors.payload._story_access", lambda _slug: None)
-    client = authenticated_client(make_user(django_user_model, "concurrent-shop-contract"))
-
-    response = client.get("/api/shop/catalog/")
-
-    assert response.status_code == 200
-    story = next(item for item in response.json()["items"] if item["kind"] == "story")
-    assert "unlocks_story" not in story
 
 
 @pytest.mark.parametrize("field", ["kind", "slug"])
@@ -148,20 +89,6 @@ def test_purchase_rejects_non_string_fields_before_service_or_player_creation(
     assert field in response.json()
     purchase.assert_not_called()
     assert not Player.objects.filter(user=user).exists()
-
-
-def test_unknown_story_purchase_is_rejected(db, django_user_model):
-    user = make_user(django_user_model)
-    client = authenticated_client(user)
-
-    response = client.post(
-        "/api/shop/catalog/purchase/",
-        {"kind": "story", "slug": "nonexistent-story"},
-        format="json",
-    )
-
-    assert response.status_code == 400
-    assert response.json()["slug"] == "Unknown story 'nonexistent-story'."
 
 
 def test_first_companion_purchase_spends_wallet_and_auto_equips(db, django_user_model):

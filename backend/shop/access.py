@@ -1,7 +1,7 @@
 from authoring.models import STATUS_PUBLISHED as CONTENT_PUBLISHED
 from authoring.models import VISIBILITY_PUBLIC
 from common.exceptions import Locked
-from shop.catalog import KIND_COMPANION, is_default
+from shop.catalog import KIND_COMPANION
 from shop.models import Entitlement
 
 
@@ -34,16 +34,13 @@ def can_remix(user, item) -> bool:
 
 
 def owns_item(*, player, kind: str, slug: str) -> bool:
-    """An item is owned if it is a free default or the player has an entitlement."""
-    if is_default(kind, slug):
-        return True
+    """Nothing in the shop is free, so ownership is entirely entitlement-based."""
     if player is None:
         return False
     return Entitlement.objects.filter(player=player, kind=kind, slug=slug).exists()
 
 
 def has_any_companion(player) -> bool:
-    """No companion is free anymore, so ownership is entirely entitlement-based."""
     if player is None:
         return False
     return Entitlement.objects.filter(player=player, kind=KIND_COMPANION).exists()

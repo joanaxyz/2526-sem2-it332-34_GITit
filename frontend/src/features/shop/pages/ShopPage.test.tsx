@@ -29,16 +29,6 @@ vi.mock('@/features/shop/components/CompanionShop', () => ({
   },
 }))
 
-vi.mock('@/features/shop/components/StoryShop', () => ({
-  StoryShop: () => null,
-}))
-
-vi.mock('@/features/shop/components/ShopTabs', () => ({
-  ShopTabs: ({ balance }: { balance: number }) => (
-    <output data-testid="shop-balance">{balance}</output>
-  ),
-}))
-
 import { ShopPage } from '@/features/shop/pages/ShopPage'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
@@ -162,7 +152,7 @@ describe('ShopPage purchase cache convergence', () => {
 
     render(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={['/shop?tab=companions']}>
+        <MemoryRouter initialEntries={['/shop']}>
           <ShopPage />
           <SharedObservers snapshots={snapshots} />
         </MemoryRouter>
@@ -170,7 +160,7 @@ describe('ShopPage purchase cache convergence', () => {
     )
 
     await waitFor(() => expect(screen.getByTestId('shared-observers')).toHaveTextContent('150|none'))
-    expect(screen.getByTestId('shop-balance')).toHaveTextContent('150')
+    expect(screen.getByLabelText('GitCoin balance')).toHaveTextContent('150')
     expect(screen.getByTestId('shop-companion-state')).toHaveTextContent('unowned|inactive')
 
     let catalogRefetch!: Promise<void>
@@ -193,7 +183,7 @@ describe('ShopPage purchase cache convergence', () => {
 
     await act(async () => walletCancelGate.resolve())
     await waitFor(() => expect(screen.getByTestId('shared-observers')).toHaveTextContent('0|blue'))
-    expect(screen.getByTestId('shop-balance')).toHaveTextContent('0')
+    expect(screen.getByLabelText('GitCoin balance')).toHaveTextContent('0')
     expect(screen.getByTestId('shop-companion-state')).toHaveTextContent('owned|active')
     expect(cancelQueries).toHaveBeenCalledTimes(2)
 

@@ -1,21 +1,9 @@
-/* Primary storefront compositions --------------------------------------- */
-.shop-view--stories {
-  display: grid;
-  grid-template-columns: minmax(34rem, 2.1fr) minmax(18rem, 1fr);
-  grid-template-rows: minmax(18rem, 0.95fr) minmax(16rem, 0.75fr);
-  gap: 0.72rem;
-}
-
+/* Primary storefront composition ----------------------------------------- */
 .shop-view--companions {
   display: grid;
   grid-template-columns: minmax(34rem, 1fr) clamp(30rem, 38vw, 36rem);
   grid-template-rows: minmax(34rem, 1fr);
   gap: 0.72rem;
-}
-
-.shop-view--stories > .shop-monster-showcase {
-  grid-column: 2;
-  grid-row: 1;
 }
 
 .shop-stage {
@@ -26,7 +14,6 @@
   min-height: 0;
 }
 
-.shop-world-slide,
 .shop-portrait-slide {
   --tone: var(--theme-primary-rgb);
   position: relative;
@@ -38,27 +25,9 @@
   background: #030918;
 }
 
-.shop-world-slide[data-tone='shadow'],
 .shop-portrait-slide[data-tone='shadow'] { --tone: 150, 170, 196; }
-.shop-world-slide[data-tone='ice'],
 .shop-portrait-slide[data-tone='ice'] { --tone: var(--theme-rail-rgb); }
-.shop-world-slide[data-tone='neon'],
-.shop-portrait-slide[data-tone='neon'] { --tone: var(--theme-primary-rgb); }
 
-.shop-world-art,
-.shop-world-art img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.shop-world-art img {
-  object-fit: cover;
-  object-position: center;
-}
-
-.shop-world-slide::after,
 .shop-portrait-slide::after {
   content: '';
   position: absolute;
@@ -69,7 +38,6 @@
   pointer-events: none;
 }
 
-.shop-world-caption,
 .shop-portrait-caption {
   position: absolute;
   left: clamp(1rem, 2vw, 1.6rem);
@@ -81,7 +49,6 @@
   gap: 0.4rem;
 }
 
-.shop-world-title,
 .shop-portrait-title {
   margin: 0;
   color: #f4faff;
@@ -91,15 +58,6 @@
   letter-spacing: -0.015em;
   line-height: 0.98;
   text-shadow: 0 3px 18px rgba(0, 0, 0, 0.72);
-}
-
-.shop-world-sub {
-  margin: 0;
-  color: rgba(212, 230, 240, 0.82);
-  font-family: var(--font-mono);
-  font-size: var(--text-2xs);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
 
 /* Companion focal stage -------------------------------------------------- */

@@ -1,11 +1,8 @@
 .shop-view,
-.shop-preview-panel,
 .shop-companion-preview-suite {
   min-height: 0;
 }
 
-.shop-preview-panel,
-.shop-monster-showcase,
 .shop-companion-preview-suite {
   overflow-y: visible;
 }
@@ -22,7 +19,6 @@
     min-height: var(--app-content-height);
   }
 
-  .shop-view--stories,
   .shop-view--companions {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto;
@@ -33,18 +29,6 @@
     grid-row: 1;
     height: min(34rem, 62vh);
     min-height: 27rem;
-  }
-
-  .shop-view--stories > .shop-monster-showcase {
-    grid-column: 1;
-    grid-row: 2;
-    min-height: 30rem;
-  }
-
-  .shop-contents-shelf {
-    grid-column: 1;
-    grid-row: 3;
-    min-height: 24rem;
   }
 
   .shop-companion-preview-suite {
@@ -95,9 +79,6 @@
     min-height: 28rem;
   }
 
-  .shop-view--stories > .shop-monster-showcase { min-height: 28rem; }
-  .shop-contents-shelf { min-height: 21rem; }
-
   .shop-skill-picker {
     grid-template-columns: minmax(0, 1fr);
     max-height: none;
@@ -113,8 +94,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .shop-carousel-story,
-  .shop-preview-chip,
-  .shop-monster-pick {
+  .shop-preview-chip {
     transition: none;
   }
 }

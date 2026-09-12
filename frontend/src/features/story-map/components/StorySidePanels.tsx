@@ -90,7 +90,7 @@ export function StorySkillFocusPanel({
                 </>
               ) : (
                 <>
-                  <Link to={`${SHOP_ROUTE}?tab=companions&required=1`}>Choose a companion</Link> before
+                  <Link to={`${SHOP_ROUTE}?required=1`}>Choose a companion</Link> before
                   clearing <strong>{next.level.title}</strong> to bind this spell.
                 </>
               )}
@@ -114,7 +114,7 @@ export function StoryCompanionPanel({ companion }: { companion: CompanionDef | n
       >
         <div className="story-companion-empty">
           <p>Choose a companion before entering an Adventure.</p>
-          <Link to={`${SHOP_ROUTE}?tab=companions&required=1`}>Choose companion</Link>
+          <Link to={`${SHOP_ROUTE}?required=1`}>Choose companion</Link>
         </div>
       </GamePanel>
     )

@@ -27,9 +27,8 @@ const shopSteps = [
   },
 ] satisfies WorkspaceTourStep[]
 
-export function ShopOnboarding({ ready, companionsTab, ownsCompanion, canBuy }: {
+export function ShopOnboarding({ ready, ownsCompanion, canBuy }: {
   ready: boolean
-  companionsTab: boolean
   ownsCompanion: boolean
   canBuy: boolean
 }) {
@@ -50,13 +49,11 @@ export function ShopOnboarding({ ready, companionsTab, ownsCompanion, canBuy }: 
       }>
         {ownsCompanion
           ? 'Your character is owned. Next, visit Home to check your equipped companion and explore your progress.'
-          : !companionsTab
-            ? 'Open the Companions tab to choose and buy your character.'
-            : ready && !canBuy
-              ? 'No companion can be purchased with your current balance right now. You can still explore Home or skip setup and return later.'
-              : 'Choose a portrait, check its price, and press the purchase button. Once it succeeds, we will continue to Home.'}
+          : ready && !canBuy
+            ? 'No companion can be purchased with your current balance right now. You can still explore Home or skip setup and return later.'
+            : 'Choose a portrait, check its price, and press the purchase button. Once it succeeds, we will continue to Home.'}
       </OnboardingBanner>
-      {ready && companionsTab && !ownsCompanion && onboarding.phase === 'shop' ? (
+      {ready && !ownsCompanion && onboarding.phase === 'shop' ? (
         <GameplayWorkspaceTour label="Shop welcome tour" finishLabel="Choose my character" steps={shopSteps}
           onClose={(reason) => onboarding.setPhase(reason === 'skip' ? 'done' : 'purchase')} />
       ) : null}

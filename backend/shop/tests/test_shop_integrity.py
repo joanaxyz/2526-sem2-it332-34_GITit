@@ -1,10 +1,8 @@
 from rest_framework.test import APIClient
 
-from curriculum.models import Story
 from players.services import get_or_create_player
 from progress.models import CoinTransaction, Wallet
-from progress.wallet import WalletService
-from shop.catalog import KIND_COMPANION, KIND_STORY
+from shop.catalog import KIND_COMPANION
 from shop.models import Entitlement, PlayerLoadout
 
 
@@ -20,16 +18,6 @@ def authenticated_client(user):
     client = APIClient()
     client.force_authenticate(user=user)
     return client
-
-
-def create_story(slug="arcane-spire", *, price=0):
-    return Story.objects.create(
-        slug=slug,
-        title="Arcane Spire" if slug == "arcane-spire" else slug.replace("-", " ").title(),
-        price=price,
-        world_slug=slug,
-        is_published=True,
-    )
 
 
 def test_unknown_companion_purchase_is_rejected(db, django_user_model):
@@ -75,50 +63,35 @@ def test_unowned_companion_equip_is_rejected(db, django_user_model):
     assert not PlayerLoadout.objects.filter(player=get_or_create_player(user)).exists()
 
 
-def test_story_equip_is_rejected_even_when_owned(db, django_user_model):
-    story = create_story("premium-story", price=250)
-    user = make_user(django_user_model, "story-equip")
+def test_stories_are_not_a_purchasable_kind(db, django_user_model):
+    """Stories are unlocked by mastering their prerequisite, never bought."""
+    user = make_user(django_user_model, "story-not-for-sale")
     player = get_or_create_player(user)
-    Entitlement.objects.create(player=player, kind=KIND_STORY, slug=story.slug)
     client = authenticated_client(user)
 
     response = client.post(
-        "/api/player/loadout/companion/",
-        {"kind": KIND_STORY, "slug": story.slug},
+        "/api/shop/catalog/purchase/",
+        {"kind": "story", "slug": "git-it-legacy"},
         format="json",
     )
 
     assert response.status_code == 400
-    assert response.json()["kind"] == "Stories are selected by entering the story, not equipped."
+    assert response.json()["kind"] == "Unknown shop item kind 'story'."
+    assert not Entitlement.objects.filter(player=player).exists()
 
 
-def test_default_story_purchase_is_free_and_idempotent(db, django_user_model):
-    create_story("git-it-legacy")
-    user = make_user(django_user_model, "default-story-free")
-    player = get_or_create_player(user)
-    WalletService().award(
-        player=player, amount=75, reason="test_seed", award_key="test-seed:default-story"
-    )
+def test_stories_cannot_be_equipped(db, django_user_model):
+    user = make_user(django_user_model, "story-equip")
     client = authenticated_client(user)
 
-    first = client.post(
-        "/api/shop/catalog/purchase/",
-        {"kind": KIND_STORY, "slug": "git-it-legacy"},
-        format="json",
-    )
-    second = client.post(
-        "/api/shop/catalog/purchase/",
-        {"kind": KIND_STORY, "slug": "git-it-legacy"},
+    response = client.post(
+        "/api/player/loadout/companion/",
+        {"kind": "story", "slug": "git-it-legacy"},
         format="json",
     )
 
-    assert first.status_code == 201
-    assert second.status_code == 201
-    assert Wallet.objects.get(player=player).balance == 75
-    assert not Entitlement.objects.filter(
-        player=player, kind=KIND_STORY, slug="git-it-legacy"
-    ).exists()
-    assert not CoinTransaction.objects.filter(player=player, reason="shop_purchase").exists()
+    assert response.status_code == 400
+    assert response.json()["kind"] == "Unknown shop item kind 'story'."
 
 
 def test_insufficient_funds_do_not_create_entitlement_or_charge(db, django_user_model):

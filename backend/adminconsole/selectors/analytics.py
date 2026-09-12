@@ -11,6 +11,7 @@ from adventures.models import AdventureRun
 from challenges.models import ChallengeRun
 from curriculum.models import Story
 from progress.selectors import total_adventure_level_completions, total_challenge_trial_completions
+from progress.services import MetricsService
 
 
 def admin_analytics_payload(*, now=None) -> dict:
@@ -109,4 +110,7 @@ def admin_analytics_payload(*, now=None) -> dict:
         },
         "active_learners_30d": active_learners,
         "per_story": per_story,
+        # Staff-only system diagnostics. The MetricsService remains the sole
+        # formula owner for these replay-excluded Runebound measures.
+        "runebound_performance": MetricsService().all_player_performance_summary(),
     }

@@ -56,7 +56,7 @@ export function AdventureStartPage() {
       start.error.status === 423 &&
       start.error.message.toLowerCase().includes('companion')
     ) {
-      return <Navigate replace to="/shop?tab=companions&required=1" />
+      return <Navigate replace to="/shop?required=1" />
     }
     return (
       <div className="grid min-h-screen place-items-center bg-background p-6">

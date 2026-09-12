@@ -113,7 +113,7 @@ export function StoryOnboarding({
             if (reason === 'skip') onboarding.setPhase('done')
             else {
               onboarding.setPhase('shop')
-              navigate(`${SHOP_ROUTE}?tab=companions`)
+              navigate(SHOP_ROUTE)
             }
           }}
         />

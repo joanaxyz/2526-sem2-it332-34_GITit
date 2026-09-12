@@ -50,7 +50,6 @@ def story_payload(story, chapter_count: int) -> dict:
         "slug": story.slug,
         "title": story.title,
         "summary": story.summary,
-        "price": story.price,
         "world_slug": story.world_slug,
         "difficulty": story.difficulty,
         "prerequisite_story": (

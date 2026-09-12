@@ -1,3 +1,25 @@
+/* Preview block heading --------------------------------------------------- */
+.shop-block-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.55rem;
+  color: rgb(var(--theme-primary-rgb));
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.shop-block-head small {
+  color: rgba(178, 200, 214, 0.66);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
 /* Narrow companion inspectors ------------------------------------------- */
 .shop-companion-preview-suite {
   grid-column: 2;

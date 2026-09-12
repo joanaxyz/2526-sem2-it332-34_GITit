@@ -6,6 +6,7 @@ from common.constants import DIFFICULTY_HARD, SESSION_STATUS_COMPLETED, SESSION_
 from players.services import get_or_create_player
 from practice.models import CommandStep
 from progress.serializers import PerformanceSummaryResponseSerializer
+from progress.services import MetricsService
 
 
 def test_performance_summary_uses_runebound_attempts_and_server_side_formulas(
@@ -86,3 +87,56 @@ def test_performance_summary_uses_runebound_attempts_and_server_side_formulas(
     assert module_one["hlcr"] == payload["kpis"]["hlcr"]
     assert module_one["rtr"] == payload["kpis"]["rtr"]
     assert module_one["arc"] == payload["kpis"]["arc"]
+    assert MetricsService().all_player_performance_summary() == payload
+
+
+def test_admin_aggregate_spans_learners_while_player_endpoint_stays_scoped(
+    db, django_user_model
+):
+    """The staff aggregate must widen past the requester, and only the aggregate.
+
+    Guards the boundary the admin split depends on: one learner's endpoint keeps
+    reporting that learner, while ``all_player_performance_summary`` reports the
+    union of every learner's Runebound attempts.
+    """
+
+    call_command("seed_legacy_modules", verbosity=0)
+    tier = AdventureLevelTier.objects.filter(
+        adventure_level__chapter__story__slug="git-it-legacy",
+        adventure_level__chapter__number=1,
+        difficulty=DIFFICULTY_HARD,
+    ).first()
+    assert tier is not None
+    wave = tier.waves.first()
+    variant = wave.variants.first()
+
+    players = []
+    for index, status in enumerate((SESSION_STATUS_COMPLETED, SESSION_STATUS_FAILED)):
+        user = django_user_model.objects.create_user(
+            username=f"aggregate-learner-{index}",
+            email=f"aggregate-learner-{index}@example.com",
+            password="pass12345",
+        )
+        player = get_or_create_player(user)
+        players.append((user, player))
+        AdventureLevelTierRun.objects.create(
+            player=player,
+            tier=tier,
+            current_wave=wave,
+            selected_variant=variant,
+            status=status,
+            retry_index=0,
+        )
+
+    first_user, _ = players[0]
+    client = APIClient()
+    client.force_authenticate(user=first_user)
+    scoped = client.get("/api/progress/performance/").json()
+
+    # The completing learner sees only their own perfect record.
+    assert scoped["kpis"]["scr"] == {"value": 100.0, "numerator": 1, "denominator": 1}
+
+    # Staff see both learners' attempts in one set.
+    aggregate = MetricsService().all_player_performance_summary()
+    assert aggregate["kpis"]["scr"] == {"value": 50.0, "numerator": 1, "denominator": 2}
+    assert aggregate != scoped

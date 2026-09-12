@@ -45,7 +45,7 @@ describe('Story side-panel companion state', () => {
     const links = screen.getAllByRole('link', { name: /choose (?:a )?companion/i })
     expect(links).toHaveLength(2)
     links.forEach((link) => {
-      expect(link).toHaveAttribute('href', '/shop?tab=companions&required=1')
+      expect(link).toHaveAttribute('href', '/shop?required=1')
     })
     expect(screen.getByText(/before clearing/i)).toBeInTheDocument()
   })

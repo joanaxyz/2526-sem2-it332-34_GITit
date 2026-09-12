@@ -1,11 +1,9 @@
 import { COMPANIONS } from '@/shared/cosmetics/companions/registry'
 import type { ShopItem } from '@/shared/shop/api/shopApi'
-import { STORY_WORLDS } from '@/shared/story-worlds/registry'
-import { storyPreview } from '@/shared/story-worlds/storyPreviews'
 
 export type ShopDisplayItem = ShopItem & {
   art?: string
-  tone?: 'blue' | 'ice' | 'shadow' | 'neon'
+  tone?: 'blue' | 'ice' | 'shadow'
 }
 
 function companionTone(slug: string): ShopDisplayItem['tone'] {
@@ -15,19 +13,6 @@ function companionTone(slug: string): ShopDisplayItem['tone'] {
 }
 
 export function toDisplayItem(item: ShopItem): ShopDisplayItem {
-  if (item.kind === 'story') {
-    const worldSlug = item.unlocks_story?.world_slug ?? item.slug
-    const preview = storyPreview(worldSlug)
-    return {
-      ...item,
-      // A story with no registered STORY_WORLDS entry has no dedicated theme
-      // art yet - fall back to the neutral tone rather than hiding it (see
-      // hasLocalDefinition, which used to filter these out entirely).
-      art: preview?.storyMap,
-      tone: STORY_WORLDS[worldSlug]?.tone ?? 'blue',
-    }
-  }
-
   const companion = COMPANIONS[item.slug]
   return {
     ...item,
@@ -37,12 +22,8 @@ export function toDisplayItem(item: ShopItem): ShopDisplayItem {
 }
 
 export function hasLocalDefinition(item: ShopItem) {
-  // Stories are always shown - StoryShop already renders a graceful "no
-  // preview art" empty state (see StoryContents) for a world with no
-  // STORY_WORLDS entry, so there is no visually-broken case to gate here.
-  // Companions still require a registered definition: their card art has no
-  // placeholder path.
-  if (item.kind === 'story') return true
+  // Companion card art has no placeholder path, so an unregistered companion
+  // would render as a visibly broken slide - hide it instead.
   return Boolean(COMPANIONS[item.slug])
 }
 
