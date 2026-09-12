@@ -76,7 +76,6 @@ function CreateStory({
     slug: '',
     title: '',
     summary: '',
-    price: 0,
     world_slug: worldOptions[0] ?? 'arcane-spire',
     difficulty: 'beginner',
     prerequisite_story: null,
@@ -88,7 +87,6 @@ function CreateStory({
         slug: '',
         title: '',
         summary: '',
-        price: 0,
         world_slug: worldOptions[0] ?? 'arcane-spire',
         difficulty: 'beginner',
         prerequisite_story: null,
@@ -147,15 +145,6 @@ function CreateStory({
             <option value="intermediate">Intermediate</option>
             <option value="advanced">Advanced</option>
           </select>
-        </Field>
-        <Field label="Price">
-          <input
-            type="number"
-            min={0}
-            value={form.price}
-            onChange={(event) => setForm({ ...form, price: Number(event.target.value) })}
-            className={fieldClass}
-          />
         </Field>
         <Field label="Prerequisite">
           <select
@@ -245,7 +234,6 @@ function StoryEditor({
 }) {
   const [title, setTitle] = useState(story.title)
   const [summary, setSummary] = useState(story.summary)
-  const [price, setPrice] = useState(story.price)
   const [worldSlug, setWorldSlug] = useState(story.world_slug)
   const [difficulty, setDifficulty] = useState(story.difficulty)
   const [prerequisite, setPrerequisite] = useState<number | null>(story.prerequisite_story?.id ?? null)
@@ -254,7 +242,6 @@ function StoryEditor({
     mutationFn: (isPublished) => adminApi.updateStory(story.id, {
       title,
       summary,
-      price,
       world_slug: worldSlug,
       difficulty,
       prerequisite_story: prerequisite,
@@ -281,7 +268,6 @@ function StoryEditor({
             <option value="advanced">Advanced</option>
           </select>
         </Field>
-        <Field label="Price"><input type="number" min={0} value={price} onChange={(event) => setPrice(Number(event.target.value))} className={fieldClass} /></Field>
         <Field label="Sort order"><input type="number" min={0} value={sortOrder} onChange={(event) => setSortOrder(Number(event.target.value))} className={fieldClass} /></Field>
         <Field label="Prerequisite">
           <select value={prerequisite ?? ''} onChange={(event) => setPrerequisite(event.target.value ? Number(event.target.value) : null)} className={fieldClass}>
