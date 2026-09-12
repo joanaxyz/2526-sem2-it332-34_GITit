@@ -1,3 +1,5 @@
+import { toast } from 'sonner'
+
 import { ApiError } from './apiError'
 import { apiOperations } from './generated/apiTypes'
 import type { ApiOperationId, ApiRequestBody, ApiResponseBody } from './generated/apiTypes'
@@ -140,6 +142,7 @@ async function requestAccessTokenRefresh(attempt = 0, tokenAtStart: string | nul
     }
     if (error instanceof ApiError && error.status === 401) {
       useAuthStore.getState().clearSession()
+      toast.error('Your session has expired. Please log in again.')
     }
     return false
   }

@@ -6,6 +6,7 @@ import { evaluateScaffoldTriggers } from '@/features/challenges/scaffolding/eval
 import { logScaffoldTrigger } from '@/features/challenges/scaffolding/logger'
 import { getScaffoldMessage } from '@/features/challenges/scaffolding/messages'
 import { ScaffoldToast } from '@/features/challenges/scaffolding/ScaffoldToast'
+import { ChapterBookModal } from '@/features/story-map/components/book/ChapterBookModal'
 import type { TierDifficulty, TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { readScaffoldTriggers, writeScaffoldTriggers } from './tierScaffoldStore'
 import type { ScaffoldTriggerFlags } from './tierScaffoldStore'
@@ -26,11 +27,7 @@ export function useTierScaffolding(sessionId: number) {
     writeScaffoldTriggers(sessionId, updated)
   }
 
-  function showToast(
-    trigger: 'T1' | 'T2' | 'T3',
-    run: TierRun,
-    onReviewMap: () => void,
-  ) {
+  function showToast(trigger: 'T1' | 'T2' | 'T3', run: TierRun) {
     const difficulty: TierDifficulty = run.difficulty ?? 'hard'
     const message = getScaffoldMessage(trigger, difficulty)
 
@@ -40,26 +37,16 @@ export function useTierScaffolding(sessionId: number) {
           message={message}
           trigger={trigger}
           difficulty={difficulty}
-          onReviewMap={() => {
-            clearToast()
-            onReviewMap()
-          }}
-          onContinue={() => {
-            clearToast()
-            const input = document.querySelector<HTMLInputElement>('[data-command-input]')
-            input?.focus()
-          }}
+          chapter={run.chapter ?? null}
+          FieldGuideModal={ChapterBookModal}
+          onDismiss={clearToast}
         />
       ),
       { id: SCAFFOLD_TOAST_ID, duration: Infinity },
     )
   }
 
-  function evaluateAndNotify(
-    run: TierRun,
-    stepClassification: string,
-    onReviewMap: () => void,
-  ) {
+  function evaluateAndNotify(run: TierRun, stepClassification: string) {
     if (run.status !== 'started') return
     if (stepClassification !== 'counted_action') return
 
@@ -87,7 +74,7 @@ export function useTierScaffolding(sessionId: number) {
     })
 
     markFired(trigger)
-    showToast(trigger, run, onReviewMap)
+    showToast(trigger, run)
   }
 
   return { clearToast, evaluateAndNotify, flags }
