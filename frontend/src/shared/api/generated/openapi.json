@@ -3211,12 +3211,16 @@
                         "items": {
                             "$ref": "#/components/schemas/AdminStoryAnalytics"
                         }
+                    },
+                    "runebound_performance": {
+                        "$ref": "#/components/schemas/PerformanceSummaryResponse"
                     }
                 },
                 "required": [
                     "active_learners_30d",
                     "completions",
                     "per_story",
+                    "runebound_performance",
                     "runs"
                 ]
             },
@@ -3831,10 +3835,6 @@
                     "summary": {
                         "type": "string"
                     },
-                    "price": {
-                        "type": "integer",
-                        "minimum": 0
-                    },
                     "world_slug": {
                         "type": "string",
                         "pattern": "^[-a-zA-Z0-9_]+$"
@@ -3872,7 +3872,6 @@
                     "is_published",
                     "management_source",
                     "prerequisite_story",
-                    "price",
                     "slug",
                     "sort_order",
                     "summary",
@@ -3933,11 +3932,6 @@
                         "type": "string",
                         "default": "",
                         "maxLength": 4000
-                    },
-                    "price": {
-                        "type": "integer",
-                        "minimum": 0,
-                        "default": 0
                     },
                     "world_slug": {
                         "type": "string",
@@ -6180,10 +6174,6 @@
                         "type": "string",
                         "maxLength": 4000
                     },
-                    "price": {
-                        "type": "integer",
-                        "minimum": 0
-                    },
                     "world_slug": {
                         "type": "string",
                         "maxLength": 64,
@@ -6491,9 +6481,6 @@
                     },
                     "active": {
                         "type": "boolean"
-                    },
-                    "unlocks_story": {
-                        "$ref": "#/components/schemas/ShopUnlockResponse"
                     }
                 },
                 "required": [
@@ -6507,11 +6494,10 @@
             },
             "ShopItemResponseKindEnum": {
                 "enum": [
-                    "story",
                     "companion"
                 ],
                 "type": "string",
-                "description": "* `story` - story\n* `companion` - companion"
+                "description": "* `companion` - companion"
             },
             "ShopMutationRequest": {
                 "type": "object",
@@ -6570,38 +6556,6 @@
                     "active_companion",
                     "items",
                     "purchases_enabled"
-                ]
-            },
-            "ShopUnlockResponse": {
-                "type": "object",
-                "properties": {
-                    "slug": {
-                        "type": "string"
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "chapter_count": {
-                        "type": "integer"
-                    },
-                    "world_slug": {
-                        "type": "string"
-                    },
-                    "difficulty": {
-                        "$ref": "#/components/schemas/DifficultyEnum"
-                    },
-                    "prerequisite_story": {
-                        "type": "string",
-                        "nullable": true
-                    }
-                },
-                "required": [
-                    "chapter_count",
-                    "difficulty",
-                    "prerequisite_story",
-                    "slug",
-                    "title",
-                    "world_slug"
                 ]
             },
             "SourceEntryPointEnum": {
@@ -6779,10 +6733,6 @@
                         "type": "string",
                         "readOnly": true
                     },
-                    "price": {
-                        "type": "integer",
-                        "readOnly": true
-                    },
                     "sort_order": {
                         "type": "integer",
                         "readOnly": true
@@ -6792,10 +6742,6 @@
                         "readOnly": true
                     },
                     "completed": {
-                        "type": "boolean",
-                        "readOnly": true
-                    },
-                    "owned": {
                         "type": "boolean",
                         "readOnly": true
                     },
@@ -6836,9 +6782,7 @@
                     "is_published",
                     "lock_reason",
                     "locked",
-                    "owned",
                     "prerequisite_story",
-                    "price",
                     "slug",
                     "sort_order",
                     "summary",

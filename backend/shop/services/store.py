@@ -3,7 +3,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from progress.wallet import WalletService
 from shop.access import has_any_companion, owns_item
-from shop.catalog import KIND_COMPANION, KIND_STORY, SHOP_KINDS, is_default
+from shop.catalog import KIND_COMPANION, SHOP_KINDS
 from shop.catalog import get as catalog_item
 from shop.models import Entitlement, PlayerLoadout
 
@@ -24,8 +24,7 @@ class ShopService:
                     reason="shop_purchase",
                     award_key=f"shop:{kind}:{slug}:{player.id}",
                 )
-            if not is_default(kind, slug):
-                Entitlement.objects.get_or_create(player=player, kind=kind, slug=slug)
+            Entitlement.objects.get_or_create(player=player, kind=kind, slug=slug)
             if is_first_companion:
                 # Skip the extra "now equip it" click: your first adventurer is
                 # immediately playable.
@@ -37,10 +36,6 @@ class ShopService:
     @transaction.atomic
     def equip(self, *, player, kind: str, slug: str) -> dict:
         self._require(kind, slug)
-        if kind == KIND_STORY:
-            raise ValidationError(
-                {"kind": "Stories are selected by entering the story, not equipped."}
-            )
         if not owns_item(player=player, kind=kind, slug=slug):
             raise PermissionDenied("You do not own this shop item.")
         record, _ = PlayerLoadout.objects.get_or_create(player=player)

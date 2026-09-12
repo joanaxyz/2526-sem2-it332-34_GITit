@@ -20,7 +20,7 @@ export function AdminDashboardPage() {
     <div>
       <PageHeading title="Dashboard" description="A snapshot of the realm: players and the coin economy." />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="admin-summary-grid">
         <StatTile label="Players" value={data.users.total} hint={`+${data.users.new_7d} this week`} />
         <StatTile label="New (30d)" value={data.users.new_30d} />
         <StatTile label="Coins in circulation" value={formatCoins(data.economy.coins_in_circulation)} />

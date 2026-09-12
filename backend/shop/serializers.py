@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from common.openapi import WalletSummaryResponseSerializer
-from curriculum.models import Story
 
 
 class StrictStringField(serializers.CharField):
@@ -18,29 +17,13 @@ class ShopMutationRequestSerializer(serializers.Serializer):
     slug = StrictStringField(max_length=120)
 
 
-class ShopUnlockResponseSerializer(serializers.Serializer):
-    slug = serializers.CharField()
-    title = serializers.CharField()
-    chapter_count = serializers.IntegerField()
-    world_slug = serializers.CharField()
-    difficulty = serializers.ChoiceField(choices=Story.DIFFICULTY_CHOICES)
-    prerequisite_story = serializers.CharField(allow_null=True)
-
-
 class ShopItemResponseSerializer(serializers.Serializer):
-    kind = serializers.ChoiceField(choices=["story", "companion"])
+    kind = serializers.ChoiceField(choices=["companion"])
     slug = serializers.CharField()
     label = serializers.CharField()
     price = serializers.IntegerField()
     owned = serializers.BooleanField()
     active = serializers.BooleanField()
-    unlocks_story = ShopUnlockResponseSerializer(required=False)
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        if data.get("unlocks_story") is None:
-            data.pop("unlocks_story", None)
-        return data
 
 
 class ShopResponseSerializer(serializers.Serializer):

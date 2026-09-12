@@ -35,18 +35,30 @@ class MetricsService:
     PERFORMANCE_MODULE_NUMBERS = (1, 2, 3, 4)
 
     def performance_summary(self, *, player) -> dict:
+        return self._performance_summary_for_runs(runs=self._performance_runs().filter(player=player))
+
+    def all_player_performance_summary(self) -> dict:
+        """Return the same Runebound diagnostic metrics across all learners.
+
+        This is deliberately staff-console data. The player-facing endpoint keeps
+        using ``performance_summary`` so its response and scope remain unchanged.
+        """
+        return self._performance_summary_for_runs(runs=self._performance_runs())
+
+    def _performance_runs(self):
+        return AdventureLevelTierRun.objects.filter(
+            is_replay=False,
+            tier__adventure_level__chapter__story__slug=self.PERFORMANCE_STORY_SLUG,
+            tier__adventure_level__chapter__number__in=self.PERFORMANCE_MODULE_NUMBERS,
+        )
+
+    def _performance_summary_for_runs(self, *, runs) -> dict:
         """Performance KPIs for the Runebound Turret's module attempts.
 
         CAR is the share of submitted commands the simulator could process.
         Retry transfer is the share of retry runs that end successfully. Replays
         are excluded from every attempt-based measure.
         """
-        runs = AdventureLevelTierRun.objects.filter(
-            player=player,
-            is_replay=False,
-            tier__adventure_level__chapter__story__slug=self.PERFORMANCE_STORY_SLUG,
-            tier__adventure_level__chapter__number__in=self.PERFORMANCE_MODULE_NUMBERS,
-        )
         aggregate = runs.aggregate(
             started=Count("id"),
             completed=Count("id", filter=Q(status=SESSION_STATUS_COMPLETED)),

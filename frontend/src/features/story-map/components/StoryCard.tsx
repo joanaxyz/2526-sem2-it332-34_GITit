@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 
 import type { Story } from '@/features/story-map/types'
 import { Button } from '@/shared/components/Button'
-import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 import { storyPath } from '@/shared/navigation/routes'
 import { cn } from '@/shared/utils/cn'
 
@@ -42,14 +41,7 @@ export function StoryCard({ story }: { story: Story }) {
       </div>
 
       <div className="story-select-card-actions">
-        {story.locked && !story.owned ? (
-          <Button asChild>
-            <Link to="/shop?tab=stories">
-              <GitCoinIcon />
-              Unlock for {story.price}
-            </Link>
-          </Button>
-        ) : story.locked && story.prerequisite_story ? (
+        {story.locked && story.prerequisite_story ? (
           <Button asChild>
             <Link to={storyPath(story.prerequisite_story.slug)}>
               <DoorOpen data-icon="inline-start" />

@@ -182,7 +182,8 @@ describe('HomeHubView contract', () => {
     const chooseCompanionLinks = within(profile).getAllByRole('link', { name: 'Choose companion' })
     expect(chooseCompanionLinks.length).toBeGreaterThan(0)
     for (const link of chooseCompanionLinks) {
-      expect(link).toHaveAttribute('href', '/shop?tab=companions&required=1')
+      // The shop no longer has tabs, so the companion link carries only `required`.
+      expect(link).toHaveAttribute('href', '/shop?required=1')
     }
     expect(within(profile).queryByLabelText(/blue idle animation/i)).not.toBeInTheDocument()
   })

@@ -108,7 +108,6 @@ STORY_SPEC = {
         "Ascend a rune-lit tower while mastering Git fundamentals across five modules, "
         "from repository setup and branching to conflict resolution and history rewriting."
     ),
-    "price": 0,
     "sort_order": 0,
     "is_published": True,
     "world_slug": "arcane-spire",
@@ -11989,7 +11988,6 @@ class Command(BaseCommand):
             defaults={
                 "title": STORY_SPEC["title"],
                 "summary": STORY_SPEC["summary"],
-                "price": STORY_SPEC["price"],
                 "sort_order": STORY_SPEC["sort_order"],
                 "is_published": STORY_SPEC["is_published"],
                 "world_slug": STORY_SPEC["world_slug"],

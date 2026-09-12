@@ -8,10 +8,15 @@ import { applyPreferences, persistPreferences, readStoredPreferences } from '@/s
 
 export function PreferencesSync() {
   const user = useAuthStore((state) => state.user)
+  const accessToken = useAuthStore((state) => state.accessToken)
   const query = useQuery({
     queryKey: queryKeys.preferences,
     queryFn: preferencesApi.get,
-    enabled: Boolean(user),
+    // This provider sits above the route guard, so on a cold load `user` is
+    // already hydrated from storage while the token is not. Firing here would
+    // send an unauthenticated request, 401, and kick off a refresh that races
+    // the session bootstrap. Wait for the token instead.
+    enabled: Boolean(user && accessToken),
     staleTime: 10 * 60 * 1000,
     retry: false,
   })

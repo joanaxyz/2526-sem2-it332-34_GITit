@@ -8,60 +8,32 @@ import {
 } from '@/shared/shop/model/shopPresentation'
 
 const baseItem = {
+  kind: 'companion',
   label: 'Item',
   price: 0,
   owned: false,
   active: false,
-} satisfies Omit<ShopItem, 'kind' | 'slug'>
+} satisfies Omit<ShopItem, 'slug'>
 
 describe('shopPresentation', () => {
-  it('maps story worlds and keeps unthemed stories visible with neutral presentation', () => {
-    const realStory: ShopItem = {
-      ...baseItem,
-      kind: 'story',
-      slug: 'arcane-spire',
-      unlocks_story: {
-        slug: 'arcane-spire',
-        title: 'Arcane Spire',
-        chapter_count: 7,
-        world_slug: 'arcane-spire',
-        difficulty: 'intermediate',
-        prerequisite_story: null,
-      },
-    }
-    const fakeStory: ShopItem = { ...baseItem, kind: 'story', slug: 'not-render-ready' }
-
-    expect(hasLocalDefinition(realStory)).toBe(true)
-    expect(hasLocalDefinition(fakeStory)).toBe(true)
-    expect(toDisplayItem(realStory)).toMatchObject({
-      kind: 'story',
-      slug: 'arcane-spire',
-      tone: 'blue',
-      art: '/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png',
-    })
-    expect(toDisplayItem(fakeStory)).toMatchObject({
-      kind: 'story',
-      slug: 'not-render-ready',
-      tone: 'blue',
-      art: undefined,
-    })
+  it('hides companions with no registered art so no slide renders broken', () => {
+    expect(hasLocalDefinition({ ...baseItem, slug: 'blue' })).toBe(true)
+    expect(hasLocalDefinition({ ...baseItem, slug: 'not-render-ready' })).toBe(false)
   })
 
-  it('keeps companion definitions separate and derives their status', () => {
+  it('derives companion tone, art, and status', () => {
     const companion: ShopItem = {
       ...baseItem,
-      kind: 'companion',
       slug: 'black',
       price: 150,
       owned: true,
       active: true,
     }
-    const sameSlugStory: ShopItem = { ...baseItem, kind: 'story', slug: 'black' }
 
-    expect(hasLocalDefinition(companion)).toBe(true)
-    expect(hasLocalDefinition(sameSlugStory)).toBe(true)
-    expect(toDisplayItem(sameSlugStory)).toMatchObject({ tone: 'blue', art: undefined })
     expect(toDisplayItem(companion)).toMatchObject({ tone: 'shadow' })
+    expect(toDisplayItem({ ...baseItem, slug: 'white' })).toMatchObject({ tone: 'ice' })
+    expect(toDisplayItem({ ...baseItem, slug: 'blue' }).art).toBeDefined()
     expect(statusLabel(toDisplayItem(companion))).toBe('Equipped')
+    expect(statusLabel(toDisplayItem({ ...baseItem, slug: 'blue', price: 150 }))).toBe('150 GitCoins')
   })
 })

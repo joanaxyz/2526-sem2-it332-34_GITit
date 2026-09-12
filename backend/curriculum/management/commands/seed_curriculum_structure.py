@@ -43,7 +43,6 @@ class SeedCurriculumStructureMixin:
                         "slug": spec["slug"],
                         "title": spec["title"],
                         "summary": spec.get("summary", ""),
-                        "price": spec.get("price", 0),
                         "sort_order": spec.get("sort_order", index),
                         "is_published": spec.get("is_published", True),
                         "world_slug": spec.get("world_slug", spec["slug"]),
@@ -62,7 +61,6 @@ class SeedCurriculumStructureMixin:
             update_fields=[
                 "title",
                 "summary",
-                "price",
                 "sort_order",
                 "is_published",
                 "world_slug",

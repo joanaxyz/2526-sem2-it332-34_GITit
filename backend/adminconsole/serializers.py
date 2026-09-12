@@ -3,6 +3,7 @@ from collections.abc import Mapping
 from rest_framework import serializers
 
 from curriculum.models import Story
+from progress.serializers import PerformanceSummaryResponseSerializer
 
 
 class StrictSerializer(serializers.Serializer):
@@ -212,6 +213,7 @@ class AdminAnalyticsResponseSerializer(serializers.Serializer):
     completions = AdminCompletionsSerializer()
     active_learners_30d = serializers.IntegerField(min_value=0)
     per_story = AdminStoryAnalyticsSerializer(many=True)
+    runebound_performance = PerformanceSummaryResponseSerializer()
 
 
 class AdminModerationContentSerializer(serializers.Serializer):
@@ -246,7 +248,6 @@ class AdminStorySerializer(serializers.Serializer):
     slug = serializers.SlugField()
     title = serializers.CharField()
     summary = serializers.CharField(allow_blank=True)
-    price = serializers.IntegerField(min_value=0)
     world_slug = serializers.SlugField()
     difficulty = serializers.ChoiceField(choices=Story.DIFFICULTY_CHOICES)
     prerequisite_story = AdminStoryPrerequisiteSerializer(allow_null=True)
@@ -270,7 +271,6 @@ class AdminStoryCreateRequestSerializer(StrictSerializer):
         max_length=4000,
         default="",
     )
-    price = serializers.IntegerField(required=False, min_value=0, default=0)
     world_slug = serializers.SlugField(max_length=64)
     difficulty = serializers.ChoiceField(
         choices=Story.DIFFICULTY_CHOICES,
@@ -290,7 +290,6 @@ class AdminStoryCreateRequestSerializer(StrictSerializer):
 class AdminStoryUpdateRequestSerializer(StrictSerializer):
     title = serializers.CharField(required=False, max_length=160)
     summary = serializers.CharField(required=False, allow_blank=True, max_length=4000)
-    price = serializers.IntegerField(required=False, min_value=0)
     world_slug = serializers.SlugField(required=False, max_length=64)
     difficulty = serializers.ChoiceField(
         choices=Story.DIFFICULTY_CHOICES,

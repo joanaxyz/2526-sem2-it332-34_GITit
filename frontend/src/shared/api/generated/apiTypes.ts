@@ -9,7 +9,7 @@ export type JsonObject = { [key: string]: JsonValue }
 export type ApiSchemas = {
   "AccessTokenResponse": { "access": string }
   "ActionEnum": "grant_coins" | "set_staff" | "set_active"
-  "AdminAnalyticsResponse": { "active_learners_30d": number; "completions": ApiSchemas["AdminCompletions"]; "per_story": Array<ApiSchemas["AdminStoryAnalytics"]>; "runs": ApiSchemas["AdminRuns"] }
+  "AdminAnalyticsResponse": { "active_learners_30d": number; "completions": ApiSchemas["AdminCompletions"]; "per_story": Array<ApiSchemas["AdminStoryAnalytics"]>; "runebound_performance": ApiSchemas["PerformanceSummaryResponse"]; "runs": ApiSchemas["AdminRuns"] }
   "AdminChapter": { "battle_stage": { [key: string]: JsonValue }; "description": string; "id": number; "is_playable": boolean; "is_published": boolean; "management_source": string; "number": number; "slug": string; "sort_order": number; "story_id": number | null; "title": string }
   "AdminChapterCreateRequest": { "battle_stage"?: { [key: string]: JsonValue }; "description"?: string; "is_playable"?: boolean; "is_published"?: boolean; "number": number; "slug": string; "sort_order"?: number; "story_id": number; "title": string }
   "AdminChapterListResponse": { "results": Array<ApiSchemas["AdminChapter"]> }
@@ -35,9 +35,9 @@ export type ApiSchemas = {
   "AdminRunBreakdown": { "by_status": { [key: string]: number }; "passed": number; "total": number }
   "AdminRuns": { "adventure": ApiSchemas["AdminRunBreakdown"]; "by_status": { [key: string]: number }; "challenge": ApiSchemas["AdminRunBreakdown"]; "passed": number; "total": number }
   "AdminSettingsResponse": { "feature_flags": Array<ApiSchemas["AdminFeatureFlag"]> }
-  "AdminStory": { "chapter_count": number; "difficulty": ApiSchemas["DifficultyEnum"]; "id": number; "is_published": boolean; "management_source": string; "prerequisite_story": ApiSchemas["AdminStoryPrerequisite"] | null; "price": number; "slug": string; "sort_order": number; "summary": string; "title": string; "world_slug": string }
+  "AdminStory": { "chapter_count": number; "difficulty": ApiSchemas["DifficultyEnum"]; "id": number; "is_published": boolean; "management_source": string; "prerequisite_story": ApiSchemas["AdminStoryPrerequisite"] | null; "slug": string; "sort_order": number; "summary": string; "title": string; "world_slug": string }
   "AdminStoryAnalytics": { "adventure_runs": number; "challenge_runs": number; "passed": number; "runs": number; "slug": string; "title": string }
-  "AdminStoryCreateRequest": { "difficulty"?: ApiSchemas["DifficultyEnum"]; "is_published"?: boolean; "prerequisite_story"?: number | null; "price"?: number; "slug": string; "sort_order"?: number; "summary"?: string; "title": string; "world_slug": string }
+  "AdminStoryCreateRequest": { "difficulty"?: ApiSchemas["DifficultyEnum"]; "is_published"?: boolean; "prerequisite_story"?: number | null; "slug": string; "sort_order"?: number; "summary"?: string; "title": string; "world_slug": string }
   "AdminStoryListResponse": { "results": Array<ApiSchemas["AdminStory"]>; "world_options": Array<string> }
   "AdminStoryPrerequisite": { "id": number; "slug": string; "title": string }
   "AdminTransaction": { "amount": number; "created_at": string; "id": number; "reason": string; "user_id": number; "username": string }
@@ -100,7 +100,7 @@ export type ApiSchemas = {
   "PasswordResetConfirm": { "password": string; "password_confirm": string; "token": string; "uid": string }
   "PasswordResetRequest": { "email": string }
   "PatchedAdminChapterUpdateRequest": { "battle_stage"?: { [key: string]: JsonValue }; "description"?: string; "is_playable"?: boolean; "is_published"?: boolean; "number"?: number; "sort_order"?: number; "title"?: string }
-  "PatchedAdminStoryUpdateRequest": { "difficulty"?: ApiSchemas["DifficultyEnum"]; "is_published"?: boolean; "prerequisite_story"?: number | null; "price"?: number; "sort_order"?: number; "summary"?: string; "title"?: string; "world_slug"?: string }
+  "PatchedAdminStoryUpdateRequest": { "difficulty"?: ApiSchemas["DifficultyEnum"]; "is_published"?: boolean; "prerequisite_story"?: number | null; "sort_order"?: number; "summary"?: string; "title"?: string; "world_slug"?: string }
   "PatchedContentDefinitionUpdateRequest": { "chapter"?: number | null; "command_family"?: string; "definition"?: { [key: string]: JsonValue }; "difficulty"?: string; "kind"?: ApiSchemas["KindA5eEnum"]; "official_chapter"?: number | null; "slug"?: string; "summary"?: string; "tags"?: Array<string>; "title"?: string; "visibility"?: ApiSchemas["VisibilityEnum"] }
   "PatchedPlayerPreferences": { "motion_mode"?: ApiSchemas["MotionModeEnum"]; "onboarding_phase"?: ApiSchemas["OnboardingPhaseEnum"] }
   "PerformanceKpiSet": { "arc": ApiSchemas["RateMetric"]; "car": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "rtr": ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"] }
@@ -113,12 +113,11 @@ export type ApiSchemas = {
   "RuntimeStepResponse": { "command_text": string; "id": number; "result_category": string; "terminal_output": string }
   "SessionResponse": { "access": string; "user": ApiSchemas["User"] }
   "ShopEquipResponse": { "active_companion": string | null; "shop": ApiSchemas["ShopResponse"] }
-  "ShopItemResponse": { "active": boolean; "kind": ApiSchemas["ShopItemResponseKindEnum"]; "label": string; "owned": boolean; "price": number; "slug": string; "unlocks_story"?: ApiSchemas["ShopUnlockResponse"] }
-  "ShopItemResponseKindEnum": "story" | "companion"
+  "ShopItemResponse": { "active": boolean; "kind": ApiSchemas["ShopItemResponseKindEnum"]; "label": string; "owned": boolean; "price": number; "slug": string }
+  "ShopItemResponseKindEnum": "companion"
   "ShopMutationRequest": { "kind": string; "slug": string }
   "ShopPurchaseResponse": { "owned": boolean; "shop": ApiSchemas["ShopResponse"]; "wallet": ApiSchemas["WalletSummaryResponse"] }
   "ShopResponse": { "active_companion": string | null; "items": Array<ApiSchemas["ShopItemResponse"]>; "purchases_enabled": boolean }
-  "ShopUnlockResponse": { "chapter_count": number; "difficulty": ApiSchemas["DifficultyEnum"]; "prerequisite_story": string | null; "slug": string; "title": string; "world_slug": string }
   "SourceEntryPointEnum": "level_page" | "retry"
   "StatsHeadline": { "accuracy": number | null; "boss_floors": ApiSchemas["StatsScopedCount"]; "comebacks": ApiSchemas["StatsScopedCount"]; "commands_run": number; "day_streak": number; "finish_rate": ApiSchemas["RateMetric"]; "gitcoins": number; "levels_completed": number; "longest_streak": number; "perfect_clears": number }
   "StatsScopedCount": { "scope": string; "value": number }
@@ -126,7 +125,7 @@ export type ApiSchemas = {
   "StatsSummaryResponse": { "activity_trend": Array<ApiSchemas["StatsTrendPoint"]>; "headline": ApiSchemas["StatsHeadline"]; "skill_profile": Array<ApiSchemas["StatsSkillAxis"]> }
   "StatsTrendPoint": { "commands_run": number; "date": string; "levels_completed": number }
   "StatusEnum": "draft" | "testable" | "published" | "archived"
-  "Story": { "completed": boolean; "difficulty": ApiSchemas["DifficultyEnum"]; "id": number; "is_published": boolean; "lock_reason": string; "locked": boolean; "owned": boolean; "prerequisite_story": ApiSchemas["StoryPrerequisite"] | null; "price": number; "slug": string; "sort_order": number; "summary": string; "title": string; "world_slug": string }
+  "Story": { "completed": boolean; "difficulty": ApiSchemas["DifficultyEnum"]; "id": number; "is_published": boolean; "lock_reason": string; "locked": boolean; "prerequisite_story": ApiSchemas["StoryPrerequisite"] | null; "slug": string; "sort_order": number; "summary": string; "title": string; "world_slug": string }
   "StoryPrerequisite": { "completed": boolean; "slug": string; "title": string }
   "User": { "email": string; "id": number; "is_staff": boolean; "username": string }
   "ValidationErrorRow": { "field": string; "message": string }

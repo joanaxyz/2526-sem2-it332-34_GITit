@@ -8,6 +8,7 @@ import {
   confirmAuthSession,
   useAuthStore,
 } from '@/shared/auth/useAuth'
+import { refreshSharedAccessToken } from '@/shared/api/httpClient'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { LoadingState } from '@/shared/components/LoadingState'
 
@@ -22,17 +23,27 @@ export function Protected({ children }: { children: ReactElement }) {
         confirmAuthSession(token, user)
         return user
       }
-      const refreshed = await authApi.refresh()
-      beginAuthConfirmation(refreshed.access)
+      // Shares the tab's single-flight refresh. Calling /auth/refresh/ directly
+      // here raced the 401 retry path, and single-use rotation turned the loser
+      // into a spurious logout.
+      const access = await refreshSharedAccessToken()
+      beginAuthConfirmation(access)
       const user = await authApi.me()
-      confirmAuthSession(refreshed.access, user)
+      confirmAuthSession(access, user)
       return user
     },
     enabled: !token || !user,
+    // A cached bootstrap must never satisfy a later re-entry: the store drops
+    // the token or the user on purpose (cross-tab rotation, confirmation
+    // hand-off) and each of those has to be re-confirmed, not assumed.
+    staleTime: 0,
     retry: false,
   })
 
-  if ((!token || !user) && bootstrapQuery.isPending) {
+  // An incomplete session is a session being restored, not a missing one. Only
+  // a bootstrap that actually failed sends the player back to the front door.
+  if (!token || !user) {
+    if (bootstrapQuery.isError) return <Navigate replace to="/login" />
     return (
       <LoadingState
         description="Checking your saved login before opening the workspace."
@@ -41,6 +52,6 @@ export function Protected({ children }: { children: ReactElement }) {
       />
     )
   }
-  if (!token || (!user && bootstrapQuery.isError)) return <Navigate replace to="/login" />
+
   return children
 }

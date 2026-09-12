@@ -147,7 +147,7 @@ export function HomeOnboarding({ ready, hasCompanion, tab, onSelectTab }: {
         hasCompanion
           ? <Button size="sm" onClick={finish}>Return to Stories</Button>
           : <Button size="sm" variant="outline" onClick={() => {
-            if (loadoutTab) { onboarding.setPhase('purchase'); navigate(`${SHOP_ROUTE}?tab=companions`) }
+            if (loadoutTab) { onboarding.setPhase('purchase'); navigate(SHOP_ROUTE) }
             else onSelectTab('loadout')
           }}>{loadoutTab ? 'Back to Shop' : 'Open Loadout'}</Button>
       }>

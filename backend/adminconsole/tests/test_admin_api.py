@@ -21,6 +21,16 @@ def test_overview_requires_staff(django_user_model):
 
 
 @pytest.mark.django_db
+def test_analytics_requires_staff(django_user_model):
+    """Runebound diagnostics live behind the staff gate, not in the learner UI."""
+
+    student = make_user(django_user_model, "diagnostics-student")
+    client = APIClient()
+    client.force_authenticate(user=student)
+    assert client.get("/api/admin/analytics/").status_code == 403
+
+
+@pytest.mark.django_db
 def test_staff_overview_returns_metrics(django_user_model):
     staff = make_user(django_user_model, "admin", is_staff=True)
     client = APIClient()
@@ -654,7 +664,20 @@ def test_staff_analytics_returns_shape(django_user_model):
     client.force_authenticate(user=staff)
 
     body = client.get("/api/admin/analytics/").json()
-    assert set(body) >= {"runs", "completions", "active_learners_30d", "per_story"}
+    assert set(body) >= {
+        "runs",
+        "completions",
+        "active_learners_30d",
+        "per_story",
+        "runebound_performance",
+    }
+    assert body["runebound_performance"]["kpis"] == {
+        "scr": {"value": None, "numerator": 0, "denominator": 0},
+        "car": {"value": None, "numerator": 0, "denominator": 0},
+        "hlcr": {"value": None, "numerator": 0, "denominator": 0},
+        "rtr": {"value": None, "numerator": 0, "denominator": 0},
+        "arc": {"value": None, "numerator": 0, "denominator": 0},
+    }
     assert body["runs"]["total"] == 2
     assert body["runs"]["passed"] == 2
     assert body["runs"]["adventure"]["total"] == 1

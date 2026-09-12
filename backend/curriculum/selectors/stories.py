@@ -83,28 +83,18 @@ def chapter_locked(*, player, chapter: Chapter) -> tuple[bool, str]:
 def story_locked(
     *, player, story: Story, completed_map: dict[int, bool] | None = None
 ) -> tuple[bool, str]:
-    from shop.access import owns_item
-    from shop.catalog import KIND_STORY
-
-    reasons = []
-
-    if not owns_item(player=player, kind=KIND_STORY, slug=story.slug):
-        reasons.append(f"Buy {story.title} in the Shop to unlock this story.")
-
+    """Stories are not sold - mastering the prerequisite story is the only gate."""
     prerequisite = story.prerequisite_story
-    if prerequisite is not None:
-        if completed_map is not None and prerequisite.id in completed_map:
-            prerequisite_completed = completed_map[prerequisite.id]
-        else:
-            prerequisite_completed = story_completed(player=player, story=prerequisite)
-        if not prerequisite_completed:
-            reasons.append(
-                f"Master every command in {prerequisite.title} before entering {story.title}."
-            )
+    if prerequisite is None:
+        return False, ""
 
-    if reasons:
-        return True, " ".join(reasons)
-    return False, ""
+    if completed_map is not None and prerequisite.id in completed_map:
+        prerequisite_completed = completed_map[prerequisite.id]
+    else:
+        prerequisite_completed = story_completed(player=player, story=prerequisite)
+    if prerequisite_completed:
+        return False, ""
+    return True, f"Master every command in {prerequisite.title} before entering {story.title}."
 
 
 def stories_completed_map(*, player, stories) -> dict[int, bool]:

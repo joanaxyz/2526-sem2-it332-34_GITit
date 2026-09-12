@@ -23,11 +23,7 @@ export function createChallengeWorkspaceCommandHandler({
   dagAnimation: ChallengeDagAnimationController
   queryClient: QueryClient
   clearToast: () => void
-  evaluateAndNotify: (
-    run: ChallengeRun,
-    commandClassification: string,
-    onExitSuggested: () => void,
-  ) => void
+  evaluateAndNotify: (run: ChallengeRun, commandClassification: string) => void
   setExitConfirmOpen: (open: boolean) => void
   setWorkspaceEditorPath: (path: string | null) => void
   queueOutcomeAnimation: (runId: number) => void
@@ -63,13 +59,7 @@ export function createChallengeWorkspaceCommandHandler({
         if (!response.run.replay) {
           const updatedRun = queryClient.getQueryData<ChallengeRun>(queryKeys.challengeRun(runId))
           if (updatedRun) {
-            evaluateAndNotify(
-              updatedRun,
-              response.step.command_classification,
-              () => {
-                setExitConfirmOpen(true)
-              },
-            )
+            evaluateAndNotify(updatedRun, response.step.command_classification)
           }
         }
       },

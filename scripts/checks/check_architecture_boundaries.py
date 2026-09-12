@@ -104,6 +104,9 @@ HOME_STATS_LINE_LIMITS = {
 HOME_STATS_DISPLACED_CSS = {
     "frontend/src/styles/features/home/achievements.css",
     "frontend/src/styles/features/home/stats-actions.css",
+    # The Overview "continue" CTA was replaced by the learner performance
+    # panel; its stylesheet must not come back.
+    "frontend/src/styles/features/home/continue-card.css",
 }
 
 # Build-time generators are allowed to call frontend tooling explicitly. Runtime
@@ -1426,7 +1429,11 @@ def home_overview_css_source_violations(
     if role == "home-entry":
         if imports.count("./home/stats.css") != 1:
             violations.append(f"{path_label}: home entry must import ./home/stats.css exactly once")
-        for displaced in ("./home/achievements.css", "./home/stats-actions.css"):
+        for displaced in (
+            "./home/achievements.css",
+            "./home/stats-actions.css",
+            "./home/continue-card.css",
+        ):
             if displaced in imports:
                 violations.append(f"{path_label}: must not import deleted {displaced}")
     elif role == "stats-entry":
@@ -1435,7 +1442,6 @@ def home_overview_css_source_violations(
             "./stats-kpis.css",
             "./stats-achievements.css",
             "./stats-responsive.css",
-            "./continue-card.css",
         ]
         if imports != expected:
             violations.append(

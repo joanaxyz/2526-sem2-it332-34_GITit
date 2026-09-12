@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 
 import type { ChallengeRun } from '@/features/challenges/types'
+import { ChapterBookModal } from '@/features/story-map/components/book/ChapterBookModal'
 import { computeBudgetConsumedPct } from './budget'
 import { evaluateScaffoldTriggers } from './evaluator'
 import { logScaffoldTrigger } from './logger'
@@ -33,11 +34,7 @@ export function useScaffolding(sessionId: number) {
     writeScaffoldTriggers(sessionId, updated)
   }
 
-  function showToast(
-    trigger: 'T1' | 'T2' | 'T3',
-    run: ChallengeRun,
-    onReviewMap: () => void,
-  ) {
+  function showToast(trigger: 'T1' | 'T2' | 'T3', run: ChallengeRun) {
     const difficulty = scaffoldDifficultyFor(run.difficulty)
     const message = getScaffoldMessage(trigger, difficulty)
 
@@ -47,26 +44,16 @@ export function useScaffolding(sessionId: number) {
           message={message}
           trigger={trigger}
           difficulty={difficulty}
-          onReviewMap={() => {
-            clearToast()
-            onReviewMap()
-          }}
-          onContinue={() => {
-            clearToast()
-            const input = document.querySelector<HTMLInputElement>('[data-command-input]')
-            input?.focus()
-          }}
+          chapter={run.chapter ?? null}
+          FieldGuideModal={ChapterBookModal}
+          onDismiss={clearToast}
         />
       ),
       { id: SCAFFOLD_TOAST_ID, duration: Infinity },
     )
   }
 
-  function evaluateAndNotify(
-    run: ChallengeRun,
-    stepClassification: string,
-    onReviewMap: () => void,
-  ) {
+  function evaluateAndNotify(run: ChallengeRun, stepClassification: string) {
     if (run.status !== 'started') return
     if (stepClassification !== 'counted_action') return
 
@@ -94,7 +81,7 @@ export function useScaffolding(sessionId: number) {
     })
 
     markFired(trigger)
-    showToast(trigger, run, onReviewMap)
+    showToast(trigger, run)
   }
 
   return { clearToast, evaluateAndNotify, flags }

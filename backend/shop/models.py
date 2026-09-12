@@ -6,10 +6,8 @@ SHOP_KIND_CHOICES = [(kind, kind.title()) for kind in SHOP_KINDS]
 
 
 class Entitlement(models.Model):
-    """A story or companion the user owns.
-
-    Default stories are implicitly owned and need no row.
-    """
+    """A companion the player has bought. Nothing is free, so no row means
+    not owned."""
 
     player = models.ForeignKey(
         "players.Player",

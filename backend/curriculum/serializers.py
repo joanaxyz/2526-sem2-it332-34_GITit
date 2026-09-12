@@ -4,8 +4,6 @@ from rest_framework import serializers
 from curriculum.models import Story
 from curriculum.selectors import chapter_locked, story_completed, story_locked
 from curriculum.services import CHEST_SCHEDULE
-from shop.access import owns_item
-from shop.catalog import KIND_STORY
 
 
 class StoryPrerequisiteSerializer(serializers.Serializer):
@@ -37,11 +35,9 @@ class StorySerializer(serializers.Serializer):
     slug = serializers.CharField(read_only=True)
     title = serializers.CharField(read_only=True)
     summary = serializers.CharField(read_only=True)
-    price = serializers.IntegerField(read_only=True)
     sort_order = serializers.IntegerField(read_only=True)
     is_published = serializers.BooleanField(read_only=True)
     completed = serializers.SerializerMethodField()
-    owned = serializers.SerializerMethodField()
     world_slug = serializers.CharField(read_only=True)
     difficulty = serializers.ChoiceField(
         choices=Story.DIFFICULTY_CHOICES,
@@ -59,13 +55,6 @@ class StorySerializer(serializers.Serializer):
 
     def get_completed(self, obj) -> bool:
         return self._completed(obj)
-
-    def get_owned(self, obj) -> bool:
-        return owns_item(
-            player=self.context.get("player"),
-            kind=KIND_STORY,
-            slug=obj.slug,
-        )
 
     @extend_schema_field(StoryPrerequisiteSerializer(allow_null=True))
     def get_prerequisite_story(self, obj) -> dict | None:

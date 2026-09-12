@@ -45,7 +45,6 @@ def _story_snapshot(story: Story) -> dict:
         "slug": story.slug,
         "title": story.title,
         "summary": story.summary,
-        "price": story.price,
         "world_slug": story.world_slug,
         "difficulty": story.difficulty,
         "prerequisite_story": story.prerequisite_story_id,
@@ -99,7 +98,6 @@ class AdminCurriculumService:
             slug=data["slug"],
             title=data["title"],
             summary=data["summary"],
-            price=data["price"],
             world_slug=data["world_slug"],
             difficulty=data["difficulty"],
             prerequisite_story=story_prerequisite(data["prerequisite_story"]),
@@ -129,7 +127,6 @@ class AdminCurriculumService:
         for field in (
             "title",
             "summary",
-            "price",
             "world_slug",
             "difficulty",
             "sort_order",
