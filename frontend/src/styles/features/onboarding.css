@@ -47,6 +47,41 @@
   outline-offset: 4px;
 }
 
+.story-onboarding-choice {
+  width: min(100%, 34rem);
+  max-width: 34rem;
+}
+
+.story-onboarding-choice__content {
+  display: grid;
+  gap: 1rem;
+}
+
+.story-onboarding-choice__content p,
+.story-onboarding-choice__content small {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.story-onboarding-choice__content p {
+  font-size: var(--text-sm);
+}
+
+.story-onboarding-choice__content small {
+  font-size: var(--text-xs);
+}
+
+.story-onboarding-choice__actions {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.story-onboarding-choice__actions .ui-button {
+  min-height: 2.75rem;
+  justify-content: center;
+}
+
 @media (max-width: 700px) {
   .app-onboarding-banner { flex-wrap: wrap; align-items: flex-start; }
   .app-onboarding-banner__actions { width: 100%; }

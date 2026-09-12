@@ -7,8 +7,12 @@ import { HOME_ROUTE, SHOP_ROUTE } from '@/shared/navigation/routes'
 import { preferencesApi } from '@/shared/preferences/preferencesApi'
 import type { PlayerAccountPreferences } from '@/shared/preferences/preferences'
 
-import { OnboardingContext } from './onboardingContext'
-import { readCachedOnboardingPhase, writeOnboardingPhase, type OnboardingPhase } from './onboardingState'
+import { OnboardingContext } from '@/features/onboarding/hooks/onboardingContext'
+import {
+  readCachedOnboardingPhase,
+  writeOnboardingPhase,
+  type OnboardingPhase,
+} from '@/features/onboarding/utils/onboardingState'
 
 // HomeLayout keys this provider by account, while keeping it mounted across pages.
 export function OnboardingProvider({ userId, children }: { userId?: number; children: ReactNode }) {
@@ -54,8 +58,8 @@ export function OnboardingProvider({ userId, children }: { userId?: number; chil
 
   useEffect(() => {
     // Follow users who use the normal navigation instead of a tutorial CTA.
-    if (phase === 'stories' && pathname === SHOP_ROUTE) setPhase('shop')
-    if (['stories', 'shop', 'purchase'].includes(phase) && pathname === HOME_ROUTE) setPhase('home')
+    if (['welcome', 'orientation', 'stories'].includes(phase) && pathname === SHOP_ROUTE) setPhase('shop')
+    if (['welcome', 'orientation', 'stories', 'shop', 'purchase'].includes(phase) && pathname === HOME_ROUTE) setPhase('home')
   }, [pathname, phase, setPhase])
   const value = useMemo(() => ({ phase, setPhase }), [phase, setPhase])
   return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>

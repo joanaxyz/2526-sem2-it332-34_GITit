@@ -8,7 +8,7 @@ import type { CommandSubmissionOutcome } from '@/shared/level-runtime/commandOut
 
 export type TierDifficulty = 'easy' | 'medium' | 'hard'
 
-export type TierCompletionRewards = {
+type TierCompletionRewards = {
   first_level_clear: boolean
   coins_awarded: number
   chapter_chests_awarded: Array<{ threshold: number; coins: number }>

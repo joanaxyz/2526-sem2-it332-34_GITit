@@ -3,6 +3,8 @@ from rest_framework.test import APIClient
 
 from curriculum.models import ChapterLesson
 from curriculum.selectors import chapter_content_overview
+from players.services import get_or_create_player
+from shop.models import Entitlement
 
 
 def test_seed_creates_published_lessons_with_pages(db):
@@ -38,6 +40,11 @@ def test_overview_endpoint_and_unauthored_chapter_is_empty(db, django_user_model
     api_client.force_authenticate(user=user)
 
     lesson = ChapterLesson.objects.filter(is_published=True).first()
+    Entitlement.objects.create(
+        player=get_or_create_player(user),
+        kind="story",
+        slug=lesson.chapter.story.slug,
+    )
     response = api_client.get(f"/api/chapters/{lesson.chapter_id}/overview/")
     assert response.status_code == 200
     assert response.json()["lessons"][0]["slug"] == lesson.slug
@@ -47,6 +54,9 @@ def test_overview_endpoint_and_unauthored_chapter_is_empty(db, django_user_model
     from curriculum.models import Chapter, Story
 
     story = Story.objects.get(slug="arcane-spire")
+    Entitlement.objects.get_or_create(
+        player=get_or_create_player(user), kind="story", slug=story.slug
+    )
     bare_chapter = Chapter.objects.create(
         story=story,
         slug="bare-lesson-test",

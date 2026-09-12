@@ -337,7 +337,6 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
                 "scenario_context",
                 "chapter",
                 "story",
-                "battle_stage",
                 "variant",
                 "mastery_progress",
                 "policy",

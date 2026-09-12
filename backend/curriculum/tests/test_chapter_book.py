@@ -3,6 +3,8 @@ from rest_framework.test import APIClient
 
 from curriculum.models import ChapterLesson
 from curriculum.selectors import chapter_book, published_chapters
+from players.services import get_or_create_player
+from shop.models import Entitlement
 
 
 def test_chapter_book_lists_every_registered_command(db):
@@ -82,6 +84,9 @@ def test_chapter_book_endpoint_ok_and_404(db, django_user_model):
     api_client.force_authenticate(user=user)
 
     chapter = next(s for s in published_chapters() if s.command_skill_count > 0)
+    Entitlement.objects.create(
+        player=get_or_create_player(user), kind="story", slug=chapter.story.slug
+    )
     response = api_client.get(f"/api/chapters/{chapter.id}/book/")
     assert response.status_code == 200
     assert response.json()["commands"]

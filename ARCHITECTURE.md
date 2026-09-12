@@ -167,6 +167,20 @@ python scripts/check_frontend_api_usage.py
 python scripts/check_api_type_adoption.py
 ```
 
+### Performance metrics
+
+The authenticated `GET /api/progress/performance/` endpoint is the source of truth for overall and per-module performance metrics. All attempt-based metrics exclude replay runs.
+
+| KPI | Formula | Empty-data behavior |
+| --- | --- | --- |
+| Scenario Completion Rate (SCR) | completed attempts / all attempts | `value: null` when there are no attempts |
+| Command Accuracy Rate (CAR) | processable submitted commands / all submitted commands | `value: null` when there are no commands |
+| Hard-Level Completion Rate (HLCR) | completed hard attempts / all hard attempts | `value: null` when there are no hard attempts |
+| Retry Transfer Rate (RTR) | completed retry attempts / all retry attempts | `value: null` when there are no retry attempts |
+| Average Retry Count (ARC) | sum of `retry_index` for completed attempts / completed attempts | `value: null` when there are no completed attempts |
+
+A retry attempt is a run with `prior_run` set. CAR treats `Invalid` and `Unprocessable` command results as inaccurate; every other submitted command is processable. The response always includes Modules 0–4, including modules with no attempts, so the frontend can show an honest “Waiting for practice” state.
+
 ## StoryWorld System
 
 Story worlds are the site/map visual bundles. Their names and visual tokens are semantic. Current story-world (theme) metadata lives under `frontend/src/shared/cosmetics/themes/` and is registered through `frontend/src/shared/cosmetics/registry.ts`.

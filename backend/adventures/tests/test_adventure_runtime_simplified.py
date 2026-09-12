@@ -35,6 +35,9 @@ def make_user(django_user_model, username="adventurer"):
     Entitlement.objects.get_or_create(
         player=get_or_create_player(user), kind="companion", slug="blue"
     )
+    Entitlement.objects.get_or_create(
+        player=get_or_create_player(user), kind="story", slug="arcane-spire"
+    )
     return user
 
 

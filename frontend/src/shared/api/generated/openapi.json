@@ -6052,6 +6052,8 @@
             },
             "OnboardingPhaseEnum": {
                 "enum": [
+                    "welcome",
+                    "orientation",
                     "stories",
                     "shop",
                     "purchase",
@@ -6060,7 +6062,7 @@
                     "done"
                 ],
                 "type": "string",
-                "description": "* `stories` - Stories\n* `shop` - Shop\n* `purchase` - Purchase\n* `home` - Home\n* `equip` - Equip\n* `done` - Done"
+                "description": "* `welcome` - Welcome\n* `orientation` - Orientation\n* `stories` - Stories\n* `shop` - Shop\n* `purchase` - Purchase\n* `home` - Home\n* `equip` - Equip\n* `done` - Done"
             },
             "PartialEnum": {
                 "enum": [

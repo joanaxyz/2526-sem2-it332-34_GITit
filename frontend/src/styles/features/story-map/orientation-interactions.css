@@ -1,0 +1,394 @@
+.orientation-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.65rem;
+}
+
+.orientation-choice {
+  display: grid;
+  min-height: 7.2rem;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-content: start;
+  gap: 0.35rem 0.7rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.9rem;
+  background: rgba(2, 9, 22, 0.45);
+  color: var(--text-secondary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out);
+}
+
+.orientation-choice > span {
+  display: grid;
+  width: 1.65rem;
+  height: 1.65rem;
+  grid-row: 1 / span 2;
+  place-items: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.orientation-choice svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.orientation-choice strong {
+  color: hsl(var(--foreground));
+  font-size: var(--text-sm);
+}
+
+.orientation-choice small {
+  color: var(--text-tertiary);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.orientation-choice:hover,
+.orientation-choice:focus-visible,
+.orientation-choice.is-selected {
+  border-color: var(--control-border-hover);
+  background: rgba(var(--theme-primary-rgb), 0.08);
+  outline: none;
+}
+
+.orientation-choice:focus-visible {
+  box-shadow: var(--control-focus-ring);
+}
+
+.orientation-choice.is-visited > span,
+.orientation-choice.is-selected > span {
+  border-color: rgba(var(--theme-primary-rgb), 0.58);
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.orientation-interaction-status {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.orientation-interaction-status.is-success {
+  color: hsl(var(--success));
+}
+
+.orientation-match-list {
+  display: grid;
+}
+
+.orientation-match-row {
+  display: grid;
+  grid-template-columns: minmax(14rem, 1fr) minmax(12rem, 18rem);
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.orientation-match-row > span {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.orientation-match-row small {
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+}
+
+.orientation-match-row select {
+  min-height: var(--control-height-md);
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  padding-inline: 0.7rem;
+  background: var(--control-bg);
+  color: hsl(var(--foreground));
+  font: inherit;
+  font-size: var(--text-sm);
+}
+
+.orientation-match-row select:focus-visible {
+  border-color: var(--control-border-hover);
+  box-shadow: var(--control-focus-ring);
+  outline: none;
+}
+
+.orientation-answer-reveal {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.orientation-answer-reveal p {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.orientation-answer-reveal svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  color: hsl(var(--success));
+}
+
+.orientation-answer-reveal strong {
+  color: hsl(var(--foreground));
+}
+
+.orientation-command-block,
+.orientation-output-block,
+.orientation-status-output,
+.orientation-error-parser > pre {
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: rgba(0, 4, 12, 0.68);
+}
+
+.orientation-command-label,
+.orientation-output-block > span {
+  display: flex;
+  min-height: 2.35rem;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.35rem 0.75rem;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+}
+
+.orientation-command-label button {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-tertiary);
+}
+
+.orientation-command-label button:hover,
+.orientation-command-label button:focus-visible {
+  border-color: var(--control-border);
+  background: var(--control-bg-hover);
+  color: hsl(var(--foreground));
+}
+
+.orientation-command-block pre,
+.orientation-output-block pre,
+.orientation-error-parser > pre {
+  overflow: auto;
+  margin: 0;
+  padding: 1rem;
+}
+
+.orientation-command-block code,
+.orientation-output-block code,
+.orientation-error-parser code,
+.orientation-status-output code {
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.orientation-output-block code {
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+}
+
+.orientation-hint {
+  font-size: var(--text-sm);
+}
+
+.orientation-status-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.orientation-status-controls button,
+.orientation-token-row button,
+.orientation-choice-row button {
+  display: inline-flex;
+  min-height: var(--control-height-sm);
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  padding: 0.4rem 0.7rem;
+  background: var(--control-bg);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: 650;
+  text-transform: capitalize;
+  cursor: pointer;
+  transition: border-color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out);
+}
+
+.orientation-status-controls button {
+  display: grid;
+  min-width: 13rem;
+  justify-items: start;
+  text-transform: none;
+}
+
+.orientation-status-controls small {
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.orientation-status-controls button:hover,
+.orientation-status-controls button:focus-visible,
+.orientation-status-controls button.is-selected,
+.orientation-token-row button:hover,
+.orientation-token-row button:focus-visible,
+.orientation-token-row button.is-selected,
+.orientation-token-row button.is-visited,
+.orientation-choice-row button:hover,
+.orientation-choice-row button:focus-visible,
+.orientation-choice-row button.is-selected {
+  border-color: var(--control-border-hover);
+  background: var(--control-bg-hover);
+  color: hsl(var(--foreground));
+  outline: none;
+}
+
+.orientation-status-controls button:focus-visible,
+.orientation-token-row button:focus-visible,
+.orientation-choice-row button:focus-visible {
+  box-shadow: var(--control-focus-ring);
+}
+
+.orientation-token-row button.is-visited {
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.orientation-status-output {
+  overflow: auto;
+  margin: 0;
+  padding: 1rem;
+}
+
+.orientation-status-output code {
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+}
+
+.orientation-status-output code span {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+  margin-inline: -0.3rem;
+  padding-inline: 0.3rem;
+  border-radius: 3px;
+}
+
+.orientation-status-output code span.is-highlighted {
+  background: rgba(var(--theme-primary-rgb), 0.12);
+  color: hsl(var(--foreground));
+}
+
+.orientation-token-row,
+.orientation-choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.orientation-token-row svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.orientation-dag-panel {
+  min-height: 18rem;
+}
+
+.orientation-built-command {
+  display: flex;
+  min-height: 4rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 0.9rem;
+  background: rgba(0, 4, 12, 0.68);
+  transition: border-color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out);
+}
+
+.orientation-built-command.is-correct {
+  border-color: hsl(var(--success) / 0.58);
+  background: hsl(var(--success) / 0.06);
+}
+
+.orientation-built-command code {
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.orientation-built-command > div {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.orientation-built-command button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-sm);
+  background: var(--control-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.orientation-built-command button:hover,
+.orientation-built-command button:focus-visible {
+  border-color: var(--control-border-hover);
+  color: hsl(var(--foreground));
+  outline: none;
+}
+
+.orientation-built-command button:focus-visible {
+  box-shadow: var(--control-focus-ring);
+}
+
+.orientation-built-command button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.orientation-built-command svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.orientation-error-parser > pre {
+  border-color: hsl(var(--warning) / 0.34);
+}
+
+.orientation-error-parser code {
+  color: hsl(var(--warning));
+}
+
+.orientation-choice-row button.is-error {
+  border-color: hsl(var(--destructive) / 0.65);
+  background: hsl(var(--destructive) / 0.08);
+  color: hsl(var(--destructive));
+}
+

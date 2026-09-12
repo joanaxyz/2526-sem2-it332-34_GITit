@@ -4,7 +4,7 @@ import type { ChapterBook } from '@/features/story-map/components/book/bookTypes
 import type {
   ChapterOrientationLessonDetail,
   ChapterOrientationLessonSummary,
-} from '@/features/story-map/orientation/types'
+} from '@/features/story-map/components/orientation/types'
 
 export const storyMapApi = {
   listStories() {

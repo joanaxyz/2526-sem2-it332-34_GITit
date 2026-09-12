@@ -8,7 +8,7 @@ export type { OnboardingPhase }
 // without waiting on the request; an account we have never seen here resolves
 // to "done", which is what keeps existing players out of the tour.
 const sessionPhases = new Map<number, OnboardingPhase>()
-export const onboardingStorageKey = (userId: number) => `git-it-app-onboarding:v3:${userId}`
+export const onboardingStorageKey = (userId: number) => `git-it-app-onboarding:v4:${userId}`
 
 export function readCachedOnboardingPhase(userId: number): OnboardingPhase | null {
   try {

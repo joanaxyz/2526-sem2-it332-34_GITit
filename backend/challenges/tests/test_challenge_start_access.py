@@ -3,6 +3,7 @@ from rest_framework.test import APIClient
 
 from challenges.models import ChallengeTrial
 from challenges.services import ChallengeRunService
+from players.services import get_or_create_player
 from shop.models import Entitlement
 
 
@@ -34,6 +35,11 @@ def test_starting_a_challenge_does_not_require_a_companion(
     )
     client = APIClient()
     client.force_authenticate(user=user)
+    Entitlement.objects.create(
+        player=get_or_create_player(user),
+        kind="story",
+        slug=trial.chapter.story.slug,
+    )
 
     response = client.post(f"/api/challenge-trials/{trial.id}/runs/")
 

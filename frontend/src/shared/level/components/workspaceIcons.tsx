@@ -50,13 +50,3 @@ export function TaskSealIcon(props: IconProps) {
     </svg>
   )
 }
-
-/** Bust silhouette for the Attempts row. */
-export function BustIcon(props: IconProps) {
-  return (
-    <svg {...base(props)}>
-      <circle cx="12" cy="8" r="3.6" />
-      <path d="M5.5 20c.9-4 3.4-6 6.5-6s5.6 2 6.5 6" />
-    </svg>
-  )
-}

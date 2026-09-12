@@ -1432,6 +1432,7 @@ def home_overview_css_source_violations(
     elif role == "stats-entry":
         expected = [
             "./stats-layout.css",
+            "./stats-kpis.css",
             "./stats-achievements.css",
             "./stats-responsive.css",
             "./continue-card.css",

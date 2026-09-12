@@ -13,8 +13,11 @@ import { walletApi } from '@/shared/wallet/api/walletApi'
 import { playerLoadoutApi } from '@/shared/player-loadout/playerLoadoutApi'
 import { preferencesApi } from '@/shared/preferences/preferencesApi'
 import type { OnboardingPhase } from '@/shared/preferences/preferences'
-import { OnboardingProvider } from './OnboardingProvider'
-import { onboardingStorageKey, writeOnboardingPhase } from './onboardingState'
+import { OnboardingProvider } from '@/features/onboarding/components/OnboardingProvider'
+import {
+  onboardingStorageKey,
+  writeOnboardingPhase,
+} from '@/features/onboarding/utils/onboardingState'
 
 vi.mock('@/features/shop/components/CompanionCombatPreview', () => ({
   CompanionPosePreview: () => null,
@@ -65,7 +68,14 @@ function StoryMap({ ready = true, compact = false }) {
     </>}
     <button data-onboarding="next-level">Level 1</button>
     <button data-onboarding="challenges" disabled>Challenge Gate</button>
-    <StoryOnboarding ready={ready} compact={compact} hasCompanion={false} />
+    <StoryOnboarding
+      ready={ready}
+      compact={compact}
+      hasCompanion={false}
+      orientationAvailable
+      onStartOrientation={() => undefined}
+      onSkipOrientation={() => undefined}
+    />
     <Link to="/shop?tab=companions">Shop tab</Link>
     <Link to="/home?tab=loadout">Home tab</Link>
   </>
@@ -106,11 +116,11 @@ beforeEach(() => {
   vi.spyOn(walletApi, 'summary').mockResolvedValue({ balance: 150 })
   vi.spyOn(shopApi, 'purchase').mockResolvedValue({ owned: true, shop: catalog(true, true), wallet: { balance: 0 } })
   vi.spyOn(playerLoadoutApi, 'equipCompanion').mockResolvedValue({ active_companion: 'blue', shop: catalog(true, true) })
-  servePhase('stories')
+  servePhase('welcome')
 })
 
 // The account's phase lives on the server; only a registration sets it to
-// "stories", so the mock stands in for what the API reports for this account.
+// "welcome", so the mock stands in for what the API reports for this account.
 function servePhase(onboarding_phase: OnboardingPhase) {
   vi.spyOn(preferencesApi, 'get').mockResolvedValue({ motion_mode: 'system', onboarding_phase })
   vi.spyOn(preferencesApi, 'update').mockImplementation(async (payload) => ({
@@ -127,6 +137,8 @@ describe('first-visit onboarding journey', () => {
   it('navigates Stories → Shop, waits for a real purchase, tours Home, and returns to Stories', async () => {
     const userId = 301
     const { unmount } = renderJourney(userId)
+    await screen.findByRole('heading', { name: 'Choose where to begin' })
+    fireEvent.click(screen.getByRole('button', { name: 'I know the basics — skip to Module 1' }))
     await screen.findByRole('heading', { name: 'Your Git journey starts here' })
     await completeTour('Visit the Shop', [
       'Read before you practice', 'Practice, then test your skills', 'Open your next level', 'Let’s choose your character',
@@ -158,8 +170,7 @@ describe('first-visit onboarding journey', () => {
     unmount()
     renderJourney(userId)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Getting started' }))
-    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Getting started' })).not.toBeInTheDocument()
   }, 20_000)
 
   it('resumes the purchase step after reload and does not advance when buying fails', async () => {
@@ -219,26 +230,35 @@ describe('first-visit onboarding journey', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     returning.unmount()
     renderJourney(307, '/stories/arcane-spire', true, true)
+    await screen.findByRole('heading', { name: 'Choose where to begin' })
+    fireEvent.click(screen.getByRole('button', { name: 'I know the basics — skip to Module 1' }))
     await screen.findByRole('heading', { name: 'Your Git journey starts here' })
     fireEvent.click(screen.getByRole('button', { name: 'Next' }))
     expect(await screen.findByText(/Open Chapter tools/)).toBeInTheDocument()
   })
 
-  it('leaves accounts the server never onboarded alone, and still offers a manual replay', async () => {
+  it('leaves accounts the server never onboarded alone without showing a setup control', async () => {
     servePhase('done')
     renderJourney(309)
     await waitFor(() => expect(preferencesApi.get).toHaveBeenCalled())
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(preferencesApi.update).not.toHaveBeenCalled()
-    fireEvent.click(screen.getByRole('button', { name: 'Getting started' }))
-    expect(await screen.findByRole('heading', { name: 'Your Git journey starts here' })).toBeInTheDocument()
-    expect(vi.mocked(preferencesApi.update).mock.calls[0][0]).toEqual({ onboarding_phase: 'stories' })
+    expect(screen.queryByRole('button', { name: 'Getting started' })).not.toBeInTheDocument()
   })
 
-  it('does not open or mark setup complete before the map is ready', () => {
+  it('automatically asks a new account where to begin before the map is ready', async () => {
     renderJourney(308, '/stories/arcane-spire', false)
+    expect(await screen.findByRole('heading', { name: 'Choose where to begin' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'I’m new — start Module 0' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Getting started' })).toBeDisabled()
-    expect(localStorage.getItem(onboardingStorageKey(308))).not.toBe('done')
+    expect(localStorage.getItem(onboardingStorageKey(308))).toBe('orientation')
+  })
+
+  it('waits for the map before opening the story tour after the starting choice', () => {
+    servePhase('stories')
+    renderJourney(310, '/stories/arcane-spire', false)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Getting started' })).not.toBeInTheDocument()
+    expect(localStorage.getItem(onboardingStorageKey(310))).not.toBe('done')
   })
 })

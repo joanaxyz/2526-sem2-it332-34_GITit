@@ -62,7 +62,6 @@ ADVENTURE_COMMAND_KEYS = {
 }
 ADVENTURE_STEP_KEYS = {"command_text", "id", "result_category", "terminal_output"}
 CHALLENGE_RUN_KEYS = {
-    "battle_stage",
     "challenge",
     "chapter",
     "completed_at",

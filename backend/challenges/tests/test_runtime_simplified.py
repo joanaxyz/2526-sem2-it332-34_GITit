@@ -9,6 +9,7 @@ from challenges.services.history import CommandHistoryCache
 from curriculum.selectors import challenge_levels_access_payload
 from players.services import get_or_create_player
 from progress.models import AdventureLevelCompletion, ChallengeTrialCompletion
+from shop.models import Entitlement
 
 
 def make_user(django_user_model, username="challenger"):
@@ -32,6 +33,12 @@ def unlock_chapter_for(user, chapter):
     from adventures.models import AdventureLevel, AdventureRun
 
     player = get_or_create_player(user)
+    if chapter.story_id:
+        Entitlement.objects.get_or_create(
+            player=player,
+            kind="story",
+            slug=chapter.story.slug,
+        )
     for level in AdventureLevel.objects.filter(
         chapter=chapter, is_published=True, is_required=True
     ):

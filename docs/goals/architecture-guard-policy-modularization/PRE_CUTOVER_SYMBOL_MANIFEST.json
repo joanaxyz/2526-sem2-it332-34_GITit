@@ -92,6 +92,7 @@
           "command_skill_count",
           "description",
           "id",
+          "is_orientation",
           "is_playable",
           "level_completion",
           "lock_reason",
@@ -104,7 +105,7 @@
         ],
         "type": "frozenset"
       },
-      "resolved_value_sha256": "ee3c47d196f8149d804f4c7ea6cf4c5b94673198b6735ebe0cf70aa45d0c871f"
+      "resolved_value_sha256": "650082913f14473025234b01b467d2f5d3a883e072dd83e5e3677958c5618ec4"
     },
     "CATALOG_FRONTEND_API": {
       "kind": "constant",
@@ -137,6 +138,7 @@
               "command_skill_count",
               "description",
               "id",
+              "is_orientation",
               "is_playable",
               "level_completion",
               "lock_reason",
@@ -171,7 +173,7 @@
         ],
         "type": "set"
       },
-      "resolved_value_sha256": "b950458942e8adf8b184cd440511f8ad92c36d4ec60417815b33f0a1a1b36495"
+      "resolved_value_sha256": "ec557c49c69f2b982e0cd8e14427b9a6b460c5b786ec757b425fba98f6b63224"
     },
     "CATALOG_STORY_FIELDS": {
       "kind": "constant",
@@ -499,7 +501,7 @@
     },
     "catalog_contract_source_violations": {
       "kind": "function",
-      "normalized_ast_sha256": "8a8a456f907542f050e2fc030d5289facfb66da68701c185fdbcc82b1ab3caea",
+      "normalized_ast_sha256": "d40ef3eb83c5e94f4e4b0fb674eeab4dfa22cb5590f5d17f1513d5348befec11",
       "owner": "scripts.checks.architecture_guard.contracts.catalog",
       "pre_cutover_lines": [
         2801,
@@ -508,7 +510,7 @@
     },
     "catalog_openapi_contract_violations": {
       "kind": "function",
-      "normalized_ast_sha256": "a96b0657884f8da5cf337647d7dc42a09f02d23d1d23e9a3b58f26378d4bc2a6",
+      "normalized_ast_sha256": "dee075151924512d3120615fbf3e9d44dd3112d1671ab8e4e467021602e101e4",
       "owner": "scripts.checks.architecture_guard.contracts.catalog",
       "pre_cutover_lines": [
         3003,
@@ -652,7 +654,7 @@
     },
     "is_catalog_contract_symbol": {
       "kind": "function",
-      "normalized_ast_sha256": "4e177479dfa04c8ad7644b98d219716afe581f73fe7b7113c354a2cbdf237702",
+      "normalized_ast_sha256": "4707551090ed6812db556ef2c45b607c67cf9267d05f381bc166eb16fc10c1ce",
       "owner": "scripts.checks.architecture_guard.contracts.catalog",
       "pre_cutover_lines": [
         1897,

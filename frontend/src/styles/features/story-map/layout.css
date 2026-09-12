@@ -41,6 +41,11 @@
   margin: 0 auto;
 }
 
+.story-map-layout--orientation {
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 21.4rem);
+  width: min(100%, 100rem);
+}
+
 .story-map-left,
 .story-map-right,
 .chapter-overview {
@@ -82,6 +87,16 @@
   position: relative;
   min-height: clamp(42rem, calc(var(--story-map-page-height) - 1.85rem), 51rem);
   isolation: isolate;
+}
+
+.story-map-stage--orientation {
+  min-width: 0;
+}
+
+.story-map-right--orientation {
+  grid-template-columns: minmax(0, 1fr);
+  max-height: none;
+  overflow: visible;
 }
 
 .story-panel-title-with-action {

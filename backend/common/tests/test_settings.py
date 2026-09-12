@@ -22,6 +22,7 @@ def run_settings_import(
             "DJANGO_CORS_ALLOWED_ORIGINS": "http://localhost:5173",
             "DJANGO_DEBUG": debug,
             "DJANGO_SECRET_KEY": "test-secret",
+            "JWT_COOKIE_SECURE": "True" if debug == "False" else "False",
             "REDIS_URL": redis_url,
         }
     )

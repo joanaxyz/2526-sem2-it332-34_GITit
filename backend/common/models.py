@@ -18,11 +18,10 @@ class VariantBase(models.Model):
     solution_commands = models.JSONField(default=list, blank=True)
     # Mid-solution workspace file edits the player performs by hand during
     # live play (e.g. resolving a merge conflict in the editor) that the
-    # offline target-state generator (frontend/scripts/generate-targets.mjs)
-    # needs to replicate since it has no human to type the edit. Each entry:
+    # offline target-state generator needs to replicate since it has no human
+    # to type the edit. Each entry:
     # {"mode": "write" | "create", "path": str, "content": str}. Optional
-    # "after_command_index" (default 0) matches generate-targets.mjs's
-    # convention for when mid-sequence the edit applies.
+    # "after_command_index" (default 0) controls when the edit applies.
     solution_workspace_files = models.JSONField(default=list, blank=True)
     case_id = models.CharField(max_length=160, blank=True)
     semantic_key = models.CharField(max_length=240, blank=True)

@@ -6,7 +6,7 @@ import { Button } from '@/shared/components/Button'
 import { GameplayWorkspaceTour, type WorkspaceTourStep } from '@/shared/level/components/GameplayWorkspaceTour'
 import { SHOP_ROUTE, storyPath } from '@/shared/navigation/routes'
 import { OnboardingBanner } from './OnboardingBanner'
-import { useAppOnboarding } from './onboardingContext'
+import { useAppOnboarding } from '@/features/onboarding/hooks/onboardingContext'
 
 export type HomeTourSection = 'overview' | 'loadout' | 'profile'
 
