@@ -24,12 +24,12 @@ EXPECTED_HASHES = {
     "chapters": "b3588181c71c0f83a053bc4c69666129d9923ca7736100c43a79156a3ca75b57",
     "commands": "5e4af04c91823d35b9d813f2715bc9fe3b83f5b36e2fa4dccd628c6beec2f0cc",
     "lessons": "f9f4b58f337841475c56bf31e12b2cd21ebb354a4f81fcd59b4e63a811b59c25",
-    # 2026-07-18: repinned after the reviewed curriculum patch restored the
-    # authored Project Files edits and regenerated the affected scenario ledgers.
-    "adventures": "f6e977dd1731ff69bff9aaede528afbe8594c3d5b1310d5af01f0932789f6939",
-    # 2026-07-27: repinned after the authored cherry-pick adaptations gained
-    # explicit workspace edits and remote-branch deletion scenarios were fixed.
-    "challenges": "ed84cf476c6db400e8d5647a24b7a6c8c3d00c467d8e65c7b93377c2f7a2d00f",
+    # 2026-09-10: repinned after git-init target metadata was corrected and
+    # generated targets were refreshed by commit 57b814d.
+    "adventures": "26c28379253375526e4601f4053513ada14b11905f95443d44b2a500f6f8b188",
+    # 2026-08-30: repinned after commit 63b92fd updated the authored challenge
+    # runtime scenarios and their generated blueprint projection.
+    "challenges": "cbff924c85c79145102ec2a299584b195b9fa66c53d7d6f6a815ac0034c38741",
 }
 
 

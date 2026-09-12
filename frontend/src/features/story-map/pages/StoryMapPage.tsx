@@ -1,11 +1,12 @@
-import { type CSSProperties, useEffect, useMemo, useState } from 'react'
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { PanelLeftOpen, PanelRightOpen, X } from 'lucide-react'
 
 import { StoryAdventurePath } from '@/features/story-map/components/path/StoryAdventurePath'
+import { useAppOnboarding } from '@/features/onboarding/hooks/onboardingContext'
 import { ChapterOverview } from '@/features/story-map/components/ChapterOverview'
-import { OrientationLessonWorkspace } from '@/features/story-map/orientation/OrientationLessonWorkspace'
+import { OrientationLessonWorkspace } from '@/features/story-map/components/orientation/OrientationLessonWorkspace'
 import { StoryChapterList } from '@/features/story-map/components/StoryChapterList'
 import { StoryOnboarding } from '@/features/story-map/components/StoryOnboarding'
 import { StoryCompanionPanel, StorySkillFocusPanel } from '@/features/story-map/components/StorySidePanels'
@@ -18,7 +19,6 @@ import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 import { useAuthStore } from '@/shared/auth/useAuth'
-import { STORIES_ROUTE } from '@/shared/navigation/routes'
 import { getStoryWorld } from '@/shared/story-worlds/registry'
 import { storyWorldStyle } from '@/shared/story-worlds/theme'
 
@@ -45,6 +45,7 @@ function useCompactStoryMap() {
 
 export function StoryMapPage() {
   const userId = useAuthStore((state) => state.user?.id)
+  const onboarding = useAppOnboarding()
   const { storySlug: routeStorySlug } = useParams<{ storySlug: string }>()
   const storySlug = routeStorySlug ?? 'git-it-legacy'
   const [searchParams] = useSearchParams()
@@ -59,6 +60,20 @@ export function StoryMapPage() {
   const storiesQuery = useStories()
 
   const chapters = useMemo(() => chaptersQuery.data ?? [], [chaptersQuery.data])
+  const orientationChapter = useMemo(
+    () => chapters.find((chapter) => chapter.is_orientation) ?? null,
+    [chapters],
+  )
+  const orientationPhaseActive = onboarding?.phase === 'orientation'
+  const orientationLessonsQuery = useQuery({
+    queryKey: queryKeys.orientationLessons(orientationChapter?.id),
+    queryFn: () => storyMapApi.listOrientationLessons(orientationChapter!.id),
+    enabled: Boolean(orientationChapter && orientationPhaseActive),
+    staleTime: 60 * 1000,
+  })
+  const orientationComplete = Boolean(
+    orientationLessonsQuery.data?.length && orientationLessonsQuery.data.every((lesson) => lesson.is_complete),
+  )
   const activeStory = useMemo(
     () => storiesQuery.data?.find((story) => story.slug === storySlug) ?? null,
     [storySlug, storiesQuery.data],
@@ -70,21 +85,47 @@ export function StoryMapPage() {
     backgroundImage: `url("${storyWorld.map?.background.src ?? '/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png'}")`,
   } as CSSProperties
   const [activeChapterId, setActiveChapterId] = useState<number | null>(null)
+  const userSelectedChapterId = useRef<number | null>(null)
   const [leftRailOpen, setLeftRailOpen] = useState(false)
   const [rightRailOpen, setRightRailOpen] = useState(false)
   const compactStoryMap = useCompactStoryMap()
+  const orientationRequested = orientationPhaseActive && !orientationComplete
 
   useEffect(() => {
-    if (!chapters.length) return
+    if (!chapters.length || (orientationRequested && orientationLessonsQuery.isPending)) return
 
     setActiveChapterId((current) => {
       if (focusedChapterId && chapters.some((chapter) => chapter.id === focusedChapterId)) {
         return focusedChapterId
       }
-      if (current && chapters.some((chapter) => chapter.id === current)) return current
-      return firstOpenChapter(chapters)?.id ?? null
+      if (current != null && chapters.some((chapter) => chapter.id === current)) {
+        if (
+          !orientationRequested
+          && current === orientationChapter?.id
+          && userSelectedChapterId.current !== current
+        ) {
+          return firstOpenChapter(chapters, true)?.id ?? current
+        }
+        if (
+          orientationRequested
+          && orientationChapter
+          && current !== orientationChapter.id
+          && userSelectedChapterId.current == null
+        ) {
+          return orientationChapter.id
+        }
+        return current
+      }
+      return firstOpenChapter(chapters, !orientationRequested)?.id ?? null
     })
-  }, [chapters, focusedChapterId])
+  }, [chapters, focusedChapterId, orientationChapter, orientationLessonsQuery.isPending, orientationRequested])
+
+  useEffect(() => {
+    if (!orientationComplete || onboarding?.phase !== 'orientation') return
+    onboarding.setPhase('stories')
+    userSelectedChapterId.current = null
+    setActiveChapterId(firstOpenChapter(chapters, true)?.id ?? null)
+  }, [chapters, onboarding, orientationComplete])
 
   useEffect(() => {
     setLeftRailOpen(false)
@@ -92,8 +133,8 @@ export function StoryMapPage() {
   }, [activeChapterId, storySlug])
 
   const activeChapter = useMemo(
-    () => chapters.find((chapter) => chapter.id === activeChapterId) ?? firstOpenChapter(chapters),
-    [activeChapterId, chapters],
+    () => chapters.find((chapter) => chapter.id === activeChapterId) ?? firstOpenChapter(chapters, !orientationRequested),
+    [activeChapterId, chapters, orientationRequested],
   )
 
   const overviewQuery = useQuery({
@@ -106,7 +147,7 @@ export function StoryMapPage() {
     staleTime: 2 * 60 * 1000,
   })
 
-  if (chaptersQuery.isLoading) {
+  if (chaptersQuery.isLoading || (orientationRequested && orientationLessonsQuery.isPending)) {
     return <LoadingState companionSlug={companionSlug} description="Preparing the story map." label="Loading map" variant="page" />
   }
   if (chaptersQuery.isError) {
@@ -123,13 +164,30 @@ export function StoryMapPage() {
   const challengesLocked = activeChapter.locked
   const leftRailHidden = compactStoryMap && !leftRailOpen
   const rightRailHidden = compactStoryMap && !rightRailOpen
+  const showingOrientation = activeChapter.is_orientation
+  const selectChapter = (chapterId: number) => {
+    userSelectedChapterId.current = chapterId
+    setActiveChapterId(chapterId)
+  }
+  const selectFirstStoryChapter = () => {
+    userSelectedChapterId.current = null
+    setActiveChapterId(firstOpenChapter(chapters, true)?.id ?? null)
+  }
+  const selectOrientationChapter = () => {
+    if (!orientationChapter) return
+    userSelectedChapterId.current = orientationChapter.id
+    setActiveChapterId(orientationChapter.id)
+  }
 
   return (
-    <div className="story-page-shell" style={storyWorldStyle(storyWorld)}>
+    <div
+      className={`story-page-shell ${compactStoryMap && (leftRailOpen || rightRailOpen) ? 'story-page-shell--rail-open' : ''}`}
+      style={storyWorldStyle(storyWorld)}
+    >
       <div className="story-map-backdrop" style={storyMapStyle} aria-hidden="true" />
 
       <div className="story-map-rail-controls" aria-label="Map panels">
-        <button
+        {!showingOrientation ? <button
           type="button"
           aria-expanded={leftRailOpen}
           aria-controls="story-map-tools"
@@ -137,7 +195,7 @@ export function StoryMapPage() {
         >
           <PanelLeftOpen aria-hidden="true" />
           Chapter tools
-        </button>
+        </button> : null}
         <button
           type="button"
           aria-expanded={rightRailOpen}
@@ -145,7 +203,7 @@ export function StoryMapPage() {
           onClick={() => setRightRailOpen((open) => !open)}
         >
           <PanelRightOpen aria-hidden="true" />
-          Story utilities
+          {showingOrientation ? 'Chapters' : 'Story utilities'}
         </button>
       </div>
 
@@ -158,8 +216,8 @@ export function StoryMapPage() {
         />
       ) : null}
 
-      <div className="story-map-layout">
-        <aside
+      <div className={`story-map-layout ${showingOrientation ? 'story-map-layout--orientation' : ''}`}>
+        {!showingOrientation ? <aside
           id="story-map-tools"
           className={`story-map-left ${leftRailOpen ? 'is-open' : ''}`}
           aria-label="Chapter tools"
@@ -170,23 +228,24 @@ export function StoryMapPage() {
             <X aria-hidden="true" />
           </button>
           <ChapterOverview chapter={{ ...activeChapter, title: chapterTitle(activeChapter) }} />
-        </aside>
+        </aside> : null}
 
-        <section className="story-map-stage" aria-label={`${activeStory?.title ?? 'Story'} chapter map`}>
-          <div className="story-switcher story-switcher--map" data-onboarding="stories">
-            <Link to={STORIES_ROUTE} className="story-link">
-              All stories
-            </Link>
-            {activeStory ? <span>{activeStory.title}</span> : null}
-            {userId != null ? (
-              <StoryOnboarding
-                key={userId}
-                ready={Boolean(overview) && !overviewQuery.isError && !loadoutLoading && !loadoutError}
-                compact={compactStoryMap}
-                hasCompanion={hasCompanion}
-              />
-            ) : null}
-          </div>
+        <section
+          className={`story-map-stage ${showingOrientation ? 'story-map-stage--orientation' : ''}`}
+          aria-label={showingOrientation ? `${activeStory?.title ?? 'Story'} onboarding` : `${activeStory?.title ?? 'Story'} chapter map`}
+          data-onboarding={!showingOrientation ? 'stories' : undefined}
+        >
+          {userId != null ? (
+            <StoryOnboarding
+              key={userId}
+              ready={!showingOrientation && Boolean(overview) && !overviewQuery.isError && !loadoutLoading && !loadoutError}
+              compact={compactStoryMap}
+              hasCompanion={hasCompanion}
+              orientationAvailable={Boolean(orientationChapter)}
+              onStartOrientation={selectOrientationChapter}
+              onSkipOrientation={selectFirstStoryChapter}
+            />
+          ) : null}
 
           <h1 className="story-map-title">{activeStory?.title ?? 'Story'}</h1>
 
@@ -207,26 +266,35 @@ export function StoryMapPage() {
 
         <aside
           id="story-map-utilities"
-          className={`story-map-right ${rightRailOpen ? 'is-open' : ''}`}
-          aria-label="Story chapters and companion"
+          className={`story-map-right ${showingOrientation ? 'story-map-right--orientation' : ''} ${rightRailOpen ? 'is-open' : ''}`}
+          aria-label={showingOrientation ? 'Chapters' : 'Story chapters and companion'}
           aria-hidden={rightRailHidden || undefined}
           inert={rightRailHidden || undefined}
         >
-          <button type="button" className="story-map-rail-close" aria-label="Close story utilities" onClick={() => setRightRailOpen(false)}>
+          <button
+            type="button"
+            className="story-map-rail-close"
+            aria-label={showingOrientation ? 'Close chapters' : 'Close story utilities'}
+            onClick={() => setRightRailOpen(false)}
+          >
             <X aria-hidden="true" />
           </button>
-          <StoryChapterList
-            chapters={chapters}
-            activeChapterId={activeChapter.id}
-            onSelectChapter={setActiveChapterId}
-          />
-          <StorySkillFocusPanel
-            levels={levels}
-            companionSlug={hasCompanion ? companionSlug : null}
-            companionLabel={hasCompanion ? companion.label : null}
-            loading={overviewQuery.isLoading}
-          />
-          <StoryCompanionPanel companion={hasCompanion ? companion : null} />
+          {!rightRailHidden ? (
+            <>
+              <StoryChapterList
+                chapters={chapters}
+                activeChapterId={activeChapter.id}
+                onSelectChapter={selectChapter}
+              />
+              {!showingOrientation ? <StorySkillFocusPanel
+                levels={levels}
+                companionSlug={hasCompanion ? companionSlug : null}
+                companionLabel={hasCompanion ? companion.label : null}
+                loading={overviewQuery.isLoading}
+              /> : null}
+              {!showingOrientation ? <StoryCompanionPanel companion={hasCompanion ? companion : null} /> : null}
+            </>
+          ) : null}
         </aside>
       </div>
     </div>

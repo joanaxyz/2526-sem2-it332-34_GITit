@@ -3,7 +3,7 @@ import { Backpack, BarChart3, ChevronLeft, ChevronRight, User } from 'lucide-rea
 import { useSearchParams } from 'react-router-dom'
 
 import { HomeLoadoutView } from '@/features/home/components/HomeLoadoutView'
-import { HomeOnboarding } from '@/features/onboarding/HomeOnboarding'
+import { HomeOnboarding } from '@/features/onboarding/components/HomeOnboarding'
 import { HomeStatsView } from '@/features/home/components/HomeStatsView'
 import type { CompanionPresentation } from '@/features/home/components/home-hub/companionPresentation'
 import { HomeProfileWorkspace } from '@/features/home/components/home-hub/HomeProfileWorkspace'

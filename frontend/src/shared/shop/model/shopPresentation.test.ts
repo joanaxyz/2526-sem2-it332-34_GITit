@@ -15,7 +15,7 @@ const baseItem = {
 } satisfies Omit<ShopItem, 'kind' | 'slug'>
 
 describe('shopPresentation', () => {
-  it('maps only render-ready story worlds through exact generated unlock fields', () => {
+  it('maps story worlds and keeps unthemed stories visible with neutral presentation', () => {
     const realStory: ShopItem = {
       ...baseItem,
       kind: 'story',
@@ -32,12 +32,18 @@ describe('shopPresentation', () => {
     const fakeStory: ShopItem = { ...baseItem, kind: 'story', slug: 'not-render-ready' }
 
     expect(hasLocalDefinition(realStory)).toBe(true)
-    expect(hasLocalDefinition(fakeStory)).toBe(false)
+    expect(hasLocalDefinition(fakeStory)).toBe(true)
     expect(toDisplayItem(realStory)).toMatchObject({
       kind: 'story',
       slug: 'arcane-spire',
       tone: 'blue',
       art: '/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png',
+    })
+    expect(toDisplayItem(fakeStory)).toMatchObject({
+      kind: 'story',
+      slug: 'not-render-ready',
+      tone: 'blue',
+      art: undefined,
     })
   })
 
@@ -53,7 +59,8 @@ describe('shopPresentation', () => {
     const sameSlugStory: ShopItem = { ...baseItem, kind: 'story', slug: 'black' }
 
     expect(hasLocalDefinition(companion)).toBe(true)
-    expect(hasLocalDefinition(sameSlugStory)).toBe(false)
+    expect(hasLocalDefinition(sameSlugStory)).toBe(true)
+    expect(toDisplayItem(sameSlugStory)).toMatchObject({ tone: 'blue', art: undefined })
     expect(toDisplayItem(companion)).toMatchObject({ tone: 'shadow' })
     expect(statusLabel(toDisplayItem(companion))).toBe('Equipped')
   })

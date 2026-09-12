@@ -28,8 +28,8 @@ import {
   type ShopDisplayItem,
 } from '@/shared/shop/model/shopPresentation'
 import { useWalletSummary } from '@/shared/wallet/hooks/useWallet'
-import { ShopOnboarding } from '@/features/onboarding/ShopOnboarding'
-import { useAppOnboarding } from '@/features/onboarding/onboardingContext'
+import { ShopOnboarding } from '@/features/onboarding/components/ShopOnboarding'
+import { useAppOnboarding } from '@/features/onboarding/hooks/onboardingContext'
 
 export function ShopPage() {
   const onboarding = useAppOnboarding()

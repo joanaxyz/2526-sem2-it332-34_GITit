@@ -49,6 +49,15 @@ def test_onboarding_phase_advances_and_rejects_unknown_phases(db, django_user_mo
     user = make_user(django_user_model, username="onboardinguser")
     client = authenticated_client(user)
 
+    orientation = client.patch(
+        "/api/player/preferences/",
+        {"onboarding_phase": "orientation"},
+        format="json",
+    )
+
+    assert orientation.status_code == status.HTTP_200_OK
+    assert orientation.json()["onboarding_phase"] == "orientation"
+
     updated = client.patch(
         "/api/player/preferences/",
         {"onboarding_phase": "shop"},

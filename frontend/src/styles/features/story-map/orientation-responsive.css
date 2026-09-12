@@ -1,0 +1,143 @@
+@media (max-width: 760px) {
+  .orientation-overview {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .orientation-course-progress {
+    flex-basis: auto;
+  }
+
+  .orientation-course-progress > span {
+    text-align: left;
+  }
+
+  .orientation-step-header {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .orientation-match-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.6rem;
+  }
+
+  .orientation-guide-note {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .orientation-model-diagram,
+  .orientation-commit-anatomy {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .orientation-overview h1 {
+    font-size: var(--text-xl);
+  }
+
+  .orientation-lesson-nav li {
+    flex-basis: 11rem;
+  }
+
+  .orientation-step-stage {
+    padding-inline: 1rem;
+  }
+
+  .orientation-step-nav,
+  .orientation-guide-note {
+    margin-inline: 1rem;
+  }
+
+  .orientation-lesson-header,
+  .orientation-completion {
+    padding-inline: 1rem;
+  }
+
+  .orientation-step-primary-action,
+  .orientation-step-content > .ui-button,
+  .orientation-interaction-stack > .ui-button,
+  .orientation-command-builder > .ui-button,
+  .orientation-error-parser > .ui-button {
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  .orientation-built-command {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .orientation-pipeline {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .orientation-pipeline-track {
+    top: 1.55rem;
+    bottom: 1.55rem;
+    left: 1.3rem;
+    width: 1px;
+    height: auto;
+  }
+
+  .orientation-pipeline-track > span {
+    display: none;
+  }
+
+  .orientation-pipeline > button {
+    grid-template-columns: 2.65rem minmax(0, 1fr);
+    justify-items: start;
+    gap: 0.15rem 0.75rem;
+    padding-block: 0.45rem;
+    text-align: left;
+  }
+
+  .orientation-pipeline-node {
+    grid-row: 1 / span 2;
+  }
+
+  .orientation-pipeline > button small {
+    max-width: none;
+  }
+
+  .orientation-distributed-map {
+    flex-wrap: wrap;
+  }
+
+  .orientation-commit-chain > div {
+    align-items: stretch;
+    flex-direction: column;
+    padding-block: 0.8rem;
+  }
+
+  .orientation-commit-chain > div > svg {
+    align-self: center;
+    transform: rotate(90deg);
+  }
+
+  .orientation-completion-actions,
+  .orientation-completion-actions .ui-button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orientation-progress-track > span,
+  .orientation-lesson-tab,
+  .orientation-lesson-tab::after,
+  .orientation-step-tab,
+  .orientation-choice,
+  .orientation-status-controls button,
+  .orientation-token-row button,
+  .orientation-choice-row button,
+  .orientation-built-command {
+    transition: none;
+  }
+
+  .orientation-pipeline-node {
+    transition: none;
+  }
+}

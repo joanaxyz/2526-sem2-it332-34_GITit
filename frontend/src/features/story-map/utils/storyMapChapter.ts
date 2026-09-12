@@ -9,11 +9,14 @@ export function chapterTitle(chapter: LearningChapter) {
   return isFoundationsChapter(chapter) ? 'Foundations' : chapter.title
 }
 
-export function firstOpenChapter(chapters: LearningChapter[]) {
+export function firstOpenChapter(chapters: LearningChapter[], skipOrientation = false) {
+  const availableChapters = skipOrientation
+    ? chapters.filter((chapter) => !chapter.is_orientation)
+    : chapters
   return (
-    chapters.find((chapter) => !chapter.locked && (chapter.level_completion?.value ?? 0) < 100) ??
-    chapters.find((chapter) => !chapter.locked) ??
-    chapters[0] ??
+    availableChapters.find((chapter) => !chapter.locked && (chapter.level_completion?.value ?? 0) < 100) ??
+    availableChapters.find((chapter) => !chapter.locked) ??
+    availableChapters[0] ??
     null
   )
 }

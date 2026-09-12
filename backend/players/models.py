@@ -27,13 +27,15 @@ class PlayerPreferences(models.Model):
         (MOTION_FULL, "Full"),
     ]
 
-    # The getting-started journey walks Stories -> Shop -> Home. It is stored
-    # per account (not in browser storage) so a returning player is never
-    # re-onboarded on a new device, and so a half-finished journey resumes.
+    # The getting-started journey offers the optional Module 0 orientation,
+    # then walks Stories -> Shop -> Home. It is stored per account (not in
+    # browser storage) so a half-finished journey resumes on any device.
     ONBOARDING_DONE = "done"
-    ONBOARDING_START = "stories"
+    ONBOARDING_START = "welcome"
     ONBOARDING_CHOICES = [
-        (ONBOARDING_START, "Stories"),
+        (ONBOARDING_START, "Welcome"),
+        ("orientation", "Orientation"),
+        ("stories", "Stories"),
         ("shop", "Shop"),
         ("purchase", "Purchase"),
         ("home", "Home"),

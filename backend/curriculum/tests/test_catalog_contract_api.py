@@ -28,6 +28,7 @@ CHAPTER_FIELDS = {
     "description",
     "sort_order",
     "is_playable",
+    "is_orientation",
     "story",
     "locked",
     "lock_reason",

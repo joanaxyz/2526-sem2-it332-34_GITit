@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Route } from 'lucide-react'
 
-import { useAppOnboarding } from './onboardingContext'
+import { useAppOnboarding } from '@/features/onboarding/hooks/onboardingContext'
 
 export function OnboardingBanner({ step, children, actions }: { step: number; children: ReactNode; actions?: ReactNode }) {
   const onboarding = useAppOnboarding()

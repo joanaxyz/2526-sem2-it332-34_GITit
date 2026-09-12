@@ -4,6 +4,7 @@ from rest_framework.test import APIClient
 from adventures.models import AdventureLevel
 from players.services import get_or_create_player
 from progress.wallet import WalletService
+from shop.models import Entitlement
 
 
 def make_user(django_user_model, username: str = "adventurer"):
@@ -55,6 +56,7 @@ def _authenticated_client_with_companion(django_user_model, username: str = "adv
     client = APIClient()
     client.force_authenticate(user=user)
     client.post("/api/shop/catalog/purchase/", {"kind": "companion", "slug": "blue"}, format="json")
+    Entitlement.objects.get_or_create(player=player, kind="story", slug="arcane-spire")
     return client, player
 
 
@@ -79,13 +81,14 @@ def test_buying_a_companion_unlocks_adventure_start(db, django_user_model):
     client = APIClient()
     client.force_authenticate(user=user)
 
+    Entitlement.objects.create(player=player, kind="story", slug="arcane-spire")
     client.post("/api/shop/catalog/purchase/", {"kind": "companion", "slug": "blue"}, format="json")
     response = client.post(f"/api/adventure-levels/{level.id}/runs/")
 
     assert response.status_code == 201
 
 
-def test_starting_a_later_level_before_the_previous_one_is_locked(db, django_user_model):
+def test_starting_a_later_level_does_not_require_sequential_completion(db, django_user_model):
     call_command("seed_curriculum")
     first, second = two_levels_in_one_adventure()
     assert first is not None and second is not None
@@ -93,7 +96,7 @@ def test_starting_a_later_level_before_the_previous_one_is_locked(db, django_use
 
     response = client.post(f"/api/adventure-levels/{second.id}/runs/")
 
-    assert response.status_code == 423
+    assert response.status_code == 201
 
 
 def test_completing_the_previous_level_unlocks_the_next_one(db, django_user_model):

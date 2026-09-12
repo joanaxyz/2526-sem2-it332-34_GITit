@@ -1,16 +1,27 @@
-import { BookOpen, CircleHelp, GitBranch, Play, Sparkles, Swords } from 'lucide-react'
+import { BookOpen, GitBranch, Play, Sparkles, Swords } from 'lucide-react'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { useAppOnboarding } from '@/features/onboarding/onboardingContext'
+import { useAppOnboarding } from '@/features/onboarding/hooks/onboardingContext'
 import { Button } from '@/shared/components/Button'
 import { GameplayWorkspaceTour, type WorkspaceTourStep } from '@/shared/level/components/GameplayWorkspaceTour'
-import { HOME_ROUTE, SHOP_ROUTE } from '@/shared/navigation/routes'
+import { Modal } from '@/shared/components/Modal'
+import { SHOP_ROUTE } from '@/shared/navigation/routes'
 
-export function StoryOnboarding({ ready, compact, hasCompanion }: {
+export function StoryOnboarding({
+  ready,
+  compact,
+  hasCompanion,
+  orientationAvailable,
+  onStartOrientation,
+  onSkipOrientation,
+}: {
   ready: boolean
   compact: boolean
   hasCompanion: boolean
+  orientationAvailable: boolean
+  onStartOrientation: () => void
+  onSkipOrientation: () => void
 }) {
   const onboarding = useAppOnboarding()
   const navigate = useNavigate()
@@ -59,17 +70,40 @@ export function StoryOnboarding({ ready, compact, hasCompanion }: {
   ] satisfies WorkspaceTourStep[], [compact, hasCompanion])
 
   if (!onboarding) return null
-  const resuming = !['stories', 'done'].includes(onboarding.phase)
+
+  function startOrientation() {
+    onboarding!.setPhase('orientation')
+    onStartOrientation()
+  }
+
+  function skipOrientation() {
+    onboarding!.setPhase('stories')
+    onSkipOrientation()
+  }
 
   return (
     <>
-      <Button type="button" variant="ghost" size="sm" disabled={!ready} onClick={() => {
-        if (resuming) navigate(['shop', 'purchase'].includes(onboarding.phase) ? `${SHOP_ROUTE}?tab=companions` : `${HOME_ROUTE}?tab=loadout`)
-        else onboarding.setPhase('stories')
-      }}>
-        <CircleHelp aria-hidden="true" />
-        {resuming ? 'Continue setup' : 'Getting started'}
-      </Button>
+      <Modal
+        open={onboarding.phase === 'welcome'}
+        title="Choose where to begin"
+        className="story-onboarding-choice"
+        contentClassName="story-onboarding-choice__content"
+        onClose={skipOrientation}
+      >
+        <p>
+          Module 0 is a guided introduction to Git and how GIT it! works. Take it if you are new to Git or want a refresher; otherwise, continue directly to Module 1.
+        </p>
+        <div className="story-onboarding-choice__actions">
+          {orientationAvailable ? (
+            <Button type="button" onClick={startOrientation}>I’m new — start Module 0</Button>
+          ) : null}
+          <Button type="button" variant="outline" onClick={skipOrientation}>
+            I know the basics — skip to Module 1
+          </Button>
+        </div>
+        <small>You can open Module 0 later from the Chapters dropdown.</small>
+      </Modal>
+
       {ready && onboarding.phase === 'stories' ? (
         <GameplayWorkspaceTour
           label="Welcome tour"

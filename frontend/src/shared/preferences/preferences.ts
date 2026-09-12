@@ -1,7 +1,9 @@
 export type MotionMode = 'system' | 'reduced' | 'full'
-export type OnboardingPhase = 'stories' | 'shop' | 'purchase' | 'home' | 'equip' | 'done'
+export type OnboardingPhase = 'welcome' | 'orientation' | 'stories' | 'shop' | 'purchase' | 'home' | 'equip' | 'done'
 
-export const onboardingPhases: readonly OnboardingPhase[] = ['stories', 'shop', 'purchase', 'home', 'equip', 'done']
+export const onboardingPhases: readonly OnboardingPhase[] = [
+  'welcome', 'orientation', 'stories', 'shop', 'purchase', 'home', 'equip', 'done',
+]
 
 /** What this browser stores and applies to the document. */
 export type PlayerPreferences = {

@@ -6,6 +6,7 @@ from rest_framework.test import APIClient
 from curriculum.models import Chapter
 from curriculum.selectors import chapter_content_overview
 from players.services import get_or_create_player
+from shop.models import Entitlement
 
 
 def _make_user(django_user_model, username: str = "track-student"):
@@ -63,6 +64,9 @@ def test_chapter_overview_api_does_not_fall_back_to_locked_placeholders(db, djan
     client = APIClient()
     client.force_authenticate(user=user)
     chapter = _first_seeded_chapter()
+    Entitlement.objects.create(
+        player=get_or_create_player(user), kind="story", slug=chapter.story.slug
+    )
 
     response = client.get(f"/api/chapters/{chapter.id}/overview/")
 

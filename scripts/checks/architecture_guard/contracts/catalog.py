@@ -69,6 +69,7 @@ CATALOG_CHAPTER_FIELDS = frozenset(
         "description",
         "sort_order",
         "is_playable",
+        "is_orientation",
         "command_skill_count",
         "challenge_count",
         "adventure_level_count",
@@ -90,6 +91,8 @@ def is_catalog_contract_symbol(name: str) -> bool:
     ):
         return False
     normalized = name.lower()
+    if "orientation" in normalized:
+        return False
     domain_named = "story" in normalized or "chapter" in normalized
     contract_named = any(
         marker in normalized
@@ -438,6 +441,7 @@ def catalog_contract_source_violations(
             "description": "serializers.CharField(read_only=True)",
             "sort_order": "serializers.IntegerField(read_only=True)",
             "is_playable": "serializers.BooleanField(read_only=True)",
+            "is_orientation": "serializers.BooleanField(read_only=True)",
             "command_skill_count": "serializers.IntegerField(read_only=True)",
             "challenge_count": "serializers.IntegerField(read_only=True)",
             "adventure_level_count": "serializers.IntegerField(read_only=True)",
@@ -634,6 +638,7 @@ def catalog_openapi_contract_violations(schema: dict) -> list[str]:
             "description": {"type": "string", "readOnly": True},
             "sort_order": {"type": "integer", "readOnly": True},
             "is_playable": {"type": "boolean", "readOnly": True},
+            "is_orientation": {"type": "boolean", "readOnly": True},
             "command_skill_count": {"type": "integer", "readOnly": True},
             "challenge_count": {"type": "integer", "readOnly": True},
             "adventure_level_count": {"type": "integer", "readOnly": True},

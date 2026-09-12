@@ -3,7 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 
 import { startBackgroundMusic, stopBackgroundMusic } from '@/shared/audio/battleAudio'
 import { CursorGlow } from '@/shared/components/CursorGlow'
-import { OnboardingProvider } from '@/features/onboarding/OnboardingProvider'
+import { OnboardingProvider } from '@/features/onboarding/components/OnboardingProvider'
 import { useAuthStore } from '@/shared/auth/useAuth'
 import { AppMobileNav, AppTopbar } from '@/shared/navigation/AppNavigation'
 import { isStoryMapRoute } from '@/shared/navigation/routes'
