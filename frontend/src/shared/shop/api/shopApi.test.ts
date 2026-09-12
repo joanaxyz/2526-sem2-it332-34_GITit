@@ -30,19 +30,16 @@ describe('shopApi', () => {
   })
 
   it('keeps purchases explicit in the generated request payload', () => {
-    shopApi.purchase('story', 'arcane-spire')
+    shopApi.purchase('companion', 'blue')
 
     expect(mockedApiRequest).toHaveBeenCalledWith(
       'shop_catalog_purchase_create',
       '/shop/catalog/purchase/',
-      { body: { kind: 'story', slug: 'arcane-spire' } },
+      { body: { kind: 'companion', slug: 'blue' } },
     )
   })
 
-  it('derives story unlock difficulty from the generated contract', () => {
-    type StoryUnlock = NonNullable<ShopCatalog['items'][number]['unlocks_story']>
-    expectTypeOf<StoryUnlock['difficulty']>().toEqualTypeOf<
-      'beginner' | 'intermediate' | 'advanced'
-    >()
+  it('sells companions and nothing else, per the generated contract', () => {
+    expectTypeOf<ShopCatalog['items'][number]['kind']>().toEqualTypeOf<'companion'>()
   })
 })
