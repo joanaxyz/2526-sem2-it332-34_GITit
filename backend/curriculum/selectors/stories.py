@@ -86,8 +86,10 @@ def story_locked(
     from shop.access import owns_item
     from shop.catalog import KIND_STORY
 
+    reasons = []
+
     if not owns_item(player=player, kind=KIND_STORY, slug=story.slug):
-        return True, f"Buy {story.title} in the Shop to unlock this story."
+        reasons.append(f"Buy {story.title} in the Shop to unlock this story.")
 
     prerequisite = story.prerequisite_story
     if prerequisite is not None:
@@ -96,9 +98,12 @@ def story_locked(
         else:
             prerequisite_completed = story_completed(player=player, story=prerequisite)
         if not prerequisite_completed:
-            return True, (
+            reasons.append(
                 f"Master every command in {prerequisite.title} before entering {story.title}."
             )
+
+    if reasons:
+        return True, " ".join(reasons)
     return False, ""
 
 
