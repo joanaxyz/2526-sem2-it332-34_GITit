@@ -1,4 +1,4 @@
-export type LevelTourMode = 'adventure' | 'challenge'
+export type LevelTourMode = 'adventure' | 'challenge' | 'tier'
 
 const LEVEL_TOUR_VERSION = 'v3'
 

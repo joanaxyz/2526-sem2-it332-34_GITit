@@ -9,11 +9,9 @@ STORY_FIELDS = {
     "slug",
     "title",
     "summary",
-    "price",
     "sort_order",
     "is_published",
     "completed",
-    "owned",
     "world_slug",
     "difficulty",
     "prerequisite_story",
@@ -57,7 +55,6 @@ def create_catalog():
         slug="foundation",
         title="Foundation",
         summary="Start here.",
-        price=0,
         sort_order=1,
         world_slug="arcane-spire",
         difficulty=Story.DIFFICULTY_BEGINNER,
@@ -66,7 +63,6 @@ def create_catalog():
         slug="summit",
         title="Summit",
         summary="Climb higher.",
-        price=250,
         sort_order=2,
         world_slug="frostbound-citadel",
         difficulty=Story.DIFFICULTY_ADVANCED,
@@ -114,7 +110,6 @@ def test_story_catalog_response_has_exact_nested_contract(authenticated_client):
     }
     assert rows[sequel.slug]["difficulty"] == Story.DIFFICULTY_ADVANCED
     assert rows[sequel.slug]["summary"] == "Climb higher."
-    assert rows[sequel.slug]["price"] == 250
     assert (
         rows[sequel.slug]
         == StorySerializer(

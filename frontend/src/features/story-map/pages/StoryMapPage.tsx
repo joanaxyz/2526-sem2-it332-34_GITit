@@ -168,10 +168,18 @@ export function StoryMapPage() {
   const selectChapter = (chapterId: number) => {
     userSelectedChapterId.current = chapterId
     setActiveChapterId(chapterId)
+    // Walking out of Module 0 by hand is how a player says they are done with
+    // it. Without this the journey stalls in "orientation" forever: the story
+    // tour only runs from "stories", so the map would show no tutorial at all.
+    if (onboarding?.phase === 'orientation' && chapterId !== orientationChapter?.id) onboarding.setPhase('stories')
   }
   const selectFirstStoryChapter = () => {
     userSelectedChapterId.current = null
     setActiveChapterId(firstOpenChapter(chapters, true)?.id ?? null)
+  }
+  const leaveOrientation = () => {
+    if (onboarding?.phase === 'orientation') onboarding.setPhase('stories')
+    selectFirstStoryChapter()
   }
   const selectOrientationChapter = () => {
     if (!orientationChapter) return
@@ -250,7 +258,7 @@ export function StoryMapPage() {
           <h1 className="story-map-title">{activeStory?.title ?? 'Story'}</h1>
 
           {activeChapter.is_orientation ? (
-            <OrientationLessonWorkspace chapter={activeChapter} />
+            <OrientationLessonWorkspace chapter={activeChapter} onLeaveModule={leaveOrientation} />
           ) : overviewQuery.isError ? (
             <ErrorState title="Could not load chapter levels" description={overviewQuery.error.message} />
           ) : (
