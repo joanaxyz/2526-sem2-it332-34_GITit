@@ -154,7 +154,7 @@ describe('first-visit onboarding journey', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Visit Home' }))
     expect(shopApi.purchase).toHaveBeenCalledExactlyOnceWith('companion', 'blue')
     await screen.findByRole('heading', { name: 'Home is one dropdown' })
-    await completeTour('Show Profile', ['Progress is what you see first'])
+    await completeTour('Show Profile', ['Your progress'])
     await screen.findByRole('heading', { name: 'The rank ladder' })
     for (const heading of ['Your rank progress', 'Your companion', 'Spells you have learned']) {
       fireEvent.click(screen.getByRole('button', { name: 'Next' }))
@@ -187,7 +187,7 @@ describe('first-visit onboarding journey', () => {
     renderJourney(303, '/shop')
     fireEvent.click(await screen.findByRole('button', { name: 'Visit Home' }))
     await screen.findByRole('heading', { name: 'Home is one dropdown' })
-    await completeTour('Show Profile', ['Progress is what you see first'])
+    await completeTour('Show Profile', ['Your progress'])
     await screen.findByRole('heading', { name: 'The rank ladder' })
     await completeTour('Equip a companion', ['Your rank progress', 'Your companion', 'Spells you have learned'])
     expect(screen.queryByRole('button', { name: 'Return to Stories' })).not.toBeInTheDocument()

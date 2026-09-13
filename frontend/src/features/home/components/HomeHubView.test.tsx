@@ -183,21 +183,35 @@ describe('HomeHubView contract', () => {
     window.sessionStorage.clear()
   })
 
-  it('treats an invalid view as Progress and replaces only the view parameter', () => {
+  it('treats an invalid view as Profile and replaces only the view parameter', () => {
     const { router } = renderHub('/home?campaign=alpha&view=invalid')
 
-    expect(switcher()).toHaveTextContent('Progress')
-    expect(screen.getByTestId('home-stats-view')).toHaveAttribute('data-view', 'progress')
-    expect(profileWorkspace()).toHaveAttribute('hidden')
-
-    openView('Profile')
-    expect(router.state.location.search).toBe('?campaign=alpha&view=profile')
-    expect(router.state.historyAction).toBe('REPLACE')
+    expect(switcher()).toHaveTextContent('Profile')
+    expect(screen.queryByTestId('home-stats-view')).not.toBeInTheDocument()
     expect(profileWorkspace()).not.toHaveAttribute('hidden')
 
     openView('Progress')
+    expect(router.state.location.search).toBe('?campaign=alpha&view=progress')
+    expect(router.state.historyAction).toBe('REPLACE')
+    expect(screen.getByTestId('home-stats-view')).toHaveAttribute('data-view', 'progress')
+    expect(profileWorkspace()).toHaveAttribute('hidden')
+
+    // Profile is the default, so selecting it drops the parameter entirely.
+    openView('Profile')
     expect(router.state.location.search).toBe('?campaign=alpha')
     expect(router.state.historyAction).toBe('REPLACE')
+  })
+
+  it('opens on Profile, with Profile first in the dropdown', () => {
+    renderHub()
+
+    expect(switcher()).toHaveTextContent('Profile')
+    expect(profileWorkspace()).not.toHaveAttribute('hidden')
+
+    fireEvent.click(switcher())
+    expect(
+      screen.getAllByRole('option').map((option) => option.querySelector('strong')?.textContent),
+    ).toEqual(['Profile', 'Progress', 'Skills & achievements'])
   })
 
   it('hands each data category to the stats view and renders no tab strip', () => {
@@ -229,7 +243,7 @@ describe('HomeHubView contract', () => {
     fireEvent.keyDown(listbox, { key: 'End' })
     fireEvent.keyDown(listbox, { key: 'Enter' })
 
-    expect(router.state.location.search).toBe('?view=profile')
+    expect(router.state.location.search).toBe('?view=skills')
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
   })
 
@@ -241,7 +255,7 @@ describe('HomeHubView contract', () => {
 
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
     expect(router.state.location.search).toBe('')
-    expect(switcher()).toHaveTextContent('Progress')
+    expect(switcher()).toHaveTextContent('Profile')
   })
 
   it('keeps an empty loadout explicit', () => {

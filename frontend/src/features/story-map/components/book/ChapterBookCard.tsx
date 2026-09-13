@@ -1,4 +1,3 @@
-import { BookOpen } from 'lucide-react'
 import { useState } from 'react'
 
 import fieldGuideBookImage from '@/assets/images/book.png'
@@ -36,10 +35,6 @@ export function ChapterBookCard({
           <span className="chapter-book-title">Chapter Book</span>
           <span className="chapter-book-sub">
             {commandCount} {commandCount === 1 ? 'command' : 'commands'}
-          </span>
-          <span className="chapter-book-cta">
-            <BookOpen className="size-4" aria-hidden="true" />
-            Open Field Guide
           </span>
         </span>
       </GamePanel>

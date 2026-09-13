@@ -1,0 +1,351 @@
+/* ============================================================
+   APP CHROME — the instrument rail
+   The persistent topbar: the brand sigil, the nav blade with its
+   traveling light, and the account readout. Light is the only
+   ornament here; the shapes stay hairline slabs.
+   ============================================================ */
+
+.app-topbar {
+  position: sticky;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 45;
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) auto minmax(19rem, 1fr);
+  align-items: center;
+  min-height: var(--app-topbar-height);
+  background: #030a17;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
+  transition:
+    background var(--motion-slow) var(--ease-out),
+    box-shadow var(--motion-slow) var(--ease-out);
+}
+
+/* A lit leading edge, brightest at the centre: the rail is a lamp, not a border. */
+.app-topbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: var(--panel-lightbar);
+  opacity: 0.55;
+  transition: opacity var(--motion-slow) var(--ease-out);
+}
+
+.app-topbar::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--theme-primary-rgb), 0.05),
+    rgba(var(--theme-primary-rgb), 0.26) 28%,
+    rgba(var(--theme-primary-rgb), 0.26) 72%,
+    rgba(var(--theme-primary-rgb), 0.05)
+  );
+}
+
+/* Having left the top of the page is a state, so the rail earns depth for it. */
+.app-topbar[data-scrolled] {
+  background: #01060f;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+}
+
+.app-topbar[data-scrolled]::before {
+  opacity: 1;
+}
+
+.app-brand,
+.app-nav-link,
+.app-wallet,
+.app-profile-trigger,
+.app-profile-menu-item {
+  text-decoration: none;
+}
+
+/* Rail segments run the bar's full height, so the focus ring is drawn inside
+   the rail rather than overflowing above and below it. */
+.app-brand:focus-visible,
+.app-nav-link:focus-visible,
+.app-audio-control:focus-visible,
+.app-wallet:focus-visible,
+.app-profile-trigger:focus-visible {
+  outline-offset: -2px;
+}
+
+/* ---------- Brand lockup ---------- */
+
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
+  gap: 0.66rem;
+  width: fit-content;
+  min-width: 13.5rem;
+  padding: 0 1.1rem;
+  border-right: 1px solid rgba(var(--theme-primary-rgb), 0.16);
+  color: var(--text-primary);
+}
+
+/* The logo sits in a lit plate, so it reads as an inlaid emblem. */
+.app-brand-sigil {
+  position: relative;
+  display: grid;
+  flex: 0 0 auto;
+  width: 2.45rem;
+  height: 2.45rem;
+  place-items: center;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.28);
+  border-radius: 999px;
+  background: #0a1729;
+  transition:
+    border-color var(--motion-normal) var(--ease-out),
+    box-shadow var(--motion-normal) var(--ease-out);
+}
+
+.app-brand-sigil img {
+  width: 1.85rem;
+  height: 1.85rem;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(var(--theme-primary-rgb), 0.45));
+}
+
+.app-brand:hover .app-brand-sigil,
+.app-brand:focus-visible .app-brand-sigil {
+  border-color: rgba(var(--theme-primary-rgb), 0.7);
+  box-shadow: var(--glow-active);
+}
+
+.app-brand-copy {
+  display: block;
+  min-width: 0;
+}
+
+.app-brand strong {
+  display: block;
+  /* Cinzel is scoped to this wordmark only - --font-display stays Chakra
+     Petch for every other heading (settings, shop, story-map, etc.). */
+  font-family: 'Cinzel', serif;
+  font-size: 1.42rem;
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.015em;
+}
+
+/* The machine voice under the display voice: the lockup pairs two contrasting
+   families instead of two sizes of the same one. */
+.app-brand small {
+  display: block;
+  margin-top: 0.2rem;
+  color: hsl(var(--muted-foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
+  transition: color var(--motion-normal) var(--ease-out);
+}
+
+.app-brand:hover small,
+.app-brand:focus-visible small {
+  color: rgb(var(--theme-primary-soft-rgb));
+}
+
+/* ---------- Nav blade ---------- */
+
+.app-nav {
+  --nav-item-width: 8.4rem;
+
+  position: relative;
+  /* Above the rail's own bottom hairline so the keel strikes over it. */
+  z-index: 1;
+  display: grid;
+  grid-auto-flow: column;
+  /* Fixed columns: the active item gets a heavier weight without nudging its
+     neighbours, which keeps the traveling light on a straight line. */
+  grid-auto-columns: var(--nav-item-width);
+  align-self: stretch;
+  justify-self: center;
+  height: 100%;
+}
+
+/* One light travels between items; the links themselves never fill. The lit
+   bay runs the rail's full height and keels onto its bottom hairline, so the
+   current page is marked by light rather than by a box drawn around a label. */
+.app-nav-light {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--nav-light-w, 0);
+  transform: translate3d(var(--nav-light-x, 0px), 0, 0);
+  opacity: var(--nav-light-opacity, 0);
+  background: rgba(var(--theme-primary-rgb), 0.07);
+  pointer-events: none;
+}
+
+.app-nav-light::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-right: 1px solid rgba(var(--theme-primary-rgb), 0.14);
+  border-left: 1px solid rgba(var(--theme-primary-rgb), 0.14);
+}
+
+.app-nav-light::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: rgb(var(--theme-primary-rgb));
+  box-shadow:
+    0 0 10px rgba(var(--theme-primary-rgb), 0.9),
+    0 0 26px rgba(var(--theme-primary-rgb), 0.45);
+}
+
+/* Travel is armed one frame after the first placement so the light never
+   slides in from the rail's left edge on load. */
+.app-nav[data-travel='on'] .app-nav-light {
+  transition:
+    transform 400ms var(--ease-out),
+    width 400ms var(--ease-out),
+    opacity var(--motion-normal) var(--ease-out);
+}
+
+.app-nav-link {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-sm);
+  font-weight: 600;
+  transition:
+    color var(--motion-normal) var(--ease-out),
+    background var(--motion-normal) var(--ease-out);
+}
+
+.app-nav-link-label {
+  white-space: nowrap;
+}
+
+.app-nav-link svg {
+  width: 1rem;
+  height: 1rem;
+  transition:
+    color var(--motion-normal) var(--ease-out),
+    filter var(--motion-normal) var(--ease-out);
+}
+
+.app-nav-link:hover {
+  color: var(--text-primary);
+  background: rgba(var(--theme-primary-rgb), 0.05);
+}
+
+.app-nav-link:focus-visible {
+  color: var(--text-primary);
+}
+
+.app-nav-link.is-active {
+  color: #f4fbff;
+  font-weight: 800;
+}
+
+.app-nav-link.is-active svg {
+  color: rgb(var(--theme-primary-rgb));
+  filter: drop-shadow(0 0 6px rgba(var(--theme-primary-rgb), 0.6));
+}
+
+/* ---------- Mobile bar ---------- */
+
+.app-mobile-nav {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .app-mobile-nav {
+    position: fixed;
+    right: 0.65rem;
+    bottom: calc(0.65rem + env(safe-area-inset-bottom));
+    left: 0.65rem;
+    z-index: var(--z-sticky);
+    display: grid;
+    grid-template-columns: repeat(var(--mobile-nav-count, 3), minmax(0, 1fr));
+    border: 1px solid rgba(var(--theme-primary-rgb), 0.3);
+    border-radius: var(--radius-lg);
+    background: var(--surface-overlay);
+    box-shadow: var(--shadow-overlay), var(--panel-inset);
+    backdrop-filter: blur(14px);
+  }
+
+  .app-mobile-nav.has-admin {
+    --mobile-nav-count: 4;
+  }
+
+  /* The same traveling light as the desktop blade, hung from the top edge. */
+  .app-mobile-nav .app-nav-light {
+    top: 0.2rem;
+    bottom: 0.2rem;
+    border-radius: var(--radius-sm);
+    background: rgba(var(--theme-primary-rgb), 0.1);
+  }
+
+  .app-mobile-nav .app-nav-light::before {
+    border: 0;
+  }
+
+  /* The keel hangs from the top edge here, where the bar's own edge is. */
+  .app-mobile-nav .app-nav-light::after {
+    top: 0;
+    right: 24%;
+    bottom: auto;
+    left: 24%;
+    border-radius: 999px;
+  }
+
+  .app-mobile-nav-link {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    min-width: 0;
+    min-height: 3.65rem;
+    place-items: center;
+    gap: 0.2rem;
+    padding: 0.45rem 0.25rem;
+    color: var(--text-tertiary);
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color var(--motion-normal) var(--ease-out);
+  }
+
+  .app-mobile-nav-link:focus-visible {
+    outline-offset: -3px;
+  }
+
+  .app-mobile-nav-link svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .app-mobile-nav-link.is-active {
+    color: #f4fbff;
+    font-weight: 800;
+  }
+
+  .app-mobile-nav-link.is-active svg {
+    color: rgb(var(--theme-primary-rgb));
+    filter: drop-shadow(0 0 6px rgba(var(--theme-primary-rgb), 0.6));
+  }
+}

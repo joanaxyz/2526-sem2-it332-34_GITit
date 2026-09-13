@@ -8,6 +8,7 @@ import { StoryAdventurePath } from '@/features/story-map/components/path/StoryAd
 import { GamePanel } from '@/shared/components/GamePanel'
 import type {
   AdventureLevelSummary,
+  AdventureLevelTierAccess,
   ChallengeSummary,
   LearningChapter,
 } from '@/features/story-map/types'
@@ -82,12 +83,50 @@ const PREVIEW_CHAPTERS: LearningChapter[] = [
 ]
 const PREVIEW_NEXT_SKILL = { command: 'git add', level: 3, title: 'Stage and Commit' }
 
+const PREVIEW_LEVEL_TITLES = [
+  'Initializing Repositories',
+  'Reading Repository State',
+  'Stage and Commit',
+  'Inspecting History',
+  'Undoing Working Changes',
+  'Ignoring Untracked Noise',
+]
+
+const PREVIEW_LEVEL_BRIEFS = [
+  'Create Git metadata in an existing or named project folder.',
+  'Read what Git already knows before you change anything.',
+  'Move work from the worktree into a commit that sticks.',
+  'Walk the commit log and read the shape of the DAG.',
+  'Roll back a worktree edit without touching history.',
+  'Keep generated files out of the repository for good.',
+]
+
+// Three tiers per level, staged so the preview shows every state the tier
+// popover has to render: cleared, in progress, and locked-behind-the-last.
+function previewTiers(levelIndex: number): AdventureLevelTierAccess[] {
+  const totals = [1, 2, 2]
+  return (['easy', 'medium', 'hard'] as const).map((difficulty, tierIndex) => {
+    const total = totals[tierIndex]
+    const cleared = levelIndex < 4 || (levelIndex === 4 && tierIndex === 0)
+    const inProgress = levelIndex === 4 && tierIndex === 1
+    return {
+      id: levelIndex * 10 + tierIndex + 1,
+      difficulty,
+      locked: !cleared && !inProgress && !(levelIndex === 4 && tierIndex === 1),
+      wave_progress: { completed: cleared ? total : inProgress ? 1 : 0, total },
+      completion: cleared
+        ? { stars: 3 - tierIndex, counted_action_total: 1, completed_at: '2026-08-25T00:00:00Z' }
+        : null,
+    }
+  })
+}
+
 const PREVIEW_LEVELS: AdventureLevelSummary[] = Array.from({ length: 6 }, (_, index) => ({
   item_type: 'adventure',
   id: index + 1,
   slug: `preview-level-${index + 1}`,
-  title: `Preview Level ${index + 1}`,
-  description: '',
+  title: PREVIEW_LEVEL_TITLES[index],
+  description: PREVIEW_LEVEL_BRIEFS[index],
   command: index < 2 ? 'git init' : 'git add',
   locked: false,
   lock_reason: '',
@@ -101,7 +140,7 @@ const PREVIEW_LEVELS: AdventureLevelSummary[] = Array.from({ length: 6 }, (_, in
   // Keep the preview focused on the unlocked Challenge Gate while preserving
   // the mixed star state used to assess the map's visual hierarchy.
   is_passed: true,
-  tiers: [],
+  tiers: previewTiers(index),
 }))
 
 const PREVIEW_CHALLENGES: ChallengeSummary[] = [

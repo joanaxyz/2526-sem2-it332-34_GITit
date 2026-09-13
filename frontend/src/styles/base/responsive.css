@@ -1,23 +1,22 @@
+/* Breakpoints for the app chrome. The rail sheds copy before it sheds
+   controls, and the nav blade only hands over to the mobile bar at 720px. */
+
 @media (max-width: 1280px) {
   .app-topbar {
-    grid-template-columns: minmax(9rem, auto) minmax(0, 1fr) auto;
+    grid-template-columns: minmax(9rem, 1fr) auto minmax(16rem, 1fr);
   }
 
   .app-brand {
-    min-width: 9.5rem;
-    padding-inline: 0.72rem;
+    min-width: 0;
+    padding-inline: 0.85rem;
   }
 
   .app-brand small {
     display: none;
   }
 
-  .app-nav-link {
-    min-width: 5.8rem;
-  }
-
-  .app-account {
-    margin-right: 0.55rem;
+  .app-nav {
+    --nav-item-width: 7.2rem;
   }
 
   .app-profile-trigger {
@@ -29,32 +28,43 @@
   }
 }
 
-@media (max-width: 980px) {
-  .app-brand {
-    min-width: auto;
+@media (max-width: 900px) {
+  .app-nav {
+    --nav-item-width: 4.2rem;
   }
 
-  .app-brand > span {
-    display: none;
-  }
-
-  .app-nav-link {
-    min-width: 4rem;
-    font-size: 0;
+  /* Icon-only bays: the label stays in the accessibility tree so the link
+     keeps its name. Scoped to the rail - the mobile bar keeps its labels. */
+  .app-nav .app-nav-link-label {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    clip: rect(0, 0, 0, 0);
   }
 
   .app-nav-link svg {
-    width: 1.1rem;
-    height: 1.1rem;
+    width: 1.15rem;
+    height: 1.15rem;
   }
 
   .app-wallet {
     min-width: auto;
   }
 
-  /* The topbar chip is the only GitCoin balance in the app, so the number
+  /* The rail's coin chip is the only GitCoin balance in the app, so the number
      survives every breakpoint - the coin icon carries the label instead. */
   .app-wallet small {
+    display: none;
+  }
+}
+
+/* The wordmark is the last thing to go, after the labels it outranks. */
+@media (max-width: 800px) {
+  .app-brand-copy {
     display: none;
   }
 }
@@ -73,55 +83,67 @@
   }
 
   .app-brand {
-    min-width: 0;
-    padding-left: 0.65rem;
+    padding-inline: 0.7rem 0.5rem;
+    border-right: 0;
   }
 
-  .app-brand > span {
+  .app-brand-copy {
     display: block;
   }
 
   .app-brand strong {
-    font-size: 1.3rem;
-  }
-
-  .app-account {
-    height: 2.45rem;
-    margin-right: 0.45rem;
+    font-size: 1.26rem;
   }
 
   .app-audio-control {
-    width: 2.25rem;
-    min-width: 2.25rem;
+    width: 2.2rem;
+    min-width: 2.2rem;
   }
 
-  .app-wallet,
+  .app-wallet {
+    padding-inline: 0.6rem;
+  }
+
   .app-profile-trigger {
-    padding-inline: 0.42rem;
+    padding-inline: 0.6rem 0.7rem;
+  }
+
+  .app-wallet strong {
+    font-size: var(--text-base);
   }
 
   .app-profile-avatar {
     width: 1.9rem;
     height: 1.9rem;
   }
+
+  .app-profile-menu {
+    right: 0;
+    width: min(17rem, calc(100vw - 1.4rem));
+  }
 }
 
 @media (max-width: 430px) {
   .app-brand strong {
-    font-size: 1.18rem;
+    font-size: 1.12rem;
   }
 
-  .app-brand img {
-    width: 2.05rem;
-    height: 2.05rem;
+  .app-brand-sigil {
+    width: 2.1rem;
+    height: 2.1rem;
+  }
+
+  .app-brand-sigil img {
+    width: 1.6rem;
+    height: 1.6rem;
   }
 
   .app-brand {
-    gap: 0.4rem;
+    gap: 0.45rem;
   }
 
   .app-audio-control {
-    width: 2.05rem;
-    min-width: 2.05rem;
+    width: 2rem;
+    min-width: 2rem;
   }
 }

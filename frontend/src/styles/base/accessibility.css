@@ -30,52 +30,10 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.app-mobile-nav {
-  display: none;
-}
-
 @media (max-width: 720px) {
+  /* Room for the mobile bar that navigation.css pins to the bottom. */
   .app-main {
     padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
-  }
-
-  .app-mobile-nav {
-    position: fixed;
-    right: 0.65rem;
-    bottom: calc(0.65rem + env(safe-area-inset-bottom));
-    left: 0.65rem;
-    z-index: var(--z-sticky);
-    display: grid;
-    grid-template-columns: repeat(var(--mobile-nav-count, 3), minmax(0, 1fr));
-    overflow: hidden;
-    border: 1px solid rgba(var(--theme-primary-rgb), 0.34);
-    border-radius: 0.9rem;
-    background: var(--surface-overlay);
-    box-shadow: var(--shadow-overlay), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(14px);
-  }
-
-  .app-mobile-nav-link {
-    display: grid;
-    min-width: 0;
-    min-height: 3.65rem;
-    place-items: center;
-    gap: 0.15rem;
-    padding: 0.45rem 0.25rem;
-    color: var(--text-tertiary);
-    font-size: var(--text-2xs);
-    font-weight: 700;
-    text-decoration: none;
-  }
-
-  .app-mobile-nav-link svg {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
-
-  .app-mobile-nav-link.is-active {
-    background: rgba(var(--theme-primary-rgb), 0.11);
-    color: rgb(var(--theme-primary-rgb));
   }
 }
 
@@ -88,6 +46,9 @@
 
   .skip-link,
   .app-nav-link,
+  .app-nav-light,
+  .app-topbar,
+  .app-wallet strong,
   .ui-button,
   .shop-carousel-story,
   .story-path-node-ring {
@@ -106,8 +67,3 @@
   transition-duration: 0.001ms !important;
 }
 
-@media (max-width: 720px) {
-  .app-mobile-nav.has-admin {
-    --mobile-nav-count: 4;
-  }
-}

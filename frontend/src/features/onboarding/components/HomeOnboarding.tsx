@@ -24,11 +24,11 @@ const overviewSteps = [
   {
     id: 'views', selector: '[data-onboarding="home-views"]', icon: LayoutList,
     title: 'Home is one dropdown',
-    body: 'Home has three views: Progress, Skills & achievements, and Profile. Switch between them here; the line beside the dropdown says what each one covers.',
+    body: 'Home has three views: Profile, Progress, and Skills & achievements. Switch between them here; the line beside the dropdown says what each one covers.',
   },
   {
     id: 'progress', selector: '[data-onboarding="overview-progress"]', icon: CalendarDays,
-    title: 'Progress is what you see first',
+    title: 'Your progress',
     body: 'The plot shows how much you practised — pick Week, Month or Year to change the span. The citadel beside it fills with the share of runs you finished, and your full record sits underneath.',
     optional: true,
   },

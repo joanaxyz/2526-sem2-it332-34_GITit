@@ -25,6 +25,10 @@ export type RadarAxis = {
   caption?: string
 }
 
+function formatValue(value: number | null) {
+  return value === null ? '--' : `${Math.round(value)}%`
+}
+
 function RadarTooltip({ active, payload }: TooltipContentProps) {
   const axis = payload?.[0]?.payload as RadarAxis | undefined
   if (!active || !axis) return null
@@ -50,19 +54,32 @@ function RadarTooltip({ active, payload }: TooltipContentProps) {
  * whether a learner is even across the command set or spiked on the few they
  * keep reaching for. The bar list beside it stays the precise readout — this is
  * the silhouette, and it is one series, so it needs no legend.
+ *
+ * It is drawn as a dial rather than a filled disc, and the inner radius does two
+ * jobs: a command at 0% reads as an empty ring instead of collapsing to a spike
+ * at the centre, and the centre is freed for the one figure the panel is about.
+ * That figure follows the pointer, so the shape and the numbers beside it read
+ * as one instrument rather than two views of the same list.
  */
 export function MasteryRadar({
   axes,
   label,
   activeKey,
+  onActiveKeyChange,
+  overall,
 }: {
   axes: RadarAxis[]
   label: string
-  /** Rim label + vertex to emphasise while its row is hovered or focused. */
+  /** Rim label, vertex and hub to emphasise while its command is pointed at. */
   activeKey?: string | null
+  /** Reports the axis under the pointer, so the dial can drive its own hub. */
+  onActiveKeyChange?: (key: string | null) => void
+  /** 0-100, shown in the hub whenever no single command is being pointed at. */
+  overall: number
 }) {
   const data = axes.map((axis) => ({ ...axis, plotted: axis.value ?? 0 }))
   const animation = chartAnimationDuration()
+  const active = activeKey ? data.find((axis) => axis.key === activeKey) : undefined
 
   function renderTick({ x, y, textAnchor, index }: BaseTickContentProps) {
     const axis = data[index]
@@ -81,41 +98,81 @@ export function MasteryRadar({
   }
 
   function renderDot({ cx, cy, payload, key }: DotItemDotProps) {
-    const active = (payload as RadarAxis | undefined)?.key === activeKey
+    const dotAxis = payload as RadarAxis | undefined
+    const isActive = dotAxis?.key === activeKey
     return (
       <circle
         className="ref-chart-vertex"
         cx={cx}
         cy={cy}
-        data-active={active ? 'true' : undefined}
+        data-active={isActive ? 'true' : undefined}
+        data-empty={!dotAxis?.value ? 'true' : undefined}
         key={key}
-        r={active ? 4.5 : 2.5}
+        r={isActive ? 5 : 2.75}
       />
     )
   }
 
   return (
-    <ChartSurface className="ref-chart-radar" fallbackWidth={320} height={302} label={label}>
-      {({ width, height }) => (
-        <RadarChart cx="50%" cy="50%" data={data} height={height} outerRadius="72%" width={width}>
-          <PolarGrid gridType="polygon" radialLines />
-          <PolarAngleAxis dataKey="short" tick={renderTick} tickLine={false} />
-          {/* No radius ticks: at twelve axes every ring label lands within 15 degrees
-              of a rim label. The bar list beside the shape carries the numbers. */}
-          <PolarRadiusAxis axisLine={false} domain={[0, 100]} tick={false} />
-          <Tooltip content={RadarTooltip} cursor={false} />
-          <Radar
-            animationDuration={animation}
-            className="ref-chart-shape"
-            dataKey="plotted"
-            dot={renderDot}
-            activeDot={{ r: 4.5, strokeWidth: 2 }}
-            isAnimationActive={animation > 0}
-            name="Mastery"
-            strokeWidth={2}
-          />
-        </RadarChart>
-      )}
-    </ChartSurface>
+    <div className="ref-chart-dial">
+      <div className="ref-chart-dial-plot">
+      {/* Square and self-sizing: `height` is the cap, and the dial takes
+          whatever width its rail gives it up to that, so the instrument grows
+          with the screen instead of sitting at one hard-coded size. */}
+      <ChartSurface className="ref-chart-radar" fallbackWidth={520} height={560} label={label}>
+        {({ width, height }) => (
+          <RadarChart
+            cx="50%"
+            cy="50%"
+            data={data}
+            height={Math.max(300, Math.min(width, height))}
+            innerRadius="27%"
+            onMouseLeave={() => onActiveKeyChange?.(null)}
+            onMouseMove={(state) => {
+              // Polar charts report the active index as a string, cartesian ones
+              // as a number, so it is read through Number() either way.
+              const index = state.activeTooltipIndex == null ? NaN : Number(state.activeTooltipIndex)
+              const axis = state.isTooltipActive && Number.isInteger(index) ? data[index] : undefined
+              onActiveKeyChange?.(axis?.key ?? null)
+            }}
+            outerRadius="76%"
+            width={width}
+          >
+            <defs>
+              <radialGradient id="ref-chart-dial-fill">
+                <stop className="ref-chart-dial-from" offset="0%" />
+                <stop className="ref-chart-dial-to" offset="100%" />
+              </radialGradient>
+            </defs>
+            <PolarGrid gridType="polygon" radialLines />
+            <PolarAngleAxis dataKey="short" tick={renderTick} tickLine={false} />
+            {/* No ring labels: at eighteen axes every one of them lands within
+                ten degrees of a rim label. The caption under the dial says what
+                the rings are, and the list beside it carries every value. */}
+            <PolarRadiusAxis axisLine={false} domain={[0, 100]} tick={false} />
+            <Tooltip content={RadarTooltip} cursor={false} />
+            <Radar
+              animationDuration={animation}
+              className="ref-chart-shape"
+              dataKey="plotted"
+              dot={renderDot}
+              activeDot={{ r: 5, strokeWidth: 2 }}
+              isAnimationActive={animation > 0}
+              name="Mastery"
+              strokeWidth={2}
+            />
+          </RadarChart>
+        )}
+      </ChartSurface>
+
+        {/* Decorative: the panel's own label states the overall figure, and the
+            bar list beside the dial states every per-command one. */}
+        <p className="ref-chart-hub" aria-hidden="true" data-active={active ? 'true' : undefined}>
+          <strong>{active ? formatValue(active.value) : `${overall}%`}</strong>
+          <span>{active ? active.short : 'mastery'}</span>
+        </p>
+      </div>
+      <p className="ref-chart-rings">Rings mark 25 · 50 · 75 · 100%</p>
+    </div>
   )
 }
