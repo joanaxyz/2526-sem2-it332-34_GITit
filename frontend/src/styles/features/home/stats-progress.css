@@ -1,0 +1,339 @@
+/* ── Overview view: Progress ───────────────────────────────────────────── */
+/* The 14-day activity plot and the citadel finish-rate sigil. */
+
+/* The plot takes the width it can use; the citadel is a fixed-size instrument
+   standing beside it. */
+.home-overview-stat-subgrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 21rem);
+  gap: 1.15rem;
+  min-height: 0;
+}
+
+.home-overview-stat-block {
+  min-width: 0;
+  padding: 0.1rem 0;
+}
+
+.home-overview-story-block {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border-left: 1px solid rgba(var(--theme-primary-rgb), 0.14);
+  padding-left: 1.05rem;
+}
+
+/* Centred in whatever height the activity plot beside it sets, so the tower
+   stands in the middle of its bay instead of hanging from the header. */
+.home-overview-story-block .home-overview-story-body {
+  align-content: center;
+}
+
+.home-overview-stat-block .ref-panel-head em {
+  margin-left: 0.35rem;
+  color: var(--text-tertiary);
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+/* Heading on the left, span control on the right; they share the band's first
+   line so the plot itself starts at the same height as the citadel beside it. */
+.home-overview-band-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+}
+
+.home-overview-band-head .ref-panel-head {
+  margin-bottom: 0.35rem;
+}
+
+/* A segmented control, not three loose buttons: one hairline frame, the active
+   span filled. Same button vocabulary as the achievement filters. */
+.home-overview-span {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: var(--control-bg);
+}
+
+.home-overview-span button {
+  min-height: 1.6rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 0 0.7rem;
+  transition: background var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out);
+}
+
+.home-overview-span button + button {
+  border-left: 1px solid rgba(var(--theme-primary-rgb), 0.16);
+}
+
+.home-overview-span button:hover {
+  background: var(--control-bg-hover);
+  color: var(--text-primary);
+}
+
+.home-overview-span button.is-active {
+  background: rgba(var(--theme-teal-rgb), 0.16);
+  color: rgb(var(--theme-teal-rgb));
+}
+
+.home-overview-span button:focus-visible {
+  outline: none;
+  box-shadow: var(--control-focus-ring);
+}
+
+/* A span that is still loading holds the previous plot at reduced opacity —
+   never a skeleton flash, and never a collapsed box. */
+.home-overview-activity {
+  transition: opacity var(--motion-normal) var(--ease-out);
+}
+
+.home-overview-activity[data-pending='true'] {
+  opacity: 0.5;
+}
+
+/* The totals the plot is made of, stated once under it: the chart carries the
+   shape of the fortnight, this line carries its size. */
+.home-overview-activity-summary {
+  margin: 0.5rem 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-2xs);
+}
+
+.home-overview-activity-summary strong {
+  color: rgb(var(--theme-teal-rgb));
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+}
+
+.home-overview-activity-empty {
+  margin: 1rem 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  text-wrap: pretty;
+}
+
+.home-overview-story-body {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Capped measure: the label-to-value rows below need a readable span, not the
+   full width of the plaque with 900px of dead air in between. */
+.home-overview-story-readout {
+  display: grid;
+  gap: 0.6rem;
+  min-width: 0;
+  max-width: 32rem;
+}
+
+/* The tower's number, stated once, next to the tower it fills. */
+.home-overview-story-rate {
+  display: grid;
+  gap: 0.12rem;
+  margin: 0;
+}
+
+.home-overview-story-rate strong {
+  color: rgb(var(--theme-teal-rgb));
+  font-family: var(--font-mono);
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.home-overview-story-block.is-complete .home-overview-story-rate strong {
+  color: hsl(var(--warning));
+  text-shadow: 0 0 12px hsl(var(--warning) / 0.45);
+}
+
+.home-overview-story-rate[data-empty] strong {
+  color: rgba(232, 246, 250, 0.58);
+  text-shadow: none;
+}
+
+.home-overview-story-rate small {
+  color: var(--text-secondary);
+  font-size: var(--text-2xs);
+  text-wrap: pretty;
+}
+
+/* Citadel tower: a stone shell always visible, and a teal "construction" fill that
+   rises with actual track-progress (bottom-anchored, so the wide foundation fills
+   first). At 100% the fill flips to the gold earned-achievement accent, matching the
+   achievement medallions above. */
+.home-overview-story-sigil {
+  position: relative;
+  display: grid;
+  height: 7.1rem;
+  place-items: end center;
+  --story-tower-shape: polygon(50% 0, 68% 18%, 76% 100%, 24% 100%, 32% 18%);
+}
+
+/* Fixed-size positioning context so the fill's percentage height resolves
+   against the tower's own 6.3rem box, not the taller sigil wrapper. */
+.home-overview-story-frame {
+  position: relative;
+  width: 5.2rem;
+  height: 6.3rem;
+  margin-bottom: 0.1rem;
+}
+
+.home-overview-story-shell {
+  position: absolute;
+  inset: 0;
+  clip-path: var(--story-tower-shape);
+  background:
+    linear-gradient(180deg, rgba(var(--theme-teal-rgb), 0.05) 0 2px, transparent 2px),
+    repeating-linear-gradient(180deg, rgba(var(--theme-teal-rgb), 0.14) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, rgba(var(--theme-teal-rgb), 0.2), rgba(var(--theme-teal-rgb), 0.06));
+}
+
+.home-overview-story-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  clip-path: var(--story-tower-shape);
+  transition: height 0.6s var(--ease-out);
+}
+
+/* Bright seam at the fill boundary - the shell and fill are both teal-toned, so
+   without this the exact "progress made" vs "progress remaining" line is hard to
+   read at partial percentages. Rides the mask's top edge, so it tracks the height
+   transition and is naturally clipped to the tower's silhouette by the shared
+   clip-path. Painted via ::after (not ::before) so it draws above .home-overview-
+   story-fill-inner rather than being covered by it. */
+.home-overview-story-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 0 8px rgba(var(--theme-teal-rgb), 0.85), 0 0 3px rgba(255, 255, 255, 0.7);
+}
+
+.home-overview-story-block.is-complete .home-overview-story-fill::after {
+  box-shadow: 0 0 8px hsl(var(--warning) / 0.85), 0 0 3px rgba(255, 255, 255, 0.7);
+}
+
+.home-overview-story-fill-inner {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 6.3rem;
+  background:
+    /* corner buttresses */
+    linear-gradient(90deg, transparent 17%, rgba(4, 16, 32, 0.55) 18% 21%, transparent 22% 78%, rgba(4, 16, 32, 0.55) 79% 82%, transparent 83%),
+    /* parapet band */
+    linear-gradient(180deg, transparent 0 16%, rgba(4, 16, 32, 0.55) 17% 20%, transparent 21%),
+    /* apex beacon */
+    radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.7), transparent 12%),
+    /* stone coursing texture */
+    repeating-linear-gradient(180deg, rgba(4, 16, 32, 0.28) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, rgba(var(--theme-teal-rgb), 0.98), rgba(var(--theme-teal-rgb), 0.62));
+  filter: drop-shadow(0 0 14px rgba(var(--theme-teal-rgb), 0.5));
+  animation: home-overview-story-pulse 3.4s var(--ease-out) infinite;
+}
+
+.home-overview-story-block.is-complete .home-overview-story-fill-inner {
+  background:
+    linear-gradient(90deg, transparent 17%, rgba(45, 30, 4, 0.5) 18% 21%, transparent 22% 78%, rgba(45, 30, 4, 0.5) 79% 82%, transparent 83%),
+    linear-gradient(180deg, transparent 0 16%, rgba(45, 30, 4, 0.5) 17% 20%, transparent 21%),
+    radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.85), transparent 14%),
+    repeating-linear-gradient(180deg, rgba(45, 30, 4, 0.24) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, hsl(var(--warning)), hsl(var(--warning) / 0.68));
+  filter: drop-shadow(0 0 18px hsl(var(--warning) / 0.62));
+  animation-name: home-overview-story-pulse-gold;
+}
+
+.home-overview-story-ground {
+  position: absolute;
+  bottom: 0.1rem;
+  width: 6.5rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(var(--theme-teal-rgb), 0.4), transparent 72%);
+}
+
+.home-overview-story-block.is-complete .home-overview-story-ground {
+  background: radial-gradient(ellipse, hsl(var(--warning) / 0.48), transparent 72%);
+}
+
+@keyframes home-overview-story-pulse {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(var(--theme-teal-rgb), 0.4)); }
+  50% { filter: drop-shadow(0 0 18px rgba(var(--theme-teal-rgb), 0.7)); }
+}
+
+@keyframes home-overview-story-pulse-gold {
+  0%, 100% { filter: drop-shadow(0 0 12px hsl(var(--warning) / 0.5)); }
+  50% { filter: drop-shadow(0 0 22px hsl(var(--warning) / 0.85)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-overview-story-fill-inner {
+    animation: none;
+    filter: drop-shadow(0 0 14px rgba(var(--theme-teal-rgb), 0.5));
+  }
+
+  .home-overview-story-block.is-complete .home-overview-story-fill-inner {
+    filter: drop-shadow(0 0 16px hsl(var(--warning) / 0.6));
+  }
+
+  .home-overview-story-fill {
+    transition: none;
+  }
+}
+
+.home-overview-story-body dl {
+  display: grid;
+  gap: 0.42rem;
+  margin: 0;
+  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.12);
+  padding-top: 0.55rem;
+}
+
+.home-overview-story-body dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.home-overview-story-body dt {
+  color: rgba(218, 229, 247, 0.68);
+  font-size: 0.78rem;
+}
+
+.home-overview-story-body dd {
+  margin: 0;
+  color: #f6fbff;
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+}
+
+/* A literal 0 reads as "not started yet" rather than a broken/missing stat. */
+.home-overview-story-body dd.is-zero {
+  color: rgba(218, 229, 247, 0.42);
+  font-weight: 500;
+}
+
+

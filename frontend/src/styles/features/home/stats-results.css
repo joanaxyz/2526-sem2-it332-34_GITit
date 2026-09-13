@@ -1,0 +1,94 @@
+/* ── Progress, lower band: your record ─────────────────────────────────── */
+/* Two clearly separated scopes: the account-wide record (stats-kpis.css owns the
+   tiles) and the main story's modules 1-4. Same vocabulary in both bands, so the
+   only thing that changes between them is what the numbers are measured over. */
+.home-overview-results-panel {
+  display: grid;
+  align-content: start;
+  gap: 0.3rem;
+}
+
+.home-overview-results-panel .ref-panel-head em {
+  color: var(--text-tertiary);
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.home-overview-modules {
+  margin-top: 1.15rem;
+  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.14);
+  padding-top: 0.95rem;
+}
+
+/* Four measures, four small column charts. They replaced twelve stacked meters
+   (three per module), which turned "which module is my weakest?" into a
+   scrolling comparison. Two charts side by side still compare, so the row folds
+   to two columns before it folds to one. */
+.home-overview-module-charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
+  gap: 1rem 1.5rem;
+}
+
+/* Expands the "M1" ticks, so the axis stays short and the names stay visible. */
+.home-overview-module-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1.2rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.1);
+  padding-top: 0.7rem;
+  list-style: none;
+  color: var(--text-secondary);
+  font-size: var(--text-2xs);
+}
+
+.home-overview-module-key li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.42rem;
+  min-width: 0;
+}
+
+.home-overview-module-key b {
+  color: rgb(var(--theme-primary-rgb));
+  font-family: var(--font-mono);
+  font-weight: 800;
+}
+
+/* Loading + failure: the account record above stays readable either way. */
+.home-overview-module-loading {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
+  gap: 1rem 1.5rem;
+}
+
+.home-overview-module-loading i {
+  display: block;
+  height: 9rem;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    180deg,
+    rgba(var(--theme-primary-rgb), 0.07),
+    rgba(var(--theme-primary-rgb), 0.02)
+  );
+  animation: home-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+.home-overview-module-error,
+.home-overview-module-empty {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  text-wrap: pretty;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-overview-module-loading i {
+    animation: none;
+  }
+}

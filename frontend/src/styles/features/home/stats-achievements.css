@@ -25,10 +25,27 @@
 }
 
 .home-overview-award-score {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto auto;
   align-items: baseline;
-  gap: 0.35rem;
+  justify-content: end;
+  gap: 0 0.35rem;
   white-space: nowrap;
+}
+
+/* The points score is a ratio against a limit, so it gets a meter rather than
+   leaving the reader to divide two numbers in their head. */
+.home-overview-award-score .ref-meter {
+  grid-column: 1 / -1;
+  justify-self: end;
+  width: 7.5rem;
+  height: 0.28rem;
+  margin-top: 0.35rem;
+}
+
+.home-overview-award-score .ref-meter span {
+  background: hsl(var(--warning));
+  box-shadow: 0 0 8px hsl(var(--warning) / 0.45);
 }
 
 .home-overview-award-score strong {
@@ -46,6 +63,9 @@
 }
 
 .home-overview-achievement-tools button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   min-height: var(--control-height-sm);
   border: 1px solid var(--control-border);
   border-radius: var(--control-radius);
@@ -54,7 +74,7 @@
   cursor: pointer;
   font-size: var(--text-xs);
   font-weight: 700;
-  padding: 0 1.05rem;
+  padding: 0 0.9rem;
   text-align: center;
   transition: border-color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out);
 }
@@ -72,12 +92,25 @@
   box-shadow: var(--control-focus-ring);
 }
 
+/* How many cards each filter will show, so the choice is made before the click. */
+.home-overview-achievement-tools button b {
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+}
+
+.home-overview-achievement-tools button.is-active b {
+  color: rgb(var(--theme-primary-rgb));
+}
+
+/* Full-width now that Overview shows one category at a time: hairline rows that
+   reflow into as many columns as the viewport honestly fits. */
 .home-overview-achievement-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0;
+  grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
+  gap: 0 1.6rem;
   min-height: 0;
-  overflow: auto;
 }
 
 .home-overview-achievement-card {

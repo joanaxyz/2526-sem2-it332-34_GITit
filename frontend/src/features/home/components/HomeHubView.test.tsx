@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { forwardRef, useImperativeHandle } from 'react'
 import { RouterProvider, createMemoryRouter } from 'react-router-dom'
@@ -7,6 +8,8 @@ import type { LearnedSkill } from '@/features/skills/types'
 import { richHomeFixture } from '@/features/home/preview/fixtures'
 import { richStatsFixture } from '@/features/stats/preview/fixtures'
 import { COMPANIONS } from '@/shared/cosmetics/companions/registry'
+import { OnboardingContext } from '@/features/onboarding/hooks/onboardingContext'
+import type { OnboardingPhase } from '@/shared/preferences/preferences'
 
 import { HomeHubView } from './HomeHubView'
 
@@ -17,18 +20,17 @@ const mocks = vi.hoisted(() => ({
   effectPlacementForSkill: vi.fn(),
   playEffect: vi.fn(),
   setAnimation: vi.fn(),
+  catalog: vi.fn(),
+  equipCompanion: vi.fn(),
+  setPhase: vi.fn(),
 }))
 
 vi.mock('@/features/home/components/HomeStatsView', () => ({
-  HomeStatsView: ({ companionRequired }: { companionRequired: boolean }) => (
-    <div data-testid="home-stats-view" data-companion-required={companionRequired}>
-      Overview content
+  HomeStatsView: ({ view }: { view: string }) => (
+    <div data-testid="home-stats-view" data-view={view}>
+      Category content
     </div>
   ),
-}))
-
-vi.mock('@/features/home/components/HomeLoadoutView', () => ({
-  HomeLoadoutView: () => <div data-testid="home-loadout-view">Loadout content</div>,
 }))
 
 vi.mock('@/features/skills/hooks/useLearnedSkills', () => ({
@@ -38,6 +40,18 @@ vi.mock('@/features/skills/hooks/useLearnedSkills', () => ({
 vi.mock('@/shared/player-loadout/usePlayerLoadout', () => ({
   usePlayerLoadout: mocks.usePlayerLoadout,
 }))
+
+vi.mock('@/shared/player-loadout/playerLoadoutApi', () => ({
+  playerLoadoutApi: { equipCompanion: mocks.equipCompanion },
+}))
+
+vi.mock('@/shared/shop/api/shopApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/shared/shop/api/shopApi')>()
+  return {
+    ...actual,
+    shopCatalogQueryOptions: () => ({ queryKey: ['shop-catalog'], queryFn: mocks.catalog }),
+  }
+})
 
 vi.mock('@/shared/battle/effects/effectRegistry', () => ({
   effectForSkill: mocks.effectForSkill,
@@ -90,29 +104,60 @@ const learnedSkills: LearnedSkill[] = [
   },
 ]
 
-function renderHub(path = '/home') {
+function catalog(owned = true, active = true) {
+  return {
+    active_companion: active ? 'blue' : null,
+    purchases_enabled: true,
+    items: [{ kind: 'companion' as const, slug: 'blue', label: 'Blue', price: 150, owned, active }],
+  }
+}
+
+function renderHub(path = '/home', onboardingPhase?: OnboardingPhase) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
   const router = createMemoryRouter(
     [
       {
         path: '/home',
         element: (
-          <HomeHubView
-            home={richHomeFixture}
-            stats={richStatsFixture}
-            playerName="Learner"
-            gitcoins={null}
-          />
+          <HomeHubView home={richHomeFixture} stats={richStatsFixture} playerName="Learner" />
         ),
       },
     ],
     { initialEntries: [path] },
   )
-  const result = render(<RouterProvider router={router} />)
+  // No provider means no journey in flight, which is what every existing
+  // player sees; a phase opts the render into the guided tutorial instead.
+  const tree = <RouterProvider router={router} />
+  const result = render(
+    <QueryClientProvider client={client}>
+      {onboardingPhase ? (
+        <OnboardingContext.Provider value={{ phase: onboardingPhase, setPhase: mocks.setPhase }}>
+          {tree}
+        </OnboardingContext.Provider>
+      ) : (
+        tree
+      )}
+    </QueryClientProvider>,
+  )
   return { ...result, router }
 }
 
-function homeNavigation() {
-  return screen.getByRole('navigation', { name: 'Home sections' })
+function switcher() {
+  return screen.getByRole('button', { name: /showing/i })
+}
+
+function openView(label: string) {
+  fireEvent.click(switcher())
+  fireEvent.click(within(screen.getByRole('listbox')).getByRole('option', { name: new RegExp(label, 'i') }))
+}
+
+function profileRegion() {
+  return screen.getByRole('region', { name: 'Player profile overview' })
+}
+
+/** `hidden` removes the section from the accessibility tree, so state checks use the DOM. */
+function profileWorkspace() {
+  return document.querySelector('.home-ref-grid')
 }
 
 describe('HomeHubView contract', () => {
@@ -127,6 +172,7 @@ describe('HomeHubView contract', () => {
       isError: false,
       error: null,
     })
+    mocks.catalog.mockResolvedValue(catalog())
     mocks.effectForSkill.mockReturnValue(mocks.playEffect)
     mocks.effectPlacementForSkill.mockReturnValue({ playback: 'projectile', anchor: 'feet' })
   })
@@ -134,36 +180,71 @@ describe('HomeHubView contract', () => {
   afterEach(() => {
     cleanup()
     vi.useRealTimers()
+    window.sessionStorage.clear()
   })
 
-  it('treats an invalid tab as Overview and replaces only the tab parameter', async () => {
-    const { router } = renderHub('/home?campaign=alpha&tab=invalid')
-    const navigation = homeNavigation()
+  it('treats an invalid view as Progress and replaces only the view parameter', () => {
+    const { router } = renderHub('/home?campaign=alpha&view=invalid')
 
-    expect(within(navigation).getByRole('button', { name: 'Overview' })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByTestId('home-stats-view')).toBeInTheDocument()
-    expect(document.querySelector('.home-ref-grid')).toHaveAttribute('hidden')
+    expect(switcher()).toHaveTextContent('Progress')
+    expect(screen.getByTestId('home-stats-view')).toHaveAttribute('data-view', 'progress')
+    expect(profileWorkspace()).toHaveAttribute('hidden')
 
-    fireEvent.click(within(navigation).getByRole('button', { name: 'Profile' }))
-    expect(router.state.location.search).toBe('?campaign=alpha&tab=profile')
+    openView('Profile')
+    expect(router.state.location.search).toBe('?campaign=alpha&view=profile')
     expect(router.state.historyAction).toBe('REPLACE')
-    expect(document.querySelector('.home-ref-grid')).not.toHaveAttribute('hidden')
+    expect(profileWorkspace()).not.toHaveAttribute('hidden')
 
-    fireEvent.click(within(navigation).getByRole('button', { name: 'Overview' }))
+    openView('Progress')
     expect(router.state.location.search).toBe('?campaign=alpha')
     expect(router.state.historyAction).toBe('REPLACE')
   })
 
-  it('composes the Loadout tab without unmounting the hidden Profile workspace', () => {
-    renderHub('/home?tab=loadout')
+  it('hands each data category to the stats view and renders no tab strip', () => {
+    renderHub('/home?view=skills')
 
-    expect(screen.getByTestId('home-loadout-view')).toBeInTheDocument()
-    expect(document.querySelector('.home-ref-grid')).toHaveAttribute('hidden')
-    expect(mocks.useLearnedSkills).toHaveBeenCalledTimes(1)
-    expect(mocks.usePlayerLoadout).toHaveBeenCalledTimes(1)
+    expect(screen.getByTestId('home-stats-view')).toHaveAttribute('data-view', 'skills')
+    expect(screen.queryByRole('navigation', { name: 'Home sections' })).not.toBeInTheDocument()
   })
 
-  it('keeps an empty loadout explicit across Overview and Profile', () => {
+  it('lands a bookmarked Run results link on the category that absorbed it', () => {
+    renderHub('/home?view=results')
+
+    expect(switcher()).toHaveTextContent('Progress')
+    expect(screen.getByTestId('home-stats-view')).toHaveAttribute('data-view', 'progress')
+  })
+
+  it('drops the stats view entirely while Profile is showing', () => {
+    renderHub('/home?view=profile')
+
+    expect(screen.queryByTestId('home-stats-view')).not.toBeInTheDocument()
+    expect(profileWorkspace()).not.toHaveAttribute('hidden')
+  })
+
+  it('moves and commits the dropdown selection from the keyboard', () => {
+    const { router } = renderHub()
+
+    fireEvent.click(switcher())
+    const listbox = screen.getByRole('listbox')
+    fireEvent.keyDown(listbox, { key: 'End' })
+    fireEvent.keyDown(listbox, { key: 'Enter' })
+
+    expect(router.state.location.search).toBe('?view=profile')
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+  })
+
+  it('closes the dropdown on Escape without changing the view', () => {
+    const { router } = renderHub()
+
+    fireEvent.click(switcher())
+    fireEvent.keyDown(screen.getByRole('listbox'), { key: 'Escape' })
+
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+    expect(router.state.location.search).toBe('')
+    expect(switcher()).toHaveTextContent('Progress')
+  })
+
+  it('keeps an empty loadout explicit', () => {
     mocks.usePlayerLoadout.mockReturnValue({
       companion: COMPANIONS.blue,
       companionSlug: 'blue',
@@ -174,18 +255,73 @@ describe('HomeHubView contract', () => {
     })
     renderHub()
 
-    expect(screen.getByTestId('home-stats-view')).toHaveAttribute('data-companion-required', 'true')
-    fireEvent.click(within(homeNavigation()).getByRole('button', { name: 'Profile' }))
+    // The prerequisite is stated once, by a nudge pinned outside the layout flow.
+    const nudge = screen.getByRole('note', { name: 'First step' })
+    // The shop no longer has tabs, so the companion link carries only `required`.
+    expect(within(nudge).getByRole('link', { name: /open shop/i })).toHaveAttribute(
+      'href',
+      '/shop?required=1',
+    )
 
-    const profile = screen.getByRole('region', { name: 'Player profile overview' })
+    openView('Profile')
+    const profile = profileRegion()
     expect(within(profile).getAllByText('No companion selected').length).toBeGreaterThan(0)
-    const chooseCompanionLinks = within(profile).getAllByRole('link', { name: 'Choose companion' })
-    expect(chooseCompanionLinks.length).toBeGreaterThan(0)
-    for (const link of chooseCompanionLinks) {
-      // The shop no longer has tabs, so the companion link carries only `required`.
-      expect(link).toHaveAttribute('href', '/shop?required=1')
-    }
+    expect(within(profile).getAllByRole('link', { name: 'Choose companion' })).toHaveLength(1)
     expect(within(profile).queryByLabelText(/blue idle animation/i)).not.toBeInTheDocument()
+  })
+
+  it('leaves the prerequisite to the tutorial while the guided journey runs', () => {
+    mocks.usePlayerLoadout.mockReturnValue({
+      companion: COMPANIONS.blue,
+      companionSlug: 'blue',
+      hasCompanion: false,
+      isLoading: false,
+      isError: false,
+      error: null,
+    })
+    renderHub('/home', 'home')
+
+    expect(screen.queryByRole('note', { name: 'First step' })).not.toBeInTheDocument()
+  })
+
+  it('turns the nudge on once the journey ends with no companion bought', () => {
+    mocks.usePlayerLoadout.mockReturnValue({
+      companion: COMPANIONS.blue,
+      companionSlug: 'blue',
+      hasCompanion: false,
+      isLoading: false,
+      isError: false,
+      error: null,
+    })
+    renderHub('/home', 'done')
+
+    expect(screen.getByRole('note', { name: 'First step' })).toBeInTheDocument()
+  })
+
+  it('holds a dismissal for the session only, so the next visit asks again', () => {
+    mocks.usePlayerLoadout.mockReturnValue({
+      companion: COMPANIONS.blue,
+      companionSlug: 'blue',
+      hasCompanion: false,
+      isLoading: false,
+      isError: false,
+      error: null,
+    })
+    renderHub('/home', 'done')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss first step' }))
+    expect(screen.queryByRole('note', { name: 'First step' })).not.toBeInTheDocument()
+
+    // Same session: a remount stays quiet.
+    cleanup()
+    renderHub('/home', 'done')
+    expect(screen.queryByRole('note', { name: 'First step' })).not.toBeInTheDocument()
+
+    // A new session (the next visit) states the prerequisite again.
+    cleanup()
+    window.sessionStorage.clear()
+    renderHub('/home', 'done')
+    expect(screen.getByRole('note', { name: 'First step' })).toBeInTheDocument()
   })
 
   it.each([
@@ -208,16 +344,16 @@ describe('HomeHubView contract', () => {
       hasCompanion: false,
       ...loadout,
     })
-    renderHub()
+    renderHub('/home?view=profile')
 
-    expect(screen.getByTestId('home-stats-view')).toHaveAttribute('data-companion-required', 'false')
-    fireEvent.click(within(homeNavigation()).getByRole('button', { name: 'Profile' }))
-
-    const profile = screen.getByRole('region', { name: 'Player profile overview' })
+    expect(screen.queryByRole('note', { name: 'First step' })).not.toBeInTheDocument()
+    const profile = profileRegion()
     expect(within(profile).getAllByText(heading)).toHaveLength(2)
-    expect(within(profile).getAllByRole(liveRole)).toHaveLength(1)
+    const announcements = within(profile)
+      .getAllByRole(liveRole)
+      .filter((node) => node.textContent?.includes(heading))
+    expect(announcements).toHaveLength(1)
     expect(within(profile).queryByText('No companion selected')).not.toBeInTheDocument()
-    expect(within(profile).queryByRole('link', { name: 'Choose companion' })).not.toBeInTheDocument()
     expect(within(profile).queryByLabelText(/blue idle animation/i)).not.toBeInTheDocument()
   })
 
@@ -230,15 +366,14 @@ describe('HomeHubView contract', () => {
       isError: true,
       error: new Error('background refresh failed'),
     })
-    renderHub('/home?tab=profile')
+    renderHub('/home?view=profile')
 
-    const profile = screen.getByRole('region', { name: 'Player profile overview' })
+    const profile = profileRegion()
     expect(within(profile).getByLabelText(/white idle animation/i)).toBeInTheDocument()
     expect(within(profile).queryByText('Companion unavailable')).not.toBeInTheDocument()
-    expect(within(profile).queryByRole('link', { name: 'Choose companion' })).not.toBeInTheDocument()
   })
 
-  it('announces a loadout failure while the persisted Rank view is selected', async () => {
+  it('announces a loadout failure without hiding the rank ladder', async () => {
     mocks.usePlayerLoadout.mockReturnValue({
       companion: COMPANIONS.blue,
       companionSlug: 'blue',
@@ -247,9 +382,11 @@ describe('HomeHubView contract', () => {
       isError: false,
       error: null,
     })
-    const { router } = renderHub('/home?tab=profile')
-    const profile = screen.getByRole('region', { name: 'Player profile overview' })
-    fireEvent.click(within(profile).getByRole('tab', { name: 'Rank Ladder' }))
+    const { router } = renderHub('/home?view=profile')
+    const profile = profileRegion()
+    // The ladder used to sit behind a tab; it is always on screen now, so a
+    // companion failure can never be the reason a rank is not visible.
+    expect(within(profile).getByText('Arcane Adept')).toBeInTheDocument()
 
     mocks.usePlayerLoadout.mockReturnValue({
       companion: COMPANIONS.blue,
@@ -259,68 +396,100 @@ describe('HomeHubView contract', () => {
       isError: true,
       error: new Error('catalog unavailable'),
     })
-    await act(async () => router.navigate('/home?tab=profile&refresh=error', { replace: true }))
+    await act(async () => router.navigate('/home?view=profile&refresh=error', { replace: true }))
 
-    expect(within(profile).getByRole('tab', { name: 'Rank Ladder' })).toHaveAttribute('aria-selected', 'true')
-    expect(within(profile).getByRole('alert')).toHaveTextContent('Companion unavailable')
-    expect(within(profile).queryByRole('link', { name: 'Choose companion' })).not.toBeInTheDocument()
+    expect(within(profile).getByText('Arcane Adept')).toBeInTheDocument()
+    expect(within(profile).getAllByRole('alert')[0]).toHaveTextContent('Companion unavailable')
   })
 
-  it('preserves Profile, rank, and selected-spell state across an outer-tab round trip', () => {
-    renderHub('/home?tab=profile')
-    const navigation = homeNavigation()
-    const profileRegion = screen.getByRole('region', { name: 'Player profile overview' })
+  it('preserves the selected spell across a category round trip, with the ladder always shown', () => {
+    renderHub('/home?view=profile')
+    const profile = profileRegion()
 
-    fireEvent.click(within(profileRegion).getByRole('tab', { name: 'Rank Ladder' }))
-    fireEvent.click(within(profileRegion).getByRole('button', { name: /attack with inspect history/i }))
-    expect(within(profileRegion).getByRole('tab', { name: 'Rank Ladder' })).toHaveAttribute('aria-selected', 'true')
-    expect(within(profileRegion).getByRole('button', { name: /attack with inspect history/i })).toHaveClass('is-selected')
+    fireEvent.click(within(profile).getByRole('button', { name: /attack with inspect history/i }))
+    expect(within(profile).getByText('Arcane Adept')).toBeInTheDocument()
 
-    fireEvent.click(within(navigation).getByRole('button', { name: 'Overview' }))
-    expect(profileRegion).toHaveAttribute('hidden')
-    fireEvent.click(within(navigation).getByRole('button', { name: 'Profile' }))
+    openView('Progress')
+    expect(profileWorkspace()).toHaveAttribute('hidden')
+    openView('Profile')
 
-    expect(profileRegion).not.toHaveAttribute('hidden')
-    expect(within(profileRegion).getByRole('tab', { name: 'Rank Ladder' })).toHaveAttribute('aria-selected', 'true')
-    expect(within(profileRegion).getByRole('button', { name: /attack with inspect history/i })).toHaveClass('is-selected')
+    expect(profileWorkspace()).not.toHaveAttribute('hidden')
+    expect(within(profile).getByText('Arcane Adept')).toBeInTheDocument()
+    expect(within(profile).getByRole('button', { name: /attack with inspect history/i })).toHaveClass('is-selected')
   })
 
   it('preserves profile value precedence and rank presentation', () => {
-    renderHub('/home?tab=profile')
-    const profileRegion = screen.getByRole('region', { name: 'Player profile overview' })
+    renderHub('/home?view=profile')
+    const profile = profileRegion()
 
-    expect(within(profileRegion).getByText('Learner')).toBeInTheDocument()
-    expect(within(profileRegion).getAllByText('Arcane Adept').length).toBeGreaterThan(0)
-    expect(within(profileRegion).getByText('1,240')).toBeInTheDocument()
-    expect(within(profileRegion).getByText('26')).toBeInTheDocument()
-    expect(within(profileRegion).getByText('Arcane Adept of the Fifth Chapter')).toBeInTheDocument()
+    expect(within(profile).getByText('Learner')).toBeInTheDocument()
+    expect(within(profile).getByText('Arcane Adept of the Fifth Chapter')).toBeInTheDocument()
 
-    fireEvent.click(within(profileRegion).getByRole('tab', { name: 'Rank Ladder' }))
-    expect(within(profileRegion).getByText('43')).toBeInTheDocument()
-    expect(within(profileRegion).getByText('1,187')).toBeInTheDocument()
-    expect(within(profileRegion).getByLabelText('40% toward the next rank')).toBeInTheDocument()
+    // Each of these is stated once now that both halves render together: the
+    // clear counts sit under the crest, the meter sits in it.
+    expect(within(profile).getByText('43')).toBeInTheDocument()
+    expect(within(profile).getByLabelText('40% toward the next rank')).toBeInTheDocument()
+  })
+
+  it('lists the owned roster in Profile and equips the selected companion', async () => {
+    mocks.catalog.mockResolvedValue({
+      active_companion: 'blue',
+      purchases_enabled: true,
+      items: [
+        { kind: 'companion' as const, slug: 'blue', label: 'Blue', price: 150, owned: true, active: true },
+        { kind: 'companion' as const, slug: 'white', label: 'White', price: 150, owned: true, active: false },
+      ],
+    })
+    mocks.equipCompanion.mockResolvedValue({ active_companion: 'white', shop: catalog() })
+    renderHub('/home?view=profile')
+
+    const roster = await screen.findByRole('tablist', { name: 'Owned companions' })
+    expect(within(roster).getAllByRole('tab')).toHaveLength(2)
+    // The equipped companion is preselected, so its action is already satisfied.
+    expect(screen.getByRole('button', { name: /blue is equipped/i })).toBeDisabled()
+
+    fireEvent.click(within(roster).getByRole('tab', { name: /white/i }))
+    const equip = screen.getByRole('button', { name: 'Equip companion' })
+    expect(equip).toBeEnabled()
+
+    await act(async () => {
+      fireEvent.click(equip)
+    })
+    expect(mocks.equipCompanion.mock.calls[0][0]).toBe('white')
+  })
+
+  it('sends an empty roster to the shop instead of offering an equip action', async () => {
+    mocks.catalog.mockResolvedValue(catalog(false, false))
+    renderHub('/home?view=profile')
+
+    const roster = screen.getByRole('region', { name: 'Companion roster' })
+    expect(await within(roster).findByRole('link', { name: /choose a companion/i })).toHaveAttribute(
+      'href',
+      '/shop?required=1',
+    )
+    expect(within(roster).queryByRole('button', { name: /equip/i })).not.toBeInTheDocument()
   })
 
   it('renders learned-skill loading, empty, and rich states', () => {
     mocks.useLearnedSkills.mockReturnValue({ data: undefined, isLoading: true })
-    const { container, unmount } = renderHub('/home?tab=profile')
+    const { container, unmount } = renderHub('/home?view=profile')
     expect(container.querySelectorAll('.home-spellbook-skeleton')).toHaveLength(8)
     unmount()
 
     mocks.useLearnedSkills.mockReturnValue({ data: [], isLoading: false })
-    const empty = renderHub('/home?tab=profile')
+    const empty = renderHub('/home?view=profile')
     expect(screen.getByText(/inscribe your first spell/i)).toBeInTheDocument()
     empty.unmount()
 
     mocks.useLearnedSkills.mockReturnValue({ data: learnedSkills, isLoading: false })
-    renderHub('/home?tab=profile')
+    renderHub('/home?view=profile')
     expect(screen.getByText(/2 learned/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /attack with stage changes/i })).toBeInTheDocument()
   })
 
   it('selects a skill, plays Attack, and dispatches its placed effect', () => {
     vi.useFakeTimers()
-    renderHub('/home?tab=profile')
+    renderHub('/home?view=profile')
 
     const skill = screen.getByRole('button', { name: /attack with stage changes/i })
     fireEvent.click(skill)
@@ -341,7 +510,7 @@ describe('HomeHubView contract', () => {
 
   it('keeps only the latest delayed attack and ignores the older settle callback', () => {
     vi.useFakeTimers()
-    renderHub('/home?tab=profile')
+    renderHub('/home?view=profile')
 
     fireEvent.click(screen.getByRole('button', { name: /attack with stage changes/i }))
     const firstSettle = mocks.setAnimation.mock.calls[0][1].onComplete as () => void
@@ -361,7 +530,7 @@ describe('HomeHubView contract', () => {
 
   it('cancels delayed effect and settle work on unmount', () => {
     vi.useFakeTimers()
-    const { unmount } = renderHub('/home?tab=profile')
+    const { unmount } = renderHub('/home?view=profile')
 
     fireEvent.click(screen.getByRole('button', { name: /attack with stage changes/i }))
     const settle = mocks.setAnimation.mock.calls[0][1].onComplete as () => void
@@ -373,10 +542,9 @@ describe('HomeHubView contract', () => {
     expect(mocks.setAnimation).toHaveBeenCalledTimes(1)
   })
 
-  it('adopts a changed companion without resetting Profile or Rank state', async () => {
-    const { router } = renderHub('/home?tab=profile')
-    const profileRegion = screen.getByRole('region', { name: 'Player profile overview' })
-    fireEvent.click(within(profileRegion).getByRole('tab', { name: 'Rank Ladder' }))
+  it('adopts a changed companion without resetting the profile', async () => {
+    const { router } = renderHub('/home?view=profile')
+    const profile = profileRegion()
 
     mocks.usePlayerLoadout.mockReturnValue({
       companion: COMPANIONS.white,
@@ -386,9 +554,9 @@ describe('HomeHubView contract', () => {
       isError: false,
       error: null,
     })
-    await act(async () => router.navigate('/home?tab=profile&refresh=1', { replace: true }))
+    await act(async () => router.navigate('/home?view=profile&refresh=1', { replace: true }))
 
-    expect(within(profileRegion).getByRole('tab', { name: 'Rank Ladder' })).toHaveAttribute('aria-selected', 'true')
+    expect(within(profile).getByText('Arcane Adept')).toBeInTheDocument()
     expect(screen.getByLabelText(/white idle animation/i)).toBeInTheDocument()
   })
 })

@@ -1,82 +1,44 @@
-import { Backpack, BookOpen, CalendarDays, Coins, Compass, Gauge, Route, Swords, Target, Trophy, UserRound } from 'lucide-react'
+import { BookOpen, CalendarDays, LayoutList, Swords, Trophy, UserRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { Button } from '@/shared/components/Button'
+import type { HomeView } from '@/features/home/components/home-hub/homeViews'
 import { GameplayWorkspaceTour, type WorkspaceTourStep } from '@/shared/level/components/GameplayWorkspaceTour'
 import { SHOP_ROUTE, storyPath } from '@/shared/navigation/routes'
 import { OnboardingBanner } from './OnboardingBanner'
 import { useAppOnboarding } from '@/features/onboarding/hooks/onboardingContext'
 
-export type HomeTourSection = 'overview' | 'loadout' | 'profile'
+export type HomeTourSection = 'overview' | 'profile'
 
-// The hub tour walks one section per Home tab. Only the first step of a section
-// is required; the rest depend on what the account already owns.
-const sectionOrder = ['loadout', 'overview', 'profile'] as const
+// The hub tour walks two sections in order: the data categories a learner reads,
+// then the Profile category where they equip a companion. Only the first step of
+// a section is required; the rest depend on what the account already owns.
 
-const loadoutSteps = [
-  {
-    id: 'hub', selector: '[data-onboarding="home-loadout"]', icon: Backpack,
-    title: 'Home is your character hub',
-    body: 'Home has three sections. Loadout holds the companions you own, Overview tracks your progress, and Profile shows your rank and skills. We will walk through each one.',
-  },
-  {
-    id: 'roster', selector: '[data-onboarding="loadout-roster"]', icon: UserRound,
-    title: 'Your owned roster',
-    body: 'Every companion you buy lands here. Select one to inspect it; the stage above shows the companion you are currently looking at.',
-    optional: true,
-  },
-  {
-    id: 'equipped', selector: '[data-onboarding="home-equip"]', icon: Swords,
-    title: 'Equip who joins you',
-    body: 'Equip companion sends the selected companion into your next Adventure or Challenge. Your first purchase is already equipped, so this only matters when you want to switch.',
-    optional: true,
-  },
-  {
-    id: 'worlds', selector: '[data-onboarding="loadout-worlds"]', icon: Compass,
-    title: 'Worlds you can enter',
-    body: 'Every story world open to you is listed below. Open story map takes you straight to that world and its chapters.',
-    optional: true,
-  },
-] satisfies WorkspaceTourStep[]
+/** Profile is its own tour section; every other category shares the first one. */
+function sectionFor(view: HomeView): HomeTourSection {
+  return view === 'profile' ? 'profile' : 'overview'
+}
 
 const overviewSteps = [
   {
-    id: 'next', selector: '[data-onboarding="overview-next"]', icon: Route,
-    title: 'Overview opens on your next step',
-    body: 'The top card always points at the most useful thing to do next: choose your first companion, or continue the story from the next available level.',
+    id: 'views', selector: '[data-onboarding="home-views"]', icon: LayoutList,
+    title: 'Home is one dropdown',
+    body: 'Home has three views: Progress, Skills & achievements, and Profile. Switch between them here; the line beside the dropdown says what each one covers.',
   },
   {
-    id: 'mastery', selector: '[data-onboarding="overview-mastery"]', icon: Gauge,
-    title: 'Git Skill Mastery',
-    body: 'Each bar is one family of Git commands and how reliably you use it. The orb on the right averages them into your overall mastery and proficiency stars.',
-    optional: true,
-  },
-  {
-    id: 'activity', selector: '[data-onboarding="overview-progress"]', icon: CalendarDays,
-    title: 'Activity and story progress',
-    body: 'The heatmap shows your last 14 days of practice; short regular sessions beat one long one. Story Progress counts levels cleared, perfect clears, and hard trials won.',
-    optional: true,
-  },
-  {
-    id: 'kpis', selector: '[data-onboarding="overview-kpis"]', icon: Target,
-    title: 'Where your runs stand',
-    body: 'Clear rate, hard clear rate, average retries per cleared run, and command accuracy. Accuracy stays hidden until you have run 100 commands.',
-    optional: true,
-  },
-  {
-    id: 'achievements', selector: '[data-onboarding="overview-achievements"]', icon: Trophy,
-    title: 'Achievements to chase',
-    body: 'Every achievement shows its progress and point value. Filter by Unlocked or Locked to see what is still open to you.',
+    id: 'progress', selector: '[data-onboarding="overview-progress"]', icon: CalendarDays,
+    title: 'Progress is what you see first',
+    body: 'The plot shows how much you practised — pick Week, Month or Year to change the span. The citadel beside it fills with the share of runs you finished, and your full record sits underneath.',
     optional: true,
   },
 ] satisfies WorkspaceTourStep[]
 
 const profileSteps = [
   {
-    id: 'switch', selector: '[data-onboarding="profile-switch"]', icon: UserRound,
-    title: 'Profile and Rank Ladder',
-    body: 'Profile shows who you are playing as. Rank Ladder lists every tier, from the ones you cleared to the ones still locked.',
+    id: 'ladder', selector: '[data-onboarding="profile-ladder"]', icon: UserRound,
+    title: 'The rank ladder',
+    body: 'Every tier is listed here, from the ones you cleared to the ones still locked. Your current tier is the highlighted row.',
   },
   {
     id: 'rank', selector: '[data-onboarding="profile-rank"]', icon: Trophy,
@@ -85,9 +47,9 @@ const profileSteps = [
     optional: true,
   },
   {
-    id: 'currencies', selector: '[data-onboarding="profile-currencies"]', icon: Coins,
-    title: 'GitCoins and perfect clears',
-    body: 'GitCoins are what you spend on companions in the Shop. Perfect clears count the levels you finished flawlessly.',
+    id: 'roster', selector: '[data-onboarding="profile-roster"]', icon: Swords,
+    title: 'Your companion',
+    body: 'Every companion you own is listed here. Select one and press Equip companion to send it into your next Adventure or Challenge; your first purchase is already equipped.',
     optional: true,
   },
   {
@@ -99,32 +61,32 @@ const profileSteps = [
 ] satisfies WorkspaceTourStep[]
 
 const sections = {
-  loadout: { label: 'Home tour · Loadout', steps: loadoutSteps },
-  overview: { label: 'Home tour · Overview', steps: overviewSteps },
+  overview: { label: 'Home tour · Views', steps: overviewSteps },
   profile: { label: 'Home tour · Profile', steps: profileSteps },
 } satisfies Record<HomeTourSection, { label: string; steps: readonly WorkspaceTourStep[] }>
 
-export function HomeOnboarding({ ready, hasCompanion, tab, onSelectTab }: {
+export function HomeOnboarding({ ready, hasCompanion, view, onSelectView }: {
   ready: boolean
   hasCompanion: boolean
-  tab: HomeTourSection
-  onSelectTab: (tab: HomeTourSection) => void
+  view: HomeView
+  onSelectView: (view: HomeView) => void
 }) {
   const onboarding = useAppOnboarding()
   const navigate = useNavigate()
   const [started, setStarted] = useState(false)
   const phase = onboarding?.phase
+  const section = sectionFor(view)
 
   useEffect(() => {
-    // The tour always enters at Loadout, even for players who reached Home
-    // through the normal navigation instead of the Shop CTA.
+    // The tour always enters on the data categories, even for players who reached
+    // Home through normal navigation instead of the Shop CTA.
     if (phase !== 'home' || !ready || started) return
-    if (tab !== 'loadout') onSelectTab('loadout')
+    if (view === 'profile') onSelectView('progress')
     else setStarted(true)
-  }, [onSelectTab, phase, ready, started, tab])
+  }, [onSelectView, phase, ready, started, view])
 
   if (!onboarding || !['home', 'equip'].includes(onboarding.phase)) return null
-  const loadoutTab = tab === 'loadout'
+  const profileView = view === 'profile'
 
   function finish() {
     onboarding!.setPhase('done')
@@ -132,12 +94,11 @@ export function HomeOnboarding({ ready, hasCompanion, tab, onSelectTab }: {
   }
 
   function advance() {
-    const next = sectionOrder[sectionOrder.indexOf(tab) + 1]
-    if (next) onSelectTab(next)
+    if (section === 'overview') onSelectView('profile')
     else if (hasCompanion) finish()
     else {
       onboarding!.setPhase('equip')
-      onSelectTab('loadout')
+      onSelectView('profile')
     }
   }
 
@@ -147,24 +108,22 @@ export function HomeOnboarding({ ready, hasCompanion, tab, onSelectTab }: {
         hasCompanion
           ? <Button size="sm" onClick={finish}>Return to Stories</Button>
           : <Button size="sm" variant="outline" onClick={() => {
-            if (loadoutTab) { onboarding.setPhase('purchase'); navigate(SHOP_ROUTE) }
-            else onSelectTab('loadout')
-          }}>{loadoutTab ? 'Back to Shop' : 'Open Loadout'}</Button>
+            if (profileView) { onboarding.setPhase('purchase'); navigate(SHOP_ROUTE) }
+            else onSelectView('profile')
+          }}>{profileView ? 'Back to Shop' : 'Open Profile'}</Button>
       }>
         {hasCompanion
-          ? 'Your companion is equipped. Explore Loadout, Overview, and Profile, then return to Stories to play.'
-          : 'In Loadout, select a character you own and press Equip companion. If your roster is empty, buy a character in the Shop first.'}
+          ? 'Your companion is equipped. Look through each Home view, then return to Stories to play.'
+          : 'In Profile, select a character you own and press Equip companion. If your roster is empty, buy a character in the Shop first.'}
       </OnboardingBanner>
       {ready && started && onboarding.phase === 'home' ? (
         <GameplayWorkspaceTour
-          key={tab}
-          label={sections[tab].label}
-          finishLabel={tab === 'loadout'
-            ? 'Show Overview'
-            : tab === 'overview'
-              ? 'Show Profile'
-              : hasCompanion ? 'Return to Stories' : 'Check my loadout'}
-          steps={sections[tab].steps}
+          key={section}
+          label={sections[section].label}
+          finishLabel={section === 'overview'
+            ? 'Show Profile'
+            : hasCompanion ? 'Return to Stories' : 'Equip a companion'}
+          steps={sections[section].steps}
           onClose={(reason) => {
             if (reason === 'skip') onboarding.setPhase('done')
             else advance()

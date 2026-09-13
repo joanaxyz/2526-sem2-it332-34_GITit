@@ -89,24 +89,62 @@ HOME_HUB_LINE_LIMITS = {
     "contract": 30,
 }
 
+# Home Overview is one composition over a pure model and one owner per band. The
+# composition picks the active view; each owner renders exactly one named model
+# slice and never sees a raw summary. Progress is one plaque of two bands
+# (standing, then the record behind it) because the two used to be separate
+# categories restating each other's numbers.
+HOME_STATS_DIR = "frontend/src/features/home/components/home-stats"
 HOME_STATS_VIEW = "frontend/src/features/home/components/HomeStatsView.tsx"
-HOME_STATS_MODEL = "frontend/src/features/home/components/home-stats/homeStatsModel.ts"
-HOME_STATS_DASHBOARD = "frontend/src/features/home/components/home-stats/HomeStatsDashboard.tsx"
-HOME_ACHIEVEMENT_GALLERY = (
-    "frontend/src/features/home/components/home-stats/HomeAchievementGallery.tsx"
-)
+HOME_STATS_MODEL = f"{HOME_STATS_DIR}/homeStatsModel.ts"
+HOME_PROGRESS_PANEL = f"{HOME_STATS_DIR}/HomeProgressPanel.tsx"
+HOME_SKILLS_PANEL = f"{HOME_STATS_DIR}/HomeSkillsPanel.tsx"
+HOME_RESULTS_PANEL = f"{HOME_STATS_DIR}/HomeResultsPanel.tsx"
+HOME_ACHIEVEMENT_GALLERY = f"{HOME_STATS_DIR}/HomeAchievementGallery.tsx"
+# role -> (path, model slice prop rendered by the composition)
+HOME_OVERVIEW_PANELS = {
+    "progress": (HOME_PROGRESS_PANEL, "HomeProgressPanel", "progress"),
+    "skills": (HOME_SKILLS_PANEL, "HomeSkillsPanel", "skills"),
+    "results": (HOME_RESULTS_PANEL, "HomeResultsPanel", "results"),
+    "gallery": (HOME_ACHIEVEMENT_GALLERY, "HomeAchievementGallery", "achievements"),
+}
+# Each band takes its own named model slice and nothing else. Progress is the one
+# exception: the span control (week / month / year) belongs beside the plot, but
+# the URL state it edits is owned by the composition, so the value and its setter
+# are passed in by name. They are controls, not model data.
+HOME_OVERVIEW_PANEL_PROPS = {
+    "progress": ("progress", "activityWindow", "onSelectActivityWindow"),
+    "skills": ("skills",),
+    "results": ("results",),
+    "gallery": ("achievements",),
+}
 HOME_STATS_LINE_LIMITS = {
-    "composition": 80,
-    "model": 160,
-    "dashboard": 220,
+    "composition": 60,
+    # The model also derives the activity window's bucket labels and headings.
+    "model": 200,
+    # The progress band owns the span control (week/month/year) as well as the
+    # plot and the citadel.
+    "progress": 180,
+    # The skills panel owns two views of one profile — the radar silhouette and
+    # the per-command bar list — plus the hover link between them.
+    "skills": 100,
+    "results": 175,
     "gallery": 150,
 }
 HOME_STATS_DISPLACED_CSS = {
     "frontend/src/styles/features/home/achievements.css",
     "frontend/src/styles/features/home/stats-actions.css",
-    # The Overview "continue" CTA was replaced by the learner performance
-    # panel; its stylesheet must not come back.
-    "frontend/src/styles/features/home/continue-card.css",
+    # The standalone Performance page was folded into the Overview's
+    # "Run results" view; neither the page nor its stylesheet may return.
+    "frontend/src/styles/features/performance.css",
+}
+HOME_STATS_DISPLACED_TS = {
+    f"{HOME_STATS_DIR}/HomeStatsDashboard.tsx",
+    f"{HOME_STATS_DIR}/overviewViews.ts",
+    f"{HOME_STATS_DIR}/OverviewViewSwitcher.tsx",
+    # Loadout was folded into the Profile category; the story-world atlas is gone.
+    "frontend/src/features/home/components/HomeLoadoutView.tsx",
+    "frontend/src/features/performance/pages/PerformancePage.tsx",
 }
 
 # Build-time generators are allowed to call frontend tooling explicitly. Runtime
@@ -880,7 +918,6 @@ def home_hub_source_violations(
             "home",
             "stats",
             "playerName",
-            "gitcoins",
             "hidden",
             "companion",
         ]
@@ -890,9 +927,8 @@ def home_hub_source_violations(
             "home",
             "stats",
             "playerName",
-            "gitcoins",
         ]:
-            violations.append(f"{path_label}: Hub must keep the production four-prop contract")
+            violations.append(f"{path_label}: Hub must keep the production three-prop contract")
 
     if role == "workspace":
         for hook in ("useLearnedSkills",):
@@ -1116,7 +1152,7 @@ def home_overview_source_violations(
     path_label: str,
     role: str,
 ) -> list[str]:
-    """Enforce Home Overview composition, model, and rendering ownership."""
+    """Enforce Home Overview composition, model, catalog, and view ownership."""
 
     violations: list[str] = []
     line_count = len(source.splitlines())
@@ -1126,44 +1162,44 @@ def home_overview_source_violations(
             f"{path_label}: Home Overview {role} has {line_count} lines; limit is {limit}"
         )
 
+    panel_roles = set(HOME_OVERVIEW_PANELS)
+    achievement_ledger = "frontend/src/features/home/utils/achievements"
+    # Every Overview owner sits downstream of the composition and of raw API data.
     direct_data_modules = (
         "@tanstack/react-query",
         "frontend/src/features/home/api",
+        "frontend/src/features/performance/api",
         "frontend/src/features/stats/api",
         "frontend/src/shared/api",
     )
     reverse_modules = (
         "frontend/src/features/home/components/HomeHubView",
+        "frontend/src/features/home/components/HomeStatsView",
         "frontend/src/features/home/pages/HomePage",
     )
-    forbidden_modules = {
-        "composition": direct_data_modules,
-        "model": (
+    raw_summary_modules = (
+        "frontend/src/features/home/types",
+        "frontend/src/features/stats/types",
+    )
+    if role == "composition":
+        forbidden_modules: tuple[str, ...] = direct_data_modules
+    elif role == "model":
+        forbidden_modules = (
             *direct_data_modules,
             *reverse_modules,
             "react",
             "react-router-dom",
             "lucide-react",
             "frontend/src/features/home/components",
-        ),
-        "dashboard": (
+        )
+    else:
+        forbidden_modules = (
             *direct_data_modules,
             *reverse_modules,
+            *raw_summary_modules,
             "react-router-dom",
-            "frontend/src/features/home/components/HomeStatsView",
-            "frontend/src/features/home/types",
-            "frontend/src/features/home/utils/achievements",
-            "frontend/src/features/stats/types",
-        ),
-        "gallery": (
-            *direct_data_modules,
-            *reverse_modules,
-            "react-router-dom",
-            "frontend/src/features/home/components/HomeStatsView",
-            "frontend/src/features/home/types",
-            "frontend/src/features/stats/types",
-        ),
-    }[role]
+            *(() if role == "gallery" else (achievement_ledger,)),
+        )
 
     modules = ts_module_specifiers(source)
     canonical_modules = [
@@ -1175,28 +1211,31 @@ def home_overview_source_violations(
         ):
             violations.append(f"{path_label}: Home Overview {role} must not import {module}")
 
-    required_imports = {
-        "composition": (
+    if role == "composition":
+        required_imports: tuple[str, ...] = (
             HOME_STATS_MODEL.removesuffix(".ts"),
-            HOME_STATS_DASHBOARD.removesuffix(".tsx"),
-            HOME_ACHIEVEMENT_GALLERY.removesuffix(".tsx"),
-        ),
-        "model": (
+            *(path.removesuffix(".tsx") for path, _, _ in HOME_OVERVIEW_PANELS.values()),
+        )
+    elif role == "model":
+        required_imports = (
             "frontend/src/features/home/types",
-            "frontend/src/features/home/utils/achievements",
+            achievement_ledger,
             "frontend/src/features/stats/types",
-        ),
-        "dashboard": (HOME_STATS_MODEL.removesuffix(".ts"),),
-        "gallery": ("frontend/src/features/home/utils/achievements",),
-    }[role]
+        )
+    elif role == "gallery":
+        required_imports = (achievement_ledger,)
+    elif role in panel_roles:
+        required_imports = (HOME_STATS_MODEL.removesuffix(".ts"),)
+    else:
+        required_imports = ()
     for required in required_imports:
         if canonical_modules.count(required) != 1:
             violations.append(
                 f"{path_label}: Home Overview {role} must import {required} exactly once"
             )
 
-    forbidden_markers = {
-        "composition": (
+    if role == "composition":
+        forbidden_markers: tuple[str, ...] = (
             "ACHIEVEMENT_FILTERS",
             "AchievementFilter",
             "ActivityHeatmap",
@@ -1205,9 +1244,12 @@ def home_overview_source_violations(
             "deriveAchievements",
             "home-overview-achievements-panel",
             "home-overview-stats-panel",
+            "useModulePerformance",
+            "useSearchParams",
             "useState",
-        ),
-        "model": (
+        )
+    elif role == "model":
+        forbidden_markers = (
             "Link",
             "document",
             "home-overview-",
@@ -1215,32 +1257,26 @@ def home_overview_source_violations(
             "useMemo",
             "useState",
             "window",
-        ),
-        "dashboard": (
-            "AchievementFilter",
+        )
+    else:
+        forbidden_markers = (
             "HomeSummary",
             "StatsSummary",
             "buildHomeStatsModel",
-            "deriveAchievements",
-            "home-overview-achievement-card",
-            "home-overview-achievements-panel",
-            "useState",
-        ),
-        "gallery": (
-            "ActivityHeatmap",
-            "GitCommandIcon",
-            "HomeSummary",
-            "SkillProfileBars",
-            "StatsSummary",
-            "buildHomeStatsModel",
-            "deriveAchievements",
-            "home-overview-activity",
-            "home-overview-command",
-            "home-overview-kpi",
-            "home-overview-stats-panel",
-            "home-overview-story",
-        ),
-    }[role]
+            *{
+                "progress": ("GitCommandIcon", "SkillProfileBars", "deriveAchievements", "useState"),
+                # The skills band keeps one piece of local UI state: which row the
+                # pointer is on, which is what lights the matching radar vertex.
+                "skills": ("ActivityTrendChart", "deriveAchievements"),
+                "results": (
+                    "ActivityTrendChart",
+                    "GitCommandIcon",
+                    "deriveAchievements",
+                    "useState",
+                ),
+                "gallery": ("ActivityTrendChart", "GitCommandIcon", "SkillProfileBars"),
+            }[role],
+        )
     for marker in forbidden_markers:
         owns_marker = (
             bool(re.search(rf"\b{re.escape(marker)}\b", source))
@@ -1261,8 +1297,10 @@ def home_overview_source_violations(
         required_calls = {
             "useMemo": len(re.findall(r"\buseMemo\s*\(", source)),
             "buildHomeStatsModel": len(re.findall(r"\bbuildHomeStatsModel\s*\(", source)),
-            "HomeStatsDashboard render": len(re.findall(r"<HomeStatsDashboard\b", source)),
-            "HomeAchievementGallery render": len(re.findall(r"<HomeAchievementGallery\b", source)),
+            **{
+                f"{component} render": len(re.findall(rf"<{component}\b", source))
+                for _, component, _ in HOME_OVERVIEW_PANELS.values()
+            },
         }
         for marker, count in required_calls.items():
             if count != 1:
@@ -1273,18 +1311,22 @@ def home_overview_source_violations(
             violations.append(
                 f"{path_label}: composition must own the home-overview-grid root exactly once"
             )
-        for component, prop in (
-            ("HomeStatsDashboard", "dashboard"),
-            ("HomeAchievementGallery", "achievements"),
-        ):
+        for panel_role, (_, component, prop) in HOME_OVERVIEW_PANELS.items():
             prop_names, tag_body = jsx_component_props(source, component)
-            if prop_names != [prop] or f"{prop}={{model.{prop}}}" not in tag_body:
+            expected = HOME_OVERVIEW_PANEL_PROPS[panel_role]
+            if sorted(prop_names) != sorted(expected) or f"{prop}={{model.{prop}}}" not in tag_body:
                 violations.append(
-                    f"{path_label}: {component} must receive only {prop} from the matching model slice"
+                    f"{path_label}: {component} must receive {sorted(expected)}, with {prop} "
+                    f"from the matching model slice"
                 )
 
     if role == "model":
-        for exported_type in ("HomeStatsModel", "HomeStatsDashboardModel"):
+        for exported_type in (
+            "HomeStatsModel",
+            "HomeProgressModel",
+            "HomeSkillsModel",
+            "HomeResultsModel",
+        ):
             if not re.search(rf"\bexport\s+type\s+{exported_type}\b", source):
                 violations.append(f"{path_label}: model must export {exported_type}")
         achievement_value_references = [
@@ -1292,7 +1334,7 @@ def home_overview_source_violations(
             for module in ts_value_module_references(source)
             if ts_module_matches_boundary(
                 canonical_ts_module_reference(module=module, path_label=path_label),
-                "frontend/src/features/home/utils/achievements",
+                achievement_ledger,
             )
         ]
         if len(achievement_value_references) != 1:
@@ -1300,50 +1342,49 @@ def home_overview_source_violations(
                 f"{path_label}: model must own exactly one runtime achievement-ledger import"
             )
 
-    if role == "dashboard":
-        if (
-            destructured_function_props(source, "HomeStatsDashboard") != ["dashboard"]
-            or "HomeStatsDashboardModel" not in source
+    if role == "catalog":
+        for exported in ("OverviewView", "OVERVIEW_VIEWS", "DEFAULT_OVERVIEW_VIEW"):
+            if not re.search(rf"\bexport\s+(?:type\s+|const\s+){exported}\b", source):
+                violations.append(f"{path_label}: catalog must export {exported}")
+
+    if role in panel_roles:
+        _, component, prop = HOME_OVERVIEW_PANELS[role]
+        if sorted(destructured_function_props(source, component)) != sorted(
+            HOME_OVERVIEW_PANEL_PROPS[role]
         ):
             violations.append(
-                f"{path_label}: dashboard must expose only the named dashboard model prop"
+                f"{path_label}: {component} must expose only "
+                f"{sorted(HOME_OVERVIEW_PANEL_PROPS[role])}"
             )
-        for marker in (
+        if re.search(r"\(\s*\{[^}]*\b(?:home|stats)\b[^}]*\}\s*(?::|,|\))", source):
+            violations.append(f"{path_label}: {role} must not receive raw home or stats summaries")
+
+    owned_markers = {
+        "progress": (
+            # The 14-cell heatmap became a dated plot with a span control; the
+            # band owns both, and the citadel stays its only finish-rate line.
+            "ActivityTrendChart",
+            "ActivitySpanPicker",
+            "home-overview-story-block",
+            "home-overview-story-rate",
+        ),
+        "skills": (
             "GitCommandIcon",
             "SkillProfileBars",
-            "ActivityHeatmap",
-            "home-overview-stats-panel",
-        ):
-            if marker not in source:
-                violations.append(f"{path_label}: dashboard must own {marker}")
-        if re.search(
-            r"\(\s*\{[^}]*\b(?:home|stats)\b[^}]*\}\s*(?::|,|\))",
-            source,
-        ):
-            violations.append(
-                f"{path_label}: dashboard must not receive raw home or stats summaries"
-            )
-
-    if role == "gallery":
-        if destructured_function_props(source, "HomeAchievementGallery") != [
-            "achievements"
-        ] or not re.search(r"\bAchievement\s*\[\s*\]", source):
-            violations.append(
-                f"{path_label}: gallery must expose only the named Achievement[] prop"
-            )
-        for marker in (
+            "MasteryRadar",
+            "home-overview-mastery-orb",
+        ),
+        "results": ("home-overview-kpi-row", "home-overview-modules", "useModulePerformance"),
+        "gallery": (
             "useState",
             "ACHIEVEMENT_FILTERS",
             "home-overview-achievements-panel",
             "home-overview-achievement-card",
-        ):
-            if marker not in source:
-                violations.append(f"{path_label}: gallery must own {marker}")
-        if re.search(
-            r"\(\s*\{[^}]*\b(?:home|stats)\b[^}]*\}\s*(?::|,|\))",
-            source,
-        ):
-            violations.append(f"{path_label}: gallery must not receive raw home or stats summaries")
+        ),
+    }.get(role, ())
+    for marker in owned_markers:
+        if marker not in source:
+            violations.append(f"{path_label}: Home Overview {role} must own {marker}")
     return violations
 
 
@@ -1429,19 +1470,19 @@ def home_overview_css_source_violations(
     if role == "home-entry":
         if imports.count("./home/stats.css") != 1:
             violations.append(f"{path_label}: home entry must import ./home/stats.css exactly once")
-        for displaced in (
-            "./home/achievements.css",
-            "./home/stats-actions.css",
-            "./home/continue-card.css",
-        ):
+        for displaced in ("./home/achievements.css", "./home/stats-actions.css"):
             if displaced in imports:
                 violations.append(f"{path_label}: must not import deleted {displaced}")
     elif role == "stats-entry":
         expected = [
             "./stats-layout.css",
+            "./stats-progress.css",
+            "./stats-skills.css",
             "./stats-kpis.css",
+            "./stats-results.css",
             "./stats-achievements.css",
             "./stats-responsive.css",
+            "./first-step-nudge.css",
         ]
         if imports != expected:
             violations.append(
@@ -1498,8 +1539,7 @@ def check_home_overview_ownership() -> list[str]:
     targets = (
         (ROOT / HOME_STATS_VIEW, "composition"),
         (ROOT / HOME_STATS_MODEL, "model"),
-        (ROOT / HOME_STATS_DASHBOARD, "dashboard"),
-        (ROOT / HOME_ACHIEVEMENT_GALLERY, "gallery"),
+        *((ROOT / path, role) for role, (path, _, _) in HOME_OVERVIEW_PANELS.items()),
     )
     expected_production_paths = {rel(path) for path, _ in targets}
     for path, role in targets:
@@ -1514,7 +1554,7 @@ def check_home_overview_ownership() -> list[str]:
             )
         )
 
-    owner_dir = ROOT / HOME_STATS_MODEL.rpartition("/")[0]
+    owner_dir = ROOT / HOME_STATS_DIR
     for path in iter_files(owner_dir, TS_SUFFIXES):
         path_rel = rel(path)
         if ".test." not in path.name and path_rel not in expected_production_paths:
@@ -1522,14 +1562,18 @@ def check_home_overview_ownership() -> list[str]:
                 f"{path_rel}: unexpected Home Overview production owner; avoid compatibility paths"
             )
 
+    # Only the composition may reach the view owners; the catalog is shared with
+    # the switcher because both describe the same list of categories.
     child_modules = {
         HOME_STATS_MODEL.removesuffix(".ts"),
-        HOME_STATS_DASHBOARD.removesuffix(".tsx"),
-        HOME_ACHIEVEMENT_GALLERY.removesuffix(".tsx"),
+        *(path.removesuffix(".tsx") for path, _, _ in HOME_OVERVIEW_PANELS.values()),
     }
     allowed_child_edges = {
         HOME_STATS_VIEW: child_modules,
-        HOME_STATS_DASHBOARD: {HOME_STATS_MODEL.removesuffix(".ts")},
+        **{
+            path: {HOME_STATS_MODEL.removesuffix(".ts")}
+            for path, _, _ in HOME_OVERVIEW_PANELS.values()
+        },
     }
     achievement_utility = "frontend/src/features/home/utils/achievements.ts"
     for path in iter_files(FRONTEND_SRC, TS_SUFFIXES):
@@ -1570,9 +1614,9 @@ def check_home_overview_ownership() -> list[str]:
             )
         )
 
-    for displaced in sorted(HOME_STATS_DISPLACED_CSS):
+    for displaced in sorted(HOME_STATS_DISPLACED_CSS | HOME_STATS_DISPLACED_TS):
         if (ROOT / displaced).exists():
-            violations.append(f"{displaced}: displaced Home Overview CSS must stay deleted")
+            violations.append(f"{displaced}: displaced Home Overview owner must stay deleted")
 
     for path in iter_files(FRONTEND_SRC / "styles", {".css"}):
         source = path.read_text(encoding="utf-8", errors="ignore")

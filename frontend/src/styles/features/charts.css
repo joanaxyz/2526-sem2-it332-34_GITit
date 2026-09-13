@@ -1,0 +1,231 @@
+/* ── Chart kit ─────────────────────────────────────────────────────────── */
+/* Recharts draws the geometry; every colour in it is painted here, from theme
+   tokens. SVG presentation attributes lose to any CSS rule, so the library's
+   own `fill`/`stroke` props never need to carry a hard-coded hex — a re-skinned
+   theme re-skins the charts with it.
+
+   House rules, applied to every plot: hairline solid grid one step off the
+   surface, 2px lines, thin columns with air around them, marks in colour and
+   text in text tokens. */
+
+.ref-chart {
+  width: 100%;
+  min-width: 0;
+}
+
+.ref-chart .recharts-surface {
+  overflow: visible;
+}
+
+/* ── Axes & grid: recessive, never competing with the marks ─────────────── */
+.ref-chart .recharts-cartesian-grid line,
+.ref-chart .recharts-polar-grid-angle line,
+.ref-chart .recharts-polar-grid-concentric-polygon {
+  stroke: rgba(var(--theme-primary-rgb), 0.13);
+  stroke-dasharray: none;
+  stroke-width: 1;
+  fill: none;
+}
+
+.ref-chart .recharts-cartesian-axis-tick text,
+.ref-chart-rim-label {
+  fill: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* The column baseline: a hairline the marks visibly stand on, so short columns
+   read as short rather than as floating dashes. */
+.ref-chart .recharts-cartesian-axis-line {
+  stroke: rgba(var(--theme-primary-rgb), 0.3);
+  stroke-width: 1;
+}
+
+.ref-chart-rim-label[data-active='true'] {
+  fill: rgb(var(--theme-teal-rgb));
+}
+
+/* ── Marks ─────────────────────────────────────────────────────────────── */
+.ref-chart-fill-from {
+  stop-color: rgb(var(--theme-teal-rgb));
+  stop-opacity: 0.3;
+}
+
+.ref-chart-fill-to {
+  stop-color: rgb(var(--theme-teal-rgb));
+  stop-opacity: 0.02;
+}
+
+.ref-chart-area .recharts-area-curve {
+  stroke: rgb(var(--theme-teal-rgb));
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 5px rgba(var(--theme-teal-rgb), 0.45));
+}
+
+/* Dots wear a surface ring so they stay readable where they cross the line. */
+.ref-chart .recharts-dot,
+.ref-chart .recharts-active-dot .recharts-dot {
+  fill: rgb(var(--theme-teal-rgb));
+  stroke: hsl(var(--background));
+}
+
+.ref-chart-column .recharts-rectangle {
+  fill: rgba(var(--theme-teal-rgb), 0.52);
+  transition: fill var(--motion-fast) var(--ease-out);
+}
+
+.ref-chart-column:hover .recharts-rectangle {
+  fill: rgba(var(--theme-teal-rgb), 0.72);
+}
+
+/* Vertices carry a surface ring so they stay legible where the shape crosses a
+   grid ring; the one under the pointer swells instead of changing colour. */
+.ref-chart-vertex {
+  fill: rgb(var(--theme-teal-rgb));
+  stroke: hsl(var(--background));
+  stroke-width: 2;
+  transition: r var(--motion-fast) var(--ease-out);
+}
+
+.ref-chart-vertex[data-active='true'] {
+  filter: drop-shadow(0 0 7px rgba(var(--theme-teal-rgb), 0.9));
+}
+
+.ref-chart-shape .recharts-radar-polygon {
+  fill: rgba(var(--theme-teal-rgb), 0.15);
+  stroke: rgb(var(--theme-teal-rgb));
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 8px rgba(var(--theme-teal-rgb), 0.34));
+}
+
+/* ── Direct labels: the value stays readable without hovering ───────────── */
+.ref-chart-column-value {
+  fill: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+}
+
+.ref-chart-column-value[data-empty='true'] {
+  fill: var(--text-tertiary);
+}
+
+.ref-chart .recharts-reference-dot .recharts-dot {
+  fill: hsl(var(--warning));
+  stroke: hsl(var(--background));
+  stroke-width: 2;
+}
+
+.ref-chart .recharts-reference-dot-label,
+.ref-chart .recharts-reference-dot text {
+  fill: hsl(var(--warning));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+}
+
+/* ── Cursor & tooltip ──────────────────────────────────────────────────── */
+.ref-chart .recharts-tooltip-cursor {
+  stroke: rgba(var(--theme-teal-rgb), 0.42);
+  fill: rgba(var(--theme-teal-rgb), 0.08);
+}
+
+.recharts-tooltip-wrapper {
+  z-index: var(--z-tooltip);
+  outline: none;
+}
+
+.ref-chart-tip {
+  min-width: 9rem;
+  border: 1px solid var(--panel-border-strong);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.6rem;
+  background: var(--surface-overlay);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+}
+
+.ref-chart-tip-title {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+}
+
+.ref-chart-tip-caption {
+  margin: 0.1rem 0 0;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+}
+
+.ref-chart-tip dl {
+  display: grid;
+  gap: 0.22rem;
+  margin: 0.45rem 0 0;
+}
+
+.ref-chart-tip dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.9rem;
+  align-items: baseline;
+}
+
+.ref-chart-tip dt {
+  display: flex;
+  align-items: center;
+  gap: 0.38rem;
+  color: var(--text-secondary);
+  font-size: var(--text-2xs);
+}
+
+/* Identity rides the swatch, never the label colour. */
+.ref-chart-tip dt i {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 2px;
+  background: rgb(var(--theme-primary-rgb));
+}
+
+.ref-chart-tip [data-tone='progress'] dt i {
+  background: rgb(var(--theme-teal-rgb));
+}
+
+.ref-chart-tip [data-tone='muted'] dt i {
+  background: rgba(var(--theme-teal-rgb), 0.42);
+}
+
+.ref-chart-tip dd {
+  margin: 0;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+}
+
+/* ── Small multiple ────────────────────────────────────────────────────── */
+.ref-chart-mini {
+  display: grid;
+  align-content: start;
+  gap: 0.35rem;
+  min-width: 0;
+  margin: 0;
+}
+
+.ref-chart-mini figcaption {
+  color: var(--text-secondary);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+/* Keyboard users get the same crosshair readout as a pointer (Recharts'
+   accessibility layer), so the focus ring has to be visible. */
+.ref-chart .recharts-wrapper:focus-visible {
+  border-radius: var(--radius-sm);
+  outline: 2px solid rgba(var(--theme-primary-rgb), 0.7);
+  outline-offset: 2px;
+}

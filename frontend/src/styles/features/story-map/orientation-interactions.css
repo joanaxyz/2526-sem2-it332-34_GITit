@@ -312,7 +312,13 @@
   height: 0.75rem;
 }
 
+/* min-height alone only grew the card: .ui-card is not a column, so the
+   react-flow canvas inside .ui-card-content resolved to 0 and the commit graph
+   rendered as an empty box. Give the card explicit rows so the canvas gets the
+   height the min-height reserves. */
 .orientation-dag-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   min-height: 18rem;
 }
 

@@ -110,54 +110,56 @@ export function OrientationLessonWorkspace({ chapter, onLeaveModule }: {
 
   return (
     <div className="orientation-workspace">
-      <GamePanel as="section" className="orientation-panel" aria-labelledby="orientation-title">
-        <header className="orientation-overview">
-          <div className="orientation-overview-copy">
-            <p className="orientation-kicker"><Compass aria-hidden="true" /> Module 0 · Orientation</p>
-            <h1 id="orientation-title">{chapter.title}</h1>
-            <p>Build the mental model first. The commands will make more sense when you can see the state they change.</p>
-          </div>
-          <div className="orientation-course-progress" aria-label={`${completedLessonCount} of ${lessons.length} topics complete`}>
-            <span><strong>{completedLessonCount}</strong> / {lessons.length} topics</span>
-            <div
-              className="orientation-progress-track"
-              role="progressbar"
-              aria-label="Module progress"
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={courseProgress}
-            >
-              <span style={{ width: `${courseProgress}%` }} />
-            </div>
-          </div>
-        </header>
+      <header className="orientation-masthead">
+        <p className="orientation-kicker"><Compass aria-hidden="true" /> Module 0 · Orientation</p>
+        <h1 id="orientation-title">{chapter.title}</h1>
+        <p>Build the mental model first. The commands will make more sense when you can see the state they change.</p>
+      </header>
 
-        <nav className="orientation-lesson-nav" aria-label="Module 0 topics">
-          <ol>
-            {lessons.map((item, index) => {
-              const active = item.id === activeLessonId
-              return (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    className={cn('orientation-lesson-tab', active && 'is-active', item.is_complete && 'is-complete')}
-                    aria-current={active ? 'page' : undefined}
-                    onClick={() => selectLesson(item.id)}
-                  >
-                    <span className="orientation-lesson-index" aria-hidden="true">
-                      {item.is_complete ? <Check /> : String(index + 1).padStart(2, '0')}
-                    </span>
-                    <span className="orientation-lesson-tab-copy">
-                      <strong>{displayLessonTitle(item.title)}</strong>
-                      <small>{item.is_complete ? 'Complete' : active ? 'In progress' : 'Not started'}</small>
-                    </span>
-                  </button>
-                </li>
-              )
-            })}
-          </ol>
-        </nav>
+      <GamePanel as="nav" className="orientation-syllabus" aria-label="Module 0 topics">
+        <div className="orientation-syllabus-head">
+          <p>
+            <span>Topics</span>
+            <span><strong>{completedLessonCount}</strong> / {lessons.length}</span>
+          </p>
+          <div
+            className="orientation-progress-track"
+            role="progressbar"
+            aria-label="Module progress"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={courseProgress}
+          >
+            <span style={{ width: `${courseProgress}%` }} />
+          </div>
+        </div>
 
+        <ol className="orientation-syllabus-list">
+          {lessons.map((item, index) => {
+            const active = item.id === activeLessonId
+            return (
+              <li key={item.id}>
+                <button
+                  type="button"
+                  className={cn('orientation-topic', active && 'is-active', item.is_complete && 'is-complete')}
+                  aria-current={active ? 'page' : undefined}
+                  onClick={() => selectLesson(item.id)}
+                >
+                  <span className="orientation-topic-index" aria-hidden="true">
+                    {item.is_complete ? <Check /> : String(index + 1).padStart(2, '0')}
+                  </span>
+                  <span className="orientation-topic-copy">
+                    <strong>{displayLessonTitle(item.title)}</strong>
+                    <small>{item.is_complete ? 'Complete' : active ? 'In progress' : 'Not started'}</small>
+                  </span>
+                </button>
+              </li>
+            )
+          })}
+        </ol>
+      </GamePanel>
+
+      <GamePanel as="section" className="orientation-panel" aria-label="Current topic">
         {lessonDetailQuery.isError ? (
           <ErrorState title="Could not load this topic" description={lessonDetailQuery.error.message} />
         ) : !lesson || lessonDetailQuery.isLoading ? (

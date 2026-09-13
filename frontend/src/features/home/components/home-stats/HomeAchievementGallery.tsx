@@ -11,21 +11,24 @@ const ACHIEVEMENT_FILTERS: Array<{ value: AchievementFilter; label: string }> = 
   { value: 'locked', label: 'Locked' },
 ]
 
+function matchesFilter(achievement: Achievement, filter: AchievementFilter) {
+  if (filter === 'unlocked') return achievement.unlocked
+  if (filter === 'locked') return !achievement.unlocked
+  return true
+}
+
 export function HomeAchievementGallery({ achievements }: { achievements: Achievement[] }) {
   const [filter, setFilter] = useState<AchievementFilter>('all')
   const unlocked = achievements.filter((achievement) => achievement.unlocked)
   const earnedPoints = unlocked.reduce((sum, achievement) => sum + achievement.points, 0)
   const totalPoints = achievements.reduce((sum, achievement) => sum + achievement.points, 0)
-  const visibleAchievements = achievements
-    .filter((achievement) => {
-      if (filter === 'unlocked') return achievement.unlocked
-      if (filter === 'locked') return !achievement.unlocked
-      return true
-    })
-    .slice(0, 8)
+  // Every match is shown. The gallery used to stop at eight cards, so a filter
+  // could report sixteen unlocked and then display half of them.
+  const visibleAchievements = achievements.filter((achievement) => matchesFilter(achievement, filter))
+  const pointsPct = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0
 
   return (
-    <section className="ref-panel home-overview-achievements-panel" aria-label="Achievement gallery" data-onboarding="overview-achievements">
+    <section className="home-overview-achievements-panel" aria-label="Achievement gallery" data-onboarding="overview-achievements">
       <div className="home-overview-achievements-head">
         <div>
           <header className="ref-panel-head">Achievement Gallery</header>
@@ -36,6 +39,9 @@ export function HomeAchievementGallery({ achievements }: { achievements: Achieve
         <div className="home-overview-award-score">
           <strong>{earnedPoints}</strong>
           <span>/ {totalPoints} pts</span>
+          <div className="ref-meter" aria-label={`${earnedPoints} of ${totalPoints} achievement points earned`}>
+            <span style={{ width: `${pointsPct}%` }} />
+          </div>
         </div>
       </div>
 
@@ -48,7 +54,8 @@ export function HomeAchievementGallery({ achievements }: { achievements: Achieve
             key={option.value}
             onClick={() => setFilter(option.value)}
           >
-            {option.label}
+            {option.label}{' '}
+            <b>{achievements.filter((achievement) => matchesFilter(achievement, option.value)).length}</b>
           </button>
         ))}
       </div>

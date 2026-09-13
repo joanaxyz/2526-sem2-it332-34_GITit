@@ -12,7 +12,7 @@
   }
 
   .story-map-layout--orientation {
-    grid-template-columns: minmax(0, 1fr) minmax(16rem, 19rem);
+    grid-template-columns: minmax(0, 1fr) minmax(13.5rem, 15rem);
     width: min(100%, 90rem);
   }
 

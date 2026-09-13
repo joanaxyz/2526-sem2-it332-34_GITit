@@ -1,6 +1,6 @@
 import { toast } from 'sonner'
 
-import { ApiError } from './apiError'
+import { ApiError, describeApiError, readApiFieldErrors } from './apiError'
 import { apiOperations } from './generated/apiTypes'
 import type { ApiOperationId, ApiRequestBody, ApiResponseBody } from './generated/apiTypes'
 import { useAuthStore } from '@/shared/auth/useAuth'
@@ -97,8 +97,10 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   const payload = await parseResponse(response)
   if (!response.ok) {
-    const detail = typeof payload === 'object' && payload && 'detail' in payload ? String(payload.detail) : response.statusText
-    throw new ApiError(detail, response.status, payload)
+    // Field errors carry the only useful text on a DRF 400 (password rules,
+    // for one), so they must reach the caller instead of "Bad Request".
+    const message = describeApiError(payload, response.statusText || 'Request failed.')
+    throw new ApiError(message, response.status, payload, readApiFieldErrors(payload))
   }
   return payload as T
 }

@@ -117,6 +117,42 @@ def test_register_rejects_invalid_username_format(db, api_client):
     assert "username" in response.data
 
 
+def test_register_returns_the_django_password_rule_that_rejected_it(db, api_client):
+    response = api_client.post(
+        "/api/auth/register/",
+        registration_payload(password="password", password_confirm="password"),
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    # The frontend renders these strings verbatim, so the reason must travel in
+    # the body rather than collapsing into a bare "Bad Request".
+    messages = " ".join(response.data["password"])
+    assert "too common" in messages
+
+
+def test_register_rejects_a_password_that_is_the_username(db, api_client):
+    response = api_client.post(
+        "/api/auth/register/",
+        registration_payload(password="jcgako12", password_confirm="jcgako12"),
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "similar" in " ".join(response.data["password"])
+
+
+def test_register_rejects_an_entirely_numeric_password(db, api_client):
+    response = api_client.post(
+        "/api/auth/register/",
+        registration_payload(password="284619375", password_confirm="284619375"),
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "numeric" in " ".join(response.data["password"])
+
+
 def test_login_accepts_username_or_email(db, api_client):
     create_student_user()
 

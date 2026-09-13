@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useAuthStore } from '@/shared/auth/useAuth'
 
+import { ApiError } from './apiError'
+
 import { apiOperationRequest, apiRequest } from './httpClient'
 
 const user = {
@@ -125,6 +127,21 @@ describe('apiRequest auth refresh', () => {
   })
 
 
+
+  it('surfaces DRF field errors instead of the bare status text', async () => {
+    const fetchMock = vi.fn(() =>
+      Promise.resolve(jsonResponse(400, { password: ['This password is too common.'] })),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const error = await apiRequest('/auth/register/', { method: 'POST', skipAuthRefresh: true }).catch(
+      (thrown) => thrown,
+    )
+
+    expect(error).toBeInstanceOf(ApiError)
+    expect((error as ApiError).message).toBe('This password is too common.')
+    expect((error as ApiError).fieldErrors).toEqual({ password: ['This password is too common.'] })
+  })
 
   it('uses the generated operation method and serializes typed bodies', async () => {
     const fetchMock = vi.fn((_input: RequestInfo | URL, init?: RequestInit) => {

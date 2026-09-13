@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from progress.services.metrics import ACTIVITY_WINDOWS
+
 
 class RateMetricSerializer(serializers.Serializer):
     value = serializers.FloatField(allow_null=True)
@@ -91,6 +93,9 @@ class StatsHeadlineSerializer(serializers.Serializer):
 class StatsSummaryResponseSerializer(serializers.Serializer):
     skill_profile = StatsSkillAxisSerializer(many=True)
     activity_trend = StatsTrendPointSerializer(many=True)
+    # Echoed back so the client labels the plot with the window it actually got,
+    # not the one it asked for: an unknown window resolves to the default.
+    activity_window = serializers.ChoiceField(choices=sorted(ACTIVITY_WINDOWS))
     headline = StatsHeadlineSerializer()
 
 

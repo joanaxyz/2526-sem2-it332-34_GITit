@@ -1,48 +1,57 @@
 import { useMemo } from 'react'
-import { ArrowRight } from 'lucide-react'
-import { Link } from 'react-router-dom'
 
+import type { HomeView } from '@/features/home/components/home-hub/homeViews'
 import type { HomeSummary } from '@/features/home/types'
 import type { StatsSummary } from '@/features/stats/types'
-import { SHOP_ROUTE, storyPath } from '@/shared/navigation/routes'
+import { useActivityWindow } from '@/features/stats/hooks/useActivityWindow'
 
 import { HomeAchievementGallery } from './home-stats/HomeAchievementGallery'
-import { HomeStatsDashboard } from './home-stats/HomeStatsDashboard'
+import { HomeProgressPanel } from './home-stats/HomeProgressPanel'
+import { HomeResultsPanel } from './home-stats/HomeResultsPanel'
+import { HomeSkillsPanel } from './home-stats/HomeSkillsPanel'
 import { buildHomeStatsModel } from './home-stats/homeStatsModel'
 
+/**
+ * The data categories of Home. Profile is the third category and is composed by
+ * the hub instead, because it owns companion and rank state rather than summary
+ * data. Whichever category is active, exactly one panel set renders.
+ *
+ * Progress is one plaque of two bands: where the account stands, then the record
+ * behind that standing. They were separate categories until each discovered it
+ * was quoting the other's numbers back.
+ */
 export function HomeStatsView({
   home,
   stats,
-  companionRequired,
+  view,
 }: {
   home: HomeSummary
   stats: StatsSummary
-  companionRequired: boolean
+  view: HomeView
 }) {
   const model = useMemo(() => buildHomeStatsModel(home, stats), [home, stats])
+  // The band renders the span control; HomePage reads the same URL parameter to
+  // scope its request, so the two can never disagree about what is on screen.
+  const [activityWindow, selectActivityWindow] = useActivityWindow()
 
   return (
     <section className="home-overview-grid" aria-label="Player overview">
-      <header className="home-overview-continue" data-onboarding="overview-next">
-        <div>
-          <span>{companionRequired ? 'First step' : 'Recommended next step'}</span>
-          <h2>{companionRequired ? 'Choose your first companion' : 'Continue your Git journey'}</h2>
-          <p>
-            {companionRequired
-              ? 'Recruit a companion before entering your first Adventure or Challenge.'
-              : 'Return to the story map and pick up from the next available level.'}
-          </p>
-        </div>
-        <Link
-          className="home-overview-continue-action"
-          to={companionRequired ? `${SHOP_ROUTE}?required=1` : storyPath()}
-        >
-          {companionRequired ? 'Choose companion' : 'Continue story'}
-          <ArrowRight aria-hidden="true" />
-        </Link>
-      </header>
-      <HomeStatsDashboard dashboard={model.dashboard} />
-      <HomeAchievementGallery achievements={model.achievements} />
+      {view === 'progress' ? (
+        <article className="home-overview-standing" aria-label="Progress">
+          <HomeProgressPanel
+            activityWindow={activityWindow}
+            onSelectActivityWindow={selectActivityWindow}
+            progress={model.progress}
+          />
+          <HomeResultsPanel results={model.results} />
+        </article>
+      ) : null}
+      {view === 'skills' ? (
+        <>
+          <HomeSkillsPanel skills={model.skills} />
+          <HomeAchievementGallery achievements={model.achievements} />
+        </>
+      ) : null}
     </section>
   )
 }

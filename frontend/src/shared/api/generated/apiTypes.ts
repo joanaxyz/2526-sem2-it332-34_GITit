@@ -9,6 +9,7 @@ export type JsonObject = { [key: string]: JsonValue }
 export type ApiSchemas = {
   "AccessTokenResponse": { "access": string }
   "ActionEnum": "grant_coins" | "set_staff" | "set_active"
+  "ActivityWindowEnum": "month" | "week" | "year"
   "AdminAnalyticsResponse": { "active_learners_30d": number; "completions": ApiSchemas["AdminCompletions"]; "per_story": Array<ApiSchemas["AdminStoryAnalytics"]>; "runebound_performance": ApiSchemas["PerformanceSummaryResponse"]; "runs": ApiSchemas["AdminRuns"] }
   "AdminChapter": { "battle_stage": { [key: string]: JsonValue }; "description": string; "id": number; "is_playable": boolean; "is_published": boolean; "management_source": string; "number": number; "slug": string; "sort_order": number; "story_id": number | null; "title": string }
   "AdminChapterCreateRequest": { "battle_stage"?: { [key: string]: JsonValue }; "description"?: string; "is_playable"?: boolean; "is_published"?: boolean; "number": number; "slug": string; "sort_order"?: number; "story_id": number; "title": string }
@@ -122,7 +123,7 @@ export type ApiSchemas = {
   "StatsHeadline": { "accuracy": number | null; "boss_floors": ApiSchemas["StatsScopedCount"]; "comebacks": ApiSchemas["StatsScopedCount"]; "commands_run": number; "day_streak": number; "finish_rate": ApiSchemas["RateMetric"]; "gitcoins": number; "levels_completed": number; "longest_streak": number; "perfect_clears": number }
   "StatsScopedCount": { "scope": string; "value": number }
   "StatsSkillAxis": { "command": string; "hint": string; "key": string; "label": string; "value": number | null }
-  "StatsSummaryResponse": { "activity_trend": Array<ApiSchemas["StatsTrendPoint"]>; "headline": ApiSchemas["StatsHeadline"]; "skill_profile": Array<ApiSchemas["StatsSkillAxis"]> }
+  "StatsSummaryResponse": { "activity_trend": Array<ApiSchemas["StatsTrendPoint"]>; "activity_window": ApiSchemas["ActivityWindowEnum"]; "headline": ApiSchemas["StatsHeadline"]; "skill_profile": Array<ApiSchemas["StatsSkillAxis"]> }
   "StatsTrendPoint": { "commands_run": number; "date": string; "levels_completed": number }
   "StatusEnum": "draft" | "testable" | "published" | "archived"
   "Story": { "completed": boolean; "difficulty": ApiSchemas["DifficultyEnum"]; "id": number; "is_published": boolean; "lock_reason": string; "locked": boolean; "prerequisite_story": ApiSchemas["StoryPrerequisite"] | null; "slug": string; "sort_order": number; "summary": string; "title": string; "world_slug": string }

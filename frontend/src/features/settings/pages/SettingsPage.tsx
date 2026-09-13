@@ -8,6 +8,7 @@ import { z } from 'zod'
 
 import { preferencesApi } from '@/shared/preferences/preferencesApi'
 import { queryKeys } from '@/shared/api/queryKeys'
+import { useServerFieldErrors } from '@/shared/api/useServerFieldErrors'
 import { authApi } from '@/shared/auth/authApi'
 import { useAuthStore } from '@/shared/auth/useAuth'
 import {
@@ -59,6 +60,13 @@ export function SettingsPage() {
       toast.success('Password updated')
     },
   })
+  // "Current password is incorrect." and Django's password rules both come back
+  // per field; pin them to the input instead of a lone line under the form.
+  const passwordServerFields = useServerFieldErrors(passwordForm, passwordMutation.error, [
+    'current_password',
+    'password',
+    'password_confirm',
+  ])
   const revokeOthers = useMutation({
     mutationFn: authApi.revokeOtherSessions,
     onSuccess: (result) => toast.success(result.detail),
@@ -141,7 +149,7 @@ export function SettingsPage() {
               <label><span>Current password</span><input type="password" autoComplete="current-password" {...passwordForm.register('current_password')} />{passwordForm.formState.errors.current_password ? <small>{passwordForm.formState.errors.current_password.message}</small> : null}</label>
               <label><span>New password</span><input type="password" autoComplete="new-password" {...passwordForm.register('password')} />{passwordForm.formState.errors.password ? <small>{passwordForm.formState.errors.password.message}</small> : null}</label>
               <label><span>Confirm new password</span><input type="password" autoComplete="new-password" {...passwordForm.register('password_confirm')} />{passwordForm.formState.errors.password_confirm ? <small>{passwordForm.formState.errors.password_confirm.message}</small> : null}</label>
-              {passwordMutation.isError ? <p className="settings-error">{passwordMutation.error.message}</p> : null}
+              {passwordMutation.isError && passwordServerFields.length === 0 ? <p className="settings-error">{passwordMutation.error.message}</p> : null}
               <button type="submit" className="settings-primary-action" disabled={passwordMutation.isPending}><Save aria-hidden="true" />{passwordMutation.isPending ? 'Updating' : 'Update password'}</button>
             </form>
           </div>

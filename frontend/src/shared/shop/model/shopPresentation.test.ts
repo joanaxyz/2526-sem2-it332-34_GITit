@@ -34,6 +34,8 @@ describe('shopPresentation', () => {
     expect(toDisplayItem({ ...baseItem, slug: 'white' })).toMatchObject({ tone: 'ice' })
     expect(toDisplayItem({ ...baseItem, slug: 'blue' }).art).toBeDefined()
     expect(statusLabel(toDisplayItem(companion))).toBe('Equipped')
-    expect(statusLabel(toDisplayItem({ ...baseItem, slug: 'blue', price: 150 }))).toBe('150 GitCoins')
+    expect(statusLabel(toDisplayItem({ ...baseItem, slug: 'blue', owned: true }))).toBe('Owned')
+    // The price is never duplicated into the status chip; it lives on the CTA.
+    expect(statusLabel(toDisplayItem({ ...baseItem, slug: 'blue', price: 150 }))).toBe('Not owned')
   })
 })

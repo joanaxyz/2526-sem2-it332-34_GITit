@@ -76,6 +76,17 @@ function remoteRepo(): MutableRepositoryState {
 }
 
 // A state with a tracked file split into two hunks so `add -p` has a target hunk.
+// Ch6 pops/inspects a stash, so the fixture has to already hold one: an empty
+// stack is a real failure now (matching git), not a no-op success.
+function stashedRepo(): MutableRepositoryState {
+  return {
+    ...repo(),
+    stash_stack: [
+      { working_tree: { 'src/app.py': { status: 'modified', content: 'a1' } }, staging: {}, conflicts: [], message: 'WIP on main' },
+    ],
+  } as MutableRepositoryState
+}
+
 function partialHunkRepo(): MutableRepositoryState {
   return {
     repository_initialized: true,
@@ -143,7 +154,7 @@ const CHAPTER_COMMANDS: Array<{ chapter: string; state: () => MutableRepositoryS
   },
   {
     chapter: 'Ch6 Stash/Cherry/Tag',
-    state: repo,
+    state: stashedRepo,
     commands: [
       'git stash', 'git stash -u', 'git stash -m "wip"', 'git stash list', 'git stash show', 'git stash pop',
       'git cherry-pick c2', 'git cherry-pick --no-commit c2', 'git tag v1', 'git tag -a v2 -m "rel"', 'git tag', 'git tag -d v0',

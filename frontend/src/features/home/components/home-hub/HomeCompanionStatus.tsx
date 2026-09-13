@@ -49,6 +49,9 @@ export function HomeCompanionAnnouncement({ companion }: HomeCompanionStatusProp
   )
 }
 
+/* The portrait slot is a placeholder, not a second call to action: the Sprite
+   Showcase beside it already carries the empty state and its CTA, and two
+   identical "Choose companion" buttons on one screen read as a bug. */
 export function HomeProfileCompanionStatus({ companion }: HomeCompanionStatusProps) {
   const copy = STATUS_COPY[companion.status]
 
@@ -56,11 +59,7 @@ export function HomeProfileCompanionStatus({ companion }: HomeCompanionStatusPro
     <div className={`home-profile-companion-empty home-companion-status--${companion.status}`}>
       <CompanionStatusIcon status={companion.status} />
       <span>{copy.title}</span>
-      {companion.status === 'empty' ? (
-        <Link to={`${SHOP_ROUTE}?required=1`}>Choose companion</Link>
-      ) : (
-        <small>{copy.detail}</small>
-      )}
+      {companion.status === 'empty' ? null : <small>{copy.detail}</small>}
     </div>
   )
 }
@@ -70,7 +69,7 @@ export function HomeCombatCompanionStatus({ companion }: HomeCompanionStatusProp
 
   return (
     <>
-      <section className="ref-panel home-sprite-panel">
+      <section className="home-sprite-panel">
         <header className="ref-panel-head">Sprite Showcase</header>
         <div
           className={`home-sprite-stage home-sprite-stage--empty home-companion-status--${companion.status}`}
@@ -84,7 +83,7 @@ export function HomeCombatCompanionStatus({ companion }: HomeCompanionStatusProp
         </div>
       </section>
 
-      <section className="ref-panel home-spellbook-panel">
+      <section className="home-spellbook-panel">
         <header className="ref-panel-head">
           <BookOpen aria-hidden="true" />
           Spellbook

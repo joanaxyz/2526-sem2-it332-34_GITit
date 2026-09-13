@@ -1,9 +1,10 @@
+/* Three tiles, not four: the finish rate the fourth used to carry is stated once,
+   by the citadel in the band above. */
 .home-overview-kpi-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0;
-  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.14);
-  padding-top: 0.72rem;
+  padding-top: 0.1rem;
 }
 
 .home-overview-kpi-row > div {
@@ -36,58 +37,39 @@
   opacity: 0.72;
 }
 
+/* A drawn ring holding a real icon. The three shapes here used to be clip-path
+   and border art — a rotated square, a blobby bolt and two stacked rules — which
+   read as decoration rather than as "hard levels", "retries" and "commands". */
 .home-overview-mini-sigil {
   grid-row: 1 / 4;
   display: grid;
-  width: 2.55rem;
-  height: 2.55rem;
+  width: 2.6rem;
+  height: 2.6rem;
   place-items: center;
-  border: 1px solid rgba(var(--kpi-accent-rgb), 0.42);
+  border: 1px solid rgba(var(--kpi-accent-rgb), 0.38);
   border-radius: 50%;
   color: var(--kpi-accent);
   background:
-    radial-gradient(circle, rgba(var(--kpi-accent-rgb), 0.18), transparent 58%),
+    radial-gradient(circle at 50% 32%, rgba(var(--kpi-accent-rgb), 0.16), transparent 62%),
     rgba(2, 12, 29, 0.76);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transition: border-color var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out);
 }
 
+.home-overview-mini-sigil svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke-width: 1.7;
+}
+
+/* Only an earned tier glows; at rest the ring is flat (the Earned Glow Rule). */
 .home-overview-kpi-row > div[data-tier='gold'] .home-overview-mini-sigil {
-  box-shadow: 0 0 14px rgba(var(--kpi-accent-rgb), 0.4);
+  border-color: rgba(var(--kpi-accent-rgb), 0.6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 16px rgba(var(--kpi-accent-rgb), 0.32);
 }
 
-.home-overview-mini-sigil::before,
-.home-overview-mini-sigil::after {
-  content: '';
-  display: block;
-}
-
-.home-overview-mini-sigil.is-accuracy::before {
-  width: 1.2rem;
-  height: 1.2rem;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 0.32rem rgba(var(--kpi-accent-rgb), 0.12);
-}
-
-.home-overview-mini-sigil.is-finish::before {
-  width: 1.25rem;
-  height: 1.25rem;
-  border: 1px solid currentColor;
-  transform: rotate(45deg);
-}
-
-.home-overview-mini-sigil.is-streak::before {
-  width: 0.95rem;
-  height: 1.45rem;
-  background: currentColor;
-  clip-path: polygon(58% 0, 100% 42%, 72% 42%, 85% 100%, 0 48%, 33% 48%);
-  filter: drop-shadow(0 0 7px rgba(var(--kpi-accent-rgb), 0.76));
-}
-
-.home-overview-mini-sigil.is-commands::before {
-  width: 1.34rem;
-  height: 0.9rem;
-  border-block: 1px solid currentColor;
+.home-overview-kpi-row > div[data-tier='gold'] .home-overview-mini-sigil svg {
+  filter: drop-shadow(0 0 6px rgba(var(--kpi-accent-rgb), 0.55));
 }
 
 .home-overview-kpi-row strong {
@@ -104,7 +86,8 @@
 }
 
 .home-overview-kpi-row > div[data-tier='empty'] strong {
-  color: rgba(232, 246, 250, 0.4);
+  /* Still clearly a placeholder, but a large numeral has to clear 3:1. */
+  color: rgba(232, 246, 250, 0.58);
 }
 
 .home-overview-kpi-row span:not(.home-overview-mini-sigil) {

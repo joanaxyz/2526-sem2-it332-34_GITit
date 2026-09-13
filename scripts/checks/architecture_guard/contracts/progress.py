@@ -145,6 +145,9 @@ def progress_summary_backend_contract_violations(
         "StatsSummaryResponseSerializer": {
             "skill_profile": "StatsSkillAxisSerializer(many=True)",
             "activity_trend": "StatsTrendPointSerializer(many=True)",
+            # Echoed so the client labels the plot with the span it was served,
+            # which is not always the span it asked for.
+            "activity_window": "serializers.ChoiceField(choices=sorted(ACTIVITY_WINDOWS))",
             "headline": "StatsHeadlineSerializer()",
         },
         "DashboardSummaryResponseSerializer": {
@@ -242,6 +245,7 @@ def stats_contract_source_violations(
         "StatsSummary": "ApiSchemas['StatsSummaryResponse']",
         "SkillAxis": "StatsSummary['skill_profile'][number]",
         "TrendPoint": "StatsSummary['activity_trend'][number]",
+        "ActivityWindow": "StatsSummary['activity_window']",
     }
     for alias_name, expected_body in expected_aliases.items():
         actual_body = aliases.get(alias_name)
@@ -255,7 +259,7 @@ def stats_contract_source_violations(
     extra_aliases = sorted(set(all_aliases) - set(expected_aliases))
     if extra_aliases or re.search(r"\b(?:export\s+)?interface\b", stats_types_without_comments):
         violations.append(
-            f"{STATS_FRONTEND_TYPES}: may declare only the three generated Stats aliases; "
+            f"{STATS_FRONTEND_TYPES}: may declare only the four generated Stats aliases; "
             f"extra aliases found: {extra_aliases}"
         )
 
@@ -267,9 +271,12 @@ def stats_contract_source_violations(
         violations.append(
             f"{STATS_FRONTEND_API}: must not own or override the generated Stats response type"
         )
+    # The path may carry a query string - the activity window is a request
+    # parameter - but it must still be the generated operation at the generated
+    # route, returned exactly as the client produced it.
     operation_call = re.search(
         r"\bapiOperationRequest(?P<generics>\s*<[^>]*>)?\s*\(\s*"
-        r"['\"]progress_stats_retrieve['\"]\s*,\s*['\"]/progress/stats/['\"]",
+        r"['\"]progress_stats_retrieve['\"]\s*,\s*[`'\"]/progress/stats/",
         stats_api_without_comments,
         re.S,
     )
@@ -279,22 +286,16 @@ def stats_contract_source_violations(
         )
     elif operation_call.group("generics") and "," in operation_call.group("generics"):
         violations.append(f"{STATS_FRONTEND_API}: must not pass a custom Stats response generic")
-    summary_method = re.search(
-        r"\bsummary\s*\(\s*\)\s*\{(?P<body>[^{}]*)\}",
+    if not re.search(
+        r"\breturn\s+apiOperationRequest\s*\(\s*['\"]progress_stats_retrieve['\"]",
         stats_api_without_comments,
-        re.S,
-    )
-    expected_summary_body = (
-        "returnapiOperationRequest('progress_stats_retrieve','/progress/stats/')"
-    )
-    actual_summary_body = (
-        normalized_ts_type(summary_method.group("body")).replace(";", "")
-        if summary_method is not None
-        else ""
-    )
-    if actual_summary_body != expected_summary_body:
+    ):
         violations.append(
             f"{STATS_FRONTEND_API}: summary must return the generated operation response directly"
+        )
+    if re.search(r"\.then\s*\(|\bawait\b|\.map\s*\(", stats_api_without_comments):
+        violations.append(
+            f"{STATS_FRONTEND_API}: summary must not adapt or await the generated response"
         )
     if re.search(r"\.then\s*\(|\b(?:activity|headlines|totals)\s*:", stats_api_without_comments):
         violations.append(
@@ -352,6 +353,7 @@ def stats_openapi_contract_violations(schema: dict) -> list[str]:
                 "type": "array",
                 "items": {"$ref": "#/components/schemas/StatsTrendPoint"},
             },
+            "activity_window": {"$ref": "#/components/schemas/ActivityWindowEnum"},
             "headline": {"$ref": "#/components/schemas/StatsHeadline"},
         },
     }

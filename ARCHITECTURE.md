@@ -171,15 +171,33 @@ python scripts/check_api_type_adoption.py
 
 The authenticated `GET /api/progress/performance/` endpoint is the source of truth for overall and per-module performance metrics. All attempt-based metrics exclude replay runs.
 
-| KPI | Formula | Empty-data behavior |
-| --- | --- | --- |
-| Scenario Completion Rate (SCR) | completed attempts / all attempts | `value: null` when there are no attempts |
-| Command Accuracy Rate (CAR) | processable submitted commands / all submitted commands | `value: null` when there are no commands |
-| Hard-Level Completion Rate (HLCR) | completed hard attempts / all hard attempts | `value: null` when there are no hard attempts |
-| Retry Transfer Rate (RTR) | completed retry attempts / all retry attempts | `value: null` when there are no retry attempts |
-| Average Retry Count (ARC) | sum of `retry_index` for completed attempts / completed attempts | `value: null` when there are no completed attempts |
+Internal KPI keys stay abbreviated; every learner-facing surface uses the plain-language label instead.
 
-A retry attempt is a run with `prior_run` set. CAR treats `Invalid` and `Unprocessable` command results as inaccurate; every other submitted command is processable. The response always includes Modules 0–4, including modules with no attempts, so the frontend can show an honest “Waiting for practice” state.
+| KPI | Learner-facing label | Formula | Empty-data behavior |
+| --- | --- | --- | --- |
+| `scr` Scenario Completion Rate | Levels finished | completed attempts / all attempts | `value: null` when there are no attempts |
+| `car` Command Accuracy Rate | Commands accepted | processable submitted commands / all submitted commands | `value: null` when there are no commands |
+| `hlcr` Hard-Level Completion Rate | Hard levels finished | completed hard attempts / all hard attempts | `value: null` when there are no hard attempts |
+| `rtr` Retry Transfer Rate | Retries that worked | completed retry attempts / all retry attempts | `value: null` when there are no retry attempts |
+| `arc` Average Retry Count | Retries per finish | sum of `retry_index` for completed attempts / completed attempts | `value: null` when there are no completed attempts |
+
+A retry attempt is a run with `prior_run` set. CAR treats `Invalid` and `Unprocessable` command results as inaccurate; every other submitted command is processable. The response always includes Modules 0–4, including modules with no attempts, so the frontend can show an honest “No attempts yet” state.
+
+There is no standalone Performance page. These metrics surface in **Home › Overview › Run results** (`/home?view=results`), under a `Main story` heading scoped to Modules 1–4; `/performance` redirects there. The view fetches the endpoint on demand through `features/performance/hooks/useModulePerformance`, so opening Home never waits on it. `features/performance` keeps the API wrapper, generated types, and that hook; the Admin analytics console reads the same contract types.
+
+### Home Overview composition
+
+Overview shows one category at a time, chosen by a dropdown whose selection is mirrored in the `view` search parameter (`progress` is the default and is omitted from the URL).
+
+| Owner | Responsibility |
+| --- | --- |
+| `HomeStatsView.tsx` | Composition: builds the model once, owns the active-view state, renders the switcher and exactly one panel |
+| `home-stats/homeStatsModel.ts` | Pure model; one named slice per view (`progress`, `skills`, `results`, `achievements`) |
+| `home-stats/overviewViews.ts` | The category catalog: id, label, and the blurb shown beside the dropdown |
+| `home-stats/OverviewViewSwitcher.tsx` | The ARIA listbox dropdown |
+| `home-stats/Home{Progress,Skills,Results}Panel.tsx`, `HomeAchievementGallery.tsx` | One render owner per view, each taking only its own model slice |
+
+`check_architecture_boundaries.py` enforces this shape: no view owner may see a raw `HomeSummary`/`StatsSummary`, reach back into the composition, or fetch its own summary data, and no file outside the composition may import a view owner.
 
 ## StoryWorld System
 

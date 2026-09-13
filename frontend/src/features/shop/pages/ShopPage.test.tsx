@@ -160,7 +160,6 @@ describe('ShopPage purchase cache convergence', () => {
     )
 
     await waitFor(() => expect(screen.getByTestId('shared-observers')).toHaveTextContent('150|none'))
-    expect(screen.getByLabelText('GitCoin balance')).toHaveTextContent('150')
     expect(screen.getByTestId('shop-companion-state')).toHaveTextContent('unowned|inactive')
 
     let catalogRefetch!: Promise<void>
@@ -183,7 +182,6 @@ describe('ShopPage purchase cache convergence', () => {
 
     await act(async () => walletCancelGate.resolve())
     await waitFor(() => expect(screen.getByTestId('shared-observers')).toHaveTextContent('0|blue'))
-    expect(screen.getByLabelText('GitCoin balance')).toHaveTextContent('0')
     expect(screen.getByTestId('shop-companion-state')).toHaveTextContent('owned|active')
     expect(cancelQueries).toHaveBeenCalledTimes(2)
 

@@ -90,8 +90,8 @@ export function StorySkillFocusPanel({
                 </>
               ) : (
                 <>
-                  <Link to={`${SHOP_ROUTE}?required=1`}>Choose a companion</Link> before
-                  clearing <strong>{next.level.title}</strong> to bind this spell.
+                  Clear <strong>{next.level.title}</strong> to bind this spell to your
+                  companion.
                 </>
               )}
             </p>
