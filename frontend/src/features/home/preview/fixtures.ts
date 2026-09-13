@@ -6,7 +6,6 @@
 import type { HomeSummary } from '@/features/home/types'
 
 export const previewPlayerName = 'Learner'
-export const previewGitcoins = 1240
 
 /** Mid-tier player: Warden rank, 40+ levels, mixed retry history, 5 chapters, 12-day streak. */
 export const richHomeFixture: HomeSummary = {

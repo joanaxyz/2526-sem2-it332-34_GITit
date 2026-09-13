@@ -1,0 +1,179 @@
+/* ── Overview view: Git skills ─────────────────────────────────────────── */
+/* Command-confidence bars and the overall-mastery orb beside them. */
+
+.home-overview-master-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(17rem, 21rem);
+  gap: 1.4rem;
+  min-height: 0;
+}
+
+/* Eighteen published commands in one column made a very tall panel with a small
+   radar floating beside a void. The list wraps into as many columns as the
+   viewport honestly fits instead, so the band is about as tall as the radar. */
+.home-overview-command-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
+  gap: 0.1rem 2.2rem;
+  align-content: start;
+}
+
+.home-overview-command-row {
+  display: grid;
+  grid-template-columns: 2.1rem minmax(6rem, 10rem) minmax(4.5rem, 1fr) 3rem;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 2.6rem;
+  padding: 0.12rem 0;
+}
+
+/* The command sigils carry rings and tick marks around the glyph itself; under
+   about 2rem that furniture collapses into a smudge, so they are drawn larger
+   here and the global blue cast is softened to let the glyph read. */
+.home-overview-command-glyph {
+  width: 2.1rem;
+  height: 2.1rem;
+  filter: drop-shadow(0 0 5px rgba(var(--theme-primary-rgb), 0.32));
+}
+
+.home-overview-command-row:not(.is-progressed) .home-overview-command-glyph {
+  filter: none;
+  opacity: 0.45;
+}
+
+.home-overview-command-row.is-active .home-overview-command-glyph {
+  filter: drop-shadow(0 0 9px rgba(var(--theme-teal-rgb), 0.85));
+}
+
+.home-overview-command-row > span {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.home-overview-command-row > span strong {
+  overflow: hidden;
+  color: #f5fbff;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* One line, ellipsised: the whole summary is on the row's title attribute and in
+   the radar tooltip, and two wrapped lines per row made the band twice as tall
+   as it needed to be. */
+.home-overview-command-row > span small {
+  overflow: hidden;
+  color: rgba(222, 233, 250, 0.6);
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-overview-command-row > strong {
+  color: #f6fbff;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-align: right;
+}
+
+.home-overview-command-meter {
+  position: relative;
+  overflow: hidden;
+  height: 0.5rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.18);
+  border-radius: 999px;
+  background: rgba(0, 8, 22, 0.72);
+}
+
+.home-overview-command-meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(var(--theme-rail-rgb), 0.94), rgba(var(--theme-primary-rgb), 0.98));
+  box-shadow: 0 0 14px rgba(var(--theme-primary-rgb), 0.6);
+}
+
+/* Mastered/in-progress skills (value > 0) read in the muted teal accent instead of
+   the navigation blue, so earned skill progress reads distinctly from chrome. */
+.home-overview-command-row.is-progressed .home-overview-command-meter span {
+  background: linear-gradient(90deg, rgba(var(--theme-teal-rgb), 0.85), rgba(var(--theme-teal-rgb), 0.98));
+  box-shadow: 0 0 14px rgba(var(--theme-teal-rgb), 0.55);
+}
+
+.home-overview-command-row.is-progressed > span strong {
+  font-weight: 800;
+}
+
+/* Pointing at a row lights its vertex on the radar; the row answers back so the
+   two halves read as one instrument. */
+.home-overview-command-row.is-active > span strong,
+.home-overview-command-row.is-active > strong {
+  color: rgb(var(--theme-teal-rgb));
+}
+
+/* Untouched skills (0%) stay muted gray - no accent colour, matching the locked
+   achievement treatment rather than the navigation blue used elsewhere. */
+.home-overview-command-row:not(.is-progressed) .home-overview-command-meter span {
+  background: rgba(117, 143, 159, 0.42);
+  box-shadow: none;
+}
+
+/* The radar rail: shape on top, the one overall figure under it. The compass
+   that used to sit here was drawn from CSS gradients and never moved — it
+   looked like an instrument without reporting anything. */
+.home-overview-mastery-orb {
+  display: grid;
+  /* Centred against the taller bar list, so the rail does not hang from the top
+     with a column of dead space under it. */
+  align-content: center;
+  justify-items: center;
+  gap: 0.2rem;
+  min-width: 0;
+  border-left: 1px solid rgba(var(--theme-primary-rgb), 0.14);
+  padding-left: 1.1rem;
+  text-align: center;
+}
+
+.home-overview-mastery-orb .ref-chart-radar {
+  margin-bottom: 0.2rem;
+}
+
+.home-overview-mastery-orb > span,
+.home-overview-mastery-orb small {
+  color: rgb(var(--theme-primary-rgb));
+  font-size: 0.76rem;
+  font-weight: 760;
+}
+
+.home-overview-mastery-orb strong {
+  color: #f8fbff;
+  font-family: var(--font-mono);
+  font-size: 2.05rem;
+  line-height: 1;
+}
+
+.home-overview-rating-stars {
+  display: flex;
+  gap: 0.45rem;
+  margin-top: 0.25rem;
+}
+
+.home-overview-rating-stars i {
+  display: block;
+  width: 1.05rem;
+  height: 1.05rem;
+  background: rgba(117, 143, 159, 0.3);
+  clip-path: polygon(50% 0, 61% 34%, 97% 35%, 68% 56%, 79% 91%, 50% 70%, 21% 91%, 32% 56%, 3% 35%, 39% 34%);
+}
+
+.home-overview-rating-stars i.is-lit {
+  background: rgb(var(--theme-primary-rgb));
+  filter: drop-shadow(0 0 8px rgba(var(--theme-primary-rgb), 0.78));
+}
+

@@ -1,22 +1,18 @@
-@media (max-width: 760px) {
-  .orientation-overview {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .orientation-course-progress {
-    flex-basis: auto;
-  }
-
-  .orientation-course-progress > span {
-    text-align: left;
-  }
-
-  .orientation-step-header {
+/* Below this the syllabus rail has no room to sit beside the lesson, so it
+   moves under it: still a vertical list with whole titles, just no longer
+   pushing the lesson down the page. */
+@media (max-width: 900px) {
+  .orientation-workspace {
     grid-template-columns: minmax(0, 1fr);
-    align-items: start;
   }
 
+  .orientation-syllabus.game-panel {
+    position: static;
+    order: 1;
+  }
+}
+
+@media (max-width: 760px) {
   .orientation-match-row {
     grid-template-columns: minmax(0, 1fr);
     gap: 0.6rem;
@@ -34,12 +30,8 @@
 }
 
 @media (max-width: 560px) {
-  .orientation-overview h1 {
+  .orientation-masthead h1 {
     font-size: var(--text-xl);
-  }
-
-  .orientation-lesson-nav li {
-    flex-basis: 11rem;
   }
 
   .orientation-step-stage {
@@ -49,6 +41,10 @@
   .orientation-step-nav,
   .orientation-guide-note {
     margin-inline: 1rem;
+  }
+
+  .orientation-step-tab {
+    max-width: 100%;
   }
 
   .orientation-lesson-header,
@@ -126,8 +122,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .orientation-progress-track > span,
-  .orientation-lesson-tab,
-  .orientation-lesson-tab::after,
+  .orientation-topic,
   .orientation-step-tab,
   .orientation-choice,
   .orientation-status-controls button,

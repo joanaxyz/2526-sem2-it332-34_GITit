@@ -27,9 +27,11 @@ EXPECTED_HASHES = {
     # 2026-09-10: repinned after git-init target metadata was corrected and
     # generated targets were refreshed by commit 57b814d.
     "adventures": "26c28379253375526e4601f4053513ada14b11905f95443d44b2a500f6f8b188",
-    # 2026-08-30: repinned after commit 63b92fd updated the authored challenge
-    # runtime scenarios and their generated blueprint projection.
-    "challenges": "cbff924c85c79145102ec2a299584b195b9fa66c53d7d6f6a815ac0034c38741",
+    # 2026-09-13: repinned after ch6-challenge-easy was corrected. Both variants
+    # authored their work-in-progress file as untracked, so `git stash` saved
+    # nothing and the closing `git stash pop` had an empty stack - the stash
+    # lesson never stashed. The WIP file is now a tracked modification.
+    "challenges": "5d2299d6928bbb0652b8b79ff95bcbcaba8c242e0952f9e5f80247495b2326f3",
 }
 
 

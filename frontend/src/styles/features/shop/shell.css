@@ -41,11 +41,9 @@
   padding: 0.7rem clamp(0.75rem, 1.3vw, 1.3rem) 0.85rem;
 }
 
+/* One column: the header carries the page title only. The GitCoin balance
+   lives in the app topbar directly above it and is never repeated here. */
 .shop-page-header {
-  display: grid;
-  grid-template-columns: minmax(18rem, 0.72fr) minmax(34rem, 1.28fr);
-  gap: 1.2rem;
-  align-items: end;
   flex: 0 0 auto;
   border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.18);
   padding: 0.1rem 0.15rem 0.65rem;
@@ -73,27 +71,6 @@
   color: var(--text-secondary);
   font-size: var(--text-xs);
 }
-
-.shop-rail-balance {
-  display: flex;
-  min-width: 8.2rem;
-  align-items: center;
-  gap: 0.5rem;
-  border: 1px solid rgba(243, 210, 122, 0.22);
-  border-radius: var(--radius-md);
-  padding: 0.35rem 0.65rem;
-  background: rgba(22, 18, 8, 0.42);
-}
-
-.shop-rail-balance img {
-  width: 1.75rem;
-  height: 1.75rem;
-  filter: drop-shadow(0 0 7px rgba(243, 210, 122, 0.54));
-}
-
-.shop-rail-balance span { display: grid; gap: 0.08rem; }
-.shop-rail-balance small { color: rgba(224, 210, 176, 0.68); font-size: var(--text-2xs); }
-.shop-rail-balance strong { color: #f7ecd2; font-family: var(--font-mono); font-size: var(--text-xs); }
 
 .shop-view {
   min-width: 0;
@@ -157,24 +134,13 @@
   color: var(--text-primary);
 }
 
-@media (max-width: 1080px) {
-  .shop-page-header { grid-template-columns: minmax(0, 1fr); align-items: stretch; }
-}
-
 @media (max-width: 760px) {
   .shop-ref-page { overflow: visible; }
   .shop-page-title p { display: none; }
-  .shop-rail-balance {
-    min-width: 4.15rem;
-    padding-inline: 0.45rem;
-  }
-  .shop-rail-balance small { display: none; }
 }
 
 @media (max-width: 520px) {
-  .shop-page-header { gap: 0.7rem; }
   .shop-page-title h1 { font-size: var(--text-xl); }
-  .shop-rail-balance img { width: 1.35rem; height: 1.35rem; }
   .shop-onboarding-banner { align-items: flex-start; flex-wrap: wrap; }
   .shop-onboarding-cta { width: 100%; text-align: center; }
 }

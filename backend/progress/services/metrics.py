@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import date, datetime, time, timedelta
 
 from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncDate
@@ -25,9 +25,34 @@ from progress.models import (
     Wallet,
 )
 
-# Trailing window (days) for the activity trend and the consistency axis.
+# Trailing window (days) for the consistency axis.
 
 TREND_DAYS = 14
+
+# Activity trend windows the learner can switch between. Each one is a trailing
+# span plus the bucket it is summed into, so a year is twelve points rather than
+# 365 unreadable ones.
+ACTIVITY_WINDOWS = {
+    "week": {"buckets": 7, "unit": "day"},
+    "month": {"buckets": 30, "unit": "day"},
+    "year": {"buckets": 12, "unit": "month"},
+}
+DEFAULT_ACTIVITY_WINDOW = "month"
+
+
+def resolve_activity_window(value: str | None) -> str:
+    """Any unknown window falls back to the default rather than erroring: the
+    window only decides how much history to draw."""
+
+    return value if value in ACTIVITY_WINDOWS else DEFAULT_ACTIVITY_WINDOW
+
+
+def _month_start(day: date, months_back: int) -> date:
+    year, month = day.year, day.month - months_back
+    while month <= 0:
+        month += 12
+        year -= 1
+    return date(year, month, 1)
 
 
 class MetricsService:
@@ -276,13 +301,17 @@ class MetricsService:
             "retry_trends": self._retry_trends(player=player, started=started),
         }
 
-    def stats_summary(self, *, player) -> dict:
-        """Learner-facing Stats page: a 6-axis Skill Profile radar, a daily
-        activity trend, and friendly headline numbers. Unlike dashboard_summary
-        (challenge-weighted), every axis blends adventures and challenges where
-        both produce data, so adventure-only learners still get a full profile."""
-        now = timezone.now()
-        since = now - timedelta(days=TREND_DAYS - 1)
+    def stats_summary(self, *, player, activity_window: str | None = None) -> dict:
+        """Learner-facing Stats page: a per-command Skill Profile, an activity
+        trend over the requested window, and friendly headline numbers. Unlike
+        dashboard_summary (challenge-weighted), every axis blends adventures and
+        challenges where both produce data, so adventure-only learners still get
+        a full profile.
+
+        Only `activity_trend` answers to `activity_window`; every headline number
+        is all-time, so switching the window never changes what the rest of the
+        screen reports."""
+        window = resolve_activity_window(activity_window)
         today = timezone.localdate()
 
         # Accuracy + total volume from the unified command log (spans both modes).
@@ -356,7 +385,8 @@ class MetricsService:
 
         return {
             "skill_profile": skill_profile,
-            "activity_trend": self._activity_trend(player=player, since=since, today=today),
+            "activity_trend": self._activity_trend(player=player, window=window, today=today),
+            "activity_window": window,
             "headline": headline,
         }
 
@@ -486,7 +516,19 @@ class MetricsService:
         )
         return set(adventure_completion_days) | set(challenge_completion_days) | set(step_days)
 
-    def _activity_trend(self, *, player, since, today) -> list[dict]:
+    def _activity_trend(self, *, player, window: str, today) -> list[dict]:
+        spec = ACTIVITY_WINDOWS[window]
+        buckets = spec["buckets"]
+        if spec["unit"] == "month":
+            starts = [_month_start(today, offset) for offset in range(buckets - 1, -1, -1)]
+        else:
+            starts = [today - timedelta(days=offset) for offset in range(buckets - 1, -1, -1)]
+        # The queries filter on aware datetimes, so the first bucket starts at
+        # local midnight rather than at this time of day N days ago.
+        since = timezone.make_aware(
+            datetime.combine(starts[0], time.min), timezone.get_current_timezone()
+        )
+
         completed_by_day = dict(
             AdventureLevelCompletion.objects.filter(player=player, completed_at__gte=since)
             .annotate(day=TruncDate("completed_at"))
@@ -519,14 +561,29 @@ class MetricsService:
             .annotate(count=Count("id"))
             .values_list("day", "count")
         )
+        # One point per bucket, each labelled by the day the bucket starts. Daily
+        # windows sum a single day; the year window sums the whole month, so the
+        # two shapes stay the same three keys for the client.
+        def bucket_end(index: int):
+            return starts[index + 1] if index + 1 < len(starts) else None
+
         trend = []
-        for offset in range(TREND_DAYS - 1, -1, -1):
-            day = today - timedelta(days=offset)
+        for index, start in enumerate(starts):
+            end = bucket_end(index)
+            in_bucket = (
+                (lambda day: day == start)
+                if spec["unit"] == "day"
+                else (lambda day: day >= start and (end is None or day < end))
+            )
             trend.append(
                 {
-                    "date": day.isoformat(),
-                    "levels_completed": completed_by_day.get(day, 0),
-                    "commands_run": commands_by_day.get(day, 0),
+                    "date": start.isoformat(),
+                    "levels_completed": sum(
+                        count for day, count in completed_by_day.items() if in_bucket(day)
+                    ),
+                    "commands_run": sum(
+                        count for day, count in commands_by_day.items() if in_bucket(day)
+                    ),
                 }
             )
         return trend

@@ -1,6 +1,9 @@
 @import './stats-layout.css';
+@import './stats-progress.css';
+@import './stats-skills.css';
 @import './stats-kpis.css';
+@import './stats-results.css';
 @import './stats-achievements.css';
 @import './stats-responsive.css';
 
-@import './continue-card.css';
+@import './first-step-nudge.css';

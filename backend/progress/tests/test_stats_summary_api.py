@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 from curriculum.models import CommandSkill
 from progress.serializers import StatsSummaryResponseSerializer
 
-SUMMARY_KEYS = {"skill_profile", "activity_trend", "headline"}
+SUMMARY_KEYS = {"skill_profile", "activity_trend", "activity_window", "headline"}
 SKILL_AXIS_KEYS = {"key", "label", "hint", "value", "command"}
 TREND_POINT_KEYS = {"date", "levels_completed", "commands_run"}
 HEADLINE_KEYS = {
@@ -61,7 +61,9 @@ def test_authenticated_stats_summary_matches_documented_contract(db, django_user
         for axis in payload["skill_profile"]
     )
 
-    assert len(payload["activity_trend"]) == 14
+    # The default window is a trailing month of daily points.
+    assert payload["activity_window"] == "month"
+    assert len(payload["activity_trend"]) == 30
     assert all(set(point) == TREND_POINT_KEYS for point in payload["activity_trend"])
     assert all(
         type(point["date"]) is str
@@ -121,4 +123,35 @@ def test_stats_contract_rejects_the_displaced_openapi_shape():
 
     assert set(serializer.fields) == SUMMARY_KEYS
     assert serializer.is_valid() is False
-    assert set(serializer.errors) == {"activity_trend", "headline"}
+    assert set(serializer.errors) == {"activity_trend", "activity_window", "headline"}
+
+
+def test_stats_summary_activity_window_selects_the_trailing_span(db, django_user_model):
+    user = django_user_model.objects.create_user(
+        username="stats-window",
+        email="stats-window@example.com",
+        password="pass12345",
+    )
+    client = APIClient()
+    client.force_authenticate(user=user)
+
+    week = client.get("/api/progress/stats/", {"window": "week"}).json()
+    assert week["activity_window"] == "week"
+    assert len(week["activity_trend"]) == 7
+
+    year = client.get("/api/progress/stats/", {"window": "year"}).json()
+    assert year["activity_window"] == "year"
+    # A year is twelve monthly buckets, not 365 daily ones, and every bucket is
+    # labelled by the first day of its month.
+    assert len(year["activity_trend"]) == 12
+    assert all(date.fromisoformat(point["date"]).day == 1 for point in year["activity_trend"])
+
+    # An unknown window is not an error; it falls back to the default.
+    fallback = client.get("/api/progress/stats/", {"window": "decade"}).json()
+    assert fallback["activity_window"] == "month"
+    assert len(fallback["activity_trend"]) == 30
+
+    months = [date.fromisoformat(point["date"]) for point in year["activity_trend"]]
+    assert months == sorted(months)
+    assert months[-1].month == date.today().month
+

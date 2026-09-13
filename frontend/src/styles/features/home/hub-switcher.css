@@ -1,0 +1,189 @@
+/* ── Overview category switcher ────────────────────────────────────────── */
+/* A listbox, deliberately not a second tab strip: the Home tabs sit directly
+   above and two competing strips would read as one broken row. The popup is
+   absolutely positioned against .home-switcher-control, which never clips. */
+.home-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  padding: 0.1rem 0.15rem;
+}
+
+.home-switcher-label {
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.home-switcher-control {
+  position: relative;
+  z-index: var(--z-dropdown);
+}
+
+.home-switcher-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--control-height-sm);
+  min-width: 11.5rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.28);
+  border-radius: var(--control-radius);
+  padding: 0 0.7rem;
+  background: rgba(1, 9, 23, 0.86);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: 800;
+  transition:
+    border-color var(--motion-normal) var(--ease-out),
+    background var(--motion-normal) var(--ease-out),
+    box-shadow var(--motion-normal) var(--ease-out);
+}
+
+.home-switcher-trigger > span {
+  margin-right: auto;
+}
+
+.home-switcher-trigger svg {
+  width: 1rem;
+  height: 1rem;
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.home-switcher-trigger svg:last-child {
+  color: var(--text-tertiary);
+  transition: transform var(--motion-normal) var(--ease-out);
+}
+
+.home-switcher-trigger:hover,
+.home-switcher-trigger:focus-visible {
+  border-color: rgba(var(--theme-primary-rgb), 0.55);
+  background: rgba(var(--theme-primary-rgb), 0.1);
+  outline: none;
+}
+
+.home-switcher-trigger:focus-visible {
+  box-shadow: var(--control-focus-ring);
+}
+
+.home-switcher-trigger.is-open {
+  border-color: rgba(var(--theme-primary-rgb), 0.65);
+  background: rgba(var(--theme-primary-rgb), 0.12);
+}
+
+.home-switcher-trigger.is-open svg:last-child {
+  transform: rotate(180deg);
+}
+
+.home-switcher-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  width: max(100%, 21rem);
+  display: grid;
+  gap: 0.1rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.32);
+  border-radius: var(--radius-md);
+  padding: 0.3rem;
+  background: rgba(2, 10, 24, 0.97);
+  box-shadow: 0 18px 40px rgba(0, 4, 12, 0.6);
+  transform-origin: top left;
+}
+
+.home-switcher-menu:focus-visible {
+  outline: none;
+}
+
+.home-switcher-option {
+  display: grid;
+  grid-template-columns: 1.1rem minmax(0, 1fr);
+  align-items: start;
+  gap: 0.6rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0.48rem 0.55rem;
+  cursor: pointer;
+}
+
+.home-switcher-option svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.08rem;
+  color: var(--text-tertiary);
+}
+
+.home-switcher-option strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: 800;
+}
+
+.home-switcher-option small {
+  display: block;
+  margin-top: 0.1rem;
+  color: var(--text-secondary);
+  font-size: var(--text-2xs);
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+
+.home-switcher-option.is-active {
+  border-color: rgba(var(--theme-primary-rgb), 0.3);
+  background: rgba(var(--theme-primary-rgb), 0.1);
+}
+
+.home-switcher-option.is-active svg {
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.home-switcher-option[aria-selected='true'] strong {
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.home-switcher-option[aria-selected='true'] strong::after {
+  content: '·  showing';
+  margin-left: 0.45rem;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.home-switcher-blurb {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  text-wrap: pretty;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-switcher-trigger,
+  .home-switcher-trigger svg:last-child {
+    transition: none;
+  }
+
+  .home-switcher-menu {
+    animation: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .home-switcher {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .home-switcher-control,
+  .home-switcher-trigger,
+  .home-switcher-menu {
+    width: 100%;
+  }
+}

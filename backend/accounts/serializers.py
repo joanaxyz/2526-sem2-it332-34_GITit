@@ -28,8 +28,11 @@ class RegisterSerializer(serializers.Serializer):
     def validate(self, attrs):
         if attrs["password"] != attrs["password_confirm"]:
             raise serializers.ValidationError({"password_confirm": "Passwords do not match."})
+        # Unsaved, but enough for UserAttributeSimilarityValidator to reject a
+        # password that is just the username or email back again.
+        candidate = get_user_model()(username=attrs["username"], email=attrs["email"])
         try:
-            validate_password(attrs["password"])
+            validate_password(attrs["password"], user=candidate)
         except DjangoValidationError as exc:
             raise serializers.ValidationError({"password": exc.messages})
         return attrs

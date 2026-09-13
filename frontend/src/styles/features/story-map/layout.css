@@ -41,9 +41,11 @@
   margin: 0 auto;
 }
 
+/* Orientation has no chapter-tools rail, so the stage takes the width the
+   syllabus + lesson split needs and the chapter switcher keeps a slim rail. */
 .story-map-layout--orientation {
-  grid-template-columns: minmax(0, 1fr) minmax(18rem, 21.4rem);
-  width: min(100%, 100rem);
+  grid-template-columns: minmax(0, 1fr) minmax(14rem, 15.75rem);
+  width: min(100%, 108rem);
 }
 
 .story-map-left,

@@ -7,6 +7,7 @@ import { Link, useParams } from 'react-router-dom'
 import { z } from 'zod'
 
 import { PasswordStrengthIndicator } from '@/features/auth/components/PasswordStrengthIndicator'
+import { useServerFieldErrors } from '@/shared/api/useServerFieldErrors'
 import { authApi } from '@/shared/auth/authApi'
 
 const schema = z.object({
@@ -26,6 +27,8 @@ export function ResetPasswordForm() {
   const mutation = useMutation({
     mutationFn: (values: FormValues) => authApi.confirmPasswordReset({ uid, token, ...values }),
   })
+  // Django rejects weak passwords per field; show its reason under the input.
+  const serverFields = useServerFieldErrors(form, mutation.error, ['password', 'password_confirm'])
 
   if (mutation.isSuccess) {
     return (
@@ -56,7 +59,7 @@ export function ResetPasswordForm() {
         <input className="auth-input" type={showPassword ? 'text' : 'password'} autoComplete="new-password" {...form.register('password_confirm')} />
         {form.formState.errors.password_confirm ? <small className="auth-error">{form.formState.errors.password_confirm.message}</small> : null}
       </label>
-      {mutation.isError ? <p className="auth-error-box">{mutation.error.message}</p> : null}
+      {mutation.isError && serverFields.length === 0 ? <p className="auth-error-box">{mutation.error.message}</p> : null}
       <button type="submit" className="auth-submit" disabled={mutation.isPending || !uid || !token}>
         {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <KeyRound aria-hidden="true" />}
         {mutation.isPending ? 'Updating password' : 'Reset password'}

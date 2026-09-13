@@ -42,11 +42,11 @@ describe('Story side-panel companion state', () => {
 
     expect(screen.getByText('No Companion Selected')).toBeInTheDocument()
     expect(screen.queryByText(/blue/i)).not.toBeInTheDocument()
+    // The rail states the prerequisite once: the skill panel describes the
+    // reward, the companion panel below it owns the acquisition CTA.
     const links = screen.getAllByRole('link', { name: /choose (?:a )?companion/i })
-    expect(links).toHaveLength(2)
-    links.forEach((link) => {
-      expect(link).toHaveAttribute('href', '/shop?required=1')
-    })
-    expect(screen.getByText(/before clearing/i)).toBeInTheDocument()
+    expect(links).toHaveLength(1)
+    expect(links[0]).toHaveAttribute('href', '/shop?required=1')
+    expect(screen.getByText(/to bind this spell to your companion/i)).toBeInTheDocument()
   })
 })

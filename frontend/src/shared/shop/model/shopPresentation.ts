@@ -27,9 +27,11 @@ export function hasLocalDefinition(item: ShopItem) {
   return Boolean(COMPANIONS[item.slug])
 }
 
+/** Ownership state only. The price belongs beside the purchase CTA, where the
+ *  decision is made - repeating it as a caption chip prints it twice on one
+ *  screen. */
 export function statusLabel(item: ShopDisplayItem): string {
   if (item.active) return 'Equipped'
   if (item.owned) return 'Owned'
-  if (item.price === 0) return 'Free'
-  return `${item.price.toLocaleString()} GitCoins`
+  return 'Not owned'
 }

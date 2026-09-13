@@ -1,37 +1,29 @@
 import { useCallback, type CSSProperties } from 'react'
-import { Backpack, BarChart3, ChevronLeft, ChevronRight, User } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 
-import { HomeLoadoutView } from '@/features/home/components/HomeLoadoutView'
+import { HomeFirstStepNudge } from '@/features/home/components/home-hub/HomeFirstStepNudge'
 import { HomeOnboarding } from '@/features/onboarding/components/HomeOnboarding'
 import { HomeStatsView } from '@/features/home/components/HomeStatsView'
 import type { CompanionPresentation } from '@/features/home/components/home-hub/companionPresentation'
 import { HomeProfileWorkspace } from '@/features/home/components/home-hub/HomeProfileWorkspace'
+import { HomeViewSwitcher } from '@/features/home/components/home-hub/HomeViewSwitcher'
+import { DEFAULT_HOME_VIEW, homeViewFromParam, type HomeView } from '@/features/home/components/home-hub/homeViews'
 import type { HomeSummary } from '@/features/home/types'
 import type { StatsSummary } from '@/features/stats/types'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 import { DEFAULT_STORY_WORLD_SLUG, getStoryWorld } from '@/shared/story-worlds/registry'
 
-type HomeTab = 'overview' | 'loadout' | 'profile'
-
-function homeTab(value: string | null): HomeTab {
-  if (value === 'profile' || value === 'loadout') return value
-  return 'overview'
-}
-
 export function HomeHubView({
   home,
   stats,
   playerName,
-  gitcoins,
 }: {
   home: HomeSummary
   stats: StatsSummary
   playerName: string
-  gitcoins: number | null
 }) {
   const [searchParams, setSearchParams] = useSearchParams()
-  const tab = homeTab(searchParams.get('tab'))
+  const view = homeViewFromParam(searchParams.get('view'))
   const {
     companion,
     companionSlug,
@@ -51,13 +43,13 @@ export function HomeHubView({
     '--home-theme-map': `url("${storyWorld.map?.background.src ?? '/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png'}")`,
   } as CSSProperties
 
-  const selectTab = useCallback(
-    (next: HomeTab) => {
+  const selectView = useCallback(
+    (next: HomeView) => {
       setSearchParams(
         (current) => {
           const nextParams = new URLSearchParams(current)
-          if (next === 'overview') nextParams.delete('tab')
-          else nextParams.set('tab', next)
+          if (next === DEFAULT_HOME_VIEW) nextParams.delete('view')
+          else nextParams.set('view', next)
           return nextParams
         },
         { replace: true },
@@ -70,67 +62,25 @@ export function HomeHubView({
     <div className="home-ref-screen">
       <div className="home-ref-backdrop" style={homeBackdropStyle} aria-hidden="true" />
 
-      <nav className="home-ref-tabs" aria-label="Home sections">
-        <button
-          type="button"
-          className={tab === 'overview' ? 'is-active' : ''}
-          aria-pressed={tab === 'overview'}
-          data-onboarding="home-overview"
-          onClick={() => selectTab('overview')}
-        >
-          <BarChart3 aria-hidden="true" />
-          Overview
-        </button>
-        <button
-          type="button"
-          className={tab === 'loadout' ? 'is-active' : ''}
-          aria-pressed={tab === 'loadout'}
-          data-onboarding="home-loadout"
-          onClick={() => selectTab('loadout')}
-        >
-          <Backpack aria-hidden="true" />
-          Loadout
-        </button>
-        <button
-          type="button"
-          className={tab === 'profile' ? 'is-active' : ''}
-          aria-pressed={tab === 'profile'}
-          data-onboarding="home-profile"
-          onClick={() => selectTab('profile')}
-        >
-          <User aria-hidden="true" />
-          Profile
-        </button>
-      </nav>
+      <HomeViewSwitcher view={view} onSelectView={selectView} />
 
       <HomeOnboarding
         ready={!loadoutLoading && !loadoutError}
         hasCompanion={hasCompanion}
-        tab={tab}
-        onSelectTab={selectTab}
+        view={view}
+        onSelectView={selectView}
       />
 
-      {tab === 'overview' ? (
-        <HomeStatsView
-          home={home}
-          stats={stats}
-          companionRequired={companionPresentation.status === 'empty'}
-        />
-      ) : null}
-      {tab === 'loadout' ? <HomeLoadoutView /> : null}
+      {view === 'profile' ? null : <HomeStatsView home={home} stats={stats} view={view} />}
       <HomeProfileWorkspace
         home={home}
         stats={stats}
         playerName={playerName}
-        gitcoins={gitcoins}
-        hidden={tab !== 'profile'}
+        hidden={view !== 'profile'}
         companion={companionPresentation}
       />
 
-      <div className="home-ref-arrows" aria-hidden="true">
-        <ChevronLeft />
-        <ChevronRight />
-      </div>
+      {companionPresentation.status === 'empty' ? <HomeFirstStepNudge /> : null}
     </div>
   )
 }

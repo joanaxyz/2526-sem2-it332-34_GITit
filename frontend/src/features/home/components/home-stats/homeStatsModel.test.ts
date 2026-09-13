@@ -14,24 +14,43 @@ function deepFreeze<T>(value: T): T {
 }
 
 describe('buildHomeStatsModel', () => {
-  it('adapts the rich summaries into the complete dashboard and achievement ledger', () => {
+  it('adapts the rich summaries into every Overview view slice and the achievement ledger', () => {
     const model = buildHomeStatsModel(richHomeFixture, richStatsFixture)
 
-    expect(model.dashboard.skillRows).toHaveLength(12)
-    expect(model.dashboard.skillRows[0]).toMatchObject({ label: 'Initialize', command: 'git init', value: 100 })
-    expect(model.dashboard.overallMastery).toBe(60)
-    expect(model.dashboard.masteryStars).toBe(2)
-    expect(model.dashboard.activityCells.map((cell) => cell.value)).toEqual([
-      46, 26, 63, 52, 9, 83, 49, 70, 30, 88, 47, 104, 67, 55,
-    ])
-    expect(model.dashboard.story).toEqual({
+    // The fixture mirrors the published catalog: eighteen commands, real titles.
+    expect(model.skills.rows).toHaveLength(18)
+    expect(model.skills.rows[0]).toMatchObject({ label: 'git init', command: 'git init', short: 'init', value: 100 })
+    expect(model.skills.overallMastery).toBe(54)
+    expect(model.skills.masteryStars).toBe(2)
+    // A month of daily points, exactly as the backend served them.
+    expect(model.progress.activity.points).toHaveLength(30)
+    expect(model.progress.activity.points[0]).toEqual({
+      date: '2026-05-15',
+      label: 'May 15',
+      caption: 'Fri, May 15',
+      commandsRun: 0,
+      levelsCompleted: 0,
+    })
+    // Totals, active buckets and the peak all come off the same window, so the
+    // caption under the plot can never disagree with the plot.
+    expect(model.progress.activity).toMatchObject({
+      commandsRun: 1084,
+      levelsCompleted: 56,
+      activeBuckets: 27,
+      peakIndex: 25,
+      peakLabel: '84 on Jun 9',
+      resolvedWindow: 'month',
+      heading: 'Last 30 days',
+      bucket: 'days',
+    })
+    expect(model.progress.story).toEqual({
       levelsCompleted: 43,
       perfectClears: 26,
-      hardTrialsWon: 4,
-      trackProgress: 76,
+      finishRate: { value: 76, numerator: 43, denominator: 57 },
     })
-    expect(model.dashboard.kpis).toEqual({
-      clearRate: { value: 83, numerator: 39, denominator: 47 },
+    // Hard trials won and the clear rate are gone: the record band's hard-run
+    // tile and the citadel already state them, and one screen states a fact once.
+    expect(model.results).toEqual({
       hardClearRate: { value: 62, numerator: 8, denominator: 13 },
       averageRetries: { value: 1.6, numerator: 74, denominator: 47 },
       accuracy: 91,
@@ -42,36 +61,60 @@ describe('buildHomeStatsModel', () => {
     expect(model.achievements.filter((achievement) => achievement.unlocked)).toHaveLength(16)
   })
 
-  it('pads an empty account to fourteen zero-value activity cells', () => {
+  it('plots nothing at all for an account with no trend', () => {
     const model = buildHomeStatsModel(emptyHomeFixture, emptyStatsFixture)
 
-    expect(model.dashboard.skillRows).toHaveLength(12)
-    expect(model.dashboard.overallMastery).toBe(0)
-    expect(model.dashboard.masteryStars).toBe(1)
-    expect(model.dashboard.activityCells).toHaveLength(14)
-    expect(model.dashboard.activityCells.every((cell) => cell.date === '' && cell.value === 0)).toBe(true)
-    expect(model.dashboard.story).toEqual({
+    expect(model.skills.rows).toHaveLength(18)
+    expect(model.skills.overallMastery).toBe(0)
+    expect(model.skills.masteryStars).toBe(1)
+    // An empty window is drawn as an empty state, never as fourteen fake days.
+    expect(model.progress.activity.points).toEqual([])
+    expect(model.progress.activity).toMatchObject({
+      commandsRun: 0,
+      levelsCompleted: 0,
+      activeBuckets: 0,
+      peakIndex: -1,
+      peakLabel: null,
+    })
+    expect(model.progress.story).toEqual({
       levelsCompleted: 0,
       perfectClears: 0,
-      hardTrialsWon: 0,
-      trackProgress: 0,
+      finishRate: { value: null, numerator: 0, denominator: 0 },
     })
-    expect(model.dashboard.kpis.accuracyReady).toBe(false)
+    expect(model.results.accuracyReady).toBe(false)
   })
 
-  it('keeps only the latest fourteen activity points and weights completed levels by four', () => {
+  it('plots exactly the window it was served, and labels monthly buckets by month', () => {
     const stats = structuredClone(richStatsFixture)
+    // The span is a request parameter now, so the client plots what arrived
+    // rather than trimming or padding it to a fixed cell count.
     stats.activity_trend = Array.from({ length: 16 }, (_, index) => ({
       date: `2026-07-${String(index + 1).padStart(2, '0')}`,
       commands_run: index,
       levels_completed: 1,
     }))
 
-    const model = buildHomeStatsModel(richHomeFixture, stats)
+    const daily = buildHomeStatsModel(richHomeFixture, stats)
 
-    expect(model.dashboard.activityCells).toHaveLength(14)
-    expect(model.dashboard.activityCells[0]).toEqual({ key: '2026-07-03', date: '2026-07-03', value: 6 })
-    expect(model.dashboard.activityCells.at(-1)).toEqual({ key: '2026-07-16', date: '2026-07-16', value: 19 })
+    expect(daily.progress.activity.points).toHaveLength(16)
+    expect(daily.progress.activity.points[0]).toMatchObject({ date: '2026-07-01', commandsRun: 0 })
+    expect(daily.progress.activity.peakIndex).toBe(15)
+
+    stats.activity_window = 'year'
+    stats.activity_trend = [
+      { date: '2026-05-01', commands_run: 120, levels_completed: 4 },
+      { date: '2026-06-01', commands_run: 310, levels_completed: 9 },
+    ]
+
+    const yearly = buildHomeStatsModel(richHomeFixture, stats)
+
+    expect(yearly.progress.activity.points.map((point) => point.label)).toEqual(['May', 'Jun'])
+    expect(yearly.progress.activity.points[1].caption).toBe('June 2026')
+    expect(yearly.progress.activity).toMatchObject({
+      peakLabel: '310 in Jun',
+      heading: 'Last 12 months',
+      bucket: 'months',
+    })
   })
 
   it('preserves fallbacks, clamps percentages, and applies the accuracy threshold', () => {
@@ -96,11 +139,18 @@ describe('buildHomeStatsModel', () => {
 
     const model = buildHomeStatsModel(home, stats)
 
-    expect(model.dashboard.skillRows.at(-1)?.command).toBe('Fallback command')
-    expect(model.dashboard.overallMastery).toBe(65)
-    expect(model.dashboard.masteryStars).toBe(2)
-    expect(model.dashboard.story).toMatchObject({ levelsCompleted: 43, perfectClears: 30, trackProgress: 100 })
-    expect(model.dashboard.kpis).toMatchObject({ accuracy: 95, commandsRun: 99, accuracyReady: false })
+    expect(model.skills.rows.at(-1)?.command).toBe('Fallback command')
+    // The radar rim wears the machine name, so "git add" becomes "add".
+    expect(model.skills.rows.map((row) => row.short)).toEqual(['Low', 'High', 'Fallback command'])
+    expect(buildHomeStatsModel(home, richStatsFixture).skills.rows[4].short).toBe('add')
+    expect(model.skills.overallMastery).toBe(65)
+    expect(model.skills.masteryStars).toBe(2)
+    expect(model.progress.story).toMatchObject({
+      levelsCompleted: 43,
+      perfectClears: 30,
+      finishRate: { value: 100 },
+    })
+    expect(model.results).toMatchObject({ accuracy: 95, commandsRun: 99, accuracyReady: false })
   })
 
   it('does not mutate frozen source summaries or share KPI metric objects', () => {
@@ -109,8 +159,8 @@ describe('buildHomeStatsModel', () => {
 
     const model = buildHomeStatsModel(home, stats)
 
-    expect(model.dashboard.kpis.clearRate).not.toBe(home.kpis.scr)
-    expect(model.dashboard.kpis.hardClearRate).not.toBe(home.kpis.hlcr)
-    expect(model.dashboard.kpis.averageRetries).not.toBe(home.kpis.arc)
+    expect(model.progress.story.finishRate).not.toBe(stats.headline.finish_rate)
+    expect(model.results.hardClearRate).not.toBe(home.kpis.hlcr)
+    expect(model.results.averageRetries).not.toBe(home.kpis.arc)
   })
 })

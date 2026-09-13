@@ -12,7 +12,6 @@ vi.mock('@/app/layouts/HomeLayout', async () => {
 })
 vi.mock('@/features/home/pages/HomePage', () => ({ HomePage: () => <h1>Home</h1> }))
 vi.mock('@/features/story-map/pages/StoryMapPage', () => ({ StoryMapPage: () => <h1>Story map</h1> }))
-vi.mock('@/features/performance/pages/PerformancePage', () => ({ PerformancePage: () => <h1>Performance</h1> }))
 
 describe('app entry routing', () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -25,7 +24,8 @@ describe('app entry routing', () => {
   it.each([
     ['/', 'Story map', '/stories/git-it-legacy'],
     ['/home', 'Home', '/home'],
-    ['/performance', 'Performance', '/performance'],
+    // The standalone Performance page is gone; its link now lands on Home.
+    ['/performance', 'Home', '/home'],
   ])('opens %s at the correct destination', async (entry, title, expectedPath) => {
     useAuthStore.setState({
       accessToken: 'test-token',

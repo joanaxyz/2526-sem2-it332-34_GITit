@@ -3,8 +3,8 @@ import * as React from 'react'
 import { cn } from '@/shared/utils/cn'
 
 type GamePanelProps = {
-  /** Render as section, div, or button (for interactive panel cards). */
-  as?: 'div' | 'section' | 'button'
+  /** Render as section, div, nav (landmark panels), or button (for interactive panel cards). */
+  as?: 'div' | 'section' | 'nav' | 'button'
   /** Small caps label above the title. */
   eyebrow?: React.ReactNode
   /** Display title inside the panel header. */

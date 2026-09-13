@@ -73031,10 +73031,16 @@ TARGET_STATES = json.loads(r"""
             "after": "base\n",
             "before": null,
             "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "v1\n",
+            "before": null,
+            "change_type": "added"
           }
         },
         "files": {
-          "README.md": "added"
+          "README.md": "added",
+          "src/app.py": "added"
         },
         "id": "c0",
         "is_merge": false,
@@ -73042,7 +73048,8 @@ TARGET_STATES = json.loads(r"""
         "order": 0,
         "parents": [],
         "tree": {
-          "README.md": "base\n"
+          "README.md": "base\n",
+          "src/app.py": "v1\n"
         }
       },
       {
@@ -73066,7 +73073,8 @@ TARGET_STATES = json.loads(r"""
         ],
         "tree": {
           "DOCS.md": "Urgent doc fix\n",
-          "README.md": "base\n"
+          "README.md": "base\n",
+          "src/app.py": "v1\n"
         }
       }
     ],
@@ -73077,13 +73085,18 @@ TARGET_STATES = json.loads(r"""
       "target": "c0",
       "type": "branch"
     },
+    "last_stash_action": "pop",
+    "last_stash_operation": "pop",
     "last_switch_branch": "main",
     "last_switched_to": "main",
     "last_workspace_file_created": "DOCS.md",
     "operation_metadata": {
+      "last_stash_action": "pop",
+      "last_stash_operation": "pop",
       "last_switch_branch": "main",
       "last_switched_to": "main",
-      "last_workspace_file_created": "DOCS.md"
+      "last_workspace_file_created": "DOCS.md",
+      "stash_count": 0
     },
     "partial_hunks": {},
     "reflog": [
@@ -73099,13 +73112,14 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {},
     "repository_initialized": true,
     "staging": {},
+    "stash_count": 0,
     "stash_stack": [],
     "tags": {},
     "upstream_tracking": {},
     "working_tree": {
       "src/app.py": {
         "content": "work in progress\n",
-        "status": "untracked"
+        "status": "modified"
       }
     }
   },
@@ -73121,10 +73135,16 @@ TARGET_STATES = json.loads(r"""
             "after": "base\n",
             "before": null,
             "change_type": "added"
+          },
+          "src/feature.py": {
+            "after": "v1\n",
+            "before": null,
+            "change_type": "added"
           }
         },
         "files": {
-          "README.md": "added"
+          "README.md": "added",
+          "src/feature.py": "added"
         },
         "id": "c0",
         "is_merge": false,
@@ -73132,7 +73152,8 @@ TARGET_STATES = json.loads(r"""
         "order": 0,
         "parents": [],
         "tree": {
-          "README.md": "base\n"
+          "README.md": "base\n",
+          "src/feature.py": "v1\n"
         }
       },
       {
@@ -73156,7 +73177,8 @@ TARGET_STATES = json.loads(r"""
         ],
         "tree": {
           "BUGFIX.md": "Urgent bugfix\n",
-          "README.md": "base\n"
+          "README.md": "base\n",
+          "src/feature.py": "v1\n"
         }
       }
     ],
@@ -73167,13 +73189,18 @@ TARGET_STATES = json.loads(r"""
       "target": "c0",
       "type": "branch"
     },
+    "last_stash_action": "pop",
+    "last_stash_operation": "pop",
     "last_switch_branch": "main",
     "last_switched_to": "main",
     "last_workspace_file_created": "BUGFIX.md",
     "operation_metadata": {
+      "last_stash_action": "pop",
+      "last_stash_operation": "pop",
       "last_switch_branch": "main",
       "last_switched_to": "main",
-      "last_workspace_file_created": "BUGFIX.md"
+      "last_workspace_file_created": "BUGFIX.md",
+      "stash_count": 0
     },
     "partial_hunks": {},
     "reflog": [
@@ -73189,13 +73216,14 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {},
     "repository_initialized": true,
     "staging": {},
+    "stash_count": 0,
     "stash_stack": [],
     "tags": {},
     "upstream_tracking": {},
     "working_tree": {
       "src/feature.py": {
         "content": "work in progress\n",
-        "status": "untracked"
+        "status": "modified"
       }
     }
   },

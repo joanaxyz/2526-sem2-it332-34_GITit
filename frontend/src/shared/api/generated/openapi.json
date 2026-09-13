@@ -2863,6 +2863,22 @@
         "/api/progress/stats/": {
             "get": {
                 "operationId": "progress_stats_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "window",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "month",
+                                "week",
+                                "year"
+                            ],
+                            "default": "month"
+                        },
+                        "description": "Trailing window for activity_trend only: week (7 days), month (30 days) or year (12 months). Headline numbers are all-time and do not move with it."
+                    }
+                ],
                 "tags": [
                     "progress"
                 ],
@@ -3192,6 +3208,15 @@
                 ],
                 "type": "string",
                 "description": "* `grant_coins` - grant_coins\n* `set_staff` - set_staff\n* `set_active` - set_active"
+            },
+            "ActivityWindowEnum": {
+                "enum": [
+                    "month",
+                    "week",
+                    "year"
+                ],
+                "type": "string",
+                "description": "* `month` - month\n* `week` - week\n* `year` - year"
             },
             "AdminAnalyticsResponse": {
                 "type": "object",
@@ -6674,12 +6699,16 @@
                             "$ref": "#/components/schemas/StatsTrendPoint"
                         }
                     },
+                    "activity_window": {
+                        "$ref": "#/components/schemas/ActivityWindowEnum"
+                    },
                     "headline": {
                         "$ref": "#/components/schemas/StatsHeadline"
                     }
                 },
                 "required": [
                     "activity_trend",
+                    "activity_window",
                     "headline",
                     "skill_profile"
                 ]

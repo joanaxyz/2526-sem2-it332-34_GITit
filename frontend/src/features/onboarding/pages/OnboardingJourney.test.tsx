@@ -29,24 +29,23 @@ vi.mock('@/features/home/components/HomeStatsView', () => ({
   HomeStatsView: () => (
     <section>
       <p>Learning progress</p>
-      <div data-onboarding="overview-next" />
-      <div data-onboarding="overview-mastery" />
       <div data-onboarding="overview-progress" />
-      <div data-onboarding="overview-kpis" />
-      <div data-onboarding="overview-achievements" />
     </section>
   ),
 }))
-vi.mock('@/features/home/components/home-hub/HomeProfileWorkspace', () => ({
-  HomeProfileWorkspace: ({ hidden }: { hidden: boolean }) => (
-    <section hidden={hidden}>
-      <div data-onboarding="profile-switch" />
-      <div data-onboarding="profile-rank" />
-      <div data-onboarding="profile-currencies" />
-      <div data-onboarding="profile-spellbook" />
-    </section>
-  ),
-}))
+vi.mock('@/features/home/components/home-hub/HomeProfileWorkspace', async () => {
+  const { HomeCompanionRoster } = await import('@/features/home/components/home-hub/HomeCompanionRoster')
+  return {
+    HomeProfileWorkspace: ({ hidden }: { hidden: boolean }) => (
+      <section hidden={hidden}>
+        <div data-onboarding="profile-ladder" />
+        <div data-onboarding="profile-rank" />
+        <HomeCompanionRoster />
+        <div data-onboarding="profile-spellbook" />
+      </section>
+    ),
+  }
+})
 
 function catalog(owned = false, active = false): ShopCatalog {
   return {
@@ -77,7 +76,7 @@ function StoryMap({ ready = true, compact = false }) {
       onSkipOrientation={() => undefined}
     />
     <Link to="/shop">Shop tab</Link>
-    <Link to="/home?tab=loadout">Home tab</Link>
+    <Link to="/home">Home tab</Link>
   </>
 }
 
@@ -88,10 +87,13 @@ function renderJourney(userId: number, entry = '/stories/arcane-spire', ready = 
   return render(<QueryClientProvider client={client}>
     <MemoryRouter initialEntries={[entry]}>
       <OnboardingProvider key={userId} userId={userId}>
+        {/* The wallet chip lives in the app shell topbar on every route, which
+            is where the Shop tour points at the player's balance. */}
+        <div data-onboarding="wallet-balance" />
         <Routes>
           <Route path="/stories/:storySlug" element={<StoryMap ready={ready} compact={compact} />} />
           <Route path="/shop" element={<ShopPage />} />
-          <Route path="/home" element={<HomeHubView home={richHomeFixture} stats={richStatsFixture} playerName="Archivist" gitcoins={0} />} />
+          <Route path="/home" element={<HomeHubView home={richHomeFixture} stats={richStatsFixture} playerName="Archivist" />} />
         </Routes>
       </OnboardingProvider>
     </MemoryRouter>
@@ -151,14 +153,10 @@ describe('first-visit onboarding journey', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Purchase' }))
     fireEvent.click(await screen.findByRole('button', { name: 'Visit Home' }))
     expect(shopApi.purchase).toHaveBeenCalledExactlyOnceWith('companion', 'blue')
-    await screen.findByRole('heading', { name: 'Home is your character hub' })
-    await completeTour('Show Overview', ['Your owned roster', 'Equip who joins you', 'Worlds you can enter'])
-    await screen.findByRole('heading', { name: 'Overview opens on your next step' })
-    await completeTour('Show Profile', [
-      'Git Skill Mastery', 'Activity and story progress', 'Where your runs stand', 'Achievements to chase',
-    ])
-    await screen.findByRole('heading', { name: 'Profile and Rank Ladder' })
-    for (const heading of ['Your rank progress', 'GitCoins and perfect clears', 'Spells you have learned']) {
+    await screen.findByRole('heading', { name: 'Home is one dropdown' })
+    await completeTour('Show Profile', ['Progress is what you see first'])
+    await screen.findByRole('heading', { name: 'The rank ladder' })
+    for (const heading of ['Your rank progress', 'Your companion', 'Spells you have learned']) {
       fireEvent.click(screen.getByRole('button', { name: 'Next' }))
       await screen.findByRole('heading', { name: heading })
     }
@@ -188,14 +186,10 @@ describe('first-visit onboarding journey', () => {
     vi.mocked(shopApi.catalog).mockResolvedValue(catalog(true))
     renderJourney(303, '/shop')
     fireEvent.click(await screen.findByRole('button', { name: 'Visit Home' }))
-    await screen.findByRole('heading', { name: 'Home is your character hub' })
-    await completeTour('Show Overview', ['Your owned roster', 'Equip who joins you', 'Worlds you can enter'])
-    await screen.findByRole('heading', { name: 'Overview opens on your next step' })
-    await completeTour('Show Profile', [
-      'Git Skill Mastery', 'Activity and story progress', 'Where your runs stand', 'Achievements to chase',
-    ])
-    await screen.findByRole('heading', { name: 'Profile and Rank Ladder' })
-    await completeTour('Check my loadout', ['Your rank progress', 'GitCoins and perfect clears', 'Spells you have learned'])
+    await screen.findByRole('heading', { name: 'Home is one dropdown' })
+    await completeTour('Show Profile', ['Progress is what you see first'])
+    await screen.findByRole('heading', { name: 'The rank ladder' })
+    await completeTour('Equip a companion', ['Your rank progress', 'Your companion', 'Spells you have learned'])
     expect(screen.queryByRole('button', { name: 'Return to Stories' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Equip companion' }))
     expect(await screen.findByRole('button', { name: 'Return to Stories' })).toBeEnabled()

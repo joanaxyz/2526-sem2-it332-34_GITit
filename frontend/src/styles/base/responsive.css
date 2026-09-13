@@ -52,7 +52,9 @@
     min-width: auto;
   }
 
-  .app-wallet span {
+  /* The topbar chip is the only GitCoin balance in the app, so the number
+     survives every breakpoint - the coin icon carries the label instead. */
+  .app-wallet small {
     display: none;
   }
 }

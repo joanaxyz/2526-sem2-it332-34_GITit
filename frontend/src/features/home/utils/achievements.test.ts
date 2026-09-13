@@ -32,6 +32,7 @@ const home: HomeSummary = {
 const stats: StatsSummary = {
   skill_profile: [],
   activity_trend: [],
+  activity_window: 'month',
   headline: {
     levels_completed: 12,
     finish_rate: { value: 100, numerator: 12, denominator: 12 },

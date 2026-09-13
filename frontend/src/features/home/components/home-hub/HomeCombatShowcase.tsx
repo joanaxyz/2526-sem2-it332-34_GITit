@@ -155,7 +155,7 @@ export function HomeCombatShowcase({
 
   return (
     <>
-      <section className="ref-panel home-sprite-panel">
+      <section className="home-sprite-panel">
         <header className="ref-panel-head">Sprite Showcase</header>
         <div className="home-sprite-stage">
           <div className="home-sprite-rune" aria-hidden="true" />
@@ -180,7 +180,7 @@ export function HomeCombatShowcase({
         </div>
       </section>
 
-      <section className="ref-panel home-spellbook-panel" data-onboarding="profile-spellbook">
+      <section className="home-spellbook-panel" data-onboarding="profile-spellbook">
         <header className="ref-panel-head">
           <BookOpen aria-hidden="true" />
           Spellbook

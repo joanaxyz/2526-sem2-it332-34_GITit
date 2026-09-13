@@ -5,7 +5,6 @@ import {
   LogOut,
   Settings,
   ShieldCheck,
-  ChartNoAxesCombined,
   GitBranch,
   type LucideIcon,
 } from 'lucide-react'
@@ -21,7 +20,7 @@ import { useAuthStore } from '@/shared/auth/useAuth'
 import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 import { useWalletSummary } from '@/shared/wallet/hooks/useWallet'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
-import { ADMIN_ROUTES, HOME_ROUTE, PERFORMANCE_ROUTE, SHOP_ROUTE, isStoryMapRoute, storyPath } from '@/shared/navigation/routes'
+import { ADMIN_ROUTES, HOME_ROUTE, SHOP_ROUTE, isStoryMapRoute, storyPath } from '@/shared/navigation/routes'
 import { cn } from '@/shared/utils/cn'
 import { useFocusTrap } from '@/shared/utils/useFocusTrap'
 
@@ -45,12 +44,6 @@ const primaryNavItems: PrimaryNavItem[] = [
     label: 'Modules',
     Icon: GitBranch,
     match: isStoryMapRoute,
-  },
-  {
-    to: PERFORMANCE_ROUTE,
-    label: 'Performance',
-    Icon: ChartNoAxesCombined,
-    match: (pathname) => pathname === PERFORMANCE_ROUTE,
   },
 ]
 
@@ -289,7 +282,7 @@ function ProfileDropdown({
 
 function AppWalletLink({ balance, isPending }: { balance: number; isPending?: boolean }) {
   return (
-    <NavLink to={SHOP_ROUTE} className="app-wallet" aria-label="Open shop">
+    <NavLink to={SHOP_ROUTE} className="app-wallet" aria-label="Open shop" data-onboarding="wallet-balance">
       <GitCoinIcon />
       <span>
         <strong>{formatBalance(balance, isPending)}</strong>

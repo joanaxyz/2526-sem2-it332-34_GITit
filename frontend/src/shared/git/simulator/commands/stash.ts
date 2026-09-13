@@ -37,7 +37,10 @@ function pushStash(state: MutableRepositoryState, parsed: ParsedGitCommand): Com
 
 function applyStash(state: MutableRepositoryState, index: number, remove: boolean): CommandOutcome {
   const stack = state.stash_stack ?? []
-  if (!stack.length) return { command: 'stash', stdout: 'No stash entries found.' }
+  // Real git exits non-zero here. Returning a success outcome made the terminal
+  // claim the pop worked while the backend - which expects an actual stash entry
+  // to be restored - rejected the submission as a mismatched transition.
+  if (!stack.length) throw new SimulatorCommandError('No stash entries found.', 1)
   const realIndex = stack.length - 1 - index
   const entry = stack[realIndex]
   if (!entry) throw new SimulatorCommandError(`fatal: log for stash@{${index}} only has ${stack.length} entries`)
@@ -51,7 +54,7 @@ function applyStash(state: MutableRepositoryState, index: number, remove: boolea
 
 function dropStash(state: MutableRepositoryState, index: number): CommandOutcome {
   const stack = state.stash_stack ?? []
-  if (!stack.length) return { command: 'stash', stdout: 'No stash entries found.' }
+  if (!stack.length) throw new SimulatorCommandError('No stash entries found.', 1)
   const realIndex = stack.length - 1 - index
   if (!stack[realIndex]) throw new SimulatorCommandError(`fatal: log for stash@{${index}} only has ${stack.length} entries`)
   stack.splice(realIndex, 1)

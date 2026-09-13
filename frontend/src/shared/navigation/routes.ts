@@ -4,7 +4,9 @@ const DEFAULT_STORY_SLUG = 'git-it-legacy'
 
 export const HOME_ROUTE = '/home'
 export const SHOP_ROUTE = '/shop'
-export const PERFORMANCE_ROUTE = '/performance'
+/** Retired standalone page; its content now lives in Home > Overview > Run results. */
+export const LEGACY_PERFORMANCE_ROUTE = '/performance'
+export const OVERVIEW_RESULTS_ROUTE = `${HOME_ROUTE}?view=results`
 export const STORIES_ROUTE = '/stories'
 export const STORY_DETAIL_ROUTE = `${STORIES_ROUTE}/:storySlug`
 export const DESIGN_PREVIEW_STORY_MAP_ROUTE = '/design-preview/story-map'

@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { authApi, type RegisterPayload } from '@/shared/auth/authApi'
 import { presentAuthError } from '@/features/auth/api/authError'
 import { PasswordStrengthIndicator } from '@/features/auth/components/PasswordStrengthIndicator'
+import { useServerFieldErrors } from '@/shared/api/useServerFieldErrors'
 import { useAuthStore } from '@/shared/auth/useAuth'
 import { storyPath } from '@/shared/navigation/routes'
 import { cn } from '@/shared/utils/cn'
@@ -77,6 +78,14 @@ export function RegisterForm() {
   const errorPresentation = useMemo(
     () => (mutation.error ? presentAuthError(mutation.error) : null),
     [mutation.error],
+  )
+  // Server-side rules the form cannot know (Django's password validators, a
+  // username taken since the page loaded) belong on the offending input.
+  const serverFields = useServerFieldErrors(
+    form,
+    mutation.error,
+    ['username', 'email', 'password', 'password_confirm'],
+    errorPresentation?.fieldErrors,
   )
 
   function submitRegistration(values: FormValues) {
@@ -163,7 +172,7 @@ export function RegisterForm() {
         </div>
         {form.formState.errors.password_confirm ? <small className="auth-error">{form.formState.errors.password_confirm.message}</small> : null}
       </label>
-      {errorPresentation ? (
+      {errorPresentation && serverFields.length === 0 ? (
         <div className="auth-error-box">
           <p>{errorPresentation.message}</p>
           {errorPresentation.retryable && lastSubmittedValues ? (

@@ -9,9 +9,9 @@ import { useAppOnboarding } from '@/features/onboarding/hooks/onboardingContext'
 
 const shopSteps = [
   {
-    id: 'wallet', selector: '[data-onboarding="shop-balance"]', icon: Coins,
+    id: 'wallet', selector: '[data-onboarding="wallet-balance"]', icon: Coins,
     title: 'Check your GitCoins',
-    body: 'Characters are called companions here. Each one has a GitCoin price. Check your balance before choosing; the tutorial never spends coins for you.',
+    body: 'Characters are called companions here. Each one has a GitCoin price. Your balance sits in the top bar on every screen; the tutorial never spends coins for you.',
   },
   {
     id: 'character', selector: '[data-onboarding="shop-characters"]', icon: UserRound,

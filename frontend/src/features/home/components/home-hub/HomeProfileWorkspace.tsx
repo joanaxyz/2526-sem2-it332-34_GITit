@@ -1,4 +1,5 @@
 import { HomeCombatShowcase } from '@/features/home/components/home-hub/HomeCombatShowcase'
+import { HomeCompanionRoster } from '@/features/home/components/home-hub/HomeCompanionRoster'
 import { HomeCompanionAnnouncement } from '@/features/home/components/home-hub/HomeCompanionStatus'
 import { HomeProfilePanel } from '@/features/home/components/home-hub/HomeProfilePanel'
 import type { CompanionPresentation } from '@/features/home/components/home-hub/companionPresentation'
@@ -10,7 +11,6 @@ type HomeProfileWorkspaceProps = {
   home: HomeSummary
   stats: StatsSummary
   playerName: string
-  gitcoins: number | null
   hidden: boolean
   companion: CompanionPresentation
 }
@@ -19,7 +19,6 @@ export function HomeProfileWorkspace({
   home,
   stats,
   playerName,
-  gitcoins,
   hidden,
   companion,
 }: HomeProfileWorkspaceProps) {
@@ -34,9 +33,9 @@ export function HomeProfileWorkspace({
         home={home}
         stats={stats}
         playerName={playerName}
-        gitcoins={gitcoins}
         companion={companion}
       />
+      <HomeCompanionRoster />
       <HomeCombatShowcase
         key={companion.status === 'ready' ? companion.slug : companion.status}
         companion={companion}

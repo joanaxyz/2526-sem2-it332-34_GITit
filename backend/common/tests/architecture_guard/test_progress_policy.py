@@ -134,9 +134,19 @@ def test_stats_contract_guard_rejects_async_adapters_but_ignores_comments():
         stats_api_source="// StatsSummary and ApiSchemas stay generated.\n" + api_source,
     )
     assert comment_violations == []
-    adapter_source = api_source.replace(
-        "summary() {\n    return apiOperationRequest('progress_stats_retrieve', '/progress/stats/')\n  }",
-        "async summary() {\n    const payload = await apiOperationRequest(\n      'progress_stats_retrieve', '/progress/stats/'\n    )\n    return normalize(payload)\n  }",
+    # The window is a query parameter now, so the guard accepts a path that
+    # carries one - but the call still has to be returned as produced, never
+    # awaited and reshaped on the way through.
+    adapter_source = (
+        "import { apiOperationRequest } from '@/shared/api/httpClient'\n\n"
+        "export const statsApi = {\n"
+        "  async summary() {\n"
+        "    const payload = await apiOperationRequest(\n"
+        "      'progress_stats_retrieve', '/progress/stats/'\n"
+        "    )\n"
+        "    return payload.results.map(normalize)\n"
+        "  },\n"
+        "}\n"
     )
     adapter_violations = stats_contract_source_violations(
         progress_serializers_source=progress_source,
@@ -146,6 +156,20 @@ def test_stats_contract_guard_rejects_async_adapters_but_ignores_comments():
     )
     assert any(
         "must return the generated operation response directly" in row for row in adapter_violations
+    )
+    assert any("must not adapt or await the generated response" in row for row in adapter_violations)
+
+    # The shipped wrapper builds its path from the selected window; that is the
+    # generated route with a query string, and stays clean.
+    assert "/progress/stats/${query}" in api_source
+    assert (
+        stats_contract_source_violations(
+            progress_serializers_source=progress_source,
+            common_openapi_source=common_source,
+            stats_types_source=types_source,
+            stats_api_source=api_source,
+        )
+        == []
     )
 
 

@@ -4,11 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { notifyManager, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { CompanionShop } from '@/features/shop/components/CompanionShop'
-import {
-  actionDisabled,
-  errorMessage,
-  formatCoins,
-} from '@/features/shop/utils/shopDisplay'
+import { actionDisabled, errorMessage } from '@/features/shop/utils/shopDisplay'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
@@ -23,7 +19,6 @@ import {
   toDisplayItem,
   type ShopDisplayItem,
 } from '@/shared/shop/model/shopPresentation'
-import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 import { useWalletSummary } from '@/shared/wallet/hooks/useWallet'
 import { ShopOnboarding } from '@/features/onboarding/components/ShopOnboarding'
 import { useAppOnboarding } from '@/features/onboarding/hooks/onboardingContext'
@@ -81,13 +76,6 @@ export function ShopPage() {
             <span>Citadel quartermaster</span>
             <h1>Armory</h1>
             <p>Choose your adventurer for the journey ahead.</p>
-          </div>
-          <div className="shop-rail-balance" aria-label="GitCoin balance" data-onboarding="shop-balance">
-            <GitCoinIcon />
-            <span>
-              <small>Balance</small>
-              <strong>{wallet.isPending ? '---' : formatCoins(balance)}</strong>
-            </span>
           </div>
         </header>
 
