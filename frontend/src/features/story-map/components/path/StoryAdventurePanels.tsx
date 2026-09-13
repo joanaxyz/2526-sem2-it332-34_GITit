@@ -1,4 +1,4 @@
-import { Lock, Swords } from 'lucide-react'
+import { Lock, Swords, X } from 'lucide-react'
 import type { CSSProperties, RefObject } from 'react'
 
 import easyIconImage from '@/assets/images/easy_icon.png'
@@ -6,6 +6,7 @@ import hardIconImage from '@/assets/images/hard_icon.png'
 import mediumIconImage from '@/assets/images/medium_icon.png'
 import type {
   AdventureLevelSummary,
+  AdventureLevelTierAccess,
   ChallengeSummary,
 } from '@/features/story-map/types'
 import {
@@ -30,92 +31,139 @@ const DIFFICULTY_TIER_LABELS: Record<(typeof DIFFICULTY_ORDER)[number], string> 
   hard: 'Hard',
 }
 
+export type LevelTierRowStatus = 'locked' | 'cleared' | 'in_progress' | 'not_started'
+
+const TIER_ACTION_LABELS: Record<Exclude<LevelTierRowStatus, 'locked'>, string> = {
+  cleared: 'Review',
+  in_progress: 'Continue',
+  not_started: 'Start',
+}
+
+function tierRowStatus(tier: AdventureLevelTierAccess | undefined): LevelTierRowStatus {
+  if (!tier || tier.locked) return 'locked'
+  if (tier.completion) return 'cleared'
+  return tier.wave_progress.completed > 0 ? 'in_progress' : 'not_started'
+}
+
+/** The level callout: a level node's title, brief, and one row per difficulty
+ *  tier. `placement` is 'docked' when it is absolutely positioned in the
+ *  canvas gutter beside its node, 'inline' when the canvas is too narrow for
+ *  a gutter and it falls into document flow under the path instead. */
 export function StoryLevelTierPanel({
   level,
+  levelNumber,
   panelRef,
+  placement,
   style,
   pendingTierId,
   isStarting,
+  onClose,
   onStartTier,
 }: {
   level: AdventureLevelSummary
+  levelNumber: number
   panelRef: RefObject<HTMLElement | null>
-  style: CSSProperties
+  placement: 'docked' | 'inline'
+  style?: CSSProperties
   pendingTierId?: number
   isStarting: boolean
+  onClose: () => void
   onStartTier: (tierId: number, replay: boolean) => void
 }) {
+  const rows = DIFFICULTY_ORDER.map((difficulty) => {
+    const tier = level.tiers.find((item) => item.difficulty === difficulty)
+    return { difficulty, tier, status: tierRowStatus(tier) }
+  })
+  // Exactly one accent action per callout: the first tier that is unlocked
+  // and unfinished. Everything else is a review or a lock, so the primary
+  // move is unambiguous without reading a word.
+  const nextDifficulty = rows.find(
+    (row) => row.status === 'in_progress' || row.status === 'not_started',
+  )?.difficulty
+
   return (
     <section
       id="story-level-tier-panel"
       ref={panelRef}
-      className="story-level-tier-panel"
+      className="story-level-callout"
+      data-placement={placement}
       style={style}
       aria-labelledby="story-level-tier-panel-title"
     >
-      <header className="story-level-tier-panel-header">
+      <header className="story-level-callout-head">
+        <p className="story-level-callout-eyebrow">Level {String(levelNumber).padStart(2, '0')}</p>
         <h2 id="story-level-tier-panel-title">{level.title}</h2>
-        <p>{level.description}</p>
+        {level.description ? (
+          <p className="story-level-callout-brief">{level.description}</p>
+        ) : null}
+        <button
+          type="button"
+          className="story-level-callout-close"
+          aria-label={`Close ${level.title} details`}
+          onClick={onClose}
+        >
+          <X aria-hidden="true" />
+        </button>
       </header>
 
-      <div className="story-level-tier-panel-list">
-        {DIFFICULTY_ORDER.map((difficulty) => {
-          const tier = level.tiers.find((item) => item.difficulty === difficulty)
-          const isLocked = !tier || tier.locked
-          const isCleared = Boolean(tier?.completion)
-          const stars = tier?.completion?.stars ?? 0
+      <ul className="story-level-tier-rows">
+        {rows.map(({ difficulty, tier, status }, index) => {
+          const tierLabel = DIFFICULTY_TIER_LABELS[difficulty]
           const progress = tier?.wave_progress ?? { completed: 0, total: 0 }
-          const status = isLocked
-            ? 'locked'
-            : isCleared
-              ? 'cleared'
-              : progress.completed > 0
-                ? 'in_progress'
-                : 'not_started'
-          const nextActionLabel =
-            status === 'cleared' ? 'Review' : status === 'in_progress' ? 'Continue' : 'Start'
+          const isLocked = status === 'locked'
           const isStartingThisTier = isStarting && pendingTierId === tier?.id
+          const actionLabel = isLocked
+            ? 'Locked'
+            : isStartingThisTier
+              ? 'Starting…'
+              : TIER_ACTION_LABELS[status]
 
           return (
-            <button
-              type="button"
-              className="story-level-tier-card"
-              data-status={status}
-              key={`${level.id}-${difficulty}`}
-              disabled={isLocked || !tier || isStarting}
-              aria-label={`${level.title}: ${difficulty} tier. ${nextActionLabel}.`}
-              title={isLocked ? 'Clear the previous difficulty to unlock this tier.' : undefined}
-              onClick={() => {
-                if (!tier || isLocked) return
-                onStartTier(tier.id, isCleared)
-              }}
-            >
-              <span className="story-level-tier-card-medallion">
-                <img src={DIFFICULTY_ICONS[difficulty]} alt="" />
-                {isLocked ? <Lock className="story-trial-lock" aria-hidden="true" /> : null}
-              </span>
-              <span className="story-level-tier-card-copy">
-                <strong>{DIFFICULTY_TIER_LABELS[difficulty]}</strong>
-                <StarRating stars={stars} size="sm" label={`${difficulty} stars`} />
-              </span>
-              {isLocked ? (
-                <span className="story-level-tier-card-progress">
-                  {progress.completed}/{progress.total}
+            <li key={`${level.id}-${difficulty}`}>
+              <button
+                type="button"
+                className="story-level-tier-row"
+                data-status={status}
+                data-next={difficulty === nextDifficulty || undefined}
+                style={{ '--row-index': index } as CSSProperties}
+                disabled={isLocked || !tier || isStarting}
+                aria-label={`${level.title}, ${tierLabel} tier: ${actionLabel}`}
+                title={isLocked ? 'Clear the previous difficulty to unlock this tier.' : undefined}
+                onClick={() => {
+                  if (!tier || isLocked) return
+                  onStartTier(tier.id, status === 'cleared')
+                }}
+              >
+                <span className="story-level-tier-row-mark">
+                  <img src={DIFFICULTY_ICONS[difficulty]} alt="" />
                 </span>
-              ) : (
-                <span className="story-level-tier-card-cta">
-                  <span className="story-level-tier-card-action">
-                    {isStartingThisTier ? 'Starting…' : nextActionLabel}
-                  </span>
-                  <span className="story-level-tier-card-progress">
-                    {progress.completed}/{progress.total}
+                <span className="story-level-tier-row-copy">
+                  <strong>{tierLabel}</strong>
+                  <span className="story-level-tier-row-meta">
+                    {isLocked ? null : (
+                      <StarRating
+                        stars={tier?.completion?.stars ?? 0}
+                        size="sm"
+                        label={`${tierLabel} stars`}
+                      />
+                    )}
+                    {progress.total > 0
+                      ? isLocked
+                        ? `${progress.total} ${progress.total === 1 ? 'wave' : 'waves'}`
+                        : `${progress.completed}/${progress.total}`
+                      : null}
                   </span>
                 </span>
-              )}
-            </button>
+                {isLocked ? (
+                  <Lock className="story-level-tier-row-lock" aria-hidden="true" />
+                ) : (
+                  <span className="story-level-tier-row-action">{actionLabel}</span>
+                )}
+              </button>
+            </li>
           )
         })}
-      </div>
+      </ul>
     </section>
   )
 }

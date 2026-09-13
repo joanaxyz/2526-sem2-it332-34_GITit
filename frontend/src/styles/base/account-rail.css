@@ -1,0 +1,315 @@
+/* ============================================================
+   ACCOUNT RAIL — the right end of the instrument rail
+   Audio utilities, the GitCoin readout, and the account menu.
+   Shares the blade material defined in navigation.css.
+   ============================================================ */
+
+/* ---------- Account rail ---------- */
+
+.app-account {
+  display: flex;
+  align-items: stretch;
+  align-self: stretch;
+  justify-content: end;
+  justify-self: end;
+  height: 100%;
+  /* No overflow:hidden here - it would clip the profile dropdown that drops
+     below the rail. */
+  border-left: 1px solid rgba(var(--theme-primary-rgb), 0.16);
+}
+
+.app-audio-controls {
+  display: inline-flex;
+  align-items: stretch;
+  border-left: 0;
+}
+
+/* Utilities sit a step back so the readouts beside them carry the weight. */
+.app-audio-control {
+  display: grid;
+  width: 2.35rem;
+  min-width: 2.35rem;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition:
+    background var(--motion-normal) var(--ease-out),
+    color var(--motion-normal) var(--ease-out);
+}
+
+.app-audio-control svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.app-audio-control:hover {
+  background: rgba(var(--theme-primary-rgb), 0.08);
+  color: var(--text-primary);
+}
+
+.app-audio-control[aria-pressed='true'] {
+  color: rgba(var(--theme-primary-soft-rgb), 0.9);
+}
+
+.app-audio-control.is-muted {
+  color: hsl(var(--muted-foreground) / 0.62);
+}
+
+.app-wallet {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.52rem;
+  min-width: 7.8rem;
+  padding: 0 0.85rem;
+  color: var(--text-primary);
+  transition: background var(--motion-normal) var(--ease-out);
+}
+
+/* Inset sub-rules: only the bay divisions run the rail's full height. */
+.app-wallet::before,
+.app-profile-trigger::before {
+  content: '';
+  position: absolute;
+  top: 0.9rem;
+  bottom: 0.9rem;
+  left: 0;
+  width: 1px;
+  background: rgba(var(--theme-primary-rgb), 0.16);
+}
+
+.app-wallet img {
+  width: 1.72rem;
+  height: 1.72rem;
+  filter: drop-shadow(0 0 8px rgba(243, 210, 122, 0.5));
+  transition:
+    filter var(--motion-normal) var(--ease-out),
+    transform var(--motion-normal) var(--ease-out);
+}
+
+.app-wallet:hover {
+  background: rgba(var(--theme-primary-rgb), 0.07);
+}
+
+.app-wallet:hover img {
+  filter: drop-shadow(0 0 14px rgba(243, 210, 122, 0.85));
+  transform: translateY(-1px);
+}
+
+/* Every quantity is mono, and this one is a live readout: tabular figures keep
+   the balance from jittering as it counts. */
+.app-wallet strong {
+  display: block;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.app-wallet small,
+.app-profile-copy span {
+  display: block;
+  margin-top: 0.24rem;
+  color: hsl(var(--muted-foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+@keyframes app-wallet-tick {
+  0% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-3px);
+    color: hsl(var(--warning));
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.app-wallet.is-changed strong {
+  animation: app-wallet-tick 700ms var(--ease-out);
+}
+
+.app-profile {
+  position: relative;
+}
+
+.app-profile-trigger {
+  position: relative;
+  display: inline-flex;
+  height: 100%;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 10.5rem;
+  padding: 0 1.1rem 0 0.85rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background var(--motion-normal) var(--ease-out);
+}
+
+.app-profile-trigger:hover {
+  background: rgba(var(--theme-primary-rgb), 0.07);
+}
+
+.app-profile-trigger svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  color: hsl(var(--muted-foreground));
+  transition: transform var(--motion-normal) var(--ease-out);
+}
+
+.app-profile-trigger svg.is-open {
+  transform: rotate(180deg);
+}
+
+.app-profile-copy {
+  min-width: 0;
+  text-align: left;
+}
+
+.app-profile-copy strong {
+  display: block;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-profile-avatar {
+  display: grid;
+  width: 2.05rem;
+  height: 2.05rem;
+  flex: 0 0 auto;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.55);
+  border-radius: 999px;
+  background: #06152e;
+  box-shadow: var(--glow-interactive);
+  transition:
+    border-color var(--motion-normal) var(--ease-out),
+    box-shadow var(--motion-normal) var(--ease-out);
+}
+
+.app-profile-trigger:hover .app-profile-avatar,
+.app-profile-avatar.is-open {
+  border-color: rgba(var(--theme-primary-rgb), 0.95);
+  box-shadow: var(--glow-active);
+}
+
+.app-profile-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.app-profile-avatar-initials {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* ---------- Account menu ---------- */
+
+.app-profile-menu {
+  position: absolute;
+  top: calc(100% + 0.3rem);
+  right: 0.6rem;
+  z-index: var(--z-dropdown);
+  width: 17rem;
+  overflow: hidden;
+  border: 1px solid var(--panel-border-strong);
+  border-radius: var(--radius);
+  background: var(--panel-bg-raised);
+  box-shadow: var(--panel-inset), var(--shadow-overlay);
+}
+
+.app-profile-menu-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.16);
+  padding: 0.9rem 1rem;
+}
+
+.app-profile-menu-head p,
+.app-profile-menu-head span {
+  margin: 0;
+}
+
+.app-profile-menu-head p {
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+.app-profile-menu-head span {
+  display: block;
+  margin-top: 0.24rem;
+  overflow-wrap: anywhere;
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+}
+
+.app-profile-menu-list {
+  display: grid;
+  padding: 0.3rem;
+}
+
+.app-profile-menu-list--bordered {
+  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.14);
+}
+
+.app-profile-menu-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.65rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.7rem;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--motion-fast) var(--ease-out),
+    color var(--motion-fast) var(--ease-out);
+}
+
+.app-profile-menu-item svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.app-profile-menu-item:hover,
+.app-profile-menu-item:focus-visible {
+  background: rgba(var(--theme-primary-rgb), 0.09);
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.app-profile-menu-item--danger:hover,
+.app-profile-menu-item--danger:focus-visible {
+  background: hsl(var(--destructive) / 0.1);
+  color: hsl(var(--destructive));
+}

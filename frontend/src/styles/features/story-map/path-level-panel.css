@@ -1,0 +1,376 @@
+/* The level callout: what a level node opens.
+   ------------------------------------------------------------------
+   Positioning. The serpentine route never crosses the right third of the
+   canvas, so the callout docks in that permanently empty gutter instead of
+   flipping around its node - a popup anchored beside a node inevitably
+   covers its neighbours, since nodes are only one path step apart and the
+   callout is taller than that step. Docked, it always lands in the same
+   column (one place for the eye to return to) and never occludes the map.
+   A drawn leader (.story-callout-leader) keeps the spatial link.
+
+   Colour. This is an ADVENTURE surface, so it carries the one neon accent.
+   Arcane purple belongs to the Challenge world (the gate node and the trial
+   cards) and must not leak here, or the Challenge signal stops meaning
+   anything. Inside the callout, colour marks state: the next playable tier
+   is the single accent moment, cleared tiers go quiet, locked tiers go
+   stone. */
+
+.story-level-callout {
+  position: absolute;
+  left: var(--callout-left, 0);
+  top: var(--callout-top, 0);
+  z-index: var(--z-raised);
+  width: var(--callout-width, 17rem);
+  overflow: hidden;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.28);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at 12% -10%, rgba(var(--theme-primary-rgb), 0.13), transparent 14rem),
+    linear-gradient(180deg, rgba(9, 24, 48, 0.95), rgba(3, 10, 24, 0.97));
+  box-shadow:
+    inset 0 1px 0 rgba(232, 246, 250, 0.06),
+    var(--shadow-overlay);
+  animation: story-callout-in 200ms var(--ease-out) both;
+}
+
+/* The neon light-bar the world's panels share, so the callout reads as part
+   of the same HUD vocabulary rather than a generic tooltip. */
+.story-level-callout::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--panel-lightbar);
+  pointer-events: none;
+}
+
+@keyframes story-callout-in {
+  from {
+    opacity: 0;
+    transform: translateX(-0.6rem);
+  }
+}
+
+/* Narrow canvases have no gutter to dock into, so the callout drops into
+   document flow under the path (the Challenge Gate panel's own pattern)
+   and is scrolled into view instead. */
+.story-level-callout[data-placement='inline'] {
+  position: relative;
+  width: min(100%, 34rem);
+  margin: 0 auto 1.25rem;
+  animation-name: story-callout-in-flow;
+}
+
+@keyframes story-callout-in-flow {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+}
+
+/* Header ------------------------------------------------------------- */
+
+.story-level-callout-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0 var(--space-2);
+  padding: 0.85rem 0.9rem 0.8rem;
+}
+
+.story-level-callout-eyebrow {
+  grid-column: 1;
+  margin: 0 0 0.3rem;
+  color: rgba(var(--theme-primary-rgb), 0.92);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.story-level-callout-head h2 {
+  grid-column: 1;
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: var(--text-md);
+  font-weight: 800;
+  line-height: 1.18;
+  text-wrap: balance;
+}
+
+.story-level-callout-brief {
+  grid-column: 1 / -1;
+  max-width: 46ch;
+  margin: 0.35rem 0 0;
+  color: rgba(232, 246, 250, 0.76);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+.story-level-callout-close {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: grid;
+  align-self: start;
+  width: 1.6rem;
+  height: 1.6rem;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: color var(--motion-fast) ease, background var(--motion-fast) ease,
+    border-color var(--motion-fast) ease;
+}
+
+/* 44px touch target without a 44px visual chip. */
+.story-level-callout-close::after {
+  content: '';
+  position: absolute;
+  inset: -0.65rem;
+}
+
+.story-level-callout-close svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.story-level-callout-close:hover,
+.story-level-callout-close:focus-visible {
+  border-color: rgba(var(--theme-primary-rgb), 0.38);
+  background: rgba(var(--theme-primary-rgb), 0.1);
+  color: hsl(var(--foreground));
+  outline: none;
+}
+
+/* Tier rows ---------------------------------------------------------- */
+
+/* Hairline-split rows, not cards: a card inside the callout card would be a
+   nested container, and three identical tinted slabs read as one block
+   instead of three states. */
+.story-level-tier-rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.16);
+  list-style: none;
+}
+
+.story-level-tier-rows > li + li .story-level-tier-row {
+  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.12);
+}
+
+.story-level-tier-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  min-height: 2.9rem;
+  padding: 0.55rem 0.9rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: hsl(var(--foreground));
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+  animation: story-tier-row-in 240ms var(--ease-out) both;
+  animation-delay: calc(var(--row-index, 0) * 45ms + 60ms);
+}
+
+@keyframes story-tier-row-in {
+  from {
+    opacity: 0;
+    transform: translateX(-0.35rem);
+  }
+}
+
+.story-level-tier-row:not(:disabled):hover,
+.story-level-tier-row:focus-visible {
+  background: rgba(var(--theme-primary-rgb), 0.09);
+  outline: none;
+}
+
+.story-level-tier-row:focus-visible {
+  box-shadow: inset 0 0 0 2px rgba(var(--theme-primary-rgb), 0.55);
+}
+
+.story-level-tier-row:disabled {
+  cursor: not-allowed;
+}
+
+/* The one tier the player can act on next: the callout's single accent
+   moment, so "what do I press" is answered before anything is read. */
+.story-level-tier-row[data-next] {
+  background: rgba(var(--theme-primary-rgb), 0.07);
+}
+
+.story-level-tier-row[data-next]:not(:disabled):hover,
+.story-level-tier-row[data-next]:focus-visible {
+  background: rgba(var(--theme-primary-rgb), 0.13);
+}
+
+.story-level-tier-row-mark {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+}
+
+.story-level-tier-row-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.story-level-tier-row[data-status='locked'] .story-level-tier-row-mark img {
+  opacity: 0.45;
+  filter: grayscale(0.75);
+}
+
+.story-level-tier-row-copy {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.story-level-tier-row-copy strong {
+  color: hsl(var(--foreground));
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.story-level-tier-row[data-status='locked'] .story-level-tier-row-copy strong {
+  color: hsl(var(--muted-foreground));
+  font-weight: 600;
+}
+
+.story-level-tier-row-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: rgba(232, 246, 250, 0.62);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.story-level-tier-row-meta [role='img'] svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.story-level-tier-row[data-status='locked'] .story-level-tier-row-meta {
+  color: hsl(var(--muted-foreground) / 0.86);
+}
+
+/* Right column: consistently answers "what can I do here?" - an action, or
+   a lock. Never a bare progress count with no verb attached. */
+.story-level-tier-row-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.7rem;
+  padding: 0 0.7rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.34);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: rgba(232, 246, 250, 0.88);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  white-space: nowrap;
+  transition: border-color var(--motion-fast) ease, background var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
+}
+
+.story-level-tier-row[data-next] .story-level-tier-row-action {
+  border-color: var(--control-primary-border);
+  background: var(--control-primary-bg);
+  color: var(--control-primary-text);
+  box-shadow: var(--control-primary-shadow);
+}
+
+.story-level-tier-row:not(:disabled):hover .story-level-tier-row-action,
+.story-level-tier-row:focus-visible .story-level-tier-row-action {
+  border-color: rgba(var(--theme-primary-rgb), 0.68);
+  background: rgba(var(--theme-primary-rgb), 0.14);
+}
+
+.story-level-tier-row[data-next]:not(:disabled):hover .story-level-tier-row-action,
+.story-level-tier-row[data-next]:focus-visible .story-level-tier-row-action {
+  background: var(--control-primary-bg-hover);
+  box-shadow: 0 0 18px rgba(var(--theme-primary-rgb), 0.34);
+}
+
+.story-level-tier-row-lock {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Leader ------------------------------------------------------------- */
+
+/* Drawn from the node's edge to the docked callout, so a callout that is
+   nowhere near its node still reads as belonging to it. */
+.story-callout-leader {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  overflow: visible;
+  pointer-events: none;
+}
+
+.story-callout-leader path {
+  fill: none;
+  stroke: rgba(var(--theme-primary-rgb), 0.72);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(var(--theme-primary-rgb), 0.5));
+  animation: story-leader-draw 280ms var(--ease-out) both;
+}
+
+.story-callout-leader circle {
+  fill: rgb(var(--theme-primary-rgb));
+  filter: drop-shadow(0 0 6px rgba(var(--theme-primary-rgb), 0.7));
+  animation: story-leader-dot-in 200ms var(--ease-out) both;
+  animation-delay: 140ms;
+}
+
+@keyframes story-leader-draw {
+  from {
+    stroke-dasharray: var(--leader-length, 400);
+    stroke-dashoffset: var(--leader-length, 400);
+  }
+  to {
+    stroke-dasharray: var(--leader-length, 400);
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes story-leader-dot-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-level-callout,
+  .story-level-tier-row,
+  .story-callout-leader path,
+  .story-callout-leader circle {
+    animation: none;
+  }
+
+  .story-level-tier-row,
+  .story-level-tier-row-action,
+  .story-level-callout-close {
+    transition: none;
+  }
+}

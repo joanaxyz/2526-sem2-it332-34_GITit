@@ -19,7 +19,7 @@ function ActivitySpanPicker({
   onSelectActivityWindow: (next: ActivityWindow) => void
 }) {
   return (
-    <div className="home-overview-span" role="group" aria-label="Activity span">
+    <div className="home-overview-segmented" role="group" aria-label="Activity span">
       {ACTIVITY_WINDOWS.map((option) => (
         <button
           aria-pressed={option.id === activityWindow}

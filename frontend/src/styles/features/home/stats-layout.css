@@ -60,9 +60,87 @@
   padding-top: 1.35rem;
 }
 
-/* Skills is two bands as well: the profile, then what it earned. */
-.home-overview-achievements-panel {
-  margin-top: 0.2rem;
-  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.16);
-  padding-top: 1.35rem;
+/* Skills is two subjects rather than two bands: the profile you are building
+   and what it has earned you. They are columns, split by one hairline. */
+.home-overview-grid.is-split {
+  grid-template-columns: minmax(0, 1.04fr) minmax(0, 1fr);
+  gap: 1.9rem;
+  align-items: start;
+}
+
+.home-overview-grid.is-split > .home-overview-achievements-panel {
+  border-left: 1px solid rgba(var(--theme-primary-rgb), 0.16);
+  padding-left: 1.9rem;
+}
+
+/* ── Band headers and their controls ───────────────────────────────────── */
+/* Heading on the left, its control on the right; they share the band's first
+   line so the content under them starts at one height across the screen. */
+.home-overview-band-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+}
+
+.home-overview-band-head .ref-panel-head {
+  margin-bottom: 0.35rem;
+}
+
+/* The eyebrow names the band; the em beside it is a plain sentence, not more
+   tracked mono. */
+.home-overview-band-head .ref-panel-head em {
+  margin-left: 0.35rem;
+  color: var(--text-tertiary);
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+/* A segmented control, not loose buttons: one hairline frame, the active
+   segment filled. Used by the activity span picker and the skills Bars/Radar
+   switch, so both read as the same kind of choice. */
+.home-overview-segmented {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: var(--control-bg);
+}
+
+.home-overview-segmented button {
+  min-height: 1.6rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 0 0.7rem;
+  transition: background var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out);
+}
+
+.home-overview-segmented button + button {
+  border-left: 1px solid rgba(var(--theme-primary-rgb), 0.16);
+}
+
+.home-overview-segmented button:hover {
+  background: var(--control-bg-hover);
+  color: var(--text-primary);
+}
+
+.home-overview-segmented button.is-active {
+  background: rgba(var(--theme-teal-rgb), 0.16);
+  color: rgb(var(--theme-teal-rgb));
+}
+
+.home-overview-segmented button:focus-visible {
+  outline: none;
+  box-shadow: var(--control-focus-ring);
 }

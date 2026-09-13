@@ -2,13 +2,23 @@
 /* Structural only: columns collapse, hairlines move from the side to the top.
    Nothing here restyles a component, and every rule lives in a media query. */
 
+/* Below this the two subjects stop being columns: half of 1200px is not enough
+   for a dial or for a gallery row, so they stack and the hairline moves. */
+@media (max-width: 1200px) {
+  .home-overview-grid.is-split { grid-template-columns: minmax(0, 1fr); gap: 1.6rem; }
+  .home-overview-grid.is-split > .home-overview-achievements-panel {
+    border-left: 0;
+    border-top: 1px solid rgba(var(--theme-primary-rgb), 0.16);
+    padding-left: 0;
+    padding-top: 1.35rem;
+  }
+}
+
 @media (max-width: 900px) {
   /* The radar rail and the citadel drop under their band rather than shrinking
      to a width where neither can be read. */
-  .home-overview-master-row,
   .home-overview-stat-subgrid { grid-template-columns: minmax(0, 1fr); }
-  .home-overview-mastery-orb { border-top: 1px solid hsl(var(--border) / 0.55); border-left: 0; padding: 1rem 0 0; }
-  .home-overview-mastery-orb .ref-chart-radar { max-width: 22rem; margin-inline: auto; }
+  .home-overview-mastery-orb .ref-chart-radar { max-width: 24rem; margin-inline: auto; }
   .home-overview-story-block { border-top: 1px solid rgba(var(--theme-primary-rgb), 0.14); border-left: 0; padding-top: 0.9rem; padding-left: 0; }
 }
 

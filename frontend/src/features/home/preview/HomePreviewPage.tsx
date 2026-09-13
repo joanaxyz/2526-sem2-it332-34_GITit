@@ -69,6 +69,10 @@ export function Component() {
       empty ? { ...PREVIEW_SHOP, active_companion: null, items: PREVIEW_SHOP.items.map((item) => ({ ...item, owned: false, active: false })) } : PREVIEW_SHOP,
     )
     queryClient.setQueryData(queryKeys.learnedSkills, empty ? { results: [] } : PREVIEW_SKILLS)
+    // The app shell's wallet chip fetches on every page. Left unseeded it 401s
+    // here, and the failed token refresh drops the preview on /login a few
+    // seconds after it mounts.
+    queryClient.setQueryData(queryKeys.wallet, { balance: empty ? 0 : 1240 })
   }
 
   return (

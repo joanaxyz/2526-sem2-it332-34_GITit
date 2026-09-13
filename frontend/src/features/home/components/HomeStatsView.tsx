@@ -35,7 +35,10 @@ export function HomeStatsView({
   const [activityWindow, selectActivityWindow] = useActivityWindow()
 
   return (
-    <section className="home-overview-grid" aria-label="Player overview">
+    <section
+      className={`home-overview-grid${view === 'skills' ? ' is-split' : ''}`}
+      aria-label="Player overview"
+    >
       {view === 'progress' ? (
         <article className="home-overview-standing" aria-label="Progress">
           <HomeProgressPanel

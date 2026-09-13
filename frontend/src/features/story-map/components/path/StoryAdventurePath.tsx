@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Check, Lock, Play, Swords } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -19,6 +19,17 @@ import { StoryLevelTierPanel, StoryTrialsPanel } from './StoryAdventurePanels'
 const DIFFICULTY_ORDER = ['easy', 'medium', 'hard'] as const
 
 const PILL_CLOSE_MS = 180
+
+// Callout geometry. The route's amplitude leaves the right side of the canvas
+// permanently empty, which is where the level callout docks: beside-the-node
+// placement cannot avoid covering a neighbour, because consecutive nodes sit
+// one path step apart and the callout is taller than that step.
+const CALLOUT_GAP = 16
+const CALLOUT_EDGE = 10
+const CALLOUT_MAX_WIDTH = 292
+const CALLOUT_MIN_WIDTH = 208
+const CALLOUT_CARET_INSET = 22
+const DEFAULT_NODE_RADIUS = 37
 
 // Node-level star display only: one star per difficulty tier (easy/medium/
 // hard, in that order), full once that tier is completed, half while a wave
@@ -76,17 +87,30 @@ export function StoryAdventurePath({
   const closeTimerRef = useRef<number | null>(null)
 
   const pathRef = useRef<HTMLDivElement | null>(null)
+  const canvasRef = useRef<HTMLDivElement | null>(null)
   const [pathWidth, setPathWidth] = useState(640)
+  // Ring size is breakpoint-dependent (it shrinks on small screens) and the
+  // callout's gutter is measured from a node's outer edge, so read it off the
+  // DOM rather than duplicating that media query as a constant here.
+  const [nodeRadius, setNodeRadius] = useState(DEFAULT_NODE_RADIUS)
+
+  const measureNodeRadius = useCallback(() => {
+    const ring = canvasRef.current?.querySelector('.story-path-node-ring')
+    const width = ring instanceof HTMLElement ? ring.offsetWidth : 0
+    if (width > 0) setNodeRadius(width / 2)
+  }, [])
+
   useEffect(() => {
     const el = pathRef.current
     if (!el) return
     const observer = new ResizeObserver((entries) => {
       const width = entries[0]?.contentRect.width ?? 0
       if (width > 0) setPathWidth(Math.max(320, Math.min(720, Math.round(width))))
+      measureNodeRadius()
     })
     observer.observe(el)
     return () => observer.disconnect()
-  }, [])
+  }, [measureNodeRadius])
 
   function queueClosingPill(levelId: number) {
     if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current)
@@ -166,20 +190,54 @@ export function StoryAdventurePath({
     selectedTierNodeIndex >= 0 ? (nodes[selectedTierNodeIndex] as AdventureLevelSummary) : null
   const selectedTierPoint = selectedTierNodeIndex >= 0 ? points[selectedTierNodeIndex] : null
   const levelTierPanelRef = useRef<HTMLElement | null>(null)
-  const [levelTierPanelSize, setLevelTierPanelSize] = useState({ width: 0, height: 0 })
+  const [calloutHeight, setCalloutHeight] = useState(0)
   useFocusTrap(levelTierPanelRef, Boolean(selectedTierLevel))
 
-  // Measure the panel's rendered size so it can be flipped to whichever side
-  // has room, without a layout-thrash loop (size only changes when the
-  // panel's content changes, not on every scroll/resize).
-  useEffect(() => {
+  // Measured in a layout effect, so the callout is never painted at the
+  // unmeasured (height 0) position first and then jumped into place.
+  useLayoutEffect(() => {
     const el = levelTierPanelRef.current
     if (!el || !selectedTierLevel) {
-      setLevelTierPanelSize({ width: 0, height: 0 })
+      setCalloutHeight(0)
       return
     }
-    const rect = el.getBoundingClientRect()
-    setLevelTierPanelSize({ width: rect.width, height: rect.height })
+    const measure = () => setCalloutHeight(el.getBoundingClientRect().height)
+    measure()
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [selectedTierLevel])
+
+  useLayoutEffect(() => {
+    measureNodeRadius()
+  }, [measureNodeRadius, nodes.length])
+
+  // Escape leaves the callout. Without it the focus trap is inescapable from
+  // the keyboard, since the only other way out is clicking the node again.
+  useEffect(() => {
+    if (!selectedTierLevel) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSelectedLevelId(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [selectedTierLevel])
+
+  // A pointer press outside the callout dismisses it. The node that opened it
+  // is excluded because it toggles on its own.
+  useEffect(() => {
+    if (!selectedTierLevel) return
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target
+      if (!(target instanceof Node)) return
+      if (levelTierPanelRef.current?.contains(target)) return
+      const selectedNode = canvasRef.current?.querySelector('.story-path-node[data-selected]')
+      if (selectedNode?.contains(target)) return
+      setSelectedLevelId(null)
+    }
+    window.addEventListener('pointerdown', onPointerDown)
+    return () => window.removeEventListener('pointerdown', onPointerDown)
   }, [selectedTierLevel])
 
   const trialsCleared = trials.length > 0 && trials.every((trial) => trial.completion)
@@ -193,33 +251,69 @@ export function StoryAdventurePath({
     : 'ready'
   const trialDisabled = trialState === 'locked' || trialState === 'loading'
 
-  // Anchor the tier panel beside its node - a compact popup, not a banner.
-  // Prefers whichever side (right or left) has more room in the canvas, and
-  // clamps vertically so it never renders above/below the canvas edges.
-  const TIER_PANEL_WIDTH = 260
-  const TIER_PANEL_GAP = 14
-  const NODE_HALF = 28
-  const levelTierPanelStyle: React.CSSProperties | undefined = selectedTierPoint
-    ? (() => {
-        const spaceRight = pathWidth - (selectedTierPoint.x + NODE_HALF)
-        const spaceLeft = selectedTierPoint.x - NODE_HALF
-        const openRight = spaceRight >= TIER_PANEL_WIDTH + TIER_PANEL_GAP || spaceRight >= spaceLeft
-        const left = openRight
-          ? selectedTierPoint.x + NODE_HALF + TIER_PANEL_GAP
-          : selectedTierPoint.x - NODE_HALF - TIER_PANEL_GAP - TIER_PANEL_WIDTH
-        const clampedLeft = Math.min(Math.max(left, 0), Math.max(pathWidth - TIER_PANEL_WIDTH, 0))
-        const idealTop = selectedTierPoint.y - levelTierPanelSize.height / 2
-        const top = Math.min(
-          Math.max(idealTop, 0),
-          Math.max(height - levelTierPanelSize.height, 0),
-        )
-        return { left: clampedLeft, top, width: TIER_PANEL_WIDTH }
-      })()
+  // The gutter the callout docks into, derived from the route's own widest
+  // node rather than a guessed constant, so it tracks any change to the path
+  // geometry or to the ring size at a breakpoint.
+  const calloutRail = useMemo(() => {
+    const widestNodeX = points.reduce((max, point) => Math.max(max, point.x), 0)
+    const left = Math.round(widestNodeX + nodeRadius + CALLOUT_GAP)
+    const width = Math.min(CALLOUT_MAX_WIDTH, pathWidth - left)
+    return { left, width, docked: width >= CALLOUT_MIN_WIDTH }
+  }, [points, nodeRadius, pathWidth])
+
+  // Vertically centred on its node, clamped inside the canvas. The leader is
+  // drawn to wherever the callout actually lands, so a clamped one still
+  // reads as belonging to the node that opened it.
+  const calloutPlacement = useMemo(() => {
+    if (!selectedTierPoint || !calloutRail.docked) return null
+    const maxTop = Math.max(height - calloutHeight - CALLOUT_EDGE, CALLOUT_EDGE)
+    const top = Math.round(
+      Math.min(Math.max(selectedTierPoint.y - calloutHeight / 2, CALLOUT_EDGE), maxTop),
+    )
+    const caretY = Math.min(
+      Math.max(selectedTierPoint.y - top, CALLOUT_CARET_INSET),
+      Math.max(calloutHeight - CALLOUT_CARET_INSET, CALLOUT_CARET_INSET),
+    )
+    const startX = selectedTierPoint.x + nodeRadius - 1
+    const startY = selectedTierPoint.y
+    const endX = calloutRail.left - 4
+    const endY = top + caretY
+    const bend = Math.max((endX - startX) * 0.45, 18)
+    const leader = [
+      `M${startX} ${startY}`,
+      `C${startX + bend} ${startY} ${endX - bend} ${endY} ${endX} ${endY}`,
+    ].join(' ')
+    return {
+      top,
+      leader,
+      leaderLength: Math.round(Math.hypot(endX - startX, endY - startY) * 1.2 + 32),
+      endX,
+      endY,
+    }
+  }, [selectedTierPoint, calloutRail, calloutHeight, height, nodeRadius])
+
+  // Inline placement puts the callout below the whole path, which can be far
+  // from the node that was tapped - bring it into view the way the Challenge
+  // Gate panel does.
+  useEffect(() => {
+    if (!selectedTierLevel || calloutRail.docked) return
+    const frame = window.requestAnimationFrame(() => {
+      levelTierPanelRef.current?.scrollIntoView?.({ block: 'nearest' })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [selectedTierLevel, calloutRail.docked])
+
+  const levelTierPanelStyle: React.CSSProperties | undefined = calloutPlacement
+    ? ({
+        '--callout-left': `${calloutRail.left}px`,
+        '--callout-top': `${calloutPlacement.top}px`,
+        '--callout-width': `${calloutRail.width}px`,
+      } as React.CSSProperties)
     : undefined
 
   return (
     <div className="story-adventure-path" ref={pathRef}>
-      <div className="story-path-canvas" style={{ width: pathWidth, height }}>
+      <div className="story-path-canvas" ref={canvasRef} style={{ width: pathWidth, height }}>
         <svg
           className="story-route-line"
           viewBox={`0 0 ${pathWidth} ${height}`}
@@ -272,6 +366,7 @@ export function StoryAdventurePath({
                     : `Locked level ${index + 1}`
                 }
                 aria-expanded={level ? selected : undefined}
+                aria-controls={level && hasTiers ? 'story-level-tier-panel' : undefined}
                 onClick={() => {
                   if (!level) return
                   toggleLevelPill(level.id)
@@ -348,17 +443,50 @@ export function StoryAdventurePath({
           ) : null}
         </button>
 
-        {selectedTierLevel && levelTierPanelStyle ? (
+        {selectedTierLevel && calloutPlacement ? (
+          <svg
+            className="story-callout-leader"
+            viewBox={`0 0 ${pathWidth} ${height}`}
+            width={pathWidth}
+            height={height}
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              d={calloutPlacement.leader}
+              style={{ '--leader-length': calloutPlacement.leaderLength } as React.CSSProperties}
+            />
+            <circle cx={calloutPlacement.endX} cy={calloutPlacement.endY} r={2.6} />
+          </svg>
+        ) : null}
+
+        {selectedTierLevel && calloutPlacement ? (
           <StoryLevelTierPanel
             level={selectedTierLevel}
+            levelNumber={selectedTierNodeIndex + 1}
             panelRef={levelTierPanelRef}
+            placement="docked"
             style={levelTierPanelStyle}
             pendingTierId={startTierRunMutation.variables?.tierId}
             isStarting={startTierRunMutation.isPending}
+            onClose={() => setSelectedLevelId(null)}
             onStartTier={(tierId, replay) => startTierRunMutation.mutate({ tierId, replay })}
           />
         ) : null}
       </div>
+
+      {selectedTierLevel && !calloutPlacement ? (
+        <StoryLevelTierPanel
+          level={selectedTierLevel}
+          levelNumber={selectedTierNodeIndex + 1}
+          panelRef={levelTierPanelRef}
+          placement="inline"
+          pendingTierId={startTierRunMutation.variables?.tierId}
+          isStarting={startTierRunMutation.isPending}
+          onClose={() => setSelectedLevelId(null)}
+          onStartTier={(tierId, replay) => startTierRunMutation.mutate({ tierId, replay })}
+        />
+      ) : null}
 
       {trialsOpen ? (
         <StoryTrialsPanel

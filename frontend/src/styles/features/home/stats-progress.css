@@ -39,63 +39,6 @@
   text-transform: none;
 }
 
-/* Heading on the left, span control on the right; they share the band's first
-   line so the plot itself starts at the same height as the citadel beside it. */
-.home-overview-band-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.4rem 1rem;
-}
-
-.home-overview-band-head .ref-panel-head {
-  margin-bottom: 0.35rem;
-}
-
-/* A segmented control, not three loose buttons: one hairline frame, the active
-   span filled. Same button vocabulary as the achievement filters. */
-.home-overview-span {
-  display: flex;
-  overflow: hidden;
-  border: 1px solid var(--control-border);
-  border-radius: var(--radius-pill);
-  background: var(--control-bg);
-}
-
-.home-overview-span button {
-  min-height: 1.6rem;
-  border: 0;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-family: var(--font-sans);
-  font-size: var(--text-2xs);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  padding: 0 0.7rem;
-  transition: background var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out);
-}
-
-.home-overview-span button + button {
-  border-left: 1px solid rgba(var(--theme-primary-rgb), 0.16);
-}
-
-.home-overview-span button:hover {
-  background: var(--control-bg-hover);
-  color: var(--text-primary);
-}
-
-.home-overview-span button.is-active {
-  background: rgba(var(--theme-teal-rgb), 0.16);
-  color: rgb(var(--theme-teal-rgb));
-}
-
-.home-overview-span button:focus-visible {
-  outline: none;
-  box-shadow: var(--control-focus-ring);
-}
-
 /* A span that is still loading holds the previous plot at reduced opacity —
    never a skeleton flash, and never a collapsed box. */
 .home-overview-activity {

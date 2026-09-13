@@ -1,29 +1,24 @@
 /* ── Overview view: Git skills ─────────────────────────────────────────── */
 /* Command-confidence bars and the overall-mastery orb beside them. */
 
-.home-overview-master-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(17rem, 21rem);
-  gap: 1.4rem;
-  min-height: 0;
-}
-
-/* Eighteen published commands in one column made a very tall panel with a small
-   radar floating beside a void. The list wraps into as many columns as the
-   viewport honestly fits instead, so the band is about as tall as the radar. */
+/* One column, full width. Two columns of eighteen commands fitted the band's
+   height but cost every row half its width, so each summary was ellipsised
+   mid-sentence; run down one column instead and the rows read as sentences and
+   the list stands about as tall as the dial beside it. */
 .home-overview-command-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
-  gap: 0.1rem 2.2rem;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
 }
 
+/* The text takes the slack; the meter is capped so a 100% bar still reads as a
+   bar rather than a rule drawn across the screen. */
 .home-overview-command-row {
   display: grid;
-  grid-template-columns: 2.1rem minmax(6rem, 10rem) minmax(4.5rem, 1fr) 3rem;
+  grid-template-columns: 2.1rem minmax(10rem, 1fr) minmax(6rem, 22rem) 3rem;
   align-items: center;
-  gap: 0.7rem;
-  min-height: 2.6rem;
+  gap: 0.9rem;
+  min-height: 3rem;
   padding: 0.12rem 0;
 }
 
@@ -127,16 +122,14 @@
 /* The radar rail: shape on top, the one overall figure under it. The compass
    that used to sit here was drawn from CSS gradients and never moved — it
    looked like an instrument without reporting anything. */
+/* The dial view fills the band it replaced the bars in, so it centres in the
+   column rather than hanging off a rail. */
 .home-overview-mastery-orb {
   display: grid;
-  /* Centred against the taller bar list, so the rail does not hang from the top
-     with a column of dead space under it. */
-  align-content: center;
+  align-content: start;
   justify-items: center;
-  gap: 0.2rem;
+  gap: 0.55rem;
   min-width: 0;
-  border-left: 1px solid rgba(var(--theme-primary-rgb), 0.14);
-  padding-left: 1.1rem;
   text-align: center;
 }
 
@@ -144,24 +137,16 @@
   margin-bottom: 0.2rem;
 }
 
-.home-overview-mastery-orb > span,
+/* The dial's hub carries the figure; this is the caption under the stars. */
 .home-overview-mastery-orb small {
-  color: rgb(var(--theme-primary-rgb));
-  font-size: 0.76rem;
-  font-weight: 760;
-}
-
-.home-overview-mastery-orb strong {
-  color: #f8fbff;
-  font-family: var(--font-mono);
-  font-size: 2.05rem;
-  line-height: 1;
+  color: var(--text-secondary);
+  font-size: var(--text-2xs);
+  text-wrap: balance;
 }
 
 .home-overview-rating-stars {
   display: flex;
   gap: 0.45rem;
-  margin-top: 0.25rem;
 }
 
 .home-overview-rating-stars i {

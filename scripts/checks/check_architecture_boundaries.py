@@ -125,9 +125,10 @@ HOME_STATS_LINE_LIMITS = {
     # The progress band owns the span control (week/month/year) as well as the
     # plot and the citadel.
     "progress": 180,
-    # The skills panel owns two views of one profile — the radar silhouette and
-    # the per-command bar list — plus the hover link between them.
-    "skills": 100,
+    # The skills band owns both readings of one profile — the per-command bar
+    # list and the radar dial — the control that switches them, and the hover
+    # link that survives either view.
+    "skills": 140,
     "results": 175,
     "gallery": 150,
 }

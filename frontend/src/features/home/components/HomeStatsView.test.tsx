@@ -93,6 +93,8 @@ describe('HomeStatsView contract', () => {
     expect(screen.getByRole('region', { name: 'Run results' })).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: 'Git skills' })).not.toBeInTheDocument()
     expect(screen.queryByRole('region', { name: 'Achievement gallery' })).not.toBeInTheDocument()
+    // Progress is one column; only Skills splits into two.
+    expect(screen.getByRole('region', { name: 'Player overview' })).not.toHaveClass('is-split')
   })
 
   it('states the finish rate once, in the citadel the record band never repeats', () => {
@@ -157,14 +159,22 @@ describe('HomeStatsView contract', () => {
     renderView('skills')
 
     const skills = screen.getByRole('region', { name: 'Git skills' })
+    // Bars are the default view: every value is in text without hovering.
     expect(skills.querySelectorAll('.home-overview-command-row')).toHaveLength(18)
     expect(within(skills).getByLabelText('git init: 100%')).toBeInTheDocument()
     expect(within(skills).getByLabelText('git rebase: 0%')).toBeInTheDocument()
-    expect(within(skills).getByLabelText('Overall mastery 54%')).toBeInTheDocument()
-    expect(within(skills).getByLabelText('2 of 3 proficiency stars')).toBeInTheDocument()
+    expect(skills.querySelector('.ref-chart-dial')).toBeNull()
+
+    const view = within(skills).getByRole('group', { name: 'Skill profile view' })
+    expect(within(view).getByRole('button', { name: 'Bars' })).toHaveAttribute('aria-pressed', 'true')
 
     // The radar is the same eighteen values as a shape, with the machine names
-    // on its rim; the bar list beside it stays the precise readout.
+    // on its rim. It replaces the bars rather than sitting beside them, which is
+    // what lets this band share the row with the gallery.
+    fireEvent.click(within(view).getByRole('button', { name: 'Radar' }))
+    expect(skills.querySelectorAll('.home-overview-command-row')).toHaveLength(0)
+    expect(within(skills).getByLabelText('Overall mastery 54%')).toBeInTheDocument()
+    expect(within(skills).getByLabelText('2 of 3 proficiency stars')).toBeInTheDocument()
     const radar = within(skills).getByRole('img', { name: /^Mastery across 18 git commands, overall 54%/ })
     expect(Array.from(radar.querySelectorAll('.ref-chart-rim-label')).map((tick) => tick.textContent)).toEqual([
       'init', 'clone', 'log', 'show', 'add', 'commit', 'restore', 'branch', 'switch',
@@ -174,6 +184,17 @@ describe('HomeStatsView contract', () => {
     // Achievements were merged into this category rather than kept separate.
     const gallery = screen.getByRole('region', { name: 'Achievement gallery' })
     expect(within(gallery).getByText('/ 19 unlocked')).toBeInTheDocument()
+  })
+
+  it('stands the skills band and the gallery side by side', () => {
+    renderView('skills')
+
+    const overview = screen.getByRole('region', { name: 'Player overview' })
+    expect(overview).toHaveClass('is-split')
+    expect(Array.from(overview.children).map((child) => child.getAttribute('aria-label'))).toEqual([
+      'Git skills',
+      'Achievement gallery',
+    ])
   })
 
   it('shows every achievement a filter matches, and says how many that will be', () => {
@@ -274,7 +295,11 @@ describe('HomeStatsView contract', () => {
     const skillRows = document.querySelectorAll('.home-overview-command-row')
     expect(skillRows).toHaveLength(18)
     expect(Array.from(skillRows).map((row) => row.lastElementChild?.textContent)).toEqual(Array(18).fill('--'))
+    // A fresh account's dial is a ring of hollow vertices, not a spike: the
+    // inner radius means 0% still draws.
+    fireEvent.click(screen.getByRole('button', { name: 'Radar' }))
     expect(screen.getByLabelText('Overall mastery 0%')).toBeInTheDocument()
+    expect(document.querySelectorAll('.ref-chart-vertex[data-empty="true"]')).toHaveLength(18)
     expect(screen.getByText('/ 19 unlocked')).toBeInTheDocument()
     skills.unmount()
   })

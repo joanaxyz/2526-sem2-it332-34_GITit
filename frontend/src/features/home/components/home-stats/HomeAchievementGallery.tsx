@@ -86,8 +86,10 @@ export function HomeAchievementGallery({ achievements }: { achievements: Achieve
               <div className="ref-meter" aria-label={`${achievement.title}: ${achievement.current} of ${achievement.target}`}>
                 <span style={{ width: `${Math.min(100, pct)}%` }} />
               </div>
+              {/* Tight on purpose: this column is what squeezes the title when
+                  the gallery runs five across on a wide screen. */}
               <small>
-                {achievement.current.toLocaleString()} / {achievement.target.toLocaleString()} - {achievement.points} pts
+                {achievement.current.toLocaleString()}/{achievement.target.toLocaleString()} · {achievement.points} pts
               </small>
             </article>
           )

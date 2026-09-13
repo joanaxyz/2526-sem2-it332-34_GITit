@@ -289,19 +289,3 @@
   color: rgba(219, 234, 254, 0.64);
   font-size: 0.78rem;
 }
-
-.chapter-book-cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  width: min(100%, 9.4rem);
-  min-height: var(--control-height-sm);
-  margin-top: 0.8rem;
-  border: 1px solid var(--control-border);
-  border-radius: var(--control-radius);
-  color: var(--text-secondary);
-  background: var(--control-bg);
-  font-size: var(--text-xs);
-  font-weight: 700;
-}

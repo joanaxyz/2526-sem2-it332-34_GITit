@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ChallengeTrialAccess } from '@/features/challenges/types'
 import type {
   AdventureLevelSummary,
+  AdventureLevelTierAccess,
   ChallengeSummary,
   LearningChapter,
 } from '@/features/story-map/types'
@@ -190,5 +191,117 @@ describe('StoryAdventurePath challenge gate', () => {
 
     expect(screen.queryByRole('region', { name: 'Challenge Gate' })).not.toBeInTheDocument()
     await waitFor(() => expect(gate).toHaveFocus())
+  })
+})
+
+function tier(
+  id: number,
+  difficulty: AdventureLevelTierAccess['difficulty'],
+  overrides: Partial<AdventureLevelTierAccess> = {},
+): AdventureLevelTierAccess {
+  return {
+    id,
+    difficulty,
+    locked: false,
+    wave_progress: { completed: 0, total: 2 },
+    completion: null,
+    ...overrides,
+  }
+}
+
+const tieredLevel: AdventureLevelSummary = {
+  ...adventure,
+  id: 11,
+  slug: 'stage-and-commit',
+  title: 'Stage and Commit',
+  description: 'Move work from the worktree into a commit that sticks.',
+  completion: null,
+  tiers: [
+    tier(31, 'easy', {
+      wave_progress: { completed: 1, total: 1 },
+      completion: { stars: 3, counted_action_total: 1, completed_at: '2026-08-25T00:00:00Z' },
+    }),
+    tier(32, 'medium', { wave_progress: { completed: 1, total: 2 } }),
+    tier(33, 'hard', { locked: true }),
+  ],
+}
+
+describe('StoryAdventurePath level callout', () => {
+  afterEach(() => {
+    cleanup()
+    vi.clearAllMocks()
+  })
+
+  function openCallout() {
+    const result = renderPath(
+      <StoryAdventurePath
+        chapter={chapter}
+        levels={[tieredLevel]}
+        challenges={[challenge]}
+        challengesLocked={false}
+        loading={false}
+      />,
+    )
+    const node = screen.getByRole('button', { name: /^Level 1: Stage and Commit\./ })
+    node.focus()
+    fireEvent.click(node)
+    return { ...result, node }
+  }
+
+  it('marks exactly one tier as the next action and locks the rest', () => {
+    openCallout()
+
+    const callout = screen.getByRole('region', { name: 'Stage and Commit' })
+    expect(within(callout).getByText('Level 01')).toBeInTheDocument()
+
+    const cleared = within(callout).getByRole('button', {
+      name: 'Stage and Commit, Easy tier: Review',
+    })
+    const next = within(callout).getByRole('button', {
+      name: 'Stage and Commit, Medium tier: Continue',
+    })
+    const locked = within(callout).getByRole('button', {
+      name: 'Stage and Commit, Hard tier: Locked',
+    })
+
+    expect(cleared).not.toHaveAttribute('data-next')
+    expect(next).toHaveAttribute('data-next', 'true')
+    expect(locked).toBeDisabled()
+    expect(within(locked).getByText('2 waves')).toBeInTheDocument()
+  })
+
+  it('docks the callout clear of the path instead of over the nodes', () => {
+    const { container } = openCallout()
+
+    const callout = container.querySelector<HTMLElement>('.story-level-callout')
+    expect(callout).not.toBeNull()
+    expect(callout).toHaveAttribute('data-placement', 'docked')
+
+    // The callout's left edge starts past every node's outer edge, so it can
+    // never sit on top of one whatever the selected node's own position is.
+    const left = Number.parseFloat(callout!.style.getPropertyValue('--callout-left'))
+    const nodes = Array.from(container.querySelectorAll<HTMLElement>('.story-path-node'))
+    expect(nodes.length).toBeGreaterThan(0)
+    for (const node of nodes) {
+      const nodeX = Number.parseFloat(node.style.getPropertyValue('--node-x'))
+      expect(left).toBeGreaterThan(nodeX)
+    }
+  })
+
+  it('closes the callout with Escape and restores focus to its node', async () => {
+    const { node } = openCallout()
+    expect(screen.getByRole('region', { name: 'Stage and Commit' })).toBeInTheDocument()
+
+    fireEvent.keyDown(window, { key: 'Escape' })
+
+    expect(screen.queryByRole('region', { name: 'Stage and Commit' })).not.toBeInTheDocument()
+    await waitFor(() => expect(node).toHaveFocus())
+  })
+
+  it('closes the callout from its close button', () => {
+    openCallout()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close Stage and Commit details' }))
+    expect(screen.queryByRole('region', { name: 'Stage and Commit' })).not.toBeInTheDocument()
   })
 })
