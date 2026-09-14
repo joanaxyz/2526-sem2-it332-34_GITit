@@ -4,10 +4,14 @@ import type { NodeProps } from 'reactflow'
 import type { RepositorySnapshot, RepositoryValue } from '@/shared/level/types'
 import { cn } from '@/shared/utils/cn'
 
+import { useCommitActivation } from './activation'
 import { VARIANT_COLORS } from './constants'
 import type { CommitNodeData, EmptyRepositoryNodeData, RefLabel } from './types'
 
 export function CommitNode({ data }: NodeProps<CommitNodeData>) {
+  const { activeCommitId, activate, dismiss } = useCommitActivation()
+  const commitId = data.commit.id
+  const isActive = activeCommitId === commitId
   const colors = VARIANT_COLORS[data.variant]
   const isHorizontal = data.layoutDirection === 'horizontal'
   const visibleRefs = orderRefs(data.refs, data.activeRef).slice(0, 4)
@@ -28,13 +32,13 @@ export function CommitNode({ data }: NodeProps<CommitNodeData>) {
         data.isEntering && 'dag-node-enter',
         data.isEntering && `dag-node-enter--${data.layoutDirection}`,
       )}
-      onMouseEnter={data.onActivate}
-      onMouseLeave={data.onDismiss}
-      onFocus={data.onActivate}
+      onMouseEnter={() => activate(commitId)}
+      onMouseLeave={() => dismiss(commitId)}
+      onFocus={() => activate(commitId)}
       onBlur={(event) => {
         const nextFocusTarget = event.relatedTarget
         if (!(nextFocusTarget instanceof HTMLElement) || !event.currentTarget.contains(nextFocusTarget)) {
-          data.onDismiss?.()
+          dismiss(commitId)
         }
       }}
     >
@@ -43,13 +47,13 @@ export function CommitNode({ data }: NodeProps<CommitNodeData>) {
         type="button"
         aria-label={label}
         title={label}
-        onClick={data.onActivate}
+        onClick={() => activate(commitId)}
         className={cn(
           'dag-commit-seal font-mono text-sm font-semibold outline-none transition-all focus-visible:ring-2 focus-visible:ring-ring',
           data.isHead
             ? cn('is-head', colors.headNode)
             : 'text-foreground',
-          data.isActive && 'ring-2 ring-primary/70 ring-offset-2 ring-offset-background',
+          isActive && 'ring-2 ring-primary/70 ring-offset-2 ring-offset-background',
         )}
       >
         <DagSealOrnament head={data.isHead} />

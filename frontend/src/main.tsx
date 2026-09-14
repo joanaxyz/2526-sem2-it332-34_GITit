@@ -25,6 +25,13 @@ import '@/styles/features/admin.css'
 
 initializePreferences()
 
+// The boot paint in index.html fades itself out via CSS the moment #root has
+// children, so the transition can only fire once React has actually rendered.
+// Dropping the node on the way out leaves nothing behind, and if the
+// transition never runs the element simply stays hidden as before.
+const bootPaint = document.querySelector('.git-it-boot')
+bootPaint?.addEventListener('transitionend', () => bootPaint.remove(), { once: true })
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AppErrorBoundary>

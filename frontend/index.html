@@ -4,10 +4,140 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/webp" href="/src/assets/images/GIT_logo.webp" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a1014" />
     <title>GIT IT</title>
+    <style>
+      /* Boot paint. This runs before the app bundle (and its CSS) lands, so
+         without it the first frame of a night-sky app is a white page. The
+         commit rail below is the same loading vocabulary LoadingState picks up
+         once React mounts, so the hand-off reads as one continuous screen. No
+         text: webfonts are not loaded yet and a FOUT here would be worse than
+         silence. */
+      html {
+        background: #0a1014;
+        color-scheme: dark;
+      }
+
+      body {
+        margin: 0;
+      }
+
+      .git-it-boot {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: #0a1014;
+      }
+
+      /* #root is empty until React renders; the moment it has children the
+         boot paint fades out on its own, with no JS required to tear it down. */
+      body:has(#root > *) .git-it-boot {
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 280ms ease, visibility 0s linear 280ms;
+      }
+
+      .git-it-boot__rail {
+        position: relative;
+        width: min(26rem, 68vw);
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 163, 255, 0.22) 16%,
+          rgba(0, 163, 255, 0.34) 50%,
+          rgba(0, 163, 255, 0.22) 84%,
+          transparent
+        );
+      }
+
+      .git-it-boot__sweep {
+        position: absolute;
+        inset: -0.75rem 0;
+        background: radial-gradient(ellipse 4rem 0.75rem at 50% 50%, rgba(0, 163, 255, 0.38), transparent 72%);
+        animation: git-it-boot-sweep 2.4s linear infinite;
+      }
+
+      .git-it-boot__node {
+        position: absolute;
+        top: 50%;
+        width: 7px;
+        height: 7px;
+        margin: -3.5px 0 0 -3.5px;
+        border: 1px solid rgba(0, 163, 255, 0.34);
+        border-radius: 50%;
+        background: #0a1014;
+        animation: git-it-boot-node 2.4s linear infinite;
+      }
+
+      @keyframes git-it-boot-sweep {
+        from {
+          transform: translateX(-50%);
+        }
+
+        to {
+          transform: translateX(50%);
+        }
+      }
+
+      @keyframes git-it-boot-node {
+        0% {
+          border-color: rgba(0, 163, 255, 0.34);
+          background: #0a1014;
+          box-shadow: none;
+        }
+
+        8% {
+          border-color: rgba(0, 163, 255, 0.9);
+          background: #00a3ff;
+          box-shadow: 0 0 10px rgba(0, 163, 255, 0.6);
+        }
+
+        38%,
+        100% {
+          border-color: rgba(0, 163, 255, 0.34);
+          background: #0a1014;
+          box-shadow: none;
+        }
+      }
+
+      @keyframes git-it-boot-breathe {
+        0%,
+        100% {
+          opacity: 0.25;
+        }
+
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .git-it-boot__sweep {
+          animation: git-it-boot-breathe 3.6s ease-in-out infinite;
+          transform: none;
+        }
+
+        .git-it-boot__node {
+          animation: none;
+          border-color: rgba(0, 163, 255, 0.55);
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    <div aria-hidden="true" class="git-it-boot">
+      <div class="git-it-boot__rail">
+        <span class="git-it-boot__sweep"></span>
+        <span class="git-it-boot__node" style="left: 0%; animation-delay: 0s"></span>
+        <span class="git-it-boot__node" style="left: 25%; animation-delay: 0.6s"></span>
+        <span class="git-it-boot__node" style="left: 50%; animation-delay: 1.2s"></span>
+        <span class="git-it-boot__node" style="left: 75%; animation-delay: 1.8s"></span>
+        <span class="git-it-boot__node" style="left: 100%; animation-delay: 2.4s"></span>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

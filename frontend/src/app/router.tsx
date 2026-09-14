@@ -77,6 +77,10 @@ const designPreviewRoutes: RouteObject[] = import.meta.env.DEV
         lazy: () => import('@/features/dev/pages/OutcomePreviewPage'),
       },
       {
+        path: '/dev/loading',
+        lazy: () => import('@/features/dev/pages/LoadingPreviewPage'),
+      },
+      {
         path: DESIGN_PREVIEW_STORY_MAP_ROUTE,
         lazy: () => import('@/features/story-map/pages/StoryMapPreviewPage'),
       },

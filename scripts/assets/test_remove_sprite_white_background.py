@@ -218,3 +218,102 @@ def test_clean_current_connected_white_preserves_destination_art(tmp_path: Path)
 
     assert result.removed_pixels == 1
     assert result.cleaned_current_connected_white is True
+
+
+def test_clean_current_connected_white_allows_cropped_destination(tmp_path: Path) -> None:
+    """Runtime sheets are trimmed after staging, so raw/ is often larger."""
+    source_path = tmp_path / "raw" / "idle.png"
+    destination_path = tmp_path / "idle.png"
+    source_path.parent.mkdir()
+    Image.new("RGBA", (16, 16), (200, 40, 80, 255)).save(source_path)
+
+    destination = donut_source()
+    destination.putpixel((0, 0), (255, 255, 255, 255))
+    destination.save(destination_path)
+    task = SpriteTask(
+        source=source_path,
+        destination=destination_path,
+        raw_path=source_path,
+        stage_action=None,
+    )
+
+    result = clean_png(
+        task,
+        tolerance=18,
+        alpha_threshold=0,
+        mode="connected",
+        min_hole_size=0,
+        hole_fringe_radius=0,
+        min_transparent_hole_size=4,
+        hole_fringe_min_rgb=205,
+        hole_fringe_min_luma=225,
+        hole_fringe_max_chroma=30,
+        grid_columns=1,
+        grid_rows=1,
+        restore_alpha_holes=False,
+        clean_current_white_holes=False,
+        edge_defringe=False,
+        edge_defringe_radius=1,
+        dry_run=False,
+        clean_current_connected_white=True,
+    )
+
+    with Image.open(destination_path) as cleaned:
+        rgba = cleaned.convert("RGBA")
+        assert rgba.size == (8, 8)
+        assert rgba.getpixel((0, 0))[3] == 0
+        assert rgba.getpixel((1, 1)) == (40, 50, 60, 255)
+
+    assert result.removed_pixels == 1
+
+
+def test_clean_current_connected_white_keeps_the_palette_encoding(tmp_path: Path) -> None:
+    """Runtime sheets ship as 8-bit palette PNGs; RGBA re-encoding triples them."""
+    source_path = tmp_path / "raw" / "idle.png"
+    destination_path = tmp_path / "idle.png"
+    source_path.parent.mkdir()
+    Image.new("RGBA", (8, 8), (200, 40, 80, 255)).save(source_path)
+
+    destination = Image.new("P", (8, 8), 0)
+    destination.putpalette([0, 0, 0, 40, 50, 60, 255, 255, 255])
+    for y in range(1, 7):
+        for x in range(1, 7):
+            destination.putpixel((x, y), 1)
+    destination.putpixel((0, 0), 2)
+    destination.save(destination_path, transparency=0)
+
+    task = SpriteTask(
+        source=source_path,
+        destination=destination_path,
+        raw_path=source_path,
+        stage_action=None,
+    )
+
+    result = clean_png(
+        task,
+        tolerance=18,
+        alpha_threshold=0,
+        mode="connected",
+        min_hole_size=0,
+        hole_fringe_radius=0,
+        min_transparent_hole_size=4,
+        hole_fringe_min_rgb=205,
+        hole_fringe_min_luma=225,
+        hole_fringe_max_chroma=30,
+        grid_columns=1,
+        grid_rows=1,
+        restore_alpha_holes=False,
+        clean_current_white_holes=False,
+        edge_defringe=False,
+        edge_defringe_radius=1,
+        dry_run=False,
+        clean_current_connected_white=True,
+    )
+
+    with Image.open(destination_path) as cleaned:
+        assert cleaned.mode == "P"
+        rgba = cleaned.convert("RGBA")
+        assert rgba.getpixel((0, 0))[3] == 0
+        assert rgba.getpixel((1, 1))[3] == 255
+
+    assert result.removed_pixels >= 1

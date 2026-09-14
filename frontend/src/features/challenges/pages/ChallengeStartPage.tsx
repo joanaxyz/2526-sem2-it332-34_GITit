@@ -61,5 +61,5 @@ export function ChallengeStartPage({ mode = 'start' }: { mode?: ChallengeStartMo
   }
 
   const copy = loadingCopy[mode]
-  return <LoadingState description={copy.description} label={copy.label} showCompanion={false} variant="screen" />
+  return <LoadingState description={copy.description} label={copy.label} variant="screen" />
 }

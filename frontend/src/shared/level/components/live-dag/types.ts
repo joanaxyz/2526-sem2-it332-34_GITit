@@ -18,7 +18,6 @@ export type CommitNodeData = {
   isDetachedHead: boolean
   variant: DagVariant
   layoutDirection: DagLayoutDirection
-  isActive?: boolean
   /** Commit appeared this command: play the pop-in on the node's inner div
    *  (the ReactFlow wrapper's transform is positioning - never animate it). */
   isEntering?: boolean
@@ -26,8 +25,6 @@ export type CommitNodeData = {
   enteringRefs?: string[]
   /** HEAD moved to this commit during the current command. */
   enteringHead?: boolean
-  onActivate?: () => void
-  onDismiss?: () => void
 }
 
 export type EmptyRepositoryNodeData = {

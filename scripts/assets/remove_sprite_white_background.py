@@ -32,6 +32,16 @@ islands from the current destination instead of rebuilding it from raw.
 When raw sources are older than their already-cleaned runtime sprites, use
 --clean-current-connected-white. This runs the conservative background-connected
 cleanup against the current destination and never replaces it with raw artwork.
+Runtime sheets are usually trimmed after staging, so this mode accepts a raw
+source whose dimensions no longer match; only --restore-alpha-holes needs them
+to line up.
+
+Pale matte residue that survived an earlier keying pass sits below the default
+tolerance, so it needs a wider one. The blue and black companion sheets were
+cleaned with --tolerance 75, which clears the background pockets between the
+legs without eating white artwork such as sneaker soles or eye whites. Review
+the result before raising it further: at --tolerance 90 the pass starts biting
+into those highlights.
 
 Usage:
     python scripts/remove_sprite_white_background.py --dry-run
@@ -43,6 +53,7 @@ Usage:
     python scripts/remove_sprite_white_background.py path/to/sprite --restore-alpha-holes
     python scripts/remove_sprite_white_background.py path/to/sprite --clean-current-white-holes --min-hole-size 4
     python scripts/remove_sprite_white_background.py path/to/sprite --clean-current-connected-white
+    python scripts/assets/remove_sprite_white_background.py frontend/public/cosmetics/companion/blue frontend/public/cosmetics/companion/black --clean-current-connected-white --tolerance 75 --raw-action none
 
 Requires: Pillow.
 """
@@ -760,6 +771,45 @@ def apply_transparency(rgba: Image.Image, remove_mask: bytearray) -> tuple[Image
     return output, removed
 
 
+def fully_transparent_palette_index(image: Image.Image) -> int | None:
+    """Return a palette index whose tRNS alpha is zero, when one exists."""
+    transparency = image.info.get("transparency")
+    if isinstance(transparency, int):
+        return transparency
+    if isinstance(transparency, (bytes, bytearray)):
+        for index, alpha in enumerate(transparency):
+            if alpha == 0:
+                return index
+    return None
+
+
+def repalettized_output(
+    original: Image.Image, remove_mask: bytearray, recolored: int
+) -> Image.Image | None:
+    """Rewrite a cleared-pixel result in the palette its source already used.
+
+    Runtime sheets ship as 8-bit palette PNGs. Re-encoding one as RGBA triples
+    its download size, so when the edit only clears pixels to transparent the
+    palette is reused verbatim and the cleared pixels are pointed at the
+    palette's own transparent index.
+    """
+    if recolored or original.mode != "P":
+        return None
+    index = fully_transparent_palette_index(original)
+    if index is None:
+        return None
+
+    output = original.copy()
+    indices = bytearray(output.tobytes())
+    if len(indices) != len(remove_mask):
+        return None
+    for position, flagged in enumerate(remove_mask):
+        if flagged:
+            indices[position] = index
+    output.frombytes(bytes(indices))
+    return output
+
+
 def clean_png(
     task: SpriteTask,
     tolerance: int,
@@ -793,10 +843,12 @@ def clean_png(
                     f"{task.destination}"
                 )
             with Image.open(task.destination) as destination_image:
+                destination_image.load()
+                palette_reference = destination_image.copy()
                 rgba = destination_image.convert("RGBA")
-            if rgba.size != source_rgba.size:
+            if restore_alpha_holes and rgba.size != source_rgba.size:
                 raise SystemExit(
-                    "current-destination cleanup requires matching source and destination sizes: "
+                    "alpha-hole restoration requires matching source and destination sizes: "
                     f"{task.source} is {source_rgba.size}, {task.destination} is {rgba.size}"
                 )
             if restore_alpha_holes:
@@ -841,6 +893,7 @@ def clean_png(
                         for index in range(len(remove_mask))
                     )
         else:
+            palette_reference = image.copy()
             rgba = source_rgba
             if mode == "all":
                 remove_mask = all_white_mask(rgba, tolerance, alpha_threshold)
@@ -870,6 +923,10 @@ def clean_png(
             output, recolored = decontaminate_white_edges(
                 output, alpha_threshold, edge_defringe_radius
             )
+
+        palettized = repalettized_output(palette_reference, remove_mask, recolored)
+        if palettized is not None:
+            output = palettized
 
     wrote = False
     if not dry_run:

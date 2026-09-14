@@ -1,113 +1,296 @@
-/* Companion run loader: shared loading state, centered and sprite-driven. */
+/* Loading state: a commit rail being written, with the equipped companion
+   running along it. The rail is the whole signal - it carries the loader on
+   its own when no companion is shown. */
 .git-it-loading-state--screen {
   min-height: 100dvh;
 }
 
+/* A wait too short to perceive must not flash. The box is held from the first
+   frame so nothing jumps; only the content waits to paint. */
+.git-it-loading-state__frame {
+  position: relative;
+  display: flex;
+  width: 100%;
+  max-width: 30rem;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+}
+
+.git-it-loading-state.is-painted .git-it-loading-state__frame {
+  opacity: 1;
+  transition: opacity 220ms var(--ease-out);
+}
+
+/* Copy: the label is the machine reporting state, so it takes the mono voice;
+   the description stays in the interface sans. */
+.git-it-loading-state__copy {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 40ch;
+  margin-top: var(--space-6);
+}
+
+/* First-run greeting. The one place the world's display voice enters a
+   loading state, and only for a player who owns no companion yet. */
+.git-it-loading-state__welcome {
+  margin: 0 0 var(--space-1);
+  color: hsl(var(--foreground));
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 5vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  /* Usernames are one unbreakable token and can be long. Breaking one is
+     ugly; letting it push the page sideways is worse. */
+  overflow-wrap: anywhere;
+}
+
+.git-it-loading-state__label {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.git-it-loading-state__description,
+.git-it-loading-state__slow {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.git-it-loading-state__slow {
+  color: hsl(var(--warning));
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.git-it-loading-state--screen .git-it-loading-state__label,
+.git-it-loading-state--page .git-it-loading-state__label {
+  font-size: var(--text-base);
+}
+
+.git-it-loading-state--panel .git-it-loading-state__copy,
+.git-it-loading-state--inline .git-it-loading-state__copy {
+  margin-top: var(--space-3);
+}
+
+.git-it-loading-state--compact .git-it-loading-state__copy {
+  margin-top: var(--space-2);
+}
+
+.git-it-loading-state--compact .git-it-loading-state__label {
+  font-size: var(--text-xs);
+}
+
+/* Stage: the companion's box is bottom-aligned so its pixel-anchored feet
+   land exactly on the rail instead of floating above it. */
 .git-it-companion-loader {
-  --loader-size: 18rem;
-  --loader-ground-width: 18rem;
+  --loader-size: 11rem;
+  --loader-rail-width: 22rem;
+  --loader-node: 7px;
+  --loader-head: 4rem;
+  --loader-cycle: 2.4s;
 
   position: relative;
-  display: grid;
-  width: min(24rem, 90vw);
-  min-height: var(--loader-size);
-  place-items: center;
-  overflow: visible;
+  display: flex;
+  width: min(30rem, 90vw);
+  flex-direction: column;
+  align-items: center;
 }
 
 .git-it-companion-loader--screen {
-  --loader-size: 26rem;
-  --loader-ground-width: 24rem;
-
-  width: min(30rem, 92vw);
+  --loader-size: 15rem;
+  --loader-rail-width: 26rem;
 }
 
 .git-it-companion-loader--page {
-  --loader-size: 22rem;
-  --loader-ground-width: 20rem;
-
-  width: min(28rem, 90vw);
+  --loader-size: 13rem;
+  --loader-rail-width: 24rem;
 }
 
-.git-it-companion-loader--small {
-  --loader-size: 9rem;
-  --loader-ground-width: 12rem;
+.git-it-companion-loader--panel {
+  --loader-size: 7rem;
+  --loader-rail-width: 14rem;
+  --loader-node: 6px;
+  --loader-head: 2.75rem;
+}
 
-  width: min(16rem, 82vw);
+.git-it-companion-loader--inline {
+  --loader-size: 5rem;
+  --loader-rail-width: 11rem;
+  --loader-node: 5px;
+  --loader-head: 2.25rem;
+
+  width: min(18rem, 84vw);
 }
 
 .git-it-companion-loader--compact {
-  --loader-size: 6.25rem;
-  --loader-ground-width: 8rem;
+  --loader-size: 3.5rem;
+  --loader-rail-width: 8rem;
+  --loader-node: 4px;
+  --loader-head: 1.75rem;
 
   width: min(11rem, 76vw);
 }
 
-.git-it-companion-loader::before {
-  content: '';
-  position: absolute;
-  inset: 18% 18% 8%;
-  z-index: -1;
-  border-radius: var(--radius-pill);
-  background:
-    radial-gradient(circle at 50% 62%, rgba(var(--theme-primary-rgb), 0.2), transparent 56%),
-    radial-gradient(circle at 42% 38%, rgba(var(--theme-glow-rgb), 0.12), transparent 50%);
-  filter: blur(18px);
-  opacity: 0.72;
-  animation: git-it-companion-loader-aura 1.8s var(--ease-out) infinite;
-}
-
 .git-it-companion-loader__stage {
   position: relative;
-  display: grid;
+  display: flex;
   width: 100%;
   min-height: var(--loader-size);
-  place-items: center;
-  overflow: visible;
-}
-
-.git-it-companion-loader__stage::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: 8%;
-  width: var(--loader-ground-width);
-  max-width: 82%;
-  height: 2px;
-  transform: translateX(-50%);
-  border-radius: var(--radius-pill);
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(var(--theme-primary-rgb), 0.24),
-    rgba(var(--theme-primary-rgb), 0.56),
-    rgba(var(--theme-glow-rgb), 0.22),
-    transparent
-  );
-  box-shadow: 0 0 16px rgba(var(--theme-primary-rgb), 0.22);
+  align-items: flex-end;
+  justify-content: center;
 }
 
 .git-it-companion-loader__sprite {
   position: relative;
-  z-index: 1;
-  filter: drop-shadow(0 0 14px rgba(var(--theme-primary-rgb), 0.2));
+  z-index: var(--z-base);
+  filter: drop-shadow(0 2px 10px rgba(var(--theme-primary-rgb), 0.18));
 }
 
-@keyframes git-it-companion-loader-aura {
+/* Contact pool. A run cycle spends most of its frames airborne, so without a
+   mark on the rail beneath the character they read as floating above it rather
+   than running along it. The rail is the light source here, so contact is a
+   bright pool, not a dark shadow. */
+.git-it-companion-loader.has-companion .git-it-companion-loader__stage::after {
+  content: '';
+  position: absolute;
+  bottom: -0.25rem;
+  left: 50%;
+  width: calc(var(--loader-size) * 0.34);
+  height: 0.5rem;
+  transform: translateX(-50%);
+  border-radius: var(--radius-pill);
+  background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(var(--theme-primary-rgb), 0.5), transparent 70%);
+  pointer-events: none;
+}
+
+/* The pool of light the rail casts. Sized to the rail, not the character, so
+   it reads as the rail being lit rather than a glow stuck behind a sprite. */
+.git-it-companion-loader::after {
+  content: '';
+  position: absolute;
+  bottom: -1.5rem;
+  left: 50%;
+  width: var(--loader-rail-width);
+  max-width: 92%;
+  height: 5rem;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse 46% 50% at 50% 50%, rgba(var(--theme-primary-rgb), 0.13), transparent 72%);
+  pointer-events: none;
+}
+
+/* The rail itself. */
+.git-it-commit-rail {
+  position: relative;
+  width: var(--loader-rail-width);
+  max-width: 92%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(var(--theme-rail-rgb), 0.22) 14%,
+    rgba(var(--theme-rail-rgb), 0.34) 50%,
+    rgba(var(--theme-rail-rgb), 0.22) 86%,
+    transparent
+  );
+}
+
+/* The write head, sweeping the rail once per cycle. Travelling -50% to 50% of
+   the rail puts the gradient's centre at 0% and 100% of it at the ends, so the
+   head passes each node exactly on that node's delay. */
+.git-it-commit-rail__sweep {
+  position: absolute;
+  inset: -0.75rem 0;
+  background: radial-gradient(
+    ellipse var(--loader-head) 0.75rem at 50% 50%,
+    rgba(var(--theme-primary-rgb), 0.38),
+    transparent 72%
+  );
+  animation: git-it-rail-sweep var(--loader-cycle) linear infinite;
+  pointer-events: none;
+}
+
+.git-it-commit-rail__node {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--node-index) * 25%);
+  width: var(--loader-node);
+  height: var(--loader-node);
+  margin-top: calc(var(--loader-node) / -2);
+  margin-left: calc(var(--loader-node) / -2);
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.34);
+  border-radius: var(--radius-pill);
+  background: hsl(var(--background));
+  animation: git-it-rail-node var(--loader-cycle) linear infinite;
+  animation-delay: calc(var(--node-index) * var(--loader-cycle) / 4);
+}
+
+@keyframes git-it-rail-sweep {
+  from {
+    transform: translateX(-50%);
+  }
+
+  to {
+    transform: translateX(50%);
+  }
+}
+
+@keyframes git-it-rail-node {
+  0% {
+    border-color: rgba(var(--theme-primary-rgb), 0.34);
+    background: hsl(var(--background));
+    box-shadow: none;
+  }
+
+  8% {
+    border-color: rgba(var(--theme-primary-rgb), 0.9);
+    background: rgb(var(--theme-primary-rgb));
+    box-shadow: 0 0 10px rgba(var(--theme-primary-rgb), 0.55);
+  }
+
+  38%,
+  100% {
+    border-color: rgba(var(--theme-primary-rgb), 0.34);
+    background: hsl(var(--background));
+    box-shadow: none;
+  }
+}
+
+@keyframes git-it-rail-breathe {
   0%,
   100% {
-    opacity: 0.42;
-    transform: scale(0.92);
+    opacity: 0.25;
   }
 
   50% {
-    opacity: 0.78;
-    transform: scale(1.02);
+    opacity: 0.7;
   }
 }
 
+/* Reduced motion keeps the rail legible as a graph, just not a travelling one.
+   A loader still has to say it is alive, so the head holds its place and
+   breathes instead: a slow opacity change carries no vestibular trigger the way
+   a sweep across the screen does. */
 @media (prefers-reduced-motion: reduce) {
-  .git-it-companion-loader::before {
+  .git-it-loading-state.is-painted .git-it-loading-state__frame {
+    transition: none;
+  }
+
+  .git-it-commit-rail__sweep {
+    animation: git-it-rail-breathe calc(var(--loader-cycle) * 1.5) ease-in-out infinite;
+    transform: none;
+  }
+
+  .git-it-commit-rail__node {
     animation: none;
+    border-color: rgba(var(--theme-primary-rgb), 0.55);
   }
 }
