@@ -1,9 +1,26 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { createElement } from 'react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { RepositorySnapshot } from '@/shared/level/types'
 import { graphLayoutSignature } from '@/shared/level/utils/graphLayoutSignature'
 import { LiveDagPanel } from './LiveDagPanel'
+
+// Records the `nodes` array handed to ReactFlow on every render. A new array
+// makes ReactFlow rebuild its node internals, which forgets each node's
+// measured size and paints the graph hidden for a frame - the hover flicker.
+const { renderedNodes } = vi.hoisted(() => ({ renderedNodes: [] as unknown[] }))
+
+vi.mock('reactflow', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('reactflow')>()
+  return {
+    ...actual,
+    default: (props: Parameters<typeof actual.default>[0]) => {
+      renderedNodes.push(props.nodes)
+      return createElement(actual.default, props)
+    },
+  }
+})
 
 const snapshot: RepositorySnapshot = {
   repository_initialized: true,
@@ -52,7 +69,10 @@ const snapshot: RepositorySnapshot = {
 }
 
 describe('LiveDagPanel', () => {
-  afterEach(() => cleanup())
+  afterEach(() => {
+    cleanup()
+    renderedNodes.length = 0
+  })
 
   it('keeps the same layout signature when only branch pointers move', () => {
     const movedPointerSnapshot: RepositorySnapshot = {
@@ -74,6 +94,22 @@ describe('LiveDagPanel', () => {
     expect(overlay).toBeInTheDocument()
     expect(screen.getByText('Message: Update form validation')).toBeInTheDocument()
     expect(within(overlay).getByText('main')).toBeInTheDocument()
+  })
+
+  it('keeps the ReactFlow nodes array stable while hovering a commit', () => {
+    render(<LiveDagPanel snapshot={snapshot} />)
+    const nodesBeforeHover = renderedNodes.at(-1)
+
+    const commitNode = screen.getByTitle(/commit c2/i).parentElement as HTMLElement
+    // React derives onMouseEnter from mouseover, so hover has to be fired that way.
+    fireEvent.mouseOver(commitNode)
+
+    expect(screen.getByTestId('commit-details-overlay')).toBeInTheDocument()
+    expect(renderedNodes.at(-1)).toBe(nodesBeforeHover)
+
+    fireEvent.mouseOut(commitNode)
+    expect(screen.queryByTestId('commit-details-overlay')).not.toBeInTheDocument()
+    expect(renderedNodes.at(-1)).toBe(nodesBeforeHover)
   })
 
   it('renders HEAD as a fixed seal and branch refs as banners', () => {

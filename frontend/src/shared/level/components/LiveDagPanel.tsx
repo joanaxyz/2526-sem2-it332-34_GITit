@@ -7,6 +7,7 @@ import { graphLayoutSignature } from '@/shared/level/utils/graphLayoutSignature'
 import { writePreference } from '@/shared/utils/persistentState'
 import { cn } from '@/shared/utils/cn'
 
+import { CommitActivationContext } from './live-dag/activation'
 import { MAX_DAG_ZOOM, MIN_DAG_ZOOM, NO_DELTA, VARIANT_COLORS } from './live-dag/constants'
 import { FitViewOnTopologyChange } from './live-dag/FitViewOnTopologyChange'
 import { buildGraph, layoutPositionsCache, normalizeSnapshot, rememberLayoutPositions, snapshotDelta } from './live-dag/graph'
@@ -143,9 +144,17 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   }, [normalizedSnapshot, variant, layoutCacheKey, layoutDirection])
   const nodeTypes = useMemo(() => commitNodeTypes, [])
   const [activeCommitId, setActiveCommitId] = useState<string | null>(null)
+  const activateCommit = useCallback((commitId: string) => setActiveCommitId(commitId), [])
   const dismissCommit = useCallback((commitId: string) => {
     setActiveCommitId((currentId) => (currentId === commitId ? null : currentId))
   }, [])
+  // Hover/focus rides a context rather than node data: a new `nodes` array makes
+  // ReactFlow rebuild its node internals, which forgets the measured size and
+  // hides every node for a frame - the graph flickered on each hover.
+  const activation = useMemo(
+    () => ({ activeCommitId, activate: activateCommit, dismiss: dismissCommit }),
+    [activeCommitId, activateCommit, dismissCommit],
+  )
   const diagramNodes = useMemo(
     () =>
       nodes.map((node) => {
@@ -155,16 +164,13 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
           ...node,
           data: {
             ...(node.data as CommitNodeData),
-            isActive: activeCommitId === commitId,
             isEntering: entering.commits.has(commitId),
             enteringRefs: entering.refsByCommit.get(commitId),
             enteringHead: entering.headTarget === commitId,
-            onActivate: () => setActiveCommitId(commitId),
-            onDismiss: () => dismissCommit(commitId),
           },
         }
       }),
-    [activeCommitId, dismissCommit, entering, nodes],
+    [entering, nodes],
   )
   const diagramEdges = useMemo(
     () =>
@@ -206,44 +212,46 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
               background: colors.gradientBg,
             }}
           />
-          <ReactFlow
-            className="h-full w-full"
-            style={{ height: '100%', width: '100%', background: 'transparent' }}
-            nodes={diagramNodes}
-            edges={diagramEdges}
-            nodesDraggable={false}
-            nodesConnectable={false}
-            nodeTypes={nodeTypes}
-            panOnScroll
-            minZoom={MIN_DAG_ZOOM}
-            maxZoom={MAX_DAG_ZOOM}
-            proOptions={{ hideAttribution: true }}
-            onError={handleReactFlowError}
-            onMoveEnd={
-              zoomStorageKey
-                ? (event, viewport) => {
-                    // Responsive/topology fitView calls have no source event;
-                    // persisting them would make a phone-sized zoom leak into
-                    // the next desktop session. Store only learner gestures.
-                    if (event) writePreference(zoomStorageKey, viewport.zoom)
-                  }
-                : undefined
-            }
-          >
-            <Background gap={18} color="hsl(var(--foreground) / 0.05)" />
-            <Controls
-              className="dag-controls"
-              position="bottom-right"
-              showInteractive={false}
-              aria-label={`${title} view controls`}
-            />
-            <FitViewOnTopologyChange
-              fitSignature={layoutCacheKey}
-              topologySignature={layoutSignature}
-              fitViewPadding={fitViewPadding}
-              zoomStorageKey={zoomStorageKey}
-            />
-          </ReactFlow>
+          <CommitActivationContext.Provider value={activation}>
+            <ReactFlow
+              className="h-full w-full"
+              style={{ height: '100%', width: '100%', background: 'transparent' }}
+              nodes={diagramNodes}
+              edges={diagramEdges}
+              nodesDraggable={false}
+              nodesConnectable={false}
+              nodeTypes={nodeTypes}
+              panOnScroll
+              minZoom={MIN_DAG_ZOOM}
+              maxZoom={MAX_DAG_ZOOM}
+              proOptions={{ hideAttribution: true }}
+              onError={handleReactFlowError}
+              onMoveEnd={
+                zoomStorageKey
+                  ? (event, viewport) => {
+                      // Responsive/topology fitView calls have no source event;
+                      // persisting them would make a phone-sized zoom leak into
+                      // the next desktop session. Store only learner gestures.
+                      if (event) writePreference(zoomStorageKey, viewport.zoom)
+                    }
+                  : undefined
+              }
+            >
+              <Background gap={18} color="hsl(var(--foreground) / 0.05)" />
+              <Controls
+                className="dag-controls"
+                position="bottom-right"
+                showInteractive={false}
+                aria-label={`${title} view controls`}
+              />
+              <FitViewOnTopologyChange
+                fitSignature={layoutCacheKey}
+                topologySignature={layoutSignature}
+                fitViewPadding={fitViewPadding}
+                zoomStorageKey={zoomStorageKey}
+              />
+            </ReactFlow>
+          </CommitActivationContext.Provider>
           <CommitDetailsPanel data={activeCommitData ?? null} />
         </div>
         {showRepositoryDetails ? <RepositoryDetails snapshot={normalizedSnapshot} /> : null}
