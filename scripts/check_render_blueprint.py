@@ -121,6 +121,9 @@ def main() -> int:
         "DJANGO_SUPERUSER_USERNAME",
         "DJANGO_SUPERUSER_EMAIL",
         "DJANGO_SUPERUSER_PASSWORD",
+        "MAILGUN_API_KEY",
+        "MAILGUN_DOMAIN",
+        "DEFAULT_FROM_EMAIL",
     ):
         require_secret_prompt(app_env, key)
 
@@ -132,12 +135,15 @@ def main() -> int:
     require_value(app_env, "JWT_COOKIE_SECURE", "True")
     require_value(app_env, "JWT_COOKIE_SAMESITE", "Strict")
     require_value(app_env, "ALLOW_DESTRUCTIVE_SEED_RESET", "False")
+    require_value(app_env, "EMAIL_BACKEND", "common.email_backends.MailgunEmailBackend")
+    require_value(app_env, "MAILGUN_API_BASE_URL", "https://api.mailgun.net")
+    require_value(app_env, "MAILGUN_TIMEOUT_SECONDS", "10")
 
     proxy_ranges = str(app_env.get("DJANGO_TRUSTED_PROXY_IPS", {}).get("value", ""))
     if "0.0.0.0/0" in proxy_ranges or "::/0" in proxy_ranges:
         fail("the public app must not trust forwarding headers from every IP")
 
-    print("Render Blueprint check passed ($0 app + cache, external Supabase wiring).")
+    print("Render Blueprint check passed ($0 app + cache, external Supabase + Mailgun HTTPS).")
     return 0
 
 
