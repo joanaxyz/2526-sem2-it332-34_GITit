@@ -59,14 +59,13 @@
   text-wrap: pretty;
 }
 
-/* The finished rail and the surviving figures share one hairline band:
-   the marks say which commands, the figures say how it went. */
+/* The finished track and the surviving figures share one hairline band:
+   the segments say which commands, the figures say how it went. The track
+   takes the full width rather than sharing the row - it is the record of
+   the session, and half a bar beside two numbers reads as a legend. */
 .drill-summary-tally {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4) var(--space-5);
+  display: grid;
+  gap: var(--space-4);
   margin: var(--space-5) 0 0;
   border-top: 1px solid rgba(var(--theme-primary-rgb), 0.16);
   border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.16);
@@ -158,10 +157,6 @@
 }
 
 @media (max-width: 30rem) {
-  .drill-summary-tally {
-    justify-content: flex-start;
-  }
-
   .drill-summary-figures {
     gap: var(--space-4);
   }

@@ -48,6 +48,11 @@ export function DrillVerdictBar({
         ? (card.blank?.answer ?? '')
         : card.command
   const answerGloss = !card ? (sequence?.label ?? '') : rung === 'read' ? card.command : card.intent
+  // Read is the one rung whose answer is prose and whose gloss is a
+  // command, so the two voices have to swap with it. Setting a command in
+  // Inter and a sentence in JetBrains Mono reads as a rendering fault.
+  const answerVoice = rung === 'read' ? 'prose' : 'machine'
+  const glossVoice = rung === 'read' ? 'machine' : 'prose'
   // Only the pick-one rungs have numbered rows to shortcut to.
   const picksByNumber = optionCount && optionCount > 1 ? optionCount : null
 
@@ -58,8 +63,8 @@ export function DrillVerdictBar({
       <div className="drill-teach-slot">
         {verdict?.correct ? (
           <p className="drill-confirm" role="status">
-            <code>{answerText}</code>
-            {answerGloss ? <em>{answerGloss}</em> : null}
+            <code data-voice={answerVoice}>{answerText}</code>
+            {answerGloss ? <em data-voice={glossVoice}>{answerGloss}</em> : null}
           </p>
         ) : null}
         {verdict && !verdict.correct ? (
@@ -67,14 +72,14 @@ export function DrillVerdictBar({
             {verdict.picked ? (
               <p className="drill-teach-row" data-role="picked">
                 <span className="drill-teach-label">You picked</span>
-                <code>{verdict.picked}</code>
-                {verdict.pickedGloss ? <em>{verdict.pickedGloss}</em> : null}
+                <code data-voice={answerVoice}>{verdict.picked}</code>
+                {verdict.pickedGloss ? <em data-voice={glossVoice}>{verdict.pickedGloss}</em> : null}
               </p>
             ) : null}
             <p className="drill-teach-row" data-role="answer">
               <span className="drill-teach-label">The answer</span>
-              <code>{answerText}</code>
-              {answerGloss ? <em>{answerGloss}</em> : null}
+              <code data-voice={answerVoice}>{answerText}</code>
+              {answerGloss ? <em data-voice={glossVoice}>{answerGloss}</em> : null}
             </p>
             <p className="drill-teach-note">This one comes back before the drill ends.</p>
           </div>
@@ -85,13 +90,17 @@ export function DrillVerdictBar({
         <p className="drill-verdict-state" role="status">
           {tone === 'right' ? (
             <>
-              <Check aria-hidden="true" />
+              <span className="drill-verdict-badge" aria-hidden="true">
+                <Check />
+              </span>
               <span>Correct</span>
             </>
           ) : null}
           {tone === 'wrong' ? (
             <>
-              <X aria-hidden="true" />
+              <span className="drill-verdict-badge" aria-hidden="true">
+                <X />
+              </span>
               <span>Not this one</span>
             </>
           ) : null}

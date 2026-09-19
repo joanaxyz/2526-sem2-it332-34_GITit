@@ -71,9 +71,13 @@ export function DrillQuestion({
   // need to see marked. Bring the graded row back into view.
   useEffect(() => {
     if (!verdict) return
-    const marked = sectionRef.current?.querySelector(
-      '[data-state="wrong"], [data-state="answer"]',
-    )
+    // The wrong pick first, deliberately. A combined selector returns
+    // whichever comes first in the DOM, which is usually the right answer
+    // sitting above the learner's own - and the one thing they came to see
+    // marked is the one they chose.
+    const marked =
+      sectionRef.current?.querySelector('[data-state="wrong"]') ??
+      sectionRef.current?.querySelector('[data-state="answer"]')
     marked?.scrollIntoView({
       block: 'nearest',
       behavior: prefersReducedMotion() ? 'auto' : 'smooth',

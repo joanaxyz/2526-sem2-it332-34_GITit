@@ -69,6 +69,10 @@ const designPreviewRoutes: RouteObject[] = import.meta.env.DEV
         lazy: () => import('@/features/dev/pages/BattlePlayground'),
       },
       {
+        path: '/dev/drill',
+        lazy: () => import('@/features/dev/pages/DrillPlayground'),
+      },
+      {
         path: '/dev/monster-scales',
         lazy: () => import('@/features/dev/pages/MonsterScalePlayground'),
       },

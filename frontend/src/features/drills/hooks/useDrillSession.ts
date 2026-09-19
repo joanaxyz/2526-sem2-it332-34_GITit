@@ -18,16 +18,37 @@ import {
 } from '@/features/drills/utils/drillQueue'
 
 export type DrillRailSegment = {
+  /** The closing ordering question is part of the session, but it is not a
+      command with a ladder, so anything counting commands has to skip it. */
+  kind: 'command' | 'finale'
   key: string
   command: string
   intent: string
   cleared: number
+  /** The furthest this card ever reached. A miss claws a rung back, and
+      the progress track shows the ground already won behind the live
+      edge rather than pretending it was never won. */
+  best: number
   total: number
   retired: boolean
   /** Retired by clearing every rung, rather than by hitting the ask cap. */
   mastered: boolean
   missed: boolean
   active: boolean
+}
+
+/** The furthest each card has ever reached; monotonic by construction. */
+function highWater(
+  current: Record<string, number>,
+  queue: DrillQueueState,
+): Record<string, number> {
+  let next = current
+  for (const [key, card] of Object.entries(queue.cards)) {
+    if ((next[key] ?? 0) >= card.cleared) continue
+    if (next === current) next = { ...current }
+    next[key] = card.cleared
+  }
+  return next
 }
 
 /**
@@ -53,6 +74,8 @@ export function useDrillSession(plan: DrillPlan) {
       createQueue(plan.cards, Boolean(plan.sequence)),
   )
   const [resumed] = useState(() => Boolean(plan.resume?.queue_state))
+  const [best, setBest] = useState<Record<string, number>>(() => highWater({}, queue))
+  const [finaleMissed, setFinaleMissed] = useState(false)
   const [answer, setAnswer] = useState<DrillAnswer | null>(null)
   const [verdict, setVerdict] = useState<DrillVerdict | null>(null)
   const [round, setRound] = useState(0)
@@ -65,6 +88,13 @@ export function useDrillSession(plan: DrillPlan) {
   const ask = currentAsk(queue)
   const card = ask?.kind === 'card' ? (cardsByKey[ask.cardKey] ?? null) : null
   const finished = isFinished(queue)
+
+  // Derived rather than written inside `advance`, so the map survives a
+  // restored checkpoint and a StrictMode double-render alike: it only ever
+  // climbs, and re-running it on the same queue is a no-op.
+  useEffect(() => {
+    setBest((current) => highWater(current, queue))
+  }, [queue])
 
   const saveRun = useMutation({
     mutationFn: (body: Parameters<typeof drillsApi.saveRun>[1]) =>
@@ -128,6 +158,7 @@ export function useDrillSession(plan: DrillPlan) {
 
   const advance = useCallback(() => {
     if (!verdict) return
+    if (ask?.kind === 'sequence' && !verdict.correct) setFinaleMissed(true)
     setQueue((current) => {
       const next = answerCurrent(current, verdict.correct)
       checkpoint(next)
@@ -136,7 +167,7 @@ export function useDrillSession(plan: DrillPlan) {
     setAnswer(null)
     setVerdict(null)
     setRound((value) => value + 1)
-  }, [checkpoint, verdict])
+  }, [ask, checkpoint, verdict])
 
   const restart = useCallback(() => {
     reportedRef.current = false
@@ -144,30 +175,53 @@ export function useDrillSession(plan: DrillPlan) {
     // second run would offer to resume the first one.
     drillsApi.discardRun(plan.level.id).catch(() => undefined)
     setQueue(createQueue(plan.cards, Boolean(plan.sequence)))
+    setBest({})
+    setFinaleMissed(false)
     setAnswer(null)
     setVerdict(null)
     setRound(0)
   }, [plan.cards, plan.level.id, plan.sequence])
 
-  const rail: DrillRailSegment[] = useMemo(
-    () =>
-      plan.cards.map((planCard) => {
-        const state = queue.cards[planCard.key]
-        const total = state?.ladder.length ?? 1
-        return {
-          key: planCard.key,
-          command: planCard.command,
-          intent: planCard.intent,
-          cleared: state?.cleared ?? 0,
-          total,
-          retired: state?.retired ?? false,
-          mastered: (state?.cleared ?? 0) >= total,
-          missed: state?.missed ?? false,
-          active: ask?.kind === 'card' && ask.cardKey === planCard.key,
-        }
-      }),
-    [ask, plan.cards, queue.cards],
-  )
+  const rail: DrillRailSegment[] = useMemo(() => {
+    const segments: DrillRailSegment[] = plan.cards.map((planCard) => {
+      const state = queue.cards[planCard.key]
+      const total = state?.ladder.length ?? 1
+      const cleared = state?.cleared ?? 0
+      return {
+        kind: 'command',
+        key: planCard.key,
+        command: planCard.command,
+        intent: planCard.intent,
+        cleared,
+        best: Math.max(best[planCard.key] ?? 0, cleared),
+        total,
+        retired: state?.retired ?? false,
+        mastered: cleared >= total,
+        missed: state?.missed ?? false,
+        active: ask?.kind === 'card' && ask.cardKey === planCard.key,
+      }
+    })
+    // Without this the track would sit at a full bar while the closing
+    // ordering question is still on screen - the one moment a progress
+    // statement must not lie.
+    if (plan.sequence) {
+      const done = !queue.sequencePending
+      segments.push({
+        kind: 'finale',
+        key: '__finale__',
+        command: plan.sequence.label || 'The full run',
+        intent: plan.sequence.task || '',
+        cleared: done ? 1 : 0,
+        best: done ? 1 : 0,
+        total: 1,
+        retired: done,
+        mastered: done,
+        missed: finaleMissed,
+        active: ask?.kind === 'sequence',
+      })
+    }
+    return segments
+  }, [ask, best, finaleMissed, plan.cards, plan.sequence, queue.cards, queue.sequencePending])
 
   return {
     ask,

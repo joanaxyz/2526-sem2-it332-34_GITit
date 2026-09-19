@@ -1,0 +1,443 @@
+{
+  "level": {
+    "id": 257,
+    "slug": "staging-and-committing-basic-workflow",
+    "title": "Staging and Committing",
+    "description": "Prepare intentional changes and save them with a clear message.",
+    "chapter_id": 36,
+    "chapter_number": 1,
+    "chapter_title": "Module 1",
+    "story_slug": "git-it-legacy",
+    "story_title": "The Runebound Turret"
+  },
+  "available": true,
+  "progress": {
+    "sessions": 0,
+    "clears": 0,
+    "cleared": false,
+    "best_accuracy": 0,
+    "last_accuracy": 0,
+    "first_cleared_at": null,
+    "last_played_at": null,
+    "shaky_form_keys": []
+  },
+  "resume": null,
+  "cards": [
+    {
+      "key": "git-add/legacy-m1-paths",
+      "command": "git add <path>...",
+      "intent": "Stage selected paths",
+      "base_command": "git add",
+      "summary": "Stage selected paths",
+      "tokens": [
+        "git",
+        "add",
+        "<path>..."
+      ],
+      "command_choices": [
+        {
+          "gloss": "Stage changes below the current folder",
+          "value": "git add ."
+        },
+        {
+          "gloss": "Stage all changes",
+          "value": "git add -A"
+        },
+        {
+          "gloss": "Stage selected hunks",
+          "value": "git add -p <path>"
+        }
+      ],
+      "intent_choices": [
+        {
+          "gloss": "git add .",
+          "value": "Stage changes below the current folder"
+        },
+        {
+          "gloss": "git add -A",
+          "value": "Stage all changes"
+        },
+        {
+          "gloss": "git add -p <path>",
+          "value": "Stage selected hunks"
+        }
+      ],
+      "blank": {
+        "index": 1,
+        "answer": "add",
+        "options": [
+          {
+            "gloss": "Commit with a message",
+            "value": "commit"
+          },
+          {
+            "gloss": "Initialize the current folder",
+            "value": "init"
+          },
+          {
+            "gloss": "Clone into the default folder",
+            "value": "clone"
+          }
+        ]
+      },
+      "bank": [
+        "git",
+        "add",
+        "<path>...",
+        ".",
+        "-A",
+        "-p",
+        "<path>"
+      ]
+    },
+    {
+      "key": "git-add/legacy-m1-dot",
+      "command": "git add .",
+      "intent": "Stage changes below the current folder",
+      "base_command": "git add",
+      "summary": "Stage changes below the current folder",
+      "tokens": [
+        "git",
+        "add",
+        "."
+      ],
+      "command_choices": [
+        {
+          "gloss": "Mark conflicts resolved by staging paths",
+          "value": "git add <path>..."
+        },
+        {
+          "gloss": "Stage all changes",
+          "value": "git add -A"
+        },
+        {
+          "gloss": "Stage selected hunks",
+          "value": "git add -p <path>"
+        }
+      ],
+      "intent_choices": [
+        {
+          "gloss": "git add <path>...",
+          "value": "Mark conflicts resolved by staging paths"
+        },
+        {
+          "gloss": "git add -A",
+          "value": "Stage all changes"
+        },
+        {
+          "gloss": "git add -p <path>",
+          "value": "Stage selected hunks"
+        }
+      ],
+      "blank": {
+        "index": 1,
+        "answer": "add",
+        "options": [
+          {
+            "gloss": "Commit with a message",
+            "value": "commit"
+          },
+          {
+            "gloss": "Initialize the current folder",
+            "value": "init"
+          },
+          {
+            "gloss": "Clone into the default folder",
+            "value": "clone"
+          }
+        ]
+      },
+      "bank": [
+        "git",
+        "add",
+        ".",
+        "-A",
+        "-p",
+        "<path>...",
+        "<path>"
+      ]
+    },
+    {
+      "key": "git-add/legacy-m1-all",
+      "command": "git add -A",
+      "intent": "Stage all changes",
+      "base_command": "git add",
+      "summary": "Stage all changes",
+      "tokens": [
+        "git",
+        "add",
+        "-A"
+      ],
+      "command_choices": [
+        {
+          "gloss": "Mark conflicts resolved by staging paths",
+          "value": "git add <path>..."
+        },
+        {
+          "gloss": "Stage changes below the current folder",
+          "value": "git add ."
+        },
+        {
+          "gloss": "Stage selected hunks",
+          "value": "git add -p <path>"
+        }
+      ],
+      "intent_choices": [
+        {
+          "gloss": "git add <path>...",
+          "value": "Mark conflicts resolved by staging paths"
+        },
+        {
+          "gloss": "git add .",
+          "value": "Stage changes below the current folder"
+        },
+        {
+          "gloss": "git add -p <path>",
+          "value": "Stage selected hunks"
+        }
+      ],
+      "blank": {
+        "index": 2,
+        "answer": "-A",
+        "options": [
+          {
+            "gloss": "Stage selected hunks",
+            "value": "-p"
+          },
+          {
+            "gloss": "Commit with a message",
+            "value": "-m"
+          },
+          {
+            "gloss": "Amend the latest commit and message",
+            "value": "--amend"
+          }
+        ]
+      },
+      "bank": [
+        "git",
+        "add",
+        "-A",
+        ".",
+        "-p",
+        "<path>...",
+        "<path>"
+      ]
+    },
+    {
+      "key": "git-add/legacy-m1-patch",
+      "command": "git add -p <path>",
+      "intent": "Stage selected hunks",
+      "base_command": "git add",
+      "summary": "Stage selected hunks",
+      "tokens": [
+        "git",
+        "add",
+        "-p",
+        "<path>"
+      ],
+      "command_choices": [
+        {
+          "gloss": "Mark conflicts resolved by staging paths",
+          "value": "git add <path>..."
+        },
+        {
+          "gloss": "Stage changes below the current folder",
+          "value": "git add ."
+        },
+        {
+          "gloss": "Stage all changes",
+          "value": "git add -A"
+        }
+      ],
+      "intent_choices": [
+        {
+          "gloss": "git add <path>...",
+          "value": "Mark conflicts resolved by staging paths"
+        },
+        {
+          "gloss": "git add .",
+          "value": "Stage changes below the current folder"
+        },
+        {
+          "gloss": "git add -A",
+          "value": "Stage all changes"
+        }
+      ],
+      "blank": {
+        "index": 2,
+        "answer": "-p",
+        "options": [
+          {
+            "gloss": "Stage all changes",
+            "value": "-A"
+          },
+          {
+            "gloss": "Commit with a message",
+            "value": "-m"
+          },
+          {
+            "gloss": "Amend the latest commit and message",
+            "value": "--amend"
+          }
+        ]
+      },
+      "bank": [
+        "git",
+        "add",
+        "-p",
+        "<path>",
+        ".",
+        "-A",
+        "<path>..."
+      ]
+    },
+    {
+      "key": "git-commit/legacy-m1-message",
+      "command": "git commit -m <message>",
+      "intent": "Commit with a message",
+      "base_command": "git commit",
+      "summary": "Commit with a message",
+      "tokens": [
+        "git",
+        "commit",
+        "-m",
+        "<message>"
+      ],
+      "command_choices": [
+        {
+          "gloss": "Complete the resolved merge",
+          "value": "git commit [-m <message>]"
+        },
+        {
+          "gloss": "Amend the latest commit and message",
+          "value": "git commit --amend -m <message>"
+        },
+        {
+          "gloss": "Stage selected paths",
+          "value": "git add <path>..."
+        }
+      ],
+      "intent_choices": [
+        {
+          "gloss": "git commit [-m <message>]",
+          "value": "Complete the resolved merge"
+        },
+        {
+          "gloss": "git commit --amend -m <message>",
+          "value": "Amend the latest commit and message"
+        },
+        {
+          "gloss": "git add <path>...",
+          "value": "Stage selected paths"
+        }
+      ],
+      "blank": {
+        "index": 2,
+        "answer": "-m",
+        "options": [
+          {
+            "gloss": "Amend the latest commit and message",
+            "value": "--amend"
+          },
+          {
+            "gloss": "Stage all changes",
+            "value": "-A"
+          },
+          {
+            "gloss": "Stage selected hunks",
+            "value": "-p"
+          }
+        ]
+      },
+      "bank": [
+        "git",
+        "commit",
+        "-m",
+        "<message>",
+        "[-m",
+        "--amend",
+        "add",
+        "<message>]"
+      ]
+    },
+    {
+      "key": "git-commit/legacy-m1-amend-message",
+      "command": "git commit --amend -m <message>",
+      "intent": "Amend the latest commit and message",
+      "base_command": "git commit",
+      "summary": "Amend the latest commit and message",
+      "tokens": [
+        "git",
+        "commit",
+        "--amend",
+        "-m",
+        "<message>"
+      ],
+      "command_choices": [
+        {
+          "gloss": "Commit with a message",
+          "value": "git commit -m <message>"
+        },
+        {
+          "gloss": "Complete the resolved merge",
+          "value": "git commit [-m <message>]"
+        },
+        {
+          "gloss": "Stage selected paths",
+          "value": "git add <path>..."
+        }
+      ],
+      "intent_choices": [
+        {
+          "gloss": "git commit -m <message>",
+          "value": "Commit with a message"
+        },
+        {
+          "gloss": "git commit [-m <message>]",
+          "value": "Complete the resolved merge"
+        },
+        {
+          "gloss": "git add <path>...",
+          "value": "Stage selected paths"
+        }
+      ],
+      "blank": {
+        "index": 2,
+        "answer": "--amend",
+        "options": [
+          {
+            "gloss": "Commit with a message",
+            "value": "-m"
+          },
+          {
+            "gloss": "Stage all changes",
+            "value": "-A"
+          },
+          {
+            "gloss": "Stage selected hunks",
+            "value": "-p"
+          }
+        ]
+      },
+      "bank": [
+        "git",
+        "commit",
+        "--amend",
+        "-m",
+        "<message>",
+        "[-m",
+        "add",
+        "<message>]"
+      ]
+    }
+  ],
+  "sequence": {
+    "label": "Initial commit for library-system",
+    "task": "Stage and save the single intended file with the required message.",
+    "steps": [
+      "git add .",
+      "git commit -m \"Initial commit\""
+    ]
+  }
+}
