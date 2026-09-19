@@ -1,9 +1,8 @@
 import type { SpriteAnimation } from '@/shared/sprites/types'
 
-import { effectSpecForSkill, effectsForCompanion } from './skill-effects/catalog'
+import { effectSpecForSkill } from './skill-effects/catalog'
 import {
   monsterAttackEffect,
-  playMissEffect,
   playResolvedSkillEffect,
   playSpriteProjectileEffect,
 } from './skill-effects/playback'
@@ -81,15 +80,6 @@ export function spriteDisplayMetricsForSkill(
     playback: spec.playback,
   }
 }
-
-/** Played after a missed attack's spell impacts: the fizzled cast deflects off the
- *  target and the miss sheet settles on the open floor. */
-export function missedAttackForCompanion(companionSlug?: string | null): BattleEffect {
-  const spec = effectsForCompanion(companionSlug).miss
-  return (ctx) => playMissEffect(ctx, spec)
-}
-
-export const missedAttack: BattleEffect = missedAttackForCompanion()
 
 /**
  * Sprite-strip projectile for monster arrows/magic. Player skills use the

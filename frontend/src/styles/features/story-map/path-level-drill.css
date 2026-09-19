@@ -1,0 +1,143 @@
+/* The Squire's Drill entry point inside the level callout.
+   ------------------------------------------------------------------
+   Its own file rather than more weight on path-level-panel.css: this is
+   one row belonging to a different feature (features/drills) that only
+   borrows the callout's row vocabulary; anything about the tiers
+   themselves still lives next door.
+
+   The rung before the tiers, so it sits above them and reads as another
+   hairline row rather than a banner. It takes the callout's one accent
+   only while it is genuinely the next move - nothing cleared here yet
+   and the drill not done, decided in StoryAdventurePanels - so "what do
+   I press" still has a single answer. */
+
+.story-level-drill-row {
+  display: grid;
+  width: 100%;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 2.9rem;
+  padding: 0.55rem 0.9rem;
+  border: 0;
+  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.16);
+  background: transparent;
+  color: hsl(var(--foreground));
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+  animation: story-tier-row-in 240ms var(--ease-out) both;
+  animation-delay: 40ms;
+}
+
+.story-level-drill-row:hover,
+.story-level-drill-row:focus-visible {
+  background: rgba(var(--theme-primary-rgb), 0.09);
+  outline: none;
+}
+
+.story-level-drill-row:focus-visible {
+  box-shadow: inset 0 0 0 2px rgba(var(--theme-primary-rgb), 0.55);
+}
+
+.story-level-drill-row[data-next] {
+  background: rgba(var(--theme-primary-rgb), 0.07);
+}
+
+.story-level-drill-row[data-next]:hover,
+.story-level-drill-row[data-next]:focus-visible {
+  background: rgba(var(--theme-primary-rgb), 0.13);
+}
+
+/* The same three-bar rune the drill's own rail is built from, so the
+   entry point and the surface it opens share one mark. */
+.story-level-drill-rune {
+  display: flex;
+  width: 1.75rem;
+  flex-direction: column-reverse;
+  gap: 0.16rem;
+  padding: 0 0.28rem;
+}
+
+/* Widths ascend bottom-to-top so the mark reads as a rune climbing, not
+   as three equal bars - at this size uniform bars read as a menu icon. */
+.story-level-drill-rune i {
+  width: 62%;
+  height: 0.19rem;
+  align-self: center;
+  border-radius: 1px;
+  background: rgba(232, 246, 250, 0.22);
+}
+
+.story-level-drill-rune i:nth-child(2) {
+  width: 81%;
+}
+
+.story-level-drill-rune i:nth-child(3) {
+  width: 100%;
+}
+
+.story-level-drill-row[data-next] .story-level-drill-rune i {
+  background: rgb(var(--theme-primary-rgb));
+  box-shadow: 0 0 8px rgba(var(--theme-primary-rgb), 0.45);
+}
+
+.story-level-drill-row[data-cleared] .story-level-drill-rune i {
+  background: rgba(var(--theme-primary-rgb), 0.75);
+}
+
+.story-level-drill-copy {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.story-level-drill-copy strong {
+  color: hsl(var(--foreground));
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+/* Prose, so Inter: the mono voice is for quantities, and a wrapped mono
+   sentence at 11px is the densest thing in the callout. The cleared
+   state carries a number, so that half switches voices. */
+.story-level-drill-meta {
+  color: rgba(232, 246, 250, 0.62);
+  font-size: var(--text-2xs);
+  line-height: 1.25;
+}
+
+.story-level-drill-meta b {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+/* The callout still has exactly one primary action - while the drill is
+   the recommended move it holds it, and StoryAdventurePanels suppresses
+   the tier row's accent so the two never compete. */
+.story-level-drill-row[data-next] .story-level-tier-row-action {
+  border-color: var(--control-primary-border);
+  background: var(--control-primary-bg);
+  color: var(--control-primary-text);
+  box-shadow: var(--control-primary-shadow);
+}
+
+.story-level-drill-row:hover .story-level-tier-row-action,
+.story-level-drill-row:focus-visible .story-level-tier-row-action {
+  border-color: rgba(var(--theme-primary-rgb), 0.68);
+  background: rgba(var(--theme-primary-rgb), 0.18);
+}
+
+.story-level-drill-row[data-next]:hover .story-level-tier-row-action,
+.story-level-drill-row[data-next]:focus-visible .story-level-tier-row-action {
+  background: var(--control-primary-bg-hover);
+  box-shadow: 0 0 18px rgba(var(--theme-primary-rgb), 0.34);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-level-drill-row {
+    animation: none;
+    transition: none;
+  }
+}

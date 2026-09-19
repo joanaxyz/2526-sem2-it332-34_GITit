@@ -13,9 +13,7 @@ import {
   boundedAnimation,
   CENTER_SCROLL_FRAC,
   clamp01,
-  missedSpellFloorTarget,
   MONSTER_PEEK_VISIBLE,
-  parseBattleRailY,
   isMotionReduced,
   readTranslateX,
 } from './battleMotion'
@@ -174,18 +172,6 @@ export function useBattleActorRefs(
     [],
   )
 
-  const missedSpellGroundAnchor = useCallback((playerEl: Element | null, enemyEl: Element | null) => {
-    const layer = effectLayerRef.current
-    if (!layer || !playerEl || !enemyEl) return { x: 0, y: 0 }
-    const layerBox = layer.getBoundingClientRect()
-    return missedSpellFloorTarget({
-      layerBox,
-      playerBox: playerEl.getBoundingClientRect(),
-      enemyBox: enemyEl.getBoundingClientRect(),
-      floorY: parseBattleRailY(battleStageEl(), layerBox),
-    })
-  }, [battleStageEl])
-
   /** Wide frame: foe fully off-screen right, then peeks from the rim. */
   const measureWideFrame = useCallback(() => {
     const stage = battleStageEl()
@@ -247,7 +233,6 @@ export function useBattleActorRefs(
     monsterImpactAnchor,
     monsterFeetAnchor,
     monsterSizeScale,
-    missedSpellGroundAnchor,
     measureWideFrame,
     measureClosureRun,
     centerScrollPx,

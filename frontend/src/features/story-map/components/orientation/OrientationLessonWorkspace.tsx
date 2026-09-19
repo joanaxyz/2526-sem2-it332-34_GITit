@@ -16,6 +16,7 @@ import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { GamePanel } from '@/shared/components/GamePanel'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { cn } from '@/shared/utils/cn'
 
@@ -99,7 +100,7 @@ export function OrientationLessonWorkspace({ chapter, onLeaveModule }: {
   }
 
   if (lessonsQuery.isLoading) {
-    return <LoadingState label="Loading orientation" description="Preparing lessons for this chapter." variant="page" />
+    return <LoadingScreen label="Loading orientation" description="Preparing lessons for this chapter." />
   }
   if (lessonsQuery.isError) {
     return <ErrorState title="Could not load orientation lessons" description={lessonsQuery.error.message} />

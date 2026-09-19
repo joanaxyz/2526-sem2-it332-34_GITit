@@ -1,0 +1,169 @@
+/* Squire's Drill: the screen.
+   ------------------------------------------------------------------
+   A drill is practice, so the system's "immersion outside, clarity
+   inside" rule puts it on the workspace side of the line: the world is a
+   faint wash behind ruthlessly legible controls, not a living sky. It
+   also owns its chrome rather than sitting under the floating hub blade,
+   for the same reason the terminal workspace does - this is a focused
+   surface, and the blade would collide with a docked verdict bar.
+
+   Four rows, fixed: identity, rail, the question, the one forward
+   control. The question is the only row that scrolls, so the rail and
+   the verdict bar are never chased off-screen mid-answer. */
+
+.drill-screen {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  width: 100%;
+  height: 100dvh;
+  min-height: 34rem;
+  overflow: hidden;
+  /* One wash, centred on the rail: the world is present but the question
+     is the only thing competing for attention. */
+  background:
+    radial-gradient(64rem 26rem at 50% -6rem, rgba(var(--theme-primary-rgb), 0.16), transparent 72%),
+    linear-gradient(180deg, #071223, #02060f 58%);
+  color: hsl(var(--foreground));
+}
+
+/* Header ------------------------------------------------------------- */
+
+.drill-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+  border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.16);
+  padding: 0.6rem 1rem;
+}
+
+.drill-identity {
+  min-width: 0;
+}
+
+.drill-wordmark {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+}
+
+.drill-level {
+  overflow: hidden;
+  margin: 0.1rem 0 0;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-xs);
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drill-level-chapter {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.drill-exit {
+  position: relative;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  margin-left: auto;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: hsl(var(--muted-foreground));
+  transition:
+    border-color var(--motion-fast) ease,
+    background var(--motion-fast) ease,
+    color var(--motion-fast) ease;
+}
+
+/* 44px touch target without a 44px visual chip. */
+.drill-exit::after {
+  content: '';
+  position: absolute;
+  inset: -0.6rem;
+}
+
+.drill-exit svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.drill-exit:hover,
+.drill-exit:focus-visible {
+  border-color: rgba(var(--theme-primary-rgb), 0.38);
+  background: rgba(var(--theme-primary-rgb), 0.1);
+  color: hsl(var(--foreground));
+  outline: none;
+}
+
+/* Stage -------------------------------------------------------------- */
+
+/* Top-anchored, not centred. Centring looks tidier on one screenshot and
+   is worse to use: the number of options changes from question to
+   question, so a centred block moves the prompt vertically every time and
+   the eye has to re-find it. Anchored, the rung and the prompt sit at the
+   same height for the whole session. */
+.drill-stage {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  overflow-y: auto;
+  padding: clamp(1.25rem, 7vh, 3.5rem) var(--space-4) var(--space-6);
+}
+
+.drill-stage > * {
+  width: min(100%, 44rem);
+}
+
+/* Message screens ---------------------------------------------------- */
+
+.drill-screen--message {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-4);
+  place-content: center;
+  place-items: center;
+  grid-template-rows: none;
+}
+
+.drill-screen--message > * {
+  width: min(100%, 32rem);
+}
+
+.drill-screen--message .ui-button {
+  justify-self: start;
+}
+
+.drill-empty h2 {
+  margin: 0.35rem 0 0;
+  font-size: var(--text-xl);
+  font-weight: 800;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.drill-empty p {
+  max-width: 48ch;
+  margin: 0.55rem 0 0;
+  color: rgba(232, 246, 250, 0.78);
+  font-size: var(--text-base);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+@media (max-width: 40rem) {
+  .drill-stage {
+    padding: var(--space-4) var(--space-3) var(--space-5);
+  }
+
+  .drill-header {
+    padding: 0.5rem 0.75rem;
+  }
+}

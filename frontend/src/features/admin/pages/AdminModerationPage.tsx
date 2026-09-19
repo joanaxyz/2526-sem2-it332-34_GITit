@@ -7,7 +7,7 @@ import { adminErrorMessage } from '@/features/admin/utils/errors'
 import { formatDate } from '@/features/admin/utils/format'
 import { Button } from '@/shared/components/Button'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { queryKeys } from '@/shared/api/queryKeys'
 
 export function AdminModerationPage() {
@@ -23,7 +23,7 @@ export function AdminModerationPage() {
     },
   })
 
-  if (isPending) return <LoadingState label="Loading shared content" variant="page" />
+  if (isPending) return <LoadingScreen label="Loading shared content" />
   if (isError || !data) return <ErrorState title="Could not load moderation queue" description="Try again shortly." />
 
   return (

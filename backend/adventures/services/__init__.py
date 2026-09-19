@@ -10,6 +10,7 @@ from .selectors import (
     ordered_levels_for,
     ordered_levels_for_story,
     ordered_waves_for,
+    playable_level_publication_filter,
     story_command_form_ids,
 )
 from .tier_command_processing import AdventureLevelTierCommandProcessingService
@@ -27,6 +28,7 @@ __all__ = [
     "ordered_levels_for",
     "ordered_levels_for_story",
     "ordered_waves_for",
+    "playable_level_publication_filter",
     "story_command_form_ids",
     "AdventureLevelTierCommandProcessingService",
     "AdventureLevelTierRunService",

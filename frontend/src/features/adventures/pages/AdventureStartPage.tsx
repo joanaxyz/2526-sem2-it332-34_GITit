@@ -6,7 +6,7 @@ import { useStartAdventureRun } from '@/features/adventures/hooks/useAdventureRu
 import { syncAdventureRunInCache } from '@/features/adventures/utils/adventureRunCache'
 import { ApiError } from '@/shared/api/apiError'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 
 /**
@@ -66,11 +66,10 @@ export function AdventureStartPage() {
   }
 
   return (
-    <LoadingState
+    <LoadingScreen
       companionSlug={companionSlug}
       description="Preparing the repository, terminal, and command challenge."
       label="Starting adventure"
-      variant="screen"
     />
   )
 }

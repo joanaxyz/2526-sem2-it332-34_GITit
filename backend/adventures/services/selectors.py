@@ -7,13 +7,31 @@ unlocks and mastery targets, but the runtime never walks a whole chapter as
 one continuous session.
 """
 
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from adventures.models import (
     AdventureLevel,
     AdventureLevelTierWave,
     AdventureWave,
 )
+
+
+def playable_level_publication_filter(prefix: str = "") -> Q:
+    """Publication rule every adventure run-start path must apply.
+
+    A level is startable only while its own chapter is published. Player-authored
+    levels are exempt from the chapter half on purpose: the compiler parks them in
+    a deliberately unpublished runtime chapter (see
+    ``ContentRuntimeCompiler._runtime_chapter``), so ``shop.access.can_launch`` is
+    their publication gate instead. Mirrors the rule ``get_challenge_trial``
+    already applies on the challenge side.
+
+    ``prefix`` walks the relation from a related model, e.g. ``"adventure_level__"``
+    when filtering ``AdventureLevelTier``.
+    """
+    return Q(**{f"{prefix}chapter__is_published": True}) | Q(
+        **{f"{prefix}source_content_definition__isnull": False}
+    )
 
 
 def ordered_levels_for(adventure: AdventureLevel) -> list[AdventureLevel]:

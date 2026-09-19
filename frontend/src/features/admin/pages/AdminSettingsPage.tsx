@@ -5,7 +5,7 @@ import { PageHeading } from '@/features/admin/components/adminUi'
 import { adminErrorMessage } from '@/features/admin/utils/errors'
 import { Button } from '@/shared/components/Button'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { queryKeys } from '@/shared/api/queryKeys'
 
 export function AdminSettingsPage() {
@@ -17,7 +17,7 @@ export function AdminSettingsPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.adminSettings }),
   })
 
-  if (isPending) return <LoadingState label="Loading settings" variant="page" />
+  if (isPending) return <LoadingScreen label="Loading settings" />
   if (isError || !data) return <ErrorState title="Could not load settings" description="Try again shortly." />
 
   return (

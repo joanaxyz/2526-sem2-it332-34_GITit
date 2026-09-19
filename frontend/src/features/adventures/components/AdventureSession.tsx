@@ -12,6 +12,7 @@ import { AdventureWorkspaceTour } from '@/features/adventures/components/Adventu
 import { adventuresApi } from '@/features/adventures/api/adventuresApi'
 import { useAdventureCommandSubmission } from '@/features/adventures/hooks/useAdventureCommandSubmission'
 import { createAdventureWorkspaceCommandHandler } from '@/features/adventures/utils/adventureWorkspaceCommand'
+import { useAdventureLevelAssets } from '@/features/adventures/hooks/useAdventureLevelAssets'
 import { useAdventureRun, useStartAdventureRun } from '@/features/adventures/hooks/useAdventureRun'
 import { useAdventureSessionMutations } from '@/features/adventures/hooks/useAdventureSessionMutations'
 import { invalidateAdventureProgressQueries } from '@/features/adventures/utils/adventureRunCache'
@@ -22,7 +23,7 @@ import { useAuthStore } from '@/shared/auth/useAuth'
 import type { TerminalLine } from '@/shared/level/types'
 import { PROJECT_FILES_OPEN_KEY } from '@/shared/level/workspaceKeys'
 import { hasSeenLevelTour, markLevelTourSeen } from '@/shared/level/utils/levelTour'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { usePersistentState } from '@/shared/utils/persistentState'
 import { WORKSPACE_BATTLE_STAGE_ROW } from '@/shared/level/workspaceLayout'
@@ -46,7 +47,7 @@ export function AdventureSession({
   const director = useBattleDirector()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { companionSlug } = usePlayerLoadout()
+  const { companionSlug, isLoading: loadoutLoading } = usePlayerLoadout()
   const retryRun = useStartAdventureRun()
   const startNextLevel = useStartAdventureRun()
   const [projectFilesOpen, setProjectFilesOpen] = usePersistentState(PROJECT_FILES_OPEN_KEY, true)
@@ -60,6 +61,13 @@ export function AdventureSession({
   const queriedRun = query.data
   const queriedRunId = queriedRun?.id ?? null
   const queriedRunStatus = queriedRun?.status ?? null
+  // The whole workspace waits on this: a stage that paints before its art is
+  // decoded fades the arena, the companion and the foe in over the first frames.
+  const assetsReady = useAdventureLevelAssets({
+    run: queriedRun,
+    companionSlug,
+    enabled: !loadoutLoading,
+  })
   const { completionAnimationReady, queueOutcomeAnimation } = useOutcomeAnimationGate({
     runId: queriedRunId,
     status: queriedRunStatus,
@@ -124,13 +132,12 @@ export function AdventureSession({
     setExitConfirmOpen,
     setStartOverConfirmOpen,
   })
-  if (query.isLoading) {
+  if (query.isLoading || (!query.isError && !assetsReady)) {
     return (
-      <LoadingState
+      <LoadingScreen
         companionSlug={companionSlug}
         description="Preparing the repository, terminal, and command challenge."
         label="Loading adventure"
-        variant="screen"
       />
     )
   }
@@ -155,11 +162,10 @@ export function AdventureSession({
 
   if (!attempt && run.status === 'started') {
     return (
-      <LoadingState
+      <LoadingScreen
         companionSlug={companionSlug}
         description="Setting up the next repository."
         label="Preparing next level"
-        variant="screen"
       />
     )
   }

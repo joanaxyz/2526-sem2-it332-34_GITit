@@ -59,6 +59,7 @@ export function StoryLevelTierPanel({
   isStarting,
   onClose,
   onStartTier,
+  onOpenDrill,
 }: {
   level: AdventureLevelSummary
   levelNumber: number
@@ -69,6 +70,7 @@ export function StoryLevelTierPanel({
   isStarting: boolean
   onClose: () => void
   onStartTier: (tierId: number, replay: boolean) => void
+  onOpenDrill: () => void
 }) {
   const rows = DIFFICULTY_ORDER.map((difficulty) => {
     const tier = level.tiers.find((item) => item.difficulty === difficulty)
@@ -80,6 +82,16 @@ export function StoryLevelTierPanel({
   const nextDifficulty = rows.find(
     (row) => row.status === 'in_progress' || row.status === 'not_started',
   )?.difficulty
+  // Defaulted, not assumed: a cached overview written before the drill
+  // shipped has no `drill` key, and a level callout must not throw because
+  // an optional feature is missing from a stale payload.
+  const drill = level.drill ?? { available: false, cleared: false, best_accuracy: 0 }
+  // Squire's Drill is the rung before the tiers, so it takes the callout's
+  // one accent only while it is genuinely the best next move: nothing here
+  // cleared yet, and the drill not done. Once either is true the accent
+  // belongs to the tier again, and the drill demotes to a quiet re-entry.
+  const drillIsNextMove =
+    drill.available && !drill.cleared && !rows.some((row) => row.status === 'cleared')
 
   return (
     <section
@@ -106,6 +118,42 @@ export function StoryLevelTierPanel({
         </button>
       </header>
 
+      {drill.available ? (
+        <button
+          type="button"
+          className="story-level-drill-row"
+          data-next={drillIsNextMove || undefined}
+          data-cleared={drill.cleared || undefined}
+          aria-label={
+            drill.cleared
+              ? `Squire's Drill for ${level.title}: cleared, best ${drill.best_accuracy} percent. Drill again.`
+              : `Squire's Drill for ${level.title}: rehearse this level's commands.`
+          }
+          onClick={onOpenDrill}
+        >
+          <span className="story-level-drill-rune" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span className="story-level-drill-copy">
+            <strong>Squire&rsquo;s Drill</strong>
+            <span className="story-level-drill-meta">
+              {drill.cleared ? (
+                <>
+                  Cleared · <b>{drill.best_accuracy}%</b> best
+                </>
+              ) : (
+                "Rehearse this level's commands"
+              )}
+            </span>
+          </span>
+          <span className="story-level-tier-row-action">
+            {drill.cleared ? 'Again' : 'Drill'}
+          </span>
+        </button>
+      ) : null}
+
       <ul className="story-level-tier-rows">
         {rows.map(({ difficulty, tier, status }, index) => {
           const tierLabel = DIFFICULTY_TIER_LABELS[difficulty]
@@ -124,7 +172,7 @@ export function StoryLevelTierPanel({
                 type="button"
                 className="story-level-tier-row"
                 data-status={status}
-                data-next={difficulty === nextDifficulty || undefined}
+                data-next={(!drillIsNextMove && difficulty === nextDifficulty) || undefined}
                 style={{ '--row-index': index } as CSSProperties}
                 disabled={isLocked || !tier || isStarting}
                 aria-label={`${level.title}, ${tierLabel} tier: ${actionLabel}`}

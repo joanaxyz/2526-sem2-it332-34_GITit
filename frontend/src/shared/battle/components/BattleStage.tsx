@@ -8,6 +8,7 @@ import { PlayerActor } from '@/shared/battle/components/PlayerActor'
 import { SpritePortrait } from '@/shared/battle/components/SpritePortrait'
 import type { BattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import { labelForMonster } from '@/shared/battle/monsterDescriptors'
+import { stageParallaxUrl } from '@/shared/battle/stageBackdrop'
 import type { BattleMonster, BattleStage as BattleStageConfig, StageLanding } from '@/shared/battle/types'
 import { companionBattleFromDef, companionFromDef } from '@/shared/cosmetics/companionRuntime'
 import type { SpriteDef } from '@/shared/cosmetics/types'
@@ -47,7 +48,7 @@ export function BattleStage({
   const player = useMemo(() => companionFromDef(companion), [companion])
   const playerBattle = useMemo(() => companionBattleFromDef(companion), [companion])
   const railY = railPercent(stage?.landing)
-  const parallaxUrl = resolveParallaxUrl(storyWorld, stage)
+  const parallaxUrl = stageParallaxUrl(storyWorld, stage)
   const playerMeter =
     typeof director.playerHp === 'number' && typeof director.playerMaxHp === 'number'
       ? { current: director.playerHp, max: director.playerMaxHp }
@@ -250,13 +251,4 @@ function BattleLand({ landing }: { landing: StageLanding | null }) {
 function railPercent(landing?: StageLanding | null) {
   if (!landing) return DEFAULT_RAIL_Y
   return Math.max(48, Math.min(88, (landing.y + landing.height) * 100))
-}
-
-function resolveParallaxUrl(
-  storyWorld: StoryWorldDef,
-  stage?: BattleStageConfig | null,
-): string | null {
-  const slug = stage?.parallax?.slug
-  if (slug) return storyWorld.battle.parallax?.[slug]?.src ?? storyWorld.battle.backdrop.src
-  return storyWorld.battle.backdrop.src
 }

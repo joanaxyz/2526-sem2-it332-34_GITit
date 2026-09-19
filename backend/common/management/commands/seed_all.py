@@ -60,7 +60,7 @@ class Command(BaseCommand):
             )
 
         verbosity = options.get("verbosity", 1)
-        self.stdout.write(self.style.MIGRATE_HEADING("1/3 Curriculum"))
+        self.stdout.write(self.style.MIGRATE_HEADING("1/4 Curriculum"))
         call_command(
             "seed_curriculum",
             reset=reset,
@@ -68,11 +68,16 @@ class Command(BaseCommand):
             verbosity=verbosity,
         )
 
-        self.stdout.write(self.style.MIGRATE_HEADING("2/3 Runebound Turret"))
+        self.stdout.write(self.style.MIGRATE_HEADING("2/4 Runebound Turret"))
         call_command("seed_legacy_modules", verbosity=verbosity)
 
-        self.stdout.write(self.style.MIGRATE_HEADING("3/3 Command library"))
+        self.stdout.write(self.style.MIGRATE_HEADING("3/4 Command library"))
         call_command("seed_command_library", verbosity=verbosity)
+
+        # Last: drill content is derived from the command forms and authored
+        # solutions the three steps above have just written.
+        self.stdout.write(self.style.MIGRATE_HEADING("4/4 Squire's Drill"))
+        call_command("seed_drills", verbosity=verbosity)
 
         mode = "reset and seeded" if reset else "safely upserted"
         self.stdout.write(self.style.SUCCESS(f"seed_all complete — {mode} official data."))

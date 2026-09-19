@@ -3,10 +3,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { AdventureMasteryOverlay } from '@/features/adventures/components/AdventureMasteryOverlay'
 import { AdventureProgressBar } from '@/features/adventures/components/AdventureProgressBar'
 import type { AdventureAttempt, AdventureRun } from '@/features/adventures/types'
+import {
+  adventureEncounterRoster,
+  adventureStoryWorld,
+} from '@/features/adventures/utils/adventureEncounter'
 import { BattleStage } from '@/shared/battle/components/BattleStage'
 import { GameplayBattlePanel } from '@/shared/battle/components/GameplayBattlePanel'
-import { clientAdventureRoster } from '@/shared/battle/deriveBattleEvents'
-import { getStoryWorld } from '@/shared/story-worlds/registry'
 import type { BattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import { useBattleEncounterSetup } from '@/shared/battle/hooks/useBattleEncounterSetup'
 
@@ -33,32 +35,21 @@ export function AdventureBattlePanel({
 
   const displayWave = Math.max(1, run.current_wave || attempt.wave + 1)
   const displayTotal = Math.max(displayWave, run.total_waves || displayWave)
-  const storyWorld = getStoryWorld(run.story?.world_slug ?? run.story?.slug)
+  const storyWorld = adventureStoryWorld(run)
 
   const encounterKey = `${attempt.id}:${attempt.wave}:${run.current_wave}`
   const maxHp = attempt.command_budget.max_counted_commands
   const encounterRoster = useMemo(
     () =>
-      clientAdventureRoster(
-        attempt.wave,
-        run.total_waves,
-        Object.keys(storyWorld.battle.monsters),
-        {
-          // Wave-independent base seed: clientAdventureRoster rotates by the wave
-          // index (attempt.wave) so consecutive waves always show a new monster.
-          seed: `${storyWorld.slug}:${run.id}:${attempt.id}`,
-          storyWorldSlug: storyWorld.slug,
-          maxHp,
-        },
-      ),
-    [
-      attempt.id,
-      attempt.wave,
-      maxHp,
-      run.id,
-      run.total_waves,
-      storyWorld,
-    ],
+      adventureEncounterRoster({
+        runId: run.id,
+        attemptId: attempt.id,
+        wave: attempt.wave,
+        totalWaves: run.total_waves,
+        maxHp,
+        storyWorld,
+      }),
+    [attempt.id, attempt.wave, maxHp, run.id, run.total_waves, storyWorld],
   )
 
   const hp = Math.max(0, maxHp - attempt.counts.counted_command_count)

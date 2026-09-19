@@ -27,6 +27,7 @@ from adventures.services import (
     AdventureLevelTierCommandProcessingService,
     AdventureLevelTierRunService,
     AdventureRunService,
+    playable_level_publication_filter,
 )
 from adventures.tier_payloads import (
     command_run_payload,
@@ -95,31 +96,38 @@ def _run_with_active_attempt(
     return attempt, attempt
 
 
-def _assert_level_unlocked(player, level: AdventureLevel) -> None:
-    from shop.access import require_companion
+def _assert_adventure_accessible(player, level: AdventureLevel) -> None:
+    """The gate every adventure run-start path shares, whatever its run shape.
+
+    Both the wave flow and the difficulty-tier flow start a run on an
+    ``AdventureLevel``, so both owe the same three checks. The tier flow was
+    written by copying challenges/views.py, which deliberately has no companion
+    requirement (see challenges/tests/test_challenge_start_access.py), and
+    inherited that omission along with the rest - hence one shared helper rather
+    than two hand-kept copies.
+    """
+    from shop.access import can_launch, require_companion
 
     require_companion(player)
-    chapter = level.chapter
-    if chapter.story_id:
-        from curriculum.selectors import story_locked
-
-        locked, reason = story_locked(player=player, story=chapter.story)
-        if locked:
-            raise Locked(reason or "This story is locked.")
-    locked, reason = chapter_locked(player=player, chapter=chapter)
+    # chapter_locked resolves the owning story's prerequisite gate too and
+    # reports unlocked for a chapter with no story, so it covers both.
+    locked, reason = chapter_locked(player=player, chapter=level.chapter)
     if locked:
         raise Locked(reason or "Clear the previous chapter to unlock this adventure.")
+    if level.source_content_definition_id and not can_launch(
+        player.user, level.source_content_definition
+    ):
+        raise PermissionDenied("You do not have access to this adventure.")
+
+
+def _assert_level_unlocked(player, level: AdventureLevel) -> None:
+    _assert_adventure_accessible(player, level)
     locked, reason = adventure_locked(player=player, adventure=level)
     if locked:
         raise Locked(reason or "Complete the previous adventure to unlock this adventure.")
     locked, reason = level_locked(player=player, level=level)
     if locked:
         raise Locked(reason or "Complete the previous level to unlock this one.")
-    if level.source_content_definition_id:
-        from shop.access import can_launch
-
-        if not can_launch(player.user, level.source_content_definition):
-            raise PermissionDenied("You do not have access to this adventure.")
 
 
 class AdventureLevelRunStartAPIView(APIView):
@@ -132,7 +140,7 @@ class AdventureLevelRunStartAPIView(APIView):
                 "source_content_definition",
             )
             .prefetch_related("command_forms", "waves", "waves__variants")
-            .get(id=level_id, is_published=True)
+            .get(playable_level_publication_filter(), id=level_id, is_published=True)
         )
         player = get_or_create_player(request.user)
         _assert_level_unlocked(player, level)
@@ -334,18 +342,15 @@ class AdventureLevelTierRunStartAPIView(APIView):
             "adventure_level",
             "adventure_level__chapter",
             "adventure_level__chapter__story",
-        ).get(id=tier_id, is_published=True)
+            "adventure_level__source_content_definition",
+        ).get(
+            playable_level_publication_filter("adventure_level__"),
+            id=tier_id,
+            is_published=True,
+            adventure_level__is_published=True,
+        )
         player = get_or_create_player(request.user)
-        chapter = tier.adventure_level.chapter
-        if chapter.story_id:
-            from curriculum.selectors import story_locked
-
-            locked, reason = story_locked(player=player, story=chapter.story)
-            if locked:
-                raise Locked(reason or "This story is locked.")
-            locked, reason = chapter_locked(player=player, chapter=chapter)
-            if locked:
-                raise Locked(reason or "This chapter is locked.")
+        _assert_adventure_accessible(player, tier.adventure_level)
         prior_run = None
         prior_run_id = serializer.validated_data.get("prior_run_id")
         if prior_run_id:

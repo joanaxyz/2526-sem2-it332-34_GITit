@@ -37,7 +37,7 @@ import { useChallengeDagAnimation } from '@/features/challenges/hooks/useChallen
 import type { ChallengeRun } from '@/features/challenges/types'
 import { useAuthStore } from '@/shared/auth/useAuth'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { usePersistentState } from '@/shared/utils/persistentState'
 
@@ -155,11 +155,10 @@ export function ChallengeWorkspace() {
   })
   if (query.isLoading) {
     return (
-      <LoadingState
+      <LoadingScreen
         description="Preparing the repository, terminal, and challenge workspace."
         label="Loading challenge"
         showCompanion={false}
-        variant="screen"
       />
     )
   }

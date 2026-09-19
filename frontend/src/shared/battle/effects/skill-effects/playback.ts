@@ -1,6 +1,5 @@
 
 export {
-  playMissEffect,
   playResolvedSkillEffect,
   playSpriteProjectileEffect,
 } from './companionPlayback'

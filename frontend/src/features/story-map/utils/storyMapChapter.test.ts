@@ -21,6 +21,7 @@ function level(overrides: Partial<AdventureLevelSummary>): AdventureLevelSummary
     completion: null,
     is_passed: false,
     tiers: [],
+    drill: { available: false, cleared: false, best_accuracy: 0 },
     ...overrides,
   }
 }

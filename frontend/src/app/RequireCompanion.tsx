@@ -2,7 +2,7 @@ import { Navigate, useSearchParams } from 'react-router-dom'
 import type { ReactElement } from 'react'
 
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { ErrorState } from '@/shared/components/ErrorState'
 
 /**
@@ -16,11 +16,10 @@ export function RequireCompanion({ children }: { children: ReactElement }) {
 
   if (isLoading) {
     return (
-      <LoadingState
+      <LoadingScreen
         companionSlug={companionSlug}
         description="Checking your adventuring party."
         label="Loading"
-        variant="screen"
       />
     )
   }

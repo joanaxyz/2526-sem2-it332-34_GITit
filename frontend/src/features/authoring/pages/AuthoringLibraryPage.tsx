@@ -8,7 +8,7 @@ import type { AuthoringChapter, ContentDefinition, ContentKind, ContentStatus } 
 import { queryKeys } from '@/shared/api/queryKeys'
 import { Button } from '@/shared/components/Button'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { cn } from '@/shared/utils/cn'
 
 const KIND_META: Record<ContentKind, { label: string; icon: typeof Swords }> = {
@@ -33,7 +33,7 @@ export function AuthoringLibraryPage() {
   const chaptersQuery = useQuery({ queryKey: queryKeys.authoringChapters, queryFn: authoringApi.chapters })
 
   if (contentQuery.isLoading || chaptersQuery.isLoading)
-    return <LoadingState label="Opening content library" variant="page" />
+    return <LoadingScreen label="Opening content library" />
   if (contentQuery.isError)
     return <ErrorState title="Could not open content library" description={contentQuery.error.message} />
 

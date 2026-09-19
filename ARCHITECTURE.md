@@ -13,6 +13,7 @@ Use these terms in product copy, code names, tests, and seed data:
 - `Wave` — one scenario inside an adventure level.
 - `Challenge` — independent assessment practice.
 - `Trial` — an easy, medium, or hard scenario inside a challenge.
+- `Drill` — optional recall practice attached to an adventure level (Squire's Drill).
 - `Level map` — the visual chapter navigation surface.
 - `Story world` — a site/map visual bundle.
 - `Companion` — a player-side battle/avatar cosmetic.
@@ -209,6 +210,58 @@ Rules:
 - Companions are independent from story worlds.
 - Story-world CSS uses semantic tokens such as `--theme-primary-rgb`, `--theme-secondary-rgb`, `--theme-accent-rgb`, `--theme-surface-rgb`, `--theme-glow-rgb`, and `--level-map-bg`.
 - CSS files stay split and reviewable; `scripts/check_css_architecture.py` enforces file-size and legacy-reference limits.
+
+## Squire's Drill
+
+Squire's Drill is the rung between reading a chapter and typing at a live
+prompt: short recall practice on exactly the commands one adventure level
+will ask for. It is optional, gates nothing, and pays no currency.
+
+Drill content is **seed data, not runtime composition**. `manage.py
+seed_drills` derives it once and writes rows; runtime reads those rows.
+
+Ownership:
+
+- `backend/drills/services/composer.py` derives every question from
+  authored curriculum data, and runs at **seed time only**. Nothing is
+  hand-authored per level: cards come from the level's `CommandForm` rows
+  (`usage_form` / `label`), and the ordering finale from a wave variant's
+  `solution_commands`. Pass a shared `DrillCatalog` when composing many
+  levels so the published command list is read once per run.
+- Distractors are always other real command forms, siblings of the same
+  command first, so a wrong answer can be explained with authored text.
+- When a level has no `command_forms` wired, the composer recovers them by
+  resolving the level's authored solution commands through
+  `curriculum.library_preview.command_preview_syntax_for_command` and
+  matching the published catalog. This keeps a database seeded before that
+  wiring existed from producing an empty drill.
+- `backend/drills/services/seeding.py` upserts `LevelDrill` /
+  `LevelDrillCard` per level, keyed on `(drill, form_key)` so a reseed
+  rewrites in place and drops only cards the level no longer teaches.
+  `seed_drills` runs last in `seed_all`, after the curriculum, legacy
+  modules, and command library it derives from.
+- `backend/drills/selectors/content.py` is the only runtime read path.
+  `drillable_level_ids` answers "does this level have a drill" from the
+  same rows the drill page reads, so the level map and the page cannot
+  disagree; the map embeds it as `drill` on each adventure summary.
+- `drills.models.DrillRun` checkpoints the in-progress queue after every
+  answer so a refresh resumes mid-drill. The stored state is client-owned
+  and bounded by `DrillRunStateSerializer`, then intersected with the
+  level's seeded card keys — a resumed queue decides which questions
+  appear, so unknown keys are dropped rather than trusted.
+- `drills.models.DrillProgress` stores per-(player, level) history. The
+  client grades itself and reports the session because there is no reward
+  to forge; the backend clamps the counts and intersects reported weak
+  spots with the level's seeded card keys. A session only counts as a
+  clear when every card topped its ladder — running out of attempts ends
+  the queue but does not earn the mark.
+- The frontend feature is `frontend/src/features/drills`. The queue,
+  ladder, rehydration, and grading rules are pure modules under `utils/`
+  with tests; entry lives in the story map's level callout.
+
+A fresh install must run `seed_drills` (or `seed_all`) before any drill
+appears. That is deliberate: content lives in rows, so an unseeded
+database honestly has none rather than synthesising it per request.
 
 ## Generated Curriculum Targets
 

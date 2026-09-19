@@ -88,11 +88,23 @@ export type ApiSchemas = {
   "DashboardSummaryResponse": { "chapter_kpis": { [key: string]: ApiSchemas["DashboardKpiSet"] }; "completed_stories": Array<string>; "completed_story_slug": string | null; "counts": ApiSchemas["DashboardCounts"]; "kpis": ApiSchemas["DashboardKpiSet"]; "mastery": number; "perfect_clears": number; "retry_trends": Array<ApiSchemas["DashboardRetryTrend"]>; "streak": ApiSchemas["DashboardStreak"] }
   "DetailResponse": { "detail": string }
   "DifficultyEnum": "beginner" | "intermediate" | "advanced"
+  "DrillBlank": { "answer": string; "index": number; "options": Array<ApiSchemas["DrillChoice"]> }
+  "DrillCard": { "bank": Array<string>; "base_command": string; "blank": ApiSchemas["DrillBlank"] | null; "command": string; "command_choices": Array<ApiSchemas["DrillChoice"]>; "intent": string; "intent_choices": Array<ApiSchemas["DrillChoice"]>; "key": string; "summary": string; "tokens": Array<string> }
+  "DrillChoice": { "gloss": string; "value": string }
+  "DrillLevel": { "chapter_id": number | null; "chapter_number": number | null; "chapter_title": string; "description": string; "id": number; "slug": string; "story_slug": string; "story_title": string; "title": string }
+  "DrillProgress": { "best_accuracy": number; "cleared": boolean; "clears": number; "first_cleared_at": string | null; "last_accuracy": number; "last_played_at": string | null; "sessions": number; "shaky_form_keys": Array<string> }
+  "DrillReport": { "answers_correct": number; "answers_total": number; "completed": boolean; "shaky_form_keys"?: Array<string> }
+  "DrillReportResponse": { "progress": ApiSchemas["DrillProgress"] }
+  "DrillResume": { "answered": number; "correct": number; "id": number; "queue_state": { [key: string]: JsonValue }; "updated_at": string }
+  "DrillRunState": { "answered": number; "cards": { [key: string]: { [key: string]: JsonValue } }; "correct": number; "queue": Array<string>; "sequence_pending"?: boolean }
+  "DrillRunStateResponse": { "resume": ApiSchemas["DrillResume"] | null }
+  "DrillSequence": { "label": string; "steps": Array<string>; "task": string }
   "GameplayRunStatus": "started" | "completed" | "failed" | "abandoned"
   "KeyEnum": "shop-purchases"
   "KindA5eEnum": "adventure" | "challenge" | "lesson"
   "LearnedSkillResponse": { "base_command": string; "chapter_id"?: number | null; "chapter_number": number; "chapter_title": string; "id": number; "slug": string; "summary": string; "title": string }
   "LearnedSkillsResponse": { "results": Array<ApiSchemas["LearnedSkillResponse"]> }
+  "LevelDrillPlanResponse": { "available": boolean; "cards": Array<ApiSchemas["DrillCard"]>; "level": ApiSchemas["DrillLevel"]; "progress": ApiSchemas["DrillProgress"]; "resume": ApiSchemas["DrillResume"] | null; "sequence": ApiSchemas["DrillSequence"] | null }
   "Login": { "identifier": string; "password": string }
   "MotionModeEnum": "system" | "reduced" | "full"
   "OnboardingPhaseEnum": "welcome" | "orientation" | "stories" | "shop" | "purchase" | "home" | "equip" | "done"
@@ -154,6 +166,9 @@ export type ApiPath =
   | "/api/admin/users/{user_id}/"
   | "/api/admin/users/{user_id}/actions/"
   | "/api/adventure-level-tiers/{tier_id}/runs/"
+  | "/api/adventure-levels/{level_id}/drill/"
+  | "/api/adventure-levels/{level_id}/drill/results/"
+  | "/api/adventure-levels/{level_id}/drill/run/"
   | "/api/adventure-levels/{level_id}/runs/"
   | "/api/adventure-runs/{run_id}/"
   | "/api/adventure-runs/{run_id}/files/"
@@ -229,6 +244,9 @@ export type ApiMethodByPath = {
   "/api/admin/users/{user_id}/": "GET"
   "/api/admin/users/{user_id}/actions/": "POST"
   "/api/adventure-level-tiers/{tier_id}/runs/": "POST"
+  "/api/adventure-levels/{level_id}/drill/": "GET"
+  "/api/adventure-levels/{level_id}/drill/results/": "POST"
+  "/api/adventure-levels/{level_id}/drill/run/": "DELETE" | "PUT"
   "/api/adventure-levels/{level_id}/runs/": "POST"
   "/api/adventure-runs/{run_id}/": "DELETE" | "GET"
   "/api/adventure-runs/{run_id}/files/": "DELETE" | "PATCH" | "POST" | "PUT"
@@ -306,6 +324,10 @@ export const apiOperations = {
   admin_users_retrieve_2: { method: "GET", path: "/api/admin/users/{user_id}/", operationId: "admin_users_retrieve_2", tags: ["admin"] },
   admin_users_actions_create: { method: "POST", path: "/api/admin/users/{user_id}/actions/", operationId: "admin_users_actions_create", tags: ["admin"] },
   adventure_level_tiers_runs_create: { method: "POST", path: "/api/adventure-level-tiers/{tier_id}/runs/", operationId: "adventure_level_tiers_runs_create", tags: ["adventure-level-tiers"] },
+  adventure_levels_drill_retrieve: { method: "GET", path: "/api/adventure-levels/{level_id}/drill/", operationId: "adventure_levels_drill_retrieve", tags: ["adventure-levels"] },
+  adventure_levels_drill_results_create: { method: "POST", path: "/api/adventure-levels/{level_id}/drill/results/", operationId: "adventure_levels_drill_results_create", tags: ["adventure-levels"] },
+  adventure_levels_drill_run_destroy: { method: "DELETE", path: "/api/adventure-levels/{level_id}/drill/run/", operationId: "adventure_levels_drill_run_destroy", tags: ["adventure-levels"] },
+  adventure_levels_drill_run_update: { method: "PUT", path: "/api/adventure-levels/{level_id}/drill/run/", operationId: "adventure_levels_drill_run_update", tags: ["adventure-levels"] },
   adventure_levels_runs_create: { method: "POST", path: "/api/adventure-levels/{level_id}/runs/", operationId: "adventure_levels_runs_create", tags: ["adventure-levels"] },
   adventure_runs_destroy: { method: "DELETE", path: "/api/adventure-runs/{run_id}/", operationId: "adventure_runs_destroy", tags: ["adventure-runs"] },
   adventure_runs_retrieve: { method: "GET", path: "/api/adventure-runs/{run_id}/", operationId: "adventure_runs_retrieve", tags: ["adventure-runs"] },
@@ -403,6 +425,10 @@ export type ApiRequestBodyByOperation = {
   admin_users_retrieve_2: null
   admin_users_actions_create: ApiSchemas["AdminUserActionRequest"]
   adventure_level_tiers_runs_create: ApiSchemas["AdventureLevelTierRunStart"]
+  adventure_levels_drill_retrieve: null
+  adventure_levels_drill_results_create: ApiSchemas["DrillReport"]
+  adventure_levels_drill_run_destroy: null
+  adventure_levels_drill_run_update: ApiSchemas["DrillRunState"]
   adventure_levels_runs_create: null
   adventure_runs_destroy: null
   adventure_runs_retrieve: null
@@ -497,6 +523,10 @@ export type ApiResponseBodyByOperation = {
   admin_users_retrieve_2: ApiSchemas["AdminUserDetail"]
   admin_users_actions_create: ApiSchemas["AdminUserDetail"]
   adventure_level_tiers_runs_create: ApiSchemas["AdventureLevelTierRunResponse"]
+  adventure_levels_drill_retrieve: ApiSchemas["LevelDrillPlanResponse"]
+  adventure_levels_drill_results_create: ApiSchemas["DrillReportResponse"]
+  adventure_levels_drill_run_destroy: ApiSchemas["DrillRunStateResponse"]
+  adventure_levels_drill_run_update: ApiSchemas["DrillRunStateResponse"]
   adventure_levels_runs_create: ApiSchemas["AdventureRunResponse"]
   adventure_runs_destroy: null
   adventure_runs_retrieve: ApiSchemas["AdventureRunResponse"]

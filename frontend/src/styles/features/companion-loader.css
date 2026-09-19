@@ -1,13 +1,21 @@
-/* Loading state: a commit rail being written, with the equipped companion
+/* The loading screen: a commit rail being written, with the equipped companion
    running along it. The rail is the whole signal - it carries the loader on
-   its own when no companion is shown. */
-.git-it-loading-state--screen {
-  min-height: 100dvh;
+   its own when no companion is shown.
+
+   It is a fixed overlay, never a box in the layout flow: the component-level
+   loader is the spinner in spinner.css. */
+.git-it-loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-loading-screen);
+  padding: var(--space-4);
+  background: hsl(var(--background));
 }
 
-/* A wait too short to perceive must not flash. The box is held from the first
-   frame so nothing jumps; only the content waits to paint. */
-.git-it-loading-state__frame {
+/* A wait too short to perceive must not flash. The overlay itself is opaque
+   from the first frame so nothing behind it flickers through; only the content
+   waits to paint. */
+.git-it-loading-screen__frame {
   position: relative;
   display: flex;
   width: 100%;
@@ -17,14 +25,14 @@
   opacity: 0;
 }
 
-.git-it-loading-state.is-painted .git-it-loading-state__frame {
+.git-it-loading-screen.is-painted .git-it-loading-screen__frame {
   opacity: 1;
   transition: opacity 220ms var(--ease-out);
 }
 
 /* Copy: the label is the machine reporting state, so it takes the mono voice;
    the description stays in the interface sans. */
-.git-it-loading-state__copy {
+.git-it-loading-screen__copy {
   display: grid;
   gap: var(--space-2);
   max-width: 40ch;
@@ -33,7 +41,7 @@
 
 /* First-run greeting. The one place the world's display voice enters a
    loading state, and only for a player who owns no companion yet. */
-.git-it-loading-state__welcome {
+.git-it-loading-screen__welcome {
   margin: 0 0 var(--space-1);
   color: hsl(var(--foreground));
   font-family: var(--font-display);
@@ -47,17 +55,17 @@
   overflow-wrap: anywhere;
 }
 
-.git-it-loading-state__label {
+.git-it-loading-screen__label {
   margin: 0;
   color: hsl(var(--foreground));
   font-family: var(--font-mono);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   font-weight: 600;
   letter-spacing: 0.02em;
 }
 
-.git-it-loading-state__description,
-.git-it-loading-state__slow {
+.git-it-loading-screen__description,
+.git-it-loading-screen__slow {
   margin: 0;
   color: hsl(var(--muted-foreground));
   font-size: var(--text-sm);
@@ -65,35 +73,17 @@
   text-wrap: pretty;
 }
 
-.git-it-loading-state__slow {
+.git-it-loading-screen__slow {
   color: hsl(var(--warning));
   font-family: var(--font-mono);
-  font-size: var(--text-xs);
-}
-
-.git-it-loading-state--screen .git-it-loading-state__label,
-.git-it-loading-state--page .git-it-loading-state__label {
-  font-size: var(--text-base);
-}
-
-.git-it-loading-state--panel .git-it-loading-state__copy,
-.git-it-loading-state--inline .git-it-loading-state__copy {
-  margin-top: var(--space-3);
-}
-
-.git-it-loading-state--compact .git-it-loading-state__copy {
-  margin-top: var(--space-2);
-}
-
-.git-it-loading-state--compact .git-it-loading-state__label {
   font-size: var(--text-xs);
 }
 
 /* Stage: the companion's box is bottom-aligned so its pixel-anchored feet
    land exactly on the rail instead of floating above it. */
 .git-it-companion-loader {
-  --loader-size: 11rem;
-  --loader-rail-width: 22rem;
+  --loader-size: 15rem;
+  --loader-rail-width: 26rem;
   --loader-node: 7px;
   --loader-head: 4rem;
   --loader-cycle: 2.4s;
@@ -103,41 +93,6 @@
   width: min(30rem, 90vw);
   flex-direction: column;
   align-items: center;
-}
-
-.git-it-companion-loader--screen {
-  --loader-size: 15rem;
-  --loader-rail-width: 26rem;
-}
-
-.git-it-companion-loader--page {
-  --loader-size: 13rem;
-  --loader-rail-width: 24rem;
-}
-
-.git-it-companion-loader--panel {
-  --loader-size: 7rem;
-  --loader-rail-width: 14rem;
-  --loader-node: 6px;
-  --loader-head: 2.75rem;
-}
-
-.git-it-companion-loader--inline {
-  --loader-size: 5rem;
-  --loader-rail-width: 11rem;
-  --loader-node: 5px;
-  --loader-head: 2.25rem;
-
-  width: min(18rem, 84vw);
-}
-
-.git-it-companion-loader--compact {
-  --loader-size: 3.5rem;
-  --loader-rail-width: 8rem;
-  --loader-node: 4px;
-  --loader-head: 1.75rem;
-
-  width: min(11rem, 76vw);
 }
 
 .git-it-companion-loader__stage {
@@ -280,7 +235,7 @@
    breathes instead: a slow opacity change carries no vestibular trigger the way
    a sweep across the screen does. */
 @media (prefers-reduced-motion: reduce) {
-  .git-it-loading-state.is-painted .git-it-loading-state__frame {
+  .git-it-loading-screen.is-painted .git-it-loading-screen__frame {
     transition: none;
   }
 

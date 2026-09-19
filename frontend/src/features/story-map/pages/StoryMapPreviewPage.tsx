@@ -141,6 +141,9 @@ const PREVIEW_LEVELS: AdventureLevelSummary[] = Array.from({ length: 6 }, (_, in
   // the mixed star state used to assess the map's visual hierarchy.
   is_passed: true,
   tiers: previewTiers(index),
+  // Mixed drill state: the first levels are drilled, the current one is not,
+  // so the preview shows both the quiet row and the accented one.
+  drill: { available: true, cleared: index < 3, best_accuracy: index < 3 ? 90 : 0 },
 }))
 
 const PREVIEW_CHALLENGES: ChallengeSummary[] = [

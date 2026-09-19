@@ -34,9 +34,6 @@ const EFFECT_ROOTS = {
   black: '/cosmetics/companion/black/effects/skill-lightning-25',
 }
 
-// Not player-facing skills: keep them out of the showcase.
-const EXCLUDE = new Set(['miss'])
-
 // Rough git-workflow order so the showcase reads as a progression rather than
 // manifest insertion order. Unknown families sort after these, alphabetically.
 const ORDER = [
@@ -60,7 +57,6 @@ for (const [slug, effectRoot] of Object.entries(EFFECT_ROOTS)) {
   const sprites = manifest.sprites ?? {}
   const entries = []
   for (const [name, entry] of Object.entries(sprites)) {
-    if (EXCLUDE.has(name)) continue
     // Layered effects have no `<name>.png`; their still points at `<name>_front.png`.
     // Verify the representative sheet named in the manifest actually exists.
     const sheetPath = resolve(PUBLIC, `.${String(entry.src)}`)

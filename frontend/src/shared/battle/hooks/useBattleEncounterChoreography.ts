@@ -1,11 +1,13 @@
 import { useCallback } from 'react'
 import type { MutableRefObject } from 'react'
 
+import { monsterAssetManifest, warmBattleAssets } from '@/shared/battle/battleAssets'
 import type { BattleQueue } from '@/shared/battle/battleQueue'
 import type { BattleBackdropHandle } from '@/shared/battle/components/BattleBackdrop'
 import type { MonsterActorHandle } from '@/shared/battle/components/MonsterActor'
 import type { PlayerActorHandle } from '@/shared/battle/components/PlayerActor'
 import type { BattleMonster } from '@/shared/battle/types'
+import type { StoryWorldDef } from '@/shared/story-worlds/types'
 
 import {
   CAMERA_FOLLOW_FRAC,
@@ -24,12 +26,19 @@ import {
 } from './battleMotion'
 import type { BattleTransitionCueConfig, EncounterOptions } from './battleDirectorTypes'
 
+/**
+ * How long a wave swap will wait for the incoming foe's sheets. The departure
+ * travel usually covers the fetch on its own; this only bounds a cold cache.
+ */
+const MONSTER_ART_WAIT_MS = 1500
+
 type EncounterChoreographyDeps = {
   queue: BattleQueue
   rosterRef: MutableRefObject<BattleMonster[]>
   playerRef: MutableRefObject<PlayerActorHandle | null>
   backdropRef: MutableRefObject<BattleBackdropHandle | null>
   monsterHandles: MutableRefObject<Map<number, MonsterActorHandle>>
+  storyWorldRef: MutableRefObject<StoryWorldDef>
   measureWideFrame: () => { monsterEntryFromPx: number; monsterPeekPx: number }
   measureClosureRun: () => { blueClosurePx: number }
   centerScrollPx: () => number
@@ -51,6 +60,7 @@ export function useBattleEncounterChoreography({
   playerRef,
   backdropRef,
   monsterHandles,
+  storyWorldRef,
   measureWideFrame,
   measureClosureRun,
   centerScrollPx,
@@ -167,6 +177,12 @@ export function useBattleEncounterChoreography({
       const entry = opts?.entry ?? 'run'
       const travelsBackToEdge = Boolean(opts?.travel && entry === 'run' && !reduced)
       const cue = opts?.transitionCue ?? null
+      // Start decoding the incoming foe now, so the fetch overlaps the beats
+      // that play before it walks on.
+      const artReady = warmBattleAssets(
+        monsterAssetManifest(storyWorldRef.current, next.map((monster) => monster.species)),
+        { timeoutMs: MONSTER_ART_WAIT_MS },
+      )
 
       // Departure: the previous encounter cleared - Blue runs back to the edge.
       // The world pan rides the arrival's travel, not the exit.
@@ -183,6 +199,15 @@ export function useBattleEncounterChoreography({
           },
         })
       }
+
+      // A foe whose sheets are still loading pops in mid-entrance. Cosmetic, so
+      // a fast-forward drops the wait with the rest of the show.
+      queue.enqueue({
+        cosmetic: true,
+        run: async (ctx) => {
+          if (!ctx.fast) await artReady
+        },
+      })
 
       queue.enqueue({
         run: (ctx) => {
@@ -240,6 +265,7 @@ export function useBattleEncounterChoreography({
       setEntranceHidden,
       resetPlayerVitals,
       setRoster,
+      storyWorldRef,
     ],
   )
 

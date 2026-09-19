@@ -11,7 +11,6 @@ import { useBattleResolveQueue } from './useBattleResolveQueue'
 import type { BattleDirector, BattleTransitionCue, BattleTransitionCueConfig } from './battleDirectorTypes'
 import type { BattleMonster } from '@/shared/battle/types'
 
-export { missedSpellFloorTarget } from './battleMotion'
 export type { BattleDirector,  BattleTransitionCueConfig, EncounterOptions } from './battleDirectorTypes'
 
 /**
@@ -66,7 +65,6 @@ export function useBattleDirector(): BattleDirector {
     monsterImpactAnchor,
     monsterFeetAnchor,
     monsterSizeScale,
-    missedSpellGroundAnchor,
     measureWideFrame,
     measureClosureRun,
     centerScrollPx,
@@ -126,6 +124,7 @@ export function useBattleDirector(): BattleDirector {
     playerRef,
     backdropRef,
     monsterHandles,
+    storyWorldRef,
     measureWideFrame,
     measureClosureRun,
     centerScrollPx,
@@ -157,7 +156,6 @@ export function useBattleDirector(): BattleDirector {
     monsterImpactAnchor,
     monsterFeetAnchor,
     monsterSizeScale,
-    missedSpellGroundAnchor,
     playApproach,
     playCenterBeat,
     emitTransitionCue,

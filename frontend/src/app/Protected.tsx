@@ -10,7 +10,7 @@ import {
 } from '@/shared/auth/useAuth'
 import { refreshSharedAccessToken } from '@/shared/api/httpClient'
 import { queryKeys } from '@/shared/api/queryKeys'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
 export function Protected({ children }: { children: ReactElement }) {
   const token = useAuthStore((state) => state.accessToken)
@@ -45,10 +45,9 @@ export function Protected({ children }: { children: ReactElement }) {
   if (!token || !user) {
     if (bootstrapQuery.isError) return <Navigate replace to="/login" />
     return (
-      <LoadingState
+      <LoadingScreen
         description="Checking your saved login before opening the workspace."
         label="Restoring session"
-        variant="screen"
       />
     )
   }

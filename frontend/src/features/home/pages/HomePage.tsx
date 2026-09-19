@@ -8,7 +8,7 @@ import { statsApi } from '@/features/stats/api/statsApi'
 import { activityWindowFromParam } from '@/features/stats/utils/activityWindow'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
 export function HomePage() {
   const [searchParams] = useSearchParams()
@@ -33,10 +33,9 @@ export function HomePage() {
 
   if (home.isLoading || stats.isLoading) {
     return (
-      <LoadingState
+      <LoadingScreen
         description="Pulling your rank, streak, stats, and achievements."
         label="Loading home"
-        variant="page"
       />
     )
   }

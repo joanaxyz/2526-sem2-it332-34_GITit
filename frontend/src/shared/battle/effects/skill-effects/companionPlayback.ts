@@ -6,8 +6,6 @@ import { playChargeProjectileLayer, playProjectileLayer, playTargetLayer } from 
 import {
   CENTER_ANCHOR,
   FEET_ANCHOR,
-  MISS_LANDING_ANCHOR,
-  PROJECTILE_NOSE_ANCHOR,
   animateSheet,
   containSpriteInHost,
   finishAnimation,
@@ -80,83 +78,6 @@ async function playGatherOrbProjectileImpact(
     onLaunch: spec.element ? () => playSkillSound(spec.element, 'projectile') : undefined,
     onImpact: spec.element ? () => playSkillSound(spec.element, 'impact') : undefined,
   })
-}
-
-async function playGroundBurst(ctx: EffectContext, at: { x: number; y: number }): Promise<void> {
-  const burst = document.createElement('div')
-  Object.assign(burst.style, {
-    position: 'absolute',
-    left: '0',
-    top: '0',
-    width: '148px',
-    height: '52px',
-    pointerEvents: 'none',
-    userSelect: 'none',
-    transform: `translate(${at.x - 74}px, ${at.y - 26}px)`,
-    opacity: '0',
-    borderRadius: '999px',
-    background:
-      'radial-gradient(ellipse at center, rgba(var(--theme-primary-rgb),0.45), rgba(var(--theme-primary-soft-rgb),0.22) 42%, transparent 72%)',
-    filter: 'blur(0.5px) drop-shadow(0 0 12px rgba(var(--theme-primary-rgb),0.34))',
-    willChange: 'transform, opacity',
-  } satisfies Partial<CSSStyleDeclaration>)
-  ctx.layer.appendChild(burst)
-  const duration = 260
-  const flare = burst.animate(
-    [
-      { transform: `translate(${at.x - 48}px, ${at.y - 18}px) scale(0.42)`, opacity: 0 },
-      { transform: `translate(${at.x - 74}px, ${at.y - 26}px) scale(1)`, opacity: 0.88, offset: 0.28 },
-      { transform: `translate(${at.x - 82}px, ${at.y - 26}px) scale(1.18)`, opacity: 0 },
-    ],
-    { duration, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' },
-  )
-  await finishAnimation(flare, duration)
-  flare.cancel()
-  burst.remove()
-}
-
-async function playMissProjectile(ctx: EffectContext, spec: SkillSpriteSpec): Promise<void> {
-  const baseW = spec.sheet.frameWidth * spec.scale
-  const baseH = spec.sheet.frameHeight * spec.scale
-  const contained = containSpriteInHost(ctx.layer, ctx.to, MISS_LANDING_ANCHOR, baseW, baseH, {
-    grow: 1,
-    minScaleBeforeShift: 0.58,
-  })
-  const scale = spec.scale * contained.scale
-  const impact = contained.point
-  const node = spriteNode(ctx.layer, spec.sheet, {
-    scale,
-    opacity: 1,
-    filter: 'saturate(0.72) brightness(0.9)',
-  })
-  const w = spec.sheet.frameWidth * scale
-  const h = spec.sheet.frameHeight * scale
-  const size = { w, h }
-  const duration = spec.durationMs
-  const midpoint = {
-    x: ctx.from.x + (impact.x - ctx.from.x) * 0.58,
-    y: ctx.from.y + (impact.y - ctx.from.y) * 0.28 - 18,
-  }
-  const plunge = {
-    x: ctx.from.x + (impact.x - ctx.from.x) * 0.86,
-    y: impact.y - h * 0.18,
-  }
-
-  const sheetRun = animateSheet(node, spec.sheet, duration)
-  const travel = node.animate(
-    [
-      { transform: placeAt(ctx.from, size, { x: 0.64, y: 0.58 }), opacity: 0.92 },
-      { transform: placeAt(midpoint, size, PROJECTILE_NOSE_ANCHOR), opacity: 1, offset: 0.48 },
-      { transform: placeAt(plunge, size, { x: 0.56, y: 0.64 }), opacity: 1, offset: 0.78 },
-      { transform: placeAt(impact, size, MISS_LANDING_ANCHOR), opacity: 1, offset: 0.88 },
-      { transform: placeAt(impact, size, MISS_LANDING_ANCHOR), opacity: 0 },
-    ],
-    { duration, easing: 'cubic-bezier(0.16, 0.84, 0.24, 1)', fill: 'forwards' },
-  )
-  await Promise.all([sheetRun, finishAnimation(travel, duration)])
-  travel.cancel()
-  node.remove()
-  await playGroundBurst(ctx, impact)
 }
 
 /** Resolve the runtime placement anchor a target/ground spec was baked for.
@@ -277,17 +198,8 @@ export async function playResolvedSkillEffect(ctx: EffectContext, spec: SkillSpr
     await playGround(ctx, sized)
     return
   }
-  if (sized.playback === 'miss') {
-    await playMissProjectile(ctx, sized)
-    return
-  }
   playSkillSound(sized.element, sized.anchor === 'center' ? 'target-center' : 'target-ground')
   await playTarget(ctx, sized)
-}
-
-export async function playMissEffect(ctx: EffectContext, spec: SkillSpriteSpec): Promise<void> {
-  if (reduceMotion()) return
-  await playMissProjectile(ctx, spec)
 }
 
 export async function playSpriteProjectileEffect(

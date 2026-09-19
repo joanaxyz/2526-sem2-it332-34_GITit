@@ -16,7 +16,7 @@ import { chapterTitle, firstOpenChapter } from '@/features/story-map/utils/story
 import { queryKeys } from '@/shared/api/queryKeys'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 import { useAuthStore } from '@/shared/auth/useAuth'
 import { getStoryWorld } from '@/shared/story-worlds/registry'
@@ -148,7 +148,7 @@ export function StoryMapPage() {
   })
 
   if (chaptersQuery.isLoading || (orientationRequested && orientationLessonsQuery.isPending)) {
-    return <LoadingState companionSlug={companionSlug} description="Preparing the story map." label="Loading map" variant="page" />
+    return <LoadingScreen companionSlug={companionSlug} description="Preparing the story map." label="Loading map" />
   }
   if (chaptersQuery.isError) {
     return <ErrorState title="Could not load map" description={chaptersQuery.error.message} />
