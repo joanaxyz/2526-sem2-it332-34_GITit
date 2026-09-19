@@ -1,36 +1,29 @@
 /* Answer boards.
    ------------------------------------------------------------------
-   Pick-one answers reuse the level callout's pattern - one bordered
-   group, hairline-split rows - so the drill reads as part of the map it
-   hangs off rather than a separate product. Single tokens get chips
-   instead, because a two-character answer stretched across a full-width
-   row looks like a bug.
+   Discrete tiles, not hairline rows inside one box. A drill is answered
+   by aim: the eye compares three or four candidates and the hand commits
+   to one, and separated targets are read and hit faster than rows that
+   share a container. The tiles sit on a 2px ledge of their own edge and
+   travel down onto it when pressed - the only honest way to say "push
+   this" on a screen whose other controls are text.
+
+   Single tokens keep the chip shape, because a two-character answer
+   stretched across a full-width tile looks like a bug.
 
    Graded state never rests on colour alone: the answer and the wrong
    pick both carry an icon, and both carry a screen-reader label. */
 
 .drill-choices {
   display: grid;
+  gap: 0.5rem;
   margin: var(--space-4) 0 0;
   padding: 0;
   list-style: none;
 }
 
-.drill-choices[data-layout='rows'] {
-  overflow: hidden;
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.2);
-  border-radius: var(--radius-lg);
-  background: rgba(6, 15, 30, 0.6);
-}
-
-.drill-choices[data-layout='rows'] > li + li .drill-choice {
-  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.12);
-}
-
 .drill-choices[data-layout='chips'] {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
 }
 
 .drill-choice {
@@ -39,10 +32,12 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.7rem;
-  min-height: 3rem;
-  padding: 0.6rem 0.85rem;
-  border: 0;
-  background: transparent;
+  min-height: 3.25rem;
+  padding: 0.62rem 0.9rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.22);
+  border-radius: var(--radius-lg);
+  background: rgba(6, 15, 30, 0.62);
+  box-shadow: 0 2px 0 rgba(var(--theme-primary-rgb), 0.16);
   color: hsl(var(--foreground));
   text-align: left;
   cursor: pointer;
@@ -50,6 +45,7 @@
     background var(--motion-fast) ease,
     border-color var(--motion-fast) ease,
     box-shadow var(--motion-fast) ease,
+    transform var(--motion-fast) var(--ease-out),
     opacity var(--motion-fast) ease;
   animation: drill-choice-in 220ms var(--ease-out) both;
 }
@@ -67,7 +63,7 @@
 @keyframes drill-choice-in {
   from {
     opacity: 0;
-    transform: translateX(-0.4rem);
+    transform: translateY(0.4rem);
   }
 }
 
@@ -79,7 +75,6 @@
   min-height: 2.75rem;
   grid-template-columns: auto auto;
   gap: 0.5rem;
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.26);
   border-radius: var(--radius-pill);
   padding: 0.35rem 0.9rem 0.35rem 0.45rem;
   background: rgba(var(--theme-surface-rgb), 0.85);
@@ -87,12 +82,23 @@
 
 .drill-choice:not(:disabled):hover,
 .drill-choice:focus-visible {
+  border-color: rgba(var(--theme-primary-rgb), 0.45);
   background: rgba(var(--theme-primary-rgb), 0.1);
+  box-shadow: 0 2px 0 rgba(var(--theme-primary-rgb), 0.32);
   outline: none;
 }
 
+/* The press. The tile drops the 2px it was standing on, which is the
+   whole point of the ledge - the feedback lands before the verdict does. */
+.drill-choice:not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 rgba(var(--theme-primary-rgb), 0);
+}
+
 .drill-choice:focus-visible {
-  box-shadow: inset 0 0 0 2px rgba(var(--theme-primary-rgb), 0.55);
+  box-shadow:
+    inset 0 0 0 2px rgba(var(--theme-primary-rgb), 0.55),
+    0 2px 0 rgba(var(--theme-primary-rgb), 0.32);
 }
 
 .drill-choice-key {
@@ -127,7 +133,9 @@
 }
 
 .drill-choice[data-state='selected'] {
+  border-color: rgb(var(--theme-primary-rgb));
   background: rgba(var(--theme-primary-rgb), 0.14);
+  box-shadow: 0 2px 0 rgba(var(--theme-primary-rgb), 0.55);
 }
 
 .drill-choice[data-state='selected'] .drill-choice-key {
@@ -137,7 +145,9 @@
 }
 
 .drill-choice[data-state='answer'] {
+  border-color: hsl(var(--success) / 0.7);
   background: hsl(var(--success) / 0.14);
+  box-shadow: 0 2px 0 hsl(var(--success) / 0.45);
 }
 
 .drill-choice[data-state='answer'] .drill-choice-key {
@@ -145,17 +155,11 @@
   color: hsl(var(--success));
 }
 
-.drill-choices[data-layout='chips'] .drill-choice[data-state='answer'] {
-  border-color: hsl(var(--success) / 0.7);
-}
-
 .drill-choice[data-state='wrong'] {
-  background: hsl(var(--destructive) / 0.12);
-  animation: drill-shake 220ms var(--ease-out) both;
-}
-
-.drill-choices[data-layout='chips'] .drill-choice[data-state='wrong'] {
   border-color: hsl(var(--destructive) / 0.6);
+  background: hsl(var(--destructive) / 0.12);
+  box-shadow: 0 2px 0 hsl(var(--destructive) / 0.45);
+  animation: drill-shake 220ms var(--ease-out) both;
 }
 
 .drill-choice[data-state='wrong'] .drill-choice-key {
@@ -163,8 +167,13 @@
   color: hsl(var(--destructive));
 }
 
+/* Neither picked nor right: it recedes rather than being read again. The
+   ledge goes with it - nothing here is pressable any more. */
 .drill-choice[data-state='muted'] {
-  opacity: 0.42;
+  border-color: rgba(var(--theme-primary-rgb), 0.12);
+  background: transparent;
+  box-shadow: none;
+  opacity: 0.58;
 }
 
 .drill-choice-mark {
@@ -209,5 +218,9 @@
   .drill-choice[data-state='wrong'] {
     animation: none;
     transition: none;
+  }
+
+  .drill-choice:not(:disabled):active {
+    transform: none;
   }
 }

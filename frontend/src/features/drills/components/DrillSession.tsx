@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { X } from 'lucide-react'
 
 import { DrillQuestion } from '@/features/drills/components/DrillQuestion'
-import { DrillRuneRail } from '@/features/drills/components/DrillRuneRail'
+import { DrillProgressTrack } from '@/features/drills/components/DrillProgressTrack'
 import { DrillSummary } from '@/features/drills/components/DrillSummary'
 import { DrillVerdictBar } from '@/features/drills/components/DrillVerdictBar'
 import { useDrillSession } from '@/features/drills/hooks/useDrillSession'
@@ -57,36 +57,44 @@ export function DrillSession({ plan }: { plan: DrillPlan }) {
 
   return (
     <div className="drill-screen">
+      {/* Identity and progress share one band. They were two, and the rail
+          that sat below cost a whole row of a screen that cannot scroll -
+          on a laptop that row came out of the question. */}
       <header className="drill-header">
         <div className="drill-identity">
           <p className="drill-wordmark">Squire&rsquo;s Drill</p>
-          <p className="drill-level">
-            {plan.level.chapter_number ? (
-              <span className="drill-level-chapter">
-                Chapter {plan.level.chapter_number}
-                <span aria-hidden="true"> · </span>
-              </span>
-            ) : null}
-            {plan.level.title}
-          </p>
+          {/* The summary titles itself with the level, so carrying it up
+              here too would print the same string twice a hundred pixels
+              apart. */}
+          {session.finished ? null : (
+            <p className="drill-level">
+              {plan.level.chapter_number ? (
+                <span className="drill-level-chapter">
+                  Chapter {plan.level.chapter_number}
+                  <span aria-hidden="true"> · </span>
+                </span>
+              ) : null}
+              {plan.level.title}
+            </p>
+          )}
+          <Link className="drill-exit" to={exitPath} aria-label="Leave the drill">
+            <X aria-hidden="true" />
+          </Link>
         </div>
-        <Link className="drill-exit" to={exitPath} aria-label="Leave the drill">
-          <X aria-hidden="true" />
-        </Link>
+        {session.finished ? null : <DrillProgressTrack segments={session.rail} />}
       </header>
 
-      {session.finished ? null : <DrillRuneRail segments={session.rail} />}
-
-      {/* Shown once, on arrival only: a half-lit rail with no explanation
-          reads as a bug the first time someone sees it. It leaves on the
-          first answer rather than lingering as chrome. */}
-      {!session.finished && session.resumed && session.round === 0 ? (
-        <p className="drill-resumed" role="status">
-          Picked up where you left off.
-        </p>
-      ) : null}
-
       <main className="drill-stage">
+        {/* Shown once, on arrival only: a part-filled track with no
+            explanation reads as a bug the first time someone sees it. It
+            sits in the question column so it lines up with the question it
+            is explaining, and leaves on the first answer. */}
+        {!session.finished && session.resumed && session.round === 0 ? (
+          <p className="drill-resumed" role="status">
+            Picked up where you left off.
+          </p>
+        ) : null}
+
         {session.finished ? (
           <DrillSummary
             plan={plan}

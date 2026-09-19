@@ -6,9 +6,11 @@
    pushes the question up), and this is the one accessible way to do that
    without animating a height on a box whose content size is unknown.
 
-   Tone is carried by the top hairline and an icon plus words - the
-   system's rule that pass/fail never rests on colour holds here more
-   than anywhere, because this is the surface a learner reads fastest. */
+   The whole sheet takes the tone, not just its top hairline. This is the
+   surface a learner reads fastest and often out of the corner of the eye,
+   and a wash carries further than a 1px line - but the system's rule that
+   pass/fail never rests on colour still holds, so the wash arrives with a
+   marked icon and the word for it. */
 
 .drill-verdict {
   display: grid;
@@ -17,19 +19,27 @@
   background: linear-gradient(180deg, rgba(5, 13, 26, 0.96), rgba(2, 7, 16, 0.98));
   transition:
     grid-template-rows 220ms var(--ease-out),
+    background var(--motion-normal) ease,
+    box-shadow var(--motion-normal) ease,
     border-color var(--motion-normal) ease;
 }
 
 .drill-verdict[data-tone='right'] {
   grid-template-rows: 1fr auto;
-  border-top-color: hsl(var(--success) / 0.6);
-  box-shadow: 0 -1px 18px hsl(var(--success) / 0.1);
+  border-top-color: hsl(var(--success) / 0.75);
+  background:
+    linear-gradient(180deg, hsl(var(--success) / 0.14), hsl(var(--success) / 0.05)),
+    linear-gradient(180deg, rgba(5, 13, 26, 0.96), rgba(2, 7, 16, 0.98));
+  box-shadow: 0 -2px 26px hsl(var(--success) / 0.16);
 }
 
 .drill-verdict[data-tone='wrong'] {
   grid-template-rows: 1fr auto;
-  border-top-color: hsl(var(--destructive) / 0.6);
-  box-shadow: 0 -1px 18px hsl(var(--destructive) / 0.1);
+  border-top-color: hsl(var(--destructive) / 0.75);
+  background:
+    linear-gradient(180deg, hsl(var(--destructive) / 0.14), hsl(var(--destructive) / 0.05)),
+    linear-gradient(180deg, rgba(5, 13, 26, 0.96), rgba(2, 7, 16, 0.98));
+  box-shadow: 0 -2px 26px hsl(var(--destructive) / 0.16);
 }
 
 .drill-teach-slot {
@@ -80,8 +90,12 @@
   margin: 0;
 }
 
+/* Mist is the floor for small labels on Night Sky, but these sit on a
+   tinted wash, and a cool grey over a red or cyan ground goes muddy
+   rather than quiet. A transparency of the ink keeps the hue honest and
+   the contrast above the floor. */
 .drill-teach-label {
-  color: hsl(var(--muted-foreground));
+  color: rgba(232, 246, 250, 0.66);
   font-family: var(--font-mono);
   font-size: var(--text-2xs);
   font-weight: 800;
@@ -113,9 +127,24 @@
   line-height: 1.4;
 }
 
+/* The Read rung answers with prose and glosses with a command, so the
+   voices swap with it. A command must always be the machine's line and a
+   sentence must always be the interface's, whichever slot it lands in. */
+.drill-confirm code[data-voice='prose'],
+.drill-teach-row code[data-voice='prose'] {
+  font-family: var(--font-sans);
+  font-weight: 700;
+}
+
+.drill-confirm em[data-voice='machine'],
+.drill-teach-row em[data-voice='machine'] {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
 .drill-teach-note {
   margin: 0.15rem 0 0;
-  color: hsl(var(--muted-foreground));
+  color: rgba(232, 246, 250, 0.62);
   font-size: var(--text-xs);
 }
 
@@ -132,16 +161,39 @@
 .drill-verdict-state {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.55rem;
   min-width: 0;
   margin: 0;
-  font-size: var(--text-sm);
-  font-weight: 700;
+  font-size: var(--text-md);
+  font-weight: 800;
+  letter-spacing: -0.005em;
 }
 
-.drill-verdict-state svg {
-  width: 1.1rem;
-  height: 1.1rem;
+/* The mark, seated in its own disc. At a glance the shape reads before
+   the word does, which is what a learner in a fast loop actually uses. */
+.drill-verdict-badge {
+  display: grid;
+  width: 1.65rem;
+  height: 1.65rem;
+  flex: none;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: currentcolor;
+  animation: drill-verdict-mark 260ms var(--ease-out) both;
+}
+
+.drill-verdict-badge svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  color: hsl(var(--background));
+  stroke-width: 3;
+}
+
+@keyframes drill-verdict-mark {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
 }
 
 .drill-verdict[data-tone='right'] .drill-verdict-state {
@@ -198,5 +250,9 @@
 @media (prefers-reduced-motion: reduce) {
   .drill-verdict {
     transition: none;
+  }
+
+  .drill-verdict-badge {
+    animation: none;
   }
 }

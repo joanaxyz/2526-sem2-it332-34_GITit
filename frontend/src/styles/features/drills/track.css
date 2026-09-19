@@ -1,0 +1,200 @@
+/* The progress track.
+   ------------------------------------------------------------------
+   One bar, filling left to right, because "how far in am I" is one
+   question. It sits flush under the drill's identity line and carries
+   the whole answer: the count that used to sit beside it said the same
+   thing twice, at a size nobody read.
+
+   Notched into one length per command and weighted by that command's
+   ladder, so the bar carries the session's scale without becoming a
+   chart. The fill runs straight through the notches: a drill cycles
+   between its cards rather than finishing them in turn, and filling each
+   notch separately scattered lit dashes along the rail that the eye had
+   to add up.
+
+   Every fill is two layers: the bright front, and behind it the dim reach
+   mark that remembers the furthest the session ever got. A miss steps a
+   rung back, so the bright edge recedes and the dim one stays - ground to
+   win back, not ground destroyed.
+
+   At the end the same bar switches to the record: each notch fills from
+   its own command, and amber marks the ones that needed a second look. */
+
+.drill-track {
+  --track-height: 0.5rem;
+  --track-gap: 0.2rem;
+  padding: 0.1rem 0 0;
+}
+
+.drill-track-bar {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: var(--track-gap);
+  height: var(--track-height);
+  border-radius: var(--radius-pill);
+}
+
+.drill-track-seg {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  /* The unlit trough. Faint enough that an untouched bar does not read as
+     a filled grey one, bright enough to show how far the rail runs. */
+  background: rgba(232, 246, 250, 0.1);
+  transition: background var(--motion-normal) ease;
+}
+
+/* You are here. The lift is deliberately colourless: a blue trough under
+   the current command reads as a blue fill, and the bar then claims a
+   rung the learner has not cleared. Position is carried by the cap below
+   instead - a lit edge, which is the one thing a trough cannot imitate. */
+.drill-track-seg[data-state='active'] {
+  background: rgba(232, 246, 250, 0.15);
+}
+
+.drill-track-reach,
+.drill-track-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  transition: width 420ms var(--ease-out);
+}
+
+/* The high-water mark left behind by a miss. */
+.drill-track-reach {
+  width: var(--reach, 0%);
+  background: rgba(var(--theme-primary-rgb), 0.3);
+}
+
+.drill-track-fill {
+  width: var(--fill, 0%);
+  background: rgb(var(--theme-primary-rgb));
+}
+
+/* The live edge: a bright cap on the command in hand, so the eye knows
+   where the next gain will land. Reserved for the active segment - lit
+   caps all along the rail would be decoration, not signal. */
+.drill-track-seg[data-state='active'] {
+  /* The cap stands slightly proud of the rail, so it cannot be clipped. */
+  overflow: visible;
+}
+
+.drill-track-seg[data-state='active'] .drill-track-fill {
+  min-width: 0.18rem;
+  box-shadow: 0 0 10px rgba(var(--theme-primary-rgb), 0.55);
+}
+
+.drill-track-seg[data-state='active'] .drill-track-fill::after {
+  content: '';
+  position: absolute;
+  inset: -0.12rem -0.1rem;
+  left: auto;
+  width: 0.34rem;
+  border-radius: var(--radius-pill);
+  background: rgb(var(--theme-spark-rgb));
+  box-shadow: 0 0 9px 1px rgba(var(--theme-spark-rgb), 0.75);
+}
+
+/* Retired and clean: the glow is spent, the ground is kept. */
+.drill-track-seg[data-state='done'] .drill-track-fill {
+  background: rgba(var(--theme-primary-rgb), 0.85);
+  box-shadow: none;
+}
+
+/* Amber is the system's one "needs attention" note. A command that took a
+   second look says so quietly rather than passing as clean. */
+.drill-track-seg[data-missed] .drill-track-fill {
+  background: hsl(var(--warning) / 0.9);
+}
+
+.drill-track-seg[data-missed] .drill-track-reach {
+  background: hsl(var(--warning) / 0.3);
+}
+
+/* Left the queue without ever topping its ladder. The trough carries the
+   amber too, so the gap reads as "this one is still open", not as an
+   unrendered segment. */
+.drill-track-seg[data-unfinished] {
+  background: hsl(var(--warning) / 0.16);
+}
+
+.drill-track-seg[data-unfinished] .drill-track-fill {
+  background: hsl(var(--warning) / 0.75);
+}
+
+/* The gain. One pass of light down the length already earned - the
+   acknowledgement that a rung counted, which a width change alone cannot
+   give. It is the only motion in the drill that is not state. */
+.drill-track-sweep {
+  position: absolute;
+  inset: 0 auto 0 0;
+  overflow: hidden;
+  width: var(--swept, 0%);
+  border-radius: var(--radius-pill);
+  pointer-events: none;
+}
+
+.drill-track-sweep::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 45%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(var(--theme-spark-rgb), 0.9),
+    transparent
+  );
+  animation: drill-track-sweep 620ms var(--ease-out) both;
+}
+
+@keyframes drill-track-sweep {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(245%);
+  }
+}
+
+/* The end-of-drill state: the same bar, at a size that can be read as a
+   record rather than watched as a gauge. */
+.drill-track[data-mode='record'] {
+  --track-height: 0.75rem;
+  --track-gap: 0.28rem;
+  padding: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drill-track-reach,
+  .drill-track-fill,
+  .drill-track-seg {
+    transition: none;
+  }
+
+  .drill-track-sweep {
+    display: none;
+  }
+}
+
+/* Resume note ------------------------------------------------------- */
+
+.drill-resumed {
+  margin: 0 0 var(--space-4);
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-xs);
+  animation: drill-resumed-in 260ms var(--ease-out) both;
+}
+
+@keyframes drill-resumed-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drill-resumed {
+    animation: none;
+  }
+}

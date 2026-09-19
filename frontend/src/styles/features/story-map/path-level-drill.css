@@ -49,32 +49,23 @@
   background: rgba(var(--theme-primary-rgb), 0.13);
 }
 
-/* The same three-bar rune the drill's own rail is built from, so the
-   entry point and the surface it opens share one mark. */
+/* A notched rail in miniature: the same mark the drill's own progress
+   track is built from, so the entry point and the surface it opens still
+   share one shape. It was a vertical three-bar rune, which matched the
+   rail the drill used to carry; that rail is gone. */
 .story-level-drill-rune {
   display: flex;
   width: 1.75rem;
-  flex-direction: column-reverse;
-  gap: 0.16rem;
-  padding: 0 0.28rem;
+  align-items: center;
+  gap: 0.12rem;
+  padding: 0 0.1rem;
 }
 
-/* Widths ascend bottom-to-top so the mark reads as a rune climbing, not
-   as three equal bars - at this size uniform bars read as a menu icon. */
 .story-level-drill-rune i {
-  width: 62%;
-  height: 0.19rem;
-  align-self: center;
-  border-radius: 1px;
+  height: 0.3rem;
+  flex: 1 1 0;
+  border-radius: var(--radius-pill);
   background: rgba(232, 246, 250, 0.22);
-}
-
-.story-level-drill-rune i:nth-child(2) {
-  width: 81%;
-}
-
-.story-level-drill-rune i:nth-child(3) {
-  width: 100%;
 }
 
 .story-level-drill-row[data-next] .story-level-drill-rune i {

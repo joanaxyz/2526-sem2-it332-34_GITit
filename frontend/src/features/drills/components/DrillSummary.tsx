@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { RotateCcw } from 'lucide-react'
 
-import { DrillRuneRail } from '@/features/drills/components/DrillRuneRail'
+import { DrillProgressTrack } from '@/features/drills/components/DrillProgressTrack'
 import type { DrillCard, DrillPlan } from '@/features/drills/types'
 import type { DrillRailSegment } from '@/features/drills/hooks/useDrillSession'
 import { drillExitPath } from '@/features/drills/utils/drillRoutes'
@@ -14,7 +14,7 @@ import { drillExitPath } from '@/features/drills/utils/drillRoutes'
  * pays instead is information: the forms that took more than one look,
  * named, so the learner walks into the level knowing where they are thin.
  *
- * The finished rail is the reward image rather than a row of figures. It
+ * The finished track is the reward image rather than a row of figures. It
  * is the thing they watched fill for the whole session, so hiding it at
  * the moment it completes throws away the payoff - and it already carries
  * per-command truth (amber where a command needed a second look) that a
@@ -45,7 +45,9 @@ export function DrillSummary({
   // was cleared when some were given up on is the one thing this screen
   // must not do - the learner would walk into the level trusting a
   // reassurance the session never earned.
-  const unfinished = rail.filter((segment) => !segment.mastered).length
+  const unfinished = rail.filter(
+    (segment) => segment.kind === 'command' && !segment.mastered,
+  ).length
   const tone = unfinished > 0 ? 'unfinished' : shakyCards.length ? 'wobbled' : 'clean'
   const lede = {
     clean: 'Every command first time. These are ready to use in the level.',
@@ -63,7 +65,7 @@ export function DrillSummary({
       <p className="drill-summary-lede">{lede}</p>
 
       <div className="drill-summary-tally">
-        <DrillRuneRail segments={rail} size="lg" />
+        <DrillProgressTrack segments={rail} mode="record" />
         <dl className="drill-summary-figures">
           <div>
             <dt>First-pass accuracy</dt>

@@ -99,6 +99,9 @@
   border-radius: var(--radius-pill);
   padding: 0.3rem 0.85rem;
   background: rgba(var(--theme-surface-rgb), 0.9);
+  /* The same ledge the answer tiles stand on: one pushable vocabulary
+     across the drill, rather than tiles that press and tokens that lift. */
+  box-shadow: 0 2px 0 rgba(var(--theme-primary-rgb), 0.16);
   color: hsl(var(--foreground));
   font-family: var(--font-mono);
   font-size: var(--text-base);
@@ -115,12 +118,17 @@
 .drill-piece:focus-visible {
   border-color: rgba(var(--theme-primary-rgb), 0.62);
   background: rgba(var(--theme-primary-rgb), 0.12);
+  box-shadow: 0 2px 0 rgba(var(--theme-primary-rgb), 0.32);
   outline: none;
-  transform: translateY(-1px);
+}
+
+.drill-piece:not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 rgba(var(--theme-primary-rgb), 0);
 }
 
 .drill-piece:focus-visible {
-  box-shadow: var(--control-focus-ring);
+  box-shadow: var(--control-focus-ring), 0 2px 0 rgba(var(--theme-primary-rgb), 0.32);
 }
 
 /* Committed pieces read as written, not as still-available: a filled
@@ -129,17 +137,20 @@
 .drill-piece[data-placed] {
   border-color: rgba(var(--theme-primary-rgb), 0.75);
   background: rgba(var(--theme-primary-rgb), 0.24);
+  box-shadow: 0 2px 0 rgba(var(--theme-primary-rgb), 0.5);
   color: rgb(var(--theme-spark-rgb));
 }
 
 .drill-piece[data-state='right'] {
   border-color: hsl(var(--success) / 0.65);
   background: hsl(var(--success) / 0.14);
+  box-shadow: 0 2px 0 hsl(var(--success) / 0.4);
 }
 
 .drill-piece[data-state='wrong'] {
   border-color: hsl(var(--destructive) / 0.6);
   background: hsl(var(--destructive) / 0.14);
+  box-shadow: 0 2px 0 hsl(var(--destructive) / 0.4);
   animation: drill-shake 220ms var(--ease-out) both;
 }
 
@@ -257,7 +268,7 @@
     transition: none;
   }
 
-  .drill-piece:not(:disabled):hover {
+  .drill-piece:not(:disabled):active {
     transform: none;
   }
 }
