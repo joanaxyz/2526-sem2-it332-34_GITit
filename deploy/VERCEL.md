@@ -57,11 +57,13 @@ mentions `FROM node`, `npm ci`, or `nginx`.
 
 ## 1. Confirm the backend URL
 
-`frontend/vercel.json` ships with `https://git-it-app.onrender.com`. Confirm
-the real URL in the Render dashboard, and edit it if it differs:
+`frontend/vercel.json` points at `https://git-it-app-czpy.onrender.com`.
+Render appends a random suffix when the service name is already taken
+globally, so confirm the real URL in the Render dashboard and edit the
+rewrite if yours differs:
 
 ```bash
-curl -i https://git-it-app.onrender.com/api/health/live/
+curl -i https://git-it-app-czpy.onrender.com/api/health/live/
 ```
 
 A free Render instance that has spun down takes roughly 50 seconds to answer
@@ -140,7 +142,7 @@ If check 1 returns 301, change the rewrite in `frontend/vercel.json` to an
 anchored regular expression, which cannot drop the slash:
 
 ```json
-{ "source": "^/api/(.*)$", "destination": "https://git-it-app.onrender.com/api/$1" }
+{ "source": "^/api/(.*)$", "destination": "https://git-it-app-czpy.onrender.com/api/$1" }
 ```
 
 ## 4. Required Render environment values
@@ -153,7 +155,7 @@ URL exists.
 it.** It must list both hostnames, comma separated, without schemes:
 
 ```
-git-it-app.onrender.com,your-project.vercel.app
+git-it-app-czpy.onrender.com,your-project.vercel.app
 ```
 
 `DJANGO_TRUST_PROXY_HEADERS=True` enables Django's `USE_X_FORWARDED_HOST`, and
