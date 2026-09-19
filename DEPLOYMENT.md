@@ -1,12 +1,21 @@
 # Production Deployment
 
-This guide provides two supported deployment paths:
+This guide provides three supported deployment paths:
 
 1. A reference Linux host using Docker Compose and a TLS reverse proxy.
 2. A container platform using the same backend and frontend Dockerfiles.
+3. A split host: the Vite SPA on Vercel, the Django API on Render.
 
 For Render, use the checked-in `render.yaml` Blueprint and follow the
 platform-specific [Render deployment guide](deploy/RENDER.md).
+
+For Vercel, follow the [Vercel deployment guide](deploy/VERCEL.md). Vercel
+serves the SPA and rewrites `/api` to the Render service, so the browser still
+sees a single origin and the `SameSite=Strict` refresh cookie keeps working
+without cross-origin auth exceptions. On that path the Render Blueprint
+builds the backend only, and four Render environment values depend on the
+Vercel origin. `DJANGO_ALLOWED_HOSTS` must list the Vercel hostname alongside
+the Render one, or Django rejects every proxied request.
 
 The application topology is:
 

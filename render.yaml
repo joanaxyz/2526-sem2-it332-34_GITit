@@ -1,21 +1,22 @@
 services:
-  # Disposable $0 preview: Nginx serves the Vite build and proxies /api to
-  # Gunicorn inside this single Free web-service container. Keeping one public
-  # origin preserves secure SameSite=Strict refresh cookies.
+  # Disposable $0 API. This service builds the Django backend only: Gunicorn
+  # binds Render's public port and WhiteNoise serves the small Django admin /
+  # DRF schema static bundle. The Vite SPA is hosted on Vercel, which rewrites
+  # /api to this service, so the browser still sees one origin and secure
+  # SameSite=Strict refresh cookies keep working. See deploy/VERCEL.md.
   - type: web
     name: git-it-app
     runtime: docker
     plan: free
     region: singapore
-    dockerfilePath: ./deploy/render-free/Dockerfile
+    dockerfilePath: ./deploy/render-api/Dockerfile
     dockerContext: .
     healthCheckPath: /api/health/live/
     autoDeployTrigger: checksPass
     buildFilter:
       paths:
         - backend/**
-        - frontend/**
-        - deploy/render-free/**
+        - deploy/render-api/**
         - .dockerignore
         - render.yaml
     envVars:
@@ -32,7 +33,7 @@ services:
 
       # Free web services cannot use pre-deploy commands or one-off jobs.
       # Keep migrations on startup, but seed curriculum separately so a long
-      # seed cannot prevent Gunicorn/Nginx from binding the public port.
+      # seed cannot prevent Gunicorn from binding the public port.
       # To seed on first deploy, temporarily set DJANGO_SEED_ON_STARTUP=True
       # via the Render dashboard, then revert after the deploy completes.
       - key: DJANGO_MIGRATE_ON_STARTUP
@@ -46,28 +47,32 @@ services:
       - key: GUNICORN_TIMEOUT
         value: "60"
 
+      # The four values below depend on the Vercel origin, which this
+      # Blueprint cannot know, so Render prompts for each one.
+      #
+      # DJANGO_ALLOWED_HOSTS must list BOTH hostnames, comma separated:
+      #   git-it-app.onrender.com,your-project.vercel.app
+      # DJANGO_TRUST_PROXY_HEADERS below turns on USE_X_FORWARDED_HOST, and
+      # Vercel forwards the Vercel domain in X-Forwarded-Host. Omitting it
+      # makes Django reject every proxied request with DisallowedHost.
       - key: DJANGO_ALLOWED_HOSTS
-        fromService:
-          type: web
-          name: git-it-app
-          envVarKey: RENDER_EXTERNAL_HOSTNAME
+        sync: false
+
+      # The Vercel origin, for example https://your-project.vercel.app.
+      # While the Vercel rewrite is in place the browser never calls this
+      # service cross-origin, so these two are defence in depth rather than
+      # load-bearing. Django admin stays same-origin on the Render URL.
       - key: DJANGO_CORS_ALLOWED_ORIGINS
-        fromService:
-          type: web
-          name: git-it-app
-          envVarKey: RENDER_EXTERNAL_URL
+        sync: false
       - key: DJANGO_CSRF_TRUSTED_ORIGINS
-        fromService:
-          type: web
-          name: git-it-app
-          envVarKey: RENDER_EXTERNAL_URL
+        sync: false
       - key: CORS_ALLOW_CREDENTIALS
         value: "True"
+
+      # Password-reset links. Render no longer serves the SPA, so this must be
+      # the Vercel origin or emailed links point at a dead path.
       - key: FRONTEND_BASE_URL
-        fromService:
-          type: web
-          name: git-it-app
-          envVarKey: RENDER_EXTERNAL_URL
+        sync: false
 
       # Paste the existing Supabase pooler URI when Render prompts. Never
       # commit the database password to this file.
