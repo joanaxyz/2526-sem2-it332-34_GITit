@@ -98,7 +98,7 @@ deployments use `autoDeployTrigger: checksPass`.
    not deployed yet, put the Render values in now and correct them afterwards.
    - `DJANGO_ALLOWED_HOSTS`: **both** hostnames, comma separated and with no
      scheme, for example
-     `git-it-app.onrender.com,your-project.vercel.app`. Proxy headers are
+     `git-it-app-czpy.onrender.com,your-project.vercel.app`. Proxy headers are
      trusted, which enables `USE_X_FORWARDED_HOST`, and Vercel forwards its
      own domain in `X-Forwarded-Host`. Omit it and Django rejects every
      proxied request with `DisallowedHost`.
@@ -148,7 +148,7 @@ bootstrap password no longer remains in the service environment.
 Copy the public `git-it-app` URL and run:
 
 ```bash
-export APP_URL=https://git-it-app.onrender.com
+export APP_URL=https://git-it-app-czpy.onrender.com
 curl --fail --show-error "$APP_URL/api/health/live/"
 curl --fail --show-error "$APP_URL/api/health/ready/"
 ```

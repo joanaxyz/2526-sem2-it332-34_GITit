@@ -7,7 +7,7 @@
   "rewrites": [
     {
       "source": "/api/:path(.*)",
-      "destination": "https://git-it-app.onrender.com/api/:path"
+      "destination": "https://git-it-app-czpy.onrender.com/api/:path"
     },
     {
       "source": "/:path((?!api/|assets/|cosmetics/|audio/).*)",
