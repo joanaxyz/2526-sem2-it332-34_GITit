@@ -7,7 +7,7 @@ import { CompanionShop } from '@/features/shop/components/CompanionShop'
 import { actionDisabled, errorMessage } from '@/features/shop/utils/shopDisplay'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { HOME_ROUTE, storyPath } from '@/shared/navigation/routes'
 import {
   shopApi,
@@ -111,9 +111,7 @@ export function ShopPage() {
         ) : null}
 
         {shop.isPending ? (
-          <section className="shop-view">
-            <LoadingState label="Loading shop" description="Fetching your companions." />
-          </section>
+          <LoadingScreen label="Loading shop" description="Fetching your companions." />
         ) : null}
 
         {shop.isError ? (

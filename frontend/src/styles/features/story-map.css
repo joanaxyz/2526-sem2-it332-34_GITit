@@ -2,6 +2,7 @@
 @import './story-map/path.css';
 @import './story-map/path-panels.css';
 @import './story-map/path-level-panel.css';
+@import './story-map/path-level-drill.css';
 @import './story-map/chapter-picker.css';
 @import './story-map/orientation.css';
 @import './story-map/sidebar.css';

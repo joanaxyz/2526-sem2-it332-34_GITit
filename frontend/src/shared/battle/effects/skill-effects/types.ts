@@ -26,7 +26,7 @@ export type MonsterEffectContext = EffectContext & {
   targetFacing?: 'left' | 'right'
 }
 export type MonsterBattleEffect = (ctx: MonsterEffectContext) => Promise<void>
-export type SkillEffectPlayback = 'projectile' | 'target' | 'ground' | 'miss'
+export type SkillEffectPlayback = 'projectile' | 'target' | 'ground'
 /** Where a target/ground effect plants: on the enemy body, or on its ground line. */
 export type SkillEffectAnchor = 'center' | 'feet'
 export type FlameTint = 'cyan' | 'azure' | 'indigo' | 'steel' | 'violet' | 'ash'

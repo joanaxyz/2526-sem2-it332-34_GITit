@@ -22,6 +22,7 @@ const firstLevel: AdventureLevelSummary = {
   completion: null,
   is_passed: false,
   tiers: [],
+  drill: { available: false, cleared: false, best_accuracy: 0 },
 }
 
 afterEach(cleanup)

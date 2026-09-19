@@ -6,7 +6,7 @@ import { challengesApi } from '@/features/challenges/api/challengesApi'
 import { syncChallengeRunInCache } from '@/features/challenges/utils/challengeRunCache'
 import type { ChallengeRun } from '@/features/challenges/types'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
 type ChallengeStartMode = 'start' | 'replay' | 'retry'
 
@@ -61,5 +61,5 @@ export function ChallengeStartPage({ mode = 'start' }: { mode?: ChallengeStartMo
   }
 
   const copy = loadingCopy[mode]
-  return <LoadingState description={copy.description} label={copy.label} variant="screen" />
+  return <LoadingScreen description={copy.description} label={copy.label} />
 }

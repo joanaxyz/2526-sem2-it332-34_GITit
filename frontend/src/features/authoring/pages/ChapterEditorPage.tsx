@@ -11,7 +11,7 @@ import type { AuthoringChapter } from '@/features/authoring/types'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { Button } from '@/shared/components/Button'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
 /** A blank chapter draft for the create flow. `index` (1-based) presets the
  *  default name and sort order when the floor slot is known. */
@@ -89,11 +89,11 @@ export function ChapterEditorPage() {
   const isDirty = Boolean(draft && baseline && !sameChapter(draft, baseline))
   useUnsavedChangesGuard({ when: isDirty && !save.isPending })
 
-  if (!isNew && chaptersQuery.isLoading) return <LoadingState label="Loading chapter" variant="page" />
+  if (!isNew && chaptersQuery.isLoading) return <LoadingScreen label="Loading chapter" />
   if (!isNew && chaptersQuery.isError)
     return <ErrorState title="Could not load chapter" description={chaptersQuery.error.message} />
   if (!isNew && !loaded) return <ErrorState title="Chapter not found" description="It may have been deleted." />
-  if (!draft) return <LoadingState label="Loading chapter" variant="page" />
+  if (!draft) return <LoadingScreen label="Loading chapter" />
 
   return (
     <div className="author-page">

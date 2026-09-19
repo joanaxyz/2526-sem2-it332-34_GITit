@@ -656,6 +656,168 @@
                 }
             }
         },
+        "/api/adventure-levels/{level_id}/drill/": {
+            "get": {
+                "operationId": "adventure_levels_drill_retrieve",
+                "description": "The composed drill for one level, plus this player's drill history.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "level_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "adventure-levels"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LevelDrillPlanResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/adventure-levels/{level_id}/drill/results/": {
+            "post": {
+                "operationId": "adventure_levels_drill_results_create",
+                "description": "Record one reported session. Rewards nothing and unlocks nothing - see\n``drills.services.progress`` for why self-reporting is safe here.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "level_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "adventure-levels"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DrillReport"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DrillReport"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DrillReport"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DrillReportResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/adventure-levels/{level_id}/drill/run/": {
+            "put": {
+                "operationId": "adventure_levels_drill_run_update",
+                "description": "Checkpoint or discard the in-progress queue.\n\nPUT after each answer; DELETE when the learner deliberately starts\nover. Nothing here is reward-affecting - it only decides which\nquestion a return lands on.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "level_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "adventure-levels"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DrillRunState"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DrillRunState"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DrillRunState"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DrillRunStateResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "adventure_levels_drill_run_destroy",
+                "description": "Checkpoint or discard the in-progress queue.\n\nPUT after each answer; DELETE when the learner deliberately starts\nover. Nothing here is reward-affecting - it only decides which\nquestion a return lands on.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "level_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "adventure-levels"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DrillRunStateResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/adventure-levels/{level_id}/runs/": {
             "post": {
                 "operationId": "adventure_levels_runs_create",
@@ -5965,6 +6127,351 @@
                 "type": "string",
                 "description": "* `beginner` - Beginner\n* `intermediate` - Intermediate\n* `advanced` - Advanced"
             },
+            "DrillBlank": {
+                "type": "object",
+                "properties": {
+                    "index": {
+                        "type": "integer"
+                    },
+                    "answer": {
+                        "type": "string"
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/DrillChoice"
+                        }
+                    }
+                },
+                "required": [
+                    "answer",
+                    "index",
+                    "options"
+                ]
+            },
+            "DrillCard": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "command": {
+                        "type": "string"
+                    },
+                    "intent": {
+                        "type": "string"
+                    },
+                    "base_command": {
+                        "type": "string"
+                    },
+                    "summary": {
+                        "type": "string"
+                    },
+                    "tokens": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "command_choices": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/DrillChoice"
+                        }
+                    },
+                    "intent_choices": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/DrillChoice"
+                        }
+                    },
+                    "blank": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/DrillBlank"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "bank": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "bank",
+                    "base_command",
+                    "blank",
+                    "command",
+                    "command_choices",
+                    "intent",
+                    "intent_choices",
+                    "key",
+                    "summary",
+                    "tokens"
+                ]
+            },
+            "DrillChoice": {
+                "type": "object",
+                "description": "One wrong option, and the authored line that explains it.\n\n``gloss`` is always another real command form's own text, which is what\nlets a miss be answered with the truth (\"-A stages all changes\") rather\nthan a generic \"incorrect\".",
+                "properties": {
+                    "value": {
+                        "type": "string"
+                    },
+                    "gloss": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "gloss",
+                    "value"
+                ]
+            },
+            "DrillLevel": {
+                "type": "object",
+                "description": "Where the drill came from, flat.\n\nChapter and story identity are carried as plain fields rather than\nnested objects: the drill needs a breadcrumb and a way back to the\nmap, not a second copy of the catalog contract that curriculum owns.",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "chapter_id": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "chapter_number": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "chapter_title": {
+                        "type": "string"
+                    },
+                    "story_slug": {
+                        "type": "string"
+                    },
+                    "story_title": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "chapter_id",
+                    "chapter_number",
+                    "chapter_title",
+                    "description",
+                    "id",
+                    "slug",
+                    "story_slug",
+                    "story_title",
+                    "title"
+                ]
+            },
+            "DrillProgress": {
+                "type": "object",
+                "properties": {
+                    "sessions": {
+                        "type": "integer"
+                    },
+                    "clears": {
+                        "type": "integer"
+                    },
+                    "cleared": {
+                        "type": "boolean"
+                    },
+                    "best_accuracy": {
+                        "type": "integer"
+                    },
+                    "last_accuracy": {
+                        "type": "integer"
+                    },
+                    "shaky_form_keys": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "first_cleared_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "last_played_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "best_accuracy",
+                    "cleared",
+                    "clears",
+                    "first_cleared_at",
+                    "last_accuracy",
+                    "last_played_at",
+                    "sessions",
+                    "shaky_form_keys"
+                ]
+            },
+            "DrillReport": {
+                "type": "object",
+                "properties": {
+                    "answers_total": {
+                        "type": "integer",
+                        "maximum": 500,
+                        "minimum": 0
+                    },
+                    "answers_correct": {
+                        "type": "integer",
+                        "maximum": 500,
+                        "minimum": 0
+                    },
+                    "completed": {
+                        "type": "boolean"
+                    },
+                    "shaky_form_keys": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 160
+                        },
+                        "maxItems": 64
+                    }
+                },
+                "required": [
+                    "answers_correct",
+                    "answers_total",
+                    "completed"
+                ]
+            },
+            "DrillReportResponse": {
+                "type": "object",
+                "properties": {
+                    "progress": {
+                        "$ref": "#/components/schemas/DrillProgress"
+                    }
+                },
+                "required": [
+                    "progress"
+                ]
+            },
+            "DrillResume": {
+                "type": "object",
+                "description": "An unfinished queue handed back so a return lands mid-drill.",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "queue_state": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "answered": {
+                        "type": "integer"
+                    },
+                    "correct": {
+                        "type": "integer"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "answered",
+                    "correct",
+                    "id",
+                    "queue_state",
+                    "updated_at"
+                ]
+            },
+            "DrillRunState": {
+                "type": "object",
+                "description": "The client's in-progress queue, bounded before it is stored.\n\nDeliberately structural: the queue drives which questions the learner\nresumes into, not what anything pays, so this proves the payload is\nsmall and well-shaped and leaves the card keys to\n``sanitize_queue_state`` - which checks them against the level's own\nseeded vocabulary.",
+                "properties": {
+                    "cards": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "queue": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 160
+                        },
+                        "maxItems": 512
+                    },
+                    "sequence_pending": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "answered": {
+                        "type": "integer",
+                        "maximum": 500,
+                        "minimum": 0
+                    },
+                    "correct": {
+                        "type": "integer",
+                        "maximum": 500,
+                        "minimum": 0
+                    }
+                },
+                "required": [
+                    "answered",
+                    "cards",
+                    "correct",
+                    "queue"
+                ]
+            },
+            "DrillRunStateResponse": {
+                "type": "object",
+                "properties": {
+                    "resume": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/DrillResume"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "resume"
+                ]
+            },
+            "DrillSequence": {
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "type": "string"
+                    },
+                    "task": {
+                        "type": "string"
+                    },
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "label",
+                    "steps",
+                    "task"
+                ]
+            },
             "GameplayRunStatus": {
                 "type": "string",
                 "enum": [
@@ -6041,6 +6548,50 @@
                 },
                 "required": [
                     "results"
+                ]
+            },
+            "LevelDrillPlanResponse": {
+                "type": "object",
+                "properties": {
+                    "level": {
+                        "$ref": "#/components/schemas/DrillLevel"
+                    },
+                    "available": {
+                        "type": "boolean"
+                    },
+                    "progress": {
+                        "$ref": "#/components/schemas/DrillProgress"
+                    },
+                    "resume": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/DrillResume"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "cards": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/DrillCard"
+                        }
+                    },
+                    "sequence": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/DrillSequence"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "available",
+                    "cards",
+                    "level",
+                    "progress",
+                    "resume",
+                    "sequence"
                 ]
             },
             "Login": {

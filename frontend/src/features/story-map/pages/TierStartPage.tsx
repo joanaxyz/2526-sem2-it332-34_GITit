@@ -6,7 +6,7 @@ import { tierRunsApi } from '@/features/story-map/api/tierRunsApi'
 import { syncTierRunInCache } from '@/features/story-map/utils/tierRunCache'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
 type TierStartMode = 'start' | 'replay' | 'retry'
 
@@ -62,5 +62,5 @@ export function TierStartPage({ mode = 'start' }: { mode?: TierStartMode }) {
   }
 
   const copy = loadingCopy[mode]
-  return <LoadingState description={copy.description} label={copy.label} variant="screen" />
+  return <LoadingScreen description={copy.description} label={copy.label} />
 }

@@ -16,6 +16,14 @@ export type AdventureLevelTierAccess = {
   completion: LevelCompletionSummary | null
 }
 
+/** Squire's Drill state for one level, as the chapter overview reports it. */
+export type AdventureLevelDrillAccess = {
+  /** False when the level teaches no published command form to rehearse. */
+  available: boolean
+  cleared: boolean
+  best_accuracy: number
+}
+
 type AdventureSummary = {
   item_type: 'adventure'
   id: number
@@ -33,6 +41,9 @@ type AdventureSummary = {
   // system. Empty for every existing arcane-spire level (single-wave flow) -
   // StoryAdventurePath falls back to the plain Play pill in that case.
   tiers: AdventureLevelTierAccess[]
+  // Optional on the type as well as at runtime: a client can outlive the
+  // backend that added it, and the callout defaults rather than throwing.
+  drill?: AdventureLevelDrillAccess
 }
 
 export type AdventureLevelSummary = AdventureSummary

@@ -471,6 +471,7 @@ export function StoryAdventurePath({
             isStarting={startTierRunMutation.isPending}
             onClose={() => setSelectedLevelId(null)}
             onStartTier={(tierId, replay) => startTierRunMutation.mutate({ tierId, replay })}
+            onOpenDrill={() => navigate(`/adventure-levels/${selectedTierLevel.id}/drill`)}
           />
         ) : null}
       </div>
@@ -485,6 +486,7 @@ export function StoryAdventurePath({
           isStarting={startTierRunMutation.isPending}
           onClose={() => setSelectedLevelId(null)}
           onStartTier={(tierId, replay) => startTierRunMutation.mutate({ tierId, replay })}
+          onOpenDrill={() => navigate(`/adventure-levels/${selectedTierLevel.id}/drill`)}
         />
       ) : null}
 

@@ -14,6 +14,7 @@ export const queryKeys = {
   preferences: ['player-preferences'] as const,
   chapterOverview: (chapterId: number | null | undefined) => ['chapter-overview', chapterId] as const,
   learnedSkills: ['learned-skills'] as const,
+  levelDrill: (levelId: number | null | undefined) => ['level-drill', levelId] as const,
   chapterBook: (chapterId: number | null | undefined) => ['chapter-book', chapterId] as const,
   orientationLessons: (chapterId: number | null | undefined) => ['orientation-lessons', chapterId] as const,
   orientationLesson: (lessonId: number | null | undefined) => ['orientation-lesson', lessonId] as const,

@@ -5,6 +5,11 @@ from typing import TYPE_CHECKING
 
 from adventures.models import AdventureLevel, AdventureLevelTier, AdventureRun
 from common.constants import DIFFICULTY_EASY, DIFFICULTY_HARD, DIFFICULTY_MEDIUM
+from drills.selectors import (
+    drill_access_payload,
+    drill_progress_by_level_id,
+    drillable_level_ids,
+)
 
 from .access_helpers import (
     _completion_payload,
@@ -27,6 +32,11 @@ class AdventureAccessContext:
     passed_adventure_ids: set[int] = field(default_factory=set)
     locked_adventure_ids: set[int] = field(default_factory=set)
     lock_reasons: dict[int, str] = field(default_factory=dict)
+    # Squire's Drill: which levels have seeded drill content, and this
+    # player's row for each. Batch-loaded here so the map can mark drilled
+    # levels without a query per node.
+    drillable_adventure_ids: set[int] = field(default_factory=set)
+    drill_progress_by_adventure_id: dict[int, object] = field(default_factory=dict)
 
 
 def _build_adventure_access(*, player, adventures: list[AdventureLevel]) -> AdventureAccessContext:
@@ -68,6 +78,12 @@ def _build_adventure_access(*, player, adventures: list[AdventureLevel]) -> Adve
     return AdventureAccessContext(
         completion_by_adventure_id=completion_by_adventure_id,
         passed_adventure_ids=passed_adventure_ids,
+        drillable_adventure_ids=drillable_level_ids(
+            level_ids=[adventure.id for adventure in adventures]
+        ),
+        drill_progress_by_adventure_id=drill_progress_by_level_id(
+            player=player, level_ids=[adventure.id for adventure in adventures]
+        ),
     )
 
 
@@ -120,6 +136,10 @@ def adventure_summary_payload(
         "locked": adventure.id in access.locked_adventure_ids,
         "lock_reason": access.lock_reasons.get(adventure.id, ""),
         "completion": _completion_payload(completion),
+        "drill": drill_access_payload(
+            available=adventure.id in access.drillable_adventure_ids,
+            progress=access.drill_progress_by_adventure_id.get(adventure.id),
+        ),
         "tiers": [
             adventure_level_tier_payload(tier=tier, access=tier_access)
             for tier in _ordered_adventure_tiers(tiers)

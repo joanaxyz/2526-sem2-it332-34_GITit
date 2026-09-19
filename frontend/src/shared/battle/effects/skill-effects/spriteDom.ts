@@ -1,3 +1,4 @@
+import { warmImage } from '@/shared/sprites/preload'
 import type { SpriteAnimation } from '@/shared/sprites/types'
 
 import type { SpriteAnchor, SpriteBounds } from './types'
@@ -8,14 +9,11 @@ export const PROJECTILE_NOSE_ANCHOR: SpriteAnchor = { x: 0.78, y: 0.52 }
 // charges and launches with its body extending FORWARD (into the open space past
 // the hand) rather than centered on the caster, so it never overlaps him.
 export const PROJECTILE_ORIGIN_ANCHOR: SpriteAnchor = { x: 0.24, y: 0.5 }
-export const MISS_LANDING_ANCHOR: SpriteAnchor = { x: 0.47, y: 0.7 }
 // Ground-rooted effects are baked with their visible base planted on this line
 // (GROUND_ANCHOR_Y / FRAME in process_companion_spell_sheets.py). Placing this
 // anchor on the enemy's ground point sits geysers, tornadoes, rings, the push
 // shockwave and the switch wave on the floor instead of the enemy's head.
 export const FEET_ANCHOR: SpriteAnchor = { x: 0.5, y: 0.86 }
-
-const spriteSheetLoads = new Map<string, Promise<void>>()
 
 export function reduceMotion(): boolean {
   return (
@@ -23,24 +21,11 @@ export function reduceMotion(): boolean {
   )
 }
 
+/** Decode one effect sheet before it is painted. Shares the session-wide image
+ *  cache with level asset warming, so a sheet is only ever fetched once. */
 export function preloadSpriteSheet(sheet: SpriteAnimation): Promise<void> {
-  if (typeof Image === 'undefined' || !sheet.src) return Promise.resolve()
-  const cached = spriteSheetLoads.get(sheet.src)
-  if (cached) return cached
-
-  const image = new Image()
-  image.decoding = 'async'
-  image.src = sheet.src
-  const loaded =
-    typeof image.decode === 'function'
-      ? image.decode()
-      : new Promise<void>((resolve, reject) => {
-          image.onload = () => resolve()
-          image.onerror = () => reject(new Error(`Could not preload sprite sheet ${sheet.src}`))
-        })
-  const safeLoad = loaded.catch(() => undefined)
-  spriteSheetLoads.set(sheet.src, safeLoad)
-  return safeLoad
+  if (!sheet.src) return Promise.resolve()
+  return warmImage(sheet.src)
 }
 
 export function finishAnimation(animation: Animation, ms: number): Promise<void> {

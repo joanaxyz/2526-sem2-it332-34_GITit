@@ -34,7 +34,7 @@ import { useTierDagAnimation } from '@/features/story-map/hooks/useTierDagAnimat
 import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { usePersistentState } from '@/shared/utils/persistentState'
 
@@ -134,11 +134,10 @@ export function TierWorkspace() {
   })
   if (query.isLoading) {
     return (
-      <LoadingState
+      <LoadingScreen
         description="Preparing the repository, terminal, and adventure workspace."
         label="Loading adventure"
         showCompanion={false}
-        variant="screen"
       />
     )
   }

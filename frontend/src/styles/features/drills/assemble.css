@@ -1,0 +1,263 @@
+/* Build-the-answer: the forge line and its bank.
+   ------------------------------------------------------------------
+   The line is a writing line, not a box - a single dashed rule under a
+   row of chips, so an empty line still reads as "something goes here".
+   Chips fly from the bank into it (see utils/flyToSlot), which is what
+   makes the two rows read as one object being assembled instead of two
+   unrelated lists.
+
+   The ordering finale reuses the same mechanic turned vertical, so
+   there is one interaction to learn across the whole drill. */
+
+.drill-assemble {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.drill-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 3.4rem;
+  margin: 0;
+  padding: 0.5rem 0.2rem 0.65rem;
+  border-bottom: 1px dashed rgba(var(--theme-primary-rgb), 0.45);
+  list-style: none;
+}
+
+/* A prompt glyph anchors the line: without it a half-built row of chips
+   floats, and the point of this rung is that the learner is writing a
+   command, not arranging words. */
+.drill-assemble[data-variant='tokens'] .drill-line::before {
+  content: '$';
+  align-self: center;
+  color: rgba(var(--theme-primary-rgb), 0.65);
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.drill-assemble[data-variant='steps'] .drill-line {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.4rem;
+}
+
+.drill-line-hint {
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-sm);
+  font-style: normal;
+}
+
+/* An empty ordering slot: same footprint as the placed row, so the line
+   does not resize as pieces land in it. */
+.drill-slot {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  border: 1px dashed rgba(var(--theme-primary-rgb), 0.3);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.85rem;
+}
+
+.drill-slot .drill-piece-index {
+  background: rgba(var(--theme-primary-rgb), 0.12);
+  color: rgba(232, 246, 250, 0.5);
+}
+
+.drill-bank {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.drill-bank .drill-piece {
+  border-color: rgba(var(--theme-primary-rgb), 0.2);
+  background: rgba(var(--theme-surface-rgb), 0.95);
+  color: rgba(232, 246, 250, 0.9);
+}
+
+.drill-bank-empty {
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-xs);
+}
+
+.drill-piece {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  /* 44px: these are the drill's most-tapped controls and a 40px pill was
+     under the touch floor. The empty ordering slot matches it below. */
+  min-height: 2.75rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.26);
+  border-radius: var(--radius-pill);
+  padding: 0.3rem 0.85rem;
+  background: rgba(var(--theme-surface-rgb), 0.9);
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color var(--motion-fast) ease,
+    background var(--motion-fast) ease,
+    transform var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) ease;
+}
+
+.drill-piece:not(:disabled):hover,
+.drill-piece:focus-visible {
+  border-color: rgba(var(--theme-primary-rgb), 0.62);
+  background: rgba(var(--theme-primary-rgb), 0.12);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.drill-piece:focus-visible {
+  box-shadow: var(--control-focus-ring);
+}
+
+/* Committed pieces read as written, not as still-available: a filled
+   accent against the bank's stone keeps the two rows from looking like
+   one long list of chips. */
+.drill-piece[data-placed] {
+  border-color: rgba(var(--theme-primary-rgb), 0.75);
+  background: rgba(var(--theme-primary-rgb), 0.24);
+  color: rgb(var(--theme-spark-rgb));
+}
+
+.drill-piece[data-state='right'] {
+  border-color: hsl(var(--success) / 0.65);
+  background: hsl(var(--success) / 0.14);
+}
+
+.drill-piece[data-state='wrong'] {
+  border-color: hsl(var(--destructive) / 0.6);
+  background: hsl(var(--destructive) / 0.14);
+  animation: drill-shake 220ms var(--ease-out) both;
+}
+
+.drill-piece:disabled {
+  cursor: default;
+}
+
+.drill-assemble[data-variant='steps'] .drill-piece {
+  /* Full width, so a filled step and an empty slot are the same object at
+     two states rather than two different shapes. */
+  width: 100%;
+  justify-content: flex-start;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.85rem;
+  font-size: var(--text-sm);
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.drill-piece-index {
+  display: grid;
+  width: 1.4rem;
+  height: 1.4rem;
+  flex: none;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: rgba(var(--theme-primary-rgb), 0.22);
+  color: rgb(var(--theme-spark-rgb));
+  font-size: var(--text-2xs);
+  font-weight: 800;
+}
+
+.drill-piece-value {
+  min-width: 0;
+}
+
+/* Typed fallback ----------------------------------------------------- */
+
+.drill-typed-label {
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.drill-typed-input {
+  width: 100%;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.3);
+  border-radius: var(--radius-md);
+  padding: 0.7rem 0.85rem;
+  background: rgba(2, 8, 18, 0.8);
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  transition:
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
+}
+
+.drill-typed-input::placeholder {
+  color: rgba(232, 246, 250, 0.45);
+}
+
+.drill-typed-input:focus {
+  border-color: rgb(var(--theme-primary-rgb));
+  box-shadow: 0 0 0 2px rgba(var(--theme-primary-rgb), 0.28);
+  outline: none;
+}
+
+.drill-mode-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 0.4rem;
+  min-height: 2.2rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: 0 0.4rem;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-xs);
+  font-weight: 700;
+  cursor: pointer;
+  transition: color var(--motion-fast) ease;
+}
+
+/* A 44px hit area without a 44px visual chip, the same trick the callout
+   close button uses - this is a quiet tertiary control and should not
+   grow to shout. */
+.drill-mode-toggle::after {
+  content: '';
+  position: absolute;
+  inset: -0.35rem -0.5rem;
+}
+
+.drill-mode-toggle svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.drill-mode-toggle:hover,
+.drill-mode-toggle:focus-visible {
+  color: rgb(var(--theme-spark-rgb));
+  outline: none;
+}
+
+.drill-mode-toggle:focus-visible {
+  box-shadow: var(--control-focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drill-piece,
+  .drill-piece[data-state='wrong'] {
+    animation: none;
+    transition: none;
+  }
+
+  .drill-piece:not(:disabled):hover {
+    transform: none;
+  }
+}

@@ -133,7 +133,6 @@ function buildEffects(companionSlug = DEFAULT_EFFECT_COMPANION): Record<string, 
     tag: { sheet: sheet('tag', companionSlug), playback: 'target', anchor: 'feet', tint: 'indigo', scale: TARGET_SCALE, durationMs: 900 },
     'rev-list': { sheet: sheet('rev-list', companionSlug), playback: 'target', anchor: 'center', tint: 'violet', scale: 0.62, durationMs: 900 },
     default: { sheet: sheet('default', companionSlug), playback: 'projectile', tint: 'cyan', scale: PROJECTILE_SCALE, durationMs: 740, impactStartFrame: 15 },
-    miss: { sheet: sheet('miss', companionSlug), playback: 'miss', tint: 'ash', scale: 0.56, durationMs: 760 },
   }
 
   if (slug === 'black') {
@@ -172,7 +171,7 @@ function buildEffects(companionSlug = DEFAULT_EFFECT_COMPANION): Record<string, 
   // The runtime pins these on the target instead of the fixed FEET/CENTER
   // fraction, so placement follows the actual baked pixels and survives a
   // reprocess that shifts art within its transparent cell. Families the index
-  // omits (default/miss) keep the constant-anchor fallback.
+  // omits (default) keep the constant-anchor fallback.
   const placementGeometry = companionPlacementGeometry(slug)
   for (const key of Object.keys(effects)) {
     const measured = placementGeometry[key]
@@ -189,7 +188,7 @@ function buildEffects(companionSlug = DEFAULT_EFFECT_COMPANION): Record<string, 
 
 const EFFECTS_CACHE = new Map<string, Record<string, SkillSpriteSpec>>()
 
-export function effectsForCompanion(companionSlug?: string | null): Record<string, SkillSpriteSpec> {
+function effectsForCompanion(companionSlug?: string | null): Record<string, SkillSpriteSpec> {
   const owner = companionEffectSlug(companionSlug)
   const cached = EFFECTS_CACHE.get(owner)
   if (cached) return cached

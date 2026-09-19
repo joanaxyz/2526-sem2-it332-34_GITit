@@ -112,6 +112,7 @@ INSTALLED_APPS = [
     "curriculum",
     "adventures.apps.AdventuresConfig",
     "challenges",
+    "drills",
     "practice",
     "simulator",
     "evaluation",

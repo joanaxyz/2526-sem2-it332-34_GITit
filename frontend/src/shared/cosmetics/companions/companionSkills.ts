@@ -14,7 +14,7 @@ export type CompanionSkill = {
   family: string
   command: string
   tint: string
-  playback: 'projectile' | 'target' | 'ground' | 'miss'
+  playback: 'projectile' | 'target' | 'ground'
   anchor: 'center' | 'feet'
   launchStartFrame?: number
   impactStartFrame?: number

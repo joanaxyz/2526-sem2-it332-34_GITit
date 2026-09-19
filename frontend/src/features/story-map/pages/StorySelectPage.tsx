@@ -4,13 +4,13 @@ import { StoryCard } from '@/features/story-map/components/StoryCard'
 import { useStories } from '@/features/story-map/hooks/useStories'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
 export function StorySelectPage() {
   const stories = useStories()
 
   if (stories.isLoading) {
-    return <LoadingState description="Reading the story registry." label="Loading stories" variant="page" />
+    return <LoadingScreen description="Reading the story registry." label="Loading stories" />
   }
 
   if (stories.isError) {

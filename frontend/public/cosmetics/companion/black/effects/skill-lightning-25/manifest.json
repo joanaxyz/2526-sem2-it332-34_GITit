@@ -983,23 +983,6 @@
         "bottom": 0.9141
       }
     },
-    "miss": {
-      "src": "/cosmetics/companion/black/effects/skill-lightning-25/miss.png",
-      "fps": 18,
-      "loops": false,
-      "frameWidth": 256,
-      "frameHeight": 256,
-      "columns": 5,
-      "rows": 5,
-      "frameCount": 25,
-      "tint": "ash",
-      "motif": "black-lightning-misfire",
-      "playback": "miss",
-      "commandFamily": "miss",
-      "baseCommand": "missed attack",
-      "skillSlug": "missed-attack",
-      "generationSource": "black-imagegen-raw"
-    },
     "tag": {
       "src": "/cosmetics/companion/black/effects/skill-lightning-25/tag.png",
       "fps": 18,

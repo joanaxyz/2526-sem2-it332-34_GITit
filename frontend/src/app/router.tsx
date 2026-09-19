@@ -39,7 +39,7 @@ import {
   LEGACY_STORY_ROUTE,
   LEGACY_STORIES_ROUTE,
 } from '@/shared/navigation/legacyRoutes'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
 /**
  * Dev-only design preview: the real Home hub view inside the real layout
@@ -219,6 +219,15 @@ const appRoutes: RouteObject[] = [
       </Protected>
     ),
     children: [
+      // Squire's Drill is recall practice on text, not a battle, so it sits
+      // outside RequireCompanion: the rung that exists to unstick beginners
+      // must not be gated behind owning a companion.
+      {
+        path: '/adventure-levels/:levelId/drill',
+        lazy: async () => ({
+          Component: (await import('@/features/drills/pages/DrillPage')).DrillPage,
+        }),
+      },
       { path: '/challenge-trials/:trialId', element: <ChallengeStartPage mode="start" /> },
       { path: '/challenge-trials/:trialId/replay', element: <ChallengeStartPage mode="replay" /> },
       { path: '/challenge-runs/:runId/retry', element: <ChallengeStartPage mode="retry" /> },
@@ -263,7 +272,7 @@ const appRoutes: RouteObject[] = [
 export const router = createBrowserRouter([
   {
     element: <Outlet />,
-    hydrateFallbackElement: <LoadingState label="Loading application" variant="page" />,
+    hydrateFallbackElement: <LoadingScreen label="Loading application" />,
     children: appRoutes,
   },
 ])

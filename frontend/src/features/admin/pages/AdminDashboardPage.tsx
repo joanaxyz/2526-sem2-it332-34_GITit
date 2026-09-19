@@ -4,7 +4,7 @@ import { adminApi } from '@/features/admin/api/adminApi'
 import { PageHeading, StatTile } from '@/features/admin/components/adminUi'
 import { formatCoins, formatDate } from '@/features/admin/utils/format'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { queryKeys } from '@/shared/api/queryKeys'
 
 export function AdminDashboardPage() {
@@ -13,7 +13,7 @@ export function AdminDashboardPage() {
     queryFn: adminApi.overview,
   })
 
-  if (isPending) return <LoadingState label="Loading dashboard" variant="page" />
+  if (isPending) return <LoadingScreen label="Loading dashboard" />
   if (isError || !data) return <ErrorState title="Could not load dashboard" description="Try again shortly." />
 
   return (

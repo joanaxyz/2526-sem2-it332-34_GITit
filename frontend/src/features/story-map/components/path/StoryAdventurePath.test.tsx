@@ -67,6 +67,7 @@ const adventure: AdventureLevelSummary = {
   },
   is_passed: true,
   tiers: [],
+  drill: { available: true, cleared: false, best_accuracy: 0 },
 }
 
 function trial(

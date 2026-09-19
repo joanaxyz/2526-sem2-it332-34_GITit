@@ -21,6 +21,19 @@ def chapter_payload(chapter: AuthoringChapter) -> dict:
     }
 
 
+def visible_authoring_chapters(*, user):
+    """Authoring chapters ``user`` may address by id.
+
+    Authoring chapters are private workspaces with no public/published state, so
+    this is ownership only (staff still see everything). Loading a chapter
+    through it keeps a wrong-owner id a 404 instead of the 403 that would
+    otherwise confirm the row exists.
+    """
+    if getattr(user, "is_staff", False):
+        return AuthoringChapter.objects.all()
+    return AuthoringChapter.objects.filter(owner=user)
+
+
 def visible_content_definitions(*, user):
     if getattr(user, "is_staff", False):
         return ContentDefinition.objects.all()

@@ -366,11 +366,6 @@ COMPANION_COMMAND_OVERRIDES: dict[str, dict[str, dict[str, object]]] = {
     "blue": {"add": {"launchStartFrame": 3, "impactStartFrame": 16}},
 }
 
-EXTERNALLY_SUPPLIED_EFFECTS = [
-    {"name": "miss", "tint": "ash", "motif": "misfire", "playback": "miss"},
-]
-
-ALL_EFFECTS = [*COMMANDS, *EXTERNALLY_SUPPLIED_EFFECTS]
 RAW_COMMANDS = {spec["name"] for spec in COMMANDS}
 
 COMPANION_EFFECT_SETS: dict[str, dict[str, object]] = {
@@ -2413,16 +2408,9 @@ def manifest_entry(name: str, spec: dict[str, object], layered: bool = False) ->
         "checkout-conflict": "checkout",
         "diff-conflict": "diff",
         "default": "default",
-        "miss": "miss",
     }.get(name, name)
-    base_command = {
-        "default": "default",
-        "miss": "missed attack",
-    }.get(name, f"git {command_family}")
-    skill_slug = {
-        "default": "default",
-        "miss": "missed-attack",
-    }.get(name, f"git-{name}")
+    base_command = {"default": "default"}.get(name, f"git {command_family}")
+    skill_slug = {"default": "default"}.get(name, f"git-{name}")
     tint = INIT_TINT_OVERRIDE if name == "init" and INIT_TINT_OVERRIDE else spec["tint"]
     # Report the runtime placement anchor: body-centered projectiles/auras use
     # "center", while Blue clone and ground-rooted effects use "feet".
@@ -2528,7 +2516,7 @@ def make_preview() -> None:
     tile_w = 246
     tile_h = 166
     cols = 4
-    preview_specs = [spec for spec in ALL_EFFECTS if preview_sheet_path(spec["name"]) is not None]
+    preview_specs = [spec for spec in COMMANDS if preview_sheet_path(spec["name"]) is not None]
     if not preview_specs:
         return
     rows = math.ceil(len(preview_specs) / cols)
@@ -2677,20 +2665,16 @@ def main() -> None:
         remeasure_place_anchors()
         return
     selected_names = split_selected_names(args.only)
-    known_names = {spec["name"] for spec in ALL_EFFECTS}
+    known_names = {spec["name"] for spec in COMMANDS}
     unknown_names = sorted((selected_names or set()) - known_names)
     if unknown_names:
         raise SystemExit(f"Unknown effect name(s): {', '.join(unknown_names)}")
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     command_specs = selected_specs(COMMANDS, selected_names)
-    external_specs = selected_specs(EXTERNALLY_SUPPLIED_EFFECTS, selected_names)
 
     if REQUIRE_COMPLETE_RAW_COVERAGE:
-        # Only the generated command sheets must be complete for a companion that
-        # claims full coverage. Externally-supplied sheets (miss) are hand-authored
-        # and simply skipped when absent, exactly as they are for the other
-        # companions - a missing one is a content gap, not a processing error.
+        # A companion that claims full coverage must have every command's raw sheet.
         missing = [spec["name"] for spec in command_specs if not command_layers(spec["name"])]
         if missing:
             raise SystemExit(f"Missing raw generated sheets: {', '.join(missing)}")
@@ -2740,17 +2724,6 @@ def main() -> None:
             # Drop a stale single-layer export from before this effect was split.
             (OUT_DIR / f"{name}.png").unlink(missing_ok=True)
         sprites[name] = manifest_entry(name, resolved, layered=len(layers) > 1)
-        attach_place_anchor(sprites[name])
-
-    for spec in external_specs:
-        name = spec["name"]
-        out_path = OUT_DIR / f"{name}.png"
-        if not out_path.exists():
-            skipped.append(name)
-            continue
-        sheet = Image.open(out_path).convert("RGBA")
-        diagnostics[name] = frame_diagnostics(sheet, spec["playback"])
-        sprites[name] = manifest_entry(name, spec)
         attach_place_anchor(sprites[name])
 
     if skipped:

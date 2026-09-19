@@ -2,7 +2,6 @@ import { useCallback } from 'react'
 import type { MutableRefObject } from 'react'
 
 import { activeBattleMonsters } from '@/shared/battle/deriveBattleEvents'
-import { missedAttackForCompanion } from '@/shared/battle/effects/effectRegistry'
 import type { BattleQueue } from '@/shared/battle/battleQueue'
 import type { BattleBackdropHandle } from '@/shared/battle/components/BattleBackdrop'
 import type { MonsterActorHandle } from '@/shared/battle/components/MonsterActor'
@@ -35,7 +34,6 @@ type BattleResolveQueueDeps = {
   monsterImpactAnchor: (monsterId: number, side?: 'left' | 'right') => Point
   monsterFeetAnchor: (monsterId: number) => Point
   monsterSizeScale: (monsterId: number) => number
-  missedSpellGroundAnchor: (playerEl: Element | null, enemyEl: Element | null) => Point
   playApproach: (next: BattleMonster[], fromEdge?: boolean, fast?: boolean) => Promise<void>
   playCenterBeat: (fast?: boolean) => Promise<void>
   emitTransitionCue: (cue: BattleTransitionCueConfig) => void
@@ -71,7 +69,6 @@ export function useBattleResolveQueue({
   monsterImpactAnchor,
   monsterFeetAnchor,
   monsterSizeScale,
-  missedSpellGroundAnchor,
   playApproach,
   playCenterBeat,
   emitTransitionCue,
@@ -145,26 +142,6 @@ export function useBattleResolveQueue({
                 await playPlayerAttack(event, !ctx.fast && !reduced)
               },
             })
-            if (event.missed) {
-              // The spell connected but did nothing: after the companion's miss
-              // release, the effect fizzles off the target and lands on the open
-              // floor between the fighters before the monster counter-turn.
-              queue.enqueue({
-                run: async (ctx) => {
-                  if (ctx.fast || reduced) return
-                  const player = playerRef.current
-                  const layer = effectLayerRef.current
-                  const target = rosterRef.current.find((m) => m.id === event.target)
-                  const targetEl = target ? monsterHandles.current.get(target.id)?.element() : null
-                  if (!player || !layer || !targetEl) return
-                  await missedAttackForCompanion(companionSlugRef.current)({
-                    layer,
-                    from: monsterImpactAnchor(event.target),
-                    to: missedSpellGroundAnchor(player.element(), targetEl),
-                  })
-                },
-              })
-            }
             break
           }
           case 'monster_death': {
@@ -270,18 +247,13 @@ export function useBattleResolveQueue({
       backdropRef,
       bumpRosterEpoch,
       attackPendingRef,
-      companionSlugRef,
       defeatedRef,
-      effectLayerRef,
       emitTransitionCue,
-      missedSpellGroundAnchor,
       monsterHandles,
-      monsterImpactAnchor,
       playApproach,
       playCenterBeat,
       playerRef,
       queue,
-      rosterRef,
       setDefeated,
       setEntranceHidden,
       setPlayerHp,

@@ -16,6 +16,7 @@ urlpatterns = [
     path("api/authoring/", include("authoring.urls")),
     path("api/", include("challenges.urls")),
     path("api/", include("adventures.urls")),
+    path("api/", include("drills.urls")),
     path("api/", include("curriculum.urls")),
     path("api/", include("shop.urls")),
     path("api/progress/", include("progress.urls")),

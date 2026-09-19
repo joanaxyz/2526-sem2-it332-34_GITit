@@ -145,4 +145,7 @@
   --z-modal: 60;
   --z-toast: 70;
   --z-tooltip: 80;
+  /* The full-screen loading screen outranks everything: while it is up the app
+     behind it is not ready to be touched, modals and toasts included. */
+  --z-loading-screen: 90;
 }

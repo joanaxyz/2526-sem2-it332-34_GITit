@@ -24,6 +24,7 @@ def chapter_content_overview(*, player, chapter_id: int) -> dict:
     adventures = list(
         AdventureLevel.objects.filter(chapter_id=chapter_id, is_published=True)
         .select_related("chapter")
+        .prefetch_related("command_forms__command_skill")
         .order_by("sort_order", "id")
     )
     lessons = ChapterLesson.objects.filter(chapter_id=chapter_id, is_published=True).order_by(

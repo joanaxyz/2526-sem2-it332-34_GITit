@@ -1,0 +1,149 @@
+/* The question.
+   ------------------------------------------------------------------
+   Hierarchy is deliberately inverted from the obvious reading. The ask
+   ("Which command does this?") is the same handful of words every time,
+   so it stays small; the subject - the intent, or the command itself -
+   is the thing being reasoned about and gets the size. Boilerplate never
+   outranks content.
+
+   The three type voices do real work here: the rung is the machine
+   reporting state, an intent is interface prose, and a command is
+   rendered as the machine's own line, inset like a terminal row, because
+   that shape is part of what the learner is memorising. */
+
+.drill-question {
+  display: grid;
+  gap: 0.2rem;
+  animation: drill-question-in 240ms var(--ease-out) both;
+}
+
+/* The section takes focus on mount so the keyboard lands on the new
+   question; it is a scroll target, not a control, so it shows no ring. */
+.drill-question:focus {
+  outline: none;
+}
+
+@keyframes drill-question-in {
+  from {
+    opacity: 0;
+    transform: translateX(1.25rem);
+  }
+}
+
+.drill-rung {
+  margin: 0;
+  color: rgba(var(--theme-primary-rgb), 0.92);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+/* Was 0.55 alpha, which lands under 4.5:1 for 11px text. Mist is the
+   system's documented floor for small labels. */
+.drill-rung-command {
+  color: hsl(var(--muted-foreground));
+  text-transform: none;
+}
+
+.drill-ask {
+  margin: 0.25rem 0 0;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.drill-subject {
+  margin: 0.55rem 0 0;
+  color: hsl(var(--foreground));
+  font-size: clamp(1.35rem, 4vw, 1.85rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+
+/* The machine voice, made physical: a command sits on its own inset line
+   so it reads as something typed, not something written about. */
+.drill-subject[data-voice='machine'] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.45ch;
+  overflow-wrap: anywhere;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.2);
+  border-radius: var(--radius-md);
+  padding: 0.7rem 0.85rem;
+  background: rgba(2, 8, 18, 0.72);
+  box-shadow: inset 0 1px 0 rgba(232, 246, 250, 0.04);
+  font-family: var(--font-mono);
+  font-size: clamp(1.05rem, 3.4vw, 1.5rem);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.drill-subject-note {
+  max-width: 62ch;
+  margin: 0.5rem 0 0;
+  color: rgba(232, 246, 250, 0.8);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+/* The blank is a slot, not an underline: on a flex line the underline
+   lands at the bottom of the line box rather than under the missing
+   characters, which reads as an artifact. Dashed while empty, solid and
+   accented once filled, because the fill is the answer. */
+.drill-gap {
+  display: inline-flex;
+  min-width: 4.5ch;
+  align-items: center;
+  align-self: center;
+  justify-content: center;
+  border: 1px dashed rgba(var(--theme-primary-rgb), 0.55);
+  border-radius: var(--radius-sm);
+  padding: 0 0.35ch;
+  background: rgba(var(--theme-primary-rgb), 0.07);
+  color: rgba(232, 246, 250, 0.45);
+  transition:
+    color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    background var(--motion-fast) ease;
+}
+
+.drill-gap[data-filled] {
+  border-style: solid;
+  border-color: rgb(var(--theme-primary-rgb));
+  background: rgba(var(--theme-primary-rgb), 0.16);
+  color: rgb(var(--theme-spark-rgb));
+  animation: drill-gap-fill 200ms var(--ease-out) both;
+}
+
+@keyframes drill-gap-fill {
+  from {
+    opacity: 0.4;
+    transform: translateY(-0.18em);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drill-question {
+    animation: drill-fade-in 160ms ease both;
+  }
+
+  .drill-gap,
+  .drill-gap[data-filled] {
+    animation: none;
+    transition: none;
+  }
+}
+
+@keyframes drill-fade-in {
+  from {
+    opacity: 0;
+  }
+}

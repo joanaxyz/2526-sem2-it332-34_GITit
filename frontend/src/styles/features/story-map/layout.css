@@ -116,10 +116,8 @@
 }
 
 .story-overview-badge {
-  position: absolute;
-  top: 3.45rem;
-  right: 1.55rem;
   display: grid;
+  flex: none;
   width: 4.35rem;
   height: 4.35rem;
   place-items: center;
@@ -154,6 +152,8 @@
 }
 
 .chapter-overview > .game-panel:first-child .game-panel-head {
+  /* The badge rides in the header row, centred on the eyebrow + title block. */
+  align-items: center;
   margin-bottom: 1.35rem;
 }
 

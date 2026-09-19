@@ -1,0 +1,202 @@
+/* The verdict bar, and the teaching moment inside it.
+   ------------------------------------------------------------------
+   One docked control, always in the same place, so "what do I press" is
+   never a question. The teach panel lives in the bar's first grid row
+   and opens by animating grid-template-rows: the row has to reflow (it
+   pushes the question up), and this is the one accessible way to do that
+   without animating a height on a box whose content size is unknown.
+
+   Tone is carried by the top hairline and an icon plus words - the
+   system's rule that pass/fail never rests on colour holds here more
+   than anywhere, because this is the surface a learner reads fastest. */
+
+.drill-verdict {
+  display: grid;
+  grid-template-rows: 0fr auto;
+  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.18);
+  background: linear-gradient(180deg, rgba(5, 13, 26, 0.96), rgba(2, 7, 16, 0.98));
+  transition:
+    grid-template-rows 220ms var(--ease-out),
+    border-color var(--motion-normal) ease;
+}
+
+.drill-verdict[data-tone='right'] {
+  grid-template-rows: 1fr auto;
+  border-top-color: hsl(var(--success) / 0.6);
+  box-shadow: 0 -1px 18px hsl(var(--success) / 0.1);
+}
+
+.drill-verdict[data-tone='wrong'] {
+  grid-template-rows: 1fr auto;
+  border-top-color: hsl(var(--destructive) / 0.6);
+  box-shadow: 0 -1px 18px hsl(var(--destructive) / 0.1);
+}
+
+.drill-teach-slot {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.drill-teach {
+  display: grid;
+  gap: 0.4rem;
+  width: min(100%, 44rem);
+  margin: 0 auto;
+  padding: 0.9rem 1rem 0.2rem;
+}
+
+/* The confirmation after a right answer: one line, no labels. It uses the
+   same slot as the miss panel so the bar opens with one motion either way,
+   but stays deliberately shorter - a nod, not a lesson. */
+.drill-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.75rem;
+  width: min(100%, 44rem);
+  margin: 0 auto;
+  padding: 0.85rem 1rem 0.1rem;
+}
+
+.drill-confirm code {
+  color: hsl(var(--success));
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.drill-confirm em {
+  color: rgba(232, 246, 250, 0.74);
+  font-size: var(--text-sm);
+  font-style: normal;
+}
+
+.drill-teach-row {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.15rem 0.75rem;
+  margin: 0;
+}
+
+.drill-teach-label {
+  color: hsl(var(--muted-foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.drill-teach-row code {
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.drill-teach-row[data-role='picked'] code {
+  color: hsl(var(--destructive));
+}
+
+.drill-teach-row[data-role='answer'] code {
+  color: rgb(var(--theme-spark-rgb));
+}
+
+.drill-teach-row em {
+  grid-column: 2;
+  color: rgba(232, 246, 250, 0.74);
+  font-size: var(--text-sm);
+  font-style: normal;
+  line-height: 1.4;
+}
+
+.drill-teach-note {
+  margin: 0.15rem 0 0;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-xs);
+}
+
+.drill-verdict-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  width: min(100%, 44rem);
+  margin: 0 auto;
+  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+.drill-verdict-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.drill-verdict-state svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.drill-verdict[data-tone='right'] .drill-verdict-state {
+  color: hsl(var(--success));
+}
+
+.drill-verdict[data-tone='wrong'] .drill-verdict-state {
+  color: hsl(var(--destructive));
+}
+
+.drill-verdict-hint {
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+
+.drill-verdict-hint kbd {
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.3);
+  border-radius: var(--radius-sm);
+  padding: 0.05rem 0.35rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+}
+
+.drill-verdict .ui-button {
+  min-width: 8rem;
+  flex: none;
+}
+
+.drill-verdict .ui-button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+@media (max-width: 30rem) {
+  .drill-verdict-hint {
+    display: none;
+  }
+
+  .drill-verdict .ui-button {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .drill-teach-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .drill-teach-row em {
+    grid-column: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drill-verdict {
+    transition: none;
+  }
+}

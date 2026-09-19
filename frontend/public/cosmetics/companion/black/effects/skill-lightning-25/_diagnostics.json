@@ -2077,40 +2077,6 @@
       ]
     }
   },
-  "miss": {
-    "size": [
-      1280,
-      1280
-    ],
-    "alphaExtrema": [
-      0,
-      255
-    ],
-    "bbox": [
-      38,
-      133,
-      1220,
-      1206
-    ],
-    "frameBBoxCenterRange": [
-      88.5,
-      147.5,
-      103.5,
-      169.0
-    ],
-    "frameEnergyAnchorRange": [
-      109.05,
-      163.35,
-      123.55,
-      169.88
-    ],
-    "frameRegistrationAnchorRange": [
-      109.05,
-      163.35,
-      123.55,
-      169.88
-    ]
-  },
   "tag": {
     "size": [
       1280,

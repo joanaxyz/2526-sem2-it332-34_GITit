@@ -12,6 +12,13 @@ const mocks = vi.hoisted(() => ({
   useAdventureRun: vi.fn(),
   useStartAdventureRun: vi.fn(),
   discardRun: vi.fn(() => Promise.resolve()),
+  // The real gate decodes sprite sheets, which jsdom never loads. Its own
+  // behavior is covered in useAdventureLevelAssets.test.ts.
+  useAdventureLevelAssets: vi.fn(() => true),
+}))
+
+vi.mock('@/features/adventures/hooks/useAdventureLevelAssets', () => ({
+  useAdventureLevelAssets: mocks.useAdventureLevelAssets,
 }))
 
 vi.mock('@/features/adventures/hooks/useAdventureRun', () => ({
@@ -202,6 +209,31 @@ describe('AdventureSession', () => {
     cleanup()
     window.localStorage.clear()
     vi.clearAllMocks()
+    mocks.useAdventureLevelAssets.mockReturnValue(true)
+  })
+
+  it('holds the loading screen until the level art is decoded', () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    })
+    mocks.useAdventureLevelAssets.mockReturnValue(false)
+    mocks.useAdventureRun.mockReturnValue({
+      query: { isLoading: false, isError: false, data: retryRun },
+      lines: [],
+      createFile: { isPending: false, mutateAsync: vi.fn() },
+      writeFile: { isPending: false, mutateAsync: vi.fn() },
+      renameFile: { isPending: false, mutateAsync: vi.fn() },
+      deleteFile: { isPending: false, mutateAsync: vi.fn() },
+    })
+    mocks.useStartAdventureRun.mockReturnValue({ isPending: false, mutate: vi.fn() })
+
+    renderSession(queryClient)
+
+    expect(screen.getByText('Loading adventure')).toBeInTheDocument()
+    expect(screen.queryByTestId('adventure-battle-panel')).not.toBeInTheDocument()
   })
 
   it('opens once for a first Adventure without suppressing the Challenge tour', async () => {

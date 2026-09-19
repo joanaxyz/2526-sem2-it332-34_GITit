@@ -954,22 +954,6 @@
         "bottom": 0.75
       }
     },
-    "miss": {
-      "src": "/cosmetics/companion/blue/effects/skill-flames-25/miss.png",
-      "fps": 18,
-      "loops": false,
-      "frameWidth": 256,
-      "frameHeight": 256,
-      "columns": 5,
-      "rows": 5,
-      "frameCount": 25,
-      "tint": "ash",
-      "motif": "misfire",
-      "playback": "miss",
-      "commandFamily": "miss",
-      "baseCommand": "missed attack",
-      "skillSlug": "missed-attack"
-    },
     "tag": {
       "src": "/cosmetics/companion/blue/effects/skill-flames-25/tag.png",
       "fps": 18,

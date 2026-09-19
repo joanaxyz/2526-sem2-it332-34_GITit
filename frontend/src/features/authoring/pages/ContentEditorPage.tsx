@@ -7,7 +7,7 @@ import { ContentMetadataSection } from '@/features/authoring/components/content-
 import { LevelsEditor } from '@/features/authoring/components/LevelsEditor'
 import { useContentEditorController } from '@/features/authoring/hooks/useContentEditorController'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
 export function ContentEditorPage() {
   const {
@@ -32,7 +32,7 @@ export function ContentEditorPage() {
     createChapter,
   } = useContentEditorController()
 
-  if (isLoading) return <LoadingState label="Loading content" variant="page" />
+  if (isLoading) return <LoadingScreen label="Loading content" />
   if (loadError) return <ErrorState title="Could not load content" description={loadError} />
 
   const selectedChapterId = isOfficialMode ? form.officialChapterId : form.chapterId

@@ -1,0 +1,100 @@
+/* The basic spinner: every loading state smaller than a screen. A ring in the
+   theme's own accent, sized by the block it sits in - no companion, no rail.
+   The full-screen companion loader lives in companion-loader.css. */
+.git-it-spinner {
+  --spinner-size: 1.5rem;
+  --spinner-track: 2px;
+
+  display: block;
+  width: var(--spinner-size);
+  height: var(--spinner-size);
+  border: var(--spinner-track) solid rgba(var(--theme-primary-rgb), 0.2);
+  border-top-color: rgb(var(--theme-primary-rgb));
+  border-radius: var(--radius-pill);
+  animation: git-it-spinner-turn 720ms linear infinite;
+}
+
+.git-it-spinner--xs {
+  --spinner-size: 0.875rem;
+  --spinner-track: 1.5px;
+}
+
+.git-it-spinner--sm {
+  --spinner-size: 1.125rem;
+  --spinner-track: 2px;
+}
+
+.git-it-spinner--md {
+  --spinner-size: 1.5rem;
+  --spinner-track: 2px;
+}
+
+.git-it-spinner--lg {
+  --spinner-size: 2.25rem;
+  --spinner-track: 3px;
+}
+
+@keyframes git-it-spinner-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* A wait too short to perceive must not flash. The block holds its box from
+   the first frame so nothing jumps; only the spinner and its copy wait. */
+.git-it-loading-state__frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  opacity: 0;
+}
+
+.git-it-loading-state.is-painted .git-it-loading-state__frame {
+  opacity: 1;
+  transition: opacity 180ms var(--ease-out);
+}
+
+.git-it-loading-state__copy {
+  display: grid;
+  gap: var(--space-1);
+  max-width: 40ch;
+}
+
+.git-it-loading-state__label {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.git-it-loading-state--compact .git-it-loading-state__frame {
+  flex-direction: row;
+  gap: var(--space-2);
+}
+
+.git-it-loading-state--compact .git-it-loading-state__label {
+  font-size: var(--text-xs);
+}
+
+.git-it-loading-state__description {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .git-it-loading-state.is-painted .git-it-loading-state__frame {
+    transition: none;
+  }
+
+  /* A spinner still has to say it is alive; a slow turn carries none of the
+     vestibular load of a fast one. */
+  .git-it-spinner {
+    animation-duration: 2.4s;
+  }
+}

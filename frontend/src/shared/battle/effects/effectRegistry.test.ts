@@ -7,8 +7,6 @@ import {
   effectForSkill,
   effectPlaybackForSkill,
   effectPlacementForSkill,
-  missedAttack,
-  missedAttackForCompanion,
   monsterAttackEffect,
   spriteDisplayMetricsForSkill,
   spriteSourceForSkill,
@@ -181,12 +179,6 @@ describe('effectRegistry', () => {
     expect(spriteSourceForSkill('rev-list')).toBe(`${ROOT}/rev-list.png`)
   })
 
-  it('exposes a dedicated miss effect instead of the default projectile', () => {
-    expect(spriteSourceForSkill('miss')).toBe(`${ROOT}/miss.png`)
-    expect(effectPlaybackForSkill('miss')).toBe('miss')
-    expect(tintForSkill('miss')).toBe('ash')
-  })
-
   it('keeps unknown skills on the default sheet', () => {
     expect(spriteSourceForSkill('not-a-real-skill')).toBe(`${ROOT}/default.png`)
     expect(effectPlaybackForSkill('not-a-real-skill')).toBe('projectile')
@@ -208,10 +200,6 @@ describe('effectRegistry', () => {
     expect(effectSheetForSkill('commit', 'white')).toMatchObject({
       name: 'white.skill.commit',
       src: `${WHITE_ROOT}/commit.png`,
-    })
-    expect(effectSheetForSkill('miss', 'white')).toMatchObject({
-      name: 'white.skill.miss',
-      src: `${WHITE_ROOT}/miss.png`,
     })
     expect(effectPlaybackForSkill('init', 'white')).toBe('projectile')
     expect(tintForSkill('init', 'white')).toBe('azure')
@@ -384,10 +372,6 @@ describe('effectRegistry', () => {
       name: 'black.skill.init',
       src: `${BLACK_ROOT}/init.png`,
     })
-    expect(effectSheetForSkill('miss', 'black')).toMatchObject({
-      name: 'black.skill.miss',
-      src: `${BLACK_ROOT}/miss.png`,
-    })
     expect(spriteSourceForSkill('push', 'black')).toBe(`${BLACK_ROOT}/push.png`)
     expect(effectPlaybackForSkill('init', 'black')).toBe('projectile')
     expect(tintForSkill('init', 'black')).toBe('violet')
@@ -400,7 +384,6 @@ describe('effectRegistry', () => {
       playback: 'projectile',
     })
     expect(spriteDisplayMetricsForSkill('push').width).toBeLessThanOrEqual(140)
-    expect(spriteDisplayMetricsForSkill('miss').width).toBeLessThanOrEqual(144)
   })
 
   it('lands projectile noses on the supplied target point instead of centering the sprite there', async () => {
@@ -640,35 +623,6 @@ describe('effectRegistry', () => {
       expect(travelNose.y + metrics.height * 0.52).toBeCloseTo(bodyPoint.y, 4)
       expect(settle.x + metrics.width * pa.x).toBeCloseTo(impactPoint.x, 4)
       expect(settle.y + metrics.height * pa.y).toBeCloseTo(impactPoint.y, 4)
-    } finally {
-      runtime.restore()
-    }
-  })
-
-  it('lands the missed attack splash anchor on the supplied ground point', async () => {
-    const runtime = installAnimationMocks()
-    try {
-      const layer = document.createElement('div')
-      await missedAttackForCompanion('white')({ layer, from: { x: 80, y: 90 }, to: { x: 280, y: 180 } })
-
-      const travel = runtime.animations.find((frames) => frames.length === 5 && frames[3].offset === 0.88)
-      expect(travel).toBeDefined()
-      const impact = translateOf(travel![3])
-      const metrics = spriteDisplayMetricsForSkill('miss')
-      expect(impact.x + metrics.width * 0.47).toBeCloseTo(280, 4)
-      expect(impact.y + metrics.height * 0.7).toBeCloseTo(180, 4)
-    } finally {
-      runtime.restore()
-    }
-  })
-
-  it('keeps the legacy missedAttack export on the default companion', async () => {
-    const runtime = installAnimationMocks()
-    try {
-      const layer = document.createElement('div')
-      await missedAttack({ layer, from: { x: 80, y: 90 }, to: { x: 280, y: 180 } })
-
-      expect(runtime.animations.some((frames) => frames.length === 5 && frames[3].offset === 0.88)).toBe(true)
     } finally {
       runtime.restore()
     }

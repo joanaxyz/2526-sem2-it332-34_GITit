@@ -6,7 +6,7 @@ import { PageHeading, StatTile } from '@/features/admin/components/adminUi'
 import type { PerformanceModule, RateMetric } from '@/features/performance/types'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { LoadingState } from '@/shared/components/LoadingState'
+import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
 // Diagnostic Runebound metrics are staff-only: they describe simulator and
 // retry behaviour, not learner outcomes, so they never appear in the player UI.
@@ -67,7 +67,7 @@ export function AdminAnalyticsPage() {
     queryFn: adminApi.analytics,
   })
 
-  if (isPending) return <LoadingState label="Loading analytics" variant="page" />
+  if (isPending) return <LoadingScreen label="Loading analytics" />
   if (isError || !data) {
     return <ErrorState title="Could not load analytics" description="Try again shortly." />
   }
