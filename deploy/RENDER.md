@@ -1,9 +1,14 @@
 # Deploy GIT it! on Render for $0
 
 The root [`render.yaml`](../render.yaml) is a disposable all-Free Render
-Blueprint. It runs the Vite frontend, Nginx, and Django in one Free Docker web
-service, uses one Free Render Key Value instance, and connects to the existing
-Supabase Postgres database supplied through a secret environment variable.
+Blueprint. It runs the Django API only: Gunicorn in one Free Docker web
+service, one Free Render Key Value instance, and the existing Supabase
+Postgres database supplied through a secret environment variable.
+
+The Vite frontend is **not** built or served here. It is hosted on Vercel,
+which rewrites `/api` to this service; see the
+[Vercel deployment guide](VERCEL.md). Deploy this service first, because
+Vercel's rewrite needs its URL.
 
 No Render Postgres database or paid Render instance is declared.
 
@@ -11,14 +16,18 @@ No Render Postgres database or paid Render instance is declared.
 
 | Resource | Render type | Plan | Public? |
 | --- | --- | --- | --- |
-| `git-it-app` | Combined Docker web service | Free | Yes |
+| `git-it-app` | API-only Docker web service | Free | Yes |
 | `git-it-cache` | Key Value | Free | No external access |
 | Existing Supabase database | External Postgres | Your Supabase plan | No new Render resource |
 
-The single-origin container is intentional. Nginx serves the frontend and
-proxies `/api` to Gunicorn in the same container, so secure
-`SameSite=Strict` refresh cookies continue to work without cross-origin auth
-exceptions. It also consumes Free web-service hours for only one service.
+Single-origin auth is still intentional, but the single origin is now
+Vercel's. Vercel serves the SPA and rewrites `/api` to this service, so the
+browser never makes a cross-origin call and secure `SameSite=Strict` refresh
+cookies keep working without cross-origin auth exceptions.
+
+This service stays public because Vercel's rewrite has to reach it. Django
+admin and the DRF schema are reached on this Render URL directly, and
+WhiteNoise serves their static files.
 
 ## 1. Cancel the old payment dialog
 
@@ -85,7 +94,20 @@ deployments use `autoDeployTrigger: checksPass`.
    - `DJANGO_SUPERUSER_USERNAME`: your first admin username
    - `DJANGO_SUPERUSER_EMAIL`: your admin email
    - `DJANGO_SUPERUSER_PASSWORD`: a unique strong password
-6. Apply the Blueprint and watch the `git-it-app` Events logs.
+6. Enter the prompted values that depend on the Vercel origin. If Vercel is
+   not deployed yet, put the Render values in now and correct them afterwards.
+   - `DJANGO_ALLOWED_HOSTS`: **both** hostnames, comma separated and with no
+     scheme, for example
+     `git-it-app.onrender.com,your-project.vercel.app`. Proxy headers are
+     trusted, which enables `USE_X_FORWARDED_HOST`, and Vercel forwards its
+     own domain in `X-Forwarded-Host`. Omit it and Django rejects every
+     proxied request with `DisallowedHost`.
+   - `DJANGO_CORS_ALLOWED_ORIGINS`: the Vercel origin with its scheme, for
+     example `https://your-project.vercel.app`.
+   - `DJANGO_CSRF_TRUSTED_ORIGINS`: the same Vercel origin.
+   - `FRONTEND_BASE_URL`: the same Vercel origin. Password-reset links are
+     built from it.
+7. Apply the Blueprint and watch the `git-it-app` Events logs.
 
 If the resource review shows Starter, Basic, Standard, a Render database, or
 another paid resource, stop. If Render displays **Payment Information
@@ -95,19 +117,26 @@ reading the latest `render.yaml` commit.
 ## 5. First startup
 
 Free web services do not support pre-deploy commands, one-off jobs, Dashboard
-shell access, or SSH. The combined container therefore performs these safe
-steps before accepting traffic:
+shell access, or SSH. The container therefore performs these safe steps
+before accepting traffic:
 
 1. Validate Django's production environment.
 2. Apply pending migrations to Supabase.
-3. Idempotently upsert official curriculum and command-library data.
+3. Seed official curriculum and command-library data, **only when
+   `DJANGO_SEED_ON_STARTUP=True`**. The Blueprint ships it as `False`.
 4. Create or update the bootstrap administrator from the prompted secrets.
 5. Collect Django static files.
-6. Start Gunicorn and Nginx.
+6. Start Gunicorn on Render's public port.
 
-The first startup can take longer than later cold starts. Seed commands do not
-use `--reset`, and `ALLOW_DESTRUCTIVE_SEED_RESET=False` prevents accidental
-production deletion.
+Every one of those steps runs before Gunicorn binds the port, which is why
+seeding is off by default: a multi-minute seed makes Render fail the deploy
+for not binding in time.
+
+**To seed on a first deploy**, set `DJANGO_SEED_ON_STARTUP=True` on the
+`git-it-app` Environment page, redeploy, wait for the service to go live,
+then set it back to `False`. Seed commands do not use `--reset`, and
+`ALLOW_DESTRUCTIVE_SEED_RESET=False` prevents accidental production
+deletion.
 
 After the first successful administrator login, remove all three
 `DJANGO_SUPERUSER_*` variables from the `git-it-app` Environment page and
@@ -120,25 +149,22 @@ Copy the public `git-it-app` URL and run:
 
 ```bash
 export APP_URL=https://git-it-app.onrender.com
-curl --fail --show-error "$APP_URL/nginx-health"
 curl --fail --show-error "$APP_URL/api/health/live/"
 curl --fail --show-error "$APP_URL/api/health/ready/"
-curl --fail --show-error \
-  "$APP_URL/cosmetics/story-worlds/arcane-spire/monsters/monster-01/portrait.png" \
-  --output /dev/null
 ```
 
 Replace the example hostname with the URL assigned by Render. The first
 request after an idle period can take about a minute while the Free service
 wakes.
 
-In a browser, verify registration, sign-in, authenticated refresh, profile
-avatar, story map, one adventure, one challenge, shop, sign-out, sign-in, and
-administrator access. Check the Network panel for `/api`, `/cosmetics`,
-`/audio`, or `/assets` 404/5xx responses.
+This service no longer serves the SPA or its media, so there is no
+`/nginx-health`, and `/cosmetics`, `/audio` and `/assets` return 404 here by
+design. Those belong to Vercel now. Exercise the application itself through
+the Vercel URL, following the verification steps in the
+[Vercel deployment guide](VERCEL.md).
 
-All current runtime media is committed and copied into the combined frontend
-build. User-uploaded files would still require external object storage.
+Runtime media is committed and ships in the Vercel build. User-uploaded files
+would still require external object storage.
 
 ## 7. Email behavior
 
@@ -170,15 +196,21 @@ Billing page before adding a card.
   commit and lists only `git-it-app` Free plus `git-it-cache` Free.
 - **Database connection fails**: use the Supabase Session pooler URL on port
   `5432`, verify its password, and keep `DATABASE_SSLMODE=require`.
-- **Invalid HTTP Host or redirect loop**: confirm the app's self-referenced
-  `RENDER_EXTERNAL_HOSTNAME` and proxy settings were created by the Blueprint.
+- **`DisallowedHost` / Invalid HTTP Host**: `DJANGO_ALLOWED_HOSTS` is a
+  prompted value now. It must list the Render hostname **and** the Vercel
+  hostname, comma separated and without schemes, because trusted proxy
+  headers enable `USE_X_FORWARDED_HOST` and Vercel forwards its own domain in
+  `X-Forwarded-Host`.
 - **Readiness returns 503**: inspect the app logs for Supabase or Key Value
   connectivity errors.
 - **Startup fails at bootstrap admin**: provide all three
   `DJANGO_SUPERUSER_*` values and use a password accepted by Django's password
   validators.
-- **Media returns HTML or 404**: run
+- **Deploy times out without binding a port**: a startup seed is running. Set
+  `DJANGO_SEED_ON_STARTUP=False` and redeploy.
+- **Media returns HTML or 404**: media is served by Vercel, not Render. Check
+  the Vercel deployment first, then run
   `python scripts/check_runtime_assets.py --require-tracked` on the deployed
-  commit and confirm the combined Docker build completed.
+  commit.
 - **Blueprint does not redeploy**: confirm GitHub CI passed and sync the latest
   Blueprint commit manually.

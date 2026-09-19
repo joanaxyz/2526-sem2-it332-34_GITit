@@ -1,0 +1,30 @@
+# Vercel uses this instead of .gitignore, so local-only paths that .gitignore
+# already covers must be repeated here or the CLI would upload them.
+
+node_modules
+dist
+coverage
+.vite
+
+# Local secrets and logs. .env holds an ElevenLabs key and a localhost API URL;
+# .env.production is deliberately NOT ignored.
+.env
+*.log
+vite-*.err.log
+
+# Design references and local screenshots. Not imported by src/, and
+# tsconfig.app.json only includes src/.
+design
+/--full-page
+/register_state.png
+/home-loadout-1920*.png
+
+# Sprite sources and pose exports. The runtime sheets at each asset root stay.
+public/cosmetics/story-worlds/*/monsters/*/pose/
+public/cosmetics/story-worlds/*/monsters/*/raw/
+public/cosmetics/story-worlds/*/monsters/*/effects/raw/
+public/cosmetics/story-worlds/*/monsters/*/effects/_raw/
+public/cosmetics/companion/*/pose/
+public/cosmetics/companion/*/raw/
+public/cosmetics/companion/*/effects/*/_raw/
+public/**/_raw.zip

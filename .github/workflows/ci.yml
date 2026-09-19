@@ -93,11 +93,11 @@ jobs:
         run: docker build --tag git-it-backend-ci:${{ github.sha }} backend
       - name: Build frontend image
         run: docker build --tag git-it-frontend-ci:${{ github.sha }} frontend
-      - name: Build all-Free Render image
+      - name: Build API-only Render image
         run: >-
           docker build
-          --tag git-it-render-free-ci:${{ github.sha }}
-          --file deploy/render-free/Dockerfile
+          --tag git-it-render-api-ci:${{ github.sha }}
+          --file deploy/render-api/Dockerfile
           .
       - name: Validate rendered Nginx configuration
         run: >-
@@ -106,14 +106,25 @@ jobs:
           --env BACKEND_PORT=8000
           git-it-frontend-ci:${{ github.sha }}
           nginx -t
-      - name: Smoke-test all-Free Render Nginx as non-root
-        run: >-
-          docker run --rm
-          git-it-render-free-ci:${{ github.sha }}
-          sh -ec
-          "nginx;
-          python -c 'import urllib.request; assert urllib.request.urlopen(\"http://127.0.0.1:10000/nginx-health\", timeout=3).read() == b\"ok\"';
-          nginx -s quit"
+      # The Render image serves the API only. Prove it runs unprivileged, has
+      # its Python dependencies, and ships no frontend server. Passing a
+      # command makes start.sh exec it instead of booting Gunicorn, which
+      # would need a database.
+      - name: Smoke-test API-only Render image as non-root
+        run: |
+          docker run --rm git-it-render-api-ci:${{ github.sha }} sh -ec '
+            id -u | grep -qxv 0
+            python -c "import django, gunicorn"
+            command -v gunicorn >/dev/null
+            if command -v nginx >/dev/null; then
+              echo "nginx must not be present in the API-only image" >&2
+              exit 1
+            fi
+            if [ -d /app/frontend-dist ]; then
+              echo "the SPA build must not be present in the API-only image" >&2
+              exit 1
+            fi
+          '
 
   # Replays every authored solution through the real browser engine and proves
   # the committed generated targets are current. Needs both Python and Node.
