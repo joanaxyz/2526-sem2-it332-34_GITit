@@ -94,19 +94,16 @@ deployments use `autoDeployTrigger: checksPass`.
    - `DJANGO_SUPERUSER_USERNAME`: your first admin username
    - `DJANGO_SUPERUSER_EMAIL`: your admin email
    - `DJANGO_SUPERUSER_PASSWORD`: a unique strong password
-6. Enter the prompted values that depend on the Vercel origin. If Vercel is
-   not deployed yet, put the Render values in now and correct them afterwards.
-   - `DJANGO_ALLOWED_HOSTS`: **both** hostnames, comma separated and with no
-     scheme, for example
-     `git-it-app-czpy.onrender.com,your-project.vercel.app`. Proxy headers are
-     trusted, which enables `USE_X_FORWARDED_HOST`, and Vercel forwards its
-     own domain in `X-Forwarded-Host`. Omit it and Django rejects every
-     proxied request with `DisallowedHost`.
-   - `DJANGO_CORS_ALLOWED_ORIGINS`: the Vercel origin with its scheme, for
-     example `https://your-project.vercel.app`.
-   - `DJANGO_CSRF_TRUSTED_ORIGINS`: the same Vercel origin.
-   - `FRONTEND_BASE_URL`: the same Vercel origin. Password-reset links are
-     built from it.
+6. Two more prompts may appear. Both are safe to leave blank until Vercel
+   exists, then set both to the Vercel origin with its scheme, for example
+   `https://your-project.vercel.app`:
+   - `DJANGO_CORS_ALLOWED_ORIGINS`
+   - `DJANGO_CSRF_TRUSTED_ORIGINS`
+
+   `DJANGO_ALLOWED_HOSTS` and `FRONTEND_BASE_URL` are **not** prompted. They
+   are declared in `render.yaml`, so edit them there and push rather than in
+   the dashboard: a Blueprint value overwrites the dashboard on sync, so a
+   dashboard edit would be silently reverted.
 7. Apply the Blueprint and watch the `git-it-app` Events logs.
 
 If the resource review shows Starter, Basic, Standard, a Render database, or

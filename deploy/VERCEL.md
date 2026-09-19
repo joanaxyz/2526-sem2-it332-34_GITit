@@ -147,31 +147,39 @@ anchored regular expression, which cannot drop the slash:
 
 ## 4. Required Render environment values
 
-Four `git-it-app` values are Render dashboard prompts because they depend on
-the Vercel origin, which the Blueprint cannot know. Set them once the Vercel
-URL exists.
+Two of these live in `render.yaml` and two are dashboard prompts.
 
-**`DJANGO_ALLOWED_HOSTS` is the one that will break everything if you skip
-it.** It must list both hostnames, comma separated, without schemes:
+### Declared in the Blueprint, changed by pushing
 
-```
-git-it-app-czpy.onrender.com,your-project.vercel.app
-```
+Hostnames are public, not secrets, so they are version controlled. **Editing
+these in the Render dashboard does not stick** - a Blueprint value overwrites
+the dashboard on the next sync. Edit `render.yaml` and push instead.
+
+| Key | Value |
+| --- | --- |
+| `DJANGO_ALLOWED_HOSTS` | `git-it-app-czpy.onrender.com` - append `,your-project.vercel.app` once the SPA is live |
+| `FRONTEND_BASE_URL` | `https://git-it-app-czpy.onrender.com` - repoint at the Vercel origin once it exists |
+
+`DJANGO_ALLOWED_HOSTS` takes **bare hostnames**: no scheme, no port, no
+trailing slash. `FRONTEND_BASE_URL` takes a **full https:// origin** with no
+trailing slash. The two formats differ, which is the easiest thing to get
+wrong; `scripts/check_render_blueprint.py` now fails the build on either
+mistake.
 
 `DJANGO_TRUST_PROXY_HEADERS=True` enables Django's `USE_X_FORWARDED_HOST`, and
 Vercel forwards its own domain in `X-Forwarded-Host`. If the Vercel hostname
-is missing, Django rejects every proxied request with `DisallowedHost` and the
-whole app returns 400.
+is missing from `DJANGO_ALLOWED_HOSTS`, Django rejects every proxied request
+with `DisallowedHost` and the whole app returns 400.
 
-The other three take the full Vercel origin, scheme included, for example
-`https://your-project.vercel.app`:
+### Dashboard prompts
+
+Both take the full Vercel origin, for example
+`https://your-project.vercel.app`, and both are safe to leave blank:
 
 - `DJANGO_CORS_ALLOWED_ORIGINS` and `DJANGO_CSRF_TRUSTED_ORIGINS` are defence
   in depth. The browser never calls Render cross-origin while the rewrite is
   in place, and DRF views are `csrf_exempt` because authentication is JWT
   only, so neither is load-bearing today.
-- `FRONTEND_BASE_URL` builds password-reset links. The preview runs
-  `EMAIL_BACKEND=dummy`, so nothing is sent until you enable real email.
 
 ## Differences from the Render Nginx setup
 
