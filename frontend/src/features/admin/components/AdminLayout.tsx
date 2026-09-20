@@ -1,61 +1,55 @@
-import { ArrowLeft } from 'lucide-react'
+import { BarChart3, ArrowLeft, Users } from 'lucide-react'
 import { NavLink, Navigate, Outlet } from 'react-router-dom'
 
-import { ADMIN_SECTIONS } from '@/features/admin/utils/adminSections'
+import { ADMIN_ROUTES, HOME_ROUTE } from '@/shared/navigation/routes'
 import { useAuthStore } from '@/shared/auth/useAuth'
-import { HOME_ROUTE } from '@/shared/navigation/routes'
 import { cn } from '@/shared/utils/cn'
 
-/** Staff-only console shell. Non-staff are redirected back to the app. */
+const NAV_ITEMS = [
+  { to: ADMIN_ROUTES.dashboard, label: 'KPI Overview', icon: BarChart3, end: true },
+  { to: ADMIN_ROUTES.users,    label: 'Learners',     icon: Users,    end: false },
+]
+
 export function AdminLayout() {
   const user = useAuthStore((state) => state.user)
   if (!user) return <Navigate replace to="/login" />
   if (!user.is_staff) return <Navigate replace to={HOME_ROUTE} />
 
   return (
-    <div className="admin-shell">
-      <div className="admin-shell-inner">
-        <aside className="admin-sidebar">
-          <div className="admin-sidebar-brand">
-            <p>Admin</p>
-            <strong>Observatory Console</strong>
+    <div className="adm-root">
+      <header className="adm-topbar">
+        <div className="adm-topbar-inner">
+          <div className="adm-brand">
+            <span className="adm-brand-eyebrow">Admin</span>
+            <span className="adm-brand-name">GIT it!</span>
           </div>
-          {ADMIN_SECTIONS.map(({ path, label, icon: Icon, end }) => (
-            <NavLink
-              key={path}
-              to={path}
-              end={end}
-              className={({ isActive }) => cn('admin-sidebar-link', isActive && 'is-active')}
-            >
-              <Icon className="size-4" />
-              {label}
-            </NavLink>
-          ))}
-          <NavLink to={HOME_ROUTE} className="admin-back-link">
-            <ArrowLeft className="size-4" />
-            Back to app
-          </NavLink>
-        </aside>
 
-        {/* Mobile section tabs */}
-        <div className="admin-content-wrap">
-          <nav className="admin-mobile-nav" aria-label="Admin sections">
-            {ADMIN_SECTIONS.map(({ path, label, end }) => (
+          <nav className="adm-nav" aria-label="Admin navigation">
+            {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
               <NavLink
-                key={path}
-                to={path}
+                key={to}
+                to={to}
                 end={end}
-                className={({ isActive }) => cn('admin-mobile-link', isActive && 'is-active')}
+                className={({ isActive }) => cn('adm-nav-link', isActive && 'is-active')}
               >
+                <Icon aria-hidden="true" />
                 {label}
               </NavLink>
             ))}
           </nav>
-          <main className="admin-main">
-            <Outlet />
-          </main>
+
+          <NavLink to={HOME_ROUTE} className="adm-back-btn">
+            <ArrowLeft aria-hidden="true" />
+            Back to app
+          </NavLink>
         </div>
-      </div>
+      </header>
+
+      <main className="adm-main">
+        <div className="adm-content">
+          <Outlet />
+        </div>
+      </main>
     </div>
   )
 }
