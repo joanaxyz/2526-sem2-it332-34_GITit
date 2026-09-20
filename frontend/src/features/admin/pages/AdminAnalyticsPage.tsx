@@ -114,7 +114,12 @@ function KpiSummaryTable({ diagnostics, passRate, totalRuns, passedRuns }: {
                 </td>
                 <StatusCell rate={overall} target={meta.target} higherIsBetter={meta.higherIsBetter} format={meta.format} />
                 {diagnostics.modules.map((mod) => {
-                  const modRate = (mod as Record<string, RateMetricLike>)[meta.key]
+                  const modRate = meta.key === 'scr' ? mod.scr
+                    : meta.key === 'car' ? undefined
+                    : meta.key === 'hlcr' ? mod.hlcr
+                    : meta.key === 'arc' ? mod.arc
+                    : meta.key === 'rtr' ? mod.rtr
+                    : undefined
                   return (
                     <StatusCell key={mod.number} rate={modRate} target={meta.target} higherIsBetter={meta.higherIsBetter} format={meta.format} />
                   )
