@@ -68,6 +68,16 @@ const KPIS = [
 
 type KpiKey = (typeof KPIS)[number]['key']
 
+const EMPTY_RATE: Rate = { value: null, numerator: 0, denominator: 0 }
+
+function getModuleRate(mod: PerformanceModule, key: KpiKey): Rate {
+  if (key === 'scr') return mod.scr
+  if (key === 'hlcr') return mod.hlcr
+  if (key === 'arc') return mod.arc
+  if (key === 'rtr') return mod.rtr
+  return EMPTY_RATE
+}
+
 // ─── full capstone objectives structure ───────────────────────────────────────
 const MODULES = [
   {
@@ -239,9 +249,7 @@ function SoRow({ so, modData }: {
   modData: PerformanceModule | undefined
 }) {
   const kpiMeta = KPIS.find(k => k.key === so.kpi)!
-  const r: Rate = modData
-    ? ((modData as Record<string, Rate>)[so.kpi] ?? { value: null, numerator: 0, denominator: 0 })
-    : { value: null, numerator: 0, denominator: 0 }
+  const r: Rate = modData ? getModuleRate(modData, so.kpi) : EMPTY_RATE
   const s = status(r, so.target, so.up)
   const valStr = r.value === null ? '—' : kpiMeta.pct ? `${r.value}%` : r.value.toFixed(2)
 
@@ -289,9 +297,7 @@ function ModuleAccordion({ modules }: { modules: PerformanceModule[] }) {
         const allStatuses: Status[] = [
           goS,
           ...mod.sos.map(so => {
-            const r: Rate = mdata
-              ? ((mdata as Record<string, Rate>)[so.kpi] ?? { value: null, numerator: 0, denominator: 0 })
-              : { value: null, numerator: 0, denominator: 0 }
+            const r: Rate = mdata ? getModuleRate(mdata, so.kpi) : EMPTY_RATE
             return status(r, so.target, so.up)
           }),
         ]

@@ -386,7 +386,7 @@ function KpiPanel({
                   <td className="kp-mod-num">M{mod.number}</td>
                   {moduleKeys.map(key => {
                     const m = KPI_META[key]
-                    const r = (mod as Record<string, KpiRate>)[key] as KpiRate
+                    const r: KpiRate | undefined = key === 'scr' ? mod.scr : key === 'hlcr' ? mod.hlcr : key === 'arc' ? mod.arc : key === 'rtr' ? mod.rtr : undefined
                     if (!r) return <td key={key} className="kp-mod-cell kp-mod-cell--none">—</td>
                     const s = kpiStatus(r, key)
                     return (
