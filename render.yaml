@@ -59,13 +59,13 @@ services:
       # Hostnames only. A scheme or a trailing slash never matches and makes
       # Django reject every request with DisallowedHost.
       - key: DJANGO_ALLOWED_HOSTS
-        value: git-it-app-czpy.onrender.com
+        value: git-it-app-czpy.onrender.com,git-it-eight.vercel.app
 
       # Password-reset links. Render no longer serves the SPA, so point this
       # at the Vercel origin once it exists. Must be an https:// origin or
       # Django refuses to start.
       - key: FRONTEND_BASE_URL
-        value: https://git-it-app-czpy.onrender.com
+        value: https://git-it-eight.vercel.app
 
       # The Vercel origin, for example https://your-project.vercel.app.
       # While the Vercel rewrite is in place the browser never calls this
