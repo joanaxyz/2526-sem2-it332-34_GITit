@@ -15,6 +15,7 @@ from adminconsole.views import (
     AdminTransactionListAPIView,
     AdminUserActionAPIView,
     AdminUserDetailAPIView,
+    AdminUserKpisAPIView,
     AdminUserListAPIView,
 )
 
@@ -25,6 +26,7 @@ urlpatterns = [
     path(
         "users/<int:user_id>/actions/", AdminUserActionAPIView.as_view(), name="admin-user-action"
     ),
+    path("users/<int:user_id>/kpis/", AdminUserKpisAPIView.as_view(), name="admin-user-kpis"),
     path("economy/transactions/", AdminTransactionListAPIView.as_view(), name="admin-transactions"),
     path("economy/adjust/", AdminEconomyAdjustAPIView.as_view(), name="admin-economy-adjust"),
     path("stories/", AdminStoryListCreateAPIView.as_view(), name="admin-story-list"),

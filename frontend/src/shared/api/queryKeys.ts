@@ -26,6 +26,7 @@ export const queryKeys = {
   adminOverview: ['admin-overview'] as const,
   adminUsers: (query?: string) => ['admin-users', query ?? ''] as const,
   adminUser: (id: number) => ['admin-user', id] as const,
+  adminUserKpis: (id: number) => ['admin-user-kpis', id] as const,
   adminTransactions: (userId?: number) => ['admin-transactions', userId ?? 'all'] as const,
   adminStories: ['admin-stories'] as const,
   adminChapters: (storyId?: number) => ['admin-chapters', storyId ?? 'all'] as const,

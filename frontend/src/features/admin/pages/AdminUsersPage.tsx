@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type ReactNode } from 'react'
 
-import { adminApi } from '@/features/admin/api/adminApi'
+import { adminApi, type KpiRate } from '@/features/admin/api/adminApi'
 import { PageHeading } from '@/features/admin/components/adminUi'
 import { adminErrorMessage } from '@/features/admin/utils/errors'
 import { formatCoins, formatDate } from '@/features/admin/utils/format'
@@ -104,6 +104,12 @@ function UserDetailPanel({ userId, onChanged }: { userId: number | null; onChang
   const detailQuery = useQuery({
     queryKey: queryKeys.adminUser(userId ?? 0),
     queryFn: () => adminApi.user(userId as number),
+    enabled: userId != null,
+  })
+
+  const kpisQuery = useQuery({
+    queryKey: queryKeys.adminUserKpis(userId ?? 0),
+    queryFn: () => adminApi.userKpis(userId as number),
     enabled: userId != null,
   })
 
@@ -229,6 +235,19 @@ function UserDetailPanel({ userId, onChanged }: { userId: number | null; onChang
           {adminErrorMessage(action.error, 'Action failed. Check the input and try again.')}
         </p>
       ) : null}
+
+      <div className="mt-4 border-t border-border/60 pt-4">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Learning KPIs</p>
+        {kpisQuery.isPending ? (
+          <p className="text-xs text-muted-foreground">Loading KPIs…</p>
+        ) : kpisQuery.isError || !kpisQuery.data ? (
+          <p className="text-xs text-destructive">Could not load KPIs.</p>
+        ) : !kpisQuery.data.has_data ? (
+          <p className="text-xs text-muted-foreground">No activity recorded yet.</p>
+        ) : kpisQuery.data.kpis ? (
+          <UserKpiPanel kpis={kpisQuery.data.kpis} modules={kpisQuery.data.modules} />
+        ) : null}
+      </div>
     </div>
   )
 }
@@ -238,6 +257,113 @@ function Stat({ label, value }: { label: string; value: ReactNode }) {
     <div className="rounded-md bg-background/40 px-3 py-2">
       <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd className="font-semibold text-foreground">{value}</dd>
+    </div>
+  )
+}
+
+// KPI targets from the capstone SRS
+const KPI_TARGETS = {
+  scr: { label: 'SCR', full: 'Scenario Completion Rate', target: 80, higherIsBetter: true, unit: '%', format: 'percent' },
+  car: { label: 'CAR', full: 'Command Accuracy Rate', target: 70, higherIsBetter: true, unit: '%', format: 'percent' },
+  hlcr: { label: 'HLCR', full: 'Hard-Level Completion Rate', target: 70, higherIsBetter: true, unit: '%', format: 'percent' },
+  arc: { label: 'ARC', full: 'Avg Retry Count', target: 2, higherIsBetter: false, unit: '', format: 'decimal' },
+  rtr: { label: 'RTR', full: 'Retry Transfer Rate', target: 65, higherIsBetter: true, unit: '%', format: 'percent' },
+  rta: { label: 'RTA', full: 'Retry Transfer Accuracy', target: 65, higherIsBetter: true, unit: '%', format: 'percent' },
+} as const
+
+type KpiKey = keyof typeof KPI_TARGETS
+
+function formatKpiValue(rate: KpiRate, format: string): string {
+  if (rate.value === null) return '--'
+  return format === 'percent' ? `${rate.value}%` : rate.value.toFixed(2)
+}
+
+function metTarget(rate: KpiRate, key: KpiKey): boolean | null {
+  if (rate.value === null) return null
+  const { target, higherIsBetter } = KPI_TARGETS[key]
+  return higherIsBetter ? rate.value >= target : rate.value <= target
+}
+
+function KpiBadge({ rate, kpiKey }: { rate: KpiRate; kpiKey: KpiKey }) {
+  const { format } = KPI_TARGETS[kpiKey]
+  const display = formatKpiValue(rate, format)
+  const met = metTarget(rate, kpiKey)
+  const color =
+    met === null ? 'text-muted-foreground bg-background/40 border-border' :
+    met ? 'text-green-400 bg-green-400/10 border-green-400/30' :
+    'text-red-400 bg-red-400/10 border-red-400/30'
+  return (
+    <span className={`rounded border px-1.5 py-0.5 font-mono text-xs font-bold ${color}`}>
+      {display}
+    </span>
+  )
+}
+
+function UserKpiPanel({
+  kpis,
+  modules,
+}: {
+  kpis: NonNullable<import('@/features/admin/api/adminApi').UserKpisResponse['kpis']>
+  modules: import('@/features/admin/api/adminApi').UserKpisResponse['modules']
+}) {
+  const overallKeys: KpiKey[] = ['scr', 'car', 'hlcr', 'arc', 'rtr', 'rta']
+  const moduleKeys: Array<Exclude<KpiKey, 'car' | 'rta'>> = ['scr', 'hlcr', 'arc', 'rtr']
+
+  return (
+    <div className="grid gap-4">
+      {/* Overall KPIs */}
+      <div className="grid gap-1.5">
+        <p className="text-xs font-semibold text-foreground">Overall (all modules)</p>
+        <div className="grid gap-1">
+          {overallKeys.map((key) => {
+            const rate = kpis[key]
+            const meta = KPI_TARGETS[key]
+            return (
+              <div key={key} className="flex items-center justify-between gap-2">
+                <span className="text-xs text-muted-foreground" title={meta.full}>
+                  {meta.label}
+                  <span className="ml-1 text-muted-foreground/60">≥{meta.target}{meta.unit || ''}</span>
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">{rate.denominator ? `${rate.numerator}/${rate.denominator}` : '--'}</span>
+                  <KpiBadge rate={rate} kpiKey={key} />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Per-module breakdown */}
+      {modules.length > 0 && (
+        <div className="grid gap-1.5">
+          <p className="text-xs font-semibold text-foreground">Per module</p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-border/40 text-left text-muted-foreground">
+                  <th className="pb-1 pr-2 font-medium">Module</th>
+                  {moduleKeys.map((k) => (
+                    <th key={k} className="pb-1 pr-1 font-medium text-center">{KPI_TARGETS[k].label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {modules.map((mod) => (
+                  <tr key={mod.number} className="border-b border-border/20">
+                    <td className="py-1 pr-2 text-muted-foreground">M{mod.number}</td>
+                    {moduleKeys.map((key) => (
+                      <td key={key} className="py-1 pr-1 text-center">
+                        <KpiBadge rate={mod[key]} kpiKey={key} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

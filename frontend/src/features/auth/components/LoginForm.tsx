@@ -45,7 +45,7 @@ export function LoginForm() {
     onSuccess: (data) => {
       queryClient.clear()
       setSession(data.access, data.user)
-      navigate(storyPath(), { replace: true })
+      navigate(data.user.is_staff ? '/admin' : storyPath(), { replace: true })
     },
   })
   const errorPresentation = useMemo(

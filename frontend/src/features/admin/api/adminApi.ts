@@ -1,4 +1,4 @@
-import { apiOperationRequest } from '@/shared/api/httpClient'
+import { apiOperationRequest, apiRequest } from '@/shared/api/httpClient'
 import type {
   ApiRequestBody,
   ApiSchemas,
@@ -91,4 +91,29 @@ export const adminApi = {
   saveFlag(payload: FeatureFlagUpdatePayload) {
     return apiOperationRequest('admin_settings_create', '/admin/settings/', { body: payload })
   },
+  userKpis(id: number) {
+    return apiRequest<UserKpisResponse>(`/admin/users/${id}/kpis/`)
+  },
+}
+
+export type KpiRate = { value: number | null; numerator: number; denominator: number }
+
+export type UserKpisResponse = {
+  has_data: boolean
+  kpis: {
+    scr: KpiRate
+    car: KpiRate
+    hlcr: KpiRate
+    rtr: KpiRate
+    arc: KpiRate
+    rta: KpiRate
+  } | null
+  modules: Array<{
+    number: number
+    title: string
+    scr: KpiRate
+    hlcr: KpiRate
+    rtr: KpiRate
+    arc: KpiRate
+  }>
 }
