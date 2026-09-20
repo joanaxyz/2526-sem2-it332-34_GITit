@@ -14,7 +14,7 @@ from .curriculum import (
 from .dashboard import AdminAnalyticsAPIView, AdminOverviewAPIView
 from .economy import AdminEconomyAdjustAPIView, AdminTransactionListAPIView
 from .settings import AdminSettingsAPIView
-from .users import AdminUserActionAPIView, AdminUserDetailAPIView, AdminUserListAPIView
+from .users import AdminUserActionAPIView, AdminUserDetailAPIView, AdminUserKpisAPIView, AdminUserListAPIView
 
 __all__ = [
     "AdminAnalyticsAPIView",
@@ -31,5 +31,6 @@ __all__ = [
     "AdminTransactionListAPIView",
     "AdminUserActionAPIView",
     "AdminUserDetailAPIView",
+    "AdminUserKpisAPIView",
     "AdminUserListAPIView",
 ]

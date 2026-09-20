@@ -25,6 +25,112 @@ function evidenceLabel(metric: RateMetric, noun: string) {
   return `${metric.numerator} / ${metric.denominator} ${noun}`
 }
 
+type RateMetricLike = { value: number | null; numerator: number; denominator: number }
+
+const ALL_KPI_META = [
+  { key: 'scr',  label: 'SCR',  full: 'Scenario Completion Rate',   target: 80,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '1–4' },
+  { key: 'car',  label: 'CAR',  full: 'Command Accuracy Rate',       target: 70,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '1–4' },
+  { key: 'hlcr', label: 'HLCR', full: 'Hard-Level Completion Rate',  target: 70,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '1–3 (≥65% M4)' },
+  { key: 'arc',  label: 'ARC',  full: 'Average Retry Count',         target: 2,   higherIsBetter: false, unit: '',   format: 'decimal', modules: '1–3 (≤3 M4)' },
+  { key: 'rtr',  label: 'RTR',  full: 'Retry Transfer Rate',         target: 65,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '3–4' },
+]
+
+function fmtRate(value: number | null, format: string): string {
+  if (value === null) return '--'
+  return format === 'percent' ? `${value}%` : value.toFixed(2)
+}
+
+function kpiStatus(value: number | null, target: number, higherIsBetter: boolean): 'met' | 'missed' | 'empty' {
+  if (value === null) return 'empty'
+  return (higherIsBetter ? value >= target : value <= target) ? 'met' : 'missed'
+}
+
+function StatusCell({ rate, target, higherIsBetter, format }: {
+  rate: RateMetricLike | undefined
+  target: number
+  higherIsBetter: boolean
+  format: string
+}) {
+  if (!rate) return <td className="px-3 py-2 text-center text-muted-foreground text-xs">--</td>
+  const status = kpiStatus(rate.value, target, higherIsBetter)
+  const color = status === 'met' ? 'text-green-400 font-bold' : status === 'missed' ? 'text-red-400 font-bold' : 'text-muted-foreground'
+  const bg = status === 'met' ? 'bg-green-400/10' : status === 'missed' ? 'bg-red-400/10' : ''
+  return (
+    <td className={`px-3 py-2 text-center text-xs ${color} ${bg}`}>
+      {fmtRate(rate.value, format)}
+      {rate.denominator > 0 && (
+        <span className="ml-1 text-muted-foreground font-normal">({rate.denominator})</span>
+      )}
+    </td>
+  )
+}
+
+function KpiSummaryTable({ diagnostics, passRate, totalRuns, passedRuns }: {
+  diagnostics: { kpis: { scr?: RateMetricLike; car: RateMetricLike; hlcr: RateMetricLike; rtr: RateMetricLike; arc: RateMetricLike }; modules: PerformanceModule[] }
+  passRate: number
+  totalRuns: number
+  passedRuns: number
+}) {
+  const scrOverall: RateMetricLike = {
+    value: totalRuns > 0 ? passRate : null,
+    numerator: passedRuns,
+    denominator: totalRuns,
+  }
+
+  const overallByKey: Record<string, RateMetricLike> = {
+    scr: scrOverall,
+    car: diagnostics.kpis.car,
+    hlcr: diagnostics.kpis.hlcr,
+    arc: diagnostics.kpis.arc,
+    rtr: diagnostics.kpis.rtr,
+  }
+
+  return (
+    <div className="admin-table-scroll">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-border text-left text-xs uppercase text-muted-foreground">
+            <th className="px-3 py-2 font-semibold">KPI</th>
+            <th className="px-3 py-2 font-semibold">Description</th>
+            <th className="px-3 py-2 font-semibold text-center">Target</th>
+            <th className="px-3 py-2 font-semibold text-center">Overall</th>
+            {diagnostics.modules.map((m) => (
+              <th key={m.number} className="px-3 py-2 font-semibold text-center">M{m.number}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {ALL_KPI_META.map((meta) => {
+            const overall = overallByKey[meta.key]
+            return (
+              <tr key={meta.key} className="border-b border-border/40">
+                <td className="px-3 py-2">
+                  <span className="font-mono font-bold text-foreground">{meta.label}</span>
+                  <span className="ml-2 text-xs text-muted-foreground">{meta.modules}</span>
+                </td>
+                <td className="px-3 py-2 text-muted-foreground">{meta.full}</td>
+                <td className="px-3 py-2 text-center text-xs text-muted-foreground">
+                  {meta.higherIsBetter ? '≥' : '≤'}{meta.target}{meta.unit}
+                </td>
+                <StatusCell rate={overall} target={meta.target} higherIsBetter={meta.higherIsBetter} format={meta.format} />
+                {diagnostics.modules.map((mod) => {
+                  const modRate = (mod as Record<string, RateMetricLike>)[meta.key]
+                  return (
+                    <StatusCell key={mod.number} rate={modRate} target={meta.target} higherIsBetter={meta.higherIsBetter} format={meta.format} />
+                  )
+                })}
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+      <p className="mt-2 text-xs text-muted-foreground px-3 pb-2">
+        Green = target met · Red = target missed · (n) = sessions/attempts · -- = no data
+      </p>
+    </div>
+  )
+}
+
 function ModuleRows({
   modules,
   metric,
@@ -142,6 +248,16 @@ export function AdminAnalyticsPage() {
             <ModuleRows modules={diagnostics.modules} metric="arc" scalar />
           </article>
         </div>
+      </section>
+
+      <section className="admin-section" aria-labelledby="kpi-summary-title">
+        <header className="admin-section-head">
+          <div>
+            <h2 id="kpi-summary-title">KPI Summary — All Learners</h2>
+          </div>
+          <p className="admin-section-note">Runebound Turret · Modules 1–4</p>
+        </header>
+        <KpiSummaryTable diagnostics={diagnostics} passRate={passRate} totalRuns={data.runs.total} passedRuns={data.runs.passed} />
       </section>
 
       <div className="admin-section admin-analytics-split">
