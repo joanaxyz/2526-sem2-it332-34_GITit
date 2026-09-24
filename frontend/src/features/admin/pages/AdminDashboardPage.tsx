@@ -381,11 +381,12 @@ export function AdminDashboardPage() {
 
   const data     = analytics.data
   const diag     = data.runebound_performance
-  const passRate = data.runs.total > 0
-    ? Math.round((data.runs.passed / data.runs.total) * 100) : 0
 
+  // Overall SCR uses the same source and filters as the per-module SCR
+  // (Runebound tier runs, Modules 1–4, replays excluded), not data.runs,
+  // which spans every story and run type.
   const byKey: Record<string, Rate> = {
-    scr:  { value: data.runs.total > 0 ? passRate : null, numerator: data.runs.passed, denominator: data.runs.total },
+    scr:  diag.kpis.scr,
     car:  diag.kpis.car,
     hlcr: diag.kpis.hlcr,
     arc:  diag.kpis.arc,
