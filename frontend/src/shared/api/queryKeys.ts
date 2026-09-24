@@ -32,6 +32,9 @@ export const queryKeys = {
   adminChapters: (storyId?: number) => ['admin-chapters', storyId ?? 'all'] as const,
   adminContent: ['admin-content'] as const,
   adminAnalytics: ['admin-analytics'] as const,
+  /** Same root as adminAnalytics, so invalidating that key refreshes every range. */
+  adminAnalyticsRange: (startDate: string | null, endDate: string | null) =>
+    ['admin-analytics', startDate, endDate] as const,
   adminModeration: ['admin-moderation'] as const,
   adminSettings: ['admin-settings'] as const,
 }

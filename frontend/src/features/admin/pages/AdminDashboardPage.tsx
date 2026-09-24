@@ -1,8 +1,11 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { Activity, BookOpen, CheckCircle2, ChevronDown, Minus, X, XCircle } from 'lucide-react'
 import { useState } from 'react'
 
 import { adminApi } from '@/features/admin/api/adminApi'
+import { KpiRangePicker } from '@/features/admin/components/KpiRangePicker'
+import type { KpiDateRange } from '@/features/admin/types'
+import { ALL_TIME } from '@/features/admin/utils/kpiRange'
 import type { PerformanceModule } from '@/features/performance/types'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
@@ -411,7 +414,13 @@ function ModuleAccordion({ modules, objectives }: { modules: PerformanceModule[]
 // ─── page ─────────────────────────────────────────────────────────────────────
 export function AdminDashboardPage() {
   const [refOpen, setRefOpen] = useState(false)
-  const analytics = useQuery({ queryKey: queryKeys.adminAnalytics, queryFn: adminApi.analytics })
+  const [range, setRange] = useState<KpiDateRange>(ALL_TIME)
+  const analytics = useQuery({
+    queryKey: queryKeys.adminAnalyticsRange(range.startDate, range.endDate),
+    queryFn: () => adminApi.analytics(range),
+    // Keep the current numbers on screen while a new range loads.
+    placeholderData: keepPreviousData,
+  })
   const overview  = useQuery({ queryKey: queryKeys.adminOverview,  queryFn: adminApi.overview  })
 
   if (analytics.isPending) return <LoadingScreen label="Loading" />
@@ -445,7 +454,7 @@ export function AdminDashboardPage() {
         <div className="dk-header-left">
           <p className="dk-eyebrow">
             <Activity aria-hidden="true" />
-            Runebound Turret · Modules 1–4 · replays excluded
+            Runebound Turret · Modules 1–4 · replays and staff excluded
           </p>
           <h1 className="dk-title">KPI Overview</h1>
           <p className="dk-subtitle">
@@ -477,6 +486,8 @@ export function AdminDashboardPage() {
           )}
         </div>
       </div>
+
+      <KpiRangePicker value={range} applied={data.kpi_range} onChange={setRange} />
 
       {/* ── KPI cards ── */}
       <div className="dk-section">
