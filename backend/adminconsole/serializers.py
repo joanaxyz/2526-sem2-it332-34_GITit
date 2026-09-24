@@ -7,6 +7,7 @@ from progress.serializers import (
     PerformanceKpiSetSerializer,
     PerformanceModuleSerializer,
     PerformanceSummaryResponseSerializer,
+    RateMetricSerializer,
 )
 
 
@@ -218,6 +219,10 @@ class AdminAnalyticsResponseSerializer(serializers.Serializer):
     active_learners_30d = serializers.IntegerField(min_value=0)
     per_story = AdminStoryAnalyticsSerializer(many=True)
     runebound_performance = PerformanceSummaryResponseSerializer()
+    objectives = serializers.DictField(
+        child=RateMetricSerializer(),
+        help_text="Per-SO Command Accuracy Rate keyed by official SO code, e.g. 'SO 1.1'.",
+    )
 
 
 class AdminUserKpisResponseSerializer(serializers.Serializer):

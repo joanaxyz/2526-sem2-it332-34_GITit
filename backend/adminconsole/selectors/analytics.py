@@ -113,4 +113,6 @@ def admin_analytics_payload(*, now=None) -> dict:
         # Staff-only system diagnostics. The MetricsService remains the sole
         # formula owner for these replay-excluded Runebound measures.
         "runebound_performance": MetricsService().all_player_performance_summary(),
+        # Per-SO CAR, keyed by official SO code (see progress.objectives).
+        "objectives": MetricsService().all_player_objective_car(),
     }

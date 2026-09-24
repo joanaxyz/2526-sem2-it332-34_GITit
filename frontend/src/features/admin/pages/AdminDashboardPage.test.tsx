@@ -33,7 +33,10 @@ function moduleRow(number: number, overrides: Partial<ApiSchemas['PerformanceMod
   }
 }
 
-function analyticsFixture(overrides: Partial<Analytics['runebound_performance']> = {}): Analytics {
+function analyticsFixture(
+  overrides: Partial<Analytics['runebound_performance']> = {},
+  objectives: Analytics['objectives'] = {},
+): Analytics {
   const breakdown = { total: 20, passed: 18, by_status: { completed: 18, failed: 2 } }
   return {
     // The old SCR card source: every story and run type, 90% passed.
@@ -41,6 +44,7 @@ function analyticsFixture(overrides: Partial<Analytics['runebound_performance']>
     completions: { adventure: 0, challenge: 0, total: 0 },
     active_learners_30d: 3,
     per_story: [],
+    objectives,
     runebound_performance: {
       kpis: {
         scr: { value: 50, numerator: 2, denominator: 4 },
@@ -227,6 +231,28 @@ describe('AdminDashboardPage specific objectives', () => {
     const row = soRow('SO 4.5')
     expect(row).toHaveTextContent('≤3')
     expect(row).toHaveClass('is-met')
+  })
+
+  it('reads CAR per SO from the objectives map, not the overall CAR', async () => {
+    renderPage(
+      analyticsFixture(
+        { kpis: { ...analyticsFixture().runebound_performance.kpis, car: { value: 99, numerator: 99, denominator: 100 } } },
+        {
+          'SO 1.1': { value: 80, numerator: 8, denominator: 10 },
+          'SO 1.2': { value: 50, numerator: 1, denominator: 2 },
+        },
+      ),
+    )
+    await openModule(1)
+
+    expect(soRow('SO 1.1')).toHaveTextContent('80%')
+    expect(soRow('SO 1.1')).toHaveClass('is-met')
+    expect(soRow('SO 1.2')).toHaveTextContent('50%')
+    expect(soRow('SO 1.2')).toHaveClass('is-miss')
+    // No data for this SO: shows "—", not the 99% overall CAR.
+    expect(soRow('SO 1.3')).toHaveTextContent('—')
+    expect(soRow('SO 1.3')).not.toHaveTextContent('99%')
+    expect(soRow('SO 1.3')).toHaveClass('is-none')
   })
 
   it('has no verdict for a two-metric SO while one metric has no data', async () => {
