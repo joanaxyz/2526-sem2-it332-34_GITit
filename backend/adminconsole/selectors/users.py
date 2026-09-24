@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 
 from players.models import Player
+from progress.services import MetricsService
 from progress.wallet import WalletService
 from shop.models import Entitlement
 
@@ -47,4 +48,22 @@ def user_detail(user) -> dict:
         "last_login": user.last_login,
         "wallet": wallet,
         "entitlement_count": (Entitlement.objects.filter(player=player).count() if player else 0),
+    }
+
+
+def admin_user_kpis_payload(user) -> dict:
+    """Per-user learning KPIs for the admin detail panel.
+
+    Every value comes from MetricsService.performance_summary, the same code
+    path as the admin dashboard aggregate, so RTA cannot drift between them.
+    """
+    player = Player.objects.filter(user=user).first()
+    if player is None:
+        return {"has_data": False, "kpis": None, "modules": []}
+    summary = MetricsService().performance_summary(player=player)
+    kpis = summary["kpis"]
+    return {
+        "has_data": summary["completed_sessions"] > 0 or kpis["rta"]["denominator"] > 0,
+        "kpis": kpis,
+        "modules": summary["modules"],
     }

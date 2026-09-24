@@ -15,11 +15,23 @@ class DashboardKpiSetSerializer(serializers.Serializer):
     hlcr = RateMetricSerializer()
 
 
+RTA_HELP_TEXT = (
+    "Retry Transfer Accuracy (Modules 3-4): first retries after a failure on a "
+    "structurally changed variant that complete, over all such retries."
+)
+RETRY_SUCCESS_RATE_HELP_TEXT = "Learner-facing share of runs with a prior run that complete."
+# TODO(next release): drop the deprecated "rtr" alias once no deployed frontend
+# reads it; it mirrors retry_success_rate so older bundles keep rendering.
+RTR_DEPRECATED_HELP_TEXT = "Deprecated alias of retry_success_rate. Will be removed."
+
+
 class PerformanceKpiSetSerializer(serializers.Serializer):
     scr = RateMetricSerializer()
     car = RateMetricSerializer()
     hlcr = RateMetricSerializer()
-    rtr = RateMetricSerializer()
+    rta = RateMetricSerializer(help_text=RTA_HELP_TEXT)
+    retry_success_rate = RateMetricSerializer(help_text=RETRY_SUCCESS_RATE_HELP_TEXT)
+    rtr = RateMetricSerializer(required=False, help_text=RTR_DEPRECATED_HELP_TEXT)
     arc = RateMetricSerializer()
 
 
@@ -28,7 +40,9 @@ class PerformanceModuleSerializer(serializers.Serializer):
     title = serializers.CharField()
     scr = RateMetricSerializer()
     hlcr = RateMetricSerializer()
-    rtr = RateMetricSerializer()
+    rta = RateMetricSerializer(help_text=RTA_HELP_TEXT)
+    retry_success_rate = RateMetricSerializer(help_text=RETRY_SUCCESS_RATE_HELP_TEXT)
+    rtr = RateMetricSerializer(required=False, help_text=RTR_DEPRECATED_HELP_TEXT)
     arc = RateMetricSerializer()
 
 

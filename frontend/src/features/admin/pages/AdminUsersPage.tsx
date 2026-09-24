@@ -24,7 +24,6 @@ const KPI_META = {
   car:  { abbr: 'CAR',  name: 'Command Accuracy Rate',     target: 70, up: true,  pct: true  },
   hlcr: { abbr: 'HLCR', name: 'Hard-Level Completion Rate',target: 70, up: true,  pct: true  },
   arc:  { abbr: 'ARC',  name: 'Avg Retry Count',           target: 2,  up: false, pct: false },
-  rtr:  { abbr: 'RTR',  name: 'Retry Transfer Rate',       target: 65, up: true,  pct: true  },
   rta:  { abbr: 'RTA',  name: 'Retry Transfer Accuracy',   target: 65, up: true,  pct: true  },
 } as const
 
@@ -335,8 +334,8 @@ function KpiPanel({
   kpis: NonNullable<import('@/features/admin/api/adminApi').UserKpisResponse['kpis']>
   modules: import('@/features/admin/api/adminApi').UserKpisResponse['modules']
 }) {
-  const overallKeys: KpiKey[] = ['scr', 'car', 'hlcr', 'arc', 'rtr', 'rta']
-  const moduleKeys: KpiKey[]  = ['scr', 'hlcr', 'arc', 'rtr']
+  const overallKeys: KpiKey[] = ['scr', 'car', 'hlcr', 'arc', 'rta']
+  const moduleKeys: KpiKey[]  = ['scr', 'hlcr', 'arc', 'rta']
 
   const metCount = overallKeys.filter(k => kpiStatus(kpis[k], k) === 'met').length
 
@@ -386,7 +385,7 @@ function KpiPanel({
                   <td className="kp-mod-num">M{mod.number}</td>
                   {moduleKeys.map(key => {
                     const m = KPI_META[key]
-                    const r: KpiRate | undefined = key === 'scr' ? mod.scr : key === 'hlcr' ? mod.hlcr : key === 'arc' ? mod.arc : key === 'rtr' ? mod.rtr : undefined
+                    const r: KpiRate | undefined = key === 'scr' ? mod.scr : key === 'hlcr' ? mod.hlcr : key === 'arc' ? mod.arc : key === 'rta' ? mod.rta : undefined
                     if (!r) return <td key={key} className="kp-mod-cell kp-mod-cell--none">—</td>
                     const s = kpiStatus(r, key)
                     return (

@@ -675,6 +675,8 @@ def test_staff_analytics_returns_shape(django_user_model):
         "scr": {"value": None, "numerator": 0, "denominator": 0},
         "car": {"value": None, "numerator": 0, "denominator": 0},
         "hlcr": {"value": None, "numerator": 0, "denominator": 0},
+        "rta": {"value": None, "numerator": 0, "denominator": 0},
+        "retry_success_rate": {"value": None, "numerator": 0, "denominator": 0},
         "rtr": {"value": None, "numerator": 0, "denominator": 0},
         "arc": {"value": None, "numerator": 0, "denominator": 0},
     }

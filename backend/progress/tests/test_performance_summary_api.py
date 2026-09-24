@@ -77,6 +77,10 @@ def test_performance_summary_uses_runebound_attempts_and_server_side_formulas(
         "scr": {"value": 50.0, "numerator": 1, "denominator": 2},
         "car": {"value": 50.0, "numerator": 1, "denominator": 2},
         "hlcr": {"value": 50.0, "numerator": 1, "denominator": 2},
+        # Module 1 same-variant retry: outside RTA scope, so RTA has no data,
+        # while the learner retry success rate keeps its previous value.
+        "rta": {"value": None, "numerator": 0, "denominator": 0},
+        "retry_success_rate": {"value": 100.0, "numerator": 1, "denominator": 1},
         "rtr": {"value": 100.0, "numerator": 1, "denominator": 1},
         "arc": {"value": 1.0, "numerator": 1, "denominator": 1},
     }
@@ -85,7 +89,8 @@ def test_performance_summary_uses_runebound_attempts_and_server_side_formulas(
     module_one = payload["modules"][0]
     assert module_one["scr"] == payload["kpis"]["scr"]
     assert module_one["hlcr"] == payload["kpis"]["hlcr"]
-    assert module_one["rtr"] == payload["kpis"]["rtr"]
+    assert module_one["rta"] == payload["kpis"]["rta"]
+    assert module_one["retry_success_rate"] == payload["kpis"]["retry_success_rate"]
     assert module_one["arc"] == payload["kpis"]["arc"]
     assert MetricsService().all_player_performance_summary() == payload
 

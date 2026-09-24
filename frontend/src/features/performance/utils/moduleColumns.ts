@@ -49,11 +49,11 @@ export function moduleColumnSeries(modules: PerformanceModule[]) {
   return {
     /** False for a fresh account: four empty plots say less than one sentence. */
     hasAnyData: modules.some((module) =>
-      [module.scr, module.hlcr, module.rtr, module.arc].some((metric) => metric.denominator > 0),
+      [module.scr, module.hlcr, module.retry_success_rate, module.arc].some((metric) => metric.denominator > 0),
     ),
     levelsFinished: modules.map((module) => rateColumn(module, module.scr, 'runs')),
     hardLevelsFinished: modules.map((module) => rateColumn(module, module.hlcr, 'hard runs')),
-    retriesThatWorked: modules.map((module) => rateColumn(module, module.rtr, 'retries')),
+    retriesThatWorked: modules.map((module) => rateColumn(module, module.retry_success_rate, 'retries')),
     retriesPerFinish: modules.map(retryColumn),
     /** Expands the "M1" ticks: the axis stays short, the names stay visible. */
     key: modules.map((module) => ({ id: module.number, label: `M${module.number}`, title: caption(module) })),

@@ -46,6 +46,7 @@ export type ApiSchemas = {
   "AdminUserActionRequest": { "action": ApiSchemas["ActionEnum"]; "amount"?: number; "reason"?: string; "request_id"?: string; "value"?: boolean }
   "AdminUserBrief": { "date_joined": string; "email": string; "id": number; "is_active": boolean; "is_staff": boolean; "username": string }
   "AdminUserDetail": { "date_joined": string; "email": string; "entitlement_count": number; "id": number; "is_active": boolean; "is_staff": boolean; "last_login": string | null; "username": string; "wallet": ApiSchemas["WalletSummary"] }
+  "AdminUserKpisResponse": { "has_data": boolean; "kpis": ApiSchemas["PerformanceKpiSet"] | null; "modules": Array<ApiSchemas["PerformanceModule"]> }
   "AdminUserListResponse": { "results": Array<ApiSchemas["AdminUserBrief"]> }
   "AdventureCommandResponse": { "command_classification": string; "command_outcome": { [key: string]: JsonValue }; "exit_code": number; "run": ApiSchemas["AdventureCommandRunResponse"]; "solved": boolean; "stderr": string; "stdout": string; "step": ApiSchemas["RuntimeStepResponse"]; "terminal_output": string }
   "AdventureCommandRunResponse": ApiSchemas["AdventureRunResponse"] | ApiSchemas["AdventureRunPatchResponse"]
@@ -116,8 +117,8 @@ export type ApiSchemas = {
   "PatchedAdminStoryUpdateRequest": { "difficulty"?: ApiSchemas["DifficultyEnum"]; "is_published"?: boolean; "prerequisite_story"?: number | null; "sort_order"?: number; "summary"?: string; "title"?: string; "world_slug"?: string }
   "PatchedContentDefinitionUpdateRequest": { "chapter"?: number | null; "command_family"?: string; "definition"?: { [key: string]: JsonValue }; "difficulty"?: string; "kind"?: ApiSchemas["KindA5eEnum"]; "official_chapter"?: number | null; "slug"?: string; "summary"?: string; "tags"?: Array<string>; "title"?: string; "visibility"?: ApiSchemas["VisibilityEnum"] }
   "PatchedPlayerPreferences": { "motion_mode"?: ApiSchemas["MotionModeEnum"]; "onboarding_phase"?: ApiSchemas["OnboardingPhaseEnum"] }
-  "PerformanceKpiSet": { "arc": ApiSchemas["RateMetric"]; "car": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "rtr": ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"] }
-  "PerformanceModule": { "arc": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "number": number; "rtr": ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"]; "title": string }
+  "PerformanceKpiSet": { "arc": ApiSchemas["RateMetric"]; "car": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "retry_success_rate": ApiSchemas["RateMetric"]; "rta": ApiSchemas["RateMetric"]; "rtr"?: ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"] }
+  "PerformanceModule": { "arc": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "number": number; "retry_success_rate": ApiSchemas["RateMetric"]; "rta": ApiSchemas["RateMetric"]; "rtr"?: ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"]; "title": string }
   "PerformanceSummaryResponse": { "completed_sessions": number; "kpis": ApiSchemas["PerformanceKpiSet"]; "modules": Array<ApiSchemas["PerformanceModule"]> }
   "PlayerPreferences": { "motion_mode"?: ApiSchemas["MotionModeEnum"]; "onboarding_phase"?: ApiSchemas["OnboardingPhaseEnum"] }
   "RateMetric": { "denominator": number; "numerator": number; "value": number | null }
@@ -165,6 +166,7 @@ export type ApiPath =
   | "/api/admin/users/"
   | "/api/admin/users/{user_id}/"
   | "/api/admin/users/{user_id}/actions/"
+  | "/api/admin/users/{user_id}/kpis/"
   | "/api/adventure-level-tiers/{tier_id}/runs/"
   | "/api/adventure-levels/{level_id}/drill/"
   | "/api/adventure-levels/{level_id}/drill/results/"
@@ -243,6 +245,7 @@ export type ApiMethodByPath = {
   "/api/admin/users/": "GET"
   "/api/admin/users/{user_id}/": "GET"
   "/api/admin/users/{user_id}/actions/": "POST"
+  "/api/admin/users/{user_id}/kpis/": "GET"
   "/api/adventure-level-tiers/{tier_id}/runs/": "POST"
   "/api/adventure-levels/{level_id}/drill/": "GET"
   "/api/adventure-levels/{level_id}/drill/results/": "POST"
@@ -323,6 +326,7 @@ export const apiOperations = {
   admin_users_retrieve: { method: "GET", path: "/api/admin/users/", operationId: "admin_users_retrieve", tags: ["admin"] },
   admin_users_retrieve_2: { method: "GET", path: "/api/admin/users/{user_id}/", operationId: "admin_users_retrieve_2", tags: ["admin"] },
   admin_users_actions_create: { method: "POST", path: "/api/admin/users/{user_id}/actions/", operationId: "admin_users_actions_create", tags: ["admin"] },
+  admin_users_kpis_retrieve: { method: "GET", path: "/api/admin/users/{user_id}/kpis/", operationId: "admin_users_kpis_retrieve", tags: ["admin"] },
   adventure_level_tiers_runs_create: { method: "POST", path: "/api/adventure-level-tiers/{tier_id}/runs/", operationId: "adventure_level_tiers_runs_create", tags: ["adventure-level-tiers"] },
   adventure_levels_drill_retrieve: { method: "GET", path: "/api/adventure-levels/{level_id}/drill/", operationId: "adventure_levels_drill_retrieve", tags: ["adventure-levels"] },
   adventure_levels_drill_results_create: { method: "POST", path: "/api/adventure-levels/{level_id}/drill/results/", operationId: "adventure_levels_drill_results_create", tags: ["adventure-levels"] },
@@ -424,6 +428,7 @@ export type ApiRequestBodyByOperation = {
   admin_users_retrieve: null
   admin_users_retrieve_2: null
   admin_users_actions_create: ApiSchemas["AdminUserActionRequest"]
+  admin_users_kpis_retrieve: null
   adventure_level_tiers_runs_create: ApiSchemas["AdventureLevelTierRunStart"]
   adventure_levels_drill_retrieve: null
   adventure_levels_drill_results_create: ApiSchemas["DrillReport"]
@@ -522,6 +527,7 @@ export type ApiResponseBodyByOperation = {
   admin_users_retrieve: ApiSchemas["AdminUserListResponse"]
   admin_users_retrieve_2: ApiSchemas["AdminUserDetail"]
   admin_users_actions_create: ApiSchemas["AdminUserDetail"]
+  admin_users_kpis_retrieve: ApiSchemas["AdminUserKpisResponse"]
   adventure_level_tiers_runs_create: ApiSchemas["AdventureLevelTierRunResponse"]
   adventure_levels_drill_retrieve: ApiSchemas["LevelDrillPlanResponse"]
   adventure_levels_drill_results_create: ApiSchemas["DrillReportResponse"]

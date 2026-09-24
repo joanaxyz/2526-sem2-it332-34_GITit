@@ -10,7 +10,7 @@ import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
 // Diagnostic Runebound metrics are staff-only: they describe simulator and
 // retry behaviour, not learner outcomes, so they never appear in the player UI.
-type DiagnosticMetric = 'rtr' | 'arc'
+type DiagnosticMetric = 'rta' | 'arc'
 
 function formatPercent(metric: RateMetric) {
   return metric.value === null ? '--' : `${Math.round(metric.value)}%`
@@ -32,7 +32,7 @@ const ALL_KPI_META = [
   { key: 'car',  label: 'CAR',  full: 'Command Accuracy Rate',       target: 70,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '1–4' },
   { key: 'hlcr', label: 'HLCR', full: 'Hard-Level Completion Rate',  target: 70,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '1–3 (≥65% M4)' },
   { key: 'arc',  label: 'ARC',  full: 'Average Retry Count',         target: 2,   higherIsBetter: false, unit: '',   format: 'decimal', modules: '1–3 (≤3 M4)' },
-  { key: 'rtr',  label: 'RTR',  full: 'Retry Transfer Rate',         target: 65,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '3–4' },
+  { key: 'rta',  label: 'RTA',  full: 'Retry Transfer Accuracy',     target: 65,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '3–4' },
 ]
 
 function fmtRate(value: number | null, format: string): string {
@@ -66,7 +66,7 @@ function StatusCell({ rate, target, higherIsBetter, format }: {
 }
 
 function KpiSummaryTable({ diagnostics, passRate, totalRuns, passedRuns }: {
-  diagnostics: { kpis: { scr?: RateMetricLike; car: RateMetricLike; hlcr: RateMetricLike; rtr: RateMetricLike; arc: RateMetricLike }; modules: PerformanceModule[] }
+  diagnostics: { kpis: { scr?: RateMetricLike; car: RateMetricLike; hlcr: RateMetricLike; rta: RateMetricLike; arc: RateMetricLike }; modules: PerformanceModule[] }
   passRate: number
   totalRuns: number
   passedRuns: number
@@ -82,7 +82,7 @@ function KpiSummaryTable({ diagnostics, passRate, totalRuns, passedRuns }: {
     car: diagnostics.kpis.car,
     hlcr: diagnostics.kpis.hlcr,
     arc: diagnostics.kpis.arc,
-    rtr: diagnostics.kpis.rtr,
+    rta: diagnostics.kpis.rta,
   }
 
   return (
@@ -118,7 +118,7 @@ function KpiSummaryTable({ diagnostics, passRate, totalRuns, passedRuns }: {
                     : meta.key === 'car' ? undefined
                     : meta.key === 'hlcr' ? mod.hlcr
                     : meta.key === 'arc' ? mod.arc
-                    : meta.key === 'rtr' ? mod.rtr
+                    : meta.key === 'rta' ? mod.rta
                     : undefined
                   return (
                     <StatusCell key={mod.number} rate={modRate} target={meta.target} higherIsBetter={meta.higherIsBetter} format={meta.format} />
@@ -234,12 +234,12 @@ export function AdminAnalyticsPage() {
           <article>
             <header className="admin-diagnostic-head">
               <RotateCcw aria-hidden="true" />
-              <span>Retry transfer</span>
+              <span>Retry transfer accuracy</span>
             </header>
-            <strong className="admin-diagnostic-value">{formatPercent(diagnostics.kpis.rtr)}</strong>
-            <p>Retry runs that end in a successful completion.</p>
-            <small>{evidenceLabel(diagnostics.kpis.rtr, 'retry attempts')}</small>
-            <ModuleRows modules={diagnostics.modules} metric="rtr" />
+            <strong className="admin-diagnostic-value">{formatPercent(diagnostics.kpis.rta)}</strong>
+            <p>First retries after a failure, on a structurally changed variant, that complete (Modules 3-4).</p>
+            <small>{evidenceLabel(diagnostics.kpis.rta, 'retry sessions')}</small>
+            <ModuleRows modules={diagnostics.modules} metric="rta" />
           </article>
 
           <article>

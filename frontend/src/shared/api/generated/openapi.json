@@ -607,6 +607,37 @@
                 }
             }
         },
+        "/api/admin/users/{user_id}/kpis/": {
+            "get": {
+                "operationId": "admin_users_kpis_retrieve",
+                "description": "Per-user learning KPIs for the admin console detail panel.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "user_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminUserKpisResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/adventure-level-tiers/{tier_id}/runs/": {
             "post": {
                 "operationId": "adventure_level_tiers_runs_create",
@@ -4348,6 +4379,33 @@
                     "wallet"
                 ]
             },
+            "AdminUserKpisResponse": {
+                "type": "object",
+                "properties": {
+                    "has_data": {
+                        "type": "boolean"
+                    },
+                    "kpis": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PerformanceKpiSet"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "modules": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PerformanceModule"
+                        }
+                    }
+                },
+                "required": [
+                    "has_data",
+                    "kpis",
+                    "modules"
+                ]
+            },
             "AdminUserListResponse": {
                 "type": "object",
                 "properties": {
@@ -6843,8 +6901,29 @@
                     "hlcr": {
                         "$ref": "#/components/schemas/RateMetric"
                     },
+                    "rta": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RateMetric"
+                            }
+                        ],
+                        "description": "Retry Transfer Accuracy (Modules 3-4): first retries after a failure on a structurally changed variant that complete, over all such retries."
+                    },
+                    "retry_success_rate": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RateMetric"
+                            }
+                        ],
+                        "description": "Learner-facing share of runs with a prior run that complete."
+                    },
                     "rtr": {
-                        "$ref": "#/components/schemas/RateMetric"
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RateMetric"
+                            }
+                        ],
+                        "description": "Deprecated alias of retry_success_rate. Will be removed."
                     },
                     "arc": {
                         "$ref": "#/components/schemas/RateMetric"
@@ -6854,7 +6933,8 @@
                     "arc",
                     "car",
                     "hlcr",
-                    "rtr",
+                    "retry_success_rate",
+                    "rta",
                     "scr"
                 ]
             },
@@ -6873,8 +6953,29 @@
                     "hlcr": {
                         "$ref": "#/components/schemas/RateMetric"
                     },
+                    "rta": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RateMetric"
+                            }
+                        ],
+                        "description": "Retry Transfer Accuracy (Modules 3-4): first retries after a failure on a structurally changed variant that complete, over all such retries."
+                    },
+                    "retry_success_rate": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RateMetric"
+                            }
+                        ],
+                        "description": "Learner-facing share of runs with a prior run that complete."
+                    },
                     "rtr": {
-                        "$ref": "#/components/schemas/RateMetric"
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RateMetric"
+                            }
+                        ],
+                        "description": "Deprecated alias of retry_success_rate. Will be removed."
                     },
                     "arc": {
                         "$ref": "#/components/schemas/RateMetric"
@@ -6884,7 +6985,8 @@
                     "arc",
                     "hlcr",
                     "number",
-                    "rtr",
+                    "retry_success_rate",
+                    "rta",
                     "scr",
                     "title"
                 ]
