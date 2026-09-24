@@ -11851,9 +11851,241 @@ def _module_4_rebase_case(
     }
 
 
-# The MVP revert repository. The first variant of every revert tier (re6/rm6/
-# rh6) keeps it, so a first-time player still starts from the same repository
-# as in the MVP data; only the grading is stricter.
+def _m4_linear(base_tree: dict[str, str], steps: list[tuple[str, dict[str, str]]]) -> list[dict]:
+    """Linear history c0..cN; each step is (message, changed files)."""
+    commits: list[dict[str, Any]] = []
+    tree = dict(base_tree)
+    for index, (message, changes) in enumerate(steps):
+        tree = {**tree, **changes}
+        parents = [f"c{index - 1}"] if index else []
+        commits.append(_m4_commit(f"c{index}", message, parents, dict(tree)))
+    return commits
+
+
+def _m4_published_main(commits: list[dict[str, Any]], remote: str) -> dict[str, Any]:
+    """A main branch whose tip is already pushed to origin/main."""
+    tip = commits[-1]["id"]
+    return {
+        "repository_initialized": True,
+        "commits": commits,
+        "branches": {"main": tip},
+        "head": {"type": "branch", "name": "main"},
+        "remotes": {"origin": remote},
+        "remote_branches": {"origin/main": tip},
+        "upstream_tracking": {"main": "origin/main"},
+        "staging": {},
+        "working_tree": {},
+        "conflicts": [],
+    }
+
+
+def _module_4_buried_revert_case(
+    case_id: str,
+    *,
+    label: str,
+    context: str,
+    remote: str,
+    base_tree: dict[str, str],
+    steps: list[tuple[str, dict[str, str]]],
+    bad_commit: str,
+    restored_token: str,
+) -> dict[str, Any]:
+    """Medium revert: the faulty commit sits 2-3 commits below the pushed tip
+    and is described only by its symptom, so the learner finds it in history.
+
+    Grading is the strict revert check: the revert names that commit and
+    restores its pre-change content, history is kept, and main is pushed.
+    """
+    commits = _m4_linear(base_tree, steps)
+    bad_message = next(c["message"] for c in commits if c["id"] == bad_commit)
+    return {
+        "case_id": case_id,
+        "label": label,
+        "context": context,
+        "initial_state": _m4_published_main(commits, remote),
+        "solution_commands": [
+            "git log --oneline",
+            f"git show {bad_commit}",
+            f"git revert {bad_commit}",
+            "git push",
+        ],
+        "state_requirements": {
+            "head_branch": "main",
+            "working_tree_clean": True,
+            "staging_empty": True,
+            "conflict_free": True,
+            "required_commands": ["git revert", "git push"],
+            "rules": [
+                {"type": "new_revert_commit_exists"},
+                {
+                    "type": "latest_commit_message_contains",
+                    "branch": "main",
+                    "text": f'Revert "{bad_message}"',
+                },
+                {
+                    "type": "commit_tree_contains_tokens",
+                    "branch": "main",
+                    "tokens": [restored_token],
+                },
+                {"type": "revert_preserves_history", "commit": bad_commit, "branch": "main"},
+                {
+                    "type": "push_moved_remote_to_local_tip",
+                    "branch": "main",
+                    "remote_branch": "origin/main",
+                },
+            ],
+        },
+    }
+
+
+def _module_4_double_revert_case(
+    case_id: str,
+    *,
+    label: str,
+    context: str,
+    remote: str,
+    base_tree: dict[str, str],
+    steps: list[tuple[str, dict[str, str]]],
+    bad_commits: tuple[str, str],
+    restored_tokens: list[str],
+    kept_tokens: list[str],
+) -> dict[str, Any]:
+    """Hard revert: two separate faulty published commits with a good commit
+    between them. Both are reverted, the good work stays, one push.
+
+    Grading: both faulty contents restored and every good change kept, both
+    faulty commits still in history, exactly two new commits, and pushed.
+    """
+    commits = _m4_linear(base_tree, steps)
+    older, newer = bad_commits
+    return {
+        "case_id": case_id,
+        "label": label,
+        "context": context,
+        "initial_state": _m4_published_main(commits, remote),
+        "solution_commands": [f"git revert {newer}", f"git revert {older}", "git push"],
+        "state_requirements": {
+            "head_branch": "main",
+            "working_tree_clean": True,
+            "staging_empty": True,
+            "conflict_free": True,
+            "required_commands": ["git revert", "git push"],
+            "rules": [
+                {"type": "new_revert_commit_exists"},
+                {
+                    "type": "commit_tree_contains_tokens",
+                    "branch": "main",
+                    "tokens": [*restored_tokens, *kept_tokens],
+                },
+                {"type": "revert_preserves_history", "commit": older, "branch": "main"},
+                {"type": "revert_preserves_history", "commit": newer, "branch": "main"},
+                {
+                    "type": "commit_count_on_branch_equals",
+                    "branch": "main",
+                    "count": len(commits) + 2,
+                },
+                {
+                    "type": "push_moved_remote_to_local_tip",
+                    "branch": "main",
+                    "remote_branch": "origin/main",
+                },
+            ],
+        },
+    }
+
+
+def _module_4_dropped_commit_case(
+    case_id: str,
+    *,
+    context: str,
+    base_tree: dict[str, str],
+    main_commits: list[tuple[str, dict[str, str]]],
+    feature_commits: list[tuple[str, dict[str, str]]],
+    branch: str,
+    dropped_index: int,
+    tokens: list[str],
+) -> dict[str, Any]:
+    """Hard rebase: a teammate's rebase replayed the branch onto main but
+    dropped one commit. The original tip is still in the reflog; the learner
+    resets the branch to it and rebases the complete branch onto main.
+
+    Grading: no rebase in progress, main's tip in the branch history, a
+    linear (non-merge) tip, the exact commit count, and every feature change
+    (including the dropped one) plus main's changes present.
+    """
+    commits = [_m4_commit("c0", "Common base", [], dict(base_tree))]
+    next_id = 1
+    tips = []
+    for line in (main_commits, feature_commits):
+        parent, tree = "c0", dict(base_tree)
+        for message, changes in line:
+            tree = {**tree, **changes}
+            commits.append(_m4_commit(f"c{next_id}", message, [parent], dict(tree)))
+            parent = f"c{next_id}"
+            next_id += 1
+        tips.append(parent)
+    main_tip, feature_tip = tips
+    # The botched rebase: feature commits copied onto main, one left out.
+    parent = main_tip
+    tree = dict(next(c["tree"] for c in commits if c["id"] == main_tip))
+    for index, (message, changes) in enumerate(feature_commits):
+        if index == dropped_index:
+            continue
+        tree = {**tree, **changes}
+        commits.append(_m4_commit(f"c{next_id}", message, [parent], dict(tree)))
+        parent = f"c{next_id}"
+        next_id += 1
+    botched_tip = parent
+    return {
+        "case_id": case_id,
+        "label": f"Recover the dropped commit on {branch}",
+        "context": context,
+        "initial_state": {
+            "repository_initialized": True,
+            "commits": commits,
+            "branches": {"main": main_tip, branch: botched_tip},
+            "head": {"type": "branch", "name": branch},
+            "reflog": [
+                {
+                    "ref": branch,
+                    "commit": feature_tip,
+                    "action": f"commit: {feature_commits[-1][0]}",
+                },
+                {
+                    "ref": branch,
+                    "commit": botched_tip,
+                    "action": f"rebase (finish): refs/heads/{branch} onto {main_tip}",
+                },
+            ],
+            "staging": {},
+            "working_tree": {},
+            "conflicts": [],
+        },
+        "solution_commands": ["git reflog", f"git reset --hard {feature_tip}", "git rebase main"],
+        "state_requirements": {
+            "skip_required_commands": True,
+            "head_branch": branch,
+            "staging_empty": True,
+            "working_tree_clean": True,
+            "conflict_free": True,
+            "rules": [
+                {"type": "rebase_not_in_progress"},
+                {"type": "branch_history_contains", "branch": branch, "commits": [main_tip]},
+                {"type": "commit_is_not_merge", "branch": branch},
+                {
+                    "type": "commit_count_on_branch_equals",
+                    "branch": branch,
+                    "count": 1 + len(main_commits) + len(feature_commits),
+                },
+                {"type": "commit_tree_contains_tokens", "branch": branch, "tokens": tokens},
+            ],
+        },
+    }
+
+
+# The MVP revert repository, kept by the first easy revert variant (re6) so a
+# first-time player still starts from the same repository as in the MVP data;
+# only the grading is stricter.
 _M4_ORIGINAL_REVERT = {
     "context": (
         "You are a backend developer in a software company. A risky configuration "
@@ -11883,13 +12115,10 @@ _M4_ORIGINAL_REVERT = {
 
 _M4_DOCS_SITE = {"index.html": "home-v1", "README.md": "site-readme"}
 _M4_API = {"src/server.js": "server-v1", "config/timeouts.json": "timeouts-v1-30s"}
-_M4_BILLING = {"billing/invoice.py": "invoice-v1", "README.md": "billing-readme-v1"}
-_M4_STORE = {"styles/theme.css": "theme-v1-blue", "index.html": "index-v1"}
-_M4_AUTH = {"auth/session.py": "session-v1", "auth/cache.py": "cache-v1-15m"}
-_M4_SHOP = {"flags/checkout.json": "checkout-flag-v1-beta-only", "app/checkout.py": "checkout-v1"}
 
-# Revert tiers keep the MVP shapes: easy reverts the pushed tip; medium and
-# hard revert the commit one below the tip, whose follow-up must survive.
+# Revert tiers get harder by what the learner must work out: easy reverts the
+# pushed tip; medium finds a faulty commit 2-3 below the tip from its symptom;
+# hard reverts two separate faulty commits around a good one, then pushes once.
 MODULE_4_REVERT_CASES: dict[str, list[dict[str, Any]]] = {
     "easy": [
         _module_4_revert_case(
@@ -11961,173 +12190,166 @@ MODULE_4_REVERT_CASES: dict[str, list[dict[str, Any]]] = {
         ),
     ],
     "medium": [
-        _module_4_revert_case(
-            "rm6", bad_commit="c2", restored_token="config-v1", **_M4_ORIGINAL_REVERT
-        ),
-        _module_4_revert_case(
-            "rm7",
+        _module_4_buried_revert_case(
+            "rm6",
+            label="Restore progressive tax withholding",
             context=(
-                "You support the finance team. Customers are being overcharged because of "
-                "a published rounding change, and later commits must stay."
+                "Payroll support reports that payslips since the last release withhold a flat "
+                "30% instead of using the progressive tax table. Find the published change that "
+                "caused it and roll it back; everything published after it must stay."
             ),
-            remote="https://example.test/billing.git",
-            commits=[
-                _m4_commit("c0", "Initial billing service", [], dict(_M4_BILLING)),
-                _m4_commit(
-                    "c1", "Add tax table", ["c0"], {**_M4_BILLING, "billing/tax.py": "tax-v1"}
-                ),
-                _m4_commit(
-                    "c2",
-                    "Round invoice totals to whole units",
-                    ["c1"],
-                    {
-                        **_M4_BILLING,
-                        "billing/invoice.py": "invoice-v2-rounded",
-                        "billing/tax.py": "tax-v1",
-                    },
-                ),
-                _m4_commit(
-                    "c3",
-                    "Document billing setup",
-                    ["c2"],
-                    {
-                        "billing/invoice.py": "invoice-v2-rounded",
-                        "billing/tax.py": "tax-v1",
-                        "README.md": "billing-readme-v2",
-                    },
-                ),
+            remote="https://example.test/payroll.git",
+            base_tree={
+                "payroll/tax.py": "tax-v1-progressive",
+                "payroll/export.py": "export-v1",
+                "README.md": "payroll-readme-v1",
+            },
+            steps=[
+                ("Initial payroll service", {}),
+                ("Add holiday calendar", {"payroll/holidays.py": "holidays-v1"}),
+                ("Switch withholding to a flat 30% rate", {"payroll/tax.py": "tax-v2-flat-30"}),
+                ("Add bank file export", {"payroll/export.py": "export-v2-bank"}),
+                ("Document payroll cut-off", {"README.md": "payroll-readme-v2"}),
             ],
             bad_commit="c2",
-            restored_token="invoice-v1",
+            restored_token="tax-v1-progressive",
         ),
-        _module_4_revert_case(
-            "rm8",
+        _module_4_buried_revert_case(
+            "rm7",
+            label="Stop the every-minute push notifications",
             context=(
-                "You maintain a storefront. Marketing wants the neon brand colour gone, "
-                "but the accessibility notes pushed after it must stay."
+                "Users are getting a push notification every minute. Find the published change "
+                "that did it and roll it back; the templates, quiet hours and settings work "
+                "around it must stay."
             ),
-            remote="https://example.test/storefront.git",
-            commits=[
-                _m4_commit("c0", "Initial storefront", [], dict(_M4_STORE)),
-                _m4_commit(
-                    "c1",
-                    "Add dark mode toggle",
-                    ["c0"],
-                    {**_M4_STORE, "scripts/toggle.js": "toggle-v1"},
+            remote="https://example.test/notify.git",
+            base_tree={"notify/push.py": "push-v1-batched", "app/settings.py": "settings-v1"},
+            steps=[
+                ("Initial notification service", {}),
+                ("Add notification templates", {"notify/templates.py": "templates-v1"}),
+                (
+                    "Send push notifications every minute",
+                    {"notify/push.py": "push-v2-every-minute"},
                 ),
-                _m4_commit(
-                    "c2",
-                    "Add footer links",
-                    ["c1"],
-                    {**_M4_STORE, "index.html": "index-v2", "scripts/toggle.js": "toggle-v1"},
-                ),
-                _m4_commit(
-                    "c3",
-                    "Switch brand color to neon",
-                    ["c2"],
-                    {
-                        "styles/theme.css": "theme-v2-neon",
-                        "index.html": "index-v2",
-                        "scripts/toggle.js": "toggle-v1",
-                    },
-                ),
-                _m4_commit(
-                    "c4",
-                    "Add accessibility notes",
-                    ["c3"],
-                    {
-                        "styles/theme.css": "theme-v2-neon",
-                        "index.html": "index-v2",
-                        "scripts/toggle.js": "toggle-v1",
-                        "docs/a11y.md": "a11y-v1",
-                    },
-                ),
+                ("Add quiet hours", {"notify/quiet_hours.py": "quiet-v1"}),
+                ("Add a settings toggle for sounds", {"app/settings.py": "settings-v2"}),
+                ("Document notification settings", {"docs/notify.md": "notify-doc-v1"}),
             ],
-            bad_commit="c3",
-            restored_token="theme-v1-blue",
+            bad_commit="c2",
+            restored_token="push-v1-batched",
+        ),
+        _module_4_buried_revert_case(
+            "rm8",
+            label="Restore relevance ranking in search",
+            context=(
+                "Search results are now listed by upload date instead of relevance. Find the "
+                "published change behind it and roll it back; the synonyms, pagination and docs "
+                "added later must stay."
+            ),
+            remote="https://example.test/docs-portal.git",
+            base_tree={
+                "search/ranking.py": "ranking-v1-relevance",
+                "search/index.py": "index-v1",
+                "ui/results.html": "results-v1",
+            },
+            steps=[
+                ("Initial docs portal", {}),
+                ("Sort search results by upload date", {"search/ranking.py": "ranking-v2-by-date"}),
+                ("Add synonym list", {"search/synonyms.py": "synonyms-v1"}),
+                ("Paginate the results page", {"ui/results.html": "results-v2"}),
+                ("Document search tips", {"docs/search.md": "search-doc-v1"}),
+            ],
+            bad_commit="c1",
+            restored_token="ranking-v1-relevance",
         ),
     ],
     "hard": [
-        _module_4_revert_case(
-            "rh6", bad_commit="c2", restored_token="config-v1", **_M4_ORIGINAL_REVERT
-        ),
-        _module_4_revert_case(
-            "rh7",
+        _module_4_double_revert_case(
+            "rh6",
+            label="Roll back two faulty checkout changes",
             context=(
-                "You are the release owner. A published change keeps sessions cached for a "
-                "full day, which breaks forced logouts; the audit rename after it must stay."
-            ),
-            remote="https://example.test/auth-service.git",
-            commits=[
-                _m4_commit("c0", "Initial auth service", [], dict(_M4_AUTH)),
-                _m4_commit(
-                    "c1", "Add login audit log", ["c0"], {**_M4_AUTH, "auth/audit.py": "audit-v1"}
-                ),
-                _m4_commit(
-                    "c2",
-                    "Cache sessions for 24 hours",
-                    ["c1"],
-                    {**_M4_AUTH, "auth/cache.py": "cache-v2-24h", "auth/audit.py": "audit-v1"},
-                ),
-                _m4_commit(
-                    "c3",
-                    "Rename audit log fields",
-                    ["c2"],
-                    {**_M4_AUTH, "auth/cache.py": "cache-v2-24h", "auth/audit.py": "audit-v2"},
-                ),
-            ],
-            bad_commit="c2",
-            restored_token="cache-v1-15m",
-        ),
-        _module_4_revert_case(
-            "rh8",
-            context=(
-                "You are the release owner during a deploy freeze. The beta checkout was "
-                "switched on for everyone by mistake; the metrics commit after it must stay."
+                "Two published checkout changes broke production: the beta checkout was "
+                "switched on for everyone, and coupon discounts are applied twice. Roll back "
+                "both, keep the order summary email and checkout metrics, and publish once."
             ),
             remote="https://example.test/shop.git",
-            commits=[
-                _m4_commit("c0", "Initial checkout flow", [], dict(_M4_SHOP)),
-                _m4_commit(
-                    "c1", "Add coupon field", ["c0"], {**_M4_SHOP, "app/coupons.py": "coupons-v1"}
-                ),
-                _m4_commit(
-                    "c2",
-                    "Add order summary email",
-                    ["c1"],
-                    {**_M4_SHOP, "app/coupons.py": "coupons-v1", "app/email.py": "email-v1"},
-                ),
-                _m4_commit(
-                    "c3",
+            base_tree={
+                "flags/checkout.json": "checkout-flag-v1-beta-only",
+                "app/coupons.py": "coupons-v1",
+                "app/tax.py": "tax-v1",
+            },
+            steps=[
+                ("Initial checkout flow", {}),
+                (
                     "Enable beta checkout for all users",
-                    ["c2"],
-                    {
-                        **_M4_SHOP,
-                        "flags/checkout.json": "checkout-flag-v2-all-users",
-                        "app/coupons.py": "coupons-v1",
-                        "app/email.py": "email-v1",
-                    },
+                    {"flags/checkout.json": "checkout-flag-v2-all-users"},
                 ),
-                _m4_commit(
-                    "c4",
-                    "Add checkout metrics",
-                    ["c3"],
-                    {
-                        **_M4_SHOP,
-                        "flags/checkout.json": "checkout-flag-v2-all-users",
-                        "app/coupons.py": "coupons-v1",
-                        "app/email.py": "email-v1",
-                        "metrics/checkout.py": "metrics-v1",
-                    },
-                ),
+                ("Add order summary email", {"app/email.py": "email-v1"}),
+                ("Apply coupon discounts twice", {"app/coupons.py": "coupons-v2-double"}),
+                ("Add checkout metrics", {"metrics/checkout.py": "metrics-v1"}),
             ],
-            bad_commit="c3",
-            restored_token="checkout-flag-v1-beta-only",
+            bad_commits=("c1", "c3"),
+            restored_tokens=["checkout-flag-v1-beta-only", "coupons-v1"],
+            kept_tokens=["email-v1", "metrics-v1"],
+        ),
+        _module_4_double_revert_case(
+            "rh7",
+            label="Roll back two faulty session changes",
+            context=(
+                "Security flagged two published auth changes: sessions now last 30 days, and "
+                "sessions are cached for 24 hours so forced logouts do nothing. Roll back both, "
+                "keep the audit-field change between them, and publish once."
+            ),
+            remote="https://example.test/auth-service.git",
+            base_tree={
+                "auth/session.py": "session-v1-8h",
+                "auth/cache.py": "cache-v1-15m",
+                "auth/audit.py": "audit-v1",
+            },
+            steps=[
+                ("Initial auth service", {}),
+                ("Extend sessions to 30 days", {"auth/session.py": "session-v2-30d"}),
+                ("Add login audit fields", {"auth/audit.py": "audit-v2"}),
+                ("Cache sessions for 24 hours", {"auth/cache.py": "cache-v2-24h"}),
+            ],
+            bad_commits=("c1", "c3"),
+            restored_tokens=["session-v1-8h", "cache-v1-15m"],
+            kept_tokens=["audit-v2"],
+        ),
+        _module_4_double_revert_case(
+            "rh8",
+            label="Roll back two faulty site changes",
+            context=(
+                "The public site stopped appearing in search results, and analytics started "
+                "logging full visitor IP addresses. Both came from published changes. Roll back "
+                "both, keep the pages and fixes around them, and publish once."
+            ),
+            remote="https://example.test/public-site.git",
+            base_tree={
+                "site/nav.html": "nav-v1",
+                "site/robots.txt": "robots-v1-allow",
+                "site/analytics.js": "analytics-v1-anon",
+            },
+            steps=[
+                ("Initial public site", {}),
+                ("Add pricing page", {"site/pricing.html": "pricing-v1"}),
+                (
+                    "Block search engines in robots.txt",
+                    {"site/robots.txt": "robots-v2-disallow-all"},
+                ),
+                ("Add changelog page", {"site/changelog.html": "changelog-v1"}),
+                ("Log full visitor IP addresses", {"site/analytics.js": "analytics-v2-full-ip"}),
+                ("Fix footer typo", {"site/nav.html": "nav-v2"}),
+            ],
+            bad_commits=("c2", "c4"),
+            restored_tokens=["robots-v1-allow", "analytics-v1-anon"],
+            kept_tokens=["pricing-v1", "changelog-v1", "nav-v2"],
         ),
     ],
 }
 
-# The MVP rebase repository, kept by the first variant of every rebase tier.
+# The MVP rebase repository, kept by the first easy and medium rebase variants
+# (be6, bm6) so a first-time player still starts from it.
 _M4_ORIGINAL_REBASE = {
     "context": (
         "You are a feature owner in a software company. Your branch diverged while "
@@ -12142,8 +12364,9 @@ _M4_ORIGINAL_REBASE = {
     "branch": "feature/recovery",
 }
 
-# Every rebase is conflict-free, matching the MVP shape: main and the feature
-# branch touch different files.
+# Easy and medium replay a diverged branch onto main (conflict-free: main and
+# the feature touch different files). Hard starts after a teammate's rebase
+# dropped a commit: recover the original tip from the reflog, then rebase.
 MODULE_4_REBASE_CASES: dict[str, list[dict[str, Any]]] = {
     "easy": [
         _module_4_rebase_case("be6", **_M4_ORIGINAL_REBASE),
@@ -12220,38 +12443,62 @@ MODULE_4_REBASE_CASES: dict[str, list[dict[str, Any]]] = {
         ),
     ],
     "hard": [
-        _module_4_rebase_case("bh6", **_M4_ORIGINAL_REBASE),
-        _module_4_rebase_case(
+        _module_4_dropped_commit_case(
+            "bh6",
+            context=(
+                "A teammate rebased feature/cli-flags onto main for you, but the --quiet flag "
+                "commit is missing afterwards. Recover your original branch from the reflog, "
+                "then rebase all of it onto main with a linear history."
+            ),
+            base_tree={"cli/main.py": "main-v1", "docs/usage.md": "usage-v1"},
+            main_commits=[("Fix typo in usage docs", {"docs/usage.md": "usage-v2"})],
+            feature_commits=[
+                ("Parse --verbose flag", {"cli/flags.py": "flags-v1-verbose"}),
+                ("Parse --quiet flag", {"cli/quiet.py": "quiet-v1"}),
+                ("Use flags in main", {"cli/main.py": "main-v2"}),
+            ],
+            branch="feature/cli-flags",
+            dropped_index=1,
+            tokens=["flags-v1-verbose", "quiet-v1", "main-v2", "usage-v2"],
+        ),
+        _module_4_dropped_commit_case(
             "bh7",
             context=(
-                "Release cleanup: your CSV export hotfix must land on the current main with "
-                "a linear history before the release branch is cut."
+                "Release cleanup: a rebase of hotfix/export-csv onto main silently dropped the "
+                "commit with the CSV tests. Recover the original branch from the reflog, then "
+                "rebase all of it onto main with a linear history."
             ),
             base_tree={"reports/pdf.py": "pdf-v1", "CHANGELOG.md": "changelog-v1"},
             main_commits=[
-                ("c1", "Speed up PDF reports", {"reports/pdf.py": "pdf-v2"}),
-                ("c2", "Update changelog", {"CHANGELOG.md": "changelog-v2"}),
+                ("Speed up PDF reports", {"reports/pdf.py": "pdf-v2"}),
+                ("Update changelog", {"CHANGELOG.md": "changelog-v2"}),
             ],
             feature_commits=[
-                ("c3", "Add CSV export", {"reports/csv.py": "csv-v1"}),
-                ("c4", "Test CSV export", {"tests/test_csv.py": "test-csv-v1"}),
+                ("Add CSV export", {"reports/csv.py": "csv-v1"}),
+                ("Test CSV export", {"tests/test_csv.py": "test-csv-v1"}),
+                ("Add CSV column headers", {"reports/csv_headers.py": "headers-v1"}),
             ],
             branch="hotfix/export-csv",
+            dropped_index=1,
+            tokens=["csv-v1", "test-csv-v1", "headers-v1", "pdf-v2", "changelog-v2"],
         ),
-        _module_4_rebase_case(
+        _module_4_dropped_commit_case(
             "bh8",
             context=(
-                "Release cleanup: branch-integrity checks require your rate-limit work to be "
-                "replayed on the newest main without merge commits."
+                "Branch-integrity checks failed after a teammate rebased feature/rate-limits: "
+                "the rate limiter itself was dropped. Recover the original branch from the "
+                "reflog, then rebase all of it onto main with a linear history."
             ),
             base_tree={"server/app.go": "app-v1", "docs/README.md": "docs-v1"},
-            main_commits=[("c1", "Add graceful shutdown", {"server/app.go": "app-v2"})],
+            main_commits=[("Add graceful shutdown", {"server/app.go": "app-v2"})],
             feature_commits=[
-                ("c2", "Add rate limiter", {"server/limits.go": "limits-v1"}),
-                ("c3", "Test rate limiter", {"server/limits_test.go": "limits-test-v1"}),
-                ("c4", "Document rate limits", {"docs/limits.md": "limits-doc-v1"}),
+                ("Add rate limiter", {"server/limits.go": "limits-v1"}),
+                ("Test rate limiter", {"server/limits_test.go": "limits-test-v1"}),
+                ("Document rate limits", {"docs/limits.md": "limits-doc-v1"}),
             ],
             branch="feature/rate-limits",
+            dropped_index=0,
+            tokens=["limits-v1", "limits-test-v1", "limits-doc-v1", "app-v2"],
         ),
     ],
 }
@@ -12331,8 +12578,8 @@ MODULE_4_LEVELS: list[dict[str, Any]] = [
                 "required_successful_attempts": 1,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["hard"],
                 "story": "You are the release owner during a high-stakes deploy window with strict rollback constraints.",
-                "task": "Execute the required rollback while preserving shared history integrity across local and remote.",
-                "min_counted_commands": 2,
+                "task": "Roll back both faulty published changes, keep the good change between them, and publish once without rewriting shared history.",
+                "min_counted_commands": 3,
                 "cases": MODULE_4_REVERT_CASES["hard"],
             },
         },
@@ -12363,8 +12610,8 @@ MODULE_4_LEVELS: list[dict[str, Any]] = [
                 "required_successful_attempts": 1,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["hard"],
                 "story": "You are driving final release cleanup, and branch integrity checks are stricter than usual.",
-                "task": "Complete the full recovery sequence and validate branch integrity with all required checks.",
-                "min_counted_commands": 1,
+                "task": "A rebase dropped one of your commits: recover the original branch from the reflog, then rebase all of it onto main with a linear history.",
+                "min_counted_commands": 2,
                 "cases": MODULE_4_REBASE_CASES["hard"],
             },
         },

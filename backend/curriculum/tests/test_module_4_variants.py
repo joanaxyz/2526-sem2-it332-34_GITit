@@ -13,6 +13,7 @@ Two layers:
 """
 
 import json
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -23,8 +24,10 @@ from django.core.management import call_command
 
 from adventures.models import AdventureLevelTierRun, AdventureLevelTierWaveVariant
 from common.constants import SESSION_STATUS_COMPLETED
+from common.runtime import counted_command_total
 from curriculum.management.commands.seed_legacy_modules import (
     DIFFICULTY_MAX_COUNTED_COMMANDS,
+    MODULE_4_LEVELS,
     MODULE_4_REBASE_CASES,
     MODULE_4_RETIRED_CASE_IDS,
     MODULE_4_REVERT_CASES,
@@ -49,31 +52,41 @@ CASES = {
     for case in tier_cases
 }
 
-# One plausible mistake per variant. Revert: undo the wrong commit, rewrite
-# shared history, or forget to publish. Rebase: merge main in instead.
+# One plausible mistake per variant.
 WRONG_SOLUTIONS = {
+    # Easy revert: rewrite shared history, or forget to publish.
     "re6": ["git reset --hard c2", "git push --force"],
     "re7": ["git revert c2"],
     "re8": ["git reset --hard c3", "git push --force"],
-    "rm6": ["git revert c3", "git push"],
-    "rm7": ["git revert c3", "git push"],
-    "rm8": ["git revert c4", "git push"],
+    # Medium revert: revert the tip instead of finding the faulty commit.
+    "rm6": ["git revert HEAD", "git push"],
+    "rm7": ["git revert HEAD", "git push"],
+    "rm8": ["git revert HEAD", "git push"],
+    # Hard revert: only one of the two faulty commits, or rewrite history.
     "rh6": ["git revert c3", "git push"],
-    "rh7": ["git revert c3", "git push"],
-    "rh8": ["git reset --hard c2", "git push --force"],
-    **{key: ["git merge main"] for key in CASES if key[:2] in {"be", "bm", "bh"}},
+    "rh7": ["git revert c1", "git push"],
+    "rh8": ["git reset --hard c1", "git push --force"],
+    # Easy/medium rebase: merge main in instead.
+    **{key: ["git merge main"] for key in CASES if key[:2] in {"be", "bm"}},
+    # Hard rebase: rebase without recovering the dropped commit, or recover
+    # and then merge instead of rebasing.
+    "bh6": ["git rebase main"],
+    "bh7": ["git reset --hard c5", "git merge main"],
+    "bh8": ["git rebase main"],
 }
 
 # Other valid routes the grading must accept.
 ALTERNATIVE_SOLUTIONS = {
     "re7": ["git revert HEAD", "git push"],
     "re8": ["git revert --no-edit c4", "git push origin main"],
-    "rm7": ["git revert HEAD~1", "git push"],
-    "rm8": ["git log --oneline", "git show c3", "git revert c3", "git push origin main"],
-    "rh7": ["git revert --no-edit HEAD~1", "git push origin main"],
+    "rm6": ["git revert --no-edit c2", "git push origin main"],
+    "rm8": ["git revert HEAD~3", "git push"],
+    "rh6": ["git revert c1", "git revert c3", "git push origin main"],
+    "rh7": ["git revert --no-edit c3", "git revert --no-edit c1", "git push"],
     "be7": ["git rebase main feature/search-filters"],
     "bm8": ["git switch main", "git switch feature/i18n", "git rebase main"],
-    "bh8": ["git status", "git rebase main"],
+    "bh6": ["git reflog", "git reset --hard c4", "git rebase main feature/cli-flags"],
+    "bh8": ["git reset --hard c4", "git status", "git rebase main"],
 }
 
 
@@ -110,13 +123,13 @@ def test_each_affected_tier_has_three_new_variants_with_the_original_first():
             assert not set(keys) & MODULE_4_RETIRED_CASE_IDS
 
 
-def test_x6_variants_keep_the_original_mvp_repository():
+def test_first_variants_keep_the_mvp_repository_where_the_tier_shape_is_unchanged():
+    """Easy revert, easy rebase and medium rebase keep the MVP task shape, so
+    their first variant keeps the MVP repository. The reworked medium/hard
+    revert and hard rebase tiers are new exercises."""
     revert_original = CASES["re6"][2]["initial_state"]
     rebase_original = CASES["be6"][2]["initial_state"]
-    for key in ("rm6", "rh6"):
-        assert CASES[key][2]["initial_state"] == revert_original
-    for key in ("bm6", "bh6"):
-        assert CASES[key][2]["initial_state"] == rebase_original
+    assert CASES["bm6"][2]["initial_state"] == rebase_original
     # The MVP repositories, by their distinguishing content.
     assert [c["message"] for c in revert_original["commits"]] == [
         "Initial commit",
@@ -125,6 +138,85 @@ def test_x6_variants_keep_the_original_mvp_repository():
         "Unrelated follow-up",
     ]
     assert rebase_original["branches"] == {"main": "c1", "feature/recovery": "c3"}
+
+
+TIER_SPECS = {
+    (level["slug"], difficulty): spec
+    for level in MODULE_4_LEVELS
+    if level["slug"] in LEVEL_BY_TABLE
+    for difficulty, spec in level["tiers"].items()
+}
+
+# Room left for a learner's mistakes: the tier budget minus the correct
+# route's counted commands must be at least this.
+MIN_SPARE_COMMANDS = 5
+
+
+def _rule_values(case, rule_type, key):
+    rules = case["state_requirements"]["rules"]
+    return [rule[key] for rule in rules if rule["type"] == rule_type]
+
+
+@pytest.mark.parametrize("tier_key", sorted(TIER_SPECS))
+def test_every_tier_fits_its_budget_with_room_for_mistakes(tier_key):
+    spec = TIER_SPECS[tier_key]
+    _, difficulty = tier_key
+    counted = max(counted_command_total(c["solution_commands"]) for c in spec["cases"])
+
+    # Two stars require counted <= min_counted_commands, so it must be reachable.
+    assert counted <= spec["min_counted_commands"], (tier_key, counted)
+    assert spec["max_counted_commands"] == DIFFICULTY_MAX_COUNTED_COMMANDS[difficulty]
+    assert spec["max_counted_commands"] - counted >= MIN_SPARE_COMMANDS, tier_key
+
+
+@pytest.mark.parametrize("case_id", ["rm6", "rm7", "rm8"])
+def test_medium_revert_buries_the_faulty_commit_and_names_only_its_symptom(case_id):
+    _, _, case = CASES[case_id]
+    commits = [c["id"] for c in case["initial_state"]["commits"]]
+    (bad,) = _rule_values(case, "revert_preserves_history", "commit")
+
+    assert len(commits) - 1 - commits.index(bad) in {2, 3}
+    # The learner is not handed the commit ID; they find it from the symptom.
+    for text in (case["label"], case["context"]):
+        assert not re.search(r"\bc\d+\b", text), text
+
+
+@pytest.mark.parametrize("case_id", ["rh6", "rh7", "rh8"])
+def test_hard_revert_has_two_faulty_commits_around_a_good_one(case_id):
+    _, _, case = CASES[case_id]
+    commits = [c["id"] for c in case["initial_state"]["commits"]]
+    older, newer = sorted(
+        _rule_values(case, "revert_preserves_history", "commit"), key=commits.index
+    )
+
+    assert commits.index(newer) - commits.index(older) >= 2
+    assert _rule_values(case, "commit_count_on_branch_equals", "count") == [len(commits) + 2]
+    assert sum(cmd.startswith("git push") for cmd in case["solution_commands"]) == 1
+
+
+@pytest.mark.parametrize("case_id", ["bh6", "bh7", "bh8"])
+def test_hard_rebase_starts_with_a_dropped_commit_recoverable_from_the_reflog(case_id):
+    _, _, case = CASES[case_id]
+    state = case["initial_state"]
+    branch = state["head"]["name"]
+    tip_tree = next(c["tree"] for c in state["commits"] if c["id"] == state["branches"][branch])
+    (tokens,) = _rule_values(case, "commit_tree_contains_tokens", "tokens")
+    reset_target = case["solution_commands"][1].split()[-1]
+
+    missing = [token for token in tokens if token not in tip_tree.values()]
+    assert len(missing) == 1, missing
+    assert reset_target in [entry["commit"] for entry in state["reflog"]]
+    assert {"type": "rebase_not_in_progress"} in case["state_requirements"]["rules"]
+
+
+def test_tier_task_text_matches_the_grading():
+    revert_medium = TIER_SPECS[("reversing-pushed-commits-safely", "medium")]["task"]
+    revert_hard = TIER_SPECS[("reversing-pushed-commits-safely", "hard")]["task"]
+    rebase_hard = TIER_SPECS[("completing-rebase-recovery-sequences", "hard")]["task"]
+
+    assert "Identify the correct published change" in revert_medium
+    assert "both faulty" in revert_hard and "publish once" in revert_hard
+    assert "reflog" in rebase_hard and "linear history" in rebase_hard
 
 
 def test_every_new_variant_has_a_committed_target_state():
