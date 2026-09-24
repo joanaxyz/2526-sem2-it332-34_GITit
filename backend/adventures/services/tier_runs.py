@@ -160,6 +160,14 @@ class AdventureLevelTierRunService:
         elif prior_run and prior_run.status == SESSION_STATUS_ABANDONED:
             prior_reference = None
 
+        # A wave may be authored with min_counted_commands=0 (read-only
+        # scenarios), but a run's star budget must be at least 1: the run
+        # constraint requires it, and a zero budget would otherwise surface as
+        # a misleading "active run" conflict. Same rule as
+        # common.runtime.star_target_for_variants: keep one command of room.
+        min_counted = max(1, wave.min_counted_commands)
+        max_counted = max(min_counted, wave.max_counted_commands)
+
         try:
             run = AdventureLevelTierRun.objects.create(
                 player=player,
@@ -171,8 +179,8 @@ class AdventureLevelTierRunService:
                 is_replay=is_replay,
                 changed_variant=changed_variant,
                 retry_index=retry_index,
-                min_counted_commands=wave.min_counted_commands,
-                max_counted_commands=wave.max_counted_commands,
+                min_counted_commands=min_counted,
+                max_counted_commands=max_counted,
                 repository_state=variant.initial_state,
             )
         except IntegrityError as exc:

@@ -39,9 +39,10 @@ describe('AdminLayout access boundary', () => {
 
     renderLayout()
 
-    expect(screen.getByText('Observatory Console')).toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: 'Admin navigation' })).toBeInTheDocument()
     expect(screen.getByText('Admin dashboard content')).toBeInTheDocument()
-    expect(screen.getAllByRole('link', { name: 'Users' })).toHaveLength(2)
+    expect(screen.getByRole('link', { name: 'Learners' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Back to app' })).toBeInTheDocument()
   })
 
   it('redirects signed-out users to login', () => {
@@ -50,7 +51,7 @@ describe('AdminLayout access boundary', () => {
     renderLayout()
 
     expect(screen.getByText('Sign in')).toBeInTheDocument()
-    expect(screen.queryByText('Observatory Console')).not.toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: 'Admin navigation' })).not.toBeInTheDocument()
   })
 
   it('redirects non-staff users to the player app', () => {
@@ -67,6 +68,6 @@ describe('AdminLayout access boundary', () => {
     renderLayout()
 
     expect(screen.getByText('Player home')).toBeInTheDocument()
-    expect(screen.queryByText('Observatory Console')).not.toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: 'Admin navigation' })).not.toBeInTheDocument()
   })
 })
