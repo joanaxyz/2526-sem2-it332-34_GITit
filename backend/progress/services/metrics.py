@@ -24,6 +24,7 @@ from progress.models import (
     StreakRecord,
     Wallet,
 )
+from progress.objectives import SO_CAR_LEVELS
 
 # Trailing window (days) for the consistency axis.
 
@@ -79,6 +80,41 @@ class MetricsService:
             tier__adventure_level__chapter__story__slug=self.PERFORMANCE_STORY_SLUG,
             tier__adventure_level__chapter__number__in=self.PERFORMANCE_MODULE_NUMBERS,
         )
+
+    _CAR_COUNTS = {
+        "total": Count("id"),
+        "unprocessable": Count(
+            "id", filter=Q(result_category__in=[RESULT_INVALID, RESULT_UNPROCESSABLE])
+        ),
+    }
+
+    def _car_steps(self, *, runs):
+        """The submitted commands CAR is computed from, overall and per SO."""
+        return CommandStep.objects.filter(adventure_tier_run__in=runs)
+
+    def all_player_objective_car(self) -> dict:
+        """Per-SO CAR across all learners (staff console), keyed by SO code.
+
+        Uses the same runs and command steps as the overall CAR, grouped by
+        adventure level through the static SO_CAR_LEVELS mapping.
+        """
+        return self._objective_car_for_runs(runs=self._performance_runs())
+
+    def _objective_car_for_runs(self, *, runs) -> dict:
+        by_level = {
+            row["adventure_tier_run__tier__adventure_level__slug"]: row
+            for row in self._car_steps(runs=runs)
+            .values("adventure_tier_run__tier__adventure_level__slug")
+            .annotate(**self._CAR_COUNTS)
+        }
+        objectives = {}
+        for so_code, level_slugs in SO_CAR_LEVELS.items():
+            total = sum((by_level.get(slug) or {}).get("total", 0) for slug in level_slugs)
+            unprocessable = sum(
+                (by_level.get(slug) or {}).get("unprocessable", 0) for slug in level_slugs
+            )
+            objectives[so_code] = self._rate(total - unprocessable, total)
+        return objectives
 
     def _rta_for_runs(self, *, runs) -> dict:
         """Retry Transfer Accuracy (RTA) over a set of performance runs.
@@ -139,13 +175,7 @@ class MetricsService:
             completed_retry_total=Sum("retry_index", filter=Q(status=SESSION_STATUS_COMPLETED)),
         )
 
-        steps = CommandStep.objects.filter(adventure_tier_run__in=runs)
-        step_counts = steps.aggregate(
-            total=Count("id"),
-            unprocessable=Count(
-                "id", filter=Q(result_category__in=[RESULT_INVALID, RESULT_UNPROCESSABLE])
-            ),
-        )
+        step_counts = self._car_steps(runs=runs).aggregate(**self._CAR_COUNTS)
         total_commands = step_counts["total"] or 0
         processable_commands = total_commands - (step_counts["unprocessable"] or 0)
 

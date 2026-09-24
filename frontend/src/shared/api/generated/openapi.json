@@ -3432,11 +3432,19 @@
                     },
                     "runebound_performance": {
                         "$ref": "#/components/schemas/PerformanceSummaryResponse"
+                    },
+                    "objectives": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "$ref": "#/components/schemas/RateMetric"
+                        },
+                        "description": "Per-SO Command Accuracy Rate keyed by official SO code, e.g. 'SO 1.1'."
                     }
                 },
                 "required": [
                     "active_learners_30d",
                     "completions",
+                    "objectives",
                     "per_story",
                     "runebound_performance",
                     "runs"

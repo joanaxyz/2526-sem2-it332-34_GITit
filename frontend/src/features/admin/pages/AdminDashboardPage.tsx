@@ -169,12 +169,17 @@ function combinedStatus(statuses: Status[]): Status {
   return 'none'
 }
 
-function soMetricRate(metric: SoMetric, modData: PerformanceModule | undefined): Rate {
-  return modData ? getModuleRate(modData, metric.kpi) : EMPTY_RATE
+// CAR is measured per SO (from the SO-to-level mapping); every other KPI is
+// measured per module.
+type SoData = { module: PerformanceModule | undefined; objectives: Record<string, Rate> }
+
+function soMetricRate(metric: SoMetric, so: SpecificObjective, data: SoData): Rate {
+  if (metric.kpi === 'car') return data.objectives[so.id] ?? EMPTY_RATE
+  return data.module ? getModuleRate(data.module, metric.kpi) : EMPTY_RATE
 }
 
-function soStatus(so: SpecificObjective, modData: PerformanceModule | undefined): Status {
-  return combinedStatus(so.metrics.map(m => status(soMetricRate(m, modData), m.target, m.up)))
+function soStatus(so: SpecificObjective, data: SoData): Status {
+  return combinedStatus(so.metrics.map(m => status(soMetricRate(m, so, data), m.target, m.up)))
 }
 
 function fmtRate(r: Rate, pct: boolean): string {
@@ -279,9 +284,9 @@ function KpiRefPanel() {
 }
 
 // ─── SO row ───────────────────────────────────────────────────────────────────
-function SoMetricCell({ metric, modData }: { metric: SoMetric; modData: PerformanceModule | undefined }) {
+function SoMetricCell({ metric, so, data }: { metric: SoMetric; so: SpecificObjective; data: SoData }) {
   const kpiMeta = KPIS.find(k => k.key === metric.kpi)!
-  const r = soMetricRate(metric, modData)
+  const r = soMetricRate(metric, so, data)
   const s = status(r, metric.target, metric.up)
 
   return (
@@ -299,8 +304,8 @@ function SoMetricCell({ metric, modData }: { metric: SoMetric; modData: Performa
   )
 }
 
-function SoRow({ so, modData }: { so: SpecificObjective; modData: PerformanceModule | undefined }) {
-  const s = soStatus(so, modData)
+function SoRow({ so, data }: { so: SpecificObjective; data: SoData }) {
+  const s = soStatus(so, data)
 
   return (
     <div className={`dk-so-row is-${s}`} data-so={so.id}>
@@ -313,7 +318,7 @@ function SoRow({ so, modData }: { so: SpecificObjective; modData: PerformanceMod
       </div>
       <div className="dk-so-kpis">
         {so.metrics.map(metric => (
-          <SoMetricCell key={metric.kpi} metric={metric} modData={modData} />
+          <SoMetricCell key={metric.kpi} metric={metric} so={so} data={data} />
         ))}
       </div>
     </div>
@@ -321,13 +326,14 @@ function SoRow({ so, modData }: { so: SpecificObjective; modData: PerformanceMod
 }
 
 // ─── module accordion ─────────────────────────────────────────────────────────
-function ModuleAccordion({ modules }: { modules: PerformanceModule[] }) {
+function ModuleAccordion({ modules, objectives }: { modules: PerformanceModule[]; objectives: Record<string, Rate> }) {
   const [open, setOpen] = useState<number | null>(1)
 
   return (
     <div className="dk-modules">
       {MODULES.map(mod => {
         const mdata  = modules.find(m => m.number === mod.num)
+        const soData: SoData = { module: mdata, objectives }
         const isOpen = open === mod.num
 
         // GO uses SCR
@@ -337,7 +343,7 @@ function ModuleAccordion({ modules }: { modules: PerformanceModule[] }) {
         const goS = status(goRate, GO_SCR_TARGET, true)
 
         // tally all objectives
-        const allStatuses: Status[] = [goS, ...mod.sos.map(so => soStatus(so, mdata))]
+        const allStatuses: Status[] = [goS, ...mod.sos.map(so => soStatus(so, soData))]
         const met   = allStatuses.filter(s => s === 'met').length
         const total = allStatuses.filter(s => s !== 'none').length
 
@@ -389,7 +395,7 @@ function ModuleAccordion({ modules }: { modules: PerformanceModule[] }) {
                 {/* Specific Objectives */}
                 <div className="dk-so-list">
                   {mod.sos.map(so => (
-                    <SoRow key={so.id} so={so} modData={mdata} />
+                    <SoRow key={so.id} so={so} data={soData} />
                   ))}
                 </div>
 
@@ -497,7 +503,7 @@ export function AdminDashboardPage() {
             <p className="dk-section-sub">General Objective + Specific Objectives SO 1.1 – SO 4.5</p>
           </div>
         </div>
-        <ModuleAccordion modules={diag.modules} />
+        <ModuleAccordion modules={diag.modules} objectives={data.objectives} />
       </div>
 
     </div>
