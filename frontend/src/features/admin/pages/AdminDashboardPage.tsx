@@ -455,7 +455,8 @@ export function AdminDashboardPage() {
             <span className="dk-stat-label">targets met</span>
           </div>
           <div className="dk-stat">
-            <span className="dk-stat-value">{data.runs.total.toLocaleString()}</span>
+            {/* Started sessions under the header's scope: SCR's denominator. */}
+            <span className="dk-stat-value">{diag.kpis.scr.denominator.toLocaleString()}</span>
             <span className="dk-stat-label">sessions</span>
           </div>
           <div className="dk-stat">

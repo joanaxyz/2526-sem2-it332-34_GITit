@@ -89,6 +89,15 @@ describe('AdminDashboardPage overall SCR', () => {
     expect(card).toHaveTextContent('2 / 4 sessions')
     expect(card).not.toHaveTextContent('90%')
   })
+
+  it('counts sessions under the header scope, not all-story run totals', async () => {
+    renderPage(analyticsFixture())
+
+    await screen.findByText('KPI Overview')
+    const stat = screen.getByText('sessions').closest('.dk-stat') as HTMLElement
+    expect(stat).toHaveTextContent('4')
+    expect(stat).not.toHaveTextContent('20')
+  })
 })
 
 const OFFICIAL_SOS: Record<number, string[]> = {
