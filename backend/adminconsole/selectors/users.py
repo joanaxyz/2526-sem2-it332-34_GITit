@@ -7,6 +7,7 @@ from django.db.models import Q
 
 from players.models import Player
 from progress.services import MetricsService
+from progress.services.kpi_range import ALL_TIME, KpiRange
 from progress.wallet import WalletService
 from shop.models import Entitlement
 
@@ -51,16 +52,17 @@ def user_detail(user) -> dict:
     }
 
 
-def admin_user_kpis_payload(user) -> dict:
+def admin_user_kpis_payload(user, *, kpi_range: KpiRange = ALL_TIME) -> dict:
     """Per-user learning KPIs for the admin detail panel.
 
-    Every value comes from MetricsService.performance_summary, the same code
-    path as the admin dashboard aggregate, so RTA cannot drift between them.
+    Uses the same KPI scope as the admin dashboard (staff accounts excluded,
+    optional date range) and the same MetricsService code path, so RTA cannot
+    drift between them. A staff account therefore shows no KPI data.
     """
     player = Player.objects.filter(user=user).first()
     if player is None:
         return {"has_data": False, "kpis": None, "modules": []}
-    summary = MetricsService().performance_summary(player=player)
+    summary = MetricsService().admin_player_performance_summary(player=player, kpi_range=kpi_range)
     kpis = summary["kpis"]
     return {
         "has_data": summary["completed_sessions"] > 0 or kpis["rta"]["denominator"] > 0,
