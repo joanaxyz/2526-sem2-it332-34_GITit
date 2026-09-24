@@ -265,3 +265,49 @@ def test_endpoints_reject_an_invalid_range(db, django_user_model, query):
     client = _staff_client(django_user_model)
 
     assert client.get(f"/api/admin/analytics/{query}").status_code == 400
+
+
+# -------------------------------------------- supplementary retry rate ---
+
+
+def test_admin_retry_success_rate_matches_the_learner_value(tier, django_user_model):
+    """The dashboard's supplementary card is the learner-side calculation."""
+    learner_user, learner = _player(django_user_model, "scope-retry")
+    failed = _run(learner, tier, "a", SESSION_STATUS_FAILED)
+    retry = _run(learner, tier, "a", SESSION_STATUS_FAILED, prior=failed)  # same variant
+    _run(learner, tier, "b", SESSION_STATUS_COMPLETED, prior=retry)  # later attempt
+    cleared = _run(learner, tier, "a", SESSION_STATUS_COMPLETED)
+    _run(learner, tier, "b", SESSION_STATUS_COMPLETED, prior=cleared)  # continue
+    service = MetricsService()
+
+    learner_side = service.performance_summary(player=learner)
+    admin_side = service.all_player_performance_summary()
+    panel = _staff_client(django_user_model).get(f"/api/admin/users/{learner_user.id}/kpis/").json()
+
+    # Runs with a prior run: the failed retry, the later success, the continue.
+    expected = {"value": 66.7, "numerator": 2, "denominator": 3}
+    assert learner_side["kpis"]["retry_success_rate"] == expected
+    assert admin_side["kpis"]["retry_success_rate"] == expected
+    assert panel["kpis"]["retry_success_rate"] == expected
+    assert [m["retry_success_rate"] for m in admin_side["modules"]] == [
+        m["retry_success_rate"] for m in learner_side["modules"]
+    ]
+
+
+def test_admin_retry_success_rate_follows_staff_and_range_scope(tier, django_user_model):
+    _, learner = _player(django_user_model, "scope-retry-range")
+    failed = _run(learner, tier, "a", SESSION_STATUS_FAILED, started_at=utc(2026, 10, 2))
+    _run(learner, tier, "b", SESSION_STATUS_COMPLETED, prior=failed, started_at=utc(2026, 10, 2, 1))
+    old = _run(learner, tier, "a", SESSION_STATUS_FAILED, started_at=utc(2026, 8, 1))
+    _run(learner, tier, "b", SESSION_STATUS_FAILED, prior=old, started_at=utc(2026, 8, 1, 1))
+    _, tester = _player(django_user_model, "scope-retry-staff", staff=True)
+    t_failed = _run(tester, tier, "a", SESSION_STATUS_FAILED, started_at=utc(2026, 10, 3))
+    _run(tester, tier, "b", SESSION_STATUS_FAILED, prior=t_failed, started_at=utc(2026, 10, 3, 1))
+
+    ranged = MetricsService().all_player_performance_summary(kpi_range=OCT_1_TO_10)
+
+    assert ranged["kpis"]["retry_success_rate"] == {
+        "value": 100.0,
+        "numerator": 1,
+        "denominator": 1,
+    }

@@ -4,6 +4,10 @@ import { useState } from 'react'
 
 import { adminApi } from '@/features/admin/api/adminApi'
 import { KpiRangePicker } from '@/features/admin/components/KpiRangePicker'
+import {
+  SupplementaryRetryCard,
+  SupplementaryRetryModuleRow,
+} from '@/features/admin/components/SupplementaryRetryRate'
 import type { KpiDateRange } from '@/features/admin/types'
 import { ALL_TIME } from '@/features/admin/utils/kpiRange'
 import type { PerformanceModule } from '@/features/performance/types'
@@ -402,6 +406,8 @@ function ModuleAccordion({ modules, objectives }: { modules: PerformanceModule[]
                   ))}
                 </div>
 
+                {mdata && <SupplementaryRetryModuleRow rate={mdata.retry_success_rate} />}
+
               </div>
             )}
           </div>
@@ -504,6 +510,7 @@ export function AdminDashboardPage() {
             <KpiCard key={kpi.key} kpi={kpi} rate={byKey[kpi.key]} />
           ))}
         </div>
+        <SupplementaryRetryCard rate={diag.kpis.retry_success_rate} />
       </div>
 
       {/* ── module breakdown ── */}

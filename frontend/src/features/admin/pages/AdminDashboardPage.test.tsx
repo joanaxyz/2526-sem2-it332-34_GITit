@@ -351,3 +351,60 @@ describe('AdminDashboardPage date range', () => {
     })
   })
 })
+
+describe('AdminDashboardPage supplementary retry success rate', () => {
+  afterEach(() => {
+    cleanup()
+    vi.clearAllMocks()
+  })
+
+  const TOOLTIP =
+    'Share of retry sessions that eventually ended in completion, any variant, any attempt. ' +
+    'Supplementary indicator only; RTA is the evaluation KPI for SO 3.5, SO 4.5 and RQ4.'
+
+  function fixtureWithRetrySuccess() {
+    const base = analyticsFixture()
+    return analyticsFixture({
+      kpis: { ...base.runebound_performance.kpis, retry_success_rate: { value: 30, numerator: 3, denominator: 10 } },
+      modules: [
+        moduleRow(1, { retry_success_rate: { value: 80, numerator: 4, denominator: 5 } }),
+        moduleRow(2),
+        moduleRow(3),
+        moduleRow(4),
+      ],
+    })
+  }
+
+  it('shows a secondary card with no target and the required tooltip', async () => {
+    renderPage(fixtureWithRetrySuccess())
+    await screen.findByText('KPI Overview')
+
+    const card = screen.getByRole('complementary', { name: 'Retry Success Rate (supplementary)' })
+    expect(card).toHaveTextContent('30%')
+    expect(card).toHaveTextContent('3 / 10 retry sessions')
+    expect(card).toHaveTextContent('No target')
+    expect(card).toHaveAttribute('title', TOOLTIP)
+    expect(card).not.toHaveTextContent('Target:')
+    expect(card.className).not.toMatch(/is-met|is-miss/)
+    expect(card.closest('.dk-kpi-grid')).toBeNull()
+  })
+
+  it('is not one of the evaluation KPIs counted in "targets met"', async () => {
+    renderPage(fixtureWithRetrySuccess())
+    await screen.findByText('KPI Overview')
+
+    const stat = screen.getByText('targets met').closest('.dk-stat') as HTMLElement
+    expect(stat).toHaveTextContent('/5')
+    expect(document.querySelectorAll('.dk-kpi-card')).toHaveLength(5)
+  })
+
+  it('shows the per-module value inside each module', async () => {
+    renderPage(fixtureWithRetrySuccess())
+    await openModule(1)
+
+    const row = document.querySelector('.dk-supp-row') as HTMLElement
+    expect(row).toHaveTextContent('Retry Success Rate (supplementary)')
+    expect(row).toHaveTextContent('80% (4/5)')
+    expect(row).toHaveAttribute('title', TOOLTIP)
+  })
+})
