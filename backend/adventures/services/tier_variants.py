@@ -3,6 +3,7 @@ from adventures.models import (
     AdventureLevelTierRun,
     AdventureLevelTierWaveVariant,
 )
+from common.constants import SESSION_STATUS_ABANDONED
 
 
 class TierVariantSelectionService:
@@ -69,7 +70,10 @@ class TierVariantSelectionService:
 
     def _tried_variant_keys(self, *, player, tier: AdventureLevelTier) -> set[str]:
         variant_ids = (
+            # Abandoned runs are excluded so variant rotation behaves exactly
+            # as when they were deleted.
             AdventureLevelTierRun.objects.filter(player=player, tier=tier)
+            .exclude(status=SESSION_STATUS_ABANDONED)
             .values_list("selected_variant_id", flat=True)
             .distinct()
         )
