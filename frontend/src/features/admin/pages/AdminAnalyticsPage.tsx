@@ -168,7 +168,7 @@ function ModuleRows({
 export function AdminAnalyticsPage() {
   const { data, isPending, isError } = useQuery({
     queryKey: queryKeys.adminAnalytics,
-    queryFn: adminApi.analytics,
+    queryFn: () => adminApi.analytics(),
   })
 
   if (isPending) return <LoadingScreen label="Loading analytics" />

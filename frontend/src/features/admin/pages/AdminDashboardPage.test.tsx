@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { ApiSchemas } from '@/shared/api/generated/apiTypes'
@@ -45,6 +45,7 @@ function analyticsFixture(
     active_learners_30d: 3,
     per_story: [],
     objectives,
+    kpi_range: { start_date: null, end_date: null, timezone: 'Asia/Manila' },
     runebound_performance: {
       kpis: {
         scr: { value: 50, numerator: 2, denominator: 4 },
@@ -269,5 +270,84 @@ describe('AdminDashboardPage specific objectives', () => {
     await openModule(3)
 
     expect(soRow('SO 3.5')).toHaveClass('is-none')
+  })
+})
+
+describe('AdminDashboardPage date range', () => {
+  afterEach(() => {
+    cleanup()
+    vi.clearAllMocks()
+  })
+
+  function renderEchoingRange() {
+    // The API echoes the range it applied, as the backend does.
+    vi.mocked(adminApi.analytics).mockImplementation(async (range) => ({
+      ...analyticsFixture(),
+      kpi_range: {
+        start_date: range?.startDate ?? null,
+        end_date: range?.endDate ?? null,
+        timezone: 'Asia/Manila',
+      },
+    }))
+    vi.mocked(adminApi.overview).mockReturnValue(new Promise(() => {}))
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AdminDashboardPage />
+      </QueryClientProvider>,
+    )
+  }
+
+  function rangeGroup() {
+    return screen.getByRole('group', { name: 'KPI date range' })
+  }
+
+  it('defaults to all time and says so', async () => {
+    renderEchoingRange()
+
+    await screen.findByText('KPI Overview')
+    expect(adminApi.analytics).toHaveBeenCalledWith({ startDate: null, endDate: null })
+    expect(rangeGroup()).toHaveTextContent('Showing All time')
+    expect(rangeGroup()).toHaveTextContent('Philippine time (UTC+8)')
+    expect(screen.getByRole('button', { name: 'All time' })).toBeDisabled()
+  })
+
+  it('refetches for a chosen range, labels it, and resets to all time', async () => {
+    renderEchoingRange()
+    await screen.findByText('KPI Overview')
+
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-10-01' } })
+    fireEvent.change(screen.getByLabelText('To'), { target: { value: '2026-10-10' } })
+
+    await waitFor(() =>
+      expect(adminApi.analytics).toHaveBeenLastCalledWith({
+        startDate: '2026-10-01',
+        endDate: '2026-10-10',
+      }),
+    )
+    await waitFor(() =>
+      expect(rangeGroup()).toHaveTextContent('Showing Oct 1, 2026 – Oct 10, 2026'),
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'All time' }))
+
+    await waitFor(() => expect(rangeGroup()).toHaveTextContent('Showing All time'))
+    expect(adminApi.analytics).toHaveBeenLastCalledWith({ startDate: null, endDate: null })
+  })
+
+  it('ignores an end date before the start date', async () => {
+    renderEchoingRange()
+    await screen.findByText('KPI Overview')
+
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-10-10' } })
+    await waitFor(() =>
+      expect(adminApi.analytics).toHaveBeenLastCalledWith({ startDate: '2026-10-10', endDate: null }),
+    )
+    fireEvent.change(screen.getByLabelText('To'), { target: { value: '2026-10-01' } })
+
+    expect(adminApi.analytics).not.toHaveBeenCalledWith({
+      startDate: '2026-10-10',
+      endDate: '2026-10-01',
+    })
   })
 })
