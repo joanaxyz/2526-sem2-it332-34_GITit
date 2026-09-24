@@ -1,7 +1,13 @@
 from django.db import IntegrityError, transaction
+from django.utils import timezone
 
 from adventures.models import AdventureLevelTier, AdventureLevelTierProgress, AdventureLevelTierRun
-from common.constants import DIFFICULTY_EASY, DIFFICULTY_MEDIUM, SESSION_STATUS_STARTED
+from common.constants import (
+    DIFFICULTY_EASY,
+    DIFFICULTY_MEDIUM,
+    SESSION_STATUS_ABANDONED,
+    SESSION_STATUS_STARTED,
+)
 from common.exceptions import Conflict, Locked
 from common.runtime import discard_started_run
 from progress.models import AdventureLevelTierCompletion
@@ -146,7 +152,12 @@ class AdventureLevelTierRunService:
         retry_index = prior_run.retry_index + 1 if prior_run else 0
         prior_reference = prior_run
         if prior_run and prior_run.status == SESSION_STATUS_STARTED:
+            # "Start over" mid-run: the old run is abandoned (or deleted when
+            # empty) and never becomes the new run's prior - the same chain
+            # shape as when the old run was always deleted.
             self.discard(run=prior_run)
+            prior_reference = None
+        elif prior_run and prior_run.status == SESSION_STATUS_ABANDONED:
             prior_reference = None
 
         try:
@@ -212,4 +223,22 @@ class AdventureLevelTierRunService:
         return completion.tier_run.selected_variant
 
     def discard(self, *, run: AdventureLevelTierRun) -> bool:
-        return discard_started_run(run)
+        """End a still-active run the learner is leaving.
+
+        Every trigger goes through here: the exit button, navigating away,
+        "start over", and a new start on the same tier replacing an active run
+        (including one left open by a closed tab). A run with at least one
+        submitted command is kept as ABANDONED, so it counts as a started
+        session that did not succeed; a run with no commands is deleted, since
+        it carries no learning evidence (an accidental open or a double
+        mount). Returns False when the run had already ended.
+        """
+        locked = AdventureLevelTierRun.objects.select_for_update().filter(pk=run.pk).first()
+        if locked is None or locked.status != SESSION_STATUS_STARTED:
+            return False
+        if not locked.steps.exists():
+            return discard_started_run(locked)
+        locked.status = SESSION_STATUS_ABANDONED
+        locked.ended_at = timezone.now()
+        locked.save(update_fields=["status", "ended_at"])
+        return True

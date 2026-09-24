@@ -26,6 +26,11 @@ from progress.models import (
 )
 from progress.objectives import SO_CAR_LEVELS
 
+# Learner retry success rate: any run started from a prior run. Abandoned runs
+# are left out so the learner-facing measure keeps its meaning from before
+# abandoned runs were recorded (they used to be deleted).
+LEARNER_RETRY = Q(prior_run__isnull=False) & ~Q(status=SESSION_STATUS_ABANDONED)
+
 # Trailing window (days) for the consistency axis.
 
 TREND_DAYS = 14
@@ -125,15 +130,20 @@ class MetricsService:
         streak are excluded), in Modules 3-4 only, whose variant is
         structurally different from the failed run's variant (initial_state or
         target_state differs - a different variant key alone is not enough).
-        Success means that eligible run completes. Runs still in progress have
-        no outcome yet and are left out. No eligible sessions returns a null
+        Success means that eligible run completes; an eligible run the learner
+        abandoned counts as eligible but not successful. Runs still in progress
+        have no outcome yet and are left out. No eligible sessions returns a null
         rate, never 0%.
         """
         candidates = (
             runs.filter(
                 tier__adventure_level__chapter__number__in=self.RTA_MODULE_NUMBERS,
                 prior_run__status=SESSION_STATUS_FAILED,
-                status__in=(SESSION_STATUS_COMPLETED, SESSION_STATUS_FAILED),
+                status__in=(
+                    SESSION_STATUS_COMPLETED,
+                    SESSION_STATUS_FAILED,
+                    SESSION_STATUS_ABANDONED,
+                ),
             )
             .exclude(prior_run__prior_run__status=SESSION_STATUS_FAILED)
             .select_related("selected_variant", "prior_run__selected_variant")
@@ -159,6 +169,11 @@ class MetricsService:
         RTA is Retry Transfer Accuracy (see ``_rta_for_runs``). The learner
         retry success rate is the share of any run with a prior run that ends
         successfully. Replays are excluded from every attempt-based measure.
+
+        An abandoned run is a started session that did not succeed: it counts
+        in SCR's and HLCR's started totals, its commands count in CAR, and it
+        can be an unsuccessful RTA session. ARC (completed runs only) and the
+        learner retry success rate leave it out.
         """
         aggregate = runs.aggregate(
             started=Count("id"),
@@ -168,7 +183,7 @@ class MetricsService:
                 "id",
                 filter=Q(tier__difficulty=DIFFICULTY_HARD, status=SESSION_STATUS_COMPLETED),
             ),
-            retry_started=Count("id", filter=Q(prior_run__isnull=False)),
+            retry_started=Count("id", filter=LEARNER_RETRY),
             retry_completed=Count(
                 "id", filter=Q(prior_run__isnull=False, status=SESSION_STATUS_COMPLETED)
             ),
@@ -192,7 +207,7 @@ class MetricsService:
                         status=SESSION_STATUS_COMPLETED,
                     ),
                 ),
-                retry_started=Count("id", filter=Q(prior_run__isnull=False)),
+                retry_started=Count("id", filter=LEARNER_RETRY),
                 retry_completed=Count(
                     "id", filter=Q(prior_run__isnull=False, status=SESSION_STATUS_COMPLETED)
                 ),

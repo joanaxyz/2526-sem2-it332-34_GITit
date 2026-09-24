@@ -13,6 +13,7 @@ import { TierWorkspaceTour } from '@/features/story-map/components/TierWorkspace
 import { useTierCommandSubmission } from '@/features/story-map/hooks/useTierCommandSubmission'
 import { useTierWorkspaceMutations } from '@/features/story-map/hooks/useTierWorkspaceMutations'
 import { createTierWorkspaceCommandHandler } from '@/features/story-map/utils/tierWorkspaceCommand'
+import { useLeaveAbandonedRun } from '@/features/story-map/hooks/useLeaveAbandonedRun'
 import { useTierRun } from '@/features/story-map/hooks/useTierRun'
 import { invalidateTierProgressQueries } from '@/features/story-map/utils/tierRunCache'
 import {
@@ -94,6 +95,8 @@ export function TierWorkspace() {
   useEffect(() => {
     latestRunRef.current = run
   }, [run])
+
+  useLeaveAbandonedRun(run, navigate)
 
   useEffect(() => {
     if (navigationBlocker.state !== 'blocked' || !activeRunId) return
