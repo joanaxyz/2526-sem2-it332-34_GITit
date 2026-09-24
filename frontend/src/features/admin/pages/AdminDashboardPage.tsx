@@ -80,20 +80,35 @@ function getModuleRate(mod: PerformanceModule, key: KpiKey): Rate {
 }
 
 // ─── full capstone objectives structure ───────────────────────────────────────
-const MODULES = [
+// Official Specific Objectives (Proposal, SO 1.1 – SO 4.5). Each General
+// Objective is measured by module SCR ≥ 80%. Per-SO targets override the
+// default card targets (e.g. SO 4.4 HLCR ≥ 65%, SO 4.5 ARC ≤ 3). An SO with two
+// metrics is met only when both are met.
+type SoMetric = { kpi: KpiKey; target: number; up: boolean }
+type SpecificObjective = { id: string; title: string; metrics: readonly SoMetric[] }
+type ModuleObjectives = { num: number; title: string; go: string; sos: readonly SpecificObjective[] }
+
+const GO_SCR_TARGET = 80
+
+const car  = (): SoMetric => ({ kpi: 'car',  target: 70, up: true })
+const hlcr = (target: number): SoMetric => ({ kpi: 'hlcr', target, up: true })
+const arc  = (target: number): SoMetric => ({ kpi: 'arc',  target, up: false })
+const rta  = (target: number): SoMetric => ({ kpi: 'rta',  target, up: true })
+
+const MODULES: readonly ModuleObjectives[] = [
   {
     num: 1,
     title: 'Local Repository Foundations',
     go: 'Learners can confidently manage a local Git repository by initializing, staging, committing, and manipulating repository states without reference to external materials.',
     sos: [
-      { id: 'SO 1.1', kpi: 'car' as KpiKey, target: 70, up: true,  text: 'Learners can initialize a Git repository (git init) and verify its creation.' },
-      { id: 'SO 1.2', kpi: 'car' as KpiKey, target: 70, up: true,  text: 'Learners can clone a remote repository (git clone) and navigate the resulting directory structure.' },
-      { id: 'SO 1.3', kpi: 'car' as KpiKey, target: 70, up: true,  text: 'Learners can stage files (git add) and commit changes (git commit) with descriptive messages.' },
-      { id: 'SO 1.4', kpi: 'car' as KpiKey, target: 70, up: true,  text: 'Learners can perform partial staging (git add -p) to select specific hunks of changes.' },
-      { id: 'SO 1.5', kpi: 'car' as KpiKey, target: 70, up: true,  text: 'Learners can amend the most recent commit (git commit --amend) to correct messages or staged content.' },
-      { id: 'SO 1.6', kpi: 'car' as KpiKey, target: 70, up: true,  text: 'Learners can unstage files (git restore --staged) and discard working-directory changes (git restore).' },
-      { id: 'SO 1.7', kpi: 'hlcr' as KpiKey, target: 70, up: true, text: 'Learners demonstrate independent management of local repository operations without hints or scaffolding in hard-tier scenarios.' },
-      { id: 'SO 1.8', kpi: 'arc' as KpiKey, target: 2,  up: false, text: 'Learners show efficient repository-state reasoning with ≤2 retries on average across Module 1 scenarios.' },
+      { id: 'SO 1.1', title: 'Initializing Repositories',               metrics: [car()] },
+      { id: 'SO 1.2', title: 'Cloning Remote Repositories',             metrics: [car()] },
+      { id: 'SO 1.3', title: 'Staging and Committing',                  metrics: [car()] },
+      { id: 'SO 1.4', title: 'Partial Staging',                         metrics: [car()] },
+      { id: 'SO 1.5', title: 'Amending Commits',                        metrics: [car()] },
+      { id: 'SO 1.6', title: 'Unstaging and Discarding Changes',        metrics: [car()] },
+      { id: 'SO 1.7', title: 'Independent Local Repository Management', metrics: [hlcr(70)] },
+      { id: 'SO 1.8', title: 'Efficient Repository-State Reasoning',    metrics: [arc(2)] },
     ],
   },
   {
@@ -101,17 +116,17 @@ const MODULES = [
     title: 'Branching and Collaboration',
     go: 'Learners can create and manage branches, integrate remote collaboration workflows, and handle stash and merge operations to support team-based development.',
     sos: [
-      { id: 'SO 2.1',  kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can create a new branch (git switch -c / git branch) and switch between branches.' },
-      { id: 'SO 2.2',  kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can stash work in progress (git stash) and restore it (git stash pop).' },
-      { id: 'SO 2.3',  kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can merge branches using fast-forward, merge commit, and squash strategies.' },
-      { id: 'SO 2.4',  kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can push a local branch to a remote repository (git push) and set an upstream.' },
-      { id: 'SO 2.5',  kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can pull remote changes (git pull / git fetch + git merge) into a local branch.' },
-      { id: 'SO 2.6',  kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can delete local and remote branches safely after merging.' },
-      { id: 'SO 2.7',  kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can inspect branch history with git log and identify divergence points.' },
-      { id: 'SO 2.8',  kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can rebase a feature branch onto another branch (git rebase) in a clean linear scenario.' },
-      { id: 'SO 2.9',  kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can cherry-pick a specific commit onto the current branch (git cherry-pick).' },
-      { id: 'SO 2.10', kpi: 'hlcr' as KpiKey, target: 70, up: true,  text: 'Learners demonstrate independent branch management in hard-tier scenarios without scaffolding.' },
-      { id: 'SO 2.11', kpi: 'arc' as KpiKey,  target: 2,  up: false, text: 'Learners show reduced trial-and-error in collaboration workflows with ≤2 average retries across Module 2.' },
+      { id: 'SO 2.1',  title: 'Creating and Switching Branches',                 metrics: [car()] },
+      { id: 'SO 2.2',  title: 'Branch Naming Conventions and Housekeeping',      metrics: [car()] },
+      { id: 'SO 2.3',  title: 'Stashing Work in Progress',                       metrics: [car()] },
+      { id: 'SO 2.4',  title: 'Pushing to a Remote',                             metrics: [car()] },
+      { id: 'SO 2.5',  title: 'Fetching and Pulling from a Remote',              metrics: [car()] },
+      { id: 'SO 2.6',  title: 'Reconciling Diverged Local and Remote Histories', metrics: [car()] },
+      { id: 'SO 2.7',  title: 'Completing Branch Merges',                        metrics: [car()] },
+      { id: 'SO 2.8',  title: 'Squash Merging',                                  metrics: [car()] },
+      { id: 'SO 2.9',  title: 'Deleting and Recovering Remote Branches',         metrics: [car()] },
+      { id: 'SO 2.10', title: 'Independent Branch and Collaboration Management', metrics: [hlcr(70)] },
+      { id: 'SO 2.11', title: 'Reduced Trial-and-Error Branching',               metrics: [arc(2)] },
     ],
   },
   {
@@ -119,11 +134,11 @@ const MODULES = [
     title: 'Conflict Resolution',
     go: 'Learners can identify, interpret, and resolve merge conflicts correctly, and transfer that reasoning to novel conflict scenarios independently.',
     sos: [
-      { id: 'SO 3.1', kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can identify a merge conflict from git output and locate conflict markers in affected files.' },
-      { id: 'SO 3.2', kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can manually resolve a conflict by editing the file, removing all markers, and staging the result.' },
-      { id: 'SO 3.3', kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can abort an in-progress merge or rebase (git merge --abort / git rebase --abort) when needed.' },
-      { id: 'SO 3.4', kpi: 'hlcr' as KpiKey, target: 70, up: true,  text: 'Learners independently resolve conflicts in hard-tier scenarios without step-by-step guidance.' },
-      { id: 'SO 3.5', kpi: 'rta' as KpiKey,  target: 65, up: true,  text: 'Learners demonstrate transferable conflict-resolution reasoning with ≤2 retries on average and ≥65% retry-to-success rate.' },
+      { id: 'SO 3.1', title: 'Resolving Merge Conflicts Manually',         metrics: [car()] },
+      { id: 'SO 3.2', title: 'Resolving Conflicts Using a Merge Tool',     metrics: [car()] },
+      { id: 'SO 3.3', title: 'Cherry-Picking Commits',                     metrics: [car()] },
+      { id: 'SO 3.4', title: 'Independent Conflict Resolution',            metrics: [hlcr(70)] },
+      { id: 'SO 3.5', title: 'Transferable Conflict-Resolution Reasoning', metrics: [rta(65), arc(2)] },
     ],
   },
   {
@@ -131,19 +146,35 @@ const MODULES = [
     title: 'Advanced Recovery and History',
     go: 'Learners can navigate and recover lost work using reflog, revert, and reset, and demonstrate deliberate history-manipulation strategies under novel conditions.',
     sos: [
-      { id: 'SO 4.1', kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can use git reflog to locate a lost commit hash and restore it to a branch.' },
-      { id: 'SO 4.2', kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can revert a pushed commit safely using git revert without rewriting shared history.' },
-      { id: 'SO 4.3', kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can use git reset (--soft, --mixed, --hard) appropriately depending on the recovery goal.' },
-      { id: 'SO 4.4', kpi: 'hlcr' as KpiKey, target: 65, up: true,  text: 'Learners independently perform recovery operations in hard-tier scenarios with ≥65% hard-level completion.' },
-      { id: 'SO 4.5', kpi: 'rta' as KpiKey,  target: 65, up: true,  text: 'Learners show deliberate recovery reasoning with ≤3 average retries and ≥65% retry-to-success rate across Module 4.' },
+      { id: 'SO 4.1', title: 'Recovering from Hard Resets',          metrics: [car()] },
+      { id: 'SO 4.2', title: 'Reversing Pushed Commits Safely',      metrics: [car()] },
+      { id: 'SO 4.3', title: 'Completing Rebase Recovery Sequences', metrics: [car()] },
+      { id: 'SO 4.4', title: 'Independent Recovery Operations',      metrics: [hlcr(65)] },
+      { id: 'SO 4.5', title: 'Reduced Trial-and-Error Recovery',     metrics: [rta(65), arc(3)] },
     ],
   },
-] as const
+]
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 function status(r: Rate, target: number, up: boolean): Status {
   if (r.value === null || r.denominator === 0) return 'none'
   return (up ? r.value >= target : r.value <= target) ? 'met' : 'miss'
+}
+
+// A multi-metric SO misses if any metric misses, is met only when every metric
+// is met, and otherwise has no verdict yet.
+function combinedStatus(statuses: Status[]): Status {
+  if (statuses.includes('miss')) return 'miss'
+  if (statuses.length > 0 && statuses.every(st => st === 'met')) return 'met'
+  return 'none'
+}
+
+function soMetricRate(metric: SoMetric, modData: PerformanceModule | undefined): Rate {
+  return modData ? getModuleRate(modData, metric.kpi) : EMPTY_RATE
+}
+
+function soStatus(so: SpecificObjective, modData: PerformanceModule | undefined): Status {
+  return combinedStatus(so.metrics.map(m => status(soMetricRate(m, modData), m.target, m.up)))
 }
 
 function fmtRate(r: Rate, pct: boolean): string {
@@ -248,34 +279,42 @@ function KpiRefPanel() {
 }
 
 // ─── SO row ───────────────────────────────────────────────────────────────────
-function SoRow({ so, modData }: {
-  so: { id: string; kpi: KpiKey; target: number; up: boolean; text: string }
-  modData: PerformanceModule | undefined
-}) {
-  const kpiMeta = KPIS.find(k => k.key === so.kpi)!
-  const r: Rate = modData ? getModuleRate(modData, so.kpi) : EMPTY_RATE
-  const s = status(r, so.target, so.up)
-  const valStr = r.value === null ? '—' : kpiMeta.pct ? `${r.value}%` : r.value.toFixed(2)
+function SoMetricCell({ metric, modData }: { metric: SoMetric; modData: PerformanceModule | undefined }) {
+  const kpiMeta = KPIS.find(k => k.key === metric.kpi)!
+  const r = soMetricRate(metric, modData)
+  const s = status(r, metric.target, metric.up)
 
   return (
-    <div className={`dk-so-row is-${s}`}>
+    <div className="dk-so-kpi">
+      <span className={`dk-so-kpi-chip ${s !== 'none' ? `is-${s}` : ''}`}>
+        {kpiMeta.abbr}
+      </span>
+      <span className={`dk-so-kpi-val ${s !== 'none' ? `is-${s}` : ''}`}>
+        {fmtRate(r, kpiMeta.pct)}
+      </span>
+      <span className="dk-target-text">
+        {metric.up ? '≥' : '≤'}{metric.target}{kpiMeta.pct ? '%' : ''}
+      </span>
+    </div>
+  )
+}
+
+function SoRow({ so, modData }: { so: SpecificObjective; modData: PerformanceModule | undefined }) {
+  const s = soStatus(so, modData)
+
+  return (
+    <div className={`dk-so-row is-${s}`} data-so={so.id}>
       <div className="dk-so-icon">
         <StatusIcon s={s} />
       </div>
       <div className="dk-so-body">
         <span className="dk-so-id">{so.id}</span>
-        <p className="dk-so-text">{so.text}</p>
+        <p className="dk-so-text">{so.title}</p>
       </div>
-      <div className="dk-so-kpi">
-        <span className={`dk-so-kpi-chip ${s !== 'none' ? `is-${s}` : ''}`}>
-          {kpiMeta.abbr}
-        </span>
-        <span className={`dk-so-kpi-val ${s !== 'none' ? `is-${s}` : ''}`}>
-          {valStr}
-        </span>
-        <span className="dk-target-text">
-          {so.up ? '≥' : '≤'}{so.target}{kpiMeta.pct ? '%' : ''}
-        </span>
+      <div className="dk-so-kpis">
+        {so.metrics.map(metric => (
+          <SoMetricCell key={metric.kpi} metric={metric} modData={modData} />
+        ))}
       </div>
     </div>
   )
@@ -295,16 +334,10 @@ function ModuleAccordion({ modules }: { modules: PerformanceModule[] }) {
         const goRate: Rate = mdata?.scr
           ? mdata.scr
           : { value: null, numerator: 0, denominator: 0 }
-        const goS = status(goRate, 80, true)
+        const goS = status(goRate, GO_SCR_TARGET, true)
 
         // tally all objectives
-        const allStatuses: Status[] = [
-          goS,
-          ...mod.sos.map(so => {
-            const r: Rate = mdata ? getModuleRate(mdata, so.kpi) : EMPTY_RATE
-            return status(r, so.target, so.up)
-          }),
-        ]
+        const allStatuses: Status[] = [goS, ...mod.sos.map(so => soStatus(so, mdata))]
         const met   = allStatuses.filter(s => s === 'met').length
         const total = allStatuses.filter(s => s !== 'none').length
 
@@ -344,7 +377,7 @@ function ModuleAccordion({ modules }: { modules: PerformanceModule[] }) {
                       <span className={`dk-val is-${goS}`}>
                         {goRate.value === null ? '—' : `${goRate.value}%`}
                       </span>
-                      <span className="dk-target-text">≥80%</span>
+                      <span className="dk-target-text">≥{GO_SCR_TARGET}%</span>
                       <span className={`dk-status-icon is-${goS}`}>
                         <StatusIcon s={goS} />
                       </span>

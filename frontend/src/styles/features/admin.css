@@ -741,7 +741,8 @@
   line-height: 1.6;
 }
 
-/* KPI chip column (right) */
+/* KPI chip column (right); an SO with two metrics shows them side by side */
+.dk-so-kpis { display: flex; align-items: flex-start; gap: 0.9rem; }
 .dk-so-kpi {
   display: flex;
   flex-direction: column;
