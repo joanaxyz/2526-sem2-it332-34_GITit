@@ -58,6 +58,9 @@ def _month_start(day: date, months_back: int) -> date:
 class MetricsService:
     PERFORMANCE_STORY_SLUG = "git-it-legacy"
     PERFORMANCE_MODULE_NUMBERS = (1, 2, 3, 4)
+    # RTA measures transfer to structurally changed scenarios; it is defined
+    # for the conflict-resolution and recovery modules only.
+    RTA_MODULE_NUMBERS = (3, 4)
 
     def performance_summary(self, *, player) -> dict:
         return self._performance_summary_for_runs(runs=self._performance_runs().filter(player=player))
@@ -77,12 +80,49 @@ class MetricsService:
             tier__adventure_level__chapter__number__in=self.PERFORMANCE_MODULE_NUMBERS,
         )
 
+    def _rta_for_runs(self, *, runs) -> dict:
+        """Retry Transfer Accuracy (RTA) over a set of performance runs.
+
+        An eligible retry session is the first run started directly after a
+        failed run, where that failed run was not itself a retry-after-failure
+        (so continue-after-success runs and later retries in the same failure
+        streak are excluded), in Modules 3-4 only, whose variant is
+        structurally different from the failed run's variant (initial_state or
+        target_state differs - a different variant key alone is not enough).
+        Success means that eligible run completes. Runs still in progress have
+        no outcome yet and are left out. No eligible sessions returns a null
+        rate, never 0%.
+        """
+        candidates = (
+            runs.filter(
+                tier__adventure_level__chapter__number__in=self.RTA_MODULE_NUMBERS,
+                prior_run__status=SESSION_STATUS_FAILED,
+                status__in=(SESSION_STATUS_COMPLETED, SESSION_STATUS_FAILED),
+            )
+            .exclude(prior_run__prior_run__status=SESSION_STATUS_FAILED)
+            .select_related("selected_variant", "prior_run__selected_variant")
+        )
+        eligible = successful = 0
+        for run in candidates:
+            prior_variant = run.prior_run.selected_variant
+            variant = run.selected_variant
+            if (
+                prior_variant.initial_state == variant.initial_state
+                and prior_variant.target_state == variant.target_state
+            ):
+                continue
+            eligible += 1
+            if run.status == SESSION_STATUS_COMPLETED:
+                successful += 1
+        return self._rate(successful, eligible)
+
     def _performance_summary_for_runs(self, *, runs) -> dict:
         """Performance KPIs for the Runebound Turret's module attempts.
 
         CAR is the share of submitted commands the simulator could process.
-        Retry transfer is the share of retry runs that end successfully. Replays
-        are excluded from every attempt-based measure.
+        RTA is Retry Transfer Accuracy (see ``_rta_for_runs``). The learner
+        retry success rate is the share of any run with a prior run that ends
+        successfully. Replays are excluded from every attempt-based measure.
         """
         aggregate = runs.aggregate(
             started=Count("id"),
@@ -139,6 +179,10 @@ class MetricsService:
             row = grouped.get(chapter.id, {})
             started = row.get("started") or 0
             completed = row.get("completed") or 0
+            retry_success_rate = self._rate(
+                row.get("retry_completed") or 0,
+                row.get("retry_started") or 0,
+            )
             modules.append(
                 {
                     "number": chapter.number,
@@ -148,10 +192,13 @@ class MetricsService:
                         row.get("hard_completed") or 0,
                         row.get("hard_started") or 0,
                     ),
-                    "rtr": self._rate(
-                        row.get("retry_completed") or 0,
-                        row.get("retry_started") or 0,
+                    "rta": self._rta_for_runs(
+                        runs=runs.filter(tier__adventure_level__chapter_id=chapter.id)
                     ),
+                    "retry_success_rate": retry_success_rate,
+                    # TODO(next release): remove the deprecated "rtr" alias once
+                    # the frontend reading "retry_success_rate"/"rta" is live.
+                    "rtr": retry_success_rate,
                     "arc": self._average_retry_count_from_counts(
                         row.get("completed_retry_total") or 0,
                         completed,
@@ -161,6 +208,10 @@ class MetricsService:
 
         started = aggregate["started"] or 0
         completed = aggregate["completed"] or 0
+        retry_success_rate = self._rate(
+            aggregate["retry_completed"] or 0,
+            aggregate["retry_started"] or 0,
+        )
         return {
             "kpis": {
                 "scr": self._rate(completed, started),
@@ -169,10 +220,11 @@ class MetricsService:
                     aggregate["hard_completed"] or 0,
                     aggregate["hard_started"] or 0,
                 ),
-                "rtr": self._rate(
-                    aggregate["retry_completed"] or 0,
-                    aggregate["retry_started"] or 0,
-                ),
+                "rta": self._rta_for_runs(runs=runs),
+                "retry_success_rate": retry_success_rate,
+                # TODO(next release): remove the deprecated "rtr" alias once the
+                # frontend reading "retry_success_rate"/"rta" is live.
+                "rtr": retry_success_rate,
                 "arc": self._average_retry_count_from_counts(
                     aggregate["completed_retry_total"] or 0,
                     completed,

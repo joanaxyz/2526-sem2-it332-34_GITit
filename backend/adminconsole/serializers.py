@@ -3,7 +3,11 @@ from collections.abc import Mapping
 from rest_framework import serializers
 
 from curriculum.models import Story
-from progress.serializers import PerformanceSummaryResponseSerializer
+from progress.serializers import (
+    PerformanceKpiSetSerializer,
+    PerformanceModuleSerializer,
+    PerformanceSummaryResponseSerializer,
+)
 
 
 class StrictSerializer(serializers.Serializer):
@@ -214,6 +218,12 @@ class AdminAnalyticsResponseSerializer(serializers.Serializer):
     active_learners_30d = serializers.IntegerField(min_value=0)
     per_story = AdminStoryAnalyticsSerializer(many=True)
     runebound_performance = PerformanceSummaryResponseSerializer()
+
+
+class AdminUserKpisResponseSerializer(serializers.Serializer):
+    has_data = serializers.BooleanField()
+    kpis = PerformanceKpiSetSerializer(allow_null=True)
+    modules = PerformanceModuleSerializer(many=True)
 
 
 class AdminModerationContentSerializer(serializers.Serializer):

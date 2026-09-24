@@ -1,4 +1,4 @@
-import { apiOperationRequest, apiRequest } from '@/shared/api/httpClient'
+import { apiOperationRequest } from '@/shared/api/httpClient'
 import type {
   ApiRequestBody,
   ApiSchemas,
@@ -92,28 +92,10 @@ export const adminApi = {
     return apiOperationRequest('admin_settings_create', '/admin/settings/', { body: payload })
   },
   userKpis(id: number) {
-    return apiRequest<UserKpisResponse>(`/admin/users/${id}/kpis/`)
+    return apiOperationRequest('admin_users_kpis_retrieve', `/admin/users/${id}/kpis/`)
   },
 }
 
-export type KpiRate = { value: number | null; numerator: number; denominator: number }
+export type KpiRate = ApiSchemas['RateMetric']
 
-export type UserKpisResponse = {
-  has_data: boolean
-  kpis: {
-    scr: KpiRate
-    car: KpiRate
-    hlcr: KpiRate
-    rtr: KpiRate
-    arc: KpiRate
-    rta: KpiRate
-  } | null
-  modules: Array<{
-    number: number
-    title: string
-    scr: KpiRate
-    hlcr: KpiRate
-    rtr: KpiRate
-    arc: KpiRate
-  }>
-}
+export type UserKpisResponse = ApiSchemas['AdminUserKpisResponse']

@@ -55,14 +55,15 @@ const KPIS = [
     why: 'How many times on average a learner retries before succeeding. ≤2 is healthy. Above 3, learners are stuck in a loop — the failure feedback isn\'t actionable.',
   },
   {
-    key: 'rtr',
-    abbr: 'RTR',
-    name: 'Retry Transfer Rate',
+    key: 'rta',
+    abbr: 'RTA',
+    name: 'Retry Transfer Accuracy',
     target: 65,
     up: true,
     pct: true,
-    formula: 'Retry runs ending in completion ÷ All retry runs × 100',
-    why: 'Of all retries after failure, how often did the learner succeed? High RTR means the retry is teaching something. Low RTR means they\'re repeating the same mistakes.',
+    formula: 'Successful first-attempt completions on changed-variant retry sessions ÷ all changed-variant retry sessions × 100',
+    why: 'Measures skill transfer: after a failure, does the learner complete the first retry when the scenario is structurally changed (a different starting repository or target)? Modules 3–4 only.',
+    tooltip: 'RTA measures skill transfer to structurally changed scenarios in Modules 3–4: the first retry after a failure counts only when its starting repository or target state differs from the failed attempt.',
   },
 ] as const
 
@@ -74,7 +75,7 @@ function getModuleRate(mod: PerformanceModule, key: KpiKey): Rate {
   if (key === 'scr') return mod.scr
   if (key === 'hlcr') return mod.hlcr
   if (key === 'arc') return mod.arc
-  if (key === 'rtr') return mod.rtr
+  if (key === 'rta') return mod.rta
   return EMPTY_RATE
 }
 
@@ -122,7 +123,7 @@ const MODULES = [
       { id: 'SO 3.2', kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can manually resolve a conflict by editing the file, removing all markers, and staging the result.' },
       { id: 'SO 3.3', kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can abort an in-progress merge or rebase (git merge --abort / git rebase --abort) when needed.' },
       { id: 'SO 3.4', kpi: 'hlcr' as KpiKey, target: 70, up: true,  text: 'Learners independently resolve conflicts in hard-tier scenarios without step-by-step guidance.' },
-      { id: 'SO 3.5', kpi: 'rtr' as KpiKey,  target: 65, up: true,  text: 'Learners demonstrate transferable conflict-resolution reasoning with ≤2 retries on average and ≥65% retry-to-success rate.' },
+      { id: 'SO 3.5', kpi: 'rta' as KpiKey,  target: 65, up: true,  text: 'Learners demonstrate transferable conflict-resolution reasoning with ≤2 retries on average and ≥65% retry-to-success rate.' },
     ],
   },
   {
@@ -134,7 +135,7 @@ const MODULES = [
       { id: 'SO 4.2', kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can revert a pushed commit safely using git revert without rewriting shared history.' },
       { id: 'SO 4.3', kpi: 'car' as KpiKey,  target: 70, up: true,  text: 'Learners can use git reset (--soft, --mixed, --hard) appropriately depending on the recovery goal.' },
       { id: 'SO 4.4', kpi: 'hlcr' as KpiKey, target: 65, up: true,  text: 'Learners independently perform recovery operations in hard-tier scenarios with ≥65% hard-level completion.' },
-      { id: 'SO 4.5', kpi: 'rtr' as KpiKey,  target: 65, up: true,  text: 'Learners show deliberate recovery reasoning with ≤3 average retries and ≥65% retry-to-success rate across Module 4.' },
+      { id: 'SO 4.5', kpi: 'rta' as KpiKey,  target: 65, up: true,  text: 'Learners show deliberate recovery reasoning with ≤3 average retries and ≥65% retry-to-success rate across Module 4.' },
     ],
   },
 ] as const
@@ -172,7 +173,10 @@ function KpiCard({ kpi, rate }: { kpi: typeof KPIS[number]; rate: Rate | undefin
   const valClass = s !== 'none' ? s : hasData ? 'has-data' : ''
 
   return (
-    <div className={`dk-kpi-card ${s === 'met' ? 'is-met' : s === 'miss' ? 'is-miss' : ''}`}>
+    <div
+      className={`dk-kpi-card ${s === 'met' ? 'is-met' : s === 'miss' ? 'is-miss' : ''}`}
+      title={'tooltip' in kpi ? kpi.tooltip : undefined}
+    >
       <div className="dk-kpi-top">
         <span className="dk-kpi-abbr">{kpi.abbr}</span>
         <span className={`dk-kpi-dot ${s === 'met' ? 'is-met' : s === 'miss' ? 'is-miss' : ''}`} aria-hidden="true" />
@@ -385,7 +389,7 @@ export function AdminDashboardPage() {
     car:  diag.kpis.car,
     hlcr: diag.kpis.hlcr,
     arc:  diag.kpis.arc,
-    rtr:  diag.kpis.rtr,
+    rta:  diag.kpis.rta,
   }
 
   const metCount = KPIS.filter(k => {
