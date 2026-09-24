@@ -65,20 +65,13 @@ function StatusCell({ rate, target, higherIsBetter, format }: {
   )
 }
 
-function KpiSummaryTable({ diagnostics, passRate, totalRuns, passedRuns }: {
-  diagnostics: { kpis: { scr?: RateMetricLike; car: RateMetricLike; hlcr: RateMetricLike; rta: RateMetricLike; arc: RateMetricLike }; modules: PerformanceModule[] }
-  passRate: number
-  totalRuns: number
-  passedRuns: number
+function KpiSummaryTable({ diagnostics }: {
+  diagnostics: { kpis: { scr: RateMetricLike; car: RateMetricLike; hlcr: RateMetricLike; rta: RateMetricLike; arc: RateMetricLike }; modules: PerformanceModule[] }
 }) {
-  const scrOverall: RateMetricLike = {
-    value: totalRuns > 0 ? passRate : null,
-    numerator: passedRuns,
-    denominator: totalRuns,
-  }
-
+  // Overall SCR shares the per-module source (Runebound tier runs, Modules 1–4,
+  // replays excluded) instead of the all-story run totals.
   const overallByKey: Record<string, RateMetricLike> = {
-    scr: scrOverall,
+    scr: diagnostics.kpis.scr,
     car: diagnostics.kpis.car,
     hlcr: diagnostics.kpis.hlcr,
     arc: diagnostics.kpis.arc,
@@ -262,7 +255,7 @@ export function AdminAnalyticsPage() {
           </div>
           <p className="admin-section-note">Runebound Turret · Modules 1–4</p>
         </header>
-        <KpiSummaryTable diagnostics={diagnostics} passRate={passRate} totalRuns={data.runs.total} passedRuns={data.runs.passed} />
+        <KpiSummaryTable diagnostics={diagnostics} />
       </section>
 
       <div className="admin-section admin-analytics-split">
