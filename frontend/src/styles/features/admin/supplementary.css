@@ -1,0 +1,40 @@
+/* Supplementary (non-evaluation) indicators on the KPI Overview. Deliberately
+   quieter than the KPI cards: dashed border, muted text, no status colour. */
+.dk-supp-card {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px dashed var(--a-border-2);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--a-t3);
+}
+.dk-supp-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.dk-supp-name { color: var(--a-t3); font-size: var(--text-xs); font-weight: 600; }
+.dk-supp-tag {
+  padding: 0.05rem 0.45rem;
+  border: 1px solid var(--a-border-2);
+  border-radius: 999px;
+  color: var(--a-t4);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.dk-supp-value { color: var(--a-t2); font-family: var(--font-mono); font-size: var(--text-lg); font-weight: 600; }
+.dk-supp-evidence,
+.dk-supp-note { margin: 0; color: var(--a-t4); font-size: var(--text-2xs); line-height: 1.5; }
+
+.dk-supp-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--a-border);
+}
+.dk-supp-row-value { color: var(--a-t3); font-family: var(--font-mono); font-size: var(--text-xs); }
+.dk-supp-row-value small { color: var(--a-t4); }
