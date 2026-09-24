@@ -10,7 +10,7 @@ export type ApiSchemas = {
   "AccessTokenResponse": { "access": string }
   "ActionEnum": "grant_coins" | "set_staff" | "set_active"
   "ActivityWindowEnum": "month" | "week" | "year"
-  "AdminAnalyticsResponse": { "active_learners_30d": number; "completions": ApiSchemas["AdminCompletions"]; "objectives": { [key: string]: ApiSchemas["RateMetric"] }; "per_story": Array<ApiSchemas["AdminStoryAnalytics"]>; "runebound_performance": ApiSchemas["PerformanceSummaryResponse"]; "runs": ApiSchemas["AdminRuns"] }
+  "AdminAnalyticsResponse": { "active_learners_30d": number; "completions": ApiSchemas["AdminCompletions"]; "kpi_range": ApiSchemas["AdminKpiRange"]; "objectives": { [key: string]: ApiSchemas["RateMetric"] }; "per_story": Array<ApiSchemas["AdminStoryAnalytics"]>; "runebound_performance": ApiSchemas["PerformanceSummaryResponse"]; "runs": ApiSchemas["AdminRuns"] }
   "AdminChapter": { "battle_stage": { [key: string]: JsonValue }; "description": string; "id": number; "is_playable": boolean; "is_published": boolean; "management_source": string; "number": number; "slug": string; "sort_order": number; "story_id": number | null; "title": string }
   "AdminChapterCreateRequest": { "battle_stage"?: { [key: string]: JsonValue }; "description"?: string; "is_playable"?: boolean; "is_published"?: boolean; "number": number; "slug": string; "sort_order"?: number; "story_id": number; "title": string }
   "AdminChapterListResponse": { "results": Array<ApiSchemas["AdminChapter"]> }
@@ -22,6 +22,7 @@ export type ApiSchemas = {
   "AdminEconomyAdjustResponse": { "applied": boolean; "wallet": ApiSchemas["WalletSummary"] }
   "AdminFeatureFlag": { "description": string; "enabled": boolean; "key": ApiSchemas["KeyEnum"]; "label": string }
   "AdminFeatureFlagUpdateRequest": { "enabled": boolean; "key": ApiSchemas["KeyEnum"] }
+  "AdminKpiRange": { "end_date": string | null; "start_date": string | null; "timezone": string }
   "AdminModerationContent": { "id": number; "kind": string; "owner": string | null; "title": string; "updated_at": string }
   "AdminModerationListResponse": { "content": Array<ApiSchemas["AdminModerationContent"]> }
   "AdminModerationUnpublishRequest": { "id": number; "kind": ApiSchemas["AdminModerationUnpublishRequestKindEnum"] }

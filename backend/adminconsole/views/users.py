@@ -12,6 +12,7 @@ from adminconsole.selectors import (
     user_detail,
 )
 from adminconsole.serializers import (
+    AdminKpiRangeQuerySerializer,
     AdminUserActionRequestSerializer,
     AdminUserDetailSerializer,
     AdminUserKpisResponseSerializer,
@@ -100,6 +101,13 @@ class AdminUserKpisAPIView(APIView):
 
     permission_classes = [IsStaff]
 
-    @extend_schema(responses={200: AdminUserKpisResponseSerializer})
+    @extend_schema(
+        parameters=[AdminKpiRangeQuerySerializer],
+        responses={200: AdminUserKpisResponseSerializer},
+    )
     def get(self, request, user_id: int):
-        return Response(admin_user_kpis_payload(_require_user(user_id)))
+        query = AdminKpiRangeQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        return Response(
+            admin_user_kpis_payload(_require_user(user_id), kpi_range=query.kpi_range())
+        )

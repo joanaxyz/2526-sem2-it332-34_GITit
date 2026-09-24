@@ -9,6 +9,24 @@
         "/api/admin/analytics/": {
             "get": {
                 "operationId": "admin_analytics_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "end_date",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "start_date",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
                 "tags": [
                     "admin"
                 ],
@@ -612,6 +630,22 @@
                 "operationId": "admin_users_kpis_retrieve",
                 "description": "Per-user learning KPIs for the admin console detail panel.",
                 "parameters": [
+                    {
+                        "in": "query",
+                        "name": "end_date",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "start_date",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
                     {
                         "in": "path",
                         "name": "user_id",
@@ -3433,6 +3467,14 @@
                     "runebound_performance": {
                         "$ref": "#/components/schemas/PerformanceSummaryResponse"
                     },
+                    "kpi_range": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AdminKpiRange"
+                            }
+                        ],
+                        "description": "Date range the KPI sections cover; null bounds mean all time."
+                    },
                     "objectives": {
                         "type": "object",
                         "additionalProperties": {
@@ -3444,6 +3486,7 @@
                 "required": [
                     "active_learners_30d",
                     "completions",
+                    "kpi_range",
                     "objectives",
                     "per_story",
                     "runebound_performance",
@@ -3740,6 +3783,29 @@
                 "required": [
                     "enabled",
                     "key"
+                ]
+            },
+            "AdminKpiRange": {
+                "type": "object",
+                "properties": {
+                    "start_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "end_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "timezone": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "end_date",
+                    "start_date",
+                    "timezone"
                 ]
             },
             "AdminModerationContent": {

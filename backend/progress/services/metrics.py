@@ -25,6 +25,7 @@ from progress.models import (
     Wallet,
 )
 from progress.objectives import SO_CAR_LEVELS
+from progress.services.kpi_range import ALL_TIME, KpiRange
 
 # Learner retry success rate: any run started from a prior run. Abandoned runs
 # are left out so the learner-facing measure keeps its meaning from before
@@ -71,19 +72,42 @@ class MetricsService:
     def performance_summary(self, *, player) -> dict:
         return self._performance_summary_for_runs(runs=self._performance_runs().filter(player=player))
 
-    def all_player_performance_summary(self) -> dict:
+    def all_player_performance_summary(self, *, kpi_range: KpiRange = ALL_TIME) -> dict:
         """Return the same Runebound diagnostic metrics across all learners.
 
-        This is deliberately staff-console data. The player-facing endpoint keeps
+        This is deliberately staff-console data: staff accounts are excluded
+        and the optional date range applies. The player-facing endpoint keeps
         using ``performance_summary`` so its response and scope remain unchanged.
         """
-        return self._performance_summary_for_runs(runs=self._performance_runs())
+        return self._performance_summary_for_runs(
+            runs=self._kpi_runs(kpi_range=kpi_range), kpi_range=kpi_range
+        )
+
+    def admin_player_performance_summary(self, *, player, kpi_range: KpiRange = ALL_TIME) -> dict:
+        """One learner's KPIs as the staff console reports them (same scope as
+        the dashboard: staff accounts excluded, optional date range)."""
+        return self._performance_summary_for_runs(
+            runs=self._kpi_runs(kpi_range=kpi_range).filter(player=player),
+            kpi_range=kpi_range,
+        )
 
     def _performance_runs(self):
         return AdventureLevelTierRun.objects.filter(
             is_replay=False,
             tier__adventure_level__chapter__story__slug=self.PERFORMANCE_STORY_SLUG,
             tier__adventure_level__chapter__number__in=self.PERFORMANCE_MODULE_NUMBERS,
+        )
+
+    def _kpi_runs(self, *, kpi_range: KpiRange):
+        """Runs every admin KPI is computed from.
+
+        Staff accounts are excluded so play-testing on production never counts,
+        and runs are limited to those started inside the (Manila-time) range.
+        """
+        return (
+            self._performance_runs()
+            .exclude(player__user__is_staff=True)
+            .filter(kpi_range.q("started_at"))
         )
 
     _CAR_COUNTS = {
@@ -97,13 +121,13 @@ class MetricsService:
         """The submitted commands CAR is computed from, overall and per SO."""
         return CommandStep.objects.filter(adventure_tier_run__in=runs)
 
-    def all_player_objective_car(self) -> dict:
+    def all_player_objective_car(self, *, kpi_range: KpiRange = ALL_TIME) -> dict:
         """Per-SO CAR across all learners (staff console), keyed by SO code.
 
         Uses the same runs and command steps as the overall CAR, grouped by
         adventure level through the static SO_CAR_LEVELS mapping.
         """
-        return self._objective_car_for_runs(runs=self._performance_runs())
+        return self._objective_car_for_runs(runs=self._kpi_runs(kpi_range=kpi_range))
 
     def _objective_car_for_runs(self, *, runs) -> dict:
         by_level = {
@@ -121,7 +145,7 @@ class MetricsService:
             objectives[so_code] = self._rate(total - unprocessable, total)
         return objectives
 
-    def _rta_for_runs(self, *, runs) -> dict:
+    def _rta_for_runs(self, *, runs, kpi_range: KpiRange = ALL_TIME) -> dict:
         """Retry Transfer Accuracy (RTA) over a set of performance runs.
 
         An eligible retry session is the first run started directly after a
@@ -132,7 +156,9 @@ class MetricsService:
         target_state differs - a different variant key alone is not enough).
         Success means that eligible run completes; an eligible run the learner
         abandoned counts as eligible but not successful. Runs still in progress
-        have no outcome yet and are left out. No eligible sessions returns a null
+        have no outcome yet and are left out. With a date range, both the retry
+        and the failed run before it must have started inside it, so a retry of
+        a pre-range failure is not counted. No eligible sessions returns a null
         rate, never 0%.
         """
         candidates = (
@@ -146,6 +172,7 @@ class MetricsService:
                 ),
             )
             .exclude(prior_run__prior_run__status=SESSION_STATUS_FAILED)
+            .filter(kpi_range.q("prior_run__started_at"))
             .select_related("selected_variant", "prior_run__selected_variant")
         )
         eligible = successful = 0
@@ -162,7 +189,7 @@ class MetricsService:
                 successful += 1
         return self._rate(successful, eligible)
 
-    def _performance_summary_for_runs(self, *, runs) -> dict:
+    def _performance_summary_for_runs(self, *, runs, kpi_range: KpiRange = ALL_TIME) -> dict:
         """Performance KPIs for the Runebound Turret's module attempts.
 
         CAR is the share of submitted commands the simulator could process.
@@ -238,7 +265,8 @@ class MetricsService:
                         row.get("hard_started") or 0,
                     ),
                     "rta": self._rta_for_runs(
-                        runs=runs.filter(tier__adventure_level__chapter_id=chapter.id)
+                        runs=runs.filter(tier__adventure_level__chapter_id=chapter.id),
+                        kpi_range=kpi_range,
                     ),
                     "retry_success_rate": retry_success_rate,
                     # TODO(next release): remove the deprecated "rtr" alias once
@@ -265,7 +293,7 @@ class MetricsService:
                     aggregate["hard_completed"] or 0,
                     aggregate["hard_started"] or 0,
                 ),
-                "rta": self._rta_for_runs(runs=runs),
+                "rta": self._rta_for_runs(runs=runs, kpi_range=kpi_range),
                 "retry_success_rate": retry_success_rate,
                 # TODO(next release): remove the deprecated "rtr" alias once the
                 # frontend reading "retry_success_rate"/"rta" is live.
