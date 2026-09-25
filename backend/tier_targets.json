@@ -34085,154 +34085,209 @@
         "message": "Common base",
         "parents": [],
         "tree": {
-          "src/app.ts": "app-base",
-          "src/feature.ts": "feature-base"
+          "site/footer.html": "footer-v1",
+          "site/checkout.html": "checkout-v1"
         },
         "changes": {
-          "src/app.ts": {
+          "site/checkout.html": {
             "change_type": "added",
             "before": null,
-            "after": "app-base"
+            "after": "checkout-v1"
           },
-          "src/feature.ts": {
+          "site/footer.html": {
             "change_type": "added",
             "before": null,
-            "after": "feature-base"
+            "after": "footer-v1"
           }
         },
         "is_merge": false,
         "files": {
-          "src/app.ts": "added",
-          "src/feature.ts": "added"
+          "site/checkout.html": "added",
+          "site/footer.html": "added"
         },
         "order": 0
       },
       {
         "id": "c1",
-        "message": "Main update",
+        "message": "Update privacy link",
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/app.ts": "app-v2",
-          "src/feature.ts": "feature-base"
+          "site/footer.html": "footer-v1",
+          "site/checkout.html": "checkout-v1",
+          "site/privacy.html": "privacy-v2"
         },
         "changes": {
-          "src/app.ts": {
-            "change_type": "modified",
-            "before": "app-base",
-            "after": "app-v2"
+          "site/privacy.html": {
+            "change_type": "added",
+            "before": null,
+            "after": "privacy-v2"
           }
         },
         "is_merge": false,
         "files": {
-          "src/app.ts": "modified"
+          "site/privacy.html": "added"
         },
         "order": 1
       },
       {
         "id": "c2",
-        "message": "Feature work part 1",
+        "message": "Redesign checkout layout",
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/app.ts": "app-base",
-          "src/feature.ts": "feature-v2"
+          "site/footer.html": "footer-v1",
+          "site/checkout.html": "checkout-v2-redesign"
         },
         "changes": {
-          "src/feature.ts": {
+          "site/checkout.html": {
             "change_type": "modified",
-            "before": "feature-base",
-            "after": "feature-v2"
+            "before": "checkout-v1",
+            "after": "checkout-v2-redesign"
           }
         },
         "is_merge": false,
         "files": {
-          "src/feature.ts": "modified"
+          "site/checkout.html": "modified"
         },
         "order": 2
       },
       {
         "id": "c3",
-        "message": "Feature work part 2",
+        "message": "Add checkout animations",
         "parents": [
           "c2"
         ],
         "tree": {
-          "src/app.ts": "app-base",
-          "src/feature.ts": "feature-v3"
+          "site/footer.html": "footer-v1",
+          "site/checkout.html": "checkout-v2-redesign",
+          "site/checkout.css": "checkout-anim-v1"
         },
         "changes": {
-          "src/feature.ts": {
-            "change_type": "modified",
-            "before": "feature-v2",
-            "after": "feature-v3"
+          "site/checkout.css": {
+            "change_type": "added",
+            "before": null,
+            "after": "checkout-anim-v1"
           }
         },
         "is_merge": false,
         "files": {
-          "src/feature.ts": "modified"
+          "site/checkout.css": "added"
         },
         "order": 3
       },
       {
         "id": "c4",
-        "message": "Feature work part 1",
+        "message": "Fix footer typo",
         "parents": [
-          "c1"
+          "c3"
         ],
         "tree": {
-          "src/app.ts": "app-v2",
-          "src/feature.ts": "feature-v2"
+          "site/footer.html": "footer-v2-typo-fixed",
+          "site/checkout.html": "checkout-v2-redesign",
+          "site/checkout.css": "checkout-anim-v1"
         },
         "changes": {
-          "src/feature.ts": {
+          "site/footer.html": {
             "change_type": "modified",
-            "before": "feature-base",
-            "after": "feature-v2"
+            "before": "footer-v1",
+            "after": "footer-v2-typo-fixed"
           }
         },
+        "is_merge": false,
         "files": {
-          "src/feature.ts": "modified"
+          "site/footer.html": "modified"
         },
-        "author": "GIT it",
-        "order": 4,
-        "is_merge": false
+        "order": 4
       },
       {
         "id": "c5",
-        "message": "Feature work part 2",
+        "message": "Fix footer year",
         "parents": [
           "c4"
         ],
         "tree": {
-          "src/app.ts": "app-v2",
-          "src/feature.ts": "feature-v3"
+          "site/footer.html": "footer-v2-typo-fixed",
+          "site/checkout.html": "checkout-v2-redesign",
+          "site/checkout.css": "checkout-anim-v1",
+          "site/footer_year.txt": "year-2026"
         },
         "changes": {
-          "src/feature.ts": {
+          "site/footer_year.txt": {
+            "change_type": "added",
+            "before": null,
+            "after": "year-2026"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "site/footer_year.txt": "added"
+        },
+        "order": 5
+      },
+      {
+        "id": "c6",
+        "message": "Fix footer typo",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "site/footer.html": "footer-v2-typo-fixed",
+          "site/checkout.html": "checkout-v1",
+          "site/privacy.html": "privacy-v2"
+        },
+        "changes": {
+          "site/footer.html": {
             "change_type": "modified",
-            "before": "feature-v2",
-            "after": "feature-v3"
+            "before": "footer-v1",
+            "after": "footer-v2-typo-fixed"
           }
         },
         "files": {
-          "src/feature.ts": "modified"
+          "site/footer.html": "modified"
         },
         "author": "GIT it",
-        "order": 5,
+        "order": 6,
+        "is_merge": false
+      },
+      {
+        "id": "c7",
+        "message": "Fix footer year",
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "site/footer.html": "footer-v2-typo-fixed",
+          "site/checkout.html": "checkout-v1",
+          "site/privacy.html": "privacy-v2",
+          "site/footer_year.txt": "year-2026"
+        },
+        "changes": {
+          "site/footer_year.txt": {
+            "change_type": "added",
+            "before": null,
+            "after": "year-2026"
+          }
+        },
+        "files": {
+          "site/footer_year.txt": "added"
+        },
+        "author": "GIT it",
+        "order": 7,
         "is_merge": false
       }
     ],
     "branches": {
       "main": "c1",
-      "feature/recovery": "c5"
+      "feature/checkout-redesign": "c3",
+      "fix/footer-typo": "c7"
     },
     "head": {
       "type": "branch",
-      "name": "feature/recovery",
-      "target": "c5"
+      "name": "fix/footer-typo",
+      "target": "c7"
     },
     "staging": {},
     "working_tree": {},
@@ -34247,7 +34302,7 @@
     "reflog": [
       {
         "ref": "HEAD@{0}",
-        "target": "c5",
+        "target": "c7",
         "message": "move HEAD"
       }
     ],
@@ -34255,23 +34310,23 @@
     "replaced_commits": {},
     "operation_metadata": {
       "last_rebase_target": "main",
-      "last_rebase_onto": null,
-      "last_rebase_upstream": "c1",
-      "last_rebase_new_head": "c5",
+      "last_rebase_onto": "c1",
+      "last_rebase_upstream": "c3",
+      "last_rebase_new_head": "c7",
       "last_rebase_interactive": false,
       "last_rebase_replayed_commits": [
-        "c4",
-        "c5"
+        "c6",
+        "c7"
       ]
     },
     "last_rebase_target": "main",
-    "last_rebase_onto": null,
-    "last_rebase_upstream": "c1",
-    "last_rebase_new_head": "c5",
+    "last_rebase_onto": "c1",
+    "last_rebase_upstream": "c3",
+    "last_rebase_new_head": "c7",
     "last_rebase_interactive": false,
     "last_rebase_replayed_commits": [
-      "c4",
-      "c5"
+      "c6",
+      "c7"
     ]
   },
   "bm7": {
@@ -34282,158 +34337,263 @@
         "message": "Common base",
         "parents": [],
         "tree": {
-          "api/routes.py": "routes-v1",
-          "payments/charge.py": "charge-v1"
+          "auth/login.py": "login-v1",
+          "auth/session.py": "session-v1"
         },
         "changes": {
-          "api/routes.py": {
+          "auth/login.py": {
             "change_type": "added",
             "before": null,
-            "after": "routes-v1"
+            "after": "login-v1"
           },
-          "payments/charge.py": {
+          "auth/session.py": {
             "change_type": "added",
             "before": null,
-            "after": "charge-v1"
+            "after": "session-v1"
           }
         },
         "is_merge": false,
         "files": {
-          "api/routes.py": "added",
-          "payments/charge.py": "added"
+          "auth/login.py": "added",
+          "auth/session.py": "added"
         },
         "order": 0
       },
       {
         "id": "c1",
-        "message": "Add refunds route",
+        "message": "Harden password reset",
         "parents": [
           "c0"
         ],
         "tree": {
-          "api/routes.py": "routes-v2",
-          "payments/charge.py": "charge-v1"
+          "auth/login.py": "login-v1",
+          "auth/session.py": "session-v1",
+          "auth/reset.py": "reset-v2"
         },
         "changes": {
-          "api/routes.py": {
-            "change_type": "modified",
-            "before": "routes-v1",
-            "after": "routes-v2"
+          "auth/reset.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "reset-v2"
           }
         },
         "is_merge": false,
         "files": {
-          "api/routes.py": "modified"
+          "auth/reset.py": "added"
         },
         "order": 1
       },
       {
         "id": "c2",
-        "message": "Add retry policy",
+        "message": "Update security contacts",
         "parents": [
-          "c0"
+          "c1"
         ],
         "tree": {
-          "api/routes.py": "routes-v1",
-          "payments/charge.py": "charge-v1",
-          "payments/retry.py": "retry-v1"
+          "auth/login.py": "login-v1",
+          "auth/session.py": "session-v1",
+          "auth/reset.py": "reset-v2",
+          "SECURITY.md": "security-v2"
         },
         "changes": {
-          "payments/retry.py": {
+          "SECURITY.md": {
             "change_type": "added",
             "before": null,
-            "after": "retry-v1"
+            "after": "security-v2"
           }
         },
         "is_merge": false,
         "files": {
-          "payments/retry.py": "added"
+          "SECURITY.md": "added"
         },
         "order": 2
       },
       {
         "id": "c3",
-        "message": "Retry failed charges",
+        "message": "Beta: new session store",
         "parents": [
-          "c2"
+          "c0"
         ],
         "tree": {
-          "api/routes.py": "routes-v1",
-          "payments/charge.py": "charge-v2",
-          "payments/retry.py": "retry-v1"
+          "auth/login.py": "login-v1",
+          "auth/session.py": "session-v2-beta"
         },
         "changes": {
-          "payments/charge.py": {
+          "auth/session.py": {
             "change_type": "modified",
-            "before": "charge-v1",
-            "after": "charge-v2"
+            "before": "session-v1",
+            "after": "session-v2-beta"
           }
         },
         "is_merge": false,
         "files": {
-          "payments/charge.py": "modified"
+          "auth/session.py": "modified"
         },
         "order": 3
       },
       {
         "id": "c4",
-        "message": "Add retry policy",
+        "message": "Beta: passkey prototype",
         "parents": [
-          "c1"
+          "c3"
         ],
         "tree": {
-          "api/routes.py": "routes-v2",
-          "payments/charge.py": "charge-v1",
-          "payments/retry.py": "retry-v1"
+          "auth/login.py": "login-v1",
+          "auth/session.py": "session-v2-beta",
+          "auth/passkeys.py": "passkeys-beta"
         },
         "changes": {
-          "payments/retry.py": {
+          "auth/passkeys.py": {
             "change_type": "added",
             "before": null,
-            "after": "retry-v1"
+            "after": "passkeys-beta"
           }
         },
+        "is_merge": false,
         "files": {
-          "payments/retry.py": "added"
+          "auth/passkeys.py": "added"
         },
-        "author": "GIT it",
-        "order": 4,
-        "is_merge": false
+        "order": 4
       },
       {
         "id": "c5",
-        "message": "Retry failed charges",
+        "message": "Beta: telemetry hooks",
         "parents": [
           "c4"
         ],
         "tree": {
-          "api/routes.py": "routes-v2",
-          "payments/charge.py": "charge-v2",
-          "payments/retry.py": "retry-v1"
+          "auth/login.py": "login-v1",
+          "auth/session.py": "session-v2-beta",
+          "auth/passkeys.py": "passkeys-beta",
+          "auth/telemetry.py": "telemetry-beta"
         },
         "changes": {
-          "payments/charge.py": {
+          "auth/telemetry.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "telemetry-beta"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "auth/telemetry.py": "added"
+        },
+        "order": 5
+      },
+      {
+        "id": "c6",
+        "message": "Raise login timeout to 30s",
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "auth/login.py": "login-v2-timeout-30s",
+          "auth/session.py": "session-v2-beta",
+          "auth/passkeys.py": "passkeys-beta",
+          "auth/telemetry.py": "telemetry-beta"
+        },
+        "changes": {
+          "auth/login.py": {
             "change_type": "modified",
-            "before": "charge-v1",
-            "after": "charge-v2"
+            "before": "login-v1",
+            "after": "login-v2-timeout-30s"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "auth/login.py": "modified"
+        },
+        "order": 6
+      },
+      {
+        "id": "c7",
+        "message": "Log login timeouts",
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "auth/login.py": "login-v2-timeout-30s",
+          "auth/session.py": "session-v2-beta",
+          "auth/passkeys.py": "passkeys-beta",
+          "auth/telemetry.py": "telemetry-beta",
+          "auth/login_log.py": "login-log-v1"
+        },
+        "changes": {
+          "auth/login_log.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "login-log-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "auth/login_log.py": "added"
+        },
+        "order": 7
+      },
+      {
+        "id": "c8",
+        "message": "Raise login timeout to 30s",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "auth/login.py": "login-v2-timeout-30s",
+          "auth/session.py": "session-v1",
+          "auth/reset.py": "reset-v2",
+          "SECURITY.md": "security-v2"
+        },
+        "changes": {
+          "auth/login.py": {
+            "change_type": "modified",
+            "before": "login-v1",
+            "after": "login-v2-timeout-30s"
           }
         },
         "files": {
-          "payments/charge.py": "modified"
+          "auth/login.py": "modified"
         },
         "author": "GIT it",
-        "order": 5,
+        "order": 8,
+        "is_merge": false
+      },
+      {
+        "id": "c9",
+        "message": "Log login timeouts",
+        "parents": [
+          "c8"
+        ],
+        "tree": {
+          "auth/login.py": "login-v2-timeout-30s",
+          "auth/session.py": "session-v1",
+          "auth/reset.py": "reset-v2",
+          "SECURITY.md": "security-v2",
+          "auth/login_log.py": "login-log-v1"
+        },
+        "changes": {
+          "auth/login_log.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "login-log-v1"
+          }
+        },
+        "files": {
+          "auth/login_log.py": "added"
+        },
+        "author": "GIT it",
+        "order": 9,
         "is_merge": false
       }
     ],
     "branches": {
-      "main": "c1",
-      "feature/payment-retry": "c5"
+      "main": "c2",
+      "release/2.0-beta": "c5",
+      "hotfix/login-timeout": "c9"
     },
     "head": {
       "type": "branch",
-      "name": "feature/payment-retry",
-      "target": "c5"
+      "name": "hotfix/login-timeout",
+      "target": "c9"
     },
     "staging": {},
     "working_tree": {},
@@ -34448,7 +34608,7 @@
     "reflog": [
       {
         "ref": "HEAD@{0}",
-        "target": "c5",
+        "target": "c9",
         "message": "move HEAD"
       }
     ],
@@ -34456,23 +34616,23 @@
     "replaced_commits": {},
     "operation_metadata": {
       "last_rebase_target": "main",
-      "last_rebase_onto": null,
-      "last_rebase_upstream": "c1",
-      "last_rebase_new_head": "c5",
+      "last_rebase_onto": "c2",
+      "last_rebase_upstream": "c5",
+      "last_rebase_new_head": "c9",
       "last_rebase_interactive": false,
       "last_rebase_replayed_commits": [
-        "c4",
-        "c5"
+        "c8",
+        "c9"
       ]
     },
     "last_rebase_target": "main",
-    "last_rebase_onto": null,
-    "last_rebase_upstream": "c1",
-    "last_rebase_new_head": "c5",
+    "last_rebase_onto": "c2",
+    "last_rebase_upstream": "c5",
+    "last_rebase_new_head": "c9",
     "last_rebase_interactive": false,
     "last_rebase_replayed_commits": [
-      "c4",
-      "c5"
+      "c8",
+      "c9"
     ]
   },
   "bm8": {
@@ -34483,181 +34643,170 @@
         "message": "Common base",
         "parents": [],
         "tree": {
-          "src/i18n.ts": "i18n-v1",
-          "styles/base.css": "base-v1",
-          "package.json": "pkg-v1"
+          "reports/export.py": "export-v1",
+          "render/engine.py": "engine-v1"
         },
         "changes": {
-          "package.json": {
+          "render/engine.py": {
             "change_type": "added",
             "before": null,
-            "after": "pkg-v1"
+            "after": "engine-v1"
           },
-          "src/i18n.ts": {
+          "reports/export.py": {
             "change_type": "added",
             "before": null,
-            "after": "i18n-v1"
-          },
-          "styles/base.css": {
-            "change_type": "added",
-            "before": null,
-            "after": "base-v1"
+            "after": "export-v1"
           }
         },
         "is_merge": false,
         "files": {
-          "package.json": "added",
-          "src/i18n.ts": "added",
-          "styles/base.css": "added"
+          "render/engine.py": "added",
+          "reports/export.py": "added"
         },
         "order": 0
       },
       {
         "id": "c1",
-        "message": "Refresh base styles",
+        "message": "Add CSV export",
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/i18n.ts": "i18n-v1",
-          "styles/base.css": "base-v2",
-          "package.json": "pkg-v1"
+          "reports/export.py": "export-v1",
+          "render/engine.py": "engine-v1",
+          "reports/csv.py": "csv-v1"
         },
         "changes": {
-          "styles/base.css": {
-            "change_type": "modified",
-            "before": "base-v1",
-            "after": "base-v2"
+          "reports/csv.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "csv-v1"
           }
         },
         "is_merge": false,
         "files": {
-          "styles/base.css": "modified"
+          "reports/csv.py": "added"
         },
         "order": 1
       },
       {
         "id": "c2",
-        "message": "Update dependencies",
+        "message": "Spike: swap rendering engine",
         "parents": [
-          "c1"
+          "c0"
         ],
         "tree": {
-          "src/i18n.ts": "i18n-v1",
-          "styles/base.css": "base-v2",
-          "package.json": "pkg-v2"
+          "reports/export.py": "export-v1",
+          "render/engine.py": "engine-v2-spike"
         },
         "changes": {
-          "package.json": {
+          "render/engine.py": {
             "change_type": "modified",
-            "before": "pkg-v1",
-            "after": "pkg-v2"
+            "before": "engine-v1",
+            "after": "engine-v2-spike"
           }
         },
         "is_merge": false,
         "files": {
-          "package.json": "modified"
+          "render/engine.py": "modified"
         },
         "order": 2
       },
       {
         "id": "c3",
-        "message": "Add English strings",
+        "message": "Add PDF export",
         "parents": [
-          "c0"
+          "c2"
         ],
         "tree": {
-          "src/i18n.ts": "i18n-v1",
-          "styles/base.css": "base-v1",
-          "package.json": "pkg-v1",
-          "locales/en.json": "en-v1"
+          "reports/export.py": "export-v1",
+          "render/engine.py": "engine-v2-spike",
+          "reports/pdf.py": "pdf-v1"
         },
         "changes": {
-          "locales/en.json": {
+          "reports/pdf.py": {
             "change_type": "added",
             "before": null,
-            "after": "en-v1"
+            "after": "pdf-v1"
           }
         },
         "is_merge": false,
         "files": {
-          "locales/en.json": "added"
+          "reports/pdf.py": "added"
         },
         "order": 3
       },
       {
         "id": "c4",
-        "message": "Add Spanish strings",
+        "message": "Add PDF page numbers",
         "parents": [
           "c3"
         ],
         "tree": {
-          "src/i18n.ts": "i18n-v1",
-          "styles/base.css": "base-v1",
-          "package.json": "pkg-v1",
-          "locales/en.json": "en-v1",
-          "locales/es.json": "es-v1"
+          "reports/export.py": "export-v1",
+          "render/engine.py": "engine-v2-spike",
+          "reports/pdf.py": "pdf-v1",
+          "reports/pdf_pages.py": "pdf-pages-v1"
         },
         "changes": {
-          "locales/es.json": {
+          "reports/pdf_pages.py": {
             "change_type": "added",
             "before": null,
-            "after": "es-v1"
+            "after": "pdf-pages-v1"
           }
         },
         "is_merge": false,
         "files": {
-          "locales/es.json": "added"
+          "reports/pdf_pages.py": "added"
         },
         "order": 4
       },
       {
         "id": "c5",
-        "message": "Load locales at startup",
+        "message": "Wire PDF into the export menu",
         "parents": [
           "c4"
         ],
         "tree": {
-          "src/i18n.ts": "i18n-v2",
-          "styles/base.css": "base-v1",
-          "package.json": "pkg-v1",
-          "locales/en.json": "en-v1",
-          "locales/es.json": "es-v1"
+          "reports/export.py": "export-v2-pdf",
+          "render/engine.py": "engine-v2-spike",
+          "reports/pdf.py": "pdf-v1",
+          "reports/pdf_pages.py": "pdf-pages-v1"
         },
         "changes": {
-          "src/i18n.ts": {
+          "reports/export.py": {
             "change_type": "modified",
-            "before": "i18n-v1",
-            "after": "i18n-v2"
+            "before": "export-v1",
+            "after": "export-v2-pdf"
           }
         },
         "is_merge": false,
         "files": {
-          "src/i18n.ts": "modified"
+          "reports/export.py": "modified"
         },
         "order": 5
       },
       {
         "id": "c6",
-        "message": "Add English strings",
+        "message": "Add PDF export",
         "parents": [
-          "c2"
+          "c1"
         ],
         "tree": {
-          "src/i18n.ts": "i18n-v1",
-          "styles/base.css": "base-v2",
-          "package.json": "pkg-v2",
-          "locales/en.json": "en-v1"
+          "reports/export.py": "export-v1",
+          "render/engine.py": "engine-v1",
+          "reports/csv.py": "csv-v1",
+          "reports/pdf.py": "pdf-v1"
         },
         "changes": {
-          "locales/en.json": {
+          "reports/pdf.py": {
             "change_type": "added",
             "before": null,
-            "after": "en-v1"
+            "after": "pdf-v1"
           }
         },
         "files": {
-          "locales/en.json": "added"
+          "reports/pdf.py": "added"
         },
         "author": "GIT it",
         "order": 6,
@@ -34665,26 +34814,26 @@
       },
       {
         "id": "c7",
-        "message": "Add Spanish strings",
+        "message": "Add PDF page numbers",
         "parents": [
           "c6"
         ],
         "tree": {
-          "src/i18n.ts": "i18n-v1",
-          "styles/base.css": "base-v2",
-          "package.json": "pkg-v2",
-          "locales/en.json": "en-v1",
-          "locales/es.json": "es-v1"
+          "reports/export.py": "export-v1",
+          "render/engine.py": "engine-v1",
+          "reports/csv.py": "csv-v1",
+          "reports/pdf.py": "pdf-v1",
+          "reports/pdf_pages.py": "pdf-pages-v1"
         },
         "changes": {
-          "locales/es.json": {
+          "reports/pdf_pages.py": {
             "change_type": "added",
             "before": null,
-            "after": "es-v1"
+            "after": "pdf-pages-v1"
           }
         },
         "files": {
-          "locales/es.json": "added"
+          "reports/pdf_pages.py": "added"
         },
         "author": "GIT it",
         "order": 7,
@@ -34692,26 +34841,26 @@
       },
       {
         "id": "c8",
-        "message": "Load locales at startup",
+        "message": "Wire PDF into the export menu",
         "parents": [
           "c7"
         ],
         "tree": {
-          "src/i18n.ts": "i18n-v2",
-          "styles/base.css": "base-v2",
-          "package.json": "pkg-v2",
-          "locales/en.json": "en-v1",
-          "locales/es.json": "es-v1"
+          "reports/export.py": "export-v2-pdf",
+          "render/engine.py": "engine-v1",
+          "reports/csv.py": "csv-v1",
+          "reports/pdf.py": "pdf-v1",
+          "reports/pdf_pages.py": "pdf-pages-v1"
         },
         "changes": {
-          "src/i18n.ts": {
+          "reports/export.py": {
             "change_type": "modified",
-            "before": "i18n-v1",
-            "after": "i18n-v2"
+            "before": "export-v1",
+            "after": "export-v2-pdf"
           }
         },
         "files": {
-          "src/i18n.ts": "modified"
+          "reports/export.py": "modified"
         },
         "author": "GIT it",
         "order": 8,
@@ -34719,12 +34868,13 @@
       }
     ],
     "branches": {
-      "main": "c2",
-      "feature/i18n": "c8"
+      "main": "c1",
+      "spike/new-renderer": "c2",
+      "feature/export-pdf": "c8"
     },
     "head": {
       "type": "branch",
-      "name": "feature/i18n",
+      "name": "feature/export-pdf",
       "target": "c8"
     },
     "staging": {},
@@ -34748,7 +34898,7 @@
     "replaced_commits": {},
     "operation_metadata": {
       "last_rebase_target": "main",
-      "last_rebase_onto": null,
+      "last_rebase_onto": "c1",
       "last_rebase_upstream": "c2",
       "last_rebase_new_head": "c8",
       "last_rebase_interactive": false,
@@ -34759,7 +34909,7 @@
       ]
     },
     "last_rebase_target": "main",
-    "last_rebase_onto": null,
+    "last_rebase_onto": "c1",
     "last_rebase_upstream": "c2",
     "last_rebase_new_head": "c8",
     "last_rebase_interactive": false,

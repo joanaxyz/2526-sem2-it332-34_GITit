@@ -68,6 +68,7 @@ WRONG_SOLUTIONS = {
     "rh8": ["git reset --hard c1", "git push --force"],
     # Easy/medium rebase: merge main in instead.
     **{key: ["git merge main"] for key in CASES if key[:2] in {"be", "bm"}},
+    # (Medium rebase has more near-misses in EXTRA_WRONG_SOLUTIONS.)
     # Hard rebase: rebase without recovering the dropped commit, or recover
     # and then merge instead of rebasing.
     "bh6": ["git rebase main"],
@@ -84,10 +85,44 @@ ALTERNATIVE_SOLUTIONS = {
     "rh6": ["git revert c1", "git revert c3", "git push origin main"],
     "rh7": ["git revert --no-edit c3", "git revert --no-edit c1", "git push"],
     "be7": ["git rebase main feature/search-filters"],
-    "bm8": ["git switch main", "git switch feature/i18n", "git rebase main"],
+    "bm6": ["git rebase --onto main feature/checkout-redesign"],
+    "bm7": ["git status", "git rebase --onto main release/2.0-beta"],
+    "bm8": ["git rebase --onto main c2"],
     "bh6": ["git reflog", "git reset --hard c4", "git rebase main feature/cli-flags"],
     "bh8": ["git reset --hard c4", "git status", "git rebase main"],
 }
+
+# Medium rebase (--onto): a plain rebase carries the wrong base's commits
+# along, and cherry-picking only some of the branch's commits loses work.
+EXTRA_WRONG_SOLUTIONS = {
+    "bm6": [["git rebase main"], ["git reset --hard main", "git cherry-pick c4"]],
+    "bm7": [["git rebase main"], ["git reset --hard main", "git cherry-pick c7"]],
+    "bm8": [
+        ["git rebase main"],
+        ["git reset --hard main", "git cherry-pick c3", "git cherry-pick c4"],
+    ],
+}
+
+# Replaying every one of the branch's own commits onto main is also valid.
+EXTRA_ALTERNATIVE_SOLUTIONS = {
+    "bm6": [
+        ["git rebase --onto main c3 fix/footer-typo"],
+        ["git reset --hard main", "git cherry-pick c4", "git cherry-pick c5"],
+    ],
+}
+
+
+def _routes(single: dict, extra: dict) -> dict[str, tuple[str, list[str]]]:
+    """Flatten route tables to {route_id: (case_id, commands)}."""
+    routes = {f"{case_id}#0": (case_id, commands) for case_id, commands in single.items()}
+    for case_id, more in extra.items():
+        for index, commands in enumerate(more, start=1):
+            routes[f"{case_id}#{index}"] = (case_id, commands)
+    return routes
+
+
+WRONG_ROUTES = _routes(WRONG_SOLUTIONS, EXTRA_WRONG_SOLUTIONS)
+ALTERNATIVE_ROUTES = _routes(ALTERNATIVE_SOLUTIONS, EXTRA_ALTERNATIVE_SOLUTIONS)
 
 
 def _evaluate(case: dict, state: dict, commands: list[str]):
@@ -124,12 +159,11 @@ def test_each_affected_tier_has_three_new_variants_with_the_original_first():
 
 
 def test_first_variants_keep_the_mvp_repository_where_the_tier_shape_is_unchanged():
-    """Easy revert, easy rebase and medium rebase keep the MVP task shape, so
-    their first variant keeps the MVP repository. The reworked medium/hard
-    revert and hard rebase tiers are new exercises."""
+    """Easy revert and easy rebase keep the MVP task shape, so their first
+    variant keeps the MVP repository. Every medium and hard tier is a new
+    exercise."""
     revert_original = CASES["re6"][2]["initial_state"]
     rebase_original = CASES["be6"][2]["initial_state"]
-    assert CASES["bm6"][2]["initial_state"] == rebase_original
     # The MVP repositories, by their distinguishing content.
     assert [c["message"] for c in revert_original["commits"]] == [
         "Initial commit",
@@ -194,6 +228,24 @@ def test_hard_revert_has_two_faulty_commits_around_a_good_one(case_id):
     assert sum(cmd.startswith("git push") for cmd in case["solution_commands"]) == 1
 
 
+@pytest.mark.parametrize("case_id", ["bm6", "bm7", "bm8"])
+def test_medium_rebase_branch_starts_on_a_wrong_base_whose_work_must_be_left_behind(case_id):
+    _, _, case = CASES[case_id]
+    state = case["initial_state"]
+    branch = state["head"]["name"]
+    commits = {c["id"]: c for c in state["commits"]}
+    tip_tree = commits[state["branches"][branch]]["tree"]
+    (wrong_tokens,) = _rule_values(case, "commit_tree_excludes_tokens", "tokens")
+    (wrong_base,) = [name for name in state["branches"] if name not in {"main", branch}]
+
+    # The branch currently carries the wrong base's work...
+    assert wrong_tokens and all(token in tip_tree.values() for token in wrong_tokens)
+    # ...which is another branch that main does not contain.
+    assert state["branches"][wrong_base] != state["branches"]["main"]
+    assert f"--onto main {wrong_base}" in case["solution_commands"][-1]
+    assert {"type": "rebase_not_in_progress"} in case["state_requirements"]["rules"]
+
+
 @pytest.mark.parametrize("case_id", ["bh6", "bh7", "bh8"])
 def test_hard_rebase_starts_with_a_dropped_commit_recoverable_from_the_reflog(case_id):
     _, _, case = CASES[case_id]
@@ -212,9 +264,11 @@ def test_hard_rebase_starts_with_a_dropped_commit_recoverable_from_the_reflog(ca
 def test_tier_task_text_matches_the_grading():
     revert_medium = TIER_SPECS[("reversing-pushed-commits-safely", "medium")]["task"]
     revert_hard = TIER_SPECS[("reversing-pushed-commits-safely", "hard")]["task"]
+    rebase_medium = TIER_SPECS[("completing-rebase-recovery-sequences", "medium")]["task"]
     rebase_hard = TIER_SPECS[("completing-rebase-recovery-sequences", "hard")]["task"]
 
     assert "Identify the correct published change" in revert_medium
+    assert "wrong base" in rebase_medium and "only its own commits" in rebase_medium
     assert "both faulty" in revert_hard and "publish once" in revert_hard
     assert "reflog" in rebase_hard and "linear history" in rebase_hard
 
@@ -319,20 +373,20 @@ needs_simulator = pytest.mark.skipif(
 @pytest.fixture(scope="module")
 def replayed(tmp_path_factory):
     """Replay every correct, wrong and alternative route in one simulator run."""
+    labelled = {
+        f"{case_id}::correct": (case_id, CASES[case_id][2]["solution_commands"])
+        for case_id in CASES
+    }
+    labelled.update({f"{route}::wrong": value for route, value in WRONG_ROUTES.items()})
+    labelled.update({f"{route}::alternative": value for route, value in ALTERNATIVE_ROUTES.items()})
     routes = {}
-    for case_id, (_, tier, case) in CASES.items():
-        budget = DIFFICULTY_MAX_COUNTED_COMMANDS[tier]
-        for kind, commands in (
-            ("correct", case["solution_commands"]),
-            ("wrong", WRONG_SOLUTIONS[case_id]),
-            ("alternative", ALTERNATIVE_SOLUTIONS.get(case_id)),
-        ):
-            if commands:
-                routes[f"{case_id}::{kind}"] = {
-                    "initial_state": case["initial_state"],
-                    "solution_commands": commands,
-                    "max_counted_commands": budget,
-                }
+    for key, (case_id, commands) in labelled.items():
+        _, tier, case = CASES[case_id]
+        routes[key] = {
+            "initial_state": case["initial_state"],
+            "solution_commands": commands,
+            "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS[tier],
+        }
     tmp = tmp_path_factory.mktemp("m4-replay")
     source, output = tmp / "routes.json", tmp / "states.json"
     source.write_text(json.dumps(routes), encoding="utf-8")
@@ -361,22 +415,22 @@ def test_correct_solution_passes_and_matches_committed_target(replayed, case_id)
 
 
 @needs_simulator
-@pytest.mark.parametrize("case_id", sorted(CASES))
-def test_wrong_solution_fails(replayed, case_id):
+@pytest.mark.parametrize("route", sorted(WRONG_ROUTES))
+def test_wrong_solution_fails(replayed, route):
+    case_id, commands = WRONG_ROUTES[route]
     _, _, case = CASES[case_id]
-    commands = WRONG_SOLUTIONS[case_id]
 
-    outcome = _evaluate(case, replayed[f"{case_id}::wrong"], commands)
+    outcome = _evaluate(case, replayed[f"{route}::wrong"], commands)
 
     assert not outcome.target_matched, commands
 
 
 @needs_simulator
-@pytest.mark.parametrize("case_id", sorted(ALTERNATIVE_SOLUTIONS))
-def test_alternative_valid_solution_passes(replayed, case_id):
+@pytest.mark.parametrize("route", sorted(ALTERNATIVE_ROUTES))
+def test_alternative_valid_solution_passes(replayed, route):
+    case_id, commands = ALTERNATIVE_ROUTES[route]
     _, _, case = CASES[case_id]
-    commands = ALTERNATIVE_SOLUTIONS[case_id]
 
-    outcome = _evaluate(case, replayed[f"{case_id}::alternative"], commands)
+    outcome = _evaluate(case, replayed[f"{route}::alternative"], commands)
 
     assert outcome.target_matched, (commands, [r.get("type") for r in outcome.failed_rules])

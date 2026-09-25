@@ -12083,6 +12083,91 @@ def _module_4_dropped_commit_case(
     }
 
 
+def _module_4_onto_case(
+    case_id: str,
+    *,
+    context: str,
+    base_tree: dict[str, str],
+    main_commits: list[tuple[str, dict[str, str]]],
+    wrong_base: str,
+    wrong_base_commits: list[tuple[str, dict[str, str]]],
+    branch: str,
+    own_commits: list[tuple[str, dict[str, str]]],
+) -> dict[str, Any]:
+    """Medium rebase: a branch was started from the wrong base (another
+    unmerged branch). Move only its own commits onto main - rebase --onto.
+
+    Grading: no rebase in progress, main's tip in the branch history, a linear
+    tip, the exact commit count (base + main + own commits only), every own and
+    main change present, and none of the wrong base's changes.
+    """
+    commits = [_m4_commit("c0", "Common base", [], dict(base_tree))]
+    next_id = 1
+
+    def extend(parent: str, steps: list[tuple[str, dict[str, str]]]) -> str:
+        nonlocal next_id
+        tree = dict(next(c["tree"] for c in commits if c["id"] == parent))
+        for message, changes in steps:
+            tree = {**tree, **changes}
+            commits.append(_m4_commit(f"c{next_id}", message, [parent], dict(tree)))
+            parent = f"c{next_id}"
+            next_id += 1
+        return parent
+
+    main_tip = extend("c0", main_commits)
+    wrong_tip = extend("c0", wrong_base_commits)
+    branch_tip = extend(wrong_tip, own_commits)
+
+    def tokens(steps: list[tuple[str, dict[str, str]]]) -> list[str]:
+        return [value for _, changes in steps for value in changes.values()]
+
+    return {
+        "case_id": case_id,
+        "label": f"Move {branch} onto main",
+        "context": context,
+        "initial_state": {
+            "repository_initialized": True,
+            "commits": commits,
+            "branches": {"main": main_tip, wrong_base: wrong_tip, branch: branch_tip},
+            "head": {"type": "branch", "name": branch},
+            "staging": {},
+            "working_tree": {},
+            "conflicts": [],
+        },
+        "solution_commands": [
+            "git log --oneline --graph --all",
+            f"git rebase --onto main {wrong_base} {branch}",
+        ],
+        "state_requirements": {
+            "skip_required_commands": True,
+            "head_branch": branch,
+            "staging_empty": True,
+            "working_tree_clean": True,
+            "conflict_free": True,
+            "rules": [
+                {"type": "rebase_not_in_progress"},
+                {"type": "branch_history_contains", "branch": branch, "commits": [main_tip]},
+                {"type": "commit_is_not_merge", "branch": branch},
+                {
+                    "type": "commit_count_on_branch_equals",
+                    "branch": branch,
+                    "count": 1 + len(main_commits) + len(own_commits),
+                },
+                {
+                    "type": "commit_tree_contains_tokens",
+                    "branch": branch,
+                    "tokens": [*tokens(own_commits), *tokens(main_commits)],
+                },
+                {
+                    "type": "commit_tree_excludes_tokens",
+                    "branch": branch,
+                    "tokens": tokens(wrong_base_commits),
+                },
+            ],
+        },
+    }
+
+
 # The MVP revert repository, kept by the first easy revert variant (re6) so a
 # first-time player still starts from the same repository as in the MVP data;
 # only the grading is stricter.
@@ -12348,8 +12433,8 @@ MODULE_4_REVERT_CASES: dict[str, list[dict[str, Any]]] = {
     ],
 }
 
-# The MVP rebase repository, kept by the first easy and medium rebase variants
-# (be6, bm6) so a first-time player still starts from it.
+# The MVP rebase repository, kept by the first easy rebase variant (be6) so a
+# first-time player still starts from it.
 _M4_ORIGINAL_REBASE = {
     "context": (
         "You are a feature owner in a software company. Your branch diverged while "
@@ -12364,9 +12449,12 @@ _M4_ORIGINAL_REBASE = {
     "branch": "feature/recovery",
 }
 
-# Easy and medium replay a diverged branch onto main (conflict-free: main and
-# the feature touch different files). Hard starts after a teammate's rebase
-# dropped a commit: recover the original tip from the reflog, then rebase.
+# Easy replays a diverged branch onto main (conflict-free: main and the
+# feature touch different files). Medium moves a branch that was started from
+# the wrong base onto main, keeping only its own commits (rebase --onto). Hard
+# starts after a teammate's rebase dropped a commit: recover the original tip
+# from the reflog, then rebase. Rebase conflicts are not exercised: the
+# simulator's rebase does not stop on a conflict.
 MODULE_4_REBASE_CASES: dict[str, list[dict[str, Any]]] = {
     "easy": [
         _module_4_rebase_case("be6", **_M4_ORIGINAL_REBASE),
@@ -12404,42 +12492,68 @@ MODULE_4_REBASE_CASES: dict[str, list[dict[str, Any]]] = {
         ),
     ],
     "medium": [
-        _module_4_rebase_case("bm6", **_M4_ORIGINAL_REBASE),
-        _module_4_rebase_case(
+        _module_4_onto_case(
+            "bm6",
+            context=(
+                "You branched fix/footer-typo from feature/checkout-redesign by mistake; that "
+                "redesign is not approved. Move only your typo fix onto main, leaving the "
+                "redesign commits behind."
+            ),
+            base_tree={"site/footer.html": "footer-v1", "site/checkout.html": "checkout-v1"},
+            main_commits=[("Update privacy link", {"site/privacy.html": "privacy-v2"})],
+            wrong_base="feature/checkout-redesign",
+            wrong_base_commits=[
+                ("Redesign checkout layout", {"site/checkout.html": "checkout-v2-redesign"}),
+                ("Add checkout animations", {"site/checkout.css": "checkout-anim-v1"}),
+            ],
+            branch="fix/footer-typo",
+            own_commits=[
+                ("Fix footer typo", {"site/footer.html": "footer-v2-typo-fixed"}),
+                ("Fix footer year", {"site/footer_year.txt": "year-2026"}),
+            ],
+        ),
+        _module_4_onto_case(
             "bm7",
             context=(
-                "Reviewers asked for your payment-retry branch to sit on the latest main "
-                "before they approve it."
+                "hotfix/login-timeout was started from release/2.0-beta instead of main, and "
+                "the beta is not shipping. Move only the hotfix commits onto main so none of "
+                "the beta work comes with them."
             ),
-            base_tree={"api/routes.py": "routes-v1", "payments/charge.py": "charge-v1"},
-            main_commits=[("c1", "Add refunds route", {"api/routes.py": "routes-v2"})],
-            feature_commits=[
-                ("c2", "Add retry policy", {"payments/retry.py": "retry-v1"}),
-                ("c3", "Retry failed charges", {"payments/charge.py": "charge-v2"}),
+            base_tree={"auth/login.py": "login-v1", "auth/session.py": "session-v1"},
+            main_commits=[
+                ("Harden password reset", {"auth/reset.py": "reset-v2"}),
+                ("Update security contacts", {"SECURITY.md": "security-v2"}),
             ],
-            branch="feature/payment-retry",
+            wrong_base="release/2.0-beta",
+            wrong_base_commits=[
+                ("Beta: new session store", {"auth/session.py": "session-v2-beta"}),
+                ("Beta: passkey prototype", {"auth/passkeys.py": "passkeys-beta"}),
+                ("Beta: telemetry hooks", {"auth/telemetry.py": "telemetry-beta"}),
+            ],
+            branch="hotfix/login-timeout",
+            own_commits=[
+                ("Raise login timeout to 30s", {"auth/login.py": "login-v2-timeout-30s"}),
+                ("Log login timeouts", {"auth/login_log.py": "login-log-v1"}),
+            ],
         ),
-        _module_4_rebase_case(
+        _module_4_onto_case(
             "bm8",
             context=(
-                "Your translation branch fell behind while main updated styles and "
-                "dependencies; reviewers want a linear history."
+                "feature/export-pdf was branched from spike/new-renderer, an experiment the "
+                "team dropped. Move only the PDF export commits onto main without the spike."
             ),
-            base_tree={
-                "src/i18n.ts": "i18n-v1",
-                "styles/base.css": "base-v1",
-                "package.json": "pkg-v1",
-            },
-            main_commits=[
-                ("c1", "Refresh base styles", {"styles/base.css": "base-v2"}),
-                ("c2", "Update dependencies", {"package.json": "pkg-v2"}),
+            base_tree={"reports/export.py": "export-v1", "render/engine.py": "engine-v1"},
+            main_commits=[("Add CSV export", {"reports/csv.py": "csv-v1"})],
+            wrong_base="spike/new-renderer",
+            wrong_base_commits=[
+                ("Spike: swap rendering engine", {"render/engine.py": "engine-v2-spike"}),
             ],
-            feature_commits=[
-                ("c3", "Add English strings", {"locales/en.json": "en-v1"}),
-                ("c4", "Add Spanish strings", {"locales/es.json": "es-v1"}),
-                ("c5", "Load locales at startup", {"src/i18n.ts": "i18n-v2"}),
+            branch="feature/export-pdf",
+            own_commits=[
+                ("Add PDF export", {"reports/pdf.py": "pdf-v1"}),
+                ("Add PDF page numbers", {"reports/pdf_pages.py": "pdf-pages-v1"}),
+                ("Wire PDF into the export menu", {"reports/export.py": "export-v2-pdf"}),
             ],
-            branch="feature/i18n",
         ),
     ],
     "hard": [
@@ -12602,7 +12716,7 @@ MODULE_4_LEVELS: list[dict[str, Any]] = [
                 "required_successful_attempts": 1,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["medium"],
                 "story": "You are coordinating with reviewers who need a refined commit sequence before acceptance.",
-                "task": "Run an interactive recovery flow and verify no incomplete rebase state remains.",
+                "task": "Your branch was started from the wrong base. Move only its own commits onto main, leaving the other branch's work behind, with a linear history.",
                 "min_counted_commands": 1,
                 "cases": MODULE_4_REBASE_CASES["medium"],
             },

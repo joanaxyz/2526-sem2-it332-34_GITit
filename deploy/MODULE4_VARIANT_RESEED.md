@@ -21,17 +21,19 @@ commands, one-off jobs, or shell. Seeding therefore runs through
 
 ## Tier changes in this release
 
-Revert easy and rebase easy/medium keep their task shape. These three tiers now
-ask for more, and their task text says so:
+Revert easy and rebase easy keep their task shape. These four tiers now ask
+for more, and their task text says so:
 
 | Tier | Now asks the learner to | Task text | Star budget (`min_counted_commands`) | Command budget (`max_counted_commands`) |
 |---|---|---|---|---|
 | Revert medium | Find a faulty commit 2–3 below the pushed tip from its symptom (no commit ID given), revert it, push | Unchanged: "Identify the correct published change to roll back and synchronize the shared branch." | 2 (unchanged) | 10 (unchanged) |
 | Revert hard | Revert two separate faulty commits, keep the good commit between them, push once | Was "Execute the required rollback while preserving shared history integrity across local and remote." Now "Roll back both faulty published changes, keep the good change between them, and publish once without rewriting shared history." | 2 → 3 (two reverts and a push) | 8 (unchanged) |
+| Rebase medium | Move a branch that was started from the wrong base (another unmerged branch) onto main, keeping only its own commits (`git rebase --onto`) | Was "Run an interactive recovery flow and verify no incomplete rebase state remains." Now "Your branch was started from the wrong base. Move only its own commits onto main, leaving the other branch's work behind, with a linear history." | 1 (unchanged) | 10 (unchanged) |
 | Rebase hard | Recover a commit a teammate's rebase dropped (reset to the original tip from the reflog), then rebase all of it onto main | Was "Complete the full recovery sequence and validate branch integrity with all required checks." Now "A rebase dropped one of your commits: recover the original branch from the reflog, then rebase all of it onto main with a linear history." | 1 → 2 (reset and rebase) | 8 (unchanged) |
 
-Rebase medium is unchanged in this release. Its planned "rebase stops on a
-conflict" exercise needs simulator work (see the PR notes).
+Rebase conflicts are not supported by the simulator (`git rebase` overwrites
+instead of stopping), so SO 4.3's conflict conditions are not exercised in
+Module 4.
 
 HLCR for SO 4.4 before and after this release measures different exercises.
 Report the two periods separately.
@@ -143,9 +145,8 @@ tier, and check that each variant:
 
 On a first attempt you get the `…6` variant. To reach `…7` and `…8`, fail and
 press **Retry**, or clear the tier and press **Continue** on easy tiers, which
-need two clears. `re6`, `be6` and `bm6` keep the MVP repository; the medium and
-hard revert tiers and the hard rebase tier are new exercises (see
-"Tier changes" below). The variant key is the `case_id`, visible in Django admin
+need two clears. `re6` and `be6` keep the MVP repository; every medium and hard
+tier is a new exercise (see "Tier changes" below). The variant key is the `case_id`, visible in Django admin
 under *Adventure level tier wave variants*.
 
 | Variant | Level / tier | Repository to expect | Correct | Wrong (must not complete) |
@@ -162,9 +163,9 @@ under *Adventure level tier wave variants*.
 | be6 | Completing Rebase Recovery Sequences / Easy | MVP repo, branch `feature/recovery` | `git rebase main` | `git merge main` |
 | be7 | Completing Rebase Recovery Sequences / Easy | `feature/search-filters` behind an app-shell update | `git rebase main` | `git merge main` |
 | be8 | Completing Rebase Recovery Sequences / Easy | `feature/cli-flags` (3 commits) behind 2 main commits | `git rebase main` | `git merge main` |
-| bm6 | Completing Rebase Recovery Sequences / Medium | MVP repo, branch `feature/recovery` | `git rebase main` | `git merge main` |
-| bm7 | Completing Rebase Recovery Sequences / Medium | `feature/payment-retry` behind "Add refunds route" | `git rebase main` | `git merge main` |
-| bm8 | Completing Rebase Recovery Sequences / Medium | `feature/i18n` (3 commits) behind 2 main commits | `git rebase main` | `git merge main` |
+| bm6 | Completing Rebase Recovery Sequences / Medium | `fix/footer-typo` started from `feature/checkout-redesign` | `git rebase --onto main feature/checkout-redesign fix/footer-typo` | `git rebase main` (drags the redesign along); `git merge main`; `git reset --hard main`, `git cherry-pick c4` (loses the second fix) |
+| bm7 | Completing Rebase Recovery Sequences / Medium | `hotfix/login-timeout` started from `release/2.0-beta` | `git rebase --onto main release/2.0-beta hotfix/login-timeout` | `git rebase main`; `git merge main`; `git reset --hard main`, `git cherry-pick c7` |
+| bm8 | Completing Rebase Recovery Sequences / Medium | `feature/export-pdf` started from `spike/new-renderer` | `git rebase --onto main spike/new-renderer feature/export-pdf` | `git rebase main`; `git merge main`; `git reset --hard main`, `git cherry-pick c3`, `git cherry-pick c4` |
 | bh6 | Completing Rebase Recovery Sequences / Hard | `feature/cli-flags` rebased by a teammate, "Parse --quiet flag" dropped | `git reflog`, `git reset --hard c4`, `git rebase main` | `git rebase main` (dropped commit stays lost) |
 | bh7 | Completing Rebase Recovery Sequences / Hard | `hotfix/export-csv` rebased, "Test CSV export" dropped | `git reflog`, `git reset --hard c5`, `git rebase main` | `git reset --hard c5`, `git merge main` |
 | bh8 | Completing Rebase Recovery Sequences / Hard | `feature/rate-limits` rebased, "Add rate limiter" dropped | `git reflog`, `git reset --hard c4`, `git rebase main` | `git rebase main` (dropped commit stays lost) |
