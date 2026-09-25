@@ -4,22 +4,22 @@ import { useState } from 'react'
 
 import { adminApi } from '@/features/admin/api/adminApi'
 import { KpiRangePicker } from '@/features/admin/components/KpiRangePicker'
-import {
-  SupplementaryRetryCard,
-  SupplementaryRetryModuleRow,
-} from '@/features/admin/components/SupplementaryRetryRate'
+import { SupplementaryRetryModuleRow } from '@/features/admin/components/SupplementaryRetryRate'
 import type { KpiDateRange } from '@/features/admin/types'
 import {
   EMPTY_RATE,
   GO_SCR_TARGET,
   KPIS,
   MODULES,
+  SUPPLEMENTARY_KPI,
   getModuleRate,
+  type CardKpi,
   type Rate,
   type SoMetric,
   type SpecificObjective,
   type Status,
 } from '@/features/admin/utils/kpiCatalogue'
+import { kpiEvidence } from '@/features/admin/utils/kpiEvidence'
 import { ALL_TIME } from '@/features/admin/utils/kpiRange'
 import type { PerformanceModule } from '@/features/performance/types'
 import { queryKeys } from '@/shared/api/queryKeys'
@@ -72,48 +72,51 @@ function StatusIcon({ s }: { s: Status }) {
 }
 
 // ─── KPI card ─────────────────────────────────────────────────────────────────
-function KpiCard({ kpi, rate }: { kpi: typeof KPIS[number]; rate: Rate | undefined }) {
+function KpiCard({ kpi, rate }: { kpi: CardKpi; rate: Rate | undefined }) {
   const r: Rate = rate ?? { value: null, numerator: 0, denominator: 0 }
-  const s = status(r, kpi.target, kpi.up)
-  const bw = barW(r, kpi.target, kpi.up)
+  // The supplementary indicator has no target: no status, bar or target line.
+  const target = 'target' in kpi ? { value: kpi.target, up: kpi.up } : null
+  const s: Status = target ? status(r, target.value, target.up) : 'none'
   const hasData = r.value !== null
   const valClass = s !== 'none' ? s : hasData ? 'has-data' : ''
+  const stateClass = s === 'met' ? 'is-met' : s === 'miss' ? 'is-miss' : ''
 
   return (
     <div
-      className={`dk-kpi-card ${s === 'met' ? 'is-met' : s === 'miss' ? 'is-miss' : ''}`}
+      className={`dk-kpi-card ${stateClass}`}
       title={'tooltip' in kpi ? kpi.tooltip : undefined}
     >
       <div className="dk-kpi-top">
         <span className="dk-kpi-abbr">{kpi.abbr}</span>
-        <span className={`dk-kpi-dot ${s === 'met' ? 'is-met' : s === 'miss' ? 'is-miss' : ''}`} aria-hidden="true" />
+        {target
+          ? <span className={`dk-kpi-dot ${stateClass}`} aria-hidden="true" />
+          : <span className="dk-kpi-tag">No target</span>}
       </div>
 
       <div className={`dk-kpi-value ${valClass}`}>
         {fmtRate(r, kpi.pct)}
       </div>
 
-      <div className="dk-kpi-target">
-        Target: {kpi.up ? '≥' : '≤'}{kpi.target}{kpi.pct ? '%' : ''}
-      </div>
-
-      <div
-        className="dk-kpi-bar"
-        role="progressbar"
-        aria-valuenow={bw}
-        aria-valuemin={0}
-        aria-valuemax={100}
-      >
-        <div
-          className={`dk-kpi-bar-fill ${s === 'met' ? 'is-met' : s === 'miss' ? 'is-miss' : ''}`}
-          style={{ width: `${bw}%` }}
-        />
-      </div>
+      {target && (
+        <>
+          <div className="dk-kpi-target">
+            Target: {target.up ? '≥' : '≤'}{target.value}{kpi.pct ? '%' : ''}
+          </div>
+          <KpiBar rate={r} target={target.value} up={target.up} stateClass={stateClass} />
+        </>
+      )}
 
       <p className="dk-kpi-name">{kpi.name}</p>
-      <p className="dk-kpi-evidence">
-        {r.denominator > 0 ? `${r.numerator} / ${r.denominator} sessions` : 'No data yet'}
-      </p>
+      <p className="dk-kpi-evidence">{kpiEvidence(kpi.key, r)}</p>
+    </div>
+  )
+}
+
+function KpiBar({ rate, target, up, stateClass }: { rate: Rate; target: number; up: boolean; stateClass: string }) {
+  const bw = barW(rate, target, up)
+  return (
+    <div className="dk-kpi-bar" role="progressbar" aria-valuenow={bw} aria-valuemin={0} aria-valuemax={100}>
+      <div className={`dk-kpi-bar-fill ${stateClass}`} style={{ width: `${bw}%` }} />
     </div>
   )
 }
@@ -161,7 +164,7 @@ function SoMetricCell({ metric, so, data }: { metric: SoMetric; so: SpecificObje
   const s = status(r, metric.target, metric.up)
 
   return (
-    <div className="dk-so-kpi">
+    <div className="dk-so-kpi" title={kpiEvidence(metric.kpi, r)}>
       <span className={`dk-so-kpi-chip ${s !== 'none' ? `is-${s}` : ''}`}>
         {kpiMeta.abbr}
       </span>
@@ -249,7 +252,7 @@ function ModuleAccordion({ modules, objectives }: { modules: PerformanceModule[]
                 <div className="dk-go">
                   <div className="dk-go-top">
                     <span className="dk-go-label">General Objective</span>
-                    <div className="dk-go-kpi-row">
+                    <div className="dk-go-kpi-row" title={kpiEvidence('scr', goRate)}>
                       <span className="dk-chip">SCR</span>
                       <span className={`dk-val is-${goS}`}>
                         {goRate.value === null ? '—' : `${goRate.value}%`}
@@ -373,8 +376,8 @@ export function AdminDashboardPage() {
           {KPIS.map(kpi => (
             <KpiCard key={kpi.key} kpi={kpi} rate={byKey[kpi.key]} />
           ))}
+          <KpiCard kpi={SUPPLEMENTARY_KPI} rate={diag.kpis.retry_success_rate} />
         </div>
-        <SupplementaryRetryCard rate={diag.kpis.retry_success_rate} />
       </div>
 
       {/* ── module breakdown ── */}
