@@ -6,6 +6,7 @@ from common.constants import (
     DIFFICULTY_EASY,
     DIFFICULTY_MEDIUM,
     SESSION_STATUS_ABANDONED,
+    SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
 from common.exceptions import Conflict, Locked
@@ -106,6 +107,16 @@ class AdventureLevelTierRunService:
         if active and (not prior_run or active.id != prior_run.id):
             self.discard(run=active)
 
+        # A fresh start (e.g. from the level page) right after a failure on
+        # this tier is a retry of that failure, exactly as if the learner had
+        # pressed Retry: same prior_run, retry_index and variant rotation.
+        # Decided after the discard above, so an abandoned in-between run
+        # blocks the link and a deleted empty one does not.
+        if prior_run is None and not is_replay:
+            prior_run = self._unretried_last_failure(player=player, tier=tier)
+            if prior_run is not None:
+                selection_reference = prior_run
+
         wave = self._published_wave(tier)
         if wave is None:
             raise Locked("This difficulty tier has no published wave.")
@@ -186,6 +197,27 @@ class AdventureLevelTierRunService:
         except IntegrityError as exc:
             raise Conflict("An active run already exists for this difficulty tier.") from exc
         return self.hydrate_run(run)
+
+    def _unretried_last_failure(self, *, player, tier: AdventureLevelTier):
+        """The learner's most recent run on this tier, if it failed and nothing
+        has retried it yet; otherwise None.
+
+        Not linked when the most recent run completed or was abandoned (any
+        run after a failure means it is not the latest), when it was a replay,
+        or when some run already has it as prior_run (never linked twice).
+        """
+        latest = (
+            AdventureLevelTierRun.objects.select_for_update()
+            .select_related("selected_variant")
+            .filter(player=player, tier=tier)
+            .order_by("-started_at", "-id")
+            .first()
+        )
+        if latest is None or latest.status != SESSION_STATUS_FAILED or latest.is_replay:
+            return None
+        if latest.retry_runs.exists():
+            return None
+        return latest
 
     def _active_run(self, *, player, tier: AdventureLevelTier, for_update: bool = False):
         queryset = AdventureLevelTierRun.objects.filter(
