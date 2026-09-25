@@ -1,7 +1,14 @@
 from django.db import IntegrityError, transaction
+from django.utils import timezone
 
 from adventures.models import AdventureLevelTier, AdventureLevelTierProgress, AdventureLevelTierRun
-from common.constants import DIFFICULTY_EASY, DIFFICULTY_MEDIUM, SESSION_STATUS_STARTED
+from common.constants import (
+    DIFFICULTY_EASY,
+    DIFFICULTY_MEDIUM,
+    SESSION_STATUS_ABANDONED,
+    SESSION_STATUS_FAILED,
+    SESSION_STATUS_STARTED,
+)
 from common.exceptions import Conflict, Locked
 from common.runtime import discard_started_run
 from progress.models import AdventureLevelTierCompletion
@@ -100,6 +107,16 @@ class AdventureLevelTierRunService:
         if active and (not prior_run or active.id != prior_run.id):
             self.discard(run=active)
 
+        # A fresh start (e.g. from the level page) right after a failure on
+        # this tier is a retry of that failure, exactly as if the learner had
+        # pressed Retry: same prior_run, retry_index and variant rotation.
+        # Decided after the discard above, so an abandoned in-between run
+        # blocks the link and a deleted empty one does not.
+        if prior_run is None and not is_replay:
+            prior_run = self._unretried_last_failure(player=player, tier=tier)
+            if prior_run is not None:
+                selection_reference = prior_run
+
         wave = self._published_wave(tier)
         if wave is None:
             raise Locked("This difficulty tier has no published wave.")
@@ -146,8 +163,21 @@ class AdventureLevelTierRunService:
         retry_index = prior_run.retry_index + 1 if prior_run else 0
         prior_reference = prior_run
         if prior_run and prior_run.status == SESSION_STATUS_STARTED:
+            # "Start over" mid-run: the old run is abandoned (or deleted when
+            # empty) and never becomes the new run's prior - the same chain
+            # shape as when the old run was always deleted.
             self.discard(run=prior_run)
             prior_reference = None
+        elif prior_run and prior_run.status == SESSION_STATUS_ABANDONED:
+            prior_reference = None
+
+        # A wave may be authored with min_counted_commands=0 (read-only
+        # scenarios), but a run's star budget must be at least 1: the run
+        # constraint requires it, and a zero budget would otherwise surface as
+        # a misleading "active run" conflict. Same rule as
+        # common.runtime.star_target_for_variants: keep one command of room.
+        min_counted = max(1, wave.min_counted_commands)
+        max_counted = max(min_counted, wave.max_counted_commands)
 
         try:
             run = AdventureLevelTierRun.objects.create(
@@ -160,13 +190,34 @@ class AdventureLevelTierRunService:
                 is_replay=is_replay,
                 changed_variant=changed_variant,
                 retry_index=retry_index,
-                min_counted_commands=wave.min_counted_commands,
-                max_counted_commands=wave.max_counted_commands,
+                min_counted_commands=min_counted,
+                max_counted_commands=max_counted,
                 repository_state=variant.initial_state,
             )
         except IntegrityError as exc:
             raise Conflict("An active run already exists for this difficulty tier.") from exc
         return self.hydrate_run(run)
+
+    def _unretried_last_failure(self, *, player, tier: AdventureLevelTier):
+        """The learner's most recent run on this tier, if it failed and nothing
+        has retried it yet; otherwise None.
+
+        Not linked when the most recent run completed or was abandoned (any
+        run after a failure means it is not the latest), when it was a replay,
+        or when some run already has it as prior_run (never linked twice).
+        """
+        latest = (
+            AdventureLevelTierRun.objects.select_for_update()
+            .select_related("selected_variant")
+            .filter(player=player, tier=tier)
+            .order_by("-started_at", "-id")
+            .first()
+        )
+        if latest is None or latest.status != SESSION_STATUS_FAILED or latest.is_replay:
+            return None
+        if latest.retry_runs.exists():
+            return None
+        return latest
 
     def _active_run(self, *, player, tier: AdventureLevelTier, for_update: bool = False):
         queryset = AdventureLevelTierRun.objects.filter(
@@ -212,4 +263,22 @@ class AdventureLevelTierRunService:
         return completion.tier_run.selected_variant
 
     def discard(self, *, run: AdventureLevelTierRun) -> bool:
-        return discard_started_run(run)
+        """End a still-active run the learner is leaving.
+
+        Every trigger goes through here: the exit button, navigating away,
+        "start over", and a new start on the same tier replacing an active run
+        (including one left open by a closed tab). A run with at least one
+        submitted command is kept as ABANDONED, so it counts as a started
+        session that did not succeed; a run with no commands is deleted, since
+        it carries no learning evidence (an accidental open or a double
+        mount). Returns False when the run had already ended.
+        """
+        locked = AdventureLevelTierRun.objects.select_for_update().filter(pk=run.pk).first()
+        if locked is None or locked.status != SESSION_STATUS_STARTED:
+            return False
+        if not locked.steps.exists():
+            return discard_started_run(locked)
+        locked.status = SESSION_STATUS_ABANDONED
+        locked.ended_at = timezone.now()
+        locked.save(update_fields=["status", "ended_at"])
+        return True

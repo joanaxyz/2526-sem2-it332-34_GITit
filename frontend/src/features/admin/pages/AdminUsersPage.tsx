@@ -1,44 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Activity,
-  CheckCircle2,
   ChevronDown,
   Search,
   UserX,
   X,
-  XCircle,
 } from 'lucide-react'
 import { useState } from 'react'
 
-import { adminApi, type KpiRate } from '@/features/admin/api/adminApi'
+import { adminApi } from '@/features/admin/api/adminApi'
+import { LearnerKpiPanel } from '@/features/admin/components/LearnerKpiPanel'
 import { adminErrorMessage } from '@/features/admin/utils/errors'
 import { formatDate } from '@/features/admin/utils/format'
 import { Button } from '@/shared/components/Button'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { queryKeys } from '@/shared/api/queryKeys'
-
-// ─── KPI catalogue ───────────────────────────────────────────────────────────
-const KPI_META = {
-  scr:  { abbr: 'SCR',  name: 'Scenario Completion Rate',  target: 80, up: true,  pct: true  },
-  car:  { abbr: 'CAR',  name: 'Command Accuracy Rate',     target: 70, up: true,  pct: true  },
-  hlcr: { abbr: 'HLCR', name: 'Hard-Level Completion Rate',target: 70, up: true,  pct: true  },
-  arc:  { abbr: 'ARC',  name: 'Avg Retry Count',           target: 2,  up: false, pct: false },
-  rtr:  { abbr: 'RTR',  name: 'Retry Transfer Rate',       target: 65, up: true,  pct: true  },
-  rta:  { abbr: 'RTA',  name: 'Retry Transfer Accuracy',   target: 65, up: true,  pct: true  },
-} as const
-
-type KpiKey = keyof typeof KPI_META
-
-function fmtKpi(r: KpiRate, pct: boolean) {
-  return r.value === null ? '—' : pct ? `${r.value}%` : r.value.toFixed(2)
-}
-
-function kpiStatus(r: KpiRate, key: KpiKey): 'met' | 'miss' | 'none' {
-  if (r.value === null || r.denominator === 0) return 'none'
-  const { target, up } = KPI_META[key]
-  return (up ? r.value >= target : r.value <= target) ? 'met' : 'miss'
-}
 
 // ─── main page ───────────────────────────────────────────────────────────────
 export function AdminUsersPage() {
@@ -242,7 +219,7 @@ function LearnerDetail({ userId, onChanged }: { userId: number; onChanged: () =>
           <p className="ld-no-data">No activity recorded yet.</p>
         )}
         {kpis.data?.has_data && kpis.data.kpis && (
-          <KpiPanel kpis={kpis.data.kpis} modules={kpis.data.modules} />
+          <LearnerKpiPanel kpis={kpis.data.kpis} modules={kpis.data.modules} />
         )}
       </div>
 
@@ -323,84 +300,6 @@ function LearnerDetail({ userId, onChanged }: { userId: number; onChanged: () =>
           </div>
         )}
       </div>
-    </div>
-  )
-}
-
-// ─── KPI panel inside drawer ─────────────────────────────────────────────────
-function KpiPanel({
-  kpis,
-  modules,
-}: {
-  kpis: NonNullable<import('@/features/admin/api/adminApi').UserKpisResponse['kpis']>
-  modules: import('@/features/admin/api/adminApi').UserKpisResponse['modules']
-}) {
-  const overallKeys: KpiKey[] = ['scr', 'car', 'hlcr', 'arc', 'rtr', 'rta']
-  const moduleKeys: KpiKey[]  = ['scr', 'hlcr', 'arc', 'rtr']
-
-  const metCount = overallKeys.filter(k => kpiStatus(kpis[k], k) === 'met').length
-
-  return (
-    <div className="kp-wrap">
-      {/* met / total */}
-      <div className="kp-summary">
-        <span className="kp-summary-label">Targets met</span>
-        <span className={`kp-summary-val ${metCount === overallKeys.length ? 'kp-val--all' : ''}`}>
-          {metCount}/{overallKeys.length}
-        </span>
-      </div>
-
-      {/* overall grid */}
-      <div className="kp-grid">
-        {overallKeys.map(key => {
-          const m = KPI_META[key]
-          const r = kpis[key]
-          const s = kpiStatus(r, key)
-          return (
-            <div key={key} className={`kp-cell kp-cell--${s}`} title={m.name}>
-              <span className="kp-cell-abbr">{m.abbr}</span>
-              <strong className={`kp-cell-val kp-val--${s}`}>{fmtKpi(r, m.pct)}</strong>
-              <span className="kp-cell-target">{m.up ? '≥' : '≤'}{m.target}{m.pct ? '%' : ''}</span>
-              <span className={`kp-cell-icon kp-icon--${s}`} aria-hidden="true">
-                {s === 'met'  ? <CheckCircle2 /> : s === 'miss' ? <XCircle /> : null}
-              </span>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* per-module table */}
-      {modules.length > 0 && (
-        <div className="kp-mod-wrap">
-          <p className="kp-mod-label">By module</p>
-          <table className="kp-mod-table">
-            <thead>
-              <tr>
-                <th>Mod</th>
-                {moduleKeys.map(k => <th key={k}>{KPI_META[k].abbr}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {modules.map(mod => (
-                <tr key={mod.number}>
-                  <td className="kp-mod-num">M{mod.number}</td>
-                  {moduleKeys.map(key => {
-                    const m = KPI_META[key]
-                    const r: KpiRate | undefined = key === 'scr' ? mod.scr : key === 'hlcr' ? mod.hlcr : key === 'arc' ? mod.arc : key === 'rtr' ? mod.rtr : undefined
-                    if (!r) return <td key={key} className="kp-mod-cell kp-mod-cell--none">—</td>
-                    const s = kpiStatus(r, key)
-                    return (
-                      <td key={key} className={`kp-mod-cell kp-mod-cell--${s}`}>
-                        {fmtKpi(r, m.pct)}
-                      </td>
-                    )
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
     </div>
   )
 }

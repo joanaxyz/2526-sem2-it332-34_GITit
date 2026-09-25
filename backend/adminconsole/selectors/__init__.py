@@ -19,7 +19,13 @@ from .curriculum import (
 from .economy import admin_economy_adjustment_payload, admin_transaction_list_payload
 from .overview import admin_overview_payload
 from .settings import admin_settings_payload, flag_payload
-from .users import admin_user_list_payload, find_admin_user, user_brief, user_detail
+from .users import (
+    admin_user_kpis_payload,
+    admin_user_list_payload,
+    find_admin_user,
+    user_brief,
+    user_detail,
+)
 
 __all__ = [
     "admin_analytics_payload",
@@ -32,6 +38,7 @@ __all__ = [
     "admin_story_detail_payload",
     "admin_story_list_payload",
     "admin_transaction_list_payload",
+    "admin_user_kpis_payload",
     "admin_user_list_payload",
     "chapter_payload",
     "content_payload",

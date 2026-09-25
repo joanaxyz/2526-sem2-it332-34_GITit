@@ -24,6 +24,13 @@ from progress.models import (
     StreakRecord,
     Wallet,
 )
+from progress.objectives import SO_CAR_LEVELS
+from progress.services.kpi_range import ALL_TIME, KpiRange
+
+# Learner retry success rate: any run started from a prior run. Abandoned runs
+# are left out so the learner-facing measure keeps its meaning from before
+# abandoned runs were recorded (they used to be deleted).
+LEARNER_RETRY = Q(prior_run__isnull=False) & ~Q(status=SESSION_STATUS_ABANDONED)
 
 # Trailing window (days) for the consistency axis.
 
@@ -58,17 +65,31 @@ def _month_start(day: date, months_back: int) -> date:
 class MetricsService:
     PERFORMANCE_STORY_SLUG = "git-it-legacy"
     PERFORMANCE_MODULE_NUMBERS = (1, 2, 3, 4)
+    # RTA measures transfer to structurally changed scenarios; it is defined
+    # for the conflict-resolution and recovery modules only.
+    RTA_MODULE_NUMBERS = (3, 4)
 
     def performance_summary(self, *, player) -> dict:
         return self._performance_summary_for_runs(runs=self._performance_runs().filter(player=player))
 
-    def all_player_performance_summary(self) -> dict:
+    def all_player_performance_summary(self, *, kpi_range: KpiRange = ALL_TIME) -> dict:
         """Return the same Runebound diagnostic metrics across all learners.
 
-        This is deliberately staff-console data. The player-facing endpoint keeps
+        This is deliberately staff-console data: staff accounts are excluded
+        and the optional date range applies. The player-facing endpoint keeps
         using ``performance_summary`` so its response and scope remain unchanged.
         """
-        return self._performance_summary_for_runs(runs=self._performance_runs())
+        return self._performance_summary_for_runs(
+            runs=self._kpi_runs(kpi_range=kpi_range), kpi_range=kpi_range
+        )
+
+    def admin_player_performance_summary(self, *, player, kpi_range: KpiRange = ALL_TIME) -> dict:
+        """One learner's KPIs as the staff console reports them (same scope as
+        the dashboard: staff accounts excluded, optional date range)."""
+        return self._performance_summary_for_runs(
+            runs=self._kpi_runs(kpi_range=kpi_range).filter(player=player),
+            kpi_range=kpi_range,
+        )
 
     def _performance_runs(self):
         return AdventureLevelTierRun.objects.filter(
@@ -77,12 +98,109 @@ class MetricsService:
             tier__adventure_level__chapter__number__in=self.PERFORMANCE_MODULE_NUMBERS,
         )
 
-    def _performance_summary_for_runs(self, *, runs) -> dict:
+    def _kpi_runs(self, *, kpi_range: KpiRange):
+        """Runs every admin KPI is computed from.
+
+        Staff accounts are excluded so play-testing on production never counts,
+        and runs are limited to those started inside the (Manila-time) range.
+        """
+        return (
+            self._performance_runs()
+            .exclude(player__user__is_staff=True)
+            .filter(kpi_range.q("started_at"))
+        )
+
+    _CAR_COUNTS = {
+        "total": Count("id"),
+        "unprocessable": Count(
+            "id", filter=Q(result_category__in=[RESULT_INVALID, RESULT_UNPROCESSABLE])
+        ),
+    }
+
+    def _car_steps(self, *, runs):
+        """The submitted commands CAR is computed from, overall and per SO."""
+        return CommandStep.objects.filter(adventure_tier_run__in=runs)
+
+    def all_player_objective_car(self, *, kpi_range: KpiRange = ALL_TIME) -> dict:
+        """Per-SO CAR across all learners (staff console), keyed by SO code.
+
+        Uses the same runs and command steps as the overall CAR, grouped by
+        adventure level through the static SO_CAR_LEVELS mapping.
+        """
+        return self._objective_car_for_runs(runs=self._kpi_runs(kpi_range=kpi_range))
+
+    def _objective_car_for_runs(self, *, runs) -> dict:
+        by_level = {
+            row["adventure_tier_run__tier__adventure_level__slug"]: row
+            for row in self._car_steps(runs=runs)
+            .values("adventure_tier_run__tier__adventure_level__slug")
+            .annotate(**self._CAR_COUNTS)
+        }
+        objectives = {}
+        for so_code, level_slugs in SO_CAR_LEVELS.items():
+            total = sum((by_level.get(slug) or {}).get("total", 0) for slug in level_slugs)
+            unprocessable = sum(
+                (by_level.get(slug) or {}).get("unprocessable", 0) for slug in level_slugs
+            )
+            objectives[so_code] = self._rate(total - unprocessable, total)
+        return objectives
+
+    def _rta_for_runs(self, *, runs, kpi_range: KpiRange = ALL_TIME) -> dict:
+        """Retry Transfer Accuracy (RTA) over a set of performance runs.
+
+        An eligible retry session is the first run started directly after a
+        failed run, where that failed run was not itself a retry-after-failure
+        (so continue-after-success runs and later retries in the same failure
+        streak are excluded), in Modules 3-4 only, whose variant is
+        structurally different from the failed run's variant (initial_state or
+        target_state differs - a different variant key alone is not enough).
+        Success means that eligible run completes; an eligible run the learner
+        abandoned counts as eligible but not successful. Runs still in progress
+        have no outcome yet and are left out. With a date range, both the retry
+        and the failed run before it must have started inside it, so a retry of
+        a pre-range failure is not counted. No eligible sessions returns a null
+        rate, never 0%.
+        """
+        candidates = (
+            runs.filter(
+                tier__adventure_level__chapter__number__in=self.RTA_MODULE_NUMBERS,
+                prior_run__status=SESSION_STATUS_FAILED,
+                status__in=(
+                    SESSION_STATUS_COMPLETED,
+                    SESSION_STATUS_FAILED,
+                    SESSION_STATUS_ABANDONED,
+                ),
+            )
+            .exclude(prior_run__prior_run__status=SESSION_STATUS_FAILED)
+            .filter(kpi_range.q("prior_run__started_at"))
+            .select_related("selected_variant", "prior_run__selected_variant")
+        )
+        eligible = successful = 0
+        for run in candidates:
+            prior_variant = run.prior_run.selected_variant
+            variant = run.selected_variant
+            if (
+                prior_variant.initial_state == variant.initial_state
+                and prior_variant.target_state == variant.target_state
+            ):
+                continue
+            eligible += 1
+            if run.status == SESSION_STATUS_COMPLETED:
+                successful += 1
+        return self._rate(successful, eligible)
+
+    def _performance_summary_for_runs(self, *, runs, kpi_range: KpiRange = ALL_TIME) -> dict:
         """Performance KPIs for the Runebound Turret's module attempts.
 
         CAR is the share of submitted commands the simulator could process.
-        Retry transfer is the share of retry runs that end successfully. Replays
-        are excluded from every attempt-based measure.
+        RTA is Retry Transfer Accuracy (see ``_rta_for_runs``). The learner
+        retry success rate is the share of any run with a prior run that ends
+        successfully. Replays are excluded from every attempt-based measure.
+
+        An abandoned run is a started session that did not succeed: it counts
+        in SCR's and HLCR's started totals, its commands count in CAR, and it
+        can be an unsuccessful RTA session. ARC (completed runs only) and the
+        learner retry success rate leave it out.
         """
         aggregate = runs.aggregate(
             started=Count("id"),
@@ -92,20 +210,14 @@ class MetricsService:
                 "id",
                 filter=Q(tier__difficulty=DIFFICULTY_HARD, status=SESSION_STATUS_COMPLETED),
             ),
-            retry_started=Count("id", filter=Q(prior_run__isnull=False)),
+            retry_started=Count("id", filter=LEARNER_RETRY),
             retry_completed=Count(
                 "id", filter=Q(prior_run__isnull=False, status=SESSION_STATUS_COMPLETED)
             ),
             completed_retry_total=Sum("retry_index", filter=Q(status=SESSION_STATUS_COMPLETED)),
         )
 
-        steps = CommandStep.objects.filter(adventure_tier_run__in=runs)
-        step_counts = steps.aggregate(
-            total=Count("id"),
-            unprocessable=Count(
-                "id", filter=Q(result_category__in=[RESULT_INVALID, RESULT_UNPROCESSABLE])
-            ),
-        )
+        step_counts = self._car_steps(runs=runs).aggregate(**self._CAR_COUNTS)
         total_commands = step_counts["total"] or 0
         processable_commands = total_commands - (step_counts["unprocessable"] or 0)
 
@@ -122,7 +234,7 @@ class MetricsService:
                         status=SESSION_STATUS_COMPLETED,
                     ),
                 ),
-                retry_started=Count("id", filter=Q(prior_run__isnull=False)),
+                retry_started=Count("id", filter=LEARNER_RETRY),
                 retry_completed=Count(
                     "id", filter=Q(prior_run__isnull=False, status=SESSION_STATUS_COMPLETED)
                 ),
@@ -139,6 +251,10 @@ class MetricsService:
             row = grouped.get(chapter.id, {})
             started = row.get("started") or 0
             completed = row.get("completed") or 0
+            retry_success_rate = self._rate(
+                row.get("retry_completed") or 0,
+                row.get("retry_started") or 0,
+            )
             modules.append(
                 {
                     "number": chapter.number,
@@ -148,10 +264,14 @@ class MetricsService:
                         row.get("hard_completed") or 0,
                         row.get("hard_started") or 0,
                     ),
-                    "rtr": self._rate(
-                        row.get("retry_completed") or 0,
-                        row.get("retry_started") or 0,
+                    "rta": self._rta_for_runs(
+                        runs=runs.filter(tier__adventure_level__chapter_id=chapter.id),
+                        kpi_range=kpi_range,
                     ),
+                    "retry_success_rate": retry_success_rate,
+                    # TODO(next release): remove the deprecated "rtr" alias once
+                    # the frontend reading "retry_success_rate"/"rta" is live.
+                    "rtr": retry_success_rate,
                     "arc": self._average_retry_count_from_counts(
                         row.get("completed_retry_total") or 0,
                         completed,
@@ -161,6 +281,10 @@ class MetricsService:
 
         started = aggregate["started"] or 0
         completed = aggregate["completed"] or 0
+        retry_success_rate = self._rate(
+            aggregate["retry_completed"] or 0,
+            aggregate["retry_started"] or 0,
+        )
         return {
             "kpis": {
                 "scr": self._rate(completed, started),
@@ -169,10 +293,11 @@ class MetricsService:
                     aggregate["hard_completed"] or 0,
                     aggregate["hard_started"] or 0,
                 ),
-                "rtr": self._rate(
-                    aggregate["retry_completed"] or 0,
-                    aggregate["retry_started"] or 0,
-                ),
+                "rta": self._rta_for_runs(runs=runs, kpi_range=kpi_range),
+                "retry_success_rate": retry_success_rate,
+                # TODO(next release): remove the deprecated "rtr" alias once the
+                # frontend reading "retry_success_rate"/"rta" is live.
+                "rtr": retry_success_rate,
                 "arc": self._average_retry_count_from_counts(
                     aggregate["completed_retry_total"] or 0,
                     completed,
