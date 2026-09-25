@@ -3,6 +3,7 @@ import { Activity, Command, RotateCcw } from 'lucide-react'
 
 import { adminApi } from '@/features/admin/api/adminApi'
 import { PageHeading, StatTile } from '@/features/admin/components/adminUi'
+import { type EvidenceKey, kpiEvidence } from '@/features/admin/utils/kpiEvidence'
 import type { PerformanceModule, RateMetric } from '@/features/performance/types'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
@@ -20,11 +21,6 @@ function formatScalar(metric: RateMetric) {
   return metric.value === null ? '--' : metric.value.toFixed(2)
 }
 
-function evidenceLabel(metric: RateMetric, noun: string) {
-  if (!metric.denominator) return `No ${noun} yet`
-  return `${metric.numerator} / ${metric.denominator} ${noun}`
-}
-
 type RateMetricLike = { value: number | null; numerator: number; denominator: number }
 
 const ALL_KPI_META = [
@@ -33,7 +29,7 @@ const ALL_KPI_META = [
   { key: 'hlcr', label: 'HLCR', full: 'Hard-Level Completion Rate',  target: 70,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '1–3 (≥65% M4)' },
   { key: 'arc',  label: 'ARC',  full: 'Average Retry Count',         target: 2,   higherIsBetter: false, unit: '',   format: 'decimal', modules: '1–3 (≤3 M4)' },
   { key: 'rta',  label: 'RTA',  full: 'Retry Transfer Accuracy',     target: 65,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '3–4' },
-]
+] as const satisfies readonly { key: EvidenceKey; [field: string]: unknown }[]
 
 function fmtRate(value: number | null, format: string): string {
   if (value === null) return '--'
@@ -45,18 +41,19 @@ function kpiStatus(value: number | null, target: number, higherIsBetter: boolean
   return (higherIsBetter ? value >= target : value <= target) ? 'met' : 'missed'
 }
 
-function StatusCell({ rate, target, higherIsBetter, format }: {
+function StatusCell({ rate, target, higherIsBetter, format, evidenceKey }: {
   rate: RateMetricLike | undefined
   target: number
   higherIsBetter: boolean
   format: string
+  evidenceKey: EvidenceKey
 }) {
   if (!rate) return <td className="px-3 py-2 text-center text-muted-foreground text-xs">--</td>
   const status = kpiStatus(rate.value, target, higherIsBetter)
   const color = status === 'met' ? 'text-green-400 font-bold' : status === 'missed' ? 'text-red-400 font-bold' : 'text-muted-foreground'
   const bg = status === 'met' ? 'bg-green-400/10' : status === 'missed' ? 'bg-red-400/10' : ''
   return (
-    <td className={`px-3 py-2 text-center text-xs ${color} ${bg}`}>
+    <td className={`px-3 py-2 text-center text-xs ${color} ${bg}`} title={kpiEvidence(evidenceKey, rate)}>
       {fmtRate(rate.value, format)}
       {rate.denominator > 0 && (
         <span className="ml-1 text-muted-foreground font-normal">({rate.denominator})</span>
@@ -105,7 +102,7 @@ function KpiSummaryTable({ diagnostics }: {
                 <td className="px-3 py-2 text-center text-xs text-muted-foreground">
                   {meta.higherIsBetter ? '≥' : '≤'}{meta.target}{meta.unit}
                 </td>
-                <StatusCell rate={overall} target={meta.target} higherIsBetter={meta.higherIsBetter} format={meta.format} />
+                <StatusCell rate={overall} target={meta.target} higherIsBetter={meta.higherIsBetter} format={meta.format} evidenceKey={meta.key} />
                 {diagnostics.modules.map((mod) => {
                   const modRate = meta.key === 'scr' ? mod.scr
                     : meta.key === 'car' ? undefined
@@ -114,7 +111,7 @@ function KpiSummaryTable({ diagnostics }: {
                     : meta.key === 'rta' ? mod.rta
                     : undefined
                   return (
-                    <StatusCell key={mod.number} rate={modRate} target={meta.target} higherIsBetter={meta.higherIsBetter} format={meta.format} />
+                    <StatusCell key={mod.number} rate={modRate} target={meta.target} higherIsBetter={meta.higherIsBetter} format={meta.format} evidenceKey={meta.key} />
                   )
                 })}
               </tr>
@@ -123,7 +120,9 @@ function KpiSummaryTable({ diagnostics }: {
         </tbody>
       </table>
       <p className="mt-2 text-xs text-muted-foreground px-3 pb-2">
-        Green = target met · Red = target missed · (n) = sessions/attempts · -- = no data
+        Green = target met · Red = target missed · (n) = each formula's denominator: started sessions (SCR),
+        submitted commands (CAR), hard sessions (HLCR), completed sessions (ARC), eligible retries (RTA); hover a
+        value for its full count · -- = no data
       </p>
     </div>
   )
@@ -153,7 +152,7 @@ function ModuleRows({
             <span title={module.title}>{module.number}</span>
             <div
               className={`admin-diagnostic-meter${value.value === null ? ' is-empty' : ''}`}
-              aria-label={`Module ${module.number} ${module.title}: ${display}, ${evidenceLabel(value, 'attempts')}`}
+              aria-label={`Module ${module.number} ${module.title}: ${display}, ${kpiEvidence(metric, value)}`}
             >
               <i style={{ width: `${Math.max(0, Math.min(100, width))}%` }} />
             </div>
@@ -221,7 +220,7 @@ export function AdminAnalyticsPage() {
             </header>
             <strong className="admin-diagnostic-value">{formatPercent(diagnostics.kpis.car)}</strong>
             <p>Submitted commands the simulator could process.</p>
-            <small>{evidenceLabel(diagnostics.kpis.car, 'commands')} - aggregate only</small>
+            <small>{kpiEvidence('car', diagnostics.kpis.car)} - aggregate only</small>
           </article>
 
           <article>
@@ -231,7 +230,7 @@ export function AdminAnalyticsPage() {
             </header>
             <strong className="admin-diagnostic-value">{formatPercent(diagnostics.kpis.rta)}</strong>
             <p>First retries after a failure, on a structurally changed variant, that complete (Modules 3-4).</p>
-            <small>{evidenceLabel(diagnostics.kpis.rta, 'retry sessions')}</small>
+            <small>{kpiEvidence('rta', diagnostics.kpis.rta)}</small>
             <ModuleRows modules={diagnostics.modules} metric="rta" />
           </article>
 
@@ -242,7 +241,7 @@ export function AdminAnalyticsPage() {
             </header>
             <strong className="admin-diagnostic-value">{formatScalar(diagnostics.kpis.arc)}</strong>
             <p>Retries accumulated per completed session.</p>
-            <small>{evidenceLabel(diagnostics.kpis.arc, 'completed sessions')} - relative scale</small>
+            <small>{kpiEvidence('arc', diagnostics.kpis.arc)} - relative scale</small>
             <ModuleRows modules={diagnostics.modules} metric="arc" scalar />
           </article>
         </div>

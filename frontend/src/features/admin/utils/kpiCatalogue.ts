@@ -64,6 +64,22 @@ export const KPIS = [
 
 export type KpiKey = (typeof KPIS)[number]['key']
 
+/** The old RTR measure, shown next to the evaluation KPIs for context. It has
+ * no target, so it never counts toward "targets met". */
+export const SUPPLEMENTARY_KPI = {
+  key: 'retry_success_rate',
+  abbr: 'RSR',
+  name: 'Retry Success Rate (supplementary)',
+  pct: true,
+  tooltip:
+    'Share of retry sessions that eventually ended in completion, any variant, any attempt. ' +
+    'Supplementary indicator only; RTA is the evaluation KPI for SO 3.5, SO 4.5 and RQ4.',
+} as const
+
+/** Any card on the Overall row: an evaluation KPI (with a target) or the
+ * supplementary indicator (without one). */
+export type CardKpi = (typeof KPIS)[number] | typeof SUPPLEMENTARY_KPI
+
 export const EMPTY_RATE: Rate = { value: null, numerator: 0, denominator: 0 }
 
 export function getModuleRate(mod: PerformanceModule, key: KpiKey): Rate {

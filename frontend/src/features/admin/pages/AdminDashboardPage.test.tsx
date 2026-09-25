@@ -91,7 +91,7 @@ describe('AdminDashboardPage overall SCR', () => {
     await screen.findByText('KPI Overview')
     const card = kpiCard('SCR')
     expect(card).toHaveTextContent('50%')
-    expect(card).toHaveTextContent('2 / 4 sessions')
+    expect(card).toHaveTextContent('2 of 4 sessions completed')
     expect(card).not.toHaveTextContent('90%')
   })
 
@@ -352,6 +352,7 @@ describe('AdminDashboardPage date range', () => {
   })
 })
 
+
 describe('AdminDashboardPage supplementary retry success rate', () => {
   afterEach(() => {
     cleanup()
@@ -365,7 +366,12 @@ describe('AdminDashboardPage supplementary retry success rate', () => {
   function fixtureWithRetrySuccess() {
     const base = analyticsFixture()
     return analyticsFixture({
-      kpis: { ...base.runebound_performance.kpis, retry_success_rate: { value: 30, numerator: 3, denominator: 10 } },
+      kpis: {
+        ...base.runebound_performance.kpis,
+        // RTA misses its target; the supplementary card must not look like a verdict.
+        rta: { value: 10, numerator: 1, denominator: 10 },
+        retry_success_rate: { value: 30, numerator: 3, denominator: 10 },
+      },
       modules: [
         moduleRow(1, { retry_success_rate: { value: 80, numerator: 4, denominator: 5 } }),
         moduleRow(2),
@@ -375,27 +381,34 @@ describe('AdminDashboardPage supplementary retry success rate', () => {
     })
   }
 
-  it('shows a secondary card with no target and the required tooltip', async () => {
+  it('is a normal sixth card in the Overall row, with a No target tag instead of a status', async () => {
     renderPage(fixtureWithRetrySuccess())
     await screen.findByText('KPI Overview')
 
-    const card = screen.getByRole('complementary', { name: 'Retry Success Rate (supplementary)' })
+    const grid = document.querySelector('.dk-kpi-grid') as HTMLElement
+    const cards = Array.from(grid.querySelectorAll('.dk-kpi-card'))
+    expect(cards).toHaveLength(6)
+    const card = kpiCard('RSR')
+    expect(cards[5]).toBe(card)
+    expect(card).toHaveTextContent('Retry Success Rate (supplementary)')
     expect(card).toHaveTextContent('30%')
-    expect(card).toHaveTextContent('3 / 10 retry sessions')
+    expect(card).toHaveTextContent('3 of 10 retry sessions completed')
     expect(card).toHaveTextContent('No target')
     expect(card).toHaveAttribute('title', TOOLTIP)
     expect(card).not.toHaveTextContent('Target:')
     expect(card.className).not.toMatch(/is-met|is-miss/)
-    expect(card.closest('.dk-kpi-grid')).toBeNull()
+    expect(card.querySelector('.dk-kpi-dot')).toBeNull()
+    expect(card.querySelector('.dk-kpi-bar')).toBeNull()
+    // Same full-contrast value styling as a KPI card with data.
+    expect(card.querySelector('.dk-kpi-value')).toHaveClass('has-data')
   })
 
-  it('is not one of the evaluation KPIs counted in "targets met"', async () => {
+  it('stays out of "targets met", which counts the five evaluation KPIs', async () => {
     renderPage(fixtureWithRetrySuccess())
     await screen.findByText('KPI Overview')
 
     const stat = screen.getByText('targets met').closest('.dk-stat') as HTMLElement
     expect(stat).toHaveTextContent('/5')
-    expect(document.querySelectorAll('.dk-kpi-card')).toHaveLength(5)
   })
 
   it('shows the per-module value inside each module', async () => {
@@ -404,7 +417,39 @@ describe('AdminDashboardPage supplementary retry success rate', () => {
 
     const row = document.querySelector('.dk-supp-row') as HTMLElement
     expect(row).toHaveTextContent('Retry Success Rate (supplementary)')
-    expect(row).toHaveTextContent('80% (4/5)')
+    expect(row).toHaveTextContent('No target')
+    expect(row).toHaveTextContent('80%')
+    expect(row).toHaveTextContent('4 of 5 retry sessions completed')
     expect(row).toHaveAttribute('title', TOOLTIP)
+  })
+})
+
+describe('AdminDashboardPage denominator labels', () => {
+  afterEach(() => {
+    cleanup()
+    vi.clearAllMocks()
+  })
+
+  it('labels every card with the unit its formula counts', async () => {
+    const base = analyticsFixture()
+    renderPage(
+      analyticsFixture({
+        kpis: {
+          ...base.runebound_performance.kpis,
+          car: { value: 17.6, numerator: 22, denominator: 125 },
+          hlcr: { value: 25, numerator: 1, denominator: 4 },
+          arc: { value: 0.1, numerator: 1, denominator: 10 },
+          rta: { value: 50, numerator: 1, denominator: 2 },
+        },
+      }),
+    )
+    await screen.findByText('KPI Overview')
+
+    expect(kpiCard('SCR')).toHaveTextContent('2 of 4 sessions completed')
+    expect(kpiCard('CAR')).toHaveTextContent('22 processable / 125 submitted commands')
+    expect(kpiCard('HLCR')).toHaveTextContent('1 of 4 hard sessions completed')
+    expect(kpiCard('ARC')).toHaveTextContent('1 retry across 10 completed sessions')
+    expect(kpiCard('RTA')).toHaveTextContent('1 of 2 eligible retries succeeded')
+    expect(kpiCard('CAR')).not.toHaveTextContent('sessions')
   })
 })
