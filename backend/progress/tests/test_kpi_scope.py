@@ -140,6 +140,21 @@ def test_staff_runs_change_no_admin_kpi(tier, django_user_model):
     assert learner_panel["kpis"]["scr"] == before[0]["kpis"]["scr"]
 
 
+def test_failed_only_learner_is_reported_as_having_activity(tier, django_user_model):
+    learner_user, learner = _player(django_user_model, "scope-failed-only")
+    _run(learner, tier, "a", SESSION_STATUS_FAILED)
+
+    panel = _staff_client(django_user_model).get(f"/api/admin/users/{learner_user.id}/kpis/")
+
+    assert panel.status_code == 200
+    assert panel.json()["has_data"] is True
+    assert panel.json()["kpis"]["scr"] == {
+        "value": 0.0,
+        "numerator": 0,
+        "denominator": 1,
+    }
+
+
 def test_learner_performance_page_still_includes_a_staff_players_own_runs(tier, django_user_model):
     _, tester = _player(django_user_model, "scope-self", staff=True)
     _run(tester, tier, "a", SESSION_STATUS_COMPLETED)

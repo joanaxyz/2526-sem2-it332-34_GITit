@@ -95,9 +95,7 @@ def test_performance_summary_uses_runebound_attempts_and_server_side_formulas(
     assert MetricsService().all_player_performance_summary() == payload
 
 
-def test_admin_aggregate_spans_learners_while_player_endpoint_stays_scoped(
-    db, django_user_model
-):
+def test_admin_aggregate_spans_learners_while_player_endpoint_stays_scoped(db, django_user_model):
     """The staff aggregate must widen past the requester, and only the aggregate.
 
     Guards the boundary the admin split depends on: one learner's endpoint keeps

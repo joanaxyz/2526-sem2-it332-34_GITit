@@ -235,7 +235,8 @@ def _distractor_pool(forms: list[CommandForm], catalog: DrillCatalog) -> list[Co
     return [
         form
         for form in catalog.forms
-        if form.command_skill_id in skill_ids or (form.chapter_id and form.chapter_id in chapter_ids)
+        if form.command_skill_id in skill_ids
+        or (form.chapter_id and form.chapter_id in chapter_ids)
     ]
 
 

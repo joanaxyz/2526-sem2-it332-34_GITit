@@ -157,7 +157,9 @@ def test_stats_contract_guard_rejects_async_adapters_but_ignores_comments():
     assert any(
         "must return the generated operation response directly" in row for row in adapter_violations
     )
-    assert any("must not adapt or await the generated response" in row for row in adapter_violations)
+    assert any(
+        "must not adapt or await the generated response" in row for row in adapter_violations
+    )
 
     # The shipped wrapper builds its path from the selected window; that is the
     # generated route with a query string, and stays clean.

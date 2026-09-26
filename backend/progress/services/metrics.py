@@ -70,7 +70,9 @@ class MetricsService:
     RTA_MODULE_NUMBERS = (3, 4)
 
     def performance_summary(self, *, player) -> dict:
-        return self._performance_summary_for_runs(runs=self._performance_runs().filter(player=player))
+        return self._performance_summary_for_runs(
+            runs=self._performance_runs().filter(player=player)
+        )
 
     def all_player_performance_summary(self, *, kpi_range: KpiRange = ALL_TIME) -> dict:
         """Return the same Runebound diagnostic metrics across all learners.
@@ -686,6 +688,7 @@ class MetricsService:
             .annotate(count=Count("id"))
             .values_list("day", "count")
         )
+
         # One point per bucket, each labelled by the day the bucket starts. Daily
         # windows sum a single day; the year window sums the whole month, so the
         # two shapes stay the same three keys for the client.
@@ -695,20 +698,25 @@ class MetricsService:
         trend = []
         for index, start in enumerate(starts):
             end = bucket_end(index)
-            in_bucket = (
-                (lambda day: day == start)
-                if spec["unit"] == "day"
-                else (lambda day: day >= start and (end is None or day < end))
-            )
+            if spec["unit"] == "day":
+                levels_completed = completed_by_day.get(start, 0)
+                commands_run = commands_by_day.get(start, 0)
+            else:
+                levels_completed = sum(
+                    count
+                    for day, count in completed_by_day.items()
+                    if day >= start and (end is None or day < end)
+                )
+                commands_run = sum(
+                    count
+                    for day, count in commands_by_day.items()
+                    if day >= start and (end is None or day < end)
+                )
             trend.append(
                 {
                     "date": start.isoformat(),
-                    "levels_completed": sum(
-                        count for day, count in completed_by_day.items() if in_bucket(day)
-                    ),
-                    "commands_run": sum(
-                        count for day, count in commands_by_day.items() if in_bucket(day)
-                    ),
+                    "levels_completed": levels_completed,
+                    "commands_run": commands_run,
                 }
             )
         return trend

@@ -6,6 +6,7 @@ Export from a DB that has correct target states:
 Import into a DB with empty target states:
     python manage.py backfill_tier_target_states --import tier_targets.json
 """
+
 from __future__ import annotations
 
 import json
@@ -22,7 +23,12 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument("--export", metavar="FILE", help="Export target states to a JSON file.")
-        group.add_argument("--import", metavar="FILE", dest="import_file", help="Import target states from a JSON file.")
+        group.add_argument(
+            "--import",
+            metavar="FILE",
+            dest="import_file",
+            help="Import target states from a JSON file.",
+        )
 
     def handle(self, *args, **options):
         if options["export"]:
@@ -31,7 +37,9 @@ class Command(BaseCommand):
             self._import(options["import_file"])
 
     def _export(self, path: str):
-        variants = AdventureLevelTierWaveVariant.objects.exclude(case_id="").exclude(target_state={})
+        variants = AdventureLevelTierWaveVariant.objects.exclude(case_id="").exclude(
+            target_state={}
+        )
         data = {v.case_id: v.target_state for v in variants}
         Path(path).write_text(json.dumps(data, indent=2), encoding="utf-8")
         self.stdout.write(self.style.SUCCESS(f"Exported {len(data)} target states to {path}."))

@@ -65,7 +65,10 @@ def admin_user_kpis_payload(user, *, kpi_range: KpiRange = ALL_TIME) -> dict:
     summary = MetricsService().admin_player_performance_summary(player=player, kpi_range=kpi_range)
     kpis = summary["kpis"]
     return {
-        "has_data": summary["completed_sessions"] > 0 or kpis["rta"]["denominator"] > 0,
+        # SCR's denominator is every scoped, non-replay run. Using completed
+        # sessions here hid learners whose only evidence was failed or
+        # abandoned work behind a misleading "No activity" message.
+        "has_data": kpis["scr"]["denominator"] > 0,
         "kpis": kpis,
         "modules": summary["modules"],
     }

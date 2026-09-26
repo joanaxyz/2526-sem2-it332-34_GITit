@@ -348,9 +348,7 @@ class AdventureLevelTierCommandProcessingService:
 
     def _credit_mastery(self, run: AdventureLevelTierRun) -> list[dict]:
         form_ids = set(
-            run.current_wave.command_forms.filter(is_published=True).values_list(
-                "id", flat=True
-            )
+            run.current_wave.command_forms.filter(is_published=True).values_list("id", flat=True)
         )
         if not form_ids:
             return []

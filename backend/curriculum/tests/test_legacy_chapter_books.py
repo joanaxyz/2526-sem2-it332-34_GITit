@@ -55,11 +55,7 @@ def test_legacy_modules_seed_complete_rich_field_guides(db):
         assert book["command_count"] == len(expected_commands)
         assert listed_counts[module_number] == book["command_count"]
         assert all(command["forms"] for command in book["commands"])
-        assert all(
-            form["is_playable"]
-            for command in book["commands"]
-            for form in command["forms"]
-        )
+        assert all(form["is_playable"] for command in book["commands"] for form in command["forms"])
         assert all(command["tags"] for command in book["commands"])
         assert all(len(command["pages"]) > 1 for command in book["commands"])
 
