@@ -262,6 +262,7 @@ class AdventureLevelTierRunService:
             raise Locked("Free play is available only after completing this difficulty tier.")
         return completion.tier_run.selected_variant
 
+    @transaction.atomic
     def discard(self, *, run: AdventureLevelTierRun) -> bool:
         """End a still-active run the learner is leaving.
 

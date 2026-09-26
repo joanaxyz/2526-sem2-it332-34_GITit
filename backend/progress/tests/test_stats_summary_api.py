@@ -154,4 +154,3 @@ def test_stats_summary_activity_window_selects_the_trailing_span(db, django_user
     months = [date.fromisoformat(point["date"]) for point in year["activity_trend"]]
     assert months == sorted(months)
     assert months[-1].month == date.today().month
-

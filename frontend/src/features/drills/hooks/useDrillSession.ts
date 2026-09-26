@@ -244,5 +244,3 @@ export function useDrillSession(plan: DrillPlan) {
     resumed,
   }
 }
-
-export type DrillSession = ReturnType<typeof useDrillSession>

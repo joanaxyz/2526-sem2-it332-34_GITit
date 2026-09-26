@@ -18,7 +18,11 @@ from django.db import transaction
 from django.utils import timezone
 
 from adventures.models import AdventureLevel
-from common.constants import SESSION_STATUS_ABANDONED, SESSION_STATUS_COMPLETED, SESSION_STATUS_STARTED
+from common.constants import (
+    SESSION_STATUS_ABANDONED,
+    SESSION_STATUS_COMPLETED,
+    SESSION_STATUS_STARTED,
+)
 from drills.models import DrillRun
 from drills.selectors.content import drill_card_keys
 

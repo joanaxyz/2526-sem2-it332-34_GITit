@@ -16,7 +16,7 @@ export type MonsterEffectPlacement = 'target' | 'caster'
  *  hand before firing. The runtime mirrors from the actual travel direction. */
 export type MonsterEffectMotion = 'charge'
 
-export type MonsterEffectLayer = SpriteDef & {
+type MonsterEffectLayer = SpriteDef & {
   layer?: MonsterEffectLayerDepth
   scale?: number
   opacity?: number

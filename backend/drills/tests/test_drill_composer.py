@@ -100,10 +100,7 @@ def test_token_bank_can_always_build_the_answer(db):
 def test_sequence_finale_uses_an_authored_solution(db):
     call_command("seed_curriculum")
 
-    sequences = [
-        compose_level_drill(level)["sequence"]
-        for level in _levels_with_forms(20)
-    ]
+    sequences = [compose_level_drill(level)["sequence"] for level in _levels_with_forms(20)]
     found = [sequence for sequence in sequences if sequence]
     assert found, "seeded levels should yield at least one ordering exercise"
     for sequence in found:

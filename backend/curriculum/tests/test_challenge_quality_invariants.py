@@ -21,13 +21,10 @@ from curriculum.seed_data.stories import STORIES
 
 _STORY_ORDER = {story["slug"]: story["sort_order"] for story in STORIES}
 _CHAPTER_ORDER = {
-    chapter["slug"]: (_STORY_ORDER[chapter["story"]], chapter["number"])
-    for chapter in CHAPTERS
+    chapter["slug"]: (_STORY_ORDER[chapter["story"]], chapter["number"]) for chapter in CHAPTERS
 }
 _ARCANE_CHAPTER_BY_NUMBER = {
-    chapter["number"]: chapter["slug"]
-    for chapter in CHAPTERS
-    if chapter["story"] == "arcane-spire"
+    chapter["number"]: chapter["slug"] for chapter in CHAPTERS if chapter["story"] == "arcane-spire"
 }
 _ADVENTURE_SOURCE_OWNER = {
     source["slug"]: chapter_slug
@@ -83,8 +80,7 @@ def _introduced_command_shapes() -> dict[str, set[tuple[str, ...]]]:
         chapter_slug = _ADVENTURE_SOURCE_OWNER[spec["adventure"]]
         for variant in spec.get("variants", []):
             by_chapter[chapter_slug].update(
-                _command_shape(command)
-                for command in variant.get("solution_commands_template", [])
+                _command_shape(command) for command in variant.get("solution_commands_template", [])
             )
 
     cumulative: dict[str, set[tuple[str, ...]]] = {}
@@ -124,10 +120,7 @@ def _live_dag_signature(state: dict) -> tuple:
 
 
 def _citation_owners() -> dict[str, str]:
-    return {
-        spec["slug"]: _ADVENTURE_SOURCE_OWNER[spec["adventure"]]
-        for spec in ADVENTURE_LEVELS
-    }
+    return {spec["slug"]: _ADVENTURE_SOURCE_OWNER[spec["adventure"]] for spec in ADVENTURE_LEVELS}
 
 
 def _citation_owner(citation: str, owners: dict[str, str]) -> str | None:

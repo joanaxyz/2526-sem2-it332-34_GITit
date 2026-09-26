@@ -24,7 +24,7 @@ cyclonedx-python-lib==9.1.0
     # via pip-audit
 defusedxml==0.7.1
     # via py-serializable
-django==6.0.7
+django==6.0.8
     # via
     #   -r requirements.in
     #   django-cors-headers
@@ -38,7 +38,7 @@ django-environ==0.13.0
     # via -r requirements.in
 django-redis==6.0.0
     # via -r requirements.in
-djangorestframework==3.17.1
+djangorestframework==3.17.2
     # via
     #   -r requirements.in
     #   djangorestframework-simplejwt
@@ -138,8 +138,10 @@ ruff==0.14.10
     # via -r requirements-dev.in
 sortedcontainers==2.4.0
     # via cyclonedx-python-lib
-sqlparse==0.5.5
-    # via django
+sqlparse==0.6.0
+    # via
+    #   -r requirements.in
+    #   django
 toml==0.10.2
     # via pip-audit
 tzdata==2026.2 ; sys_platform == 'win32'

@@ -12821,8 +12821,7 @@ class Command(BaseCommand):
         database; seed_curriculum can later update that same canonical row.
         """
         catalog_by_slug = {
-            spec["slug"]: (index, spec)
-            for index, spec in enumerate(COMMAND_CATALOG, 1)
+            spec["slug"]: (index, spec) for index, spec in enumerate(COMMAND_CATALOG, 1)
         }
         live_form_ids: list[int] = []
 

@@ -17,7 +17,7 @@ export type AdventureLevelTierAccess = {
 }
 
 /** Squire's Drill state for one level, as the chapter overview reports it. */
-export type AdventureLevelDrillAccess = {
+type AdventureLevelDrillAccess = {
   /** False when the level teaches no published command form to rehearse. */
   available: boolean
   cleared: boolean

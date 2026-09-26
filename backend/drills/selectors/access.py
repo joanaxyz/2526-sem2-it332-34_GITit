@@ -20,9 +20,7 @@ def get_drill_progress(*, player, level_id: int) -> DrillProgress | None:
     return DrillProgress.objects.filter(player=player, adventure_level_id=level_id).first()
 
 
-def drill_progress_by_level_id(
-    *, player, level_ids: Iterable[int]
-) -> dict[int, DrillProgress]:
+def drill_progress_by_level_id(*, player, level_ids: Iterable[int]) -> dict[int, DrillProgress]:
     level_ids = list(level_ids)
     if player is None or not level_ids:
         return {}
